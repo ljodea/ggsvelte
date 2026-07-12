@@ -3,8 +3,9 @@
 ## Setup
 
 1. **bun** — the package manager, script runner, and unit-test runner.
-   Pinned via `packageManager` in `package.json` (currently **bun 1.3.6**).
-   Install: <https://bun.sh> → `~/.bun/bin/bun` must be on `PATH`.
+   Pinned via `packageManager` in `package.json` and `mise.toml` (currently
+   **bun 1.3.14**). Install with `mise install` or <https://bun.sh> →
+   `~/.bun/bin/bun` must be on `PATH`.
 2. **Install dependencies**: `bun install` (text lockfile `bun.lock`; CI uses
    `--frozen-lockfile`).
 3. **uv + pre-commit + zizmor** (Python-side tooling):
@@ -55,8 +56,8 @@ upstream, `.md`/`.yaml`/`.svelte` can fold back into oxfmt (`.oxfmtrc.json`
 
 | Tool                                         | Version                | Role                                                                                  |
 | -------------------------------------------- | ---------------------- | ------------------------------------------------------------------------------------- |
-| bun                                          | 1.3.6 (pinned)         | PM / runner / unit tests                                                              |
-| typescript                                   | 5.9.3                  | `tsc -b` project references (spec, core)                                              |
+| bun                                          | 1.3.14 (pinned)        | PM / runner / unit tests                                                              |
+| typescript                                   | 6.0.3                  | `tsc -b` project references (spec, core)                                              |
 | oxlint                                       | 1.73.0                 | JS/TS linting (correctness+suspicious error, pedantic warn)                           |
 | oxlint-tsgolint                              | 0.24.0                 | type-aware rules via `oxlint --type-aware` (no standalone CLI)                        |
 | oxfmt                                        | 0.58.0                 | formatter for ts/js/json/jsonc/css/toml                                               |
@@ -70,7 +71,7 @@ upstream, `.md`/`.yaml`/`.svelte` can fold back into oxfmt (`.oxfmtrc.json`
 | vitest + @vitest/browser-playwright          | 4.1.10                 | browser-mode component tests (factory `playwright()` provider)                        |
 | playwright / @playwright/test                | 1.61.1 (exact pins)    | must match CI container `mcr.microsoft.com/playwright:v1.61.1-noble` — asserted in CI |
 | @sveltejs/kit + @sveltejs/adapter-static     | 2.x / 3.x              | apps/docs static docs site (the VR screenshot target)                                 |
-| svelte / vite / @sveltejs/vite-plugin-svelte | 5.56.4 / 7.3.6 / 6.2.4 | spike + adapter toolchain                                                             |
+| svelte / vite / @sveltejs/vite-plugin-svelte | 5.56.4 / 8.1.4 / 7.2.0 | spike + adapter toolchain                                                             |
 | pre-commit                                   | 4.6.0                  | hook framework (both stages)                                                          |
 
 ## Running the checks
