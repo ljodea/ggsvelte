@@ -1,0 +1,70 @@
+{
+  "name": "ggsvelte",
+  "version": "0.0.0",
+  "description": "ggsvelte: a layered grammar of graphics for Svelte 5 — ggplot2 semantics, JSON-serializable specs, agent-friendly validation, hybrid SVG/canvas rendering, and the ggsvelte-render CLI.",
+  "keywords": [
+    "charts",
+    "components",
+    "dataviz",
+    "ggplot2",
+    "grammar-of-graphics",
+    "interactive",
+    "plot",
+    "svelte",
+    "svelte5",
+    "visualization"
+  ],
+  "homepage": "https://github.com/ljodea/ggsvelte",
+  "bugs": "https://github.com/ljodea/ggsvelte/issues",
+  "license": "MIT",
+  "author": "Liam O'Dea",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ljodea/ggsvelte.git"
+  },
+  "bin": {
+    "ggsvelte-render": "./bin/ggsvelte-render.js"
+  },
+  "files": [
+    "dist",
+    "bin",
+    "skills"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "svelte": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "svelte-package -i src/lib -o dist",
+    "check": "svelte-check --fail-on-warnings",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@ggsvelte/core": "workspace:*",
+    "@ggsvelte/spec": "workspace:*"
+  },
+  "devDependencies": {
+    "@sveltejs/package": "^2.5.4",
+    "@sveltejs/vite-plugin-svelte": "^6.2.4",
+    "@testing-library/svelte-core": "^1.1.3",
+    "@vitest/browser-playwright": "^4.1.10",
+    "playwright": "1.61.1",
+    "svelte": "^5.0.0",
+    "svelte-check": "^4.0.0",
+    "typescript": "^5.9.0",
+    "vite": "^7.0.0",
+    "vitest": "^4.1.10"
+  },
+  "peerDependencies": {
+    "svelte": "^5.0.0"
+  }
+}

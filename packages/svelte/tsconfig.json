@@ -1,0 +1,10 @@
+{
+  // Checked by svelte-check from this directory (per plan: the svelte package
+  // is NOT part of the tsc -b project-reference graph).
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "lib": ["es2023", "dom", "dom.iterable"]
+  },
+  "include": ["src/**/*", "svelte.config.js"]
+}

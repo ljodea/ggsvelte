@@ -1,0 +1,107 @@
+// ggsvelte — Svelte 5 adapter. Props-first API (<GGPlot spec/props>);
+// declaration-only children (<GeomPoint>/<GeomBar>/...) are optional sugar
+// (decision 0001, mechanism A). Re-exports the spec/core surface so
+// `bun add ggsvelte` gets everything. Owns the `ggsvelte-render` CLI bin
+// (bin/ggsvelte-render.js, wrapping @ggsvelte/core's runCLI).
+//
+// Lifecycle (Hadley lesson 13; meanings in CONTRIBUTING.md): tags collected
+// into lifecycle.json by scripts/gen-lifecycle.ts.
+// @lifecycle-default experimental
+
+// Components
+/** @lifecycle stable-intent */
+export { default as GGPlot } from "./GGPlot.svelte";
+export { default as Tooltip } from "./Tooltip.svelte";
+export type { BrushSelection, TooltipContext, ZoomDomains } from "./interaction.js";
+export { default as GeomPoint } from "./GeomPoint.svelte";
+export { default as GeomLine } from "./GeomLine.svelte";
+export { default as GeomCol } from "./GeomCol.svelte";
+export { default as GeomBar } from "./GeomBar.svelte";
+export { default as GeomArea } from "./GeomArea.svelte";
+export { default as GeomRule } from "./GeomRule.svelte";
+export { default as GeomText } from "./GeomText.svelte";
+export { default as GeomHistogram } from "./GeomHistogram.svelte";
+export { default as GeomSmooth } from "./GeomSmooth.svelte";
+export { default as GeomBoxplot } from "./GeomBoxplot.svelte";
+export { default as GeomDensity } from "./GeomDensity.svelte";
+export { default as GeomErrorbar } from "./GeomErrorbar.svelte";
+export { registerLayer } from "./registry.svelte.js";
+export type { LayerDescriptor, LayerRegistry } from "./registry.svelte.js";
+export { createGeomLayer } from "./geom-factory.svelte.js";
+export type { GeomProps } from "./geom-factory.svelte.js";
+
+// Spec surface (builder + canonicalizer + validation)
+export {
+  aes,
+  gg,
+  GGBuilder,
+  isPortable,
+  lintSpec,
+  normalize, // @lifecycle stable-intent
+  SpecValidationError, // @lifecycle stable-intent
+  toPortable,
+  toPortableLossy,
+  validate, // @lifecycle stable-intent
+} from "@ggsvelte/spec";
+export type {
+  A11yMode,
+  Aes,
+  AesInput,
+  ChannelValue,
+  ColorScaleSpec,
+  CoordSpec,
+  DataInput,
+  BoxplotParams,
+  DataProfile,
+  DataRef,
+  DensityParams,
+  FacetInput,
+  FacetScales,
+  FacetSpec,
+  ErrorbarParams,
+  Labs,
+  LayerInput,
+  LayerSpec,
+  LegendSpec,
+  PointPosition,
+  PortableSpec, // @lifecycle stable-intent
+  PositionParams,
+  PositionScaleSpec,
+  RenderBackend,
+  RuntimeSpec,
+  Scales,
+  SmoothParams,
+  SpecAdvisory,
+  SpecError,
+  SpecInput,
+  StackablePosition,
+  ThemeName,
+  ThemeSpec,
+  ValidateResult,
+} from "@ggsvelte/spec";
+
+// Core surface (pure renderer + pipeline)
+export {
+  PipelineError,
+  planStrata,
+  renderToSVGString, // @lifecycle stable-intent
+  runPipeline,
+} from "@ggsvelte/core";
+export type {
+  Advisory,
+  LayerBackend,
+  MappedField,
+  PipelineWarning,
+  RenderModel,
+  RenderSVGOptions,
+  ResolvedColorScale,
+  RunOptions,
+  ScaleState,
+  Scene,
+  Stratum,
+  ThemeTokens,
+} from "@ggsvelte/core";
+
+// DOM surface (hit index; canvas renderers are internal to <GGPlot>)
+export { buildHitIndex, DEFAULT_HIT_TOLERANCE } from "@ggsvelte/core/dom";
+export type { HitIndexOptions, SceneHit, SceneHitIndex } from "@ggsvelte/core/dom";
