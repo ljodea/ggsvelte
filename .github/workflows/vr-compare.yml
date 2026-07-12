@@ -55,6 +55,10 @@ jobs:
       # Pinned baseline platform — keep in sync with ci.yml's component job
       # and the repo-pinned playwright/@playwright/test 1.61.1.
       image: mcr.microsoft.com/playwright:v1.61.1-noble
+    defaults:
+      run:
+        # The container's /bin/sh is dash, which rejects `set -o pipefail`.
+        shell: bash
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:

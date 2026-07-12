@@ -73,6 +73,10 @@ jobs:
     container:
       # Keep in sync with env.PLAYWRIGHT_CONTAINER_TAG above.
       image: mcr.microsoft.com/playwright:v1.61.1-noble
+    defaults:
+      run:
+        # The container's /bin/sh is dash, which rejects `set -o pipefail`.
+        shell: bash
     permissions:
       contents: read
     steps:

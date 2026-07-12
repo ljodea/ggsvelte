@@ -31,14 +31,30 @@ if (files.length === 0) {
   process.exit(0);
 }
 
+// The npm wasm build (2.0.6) lags the Go actionlint and does not know the
+// `vars` context (GitHub "configuration variables", valid since 2022; used by
+// release.yml's NPM_PUBLISH_ENABLED gate). Filter that one false positive.
+// Remove this when the npm package's checker recognizes `vars`.
+const KNOWN_FALSE_POSITIVES = [/undefined variable "vars"/];
+
 const lint = await createLinter();
 let findings = 0;
+let suppressed = 0;
 for (const file of files) {
   const source = await readFile(file, "utf8");
   for (const r of lint(source, file)) {
+    if (KNOWN_FALSE_POSITIVES.some((re) => re.test(r.message))) {
+      suppressed += 1;
+      continue;
+    }
     findings += 1;
     console.error(`${r.file}:${r.line}:${r.column}: ${r.message} [${r.kind}]`);
   }
+}
+if (suppressed > 0) {
+  console.log(
+    `actionlint: ${suppressed} known-false-positive finding(s) suppressed (see KNOWN_FALSE_POSITIVES).`,
+  );
 }
 
 if (findings > 0) {
