@@ -1,0 +1,51 @@
+{
+  "case": "04-stack-positive",
+  "description": "position_stack: per-x cumulative ymin/ymax; first group level on top.",
+  "provenance": "R-generated",
+  "ggplot2Version": "4.0.3",
+  "rVersion": "4.6.1",
+  "ggplotCall": "ggplot(df, aes(x, y, fill = g, label = g)) + geom_col(position = 'stack')",
+  "data": {
+    "x": ["p", "p", "p", "q", "q", "q"],
+    "g": ["g1", "g2", "g3", "g1", "g2", "g3"],
+    "y": [3, 2, 5, 1, 4, 2]
+  },
+  "expected": [
+    {
+      "x": "p",
+      "g": "g1",
+      "ymin": 7,
+      "ymax": 10
+    },
+    {
+      "x": "p",
+      "g": "g2",
+      "ymin": 5,
+      "ymax": 7
+    },
+    {
+      "x": "p",
+      "g": "g3",
+      "ymin": 0,
+      "ymax": 5
+    },
+    {
+      "x": "q",
+      "g": "g1",
+      "ymin": 6,
+      "ymax": 7
+    },
+    {
+      "x": "q",
+      "g": "g2",
+      "ymin": 2,
+      "ymax": 6
+    },
+    {
+      "x": "q",
+      "g": "g3",
+      "ymin": 0,
+      "ymax": 2
+    }
+  ]
+}

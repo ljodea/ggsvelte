@@ -1,0 +1,51 @@
+{
+  "case": "05-stack-mixed-sign",
+  "description": "position_stack with mixed signs: positive values stack up from 0, negative values stack down from 0.",
+  "provenance": "R-generated",
+  "ggplot2Version": "4.0.3",
+  "rVersion": "4.6.1",
+  "ggplotCall": "ggplot(df, aes(x, y, fill = g, label = g)) + geom_col(position = 'stack')",
+  "data": {
+    "x": ["p", "p", "p", "q", "q", "q"],
+    "g": ["g1", "g2", "g3", "g1", "g2", "g3"],
+    "y": [3, -2, 5, -1, 4, -2]
+  },
+  "expected": [
+    {
+      "x": "p",
+      "g": "g1",
+      "ymin": 5,
+      "ymax": 8
+    },
+    {
+      "x": "p",
+      "g": "g2",
+      "ymin": -2,
+      "ymax": 0
+    },
+    {
+      "x": "p",
+      "g": "g3",
+      "ymin": 0,
+      "ymax": 5
+    },
+    {
+      "x": "q",
+      "g": "g1",
+      "ymin": -3,
+      "ymax": -2
+    },
+    {
+      "x": "q",
+      "g": "g2",
+      "ymin": 0,
+      "ymax": 4
+    },
+    {
+      "x": "q",
+      "g": "g3",
+      "ymin": -2,
+      "ymax": 0
+    }
+  ]
+}

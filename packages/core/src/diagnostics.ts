@@ -1,0 +1,227 @@
+/**
+ * The core diagnostics catalog — render-time errors, warnings, and advisories
+ * (M3 error-catalog audit). @ggsvelte/spec owns the VALIDATION catalog
+ * (ERROR_CATALOG in its errors.ts); this module owns everything the pipeline,
+ * renderer, and CLI can emit at run time. The docs error-reference page and
+ * llms-full.txt render straight from these tables — one source, no drift —
+ * and diagnostics.test.ts scans the core sources to prove the tables are
+ * complete in both directions (every emitted code is cataloged; every
+ * cataloged code is emitted somewhere).
+ *
+ * Naming note: `palette-exhausted` appears as BOTH an error and a warning by
+ * design (the palette-exhaustion contract): the default `onExhaust: "cycle"`
+ * emits the warning; opt-in `onExhaust: "error"` throws the error.
+ * `max-marks-exceeded` likewise exists as a PipelineError (renderToSVGString)
+ * and a CLI diagnostic (the CLI's own --max-marks check).
+ */
+
+/** One render-time error catalog entry. */
+export interface PipelineErrorCatalogEntry {
+  summary: string;
+  fix: string;
+}
+
+/** Structured errors thrown as `PipelineError { code, path, message }`. */
+export const PIPELINE_ERROR_CATALOG = {
+  "no-data": {
+    summary: "The spec has no data source and no layer provides one.",
+    fix: "Set spec.data ({values}, {columns}, or {name}) or pass named data via RunOptions.data.",
+  },
+  "dataset-collision": {
+    summary: "A dataset name is defined in both spec.datasets and RunOptions.data.",
+    fix: "Rename one of them, or pass allowOverride: true to let the runtime data win.",
+  },
+  "unknown-dataset": {
+    summary: 'A {"name": ...} data ref names a dataset that is not defined anywhere.',
+    fix: "Define it in spec.datasets or RunOptions.data (the message lists the available names).",
+  },
+  "unknown-field": {
+    summary: "A channel maps a field that does not exist in the bound data.",
+    fix: "Map the channel to one of the available fields (the message lists them).",
+  },
+  "all-null-column": {
+    summary: "A mapped column contains only null values (tier-2 failure policy).",
+    fix: "Map the channel to a column with actual values, or fix the data.",
+  },
+  "missing-channel": {
+    summary: "A geom is missing a required aesthetic channel at render time.",
+    fix: "Map the named channel in the layer's aes or the plot-level aes.",
+  },
+  "unknown-stat-column": {
+    summary: "A { stat } channel names a column the layer's stat does not generate.",
+    fix: "Use a column the stat generates (each stat's contract is documented), or change the stat.",
+  },
+  "channel-type-mismatch": {
+    summary: "A mapped field's type is incompatible with the layer's geom/stat.",
+    fix: "Map a field of the required type, or switch to a geom that fits the field.",
+  },
+  "computed-y-mapped": {
+    summary: "A layer whose stat computes y (count, bin, density) maps aes.y to a data field.",
+    fix: 'Unset y with null — or use geom "col" for pre-computed bar heights.',
+  },
+  "bin-center-and-boundary": {
+    summary: "A bin-stat layer sets BOTH params.center and params.boundary.",
+    fix: "Keep one bin-grid alignment parameter and remove the other.",
+  },
+  "rule-form-ambiguous": {
+    summary: "A rule layer mixes fixed intercepts with mapped aes.x/aes.y.",
+    fix: "Use the annotation form (intercept params) OR a data mapping, never both.",
+  },
+  "rule-form-missing": {
+    summary: "A rule layer has neither intercepts nor a mapped aes.x/aes.y — nothing to draw.",
+    fix: "Set params.yintercept/xintercept, or map aes.x/aes.y to a field.",
+  },
+  "rule-both-axes": {
+    summary: "A data-driven rule layer maps BOTH aes.x and aes.y.",
+    fix: "Keep one direction and unset the other channel with null.",
+  },
+  "facet-form-ambiguous": {
+    summary: "A facet sets BOTH the wrap form and the rows/cols grid form.",
+    fix: "Keep facet.wrap OR facet.rows/facet.cols, never both.",
+  },
+  "facet-form-missing": {
+    summary: "A facet sets neither wrap nor rows/cols.",
+    fix: "Set facet.wrap (wrap form) or facet.rows/facet.cols (grid form).",
+  },
+  "invalid-scale-domain": {
+    summary: "An explicit scale domain is malformed for its scale type.",
+    fix: "Provide a two-element [min, max] for continuous scales (values of the field's type).",
+  },
+  "log-domain-not-positive": {
+    summary: "A log scale received an explicit domain that is not strictly positive.",
+    fix: "Restrict the domain to positive values, or use a linear scale.",
+  },
+  "palette-exhausted": {
+    summary:
+      'A discrete color scale with onExhaust: "error" ran out of palette entries (the default "cycle" only warns).',
+    fix: "Provide a larger range, set an explicit domain, or accept cycling by removing onExhaust.",
+  },
+  "unknown-theme": {
+    summary: "spec.theme names a theme that is not registered.",
+    fix: "Use a registered name (default, light, dark, minimal) or a theme object.",
+  },
+  "renderer-failure": {
+    summary: "The SVG renderer threw while drawing a scene (never blank output — failure policy).",
+    fix: "This is a ggsvelte bug; the message carries the underlying error. Please report it.",
+  },
+  "max-marks-exceeded": {
+    summary: "renderToSVGString refused to render more marks than its maxMarks safety limit.",
+    fix: "Raise options.maxMarks deliberately, reduce the data, or render interactively (canvas).",
+  },
+} as const satisfies Record<string, PipelineErrorCatalogEntry>;
+
+export type PipelineErrorCode = keyof typeof PIPELINE_ERROR_CATALOG;
+
+/** Warnings (`RenderModel.warnings`): degraded-but-rendered conditions. */
+export const PIPELINE_WARNING_CATALOG = {
+  "empty-data": {
+    summary: "The data has no rows; the frame and axes render as a placeholder.",
+  },
+  "empty-layer": {
+    summary: "A layer produced no drawable marks after stats/positions; it was skipped.",
+  },
+  "empty-domain": {
+    summary: "A positional scale found no finite values; a placeholder domain is used.",
+  },
+  "removed-missing": {
+    summary:
+      "Rows with missing/non-finite values in required channels were dropped (count in message).",
+  },
+  "log-nonpositive": {
+    summary: "A log scale dropped non-positive values (count in message).",
+  },
+  "sequential-discrete-field": {
+    summary: "A sequential color scale is fed a discrete field; unparseable values render unknown.",
+  },
+  "invalid-label-format": {
+    summary: "A labels format string was not recognized; the default format is used.",
+  },
+  "unknown-edition": {
+    summary:
+      "The spec targets a defaults edition this build does not know; the latest known edition's defaults are used.",
+  },
+  "stat-channel-unsupported": {
+    summary: "A { stat } channel is mapped where this milestone only supports it on y.",
+  },
+  "color-on-fill-geom": {
+    summary:
+      "The color channel is mapped on a fill-styled geom (bar/col/area); fill is what varies.",
+  },
+  "weight-unsupported": {
+    summary: "aes.weight is mapped on a stat that does not consume weights.",
+  },
+  "density-group-dropped": {
+    summary: "A density group had too few finite values and was dropped.",
+  },
+  "smooth-group-dropped": {
+    summary: "A smooth group had too few points for the fit and was dropped.",
+  },
+  "palette-exhausted": {
+    summary:
+      "A discrete color scale ran out of palette entries and cycled (the default onExhaust).",
+  },
+  "fingerprint-mismatch": {
+    summary: "Restored scale state was trained on a different palette; assignments start fresh.",
+  },
+  "version-mismatch": {
+    summary: "Restored scale state has an unknown schema version; assignments start fresh.",
+  },
+  "out-of-domain": {
+    summary: "Values outside an explicit scale domain render the unknown color (deduplicated).",
+  },
+} as const satisfies Record<string, { summary: string }>;
+
+export type PipelineWarningCode = keyof typeof PIPELINE_WARNING_CATALOG;
+
+/**
+ * Advisories (`RenderModel.advisories`, Hadley lesson 12): every heuristic
+ * the pipeline takes, as `{ code, path, chosen, howToOverride }` — agents see
+ * the guess and can correct it. Distinct from spec-lint advisories
+ * (@ggsvelte/spec `lintSpec`), which flag questionable-but-valid SPECS before
+ * any pipeline run.
+ */
+export const ADVISORY_CATALOG = {
+  "scale-type-inferred": {
+    summary: "A positional scale's type was inferred from the mapped data.",
+  },
+  "zero-forced": {
+    summary: "Bars/areas forced the measure axis to include zero.",
+  },
+  "bar-x-discretized": {
+    summary: "A numeric x on a count-stat bar layer was treated as discrete categories.",
+  },
+  "bin-default-bins": {
+    summary: "The bin stat used its default bin count; set params.binwidth to control it.",
+  },
+  "smooth-method-inferred": {
+    summary: "The smooth stat chose its method (lm vs loess) from the group size.",
+  },
+  "jitter-seeded": {
+    summary: "The jitter position used its default deterministic seed.",
+  },
+  "palette-inferred": {
+    summary: "A color scale used the edition's default palette/ramp.",
+  },
+  "canvas-auto": {
+    summary:
+      "A high-count layer auto-switched to the canvas backend (a11y/copy-SVG tradeoff disclosed).",
+  },
+} as const satisfies Record<string, { summary: string }>;
+
+export type AdvisoryCode = keyof typeof ADVISORY_CATALOG;
+
+/** CLI-only diagnostics (`ggsvelte-render` stderr JSON lines, exit codes 1–3). */
+export const CLI_DIAGNOSTIC_CATALOG = {
+  usage: { summary: "Bad flags or arguments (exit 2). --help shows usage." },
+  "unreadable-input": { summary: "The spec/data file (or stdin) could not be read (exit 2)." },
+  "invalid-json": { summary: "The spec or data file is not valid JSON (exit 2)." },
+  "invalid-data-file": {
+    summary: "--data must be a JSON object mapping dataset names to inline data (exit 2).",
+  },
+  "max-marks-exceeded": {
+    summary: "The plot renders more marks than --max-marks allows (exit 1).",
+  },
+  internal: { summary: "An unexpected internal error (exit 1). Please report it." },
+} as const satisfies Record<string, { summary: string }>;
+
+export type CLIDiagnosticCode = keyof typeof CLI_DIAGNOSTIC_CATALOG;

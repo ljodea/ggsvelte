@@ -1,0 +1,44 @@
+{
+  "case": "02-count-by-x-and-fill",
+  "description": "stat_count: rows counted per (x, fill group) combination.",
+  "provenance": "R-generated",
+  "ggplot2Version": "4.0.3",
+  "rVersion": "4.6.1",
+  "ggplotCall": "ggplot(df, aes(x, fill = g, label = g)) + geom_bar()",
+  "data": {
+    "x": ["a", "a", "b", "b", "c", "c", "c", "a"],
+    "g": ["g1", "g2", "g1", "g2", "g1", "g2", "g1", "g1"]
+  },
+  "expected": [
+    {
+      "x": "a",
+      "g": "g1",
+      "count": 2
+    },
+    {
+      "x": "a",
+      "g": "g2",
+      "count": 1
+    },
+    {
+      "x": "b",
+      "g": "g1",
+      "count": 1
+    },
+    {
+      "x": "b",
+      "g": "g2",
+      "count": 1
+    },
+    {
+      "x": "c",
+      "g": "g1",
+      "count": 2
+    },
+    {
+      "x": "c",
+      "g": "g2",
+      "count": 1
+    }
+  ]
+}

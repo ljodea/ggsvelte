@@ -1,0 +1,28 @@
+{
+  "case": "01-count-by-x",
+  "description": "stat_count: rows counted per distinct x value (one group).",
+  "provenance": "R-generated",
+  "ggplot2Version": "4.0.3",
+  "rVersion": "4.6.1",
+  "ggplotCall": "ggplot(df, aes(x)) + geom_bar()",
+  "data": {
+    "x": ["a", "a", "b", "b", "c", "c", "c", "a"]
+  },
+  "expected": [
+    {
+      "x": "a",
+      "g": "all",
+      "count": 3
+    },
+    {
+      "x": "b",
+      "g": "all",
+      "count": 2
+    },
+    {
+      "x": "c",
+      "g": "all",
+      "count": 3
+    }
+  ]
+}

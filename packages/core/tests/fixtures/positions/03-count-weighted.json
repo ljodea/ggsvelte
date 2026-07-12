@@ -1,0 +1,45 @@
+{
+  "case": "03-count-weighted",
+  "description": "stat_count with aes(weight): count = sum of weights per (x, group).",
+  "provenance": "R-generated",
+  "ggplot2Version": "4.0.3",
+  "rVersion": "4.6.1",
+  "ggplotCall": "ggplot(df, aes(x, fill = g, label = g, weight = w)) + geom_bar()",
+  "data": {
+    "x": ["a", "a", "b", "b", "c", "c", "c", "a"],
+    "g": ["g1", "g2", "g1", "g2", "g1", "g2", "g1", "g1"],
+    "w": [1, 2, 3, 4, 5, 6, 7, 8]
+  },
+  "expected": [
+    {
+      "x": "a",
+      "g": "g1",
+      "count": 9
+    },
+    {
+      "x": "a",
+      "g": "g2",
+      "count": 2
+    },
+    {
+      "x": "b",
+      "g": "g1",
+      "count": 3
+    },
+    {
+      "x": "b",
+      "g": "g2",
+      "count": 4
+    },
+    {
+      "x": "c",
+      "g": "g1",
+      "count": 12
+    },
+    {
+      "x": "c",
+      "g": "g2",
+      "count": 6
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "case": "01-no-discrete-single-group",
+  "description": "No discrete aesthetic in the mapping: every row gets ggplot2's NO_GROUP (-1), i.e. one implicit group.",
+  "provenance": "R-generated",
+  "ggplot2Version": "4.0.3",
+  "rVersion": "4.6.1",
+  "ggplotCall": "ggplot(df, aes(x = num1, y = num2)) + geom_point()",
+  "aes": {
+    "x": {
+      "field": "num1"
+    },
+    "y": {
+      "field": "num2"
+    }
+  },
+  "expected": {
+    "rawGgplotGroups": [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+    "canonicalGroups": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    "groupCount": 1
+  }
+}

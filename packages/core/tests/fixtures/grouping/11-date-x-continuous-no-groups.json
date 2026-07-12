@@ -1,0 +1,21 @@
+{
+  "case": "11-date-x-continuous-no-groups",
+  "description": "Date column on x is continuous in ggplot2: it must NOT create groups.",
+  "provenance": "R-generated",
+  "ggplot2Version": "4.0.3",
+  "rVersion": "4.6.1",
+  "ggplotCall": "ggplot(df, aes(x = date1, y = num1)) + geom_point()",
+  "aes": {
+    "x": {
+      "field": "date1"
+    },
+    "y": {
+      "field": "num1"
+    }
+  },
+  "expected": {
+    "rawGgplotGroups": [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+    "canonicalGroups": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    "groupCount": 1
+  }
+}

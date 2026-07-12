@@ -1,0 +1,63 @@
+{
+  "case": "07-dodge-slots",
+  "description": "position_dodge: every group gets one slot per x; offsets from the band center in resolution units (total width 0.9).",
+  "provenance": "R-generated",
+  "ggplot2Version": "4.0.3",
+  "rVersion": "4.6.1",
+  "ggplotCall": "ggplot(df, aes(x, y, fill = g, label = g)) + geom_col(position = 'dodge')",
+  "data": {
+    "x": ["p", "p", "p", "q", "q", "q"],
+    "g": ["g1", "g2", "g3", "g1", "g2", "g3"],
+    "y": [3, 2, 5, 1, 4, 2]
+  },
+  "expected": [
+    {
+      "x": "p",
+      "g": "g1",
+      "xminOffset": -0.45,
+      "xmaxOffset": -0.15,
+      "ymin": 0,
+      "ymax": 3
+    },
+    {
+      "x": "p",
+      "g": "g2",
+      "xminOffset": -0.15,
+      "xmaxOffset": 0.15,
+      "ymin": 0,
+      "ymax": 2
+    },
+    {
+      "x": "p",
+      "g": "g3",
+      "xminOffset": 0.15,
+      "xmaxOffset": 0.45,
+      "ymin": 0,
+      "ymax": 5
+    },
+    {
+      "x": "q",
+      "g": "g1",
+      "xminOffset": -0.45,
+      "xmaxOffset": -0.15,
+      "ymin": 0,
+      "ymax": 1
+    },
+    {
+      "x": "q",
+      "g": "g2",
+      "xminOffset": -0.15,
+      "xmaxOffset": 0.15,
+      "ymin": 0,
+      "ymax": 4
+    },
+    {
+      "x": "q",
+      "g": "g3",
+      "xminOffset": 0.15,
+      "xmaxOffset": 0.45,
+      "ymin": 0,
+      "ymax": 2
+    }
+  ]
+}

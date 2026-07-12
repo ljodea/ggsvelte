@@ -1,0 +1,24 @@
+{
+  "case": "03-discrete-color-groups",
+  "description": "Discrete color on continuous positions: groups follow cat1.",
+  "provenance": "R-generated",
+  "ggplot2Version": "4.0.3",
+  "rVersion": "4.6.1",
+  "ggplotCall": "ggplot(df, aes(x = num1, y = num2, color = cat1)) + geom_point()",
+  "aes": {
+    "x": {
+      "field": "num1"
+    },
+    "y": {
+      "field": "num2"
+    },
+    "color": {
+      "field": "cat1"
+    }
+  },
+  "expected": {
+    "rawGgplotGroups": [2, 1, 3, 2, 1, 3, 2, 1, 3, 2, 1, 3],
+    "canonicalGroups": [0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2],
+    "groupCount": 3
+  }
+}

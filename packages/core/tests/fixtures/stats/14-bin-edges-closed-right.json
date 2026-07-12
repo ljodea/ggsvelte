@@ -1,0 +1,58 @@
+{
+  "case": "14-bin-edges-closed-right",
+  "description": "Integer values ON bin edges with closed = 'right' (default): x = k lands in (k-1, k].",
+  "provenance": "R-generated",
+  "ggplot2Version": "4.0.3",
+  "rVersion": "4.6.1",
+  "ggplotCall": "ggplot(df, aes(x)) + geom_histogram(binwidth = 1, boundary = 0)",
+  "data": {
+    "x": [0, 1, 1, 2, 2, 2, 3, 4, 4, 5]
+  },
+  "expected": [
+    {
+      "x": 0.5,
+      "xmin": 0,
+      "xmax": 1,
+      "count": 3,
+      "density": 0.3,
+      "ncount": 1,
+      "ndensity": 1
+    },
+    {
+      "x": 1.5,
+      "xmin": 1,
+      "xmax": 2,
+      "count": 3,
+      "density": 0.3,
+      "ncount": 1,
+      "ndensity": 1
+    },
+    {
+      "x": 2.5,
+      "xmin": 2,
+      "xmax": 3,
+      "count": 1,
+      "density": 0.1,
+      "ncount": 0.333333333333333,
+      "ndensity": 0.333333333333333
+    },
+    {
+      "x": 3.5,
+      "xmin": 3,
+      "xmax": 4,
+      "count": 2,
+      "density": 0.2,
+      "ncount": 0.666666666666667,
+      "ndensity": 0.666666666666667
+    },
+    {
+      "x": 4.5,
+      "xmin": 4,
+      "xmax": 5,
+      "count": 1,
+      "density": 0.1,
+      "ncount": 0.333333333333333,
+      "ndensity": 0.333333333333333
+    }
+  ]
+}

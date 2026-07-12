@@ -1,0 +1,72 @@
+{
+  "case": "09-bar-dodge",
+  "description": "Same mapping with position_dodge: identical group derivation; bars separate horizontally, one dodge slot per group present at each x.",
+  "provenance": "R-generated",
+  "ggplot2Version": "4.0.3",
+  "rVersion": "4.6.1",
+  "ggplotCall": "ggplot(df, aes(x = cat1, fill = cat2)) + geom_bar(position = \"dodge\")",
+  "aes": {
+    "x": {
+      "field": "cat1"
+    },
+    "fill": {
+      "field": "cat2"
+    }
+  },
+  "expected": {
+    "rawGgplotGroups": [4, 1, 6, 3, 2, 5, 4, 1, 6, 3, 2, 5],
+    "canonicalGroups": [0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5],
+    "groupCount": 6
+  },
+  "builtBars": [
+    {
+      "xLevel": "a",
+      "fill": "#F8766D",
+      "count": 2,
+      "canonicalGroup": 0,
+      "xmin": 0.55,
+      "xmax": 1
+    },
+    {
+      "xLevel": "a",
+      "fill": "#00BFC4",
+      "count": 2,
+      "canonicalGroup": 1,
+      "xmin": 1,
+      "xmax": 1.45
+    },
+    {
+      "xLevel": "b",
+      "fill": "#F8766D",
+      "count": 2,
+      "canonicalGroup": 2,
+      "xmin": 1.55,
+      "xmax": 2
+    },
+    {
+      "xLevel": "b",
+      "fill": "#00BFC4",
+      "count": 2,
+      "canonicalGroup": 3,
+      "xmin": 2,
+      "xmax": 2.45
+    },
+    {
+      "xLevel": "c",
+      "fill": "#F8766D",
+      "count": 2,
+      "canonicalGroup": 4,
+      "xmin": 2.55,
+      "xmax": 3
+    },
+    {
+      "xLevel": "c",
+      "fill": "#00BFC4",
+      "count": 2,
+      "canonicalGroup": 5,
+      "xmin": 3,
+      "xmax": 3.45
+    }
+  ],
+  "dodgeSlotsPerX": [2, 2, 2]
+}
