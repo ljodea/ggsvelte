@@ -42,7 +42,7 @@ The table is **environment-specific** (it encodes whichever font the stack resol
 
 ## 2. Layout algorithm (as validated)
 
-```
+```text
 layout(input):
   passA = layoutPass(theme.marginPriors, input)
   passB = layoutPass(passA.margins, input)

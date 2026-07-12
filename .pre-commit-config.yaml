@@ -30,6 +30,14 @@ repos:
         files: \.(svelte|md|yml|yaml)$
         exclude: ^spikes/
 
+      - id: markdownlint-cli2
+        name: markdownlint-cli2 (staged .md)
+        entry: bun node_modules/.bin/markdownlint-cli2
+        language: system
+        files: \.md$
+        exclude: ^spikes/
+        # Config: .markdownlint-cli2.jsonc (MD013/MD029 relaxed for prose + decision notes)
+
       - id: oxlint
         name: oxlint (staged)
         entry: bun node_modules/.bin/oxlint

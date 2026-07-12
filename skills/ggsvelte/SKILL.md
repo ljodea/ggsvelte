@@ -11,7 +11,7 @@ canvas output yourself — describe the plot, let the pipeline render it.
 
 ## Mental model
 
-```
+```text
 spec = data + aes (mappings) + layers[]        one layer = { geom, stat, position, aes?, params? }
        + scales? coord? facet? labs? theme?
 ```

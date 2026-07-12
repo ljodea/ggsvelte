@@ -1,0 +1,13 @@
+{
+  // Shared by CLI, vscode-markdownlint, and the local pre-commit hook.
+  // All hooks invoke the lockfile-installed binary via bun (see .pre-commit-config.yaml).
+  "config": {
+    // Prose, tables, and long URLs routinely exceed 80 columns; prettier owns .md layout.
+    "MD013": false,
+    // Decision notes intentionally continue ordered numbering across subsection breaks.
+    "MD029": false
+  },
+  "globs": ["**/*.md"],
+  "ignores": ["**/node_modules/**", "spikes/**"],
+  "gitignore": true
+}

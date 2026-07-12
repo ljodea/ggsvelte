@@ -62,6 +62,7 @@ upstream, `.md`/`.yaml`/`.svelte` can fold back into oxfmt (`.oxfmtrc.json`
 | oxlint-tsgolint                              | 0.24.0                 | type-aware rules via `oxlint --type-aware` (no standalone CLI)                        |
 | oxfmt                                        | 0.58.0                 | formatter for ts/js/json/jsonc/css/toml                                               |
 | prettier + prettier-plugin-svelte            | 3.9.5 / 4.1.1          | formatter for .svelte/.md/.yaml (see quirk above)                                     |
+| markdownlint-cli2                            | 0.23.0                 | markdown lint (pre-commit stage; config `.markdownlint-cli2.jsonc`)                   |
 | svelte-check                                 | 4.7.2                  | Svelte template + type checking (packages/svelte)                                     |
 | knip                                         | 6.26.0                 | unused files/exports/deps (spikes ignored)                                            |
 | publint / @arethetypeswrong/cli              | 0.3.21 / 0.18.5        | package publish shape (skips unbuilt stubs)                                           |
@@ -82,6 +83,7 @@ upstream, `.md`/`.yaml`/`.svelte` can fold back into oxfmt (`.oxfmtrc.json`
 | `bun run build`                                     | `bun run check` + `svelte-package` for packages/svelte (everything the publish shape needs)                                             |
 | `bun run check:svelte`                              | svelte-check `--fail-on-warnings` in packages/svelte (needs `bun run check` first: dist types)                                          |
 | `bun run lint`                                      | oxlint over the repo (`.oxlintrc.json`; spikes excluded)                                                                                |
+| `bun run lint:md`                                   | markdownlint-cli2 over `**/*.md` (`.markdownlint-cli2.jsonc`; spikes + node_modules ignored)                                            |
 | `bun run lint:type-aware`                           | oxlint `--type-aware --deny-warnings` (tsgolint; permanent CI gate)                                                                     |
 | `bun run fmt` / `bun run fmt:check`                 | oxfmt (ts/js/json/css/toml) + prettier (.svelte/.md/.yaml)                                                                              |
 | `bun run test`                                      | bun unit tests (spec + core + scripts + evals harness; needs `bun run check` first)                                                     |
