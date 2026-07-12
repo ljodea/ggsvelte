@@ -1,0 +1,25 @@
+{
+  "case": "07-line-splits-by-group",
+  "description": "geom_line splits into one polyline per group: line count must equal group count.",
+  "provenance": "R-generated",
+  "ggplot2Version": "4.0.3",
+  "rVersion": "4.6.1",
+  "ggplotCall": "ggplot(df, aes(x = num1, y = num2, color = cat1)) + geom_line()",
+  "aes": {
+    "x": {
+      "field": "num1"
+    },
+    "y": {
+      "field": "num2"
+    },
+    "color": {
+      "field": "cat1"
+    }
+  },
+  "expected": {
+    "rawGgplotGroups": [2, 1, 3, 2, 1, 3, 2, 1, 3, 2, 1, 3],
+    "canonicalGroups": [0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2],
+    "groupCount": 3
+  },
+  "expectedLineCount": 3
+}

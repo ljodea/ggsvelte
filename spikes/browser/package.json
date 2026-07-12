@@ -1,0 +1,22 @@
+{
+  "name": "@ggsvelte-spike/browser",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Throwaway M0a spikes needing a real browser: declaration-only children (M0a-1), compositing strata + pointer-events (M0a-6), browser-measurer half of layout (M0a-3). vitest 4 browser mode + Playwright chromium. Retired from repo tooling (lint/knip); still runnable manually.",
+  "scripts": {
+    "test": "vitest run",
+    "test:ssr": "vitest run --project ssr"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^6.2.4",
+    "@testing-library/svelte-core": "^1.1.3",
+    "@vitest/browser-playwright": "^4.1.10",
+    "playwright": "1.61.1",
+    "svelte": "^5.0.0",
+    "typescript": "^5.9.0",
+    "vite": "^7.0.0",
+    "vitest": "^4.1.10",
+    "vitest-browser-svelte": "^3.0.0"
+  }
+}

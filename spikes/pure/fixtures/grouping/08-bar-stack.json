@@ -1,0 +1,72 @@
+{
+  "case": "08-bar-stack",
+  "description": "geom_bar stacking with x=cat1, fill=cat2: pre-stat groups are the full cat1 x cat2 interaction; stat_count yields one bar segment per group; segments stack per x.",
+  "provenance": "R-generated",
+  "ggplot2Version": "4.0.3",
+  "rVersion": "4.6.1",
+  "ggplotCall": "ggplot(df, aes(x = cat1, fill = cat2)) + geom_bar()",
+  "aes": {
+    "x": {
+      "field": "cat1"
+    },
+    "fill": {
+      "field": "cat2"
+    }
+  },
+  "expected": {
+    "rawGgplotGroups": [4, 1, 6, 3, 2, 5, 4, 1, 6, 3, 2, 5],
+    "canonicalGroups": [0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5],
+    "groupCount": 6
+  },
+  "builtBars": [
+    {
+      "xLevel": "a",
+      "fill": "#F8766D",
+      "count": 2,
+      "canonicalGroup": 0,
+      "ymin": 2,
+      "ymax": 4
+    },
+    {
+      "xLevel": "a",
+      "fill": "#00BFC4",
+      "count": 2,
+      "canonicalGroup": 1,
+      "ymin": 0,
+      "ymax": 2
+    },
+    {
+      "xLevel": "b",
+      "fill": "#F8766D",
+      "count": 2,
+      "canonicalGroup": 2,
+      "ymin": 2,
+      "ymax": 4
+    },
+    {
+      "xLevel": "b",
+      "fill": "#00BFC4",
+      "count": 2,
+      "canonicalGroup": 3,
+      "ymin": 0,
+      "ymax": 2
+    },
+    {
+      "xLevel": "c",
+      "fill": "#F8766D",
+      "count": 2,
+      "canonicalGroup": 4,
+      "ymin": 2,
+      "ymax": 4
+    },
+    {
+      "xLevel": "c",
+      "fill": "#00BFC4",
+      "count": 2,
+      "canonicalGroup": 5,
+      "ymin": 0,
+      "ymax": 2
+    }
+  ],
+  "stackSegmentsPerX": [2, 2, 2]
+}

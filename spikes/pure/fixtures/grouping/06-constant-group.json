@@ -1,0 +1,24 @@
+{
+  "case": "06-constant-group",
+  "description": "aes(group = 1): constant explicit group forces a single group.",
+  "provenance": "R-generated",
+  "ggplot2Version": "4.0.3",
+  "rVersion": "4.6.1",
+  "ggplotCall": "ggplot(df, aes(x = num1, y = num2, group = 1)) + geom_line()",
+  "aes": {
+    "x": {
+      "field": "num1"
+    },
+    "y": {
+      "field": "num2"
+    },
+    "group": {
+      "value": 1
+    }
+  },
+  "expected": {
+    "rawGgplotGroups": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    "canonicalGroups": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    "groupCount": 1
+  }
+}

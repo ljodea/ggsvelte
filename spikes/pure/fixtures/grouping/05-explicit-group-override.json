@@ -1,0 +1,24 @@
+{
+  "case": "05-explicit-group-override",
+  "description": "Explicit aes(group = cat2) wins: discrete x (cat1) is ignored for grouping.",
+  "provenance": "R-generated",
+  "ggplot2Version": "4.0.3",
+  "rVersion": "4.6.1",
+  "ggplotCall": "ggplot(df, aes(x = cat1, y = num1, group = cat2)) + geom_point()",
+  "aes": {
+    "x": {
+      "field": "cat1"
+    },
+    "y": {
+      "field": "num1"
+    },
+    "group": {
+      "field": "cat2"
+    }
+  },
+  "expected": {
+    "rawGgplotGroups": [2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1],
+    "canonicalGroups": [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
+    "groupCount": 2
+  }
+}

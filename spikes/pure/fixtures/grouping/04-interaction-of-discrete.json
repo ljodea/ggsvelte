@@ -1,0 +1,27 @@
+{
+  "case": "04-interaction-of-discrete",
+  "description": "Two discrete aesthetics: effective group is the interaction cat1 x cat2 (6 groups).",
+  "provenance": "R-generated",
+  "ggplot2Version": "4.0.3",
+  "rVersion": "4.6.1",
+  "ggplotCall": "ggplot(df, aes(x = num1, y = num2, color = cat1, linetype = cat2)) + geom_path()",
+  "aes": {
+    "x": {
+      "field": "num1"
+    },
+    "y": {
+      "field": "num2"
+    },
+    "color": {
+      "field": "cat1"
+    },
+    "linetype": {
+      "field": "cat2"
+    }
+  },
+  "expected": {
+    "rawGgplotGroups": [4, 1, 6, 3, 2, 5, 4, 1, 6, 3, 2, 5],
+    "canonicalGroups": [0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5],
+    "groupCount": 6
+  }
+}

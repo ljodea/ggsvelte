@@ -1,0 +1,21 @@
+{
+  "case": "02-discrete-x-groups",
+  "description": "Discrete x (character column): groups follow cat1 levels.",
+  "provenance": "R-generated",
+  "ggplot2Version": "4.0.3",
+  "rVersion": "4.6.1",
+  "ggplotCall": "ggplot(df, aes(x = cat1, y = num1)) + geom_point()",
+  "aes": {
+    "x": {
+      "field": "cat1"
+    },
+    "y": {
+      "field": "num1"
+    }
+  },
+  "expected": {
+    "rawGgplotGroups": [2, 1, 3, 2, 1, 3, 2, 1, 3, 2, 1, 3],
+    "canonicalGroups": [0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2],
+    "groupCount": 3
+  }
+}

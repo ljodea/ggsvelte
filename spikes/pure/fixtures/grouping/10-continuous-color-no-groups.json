@@ -1,0 +1,24 @@
+{
+  "case": "10-continuous-color-no-groups",
+  "description": "A numeric column on color is a continuous scale: it must NOT create groups (NO_GROUP -1).",
+  "provenance": "R-generated",
+  "ggplot2Version": "4.0.3",
+  "rVersion": "4.6.1",
+  "ggplotCall": "ggplot(df, aes(x = num1, y = num2, color = num2)) + geom_point()",
+  "aes": {
+    "x": {
+      "field": "num1"
+    },
+    "y": {
+      "field": "num2"
+    },
+    "color": {
+      "field": "num2"
+    }
+  },
+  "expected": {
+    "rawGgplotGroups": [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+    "canonicalGroups": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    "groupCount": 1
+  }
+}
