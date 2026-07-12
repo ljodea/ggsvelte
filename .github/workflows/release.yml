@@ -59,11 +59,22 @@ jobs:
       - run: bun install --frozen-lockfile
       - name: build packages (published exports point at dist/)
         run: bun run build
+      # Publishing is gated behind the NPM_PUBLISH_ENABLED repo variable so
+      # this workflow stays green until npm trusted publishing (OIDC) is
+      # configured for all three packages on npmjs.com. Until then the action
+      # only maintains the "Version Packages" PR. Flip the gate with:
+      #   gh variable set NPM_PUBLISH_ENABLED --body true
       - name: changesets — version PR or publish
+        if: vars.NPM_PUBLISH_ENABLED == 'true'
         uses: changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d # v1.9.0
         with:
           # Repo policy bans network bunx — invoke the lockfile-installed
           # binary directly. Version command stays the changesets default.
           publish: bun node_modules/.bin/changeset publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: changesets — version PR only (publishing not yet enabled)
+        if: vars.NPM_PUBLISH_ENABLED != 'true'
+        uses: changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d # v1.9.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
