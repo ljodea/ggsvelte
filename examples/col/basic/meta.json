@@ -1,0 +1,6 @@
+{
+  "title": "Column chart",
+  "description": "Pre-computed bar heights with geom col (ggplot2's geom_col): a band x scale, a zero-based linear y scale, and the theme's accent role filling the unmapped bars.",
+  "tags": ["col", "band", "bars"],
+  "docsSection": "Bars & columns"
+}

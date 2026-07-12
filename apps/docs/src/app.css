@@ -1,0 +1,137 @@
+/*
+ * Docs styles. Two jobs beyond looking decent:
+ *
+ * 1. THEME → CHART BRIDGE: every chart color rides a --gg-* custom property
+ *    with the resolved theme role as fallback, so defining --gg-* per
+ *    [data-theme] here restyles every rendered chart without a re-render.
+ *    Values mirror @ggsvelte/core BUILTIN_THEMES.light/.dark.
+ *
+ * 2. VR MODE (html[data-vr], stamped pre-paint by app.html): strip chrome,
+ *    freeze all transitions/animations, and pin the fixed-size
+ *    .gg-example-frame to the top-left corner for screenshotting.
+ *
+ * FONT: system-font stack for the page; the chart SVG pins
+ * "Helvetica, Arial, sans-serif" (set by the renderer) so that text metrics
+ * track decision 0003's Helvetica-based FONT_METRICS table. In the pinned VR
+ * container this resolves to Liberation Sans (Arial-metric-compatible).
+ * See docs/decisions/0009 for the VR implications.
+ */
+
+:root {
+  --bg: #ffffff;
+  --fg: #1f2328;
+  --muted: #57606a;
+  --surface: #f6f8fa;
+  --border: #d0d7de;
+  --accent: #4269d0;
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --bg: #16181d;
+  --fg: #e6e8eb;
+  --muted: #9aa2ab;
+  --surface: #1f232b;
+  --border: #343a44;
+  --accent: #7ea1f0;
+  color-scheme: dark;
+}
+
+/* Chart theme roles (mirror BUILTIN_THEMES in @ggsvelte/core). */
+:root[data-theme="light"] {
+  --gg-ink: #1f2328;
+  --gg-grid: rgba(31, 35, 40, 0.14);
+  --gg-accent: #4269d0;
+}
+
+:root[data-theme="dark"] {
+  --gg-ink: #e6e8eb;
+  --gg-grid: rgba(230, 232, 235, 0.16);
+  --gg-accent: #7ea1f0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.55;
+}
+
+a {
+  color: var(--accent);
+}
+
+code,
+pre {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9em;
+}
+
+.site-main {
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.site-chrome {
+  border-bottom: 1px solid var(--border);
+}
+
+.site-chrome nav {
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  align-items: baseline;
+  gap: 1.25rem;
+}
+
+.site-chrome .brand {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--fg);
+  text-decoration: none;
+}
+
+.site-chrome a {
+  text-decoration: none;
+}
+
+.gg-example-frame {
+  /* Sized inline per example (width/height from the manifest). */
+  overflow: hidden;
+  background: var(--bg);
+}
+
+/* ---- VR mode (html[data-vr] is set pre-paint) ------------------------- */
+
+html[data-vr] *,
+html[data-vr] *::before,
+html[data-vr] *::after {
+  transition: none !important;
+  animation: none !important;
+  caret-color: transparent !important;
+}
+
+html[data-vr] .site-chrome,
+html[data-vr] .example-prose {
+  display: none !important;
+}
+
+html[data-vr] .site-main {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+html[data-vr] .gg-example-frame {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 999;
+}

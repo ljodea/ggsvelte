@@ -1,0 +1,6 @@
+{
+  "title": "Time-axis line chart",
+  "description": "A time series over ISO 8601 date strings: the time scale picks UTC calendar ticks (weeks here) with d3-style multi-scale labels, and the y scale is forced to include zero.",
+  "tags": ["line", "time", "scales"],
+  "docsSection": "Lines & time"
+}

@@ -1,0 +1,6 @@
+{
+  "title": "Scatter plot with color",
+  "description": "A classic scatter plot: two quantitative channels plus a discrete color mapping with a value-stable categorical palette and an automatic legend.",
+  "tags": ["point", "color", "legend", "scatter"],
+  "docsSection": "Scatter plots"
+}

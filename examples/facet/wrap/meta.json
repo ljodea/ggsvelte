@@ -1,0 +1,6 @@
+{
+  "title": "Faceted histograms (facet wrap)",
+  "description": "facet.wrap partitions the data BEFORE the bin stat: each panel bins its own service's response times over one shared break grid, and fixed scales share both axes (edge axes only).",
+  "tags": ["facet", "histogram", "bin", "wrap"],
+  "docsSection": "Facets"
+}

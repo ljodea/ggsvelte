@@ -1,0 +1,6 @@
+{
+  "title": "Data-driven rules (rug)",
+  "description": "The rule geom's data-driven form: mapping aes.x (and only x) draws one vertical panel-spanning rule per row — a rug plot of the distribution. Semi-transparent strokes reveal density.",
+  "tags": ["rule", "distribution", "rug"],
+  "docsSection": "Annotations & rules"
+}

@@ -1,0 +1,6 @@
+{
+  "title": "Area chart",
+  "description": "A single filled area from the zero baseline (the theme's accent role) with a line layer tracing its upper edge — layer order is paint order.",
+  "tags": ["area", "line", "layers"],
+  "docsSection": "Areas"
+}

@@ -1,0 +1,6 @@
+{
+  "title": "Columns with value labels",
+  "description": "A text layer composed over a column layer: the label channel reads a preformatted field, and a dy offset lifts each label just above its bar.",
+  "tags": ["col", "text", "labels", "layers"],
+  "docsSection": "Bars & columns"
+}

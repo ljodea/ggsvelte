@@ -1,0 +1,21 @@
+/** Palmer-penguins-style measurements (static subset, as in scatter-color). */
+export const penguins = [
+  { flipper: 181, mass: 3750, species: "Adelie" },
+  { flipper: 186, mass: 3800, species: "Adelie" },
+  { flipper: 195, mass: 3250, species: "Adelie" },
+  { flipper: 193, mass: 3450, species: "Adelie" },
+  { flipper: 190, mass: 3650, species: "Adelie" },
+  { flipper: 198, mass: 4400, species: "Adelie" },
+  { flipper: 192, mass: 3500, species: "Chinstrap" },
+  { flipper: 196, mass: 3900, species: "Chinstrap" },
+  { flipper: 193, mass: 3650, species: "Chinstrap" },
+  { flipper: 197, mass: 3725, species: "Chinstrap" },
+  { flipper: 202, mass: 4150, species: "Chinstrap" },
+  { flipper: 205, mass: 4300, species: "Chinstrap" },
+  { flipper: 211, mass: 4500, species: "Gentoo" },
+  { flipper: 230, mass: 5700, species: "Gentoo" },
+  { flipper: 218, mass: 5700, species: "Gentoo" },
+  { flipper: 215, mass: 5400, species: "Gentoo" },
+  { flipper: 219, mass: 5200, species: "Gentoo" },
+  { flipper: 213, mass: 4650, species: "Gentoo" },
+] as const;

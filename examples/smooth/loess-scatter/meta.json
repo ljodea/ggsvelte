@@ -1,0 +1,6 @@
+{
+  "title": "Loess smooth with confidence ribbon",
+  "description": "A loess trend (R-parity local regression, degree 2) fitted over a scatter, with its 95% confidence ribbon drawn under the line — ggplot2's geom_smooth.",
+  "tags": ["smooth", "loess", "ribbon", "scatter"],
+  "docsSection": "Statistical summaries"
+}

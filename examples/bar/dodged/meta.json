@@ -1,0 +1,6 @@
+{
+  "title": "Dodged bar chart",
+  "description": "position dodge places the fill groups side by side within each band: groups present at an x split the band evenly (ggplot2's preserve = \"total\").",
+  "tags": ["bar", "count", "dodge", "fill", "legend"],
+  "docsSection": "Bars & columns"
+}

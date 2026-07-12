@@ -1,0 +1,6 @@
+{
+  "title": "Text labels on a scatter",
+  "description": "A text layer labels each point from a data field, offset with dy. Labels draw exactly where placed — no collision detection in M1.",
+  "tags": ["text", "point", "labels"],
+  "docsSection": "Labels & text"
+}

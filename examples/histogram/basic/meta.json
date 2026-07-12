@@ -1,0 +1,6 @@
+{
+  "title": "Histogram",
+  "description": "A continuous variable divided into fixed-width bins (the histogram geom is canonicalized to bar + stat bin). Set binwidth deliberately — the bins = 30 default emits an advisory.",
+  "tags": ["histogram", "bin", "distribution"],
+  "docsSection": "Distributions"
+}

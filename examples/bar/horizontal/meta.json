@@ -1,0 +1,6 @@
+{
+  "title": "Horizontal bar chart (coord flip)",
+  "description": "coord: {\"type\": \"flip\"} is THE horizontal-composition mechanism: map x to the category and y to the value as usual, then flip — the band axis moves to the left (first category at the bottom, like ggplot2), the measure runs rightward, and stacking/dodging would follow.",
+  "tags": ["bar", "col", "coord", "flip", "horizontal"],
+  "docsSection": "Bars & columns"
+}

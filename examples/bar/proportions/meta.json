@@ -1,0 +1,6 @@
+{
+  "title": "Proportion bars (position fill)",
+  "description": "position fill stacks each band to 1 so bars compare composition, with percent tick labels and a sorted legend (ordering never reassigns colors).",
+  "tags": ["bar", "count", "fill-position", "legend", "percent"],
+  "docsSection": "Bars & columns"
+}

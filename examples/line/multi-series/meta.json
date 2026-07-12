@@ -1,0 +1,6 @@
+{
+  "title": "Multi-series line chart",
+  "description": "One line per group, derived from the discrete color mapping — plus a point layer on top showing how layers compose. Explicit breaks pin one tick per month.",
+  "tags": ["line", "point", "color", "legend", "layers"],
+  "docsSection": "Lines & time"
+}

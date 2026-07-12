@@ -1,0 +1,6 @@
+{
+  "title": "Continuous color (ramp legend)",
+  "description": "A quantitative color mapping through the viridis sequential ramp, with a gradient ramp legend instead of discrete swatches.",
+  "tags": ["point", "color", "sequential", "viridis", "legend"],
+  "docsSection": "Color & legends"
+}

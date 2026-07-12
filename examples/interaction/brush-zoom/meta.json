@@ -1,0 +1,6 @@
+{
+  "title": "Brush to zoom",
+  "description": "The transient brush selects rows through the hit index's rect query; with zoom enabled a finished brush respecs explicit continuous domains via scale inversion — colors never shift because the committed scale state flows into the new run. Double-click resets; interactions are excluded from VR shots (component-tested instead).",
+  "tags": ["interaction", "brush", "zoom", "point"],
+  "docsSection": "Interaction"
+}

@@ -1,0 +1,6 @@
+{
+  "title": "Stacked bar chart",
+  "description": "geom bar counts rows per x value — no y mapping — and the default stack position piles the fill groups. The legend comes from the fill scale.",
+  "tags": ["bar", "count", "stack", "fill", "legend"],
+  "docsSection": "Bars & columns"
+}

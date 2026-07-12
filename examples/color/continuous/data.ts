@@ -1,0 +1,21 @@
+/** Alpine weather stations: elevation, July mean temperature (static). */
+export const stations = [
+  { station: "Valley South", elevation: 210, julyTemp: 23.9 },
+  { station: "Riverbend", elevation: 340, julyTemp: 22.8 },
+  { station: "Old Mill", elevation: 470, julyTemp: 21.9 },
+  { station: "Foothill Gate", elevation: 620, julyTemp: 20.7 },
+  { station: "Chapel Rise", elevation: 780, julyTemp: 19.6 },
+  { station: "Pine Shelf", elevation: 905, julyTemp: 18.9 },
+  { station: "Lower Meadow", elevation: 1040, julyTemp: 17.8 },
+  { station: "Upper Meadow", elevation: 1215, julyTemp: 16.7 },
+  { station: "Larch Edge", elevation: 1370, julyTemp: 15.6 },
+  { station: "Stone Hut", elevation: 1540, julyTemp: 14.4 },
+  { station: "Grey Col", elevation: 1720, julyTemp: 13.1 },
+  { station: "High Bowl", elevation: 1895, julyTemp: 11.9 },
+  { station: "Cirque View", elevation: 2075, julyTemp: 10.6 },
+  { station: "Ridge Camp", elevation: 2260, julyTemp: 9.2 },
+  { station: "Windy Pass", elevation: 2440, julyTemp: 7.9 },
+  { station: "Glacier Toe", elevation: 2635, julyTemp: 6.4 },
+  { station: "Serac Field", elevation: 2810, julyTemp: 5.1 },
+  { station: "Summit Shoulder", elevation: 2990, julyTemp: 3.7 },
+] as const;

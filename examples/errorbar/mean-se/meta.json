@@ -1,0 +1,6 @@
+{
+  "title": "Errorbars (mean ± se) over raw data",
+  "description": "The summary stat computes mean ± standard error per group (ggplot2's mean_se default), drawn as errorbars over the seeded-jitter raw observations.",
+  "tags": ["errorbar", "summary", "mean-se", "jitter"],
+  "docsSection": "Statistical summaries"
+}

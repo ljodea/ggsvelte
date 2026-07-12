@@ -1,0 +1,6 @@
+{
+  "title": "Free y scales per panel",
+  "description": "scales: \"free_y\" trains the y domain per panel — each metric fills its panel at its own magnitude, every panel gets its own left axis, and x stays shared. Discrete color assignments would still be global (one legend).",
+  "tags": ["facet", "free-scales", "line", "wrap"],
+  "docsSection": "Facets"
+}

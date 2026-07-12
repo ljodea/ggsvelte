@@ -1,0 +1,6 @@
+{
+  "title": "Density overlay",
+  "description": "Gaussian kernel density estimates (bw.nrd0 bandwidth, 512-point grid) overlaid per group with translucent fills — the smoothed alternative to overlapping histograms.",
+  "tags": ["density", "kde", "overlay", "distribution"],
+  "docsSection": "Distributions"
+}

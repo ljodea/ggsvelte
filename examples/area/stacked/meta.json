@@ -1,0 +1,6 @@
+{
+  "title": "Stacked area chart",
+  "description": "Areas stack by default: the fill groups pile from the zero baseline, showing total and composition over time. First-seen group order stays on top.",
+  "tags": ["area", "stack", "fill", "legend"],
+  "docsSection": "Areas"
+}

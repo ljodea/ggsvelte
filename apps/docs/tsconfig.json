@@ -1,0 +1,11 @@
+{
+  // Per plan: ONLY apps/docs extends its own generated .svelte-kit config.
+  "extends": "./.svelte-kit/tsconfig.json",
+  "compilerOptions": {
+    "strict": true,
+    "moduleResolution": "bundler",
+    // No ambient @types (the hoisted @types/bun's import.meta declarations
+    // clash with vite/client's): the app code uses no bun/node globals.
+    "types": []
+  }
+}

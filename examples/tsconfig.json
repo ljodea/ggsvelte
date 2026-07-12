@@ -1,0 +1,12 @@
+{
+  // Type-checks the corpus's .ts files (spec.ts / data.ts / define.ts /
+  // manifest.ts) via `bun run check:examples` (pre-push + CI parity).
+  // Example.svelte files are compiled and checked by the docs app
+  // (apps/docs svelte-check + vite build). Requires `bun run check` +
+  // `bun run build` first: imports resolve through the packages' dist/.
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": ["**/*.ts"]
+}

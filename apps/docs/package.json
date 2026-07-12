@@ -1,0 +1,27 @@
+{
+  "name": "@ggsvelte/docs",
+  "version": "0.0.0",
+  "private": true,
+  "description": "ggsvelte docs site: SvelteKit + adapter-static. The gallery and per-example pages render from examples/manifest.ts (one source, three uses); the built output in build/ is the VR screenshot target.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev",
+    "build": "svelte-kit sync && vite build",
+    "preview": "vite preview",
+    "check": "svelte-kit sync && svelte-check --fail-on-warnings"
+  },
+  "dependencies": {
+    "@ggsvelte/examples": "workspace:*",
+    "@ggsvelte/spec": "workspace:*",
+    "ggsvelte": "workspace:*"
+  },
+  "devDependencies": {
+    "@sveltejs/adapter-static": "^3.0.0",
+    "@sveltejs/kit": "^2.0.0",
+    "@sveltejs/vite-plugin-svelte": "^6.2.4",
+    "svelte": "^5.0.0",
+    "svelte-check": "^4.0.0",
+    "typescript": "^5.9.0",
+    "vite": "^7.0.0"
+  }
+}

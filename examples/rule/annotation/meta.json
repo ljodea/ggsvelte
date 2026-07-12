@@ -1,0 +1,6 @@
+{
+  "title": "Reference-line annotations",
+  "description": "The rule geom's annotation form: fixed x/y intercepts drawn under a line layer. Annotation rules inherit no plot aes and still train the scales, exactly like ggplot2's vline/hline.",
+  "tags": ["rule", "annotation", "line", "layers"],
+  "docsSection": "Annotations & rules"
+}

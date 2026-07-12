@@ -1,0 +1,6 @@
+{
+  "title": "Log-scale scatter",
+  "description": "A scatter plot with a base-10 logarithmic x scale and SI-prefix tick labels — density-adaptive log ticks handle three decades of GDP per capita.",
+  "tags": ["point", "log", "scales", "scatter"],
+  "docsSection": "Scatter plots"
+}

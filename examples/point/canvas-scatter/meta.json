@@ -1,0 +1,6 @@
+{
+  "title": "Canvas scatter (10k points)",
+  "description": "Above the 2,000-mark threshold, render: \"auto\" moves the layer onto a canvas stratum (advisory `canvas-auto`): axes, grid, and the legend stay SVG; the marks raster into one canvas sized by the DPR recipe, paired with an off-screen description block and a data-table toggle. Set render: \"svg\" or a11y: \"force-svg\" to opt out.",
+  "tags": ["point", "canvas", "performance", "strata"],
+  "docsSection": "Scatter plots"
+}

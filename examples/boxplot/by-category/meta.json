@@ -1,0 +1,6 @@
+{
+  "title": "Boxplot by category",
+  "description": "Five-number summaries per category: type-7 quantile hinges (the R default), whiskers to the furthest point within 1.5 × IQR, and outliers drawn individually.",
+  "tags": ["boxplot", "quartiles", "outliers", "distribution"],
+  "docsSection": "Distributions"
+}
