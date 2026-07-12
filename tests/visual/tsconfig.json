@@ -1,0 +1,11 @@
+{
+  // Type info for oxlint --type-aware over the VR suite (the suite itself is
+  // executed by @playwright/test, which transpiles on the fly).
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["node"],
+    "lib": ["es2023", "dom", "dom.iterable"]
+  },
+  "include": ["**/*.ts", "../../examples/manifest.ts"]
+}
