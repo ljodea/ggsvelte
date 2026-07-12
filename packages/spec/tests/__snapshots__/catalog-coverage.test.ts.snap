@@ -1,0 +1,664 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`ERROR_CATALOG coverage [invalid-spec-root] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Provide an object with at least one layer: {"layers": [{"geom": "point", ...}]}.",
+    "summary": "The spec is not a JSON object.",
+    "tier": 1,
+  },
+  "instance": {
+    "code": "invalid-spec-root",
+    "fix": {
+      "description": "Provide an object with at least one layer.",
+      "example": {
+        "layers": [
+          {
+            "aes": {
+              "x": {
+                "field": "x",
+              },
+              "y": {
+                "field": "y",
+              },
+            },
+            "geom": "point",
+          },
+        ],
+      },
+    },
+    "message": "A plot spec must be a JSON object with a "layers" array (got number).",
+    "path": "",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [missing-layers] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Add a layers array with at least one layer object.",
+    "summary": "\`layers\` is missing or not an array.",
+    "tier": 1,
+  },
+  "instance": {
+    "code": "missing-layers",
+    "fix": {
+      "description": "Add a layers array with at least one layer.",
+      "example": [
+        {
+          "geom": "point",
+        },
+      ],
+    },
+    "message": ""layers" must be an array of layer objects (got nothing).",
+    "path": "/layers",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [empty-layers] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Add a layer, e.g. {"geom": "point"}.",
+    "summary": "\`layers\` is present but empty (a plot needs at least one layer).",
+    "tier": 1,
+  },
+  "instance": {
+    "code": "empty-layers",
+    "fix": {
+      "description": "Add a layer.",
+      "example": [
+        {
+          "geom": "point",
+        },
+      ],
+    },
+    "message": ""layers" must contain at least one layer.",
+    "path": "/layers",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [invalid-layer] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Replace the entry with a layer object carrying a "geom".",
+    "summary": "A layer is not an object.",
+    "tier": 1,
+  },
+  "instance": {
+    "code": "invalid-layer",
+    "fix": {
+      "description": "Replace with a layer object.",
+      "example": {
+        "geom": "point",
+      },
+    },
+    "message": "Each layer must be an object with a "geom" (got number).",
+    "path": "/layers/0",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [missing-geom] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Add a geom name to the layer, e.g. {"geom": "point"}.",
+    "summary": "A layer has no "geom" discriminator.",
+    "tier": 1,
+  },
+  "instance": {
+    "allowed": [
+      "point",
+      "line",
+      "col",
+      "bar",
+      "histogram",
+      "area",
+      "rule",
+      "text",
+      "smooth",
+      "boxplot",
+      "density",
+      "errorbar",
+    ],
+    "code": "missing-geom",
+    "fix": {
+      "description": "Add a geom to the layer.",
+      "example": {
+        "geom": "point",
+      },
+    },
+    "message": "Every layer needs a "geom" discriminator. Allowed geoms: "point", "line", "col", "bar", "histogram", "area", "rule", "text", "smooth", "boxplot", "density", "errorbar".",
+    "path": "/layers/0/geom",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [unknown-geom] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Use one of the allowed geoms (the error lists them, with a did-you-mean).",
+    "summary": "A layer's "geom" is not a known geom name.",
+    "tier": 1,
+  },
+  "instance": {
+    "allowed": [
+      "point",
+      "line",
+      "col",
+      "bar",
+      "histogram",
+      "area",
+      "rule",
+      "text",
+      "smooth",
+      "boxplot",
+      "density",
+      "errorbar",
+    ],
+    "code": "unknown-geom",
+    "fix": {
+      "description": "Set geom to "point".",
+      "example": {
+        "geom": "point",
+      },
+    },
+    "message": "Unknown geom "pont". Allowed geoms: "point", "line", "col", "bar", "histogram", "area", "rule", "text", "smooth", "boxplot", "density", "errorbar". Did you mean "point"?",
+    "path": "/layers/0/geom",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [invalid-channel-value] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Wrap field mappings as {"field": "column_name"} and constants as {"value": ...}.",
+    "summary": "A channel value is not one of the canonical forms {field}/{value}/{stat}/null (bare strings are builder-only shorthand).",
+    "tier": 1,
+  },
+  "instance": {
+    "code": "invalid-channel-value",
+    "fix": {
+      "description": "Use a canonical channel form, e.g. {"field": "column_name"} to map "x" to a data column.",
+      "example": {
+        "field": "displ",
+      },
+    },
+    "message": "Channel "x" is the bare string "displ"; portable specs require the canonical form {"field": "displ"}.",
+    "path": "/layers/0/aes/x",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [unexpected-property] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Remove or rename the property (the error suggests the closest allowed name).",
+    "summary": "An object carries a property the schema does not allow.",
+    "tier": 1,
+  },
+  "instance": {
+    "allowed": [
+      "$schema",
+      "edition",
+      "data",
+      "datasets",
+      "aes",
+      "layers",
+      "facet",
+      "coord",
+      "scales",
+      "legend",
+      "labs",
+      "theme",
+      "width",
+      "height",
+      "a11y",
+    ],
+    "code": "unexpected-property",
+    "fix": {
+      "description": "Rename "labz" to "labs".",
+    },
+    "message": "Unknown property "labz". Did you mean "labs"?",
+    "path": "/labz",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [missing-property] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Add the named property.",
+    "summary": "A required property is missing.",
+    "tier": 1,
+  },
+  "instance": {
+    "code": "missing-property",
+    "message": "Missing required property "type".",
+    "path": "/coord/type",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [invalid-enum-value] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Use one of the allowed values (the error lists them, with a did-you-mean).",
+    "summary": "A value is outside its declared enum/literal set.",
+    "tier": 1,
+  },
+  "instance": {
+    "allowed": [
+      "cartesian",
+      "flip",
+    ],
+    "code": "invalid-enum-value",
+    "message": "Invalid value "polar" for "type"; allowed: "cartesian", "flip".",
+    "path": "/coord/type",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [value-out-of-range] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Set the value inside the bounds stated by the error message.",
+    "summary": "A numeric value is outside its declared bounds.",
+    "tier": 1,
+  },
+  "instance": {
+    "code": "value-out-of-range",
+    "fix": {
+      "description": "Set "width" to a number > 0.",
+    },
+    "message": "Value -5 for "width" is out of range (must be > 0).",
+    "path": "/width",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [invalid-data] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Use {"values": [...rows]}, {"columns": {...arrays}}, or {"name": "dataset"}.",
+    "summary": "\`data\` (or a dataset entry) matches none of the data forms.",
+    "tier": 1,
+  },
+  "instance": {
+    "allowed": [
+      "values",
+      "columns",
+      "name",
+    ],
+    "code": "invalid-data",
+    "fix": {
+      "description": "Wrap inline rows as {"values": [...]}.",
+      "example": {
+        "values": [
+          {
+            "x": 1,
+            "y": 2,
+          },
+        ],
+      },
+    },
+    "message": "Data must be one of {"values": [...rows]}, {"columns": {...arrays}}, or {"name": "dataset"}.",
+    "path": "/data",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [invalid-type] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Give the property the JSON type the message names.",
+    "summary": "Fallback: a value has the wrong JSON type.",
+    "tier": 1,
+  },
+  "instance": {
+    "code": "invalid-type",
+    "message": "Expected number at "width" (got "wide").",
+    "path": "/width",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [missing-required-channel] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Map the named channel to a data field in the layer's aes or the plot-level aes.",
+    "summary": "A geom is missing a required aesthetic channel (x, y, label, ...).",
+    "tier": 2,
+  },
+  "instance": {
+    "code": "missing-required-channel",
+    "fix": {
+      "description": "Map "x" to a data field.",
+      "example": {
+        "x": {
+          "field": "column_name",
+        },
+      },
+    },
+    "message": "The point geom requires a "x" channel; map it in the layer's aes or the plot-level aes.",
+    "path": "/layers/0/aes/x",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [rule-form-ambiguous] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Use fixed intercepts OR a data mapping, never both (unset the other with null).",
+    "summary": "A rule layer mixes the annotation form (params.xintercept/yintercept) with mapped aes.x/aes.y.",
+    "tier": 2,
+  },
+  "instance": {
+    "code": "rule-form-ambiguous",
+    "fix": {
+      "description": "Remove the intercept params (data-driven form), or unset aes.x/aes.y with null (annotation form).",
+      "example": {
+        "aes": {
+          "x": null,
+          "y": null,
+        },
+        "geom": "rule",
+        "params": {
+          "yintercept": 0,
+        },
+      },
+    },
+    "message": "This rule layer mixes the annotation form (params.xintercept/yintercept) with mapped aes.x/aes.y. Use fixed intercepts OR a data mapping, never both.",
+    "path": "/layers/0",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [rule-form-missing] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Set params.yintercept/xintercept (annotation) or map aes.x/aes.y (data-driven).",
+    "summary": "A rule layer has neither intercept params nor a mapped aes.x/aes.y.",
+    "tier": 2,
+  },
+  "instance": {
+    "code": "rule-form-missing",
+    "fix": {
+      "description": "Set params.yintercept (or xintercept) for an annotation, or map aes.x/aes.y to a field for data-driven rules.",
+      "example": {
+        "geom": "rule",
+        "params": {
+          "yintercept": 0,
+        },
+      },
+    },
+    "message": "This rule layer has neither fixed intercepts (params.xintercept/yintercept) nor a mapped aes.x/aes.y — nothing to draw.",
+    "path": "/layers/0",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [rule-both-axes] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Keep one direction (vertical: map x; horizontal: map y) and unset the other with null.",
+    "summary": "A data-driven rule layer maps BOTH aes.x and aes.y (pick one direction).",
+    "tier": 2,
+  },
+  "instance": {
+    "code": "rule-both-axes",
+    "fix": {
+      "description": "Keep one direction and unset the other channel with null.",
+      "example": {
+        "aes": {
+          "y": null,
+        },
+        "geom": "rule",
+      },
+    },
+    "message": "This rule layer maps BOTH aes.x and aes.y; a data-driven rule is either vertical (map x) or horizontal (map y). Unset the other channel with null.",
+    "path": "/layers/0",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [computed-y-mapped] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Unset y with null — or, for pre-computed bar heights, switch the layer to geom "col".",
+    "summary": "A layer whose stat computes y (count, bin, density) maps aes.y to a data field.",
+    "tier": 2,
+  },
+  "instance": {
+    "code": "computed-y-mapped",
+    "fix": {
+      "description": "Switch the layer to geom "col" (identity stat) to draw mapped y values.",
+      "example": {
+        "geom": "col",
+      },
+    },
+    "message": "The bar geom computes y with the count stat, so aes.y must not map data. Use geom "col" for pre-computed heights, or unset y with null.",
+    "path": "/layers/0/aes/y",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [bin-center-and-boundary] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Keep one bin-grid alignment parameter and remove the other.",
+    "summary": "A bin-stat layer sets BOTH params.center and params.boundary.",
+    "tier": 2,
+  },
+  "instance": {
+    "code": "bin-center-and-boundary",
+    "fix": {
+      "description": "Keep one alignment parameter and remove the other.",
+      "example": {
+        "params": {
+          "binwidth": 1,
+          "boundary": 0,
+        },
+      },
+    },
+    "message": "The bin stat accepts params.center OR params.boundary (both align the bin grid), never both.",
+    "path": "/layers/0/params",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [facet-form-ambiguous] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Keep facet.wrap (and drop rows/cols), or keep rows/cols (and drop wrap).",
+    "summary": "A facet sets BOTH the wrap form and the rows/cols grid form.",
+    "tier": 2,
+  },
+  "instance": {
+    "code": "facet-form-ambiguous",
+    "fix": {
+      "description": "Keep facet.wrap (and drop rows/cols), or keep rows/cols (and drop wrap).",
+      "example": {
+        "ncol": 3,
+        "wrap": {
+          "field": "group",
+        },
+      },
+    },
+    "message": "This facet mixes the wrap form (facet.wrap) with the grid form (facet.rows/facet.cols). Use wrap OR rows/cols, never both.",
+    "path": "/facet",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [facet-form-missing] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Set facet.wrap (wrap form) or facet.rows/facet.cols (grid form).",
+    "summary": "A facet sets neither wrap nor rows/cols — nothing to partition by.",
+    "tier": 2,
+  },
+  "instance": {
+    "code": "facet-form-missing",
+    "fix": {
+      "description": "Set facet.wrap (wrap form) or facet.rows/facet.cols (grid form).",
+      "example": {
+        "wrap": {
+          "field": "group",
+        },
+      },
+    },
+    "message": "This facet sets neither wrap nor rows/cols — there is no field to partition panels by.",
+    "path": "/facet",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [facet-ncol-without-wrap] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Remove ncol, or switch to the wrap form.",
+    "summary": "facet.ncol only applies to the wrap form.",
+    "tier": 2,
+  },
+  "instance": {
+    "code": "facet-ncol-without-wrap",
+    "fix": {
+      "description": "Remove ncol, or switch to the wrap form.",
+    },
+    "message": "facet.ncol only applies to the wrap form; the grid form's columns come from facet.cols' distinct values.",
+    "path": "/facet/ncol",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [unknown-field] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Map the channel to one of the available fields (the error lists them, with a did-you-mean).",
+    "summary": "A channel maps a field that does not exist in the data.",
+    "tier": 2,
+  },
+  "instance": {
+    "allowed": [
+      "x",
+      "y",
+    ],
+    "code": "unknown-field",
+    "fix": {
+      "description": "Map "x" to "x".",
+      "example": {
+        "field": "x",
+      },
+    },
+    "message": "Unknown field "xx" (available: x, y). Did you mean "x"?",
+    "path": "/layers/0/aes/x",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [all-null-column] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Map the channel to a column with actual values, or fix the data.",
+    "summary": "A mapped column contains only null values.",
+    "tier": 2,
+  },
+  "instance": {
+    "code": "all-null-column",
+    "message": "Field "x" contains only null values; the "x" channel cannot be drawn from it.",
+    "path": "/layers/0/aes/x",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [scale-type-mismatch] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Change the scale type to match the field (band for categories, time for temporal), or map a compatible field.",
+    "summary": "A configured scale type is incompatible with the mapped field's type.",
+    "tier": 2,
+  },
+  "instance": {
+    "code": "scale-type-mismatch",
+    "message": "scales.x.type is "time" but field "x" is quantitative; time scales need temporal values (Dates or ISO 8601 strings).",
+    "path": "/layers/0/aes/x",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [channel-type-mismatch] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Map a field of the type the geom/stat needs, or switch to a geom that fits the field (the message suggests one).",
+    "summary": "A mapped field's type is incompatible with the layer's geom/stat (e.g. a nominal x on smooth/bin/density, a continuous x on boxplot).",
+    "tier": 2,
+  },
+  "instance": {
+    "code": "channel-type-mismatch",
+    "fix": {
+      "description": "Map the channel to a numeric field, or use a boxplot for discrete x.",
+    },
+    "message": "The smooth stat needs quantitative x and y, but field "k" (x) is nominal.",
+    "path": "/layers/0/aes/x",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [unknown-stat-column] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Use one of the columns the stat generates (the error lists them), or change the layer's stat.",
+    "summary": "A { stat } channel names a column the layer's stat does not generate.",
+    "tier": 2,
+  },
+  "instance": {
+    "code": "unknown-stat-column",
+    "message": "Channel "y" maps stat column "count", but this layer's stat ("identity") generates no columns.",
+    "path": "/layers/0/aes/y",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [invalid-data-profile] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Provide { fields: [{ name, type: "quantitative"|"temporal"|"ordinal"|"nominal" }], rowCount? }.",
+    "summary": "The provided DataProfile is malformed.",
+    "tier": 2,
+  },
+  "instance": {
+    "code": "invalid-data-profile",
+    "fix": {
+      "description": "Provide { fields: [{ name, type: "quantitative"|"temporal"|"ordinal"|"nominal" }], rowCount? }.",
+      "example": {
+        "fields": [
+          {
+            "name": "displ",
+            "type": "quantitative",
+          },
+        ],
+        "rowCount": 234,
+      },
+    },
+    "message": "Invalid DataProfile: field "x" has type "numeric"; allowed: quantitative, temporal, ordinal, nominal.",
+    "path": "",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [validation-limit] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Validate with a DataProfile instead of huge inline data, or raise the limit via options.limits.",
+    "summary": "Validation input exceeded a documented limit (rows/bytes/depth/diagnostics).",
+    "tier": 2,
+  },
+  "instance": {
+    "code": "validation-limit",
+    "message": "Inline data has 2 rows, more than the documented maxRows limit (1); data-aware checks skipped. Validate with a DataProfile instead.",
+    "path": "/data",
+  },
+}
+`;

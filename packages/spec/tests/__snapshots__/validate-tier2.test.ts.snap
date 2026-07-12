@@ -1,0 +1,87 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`tier 2 — M2 statistical layer (snapshot-tested messages) density y mapped to a field -> computed-y-mapped 1`] = `
+{
+  "code": "computed-y-mapped",
+  "fix": {
+    "description": "Remove the y mapping (or unset an inherited one with null).",
+    "example": {
+      "aes": {
+        "y": null,
+      },
+      "geom": "density",
+    },
+  },
+  "message": "The density geom computes y with the density stat, so aes.y must not map data. Map only x, or unset y with null.",
+  "path": "/layers/0/aes/y",
+}
+`;
+
+exports[`tier 2 — M2 statistical layer (snapshot-tested messages) bin center + boundary -> bin-center-and-boundary 1`] = `
+{
+  "code": "bin-center-and-boundary",
+  "fix": {
+    "description": "Keep one alignment parameter and remove the other.",
+    "example": {
+      "params": {
+        "binwidth": 1,
+        "boundary": 0,
+      },
+    },
+  },
+  "message": "The bin stat accepts params.center OR params.boundary (both align the bin grid), never both.",
+  "path": "/layers/0/params",
+}
+`;
+
+exports[`tier 2 — M2 statistical layer (snapshot-tested messages) errorbar summary requires y instead 1`] = `
+{
+  "code": "missing-required-channel",
+  "fix": {
+    "description": "Map "y" to a data field.",
+    "example": {
+      "y": {
+        "field": "column_name",
+      },
+    },
+  },
+  "message": "The errorbar geom with the summary stat requires a "y" channel; map it in the layer's aes or the plot-level aes.",
+  "path": "/layers/0/aes/y",
+}
+`;
+
+exports[`tier 2 — M2 statistical layer (snapshot-tested messages) smooth over nominal fields -> channel-type-mismatch (inline data) 1`] = `
+{
+  "code": "channel-type-mismatch",
+  "fix": {
+    "description": "Map the channel to a numeric field, or use a boxplot for discrete x.",
+  },
+  "message": "The smooth stat needs quantitative x and y, but field "c" (x) is nominal.",
+  "path": "/layers/0/aes/x",
+}
+`;
+
+exports[`tier 2 — M2 statistical layer (snapshot-tested messages) boxplot needs discrete x + quantitative y (inline data) 1`] = `
+{
+  "code": "channel-type-mismatch",
+  "fix": {
+    "description": "Map x to a categorical field (strings), or bin the values into labeled categories first.",
+  },
+  "message": "The boxplot geom needs a DISCRETE x this milestone, but field "v" is quantitative.",
+  "path": "/layers/0/aes/x",
+}
+`;
+
+exports[`tier 2 — M2 statistical layer (snapshot-tested messages) histogram y mapped to a field -> computed-y-mapped 1`] = `
+{
+  "code": "computed-y-mapped",
+  "fix": {
+    "description": "Switch the layer to geom "col" (identity stat) to draw mapped y values.",
+    "example": {
+      "geom": "col",
+    },
+  },
+  "message": "The histogram geom computes y with the bin stat, so aes.y must not map data. Use geom "col" for pre-computed heights, or unset y with null.",
+  "path": "/layers/0/aes/y",
+}
+`;

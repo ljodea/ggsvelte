@@ -1,0 +1,50 @@
+{
+  "name": "@ggsvelte/spec",
+  "version": "0.0.0",
+  "description": "ggsvelte plot spec: TypeBox schemas, PortableSpec types, normalize(), validate() with agent errors, fluent builder, JSON Schema artifact.",
+  "keywords": [
+    "agents",
+    "charts",
+    "dataviz",
+    "ggplot2",
+    "grammar-of-graphics",
+    "json-schema",
+    "plot",
+    "spec",
+    "validation",
+    "visualization"
+  ],
+  "homepage": "https://github.com/ljodea/ggsvelte",
+  "bugs": "https://github.com/ljodea/ggsvelte/issues",
+  "license": "MIT",
+  "author": "Liam O'Dea",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ljodea/ggsvelte.git"
+  },
+  "files": [
+    "dist",
+    "schema",
+    "src"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./schema/v0.json": "./schema/v0.json"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "dependencies": {
+    "@sinclair/typebox": "^0.34.0"
+  },
+  "devDependencies": {
+    "ajv": "^8.20.0",
+    "typescript": "^5.9.0"
+  }
+}

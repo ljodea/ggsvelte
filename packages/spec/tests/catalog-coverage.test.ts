@@ -1,0 +1,128 @@
+/**
+ * Error-catalog coverage (M3 audit): every code in ERROR_CATALOG must be
+ * reproducible by validate(), with its message/fix snapshot-tested here in
+ * one place. Adding a catalog code without a trigger — or a trigger whose
+ * code silently changes — fails this test.
+ */
+import { describe, expect, it } from "bun:test";
+
+import { ERROR_CATALOG, ERROR_CODES } from "../src/errors.ts";
+import type { SpecErrorCode } from "../src/errors.ts";
+import type { ValidateOptions } from "../src/validate-data.ts";
+import { validate } from "../src/validate.ts";
+
+interface Trigger {
+  spec: unknown;
+  options?: ValidateOptions;
+}
+
+const point = { geom: "point", aes: { x: { field: "x" }, y: { field: "y" } } };
+const xy = { values: [{ x: 1, y: 2 }] };
+
+/** One minimal trigger per catalog code. */
+const TRIGGERS: Record<SpecErrorCode, Trigger> = {
+  "invalid-spec-root": { spec: 42 },
+  "missing-layers": { spec: {} },
+  "empty-layers": { spec: { layers: [] } },
+  "invalid-layer": { spec: { layers: [42] } },
+  "missing-geom": { spec: { layers: [{}] } },
+  "unknown-geom": { spec: { layers: [{ geom: "pont" }] } },
+  "invalid-channel-value": { spec: { layers: [{ geom: "point", aes: { x: "displ" } }] } },
+  "unexpected-property": { spec: { layers: [point], labz: {} } },
+  "missing-property": { spec: { layers: [point], coord: {} } },
+  "invalid-enum-value": { spec: { layers: [point], coord: { type: "polar" } } },
+  "value-out-of-range": { spec: { layers: [point], width: -5 } },
+  "invalid-data": { spec: { layers: [point], data: { rows: [] } } },
+  "invalid-type": { spec: { layers: [point], width: "wide" } },
+  "missing-required-channel": { spec: { layers: [{ geom: "point" }] }, options: {} },
+  "rule-form-ambiguous": {
+    spec: {
+      layers: [{ geom: "rule", aes: { x: { field: "x" } }, params: { yintercept: 0 } }],
+    },
+    options: {},
+  },
+  "rule-form-missing": { spec: { layers: [{ geom: "rule" }] }, options: {} },
+  "rule-both-axes": {
+    spec: { layers: [{ geom: "rule", aes: { x: { field: "x" }, y: { field: "y" } } }] },
+    options: {},
+  },
+  "computed-y-mapped": {
+    spec: { layers: [{ geom: "bar", aes: { x: { field: "x" }, y: { field: "y" } } }] },
+    options: {},
+  },
+  "bin-center-and-boundary": {
+    spec: {
+      layers: [
+        { geom: "histogram", aes: { x: { field: "x" } }, params: { center: 0, boundary: 0 } },
+      ],
+    },
+    options: {},
+  },
+  "facet-form-ambiguous": {
+    spec: {
+      layers: [point],
+      facet: { wrap: { field: "g" }, rows: { field: "h" } },
+    },
+    options: {},
+  },
+  "facet-form-missing": { spec: { layers: [point], facet: {} }, options: {} },
+  "facet-ncol-without-wrap": {
+    spec: { layers: [point], facet: { rows: { field: "g" }, ncol: 2 } },
+    options: {},
+  },
+  "unknown-field": {
+    spec: { data: xy, layers: [{ geom: "point", aes: { x: { field: "xx" }, y: { field: "y" } } }] },
+    options: {},
+  },
+  "all-null-column": {
+    spec: {
+      data: { values: [{ x: null, y: 1 }] },
+      layers: [point],
+    },
+    options: {},
+  },
+  "scale-type-mismatch": {
+    spec: { data: xy, layers: [point], scales: { x: { type: "time" } } },
+    options: {},
+  },
+  "channel-type-mismatch": {
+    spec: {
+      data: { values: [{ k: "a", y: 1 }] },
+      layers: [{ geom: "smooth", aes: { x: { field: "k" }, y: { field: "y" } } }],
+    },
+    options: {},
+  },
+  "unknown-stat-column": {
+    spec: {
+      data: xy,
+      layers: [{ geom: "point", aes: { x: { field: "x" }, y: { stat: "count" } } }],
+    },
+    options: {},
+  },
+  "invalid-data-profile": {
+    spec: { layers: [point] },
+    options: { profile: { fields: [{ name: "x", type: "numeric" }] } as never },
+  },
+  "validation-limit": {
+    spec: { data: { values: [{ x: 1 }, { x: 2 }] }, layers: [point] },
+    options: { limits: { maxRows: 1 } },
+  },
+};
+
+describe("ERROR_CATALOG coverage", () => {
+  it("has a trigger for every code and no extras", () => {
+    expect(Object.keys(TRIGGERS).toSorted()).toEqual([...ERROR_CODES].toSorted());
+  });
+
+  for (const code of ERROR_CODES) {
+    it(`[${code}] is reproducible; message + fix snapshot`, () => {
+      const { spec, options } = TRIGGERS[code];
+      const result = options === undefined ? validate(spec) : validate(spec, options);
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      const hit = result.errors.find((e) => e.code === code);
+      expect(hit?.code).toBe(code);
+      expect({ catalog: ERROR_CATALOG[code], instance: hit }).toMatchSnapshot();
+    });
+  }
+});

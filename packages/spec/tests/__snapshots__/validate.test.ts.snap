@@ -1,0 +1,318 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`validate — agent errors (snapshot-tested messages) non-object root 1`] = `
+[
+  {
+    "code": "invalid-spec-root",
+    "fix": {
+      "description": "Provide an object with at least one layer.",
+      "example": {
+        "layers": [
+          {
+            "aes": {
+              "x": {
+                "field": "x",
+              },
+              "y": {
+                "field": "y",
+              },
+            },
+            "geom": "point",
+          },
+        ],
+      },
+    },
+    "message": "A plot spec must be a JSON object with a "layers" array (got string).",
+    "path": "",
+  },
+]
+`;
+
+exports[`validate — agent errors (snapshot-tested messages) missing layers 1`] = `
+[
+  {
+    "code": "missing-layers",
+    "fix": {
+      "description": "Add a layers array with at least one layer.",
+      "example": [
+        {
+          "geom": "point",
+        },
+      ],
+    },
+    "message": ""layers" must be an array of layer objects (got nothing).",
+    "path": "/layers",
+  },
+]
+`;
+
+exports[`validate — agent errors (snapshot-tested messages) empty layers 1`] = `
+[
+  {
+    "code": "empty-layers",
+    "fix": {
+      "description": "Add a layer.",
+      "example": [
+        {
+          "geom": "point",
+        },
+      ],
+    },
+    "message": ""layers" must contain at least one layer.",
+    "path": "/layers",
+  },
+]
+`;
+
+exports[`validate — agent errors (snapshot-tested messages) unknown geom with did-you-mean 1`] = `
+[
+  {
+    "allowed": [
+      "point",
+      "line",
+      "col",
+      "bar",
+      "histogram",
+      "area",
+      "rule",
+      "text",
+      "smooth",
+      "boxplot",
+      "density",
+      "errorbar",
+    ],
+    "code": "unknown-geom",
+    "fix": {
+      "description": "Set geom to "point".",
+      "example": {
+        "geom": "point",
+      },
+    },
+    "message": "Unknown geom "poit". Allowed geoms: "point", "line", "col", "bar", "histogram", "area", "rule", "text", "smooth", "boxplot", "density", "errorbar". Did you mean "point"?",
+    "path": "/layers/0/geom",
+  },
+]
+`;
+
+exports[`validate — agent errors (snapshot-tested messages) geom missing entirely 1`] = `
+[
+  {
+    "allowed": [
+      "point",
+      "line",
+      "col",
+      "bar",
+      "histogram",
+      "area",
+      "rule",
+      "text",
+      "smooth",
+      "boxplot",
+      "density",
+      "errorbar",
+    ],
+    "code": "missing-geom",
+    "fix": {
+      "description": "Add a geom to the layer.",
+      "example": {
+        "geom": "point",
+      },
+    },
+    "message": "Every layer needs a "geom" discriminator. Allowed geoms: "point", "line", "col", "bar", "histogram", "area", "rule", "text", "smooth", "boxplot", "density", "errorbar".",
+    "path": "/layers/0/geom",
+  },
+]
+`;
+
+exports[`validate — agent errors (snapshot-tested messages) bare-string channel gets the canonical-form fix 1`] = `
+[
+  {
+    "code": "invalid-channel-value",
+    "fix": {
+      "description": "Use a canonical channel form, e.g. {"field": "column_name"} to map "x" to a data column.",
+      "example": {
+        "field": "displ",
+      },
+    },
+    "message": "Channel "x" is the bare string "displ"; portable specs require the canonical form {"field": "displ"}.",
+    "path": "/aes/x",
+  },
+]
+`;
+
+exports[`validate — agent errors (snapshot-tested messages) wrong-geom params (line params on point) name the unknown property 1`] = `
+[
+  {
+    "allowed": [
+      "alpha",
+      "size",
+      "shape",
+    ],
+    "code": "unexpected-property",
+    "message": "Unknown property "linewidth".",
+    "path": "/layers/0/params/linewidth",
+  },
+]
+`;
+
+exports[`validate — agent errors (snapshot-tested messages) typo'd param with did-you-mean 1`] = `
+[
+  {
+    "allowed": [
+      "alpha",
+      "size",
+      "shape",
+    ],
+    "code": "unexpected-property",
+    "fix": {
+      "description": "Rename "alpa" to "alpha".",
+    },
+    "message": "Unknown property "alpa". Did you mean "alpha"?",
+    "path": "/layers/0/params/alpa",
+  },
+]
+`;
+
+exports[`validate — agent errors (snapshot-tested messages) param out of range 1`] = `
+[
+  {
+    "code": "value-out-of-range",
+    "fix": {
+      "description": "Set "alpha" to a number >= 0 and <= 1.",
+    },
+    "message": "Value 5 for "alpha" is out of range (must be >= 0 and <= 1).",
+    "path": "/layers/0/params/alpha",
+  },
+]
+`;
+
+exports[`validate — agent errors (snapshot-tested messages) bad enum value with did-you-mean 1`] = `
+[
+  {
+    "allowed": [
+      "linear",
+      "step",
+    ],
+    "code": "invalid-enum-value",
+    "fix": {
+      "description": "Set "curve" to "step".",
+    },
+    "message": "Invalid value "stepp" for "curve"; allowed: "linear", "step". Did you mean "step"?",
+    "path": "/layers/0/params/curve",
+  },
+]
+`;
+
+exports[`validate — agent errors (snapshot-tested messages) invalid data ref 1`] = `
+[
+  {
+    "allowed": [
+      "values",
+      "columns",
+      "name",
+    ],
+    "code": "invalid-data",
+    "fix": {
+      "description": "Wrap inline rows as {"values": [...]}.",
+      "example": {
+        "values": [
+          {
+            "x": 1,
+            "y": 2,
+          },
+        ],
+      },
+    },
+    "message": "Data must be one of {"values": [...rows]}, {"columns": {...arrays}}, or {"name": "dataset"}.",
+    "path": "/data",
+  },
+]
+`;
+
+exports[`validate — agent errors (snapshot-tested messages) unexpected top-level property with did-you-mean 1`] = `
+[
+  {
+    "allowed": [
+      "$schema",
+      "edition",
+      "data",
+      "datasets",
+      "aes",
+      "layers",
+      "facet",
+      "coord",
+      "scales",
+      "legend",
+      "labs",
+      "theme",
+      "width",
+      "height",
+      "a11y",
+    ],
+    "code": "unexpected-property",
+    "fix": {
+      "description": "Rename "layer" to "layers".",
+    },
+    "message": "Unknown property "layer". Did you mean "layers"?",
+    "path": "/layer",
+  },
+]
+`;
+
+exports[`validate — agent errors (snapshot-tested messages) multiple errors are all reported 1`] = `
+[
+  {
+    "allowed": [
+      "point",
+      "line",
+      "col",
+      "bar",
+      "histogram",
+      "area",
+      "rule",
+      "text",
+      "smooth",
+      "boxplot",
+      "density",
+      "errorbar",
+    ],
+    "code": "unknown-geom",
+    "fix": {
+      "description": "Set geom to "point".",
+      "example": {
+        "geom": "point",
+      },
+    },
+    "message": "Unknown geom "poit". Allowed geoms: "point", "line", "col", "bar", "histogram", "area", "rule", "text", "smooth", "boxplot", "density", "errorbar". Did you mean "point"?",
+    "path": "/layers/0/geom",
+  },
+  {
+    "code": "value-out-of-range",
+    "fix": {
+      "description": "Set "linewidth" to a number > 0.",
+    },
+    "message": "Value -1 for "linewidth" is out of range (must be > 0).",
+    "path": "/layers/1/params/linewidth",
+  },
+  {
+    "allowed": [
+      "linear",
+      "step",
+    ],
+    "code": "invalid-enum-value",
+    "message": "Invalid value "zig" for "curve"; allowed: "linear", "step".",
+    "path": "/layers/1/params/curve",
+  },
+  {
+    "code": "invalid-channel-value",
+    "fix": {
+      "description": "Use a canonical channel form, e.g. {"field": "column_name"} to map "x" to a data column.",
+      "example": {
+        "field": "displ",
+      },
+    },
+    "message": "Channel "x" is the bare string "displ"; portable specs require the canonical form {"field": "displ"}.",
+    "path": "/aes/x",
+  },
+]
+`;

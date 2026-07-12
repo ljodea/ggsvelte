@@ -1,0 +1,11 @@
+{
+  // Type context for bun:test smoke tests (discovered by oxlint --type-aware;
+  // NOT part of the tsc -b build graph, which only emits from src/).
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "types": ["bun"]
+  },
+  "include": ["./**/*.ts", "../src/**/*.ts"]
+}
