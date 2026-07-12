@@ -1,0 +1,53 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  // Spikes are retired M0a evidence: kept runnable, excluded from tooling.
+  "ignoreWorkspaces": ["spikes/*"],
+  // zizmor is a uv-installed tool (Rust, distributed via PyPI), not an npm
+  // dependency — see CONTRIBUTING.md.
+  "ignoreBinaries": ["zizmor"],
+  // publint + attw are spawned by scripts/package-lint.ts (guarded to run
+  // only on built output), which knip's static analysis cannot trace. oxfmt
+  // is invoked as `bun node_modules/.bin/oxfmt` (arch-proof invocation, see
+  // CONTRIBUTING.md), which knip's script parser does not resolve.
+  "ignoreDependencies": ["publint", "@arethetypeswrong/cli", "oxfmt"],
+  "workspaces": {
+    ".": {
+      "entry": ["scripts/*.ts", "tests/visual/**/*.ts", "tests/evals/**/*.ts"],
+      "project": ["scripts/**/*.ts", "tests/visual/**/*.ts", "tests/evals/**/*.ts"],
+    },
+    "packages/spec": {
+      // scripts/emit-schema.ts is invoked by the ROOT "schema:emit" script;
+      // knip does not trace cross-workspace script paths, so it is an
+      // explicit entry here.
+      "entry": ["tests/**/*.test.ts", "scripts/emit-schema.ts"],
+      "project": ["src/**", "scripts/**", "tests/**"],
+    },
+    "packages/core": {
+      "entry": ["tests/**/*.test.ts"],
+      "project": ["src/**", "tests/**"],
+    },
+    "packages/svelte": {
+      "entry": ["tests/**/*.test.ts"],
+      "project": ["src/**", "tests/**"],
+    },
+    "benchmarks": {
+      "entry": ["*.bench.ts"],
+      "project": ["**/*.ts"],
+    },
+    "examples": {
+      // The corpus: spec.ts/data.ts are consumed by the docs app via the
+      // $examples alias and by tests/visual via the generated manifest.
+      "entry": ["*/*/spec.ts", "*/*/data.ts", "define.ts", "rng.ts", "manifest.ts"],
+      "project": ["**/*.ts"],
+    },
+    "apps/docs": {
+      // svelte.config.js / vite.config.ts are auto-entries via knip's
+      // svelte plugin.
+      "entry": ["src/routes/**/+*.ts", "src/lib/**/*.ts"],
+      "project": ["src/**/*.ts", "*.{js,ts}"],
+      // Imported only from .svelte files / the $examples alias, which knip
+      // does not trace.
+      "ignoreDependencies": ["ggsvelte", "@ggsvelte/examples"],
+    },
+  },
+}

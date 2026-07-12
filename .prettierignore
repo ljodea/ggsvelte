@@ -1,0 +1,6 @@
+# prettier only handles .svelte in this repo (oxfmt owns everything else);
+# spikes are retired from tooling.
+spikes/
+dist/
+node_modules/
+.svelte-kit/

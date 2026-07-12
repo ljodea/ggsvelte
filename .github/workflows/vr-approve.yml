@@ -1,0 +1,272 @@
+# Visual-regression APPROVE — the PRIVILEGED half of the two-workflow trust
+# separation (plan, round-2 security fix).
+#
+# Security invariants (enforced in order):
+#   1. NEVER executes PR-authored code: no PR checkout, no bun install of PR
+#      manifests, no scripts from the artifact. It only downloads the
+#      `vr-baselines-approved` artifact produced by the unprivileged
+#      vr-compare run and verifies it as inert data.
+#   2. Flavor gate: only `/approve-visuals`-triggered (issue_comment) VR
+#      Compare runs proceed. Plain pull_request runs upload bootstrap
+#      candidates only and are never committed from here.
+#   3. Verification before any write: PNG-only content check (magic bytes,
+#      not extensions), file-count limit, total-size limit — the artifact is
+#      inert data throughout.
+#   4. INDEPENDENT approval re-verification via the API: artifact metadata is
+#      a hint, never a credential. The referenced comment must literally be
+#      `/approve-visuals`, must belong to the referenced PR, its author must
+#      hold write/maintain/admin, the metadata head SHA must be the PR's
+#      CURRENT head, and the comment must postdate the head commit — approval
+#      must postdate the code it approves. (Committer dates are self-reported
+#      by pushers; the residual risk is bounded because the vr-update branch
+#      still lands through a human-reviewed PR.)
+#   5. Writes ONLY to a `vr-update/pr-<n>` branch in the base repo (never to
+#      the PR branch, never to a fork), idempotent per head SHA.
+#   6. `contents: write` is job-scoped; the workflow default is no permissions.
+#
+# Companion guard: ci.yml's `vr-baseline-guard` job rejects any PR diff that
+# touches tests/visual/__screenshots__/ unless it comes from a same-repo
+# vr-update/pr-<n> branch — baselines only ever land through this verified
+# artifact path, never from a contributor's machine (decision 0009).
+name: VR Approve
+
+on:
+  # zizmor flags workflow_run as a dangerous trigger in general; it is the
+  # deliberate mechanism here (privileged half runs only in the base repo,
+  # and never executes PR code — invariant 1).
+  workflow_run: # zizmor: ignore[dangerous-triggers]
+    workflows: [VR Compare]
+    types: [completed]
+
+permissions: {}
+
+concurrency:
+  group: vr-approve-${{ github.event.workflow_run.id }}
+  cancel-in-progress: false
+
+jobs:
+  approve:
+    name: verify candidate baselines, commit to vr-update branch
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # push the verified vr-update/pr-<n> branch
+      actions: read # download the triggering run's artifact
+      pull-requests: read # re-verify the approval comment / PR head via API
+    steps:
+      - name: flavor gate — only /approve-visuals (issue_comment) runs proceed
+        id: gate
+        env:
+          RUN_EVENT: ${{ github.event.workflow_run.event }}
+        run: |
+          set -euo pipefail
+          if [ "${RUN_EVENT}" = "issue_comment" ]; then
+            echo "approval-flavored VR Compare run — verifying"
+            echo "approved=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::pull_request-flavored VR Compare run — candidate baselines only, NOT approved. Comment /approve-visuals on the PR (maintainers only) to land baselines."
+            {
+              echo "## VR approve: not an approval run"
+              echo ""
+              echo "This VR Compare run was triggered by \`${RUN_EVENT}\`, so its artifact"
+              echo "holds bootstrap CANDIDATES only. A maintainer comments \`/approve-visuals\`"
+              echo "on the PR to regenerate + land baselines via the verified path."
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "approved=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: download approved-baseline artifact (inert data only)
+        if: steps.gate.outputs.approved == 'true'
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: vr-baselines-approved
+          path: vr-artifact
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: verify artifact — PNG-only, count/size limits, metadata shape
+        id: verify
+        if: steps.gate.outputs.approved == 'true'
+        env:
+          MAX_FILES: "500"
+          MAX_TOTAL_BYTES: "52428800" # 50 MiB
+        run: |
+          set -euo pipefail
+          cd vr-artifact
+
+          # Metadata must exist and parse into well-formed fields. NOTE: for
+          # issue_comment-flavored runs, github.event.workflow_run.head_sha
+          # points at the DEFAULT branch (the comment's run context), not the
+          # PR head — so the head-SHA binding is asserted against the PR's
+          # current head via the API in the next step instead.
+          [ -f metadata.txt ] || { echo "::error::metadata.txt missing"; exit 1; }
+          pr="$(sed -n 's/^pr=//p' metadata.txt)"
+          head_sha="$(sed -n 's/^head_sha=//p' metadata.txt)"
+          comment_id="$(sed -n 's/^comment_id=//p' metadata.txt)"
+          case "${pr}" in (*[!0-9]*|'') echo "::error::invalid pr number in metadata"; exit 1 ;; esac
+          case "${comment_id}" in (*[!0-9]*|'') echo "::error::invalid comment id in metadata"; exit 1 ;; esac
+          if ! printf '%s' "${head_sha}" | grep -Eq '^[0-9a-f]{40}$'; then
+            echo "::error::invalid head_sha in metadata"
+            exit 1
+          fi
+
+          # Everything except metadata.txt must be a real PNG (magic bytes).
+          count=0
+          total=0
+          while IFS= read -r -d '' f; do
+            [ "${f}" = "./metadata.txt" ] && continue
+            case "${f}" in
+              *.png) ;;
+              *) echo "::error::non-PNG path in artifact: ${f}"; exit 1 ;;
+            esac
+            magic="$(head -c 8 "${f}" | od -An -tx1 | tr -d ' \n')"
+            if [ "${magic}" != "89504e470d0a1a0a" ]; then
+              echo "::error::file is not a PNG by content: ${f}"
+              exit 1
+            fi
+            count=$((count + 1))
+            total=$((total + $(wc -c < "${f}")))
+          done < <(find . -type f -print0)
+
+          if [ "${count}" -gt "${MAX_FILES}" ]; then
+            echo "::error::too many files in artifact: ${count} > ${MAX_FILES}"
+            exit 1
+          fi
+          if [ "${total}" -gt "${MAX_TOTAL_BYTES}" ]; then
+            echo "::error::artifact too large: ${total} bytes > ${MAX_TOTAL_BYTES}"
+            exit 1
+          fi
+          echo "verified ${count} PNG file(s), ${total} bytes total"
+
+          # Validated-above values only (numeric / 40-hex) — safe as outputs.
+          {
+            echo "pr=${pr}"
+            echo "head_sha=${head_sha}"
+            echo "comment_id=${comment_id}"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: independently re-verify the approval via the API
+        if: steps.gate.outputs.approved == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ steps.verify.outputs.pr }}
+          HEAD_SHA: ${{ steps.verify.outputs.head_sha }}
+          COMMENT_ID: ${{ steps.verify.outputs.comment_id }}
+        run: |
+          set -euo pipefail
+          # The artifact was produced by a run that executed PR-authored code,
+          # so its metadata could be forged. Re-derive every trust decision
+          # from the API; the metadata only tells us WHERE to look.
+
+          # (a) The referenced comment must literally be `/approve-visuals`.
+          comment_json="$(gh api "repos/${REPO}/issues/comments/${COMMENT_ID}")"
+          body="$(printf '%s' "${comment_json}" | jq -r .body)"
+          trimmed="${body#"${body%%[![:space:]]*}"}"
+          trimmed="${trimmed%"${trimmed##*[![:space:]]}"}"
+          if [ "${trimmed}" != "/approve-visuals" ]; then
+            echo "::error::comment ${COMMENT_ID} is not an /approve-visuals command"
+            exit 1
+          fi
+
+          # (b) …and must belong to the PR named in the metadata.
+          issue_url="$(printf '%s' "${comment_json}" | jq -r .issue_url)"
+          if [ "${issue_url}" != "https://api.github.com/repos/${REPO}/issues/${PR_NUMBER}" ]; then
+            echo "::error::comment ${COMMENT_ID} does not belong to PR #${PR_NUMBER} (issue_url: ${issue_url})"
+            exit 1
+          fi
+
+          # (c) …and its author must hold write/maintain/admin on this repo.
+          author="$(printf '%s' "${comment_json}" | jq -r .user.login)"
+          permission="$(gh api "repos/${REPO}/collaborators/${author}/permission" --jq .permission)"
+          case "${permission}" in
+            admin|maintain|write) echo "approver ${author} has ${permission} permission" ;;
+            *) echo "::error::comment author ${author} has insufficient permission: ${permission}"; exit 1 ;;
+          esac
+
+          # (d) The metadata head SHA must be the PR's CURRENT head — binds
+          # the PNGs to the code being approved and refuses stale artifacts
+          # (workflow_run.head_sha is unusable here; see previous step).
+          current_head="$(gh api "repos/${REPO}/pulls/${PR_NUMBER}" --jq .head.sha)"
+          if [ "${current_head}" != "${HEAD_SHA}" ]; then
+            echo "::error::PR #${PR_NUMBER} head moved: artifact is for ${HEAD_SHA}, PR is at ${current_head} — re-approve"
+            exit 1
+          fi
+
+          # (e) Approval must postdate the code it approves: the comment may
+          # not be older than the head commit's committer date.
+          comment_created="$(printf '%s' "${comment_json}" | jq -r .created_at)"
+          commit_date="$(gh api "repos/${REPO}/commits/${HEAD_SHA}" --jq .commit.committer.date)"
+          comment_epoch="$(date -u -d "${comment_created}" +%s)"
+          commit_epoch="$(date -u -d "${commit_date}" +%s)"
+          if [ "${comment_epoch}" -lt "${commit_epoch}" ]; then
+            echo "::error::approval comment (${comment_created}) predates head commit (${commit_date}) — approve the current code, not older code"
+            exit 1
+          fi
+          echo "approval verified: ${author} approved PR #${PR_NUMBER} @ ${HEAD_SHA}"
+
+      - name: idempotency — skip if this head SHA is already on the branch
+        id: idem
+        if: steps.gate.outputs.approved == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ steps.verify.outputs.pr }}
+          HEAD_SHA: ${{ steps.verify.outputs.head_sha }}
+        run: |
+          set -euo pipefail
+          branch="vr-update/pr-${PR_NUMBER}"
+          tip="$(git ls-remote "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" "refs/heads/${branch}" | cut -f1)"
+          if [ -n "${tip}" ]; then
+            message="$(gh api "repos/${REPO}/commits/${tip}" --jq .commit.message)"
+            if printf '%s' "${message}" | grep -qF "${HEAD_SHA}"; then
+              echo "::notice::${branch} tip already carries baselines for ${HEAD_SHA} — nothing to do"
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          fi
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+
+      - name: checkout base repo (default branch — never PR code)
+        if: steps.gate.outputs.approved == 'true' && steps.idem.outputs.skip != 'true'
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+          path: base
+
+      - name: commit verified baselines to vr-update/pr-<n>
+        if: steps.gate.outputs.approved == 'true' && steps.idem.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ steps.verify.outputs.pr }}
+          APPROVED_HEAD_SHA: ${{ steps.verify.outputs.head_sha }}
+        run: |
+          set -euo pipefail
+          pr="${PR_NUMBER}"
+          case "${pr}" in (*[!0-9]*|'') echo "::error::invalid pr number"; exit 1 ;; esac
+          branch="vr-update/pr-${pr}"
+          push_url="https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git"
+
+          cd base
+          git config user.name "ggsvelte-vr-bot"
+          git config user.email "vr-bot@users.noreply.github.com"
+          # Record the current remote tip (empty if the branch is new) so the
+          # lease below only replaces exactly what we observed — a concurrent
+          # push between here and ours is rejected instead of clobbered.
+          old_tip="$(git ls-remote "${push_url}" "refs/heads/${branch}" | cut -f1)"
+          git checkout -B "${branch}"
+
+          mkdir -p tests/visual/__screenshots__
+          find ../vr-artifact -name '*.png' -exec cp {} tests/visual/__screenshots__/ \;
+          git add tests/visual/__screenshots__
+
+          if git diff --cached --quiet; then
+            echo "no baseline changes — nothing to commit (idempotent per head SHA)"
+            exit 0
+          fi
+          # The head SHA in the message is the idempotency key checked above.
+          git commit -m "vr: update baselines for PR #${pr} @ ${APPROVED_HEAD_SHA}"
+          git push --force-with-lease="refs/heads/${branch}:${old_tip}" \
+            "${push_url}" "HEAD:refs/heads/${branch}"
+          echo "pushed verified baselines to ${branch}"

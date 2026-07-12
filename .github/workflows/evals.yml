@@ -1,0 +1,84 @@
+# Agent evals (plan M3 — skeleton). Label-triggered ('run-evals') or manual
+# (workflow_dispatch) ONLY: nightly/scheduled automation is deliberately
+# post-0.1.0 (plan M4).
+# All third-party actions pinned by full commit SHA (zizmor-enforced).
+#
+# Secret: OPENROUTER_API_KEY is USER-BLOCKED setup (a repo Actions secret).
+# The eval workflow uses the OpenRouter API (user mandate — NOT the
+# Anthropic API; see docs/decisions/0012-m3-notes.md, Amendment). The runner
+# (tests/evals/run.ts) auto-falls-back to --dry-run with a mock model when
+# the key is empty, so this workflow stays green (dry-run scoreboard) until
+# the secret exists.
+#
+# Fork safety: the labeled trigger executes PR-authored code with the secret
+# in env, so it is restricted to SAME-REPO PRs (head repo == base repo) in
+# the job `if:` below — fork PRs must never see the key. The comparison
+# happens entirely inside the expression (no shell interpolation), so it is
+# injection-safe. Fork contributions can still be evaluated by pulling them
+# into a same-repo branch or via workflow_dispatch on a trusted ref.
+name: Evals
+
+on:
+  workflow_dispatch:
+    inputs:
+      cases:
+        description: "optional case filter, passed to the runner as --cases"
+        required: false
+        type: string
+      model:
+        description: "optional OpenRouter model id override, passed to the runner as --model"
+        required: false
+        type: string
+  pull_request:
+    types: [labeled]
+
+permissions: {}
+
+concurrency:
+  group: evals-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  evals:
+    name: run eval scoreboard
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.label.name == 'run-evals' &&
+       github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.3.6
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-
+      - run: bun install --frozen-lockfile
+      - name: build spec/core dist (the runner imports the packages)
+        run: bun run check
+      - name: run evals (auto dry-run with a mock model when the key is empty)
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          # Dispatch inputs are empty strings on pull_request runs.
+          CASES: ${{ inputs.cases }}
+          MODEL: ${{ inputs.model }}
+        run: |
+          set -euo pipefail
+          args=()
+          if [ -n "${CASES}" ]; then args+=(--cases "${CASES}"); fi
+          if [ -n "${MODEL}" ]; then args+=(--model "${MODEL}"); fi
+          bun tests/evals/run.ts "${args[@]}"
+      - name: upload scoreboard
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: eval-scoreboard
+          path: tests/evals/out/
+          if-no-files-found: error
+          retention-days: 14

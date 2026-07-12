@@ -1,0 +1,12 @@
+{
+  // Root project for repo tooling scripts only. The publishable packages use
+  // `tsc -b` project references (packages/spec, packages/core); the svelte
+  // package is checked by svelte-check from its own directory. This config
+  // exists so oxlint --type-aware has type information for scripts/.
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["bun"]
+  },
+  "include": ["scripts/**/*.ts"]
+}

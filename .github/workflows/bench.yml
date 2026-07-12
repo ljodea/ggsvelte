@@ -1,0 +1,90 @@
+# Benchmarks (plan M3). Two flavors, neither a hard perf gate on trends:
+#   - bench-trend: every push to main records mitata timings as a datapoint
+#     on the gh-pages `bench/` data dir via github-action-benchmark. Trend
+#     tracking only — alerts never fail the job. Activates once a GitHub
+#     remote exists (the action creates the gh-pages branch on first push).
+#   - bench-label: PRs labeled 'run-bench' run the same suite and gate on
+#     the absolute budgets in benchmarks/budgets.json. Same-runner A/B
+#     (baseline vs PR head on one machine) is future work — until then the
+#     absolute budgets are deliberately loose to absorb runner variance.
+# All third-party actions pinned by full commit SHA (zizmor-enforced).
+name: Bench
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [labeled]
+
+permissions: {}
+
+jobs:
+  bench-trend:
+    name: bench-trend (record datapoint on gh-pages)
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # github-action-benchmark pushes the datapoint to gh-pages
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.3.6
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-
+      - run: bun install --frozen-lockfile
+      - name: build spec/core dist (benchmarks import the packages)
+        run: bun run check
+      - name: bench (writes bench-results.json, customSmallerIsBetter format)
+        run: bun run bench:json
+      - name: record trend datapoint
+        uses: benchmark-action/github-action-benchmark@fd31771ce86cc65eab85653da103f71ab1b4479c # v1.9.0
+        with:
+          tool: customSmallerIsBetter
+          output-file-path: bench-results.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: true
+          gh-pages-branch: gh-pages
+          benchmark-data-dir-path: bench
+          # Alerting is informational only: trend tracking, not a gate.
+          alert-threshold: 150%
+          comment-on-alert: false
+          fail-on-alert: false
+
+  bench-label:
+    name: bench-label (budget gate on 'run-bench' PRs)
+    if: github.event_name == 'pull_request' && github.event.label.name == 'run-bench'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.3.6
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-
+      - run: bun install --frozen-lockfile
+      - name: build spec/core dist (benchmarks import the packages)
+        run: bun run check
+      - name: bench (writes bench-results.json, customSmallerIsBetter format)
+        run: bun run bench:json
+      - name: enforce absolute budgets (benchmarks/budgets.json)
+        run: bun run bench:budgets
+      - name: upload results
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: bench-results
+          path: bench-results.json
+          if-no-files-found: error
+          retention-days: 14

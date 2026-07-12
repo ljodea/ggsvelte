@@ -1,0 +1,78 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  // Baseline: correctness + suspicious are hard errors; pedantic surfaces as
+  // warnings. Type-aware rules (oxlint-tsgolint) activate via `--type-aware`
+  // in the lint:type-aware script; they follow these same categories.
+  "categories": {
+    "correctness": "error",
+    "suspicious": "error",
+    "pedantic": "warn"
+  },
+  "ignorePatterns": [
+    "spikes/**",
+    "**/dist/**",
+    "**/node_modules/**",
+    "**/.svelte-kit/**",
+    "tests/visual/test-results/**",
+    "tests/visual/playwright-report/**"
+  ],
+  // Named pedantic opt-outs (M0c, see decision 0007). `lint:type-aware`
+  // runs --deny-warnings, so every pedantic warning is effectively a hard
+  // gate; these two rules are disabled by name (never by category):
+  // - prefer-readonly-parameter-types demands deep-readonly on every
+  //   parameter, which would smear Readonly<> through the public spec/core
+  //   API types for no soundness gain.
+  // - no-inline-comments forbids trailing comments, which this codebase uses
+  //   deliberately (annotated literals in tables/fixtures).
+  "rules": {
+    "typescript/prefer-readonly-parameter-types": "off",
+    "eslint/no-inline-comments": "off",
+    // `as` narrowing at unknown/JSON boundaries is what a validator package
+    // does; typescript-eslint ships this rule off even in `strict`.
+    "typescript/no-unsafe-type-assertion": "off",
+    // Deliberate default-fallback switches over `typeof`/enum inputs.
+    "typescript/switch-exhaustiveness-check": "off",
+    // Math.trunc() is NOT equivalent to `>>> 0` / `| 0` in uint32 bit math —
+    // the suggested fix would break the FNV-1a hash and the seeded PRNGs.
+    "unicorn/prefer-math-trunc": "off",
+    // ASCII-only regexes over controlled inputs; the 'u' flag changes escape
+    // semantics and buys nothing here.
+    "eslint/require-unicode-regexp": "off",
+    // Pipeline stages and the validator walk are cohesive units; splitting
+    // them to satisfy a line count harms readability.
+    "eslint/max-lines": "off",
+    "eslint/max-lines-per-function": "off"
+  },
+  "overrides": [
+    {
+      // Tests + benchmarks: fixture literals are cast deliberately (invalid
+      // specs, RuntimeSpec shapes) and test files run long by design.
+      "files": ["**/tests/**", "benchmarks/**"],
+      "rules": {
+        "unicorn/consistent-function-scoping": "off",
+        "typescript/no-unnecessary-type-parameters": "off"
+      }
+    },
+    {
+      // examples/ is the shared docs/VR/llms corpus: nondeterminism is banned
+      // so visual-regression screenshots stay reproducible. (Dir does not
+      // exist yet — the override is pre-wired per plan M0b.)
+      "files": ["examples/**"],
+      "rules": {
+        "no-restricted-properties": [
+          "error",
+          {
+            "object": "Math",
+            "property": "random",
+            "message": "examples/ must be deterministic (VR baselines): use the seeded RNG helper instead of Math.random()."
+          },
+          {
+            "object": "Date",
+            "property": "now",
+            "message": "examples/ must be deterministic (VR baselines): use a fixed timestamp instead of Date.now()."
+          }
+        ]
+      }
+    }
+  ]
+}

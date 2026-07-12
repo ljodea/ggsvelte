@@ -1,0 +1,258 @@
+# Visual-regression COMPARE — the UNPRIVILEGED half of the two-workflow trust
+# separation (plan, round-2 security fix).
+#
+# Invariants (do not weaken):
+#   - triggers are plain `pull_request` and `issue_comment`: NO secrets beyond
+#     the read-only default GITHUB_TOKEN, NO write permissions, and PR-authored
+#     code (including build configs/plugins) only ever executes HERE, in this
+#     unprivileged context.
+#   - its only output channels to the privileged half are workflow artifacts:
+#     `vr-baselines` (pull_request flavor: candidate shots) and
+#     `vr-baselines-approved` (/approve-visuals flavor: regenerated baselines).
+#     vr-approve.yml verifies those WITHOUT executing anything from them, and
+#     INDEPENDENTLY re-verifies the approval via the API — metadata written
+#     here is a hint for the privileged half, never a credential.
+#
+# Approval flavor (M3): a maintainer comments `/approve-visuals` on a PR. The
+# approve-gate job checks the command + author association and resolves the
+# exact PR head SHA; approve-regenerate checks out THAT SHA, rebuilds, and
+# REGENERATES baselines inside the pinned container. Still unprivileged: PR
+# code runs only in read-only contexts, to produce inert PNGs.
+#
+# Baseline policy (decision 0009): committed baselines in
+# tests/visual/__screenshots__/ come ONLY from this pinned container. While
+# the directory is empty (pre-bootstrap), the pull_request run GENERATES
+# candidate shots, uploads them, and posts a "no baselines yet" summary
+# instead of failing — the first CI run on GitHub bootstraps the baseline set
+# via the vr-approve flow.
+name: VR Compare
+
+on:
+  pull_request:
+  # Approval flavor. issue_comment fires for every comment in the repo; the
+  # approve-* jobs gate hard on PR-ness, the exact `/approve-visuals` command,
+  # and the commenter's author_association (computed by GitHub, not
+  # attacker-supplied).
+  issue_comment:
+    types: [created]
+
+permissions: {}
+
+concurrency:
+  # Separate groups per flavor so an approval run never cancels (or is
+  # cancelled by) the plain compare run for the same PR.
+  group: vr-compare-${{ github.event_name }}-${{ github.event.pull_request.number || github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  compare:
+    name: build docs, screenshot, upload candidate baselines
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    container:
+      # Pinned baseline platform — keep in sync with ci.yml's component job
+      # and the repo-pinned playwright/@playwright/test 1.61.1.
+      image: mcr.microsoft.com/playwright:v1.61.1-noble
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.3.6
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.bun/install/cache
+          key: bun-container-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-container-${{ runner.os }}-
+      - run: bun install --frozen-lockfile
+
+      - name: manifest is current (the VR matrix is generated from it)
+        run: bun run manifest:check
+
+      - name: build packages (spec/core dist + svelte-package)
+        run: bun run build
+
+      - name: build static docs site (the VR screenshot target)
+        run: bun run build:docs
+
+      - name: run VR screenshots against the built docs
+        run: |
+          set -euo pipefail
+          if ls tests/visual/__screenshots__/*.png >/dev/null 2>&1; then
+            echo "committed baselines present — comparing"
+            bun run test:visual
+          else
+            echo "::notice::no committed baselines yet — generating candidates (bootstrap via CI; see docs/decisions/0009)"
+            {
+              echo "## VR bootstrap mode"
+              echo ""
+              echo "\`tests/visual/__screenshots__/\` is empty: no baselines are committed yet."
+              echo "This run GENERATED candidate baselines inside the pinned container and"
+              echo "uploaded them as the \`vr-baselines\` artifact. Land them via the vr-approve"
+              echo "flow (container-only baseline policy — docs/decisions/0009)."
+            } >> "$GITHUB_STEP_SUMMARY"
+            bun run test:visual -- --update-snapshots
+          fi
+
+      - name: upload playwright report (on comparison failure)
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: vr-playwright-report
+          path: tests/visual/playwright-report/
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: assemble candidate-baseline artifact (PNGs + metadata)
+        run: |
+          set -euo pipefail
+          mkdir -p vr-artifact/__screenshots__
+          if ls tests/visual/__screenshots__/*.png >/dev/null 2>&1; then
+            cp tests/visual/__screenshots__/*.png vr-artifact/__screenshots__/
+          fi
+          # The metadata contract below is load-bearing for vr-approve.yml:
+          printf '%s\n' "pr=${PR_NUMBER}" "head_sha=${HEAD_SHA}" > vr-artifact/metadata.txt
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+
+      - name: upload candidate baselines
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: vr-baselines
+          path: vr-artifact/
+          if-no-files-found: error
+          retention-days: 7
+
+  approve-gate:
+    name: /approve-visuals — parse command, resolve PR head (read-only)
+    # Only comments ON a PR, only from commenters whose association implies
+    # repo trust (OWNER/MEMBER/COLLABORATOR). This job runs NO checked-out
+    # code — just the command parse and a read-only API lookup.
+    if: >-
+      github.event_name == 'issue_comment' &&
+      github.event.issue.pull_request &&
+      contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read # resolve the PR head via `gh api` (read-only)
+    outputs:
+      match: ${{ steps.cmd.outputs.match }}
+      head_sha: ${{ steps.pr.outputs.head_sha }}
+      head_repo: ${{ steps.pr.outputs.head_repo }}
+    steps:
+      - name: trimmed comment body must be exactly `/approve-visuals`
+        id: cmd
+        env:
+          # env-indirection: the body is attacker-controlled text and must
+          # never be interpolated into the script itself.
+          BODY: ${{ github.event.comment.body }}
+        run: |
+          set -euo pipefail
+          trimmed="${BODY#"${BODY%%[![:space:]]*}"}"
+          trimmed="${trimmed%"${trimmed##*[![:space:]]}"}"
+          if [ "${trimmed}" = "/approve-visuals" ]; then
+            echo "match=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "comment is not an /approve-visuals command — nothing to do"
+            echo "match=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: resolve PR head SHA + head repo (read-only API)
+        id: pr
+        if: steps.cmd.outputs.match == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          set -euo pipefail
+          head_sha="$(gh api "repos/${REPO}/pulls/${PR_NUMBER}" --jq .head.sha)"
+          head_repo="$(gh api "repos/${REPO}/pulls/${PR_NUMBER}" --jq .head.repo.full_name)"
+          if ! printf '%s' "${head_sha}" | grep -Eq '^[0-9a-f]{40}$'; then
+            echo "::error::resolved head SHA is not a 40-hex commit id: ${head_sha}"
+            exit 1
+          fi
+          echo "resolved PR #${PR_NUMBER} head: ${head_repo}@${head_sha}"
+          echo "head_sha=${head_sha}" >> "$GITHUB_OUTPUT"
+          echo "head_repo=${head_repo}" >> "$GITHUB_OUTPUT"
+
+  approve-regenerate:
+    name: /approve-visuals — regenerate baselines at PR head (pinned container)
+    needs: approve-gate
+    if: needs.approve-gate.outputs.match == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # checkout only; this job can write nothing
+    container:
+      # SAME pinned image as the compare job — container-only baseline
+      # policy (decision 0009).
+      image: mcr.microsoft.com/playwright:v1.61.1-noble
+    steps:
+      # PR-authored code (build configs, plugins, the examples themselves)
+      # executes from here on. That is acceptable ONLY because this job is
+      # read-only: no write permissions, no secrets beyond the read-only
+      # default GITHUB_TOKEN, and its sole output is the inert artifact
+      # below, which vr-approve.yml re-verifies against the API.
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          repository: ${{ needs.approve-gate.outputs.head_repo }}
+          # Exact resolved SHA, never a movable branch ref — what gets
+          # screenshotted is exactly what vr-approve re-verifies against.
+          ref: ${{ needs.approve-gate.outputs.head_sha }}
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.3.6
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.bun/install/cache
+          key: bun-container-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-container-${{ runner.os }}-
+      - run: bun install --frozen-lockfile
+
+      - name: manifest is current (the VR matrix is generated from it)
+        run: bun run manifest:check
+
+      - name: build packages (spec/core dist + svelte-package)
+        run: bun run build
+
+      - name: build static docs site (the VR screenshot target)
+        run: bun run build:docs
+
+      - name: REGENERATE baselines at the approved head
+        run: bun run test:visual -- --update-snapshots
+
+      - name: assemble approved-baseline artifact (PNGs + metadata)
+        env:
+          PR_NUMBER: ${{ github.event.issue.number }}
+          HEAD_SHA: ${{ needs.approve-gate.outputs.head_sha }}
+          COMMENT_ID: ${{ github.event.comment.id }}
+          COMMENT_CREATED_AT: ${{ github.event.comment.created_at }}
+          COMMENT_AUTHOR: ${{ github.event.comment.user.login }}
+        run: |
+          set -euo pipefail
+          mkdir -p vr-artifact/__screenshots__
+          cp tests/visual/__screenshots__/*.png vr-artifact/__screenshots__/
+          # Metadata contract is load-bearing for vr-approve.yml. Every claim
+          # below is RE-VERIFIED there against the GitHub API (comment body,
+          # PR linkage, author permission, timestamps) before anything is
+          # written — this file merely tells the privileged half where to look.
+          printf '%s\n' \
+            "pr=${PR_NUMBER}" \
+            "head_sha=${HEAD_SHA}" \
+            "comment_id=${COMMENT_ID}" \
+            "comment_created_at=${COMMENT_CREATED_AT}" \
+            "comment_author=${COMMENT_AUTHOR}" > vr-artifact/metadata.txt
+
+      - name: upload approved baselines
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: vr-baselines-approved
+          path: vr-artifact/
+          if-no-files-found: error
+          retention-days: 7

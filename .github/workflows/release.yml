@@ -1,0 +1,69 @@
+# Release — changesets version-or-publish on every push to main (plan M3).
+# All third-party actions pinned by full commit SHA (zizmor-enforced).
+#
+# DORMANT until two pieces of USER-BLOCKED setup exist:
+#   1. A GitHub remote for this repo — until the repo is pushed to GitHub,
+#      this workflow never runs.
+#   2. npm "trusted publishing" configured on npmjs.com for EACH published
+#      package — @ggsvelte/spec, @ggsvelte/core, and ggsvelte — each pointing
+#      at this repository + this workflow file (release.yml). This requires
+#      the npm org/packages to exist and is maintainer-side setup.
+#
+# Publishing credential: there is deliberately NO NPM_TOKEN secret anywhere.
+# `id-token: write` + npm's OIDC exchange ("trusted publisher") is the only
+# way packages leave this repo. That needs npm >= 11.5, hence Node 24 below.
+#
+# Flow: changesets/action either opens/updates the "Version Packages" PR
+# (authenticated via the default GITHUB_TOKEN passed in its env — the
+# checkout itself stays credential-free) or, on a push that contains merged
+# version changes, runs the publish command.
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions: {}
+
+concurrency:
+  group: release
+  cancel-in-progress: false # never cancel an in-flight publish
+
+jobs:
+  release:
+    name: changesets version-or-publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # changesets/action pushes version commits + tags
+      pull-requests: write # changesets/action opens the Version Packages PR
+      id-token: write # npm trusted publishing (OIDC) — no NPM_TOKEN anywhere
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.3.6
+      # `changeset publish` shells out to npm for the actual publish; OIDC
+      # trusted publishing needs npm >= 11.5 (bundled with Node 24) and a
+      # registry-url so the OIDC/provenance exchange targets npmjs.org.
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-
+      - run: bun install --frozen-lockfile
+      - name: build packages (published exports point at dist/)
+        run: bun run build
+      - name: changesets — version PR or publish
+        uses: changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d # v1.9.0
+        with:
+          # Repo policy bans network bunx — invoke the lockfile-installed
+          # binary directly. Version command stays the changesets default.
+          publish: bun node_modules/.bin/changeset publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

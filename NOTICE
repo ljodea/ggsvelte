@@ -1,0 +1,28 @@
+ggsvelte — third-party attribution notices
+
+LOESS reference implementation
+------------------------------
+packages/core/src/stats/loess.ts adapts its structure (the sorted
+nearest-neighbor window walk and the tricube kernel) from SveltePlot's
+`src/regression/loess.ts` (ISC License, Copyright (c) Gregor Aisch and
+SveltePlot contributors), which is itself adapted from:
+
+  - d3-regression, Copyright (c) Harry Stevens (MIT License)
+    https://github.com/HarryStevens/d3-regression
+  - science.js, Copyright (c) Jason Davies (BSD-3-Clause License)
+    https://github.com/jasondavies/science.js
+  - vega-statistics, Copyright (c) University of Washington Interactive
+    Data Lab (BSD-3-Clause License)
+    https://github.com/vega/vega
+
+The ggsvelte implementation is substantially rewritten for parity with R's
+stats::loess (span-based neighborhoods, configurable polynomial degree,
+prediction at arbitrary points, and exact operator statistics for the
+confidence band); no verbatim code from the above projects remains, but the
+algorithmic lineage is acknowledged here per their license terms and the
+project plan.
+
+Binning, boxplot, density, and summary algorithms are independent ports of
+the published ggplot2 (MIT) and R (GPL — algorithms only, no code copied)
+semantics, verified against R-generated fixtures; see
+docs/decisions/0010-m2-stats-notes.md.
