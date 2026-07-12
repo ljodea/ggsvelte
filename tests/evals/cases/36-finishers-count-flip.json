@@ -1,0 +1,135 @@
+{
+  "id": "36-finishers-count-flip",
+  "kind": "chart",
+  "prompt": "Horizontal bar chart counting finishers by age group.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "age_group",
+        "type": "ordinal",
+        "examples": ["18-29", "30-39", "40-49", "50+"]
+      }
+    ],
+    "rowCount": 30
+  },
+  "data": {
+    "main": [
+      {
+        "age_group": "18-29"
+      },
+      {
+        "age_group": "18-29"
+      },
+      {
+        "age_group": "18-29"
+      },
+      {
+        "age_group": "18-29"
+      },
+      {
+        "age_group": "18-29"
+      },
+      {
+        "age_group": "18-29"
+      },
+      {
+        "age_group": "18-29"
+      },
+      {
+        "age_group": "30-39"
+      },
+      {
+        "age_group": "30-39"
+      },
+      {
+        "age_group": "30-39"
+      },
+      {
+        "age_group": "30-39"
+      },
+      {
+        "age_group": "30-39"
+      },
+      {
+        "age_group": "30-39"
+      },
+      {
+        "age_group": "30-39"
+      },
+      {
+        "age_group": "30-39"
+      },
+      {
+        "age_group": "30-39"
+      },
+      {
+        "age_group": "30-39"
+      },
+      {
+        "age_group": "30-39"
+      },
+      {
+        "age_group": "40-49"
+      },
+      {
+        "age_group": "40-49"
+      },
+      {
+        "age_group": "40-49"
+      },
+      {
+        "age_group": "40-49"
+      },
+      {
+        "age_group": "40-49"
+      },
+      {
+        "age_group": "40-49"
+      },
+      {
+        "age_group": "40-49"
+      },
+      {
+        "age_group": "40-49"
+      },
+      {
+        "age_group": "50+"
+      },
+      {
+        "age_group": "50+"
+      },
+      {
+        "age_group": "50+"
+      },
+      {
+        "age_group": "50+"
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "bar",
+        "stat": "count",
+        "position": "stack",
+        "aes": {
+          "x": {
+            "field": "age_group"
+          },
+          "y": {
+            "stat": "count"
+          }
+        }
+      }
+    ],
+    "coord": {
+      "type": "flip"
+    }
+  },
+  "expectRefusal": false,
+  "notes": "Count-stat bar + coord flip; only one field in the profile."
+}

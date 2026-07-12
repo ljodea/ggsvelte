@@ -1,0 +1,149 @@
+{
+  "id": "12-power-stepped-line",
+  "kind": "chart",
+  "prompt": "Chart the kilowatts draw over the day as a stepped line.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "timestamp",
+        "type": "temporal"
+      },
+      {
+        "name": "kilowatts",
+        "type": "quantitative"
+      }
+    ],
+    "rowCount": 24
+  },
+  "data": {
+    "main": [
+      {
+        "timestamp": "2026-02-10T00:00:00Z",
+        "kilowatts": 3.1
+      },
+      {
+        "timestamp": "2026-02-10T01:00:00Z",
+        "kilowatts": 3
+      },
+      {
+        "timestamp": "2026-02-10T02:00:00Z",
+        "kilowatts": 2.9
+      },
+      {
+        "timestamp": "2026-02-10T03:00:00Z",
+        "kilowatts": 2.9
+      },
+      {
+        "timestamp": "2026-02-10T04:00:00Z",
+        "kilowatts": 3.2
+      },
+      {
+        "timestamp": "2026-02-10T05:00:00Z",
+        "kilowatts": 4.8
+      },
+      {
+        "timestamp": "2026-02-10T06:00:00Z",
+        "kilowatts": 6.5
+      },
+      {
+        "timestamp": "2026-02-10T07:00:00Z",
+        "kilowatts": 7.9
+      },
+      {
+        "timestamp": "2026-02-10T08:00:00Z",
+        "kilowatts": 8.4
+      },
+      {
+        "timestamp": "2026-02-10T09:00:00Z",
+        "kilowatts": 8.1
+      },
+      {
+        "timestamp": "2026-02-10T10:00:00Z",
+        "kilowatts": 7.6
+      },
+      {
+        "timestamp": "2026-02-10T11:00:00Z",
+        "kilowatts": 7.8
+      },
+      {
+        "timestamp": "2026-02-10T12:00:00Z",
+        "kilowatts": 8
+      },
+      {
+        "timestamp": "2026-02-10T13:00:00Z",
+        "kilowatts": 7.7
+      },
+      {
+        "timestamp": "2026-02-10T14:00:00Z",
+        "kilowatts": 7.5
+      },
+      {
+        "timestamp": "2026-02-10T15:00:00Z",
+        "kilowatts": 7.9
+      },
+      {
+        "timestamp": "2026-02-10T16:00:00Z",
+        "kilowatts": 8.6
+      },
+      {
+        "timestamp": "2026-02-10T17:00:00Z",
+        "kilowatts": 9.2
+      },
+      {
+        "timestamp": "2026-02-10T18:00:00Z",
+        "kilowatts": 8.8
+      },
+      {
+        "timestamp": "2026-02-10T19:00:00Z",
+        "kilowatts": 7.4
+      },
+      {
+        "timestamp": "2026-02-10T20:00:00Z",
+        "kilowatts": 6.1
+      },
+      {
+        "timestamp": "2026-02-10T21:00:00Z",
+        "kilowatts": 5
+      },
+      {
+        "timestamp": "2026-02-10T22:00:00Z",
+        "kilowatts": 4.2
+      },
+      {
+        "timestamp": "2026-02-10T23:00:00Z",
+        "kilowatts": 3.6
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "line",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": {
+            "field": "timestamp"
+          },
+          "y": {
+            "field": "kilowatts"
+          }
+        },
+        "params": {
+          "curve": "step"
+        }
+      }
+    ],
+    "scales": {
+      "x": {
+        "type": "time"
+      }
+    }
+  },
+  "expectRefusal": false,
+  "notes": "Step interpolation on a time axis. The MockResponder deliberately answers this one with an unknown geom first, so the harness's repair round is exercised deterministically."
+}

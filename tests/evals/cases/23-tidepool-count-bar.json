@@ -1,0 +1,159 @@
+{
+  "id": "23-tidepool-count-bar",
+  "kind": "chart",
+  "prompt": "How many sightings of each species did we record? A simple tally.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "species",
+        "type": "nominal",
+        "examples": ["anemone", "chiton", "sculpin"]
+      },
+      {
+        "name": "site",
+        "type": "nominal",
+        "examples": ["north-cove", "south-cove"]
+      }
+    ],
+    "rowCount": 28
+  },
+  "data": {
+    "main": [
+      {
+        "species": "anemone",
+        "site": "north-cove"
+      },
+      {
+        "species": "anemone",
+        "site": "south-cove"
+      },
+      {
+        "species": "anemone",
+        "site": "north-cove"
+      },
+      {
+        "species": "anemone",
+        "site": "south-cove"
+      },
+      {
+        "species": "anemone",
+        "site": "north-cove"
+      },
+      {
+        "species": "anemone",
+        "site": "south-cove"
+      },
+      {
+        "species": "anemone",
+        "site": "north-cove"
+      },
+      {
+        "species": "anemone",
+        "site": "south-cove"
+      },
+      {
+        "species": "anemone",
+        "site": "north-cove"
+      },
+      {
+        "species": "anemone",
+        "site": "south-cove"
+      },
+      {
+        "species": "chiton",
+        "site": "north-cove"
+      },
+      {
+        "species": "chiton",
+        "site": "south-cove"
+      },
+      {
+        "species": "chiton",
+        "site": "north-cove"
+      },
+      {
+        "species": "chiton",
+        "site": "south-cove"
+      },
+      {
+        "species": "chiton",
+        "site": "north-cove"
+      },
+      {
+        "species": "chiton",
+        "site": "south-cove"
+      },
+      {
+        "species": "chiton",
+        "site": "north-cove"
+      },
+      {
+        "species": "sculpin",
+        "site": "north-cove"
+      },
+      {
+        "species": "sculpin",
+        "site": "south-cove"
+      },
+      {
+        "species": "sculpin",
+        "site": "north-cove"
+      },
+      {
+        "species": "sculpin",
+        "site": "south-cove"
+      },
+      {
+        "species": "sculpin",
+        "site": "north-cove"
+      },
+      {
+        "species": "urchin",
+        "site": "north-cove"
+      },
+      {
+        "species": "urchin",
+        "site": "south-cove"
+      },
+      {
+        "species": "urchin",
+        "site": "north-cove"
+      },
+      {
+        "species": "urchin",
+        "site": "south-cove"
+      },
+      {
+        "species": "urchin",
+        "site": "north-cove"
+      },
+      {
+        "species": "urchin",
+        "site": "south-cove"
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "bar",
+        "stat": "count",
+        "position": "stack",
+        "aes": {
+          "x": {
+            "field": "species"
+          },
+          "y": {
+            "stat": "count"
+          }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "Plain count-stat bar; y is the computed count, never mapped."
+}

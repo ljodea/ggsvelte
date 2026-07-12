@@ -1,0 +1,144 @@
+{
+  "id": "34-product-col-stacked",
+  "kind": "chart",
+  "prompt": "Column chart of revenue k by month name, stacked by product.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "month_name",
+        "type": "ordinal",
+        "examples": ["Jan", "Feb", "Mar"]
+      },
+      {
+        "name": "product",
+        "type": "nominal",
+        "examples": ["core", "addon", "support"]
+      },
+      {
+        "name": "revenue_k",
+        "type": "quantitative"
+      }
+    ],
+    "rowCount": 18
+  },
+  "data": {
+    "main": [
+      {
+        "month_name": "Jan",
+        "product": "core",
+        "revenue_k": 64
+      },
+      {
+        "month_name": "Jan",
+        "product": "addon",
+        "revenue_k": 22
+      },
+      {
+        "month_name": "Jan",
+        "product": "support",
+        "revenue_k": 11
+      },
+      {
+        "month_name": "Feb",
+        "product": "core",
+        "revenue_k": 67
+      },
+      {
+        "month_name": "Feb",
+        "product": "addon",
+        "revenue_k": 24
+      },
+      {
+        "month_name": "Feb",
+        "product": "support",
+        "revenue_k": 12
+      },
+      {
+        "month_name": "Mar",
+        "product": "core",
+        "revenue_k": 70
+      },
+      {
+        "month_name": "Mar",
+        "product": "addon",
+        "revenue_k": 26
+      },
+      {
+        "month_name": "Mar",
+        "product": "support",
+        "revenue_k": 13
+      },
+      {
+        "month_name": "Apr",
+        "product": "core",
+        "revenue_k": 73
+      },
+      {
+        "month_name": "Apr",
+        "product": "addon",
+        "revenue_k": 28
+      },
+      {
+        "month_name": "Apr",
+        "product": "support",
+        "revenue_k": 14
+      },
+      {
+        "month_name": "May",
+        "product": "core",
+        "revenue_k": 76
+      },
+      {
+        "month_name": "May",
+        "product": "addon",
+        "revenue_k": 30
+      },
+      {
+        "month_name": "May",
+        "product": "support",
+        "revenue_k": 15
+      },
+      {
+        "month_name": "Jun",
+        "product": "core",
+        "revenue_k": 79
+      },
+      {
+        "month_name": "Jun",
+        "product": "addon",
+        "revenue_k": 32
+      },
+      {
+        "month_name": "Jun",
+        "product": "support",
+        "revenue_k": 16
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "col",
+        "stat": "identity",
+        "position": "stack",
+        "aes": {
+          "x": {
+            "field": "month_name"
+          },
+          "y": {
+            "field": "revenue_k"
+          },
+          "fill": {
+            "field": "product"
+          }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "Stacked col (stack is the geom default — no non-default position fact)."
+}

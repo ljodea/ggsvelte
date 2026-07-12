@@ -1,0 +1,145 @@
+{
+  "id": "26-crab-boxplot-flip",
+  "kind": "chart",
+  "prompt": "Horizontal boxplots of shell width by habitat.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "habitat",
+        "type": "nominal",
+        "examples": ["mudflat", "eelgrass", "cobble"]
+      },
+      {
+        "name": "shell_width_mm",
+        "type": "quantitative"
+      }
+    ],
+    "rowCount": 24
+  },
+  "data": {
+    "main": [
+      {
+        "habitat": "mudflat",
+        "shell_width_mm": 53.5
+      },
+      {
+        "habitat": "mudflat",
+        "shell_width_mm": 49.8
+      },
+      {
+        "habitat": "mudflat",
+        "shell_width_mm": 55.8
+      },
+      {
+        "habitat": "mudflat",
+        "shell_width_mm": 52.4
+      },
+      {
+        "habitat": "mudflat",
+        "shell_width_mm": 49
+      },
+      {
+        "habitat": "mudflat",
+        "shell_width_mm": 57.2
+      },
+      {
+        "habitat": "mudflat",
+        "shell_width_mm": 50.9
+      },
+      {
+        "habitat": "mudflat",
+        "shell_width_mm": 54.4
+      },
+      {
+        "habitat": "eelgrass",
+        "shell_width_mm": 60.5
+      },
+      {
+        "habitat": "eelgrass",
+        "shell_width_mm": 56.8
+      },
+      {
+        "habitat": "eelgrass",
+        "shell_width_mm": 62.8
+      },
+      {
+        "habitat": "eelgrass",
+        "shell_width_mm": 59.4
+      },
+      {
+        "habitat": "eelgrass",
+        "shell_width_mm": 56
+      },
+      {
+        "habitat": "eelgrass",
+        "shell_width_mm": 64.2
+      },
+      {
+        "habitat": "eelgrass",
+        "shell_width_mm": 57.9
+      },
+      {
+        "habitat": "eelgrass",
+        "shell_width_mm": 61.4
+      },
+      {
+        "habitat": "cobble",
+        "shell_width_mm": 67.5
+      },
+      {
+        "habitat": "cobble",
+        "shell_width_mm": 63.8
+      },
+      {
+        "habitat": "cobble",
+        "shell_width_mm": 69.8
+      },
+      {
+        "habitat": "cobble",
+        "shell_width_mm": 66.4
+      },
+      {
+        "habitat": "cobble",
+        "shell_width_mm": 63
+      },
+      {
+        "habitat": "cobble",
+        "shell_width_mm": 71.2
+      },
+      {
+        "habitat": "cobble",
+        "shell_width_mm": 64.9
+      },
+      {
+        "habitat": "cobble",
+        "shell_width_mm": 68.4
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "boxplot",
+        "stat": "boxplot",
+        "position": "dodge",
+        "aes": {
+          "x": {
+            "field": "habitat"
+          },
+          "y": {
+            "field": "shell_width_mm"
+          }
+        }
+      }
+    ],
+    "coord": {
+      "type": "flip"
+    }
+  },
+  "expectRefusal": false,
+  "notes": "coord flip on a boxplot — x stays the category, the flip is a coord fact."
+}

@@ -1,0 +1,142 @@
+{
+  "id": "20-sprint-jitter",
+  "kind": "chart",
+  "prompt": "Show individual sprint speed by position group as jittered points.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "position_group",
+        "type": "nominal",
+        "examples": ["backs", "mids", "fwds"]
+      },
+      {
+        "name": "sprint_speed_kmh",
+        "type": "quantitative"
+      }
+    ],
+    "rowCount": 24
+  },
+  "data": {
+    "main": [
+      {
+        "position_group": "backs",
+        "sprint_speed_kmh": 33.3
+      },
+      {
+        "position_group": "backs",
+        "sprint_speed_kmh": 32.5
+      },
+      {
+        "position_group": "backs",
+        "sprint_speed_kmh": 33.9
+      },
+      {
+        "position_group": "backs",
+        "sprint_speed_kmh": 33.1
+      },
+      {
+        "position_group": "backs",
+        "sprint_speed_kmh": 32.2
+      },
+      {
+        "position_group": "backs",
+        "sprint_speed_kmh": 34.2
+      },
+      {
+        "position_group": "backs",
+        "sprint_speed_kmh": 32.7
+      },
+      {
+        "position_group": "backs",
+        "sprint_speed_kmh": 33.6
+      },
+      {
+        "position_group": "mids",
+        "sprint_speed_kmh": 31.8
+      },
+      {
+        "position_group": "mids",
+        "sprint_speed_kmh": 31
+      },
+      {
+        "position_group": "mids",
+        "sprint_speed_kmh": 32.4
+      },
+      {
+        "position_group": "mids",
+        "sprint_speed_kmh": 31.6
+      },
+      {
+        "position_group": "mids",
+        "sprint_speed_kmh": 30.7
+      },
+      {
+        "position_group": "mids",
+        "sprint_speed_kmh": 32.7
+      },
+      {
+        "position_group": "mids",
+        "sprint_speed_kmh": 31.2
+      },
+      {
+        "position_group": "mids",
+        "sprint_speed_kmh": 32.1
+      },
+      {
+        "position_group": "fwds",
+        "sprint_speed_kmh": 30.3
+      },
+      {
+        "position_group": "fwds",
+        "sprint_speed_kmh": 29.5
+      },
+      {
+        "position_group": "fwds",
+        "sprint_speed_kmh": 30.9
+      },
+      {
+        "position_group": "fwds",
+        "sprint_speed_kmh": 30.1
+      },
+      {
+        "position_group": "fwds",
+        "sprint_speed_kmh": 29.2
+      },
+      {
+        "position_group": "fwds",
+        "sprint_speed_kmh": 31.2
+      },
+      {
+        "position_group": "fwds",
+        "sprint_speed_kmh": 29.7
+      },
+      {
+        "position_group": "fwds",
+        "sprint_speed_kmh": 30.6
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "point",
+        "stat": "identity",
+        "position": "jitter",
+        "aes": {
+          "x": {
+            "field": "position_group"
+          },
+          "y": {
+            "field": "sprint_speed_kmh"
+          }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "Points over a discrete x with position jitter (always-seeded in ggsvelte)."
+}

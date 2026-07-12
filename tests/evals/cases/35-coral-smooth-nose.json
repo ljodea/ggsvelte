@@ -1,0 +1,134 @@
+{
+  "id": "35-coral-smooth-nose",
+  "kind": "chart",
+  "prompt": "Plot coral cover pct against water temp c with a loess smooth, no confidence band.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "water_temp_c",
+        "type": "quantitative"
+      },
+      {
+        "name": "coral_cover_pct",
+        "type": "quantitative"
+      }
+    ],
+    "rowCount": 18
+  },
+  "data": {
+    "main": [
+      {
+        "water_temp_c": 24.1,
+        "coral_cover_pct": 62
+      },
+      {
+        "water_temp_c": 24.6,
+        "coral_cover_pct": 60
+      },
+      {
+        "water_temp_c": 25,
+        "coral_cover_pct": 61
+      },
+      {
+        "water_temp_c": 25.4,
+        "coral_cover_pct": 58
+      },
+      {
+        "water_temp_c": 25.9,
+        "coral_cover_pct": 55
+      },
+      {
+        "water_temp_c": 26.3,
+        "coral_cover_pct": 54
+      },
+      {
+        "water_temp_c": 26.8,
+        "coral_cover_pct": 50
+      },
+      {
+        "water_temp_c": 27.2,
+        "coral_cover_pct": 47
+      },
+      {
+        "water_temp_c": 27.7,
+        "coral_cover_pct": 44
+      },
+      {
+        "water_temp_c": 28.1,
+        "coral_cover_pct": 40
+      },
+      {
+        "water_temp_c": 28.5,
+        "coral_cover_pct": 36
+      },
+      {
+        "water_temp_c": 29,
+        "coral_cover_pct": 31
+      },
+      {
+        "water_temp_c": 29.4,
+        "coral_cover_pct": 27
+      },
+      {
+        "water_temp_c": 29.9,
+        "coral_cover_pct": 22
+      },
+      {
+        "water_temp_c": 30.3,
+        "coral_cover_pct": 18
+      },
+      {
+        "water_temp_c": 30.8,
+        "coral_cover_pct": 13
+      },
+      {
+        "water_temp_c": 31.2,
+        "coral_cover_pct": 10
+      },
+      {
+        "water_temp_c": 31.7,
+        "coral_cover_pct": 7
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "point",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": {
+            "field": "water_temp_c"
+          },
+          "y": {
+            "field": "coral_cover_pct"
+          }
+        }
+      },
+      {
+        "geom": "smooth",
+        "stat": "smooth",
+        "position": "identity",
+        "aes": {
+          "x": {
+            "field": "water_temp_c"
+          },
+          "y": {
+            "field": "coral_cover_pct"
+          }
+        },
+        "params": {
+          "method": "loess",
+          "se": false
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "Smooth with the se ribbon turned off (params.se false)."
+}

@@ -1,0 +1,26 @@
+{
+  "id": "38-surface-3d-unsupported",
+  "kind": "adversarial-unsupported",
+  "prompt": "Render a 3d surface plot of elevation over the lat lon grid.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "lat",
+        "type": "quantitative"
+      },
+      {
+        "name": "lon",
+        "type": "quantitative"
+      },
+      {
+        "name": "elevation",
+        "type": "quantitative"
+      }
+    ],
+    "rowCount": 400
+  },
+  "data": null,
+  "gold": null,
+  "expectRefusal": true,
+  "notes": "3D surfaces are unsupported; expect the refusal shape."
+}

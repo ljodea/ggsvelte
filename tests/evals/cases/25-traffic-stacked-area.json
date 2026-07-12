@@ -1,0 +1,178 @@
+{
+  "id": "25-traffic-stacked-area",
+  "kind": "chart",
+  "prompt": "Stacked area chart of sessions per day, one area per device.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "day",
+        "type": "temporal"
+      },
+      {
+        "name": "sessions",
+        "type": "quantitative"
+      },
+      {
+        "name": "device",
+        "type": "nominal",
+        "examples": ["mobile", "desktop", "tablet"]
+      }
+    ],
+    "rowCount": 24
+  },
+  "data": {
+    "main": [
+      {
+        "day": "2026-06-01",
+        "device": "mobile",
+        "sessions": 915
+      },
+      {
+        "day": "2026-06-02",
+        "device": "mobile",
+        "sessions": 904
+      },
+      {
+        "day": "2026-06-03",
+        "device": "mobile",
+        "sessions": 978
+      },
+      {
+        "day": "2026-06-04",
+        "device": "mobile",
+        "sessions": 962
+      },
+      {
+        "day": "2026-06-05",
+        "device": "mobile",
+        "sessions": 1021
+      },
+      {
+        "day": "2026-06-06",
+        "device": "mobile",
+        "sessions": 1005
+      },
+      {
+        "day": "2026-06-07",
+        "device": "mobile",
+        "sessions": 1064
+      },
+      {
+        "day": "2026-06-08",
+        "device": "mobile",
+        "sessions": 1073
+      },
+      {
+        "day": "2026-06-01",
+        "device": "desktop",
+        "sessions": 635
+      },
+      {
+        "day": "2026-06-02",
+        "device": "desktop",
+        "sessions": 611
+      },
+      {
+        "day": "2026-06-03",
+        "device": "desktop",
+        "sessions": 672
+      },
+      {
+        "day": "2026-06-04",
+        "device": "desktop",
+        "sessions": 643
+      },
+      {
+        "day": "2026-06-05",
+        "device": "desktop",
+        "sessions": 689
+      },
+      {
+        "day": "2026-06-06",
+        "device": "desktop",
+        "sessions": 660
+      },
+      {
+        "day": "2026-06-07",
+        "device": "desktop",
+        "sessions": 706
+      },
+      {
+        "day": "2026-06-08",
+        "device": "desktop",
+        "sessions": 702
+      },
+      {
+        "day": "2026-06-01",
+        "device": "tablet",
+        "sessions": 155
+      },
+      {
+        "day": "2026-06-02",
+        "device": "tablet",
+        "sessions": 124
+      },
+      {
+        "day": "2026-06-03",
+        "device": "tablet",
+        "sessions": 178
+      },
+      {
+        "day": "2026-06-04",
+        "device": "tablet",
+        "sessions": 142
+      },
+      {
+        "day": "2026-06-05",
+        "device": "tablet",
+        "sessions": 181
+      },
+      {
+        "day": "2026-06-06",
+        "device": "tablet",
+        "sessions": 145
+      },
+      {
+        "day": "2026-06-07",
+        "device": "tablet",
+        "sessions": 184
+      },
+      {
+        "day": "2026-06-08",
+        "device": "tablet",
+        "sessions": 173
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "area",
+        "stat": "identity",
+        "position": "stack",
+        "aes": {
+          "x": {
+            "field": "day"
+          },
+          "y": {
+            "field": "sessions"
+          },
+          "fill": {
+            "field": "device"
+          }
+        }
+      }
+    ],
+    "scales": {
+      "x": {
+        "type": "time"
+      }
+    }
+  },
+  "expectRefusal": false,
+  "notes": "Stacked area (default stack position) split by fill, over a time axis."
+}

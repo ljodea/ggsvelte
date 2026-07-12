@@ -1,0 +1,142 @@
+{
+  "id": "29-quake-bubble",
+  "kind": "chart",
+  "prompt": "Scatter magnitude against depth km, sized by stations.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "depth_km",
+        "type": "quantitative"
+      },
+      {
+        "name": "magnitude",
+        "type": "quantitative"
+      },
+      {
+        "name": "stations",
+        "type": "quantitative"
+      }
+    ],
+    "rowCount": 18
+  },
+  "data": {
+    "main": [
+      {
+        "depth_km": 5,
+        "magnitude": 2.1,
+        "stations": 8
+      },
+      {
+        "depth_km": 12,
+        "magnitude": 3.4,
+        "stations": 21
+      },
+      {
+        "depth_km": 33,
+        "magnitude": 4.2,
+        "stations": 40
+      },
+      {
+        "depth_km": 8,
+        "magnitude": 2.8,
+        "stations": 14
+      },
+      {
+        "depth_km": 70,
+        "magnitude": 4.9,
+        "stations": 66
+      },
+      {
+        "depth_km": 21,
+        "magnitude": 3.1,
+        "stations": 18
+      },
+      {
+        "depth_km": 45,
+        "magnitude": 4.5,
+        "stations": 52
+      },
+      {
+        "depth_km": 16,
+        "magnitude": 2.5,
+        "stations": 11
+      },
+      {
+        "depth_km": 95,
+        "magnitude": 5.3,
+        "stations": 80
+      },
+      {
+        "depth_km": 28,
+        "magnitude": 3.8,
+        "stations": 30
+      },
+      {
+        "depth_km": 55,
+        "magnitude": 4,
+        "stations": 38
+      },
+      {
+        "depth_km": 7,
+        "magnitude": 1.9,
+        "stations": 6
+      },
+      {
+        "depth_km": 120,
+        "magnitude": 5.8,
+        "stations": 95
+      },
+      {
+        "depth_km": 38,
+        "magnitude": 3.6,
+        "stations": 27
+      },
+      {
+        "depth_km": 62,
+        "magnitude": 4.7,
+        "stations": 58
+      },
+      {
+        "depth_km": 18,
+        "magnitude": 2.9,
+        "stations": 16
+      },
+      {
+        "depth_km": 84,
+        "magnitude": 5.1,
+        "stations": 72
+      },
+      {
+        "depth_km": 25,
+        "magnitude": 3.3,
+        "stations": 24
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "point",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": {
+            "field": "depth_km"
+          },
+          "y": {
+            "field": "magnitude"
+          },
+          "size": {
+            "field": "stations"
+          }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "Bubble chart — the size channel mapped to a third quantitative field."
+}

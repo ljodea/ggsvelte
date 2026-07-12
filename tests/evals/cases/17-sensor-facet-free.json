@@ -1,0 +1,181 @@
+{
+  "id": "17-sensor-facet-free",
+  "kind": "chart",
+  "prompt": "Plot value over time faceted by sensor with a free y axis for each panel.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "reading_time",
+        "type": "temporal"
+      },
+      {
+        "name": "value",
+        "type": "quantitative"
+      },
+      {
+        "name": "sensor",
+        "type": "nominal",
+        "examples": ["co2", "pm25", "noise"]
+      }
+    ],
+    "rowCount": 24
+  },
+  "data": {
+    "main": [
+      {
+        "reading_time": "2026-05-01T08:00:00Z",
+        "sensor": "co2",
+        "value": 428
+      },
+      {
+        "reading_time": "2026-05-01T09:00:00Z",
+        "sensor": "co2",
+        "value": 435
+      },
+      {
+        "reading_time": "2026-05-01T10:00:00Z",
+        "sensor": "co2",
+        "value": 424
+      },
+      {
+        "reading_time": "2026-05-01T11:00:00Z",
+        "sensor": "co2",
+        "value": 442
+      },
+      {
+        "reading_time": "2026-05-01T12:00:00Z",
+        "sensor": "co2",
+        "value": 450
+      },
+      {
+        "reading_time": "2026-05-01T13:00:00Z",
+        "sensor": "co2",
+        "value": 438
+      },
+      {
+        "reading_time": "2026-05-01T14:00:00Z",
+        "sensor": "co2",
+        "value": 446
+      },
+      {
+        "reading_time": "2026-05-01T15:00:00Z",
+        "sensor": "co2",
+        "value": 460
+      },
+      {
+        "reading_time": "2026-05-01T08:00:00Z",
+        "sensor": "pm25",
+        "value": 13
+      },
+      {
+        "reading_time": "2026-05-01T09:00:00Z",
+        "sensor": "pm25",
+        "value": 15
+      },
+      {
+        "reading_time": "2026-05-01T10:00:00Z",
+        "sensor": "pm25",
+        "value": 14
+      },
+      {
+        "reading_time": "2026-05-01T11:00:00Z",
+        "sensor": "pm25",
+        "value": 17
+      },
+      {
+        "reading_time": "2026-05-01T12:00:00Z",
+        "sensor": "pm25",
+        "value": 16
+      },
+      {
+        "reading_time": "2026-05-01T13:00:00Z",
+        "sensor": "pm25",
+        "value": 18
+      },
+      {
+        "reading_time": "2026-05-01T14:00:00Z",
+        "sensor": "pm25",
+        "value": 17
+      },
+      {
+        "reading_time": "2026-05-01T15:00:00Z",
+        "sensor": "pm25",
+        "value": 20
+      },
+      {
+        "reading_time": "2026-05-01T08:00:00Z",
+        "sensor": "noise",
+        "value": 57
+      },
+      {
+        "reading_time": "2026-05-01T09:00:00Z",
+        "sensor": "noise",
+        "value": 61
+      },
+      {
+        "reading_time": "2026-05-01T10:00:00Z",
+        "sensor": "noise",
+        "value": 58
+      },
+      {
+        "reading_time": "2026-05-01T11:00:00Z",
+        "sensor": "noise",
+        "value": 64
+      },
+      {
+        "reading_time": "2026-05-01T12:00:00Z",
+        "sensor": "noise",
+        "value": 62
+      },
+      {
+        "reading_time": "2026-05-01T13:00:00Z",
+        "sensor": "noise",
+        "value": 66
+      },
+      {
+        "reading_time": "2026-05-01T14:00:00Z",
+        "sensor": "noise",
+        "value": 63
+      },
+      {
+        "reading_time": "2026-05-01T15:00:00Z",
+        "sensor": "noise",
+        "value": 68
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "line",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": {
+            "field": "reading_time"
+          },
+          "y": {
+            "field": "value"
+          }
+        }
+      }
+    ],
+    "facet": {
+      "wrap": {
+        "field": "sensor"
+      },
+      "scales": "free_y"
+    },
+    "scales": {
+      "x": {
+        "type": "time"
+      }
+    }
+  },
+  "expectRefusal": false,
+  "notes": "Facet wrap with free_y — per-panel y scales for different magnitudes."
+}

@@ -1,0 +1,98 @@
+{
+  "id": "33-district-col-sequential",
+  "kind": "chart",
+  "prompt": "Column chart of output gwh by district, filled by avg load pct.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "district",
+        "type": "nominal",
+        "examples": ["harbor", "old-town", "mills"]
+      },
+      {
+        "name": "output_gwh",
+        "type": "quantitative"
+      },
+      {
+        "name": "avg_load_pct",
+        "type": "quantitative"
+      }
+    ],
+    "rowCount": 8
+  },
+  "data": {
+    "main": [
+      {
+        "district": "harbor",
+        "output_gwh": 34,
+        "avg_load_pct": 71
+      },
+      {
+        "district": "old-town",
+        "output_gwh": 21,
+        "avg_load_pct": 58
+      },
+      {
+        "district": "mills",
+        "output_gwh": 45,
+        "avg_load_pct": 83
+      },
+      {
+        "district": "meadows",
+        "output_gwh": 17,
+        "avg_load_pct": 49
+      },
+      {
+        "district": "north-gate",
+        "output_gwh": 28,
+        "avg_load_pct": 63
+      },
+      {
+        "district": "foundry",
+        "output_gwh": 52,
+        "avg_load_pct": 90
+      },
+      {
+        "district": "arsenal",
+        "output_gwh": 25,
+        "avg_load_pct": 61
+      },
+      {
+        "district": "lakeside",
+        "output_gwh": 12,
+        "avg_load_pct": 42
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "col",
+        "stat": "identity",
+        "position": "stack",
+        "aes": {
+          "x": {
+            "field": "district"
+          },
+          "y": {
+            "field": "output_gwh"
+          },
+          "fill": {
+            "field": "avg_load_pct"
+          }
+        }
+      }
+    ],
+    "scales": {
+      "fill": {
+        "type": "sequential"
+      }
+    }
+  },
+  "expectRefusal": false,
+  "notes": "Sequential FILL ramp over a quantitative field on a col chart."
+}

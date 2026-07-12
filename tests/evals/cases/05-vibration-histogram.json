@@ -1,0 +1,169 @@
+{
+  "id": "05-vibration-histogram",
+  "kind": "chart",
+  "prompt": "Draw a histogram of vibration readings with a binwidth of 0.5.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "vibration_rms",
+        "type": "quantitative"
+      },
+      {
+        "name": "machine",
+        "type": "nominal",
+        "examples": ["press-a", "press-b"]
+      }
+    ],
+    "rowCount": 30
+  },
+  "data": {
+    "main": [
+      {
+        "vibration_rms": 1.1,
+        "machine": "press-a"
+      },
+      {
+        "vibration_rms": 1.4,
+        "machine": "press-b"
+      },
+      {
+        "vibration_rms": 1.8,
+        "machine": "press-a"
+      },
+      {
+        "vibration_rms": 2,
+        "machine": "press-b"
+      },
+      {
+        "vibration_rms": 2.1,
+        "machine": "press-a"
+      },
+      {
+        "vibration_rms": 2.2,
+        "machine": "press-b"
+      },
+      {
+        "vibration_rms": 2.3,
+        "machine": "press-a"
+      },
+      {
+        "vibration_rms": 2.3,
+        "machine": "press-b"
+      },
+      {
+        "vibration_rms": 2.4,
+        "machine": "press-a"
+      },
+      {
+        "vibration_rms": 2.5,
+        "machine": "press-b"
+      },
+      {
+        "vibration_rms": 2.5,
+        "machine": "press-a"
+      },
+      {
+        "vibration_rms": 2.6,
+        "machine": "press-b"
+      },
+      {
+        "vibration_rms": 2.7,
+        "machine": "press-a"
+      },
+      {
+        "vibration_rms": 2.7,
+        "machine": "press-b"
+      },
+      {
+        "vibration_rms": 2.8,
+        "machine": "press-a"
+      },
+      {
+        "vibration_rms": 2.9,
+        "machine": "press-b"
+      },
+      {
+        "vibration_rms": 3,
+        "machine": "press-a"
+      },
+      {
+        "vibration_rms": 3,
+        "machine": "press-b"
+      },
+      {
+        "vibration_rms": 3.1,
+        "machine": "press-a"
+      },
+      {
+        "vibration_rms": 3.2,
+        "machine": "press-b"
+      },
+      {
+        "vibration_rms": 3.3,
+        "machine": "press-a"
+      },
+      {
+        "vibration_rms": 3.5,
+        "machine": "press-b"
+      },
+      {
+        "vibration_rms": 3.6,
+        "machine": "press-a"
+      },
+      {
+        "vibration_rms": 3.8,
+        "machine": "press-b"
+      },
+      {
+        "vibration_rms": 4,
+        "machine": "press-a"
+      },
+      {
+        "vibration_rms": 4.2,
+        "machine": "press-b"
+      },
+      {
+        "vibration_rms": 4.5,
+        "machine": "press-a"
+      },
+      {
+        "vibration_rms": 4.9,
+        "machine": "press-b"
+      },
+      {
+        "vibration_rms": 5.3,
+        "machine": "press-a"
+      },
+      {
+        "vibration_rms": 5.8,
+        "machine": "press-b"
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "bar",
+        "stat": "bin",
+        "position": "stack",
+        "aes": {
+          "x": {
+            "field": "vibration_rms"
+          },
+          "y": {
+            "stat": "count"
+          }
+        },
+        "params": {
+          "binwidth": 0.5
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "Histogram = bin stat; canonical form is geom bar + stat bin. y must NOT be mapped (computed)."
+}

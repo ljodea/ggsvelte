@@ -1,0 +1,145 @@
+{
+  "id": "08-stellar-density",
+  "kind": "chart",
+  "prompt": "Show the density of surface temp for the star catalog, one curve per spectral class.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "spectral_class",
+        "type": "nominal",
+        "examples": ["K", "G", "F"]
+      },
+      {
+        "name": "surface_temp_k",
+        "type": "quantitative"
+      }
+    ],
+    "rowCount": 24
+  },
+  "data": {
+    "main": [
+      {
+        "spectral_class": "K",
+        "surface_temp_k": 3940
+      },
+      {
+        "spectral_class": "K",
+        "surface_temp_k": 4070
+      },
+      {
+        "spectral_class": "K",
+        "surface_temp_k": 4140
+      },
+      {
+        "spectral_class": "K",
+        "surface_temp_k": 4200
+      },
+      {
+        "spectral_class": "K",
+        "surface_temp_k": 4240
+      },
+      {
+        "spectral_class": "K",
+        "surface_temp_k": 4320
+      },
+      {
+        "spectral_class": "K",
+        "surface_temp_k": 4410
+      },
+      {
+        "spectral_class": "K",
+        "surface_temp_k": 4520
+      },
+      {
+        "spectral_class": "G",
+        "surface_temp_k": 4840
+      },
+      {
+        "spectral_class": "G",
+        "surface_temp_k": 4970
+      },
+      {
+        "spectral_class": "G",
+        "surface_temp_k": 5040
+      },
+      {
+        "spectral_class": "G",
+        "surface_temp_k": 5100
+      },
+      {
+        "spectral_class": "G",
+        "surface_temp_k": 5140
+      },
+      {
+        "spectral_class": "G",
+        "surface_temp_k": 5220
+      },
+      {
+        "spectral_class": "G",
+        "surface_temp_k": 5310
+      },
+      {
+        "spectral_class": "G",
+        "surface_temp_k": 5420
+      },
+      {
+        "spectral_class": "F",
+        "surface_temp_k": 5740
+      },
+      {
+        "spectral_class": "F",
+        "surface_temp_k": 5870
+      },
+      {
+        "spectral_class": "F",
+        "surface_temp_k": 5940
+      },
+      {
+        "spectral_class": "F",
+        "surface_temp_k": 6000
+      },
+      {
+        "spectral_class": "F",
+        "surface_temp_k": 6040
+      },
+      {
+        "spectral_class": "F",
+        "surface_temp_k": 6120
+      },
+      {
+        "spectral_class": "F",
+        "surface_temp_k": 6210
+      },
+      {
+        "spectral_class": "F",
+        "surface_temp_k": 6320
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "density",
+        "stat": "density",
+        "position": "identity",
+        "aes": {
+          "x": {
+            "field": "surface_temp_k"
+          },
+          "color": {
+            "field": "spectral_class"
+          },
+          "y": {
+            "stat": "density"
+          }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "Overlaid densities grouped by a discrete color; y is stat-computed (never mapped)."
+}

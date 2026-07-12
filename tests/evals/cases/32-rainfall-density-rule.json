@@ -1,0 +1,121 @@
+{
+  "id": "32-rainfall-density-rule",
+  "kind": "chart",
+  "prompt": "Density of annual rain mm with a vertical average line at 820.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "annual_rain_mm",
+        "type": "quantitative"
+      }
+    ],
+    "rowCount": 24
+  },
+  "data": {
+    "main": [
+      {
+        "annual_rain_mm": 610
+      },
+      {
+        "annual_rain_mm": 655
+      },
+      {
+        "annual_rain_mm": 680
+      },
+      {
+        "annual_rain_mm": 700
+      },
+      {
+        "annual_rain_mm": 715
+      },
+      {
+        "annual_rain_mm": 730
+      },
+      {
+        "annual_rain_mm": 745
+      },
+      {
+        "annual_rain_mm": 760
+      },
+      {
+        "annual_rain_mm": 775
+      },
+      {
+        "annual_rain_mm": 790
+      },
+      {
+        "annual_rain_mm": 805
+      },
+      {
+        "annual_rain_mm": 815
+      },
+      {
+        "annual_rain_mm": 825
+      },
+      {
+        "annual_rain_mm": 835
+      },
+      {
+        "annual_rain_mm": 850
+      },
+      {
+        "annual_rain_mm": 865
+      },
+      {
+        "annual_rain_mm": 880
+      },
+      {
+        "annual_rain_mm": 900
+      },
+      {
+        "annual_rain_mm": 915
+      },
+      {
+        "annual_rain_mm": 935
+      },
+      {
+        "annual_rain_mm": 960
+      },
+      {
+        "annual_rain_mm": 990
+      },
+      {
+        "annual_rain_mm": 1020
+      },
+      {
+        "annual_rain_mm": 1060
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "density",
+        "stat": "density",
+        "position": "identity",
+        "aes": {
+          "x": {
+            "field": "annual_rain_mm"
+          },
+          "y": {
+            "stat": "density"
+          }
+        }
+      },
+      {
+        "geom": "rule",
+        "stat": "identity",
+        "position": "identity",
+        "params": {
+          "xintercept": 820
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "Density + vertical annotation rule (xintercept form)."
+}

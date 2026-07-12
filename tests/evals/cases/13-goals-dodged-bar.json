@@ -1,0 +1,170 @@
+{
+  "id": "13-goals-dodged-bar",
+  "kind": "chart",
+  "prompt": "How many goals were scored on each matchday? Show bars grouped by squad, side by side.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "matchday",
+        "type": "ordinal",
+        "examples": ["MD1", "MD2", "MD3"]
+      },
+      {
+        "name": "squad",
+        "type": "nominal",
+        "examples": ["north", "south"]
+      }
+    ],
+    "rowCount": 30
+  },
+  "data": {
+    "main": [
+      {
+        "matchday": "MD1",
+        "squad": "north"
+      },
+      {
+        "matchday": "MD1",
+        "squad": "north"
+      },
+      {
+        "matchday": "MD1",
+        "squad": "north"
+      },
+      {
+        "matchday": "MD1",
+        "squad": "north"
+      },
+      {
+        "matchday": "MD1",
+        "squad": "north"
+      },
+      {
+        "matchday": "MD1",
+        "squad": "north"
+      },
+      {
+        "matchday": "MD1",
+        "squad": "south"
+      },
+      {
+        "matchday": "MD1",
+        "squad": "south"
+      },
+      {
+        "matchday": "MD1",
+        "squad": "south"
+      },
+      {
+        "matchday": "MD1",
+        "squad": "south"
+      },
+      {
+        "matchday": "MD2",
+        "squad": "north"
+      },
+      {
+        "matchday": "MD2",
+        "squad": "north"
+      },
+      {
+        "matchday": "MD2",
+        "squad": "north"
+      },
+      {
+        "matchday": "MD2",
+        "squad": "north"
+      },
+      {
+        "matchday": "MD2",
+        "squad": "south"
+      },
+      {
+        "matchday": "MD2",
+        "squad": "south"
+      },
+      {
+        "matchday": "MD2",
+        "squad": "south"
+      },
+      {
+        "matchday": "MD2",
+        "squad": "south"
+      },
+      {
+        "matchday": "MD2",
+        "squad": "south"
+      },
+      {
+        "matchday": "MD2",
+        "squad": "south"
+      },
+      {
+        "matchday": "MD3",
+        "squad": "north"
+      },
+      {
+        "matchday": "MD3",
+        "squad": "north"
+      },
+      {
+        "matchday": "MD3",
+        "squad": "north"
+      },
+      {
+        "matchday": "MD3",
+        "squad": "north"
+      },
+      {
+        "matchday": "MD3",
+        "squad": "north"
+      },
+      {
+        "matchday": "MD3",
+        "squad": "south"
+      },
+      {
+        "matchday": "MD3",
+        "squad": "south"
+      },
+      {
+        "matchday": "MD3",
+        "squad": "south"
+      },
+      {
+        "matchday": "MD3",
+        "squad": "south"
+      },
+      {
+        "matchday": "MD3",
+        "squad": "south"
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "bar",
+        "stat": "count",
+        "position": "dodge",
+        "aes": {
+          "x": {
+            "field": "matchday"
+          },
+          "fill": {
+            "field": "squad"
+          },
+          "y": {
+            "stat": "count"
+          }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "Count stat with position dodge; rows are individual goals."
+}

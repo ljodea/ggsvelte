@@ -1,0 +1,207 @@
+{
+  "id": "16-store-facet-grid",
+  "kind": "chart",
+  "prompt": "Scatter weekly sales against floor area in a grid with rows by region and columns by format.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "floor_area_m2",
+        "type": "quantitative"
+      },
+      {
+        "name": "weekly_sales_k",
+        "type": "quantitative"
+      },
+      {
+        "name": "region",
+        "type": "nominal",
+        "examples": ["east", "west"]
+      },
+      {
+        "name": "format",
+        "type": "nominal",
+        "examples": ["urban", "retail-park"]
+      }
+    ],
+    "rowCount": 24
+  },
+  "data": {
+    "main": [
+      {
+        "region": "east",
+        "format": "urban",
+        "floor_area_m2": 300,
+        "weekly_sales_k": 43
+      },
+      {
+        "region": "east",
+        "format": "urban",
+        "floor_area_m2": 420,
+        "weekly_sales_k": 45
+      },
+      {
+        "region": "east",
+        "format": "urban",
+        "floor_area_m2": 540,
+        "weekly_sales_k": 64
+      },
+      {
+        "region": "east",
+        "format": "urban",
+        "floor_area_m2": 660,
+        "weekly_sales_k": 65
+      },
+      {
+        "region": "east",
+        "format": "urban",
+        "floor_area_m2": 780,
+        "weekly_sales_k": 81
+      },
+      {
+        "region": "east",
+        "format": "urban",
+        "floor_area_m2": 900,
+        "weekly_sales_k": 80
+      },
+      {
+        "region": "east",
+        "format": "retail-park",
+        "floor_area_m2": 1200,
+        "weekly_sales_k": 98
+      },
+      {
+        "region": "east",
+        "format": "retail-park",
+        "floor_area_m2": 1320,
+        "weekly_sales_k": 100
+      },
+      {
+        "region": "east",
+        "format": "retail-park",
+        "floor_area_m2": 1440,
+        "weekly_sales_k": 119
+      },
+      {
+        "region": "east",
+        "format": "retail-park",
+        "floor_area_m2": 1560,
+        "weekly_sales_k": 120
+      },
+      {
+        "region": "east",
+        "format": "retail-park",
+        "floor_area_m2": 1680,
+        "weekly_sales_k": 136
+      },
+      {
+        "region": "east",
+        "format": "retail-park",
+        "floor_area_m2": 1800,
+        "weekly_sales_k": 135
+      },
+      {
+        "region": "west",
+        "format": "urban",
+        "floor_area_m2": 360,
+        "weekly_sales_k": 55
+      },
+      {
+        "region": "west",
+        "format": "urban",
+        "floor_area_m2": 480,
+        "weekly_sales_k": 57
+      },
+      {
+        "region": "west",
+        "format": "urban",
+        "floor_area_m2": 600,
+        "weekly_sales_k": 76
+      },
+      {
+        "region": "west",
+        "format": "urban",
+        "floor_area_m2": 720,
+        "weekly_sales_k": 77
+      },
+      {
+        "region": "west",
+        "format": "urban",
+        "floor_area_m2": 840,
+        "weekly_sales_k": 93
+      },
+      {
+        "region": "west",
+        "format": "urban",
+        "floor_area_m2": 960,
+        "weekly_sales_k": 92
+      },
+      {
+        "region": "west",
+        "format": "retail-park",
+        "floor_area_m2": 1260,
+        "weekly_sales_k": 110
+      },
+      {
+        "region": "west",
+        "format": "retail-park",
+        "floor_area_m2": 1380,
+        "weekly_sales_k": 112
+      },
+      {
+        "region": "west",
+        "format": "retail-park",
+        "floor_area_m2": 1500,
+        "weekly_sales_k": 131
+      },
+      {
+        "region": "west",
+        "format": "retail-park",
+        "floor_area_m2": 1620,
+        "weekly_sales_k": 132
+      },
+      {
+        "region": "west",
+        "format": "retail-park",
+        "floor_area_m2": 1740,
+        "weekly_sales_k": 148
+      },
+      {
+        "region": "west",
+        "format": "retail-park",
+        "floor_area_m2": 1860,
+        "weekly_sales_k": 147
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "point",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": {
+            "field": "floor_area_m2"
+          },
+          "y": {
+            "field": "weekly_sales_k"
+          }
+        }
+      }
+    ],
+    "facet": {
+      "rows": {
+        "field": "region"
+      },
+      "cols": {
+        "field": "format"
+      }
+    }
+  },
+  "expectRefusal": false,
+  "notes": "Facet GRID form (rows x cols), distinct from wrap."
+}

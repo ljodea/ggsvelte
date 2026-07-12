@@ -1,0 +1,102 @@
+{
+  "id": "03-revenue-line-time",
+  "kind": "chart",
+  "prompt": "Show monthly revenue over time as a line chart.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "month",
+        "type": "temporal"
+      },
+      {
+        "name": "revenue_eur",
+        "type": "quantitative"
+      }
+    ],
+    "rowCount": 12
+  },
+  "data": {
+    "main": [
+      {
+        "month": "2025-01-01",
+        "revenue_eur": 42000
+      },
+      {
+        "month": "2025-02-01",
+        "revenue_eur": 45000
+      },
+      {
+        "month": "2025-03-01",
+        "revenue_eur": 44000
+      },
+      {
+        "month": "2025-04-01",
+        "revenue_eur": 51000
+      },
+      {
+        "month": "2025-05-01",
+        "revenue_eur": 55000
+      },
+      {
+        "month": "2025-06-01",
+        "revenue_eur": 58000
+      },
+      {
+        "month": "2025-07-01",
+        "revenue_eur": 61000
+      },
+      {
+        "month": "2025-08-01",
+        "revenue_eur": 60000
+      },
+      {
+        "month": "2025-09-01",
+        "revenue_eur": 66000
+      },
+      {
+        "month": "2025-10-01",
+        "revenue_eur": 71000
+      },
+      {
+        "month": "2025-11-01",
+        "revenue_eur": 69000
+      },
+      {
+        "month": "2025-12-01",
+        "revenue_eur": 78000
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "line",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": {
+            "field": "month"
+          },
+          "y": {
+            "field": "revenue_eur"
+          }
+        }
+      }
+    ],
+    "scales": {
+      "x": {
+        "type": "time"
+      }
+    },
+    "labs": {
+      "title": "Monthly revenue",
+      "y": "Revenue (EUR)"
+    }
+  },
+  "expectRefusal": false,
+  "notes": "Time-series line; the x scale must be declared as a time scale."
+}

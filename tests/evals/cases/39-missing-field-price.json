@@ -1,0 +1,101 @@
+{
+  "id": "39-missing-field-price",
+  "kind": "adversarial-missing-field",
+  "prompt": "Scatter price against weight kg for the catalog.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "cost_usd",
+        "type": "quantitative"
+      },
+      {
+        "name": "weight_kg",
+        "type": "quantitative"
+      }
+    ],
+    "rowCount": 14
+  },
+  "data": {
+    "main": [
+      {
+        "weight_kg": 4.5,
+        "cost_usd": 120
+      },
+      {
+        "weight_kg": 7.9,
+        "cost_usd": 210
+      },
+      {
+        "weight_kg": 2.1,
+        "cost_usd": 60
+      },
+      {
+        "weight_kg": 11.4,
+        "cost_usd": 330
+      },
+      {
+        "weight_kg": 6.3,
+        "cost_usd": 170
+      },
+      {
+        "weight_kg": 9.8,
+        "cost_usd": 260
+      },
+      {
+        "weight_kg": 3.4,
+        "cost_usd": 95
+      },
+      {
+        "weight_kg": 13,
+        "cost_usd": 380
+      },
+      {
+        "weight_kg": 5.5,
+        "cost_usd": 150
+      },
+      {
+        "weight_kg": 8.7,
+        "cost_usd": 240
+      },
+      {
+        "weight_kg": 1.6,
+        "cost_usd": 45
+      },
+      {
+        "weight_kg": 12.2,
+        "cost_usd": 350
+      },
+      {
+        "weight_kg": 7.1,
+        "cost_usd": 190
+      },
+      {
+        "weight_kg": 10.5,
+        "cost_usd": 300
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "point",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": {
+            "field": "weight_kg"
+          },
+          "y": {
+            "field": "cost_usd"
+          }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "'price' is not in the profile; the gold maps the closest real field (cost_usd) as y. A refusal-shaped clarification is also tolerated as a pass (documented in score.ts/run.ts)."
+}

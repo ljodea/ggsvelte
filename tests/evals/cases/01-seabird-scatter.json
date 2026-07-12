@@ -1,0 +1,116 @@
+{
+  "id": "01-seabird-scatter",
+  "kind": "chart",
+  "prompt": "Make a scatter plot of body mass against wingspan for our seabird survey, colored by species.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "wingspan_cm",
+        "type": "quantitative"
+      },
+      {
+        "name": "body_mass_g",
+        "type": "quantitative"
+      },
+      {
+        "name": "species",
+        "type": "nominal",
+        "examples": ["tern", "gull", "skua"]
+      }
+    ],
+    "rowCount": 12
+  },
+  "data": {
+    "main": [
+      {
+        "wingspan_cm": 66,
+        "body_mass_g": 118,
+        "species": "tern"
+      },
+      {
+        "wingspan_cm": 70,
+        "body_mass_g": 127,
+        "species": "tern"
+      },
+      {
+        "wingspan_cm": 63,
+        "body_mass_g": 110,
+        "species": "tern"
+      },
+      {
+        "wingspan_cm": 68,
+        "body_mass_g": 122,
+        "species": "tern"
+      },
+      {
+        "wingspan_cm": 120,
+        "body_mass_g": 940,
+        "species": "gull"
+      },
+      {
+        "wingspan_cm": 128,
+        "body_mass_g": 1040,
+        "species": "gull"
+      },
+      {
+        "wingspan_cm": 115,
+        "body_mass_g": 880,
+        "species": "gull"
+      },
+      {
+        "wingspan_cm": 124,
+        "body_mass_g": 990,
+        "species": "gull"
+      },
+      {
+        "wingspan_cm": 132,
+        "body_mass_g": 1330,
+        "species": "skua"
+      },
+      {
+        "wingspan_cm": 138,
+        "body_mass_g": 1460,
+        "species": "skua"
+      },
+      {
+        "wingspan_cm": 127,
+        "body_mass_g": 1250,
+        "species": "skua"
+      },
+      {
+        "wingspan_cm": 135,
+        "body_mass_g": 1390,
+        "species": "skua"
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "point",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": {
+            "field": "wingspan_cm"
+          },
+          "y": {
+            "field": "body_mass_g"
+          },
+          "color": {
+            "field": "species"
+          }
+        }
+      }
+    ],
+    "labs": {
+      "title": "Seabird body mass vs wingspan"
+    }
+  },
+  "expectRefusal": false,
+  "notes": "Baseline scatter with a discrete color mapping; 'A against B' must become y=A, x=B."
+}

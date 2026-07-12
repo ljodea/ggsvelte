@@ -1,0 +1,125 @@
+{
+  "id": "02-kelp-smooth-loess",
+  "kind": "chart",
+  "prompt": "Plot frond length against depth for the kelp transect and add a loess smooth trend line.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "depth_m",
+        "type": "quantitative"
+      },
+      {
+        "name": "frond_length_cm",
+        "type": "quantitative"
+      }
+    ],
+    "rowCount": 16
+  },
+  "data": {
+    "main": [
+      {
+        "depth_m": 2,
+        "frond_length_cm": 129.4
+      },
+      {
+        "depth_m": 3,
+        "frond_length_cm": 126.4
+      },
+      {
+        "depth_m": 4,
+        "frond_length_cm": 134.2
+      },
+      {
+        "depth_m": 5,
+        "frond_length_cm": 124.5
+      },
+      {
+        "depth_m": 6,
+        "frond_length_cm": 128.9
+      },
+      {
+        "depth_m": 7,
+        "frond_length_cm": 119.5
+      },
+      {
+        "depth_m": 8,
+        "frond_length_cm": 120.3
+      },
+      {
+        "depth_m": 9,
+        "frond_length_cm": 103.3
+      },
+      {
+        "depth_m": 10,
+        "frond_length_cm": 101
+      },
+      {
+        "depth_m": 11,
+        "frond_length_cm": 85.4
+      },
+      {
+        "depth_m": 12,
+        "frond_length_cm": 81.2
+      },
+      {
+        "depth_m": 13,
+        "frond_length_cm": 60.8
+      },
+      {
+        "depth_m": 14,
+        "frond_length_cm": 56.5
+      },
+      {
+        "depth_m": 15,
+        "frond_length_cm": 40.9
+      },
+      {
+        "depth_m": 16,
+        "frond_length_cm": 38.3
+      },
+      {
+        "depth_m": 17,
+        "frond_length_cm": 21.2
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "point",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": {
+            "field": "depth_m"
+          },
+          "y": {
+            "field": "frond_length_cm"
+          }
+        }
+      },
+      {
+        "geom": "smooth",
+        "stat": "smooth",
+        "position": "identity",
+        "aes": {
+          "x": {
+            "field": "depth_m"
+          },
+          "y": {
+            "field": "frond_length_cm"
+          }
+        },
+        "params": {
+          "method": "loess"
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "Multi-layer point + loess smooth; probes stat smooth with an explicit method."
+}

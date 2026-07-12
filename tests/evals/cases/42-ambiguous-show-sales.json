@@ -1,0 +1,130 @@
+{
+  "id": "42-ambiguous-show-sales",
+  "kind": "adversarial-ambiguous",
+  "prompt": "Show me sales.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "date",
+        "type": "temporal"
+      },
+      {
+        "name": "sales_usd",
+        "type": "quantitative"
+      },
+      {
+        "name": "rep",
+        "type": "nominal",
+        "examples": ["ana", "bo", "cai"]
+      }
+    ],
+    "rowCount": 15
+  },
+  "data": {
+    "main": [
+      {
+        "date": "2026-02-03",
+        "sales_usd": 5500,
+        "rep": "ana"
+      },
+      {
+        "date": "2026-02-04",
+        "sales_usd": 5120,
+        "rep": "bo"
+      },
+      {
+        "date": "2026-02-05",
+        "sales_usd": 5960,
+        "rep": "cai"
+      },
+      {
+        "date": "2026-02-06",
+        "sales_usd": 5470,
+        "rep": "ana"
+      },
+      {
+        "date": "2026-02-07",
+        "sales_usd": 5850,
+        "rep": "bo"
+      },
+      {
+        "date": "2026-02-08",
+        "sales_usd": 6200,
+        "rep": "cai"
+      },
+      {
+        "date": "2026-02-09",
+        "sales_usd": 5820,
+        "rep": "ana"
+      },
+      {
+        "date": "2026-02-10",
+        "sales_usd": 6660,
+        "rep": "bo"
+      },
+      {
+        "date": "2026-02-11",
+        "sales_usd": 6170,
+        "rep": "cai"
+      },
+      {
+        "date": "2026-02-12",
+        "sales_usd": 6550,
+        "rep": "ana"
+      },
+      {
+        "date": "2026-02-13",
+        "sales_usd": 6900,
+        "rep": "bo"
+      },
+      {
+        "date": "2026-02-14",
+        "sales_usd": 6520,
+        "rep": "cai"
+      },
+      {
+        "date": "2026-02-15",
+        "sales_usd": 7360,
+        "rep": "ana"
+      },
+      {
+        "date": "2026-02-16",
+        "sales_usd": 6870,
+        "rep": "bo"
+      },
+      {
+        "date": "2026-02-17",
+        "sales_usd": 7250,
+        "rep": "cai"
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "line",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": {
+            "field": "date"
+          },
+          "y": {
+            "field": "sales_usd"
+          }
+        }
+      }
+    ],
+    "scales": {
+      "x": {
+        "type": "time"
+      }
+    }
+  },
+  "expectRefusal": false,
+  "notes": "Underspecified. With a temporal field present, a sales-over-time line is the most defensible default (vs per-rep bars). The structural threshold (0.8) applies as usual."
+}

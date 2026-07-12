@@ -1,0 +1,81 @@
+{
+  "id": "18-bookings-col-labels",
+  "kind": "chart",
+  "prompt": "Column chart of bookings by quarter, and label each bar with its value.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "quarter",
+        "type": "ordinal",
+        "examples": ["Q1", "Q2", "Q3", "Q4"]
+      },
+      {
+        "name": "bookings",
+        "type": "quantitative"
+      }
+    ],
+    "rowCount": 4
+  },
+  "data": {
+    "main": [
+      {
+        "quarter": "Q1",
+        "bookings": 118
+      },
+      {
+        "quarter": "Q2",
+        "bookings": 134
+      },
+      {
+        "quarter": "Q3",
+        "bookings": 127
+      },
+      {
+        "quarter": "Q4",
+        "bookings": 156
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "col",
+        "stat": "identity",
+        "position": "stack",
+        "aes": {
+          "x": {
+            "field": "quarter"
+          },
+          "y": {
+            "field": "bookings"
+          }
+        }
+      },
+      {
+        "geom": "text",
+        "stat": "identity",
+        "position": "nudge",
+        "positionParams": {
+          "y": 6
+        },
+        "aes": {
+          "x": {
+            "field": "quarter"
+          },
+          "y": {
+            "field": "bookings"
+          },
+          "label": {
+            "field": "bookings"
+          }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "Multi-layer col + text value labels nudged above the bars (position nudge)."
+}

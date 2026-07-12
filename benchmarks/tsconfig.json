@@ -1,0 +1,12 @@
+{
+  // Type context for the benchmark scripts (discovered by oxlint
+  // --type-aware; NOT part of the tsc -b build graph). Imports of the
+  // workspace packages resolve to their built dist/ types — run
+  // `bun run check` first.
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["bun"]
+  },
+  "include": ["./**/*.ts"]
+}

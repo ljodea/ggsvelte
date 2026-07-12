@@ -1,0 +1,98 @@
+{
+  "id": "40-missing-field-date",
+  "kind": "adversarial-missing-field",
+  "prompt": "Line chart of celsius by date.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "recorded_at",
+        "type": "temporal"
+      },
+      {
+        "name": "celsius",
+        "type": "quantitative"
+      }
+    ],
+    "rowCount": 12
+  },
+  "data": {
+    "main": [
+      {
+        "recorded_at": "2026-01-02",
+        "celsius": 12.5
+      },
+      {
+        "recorded_at": "2026-01-03",
+        "celsius": 13.1
+      },
+      {
+        "recorded_at": "2026-01-04",
+        "celsius": 12.8
+      },
+      {
+        "recorded_at": "2026-01-05",
+        "celsius": 14
+      },
+      {
+        "recorded_at": "2026-01-06",
+        "celsius": 15.2
+      },
+      {
+        "recorded_at": "2026-01-07",
+        "celsius": 16.8
+      },
+      {
+        "recorded_at": "2026-01-08",
+        "celsius": 18.1
+      },
+      {
+        "recorded_at": "2026-01-09",
+        "celsius": 17.6
+      },
+      {
+        "recorded_at": "2026-01-10",
+        "celsius": 16.2
+      },
+      {
+        "recorded_at": "2026-01-11",
+        "celsius": 14.9
+      },
+      {
+        "recorded_at": "2026-01-12",
+        "celsius": 13.4
+      },
+      {
+        "recorded_at": "2026-01-13",
+        "celsius": 12.9
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "line",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": {
+            "field": "recorded_at"
+          },
+          "y": {
+            "field": "celsius"
+          }
+        }
+      }
+    ],
+    "scales": {
+      "x": {
+        "type": "time"
+      }
+    }
+  },
+  "expectRefusal": false,
+  "notes": "'date' does not exist; the only temporal field (recorded_at) is the obvious substitute. Refusal-shaped clarification also tolerated."
+}

@@ -1,0 +1,178 @@
+{
+  "id": "10-browser-share-fill",
+  "kind": "chart",
+  "prompt": "Show the share of visits per quarter as a proportion bar chart, stacked by browser.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "quarter",
+        "type": "ordinal",
+        "examples": ["Q1", "Q2", "Q3", "Q4"]
+      },
+      {
+        "name": "browser",
+        "type": "nominal",
+        "examples": ["iris", "comet", "pond"]
+      }
+    ],
+    "rowCount": 32
+  },
+  "data": {
+    "main": [
+      {
+        "quarter": "Q1",
+        "browser": "iris"
+      },
+      {
+        "quarter": "Q1",
+        "browser": "iris"
+      },
+      {
+        "quarter": "Q1",
+        "browser": "iris"
+      },
+      {
+        "quarter": "Q1",
+        "browser": "comet"
+      },
+      {
+        "quarter": "Q1",
+        "browser": "comet"
+      },
+      {
+        "quarter": "Q1",
+        "browser": "pond"
+      },
+      {
+        "quarter": "Q1",
+        "browser": "pond"
+      },
+      {
+        "quarter": "Q1",
+        "browser": "pond"
+      },
+      {
+        "quarter": "Q2",
+        "browser": "iris"
+      },
+      {
+        "quarter": "Q2",
+        "browser": "iris"
+      },
+      {
+        "quarter": "Q2",
+        "browser": "iris"
+      },
+      {
+        "quarter": "Q2",
+        "browser": "comet"
+      },
+      {
+        "quarter": "Q2",
+        "browser": "comet"
+      },
+      {
+        "quarter": "Q2",
+        "browser": "pond"
+      },
+      {
+        "quarter": "Q2",
+        "browser": "pond"
+      },
+      {
+        "quarter": "Q2",
+        "browser": "pond"
+      },
+      {
+        "quarter": "Q3",
+        "browser": "iris"
+      },
+      {
+        "quarter": "Q3",
+        "browser": "iris"
+      },
+      {
+        "quarter": "Q3",
+        "browser": "iris"
+      },
+      {
+        "quarter": "Q3",
+        "browser": "comet"
+      },
+      {
+        "quarter": "Q3",
+        "browser": "comet"
+      },
+      {
+        "quarter": "Q3",
+        "browser": "pond"
+      },
+      {
+        "quarter": "Q3",
+        "browser": "pond"
+      },
+      {
+        "quarter": "Q3",
+        "browser": "pond"
+      },
+      {
+        "quarter": "Q4",
+        "browser": "comet"
+      },
+      {
+        "quarter": "Q4",
+        "browser": "comet"
+      },
+      {
+        "quarter": "Q4",
+        "browser": "iris"
+      },
+      {
+        "quarter": "Q4",
+        "browser": "comet"
+      },
+      {
+        "quarter": "Q4",
+        "browser": "comet"
+      },
+      {
+        "quarter": "Q4",
+        "browser": "pond"
+      },
+      {
+        "quarter": "Q4",
+        "browser": "pond"
+      },
+      {
+        "quarter": "Q4",
+        "browser": "pond"
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "bar",
+        "stat": "count",
+        "position": "fill",
+        "aes": {
+          "x": {
+            "field": "quarter"
+          },
+          "fill": {
+            "field": "browser"
+          },
+          "y": {
+            "stat": "count"
+          }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "Count stat + position fill (proportions); rows are individual visits."
+}

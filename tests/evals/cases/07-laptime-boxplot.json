@@ -1,0 +1,142 @@
+{
+  "id": "07-laptime-boxplot",
+  "kind": "chart",
+  "prompt": "Compare lap seconds across teams with a boxplot per team.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "team",
+        "type": "nominal",
+        "examples": ["falcons", "otters", "wolves"]
+      },
+      {
+        "name": "lap_seconds",
+        "type": "quantitative"
+      }
+    ],
+    "rowCount": 24
+  },
+  "data": {
+    "main": [
+      {
+        "team": "falcons",
+        "lap_seconds": 71.2
+      },
+      {
+        "team": "falcons",
+        "lap_seconds": 70.2
+      },
+      {
+        "team": "falcons",
+        "lap_seconds": 72.4
+      },
+      {
+        "team": "falcons",
+        "lap_seconds": 71.6
+      },
+      {
+        "team": "falcons",
+        "lap_seconds": 69.9
+      },
+      {
+        "team": "falcons",
+        "lap_seconds": 73.3
+      },
+      {
+        "team": "falcons",
+        "lap_seconds": 70.6
+      },
+      {
+        "team": "falcons",
+        "lap_seconds": 71.9
+      },
+      {
+        "team": "otters",
+        "lap_seconds": 73.7
+      },
+      {
+        "team": "otters",
+        "lap_seconds": 72.7
+      },
+      {
+        "team": "otters",
+        "lap_seconds": 74.9
+      },
+      {
+        "team": "otters",
+        "lap_seconds": 74.1
+      },
+      {
+        "team": "otters",
+        "lap_seconds": 72.4
+      },
+      {
+        "team": "otters",
+        "lap_seconds": 75.8
+      },
+      {
+        "team": "otters",
+        "lap_seconds": 73.1
+      },
+      {
+        "team": "otters",
+        "lap_seconds": 74.4
+      },
+      {
+        "team": "wolves",
+        "lap_seconds": 76.2
+      },
+      {
+        "team": "wolves",
+        "lap_seconds": 75.2
+      },
+      {
+        "team": "wolves",
+        "lap_seconds": 77.4
+      },
+      {
+        "team": "wolves",
+        "lap_seconds": 76.6
+      },
+      {
+        "team": "wolves",
+        "lap_seconds": 74.9
+      },
+      {
+        "team": "wolves",
+        "lap_seconds": 78.3
+      },
+      {
+        "team": "wolves",
+        "lap_seconds": 75.6
+      },
+      {
+        "team": "wolves",
+        "lap_seconds": 76.9
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "boxplot",
+        "stat": "boxplot",
+        "position": "dodge",
+        "aes": {
+          "x": {
+            "field": "team"
+          },
+          "y": {
+            "field": "lap_seconds"
+          }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "Boxplot stat over a discrete x; default position is dodge."
+}

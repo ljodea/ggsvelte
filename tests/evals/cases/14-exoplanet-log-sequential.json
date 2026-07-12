@@ -1,0 +1,150 @@
+{
+  "id": "14-exoplanet-log-sequential",
+  "kind": "chart",
+  "prompt": "Scatter planet radius against orbital period on a log x axis, shaded by equilibrium temp.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "orbital_period_days",
+        "type": "quantitative"
+      },
+      {
+        "name": "planet_radius_re",
+        "type": "quantitative"
+      },
+      {
+        "name": "equilibrium_temp_k",
+        "type": "quantitative"
+      }
+    ],
+    "rowCount": 18
+  },
+  "data": {
+    "main": [
+      {
+        "orbital_period_days": 0.8,
+        "planet_radius_re": 1.9,
+        "equilibrium_temp_k": 2100
+      },
+      {
+        "orbital_period_days": 1.6,
+        "planet_radius_re": 1.4,
+        "equilibrium_temp_k": 1750
+      },
+      {
+        "orbital_period_days": 3.5,
+        "planet_radius_re": 2.8,
+        "equilibrium_temp_k": 1300
+      },
+      {
+        "orbital_period_days": 5.2,
+        "planet_radius_re": 1.1,
+        "equilibrium_temp_k": 1100
+      },
+      {
+        "orbital_period_days": 8.9,
+        "planet_radius_re": 3.6,
+        "equilibrium_temp_k": 900
+      },
+      {
+        "orbital_period_days": 14,
+        "planet_radius_re": 2.2,
+        "equilibrium_temp_k": 760
+      },
+      {
+        "orbital_period_days": 22,
+        "planet_radius_re": 4.1,
+        "equilibrium_temp_k": 640
+      },
+      {
+        "orbital_period_days": 37,
+        "planet_radius_re": 1.7,
+        "equilibrium_temp_k": 520
+      },
+      {
+        "orbital_period_days": 61,
+        "planet_radius_re": 3.1,
+        "equilibrium_temp_k": 430
+      },
+      {
+        "orbital_period_days": 95,
+        "planet_radius_re": 2.5,
+        "equilibrium_temp_k": 360
+      },
+      {
+        "orbital_period_days": 140,
+        "planet_radius_re": 5.2,
+        "equilibrium_temp_k": 300
+      },
+      {
+        "orbital_period_days": 230,
+        "planet_radius_re": 1.3,
+        "equilibrium_temp_k": 250
+      },
+      {
+        "orbital_period_days": 370,
+        "planet_radius_re": 4.4,
+        "equilibrium_temp_k": 210
+      },
+      {
+        "orbital_period_days": 590,
+        "planet_radius_re": 2.9,
+        "equilibrium_temp_k": 175
+      },
+      {
+        "orbital_period_days": 900,
+        "planet_radius_re": 6.1,
+        "equilibrium_temp_k": 150
+      },
+      {
+        "orbital_period_days": 1400,
+        "planet_radius_re": 3.8,
+        "equilibrium_temp_k": 125
+      },
+      {
+        "orbital_period_days": 2300,
+        "planet_radius_re": 5.5,
+        "equilibrium_temp_k": 105
+      },
+      {
+        "orbital_period_days": 3600,
+        "planet_radius_re": 4.7,
+        "equilibrium_temp_k": 90
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "point",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": {
+            "field": "orbital_period_days"
+          },
+          "y": {
+            "field": "planet_radius_re"
+          },
+          "color": {
+            "field": "equilibrium_temp_k"
+          }
+        }
+      }
+    ],
+    "scales": {
+      "x": {
+        "type": "log"
+      },
+      "color": {
+        "type": "sequential"
+      }
+    }
+  },
+  "expectRefusal": false,
+  "notes": "Log x + sequential color ramp over a quantitative field, both declared."
+}

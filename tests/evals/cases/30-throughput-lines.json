@@ -1,0 +1,178 @@
+{
+  "id": "30-throughput-lines",
+  "kind": "chart",
+  "prompt": "Line chart of mbps over time, one line per link.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "minute",
+        "type": "temporal"
+      },
+      {
+        "name": "mbps",
+        "type": "quantitative"
+      },
+      {
+        "name": "link",
+        "type": "nominal",
+        "examples": ["fiber-1", "fiber-2", "lte"]
+      }
+    ],
+    "rowCount": 24
+  },
+  "data": {
+    "main": [
+      {
+        "minute": "2026-03-03T09:00:00Z",
+        "link": "fiber-1",
+        "mbps": 852
+      },
+      {
+        "minute": "2026-03-03T09:05:00Z",
+        "link": "fiber-1",
+        "mbps": 822
+      },
+      {
+        "minute": "2026-03-03T09:10:00Z",
+        "link": "fiber-1",
+        "mbps": 865
+      },
+      {
+        "minute": "2026-03-03T09:15:00Z",
+        "link": "fiber-1",
+        "mbps": 832
+      },
+      {
+        "minute": "2026-03-03T09:20:00Z",
+        "link": "fiber-1",
+        "mbps": 870
+      },
+      {
+        "minute": "2026-03-03T09:25:00Z",
+        "link": "fiber-1",
+        "mbps": 818
+      },
+      {
+        "minute": "2026-03-03T09:30:00Z",
+        "link": "fiber-1",
+        "mbps": 855
+      },
+      {
+        "minute": "2026-03-03T09:35:00Z",
+        "link": "fiber-1",
+        "mbps": 844
+      },
+      {
+        "minute": "2026-03-03T09:00:00Z",
+        "link": "fiber-2",
+        "mbps": 802
+      },
+      {
+        "minute": "2026-03-03T09:05:00Z",
+        "link": "fiber-2",
+        "mbps": 772
+      },
+      {
+        "minute": "2026-03-03T09:10:00Z",
+        "link": "fiber-2",
+        "mbps": 815
+      },
+      {
+        "minute": "2026-03-03T09:15:00Z",
+        "link": "fiber-2",
+        "mbps": 782
+      },
+      {
+        "minute": "2026-03-03T09:20:00Z",
+        "link": "fiber-2",
+        "mbps": 820
+      },
+      {
+        "minute": "2026-03-03T09:25:00Z",
+        "link": "fiber-2",
+        "mbps": 768
+      },
+      {
+        "minute": "2026-03-03T09:30:00Z",
+        "link": "fiber-2",
+        "mbps": 805
+      },
+      {
+        "minute": "2026-03-03T09:35:00Z",
+        "link": "fiber-2",
+        "mbps": 794
+      },
+      {
+        "minute": "2026-03-03T09:00:00Z",
+        "link": "lte",
+        "mbps": 107
+      },
+      {
+        "minute": "2026-03-03T09:05:00Z",
+        "link": "lte",
+        "mbps": 77
+      },
+      {
+        "minute": "2026-03-03T09:10:00Z",
+        "link": "lte",
+        "mbps": 120
+      },
+      {
+        "minute": "2026-03-03T09:15:00Z",
+        "link": "lte",
+        "mbps": 87
+      },
+      {
+        "minute": "2026-03-03T09:20:00Z",
+        "link": "lte",
+        "mbps": 125
+      },
+      {
+        "minute": "2026-03-03T09:25:00Z",
+        "link": "lte",
+        "mbps": 73
+      },
+      {
+        "minute": "2026-03-03T09:30:00Z",
+        "link": "lte",
+        "mbps": 110
+      },
+      {
+        "minute": "2026-03-03T09:35:00Z",
+        "link": "lte",
+        "mbps": 99
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "line",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": {
+            "field": "minute"
+          },
+          "y": {
+            "field": "mbps"
+          },
+          "color": {
+            "field": "link"
+          }
+        }
+      }
+    ],
+    "scales": {
+      "x": {
+        "type": "time"
+      }
+    }
+  },
+  "expectRefusal": false,
+  "notes": "Multi-series line via the color channel; one series per category."
+}

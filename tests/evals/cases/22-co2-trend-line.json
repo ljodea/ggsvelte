@@ -1,0 +1,149 @@
+{
+  "id": "22-co2-trend-line",
+  "kind": "chart",
+  "prompt": "Plot the co2 ppm trend over time and title it 'Station record'.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "sample_date",
+        "type": "temporal"
+      },
+      {
+        "name": "co2_ppm",
+        "type": "quantitative"
+      }
+    ],
+    "rowCount": 24
+  },
+  "data": {
+    "main": [
+      {
+        "sample_date": "2024-01-15",
+        "co2_ppm": 425.8
+      },
+      {
+        "sample_date": "2024-02-15",
+        "co2_ppm": 426.6
+      },
+      {
+        "sample_date": "2024-03-15",
+        "co2_ppm": 425.5
+      },
+      {
+        "sample_date": "2024-04-15",
+        "co2_ppm": 424.9
+      },
+      {
+        "sample_date": "2024-05-15",
+        "co2_ppm": 423.6
+      },
+      {
+        "sample_date": "2024-06-15",
+        "co2_ppm": 422.5
+      },
+      {
+        "sample_date": "2024-07-15",
+        "co2_ppm": 422.2
+      },
+      {
+        "sample_date": "2024-08-15",
+        "co2_ppm": 423.3
+      },
+      {
+        "sample_date": "2024-09-15",
+        "co2_ppm": 424.9
+      },
+      {
+        "sample_date": "2024-10-15",
+        "co2_ppm": 426.4
+      },
+      {
+        "sample_date": "2024-11-15",
+        "co2_ppm": 427.4
+      },
+      {
+        "sample_date": "2024-12-15",
+        "co2_ppm": 428.1
+      },
+      {
+        "sample_date": "2025-01-15",
+        "co2_ppm": 428.4
+      },
+      {
+        "sample_date": "2025-02-15",
+        "co2_ppm": 429.3
+      },
+      {
+        "sample_date": "2025-03-15",
+        "co2_ppm": 428.2
+      },
+      {
+        "sample_date": "2025-04-15",
+        "co2_ppm": 427.5
+      },
+      {
+        "sample_date": "2025-05-15",
+        "co2_ppm": 426.2
+      },
+      {
+        "sample_date": "2025-06-15",
+        "co2_ppm": 425.1
+      },
+      {
+        "sample_date": "2025-07-15",
+        "co2_ppm": 424.9
+      },
+      {
+        "sample_date": "2025-08-15",
+        "co2_ppm": 426
+      },
+      {
+        "sample_date": "2025-09-15",
+        "co2_ppm": 427.5
+      },
+      {
+        "sample_date": "2025-10-15",
+        "co2_ppm": 429
+      },
+      {
+        "sample_date": "2025-11-15",
+        "co2_ppm": 430
+      },
+      {
+        "sample_date": "2025-12-15",
+        "co2_ppm": 430.8
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "line",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": {
+            "field": "sample_date"
+          },
+          "y": {
+            "field": "co2_ppm"
+          }
+        }
+      }
+    ],
+    "scales": {
+      "x": {
+        "type": "time"
+      }
+    },
+    "labs": {
+      "title": "Station record"
+    }
+  },
+  "expectRefusal": false,
+  "notes": "Time-series line with a requested title (labs are not part of the rubric)."
+}

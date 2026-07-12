@@ -1,0 +1,155 @@
+{
+  "id": "09-sprout-errorbar",
+  "kind": "chart",
+  "prompt": "Plot mean sprout height with standard error bars per treatment, with the individual points jittered behind.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "treatment",
+        "type": "nominal",
+        "examples": ["control", "compost", "biochar"]
+      },
+      {
+        "name": "sprout_height_cm",
+        "type": "quantitative"
+      }
+    ],
+    "rowCount": 24
+  },
+  "data": {
+    "main": [
+      {
+        "treatment": "control",
+        "sprout_height_cm": 8.4
+      },
+      {
+        "treatment": "control",
+        "sprout_height_cm": 7.4
+      },
+      {
+        "treatment": "control",
+        "sprout_height_cm": 9.1
+      },
+      {
+        "treatment": "control",
+        "sprout_height_cm": 8.2
+      },
+      {
+        "treatment": "control",
+        "sprout_height_cm": 7.1
+      },
+      {
+        "treatment": "control",
+        "sprout_height_cm": 9.6
+      },
+      {
+        "treatment": "control",
+        "sprout_height_cm": 7.8
+      },
+      {
+        "treatment": "control",
+        "sprout_height_cm": 8.5
+      },
+      {
+        "treatment": "compost",
+        "sprout_height_cm": 10.4
+      },
+      {
+        "treatment": "compost",
+        "sprout_height_cm": 9.4
+      },
+      {
+        "treatment": "compost",
+        "sprout_height_cm": 11.1
+      },
+      {
+        "treatment": "compost",
+        "sprout_height_cm": 10.2
+      },
+      {
+        "treatment": "compost",
+        "sprout_height_cm": 9.1
+      },
+      {
+        "treatment": "compost",
+        "sprout_height_cm": 11.6
+      },
+      {
+        "treatment": "compost",
+        "sprout_height_cm": 9.8
+      },
+      {
+        "treatment": "compost",
+        "sprout_height_cm": 10.5
+      },
+      {
+        "treatment": "biochar",
+        "sprout_height_cm": 12.4
+      },
+      {
+        "treatment": "biochar",
+        "sprout_height_cm": 11.4
+      },
+      {
+        "treatment": "biochar",
+        "sprout_height_cm": 13.1
+      },
+      {
+        "treatment": "biochar",
+        "sprout_height_cm": 12.2
+      },
+      {
+        "treatment": "biochar",
+        "sprout_height_cm": 11.1
+      },
+      {
+        "treatment": "biochar",
+        "sprout_height_cm": 13.6
+      },
+      {
+        "treatment": "biochar",
+        "sprout_height_cm": 11.8
+      },
+      {
+        "treatment": "biochar",
+        "sprout_height_cm": 12.5
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "point",
+        "stat": "identity",
+        "position": "jitter",
+        "aes": {
+          "x": {
+            "field": "treatment"
+          },
+          "y": {
+            "field": "sprout_height_cm"
+          }
+        }
+      },
+      {
+        "geom": "errorbar",
+        "stat": "summary",
+        "position": "identity",
+        "aes": {
+          "x": {
+            "field": "treatment"
+          },
+          "y": {
+            "field": "sprout_height_cm"
+          }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "stat summary (mean±se) + jittered raw points; probes the summary stat and jitter."
+}

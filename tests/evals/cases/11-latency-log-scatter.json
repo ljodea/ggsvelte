@@ -1,0 +1,130 @@
+{
+  "id": "11-latency-log-scatter",
+  "kind": "chart",
+  "prompt": "Scatter load ms against page weight, with a log scale on the y axis.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "page_weight_kb",
+        "type": "quantitative"
+      },
+      {
+        "name": "load_ms",
+        "type": "quantitative"
+      }
+    ],
+    "rowCount": 20
+  },
+  "data": {
+    "main": [
+      {
+        "page_weight_kb": 120,
+        "load_ms": 180
+      },
+      {
+        "page_weight_kb": 340,
+        "load_ms": 420
+      },
+      {
+        "page_weight_kb": 90,
+        "load_ms": 130
+      },
+      {
+        "page_weight_kb": 560,
+        "load_ms": 900
+      },
+      {
+        "page_weight_kb": 210,
+        "load_ms": 260
+      },
+      {
+        "page_weight_kb": 780,
+        "load_ms": 1500
+      },
+      {
+        "page_weight_kb": 55,
+        "load_ms": 95
+      },
+      {
+        "page_weight_kb": 430,
+        "load_ms": 610
+      },
+      {
+        "page_weight_kb": 995,
+        "load_ms": 2400
+      },
+      {
+        "page_weight_kb": 150,
+        "load_ms": 210
+      },
+      {
+        "page_weight_kb": 610,
+        "load_ms": 1100
+      },
+      {
+        "page_weight_kb": 260,
+        "load_ms": 330
+      },
+      {
+        "page_weight_kb": 880,
+        "load_ms": 1900
+      },
+      {
+        "page_weight_kb": 70,
+        "load_ms": 110
+      },
+      {
+        "page_weight_kb": 380,
+        "load_ms": 480
+      },
+      {
+        "page_weight_kb": 720,
+        "load_ms": 1300
+      },
+      {
+        "page_weight_kb": 180,
+        "load_ms": 240
+      },
+      {
+        "page_weight_kb": 510,
+        "load_ms": 760
+      },
+      {
+        "page_weight_kb": 300,
+        "load_ms": 390
+      },
+      {
+        "page_weight_kb": 940,
+        "load_ms": 2100
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "point",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": {
+            "field": "page_weight_kb"
+          },
+          "y": {
+            "field": "load_ms"
+          }
+        }
+      }
+    ],
+    "scales": {
+      "y": {
+        "type": "log"
+      }
+    }
+  },
+  "expectRefusal": false,
+  "notes": "Declared log scale on y; all values positive by construction."
+}

@@ -1,0 +1,142 @@
+{
+  "id": "43-ambiguous-compare-teams",
+  "kind": "adversarial-ambiguous",
+  "prompt": "Compare the teams.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "team",
+        "type": "nominal",
+        "examples": ["kites", "orcas", "lynx"]
+      },
+      {
+        "name": "points",
+        "type": "quantitative"
+      }
+    ],
+    "rowCount": 24
+  },
+  "data": {
+    "main": [
+      {
+        "team": "kites",
+        "points": 60
+      },
+      {
+        "team": "kites",
+        "points": 53
+      },
+      {
+        "team": "kites",
+        "points": 66
+      },
+      {
+        "team": "kites",
+        "points": 59
+      },
+      {
+        "team": "kites",
+        "points": 52
+      },
+      {
+        "team": "kites",
+        "points": 68
+      },
+      {
+        "team": "kites",
+        "points": 56
+      },
+      {
+        "team": "kites",
+        "points": 62
+      },
+      {
+        "team": "orcas",
+        "points": 66
+      },
+      {
+        "team": "orcas",
+        "points": 59
+      },
+      {
+        "team": "orcas",
+        "points": 72
+      },
+      {
+        "team": "orcas",
+        "points": 65
+      },
+      {
+        "team": "orcas",
+        "points": 58
+      },
+      {
+        "team": "orcas",
+        "points": 74
+      },
+      {
+        "team": "orcas",
+        "points": 62
+      },
+      {
+        "team": "orcas",
+        "points": 68
+      },
+      {
+        "team": "lynx",
+        "points": 72
+      },
+      {
+        "team": "lynx",
+        "points": 65
+      },
+      {
+        "team": "lynx",
+        "points": 78
+      },
+      {
+        "team": "lynx",
+        "points": 71
+      },
+      {
+        "team": "lynx",
+        "points": 64
+      },
+      {
+        "team": "lynx",
+        "points": 80
+      },
+      {
+        "team": "lynx",
+        "points": 68
+      },
+      {
+        "team": "lynx",
+        "points": 74
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "boxplot",
+        "stat": "boxplot",
+        "position": "dodge",
+        "aes": {
+          "x": {
+            "field": "team"
+          },
+          "y": {
+            "field": "points"
+          }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "Underspecified 'compare'. With repeated observations per team, comparing DISTRIBUTIONS (boxplot) is more defensible than comparing sums/means. Threshold applies as usual."
+}

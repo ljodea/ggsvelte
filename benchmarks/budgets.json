@@ -1,0 +1,23 @@
+{
+  "$comment": "PROVISIONAL budgets (plan M3): measured on an Apple M1 Pro dev machine (darwin arm64, bun 1.3.6) on 2026-07-11 via `bun run bench:json`; budget = median * 1.5 headroom, rounded up to ~2 significant figures. Re-baseline on the CI runner when a remote exists (plan M3->M4). Canvas workloads measure JS command-generation cost against a stub 2d context (bun has no raster) — see workloads.ts. Keys must exactly match the workload ids emitted by bench-json.ts; check-budgets.ts asserts coverage in both directions.",
+  "budgets": {
+    "pipeline scatter 1k": { "budgetMs": 2.9 },
+    "svg render scatter 1k": { "budgetMs": 3.4 },
+    "pipeline scatter 10k": { "budgetMs": 12 },
+    "svg render scatter 10k": { "budgetMs": 15 },
+    "pipeline scatter 100k": { "budgetMs": 88 },
+    "svg render scatter 100k": { "budgetMs": 130 },
+    "pipeline stacked-bars 50x4": { "budgetMs": 1.1 },
+    "svg render stacked-bars 50x4": { "budgetMs": 1.3 },
+    "pipeline line-series 10x10k": { "budgetMs": 87 },
+    "svg render line-series 10x10k": { "budgetMs": 120 },
+    "pipeline faceted-bars 50 panels": { "budgetMs": 20 },
+    "svg render faceted-bars 50 panels": { "budgetMs": 20 },
+    "canvas cold scatter 100k": { "budgetMs": 130 },
+    "canvas redraw scatter 100k": { "budgetMs": 0.87 },
+    "hit-index build 100k": { "budgetMs": 31 },
+    "pipeline histogram 100k": { "budgetMs": 30 },
+    "pipeline loess 5k": { "budgetMs": 710 },
+    "pipeline density 100k": { "budgetMs": 150 }
+  }
+}

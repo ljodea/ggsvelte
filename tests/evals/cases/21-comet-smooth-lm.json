@@ -1,0 +1,125 @@
+{
+  "id": "21-comet-smooth-lm",
+  "kind": "chart",
+  "prompt": "Scatter tail length against perihelion distance and fit a straight regression line with lm.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "perihelion_au",
+        "type": "quantitative"
+      },
+      {
+        "name": "tail_length_mkm",
+        "type": "quantitative"
+      }
+    ],
+    "rowCount": 16
+  },
+  "data": {
+    "main": [
+      {
+        "perihelion_au": 0.3,
+        "tail_length_mkm": 42
+      },
+      {
+        "perihelion_au": 0.5,
+        "tail_length_mkm": 38
+      },
+      {
+        "perihelion_au": 0.7,
+        "tail_length_mkm": 33
+      },
+      {
+        "perihelion_au": 0.9,
+        "tail_length_mkm": 30
+      },
+      {
+        "perihelion_au": 1.1,
+        "tail_length_mkm": 27
+      },
+      {
+        "perihelion_au": 1.3,
+        "tail_length_mkm": 26
+      },
+      {
+        "perihelion_au": 1.5,
+        "tail_length_mkm": 22
+      },
+      {
+        "perihelion_au": 1.7,
+        "tail_length_mkm": 21
+      },
+      {
+        "perihelion_au": 1.9,
+        "tail_length_mkm": 18
+      },
+      {
+        "perihelion_au": 2.1,
+        "tail_length_mkm": 17
+      },
+      {
+        "perihelion_au": 2.3,
+        "tail_length_mkm": 15
+      },
+      {
+        "perihelion_au": 2.5,
+        "tail_length_mkm": 12
+      },
+      {
+        "perihelion_au": 2.7,
+        "tail_length_mkm": 11
+      },
+      {
+        "perihelion_au": 2.9,
+        "tail_length_mkm": 9
+      },
+      {
+        "perihelion_au": 3.1,
+        "tail_length_mkm": 8
+      },
+      {
+        "perihelion_au": 3.3,
+        "tail_length_mkm": 5
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "point",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": {
+            "field": "perihelion_au"
+          },
+          "y": {
+            "field": "tail_length_mkm"
+          }
+        }
+      },
+      {
+        "geom": "smooth",
+        "stat": "smooth",
+        "position": "identity",
+        "aes": {
+          "x": {
+            "field": "perihelion_au"
+          },
+          "y": {
+            "field": "tail_length_mkm"
+          }
+        },
+        "params": {
+          "method": "lm"
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "Smooth with the lm method (vs loess in 02) — both smooth methods covered."
+}

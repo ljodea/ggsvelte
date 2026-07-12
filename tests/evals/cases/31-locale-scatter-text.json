@@ -1,0 +1,129 @@
+{
+  "id": "31-locale-scatter-text",
+  "kind": "chart",
+  "prompt": "Scatter conversion rate against bounce rate and label each point with its locale.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "bounce_rate",
+        "type": "quantitative"
+      },
+      {
+        "name": "conversion_rate",
+        "type": "quantitative"
+      },
+      {
+        "name": "locale",
+        "type": "nominal",
+        "examples": ["de-DE", "fr-FR", "ja-JP"]
+      }
+    ],
+    "rowCount": 12
+  },
+  "data": {
+    "main": [
+      {
+        "bounce_rate": 28,
+        "conversion_rate": 4.1,
+        "locale": "de-DE"
+      },
+      {
+        "bounce_rate": 35,
+        "conversion_rate": 3.2,
+        "locale": "fr-FR"
+      },
+      {
+        "bounce_rate": 52,
+        "conversion_rate": 1.4,
+        "locale": "ja-JP"
+      },
+      {
+        "bounce_rate": 31,
+        "conversion_rate": 3.8,
+        "locale": "nl-NL"
+      },
+      {
+        "bounce_rate": 44,
+        "conversion_rate": 2.2,
+        "locale": "es-ES"
+      },
+      {
+        "bounce_rate": 26,
+        "conversion_rate": 4.6,
+        "locale": "sv-SE"
+      },
+      {
+        "bounce_rate": 58,
+        "conversion_rate": 1.1,
+        "locale": "ko-KR"
+      },
+      {
+        "bounce_rate": 39,
+        "conversion_rate": 2.9,
+        "locale": "it-IT"
+      },
+      {
+        "bounce_rate": 47,
+        "conversion_rate": 1.9,
+        "locale": "pt-BR"
+      },
+      {
+        "bounce_rate": 33,
+        "conversion_rate": 3.5,
+        "locale": "en-GB"
+      },
+      {
+        "bounce_rate": 55,
+        "conversion_rate": 1.3,
+        "locale": "zh-TW"
+      },
+      {
+        "bounce_rate": 41,
+        "conversion_rate": 2.5,
+        "locale": "pl-PL"
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "point",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": {
+            "field": "bounce_rate"
+          },
+          "y": {
+            "field": "conversion_rate"
+          }
+        }
+      },
+      {
+        "geom": "text",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": {
+            "field": "bounce_rate"
+          },
+          "y": {
+            "field": "conversion_rate"
+          },
+          "label": {
+            "field": "locale"
+          }
+        },
+        "params": {
+          "dy": -8
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "Point + text label layer sharing x/y; label channel mapped to a nominal field."
+}

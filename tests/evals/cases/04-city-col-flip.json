@@ -1,0 +1,81 @@
+{
+  "id": "04-city-col-flip",
+  "kind": "chart",
+  "prompt": "Give me a horizontal bar chart of units sold per city.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "city",
+        "type": "nominal",
+        "examples": ["Porto", "Lyon", "Graz"]
+      },
+      {
+        "name": "units_sold",
+        "type": "quantitative"
+      }
+    ],
+    "rowCount": 8
+  },
+  "data": {
+    "main": [
+      {
+        "city": "Porto",
+        "units_sold": 412
+      },
+      {
+        "city": "Lyon",
+        "units_sold": 380
+      },
+      {
+        "city": "Graz",
+        "units_sold": 295
+      },
+      {
+        "city": "Malmo",
+        "units_sold": 260
+      },
+      {
+        "city": "Leeds",
+        "units_sold": 505
+      },
+      {
+        "city": "Bilbao",
+        "units_sold": 218
+      },
+      {
+        "city": "Utrecht",
+        "units_sold": 342
+      },
+      {
+        "city": "Tampere",
+        "units_sold": 199
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "col",
+        "stat": "identity",
+        "position": "stack",
+        "aes": {
+          "x": {
+            "field": "city"
+          },
+          "y": {
+            "field": "units_sold"
+          }
+        }
+      }
+    ],
+    "coord": {
+      "type": "flip"
+    }
+  },
+  "expectRefusal": false,
+  "notes": "Horizontal bars = geom col + coord flip (x stays the category); pre-computed heights mean col, not bar."
+}

@@ -1,0 +1,77 @@
+/**
+ * Prompt construction for the NL→spec eval harness.
+ *
+ * The system prompt carries: the role, the emit-JSON-only contract, a compact
+ * grammar cheat-sheet (canonical channel forms, geoms, stat/position
+ * defaults, facet/coord/scales shapes), the graceful-refusal contract, and
+ * the repair instruction. The full JSON Schema (packages/spec/schema/v0.json)
+ * is deliberately NOT inlined — it is too large for an eval prompt; the
+ * cheat-sheet plus validator repair round covers the same ground.
+ *
+ * The user prompt is the case's natural-language request plus the serialized
+ * DataProfile on a single marked line (MockResponder parses that line back).
+ */
+import type { DataProfile, SpecError } from "@ggsvelte/spec";
+
+export const PROFILE_MARKER = "DataProfile (JSON):";
+export const REPAIR_MARKER = "VALIDATION ERRORS (SpecError JSON):";
+
+export function buildSystemPrompt(): string {
+  return `You are a chart-spec compiler. Turn the user's natural-language request plus a DataProfile into ONE ggsvelte PortableSpec, as JSON.
+
+OUTPUT CONTRACT
+- Reply with a single JSON object and NOTHING else: no prose, no markdown fences.
+- The spec is strict JSON. A JSON Schema for it exists (ggsvelte spec v0), but this cheat-sheet is authoritative for you.
+- Reference the caller's data with "data": {"name": "main"} — the harness supplies the rows out of band.
+
+GRAMMAR CHEAT-SHEET
+- Top level: { "data": {"name":"main"}, "layers": [...], "facet"?, "coord"?, "scales"?, "labs"? }.
+- Channels use CANONICAL forms only — NEVER bare strings:
+    {"field": "column"}   map a data column
+    {"value": 3}          constant ({"value": "red"} for literal colors)
+    {"stat": "count"}     a stat-computed column
+    null                  unset an inherited channel
+- Channel names: x, y, color, fill, size, linewidth, alpha, group, label, weight, ymin, ymax.
+- Layers: { "geom": ..., "stat"?, "position"?, "aes": {...}, "params"?, "positionParams"? }.
+- Geoms: point, line, col, bar, histogram, area, rule, text, smooth, boxplot, density, errorbar.
+- Stat defaults per geom (omit to accept): bar→count, histogram→bin, smooth→smooth, boxplot→boxplot, density→density, everything else→identity.
+- Position defaults: bar/histogram/col/area→stack, boxplot→dodge, else identity. Alternatives: fill (proportions), dodge (side by side), jitter (points; positionParams {width,height,seed}), nudge (text; positionParams {x,y}).
+- bar COUNTS rows (never map aes.y); col draws pre-computed heights (map aes.y). histogram bins a continuous x (params: bins | binwidth).
+- smooth params: {"method": "lm"|"loess", "se": bool, "span"?}. errorbar with "stat":"summary" maps x+y and computes mean±se (params fun/funMin/funMax); with identity stat map x+ymin+ymax.
+- rule annotation form: params.xintercept / params.yintercept (numbers or ISO dates), NO aes.x/aes.y on that layer. text needs aes x, y, label.
+- Facet: {"wrap": {"field": f}, "ncol"?, "scales"?: "fixed"|"free"|"free_x"|"free_y"} OR grid {"rows": {"field": f}, "cols": {"field": g}} — never both forms.
+- Coord: {"type": "flip"} makes horizontal charts (still map x=category, y=value).
+- Scales: {"x"|"y": {"type": "linear"|"log"|"time"|"band", "domain"?, "nice"?, "zero"?}, "color"|"fill": {"type": "ordinal"|"sequential", "range"?}}. Use "time" for temporal fields, "log" only for positive quantitative fields, "sequential" only for quantitative color/fill.
+- Labs: {"title", "subtitle", "caption", "x", "y", "color", "fill"} — plain strings.
+- Only map fields that exist in the DataProfile, with their exact names.
+
+REFUSAL CONTRACT
+If the request needs a chart type outside the geoms above (maps, 3D, networks, ...), or is unanswerable from the profile, reply instead with exactly:
+  {"unsupported": "<one-sentence reason>", "closestAlternative": <a supported PortableSpec or null>}
+
+REPAIR
+If a follow-up message reports validation errors, each error may include fix.example — apply it. Return the corrected complete JSON spec only.`;
+}
+
+export function buildUserPrompt(prompt: string, profile: DataProfile): string {
+  return `${prompt}\n\n${PROFILE_MARKER} ${JSON.stringify(profile)}`;
+}
+
+/** The one-round repair prompt: original request + the SpecError JSON. */
+export function buildRepairPrompt(
+  userPrompt: string,
+  previousReply: string,
+  errors: readonly SpecError[],
+): string {
+  return `${userPrompt}
+
+Your previous spec failed validation.
+
+PREVIOUS SPEC:
+${previousReply}
+
+${REPAIR_MARKER}
+${JSON.stringify(errors, null, 2)}
+
+Errors include fix.example — apply the fixes and reply with the corrected complete JSON spec only.`;
+}

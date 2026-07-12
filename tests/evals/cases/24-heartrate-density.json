@@ -1,0 +1,119 @@
+{
+  "id": "24-heartrate-density",
+  "kind": "chart",
+  "prompt": "What's the density of resting hr across the roster?",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "resting_hr",
+        "type": "quantitative"
+      }
+    ],
+    "rowCount": 26
+  },
+  "data": {
+    "main": [
+      {
+        "resting_hr": 44
+      },
+      {
+        "resting_hr": 46
+      },
+      {
+        "resting_hr": 47
+      },
+      {
+        "resting_hr": 48
+      },
+      {
+        "resting_hr": 49
+      },
+      {
+        "resting_hr": 50
+      },
+      {
+        "resting_hr": 50
+      },
+      {
+        "resting_hr": 51
+      },
+      {
+        "resting_hr": 52
+      },
+      {
+        "resting_hr": 52
+      },
+      {
+        "resting_hr": 53
+      },
+      {
+        "resting_hr": 53
+      },
+      {
+        "resting_hr": 54
+      },
+      {
+        "resting_hr": 54
+      },
+      {
+        "resting_hr": 55
+      },
+      {
+        "resting_hr": 55
+      },
+      {
+        "resting_hr": 56
+      },
+      {
+        "resting_hr": 57
+      },
+      {
+        "resting_hr": 57
+      },
+      {
+        "resting_hr": 58
+      },
+      {
+        "resting_hr": 59
+      },
+      {
+        "resting_hr": 60
+      },
+      {
+        "resting_hr": 61
+      },
+      {
+        "resting_hr": 62
+      },
+      {
+        "resting_hr": 64
+      },
+      {
+        "resting_hr": 66
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "density",
+        "stat": "density",
+        "position": "identity",
+        "aes": {
+          "x": {
+            "field": "resting_hr"
+          },
+          "y": {
+            "stat": "density"
+          }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "Single kernel-density curve; y is stat-computed."
+}

@@ -1,0 +1,20 @@
+{
+  "name": "@ggsvelte-bench/benchmarks",
+  "version": "0.0.0",
+  "private": true,
+  "description": "mitata benchmarks for the ggsvelte pipeline + SVG renderer (plan: instrumented from the walking skeleton). `bun run bench` for the full suite, `bun run bench:smoke` for the CI smoke (1k only), `bun run bench:json` to emit bench-results.json (repo root), `bun run bench:budgets` to gate it against budgets.json (M3).",
+  "type": "module",
+  "scripts": {
+    "bench": "bun run pipeline.bench.ts",
+    "bench:smoke": "BENCH_SMOKE=1 bun run pipeline.bench.ts",
+    "bench:json": "bun run bench-json.ts",
+    "bench:budgets": "bun run check-budgets.ts"
+  },
+  "dependencies": {
+    "@ggsvelte/core": "workspace:*",
+    "@ggsvelte/spec": "workspace:*"
+  },
+  "devDependencies": {
+    "mitata": "^1.0.34"
+  }
+}

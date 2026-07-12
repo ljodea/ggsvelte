@@ -1,0 +1,23 @@
+{
+  "id": "37-choropleth-unsupported",
+  "kind": "adversarial-unsupported",
+  "prompt": "Draw a choropleth map of revenue by US state.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "state",
+        "type": "nominal",
+        "examples": ["CA", "TX", "NY"]
+      },
+      {
+        "name": "revenue",
+        "type": "quantitative"
+      }
+    ],
+    "rowCount": 50
+  },
+  "data": null,
+  "gold": null,
+  "expectRefusal": true,
+  "notes": "Geographic choropleth is outside the geom set; the correct behavior is the documented refusal shape (a col chart of revenue by state is a reasonable closestAlternative)."
+}

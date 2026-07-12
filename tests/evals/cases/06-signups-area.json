@@ -1,0 +1,90 @@
+{
+  "id": "06-signups-area",
+  "kind": "chart",
+  "prompt": "Chart weekly signups as an area chart.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "week",
+        "type": "temporal"
+      },
+      {
+        "name": "signups",
+        "type": "quantitative"
+      }
+    ],
+    "rowCount": 10
+  },
+  "data": {
+    "main": [
+      {
+        "week": "2026-01-01",
+        "signups": 180
+      },
+      {
+        "week": "2026-01-04",
+        "signups": 205
+      },
+      {
+        "week": "2026-01-07",
+        "signups": 197
+      },
+      {
+        "week": "2026-01-10",
+        "signups": 240
+      },
+      {
+        "week": "2026-01-13",
+        "signups": 262
+      },
+      {
+        "week": "2026-01-16",
+        "signups": 251
+      },
+      {
+        "week": "2026-01-19",
+        "signups": 289
+      },
+      {
+        "week": "2026-01-22",
+        "signups": 301
+      },
+      {
+        "week": "2026-01-25",
+        "signups": 318
+      },
+      {
+        "week": "2026-01-28",
+        "signups": 340
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "area",
+        "stat": "identity",
+        "position": "stack",
+        "aes": {
+          "x": {
+            "field": "week"
+          },
+          "y": {
+            "field": "signups"
+          }
+        }
+      }
+    ],
+    "scales": {
+      "x": {
+        "type": "time"
+      }
+    }
+  },
+  "expectRefusal": false,
+  "notes": "Single-series area over a temporal x; area defaults to position stack."
+}

@@ -1,0 +1,133 @@
+{
+  "id": "19-temp-threshold-rule",
+  "kind": "chart",
+  "prompt": "Line chart over test cycle showing temperature c, with a reference line at 85.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "cycle",
+        "type": "quantitative"
+      },
+      {
+        "name": "temperature_c",
+        "type": "quantitative"
+      }
+    ],
+    "rowCount": 20
+  },
+  "data": {
+    "main": [
+      {
+        "cycle": 1,
+        "temperature_c": 62
+      },
+      {
+        "cycle": 2,
+        "temperature_c": 65
+      },
+      {
+        "cycle": 3,
+        "temperature_c": 67
+      },
+      {
+        "cycle": 4,
+        "temperature_c": 70
+      },
+      {
+        "cycle": 5,
+        "temperature_c": 72
+      },
+      {
+        "cycle": 6,
+        "temperature_c": 75
+      },
+      {
+        "cycle": 7,
+        "temperature_c": 77
+      },
+      {
+        "cycle": 8,
+        "temperature_c": 79
+      },
+      {
+        "cycle": 9,
+        "temperature_c": 80
+      },
+      {
+        "cycle": 10,
+        "temperature_c": 82
+      },
+      {
+        "cycle": 11,
+        "temperature_c": 83
+      },
+      {
+        "cycle": 12,
+        "temperature_c": 84
+      },
+      {
+        "cycle": 13,
+        "temperature_c": 86
+      },
+      {
+        "cycle": 14,
+        "temperature_c": 87
+      },
+      {
+        "cycle": 15,
+        "temperature_c": 88
+      },
+      {
+        "cycle": 16,
+        "temperature_c": 87
+      },
+      {
+        "cycle": 17,
+        "temperature_c": 85
+      },
+      {
+        "cycle": 18,
+        "temperature_c": 83
+      },
+      {
+        "cycle": 19,
+        "temperature_c": 81
+      },
+      {
+        "cycle": 20,
+        "temperature_c": 78
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "line",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": {
+            "field": "cycle"
+          },
+          "y": {
+            "field": "temperature_c"
+          }
+        }
+      },
+      {
+        "geom": "rule",
+        "stat": "identity",
+        "position": "identity",
+        "params": {
+          "yintercept": 85
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "Annotation-form rule (fixed yintercept, inherits NO aes) layered over a line."
+}

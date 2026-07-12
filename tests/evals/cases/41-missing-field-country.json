@@ -1,0 +1,151 @@
+{
+  "id": "41-missing-field-country",
+  "kind": "adversarial-missing-field",
+  "prompt": "How many orders per country? A simple tally chart.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "region",
+        "type": "nominal",
+        "examples": ["EU", "NA", "APAC"]
+      },
+      {
+        "name": "payment",
+        "type": "nominal",
+        "examples": ["card", "invoice"]
+      }
+    ],
+    "rowCount": 26
+  },
+  "data": {
+    "main": [
+      {
+        "region": "EU",
+        "payment": "invoice"
+      },
+      {
+        "region": "EU",
+        "payment": "card"
+      },
+      {
+        "region": "EU",
+        "payment": "card"
+      },
+      {
+        "region": "EU",
+        "payment": "invoice"
+      },
+      {
+        "region": "EU",
+        "payment": "card"
+      },
+      {
+        "region": "EU",
+        "payment": "card"
+      },
+      {
+        "region": "EU",
+        "payment": "invoice"
+      },
+      {
+        "region": "EU",
+        "payment": "card"
+      },
+      {
+        "region": "EU",
+        "payment": "card"
+      },
+      {
+        "region": "EU",
+        "payment": "invoice"
+      },
+      {
+        "region": "EU",
+        "payment": "card"
+      },
+      {
+        "region": "NA",
+        "payment": "invoice"
+      },
+      {
+        "region": "NA",
+        "payment": "card"
+      },
+      {
+        "region": "NA",
+        "payment": "card"
+      },
+      {
+        "region": "NA",
+        "payment": "invoice"
+      },
+      {
+        "region": "NA",
+        "payment": "card"
+      },
+      {
+        "region": "NA",
+        "payment": "card"
+      },
+      {
+        "region": "NA",
+        "payment": "invoice"
+      },
+      {
+        "region": "NA",
+        "payment": "card"
+      },
+      {
+        "region": "NA",
+        "payment": "card"
+      },
+      {
+        "region": "APAC",
+        "payment": "invoice"
+      },
+      {
+        "region": "APAC",
+        "payment": "card"
+      },
+      {
+        "region": "APAC",
+        "payment": "card"
+      },
+      {
+        "region": "APAC",
+        "payment": "invoice"
+      },
+      {
+        "region": "APAC",
+        "payment": "card"
+      },
+      {
+        "region": "APAC",
+        "payment": "card"
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "bar",
+        "stat": "count",
+        "position": "stack",
+        "aes": {
+          "x": {
+            "field": "region"
+          },
+          "y": {
+            "stat": "count"
+          }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "'country' is absent; region is the closest real field for a count bar. Refusal-shaped clarification also tolerated."
+}

@@ -1,0 +1,103 @@
+{
+  "id": "28-no2-errorbar-identity",
+  "kind": "chart",
+  "prompt": "For each station plot the mean no2 as a point with error bars from lo to hi.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "station",
+        "type": "nominal",
+        "examples": ["dock", "ring-road", "park"]
+      },
+      {
+        "name": "mean_no2",
+        "type": "quantitative"
+      },
+      {
+        "name": "lo",
+        "type": "quantitative"
+      },
+      {
+        "name": "hi",
+        "type": "quantitative"
+      }
+    ],
+    "rowCount": 5
+  },
+  "data": {
+    "main": [
+      {
+        "station": "dock",
+        "mean_no2": 41,
+        "lo": 36,
+        "hi": 46
+      },
+      {
+        "station": "ring-road",
+        "mean_no2": 58,
+        "lo": 52,
+        "hi": 64
+      },
+      {
+        "station": "park",
+        "mean_no2": 19,
+        "lo": 16,
+        "hi": 22
+      },
+      {
+        "station": "school",
+        "mean_no2": 33,
+        "lo": 29,
+        "hi": 37
+      },
+      {
+        "station": "quay",
+        "mean_no2": 47,
+        "lo": 42,
+        "hi": 52
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "point",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": {
+            "field": "station"
+          },
+          "y": {
+            "field": "mean_no2"
+          }
+        }
+      },
+      {
+        "geom": "errorbar",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": {
+            "field": "station"
+          },
+          "y": {
+            "field": "mean_no2"
+          },
+          "ymin": {
+            "field": "lo"
+          },
+          "ymax": {
+            "field": "hi"
+          }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "Identity-stat errorbar with pre-computed ymin/ymax bounds (vs the summary stat in 09). Deliberately hard for the keyword mock."
+}

@@ -1,0 +1,179 @@
+{
+  "id": "27-humidity-hist-facet",
+  "kind": "chart",
+  "prompt": "Histogram of humidity pct, faceted by season.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "humidity_pct",
+        "type": "quantitative"
+      },
+      {
+        "name": "season",
+        "type": "nominal",
+        "examples": ["wet", "dry"]
+      }
+    ],
+    "rowCount": 32
+  },
+  "data": {
+    "main": [
+      {
+        "season": "wet",
+        "humidity_pct": 68
+      },
+      {
+        "season": "wet",
+        "humidity_pct": 70
+      },
+      {
+        "season": "wet",
+        "humidity_pct": 71
+      },
+      {
+        "season": "wet",
+        "humidity_pct": 73
+      },
+      {
+        "season": "wet",
+        "humidity_pct": 74
+      },
+      {
+        "season": "wet",
+        "humidity_pct": 75
+      },
+      {
+        "season": "wet",
+        "humidity_pct": 76
+      },
+      {
+        "season": "wet",
+        "humidity_pct": 76
+      },
+      {
+        "season": "wet",
+        "humidity_pct": 77
+      },
+      {
+        "season": "wet",
+        "humidity_pct": 78
+      },
+      {
+        "season": "wet",
+        "humidity_pct": 79
+      },
+      {
+        "season": "wet",
+        "humidity_pct": 80
+      },
+      {
+        "season": "wet",
+        "humidity_pct": 81
+      },
+      {
+        "season": "wet",
+        "humidity_pct": 83
+      },
+      {
+        "season": "wet",
+        "humidity_pct": 85
+      },
+      {
+        "season": "wet",
+        "humidity_pct": 88
+      },
+      {
+        "season": "dry",
+        "humidity_pct": 34
+      },
+      {
+        "season": "dry",
+        "humidity_pct": 36
+      },
+      {
+        "season": "dry",
+        "humidity_pct": 37
+      },
+      {
+        "season": "dry",
+        "humidity_pct": 39
+      },
+      {
+        "season": "dry",
+        "humidity_pct": 40
+      },
+      {
+        "season": "dry",
+        "humidity_pct": 41
+      },
+      {
+        "season": "dry",
+        "humidity_pct": 42
+      },
+      {
+        "season": "dry",
+        "humidity_pct": 42
+      },
+      {
+        "season": "dry",
+        "humidity_pct": 43
+      },
+      {
+        "season": "dry",
+        "humidity_pct": 44
+      },
+      {
+        "season": "dry",
+        "humidity_pct": 45
+      },
+      {
+        "season": "dry",
+        "humidity_pct": 46
+      },
+      {
+        "season": "dry",
+        "humidity_pct": 47
+      },
+      {
+        "season": "dry",
+        "humidity_pct": 49
+      },
+      {
+        "season": "dry",
+        "humidity_pct": 51
+      },
+      {
+        "season": "dry",
+        "humidity_pct": 54
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "bar",
+        "stat": "bin",
+        "position": "stack",
+        "aes": {
+          "x": {
+            "field": "humidity_pct"
+          },
+          "y": {
+            "stat": "count"
+          }
+        }
+      }
+    ],
+    "facet": {
+      "wrap": {
+        "field": "season"
+      }
+    }
+  },
+  "expectRefusal": false,
+  "notes": "Bin stat inside facet panels (facets partition before stats run)."
+}
