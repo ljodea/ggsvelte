@@ -14,9 +14,12 @@
  *
  * The table is environment-specific: it encodes the glyph advances of the
  * first resolved font in DEFAULT_FONT_STACK on the machine/container that
- * generated it. The production table must be generated inside the pinned
- * Playwright container (or against a self-hosted font) — this spike's table
- * was generated on macOS Chromium (Helvetica), 2026-07-10.
+ * generated it. CI runs this suite only inside the pinned Playwright
+ * container, so the checked-in table MUST match that environment: this
+ * table was generated inside mcr.microsoft.com/playwright:v1.61.1-noble
+ * Chromium (Arial resolves to Liberation Sans), 2026-07-11. Running the
+ * suite on a bare macOS host (Helvetica) will report staleness — that is
+ * expected; regenerate inside the container only.
  */
 import type { MetricsTable } from './measure.js';
 import { DEFAULT_FONT_STACK } from './measure.js';
@@ -24,8 +27,8 @@ import { DEFAULT_FONT_STACK } from './measure.js';
 export const FONT_METRICS: MetricsTable = {
   fontStack: DEFAULT_FONT_STACK,
   refSize: 100,
-  ascent: 92,
-  descent: 23,
+  ascent: 91,
+  descent: 21,
   defaultAdvance: 55.615234375,
   advances: {
     '0': 55.615234375,
@@ -138,7 +141,7 @@ export const FONT_METRICS: MetricsTable = {
     '\u00AC': 58.3984375,
     '\u00AD': 0,
     '\u00AE': 73.681640625,
-    '\u00AF': 33.30078125,
+    '\u00AF': 55.224609375,
     '\u00B0': 39.990234375,
     '\u00B1': 54.8828125,
     '\u00B2': 33.30078125,
@@ -146,7 +149,7 @@ export const FONT_METRICS: MetricsTable = {
     '\u00B4': 33.30078125,
     '\u00B5': 57.6171875,
     '\u00B6': 53.7109375,
-    '\u00B7': 27.783203125,
+    '\u00B7': 33.30078125,
     '\u00B8': 33.30078125,
     '\u00B9': 33.30078125,
     '\u00BA': 36.5234375,
@@ -219,7 +222,7 @@ export const FONT_METRICS: MetricsTable = {
     '\u00FD': 50,
     '\u00FE': 55.615234375,
     '\u00FF': 50,
-    '\u2009': 13.916015625,
+    '\u2009': 20.01953125,
     '\u2013': 55.615234375,
     '\u2014': 100,
     '\u2018': 22.216796875,
@@ -230,6 +233,6 @@ export const FONT_METRICS: MetricsTable = {
     '\u2212': 58.3984375,
     '\u2264': 54.8828125,
     '\u2265': 54.8828125,
-    '\u20AC': 74.4140625,
+    '\u20AC': 55.615234375,
   },
 };
