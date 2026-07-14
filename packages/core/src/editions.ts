@@ -26,7 +26,7 @@ import type { ThemeName } from "@ggsvelte/spec";
 import { VIRIDIS_RAMP_10 } from "./scales/color.js";
 import { CATEGORICAL_PALETTE_10 } from "./scales/train.js";
 import type { ThemeTokens } from "./theme.js";
-import { BUILTIN_THEMES } from "./theme.js";
+import { BUILTIN_THEMES, LEGACY_BUILTIN_THEMES } from "./theme.js";
 
 /** The default-aesthetics bundle one edition pins. */
 export interface EditionDefaults {
@@ -41,6 +41,11 @@ export interface EditionDefaults {
 /** Editions known to this build. Edition 1 = the 0.1.0 defaults. */
 export const EDITION_DEFAULTS: Readonly<Record<number, EditionDefaults>> = Object.freeze({
   1: Object.freeze({
+    categoricalPalette: CATEGORICAL_PALETTE_10,
+    sequentialRamp: VIRIDIS_RAMP_10,
+    themes: LEGACY_BUILTIN_THEMES,
+  }),
+  2: Object.freeze({
     categoricalPalette: CATEGORICAL_PALETTE_10,
     sequentialRamp: VIRIDIS_RAMP_10,
     themes: BUILTIN_THEMES,

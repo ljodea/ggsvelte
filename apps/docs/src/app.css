@@ -10,11 +10,8 @@
  *    freeze all transitions/animations, and pin the fixed-size
  *    .gg-example-frame to the top-left corner for screenshotting.
  *
- * FONT: system-font stack for the page; the chart SVG pins
- * "Helvetica, Arial, sans-serif" (set by the renderer) so that text metrics
- * track decision 0003's Helvetica-based FONT_METRICS table. In the pinned VR
- * container this resolves to Liberation Sans (Arial-metric-compatible).
- * See docs/decisions/0009 for the VR implications.
+ * FONT: the chart component self-hosts Roboto Condensed and waits on
+ * document.fonts.ready in VR. The page chrome keeps a native UI stack.
  */
 
 :root {
@@ -39,15 +36,27 @@
 
 /* Chart theme roles (mirror BUILTIN_THEMES in @ggsvelte/core). */
 :root[data-theme="light"] {
-  --gg-ink: #1f2328;
-  --gg-grid: rgba(31, 35, 40, 0.14);
-  --gg-accent: #4269d0;
+  --gg-ink: #262626;
+  --gg-paper: #ffffff;
+  --gg-panel: #ffffff;
+  --gg-grid: #cccccc;
+  --gg-accent: #4385be;
+  --gg-axisText: #4d4d4d;
+  --gg-axisLine: #cccccc;
+  --gg-tickColor: #cccccc;
+  --gg-panelBorder: #cccccc;
 }
 
 :root[data-theme="dark"] {
   --gg-ink: #e6e8eb;
-  --gg-grid: rgba(230, 232, 235, 0.16);
+  --gg-paper: #16181d;
+  --gg-panel: #16181d;
+  --gg-grid: #3b3f46;
   --gg-accent: #7ea1f0;
+  --gg-axisText: #c6c9ce;
+  --gg-axisLine: #6b717b;
+  --gg-tickColor: #6b717b;
+  --gg-panelBorder: #6b717b;
 }
 
 * {

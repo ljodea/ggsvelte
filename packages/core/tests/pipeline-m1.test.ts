@@ -544,11 +544,27 @@ describe("theme wiring", () => {
     expect(svg).toContain("var(--gg-ink, #e6e8eb)");
   });
 
-  it("default theme keeps currentColor (no paper rect)", () => {
+  it("edition-2 default uses the hrbr-style paper and ink roles", () => {
     const svg = renderToSVGString(
       gg(salesRows, aes({ x: "city", y: "sales" }))
         .geomCol()
         .spec(),
+      size,
+    );
+    expect(svg).toContain('class="gg-paper"');
+    expect(svg).toContain("var(--gg-paper, #ffffff)");
+    expect(svg).toContain("var(--gg-ink, #262626)");
+    expect(svg).not.toContain("gg-axis-line");
+  });
+
+  it("edition-1 specs retain the legacy transparent currentColor theme", () => {
+    const svg = renderToSVGString(
+      {
+        edition: 1,
+        data: { values: salesRows },
+        aes: { x: { field: "city" }, y: { field: "sales" } },
+        layers: [{ geom: "col" }],
+      },
       size,
     );
     expect(svg).not.toContain("gg-paper");

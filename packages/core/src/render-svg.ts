@@ -247,21 +247,30 @@ function renderBatch(batch: Scene["batches"][number], theme: ThemeTokens): strin
   }
 }
 
-function renderPanelAxes(panel: ScenePanel, ink: string): string {
+function renderPanelAxes(panel: ScenePanel, theme: ThemeTokens): string {
   const parts: string[] = [];
+  const axisText = themeVar("axisText", theme);
+  const axisLine = themeVar("axisLine", theme);
+  const tickColor = themeVar("tickColor", theme);
   if (panel.axisX !== null) {
     parts.push(
       `<g class="gg-axis gg-axis-x" transform="translate(${px(panel.x)},${px(panel.y + panel.height)})">`,
-      `<line class="gg-axis-line" x1="0" y1="0" x2="${px(panel.width)}" y2="0" stroke="${ink}"/>`,
     );
-    for (const tick of panel.axisX) {
+    if (theme.axisLineX) {
       parts.push(
-        `<g class="gg-tick" transform="translate(${px(tick.pos)},0)">`,
-        `<line y2="6" stroke="${ink}"/>`,
+        `<line class="gg-axis-line" x1="0" y1="0" x2="${px(panel.width)}" y2="0" stroke="${axisLine}" stroke-width="${px(theme.axisLineWidth)}" vector-effect="non-scaling-stroke"/>`,
       );
+    }
+    for (const tick of panel.axisX) {
+      parts.push(`<g class="gg-tick" transform="translate(${px(tick.pos)},0)">`);
+      if (theme.ticksX) {
+        parts.push(
+          `<line y2="${px(theme.tickLength)}" stroke="${tickColor}" stroke-width="${px(theme.tickWidth)}" vector-effect="non-scaling-stroke"/>`,
+        );
+      }
       if (tick.label !== "") {
         parts.push(
-          `<text y="9" dy="0.71em" text-anchor="middle" fill="${ink}">${escapeXML(tick.label)}</text>`,
+          `<text y="${px((theme.ticksX ? theme.tickLength : 0) + 3)}" dy="0.71em" text-anchor="middle" fill="${axisText}" font-size="${px(theme.axisTextSize)}" font-weight="${theme.fontWeight}">${escapeXML(tick.label)}</text>`,
         );
       }
       parts.push("</g>");
@@ -271,16 +280,22 @@ function renderPanelAxes(panel: ScenePanel, ink: string): string {
   if (panel.axisY !== null) {
     parts.push(
       `<g class="gg-axis gg-axis-y" transform="translate(${px(panel.x)},${px(panel.y)})">`,
-      `<line class="gg-axis-line" x1="0" y1="0" x2="0" y2="${px(panel.height)}" stroke="${ink}"/>`,
     );
-    for (const tick of panel.axisY) {
+    if (theme.axisLineY) {
       parts.push(
-        `<g class="gg-tick" transform="translate(0,${px(tick.pos)})">`,
-        `<line x2="-6" stroke="${ink}"/>`,
+        `<line class="gg-axis-line" x1="0" y1="0" x2="0" y2="${px(panel.height)}" stroke="${axisLine}" stroke-width="${px(theme.axisLineWidth)}" vector-effect="non-scaling-stroke"/>`,
       );
+    }
+    for (const tick of panel.axisY) {
+      parts.push(`<g class="gg-tick" transform="translate(0,${px(tick.pos)})">`);
+      if (theme.ticksY) {
+        parts.push(
+          `<line x2="-${px(theme.tickLength)}" stroke="${tickColor}" stroke-width="${px(theme.tickWidth)}" vector-effect="non-scaling-stroke"/>`,
+        );
+      }
       if (tick.label !== "") {
         parts.push(
-          `<text x="-9" dy="0.32em" text-anchor="end" fill="${ink}">${escapeXML(tick.label)}</text>`,
+          `<text x="-${px((theme.ticksY ? theme.tickLength : 0) + 3)}" dy="0.32em" text-anchor="end" fill="${axisText}" font-size="${px(theme.axisTextSize)}" font-weight="${theme.fontWeight}">${escapeXML(tick.label)}</text>`,
         );
       }
       parts.push("</g>");
@@ -299,7 +314,7 @@ function renderStrip(panel: ScenePanel, scene: Scene): string {
   return (
     `<g class="gg-strip" transform="translate(${px(panel.x)},${px(top)})">` +
     `<rect width="${px(panel.width)}" height="${px(STRIP_BAND - 2)}" fill="${stripFill}"/>` +
-    `<text x="${px(panel.width / 2)}" y="${px((STRIP_BAND - 2) / 2)}" dy="0.32em" text-anchor="middle" fill="${ink}">${escapeXML(panel.strip)}</text>` +
+    `<text x="${px(panel.width / 2)}" y="${px((STRIP_BAND - 2) / 2)}" dy="0.32em" text-anchor="middle" fill="${ink}" font-size="${px(scene.theme.stripSize)}" font-weight="${scene.theme.stripWeight}">${escapeXML(panel.strip)}</text>` +
     "</g>"
   );
 }
@@ -316,25 +331,30 @@ function renderAxisTitles(scene: Scene): string {
   const parts: string[] = [];
   if (scene.axes.x.title !== "") {
     parts.push(
-      `<text class="gg-axis-title" x="${px((gridLeft + gridRight) / 2)}" y="${px(gridBottom + 34)}" text-anchor="middle" fill="${ink}">${escapeXML(scene.axes.x.title)}</text>`,
+      `<text class="gg-axis-title" x="${px((gridLeft + gridRight) / 2)}" y="${px(gridBottom + 32)}" text-anchor="middle" fill="${ink}" font-size="${px(scene.theme.axisTitleSize)}" font-weight="${scene.theme.axisTitleWeight}">${escapeXML(scene.axes.x.title)}</text>`,
     );
   }
   if (scene.axes.y.title !== "") {
     parts.push(
-      `<text class="gg-axis-title" transform="translate(12,${px((gridTop + gridBottom) / 2)}) rotate(-90)" text-anchor="middle" fill="${ink}">${escapeXML(scene.axes.y.title)}</text>`,
+      `<text class="gg-axis-title" transform="translate(12,${px((gridTop + gridBottom) / 2)}) rotate(-90)" text-anchor="middle" fill="${ink}" font-size="${px(scene.theme.axisTitleSize)}" font-weight="${scene.theme.axisTitleWeight}">${escapeXML(scene.axes.y.title)}</text>`,
     );
   }
   return parts.join("");
 }
 
 function renderGrid(panel: ScenePanel, theme: ThemeTokens): string {
-  const parts: string[] = [`<g class="gg-grid" stroke="${themeVar("grid", theme)}">`];
-  for (const gx of panel.grid.x) {
-    parts.push(`<line x1="${px(gx)}" y1="0" x2="${px(gx)}" y2="${px(panel.height)}"/>`);
-  }
-  for (const gy of panel.grid.y) {
-    parts.push(`<line x1="0" y1="${px(gy)}" x2="${px(panel.width)}" y2="${px(gy)}"/>`);
-  }
+  const dash = theme.gridDasharray === "" ? "" : ` stroke-dasharray="${theme.gridDasharray}"`;
+  const parts: string[] = [
+    `<g class="gg-grid" stroke="${themeVar("grid", theme)}" stroke-width="${px(theme.gridWidth)}"${dash} vector-effect="non-scaling-stroke">`,
+  ];
+  if (theme.gridX)
+    for (const gx of panel.grid.x) {
+      parts.push(`<line x1="${px(gx)}" y1="0" x2="${px(gx)}" y2="${px(panel.height)}"/>`);
+    }
+  if (theme.gridY)
+    for (const gy of panel.grid.y) {
+      parts.push(`<line x1="0" y1="${px(gy)}" x2="${px(panel.width)}" y2="${px(gy)}"/>`);
+    }
   parts.push("</g>");
   return parts.join("");
 }
@@ -401,7 +421,7 @@ export function sceneToSVGString(scene: Scene): string {
   const parts: string[] = [];
   const label = sceneLabel(scene);
   parts.push(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${px(scene.width)}" height="${px(scene.height)}" viewBox="0 0 ${px(scene.width)} ${px(scene.height)}" role="img" aria-label="${escapeXML(label)}" class="gg-plot" font-family="Helvetica, Arial, sans-serif" font-size="11">`,
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${px(scene.width)}" height="${px(scene.height)}" viewBox="0 0 ${px(scene.width)} ${px(scene.height)}" role="img" aria-label="${escapeXML(label)}" class="gg-plot" font-family="${escapeXML(scene.theme.fontFamily)}" font-size="${px(scene.theme.fontSize)}" font-weight="${scene.theme.fontWeight}" text-rendering="optimizeLegibility" shape-rendering="geometricPrecision">`,
     `<title>${escapeXML(label)}</title>`,
   );
   if (theme.paper !== "none") {
@@ -411,13 +431,16 @@ export function sceneToSVGString(scene: Scene): string {
   }
   if (scene.title !== "") {
     parts.push(
-      `<text class="gg-title" x="${px(panel.x)}" y="16" font-size="15" font-weight="bold" fill="${ink}">${escapeXML(scene.title)}</text>`,
+      `<text class="gg-title" x="${px(panel.x)}" y="${px(scene.theme.titleSize)}" font-size="${px(scene.theme.titleSize)}" font-weight="${scene.theme.titleWeight}" fill="${ink}">${escapeXML(scene.title)}</text>`,
     );
   }
   if (scene.subtitle !== "") {
-    const y = scene.title === "" ? 13 : 34;
+    const y =
+      scene.title === ""
+        ? scene.theme.subtitleSize
+        : scene.theme.titleSize + scene.theme.subtitleSize + 3;
     parts.push(
-      `<text class="gg-subtitle" x="${px(panel.x)}" y="${px(y)}" font-size="12" fill="${ink}">${escapeXML(scene.subtitle)}</text>`,
+      `<text class="gg-subtitle" x="${px(panel.x)}" y="${px(y)}" font-size="${px(scene.theme.subtitleSize)}" font-weight="${scene.theme.subtitleWeight}" fill="${ink}">${escapeXML(scene.subtitle)}</text>`,
     );
   }
   // Panel clip paths (decision 0008/0010 follow-up: marks clip to their
@@ -435,13 +458,22 @@ export function sceneToSVGString(scene: Scene): string {
     const p = scene.panels[i]!;
     parts.push(
       `<g class="gg-panel" data-panel="${i}" transform="translate(${px(p.x)},${px(p.y)})">`,
+      theme.panel === "none"
+        ? ""
+        : `<rect class="gg-panel-background" width="${px(p.width)}" height="${px(p.height)}" fill="${themeVar("panel", theme)}"/>`,
       renderGrid(p, theme),
       `<g class="gg-marks" clip-path="url(#gg-clip-${i})">`,
     );
     for (const batch of scene.batches) {
       if (batch.panelIndex === i) parts.push(renderBatch(batch, theme));
     }
-    parts.push("</g>", "</g>", renderStrip(p, scene), renderPanelAxes(p, ink));
+    parts.push("</g>");
+    if (theme.showPanelBorder) {
+      parts.push(
+        `<rect class="gg-panel-border" width="${px(p.width)}" height="${px(p.height)}" fill="none" stroke="${themeVar("panelBorder", theme)}" stroke-width="${px(theme.panelBorderWidth)}" vector-effect="non-scaling-stroke"/>`,
+      );
+    }
+    parts.push("</g>", renderStrip(p, scene), renderPanelAxes(p, theme));
   }
   parts.push(renderAxisTitles(scene));
   for (const legend of scene.legends) {
@@ -452,7 +484,7 @@ export function sceneToSVGString(scene: Scene): string {
   }
   if (scene.caption !== "") {
     parts.push(
-      `<text class="gg-caption" x="${px(scene.width - 4)}" y="${px(scene.height - 4)}" font-size="9" text-anchor="end" fill="${ink}">${escapeXML(scene.caption)}</text>`,
+      `<text class="gg-caption" x="${px(scene.width - 4)}" y="${px(scene.height - 4)}" font-size="${px(scene.theme.captionSize)}" text-anchor="end" fill="${ink}">${escapeXML(scene.caption)}</text>`,
     );
   }
   parts.push("</svg>");

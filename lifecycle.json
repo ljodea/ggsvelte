@@ -731,6 +731,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "CATEGORICAL_SCHEMES": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "CLIDiagnosticCode": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -740,6 +744,10 @@
           "lifecycle": "experimental"
         },
         "CLI_DIAGNOSTIC_CATALOG": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "COLORBLIND_PALETTE": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -823,6 +831,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "FLEXOKI_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "FONT_METRICS": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -841,6 +853,10 @@
         },
         "GroupDerivation": {
           "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "IPSUM_PALETTE": {
+          "kind": "value",
           "lifecycle": "experimental"
         },
         "LayerBackend": {
@@ -1061,6 +1077,10 @@
         },
         "Stratum": {
           "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "TABLEAU10_PALETTE": {
+          "kind": "value",
           "lifecycle": "experimental"
         },
         "TextMeasurer": {

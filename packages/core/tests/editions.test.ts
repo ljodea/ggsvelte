@@ -15,7 +15,7 @@ import { EDITION_DEFAULTS, resolveEditionDefaults } from "../src/editions.ts";
 import { runPipeline } from "../src/pipeline.ts";
 import type { PointsBatch, RectsBatch } from "../src/scene.ts";
 import { CATEGORICAL_PALETTE_10 } from "../src/scales/train.ts";
-import { BUILTIN_THEMES } from "../src/theme.ts";
+import { BUILTIN_THEMES, LEGACY_BUILTIN_THEMES } from "../src/theme.ts";
 
 /** A garish palette no real edition would ship — unmistakable in assertions. */
 const FAKE_EDITION_2: EditionDefaults = {
@@ -23,7 +23,13 @@ const FAKE_EDITION_2: EditionDefaults = {
   sequentialRamp: ["#000000", "#ffffff"],
   themes: {
     ...BUILTIN_THEMES,
-    default: { ink: "#123456", paper: "none", accent: "#abcdef", grid: "rgba(0,0,0,0.1)" },
+    default: {
+      ...BUILTIN_THEMES.default,
+      ink: "#123456",
+      paper: "none",
+      accent: "#abcdef",
+      grid: "rgba(0,0,0,0.1)",
+    },
   },
 };
 
@@ -63,7 +69,7 @@ describe("normalize() edition stamping (spec side)", () => {
 
 describe("resolveEditionDefaults", () => {
   it("undefined means latest known; known editions resolve exactly", () => {
-    expect(resolveEditionDefaults().edition).toBe(1);
+    expect(resolveEditionDefaults().edition).toBe(CURRENT_EDITION);
     expect(resolveEditionDefaults(1).defaults).toBe(EDITION_DEFAULTS[1]!);
     const r = resolveEditionDefaults(2, EDITIONS_WITH_FAKE_2);
     expect(r.defaults).toBe(FAKE_EDITION_2);
@@ -81,7 +87,7 @@ describe("pipeline defaults keyed by edition", () => {
   it("an edition-1 spec keeps edition-1 colors even when edition 2 exists", () => {
     // The old spec: stamped edition 1 (normalize default). A NEW ggsvelte
     // whose table also contains edition 2 must NOT restyle it.
-    const model = runPipeline(scatterSpec(), { ...RUN, editions: EDITIONS_WITH_FAKE_2 });
+    const model = runPipeline(scatterSpec(1), { ...RUN, editions: EDITIONS_WITH_FAKE_2 });
     const colors = pointColors(model);
     for (const c of colors.slice(0, 3)) {
       expect(CATEGORICAL_PALETTE_10).toContain(c);
@@ -111,7 +117,7 @@ describe("pipeline defaults keyed by edition", () => {
     // + fillRole "accent" — renderers substitute the token).
     const rects1 = m1.scene.batches.find((b) => b.kind === "rects") as RectsBatch;
     expect(rects1.fill).toBeNull();
-    expect(m1.scene.theme.accent).toBe(BUILTIN_THEMES.default.accent);
+    expect(m1.scene.theme.accent).toBe(LEGACY_BUILTIN_THEMES.default.accent);
     expect(m2.scene.theme.accent).toBe("#abcdef");
   });
 

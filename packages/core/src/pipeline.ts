@@ -1478,7 +1478,9 @@ function resolveColorScale(
     editionDefaults.categoricalPalette === CATEGORICAL_PALETTE_10
       ? undefined
       : editionDefaults.categoricalPalette;
-  const range = config?.range ?? (scheme === "viridis" ? VIRIDIS_RAMP_10 : editionPalette);
+  // A named scheme resolves inside trainColor. Edition defaults only apply
+  // when the caller supplied neither a scheme nor an explicit range.
+  const range = config?.range ?? (scheme === undefined ? editionPalette : undefined);
   let scale: ColorScale;
   try {
     scale = trainColor(values, prevState, {
@@ -2942,8 +2944,12 @@ export function runPipeline(spec: SpecInput | PortableSpec, options: RunOptions)
     allFrames.find((f) => f.binding.yField !== null)?.binding.yField ??
     allFrames.find((f) => f.binding.yStatColumn !== null)?.binding.yStatColumn ??
     "";
-  const topBand = (title === "" ? 0 : TITLE_BAND) + (subtitle === "" ? 0 : SUBTITLE_BAND);
-  const bottomBand = caption === "" ? 0 : CAPTION_BAND;
+  const titleBand = Math.max(TITLE_BAND, theme.titleSize + 7);
+  const subtitleBand = Math.max(SUBTITLE_BAND, theme.subtitleSize + 4);
+  const captionBand = Math.max(CAPTION_BAND, theme.captionSize + 5);
+  const axisTitleBand = Math.max(AXIS_TITLE_BAND, theme.axisTitleSize + 9);
+  const topBand = (title === "" ? 0 : titleBand) + (subtitle === "" ? 0 : subtitleBand);
+  const bottomBand = caption === "" ? 0 : captionBand;
 
   // Display sides: under coord flip the BOTTOM axis shows the y channel and
   // the LEFT axis shows the x channel — titles, formatters, domains, and
@@ -2964,6 +2970,12 @@ export function runPipeline(spec: SpecInput | PortableSpec, options: RunOptions)
   };
 
   const measurer = options.measureText ?? new MetricsTableMeasurer(FONT_METRICS);
+  const layoutTheme = {
+    ...DEFAULT_LAYOUT_THEME,
+    fontSize: theme.axisTextSize,
+    tickLength: theme.ticksX || theme.ticksY ? theme.tickLength : 0,
+    tickLabelGap: theme.ticksX || theme.ticksY ? 3 : 5,
+  };
   const legendOrder: LegendOrder = normalized.legend?.order ?? "stable-domain";
   const legendInputs = [colorResolution.legendInput, fillResolution.legendInput].filter(
     (l): l is LegendInput => l !== null,
@@ -2996,8 +3008,8 @@ export function runPipeline(spec: SpecInput | PortableSpec, options: RunOptions)
     // grid regular), then a second tick pass at the true panel size.
     const spacing = PANEL_SPACING;
     const strip = STRIP_BAND;
-    const outerLeft = vTitle === "" ? 0 : AXIS_TITLE_BAND;
-    const outerBottom = hTitle === "" ? 0 : AXIS_TITLE_BAND;
+    const outerLeft = vTitle === "" ? 0 : axisTitleBand;
+    const outerBottom = hTitle === "" ? 0 : axisTitleBand;
     const outerRight = legendBlock.width > 0 ? legendBlock.width + LEGEND_GAP + LEGEND_EDGE_PAD : 0;
     const gridW = Math.max(40, options.width - outerLeft - outerRight);
     const gridH = Math.max(40, layoutHeight - outerBottom);
@@ -3015,6 +3027,7 @@ export function runPipeline(spec: SpecInput | PortableSpec, options: RunOptions)
         ...(formatH !== undefined && { formatX: formatH }),
         ...(formatV !== undefined && { formatY: formatV }),
         measurer,
+        theme: layoutTheme,
       });
       mMax = elementwiseMaxMargins(mMax, run.margins);
     }
@@ -3069,7 +3082,7 @@ export function runPipeline(spec: SpecInput | PortableSpec, options: RunOptions)
           ...(formatV !== undefined && { formatY: formatV }),
           measurer,
         },
-        DEFAULT_LAYOUT_THEME,
+        layoutTheme,
       );
       placements.push({
         x: colX[def.col]!,
@@ -3085,8 +3098,8 @@ export function runPipeline(spec: SpecInput | PortableSpec, options: RunOptions)
   } else {
     const { h, v } = displayScales(0);
     const reserve: Partial<Margins> = {
-      ...(hTitle !== "" && { bottom: AXIS_TITLE_BAND }),
-      ...(vTitle !== "" && { left: AXIS_TITLE_BAND }),
+      ...(hTitle !== "" && { bottom: axisTitleBand }),
+      ...(vTitle !== "" && { left: axisTitleBand }),
       ...(legendBlock.width > 0 && { right: legendBlock.width + LEGEND_GAP + LEGEND_EDGE_PAD }),
     };
     const layoutResult = layout({
@@ -3098,6 +3111,7 @@ export function runPipeline(spec: SpecInput | PortableSpec, options: RunOptions)
       ...(formatV !== undefined && { formatY: formatV }),
       measurer,
       reserve,
+      theme: layoutTheme,
     });
     const margins = layoutResult.margins;
     placements.push({

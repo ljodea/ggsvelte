@@ -36,8 +36,10 @@ describe("pure entry (Node smoke)", () => {
     expect(svg).toContain("<circle");
     expect(svg).toContain("<path d=");
     expect(svg).toContain("gg-axis-x");
-    expect(svg).toContain("currentColor");
+    expect(svg).toContain("Roboto Condensed");
     expect(svg).toContain("--gg-grid");
+    expect(svg).toContain('stroke-width="0.4"');
+    expect(svg).not.toContain("gg-axis-line");
   });
 });
 

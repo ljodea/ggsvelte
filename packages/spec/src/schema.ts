@@ -1151,10 +1151,20 @@ export const SpecModule = Type.Module({
         }),
       ),
       scheme: Type.Optional(
-        Type.Union([Type.Literal("observable10"), Type.Literal("viridis")], {
-          description:
-            'Named color scheme: "observable10" (categorical, default for ordinal) or "viridis" (perceptually uniform ramp, default for sequential).',
-        }),
+        Type.Union(
+          [
+            Type.Literal("observable10"),
+            Type.Literal("ipsum"),
+            Type.Literal("flexoki"),
+            Type.Literal("tableau10"),
+            Type.Literal("colorblind"),
+            Type.Literal("viridis"),
+          ],
+          {
+            description:
+              'Named color scheme: categorical "observable10" (default), "ipsum" and "flexoki" (hrbrthemes), "tableau10" and "colorblind" (ggthemes), or sequential "viridis" (default).',
+          },
+        ),
       ),
       reverse: Type.Optional(
         Type.Boolean({ description: "Reverse the color range. Default false." }),
@@ -1217,7 +1227,20 @@ export const SpecModule = Type.Module({
   ),
 
   ThemeName: Type.Union(
-    [Type.Literal("default"), Type.Literal("light"), Type.Literal("dark"), Type.Literal("minimal")],
+    [
+      Type.Literal("default"),
+      Type.Literal("light"),
+      Type.Literal("dark"),
+      Type.Literal("minimal"),
+      Type.Literal("ggplot2"),
+      Type.Literal("classic"),
+      Type.Literal("hrbr"),
+      Type.Literal("few"),
+      Type.Literal("clean"),
+      Type.Literal("fivethirtyeight"),
+      Type.Literal("economist"),
+      Type.Literal("tufte"),
+    ],
     {
       description:
         'A registered theme name: "default" (inherits the page color via currentColor), "light", "dark", or "minimal".',
@@ -1250,6 +1273,41 @@ export const SpecModule = Type.Module({
         }),
       ),
       grid: Type.Optional(Type.String({ description: "Panel grid line color (CSS color)." })),
+      panel: Type.Optional(Type.String({ description: "Panel background color (CSS color)." })),
+      axisText: Type.Optional(Type.String({ description: "Axis tick-label color (CSS color)." })),
+      axisLine: Type.Optional(Type.String({ description: "Axis-line color (CSS color)." })),
+      tickColor: Type.Optional(Type.String({ description: "Axis-tick color (CSS color)." })),
+      panelBorder: Type.Optional(Type.String({ description: "Panel-border color (CSS color)." })),
+      fontFamily: Type.Optional(Type.String({ description: "Chart font-family stack." })),
+      fontSize: Type.Optional(
+        Type.Number({ minimum: 1, description: "Base and tick-label font size in px." }),
+      ),
+      axisTextSize: Type.Optional(Type.Number({ minimum: 1 })),
+      fontWeight: Type.Optional(Type.Number({ minimum: 1, maximum: 1000 })),
+      titleSize: Type.Optional(Type.Number({ minimum: 1 })),
+      titleWeight: Type.Optional(Type.Number({ minimum: 1, maximum: 1000 })),
+      subtitleSize: Type.Optional(Type.Number({ minimum: 1 })),
+      subtitleWeight: Type.Optional(Type.Number({ minimum: 1, maximum: 1000 })),
+      axisTitleSize: Type.Optional(Type.Number({ minimum: 1 })),
+      axisTitleWeight: Type.Optional(Type.Number({ minimum: 1, maximum: 1000 })),
+      captionSize: Type.Optional(Type.Number({ minimum: 1 })),
+      stripSize: Type.Optional(Type.Number({ minimum: 1 })),
+      stripWeight: Type.Optional(Type.Number({ minimum: 1, maximum: 1000 })),
+      axisLineWidth: Type.Optional(Type.Number({ minimum: 0 })),
+      tickWidth: Type.Optional(Type.Number({ minimum: 0 })),
+      tickLength: Type.Optional(Type.Number({ minimum: 0 })),
+      gridWidth: Type.Optional(Type.Number({ minimum: 0 })),
+      panelBorderWidth: Type.Optional(Type.Number({ minimum: 0 })),
+      gridDasharray: Type.Optional(
+        Type.String({ description: "SVG stroke-dasharray for major grid lines." }),
+      ),
+      axisLineX: Type.Optional(Type.Boolean()),
+      axisLineY: Type.Optional(Type.Boolean()),
+      ticksX: Type.Optional(Type.Boolean()),
+      ticksY: Type.Optional(Type.Boolean()),
+      gridX: Type.Optional(Type.Boolean()),
+      gridY: Type.Optional(Type.Boolean()),
+      showPanelBorder: Type.Optional(Type.Boolean()),
     },
     {
       additionalProperties: false,
@@ -1577,7 +1635,20 @@ export const KNOWN_GEOMS = [
 export type GeomName = (typeof KNOWN_GEOMS)[number];
 
 /** Built-in theme names known to this schema version. */
-export const THEME_NAMES = ["default", "light", "dark", "minimal"] as const;
+export const THEME_NAMES = [
+  "default",
+  "light",
+  "dark",
+  "minimal",
+  "ggplot2",
+  "classic",
+  "hrbr",
+  "few",
+  "clean",
+  "fivethirtyeight",
+  "economist",
+  "tufte",
+] as const;
 
 /**
  * The current DEFAULTS EDITION (Hadley lesson 13: fix accumulated bad
@@ -1588,7 +1659,7 @@ export const THEME_NAMES = ["default", "light", "dark", "minimal"] as const;
  * so when a future edition improves the defaults, already-stamped specs keep
  * their edition-1 look. Explicit theme/scale settings always win regardless.
  */
-export const CURRENT_EDITION = 1;
+export const CURRENT_EDITION = 2;
 
 /** Aesthetic channel names known to this schema version. */
 export const CHANNELS = [

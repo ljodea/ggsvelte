@@ -220,11 +220,13 @@ describe("sequential color", () => {
 });
 
 describe("theme registry", () => {
-  it("resolves built-ins; default preserves currentColor", () => {
+  it("resolves the edition-2 typography and structural theme tokens", () => {
     expect(resolveTheme()).toBe(BUILTIN_THEMES.default);
-    expect(resolveTheme("default").ink).toBe("currentColor");
+    expect(resolveTheme("default").fontFamily).toContain("Roboto Condensed");
+    expect(resolveTheme("hrbr").axisLineX).toBe(false);
+    expect(resolveTheme("classic").axisLineX).toBe(true);
     expect(resolveTheme("dark").paper).toBe("#16181d");
-    expect(resolveTheme("light").ink).toBe("#1f2328");
+    expect(resolveTheme("light").gridWidth).toBe(0.25);
   });
 
   it("object themes override roles over a named base", () => {
@@ -235,6 +237,6 @@ describe("theme registry", () => {
 
   it("unknown names throw (tier-1 error) and themeVar wraps --gg-* vars", () => {
     expect(() => resolveTheme("darkk" as never)).toThrow(UnknownThemeError);
-    expect(themeVar("ink", BUILTIN_THEMES.default)).toBe("var(--gg-ink, currentColor)");
+    expect(themeVar("ink", BUILTIN_THEMES.default)).toBe("var(--gg-ink, #262626)");
   });
 });

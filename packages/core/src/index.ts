@@ -52,14 +52,19 @@ export type {
 } from "./scales/state.js";
 export {
   bandKey,
+  CATEGORICAL_SCHEMES,
   CATEGORICAL_PALETTE_10,
+  COLORBLIND_PALETTE,
   finiteExtent,
+  FLEXOKI_PALETTE,
+  IPSUM_PALETTE,
   niceLinearDomain,
   ScaleConfigError,
   trainBand,
   trainColor,
   trainContinuous,
   trainLinear,
+  TABLEAU10_PALETTE,
 } from "./scales/train.js";
 export type {
   BandConfig,

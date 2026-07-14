@@ -1,8 +1,13 @@
 import { describe, expect, it } from "bun:test";
 
 import {
+  CATEGORICAL_SCHEMES,
   CATEGORICAL_PALETTE_10,
+  COLORBLIND_PALETTE,
+  FLEXOKI_PALETTE,
+  IPSUM_PALETTE,
   niceLinearDomain,
+  TABLEAU10_PALETTE,
   trainBand,
   trainColor,
   trainLinear,
@@ -57,6 +62,68 @@ describe("trainBand", () => {
 });
 
 describe("trainColor (value-stable, decision 0002)", () => {
+  it("matches the audited hrbrthemes and ggthemes categorical palettes exactly", () => {
+    expect(IPSUM_PALETTE).toEqual([
+      "#d18975",
+      "#8fd175",
+      "#3f2d54",
+      "#75b8d1",
+      "#2d543d",
+      "#c9d175",
+      "#d1ab75",
+      "#d175b8",
+      "#758bd1",
+    ]);
+    expect(FLEXOKI_PALETTE).toEqual([
+      "#D14D41",
+      "#DA702C",
+      "#D0A215",
+      "#879A39",
+      "#3AA99F",
+      "#4385BE",
+      "#8B7EC8",
+      "#CE5D97",
+    ]);
+    expect(TABLEAU10_PALETTE).toEqual([
+      "#4E79A7",
+      "#F28E2B",
+      "#E15759",
+      "#76B7B2",
+      "#59A14F",
+      "#EDC948",
+      "#B07AA1",
+      "#FF9DA7",
+      "#9C755F",
+      "#BAB0AC",
+    ]);
+    expect(COLORBLIND_PALETTE).toEqual([
+      "#000000",
+      "#E69F00",
+      "#56B4E9",
+      "#009E73",
+      "#F0E442",
+      "#0072B2",
+      "#D55E00",
+      "#CC79A7",
+    ]);
+  });
+
+  it("resolves every named categorical scheme in source order", () => {
+    for (const [scheme, palette] of Object.entries(CATEGORICAL_SCHEMES)) {
+      const values = palette.map((_, i) => `category-${i}`);
+      const scale = trainColor(values, null, { scheme });
+      expect(values.map((value) => scale.colorOf(value))).toEqual(palette);
+    }
+  });
+
+  it("reverses named schemes and gives reversed state a distinct identity", () => {
+    const normal = trainColor(["a", "b"], null, { scheme: "ipsum" });
+    const reversed = trainColor(["a", "b"], normal.state, { scheme: "ipsum", reverse: true });
+    expect(reversed.colorOf("a")).toBe(IPSUM_PALETTE.at(-1));
+    expect(reversed.colorOf("b")).toBe(IPSUM_PALETTE.at(-2));
+    expect(reversed.warnings.map((warning) => warning.code)).toContain("fingerprint-mismatch");
+  });
+
   it("assigns palette colors first-seen and keeps them across data changes", () => {
     const first = trainColor(["a", "b", "c"]);
     expect(first.colorOf("a")).toBe(CATEGORICAL_PALETTE_10[0]);

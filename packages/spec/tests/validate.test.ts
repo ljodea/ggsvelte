@@ -18,6 +18,16 @@ describe("validate — accepts", () => {
     expect(result.ok).toBe(true);
   });
 
+  it("accepts the hrbrthemes and ggthemes categorical schemes", () => {
+    for (const scheme of ["ipsum", "flexoki", "tableau10", "colorblind"]) {
+      const result = validate({
+        layers: [{ geom: "point" }],
+        scales: { color: { type: "ordinal", scheme } },
+      });
+      expect(result.ok).toBe(true);
+    }
+  });
+
   it("a full spec with all channel forms", () => {
     const result = validate({
       $schema: "https://example.invalid/v0.json",

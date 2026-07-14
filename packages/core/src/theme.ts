@@ -31,34 +31,315 @@ export interface ThemeTokens {
   accent: string;
   /** Panel grid lines. */
   grid: string;
+  /** Panel background (separate from the plot-wide paper). */
+  panel: string;
+  /** Axis tick-label color. */
+  axisText: string;
+  /** Axis baseline color. */
+  axisLine: string;
+  /** Tick-mark color. */
+  tickColor: string;
+  /** Panel-border color. */
+  panelBorder: string;
+  /** Explicit chart typeface stack. */
+  fontFamily: string;
+  fontSize: number;
+  axisTextSize: number;
+  fontWeight: number;
+  titleSize: number;
+  titleWeight: number;
+  subtitleSize: number;
+  subtitleWeight: number;
+  axisTitleSize: number;
+  axisTitleWeight: number;
+  captionSize: number;
+  stripSize: number;
+  stripWeight: number;
+  axisLineWidth: number;
+  tickWidth: number;
+  tickLength: number;
+  gridWidth: number;
+  panelBorderWidth: number;
+  gridDasharray: string;
+  axisLineX: boolean;
+  axisLineY: boolean;
+  ticksX: boolean;
+  ticksY: boolean;
+  gridX: boolean;
+  gridY: boolean;
+  showPanelBorder: boolean;
 }
 
-/** Built-in themes. `default` preserves the M0c currentColor behavior. */
+const ROBOTO_CONDENSED = '"Roboto Condensed", "Arial Narrow", Arial, sans-serif';
+
+const HRBR_BASE: ThemeTokens = {
+  ink: "#262626",
+  paper: "#ffffff",
+  accent: "#4385be",
+  grid: "#cccccc",
+  panel: "#ffffff",
+  axisText: "#4d4d4d",
+  axisLine: "#cccccc",
+  tickColor: "#cccccc",
+  panelBorder: "#cccccc",
+  fontFamily: ROBOTO_CONDENSED,
+  fontSize: 11.5,
+  axisTextSize: 11.5,
+  fontWeight: 300,
+  titleSize: 18,
+  titleWeight: 700,
+  subtitleSize: 13,
+  subtitleWeight: 300,
+  axisTitleSize: 9,
+  axisTitleWeight: 400,
+  captionSize: 9,
+  stripSize: 12,
+  stripWeight: 400,
+  axisLineWidth: 0.2,
+  tickWidth: 0.2,
+  tickLength: 5,
+  gridWidth: 0.4,
+  panelBorderWidth: 0.5,
+  gridDasharray: "",
+  axisLineX: false,
+  axisLineY: false,
+  ticksX: false,
+  ticksY: false,
+  gridX: true,
+  gridY: true,
+  showPanelBorder: false,
+};
+
+function themed(overrides: Partial<ThemeTokens>): ThemeTokens {
+  return Object.freeze({ ...HRBR_BASE, ...overrides });
+}
+
+/**
+ * Built-in themes for edition 2. The default deliberately follows
+ * hrbrthemes' quiet hierarchy: real typography, hairline grids, and no heavy
+ * axis frame. Named presets retain the structural contracts of their R
+ * counterparts rather than acting as color aliases.
+ */
 export const BUILTIN_THEMES: Readonly<Record<ThemeName, ThemeTokens>> = Object.freeze({
-  default: {
-    ink: "currentColor",
-    paper: "none",
-    accent: "#4269d0",
-    grid: "rgba(128,128,128,0.25)",
-  },
-  light: {
-    ink: "#1f2328",
-    paper: "#ffffff",
-    accent: "#4269d0",
-    grid: "rgba(31,35,40,0.14)",
-  },
-  dark: {
+  default: themed({}),
+  hrbr: themed({}),
+  minimal: themed({
+    ink: "#333333",
+    accent: "#4385be",
+    grid: "#ebebeb",
+    fontSize: 11,
+    axisTextSize: 8.8,
+    titleSize: 15,
+    subtitleSize: 12,
+    gridWidth: 0.5,
+  }),
+  light: themed({
+    ink: "#333333",
+    grid: "#dedede",
+    axisText: "#4d4d4d",
+    axisLine: "#b3b3b3",
+    tickColor: "#b3b3b3",
+    fontSize: 11,
+    axisTextSize: 8.8,
+    titleSize: 15,
+    subtitleSize: 12,
+    axisLineWidth: 0.5,
+    tickWidth: 0.25,
+    tickLength: 3.67,
+    gridWidth: 0.25,
+    ticksX: true,
+    ticksY: true,
+    showPanelBorder: true,
+  }),
+  dark: themed({
     ink: "#e6e8eb",
     paper: "#16181d",
+    panel: "#16181d",
     accent: "#7ea1f0",
+    grid: "#3b3f46",
+    axisText: "#c6c9ce",
+    axisLine: "#6b717b",
+    tickColor: "#6b717b",
+  }),
+  ggplot2: themed({
+    ink: "#333333",
+    panel: "#ebebeb",
+    grid: "#ffffff",
+    axisText: "#4d4d4d",
+    tickColor: "#333333",
+    fontSize: 11,
+    axisTextSize: 8.8,
+    fontWeight: 400,
+    titleSize: 13.2,
+    subtitleSize: 11,
+    axisTitleSize: 11,
+    captionSize: 8.8,
+    stripSize: 8.8,
+    tickWidth: 0.5,
+    tickLength: 3.67,
+    gridWidth: 0.5,
+    ticksX: true,
+    ticksY: true,
+  }),
+  classic: themed({
+    ink: "#000000",
+    grid: "none",
+    axisText: "#000000",
+    axisLine: "#000000",
+    tickColor: "#000000",
+    fontSize: 11,
+    axisTextSize: 8.8,
+    fontWeight: 400,
+    titleSize: 15,
+    subtitleSize: 12,
+    axisTitleSize: 11,
+    axisLineWidth: 0.5,
+    tickWidth: 0.5,
+    tickLength: 3.67,
+    gridWidth: 0,
+    axisLineX: true,
+    axisLineY: true,
+    ticksX: true,
+    ticksY: true,
+    gridX: false,
+    gridY: false,
+  }),
+  few: themed({
+    ink: "#333333",
+    accent: "#5da5da",
+    grid: "none",
+    axisText: "#4d4d4d",
+    fontSize: 12,
+    axisTextSize: 9.6,
+    fontWeight: 400,
+    titleSize: 14.4,
+    subtitleSize: 12,
+    axisTitleSize: 12,
+    axisLine: "#4d4d4d",
+    tickColor: "#4d4d4d",
+    panelBorder: "#4d4d4d",
+    axisLineWidth: 0.5,
+    tickWidth: 0.5,
+    tickLength: 3,
+    gridWidth: 0,
+    ticksX: true,
+    ticksY: true,
+    gridX: false,
+    gridY: false,
+    showPanelBorder: true,
+  }),
+  clean: themed({
+    accent: "#5da5da",
+    grid: "#b3b3b3",
+    axisLine: "#4d4d4d",
+    tickColor: "#4d4d4d",
+    axisLineWidth: 0.5,
+    tickWidth: 0.5,
+    tickLength: 3,
+    gridWidth: 0.4,
+    gridDasharray: "1.5 2.5",
+    axisLineX: true,
+    axisLineY: true,
+    ticksX: true,
+    ticksY: true,
+    gridX: false,
+  }),
+  fivethirtyeight: themed({
+    ink: "#3c3c3c",
+    paper: "#f0f0f0",
+    panel: "#f0f0f0",
+    accent: "#008fd5",
+    grid: "#ffffff",
+    axisText: "#3c3c3c",
+    gridWidth: 0.5,
+  }),
+  economist: themed({
+    ink: "#014d64",
+    paper: "#d5e4eb",
+    panel: "#d5e4eb",
+    accent: "#ed111a",
+    grid: "#ffffff",
+    axisText: "#014d64",
+    tickColor: "#6794a7",
+    tickWidth: 0.5,
+    tickLength: 4,
+    gridWidth: 0.5,
+    ticksX: true,
+  }),
+  tufte: themed({
+    ink: "#111111",
+    accent: "#111111",
+    grid: "none",
+    gridWidth: 0,
+    gridX: false,
+    gridY: false,
+  }),
+});
+
+const LEGACY_BASE = themed({
+  ink: "currentColor",
+  paper: "none",
+  panel: "none",
+  accent: "#4269d0",
+  grid: "rgba(128,128,128,0.25)",
+  axisText: "currentColor",
+  axisLine: "currentColor",
+  tickColor: "currentColor",
+  panelBorder: "currentColor",
+  fontFamily: "Helvetica, Arial, sans-serif",
+  fontSize: 11,
+  axisTextSize: 11,
+  fontWeight: 400,
+  titleSize: 15,
+  titleWeight: 700,
+  subtitleSize: 12,
+  subtitleWeight: 400,
+  axisTitleSize: 11,
+  axisTitleWeight: 400,
+  captionSize: 9,
+  stripSize: 11,
+  stripWeight: 400,
+  axisLineWidth: 1,
+  tickWidth: 1,
+  tickLength: 6,
+  gridWidth: 1,
+  panelBorderWidth: 1,
+  axisLineX: true,
+  axisLineY: true,
+  ticksX: true,
+  ticksY: true,
+});
+
+/** Edition-1 color themes with their original typography and chrome. */
+export const LEGACY_BUILTIN_THEMES: Readonly<Record<ThemeName, ThemeTokens>> = Object.freeze({
+  ...BUILTIN_THEMES,
+  default: LEGACY_BASE,
+  light: themed({
+    ...LEGACY_BASE,
+    ink: "#1f2328",
+    paper: "#ffffff",
+    panel: "none",
+    axisText: "#1f2328",
+    axisLine: "#1f2328",
+    tickColor: "#1f2328",
+    grid: "rgba(31,35,40,0.14)",
+  }),
+  dark: themed({
+    ...LEGACY_BASE,
+    ink: "#e6e8eb",
+    paper: "#16181d",
+    panel: "none",
+    accent: "#7ea1f0",
+    axisText: "#e6e8eb",
+    axisLine: "#e6e8eb",
+    tickColor: "#e6e8eb",
     grid: "rgba(230,232,235,0.16)",
-  },
-  minimal: {
-    ink: "currentColor",
-    paper: "none",
+  }),
+  minimal: themed({
+    ...LEGACY_BASE,
     accent: "#9498a0",
     grid: "rgba(128,128,128,0.12)",
-  },
+  }),
 });
 
 /** Thrown for unknown theme names (tier-1 error per the plan). */
@@ -98,10 +379,52 @@ export function resolveTheme(
     paper: theme.paper ?? base.paper,
     accent: theme.accent ?? base.accent,
     grid: theme.grid ?? base.grid,
+    panel: theme.panel ?? base.panel,
+    axisText: theme.axisText ?? base.axisText,
+    axisLine: theme.axisLine ?? base.axisLine,
+    tickColor: theme.tickColor ?? base.tickColor,
+    panelBorder: theme.panelBorder ?? base.panelBorder,
+    fontFamily: theme.fontFamily ?? base.fontFamily,
+    fontSize: theme.fontSize ?? base.fontSize,
+    axisTextSize: theme.axisTextSize ?? base.axisTextSize,
+    fontWeight: theme.fontWeight ?? base.fontWeight,
+    titleSize: theme.titleSize ?? base.titleSize,
+    titleWeight: theme.titleWeight ?? base.titleWeight,
+    subtitleSize: theme.subtitleSize ?? base.subtitleSize,
+    subtitleWeight: theme.subtitleWeight ?? base.subtitleWeight,
+    axisTitleSize: theme.axisTitleSize ?? base.axisTitleSize,
+    axisTitleWeight: theme.axisTitleWeight ?? base.axisTitleWeight,
+    captionSize: theme.captionSize ?? base.captionSize,
+    stripSize: theme.stripSize ?? base.stripSize,
+    stripWeight: theme.stripWeight ?? base.stripWeight,
+    axisLineWidth: theme.axisLineWidth ?? base.axisLineWidth,
+    tickWidth: theme.tickWidth ?? base.tickWidth,
+    tickLength: theme.tickLength ?? base.tickLength,
+    gridWidth: theme.gridWidth ?? base.gridWidth,
+    panelBorderWidth: theme.panelBorderWidth ?? base.panelBorderWidth,
+    gridDasharray: theme.gridDasharray ?? base.gridDasharray,
+    axisLineX: theme.axisLineX ?? base.axisLineX,
+    axisLineY: theme.axisLineY ?? base.axisLineY,
+    ticksX: theme.ticksX ?? base.ticksX,
+    ticksY: theme.ticksY ?? base.ticksY,
+    gridX: theme.gridX ?? base.gridX,
+    gridY: theme.gridY ?? base.gridY,
+    showPanelBorder: theme.showPanelBorder ?? base.showPanelBorder,
   };
 }
 
-/** A theme role wrapped in its --gg-* custom property with the token fallback. */
-export function themeVar(role: keyof ThemeTokens, tokens: ThemeTokens): string {
+export type ThemeColorRole =
+  | "ink"
+  | "paper"
+  | "accent"
+  | "grid"
+  | "panel"
+  | "axisText"
+  | "axisLine"
+  | "tickColor"
+  | "panelBorder";
+
+/** A color theme role wrapped in its --gg-* custom property with the token fallback. */
+export function themeVar(role: ThemeColorRole, tokens: ThemeTokens): string {
   return `var(--gg-${role}, ${tokens[role]})`;
 }

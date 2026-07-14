@@ -1370,10 +1370,26 @@
           }
         },
         "scheme": {
-          "description": "Named color scheme: \"observable10\" (categorical, default for ordinal) or \"viridis\" (perceptually uniform ramp, default for sequential).",
+          "description": "Named color scheme: categorical \"observable10\" (default), \"ipsum\" and \"flexoki\" (hrbrthemes), \"tableau10\" and \"colorblind\" (ggthemes), or sequential \"viridis\" (default).",
           "anyOf": [
             {
               "const": "observable10",
+              "type": "string"
+            },
+            {
+              "const": "ipsum",
+              "type": "string"
+            },
+            {
+              "const": "flexoki",
+              "type": "string"
+            },
+            {
+              "const": "tableau10",
+              "type": "string"
+            },
+            {
+              "const": "colorblind",
               "type": "string"
             },
             {
@@ -1466,6 +1482,38 @@
         {
           "const": "minimal",
           "type": "string"
+        },
+        {
+          "const": "ggplot2",
+          "type": "string"
+        },
+        {
+          "const": "classic",
+          "type": "string"
+        },
+        {
+          "const": "hrbr",
+          "type": "string"
+        },
+        {
+          "const": "few",
+          "type": "string"
+        },
+        {
+          "const": "clean",
+          "type": "string"
+        },
+        {
+          "const": "fivethirtyeight",
+          "type": "string"
+        },
+        {
+          "const": "economist",
+          "type": "string"
+        },
+        {
+          "const": "tufte",
+          "type": "string"
         }
       ]
     },
@@ -1493,6 +1541,129 @@
         "grid": {
           "description": "Panel grid line color (CSS color).",
           "type": "string"
+        },
+        "panel": {
+          "description": "Panel background color (CSS color).",
+          "type": "string"
+        },
+        "axisText": {
+          "description": "Axis tick-label color (CSS color).",
+          "type": "string"
+        },
+        "axisLine": {
+          "description": "Axis-line color (CSS color).",
+          "type": "string"
+        },
+        "tickColor": {
+          "description": "Axis-tick color (CSS color).",
+          "type": "string"
+        },
+        "panelBorder": {
+          "description": "Panel-border color (CSS color).",
+          "type": "string"
+        },
+        "fontFamily": {
+          "description": "Chart font-family stack.",
+          "type": "string"
+        },
+        "fontSize": {
+          "minimum": 1,
+          "description": "Base and tick-label font size in px.",
+          "type": "number"
+        },
+        "axisTextSize": {
+          "minimum": 1,
+          "type": "number"
+        },
+        "fontWeight": {
+          "minimum": 1,
+          "maximum": 1000,
+          "type": "number"
+        },
+        "titleSize": {
+          "minimum": 1,
+          "type": "number"
+        },
+        "titleWeight": {
+          "minimum": 1,
+          "maximum": 1000,
+          "type": "number"
+        },
+        "subtitleSize": {
+          "minimum": 1,
+          "type": "number"
+        },
+        "subtitleWeight": {
+          "minimum": 1,
+          "maximum": 1000,
+          "type": "number"
+        },
+        "axisTitleSize": {
+          "minimum": 1,
+          "type": "number"
+        },
+        "axisTitleWeight": {
+          "minimum": 1,
+          "maximum": 1000,
+          "type": "number"
+        },
+        "captionSize": {
+          "minimum": 1,
+          "type": "number"
+        },
+        "stripSize": {
+          "minimum": 1,
+          "type": "number"
+        },
+        "stripWeight": {
+          "minimum": 1,
+          "maximum": 1000,
+          "type": "number"
+        },
+        "axisLineWidth": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "tickWidth": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "tickLength": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "gridWidth": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "panelBorderWidth": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "gridDasharray": {
+          "description": "SVG stroke-dasharray for major grid lines.",
+          "type": "string"
+        },
+        "axisLineX": {
+          "type": "boolean"
+        },
+        "axisLineY": {
+          "type": "boolean"
+        },
+        "ticksX": {
+          "type": "boolean"
+        },
+        "ticksY": {
+          "type": "boolean"
+        },
+        "gridX": {
+          "type": "boolean"
+        },
+        "gridY": {
+          "type": "boolean"
+        },
+        "showPanelBorder": {
+          "type": "boolean"
         }
       }
     },
