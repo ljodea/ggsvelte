@@ -1,0 +1,50 @@
+{
+  "ggplot2": {
+    "width": 1440,
+    "height": 960,
+    "fontFamily": "\"Roboto Condensed\", \"Arial Narrow\", Arial, sans-serif",
+    "fontSize": "11px",
+    "fontWeight": "400",
+    "fontReady": true,
+    "axisLines": 0,
+    "panelBorders": 0,
+    "tickLines": 12,
+    "gridLines": 12,
+    "gridStroke": "rgb(255, 255, 255)",
+    "gridWidth": "0.5",
+    "xLabels": ["1", "2", "3", "4", "5", "6"],
+    "yLabels": ["0", "2", "4", "6", "8", "10"]
+  },
+  "hrbr": {
+    "width": 1440,
+    "height": 960,
+    "fontFamily": "\"Roboto Condensed\", \"Arial Narrow\", Arial, sans-serif",
+    "fontSize": "11.5px",
+    "fontWeight": "300",
+    "fontReady": true,
+    "axisLines": 0,
+    "panelBorders": 0,
+    "tickLines": 0,
+    "gridLines": 12,
+    "gridStroke": "rgb(204, 204, 204)",
+    "gridWidth": "0.4",
+    "xLabels": ["1", "2", "3", "4", "5", "6"],
+    "yLabels": ["0", "2", "4", "6", "8", "10"]
+  },
+  "few": {
+    "width": 1440,
+    "height": 960,
+    "fontFamily": "\"Roboto Condensed\", \"Arial Narrow\", Arial, sans-serif",
+    "fontSize": "12px",
+    "fontWeight": "400",
+    "fontReady": true,
+    "axisLines": 0,
+    "panelBorders": 1,
+    "tickLines": 12,
+    "gridLines": 0,
+    "gridStroke": null,
+    "gridWidth": "0",
+    "xLabels": ["1", "2", "3", "4", "5", "6"],
+    "yLabels": ["0", "2", "4", "6", "8", "10"]
+  }
+}
