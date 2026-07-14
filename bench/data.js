@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1783997276721,
+  "lastUpdate": 1783997443915,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -683,6 +683,120 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 159.3573,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "ljodea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "ljodea",
+            "username": "ljodea"
+          },
+          "distinct": true,
+          "id": "b36108c1dbdb05fe053ea1500db8a7f2d36d6ac6",
+          "message": "fix: package Svelte before Pages build",
+          "timestamp": "2026-07-13T21:48:16-05:00",
+          "tree_id": "1f14d9131124d0d8696f9a4896bf607ef2aea034",
+          "url": "https://github.com/ljodea/ggsvelte/commit/b36108c1dbdb05fe053ea1500db8a7f2d36d6ac6"
+        },
+        "date": 1783997443185,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 1.7223,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.1527,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 7.6014,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 10.8427,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 64.3178,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 93.2288,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 0.7838,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 0.8985,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 65.1455,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 84.2721,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 9.3706,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 9.0075,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 93.7583,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.5073,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 20.2867,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 21.9914,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 505.1755,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 127.5427,
             "unit": "ms"
           }
         ]
