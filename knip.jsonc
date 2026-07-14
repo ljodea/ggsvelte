@@ -2,14 +2,14 @@
   "$schema": "https://unpkg.com/knip@6/schema.json",
   // Spikes are retired M0a evidence: kept runnable, excluded from tooling.
   "ignoreWorkspaces": ["spikes/*"],
-  // zizmor is a uv-installed tool (Rust, distributed via PyPI), not an npm
-  // dependency — see CONTRIBUTING.md.
-  "ignoreBinaries": ["zizmor"],
+  // zizmor and Rscript are system-installed tools, not npm dependencies.
+  "ignoreBinaries": ["zizmor", "Rscript"],
   // publint + attw are spawned by scripts/package-lint.ts (guarded to run
   // only on built output), which knip's static analysis cannot trace. oxfmt
   // is invoked as `bun node_modules/.bin/oxfmt` (arch-proof invocation, see
-  // CONTRIBUTING.md), which knip's script parser does not resolve.
-  "ignoreDependencies": ["publint", "@arethetypeswrong/cli", "oxfmt"],
+  // CONTRIBUTING.md), which knip's script parser does not resolve. The same
+  // is true for markdownlint-cli2's explicit node_modules/.bin invocation.
+  "ignoreDependencies": ["publint", "@arethetypeswrong/cli", "oxfmt", "markdownlint-cli2"],
   "workspaces": {
     ".": {
       "entry": ["scripts/*.ts", "tests/visual/**/*.ts", "tests/evals/**/*.ts"],

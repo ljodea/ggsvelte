@@ -1,3 +1,5 @@
+/// <reference lib="dom" />
+
 import { mkdir } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
