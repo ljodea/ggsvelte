@@ -1,121 +1,168 @@
 {
   "ok": 23,
   "fail": 0,
+  "deviceScaleFactor": 2,
   "results": [
     {
-      "name": "scatter",
-      "ms": 266,
-      "bytes": 7097
-    },
-    {
-      "name": "stacked",
-      "ms": 121,
-      "bytes": 6192
-    },
-    {
-      "name": "hist",
-      "ms": 136,
-      "bytes": 5244
+      "name": "area",
+      "bytes": 7130,
+      "fontReady": true,
+      "width": 1280,
+      "height": 800
     },
     {
       "name": "box",
-      "ms": 131,
-      "bytes": 5873
-    },
-    {
-      "name": "line",
-      "ms": 99,
-      "bytes": 9569
-    },
-    {
-      "name": "density",
-      "ms": 165,
-      "bytes": 30802
-    },
-    {
-      "name": "smooth",
-      "ms": 251,
-      "bytes": 13734
-    },
-    {
-      "name": "facet",
-      "ms": 131,
-      "bytes": 11797
-    },
-    {
-      "name": "horiz",
-      "ms": 84,
-      "bytes": 5164
-    },
-    {
-      "name": "continuous",
-      "ms": 99,
-      "bytes": 7794
-    },
-    {
-      "name": "text",
-      "ms": 100,
-      "bytes": 7856
-    },
-    {
-      "name": "errorbar",
-      "ms": 84,
-      "bytes": 9631
-    },
-    {
-      "name": "jitter",
-      "ms": 100,
-      "bytes": 21911
-    },
-    {
-      "name": "area",
-      "ms": 101,
-      "bytes": 6405
-    },
-    {
-      "name": "props",
-      "ms": 98,
-      "bytes": 6359
-    },
-    {
-      "name": "time",
-      "ms": 85,
-      "bytes": 7658
+      "bytes": 6377,
+      "fontReady": true,
+      "width": 1280,
+      "height": 800
     },
     {
       "name": "canvas",
-      "ms": 224,
-      "bytes": 558190
-    },
-    {
-      "name": "dodged",
-      "ms": 92,
-      "bytes": 6612
-    },
-    {
-      "name": "freeY",
-      "ms": 100,
-      "bytes": 16342
-    },
-    {
-      "name": "log",
-      "ms": 100,
-      "bytes": 6408
-    },
-    {
-      "name": "rule",
-      "ms": 83,
-      "bytes": 6499
+      "bytes": 558573,
+      "fontReady": true,
+      "width": 1280,
+      "height": 800
     },
     {
       "name": "col",
-      "ms": 84,
-      "bytes": 5605
+      "bytes": 6189,
+      "fontReady": true,
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "name": "continuous",
+      "bytes": 8319,
+      "fontReady": true,
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "name": "density",
+      "bytes": 31324,
+      "fontReady": true,
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "name": "dodged",
+      "bytes": 7193,
+      "fontReady": true,
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "name": "errorbar",
+      "bytes": 9806,
+      "fontReady": true,
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "name": "facet",
+      "bytes": 12596,
+      "fontReady": true,
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "name": "freeY",
+      "bytes": 16178,
+      "fontReady": true,
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "name": "hist",
+      "bytes": 5842,
+      "fontReady": true,
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "name": "horiz",
+      "bytes": 5701,
+      "fontReady": true,
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "name": "jitter",
+      "bytes": 21304,
+      "fontReady": true,
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "name": "line",
+      "bytes": 9984,
+      "fontReady": true,
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "name": "log",
+      "bytes": 6924,
+      "fontReady": true,
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "name": "props",
+      "bytes": 6899,
+      "fontReady": true,
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "name": "rule",
+      "bytes": 7007,
+      "fontReady": true,
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "name": "scatter",
+      "bytes": 7595,
+      "fontReady": true,
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "name": "smooth",
+      "bytes": 13929,
+      "fontReady": true,
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "name": "stacked",
+      "bytes": 6705,
+      "fontReady": true,
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "name": "text",
+      "bytes": 8160,
+      "fontReady": true,
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "name": "time",
+      "bytes": 8048,
+      "fontReady": true,
+      "width": 1280,
+      "height": 800
     },
     {
       "name": "valueLabels",
-      "ms": 83,
-      "bytes": 5473
+      "bytes": 6010,
+      "fontReady": true,
+      "width": 1280,
+      "height": 800
     }
   ]
 }

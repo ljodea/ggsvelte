@@ -40,7 +40,9 @@
     "bench:smoke": "cd benchmarks && bun run bench:smoke",
     "bench:json": "cd benchmarks && bun run bench:json",
     "bench:budgets": "cd benchmarks && bun run bench:budgets",
-    "evals": "bun tests/evals/run.ts"
+    "evals": "bun tests/evals/run.ts",
+    "render:fresh": "bun scripts/render-fresh.ts",
+    "render:theme-evidence": "bun scripts/render-theme-evidence.ts && Rscript scripts/render-theme-references.R"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "0.18.5",
