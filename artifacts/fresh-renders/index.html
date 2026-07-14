@@ -1,0 +1,43 @@
+<!doctype html><html><head><meta charset=utf-8><title>ggsvelte fresh renders</title>
+<style>
+body{font:14px/1.4 system-ui;margin:24px;background:#f6f6f6;color:#111}
+h1,h2{font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px}
+figure{margin:0;background:#fff;border:1px solid #ddd;border-radius:8px;padding:8px}
+figcaption{margin-top:6px;font-family:ui-monospace,monospace;font-size:12px}
+img{width:100%;height:auto;background:#fff}
+.banner{background:#e8f5e9;border:1px solid #a5d6a7;padding:12px 16px;border-radius:8px;margin-bottom:20px}
+</style></head><body>
+<h1>ggsvelte visual evidence (fresh, 2026-07-13)</h1>
+<div class="banner"><b>Result:</b> headless <code>renderToSVGString</code> produced real charts for 23 sampled geoms (0 failures). Docs VR path (Svelte &lt;GGPlot&gt;) also ready=true for 5/5 sampled examples including canvas stratum.</div>
+<h2>Headless SVG → PNG</h2>
+<div class="grid"><figure><img src="area.png" alt="area" width="320"/><figcaption>area</figcaption></figure>
+<figure><img src="box.png" alt="box" width="320"/><figcaption>box</figcaption></figure>
+<figure><img src="canvas.png" alt="canvas" width="320"/><figcaption>canvas</figcaption></figure>
+<figure><img src="col.png" alt="col" width="320"/><figcaption>col</figcaption></figure>
+<figure><img src="continuous.png" alt="continuous" width="320"/><figcaption>continuous</figcaption></figure>
+<figure><img src="density.png" alt="density" width="320"/><figcaption>density</figcaption></figure>
+<figure><img src="dodged.png" alt="dodged" width="320"/><figcaption>dodged</figcaption></figure>
+<figure><img src="errorbar.png" alt="errorbar" width="320"/><figcaption>errorbar</figcaption></figure>
+<figure><img src="facet.png" alt="facet" width="320"/><figcaption>facet</figcaption></figure>
+<figure><img src="freeY.png" alt="freeY" width="320"/><figcaption>freeY</figcaption></figure>
+<figure><img src="hist.png" alt="hist" width="320"/><figcaption>hist</figcaption></figure>
+<figure><img src="horiz.png" alt="horiz" width="320"/><figcaption>horiz</figcaption></figure>
+<figure><img src="jitter.png" alt="jitter" width="320"/><figcaption>jitter</figcaption></figure>
+<figure><img src="line.png" alt="line" width="320"/><figcaption>line</figcaption></figure>
+<figure><img src="log.png" alt="log" width="320"/><figcaption>log</figcaption></figure>
+<figure><img src="props.png" alt="props" width="320"/><figcaption>props</figcaption></figure>
+<figure><img src="rule.png" alt="rule" width="320"/><figcaption>rule</figcaption></figure>
+<figure><img src="scatter.png" alt="scatter" width="320"/><figcaption>scatter</figcaption></figure>
+<figure><img src="smooth.png" alt="smooth" width="320"/><figcaption>smooth</figcaption></figure>
+<figure><img src="stacked.png" alt="stacked" width="320"/><figcaption>stacked</figcaption></figure>
+<figure><img src="text.png" alt="text" width="320"/><figcaption>text</figcaption></figure>
+<figure><img src="time.png" alt="time" width="320"/><figcaption>time</figcaption></figure>
+<figure><img src="valueLabels.png" alt="valueLabels" width="320"/><figcaption>valueLabels</figcaption></figure></div>
+<h2>Docs site VR path (built static site)</h2>
+<div class="grid"><figure><img src="docs-vr/bar-stacked-light.png" alt="bar-stacked-light.png" width="320"/><figcaption>docs: bar-stacked-light.png</figcaption></figure>
+<figure><img src="docs-vr/point-canvas-scatter-light.png" alt="point-canvas-scatter-light.png" width="320"/><figcaption>docs: point-canvas-scatter-light.png</figcaption></figure>
+<figure><img src="docs-vr/smooth-loess-scatter-light.png" alt="smooth-loess-scatter-light.png" width="320"/><figcaption>docs: smooth-loess-scatter-light.png</figcaption></figure>
+<figure><img src="docs-vr/point-scatter-color-light.png" alt="point-scatter-color-light.png" width="320"/><figcaption>docs: point-scatter-color-light.png</figcaption></figure>
+<figure><img src="docs-vr/facet-wrap-light.png" alt="facet-wrap-light.png" width="320"/><figcaption>docs: facet-wrap-light.png</figcaption></figure></div>
+</body></html>

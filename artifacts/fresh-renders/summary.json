@@ -1,0 +1,121 @@
+{
+  "ok": 23,
+  "fail": 0,
+  "results": [
+    {
+      "name": "scatter",
+      "ms": 266,
+      "bytes": 7097
+    },
+    {
+      "name": "stacked",
+      "ms": 121,
+      "bytes": 6192
+    },
+    {
+      "name": "hist",
+      "ms": 136,
+      "bytes": 5244
+    },
+    {
+      "name": "box",
+      "ms": 131,
+      "bytes": 5873
+    },
+    {
+      "name": "line",
+      "ms": 99,
+      "bytes": 9569
+    },
+    {
+      "name": "density",
+      "ms": 165,
+      "bytes": 30802
+    },
+    {
+      "name": "smooth",
+      "ms": 251,
+      "bytes": 13734
+    },
+    {
+      "name": "facet",
+      "ms": 131,
+      "bytes": 11797
+    },
+    {
+      "name": "horiz",
+      "ms": 84,
+      "bytes": 5164
+    },
+    {
+      "name": "continuous",
+      "ms": 99,
+      "bytes": 7794
+    },
+    {
+      "name": "text",
+      "ms": 100,
+      "bytes": 7856
+    },
+    {
+      "name": "errorbar",
+      "ms": 84,
+      "bytes": 9631
+    },
+    {
+      "name": "jitter",
+      "ms": 100,
+      "bytes": 21911
+    },
+    {
+      "name": "area",
+      "ms": 101,
+      "bytes": 6405
+    },
+    {
+      "name": "props",
+      "ms": 98,
+      "bytes": 6359
+    },
+    {
+      "name": "time",
+      "ms": 85,
+      "bytes": 7658
+    },
+    {
+      "name": "canvas",
+      "ms": 224,
+      "bytes": 558190
+    },
+    {
+      "name": "dodged",
+      "ms": 92,
+      "bytes": 6612
+    },
+    {
+      "name": "freeY",
+      "ms": 100,
+      "bytes": 16342
+    },
+    {
+      "name": "log",
+      "ms": 100,
+      "bytes": 6408
+    },
+    {
+      "name": "rule",
+      "ms": 83,
+      "bytes": 6499
+    },
+    {
+      "name": "col",
+      "ms": 84,
+      "bytes": 5605
+    },
+    {
+      "name": "valueLabels",
+      "ms": 83,
+      "bytes": 5473
+    }
+  ]
+}
