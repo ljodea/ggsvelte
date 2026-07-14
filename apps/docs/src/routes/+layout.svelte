@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { base } from "$app/paths";
+
   import "../app.css";
 
   const { children } = $props();
@@ -11,9 +13,9 @@
 <!-- .site-chrome is hidden in VR mode (html[data-vr], see app.css) -->
 <header class="site-chrome">
   <nav>
-    <a class="brand" href="/">ggsvelte</a>
-    <a href="/guide/getting-started">Guide</a>
-    <a href="/examples">Examples</a>
+    <a class="brand" href={`${base}/`}>ggsvelte</a>
+    <a href={`${base}/guide/getting-started`}>Guide</a>
+    <a href={`${base}/examples`}>Examples</a>
     <a href="https://github.com/ljodea/ggsvelte" rel="external">GitHub</a>
   </nav>
 </header>

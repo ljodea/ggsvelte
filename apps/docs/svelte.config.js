@@ -1,11 +1,14 @@
 import adapter from "@sveltejs/adapter-static";
 import { vitePreprocess } from "@sveltejs/vite-plugin-svelte";
 
+const base = process.env.BASE_PATH ?? "";
+
 /** @type {import('@sveltejs/kit').Config} */
 export default {
   preprocess: vitePreprocess(),
   kit: {
     adapter: adapter(),
+    paths: { base },
     alias: {
       // The shared example corpus (plan: "one source, three uses"). The docs
       // site is one consumer; tests/visual and llms-full.txt are the others.

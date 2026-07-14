@@ -1,8 +1,10 @@
 <script lang="ts">
+  import { base } from "$app/paths";
+
   import { renderMarkdown } from "$scripts/gen-llms";
 
   const { data } = $props();
-  const html = $derived(renderMarkdown(data.page.markdown));
+  const html = $derived(renderMarkdown(data.page.markdown, base));
 </script>
 
 <svelte:head>

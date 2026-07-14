@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { base } from "$app/paths";
+
   import Scatter from "$examples/point/scatter-color/Example.svelte";
 </script>
 
@@ -20,15 +22,15 @@
   </p>
   <pre><code>bun add ggsvelte</code></pre>
   <p>
-    <a href="/guide/getting-started">Get started →</a>
+    <a href={`${base}/guide/getting-started`}>Get started →</a>
     &nbsp;·&nbsp;
-    <a href="/examples">Browse the example gallery →</a>
+    <a href={`${base}/examples`}>Browse the example gallery →</a>
   </p>
   <p>
-    Agents: <a href="/schema/v0.json">JSON Schema</a> ·
-    <a href="/llms.txt">llms.txt</a> ·
-    <a href="/llms-full.txt">llms-full.txt</a> ·
-    <a href="/guide/errors">error catalog</a>
+    Agents: <a href={`${base}/schema/v0.json`}>JSON Schema</a> ·
+    <a href={`${base}/llms.txt`}>llms.txt</a> ·
+    <a href={`${base}/llms-full.txt`}>llms-full.txt</a> ·
+    <a href={`${base}/guide/errors`}>error catalog</a>
   </p>
 </section>
 

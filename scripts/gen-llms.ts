@@ -37,19 +37,20 @@ function escapeHtml(s: string): string {
     .replaceAll('"', "&quot;");
 }
 
-function inline(s: string): string {
+function inline(s: string, base: string): string {
   let out = escapeHtml(s);
   out = out.replaceAll(/`([^`]+)`/g, (_m, code: string) => `<code>${code}</code>`);
   out = out.replaceAll(
     /\[([^\]]+)\]\(([^)\s]+)\)/g,
-    (_m, text: string, href: string) => `<a href="${href}">${text}</a>`,
+    (_m, text: string, href: string) =>
+      `<a href="${href.startsWith("/") ? `${base}${href}` : href}">${text}</a>`,
   );
   out = out.replaceAll(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
   return out;
 }
 
 /** Render the markdown subset used by the guide sections to HTML. */
-export function renderMarkdown(md: string): string {
+export function renderMarkdown(md: string, base = ""): string {
   const lines = md.split("\n");
   const html: string[] = [];
   let paragraph: string[] = [];
@@ -59,13 +60,13 @@ export function renderMarkdown(md: string): string {
 
   const flushParagraph = () => {
     if (paragraph.length > 0) {
-      html.push(`<p>${inline(paragraph.join(" "))}</p>`);
+      html.push(`<p>${inline(paragraph.join(" "), base)}</p>`);
       paragraph = [];
     }
   };
   const flushList = () => {
     if (list !== null) {
-      html.push(`<ul>${list.map((li) => `<li>${inline(li)}</li>`).join("")}</ul>`);
+      html.push(`<ul>${list.map((li) => `<li>${inline(li, base)}</li>`).join("")}</ul>`);
       list = null;
     }
   };
@@ -94,7 +95,7 @@ export function renderMarkdown(md: string): string {
       flushParagraph();
       flushList();
       const level = heading[1]!.length;
-      html.push(`<h${level}>${inline(heading[2]!)}</h${level}>`);
+      html.push(`<h${level}>${inline(heading[2]!, base)}</h${level}>`);
       continue;
     }
     if (line.startsWith("- ")) {

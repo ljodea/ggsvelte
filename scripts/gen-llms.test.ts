@@ -43,6 +43,15 @@ describe("renderMarkdown", () => {
   it("escapes HTML everywhere", () => {
     expect(renderMarkdown("<script>alert(1)</script>")).not.toContain("<script>");
   });
+
+  it("prefixes root-relative guide links for project-hosted docs", () => {
+    const html = renderMarkdown(
+      "[docs](/guide/errors) [external](https://example.com)",
+      "/ggsvelte",
+    );
+    expect(html).toContain('href="/ggsvelte/guide/errors"');
+    expect(html).toContain('href="https://example.com"');
+  });
 });
 
 describe("guide sections cover their catalogs", () => {

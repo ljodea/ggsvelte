@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { base } from "$app/paths";
+
   import type { ExampleManifestEntry } from "$lib/examples";
   import { EXAMPLES } from "$lib/examples";
 
@@ -32,7 +34,7 @@
     <ul class="cards">
       {#each entries as entry (entry.id)}
         <li>
-          <a href={`/examples/${entry.id}`}>
+          <a href={`${base}/examples/${entry.id}`}>
             <h3>{entry.title}</h3>
             <p>{entry.description}</p>
             <p class="tags">

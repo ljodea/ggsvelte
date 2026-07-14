@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { base } from "$app/paths";
+
   import CodeTabs from "$lib/CodeTabs.svelte";
 
   import type { PageProps } from "./$types";
@@ -24,7 +26,7 @@
   <!-- .example-prose is hidden in VR mode; the frame is what gets shot. -->
   <div class="example-prose">
     <p class="crumbs">
-      <a href="/examples">Examples</a> / {data.entry.docsSection}
+      <a href={`${base}/examples`}>Examples</a> / {data.entry.docsSection}
     </p>
     <h1>{data.entry.title}</h1>
     <p>{data.entry.description}</p>
