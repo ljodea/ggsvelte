@@ -3,14 +3,24 @@
 A layered grammar of graphics for JavaScript — ggplot2 semantics (aes, geom,
 stat, scale, coord, facet, theme, position), a strictly-JSON spec at the
 center, Svelte 5 runes-native components, and hybrid SVG/canvas rendering.
-Agent-first: language models emit a `PortableSpec` validated by a published
-JSON Schema; a deterministic renderer draws it.
+
+Build polished charts from Svelte components, a fluent builder, or portable
+JSON. ggsvelte gives you readable scales, stable colors, contained responsive
+rendering, and publication-ready themes before you tune anything.
 
 > **Status: pre-0.1.0, explicitly unstable.** Every export carries a
 > lifecycle tag (see `lifecycle.json` and the docs lifecycle page); the
 > agent core path (`PortableSpec` / `normalize` / `validate` /
 > `renderToSVGString` / `GGPlot`) is `stable-intent`, everything else
 > `experimental`.
+
+## What you can make
+
+|                                               Categorical scatter                                               |                                         Loess trend with uncertainty                                         |
+| :-------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------: |
+| ![Penguin body mass plotted against flipper length and colored by species](artifacts/fresh-renders/scatter.png) | ![Dose response scatter plot with a loess trend and confidence interval](artifacts/fresh-renders/smooth.png) |
+|                                            **Faceted distributions**                                            |                                               **Time series**                                                |
+|                ![Response-time histograms faceted by service](artifacts/fresh-renders/facet.png)                |       ![Daily active users plotted across the first quarter of 2026](artifacts/fresh-renders/time.png)       |
 
 ## Install
 
@@ -20,6 +30,23 @@ bun add ggsvelte        # or: npm install ggsvelte
 
 `ggsvelte` pulls in `@ggsvelte/spec` (spec types, validation, builder) and
 `@ggsvelte/core` (pipeline + renderers) and re-exports the whole surface.
+
+## Why ggsvelte
+
+- **Good defaults without hidden rules** — readable axes, restrained themes,
+  sensible inferred scales, and stable categorical colors. Valid but
+  questionable choices produce actionable advisories instead of visual
+  footguns.
+- **Charts stay inside their container** — `width="container"` responds to
+  layout changes, while the plot surface clips marks and keeps overlays
+  bounded.
+- **Defaults can improve safely** — every spec is stamped with an edition, so
+  future improvements do not silently restyle existing charts.
+- **Use the right renderer for the data** — SVG for axes, text, and ordinary
+  layers; canvas automatically above 2,000 marks; deterministic SVG for export.
+- **A real grammar, not a chart-type menu** — 12+ geoms, R-fixture-tested
+  statistics, positions, free-scale facets, coordinates, annotations, and
+  interaction compose through the same model.
 
 ## One spec, three surfaces
 
@@ -71,23 +98,6 @@ const svg = renderToSVGString(spec, { width: 640, height: 400 });
 ```
 
 CLI: `ggsvelte-render spec.json > chart.svg` (JSON-line diagnostics on stderr).
-
-## Why ggsvelte
-
-- **Value-stable color scales** — remove a series and nothing else changes
-  color; a returning series gets its old color back.
-- **Prescriptive validation for agents** — every error is
-  `{ code, path, message, allowed?, fix: { description, example } }`; the
-  fix example is machine-applicable. `lintSpec` adds advisories for
-  valid-but-questionable specs.
-- **Defaults editions** — specs are stamped `edition: 1`; future default
-  improvements never restyle existing charts.
-- **Hybrid rendering** — SVG axes/text/legends, canvas for high-count layers
-  (auto above 2000 marks, `a11y: "force-svg"` escape hatch),
-  all-SVG export path.
-- **12+ geoms, R-fixture-tested stats** (bin, lm/loess smooth, boxplot,
-  density, summary), panel-aware facets (wrap + grid, free scales),
-  `coord: flip`, tooltips/brush/zoom.
 
 ## Packages
 
