@@ -1,5 +1,16 @@
 # @ggsvelte/core
 
+## 0.1.1
+
+### Patch Changes
+
+- 6b3b581: # Installable registry dependencies
+
+  Publish registry-compatible internal dependency ranges and verify release-shaped tarballs with npm, matching the actual Changesets publishing path.
+
+- Updated dependencies [6b3b581]
+  - @ggsvelte/spec@0.1.1
+
 ## 0.1.0
 
 ### Minor Changes
