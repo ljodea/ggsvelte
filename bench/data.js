@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784158152910,
+  "lastUpdate": 1784159675854,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -4843,6 +4843,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 133.1112,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b3a213d44009f4ae527df2d174914678b26579a9",
+          "message": "refactor(svelte): extract plot assemble and semantic key helpers (#49)\n\n* refactor(svelte): extract plot assemble and semantic key helpers\n\nMove PortableSpec assembly, interaction-scope resolution, source-identity\ntracking, and semantic key diagnostics out of GGPlot into pure modules\nwith characterization tests. GGPlot remains the orchestrator; public API\nand interaction semantics are unchanged.\n\n* fix(svelte): short-circuit assembled spec before registry reads\n\nWhen an explicit spec is provided, avoid evaluating registry children and\nother ignored props as reactive dependencies of the assembled plot.",
+          "timestamp": "2026-07-15T18:54:02-05:00",
+          "tree_id": "0fbe7d9461a668f527722d5c02e422b4a82d8b67",
+          "url": "https://github.com/ljodea/ggsvelte/commit/b3a213d44009f4ae527df2d174914678b26579a9"
+        },
+        "date": 1784159675486,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.423,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.8228,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 10.9898,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 13.4647,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 85.3756,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 121.4734,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 0.9393,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.1866,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 86.1336,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 110.1689,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 11.4941,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 11.7153,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 116.1199,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.6578,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 28.2061,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.4358,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 27.1305,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 635.5279,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 167.7446,
             "unit": "ms"
           }
         ]
