@@ -32,6 +32,7 @@ test("inspection example supports its documented keyboard journey", async ({ pag
   await surface.focus();
   await surface.press("ArrowRight");
   await expect(page.locator(".gg-tooltip")).toBeVisible();
+  await expect(page.locator("[aria-live='polite']")).toHaveCount(1);
   await surface.press("Enter");
   await expect(page.locator(".event-status")).toContainText("Pinned");
   await surface.press("Escape");
@@ -41,6 +42,7 @@ test("inspection example supports its documented keyboard journey", async ({ pag
 test("interval example supports the two-tap touch journey", async ({ page }) => {
   await page.goto("/examples/interactions/interval-selection");
   await settleVisualState(page);
+  await expect(page.locator("[aria-live='polite']")).toHaveCount(1);
   await page.getByRole("button", { name: "Select area" }).click();
   const capture = page.locator(".gg-capture");
   const box = await capture.boundingBox();

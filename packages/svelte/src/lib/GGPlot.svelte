@@ -546,6 +546,7 @@
     PropertyKey
   > | null>(null);
   let inspectionSeed: CandidateFacts | null = null;
+  let interactionAnnouncement = $state("");
   const inspectionPanel = $derived.by(() => {
     if (inspection === null || model === null) return null;
     const anchor = inspection.focus.anchor;
@@ -710,8 +711,24 @@
   }
 
   function emitSelection(event: PlotSelection): void {
+    if (event.phase === "end") {
+      const count =
+        event.mode === "point" ? event.keys.length : event.lineageCount;
+      announceInteraction(
+        `Selection complete, ${String(count)} ${count === 1 ? "datum" : "data"}.`,
+      );
+    } else if (event.phase === "clear") {
+      announceInteraction("Selection cleared.");
+    }
     onselect?.(event as unknown as PlotSelection<PublicKey>);
     oninteraction?.(event as unknown as PlotInteractionEvent<Row, PublicKey>);
+  }
+
+  function announceInteraction(message: string): void {
+    interactionAnnouncement = "";
+    queueMicrotask(() => {
+      interactionAnnouncement = message;
+    });
   }
   const plotId = $props.id();
   const priorKeys = new Map<string, PropertyKey>();
@@ -1066,6 +1083,8 @@
     concreteMode?: "exact" | "x" | "y" | "xy",
     candidate?: CandidateFacts,
   ): void {
+    if (hit !== null && (source === "keyboard" || source === "touch"))
+      interactionAnnouncement = "";
     if (inspection?.state === "pinned" && state === "transient") return;
     if (hit === null) {
       if (tooltipHovered || inspection?.state === "pinned") return;
@@ -1153,6 +1172,8 @@
         source,
       });
     if (state === "transient") inspectionCoordinator.release("pinned");
+    if (state === "transient" && (source === "keyboard" || source === "touch"))
+      announceInteraction(`${inspectionLiveText(resolved.snapshot)}, unpinned`);
     if (resolved.semanticChanged)
       emitInspection(resolved.snapshot, resolved.semanticFingerprint);
     if (
@@ -1427,6 +1448,7 @@
     } as { x0: number; y0: number; x1: number; y1: number });
     if (rect.x1 - rect.x0 < 4 && rect.y1 - rect.y0 < 4) {
       brushRect = rect;
+      announceInteraction("Choose opposite corner.");
       return;
     }
     brushRect = null;
@@ -1451,6 +1473,7 @@
       source,
       domains: null,
     });
+    announceInteraction("Zoom reset.");
     onzoom?.(event);
     oninteraction?.(event);
   }
@@ -1479,6 +1502,7 @@
       source: "programmatic",
       domains: zoomDomains,
     });
+    announceInteraction("Zoom complete.");
     onzoom?.(event);
     oninteraction?.(event);
   }
@@ -1544,6 +1568,7 @@
       source,
       domains: zoomDomains,
     });
+    announceInteraction("Zoom complete.");
     onzoom?.(event);
     oninteraction?.(event);
   }
@@ -1575,6 +1600,26 @@
       parts.push(`${field.field} ${String(values[field.field] ?? "")}`);
     }
     return parts.join(", ") || "Active datum";
+  }
+
+  function inspectionLiveText(
+    value: PlotInspectionChange<Record<string, CellValue>, PropertyKey>,
+  ): string {
+    const count = value.members.length;
+    const state = value.state === "pinned" ? ", pinned" : "";
+    if (value.mode !== "x" && value.mode !== "y")
+      return `${datumLabel(value.focus.row)}; ${String(count)} ${count === 1 ? "datum" : "data"}${state}`;
+    const seen = new Set<string>();
+    const focused = value.focus.fields
+      .filter(
+        (field) =>
+          field.channel !== value.mode &&
+          !seen.has(field.field) &&
+          seen.add(field.field),
+      )
+      .map((field) => `${field.field} ${String(field.value ?? "")}`)
+      .join(", ");
+    return `${value.mode} ${value.axisLabel}; ${String(count)} ${count === 1 ? "datum" : "data"}${focused ? `; focused ${focused}` : ""}${state}`;
   }
 
   function navigate(delta: number): void {
@@ -1714,6 +1759,7 @@
           point: anchor,
           panelId: panelId(0),
         });
+        announceInteraction("Choose opposite corner.");
       } else {
         const rect = normalizedRect(brushRect);
         brushRect = null;
@@ -2099,12 +2145,13 @@
         aria-live="polite"
         aria-atomic="true"
       >
-        {inspection?.source === "keyboard" || inspection?.source === "touch"
-          ? `${datumLabel(inspection.focus.row)}; ${inspection.mode === "x" || inspection.mode === "y" ? inspection.axisLabel + ", " : ""}${inspection.members.length} ${inspection.members.length === 1 ? "datum" : "data"}${inspection.state === "pinned" ? ", pinned" : ""}`
-          : ""}
+        {interactionAnnouncement ||
+          (inspection?.source === "keyboard" || inspection?.source === "touch"
+            ? inspectionLiveText(inspection)
+            : "")}
       </div>
       {#if areaAwaitingSecond}
-        <p class="gg-area-instruction" role="status">Choose opposite corner</p>
+        <p class="gg-area-instruction">Choose opposite corner</p>
       {/if}
       {#if inspection !== null}
         <Tooltip

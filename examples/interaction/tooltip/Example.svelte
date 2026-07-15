@@ -12,7 +12,7 @@
   data={penguins}
   aes={{ x: "flipper", y: "mass", color: "species" }}
   key="id"
-  inspect={{ mode: "xy", pin: true, maxDistance: 24 }}
+  inspect={{ mode: "x", pin: true, maxDistance: 24 }}
   oninspect={(event) => {
     inspectionStatus =
       event.phase === "clear"
@@ -20,7 +20,7 @@
         : `${event.state === "pinned" ? "Pinned" : "Inspecting"} ${String(event.focus.row?.species ?? "datum")} · ${String(event.members.length)} member${event.members.length === 1 ? "" : "s"} · ${event.source}`;
   }}
   labs={{
-    title: "Inspect a point, then click to pin",
+    title: "Inspect a shared x value, then pin",
     x: "Flipper length (mm)",
     y: "Body mass (g)",
     color: "Species",
@@ -31,7 +31,8 @@
   <GeomPoint size={4} alpha={0.85} />
 </GGPlot>
 
-<p class="event-status" aria-live="polite">{inspectionStatus}</p>
+<!-- Visual callback evidence only. GGPlot owns the single concise live region. -->
+<p class="event-status">{inspectionStatus}</p>
 
 <style>
   .event-status {

@@ -1,0 +1,113 @@
+{
+  "version": 1,
+  "flows": [
+    {
+      "id": "inspection",
+      "fixture": "/examples/interactions/inspection",
+      "steps": [
+        "Focus the plot inspection surface.",
+        "Move to a datum with an arrow key or touch exploration."
+      ],
+      "assertions": {
+        "focused-member-once": "The focused datum is announced once.",
+        "axis-value-once": "The inspected axis value is announced once where grouped inspection applies.",
+        "member-count-once": "The number of grouped members is announced once."
+      }
+    },
+    {
+      "id": "pin",
+      "fixture": "/examples/interactions/inspection",
+      "steps": ["Inspect a datum.", "Press Enter or activate the datum to pin it."],
+      "assertions": {
+        "pin-state-once": "Pinned state is announced once.",
+        "focus-remains-or-is-restored": "Focus remains on, or returns to, the inspection surface."
+      }
+    },
+    {
+      "id": "unpin",
+      "fixture": "/examples/interactions/inspection",
+      "steps": ["Pin a datum.", "Press Enter or activate it again to unpin."],
+      "assertions": {
+        "pin-state-once": "The transition out of pinned state is announced once.",
+        "focus-remains-or-is-restored": "Focus remains on, or returns to, the inspection surface."
+      }
+    },
+    {
+      "id": "dismiss",
+      "fixture": "/examples/interactions/inspection",
+      "steps": ["Inspect or pin a datum.", "Press Escape."],
+      "assertions": {
+        "focus-remains-or-is-restored": "The tooltip closes without losing the inspection surface focus."
+      }
+    },
+    {
+      "id": "grouped-narration",
+      "fixture": "/examples/interactions/inspection",
+      "steps": [
+        "Inspect the shared x value containing more than one member.",
+        "Pin the group.",
+        "Navigate the pinned tooltip content."
+      ],
+      "assertions": {
+        "group-summary-once": "The shared axis value and member count are announced once.",
+        "full-group-not-in-live-region": "The live announcement does not enumerate every group member.",
+        "pinned-content-navigable-dom": "Every pinned group member remains available in ordinary navigable DOM."
+      }
+    },
+    {
+      "id": "select-area",
+      "fixture": "/examples/interactions/interval-selection",
+      "steps": [
+        "Activate Select area.",
+        "Choose two opposite corners with the keyboard or drag a rectangle."
+      ],
+      "assertions": {
+        "tool-state-announced": "The selected tool and selection completion are perceivable.",
+        "focus-remains-or-is-restored": "Focus remains in a predictable place after selection."
+      }
+    },
+    {
+      "id": "zoom-area",
+      "fixture": "/examples/interactions/interval-selection",
+      "steps": [
+        "Activate Zoom area.",
+        "Choose two opposite corners with the keyboard or drag a rectangle."
+      ],
+      "assertions": {
+        "tool-state-announced": "The selected tool and zoom completion are perceivable.",
+        "focus-remains-or-is-restored": "Focus remains in a predictable place after zoom."
+      }
+    },
+    {
+      "id": "clear-selection",
+      "fixture": "/examples/interactions/interval-selection",
+      "steps": ["Complete a selection.", "Activate Clear selection."],
+      "assertions": {
+        "recovery-action-reachable": "Clear selection is reachable and clears the selection.",
+        "tool-state-announced": "The cleared selection state is perceivable."
+      }
+    },
+    {
+      "id": "reset-zoom",
+      "fixture": "/examples/interactions/interval-selection",
+      "steps": ["Complete a zoom.", "Activate Reset zoom."],
+      "assertions": {
+        "recovery-action-reachable": "Reset zoom is reachable and restores the domains.",
+        "tool-state-announced": "The reset zoom state is perceivable."
+      }
+    },
+    {
+      "id": "docked-narrow-tooltip",
+      "fixture": "/examples/interactions/inspection",
+      "steps": [
+        "Set a narrow viewport.",
+        "Inspect and pin a grouped value.",
+        "Navigate the docked tooltip."
+      ],
+      "assertions": {
+        "pinned-content-navigable-dom": "The complete pinned group is navigable in the docked ordinary-DOM tooltip.",
+        "focus-remains-or-is-restored": "Docking does not steal or strand focus."
+      }
+    }
+  ]
+}
