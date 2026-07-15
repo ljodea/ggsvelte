@@ -1035,5 +1035,5 @@ describe("R0 interaction evidence", () => {
       .poll(() => view.container.querySelector("svg.gg-plot")?.getAttribute("height"))
       .toBe("360");
     expect(view.container.querySelectorAll(".gg-tooltip dl")).toHaveLength(1_000);
-  }, 30_000);
+  }, 90_000); // axe walks all 1,000 labelled members; pinned Linux Firefox needs ~45s.
 });
