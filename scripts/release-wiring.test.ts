@@ -24,6 +24,7 @@ describe("R0 release wiring", () => {
     const ci = read(".github/workflows/ci.yml");
     const bench = read(".github/workflows/bench.yml");
     expect(ci).toContain("mcr.microsoft.com/playwright:v1.61.1-noble");
+    expect(ci).toContain("HOME: /root");
     expect(ci).toContain("bun run test:interaction-perf");
     expect(ci).toContain("interaction-accessibility.spec.ts");
     expect(bench).toContain("mcr.microsoft.com/playwright:v1.61.1-noble");

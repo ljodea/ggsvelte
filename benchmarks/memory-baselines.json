@@ -1,11 +1,12 @@
 {
-  "$comment": "Retained-memory release baselines. Capture with `bun run bench:memory`; enforce with `bun run bench:memory:check`. The median uses five forced-GC heap deltas and keeps each result live during measurement. The grouped candidate+lineage+navigation+two-slot fixture must satisfy both the reviewed 16 MiB absolute ceiling and a 20% regression limit from its checked-in baseline.",
+  "$comment": "Retained-memory release baselines. Capture in the pinned Linux CI environment with `bun run bench:memory`; enforce with `bun run bench:memory:check`. The median uses five forced-GC heap deltas and keeps each result live during measurement. The grouped candidate+lineage+navigation+two-slot fixture must satisfy both the reviewed 16 MiB absolute ceiling and a 20% regression limit from its checked-in baseline.",
   "version": 1,
   "baselines": {
     "pipeline scatter 100k retained": { "maxRetainedBytes": 134217728 },
     "grouped inspection 1k two-slot retained": {
       "maxRetainedBytes": 16777216,
-      "baselineRetainedBytes": 693499,
+      "baselinePlatform": "linux-x64-bun-1.3.14",
+      "baselineRetainedBytes": 1056004,
       "maxRegressionRatio": 1.2
     }
   }

@@ -13,6 +13,7 @@ export interface MemoryBaselineFile {
 
 export interface MemoryBudget {
   readonly maxRetainedBytes: number;
+  readonly baselinePlatform?: string;
   readonly baselineRetainedBytes?: number;
   readonly maxRegressionRatio?: number;
 }
