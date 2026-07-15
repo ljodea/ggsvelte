@@ -51,8 +51,8 @@
     "test:ssr": "vitest run --config vitest.ssr.config.ts"
   },
   "dependencies": {
-    "@ggsvelte/core": "workspace:*",
-    "@ggsvelte/spec": "workspace:*"
+    "@ggsvelte/core": "^0.1.0",
+    "@ggsvelte/spec": "^0.1.0"
   },
   "devDependencies": {
     "@sveltejs/package": "^2.5.8",

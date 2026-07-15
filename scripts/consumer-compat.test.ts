@@ -6,6 +6,7 @@ import {
   commandInvocation,
   commandPlan,
   fixtureManifest,
+  packagePackInvocation,
   packageTarballNames,
   resolveConsumerOptions,
 } from "./consumer-compat.js";
@@ -24,6 +25,14 @@ describe("packed consumer compatibility harness", () => {
     expect(commandExecutable("pnpm", "win32")).toBe("pnpm.cmd");
     expect(commandExecutable("bun", "win32")).toBe("bun");
     expect(commandExecutable("npm", "linux")).toBe("npm");
+  });
+
+  test("packs release-shaped artifacts with npm, matching changesets publish", () => {
+    expect(packagePackInvocation("/artifacts", "linux")).toEqual({
+      command: "npm",
+      args: ["pack", ".", "--pack-destination", "/artifacts", "--ignore-scripts", "--silent"],
+    });
+    expect(packagePackInvocation("C:\\artifacts", "win32").command).toBe("npm.cmd");
   });
 
   test("reads matrix options from the environment without shell-specific expansion", () => {
