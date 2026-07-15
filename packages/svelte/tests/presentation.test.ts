@@ -92,6 +92,48 @@ describe("DESIGN.md interaction presentation", () => {
     expect(container.querySelector(".gg-crosshair")?.getAttribute("stroke-dasharray")).toBeNull();
   });
 
+  it("keeps extracted tool rail and overlay positioned as plot-root siblings", async () => {
+    const narrow = render(GGPlot, {
+      data: rows,
+      aes: { x: "x", y: "y" },
+      layers: [{ geom: "point" }],
+      key: "id",
+      inspect: true,
+      select: "interval",
+      zoom: true,
+      width: 400,
+      height: 280,
+    });
+    const narrowRoot = narrow.container.querySelector(".gg-plot-root")!;
+    const rail = narrow.container.querySelector<HTMLElement>(".gg-tool-rail")!;
+    expect(rail.parentElement).toBe(narrowRoot);
+    expect(rail.classList.contains("gg-tool-rail-narrow")).toBe(true);
+    expect(getComputedStyle(rail).position).toBe("absolute");
+
+    const wide = render(GGPlot, {
+      data: rows,
+      aes: { x: "x", y: "y" },
+      layers: [{ geom: "point" }],
+      inspect: { mode: "xy" },
+      width: 640,
+      height: 360,
+    });
+    const wideRoot = wide.container.querySelector(".gg-plot-root")!;
+    const capture = wide.container.querySelector<HTMLElement>(".gg-capture")!;
+    capture.focus();
+    capture.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true }));
+    await expect.poll(() => wide.container.querySelector(".gg-interaction-overlay")).not.toBeNull();
+    const overlay = wide.container.querySelector<SVGElement>(".gg-interaction-overlay")!;
+    expect(overlay.parentElement).toBe(wideRoot);
+    expect(getComputedStyle(overlay).position).toBe("absolute");
+    expect(getComputedStyle(overlay).pointerEvents).toBe("none");
+    // Capture remains the last interactive sibling after the overlay.
+    expect(
+      [...wideRoot.children].indexOf(overlay) <
+        [...wideRoot.children].indexOf(capture),
+    ).toBe(true);
+  });
+
   it("preserves chart chrome and reports empty and unavailable states", () => {
     const empty = render(GGPlot, {
       data: [],
