@@ -45,20 +45,27 @@ adb shell wm density 420
 adb shell input keyevent KEYCODE_WAKEUP
 adb shell wm dismiss-keyguard
 
-adb shell settings put secure accessibility_enabled 0
-adb shell settings put secure touch_exploration_granted_accessibility_services \
-  "${TALKBACK_SERVICE}"
-adb shell settings put secure touch_exploration_enabled 1
-adb shell settings put secure enabled_accessibility_services "${TALKBACK_SERVICE}"
-adb shell settings put secure accessibility_enabled 1
-sleep 8
-
-adb shell dumpsys accessibility > "${OUTPUT_DIR}/accessibility-dump.txt"
-grep -F "${TALKBACK_SERVICE}" "${OUTPUT_DIR}/accessibility-dump.txt" >/dev/null || \
-  fail "The real TalkBack AccessibilityService is not enabled"
-grep -E 'mIsTouchExplorationEnabled=true|touchExplorationEnabled=true' \
-  "${OUTPUT_DIR}/accessibility-dump.txt" >/dev/null || \
-  fail "TalkBack is enabled but Android did not grant touch exploration"
+accessibility_ready=false
+for attempt in 1 2 3; do
+  adb shell settings put secure accessibility_enabled 0
+  sleep 2
+  adb shell settings put secure touch_exploration_granted_accessibility_services \
+    "${TALKBACK_SERVICE}"
+  adb shell settings put secure touch_exploration_enabled 1
+  adb shell settings put secure enabled_accessibility_services "${TALKBACK_SERVICE}"
+  adb shell settings put secure accessibility_enabled 1
+  sleep 8
+  adb shell dumpsys accessibility > "${OUTPUT_DIR}/accessibility-dump.txt"
+  if grep -F "${TALKBACK_SERVICE}" "${OUTPUT_DIR}/accessibility-dump.txt" >/dev/null && \
+    grep -E 'mIsTouchExplorationEnabled=true|touchExplorationEnabled=true' \
+      "${OUTPUT_DIR}/accessibility-dump.txt" >/dev/null; then
+    accessibility_ready=true
+    break
+  fi
+  echo "TalkBack accessibility state was not ready after attempt ${attempt}" >&2
+done
+[[ "${accessibility_ready}" == "true" ]] || \
+  fail "TalkBack and touch exploration did not become ready together"
 
 # Skip Chrome's first-run UI without replacing Chrome or its accessibility
 # stack. This flag only removes account/onboarding screens from the fixture.
