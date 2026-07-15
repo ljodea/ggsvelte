@@ -20,6 +20,7 @@ describe("packed Pages link checks", () => {
     "reference/interactions.html",
     "examples/interaction/tooltip.html",
     "examples/interaction/brush-zoom.html",
+    "examples/interaction/linked-views.html",
     "examples/interactions/inspection.html",
     "examples/interactions/interval-selection.html",
     "llms.txt",

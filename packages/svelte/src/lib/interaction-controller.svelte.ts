@@ -1,0 +1,333 @@
+import type {
+  InteractionSource,
+  PlotInteractionChange,
+  PlotInteractionScope,
+  PlotInteractionSnapshot,
+  PlotInteractionTransition,
+  ReadonlyZoomDomains,
+  ScopedInteractionDomain,
+  ScopedInteractionKeys,
+} from "./interaction.js";
+
+type KeyScope = string | PlotInteractionScope;
+
+export interface PlotInteractionMutationOptions {
+  readonly scope: KeyScope;
+  readonly source?: InteractionSource;
+}
+
+export interface PlotInteractionZoomOptions {
+  readonly scope: PlotInteractionScope;
+  readonly source?: InteractionSource;
+}
+
+export interface CreatePlotInteractionOptions<Key extends PropertyKey> {
+  readonly onchange?: (transition: PlotInteractionTransition<Key>) => void;
+}
+
+export interface PlotInteractionController<Key extends PropertyKey> {
+  readonly revision: number;
+  readonly snapshot: PlotInteractionSnapshot<Key>;
+  selected(scope: KeyScope): ReadonlyArray<Key>;
+  emphasized(scope: KeyScope): ReadonlyArray<Key>;
+  isSelected(key: Key, scope: KeyScope): boolean;
+  setSelection(
+    keys: ReadonlyArray<Key>,
+    options: PlotInteractionMutationOptions,
+  ): PlotInteractionTransition<Key> | null;
+  toggleSelection(
+    key: Key,
+    options: PlotInteractionMutationOptions,
+  ): PlotInteractionTransition<Key> | null;
+  clearSelection(options: PlotInteractionMutationOptions): PlotInteractionTransition<Key> | null;
+  setEmphasis(
+    keys: ReadonlyArray<Key>,
+    options: PlotInteractionMutationOptions,
+  ): PlotInteractionTransition<Key> | null;
+  clearEmphasis(options: PlotInteractionMutationOptions): PlotInteractionTransition<Key> | null;
+  zoom(scope: PlotInteractionScope): ReadonlyZoomDomains;
+  setZoom(
+    domains: ReadonlyZoomDomains,
+    options: PlotInteractionZoomOptions,
+  ): PlotInteractionTransition<Key> | null;
+  resetZoom(options: PlotInteractionZoomOptions): PlotInteractionTransition<Key> | null;
+  reconcileKeys(
+    validKeys: ReadonlyArray<Key>,
+    options: PlotInteractionMutationOptions,
+  ): PlotInteractionTransition<Key> | null;
+}
+
+const EMPTY_KEYS = Object.freeze([]) as readonly never[];
+
+function assertScope(value: string, channel: string): void {
+  if (value.length === 0)
+    throw new TypeError(`Interaction ${channel} scope must be a non-empty string.`);
+}
+
+function normalizedScope(scope: KeyScope): PlotInteractionScope {
+  const value = typeof scope === "string" ? { keys: scope } : scope;
+  assertScope(value.keys, "keys");
+  if (value.x !== undefined) assertScope(value.x, "x");
+  if (value.y !== undefined) assertScope(value.y, "y");
+  return Object.freeze({
+    keys: value.keys,
+    ...(value.x !== undefined && { x: value.x }),
+    ...(value.y !== undefined && { y: value.y }),
+  });
+}
+
+function keyScope(scope: KeyScope): string {
+  return normalizedScope(scope).keys;
+}
+
+function assertKey(value: unknown): asserts value is PropertyKey {
+  if (typeof value !== "string" && typeof value !== "number" && typeof value !== "symbol")
+    throw new TypeError("Interaction keys must be strings, numbers, or symbols.");
+}
+
+function keyRank(value: PropertyKey): number {
+  return typeof value === "number" ? 0 : typeof value === "string" ? 1 : 2;
+}
+
+function compareKeys(a: PropertyKey, b: PropertyKey): number {
+  const rankDelta = keyRank(a) - keyRank(b);
+  if (rankDelta !== 0) return rankDelta;
+  if (typeof a === "number" && typeof b === "number") {
+    if (Object.is(a, b)) return 0;
+    if (Number.isNaN(a)) return 1;
+    if (Number.isNaN(b)) return -1;
+    return a - b;
+  }
+  const left = typeof a === "symbol" ? (Symbol.keyFor(a) ?? a.description ?? "") : String(a);
+  const right = typeof b === "symbol" ? (Symbol.keyFor(b) ?? b.description ?? "") : String(b);
+  return left < right ? -1 : left > right ? 1 : 0;
+}
+
+function canonicalKeys<Key extends PropertyKey>(keys: ReadonlyArray<Key>): ReadonlyArray<Key> {
+  for (const key of keys) assertKey(key);
+  return Object.freeze([...new Set(keys)].toSorted(compareKeys));
+}
+
+function equalKeys<Key extends PropertyKey>(
+  left: ReadonlyArray<Key>,
+  right: ReadonlyArray<Key>,
+): boolean {
+  if (left.length !== right.length) return false;
+  const values = new Set(right);
+  return left.every((key) => values.has(key));
+}
+
+function canonicalDomain(domain: readonly [number, number]): readonly [number, number] {
+  const [first, second] = domain;
+  if (!Number.isFinite(first) || !Number.isFinite(second))
+    throw new TypeError("Interaction zoom domains must contain two finite numbers.");
+  return Object.freeze(first <= second ? [first, second] : [second, first]);
+}
+
+function equalDomain(
+  left: readonly [number, number] | undefined,
+  right: readonly [number, number] | undefined,
+): boolean {
+  return (
+    left === right ||
+    (left !== undefined &&
+      right !== undefined &&
+      Object.is(left[0], right[0]) &&
+      Object.is(left[1], right[1]))
+  );
+}
+
+function sortedScopes<T>(values: Map<string, T>): Array<[string, T]> {
+  return [...values].toSorted(([left], [right]) => (left < right ? -1 : left > right ? 1 : 0));
+}
+
+/** Create chart-independent, semantic interaction state for Svelte 5.
+ *
+ * The controller owns stable keys and scoped data domains only. A chart is
+ * responsible for translating those semantics to its current render model;
+ * passive consumption must never publish the state back to the controller.
+ */
+export function createPlotInteraction<Key extends PropertyKey = PropertyKey>(
+  options: CreatePlotInteractionOptions<Key> = {},
+): PlotInteractionController<Key> {
+  let revision = $state(0);
+  const selections = new Map<string, ReadonlyArray<Key>>();
+  const emphases = new Map<string, ReadonlyArray<Key>>();
+  const zoomX = new Map<string, readonly [number, number]>();
+  const zoomY = new Map<string, readonly [number, number]>();
+  let notifying = false;
+
+  const assertMutationAllowed = (): void => {
+    if (notifying)
+      throw new TypeError(
+        "PlotInteractionController must not be mutated from its onchange callback. Schedule a later application update instead.",
+      );
+  };
+
+  const scopedKeys = (
+    values: Map<string, ReadonlyArray<Key>>,
+  ): ReadonlyArray<ScopedInteractionKeys<Key>> =>
+    Object.freeze(sortedScopes(values).map(([scope, keys]) => Object.freeze({ scope, keys })));
+
+  const scopedDomains = (
+    values: Map<string, readonly [number, number]>,
+  ): ReadonlyArray<ScopedInteractionDomain> =>
+    Object.freeze(sortedScopes(values).map(([scope, domain]) => Object.freeze({ scope, domain })));
+
+  const currentSnapshot = (): PlotInteractionSnapshot<Key> =>
+    Object.freeze({
+      revision,
+      selections: scopedKeys(selections),
+      emphases: scopedKeys(emphases),
+      zoom: Object.freeze({
+        x: scopedDomains(zoomX),
+        y: scopedDomains(zoomY),
+      }),
+    });
+
+  const commit = (
+    kind: PlotInteractionTransition<Key>["kind"],
+    changes: ReadonlyArray<PlotInteractionChange>,
+    scope: PlotInteractionScope,
+    source: InteractionSource,
+  ): PlotInteractionTransition<Key> => {
+    revision += 1;
+    const transition = Object.freeze({
+      revision,
+      kind,
+      changes: Object.freeze([...changes]),
+      source,
+      scope,
+      snapshot: currentSnapshot(),
+    });
+    if (options.onchange !== undefined) {
+      notifying = true;
+      try {
+        options.onchange(transition);
+      } finally {
+        notifying = false;
+      }
+    }
+    return transition;
+  };
+
+  const replaceKeys = (
+    values: Map<string, ReadonlyArray<Key>>,
+    nextKeys: ReadonlyArray<Key>,
+    mutation: PlotInteractionMutationOptions,
+    kind: "selection" | "emphasis",
+  ): PlotInteractionTransition<Key> | null => {
+    const scope = normalizedScope(mutation.scope);
+    const next = canonicalKeys(nextKeys);
+    const prior = values.get(scope.keys) ?? EMPTY_KEYS;
+    if (equalKeys(prior, next)) return null;
+    if (next.length === 0) values.delete(scope.keys);
+    else values.set(scope.keys, next);
+    return commit(kind, [kind], scope, mutation.source ?? "programmatic");
+  };
+
+  const controller: PlotInteractionController<Key> = {
+    get revision() {
+      return revision;
+    },
+    get snapshot() {
+      return currentSnapshot();
+    },
+    selected(scope) {
+      void revision;
+      return selections.get(keyScope(scope)) ?? EMPTY_KEYS;
+    },
+    emphasized(scope) {
+      void revision;
+      return emphases.get(keyScope(scope)) ?? EMPTY_KEYS;
+    },
+    isSelected(key, scope) {
+      assertKey(key);
+      return controller.selected(scope).includes(key);
+    },
+    setSelection(keys, mutation) {
+      assertMutationAllowed();
+      return replaceKeys(selections, keys, mutation, "selection");
+    },
+    toggleSelection(key, mutation) {
+      assertKey(key);
+      const current = controller.selected(mutation.scope);
+      return controller.setSelection(
+        current.includes(key)
+          ? current.filter((value) => value !== key && !(Number.isNaN(value) && Number.isNaN(key)))
+          : [...current, key],
+        mutation,
+      );
+    },
+    clearSelection(mutation) {
+      return controller.setSelection([], mutation);
+    },
+    setEmphasis(keys, mutation) {
+      assertMutationAllowed();
+      return replaceKeys(emphases, keys, mutation, "emphasis");
+    },
+    clearEmphasis(mutation) {
+      return controller.setEmphasis([], mutation);
+    },
+    zoom(inputScope) {
+      void revision;
+      const scope = normalizedScope(inputScope);
+      const x = scope.x === undefined ? undefined : zoomX.get(scope.x);
+      const y = scope.y === undefined ? undefined : zoomY.get(scope.y);
+      return Object.freeze({
+        ...(x !== undefined && { x }),
+        ...(y !== undefined && { y }),
+      });
+    },
+    setZoom(domains, mutation) {
+      assertMutationAllowed();
+      const scope = normalizedScope(mutation.scope);
+      const x = domains.x === undefined ? undefined : canonicalDomain(domains.x);
+      const y = domains.y === undefined ? undefined : canonicalDomain(domains.y);
+      const changesX =
+        scope.x !== undefined && x !== undefined && !equalDomain(zoomX.get(scope.x), x);
+      const changesY =
+        scope.y !== undefined && y !== undefined && !equalDomain(zoomY.get(scope.y), y);
+      if (!changesX && !changesY) return null;
+      if (changesX && scope.x !== undefined && x !== undefined) zoomX.set(scope.x, x);
+      if (changesY && scope.y !== undefined && y !== undefined) zoomY.set(scope.y, y);
+      return commit("zoom", ["zoom"], scope, mutation.source ?? "programmatic");
+    },
+    resetZoom(mutation) {
+      assertMutationAllowed();
+      const scope = normalizedScope(mutation.scope);
+      const changesX = scope.x !== undefined && zoomX.has(scope.x);
+      const changesY = scope.y !== undefined && zoomY.has(scope.y);
+      if (!changesX && !changesY) return null;
+      if (changesX && scope.x !== undefined) zoomX.delete(scope.x);
+      if (changesY && scope.y !== undefined) zoomY.delete(scope.y);
+      return commit("zoom", ["zoom"], scope, mutation.source ?? "programmatic");
+    },
+    reconcileKeys(validKeys, mutation) {
+      assertMutationAllowed();
+      const scope = normalizedScope(mutation.scope);
+      const valid = new Set(canonicalKeys(validKeys));
+      const priorSelection = selections.get(scope.keys) ?? EMPTY_KEYS;
+      const priorEmphasis = emphases.get(scope.keys) ?? EMPTY_KEYS;
+      const nextSelection = Object.freeze(priorSelection.filter((key) => valid.has(key)));
+      const nextEmphasis = Object.freeze(priorEmphasis.filter((key) => valid.has(key)));
+      const selectionChanged = !equalKeys(priorSelection, nextSelection);
+      const emphasisChanged = !equalKeys(priorEmphasis, nextEmphasis);
+      if (!selectionChanged && !emphasisChanged) return null;
+      if (selectionChanged) {
+        if (nextSelection.length === 0) selections.delete(scope.keys);
+        else selections.set(scope.keys, nextSelection);
+      }
+      if (emphasisChanged) {
+        if (nextEmphasis.length === 0) emphases.delete(scope.keys);
+        else emphases.set(scope.keys, nextEmphasis);
+      }
+      const changes = Object.freeze([
+        ...(selectionChanged ? (["selection"] as const) : []),
+        ...(emphasisChanged ? (["emphasis"] as const) : []),
+      ]);
+      return commit("reconcile", changes, scope, mutation.source ?? "programmatic");
+    },
+  };
+  return Object.freeze(controller);
+}

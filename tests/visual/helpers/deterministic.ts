@@ -5,7 +5,7 @@ import { expect, type Page } from "@playwright/test";
  * not mutate application stores: interactive cases must use pointer/keyboard
  * input before calling this helper.
  */
-export async function settleVisualState(page: Page): Promise<void> {
+export async function settleVisualState(page: Page, expectedPlots = 1): Promise<void> {
   await page.emulateMedia({ colorScheme: "light", reducedMotion: "reduce" });
   await page.addStyleTag({
     content: `
@@ -28,5 +28,5 @@ export async function settleVisualState(page: Page): Promise<void> {
       });
     });
   });
-  await expect(page.locator('.gg-plot-root[data-gg-ready="true"]')).toHaveCount(1);
+  await expect(page.locator('.gg-plot-root[data-gg-ready="true"]')).toHaveCount(expectedPlots);
 }

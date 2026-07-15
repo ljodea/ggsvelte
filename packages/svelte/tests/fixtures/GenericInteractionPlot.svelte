@@ -2,6 +2,7 @@
   import type { PortableSpec, SpecInput } from "@ggsvelte/spec";
 
   import GGPlot from "../../src/lib/GGPlot.svelte";
+  import { createPlotInteraction } from "../../src/lib/interaction-controller.svelte.js";
 
   interface Datum {
     id: string;
@@ -33,6 +34,12 @@
     aes: { x: { field: "x" }, y: { field: "y" } },
     layers: [{ geom: "point", stat: "identity", position: "identity" }],
   };
+  const stringInteraction = createPlotInteraction<string>();
+  const numberInteraction = createPlotInteraction<number>();
+  const stringKeys: readonly string[] = stringInteraction.selected("id");
+  const numberKeys: readonly number[] = numberInteraction.selected("sequence");
+  void stringKeys;
+  void numberKeys;
 </script>
 
 <!-- These assignments are compile-time regression locks for field/accessor
@@ -42,6 +49,8 @@
   aes={{ x: "x", y: "y" }}
   layers={[{ geom: "point" }]}
   key="id"
+  interaction={stringInteraction}
+  interactionScope={{ keys: "id", x: "x", y: "y" }}
   inspect
   oninspect={(event) => {
     if (event.phase === "change") {
@@ -56,6 +65,8 @@
   aes={{ x: "x", y: "y" }}
   layers={[{ geom: "point" }]}
   key={(row: Datum) => row.sequence}
+  interaction={numberInteraction}
+  interactionScope={{ keys: "sequence", x: "x", y: "y" }}
   inspect
   oninspect={(event) => {
     if (event.phase === "change") {
@@ -70,6 +81,8 @@
 <GGPlot
   spec={namedSpec}
   key={(row: Datum) => row.id}
+  interaction={stringInteraction}
+  interactionScope={{ keys: "id", x: "x", y: "y" }}
   inspect
   oninspect={(event) => {
     if (event.phase === "change") {
@@ -84,6 +97,8 @@
 <GGPlot
   spec={portableSpec}
   key={(row: Datum) => row.sequence}
+  interaction={numberInteraction}
+  interactionScope={{ keys: "sequence", x: "x", y: "y" }}
   select="point"
   onselect={(event) => {
     const keys: readonly number[] = event.keys;

@@ -1521,6 +1521,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "CreatePlotInteractionOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "DataInput": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1709,7 +1713,35 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "PlotInteractionChange": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PlotInteractionController": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "PlotInteractionEvent": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PlotInteractionMutationOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PlotInteractionScope": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PlotInteractionSnapshot": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PlotInteractionTransition": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PlotInteractionZoomOptions": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -1782,6 +1814,14 @@
           "lifecycle": "experimental"
         },
         "Scene": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ScopedInteractionDomain": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ScopedInteractionKeys": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -1870,6 +1910,10 @@
           "lifecycle": "experimental"
         },
         "createGeomLayer": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "createPlotInteraction": {
           "kind": "value",
           "lifecycle": "experimental"
         },

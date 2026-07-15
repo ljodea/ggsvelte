@@ -286,13 +286,14 @@ needs with \`inspect\`, \`select\`, and \`zoom\`. Once more than one behavior is
 available, the chart renders an accessible tool rail so inspection, selection,
 and zoom never compete for the same drag or click.
 
-**v0.1 scope:** interaction props emit chart-local callbacks. The public
-controller and linked-chart API is planned for R1 and is not part of v0.1.
-Application code may consume a callback into its own Svelte state, but
-ggsvelte does not yet publish a coordination controller.
+Interaction state has two deliberate ownership models. Without a controller,
+inspection, selection, and zoom are private to one chart and callbacks report
+what changed. Pass a \`createPlotInteraction()\` controller when plots, controls,
+tables, or other Svelte components should share semantic state.
 
 Start with the runnable [inspection and pinning example](/examples/interactions/inspection),
 the [interval selection and zoom example](/examples/interactions/interval-selection),
+the [linked plots, controls, and table example](/examples/interaction/linked-views),
 or [use your own local JSON rows in the playground](/playground). For exact
 props, callbacks, phases, and diagnostics, use the
 [interaction reference](/guide/interaction-reference).
@@ -370,6 +371,50 @@ count for aggregate marks.
 Interval selection currently requires one unfaceted panel. A faceted request
 emits \`INTERACTION_INTERVAL_FACET_UNSUPPORTED\` through \`ondiagnostic\` and is
 disabled rather than behaving inconsistently.
+
+## Shared controlled state
+
+\`createPlotInteraction<Key>()\` owns selection, emphasis, and continuous zoom
+domains outside any chart. Give linked consumers the same controller and a
+required, stable semantic scope via \`interactionScope\`. A transition is
+published once by its origin; passive charts render the new snapshot without
+emitting the callback again. Controlled plots never infer channel names: add an
+\`x\` and/or \`y\` scope whenever controlled zoom uses that channel.
+
+\`\`\`svelte
+<script lang="ts">
+  import { createPlotInteraction } from "@ggsvelte/svelte";
+
+  const interaction = createPlotInteraction<string>();
+  const scope = { keys: "penguin-id", x: "flipper-mm", y: "mass-g" } as const;
+  const selected = $derived(interaction.selected(scope));
+</script>
+
+<GGPlot
+  {data}
+  key="id"
+  select={{ type: "point", multiple: true }}
+  {interaction}
+  interactionScope={scope}
+/>
+<GGPlot
+  {data}
+  key="id"
+  select={{ type: "point", multiple: true }}
+  {interaction}
+  interactionScope={scope}
+/>
+<button onclick={() => interaction.setSelection(["gentoo-1"], { scope })}>
+  Select Gentoo 1
+</button>
+\`\`\`
+
+Use \`setSelection\`, \`toggleSelection\`, and \`clearSelection\` for durable
+keys. \`setEmphasis\` is presentation-only: linked charts update their highlight
+overlay without retraining scales or rerunning the render pipeline. Matching
+\`x\` and \`y\` scope names share numeric zoom domains. When application data is
+replaced, call \`reconcileKeys(validKeys, { scope })\` explicitly; a chart never
+guesses whether a temporary subset should erase another view's selection.
 
 ## Brush zoom
 
@@ -456,9 +501,9 @@ ${entry.message}
 
 export const INTERACTION_REFERENCE_MD = `# Interaction reference
 
-This page is the searchable contract for v0.1 interaction. All outputs are
-chart-local callbacks. A public controller for linked charts is planned for
-R1 and is not shipped in v0.1.
+This page is the searchable interaction contract. Charts own private state by
+default and emit chart-local callbacks. \`createPlotInteraction()\` opts into
+controlled semantic state shared by plots and ordinary Svelte components.
 
 ## Static default
 
@@ -511,8 +556,33 @@ plot tool rail must stay synchronized:
 \`\`\`
 
 A controlled unavailable tool requests a change and emits a diagnostic; it
-does not silently arm a different drag behavior. This state remains local to
-one chart in v0.1; it is not the planned R1 linked-chart controller.
+does not silently arm a different drag behavior. The active tool remains local
+to one chart; shared controllers coordinate data semantics, not UI modes.
+
+## Shared controller
+
+\`createPlotInteraction<Key>({ onchange? })\` returns a reactive
+\`PlotInteractionController<Key>\`. Pass it through the \`interaction\` prop and
+name the semantic channels with the required
+\`interactionScope={{ keys, x?, y? }}\`; controlled plots never fall back to a
+generic scope or infer x/y channel names from encodings. Controlled zoom
+requires an explicit scope for every active channel (x, y, or both).
+
+- Reads: \`selected(scope)\`, \`emphasized(scope)\`, \`isSelected(key, scope)\`,
+  \`zoom(scope)\`, \`snapshot\`, and \`revision\`.
+- Selection: \`setSelection\`, \`toggleSelection\`, and \`clearSelection\`.
+- Lightweight presentation: \`setEmphasis\` and \`clearEmphasis\`.
+- Domains: \`setZoom\` and \`resetZoom\` for finite numeric x/y pairs.
+- Data replacement: \`reconcileKeys(validKeys, { scope })\` explicitly removes
+  selected or emphasized keys that no longer exist.
+
+Scopes are application-level names. Reuse a key scope only where keys mean the
+same thing, and reuse x/y scopes only where their data domains are compatible.
+Every mutation returns one immutable transition or \`null\` for a no-op. Passive
+consumers never republish controller state, preventing linked-view feedback
+loops. Do not mutate the controller inside its synchronous \`onchange\`
+callback; schedule a later Svelte application update instead. See the
+[linked views example](/examples/interaction/linked-views).
 
 ## Identity
 
@@ -623,6 +693,14 @@ export const INTERACTION_REFERENCE_INDEX: readonly InteractionReferenceEntry[] =
     summary: "Synchronize the active Inspect, Select area, or Zoom area mode with Svelte state.",
     href: "/guide/interaction-reference#controlled-tool",
     keywords: ["tool", "ontoolchange", "state"],
+  },
+  {
+    id: "shared-controller",
+    name: "Shared controller",
+    summary:
+      "Link plots, controls, and tables with scoped semantic selection, emphasis, and domains.",
+    href: "/guide/interaction-reference#shared-controller",
+    keywords: ["createPlotInteraction", "linked views", "scope", "reconcileKeys"],
   },
   {
     id: "identity",
