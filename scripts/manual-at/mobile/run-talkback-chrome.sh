@@ -53,9 +53,9 @@ adb shell settings put secure touch_exploration_enabled 1
 sleep 8
 
 adb shell dumpsys accessibility > "${OUTPUT_DIR}/accessibility-dump.txt"
-rg -F "${TALKBACK_SERVICE}" "${OUTPUT_DIR}/accessibility-dump.txt" >/dev/null || \
+grep -F "${TALKBACK_SERVICE}" "${OUTPUT_DIR}/accessibility-dump.txt" >/dev/null || \
   fail "The real TalkBack AccessibilityService is not enabled"
-rg 'mIsTouchExplorationEnabled=true|touchExplorationEnabled=true' \
+grep -E 'mIsTouchExplorationEnabled=true|touchExplorationEnabled=true' \
   "${OUTPUT_DIR}/accessibility-dump.txt" >/dev/null || \
   fail "TalkBack is enabled but Android did not grant touch exploration"
 
@@ -92,7 +92,7 @@ for index in $(seq -w 1 60); do
   if (( 10#${index} % 5 == 0 )); then
     adb exec-out screencap -p > "${OUTPUT_DIR}/screenshots/linear-${index}.png"
   fi
-  if adb logcat -d -v brief | rg -i \
+  if adb logcat -d -v brief | grep -Ei \
     'SpeechController.*Speaking fragment text=.*Inspect a shared x value, then pin' >/dev/null; then
     plot_focused=true
     echo "TalkBack reached the plot after $((10#${index})) right-swipe gestures"
@@ -114,11 +114,11 @@ for index in $(seq -w 26 34); do
 done
 
 adb logcat -d -v threadtime > "${OUTPUT_DIR}/logcat-full.txt"
-rg 'SpeechController.*Speaking fragment text=' "${OUTPUT_DIR}/logcat-full.txt" > \
+grep -E 'SpeechController.*Speaking fragment text=' "${OUTPUT_DIR}/logcat-full.txt" > \
   "${OUTPUT_DIR}/talkback-speech.log" || \
   fail "TalkBack ran, but its real speech pipeline emitted no auditable utterances"
 
-rg -i 'ggsvelte|plot|chart|flipper|mass|species|datum|select area|zoom area|reset zoom|clear selection' \
+grep -Ei 'ggsvelte|plot|chart|flipper|mass|species|datum|select area|zoom area|reset zoom|clear selection' \
   "${OUTPUT_DIR}/talkback-speech.log" > "${OUTPUT_DIR}/fixture-speech.log" || \
   fail "TalkBack spoke, but never reached the ggsvelte fixture"
 
