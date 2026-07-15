@@ -116,8 +116,8 @@ jobs:
             echo "::error::@playwright/test version (${vr_version}) does not match pinned container tag (${PLAYWRIGHT_CONTAINER_TAG})"
             exit 1
           fi
-      - name: build spec/core dist (package exports point at dist/)
-        run: bun run check
+      - name: build all packages for browser and docs targets
+        run: bun run build
       - name: component tests (packages/svelte, vitest browser mode)
         working-directory: packages/svelte
         run: bun run --bun test

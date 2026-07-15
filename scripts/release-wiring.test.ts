@@ -23,8 +23,11 @@ describe("R0 release wiring", () => {
   it("runs the Playwright interaction performance gate with benchmark budgets", () => {
     const ci = read(".github/workflows/ci.yml");
     const bench = read(".github/workflows/bench.yml");
+    const componentJob = ci.slice(ci.indexOf("  component:"), ci.indexOf("\n  build:"));
     expect(ci).toContain("mcr.microsoft.com/playwright:v1.61.1-noble");
     expect(ci).toContain("HOME: /root");
+    expect(componentJob).toContain("name: build all packages for browser and docs targets");
+    expect(componentJob).toContain("run: bun run build");
     expect(ci).toContain("bun run test:interaction-perf");
     expect(ci).toContain("interaction-accessibility.spec.ts");
     expect(bench).toContain("mcr.microsoft.com/playwright:v1.61.1-noble");
