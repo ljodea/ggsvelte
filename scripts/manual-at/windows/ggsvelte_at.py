@@ -29,6 +29,7 @@ import NvdaLib
 
 _built_in = BuiltIn()
 _browser_process: subprocess.Popen[bytes] | None = None
+_browser_hwnd: int | None = None
 _browser_name = ""
 _target_url = ""
 _release = ""
@@ -143,14 +144,17 @@ def _speech_after_key(
     # A newly loaded document may still be producing unbounded browse-mode
     # narration. A physical Control press is NVDA's public "silence" command;
     # use it to establish a clean speech boundary before the intended action.
+    _ensure_browser_foreground()
     _send_key("control")
     time.sleep(0.15)
     index = spy.get_next_speech_index()
+    _ensure_browser_foreground()
     _send_key(key, modifiers)
     if require_speech:
         spy.wait_for_speech_to_finish(speechStartedIndex=index)
     else:
         time.sleep(1.0)
+        _ensure_browser_foreground()
         _send_key("control")
     speech = spy.get_speech_at_index_until_now(index)
     _record(action, speech, key=key, modifiers=list(modifiers))
@@ -265,6 +269,7 @@ def _launch_browser(path: str, width: int = 1180, height: int = 760) -> None:
 
 
 def _focus_browser_window() -> None:
+    global _browser_hwnd
     deadline = time.monotonic() + 25
     user32 = ctypes.windll.user32
     match: int | None = None
@@ -291,12 +296,31 @@ def _focus_browser_window() -> None:
                 match = hwnd
                 break
         if match is not None:
-            user32.ShowWindow(match, 9)
-            user32.SetForegroundWindow(match)
+            _browser_hwnd = match
             time.sleep(5)
+            _ensure_browser_foreground()
             return
         time.sleep(0.5)
     raise AssertionError(f"The headed {_browser_name} ggsvelte window did not appear.")
+
+
+def _ensure_browser_foreground() -> None:
+    """Reclaim the headed browser from hosted-runner infrastructure windows."""
+
+    if _browser_hwnd is None:
+        raise AssertionError("The headed browser window has not been matched.")
+    user32 = ctypes.windll.user32
+    deadline = time.monotonic() + 3
+    while time.monotonic() < deadline:
+        user32.ShowWindow(_browser_hwnd, 9)
+        user32.BringWindowToTop(_browser_hwnd)
+        user32.SetForegroundWindow(_browser_hwnd)
+        if user32.GetForegroundWindow() == _browser_hwnd:
+            return
+        time.sleep(0.05)
+    raise AssertionError(
+        f"The hosted runner prevented foreground activation of {_browser_name}."
+    )
 
 
 def _tab_until(
@@ -453,7 +477,7 @@ def finish_evidence() -> None:
 
 
 def close_browser() -> None:
-    global _browser_process, _profile_path
+    global _browser_process, _browser_hwnd, _profile_path
     if _browser_process is not None:
         _browser_process.terminate()
         try:
@@ -461,6 +485,7 @@ def close_browser() -> None:
         except subprocess.TimeoutExpired:
             _browser_process.kill()
         _browser_process = None
+    _browser_hwnd = None
     executable = "chrome.exe" if _browser_name == "chrome" else "firefox.exe"
     subprocess.run(
         ["taskkill", "/F", "/T", "/IM", executable], capture_output=True, check=False
