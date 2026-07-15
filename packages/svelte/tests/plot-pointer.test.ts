@@ -208,10 +208,7 @@ describe("matchCandidateFromHit", () => {
   });
 
   it("returns the first match in iteration order", () => {
-    const candidates = [
-      asCandidate({ id: 0, x: 10, y: 20 }),
-      asCandidate({ id: 1, x: 10, y: 20 }),
-    ];
+    const candidates = [asCandidate({ id: 0, x: 10, y: 20 }), asCandidate({ id: 1, x: 10, y: 20 })];
     expect(matchCandidateFromHit(candidates, hit(10, 20, { rowIndex: 1 }))?.id).toBe(0);
   });
 

@@ -8,21 +8,12 @@ export type ScaleTypeRef = {
 };
 
 /** True when at least one channel requested by mode is non-band. */
-export function zoomSupportsChannel(
-  mode: ZoomAreaMode,
-  scales: ScaleTypeRef,
-): boolean {
-  return (
-    (mode !== "y" && scales.x.type !== "band") ||
-    (mode !== "x" && scales.y.type !== "band")
-  );
+export function zoomSupportsChannel(mode: ZoomAreaMode, scales: ScaleTypeRef): boolean {
+  return (mode !== "y" && scales.x.type !== "band") || (mode !== "x" && scales.y.type !== "band");
 }
 
 /** Band channels that block zoom under the given mode. */
-export function bandChannelsForZoom(
-  mode: ZoomAreaMode,
-  scales: ScaleTypeRef,
-): Array<"x" | "y"> {
+export function bandChannelsForZoom(mode: ZoomAreaMode, scales: ScaleTypeRef): Array<"x" | "y"> {
   const channels: Array<"x" | "y"> = [];
   if (mode !== "y" && scales.x.type === "band") channels.push("x");
   if (mode !== "x" && scales.y.type === "band") channels.push("y");

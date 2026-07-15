@@ -1,9 +1,6 @@
 import type { CellValue } from "@ggsvelte/core";
 
-import type {
-  InteractionSource,
-  IntervalSelection,
-} from "./interaction.js";
+import type { InteractionSource, IntervalSelection } from "./interaction.js";
 import type { PlotRect } from "./plot-geometry.js";
 
 /** Pointer brush-end gate only. Keyboard Enter/Space commits any size. */
@@ -20,10 +17,7 @@ export type IntervalDomain = {
  * Pointer brush-end degeneracy: BOTH spans must be strictly less than min.
  * Input must already be normalized (x0≤x1, y0≤y1); this does not take abs.
  */
-export function isBrushTooSmall(
-  rect: PlotRect,
-  minPx: number = BRUSH_MIN_SPAN_PX,
-): boolean {
+export function isBrushTooSmall(rect: PlotRect, minPx: number = BRUSH_MIN_SPAN_PX): boolean {
   return rect.x1 - rect.x0 < minPx && rect.y1 - rect.y0 < minPx;
 }
 
@@ -39,9 +33,7 @@ export function filterDomainBySelectMode(
 }
 
 /** Freeze an interval domain bag (nested tuples when present). */
-export function freezeIntervalDomain(
-  domain: IntervalDomain,
-): IntervalSelection["domain"] {
+export function freezeIntervalDomain(domain: IntervalDomain): IntervalSelection["domain"] {
   return Object.freeze({
     ...(domain.x !== undefined && {
       x: Object.freeze([...domain.x]) as [CellValue, CellValue],
@@ -64,9 +56,7 @@ export type BuildIntervalSelectionInput = {
 };
 
 /** Build a frozen IntervalSelection event payload. */
-export function buildIntervalSelection(
-  input: BuildIntervalSelectionInput,
-): IntervalSelection {
+export function buildIntervalSelection(input: BuildIntervalSelectionInput): IntervalSelection {
   return Object.freeze({
     type: "select",
     phase: input.phase,
