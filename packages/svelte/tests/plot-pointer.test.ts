@@ -5,6 +5,7 @@ import type { SceneHit } from "@ggsvelte/core/dom";
 
 import {
   bestDirectionalIndex,
+  CANDIDATE_HIT_TOLERANCE,
   cycleCoincidentIndex,
   hitFromCandidate,
   matchCandidateFromHit,
@@ -202,8 +203,9 @@ describe("matchCandidateFromHit", () => {
     expect(matched?.id).toBe(0);
   });
 
-  it("rejects |Δ| === 0.5 (exclusive bound)", () => {
-    const candidates = [asCandidate({ id: 0, x: 10.5, y: 20 })];
+  it("rejects |Δ| === CANDIDATE_HIT_TOLERANCE (exclusive bound)", () => {
+    expect(CANDIDATE_HIT_TOLERANCE).toBe(0.5);
+    const candidates = [asCandidate({ id: 0, x: 10 + CANDIDATE_HIT_TOLERANCE, y: 20 })];
     expect(matchCandidateFromHit(candidates, hit(10, 20, { rowIndex: 1 }))).toBeNull();
   });
 
