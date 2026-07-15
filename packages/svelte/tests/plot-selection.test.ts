@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { anchorsFromCandidateKeys, nextPointSelectionKeys } from "../src/lib/plot-selection.js";
+import {
+  anchorsFromCandidateKeys,
+  nextPointSelectionKeys,
+  rowIndexesForCandidate,
+  uniqueKeysFromRowIndexes,
+} from "../src/lib/plot-selection.js";
 
 describe("nextPointSelectionKeys", () => {
   it("no-ops on empty toggle input", () => {
@@ -54,5 +59,30 @@ describe("anchorsFromCandidateKeys", () => {
       { x: 1, y: 2, keys: ["a"] },
     ];
     expect(anchorsFromCandidateKeys(dupes, ["a"])).toEqual([{ x: 1, y: 2 }]);
+  });
+});
+
+describe("rowIndexesForCandidate", () => {
+  it("preserves lineage order and appends rowIndex only if absent", () => {
+    expect(rowIndexesForCandidate({ rowIndex: 9 }, [3, 1, 4])).toEqual([3, 1, 4, 9]);
+    expect(rowIndexesForCandidate({ rowIndex: 1 }, [3, 1, 4])).toEqual([3, 1, 4]);
+    expect(rowIndexesForCandidate({ rowIndex: null }, [3, 1])).toEqual([3, 1]);
+  });
+});
+
+describe("uniqueKeysFromRowIndexes", () => {
+  it("keeps first-seen non-null keys and skips nulls", () => {
+    const keyForRow = (rowIndex: number): PropertyKey | null => {
+      if (rowIndex === 1) return "a";
+      if (rowIndex === 2) return null;
+      if (rowIndex === 3) return "b";
+      if (rowIndex === 4) return "a";
+      return "c";
+    };
+    expect(uniqueKeysFromRowIndexes([1, 2, 3, 4, 5], keyForRow)).toEqual(["a", "b", "c"]);
+  });
+
+  it("returns empty for empty input", () => {
+    expect(uniqueKeysFromRowIndexes([], () => "x")).toEqual([]);
   });
 });

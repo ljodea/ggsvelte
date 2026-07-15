@@ -4,6 +4,39 @@ export type CandidateAnchorKeys = {
   readonly keys: readonly PropertyKey[];
 };
 
+export type CandidateRowRef = {
+  readonly rowIndex: number | null;
+};
+
+/**
+ * Union lineage row indexes with the candidate's own rowIndex when set.
+ * Lineage order is preserved; the candidate row is appended only if absent.
+ */
+export function rowIndexesForCandidate(
+  candidate: CandidateRowRef,
+  lineageRowIndexes: Iterable<number>,
+): number[] {
+  const rows = [...lineageRowIndexes];
+  if (candidate.rowIndex !== null && !rows.includes(candidate.rowIndex))
+    rows.push(candidate.rowIndex);
+  return rows;
+}
+
+/**
+ * Map row indexes through a key resolver, keeping first-seen unique non-null keys.
+ */
+export function uniqueKeysFromRowIndexes(
+  rowIndexes: Iterable<number>,
+  keyForRow: (rowIndex: number) => PropertyKey | null,
+): PropertyKey[] {
+  const keys: PropertyKey[] = [];
+  for (const rowIndex of rowIndexes) {
+    const key = keyForRow(rowIndex);
+    if (key !== null && !keys.includes(key)) keys.push(key);
+  }
+  return keys;
+}
+
 /**
  * Point-selection set algebra for toggle-on-click/keyboard.
  * Empty toggled keys leave the current selection unchanged.

@@ -7,6 +7,7 @@ import {
   bestDirectionalIndex,
   cycleCoincidentIndex,
   hitFromCandidate,
+  matchCandidateFromHit,
   nextTraversalIndex,
   plotPointFromClient,
 } from "../src/lib/plot-pointer.js";
@@ -170,5 +171,54 @@ describe("cycleCoincidentIndex", () => {
   it("starts at first coincident when active index is not in the set", () => {
     // activeIndex 1 is not coincident → Math.max(0, -1) = 0 → next from first
     expect(cycleCoincidentIndex(origin, hits, 1, 1)).toBe(2);
+  });
+});
+
+describe("matchCandidateFromHit", () => {
+  const base = {
+    id: 0,
+    layerIndex: 0,
+    panelIndex: 0,
+    rowIndex: 1 as number | null,
+    x: 10,
+    y: 20,
+    kind: "point" as const,
+    autoMode: "exact" as const,
+    lineage: 0,
+  };
+
+  const asCandidate = (partial: Partial<typeof base> & { id: number }): CandidateFacts =>
+    ({
+      ...base,
+      ...partial,
+    }) as CandidateFacts;
+
+  it("matches on layer/panel/row/kind within exclusive 0.5 tolerance", () => {
+    const candidates = [
+      asCandidate({ id: 0, x: 10.49, y: 20.49 }),
+      asCandidate({ id: 1, x: 10, y: 20, rowIndex: 2 }),
+    ];
+    const matched = matchCandidateFromHit(candidates, hit(10, 20, { rowIndex: 1 }));
+    expect(matched?.id).toBe(0);
+  });
+
+  it("rejects |Δ| === 0.5 (exclusive bound)", () => {
+    const candidates = [asCandidate({ id: 0, x: 10.5, y: 20 })];
+    expect(matchCandidateFromHit(candidates, hit(10, 20, { rowIndex: 1 }))).toBeNull();
+  });
+
+  it("returns the first match in iteration order", () => {
+    const candidates = [
+      asCandidate({ id: 0, x: 10, y: 20 }),
+      asCandidate({ id: 1, x: 10, y: 20 }),
+    ];
+    expect(matchCandidateFromHit(candidates, hit(10, 20, { rowIndex: 1 }))?.id).toBe(0);
+  });
+
+  it("requires kind and row identity", () => {
+    const candidates = [asCandidate({ id: 0, kind: "line" as never })];
+    expect(
+      matchCandidateFromHit(candidates, hit(10, 20, { rowIndex: 1, kind: "point" })),
+    ).toBeNull();
   });
 });
