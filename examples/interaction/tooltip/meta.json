@@ -1,6 +1,18 @@
 {
-  "title": "Hover tooltip",
-  "description": "tooltip on <GGPlot> shows the hovered mark's mapped values (or a custom snippet). Hits resolve through the unified plot-pixel hit index — a quadtree for points, exact containment for bars, stroke proximity for lines — identically for SVG and canvas strata, and hovering never re-runs the pipeline.",
-  "tags": ["interaction", "tooltip", "hover", "point"],
-  "docsSection": "Interaction"
+  "title": "Inspect and pin data",
+  "description": "Opt-in inspection adds a semantic crosshair, an HTML tooltip, keyboard traversal, and click-or-Enter pinning. The example also renders the typed oninspect lifecycle so transient, pinned, and clear states are visible without exposing renderer indices.",
+  "tags": ["interaction", "inspect", "tooltip", "crosshair", "keyboard", "pin"],
+  "docsSection": "Interaction",
+  "vrHeight": 740,
+  "journey": {
+    "pointer": "Move across a point to inspect it, then click to pin the inspection.",
+    "keyboard": "Tab to the chart, use the Arrow keys to inspect points, press Enter to pin, and press Escape to dismiss.",
+    "touch": "Tap a point to pin its values; tap outside the chart to dismiss the inspection.",
+    "references": [
+      { "label": "Interaction guide and event reference", "href": "/guide/interactions" },
+      { "label": "Pre-0.1 interaction migration", "href": "/guide/migrating-pre-0-1" }
+    ],
+    "svelteFirst": true,
+    "fullWidth": true
+  }
 }

@@ -112,7 +112,6 @@ pre {
 }
 
 .gg-example-frame {
-  /* Sized inline per example (width/height from the manifest). */
   overflow: hidden;
   background: var(--bg);
 }
@@ -143,4 +142,7 @@ html[data-vr] .gg-example-frame {
   top: 0;
   left: 0;
   z-index: 999;
+  width: var(--example-vr-width) !important;
+  max-width: none !important;
+  height: var(--example-vr-height) !important;
 }

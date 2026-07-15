@@ -8,7 +8,9 @@
     "bench": "bun run pipeline.bench.ts",
     "bench:smoke": "BENCH_SMOKE=1 bun run pipeline.bench.ts",
     "bench:json": "bun run bench-json.ts",
-    "bench:budgets": "bun run check-budgets.ts"
+    "bench:budgets": "bun run check-budgets.ts",
+    "bench:memory": "bun run retained-memory.ts",
+    "bench:memory:check": "bun run retained-memory.ts --check"
   },
   "dependencies": {
     "@ggsvelte/core": "workspace:*",

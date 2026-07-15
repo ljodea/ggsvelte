@@ -1,0 +1,8 @@
+{
+  "$comment": "R0 public interaction scheduling gate in pinned Playwright Chromium: 50 warm-ups, 500 operations per sample, five samples. The median sample p95 must remain below the absolute threshold.",
+  "version": 1,
+  "warmupOperations": 50,
+  "operationsPerSample": 500,
+  "samples": 5,
+  "pointerDispatchP95Ms": 8
+}

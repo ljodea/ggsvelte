@@ -51,6 +51,9 @@ export default defineConfig({
     deviceScaleFactor: 1,
     viewport: { width: 800, height: 640 },
     colorScheme: "light",
+    contextOptions: { reducedMotion: "reduce" },
+    locale: "en-US",
+    timezoneId: "UTC",
   },
   projects: [{ name: "chromium", use: { browserName: "chromium" } }],
   webServer: {

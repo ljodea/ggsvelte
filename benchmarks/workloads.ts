@@ -320,6 +320,16 @@ export function buildWorkloads(smoke: boolean): Workload[] {
         bench: `hit index build ${label} points`,
         fn: () => buildHitIndex(model.scene),
       },
+      {
+        id: `candidate lookup ${label}`,
+        group: groupLabel,
+        bench: `candidate nearest/group/rect ${label}`,
+        fn: () => {
+          const match = model.candidates.nearest(400, 250, { mode: "xy", maxDistance: 32 });
+          if (match !== null && match.xToken !== null) model.candidates.group(match.id, "x");
+          model.candidates.queryRect(200, 125, 600, 375);
+        },
+      },
     );
   }
 
