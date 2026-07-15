@@ -45,11 +45,12 @@ adb shell wm density 420
 adb shell input keyevent KEYCODE_WAKEUP
 adb shell wm dismiss-keyguard
 
-adb shell settings put secure enabled_accessibility_services "${TALKBACK_SERVICE}"
-adb shell settings put secure accessibility_enabled 1
+adb shell settings put secure accessibility_enabled 0
 adb shell settings put secure touch_exploration_granted_accessibility_services \
   "${TALKBACK_SERVICE}"
 adb shell settings put secure touch_exploration_enabled 1
+adb shell settings put secure enabled_accessibility_services "${TALKBACK_SERVICE}"
+adb shell settings put secure accessibility_enabled 1
 sleep 8
 
 adb shell dumpsys accessibility > "${OUTPUT_DIR}/accessibility-dump.txt"
