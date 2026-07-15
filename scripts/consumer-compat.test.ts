@@ -3,11 +3,11 @@ import { join } from "node:path";
 
 import {
   commandExecutable,
+  commandInvocation,
   commandPlan,
   fixtureManifest,
   packageTarballNames,
   resolveConsumerOptions,
-  withLocalBinPath,
 } from "./consumer-compat.js";
 
 describe("packed consumer compatibility harness", () => {
@@ -40,11 +40,11 @@ describe("packed consumer compatibility harness", () => {
     });
   });
 
-  test("prepends the repository-local executable directory for clean consumer commands", () => {
-    expect(withLocalBinPath("/repo", "/usr/bin")).toStartWith(
-      join("/repo", "node_modules", ".bin"),
-    );
-    expect(withLocalBinPath("/repo", "/usr/bin")).toContain("/usr/bin");
+  test("invokes the pinned pnpm CLI without relying on an installer-generated shim", () => {
+    expect(commandInvocation("pnpm", ["--version"], "/repo", "linux")).toEqual({
+      command: "node",
+      args: [join("/repo", "node_modules", "pnpm", "bin", "pnpm.mjs"), "--version"],
+    });
   });
 
   test.each(["npm", "pnpm", "bun"] as const)(

@@ -1,6 +1,6 @@
 import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { basename, delimiter, join, relative, resolve } from "node:path";
+import { basename, join, relative, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 
 import type { PackageManager } from "./support-matrix.js";
@@ -49,8 +49,19 @@ export function resolveConsumerOptions(
   };
 }
 
-export function withLocalBinPath(root: string, currentPath: string): string {
-  return `${join(root, "node_modules", ".bin")}${delimiter}${currentPath}`;
+export function commandInvocation(
+  command: string,
+  args: string[],
+  root: string,
+  platform = process.platform,
+): { command: string; args: string[] } {
+  if (command === "pnpm") {
+    return {
+      command: "node",
+      args: [join(root, "node_modules", "pnpm", "bin", "pnpm.mjs"), ...args],
+    };
+  }
+  return { command: commandExecutable(command, platform), args };
 }
 
 function runner(packageManager: PackageManager, binary: string, args: string[]): CommandStep {
@@ -239,9 +250,10 @@ console.log("consumer smoke passed");
   );
 }
 
-function run(step: CommandStep, cwd: string): void {
+function run(step: CommandStep, cwd: string, root: string): void {
   console.log(`consumer-compat: ${step.label}`);
-  const result = spawnSync(commandExecutable(step.command), step.args, {
+  const invocation = commandInvocation(step.command, step.args, root);
+  const result = spawnSync(invocation.command, invocation.args, {
     cwd,
     encoding: "utf8",
     input: step.input,
@@ -262,8 +274,10 @@ function verifyPackageManagerVersion(
   packageManager: PackageManager,
   expectedVersion: string | undefined,
   cwd: string,
+  root: string,
 ): void {
-  const result = spawnSync(commandExecutable(packageManager), ["--version"], {
+  const invocation = commandInvocation(packageManager, ["--version"], root);
+  const result = spawnSync(invocation.command, invocation.args, {
     cwd,
     encoding: "utf8",
     stdio: ["ignore", "pipe", "pipe"],
@@ -318,7 +332,6 @@ function main(): void {
     throw new Error(`unknown package manager: ${packageManager}`);
   }
   const root = resolve(import.meta.dir, "..");
-  process.env.PATH = withLocalBinPath(root, process.env.PATH ?? "");
   const temporaryRoot = mkdtempSync(join(tmpdir(), "ggsvelte-compat-"));
   const artifacts = join(temporaryRoot, "packed artifacts");
   const fixture = join(temporaryRoot, "consumer space ü");
@@ -327,8 +340,8 @@ function main(): void {
   try {
     const tarballs = pack(root, artifacts);
     writeFixture(fixture, svelteVersion, tarballs, packageManager);
-    verifyPackageManagerVersion(packageManager, packageManagerVersion, fixture);
-    for (const step of commandPlan(packageManager)) run(step, fixture);
+    verifyPackageManagerVersion(packageManager, packageManagerVersion, fixture, root);
+    for (const step of commandPlan(packageManager)) run(step, fixture, root);
     console.log(`consumer-compat: PASS (${packageManager}, Svelte ${svelteVersion})`);
   } finally {
     rmSync(temporaryRoot, { recursive: true, force: true });
