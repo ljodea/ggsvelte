@@ -1,6 +1,6 @@
 {
   "name": "@ggsvelte/svelte",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "ggsvelte: a layered grammar of graphics for Svelte 5 — ggplot2 semantics, JSON-serializable specs, agent-friendly validation, hybrid SVG/canvas rendering, and the ggsvelte-render CLI.",
   "keywords": [
     "charts",
