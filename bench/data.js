@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784155066183,
+  "lastUpdate": 1784156544753,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -4605,6 +4605,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 166.3719,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b89d96ba4a338491cc14ed4b29c61e7e857e56fe",
+          "message": "refactor(svelte): extract pure GGPlot interaction helpers (#47)\n\n* refactor(svelte): extract pure GGPlot interaction helpers\n\nPull pointer navigation, zoom domain merge, selection algebra, interval\nquery expansion, and theme CSS token formatting out of GGPlot into focused\nmodules with characterization tests. GGPlot stays the orchestrator; public\nAPI and interaction semantics are unchanged.\n\n* fix(svelte): drop unnecessary type assertion in plot-zoom\n\nSatisfies oxlint typescript/no-unnecessary-type-assertion for CI\npre-commit type-aware parity.",
+          "timestamp": "2026-07-15T18:01:47-05:00",
+          "tree_id": "a2a2389764398982839c8d3c8b6f82252afd35e9",
+          "url": "https://github.com/ljodea/ggsvelte/commit/b89d96ba4a338491cc14ed4b29c61e7e857e56fe"
+        },
+        "date": 1784156543836,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.4554,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.5268,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 8.3006,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 13.5026,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 86.9387,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 127.7398,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.2494,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2198,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 93.0989,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 113.9588,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 9.8455,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 9.7431,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 123.6093,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.6256,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 24.4844,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 5.902,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 34.2862,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 590.3116,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 137.0017,
             "unit": "ms"
           }
         ]
