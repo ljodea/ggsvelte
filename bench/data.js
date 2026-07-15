@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784102827430,
+  "lastUpdate": 1784103062997,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -1630,6 +1630,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 155.9784,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "be438bb2ac246aa7c861b59f208c5626f3aae7d9",
+          "message": "fix(a11y): establish the v0.1 manual AT release gate\n\nAdds release-ready interaction announcements, an atomic manual AT evidence schema, and real NVDA, VoiceOver, and TalkBack evidence harnesses.",
+          "timestamp": "2026-07-15T03:10:19-05:00",
+          "tree_id": "ab18f08ae2a1efebf9ffc813ba550a49d6f5fa53",
+          "url": "https://github.com/ljodea/ggsvelte/commit/be438bb2ac246aa7c861b59f208c5626f3aae7d9"
+        },
+        "date": 1784103062160,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 3.4153,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.2873,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 11.5283,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 15.9866,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 102.7399,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 136.1506,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.0562,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.3146,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 101.5476,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 127.6952,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 12.7338,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 11.1515,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 134.2135,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.6531,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 27.2263,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 6.2834,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 34.6871,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 659.2956,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 155.1074,
             "unit": "ms"
           }
         ]
