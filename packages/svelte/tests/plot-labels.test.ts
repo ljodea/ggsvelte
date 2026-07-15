@@ -113,7 +113,7 @@ describe("inspectionLiveText", () => {
     const pinned = {
       ...one,
       state: "pinned" as const,
-      members: [one.members[0]!, one.members[0]!],
+      members: [one.members[0], one.members[0]],
     };
     expect(inspectionLiveText(m, pinned as never)).toBe("x 1, y 2; 2 data, pinned");
   });

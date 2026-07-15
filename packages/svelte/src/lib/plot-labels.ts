@@ -44,9 +44,11 @@ export function inspectionLiveText(
     return `${datumLabel(model, value.focus.row)}; ${String(count)} ${count === 1 ? "datum" : "data"}${state}`;
   const seen = new Set<string>();
   const focused = value.focus.fields
-    .filter(
-      (field) => field.channel !== value.mode && !seen.has(field.field) && seen.add(field.field),
-    )
+    .filter((field) => {
+      if (field.channel === value.mode || seen.has(field.field)) return false;
+      seen.add(field.field);
+      return true;
+    })
     .map((field) => `${field.field} ${String(field.value ?? "")}`)
     .join(", ");
   return `${value.mode} ${value.axisLabel}; ${String(count)} ${count === 1 ? "datum" : "data"}${focused ? `; focused ${focused}` : ""}${state}`;

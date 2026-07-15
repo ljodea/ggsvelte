@@ -1,7 +1,5 @@
 import type { RenderModel } from "@ggsvelte/core";
 
-import type { ZoomDomains } from "./interaction.js";
-
 export type PlotRect = {
   readonly x0: number;
   readonly y0: number;
@@ -14,6 +12,12 @@ export type PanelBounds = {
   readonly y: number;
   readonly width: number;
   readonly height: number;
+};
+
+/** Continuous zoom domain bag used by brush-to-zoom commit paths. */
+export type ContinuousZoomDomains = {
+  x?: [number, number];
+  y?: [number, number];
 };
 
 export const clamp = (v: number, lo: number, hi: number): number => Math.max(lo, Math.min(hi, v));
@@ -31,7 +35,7 @@ export function invertedDomain(
   return a <= b ? [a, b] : [b, a];
 }
 
-export function frozenZoomDomains(domains: ZoomDomains): ZoomDomains {
+export function frozenZoomDomains(domains: ContinuousZoomDomains): ContinuousZoomDomains {
   return Object.freeze({
     ...(domains.x !== undefined && {
       x: Object.freeze([...domains.x]) as unknown as [number, number],
