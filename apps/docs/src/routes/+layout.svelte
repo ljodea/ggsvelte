@@ -16,6 +16,7 @@
     <a class="brand" href={`${base}/`}>ggsvelte</a>
     <a href={`${base}/guide/getting-started`}>Guide</a>
     <a href={`${base}/examples`}>Examples</a>
+    <a href={`${base}/playground`}>Playground</a>
     <a href="https://github.com/ljodea/ggsvelte" rel="external">GitHub</a>
   </nav>
 </header>

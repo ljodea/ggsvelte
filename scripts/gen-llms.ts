@@ -23,6 +23,7 @@ import {
   PIPELINE_WARNING_CATALOG,
 } from "@ggsvelte/core";
 import { ERROR_CATALOG, LINT_CATALOG } from "@ggsvelte/spec";
+import { INTERACTION_DIAGNOSTIC_CATALOG } from "../packages/svelte/src/lib/interaction";
 import supportMatrix from "../support-matrix.json";
 
 // ---------------------------------------------------------------------------
@@ -58,6 +59,21 @@ export function renderMarkdown(md: string, base = ""): string {
   let list: string[] | null = null;
   let code: string[] | null = null;
   let codeLang = "";
+  const headingCounts = new Map<string, number>();
+
+  const headingId = (text: string): string => {
+    const stem =
+      text
+        .replaceAll(/`([^`]+)`/g, "$1")
+        .toLowerCase()
+        .normalize("NFKD")
+        .replaceAll(/[\u0300-\u036F]/g, "")
+        .replaceAll(/[^a-z0-9]+/g, "-")
+        .replaceAll(/^-|-$/g, "") || "section";
+    const count = (headingCounts.get(stem) ?? 0) + 1;
+    headingCounts.set(stem, count);
+    return count === 1 ? stem : `${stem}-${String(count)}`;
+  };
 
   const flushParagraph = () => {
     if (paragraph.length > 0) {
@@ -96,7 +112,9 @@ export function renderMarkdown(md: string, base = ""): string {
       flushParagraph();
       flushList();
       const level = heading[1]!.length;
-      html.push(`<h${level}>${inline(heading[2]!, base)}</h${level}>`);
+      html.push(
+        `<h${level} id="${headingId(heading[2]!)}">${inline(heading[2]!, base)}</h${level}>`,
+      );
       continue;
     }
     if (line.startsWith("- ")) {
@@ -221,6 +239,10 @@ and **the fix carries a machine-applicable example — apply it**. Pass
   the builder chain, and the canonical spec JSON side by side.
 - [Interactions](/guide/interactions) — inspection, selection, zoom, typed
   events, keyboard behavior, and stable identity.
+- [Local data playground](/playground) — paste bounded JSON rows without
+  uploads, remote fetches, or code execution.
+- [Interaction reference](/guide/interaction-reference) — props, callbacks,
+  event phases, diagnostics, and accessibility defaults.
 - [Compatibility](/guide/compatibility) — tested Node, Svelte, installer,
   browser, and operating-system boundaries.
 - [Pre-0.1 interaction migration](/guide/migrating-pre-0-1) — replace the old
@@ -263,6 +285,17 @@ ggsvelte keeps static charts static. Opt in to only the behaviors the chart
 needs with \`inspect\`, \`select\`, and \`zoom\`. Once more than one behavior is
 available, the chart renders an accessible tool rail so inspection, selection,
 and zoom never compete for the same drag or click.
+
+**v0.1 scope:** interaction props emit chart-local callbacks. The public
+controller and linked-chart API is planned for R1 and is not part of v0.1.
+Application code may consume a callback into its own Svelte state, but
+ggsvelte does not yet publish a coordination controller.
+
+Start with the runnable [inspection and pinning example](/examples/interactions/inspection),
+the [interval selection and zoom example](/examples/interactions/interval-selection),
+or [use your own local JSON rows in the playground](/playground). For exact
+props, callbacks, phases, and diagnostics, use the
+[interaction reference](/guide/interaction-reference).
 
 ## Inspection
 
@@ -309,7 +342,13 @@ Point selection is durable identity, not a renderer index. Supply a unique,
 stable string, number, or symbol for every source row:
 
 \`\`\`svelte
-<GGPlot key="id" select={{ type: "point", multiple: true }} />
+<GGPlot
+  key="id"
+  select={{ type: "point", multiple: true }}
+  onselect={(event) => {
+    if (event.mode === "point") selectedKeys = event.keys;
+  }}
+/>
 \`\`\`
 
 Use interval selection for brushing. The callback receives both the selected
@@ -341,8 +380,6 @@ domains; Reset zoom or double-click emits a clear event.
 
 \`\`\`svelte
 <GGPlot
-  inspect={true}
-  select={{ type: "interval", mode: "xy" }}
   zoom={{ mode: "xy" }}
   onzoom={(event) => console.log(event.domains)}
 />
@@ -403,6 +440,222 @@ updates. Invalid or duplicate keys emit structured diagnostics through
 \`ondiagnostic\`; they never silently fall back to array positions. Stable keys
 let pinned inspection and point selection follow a datum when data is updated.
 `;
+
+const interactionDiagnostics = Object.values(INTERACTION_DIAGNOSTIC_CATALOG)
+  .map(
+    (entry) => `### \`${entry.code}\`
+
+${entry.message}
+
+- Prop: \`${entry.prop}\`
+- Severity: \`${entry.severity}\`
+- Try: ${entry.suggestions.join("; ")}
+- More: [${entry.docUrl}](${entry.docUrl})`,
+  )
+  .join("\n\n");
+
+export const INTERACTION_REFERENCE_MD = `# Interaction reference
+
+This page is the searchable contract for v0.1 interaction. All outputs are
+chart-local callbacks. A public controller for linked charts is planned for
+R1 and is not shipped in v0.1.
+
+## Static default
+
+Charts have no capture layer, tooltip, selection state, or zoom behavior until
+the corresponding capability is enabled. This keeps ordinary charts light and
+prevents interaction gestures from competing with page scrolling.
+
+## Capability props
+
+### \`inspect\`
+
+Enables inspection, the default HTML tooltip, semantic crosshair, keyboard
+traversal, and optional pinning. Inputs are \`true\` or options with \`mode\`,
+\`pin\`, \`maxDistance\`, \`content\`, and \`contentMode\`.
+
+### Point selection
+
+\`select={{ type: "point", multiple: true }}\` stores stable semantic keys.
+Supply \`key\` for every row.
+
+### Interval selection
+
+\`select={{ type: "interval", mode: "x" | "y" | "xy", persistent: true }}\`
+enables an explicit Select area tool and emits domain and pixel bounds.
+
+### \`zoom\`
+
+\`zoom={{ mode: "x" | "y" | "xy" }}\` enables the explicit Zoom area tool.
+Reset zoom and double-click return to the natural domains.
+
+## Controlled tool
+
+\`tool\` and \`ontoolchange\` control the active Inspect, Select area, or Zoom
+area mode. Keep the value in Svelte state when application controls and the
+plot tool rail must stay synchronized:
+
+\`\`\`svelte
+<script lang="ts">
+  import type { InteractionTool } from "ggsvelte";
+
+  let activeTool = $state<InteractionTool>("inspect");
+</script>
+
+<GGPlot
+  inspect={true}
+  select={{ type: "interval" }}
+  tool={activeTool}
+  ontoolchange={(next) => (activeTool = next)}
+/>
+\`\`\`
+
+A controlled unavailable tool requests a change and emits a diagnostic; it
+does not silently arm a different drag behavior. This state remains local to
+one chart in v0.1; it is not the planned R1 linked-chart controller.
+
+## Identity
+
+\`key\` is a field name or accessor returning a unique stable \`PropertyKey\`. Public
+events expose semantic keys, aggregate \`sourceKeys\`, and \`lineageCount\`,
+never renderer indices.
+
+## Events
+
+### \`oninspect\`
+
+Receives \`PlotInspection\`: \`change\` with transient or pinned focus and
+members, or \`clear\`.
+
+### \`onselect\`
+
+Receives \`PlotSelection\`. Point selection emits \`end\` and \`clear\`.
+Interval selection emits \`start\`, \`change\`, \`end\`, and \`clear\`.
+
+### \`onzoom\`
+
+Receives \`ZoomEvent\`: \`end\` with explicit domains or \`clear\` with null
+domains.
+
+### \`oninteraction\`
+
+Receives the same discriminated \`PlotInteractionEvent\` union emitted by the
+focused callbacks. Narrow on \`type\` and \`phase\`.
+
+### \`ondiagnostic\`
+
+Receives structured \`InteractionDiagnostic\` objects with \`severity\`,
+\`code\`, \`message\`, \`prop\`, \`suggestions\`, and \`docUrl\`.
+
+\`\`\`svelte
+<GGPlot
+  ondiagnostic={(diagnostic) =>
+    console.warn(diagnostic.code, diagnostic.message, diagnostic.suggestions)}
+/>
+\`\`\`
+
+Every event has a \`source\`: \`pointer\`, \`keyboard\`, \`touch\`, or
+\`programmatic\`.
+
+## Diagnostics
+
+${interactionDiagnostics}
+
+## Accessibility
+
+The plot surface is named and keyboard focusable when interaction is enabled.
+Arrow keys or brackets traverse data; Enter or Space pins or commits the active
+tool; Escape dismisses. A polite live region announces concise state while
+pinned HTML remains labelled, navigable DOM. Area tools remain explicit so
+ordinary page scrolling is available until a user chooses a drag mode.
+`;
+
+export interface InteractionReferenceEntry {
+  id: string;
+  name: string;
+  summary: string;
+  href: string;
+  keywords: readonly string[];
+}
+
+/** Search data for the human-facing reference page, kept beside its prose. */
+export const INTERACTION_REFERENCE_INDEX: readonly InteractionReferenceEntry[] = [
+  {
+    id: "static-default",
+    name: "Static by default",
+    summary: "Keep capture layers and gestures out of charts until a capability is enabled.",
+    href: "/guide/interaction-reference#static-default",
+    keywords: ["opt in", "capture", "scroll"],
+  },
+  {
+    id: "inspect",
+    name: "Inspect and pin",
+    summary: "Show an HTML tooltip and semantic crosshair with pointer and keyboard traversal.",
+    href: "/guide/interaction-reference#inspect",
+    keywords: ["tooltip", "crosshair", "pin", "keyboard"],
+  },
+  {
+    id: "point-selection",
+    name: "Point selection",
+    summary:
+      "Select one or many data records using stable semantic keys instead of renderer indices.",
+    href: "/guide/interaction-reference#point-selection",
+    keywords: ["select", "multiple", "keys"],
+  },
+  {
+    id: "interval-selection",
+    name: "Interval selection",
+    summary:
+      "Brush an explicit rectangular area and receive domain, pixel, and semantic-key bounds.",
+    href: "/guide/interaction-reference#interval-selection",
+    keywords: ["brush", "rectangle", "domain"],
+  },
+  {
+    id: "zoom",
+    name: "Brush zoom",
+    summary: "Zoom one or both axes with an explicit area tool and a predictable reset path.",
+    href: "/guide/interaction-reference#zoom",
+    keywords: ["domain", "reset", "double click"],
+  },
+  {
+    id: "controlled-tool",
+    name: "Controlled tool",
+    summary: "Synchronize the active Inspect, Select area, or Zoom area mode with Svelte state.",
+    href: "/guide/interaction-reference#controlled-tool",
+    keywords: ["tool", "ontoolchange", "state"],
+  },
+  {
+    id: "identity",
+    name: "Stable identity",
+    summary: "Preserve inspection and selection across updates with unique application-level keys.",
+    href: "/guide/interaction-reference#identity",
+    keywords: ["key", "lineage", "sourceKeys"],
+  },
+  {
+    id: "events",
+    name: "Typed events",
+    summary:
+      "Handle focused callbacks or one discriminated interaction event union with explicit phases.",
+    href: "/guide/interaction-reference#events",
+    keywords: ["oninspect", "onselect", "onzoom", "oninteraction", "phase"],
+  },
+  {
+    id: "diagnostics",
+    name: "Diagnostics",
+    summary:
+      "Respond to structured codes, suggestions, affected props, and exact documentation links.",
+    href: "/guide/interaction-reference#diagnostics",
+    keywords: ["ondiagnostic", "warning", "error", "suggestions"],
+  },
+  {
+    id: "accessibility",
+    name: "Accessibility",
+    summary:
+      "Use keyboard traversal, concise announcements, labelled DOM, and explicit area tools.",
+    href: "/guide/interaction-reference#accessibility",
+    keywords: ["screen reader", "keyboard", "live region", "focus"],
+  },
+];
 
 export const MIGRATING_PRE_0_1_MD = `# Migrating pre-0.1 interactions
 
@@ -499,7 +752,9 @@ export function buildErrorsMd(): string {
     "Validation errors (@ggsvelte/spec)",
     "Returned by `validate()` as `{ code, path, message, allowed?, fix }`. Tier 1 = schema shape, no data needed; tier 2 runs when an options argument is passed (structural grammar rules + data-aware checks against inline data or a DataProfile). Instances carry a concrete `fix.example` — apply it.",
     ERROR_CATALOG,
-    { tierOf: (code) => `tier ${String(ERROR_CATALOG[code as keyof typeof ERROR_CATALOG].tier)}` },
+    {
+      tierOf: (code) => `tier ${String(ERROR_CATALOG[code as keyof typeof ERROR_CATALOG].tier)}`,
+    },
   );
   const pipeline = catalogSection(
     "Render-time errors (@ggsvelte/core)",
@@ -686,6 +941,12 @@ export function guidePages(lifecycle: LifecycleDoc): GuidePage[] {
       markdown: INTERACTIONS_MD,
     },
     {
+      slug: "interaction-reference",
+      title: "Interaction reference",
+      description: "Search interaction props, callbacks, event phases, and diagnostic codes.",
+      markdown: INTERACTION_REFERENCE_MD,
+    },
+    {
       slug: "migrating-pre-0-1",
       title: "Migrating pre-0.1 interactions",
       description: "Move from tooltip and brush props to semantic interaction capabilities.",
@@ -711,6 +972,8 @@ export function buildLlmsIndex(
     lines.push(`- [${page.title}](/guide/${page.slug}): ${page.description}`);
   }
   lines.push(
+    "- [Local data playground](/playground): safely try bounded JSON rows with static and interactive chart controls",
+    "- [Search interaction reference](/reference/interactions): filter interaction capabilities, events, diagnostics, and accessibility guidance",
     "- [JSON Schema v0](/schema/v0.json): the PortableSpec schema (unstable pre-0.1.0)",
     "- [llms-full.txt](/llms-full.txt): all docs prose plus every example (spec JSON + Svelte source)",
     "",

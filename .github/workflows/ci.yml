@@ -178,8 +178,8 @@ jobs:
         run: bun run --bun test
       - name: build packaged interaction test target
         run: BASE_PATH=/ggsvelte bun run build:docs
-      - name: interaction accessibility, keyboard, and touch journeys
-        run: bun run test:visual -- interaction-accessibility.spec.ts
+      - name: interaction and safe-playground accessibility journeys
+        run: bun run test:visual -- interaction-accessibility.spec.ts playground.spec.ts
       - name: interaction performance p50/p95 gate
         run: bun run test:interaction-perf
       - name: upload browser traces, screenshots, and reports on failure

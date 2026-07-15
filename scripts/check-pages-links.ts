@@ -4,7 +4,10 @@ import { posix, resolve } from "node:path";
 
 export const requiredPages = [
   "guide/interactions.html",
+  "guide/interaction-reference.html",
   "guide/migrating-pre-0-1.html",
+  "playground.html",
+  "reference/interactions.html",
   "examples/interaction/tooltip.html",
   "examples/interaction/brush-zoom.html",
   "examples/interactions/inspection.html",
@@ -47,6 +50,33 @@ export function findBrokenLinks(
   });
 }
 
+/** Return internal hrefs whose target exists but whose fragment id does not. */
+export function findBrokenFragments(
+  sourcePath: string,
+  hrefs: readonly string[],
+  files: ReadonlySet<string>,
+  anchors: ReadonlyMap<string, ReadonlySet<string>>,
+): string[] {
+  return hrefs.filter((href) => {
+    const hashIndex = href.indexOf("#");
+    if (hashIndex < 0 || hashIndex === href.length - 1) return false;
+    const beforeHash = href.slice(0, hashIndex);
+    if (beforeHash.startsWith("//") || EXTERNAL_PROTOCOL.test(beforeHash)) return false;
+
+    let fragment: string;
+    try {
+      fragment = decodeURIComponent(href.slice(hashIndex + 1));
+    } catch {
+      return true;
+    }
+    const target = beforeHash === "" ? sourcePath : targetPath(sourcePath, beforeHash);
+    if (target === null) return false;
+    const page = candidates(target).find((candidate) => files.has(candidate));
+    if (page === undefined || !page.endsWith(".html")) return false;
+    return !(anchors.get(page)?.has(fragment) ?? false);
+  });
+}
+
 function listFiles(root: string, directory = root): string[] {
   return readdirSync(directory).flatMap((name) => {
     const absolute = resolve(directory, name);
@@ -59,18 +89,36 @@ function listFiles(root: string, directory = root): string[] {
 export function checkPackedPages(buildDirectory: string): string[] {
   if (!existsSync(buildDirectory)) return [`packed Pages directory is missing: ${buildDirectory}`];
   const files = new Set(listFiles(buildDirectory));
+  const htmlByPath = new Map<string, string>();
+  const anchors = new Map<string, ReadonlySet<string>>();
+  for (const path of files) {
+    if (!path.endsWith(".html")) continue;
+    const html = readFileSync(resolve(buildDirectory, path), "utf8");
+    htmlByPath.set(path, html);
+    anchors.set(
+      path,
+      new Set(
+        [...html.matchAll(/\bid=(?:"([^"]*)"|'([^']*)')/gi)].map(
+          (match) => match[1] ?? match[2] ?? "",
+        ),
+      ),
+    );
+  }
   const problems = requiredPages
     .filter((page) => !files.has(page))
     .map((page) => `missing required page: ${page}`);
 
   for (const sourcePath of files) {
     if (!sourcePath.endsWith(".html")) continue;
-    const html = readFileSync(resolve(buildDirectory, sourcePath), "utf8");
+    const html = htmlByPath.get(sourcePath) ?? "";
     const hrefs = [...html.matchAll(/\bhref=(?:"([^"]*)"|'([^']*)')/gi)].map(
       (match) => match[1] ?? match[2] ?? "",
     );
     for (const href of findBrokenLinks(sourcePath, hrefs, files)) {
       problems.push(`${sourcePath}: broken href ${JSON.stringify(href)}`);
+    }
+    for (const href of findBrokenFragments(sourcePath, hrefs, files, anchors)) {
+      problems.push(`${sourcePath}: broken fragment ${JSON.stringify(href)}`);
     }
   }
   return problems;

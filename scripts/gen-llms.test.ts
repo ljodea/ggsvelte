@@ -10,6 +10,7 @@ import { join } from "node:path";
 
 import { ADVISORY_CATALOG, PIPELINE_ERROR_CATALOG, PIPELINE_WARNING_CATALOG } from "@ggsvelte/core";
 import { ERROR_CATALOG, LINT_CATALOG } from "@ggsvelte/spec";
+import { INTERACTION_DIAGNOSTIC_CATALOG } from "../packages/svelte/src/lib/interaction.ts";
 
 import { EXAMPLES } from "../examples/manifest.ts";
 import type { LifecycleDoc } from "./gen-llms.ts";
@@ -22,6 +23,8 @@ import {
   GETTING_STARTED_MD,
   COMPATIBILITY_MD,
   INTERACTIONS_MD,
+  INTERACTION_REFERENCE_MD,
+  INTERACTION_REFERENCE_INDEX,
   MIGRATING_PRE_0_1_MD,
   guidePages,
   pruneSpecData,
@@ -37,7 +40,7 @@ describe("renderMarkdown", () => {
     const html = renderMarkdown(
       "# T\n\npara with `code` and [x](/y)\n\n- a\n- b\n\n```ts\nconst a = 1 < 2;\n```\n",
     );
-    expect(html).toContain("<h1>T</h1>");
+    expect(html).toContain('<h1 id="t">T</h1>');
     expect(html).toContain('<p>para with <code>code</code> and <a href="/y">x</a></p>');
     expect(html).toContain("<ul><li>a</li><li>b</li></ul>");
     expect(html).toContain('<pre><code class="language-ts">const a = 1 &lt; 2;</code></pre>');
@@ -54,6 +57,13 @@ describe("renderMarkdown", () => {
     );
     expect(html).toContain('href="/ggsvelte/guide/errors"');
     expect(html).toContain('href="https://example.com"');
+  });
+
+  it("adds stable unique heading fragments", () => {
+    const html = renderMarkdown("# Events\n\n## `onselect` event\n\n## `onselect` event");
+    expect(html).toContain('<h1 id="events">Events</h1>');
+    expect(html).toContain('<h2 id="onselect-event"><code>onselect</code> event</h2>');
+    expect(html).toContain('<h2 id="onselect-event-2"><code>onselect</code> event</h2>');
   });
 });
 
@@ -96,6 +106,10 @@ describe("guide sections cover their catalogs", () => {
   });
 
   it("documents the complete interaction capability and event contracts", () => {
+    expect(INTERACTIONS_MD).toContain("chart-local callbacks");
+    expect(INTERACTIONS_MD).toContain("controller and linked-chart API is planned for R1");
+    expect(INTERACTIONS_MD).toContain("/examples/interactions/inspection");
+    expect(INTERACTIONS_MD).toContain("/playground");
     expect(INTERACTIONS_MD).toContain('inspect={{ mode: "x",');
     expect(INTERACTIONS_MD).toContain('select={{ type: "interval", mode: "xy",');
     expect(INTERACTIONS_MD).toContain('key="id"');
@@ -105,6 +119,50 @@ describe("guide sections cover their catalogs", () => {
     expect(INTERACTIONS_MD).toContain('phase: "clear"');
     expect(INTERACTIONS_MD).toContain('type: "zoom"');
     expect(INTERACTIONS_MD).toContain("INTERACTION_INTERVAL_FACET_UNSUPPORTED");
+  });
+
+  it("publishes a dedicated interaction capability and event reference", () => {
+    for (const term of [
+      "inspect",
+      "point selection",
+      "interval selection",
+      "zoom",
+      "tool",
+      "oninspect",
+      "onselect",
+      "onzoom",
+      "oninteraction",
+      "ondiagnostic",
+    ]) {
+      expect(INTERACTION_REFERENCE_MD.toLowerCase()).toContain(term);
+    }
+    expect(INTERACTION_REFERENCE_MD).toContain("INTERACTION_TOOL_UNAVAILABLE");
+    expect(INTERACTION_REFERENCE_MD).toContain("chart-local");
+    const html = renderMarkdown(INTERACTION_REFERENCE_MD);
+    for (const diagnostic of Object.values(INTERACTION_DIAGNOSTIC_CATALOG)) {
+      const fragment = diagnostic.docUrl.split("#")[1];
+      expect(diagnostic.docUrl).toContain("/guide/interaction-reference#");
+      expect(html).toContain(`id="${fragment}"`);
+    }
+  });
+
+  it("exposes an exact searchable interaction index", () => {
+    expect(INTERACTION_REFERENCE_INDEX.map((entry) => entry.id)).toEqual([
+      "static-default",
+      "inspect",
+      "point-selection",
+      "interval-selection",
+      "zoom",
+      "controlled-tool",
+      "identity",
+      "events",
+      "diagnostics",
+      "accessibility",
+    ]);
+    for (const entry of INTERACTION_REFERENCE_INDEX) {
+      expect(entry.summary.length).toBeGreaterThan(20);
+      expect(entry.href).toStartWith("/guide/interaction-reference#");
+    }
   });
 
   it("provides a pre-0.1 source migration for every superseded interaction prop", () => {
@@ -120,13 +178,21 @@ describe("guide sections cover their catalogs", () => {
 describe("pruneSpecData", () => {
   it("truncates values rows and column arrays, reporting the pruned count", () => {
     const values = pruneSpecData(
-      { data: { values: Array.from({ length: 50 }, (_, i) => ({ x: i })) }, layers: [] },
+      {
+        data: { values: Array.from({ length: 50 }, (_, i) => ({ x: i })) },
+        layers: [],
+      },
       20,
     );
     expect(values.prunedRows).toBe(30);
     expect((values.spec as { data: { values: unknown[] } }).data.values).toHaveLength(20);
     const columns = pruneSpecData(
-      { datasets: { d: { columns: { x: Array.from({ length: 25 }, (_, i) => i) } } }, layers: [] },
+      {
+        datasets: {
+          d: { columns: { x: Array.from({ length: 25 }, (_, i) => i) } },
+        },
+        layers: [],
+      },
       20,
     );
     expect(columns.prunedRows).toBe(5);
@@ -147,8 +213,11 @@ describe("llms surfaces", () => {
     expect(txt.startsWith("# ggsvelte\n")).toBe(true);
     for (const page of pages) expect(txt).toContain(`(/guide/${page.slug})`);
     expect(txt).toContain("(/schema/v0.json)");
+    expect(txt).toContain("(/playground)");
+    expect(txt).toContain("(/reference/interactions)");
     for (const ex of EXAMPLES) expect(txt).toContain(`(/examples/${ex.id})`);
     expect(pages.map((page) => page.slug)).toContain("interactions");
+    expect(pages.map((page) => page.slug)).toContain("interaction-reference");
     expect(pages.map((page) => page.slug)).toContain("migrating-pre-0-1");
     expect(pages.map((page) => page.slug)).toContain("compatibility");
   });

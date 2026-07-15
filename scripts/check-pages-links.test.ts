@@ -3,13 +3,21 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 
-import { checkPackedPages, findBrokenLinks, requiredPages } from "./check-pages-links.ts";
+import {
+  checkPackedPages,
+  findBrokenFragments,
+  findBrokenLinks,
+  requiredPages,
+} from "./check-pages-links.ts";
 
 describe("packed Pages link checks", () => {
   const files = new Set([
     "index.html",
     "guide/interactions.html",
+    "guide/interaction-reference.html",
     "guide/migrating-pre-0-1.html",
+    "playground.html",
+    "reference/interactions.html",
     "examples/interaction/tooltip.html",
     "examples/interaction/brush-zoom.html",
     "examples/interactions/inspection.html",
@@ -47,10 +55,28 @@ describe("packed Pages link checks", () => {
     ).toEqual(["../../guide/missing"]);
   });
 
-  it("requires both R0 examples, guides, and agent endpoints in the packed site", () => {
+  it("validates same-page and cross-page heading fragments", () => {
+    const anchors = new Map([
+      ["guide/interactions.html", new Set(["inspection", "brush-zoom"])],
+      ["guide/interaction-reference.html", new Set(["oninspect", "ondiagnostic"])],
+    ]);
+    expect(
+      findBrokenFragments(
+        "guide/interactions.html",
+        ["#inspection", "./interaction-reference#oninspect", "#missing"],
+        files,
+        anchors,
+      ),
+    ).toEqual(["#missing"]);
+  });
+
+  it("requires the playground, R0 examples, guides, and agent endpoints in the packed site", () => {
     for (const page of requiredPages) expect(files.has(page)).toBe(true);
     expect(requiredPages).toContain("examples/interactions/inspection.html");
     expect(requiredPages).toContain("examples/interactions/interval-selection.html");
+    expect(requiredPages).toContain("playground.html");
+    expect(requiredPages).toContain("reference/interactions.html");
+    expect(requiredPages).toContain("guide/interaction-reference.html");
   });
 
   it("reports a missing packed directory and every absent required page", () => {
