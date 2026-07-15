@@ -14,20 +14,33 @@ afterEach(() => {
 function repoWithTrackedBaseline(): string {
   const repo = mkdtempSync(resolve(tmpdir(), "ggsvelte-output-guard-"));
   repos.push(repo);
-  spawnSync("git", ["init", "-b", "main"], { cwd: repo });
-  spawnSync("git", ["config", "user.name", "Guard Test"], { cwd: repo });
-  spawnSync("git", ["config", "user.email", "guard@example.test"], { cwd: repo });
+  spawnSync("git", ["init", "-b", "main", repo]);
+  git(repo, ["config", "user.name", "Guard Test"]);
+  git(repo, ["config", "user.email", "guard@example.test"]);
   mkdirSync(resolve(repo, "tests/visual/__screenshots__"), { recursive: true });
   writeFileSync(resolve(repo, "tests/visual/__screenshots__/plot.png"), "baseline");
-  spawnSync("git", ["add", "."], { cwd: repo });
-  spawnSync("git", ["commit", "-m", "baseline"], { cwd: repo });
+  git(repo, ["add", "."]);
+  git(repo, ["commit", "-m", "baseline"]);
   return repo;
+}
+
+function git(repo: string, args: string[]) {
+  return spawnSync("git", args, { env: isolatedGitEnv(repo) });
+}
+
+function isolatedGitEnv(repo: string) {
+  return { ...process.env, GIT_DIR: resolve(repo, ".git"), GIT_WORK_TREE: repo };
 }
 
 function runGuard(repo: string) {
   return spawnSync("bash", [guard, "tests/visual/__screenshots__/plot.png"], {
     cwd: repo,
     encoding: "utf8",
+    env: {
+      ...isolatedGitEnv(repo),
+      GITHUB_HEAD_REF: "",
+      GITHUB_REF_NAME: "",
+    },
   });
 }
 
@@ -39,7 +52,7 @@ describe("block-output-paths guard", () => {
   it("blocks a newly staged baseline on an ordinary branch", () => {
     const repo = repoWithTrackedBaseline();
     writeFileSync(resolve(repo, "tests/visual/__screenshots__/plot.png"), "changed");
-    spawnSync("git", ["add", "."], { cwd: repo });
+    git(repo, ["add", "."]);
     const result = runGuard(repo);
     expect(result.status).toBe(1);
     expect(result.stderr).toContain("plot.png");
@@ -47,9 +60,9 @@ describe("block-output-paths guard", () => {
 
   it("allows the audited visual-update branch", () => {
     const repo = repoWithTrackedBaseline();
-    spawnSync("git", ["switch", "-c", "vr-update/pr-11"], { cwd: repo });
+    git(repo, ["switch", "-c", "vr-update/pr-11"]);
     writeFileSync(resolve(repo, "tests/visual/__screenshots__/plot.png"), "approved");
-    spawnSync("git", ["add", "."], { cwd: repo });
+    git(repo, ["add", "."]);
     expect(runGuard(repo).status).toBe(0);
   });
 });
