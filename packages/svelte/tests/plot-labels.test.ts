@@ -3,11 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { RenderModel } from "@ggsvelte/core";
 
 import type { PlotInspectionChange } from "../src/lib/interaction.js";
-import {
-  datumLabel,
-  inspectionLiveText,
-  markLabel,
-} from "../src/lib/plot-labels.js";
+import { datumLabel, inspectionLiveText, markLabel } from "../src/lib/plot-labels.js";
 
 function model(opts: {
   layerFields?: { field: string }[][];
@@ -51,9 +47,7 @@ describe("datumLabel", () => {
   });
 
   it("returns Active datum when there are no mapped fields", () => {
-    expect(datumLabel(model({ layerFields: [[]] }), { x: 1 })).toBe(
-      "Active datum",
-    );
+    expect(datumLabel(model({ layerFields: [[]] }), { x: 1 })).toBe("Active datum");
   });
 
   it("stringifies missing values as empty", () => {
@@ -121,9 +115,7 @@ describe("inspectionLiveText", () => {
       state: "pinned" as const,
       members: [one.members[0]!, one.members[0]!],
     };
-    expect(inspectionLiveText(m, pinned as never)).toBe(
-      "x 1, y 2; 2 data, pinned",
-    );
+    expect(inspectionLiveText(m, pinned as never)).toBe("x 1, y 2; 2 data, pinned");
   });
 
   it("excludes the axis channel from focused fields for x/y modes", () => {
@@ -162,8 +154,6 @@ describe("inspectionLiveText", () => {
         },
       ],
     });
-    expect(inspectionLiveText(m, value as never)).toBe(
-      "x 3.0; 1 datum; focused y 9, color blue",
-    );
+    expect(inspectionLiveText(m, value as never)).toBe("x 3.0; 1 datum; focused y 9, color blue");
   });
 });

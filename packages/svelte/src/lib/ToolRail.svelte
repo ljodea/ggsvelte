@@ -37,7 +37,13 @@
   }
 </script>
 
-<div class="gg-tool-rail" class:gg-tool-rail-narrow={narrow} role="toolbar" aria-label="Chart interaction tools" aria-busy={!ready}>
+<div
+  class="gg-tool-rail"
+  class:gg-tool-rail-narrow={narrow}
+  role="toolbar"
+  aria-label="Chart interaction tools"
+  aria-busy={!ready}
+>
   <div class="gg-tool-modes">
     {#each availableTools as available (available)}
       <button

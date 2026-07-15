@@ -15,8 +15,7 @@ export function a11yRows(
   }
   const fieldSet = new Set<string>();
   for (const batch of batches) {
-    for (const f of model.layerFields[batch.layerIndex] ?? [])
-      fieldSet.add(f.field);
+    for (const f of model.layerFields[batch.layerIndex] ?? []) fieldSet.add(f.field);
   }
   const fields = [...fieldSet];
   const rows: CellValue[][] = [];

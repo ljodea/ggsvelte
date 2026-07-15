@@ -16,8 +16,7 @@ export type PanelBounds = {
   readonly height: number;
 };
 
-export const clamp = (v: number, lo: number, hi: number): number =>
-  Math.max(lo, Math.min(hi, v));
+export const clamp = (v: number, lo: number, hi: number): number => Math.max(lo, Math.min(hi, v));
 
 /** Invert a normalized [t0, t1] window through a positional scale (band
  *  scales cannot zoom — documented M2 limitation). */
@@ -67,16 +66,8 @@ export function panelDataDomains(
   const tx1 = clamp((rect.x1 - panel.x) / panel.width, 0, 1);
   const ty0 = clamp(1 - (rect.y1 - panel.y) / panel.height, 0, 1);
   const ty1 = clamp(1 - (rect.y0 - panel.y) / panel.height, 0, 1);
-  const horizontalDomain = invertedDomain(
-    flipped ? scales.y : scales.x,
-    tx0,
-    tx1,
-  );
-  const verticalDomain = invertedDomain(
-    flipped ? scales.x : scales.y,
-    ty0,
-    ty1,
-  );
+  const horizontalDomain = invertedDomain(flipped ? scales.y : scales.x, tx0, tx1);
+  const verticalDomain = invertedDomain(flipped ? scales.x : scales.y, ty0, ty1);
   const xDomain = flipped ? verticalDomain : horizontalDomain;
   const yDomain = flipped ? horizontalDomain : verticalDomain;
   return {

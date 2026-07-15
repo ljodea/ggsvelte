@@ -4,10 +4,7 @@ import type { GeometryBatch, RenderModel } from "@ggsvelte/core";
 
 import { A11Y_TABLE_CAP, a11yRows } from "../src/lib/canvas-a11y.js";
 
-function batch(partial: {
-  layerIndex: number;
-  rowIndex: number[];
-}): GeometryBatch {
+function batch(partial: { layerIndex: number; rowIndex: number[] }): GeometryBatch {
   return {
     layerIndex: partial.layerIndex,
     geom: "point",
@@ -59,9 +56,7 @@ describe("a11yRows", () => {
         3: null,
       },
     });
-    const table = a11yRows(m, [
-      batch({ layerIndex: 0, rowIndex: [1, 0xffffffff, 3, 1] }),
-    ]);
+    const table = a11yRows(m, [batch({ layerIndex: 0, rowIndex: [1, 0xffffffff, 3, 1] })]);
     expect(table.total).toBe(2);
     expect(table.rows).toEqual([[1]]);
   });

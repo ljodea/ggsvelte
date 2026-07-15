@@ -3,10 +3,7 @@ import type { CellValue, RenderModel } from "@ggsvelte/core";
 import type { PlotInspectionChange } from "./interaction.js";
 
 /** Accessible per-mark label from the layer's mapped fields. */
-export function markLabel(
-  model: RenderModel | null,
-  row: number,
-): string {
+export function markLabel(model: RenderModel | null, row: number): string {
   if (model === null) return `data point ${row + 1}`;
   const values = model.row(row);
   if (values === null) return `data point ${row + 1}`;
@@ -48,10 +45,7 @@ export function inspectionLiveText(
   const seen = new Set<string>();
   const focused = value.focus.fields
     .filter(
-      (field) =>
-        field.channel !== value.mode &&
-        !seen.has(field.field) &&
-        seen.add(field.field),
+      (field) => field.channel !== value.mode && !seen.has(field.field) && seen.add(field.field),
     )
     .map((field) => `${field.field} ${String(field.value ?? "")}`)
     .join(", ");

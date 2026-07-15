@@ -91,12 +91,7 @@ describe("panelDataDomains", () => {
   };
 
   it("maps a full panel rect to full scale domains", () => {
-    const domains = panelDataDomains(
-      { x0: 40, y0: 20, x1: 240, y1: 120 },
-      panel,
-      scales,
-      false,
-    );
+    const domains = panelDataDomains({ x0: 40, y0: 20, x1: 240, y1: 120 }, panel, scales, false);
     expect(domains.x?.[0]).toBeCloseTo(0);
     expect(domains.x?.[1]).toBeCloseTo(10);
     expect(domains.y?.[0]).toBeCloseTo(0);
@@ -104,12 +99,7 @@ describe("panelDataDomains", () => {
   });
 
   it("clips out-of-panel coordinates", () => {
-    const domains = panelDataDomains(
-      { x0: -100, y0: -50, x1: 400, y1: 400 },
-      panel,
-      scales,
-      false,
-    );
+    const domains = panelDataDomains({ x0: -100, y0: -50, x1: 400, y1: 400 }, panel, scales, false);
     expect(domains.x?.[0]).toBeCloseTo(0);
     expect(domains.x?.[1]).toBeCloseTo(10);
     expect(domains.y?.[0]).toBeCloseTo(0);
@@ -118,12 +108,7 @@ describe("panelDataDomains", () => {
 
   it("remaps channels when flipped", () => {
     // Left half of panel, full vertical → horizontal half of y scale when flipped.
-    const domains = panelDataDomains(
-      { x0: 40, y0: 20, x1: 140, y1: 120 },
-      panel,
-      scales,
-      true,
-    );
+    const domains = panelDataDomains({ x0: 40, y0: 20, x1: 140, y1: 120 }, panel, scales, true);
     // Screen-x half → y data domain (scale y inverted with tx)
     expect(domains.y?.[0]).toBeCloseTo(0);
     expect(domains.y?.[1]).toBeCloseTo(25);
@@ -137,12 +122,7 @@ describe("panelDataDomains", () => {
       x: bandScale as never,
       y: continuousScale([0, 50]) as never,
     };
-    const domains = panelDataDomains(
-      { x0: 40, y0: 20, x1: 240, y1: 120 },
-      panel,
-      mixed,
-      false,
-    );
+    const domains = panelDataDomains({ x0: 40, y0: 20, x1: 240, y1: 120 }, panel, mixed, false);
     expect(domains.x).toBeUndefined();
     expect(domains.y?.[0]).toBeCloseTo(0);
     expect(domains.y?.[1]).toBeCloseTo(50);

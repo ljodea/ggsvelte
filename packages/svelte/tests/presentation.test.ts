@@ -128,10 +128,9 @@ describe("DESIGN.md interaction presentation", () => {
     expect(getComputedStyle(overlay).position).toBe("absolute");
     expect(getComputedStyle(overlay).pointerEvents).toBe("none");
     // Capture remains the last interactive sibling after the overlay.
-    expect(
-      [...wideRoot.children].indexOf(overlay) <
-        [...wideRoot.children].indexOf(capture),
-    ).toBe(true);
+    expect([...wideRoot.children].indexOf(overlay) < [...wideRoot.children].indexOf(capture)).toBe(
+      true,
+    );
   });
 
   it("preserves chart chrome and reports empty and unavailable states", () => {
