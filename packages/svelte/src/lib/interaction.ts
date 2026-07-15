@@ -147,7 +147,8 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
     message: "Interval selection and brush zoom currently require one unfaceted panel.",
     prop: "select",
     suggestions: ["Remove the facet", "Use point inspection", "Track facet intervals in issue #3"],
-    docUrl: "https://ljodea.github.io/ggsvelte/guide/interactions",
+    docUrl:
+      "https://ljodea.github.io/ggsvelte/guide/interaction-reference#interaction-interval-facet-unsupported",
   },
   INTERACTION_INVALID_MAX_DISTANCE: {
     severity: "error",
@@ -155,7 +156,8 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
     message: "inspect.maxDistance must be a finite non-negative CSS-pixel distance.",
     prop: "inspect.maxDistance",
     suggestions: ["Use a finite number greater than or equal to zero"],
-    docUrl: "https://ljodea.github.io/ggsvelte/guide/interactions#inspection",
+    docUrl:
+      "https://ljodea.github.io/ggsvelte/guide/interaction-reference#interaction-invalid-max-distance",
   },
   INTERACTION_POINT_REQUIRES_KEY: {
     severity: "warning",
@@ -163,7 +165,8 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
     message: "Durable point selection requires a stable key field or accessor.",
     prop: "key",
     suggestions: ['Pass key="id"', "Pass a stable key accessor"],
-    docUrl: "https://ljodea.github.io/ggsvelte/guide/interactions#identity",
+    docUrl:
+      "https://ljodea.github.io/ggsvelte/guide/interaction-reference#interaction-point-requires-key",
   },
   INTERACTION_INVALID_KEY: {
     severity: "error",
@@ -171,7 +174,7 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
     message: "A key accessor returned null, undefined, or a non-PropertyKey value.",
     prop: "key",
     suggestions: ["Return a stable string, number, or symbol for every row"],
-    docUrl: "https://ljodea.github.io/ggsvelte/guide/interactions#identity",
+    docUrl: "https://ljodea.github.io/ggsvelte/guide/interaction-reference#interaction-invalid-key",
   },
   INTERACTION_DUPLICATE_KEY: {
     severity: "error",
@@ -180,7 +183,8 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
       "The key accessor returned a duplicate value; durable interaction is disabled for that value.",
     prop: "key",
     suggestions: ["Use a field that uniquely identifies each source row"],
-    docUrl: "https://ljodea.github.io/ggsvelte/guide/interactions#identity",
+    docUrl:
+      "https://ljodea.github.io/ggsvelte/guide/interaction-reference#interaction-duplicate-key",
   },
   INTERACTION_UNSTABLE_KEY: {
     severity: "error",
@@ -188,7 +192,8 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
     message: "The key accessor returned a different value for the same source row.",
     prop: "key",
     suggestions: ["Return an immutable field that uniquely identifies each row"],
-    docUrl: "https://ljodea.github.io/ggsvelte/guide/interactions#identity",
+    docUrl:
+      "https://ljodea.github.io/ggsvelte/guide/interaction-reference#interaction-unstable-key",
   },
   INTERACTION_MISSING_LINEAGE: {
     severity: "warning",
@@ -196,7 +201,8 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
     message: "A synthetic or aggregate mark did not expose source-row lineage.",
     prop: "layers",
     suggestions: ["Use a stat that preserves source-row lineage"],
-    docUrl: "https://ljodea.github.io/ggsvelte/guide/interactions#identity",
+    docUrl:
+      "https://ljodea.github.io/ggsvelte/guide/interaction-reference#interaction-missing-lineage",
   },
   INTERACTION_INTERVAL_SCALE_UNSUPPORTED: {
     severity: "warning",
@@ -204,7 +210,8 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
     message: "Interval domains and brush zoom require continuous linear, log, or time scales.",
     prop: "scales",
     suggestions: ["Use a continuous positional scale", "Use point inspection for band data"],
-    docUrl: "https://ljodea.github.io/ggsvelte/guide/interactions#intervals",
+    docUrl:
+      "https://ljodea.github.io/ggsvelte/guide/interaction-reference#interaction-interval-scale-unsupported",
   },
   INTERACTION_TOOL_UNAVAILABLE: {
     severity: "warning",
@@ -212,7 +219,8 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
     message: "The requested interaction tool is unavailable for the enabled capabilities.",
     prop: "tool",
     suggestions: ["Enable the matching capability", "Choose an available interaction tool"],
-    docUrl: "https://ljodea.github.io/ggsvelte/guide/interactions#tools",
+    docUrl:
+      "https://ljodea.github.io/ggsvelte/guide/interaction-reference#interaction-tool-unavailable",
   },
 });
 

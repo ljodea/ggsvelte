@@ -57,7 +57,9 @@ tested with npm, pnpm, and Bun on Ubuntu and Windows; see the
 
 Try [inspection and pinning](https://ljodea.github.io/ggsvelte/examples/interaction/tooltip)
 or [interval selection and zoom](https://ljodea.github.io/ggsvelte/examples/interaction/brush-zoom),
-then read the [interaction guide and event reference](https://ljodea.github.io/ggsvelte/guide/interactions).
+bring [your own local JSON rows to the playground](https://ljodea.github.io/ggsvelte/playground),
+then read the [interaction guide](https://ljodea.github.io/ggsvelte/guide/interactions)
+or [searchable event reference](https://ljodea.github.io/ggsvelte/reference/interactions).
 
 ## One spec, three surfaces
 
@@ -129,6 +131,7 @@ CLI: `ggsvelte-render spec.json > chart.svg` (JSON-line diagnostics on stderr).
 
 - [Guide and examples](https://ljodea.github.io/ggsvelte/)
 - [Interactions and event reference](https://ljodea.github.io/ggsvelte/guide/interactions)
+- [Local data playground](https://ljodea.github.io/ggsvelte/playground)
 - [Pre-0.1 interaction migration](https://ljodea.github.io/ggsvelte/guide/migrating-pre-0-1)
 - [Lifecycle and editions](https://ljodea.github.io/ggsvelte/guide/lifecycle)
 
