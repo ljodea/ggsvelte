@@ -1278,6 +1278,32 @@ export const SpecModule = Type.Module({
       axisLine: Type.Optional(Type.String({ description: "Axis-line color (CSS color)." })),
       tickColor: Type.Optional(Type.String({ description: "Axis-tick color (CSS color)." })),
       panelBorder: Type.Optional(Type.String({ description: "Panel-border color (CSS color)." })),
+      interactionInk: Type.Optional(
+        Type.String({ description: "Primary interaction-control and overlay ink (CSS color)." }),
+      ),
+      interactionMuted: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          exclusiveMaximum: 1,
+          description: "Opacity for marks de-emphasized by an interaction.",
+        }),
+      ),
+      focusRing: Type.Optional(Type.String({ description: "Focus-ring color (CSS color)." })),
+      crosshair: Type.Optional(Type.String({ description: "Crosshair-guide color (CSS color)." })),
+      selectionFill: Type.Optional(
+        Type.String({ description: "Interval-selection fill (CSS color, normally translucent)." }),
+      ),
+      selectionStroke: Type.Optional(
+        Type.String({ description: "Selection and zoom-target stroke (CSS color)." }),
+      ),
+      tooltipPaper: Type.Optional(
+        Type.String({ description: "Opaque tooltip surface (CSS color)." }),
+      ),
+      tooltipInk: Type.Optional(Type.String({ description: "Tooltip foreground (CSS color)." })),
+      tooltipBorder: Type.Optional(Type.String({ description: "Tooltip keyline (CSS color)." })),
+      toolActive: Type.Optional(
+        Type.String({ description: "Active-tool text and underline (CSS color)." }),
+      ),
       fontFamily: Type.Optional(Type.String({ description: "Chart font-family stack." })),
       fontSize: Type.Optional(
         Type.Number({ minimum: 1, description: "Base and tick-label font size in px." }),

@@ -60,6 +60,8 @@ import type { TextMeasurer } from "./layout/measure.js";
 import { MetricsTableMeasurer } from "./layout/measure.js";
 import { formatTime, numberFormatter } from "./layout/format.js";
 import { defaultTickFormat, tickStep } from "./layout/ticks.js";
+import { defaultLogTickFormat } from "./layout/ticks.js";
+import { defaultTimeTickFormat } from "./layout/time.js";
 import type { LegendInput, LegendOrder } from "./legend.js";
 import { buildLegends } from "./legend.js";
 import type { SequentialColorScale } from "./scales/color.js";
@@ -106,6 +108,14 @@ import { resolveEditionDefaults } from "./editions.js";
 import type { ThemeTokens } from "./theme.js";
 import { resolveTheme, UnknownThemeError } from "./theme.js";
 import { perfMark, perfMeasure } from "./perf.js";
+import { buildCandidateStore } from "./candidate-store.js";
+import type {
+  CandidateBuildFacts,
+  CandidateDatum,
+  CandidateStore,
+  ResolvedCandidateInspectMode,
+} from "./candidate-store.js";
+import { LineageStore } from "./identity.js";
 
 // ---------------------------------------------------------------------------
 // Public contract
@@ -160,6 +170,18 @@ export interface TrainedScales {
   state: Record<string, ScaleState>;
 }
 
+export interface ScaleDomainSnapshot {
+  readonly x: readonly CellValue[];
+  readonly y: readonly CellValue[];
+  readonly panels: readonly Readonly<{
+    x: readonly CellValue[];
+    y: readonly CellValue[];
+  }>[];
+}
+
+/** Format a logical value using its trained semantic positional axis. */
+export type AxisValueFormatter = (value: CellValue) => string;
+
 /** Resolved rendering backend per layer (after hints/threshold/a11y). */
 export type LayerBackend = "svg" | "canvas";
 
@@ -167,6 +189,9 @@ export type LayerBackend = "svg" | "canvas";
 export interface MappedField {
   channel: string;
   field: string;
+  /** Stat output rather than a source-table column. Its semantic x/y value
+   *  is available directly on CandidateFacts for synthesized marks. */
+  source?: "stat";
 }
 
 export interface RenderModel {
@@ -185,6 +210,14 @@ export interface RenderModel {
   layerBackends: LayerBackend[];
   /** Field-mapped channels per layer (drives default tooltip content). */
   layerFields: MappedField[][];
+  /** Stable baseline plus the domains actually used for this render. */
+  domains: Readonly<{ baseline: ScaleDomainSnapshot; effective: ScaleDomainSnapshot }>;
+  /** Interned source-row memberships. Public adapters resolve these through keys. */
+  lineage: LineageStore<number>;
+  /** Shared epoch-scoped interaction candidate storage. */
+  candidates: CandidateStore;
+  /** Trained semantic formatters. Coord transforms never swap x and y here. */
+  axisFormatters: Readonly<{ x: AxisValueFormatter; y: AxisValueFormatter }>;
   /** The source data row behind a hit-index rowIndex (null for synthesized
    *  stat rows). Reads the bound table — do not call after dispose(). */
   row(index: number): Record<string, CellValue> | null;
@@ -220,6 +253,17 @@ export interface RunOptions {
    *  registry; used by tests proving edition stability and by future
    *  edition rollouts. Defaults to EDITION_DEFAULTS. */
   editions?: Readonly<Record<number, EditionDefaults>>;
+  /** Latest data-derived domains retained by an interaction controller while
+   * an explicit zoom domain is effective. Omit for an unzoomed render. */
+  baselineDomains?: ScaleDomainSnapshot;
+  /** Unzoomed positional scale configuration. When supplied, the pipeline
+   * trains the latest natural baseline from this run's data while rendering
+   * with the spec's effective (typically explicit zoom) domains. Missing
+   * axes mean natural default scale configuration. `baselineDomains` wins. */
+  baselineScales?: Readonly<{
+    x?: PositionScaleSpec;
+    y?: PositionScaleSpec;
+  }>;
 }
 
 /** Default `render: "auto"` mark-count threshold for the canvas backend. */
@@ -623,6 +667,8 @@ interface BoxFrame {
   outlierY: Float64Array;
   /** Box row each outlier belongs to (dodge offsets follow the box). */
   outlierBox: Uint32Array;
+  /** Original source row represented by each outlier point. */
+  outlierRow: Uint32Array;
 }
 
 interface LayerFrame {
@@ -713,6 +759,78 @@ function deriveLayerGroups(binding: LayerBinding, table: ColumnTable): number[] 
     }
   }
   return [...deriveGroups(table.columns(), aes, declared).groups];
+}
+
+function createRawCandidateDatumResolver(
+  bindings: readonly LayerBinding[],
+  table: ColumnTable,
+  color: ResolvedColorScale | null,
+  fill: ResolvedColorScale | null,
+  lineage: LineageStore<number>,
+): (facts: CandidateBuildFacts) => CandidateDatum {
+  const groupsByLayer = new Map<number, readonly number[]>();
+  const groupsFor = (layerIndex: number): readonly number[] => {
+    let groups = groupsByLayer.get(layerIndex);
+    if (groups === undefined) {
+      const binding = bindings[layerIndex];
+      groups = binding === undefined ? [] : deriveLayerGroups(binding, table);
+      groupsByLayer.set(layerIndex, groups);
+    }
+    return groups;
+  };
+  return (facts) => {
+    const binding = bindings[facts.layerIndex];
+    const sourceRow = facts.rowIndex;
+    if (binding === undefined || sourceRow === null) return {};
+    const value = (field: string | null): CellValue =>
+      field === null ? null : table.column(field)[sourceRow]!;
+    const group = groupsFor(facts.layerIndex)[sourceRow] ?? 0;
+    const ordinalRank = (resolved: ResolvedColorScale | null, field: string | null) => {
+      if (resolved?.kind !== "ordinal" || field === null) return -1;
+      const key = bandKey(value(field));
+      return resolved.scale.domain.findIndex((domainValue) => bandKey(domainValue) === key);
+    };
+    const colorRank = ordinalRank(color, binding.color.field);
+    const fillRank = ordinalRank(fill, binding.fill.field);
+    return {
+      xValue: value(binding.xField),
+      yValue: value(binding.yField),
+      seriesId: group,
+      seriesRank: colorRank >= 0 ? colorRank : fillRank >= 0 ? fillRank : group,
+      sourceOrder: sourceRow,
+      lineage: lineage.intern([sourceRow]),
+      autoMode: candidateAutoMode(binding, facts.primitiveIndex),
+    };
+  };
+}
+
+function candidateAutoMode(
+  binding: LayerBinding,
+  primitiveIndex: number,
+): ResolvedCandidateInspectMode {
+  switch (binding.layer.geom) {
+    case "point":
+    case "text":
+      return "xy";
+    case "col":
+    case "bar":
+      return "exact";
+    case "line":
+    case "area":
+    case "density":
+    case "smooth":
+    case "errorbar":
+    case "boxplot":
+      return "x";
+    case "rule": {
+      if (binding.ruleForm === "vertical") return "x";
+      if (binding.ruleForm === "horizontal") return "y";
+      const params = (binding.layer.params ?? {}) as { xintercept?: unknown };
+      return primitiveIndex < interceptList(params.xintercept).length ? "x" : "y";
+    }
+    default:
+      return "xy";
+  }
 }
 
 /** Carried discrete columns for stats (color/fill/label, minus the x field). */
@@ -977,6 +1095,7 @@ function buildFrame(
         outlierX: result.outliers.map((o) => o.x),
         outlierY: Float64Array.from(result.outliers.map((o) => o.y)),
         outlierBox: Uint32Array.from(result.outliers.map((o) => o.boxRow)),
+        outlierRow: Uint32Array.from(result.outliers.map((o) => o.sourceRow)),
       },
     };
   }
@@ -2437,6 +2556,8 @@ function buildBatch(
 // ---------------------------------------------------------------------------
 
 interface FacetPanelDef {
+  /** Stable facet field/value identity; independent of display position. */
+  id: string;
   /** Strip label ("" = no strip; the unfaceted single panel). */
   label: string;
   row: number;
@@ -2497,6 +2618,19 @@ function facetValues(table: ColumnTable, field: string): CellValue[] {
   return values;
 }
 
+function panelValueToken(value: CellValue): string {
+  if (value instanceof Date) return `d:${value.getTime()}`;
+  if (value === null) return "null";
+  if (typeof value === "string") return `s:${value}`;
+  if (typeof value === "number") return `n:${Object.is(value, -0) ? 0 : value}`;
+  return `b:${value}`;
+}
+
+function panelComponentToken(field: string, value: CellValue): string {
+  const token = panelValueToken(value);
+  return `${field.length}:${field}=${token.length}:${token}`;
+}
+
 function rowsMatching(table: ColumnTable, field: string, value: CellValue): number[] {
   const key = bandKey(value);
   const column = table.column(field);
@@ -2509,7 +2643,7 @@ function rowsMatching(table: ColumnTable, field: string, value: CellValue): numb
 
 const SINGLE_PANEL = (table: ColumnTable): FacetLayout => ({
   faceted: false,
-  panels: [{ label: "", row: 0, col: 0, table, sourceRows: null }],
+  panels: [{ id: "panel:all", label: "", row: 0, col: 0, table, sourceRows: null }],
   nrow: 1,
   ncol: 1,
   freeX: false,
@@ -2547,6 +2681,7 @@ function resolveFacet(facet: FacetSpec | undefined, table: ColumnTable): FacetLa
     const panels = values.map((value, i) => {
       const rows = rowsMatching(table, wrapField, value);
       return {
+        id: `panel:wrap:${wrapField}=${panelValueToken(value)}`,
         label: bandKey(value),
         row: Math.floor(i / ncol),
         col: i % ncol,
@@ -2583,6 +2718,10 @@ function resolveFacet(facet: FacetSpec | undefined, table: ColumnTable): FacetLa
       if (rowsField !== null) parts.push(bandKey(rowValues[r]!));
       if (colsField !== null) parts.push(bandKey(colValues[c]!));
       panels.push({
+        id: `panel:grid:${[
+          ...(rowsField === null ? [] : [panelComponentToken(rowsField, rowValues[r]!)]),
+          ...(colsField === null ? [] : [panelComponentToken(colsField, colValues[c]!)]),
+        ].join("|")}`,
         label: parts.join(" / "),
         row: r,
         col: c,
@@ -2698,6 +2837,24 @@ function makeAxisFormatter(
   return (value) => f.format(value as number);
 }
 
+function makeAxisValueFormatter(
+  scale: PositionScale,
+  custom: TickFormatter | undefined,
+): AxisValueFormatter {
+  if (scale.type === "band") return (value) => (value === null ? "–" : String(value));
+  const fallback =
+    scale.type === "time"
+      ? defaultTimeTickFormat
+      : scale.type === "log"
+        ? defaultLogTickFormat
+        : defaultTickFormat(tickStep(scale.domain[0], scale.domain[1], 5));
+  return (value) => {
+    if (value === null) return "–";
+    const numeric = cellToNumber(value);
+    return custom === undefined ? fallback(numeric) : custom(numeric, NaN);
+  };
+}
+
 /** Project layout ticks through a scale onto an axis extent, in px. */
 function axisTicks(
   scale: PositionScale,
@@ -2768,6 +2925,10 @@ function remapSourceRows(frame: LayerFrame, sourceRows: number[] | null): void {
     const local = frame.rowIndex[i]!;
     if (local !== NO_ROW) frame.rowIndex[i] = sourceRows[local]!;
   }
+}
+
+function scaleDomainSnapshot(scale: PositionScale): readonly CellValue[] {
+  return Object.freeze([...scale.domain]);
 }
 
 // ---------------------------------------------------------------------------
@@ -3179,6 +3340,7 @@ export function runPipeline(spec: SpecInput | PortableSpec, options: RunOptions)
     const bottom = axisTicks(h, placement.ticksH, placement.width, false);
     const left = axisTicks(v, placement.ticksV, placement.height, true);
     return {
+      id: facetPanels[p]!.id,
       x: placement.x,
       y: placement.y,
       width: placement.width,
@@ -3244,11 +3406,26 @@ export function runPipeline(spec: SpecInput | PortableSpec, options: RunOptions)
     const binding = bindings[index];
     if (binding === undefined) return [];
     const fields: MappedField[] = [];
-    const push = (channel: string, field: string | null) => {
-      if (field !== null) fields.push({ channel, field });
+    const push = (channel: string, field: string | null, source?: "stat") => {
+      if (field !== null)
+        fields.push(source === undefined ? { channel, field } : { channel, field, source });
     };
-    push("x", binding.xField);
-    push("y", binding.yField);
+    const stat = binding.layer.stat ?? "identity";
+    if (stat === "identity") {
+      push("x", binding.xField);
+      push("y", binding.yField);
+    } else {
+      // Synthesized stat rows have no source row. Advertise only semantic
+      // generated channels that CandidateFacts can resolve truthfully.
+      if (binding.xField !== null) push("x", "x", "stat");
+      if (stat === "count" || stat === "bin" || stat === "density") {
+        push("y", binding.yStatColumn ?? (stat === "density" ? "density" : "count"), "stat");
+      } else if (stat === "boxplot") {
+        push("y", "middle", "stat");
+      } else if (stat === "smooth" || stat === "summary") {
+        push("y", "y", "stat");
+      }
+    }
     push("ymin", binding.yminField);
     push("ymax", binding.ymaxField);
     push("color", binding.color.field);
@@ -3262,10 +3439,272 @@ export function runPipeline(spec: SpecInput | PortableSpec, options: RunOptions)
   if (colorResolution.state !== null) state["color"] = colorResolution.state;
   if (fillResolution.state !== null) state["fill"] = fillResolution.state;
 
+  const effectiveDomains: ScaleDomainSnapshot = Object.freeze({
+    x: scaleDomainSnapshot(xTraining.scale),
+    y: scaleDomainSnapshot(yTraining.scale),
+    panels: Object.freeze(
+      panelScales.map((panel) =>
+        Object.freeze({ x: scaleDomainSnapshot(panel.x), y: scaleDomainSnapshot(panel.y) }),
+      ),
+    ),
+  });
+  let baselineDomains = options.baselineDomains;
+  if (baselineDomains === undefined && options.baselineScales !== undefined) {
+    const baselineX = trainAxis("x", xInputs, options.baselineScales.x).scale;
+    const baselineY = trainAxis("y", yInputs, options.baselineScales.y).scale;
+    const baselinePanels = facetPanels.map((_, panelIndex) => {
+      let x = baselineX;
+      let y = baselineY;
+      const scratch: Advisory[] = [];
+      if (freeX) {
+        const inputs = collectAxisInputs(
+          "x",
+          panelFrames[panelIndex]!,
+          options.baselineScales?.x?.type,
+          scratch,
+        );
+        x = trainAxis("x", inputs, {
+          ...options.baselineScales?.x,
+          type: baselineX.type,
+        }).scale;
+      }
+      if (freeY) {
+        const inputs = collectAxisInputs(
+          "y",
+          panelFrames[panelIndex]!,
+          options.baselineScales?.y?.type,
+          scratch,
+        );
+        y = trainAxis("y", inputs, {
+          ...options.baselineScales?.y,
+          type: baselineY.type,
+        }).scale;
+      }
+      return Object.freeze({ x: scaleDomainSnapshot(x), y: scaleDomainSnapshot(y) });
+    });
+    baselineDomains = Object.freeze({
+      x: scaleDomainSnapshot(baselineX),
+      y: scaleDomainSnapshot(baselineY),
+      panels: Object.freeze(baselinePanels),
+    });
+  }
+  baselineDomains ??= effectiveDomains;
+
+  const lineage = new LineageStore<number>();
+  let identityIndex: Readonly<{
+    seriesByRow: Map<string, number>;
+    sourceRowsByGroup: Map<string, number[]>;
+    frameGroups: Map<string, number[]>;
+  }> | null = null;
+  const getIdentityIndex = () => {
+    if (identityIndex !== null) return identityIndex;
+    const seriesByRow = new Map<string, number>();
+    const sourceRowsByGroup = new Map<string, number[]>();
+    const frameGroups = new Map<string, number[]>();
+    for (let panelIndex = 0; panelIndex < panelFrames.length; panelIndex++) {
+      for (const frame of panelFrames[panelIndex] ?? []) {
+        const frameKey = `${panelIndex}:${frame.binding.index}`;
+        frameGroups.set(frameKey, [...new Set(frame.groups)]);
+        const inputGroups = deriveLayerGroups(frame.binding, frame.table);
+        for (let localRow = 0; localRow < inputGroups.length; localRow++) {
+          const group = inputGroups[localRow]!;
+          const sourceRow = facetPanels[panelIndex]!.sourceRows?.[localRow] ?? localRow;
+          const key = `${frameKey}:${group}`;
+          const members = sourceRowsByGroup.get(key);
+          if (members === undefined) sourceRowsByGroup.set(key, [sourceRow]);
+          else members.push(sourceRow);
+        }
+        for (let i = 0; i < frame.rowIndex.length; i++) {
+          const sourceRow = frame.rowIndex[i]!;
+          if (sourceRow !== NO_ROW) {
+            seriesByRow.set(
+              `${panelIndex}:${frame.binding.index}:${sourceRow}`,
+              frame.groups[i] ?? 0,
+            );
+          }
+        }
+      }
+    }
+    identityIndex = { seriesByRow, sourceRowsByGroup, frameGroups };
+    return identityIndex;
+  };
+  const allSourceBacked = bindings.every(
+    (binding) =>
+      (binding.layer.stat ?? "identity") === "identity" && binding.ruleForm !== "annotation",
+  );
+  const candidates = allSourceBacked
+    ? buildCandidateStore(scene, {
+        epoch: runId,
+        flip,
+        datum: createRawCandidateDatumResolver(
+          bindings,
+          table,
+          colorResolution.resolved,
+          fillResolution.resolved,
+          lineage,
+        ),
+      })
+    : buildCandidateStore(scene, {
+        epoch: runId,
+        flip,
+        datum(facts) {
+          const { seriesByRow, sourceRowsByGroup, frameGroups } = getIdentityIndex();
+          const fields = layerFields[facts.layerIndex] ?? [];
+          const sourceRow = facts.rowIndex;
+          const frame = panelFrames[facts.panelIndex]?.[facts.layerIndex];
+          const batch = scene.batches[facts.batchIndex]!;
+          const outlierLocalRow =
+            frame?.box !== null &&
+            frame?.binding.layer.geom === "boxplot" &&
+            batch.kind === "points"
+              ? (frame?.box.outlierRow[facts.primitiveIndex] ?? null)
+              : null;
+          const outlierSourceRow =
+            outlierLocalRow === null
+              ? null
+              : (facetPanels[facts.panelIndex]?.sourceRows?.[outlierLocalRow] ?? outlierLocalRow);
+          const orderedGroups = frameGroups.get(`${facts.panelIndex}:${facts.layerIndex}`) ?? [0];
+          let frameRow = Math.min(facts.primitiveIndex, Math.max(0, (frame?.n ?? 1) - 1));
+          let derivedGroup = frame?.groups[frameRow] ?? 0;
+          if (frame !== undefined && batch.kind === "paths") {
+            let subpath = 0;
+            while (
+              subpath + 1 < batch.pathOffsets.length &&
+              facts.primitiveIndex >= batch.pathOffsets[subpath + 1]!
+            )
+              subpath++;
+            derivedGroup = orderedGroups[Math.min(subpath, orderedGroups.length - 1)] ?? 0;
+            const rowsInGroup = frame.groups
+              .map((group, row) => ({ group, row }))
+              .filter((entry) => entry.group === derivedGroup)
+              .map((entry) => entry.row)
+              .toSorted((a, b) => (frame.xNumeric?.[a] ?? a) - (frame.xNumeric?.[b] ?? b));
+            const local = facts.primitiveIndex - (batch.pathOffsets[subpath] ?? 0);
+            const reflected =
+              local < rowsInGroup.length ? local : Math.max(0, rowsInGroup.length * 2 - 1 - local);
+            frameRow = rowsInGroup[Math.min(reflected, rowsInGroup.length - 1)] ?? frameRow;
+          } else if (frame !== undefined && batch.kind === "segments") {
+            if (frame.binding.layer.geom === "errorbar")
+              frameRow = Math.floor(facts.primitiveIndex / 3);
+            else if (frame.binding.layer.geom === "boxplot" && batch.rowIndex.length >= frame.n * 2)
+              frameRow = Math.floor(facts.primitiveIndex / 2);
+            derivedGroup =
+              frame.groups[Math.min(frameRow, frame.groups.length - 1)] ?? derivedGroup;
+          } else if (
+            frame?.box !== null &&
+            frame?.binding.layer.geom === "boxplot" &&
+            batch.kind === "points"
+          ) {
+            frameRow = frame.box.outlierBox[facts.primitiveIndex] ?? frameRow;
+            derivedGroup = frame.groups[frameRow] ?? derivedGroup;
+          }
+          const sourceValue = (field: string | undefined): CellValue =>
+            sourceRow === null || field === undefined ? null : table.column(field)[sourceRow]!;
+          const xField = fields.find((field) => field.channel === "x")?.field;
+          const yField = fields.find((field) => field.channel === "y")?.field;
+          const colorField = fields.find((field) => field.channel === "color")?.field;
+          const fillField = fields.find((field) => field.channel === "fill")?.field;
+          const group =
+            sourceRow === null
+              ? derivedGroup
+              : (seriesByRow.get(`${facts.panelIndex}:${facts.layerIndex}:${sourceRow}`) ?? 0);
+          const ordinalRank = (resolved: ResolvedColorScale | null, field: string | undefined) => {
+            if (resolved?.kind !== "ordinal" || field === undefined || sourceRow === null)
+              return -1;
+            const key = bandKey(sourceValue(field));
+            return resolved.scale.domain.findIndex((value) => bandKey(value) === key);
+          };
+          const colorRank = ordinalRank(colorResolution.resolved, colorField);
+          const fillRank = ordinalRank(fillResolution.resolved, fillField);
+          const autoMode = candidateAutoMode(
+            frame?.binding ?? bindings[facts.layerIndex]!,
+            facts.primitiveIndex,
+          );
+          const annotationRule = frame?.binding.ruleForm === "annotation";
+          const annotationX = annotationRule
+            ? (frame.xIntercepts[facts.primitiveIndex] ?? null)
+            : null;
+          const annotationY = annotationRule
+            ? (frame.yIntercepts[facts.primitiveIndex - frame.xIntercepts.length] ?? null)
+            : null;
+          let representedRows =
+            outlierSourceRow === null
+              ? (sourceRowsByGroup.get(`${facts.panelIndex}:${facts.layerIndex}:${group}`) ?? [])
+              : [outlierSourceRow];
+          if (sourceRow === null && frame !== undefined) {
+            const stat = frame.binding.layer.stat ?? "identity";
+            const aggregateXField = frame.binding.xField;
+            const outputX = frame.xValues?.[frameRow] ?? frame.xNumeric?.[frameRow] ?? null;
+            if (
+              aggregateXField !== null &&
+              outputX !== null &&
+              (stat === "count" || stat === "summary" || stat === "boxplot")
+            ) {
+              const outputKey = bandKey(outputX);
+              representedRows = representedRows.filter(
+                (row) => bandKey(table.column(aggregateXField)[row]) === outputKey,
+              );
+            } else if (
+              stat === "bin" &&
+              aggregateXField !== null &&
+              frame.xmin !== null &&
+              frame.xmax !== null
+            ) {
+              const hi = frame.xmax[frameRow]!;
+              const lo = frame.xmin[frameRow]!;
+              const closed = ((frame.binding.layer.params ?? {}) as BarParams).closed ?? "right";
+              const frameGroup = frame.groups[frameRow];
+              const firstInGroup = frameRow === 0 || frame.groups[frameRow - 1] !== frameGroup;
+              const lastInGroup =
+                frameRow === frame.n - 1 || frame.groups[frameRow + 1] !== frameGroup;
+              representedRows = representedRows.filter((row) => {
+                const value = cellToNumber(table.column(aggregateXField)[row]!);
+                if (!Number.isFinite(value)) return false;
+                return closed === "right"
+                  ? value <= hi && (value > lo || (firstInGroup && value >= lo))
+                  : value >= lo && (value < hi || (lastInGroup && value <= hi));
+              });
+            }
+            const aggregateYField = frame.binding.yField;
+            if (
+              (stat === "smooth" || stat === "summary" || stat === "boxplot") &&
+              aggregateYField !== null
+            ) {
+              representedRows = representedRows.filter((row) =>
+                Number.isFinite(cellToNumber(table.column(aggregateYField)[row]!)),
+              );
+            }
+          }
+          return {
+            xValue: annotationRule
+              ? annotationX
+              : outlierSourceRow === null
+                ? sourceRow === null
+                  ? (frame?.xValues?.[frameRow] ?? frame?.xNumeric?.[frameRow] ?? null)
+                  : sourceValue(xField)
+                : (frame?.box?.outlierX[facts.primitiveIndex] ?? null),
+            yValue: annotationRule
+              ? annotationY
+              : outlierSourceRow === null
+                ? sourceRow === null
+                  ? (frame?.yNumeric?.[frameRow] ?? frame?.box?.middle[frameRow] ?? null)
+                  : sourceValue(yField)
+                : (frame?.box?.outlierY[facts.primitiveIndex] ?? null),
+            seriesId: group,
+            seriesRank: colorRank >= 0 ? colorRank : fillRank >= 0 ? fillRank : group,
+            sourceOrder: sourceRow ?? outlierSourceRow ?? facts.primitiveIndex,
+            lineage:
+              sourceRow === null ? lineage.intern(representedRows) : lineage.intern([sourceRow]),
+            autoMode,
+          };
+        },
+      });
+
   perfMark("ggsvelte:pipeline:end");
   perfMeasure("ggsvelte:pipeline", "ggsvelte:pipeline:start", "ggsvelte:pipeline:end");
 
   let disposed = false;
+  let retainedTable: ColumnTable | null = table;
   return {
     scene,
     scales: {
@@ -3281,15 +3720,25 @@ export function runPipeline(spec: SpecInput | PortableSpec, options: RunOptions)
     runId,
     layerBackends,
     layerFields,
+    domains: Object.freeze({ baseline: baselineDomains, effective: effectiveDomains }),
+    lineage,
+    candidates,
+    axisFormatters: Object.freeze({
+      x: makeAxisValueFormatter(xTraining.scale, formatX),
+      y: makeAxisValueFormatter(yTraining.scale, formatY),
+    }),
     row(index: number): Record<string, CellValue> | null {
-      if (disposed || index === NO_ROW || index < 0 || index >= table.rowCount) return null;
+      const source = retainedTable;
+      if (source === null || index === NO_ROW || index < 0 || index >= source.rowCount) return null;
       const out: Record<string, CellValue> = {};
-      for (const field of table.fields) out[field] = table.column(field)[index]!;
+      for (const field of source.fields) out[field] = source.column(field)[index]!;
       return out;
     },
     dispose(): void {
       if (disposed) return;
       disposed = true;
+      candidates.dispose();
+      retainedTable = null;
       // Release geometry (typed arrays) and per-panel structures; the bound
       // table and its numeric caches become unreachable with this model.
       scene.batches.length = 0;

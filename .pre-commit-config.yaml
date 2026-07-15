@@ -62,8 +62,8 @@ repos:
         language: system
         files: (^|/)(test-results|playwright-report|\.vitest-attachments|__screenshots__)(/|$)
         # VR baselines (tests/visual/__screenshots__) land only via the
-        # vr-approve workflow; skip deliberately with
-        # `SKIP=block-output-paths git commit` if you know what you're doing.
+        # audited vr-update/pr-N branch. The hook checks the staged diff so
+        # clean committed baselines do not break `pre-commit run --all-files`.
 
       # ---- pre-push stage (all files) ----
       # package-build runs FIRST: since M0c the package exports point at
@@ -122,8 +122,8 @@ repos:
         stages: [pre-push]
 
       - id: bun-test-packages
-        name: bun test (spec + core + scripts + evals harness; svelte runs under vitest browser mode)
-        entry: bun test packages/spec packages/core scripts tests/evals
+        name: bun test (spec + core + benchmarks + scripts + evals harness; svelte runs under vitest browser mode)
+        entry: bun test packages/spec packages/core benchmarks scripts tests/evals
         language: system
         pass_filenames: false
         always_run: true

@@ -46,7 +46,7 @@ export interface BoxplotStatResult {
   groups: number[];
   carried: Record<string, CellValue[]>;
   /** Outlier points (one row each), indexed back to their box row. */
-  outliers: { x: CellValue; y: number; boxRow: number }[];
+  outliers: { x: CellValue; y: number; boxRow: number; sourceRow: number }[];
   /** Input rows dropped (missing / non-finite y). */
   dropped: number;
 }
@@ -83,7 +83,7 @@ export function statBoxplot(input: BoxplotStatInput): BoxplotStatResult {
   const outGroups: number[] = [];
   const carried: Record<string, CellValue[]> = {};
   for (const name of carriedNames) carried[name] = [];
-  const outliers: { x: CellValue; y: number; boxRow: number }[] = [];
+  const outliers: { x: CellValue; y: number; boxRow: number; sourceRow: number }[] = [];
 
   for (const g of groupOrder) {
     const rows = groupRows.get(g)!;
@@ -107,7 +107,7 @@ export function statBoxplot(input: BoxplotStatInput): BoxplotStatResult {
       const v = y[row]!;
       if (v < loFence || v > hiFence) {
         hasOutliers = true;
-        outliers.push({ x: x[row]!, y: v, boxRow });
+        outliers.push({ x: x[row]!, y: v, boxRow, sourceRow: row });
       }
     }
     if (hasOutliers) {

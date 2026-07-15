@@ -20,6 +20,8 @@ import {
   buildLlmsFull,
   buildLlmsIndex,
   GETTING_STARTED_MD,
+  INTERACTIONS_MD,
+  MIGRATING_PRE_0_1_MD,
   guidePages,
   pruneSpecData,
   renderMarkdown,
@@ -82,6 +84,27 @@ describe("guide sections cover their catalogs", () => {
     expect(GETTING_STARTED_MD).toContain("<GeomPoint />");
     expect(GETTING_STARTED_MD).toContain("fix");
   });
+
+  it("documents the complete interaction capability and event contracts", () => {
+    expect(INTERACTIONS_MD).toContain('inspect={{ mode: "x",');
+    expect(INTERACTIONS_MD).toContain('select={{ type: "interval", mode: "xy",');
+    expect(INTERACTIONS_MD).toContain('key="id"');
+    expect(INTERACTIONS_MD).toContain("oninspect");
+    expect(INTERACTIONS_MD).toContain("onselect");
+    expect(INTERACTIONS_MD).toContain("oninteraction");
+    expect(INTERACTIONS_MD).toContain('phase: "clear"');
+    expect(INTERACTIONS_MD).toContain('type: "zoom"');
+    expect(INTERACTIONS_MD).toContain("INTERACTION_INTERVAL_FACET_UNSUPPORTED");
+  });
+
+  it("provides a pre-0.1 source migration for every superseded interaction prop", () => {
+    expect(MIGRATING_PRE_0_1_MD).toContain("`tooltip` → `inspect`");
+    expect(MIGRATING_PRE_0_1_MD).toContain('`brush` → `select={{ type: "interval" }}`');
+    expect(MIGRATING_PRE_0_1_MD).toContain("`onhover` → `oninspect`");
+    expect(MIGRATING_PRE_0_1_MD).toContain("`onbrush` → `onselect`");
+    expect(MIGRATING_PRE_0_1_MD).toContain("`TooltipContext` → `PlotInspectionChange`");
+    expect(MIGRATING_PRE_0_1_MD).toContain("`BrushSelection` → `IntervalSelection`");
+  });
 });
 
 describe("pruneSpecData", () => {
@@ -115,6 +138,17 @@ describe("llms surfaces", () => {
     for (const page of pages) expect(txt).toContain(`(/guide/${page.slug})`);
     expect(txt).toContain("(/schema/v0.json)");
     for (const ex of EXAMPLES) expect(txt).toContain(`(/examples/${ex.id})`);
+    expect(pages.map((page) => page.slug)).toContain("interactions");
+    expect(pages.map((page) => page.slug)).toContain("migrating-pre-0-1");
+  });
+
+  it("keeps first-party interaction examples focused on the current API", () => {
+    const inspection = EXAMPLES.find((example) => example.id === "interaction/tooltip");
+    const selection = EXAMPLES.find((example) => example.id === "interaction/brush-zoom");
+    expect(inspection?.title).toBe("Inspect and pin data");
+    expect(inspection?.tags).toContain("inspect");
+    expect(selection?.title).toBe("Interval selection and zoom");
+    expect(selection?.tags).toContain("select");
   });
 
   it("llms-full.txt embeds guide prose + spec JSON + svelte source per example", () => {

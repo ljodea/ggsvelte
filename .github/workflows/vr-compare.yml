@@ -198,6 +198,10 @@ jobs:
       # SAME pinned image as the compare job — container-only baseline
       # policy (decision 0009).
       image: mcr.microsoft.com/playwright:v1.61.1-noble
+    defaults:
+      run:
+        # The container's /bin/sh is dash, which rejects `set -o pipefail`.
+        shell: bash
     steps:
       # PR-authored code (build configs, plugins, the examples themselves)
       # executes from here on. That is acceptable ONLY because this job is

@@ -262,4 +262,29 @@
     font-weight: 700;
     font-display: swap;
   }
+
+  @media (forced-colors: active) {
+    .gg-plot {
+      forced-color-adjust: none;
+    }
+
+    .gg-plot :global(text) {
+      fill: CanvasText;
+    }
+
+    .gg-plot :global(.gg-paper),
+    .gg-plot :global(.gg-panel-background) {
+      fill: Canvas;
+    }
+
+    .gg-plot :global(.gg-grid) {
+      stroke: GrayText;
+    }
+
+    .gg-plot :global(.gg-axis-line),
+    .gg-plot :global(.gg-tick line),
+    .gg-plot :global(.gg-panel-border) {
+      stroke: CanvasText;
+    }
+  }
 </style>

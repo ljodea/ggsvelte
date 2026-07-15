@@ -5,7 +5,7 @@
  *
  * Contract per example: examples/<category>/<name>/{spec.ts, Example.svelte,
  * meta.json, data.ts?}. meta.json carries {title, description, tags,
- * docsSection, vrHeight?}. Output ordering is stable (codepoint sort by
+ * docsSection, vrHeight?, journey?}. Output ordering is stable (codepoint sort by
  * category, then name), ids are collision-checked, and metas are validated —
  * all unit-tested in gen-manifest.test.ts.
  *
@@ -27,6 +27,21 @@ export interface ExampleMeta {
   tags: readonly string[];
   docsSection: string;
   vrHeight?: number;
+  journey?: ExampleJourney;
+}
+
+export interface ExampleReference {
+  label: string;
+  href: string;
+}
+
+export interface ExampleJourney {
+  pointer: string;
+  keyboard: string;
+  touch: string;
+  references: readonly ExampleReference[];
+  svelteFirst: boolean;
+  fullWidth: boolean;
 }
 
 export interface DiscoveredExample extends ExampleMeta {
@@ -51,7 +66,63 @@ export class ManifestError extends Error {
 // Meta validation (pure — unit-tested)
 // ---------------------------------------------------------------------------
 
-const META_KEYS = new Set(["title", "description", "tags", "docsSection", "vrHeight"]);
+const META_KEYS = new Set(["title", "description", "tags", "docsSection", "vrHeight", "journey"]);
+const JOURNEY_KEYS = new Set([
+  "pointer",
+  "keyboard",
+  "touch",
+  "references",
+  "svelteFirst",
+  "fullWidth",
+]);
+const REFERENCE_KEYS = new Set(["label", "href"]);
+
+function validateJourney(journey: unknown, id: string): string[] {
+  const problems: string[] = [];
+  if (typeof journey !== "object" || journey === null || Array.isArray(journey)) {
+    return [`${id}: meta.json "journey" must be an object when present`];
+  }
+  const j = journey as Record<string, unknown>;
+  for (const key of Object.keys(j)) {
+    if (!JOURNEY_KEYS.has(key)) {
+      problems.push(`${id}: meta.json "journey" has unknown key "${key}"`);
+    }
+  }
+  for (const key of ["pointer", "keyboard", "touch"] as const) {
+    if (typeof j[key] !== "string" || j[key].trim() === "") {
+      problems.push(`${id}: meta.json "journey.${key}" must be a non-empty string`);
+    }
+  }
+  for (const key of ["svelteFirst", "fullWidth"] as const) {
+    if (typeof j[key] !== "boolean") {
+      problems.push(`${id}: meta.json "journey.${key}" must be a boolean`);
+    }
+  }
+  const references = j["references"];
+  if (!Array.isArray(references) || references.length === 0) {
+    problems.push(`${id}: meta.json "journey.references" must be a non-empty array`);
+    return problems;
+  }
+  for (const [index, reference] of references.entries()) {
+    const prefix = `${id}: meta.json "journey.references[${String(index)}]"`;
+    if (typeof reference !== "object" || reference === null || Array.isArray(reference)) {
+      problems.push(`${prefix} must be an object`);
+      continue;
+    }
+    const r = reference as Record<string, unknown>;
+    for (const key of Object.keys(r)) {
+      if (!REFERENCE_KEYS.has(key)) problems.push(`${prefix} has unknown key "${key}"`);
+    }
+    if (typeof r["label"] !== "string" || r["label"].trim() === "") {
+      problems.push(`${prefix}.label must be a non-empty string`);
+    }
+    const href = r["href"];
+    if (typeof href !== "string" || !href.startsWith("/") || href.startsWith("//")) {
+      problems.push(`${prefix}.href must be a root-relative internal link`);
+    }
+  }
+  return problems;
+}
 
 /** Validate one parsed meta.json; returns problem strings (empty = valid). */
 export function validateMeta(meta: unknown, id: string): string[] {
@@ -84,6 +155,8 @@ export function validateMeta(meta: unknown, id: string): string[] {
   ) {
     problems.push(`${id}: meta.json "vrHeight" must be a positive number when present`);
   }
+  const journey = m["journey"];
+  if (journey !== undefined) problems.push(...validateJourney(journey, id));
   return problems;
 }
 
@@ -140,6 +213,23 @@ export function buildManifestSource(examples: readonly DiscoveredExample[]): str
         `    tags: [${ex.tags.map((t) => JSON.stringify(t)).join(", ")}],`,
         `    docsSection: ${JSON.stringify(ex.docsSection)},`,
         ...(ex.vrHeight === undefined ? [] : [`    vrHeight: ${String(ex.vrHeight)},`]),
+        ...(ex.journey === undefined
+          ? []
+          : [
+              `    journey: {`,
+              `      pointer: ${JSON.stringify(ex.journey.pointer)},`,
+              `      keyboard: ${JSON.stringify(ex.journey.keyboard)},`,
+              `      touch: ${JSON.stringify(ex.journey.touch)},`,
+              `      references: [`,
+              ...ex.journey.references.map(
+                (reference) =>
+                  `        { label: ${JSON.stringify(reference.label)}, href: ${JSON.stringify(reference.href)} },`,
+              ),
+              `      ],`,
+              `      svelteFirst: ${String(ex.journey.svelteFirst)},`,
+              `      fullWidth: ${String(ex.journey.fullWidth)},`,
+              `    },`,
+            ]),
         `    hasData: ${String(ex.hasData)},`,
       ];
       return `  {\n${lines.join("\n")}\n  },`;
@@ -151,6 +241,20 @@ export function buildManifestSource(examples: readonly DiscoveredExample[]): str
 //
 // One source, three uses: this manifest feeds the docs gallery
 // (apps/docs), the VR matrix (tests/visual), and llms-full.txt (M3).
+
+export interface ExampleReference {
+  readonly label: string;
+  readonly href: string;
+}
+
+export interface ExampleJourney {
+  readonly pointer: string;
+  readonly keyboard: string;
+  readonly touch: string;
+  readonly references: readonly ExampleReference[];
+  readonly svelteFirst: boolean;
+  readonly fullWidth: boolean;
+}
 
 export interface ExampleManifestEntry {
   /** "<category>/<name>" — docs route slug and VR snapshot key. */
@@ -164,6 +268,8 @@ export interface ExampleManifestEntry {
   readonly docsSection: string;
   /** VR frame height in px (default 400). */
   readonly vrHeight?: number;
+  /** Optional guided interaction journey for runnable examples. */
+  readonly journey?: ExampleJourney;
   /** Whether the example ships a data.ts module. */
   readonly hasData: boolean;
 }
@@ -223,6 +329,7 @@ export function discoverExamples(examplesDir: string): DiscoveredExample[] {
         tags: m.tags,
         docsSection: m.docsSection,
         ...(m.vrHeight === undefined ? {} : { vrHeight: m.vrHeight }),
+        ...(m.journey === undefined ? {} : { journey: m.journey }),
         hasData: existsSync(join(dir, "data.ts")),
       });
     }

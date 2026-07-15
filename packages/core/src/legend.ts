@@ -117,6 +117,7 @@ export function buildLegends(
         const label = truncate(bandKey(values[i]), maxLabelWidth, measurer);
         labelWidth = Math.max(labelWidth, measurer.measureWidth(label, FONT_SIZE));
         entries.push({
+          value: values[i],
           label,
           color: input.colorOf(values[i]) ?? UNKNOWN_COLOR,
           y: titleHeight + i * ROW_HEIGHT,

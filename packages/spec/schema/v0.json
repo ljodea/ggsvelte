@@ -1562,6 +1562,48 @@
           "description": "Panel-border color (CSS color).",
           "type": "string"
         },
+        "interactionInk": {
+          "description": "Primary interaction-control and overlay ink (CSS color).",
+          "type": "string"
+        },
+        "interactionMuted": {
+          "exclusiveMinimum": 0,
+          "exclusiveMaximum": 1,
+          "description": "Opacity for marks de-emphasized by an interaction.",
+          "type": "number"
+        },
+        "focusRing": {
+          "description": "Focus-ring color (CSS color).",
+          "type": "string"
+        },
+        "crosshair": {
+          "description": "Crosshair-guide color (CSS color).",
+          "type": "string"
+        },
+        "selectionFill": {
+          "description": "Interval-selection fill (CSS color, normally translucent).",
+          "type": "string"
+        },
+        "selectionStroke": {
+          "description": "Selection and zoom-target stroke (CSS color).",
+          "type": "string"
+        },
+        "tooltipPaper": {
+          "description": "Opaque tooltip surface (CSS color).",
+          "type": "string"
+        },
+        "tooltipInk": {
+          "description": "Tooltip foreground (CSS color).",
+          "type": "string"
+        },
+        "tooltipBorder": {
+          "description": "Tooltip keyline (CSS color).",
+          "type": "string"
+        },
+        "toolActive": {
+          "description": "Active-tool text and underline (CSS color).",
+          "type": "string"
+        },
         "fontFamily": {
           "description": "Chart font-family stack.",
           "type": "string"

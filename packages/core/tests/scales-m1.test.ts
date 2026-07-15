@@ -220,6 +220,18 @@ describe("sequential color", () => {
 });
 
 describe("theme registry", () => {
+  const interactionColorRoles = [
+    "interactionInk",
+    "focusRing",
+    "crosshair",
+    "selectionFill",
+    "selectionStroke",
+    "tooltipPaper",
+    "tooltipInk",
+    "tooltipBorder",
+    "toolActive",
+  ] as const;
+
   it("resolves the edition-2 typography and structural theme tokens", () => {
     expect(resolveTheme()).toBe(BUILTIN_THEMES.default);
     expect(resolveTheme("default").fontFamily).toContain("Roboto Condensed");
@@ -230,13 +242,46 @@ describe("theme registry", () => {
   });
 
   it("object themes override roles over a named base", () => {
-    const tokens = resolveTheme({ name: "dark", accent: "#ff0000" });
+    const tokens = resolveTheme({
+      name: "dark",
+      accent: "#ff0000",
+      focusRing: "#00ff00",
+      interactionMuted: 0.5,
+      tooltipPaper: "#111111",
+    });
     expect(tokens.accent).toBe("#ff0000");
     expect(tokens.ink).toBe(BUILTIN_THEMES.dark.ink);
+    expect(tokens.focusRing).toBe("#00ff00");
+    expect(tokens.interactionMuted).toBe(0.5);
+    expect(tokens.tooltipPaper).toBe("#111111");
   });
 
   it("unknown names throw (tier-1 error) and themeVar wraps --gg-* vars", () => {
     expect(() => resolveTheme("darkk" as never)).toThrow(UnknownThemeError);
     expect(themeVar("ink", BUILTIN_THEMES.default)).toBe("var(--gg-ink, #262626)");
+  });
+
+  it("resolves the complete interaction visual language as CSS-variable roles", () => {
+    for (const name of Object.keys(BUILTIN_THEMES) as (keyof typeof BUILTIN_THEMES)[]) {
+      const tokens = resolveTheme(name);
+      for (const role of interactionColorRoles) {
+        expect(tokens[role], `${name}.${role}`).toBeTruthy();
+        expect(themeVar(role, tokens), `${name}.${role} CSS variable`).toBe(
+          `var(--gg-${role}, ${tokens[role]})`,
+        );
+      }
+      expect(tokens.interactionMuted, `${name}.interactionMuted`).toBeGreaterThan(0);
+      expect(tokens.interactionMuted, `${name}.interactionMuted`).toBeLessThan(1);
+      expect(themeVar("interactionMuted", tokens)).toBe(
+        `var(--gg-interactionMuted, ${tokens.interactionMuted})`,
+      );
+    }
+
+    expect(BUILTIN_THEMES.default.tooltipPaper).toBe(BUILTIN_THEMES.default.paper);
+    expect(BUILTIN_THEMES.default.tooltipInk).toBe(BUILTIN_THEMES.default.ink);
+    expect(BUILTIN_THEMES.dark.tooltipPaper).toBe(BUILTIN_THEMES.dark.paper);
+    expect(BUILTIN_THEMES.dark.tooltipInk).toBe(BUILTIN_THEMES.dark.ink);
+    expect(BUILTIN_THEMES.default.selectionFill).toContain("rgba(");
+    expect(BUILTIN_THEMES.dark.selectionFill).toContain("rgba(");
   });
 });

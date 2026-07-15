@@ -81,7 +81,7 @@ export type { SequentialColorScale, SequentialConfig } from "./scales/color.js";
 
 // Theme registry
 export { BUILTIN_THEMES, resolveTheme, themeVar, UnknownThemeError } from "./theme.js";
-export type { ThemeTokens } from "./theme.js";
+export type { ThemeColorRole, ThemeRole, ThemeTokens } from "./theme.js";
 
 // Defaults editions (Hadley lesson 13; normalize() stamps spec.edition)
 export { EDITION_DEFAULTS, resolveEditionDefaults } from "./editions.js";
@@ -144,6 +144,7 @@ export type {
 export { batchMarkCount, CANVAS_AUTO_THRESHOLD, PipelineError, runPipeline } from "./pipeline.js";
 export type {
   Advisory,
+  AxisValueFormatter,
   LayerBackend,
   MappedField,
   NamedData,
@@ -152,7 +153,25 @@ export type {
   ResolvedColorScale,
   RunOptions,
   TrainedScales,
+  ScaleDomainSnapshot,
 } from "./pipeline.js";
+export { LineageStore } from "./identity.js";
+export type { LineageRef } from "./identity.js";
+export { buildCandidateStore, canonicalAxisToken } from "./candidate-store.js";
+export type {
+  CandidateBuildFacts,
+  CandidateDatum,
+  CandidateFacts,
+  CandidateGroup,
+  CandidateInspectMode,
+  CandidateMatch,
+  CandidateRange,
+  ResolvedCandidateInspectMode,
+  CandidateStore,
+  CandidateStoreOptions,
+  CanonicalAxisToken,
+  TraversalDirection,
+} from "./candidate-store.js";
 export { PANEL_SPACING, STRIP_BAND } from "./scene.js";
 export type {
   GeometryBatch,

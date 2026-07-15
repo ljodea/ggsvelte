@@ -13,6 +13,8 @@
 
   let active = $state(0);
   let copied = $state(false);
+  const tabsetId = $props.id();
+  const panelId = `${tabsetId}-panel`;
   let copyTimer: ReturnType<typeof setTimeout> | undefined;
 
   async function copy(): Promise<void> {
@@ -36,25 +38,47 @@
 </script>
 
 <div class="code-tabs">
-  <div class="bar" role="tablist" aria-label="Code representations">
-    {#each tabs as tab, i (tab.label)}
-      <button
-        type="button"
-        role="tab"
-        aria-selected={i === active}
-        class:active={i === active}
-        onclick={() => {
-          select(i);
-        }}
-      >
-        {tab.label}
-      </button>
-    {/each}
+  <div class="bar">
+    <div
+      class="representations"
+      role="tablist"
+      aria-label="Code representations"
+    >
+      {#each tabs as tab, i (tab.label)}
+        <button
+          id={`${tabsetId}-tab-${String(i)}`}
+          type="button"
+          role="tab"
+          aria-controls={panelId}
+          aria-selected={i === active}
+          class:active={i === active}
+          onclick={() => {
+            select(i);
+          }}
+        >
+          {tab.label}
+        </button>
+      {/each}
+    </div>
     <button type="button" class="copy" onclick={copy}>
       {copied ? "Copied!" : "Copy"}
     </button>
   </div>
-  <pre><code>{tabs[active]?.code ?? ""}</code></pre>
+  <div
+    id={panelId}
+    role="tabpanel"
+    aria-labelledby={`${tabsetId}-tab-${String(active)}`}
+  >
+    <!-- svelte-ignore a11y_no_noninteractive_tabindex (scrollable code must be keyboard reachable) -->
+    <div
+      class="scroll-region"
+      role="region"
+      aria-label="Code example"
+      tabindex="0"
+    >
+      <pre><code>{tabs[active]?.code ?? ""}</code></pre>
+    </div>
+  </div>
 </div>
 
 <style>
@@ -72,6 +96,11 @@
     padding: 0.4rem 0.6rem;
     background: var(--surface);
     border-bottom: 1px solid var(--border);
+  }
+
+  .representations {
+    display: flex;
+    gap: 0.25rem;
   }
 
   .bar button {
@@ -96,10 +125,13 @@
     color: var(--accent);
   }
 
+  .scroll-region {
+    overflow-x: auto;
+  }
+
   pre {
     margin: 0;
     padding: 1rem;
-    overflow-x: auto;
     font-size: 0.8rem;
     line-height: 1.5;
   }

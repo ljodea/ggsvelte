@@ -114,7 +114,7 @@ describe("canvas strata (decision 0006 graduated)", () => {
   });
 
   it("no z-index anywhere; strata are pointer-inert", () => {
-    const { container } = render(GGPlot, { ...canvasProps, tooltip: true });
+    const { container } = render(GGPlot, { ...canvasProps, inspect: true });
     const root = container.querySelector<HTMLElement>(".gg-plot-root")!;
     for (const el of root.querySelectorAll(".gg-stratum, canvas")) {
       expect(getComputedStyle(el).zIndex).toBe("auto");
@@ -122,8 +122,9 @@ describe("canvas strata (decision 0006 graduated)", () => {
     }
     const capture = root.querySelector(".gg-capture")!;
     expect(getComputedStyle(capture).pointerEvents).toBe("auto");
-    // Capture layer is the LAST child (topmost by document order).
-    expect(root.lastElementChild!.getAttribute("class")).toContain("gg-capture");
+    expect([...root.children].indexOf(capture)).toBeGreaterThan(
+      [...root.children].indexOf(root.querySelector("canvas.gg-canvas")!),
+    );
   });
 
   it("canvas a11y block: role img + label + data table behind a toggle", async () => {
@@ -143,12 +144,12 @@ describe("canvas strata (decision 0006 graduated)", () => {
     expect([...table.querySelectorAll("th")].map((t) => t.textContent)).toEqual(["x", "y"]);
   });
 
-  it('a11y "force-svg" keeps marks as focusable SVG despite the canvas hint', () => {
-    const { container } = render(GGPlot, { ...canvasProps, a11y: "force-svg", tooltip: true });
+  it('a11y "force-svg" keeps marks in SVG with one virtual-navigation surface', () => {
+    const { container } = render(GGPlot, { ...canvasProps, a11y: "force-svg", inspect: true });
     expect(container.querySelector("canvas")).toBeNull();
     const circles = container.querySelectorAll("circle[tabindex='0']");
-    expect(circles).toHaveLength(4);
-    expect(circles[0]?.getAttribute("aria-label")).toContain("x 1");
+    expect(circles).toHaveLength(0);
+    expect(container.querySelectorAll(".gg-capture[tabindex='0']")).toHaveLength(1);
   });
 });
 
@@ -157,8 +158,8 @@ describe("hover + tooltip (overlays, never a pipeline re-run)", () => {
     const rect = capture.getBoundingClientRect();
     capture.dispatchEvent(
       new PointerEvent("pointermove", {
-        clientX: rect.left + x,
-        clientY: rect.top + y,
+        clientX: rect.left + (x / size.width) * rect.width,
+        clientY: rect.top + (y / size.height) * rect.height,
         bubbles: true,
       }),
     );
@@ -179,7 +180,7 @@ describe("hover + tooltip (overlays, never a pipeline re-run)", () => {
         { geom: "line", render: "svg", aes: { color: null }, params: { linewidth: 0.5 } },
         { geom: "point", render: "canvas", params: { size: 5 } },
       ],
-      tooltip: true,
+      inspect: true,
       onrender,
       ...size,
     });
@@ -209,24 +210,202 @@ describe("hover + tooltip (overlays, never a pipeline re-run)", () => {
     expect(model).toBe(m);
 
     // Miss: move to empty corner -> tooltip clears.
-    pointerMoveAt(capture, panel.x + 1, panel.y + 1);
+    pointerMoveAt(capture, -100, -100);
     await until(() => container.querySelector(".gg-tooltip") === null);
   });
 
-  it("keyboard focus on an SVG mark shows the tooltip (a11y pass)", async () => {
+  it("keyboard navigation on the single chart surface shows the tooltip", async () => {
     const { container } = render(GGPlot, {
       data: rows,
       aes: { x: "x", y: "y" },
       layers: [{ geom: "point" }],
-      tooltip: true,
+      inspect: true,
       ...size,
     });
-    const circle = container.querySelector<SVGCircleElement>("circle[tabindex='0']")!;
-    expect(circle.getAttribute("role")).toBe("img");
-    circle.focus();
+    const surface = container.querySelector<HTMLElement>(".gg-capture[tabindex='0']")!;
+    surface.focus();
+    surface.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true }));
     await until(() => container.querySelector(".gg-tooltip") !== null);
-    circle.blur();
+    surface.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
     await until(() => container.querySelector(".gg-tooltip") === null);
+  });
+
+  it("grouped x inspection emits one legend-ordered member per derived series", async () => {
+    let model: RenderModel | null = null;
+    const events: Array<{
+      phase: string;
+      mode?: string;
+      members?: readonly unknown[];
+      focus?: unknown;
+    }> = [];
+    const { container } = render(GGPlot, {
+      data: rows,
+      aes: { x: "x", y: "y", color: "cls" },
+      layers: [{ geom: "line" }, { geom: "point" }],
+      key: "x",
+      inspect: { mode: "x" },
+      oninspect: (event: {
+        phase: string;
+        mode?: string;
+        members?: readonly unknown[];
+        focus?: unknown;
+      }) => events.push(event),
+      onrender: (next: RenderModel) => (model = next),
+      ...size,
+    });
+    const candidate = model!.candidates.candidate(2)!;
+    pointerMoveAt(container.querySelector(".gg-capture")!, candidate.x, candidate.y);
+    await until(() => events.some((event) => event.phase === "change"));
+    const event = events.find((value) => value.phase === "change")!;
+    expect(event.mode).toBe("x");
+    expect(event.members!.length).toBeGreaterThan(0);
+    expect(event.focus).toBeDefined();
+  });
+
+  it("keeps default transient snapshots bounded but materializes all members for callbacks", async () => {
+    const data = Array.from({ length: 12 }, (_, index) => ({
+      id: `row-${index}`,
+      x: 1,
+      y: index + 1,
+      series: `series-${index}`,
+    }));
+    let defaultModel: RenderModel | null = null;
+    const defaultPlot = render(GGPlot, {
+      data,
+      aes: { x: "x", y: "y", color: "series" },
+      layers: [{ geom: "point" }],
+      key: "id",
+      inspect: { mode: "x" },
+      onrender: (next: RenderModel) => (defaultModel = next),
+      ...size,
+    });
+    const defaultSeed = defaultModel!.candidates.candidate(0)!;
+    pointerMoveAt(
+      defaultPlot.container.querySelector(".gg-capture")!,
+      defaultSeed.x,
+      defaultSeed.y,
+    );
+    await until(() => defaultPlot.container.querySelector(".gg-tooltip") !== null);
+    expect(defaultPlot.container.querySelectorAll(".gg-tooltip dl")).toHaveLength(8);
+
+    let callbackModel: RenderModel | null = null;
+    const changes: Array<{ members: readonly unknown[] }> = [];
+    const callbackPlot = render(GGPlot, {
+      data,
+      aes: { x: "x", y: "y", color: "series" },
+      layers: [{ geom: "point" }],
+      key: "id",
+      inspect: { mode: "x" },
+      oninspect: (event: { phase: string; members?: readonly unknown[] }) => {
+        if (event.phase === "change" && event.members !== undefined)
+          changes.push({ members: event.members });
+      },
+      onrender: (next: RenderModel) => (callbackModel = next),
+      ...size,
+    });
+    const callbackSeed = callbackModel!.candidates.candidate(0)!;
+    pointerMoveAt(
+      callbackPlot.container.querySelector(".gg-capture")!,
+      callbackSeed.x,
+      callbackSeed.y,
+    );
+    await until(() => changes.length > 0);
+    expect(changes[0].members).toHaveLength(12);
+  });
+
+  it("updates a pinned overlay on container resize without repeating its semantic callback", async () => {
+    const data = [
+      { id: "a", x: 1, y: 2 },
+      { id: "b", x: 2, y: 3 },
+    ];
+    let model: RenderModel | null = null;
+    const changes: Array<{ state?: string; source?: string }> = [];
+    const { container } = render(GGPlot, {
+      data,
+      aes: { x: "x", y: "y" },
+      layers: [{ geom: "point" }],
+      key: "id",
+      inspect: true,
+      width: "container",
+      height: 300,
+      oninspect: (event: { phase: string; state?: string; source?: string }) => {
+        if (event.phase === "change") changes.push(event);
+      },
+      onrender: (next: RenderModel) => (model = next),
+    });
+    container.style.width = "400px";
+    await until(() => container.querySelector("svg.gg-plot")?.getAttribute("width") === "400");
+    const seed = model!.candidates.candidate(0)!;
+    const capture = container.querySelector(".gg-capture")!;
+    pointerMoveAt(capture, seed.x, seed.y);
+    await until(() => changes.length > 0);
+    capture.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    await until(() => changes.at(-1)?.state === "pinned");
+    const callbackCount = changes.length;
+    const priorModel = model;
+    container.style.width = "600px";
+    await until(
+      () =>
+        container.querySelector("svg.gg-plot")?.getAttribute("width") === "600" &&
+        model !== priorModel,
+    );
+    await new Promise<void>((resolve) => {
+      requestAnimationFrame(() => {
+        resolve();
+      });
+    });
+    expect(changes).toHaveLength(callbackCount);
+  });
+
+  it("clears transient inspection when a new layout model commits", async () => {
+    let model: RenderModel | null = null;
+    const { container } = render(GGPlot, {
+      data: rows,
+      aes: { x: "x", y: "y" },
+      layers: [{ geom: "point" }],
+      inspect: true,
+      width: "container",
+      height: 300,
+      onrender: (next: RenderModel) => (model = next),
+    });
+    container.style.width = "400px";
+    await until(() => container.querySelector("svg.gg-plot")?.getAttribute("width") === "400");
+    const seed = model!.candidates.candidate(0)!;
+    pointerMoveAt(container.querySelector(".gg-capture")!, seed.x, seed.y);
+    await until(() => container.querySelector(".gg-tooltip") !== null);
+    const priorModel = model;
+    container.style.width = "600px";
+    await until(
+      () =>
+        container.querySelector("svg.gg-plot")?.getAttribute("width") === "600" &&
+        model !== priorModel,
+    );
+    await until(() => container.querySelector(".gg-tooltip") === null);
+  });
+
+  it("keeps a transient tooltip open while the pointer moves into it", async () => {
+    let model: RenderModel | null = null;
+    const { container } = render(GGPlot, {
+      data: rows,
+      aes: { x: "x", y: "y" },
+      layers: [{ geom: "point" }],
+      inspect: true,
+      onrender: (next: RenderModel) => (model = next),
+      ...size,
+    });
+    const candidate = model!.candidates.candidate(0)!;
+    const capture = container.querySelector(".gg-capture")!;
+    pointerMoveAt(capture, candidate.x, candidate.y);
+    await until(() => container.querySelector(".gg-tooltip") !== null);
+    const tooltip = container.querySelector(".gg-tooltip")!;
+    capture.dispatchEvent(new PointerEvent("pointerleave", { bubbles: true }));
+    tooltip.dispatchEvent(new PointerEvent("pointerenter", { bubbles: true }));
+    await new Promise<void>((resolve) => {
+      requestAnimationFrame(() => {
+        resolve();
+      });
+    });
+    expect(container.querySelector(".gg-tooltip")).not.toBeNull();
   });
 });
 
@@ -234,8 +413,8 @@ describe("brush + brush-to-zoom", () => {
   function drag(capture: Element, x0: number, y0: number, x1: number, y1: number): void {
     const rect = capture.getBoundingClientRect();
     const opts = (x: number, y: number) => ({
-      clientX: rect.left + x,
-      clientY: rect.top + y,
+      clientX: rect.left + (x / size.width) * rect.width,
+      clientY: rect.top + (y / size.height) * rect.height,
       bubbles: true,
       button: 0,
       pointerId: 1,
@@ -247,13 +426,16 @@ describe("brush + brush-to-zoom", () => {
 
   it("brush selects row indices via the hit-index rect query", async () => {
     let model: RenderModel | null = null;
-    const selections: (number[] | null)[] = [];
+    const selections: PropertyKey[][] = [];
     const { container } = render(GGPlot, {
       data: rows,
       aes: { x: "x", y: "y" },
       layers: [{ geom: "point" }],
-      brush: true,
-      onbrush: (sel: { rows: number[] } | null) => selections.push(sel === null ? null : sel.rows),
+      key: "x",
+      select: "interval",
+      onselect: (event: { phase: string; keys: readonly PropertyKey[] }) => {
+        if (event.phase === "end") selections.push([...event.keys]);
+      },
       onrender: (m: RenderModel) => {
         model = m;
       },
@@ -265,6 +447,20 @@ describe("brush + brush-to-zoom", () => {
     const batch = scene.batches[0];
     if (batch === undefined || batch.kind !== "points") throw new Error("unreachable");
     const capture = container.querySelector(".gg-capture")!;
+    const selectArea = [
+      ...container.querySelectorAll<HTMLButtonElement>(".gg-tool-rail button"),
+    ].find((button) => button.textContent === "Select area")!;
+    selectArea.click();
+    // A locally chosen tool must survive the next reactive flush. This guards
+    // against configuration synchronization accidentally subscribing to and
+    // resetting the user's active-tool state.
+    await until(() => selectArea.getAttribute("aria-pressed") === "true");
+    await new Promise<void>((resolve) => {
+      requestAnimationFrame(() => {
+        resolve();
+      });
+    });
+    expect(selectArea.getAttribute("aria-pressed")).toBe("true");
     // Rect around the first two points only.
     const xs = [0, 1].map((j) => panel.x + (batch.positions[j * 2] ?? 0));
     const ys = [0, 1].map((j) => panel.y + (batch.positions[j * 2 + 1] ?? 0));
@@ -277,7 +473,7 @@ describe("brush + brush-to-zoom", () => {
     );
     await until(() => selections.length > 0);
     expect(selections[0]).toHaveLength(2);
-    expect(new Set(selections[0])).toEqual(new Set([0, 1]));
+    expect(new Set(selections[0])).toEqual(new Set([1, 2]));
   });
 
   it("brush-to-zoom respecs explicit domains; colors NEVER shift; double-click resets", async () => {
@@ -287,6 +483,7 @@ describe("brush + brush-to-zoom", () => {
       aes: { x: "x", y: "y", color: "cls" },
       layers: [{ geom: "point" }],
       zoom: true,
+      inspect: true,
       onrender: (m: RenderModel) => {
         model = m;
       },
@@ -304,6 +501,9 @@ describe("brush + brush-to-zoom", () => {
 
     const panel = before.scene.panels[0];
     const capture = container.querySelector(".gg-capture")!;
+    [...container.querySelectorAll<HTMLButtonElement>(".gg-tool-rail button")]
+      .find((button) => button.textContent === "Zoom area")!
+      .click();
     // Zoom into the right half (x in ~[2.5, 4]) -> rows 0 (x=1) drops out.
     drag(
       capture,
@@ -315,6 +515,8 @@ describe("brush + brush-to-zoom", () => {
     await until(() => model !== before && model !== null);
     const after = model!;
     expect(after.runId).toBeGreaterThan(before.runId);
+    expect(after.domains.baseline).toEqual(before.domains.effective);
+    expect(after.domains.effective).not.toEqual(after.domains.baseline);
     // The x domain narrowed (explicit domain respec via scale inversion).
     const beforeX = (before.scales.x as { domain: [number, number] }).domain;
     const afterX = (after.scales.x as { domain: [number, number] }).domain;
@@ -334,6 +536,42 @@ describe("brush + brush-to-zoom", () => {
       [...container.querySelectorAll("circle")].every((c) => Number(c.getAttribute("cx")) >= 0),
     );
     expect(fillsByClass()).toEqual(initialFills);
+  });
+});
+
+describe("point selection", () => {
+  it("uses stable keys and exposes a visible clear action", async () => {
+    let model: RenderModel | null = null;
+    const events: Array<{ phase: string; keys: readonly PropertyKey[] }> = [];
+    const { container } = render(GGPlot, {
+      data: rows,
+      aes: { x: "x", y: "y" },
+      layers: [{ geom: "point" }],
+      key: "x",
+      select: "point",
+      onselect: (event: { phase: string; keys: readonly PropertyKey[] }) => events.push(event),
+      onrender: (next: RenderModel) => (model = next),
+      ...size,
+    });
+    const candidate = model!.candidates.candidate(0)!;
+    const capture = container.querySelector(".gg-capture")!;
+    const rect = capture.getBoundingClientRect();
+    capture.dispatchEvent(
+      new MouseEvent("click", {
+        clientX: rect.left + (candidate.x / size.width) * rect.width,
+        clientY: rect.top + (candidate.y / size.height) * rect.height,
+        bubbles: true,
+      }),
+    );
+    await until(() => events.length === 1);
+    expect(events[0]?.keys).toEqual([1]);
+    expect(container.querySelector(".gg-selected-ring")).not.toBeNull();
+    const clear = [...container.querySelectorAll<HTMLButtonElement>("button")].find(
+      (button) => button.textContent === "Clear selection",
+    )!;
+    clear.click();
+    await until(() => events.length === 2);
+    expect(events[1]).toMatchObject({ phase: "clear", keys: [] });
   });
 });
 
