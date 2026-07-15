@@ -47,6 +47,82 @@ function pointer(
 }
 
 describe("final R-1/R0 evidence locks", () => {
+  it("announces a grouped axis value, member count, focus, and pin state exactly once", async () => {
+    const data = [
+      { id: "a", x: 1, y: 10, group: "alpha" },
+      { id: "b", x: 1, y: 20, group: "beta" },
+    ];
+    const { container } = render(GGPlot, {
+      data,
+      aes: { x: "x", y: "y", color: "group" },
+      layers: [{ geom: "point" }],
+      key: "id",
+      inspect: { mode: "x" },
+      ...size,
+    });
+    const surface = container.querySelector<HTMLElement>(".gg-capture")!;
+    surface.focus();
+    await tick();
+    const live = container.querySelector<HTMLElement>("[aria-live='polite']")!;
+    expect(live.textContent).toMatch(/^x 1\.0; 2 data; focused /);
+    expect(live.textContent?.match(/x 1/g)).toHaveLength(1);
+    expect(live.textContent?.match(/2 data/g)).toHaveLength(1);
+    expect(
+      Number(live.textContent?.includes("alpha")) + Number(live.textContent?.includes("beta")),
+    ).toBe(1);
+
+    keydown(surface, "Enter");
+    await tick();
+    expect(live.textContent?.match(/pinned/g)).toHaveLength(1);
+    expect(container.querySelectorAll(".gg-tooltip-members dl")).toHaveLength(2);
+  });
+
+  it("uses one live region for area instructions, completion, clear, zoom, and reset", async () => {
+    const { container } = render(GGPlot, {
+      data: [
+        { id: "a", x: 1, y: 1 },
+        { id: "b", x: 2, y: 2 },
+      ],
+      aes: { x: "x", y: "y" },
+      layers: [{ geom: "point" }],
+      key: "id",
+      inspect: true,
+      select: { type: "interval", persistent: true },
+      zoom: true,
+      ...size,
+    });
+    expect(container.querySelectorAll("[aria-live], [role='status']")).toHaveLength(1);
+    const surface = container.querySelector<HTMLElement>(".gg-capture")!;
+    button(container, "Select area").click();
+    surface.focus();
+    keydown(surface, "Enter");
+    await tick();
+    expect(container.querySelector("[aria-live='polite']")?.textContent).toBe(
+      "Choose opposite corner.",
+    );
+    keydown(surface, "ArrowRight");
+    keydown(surface, "ArrowDown");
+    keydown(surface, "Enter");
+    await tick();
+    expect(container.querySelector("[aria-live='polite']")?.textContent).toMatch(
+      /^Selection complete, /,
+    );
+    button(container, "Clear selection").click();
+    await tick();
+    expect(container.querySelector("[aria-live='polite']")?.textContent).toBe("Selection cleared.");
+
+    button(container, "Zoom area").click();
+    keydown(surface, "Enter");
+    keydown(surface, "ArrowRight");
+    keydown(surface, "ArrowDown");
+    keydown(surface, "Enter");
+    await tick();
+    expect(container.querySelector("[aria-live='polite']")?.textContent).toBe("Zoom complete.");
+    button(container, "Reset zoom").click();
+    await tick();
+    expect(container.querySelector("[aria-live='polite']")?.textContent).toBe("Zoom reset.");
+  });
+
   it("activates and announces first focus, navigates four directions, cycles coincident marks, and closes on focus leave", async () => {
     const changes: string[] = [];
     const data = [

@@ -1,22 +1,45 @@
 {
   "$schema": "./record.schema.json",
+  "schemaVersion": 1,
   "release": "0.0.0-rc.0",
-  "date": "2026-01-01",
-  "tester": "initials-or-team",
-  "platform": "macOS 15.x",
-  "assistiveTechnology": { "name": "VoiceOver", "version": "15.x" },
-  "browser": { "name": "Safari", "version": "18.x" },
-  "fixture": "/examples/interactions/inspection",
-  "reducedMotion": false,
-  "checks": [
+  "testedCommit": "0000000000000000000000000000000000000000",
+  "completedAt": "2026-01-01",
+  "acceptedIssues": [],
+  "runs": [
     {
-      "id": "inspection-keyboard",
-      "steps": ["Focus the plot", "Move inspection with ArrowRight", "Pin with Enter"],
-      "expected": "The focused datum, group count, and pinned state are announced once.",
-      "observed": "",
-      "result": "pending",
-      "issue": null
+      "id": "voiceover-safari-macos-baseline",
+      "pairing": "voiceover-safari-macos",
+      "date": "2026-01-01",
+      "tester": "initials-or-team",
+      "platform": { "name": "macOS", "version": "15.x" },
+      "assistiveTechnology": { "name": "VoiceOver", "version": "15.x" },
+      "browser": { "name": "Safari", "version": "18.x" },
+      "profile": "baseline",
+      "settings": {
+        "reducedMotion": false,
+        "contrast": "default",
+        "browserZoomPercent": 100,
+        "largePointer": false,
+        "input": "keyboard-pointer",
+        "viewportCssPixels": "1280x800"
+      },
+      "flows": [
+        {
+          "id": "inspection",
+          "fixture": "/examples/interactions/inspection",
+          "observations": [
+            {
+              "id": "focused-member-once",
+              "observed": "",
+              "result": "pending",
+              "acceptedIssue": null
+            }
+          ],
+          "notes": ""
+        }
+      ],
+      "notes": ""
     }
   ],
-  "notes": ""
+  "notes": "Drafts may contain pending results; records/v<release>.json may not."
 }

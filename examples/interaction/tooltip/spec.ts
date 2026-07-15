@@ -7,7 +7,7 @@ export default defineExample(
   gg(penguins, aes({ x: "flipper", y: "mass", color: "species" }))
     .geomPoint({ size: 4, alpha: 0.85 })
     .labs({
-      title: "Inspect a point, then click to pin",
+      title: "Inspect a shared x value, then pin",
       x: "Flipper length (mm)",
       y: "Body mass (g)",
       color: "Species",

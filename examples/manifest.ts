@@ -215,14 +215,14 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     category: "interaction",
     name: "tooltip",
     title: "Inspect and pin data",
-    description: "Opt-in inspection adds a semantic crosshair, an HTML tooltip, keyboard traversal, and click-or-Enter pinning. The example also renders the typed oninspect lifecycle so transient, pinned, and clear states are visible without exposing renderer indices.",
+    description: "Opt-in grouped inspection adds a semantic crosshair, a complete HTML tooltip, keyboard traversal, and click-or-Enter pinning. The concise live announcement reports the shared x value and group count once, while every member remains navigable in ordinary DOM.",
     tags: ["interaction", "inspect", "tooltip", "crosshair", "keyboard", "pin"],
     docsSection: "Interaction",
     vrHeight: 740,
     journey: {
-      pointer: "Move across a point to inspect it, then click to pin the inspection.",
-      keyboard: "Tab to the chart, use the Arrow keys to inspect points, press Enter to pin, and press Escape to dismiss.",
-      touch: "Tap a point to pin its values; tap outside the chart to dismiss the inspection.",
+      pointer: "Move across a shared x value to inspect its group, then click to pin it.",
+      keyboard: "Tab to the chart, use the Arrow keys to inspect x groups, press Enter to pin, and press Escape to dismiss.",
+      touch: "Tap an x group to pin its values; tap outside the chart to dismiss the inspection.",
       references: [
         { label: "Interaction guide and event reference", href: "/guide/interactions" },
         { label: "Pre-0.1 interaction migration", href: "/guide/migrating-pre-0-1" },

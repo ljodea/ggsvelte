@@ -44,7 +44,8 @@
   <GeomPoint size={2.5} alpha={0.8} />
 </GGPlot>
 
-<div class="event-status" aria-live="polite">
+<!-- Visual callback evidence only. GGPlot owns the single concise live region. -->
+<div class="event-status">
   <p><strong>Selection:</strong> {selectionStatus}</p>
   <p><strong>Zoom:</strong> {zoomStatus}</p>
 </div>
