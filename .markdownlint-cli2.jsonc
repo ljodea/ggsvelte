@@ -6,6 +6,8 @@
     "MD013": false,
     // Decision notes intentionally continue ordered numbering across subsection breaks.
     "MD029": false,
+    // Generated changelogs repeat change-type headings beneath distinct release headings.
+    "MD024": { "siblings_only": true },
   },
   "globs": ["**/*.md"],
   "ignores": ["**/node_modules/**", "spikes/**"],
