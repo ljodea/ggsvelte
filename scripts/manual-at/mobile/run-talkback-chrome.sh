@@ -45,6 +45,41 @@ adb shell wm density 420
 adb shell input keyevent KEYCODE_WAKEUP
 adb shell wm dismiss-keyguard
 
+# Skip Chrome's first-run UI without replacing Chrome or its accessibility
+# stack. Chrome can still show a separate notifications education modal after
+# these flags, so dismiss that while ordinary touch input is active, before
+# TalkBack owns the touchscreen.
+adb shell settings put secure accessibility_enabled 0
+adb shell am set-debug-app --persistent "${CHROME_PACKAGE}"
+adb shell 'echo "chrome --no-first-run --disable-fre --disable-default-apps" > /data/local/tmp/chrome-command-line'
+
+dump_chrome_ui() {
+  adb shell uiautomator dump /sdcard/ggsvelte-chrome-ui.xml >/dev/null
+  adb shell cat /sdcard/ggsvelte-chrome-ui.xml | tr -d '\r' > "${OUTPUT_DIR}/chrome-ui.xml"
+}
+
+dismiss_chrome_onboarding() {
+  adb shell am force-stop "${CHROME_PACKAGE}"
+  adb shell am start -W -a android.intent.action.VIEW -d "${TEST_URL}" "${CHROME_PACKAGE}" > \
+    "${OUTPUT_DIR}/chrome-preload.txt" || fail "Chrome could not preload the test fixture"
+  sleep 8
+  dump_chrome_ui
+  if grep -F 'text="Chrome notifications make things easier"' \
+    "${OUTPUT_DIR}/chrome-ui.xml" >/dev/null; then
+    # "No thanks" is stable at the lower-left action position on the pinned
+    # Pixel 7 / 1080x1920 fixture. TalkBack is deliberately still disabled.
+    adb shell input tap 610 1500
+    sleep 3
+    dump_chrome_ui
+  fi
+  if grep -F 'text="Chrome notifications make things easier"' \
+    "${OUTPUT_DIR}/chrome-ui.xml" >/dev/null; then
+    fail "Chrome onboarding still obscures the test fixture"
+  fi
+}
+
+dismiss_chrome_onboarding
+
 accessibility_ready=false
 for attempt in 1 2 3; do
   adb shell settings put secure accessibility_enabled 0
@@ -67,14 +102,15 @@ done
 [[ "${accessibility_ready}" == "true" ]] || \
   fail "TalkBack and touch exploration did not become ready together"
 
-# Skip Chrome's first-run UI without replacing Chrome or its accessibility
-# stack. This flag only removes account/onboarding screens from the fixture.
-adb shell am set-debug-app --persistent "${CHROME_PACKAGE}"
-adb shell 'echo "chrome --no-first-run --disable-fre --disable-default-apps" > /data/local/tmp/chrome-command-line'
 adb shell am force-stop "${CHROME_PACKAGE}"
 adb shell am start -W -a android.intent.action.VIEW -d "${TEST_URL}" "${CHROME_PACKAGE}" > \
   "${OUTPUT_DIR}/chrome-start.txt" || fail "Chrome could not open the test fixture"
 sleep 12
+dump_chrome_ui
+if grep -F 'text="Chrome notifications make things easier"' \
+  "${OUTPUT_DIR}/chrome-ui.xml" >/dev/null; then
+  fail "Chrome onboarding still obscures the test fixture"
+fi
 adb exec-out screencap -p > "${OUTPUT_DIR}/screenshots/00-loaded.png"
 
 # Clear setup chatter. Every later swipe and tap is injected through Android's
