@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { GeomLine, GeomPoint, GGPlot } from "ggsvelte";
+  import { GeomLine, GeomPoint, GGPlot } from "@ggsvelte/svelte";
 
   import { temperatures } from "./data.js";
 </script>

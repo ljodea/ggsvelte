@@ -101,7 +101,7 @@
     can collide ids (documented caveat). The Svelte adapter uses
     `$props.id()` and is collision-free.
 16. **CLI**: logic lives in `@ggsvelte/core` (`runCLI`, injectable IO,
-    testable without spawning); the `ggsvelte-render` bin on the `ggsvelte`
+    testable without spawning); the `ggsvelte-render` bin on the `@ggsvelte/svelte`
     package is a ~35-line wrapper. Exit codes: 0 rendered / 1 render failed
     / 2 usage error / 3 invalid spec. stdout carries ONLY SVG; diagnostics
     are stderr JSON lines ({kind: error|warning|advisory, ...}).

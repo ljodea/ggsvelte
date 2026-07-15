@@ -52,9 +52,11 @@ describe("R0 release wiring", () => {
 
   it("versions only publishable packages", () => {
     const config = JSON.parse(read(".changeset/config.json")) as {
+      linked?: string[][];
       privatePackages?: boolean | { version?: boolean; tag?: boolean };
     };
     expect(config.privatePackages).toBe(false);
+    expect(config.linked).toEqual([["@ggsvelte/spec", "@ggsvelte/core", "@ggsvelte/svelte"]]);
   });
 
   it("ships the CLI bin without npm manifest normalization", () => {

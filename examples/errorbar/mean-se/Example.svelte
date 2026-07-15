@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { GeomErrorbar, GeomPoint, GGPlot } from "ggsvelte";
+  import { GeomErrorbar, GeomPoint, GGPlot } from "@ggsvelte/svelte";
 
   import { yields } from "./data.js";
 </script>

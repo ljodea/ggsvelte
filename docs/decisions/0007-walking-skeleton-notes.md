@@ -14,7 +14,7 @@
 | `measure.ts` / `font-metrics.ts`  | `src/layout/measure.ts` / `layout/font-metrics.ts`  | Verbatim. The metrics table is still the macOS-Chromium/Helvetica one from the spike — regeneration in the pinned container is an M1 follow-up (see below).    |
 | `ticks.ts` / `layout.ts` (M0a-3)  | `src/layout/ticks.ts` / `layout/layout.ts`          | Verbatim algorithmically; two `if/else` branches restructured to hoist shared trailing code (behavior-identical, sweep still 98.4% converged).                 |
 | spike tests (6 suites)            | `packages/core/tests/*` + `tests/fixtures/grouping` | Ported nearly verbatim (paths/imports; `Columns` type rename). All 87 pass.                                                                                    |
-| `spikes/browser` registry (M0a-1) | `ggsvelte` `src/lib/registry.svelte.ts`             | Rewritten to the production shape but mechanism-identical: non-reactive Map + monotonic version `$state`, init-time registration, live getter descriptors.     |
+| `spikes/browser` registry (M0a-1) | `@ggsvelte/svelte` `src/lib/registry.svelte.ts`     | Rewritten to the production shape but mechanism-identical: non-reactive Map + monotonic version `$state`, init-time registration, live getter descriptors.     |
 
 Everything else (schema, normalize, validate, builder, portability,
 ColumnTable, pipeline, renderers, components) is new M0c code built on the
@@ -58,7 +58,7 @@ packages stay dependency-free apart from `@sinclair/typebox`:
    bottom/left margins). Safe direction: the panel shrinks, measured labels
    still fit; only tick density drifts marginally. Folding titles into the
    layout measurement loop is the clean fix — M1, together with legends.
-5. **attw runs `--profile esm-only`**, and the `ggsvelte` package is checked
+5. **attw runs `--profile esm-only`**, and the `@ggsvelte/svelte` package is checked
    by publint only: its d.ts files import `./*.svelte` modules, which no
    node16 resolution mode can resolve — Svelte packages are consumed through
    bundlers via the `svelte` condition. Documented in `scripts/package-lint.ts`.
@@ -116,7 +116,7 @@ packages stay dependency-free apart from `@sinclair/typebox`:
 3. Fold axis titles (and legends) into the two-pass layout measurement.
 4. Wire `aes` channels beyond x/y/color/group into geometry (size, alpha,
    linewidth as data channels — with the sqrt/linear dimensional split).
-5. `ggsvelte-render` CLI bin on the `ggsvelte` package (plan M1) — the pure
+5. `ggsvelte-render` CLI bin on the `@ggsvelte/svelte` package (plan M1) — the pure
    entry is ready for it.
 6. SvelteKit-real SSR/hydration round-trip for `<GGPlot>` + SSR scale-state
    adoption (`adoptScaleState` is exported and tested at the core level).

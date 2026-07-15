@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { RenderModel } from "@ggsvelte/core";
-  import { GGPlot } from "ggsvelte";
+  import { GGPlot } from "@ggsvelte/svelte";
 
   type Row = Readonly<{
     id: number;

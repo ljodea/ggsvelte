@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { GeomRule, GGPlot } from "ggsvelte";
+  import { GeomRule, GGPlot } from "@ggsvelte/svelte";
 
   import { eruptions } from "./data.js";
 </script>

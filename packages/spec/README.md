@@ -5,13 +5,13 @@ Schema (`schema/v0.json`), the `normalize()` canonicalizer, two-tier
 `validate()` with the agent error contract (`{ code, path, message,
 allowed?, fix }` — every fix carries a machine-applicable example),
 `lintSpec()` advisories, portability helpers, and the fluent `gg()/aes()`
-builder. Zero DOM, zero d3. Pre-0.1.0, explicitly unstable.
+builder. Zero DOM, zero d3. The v0.1 API is intentionally early.
 
 ```sh
 bun add @ggsvelte/spec     # or: npm install @ggsvelte/spec
 ```
 
-Most apps want the [`ggsvelte`](https://www.npmjs.com/package/ggsvelte)
+Most apps want the [`@ggsvelte/svelte`](https://www.npmjs.com/package/@ggsvelte/svelte)
 package instead — it re-exports all of this. Install `@ggsvelte/spec` alone
 for validation/authoring tooling with no renderer.
 
@@ -39,7 +39,7 @@ import schema from "@ggsvelte/spec/schema/v0.json";
 ```
 
 Render the spec with [`@ggsvelte/core`](https://www.npmjs.com/package/@ggsvelte/core)
-(headless SVG) or [`ggsvelte`](https://www.npmjs.com/package/ggsvelte)
+(headless SVG) or [`@ggsvelte/svelte`](https://www.npmjs.com/package/@ggsvelte/svelte)
 (Svelte 5 components).
 
 Repo + docs: <https://github.com/ljodea/ggsvelte> · MIT © Liam O'Dea

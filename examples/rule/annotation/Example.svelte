@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { GeomLine, GeomPoint, GeomRule, GGPlot } from "ggsvelte";
+  import { GeomLine, GeomPoint, GeomRule, GGPlot } from "@ggsvelte/svelte";
 
   import { signups, target } from "./data.js";
 </script>

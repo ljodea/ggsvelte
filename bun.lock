@@ -32,7 +32,7 @@
       "dependencies": {
         "@ggsvelte/examples": "workspace:*",
         "@ggsvelte/spec": "workspace:*",
-        "ggsvelte": "workspace:*",
+        "@ggsvelte/svelte": "workspace:*",
       },
       "devDependencies": {
         "@sveltejs/adapter-static": "^3.0.10",
@@ -60,7 +60,7 @@
       "version": "0.0.0",
       "dependencies": {
         "@ggsvelte/spec": "workspace:*",
-        "ggsvelte": "workspace:*",
+        "@ggsvelte/svelte": "workspace:*",
       },
       "devDependencies": {
         "svelte": "^5.46.4",
@@ -89,7 +89,7 @@
       },
     },
     "packages/svelte": {
-      "name": "ggsvelte",
+      "name": "@ggsvelte/svelte",
       "version": "0.0.0",
       "bin": {
         "ggsvelte-render": "./bin/ggsvelte-render.js",
@@ -209,6 +209,8 @@
     "@ggsvelte/examples": ["@ggsvelte/examples@workspace:examples"],
 
     "@ggsvelte/spec": ["@ggsvelte/spec@workspace:packages/spec"],
+
+    "@ggsvelte/svelte": ["@ggsvelte/svelte@workspace:packages/svelte"],
 
     "@inquirer/external-editor": ["@inquirer/external-editor@1.0.3", "", { "dependencies": { "chardet": "^2.1.1", "iconv-lite": "^0.7.0" }, "peerDependencies": { "@types/node": ">=18" }, "optionalPeers": ["@types/node"] }, "sha512-RWbSrDiYmO4LbejWY7ttpxczuwQyZLBUyygsA9Nsv95hpzUWwnNTVQmAq3xuh7vNwCp07UTmE5i11XAEExx4RA=="],
 
@@ -653,8 +655,6 @@
     "get-east-asian-width": ["get-east-asian-width@1.6.0", "", {}, "sha512-QRbvDIbx6YklUe6RxeTeleMR0yv3cYH6PsPZHcnVn7xv7zO1BHN8r0XETu8n6Ye3Q+ahtSarc3WgtNWmehIBfA=="],
 
     "get-tsconfig": ["get-tsconfig@4.14.0", "", { "dependencies": { "resolve-pkg-maps": "^1.0.0" } }, "sha512-yTb+8DXzDREzgvYmh6s9vHsSVCHeC0G3PI5bEXNBHtmshPnO+S5O7qgLEOn0I5QvMy6kpZN8K1NKGyilLb93wA=="],
-
-    "ggsvelte": ["ggsvelte@workspace:packages/svelte"],
 
     "glob-parent": ["glob-parent@5.1.2", "", { "dependencies": { "is-glob": "^4.0.1" } }, "sha512-AOIgSQCepiJYwP3ARnGx+5VnTu2HBYdzbGP45eLw1vr3zB3vZLeyed1sC9hnbcOc9/SrMyM5RPQrkGz4aS9Zow=="],
 

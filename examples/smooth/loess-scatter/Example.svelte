@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { GeomPoint, GeomSmooth, GGPlot } from "ggsvelte";
+  import { GeomPoint, GeomSmooth, GGPlot } from "@ggsvelte/svelte";
 
   import { trend } from "./data.js";
 </script>

@@ -116,7 +116,7 @@ and consequences:
 - **`bun run test` now includes `scripts/`** (the manifest generator's unit
   tests) — the pre-push hook and CI unit job were updated to match.
 - **Pre-push tsc-build hook became package-build** (`bun run build`): the
-  docs app and examples corpus import the BUILT `ggsvelte` package, so
+  docs app and examples corpus import the BUILT `@ggsvelte/svelte` package, so
   svelte-package must run before docs/examples checks. Adds ~1s.
 - The docs header's GitHub link points at a placeholder org URL (repo not
   published yet).

@@ -6,7 +6,7 @@
   "type": "module",
   "dependencies": {
     "@ggsvelte/spec": "workspace:*",
-    "ggsvelte": "workspace:*"
+    "@ggsvelte/svelte": "workspace:*"
   },
   "devDependencies": {
     "svelte": "^5.46.4",

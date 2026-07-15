@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { GeomHistogram, GGPlot } from "ggsvelte";
+  import { GeomHistogram, GGPlot } from "@ggsvelte/svelte";
 
   import { responses } from "./data.js";
 </script>

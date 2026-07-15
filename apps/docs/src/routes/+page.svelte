@@ -20,7 +20,7 @@
     compose Svelte components — all three compile to the same canonical
     <code>PortableSpec</code>.
   </p>
-  <pre><code>bun add ggsvelte</code></pre>
+  <pre><code>bun add @ggsvelte/svelte</code></pre>
   <p>
     <a href={`${base}/guide/getting-started`}>Get started →</a>
     &nbsp;·&nbsp;

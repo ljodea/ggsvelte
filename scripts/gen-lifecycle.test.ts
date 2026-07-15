@@ -104,7 +104,7 @@ describe("lifecycle.json", () => {
       expect(spec).toContain(name);
     }
     expect(stableIntent("@ggsvelte/core", ".")).toContain("renderToSVGString");
-    const svelte = stableIntent("ggsvelte", ".");
+    const svelte = stableIntent("@ggsvelte/svelte", ".");
     for (const name of ["GGPlot", "PortableSpec", "normalize", "validate", "renderToSVGString"]) {
       expect(svelte).toContain(name);
     }

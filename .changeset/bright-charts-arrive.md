@@ -1,7 +1,7 @@
 ---
 "@ggsvelte/spec": minor
 "@ggsvelte/core": minor
-"ggsvelte": minor
+"@ggsvelte/svelte": minor
 ---
 
 # First public release

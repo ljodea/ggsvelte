@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { GeomDensity, GGPlot } from "ggsvelte";
+  import { GeomDensity, GGPlot } from "@ggsvelte/svelte";
 
   import { sessions } from "./data.js";
 </script>
