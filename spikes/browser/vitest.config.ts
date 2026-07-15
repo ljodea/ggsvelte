@@ -11,10 +11,19 @@ export default defineConfig({
         test: {
           name: 'browser',
           include: ['tests/browser/**/*.test.ts'],
+          retry: process.env.CI === 'true' ? 1 : 0,
           browser: {
             enabled: true,
             provider: playwright(),
             headless: true,
+            screenshotFailures: true,
+            screenshotDirectory: 'test-results/screenshots',
+            trace: {
+              mode: 'on-first-retry',
+              tracesDir: 'test-results/traces',
+              screenshots: true,
+              snapshots: false,
+            },
             instances: [{ browser: 'chromium' }],
           },
         },

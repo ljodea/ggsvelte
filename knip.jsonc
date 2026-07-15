@@ -8,8 +8,9 @@
   // only on built output), which knip's static analysis cannot trace. oxfmt
   // is invoked as `bun node_modules/.bin/oxfmt` (arch-proof invocation, see
   // CONTRIBUTING.md), which knip's script parser does not resolve. The same
-  // is true for markdownlint-cli2's explicit node_modules/.bin invocation.
-  "ignoreDependencies": ["publint", "@arethetypeswrong/cli", "oxfmt", "markdownlint-cli2"],
+  // is true for markdownlint-cli2's explicit node_modules/.bin invocation
+  // and pnpm, which the clean-consumer harness resolves from PATH.
+  "ignoreDependencies": ["publint", "@arethetypeswrong/cli", "oxfmt", "markdownlint-cli2", "pnpm"],
   "workspaces": {
     ".": {
       "entry": ["scripts/*.ts", "tests/visual/**/*.ts", "tests/evals/**/*.ts"],

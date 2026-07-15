@@ -15,6 +15,8 @@ export default defineConfig({
     viewport: { width: 800, height: 640 },
     locale: "en-US",
     timezoneId: "UTC",
+    trace: "retain-on-failure",
+    screenshot: "only-on-failure",
   },
   webServer: {
     command: "bun ../../scripts/serve-docs.ts",

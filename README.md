@@ -31,6 +31,10 @@ bun add ggsvelte        # or: npm install ggsvelte
 `ggsvelte` pulls in `@ggsvelte/spec` (spec types, validation, builder) and
 `@ggsvelte/core` (pipeline + renderers) and re-exports the whole surface.
 
+Requires Node.js 22+ and Svelte 5.29+. Clean packed-artifact installs are
+tested with npm, pnpm, and Bun on Ubuntu and Windows; see the
+[compatibility matrix](https://ljodea.github.io/ggsvelte/guide/compatibility).
+
 ## Why ggsvelte
 
 - **Good defaults without hidden rules** — readable axes, restrained themes,

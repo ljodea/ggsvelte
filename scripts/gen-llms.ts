@@ -23,6 +23,7 @@ import {
   PIPELINE_WARNING_CATALOG,
 } from "@ggsvelte/core";
 import { ERROR_CATALOG, LINT_CATALOG } from "@ggsvelte/spec";
+import supportMatrix from "../support-matrix.json";
 
 // ---------------------------------------------------------------------------
 // Minimal markdown renderer (headings, paragraphs, fenced code, inline code,
@@ -220,6 +221,8 @@ and **the fix carries a machine-applicable example — apply it**. Pass
   the builder chain, and the canonical spec JSON side by side.
 - [Interactions](/guide/interactions) — inspection, selection, zoom, typed
   events, keyboard behavior, and stable identity.
+- [Compatibility](/guide/compatibility) — tested Node, Svelte, installer,
+  browser, and operating-system boundaries.
 - [Pre-0.1 interaction migration](/guide/migrating-pre-0-1) — replace the old
   tooltip and brush props and callback payloads.
 - [Errors reference](/guide/errors) — every validation and render diagnostic.
@@ -228,6 +231,30 @@ and **the fix carries a machine-applicable example — apply it**. Pass
   defaults-edition mechanism.
 - [JSON Schema](/schema/v0.json) — for constrained decoding.
 - [llms-full.txt](/llms-full.txt) — the whole docs corpus in one file.
+`;
+
+export const COMPATIBILITY_MD = `# Compatibility
+
+ggsvelte is tested from release-shaped packed tarballs, never only through
+workspace imports. “Supported” means a clean install, strict
+type-check, client production build, server render, pure Node render, and
+installed \`ggsvelte-render\` CLI execution all pass.
+
+## Supported consumers
+
+- Node.js ${supportMatrix.node.tested.join(" and ")} are required release checks; Node.js ${supportMatrix.node.canary} is a nightly canary. Published packages declare \`${supportMatrix.node.range}\`.
+- Svelte ${supportMatrix.svelte.minimum} is the exact tested floor and ${supportMatrix.svelte.current} is the pinned current release. The peer range is \`${supportMatrix.svelte.range}\`.
+- Installers: npm ${supportMatrix.packageManagers.npm}, pnpm ${supportMatrix.packageManagers.pnpm}, and Bun ${supportMatrix.packageManagers.bun}.
+- Browsers: Chromium, Firefox, and WebKit from pinned Playwright ${supportMatrix.browsers.playwright}.
+- Ubuntu and Windows are required CI platforms; macOS is exercised nightly.
+
+The required matrix is deliberately a small covering set. A scheduled matrix
+adds Node Current, macOS, and more Windows/package-manager boundary pairs
+without making every pull request pay for a full Cartesian product. Exact,
+machine-checked rows live in [support-matrix.json](https://github.com/ljodea/ggsvelte/blob/main/support-matrix.json).
+
+The root \`bun@${supportMatrix.packageManagers.bun}\` pin is the contributor
+toolchain. Consumers may use any tested installer above; they do not need Bun.
 `;
 
 export const INTERACTIONS_MD = `# Interactions
@@ -627,6 +654,12 @@ export function guidePages(lifecycle: LifecycleDoc): GuidePage[] {
       title: "Getting started",
       description: "Install ggsvelte and draw the same chart in all three surfaces.",
       markdown: GETTING_STARTED_MD,
+    },
+    {
+      slug: "compatibility",
+      title: "Compatibility",
+      description: "Tested Node, Svelte, package-manager, browser, and OS boundaries.",
+      markdown: COMPATIBILITY_MD,
     },
     {
       slug: "errors",
