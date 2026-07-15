@@ -72,12 +72,31 @@ class _KEYBDINPUT(ctypes.Structure):
         ("wScan", wintypes.WORD),
         ("dwFlags", wintypes.DWORD),
         ("time", wintypes.DWORD),
-        ("dwExtraInfo", ctypes.POINTER(ctypes.c_ulong)),
+        ("dwExtraInfo", ctypes.c_size_t),
+    ]
+
+
+class _MOUSEINPUT(ctypes.Structure):
+    _fields_ = [
+        ("dx", wintypes.LONG),
+        ("dy", wintypes.LONG),
+        ("mouseData", wintypes.DWORD),
+        ("dwFlags", wintypes.DWORD),
+        ("time", wintypes.DWORD),
+        ("dwExtraInfo", ctypes.c_size_t),
+    ]
+
+
+class _HARDWAREINPUT(ctypes.Structure):
+    _fields_ = [
+        ("uMsg", wintypes.DWORD),
+        ("wParamL", wintypes.WORD),
+        ("wParamH", wintypes.WORD),
     ]
 
 
 class _INPUT_UNION(ctypes.Union):
-    _fields_ = [("ki", _KEYBDINPUT)]
+    _fields_ = [("mi", _MOUSEINPUT), ("ki", _KEYBDINPUT), ("hi", _HARDWAREINPUT)]
 
 
 class _INPUT(ctypes.Structure):
@@ -99,9 +118,9 @@ def _send_key(key: str, modifiers: tuple[str, ...] = ()) -> None:
     keys = [*modifiers, key]
     events: list[_INPUT] = []
     for name in keys:
-        events.append(_INPUT(type=1, ki=_KEYBDINPUT(_VK[name], 0, 0, 0, None)))
+        events.append(_INPUT(type=1, ki=_KEYBDINPUT(_VK[name], 0, 0, 0, 0)))
     for name in reversed(keys):
-        events.append(_INPUT(type=1, ki=_KEYBDINPUT(_VK[name], 0, 0x0002, 0, None)))
+        events.append(_INPUT(type=1, ki=_KEYBDINPUT(_VK[name], 0, 0x0002, 0, 0)))
     array = (_INPUT * len(events))(*events)
     sent = ctypes.windll.user32.SendInput(len(array), array, ctypes.sizeof(_INPUT))
     if sent != len(array):
