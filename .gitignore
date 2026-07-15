@@ -16,3 +16,4 @@ apps/docs/build/
 tests/visual/.local-baselines/
 /bench-results.json
 tests/evals/out/
+.gstack/
