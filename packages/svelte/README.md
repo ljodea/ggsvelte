@@ -2,18 +2,18 @@
 
 Svelte 5 adapter for the ggsvelte layered grammar of graphics — plus the
 whole `@ggsvelte/spec` + `@ggsvelte/core` surface re-exported, and the
-`ggsvelte-render` CLI. Pre-0.1.0, explicitly unstable (lifecycle tags in the
+`ggsvelte-render` CLI. The v0.1 API is intentionally early (lifecycle tags in the
 repo's `lifecycle.json`).
 
 ```sh
-bun add ggsvelte        # or: npm install ggsvelte
+bun add @ggsvelte/svelte        # or: npm install @ggsvelte/svelte
 ```
 
 ## Quick example — three surfaces, one spec
 
 ```svelte
 <script>
-  import { GGPlot, GeomPoint, gg, aes } from "ggsvelte";
+  import { GGPlot, GeomPoint, gg, aes } from "@ggsvelte/svelte";
 
   const rows = [
     { displ: 1.8, hwy: 29 },
@@ -66,7 +66,7 @@ enabled. See the [interaction guide and typed event reference](https://ljodea.gi
 ## Headless + CLI
 
 ```ts
-import { renderToSVGString } from "ggsvelte";
+import { renderToSVGString } from "@ggsvelte/svelte";
 const svg = renderToSVGString(spec, { width: 640, height: 400 });
 ```
 

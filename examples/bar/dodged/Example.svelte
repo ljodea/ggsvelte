@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { GeomBar, GGPlot } from "ggsvelte";
+  import { GeomBar, GGPlot } from "@ggsvelte/svelte";
 
   import { attendees } from "./data.js";
 </script>

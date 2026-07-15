@@ -1477,7 +1477,7 @@
       }
     },
     {
-      "package": "ggsvelte",
+      "package": "@ggsvelte/svelte",
       "entry": ".",
       "source": "packages/svelte/src/lib/index.ts",
       "exports": {

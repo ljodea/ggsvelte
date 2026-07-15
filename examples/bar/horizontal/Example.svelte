@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { GeomCol, GGPlot } from "ggsvelte";
+  import { GeomCol, GGPlot } from "@ggsvelte/svelte";
 
   import { languages } from "./data.js";
 </script>

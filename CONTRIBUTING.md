@@ -233,7 +233,7 @@ so the privileged path is dormant until then. Do not weaken these invariants.
 ## Lifecycle policy (Hadley lesson 13)
 
 Every public export of `@ggsvelte/spec`, `@ggsvelte/core` (both entries), and
-`ggsvelte` carries a lifecycle tag, annotated in the package index files
+`@ggsvelte/svelte` carries a lifecycle tag, annotated in the package index files
 (file default `// @lifecycle-default`, statement-level one-line
 `@lifecycle` JSDoc markers, per-name trailing `// @lifecycle` comments) and
 collected into the generated `lifecycle.json` (`bun run lifecycle:gen`;
@@ -286,7 +286,7 @@ Consequences:
   value-stable scale state (decision 0002), two-pass layout (decision 0003),
   `runPipeline()`, `renderToSVGString()`. No DOM globals — enforced by the
   Node smoke test. `/dom` stays a stub until M2 canvas work.
-- `ggsvelte`: props-first `<GGPlot>`, declaration-only `<GeomPoint>`/
+- `@ggsvelte/svelte`: props-first `<GGPlot>`, declaration-only `<GeomPoint>`/
   `<GeomLine>` sugar (decision 0001, mechanism A), vitest-4 browser-mode
   component tests (`bun run test:components`).
 - Benchmarks live in `benchmarks/` (mitata; `bench-smoke` CI job runs the 1k
@@ -301,7 +301,7 @@ adapter-static site, `<GGPlot>`'s `data-gg-ready` readiness signal, the
 `tests/visual` Playwright suite, and a real (un-guarded) `vr-compare.yml`.
 Pre-push consequence: the first hook is now **package-build**
 (`bun run build`, not just `tsc -b`) because docs/examples checks import the
-built `ggsvelte` package.
+built `@ggsvelte/svelte` package.
 
 ## Milestone context (M2 — statistical layer)
 

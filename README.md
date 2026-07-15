@@ -8,7 +8,7 @@ Build polished charts from Svelte components, a fluent builder, or portable
 JSON. ggsvelte gives you readable scales, stable colors, contained responsive
 rendering, and publication-ready themes before you tune anything.
 
-> **Status: pre-0.1.0, explicitly unstable.** Every export carries a
+> **Status: v0.1 is the first public release and intentionally early.** Every export carries a
 > lifecycle tag (see `lifecycle.json` and the docs lifecycle page); the
 > agent core path (`PortableSpec` / `normalize` / `validate` /
 > `renderToSVGString` / `GGPlot`) is `stable-intent`, everything else
@@ -25,10 +25,10 @@ rendering, and publication-ready themes before you tune anything.
 ## Install
 
 ```sh
-bun add ggsvelte        # or: npm install ggsvelte
+bun add @ggsvelte/svelte        # or: npm install @ggsvelte/svelte
 ```
 
-`ggsvelte` pulls in `@ggsvelte/spec` (spec types, validation, builder) and
+`@ggsvelte/svelte` pulls in `@ggsvelte/spec` (spec types, validation, builder) and
 `@ggsvelte/core` (pipeline + renderers) and re-exports the whole surface.
 
 Requires Node.js 22+ and Svelte 5.29+. Clean packed-artifact installs are
@@ -67,7 +67,7 @@ or [searchable event reference](https://ljodea.github.io/ggsvelte/reference/inte
 
 ```svelte
 <script>
-  import { GGPlot } from "ggsvelte";
+  import { GGPlot } from "@ggsvelte/svelte";
 
   const spec = {
     data: {
@@ -88,7 +88,7 @@ or [searchable event reference](https://ljodea.github.io/ggsvelte/reference/inte
 **Fluent builder**:
 
 ```ts
-import { aes, gg } from "ggsvelte";
+import { aes, gg } from "@ggsvelte/svelte";
 
 const spec = gg(rows, aes({ x: "displ", y: "hwy" }))
   .geomPoint()
@@ -114,16 +114,16 @@ CLI: `ggsvelte-render spec.json > chart.svg` (JSON-line diagnostics on stderr).
 
 ## Packages
 
-| Package                           | What                                                                                            |
-| --------------------------------- | ----------------------------------------------------------------------------------------------- |
-| [`ggsvelte`](packages/svelte)     | Svelte 5 components + everything re-exported + the CLI                                          |
-| [`@ggsvelte/spec`](packages/spec) | Spec types, JSON Schema, `normalize()`, `validate()`, `lintSpec()`, builder — zero DOM, zero d3 |
-| [`@ggsvelte/core`](packages/core) | Framework-agnostic pipeline + SVG renderer (pure entry) and canvas/hit-index (`/dom` entry)     |
+| Package                               | What                                                                                            |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| [`@ggsvelte/svelte`](packages/svelte) | Svelte 5 components + everything re-exported + the CLI                                          |
+| [`@ggsvelte/spec`](packages/spec)     | Spec types, JSON Schema, `normalize()`, `validate()`, `lintSpec()`, builder — zero DOM, zero d3 |
+| [`@ggsvelte/core`](packages/core)     | Framework-agnostic pipeline + SVG renderer (pure entry) and canvas/hit-index (`/dom` entry)     |
 
 ## Agents
 
 - Skill: [`skills/ggsvelte/SKILL.md`](skills/ggsvelte/SKILL.md) (also shipped
-  inside the `ggsvelte` package).
+  inside the `@ggsvelte/svelte` package).
 - Docs site endpoints: `/llms.txt`, `/llms-full.txt`, `/schema/v0.json`.
 - Held-out eval harness: `tests/evals/` (`bun run evals`, dry-run without a key).
 

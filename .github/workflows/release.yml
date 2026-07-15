@@ -5,7 +5,7 @@
 #   1. A GitHub remote for this repo — until the repo is pushed to GitHub,
 #      this workflow never runs.
 #   2. npm "trusted publishing" configured on npmjs.com for EACH published
-#      package — @ggsvelte/spec, @ggsvelte/core, and ggsvelte — each pointing
+#      package — @ggsvelte/spec, @ggsvelte/core, and @ggsvelte/svelte — each pointing
 #      at this repository + this workflow file (release.yml). This requires
 #      the npm org/packages to exist and is maintainer-side setup.
 #

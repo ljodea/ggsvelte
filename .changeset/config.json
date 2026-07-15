@@ -3,7 +3,7 @@
   "changelog": "@changesets/cli/changelog",
   "commit": false,
   "fixed": [],
-  "linked": [["@ggsvelte/spec", "@ggsvelte/core", "ggsvelte"]],
+  "linked": [["@ggsvelte/spec", "@ggsvelte/core", "@ggsvelte/svelte"]],
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",

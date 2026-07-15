@@ -98,7 +98,7 @@ mental model, the validation-error contract ("errors include fix.example —
 apply it"), the DataProfile→geom recommendation table, 20 recipes as
 canonical spec JSON (every explicit recipe machine-validated during
 authoring), links to schema + llms-full. A byte-identical copy ships inside
-the `ggsvelte` package (`files: ["dist","bin","skills"]`),
+the `@ggsvelte/svelte` package (`files: ["dist","bin","skills"]`),
 `scripts/skill-sync.test.ts` enforces sync.
 
 ## Held-out eval harness (tests/evals)
@@ -197,8 +197,8 @@ LICENSE (MIT, Liam O'Dea) at root + copied into each package; READMEs (root
    history is still uncommitted by instruction). Update `repository`/
    `homepage`/`bugs` in all three package.jsons + README/CONTRIBUTING links
    if the org/name differs from `ggsvelte/ggsvelte`.
-2. **npm**: reserve the `ggsvelte` name and the `@ggsvelte` org; configure
-   **trusted publishing** (OIDC) for `ggsvelte`, `@ggsvelte/spec`,
+2. **npm**: reserve the `@ggsvelte/svelte` name and the `@ggsvelte` org; configure
+   **trusted publishing** (OIDC) for `@ggsvelte/svelte`, `@ggsvelte/spec`,
    `@ggsvelte/core` pointing at `.github/workflows/release.yml`.
 3. **Secrets**: `ANTHROPIC_API_KEY` (evals.yml). No NPM_TOKEN — trusted
    publishing only.
@@ -242,3 +242,11 @@ Same date, user-blocked item 1 partially resolved: the real repository is
 three package.jsons and the placeholder `github.com/ggsvelte/ggsvelte` links
 (package READMEs, docs-site layout) now point there. npm scope names
 (`@ggsvelte/*`, `ggsvelte`) are unchanged.
+
+## Amendment (2026-07-15): Svelte adapter uses the organization scope
+
+npm rejected the unscoped `ggsvelte` name under its anti-typosquatting rule
+because it is too similar to `svelte`. The public adapter is therefore
+`@ggsvelte/svelte`; `@ggsvelte/spec` and `@ggsvelte/core` retain their planned
+names. This keeps all public packages under the project-owned scope and leaves
+room for future framework adapters.

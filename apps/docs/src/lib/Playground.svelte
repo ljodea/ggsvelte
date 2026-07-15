@@ -1,13 +1,13 @@
 <script lang="ts">
   import { tick } from "svelte";
 
-  import { GGPlot } from "ggsvelte";
+  import { GGPlot } from "@ggsvelte/svelte";
   import type {
     AesInput,
     InteractionDiagnostic,
     LayerInput,
     PlotInteractionEvent,
-  } from "ggsvelte";
+  } from "@ggsvelte/svelte";
 
   import {
     inferPlaygroundFields,

@@ -1,6 +1,6 @@
 ---
 name: ggsvelte
-description: Build data visualizations with ggsvelte, a grammar-of-graphics charting library (ggplot2 semantics, JSON specs, Svelte 5 components, headless SVG rendering). Use whenever creating, editing, validating, or debugging charts, plots, graphs, scatter plots, bar charts, histograms, line charts, boxplots, density plots, faceted/small-multiple charts, or data visualization in a JavaScript/TypeScript/Svelte project; when code imports from "ggsvelte", "@ggsvelte/spec", or "@ggsvelte/core"; when emitting a ggsvelte plot spec JSON; or when rendering charts server-side/headless to SVG.
+description: Build data visualizations with ggsvelte, a grammar-of-graphics charting library (ggplot2 semantics, JSON specs, Svelte 5 components, headless SVG rendering). Use whenever creating, editing, validating, or debugging charts, plots, graphs, scatter plots, bar charts, histograms, line charts, boxplots, density plots, faceted/small-multiple charts, or data visualization in a JavaScript/TypeScript/Svelte project; when code imports from "@ggsvelte/svelte", "@ggsvelte/spec", or "@ggsvelte/core"; when emitting a ggsvelte plot spec JSON; or when rendering charts server-side/headless to SVG.
 ---
 
 # ggsvelte

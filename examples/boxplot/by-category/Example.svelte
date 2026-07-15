@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { GeomBoxplot, GGPlot } from "ggsvelte";
+  import { GeomBoxplot, GGPlot } from "@ggsvelte/svelte";
 
   import { readings } from "./data.js";
 </script>

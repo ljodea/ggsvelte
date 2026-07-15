@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { GeomArea, GGPlot } from "ggsvelte";
+  import { GeomArea, GGPlot } from "@ggsvelte/svelte";
 
   import { generation } from "./data.js";
 </script>

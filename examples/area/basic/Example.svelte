@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { GeomArea, GeomLine, GGPlot } from "ggsvelte";
+  import { GeomArea, GeomLine, GGPlot } from "@ggsvelte/svelte";
 
   import { rainfall } from "./data.js";
 </script>

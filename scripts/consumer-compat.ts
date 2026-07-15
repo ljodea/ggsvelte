@@ -27,7 +27,7 @@ export function packageTarballNames(version: string): string[] {
   return [
     `ggsvelte-spec-${version}.tgz`,
     `ggsvelte-core-${version}.tgz`,
-    `ggsvelte-${version}.tgz`,
+    `ggsvelte-svelte-${version}.tgz`,
   ];
 }
 
@@ -143,7 +143,7 @@ export function fixtureManifest(
   const localPackages = {
     "@ggsvelte/spec": file(tarballs[0]!),
     "@ggsvelte/core": file(tarballs[1]!),
-    ggsvelte: file(tarballs[2]!),
+    "@ggsvelte/svelte": file(tarballs[2]!),
   };
   return {
     name: "ggsvelte-packed-consumer",
@@ -175,7 +175,7 @@ function writeFixture(
   if (packageManager === "pnpm") {
     writeFileSync(
       join(directory, "pnpm-workspace.yaml"),
-      `packages: []\noverrides:\n  '@ggsvelte/spec': ${JSON.stringify(manifest.dependencies["@ggsvelte/spec"])}\n  '@ggsvelte/core': ${JSON.stringify(manifest.dependencies["@ggsvelte/core"])}\n  'ggsvelte': ${JSON.stringify(manifest.dependencies.ggsvelte)}\n`,
+      `packages: []\noverrides:\n  '@ggsvelte/spec': ${JSON.stringify(manifest.dependencies["@ggsvelte/spec"])}\n  '@ggsvelte/core': ${JSON.stringify(manifest.dependencies["@ggsvelte/core"])}\n  '@ggsvelte/svelte': ${JSON.stringify(manifest.dependencies["@ggsvelte/svelte"])}\n`,
     );
   }
   writeFileSync(
@@ -203,7 +203,7 @@ function writeFixture(
   writeFileSync(
     join(directory, "src", "App.svelte"),
     `<script lang="ts">
-  import { GGPlot, type PortableSpec } from "ggsvelte";
+  import { GGPlot, type PortableSpec } from "@ggsvelte/svelte";
   const spec: PortableSpec = ${JSON.stringify(plotSpec)};
 </script>
 <GGPlot {spec} width={480} height={320} inspect={true} />
@@ -222,14 +222,14 @@ await build({
   configFile: false,
   plugins: [svelte()],
   build: { ssr: "src/ssr.ts", outDir: "dist-ssr" },
-  ssr: { noExternal: ["ggsvelte"] },
+  ssr: { noExternal: ["@ggsvelte/svelte"] },
 });
 `,
   );
   writeFileSync(
     join(directory, "src", "ssr.ts"),
     `import { render } from "svelte/server";
-import { GGPlot, type PortableSpec } from "ggsvelte";
+import { GGPlot, type PortableSpec } from "@ggsvelte/svelte";
 const spec: PortableSpec = ${JSON.stringify(plotSpec)};
 export const html = render(GGPlot, { props: { spec, width: 480, height: 320 } }).body;
 `,

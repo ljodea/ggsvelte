@@ -154,7 +154,7 @@ canonical spec — JSON for agents, a fluent builder, and Svelte 5 components.
 ## Install
 
 \`\`\`sh
-bun add ggsvelte        # or: npm install ggsvelte
+bun add @ggsvelte/svelte        # or: npm install @ggsvelte/svelte
 \`\`\`
 
 The \`ggsvelte\` package re-exports the whole surface (\`@ggsvelte/spec\` and
@@ -171,7 +171,7 @@ same canonical PortableSpec.
 
 \`\`\`svelte
 <script>
-  import { GGPlot } from "ggsvelte";
+  import { GGPlot } from "@ggsvelte/svelte";
 
   const spec = {
     data: { values: [{ displ: 1.8, hwy: 29 }, { displ: 5.7, hwy: 16 }] },
@@ -191,7 +191,7 @@ same canonical PortableSpec.
 the canonical PortableSpec:
 
 \`\`\`ts
-import { aes, gg } from "ggsvelte";
+import { aes, gg } from "@ggsvelte/svelte";
 
 const spec = gg(rows, aes({ x: "displ", y: "hwy" })).geomPoint().spec();
 \`\`\`
@@ -200,7 +200,7 @@ const spec = gg(rows, aes({ x: "displ", y: "hwy" })).geomPoint().spec();
 
 \`\`\`svelte
 <script>
-  import { GGPlot, GeomPoint } from "ggsvelte";
+  import { GGPlot, GeomPoint } from "@ggsvelte/svelte";
   import { rows } from "./data.js";
 </script>
 
@@ -497,7 +497,7 @@ plot tool rail must stay synchronized:
 
 \`\`\`svelte
 <script lang="ts">
-  import type { InteractionTool } from "ggsvelte";
+  import type { InteractionTool } from "@ggsvelte/svelte";
 
   let activeTool = $state<InteractionTool>("inspect");
 </script>
@@ -851,12 +851,12 @@ Every public export carries a lifecycle tag (generated into
 \`bun run lifecycle:gen\`):
 
 - **experimental** — may change or disappear in any 0.x release. The default
-  for everything pre-0.1.0.
+  for APIs not explicitly promoted.
 - **stable-intent** — the agent core path (PortableSpec, normalize, validate,
   renderToSVGString, GGPlot and their direct result contracts). Not frozen
   pre-1.0, but changes here are treated as breaking: they get a changeset, a
   migration note, and a deprecation window where feasible.
-- **stable** — committed API under semver (none pre-0.1.0).
+- **stable** — committed API under semver (none in v0.1).
 - **superseded** — keeps working but stops being recommended; docs point to
   the replacement. Protects agent-generated code from silent breakage.
 
@@ -974,7 +974,7 @@ export function buildLlmsIndex(
   lines.push(
     "- [Local data playground](/playground): safely try bounded JSON rows with static and interactive chart controls",
     "- [Search interaction reference](/reference/interactions): filter interaction capabilities, events, diagnostics, and accessibility guidance",
-    "- [JSON Schema v0](/schema/v0.json): the PortableSpec schema (unstable pre-0.1.0)",
+    "- [JSON Schema v0](/schema/v0.json): the PortableSpec schema (unstable in v0.1)",
     "- [llms-full.txt](/llms-full.txt): all docs prose plus every example (spec JSON + Svelte source)",
     "",
     "## Examples",

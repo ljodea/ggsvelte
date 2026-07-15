@@ -15,7 +15,7 @@ describe("packed consumer compatibility harness", () => {
     expect(packageTarballNames("0.1.0")).toEqual([
       "ggsvelte-spec-0.1.0.tgz",
       "ggsvelte-core-0.1.0.tgz",
-      "ggsvelte-0.1.0.tgz",
+      "ggsvelte-svelte-0.1.0.tgz",
     ]);
   });
 
@@ -69,13 +69,13 @@ describe("packed consumer compatibility harness", () => {
       [
         join("artifacts", "ggsvelte-spec-0.0.0.tgz"),
         join("artifacts", "ggsvelte-core-0.0.0.tgz"),
-        join("artifacts", "ggsvelte-0.0.0.tgz"),
+        join("artifacts", "ggsvelte-svelte-0.0.0.tgz"),
       ],
       "/consumer",
     );
     expect(manifest.dependencies.svelte).toBe("5.29.0");
     expect(manifest.dependencies["@ggsvelte/spec"]).toContain("ggsvelte-spec-0.0.0.tgz");
     expect(manifest.dependencies["@ggsvelte/core"]).toContain("ggsvelte-core-0.0.0.tgz");
-    expect(manifest.dependencies.ggsvelte).toContain("ggsvelte-0.0.0.tgz");
+    expect(manifest.dependencies["@ggsvelte/svelte"]).toContain("ggsvelte-svelte-0.0.0.tgz");
   });
 });

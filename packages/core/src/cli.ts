@@ -1,5 +1,5 @@
 /**
- * `ggsvelte-render` CLI implementation (plan: the bin lives on the `ggsvelte`
+ * `ggsvelte-render` CLI implementation (plan: the bin lives on the `@ggsvelte/svelte`
  * package — packages/svelte/bin/ggsvelte-render.js is a thin wrapper around
  * this pure-entry module, so the logic is testable without spawning).
  *

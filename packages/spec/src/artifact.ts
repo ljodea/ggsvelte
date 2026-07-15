@@ -51,7 +51,7 @@ export const SCHEMA_VERSION = "v0";
 
 /**
  * Build the publishable JSON Schema document (plain data, deterministic).
- * Explicitly UNSTABLE pre-0.1.0 per the plan; served from the repo until
+ * The v0 schema remains explicitly unstable; served from the repo until
  * hosting infrastructure exists (no $id URL is claimed yet).
  */
 export function buildSchemaArtifact(): Record<string, unknown> {
@@ -66,7 +66,7 @@ export function buildSchemaArtifact(): Record<string, unknown> {
     $schema: "https://json-schema.org/draft/2020-12/schema",
     title: "ggsvelte PortableSpec",
     description:
-      "A ggsvelte plot specification (schema v0 — UNSTABLE, pre-0.1.0; served from the repo until schema hosting exists).",
+      "A ggsvelte plot specification (schema v0 — UNSTABLE; served from the repo until schema hosting exists).",
     ...transformed,
   };
 }

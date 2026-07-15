@@ -13,7 +13,7 @@
   "dependencies": {
     "@ggsvelte/examples": "workspace:*",
     "@ggsvelte/spec": "workspace:*",
-    "ggsvelte": "workspace:*"
+    "@ggsvelte/svelte": "workspace:*"
   },
   "devDependencies": {
     "@sveltejs/adapter-static": "^3.0.10",

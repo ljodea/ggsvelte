@@ -4,13 +4,13 @@ The framework-agnostic ggsvelte engine: the grammar-of-graphics pipeline
 (stats, positions, panel-aware facets, value-stable scales, two-pass layout)
 and the pure SVG-string renderer. The main entry has no DOM dependency —
 safe in Node, edge runtimes, and workers; canvas rendering and the hit index
-live behind `@ggsvelte/core/dom`. Pre-0.1.0, explicitly unstable.
+live behind `@ggsvelte/core/dom`. The v0.1 API is intentionally early.
 
 ```sh
 bun add @ggsvelte/core     # or: npm install @ggsvelte/core
 ```
 
-Most apps want the [`ggsvelte`](https://www.npmjs.com/package/ggsvelte)
+Most apps want the [`@ggsvelte/svelte`](https://www.npmjs.com/package/@ggsvelte/svelte)
 package instead — Svelte 5 components over this engine. Use `@ggsvelte/core`
 directly for server/CLI/agent rendering.
 
