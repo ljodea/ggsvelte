@@ -85,22 +85,7 @@ jobs:
           bun run build
           bun run build:docs
           New-Item -ItemType Directory -Force .manual-at/evidence/${{ matrix.browser }} | Out-Null
-          $server = Start-Process bun `
-            -ArgumentList @('scripts/serve-docs.ts') `
-            -PassThru `
-            -RedirectStandardOutput '.manual-at/evidence/${{ matrix.browser }}/fixture-server.stdout.log' `
-            -RedirectStandardError '.manual-at/evidence/${{ matrix.browser }}/fixture-server.stderr.log'
-          "FIXTURE_SERVER_PID=$($server.Id)" | Out-File -FilePath $env:GITHUB_ENV -Append
           "TARGET_URL=http://127.0.0.1:4173" | Out-File -FilePath $env:GITHUB_ENV -Append
-          for ($attempt = 0; $attempt -lt 60; $attempt++) {
-            try {
-              $response = Invoke-WebRequest -UseBasicParsing 'http://127.0.0.1:4173/examples/interactions/inspection'
-              if ($response.StatusCode -eq 200) { exit 0 }
-            } catch {
-              Start-Sleep -Seconds 1
-            }
-          }
-          throw 'The local built fixture did not become ready.'
 
       - name: Select and verify the live fixture
         if: inputs.target == 'live'
@@ -164,15 +149,37 @@ jobs:
           PROFILE: ${{ inputs.profile }}
           EVIDENCE_DIR: ${{ github.workspace }}\.manual-at\evidence\${{ matrix.browser }}
         run: |
-          .\runsystemtests.bat `
-            --variable whichNVDA:installed `
-            --variable browser:$env:BROWSER `
-            --variable targetUrl:$env:TARGET_URL `
-            --variable evidenceDir:$env:EVIDENCE_DIR `
-            --variable release:$env:RELEASE `
-            --variable profile:$env:PROFILE `
-            --include ggsvelte_at
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $server = $null
+          try {
+            if ('${{ inputs.target }}' -eq 'local') {
+              $server = Start-Process bun `
+                -WorkingDirectory $env:GITHUB_WORKSPACE `
+                -ArgumentList @('scripts/serve-docs.ts') `
+                -PassThru `
+                -RedirectStandardOutput "$env:EVIDENCE_DIR\fixture-server.stdout.log" `
+                -RedirectStandardError "$env:EVIDENCE_DIR\fixture-server.stderr.log"
+              for ($attempt = 0; $attempt -lt 60; $attempt++) {
+                try {
+                  $response = Invoke-WebRequest -UseBasicParsing "$env:TARGET_URL/examples/interactions/inspection"
+                  if ($response.StatusCode -eq 200) { break }
+                } catch {
+                  Start-Sleep -Seconds 1
+                }
+              }
+              if ($attempt -eq 60) { throw 'The local built fixture did not become ready.' }
+            }
+            .\runsystemtests.bat `
+              --variable whichNVDA:installed `
+              --variable browser:$env:BROWSER `
+              --variable targetUrl:$env:TARGET_URL `
+              --variable evidenceDir:$env:EVIDENCE_DIR `
+              --variable release:$env:RELEASE `
+              --variable profile:$env:PROFILE `
+              --include ggsvelte_at
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          } finally {
+            if ($server) { Stop-Process -Id $server.Id -Force -ErrorAction SilentlyContinue }
+          }
 
       - name: Preserve exact speech, Robot reports, screenshots, and NVDA logs
         if: always()
@@ -184,11 +191,3 @@ jobs:
             .manual-at/nvda/testOutput/system/
           if-no-files-found: error
           retention-days: 30
-
-      - name: Stop the local fixture server
-        if: always() && inputs.target == 'local'
-        shell: pwsh
-        run: |
-          if ($env:FIXTURE_SERVER_PID) {
-            Stop-Process -Id $env:FIXTURE_SERVER_PID -Force -ErrorAction SilentlyContinue
-          }
