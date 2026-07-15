@@ -1,6 +1,6 @@
 import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { basename, join, relative, resolve } from "node:path";
+import { basename, delimiter, join, relative, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 
 import type { PackageManager } from "./support-matrix.js";
@@ -47,6 +47,10 @@ export function resolveConsumerOptions(
     svelteVersion: args[1] ?? environment.SVELTE_VERSION ?? "5.29.0",
     packageManagerVersion: args[2] ?? environment.PACKAGE_MANAGER_VERSION,
   };
+}
+
+export function withLocalBinPath(root: string, currentPath: string): string {
+  return `${join(root, "node_modules", ".bin")}${delimiter}${currentPath}`;
 }
 
 function runner(packageManager: PackageManager, binary: string, args: string[]): CommandStep {
@@ -314,6 +318,7 @@ function main(): void {
     throw new Error(`unknown package manager: ${packageManager}`);
   }
   const root = resolve(import.meta.dir, "..");
+  process.env.PATH = withLocalBinPath(root, process.env.PATH ?? "");
   const temporaryRoot = mkdtempSync(join(tmpdir(), "ggsvelte-compat-"));
   const artifacts = join(temporaryRoot, "packed artifacts");
   const fixture = join(temporaryRoot, "consumer space ü");

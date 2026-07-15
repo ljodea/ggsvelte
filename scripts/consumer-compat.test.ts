@@ -7,6 +7,7 @@ import {
   fixtureManifest,
   packageTarballNames,
   resolveConsumerOptions,
+  withLocalBinPath,
 } from "./consumer-compat.js";
 
 describe("packed consumer compatibility harness", () => {
@@ -37,6 +38,13 @@ describe("packed consumer compatibility harness", () => {
       packageManagerVersion: "11.13.0",
       svelteVersion: "5.56.5",
     });
+  });
+
+  test("prepends the repository-local executable directory for clean consumer commands", () => {
+    expect(withLocalBinPath("/repo", "/usr/bin")).toStartWith(
+      join("/repo", "node_modules", ".bin"),
+    );
+    expect(withLocalBinPath("/repo", "/usr/bin")).toContain("/usr/bin");
   });
 
   test.each(["npm", "pnpm", "bun"] as const)(
