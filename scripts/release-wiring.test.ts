@@ -49,4 +49,11 @@ describe("R0 release wiring", () => {
     expect(approvalJob).toContain("defaults:");
     expect(approvalJob).toContain("shell: bash");
   });
+
+  it("versions only publishable packages", () => {
+    const config = JSON.parse(read(".changeset/config.json")) as {
+      privatePackages?: boolean | { version?: boolean; tag?: boolean };
+    };
+    expect(config.privatePackages).toBe(false);
+  });
 });
