@@ -59,6 +59,18 @@ describe("R0 release wiring", () => {
     expect(config.linked).toEqual([["@ggsvelte/spec", "@ggsvelte/core", "@ggsvelte/svelte"]]);
   });
 
+  it("keeps internal dependencies installable in npm-published manifests", () => {
+    for (const path of ["packages/core/package.json", "packages/svelte/package.json"]) {
+      const manifest = JSON.parse(read(path)) as { dependencies?: Record<string, string> };
+      for (const [name, range] of Object.entries(manifest.dependencies ?? {})) {
+        if (!name.startsWith("@ggsvelte/")) continue;
+        expect(range, `${path}: ${name} must be a registry semver range`).not.toStartWith(
+          "workspace:",
+        );
+      }
+    }
+  });
+
   it("ships the CLI bin without npm manifest normalization", () => {
     const manifest = JSON.parse(read("packages/svelte/package.json")) as {
       bin?: Record<string, string>;

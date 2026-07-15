@@ -64,6 +64,16 @@ export function commandInvocation(
   return { command: commandExecutable(command, platform), args };
 }
 
+export function packagePackInvocation(
+  artifacts: string,
+  platform = process.platform,
+): { command: string; args: string[] } {
+  return {
+    command: commandExecutable("npm", platform),
+    args: ["pack", ".", "--pack-destination", artifacts, "--ignore-scripts", "--silent"],
+  };
+}
+
 function runner(packageManager: PackageManager, binary: string, args: string[]): CommandStep {
   if (packageManager === "npm") {
     return { label: "", command: "npm", args: ["exec", "--", binary, ...args] };
@@ -305,15 +315,12 @@ function pack(root: string, artifacts: string): string[] {
     }
   ).version;
   for (const packageDirectory of ["spec", "core", "svelte"]) {
-    const result = spawnSync(
-      "bun",
-      ["pm", "pack", "--destination", artifacts, "--ignore-scripts", "--quiet"],
-      {
-        cwd: join(root, "packages", packageDirectory),
-        stdio: "inherit",
-        shell: false,
-      },
-    );
+    const invocation = packagePackInvocation(artifacts);
+    const result = spawnSync(invocation.command, invocation.args, {
+      cwd: join(root, "packages", packageDirectory),
+      stdio: "inherit",
+      shell: false,
+    });
     if (result.status !== 0) throw new Error(`packing packages/${packageDirectory} failed`);
   }
   const tarballs = packageTarballNames(version).map((name) => join(artifacts, name));

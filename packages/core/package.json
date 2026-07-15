@@ -43,7 +43,7 @@
     "provenance": true
   },
   "dependencies": {
-    "@ggsvelte/spec": "workspace:*"
+    "@ggsvelte/spec": "^0.1.0"
   },
   "devDependencies": {
     "typescript": "^6.0.3"
