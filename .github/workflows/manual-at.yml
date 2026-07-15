@@ -60,6 +60,7 @@ jobs:
           repository: nvaccess/nvda
           ref: ${{ env.NVDA_HARNESS_COMMIT }}
           path: .manual-at/nvda
+          submodules: recursive
           persist-credentials: false
 
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
