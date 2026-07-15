@@ -23,7 +23,7 @@
     "url": "git+https://github.com/ljodea/ggsvelte.git"
   },
   "bin": {
-    "ggsvelte-render": "./bin/ggsvelte-render.js"
+    "ggsvelte-render": "bin/ggsvelte-render.js"
   },
   "files": [
     "dist",

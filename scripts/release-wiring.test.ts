@@ -56,4 +56,13 @@ describe("R0 release wiring", () => {
     };
     expect(config.privatePackages).toBe(false);
   });
+
+  it("ships the CLI bin without npm manifest normalization", () => {
+    const manifest = JSON.parse(read("packages/svelte/package.json")) as {
+      bin?: Record<string, string>;
+    };
+    expect(manifest.bin).toEqual({
+      "ggsvelte-render": "bin/ggsvelte-render.js",
+    });
+  });
 });
