@@ -243,9 +243,11 @@
 
   // Reading descriptors through toLayerInput goes through live getters, so
   // geom prop changes flow into this $derived without re-registration.
-  const assembled: PortableSpec | null = $derived.by(() =>
-    assemblePortableSpec({
-      ...(spec !== undefined && { spec }),
+  // Explicit `spec` short-circuits before registry/children so ignored props
+  // do not become reactive dependencies of the assembled plot.
+  const assembled: PortableSpec | null = $derived.by(() => {
+    if (spec !== undefined) return assemblePortableSpec({ spec, layers: [] });
+    return assemblePortableSpec({
       ...(data !== undefined && { data: data as DataInput | readonly Row[] }),
       ...(mapping !== undefined && { aes: mapping }),
       layers: layers ?? registry.layers.map(toLayerInput),
@@ -256,8 +258,8 @@
       ...(theme !== undefined && { theme }),
       ...(labs !== undefined && { labs }),
       ...(a11y !== undefined && { a11y }),
-    }),
-  );
+    });
+  });
 
   const resolvedInteractionScope: PlotInteractionScope = $derived(
     resolveInteractionScope({

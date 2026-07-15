@@ -71,6 +71,23 @@ describe("assemblePortableSpec", () => {
     expect(assembled!.layers[0].geom).toBe("point");
   });
 
+  it("ignores sibling inputs when an explicit spec is provided", () => {
+    const assembled = assemblePortableSpec({
+      spec: {
+        data: { values: rows },
+        layers: [{ geom: "point", aes: { x: "x", y: "y" } }],
+        labs: { title: "from-spec" },
+      },
+      data: [{ x: 9, y: 9 }],
+      aes: { x: "nope", y: "nope" },
+      layers: [{ geom: "line", aes: { x: "x", y: "y" } }],
+      labs: { title: "ignored" },
+    });
+    expect(assembled!.labs?.title).toBe("from-spec");
+    expect(assembled!.layers).toHaveLength(1);
+    expect(assembled!.layers[0].geom).toBe("point");
+  });
+
   it("returns null when there are no layers", () => {
     expect(
       assemblePortableSpec({
