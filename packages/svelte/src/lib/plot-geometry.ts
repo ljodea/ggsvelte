@@ -79,3 +79,31 @@ export function panelDataDomains(
     ...(yDomain !== undefined && { y: yDomain }),
   };
 }
+
+export type IntervalSelectMode = "x" | "y" | "xy";
+
+/**
+ * Expand a brush rect to the free axis for interval selection.
+ * Under coord flip, x-mode expands the horizontal panel span and y-mode the
+ * vertical span (channels are swapped relative to unflipped). Absent panels
+ * leave the rect unchanged.
+ */
+export function expandIntervalQuery(
+  rect: PlotRect,
+  panel: PanelBounds | undefined,
+  mode: IntervalSelectMode,
+  flipped: boolean,
+): PlotRect {
+  if (panel === undefined) return rect;
+  if (mode === "x") {
+    return flipped
+      ? { ...rect, x0: panel.x, x1: panel.x + panel.width }
+      : { ...rect, y0: panel.y, y1: panel.y + panel.height };
+  }
+  if (mode === "y") {
+    return flipped
+      ? { ...rect, y0: panel.y, y1: panel.y + panel.height }
+      : { ...rect, x0: panel.x, x1: panel.x + panel.width };
+  }
+  return rect;
+}
