@@ -67,6 +67,58 @@ jobs:
         run: bun run check
       - run: bun test packages/spec packages/core benchmarks scripts tests/evals
 
+  compatibility-matrix:
+    name: compatibility matrix (machine-checked source)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.3.14
+      - id: matrix
+        name: emit required packed-consumer rows
+        shell: bash
+        run: echo "matrix=$(bun scripts/support-matrix.ts required)" >> "$GITHUB_OUTPUT"
+
+  consumer-compat:
+    name: packed consumer (${{ matrix.os }}, Node ${{ matrix.node }}, ${{ matrix.packageManager }}, Svelte ${{ matrix.svelte }})
+    needs: compatibility-matrix
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix: ${{ fromJSON(needs.compatibility-matrix.outputs.matrix) }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: ${{ matrix.node }}
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.3.14
+      - run: bun install --frozen-lockfile
+      - name: build release-shaped package contents
+        run: bun run build
+      - name: type-check Svelte package source
+        run: bun run check:svelte
+      - name: install tarballs in a clean consumer and exercise types, build, SSR, Node, and CLI
+        env:
+          PACKAGE_MANAGER: ${{ matrix.packageManager }}
+          PACKAGE_MANAGER_VERSION: ${{ matrix.packageManagerVersion }}
+          SVELTE_VERSION: ${{ matrix.svelte }}
+        run: bun scripts/consumer-compat.ts
+
   component:
     name: component (vitest browser mode, pinned Playwright container)
     runs-on: ubuntu-latest
@@ -130,6 +182,19 @@ jobs:
         run: bun run test:visual -- interaction-accessibility.spec.ts
       - name: interaction performance p50/p95 gate
         run: bun run test:interaction-perf
+      - name: upload browser traces, screenshots, and reports on failure
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: component-browser-failure-artifacts
+          path: |
+            packages/svelte/test-results/
+            spikes/browser/test-results/
+            tests/visual/test-results/
+            tests/visual/playwright-report/
+            tests/performance/test-results/
+          if-no-files-found: ignore
+          retention-days: 7
 
   build:
     name: build (tsc -b, packaging lint)

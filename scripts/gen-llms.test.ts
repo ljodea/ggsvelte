@@ -20,6 +20,7 @@ import {
   buildLlmsFull,
   buildLlmsIndex,
   GETTING_STARTED_MD,
+  COMPATIBILITY_MD,
   INTERACTIONS_MD,
   MIGRATING_PRE_0_1_MD,
   guidePages,
@@ -85,6 +86,15 @@ describe("guide sections cover their catalogs", () => {
     expect(GETTING_STARTED_MD).toContain("fix");
   });
 
+  it("documents the machine-checked packed-consumer support contract", () => {
+    expect(COMPATIBILITY_MD).toContain("Node.js 22");
+    expect(COMPATIBILITY_MD).toContain("Svelte 5.29.0");
+    expect(COMPATIBILITY_MD).toContain("npm bundled with Node");
+    expect(COMPATIBILITY_MD).toContain("pnpm 11.13.0");
+    expect(COMPATIBILITY_MD).toContain("Bun 1.3.14");
+    expect(COMPATIBILITY_MD).toContain("packed tarballs");
+  });
+
   it("documents the complete interaction capability and event contracts", () => {
     expect(INTERACTIONS_MD).toContain('inspect={{ mode: "x",');
     expect(INTERACTIONS_MD).toContain('select={{ type: "interval", mode: "xy",');
@@ -140,6 +150,7 @@ describe("llms surfaces", () => {
     for (const ex of EXAMPLES) expect(txt).toContain(`(/examples/${ex.id})`);
     expect(pages.map((page) => page.slug)).toContain("interactions");
     expect(pages.map((page) => page.slug)).toContain("migrating-pre-0-1");
+    expect(pages.map((page) => page.slug)).toContain("compatibility");
   });
 
   it("keeps first-party interaction examples focused on the current API", () => {

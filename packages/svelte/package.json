@@ -68,6 +68,9 @@
     "vitest": "^4.1.10"
   },
   "peerDependencies": {
-    "svelte": "^5.0.0"
+    "svelte": "^5.29.0"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }
