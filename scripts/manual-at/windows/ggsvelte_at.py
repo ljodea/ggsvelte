@@ -261,6 +261,7 @@ def _launch_browser(path: str, width: int = 1180, height: int = 760) -> None:
         )
         if not enabled:
             raise AssertionError("Windows High Contrast was off before browser launch.")
+    _hide_runner_infrastructure_windows()
     _browser_process = subprocess.Popen(args)
     _focus_browser_window()
     _record("launch browser", "", url=url, viewport={"width": width, "height": height})
@@ -302,6 +303,37 @@ def _focus_browser_window() -> None:
             return
         time.sleep(0.5)
     raise AssertionError(f"The headed {_browser_name} ggsvelte window did not appear.")
+
+
+def _hide_runner_infrastructure_windows() -> None:
+    """Hide GitHub's console so it cannot repeatedly steal AT test focus."""
+
+    user32 = ctypes.windll.user32
+    hidden_titles: list[str] = []
+
+    @ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HWND, wintypes.LPARAM)
+    def hide(hwnd: int, _lparam: int) -> bool:
+        if not user32.IsWindowVisible(hwnd):
+            return True
+        length = user32.GetWindowTextLengthW(hwnd)
+        if length == 0:
+            return True
+        buffer = ctypes.create_unicode_buffer(length + 1)
+        user32.GetWindowTextW(hwnd, buffer, length + 1)
+        title = buffer.value
+        normalized = title.lower().replace("\\", "")
+        if "hosted-compute-agent" in normalized or "hostedcomputeagent" in normalized:
+            user32.ShowWindow(hwnd, 0)
+            hidden_titles.append(title)
+        return True
+
+    user32.EnumWindows(hide, 0)
+    _record(
+        "hide hosted runner infrastructure windows",
+        "",
+        hiddenCount=len(hidden_titles),
+        hiddenTitles=hidden_titles,
+    )
 
 
 def _ensure_browser_foreground() -> None:
