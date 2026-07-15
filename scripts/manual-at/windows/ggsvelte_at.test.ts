@@ -24,4 +24,15 @@ describe("NVDA headed-browser focus boundary", () => {
       helper.indexOf('_ensure_browser_foreground()\n        _send_key("control")'),
     ).toBeGreaterThan(-1);
   });
+
+  test("hides the hosted runner console before launching the browser", () => {
+    expect(source).toContain('"hosted-compute-agent"');
+    expect(source).toContain('"hostedcomputeagent"');
+    expect(source).toContain("user32.ShowWindow(hwnd, 0)");
+    expect(
+      source.indexOf(
+        "_hide_runner_infrastructure_windows()\n    _browser_process = subprocess.Popen(args)",
+      ),
+    ).toBeGreaterThan(-1);
+  });
 });
