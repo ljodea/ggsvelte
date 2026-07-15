@@ -41,6 +41,33 @@ export function hitFromCandidate(candidate: CandidateFacts): SceneHit {
   };
 }
 
+/** Pixel tolerance for matching a hit back to a stored candidate (both axes). */
+export const CANDIDATE_HIT_TOLERANCE = 0.5;
+
+/**
+ * Find the first candidate matching a SceneHit identity + proximity.
+ * Iteration order is caller-owned (production walks id-ascending).
+ * Tolerance is exclusive: |Δ| < tol matches; |Δ| === tol does not.
+ */
+export function matchCandidateFromHit(
+  candidates: Iterable<CandidateFacts>,
+  hit: SceneHit,
+  tolerance: number = CANDIDATE_HIT_TOLERANCE,
+): CandidateFacts | null {
+  for (const candidate of candidates) {
+    if (
+      candidate.layerIndex === hit.layerIndex &&
+      candidate.panelIndex === hit.panelIndex &&
+      candidate.rowIndex === hit.rowIndex &&
+      candidate.kind === hit.kind &&
+      Math.abs(candidate.x - hit.x) < tolerance &&
+      Math.abs(candidate.y - hit.y) < tolerance
+    )
+      return candidate;
+  }
+  return null;
+}
+
 /** Modular wrap for keyboard traversal across a hit list. */
 export function nextTraversalIndex(current: number, delta: number, length: number): number {
   if (length <= 0) return -1;

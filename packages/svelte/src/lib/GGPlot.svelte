@@ -107,12 +107,27 @@
     bestDirectionalIndex,
     cycleCoincidentIndex,
     hitFromCandidate,
+    matchCandidateFromHit,
     nextTraversalIndex,
     plotPointFromClient,
   } from "./plot-pointer.js";
   import {
+    bandChannelsForZoom,
+    capabilityStatusText,
+    zoomScaleDiagnosticsFromChannels,
+    zoomSupportsChannel,
+  } from "./plot-capability.js";
+  import {
+    buildIntervalSelection,
+    clearIntervalSelectionEvent,
+    filterDomainBySelectMode,
+    isBrushTooSmall,
+  } from "./plot-interval.js";
+  import {
     anchorsFromCandidateKeys,
     nextPointSelectionKeys,
+    rowIndexesForCandidate,
+    uniqueKeysFromRowIndexes,
   } from "./plot-selection.js";
   import { themeTokensToCss } from "./plot-theme-css.js";
   import {
@@ -622,11 +637,7 @@
   let committedInterval = $state<IntervalSelection | null>(null);
   const zoomHasSupportedChannel = $derived.by(() => {
     if (interactionConfig.zoom === null || model === null) return true;
-    const mode = interactionConfig.zoom.mode;
-    return (
-      (mode !== "y" && model.scales.x.type !== "band") ||
-      (mode !== "x" && model.scales.y.type !== "band")
-    );
+    return zoomSupportsChannel(interactionConfig.zoom.mode, model.scales);
   });
   const availableTools = $derived(
     interactionConfig.availableTools.filter(
@@ -645,37 +656,28 @@
       model.scene.batches.every((batch) => batch.rowIndex.length === 0),
   );
   const areaScaleDiagnostics = $derived.by(() => {
-    if (model === null) return [] as InteractionDiagnostic[];
-    const modes =
-      interactionConfig.zoom === null ? [] : [interactionConfig.zoom.mode];
-    const channels = new Set<"x" | "y">();
-    for (const mode of modes) {
-      if (mode !== "y" && model.scales.x.type === "band") channels.add("x");
-      if (mode !== "x" && model.scales.y.type === "band") channels.add("y");
-    }
-    return [...channels].map((channel) => ({
-      ...INTERACTION_DIAGNOSTIC_CATALOG.INTERACTION_INTERVAL_SCALE_UNSUPPORTED,
-      prop: `scales.${channel}`,
-      actual: "band",
-    }));
+    if (model === null || interactionConfig.zoom === null)
+      return [] as InteractionDiagnostic[];
+    return zoomScaleDiagnosticsFromChannels(
+      bandChannelsForZoom(interactionConfig.zoom.mode, model.scales),
+      INTERACTION_DIAGNOSTIC_CATALOG.INTERACTION_INTERVAL_SCALE_UNSUPPORTED,
+    );
   });
   const capabilityStatus = $derived.by(() => {
     const unavailable = interactionConfig.diagnostics.find(
       (diagnostic) =>
         diagnostic.code === "INTERACTION_INTERVAL_FACET_UNSUPPORTED",
     );
-    if (unavailable !== undefined)
-      return `Area interaction unavailable: ${unavailable.message}`;
-    if (areaScaleDiagnostics.length > 0)
-      return `Zoom ${zoomHasSupportedChannel ? "limited" : "unavailable"}: ${areaScaleDiagnostics[0]!.message}`;
-    if (
-      interactive &&
-      !emptyPlot &&
-      model !== null &&
-      model.candidates.size === 0
-    )
-      return "No inspectable marks";
-    return null;
+    return capabilityStatusText({
+      ...(unavailable !== undefined && {
+        facetUnavailableMessage: unavailable.message,
+      }),
+      areaDiagnostics: areaScaleDiagnostics,
+      zoomSupported: zoomHasSupportedChannel,
+      interactive,
+      emptyPlot,
+      candidateCount: model === null ? null : model.candidates.size,
+    });
   });
   const themeStyle = $derived.by(() =>
     model === null ? "" : themeTokensToCss(model.scene.theme),
@@ -754,17 +756,7 @@
 
   function clearIntervalSelection(source: InteractionSource): void {
     if (committedInterval === null) return;
-    const event: IntervalSelection = Object.freeze({
-      type: "select",
-      phase: "clear",
-      mode: committedInterval.mode,
-      panelId: committedInterval.panelId,
-      domain: Object.freeze({}),
-      pixels: Object.freeze({ ...committedInterval.pixels }),
-      keys: Object.freeze([]),
-      lineageCount: 0,
-      source,
-    });
+    const event = clearIntervalSelectionEvent(committedInterval, source);
     committedInterval = null;
     emitSelection(event);
   }
@@ -960,14 +952,13 @@
 
   function candidateSemanticKeys(candidate: CandidateFacts): PropertyKey[] {
     if (model === null) return [];
-    const keys: PropertyKey[] = [];
-    const rows = new Set(model.lineage.keys(candidate.lineage));
-    if (candidate.rowIndex !== null) rows.add(candidate.rowIndex);
-    for (const rowIndex of rows) {
-      const key = semanticKey(model.row(rowIndex), rowIndex);
-      if (key !== null && !keys.includes(key)) keys.push(key);
-    }
-    return keys;
+    const rows = rowIndexesForCandidate(
+      candidate,
+      model.lineage.keys(candidate.lineage),
+    );
+    return uniqueKeysFromRowIndexes(rows, (rowIndex) =>
+      semanticKey(model.row(rowIndex), rowIndex),
+    );
   }
 
   const inspectionCoordinator = createInspectionCoordinator<
@@ -979,20 +970,15 @@
 
   function candidateFromHit(hit: SceneHit): CandidateFacts | null {
     if (model === null) return null;
-    for (let id = 0; id < model.candidates.size; id++) {
-      const candidate = model.candidates.candidate(id);
-      if (
-        candidate !== null &&
-        candidate.layerIndex === hit.layerIndex &&
-        candidate.panelIndex === hit.panelIndex &&
-        candidate.rowIndex === hit.rowIndex &&
-        candidate.kind === hit.kind &&
-        Math.abs(candidate.x - hit.x) < 0.5 &&
-        Math.abs(candidate.y - hit.y) < 0.5
-      )
-        return candidate;
-    }
-    return null;
+    return matchCandidateFromHit(
+      (function* () {
+        for (let id = 0; id < model.candidates.size; id++) {
+          const candidate = model.candidates.candidate(id);
+          if (candidate !== null) yield candidate;
+        }
+      })(),
+      hit,
+    );
   }
 
   function resolveInspection(
@@ -1386,39 +1372,21 @@
     for (const candidate of candidates)
       for (const rowIndex of model?.lineage.keys(candidate.lineage) ?? [])
         sourceRows.add(rowIndex);
-    const keys = [
-      ...new Set(
-        [...sourceRows]
-          .map((rowIndex) =>
-            semanticKey(model?.row(rowIndex) ?? null, rowIndex),
-          )
-          .filter((key): key is PropertyKey => key !== null),
-      ),
-    ];
-    const domain: { x?: [CellValue, CellValue]; y?: [CellValue, CellValue] } =
-      {};
-    if (model !== null && model.scene.panels.length === 1) {
-      const solePanel = model.scene.panels[0]!;
-      const inverted = panelDataDomains(rect, solePanel, model.scales, flip);
-      if (mode !== "y" && inverted.x !== undefined) domain.x = inverted.x;
-      if (mode !== "x" && inverted.y !== undefined) domain.y = inverted.y;
-    }
-    const frozenDomain = Object.freeze({
-      ...(domain.x !== undefined && {
-        x: Object.freeze([...domain.x]) as [CellValue, CellValue],
-      }),
-      ...(domain.y !== undefined && {
-        y: Object.freeze([...domain.y]) as [CellValue, CellValue],
-      }),
-    });
-    return Object.freeze({
-      type: "select",
+    const keys = uniqueKeysFromRowIndexes(sourceRows, (rowIndex) =>
+      semanticKey(model?.row(rowIndex) ?? null, rowIndex),
+    );
+    const inverted =
+      model !== null && model.scene.panels.length === 1
+        ? panelDataDomains(rect, model.scene.panels[0]!, model.scales, flip)
+        : {};
+    const domain = filterDomainBySelectMode(inverted, mode);
+    return buildIntervalSelection({
       phase,
-      mode: interactionConfig.select?.mode ?? "xy",
+      mode,
       panelId: panelId(0),
-      domain: frozenDomain,
-      pixels: Object.freeze({ ...rect }),
-      keys: Object.freeze([...keys]),
+      domain,
+      pixels: rect,
+      keys,
       lineageCount: sourceRows.size,
       source,
     });
@@ -1464,7 +1432,7 @@
         ]),
       ),
     } as { x0: number; y0: number; x1: number; y1: number });
-    if (rect.x1 - rect.x0 < 4 && rect.y1 - rect.y0 < 4) {
+    if (isBrushTooSmall(rect)) {
       brushRect = rect;
       announceInteraction("Choose opposite corner.");
       return;
