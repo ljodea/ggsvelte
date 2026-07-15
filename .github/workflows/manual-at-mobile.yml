@@ -45,7 +45,7 @@ jobs:
           bun install --frozen-lockfile
           bun run build
           bun run build:docs
-          python3 -m http.server 4173 --directory apps/docs/build > "${RUNNER_TEMP}/ggsvelte-docs.log" 2>&1 &
+          bun scripts/serve-docs.ts > "${RUNNER_TEMP}/ggsvelte-docs.log" 2>&1 &
           echo "$!" > "${RUNNER_TEMP}/ggsvelte-docs.pid"
           for attempt in {1..30}; do
             curl --fail --silent http://127.0.0.1:4173/examples/interactions/inspection >/dev/null && exit 0
