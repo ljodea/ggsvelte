@@ -1,0 +1,244 @@
+ObjC.import("Foundation");
+
+function run(argv) {
+  const [browserId, profile, baseUrl, outputDirectory] = argv;
+  if (!browserId || !profile || !baseUrl || !outputDirectory) {
+    throw new Error("browser, profile, base URL, and output directory are required");
+  }
+
+  const browser =
+    browserId === "safari"
+      ? { app: "Safari", executable: "/Applications/Safari.app", process: "Safari" }
+      : {
+          app: "Google Chrome",
+          executable: "/Applications/Google Chrome.app",
+          process: "Google Chrome",
+        };
+  const app = Application.currentApplication();
+  app.includeStandardAdditions = true;
+  const voiceOver = Application("VoiceOver");
+  const systemEvents = Application("System Events");
+  const transcriptPath = `${outputDirectory}/transcript.jsonl`;
+  const failurePath = `${outputDirectory}/failure.txt`;
+  const observations = [];
+  let screenshotIndex = 0;
+
+  function write(path, text) {
+    const value = $.NSString.alloc.initWithUTF8String(String(text));
+    const ok = value.writeToFileAtomicallyEncodingError(
+      path,
+      true,
+      $.NSUTF8StringEncoding,
+      null,
+    );
+    if (!ok) throw new Error(`could not write ${path}`);
+  }
+
+  function flush() {
+    write(
+      transcriptPath,
+      observations.map((entry) => JSON.stringify(entry)).join("\n") + "\n",
+    );
+  }
+
+  function shellQuote(value) {
+    return `'${String(value).replace(/'/g, `'"'"'`)}'`;
+  }
+
+  function phrase() {
+    return String(voiceOver.lastPhrase.content()).trim();
+  }
+
+  function record(step, spoken, kind = "speech") {
+    const entry = {
+      timestamp: new Date().toISOString(),
+      browser: browserId,
+      profile,
+      step,
+      kind,
+      observed: spoken,
+    };
+    const previous = observations[observations.length - 1];
+    if (
+      !previous ||
+      previous.step !== entry.step ||
+      previous.kind !== entry.kind ||
+      previous.observed !== entry.observed
+    ) {
+      observations.push(entry);
+      flush();
+    }
+  }
+
+  function screenshot(step) {
+    screenshotIndex += 1;
+    const safeStep = step.replace(/[^a-z0-9-]+/gi, "-").toLowerCase();
+    const path = `${outputDirectory}/screenshots/${String(screenshotIndex).padStart(2, "0")}-${safeStep}.png`;
+    app.doShellScript(`/usr/sbin/screencapture -x ${shellQuote(path)}`);
+    record(step, path, "screenshot");
+  }
+
+  function key(code, modifiers = []) {
+    systemEvents.keyCode(code, modifiers.length ? { using: modifiers } : {});
+  }
+
+  function collect(step, seconds = 2) {
+    const seen = [];
+    const deadline = Date.now() + seconds * 1000;
+    let previous = "";
+    while (Date.now() < deadline) {
+      delay(0.08);
+      const current = phrase();
+      if (current && current !== previous) {
+        previous = current;
+        seen.push(current);
+        record(step, current);
+      }
+    }
+    return seen;
+  }
+
+  function act(step, action, expected, seconds = 2) {
+    action();
+    const spoken = collect(step, seconds);
+    const joined = spoken.join(" | ");
+    if (expected && !expected.test(joined)) {
+      screenshot(`${step}-failed`);
+      throw new Error(`${step}: expected ${String(expected)}, observed ${JSON.stringify(spoken)}`);
+    }
+    screenshot(step);
+    return spoken;
+  }
+
+  function tabTo(step, expected, maximum = 35) {
+    for (let attempt = 1; attempt <= maximum; attempt += 1) {
+      key(48);
+      const spoken = collect(`${step}-tab-${String(attempt)}`, 0.7);
+      if (expected.test(spoken.join(" | "))) {
+        screenshot(step);
+        return;
+      }
+    }
+    screenshot(`${step}-not-found`);
+    throw new Error(`${step}: no Tab stop announced ${String(expected)}`);
+  }
+
+  function openRoute(route, width) {
+    try {
+      Application(browser.app).quit();
+      delay(1);
+    } catch (_) {
+      // The app is allowed not to have been running.
+    }
+    const url = `${baseUrl}${route}`;
+    if (browserId === "chrome") {
+      app.doShellScript(
+        `open -na ${shellQuote(browser.executable)} --args --new-window --no-first-run --disable-default-apps ${shellQuote(url)}`,
+      );
+    } else {
+      app.doShellScript(`open -na ${shellQuote(browser.executable)} ${shellQuote(url)}`);
+    }
+    delay(7);
+    Application(browser.app).activate();
+    delay(1);
+    if (width) {
+      const process = systemEvents.applicationProcesses.byName(browser.process);
+      process.frontmost = true;
+      process.windows[0].position = [20, 40];
+      process.windows[0].size = [width, 820];
+      delay(1);
+    }
+    if (profile === "browser-zoom-200") {
+      for (let index = 0; index < 5; index += 1) key(24, ["command down"]);
+      collect("browser-zoom-200", 1);
+    }
+    screenshot(`open-${route.split("/").pop()}`);
+  }
+
+  function focusPlot(step, title) {
+    tabTo(step, new RegExp(title, "i"));
+  }
+
+  function inspectionJourney(narrow = false) {
+    openRoute("/examples/interactions/inspection", narrow ? 460 : undefined);
+    focusPlot(narrow ? "focus-narrow-plot" : "focus-inspection-plot", "Inspect a shared x value");
+
+    let grouped = false;
+    for (let move = 1; move <= 30; move += 1) {
+      key(124);
+      const spoken = collect(`inspect-arrow-${String(move)}`, 1.1);
+      const joined = spoken.join(" | ");
+      if (/\b2 data\b/i.test(joined)) {
+        grouped = true;
+        break;
+      }
+    }
+    if (!grouped) throw new Error("grouped inspection never announced exactly 2 data");
+    screenshot(narrow ? "grouped-inspection-narrow" : "grouped-inspection");
+
+    act("pin-group", () => key(36), /\bpinned\b/i);
+    // Move the real VoiceOver cursor through the ordinary DOM tooltip. This is
+    // not an AX-tree assertion: every phrase below is VoiceOver's own output.
+    let navigatedMember = false;
+    for (let move = 1; move <= 30; move += 1) {
+      key(124, ["control down", "option down"]);
+      const spoken = collect(`pinned-dom-${String(move)}`, 0.65);
+      if (/(Adelie|Chinstrap|Gentoo|flipper|mass)/i.test(spoken.join(" | "))) {
+        navigatedMember = true;
+      }
+    }
+    if (!navigatedMember) throw new Error("VoiceOver did not navigate any pinned member content");
+    screenshot(narrow ? "pinned-dom-narrow" : "pinned-dom");
+
+    // Return keyboard focus to the surface without touching DOM internals.
+    focusPlot("return-to-inspection-plot", "Inspect a shared x value");
+    act("unpin-group", () => key(36), /\bunpinned\b/i);
+    act("dismiss-inspection", () => key(53), null, 0.8);
+    act("focus-after-dismiss", () => key(124), /\b(data|datum)\b/i);
+  }
+
+  function areaJourney(toolName, completion, recovery, cleared) {
+    openRoute("/examples/interactions/interval-selection");
+    tabTo(`focus-${toolName.toLowerCase().replace(" ", "-")}`, new RegExp(toolName, "i"));
+    act(`activate-${toolName.toLowerCase().replace(" ", "-")}`, () => key(49), /(pressed|selected|area)/i);
+    focusPlot(`focus-${toolName.toLowerCase().replace(" ", "-")}-plot`, "Select an interval or brush to zoom");
+    act(`${toolName}-first-corner`, () => key(36), /choose opposite corner/i);
+    for (let index = 0; index < 8; index += 1) {
+      key(124, ["shift down"]);
+      key(125, ["shift down"]);
+    }
+    act(`${toolName}-commit`, () => key(36), completion, 2.5);
+    tabTo(`focus-${recovery.toLowerCase().replace(" ", "-")}`, new RegExp(recovery, "i"));
+    act(`activate-${recovery.toLowerCase().replace(" ", "-")}`, () => key(49), cleared);
+  }
+
+  try {
+    // Reading this property proves that the evidence source is VoiceOver. If
+    // Apple Events/TCC permission is absent, the run fails here rather than
+    // falling back to an accessibility tree or synthetic speech.
+    record("voiceover-started", phrase());
+    voiceOver.captionWindow.enabled.set(true);
+    delay(1);
+    screenshot("voiceover-caption-panel");
+
+    inspectionJourney(false);
+    areaJourney("Select area", /selection complete/i, "Clear selection", /selection cleared/i);
+    areaJourney("Zoom area", /zoom complete/i, "Reset zoom", /zoom reset/i);
+    inspectionJourney(true);
+
+    record("run-complete", "All required VoiceOver speech assertions passed.", "harness");
+    screenshot("run-complete");
+    return `VoiceOver ${browserId}/${profile} run passed; ${String(observations.length)} evidence records.`;
+  } catch (error) {
+    const message = error && error.message ? error.message : String(error);
+    record("run-failed", message, "harness");
+    write(failurePath, `${message}\n`);
+    throw error;
+  } finally {
+    try {
+      voiceOver.captionWindow.enabled.set(false);
+    } catch (_) {
+      // Cleanup in run.sh still quits VoiceOver if the caption API itself failed.
+    }
+  }
+}

@@ -20,3 +20,10 @@ macOS, and NVDA with Firefox and Chrome on Windows. Variant runs cover reduced
 motion, high contrast or forced colors, 200% browser zoom, a large pointer, and
 real touch-only assistive technology. Playwright, axe, or touch emulation cannot
 be reported as a manual AT pass.
+
+The reproducible evidence harnesses are documented for
+[VoiceOver on macOS](./macos-voiceover.md),
+[NVDA on Windows](./harness/windows-nvda.md), and
+[TalkBack on Android](./mobile-harness.md). Their retained transcripts and
+screenshots support review; only the complete versioned manifest is the release
+gate.

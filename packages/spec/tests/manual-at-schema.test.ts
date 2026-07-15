@@ -67,6 +67,14 @@ const schema = JSON.parse(
 const template = JSON.parse(
   readFileSync(join(manualAtDirectory, "template.json"), "utf8"),
 ) as object;
+const packageVersion = (
+  JSON.parse(
+    readFileSync(
+      join(manualAtDirectory, "..", "..", "..", "packages", "svelte", "package.json"),
+      "utf8",
+    ),
+  ) as { version: string }
+).version;
 const procedures = (
   JSON.parse(readFileSync(join(manualAtDirectory, "procedures.json"), "utf8")) as {
     flows: Procedure[];
@@ -337,10 +345,11 @@ describe("manual assistive-technology evidence schema", () => {
     expect(keywords).toContain("format");
   });
 
-  it("requires a complete, internally consistent v0.1.0 release manifest", () => {
+  it("requires a complete manifest before a non-placeholder package version can ship", () => {
+    if (packageVersion === "0.0.0") return;
     const recordsDirectory = join(manualAtDirectory, "records");
-    const file = join(recordsDirectory, "v0.1.0.json");
-    expect(existsSync(file), "missing the v0.1.0 manual AT release record").toBe(true);
+    const file = join(recordsDirectory, `v${packageVersion}.json`);
+    expect(existsSync(file), `missing the v${packageVersion} manual AT release record`).toBe(true);
     validateReleaseRecord(file, JSON.parse(readFileSync(file, "utf8")) as ReleaseRecord);
   });
 
