@@ -1,0 +1,84 @@
+name: Bug report
+description: Report a reproducible rendering, grammar, packaging, or runtime defect.
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve ggsvelte. Use synthetic or public data only; remove credentials, private records, and identifying information.
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Affected surface
+      options:
+        - Svelte components
+        - Fluent builder
+        - Portable JSON spec
+        - Headless SVG renderer
+        - ggsvelte-render CLI
+        - Documentation or examples
+        - Packaging or installation
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Paste the smallest component, builder call, or PortableSpec that demonstrates the problem. A public repository or REPL is also welcome.
+      placeholder: |
+        const spec = {
+          data: { values: [{ x: 1, y: 2 }] },
+          layers: [{ geom: "point", aes: { x: { field: "x" }, y: { field: "y" } } }]
+        };
+      render: typescript
+    validations:
+      required: true
+  - type: dropdown
+    id: renderer
+    attributes:
+      label: Renderer
+      options:
+        - SVG in the browser
+        - Canvas marks with SVG chrome
+        - Headless or exported SVG
+        - Not sure or not applicable
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: Include ggsvelte, Svelte, browser/runtime, and package-manager versions where relevant.
+      placeholder: ggsvelte 0.x, Svelte 5.x, Chromium 1xx, Node 24, pnpm 11
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Browser and operating system
+      placeholder: Firefox 1xx on Windows 11, or Node 24 on Ubuntu
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: Describe the chart or semantic result you expected.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior and evidence
+      description: Include exact diagnostics and cropped screenshots or recordings when useful. Redact sensitive data.
+    validations:
+      required: true
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Checks
+      options:
+        - label: I reduced this to a minimal reproduction using non-sensitive data.
+          required: true
+        - label: I searched existing issues and Discussions for the same behavior.
+          required: true

@@ -1,0 +1,28 @@
+title: "[Question] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Ask for help with the grammar, Svelte integration, or chart behavior. For a reproducible defect, use the bug or interaction issue form instead. Use synthetic or public data only.
+  - type: textarea
+    id: goal
+    attributes:
+      label: What are you trying to make?
+      description: Describe the chart, data meaning, and intended outcome.
+    validations:
+      required: true
+  - type: textarea
+    id: attempt
+    attributes:
+      label: Minimal attempt
+      description: Paste a small component, builder call, or PortableSpec using non-sensitive data.
+      render: typescript
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: What happened?
+      description: Include diagnostics and versions when relevant.
+    validations:
+      required: true

@@ -1,0 +1,100 @@
+name: Interaction or accessibility problem
+description: Report problems with inspection, selection, zoom, input, focus, or assistive technology.
+title: "[Interaction/a11y]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ggsvelte interaction is semantic and opt-in. Please describe the intended data behavior as well as the visual symptom. Never include private user data or assistive-technology logs containing personal information.
+  - type: dropdown
+    id: capability
+    attributes:
+      label: Interaction capability
+      options:
+        - Inspect, tooltip, crosshair, or pinning
+        - Point selection
+        - Interval selection or brushing
+        - Zoom or reset
+        - Tool rail or controlled tool
+        - Legend interaction
+        - Focus, announcements, or chart description
+        - Other accessibility behavior
+    validations:
+      required: true
+  - type: checkboxes
+    id: input_modalities
+    attributes:
+      label: Input modalities tested
+      description: Select every modality you exercised.
+      options:
+        - label: Keyboard
+        - label: Pointer or mouse
+        - label: Touch
+        - label: Switch, voice, or another alternative input
+        - label: Assistive technology
+    validations:
+      required: true
+  - type: input
+    id: assistive_technology
+    attributes:
+      label: Assistive technology
+      description: Name and version, or “not used.” Do not paste transcripts containing sensitive data.
+      placeholder: VoiceOver on macOS 15, NVDA 2026.1 with Firefox, or not used
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal plot reproduction
+      description: Include synthetic data, stable key configuration, enabled interaction props, and callbacks.
+      render: svelte
+    validations:
+      required: true
+  - type: textarea
+    id: journey
+    attributes:
+      label: Exact interaction journey
+      description: List focus, key, gesture, or pointer steps in order and say where behavior diverges.
+      placeholder: 1. Tab to the plot. 2. Press ArrowRight. 3. Press Enter to pin.
+    validations:
+      required: true
+  - type: textarea
+    id: expected_semantics
+    attributes:
+      label: Expected semantic behavior
+      description: Describe the datum, keys, domains, event phases, focus, or announcement that should result.
+    validations:
+      required: true
+  - type: textarea
+    id: actual_behavior
+    attributes:
+      label: Actual behavior
+      description: Include the emitted event or diagnostic if available and attach redacted visual evidence when useful.
+    validations:
+      required: true
+  - type: dropdown
+    id: renderer
+    attributes:
+      label: Renderer
+      options:
+        - SVG in the browser
+        - Canvas marks with SVG chrome
+        - Not sure
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: ggsvelte, Svelte, browser, and OS versions
+      placeholder: ggsvelte 0.x, Svelte 5.x, Safari 1x, macOS 15
+    validations:
+      required: true
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Checks
+      options:
+        - label: I used non-sensitive data and removed identifying information from evidence.
+          required: true
+        - label: I searched existing issues and Discussions for this journey.
+          required: true

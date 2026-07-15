@@ -1,0 +1,54 @@
+name: Documentation gap
+description: Report missing, misleading, inaccessible, or stale documentation.
+title: "[Docs]: "
+body:
+  - type: input
+    id: location
+    attributes:
+      label: Documentation location
+      description: Link the page, README section, example, error code, or source file.
+      placeholder: https://ljodea.github.io/ggsvelte/guide/interactions
+    validations:
+      required: true
+  - type: dropdown
+    id: gap_kind
+    attributes:
+      label: Kind of gap
+      options:
+        - Missing task or concept
+        - Incorrect or stale content
+        - Example does not demonstrate the claim
+        - Accessibility or readability problem
+        - Search, navigation, or discoverability problem
+        - Agent-facing schema, diagnostic, or llms.txt problem
+    validations:
+      required: true
+  - type: textarea
+    id: goal
+    attributes:
+      label: What were you trying to accomplish?
+    validations:
+      required: true
+  - type: textarea
+    id: observed
+    attributes:
+      label: What was unclear or incorrect?
+      description: Quote only the shortest relevant phrase; link to longer source material.
+    validations:
+      required: true
+  - type: textarea
+    id: proposed
+    attributes:
+      label: Suggested improvement
+      description: A correction, example outline, or expected destination is enough.
+    validations:
+      required: true
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Checks
+      options:
+        - label: I searched existing documentation issues and Discussions.
+          required: true
+        - label: This report contains no sensitive or private data.
+          required: true

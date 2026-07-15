@@ -1,5 +1,28 @@
 # Contributing to ggsvelte
 
+## Start in the right place
+
+- Reproducible rendering, runtime, packaging, and grammar defects use the
+  [bug form](https://github.com/ljodea/ggsvelte/issues/new?template=bug.yml).
+- Inspection, selection, zoom, keyboard, touch, focus, and assistive-technology
+  problems use the
+  [interaction and accessibility form](https://github.com/ljodea/ggsvelte/issues/new?template=interaction-accessibility.yml).
+- Scoped additions use the
+  [feature form](https://github.com/ljodea/ggsvelte/issues/new?template=feature.yml);
+  explore early API and design ideas in
+  [Ideas](https://github.com/ljodea/ggsvelte/discussions/categories/ideas).
+- Documentation gaps use the
+  [documentation form](https://github.com/ljodea/ggsvelte/issues/new?template=documentation.yml).
+- Usage questions belong in
+  [Q&A](https://github.com/ljodea/ggsvelte/discussions/categories/q-a), and
+  reusable examples belong in
+  [Show and tell](https://github.com/ljodea/ggsvelte/discussions/categories/show-and-tell).
+- Suspected vulnerabilities must follow the [private security policy](SECURITY.md),
+  not a public issue or Discussion.
+
+The project has no guaranteed response times. See [SUPPORT.md](SUPPORT.md) for
+tested support boundaries and what information helps the community respond.
+
 ## Setup
 
 1. **bun** — the package manager, script runner, and unit-test runner.

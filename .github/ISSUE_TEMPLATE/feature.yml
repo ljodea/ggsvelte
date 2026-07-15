@@ -1,0 +1,71 @@
+name: Feature proposal
+description: Propose a scoped addition after considering its semantics and portability.
+title: "[Feature]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Early design exploration belongs in the Ideas Discussion category. Use this form when the problem and desired outcome are concrete enough to scope.
+  - type: dropdown
+    id: request_kind
+    attributes:
+      label: Request kind
+      description: Presentation changes affect appearance; semantic changes affect data meaning, events, state, or the grammar.
+      options:
+        - Presentation, theme, palette, or default
+        - Grammar, stat, geom, scale, coordinate, or PortableSpec
+        - Semantic interaction, event, identity, or linking
+        - Renderer, performance, export, or picking
+        - Developer experience, packaging, or tooling
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+      description: Describe the user goal and why existing composition or configuration is insufficient.
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome
+      description: Show a concise API or spec sketch and the observable result.
+    validations:
+      required: true
+  - type: textarea
+    id: semantics
+    attributes:
+      label: Semantic and interaction contract
+      description: Which data, keys, domains, events, states, or accessibility behavior would change? Say “presentation only” when none change.
+    validations:
+      required: true
+  - type: textarea
+    id: portability
+    attributes:
+      label: Portability and rendering
+      description: Should this work in PortableSpec, headless SVG, browser SVG, and canvas? Explain intentional exceptions.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Include composition, explicit configuration, or another library where relevant.
+    validations:
+      required: true
+  - type: input
+    id: discussion
+    attributes:
+      label: Related Discussion
+      description: Link the Ideas thread if the proposal was explored there, or say “not discussed.”
+      placeholder: https://github.com/ljodea/ggsvelte/discussions/…
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Checks
+      options:
+        - label: I searched existing issues, Discussions, and the interaction reference.
+          required: true
+        - label: This report contains no sensitive or private data.
+          required: true

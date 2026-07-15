@@ -1,0 +1,31 @@
+title: "[Example] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Share a chart, technique, theme, integration, or public project. Include an accessible description and only data you are allowed to publish.
+  - type: textarea
+    id: example
+    attributes:
+      label: What did you make?
+      description: Explain the chart's question, encoding, and useful ggsvelte features.
+    validations:
+      required: true
+  - type: textarea
+    id: accessibility
+    attributes:
+      label: Accessible description
+      description: Summarize the visual and its main conclusion for someone who cannot see an image.
+    validations:
+      required: true
+  - type: input
+    id: link
+    attributes:
+      label: Public link
+      description: Link a repository, REPL, article, or deployed example if one is available.
+  - type: textarea
+    id: lessons
+    attributes:
+      label: What should others learn from it?
+    validations:
+      required: true
