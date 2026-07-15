@@ -140,14 +140,18 @@ def _speech_after_key(
     require_speech: bool = True,
 ) -> str:
     spy = _spy()
-    spy.wait_for_speech_to_finish()
+    # A newly loaded document may still be producing unbounded browse-mode
+    # narration. A physical Control press is NVDA's public "silence" command;
+    # use it to establish a clean speech boundary before the intended action.
+    _send_key("control")
+    time.sleep(0.15)
     index = spy.get_next_speech_index()
     _send_key(key, modifiers)
     if require_speech:
         spy.wait_for_speech_to_finish(speechStartedIndex=index)
     else:
         time.sleep(1.0)
-        spy.wait_for_speech_to_finish()
+        _send_key("control")
     speech = spy.get_speech_at_index_until_now(index)
     _record(action, speech, key=key, modifiers=list(modifiers))
     return speech
