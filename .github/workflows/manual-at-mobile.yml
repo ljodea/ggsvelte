@@ -6,7 +6,7 @@ on:
       fixture_url:
         description: Optional URL reachable from the Android emulator
         required: false
-        default: http://10.0.2.2:4173/examples/interactions/inspection
+        default: http://10.0.2.2:4173/examples/interactions/inspection#try-it-heading
         type: string
 
 permissions: {}

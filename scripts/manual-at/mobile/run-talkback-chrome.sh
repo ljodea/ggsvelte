@@ -5,7 +5,7 @@ readonly TALKBACK_COMMIT="229212fdf5842191d0a93fc95d9ca1423b346866"
 readonly TALKBACK_PACKAGE="com.android.talkback"
 readonly TALKBACK_SERVICE="com.android.talkback/com.google.android.marvin.talkback.TalkBackService"
 readonly CHROME_PACKAGE="com.android.chrome"
-readonly TEST_URL="${MANUAL_AT_URL:-http://10.0.2.2:4173/examples/interactions/inspection}"
+readonly TEST_URL="${MANUAL_AT_URL:-http://10.0.2.2:4173/examples/interactions/inspection#try-it-heading}"
 readonly OUTPUT_DIR="${MANUAL_AT_OUTPUT_DIR:-${PWD}/artifacts/manual-at-mobile}"
 readonly APK="${OUTPUT_DIR}/talkback-${TALKBACK_COMMIT}.apk"
 
@@ -27,6 +27,8 @@ adb shell pm path "${CHROME_PACKAGE}" >/dev/null 2>&1 || \
   fail "Chrome is not installed in this emulator image; this is not a real TalkBack/Chrome run"
 adb install -r "${APK}" >/dev/null || fail "Could not install the pinned Google TalkBack APK"
 adb shell pm path "${TALKBACK_PACKAGE}" >/dev/null 2>&1 || fail "TalkBack did not install"
+adb shell pm grant "${TALKBACK_PACKAGE}" android.permission.READ_PHONE_STATE || \
+  fail "Could not grant TalkBack's requested phone-state permission before startup"
 
 # The source-built APK is debuggable. Set TalkBack's documented developer
 # preferences before starting its service so verbose logs expose the exact
@@ -113,9 +115,9 @@ if grep -F 'text="Chrome notifications make things easier"' \
 fi
 adb exec-out screencap -p > "${OUTPUT_DIR}/screenshots/00-loaded.png"
 
-# Clear setup chatter. Every later swipe and tap is injected through Android's
-# touchscreen input path. TalkBack, not UIAutomator or Playwright, consumes the
-# gestures and moves accessibility focus in real Chrome.
+# Clear setup chatter. Every later tap is injected through Android's touchscreen
+# input path. TalkBack, not UIAutomator or Playwright, consumes touch exploration
+# and moves accessibility focus in real Chrome.
 adb logcat -c
 printf 'phase\tgesture\n' > "${OUTPUT_DIR}/gestures.tsv"
 
@@ -127,19 +129,29 @@ gesture() {
   sleep 1
 }
 
-# Linear TalkBack exploration. Stop only after TalkBack itself speaks the
-# plot's accessible name, so the following activation cannot silently target
-# an unrelated page control.
+# ADB's single-pointer swipe is not a TalkBack next-item gesture: it bypasses the
+# service and scrolls or navigates Chrome. Instead, explore a bounded grid over
+# the anchored Try it region with real touchscreen taps. Stop only after
+# TalkBack itself speaks the plot's accessible name, so activation cannot
+# silently target an unrelated page control.
 plot_focused=false
-for index in $(seq -w 1 60); do
-  gesture "linear-${index}" "input swipe 260 1060 830 1060 220"
-  if (( 10#${index} % 5 == 0 )); then
-    adb exec-out screencap -p > "${OUTPUT_DIR}/screenshots/linear-${index}.png"
-  fi
+touch_points=(
+  "180 420" "540 420" "900 420"
+  "180 700" "540 700" "900 700"
+  "180 980" "540 980" "900 980"
+  "180 1260" "540 1260" "900 1260"
+  "180 1540" "540 1540" "900 1540"
+  "180 1740" "540 1740" "900 1740"
+)
+index=0
+for point in "${touch_points[@]}"; do
+  index=$((index + 1))
+  gesture "explore-${index}" "input tap ${point}"
+  adb exec-out screencap -p > "${OUTPUT_DIR}/screenshots/explore-${index}.png"
   if adb logcat -d -v brief | grep -Ei \
     'SpeechController.*Speaking fragment text=.*Inspect a shared x value, then pin' >/dev/null; then
     plot_focused=true
-    echo "TalkBack reached the plot after $((10#${index})) right-swipe gestures"
+    echo "TalkBack reached the plot after ${index} touch-exploration taps"
     break
   fi
 done
@@ -153,8 +165,10 @@ printf '%s\t%s\n' "activate" "input tap 540 1180; input tap 540 1180" >> \
 adb shell 'input tap 540 1180; input tap 540 1180'
 sleep 2
 adb exec-out screencap -p > "${OUTPUT_DIR}/screenshots/25-activated.png"
-for index in $(seq -w 26 34); do
-  gesture "post-activate-${index}" "input swipe 260 1060 830 1060 220"
+index=0
+for point in "${touch_points[@]}"; do
+  index=$((index + 1))
+  gesture "post-activate-${index}" "input tap ${point}"
 done
 
 adb logcat -d -v threadtime > "${OUTPUT_DIR}/logcat-full.txt"

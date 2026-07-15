@@ -15,4 +15,11 @@ describe("TalkBack Chrome evidence harness", () => {
     expect(script).toContain('fail "Chrome onboarding still obscures the test fixture"');
     expect(script).toContain('text="Chrome notifications make things easier"');
   });
+
+  test("uses visible touch exploration without pretending ADB swipes are TalkBack gestures", () => {
+    expect(script).toContain("#try-it-heading");
+    expect(script).toContain("android.permission.READ_PHONE_STATE");
+    expect(script).toContain('gesture "explore-${index}" "input tap ${point}"');
+    expect(script).not.toContain('gesture "linear-${index}" "input swipe');
+  });
 });
