@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ggsvelte.dev/schemas/manual-at-record-alias.json",
+  "title": "ggsvelte manual assistive-technology release evidence alias",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "release",
+    "inherits",
+    "releaseCommit",
+    "completedAt",
+    "runtimeBehaviorChanged",
+    "rationale"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": 1 },
+    "release": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"
+    },
+    "inherits": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"
+    },
+    "releaseCommit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "completedAt": { "type": "string", "format": "date" },
+    "runtimeBehaviorChanged": { "const": false },
+    "rationale": { "type": "string", "minLength": 1 }
+  }
+}

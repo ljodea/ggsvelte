@@ -1,0 +1,10 @@
+{
+  "$schema": "../record-alias.schema.json",
+  "schemaVersion": 1,
+  "release": "0.1.1",
+  "inherits": "0.1.0",
+  "releaseCommit": "68f29f80b22b91d301378b4e6e17d2abd7b093ec",
+  "completedAt": "2026-07-15",
+  "runtimeBehaviorChanged": false,
+  "rationale": "v0.1.1 changed package versions, dependency ranges, changelogs, and release compatibility checks only; it did not change shipped chart or interaction runtime behavior. The complete v0.1.0 manual AT matrix therefore remains applicable."
+}

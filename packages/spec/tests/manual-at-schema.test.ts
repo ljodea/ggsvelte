@@ -46,6 +46,14 @@ interface ReleaseRecord {
   runs: Run[];
 }
 
+interface ReleaseAlias {
+  release: string;
+  inherits: string;
+  releaseCommit: string;
+  runtimeBehaviorChanged: false;
+  rationale: string;
+}
+
 interface Procedure {
   id: string;
   fixture: string;
@@ -63,6 +71,9 @@ const manualAtDirectory = join(
 );
 const schema = JSON.parse(
   readFileSync(join(manualAtDirectory, "record.schema.json"), "utf8"),
+) as object;
+const aliasSchema = JSON.parse(
+  readFileSync(join(manualAtDirectory, "record-alias.schema.json"), "utf8"),
 ) as object;
 const template = JSON.parse(
   readFileSync(join(manualAtDirectory, "template.json"), "utf8"),
@@ -200,7 +211,7 @@ const profileSettings: Record<string, Partial<Run["settings"]>> = {
   "touch-only": { input: "touch-only" },
 };
 
-function validator() {
+function validator(inputSchema: object = schema) {
   const ajv = new Ajv2020({ strict: false, allErrors: true });
   ajv.addFormat("date", {
     type: "string",
@@ -221,7 +232,17 @@ function validator() {
       }
     },
   });
-  return ajv.compile(schema);
+  return ajv.compile(inputSchema);
+}
+
+function versionParts(version: string): readonly [number, number, number] {
+  const match = /^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$/.exec(version);
+  expect(match, `invalid stable release ${version}`).not.toBeNull();
+  return [Number(match?.[1]), Number(match?.[2]), Number(match?.[3])];
+}
+
+function isReleaseAlias(value: ReleaseRecord | ReleaseAlias): value is ReleaseAlias {
+  return "inherits" in value;
 }
 
 function unique(values: readonly string[], label: string): void {
@@ -331,6 +352,44 @@ function validateReleaseRecord(file: string, record: ReleaseRecord): void {
   }
 }
 
+function validateReleaseEvidence(
+  file: string,
+  evidence: ReleaseRecord | ReleaseAlias,
+  resolving: ReadonlySet<string> = new Set(),
+): ReleaseRecord {
+  if (!isReleaseAlias(evidence)) {
+    validateReleaseRecord(file, evidence);
+    return evidence;
+  }
+
+  const validate = validator(aliasSchema);
+  expect(validate(evidence), JSON.stringify(validate.errors, null, 2)).toBe(true);
+  expect(basename(file)).toBe(`v${evidence.release}.json`);
+  expect(evidence.runtimeBehaviorChanged).toBe(false);
+  expect(evidence.rationale.trim().length).toBeGreaterThan(0);
+
+  const [releaseMajor, releaseMinor, releasePatch] = versionParts(evidence.release);
+  const [sourceMajor, sourceMinor, sourcePatch] = versionParts(evidence.inherits);
+  expect([releaseMajor, releaseMinor], "aliases must stay within one major/minor line").toEqual([
+    sourceMajor,
+    sourceMinor,
+  ]);
+  expect(sourcePatch, "an alias must inherit an earlier patch release").toBeLessThan(releasePatch);
+  expect(resolving.has(evidence.release), `cyclic manual AT alias at ${evidence.release}`).toBe(
+    false,
+  );
+
+  const recordsDirectory = join(manualAtDirectory, "records");
+  const inheritedFile = join(recordsDirectory, `v${evidence.inherits}.json`);
+  expect(
+    existsSync(inheritedFile),
+    `missing inherited v${evidence.inherits} manual AT record`,
+  ).toBe(true);
+  const nextResolving = new Set(resolving).add(evidence.release);
+  const inherited = JSON.parse(readFileSync(inheritedFile, "utf8")) as ReleaseRecord | ReleaseAlias;
+  return validateReleaseEvidence(inheritedFile, inherited, nextResolving);
+}
+
 describe("manual assistive-technology evidence schema", () => {
   it("compiles and accepts the draft template", () => {
     const validate = validator();
@@ -345,12 +404,31 @@ describe("manual assistive-technology evidence schema", () => {
     expect(keywords).toContain("format");
   });
 
+  it("accepts only explicit same-line aliases for behavior-preserving patch releases", () => {
+    const validate = validator(aliasSchema);
+    const alias = {
+      schemaVersion: 1,
+      release: "0.1.1",
+      inherits: "0.1.0",
+      releaseCommit: "68f29f80b22b91d301378b4e6e17d2abd7b093ec",
+      completedAt: "2026-07-15",
+      runtimeBehaviorChanged: false,
+      rationale: "Package metadata only.",
+    };
+    expect(validate(alias), JSON.stringify(validate.errors, null, 2)).toBe(true);
+    expect(validate({ ...alias, runtimeBehaviorChanged: true })).toBe(false);
+    expect(validate({ ...alias, rationale: "" })).toBe(false);
+  });
+
   it("requires a complete manifest before a non-placeholder package version can ship", () => {
     if (packageVersion === "0.0.0") return;
     const recordsDirectory = join(manualAtDirectory, "records");
     const file = join(recordsDirectory, `v${packageVersion}.json`);
     expect(existsSync(file), `missing the v${packageVersion} manual AT release record`).toBe(true);
-    validateReleaseRecord(file, JSON.parse(readFileSync(file, "utf8")) as ReleaseRecord);
+    validateReleaseEvidence(
+      file,
+      JSON.parse(readFileSync(file, "utf8")) as ReleaseRecord | ReleaseAlias,
+    );
   });
 
   it("validates every committed release manifest", () => {
@@ -360,7 +438,10 @@ describe("manual assistive-technology evidence schema", () => {
       candidate.endsWith(".json"),
     )) {
       const file = join(recordsDirectory, name);
-      validateReleaseRecord(file, JSON.parse(readFileSync(file, "utf8")) as ReleaseRecord);
+      validateReleaseEvidence(
+        file,
+        JSON.parse(readFileSync(file, "utf8")) as ReleaseRecord | ReleaseAlias,
+      );
     }
   });
 });
