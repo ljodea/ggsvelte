@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784106691665,
+  "lastUpdate": 1784107035271,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -2820,6 +2820,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 162.0906,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "136611459fbbf26c74cf3fe0680f40e4f289d4fb",
+          "message": "fix(ci): dismiss Chrome onboarding before TalkBack (#31)",
+          "timestamp": "2026-07-15T04:16:44-05:00",
+          "tree_id": "ddb9c2377dc8950b16b1eb527b68f412e838f0e0",
+          "url": "https://github.com/ljodea/ggsvelte/commit/136611459fbbf26c74cf3fe0680f40e4f289d4fb"
+        },
+        "date": 1784107034816,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.0963,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.2448,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 8.867,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 9.9753,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 66.2828,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 95.03,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 0.7376,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 0.92,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 67.1781,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 87.6002,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 8.9499,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 8.9168,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 95.2892,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.5059,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 22.6046,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 5.7994,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 28.0164,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 484.4879,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 131.0707,
             "unit": "ms"
           }
         ]
