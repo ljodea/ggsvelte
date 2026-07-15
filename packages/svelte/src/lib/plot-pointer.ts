@@ -1,0 +1,101 @@
+import type { CandidateFacts } from "@ggsvelte/core";
+import type { SceneHit } from "@ggsvelte/core/dom";
+
+export type ClientRectSize = {
+  readonly left: number;
+  readonly top: number;
+  readonly width: number;
+  readonly height: number;
+};
+
+export type SceneSize = {
+  readonly width: number;
+  readonly height: number;
+};
+
+/** Map a client pointer position into plot/scene coordinates. Zero-size
+ *  targets return the origin; out-of-bounds clients are intentionally not
+ *  clamped (callers may drag past the capture edge). */
+export function plotPointFromClient(
+  clientX: number,
+  clientY: number,
+  rect: ClientRectSize,
+  scene: SceneSize,
+): { x: number; y: number } {
+  if (rect.width === 0 || rect.height === 0) return { x: 0, y: 0 };
+  return {
+    x: ((clientX - rect.left) / rect.width) * scene.width,
+    y: ((clientY - rect.top) / rect.height) * scene.height,
+  };
+}
+
+/** Project a candidate into the SceneHit shape used by hit indexes/overlays. */
+export function hitFromCandidate(candidate: CandidateFacts): SceneHit {
+  return {
+    layerIndex: candidate.layerIndex,
+    panelIndex: candidate.panelIndex,
+    rowIndex: candidate.rowIndex,
+    x: candidate.x,
+    y: candidate.y,
+    kind: candidate.kind,
+  };
+}
+
+/** Modular wrap for keyboard traversal across a hit list. */
+export function nextTraversalIndex(current: number, delta: number, length: number): number {
+  if (length <= 0) return -1;
+  return (current + delta + length) % length;
+}
+
+/**
+ * Pick the best hit in direction (dx, dy) from origin.
+ * Score = primary + 2 * |orthogonal|; ties keep the later traversal index
+ * (matches topmost/later paint order used by pointer hit testing).
+ * Returns -1 when no forward candidate exists.
+ */
+export function bestDirectionalIndex(
+  origin: Readonly<{ x: number; y: number }>,
+  hits: readonly Readonly<{ x: number; y: number }>[],
+  dx: number,
+  dy: number,
+): number {
+  let bestIndex = -1;
+  let bestScore = Number.POSITIVE_INFINITY;
+  for (let index = 0; index < hits.length; index++) {
+    const hit = hits[index]!;
+    const horizontal = hit.x - origin.x;
+    const vertical = hit.y - origin.y;
+    const primary = horizontal * dx + vertical * dy;
+    if (primary <= 0) continue;
+    const orthogonal = Math.abs(horizontal * dy - vertical * dx);
+    const score = primary + orthogonal * 2;
+    // Equal scores overwrite → later traversal order wins.
+    if (score > bestScore) continue;
+    bestScore = score;
+    bestIndex = index;
+  }
+  return bestIndex;
+}
+
+/**
+ * Cycle among hits coincident with origin (within < 0.5 px on both axes).
+ * When activeIndex is not among them, starts as if at the first coincident
+ * entry (Math.max(0, -1) = 0). Returns -1 when fewer than two matches.
+ */
+export function cycleCoincidentIndex(
+  origin: Readonly<{ x: number; y: number }>,
+  hits: readonly Readonly<{ x: number; y: number }>[],
+  activeIndex: number,
+  delta: number,
+): number {
+  const coincident = hits
+    .map((hit, index) => ({ hit, index }))
+    .filter(({ hit }) => Math.abs(hit.x - origin.x) < 0.5 && Math.abs(hit.y - origin.y) < 0.5);
+  if (coincident.length < 2) return -1;
+  const current = Math.max(
+    0,
+    coincident.findIndex(({ index }) => index === activeIndex),
+  );
+  const next = coincident[(current + delta + coincident.length) % coincident.length]!;
+  return next.index;
+}

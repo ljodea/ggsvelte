@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   clamp,
+  expandIntervalQuery,
   frozenZoomDomains,
   invertedDomain,
   normalizedRect,
@@ -126,5 +127,43 @@ describe("panelDataDomains", () => {
     expect(domains.x).toBeUndefined();
     expect(domains.y?.[0]).toBeCloseTo(0);
     expect(domains.y?.[1]).toBeCloseTo(50);
+  });
+});
+
+describe("expandIntervalQuery", () => {
+  const panel = { x: 10, y: 20, width: 100, height: 50 };
+  const rect = { x0: 30, y0: 25, x1: 70, y1: 55 };
+
+  it("returns the rect unchanged when panel is absent", () => {
+    expect(expandIntervalQuery(rect, undefined, "x", false)).toEqual(rect);
+  });
+
+  it("expands the free axis for x/y modes and swaps under flip", () => {
+    expect(expandIntervalQuery(rect, panel, "x", false)).toEqual({
+      ...rect,
+      y0: 20,
+      y1: 70,
+    });
+    expect(expandIntervalQuery(rect, panel, "y", false)).toEqual({
+      ...rect,
+      x0: 10,
+      x1: 110,
+    });
+    // Flipped: x-mode expands horizontal (panel x span); y-mode expands vertical.
+    expect(expandIntervalQuery(rect, panel, "x", true)).toEqual({
+      ...rect,
+      x0: 10,
+      x1: 110,
+    });
+    expect(expandIntervalQuery(rect, panel, "y", true)).toEqual({
+      ...rect,
+      y0: 20,
+      y1: 70,
+    });
+  });
+
+  it("leaves xy mode unexpanded", () => {
+    expect(expandIntervalQuery(rect, panel, "xy", false)).toEqual(rect);
+    expect(expandIntervalQuery(rect, panel, "xy", true)).toEqual(rect);
   });
 });

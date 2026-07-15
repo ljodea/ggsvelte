@@ -93,6 +93,7 @@
   import InteractionOverlay from "./InteractionOverlay.svelte";
   import {
     clamp,
+    expandIntervalQuery,
     frozenZoomDomains,
     normalizedRect,
     panelDataDomains,
@@ -102,6 +103,23 @@
     inspectionLiveText as inspectionLiveTextFor,
     markLabel as markLabelFor,
   } from "./plot-labels.js";
+  import {
+    bestDirectionalIndex,
+    cycleCoincidentIndex,
+    hitFromCandidate,
+    nextTraversalIndex,
+    plotPointFromClient,
+  } from "./plot-pointer.js";
+  import {
+    anchorsFromCandidateKeys,
+    nextPointSelectionKeys,
+  } from "./plot-selection.js";
+  import { themeTokensToCss } from "./plot-theme-css.js";
+  import {
+    applyZoomToSpec,
+    resolveBrushZoomDomains,
+    sanitizePartialZoomDomains,
+  } from "./plot-zoom.js";
   import SceneView from "./SceneView.svelte";
   import Tooltip from "./Tooltip.svelte";
   import ToolRail from "./ToolRail.svelte";
@@ -318,26 +336,9 @@
       : (domains as ZoomDomains);
   });
 
-  const zoomScale = (config: Scales["x"], domain: [number, number]) => ({
-    ...config,
-    domain: [domain[0], domain[1]],
-    nice: false,
-  });
-
   const effectiveSpec: PortableSpec | null = $derived.by(() => {
     if (assembled === null || effectiveZoomDomains === null) return assembled;
-    return {
-      ...assembled,
-      scales: {
-        ...assembled.scales,
-        ...(effectiveZoomDomains.x !== undefined && {
-          x: zoomScale(assembled.scales?.x, effectiveZoomDomains.x),
-        }),
-        ...(effectiveZoomDomains.y !== undefined && {
-          y: zoomScale(assembled.scales?.y, effectiveZoomDomains.y),
-        }),
-      },
-    };
+    return applyZoomToSpec(assembled, effectiveZoomDomains);
   });
 
   // Source identity/order epoch: stable through responsive layout and zoom
@@ -676,24 +677,9 @@
       return "No inspectable marks";
     return null;
   });
-  const themeStyle = $derived.by(() => {
-    if (model === null) return "";
-    const tokens = model.scene.theme;
-    return [
-      ["interactionInk", tokens.interactionInk],
-      ["interactionMuted", tokens.interactionMuted],
-      ["focusRing", tokens.focusRing],
-      ["crosshair", tokens.crosshair],
-      ["selectionFill", tokens.selectionFill],
-      ["selectionStroke", tokens.selectionStroke],
-      ["tooltipPaper", tokens.tooltipPaper],
-      ["tooltipInk", tokens.tooltipInk],
-      ["tooltipBorder", tokens.tooltipBorder],
-      ["toolActive", tokens.toolActive],
-    ]
-      .map(([role, value]) => `--gg-theme-${role}:${value}`)
-      .join(";");
-  });
+  const themeStyle = $derived.by(() =>
+    model === null ? "" : themeTokensToCss(model.scene.theme),
+  );
   const rootStyle = $derived(
     `${hasCanvas || interactive || effectiveEmphasisKeys.length > 0 ? `width:${width === undefined || width === "container" ? "100%" : `${model?.scene.width ?? resolvedWidth}px`};height:${model?.scene.height ?? resolvedHeight}px;` : ""}${themeStyle}` ||
       undefined,
@@ -703,25 +689,21 @@
     y: number;
   }[] {
     if (model === null || keys.length === 0) return [];
-    const keySet = new Set(keys);
-    const anchors: { x: number; y: number }[] = [];
-    const seen = new Set<string>();
+    const candidates: {
+      x: number;
+      y: number;
+      keys: readonly PropertyKey[];
+    }[] = [];
     for (let id = 0; id < model.candidates.size; id++) {
       const candidate = model.candidates.candidate(id);
       if (candidate === null) continue;
-      let selected = false;
-      for (const key of candidateSemanticKeys(candidate)) {
-        if (!keySet.has(key)) continue;
-        selected = true;
-        break;
-      }
-      const identity = `${String(candidate.x)}:${String(candidate.y)}`;
-      if (selected && !seen.has(identity)) {
-        seen.add(identity);
-        anchors.push({ x: candidate.x, y: candidate.y });
-      }
+      candidates.push({
+        x: candidate.x,
+        y: candidate.y,
+        keys: candidateSemanticKeys(candidate),
+      });
     }
-    return anchors;
+    return anchorsFromCandidateKeys(candidates, keys);
   }
   const selectedAnchors = $derived(anchorsForKeys(effectiveSelectedKeys));
   const emphasizedAnchors = $derived(anchorsForKeys(effectiveEmphasisKeys));
@@ -958,12 +940,8 @@
   } {
     const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
     const scene = model?.scene;
-    if (scene === undefined || rect.width === 0 || rect.height === 0)
-      return { x: 0, y: 0 };
-    return {
-      x: ((event.clientX - rect.left) / rect.width) * scene.width,
-      y: ((event.clientY - rect.top) / rect.height) * scene.height,
-    };
+    if (scene === undefined) return { x: 0, y: 0 };
+    return plotPointFromClient(event.clientX, event.clientY, rect, scene);
   }
 
   function panelId(index: number): string | null {
@@ -998,17 +976,6 @@
   >((_row, index) => semanticKeys.keys.get(index) ?? null);
 
   $effect(() => () => inspectionCoordinator.invalidate());
-
-  function hitFromCandidate(candidate: CandidateFacts): SceneHit {
-    return {
-      layerIndex: candidate.layerIndex,
-      panelIndex: candidate.panelIndex,
-      rowIndex: candidate.rowIndex,
-      x: candidate.x,
-      y: candidate.y,
-      kind: candidate.kind,
-    };
-  }
 
   function candidateFromHit(hit: SceneHit): CandidateFacts | null {
     if (model === null) return null;
@@ -1399,18 +1366,7 @@
     const mode = interactionConfig.select?.mode ?? "xy";
     const panel = model?.scene.panels[0];
     const flip = assembled?.coord?.type === "flip";
-    const query =
-      panel === undefined
-        ? rect
-        : mode === "x"
-          ? flip
-            ? { ...rect, x0: panel.x, x1: panel.x + panel.width }
-            : { ...rect, y0: panel.y, y1: panel.y + panel.height }
-          : mode === "y"
-            ? flip
-              ? { ...rect, y0: panel.y, y1: panel.y + panel.height }
-              : { ...rect, x0: panel.x, x1: panel.x + panel.width }
-            : rect;
+    const query = expandIntervalQuery(rect, panel, mode, flip);
     const candidates =
       model === null
         ? []
@@ -1575,20 +1531,12 @@
   /** Replace one or both continuous zoom domains without disturbing the
    *  other channel. This is the controlled linking/programmatic-zoom path. */
   export function setZoom(domains: Partial<ZoomDomains>): void {
-    const next: ZoomDomains = { ...effectiveZoomDomains };
-    for (const channel of ["x", "y"] as const) {
-      const domain = domains[channel];
-      if (domain === undefined) continue;
-      const scale = model?.scales[channel];
-      if (
-        scale?.type === "band" ||
-        domain.length !== 2 ||
-        !domain.every((value) => Number.isFinite(value))
-      )
-        continue;
-      next[channel] = [domain[0], domain[1]];
-    }
-    if (next.x === undefined && next.y === undefined) return;
+    const next = sanitizePartialZoomDomains(
+      domains,
+      model?.scales,
+      effectiveZoomDomains,
+    );
+    if (next === null) return;
     commitZoom(frozenZoomDomains(next), "programmatic");
   }
 
@@ -1614,17 +1562,15 @@
     if (model === null || model.scene.panels.length !== 1) return;
     const panel = model.scene.panels[0]!;
     const flip = assembled?.coord?.type === "flip";
-    const th0 = clamp((rect.x0 - panel.x) / panel.width, 0, 1);
-    const th1 = clamp((rect.x1 - panel.x) / panel.width, 0, 1);
-    const tv0 = clamp(1 - (rect.y1 - panel.y) / panel.height, 0, 1);
-    const tv1 = clamp(1 - (rect.y0 - panel.y) / panel.height, 0, 1);
-    if (th1 - th0 <= 0 && tv1 - tv0 <= 0) return;
-    const inverted = panelDataDomains(rect, panel, model.scales, flip);
-    const mode = interactionConfig.zoom?.mode ?? "xy";
-    const next: ZoomDomains = { ...effectiveZoomDomains };
-    if (mode !== "y" && inverted.x !== undefined) next.x = inverted.x;
-    if (mode !== "x" && inverted.y !== undefined) next.y = inverted.y;
-    if (next.x === undefined && next.y === undefined) return;
+    const next = resolveBrushZoomDomains(
+      rect,
+      panel,
+      model.scales,
+      flip,
+      interactionConfig.zoom?.mode ?? "xy",
+      effectiveZoomDomains,
+    );
+    if (next === null) return;
     commitZoom(frozenZoomDomains(next), source);
   }
 
@@ -1640,9 +1586,11 @@
 
   function navigate(delta: number): void {
     if (traversalHits.length === 0) return;
-    activeTraversalIndex =
-      (activeTraversalIndex + delta + traversalHits.length) %
-      traversalHits.length;
+    activeTraversalIndex = nextTraversalIndex(
+      activeTraversalIndex,
+      delta,
+      traversalHits.length,
+    );
     setInspection(traversalHits[activeTraversalIndex]!, "keyboard");
   }
 
@@ -1652,23 +1600,12 @@
       navigate(1);
       return;
     }
-    const origin = inspection.focus.anchor;
-    let bestIndex = -1;
-    let bestScore = Number.POSITIVE_INFINITY;
-    for (let index = 0; index < traversalHits.length; index++) {
-      const hit = traversalHits[index]!;
-      const horizontal = hit.x - origin.x;
-      const vertical = hit.y - origin.y;
-      const primary = horizontal * dx + vertical * dy;
-      if (primary <= 0) continue;
-      const orthogonal = Math.abs(horizontal * dy - vertical * dx);
-      const score = primary + orthogonal * 2;
-      // Equal geometric candidates resolve to the later paint/source order,
-      // matching the deterministic topmost representative used by pointer hit testing.
-      if (score > bestScore) continue;
-      bestScore = score;
-      bestIndex = index;
-    }
+    const bestIndex = bestDirectionalIndex(
+      inspection.focus.anchor,
+      traversalHits,
+      dx,
+      dy,
+    );
     if (bestIndex < 0) return;
     activeTraversalIndex = bestIndex;
     setInspection(traversalHits[bestIndex]!, "keyboard");
@@ -1679,22 +1616,15 @@
       navigate(1);
       return;
     }
-    const anchor = inspection.focus.anchor;
-    const coincident = traversalHits
-      .map((hit, index) => ({ hit, index }))
-      .filter(
-        ({ hit }) =>
-          Math.abs(hit.x - anchor.x) < 0.5 && Math.abs(hit.y - anchor.y) < 0.5,
-      );
-    if (coincident.length < 2) return;
-    const current = Math.max(
-      0,
-      coincident.findIndex(({ index }) => index === activeTraversalIndex),
+    const nextIndex = cycleCoincidentIndex(
+      inspection.focus.anchor,
+      traversalHits,
+      activeTraversalIndex,
+      delta,
     );
-    const next =
-      coincident[(current + delta + coincident.length) % coincident.length]!;
-    activeTraversalIndex = next.index;
-    setInspection(next.hit, "keyboard");
+    if (nextIndex < 0) return;
+    activeTraversalIndex = nextIndex;
+    setInspection(traversalHits[nextIndex]!, "keyboard");
   }
 
   function onSurfaceBlur(event: FocusEvent): void {
@@ -1709,14 +1639,11 @@
     source: InteractionSource,
   ): void {
     if (keys.length === 0) return;
-    const allSelected = keys.every((key) =>
-      effectiveSelectedKeys.includes(key),
+    const next = nextPointSelectionKeys(
+      effectiveSelectedKeys,
+      keys,
+      interactionConfig.select?.multiple ?? false,
     );
-    const next = allSelected
-      ? effectiveSelectedKeys.filter((key) => !keys.includes(key))
-      : interactionConfig.select?.multiple
-        ? [...new Set([...effectiveSelectedKeys, ...keys])]
-        : [...keys];
     commitPointSelection(next, source);
   }
 
