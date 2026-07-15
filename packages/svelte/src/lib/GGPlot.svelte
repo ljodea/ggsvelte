@@ -77,12 +77,14 @@
     type PlotInspection,
     type PlotInspectionChange,
     type PlotInteractionEvent,
+    type PlotInteractionScope,
     type PlotSelection,
     type SelectInput,
     type ZoomDomains,
     type ZoomEvent,
     type ZoomInput,
   } from "./interaction.js";
+  import type { PlotInteractionController } from "./interaction-controller.svelte.js";
   import { createInspectionCoordinator } from "./inspection-resolver.js";
   import { createInteractionReducer } from "./interaction-reducer.js";
   import type { LayerDescriptor } from "./registry.svelte.js";
@@ -133,6 +135,10 @@
     zoom?: ZoomInput;
     /** Controlled initial/active tool. */
     tool?: InteractionTool;
+    /** Optional durable semantic state shared with other plots and Svelte UI. */
+    interaction?: PlotInteractionController<PublicKey>;
+    /** Semantic identity for linked keys and positional domains. */
+    interactionScope?: PlotInteractionScope;
     /** Accessible chart name; falls back to the plot title/generated label. */
     ariaLabel?: string;
     oninspect?: (event: PlotInspection<Row, PublicKey>) => void;
@@ -166,6 +172,8 @@
     select = false,
     zoom = false,
     tool,
+    interaction,
+    interactionScope,
     ariaLabel,
     oninspect,
     onselect,
@@ -242,6 +250,51 @@
     return builder.spec();
   });
 
+  function mappedScope(channel: "x" | "y"): string {
+    const channelValue =
+      assembled?.aes?.[channel] ??
+      assembled?.layers.find(
+        (layer) =>
+          layer.aes?.[channel] !== undefined && layer.aes[channel] !== null,
+      )?.aes?.[channel];
+    return channelValue !== undefined &&
+      channelValue !== null &&
+      "field" in channelValue
+      ? channelValue.field
+      : channel;
+  }
+
+  const resolvedInteractionScope: PlotInteractionScope = $derived.by(() => {
+    if (interaction !== undefined) {
+      if (interactionScope === undefined)
+        throw new TypeError(
+          "GGPlot requires interactionScope when interaction is supplied so unrelated charts cannot share semantic keys or domains accidentally.",
+        );
+      const zoomMode =
+        zoom === true ? "xy" : typeof zoom === "object" ? zoom.mode : null;
+      if (zoomMode !== null) {
+        if (zoomMode !== "y" && interactionScope.x === undefined)
+          throw new TypeError(
+            "Controlled x zoom requires interactionScope.x; controlled plots never infer domain scopes.",
+          );
+        if (zoomMode !== "x" && interactionScope.y === undefined)
+          throw new TypeError(
+            "Controlled y zoom requires interactionScope.y; controlled plots never infer domain scopes.",
+          );
+      }
+      return Object.freeze({
+        keys: interactionScope.keys,
+        ...(interactionScope.x !== undefined && { x: interactionScope.x }),
+        ...(interactionScope.y !== undefined && { y: interactionScope.y }),
+      });
+    }
+    return Object.freeze({
+      keys: typeof datumKey === "string" ? String(datumKey) : "default",
+      x: mappedScope("x"),
+      y: mappedScope("y"),
+    });
+  });
+
   const interactionConfig = $derived(
     normalizeInteractionConfig(
       { inspect, select, zoom, ...(tool !== undefined && { tool }) },
@@ -267,7 +320,16 @@
   });
 
   // ------------------------------------------------------------ zoom respec
-  let zoomDomains = $state<ZoomDomains | null>(null);
+  let localZoomDomains = $state<ZoomDomains | null>(null);
+  const controllerRevision = $derived(interaction?.revision ?? 0);
+  const effectiveZoomDomains: ZoomDomains | null = $derived.by(() => {
+    void controllerRevision;
+    if (interaction === undefined) return localZoomDomains;
+    const domains = interaction.zoom(resolvedInteractionScope);
+    return domains.x === undefined && domains.y === undefined
+      ? null
+      : (domains as ZoomDomains);
+  });
 
   const zoomScale = (config: Scales["x"], domain: [number, number]) => ({
     ...config,
@@ -276,16 +338,16 @@
   });
 
   const effectiveSpec: PortableSpec | null = $derived.by(() => {
-    if (assembled === null || zoomDomains === null) return assembled;
+    if (assembled === null || effectiveZoomDomains === null) return assembled;
     return {
       ...assembled,
       scales: {
         ...assembled.scales,
-        ...(zoomDomains.x !== undefined && {
-          x: zoomScale(assembled.scales?.x, zoomDomains.x),
+        ...(effectiveZoomDomains.x !== undefined && {
+          x: zoomScale(assembled.scales?.x, effectiveZoomDomains.x),
         }),
-        ...(zoomDomains.y !== undefined && {
-          y: zoomScale(assembled.scales?.y, zoomDomains.y),
+        ...(effectiveZoomDomains.y !== undefined && {
+          y: zoomScale(assembled.scales?.y, effectiveZoomDomains.y),
         }),
       },
     };
@@ -367,7 +429,9 @@
       width: resolvedWidth,
       height: resolvedHeight,
       ...(scaleBox.scales !== undefined && { prevScales: scaleBox.scales }),
-      ...(zoomDomains !== null && { baselineScales: assembled?.scales ?? {} }),
+      ...(effectiveZoomDomains !== null && {
+        baselineScales: assembled?.scales ?? {},
+      }),
     });
     if (m.runId > scaleBox.runId) {
       scaleBox.runId = m.runId;
@@ -384,7 +448,8 @@
   export function resetScales(): void {
     scaleBox.runId = -1;
     scaleBox.scales = undefined;
-    zoomDomains = null;
+    if (interaction === undefined) localZoomDomains = null;
+    else interaction.resetZoom({ scope: resolvedInteractionScope });
     scaleEpoch++;
   }
 
@@ -396,7 +461,8 @@
   });
 
   $effect(() => {
-    if (model !== null && assembled !== null) onrender?.(model, assembled);
+    if (model !== null && assembled !== null)
+      untrack(() => onrender?.(model, assembled));
   });
 
   // ---------------------------------------------------------- strata plan
@@ -582,7 +648,15 @@
   });
   let lastInspectionFingerprint = "";
   let activeTraversalIndex = $state(-1);
-  let selectedKeys = $state<PropertyKey[]>([]);
+  let localSelectedKeys = $state<PropertyKey[]>([]);
+  const effectiveSelectedKeys: readonly PropertyKey[] = $derived.by(() => {
+    void controllerRevision;
+    return interaction?.selected(resolvedInteractionScope) ?? localSelectedKeys;
+  });
+  const effectiveEmphasisKeys: readonly PropertyKey[] = $derived.by(() => {
+    void controllerRevision;
+    return interaction?.emphasized(resolvedInteractionScope) ?? [];
+  });
   let committedInterval = $state<IntervalSelection | null>(null);
   const zoomHasSupportedChannel = $derived.by(() => {
     if (interactionConfig.zoom === null || model === null) return true;
@@ -600,9 +674,9 @@
   const showToolRail = $derived(
     interactive &&
       (availableTools.length > 1 ||
-        selectedKeys.length > 0 ||
+        effectiveSelectedKeys.length > 0 ||
         committedInterval !== null ||
-        zoomDomains !== null),
+        effectiveZoomDomains !== null),
   );
   const emptyPlot = $derived(
     model !== null &&
@@ -660,37 +734,79 @@
       .join(";");
   });
   const rootStyle = $derived(
-    `${hasCanvas || interactive ? `width:${width === undefined || width === "container" ? "100%" : `${model?.scene.width ?? resolvedWidth}px`};height:${model?.scene.height ?? resolvedHeight}px;` : ""}${themeStyle}` ||
+    `${hasCanvas || interactive || effectiveEmphasisKeys.length > 0 ? `width:${width === undefined || width === "container" ? "100%" : `${model?.scene.width ?? resolvedWidth}px`};height:${model?.scene.height ?? resolvedHeight}px;` : ""}${themeStyle}` ||
       undefined,
   );
-  const selectedAnchors = $derived.by(() => {
-    if (model === null || selectedKeys.length === 0) return [];
+  function anchorsForKeys(keys: readonly PropertyKey[]): {
+    x: number;
+    y: number;
+  }[] {
+    if (model === null || keys.length === 0) return [];
+    const keySet = new Set(keys);
     const anchors: { x: number; y: number }[] = [];
+    const seen = new Set<string>();
     for (let id = 0; id < model.candidates.size; id++) {
       const candidate = model.candidates.candidate(id);
       if (candidate === null) continue;
       let selected = false;
       for (const key of candidateSemanticKeys(candidate)) {
-        if (!selectedKeys.includes(key)) continue;
+        if (!keySet.has(key)) continue;
         selected = true;
         break;
       }
-      if (selected) anchors.push({ x: candidate.x, y: candidate.y });
+      const identity = `${String(candidate.x)}:${String(candidate.y)}`;
+      if (selected && !seen.has(identity)) {
+        seen.add(identity);
+        anchors.push({ x: candidate.x, y: candidate.y });
+      }
     }
     return anchors;
-  });
+  }
+  const selectedAnchors = $derived(anchorsForKeys(effectiveSelectedKeys));
+  const emphasizedAnchors = $derived(anchorsForKeys(effectiveEmphasisKeys));
+
+  function commitPointSelection(
+    keys: readonly PropertyKey[],
+    source: InteractionSource,
+  ): void {
+    let committed: readonly PropertyKey[];
+    if (interaction === undefined) {
+      const next = [...new Set(keys)];
+      if (
+        next.length === localSelectedKeys.length &&
+        next.every((key, index) => Object.is(key, localSelectedKeys[index]))
+      )
+        return;
+      localSelectedKeys = next;
+      committed = localSelectedKeys;
+    } else {
+      const transition = interaction.setSelection(
+        keys as readonly PublicKey[],
+        {
+          scope: resolvedInteractionScope,
+          source,
+        },
+      );
+      if (transition === null) return;
+      committed =
+        transition.snapshot.selections.find(
+          (selection) => selection.scope === resolvedInteractionScope.keys,
+        )?.keys ?? [];
+    }
+    emitSelection(
+      Object.freeze({
+        type: "select",
+        phase: committed.length === 0 ? "clear" : "end",
+        mode: "point",
+        keys: Object.freeze([...committed]),
+        source,
+      }),
+    );
+  }
 
   function clearPointSelection(source: InteractionSource): void {
-    if (selectedKeys.length === 0) return;
-    selectedKeys = [];
-    const selection = Object.freeze({
-      type: "select",
-      phase: "clear",
-      mode: "point",
-      keys: Object.freeze([]) as readonly PropertyKey[],
-      source,
-    } as const);
-    emitSelection(selection);
+    if (effectiveSelectedKeys.length === 0) return;
+    commitPointSelection([], source);
   }
 
   function clearIntervalSelection(source: InteractionSource): void {
@@ -1464,24 +1580,56 @@
     reducer.dispatch({ type: "cancel-area" });
   }
 
-  function resetZoom(source: InteractionSource = "programmatic"): void {
-    if (zoomDomains === null) return;
-    zoomDomains = null;
+  function commitZoom(
+    domains: ZoomDomains | null,
+    source: InteractionSource,
+  ): void {
+    let committed: ZoomDomains | null = domains;
+    if (interaction === undefined) {
+      if (domains === null && localZoomDomains === null) return;
+      localZoomDomains = domains;
+    } else {
+      const transition =
+        domains === null
+          ? interaction.resetZoom({ scope: resolvedInteractionScope, source })
+          : interaction.setZoom(domains, {
+              scope: resolvedInteractionScope,
+              source,
+            });
+      if (transition === null) return;
+      if (domains !== null) {
+        const x = transition.snapshot.zoom.x.find(
+          (domain) => domain.scope === resolvedInteractionScope.x,
+        )?.domain;
+        const y = transition.snapshot.zoom.y.find(
+          (domain) => domain.scope === resolvedInteractionScope.y,
+        )?.domain;
+        committed = frozenZoomDomains({
+          ...(x !== undefined && { x: [...x] }),
+          ...(y !== undefined && { y: [...y] }),
+        });
+      }
+    }
     const event: ZoomEvent = Object.freeze({
       type: "zoom",
-      phase: "clear",
+      phase: committed === null ? "clear" : "end",
       source,
-      domains: null,
+      domains: committed,
     });
-    announceInteraction("Zoom reset.");
+    announceInteraction(committed === null ? "Zoom reset." : "Zoom complete.");
     onzoom?.(event);
     oninteraction?.(event);
+  }
+
+  function resetZoom(source: InteractionSource = "programmatic"): void {
+    if (effectiveZoomDomains === null) return;
+    commitZoom(null, source);
   }
 
   /** Replace one or both continuous zoom domains without disturbing the
    *  other channel. This is the controlled linking/programmatic-zoom path. */
   export function setZoom(domains: Partial<ZoomDomains>): void {
-    const next: ZoomDomains = { ...zoomDomains };
+    const next: ZoomDomains = { ...effectiveZoomDomains };
     for (const channel of ["x", "y"] as const) {
       const domain = domains[channel];
       if (domain === undefined) continue;
@@ -1495,16 +1643,7 @@
       next[channel] = [domain[0], domain[1]];
     }
     if (next.x === undefined && next.y === undefined) return;
-    zoomDomains = frozenZoomDomains(next);
-    const event: ZoomEvent = Object.freeze({
-      type: "zoom",
-      phase: "end",
-      source: "programmatic",
-      domains: zoomDomains,
-    });
-    announceInteraction("Zoom complete.");
-    onzoom?.(event);
-    oninteraction?.(event);
+    commitZoom(frozenZoomDomains(next), "programmatic");
   }
 
   function onDblClick(): void {
@@ -1550,7 +1689,7 @@
     if (th1 - th0 <= 0 && tv1 - tv0 <= 0) return;
     const hScale = flip ? model.scales.y : model.scales.x;
     const vScale = flip ? model.scales.x : model.scales.y;
-    const next: ZoomDomains = { ...zoomDomains };
+    const next: ZoomDomains = { ...effectiveZoomDomains };
     const hDomain = invertedDomain(hScale, th0, th1);
     const vDomain = invertedDomain(vScale, tv0, tv1);
     const mode = interactionConfig.zoom?.mode ?? "xy";
@@ -1561,16 +1700,7 @@
     if (vDomain !== undefined && mode !== horizontalChannel)
       next[verticalChannel] = vDomain;
     if (next.x === undefined && next.y === undefined) return;
-    zoomDomains = frozenZoomDomains(next);
-    const event: ZoomEvent = Object.freeze({
-      type: "zoom",
-      phase: "end",
-      source,
-      domains: zoomDomains,
-    });
-    announceInteraction("Zoom complete.");
-    onzoom?.(event);
-    oninteraction?.(event);
+    commitZoom(frozenZoomDomains(next), source);
   }
 
   /** Accessible per-mark label from the layer's mapped fields. */
@@ -1693,21 +1823,15 @@
     source: InteractionSource,
   ): void {
     if (keys.length === 0) return;
-    const allSelected = keys.every((key) => selectedKeys.includes(key));
-    selectedKeys = allSelected
-      ? selectedKeys.filter((key) => !keys.includes(key))
-      : interactionConfig.select?.multiple
-        ? [...new Set([...selectedKeys, ...keys])]
-        : [...keys];
-    emitSelection(
-      Object.freeze({
-        type: "select",
-        phase: selectedKeys.length === 0 ? "clear" : "end",
-        mode: "point",
-        keys: Object.freeze([...selectedKeys]),
-        source,
-      }),
+    const allSelected = keys.every((key) =>
+      effectiveSelectedKeys.includes(key),
     );
+    const next = allSelected
+      ? effectiveSelectedKeys.filter((key) => !keys.includes(key))
+      : interactionConfig.select?.multiple
+        ? [...new Set([...effectiveSelectedKeys, ...keys])]
+        : [...keys];
+    commitPointSelection(next, source);
   }
 
   function onSurfaceKeyDown(event: KeyboardEvent): void {
@@ -1904,12 +2028,12 @@
         {/each}
       </div>
       <div class="gg-tool-recovery-actions">
-        {#if zoomDomains !== null}
+        {#if effectiveZoomDomains !== null}
           <button type="button" onclick={() => resetZoom("pointer")}
             >Reset zoom</button
           >
         {/if}
-        {#if selectedKeys.length > 0}
+        {#if effectiveSelectedKeys.length > 0}
           <button type="button" onclick={() => clearPointSelection("pointer")}
             >Clear selection</button
           >
@@ -1981,6 +2105,25 @@
     {:else}
       <SceneView scene={model.scene} focusable={false} {markLabel} />
     {/if}
+    {#if !interactive && emphasizedAnchors.length > 0}
+      <svg
+        class="gg-stratum gg-interaction-overlay"
+        width={model.scene.width}
+        height={model.scene.height}
+        viewBox={`0 0 ${model.scene.width} ${model.scene.height}`}
+        aria-hidden="true"
+      >
+        {#each emphasizedAnchors as anchor, index (index)}
+          <circle
+            class="gg-emphasized-ring"
+            cx={anchor.x}
+            cy={anchor.y}
+            r="11"
+            fill="none"
+          />
+        {/each}
+      </svg>
+    {/if}
     {#if interactive}
       <svg
         class="gg-stratum gg-interaction-overlay"
@@ -2041,6 +2184,15 @@
             cx={anchor.x}
             cy={anchor.y}
             r="8"
+            fill="none"
+          />
+        {/each}
+        {#each emphasizedAnchors as anchor, index (index)}
+          <circle
+            class="gg-emphasized-ring"
+            cx={anchor.x}
+            cy={anchor.y}
+            r="11"
             fill="none"
           />
         {/each}
@@ -2323,6 +2475,22 @@
     );
     stroke-width: 2.5;
     vector-effect: non-scaling-stroke;
+  }
+
+  .gg-emphasized-ring {
+    stroke: var(
+      --gg-interactionInk,
+      var(--gg-theme-interactionInk, currentColor)
+    );
+    stroke-width: 2;
+    stroke-dasharray: 3 2;
+    vector-effect: non-scaling-stroke;
+  }
+
+  @media (forced-colors: active) {
+    .gg-emphasized-ring {
+      stroke: Highlight;
+    }
   }
 
   .gg-tool-rail {

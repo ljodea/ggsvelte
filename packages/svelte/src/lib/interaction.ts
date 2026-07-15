@@ -333,6 +333,48 @@ export interface ReadonlyZoomDomains {
   readonly y?: readonly [number, number];
 }
 
+/** Semantic namespaces used when one controller coordinates unlike views.
+ * Key state crosses charts only through `keys`; data-space zoom crosses one
+ * positional channel only when that channel's scope also matches. */
+export interface PlotInteractionScope {
+  readonly keys: string;
+  readonly x?: string;
+  readonly y?: string;
+}
+
+export type PlotInteractionChange = "selection" | "emphasis" | "zoom";
+
+export interface ScopedInteractionKeys<Key extends PropertyKey> {
+  readonly scope: string;
+  readonly keys: ReadonlyArray<Key>;
+}
+
+export interface ScopedInteractionDomain {
+  readonly scope: string;
+  readonly domain: readonly [number, number];
+}
+
+/** Controller semantic state. It deliberately excludes rows, renderer
+ * indices, pixel rectangles, candidate ids, models, and DOM references. */
+export interface PlotInteractionSnapshot<Key extends PropertyKey> {
+  readonly revision: number;
+  readonly selections: ReadonlyArray<ScopedInteractionKeys<Key>>;
+  readonly emphases: ReadonlyArray<ScopedInteractionKeys<Key>>;
+  readonly zoom: Readonly<{
+    x: ReadonlyArray<ScopedInteractionDomain>;
+    y: ReadonlyArray<ScopedInteractionDomain>;
+  }>;
+}
+
+export interface PlotInteractionTransition<Key extends PropertyKey> {
+  readonly revision: number;
+  readonly kind: PlotInteractionChange | "reconcile";
+  readonly changes: ReadonlyArray<PlotInteractionChange>;
+  readonly source: InteractionSource;
+  readonly scope: PlotInteractionScope;
+  readonly snapshot: PlotInteractionSnapshot<Key>;
+}
+
 /** @deprecated Use IntervalSelection. Kept as a source migration alias only. */
 export type BrushSelection = IntervalSelection;
 /** @deprecated Use PlotInspectionChange. */

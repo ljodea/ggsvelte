@@ -106,9 +106,15 @@ describe("guide sections cover their catalogs", () => {
   });
 
   it("documents the complete interaction capability and event contracts", () => {
-    expect(INTERACTIONS_MD).toContain("chart-local callbacks");
-    expect(INTERACTIONS_MD).toContain("controller and linked-chart API is planned for R1");
+    expect(INTERACTIONS_MD).toContain("private to one chart");
+    expect(INTERACTIONS_MD).toContain("createPlotInteraction");
+    expect(INTERACTIONS_MD).toContain("stable semantic scope");
+    expect(INTERACTIONS_MD).toContain("required, stable semantic scope");
+    expect(INTERACTIONS_MD).toContain("Controlled plots never infer channel names");
+    expect(INTERACTIONS_MD).toContain("reconcileKeys");
+    expect(INTERACTIONS_MD).toContain("without retraining scales");
     expect(INTERACTIONS_MD).toContain("/examples/interactions/inspection");
+    expect(INTERACTIONS_MD).toContain("/examples/interaction/linked-views");
     expect(INTERACTIONS_MD).toContain("/playground");
     expect(INTERACTIONS_MD).toContain('inspect={{ mode: "x",');
     expect(INTERACTIONS_MD).toContain('select={{ type: "interval", mode: "xy",');
@@ -138,6 +144,10 @@ describe("guide sections cover their catalogs", () => {
     }
     expect(INTERACTION_REFERENCE_MD).toContain("INTERACTION_TOOL_UNAVAILABLE");
     expect(INTERACTION_REFERENCE_MD).toContain("chart-local");
+    expect(INTERACTION_REFERENCE_MD).toContain("PlotInteractionController");
+    expect(INTERACTION_REFERENCE_MD).toContain("required");
+    expect(INTERACTION_REFERENCE_MD).toContain("feedback");
+    expect(INTERACTION_REFERENCE_MD).toContain("Do not mutate the controller inside");
     const html = renderMarkdown(INTERACTION_REFERENCE_MD);
     for (const diagnostic of Object.values(INTERACTION_DIAGNOSTIC_CATALOG)) {
       const fragment = diagnostic.docUrl.split("#")[1];
@@ -154,6 +164,7 @@ describe("guide sections cover their catalogs", () => {
       "interval-selection",
       "zoom",
       "controlled-tool",
+      "shared-controller",
       "identity",
       "events",
       "diagnostics",
@@ -225,10 +236,15 @@ describe("llms surfaces", () => {
   it("keeps first-party interaction examples focused on the current API", () => {
     const inspection = EXAMPLES.find((example) => example.id === "interaction/tooltip");
     const selection = EXAMPLES.find((example) => example.id === "interaction/brush-zoom");
+    const linked = EXAMPLES.find((example) => example.id === "interaction/linked-views");
     expect(inspection?.title).toBe("Inspect and pin data");
     expect(inspection?.tags).toContain("inspect");
+    expect(inspection?.description).toContain("Chart-local");
     expect(selection?.title).toBe("Interval selection and zoom");
     expect(selection?.tags).toContain("select");
+    expect(linked?.title).toBe("Link plots, controls, and a table");
+    expect(linked?.tags).toContain("controller");
+    expect(linked?.tags).toContain("linked-views");
   });
 
   it("llms-full.txt embeds guide prose + spec JSON + svelte source per example", () => {

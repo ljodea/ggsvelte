@@ -13,6 +13,13 @@
 /** @lifecycle stable-intent */
 export { default as GGPlot } from "./GGPlot.svelte";
 export { default as Tooltip } from "./Tooltip.svelte";
+export { createPlotInteraction } from "./interaction-controller.svelte.js";
+export type {
+  CreatePlotInteractionOptions,
+  PlotInteractionController,
+  PlotInteractionMutationOptions,
+  PlotInteractionZoomOptions,
+} from "./interaction-controller.svelte.js";
 export { INTERACTION_DIAGNOSTIC_CATALOG, normalizeInteractionConfig } from "./interaction.js";
 export type {
   AreaMode,
@@ -31,6 +38,10 @@ export type {
   PlotInspectionChange,
   PlotInspectionClear,
   PlotInteractionEvent,
+  PlotInteractionChange,
+  PlotInteractionScope,
+  PlotInteractionSnapshot,
+  PlotInteractionTransition,
   PlotSelection,
   PointSelection,
   ReadonlyZoomDomains,
@@ -38,6 +49,8 @@ export type {
   ResolvedInteractionConfig,
   SelectInput,
   SelectOptions,
+  ScopedInteractionDomain,
+  ScopedInteractionKeys,
   TooltipContext,
   TooltipField,
   ZoomDomains,

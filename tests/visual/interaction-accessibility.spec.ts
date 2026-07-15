@@ -6,10 +6,11 @@ import { settleVisualState } from "./helpers/deterministic";
 for (const route of [
   "/examples/interactions/inspection",
   "/examples/interactions/interval-selection",
+  "/examples/interaction/linked-views",
 ]) {
   test(`${route} has no automated accessibility violations`, async ({ page }) => {
     await page.goto(route);
-    await settleVisualState(page);
+    await settleVisualState(page, route.endsWith("linked-views") ? 2 : 1);
     await page.addScriptTag({ content: axe.source });
     const violations = await page.evaluate(async () => {
       const runner = (globalThis as typeof globalThis & { axe: typeof axe }).axe;
@@ -24,6 +25,27 @@ for (const route of [
     expect(violations, JSON.stringify(violations, null, 2)).toEqual([]);
   });
 }
+
+test("linked views share external selection and emphasis without callback loops", async ({
+  page,
+}) => {
+  await page.goto("/examples/interaction/linked-views");
+  await settleVisualState(page, 2);
+
+  await page.getByRole("button", { name: "Select Gentoo" }).click();
+  await expect(page.locator("tbody tr[aria-selected='true']")).toHaveCount(4);
+  await expect(page.locator(".gg-selected-ring")).toHaveCount(8);
+
+  const emphasis = page.getByRole("button", { name: "Emphasize Adelie 2" });
+  await emphasis.click();
+  await expect(emphasis).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator(".gg-emphasized-ring")).toHaveCount(2);
+
+  await page.getByRole("button", { name: "Clear all" }).click();
+  await expect(page.locator("tbody tr[aria-selected='true']")).toHaveCount(0);
+  await expect(page.locator(".gg-selected-ring")).toHaveCount(0);
+  await expect(page.locator(".gg-emphasized-ring")).toHaveCount(0);
+});
 
 test("inspection example supports its documented keyboard journey", async ({ page }) => {
   await page.goto("/examples/interactions/inspection");

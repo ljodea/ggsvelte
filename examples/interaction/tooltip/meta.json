@@ -1,6 +1,6 @@
 {
   "title": "Inspect and pin data",
-  "description": "Opt-in grouped inspection adds a semantic crosshair, a complete HTML tooltip, keyboard traversal, and click-or-Enter pinning. The concise live announcement reports the shared x value and group count once, while every member remains navigable in ordinary DOM.",
+  "description": "Chart-local, private inspection state adds a semantic crosshair, a complete HTML tooltip, keyboard traversal, and click-or-Enter pinning. The concise live announcement reports the shared x value and group count once, while every member remains navigable in ordinary DOM.",
   "tags": ["interaction", "inspect", "tooltip", "crosshair", "keyboard", "pin"],
   "docsSection": "Interaction",
   "vrHeight": 740,
@@ -10,6 +10,7 @@
     "touch": "Tap an x group to pin its values; tap outside the chart to dismiss the inspection.",
     "references": [
       { "label": "Interaction guide and event reference", "href": "/guide/interactions" },
+      { "label": "Linked controlled-state example", "href": "/examples/interaction/linked-views" },
       { "label": "Pre-0.1 interaction migration", "href": "/guide/migrating-pre-0-1" }
     ],
     "svelteFirst": true,
