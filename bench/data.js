@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784104017878,
+  "lastUpdate": 1784104299632,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -1987,6 +1987,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 157.9667,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c586413d3ba784f56b45639cac9bee1bb340ba84",
+          "message": "fix(ci): use portable filters in TalkBack harness\n\nKeeps the same real TalkBack assertions while using grep available on hosted Ubuntu.",
+          "timestamp": "2026-07-15T03:30:58-05:00",
+          "tree_id": "cfc7f94225c456c98e65bd445323b10089addcca",
+          "url": "https://github.com/ljodea/ggsvelte/commit/c586413d3ba784f56b45639cac9bee1bb340ba84"
+        },
+        "date": 1784104298750,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.8635,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.9538,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 10.9398,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 15.7403,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 85.5387,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 118.9077,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 0.9676,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2558,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 86.4599,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 108.6253,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.5883,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.5007,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 115.203,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.632,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 26.4664,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.324,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 28.3118,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 595.2194,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 161.6957,
             "unit": "ms"
           }
         ]
