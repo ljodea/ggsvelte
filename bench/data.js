@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784156544753,
+  "lastUpdate": 1784158152910,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -4724,6 +4724,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 137.0017,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "1d0f63cfd279ebd452b118cee3f6894594c95660",
+          "message": "refactor(svelte): extract interval selection and capability helpers (#48)\n\n* refactor(svelte): extract interval selection and capability helpers\n\nMove pointer brush-end gate, interval selection event freeze/clear,\ncandidate hit matching, semantic key collection helpers, and zoom\ncapability status copy out of GGPlot into pure modules with\ncharacterization tests. No public API change.\n\n* style: apply oxfmt to interval/capability helper extracts\n\n* fix: use CANDIDATE_HIT_TOLERANCE in tests for knip\n\nknip flagged the exported constant as unused; pin the exclusive\ntolerance contract via the public export in characterization tests.",
+          "timestamp": "2026-07-15T18:28:38-05:00",
+          "tree_id": "fb60bf883efe3bf7a3aa3931564b1d50e77a73ff",
+          "url": "https://github.com/ljodea/ggsvelte/commit/1d0f63cfd279ebd452b118cee3f6894594c95660"
+        },
+        "date": 1784158152340,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.4558,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.6156,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 10.2228,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 14.5026,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 94.2193,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 126.3018,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 0.9472,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.7175,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 89.9245,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 112.8423,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 10.3978,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 10.0129,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 117.9413,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.617,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 24.2726,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 5.5849,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 28.7086,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 590.2791,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 133.1112,
             "unit": "ms"
           }
         ]
