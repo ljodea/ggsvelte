@@ -49,7 +49,6 @@
     ThemeName,
     ThemeSpec,
   } from "@ggsvelte/spec";
-  import { gg, normalize } from "@ggsvelte/spec";
   import type {
     CandidateFacts,
     CellValue,
@@ -87,10 +86,14 @@
   import type { PlotInteractionController } from "./interaction-controller.svelte.js";
   import { createInspectionCoordinator } from "./inspection-resolver.js";
   import { createInteractionReducer } from "./interaction-reducer.js";
-  import type { LayerDescriptor } from "./registry.svelte.js";
   import { provideRegistry } from "./registry.svelte.js";
   import { a11yRows } from "./canvas-a11y.js";
   import InteractionOverlay from "./InteractionOverlay.svelte";
+  import {
+    assemblePortableSpec,
+    resolveInteractionScope,
+    toLayerInput,
+  } from "./plot-assemble.js";
   import {
     clamp,
     expandIntervalQuery,
@@ -129,6 +132,10 @@
     rowIndexesForCandidate,
     uniqueKeysFromRowIndexes,
   } from "./plot-selection.js";
+  import {
+    createSourceIdentityTracker,
+    resolveSemanticKeys,
+  } from "./plot-semantic-keys.js";
   import { themeTokensToCss } from "./plot-theme-css.js";
   import {
     applyZoomToSpec,
@@ -234,86 +241,35 @@
 
   const registry = provideRegistry();
 
-  function toLayerInput(descriptor: LayerDescriptor): LayerInput {
-    // Reading .aes/.position/.params here goes through the child's live
-    // getters, so geom prop changes flow into this $derived without
-    // re-registration.
-    return {
-      geom: descriptor.geom,
-      ...(descriptor.stat !== undefined && { stat: descriptor.stat }),
-      ...(descriptor.position !== undefined && {
-        position: descriptor.position,
-      }),
-      ...(descriptor.positionParams !== undefined && {
-        positionParams: descriptor.positionParams,
-      }),
-      ...(descriptor.render !== undefined && { render: descriptor.render }),
-      ...(descriptor.aes !== undefined && { aes: descriptor.aes }),
-      ...(descriptor.params !== undefined && { params: descriptor.params }),
-    } as LayerInput;
-  }
-
+  // Reading descriptors through toLayerInput goes through live getters, so
+  // geom prop changes flow into this $derived without re-registration.
+  // Explicit `spec` short-circuits before registry/children so ignored props
+  // do not become reactive dependencies of the assembled plot.
   const assembled: PortableSpec | null = $derived.by(() => {
-    if (spec !== undefined) return normalize(spec);
-    const layerInputs: LayerInput[] =
-      layers ?? registry.layers.map(toLayerInput);
-    if (layerInputs.length === 0) return null;
-    let builder = gg(data as DataInput, mapping);
-    for (const layer of layerInputs) builder = builder.layer(layer);
-    if (facet !== undefined) builder = builder.facet(facet);
-    if (coord !== undefined) builder = builder.coord(coord);
-    if (a11y !== undefined) builder = builder.a11y(a11y);
-    if (scales !== undefined) builder = builder.scales(scales);
-    if (legend !== undefined) builder = builder.legend(legend);
-    if (theme !== undefined) builder = builder.theme(theme);
-    if (labs !== undefined) builder = builder.labs(labs);
-    return builder.spec();
-  });
-
-  function mappedScope(channel: "x" | "y"): string {
-    const channelValue =
-      assembled?.aes?.[channel] ??
-      assembled?.layers.find(
-        (layer) =>
-          layer.aes?.[channel] !== undefined && layer.aes[channel] !== null,
-      )?.aes?.[channel];
-    return channelValue !== undefined &&
-      channelValue !== null &&
-      "field" in channelValue
-      ? channelValue.field
-      : channel;
-  }
-
-  const resolvedInteractionScope: PlotInteractionScope = $derived.by(() => {
-    if (interaction !== undefined) {
-      if (interactionScope === undefined)
-        throw new TypeError(
-          "GGPlot requires interactionScope when interaction is supplied so unrelated charts cannot share semantic keys or domains accidentally.",
-        );
-      const zoomMode =
-        zoom === true ? "xy" : typeof zoom === "object" ? zoom.mode : null;
-      if (zoomMode !== null) {
-        if (zoomMode !== "y" && interactionScope.x === undefined)
-          throw new TypeError(
-            "Controlled x zoom requires interactionScope.x; controlled plots never infer domain scopes.",
-          );
-        if (zoomMode !== "x" && interactionScope.y === undefined)
-          throw new TypeError(
-            "Controlled y zoom requires interactionScope.y; controlled plots never infer domain scopes.",
-          );
-      }
-      return Object.freeze({
-        keys: interactionScope.keys,
-        ...(interactionScope.x !== undefined && { x: interactionScope.x }),
-        ...(interactionScope.y !== undefined && { y: interactionScope.y }),
-      });
-    }
-    return Object.freeze({
-      keys: typeof datumKey === "string" ? String(datumKey) : "default",
-      x: mappedScope("x"),
-      y: mappedScope("y"),
+    if (spec !== undefined) return assemblePortableSpec({ spec, layers: [] });
+    return assemblePortableSpec({
+      ...(data !== undefined && { data: data as DataInput | readonly Row[] }),
+      ...(mapping !== undefined && { aes: mapping }),
+      layers: layers ?? registry.layers.map(toLayerInput),
+      ...(facet !== undefined && { facet }),
+      ...(coord !== undefined && { coord }),
+      ...(scales !== undefined && { scales }),
+      ...(legend !== undefined && { legend }),
+      ...(theme !== undefined && { theme }),
+      ...(labs !== undefined && { labs }),
+      ...(a11y !== undefined && { a11y }),
     });
   });
+
+  const resolvedInteractionScope: PlotInteractionScope = $derived(
+    resolveInteractionScope({
+      interaction,
+      ...(interactionScope !== undefined && { interactionScope }),
+      zoom,
+      ...(datumKey !== undefined && { datumKey }),
+      assembled,
+    }),
+  );
 
   const interactionConfig = $derived(
     normalizeInteractionConfig(
@@ -358,21 +314,8 @@
 
   // Source identity/order epoch: stable through responsive layout and zoom
   // respecs, different when normalized inline data or data references change.
-  const sourceIdentities = new WeakMap<object, number>();
-  let nextSourceIdentity = 1;
-  function sourceIdentity(value: unknown): string {
-    if (
-      (typeof value !== "object" && typeof value !== "function") ||
-      value === null
-    )
-      return String(value);
-    let identity = sourceIdentities.get(value);
-    if (identity === undefined) {
-      identity = nextSourceIdentity++;
-      sourceIdentities.set(value, identity);
-    }
-    return String(identity);
-  }
+  // Tracker is owned for the component lifetime (never cleared).
+  const { sourceIdentity } = createSourceIdentityTracker();
   const dataIdentityEpoch = $derived(
     assembled === null
       ? "no-data"
@@ -782,92 +725,29 @@
     });
   }
   const plotId = $props.id();
+  // Owned for the component lifetime; resolveSemanticKeys mutates in place.
   const priorKeys = new Map<string, PropertyKey>();
 
   const semanticKeys = $derived.by(() => {
-    const keys = new Map<number, PropertyKey | null>();
-    const diagnostics: InteractionDiagnostic[] = [];
-    if (model === null || datumKey === undefined) return { keys, diagnostics };
-    const owners = new Map<PropertyKey, number>();
-    const sourceRows = new Set<number>();
-    if (
-      model.candidates.size === 0 &&
-      assembled?.layers.some(
-        (layer) =>
-          layer.geom === "rule" &&
-          (layer.params?.["xintercept"] !== undefined ||
-            layer.params?.["yintercept"] !== undefined),
-      )
-    )
-      diagnostics.push({
-        ...INTERACTION_DIAGNOSTIC_CATALOG.INTERACTION_MISSING_LINEAGE,
-        actual: "synthetic rule has no source rows",
-      });
-    for (let id = 0; id < model.candidates.size; id++) {
-      const candidate = model.candidates.candidate(id);
-      if (candidate === null) continue;
-      if (candidate.rowIndex !== null) sourceRows.add(candidate.rowIndex);
-      const lineageRows = [...model.lineage.keys(candidate.lineage)];
-      if (candidate.rowIndex === null && lineageRows.length === 0)
-        diagnostics.push({
-          ...INTERACTION_DIAGNOSTIC_CATALOG.INTERACTION_MISSING_LINEAGE,
-          actual: {
-            layerIndex: candidate.layerIndex,
-            candidateId: candidate.id,
-          },
-        });
-      for (const rowIndex of lineageRows) sourceRows.add(rowIndex);
-    }
-    for (const rowIndex of sourceRows) {
-      const row = model.row(rowIndex);
-      const value =
-        row === null
-          ? null
-          : typeof datumKey === "function"
-            ? (datumKey as (row: Row, index: number) => PropertyKey)(
-                row as Row,
-                rowIndex,
-              )
-            : row[datumKey as string];
-      if (
-        typeof value !== "string" &&
-        typeof value !== "number" &&
-        typeof value !== "symbol"
-      ) {
-        keys.set(rowIndex, null);
-        diagnostics.push({
-          ...INTERACTION_DIAGNOSTIC_CATALOG.INTERACTION_INVALID_KEY,
-          actual: value,
-        });
-        continue;
-      }
-      if (row !== null) {
-        const rowIdentity = `${sourceIdentity(data)}:${sourceIdentity(spec)}:${rowIndex}`;
-        const priorKey = priorKeys.get(rowIdentity);
-        if (priorKey !== undefined && priorKey !== value) {
-          keys.set(rowIndex, null);
-          diagnostics.push({
-            ...INTERACTION_DIAGNOSTIC_CATALOG.INTERACTION_UNSTABLE_KEY,
-            actual: { previous: priorKey, current: value },
-          });
-          continue;
-        }
-        priorKeys.set(rowIdentity, value);
-      }
-      const prior = owners.get(value);
-      if (prior !== undefined && prior !== rowIndex) {
-        keys.set(prior, null);
-        keys.set(rowIndex, null);
-        diagnostics.push({
-          ...INTERACTION_DIAGNOSTIC_CATALOG.INTERACTION_DUPLICATE_KEY,
-          actual: value,
-        });
-      } else {
-        owners.set(value, rowIndex);
-        keys.set(rowIndex, value);
-      }
-    }
-    return { keys, diagnostics };
+    if (model === null)
+      return {
+        keys: new Map<number, PropertyKey | null>(),
+        diagnostics: [] as InteractionDiagnostic[],
+      };
+    return resolveSemanticKeys({
+      model: {
+        candidateCount: model.candidates.size,
+        candidate: (id) => model.candidates.candidate(id),
+        lineageKeys: (lineageId) => model.lineage.keys(lineageId),
+        row: (rowIndex) => model.row(rowIndex),
+        layers: assembled?.layers ?? [],
+      },
+      datumKey: datumKey as
+        string | ((row: never, index: number) => PropertyKey) | undefined,
+      priorKeys,
+      rowIdentity: (rowIndex) =>
+        `${sourceIdentity(data)}:${sourceIdentity(spec)}:${rowIndex}`,
+    });
   });
 
   $effect(() => {
