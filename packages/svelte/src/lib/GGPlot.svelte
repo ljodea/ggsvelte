@@ -89,8 +89,22 @@
   import { createInteractionReducer } from "./interaction-reducer.js";
   import type { LayerDescriptor } from "./registry.svelte.js";
   import { provideRegistry } from "./registry.svelte.js";
+  import { a11yRows } from "./canvas-a11y.js";
+  import InteractionOverlay from "./InteractionOverlay.svelte";
+  import {
+    clamp,
+    frozenZoomDomains,
+    normalizedRect,
+    panelDataDomains,
+  } from "./plot-geometry.js";
+  import {
+    datumLabel as datumLabelFor,
+    inspectionLiveText as inspectionLiveTextFor,
+    markLabel as markLabelFor,
+  } from "./plot-labels.js";
   import SceneView from "./SceneView.svelte";
   import Tooltip from "./Tooltip.svelte";
+  import ToolRail from "./ToolRail.svelte";
 
   type PublicKey = Identity extends keyof Row
     ? Extract<Row[Identity], PropertyKey>
@@ -186,33 +200,6 @@
   }: Props = $props();
 
   const registry = provideRegistry();
-
-  const clamp = (v: number, lo: number, hi: number) =>
-    Math.max(lo, Math.min(hi, v));
-
-  /** Invert a normalized [t0, t1] window through a positional scale (band
-   *  scales cannot zoom — documented M2 limitation). */
-  function invertedDomain(
-    scale: RenderModel["scales"]["x"],
-    t0: number,
-    t1: number,
-  ): [number, number] | undefined {
-    if (scale.type === "band") return undefined;
-    const a = scale.invert(t0);
-    const b = scale.invert(t1);
-    return a <= b ? [a, b] : [b, a];
-  }
-
-  function frozenZoomDomains(domains: ZoomDomains): ZoomDomains {
-    return Object.freeze({
-      ...(domains.x !== undefined && {
-        x: Object.freeze([...domains.x]) as unknown as [number, number],
-      }),
-      ...(domains.y !== undefined && {
-        y: Object.freeze([...domains.y]) as unknown as [number, number],
-      }),
-    });
-  }
 
   function toLayerInput(descriptor: LayerDescriptor): LayerInput {
     // Reading .aes/.position/.params here goes through the child's live
@@ -517,32 +504,6 @@
     };
   }
 
-  /** Rows referenced by a canvas stratum, capped for the a11y table. */
-  const A11Y_TABLE_CAP = 100;
-  function a11yRows(
-    m: RenderModel,
-    batches: GeometryBatch[],
-  ): { fields: string[]; rows: CellValue[][]; total: number } {
-    const rowSet = new Set<number>();
-    for (const batch of batches) {
-      for (const raw of batch.rowIndex) {
-        if (raw !== 0xffffffff) rowSet.add(raw);
-      }
-    }
-    const fieldSet = new Set<string>();
-    for (const batch of batches) {
-      for (const f of m.layerFields[batch.layerIndex] ?? [])
-        fieldSet.add(f.field);
-    }
-    const fields = [...fieldSet];
-    const rows: CellValue[][] = [];
-    for (const index of [...rowSet].toSorted((a, b) => a - b)) {
-      if (rows.length >= A11Y_TABLE_CAP) break;
-      const row = m.row(index);
-      if (row !== null) rows.push(fields.map((f) => row[f] ?? null));
-    }
-    return { fields, rows, total: rowSet.size };
-  }
   let a11yTableOpen = $state(false);
 
   // ---------------------------------------------------------- interaction
@@ -1482,24 +1443,9 @@
       {};
     if (model !== null && model.scene.panels.length === 1) {
       const solePanel = model.scene.panels[0]!;
-      const tx0 = clamp((rect.x0 - solePanel.x) / solePanel.width, 0, 1);
-      const tx1 = clamp((rect.x1 - solePanel.x) / solePanel.width, 0, 1);
-      const ty0 = clamp(1 - (rect.y1 - solePanel.y) / solePanel.height, 0, 1);
-      const ty1 = clamp(1 - (rect.y0 - solePanel.y) / solePanel.height, 0, 1);
-      const horizontalDomain = invertedDomain(
-        flip ? model.scales.y : model.scales.x,
-        tx0,
-        tx1,
-      );
-      const verticalDomain = invertedDomain(
-        flip ? model.scales.x : model.scales.y,
-        ty0,
-        ty1,
-      );
-      const xDomain = flip ? verticalDomain : horizontalDomain;
-      const yDomain = flip ? horizontalDomain : verticalDomain;
-      if (mode !== "y" && xDomain !== undefined) domain.x = xDomain;
-      if (mode !== "x" && yDomain !== undefined) domain.y = yDomain;
+      const inverted = panelDataDomains(rect, solePanel, model.scales, flip);
+      if (mode !== "y" && inverted.x !== undefined) domain.x = inverted.x;
+      if (mode !== "x" && inverted.y !== undefined) domain.y = inverted.y;
     }
     const frozenDomain = Object.freeze({
       ...(domain.x !== undefined && {
@@ -1651,20 +1597,6 @@
     resetZoom("pointer");
   }
 
-  function normalizedRect(r: {
-    x0: number;
-    y0: number;
-    x1: number;
-    y1: number;
-  }) {
-    return {
-      x0: Math.min(r.x0, r.x1),
-      y0: Math.min(r.y0, r.y1),
-      x1: Math.max(r.x0, r.x1),
-      y1: Math.max(r.y0, r.y1),
-    };
-  }
-
   /**
    * Brush-to-zoom = an intentional respec: invert the brushed plot-px rect
    * through the trained scales into explicit continuous domains. Band axes
@@ -1687,70 +1619,24 @@
     const tv0 = clamp(1 - (rect.y1 - panel.y) / panel.height, 0, 1);
     const tv1 = clamp(1 - (rect.y0 - panel.y) / panel.height, 0, 1);
     if (th1 - th0 <= 0 && tv1 - tv0 <= 0) return;
-    const hScale = flip ? model.scales.y : model.scales.x;
-    const vScale = flip ? model.scales.x : model.scales.y;
-    const next: ZoomDomains = { ...effectiveZoomDomains };
-    const hDomain = invertedDomain(hScale, th0, th1);
-    const vDomain = invertedDomain(vScale, tv0, tv1);
+    const inverted = panelDataDomains(rect, panel, model.scales, flip);
     const mode = interactionConfig.zoom?.mode ?? "xy";
-    const horizontalChannel = flip ? "y" : "x";
-    const verticalChannel = flip ? "x" : "y";
-    if (hDomain !== undefined && mode !== verticalChannel)
-      next[horizontalChannel] = hDomain;
-    if (vDomain !== undefined && mode !== horizontalChannel)
-      next[verticalChannel] = vDomain;
+    const next: ZoomDomains = { ...effectiveZoomDomains };
+    if (mode !== "y" && inverted.x !== undefined) next.x = inverted.x;
+    if (mode !== "x" && inverted.y !== undefined) next.y = inverted.y;
     if (next.x === undefined && next.y === undefined) return;
     commitZoom(frozenZoomDomains(next), source);
   }
 
-  /** Accessible per-mark label from the layer's mapped fields. */
-  function markLabel(row: number): string {
-    if (model === null) return `data point ${row + 1}`;
-    const values = model.row(row);
-    if (values === null) return `data point ${row + 1}`;
-    const fields = model.layerFields.flat();
-    const seen = new Set<string>();
-    const parts: string[] = [];
-    for (const f of fields) {
-      if (seen.has(f.field)) continue;
-      seen.add(f.field);
-      parts.push(`${f.field} ${String(values[f.field] ?? "")}`);
-    }
-    return parts.join(", ") || `data point ${row + 1}`;
-  }
-
-  function datumLabel(values: Record<string, CellValue> | null): string {
-    if (values === null) return "No active datum";
-    const fields = model?.layerFields.flat() ?? [];
-    const seen = new Set<string>();
-    const parts: string[] = [];
-    for (const field of fields) {
-      if (seen.has(field.field)) continue;
-      seen.add(field.field);
-      parts.push(`${field.field} ${String(values[field.field] ?? "")}`);
-    }
-    return parts.join(", ") || "Active datum";
-  }
-
-  function inspectionLiveText(
+  // Stable SceneView callback identity when model is unchanged.
+  const markLabel = $derived.by(
+    () => (row: number) => markLabelFor(model, row),
+  );
+  const datumLabel = (values: Record<string, CellValue> | null) =>
+    datumLabelFor(model, values);
+  const inspectionLiveText = (
     value: PlotInspectionChange<Record<string, CellValue>, PropertyKey>,
-  ): string {
-    const count = value.members.length;
-    const state = value.state === "pinned" ? ", pinned" : "";
-    if (value.mode !== "x" && value.mode !== "y")
-      return `${datumLabel(value.focus.row)}; ${String(count)} ${count === 1 ? "datum" : "data"}${state}`;
-    const seen = new Set<string>();
-    const focused = value.focus.fields
-      .filter(
-        (field) =>
-          field.channel !== value.mode &&
-          !seen.has(field.field) &&
-          seen.add(field.field),
-      )
-      .map((field) => `${field.field} ${String(field.value ?? "")}`)
-      .join(", ");
-    return `${value.mode} ${value.axisLabel}; ${String(count)} ${count === 1 ? "datum" : "data"}${focused ? `; focused ${focused}` : ""}${state}`;
-  }
+  ) => inspectionLiveTextFor(model, value);
 
   function navigate(delta: number): void {
     if (traversalHits.length === 0) return;
@@ -2001,52 +1887,20 @@
 >
   {@render children?.()}
   {#if showToolRail}
-    <div
-      class="gg-tool-rail"
-      role="toolbar"
-      aria-label="Chart interaction tools"
-      aria-busy={!ready}
-    >
-      <div class="gg-tool-modes">
-        {#each availableTools as available (available)}
-          <button
-            type="button"
-            disabled={!ready ||
-              (emptyPlot &&
-                (available === "select-area" || available === "zoom-area"))}
-            class:active={activeTool === available}
-            aria-pressed={activeTool === available}
-            onclick={() => chooseTool(available)}
-            >{available === "select-area"
-              ? "Select area"
-              : available === "zoom-area"
-                ? "Zoom area"
-                : available === "point"
-                  ? "Select point"
-                  : "Inspect"}</button
-          >
-        {/each}
-      </div>
-      <div class="gg-tool-recovery-actions">
-        {#if effectiveZoomDomains !== null}
-          <button type="button" onclick={() => resetZoom("pointer")}
-            >Reset zoom</button
-          >
-        {/if}
-        {#if effectiveSelectedKeys.length > 0}
-          <button type="button" onclick={() => clearPointSelection("pointer")}
-            >Clear selection</button
-          >
-        {/if}
-        {#if committedInterval !== null}
-          <button
-            type="button"
-            onclick={() => clearIntervalSelection("pointer")}
-            >Clear selection</button
-          >
-        {/if}
-      </div>
-    </div>
+    <ToolRail
+      {availableTools}
+      {activeTool}
+      {ready}
+      {emptyPlot}
+      narrow={resolvedWidth < 560}
+      zoomDomains={effectiveZoomDomains}
+      hasPointSelection={effectiveSelectedKeys.length > 0}
+      hasIntervalSelection={committedInterval !== null}
+      onChooseTool={chooseTool}
+      onResetZoom={() => resetZoom("pointer")}
+      onClearPointSelection={() => clearPointSelection("pointer")}
+      onClearIntervalSelection={() => clearIntervalSelection("pointer")}
+    />
   {/if}
   {#if model !== null}
     {#if hasCanvas}
@@ -2106,138 +1960,27 @@
       <SceneView scene={model.scene} focusable={false} {markLabel} />
     {/if}
     {#if !interactive && emphasizedAnchors.length > 0}
-      <svg
-        class="gg-stratum gg-interaction-overlay"
+      <InteractionOverlay
         width={model.scene.width}
         height={model.scene.height}
-        viewBox={`0 0 ${model.scene.width} ${model.scene.height}`}
-        aria-hidden="true"
-      >
-        {#each emphasizedAnchors as anchor, index (index)}
-          <circle
-            class="gg-emphasized-ring"
-            cx={anchor.x}
-            cy={anchor.y}
-            r="11"
-            fill="none"
-          />
-        {/each}
-      </svg>
+        interactive={false}
+        {emphasizedAnchors}
+      />
     {/if}
     {#if interactive}
-      <svg
-        class="gg-stratum gg-interaction-overlay"
+      <InteractionOverlay
         width={model.scene.width}
         height={model.scene.height}
-        viewBox={`0 0 ${model.scene.width} ${model.scene.height}`}
-        aria-hidden="true"
-      >
-        {#if inspection !== null}
-          {#if inspection.mode === "xy" || (inspection.mode === "x" && !coordFlipped) || (inspection.mode === "y" && coordFlipped)}
-            {#if inspectionPanel}
-              <line
-                class="gg-crosshair"
-                x1={inspection.focus.anchor.x}
-                x2={inspection.focus.anchor.x}
-                y1={inspectionPanel.y}
-                y2={inspectionPanel.y + inspectionPanel.height}
-              />
-              {#if "axisLabel" in inspection}
-                <text
-                  class={`gg-crosshair-axis-label gg-crosshair-axis-label-${inspection.mode}`}
-                  x={inspection.focus.anchor.x}
-                  y={inspectionPanel.y + inspectionPanel.height - 4}
-                  text-anchor="middle">{inspection.axisLabel}</text
-                >
-              {/if}
-            {/if}
-          {/if}
-          {#if inspection.mode === "xy" || (inspection.mode === "y" && !coordFlipped) || (inspection.mode === "x" && coordFlipped)}
-            {#if inspectionPanel}
-              <line
-                class="gg-crosshair"
-                x1={inspectionPanel.x}
-                x2={inspectionPanel.x + inspectionPanel.width}
-                y1={inspection.focus.anchor.y}
-                y2={inspection.focus.anchor.y}
-              />
-              {#if "axisLabel" in inspection}
-                <text
-                  class={`gg-crosshair-axis-label gg-crosshair-axis-label-${inspection.mode}`}
-                  x={inspectionPanel.x + 4}
-                  y={inspection.focus.anchor.y - 4}>{inspection.axisLabel}</text
-                >
-              {/if}
-            {/if}
-          {/if}
-          <circle
-            class="gg-hover-ring"
-            cx={inspection.focus.anchor.x}
-            cy={inspection.focus.anchor.y}
-            r="6"
-            fill="none"
-          />
-        {/if}
-        {#each selectedAnchors as anchor, index (index)}
-          <circle
-            class="gg-selected-ring"
-            cx={anchor.x}
-            cy={anchor.y}
-            r="8"
-            fill="none"
-          />
-        {/each}
-        {#each emphasizedAnchors as anchor, index (index)}
-          <circle
-            class="gg-emphasized-ring"
-            cx={anchor.x}
-            cy={anchor.y}
-            r="11"
-            fill="none"
-          />
-        {/each}
-        {#if brushRect !== null}
-          {@const r = normalizedRect(brushRect)}
-          <rect
-            class="gg-area-draft"
-            class:gg-area-draft-select={activeTool === "select-area"}
-            class:gg-area-draft-zoom={activeTool === "zoom-area"}
-            x={r.x0}
-            y={r.y0}
-            width={r.x1 - r.x0}
-            height={r.y1 - r.y0}
-            fill={activeTool === "zoom-area"
-              ? "none"
-              : "var(--gg-selectionFill, var(--gg-theme-selectionFill, currentColor))"}
-            fill-opacity={activeTool === "zoom-area" ? undefined : "0.12"}
-            stroke="var(--gg-selectionStroke, var(--gg-theme-selectionStroke, currentColor))"
-          />
-          {#if activeTool === "zoom-area"}
-            <text class="gg-zoom-label" x={r.x0 + 5} y={r.y0 + 15}>Zoom</text>
-          {/if}
-          {#if areaAwaitingSecond}
-            <circle
-              class="gg-first-corner"
-              cx={brushRect.x0}
-              cy={brushRect.y0}
-              r="4"
-              fill="var(--gg-selectionStroke, var(--gg-theme-selectionStroke, currentColor))"
-            />
-          {/if}
-        {/if}
-        {#if committedInterval !== null}
-          <rect
-            class="gg-selection"
-            x={committedInterval.pixels.x0}
-            y={committedInterval.pixels.y0}
-            width={committedInterval.pixels.x1 - committedInterval.pixels.x0}
-            height={committedInterval.pixels.y1 - committedInterval.pixels.y0}
-            fill="var(--gg-selectionFill, var(--gg-theme-selectionFill, currentColor))"
-            fill-opacity="0.08"
-            stroke="var(--gg-selectionStroke, var(--gg-theme-selectionStroke, currentColor))"
-          />
-        {/if}
-      </svg>
+        {inspection}
+        {inspectionPanel}
+        {coordFlipped}
+        {selectedAnchors}
+        {emphasizedAnchors}
+        {brushRect}
+        {activeTool}
+        {areaAwaitingSecond}
+        {committedInterval}
+      />
       <!-- The capture layer is a pointer-only surface; the accessible
            interaction paths are focusable marks and the data table. -->
       <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
@@ -2364,7 +2107,8 @@
 
   /* Strata: full-size positioned siblings; document order = paint order
      (no z-index anywhere — decision 0006). All inert; the capture layer
-     owns pointer events. */
+     owns pointer events. Parent-owned so extracted overlay SVGs with
+     class gg-stratum stay absolutely positioned. */
   .gg-plot-root :global(.gg-stratum),
   .gg-canvas-a11y {
     position: absolute;
@@ -2434,100 +2178,9 @@
     cursor: crosshair;
   }
 
-  .gg-capture:focus-visible,
-  .gg-tool-rail button:focus-visible {
+  .gg-capture:focus-visible {
     outline: 2px solid var(--gg-focusRing, var(--gg-theme-focusRing, Highlight));
     outline-offset: 2px;
-  }
-
-  .gg-crosshair {
-    stroke: var(--gg-crosshair, var(--gg-theme-crosshair, currentColor));
-    stroke-width: 1;
-    vector-effect: non-scaling-stroke;
-    opacity: 0.55;
-  }
-
-  .gg-crosshair-axis-label {
-    fill: var(
-      --gg-interactionInk,
-      var(--gg-theme-interactionInk, currentColor)
-    );
-    font: 11px/1 var(--gg-font-family, sans-serif);
-    paint-order: stroke;
-    stroke: var(--gg-tooltipPaper, var(--gg-theme-tooltipPaper, white));
-    stroke-width: 3px;
-    stroke-linejoin: round;
-  }
-
-  .gg-hover-ring {
-    stroke: var(
-      --gg-interactionInk,
-      var(--gg-theme-interactionInk, currentColor)
-    );
-    stroke-width: 1.5;
-    vector-effect: non-scaling-stroke;
-  }
-
-  .gg-selected-ring {
-    stroke: var(
-      --gg-selectionStroke,
-      var(--gg-theme-selectionStroke, currentColor)
-    );
-    stroke-width: 2.5;
-    vector-effect: non-scaling-stroke;
-  }
-
-  .gg-emphasized-ring {
-    stroke: var(
-      --gg-interactionInk,
-      var(--gg-theme-interactionInk, currentColor)
-    );
-    stroke-width: 2;
-    stroke-dasharray: 3 2;
-    vector-effect: non-scaling-stroke;
-  }
-
-  @media (forced-colors: active) {
-    .gg-emphasized-ring {
-      stroke: Highlight;
-    }
-  }
-
-  .gg-tool-rail {
-    position: absolute;
-    left: 8px;
-    right: 8px;
-    top: -48px;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 4px;
-    align-items: center;
-    z-index: 1;
-    line-height: 1.2;
-    pointer-events: auto;
-  }
-
-  .gg-tool-modes,
-  .gg-tool-recovery-actions {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
-
-  .gg-tool-rail button {
-    min-height: 44px;
-    min-width: 44px;
-    border: 0;
-    border-bottom: 2px solid transparent;
-    border-radius: 0;
-    padding: 0 10px;
-    background: transparent;
-    color: var(
-      --gg-interactionMuted,
-      var(--gg-theme-interactionMuted, currentColor)
-    );
-    font: inherit;
-    font-size: 14px;
   }
 
   .gg-area-instruction {
@@ -2543,35 +2196,6 @@
     font-size: 13px;
     line-height: 1.25;
     pointer-events: none;
-  }
-
-  .gg-tool-rail button.active {
-    border-bottom-color: var(
-      --gg-toolActive,
-      var(--gg-theme-toolActive, currentColor)
-    );
-    color: var(--gg-toolActive, var(--gg-theme-toolActive, currentColor));
-  }
-
-  .gg-tool-recovery-actions:empty {
-    display: none;
-  }
-
-  .gg-area-draft,
-  .gg-selection {
-    stroke-width: 1;
-    vector-effect: non-scaling-stroke;
-  }
-
-  .gg-zoom-label {
-    fill: var(
-      --gg-interactionInk,
-      var(--gg-theme-interactionInk, currentColor)
-    );
-    font: 10px/1 var(--gg-font-family, sans-serif);
-    paint-order: stroke;
-    stroke: var(--gg-tooltipPaper, var(--gg-theme-tooltipPaper, white));
-    stroke-width: 3px;
   }
 
   .gg-empty-state {
@@ -2603,34 +2227,12 @@
     .gg-with-tool-rail {
       margin-top: 96px;
     }
-
-    .gg-tool-rail {
-      top: -92px;
-      grid-template-columns: 1fr;
-      grid-template-rows: auto auto;
-    }
-
-    .gg-tool-modes,
-    .gg-tool-recovery-actions {
-      width: 100%;
-    }
   }
 
   /* ResizeObserver-backed fallback for engines that do not apply a query to
      descendants of a component-owned named container during hydration. */
   .gg-narrow-tools.gg-with-tool-rail {
     margin-top: 96px;
-  }
-
-  .gg-narrow-tools .gg-tool-rail {
-    top: -92px;
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto;
-  }
-
-  .gg-narrow-tools .gg-tool-modes,
-  .gg-narrow-tools .gg-tool-recovery-actions {
-    width: 100%;
   }
 
   .gg-sr-only {
@@ -2654,37 +2256,8 @@
   }
 
   @media (forced-colors: active) {
-    .gg-capture:focus-visible,
-    .gg-tool-rail button:focus-visible {
+    .gg-capture:focus-visible {
       outline-color: Highlight;
-    }
-
-    .gg-tool-rail button.active {
-      border-bottom-color: Highlight;
-      color: ButtonText;
-    }
-
-    .gg-area-draft-select,
-    .gg-selection {
-      fill: none;
-      stroke: Highlight;
-    }
-
-    .gg-area-draft-zoom {
-      fill: none;
-      stroke: CanvasText;
-      stroke-width: 2;
-    }
-
-    .gg-crosshair,
-    .gg-hover-ring,
-    .gg-selected-ring {
-      stroke: Highlight;
-    }
-
-    .gg-zoom-label {
-      fill: CanvasText;
-      stroke: Canvas;
     }
   }
 </style>
