@@ -23,7 +23,12 @@ export default defineConfig({
       headless: true,
       screenshotFailures: true,
       screenshotDirectory: "test-results/screenshots",
-      trace: { mode: "retain-on-failure", tracesDir: "test-results/traces" },
+      trace: {
+        mode: "retain-on-failure",
+        tracesDir: "test-results/traces",
+        screenshots: true,
+        snapshots: false,
+      },
       instances: [{ browser: "chromium" }, { browser: "firefox" }, { browser: "webkit" }],
     },
   },
