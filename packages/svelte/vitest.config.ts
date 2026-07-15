@@ -17,6 +17,7 @@ export default defineConfig({
   test: {
     include: ["tests/**/*.test.ts"],
     exclude: ["tests/**/*.ssr.test.ts"],
+    retry: process.env.CI === "true" ? 1 : 0,
     browser: {
       enabled: true,
       provider: playwright(),
@@ -24,7 +25,7 @@ export default defineConfig({
       screenshotFailures: true,
       screenshotDirectory: "test-results/screenshots",
       trace: {
-        mode: "retain-on-failure",
+        mode: "on-first-retry",
         tracesDir: "test-results/traces",
         screenshots: true,
         snapshots: false,
