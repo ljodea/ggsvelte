@@ -1,0 +1,42 @@
+title: "[Design proposal] "
+body:
+  - type: dropdown
+    id: request_kind
+    attributes:
+      label: Proposal kind
+      options:
+        - Presentation, theme, palette, or default
+        - Grammar or PortableSpec semantics
+        - Interaction, event, identity, or linking semantics
+        - Renderer, performance, export, or picking
+        - Developer experience, packaging, or tooling
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: User problem
+      description: Describe the job to be done before choosing an API.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed direction
+      description: Include an API or spec sketch if useful, while leaving room for alternatives.
+    validations:
+      required: true
+  - type: textarea
+    id: semantics
+    attributes:
+      label: Meaning, state, and accessibility
+      description: Distinguish appearance from changes to data meaning, events, identity, focus, or assistive-technology behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: tradeoffs
+    attributes:
+      label: Tradeoffs and alternatives
+      description: Consider portability, SVG/canvas/headless behavior, performance, and composition.
+    validations:
+      required: true
