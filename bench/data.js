@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784100043625,
+  "lastUpdate": 1784102827430,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -1511,6 +1511,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 166.5354,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "daa7e2f8bc50da574dabac2b8a32f7978049d426",
+          "message": "test(vr): approve interaction baselines for PR #19\n\nBaselines generated and verified by the protected /approve-visuals workflow. The standalone VR mismatch is expected until source PR #19 lands.",
+          "timestamp": "2026-07-15T03:06:30-05:00",
+          "tree_id": "50f5b5b850dbfc00507d69845710d494786e6c0b",
+          "url": "https://github.com/ljodea/ggsvelte/commit/daa7e2f8bc50da574dabac2b8a32f7978049d426"
+        },
+        "date": 1784102826886,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 3.5675,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.1489,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 12.884,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 16.0605,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 102.0948,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 144.72,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.0417,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.3316,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 98.4905,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 125.1796,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 11.677,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 11.3605,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 127.646,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.663,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 26.8271,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 6.8406,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 36.3168,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 655.5592,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 155.9784,
             "unit": "ms"
           }
         ]
