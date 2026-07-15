@@ -13,12 +13,11 @@ export type ZoomMode = "x" | "y" | "xy";
 const zoomScale = (
   config: Scales["x"] | undefined,
   domain: [number, number],
-): NonNullable<Scales["x"]> =>
-  ({
-    ...config,
-    domain: [domain[0], domain[1]],
-    nice: false,
-  }) as NonNullable<Scales["x"]>;
+): NonNullable<Scales["x"]> => ({
+  ...config,
+  domain: [domain[0], domain[1]],
+  nice: false,
+});
 
 /**
  * Merge continuous zoom domains into a portable spec's scales.
