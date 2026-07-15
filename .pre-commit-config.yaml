@@ -122,8 +122,8 @@ repos:
         stages: [pre-push]
 
       - id: bun-test-packages
-        name: bun test (spec + core + scripts + evals harness; svelte runs under vitest browser mode)
-        entry: bun test packages/spec packages/core scripts tests/evals
+        name: bun test (spec + core + benchmarks + scripts + evals harness; svelte runs under vitest browser mode)
+        entry: bun test packages/spec packages/core benchmarks scripts tests/evals
         language: system
         pass_filenames: false
         always_run: true

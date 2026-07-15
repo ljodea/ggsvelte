@@ -411,8 +411,12 @@ describe("RenderModel memory + tooltip contract", () => {
   it("dispose() releases geometry and row access", () => {
     const model = runPipeline(wrapSpec(), size);
     expect(model.scene.batches.length).toBeGreaterThan(0);
+    expect(model.candidates.candidate(0)).not.toBeNull();
     model.dispose();
     expect(model.scene.batches).toHaveLength(0);
+    expect(model.candidates.size).toBe(0);
+    expect(model.candidates.candidate(0)).toBeNull();
+    expect(model.candidates.x).toHaveLength(0);
     expect(model.row(0)).toBeNull();
     model.dispose(); // idempotent
   });

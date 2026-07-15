@@ -41,6 +41,26 @@ export interface ThemeTokens {
   tickColor: string;
   /** Panel-border color. */
   panelBorder: string;
+  /** Primary ink for interaction controls and overlays. */
+  interactionInk: string;
+  /** Opacity applied to marks de-emphasized by an interaction. */
+  interactionMuted: number;
+  /** Keyboard-focus and active-mark halo color. */
+  focusRing: string;
+  /** Crosshair guide color. */
+  crosshair: string;
+  /** Translucent interval-selection fill. */
+  selectionFill: string;
+  /** Interval-selection and zoom-target stroke. */
+  selectionStroke: string;
+  /** Opaque tooltip surface. */
+  tooltipPaper: string;
+  /** Tooltip foreground. */
+  tooltipInk: string;
+  /** Tooltip keyline. */
+  tooltipBorder: string;
+  /** Active tool text and underline. */
+  toolActive: string;
   /** Explicit chart typeface stack. */
   fontFamily: string;
   fontSize: number;
@@ -72,7 +92,21 @@ export interface ThemeTokens {
 
 const ROBOTO_CONDENSED = '"Roboto Condensed", "Arial Narrow", Arial, sans-serif';
 
-const HRBR_BASE: ThemeTokens = {
+type FoundationThemeTokens = Omit<
+  ThemeTokens,
+  | "interactionInk"
+  | "interactionMuted"
+  | "focusRing"
+  | "crosshair"
+  | "selectionFill"
+  | "selectionStroke"
+  | "tooltipPaper"
+  | "tooltipInk"
+  | "tooltipBorder"
+  | "toolActive"
+>;
+
+const HRBR_BASE: FoundationThemeTokens = {
   ink: "#262626",
   paper: "#ffffff",
   accent: "#4385be",
@@ -110,8 +144,46 @@ const HRBR_BASE: ThemeTokens = {
   showPanelBorder: false,
 };
 
-function themed(overrides: Partial<ThemeTokens>): ThemeTokens {
-  return Object.freeze({ ...HRBR_BASE, ...overrides });
+function translucent(color: string, alpha: number): string {
+  const hex = /^#([\da-f]{2})([\da-f]{2})([\da-f]{2})$/i.exec(color);
+  if (hex !== null) {
+    return `rgba(${Number.parseInt(hex[1]!, 16)}, ${Number.parseInt(hex[2]!, 16)}, ${Number.parseInt(hex[3]!, 16)}, ${alpha})`;
+  }
+  return `color-mix(in srgb, ${color} ${alpha * 100}%, transparent)`;
+}
+
+/**
+ * Interaction colors are relationships, not a second palette. Keeping the
+ * derivation here means every built-in and edition-specific theme gets a
+ * coherent interaction treatment when its foundational roles change.
+ */
+function themed(overrides: Partial<FoundationThemeTokens>): ThemeTokens {
+  const foundation = { ...HRBR_BASE, ...overrides };
+  const hasOpaqueSurface = foundation.paper !== "none" || foundation.panel !== "none";
+  const tooltipPaper =
+    foundation.paper === "none"
+      ? foundation.panel === "none"
+        ? "#ffffff"
+        : foundation.panel
+      : foundation.paper;
+  const tooltipInk = hasOpaqueSurface
+    ? foundation.ink
+    : foundation.ink === "currentColor"
+      ? "#1f2328"
+      : foundation.ink;
+  return Object.freeze({
+    ...foundation,
+    interactionInk: foundation.ink,
+    interactionMuted: 0.36,
+    focusRing: foundation.accent,
+    crosshair: foundation.axisText,
+    selectionFill: translucent(foundation.accent, 0.18),
+    selectionStroke: foundation.accent,
+    tooltipPaper,
+    tooltipInk,
+    tooltipBorder: foundation.grid === "none" ? foundation.panelBorder : foundation.grid,
+    toolActive: foundation.ink,
+  });
 }
 
 /**
@@ -374,7 +446,7 @@ export function resolveTheme(
     return tokens;
   }
   const base = resolveTheme(theme.name, builtins);
-  return {
+  const resolved = themed({
     ink: theme.ink ?? base.ink,
     paper: theme.paper ?? base.paper,
     accent: theme.accent ?? base.accent,
@@ -410,6 +482,19 @@ export function resolveTheme(
     gridX: theme.gridX ?? base.gridX,
     gridY: theme.gridY ?? base.gridY,
     showPanelBorder: theme.showPanelBorder ?? base.showPanelBorder,
+  });
+  return {
+    ...resolved,
+    interactionInk: theme.interactionInk ?? resolved.interactionInk,
+    interactionMuted: theme.interactionMuted ?? resolved.interactionMuted,
+    focusRing: theme.focusRing ?? resolved.focusRing,
+    crosshair: theme.crosshair ?? resolved.crosshair,
+    selectionFill: theme.selectionFill ?? resolved.selectionFill,
+    selectionStroke: theme.selectionStroke ?? resolved.selectionStroke,
+    tooltipPaper: theme.tooltipPaper ?? resolved.tooltipPaper,
+    tooltipInk: theme.tooltipInk ?? resolved.tooltipInk,
+    tooltipBorder: theme.tooltipBorder ?? resolved.tooltipBorder,
+    toolActive: theme.toolActive ?? resolved.toolActive,
   };
 }
 
@@ -422,9 +507,20 @@ export type ThemeColorRole =
   | "axisText"
   | "axisLine"
   | "tickColor"
-  | "panelBorder";
+  | "panelBorder"
+  | "interactionInk"
+  | "focusRing"
+  | "crosshair"
+  | "selectionFill"
+  | "selectionStroke"
+  | "tooltipPaper"
+  | "tooltipInk"
+  | "tooltipBorder"
+  | "toolActive";
 
-/** A color theme role wrapped in its --gg-* custom property with the token fallback. */
-export function themeVar(role: ThemeColorRole, tokens: ThemeTokens): string {
+export type ThemeRole = ThemeColorRole | "interactionMuted";
+
+/** A theme role wrapped in its --gg-* custom property with the token fallback. */
+export function themeVar(role: ThemeRole, tokens: ThemeTokens): string {
   return `var(--gg-${role}, ${tokens[role]})`;
 }

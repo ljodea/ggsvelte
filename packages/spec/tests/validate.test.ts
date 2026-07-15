@@ -28,6 +28,25 @@ describe("validate — accepts", () => {
     }
   });
 
+  it("accepts interaction theme role overrides", () => {
+    const result = validate({
+      layers: [{ geom: "point" }],
+      theme: {
+        interactionInk: "#102030",
+        interactionMuted: 0.42,
+        focusRing: "#204060",
+        crosshair: "#305070",
+        selectionFill: "rgba(32, 64, 96, 0.18)",
+        selectionStroke: "#204060",
+        tooltipPaper: "#ffffff",
+        tooltipInk: "#102030",
+        tooltipBorder: "#d0d7de",
+        toolActive: "#102030",
+      },
+    });
+    expect(result.ok).toBe(true);
+  });
+
   it("a full spec with all channel forms", () => {
     const result = validate({
       $schema: "https://example.invalid/v0.json",
