@@ -27,3 +27,11 @@ The reproducible evidence harnesses are documented for
 [TalkBack on Android](./mobile-harness.md). Their retained transcripts and
 screenshots support review; only the complete versioned manifest is the release
 gate.
+
+For a patch release that changes only packaging, documentation, or release
+automation, `records/v<release>.json` may instead use
+`record-alias.schema.json` to inherit an earlier record in the same major/minor
+line. The alias must identify the release commit, declare that runtime behavior
+did not change, and explain why the inherited matrix remains applicable. Any
+runtime or interaction change requires a new complete record; an alias must
+never be used to represent unperformed manual testing as new evidence.
