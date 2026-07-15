@@ -1,6 +1,18 @@
 {
-  "title": "Brush to zoom",
-  "description": "The transient brush selects rows through the hit index's rect query; with zoom enabled a finished brush respecs explicit continuous domains via scale inversion — colors never shift because the committed scale state flows into the new run. Double-click resets; interactions are excluded from VR shots (component-tested instead).",
-  "tags": ["interaction", "brush", "zoom", "point"],
-  "docsSection": "Interaction"
+  "title": "Interval selection and zoom",
+  "description": "The tool rail separates rectangular selection from brush zoom. Selection reports start, change, end, and clear phases with semantic keys and domain bounds; zoom reports explicit domains and a clear event on reset, while inspection remains available alongside both.",
+  "tags": ["interaction", "select", "interval", "brush", "zoom", "events"],
+  "docsSection": "Interaction",
+  "vrHeight": 640,
+  "journey": {
+    "pointer": "Choose Select area or Zoom area, then drag across the points. Use Inspect for ordinary hovering.",
+    "keyboard": "Tab to the chart or tool rail. In a drawing tool, press Enter to set a corner, move with the Arrow keys (Shift moves farther), press Enter to finish, and Escape to cancel.",
+    "touch": "Choose a tool, then drag or tap two corners. Inspect mode leaves ordinary page scrolling available.",
+    "references": [
+      { "label": "Interaction guide and event reference", "href": "/guide/interactions" },
+      { "label": "Inspect and pin data example", "href": "/examples/interaction/tooltip" }
+    ],
+    "svelteFirst": true,
+    "fullWidth": true
+  }
 }

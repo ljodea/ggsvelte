@@ -42,8 +42,26 @@ bun add ggsvelte        # or: npm install ggsvelte
 <GGPlot {spec} width={640} height={400} />
 ```
 
-`<GGPlot>` supports `facet`, `coord`, `theme`, `tooltip`, `brush`/`zoom`,
-`width="container"`, per-layer `render="canvas"`, and `a11y="force-svg"`.
+`<GGPlot>` supports `facet`, `coord`, `theme`, opt-in `inspect`, point or
+interval `select`, brush `zoom`, `width="container"`, per-layer
+`render="canvas"`, and `a11y="force-svg"`.
+
+```svelte
+<GGPlot
+  data={rows}
+  aes={{ x: "date", y: "value", color: "series" }}
+  key="id"
+  inspect={{ mode: "x" }}
+  select={{ type: "interval", mode: "xy" }}
+  oninteraction={(event) => console.log(event)}
+>
+  <GeomPoint />
+</GGPlot>
+```
+
+Inspection includes the HTML tooltip, semantic crosshair, keyboard traversal,
+and pinning. Selection and zoom use separate accessible tools when both are
+enabled. See the [interaction guide and typed event reference](https://ljodea.github.io/ggsvelte/guide/interactions).
 
 ## Headless + CLI
 
@@ -58,7 +76,9 @@ ggsvelte-render spec.json --width 640 --height 400 > chart.svg
 
 ## Links
 
-- Repo + docs: <https://github.com/ljodea/ggsvelte>
+- Docs + examples: <https://ljodea.github.io/ggsvelte/>
+- Repository: <https://github.com/ljodea/ggsvelte>
+- Pre-0.1 interaction migration: <https://ljodea.github.io/ggsvelte/guide/migrating-pre-0-1>
 - Spec package: [`@ggsvelte/spec`](https://www.npmjs.com/package/@ggsvelte/spec)
 - Core package: [`@ggsvelte/core`](https://www.npmjs.com/package/@ggsvelte/core)
 - Agent skill: `skills/ggsvelte/SKILL.md` (shipped in this package)

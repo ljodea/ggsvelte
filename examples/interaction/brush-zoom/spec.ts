@@ -7,7 +7,7 @@ export default defineExample(
   gg(field, aes({ x: "x", y: "y", color: "group" }))
     .geomPoint({ size: 2.5, alpha: 0.8 })
     .labs({
-      title: "Drag to zoom, double-click to reset",
+      title: "Select an interval or brush to zoom",
       x: "x",
       y: "y",
       color: "Group",

@@ -711,6 +711,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "AxisValueFormatter": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "BUILTIN_THEMES": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -749,6 +753,46 @@
         },
         "COLORBLIND_PALETTE": {
           "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "CandidateBuildFacts": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CandidateDatum": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CandidateFacts": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CandidateGroup": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CandidateInspectMode": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CandidateMatch": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CandidateRange": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CandidateStore": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CandidateStoreOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CanonicalAxisToken": {
+          "kind": "type",
           "lifecycle": "experimental"
         },
         "CellValue": {
@@ -887,6 +931,14 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "LineageRef": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "LineageStore": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "MappedField": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -983,6 +1035,10 @@
           "kind": "type",
           "lifecycle": "stable-intent"
         },
+        "ResolvedCandidateInspectMode": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "ResolvedColorScale": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1009,6 +1065,10 @@
         },
         "ScaleConfigError": {
           "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "ScaleDomainSnapshot": {
+          "kind": "type",
           "lifecycle": "experimental"
         },
         "ScaleState": {
@@ -1087,6 +1147,14 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "ThemeColorRole": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ThemeRole": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "ThemeTokens": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1115,6 +1183,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "TraversalDirection": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "UnknownThemeError": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -1135,7 +1207,15 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "buildCandidateStore": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "buildLegends": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "canonicalAxisToken": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -1417,6 +1497,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "AreaMode": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "BoxplotParams": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1435,10 +1519,6 @@
         },
         "CoordSpec": {
           "kind": "type",
-          "lifecycle": "experimental"
-        },
-        "DEFAULT_HIT_TOLERANCE": {
-          "kind": "value",
           "lifecycle": "experimental"
         },
         "DataInput": {
@@ -1533,7 +1613,39 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
-        "HitIndexOptions": {
+        "INTERACTION_DIAGNOSTIC_CATALOG": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "InspectInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "InspectMode": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "InspectOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "InteractionDiagnostic": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "InteractionDiagnosticCode": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "InteractionSource": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "InteractionTool": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "IntervalSelection": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -1569,6 +1681,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "NonEmptyReadonlyArray": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "PipelineError": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -1577,7 +1693,35 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "PlotDatum": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PlotInspection": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PlotInspectionChange": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PlotInspectionClear": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PlotInteractionEvent": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PlotSelection": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "PointPosition": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PointSelection": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -1590,6 +1734,10 @@
           "lifecycle": "experimental"
         },
         "PositionScaleSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ReadonlyZoomDomains": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -1606,6 +1754,14 @@
           "lifecycle": "experimental"
         },
         "ResolvedColorScale": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ResolvedInspectMode": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ResolvedInteractionConfig": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -1629,11 +1785,11 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
-        "SceneHit": {
+        "SelectInput": {
           "kind": "type",
           "lifecycle": "experimental"
         },
-        "SceneHitIndex": {
+        "SelectOptions": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -1685,6 +1841,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "TooltipField": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "ValidateResult": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1693,11 +1853,19 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
-        "aes": {
-          "kind": "value",
+        "ZoomEvent": {
+          "kind": "type",
           "lifecycle": "experimental"
         },
-        "buildHitIndex": {
+        "ZoomInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ZoomOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "aes": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -1720,6 +1888,10 @@
         "normalize": {
           "kind": "value",
           "lifecycle": "stable-intent"
+        },
+        "normalizeInteractionConfig": {
+          "kind": "value",
+          "lifecycle": "experimental"
         },
         "planStrata": {
           "kind": "value",

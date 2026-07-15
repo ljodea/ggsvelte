@@ -5,6 +5,20 @@
 // One source, three uses: this manifest feeds the docs gallery
 // (apps/docs), the VR matrix (tests/visual), and llms-full.txt (M3).
 
+export interface ExampleReference {
+  readonly label: string;
+  readonly href: string;
+}
+
+export interface ExampleJourney {
+  readonly pointer: string;
+  readonly keyboard: string;
+  readonly touch: string;
+  readonly references: readonly ExampleReference[];
+  readonly svelteFirst: boolean;
+  readonly fullWidth: boolean;
+}
+
 export interface ExampleManifestEntry {
   /** "<category>/<name>" — docs route slug and VR snapshot key. */
   readonly id: string;
@@ -17,6 +31,8 @@ export interface ExampleManifestEntry {
   readonly docsSection: string;
   /** VR frame height in px (default 400). */
   readonly vrHeight?: number;
+  /** Optional guided interaction journey for runnable examples. */
+  readonly journey?: ExampleJourney;
   /** Whether the example ships a data.ts module. */
   readonly hasData: boolean;
 }
@@ -176,20 +192,44 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     id: "interaction/brush-zoom",
     category: "interaction",
     name: "brush-zoom",
-    title: "Brush to zoom",
-    description: "The transient brush selects rows through the hit index's rect query; with zoom enabled a finished brush respecs explicit continuous domains via scale inversion — colors never shift because the committed scale state flows into the new run. Double-click resets; interactions are excluded from VR shots (component-tested instead).",
-    tags: ["interaction", "brush", "zoom", "point"],
+    title: "Interval selection and zoom",
+    description: "The tool rail separates rectangular selection from brush zoom. Selection reports start, change, end, and clear phases with semantic keys and domain bounds; zoom reports explicit domains and a clear event on reset, while inspection remains available alongside both.",
+    tags: ["interaction", "select", "interval", "brush", "zoom", "events"],
     docsSection: "Interaction",
+    vrHeight: 640,
+    journey: {
+      pointer: "Choose Select area or Zoom area, then drag across the points. Use Inspect for ordinary hovering.",
+      keyboard: "Tab to the chart or tool rail. In a drawing tool, press Enter to set a corner, move with the Arrow keys (Shift moves farther), press Enter to finish, and Escape to cancel.",
+      touch: "Choose a tool, then drag or tap two corners. Inspect mode leaves ordinary page scrolling available.",
+      references: [
+        { label: "Interaction guide and event reference", href: "/guide/interactions" },
+        { label: "Inspect and pin data example", href: "/examples/interaction/tooltip" },
+      ],
+      svelteFirst: true,
+      fullWidth: true,
+    },
     hasData: true,
   },
   {
     id: "interaction/tooltip",
     category: "interaction",
     name: "tooltip",
-    title: "Hover tooltip",
-    description: "tooltip on <GGPlot> shows the hovered mark's mapped values (or a custom snippet). Hits resolve through the unified plot-pixel hit index — a quadtree for points, exact containment for bars, stroke proximity for lines — identically for SVG and canvas strata, and hovering never re-runs the pipeline.",
-    tags: ["interaction", "tooltip", "hover", "point"],
+    title: "Inspect and pin data",
+    description: "Opt-in inspection adds a semantic crosshair, an HTML tooltip, keyboard traversal, and click-or-Enter pinning. The example also renders the typed oninspect lifecycle so transient, pinned, and clear states are visible without exposing renderer indices.",
+    tags: ["interaction", "inspect", "tooltip", "crosshair", "keyboard", "pin"],
     docsSection: "Interaction",
+    vrHeight: 740,
+    journey: {
+      pointer: "Move across a point to inspect it, then click to pin the inspection.",
+      keyboard: "Tab to the chart, use the Arrow keys to inspect points, press Enter to pin, and press Escape to dismiss.",
+      touch: "Tap a point to pin its values; tap outside the chart to dismiss the inspection.",
+      references: [
+        { label: "Interaction guide and event reference", href: "/guide/interactions" },
+        { label: "Pre-0.1 interaction migration", href: "/guide/migrating-pre-0-1" },
+      ],
+      svelteFirst: true,
+      fullWidth: true,
+    },
     hasData: true,
   },
   {

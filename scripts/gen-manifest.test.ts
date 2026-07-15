@@ -34,10 +34,78 @@ describe("meta validation", () => {
   test("accepts a complete meta", () => {
     expect(
       validateMeta(
-        { title: "T", description: "D", tags: ["a"], docsSection: "S", vrHeight: 400 },
+        {
+          title: "T",
+          description: "D",
+          tags: ["a"],
+          docsSection: "S",
+          vrHeight: 400,
+        },
         "x/y",
       ),
     ).toEqual([]);
+  });
+
+  test("accepts and emits a complete interaction journey", () => {
+    const journey = {
+      pointer: "Move over a mark, then click to pin.",
+      keyboard: "Focus the chart, use Arrow keys, then press Enter.",
+      touch: "Tap a mark to pin it.",
+      references: [
+        { label: "Interactions guide", href: "/guide/interactions" },
+        { label: "Migration guide", href: "/guide/migrating-pre-0-1" },
+      ],
+      svelteFirst: true,
+      fullWidth: true,
+    };
+    expect(
+      validateMeta(
+        {
+          title: "T",
+          description: "D",
+          tags: ["a"],
+          docsSection: "S",
+          journey,
+        },
+        "interaction/example",
+      ),
+    ).toEqual([]);
+
+    const src = buildManifestSource([example({ journey })]);
+    expect(src).toContain("readonly journey?: ExampleJourney;");
+    expect(src).toContain('href: "/guide/interactions"');
+    expect(src).toContain("svelteFirst: true");
+    expect(src).toContain("fullWidth: true");
+  });
+
+  test("rejects incomplete interaction guidance and unsafe reference links", () => {
+    const base = {
+      title: "T",
+      description: "D",
+      tags: ["a"],
+      docsSection: "S",
+    };
+    expect(
+      validateMeta({ ...base, journey: { pointer: "P", keyboard: "K", touch: "T" } }, "x/y").join(
+        "\n",
+      ),
+    ).toContain("references");
+    expect(
+      validateMeta(
+        {
+          ...base,
+          journey: {
+            pointer: "P",
+            keyboard: "K",
+            touch: "T",
+            references: [{ label: "Bad", href: "https://example.com" }],
+            svelteFirst: true,
+            fullWidth: true,
+          },
+        },
+        "x/y",
+      ).join("\n"),
+    ).toContain("root-relative");
   });
 
   test("rejects non-objects, missing fields, empty strings, bad tags, bad vrHeight, unknown keys", () => {
@@ -59,13 +127,25 @@ describe("meta validation", () => {
     ).toHaveLength(1);
     expect(
       validateMeta(
-        { title: "T", description: "D", tags: ["a"], docsSection: "S", vrHeight: -1 },
+        {
+          title: "T",
+          description: "D",
+          tags: ["a"],
+          docsSection: "S",
+          vrHeight: -1,
+        },
         "x/y",
       ),
     ).toHaveLength(1);
     expect(
       validateMeta(
-        { title: "T", description: "D", tags: ["a"], docsSection: "S", bogus: 1 },
+        {
+          title: "T",
+          description: "D",
+          tags: ["a"],
+          docsSection: "S",
+          bogus: 1,
+        },
         "x/y",
       ),
     ).toHaveLength(1);
@@ -117,7 +197,13 @@ describe("collision detection", () => {
 describe("emission format", () => {
   test("includes vrHeight only when present and marks hasData", () => {
     const src = buildManifestSource([
-      example({ id: "a/tall", category: "a", name: "tall", vrHeight: 520, hasData: true }),
+      example({
+        id: "a/tall",
+        category: "a",
+        name: "tall",
+        vrHeight: 520,
+        hasData: true,
+      }),
       example({ id: "a/plain", category: "a", name: "plain" }),
     ]);
     expect(src).toContain("vrHeight: 520,");

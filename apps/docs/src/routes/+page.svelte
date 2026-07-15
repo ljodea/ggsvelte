@@ -25,6 +25,8 @@
     <a href={`${base}/guide/getting-started`}>Get started →</a>
     &nbsp;·&nbsp;
     <a href={`${base}/examples`}>Browse the example gallery →</a>
+    &nbsp;·&nbsp;
+    <a href={`${base}/guide/interactions`}>Add interaction →</a>
   </p>
   <p>
     Agents: <a href={`${base}/schema/v0.json`}>JSON Schema</a> ·

@@ -18,6 +18,10 @@
  */
 import type { ThemeTokens } from "./theme.js";
 
+// Interaction identity boundary (keep in sync with the implementation plan):
+// source/spec -> pipeline geometry + interned lineage -> Scene + CandidateStore
+// -> compact candidate ids -> semantic resolver -> reducer/presentation/events.
+
 export interface PointsBatch {
   kind: "points";
   /** Index of the source layer in the normalized spec. */
@@ -138,6 +142,8 @@ export interface SceneAxis {
 }
 
 export interface ScenePanel {
+  /** Stable semantic identity derived from facet field/value identity. */
+  id: string;
   /** Panel origin/size in plot px. */
   x: number;
   y: number;
@@ -161,6 +167,8 @@ export const PANEL_SPACING = 8;
 
 /** One discrete legend entry (swatch + label), legend-local coordinates. */
 export interface SceneLegendEntry {
+  /** Raw domain value, retained separately from its formatted label. */
+  value: unknown;
   label: string;
   color: string;
   /** Top of the entry row, legend-local px. */

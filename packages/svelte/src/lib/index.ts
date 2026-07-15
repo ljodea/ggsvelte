@@ -7,12 +7,44 @@
 // Lifecycle (Hadley lesson 13; meanings in CONTRIBUTING.md): tags collected
 // into lifecycle.json by scripts/gen-lifecycle.ts.
 // @lifecycle-default experimental
+/* oxlint-disable typescript/no-deprecated -- migration aliases intentionally remain public */
 
 // Components
 /** @lifecycle stable-intent */
 export { default as GGPlot } from "./GGPlot.svelte";
 export { default as Tooltip } from "./Tooltip.svelte";
-export type { BrushSelection, TooltipContext, ZoomDomains } from "./interaction.js";
+export { INTERACTION_DIAGNOSTIC_CATALOG, normalizeInteractionConfig } from "./interaction.js";
+export type {
+  AreaMode,
+  BrushSelection,
+  InspectInput,
+  InspectMode,
+  InspectOptions,
+  InteractionDiagnostic,
+  InteractionDiagnosticCode,
+  InteractionSource,
+  InteractionTool,
+  IntervalSelection,
+  NonEmptyReadonlyArray,
+  PlotDatum,
+  PlotInspection,
+  PlotInspectionChange,
+  PlotInspectionClear,
+  PlotInteractionEvent,
+  PlotSelection,
+  PointSelection,
+  ReadonlyZoomDomains,
+  ResolvedInspectMode,
+  ResolvedInteractionConfig,
+  SelectInput,
+  SelectOptions,
+  TooltipContext,
+  TooltipField,
+  ZoomDomains,
+  ZoomEvent,
+  ZoomInput,
+  ZoomOptions,
+} from "./interaction.js";
 export { default as GeomPoint } from "./GeomPoint.svelte";
 export { default as GeomLine } from "./GeomLine.svelte";
 export { default as GeomCol } from "./GeomCol.svelte";
@@ -101,7 +133,3 @@ export type {
   Stratum,
   ThemeTokens,
 } from "@ggsvelte/core";
-
-// DOM surface (hit index; canvas renderers are internal to <GGPlot>)
-export { buildHitIndex, DEFAULT_HIT_TOLERANCE } from "@ggsvelte/core/dom";
-export type { HitIndexOptions, SceneHit, SceneHitIndex } from "@ggsvelte/core/dom";

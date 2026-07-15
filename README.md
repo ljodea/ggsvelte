@@ -37,9 +37,9 @@ bun add ggsvelte        # or: npm install ggsvelte
   sensible inferred scales, and stable categorical colors. Valid but
   questionable choices produce actionable advisories instead of visual
   footguns.
-- **Charts stay inside their container** — `width="container"` responds to
-  layout changes, while the plot surface clips marks and keeps overlays
-  bounded.
+- **Charts stay inside their container** — omitted width is responsive by
+  default; a numeric width is the explicit fixed-size opt-in. The plot surface
+  clips marks and keeps overlays bounded.
 - **Defaults can improve safely** — every spec is stamped with an edition, so
   future improvements do not silently restyle existing charts.
 - **Use the right renderer for the data** — SVG for axes, text, and ordinary
@@ -47,6 +47,13 @@ bun add ggsvelte        # or: npm install ggsvelte
 - **A real grammar, not a chart-type menu** — 12+ geoms, R-fixture-tested
   statistics, positions, free-scale facets, coordinates, annotations, and
   interaction compose through the same model.
+- **Interaction is semantic and opt-in** — inspect and pin data, select points
+  or intervals, brush to zoom, and consume typed Svelte 5 events without
+  depending on SVG nodes or renderer indices.
+
+Try [inspection and pinning](https://ljodea.github.io/ggsvelte/examples/interaction/tooltip)
+or [interval selection and zoom](https://ljodea.github.io/ggsvelte/examples/interaction/brush-zoom),
+then read the [interaction guide and event reference](https://ljodea.github.io/ggsvelte/guide/interactions).
 
 ## One spec, three surfaces
 
@@ -113,6 +120,13 @@ CLI: `ggsvelte-render spec.json > chart.svg` (JSON-line diagnostics on stderr).
   inside the `ggsvelte` package).
 - Docs site endpoints: `/llms.txt`, `/llms-full.txt`, `/schema/v0.json`.
 - Held-out eval harness: `tests/evals/` (`bun run evals`, dry-run without a key).
+
+## Documentation
+
+- [Guide and examples](https://ljodea.github.io/ggsvelte/)
+- [Interactions and event reference](https://ljodea.github.io/ggsvelte/guide/interactions)
+- [Pre-0.1 interaction migration](https://ljodea.github.io/ggsvelte/guide/migrating-pre-0-1)
+- [Lifecycle and editions](https://ljodea.github.io/ggsvelte/guide/lifecycle)
 
 ## Contributing
 

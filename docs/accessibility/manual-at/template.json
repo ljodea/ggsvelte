@@ -1,0 +1,22 @@
+{
+  "$schema": "./record.schema.json",
+  "release": "0.0.0-rc.0",
+  "date": "2026-01-01",
+  "tester": "initials-or-team",
+  "platform": "macOS 15.x",
+  "assistiveTechnology": { "name": "VoiceOver", "version": "15.x" },
+  "browser": { "name": "Safari", "version": "18.x" },
+  "fixture": "/examples/interactions/inspection",
+  "reducedMotion": false,
+  "checks": [
+    {
+      "id": "inspection-keyboard",
+      "steps": ["Focus the plot", "Move inspection with ArrowRight", "Pin with Enter"],
+      "expected": "The focused datum, group count, and pinned state are announced once.",
+      "observed": "",
+      "result": "pending",
+      "issue": null
+    }
+  ],
+  "notes": ""
+}

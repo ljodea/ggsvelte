@@ -218,12 +218,238 @@ and **the fix carries a machine-applicable example — apply it**. Pass
 
 - [Examples gallery](/examples) — every example shows the Svelte component,
   the builder chain, and the canonical spec JSON side by side.
+- [Interactions](/guide/interactions) — inspection, selection, zoom, typed
+  events, keyboard behavior, and stable identity.
+- [Pre-0.1 interaction migration](/guide/migrating-pre-0-1) — replace the old
+  tooltip and brush props and callback payloads.
 - [Errors reference](/guide/errors) — every validation and render diagnostic.
 - [Spec-lint advisories](/guide/advisories) — meaningless-but-valid specs.
 - [Lifecycle & editions](/guide/lifecycle) — API stability tags and the
   defaults-edition mechanism.
 - [JSON Schema](/schema/v0.json) — for constrained decoding.
 - [llms-full.txt](/llms-full.txt) — the whole docs corpus in one file.
+`;
+
+export const INTERACTIONS_MD = `# Interactions
+
+ggsvelte keeps static charts static. Opt in to only the behaviors the chart
+needs with \`inspect\`, \`select\`, and \`zoom\`. Once more than one behavior is
+available, the chart renders an accessible tool rail so inspection, selection,
+and zoom never compete for the same drag or click.
+
+## Inspection
+
+\`inspect={true}\` enables the default HTML tooltip, semantic crosshair,
+keyboard traversal, and click-or-Enter pinning. Configure it when the chart
+has a natural comparison axis:
+
+\`\`\`svelte
+<GGPlot
+  {data}
+  aes={{ x: "date", y: "value", color: "series" }}
+  key="id"
+  inspect={{ mode: "x", pin: true, maxDistance: 24 }}
+  oninspect={(event) => console.log(event)}
+>
+  <GeomLine />
+  <GeomPoint />
+</GGPlot>
+\`\`\`
+
+The modes are \`auto\`, \`exact\`, \`x\`, \`y\`, and \`xy\`. \`auto\` resolves to a
+concrete mode before an event is emitted. \`x\` and \`y\` return one
+representative per semantic series at the focused axis value; \`exact\` and
+\`xy\` return the focused datum. \`maxDistance\` is measured in CSS pixels: the
+dominant axis for \`x\` or \`y\`, Euclidean distance for \`xy\`, and geometry
+containment plus tolerance for \`exact\`.
+
+For custom HTML, pass a Svelte 5 snippet. Informational content is the default;
+choose \`contentMode: "interactive"\` only when the pinned tooltip contains
+controls that need focus.
+
+\`\`\`svelte
+{#snippet details(inspection)}
+  <strong>{inspection.focus.row?.name}</strong>
+  <span>{inspection.members.length} series at this value</span>
+{/snippet}
+
+<GGPlot inspect={{ mode: "x", content: details }} />
+\`\`\`
+
+## Point and interval selection
+
+Point selection is durable identity, not a renderer index. Supply a unique,
+stable string, number, or symbol for every source row:
+
+\`\`\`svelte
+<GGPlot key="id" select={{ type: "point", multiple: true }} />
+\`\`\`
+
+Use interval selection for brushing. The callback receives both the selected
+domain and normalized plot-pixel rectangle, plus semantic keys and a lineage
+count for aggregate marks.
+
+\`\`\`svelte
+<GGPlot
+  key="id"
+  select={{ type: "interval", mode: "xy", persistent: true }}
+  onselect={(event) => {
+    if (event.mode !== "point" && event.phase === "end") {
+      selectedDomain = event.domain;
+    }
+  }}
+/>
+\`\`\`
+
+Interval selection currently requires one unfaceted panel. A faceted request
+emits \`INTERACTION_INTERVAL_FACET_UNSUPPORTED\` through \`ondiagnostic\` and is
+disabled rather than behaving inconsistently.
+
+## Brush zoom
+
+\`zoom={true}\` enables two-dimensional brush zoom. Set \`zoom={{ mode: "x" }}\`
+or \`zoom={{ mode: "y" }}\` for a single axis. The tool rail separates Zoom area
+from Select area when both are enabled. A completed zoom emits explicit
+domains; Reset zoom or double-click emits a clear event.
+
+\`\`\`svelte
+<GGPlot
+  inspect={true}
+  select={{ type: "interval", mode: "xy" }}
+  zoom={{ mode: "xy" }}
+  onzoom={(event) => console.log(event.domains)}
+/>
+\`\`\`
+
+## Event reference
+
+All events carry \`type\`, \`phase\`, and \`source\` (\`pointer\`, \`keyboard\`,
+\`touch\`, or \`programmatic\`). Use the focused callback for one capability or
+\`oninteraction\` for the discriminated union of every event.
+
+### \`oninspect(event: PlotInspection)\`
+
+- A change is \`{ type: "inspect", phase: "change", state, source, mode,
+  panelId, focus, members }\`.
+- \`state\` is \`transient\` or \`pinned\`; \`members\` is always non-empty and
+  \`focus\` is the member under direct inspection.
+- \`x\` and \`y\` changes also carry the original logical \`axisValue\` and its
+  formatted \`axisLabel\`.
+- Dismissal is the small event \`{ type: "inspect", phase: "clear", source }\`.
+
+Each \`PlotDatum\` has \`key\`, source \`row\` when one exists, aggregate
+\`sourceKeys\` and \`lineageCount\`, \`layerIndex\`, \`panelId\`, mapped \`fields\`,
+and a plot-pixel \`anchor\`. Keyless or synthetic marks expose \`key: null\`;
+internal renderer indices never leak into callbacks.
+
+### \`onselect(event: PlotSelection)\`
+
+- Point selection emits \`{ type: "select", phase: "end" | "clear",
+  mode: "point", keys, source }\`.
+- Interval selection emits \`start\`, \`change\`, \`end\`, and \`clear\` phases with
+  \`mode\`, \`panelId\`, \`domain\`, \`pixels\`, \`keys\`, \`lineageCount\`, and
+  \`source\`.
+
+### \`onzoom(event: ZoomEvent)\`
+
+- Zoom completion is \`{ type: "zoom", phase: "end", source, domains }\`.
+- Reset is \`{ type: "zoom", phase: "clear", source, domains: null }\`.
+
+\`oninteraction(event: PlotInteractionEvent)\` receives the same objects. It
+does not wrap or duplicate them. A linked chart that consumes shared state
+should not re-emit the origin chart's event.
+
+## Keyboard and accessibility defaults
+
+Focus the plot, then use arrow keys or brackets to traverse data. Enter or
+Space pins inspection, activates point selection, or sets the two corners of
+an area, depending on the active tool. Escape dismisses the current
+interaction. Keyboard inspection updates a polite live region with a concise
+axis, count, and pin summary; complete pinned content remains ordinary labelled
+and navigable DOM.
+
+## Identity and diagnostics
+
+Use \`key="id"\` when the row has a field, or \`key={(row) => row.id}\` for an
+accessor. Keys must be non-null unique \`PropertyKey\` values and stable across
+updates. Invalid or duplicate keys emit structured diagnostics through
+\`ondiagnostic\`; they never silently fall back to array positions. Stable keys
+let pinned inspection and point selection follow a datum when data is updated.
+`;
+
+export const MIGRATING_PRE_0_1_MD = `# Migrating pre-0.1 interactions
+
+The pre-release interaction API now names user intent instead of presentation.
+This is a source migration: update props, callback payload handling, and custom
+tooltip snippets together.
+
+## Rename the props and callbacks
+
+- \`tooltip\` → \`inspect\`
+- \`brush\` → \`select={{ type: "interval" }}\`
+- \`onhover\` → \`oninspect\`
+- \`onbrush\` → \`onselect\`
+- \`onzoom={(domains) => ...}\` → \`onzoom={(event) => ...}\`
+
+Before:
+
+\`\`\`svelte
+<GGPlot
+  tooltip={true}
+  brush={true}
+  zoom={true}
+  onhover={(hit) => (hovered = hit)}
+  onbrush={(selection) => (brushed = selection)}
+  onzoom={(domains) => (zoomed = domains)}
+/>
+\`\`\`
+
+After:
+
+\`\`\`svelte
+<GGPlot
+  key="id"
+  inspect={true}
+  select={{ type: "interval" }}
+  zoom={true}
+  oninspect={(event) => (inspection = event)}
+  onselect={(event) => (selection = event)}
+  onzoom={(event) => (zoomed = event.domains)}
+/>
+\`\`\`
+
+## Migrate payload handling
+
+\`oninspect\` is a lifecycle. Narrow on \`event.phase === "change"\` before
+reading \`focus\`, \`members\`, or \`mode\`; a clear event deliberately carries
+only its type, phase, and source. Use \`event.focus.row\` instead of resolving a
+renderer hit index yourself.
+
+\`onselect\` also has phases. Interval callbacks receive domain and pixel
+bounds on \`event.domain\` and \`event.pixels\`, and return stable semantic
+\`event.keys\` instead of source-row indices and renderer hits. Point selection
+uses the same callback with \`event.mode === "point"\`.
+
+\`onzoom\` now reports an event. Read \`event.domains\` after an \`end\` phase;
+the \`clear\` phase carries \`domains: null\`.
+
+## Migrate custom tooltip snippets
+
+The snippet argument changed from one renderer hit to a semantic inspection:
+
+- \`TooltipContext\` → \`PlotInspectionChange\`
+- \`context.row\` → \`inspection.focus.row\`
+- \`context.fields\` → \`inspection.focus.fields\`
+- \`BrushSelection\` → \`IntervalSelection\`
+- \`ZoomDomains\` → \`ReadonlyZoomDomains\`
+
+The old type names remain deprecated aliases where a safe alias is possible,
+but the old component props and old callback shapes are removed. Pre-0.1 means
+there is no runtime compatibility shim: TypeScript errors should point directly
+at every source change you need to make.
+
+See [Interactions](/guide/interactions) for current options, event shapes,
+keyboard behavior, and identity requirements.
 `;
 
 function catalogSection(
@@ -419,6 +645,18 @@ export function guidePages(lifecycle: LifecycleDoc): GuidePage[] {
       title: "Lifecycle & editions",
       description: "API stability tags per export, and the defaults-edition mechanism.",
       markdown: buildLifecycleMd(lifecycle),
+    },
+    {
+      slug: "interactions",
+      title: "Interactions",
+      description: "Inspection, selection, zoom, keyboard behavior, identity, and event contracts.",
+      markdown: INTERACTIONS_MD,
+    },
+    {
+      slug: "migrating-pre-0-1",
+      title: "Migrating pre-0.1 interactions",
+      description: "Move from tooltip and brush props to semantic interaction capabilities.",
+      markdown: MIGRATING_PRE_0_1_MD,
     },
   ];
 }

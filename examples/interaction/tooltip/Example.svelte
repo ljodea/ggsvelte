@@ -2,24 +2,42 @@
   import { GeomPoint, GGPlot } from "ggsvelte";
 
   import { penguins } from "./data.js";
+
+  let inspectionStatus = $state("Move across the plot or use the arrow keys.");
 </script>
 
-<!-- tooltip is an adapter-level overlay: hover resolves through the plot's
-     hit index (never a pipeline re-run) and the default content lists the
-     hit layer's mapped fields. Interactions are excluded from VR shots;
-     component tests cover them. -->
+<!-- Inspection is opt-in. The default HTML tooltip, crosshair, keyboard
+     traversal, and pinning all consume the same semantic event. -->
 <GGPlot
   data={penguins}
   aes={{ x: "flipper", y: "mass", color: "species" }}
-  tooltip={true}
+  key="id"
+  inspect={{ mode: "xy", pin: true, maxDistance: 24 }}
+  oninspect={(event) => {
+    inspectionStatus =
+      event.phase === "clear"
+        ? `Inspection cleared by ${event.source}.`
+        : `${event.state === "pinned" ? "Pinned" : "Inspecting"} ${String(event.focus.row?.species ?? "datum")} · ${String(event.members.length)} member${event.members.length === 1 ? "" : "s"} · ${event.source}`;
+  }}
   labs={{
-    title: "Hover a point for its values",
+    title: "Inspect a point, then click to pin",
     x: "Flipper length (mm)",
     y: "Body mass (g)",
     color: "Species",
   }}
-  width={640}
+  width="container"
   height={400}
 >
   <GeomPoint size={4} alpha={0.85} />
 </GGPlot>
+
+<p class="event-status" aria-live="polite">{inspectionStatus}</p>
+
+<style>
+  .event-status {
+    max-width: 640px;
+    margin: 0.6rem 0 0;
+    color: var(--muted, #59636e);
+    font: 0.82rem/1.4 var(--gg-font-family, system-ui, sans-serif);
+  }
+</style>
