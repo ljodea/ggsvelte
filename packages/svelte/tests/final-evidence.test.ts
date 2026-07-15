@@ -75,6 +75,9 @@ describe("final R-1/R0 evidence locks", () => {
     await tick();
     expect(live.textContent?.match(/pinned/g)).toHaveLength(1);
     expect(container.querySelectorAll(".gg-tooltip-members dl")).toHaveLength(2);
+    keydown(surface, "Enter");
+    await tick();
+    expect(live.textContent?.match(/unpinned/g)).toHaveLength(1);
   });
 
   it("uses one live region for area instructions, completion, clear, zoom, and reset", async () => {

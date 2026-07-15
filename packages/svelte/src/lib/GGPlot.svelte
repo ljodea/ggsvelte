@@ -1172,6 +1172,8 @@
         source,
       });
     if (state === "transient") inspectionCoordinator.release("pinned");
+    if (state === "transient" && (source === "keyboard" || source === "touch"))
+      announceInteraction(`${inspectionLiveText(resolved.snapshot)}, unpinned`);
     if (resolved.semanticChanged)
       emitInspection(resolved.snapshot, resolved.semanticFingerprint);
     if (
