@@ -42,4 +42,11 @@ describe("R0 release wiring", () => {
   it("enforces retained memory on every CI run", () => {
     expect(read(".github/workflows/ci.yml")).toContain("bun run bench:memory:check");
   });
+
+  it("uses bash for the containerized visual approval job", () => {
+    const workflow = read(".github/workflows/vr-compare.yml");
+    const approvalJob = workflow.slice(workflow.indexOf("  approve-regenerate:"));
+    expect(approvalJob).toContain("defaults:");
+    expect(approvalJob).toContain("shell: bash");
+  });
 });
