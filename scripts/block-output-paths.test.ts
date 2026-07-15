@@ -1,43 +1,46 @@
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { chmodSync, mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { afterEach, describe, expect, it } from "bun:test";
 
 const guard = resolve(import.meta.dir, "guards/block-output-paths.sh");
-const repos: string[] = [];
+const sandboxes: string[] = [];
+const baseline = "tests/visual/__screenshots__/plot.png";
 
 afterEach(() => {
-  for (const repo of repos.splice(0)) rmSync(repo, { recursive: true, force: true });
+  for (const sandbox of sandboxes.splice(0)) rmSync(sandbox, { recursive: true, force: true });
 });
 
-function repoWithTrackedBaseline(): string {
-  const repo = mkdtempSync(resolve(tmpdir(), "ggsvelte-output-guard-"));
-  repos.push(repo);
-  spawnSync("git", ["init", "-b", "main", repo]);
-  git(repo, ["config", "user.name", "Guard Test"]);
-  git(repo, ["config", "user.email", "guard@example.test"]);
-  mkdirSync(resolve(repo, "tests/visual/__screenshots__"), { recursive: true });
-  writeFileSync(resolve(repo, "tests/visual/__screenshots__/plot.png"), "baseline");
-  git(repo, ["add", "."]);
-  git(repo, ["commit", "-m", "baseline"]);
-  return repo;
-}
+function runGuard(branch: string, staged: string) {
+  const sandbox = mkdtempSync(resolve(tmpdir(), "ggsvelte-output-guard-"));
+  const bin = resolve(sandbox, "bin");
+  sandboxes.push(sandbox);
+  mkdirSync(bin);
+  const fakeGit = resolve(bin, "git");
+  writeFileSync(
+    fakeGit,
+    `#!/bin/sh
+case "$1" in
+  symbolic-ref) printf '%s\\n' "$FAKE_BRANCH" ;;
+  diff) printf '%s\\n' "$FAKE_STAGED" ;;
+  *) exit 2 ;;
+esac
+`,
+  );
+  chmodSync(fakeGit, 0o755);
 
-function git(repo: string, args: string[]) {
-  return spawnSync("git", args, { env: isolatedGitEnv(repo) });
-}
-
-function isolatedGitEnv(repo: string) {
-  return { ...process.env, GIT_DIR: resolve(repo, ".git"), GIT_WORK_TREE: repo };
-}
-
-function runGuard(repo: string) {
-  return spawnSync("bash", [guard, "tests/visual/__screenshots__/plot.png"], {
-    cwd: repo,
+  const env = Object.fromEntries(
+    Object.entries(process.env).filter(([name]) => !name.startsWith("GIT_")),
+  );
+  return spawnSync("bash", [guard, baseline], {
+    cwd: sandbox,
     encoding: "utf8",
     env: {
-      ...isolatedGitEnv(repo),
+      ...env,
+      PATH: `${bin}:${env.PATH}`,
+      FAKE_BRANCH: branch,
+      FAKE_STAGED: staged,
       GITHUB_HEAD_REF: "",
       GITHUB_REF_NAME: "",
     },
@@ -46,23 +49,16 @@ function runGuard(repo: string) {
 
 describe("block-output-paths guard", () => {
   it("allows clean tracked baselines during all-files CI", () => {
-    expect(runGuard(repoWithTrackedBaseline()).status).toBe(0);
+    expect(runGuard("main", "").status).toBe(0);
   });
 
   it("blocks a newly staged baseline on an ordinary branch", () => {
-    const repo = repoWithTrackedBaseline();
-    writeFileSync(resolve(repo, "tests/visual/__screenshots__/plot.png"), "changed");
-    git(repo, ["add", "."]);
-    const result = runGuard(repo);
+    const result = runGuard("feature/ordinary", baseline);
     expect(result.status).toBe(1);
     expect(result.stderr).toContain("plot.png");
   });
 
   it("allows the audited visual-update branch", () => {
-    const repo = repoWithTrackedBaseline();
-    git(repo, ["switch", "-c", "vr-update/pr-11"]);
-    writeFileSync(resolve(repo, "tests/visual/__screenshots__/plot.png"), "approved");
-    git(repo, ["add", "."]);
-    expect(runGuard(repo).status).toBe(0);
+    expect(runGuard("vr-update/pr-11", baseline).status).toBe(0);
   });
 });
