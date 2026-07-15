@@ -156,6 +156,7 @@ jobs:
                 -WorkingDirectory $env:GITHUB_WORKSPACE `
                 -ArgumentList @('scripts/serve-docs.ts') `
                 -PassThru `
+                -WindowStyle Hidden `
                 -RedirectStandardOutput "$env:EVIDENCE_DIR\fixture-server.stdout.log" `
                 -RedirectStandardError "$env:EVIDENCE_DIR\fixture-server.stderr.log"
               for ($attempt = 0; $attempt -lt 60; $attempt++) {
