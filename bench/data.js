@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784147883795,
+  "lastUpdate": 1784155066183,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -4486,6 +4486,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 168.0805,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "ec0868b1e3b295fa58ceeb3d317b1bce768d99f4",
+          "message": "refactor(svelte): split GGPlot helpers and presentational UI (#46)\n\n* refactor(svelte): split GGPlot helpers and presentational UI\n\nExtract pure geometry/labels/a11y helpers and ToolRail/InteractionOverlay\ncomponents so GGPlot stays a thinner orchestrator. Behavior and public API\nare unchanged; unit tests cover the extracted pure paths.\n\n* test(svelte): cover extracted tool rail and overlay layout\n\nAssert ToolRail narrow class/positioning and that InteractionOverlay stays\nan absolute, pointer-inert plot-root sibling before the capture surface.\n\n* ci: trigger checks for PR #46\n\n* style: apply repo formatter to extracted GGPlot modules\n\n* fix(svelte): clear type-aware lint on extracted GGPlot modules\n\nAvoid deprecated ZoomDomains, drop unnecessary non-null assertions, and\nmake live-text field filtering use explicit boolean control flow.",
+          "timestamp": "2026-07-15T17:37:12-05:00",
+          "tree_id": "cc26928be3801a0720f893a4544083c6b877f8db",
+          "url": "https://github.com/ljodea/ggsvelte/commit/ec0868b1e3b295fa58ceeb3d317b1bce768d99f4"
+        },
+        "date": 1784155065831,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.4952,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.8455,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 11.0221,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 12.6395,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 89.9982,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 116.7276,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.009,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.5077,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 86.5767,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 106.8513,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 11.573,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 11.1246,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 116.3511,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.6581,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 26.3964,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.4706,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 32.546,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 620.3958,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 166.3719,
             "unit": "ms"
           }
         ]
