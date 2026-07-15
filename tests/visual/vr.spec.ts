@@ -17,13 +17,16 @@ import { EXAMPLES } from "../../examples/manifest";
 import { settleVisualState } from "./helpers/deterministic";
 
 const THEMES = ["light", "dark"] as const;
+const EXPECTED_PLOTS: Readonly<Record<string, number>> = {
+  "interaction/linked-views": 2,
+};
 
 for (const example of EXAMPLES) {
   for (const theme of THEMES) {
     test(`${example.id} — ${theme}`, async ({ page }) => {
       await page.goto(`/examples/${example.id}?vr&theme=${theme}`);
       await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
-      await settleVisualState(page);
+      await settleVisualState(page, EXPECTED_PLOTS[example.id] ?? 1);
       await expect(page.locator(".gg-example-frame")).toHaveScreenshot(
         `${example.category}-${example.name}-${theme}.png`,
       );
