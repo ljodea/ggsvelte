@@ -1,39 +1,16 @@
 /**
  * Facet grid: outer chrome, shared margin pass, and panel cell geometry.
  */
-import type { LayoutTheme, TickFormatter } from "../layout/layout.js";
-import type { TextMeasurer } from "../layout/measure.js";
-
-import type { FacetPanelDef } from "./facets.js";
 import { computeFacetCellGeometry } from "./panel-layout-facet-cells.js";
+import type { FacetGridGeometryInput } from "./panel-layout-facet-margins-input.js";
 import { computeFacetSharedMargins } from "./panel-layout-facet-margins-pass.js";
 import type { FacetGridGeometry } from "./panel-layout-facet-margins-types.js";
 import { computeFacetOuterChrome } from "./panel-layout-facet-outer.js";
-import type { DisplayScalesFn } from "./panel-layout-types.js";
 
 export type { FacetGridGeometry } from "./panel-layout-facet-margins-types.js";
+export type { FacetGridGeometryInput } from "./panel-layout-facet-margins-input.js";
 
-export function computeFacetGridGeometry(input: {
-  facetPanels: readonly FacetPanelDef[];
-  nrow: number;
-  ncol: number;
-  freeH: boolean;
-  freeV: boolean;
-  outerLeftTitle: string;
-  outerBottomTitle: string;
-  axisTitleBand: number;
-  legendWidth: number;
-  optionsWidth: number;
-  layoutHeight: number;
-  topBand: number;
-  displayScales: DisplayScalesFn;
-  hBreaks: readonly (number | string)[] | undefined;
-  vBreaks: readonly (number | string)[] | undefined;
-  formatH: TickFormatter | undefined;
-  formatV: TickFormatter | undefined;
-  measurer: TextMeasurer;
-  layoutTheme: LayoutTheme;
-}): FacetGridGeometry {
+export function computeFacetGridGeometry(input: FacetGridGeometryInput): FacetGridGeometry {
   const outer = computeFacetOuterChrome({
     nrow: input.nrow,
     ncol: input.ncol,

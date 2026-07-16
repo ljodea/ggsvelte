@@ -256,3 +256,28 @@ describe("createLazyIdentityIndex", () => {
     expect(calls).toBe(0);
   });
 });
+
+describe("allocatePipelineRunId", () => {
+  it("returns increasing positive integers", async () => {
+    const { allocatePipelineRunId } = await import("../src/pipeline/run-id.ts");
+    const a = allocatePipelineRunId();
+    const b = allocatePipelineRunId();
+    expect(a).toBeGreaterThan(0);
+    expect(b).toBe(a + 1);
+  });
+});
+
+describe("resolveOutlierContext", () => {
+  it("returns nulls for non-boxplot point batches", async () => {
+    const { resolveOutlierContext } =
+      await import("../src/pipeline/build-candidates-datum-outlier.ts");
+    expect(
+      resolveOutlierContext({
+        frame: undefined,
+        batch: { kind: "points" } as never,
+        primitiveIndex: 0,
+        facetPanel: undefined,
+      }),
+    ).toEqual({ outlierLocalRow: null, outlierSourceRow: null });
+  });
+});
