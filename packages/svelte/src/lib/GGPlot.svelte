@@ -1987,7 +1987,7 @@
   const inspectionCoordinator = createInspectionCoordinator<
     Record<string, CellValue>,
     PropertyKey
-  >((_row, index) => semanticKeys.keyAt(index) ?? null);
+  >((_row, index) => semanticKeys.keyAt(index));
 
   $effect(() => () => inspectionCoordinator.invalidate());
 
@@ -2149,7 +2149,7 @@
         source,
       })
     )
-      announcer.announce("");
+      announcer.clear();
     const action = resolveSetInspectionAction({
       hasHit: hit !== null,
       requestedState: state,
@@ -3068,8 +3068,7 @@
       {interactionMasks}
       {a11yTableOpen}
       onA11yToggle={() => (a11yTableOpen = !a11yTableOpen)}
-      onPainted={(runId, stratumKey) =>
-        runtime.notifyPainted(runId, stratumKey)}
+      onPainted={runtime.notifyPainted}
     />
     <PlotLegendTargets
       entries={interactiveLegendEntries}

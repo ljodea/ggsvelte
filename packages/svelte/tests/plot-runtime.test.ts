@@ -15,6 +15,7 @@ import {
   type ReactiveRuntimeDeps,
 } from "./helpers/runtime-deps.svelte.js";
 import { render } from "./helpers/render.js";
+import { until } from "./helpers/until.js";
 
 const minimalSpec: PortableSpec = gg(
   [
@@ -122,7 +123,6 @@ describe("createPlotRuntime model production", () => {
     expect(runtime.resolvedHeight).toBe(320);
     expect(runtime.strata.length).toBeGreaterThan(0);
     expect(runtime.hasCanvas).toBe(false);
-    expect(runtime.canvasCount).toBe(0);
 
     destroy();
   });
@@ -143,12 +143,23 @@ describe("createPlotRuntime model production", () => {
       return rt;
     });
 
+    // Ordinal color accessor (same pattern as core pipeline.test.ts).
+    const ordinal = (model: NonNullable<typeof runtime.model>) => {
+      const resolved = model.scales.color;
+      if (resolved?.kind !== "ordinal") throw new Error("expected an ordinal color scale");
+      return resolved.scale;
+    };
+
     const first = runtime.model;
     expect(first).not.toBeNull();
     const firstRunId = first!.runId;
-    const firstColorState = first!.scales.state["color"];
+    const colorOfA = ordinal(first!).colorOf("a")!;
+    const colorOfB = ordinal(first!).colorOf("b")!;
+    expect(colorOfA).not.toBe(colorOfB);
 
-    const nextSpec = gg(
+    // Grow the domain: prevScales must keep a/b value-stable (decision 0001 —
+    // the invariant the run-id commit gate exists to protect).
+    const grownSpec = gg(
       [
         { x: 1, y: 10, cls: "a" },
         { x: 2, y: 20, cls: "b" },
@@ -158,22 +169,37 @@ describe("createPlotRuntime model production", () => {
     )
       .geomPoint()
       .spec();
-    deps.setAssembled(nextSpec);
-    deps.setEffectiveSpec(nextSpec);
+    deps.setAssembled(grownSpec);
+    deps.setEffectiveSpec(grownSpec);
     // Force evaluation so an intermediate model exists (codex P2-4).
     const mid = runtime.model!;
     expect(mid.runId).toBeGreaterThan(firstRunId);
-    expect(mid.scales.state["color"]).toBeDefined();
-    if (firstColorState !== undefined) {
-      expect(mid.scales.state["color"]?.type).toBe(firstColorState.type);
-    }
+    expect(ordinal(mid).colorOf("a")).toBe(colorOfA);
+    expect(ordinal(mid).colorOf("b")).toBe(colorOfB);
+    const colorOfC = ordinal(mid).colorOf("c")!;
+    expect([colorOfA, colorOfB]).not.toContain(colorOfC);
     flushSync();
 
+    // Shrink to c-only: grow-mode reservation keeps c's color while committed
+    // scale state survives.
+    const onlyCSpec = gg([{ x: 3, y: 15, cls: "c" }], aes({ x: "x", y: "y", color: "cls" }))
+      .geomPoint()
+      .spec();
+    deps.setAssembled(onlyCSpec);
+    deps.setEffectiveSpec(onlyCSpec);
+    const shrunk = runtime.model!;
+    expect(ordinal(shrunk).colorOf("c")).toBe(colorOfC);
+    flushSync();
+
+    // resetScales drops the committed state and retrains fresh: c now trains
+    // as the only category and takes the first palette slot (= a's old color),
+    // proving the box was actually cleared and the pipeline re-ran.
     runtime.resetScales();
     expect(resetZoom).toHaveBeenCalledOnce();
     const after = runtime.model!;
-    expect(after.runId).toBeGreaterThan(mid.runId);
-    expect(after.candidates.size).toBe(3);
+    expect(after.runId).toBeGreaterThan(shrunk.runId);
+    expect(after.candidates.size).toBe(1);
+    expect(ordinal(after).colorOf("c")).toBe(colorOfA);
     flushSync();
 
     destroy();
@@ -292,63 +318,48 @@ describe("createPlotRuntime model production", () => {
         void cb;
       }
     } as unknown as typeof ResizeObserver;
-
-    const { value: runtime, destroy } = withFlushedEffectRoot(() => {
-      const deps = createReactiveRuntimeDeps({
-        assembled: minimalSpec,
-        effectiveSpec: minimalSpec,
+    try {
+      const { value: runtime, destroy } = withFlushedEffectRoot(() => {
+        const deps = createReactiveRuntimeDeps({
+          assembled: minimalSpec,
+          effectiveSpec: minimalSpec,
+        });
+        const el = document.createElement("div");
+        deps.setRoot(el);
+        deps.setWidth("container");
+        const rt = createPlotRuntime(deps);
+        rt.registerModelEffects();
+        rt.registerLateEffects();
+        return rt;
       });
-      const el = document.createElement("div");
-      deps.setRoot(el);
-      deps.setWidth("container");
-      const rt = createPlotRuntime(deps);
-      rt.registerModelEffects();
-      rt.registerLateEffects();
-      return rt;
-    });
 
-    const lastModel = runtime.model;
-    expect(lastModel).not.toBeNull();
-    expect(observe).toHaveBeenCalled();
+      const lastModel = runtime.model;
+      expect(lastModel).not.toBeNull();
+      expect(observe).toHaveBeenCalled();
 
-    const disposeSpy = vi.fn();
-    const originalDispose = lastModel!.dispose.bind(lastModel!);
-    lastModel!.dispose = () => {
-      disposeSpy();
-      originalDispose();
-    };
+      const disposeSpy = vi.fn();
+      const originalDispose = lastModel!.dispose.bind(lastModel!);
+      lastModel!.dispose = () => {
+        disposeSpy();
+        originalDispose();
+      };
 
-    destroy();
-    flushSync();
+      destroy();
+      flushSync();
 
-    expect(disconnect).toHaveBeenCalled();
-    expect(cancelAnimationFrameSpy).toHaveBeenCalled();
-    expect(disposeSpy).toHaveBeenCalled();
-
-    globalThis.ResizeObserver = OriginalRO;
-    cancelAnimationFrameSpy.mockRestore();
+      expect(disconnect).toHaveBeenCalled();
+      expect(cancelAnimationFrameSpy).toHaveBeenCalled();
+      expect(disposeSpy).toHaveBeenCalled();
+    } finally {
+      // Restore even on assertion failure — a leaked no-op ResizeObserver
+      // would cascade into every later container-width test in this worker.
+      globalThis.ResizeObserver = OriginalRO;
+      cancelAnimationFrameSpy.mockRestore();
+    }
   });
 });
 
 describe("filter capability disable onrender sequence", () => {
-  function until(predicate: () => boolean, timeout = 3000): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const started = performance.now();
-      const tick = () => {
-        if (predicate()) {
-          resolve();
-          return;
-        }
-        if (performance.now() - started > timeout) {
-          reject(new Error("until() timed out"));
-          return;
-        }
-        requestAnimationFrame(tick);
-      };
-      tick();
-    });
-  }
-
   it("emits onrender without a stale filtered model when filtering is disabled", async () => {
     const renders: number[] = [];
     const props = {

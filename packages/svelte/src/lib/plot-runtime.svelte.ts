@@ -43,7 +43,6 @@ export type PlotRuntime = {
   readonly resolvedWidth: number;
   readonly resolvedHeight: number;
   readonly strata: readonly Stratum[];
-  readonly canvasCount: number;
   readonly hasCanvas: boolean;
   readonly ready: boolean;
   notifyPainted(runId: number, stratumKey: string): void;
@@ -206,9 +205,6 @@ export function createPlotRuntime(deps: PlotRuntimeDeps): PlotRuntime {
     },
     get strata() {
       return strata;
-    },
-    get canvasCount() {
-      return canvasCount;
     },
     get hasCanvas() {
       return hasCanvas;

@@ -12,9 +12,9 @@ import { describe, expect, it } from "vitest";
 
 /** Append-only history of per-slice line ceilings (strictly decreasing). */
 const CEILINGS: readonly { readonly slice: string; readonly ceiling: number }[] = [
-  { slice: "s1", ceiling: 3400 },
+  { slice: "s1-target", ceiling: 3400 },
   // Post-extraction ratchet: actual line count + 20 headroom.
-  { slice: "s1", ceiling: 3390 },
+  { slice: "s1-final", ceiling: 3390 },
 ];
 
 // Resolve via import.meta (never CWD). Node SSR suite only — uses node:fs.

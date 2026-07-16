@@ -8,11 +8,13 @@ import { describe, expect, it } from "vitest";
 import { runPipeline, type RenderModel } from "@ggsvelte/core";
 import { aes, gg } from "@ggsvelte/spec";
 
+import { createSourceIdentityTracker } from "../src/lib/plot-semantic-keys.js";
 import {
   createPlotAnnouncer,
   createSemanticKeyService,
 } from "../src/lib/plot-shared-services.svelte.js";
 import { withEffectRoot, withFlushedEffectRoot } from "./helpers/effect-root.svelte.js";
+import { reactiveBox } from "./helpers/reactive-box.svelte.js";
 
 const rows = [
   { id: "a", x: 1, y: 10 },
@@ -44,103 +46,139 @@ describe("createPlotAnnouncer", () => {
     await Promise.resolve();
     expect(announcer.text).toBe("hello");
   });
+
+  it("clear is synchronous and never swallows a message queued in the same tick", async () => {
+    const announcer = createPlotAnnouncer();
+    // announce then clear then announce: only the last message may win, and a
+    // clear must not queue a blank that lands after a later announce.
+    announcer.announce("first");
+    announcer.clear();
+    expect(announcer.text).toBe("");
+    announcer.announce("second");
+    await Promise.resolve();
+    expect(announcer.text).toBe("second");
+  });
 });
 
 describe("createSemanticKeyService", () => {
-  it("keeps stable identity across a data-preserving re-render", () => {
-    let model = minimalModel();
-    const data = rows;
-    const spec = undefined;
-    const { sourceIdentity } = (() => {
-      const ids = new WeakMap<object, number>();
-      let next = 1;
-      return {
-        sourceIdentity(value: unknown): string {
-          if ((typeof value !== "object" && typeof value !== "function") || value === null)
-            return String(value);
-          let id = ids.get(value);
-          if (id === undefined) {
-            id = next++;
-            ids.set(value, id);
-          }
-          return String(id);
-        },
-      };
-    })();
+  it("keeps stable identity across a data-preserving re-render and flags key mutation as unstable", () => {
+    // Mutable rows: same array identity (same data token) across renders.
+    const mutableRows = [
+      { id: "a", x: 1, y: 10 },
+      { id: "b", x: 2, y: 20 },
+    ];
+    const buildModel = () =>
+      runPipeline(
+        gg(mutableRows, aes({ x: "x", y: "y", color: "id" }))
+          .geomPoint()
+          .spec(),
+        { width: 400, height: 300 },
+      );
+    const model = reactiveBox(buildModel());
+    const { sourceIdentity } = createSourceIdentityTracker();
+    const diagnostics: string[] = [];
 
     const { value: service, destroy } = withFlushedEffectRoot(() =>
       createSemanticKeyService({
-        model: () => model,
+        model: () => model.value,
         assembled: () => ({
-          data: rows,
+          data: mutableRows,
           layers: [{ geom: "point" }],
           aes: { x: { field: "x" }, y: { field: "y" }, color: { field: "id" } },
         }),
         datumKey: () => "id",
-        data: () => data,
-        spec: () => spec,
-        sourceIdentity,
-        deliverDiagnostic: () => {},
-      }),
-    );
-
-    const first = [service.keyAt(0), service.keyAt(1)];
-    expect(first).toEqual(["a", "b"]);
-
-    // Data-preserving re-render: new model, same source identity tokens.
-    const previous = model;
-    model = minimalModel();
-    flushSync();
-    expect([service.keyAt(0), service.keyAt(1)]).toEqual(first);
-    previous.dispose();
-    model.dispose();
-    destroy();
-  });
-
-  it("delivers diagnostics once per change (behavior, not implementation)", () => {
-    let model: RenderModel | null = runPipeline(
-      gg(
-        [
-          { id: "a", x: 1, y: 1 },
-          { id: "a", x: 2, y: 2 },
-        ],
-        aes({ x: "x", y: "y" }),
-      )
-        .geomPoint()
-        .spec(),
-      { width: 200, height: 200 },
-    );
-    const diagnostics: string[] = [];
-    const data = [
-      { id: "a", x: 1, y: 1 },
-      { id: "a", x: 2, y: 2 },
-    ];
-
-    const { destroy } = withFlushedEffectRoot(() =>
-      createSemanticKeyService({
-        model: () => model,
-        assembled: () => ({
-          data,
-          layers: [{ geom: "point" }],
-          aes: { x: { field: "x" }, y: { field: "y" } },
-        }),
-        datumKey: () => "id",
-        data: () => data,
+        data: () => mutableRows,
         spec: () => null,
-        sourceIdentity: String,
+        sourceIdentity,
         deliverDiagnostic: (d) => {
           diagnostics.push(d.code);
         },
       }),
     );
 
-    expect(diagnostics.length).toBeGreaterThan(0);
-    const afterFirst = diagnostics.length;
-    // Re-flush without changing keys must not re-deliver.
+    const first = [service.keyAt(0), service.keyAt(1)];
+    expect(first).toEqual(["a", "b"]);
+    expect(diagnostics).toEqual([]);
+
+    // Data-preserving re-render: NEW model, same data token → same keys, no
+    // diagnostics. (model is reactive state, so the swap re-resolves keys.)
+    const previous = model.value;
+    model.set(buildModel());
     flushSync();
-    expect(diagnostics.length).toBe(afterFirst);
-    model?.dispose();
-    model = null;
+    expect([service.keyAt(0), service.keyAt(1)]).toEqual(first);
+    expect(diagnostics).toEqual([]);
+    previous.dispose();
+
+    // Key mutation under the SAME data token: priorKeys must catch it — the
+    // mutated row's key becomes null and an unstable-key diagnostic fires.
+    // This also proves the re-render above genuinely re-resolved (the same
+    // code path now observably reacts to the model swap).
+    mutableRows[0]!.id = "z";
+    const beforeMutation = model.value;
+    model.set(buildModel());
+    flushSync();
+    expect(service.keyAt(0)).toBeNull();
+    expect(service.keyAt(1)).toBe("b");
+    expect(diagnostics).toContain("INTERACTION_UNSTABLE_KEY");
+    beforeMutation.dispose();
+    model.value.dispose();
+    destroy();
+  });
+
+  it("delivers diagnostics once per change (behavior, not implementation)", () => {
+    const duplicateRows = () => [
+      { id: "a", x: 1, y: 1 },
+      { id: "a", x: 2, y: 2 },
+    ];
+    const buildModel = (data: { id: string; x: number; y: number }[]) =>
+      runPipeline(
+        gg(data, aes({ x: "x", y: "y" }))
+          .geomPoint()
+          .spec(),
+        {
+          width: 200,
+          height: 200,
+        },
+      );
+    const dataBox = reactiveBox(duplicateRows());
+    const modelBox = reactiveBox<RenderModel | null>(buildModel(dataBox.value));
+    const diagnostics: string[] = [];
+    const { sourceIdentity } = createSourceIdentityTracker();
+
+    const { destroy } = withFlushedEffectRoot(() =>
+      createSemanticKeyService({
+        model: () => modelBox.value,
+        assembled: () => ({
+          data: dataBox.value,
+          layers: [{ geom: "point" }],
+          aes: { x: { field: "x" }, y: { field: "y" } },
+        }),
+        datumKey: () => "id",
+        data: () => dataBox.value,
+        spec: () => null,
+        sourceIdentity,
+        deliverDiagnostic: (d) => {
+          diagnostics.push(d.code);
+        },
+      }),
+    );
+
+    // Duplicate "a"/"a" keys → exactly one duplicate diagnostic on first resolve.
+    expect(diagnostics).toEqual(["INTERACTION_DUPLICATE_KEY"]);
+    // Re-flush without changing any dependency must not re-deliver.
+    flushSync();
+    expect(diagnostics).toEqual(["INTERACTION_DUPLICATE_KEY"]);
+
+    // A REAL change (new data identity, same duplicate condition) re-resolves
+    // and delivers the diagnostic exactly once more — once per change, not
+    // once per flush and not zero.
+    const previous = modelBox.value;
+    dataBox.set(duplicateRows());
+    modelBox.set(buildModel(dataBox.value));
+    flushSync();
+    expect(diagnostics).toEqual(["INTERACTION_DUPLICATE_KEY", "INTERACTION_DUPLICATE_KEY"]);
+    previous?.dispose();
+    modelBox.value?.dispose();
     destroy();
   });
 

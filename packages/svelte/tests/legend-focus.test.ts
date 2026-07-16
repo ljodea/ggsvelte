@@ -8,27 +8,10 @@ import { expectAccessible } from "./helpers/accessibility.js";
 import { render } from "./helpers/render.js";
 import { GGPlot } from "../src/lib/index.js";
 import type { LegendFocusEvent } from "../src/lib/index.js";
+import { until } from "./helpers/until.js";
 
 function state(container: HTMLElement): DOMStringMap {
   return container.querySelector<HTMLElement>("[data-legend-state]")!.dataset;
-}
-
-function until(predicate: () => boolean, timeout = 3000): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const started = performance.now();
-    const tick = () => {
-      if (predicate()) {
-        resolve();
-        return;
-      }
-      if (performance.now() - started > timeout) {
-        reject(new Error("until() timed out"));
-        return;
-      }
-      requestAnimationFrame(tick);
-    };
-    tick();
-  });
 }
 
 function afterFrame(): Promise<void> {
