@@ -193,6 +193,7 @@
     applyZoomToSpec,
     buildZoomEvent,
     continuousZoomDomainsFromScopes,
+    filterScopeChannelsByZoomMode,
     filterZoomDomainsByMode,
     resolveBrushZoomDomains,
     sanitizePartialZoomDomains,
@@ -339,12 +340,17 @@
     });
   });
 
+  // Facet intent comes from the raw prop — not assembled.facet — so declaration-
+  // only children still take the faceted diagnostic path before layers register
+  // and assembled becomes non-null on a later flush.
+  const facetedPlot = $derived(facet !== undefined);
+
   const resolvedInteractionScope: PlotInteractionScope = $derived(
     resolveInteractionScope({
       interaction,
       ...(interactionScope !== undefined && { interactionScope }),
       zoom,
-      faceted: assembled?.facet !== undefined,
+      faceted: facetedPlot,
       ...(datumKey !== undefined && { datumKey }),
       assembled,
     }),
@@ -360,7 +366,7 @@
         ...(tool !== undefined && { tool }),
       },
       {
-        faceted: assembled?.facet !== undefined,
+        faceted: facetedPlot,
         hasKey: datumKey !== undefined,
       },
     ),
@@ -491,7 +497,13 @@
     scaleBox.runId = -1;
     scaleBox.scales = undefined;
     if (interaction === undefined) localZoomDomains = null;
-    else interaction.resetZoom({ scope: resolvedInteractionScope });
+    else
+      interaction.resetZoom({
+        scope: filterScopeChannelsByZoomMode(
+          resolvedInteractionScope,
+          interactionConfig.zoom?.mode ?? null,
+        ),
+      });
     scaleEpoch++;
   }
 
@@ -1941,11 +1953,16 @@
       if (domains === null && localZoomDomains === null) return;
       localZoomDomains = domains;
     } else {
+      // Match filterZoomDomainsByMode: x-only plots must not mutate shared y.
+      const mutationScope = filterScopeChannelsByZoomMode(
+        resolvedInteractionScope,
+        interactionConfig.zoom?.mode ?? null,
+      );
       const transition =
         domains === null
-          ? interaction.resetZoom({ scope: resolvedInteractionScope, source })
+          ? interaction.resetZoom({ scope: mutationScope, source })
           : interaction.setZoom(domains, {
-              scope: resolvedInteractionScope,
+              scope: mutationScope,
               source,
             });
       if (transition === null) return;
@@ -1953,8 +1970,8 @@
         committed = frozenZoomDomains(
           continuousZoomDomainsFromScopes(
             transition.snapshot.zoom,
-            resolvedInteractionScope.x,
-            resolvedInteractionScope.y,
+            mutationScope.x,
+            mutationScope.y,
           ),
         );
       }

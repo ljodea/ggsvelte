@@ -249,6 +249,17 @@ describe("resolveInteractionScope", () => {
         assembled,
       }),
     ).toEqual({ keys: "id" });
+    // Hosts must pass faceted from the raw facet prop (not assembled.facet)
+    // so declaration-only children still take this path before layers register.
+    expect(
+      resolveInteractionScope({
+        interaction: {},
+        interactionScope: { keys: "id" },
+        zoom: true,
+        faceted: true,
+        assembled: null,
+      }),
+    ).toEqual({ keys: "id" });
   });
 
   it("requires y scope for controlled y zoom", () => {
