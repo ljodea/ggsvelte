@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784215699685,
+  "lastUpdate": 1784215940934,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -14958,6 +14958,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 161.2283,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "5ede50962bf9ec36b23630c5574b94bb061422f2",
+          "message": "refactor(core): split closed paths, candidates, boxplot, shared geometry (#135)\n\nExtract shared closed-band edge writing for area/smooth ribbons; identity\ncandidate resolve + source-backed path + represented-row lineage; boxplot\nbody buffer accumulation; geometry position/bucket modules; and frame\ngroup/carried columns. Facades keep import paths stable. Add\nappendClosedBandEdges, layoutBoxplotBody, and series characterization tests.",
+          "timestamp": "2026-07-16T10:31:45-05:00",
+          "tree_id": "f307c5d7e460c36179ebd6dac19a8308c3cf60ed",
+          "url": "https://github.com/ljodea/ggsvelte/commit/5ede50962bf9ec36b23630c5574b94bb061422f2"
+        },
+        "date": 1784215940477,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.8475,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.2354,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 10.9804,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 18.8896,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 83.8092,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 124.3424,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.0497,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.1805,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 85.2485,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 108.5978,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 12.2428,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.3756,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 115.475,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7591,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 28.1652,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.3736,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 29.1754,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 624.5242,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 167.2424,
             "unit": "ms"
           }
         ]
