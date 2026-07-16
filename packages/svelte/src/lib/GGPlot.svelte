@@ -911,7 +911,7 @@
     const onOutsidePointer = (event: PointerEvent) => {
       if (
         !shouldClosePinnedOnOutsidePointer({
-          isPinned: inspection?.state === "pinned",
+          inspectionState: inspection?.state,
           targetInsideRoot: root?.contains(event.target as Node) === true,
         })
       )
@@ -2432,9 +2432,8 @@
           assembled?.labs?.title ??
           sceneLabel(model.scene)}
         ariaControls={resolveCaptureAriaControls({
-          isPinned: inspection?.state === "pinned",
-          interactiveContent:
-            interactionConfig.inspect?.contentMode === "interactive",
+          inspectionState: inspection?.state,
+          contentMode: interactionConfig.inspect?.contentMode,
           plotId,
         })}
         onFocus={() => {

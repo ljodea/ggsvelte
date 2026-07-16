@@ -354,12 +354,15 @@ export function resolveSurfaceBlurAction(input: {
  * Whether a window pointerdown outside the plot should close a pinned
  * inspection. Host: only when `surfaceInteractive` effect is installed.
  * Host must pass `targetInsideRoot: root?.contains(target) === true`.
+ *
+ * Takes domain `inspectionState` (not a pre-derived `isPinned` boolean) so
+ * hosts pass `inspection?.state` directly — same shape as `isTooltipDocked`.
  */
 export function shouldClosePinnedOnOutsidePointer(input: {
-  readonly isPinned: boolean;
+  readonly inspectionState: "transient" | "pinned" | "none" | null | undefined;
   readonly targetInsideRoot: boolean;
 }): boolean {
-  return input.isPinned && !input.targetInsideRoot;
+  return input.inspectionState === "pinned" && !input.targetInsideRoot;
 }
 
 // ---- scene-run inspection reconcile (host $effect) ----

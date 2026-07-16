@@ -755,27 +755,41 @@ describe("shouldAnnounceUnpin / shouldFocusPinnedInteractiveTooltip", () => {
 
 describe("shouldClosePinnedOnOutsidePointer", () => {
   it("closes only when pinned and target is outside the root", () => {
-    expect(shouldClosePinnedOnOutsidePointer({ isPinned: true, targetInsideRoot: false })).toBe(
-      true,
-    );
+    expect(
+      shouldClosePinnedOnOutsidePointer({
+        inspectionState: "pinned",
+        targetInsideRoot: false,
+      }),
+    ).toBe(true);
   });
 
-  it("does not close when not pinned", () => {
-    expect(shouldClosePinnedOnOutsidePointer({ isPinned: false, targetInsideRoot: false })).toBe(
-      false,
-    );
+  it("does not close for non-pinned inspection states", () => {
+    for (const inspectionState of ["transient", "none", null, undefined] as const) {
+      expect(
+        shouldClosePinnedOnOutsidePointer({
+          inspectionState,
+          targetInsideRoot: false,
+        }),
+      ).toBe(false);
+    }
   });
 
   it("does not close when target is inside the root", () => {
-    expect(shouldClosePinnedOnOutsidePointer({ isPinned: true, targetInsideRoot: true })).toBe(
-      false,
-    );
+    expect(
+      shouldClosePinnedOnOutsidePointer({
+        inspectionState: "pinned",
+        targetInsideRoot: true,
+      }),
+    ).toBe(false);
   });
 
   it("does not close when unpinned and inside", () => {
-    expect(shouldClosePinnedOnOutsidePointer({ isPinned: false, targetInsideRoot: true })).toBe(
-      false,
-    );
+    expect(
+      shouldClosePinnedOnOutsidePointer({
+        inspectionState: "transient",
+        targetInsideRoot: true,
+      }),
+    ).toBe(false);
   });
 });
 

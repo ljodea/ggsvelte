@@ -71,13 +71,16 @@ export function plotTooltipDomId(plotId: string): string {
 /**
  * Capture-surface `aria-controls` when a pinned interactive tooltip is up.
  * Undefined otherwise (attribute omitted).
+ *
+ * Takes domain state (not pre-derived booleans) so hosts pass `inspection?.state`
+ * and inspect `contentMode` directly — same shape as `isTooltipDocked`.
  */
 export function resolveCaptureAriaControls(input: {
-  readonly isPinned: boolean;
-  readonly interactiveContent: boolean;
+  readonly inspectionState: "transient" | "pinned" | "none" | null | undefined;
+  readonly contentMode: "interactive" | "informational" | undefined;
   readonly plotId: string;
 }): string | undefined {
-  if (!input.isPinned || !input.interactiveContent) return undefined;
+  if (input.inspectionState !== "pinned" || input.contentMode !== "interactive") return undefined;
   return plotTooltipDomId(input.plotId);
 }
 

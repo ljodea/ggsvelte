@@ -150,22 +150,37 @@ describe("resolveCaptureAriaControls", () => {
   it("returns plot-scoped tooltip id only when pinned and interactive", () => {
     expect(
       resolveCaptureAriaControls({
-        isPinned: true,
-        interactiveContent: true,
+        inspectionState: "pinned",
+        contentMode: "interactive",
         plotId: "plot-a",
       }),
     ).toBe(plotTooltipDomId("plot-a"));
+  });
+
+  it("is undefined for non-pinned states even when interactive", () => {
+    for (const inspectionState of ["transient", "none", null, undefined] as const) {
+      expect(
+        resolveCaptureAriaControls({
+          inspectionState,
+          contentMode: "interactive",
+          plotId: "plot-a",
+        }),
+      ).toBeUndefined();
+    }
+  });
+
+  it("is undefined when pinned but content is not interactive", () => {
     expect(
       resolveCaptureAriaControls({
-        isPinned: true,
-        interactiveContent: false,
+        inspectionState: "pinned",
+        contentMode: "informational",
         plotId: "plot-a",
       }),
     ).toBeUndefined();
     expect(
       resolveCaptureAriaControls({
-        isPinned: false,
-        interactiveContent: true,
+        inspectionState: "pinned",
+        contentMode: undefined,
         plotId: "plot-a",
       }),
     ).toBeUndefined();
