@@ -5,6 +5,7 @@ import {
   isNarrowToolsWidth,
   plotRootInlineStyle,
   resolveClearLegendX,
+  resolveCaptureAriaControls,
   tooltipViewportSize,
 } from "../src/lib/plot-layout.js";
 
@@ -79,6 +80,32 @@ describe("plotRootInlineStyle", () => {
         themeStyle: "--t:1",
       }),
     ).toBe("width:100%;height:400px;--t:1");
+  });
+});
+
+describe("resolveCaptureAriaControls", () => {
+  it("returns plot-scoped tooltip id only when pinned and interactive", () => {
+    expect(
+      resolveCaptureAriaControls({
+        isPinned: true,
+        interactiveContent: true,
+        plotId: "plot-a",
+      }),
+    ).toBe("plot-a-tooltip");
+    expect(
+      resolveCaptureAriaControls({
+        isPinned: true,
+        interactiveContent: false,
+        plotId: "plot-a",
+      }),
+    ).toBeUndefined();
+    expect(
+      resolveCaptureAriaControls({
+        isPinned: false,
+        interactiveContent: true,
+        plotId: "plot-a",
+      }),
+    ).toBeUndefined();
   });
 });
 
