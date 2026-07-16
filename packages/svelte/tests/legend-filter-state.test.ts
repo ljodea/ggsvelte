@@ -406,9 +406,9 @@ describe("PlotLegendFilters component layout and pointer source", () => {
     // Cross-component rewrite: below-clear class carries the old combined
     // selector's `top: calc(100% + 52px)` (used value = scene height + 52).
     expect(fieldset.classList.contains("gg-legend-filters-below-clear")).toBe(true);
+    // Used value of calc(100% + 52px) with scene height 260 → 312px
+    // (default without below-clear is calc(100% + 4px) → 264px).
     expect(getComputedStyle(fieldset).top).toBe("312px");
-    // Without the rewrite this would be calc(100% + 4px) → 264px.
-    expect(Number(getComputedStyle(fieldset).top)).toBe(260 + 52);
   });
 
   it("narrow container keeps existing max-width and overflow behavior", async () => {
