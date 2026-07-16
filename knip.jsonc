@@ -48,7 +48,7 @@
       "project": ["src/**/*.ts", "*.{js,ts}"],
       // Imported only from .svelte files / the $examples alias, which knip
       // does not trace.
-      "ignoreDependencies": ["@ggsvelte/svelte", "@ggsvelte/examples"],
+      "ignoreDependencies": ["@ggsvelte/examples"],
     },
   },
 }

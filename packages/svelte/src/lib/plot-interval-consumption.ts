@@ -7,7 +7,7 @@ import type {
 } from "./interaction.js";
 
 /** The stable identity surface needed to decide whether stored state is live. */
-export interface IntervalConsumptionPanel {
+interface IntervalConsumptionPanel {
   readonly id: string;
 }
 

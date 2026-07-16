@@ -5,7 +5,7 @@ export type BoundsInputSource = "keyboard" | "pointer" | "touch";
 
 export type BoundsCategoryValue = string | number | boolean | bigint | null | undefined | Date;
 
-export interface BoundsCategory {
+interface BoundsCategory {
   readonly value: BoundsCategoryValue;
   readonly label: string;
 }
@@ -17,19 +17,19 @@ interface BoundsEditorInputBase {
   readonly reversed?: boolean;
 }
 
-export interface NumericBoundsEditorInput extends BoundsEditorInputBase {
+interface NumericBoundsEditorInput extends BoundsEditorInputBase {
   readonly scale: "linear" | "log";
   readonly bounds: readonly [number, number];
   readonly step?: number | "any";
 }
 
-export interface TimeBoundsEditorInput extends BoundsEditorInputBase {
+interface TimeBoundsEditorInput extends BoundsEditorInputBase {
   readonly scale: "time";
   /** UTC epoch milliseconds. */
   readonly bounds: readonly [number, number];
 }
 
-export interface BandBoundsEditorInput extends BoundsEditorInputBase {
+interface BandBoundsEditorInput extends BoundsEditorInputBase {
   readonly scale: "band";
   /** Inclusive category endpoints, in domain order. */
   readonly bounds: readonly [BoundsCategoryValue, BoundsCategoryValue];
