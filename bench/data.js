@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784180671714,
+  "lastUpdate": 1784182072277,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -7461,6 +7461,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 160.0556,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b6c71a6f42c56cd24ec22a0e1708ed77226dc811",
+          "message": "refactor(svelte): extract pure legend clear-control source resolver (#71)\n\nMove clear-control InteractionSource classification out of GGPlot into\nplot-legend-surface so detail/touch priority is unit-tested alongside\nother legend event decisions.",
+          "timestamp": "2026-07-16T01:07:17-05:00",
+          "tree_id": "5b182efeedf684cad37447327b0596976fba03ca",
+          "url": "https://github.com/ljodea/ggsvelte/commit/b6c71a6f42c56cd24ec22a0e1708ed77226dc811"
+        },
+        "date": 1784182071932,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.8669,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 5.2066,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 11.0013,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 13.0732,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 90.0764,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 123.8251,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 0.9822,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2537,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 86.0325,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 109.0912,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.4002,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 13.24,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 118.1835,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.6334,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 27.2318,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.3943,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 31.9229,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 599.7723,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 160.4191,
             "unit": "ms"
           }
         ]
