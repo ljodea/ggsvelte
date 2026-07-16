@@ -383,24 +383,29 @@ export type SceneInspectReconcilePlan =
  *
  * Host on every invalidate-*: clear queues, cancel scheduled pointer, set
  * reconciledRun to the new model runId, then branch-specific side effects.
+ *
+ * `getInspectionState` is a thunk so the host `$effect` can avoid reading
+ * hover `inspection` state on the skip path (same runId) — otherwise every
+ * transient pointer update would re-run this effect only to hit skip.
  */
 export function planSceneInspectReconcile(input: {
   readonly inspectionEnabled: boolean;
-  /** Host: `inspection === null ? "none" : inspection.state`. */
-  readonly inspectionState: InspectionHostState;
+  /** Host: `() => (inspection === null ? "none" : inspection.state)`. */
+  readonly getInspectionState: () => InspectionHostState;
   readonly modelRunId: number | null;
   readonly reconciledRun: number;
 }): SceneInspectReconcilePlan {
   if (!input.inspectionEnabled) {
-    return input.inspectionState === "none" ? { type: "noop" } : { type: "clear-disabled" };
+    return input.getInspectionState() === "none" ? { type: "noop" } : { type: "clear-disabled" };
   }
   if (input.modelRunId === null || input.modelRunId === input.reconciledRun) {
     return { type: "skip" };
   }
-  if (input.inspectionState === "transient") {
+  const inspectionState = input.getInspectionState();
+  if (inspectionState === "transient") {
     return { type: "invalidate-clear-transient" };
   }
-  if (input.inspectionState === "pinned") {
+  if (inspectionState === "pinned") {
     return { type: "invalidate-reconcile-pinned" };
   }
   return { type: "invalidate-idle" };

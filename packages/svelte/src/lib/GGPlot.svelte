@@ -1459,7 +1459,10 @@
     const currentModel = model;
     const plan = planSceneInspectReconcile({
       inspectionEnabled: interactionConfig.inspect !== null,
-      inspectionState: inspection === null ? "none" : inspection.state,
+      // Thunk: do not read `inspection` on the same-run skip path so hover
+      // updates are not effect dependencies of scene-run reconcile.
+      getInspectionState: () =>
+        inspection === null ? "none" : inspection.state,
       modelRunId: currentModel?.runId ?? null,
       reconciledRun,
     });

@@ -655,7 +655,7 @@ describe("planSceneInspectReconcile", () => {
     expect(
       planSceneInspectReconcile({
         inspectionEnabled: false,
-        inspectionState: "none",
+        getInspectionState: () => "none",
         modelRunId: 1,
         reconciledRun: 0,
       }),
@@ -663,18 +663,23 @@ describe("planSceneInspectReconcile", () => {
     expect(
       planSceneInspectReconcile({
         inspectionEnabled: false,
-        inspectionState: "pinned",
+        getInspectionState: () => "pinned",
         modelRunId: 1,
         reconciledRun: 0,
       }),
     ).toEqual({ type: "clear-disabled" });
   });
 
-  it("skips when model is missing or run is already reconciled", () => {
+  it("skips when model is missing or run is already reconciled without reading inspection", () => {
+    let reads = 0;
+    const getInspectionState = (): "none" | "transient" | "pinned" => {
+      reads += 1;
+      return "transient";
+    };
     expect(
       planSceneInspectReconcile({
         inspectionEnabled: true,
-        inspectionState: "pinned",
+        getInspectionState,
         modelRunId: null,
         reconciledRun: 0,
       }),
@@ -682,18 +687,19 @@ describe("planSceneInspectReconcile", () => {
     expect(
       planSceneInspectReconcile({
         inspectionEnabled: true,
-        inspectionState: "transient",
+        getInspectionState,
         modelRunId: 3,
         reconciledRun: 3,
       }),
     ).toEqual({ type: "skip" });
+    expect(reads).toBe(0);
   });
 
   it("routes advanced runs by inspection state (enabled-off already handled)", () => {
     expect(
       planSceneInspectReconcile({
         inspectionEnabled: true,
-        inspectionState: "transient",
+        getInspectionState: () => "transient",
         modelRunId: 2,
         reconciledRun: 1,
       }),
@@ -701,7 +707,7 @@ describe("planSceneInspectReconcile", () => {
     expect(
       planSceneInspectReconcile({
         inspectionEnabled: true,
-        inspectionState: "pinned",
+        getInspectionState: () => "pinned",
         modelRunId: 2,
         reconciledRun: 1,
       }),
@@ -709,7 +715,7 @@ describe("planSceneInspectReconcile", () => {
     expect(
       planSceneInspectReconcile({
         inspectionEnabled: true,
-        inspectionState: "none",
+        getInspectionState: () => "none",
         modelRunId: 2,
         reconciledRun: 1,
       }),
