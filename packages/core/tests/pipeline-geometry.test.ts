@@ -214,6 +214,30 @@ describe("buildBatch dispatch via runPipeline", () => {
     expect(col.scene.batches.some((b) => b.kind === "rects")).toBe(true);
   });
 
+  it("smooth with se ribbon emits closed ribbon path under the line", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { x: 1, y: 2 },
+          { x: 2, y: 4 },
+          { x: 3, y: 5 },
+          { x: 4, y: 7 },
+          { x: 5, y: 8 },
+        ],
+        aes({ x: "x", y: "y" }),
+      )
+        .geomSmooth({ se: true, method: "lm" })
+        .spec(),
+      size,
+    );
+    const paths = model.scene.batches.filter((b) => b.kind === "paths");
+    expect(paths.length).toBeGreaterThanOrEqual(2);
+    const closed = paths.filter((b) => b.kind === "paths" && b.closed === true);
+    expect(closed.length).toBeGreaterThanOrEqual(1);
+    const line = paths.find((b) => b.kind === "paths" && b.closed !== true);
+    expect(line).toBeTruthy();
+  });
+
   it("area emits a closed filled path batch", () => {
     const area = runPipeline(
       gg(

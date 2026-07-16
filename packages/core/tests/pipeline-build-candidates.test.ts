@@ -50,6 +50,30 @@ describe("buildPipelineCandidates via runPipeline", () => {
     expect(sizes).toContain(1);
   });
 
+  it("bin layers intern source rows using closed bin edges", () => {
+    const model = runPipeline(
+      {
+        data: { values: [{ x: 0 }, { x: 1 }, { x: 2 }] },
+        layers: [
+          {
+            geom: "histogram",
+            aes: { x: { field: "x" } },
+            params: { binwidth: 1, boundary: 0, closed: "right" },
+          },
+        ],
+      },
+      size,
+    );
+    expect(model.candidates.size).toBeGreaterThanOrEqual(2);
+    const memberships = Array.from({ length: model.candidates.size }, (_, id) => {
+      const c = model.candidates.candidate(id)!;
+      return model.lineage.count(c.lineage);
+    });
+    // three source rows assigned across bins without empty lineages
+    expect(memberships.every((n) => n >= 1)).toBe(true);
+    expect(memberships.reduce((a, b) => a + b, 0)).toBe(3);
+  });
+
   it("annotation rules produce candidates with intercept values", () => {
     const model = runPipeline(
       gg(
