@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784159675854,
+  "lastUpdate": 1784161432143,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -4962,6 +4962,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 167.7446,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "60d51e9d515514d53119ab0a3b7571a67ffe4dbf",
+          "message": "refactor(svelte): extract GGPlot paint readiness and interaction pure seams (#51)\n\nMove canvas first-paint readiness, tool filtering, traversal hit building,\ninterval selection assembly, and clear-inspection fingerprint ownership out\nof GGPlot into focused pure modules with characterization tests. Fix paint\ntracking to count distinct strata (not raw notifications) and derive\ndata-gg-ready instead of effect-syncing it.\n\nPublic GGPlot API is unchanged.",
+          "timestamp": "2026-07-15T19:23:18-05:00",
+          "tree_id": "56d15896a80dcbd569a4eb0316b5a55ab6fefa4b",
+          "url": "https://github.com/ljodea/ggsvelte/commit/60d51e9d515514d53119ab0a3b7571a67ffe4dbf"
+        },
+        "date": 1784161431775,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.4466,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.2713,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 9.6622,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 14.5997,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 85.7595,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 119.7951,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 0.9557,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.1935,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 86.8972,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 113.468,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 12.4793,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.2248,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 116.2618,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.6558,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 28.6515,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.3795,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 34.489,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 615.676,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 167.6469,
             "unit": "ms"
           }
         ]
