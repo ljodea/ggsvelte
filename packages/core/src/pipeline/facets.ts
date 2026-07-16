@@ -15,7 +15,7 @@ import { PipelineError } from "./types.js";
 // Facet partition (BEFORE stats/positions — plan round-2 consensus)
 // ---------------------------------------------------------------------------
 
-interface FacetPanelDef {
+export interface FacetPanelDef {
   /** Stable facet field/value identity; independent of display position. */
   id: string;
   /** Strip label ("" = no strip; the unfaceted single panel). */
