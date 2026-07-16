@@ -1,34 +1,16 @@
 /**
  * Facet panel tick layout pass and placement packing.
  */
-import type { LayoutTheme, Margins, TickFormatter } from "../layout/layout.js";
 import { layoutPass } from "../layout/layout.js";
-import type { TextMeasurer } from "../layout/measure.js";
-import type { PositionScale } from "../scales/train.js";
 
-import type { FacetPanelDef } from "./facets.js";
 import { layoutDomain } from "./layout-helpers.js";
+import { packFacetPanelPlacement } from "./panel-layout-facet-place-pack.js";
+import type { FacetPanelTicksInput } from "./panel-layout-facet-place-ticks-input.js";
 import type { PanelPlacement } from "./panel-layout-types.js";
 
-export function placeFacetPanelFromTicks(input: {
-  def: FacetPanelDef;
-  h: PositionScale;
-  v: PositionScale;
-  mMax: Margins;
-  panelW: number;
-  panelH: number;
-  colX: number;
-  rowY: number;
-  freeH: boolean;
-  freeV: boolean;
-  bottomMostRow: number;
-  hBreaks: readonly (number | string)[] | undefined;
-  vBreaks: readonly (number | string)[] | undefined;
-  formatH: TickFormatter | undefined;
-  formatV: TickFormatter | undefined;
-  measurer: TextMeasurer;
-  layoutTheme: LayoutTheme;
-}): PanelPlacement {
+export type { FacetPanelTicksInput } from "./panel-layout-facet-place-ticks-input.js";
+
+export function placeFacetPanelFromTicks(input: FacetPanelTicksInput): PanelPlacement {
   const {
     def,
     h,
@@ -62,14 +44,15 @@ export function placeFacetPanelFromTicks(input: {
     },
     layoutTheme,
   );
-  return {
-    x: colX,
-    y: rowY,
-    width: panelW,
-    height: panelH,
-    ticksH: ticksRun.x.ticks,
-    ticksV: ticksRun.y.ticks,
-    showAxisX: freeH || def.row === bottomMostRow,
-    showAxisY: freeV || def.col === 0,
-  };
+  return packFacetPanelPlacement({
+    def,
+    colX,
+    rowY,
+    panelW,
+    panelH,
+    freeH,
+    freeV,
+    bottomMostRow,
+    ticksRun,
+  });
 }

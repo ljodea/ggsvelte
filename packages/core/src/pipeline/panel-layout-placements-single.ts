@@ -1,0 +1,31 @@
+/**
+ * Single-panel placement from layout chrome.
+ */
+import type { PanelLayoutChrome } from "./panel-layout-chrome.js";
+import { placeSinglePanel } from "./panel-layout-single.js";
+import type { PanelPlacement } from "./panel-layout-types.js";
+import type { RunOptions } from "./types.js";
+
+export function placeSinglePanelFromChrome(
+  chrome: PanelLayoutChrome,
+  options: Pick<RunOptions, "width">,
+): PanelPlacement {
+  const { h, v } = chrome.displayScales(0);
+  return placeSinglePanel({
+    h,
+    v,
+    hTitle: chrome.hTitle,
+    vTitle: chrome.vTitle,
+    axisTitleBand: chrome.axisTitleBand,
+    legendWidth: chrome.legendBlock.width,
+    optionsWidth: options.width,
+    layoutHeight: chrome.layoutHeight,
+    topBand: chrome.topBand,
+    hBreaks: chrome.hBreaks,
+    vBreaks: chrome.vBreaks,
+    formatH: chrome.formatH,
+    formatV: chrome.formatV,
+    measurer: chrome.measurer,
+    layoutTheme: chrome.layoutTheme,
+  });
+}

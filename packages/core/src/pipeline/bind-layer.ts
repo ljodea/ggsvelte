@@ -5,15 +5,9 @@ import type { Aes, LayerSpec } from "@ggsvelte/spec";
 
 import type { ColumnTable } from "../table.js";
 
-import { checkField } from "./bind-layer-helpers.js";
 import { resolveLabelWeightColorFill } from "./bind-layer-extras.js";
+import { resolveLayerPositionChannels } from "./bind-layer-position.js";
 import { makeLayerBinding } from "./bind-layer-result.js";
-import {
-  assertRequiredChannels,
-  resolveRuleForm,
-  validateGeomStatContracts,
-} from "./bind-layer-validate.js";
-import { resolveYChannel } from "./bind-layer-y.js";
 import type { LayerBinding, PipelineWarning } from "./types.js";
 
 export function bindLayer(
@@ -23,47 +17,29 @@ export function bindLayer(
   warnings: PipelineWarning[],
 ): LayerBinding {
   const aes: Aes = layer.aes ?? {};
-  const geom = layer.geom;
-
-  const ruleForm = resolveRuleForm(layer, index);
-
-  const stat = layer.stat ?? "identity";
-  const xField = checkField(aes.x, "x", index, table, warnings);
-  const { yField, yStatColumn } = resolveYChannel({ aes, stat, index, table, warnings });
-
-  validateGeomStatContracts({ layer, index, table, xField, yField });
-
-  // --- ymin/ymax (errorbar identity form) --------------------------------------
-  const yminField = checkField(aes.ymin, "ymin", index, table, warnings);
-  const ymaxField = checkField(aes.ymax, "ymax", index, table, warnings);
-
-  assertRequiredChannels({
-    geom,
-    stat,
+  const position = resolveLayerPositionChannels({ layer, aes, index, table, warnings });
+  const extras = resolveLabelWeightColorFill({
+    aes,
+    geom: layer.geom,
+    stat: layer.stat ?? "identity",
     index,
-    ruleForm,
-    xField,
-    yField,
-    yStatColumn,
-    yminField,
-    ymaxField,
+    table,
+    warnings,
   });
-
-  const extras = resolveLabelWeightColorFill({ aes, geom, stat, index, table, warnings });
 
   return makeLayerBinding({
     layer,
     index,
-    xField,
-    yField,
-    yStatColumn,
-    yminField,
-    ymaxField,
+    xField: position.xField,
+    yField: position.yField,
+    yStatColumn: position.yStatColumn,
+    yminField: position.yminField,
+    ymaxField: position.ymaxField,
     color: extras.color,
     fill: extras.fill,
     labelField: extras.labelField,
     labelConstant: extras.labelConstant,
     weightField: extras.weightField,
-    ruleForm,
+    ruleForm: position.ruleForm,
   });
 }

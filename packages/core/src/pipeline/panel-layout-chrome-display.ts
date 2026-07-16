@@ -1,10 +1,6 @@
 /**
  * Coord-flip-aware display titles, formatters, free scales, and panel scale view.
  */
-import type { PortableSpec } from "@ggsvelte/spec";
-
-import type { PositionScale } from "../scales/train.js";
-
 import { makeAxisFormatter } from "./layout-helpers.js";
 import {
   flipDisplayBreaks,
@@ -13,23 +9,13 @@ import {
   flipDisplayTitles,
   makeDisplayScalesFn,
 } from "./panel-layout-chrome-display-flip.js";
+import type { PanelLayoutDisplayInput } from "./panel-layout-chrome-display-input.js";
 import type { PanelLayoutDisplay } from "./panel-layout-chrome-display-types.js";
-import type { PipelineWarning } from "./types.js";
 
 export type { PanelLayoutDisplay } from "./panel-layout-chrome-display-types.js";
+export type { PanelLayoutDisplayInput } from "./panel-layout-chrome-display-input.js";
 
-export function resolvePanelLayoutDisplay(input: {
-  flip: boolean;
-  freeX: boolean;
-  freeY: boolean;
-  panelScales: readonly { x: PositionScale; y: PositionScale }[];
-  scalesConfig: NonNullable<PortableSpec["scales"]>;
-  xScale: PositionScale;
-  yScale: PositionScale;
-  xTitle: string;
-  yTitle: string;
-  warnings: PipelineWarning[];
-}): PanelLayoutDisplay {
+export function resolvePanelLayoutDisplay(input: PanelLayoutDisplayInput): PanelLayoutDisplay {
   const {
     flip,
     freeX,

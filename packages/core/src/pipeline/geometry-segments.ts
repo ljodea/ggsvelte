@@ -5,10 +5,11 @@ import type { SegmentsBatch } from "../scene.js";
 
 import type { LayerFrame, PipelineWarning, ResolvedColorScale } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
-import { DEFAULT_RULE_LINEWIDTH, removedWarning } from "./geometry-shared.js";
+import { removedWarning } from "./geometry-shared.js";
 import { emitAnnotationSegments } from "./geometry-segments-annotation.js";
 import { emitDataSegments } from "./geometry-segments-data.js";
 import { createSegmentEmitters } from "./geometry-segments-emit.js";
+import { packSegmentsBatch } from "./geometry-segments-pack.js";
 
 export function segmentsBatch(
   frame: LayerFrame,
@@ -17,7 +18,6 @@ export function segmentsBatch(
   warnings: PipelineWarning[],
 ): SegmentsBatch | null {
   const { binding } = frame;
-  const params = (binding.layer.params ?? {}) as { linewidth?: number; alpha?: number };
   const segments: number[] = [];
   const rowIndex: number[] = [];
   const perSegmentColors: string[] = [];
@@ -49,18 +49,5 @@ export function segmentsBatch(
     });
   }
   removedWarning(removed, binding.index, warnings);
-  if (rowIndex.length === 0) return null;
-
-  const batch: SegmentsBatch = {
-    kind: "segments",
-    layerIndex: binding.index,
-    panelIndex: 0,
-    segments: Float32Array.from(segments),
-    rowIndex: Uint32Array.from(rowIndex),
-    stroke: binding.color.constant,
-    linewidth: params.linewidth ?? DEFAULT_RULE_LINEWIDTH,
-    alpha: params.alpha ?? 1,
-  };
-  if (wantsColors && binding.ruleForm !== "annotation") batch.strokes = perSegmentColors;
-  return batch;
+  return packSegmentsBatch({ frame, segments, rowIndex, perSegmentColors, wantsColors });
 }
