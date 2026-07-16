@@ -5,13 +5,16 @@
 import type { CandidateBuildFacts, CandidateDatum } from "../candidate-store.js";
 import type { LineageStore } from "../identity.js";
 import type { Scene } from "../scene.js";
-import type { CellValue } from "../table.js";
 import type { ColumnTable } from "../table.js";
 
 import {
   resolveAnnotationIntercepts,
   resolveOutlierContext,
 } from "./build-candidates-datum-context.js";
+import {
+  makeSourceValueLookup,
+  resolveCandidateFieldChannels,
+} from "./build-candidates-datum-fields.js";
 import {
   resolveCandidateSeries,
   resolveRepresentedSourceRows,
@@ -69,12 +72,8 @@ export function createIdentityCandidateDatumResolver(input: {
       orderedGroups,
       outlierLocalRow,
     });
-    const sourceValue = (field: string | undefined): CellValue =>
-      sourceRow === null || field === undefined ? null : table.column(field)[sourceRow]!;
-    const xField = fields.find((field) => field.channel === "x")?.field;
-    const yField = fields.find((field) => field.channel === "y")?.field;
-    const colorField = fields.find((field) => field.channel === "color")?.field;
-    const fillField = fields.find((field) => field.channel === "fill")?.field;
+    const sourceValue = makeSourceValueLookup(table, sourceRow);
+    const { xField, yField, colorField, fillField } = resolveCandidateFieldChannels(fields);
     const { group, seriesRank } = resolveCandidateSeries({
       sourceRow,
       derivedGroup,

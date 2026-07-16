@@ -10,9 +10,8 @@ import type { ThemeTokens } from "../theme.js";
 
 import type { FacetPanelDef } from "./facets.js";
 import { resolvePanelLayoutChrome } from "./panel-layout-chrome.js";
-import { placeFacetPanels } from "./panel-layout-facet.js";
-import { placeSinglePanel } from "./panel-layout-single.js";
-import type { PanelLayoutResult, PanelPlacement } from "./panel-layout-types.js";
+import { buildPanelPlacements } from "./panel-layout-placements.js";
+import type { PanelLayoutResult } from "./panel-layout-types.js";
 import type { LayerFrame, PipelineWarning, RunOptions } from "./types.js";
 
 export type { PanelPlacement, PanelLayoutResult } from "./panel-layout-types.js";
@@ -41,52 +40,14 @@ export function computePanelLayout(input: {
   const { faceted, nrow, ncol, facetPanels, options } = input;
 
   const chrome = resolvePanelLayoutChrome(input);
-  let placements: PanelPlacement[];
-
-  if (faceted) {
-    placements = placeFacetPanels({
-      facetPanels,
-      nrow,
-      ncol,
-      freeH: chrome.freeH,
-      freeV: chrome.freeV,
-      outerLeftTitle: chrome.vTitle,
-      outerBottomTitle: chrome.hTitle,
-      axisTitleBand: chrome.axisTitleBand,
-      legendWidth: chrome.legendBlock.width,
-      optionsWidth: options.width,
-      layoutHeight: chrome.layoutHeight,
-      topBand: chrome.topBand,
-      displayScales: chrome.displayScales,
-      hBreaks: chrome.hBreaks,
-      vBreaks: chrome.vBreaks,
-      formatH: chrome.formatH,
-      formatV: chrome.formatV,
-      measurer: chrome.measurer,
-      layoutTheme: chrome.layoutTheme,
-    });
-  } else {
-    const { h, v } = chrome.displayScales(0);
-    placements = [
-      placeSinglePanel({
-        h,
-        v,
-        hTitle: chrome.hTitle,
-        vTitle: chrome.vTitle,
-        axisTitleBand: chrome.axisTitleBand,
-        legendWidth: chrome.legendBlock.width,
-        optionsWidth: options.width,
-        layoutHeight: chrome.layoutHeight,
-        topBand: chrome.topBand,
-        hBreaks: chrome.hBreaks,
-        vBreaks: chrome.vBreaks,
-        formatH: chrome.formatH,
-        formatV: chrome.formatV,
-        measurer: chrome.measurer,
-        layoutTheme: chrome.layoutTheme,
-      }),
-    ];
-  }
+  const placements = buildPanelPlacements({
+    faceted,
+    nrow,
+    ncol,
+    facetPanels,
+    chrome,
+    options,
+  });
 
   return {
     placements,

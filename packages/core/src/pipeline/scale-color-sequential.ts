@@ -4,13 +4,12 @@
 import type { ColorScaleSpec } from "@ggsvelte/spec";
 
 import type { EditionDefaults } from "../editions.js";
-import { numberFormatter } from "../layout/format.js";
-import { defaultTickFormat, tickStep } from "../layout/ticks.js";
 import { trainSequential, VIRIDIS_RAMP_10 } from "../scales/color.js";
 import { finiteExtent } from "../scales/train.js";
 import type { CellValue } from "../table.js";
 import { cellsToNumeric, cellToNumber } from "../table.js";
 
+import { resolveSequentialLegendFormat } from "./scale-color-sequential-format.js";
 import type { ColorResolution } from "./scale-color-types.js";
 import type { Advisory, PipelineWarning } from "./types.js";
 
@@ -70,19 +69,7 @@ export function resolveSequentialColorScale(input: {
       howToOverride: `Set scales.${name}.range (ramp stops) or scales.${name}.domain.`,
     });
   }
-  const labelFormat = config?.labels;
-  let format = defaultTickFormat(tickStep(scale.domain[0], scale.domain[1], 5));
-  if (labelFormat !== undefined) {
-    const f = numberFormatter(labelFormat);
-    if (f.ok) {
-      format = (v: number) => f.format(v);
-    } else {
-      warnings.push({
-        code: "invalid-label-format",
-        message: `Unrecognized labels format "${labelFormat}" on scales.${name}; using the default.`,
-      });
-    }
-  }
+  const format = resolveSequentialLegendFormat(scale, config, name, warnings);
   return {
     resolved: { kind: "sequential", scale },
     legendInput: {

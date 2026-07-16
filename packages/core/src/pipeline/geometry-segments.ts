@@ -8,6 +8,7 @@ import type { LayerFrame, PipelineWarning, ResolvedColorScale } from "./types.js
 import { colorOf, NO_ROW } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
 import { DEFAULT_RULE_LINEWIDTH, positionOf, removedWarning } from "./geometry-shared.js";
+import { createSegmentEmitters } from "./geometry-segments-emit.js";
 
 export function segmentsBatch(
   frame: LayerFrame,
@@ -24,24 +25,14 @@ export function segmentsBatch(
     color !== null && (frame.colorValues !== null || binding.color.scaledConstant !== null);
   let removed = 0;
 
-  const pushVertical = (t: number | undefined, row: number) => {
-    if (t === undefined || Number.isNaN(t)) {
+  const { pushVertical, pushHorizontal } = createSegmentEmitters({
+    fx,
+    segments,
+    rowIndex,
+    onRemoved: () => {
       removed++;
-      return;
-    }
-    const x = t * fx.innerWidth;
-    segments.push(x, 0, x, fx.innerHeight);
-    rowIndex.push(row);
-  };
-  const pushHorizontal = (t: number | undefined, row: number) => {
-    if (t === undefined || Number.isNaN(t)) {
-      removed++;
-      return;
-    }
-    const y = fx.innerHeight - t * fx.innerHeight;
-    segments.push(0, y, fx.innerWidth, y);
-    rowIndex.push(row);
-  };
+    },
+  });
 
   if (binding.ruleForm === "annotation") {
     for (const v of frame.xIntercepts) {
