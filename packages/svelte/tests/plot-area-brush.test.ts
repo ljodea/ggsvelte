@@ -18,31 +18,41 @@ describe("brushAtPoint", () => {
 });
 
 describe("initialBrushRect", () => {
-  it("starts a degenerate brush when not extending or existing is null", () => {
+  it("starts a degenerate brush when not awaiting second or existing is null", () => {
     expect(
       initialBrushRect({
-        extendExisting: false,
+        areaAwaitingSecond: false,
         existing: { x0: 1, y0: 2, x1: 3, y1: 4 },
         point: { x: 9, y: 8 },
       }),
     ).toEqual({ x0: 9, y0: 8, x1: 9, y1: 8 });
     expect(
       initialBrushRect({
-        extendExisting: true,
+        areaAwaitingSecond: true,
         existing: null,
         point: { x: 5, y: 6 },
       }),
     ).toEqual({ x0: 5, y0: 6, x1: 5, y1: 6 });
   });
 
-  it("extends the free corner of an existing draft", () => {
+  it("extends the free corner only when awaiting second AND draft exists", () => {
     expect(
       initialBrushRect({
-        extendExisting: true,
+        areaAwaitingSecond: true,
         existing: { x0: 1, y0: 2, x1: 3, y1: 4 },
         point: { x: 9, y: 8 },
       }),
     ).toEqual({ x0: 1, y0: 2, x1: 9, y1: 8 });
+  });
+
+  it("restarts fresh when draft exists but reducer is not awaiting second", () => {
+    expect(
+      initialBrushRect({
+        areaAwaitingSecond: false,
+        existing: { x0: 1, y0: 2, x1: 3, y1: 4 },
+        point: { x: 9, y: 8 },
+      }),
+    ).toEqual({ x0: 9, y0: 8, x1: 9, y1: 8 });
   });
 });
 

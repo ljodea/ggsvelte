@@ -98,7 +98,6 @@
   import {
     brushAtPoint,
     brushWithEnd,
-    initialBrushRect,
     nudgeBrushEnd,
   } from "./plot-area-brush.js";
   import {
@@ -1887,27 +1886,26 @@
     // Always cancel queued inspection before pure routing (host cleanup).
     queuedPointerInspection = null;
     reducer.cancelScheduledPointer();
+    // point always computed (pure begin-area needs it; touch/none ignore).
+    const p = plotPoint(event);
     const action = resolvePointerDownAction({
       pointerType: event.pointerType,
       button: event.button,
       activeTool,
       areaAwaitingSecond,
-      hasBrushDraft: brushRect !== null,
+      brushCorners: brushRect,
+      point: p,
     });
     switch (action.type) {
       case "touch-inspect-start":
-        touchInspectStart = plotPoint(event);
+        touchInspectStart = p;
         touchInspectMoved = false;
         break;
       case "none":
         break;
       case "begin-area": {
-        const p = plotPoint(event);
-        brushRect = initialBrushRect({
-          extendExisting: action.extendExisting,
-          existing: brushRect,
-          point: p,
-        });
+        // Pure table owns fresh vs extend corner policy.
+        brushRect = action.corners;
         setInspection(null, action.source);
         reducer.dispatch({
           type: "begin-area",
@@ -1917,7 +1915,7 @@
         if (action.emitSelectStart) {
           const startEvent = selectionEvent(
             "start",
-            normalizedRect(brushRect),
+            normalizedRect(action.corners),
             action.source,
           );
           emitSelection(startEvent);
