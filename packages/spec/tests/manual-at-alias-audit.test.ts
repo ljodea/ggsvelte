@@ -71,6 +71,9 @@ describe("manual AT alias commit audit", () => {
     expect(isSkippableCommentLine("* > main nav")).toBe(false);
     expect(isSkippableCommentLine("* > svg linearGradient")).toBe(false);
     expect(isSkippableCommentLine("* > svg polygon")).toBe(false);
+    expect(isSkippableCommentLine("* > svg animateMotion")).toBe(false);
+    expect(isSkippableCommentLine("* > svg mpath")).toBe(false);
+    expect(isSkippableCommentLine("* > svg metadata")).toBe(false);
     expect(isSkippableCommentLine("* > my-widget path")).toBe(false);
     expect(isSkippableCommentLine("* + a span")).toBe(false);
     expect(isSkippableCommentLine("* > a img")).toBe(false);

@@ -49,14 +49,34 @@ const CSS_TYPE_TOKEN = new Set(
     "sub summary sup svg table tbody td template text textarea tfoot th thead " +
     "time title tr track u ul var video wbr use defs clipPath linearGradient " +
     "radialGradient stop tspan foreignObject pattern marker symbol switch " +
-    "animate animateTransform set image polygon polyline ellipse textPath " +
-    "mask view feBlend feColorMatrix feComponentTransfer feComposite " +
-    "feConvolveMatrix feDiffuseLighting feDisplacementMap feDistantLight " +
-    "feDropShadow feFlood feFuncA feFuncB feFuncG feFuncR feGaussianBlur feImage " +
-    "feMerge feMergeNode feMorphology feOffset fePointLight feSpecularLighting " +
-    "feSpotLight feTile feTurbulence filter"
+    "animate animateTransform animateMotion mpath metadata set image polygon " +
+    "polyline ellipse textPath mask view feBlend feColorMatrix " +
+    "feComponentTransfer feComposite feConvolveMatrix feDiffuseLighting " +
+    "feDisplacementMap feDistantLight feDropShadow feFlood feFuncA feFuncB " +
+    "feFuncG feFuncR feGaussianBlur feImage feMerge feMergeNode feMorphology " +
+    "feOffset fePointLight feSpecularLighting feSpotLight feTile feTurbulence " +
+    "filter"
   ).split(/\s+/),
 );
+
+/**
+ * SVG container / context roots. Bare chains under these may use any CSS type
+ * identifier for descendants (`svg animateMotion`, `svg mpath`, `g metadata`)
+ * so we do not depend on exhaustively listing every SVG element name.
+ */
+const SVG_CONTEXT_ROOT = new Set([
+  "svg",
+  "g",
+  "defs",
+  "symbol",
+  "marker",
+  "pattern",
+  "mask",
+  "filter",
+  "switch",
+  "foreignObject",
+  "clipPath",
+]);
 
 /**
  * English-first collocations that are HTML tag names but common in JSDoc lists
@@ -69,13 +89,34 @@ function isCustomElementToken(token: string): boolean {
   return /^[a-z][\w]*-[\w-]+$/.test(token);
 }
 
+/** camelCase identifiers typical of SVG (`animateMotion`, `linearGradient`). */
+function isCamelCaseTypeToken(token: string): boolean {
+  return /^[a-z][\w]*[A-Z][\w-]*$/.test(token);
+}
+
+function isCssTypeIdent(token: string): boolean {
+  return token === "*" || /^[A-Za-z_][\w-]*$/.test(token);
+}
+
 function isCssTypeToken(token: string): boolean {
   return (
     token === "*" ||
     CSS_TYPE_TOKEN.has(token) ||
     CSS_TYPE_TOKEN.has(token.toLowerCase()) ||
-    isCustomElementToken(token)
+    isCustomElementToken(token) ||
+    isCamelCaseTypeToken(token)
   );
+}
+
+/** Bare multi-token chain after a combinator: CSS vs English. */
+function bareMultiTokenChainIsCss(tokens: readonly string[]): boolean {
+  if (BARE_CHAIN_PROSE_PAIR.has(tokens.map((t) => t.toLowerCase()).join(" "))) return false;
+  if (tokens.every((t) => isCssTypeToken(t))) return true;
+  // Under an SVG container, accept any type-ident descendants (mpath, metadata, …).
+  if (tokens.some((t) => SVG_CONTEXT_ROOT.has(t) || SVG_CONTEXT_ROOT.has(t.toLowerCase()))) {
+    return tokens.every((t) => isCssTypeIdent(t));
+  }
+  return false;
 }
 
 /**
@@ -108,8 +149,7 @@ function isCssSelectorAfterCombinator(rest: string): boolean {
     }
     // Bare multi-token: HTML/SVG/custom-element types only (not English prose).
     // Anchor-led chains (`a span`) are real CSS — do not blanket-skip lead `a`.
-    if (BARE_CHAIN_PROSE_PAIR.has(tokens.map((t) => t.toLowerCase()).join(" "))) return false;
-    return tokens.every((t) => isCssTypeToken(t));
+    return bareMultiTokenChainIsCss(tokens);
   }
 
   // Weak structure (`,>+~`): recurse so `ul li, ol li` and `ul li > a` count as
