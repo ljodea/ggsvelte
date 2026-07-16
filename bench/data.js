@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784195568238,
+  "lastUpdate": 1784196356713,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -9008,6 +9008,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 164.8406,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "5cfbda520e7405e0631e69d95de3c1c8883daa98",
+          "message": "refactor(svelte): extract PlotMarkStrata and pure canvas paint (#85)\n\n* refactor(svelte): extract PlotMarkStrata and pure canvas paint\n\nMove mark-strata compositing (canvas/svg sandwich, theme redraw, first-paint\nnotify) out of GGPlot. Host keeps the paint ledger and readiness gate;\npaint succeeds only when a 2d context exists so data-gg-ready stays honest.\n\n* fix(svelte): silence type-aware lint in PlotMarkStrata tests\n\nUse typed mocks, dataset theme flips, and onPainted counts for theme redraw.\n\n* fix(svelte): drop unnecessary type assertion in mark-strata tests",
+          "timestamp": "2026-07-16T05:05:22-05:00",
+          "tree_id": "df55db1f9da957204f51f9b25a59df18d8e55619",
+          "url": "https://github.com/ljodea/ggsvelte/commit/5cfbda520e7405e0631e69d95de3c1c8883daa98"
+        },
+        "date": 1784196356357,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.3476,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.8744,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 11.2762,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 13.355,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 84.9671,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 122.1097,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.404,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.196,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 84.4959,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 108.9884,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 11.4774,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 11.2364,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 116.7318,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.6588,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 26.8836,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.3184,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 29.041,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 616.8592,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 167.2268,
             "unit": "ms"
           }
         ]
