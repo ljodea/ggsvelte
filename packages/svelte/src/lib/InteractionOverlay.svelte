@@ -107,17 +107,17 @@
       fill="none"
     />
   {/if}
-  {#if interactive}
-    {#each selectedAnchors as anchor, index (index)}
-      <circle
-        class="gg-selected-ring"
-        cx={anchor.x}
-        cy={anchor.y}
-        r="8"
-        fill="none"
-      />
-    {/each}
-  {/if}
+  <!-- Selection rings are presentation of shared controller state; passive
+       consumers (interactive=false) must still show them. -->
+  {#each selectedAnchors as anchor, index (index)}
+    <circle
+      class="gg-selected-ring"
+      cx={anchor.x}
+      cy={anchor.y}
+      r="8"
+      fill="none"
+    />
+  {/each}
   {#each emphasizedAnchors as anchor, index (index)}
     <circle
       class="gg-emphasized-ring"
