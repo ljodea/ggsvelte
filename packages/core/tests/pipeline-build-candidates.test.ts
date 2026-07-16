@@ -1,0 +1,74 @@
+/**
+ * Characterization tests for pipeline candidate construction paths:
+ * source-backed (identity layers) vs identity-indexed (stats/annotations).
+ */
+import { describe, expect, it } from "bun:test";
+
+import { aes, gg } from "@ggsvelte/spec";
+
+import { runPipeline } from "../src/pipeline.ts";
+
+const size = { width: 640, height: 400 };
+
+describe("buildPipelineCandidates via runPipeline", () => {
+  it("source-backed point layers expose one candidate per mark with lineage", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { x: 1, y: 10 },
+          { x: 2, y: 20 },
+          { x: 3, y: 30 },
+        ],
+        aes({ x: "x", y: "y" }),
+      )
+        .geomPoint()
+        .spec(),
+      size,
+    );
+    expect(model.candidates.size).toBe(3);
+    const c0 = model.candidates.candidate(0);
+    expect(c0).not.toBeNull();
+    expect(c0!.xValue).toBe(1);
+    expect(c0!.yValue).toBe(10);
+    expect(model.lineage.count(c0!.lineage)).toBe(1);
+  });
+
+  it("count bars reconstruct aggregate lineages for represented source rows", () => {
+    const model = runPipeline(
+      gg([{ g: "a" }, { g: "a" }, { g: "b" }], aes({ x: "g" }))
+        .geomBar()
+        .spec(),
+      size,
+    );
+    expect(model.candidates.size).toBeGreaterThanOrEqual(2);
+    const sizes = Array.from({ length: model.candidates.size }, (_, id) => {
+      const c = model.candidates.candidate(id)!;
+      return model.lineage.count(c.lineage);
+    }).toSorted((a, b) => a - b);
+    // one bar for "a" (2 rows) and one for "b" (1 row)
+    expect(sizes).toContain(2);
+    expect(sizes).toContain(1);
+  });
+
+  it("annotation rules produce candidates with intercept values", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { x: 1, y: 2 },
+          { x: 2, y: 3 },
+        ],
+        aes({ x: "x", y: "y" }),
+      )
+        .geomPoint()
+        .geomRule({ yintercept: 2.5, xintercept: 1.5 })
+        .spec(),
+      size,
+    );
+    expect(model.candidates.size).toBeGreaterThan(2);
+    const modes = Array.from(
+      { length: model.candidates.size },
+      (_, id) => model.candidates.candidate(id)?.autoMode,
+    );
+    expect(modes.some((m) => m === "x" || m === "y")).toBe(true);
+  });
+});
