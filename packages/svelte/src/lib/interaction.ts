@@ -125,6 +125,8 @@ export interface SelectOptions {
   readonly mode?: AreaMode;
   readonly multiple?: boolean;
   readonly persistent?: boolean;
+  /** Facet coordination semantics for durable interval selections. */
+  readonly preset?: FacetIntervalPreset;
 }
 
 export interface ZoomOptions {
@@ -330,6 +332,7 @@ export function normalizeInteractionConfig<Row, Key>(
       mode: value.mode ?? "xy",
       multiple: value.multiple ?? false,
       persistent: value.persistent ?? true,
+      preset: value.preset ?? "independent",
     });
     if (value.type === "point" && context.hasKey === false) {
       diagnostics.push({

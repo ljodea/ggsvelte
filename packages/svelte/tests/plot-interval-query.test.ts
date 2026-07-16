@@ -10,7 +10,13 @@ function scene(partial: {
   panel?: IntervalQueryScene["panel"];
   singlePanel?: boolean;
   flip?: boolean;
-  candidates?: readonly { lineage: number; x0: number; y0: number; x1: number; y1: number }[];
+  candidates?: readonly {
+    lineage: number;
+    x0: number;
+    y0: number;
+    x1: number;
+    y1: number;
+  }[];
   lineage?: Record<number, number[]>;
 }): IntervalQueryScene {
   const panel =
@@ -142,6 +148,28 @@ describe("resolveIntervalQueryParts", () => {
     expect(parts.panelId).toBe("panel:east");
     expect(parts.invertedDomain.x).toEqual([110, 150]);
     expect(parts.invertedDomain.y).toEqual([0, 500]);
+  });
+
+  it("returns inclusive band endpoints for categorical interval selection", () => {
+    const base = scene({});
+    const parts = resolveIntervalQueryParts({
+      pixels: { x0: 20, y0: 0, x1: 70, y1: 100 },
+      mode: "x",
+      scene: {
+        ...base,
+        scales: {
+          ...base.scales,
+          x: {
+            type: "band",
+            domain: ["a", "b", "c", "d"],
+            indexOf: () => undefined,
+            normalize: () => undefined,
+            step: 0.25,
+          },
+        } as IntervalQueryScene["scales"],
+      },
+    });
+    expect(parts.invertedDomain.x).toEqual(["a", "c"]);
   });
 });
 

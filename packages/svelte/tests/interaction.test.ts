@@ -83,7 +83,13 @@ describe("canvas strata (decision 0006 graduated)", () => {
   const canvasProps = {
     data: rows,
     aes: { x: "x", y: "y" },
-    layers: [{ geom: "point" as const, render: "canvas" as const, params: { size: 6 } }],
+    layers: [
+      {
+        geom: "point" as const,
+        render: "canvas" as const,
+        params: { size: 6 },
+      },
+    ],
     theme: "light" as const,
     ...size,
   };
@@ -145,7 +151,11 @@ describe("canvas strata (decision 0006 graduated)", () => {
   });
 
   it('a11y "force-svg" keeps marks in SVG with one virtual-navigation surface', () => {
-    const { container } = render(GGPlot, { ...canvasProps, a11y: "force-svg", inspect: true });
+    const { container } = render(GGPlot, {
+      ...canvasProps,
+      a11y: "force-svg",
+      inspect: true,
+    });
     expect(container.querySelector("canvas")).toBeNull();
     const circles = container.querySelectorAll("circle[tabindex='0']");
     expect(circles).toHaveLength(0);
@@ -177,7 +187,12 @@ describe("hover + tooltip (overlays, never a pipeline re-run)", () => {
       // index resolves canvas-painted marks through the capture layer, and
       // topmost-wins picks the point layer over the line beneath it.
       layers: [
-        { geom: "line", render: "svg", aes: { color: null }, params: { linewidth: 0.5 } },
+        {
+          geom: "line",
+          render: "svg",
+          aes: { color: null },
+          params: { linewidth: 0.5 },
+        },
         { geom: "point", render: "canvas", params: { size: 5 } },
       ],
       inspect: true,
@@ -426,6 +441,7 @@ describe("brush + brush-to-zoom", () => {
 
   it("brush selects row indices via the hit-index rect query", async () => {
     let model: RenderModel | null = null;
+    let renderCount = 0;
     const selections: PropertyKey[][] = [];
     const { container } = render(GGPlot, {
       data: rows,
@@ -437,6 +453,7 @@ describe("brush + brush-to-zoom", () => {
         if (event.phase === "end") selections.push([...event.keys]);
       },
       onrender: (m: RenderModel) => {
+        renderCount += 1;
         model = m;
       },
       ...size,
@@ -464,16 +481,28 @@ describe("brush + brush-to-zoom", () => {
     // Rect around the first two points only.
     const xs = [0, 1].map((j) => panel.x + (batch.positions[j * 2] ?? 0));
     const ys = [0, 1].map((j) => panel.y + (batch.positions[j * 2 + 1] ?? 0));
-    drag(
-      capture,
-      Math.min(...xs) - 5,
-      Math.min(...ys) - 5,
-      Math.max(...xs) + 5,
-      Math.max(...ys) + 5,
-    );
+    drag(capture, Math.max(...xs), Math.max(...ys), Math.min(...xs) - 5, Math.min(...ys) - 5);
     await until(() => selections.length > 0);
     expect(selections[0]).toHaveLength(2);
     expect(new Set(selections[0])).toEqual(new Set([1, 2]));
+
+    const rendersAfterBrush = renderCount;
+    const editBounds = [
+      ...container.querySelectorAll<HTMLButtonElement>(".gg-tool-rail button"),
+    ].find((button) => button.textContent === "Edit x selection bounds")!;
+    editBounds.click();
+    await until(() => container.querySelector('.gg-bounds-editor input[id$="-lower"]') !== null);
+    const lower = container.querySelector<HTMLInputElement>(
+      '.gg-bounds-editor input[id$="-lower"]',
+    )!;
+    lower.value = "1.1";
+    lower.dispatchEvent(new InputEvent("input", { bubbles: true }));
+    await Promise.resolve();
+    expect(renderCount).toBe(rendersAfterBrush);
+    container.querySelector<HTMLButtonElement>('.gg-bounds-editor button[type="submit"]')!.click();
+    await until(() => selections.length === 2);
+    expect(renderCount).toBe(rendersAfterBrush);
+    expect(document.activeElement).toBe(editBounds);
   });
 
   it("brush-to-zoom respecs explicit domains; colors NEVER shift; double-click resets", async () => {

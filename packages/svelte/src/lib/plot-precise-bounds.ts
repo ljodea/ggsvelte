@@ -13,7 +13,7 @@ export interface BoundsEditorInputForScaleOptions {
   readonly axis: BoundsAxis;
   readonly action: BoundsAction;
   readonly scale: PositionScale;
-  readonly bounds?: readonly [number, number];
+  readonly bounds?: readonly [number, number] | readonly [BoundsCategoryValue, BoundsCategoryValue];
   readonly reversed?: boolean;
 }
 
@@ -23,16 +23,19 @@ export function boundsEditorInputForScale(
   const { scale } = options;
   if (scale.type === "band") {
     const categories = scale.domain.map((value) => ({ value, label: value }));
+    const requested = options.bounds as
+      | readonly [BoundsCategoryValue, BoundsCategoryValue]
+      | undefined;
     return {
       axis: options.axis,
       action: options.action,
       scale: "band",
-      bounds: [scale.domain[0] ?? "", scale.domain.at(-1) ?? ""],
+      bounds: requested ?? [scale.domain[0] ?? "", scale.domain.at(-1) ?? ""],
       categories,
       reversed: options.reversed ?? false,
     };
   }
-  const requested = options.bounds ?? scale.domain;
+  const requested = (options.bounds as readonly [number, number] | undefined) ?? scale.domain;
   const bounds =
     requested[0] <= requested[1]
       ? ([requested[0], requested[1]] as const)

@@ -32,9 +32,50 @@ export type IntervalQueryScene = {
     readonly scales: Pick<RenderModel["scales"], "x" | "y">;
   })[];
   /** Candidates intersecting an already-expanded plot-px query rect. */
-  queryCandidates(expanded: PlotRect): readonly { readonly lineage: number }[];
+  queryCandidates(
+    expanded: PlotRect,
+    panelId?: string | null,
+  ): readonly { readonly lineage: number }[];
   lineageKeys(lineageId: number): Iterable<number>;
 };
+
+function bandDomain(
+  scale: RenderModel["scales"]["x"],
+  t0: number,
+  t1: number,
+): readonly [string, string] | undefined {
+  if (scale.type !== "band" || scale.domain.length === 0) return undefined;
+  const lo = Math.max(0, Math.min(1, Math.min(t0, t1)));
+  const hi = Math.max(0, Math.min(1, Math.max(t0, t1)));
+  const first = Math.min(scale.domain.length - 1, Math.floor(lo * scale.domain.length));
+  const last = Math.min(
+    scale.domain.length - 1,
+    Math.max(first, Math.ceil(hi * scale.domain.length) - 1),
+  );
+  return [scale.domain[first]!, scale.domain[last]!];
+}
+
+function bandDomains(
+  pixels: PlotRect,
+  panel: PanelBounds,
+  scales: Pick<RenderModel["scales"], "x" | "y">,
+  flipped: boolean,
+): IntervalDomain {
+  const tx0 = (pixels.x0 - panel.x) / panel.width;
+  const tx1 = (pixels.x1 - panel.x) / panel.width;
+  const ty0 = 1 - (pixels.y1 - panel.y) / panel.height;
+  const ty1 = 1 - (pixels.y0 - panel.y) / panel.height;
+  const horizontal = bandDomain(flipped ? scales.y : scales.x, tx0, tx1);
+  const vertical = bandDomain(flipped ? scales.x : scales.y, ty0, ty1);
+  return {
+    ...(flipped
+      ? vertical !== undefined && { x: vertical }
+      : horizontal !== undefined && { x: horizontal }),
+    ...(flipped
+      ? horizontal !== undefined && { y: horizontal }
+      : vertical !== undefined && { y: vertical }),
+  };
+}
 
 export type ResolveIntervalQueryPartsInput = {
   readonly pixels: PlotRect;
@@ -67,11 +108,18 @@ export function resolveIntervalQueryParts(input: ResolveIntervalQueryPartsInput)
       : scene.panels?.find((panel) => panel.id === input.panelId);
   const panel = requestedPanel ?? scene.panel;
   const expanded = expandIntervalQuery(input.pixels, panel, input.mode, scene.flip);
-  const candidates = scene.queryCandidates(expanded);
+  const candidates = scene.queryCandidates(expanded, panel.id);
   const rowIndexes = lineageRowIndexesFromCandidates(candidates, (id) => scene.lineageKeys(id));
-  const invertedDomain =
+  const continuousDomain =
     scene.singlePanel || requestedPanel !== undefined
       ? panelDataDomains(input.pixels, panel, requestedPanel?.scales ?? scene.scales, scene.flip)
+      : {};
+  const invertedDomain =
+    scene.singlePanel || requestedPanel !== undefined
+      ? {
+          ...bandDomains(input.pixels, panel, requestedPanel?.scales ?? scene.scales, scene.flip),
+          ...continuousDomain,
+        }
       : {};
   return {
     rowIndexes,

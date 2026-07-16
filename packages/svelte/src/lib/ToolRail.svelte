@@ -10,10 +10,14 @@
     zoomDomains = null,
     hasPointSelection = false,
     hasIntervalSelection = false,
+    intervalAxes = [],
+    zoomAxes = [],
     onChooseTool,
     onResetZoom,
     onClearPointSelection,
     onClearIntervalSelection,
+    onClearCurrentInterval,
+    onEditBounds,
   }: {
     availableTools: readonly InteractionTool[];
     activeTool: InteractionTool;
@@ -23,10 +27,18 @@
     zoomDomains?: ZoomDomains | null;
     hasPointSelection?: boolean;
     hasIntervalSelection?: boolean;
+    intervalAxes?: readonly ("x" | "y")[];
+    zoomAxes?: readonly ("x" | "y")[];
     onChooseTool: (tool: InteractionTool) => void;
     onResetZoom: () => void;
     onClearPointSelection: () => void;
     onClearIntervalSelection: () => void;
+    onClearCurrentInterval: () => void;
+    onEditBounds: (
+      action: "select" | "zoom",
+      axis: "x" | "y",
+      trigger: HTMLElement,
+    ) => void;
   } = $props();
 
   function labelFor(tool: InteractionTool): string {
@@ -60,6 +72,13 @@
   <div class="gg-tool-recovery-actions">
     {#if zoomDomains !== null}
       <button type="button" onclick={onResetZoom}>Reset zoom</button>
+      {#each zoomAxes as axis (axis)}
+        <button
+          type="button"
+          onclick={(event) => onEditBounds("zoom", axis, event.currentTarget)}
+          >Edit {axis} zoom bounds</button
+        >
+      {/each}
     {/if}
     {#if hasPointSelection}
       <button type="button" onclick={onClearPointSelection}
@@ -67,9 +86,19 @@
       >
     {/if}
     {#if hasIntervalSelection}
-      <button type="button" onclick={onClearIntervalSelection}
-        >Clear selection</button
+      <button type="button" onclick={onClearCurrentInterval}
+        >Clear panel selection</button
       >
+      <button type="button" onclick={onClearIntervalSelection}
+        >Clear all selections</button
+      >
+      {#each intervalAxes as axis (axis)}
+        <button
+          type="button"
+          onclick={(event) => onEditBounds("select", axis, event.currentTarget)}
+          >Edit {axis} selection bounds</button
+        >
+      {/each}
     {/if}
   </div>
 </div>
