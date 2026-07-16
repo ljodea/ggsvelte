@@ -1,7 +1,12 @@
 import { describe, expect, it } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { buildKnownFalsePositives, parseSelfHostedLabels } from "./actionlint.ts";
+import {
+  allowSoftSkipLoadFailure,
+  buildKnownFalsePositives,
+  parseSelfHostedLabels,
+  parseYamlListScalar,
+} from "./actionlint.ts";
 
 const root = join(import.meta.dir, "..");
 const read = (path: string) => readFileSync(join(root, path), "utf8");
@@ -29,6 +34,29 @@ labels:
     expect(parseSelfHostedLabels(yaml)).toEqual(["ggsvelte"]);
   });
 
+  it("strips unquoted inline comments from label values", () => {
+    // Codex P2: Go CLI reads `ggsvelte`; bare parser must not keep the comment.
+    const yaml = `self-hosted-runner:
+  labels:
+    - ggsvelte # primary pool
+    - "keep # hash"
+    - 'also # quoted'
+`;
+    expect(parseSelfHostedLabels(yaml)).toEqual(["ggsvelte", "keep # hash", "also # quoted"]);
+  });
+
+  it("parseYamlListScalar handles quotes, escapes, and plain comments", () => {
+    expect(parseYamlListScalar("ggsvelte # primary pool")).toBe("ggsvelte");
+    expect(parseYamlListScalar('"ggsvelte # literal"')).toBe("ggsvelte # literal");
+    expect(parseYamlListScalar("'it''s fine'")).toBe("it's fine");
+    expect(parseYamlListScalar("foo#notcomment")).toBe("foo#notcomment");
+    expect(parseYamlListScalar('"a\\"b"')).toBe('a"b');
+    // Codex P2 on #157: double-quoted YAML escapes must decode, not strip `\`.
+    expect(parseYamlListScalar('"runner\\u002darm"')).toBe("runner-arm");
+    expect(parseYamlListScalar('"runner\\x2darm"')).toBe("runner-arm");
+    expect(parseYamlListScalar('"tab\\tsep"')).toBe("tab\tsep");
+  });
+
   it("builds wasm suppressions from labels plus the vars gap", () => {
     const patterns = buildKnownFalsePositives(["ggsvelte"]);
     expect(patterns.some((re) => re.test('undefined variable "vars"'))).toBe(true);
@@ -49,6 +77,23 @@ labels:
     expect(runner).toContain(".github/actionlint.yaml");
     // Hard-coded label list would reintroduce the drift the issue filed.
     expect(runner).not.toMatch(/KNOWN_FALSE_POSITIVES\s*=\s*\[/);
+  });
+});
+
+describe("actionlint load-failure policy (Codex P1)", () => {
+  it("soft-skips only outside CI", () => {
+    expect(allowSoftSkipLoadFailure({})).toBe(true);
+    expect(allowSoftSkipLoadFailure({ CI: "true" })).toBe(false);
+    expect(allowSoftSkipLoadFailure({ GITHUB_ACTIONS: "true" })).toBe(false);
+    expect(allowSoftSkipLoadFailure({ CI: "true", GITHUB_ACTIONS: "true" })).toBe(false);
+    // Explicit non-true values (e.g. local shells exporting CI=) still allow skip.
+    expect(allowSoftSkipLoadFailure({ CI: "1" })).toBe(true);
+  });
+
+  it("documents fatal CI path in the runner source", () => {
+    const runner = read("scripts/actionlint.ts");
+    expect(runner).toContain("allowSoftSkipLoadFailure");
+    expect(runner).toContain("process.exit(1)");
   });
 });
 
