@@ -223,6 +223,7 @@
     type LegendEntryAction,
     type LegendEntryIdentity,
   } from "./plot-legend-focus.js";
+  import PlotCaptureSurface from "./PlotCaptureSurface.svelte";
   import PlotLegendTargets from "./PlotLegendTargets.svelte";
   import PlotMarkStrata from "./PlotMarkStrata.svelte";
   import PlotStatusChrome from "./PlotStatusChrome.svelte";
@@ -2349,34 +2350,27 @@
         {areaAwaitingSecond}
         {committedInterval}
       />
-      <!-- The capture layer is a pointer-only surface; the accessible
-           interaction paths are focusable marks and the data table. -->
-      <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-      <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-      <div
-        bind:this={captureSurface}
-        class="gg-capture"
-        class:gg-area-tool={activeTool === "select-area" ||
-          activeTool === "zoom-area"}
-        role="group"
-        tabindex="0"
-        aria-label={ariaLabel ??
+      <!-- Order (document = paint): overlay → capture → Tooltip → status chrome. -->
+      <PlotCaptureSurface
+        bind:element={captureSurface}
+        {plotId}
+        {activeTool}
+        ariaLabel={ariaLabel ??
           assembled?.labs?.title ??
           sceneLabel(model.scene)}
-        aria-describedby={`${plotId}-description ${plotId}-active`}
-        aria-controls={inspection?.state === "pinned" &&
+        ariaControls={inspection?.state === "pinned" &&
         interactionConfig.inspect?.contentMode === "interactive"
           ? `${plotId}-tooltip`
           : undefined}
-        onfocus={() => {
+        onFocus={() => {
           if (inspection === null) navigate(1);
         }}
-        onblur={onSurfaceBlur}
-        onpointermove={onPointerMove}
-        onpointerleave={onPointerLeave}
-        onpointerdown={onPointerDown}
-        onpointerup={onPointerUp}
-        onpointercancel={() => {
+        onBlur={onSurfaceBlur}
+        {onPointerMove}
+        {onPointerLeave}
+        {onPointerDown}
+        {onPointerUp}
+        onPointerCancel={() => {
           queuedPointerInspection = null;
           touchInspectStart = null;
           touchInspectMoved = false;
@@ -2384,7 +2378,7 @@
           brushRect = null;
           reducer.dispatch({ type: "cancel-area" });
         }}
-        onlostpointercapture={() => {
+        onLostPointerCapture={() => {
           // Decision table is pure (plot-surface-pointer); host owns draft + cancel.
           const lost = resolveLostPointerCaptureAction(reducer.state.area.kind);
           switch (lost.type) {
@@ -2399,10 +2393,10 @@
               return;
           }
         }}
-        onclick={onCaptureClick}
-        onkeydown={onSurfaceKeyDown}
-        ondblclick={onDblClick}
-      ></div>
+        onClick={onCaptureClick}
+        onKeyDown={onSurfaceKeyDown}
+        {onDblClick}
+      />
       {#if inspection !== null}
         <Tooltip
           id={`${plotId}-tooltip`}
@@ -2489,24 +2483,6 @@
     pointer-events: none;
   }
 
-  .gg-capture {
-    position: absolute;
-    inset: 0;
-    pointer-events: auto;
-    touch-action: pan-y pinch-zoom;
-    background: transparent;
-  }
-
-  .gg-capture.gg-area-tool {
-    touch-action: none;
-    cursor: crosshair;
-  }
-
-  .gg-capture:focus-visible {
-    outline: 2px solid var(--gg-focusRing, var(--gg-theme-focusRing, Highlight));
-    outline-offset: 2px;
-  }
-
   @container gg-plot (max-width: 559px) {
     .gg-with-tool-rail {
       margin-top: 96px;
@@ -2520,18 +2496,12 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    /* Parent-scoped: does not match PlotStatusChrome nodes. Chrome has no
-       transitions/animations, so this is a no-op for extracted status UI. */
-    .gg-plot-root * {
+    /* :global so the policy reaches extracted child components (mark strata,
+       capture surface, status chrome) whose nodes are outside this scope. */
+    .gg-plot-root :global(*) {
       scroll-behavior: auto;
       transition: none !important;
       animation: none !important;
-    }
-  }
-
-  @media (forced-colors: active) {
-    .gg-capture:focus-visible {
-      outline-color: Highlight;
     }
   }
 </style>
