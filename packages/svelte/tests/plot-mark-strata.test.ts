@@ -112,7 +112,7 @@ describe("PlotMarkStrata", () => {
   });
 
   it("notifies onPainted with canvas:${si} keys after successful paint", async () => {
-    const onPainted = vi.fn();
+    const onPainted = vi.fn<(runId: number, stratumKey: string) => void>();
     render(PlotMarkStrata, {
       model: model({ runId: 3 }),
       strata: [emptyCanvasStratum, emptySvgStratum, emptyCanvasStratum],
@@ -125,7 +125,7 @@ describe("PlotMarkStrata", () => {
     // Attachment runs synchronously in testing-library render for attach.
     await Promise.resolve();
     expect(onPainted).toHaveBeenCalled();
-    const keys = onPainted.mock.calls.map((call) => call[1]);
+    const keys = onPainted.mock.calls.map((call) => call[1] as string);
     expect(keys).toContain("canvas:0");
     expect(keys).toContain("canvas:2");
     expect(keys).not.toContain("canvas:1");
@@ -135,17 +135,7 @@ describe("PlotMarkStrata", () => {
   });
 
   it("repaints canvas when document theme attributes flip", async () => {
-    const getContext = HTMLCanvasElement.prototype.getContext;
-    let paintCount = 0;
-    const spy = vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation(function (
-      this: HTMLCanvasElement,
-      type: string,
-      ...args
-    ) {
-      const ctx = getContext.call(this, type, ...args);
-      if (type === "2d" && ctx !== null) paintCount += 1;
-      return ctx;
-    });
+    const onPainted = vi.fn<(runId: number, stratumKey: string) => void>();
     try {
       render(PlotMarkStrata, {
         model: model({ runId: 1 }),
@@ -154,18 +144,22 @@ describe("PlotMarkStrata", () => {
         interactionMasks: [],
         a11yTableOpen: false,
         onA11yToggle: () => {},
-        onPainted: () => {},
+        onPainted,
       });
       await Promise.resolve();
-      const afterMount = paintCount;
+      const afterMount = onPainted.mock.calls.length;
       expect(afterMount).toBeGreaterThan(0);
-      document.documentElement.setAttribute("data-theme", "dark");
-      await new Promise((r) => requestAnimationFrame(() => r(undefined)));
+      document.documentElement.dataset["theme"] = "dark";
+      await new Promise<void>((resolve) => {
+        requestAnimationFrame(() => {
+          resolve();
+        });
+      });
       await Promise.resolve();
-      expect(paintCount).toBeGreaterThan(afterMount);
+      // Theme observer bumps themeEpoch → attachment re-runs → successful paint notifies.
+      expect(onPainted.mock.calls.length).toBeGreaterThan(afterMount);
     } finally {
-      spy.mockRestore();
-      document.documentElement.removeAttribute("data-theme");
+      delete document.documentElement.dataset["theme"];
     }
   });
 });
