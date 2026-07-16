@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784233377618,
+  "lastUpdate": 1784234576862,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -17338,6 +17338,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 161.0153,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c93d2028b0b4a9626fd367786d912e124d65fbb0",
+          "message": "fix: keep actionlint load failures fatal in CI (#157)\n\n* fix: keep actionlint load failures fatal in CI\n\nCodex review on #156:\n- P1: soft-skip on wasm load/init only outside CI so actions-security\n  cannot green when actionlint never ran\n- P2: parse YAML list scalars (inline comments + quotes) so label\n  suppressions match the Go CLI config\n\n* fix: decode YAML double-quoted escapes in label parser\n\nCodex P2 on #157: stripping backslashes turned \\u002d into u002d\ninstead of '-', so suppressions would not match Go actionlint labels.",
+          "timestamp": "2026-07-16T15:42:13-05:00",
+          "tree_id": "0ff85285807a99bb9bb66bc1ef193fffbd08e573",
+          "url": "https://github.com/ljodea/ggsvelte/commit/c93d2028b0b4a9626fd367786d912e124d65fbb0"
+        },
+        "date": 1784234575761,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.6779,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.2556,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 10.6985,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 14.1168,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 95.3212,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 123.2088,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.1524,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.3988,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 88.8083,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 111.9656,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 14.9094,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 14.3839,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 121.5646,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7631,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 29.7942,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.714,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 29.2427,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 611.1251,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 163.3565,
             "unit": "ms"
           }
         ]
