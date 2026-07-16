@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784193726261,
+  "lastUpdate": 1784194400796,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -8651,6 +8651,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 128.3359,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "a42497f81b2735ac862f5209903bdc432789eb7c",
+          "message": "fix: keep JSDoc list/blockquote markers non-substantive after #72 (#82)\n\n* fix: keep JSDoc list/blockquote markers non-substantive after #72\n\n#72 treated any `* +`, `* >`, or `* ~` line as CSS so combinator selectors\nwere not skipped as JSDoc noise. That also classified Markdown list and\nblockquote comment lines as runtime changes, rejecting documentation-only\nalias ranges.\n\nCombinators are substantive only when followed by a selector fragment\n(`*`, class/id/attr/pseudo, or type selector with CSS structure).\n\n* fix: treat bare lowercase type selectors after combinators as CSS\n\nMulti-line CSS like `* + p` / `* + section` with `{` on the next line must\nstay substantive for the manual-AT alias audit. Keep capitalized and\nmulti-word text (`* > Note`, `* + positive values…`) as JSDoc/Markdown.",
+          "timestamp": "2026-07-16T04:32:44-05:00",
+          "tree_id": "f9ee53f93b6332b3686a02d5bb5af03d88faf059",
+          "url": "https://github.com/ljodea/ggsvelte/commit/a42497f81b2735ac862f5209903bdc432789eb7c"
+        },
+        "date": 1784194400390,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.4284,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.8793,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 11.537,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 15.4917,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 83.7688,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 122.5538,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.4777,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.9115,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 89.7649,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 110.3028,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 14.1191,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 13.0111,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 114.4995,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.6632,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 25.5877,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.5979,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 28.0798,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 596.4108,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 160.8629,
             "unit": "ms"
           }
         ]
