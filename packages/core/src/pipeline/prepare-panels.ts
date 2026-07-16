@@ -6,6 +6,7 @@ import type { PortableSpec } from "@ggsvelte/spec";
 import { bindData } from "./bind.js";
 import type { FacetLayout } from "./facets.js";
 import { resolveFacet, SINGLE_PANEL } from "./facets.js";
+import { warnEmptyData } from "./prepare-panels-empty.js";
 import { buildPanelFrames } from "./prepare-panels-frames.js";
 import type { PreparedPanels } from "./prepare-panels-types.js";
 import type { Advisory, LayerBinding, LayerFrame, PipelineWarning, RunOptions } from "./types.js";
@@ -20,12 +21,7 @@ export function preparePanels(
 ): PreparedPanels {
   const table = bindData(normalized, options);
   const emptyData = table.rowCount === 0;
-  if (emptyData) {
-    warnings.push({
-      code: "empty-data",
-      message: "The data has no rows; rendering the frame and axes as a placeholder.",
-    });
-  }
+  if (emptyData) warnEmptyData(warnings);
 
   const facetLayout: FacetLayout = emptyData
     ? SINGLE_PANEL(table)

@@ -5,7 +5,8 @@ import type { GlyphsBatch } from "../scene.js";
 
 import type { LayerFrame, PipelineWarning, ResolvedColorScale } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
-import { DEFAULT_TEXT_SIZE, removedWarning } from "./geometry-shared.js";
+import { removedWarning } from "./geometry-shared.js";
+import { packGlyphsBatch } from "./geometry-glyphs-pack.js";
 import { emitGlyphRows } from "./geometry-glyphs-rows.js";
 
 export function glyphsBatch(
@@ -41,20 +42,5 @@ export function glyphsBatch(
     colors,
   });
   removedWarning(removed, binding.index, warnings);
-  if (texts.length === 0) return null;
-
-  const batch: GlyphsBatch = {
-    kind: "glyphs",
-    layerIndex: binding.index,
-    panelIndex: 0,
-    positions: Float32Array.from(positions),
-    rowIndex: Uint32Array.from(rowIndex),
-    texts,
-    color: binding.color.constant,
-    size: params.size ?? DEFAULT_TEXT_SIZE,
-    anchor: params.anchor ?? "middle",
-    alpha: params.alpha ?? 1,
-  };
-  if (wantsColors) batch.colors = colors;
-  return batch;
+  return packGlyphsBatch({ frame, positions, rowIndex, texts, colors, wantsColors, params });
 }

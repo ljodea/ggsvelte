@@ -553,3 +553,57 @@ describe("geometryPanelFrame", () => {
     expect(flipped.xScale).toBe(xScale);
   });
 });
+
+describe("packSegmentsBatch", () => {
+  it("returns null for empty rowIndex and builds a segments batch otherwise", async () => {
+    const { packSegmentsBatch } = await import("../src/pipeline/geometry-segments-pack.ts");
+    const frame = {
+      binding: {
+        index: 0,
+        color: { constant: "#111" },
+        layer: { params: {} },
+        ruleForm: "vertical",
+      },
+    } as never;
+    expect(
+      packSegmentsBatch({
+        frame,
+        segments: [],
+        rowIndex: [],
+        perSegmentColors: [],
+        wantsColors: false,
+      }),
+    ).toBeNull();
+    const batch = packSegmentsBatch({
+      frame,
+      segments: [0, 0, 10, 10],
+      rowIndex: [3],
+      perSegmentColors: [],
+      wantsColors: false,
+    });
+    expect(batch?.kind).toBe("segments");
+    expect([...batch!.rowIndex]).toEqual([3]);
+    expect(batch!.stroke).toBe("#111");
+  });
+});
+
+describe("packFacetPanelPlacement", () => {
+  it("shows y-axis only for column 0 when freeV is false", async () => {
+    const { packFacetPanelPlacement } =
+      await import("../src/pipeline/panel-layout-facet-place-pack.ts");
+    const placement = packFacetPanelPlacement({
+      def: { col: 1, row: 0 } as never,
+      colX: 20,
+      rowY: 10,
+      panelW: 100,
+      panelH: 50,
+      freeH: false,
+      freeV: false,
+      bottomMostRow: 0,
+      ticksRun: { x: { ticks: [1] }, y: { ticks: [2] } } as never,
+    });
+    expect(placement.showAxisX).toBe(true);
+    expect(placement.showAxisY).toBe(false);
+    expect(placement.x).toBe(20);
+  });
+});
