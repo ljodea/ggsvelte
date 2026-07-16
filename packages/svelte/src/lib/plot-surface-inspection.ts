@@ -3,9 +3,96 @@
  * Callers own queue mutation, setInspection, and reducer side effects.
  */
 
+import type { CandidateFacts, CandidateMatch } from "@ggsvelte/core";
+import type { SceneHit } from "@ggsvelte/core/dom";
+
 import type { InteractionSource } from "./interaction.js";
+import { clearInspectionFingerprint } from "./inspection-resolver.js";
+import { hitFromCandidate } from "./plot-pointer.js";
 
 type InspectionHostState = "none" | "transient" | "pinned";
+
+/**
+ * Host queue payload for pointer-move / touch-inspect frames and pending pin restore.
+ * `concreteMode` + `candidate` are coupled: both present only when nearest match exists.
+ */
+export type QueuedPointerInspection = {
+  hit: SceneHit | null;
+  source: InteractionSource;
+  concreteMode?: "exact" | "x" | "y" | "xy";
+  candidate?: CandidateFacts;
+};
+
+/**
+ * Build the queued pointer-inspect payload.
+ * Match is a single object: mode and candidate always come from the same nearest hit.
+ */
+export function buildQueuedPointerInspection(input: {
+  readonly hit: SceneHit | null;
+  readonly source: InteractionSource;
+  readonly match: CandidateMatch | null;
+}): QueuedPointerInspection {
+  if (input.match === null) {
+    return { hit: input.hit, source: input.source };
+  }
+  return {
+    hit: input.hit,
+    source: input.source,
+    concreteMode: input.match.mode,
+    candidate: input.match,
+  };
+}
+
+/**
+ * Cohesive queue-inspect frame payload for host `onPointerMove` queue-inspect.
+ *
+ * Owns the single `match === null` branch for hit resolution + reducer
+ * candidate ref (avoids three separate null checks / eager hitTest).
+ * `fallbackHit` and `panelIdForIndex` are thunks evaluated only on the path
+ * that needs them.
+ */
+export type QueuedInspectFrameBuild = {
+  readonly queued: QueuedPointerInspection;
+  readonly candidate: InspectionCandidateRef | null;
+};
+
+export function buildQueuedInspectFrame(input: {
+  readonly match: CandidateMatch | null;
+  readonly source: InteractionSource;
+  readonly epoch: number;
+  /** Evaluated only when match is null. */
+  readonly fallbackHit: () => SceneHit | null;
+  /** Evaluated only when match is non-null. */
+  readonly panelIdForIndex: (panelIndex: number) => string | null;
+}): QueuedInspectFrameBuild {
+  if (input.match === null) {
+    const hit = input.fallbackHit();
+    return {
+      queued: buildQueuedPointerInspection({
+        hit,
+        source: input.source,
+        match: null,
+      }),
+      candidate: null,
+    };
+  }
+  const match = input.match;
+  const hit = hitFromCandidate(match);
+  return {
+    queued: buildQueuedPointerInspection({
+      hit,
+      source: input.source,
+      match,
+    }),
+    candidate: {
+      epoch: input.epoch,
+      id: match.id,
+      panelId: input.panelIdForIndex(match.panelIndex),
+      x: match.x,
+      y: match.y,
+    },
+  };
+}
 
 export type QueuedInspectFrameInput = {
   /** True when a snapshotted `queuedPointerInspection` payload exists. */
@@ -84,7 +171,14 @@ export type SetInspectionInput = {
 
 export type SetInspectionAction =
   | { readonly type: "ignore" }
-  | { readonly type: "clear" }
+  | {
+      readonly type: "clear";
+      /**
+       * Host should emit inspect clear. True when currentState !== "none"
+       * (after clear-gate priority, this is effectively currentState === "transient").
+       */
+      readonly emitClear: boolean;
+    }
   | { readonly type: "apply" };
 
 /**
@@ -93,7 +187,7 @@ export type SetInspectionAction =
  * Priority (matches current host):
  *   1. ignore — current pinned + requested transient
  *   2. ignore — !hasHit && (tooltipHovered || current pinned)
- *   3. clear — !hasHit
+ *   3. clear — !hasHit (emitClear when currentState !== "none")
  *   4. apply — hasHit
  *
  * Host note: `apply` is not terminal. After resolve, a null coordinator
@@ -106,7 +200,7 @@ export function resolveSetInspectionAction(input: SetInspectionInput): SetInspec
     return { type: "ignore" };
   if (!input.hasHit) {
     if (input.tooltipHovered || input.currentState === "pinned") return { type: "ignore" };
-    return { type: "clear" };
+    return { type: "clear", emitClear: input.currentState !== "none" };
   }
   return { type: "apply" };
 }
@@ -126,19 +220,58 @@ export function shouldCommitInspection(input: {
   return true;
 }
 
+/** Reducer inspect payload candidate (matches InteractionCandidateRef shape). */
+export type InspectionCandidateRef = {
+  readonly epoch: number;
+  readonly id: number;
+  readonly panelId: string | null;
+  readonly x: number;
+  readonly y: number;
+};
+
+/**
+ * Build the inspect-dispatch candidate ref for setInspection apply.
+ * `fallbackId` is a thunk so hosts can defer `traversalHits.indexOf(hit)`
+ * until `candidateId` is actually missing (hot pointer path).
+ */
+export function buildInspectionCandidateRef(input: {
+  readonly epoch: number;
+  readonly candidateId: number | undefined;
+  readonly fallbackId: () => number;
+  readonly panelId: string | null;
+  readonly x: number;
+  readonly y: number;
+}): InspectionCandidateRef {
+  return {
+    epoch: input.epoch,
+    id: input.candidateId ?? input.fallbackId(),
+    panelId: input.panelId,
+    x: input.x,
+    y: input.y,
+  };
+}
+
 export type ToggleInspectionPinInput = {
   readonly hasInspection: boolean;
   readonly hasSeed: boolean;
   /** Host: current inspection.state when hasInspection. */
   readonly currentState: "transient" | "pinned";
-  readonly hasPendingPinned: boolean;
+  /** Host: `pendingPinnedPointer` (null when none). */
+  readonly pending: QueuedPointerInspection | null;
 };
 
 export type ToggleInspectionPinAction =
   | { readonly type: "ignore" }
-  | { readonly type: "restore-pending" }
-  | { readonly type: "flip-to-transient" }
-  | { readonly type: "flip-to-pinned" };
+  | {
+      readonly type: "restore-pending";
+      /** Pending queue payload to restore as transient inspection. */
+      readonly pending: QueuedPointerInspection;
+    }
+  | {
+      readonly type: "flip";
+      /** Target inspection state after toggle-pin dispatch + re-resolve. */
+      readonly state: "transient" | "pinned";
+    };
 
 /**
  * Pure decision for host `toggleInspectionPin` after the null-seed guard.
@@ -146,18 +279,23 @@ export type ToggleInspectionPinAction =
  * Host sequencing (preserve exactly):
  *   1. if ignore → return (no reducer dispatch)
  *   2. always `reducer.dispatch({ type: "toggle-pin", source })` first
- *   3. restore-pending → release pinned, clear fields, setInspection(pending…)
- *   4. flip → resolveInspection; if null return with reducer already toggled
- *      (host does not roll back reducer state)
+ *   3. restore-pending → release pinned, clear fields, setInspection(action.pending…, "transient")
+ *   4. flip → resolveInspection with action.state; if null return with reducer
+ *      already toggled (host does not roll back reducer state)
+ *
+ * `pending` replaces a separate `hasPendingPinned` boolean so restore cannot
+ * race a null payload and the host does not non-null-assert after the gate.
  */
 export function resolveToggleInspectionPinAction(
   input: ToggleInspectionPinInput,
 ): ToggleInspectionPinAction {
   if (!input.hasInspection || !input.hasSeed) return { type: "ignore" };
-  if (input.currentState === "pinned" && input.hasPendingPinned) return { type: "restore-pending" };
-  return input.currentState === "pinned"
-    ? { type: "flip-to-transient" }
-    : { type: "flip-to-pinned" };
+  if (input.currentState === "pinned" && input.pending !== null)
+    return { type: "restore-pending", pending: input.pending };
+  return {
+    type: "flip",
+    state: input.currentState === "pinned" ? "transient" : "pinned",
+  };
 }
 
 /**
@@ -226,10 +364,186 @@ export function resolveSurfaceBlurAction(input: {
  * Whether a window pointerdown outside the plot should close a pinned
  * inspection. Host: only when `surfaceInteractive` effect is installed.
  * Host must pass `targetInsideRoot: root?.contains(target) === true`.
+ *
+ * Takes domain `inspectionState` (not a pre-derived `isPinned` boolean) so
+ * hosts pass `inspection?.state` directly — same shape as `isTooltipDocked`.
  */
 export function shouldClosePinnedOnOutsidePointer(input: {
-  readonly isPinned: boolean;
+  readonly inspectionState: "transient" | "pinned" | "none" | null | undefined;
   readonly targetInsideRoot: boolean;
 }): boolean {
-  return input.isPinned && !input.targetInsideRoot;
+  return input.inspectionState === "pinned" && !input.targetInsideRoot;
+}
+
+// ---- scene-run inspection reconcile (host $effect) ----
+
+export type SceneInspectReconcilePlan =
+  | { readonly type: "noop" }
+  | { readonly type: "clear-disabled" }
+  | { readonly type: "skip" }
+  | { readonly type: "invalidate-clear-transient" }
+  | { readonly type: "invalidate-idle" }
+  | { readonly type: "invalidate-reconcile-pinned" };
+
+/**
+ * Priority table for the model-run inspection reconcile effect.
+ *
+ *   1. inspect off → clear-disabled when live inspection exists, else noop
+ *   2. no model / same runId as reconciledRun → skip
+ *   3. run advanced + transient → invalidate-clear-transient
+ *   4. run advanced + pinned → invalidate-reconcile-pinned
+ *   5. run advanced + none → invalidate-idle
+ *
+ * Host on every invalidate-*: clear queues, cancel scheduled pointer, set
+ * reconciledRun to the new model runId, then branch-specific side effects.
+ *
+ * `getInspectionState` is a thunk so the host `$effect` can avoid reading
+ * hover `inspection` state on the skip path (same runId) — otherwise every
+ * transient pointer update would re-run this effect only to hit skip.
+ */
+export function planSceneInspectReconcile(input: {
+  readonly inspectionEnabled: boolean;
+  /** Host: `() => (inspection === null ? "none" : inspection.state)`. */
+  readonly getInspectionState: () => InspectionHostState;
+  readonly modelRunId: number | null;
+  readonly reconciledRun: number;
+}): SceneInspectReconcilePlan {
+  if (!input.inspectionEnabled) {
+    return input.getInspectionState() === "none" ? { type: "noop" } : { type: "clear-disabled" };
+  }
+  if (input.modelRunId === null || input.modelRunId === input.reconciledRun) {
+    return { type: "skip" };
+  }
+  const inspectionState = input.getInspectionState();
+  if (inspectionState === "transient") {
+    return { type: "invalidate-clear-transient" };
+  }
+  if (inspectionState === "pinned") {
+    return { type: "invalidate-reconcile-pinned" };
+  }
+  return { type: "invalidate-idle" };
+}
+
+// ---- toggle-pin chrome gates ----
+
+/**
+ * Whether unpinning should announce for a11y (keyboard/touch only).
+ * Host: only after a successful flip-to-transient resolve.
+ */
+export function shouldAnnounceUnpin(input: {
+  readonly state: "transient" | "pinned";
+  readonly source: InteractionSource;
+}): boolean {
+  return input.state === "transient" && (input.source === "keyboard" || input.source === "touch");
+}
+
+/**
+ * Whether to move focus into the interactive pinned tooltip after pin.
+ * Host still runs the querySelector focus in a microtask.
+ */
+export function shouldFocusPinnedInteractiveTooltip(input: {
+  readonly state: "transient" | "pinned";
+  readonly contentMode: "interactive" | "informational" | undefined;
+}): boolean {
+  return input.state === "pinned" && input.contentMode === "interactive";
+}
+
+// ---- inspection emission fingerprint gate ----
+
+export type InspectionEmitAction =
+  | { readonly type: "skip" }
+  | {
+      readonly type: "emit";
+      /**
+       * When non-null, host assigns `lastInspectionFingerprint = updateFingerprint`
+       * before callbacks. When null, host must not mutate the last fingerprint
+       * (undefined semantic path on change — always emit without update).
+       */
+      readonly updateFingerprint: string | null;
+    };
+
+/**
+ * Pure gate for host `emitInspection`: resolve fingerprint then skip/emit.
+ *
+ * Fingerprint production:
+ *   clear  → `clearInspectionFingerprint(source)` (`clear:${source}`)
+ *   change → `semanticFingerprint` (coordinator token; may be undefined)
+ *
+ * `semanticFingerprint` is meaningful only when `phase === "change"`.
+ *
+ * Emit rules after fingerprint is resolved:
+ *   undefined fingerprint → emit, do not update last
+ *   fingerprint === last  → skip (includes equal empty string; host inits last to "")
+ *   otherwise             → emit and update last to fingerprint
+ */
+export function resolveInspectionEmitAction(input: {
+  readonly phase: "clear" | "change";
+  readonly source: InteractionSource;
+  /** Coordinator semantic fingerprint; ignored when phase is clear. */
+  readonly semanticFingerprint: string | undefined;
+  readonly lastFingerprint: string;
+}): InspectionEmitAction {
+  const fingerprint =
+    input.phase === "clear" ? clearInspectionFingerprint(input.source) : input.semanticFingerprint;
+  if (fingerprint === undefined) return { type: "emit", updateFingerprint: null };
+  if (fingerprint === input.lastFingerprint) return { type: "skip" };
+  return { type: "emit", updateFingerprint: fingerprint };
+}
+
+// ---- inspection dismiss (escape vs close) ----
+
+export type InspectionDismissKind = "escape" | "close";
+
+/**
+ * Host side-effect plan for dismissing inspection.
+ * Used by a single host `dismissInspection` that Escape and closeInspection share.
+ *
+ * Escape (keyboard): invalidate coordinator, clear brush, optional returnToInspect;
+ * does **not** clear pendingPinnedPointer (preserved host behavior — may be
+ * intentional for pin-restore after tool reset).
+ * Close: release pinned, clear pending, optional restore focus to capture surface.
+ */
+export type InspectionDismissPlan = {
+  readonly emitClear: boolean;
+  readonly clearPendingPinned: boolean;
+  readonly coordinator: "invalidate" | "release-pinned";
+  readonly clearBrush: boolean;
+  readonly clearTooltipHovered: boolean;
+  readonly restoreFocus: boolean;
+  readonly returnToInspect: boolean;
+};
+
+/**
+ * Pure plan for unified inspection dismiss.
+ * Host always dispatches reducer `{ type: "escape", source }` first, then applies
+ * this plan for field clears / coordinator / focus / tool.
+ */
+export function planInspectionDismiss(input: {
+  readonly kind: InspectionDismissKind;
+  readonly hasInspection: boolean;
+  /** Close only; defaults to true when omitted (matches closeInspection default). */
+  readonly restoreFocus?: boolean;
+  /** Escape only; from `resolveSurfaceKeyAction` escape.returnToInspect. */
+  readonly returnToInspect?: boolean;
+}): InspectionDismissPlan {
+  if (input.kind === "escape") {
+    return {
+      emitClear: input.hasInspection,
+      clearPendingPinned: false,
+      coordinator: "invalidate",
+      clearBrush: true,
+      clearTooltipHovered: true,
+      restoreFocus: false,
+      returnToInspect: input.returnToInspect === true,
+    };
+  }
+  return {
+    emitClear: input.hasInspection,
+    clearPendingPinned: true,
+    coordinator: "release-pinned",
+    clearBrush: false,
+    clearTooltipHovered: true,
+    restoreFocus: input.restoreFocus !== false,
+    returnToInspect: false,
+  };
 }

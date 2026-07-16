@@ -1,33 +1,59 @@
 import { describe, expect, it } from "vitest";
 
 import type { InteractionTool } from "../src/lib/interaction.js";
+import type { BrushCorners } from "../src/lib/plot-area-brush.js";
 import {
   resolveSurfaceKeyAction,
   type SurfaceKeyboardInput,
 } from "../src/lib/plot-surface-keyboard.js";
 
+const draft: BrushCorners = { x0: 10, y0: 20, x1: 40, y1: 50 };
+/** Reversed corners — pure table must normalize before finish routing. */
+const reversedDraft: BrushCorners = { x0: 40, y0: 50, x1: 10, y1: 20 };
+/** Zero-size draft — keyboard still commits (no too-small evaluation). */
+const zeroDraft: BrushCorners = { x0: 5, y0: 5, x1: 5, y1: 5 };
+
+const panel = { x: 0, y: 0, width: 100, height: 80 };
+/** Interior free corner so unclamped ±1/±10 steps stay in-bounds. */
+const draftInterior: BrushCorners = { x0: 10, y0: 20, x1: 50, y1: 40 };
+
 const base = (
   overrides: Partial<SurfaceKeyboardInput> & Pick<SurfaceKeyboardInput, "key" | "activeTool">,
 ): SurfaceKeyboardInput => ({
   shiftKey: false,
-  hasBrushDraft: false,
+  brushCorners: null,
   hasInspection: false,
   pinEnabled: false,
+  // Meaningful only when hasInspection (toggle-point-keys); unused otherwise.
+  focusKey: null,
+  sourceKeys: [],
+  // Meaningful for begin-area / nudge; unused otherwise.
+  inspectionAnchor: null,
+  inspectionPanel: null,
+  firstPanel: undefined,
   ...overrides,
 });
 
 describe("resolveSurfaceKeyAction", () => {
   describe("area tools with brush draft", () => {
     it.each(["select-area", "zoom-area"] as const)(
-      "%s Arrow keys nudge the free corner (shift steps by 10)",
+      "%s Arrow keys nudge free corner with clamped corners payload (shift steps by 10)",
       (tool) => {
         expect(
           resolveSurfaceKeyAction(
-            base({ key: "ArrowRight", activeTool: tool, hasBrushDraft: true }),
+            base({
+              key: "ArrowRight",
+              activeTool: tool,
+              brushCorners: draftInterior,
+              firstPanel: panel,
+            }),
           ),
         ).toEqual({
           preventDefault: true,
-          action: { type: "nudge-brush", dx: 1, dy: 0 },
+          action: {
+            type: "nudge-brush",
+            corners: { x0: 10, y0: 20, x1: 51, y1: 40 },
+          },
         });
         expect(
           resolveSurfaceKeyAction(
@@ -35,60 +61,211 @@ describe("resolveSurfaceKeyAction", () => {
               key: "ArrowUp",
               shiftKey: true,
               activeTool: tool,
-              hasBrushDraft: true,
+              brushCorners: draftInterior,
+              firstPanel: panel,
             }),
           ),
         ).toEqual({
           preventDefault: true,
-          action: { type: "nudge-brush", dx: 0, dy: -10 },
+          action: {
+            type: "nudge-brush",
+            corners: { x0: 10, y0: 20, x1: 50, y1: 30 },
+          },
         });
       },
     );
 
-    it("preserves startsWith('Arrow') for nonstandard keys (zero deltas)", () => {
+    it("prefers inspectionPanel over firstPanel for nudge clamp", () => {
+      const inspectionOnly = { x: 0, y: 0, width: 20, height: 20 };
+      const firstOnly = { x: 0, y: 0, width: 1000, height: 1000 };
+      expect(
+        resolveSurfaceKeyAction(
+          base({
+            key: "ArrowRight",
+            activeTool: "select-area",
+            brushCorners: { x0: 5, y0: 5, x1: 10, y1: 10 },
+            inspectionPanel: inspectionOnly,
+            firstPanel: firstOnly,
+          }),
+        ),
+      ).toEqual({
+        preventDefault: true,
+        action: {
+          type: "nudge-brush",
+          // free corner clamps to inspection panel right edge (20), not 1000
+          corners: { x0: 5, y0: 5, x1: 11, y1: 10 },
+        },
+      });
+      // Prove first-only would not clamp at 20: large step hits inspection edge.
+      expect(
+        resolveSurfaceKeyAction(
+          base({
+            key: "ArrowRight",
+            shiftKey: true,
+            activeTool: "select-area",
+            brushCorners: { x0: 5, y0: 5, x1: 15, y1: 10 },
+            inspectionPanel: inspectionOnly,
+            firstPanel: firstOnly,
+          }),
+        ).action,
+      ).toEqual({
+        type: "nudge-brush",
+        corners: { x0: 5, y0: 5, x1: 20, y1: 10 },
+      });
+    });
+
+    it("preserves startsWith('Arrow') for nonstandard keys (zero deltas, same corners)", () => {
       expect(
         resolveSurfaceKeyAction(
           base({
             key: "ArrowDiagonal",
             activeTool: "select-area",
-            hasBrushDraft: true,
+            brushCorners: draftInterior,
+            firstPanel: panel,
           }),
         ),
       ).toEqual({
         preventDefault: true,
-        action: { type: "nudge-brush", dx: 0, dy: 0 },
+        action: {
+          type: "nudge-brush",
+          corners: draftInterior,
+        },
       });
     });
 
-    it("area Enter/Space with draft completes the brush", () => {
+    it("swallows arrow when draft exists but no panel is available", () => {
+      // Keyboard begin-area with no model can leave a draft at {0,0} without panels.
+      expect(
+        resolveSurfaceKeyAction(
+          base({
+            key: "ArrowRight",
+            activeTool: "select-area",
+            brushCorners: draft,
+            inspectionPanel: null,
+            firstPanel: undefined,
+          }),
+        ),
+      ).toEqual({ preventDefault: true, action: { type: "none" } });
+    });
+
+    it("select-area Enter completes with select-end finish (normalized rect)", () => {
       expect(
         resolveSurfaceKeyAction(
           base({
             key: "Enter",
             activeTool: "select-area",
-            hasBrushDraft: true,
+            brushCorners: draft,
             hasInspection: true,
             pinEnabled: true,
           }),
         ),
       ).toEqual({
         preventDefault: true,
-        action: { type: "complete-area" },
+        action: {
+          type: "complete-area",
+          finish: {
+            type: "select-end",
+            rect: { x0: 10, y0: 20, x1: 40, y1: 50 },
+          },
+        },
       });
+    });
+
+    it("zoom-area Space completes with zoom-end finish", () => {
       expect(
-        resolveSurfaceKeyAction(base({ key: " ", activeTool: "zoom-area", hasBrushDraft: true })),
+        resolveSurfaceKeyAction(base({ key: " ", activeTool: "zoom-area", brushCorners: draft })),
       ).toEqual({
         preventDefault: true,
-        action: { type: "complete-area" },
+        action: {
+          type: "complete-area",
+          finish: {
+            type: "zoom-end",
+            rect: { x0: 10, y0: 20, x1: 40, y1: 50 },
+          },
+        },
+      });
+    });
+
+    it("normalizes reversed corners before finish routing", () => {
+      expect(
+        resolveSurfaceKeyAction(
+          base({
+            key: "Enter",
+            activeTool: "select-area",
+            brushCorners: reversedDraft,
+          }),
+        ),
+      ).toEqual({
+        preventDefault: true,
+        action: {
+          type: "complete-area",
+          finish: {
+            type: "select-end",
+            rect: { x0: 10, y0: 20, x1: 40, y1: 50 },
+          },
+        },
+      });
+    });
+
+    it("keyboard commits zero-size drafts (no too-small evaluation)", () => {
+      expect(
+        resolveSurfaceKeyAction(
+          base({
+            key: "Enter",
+            activeTool: "select-area",
+            brushCorners: zeroDraft,
+          }),
+        ),
+      ).toEqual({
+        preventDefault: true,
+        action: {
+          type: "complete-area",
+          finish: {
+            type: "select-end",
+            rect: { x0: 5, y0: 5, x1: 5, y1: 5 },
+          },
+        },
       });
     });
   });
 
   describe("area tools without draft", () => {
-    it("Enter/Space begins an area brush", () => {
+    it("Enter/Space begins an area brush with inspection anchor when present", () => {
+      expect(
+        resolveSurfaceKeyAction(
+          base({
+            key: "Enter",
+            activeTool: "select-area",
+            inspectionAnchor: { x: 12, y: 34 },
+            firstPanel: { x: 0, y: 0, width: 100, height: 80 },
+          }),
+        ),
+      ).toEqual({
+        preventDefault: true,
+        action: { type: "begin-area", anchor: { x: 12, y: 34 } },
+      });
+    });
+
+    it("begin-area falls back to panel center when no inspection anchor", () => {
+      expect(
+        resolveSurfaceKeyAction(
+          base({
+            key: " ",
+            activeTool: "zoom-area",
+            inspectionAnchor: null,
+            firstPanel: { x: 10, y: 20, width: 100, height: 80 },
+          }),
+        ),
+      ).toEqual({
+        preventDefault: true,
+        action: { type: "begin-area", anchor: { x: 60, y: 60 } },
+      });
+    });
+
+    it("begin-area uses {0,0} when no anchor and no panel", () => {
       expect(resolveSurfaceKeyAction(base({ key: "Enter", activeTool: "select-area" }))).toEqual({
         preventDefault: true,
-        action: { type: "begin-area" },
+        action: { type: "begin-area", anchor: { x: 0, y: 0 } },
       });
     });
 
@@ -121,7 +298,7 @@ describe("resolveSurfaceKeyAction", () => {
   });
 
   describe("Enter / Space priority", () => {
-    it("point tool + inspection toggles point keys (wins over pin)", () => {
+    it("point tool + inspection toggles point keys (wins over pin) with focus key", () => {
       expect(
         resolveSurfaceKeyAction(
           base({
@@ -129,11 +306,30 @@ describe("resolveSurfaceKeyAction", () => {
             activeTool: "point",
             hasInspection: true,
             pinEnabled: true,
+            focusKey: "row-a",
+            sourceKeys: ["row-a", "row-b"],
           }),
         ),
       ).toEqual({
         preventDefault: true,
-        action: { type: "toggle-point-keys" },
+        action: { type: "toggle-point-keys", keys: ["row-a"] },
+      });
+    });
+
+    it("toggle-point-keys uses sourceKeys when focusKey is null", () => {
+      expect(
+        resolveSurfaceKeyAction(
+          base({
+            key: " ",
+            activeTool: "point",
+            hasInspection: true,
+            focusKey: null,
+            sourceKeys: ["group-1", "group-2"],
+          }),
+        ),
+      ).toEqual({
+        preventDefault: true,
+        action: { type: "toggle-point-keys", keys: ["group-1", "group-2"] },
       });
     });
 
@@ -173,7 +369,7 @@ describe("resolveSurfaceKeyAction", () => {
           base({
             key: "Enter",
             activeTool: "select-area",
-            hasBrushDraft: false,
+            brushCorners: null,
             hasInspection: true,
             pinEnabled: true,
           }),
@@ -196,7 +392,7 @@ describe("resolveSurfaceKeyAction", () => {
           base({
             key: "Escape",
             activeTool: "zoom-area",
-            hasBrushDraft: true,
+            brushCorners: draft,
           }),
         ),
       ).toEqual({
@@ -234,7 +430,7 @@ describe("resolveSurfaceKeyAction", () => {
               base({
                 key,
                 activeTool,
-                hasBrushDraft: true,
+                brushCorners: draft,
                 hasInspection: true,
                 pinEnabled: true,
               }),

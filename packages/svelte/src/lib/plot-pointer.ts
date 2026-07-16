@@ -152,3 +152,60 @@ export function cycleCoincidentIndex(
   const next = coincident[(current + delta + coincident.length) % coincident.length]!;
   return next.index;
 }
+
+// ---- host traversal step plans ----
+
+export type TraversalStepPlan =
+  | { readonly type: "none" }
+  | { readonly type: "set-index"; readonly index: number };
+
+/**
+ * Directional keyboard navigation (arrow keys).
+ *
+ * - empty hits → none
+ * - no live inspection → advance from currentIndex by +1 (host `navigate(1)`)
+ * - with inspection → `bestIndex()` (thunk so host skips anchor work when uninspected)
+ *   and none when the thunk returns a negative index
+ */
+export function planDirectionalNavigate(input: {
+  readonly hitCount: number;
+  readonly hasInspection: boolean;
+  readonly currentIndex: number;
+  /** Evaluated only when hasInspection. */
+  readonly bestIndex: () => number;
+}): TraversalStepPlan {
+  if (input.hitCount <= 0) return { type: "none" };
+  if (!input.hasInspection) {
+    const index = nextTraversalIndex(input.currentIndex, 1, input.hitCount);
+    return index < 0 ? { type: "none" } : { type: "set-index", index };
+  }
+  const best = input.bestIndex();
+  if (best < 0) return { type: "none" };
+  return { type: "set-index", index: best };
+}
+
+/**
+ * Coincident cycle (`[` / `]`).
+ *
+ * - no live inspection → advance from currentIndex by +1 (same as navigate(1))
+ * - with inspection → `nextIndex()` thunk; none when negative
+ *
+ * Host `cycleCoincident` has no empty-list guard; empty hits yield none via
+ * nextTraversalIndex / negative nextIndex.
+ */
+export function planCycleCoincident(input: {
+  readonly hasInspection: boolean;
+  readonly hitCount: number;
+  readonly currentIndex: number;
+  /** Evaluated only when hasInspection. */
+  readonly nextIndex: () => number;
+}): TraversalStepPlan {
+  if (!input.hasInspection) {
+    if (input.hitCount <= 0) return { type: "none" };
+    const index = nextTraversalIndex(input.currentIndex, 1, input.hitCount);
+    return index < 0 ? { type: "none" } : { type: "set-index", index };
+  }
+  const next = input.nextIndex();
+  if (next < 0) return { type: "none" };
+  return { type: "set-index", index: next };
+}

@@ -9,7 +9,17 @@ import {
   intervalSelectionFromRows,
   isBrushTooSmall,
   lineageRowIndexesFromCandidates,
+  persistentSelectionOrNull,
 } from "../src/lib/plot-interval.js";
+
+describe("persistentSelectionOrNull", () => {
+  it("keeps the event only when persistent is strictly true", () => {
+    const event = { phase: "end" as const };
+    expect(persistentSelectionOrNull(true, event)).toBe(event);
+    expect(persistentSelectionOrNull(false, event)).toBeNull();
+    expect(persistentSelectionOrNull(undefined, event)).toBeNull();
+  });
+});
 
 describe("isBrushTooSmall (pointer brush-end gate)", () => {
   it("defaults min span to 4", () => {

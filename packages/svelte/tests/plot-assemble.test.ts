@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   assemblePortableSpec,
+  isFacetedPlotIntent,
   mappedChannelField,
   resolveInteractionScope,
   toLayerInput,
@@ -178,6 +179,50 @@ describe("mappedChannelField", () => {
   });
 });
 
+describe("isFacetedPlotIntent", () => {
+  it("is true from the raw facet prop before layers assemble (declaration-only children)", () => {
+    // Hosts must treat a raw facet prop as intent even when assembled is still
+    // null — declaration-only children register on a later flush.
+    expect(
+      isFacetedPlotIntent({
+        facet: { rows: "g" },
+        assembled: null,
+      }),
+    ).toBe(true);
+  });
+
+  it("is true from assembled.facet when the plot is driven by a portable spec", () => {
+    // Spec-based plots put facet on the normalized spec, not a separate prop.
+    const assembled = assemblePortableSpec({
+      spec: {
+        data: [{ x: 1, y: 2, g: "a" }],
+        layers: [{ geom: "point", aes: { x: "x", y: "y" } }],
+        facet: { rows: "g" },
+      },
+      layers: [],
+    });
+    expect(assembled?.facet).toBeDefined();
+    expect(
+      isFacetedPlotIntent({
+        assembled,
+      }),
+    ).toBe(true);
+  });
+
+  it("is false when neither the prop nor the assembled spec is faceted", () => {
+    const assembled = assemblePortableSpec({
+      data: [{ x: 1, y: 2 }],
+      layers: [{ geom: "point", aes: { x: "x", y: "y" } }],
+    });
+    expect(
+      isFacetedPlotIntent({
+        assembled,
+      }),
+    ).toBe(false);
+    expect(isFacetedPlotIntent({ assembled: null })).toBe(false);
+  });
+});
+
 describe("resolveInteractionScope", () => {
   const assembled = assemblePortableSpec({
     data: [{ foo: 1, bar: 2 }],
@@ -249,8 +294,8 @@ describe("resolveInteractionScope", () => {
         assembled,
       }),
     ).toEqual({ keys: "id" });
-    // Hosts must pass faceted from the raw facet prop (not assembled.facet)
-    // so declaration-only children still take this path before layers register.
+    // Hosts must pass faceted via isFacetedPlotIntent (raw prop OR assembled.facet)
+    // so declaration-only children and spec-embedded facets both take this path.
     expect(
       resolveInteractionScope({
         interaction: {},

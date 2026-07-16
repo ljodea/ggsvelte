@@ -5,7 +5,9 @@ import type { CellValue } from "@ggsvelte/core";
 import { INTERACTION_DIAGNOSTIC_CATALOG } from "../src/lib/interaction.js";
 import {
   createSourceIdentityTracker,
+  dataIdentityEpochToken,
   resolveSemanticKeys,
+  resolveSemanticKeysForPlot,
   type SemanticKeyCandidate,
   type SemanticKeyModelView,
 } from "../src/lib/plot-semantic-keys.js";
@@ -36,6 +38,72 @@ function modelView(options: {
     layers: options.layers ?? [],
   };
 }
+
+describe("dataIdentityEpochToken", () => {
+  it("returns no-data when assembled is null", () => {
+    expect(
+      dataIdentityEpochToken({
+        assembled: null,
+        dataToken: "1",
+        specToken: "2",
+      }),
+    ).toBe("no-data");
+  });
+
+  it("joins source tokens with JSON of data and datasets (nullish → null)", () => {
+    expect(
+      dataIdentityEpochToken({
+        assembled: { data: [{ a: 1 }], datasets: undefined },
+        dataToken: "d",
+        specToken: "s",
+      }),
+    ).toBe(`d:s:${JSON.stringify([[{ a: 1 }], null])}`);
+    expect(
+      dataIdentityEpochToken({
+        assembled: {},
+        dataToken: "d",
+        specToken: "s",
+      }),
+    ).toBe(`d:s:${JSON.stringify([null, null])}`);
+  });
+});
+
+describe("resolveSemanticKeysForPlot", () => {
+  it("returns an empty bag when model is null", () => {
+    const result = resolveSemanticKeysForPlot({
+      model: null,
+      layers: [],
+      datumKey: "id",
+      priorKeys: new Map(),
+      dataToken: "d",
+      specToken: "s",
+    });
+    expect(result.keys.size).toBe(0);
+    expect(result.diagnostics).toEqual([]);
+  });
+
+  it("adapts a plot model and resolves keys with data/spec row identity tokens", () => {
+    const priorKeys = new Map<string, PropertyKey>();
+    const candidates = [{ id: 0, rowIndex: 0, layerIndex: 0, lineage: 0 }];
+    const result = resolveSemanticKeysForPlot({
+      model: {
+        candidates: {
+          size: candidates.length,
+          candidate: (id) => candidates[id] ?? null,
+        },
+        lineage: { keys: (lineageId) => (lineageId === 0 ? [0] : []) },
+        row: (rowIndex) => (rowIndex === 0 ? { id: "row-a" } : null),
+      },
+      layers: [{ geom: "point" }],
+      datumKey: "id",
+      priorKeys,
+      dataToken: "d1",
+      specToken: "s1",
+    });
+    expect(result.keys.get(0)).toBe("row-a");
+    expect(priorKeys.get("d1:s1:0")).toBe("row-a");
+  });
+});
 
 describe("createSourceIdentityTracker", () => {
   it("assigns stable ids to the same object and distinct ids to different objects", () => {

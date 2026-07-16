@@ -9,6 +9,7 @@ import {
   filterScopeChannelsByZoomMode,
   filterZoomDomainsByMode,
   resolveBrushZoomDomains,
+  resolveBrushZoomFromModel,
   sameZoomDomains,
   sanitizePartialZoomDomains,
   stableZoomDomains,
@@ -255,6 +256,90 @@ describe("resolveBrushZoomDomains", () => {
     );
     expect(domains?.x).toEqual([0, 100]);
     expect(domains?.y).toEqual([0, 50]);
+  });
+});
+
+describe("resolveBrushZoomFromModel", () => {
+  const scales = {
+    x: continuousScale([0, 100]),
+    y: continuousScale([0, 50]),
+  };
+  const single = {
+    scene: { panels: [panel] },
+    scales: scales as never,
+  };
+  const rect = { x0: 10, y0: 10, x1: 90, y1: 90 };
+
+  it("returns null when model is null", () => {
+    expect(
+      resolveBrushZoomFromModel({
+        model: null,
+        rect,
+        flipped: false,
+        mode: "xy",
+        current: null,
+      }),
+    ).toBeNull();
+  });
+
+  it("returns null for multi-panel (M2 faceted skip)", () => {
+    expect(
+      resolveBrushZoomFromModel({
+        model: {
+          scene: { panels: [panel, { x: 100, y: 0, width: 100, height: 100 }] },
+          scales: scales as never,
+        },
+        rect,
+        flipped: false,
+        mode: "xy",
+        current: null,
+      }),
+    ).toBeNull();
+  });
+
+  it("returns null when there are zero panels", () => {
+    expect(
+      resolveBrushZoomFromModel({
+        model: { scene: { panels: [] }, scales: scales as never },
+        rect,
+        flipped: false,
+        mode: "xy",
+        current: null,
+      }),
+    ).toBeNull();
+  });
+
+  it("returns frozen commit-ready domains for a single panel", () => {
+    const domains = resolveBrushZoomFromModel({
+      model: single,
+      rect,
+      flipped: false,
+      mode: "xy",
+      current: null,
+    });
+    expect(domains).not.toBeNull();
+    expect(domains!.x).toBeDefined();
+    expect(domains!.y).toBeDefined();
+    expect(Object.isFrozen(domains)).toBe(true);
+    expect(Object.isFrozen(domains!.x)).toBe(true);
+    expect(Object.isFrozen(domains!.y)).toBe(true);
+    // Deep clone: frozen tuples are not the same references as a mutable source.
+    const mutable: [number, number] = [domains!.x![0], domains!.x![1]];
+    expect(domains!.x).not.toBe(mutable);
+    mutable[0] = 999;
+    expect(domains!.x![0]).not.toBe(999);
+  });
+
+  it("returns null when domain invert degenerates", () => {
+    expect(
+      resolveBrushZoomFromModel({
+        model: single,
+        rect: { x0: 10, y0: 10, x1: 10, y1: 10 },
+        flipped: false,
+        mode: "xy",
+        current: null,
+      }),
+    ).toBeNull();
   });
 });
 

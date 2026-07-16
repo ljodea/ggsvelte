@@ -31,6 +31,105 @@ export function diffTextIsSubstantive(diff: string): boolean {
   return false;
 }
 
+/**
+ * Known HTML/SVG type selectors. Used for bare multi-token chains after a
+ * combinator so arbitrary English (`minimum latency`) stays documentation while
+ * real tag chains (`ul li`, `a span`, `svg polygon`, `my-widget path`) stay CSS.
+ * camelCase SVG names are stored as authored.
+ */
+const CSS_TYPE_TOKEN = new Set(
+  (
+    "a abbr address area article aside audio b base bdi bdo blockquote body br " +
+    "button canvas caption circle cite code col colgroup data datalist dd del " +
+    "details dfn dialog div dl dt em embed fieldset figcaption figure footer " +
+    "form g h1 h2 h3 h4 h5 h6 head header hgroup hr html i iframe img input ins " +
+    "kbd label legend li line link main map mark menu meta meter nav noscript " +
+    "object ol optgroup option output p param path picture pre progress q rect " +
+    "rp rt ruby s samp script section select slot small source span strong style " +
+    "sub summary sup svg table tbody td template text textarea tfoot th thead " +
+    "time title tr track u ul var video wbr use defs clipPath linearGradient " +
+    "radialGradient stop tspan foreignObject pattern marker symbol switch " +
+    "animate animateTransform animateMotion mpath metadata set image polygon " +
+    "polyline ellipse textPath mask view feBlend feColorMatrix " +
+    "feComponentTransfer feComposite feConvolveMatrix feDiffuseLighting " +
+    "feDisplacementMap feDistantLight feDropShadow feFlood feFuncA feFuncB " +
+    "feFuncG feFuncR feGaussianBlur feImage feMerge feMergeNode feMorphology " +
+    "feOffset fePointLight feSpecularLighting feSpotLight feTile feTurbulence " +
+    "filter"
+  ).split(/\s+/),
+);
+
+/**
+ * English-first collocations that are HTML tag names but common in JSDoc lists
+ * (`* + data table`, `* + source code`). Not CSS `a span` / `a img`.
+ */
+const BARE_CHAIN_PROSE_PAIR = new Set(["data table", "source code", "mark time", "object video"]);
+
+/** HTML custom elements must contain a hyphen (HTML living standard). */
+function isCustomElementToken(token: string): boolean {
+  return /^[a-z][\w]*-[\w-]+$/.test(token);
+}
+
+function isCssTypeToken(token: string): boolean {
+  return (
+    token === "*" ||
+    CSS_TYPE_TOKEN.has(token) ||
+    CSS_TYPE_TOKEN.has(token.toLowerCase()) ||
+    isCustomElementToken(token)
+  );
+}
+
+/** Bare multi-token chain after a combinator: CSS vs English. */
+function bareMultiTokenChainIsCss(tokens: readonly string[]): boolean {
+  if (BARE_CHAIN_PROSE_PAIR.has(tokens.map((t) => t.toLowerCase()).join(" "))) return false;
+  // Allowlist + custom elements only (no global camelCase / no loose SVG-context).
+  return tokens.every((t) => isCssTypeToken(t));
+}
+
+/**
+ * After a CSS combinator (`+`, `>`, `~`), is the remainder a selector fragment?
+ * Distinguishes `* + * {…}` / `* > .mark` / `* > ul li {…}` / `* > ul *` from
+ * JSDoc/Markdown `* + list item` and `* > Note`.
+ */
+function isCssSelectorAfterCombinator(rest: string): boolean {
+  if (rest.length === 0) return false;
+  // Universal, class, id, attribute, or pseudo at the start of the remainder.
+  if (rest.startsWith("*") || /^[.#[]/.test(rest) || rest.startsWith(":")) return true;
+
+  // Strong CSS structure anywhere (not English end-of-sentence `. Kept`).
+  if (/[{[]/.test(rest)) return true;
+  if (/(?:^|[\s>+~,])[.#][\w-]/.test(rest)) return true;
+  // Pseudo requires ident immediately after `:` so `Note: prose` stays docs.
+  if (/::?[\w-]/.test(rest)) return true;
+
+  // Leading type / universal chain (descendant spaces), then optional structure.
+  const lead = rest.match(/^((?:[A-Za-z_][\w-]*|\*)(?:\s+(?:[A-Za-z_][\w-]*|\*))*)(.*)$/);
+  if (lead === null) return false;
+  const tokens = lead[1]!.split(/\s+/);
+  const suffix = (lead[2] ?? "").trimStart();
+
+  if (suffix.length === 0) {
+    // Bare single lowercase type (`* + p`, `* + section`) — `{` often next line.
+    if (tokens.length === 1) {
+      const only = tokens[0]!;
+      return only === "*" || /^[a-z][\w-]*$/.test(only);
+    }
+    // Bare multi-token: HTML/SVG/custom-element types only (not English prose).
+    // Anchor-led chains (`a span`) are real CSS — do not blanket-skip lead `a`.
+    return bareMultiTokenChainIsCss(tokens);
+  }
+
+  // Weak structure (`,>+~`): recurse so `ul li, ol li` and `ul li > a` count as
+  // CSS while `positive values, if any` stays prose via the bare-chain rules.
+  if (/^[,>+~]/.test(suffix)) {
+    const afterComb = suffix.slice(1).trimStart();
+    if (afterComb.length === 0) return tokens.length === 1;
+    return isCssSelectorAfterCombinator(afterComb);
+  }
+
+  return false;
+}
+
 /** Lines that are blank or documentation-only (not CSS/code). */
 export function isSkippableCommentLine(body: string): boolean {
   const trimmed = body.trim();
@@ -42,11 +141,17 @@ export function isSkippableCommentLine(body: string): boolean {
 
   // JSDoc middle lines are `* text` / lone `*`. CSS universal selectors look like
   // `* {…}`, `*.class`, `*#id`, `*:hover`, `*, div`, `*[attr]`, and combinators
-  // `* + *`, `* > .x`, `* ~ *`.
+  // `* + *`, `* > .x`, `* ~ *`. Markdown list/blockquote markers (`* + …`,
+  // `* > Note`) stay documentation.
   const afterStar = trimmed.slice(1).trimStart();
   if (afterStar.length === 0) return true;
   if (afterStar.startsWith("/")) return true; // */
-  if (/^[{.,#:[\]+>~]/.test(afterStar)) return false;
+  // Unambiguous CSS after `*`.
+  if (/^[{.,#:[]/.test(afterStar)) return false;
+  // Combinators: only substantive when followed by a selector fragment.
+  if (/^[+>~]/.test(afterStar)) {
+    return !isCssSelectorAfterCombinator(afterStar.slice(1).trimStart());
+  }
   return true;
 }
 

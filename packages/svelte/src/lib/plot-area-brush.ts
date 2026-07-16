@@ -22,6 +22,22 @@ export function brushWithEnd(corners: BrushCorners, point: PlotPoint): BrushCorn
 }
 
 /**
+ * Pointer-down begin-area corners.
+ * Extend free corner only when reducer is awaiting second AND draft exists;
+ * otherwise start a degenerate brush at `point`. Both conditions are required
+ * so a surviving draft without first-corner state restarts fresh (not extend).
+ */
+export function initialBrushRect(input: {
+  readonly areaAwaitingSecond: boolean;
+  readonly existing: BrushCorners | null;
+  readonly point: PlotPoint;
+}): BrushCorners {
+  return input.areaAwaitingSecond && input.existing !== null
+    ? brushWithEnd(input.existing, input.point)
+    : brushAtPoint(input.point);
+}
+
+/**
  * Keyboard arrow nudge of the free corner, clamped to panel bounds.
  * Does not normalize; callers keep denormalized corners until commit.
  */

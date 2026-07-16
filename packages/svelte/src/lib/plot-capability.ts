@@ -17,6 +17,98 @@ export function filterAvailableTools(
   return tools.filter((tool) => tool !== "zoom-area" || zoomHasSupportedChannel);
 }
 
+/**
+ * Resolve the tool the host should sync into the reducer.
+ * Priority: requested if available → first available → `"inspect"`.
+ *
+ * Note: empty `available` still yields `"inspect"` (even when inspect is not
+ * listed). That matches the host `$effect` and intentionally diverges from
+ * `resolveChooseToolAction`, which rejects unavailable tools.
+ */
+export function resolveEffectiveTool(
+  requested: InteractionTool,
+  available: readonly InteractionTool[],
+): InteractionTool {
+  if (available.includes(requested)) return requested;
+  return available[0] ?? "inspect";
+}
+
+export type ChooseToolAction =
+  | { readonly type: "ignore" }
+  | { readonly type: "request" }
+  | { readonly type: "apply" };
+
+export type ShowToolRailInput = {
+  readonly interactive: boolean;
+  readonly availableToolCount: number;
+  /** Host: `interactionConfig.select?.type === "point"`. */
+  readonly canPublishPointSelection: boolean;
+  readonly selectedKeyCount: number;
+  readonly hasIntervalSelection: boolean;
+  readonly hasZoomDomains: boolean;
+};
+
+/**
+ * True when every batch has zero rows (including an empty batches list).
+ * Host still requires a live model before calling this.
+ */
+export function isEmptyPlotScene(
+  batches: readonly { readonly rowIndex: { readonly length: number } }[],
+): boolean {
+  return batches.every((batch) => batch.rowIndex.length === 0);
+}
+
+/**
+ * Whether the tool rail chrome should mount.
+ * Multi-tool mode, or any recovery control (point clear / interval clear / zoom reset).
+ */
+export function shouldShowToolRail(input: ShowToolRailInput): boolean {
+  return (
+    input.interactive &&
+    (input.availableToolCount > 1 ||
+      (input.canPublishPointSelection && input.selectedKeyCount > 0) ||
+      input.hasIntervalSelection ||
+      input.hasZoomDomains)
+  );
+}
+
+export type InertSelectionOverlayInput = {
+  /**
+   * Host chart-local `interactive` (tools or legend focus).
+   * Inert overlay is only for non-interactive emphasis/selection paint.
+   */
+  readonly interactive: boolean;
+  readonly selectedAnchorCount: number;
+  readonly emphasizedAnchorCount: number;
+};
+
+/**
+ * Whether to paint the non-interactive selection/emphasis overlay.
+ * Host also must not be in surface-interactive mode; PlotSceneOverlays
+ * enforces that with `{:else if}` so both never mount together.
+ */
+export function shouldShowInertSelectionOverlay(input: InertSelectionOverlayInput): boolean {
+  return !input.interactive && (input.selectedAnchorCount > 0 || input.emphasizedAnchorCount > 0);
+}
+
+/**
+ * Pure routing for host `chooseTool`.
+ *
+ * Priority:
+ *   1. ignore — `next` not in `available` (wins over controlled; no callback)
+ *   2. request — controlled prop (`tool !== undefined`): callback only
+ *   3. apply — local: dispatch + clear draft/queue + callback
+ */
+export function resolveChooseToolAction(input: {
+  readonly next: InteractionTool;
+  readonly available: readonly InteractionTool[];
+  readonly isControlled: boolean;
+}): ChooseToolAction {
+  if (!input.available.includes(input.next)) return { type: "ignore" };
+  if (input.isControlled) return { type: "request" };
+  return { type: "apply" };
+}
+
 export type ScaleTypeRef = {
   readonly x: { readonly type: string };
   readonly y: { readonly type: string };

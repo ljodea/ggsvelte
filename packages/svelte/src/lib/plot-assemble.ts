@@ -69,6 +69,23 @@ export type AssemblePortableSpecInput = {
 };
 
 /**
+ * Whether this plot instance should take the faceted interaction path
+ * (disable brush zoom / interval select with a diagnostic).
+ *
+ * True when either:
+ * - the raw `facet` prop is set (covers declaration-only children before layers
+ *   register and `assembled` is still null), or
+ * - `assembled.facet` is set (covers portable-`spec` plots that embed facet
+ *   without a separate prop).
+ */
+export function isFacetedPlotIntent(input: {
+  readonly facet?: FacetInput | undefined;
+  readonly assembled: PortableSpec | null;
+}): boolean {
+  return input.facet !== undefined || input.assembled?.facet !== undefined;
+}
+
+/**
  * Build the normalized PortableSpec for GGPlot.
  * Explicit `spec` wins; empty `layers` yields null (no plot).
  */

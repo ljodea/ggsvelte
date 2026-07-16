@@ -1,0 +1,21 @@
+/**
+ * Pipeline public contract and shared internal frame types.
+ * Split into types-public / types-frame; this module re-exports for path stability.
+ */
+export type {
+  Advisory,
+  AxisValueFormatter,
+  LayerBackend,
+  MappedField,
+  NamedData,
+  PipelineWarning,
+  RenderModel,
+  ResolvedColorScale,
+  RunOptions,
+  ScaleDomainSnapshot,
+  TrainedScales,
+} from "./types-public.js";
+export { CANVAS_AUTO_THRESHOLD, PipelineError } from "./types-public.js";
+
+export type { ColorBinding, LayerBinding, LayerFrame, RuleForm } from "./types-frame.js";
+export { NO_ROW, colorOf } from "./types-frame.js";

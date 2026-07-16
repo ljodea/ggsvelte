@@ -2,10 +2,15 @@ import { describe, expect, it } from "vitest";
 
 import type { InteractionTool } from "../src/lib/interaction.js";
 import {
+  POINT_SELECT_NEAREST_MAX_DISTANCE_PX,
+  TOUCH_INSPECT_CLICK_SUPPRESS_MS,
   TOUCH_INSPECT_MOVE_PX,
   advanceTouchInspectMoved,
+  interactionSourceFromPointerType,
   resolveCaptureClickAction,
-  resolveFinishBrushAction,
+  isAreaAwaitingSecond,
+  isAreaBrushing,
+  resolveLostPointerCaptureAction,
   resolvePointerDownAction,
   resolvePointerMoveAction,
   resolvePointerUpAction,
@@ -16,13 +21,18 @@ import {
   type SurfacePointerUpInput,
 } from "../src/lib/plot-surface-pointer.js";
 
+const downPoint = { x: 9, y: 8 } as const;
+const draftCorners = { x0: 10, y0: 20, x1: 10, y1: 20 } as const;
+const endAt = { x: 40, y: 50 } as const;
+
 const down = (
   overrides: Partial<SurfacePointerDownInput> & Pick<SurfacePointerDownInput, "activeTool">,
 ): SurfacePointerDownInput => ({
   pointerType: "mouse",
   button: 0,
   areaAwaitingSecond: false,
-  hasBrushDraft: false,
+  brushCorners: null,
+  point: downPoint,
   ...overrides,
 });
 
@@ -35,7 +45,8 @@ const up = (
   hasTouchInspectStart: false,
   touchInspectMoved: false,
   brushing: false,
-  hasBrushDraft: false,
+  brushCorners: null,
+  endPoint: endAt,
   ...overrides,
 });
 
@@ -88,54 +99,91 @@ describe("resolvePointerDownAction", () => {
   });
 
   it.each(["select-area", "zoom-area"] as const)(
-    "%s begins a new area draft when not extending",
+    "%s begins a new area draft with degenerate corners when not extending",
     (tool: InteractionTool) => {
       expect(resolvePointerDownAction(down({ activeTool: tool }))).toEqual({
         type: "begin-area",
-        extendExisting: false,
+        corners: { x0: 9, y0: 8, x1: 9, y1: 8 },
+        emitSelectStart: tool === "select-area",
+        source: "pointer",
       });
     },
   );
 
-  it("extends only when awaiting second corner AND draft exists", () => {
+  it("extends free corner when awaiting second AND draft exists", () => {
     expect(
       resolvePointerDownAction(
         down({
           activeTool: "select-area",
           areaAwaitingSecond: true,
-          hasBrushDraft: true,
+          brushCorners: { x0: 1, y0: 2, x1: 3, y1: 4 },
+          point: { x: 9, y: 8 },
         }),
       ),
-    ).toEqual({ type: "begin-area", extendExisting: true });
+    ).toEqual({
+      type: "begin-area",
+      corners: { x0: 1, y0: 2, x1: 9, y1: 8 },
+      emitSelectStart: false,
+      source: "pointer",
+    });
   });
 
-  it("does not extend when awaiting second corner but draft is missing", () => {
+  it("starts fresh when awaiting second but draft is missing", () => {
     expect(
       resolvePointerDownAction(
         down({
           activeTool: "zoom-area",
           areaAwaitingSecond: true,
-          hasBrushDraft: false,
+          brushCorners: null,
+          point: { x: 5, y: 6 },
         }),
       ),
-    ).toEqual({ type: "begin-area", extendExisting: false });
+    ).toEqual({
+      type: "begin-area",
+      corners: { x0: 5, y0: 6, x1: 5, y1: 6 },
+      emitSelectStart: false,
+      source: "pointer",
+    });
   });
 
-  it("does not extend when draft exists but reducer is not awaiting second", () => {
+  it("restarts fresh when draft exists but reducer is not awaiting second", () => {
+    // Regression: draft alone must not extend — both gates required.
     expect(
       resolvePointerDownAction(
         down({
           activeTool: "select-area",
           areaAwaitingSecond: false,
-          hasBrushDraft: true,
+          brushCorners: { x0: 1, y0: 2, x1: 3, y1: 4 },
+          point: { x: 9, y: 8 },
         }),
       ),
-    ).toEqual({ type: "begin-area", extendExisting: false });
+    ).toEqual({
+      type: "begin-area",
+      corners: { x0: 9, y0: 8, x1: 9, y1: 8 },
+      emitSelectStart: true,
+      source: "pointer",
+    });
+  });
+
+  it("maps begin-area source from pointerType (touch vs mouse)", () => {
+    expect(
+      resolvePointerDownAction(
+        down({
+          activeTool: "select-area",
+          pointerType: "touch",
+        }),
+      ),
+    ).toEqual({
+      type: "begin-area",
+      corners: { x0: 9, y0: 8, x1: 9, y1: 8 },
+      emitSelectStart: true,
+      source: "touch",
+    });
   });
 });
 
 describe("resolvePointerUpAction", () => {
-  it("resolves touch inspect tap with pin flag", () => {
+  it("resolves touch inspect tap with inspection state from pinEnabled", () => {
     expect(
       resolvePointerUpAction(
         up({
@@ -147,7 +195,7 @@ describe("resolvePointerUpAction", () => {
           pinEnabled: true,
         }),
       ),
-    ).toEqual({ type: "touch-inspect-tap", pin: true });
+    ).toEqual({ type: "touch-inspect-tap", state: "pinned" });
 
     expect(
       resolvePointerUpAction(
@@ -160,7 +208,7 @@ describe("resolvePointerUpAction", () => {
           pinEnabled: false,
         }),
       ),
-    ).toEqual({ type: "touch-inspect-tap", pin: false });
+    ).toEqual({ type: "touch-inspect-tap", state: "transient" });
   });
 
   it("ignores touch inspect drag (moved past threshold)", () => {
@@ -178,43 +226,99 @@ describe("resolvePointerUpAction", () => {
   });
 
   it("does not take touch-inspect path when inspect disabled or tool changed", () => {
-    expect(
-      resolvePointerUpAction(
-        up({
-          activeTool: "inspect",
-          pointerType: "touch",
-          inspectEnabled: false,
-          hasTouchInspectStart: true,
-          brushing: true,
-          hasBrushDraft: true,
-        }),
-      ),
-    ).toEqual({ type: "finish-brush" });
+    const finishTouch = resolvePointerUpAction(
+      up({
+        activeTool: "inspect",
+        pointerType: "touch",
+        inspectEnabled: false,
+        hasTouchInspectStart: true,
+        brushing: true,
+        brushCorners: draftCorners,
+      }),
+    );
+    expect(finishTouch.type).toBe("finish-brush");
+    if (finishTouch.type === "finish-brush") {
+      expect(finishTouch.source).toBe("touch");
+      expect(finishTouch.finish.type).toBe("end-area");
+    }
 
-    expect(
-      resolvePointerUpAction(
-        up({
-          activeTool: "select-area",
-          pointerType: "touch",
-          inspectEnabled: true,
-          hasTouchInspectStart: true,
-          brushing: true,
-          hasBrushDraft: true,
-        }),
-      ),
-    ).toEqual({ type: "finish-brush" });
+    const finishSelect = resolvePointerUpAction(
+      up({
+        activeTool: "select-area",
+        pointerType: "touch",
+        inspectEnabled: true,
+        hasTouchInspectStart: true,
+        brushing: true,
+        brushCorners: draftCorners,
+      }),
+    );
+    expect(finishSelect).toEqual({
+      type: "finish-brush",
+      source: "touch",
+      finish: {
+        type: "select-end",
+        rect: { x0: 10, y0: 20, x1: 40, y1: 50 },
+      },
+    });
   });
 
-  it("finishes brush only when both brushing and draft exist", () => {
+  it("finishes brush only when both brushing and draft exist; carries finish payload", () => {
     expect(
       resolvePointerUpAction(
         up({
           activeTool: "select-area",
           brushing: true,
-          hasBrushDraft: true,
+          brushCorners: draftCorners,
         }),
       ),
-    ).toEqual({ type: "finish-brush" });
+    ).toEqual({
+      type: "finish-brush",
+      source: "pointer",
+      finish: {
+        type: "select-end",
+        rect: { x0: 10, y0: 20, x1: 40, y1: 50 },
+      },
+    });
+  });
+
+  it("maps finish-brush source from pointerType and zoom-end finish", () => {
+    expect(
+      resolvePointerUpAction(
+        up({
+          activeTool: "zoom-area",
+          pointerType: "touch",
+          brushing: true,
+          brushCorners: draftCorners,
+        }),
+      ),
+    ).toEqual({
+      type: "finish-brush",
+      source: "touch",
+      finish: {
+        type: "zoom-end",
+        rect: { x0: 10, y0: 20, x1: 40, y1: 50 },
+      },
+    });
+  });
+
+  it("finish-brush keep-second-corner when free corner is too-small", () => {
+    expect(
+      resolvePointerUpAction(
+        up({
+          activeTool: "select-area",
+          brushing: true,
+          brushCorners: { x0: 10, y0: 10, x1: 10, y1: 10 },
+          endPoint: { x: 12, y: 12 },
+        }),
+      ),
+    ).toEqual({
+      type: "finish-brush",
+      source: "pointer",
+      finish: {
+        type: "keep-second-corner",
+        corners: { x0: 10, y0: 10, x1: 12, y1: 12 },
+      },
+    });
   });
 
   it("returns none when brushing/draft state diverges", () => {
@@ -223,7 +327,7 @@ describe("resolvePointerUpAction", () => {
         up({
           activeTool: "zoom-area",
           brushing: true,
-          hasBrushDraft: false,
+          brushCorners: null,
         }),
       ),
     ).toEqual({ type: "none" });
@@ -233,7 +337,7 @@ describe("resolvePointerUpAction", () => {
         up({
           activeTool: "zoom-area",
           brushing: false,
-          hasBrushDraft: true,
+          brushCorners: draftCorners,
         }),
       ),
     ).toEqual({ type: "none" });
@@ -504,38 +608,52 @@ describe("shouldClearInspectionOnPointerLeave", () => {
   });
 });
 
-describe("resolveFinishBrushAction", () => {
-  it("keeps second corner on too-small for any tool", () => {
-    for (const activeTool of [
-      "select-area",
-      "zoom-area",
-      "inspect",
-      "point",
-    ] as const satisfies readonly InteractionTool[]) {
-      expect(resolveFinishBrushAction({ endedKind: "too-small", activeTool })).toEqual({
-        type: "keep-second-corner",
-      });
-    }
+describe("isAreaBrushing / isAreaAwaitingSecond", () => {
+  it("classifies area.kind for host deriveds", () => {
+    expect(isAreaBrushing("idle")).toBe(false);
+    expect(isAreaBrushing("first-corner")).toBe(true);
+    expect(isAreaBrushing("dragging")).toBe(true);
+    expect(isAreaAwaitingSecond("idle")).toBe(false);
+    expect(isAreaAwaitingSecond("first-corner")).toBe(true);
+    expect(isAreaAwaitingSecond("dragging")).toBe(false);
+  });
+});
+
+describe("resolveLostPointerCaptureAction", () => {
+  it("ignores idle (not brushing)", () => {
+    expect(resolveLostPointerCaptureAction("idle")).toEqual({ type: "ignore" });
   });
 
-  it("routes commit + select-area to select-end", () => {
-    expect(resolveFinishBrushAction({ endedKind: "commit", activeTool: "select-area" })).toEqual({
-      type: "select-end",
-    });
-  });
-
-  it("routes commit + zoom-area to zoom-end", () => {
-    expect(resolveFinishBrushAction({ endedKind: "commit", activeTool: "zoom-area" })).toEqual({
-      type: "zoom-end",
+  it("keeps draft and cancels area when awaiting second corner", () => {
+    expect(resolveLostPointerCaptureAction("first-corner")).toEqual({
+      type: "cancel-keep-draft",
     });
   });
 
-  it("routes commit + non-area tools to end-area (clear draft, no emit)", () => {
-    expect(resolveFinishBrushAction({ endedKind: "commit", activeTool: "inspect" })).toEqual({
-      type: "end-area",
+  it("clears draft and cancels area when dragging", () => {
+    expect(resolveLostPointerCaptureAction("dragging")).toEqual({
+      type: "cancel-clear-draft",
     });
-    expect(resolveFinishBrushAction({ endedKind: "commit", activeTool: "point" })).toEqual({
-      type: "end-area",
-    });
+  });
+});
+
+describe("interactionSourceFromPointerType", () => {
+  it("maps touch to touch and everything else to pointer", () => {
+    expect(interactionSourceFromPointerType("touch")).toBe("touch");
+    expect(interactionSourceFromPointerType("mouse")).toBe("pointer");
+    expect(interactionSourceFromPointerType("pen")).toBe("pointer");
+    expect(interactionSourceFromPointerType("")).toBe("pointer");
+  });
+});
+
+describe("TOUCH_INSPECT_CLICK_SUPPRESS_MS", () => {
+  it("is the host suppress window after a successful touch-inspect tap", () => {
+    expect(TOUCH_INSPECT_CLICK_SUPPRESS_MS).toBe(500);
+  });
+});
+
+describe("POINT_SELECT_NEAREST_MAX_DISTANCE_PX", () => {
+  it("is the nearest-candidate radius for capture-surface point-tool click", () => {
+    expect(POINT_SELECT_NEAREST_MAX_DISTANCE_PX).toBe(24);
   });
 });

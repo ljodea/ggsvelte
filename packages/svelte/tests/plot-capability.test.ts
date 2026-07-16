@@ -5,6 +5,11 @@ import {
   capabilityStatusText,
   filterAvailableTools,
   legendFocusDiscreteOnlyDiagnostics,
+  resolveChooseToolAction,
+  resolveEffectiveTool,
+  isEmptyPlotScene,
+  shouldShowInertSelectionOverlay,
+  shouldShowToolRail,
   zoomScaleDiagnosticsFromChannels,
   zoomSupportsChannel,
 } from "../src/lib/plot-capability.js";
@@ -65,6 +70,65 @@ describe("filterAvailableTools", () => {
   it("leaves non-zoom tools untouched when zoom is unsupported", () => {
     expect(filterAvailableTools(["inspect", "point"], false)).toEqual(["inspect", "point"]);
     expect(filterAvailableTools(["zoom-area"], false)).toEqual([]);
+  });
+});
+
+describe("resolveEffectiveTool", () => {
+  it("keeps the requested tool when it is available", () => {
+    expect(resolveEffectiveTool("point", ["inspect", "point", "select-area"])).toBe("point");
+  });
+
+  it("falls back to the first available tool when requested is unavailable", () => {
+    expect(resolveEffectiveTool("zoom-area", ["inspect", "point"])).toBe("inspect");
+    expect(resolveEffectiveTool("inspect", ["point", "select-area"])).toBe("point");
+  });
+
+  it("falls back to inspect when available is empty (host asymmetry vs chooseTool)", () => {
+    // Host tool $effect dispatches "inspect" even when it is not in availableTools.
+    // chooseTool rejects tools not in availableTools — pin the split intentionally.
+    expect(resolveEffectiveTool("zoom-area", [])).toBe("inspect");
+    expect(resolveEffectiveTool("inspect", [])).toBe("inspect");
+  });
+});
+
+describe("resolveChooseToolAction", () => {
+  const available = ["inspect", "point", "select-area"] as const;
+
+  it("ignores unavailable tools before the controlled check (no callback)", () => {
+    expect(
+      resolveChooseToolAction({
+        next: "zoom-area",
+        available,
+        isControlled: true,
+      }),
+    ).toEqual({ type: "ignore" });
+    expect(
+      resolveChooseToolAction({
+        next: "zoom-area",
+        available,
+        isControlled: false,
+      }),
+    ).toEqual({ type: "ignore" });
+  });
+
+  it("requests only when controlled and available", () => {
+    expect(
+      resolveChooseToolAction({
+        next: "point",
+        available,
+        isControlled: true,
+      }),
+    ).toEqual({ type: "request" });
+  });
+
+  it("applies when local and available", () => {
+    expect(
+      resolveChooseToolAction({
+        next: "point",
+        available,
+        isControlled: false,
+      }),
+    ).toEqual({ type: "apply" });
   });
 });
 
@@ -148,6 +212,113 @@ describe("capabilityStatusText", () => {
         candidateCount: 0,
       }),
     ).toBeNull();
+  });
+});
+
+describe("isEmptyPlotScene", () => {
+  it("is true when every batch has zero rows, including no batches", () => {
+    expect(isEmptyPlotScene([])).toBe(true);
+    expect(isEmptyPlotScene([{ rowIndex: [] }, { rowIndex: [] }])).toBe(true);
+  });
+
+  it("is false when any batch has rows", () => {
+    expect(isEmptyPlotScene([{ rowIndex: [0] }, { rowIndex: [] }])).toBe(false);
+  });
+});
+
+describe("shouldShowToolRail", () => {
+  const base = {
+    interactive: true,
+    availableToolCount: 1,
+    canPublishPointSelection: false,
+    selectedKeyCount: 0,
+    hasIntervalSelection: false,
+    hasZoomDomains: false,
+  } as const;
+
+  it("is false when interaction is disabled regardless of recovery state", () => {
+    expect(
+      shouldShowToolRail({
+        ...base,
+        interactive: false,
+        availableToolCount: 4,
+        hasIntervalSelection: true,
+        hasZoomDomains: true,
+      }),
+    ).toBe(false);
+  });
+
+  it("is false for a single tool with no selection or zoom recovery", () => {
+    expect(shouldShowToolRail(base)).toBe(false);
+  });
+
+  it("is true when more than one tool is available", () => {
+    expect(shouldShowToolRail({ ...base, availableToolCount: 2 })).toBe(true);
+  });
+
+  it("is true only when point selection is publishable and non-empty", () => {
+    expect(
+      shouldShowToolRail({
+        ...base,
+        canPublishPointSelection: true,
+        selectedKeyCount: 1,
+      }),
+    ).toBe(true);
+    expect(
+      shouldShowToolRail({
+        ...base,
+        canPublishPointSelection: true,
+        selectedKeyCount: 0,
+      }),
+    ).toBe(false);
+    expect(
+      shouldShowToolRail({
+        ...base,
+        canPublishPointSelection: false,
+        selectedKeyCount: 3,
+      }),
+    ).toBe(false);
+  });
+
+  it("is true when an interval selection or zoom domains are present", () => {
+    expect(shouldShowToolRail({ ...base, hasIntervalSelection: true })).toBe(true);
+    expect(shouldShowToolRail({ ...base, hasZoomDomains: true })).toBe(true);
+  });
+});
+
+describe("shouldShowInertSelectionOverlay", () => {
+  it("is false when the chart is interactive even with anchors", () => {
+    expect(
+      shouldShowInertSelectionOverlay({
+        interactive: true,
+        selectedAnchorCount: 2,
+        emphasizedAnchorCount: 3,
+      }),
+    ).toBe(false);
+  });
+
+  it("is true only when non-interactive and at least one anchor set is non-empty", () => {
+    expect(
+      shouldShowInertSelectionOverlay({
+        interactive: false,
+        selectedAnchorCount: 1,
+        emphasizedAnchorCount: 0,
+      }),
+    ).toBe(true);
+    expect(
+      shouldShowInertSelectionOverlay({
+        interactive: false,
+        selectedAnchorCount: 0,
+        emphasizedAnchorCount: 2,
+      }),
+    ).toBe(true);
+    expect(
+      shouldShowInertSelectionOverlay({
+        interactive: false,
+        selectedAnchorCount: 0,
+        emphasizedAnchorCount: 0,
+      }),
+    ).toBe(false);
   });
 });
 

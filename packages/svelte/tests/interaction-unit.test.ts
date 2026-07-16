@@ -5,6 +5,7 @@ import { aes, gg } from "@ggsvelte/spec";
 
 import {
   INTERACTION_DIAGNOSTIC_CATALOG,
+  isAreaTool,
   normalizeInteractionConfig,
 } from "../src/lib/interaction.js";
 import {
@@ -23,6 +24,15 @@ const candidate = (id: number): InteractionCandidateRef => ({
   panelId: "panel:all",
   x: 10 + id,
   y: 20 + id,
+});
+
+describe("isAreaTool", () => {
+  it("is true only for select-area and zoom-area", () => {
+    expect(isAreaTool("select-area")).toBe(true);
+    expect(isAreaTool("zoom-area")).toBe(true);
+    expect(isAreaTool("inspect")).toBe(false);
+    expect(isAreaTool("point")).toBe(false);
+  });
 });
 
 describe("interaction capability normalization", () => {

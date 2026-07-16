@@ -3,9 +3,12 @@ import { describe, expect, it } from "vitest";
 import {
   resolveLegendClearControlSource,
   resolveLegendClickAction,
+  resolveLegendCommitAction,
   resolveLegendKeyAction,
   resolveLegendPointerUpAction,
+  resolveLegendPreviewDismissAction,
   shouldClearLegendPreviewOnBlur,
+  shouldEmitLegendFocusClear,
   shouldRenderInteractionLiveRegion,
   type LegendClearControlInput,
   type LegendClickInput,
@@ -202,5 +205,153 @@ describe("resolveLegendClearControlSource", () => {
     expect(resolveLegendClearControlSource(clear({ detail: 1, pointerType: null }))).toBe(
       "pointer",
     );
+  });
+});
+
+describe("resolveLegendCommitAction", () => {
+  const identity = { scale: "fill", entryIndex: 1 };
+
+  it("toggles clear when pressed identity matches, even with empty keys", () => {
+    // Load-bearing: empty keys after domain reshuffle must not fall into ignore.
+    expect(
+      resolveLegendCommitAction({
+        pressed: { scale: "fill", entryIndex: 1 },
+        identity,
+        keyCount: 0,
+        entrySource: "pointer",
+      }),
+    ).toEqual({ type: "toggle-clear", source: "pointer" });
+    expect(
+      resolveLegendCommitAction({
+        pressed: { scale: "fill", entryIndex: 1 },
+        identity,
+        keyCount: 3,
+        entrySource: "touch",
+      }),
+    ).toEqual({ type: "toggle-clear", source: "touch" });
+  });
+
+  it("ignores empty keys only when not toggling the pressed entry", () => {
+    expect(
+      resolveLegendCommitAction({
+        pressed: null,
+        identity,
+        keyCount: 0,
+        entrySource: "keyboard",
+      }),
+    ).toEqual({ type: "ignore" });
+    expect(
+      resolveLegendCommitAction({
+        pressed: { scale: "color", entryIndex: 1 },
+        identity,
+        keyCount: 0,
+        entrySource: "pointer",
+      }),
+    ).toEqual({ type: "ignore" });
+    expect(
+      resolveLegendCommitAction({
+        pressed: { scale: "fill", entryIndex: 0 },
+        identity,
+        keyCount: 0,
+        entrySource: "focus",
+      }),
+    ).toEqual({ type: "ignore" });
+  });
+
+  it("commits when keys exist and identity is not already pressed, mapping source", () => {
+    expect(
+      resolveLegendCommitAction({
+        pressed: null,
+        identity,
+        keyCount: 2,
+        entrySource: "pointer",
+      }),
+    ).toEqual({ type: "commit", source: "pointer" });
+    // focus → keyboard on the public InteractionSource surface
+    expect(
+      resolveLegendCommitAction({
+        pressed: null,
+        identity,
+        keyCount: 1,
+        entrySource: "focus",
+      }),
+    ).toEqual({ type: "commit", source: "keyboard" });
+  });
+});
+
+describe("resolveLegendPreviewDismissAction", () => {
+  it("returns none when previewSource is null (no active preview)", () => {
+    expect(
+      resolveLegendPreviewDismissAction({
+        previewSource: null,
+        committedEmphasisEmpty: true,
+      }),
+    ).toEqual({ type: "none" });
+    expect(
+      resolveLegendPreviewDismissAction({
+        previewSource: null,
+        committedEmphasisEmpty: false,
+      }),
+    ).toEqual({ type: "none" });
+  });
+
+  it("emits clear with mapped source when committed emphasis is empty", () => {
+    expect(
+      resolveLegendPreviewDismissAction({
+        previewSource: "pointer",
+        committedEmphasisEmpty: true,
+      }),
+    ).toEqual({ type: "clear-and-emit", source: "pointer" });
+    expect(
+      resolveLegendPreviewDismissAction({
+        previewSource: "focus",
+        committedEmphasisEmpty: true,
+      }),
+    ).toEqual({ type: "clear-and-emit", source: "keyboard" });
+  });
+
+  it("clears preview without emit when committed emphasis remains, still carries source", () => {
+    expect(
+      resolveLegendPreviewDismissAction({
+        previewSource: "touch",
+        committedEmphasisEmpty: false,
+      }),
+    ).toEqual({ type: "clear-only", source: "touch" });
+  });
+});
+
+describe("shouldEmitLegendFocusClear", () => {
+  it("is false only when preview, committed, and effective emphasis are all empty", () => {
+    expect(
+      shouldEmitLegendFocusClear({
+        hasPreview: false,
+        hasCommitted: false,
+        emphasisKeyCount: 0,
+      }),
+    ).toBe(false);
+  });
+
+  it("is true when any focus surface is present (incl. effective emphasis alone)", () => {
+    expect(
+      shouldEmitLegendFocusClear({
+        hasPreview: true,
+        hasCommitted: false,
+        emphasisKeyCount: 0,
+      }),
+    ).toBe(true);
+    expect(
+      shouldEmitLegendFocusClear({
+        hasPreview: false,
+        hasCommitted: true,
+        emphasisKeyCount: 0,
+      }),
+    ).toBe(true);
+    expect(
+      shouldEmitLegendFocusClear({
+        hasPreview: false,
+        hasCommitted: false,
+        emphasisKeyCount: 2,
+      }),
+    ).toBe(true);
   });
 });

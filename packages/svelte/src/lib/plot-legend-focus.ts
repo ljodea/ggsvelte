@@ -9,6 +9,7 @@ import type { CellValue, SceneLegend, SceneLegendEntry } from "@ggsvelte/core";
 import { legendValueEqual } from "@ggsvelte/core";
 
 import type { InteractionSource } from "./interaction.js";
+import { iterateCandidates, type CandidateLookup } from "./plot-selection.js";
 
 /** Stable renderer identity for one entry in one discrete legend. */
 export interface LegendEntryIdentity {
@@ -199,6 +200,59 @@ function resolveLegendMatchValue(
   return { skip: false, value: row[field] };
 }
 
+/**
+ * GGPlot host surface for legend entry key indexing (null model → empty map).
+ * Candidate walk is id-ascending via `iterateCandidates` (first-seen key order).
+ */
+export type LegendKeyIndexPlotModel = {
+  readonly scene: { readonly legends: readonly SceneLegend[] };
+  readonly candidates: CandidateLookup<{
+    readonly layerIndex: number;
+    readonly lineage: number;
+    readonly rowIndex: number | null;
+  }>;
+  readonly layerFields: ReadonlyArray<
+    | ReadonlyArray<{
+        readonly channel: string;
+        readonly field: string;
+        readonly source?: "stat";
+      }>
+    | undefined
+  >;
+  readonly layerScaledConstants: ReadonlyArray<Readonly<Record<string, unknown>> | undefined>;
+  readonly lineage: { keys(lineageId: number): Iterable<number> };
+  row(rowIndex: number): Record<string, CellValue> | null;
+};
+
+/**
+ * Build the legend entry → semantic keys index for a plot model.
+ * Host keeps `semanticKey` as a callback so `$derived` tracks key map updates.
+ */
+export function buildLegendEntryKeyIndexForPlot(input: {
+  readonly model: LegendKeyIndexPlotModel | null;
+  readonly semanticKey: (rowIndex: number) => PropertyKey | null | undefined;
+}): ReadonlyMap<string, readonly PropertyKey[]> {
+  if (input.model === null) return new Map();
+  const model = input.model;
+  return buildLegendEntryKeyIndex({
+    legends: model.scene.legends,
+    candidates: function* () {
+      for (const candidate of iterateCandidates(model.candidates)) {
+        yield {
+          layerIndex: candidate.layerIndex,
+          lineage: candidate.lineage,
+          rowIndex: candidate.rowIndex,
+        };
+      }
+    },
+    layerFields: (layerIndex) => model.layerFields[layerIndex],
+    layerScaledConstant: (layerIndex, channel) => model.layerScaledConstants[layerIndex]?.[channel],
+    lineageKeys: (lineageId) => model.lineage.keys(lineageId),
+    row: (rowIndex) => model.row(rowIndex),
+    semanticKey: input.semanticKey,
+  });
+}
+
 export function buildLegendEntryKeyIndex(
   adapter: LegendKeyIndexAdapter,
 ): ReadonlyMap<string, readonly PropertyKey[]> {
@@ -248,11 +302,27 @@ export function buildLegendEntryKeyIndex(
  * Decide what a legend preview attempt should do with resolved keys.
  * Empty key sets clear any active preview (empty domain entry / stale target)
  * rather than leaving the previous entry highlighted.
+ *
+ * Non-empty `set` carries mapped InteractionSource via `legendInteractionSource`
+ * so the host does not re-map `action.source` after the pure decision.
  */
-export function resolveLegendPreviewKeysDecision(
-  keys: readonly PropertyKey[],
-): { readonly type: "set"; readonly keys: readonly PropertyKey[] } | { readonly type: "clear" } {
-  return keys.length === 0 ? { type: "clear" } : { type: "set", keys };
+export function resolveLegendPreviewKeysDecision(input: {
+  readonly keys: readonly PropertyKey[];
+  /** Host: `action.source` (legend entry interaction source). */
+  readonly entrySource: LegendInteractionSource;
+}):
+  | { readonly type: "clear" }
+  | {
+      readonly type: "set";
+      readonly keys: readonly PropertyKey[];
+      readonly source: InteractionSource;
+    } {
+  if (input.keys.length === 0) return { type: "clear" };
+  return {
+    type: "set",
+    keys: input.keys,
+    source: legendInteractionSource(input.entrySource),
+  };
 }
 
 /**
@@ -296,4 +366,118 @@ export function reconcileLegendPreview(input: {
   if (keys.length === 0) return null;
   if (samePropertyKeySet(keys, input.preview.keys)) return input.preview;
   return { identity: current.identity, keys };
+}
+
+// ---- host legend $effect plans ----
+
+export type LegendCommittedState = {
+  readonly identity: LegendEntryIdentity;
+  readonly keys: readonly PropertyKey[];
+};
+
+export type LegendCommittedReconcilePlan =
+  | { readonly type: "noop" }
+  | { readonly type: "clear-committed" }
+  | { readonly type: "clear-committed-local-emit" };
+
+/**
+ * Pure plan for the committed-legend reconcile effect after data reshuffle.
+ *
+ * Owns entry lookup + key compare (same shape as `reconcileLegendPreview`).
+ * Host on non-noop: always nulls `legendCommitted`. On local-emit also clears
+ * chart-local emphasis keys and emits legend-focus clear.
+ *
+ *   1. no commit → noop
+ *   2. live keys still match → noop
+ *   3. mismatch + local emphasis active → clear-committed-local-emit
+ *   4. mismatch otherwise → clear-committed
+ */
+export function planLegendCommittedReconcile(input: {
+  readonly committed: LegendCommittedState | null;
+  readonly entries: readonly InteractiveLegendEntry[];
+  readonly keyIndex: ReadonlyMap<string, readonly PropertyKey[]>;
+  /** Host: `interaction === undefined`. */
+  readonly usesLocalEmphasis: boolean;
+  readonly localEmphasisCount: number;
+}): LegendCommittedReconcilePlan {
+  if (input.committed === null) return { type: "noop" };
+  const current = input.entries.find(
+    ({ identity }) =>
+      identity.scale === input.committed!.identity.scale &&
+      identity.entryIndex === input.committed!.identity.entryIndex,
+  );
+  const currentKeys =
+    current === undefined ? [] : keysForLegendEntry(input.keyIndex, current.identity);
+  if (samePropertyKeySet(currentKeys, input.committed.keys)) return { type: "noop" };
+  if (input.usesLocalEmphasis && input.localEmphasisCount > 0) {
+    return { type: "clear-committed-local-emit" };
+  }
+  return { type: "clear-committed" };
+}
+
+export type LegendFocusDisabledClearPlan =
+  | { readonly type: "noop" }
+  | { readonly type: "clear-host" }
+  | { readonly type: "clear-host-local" };
+
+/**
+ * Pure plan when legend focus is turned off at runtime.
+ *
+ *   1. still enabled → noop
+ *   2. host legend state already empty → noop
+ *   3. chart-local mode → clear preview+committed+localEmphasisKeys
+ *   4. controller mode → clear preview+committed only (controller emphasis stays)
+ */
+export function planLegendFocusDisabledClear(input: {
+  readonly legendFocusEnabled: boolean;
+  readonly hasPreview: boolean;
+  readonly hasCommitted: boolean;
+  readonly hasLocalEmphasis: boolean;
+  /** Host: `interaction === undefined`. */
+  readonly usesLocalEmphasis: boolean;
+}): LegendFocusDisabledClearPlan {
+  if (input.legendFocusEnabled) return { type: "noop" };
+  if (!input.hasPreview && !input.hasCommitted && !input.hasLocalEmphasis) {
+    return { type: "noop" };
+  }
+  return input.usesLocalEmphasis ? { type: "clear-host-local" } : { type: "clear-host" };
+}
+
+export type LegendRovingFocusSyncPlan =
+  | { readonly type: "noop"; readonly nextIndex: number }
+  | { readonly type: "clamp-roving"; readonly nextIndex: number }
+  | {
+      readonly type: "refocus";
+      readonly nextIndex: number;
+      readonly returnIndex: number;
+    };
+
+/**
+ * Pure plan for the legend roving-index `$effect.pre`.
+ *
+ * Host owns `document.activeElement` / dataset parse for `focusedIndex`.
+ * `Number(dataset.index)` yields NaN when missing — pass that through so
+ * `clampLegendRovingIndex` maps non-finite → 0 (refocus first entry).
+ *
+ *   - focusedIndex === null OR entryCount === 0 → no DOM refocus
+ *     (clamp-roving when nextIndex differs from current, else noop)
+ *   - otherwise → refocus with returnIndex = clamp(focusedIndex, count)
+ */
+export function planLegendRovingFocusSync(input: {
+  readonly currentRoving: number;
+  readonly entryCount: number;
+  /** null = focus not on a legend target inside root; may be NaN. */
+  readonly focusedIndex: number | null;
+}): LegendRovingFocusSyncPlan {
+  const nextIndex = clampLegendRovingIndex(input.currentRoving, input.entryCount);
+  if (input.focusedIndex === null || input.entryCount === 0) {
+    return nextIndex === input.currentRoving
+      ? { type: "noop", nextIndex }
+      : { type: "clamp-roving", nextIndex };
+  }
+  return {
+    type: "refocus",
+    nextIndex,
+    returnIndex: clampLegendRovingIndex(input.focusedIndex, input.entryCount),
+  };
 }

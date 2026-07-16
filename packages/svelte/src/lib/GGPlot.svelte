@@ -53,7 +53,6 @@
     CandidateFacts,
     BatchInteractionMask,
     CellValue,
-    GeometryBatch,
     RenderModel,
     ScaleState,
     ScenePanel,
@@ -67,12 +66,7 @@
     sceneLabel,
   } from "@ggsvelte/core";
   import type { SceneHit, SceneHitIndex } from "@ggsvelte/core/dom";
-  import {
-    buildHitIndex,
-    cssColorResolver,
-    drawStratum,
-    sizeCanvasForDpr,
-  } from "@ggsvelte/core/dom";
+  import { buildHitIndex } from "@ggsvelte/core/dom";
 
   import {
     INTERACTION_DIAGNOSTIC_CATALOG,
@@ -98,53 +92,64 @@
     type ZoomInput,
   } from "./interaction.js";
   import type { PlotInteractionController } from "./interaction-controller.svelte.js";
-  import {
-    clearInspectionFingerprint,
-    createInspectionCoordinator,
-  } from "./inspection-resolver.js";
+  import { createInspectionCoordinator } from "./inspection-resolver.js";
   import { createInteractionReducer } from "./interaction-reducer.js";
   import { provideRegistry } from "./registry.svelte.js";
-  import InteractionOverlay from "./InteractionOverlay.svelte";
   import {
     assemblePortableSpec,
+    isFacetedPlotIntent,
     resolveInteractionScope,
     toLayerInput,
   } from "./plot-assemble.js";
+  import { brushAtPoint, brushWithEnd } from "./plot-area-brush.js";
   import {
-    brushAtPoint,
-    brushWithEnd,
-    evaluatePointerBrushEnd,
-    nudgeBrushEnd,
-    panelCenterAnchor,
-  } from "./plot-area-brush.js";
-  import { frozenZoomDomains, normalizedRect } from "./plot-geometry.js";
+    frozenZoomDomains,
+    normalizedRect,
+    panelContainingAnchor,
+  } from "./plot-geometry.js";
   import { resolveSurfaceKeyAction } from "./plot-surface-keyboard.js";
   import {
+    buildInspectionCandidateRef,
+    buildQueuedInspectFrame,
+    planInspectionDismiss,
+    planSceneInspectReconcile,
     resolveInspectionCompleteness,
+    resolveInspectionEmitAction,
     resolveInspectionMode,
     resolveQueuedInspectFrameAction,
     resolveSetInspectionAction,
     resolveSurfaceBlurAction,
     resolveToggleInspectionPinAction,
+    shouldAnnounceUnpin,
     shouldClearInspectionAnnouncement,
     shouldClosePinnedOnOutsidePointer,
     shouldCommitInspection,
+    shouldFocusPinnedInteractiveTooltip,
+    type QueuedPointerInspection,
   } from "./plot-surface-inspection.js";
+  import { type FinishBrushAction } from "./plot-brush-finish.js";
   import {
     resolveCaptureClickAction,
     advanceTouchInspectMoved,
-    resolveFinishBrushAction,
+    isAreaAwaitingSecond,
+    isAreaBrushing,
+    resolveLostPointerCaptureAction,
     resolvePointerDownAction,
     resolvePointerMoveAction,
     resolvePointerUpAction,
     shouldClearInspectionOnPointerLeave,
+    POINT_SELECT_NEAREST_MAX_DISTANCE_PX,
+    TOUCH_INSPECT_CLICK_SUPPRESS_MS,
   } from "./plot-surface-pointer.js";
   import {
     resolveLegendClearControlSource,
     resolveLegendClickAction,
+    resolveLegendCommitAction,
     resolveLegendKeyAction,
     resolveLegendPointerUpAction,
+    resolveLegendPreviewDismissAction,
     shouldClearLegendPreviewOnBlur,
+    shouldEmitLegendFocusClear,
     shouldRenderInteractionLiveRegion,
   } from "./plot-legend-surface.js";
   import {
@@ -153,13 +158,20 @@
     inspectionLiveText as inspectionLiveTextFor,
     legendFocusAnnouncement,
     markLabel as markLabelFor,
+    resolveInteractionLiveText,
     selectionAnnouncement,
     zoomAnnouncement,
   } from "./plot-labels.js";
   import {
-    isDockedTooltipWidth,
+    isContainerWidthProp,
     isNarrowToolsWidth,
+    isTooltipDocked,
     plotRootInlineStyle,
+    plotTooltipDomId,
+    resolveCaptureAriaControls,
+    resolveClearLegendX,
+    resolvePlotSize,
+    tooltipViewportSize,
   } from "./plot-layout.js";
   import {
     bestDirectionalIndex,
@@ -168,19 +180,26 @@
     hitFromCandidate,
     matchCandidateFromHit,
     nextTraversalIndex,
+    planCycleCoincident,
+    planDirectionalNavigate,
     plotPointFromClient,
   } from "./plot-pointer.js";
   import {
     bandChannelsForZoom,
     capabilityStatusText,
     filterAvailableTools,
+    isEmptyPlotScene,
     legendFocusDiscreteOnlyDiagnostics,
+    resolveChooseToolAction,
+    resolveEffectiveTool,
+    shouldShowToolRail,
     zoomScaleDiagnosticsFromChannels,
     zoomSupportsChannel,
   } from "./plot-capability.js";
   import {
     buildIntervalSelection,
     clearIntervalSelectionEvent,
+    persistentSelectionOrNull,
     type IntervalDomain,
   } from "./plot-interval.js";
   import {
@@ -208,6 +227,8 @@
   import {
     anchorsFromCandidateKeys,
     buildPointSelectionEvent,
+    collectCandidates,
+    iterateCandidates,
     mergePresentationFocusKeys,
     nextPointSelectionKeys,
     rowIndexesForCandidate,
@@ -216,7 +237,8 @@
   } from "./plot-selection.js";
   import {
     createSourceIdentityTracker,
-    resolveSemanticKeys,
+    dataIdentityEpochToken,
+    resolveSemanticKeysForPlot,
   } from "./plot-semantic-keys.js";
   import { themeTokensToCss } from "./plot-theme-css.js";
   import {
@@ -225,18 +247,19 @@
     continuousZoomDomainsFromScopes,
     filterScopeChannelsByZoomMode,
     filterZoomDomainsByMode,
-    resolveBrushZoomDomains,
+    resolveBrushZoomFromModel,
     sanitizePartialZoomDomains,
     stableZoomDomains,
   } from "./plot-zoom.js";
   import {
     buildInteractiveLegendEntries,
-    buildLegendEntryKeyIndex,
-    clampLegendRovingIndex,
+    buildLegendEntryKeyIndexForPlot,
     findLegendPressedIdentity,
     keysForLegendEntry,
-    legendInteractionSource,
     moveLegendRovingIndex,
+    planLegendCommittedReconcile,
+    planLegendFocusDisabledClear,
+    planLegendRovingFocusSync,
     reconcileLegendPreview,
     resolveLegendEmphasisKeys,
     resolveLegendPreviewKeysDecision,
@@ -244,9 +267,11 @@
     type LegendEntryAction,
     type LegendEntryIdentity,
   } from "./plot-legend-focus.js";
-  import PlotCanvasA11y from "./PlotCanvasA11y.svelte";
+  import PlotCaptureSurface from "./PlotCaptureSurface.svelte";
   import PlotLegendTargets from "./PlotLegendTargets.svelte";
-  import SceneView from "./SceneView.svelte";
+  import PlotMarkStrata from "./PlotMarkStrata.svelte";
+  import PlotSceneOverlays from "./PlotSceneOverlays.svelte";
+  import PlotStatusChrome from "./PlotStatusChrome.svelte";
   import Tooltip from "./Tooltip.svelte";
   import ToolRail from "./ToolRail.svelte";
   import {
@@ -383,10 +408,9 @@
     });
   });
 
-  // Facet intent comes from the raw prop — not assembled.facet — so declaration-
-  // only children still take the faceted diagnostic path before layers register
-  // and assembled becomes non-null on a later flush.
-  const facetedPlot = $derived(facet !== undefined);
+  // Facet intent: raw prop (declaration-only children before layers register)
+  // OR assembled.facet (portable-spec plots that embed facet without a prop).
+  const facetedPlot = $derived(isFacetedPlotIntent({ facet, assembled }));
 
   const resolvedInteractionScope: PlotInteractionScope = $derived(
     resolveInteractionScope({
@@ -462,12 +486,11 @@
   // Tracker is owned for the component lifetime (never cleared).
   const { sourceIdentity } = createSourceIdentityTracker();
   const dataIdentityEpoch = $derived(
-    assembled === null
-      ? "no-data"
-      : `${sourceIdentity(data)}:${sourceIdentity(spec)}:${JSON.stringify([
-          assembled.data ?? null,
-          assembled.datasets ?? null,
-        ])}`,
+    dataIdentityEpochToken({
+      assembled,
+      dataToken: sourceIdentity(data),
+      specToken: sourceIdentity(spec),
+    }),
   );
 
   // ------------------------------------------------- container width (RO)
@@ -476,7 +499,7 @@
   let root = $state<HTMLDivElement | null>(null);
 
   $effect(() => {
-    if ((width !== undefined && width !== "container") || root === null) return;
+    if (!isContainerWidthProp(width) || root === null) return;
     const el = root;
     let frame = 0;
     const observer = new ResizeObserver((entries) => {
@@ -496,12 +519,17 @@
     };
   });
 
-  const resolvedWidth: number = $derived(
-    width === undefined || width === "container"
-      ? (containerWidth ?? assembled?.width ?? 640)
-      : (width ?? assembled?.width ?? 640),
+  const resolvedSize = $derived(
+    resolvePlotSize({
+      width,
+      height,
+      containerWidth,
+      assembledWidth: assembled?.width,
+      assembledHeight: assembled?.height,
+    }),
   );
-  const resolvedHeight: number = $derived(height ?? assembled?.height ?? 400);
+  const resolvedWidth = $derived(resolvedSize.width);
+  const resolvedHeight = $derived(resolvedSize.height);
 
   // Authoritative committed scale state: a plain non-reactive box + run-id
   // gate. Committing only monotonically newer runs keeps stale results from
@@ -661,49 +689,6 @@
     paintEpoch += 1;
   }
 
-  // Redraw canvases when the host theme flips (canvas colors resolve from
-  // computed style at draw time; SVG re-resolves via CSS automatically).
-  let themeEpoch = $state(0);
-  $effect(() => {
-    if (!hasCanvas) return;
-    const observer = new MutationObserver(() => {
-      themeEpoch++;
-    });
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["data-theme", "class"],
-    });
-    return () => observer.disconnect();
-  });
-
-  /** Svelte attachment: size for DPR, draw the stratum, signal first paint. */
-  function canvasAttachment(
-    m: RenderModel,
-    batches: GeometryBatch[],
-    stratumKey: string,
-  ) {
-    void themeEpoch;
-    const focusMasks = masksForBatches(batches);
-    return (canvas: HTMLCanvasElement) => {
-      const ctx = canvas.getContext("2d");
-      if (ctx === null) return;
-      const dpr = window.devicePixelRatio || 1;
-      sizeCanvasForDpr(canvas, ctx, m.scene.width, m.scene.height, dpr);
-      drawStratum(
-        ctx,
-        m.scene,
-        batches,
-        cssColorResolver(canvas),
-        focusMasks.length > 0
-          ? { focusMasks, mutedAlpha: m.scene.theme.interactionMuted }
-          : undefined,
-      );
-      // untrack: the attachment must WRITE paint state without SUBSCRIBING
-      // to it (a tracked read here would re-trigger the attachment -> loop).
-      untrack(() => notifyPainted(m.runId, stratumKey));
-    };
-  }
-
   let a11yTableOpen = $state(false);
 
   // ---------------------------------------------------------- interaction
@@ -723,12 +708,6 @@
     readonly epoch: number;
     readonly revision: number;
   } | null = null;
-  type QueuedPointerInspection = {
-    hit: SceneHit | null;
-    source: InteractionSource;
-    concreteMode?: "exact" | "x" | "y" | "xy";
-    candidate?: CandidateFacts;
-  };
   let queuedPointerInspection: QueuedPointerInspection | null = null;
   let pendingPinnedPointer: QueuedPointerInspection | null = null;
   let queuedAreaSource: InteractionSource = "pointer";
@@ -803,16 +782,7 @@
   let interactionAnnouncement = $state("");
   const inspectionPanel = $derived.by(() => {
     if (inspection === null || model === null) return null;
-    const anchor = inspection.focus.anchor;
-    return (
-      model.scene.panels.find(
-        (panel) =>
-          anchor.x >= panel.x &&
-          anchor.x <= panel.x + panel.width &&
-          anchor.y >= panel.y &&
-          anchor.y <= panel.y + panel.height,
-      ) ?? null
-    );
+    return panelContainingAnchor(model.scene.panels, inspection.focus.anchor);
   });
   const coordFlipped = $derived(assembled?.coord?.type === "flip");
   let tooltipHovered = $state(false);
@@ -828,11 +798,11 @@
   } | null>(null);
   const brushing = $derived.by(() => {
     void reducerRevision;
-    return reducer.state.area.kind !== "idle";
+    return isAreaBrushing(reducer.state.area.kind);
   });
   const areaAwaitingSecond = $derived.by(() => {
     void reducerRevision;
-    return reducer.state.area.kind === "first-corner";
+    return isAreaAwaitingSecond(reducer.state.area.kind);
   });
   let lastInspectionFingerprint = "";
   let activeTraversalIndex = $state(-1);
@@ -856,10 +826,14 @@
     void controllerRevision;
     return interaction?.selected(resolvedInteractionScope) ?? localSelectedKeys;
   });
+  // Shared enablement predicates (avoid re-typing the same config gates).
+  const inspectEnabled = $derived(interactionConfig.inspect !== null);
+  const pinEnabled = $derived(interactionConfig.inspect?.pin === true);
+  const legendFocusEnabled = $derived(interactionConfig.legendFocus !== null);
   const effectiveEmphasisKeys: readonly PropertyKey[] = $derived.by(() => {
     void controllerRevision;
     return resolveLegendEmphasisKeys({
-      legendFocusEnabled: interactionConfig.legendFocus !== null,
+      legendFocusEnabled,
       previewKeys: legendPreview?.keys ?? null,
       controllerKeys:
         interaction === undefined
@@ -1038,16 +1012,26 @@
   const canPublishPointSelection = $derived(
     interactionConfig.select?.type === "point",
   );
+  // Shared by tool-rail visibility and ToolRail recovery props (avoid dual calc).
+  const hasPointSelection = $derived(
+    canPublishPointSelection && effectiveSelectedKeys.length > 0,
+  );
+  // R3: interval presence covers dormant panel intervals, not just the
+  // committed one (effectiveIntervals), so recovery controls stay reachable.
+  const hasIntervalSelection = $derived(effectiveIntervals.length > 0);
+  const hasZoomDomains = $derived(effectiveZoomDomains !== null);
   const showToolRail = $derived(
-    interactive &&
-      (availableTools.length > 1 ||
-        (canPublishPointSelection && effectiveSelectedKeys.length > 0) ||
-        effectiveIntervals.length > 0 ||
-        effectiveZoomDomains !== null),
+    shouldShowToolRail({
+      interactive,
+      availableToolCount: availableTools.length,
+      canPublishPointSelection,
+      selectedKeyCount: effectiveSelectedKeys.length,
+      hasIntervalSelection,
+      hasZoomDomains,
+    }),
   );
   const emptyPlot = $derived(
-    model !== null &&
-      model.scene.batches.every((batch) => batch.rowIndex.length === 0),
+    model !== null && isEmptyPlotScene(model.scene.batches),
   );
   const preciseIntervalAxes = $derived.by((): readonly ("x" | "y")[] => {
     const selectOptions = interactionConfig.select;
@@ -1076,7 +1060,7 @@
   const legendDiagnostics = $derived.by(() => {
     if (model === null) return [] as InteractionDiagnostic[];
     return legendFocusDiscreteOnlyDiagnostics(
-      interactionConfig.legendFocus !== null,
+      legendFocusEnabled,
       model.scene.legends,
     );
   });
@@ -1106,7 +1090,7 @@
         interactive ||
         effectiveEmphasisKeys.length > 0 ||
         effectiveSelectedKeys.length > 0,
-      containerWidth: width === undefined || width === "container",
+      containerWidth: isContainerWidthProp(width),
       sceneWidth: model?.scene.width ?? resolvedWidth,
       sceneHeight: model?.scene.height ?? resolvedHeight,
       themeStyle,
@@ -1116,22 +1100,16 @@
     x: number;
     y: number;
   }[] {
+    // Empty filter short-circuits before walking (keysFor can be expensive).
     if (model === null || keys.length === 0) return [];
-    const candidates: {
-      x: number;
-      y: number;
-      keys: readonly PropertyKey[];
-    }[] = [];
-    for (let id = 0; id < model.candidates.size; id++) {
-      const candidate = model.candidates.candidate(id);
-      if (candidate === null) continue;
-      candidates.push({
+    return anchorsFromCandidateKeys(
+      collectCandidates(model.candidates, (candidate) => ({
         x: candidate.x,
         y: candidate.y,
         keys: candidateSemanticKeys(candidate),
-      });
-    }
-    return anchorsFromCandidateKeys(candidates, keys);
+      })),
+      keys,
+    );
   }
   const selectedAnchors = $derived(
     anchorsForKeys([
@@ -1348,27 +1326,24 @@
   // Owned for the component lifetime; resolveSemanticKeys mutates in place.
   const priorKeys = new Map<string, PropertyKey>();
 
-  const semanticKeys = $derived.by(() => {
-    if (model === null)
-      return {
-        keys: new Map<number, PropertyKey | null>(),
-        diagnostics: [] as InteractionDiagnostic[],
-      };
-    return resolveSemanticKeys({
-      model: {
-        candidateCount: model.candidates.size,
-        candidate: (id) => model.candidates.candidate(id),
-        lineageKeys: (lineageId) => model.lineage.keys(lineageId),
-        row: (rowIndex) => model.row(rowIndex),
-        layers: assembled?.layers ?? [],
-      },
+  const semanticKeys = $derived.by(() =>
+    resolveSemanticKeysForPlot({
+      model:
+        model === null
+          ? null
+          : {
+              candidates: model.candidates,
+              lineage: model.lineage,
+              row: (rowIndex) => model.row(rowIndex),
+            },
+      layers: assembled?.layers ?? [],
       datumKey: datumKey as
         string | ((row: never, index: number) => PropertyKey) | undefined,
       priorKeys,
-      rowIdentity: (rowIndex) =>
-        `${sourceIdentity(data)}:${sourceIdentity(spec)}:${rowIndex}`,
-    });
-  });
+      dataToken: sourceIdentity(data),
+      specToken: sourceIdentity(spec),
+    }),
+  );
 
   $effect(() => {
     for (const diagnostic of semanticKeys.diagnostics)
@@ -1389,7 +1364,7 @@
     const onOutsidePointer = (event: PointerEvent) => {
       if (
         !shouldClosePinnedOnOutsidePointer({
-          isPinned: inspection?.state === "pinned",
+          inspectionState: inspection?.state,
           targetInsideRoot: root?.contains(event.target as Node) === true,
         })
       )
@@ -1412,24 +1387,34 @@
   });
 
   $effect(() => {
-    const requested = tool ?? interactionConfig.initialTool;
-    const next = availableTools.includes(requested)
-      ? requested
-      : (availableTools[0] ?? "inspect");
+    const next = resolveEffectiveTool(
+      tool ?? interactionConfig.initialTool,
+      availableTools,
+    );
     reducer.dispatch({ type: "set-tool", tool: next });
   });
 
   function chooseTool(next: InteractionTool): void {
-    if (!availableTools.includes(next)) return;
-    if (tool !== undefined) {
-      ontoolchange?.(next);
-      return;
+    // Decision table is pure (plot-capability); this switch owns side effects.
+    const action = resolveChooseToolAction({
+      next,
+      available: availableTools,
+      isControlled: tool !== undefined,
+    });
+    switch (action.type) {
+      case "ignore":
+        return;
+      case "request":
+        ontoolchange?.(next);
+        return;
+      case "apply":
+        reducer.dispatch({ type: "set-tool", tool: next });
+        brushRect = null;
+        queuedPointerInspection = null;
+        reducer.cancelScheduledPointer();
+        ontoolchange?.(next);
+        break;
     }
-    reducer.dispatch({ type: "set-tool", tool: next });
-    brushRect = null;
-    queuedPointerInspection = null;
-    reducer.cancelScheduledPointer();
-    ontoolchange?.(next);
   }
 
   function plotPoint(event: PointerEvent | MouseEvent): {
@@ -1481,30 +1466,22 @@
   }
 
   const legendEntryKeyIndex: ReadonlyMap<string, readonly PropertyKey[]> =
-    $derived.by(() => {
-      if (model === null) return new Map<string, readonly PropertyKey[]>();
-      const current = model;
-      return buildLegendEntryKeyIndex({
-        legends: current.scene.legends,
-        candidates: function* () {
-          for (let id = 0; id < current.candidates.size; id++) {
-            const candidate = current.candidates.candidate(id);
-            if (candidate === null) continue;
-            yield {
-              layerIndex: candidate.layerIndex,
-              lineage: candidate.lineage,
-              rowIndex: candidate.rowIndex,
-            };
-          }
-        },
-        layerFields: (layerIndex) => current.layerFields[layerIndex],
-        layerScaledConstant: (layerIndex, channel) =>
-          current.layerScaledConstants[layerIndex]?.[channel],
-        lineageKeys: (lineageId) => current.lineage.keys(lineageId),
-        row: (rowIndex) => current.row(rowIndex),
+    $derived.by(() =>
+      buildLegendEntryKeyIndexForPlot({
+        model:
+          model === null
+            ? null
+            : {
+                scene: model.scene,
+                candidates: model.candidates,
+                layerFields: model.layerFields,
+                layerScaledConstants: model.layerScaledConstants,
+                lineage: model.lineage,
+                row: (rowIndex) => model.row(rowIndex),
+              },
         semanticKey: (rowIndex) => semanticKeys.keys.get(rowIndex),
-      });
-    });
+      }),
+    );
 
   function keysForLegend(action: LegendEntryAction): readonly PropertyKey[] {
     return keysForLegendEntry(legendEntryKeyIndex, action.identity);
@@ -1518,16 +1495,31 @@
 
   function previewLegend(action: LegendEntryAction | null): void {
     if (action === null) {
-      if (legendPreview === null) return;
-      const source = legendInteractionSource(legendPreview.action.source);
+      // Decision table is pure (plot-legend-surface); host owns emit + mutation.
+      // Emit gate uses committed emphasis, not effectiveEmphasisKeys (preview).
+      // Pure table maps preview source → InteractionSource on non-none actions.
+      const dismiss = resolveLegendPreviewDismissAction({
+        previewSource: legendPreview?.action.source ?? null,
+        committedEmphasisEmpty:
+          (
+            interaction?.emphasized(resolvedInteractionScope) ??
+            localEmphasisKeys
+          ).length === 0,
+      });
+      if (dismiss.type === "none") return;
       legendPreview = null;
-      const committed =
-        interaction?.emphasized(resolvedInteractionScope) ?? localEmphasisKeys;
-      if (committed.length === 0)
-        emitLegendFocus({ type: "legend-focus", phase: "clear", source });
+      if (dismiss.type === "clear-and-emit")
+        emitLegendFocus({
+          type: "legend-focus",
+          phase: "clear",
+          source: dismiss.source,
+        });
       return;
     }
-    const decision = resolveLegendPreviewKeysDecision(keysForLegend(action));
+    const decision = resolveLegendPreviewKeysDecision({
+      keys: keysForLegend(action),
+      entrySource: action.source,
+    });
     if (decision.type === "clear") {
       // Empty domain entry: do not leave the previous entry's preview active.
       previewLegend(null);
@@ -1538,7 +1530,7 @@
       type: "legend-focus",
       phase: "change",
       state: "transient",
-      source: legendInteractionSource(action.source),
+      source: decision.source,
       scale: action.identity.scale as "color" | "fill",
       value: action.entry.value as CellValue,
       label: action.entry.label,
@@ -1547,15 +1539,16 @@
   }
 
   function clearLegendFocus(source: InteractionSource): void {
-    const hadFocus =
-      legendPreview !== null ||
-      legendCommitted !== null ||
-      effectiveEmphasisKeys.length > 0;
+    const emitClear = shouldEmitLegendFocusClear({
+      hasPreview: legendPreview !== null,
+      hasCommitted: legendCommitted !== null,
+      emphasisKeyCount: effectiveEmphasisKeys.length,
+    });
     legendPreview = null;
     legendCommitted = null;
     if (interaction === undefined) localEmphasisKeys = [];
     else interaction.clearEmphasis({ scope: resolvedInteractionScope, source });
-    if (hadFocus)
+    if (emitClear)
       emitLegendFocus({ type: "legend-focus", phase: "clear", source });
   }
 
@@ -1578,34 +1571,41 @@
   }
 
   function commitLegend(action: LegendEntryAction): void {
-    const source = legendInteractionSource(action.source);
-    if (
-      effectiveLegendPressed?.scale === action.identity.scale &&
-      effectiveLegendPressed.entryIndex === action.identity.entryIndex
-    ) {
-      clearLegendFocus(source);
-      return;
-    }
+    // Eager key lookup (O(1) Map.get) before pure routing; unused on toggle-clear.
     const keys = keysForLegend(action);
-    if (keys.length === 0) return;
-    legendPreview = null;
-    legendCommitted = { identity: action.identity, keys };
-    if (interaction === undefined) localEmphasisKeys = [...keys];
-    else
-      interaction.setEmphasis(keys as readonly PublicKey[], {
-        scope: resolvedInteractionScope,
-        source,
-      });
-    emitLegendFocus({
-      type: "legend-focus",
-      phase: "change",
-      state: "committed",
-      source,
-      scale: action.identity.scale as "color" | "fill",
-      value: action.entry.value as CellValue,
-      label: action.entry.label,
-      keys,
+    const commit = resolveLegendCommitAction({
+      pressed: effectiveLegendPressed,
+      identity: action.identity,
+      keyCount: keys.length,
+      entrySource: action.source,
     });
+    switch (commit.type) {
+      case "toggle-clear":
+        clearLegendFocus(commit.source);
+        break;
+      case "ignore":
+        break;
+      case "commit":
+        legendPreview = null;
+        legendCommitted = { identity: action.identity, keys };
+        if (interaction === undefined) localEmphasisKeys = [...keys];
+        else
+          interaction.setEmphasis(keys as readonly PublicKey[], {
+            scope: resolvedInteractionScope,
+            source: commit.source,
+          });
+        emitLegendFocus({
+          type: "legend-focus",
+          phase: "change",
+          state: "committed",
+          source: commit.source,
+          scale: action.identity.scale as "color" | "fill",
+          value: action.entry.value as CellValue,
+          label: action.entry.label,
+          keys,
+        });
+        break;
+    }
   }
 
   const presentationFocusKeys: readonly PropertyKey[] = $derived(
@@ -1622,17 +1622,11 @@
 
   const semanticCandidateProjections = $derived.by(() => {
     if (model === null) return [];
-    const candidates = [];
-    for (let id = 0; id < model.candidates.size; id++) {
-      const candidate = model.candidates.candidate(id);
-      if (candidate === null) continue;
-      candidates.push({
-        batchIndex: candidate.batchIndex,
-        primitiveIndex: candidate.primitiveIndex,
-        keys: candidateSemanticKeys(candidate),
-      });
-    }
-    return candidates;
+    return collectCandidates(model.candidates, (candidate) => ({
+      batchIndex: candidate.batchIndex,
+      primitiveIndex: candidate.primitiveIndex,
+      keys: candidateSemanticKeys(candidate),
+    }));
   });
 
   const interactionMasks: readonly (BatchInteractionMask | null)[] =
@@ -1644,14 +1638,6 @@
         semanticCandidateProjections,
       );
     });
-
-  function masksForBatches(batches: readonly GeometryBatch[]) {
-    if (model === null || interactionMasks.length === 0) return [];
-    return batches.map((batch) => {
-      const index = model.scene.batches.indexOf(batch);
-      return index < 0 ? null : (interactionMasks[index] ?? null);
-    });
-  }
 
   const interactiveLegendEntries = $derived.by(() => {
     if (model === null || interactionConfig.legendFocus === null) return [];
@@ -1850,17 +1836,23 @@
 
   $effect.pre(() => {
     const count = interactiveLegendEntries.length;
-    const nextIndex = clampLegendRovingIndex(legendRovingIndex, count);
     const active = document.activeElement;
+    // Number(dataset.index) may be NaN — pure plan maps non-finite → 0.
     const focusedIndex =
       active instanceof HTMLElement &&
       active.matches("[data-gg-legend-target]") &&
       root?.contains(active)
         ? Number(active.dataset["index"])
         : null;
-    if (nextIndex !== legendRovingIndex) legendRovingIndex = nextIndex;
-    if (focusedIndex === null || count === 0) return;
-    const returnIndex = clampLegendRovingIndex(focusedIndex, count);
+    const plan = planLegendRovingFocusSync({
+      currentRoving: legendRovingIndex,
+      entryCount: count,
+      focusedIndex,
+    });
+    if (plan.nextIndex !== legendRovingIndex)
+      legendRovingIndex = plan.nextIndex;
+    if (plan.type !== "refocus") return;
+    const returnIndex = plan.returnIndex;
     queueMicrotask(() => {
       root
         ?.querySelector<HTMLElement>(
@@ -1871,27 +1863,28 @@
   });
 
   $effect(() => {
-    const committed = legendCommitted;
-    if (committed === null) return;
-    const current = interactiveLegendEntries.find(
-      ({ identity }) =>
-        identity.scale === committed.identity.scale &&
-        identity.entryIndex === committed.identity.entryIndex,
-    );
-    const currentKeys =
-      current === undefined
-        ? []
-        : keysForLegendEntry(legendEntryKeyIndex, current.identity);
-    if (samePropertyKeySet(currentKeys, committed.keys)) return;
-
-    legendCommitted = null;
-    if (interaction === undefined && localEmphasisKeys.length > 0) {
-      localEmphasisKeys = [];
-      emitLegendFocus({
-        type: "legend-focus",
-        phase: "clear",
-        source: "programmatic",
-      });
+    const plan = planLegendCommittedReconcile({
+      committed: legendCommitted,
+      entries: interactiveLegendEntries,
+      keyIndex: legendEntryKeyIndex,
+      usesLocalEmphasis: interaction === undefined,
+      localEmphasisCount: localEmphasisKeys.length,
+    });
+    switch (plan.type) {
+      case "noop":
+        return;
+      case "clear-committed":
+        legendCommitted = null;
+        break;
+      case "clear-committed-local-emit":
+        legendCommitted = null;
+        localEmphasisKeys = [];
+        emitLegendFocus({
+          type: "legend-focus",
+          phase: "clear",
+          source: "programmatic",
+        });
+        break;
     }
   });
 
@@ -1917,16 +1910,26 @@
 
   // Drop chart-local emphasis when legend focus is turned off at runtime.
   $effect(() => {
-    if (interactionConfig.legendFocus !== null) return;
-    if (
-      legendPreview === null &&
-      localEmphasisKeys.length === 0 &&
-      legendCommitted === null
-    )
-      return;
-    legendPreview = null;
-    legendCommitted = null;
-    if (interaction === undefined) localEmphasisKeys = [];
+    const plan = planLegendFocusDisabledClear({
+      legendFocusEnabled,
+      hasPreview: legendPreview !== null,
+      hasCommitted: legendCommitted !== null,
+      hasLocalEmphasis: localEmphasisKeys.length > 0,
+      usesLocalEmphasis: interaction === undefined,
+    });
+    switch (plan.type) {
+      case "noop":
+        return;
+      case "clear-host":
+        legendPreview = null;
+        legendCommitted = null;
+        break;
+      case "clear-host-local":
+        legendPreview = null;
+        legendCommitted = null;
+        localEmphasisKeys = [];
+        break;
+    }
   });
 
   function legendAction(
@@ -2055,15 +2058,7 @@
 
   function candidateFromHit(hit: SceneHit): CandidateFacts | null {
     if (model === null) return null;
-    return matchCandidateFromHit(
-      (function* () {
-        for (let id = 0; id < model.candidates.size; id++) {
-          const candidate = model.candidates.candidate(id);
-          if (candidate !== null) yield candidate;
-        }
-      })(),
-      hit,
-    );
+    return matchCandidateFromHit(iterateCandidates(model.candidates), hit);
   }
 
   function resolveInspection(
@@ -2111,9 +2106,20 @@
   let reconciledRun = -1;
   $effect(() => {
     const currentModel = model;
-    const inspectionEnabled = interactionConfig.inspect !== null;
-    if (!inspectionEnabled) {
-      if (inspection !== null) {
+    const plan = planSceneInspectReconcile({
+      inspectionEnabled: inspectEnabled,
+      // Thunk: do not read `inspection` on the same-run skip path so hover
+      // updates are not effect dependencies of scene-run reconcile.
+      getInspectionState: () =>
+        inspection === null ? "none" : inspection.state,
+      modelRunId: currentModel?.runId ?? null,
+      reconciledRun,
+    });
+    switch (plan.type) {
+      case "noop":
+      case "skip":
+        return;
+      case "clear-disabled":
         inspectionCoordinator.invalidate();
         inspection = null;
         inspectionSeed = null;
@@ -2122,50 +2128,55 @@
           candidate: null,
           source: "programmatic",
         });
+        return;
+      case "invalidate-clear-transient":
+      case "invalidate-idle":
+      case "invalidate-reconcile-pinned": {
+        // currentModel is non-null for invalidate-* (plan requires run advance).
+        const runId = currentModel!.runId;
+        reducer.dispatch({ type: "invalidate", reason: "scene" });
+        queuedPointerInspection = null;
+        pendingPinnedPointer = null;
+        queuedPointerToken = null;
+        reducer.cancelScheduledPointer();
+        reconciledRun = runId;
+        if (plan.type === "invalidate-clear-transient") {
+          inspectionCoordinator.release("transient");
+          inspection = null;
+          inspectionSeed = null;
+          reducer.dispatch({
+            type: "inspect",
+            candidate: null,
+            source: "programmatic",
+          });
+          return;
+        }
+        if (plan.type === "invalidate-idle") return;
+        const reconciled = inspectionCoordinator.reconcilePinned({
+          model: currentModel!,
+          identityEpoch: dataIdentityEpoch,
+          layoutEpoch: runId,
+          source: "programmatic",
+          completeness: "complete",
+        });
+        if (reconciled === null) {
+          reducer.dispatch({ type: "escape", source: "programmatic" });
+          reducer.dispatch({ type: "set-active", candidate: null });
+          emitInspection({
+            type: "inspect",
+            phase: "clear",
+            source: "programmatic",
+          });
+          inspection = null;
+          inspectionSeed = null;
+        } else {
+          inspection = reconciled.snapshot;
+          inspectionSeed = reconciled.seed;
+          if (reconciled.semanticChanged)
+            emitInspection(reconciled.snapshot, reconciled.semanticFingerprint);
+        }
+        break;
       }
-      return;
-    }
-    if (currentModel === null || currentModel.runId === reconciledRun) return;
-    reducer.dispatch({ type: "invalidate", reason: "scene" });
-    queuedPointerInspection = null;
-    pendingPinnedPointer = null;
-    queuedPointerToken = null;
-    reducer.cancelScheduledPointer();
-    reconciledRun = currentModel.runId;
-    if (inspection?.state === "transient") {
-      inspectionCoordinator.release("transient");
-      inspection = null;
-      inspectionSeed = null;
-      reducer.dispatch({
-        type: "inspect",
-        candidate: null,
-        source: "programmatic",
-      });
-      return;
-    }
-    if (inspection?.state !== "pinned") return;
-    const reconciled = inspectionCoordinator.reconcilePinned({
-      model: currentModel,
-      identityEpoch: dataIdentityEpoch,
-      layoutEpoch: currentModel.runId,
-      source: "programmatic",
-      completeness: "complete",
-    });
-    if (reconciled === null) {
-      reducer.dispatch({ type: "escape", source: "programmatic" });
-      reducer.dispatch({ type: "set-active", candidate: null });
-      emitInspection({
-        type: "inspect",
-        phase: "clear",
-        source: "programmatic",
-      });
-      inspection = null;
-      inspectionSeed = null;
-    } else {
-      inspection = reconciled.snapshot;
-      inspectionSeed = reconciled.seed;
-      if (reconciled.semanticChanged)
-        emitInspection(reconciled.snapshot, reconciled.semanticFingerprint);
     }
   });
 
@@ -2173,17 +2184,17 @@
     next: PlotInspection<Record<string, CellValue>>,
     semanticFingerprint?: string,
   ): void {
-    // Clear tokens come from the inspection-resolver helper. Non-clear
-    // emissions must carry the coordinator's type-aware semanticFingerprint —
-    // never a host-side String(key) fallback (collides symbols / delimiters).
-    const fingerprint =
-      next.phase === "clear"
-        ? clearInspectionFingerprint(next.source)
-        : semanticFingerprint;
-    if (fingerprint !== undefined) {
-      if (fingerprint === lastInspectionFingerprint) return;
-      lastInspectionFingerprint = fingerprint;
-    }
+    // Pure table owns clear vs semantic fingerprint + skip/emit gate.
+    // Host owns last-token mutation and callbacks only.
+    const emit = resolveInspectionEmitAction({
+      phase: next.phase,
+      source: next.source,
+      semanticFingerprint,
+      lastFingerprint: lastInspectionFingerprint,
+    });
+    if (emit.type === "skip") return;
+    if (emit.updateFingerprint !== null)
+      lastInspectionFingerprint = emit.updateFingerprint;
     oninspect?.(next as unknown as PlotInspection<Row, PublicKey>);
     oninteraction?.(next as unknown as PlotInteractionEvent<Row, PublicKey>);
   }
@@ -2217,7 +2228,7 @@
         // Preserve both dispatches (before emit/release and after) — do not
         // dedupe; may be load-bearing for reducer revision counting.
         reducer.dispatch({ type: "inspect", candidate: null, source });
-        if (inspection !== null)
+        if (action.emitClear)
           emitInspection({ type: "inspect", phase: "clear", source });
         inspection = null;
         inspectionSeed = null;
@@ -2240,13 +2251,14 @@
           return;
         }
         const next = resolved.snapshot;
-        const candidateRef = {
+        const candidateRef = buildInspectionCandidateRef({
           epoch: model?.runId ?? 0,
-          id: candidate?.id ?? traversalHits.indexOf(hit!),
+          candidateId: candidate?.id,
+          fallbackId: () => traversalHits.indexOf(hit!),
           panelId: next.panelId,
           x: hit!.x,
           y: hit!.y,
-        };
+        });
         reducer.dispatch({ type: "inspect", candidate: candidateRef, source });
         if (state === "pinned")
           reducer.dispatch({ type: "toggle-pin", source });
@@ -2270,7 +2282,7 @@
       hasInspection: inspection !== null,
       hasSeed: inspectionSeed !== null,
       currentState: inspection?.state ?? "transient",
-      hasPendingPinned: pendingPinnedPointer !== null,
+      pending: pendingPinnedPointer,
     });
     if (pinAction.type === "ignore") return;
     // toggle-pin always runs before restore/flip side effects; if flip
@@ -2278,25 +2290,23 @@
     reducer.dispatch({ type: "toggle-pin", source });
     switch (pinAction.type) {
       case "restore-pending": {
-        const pending = pendingPinnedPointer!;
+        // Pure gate carries pending payload — no host non-null assert.
         pendingPinnedPointer = null;
         inspectionCoordinator.release("pinned");
         inspection = null;
         inspectionSeed = null;
         setInspection(
-          pending.hit,
-          pending.source,
+          pinAction.pending.hit,
+          pinAction.pending.source,
           "transient",
-          pending.concreteMode,
-          pending.candidate,
+          pinAction.pending.concreteMode,
+          pinAction.pending.candidate,
         );
         return;
       }
-      case "flip-to-transient":
-      case "flip-to-pinned": {
+      case "flip": {
         // inspection + seed non-null after non-ignore (pure gate).
-        const state =
-          pinAction.type === "flip-to-transient" ? "transient" : "pinned";
+        const state = pinAction.state;
         const resolved = resolveInspection(
           hitFromCandidate(inspectionSeed!),
           source,
@@ -2320,41 +2330,67 @@
             source,
           });
         if (state === "transient") inspectionCoordinator.release("pinned");
-        if (
-          state === "transient" &&
-          (source === "keyboard" || source === "touch")
-        )
+        if (shouldAnnounceUnpin({ state, source }))
           announceInteraction(
             `${inspectionLiveText(resolved.snapshot)}, unpinned`,
           );
         if (resolved.semanticChanged)
           emitInspection(resolved.snapshot, resolved.semanticFingerprint);
         if (
-          state === "pinned" &&
-          interactionConfig.inspect?.contentMode === "interactive"
+          shouldFocusPinnedInteractiveTooltip({
+            state,
+            contentMode: interactionConfig.inspect?.contentMode,
+          })
         )
           queueMicrotask(() =>
             root
-              ?.querySelector<HTMLElement>(`#${CSS.escape(plotId)}-tooltip`)
+              ?.querySelector<HTMLElement>(
+                `#${CSS.escape(plotTooltipDomId(plotId))}`,
+              )
               ?.focus(),
           );
       }
     }
   }
 
+  /**
+   * Shared dismiss path for Escape and closeInspection.
+   * Pure plan owns escape-vs-close differences; host owns dispatch/emit/DOM.
+   */
+  function dismissInspection(
+    kind: "escape" | "close",
+    source: InteractionSource,
+    opts: { restoreFocus?: boolean; returnToInspect?: boolean } = {},
+  ): void {
+    const plan = planInspectionDismiss({
+      kind,
+      hasInspection: inspection !== null,
+      ...(opts.restoreFocus !== undefined && {
+        restoreFocus: opts.restoreFocus,
+      }),
+      ...(opts.returnToInspect !== undefined && {
+        returnToInspect: opts.returnToInspect,
+      }),
+    });
+    reducer.dispatch({ type: "escape", source });
+    if (plan.emitClear)
+      emitInspection({ type: "inspect", phase: "clear", source });
+    inspection = null;
+    inspectionSeed = null;
+    if (plan.clearTooltipHovered) tooltipHovered = false;
+    if (plan.clearPendingPinned) pendingPinnedPointer = null;
+    if (plan.coordinator === "invalidate") inspectionCoordinator.invalidate();
+    else inspectionCoordinator.release("pinned");
+    if (plan.clearBrush) brushRect = null;
+    if (plan.restoreFocus) queueMicrotask(() => captureSurface?.focus());
+    if (plan.returnToInspect) chooseTool("inspect");
+  }
+
   function closeInspection(
     source: InteractionSource,
     restoreFocus = true,
   ): void {
-    reducer.dispatch({ type: "escape", source });
-    if (inspection !== null)
-      emitInspection({ type: "inspect", phase: "clear", source });
-    inspection = null;
-    inspectionSeed = null;
-    tooltipHovered = false;
-    pendingPinnedPointer = null;
-    inspectionCoordinator.release("pinned");
-    if (restoreFocus) queueMicrotask(() => captureSurface?.focus());
+    dismissInspection("close", source, { restoreFocus });
   }
 
   function onPointerMove(event: PointerEvent): void {
@@ -2375,7 +2411,7 @@
       hasTouchInspectStart: touchInspectStart !== null,
       brushing,
       hasBrushDraft: brushRect !== null,
-      inspectEnabled: interactionConfig.inspect !== null,
+      inspectEnabled,
     });
     switch (action.type) {
       case "touch-inspect-drag-cancel":
@@ -2394,31 +2430,19 @@
             mode: inspectConfig.mode,
             maxDistance: inspectConfig.maxDistance,
           }) ?? null;
-        const resolvedHit =
-          match === null
-            ? (hitIndex?.hitTest(p.x, p.y) ?? null)
-            : hitFromCandidate(match);
-        queuedPointerInspection = {
-          hit: resolvedHit,
+        // One null branch for hit + reducer candidate (lazy hitTest / panelId).
+        const frame = buildQueuedInspectFrame({
+          match,
           source: action.source,
-          ...(match !== null && {
-            concreteMode: match.mode,
-            candidate: match,
-          }),
-        };
+          epoch: model?.runId ?? 0,
+          fallbackHit: () => hitIndex?.hitTest(p.x, p.y) ?? null,
+          panelIdForIndex: (index) => panelId(index),
+        });
+        queuedPointerInspection = frame.queued;
         queuedPointerToken = reducer.frameToken();
         reducer.queuePointer({
           type: "inspect",
-          candidate:
-            match === null
-              ? null
-              : {
-                  epoch: model?.runId ?? 0,
-                  id: match.id,
-                  panelId: panelId(match.panelIndex),
-                  x: match.x,
-                  y: match.y,
-                },
+          candidate: frame.candidate,
           source: action.source,
         });
         break;
@@ -2443,10 +2467,48 @@
   /** Map the live render model into the pure interval query scene adapter. */
   function intervalQueryScene(): IntervalQueryScene | null {
     if (model === null) return null;
-    return intervalQuerySceneFromModel(
-      model,
-      assembled?.coord?.type === "flip",
-    );
+    return intervalQuerySceneFromModel(model, coordFlipped);
+  }
+
+  /**
+   * Shared select/zoom/end/keep-second-corner effects after pure finish-brush
+   * routing (pointer finish-brush and keyboard complete-area).
+   * Pointer-only: callers must cancel scheduled pointer before this when needed.
+   */
+  function applyFinishBrush(
+    finish: FinishBrushAction,
+    source: InteractionSource,
+  ): void {
+    switch (finish.type) {
+      case "keep-second-corner":
+        brushRect = finish.corners;
+        announceInteraction(BRUSH_SECOND_CORNER_ANNOUNCEMENT);
+        break;
+      case "select-end": {
+        brushRect = null;
+        const eventValue = selectionEvent("end", finish.rect, source);
+        committedInterval = persistentSelectionOrNull(
+          interactionConfig.select?.persistent,
+          eventValue,
+        );
+        // R3: persistent selections reconcile into the typed interval set.
+        if (interactionConfig.select?.persistent)
+          commitIntervalSelection(eventValue, source);
+        emitSelection(eventValue);
+        reducer.dispatch({ type: "cancel-area" });
+        break;
+      }
+      case "zoom-end":
+        brushRect = null;
+        applyBrushZoom(finish.rect, source);
+        reducer.dispatch({ type: "cancel-area" });
+        break;
+      case "end-area":
+        // Commit with non-area tool (e.g. tool changed mid-drag): clear only.
+        brushRect = null;
+        reducer.dispatch({ type: "cancel-area" });
+        break;
+    }
   }
 
   function onPointerLeave(): void {
@@ -2471,48 +2533,48 @@
     // Always cancel queued inspection before pure routing (host cleanup).
     queuedPointerInspection = null;
     reducer.cancelScheduledPointer();
+    // point always computed (pure begin-area needs it; touch/none ignore).
+    const p = plotPoint(event);
     const action = resolvePointerDownAction({
       pointerType: event.pointerType,
       button: event.button,
       activeTool,
       areaAwaitingSecond,
-      hasBrushDraft: brushRect !== null,
+      brushCorners: brushRect,
+      point: p,
     });
     switch (action.type) {
       case "touch-inspect-start":
-        touchInspectStart = plotPoint(event);
+        touchInspectStart = p;
         touchInspectMoved = false;
         break;
       case "none":
         break;
       case "begin-area": {
-        const p = plotPoint(event);
+        // R3: the brush is panel-scoped — extending stays on the origin
+        // panel from the reducer; a fresh brush anchors to the hit panel.
         const area = reducer.state.area;
-        const originPanel = action.extendExisting
+        const extending = areaAwaitingSecond && brushRect !== null;
+        const originPanel = extending
           ? area.kind === "idle"
             ? null
             : (model?.scene.panels.find((panel) => panel.id === area.panelId) ??
               null)
           : panelAtPoint(p);
         if (originPanel === null) break;
-        brushRect =
-          action.extendExisting && brushRect !== null
-            ? brushWithEnd(brushRect, p)
-            : brushAtPoint(p);
-        setInspection(
-          null,
-          event.pointerType === "touch" ? "touch" : "pointer",
-        );
+        // Pure table owns fresh vs extend corner policy.
+        brushRect = action.corners;
+        setInspection(null, action.source);
         reducer.dispatch({
           type: "begin-area",
           point: p,
           panelId: originPanel.id,
         });
-        if (activeTool === "select-area" && !areaAwaitingSecond) {
+        if (action.emitSelectStart) {
           const startEvent = selectionEvent(
             "start",
-            normalizedRect(brushRect),
-            event.pointerType === "touch" ? "touch" : "pointer",
+            normalizedRect(action.corners),
+            action.source,
           );
           emitSelection(startEvent);
         }
@@ -2552,15 +2614,18 @@
   }
 
   function onPointerUp(event: PointerEvent): void {
+    // endPoint always computed (pure finish-brush needs it; touch paths ignore).
+    const endPoint = plotPoint(event);
     const action = resolvePointerUpAction({
       pointerType: event.pointerType,
       activeTool,
-      inspectEnabled: interactionConfig.inspect !== null,
-      pinEnabled: interactionConfig.inspect?.pin === true,
+      inspectEnabled,
+      pinEnabled,
       hasTouchInspectStart: touchInspectStart !== null,
       touchInspectMoved,
       brushing,
-      hasBrushDraft: brushRect !== null,
+      brushCorners: brushRect,
+      endPoint,
     });
     switch (action.type) {
       case "touch-inspect-drag-ignore":
@@ -2573,8 +2638,7 @@
         touchInspectMoved = false;
         const inspectConfig = interactionConfig.inspect;
         if (inspectConfig === null) break;
-        const p = plotPoint(event);
-        const match = model?.candidates.nearest(p.x, p.y, {
+        const match = model?.candidates.nearest(endPoint.x, endPoint.y, {
           mode: inspectConfig.mode,
           maxDistance: inspectConfig.maxDistance,
         });
@@ -2582,56 +2646,21 @@
           setInspection(
             hitFromCandidate(match),
             "touch",
-            action.pin ? "pinned" : "transient",
+            action.state,
             match.mode,
             match,
           );
-          suppressClickUntil = performance.now() + 500;
+          suppressClickUntil =
+            performance.now() + TOUCH_INSPECT_CLICK_SUPPRESS_MS;
         }
         break;
       }
       case "none":
         break;
       case "finish-brush": {
-        // Defensive: pure up-gate already requires hasBrushDraft.
-        if (brushRect === null) break;
+        // Pure table owns evaluate + select/zoom/end; host cancels then applies.
         reducer.cancelScheduledPointer();
-        const source = event.pointerType === "touch" ? "touch" : "pointer";
-        const ended = evaluatePointerBrushEnd(brushRect, plotPoint(event));
-        const finish = resolveFinishBrushAction({
-          endedKind: ended.kind,
-          activeTool,
-        });
-        switch (finish.type) {
-          case "keep-second-corner":
-            // ended.kind is too-small when pure returns keep-second-corner.
-            if (ended.kind === "too-small") brushRect = ended.corners;
-            announceInteraction(BRUSH_SECOND_CORNER_ANNOUNCEMENT);
-            break;
-          case "select-end":
-            brushRect = null;
-            if (ended.kind === "commit") {
-              const eventValue = selectionEvent("end", ended.rect, source);
-              committedInterval = interactionConfig.select?.persistent
-                ? eventValue
-                : null;
-              if (interactionConfig.select?.persistent)
-                commitIntervalSelection(eventValue, source);
-              emitSelection(eventValue);
-            }
-            reducer.dispatch({ type: "cancel-area" });
-            break;
-          case "zoom-end":
-            brushRect = null;
-            if (ended.kind === "commit") applyBrushZoom(ended.rect, source);
-            reducer.dispatch({ type: "cancel-area" });
-            break;
-          case "end-area":
-            // Commit with non-area tool (e.g. tool changed mid-drag): clear only.
-            brushRect = null;
-            reducer.dispatch({ type: "cancel-area" });
-            break;
-        }
+        applyFinishBrush(action.finish, action.source);
         break;
       }
     }
@@ -2795,7 +2824,8 @@
   /**
    * Brush-to-zoom = an intentional respec: invert the brushed plot-px rect
    * through the trained scales into explicit continuous domains. Band axes
-   * and faceted plots are skipped (documented M2 limitation).
+   * and faceted plots are skipped (documented M2 limitation) inside
+   * `resolveBrushZoomFromModel`.
    */
   function applyBrushZoom(
     rect: {
@@ -2806,19 +2836,16 @@
     },
     source: InteractionSource,
   ): void {
-    if (model === null || model.scene.panels.length !== 1) return;
-    const panel = model.scene.panels[0]!;
-    const flip = assembled?.coord?.type === "flip";
-    const next = resolveBrushZoomDomains(
+    // Pure owns null/multi-panel gate, invert, and freeze for commit.
+    const next = resolveBrushZoomFromModel({
+      model,
       rect,
-      panel,
-      model.scales,
-      flip,
-      interactionConfig.zoom?.mode ?? "xy",
-      effectiveZoomDomains,
-    );
+      flipped: coordFlipped,
+      mode: interactionConfig.zoom?.mode ?? "xy",
+      current: effectiveZoomDomains,
+    });
     if (next === null) return;
-    commitZoom(frozenZoomDomains(next), source);
+    commitZoom(next, source);
   }
 
   // Stable SceneView callback identity when model is unchanged.
@@ -2831,47 +2858,43 @@
     value: PlotInspectionChange<Record<string, CellValue>, PropertyKey>,
   ) => inspectionLiveTextFor(model, value);
 
+  function applyTraversalIndex(index: number): void {
+    activeTraversalIndex = index;
+    setInspection(traversalHits[index]!, "keyboard");
+  }
+
   function navigate(delta: number): void {
     if (traversalHits.length === 0) return;
-    activeTraversalIndex = nextTraversalIndex(
-      activeTraversalIndex,
-      delta,
-      traversalHits.length,
+    applyTraversalIndex(
+      nextTraversalIndex(activeTraversalIndex, delta, traversalHits.length),
     );
-    setInspection(traversalHits[activeTraversalIndex]!, "keyboard");
   }
 
   function navigateDirection(dx: number, dy: number): void {
-    if (traversalHits.length === 0) return;
-    if (inspection === null) {
-      navigate(1);
-      return;
-    }
-    const bestIndex = bestDirectionalIndex(
-      inspection.focus.anchor,
-      traversalHits,
-      dx,
-      dy,
-    );
-    if (bestIndex < 0) return;
-    activeTraversalIndex = bestIndex;
-    setInspection(traversalHits[bestIndex]!, "keyboard");
+    const plan = planDirectionalNavigate({
+      hitCount: traversalHits.length,
+      hasInspection: inspection !== null,
+      currentIndex: activeTraversalIndex,
+      bestIndex: () =>
+        bestDirectionalIndex(inspection!.focus.anchor, traversalHits, dx, dy),
+    });
+    if (plan.type === "set-index") applyTraversalIndex(plan.index);
   }
 
   function cycleCoincident(delta: number): void {
-    if (inspection === null) {
-      navigate(1);
-      return;
-    }
-    const nextIndex = cycleCoincidentIndex(
-      inspection.focus.anchor,
-      traversalHits,
-      activeTraversalIndex,
-      delta,
-    );
-    if (nextIndex < 0) return;
-    activeTraversalIndex = nextIndex;
-    setInspection(traversalHits[nextIndex]!, "keyboard");
+    const plan = planCycleCoincident({
+      hasInspection: inspection !== null,
+      hitCount: traversalHits.length,
+      currentIndex: activeTraversalIndex,
+      nextIndex: () =>
+        cycleCoincidentIndex(
+          inspection!.focus.anchor,
+          traversalHits,
+          activeTraversalIndex,
+          delta,
+        ),
+    });
+    if (plan.type === "set-index") applyTraversalIndex(plan.index);
   }
 
   function onSurfaceBlur(event: FocusEvent): void {
@@ -2903,55 +2926,49 @@
 
   function onSurfaceKeyDown(event: KeyboardEvent): void {
     // Decision table is pure (plot-surface-keyboard); this switch owns side
-    // effects only. hasBrushDraft tracks brushRect, not reducer brushing.
+    // effects only. brushCorners is the draft source of truth (not reducer
+    // brushing); nudge/complete-area carry pure payloads so host only applies.
     const { action, preventDefault } = resolveSurfaceKeyAction({
       key: event.key,
       shiftKey: event.shiftKey,
       activeTool,
-      hasBrushDraft: brushRect !== null,
+      brushCorners: brushRect,
       hasInspection: inspection !== null,
-      pinEnabled: interactionConfig.inspect?.pin === true,
+      pinEnabled,
+      focusKey: inspection?.focus.key ?? null,
+      sourceKeys: inspection?.focus.sourceKeys ?? [],
+      inspectionAnchor: inspection?.focus.anchor ?? null,
+      inspectionPanel,
+      firstPanel: model?.scene.panels[0],
     });
     if (preventDefault) event.preventDefault();
     switch (action.type) {
       case "nudge-brush": {
-        const panel = inspectionPanel ?? model?.scene.panels[0];
-        if (panel === undefined || brushRect === null) return;
-        brushRect = nudgeBrushEnd(brushRect, action.dx, action.dy, panel);
+        // Pure table owns clamp panel policy and free-corner nudge.
+        brushRect = action.corners;
         reducer.dispatch({
           type: "move-area",
-          point: { x: brushRect.x1, y: brushRect.y1 },
+          point: { x: action.corners.x1, y: action.corners.y1 },
         });
         return;
       }
       case "begin-area": {
-        const anchor =
-          inspection?.focus.anchor ?? panelCenterAnchor(model?.scene.panels[0]);
-        const originPanel = panelAtPoint(anchor);
+        // Pure table owns inspection-anchor vs panel-center policy.
+        // R3: the brush is panel-scoped — anchor to the panel under it.
+        const originPanel = panelAtPoint(action.anchor);
         if (originPanel === null) return;
-        brushRect = brushAtPoint(anchor);
+        brushRect = brushAtPoint(action.anchor);
         reducer.dispatch({
           type: "begin-area",
-          point: anchor,
+          point: action.anchor,
           panelId: originPanel.id,
         });
         announceInteraction(BRUSH_SECOND_CORNER_ANNOUNCEMENT);
         return;
       }
       case "complete-area": {
-        if (brushRect === null) return;
-        const rect = normalizedRect(brushRect);
-        brushRect = null;
-        if (activeTool === "select-area") {
-          const selection = selectionEvent("end", rect, "keyboard");
-          committedInterval = interactionConfig.select?.persistent
-            ? selection
-            : null;
-          if (interactionConfig.select?.persistent)
-            commitIntervalSelection(selection, "keyboard");
-          emitSelection(selection);
-        } else applyBrushZoom(rect, "keyboard");
-        reducer.dispatch({ type: "cancel-area" });
+        // finish payload is pure-owned (normalize + select/zoom/end routing).
+        applyFinishBrush(action.finish, "keyboard");
         return;
       }
       case "cycle-coincident":
@@ -2960,35 +2977,17 @@
       case "navigate-direction":
         navigateDirection(action.dx, action.dy);
         return;
-      case "toggle-point-keys": {
-        if (inspection === null) return;
-        togglePointKeys(
-          inspection.focus.key === null
-            ? inspection.focus.sourceKeys
-            : [inspection.focus.key],
-          "keyboard",
-        );
+      case "toggle-point-keys":
+        togglePointKeys(action.keys, "keyboard");
         return;
-      }
       case "toggle-pin":
         toggleInspectionPin("keyboard");
         return;
-      case "escape": {
-        reducer.dispatch({ type: "escape", source: "keyboard" });
-        if (inspection !== null)
-          emitInspection({
-            type: "inspect",
-            phase: "clear",
-            source: "keyboard",
-          });
-        inspection = null;
-        inspectionSeed = null;
-        tooltipHovered = false;
-        inspectionCoordinator.invalidate();
-        brushRect = null;
-        if (action.returnToInspect) chooseTool("inspect");
+      case "escape":
+        dismissInspection("escape", "keyboard", {
+          returnToInspect: action.returnToInspect,
+        });
         break;
-      }
       case "none":
         break;
     }
@@ -2998,9 +2997,9 @@
     const action = resolveCaptureClickAction({
       suppressClick: performance.now() < suppressClickUntil,
       activeTool,
-      pointSelectEnabled: interactionConfig.select?.type === "point",
-      inspectEnabled: interactionConfig.inspect !== null,
-      pinEnabled: interactionConfig.inspect?.pin === true,
+      pointSelectEnabled: canPublishPointSelection,
+      inspectEnabled,
+      pinEnabled,
       hasInspection: inspection !== null,
     });
     switch (action.type) {
@@ -3011,7 +3010,7 @@
         const point = plotPoint(event);
         const match = model?.candidates.nearest(point.x, point.y, {
           mode: "xy",
-          maxDistance: 24,
+          maxDistance: POINT_SELECT_NEAREST_MAX_DISTANCE_PX,
         });
         if (match === null || match === undefined) break;
         togglePointKeys(candidateSemanticKeys(match), "pointer");
@@ -3021,6 +3020,35 @@
         toggleInspectionPin("pointer");
         break;
       case "none":
+        break;
+    }
+  }
+
+  /** Pointer-cancel always drops draft/queue/touch-inspect and cancels area. */
+  function onPointerCancel(): void {
+    queuedPointerInspection = null;
+    touchInspectStart = null;
+    touchInspectMoved = false;
+    reducer.cancelScheduledPointer();
+    brushRect = null;
+    reducer.dispatch({ type: "cancel-area" });
+  }
+
+  /**
+   * Lost capture: pure decision table owns keep vs clear draft; host mutates
+   * brushRect and always cancels area when not ignored.
+   */
+  function onLostPointerCapture(): void {
+    const lost = resolveLostPointerCaptureAction(reducer.state.area.kind);
+    switch (lost.type) {
+      case "ignore":
+        break;
+      case "cancel-keep-draft":
+        reducer.dispatch({ type: "cancel-area" });
+        break;
+      case "cancel-clear-draft":
+        brushRect = null;
+        reducer.dispatch({ type: "cancel-area" });
         break;
     }
   }
@@ -3042,8 +3070,7 @@
     if (!clientFlush) return false;
     return isPlotReady({
       hasModel: model !== null,
-      widthMode:
-        width === undefined || width === "container" ? "container" : "fixed",
+      widthMode: isContainerWidthProp(width) ? "container" : "fixed",
       containerHasPositiveWidth,
       hasCanvas,
       paintComplete:
@@ -3062,14 +3089,16 @@
 <div
   bind:this={root}
   class="gg-plot-root"
-  class:gg-container-width={width === undefined || width === "container"}
+  class:gg-container-width={isContainerWidthProp(width)}
   class:gg-with-tool-rail={showToolRail}
-  class:gg-with-legend-clear={interactionConfig.legendFocus !== null &&
+  class:gg-with-legend-clear={legendFocusEnabled &&
     effectiveLegendPressed !== null}
   class:gg-with-legend-filters={filterableLegendEntries.length > 0}
   class:gg-narrow-tools={isNarrowToolsWidth(resolvedWidth)}
-  class:gg-with-docked-tooltip={inspection?.state === "pinned" &&
-    isDockedTooltipWidth(resolvedWidth)}
+  class:gg-with-docked-tooltip={isTooltipDocked({
+    inspectionState: inspection?.state,
+    widthPx: resolvedWidth,
+  })}
   data-gg-ready={ready ? "true" : "false"}
   style={rootStyle}
 >
@@ -3082,9 +3111,8 @@
       {emptyPlot}
       narrow={isNarrowToolsWidth(resolvedWidth)}
       zoomDomains={effectiveZoomDomains}
-      hasPointSelection={canPublishPointSelection &&
-        effectiveSelectedKeys.length > 0}
-      hasIntervalSelection={effectiveIntervals.length > 0}
+      {hasPointSelection}
+      {hasIntervalSelection}
       intervalTargetLabel={currentIntervalTargetLabel}
       canSetIntervalBounds={!emptyPlot &&
         preciseIntervalAxes.length > 0 &&
@@ -3111,41 +3139,15 @@
     </div>
   {/if}
   {#if model !== null}
-    {#if hasCanvas}
-      <SceneView scene={model.scene} mode="chrome-bottom" />
-      {#each strata as stratum, si (si)}
-        {#if stratum.backend === "canvas"}
-          <canvas
-            class="gg-stratum gg-canvas"
-            {@attach canvasAttachment(model, stratum.batches, `canvas:${si}`)}
-          ></canvas>
-          <PlotCanvasA11y
-            {model}
-            batches={stratum.batches}
-            sceneLabelText={sceneLabel(model.scene)}
-            open={a11yTableOpen}
-            onToggle={() => (a11yTableOpen = !a11yTableOpen)}
-          />
-        {:else}
-          <SceneView
-            scene={model.scene}
-            mode="marks"
-            batches={stratum.batches}
-            focusable={false}
-            {markLabel}
-            focusMasks={interactionMasks}
-          />
-        {/if}
-      {/each}
-      <SceneView scene={model.scene} mode="chrome-top" />
-    {:else}
-      <SceneView
-        scene={model.scene}
-        focusable={false}
-        {markLabel}
-        focusMasks={interactionMasks}
-      />
-    {/if}
+    <PlotMarkStrata
+      {model}
+      {strata}
+      {markLabel}
+      {interactionMasks}
+      {a11yTableOpen}
+      onA11yToggle={() => (a11yTableOpen = !a11yTableOpen)}
+      onPainted={notifyPainted}
+    />
     <PlotLegendTargets
       entries={interactiveLegendEntries}
       previewIdentity={legendPreview?.action.identity ?? null}
@@ -3153,12 +3155,11 @@
       rovingIndex={legendRovingIndex}
       sceneWidth={model.scene.width}
       sceneHeight={model.scene.height}
-      clearLegendX={interactionConfig.legendFocus !== null &&
-      effectiveLegendPressed !== null
-        ? (model.scene.legends.find(
-            (candidate) => candidate.scale === effectiveLegendPressed.scale,
-          )?.x ?? null)
-        : null}
+      clearLegendX={resolveClearLegendX({
+        legendFocusEnabled,
+        pressedScale: effectiveLegendPressed?.scale ?? null,
+        legends: model.scene.legends,
+      })}
       onPreviewIndex={(index) => previewLegendIndex(index, "pointer")}
       onPreviewClear={() => previewLegend(null)}
       onPointerDown={onLegendPointerDown}
@@ -3202,100 +3203,67 @@
         {/if}
       </fieldset>
     {/if}
-    {#if !interactive && (emphasizedAnchors.length > 0 || selectedAnchors.length > 0)}
-      <InteractionOverlay
-        width={model.scene.width}
-        height={model.scene.height}
-        interactive={false}
-        {selectedAnchors}
-        {emphasizedAnchors}
-      />
-    {/if}
+    <PlotSceneOverlays
+      width={model.scene.width}
+      height={model.scene.height}
+      {interactive}
+      {surfaceInteractive}
+      {inspection}
+      {inspectionPanel}
+      {coordFlipped}
+      {selectedAnchors}
+      {emphasizedAnchors}
+      {brushRect}
+      {activeTool}
+      {areaAwaitingSecond}
+      {committedInterval}
+    />
     {#if surfaceInteractive}
-      <InteractionOverlay
-        width={model.scene.width}
-        height={model.scene.height}
-        {inspection}
-        {inspectionPanel}
-        {coordFlipped}
-        {selectedAnchors}
-        {emphasizedAnchors}
-        {brushRect}
+      <!-- Order (document = paint): overlay → capture → Tooltip → status chrome. -->
+      <PlotCaptureSurface
+        bind:element={captureSurface}
+        {plotId}
         {activeTool}
-        {areaAwaitingSecond}
-        {committedInterval}
-      />
-      <!-- The capture layer is a pointer-only surface; the accessible
-           interaction paths are focusable marks and the data table. -->
-      <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-      <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-      <div
-        bind:this={captureSurface}
-        class="gg-capture"
-        class:gg-area-tool={activeTool === "select-area" ||
-          activeTool === "zoom-area"}
-        role="group"
-        tabindex="0"
-        aria-label={ariaLabel ??
+        ariaLabel={ariaLabel ??
           assembled?.labs?.title ??
           sceneLabel(model.scene)}
-        aria-describedby={`${plotId}-description ${plotId}-active`}
-        aria-controls={inspection?.state === "pinned" &&
-        interactionConfig.inspect?.contentMode === "interactive"
-          ? `${plotId}-tooltip`
-          : undefined}
-        onfocus={() => {
+        ariaControls={resolveCaptureAriaControls({
+          inspectionState: inspection?.state,
+          contentMode: interactionConfig.inspect?.contentMode,
+          plotId,
+        })}
+        onFocus={() => {
           if (inspection === null) navigate(1);
         }}
-        onblur={onSurfaceBlur}
-        onpointermove={onPointerMove}
-        onpointerleave={onPointerLeave}
-        onpointerdown={onPointerDown}
-        onpointerup={onPointerUp}
-        onpointercancel={() => {
-          queuedPointerInspection = null;
-          touchInspectStart = null;
-          touchInspectMoved = false;
-          reducer.cancelScheduledPointer();
-          brushRect = null;
-          reducer.dispatch({ type: "cancel-area" });
-        }}
-        onlostpointercapture={() => {
-          if (!brushing) return;
-          if (!areaAwaitingSecond) brushRect = null;
-          reducer.dispatch({ type: "cancel-area" });
-        }}
-        onclick={onCaptureClick}
-        onkeydown={onSurfaceKeyDown}
-        ondblclick={onDblClick}
-      ></div>
-      <p id={`${plotId}-description`} class="gg-sr-only">
-        {surfaceDescription}
-      </p>
-      <p id={`${plotId}-active`} class="gg-sr-only">
-        {inspection === null
-          ? "No active datum"
-          : datumLabel(inspection.focus.row)}
-      </p>
-      {#if areaAwaitingSecond}
-        <p class="gg-area-instruction">Choose opposite corner</p>
-      {/if}
+        onBlur={onSurfaceBlur}
+        {onPointerMove}
+        {onPointerLeave}
+        {onPointerDown}
+        {onPointerUp}
+        {onPointerCancel}
+        {onLostPointerCapture}
+        onClick={onCaptureClick}
+        onKeyDown={onSurfaceKeyDown}
+        {onDblClick}
+      />
       {#if inspection !== null}
+        {@const tooltipSize = tooltipViewportSize({
+          sceneWidth: model.scene.width,
+          sceneHeight: model.scene.height,
+          clientWidth: root?.clientWidth,
+          clientHeight: root?.clientHeight,
+        })}
         <Tooltip
-          id={`${plotId}-tooltip`}
+          id={plotTooltipDomId(plotId)}
           {inspection}
-          width={Math.min(
-            model.scene.width,
-            root?.clientWidth ?? model.scene.width,
-          )}
-          height={Math.min(
-            model.scene.height,
-            root?.clientHeight ?? model.scene.height,
-          )}
+          width={tooltipSize.width}
+          height={tooltipSize.height}
           content={interactionConfig.inspect?.content}
           interactive={interactionConfig.inspect?.contentMode === "interactive"}
-          docked={inspection.state === "pinned" &&
-            isDockedTooltipWidth(resolvedWidth)}
+          docked={isTooltipDocked({
+            inspectionState: inspection.state,
+            widthPx: resolvedWidth,
+          })}
           onenter={() => (tooltipHovered = true)}
           onleave={() => {
             tooltipHovered = false;
@@ -3305,25 +3273,27 @@
         />
       {/if}
     {/if}
-    {#if shouldRenderInteractionLiveRegion( { surfaceInteractive, legendFocusEnabled: interactionConfig.legendFocus !== null } )}
-      <div
-        id={`${plotId}-live`}
-        class="gg-sr-only"
-        aria-live="polite"
-        aria-atomic="true"
-      >
-        {interactionAnnouncement ||
-          (inspection?.source === "keyboard" || inspection?.source === "touch"
-            ? inspectionLiveText(inspection)
-            : "")}
-      </div>
-    {/if}
-    {#if emptyPlot}
-      <div class="gg-empty-state" role="status">No data to display</div>
-    {/if}
-    {#if capabilityStatus !== null}
-      <p class="gg-capability-status" role="status">{capabilityStatus}</p>
-    {/if}
+    <!-- Status chrome after capture/tooltip; ids stay plot-scoped for
+         aria-describedby. Parent reduced-motion rule does not match child
+         nodes (chrome has no transitions — intentional no-op). -->
+    <PlotStatusChrome
+      {plotId}
+      showInstructions={surfaceInteractive}
+      description={surfaceDescription}
+      activeDatumLabel={datumLabel(inspection?.focus.row ?? null)}
+      showAreaInstruction={surfaceInteractive && areaAwaitingSecond}
+      showLiveRegion={shouldRenderInteractionLiveRegion({
+        surfaceInteractive,
+        legendFocusEnabled,
+      })}
+      liveText={resolveInteractionLiveText({
+        announcement: interactionAnnouncement,
+        model,
+        inspection,
+      })}
+      {emptyPlot}
+      {capabilityStatus}
+    />
   {/if}
 </div>
 
@@ -3382,10 +3352,6 @@
     pointer-events: none;
   }
 
-  canvas.gg-stratum {
-    display: block;
-  }
-
   .gg-legend-filters {
     position: absolute;
     top: calc(100% + 4px);
@@ -3441,63 +3407,6 @@
     outline: 2px solid var(--gg-focusRing, var(--gg-theme-focusRing, Highlight));
     outline-offset: 2px;
   }
-  .gg-capture {
-    position: absolute;
-    inset: 0;
-    pointer-events: auto;
-    touch-action: pan-y pinch-zoom;
-    background: transparent;
-  }
-
-  .gg-capture.gg-area-tool {
-    touch-action: none;
-    cursor: crosshair;
-  }
-
-  .gg-capture:focus-visible {
-    outline: 2px solid var(--gg-focusRing, var(--gg-theme-focusRing, Highlight));
-    outline-offset: 2px;
-  }
-
-  .gg-area-instruction {
-    position: absolute;
-    right: 8px;
-    bottom: 8px;
-    z-index: 2;
-    margin: 0;
-    border-radius: 3px;
-    padding: 4px 7px;
-    background: var(--gg-tooltipBg, var(--gg-theme-tooltipBg, #fff));
-    color: var(--gg-foreground, var(--gg-theme-foreground, currentColor));
-    font-size: 13px;
-    line-height: 1.25;
-    pointer-events: none;
-  }
-
-  .gg-empty-state {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    color: var(
-      --gg-interactionMuted,
-      var(--gg-theme-interactionMuted, currentColor)
-    );
-    font: 12px/1.4 var(--gg-font-family, sans-serif);
-    pointer-events: none;
-  }
-
-  .gg-capability-status {
-    position: absolute;
-    top: calc(100% + 4px);
-    left: 0;
-    margin: 0;
-    color: var(
-      --gg-interactionMuted,
-      var(--gg-theme-interactionMuted, currentColor)
-    );
-    font: 11px/1.4 var(--gg-font-family, sans-serif);
-  }
 
   @container gg-plot (max-width: 559px) {
     .gg-with-tool-rail {
@@ -3511,29 +3420,13 @@
     margin-top: 96px;
   }
 
-  .gg-sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-    border: 0;
-  }
-
   @media (prefers-reduced-motion: reduce) {
-    .gg-plot-root * {
+    /* :global so the policy reaches extracted child components (mark strata,
+       capture surface, status chrome) whose nodes are outside this scope. */
+    .gg-plot-root :global(*) {
       scroll-behavior: auto;
       transition: none !important;
       animation: none !important;
-    }
-  }
-
-  @media (forced-colors: active) {
-    .gg-capture:focus-visible {
-      outline-color: Highlight;
     }
   }
 </style>

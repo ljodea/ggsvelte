@@ -11,6 +11,8 @@ import {
   hitFromCandidate,
   matchCandidateFromHit,
   nextTraversalIndex,
+  planCycleCoincident,
+  planDirectionalNavigate,
   plotPointFromClient,
 } from "../src/lib/plot-pointer.js";
 
@@ -233,6 +235,106 @@ describe("cycleCoincidentIndex", () => {
   it("starts at first coincident when active index is not in the set", () => {
     // activeIndex 1 is not coincident → Math.max(0, -1) = 0 → next from first
     expect(cycleCoincidentIndex(origin, hits, 1, 1)).toBe(2);
+  });
+});
+
+describe("planDirectionalNavigate", () => {
+  it("returns none when there are no hits", () => {
+    expect(
+      planDirectionalNavigate({
+        hitCount: 0,
+        hasInspection: true,
+        currentIndex: 0,
+        bestIndex: () => 2,
+      }),
+    ).toEqual({ type: "none" });
+  });
+
+  it("advances by +1 from currentIndex when uninspected (not hard-coded first)", () => {
+    expect(
+      planDirectionalNavigate({
+        hitCount: 3,
+        hasInspection: false,
+        currentIndex: 1,
+        bestIndex: () => {
+          throw new Error("thunk must not run when uninspected");
+        },
+      }),
+    ).toEqual({ type: "set-index", index: 2 });
+  });
+
+  it("uses the bestIndex thunk when inspected", () => {
+    let called = false;
+    expect(
+      planDirectionalNavigate({
+        hitCount: 4,
+        hasInspection: true,
+        currentIndex: 0,
+        bestIndex: () => {
+          called = true;
+          return 3;
+        },
+      }),
+    ).toEqual({ type: "set-index", index: 3 });
+    expect(called).toBe(true);
+  });
+
+  it("returns none when the thunk reports no forward candidate", () => {
+    expect(
+      planDirectionalNavigate({
+        hitCount: 4,
+        hasInspection: true,
+        currentIndex: 0,
+        bestIndex: () => -1,
+      }),
+    ).toEqual({ type: "none" });
+  });
+});
+
+describe("planCycleCoincident", () => {
+  it("advances by +1 when uninspected, including empty → none", () => {
+    expect(
+      planCycleCoincident({
+        hasInspection: false,
+        hitCount: 0,
+        currentIndex: 0,
+        nextIndex: () => {
+          throw new Error("thunk must not run when uninspected");
+        },
+      }),
+    ).toEqual({ type: "none" });
+    expect(
+      planCycleCoincident({
+        hasInspection: false,
+        hitCount: 3,
+        currentIndex: 2,
+        nextIndex: () => {
+          throw new Error("thunk must not run when uninspected");
+        },
+      }),
+    ).toEqual({ type: "set-index", index: 0 });
+  });
+
+  it("uses the nextIndex thunk when inspected", () => {
+    expect(
+      planCycleCoincident({
+        hasInspection: true,
+        hitCount: 5,
+        currentIndex: 0,
+        nextIndex: () => 4,
+      }),
+    ).toEqual({ type: "set-index", index: 4 });
+  });
+
+  it("returns none when the thunk reports fewer than two coincident", () => {
+    expect(
+      planCycleCoincident({
+        hasInspection: true,
+        hitCount: 5,
+        currentIndex: 0,
+        nextIndex: () => -1,
+      }),
+    ).toEqual({ type: "none" });
   });
 });
 

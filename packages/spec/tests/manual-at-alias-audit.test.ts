@@ -41,6 +41,70 @@ describe("manual AT alias commit audit", () => {
     expect(isSkippableCommentLine(" * + * { margin: 0; }")).toBe(false);
     expect(isSkippableCommentLine("* > .mark { opacity: 1; }")).toBe(false);
     expect(isSkippableCommentLine("* ~ * { display: none; }")).toBe(false);
+    // JSDoc/Markdown list and blockquote markers after `*` are documentation, not CSS.
+    expect(isSkippableCommentLine(" * + positive values are kept")).toBe(true);
+    expect(isSkippableCommentLine(" * > Note: domain is shared")).toBe(true);
+    expect(isSkippableCommentLine(" * > Note")).toBe(true);
+    // Bare lowercase type selectors (incl. multi-line CSS with `{` on the next line).
+    expect(isSkippableCommentLine(" * + p")).toBe(false);
+    expect(isSkippableCommentLine("* + section")).toBe(false);
+    expect(isSkippableCommentLine("* > div")).toBe(false);
+    // Descendant chains after combinators with CSS structure are CSS, not JSDoc.
+    expect(isSkippableCommentLine("* > ul li { list-style: none; }")).toBe(false);
+    expect(isSkippableCommentLine("* + section a { color: red; }")).toBe(false);
+    expect(isSkippableCommentLine("* > ul * { margin: 0; }")).toBe(false);
+    expect(isSkippableCommentLine("* > ul *")).toBe(false);
+    expect(isSkippableCommentLine("* > svg use { fill: currentColor; }")).toBe(false);
+    expect(isSkippableCommentLine("* > svg use")).toBe(false);
+    // Multi-word English / tag-word prose after combinators stays documentation.
+    expect(isSkippableCommentLine("* + positive values, if any")).toBe(true);
+    expect(isSkippableCommentLine("* + positive values. Kept")).toBe(true);
+    // "a button" is valid CSS (`a button` descendant); prefer AT false-positive on docs.
+    expect(isSkippableCommentLine("* + a button")).toBe(false);
+    expect(isSkippableCommentLine("* + data table")).toBe(true);
+    expect(isSkippableCommentLine("* + source code")).toBe(true);
+    // Arbitrary lowercase prose (not HTML/SVG/custom tags) is documentation.
+    expect(isSkippableCommentLine("* + minimum latency")).toBe(true);
+    expect(isSkippableCommentLine("* > fallback content")).toBe(true);
+    // Real bare HTML/SVG/custom tag chains stay CSS (incl. anchor-led, missing SVG, CE).
+    expect(isSkippableCommentLine("* + section a")).toBe(false);
+    expect(isSkippableCommentLine("* > main nav")).toBe(false);
+    expect(isSkippableCommentLine("* > svg linearGradient")).toBe(false);
+    expect(isSkippableCommentLine("* > svg polygon")).toBe(false);
+    expect(isSkippableCommentLine("* > svg animateMotion")).toBe(false);
+    expect(isSkippableCommentLine("* > svg mpath")).toBe(false);
+    expect(isSkippableCommentLine("* > svg metadata")).toBe(false);
+    // Do not treat camelCase prose or SVG token mid-phrase as CSS.
+    expect(isSkippableCommentLine("* + minValue maxValue")).toBe(true);
+    expect(isSkippableCommentLine("* + svg fallback content")).toBe(true);
+    expect(isSkippableCommentLine("* + g scale")).toBe(true);
+    expect(isSkippableCommentLine("* > my-widget path")).toBe(false);
+    expect(isSkippableCommentLine("* + a span")).toBe(false);
+    expect(isSkippableCommentLine("* > a img")).toBe(false);
+    // Continuations after multi-token chains (comma / nested combinators).
+    expect(isSkippableCommentLine("* > ul li, ol li { margin: 0; }")).toBe(false);
+    expect(isSkippableCommentLine("* > ul li > a { color: red; }")).toBe(false);
+    expect(isSkippableCommentLine("* > ul li > a")).toBe(false);
+    expect(
+      diffTextIsSubstantive(`diff --git a/x.svelte b/x.svelte
+--- a/x.svelte
++++ b/x.svelte
+@@ -1 +1 @@
+-* > ul li { margin: 0; }
++* > ul div { margin: 0; }
+`),
+    ).toBe(true);
+    expect(
+      diffTextIsSubstantive(`diff --git a/x.ts b/x.ts
+--- a/x.ts
++++ b/x.ts
+@@ -1,3 +1,3 @@
+ /**
+- * + old list item
++ * + positive values are kept
+  */
+`),
+    ).toBe(false);
     expect(
       diffTextIsSubstantive(`diff --git a/x.svelte b/x.svelte
 --- a/x.svelte
