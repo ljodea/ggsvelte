@@ -9,11 +9,12 @@
    * only children (<GeomPoint>/<GeomLine>) are OPTIONAL sugar; explicit
    * `layers` props win over children when both are present.
    *
-   * Reactivity: spec assembly is $derived; runPipeline runs in $derived.by
-   * with run-id gating; the committed scale state lives in a NON-reactive box
-   * (never read-modify-write shared reactive state across init/teardown —
-   * decision 0001, finding 3). That box is what makes discrete colors
-   * value-stable across data changes AND across brush-to-zoom respecs.
+   * Reactivity: spec assembly is $derived; model production runs in the plot
+   * runtime (`createPlotRuntime`) with run-id gating; the committed scale
+   * state lives in a NON-reactive box (never read-modify-write shared reactive
+   * state across init/teardown — decision 0001, finding 3). That box is what
+   * makes discrete colors value-stable across data changes AND across
+   * brush-to-zoom respecs.
    *
    * M2 compositing (decision 0006): when any layer resolves to the canvas
    * backend, the plot root becomes an ordered list of full-size sibling
@@ -32,7 +33,7 @@
    * on commit ($effect cleanup — runs after the DOM has moved to the new
    * model) and the last one on unmount.
    */
-  import { untrack, type Snippet } from "svelte";
+  import type { Snippet } from "svelte";
 
   import type {
     A11yMode,
@@ -54,15 +55,12 @@
     BatchInteractionMask,
     CellValue,
     RenderModel,
-    ScaleState,
     ScenePanel,
   } from "@ggsvelte/core";
   import {
     buildInteractionMasks,
     decodeKey,
     encodeKey,
-    planStrata,
-    runPipeline,
     sceneLabel,
   } from "@ggsvelte/core";
   import type { SceneHit, SceneHitIndex } from "@ggsvelte/core/dom";
@@ -174,7 +172,6 @@
     plotTooltipDomId,
     resolveCaptureAriaControls,
     resolveClearLegendX,
-    resolvePlotSize,
     tooltipViewportSize,
   } from "./plot-layout.js";
   import {
@@ -219,7 +216,6 @@
     sameIntervalRecord,
     type IntervalConsumptionCandidate,
   } from "./plot-interval-consumption.js";
-  import { createPaintLedger, isPlotReady } from "./plot-paint.js";
   import BoundsEditor from "./BoundsEditor.svelte";
   import type {
     BoundsEditorInput,
@@ -239,13 +235,16 @@
     nextPointSelectionKeys,
     rowIndexesForCandidate,
     sameOrderedPropertyKeys,
-    uniqueKeysFromRowIndexes,
   } from "./plot-selection.js";
   import {
     createSourceIdentityTracker,
     dataIdentityEpochToken,
-    resolveSemanticKeysForPlot,
   } from "./plot-semantic-keys.js";
+  import {
+    createPlotAnnouncer,
+    createSemanticKeyService,
+  } from "./plot-shared-services.svelte.js";
+  import { createPlotRuntime } from "./plot-runtime.svelte.js";
   import { themeTokensToCss } from "./plot-theme-css.js";
   import {
     applyZoomToSpec,
@@ -259,9 +258,7 @@
   } from "./plot-zoom.js";
   import {
     buildInteractiveLegendEntries,
-    buildLegendEntryKeyIndexForPlot,
     findLegendPressedIdentity,
-    keysForLegendEntry,
     moveLegendRovingIndex,
     planLegendCommittedReconcile,
     planLegendFocusDisabledClear,
@@ -499,53 +496,39 @@
     }),
   );
 
-  // ------------------------------------------------- container width (RO)
-  let containerWidth = $state<number | null>(null);
-  let containerHasPositiveWidth = $state(false);
+  // ------------------------------------------------- plot runtime (S1)
+  // Factory call at the ResizeObserver's original position registers ONLY the
+  // ResizeObserver effect. Model dispose/onrender and clientFlush register later
+  // via registerModelEffects / registerLateEffects (effect-order preservation).
   let root = $state<HTMLDivElement | null>(null);
-
-  $effect(() => {
-    if (!isContainerWidthProp(width) || root === null) return;
-    const el = root;
-    let frame = 0;
-    const observer = new ResizeObserver((entries) => {
-      // Debounce resize storms through rAF; the pipeline's run-id gate
-      // guarantees only the newest result commits regardless.
-      const nextWidth = Math.round(entries[0]?.contentRect.width ?? 0);
-      containerHasPositiveWidth = nextWidth > 0;
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
-        if (nextWidth > 0) containerWidth = nextWidth;
-      });
-    });
-    observer.observe(el);
-    return () => {
-      cancelAnimationFrame(frame);
-      observer.disconnect();
-    };
+  const runtime = createPlotRuntime({
+    widthProp: () => width,
+    heightProp: () => height,
+    assembled: () => assembled,
+    effectiveSpec: () => effectiveSpec,
+    effectiveZoomDomains: () => effectiveZoomDomains,
+    effectiveLegendFilters: () => effectiveLegendFilters,
+    root: () => root,
+    resetZoom: () => {
+      if (interaction === undefined) localZoomDomains = null;
+      else
+        interaction.resetZoom({
+          scope: filterScopeChannelsByZoomMode(
+            resolvedInteractionScope,
+            interactionConfig.zoom?.mode ?? null,
+          ),
+        });
+    },
+    onrender: () => onrender,
   });
-
-  const resolvedSize = $derived(
-    resolvePlotSize({
-      width,
-      height,
-      containerWidth,
-      assembledWidth: assembled?.width,
-      assembledHeight: assembled?.height,
-    }),
-  );
-  const resolvedWidth = $derived(resolvedSize.width);
-  const resolvedHeight = $derived(resolvedSize.height);
-
-  // Authoritative committed scale state: a plain non-reactive box + run-id
-  // gate. Committing only monotonically newer runs keeps stale results from
-  // clobbering the value-stable color assignments. scaleEpoch exists so
-  // resetScales() can force a re-run after clearing the box.
-  const scaleBox: {
-    runId: number;
-    scales: Record<string, ScaleState> | undefined;
-  } = { runId: -1, scales: undefined };
-  let scaleEpoch = $state(0);
+  // Mechanical alias so existing call sites stay unchanged in S1.
+  const model = $derived(runtime.model);
+  const resolvedWidth = $derived(runtime.resolvedWidth);
+  const resolvedHeight = $derived(runtime.resolvedHeight);
+  const strata = $derived(runtime.strata);
+  const hasCanvas = $derived(runtime.hasCanvas);
+  // Live-region announcer (owned early so legend-reset effects can call it).
+  const announcer = createPlotAnnouncer();
 
   const legendFilterOptions = $derived(
     legendFilter === false
@@ -600,7 +583,7 @@
       source: "programmatic",
       clause: null,
     });
-    announceInteraction(
+    announcer.announce(
       "Legend filters reset after the filter capability changed.",
     );
   });
@@ -624,28 +607,7 @@
       source: "programmatic",
       clause: null,
     });
-    announceInteraction("Legend filters reset after the filter mode changed.");
-  });
-
-  const model: RenderModel | null = $derived.by(() => {
-    void scaleEpoch;
-    if (effectiveSpec === null) return null;
-    const m = runPipeline(effectiveSpec, {
-      width: resolvedWidth,
-      height: resolvedHeight,
-      ...(scaleBox.scales !== undefined && { prevScales: scaleBox.scales }),
-      ...(effectiveZoomDomains !== null && {
-        baselineScales: assembled?.scales ?? {},
-      }),
-      ...(effectiveLegendFilters.length > 0 && {
-        rowFilters: effectiveLegendFilters,
-      }),
-    });
-    if (m.runId > scaleBox.runId) {
-      scaleBox.runId = m.runId;
-      scaleBox.scales = m.scales.state;
-    }
-    return m;
+    announcer.announce("Legend filters reset after the filter mode changed.");
   });
 
   /**
@@ -654,50 +616,11 @@
    * scales fresh from the current data.
    */
   export function resetScales(): void {
-    scaleBox.runId = -1;
-    scaleBox.scales = undefined;
-    if (interaction === undefined) localZoomDomains = null;
-    else
-      interaction.resetZoom({
-        scope: filterScopeChannelsByZoomMode(
-          resolvedInteractionScope,
-          interactionConfig.zoom?.mode ?? null,
-        ),
-      });
-    scaleEpoch++;
+    runtime.resetScales();
   }
 
-  // Memory ownership: dispose the previous model once the DOM has moved on
-  // (effect cleanup runs post-flush), and the last model on unmount.
-  $effect(() => {
-    const m = model;
-    return () => m?.dispose();
-  });
-
-  $effect(() => {
-    if (model !== null && assembled !== null)
-      untrack(() => onrender?.(model, assembled));
-  });
-
-  // ---------------------------------------------------------- strata plan
-  const strata = $derived(
-    model === null ? [] : planStrata(model.scene, model.layerBackends),
-  );
-  const canvasCount = $derived(
-    strata.filter((s) => s.backend === "canvas").length,
-  );
-  const hasCanvas = $derived(canvasCount > 0);
-
-  // Canvas first-paint tracking: data-gg-ready waits for every distinct
-  // canvas stratum of the CURRENT model to have painted at least once.
-  // paintEpoch bumps so readiness re-derives when the non-reactive ledger
-  // mutates (ledger itself must not be $state — set mutations are invisible).
-  const paintLedger = createPaintLedger();
-  let paintEpoch = $state(0);
-  function notifyPainted(runId: number, stratumKey: string): void {
-    paintLedger.notify(runId, stratumKey);
-    paintEpoch += 1;
-  }
+  // Phase 2: dispose + onrender after legend-reset effects (effect-order).
+  runtime.registerModelEffects();
 
   let a11yTableOpen = $state(false);
 
@@ -789,7 +712,6 @@
     PropertyKey
   > | null>(null);
   let inspectionSeed: CandidateFacts | null = null;
-  let interactionAnnouncement = $state("");
   const inspectionPanel = $derived.by(() => {
     if (inspection === null || model === null) return null;
     return panelContainingAnchor(model.scene.panels, inspection.focus.anchor);
@@ -1032,7 +954,7 @@
     // explicit Apply/Cancel still restores the initiating button.
     queueMicrotask(() => {
       captureSurface?.focus();
-      announceInteraction(
+      announcer.announce(
         `Bounds editing cancelled because ${target} is no longer available.`,
       );
     });
@@ -1356,44 +1278,28 @@
 
   function emitSelection(event: PlotSelection): void {
     const message = selectionAnnouncement(event);
-    if (message !== null) announceInteraction(message);
+    if (message !== null) announcer.announce(message);
     onselect?.(event as unknown as PlotSelection<PublicKey>);
     oninteraction?.(event as unknown as PlotInteractionEvent<Row, PublicKey>);
   }
 
-  function announceInteraction(message: string): void {
-    interactionAnnouncement = "";
-    queueMicrotask(() => {
-      interactionAnnouncement = message;
-    });
-  }
   const plotId = $props.id();
-  // Owned for the component lifetime; resolveSemanticKeys mutates in place.
-  const priorKeys = new Map<string, PropertyKey>();
-
-  const semanticKeys = $derived.by(() =>
-    resolveSemanticKeysForPlot({
-      model:
-        model === null
-          ? null
-          : {
-              candidates: model.candidates,
-              lineage: model.lineage,
-              row: (rowIndex) => model.row(rowIndex),
-            },
-      layers: assembled?.layers ?? [],
-      datumKey: datumKey as
+  // Semantic-key service at the original registration site (diagnostics effect order).
+  const semanticKeys = createSemanticKeyService({
+    model: () => model,
+    assembled: () => assembled,
+    datumKey: () =>
+      datumKey as
         string | ((row: never, index: number) => PropertyKey) | undefined,
-      priorKeys,
-      dataToken: sourceIdentity(data),
-      specToken: sourceIdentity(spec),
-    }),
-  );
-
-  $effect(() => {
-    for (const diagnostic of semanticKeys.diagnostics)
-      deliverDiagnostic(diagnostic);
+    data: () => data,
+    spec: () => spec,
+    sourceIdentity,
+    deliverDiagnostic,
   });
+  const semanticKey = semanticKeys.semanticKey;
+  const candidateSemanticKeys = semanticKeys.candidateSemanticKeys;
+  const legendEntryKeyIndex = $derived(semanticKeys.legendEntryKeyIndex);
+  const keysForLegend = semanticKeys.keysForLegend;
 
   $effect(() => {
     for (const diagnostic of areaScaleDiagnostics)
@@ -1491,49 +1397,8 @@
     );
   }
 
-  function semanticKey(
-    row: Record<string, CellValue> | null,
-    index: number | null,
-  ): PropertyKey | null {
-    if (row === null || index === null || datumKey === undefined) return null;
-    return semanticKeys.keys.get(index) ?? null;
-  }
-
-  function candidateSemanticKeys(candidate: CandidateFacts): PropertyKey[] {
-    if (model === null) return [];
-    const rows = rowIndexesForCandidate(
-      candidate,
-      model.lineage.keys(candidate.lineage),
-    );
-    return uniqueKeysFromRowIndexes(rows, (rowIndex) =>
-      semanticKey(model.row(rowIndex), rowIndex),
-    );
-  }
-
-  const legendEntryKeyIndex: ReadonlyMap<string, readonly PropertyKey[]> =
-    $derived.by(() =>
-      buildLegendEntryKeyIndexForPlot({
-        model:
-          model === null
-            ? null
-            : {
-                scene: model.scene,
-                candidates: model.candidates,
-                layerFields: model.layerFields,
-                layerScaledConstants: model.layerScaledConstants,
-                lineage: model.lineage,
-                row: (rowIndex) => model.row(rowIndex),
-              },
-        semanticKey: (rowIndex) => semanticKeys.keys.get(rowIndex),
-      }),
-    );
-
-  function keysForLegend(action: LegendEntryAction): readonly PropertyKey[] {
-    return keysForLegendEntry(legendEntryKeyIndex, action.identity);
-  }
-
   function emitLegendFocus(event: LegendFocusEvent<PropertyKey>): void {
-    announceInteraction(legendFocusAnnouncement(event));
+    announcer.announce(legendFocusAnnouncement(event));
     onlegendfocus?.(event as LegendFocusEvent<PublicKey>);
     oninteraction?.(event as PlotInteractionEvent<Row, PublicKey>);
   }
@@ -1820,7 +1685,7 @@
         source: "programmatic",
         clause,
       });
-    announceInteraction("Legend filters reconciled with the available groups.");
+    announcer.announce("Legend filters reconciled with the available groups.");
   });
 
   function legendFilterSource(event: MouseEvent): LegendFilterEvent["source"] {
@@ -1880,7 +1745,7 @@
       clause,
     });
     emitLegendFilter(filterEvent);
-    announceInteraction(
+    announcer.announce(
       `${target.entry.label} ${isLegendValueVisible(values, target.entry.value as CellValue, legendFilterOptions.mode) ? "shown" : "hidden"}.`,
     );
   }
@@ -2122,7 +1987,7 @@
   const inspectionCoordinator = createInspectionCoordinator<
     Record<string, CellValue>,
     PropertyKey
-  >((_row, index) => semanticKeys.keys.get(index) ?? null);
+  >((_row, index) => semanticKeys.keyAt(index) ?? null);
 
   $effect(() => () => inspectionCoordinator.invalidate());
 
@@ -2284,7 +2149,7 @@
         source,
       })
     )
-      interactionAnnouncement = "";
+      announcer.announce("");
     const action = resolveSetInspectionAction({
       hasHit: hit !== null,
       requestedState: state,
@@ -2401,7 +2266,7 @@
           });
         if (state === "transient") inspectionCoordinator.release("pinned");
         if (shouldAnnounceUnpin({ state, source }))
-          announceInteraction(
+          announcer.announce(
             `${inspectionLiveText(resolved.snapshot)}, unpinned`,
           );
         if (resolved.semanticChanged)
@@ -2551,7 +2416,7 @@
     switch (finish.type) {
       case "keep-second-corner":
         brushRect = finish.corners;
-        announceInteraction(BRUSH_SECOND_CORNER_ANNOUNCEMENT);
+        announcer.announce(BRUSH_SECOND_CORNER_ANNOUNCEMENT);
         break;
       case "select-end": {
         brushRect = null;
@@ -2766,7 +2631,7 @@
       }
     }
     const event = buildZoomEvent(committed, source);
-    announceInteraction(zoomAnnouncement(committed));
+    announcer.announce(zoomAnnouncement(committed));
     onzoom?.(event);
     oninteraction?.(event);
   }
@@ -3041,7 +2906,7 @@
           point: action.anchor,
           panelId: originPanel.id,
         });
-        announceInteraction(BRUSH_SECOND_CORNER_ANNOUNCEMENT);
+        announcer.announce(BRUSH_SECOND_CORNER_ANNOUNCEMENT);
         return;
       }
       case "complete-area": {
@@ -3131,30 +2996,9 @@
     }
   }
 
-  // Readiness signal for screenshot tooling (plan: VR waits on
-  // `[data-gg-ready="true"]`). Split into:
-  // - clientFlush via $effect: never runs during SSR → prerender stays
-  //   data-gg-ready="false" until the first client committed flush (decision 0009)
-  // - derived isPlotReady: updates in the same render when prerequisites flip
-  //   (e.g. model cleared, canvas paint incomplete) so VR cannot accept a
-  //   stale ready=true mid-transition. Canvas strata gate on first paint
-  //   (decision 0006 / plan).
-  let clientFlush = $state(false);
-  $effect(() => {
-    clientFlush = true;
-  });
-  const ready = $derived.by(() => {
-    void paintEpoch;
-    if (!clientFlush) return false;
-    return isPlotReady({
-      hasModel: model !== null,
-      widthMode: isContainerWidthProp(width) ? "container" : "fixed",
-      containerHasPositiveWidth,
-      hasCanvas,
-      paintComplete:
-        model !== null && paintLedger.isComplete(model.runId, canvasCount),
-    });
-  });
+  // Phase 3: clientFlush/ready effect at the end of the script (late registration).
+  runtime.registerLateEffects();
+  const ready = $derived(runtime.ready);
 </script>
 
 <!-- Children MUST render before any registry-consuming markup: SSR evaluates
@@ -3224,7 +3068,8 @@
       {interactionMasks}
       {a11yTableOpen}
       onA11yToggle={() => (a11yTableOpen = !a11yTableOpen)}
-      onPainted={notifyPainted}
+      onPainted={(runId, stratumKey) =>
+        runtime.notifyPainted(runId, stratumKey)}
     />
     <PlotLegendTargets
       entries={interactiveLegendEntries}
@@ -3366,7 +3211,7 @@
         legendFilterEnabled: legendFilterOptions !== null,
       })}
       liveText={resolveInteractionLiveText({
-        announcement: interactionAnnouncement,
+        announcement: announcer.text,
         model,
         inspection,
       })}
