@@ -528,6 +528,120 @@ describe("brush + brush-to-zoom", () => {
     expect(document.activeElement).toBe(setBounds);
   });
 
+  it("publishes typed native band-brush domains and semantic records", async () => {
+    let model: RenderModel | null = null;
+    const ended: Array<{
+      domain: { x?: readonly [unknown, unknown] };
+      keys: readonly PropertyKey[];
+    }> = [];
+    const interaction = createPlotInteraction<string>();
+    const interactionScope = { keys: "typed-brush", intervals: "typed-brush" } as const;
+    const { container } = render(GGPlot, {
+      data: [
+        { id: "number", x: 1, y: 1 },
+        { id: "string", x: "1", y: 2 },
+      ],
+      aes: { x: "x", y: "y" },
+      layers: [{ geom: "point" }],
+      scales: { x: { type: "band" } },
+      key: "id",
+      select: { type: "interval", mode: "x", preset: "cross-panel" },
+      interaction,
+      interactionScope,
+      onselect: (event: {
+        phase: string;
+        domain: { x?: readonly [unknown, unknown] };
+        keys: readonly PropertyKey[];
+      }) => {
+        if (event.phase === "end") ended.push(event);
+      },
+      onrender: (next: RenderModel) => {
+        model = next;
+      },
+      ...size,
+    });
+    await until(() => model !== null);
+    const first = model!.candidates.candidate(0)!;
+    const second = model!.candidates.candidate(1)!;
+    const halfGap = Math.abs(second.x - first.x) / 2;
+    const capture = container.querySelector(".gg-capture")!;
+    const selectArea = [
+      ...container.querySelectorAll<HTMLButtonElement>(".gg-tool-rail button"),
+    ].find((button) => button.textContent === "Select area")!;
+    selectArea.click();
+    await until(() => selectArea.getAttribute("aria-pressed") === "true");
+    drag(capture, first.x - halfGap + 1, first.y - 8, first.x + halfGap - 1, first.y + 8);
+    await until(() => ended.length === 1);
+
+    expect(ended[0]).toEqual(expect.objectContaining({ domain: { x: [1, 1] }, keys: ["number"] }));
+    expect(interaction.intervals(interactionScope)[0]).toMatchObject({
+      preset: "cross-panel",
+      domains: { x: { kind: "band", values: [encodeKey(1)] } },
+      keys: ["number"],
+    });
+  });
+
+  it("publishes complete shared xy precise domains and source-row lineage", async () => {
+    const interaction = createPlotInteraction<string>();
+    const interactionScope = { keys: "precise-xy", intervals: "precise-xy" } as const;
+    const selections: Array<{
+      domain: { x?: readonly [unknown, unknown]; y?: readonly [unknown, unknown] };
+      keys: readonly PropertyKey[];
+      lineageCount: number;
+    }> = [];
+    interaction.setInterval(
+      {
+        panelId: "panel:all",
+        preset: "independent",
+        domains: {
+          x: { kind: "linear", domain: [1, 3] },
+          y: { kind: "linear", domain: [10, 30] },
+        },
+        keys: [],
+      },
+      { scope: interactionScope },
+    );
+    const { container } = render(GGPlot, {
+      data: rows,
+      aes: { x: "x", y: "y" },
+      layers: [{ geom: "point" }],
+      select: { type: "interval", mode: "xy" },
+      interaction,
+      interactionScope,
+      onselect: (event: {
+        phase: string;
+        domain: { x?: readonly [unknown, unknown]; y?: readonly [unknown, unknown] };
+        keys: readonly PropertyKey[];
+        lineageCount: number;
+      }) => {
+        if (event.phase === "end") selections.push(event);
+      },
+      ...size,
+    });
+    const editBounds = [
+      ...container.querySelectorAll<HTMLButtonElement>(".gg-tool-rail button"),
+    ].find((button) => button.textContent === "Edit x selection bounds")!;
+    editBounds.click();
+    await until(() => container.querySelector('.gg-bounds-editor input[id$="-lower"]') !== null);
+    const [lower, upper] = [
+      ...container.querySelectorAll<HTMLInputElement>(".gg-bounds-editor input"),
+    ];
+    lower!.value = "1.5";
+    lower!.dispatchEvent(new InputEvent("input", { bubbles: true }));
+    upper!.value = "2.5";
+    upper!.dispatchEvent(new InputEvent("input", { bubbles: true }));
+    container.querySelector<HTMLButtonElement>('.gg-bounds-editor button[type="submit"]')!.click();
+    await until(() => selections.length === 1);
+
+    expect(selections[0]).toEqual(
+      expect.objectContaining({
+        domain: { x: [1.5, 2.5], y: [10, 30] },
+        keys: [],
+        lineageCount: 1,
+      }),
+    );
+  });
+
   it("starts zoom from precise bounds and preserves pointer modality", async () => {
     const zooms: Array<{ source: string; domains: unknown }> = [];
     const { container } = render(GGPlot, {

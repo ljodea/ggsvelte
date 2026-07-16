@@ -1,4 +1,4 @@
-import type { RenderModel } from "@ggsvelte/core";
+import type { CellValue, RenderModel } from "@ggsvelte/core";
 
 import type { InteractionSource, IntervalSelection } from "./interaction.js";
 import {
@@ -43,16 +43,16 @@ function bandDomain(
   scale: RenderModel["scales"]["x"],
   t0: number,
   t1: number,
-): readonly [string, string] | undefined {
-  if (scale.type !== "band" || scale.domain.length === 0) return undefined;
+): readonly [CellValue, CellValue] | undefined {
+  if (scale.type !== "band" || scale.rawDomain.length === 0) return undefined;
   const lo = Math.max(0, Math.min(1, Math.min(t0, t1)));
   const hi = Math.max(0, Math.min(1, Math.max(t0, t1)));
-  const first = Math.min(scale.domain.length - 1, Math.floor(lo * scale.domain.length));
+  const first = Math.min(scale.rawDomain.length - 1, Math.floor(lo * scale.rawDomain.length));
   const last = Math.min(
-    scale.domain.length - 1,
-    Math.max(first, Math.ceil(hi * scale.domain.length) - 1),
+    scale.rawDomain.length - 1,
+    Math.max(first, Math.ceil(hi * scale.rawDomain.length) - 1),
   );
-  return [scale.domain[first]!, scale.domain[last]!];
+  return [scale.rawDomain[first] as CellValue, scale.rawDomain[last] as CellValue];
 }
 
 function bandDomains(

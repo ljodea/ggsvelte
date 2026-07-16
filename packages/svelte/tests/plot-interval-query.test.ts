@@ -162,6 +162,7 @@ describe("resolveIntervalQueryParts", () => {
           x: {
             type: "band",
             domain: ["a", "b", "c", "d"],
+            rawDomain: ["a", "b", "c", "d"],
             indexOf: () => undefined,
             normalize: () => undefined,
             step: 0.25,
@@ -170,6 +171,33 @@ describe("resolveIntervalQueryParts", () => {
       },
     });
     expect(parts.invertedDomain.x).toEqual(["a", "c"]);
+  });
+
+  it("returns raw typed band endpoints instead of colliding display labels", () => {
+    const base = scene({});
+    const date = new Date("2025-01-02T00:00:00.000Z");
+    const rawDomain = [1, "1", true, null, date] as const;
+    const parts = resolveIntervalQueryParts({
+      pixels: { x0: 0, y0: 0, x1: 39, y1: 100 },
+      mode: "x",
+      scene: {
+        ...base,
+        scales: {
+          ...base.scales,
+          x: {
+            type: "band",
+            domain: ["1", "1", "true", "(null)", date.toISOString()],
+            rawDomain,
+            indexOf: (value: unknown) =>
+              rawDomain.findIndex((candidate) => Object.is(candidate, value)),
+            normalize: () => undefined,
+            step: 0.2,
+          },
+        } as IntervalQueryScene["scales"],
+      },
+    });
+
+    expect(parts.invertedDomain.x).toEqual([1, "1"]);
   });
 });
 

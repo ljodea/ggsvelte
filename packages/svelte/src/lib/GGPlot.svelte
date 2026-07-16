@@ -89,6 +89,7 @@
     type PlotInteractionEvent,
     type PlotInteractionScope,
     type PlotSelection,
+    type ReadonlyIntervalDomains,
     type SelectInput,
     type ZoomDomains,
     type ZoomEvent,
@@ -1091,7 +1092,7 @@
   function semanticAxis(
     panelIndex: number,
     axis: "x" | "y",
-    bounds: readonly [CellValue, CellValue] | undefined,
+    bounds: readonly [unknown, unknown] | undefined,
   ): SemanticIntervalAxis | undefined {
     if (bounds === undefined || model === null) return undefined;
     const scale = model.scales.panels[panelIndex]?.[axis] ?? model.scales[axis];
