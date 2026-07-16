@@ -496,37 +496,7 @@
     }),
   );
 
-  // ------------------------------------------------- plot runtime (S1)
-  // Factory call at the ResizeObserver's original position registers ONLY the
-  // ResizeObserver effect. Model dispose/onrender and clientFlush register later
-  // via registerModelEffects / registerLateEffects (effect-order preservation).
   let root = $state<HTMLDivElement | null>(null);
-  const runtime = createPlotRuntime({
-    widthProp: () => width,
-    heightProp: () => height,
-    assembled: () => assembled,
-    effectiveSpec: () => effectiveSpec,
-    effectiveZoomDomains: () => effectiveZoomDomains,
-    effectiveLegendFilters: () => effectiveLegendFilters,
-    root: () => root,
-    resetZoom: () => {
-      if (interaction === undefined) localZoomDomains = null;
-      else
-        interaction.resetZoom({
-          scope: filterScopeChannelsByZoomMode(
-            resolvedInteractionScope,
-            interactionConfig.zoom?.mode ?? null,
-          ),
-        });
-    },
-    onrender: () => onrender,
-  });
-  // Mechanical alias so existing call sites stay unchanged in S1.
-  const model = $derived(runtime.model);
-  const resolvedWidth = $derived(runtime.resolvedWidth);
-  const resolvedHeight = $derived(runtime.resolvedHeight);
-  const strata = $derived(runtime.strata);
-  const hasCanvas = $derived(runtime.hasCanvas);
   // Live-region announcer (owned early so legend-reset effects can call it).
   const announcer = createPlotAnnouncer();
 
@@ -619,6 +589,39 @@
     runtime.resetScales();
   }
 
+  // ------------------------------------------------- plot runtime (S1)
+  // The factory call sits AFTER the zoom-respec and legend-filter blocks:
+  // on the oldest supported Svelte, SERVER deriveds evaluate eagerly at
+  // construction, so every binding a dep getter closes over must already be
+  // initialized here (consumer-compat SSR smoke enforces this). Client-side,
+  // the ResizeObserver effect now registers after the legend-reset effects —
+  // safe: the observer callback is async and shares no state with them.
+  const runtime = createPlotRuntime({
+    widthProp: () => width,
+    heightProp: () => height,
+    assembled: () => assembled,
+    effectiveSpec: () => effectiveSpec,
+    effectiveZoomDomains: () => effectiveZoomDomains,
+    effectiveLegendFilters: () => effectiveLegendFilters,
+    root: () => root,
+    resetZoom: () => {
+      if (interaction === undefined) localZoomDomains = null;
+      else
+        interaction.resetZoom({
+          scope: filterScopeChannelsByZoomMode(
+            resolvedInteractionScope,
+            interactionConfig.zoom?.mode ?? null,
+          ),
+        });
+    },
+    onrender: () => onrender,
+  });
+  // Mechanical alias so existing call sites stay unchanged in S1.
+  const model = $derived(runtime.model);
+  const resolvedWidth = $derived(runtime.resolvedWidth);
+  const resolvedHeight = $derived(runtime.resolvedHeight);
+  const strata = $derived(runtime.strata);
+  const hasCanvas = $derived(runtime.hasCanvas);
   // Phase 2: dispose + onrender after legend-reset effects (effect-order).
   runtime.registerModelEffects();
 

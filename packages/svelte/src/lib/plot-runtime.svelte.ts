@@ -56,7 +56,11 @@ export type PlotRuntime = {
 /**
  * Create the plot runtime. Construction registers ONLY the ResizeObserver
  * effect. Call `registerModelEffects` and `registerLateEffects` at their
- * original host positions. Dep getters must not be invoked during construction.
+ * original host positions. Dep getters must not be invoked during construction
+ * ON THE CLIENT — but on the oldest supported Svelte the SERVER evaluates
+ * deriveds eagerly at construction, so the host must declare every binding a
+ * dep getter closes over BEFORE calling this factory (declaration order is the
+ * topological order; the consumer-compat SSR smoke enforces it).
  */
 export function createPlotRuntime(deps: PlotRuntimeDeps): PlotRuntime {
   // ------------------------------------------------- container width (RO)
