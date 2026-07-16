@@ -984,7 +984,7 @@
         queuedPointerInspection = null;
         reducer.cancelScheduledPointer();
         ontoolchange?.(next);
-        return;
+        break;
     }
   }
 

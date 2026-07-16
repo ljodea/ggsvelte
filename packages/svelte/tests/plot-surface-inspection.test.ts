@@ -535,15 +535,15 @@ describe("resolveInspectionEmitAction", () => {
 
   it("characterizes a stateful sequence including clear tokens", () => {
     let last = "";
-    const step = (fingerprint: string | undefined) => {
+    const step = (fingerprint?: string) => {
       const action = resolveInspectionEmitAction({ fingerprint, lastFingerprint: last });
       if (action.type === "emit" && action.updateFingerprint !== null)
         last = action.updateFingerprint;
       return action;
     };
 
-    // undefined never mutates last
-    expect(step(undefined)).toEqual({ type: "emit", updateFingerprint: null });
+    // omitted fingerprint never mutates last
+    expect(step()).toEqual({ type: "emit", updateFingerprint: null });
     expect(last).toBe("");
 
     // empty fingerprint collides with initial last → skip
