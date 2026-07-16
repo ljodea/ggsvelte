@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  resolveLegendClearControlSource,
   resolveLegendClickAction,
   resolveLegendKeyAction,
   resolveLegendPointerUpAction,
   shouldClearLegendPreviewOnBlur,
   shouldRenderInteractionLiveRegion,
+  type LegendClearControlInput,
   type LegendClickInput,
   type LegendKeyInput,
   type LegendPointerUpInput,
@@ -165,5 +167,40 @@ describe("shouldRenderInteractionLiveRegion", () => {
         legendFocusEnabled: false,
       }),
     ).toBe(false);
+  });
+});
+
+describe("resolveLegendClearControlSource", () => {
+  const clear = (overrides: Partial<LegendClearControlInput> = {}): LegendClearControlInput => ({
+    detail: 1,
+    pointerType: null,
+    ...overrides,
+  });
+
+  it("classifies detail === 0 as keyboard even when pointerType is touch", () => {
+    expect(resolveLegendClearControlSource(clear({ detail: 0, pointerType: null }))).toBe(
+      "keyboard",
+    );
+    expect(resolveLegendClearControlSource(clear({ detail: 0, pointerType: "touch" }))).toBe(
+      "keyboard",
+    );
+  });
+
+  it("classifies touch pointerType when detail > 0", () => {
+    expect(resolveLegendClearControlSource(clear({ detail: 1, pointerType: "touch" }))).toBe(
+      "touch",
+    );
+  });
+
+  it("classifies non-touch detail > 0 as pointer", () => {
+    expect(resolveLegendClearControlSource(clear({ detail: 1, pointerType: "mouse" }))).toBe(
+      "pointer",
+    );
+    expect(resolveLegendClearControlSource(clear({ detail: 2, pointerType: "pen" }))).toBe(
+      "pointer",
+    );
+    expect(resolveLegendClearControlSource(clear({ detail: 1, pointerType: null }))).toBe(
+      "pointer",
+    );
   });
 });

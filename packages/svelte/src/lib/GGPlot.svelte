@@ -123,6 +123,7 @@
     resolvePointerUpAction,
   } from "./plot-surface-pointer.js";
   import {
+    resolveLegendClearControlSource,
     resolveLegendClickAction,
     resolveLegendKeyAction,
     resolveLegendPointerUpAction,
@@ -1064,12 +1065,10 @@
     const returnTarget = root?.querySelector<HTMLElement>(
       ".gg-legend-target[aria-pressed='true']",
     );
-    const source: InteractionSource =
-      event.detail === 0
-        ? "keyboard"
-        : legendClearPointerType === "touch"
-          ? "touch"
-          : "pointer";
+    const source = resolveLegendClearControlSource({
+      detail: event.detail,
+      pointerType: legendClearPointerType,
+    });
     legendClearPointerType = null;
     clearLegendFocus(source);
     queueMicrotask(() => {

@@ -6,6 +6,8 @@
  * key routing and touch/click coordination priority.
  */
 
+import type { InteractionSource } from "./interaction.js";
+
 // ---- keydown ----
 
 export type LegendKeyInput = {
@@ -109,6 +111,29 @@ export function resolveLegendClickAction(input: LegendClickInput): LegendClickAc
     type: "commit",
     source: input.detail === 0 ? "keyboard" : "pointer",
   };
+}
+
+// ---- clear control click ----
+
+export type LegendClearControlInput = {
+  /** MouseEvent.detail from the clear control click. */
+  readonly detail: number;
+  /**
+   * Host `legendClearPointerType` from pointerdown on the clear control
+   * (null when never set / after cancel).
+   */
+  readonly pointerType: string | null;
+};
+
+/**
+ * Pure InteractionSource for the legend clear control `click`.
+ * Priority: detail === 0 → keyboard; pointerType === "touch" → touch; else pointer.
+ * Host still clears `legendClearPointerType` after classification.
+ */
+export function resolveLegendClearControlSource(input: LegendClearControlInput): InteractionSource {
+  if (input.detail === 0) return "keyboard";
+  if (input.pointerType === "touch") return "touch";
+  return "pointer";
 }
 
 // ---- blur (preview clear gate) ----
