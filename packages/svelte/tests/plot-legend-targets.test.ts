@@ -4,6 +4,9 @@ import type { InteractiveLegendEntry } from "../src/lib/plot-legend-focus.js";
 import PlotLegendTargets from "../src/lib/PlotLegendTargets.svelte";
 import { render } from "./helpers/render.js";
 
+const webEntry = { value: "web", label: "Web", color: "#123456", y: 18 };
+const storeEntry = { value: "store", label: "Store", color: "#654321", y: 42 };
+
 const discreteFill = {
   type: "discrete" as const,
   scale: "fill",
@@ -13,21 +16,18 @@ const discreteFill = {
   width: 10,
   height: 72,
   swatchSize: 12,
-  entries: [
-    { value: "web", label: "Web", color: "#123456", y: 18 },
-    { value: "store", label: "Store", color: "#654321", y: 42 },
-  ],
+  entries: [webEntry, storeEntry],
 };
 
 const entries: InteractiveLegendEntry[] = [
   {
     legend: discreteFill,
-    entry: discreteFill.entries[0]!,
+    entry: webEntry,
     identity: { scale: "fill", entryIndex: 0 },
   },
   {
     legend: discreteFill,
-    entry: discreteFill.entries[1]!,
+    entry: storeEntry,
     identity: { scale: "fill", entryIndex: 1 },
   },
 ];
@@ -71,8 +71,8 @@ describe("PlotLegendTargets", () => {
     });
     const clear = container.querySelector<HTMLButtonElement>(".gg-legend-clear");
     expect(clear).not.toBeNull();
-    expect(clear!.style.left).toBe("100px");
-    expect(clear!.style.top).toBe("304px");
+    expect(clear?.style.left).toBe("100px");
+    expect(clear?.style.top).toBe("304px");
   });
 
   it("clamps clear left into [4, sceneWidth-52]", () => {
@@ -83,9 +83,8 @@ describe("PlotLegendTargets", () => {
       clearLegendX: 0,
       ...noopHandlers,
     });
-    expect(low.container.querySelector<HTMLButtonElement>(".gg-legend-clear")!.style.left).toBe(
-      "4px",
-    );
+    const lowClear = low.container.querySelector<HTMLButtonElement>(".gg-legend-clear");
+    expect(lowClear?.style.left).toBe("4px");
 
     const high = render(PlotLegendTargets, {
       entries,
@@ -94,9 +93,8 @@ describe("PlotLegendTargets", () => {
       clearLegendX: 500,
       ...noopHandlers,
     });
-    expect(high.container.querySelector<HTMLButtonElement>(".gg-legend-clear")!.style.left).toBe(
-      "348px",
-    );
+    const highClear = high.container.querySelector<HTMLButtonElement>(".gg-legend-clear");
+    expect(highClear?.style.left).toBe("348px");
   });
 
   it("applies min target width of 24 when legend width is smaller", () => {
@@ -107,9 +105,10 @@ describe("PlotLegendTargets", () => {
       clearLegendX: null,
       ...noopHandlers,
     });
-    const first = container.querySelectorAll<HTMLButtonElement>("[data-gg-legend-target]")[0]!;
+    const targets = container.querySelectorAll<HTMLButtonElement>("[data-gg-legend-target]");
+    expect(targets.length).toBeGreaterThan(0);
     // legend width is 10 → max(24, 10) = 24
-    expect(first.style.width).toBe("24px");
+    expect(targets.item(0)?.style.width).toBe("24px");
   });
 
   it("wires preview enter for non-touch pointers", () => {
@@ -122,8 +121,10 @@ describe("PlotLegendTargets", () => {
       ...noopHandlers,
       onPreviewIndex,
     });
-    const first = container.querySelectorAll<HTMLButtonElement>("[data-gg-legend-target]")[0]!;
-    first.dispatchEvent(new PointerEvent("pointerenter", { bubbles: true, pointerType: "mouse" }));
+    const targets = container.querySelectorAll<HTMLButtonElement>("[data-gg-legend-target]");
+    const first = targets.item(0);
+    expect(first).not.toBeNull();
+    first?.dispatchEvent(new PointerEvent("pointerenter", { bubbles: true, pointerType: "mouse" }));
     expect(onPreviewIndex).toHaveBeenCalledWith(0, "pointer");
   });
 });
