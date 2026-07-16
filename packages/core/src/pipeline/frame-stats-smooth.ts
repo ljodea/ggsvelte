@@ -6,10 +6,10 @@ import type { SmoothParams } from "@ggsvelte/spec";
 import { statSmooth } from "../stats/smooth.js";
 import type { ColumnTable } from "../table.js";
 
-import { carriedColumns, emptyFrameExtras, removedStatWarning } from "./frame-helpers.js";
+import { carriedColumns, removedStatWarning } from "./frame-helpers.js";
+import { packSmoothLayerFrame } from "./frame-stats-smooth-frame.js";
 import { makeColumnOf } from "./frame-stats-shared.js";
 import type { Advisory, LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
-import { NO_ROW } from "./types.js";
 
 export function buildSmoothFrame(
   binding: LayerBinding,
@@ -44,22 +44,5 @@ export function buildSmoothFrame(
       howToOverride: `Set params.method ("lm" | "loess") on layer ${index}.`,
     });
   }
-  const col = columnOf(result, null);
-  return {
-    binding,
-    table,
-    n: result.x.length,
-    xValues: null,
-    xNumeric: result.x,
-    yNumeric: result.y,
-    groups: result.groups,
-    rowIndex: Uint32Array.from({ length: result.x.length }, () => NO_ROW),
-    colorValues: col(binding.color.field),
-    fillValues: col(binding.fill.field),
-    labelValues: col(binding.labelField),
-    ...emptyFrameExtras(),
-    ymin: result.ymin,
-    ymax: result.ymax,
-    smoothBand: result.hasBand,
-  };
+  return packSmoothLayerFrame(binding, table, result, columnOf);
 }

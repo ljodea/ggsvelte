@@ -41,6 +41,7 @@ import type { SpecInput, PortableSpec } from "@ggsvelte/spec";
 import { perfMark, perfMeasure } from "./perf.js";
 
 import type { Advisory, PipelineWarning, RenderModel, RunOptions } from "./pipeline/types.js";
+import { allocatePipelineRunId } from "./pipeline/run-id.js";
 import { setupPipelineRun } from "./pipeline/setup-run.js";
 import { preparePanels } from "./pipeline/prepare-panels.js";
 import { trainPipelineScales } from "./pipeline/train-pipeline-scales.js";
@@ -59,18 +60,15 @@ export type {
   RunOptions,
   ScaleDomainSnapshot,
   TrainedScales,
-} from "./pipeline/types.js";
-export { CANVAS_AUTO_THRESHOLD, PipelineError } from "./pipeline/types.js";
-export { batchMarkCount } from "./pipeline/geometry.js";
+} from "./pipeline/public-api.js";
+export { CANVAS_AUTO_THRESHOLD, PipelineError, batchMarkCount } from "./pipeline/public-api.js";
 
 // ---------------------------------------------------------------------------
 // runPipeline
 // ---------------------------------------------------------------------------
 
-let nextRunId = 0;
-
 export function runPipeline(spec: SpecInput | PortableSpec, options: RunOptions): RenderModel {
-  const runId = ++nextRunId;
+  const runId = allocatePipelineRunId();
   perfMark("ggsvelte:pipeline:start");
 
   const warnings: PipelineWarning[] = [];

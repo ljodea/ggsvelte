@@ -7,6 +7,7 @@ import type { TextMeasurer } from "../layout/measure.js";
 import type { PositionScale } from "../scales/train.js";
 
 import { layoutDomain } from "./layout-helpers.js";
+import { singlePanelPlacementFromLayout } from "./panel-layout-single-from-layout.js";
 import { singlePanelMarginReserve } from "./panel-layout-single-reserve.js";
 import type { PanelPlacement } from "./panel-layout-types.js";
 
@@ -56,15 +57,5 @@ export function placeSinglePanel(input: {
     reserve: singlePanelMarginReserve(hTitle, vTitle, axisTitleBand, legendWidth),
     theme: layoutTheme,
   });
-  const margins = layoutResult.margins;
-  return {
-    x: margins.left,
-    y: topBand + margins.top,
-    width: Math.max(1, optionsWidth - margins.left - margins.right),
-    height: Math.max(1, layoutHeight - margins.top - margins.bottom),
-    ticksH: layoutResult.x.ticks,
-    ticksV: layoutResult.y.ticks,
-    showAxisX: true,
-    showAxisY: true,
-  };
+  return singlePanelPlacementFromLayout(layoutResult, optionsWidth, layoutHeight, topBand);
 }
