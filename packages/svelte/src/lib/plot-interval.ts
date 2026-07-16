@@ -2,6 +2,7 @@ import type { CellValue } from "@ggsvelte/core";
 
 import type { InteractionSource, IntervalSelection } from "./interaction.js";
 import type { PlotRect } from "./plot-geometry.js";
+import { uniqueKeysFromRowIndexes } from "./plot-selection.js";
 
 /** Pointer brush-end gate only. Keyboard Enter/Space commits any size. */
 export const BRUSH_MIN_SPAN_PX = 4;
@@ -88,5 +89,59 @@ export function clearIntervalSelectionEvent(
     keys: Object.freeze([]),
     lineageCount: 0,
     source,
+  });
+}
+
+export type LineageCandidate = {
+  readonly lineage: number;
+};
+
+/**
+ * Collect source row indexes covered by interval candidates via lineage.
+ * Order is insertion order (first candidate, then lineage key order).
+ */
+export function lineageRowIndexesFromCandidates(
+  candidates: Iterable<LineageCandidate>,
+  lineageKeys: (lineageId: number) => Iterable<number>,
+): Set<number> {
+  const sourceRows = new Set<number>();
+  for (const candidate of candidates) {
+    for (const rowIndex of lineageKeys(candidate.lineage)) sourceRows.add(rowIndex);
+  }
+  return sourceRows;
+}
+
+export type IntervalSelectionFromRowsInput = {
+  readonly phase: IntervalSelection["phase"];
+  readonly mode: SelectAreaMode;
+  readonly panelId: string | null;
+  readonly pixels: PlotRect;
+  readonly source: InteractionSource;
+  /** Source row indexes (typically from lineageRowIndexesFromCandidates). */
+  readonly rowIndexes: Iterable<number>;
+  readonly keyForRow: (rowIndex: number) => PropertyKey | null;
+  /** Pre-inverted panel domains; mode filtering is applied here. */
+  readonly invertedDomain: IntervalDomain;
+};
+
+/**
+ * Pure interval-selection assembly after candidate query + domain inversion.
+ * Resolves keys from row indexes, filters domain by select mode, freezes payload.
+ */
+export function intervalSelectionFromRows(
+  input: IntervalSelectionFromRowsInput,
+): IntervalSelection {
+  const sourceRows = input.rowIndexes instanceof Set ? input.rowIndexes : new Set(input.rowIndexes);
+  const keys = uniqueKeysFromRowIndexes(sourceRows, input.keyForRow);
+  const domain = filterDomainBySelectMode(input.invertedDomain, input.mode);
+  return buildIntervalSelection({
+    phase: input.phase,
+    mode: input.mode,
+    panelId: input.panelId,
+    domain,
+    pixels: input.pixels,
+    keys,
+    lineageCount: sourceRows.size,
+    source: input.source,
   });
 }

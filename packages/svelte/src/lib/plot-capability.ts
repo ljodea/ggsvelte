@@ -1,6 +1,17 @@
-import type { InteractionDiagnostic } from "./interaction.js";
+import type { InteractionDiagnostic, InteractionTool } from "./interaction.js";
 
 export type ZoomAreaMode = "x" | "y" | "xy";
+
+/**
+ * Drop zoom-area when no continuous channel supports brush zoom.
+ * Other tools pass through unchanged.
+ */
+export function filterAvailableTools(
+  tools: readonly InteractionTool[],
+  zoomHasSupportedChannel: boolean,
+): InteractionTool[] {
+  return tools.filter((tool) => tool !== "zoom-area" || zoomHasSupportedChannel);
+}
 
 export type ScaleTypeRef = {
   readonly x: { readonly type: string };

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   bandChannelsForZoom,
   capabilityStatusText,
+  filterAvailableTools,
   zoomScaleDiagnosticsFromChannels,
   zoomSupportsChannel,
 } from "../src/lib/plot-capability.js";
@@ -49,6 +50,20 @@ describe("zoomScaleDiagnosticsFromChannels", () => {
         actual: "band",
       },
     ]);
+  });
+});
+
+describe("filterAvailableTools", () => {
+  const all = ["inspect", "point", "select-area", "zoom-area"] as const;
+
+  it("keeps zoom-area only when a continuous channel supports it", () => {
+    expect(filterAvailableTools(all, true)).toEqual([...all]);
+    expect(filterAvailableTools(all, false)).toEqual(["inspect", "point", "select-area"]);
+  });
+
+  it("leaves non-zoom tools untouched when zoom is unsupported", () => {
+    expect(filterAvailableTools(["inspect", "point"], false)).toEqual(["inspect", "point"]);
+    expect(filterAvailableTools(["zoom-area"], false)).toEqual([]);
   });
 });
 

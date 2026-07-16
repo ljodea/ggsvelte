@@ -68,6 +68,32 @@ export function matchCandidateFromHit(
   return null;
 }
 
+/**
+ * Narrow candidate-store surface for keyboard/inspection traversal.
+ * Production walks id-ascending via traverse(null,"first") / traverse(id,"next").
+ */
+export type TraversalCandidateStore = {
+  traverse(fromId: number | null, direction: "first" | "next"): number | null;
+  candidate(id: number): CandidateFacts | null;
+};
+
+/**
+ * Build the ordered SceneHit list used by keyboard navigation.
+ * Stops on cycle (duplicate id) or null terminator; skips missing candidates.
+ */
+export function buildTraversalHits(store: TraversalCandidateStore): SceneHit[] {
+  const hits: SceneHit[] = [];
+  let id = store.traverse(null, "first");
+  const seen = new Set<number>();
+  while (id !== null && !seen.has(id)) {
+    seen.add(id);
+    const candidate = store.candidate(id);
+    if (candidate !== null) hits.push(hitFromCandidate(candidate));
+    id = store.traverse(id, "next");
+  }
+  return hits;
+}
+
 /** Modular wrap for keyboard traversal across a hit list. */
 export function nextTraversalIndex(current: number, delta: number, length: number): number {
   if (length <= 0) return -1;

@@ -5,6 +5,7 @@ import type { SceneHit } from "@ggsvelte/core/dom";
 
 import {
   bestDirectionalIndex,
+  buildTraversalHits,
   CANDIDATE_HIT_TOLERANCE,
   cycleCoincidentIndex,
   hitFromCandidate,
@@ -141,6 +142,66 @@ describe("bestDirectionalIndex", () => {
   it("excludes origin-coincident and behind-direction hits (primary <= 0)", () => {
     expect(bestDirectionalIndex(origin, [hit(50, 50), hit(60, 50)], 1, 0)).toBe(1);
     expect(bestDirectionalIndex(origin, [hit(40, 50)], 1, 0)).toBe(-1);
+  });
+});
+
+describe("buildTraversalHits", () => {
+  const asCandidate = (id: number, partial: Partial<CandidateFacts> = {}): CandidateFacts =>
+    ({
+      id,
+      layerIndex: 0,
+      panelIndex: 0,
+      rowIndex: id,
+      x: id * 10,
+      y: id * 10,
+      kind: "point",
+      autoMode: "exact",
+      lineage: id,
+      ...partial,
+    }) as CandidateFacts;
+
+  it("walks first/next order and projects candidates to hits", () => {
+    const order = [2, 0, 1];
+    const store = {
+      traverse(fromId: number | null, direction: "first" | "next"): number | null {
+        if (direction === "first") return order[0] ?? null;
+        if (fromId === null) return null;
+        const index = order.indexOf(fromId);
+        return index < 0 ? null : (order[index + 1] ?? null);
+      },
+      candidate(id: number): CandidateFacts | null {
+        return asCandidate(id);
+      },
+    };
+    expect(buildTraversalHits(store)).toEqual([
+      hitFromCandidate(asCandidate(2)),
+      hitFromCandidate(asCandidate(0)),
+      hitFromCandidate(asCandidate(1)),
+    ]);
+  });
+
+  it("stops on cycles and skips missing candidates", () => {
+    const store = {
+      traverse(fromId: number | null, direction: "first" | "next"): number | null {
+        if (direction === "first") return 0;
+        if (fromId === 0) return 1;
+        if (fromId === 1) return 0; // cycle
+        return null;
+      },
+      candidate(id: number): CandidateFacts | null {
+        return id === 1 ? null : asCandidate(id);
+      },
+    };
+    expect(buildTraversalHits(store)).toEqual([hitFromCandidate(asCandidate(0))]);
+  });
+
+  it("returns empty when traverse has no first candidate", () => {
+    expect(
+      buildTraversalHits({
+        traverse: () => null,
+        candidate: () => null,
+      }),
+    ).toEqual([]);
   });
 });
 
