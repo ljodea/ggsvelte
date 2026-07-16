@@ -114,6 +114,7 @@
   } from "./plot-area-brush.js";
   import { frozenZoomDomains, normalizedRect } from "./plot-geometry.js";
   import { resolveSurfaceKeyAction } from "./plot-surface-keyboard.js";
+  import { resolveQueuedInspectFrameAction } from "./plot-surface-inspection.js";
   import {
     resolveCaptureClickAction,
     advanceTouchInspectMoved,
@@ -579,28 +580,41 @@
       if (action.type === "move-area") {
         applyAreaMove(action.point, queuedAreaSource);
       } else {
+        // Snapshot then clear queues before pure routing (matches prior host).
         const pending = queuedPointerInspection;
         const token = queuedPointerToken;
         queuedPointerInspection = null;
         queuedPointerToken = null;
-        if (pending === null) return;
-        if (token !== null && !reducer.accepts(token)) return;
-        if (inspection?.state === "pinned") {
-          pendingPinnedPointer = pending;
-          return;
+        // Short-circuit tokenAccepted when no pending so accepts() is not
+        // called for empty frames (Codex plan review).
+        const frameAction = resolveQueuedInspectFrameAction({
+          hasPending: pending !== null,
+          tokenAccepted:
+            pending === null || token === null || reducer.accepts(token),
+          currentState: inspection?.state ?? "none",
+          candidateEpochMismatch:
+            action.candidate !== null &&
+            action.candidate.epoch !== model?.runId,
+        });
+        switch (frameAction.type) {
+          case "none":
+          case "drop":
+            return;
+          case "stash-pending":
+            if (pending === null) return;
+            pendingPinnedPointer = pending;
+            return;
+          case "apply-pending":
+            if (pending === null) return;
+            setInspection(
+              pending.hit,
+              pending.source,
+              "transient",
+              pending.concreteMode,
+              pending.candidate,
+            );
+            return;
         }
-        if (
-          action.candidate !== null &&
-          action.candidate.epoch !== model?.runId
-        )
-          return;
-        setInspection(
-          pending.hit,
-          pending.source,
-          "transient",
-          pending.concreteMode,
-          pending.candidate,
-        );
       }
     },
   });
