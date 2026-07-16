@@ -4,7 +4,7 @@ import type {
   LegendFocusEvent,
   PlotInspectionChange,
   PlotSelection,
-  ZoomDomains,
+  ReadonlyZoomDomains,
 } from "./interaction.js";
 
 /** Shared a11y count phrase: "1 datum" / "N data". */
@@ -38,7 +38,7 @@ export function legendFocusAnnouncement(event: LegendFocusEvent): string {
 }
 
 /** Live message after a zoom commit or reset (`null` domains → reset). */
-export function zoomAnnouncement(domains: ZoomDomains | null): string {
+export function zoomAnnouncement(domains: ReadonlyZoomDomains | null): string {
   return domains === null ? "Zoom reset." : "Zoom complete.";
 }
 
