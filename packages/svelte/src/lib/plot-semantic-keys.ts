@@ -72,6 +72,22 @@ export type ResolveSemanticKeysResult = {
 };
 
 /**
+ * Stable data/spec identity token for inspection reconcile epochs.
+ * Host supplies sourceIdentity tokens for the raw `data` / `spec` props.
+ */
+export function dataIdentityEpochToken(input: {
+  readonly assembled: { readonly data?: unknown; readonly datasets?: unknown } | null;
+  readonly dataToken: string;
+  readonly specToken: string;
+}): string {
+  if (input.assembled === null) return "no-data";
+  return `${input.dataToken}:${input.specToken}:${JSON.stringify([
+    input.assembled.data ?? null,
+    input.assembled.datasets ?? null,
+  ])}`;
+}
+
+/**
  * Resolve durable semantic keys for interaction, emitting diagnostics in
  * encounter order: synthetic-rule missing lineage, per-candidate missing
  * lineage, then per-row invalid / unstable / duplicate key diagnostics.

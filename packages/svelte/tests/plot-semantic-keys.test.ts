@@ -5,6 +5,7 @@ import type { CellValue } from "@ggsvelte/core";
 import { INTERACTION_DIAGNOSTIC_CATALOG } from "../src/lib/interaction.js";
 import {
   createSourceIdentityTracker,
+  dataIdentityEpochToken,
   resolveSemanticKeys,
   type SemanticKeyCandidate,
   type SemanticKeyModelView,
@@ -36,6 +37,35 @@ function modelView(options: {
     layers: options.layers ?? [],
   };
 }
+
+describe("dataIdentityEpochToken", () => {
+  it("returns no-data when assembled is null", () => {
+    expect(
+      dataIdentityEpochToken({
+        assembled: null,
+        dataToken: "1",
+        specToken: "2",
+      }),
+    ).toBe("no-data");
+  });
+
+  it("joins source tokens with JSON of data and datasets (nullish → null)", () => {
+    expect(
+      dataIdentityEpochToken({
+        assembled: { data: [{ a: 1 }], datasets: undefined },
+        dataToken: "d",
+        specToken: "s",
+      }),
+    ).toBe(`d:s:${JSON.stringify([[{ a: 1 }], null])}`);
+    expect(
+      dataIdentityEpochToken({
+        assembled: {},
+        dataToken: "d",
+        specToken: "s",
+      }),
+    ).toBe(`d:s:${JSON.stringify([null, null])}`);
+  });
+});
 
 describe("createSourceIdentityTracker", () => {
   it("assigns stable ids to the same object and distinct ids to different objects", () => {

@@ -8,6 +8,7 @@ import {
   resolveLegendPointerUpAction,
   resolveLegendPreviewDismissAction,
   shouldClearLegendPreviewOnBlur,
+  shouldEmitLegendFocusClear,
   shouldRenderInteractionLiveRegion,
   type LegendClearControlInput,
   type LegendClickInput,
@@ -295,5 +296,41 @@ describe("resolveLegendPreviewDismissAction", () => {
         committedEmphasisEmpty: false,
       }),
     ).toEqual({ type: "clear-only" });
+  });
+});
+
+describe("shouldEmitLegendFocusClear", () => {
+  it("is false only when preview, committed, and effective emphasis are all empty", () => {
+    expect(
+      shouldEmitLegendFocusClear({
+        hasPreview: false,
+        hasCommitted: false,
+        emphasisKeyCount: 0,
+      }),
+    ).toBe(false);
+  });
+
+  it("is true when any focus surface is present (incl. effective emphasis alone)", () => {
+    expect(
+      shouldEmitLegendFocusClear({
+        hasPreview: true,
+        hasCommitted: false,
+        emphasisKeyCount: 0,
+      }),
+    ).toBe(true);
+    expect(
+      shouldEmitLegendFocusClear({
+        hasPreview: false,
+        hasCommitted: true,
+        emphasisKeyCount: 0,
+      }),
+    ).toBe(true);
+    expect(
+      shouldEmitLegendFocusClear({
+        hasPreview: false,
+        hasCommitted: false,
+        emphasisKeyCount: 2,
+      }),
+    ).toBe(true);
   });
 });
