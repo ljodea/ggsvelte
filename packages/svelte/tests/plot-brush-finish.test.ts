@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import type { InteractionTool } from "../src/lib/interaction.js";
-import { resolveFinishBrushAction } from "../src/lib/plot-brush-finish.js";
+import {
+  resolveFinishBrushAction,
+  resolvePointerFinishBrushAction,
+} from "../src/lib/plot-brush-finish.js";
 
 describe("resolveFinishBrushAction", () => {
   const corners = { x0: 1, y0: 2, x1: 3, y1: 4 } as const;
@@ -43,6 +46,34 @@ describe("resolveFinishBrushAction", () => {
     });
     expect(resolveFinishBrushAction({ ended: commit, activeTool: "point" })).toEqual({
       type: "end-area",
+    });
+  });
+});
+
+describe("resolvePointerFinishBrushAction", () => {
+  it("composes free-corner evaluation into select-end", () => {
+    expect(
+      resolvePointerFinishBrushAction({
+        brushCorners: { x0: 10, y0: 20, x1: 10, y1: 20 },
+        endPoint: { x: 40, y: 50 },
+        activeTool: "select-area",
+      }),
+    ).toEqual({
+      type: "select-end",
+      rect: { x0: 10, y0: 20, x1: 40, y1: 50 },
+    });
+  });
+
+  it("composes too-small free corner into keep-second-corner", () => {
+    expect(
+      resolvePointerFinishBrushAction({
+        brushCorners: { x0: 10, y0: 10, x1: 10, y1: 10 },
+        endPoint: { x: 12, y: 12 },
+        activeTool: "zoom-area",
+      }),
+    ).toEqual({
+      type: "keep-second-corner",
+      corners: { x0: 10, y0: 10, x1: 12, y1: 12 },
     });
   });
 });

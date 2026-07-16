@@ -31,6 +31,9 @@ const down = (
   ...overrides,
 });
 
+const draftCorners = { x0: 10, y0: 20, x1: 10, y1: 20 } as const;
+const endAt = { x: 40, y: 50 } as const;
+
 const up = (
   overrides: Partial<SurfacePointerUpInput> & Pick<SurfacePointerUpInput, "activeTool">,
 ): SurfacePointerUpInput => ({
@@ -40,7 +43,8 @@ const up = (
   hasTouchInspectStart: false,
   touchInspectMoved: false,
   brushing: false,
-  hasBrushDraft: false,
+  brushCorners: null,
+  endPoint: endAt,
   ...overrides,
 });
 
@@ -216,56 +220,99 @@ describe("resolvePointerUpAction", () => {
   });
 
   it("does not take touch-inspect path when inspect disabled or tool changed", () => {
-    expect(
-      resolvePointerUpAction(
-        up({
-          activeTool: "inspect",
-          pointerType: "touch",
-          inspectEnabled: false,
-          hasTouchInspectStart: true,
-          brushing: true,
-          hasBrushDraft: true,
-        }),
-      ),
-    ).toEqual({ type: "finish-brush", source: "touch" });
+    const finishTouch = resolvePointerUpAction(
+      up({
+        activeTool: "inspect",
+        pointerType: "touch",
+        inspectEnabled: false,
+        hasTouchInspectStart: true,
+        brushing: true,
+        brushCorners: draftCorners,
+      }),
+    );
+    expect(finishTouch.type).toBe("finish-brush");
+    if (finishTouch.type === "finish-brush") {
+      expect(finishTouch.source).toBe("touch");
+      expect(finishTouch.finish.type).toBe("end-area");
+    }
 
+    const finishSelect = resolvePointerUpAction(
+      up({
+        activeTool: "select-area",
+        pointerType: "touch",
+        inspectEnabled: true,
+        hasTouchInspectStart: true,
+        brushing: true,
+        brushCorners: draftCorners,
+      }),
+    );
+    expect(finishSelect).toEqual({
+      type: "finish-brush",
+      source: "touch",
+      finish: {
+        type: "select-end",
+        rect: { x0: 10, y0: 20, x1: 40, y1: 50 },
+      },
+    });
+  });
+
+  it("finishes brush only when both brushing and draft exist; carries finish payload", () => {
     expect(
       resolvePointerUpAction(
         up({
           activeTool: "select-area",
-          pointerType: "touch",
-          inspectEnabled: true,
-          hasTouchInspectStart: true,
           brushing: true,
-          hasBrushDraft: true,
+          brushCorners: draftCorners,
         }),
       ),
-    ).toEqual({ type: "finish-brush", source: "touch" });
+    ).toEqual({
+      type: "finish-brush",
+      source: "pointer",
+      finish: {
+        type: "select-end",
+        rect: { x0: 10, y0: 20, x1: 40, y1: 50 },
+      },
+    });
   });
 
-  it("finishes brush only when both brushing and draft exist", () => {
-    expect(
-      resolvePointerUpAction(
-        up({
-          activeTool: "select-area",
-          brushing: true,
-          hasBrushDraft: true,
-        }),
-      ),
-    ).toEqual({ type: "finish-brush", source: "pointer" });
-  });
-
-  it("maps finish-brush source from pointerType", () => {
+  it("maps finish-brush source from pointerType and zoom-end finish", () => {
     expect(
       resolvePointerUpAction(
         up({
           activeTool: "zoom-area",
           pointerType: "touch",
           brushing: true,
-          hasBrushDraft: true,
+          brushCorners: draftCorners,
         }),
       ),
-    ).toEqual({ type: "finish-brush", source: "touch" });
+    ).toEqual({
+      type: "finish-brush",
+      source: "touch",
+      finish: {
+        type: "zoom-end",
+        rect: { x0: 10, y0: 20, x1: 40, y1: 50 },
+      },
+    });
+  });
+
+  it("finish-brush keep-second-corner when free corner is too-small", () => {
+    expect(
+      resolvePointerUpAction(
+        up({
+          activeTool: "select-area",
+          brushing: true,
+          brushCorners: { x0: 10, y0: 10, x1: 10, y1: 10 },
+          endPoint: { x: 12, y: 12 },
+        }),
+      ),
+    ).toEqual({
+      type: "finish-brush",
+      source: "pointer",
+      finish: {
+        type: "keep-second-corner",
+        corners: { x0: 10, y0: 10, x1: 12, y1: 12 },
+      },
+    });
   });
 
   it("returns none when brushing/draft state diverges", () => {
@@ -274,7 +321,7 @@ describe("resolvePointerUpAction", () => {
         up({
           activeTool: "zoom-area",
           brushing: true,
-          hasBrushDraft: false,
+          brushCorners: null,
         }),
       ),
     ).toEqual({ type: "none" });
@@ -284,7 +331,7 @@ describe("resolvePointerUpAction", () => {
         up({
           activeTool: "zoom-area",
           brushing: false,
-          hasBrushDraft: true,
+          brushCorners: draftCorners,
         }),
       ),
     ).toEqual({ type: "none" });

@@ -1,14 +1,11 @@
 import type { InteractionTool } from "./interaction.js";
+import {
+  evaluatePointerBrushEnd,
+  type BrushCorners,
+  type PlotPoint,
+  type PointerBrushEnd,
+} from "./plot-area-brush.js";
 import type { PlotRect } from "./plot-geometry.js";
-
-/**
- * Matches `PointerBrushEnd` from plot-area-brush without importing that module
- * (local mirror; plot-area-brush does not import this file — no cycle risk,
- * but keep the payload shape self-contained for pure finish routing).
- */
-export type FinishBrushEnded =
-  | { readonly kind: "too-small"; readonly corners: PlotRect }
-  | { readonly kind: "commit"; readonly rect: PlotRect };
 
 export type FinishBrushAction =
   | { readonly type: "keep-second-corner"; readonly corners: PlotRect }
@@ -34,10 +31,10 @@ export type FinishBrushAction =
  * using action.rect when present.
  *
  * Keyboard complete-area always supplies `kind: "commit"` (no free-corner
- * too-small evaluation); pointer uses `evaluatePointerBrushEnd` first.
+ * too-small evaluation); pointer uses `resolvePointerFinishBrushAction`.
  */
 export function resolveFinishBrushAction(input: {
-  readonly ended: FinishBrushEnded;
+  readonly ended: PointerBrushEnd;
   readonly activeTool: InteractionTool;
 }): FinishBrushAction {
   if (input.ended.kind === "too-small") {
@@ -50,4 +47,20 @@ export function resolveFinishBrushAction(input: {
     return { type: "zoom-end", rect: input.ended.rect };
   }
   return { type: "end-area" };
+}
+
+/**
+ * Compose free-corner evaluation + finish routing for pointer finish-brush.
+ * Host supplies draft corners and the up event plot point; pure owns too-small
+ * vs commit and select/zoom/end payloads.
+ */
+export function resolvePointerFinishBrushAction(input: {
+  readonly brushCorners: BrushCorners;
+  readonly endPoint: PlotPoint;
+  readonly activeTool: InteractionTool;
+}): FinishBrushAction {
+  return resolveFinishBrushAction({
+    ended: evaluatePointerBrushEnd(input.brushCorners, input.endPoint),
+    activeTool: input.activeTool,
+  });
 }

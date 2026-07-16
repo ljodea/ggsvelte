@@ -1,4 +1,6 @@
 import { isAreaTool, type InteractionTool } from "./interaction.js";
+import type { BrushCorners, PlotPoint } from "./plot-area-brush.js";
+import { resolvePointerFinishBrushAction, type FinishBrushAction } from "./plot-brush-finish.js";
 
 /**
  * Capture-surface pointer decision input for pointerdown.
@@ -52,6 +54,10 @@ export function resolvePointerDownAction(input: SurfacePointerDownInput): Surfac
 /**
  * Capture-surface pointerup decision input.
  * Touch-inspect fields only matter when tool is inspect + pointer is touch.
+ *
+ * `brushCorners` is the sole draft source of truth for finish-brush (host:
+ * `brushRect`). Distinct from reducer `brushing`, which can diverge.
+ * `endPoint` is always the up-event plot point (host always computes it).
  */
 export type SurfacePointerUpInput = {
   readonly pointerType: string;
@@ -62,8 +68,13 @@ export type SurfacePointerUpInput = {
   readonly touchInspectMoved: boolean;
   /** Reducer brushing flag — can diverge from draft. */
   readonly brushing: boolean;
-  /** True when `brushRect !== null`. */
-  readonly hasBrushDraft: boolean;
+  /**
+   * Host: `brushRect`. Non-null when a draft free corner exists.
+   * Finish-brush requires both brushing and non-null corners.
+   */
+  readonly brushCorners: BrushCorners | null;
+  /** Host: `plotPoint(event)` — always available on pointerup. */
+  readonly endPoint: PlotPoint;
 };
 
 export type SurfacePointerUpAction =
@@ -77,15 +88,21 @@ export type SurfacePointerUpAction =
       readonly type: "finish-brush";
       /** Interaction source for selection/zoom emission. */
       readonly source: "touch" | "pointer";
+      /**
+       * Pure-owned too-small/commit + select/zoom/end routing (shared with
+       * keyboard complete-area via plot-brush-finish).
+       */
+      readonly finish: FinishBrushAction;
     }
   | { readonly type: "none" };
 
 /**
  * Pure decision for the plot capture-surface `pointerup` handler.
  * Priority: touch-inspect tap/drag → finish-brush (both brushing and draft)
- * → none. Geometry (too-small) and emission stay with the host after
- * `finish-brush`. Host always clears touch-inspect start state for both
- * touch-inspect actions.
+ * → none. Finish-brush carries the complete finish payload (too-small vs
+ * commit, select/zoom/end). Host cancels scheduled pointer then
+ * `applyFinishBrush(action.finish, action.source)`. Host always clears
+ * touch-inspect start state for both touch-inspect actions.
  */
 export function resolvePointerUpAction(input: SurfacePointerUpInput): SurfacePointerUpAction {
   const {
@@ -96,7 +113,8 @@ export function resolvePointerUpAction(input: SurfacePointerUpInput): SurfacePoi
     hasTouchInspectStart,
     touchInspectMoved,
     brushing,
-    hasBrushDraft,
+    brushCorners,
+    endPoint,
   } = input;
 
   if (
@@ -112,10 +130,15 @@ export function resolvePointerUpAction(input: SurfacePointerUpInput): SurfacePoi
     };
   }
 
-  if (!brushing || !hasBrushDraft) return { type: "none" };
+  if (!brushing || brushCorners === null) return { type: "none" };
   return {
     type: "finish-brush",
     source: interactionSourceFromPointerType(pointerType),
+    finish: resolvePointerFinishBrushAction({
+      brushCorners,
+      endPoint,
+      activeTool,
+    }),
   };
 }
 

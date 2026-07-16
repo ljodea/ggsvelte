@@ -98,7 +98,6 @@
   import {
     brushAtPoint,
     brushWithEnd,
-    evaluatePointerBrushEnd,
     initialBrushRect,
     nudgeBrushEnd,
   } from "./plot-area-brush.js";
@@ -127,10 +126,7 @@
     shouldFocusPinnedInteractiveTooltip,
     type QueuedPointerInspection,
   } from "./plot-surface-inspection.js";
-  import {
-    resolveFinishBrushAction,
-    type FinishBrushAction,
-  } from "./plot-brush-finish.js";
+  import { type FinishBrushAction } from "./plot-brush-finish.js";
   import {
     resolveCaptureClickAction,
     advanceTouchInspectMoved,
@@ -1957,6 +1953,8 @@
   }
 
   function onPointerUp(event: PointerEvent): void {
+    // endPoint always computed (pure finish-brush needs it; touch paths ignore).
+    const endPoint = plotPoint(event);
     const action = resolvePointerUpAction({
       pointerType: event.pointerType,
       activeTool,
@@ -1965,7 +1963,8 @@
       hasTouchInspectStart: touchInspectStart !== null,
       touchInspectMoved,
       brushing,
-      hasBrushDraft: brushRect !== null,
+      brushCorners: brushRect,
+      endPoint,
     });
     switch (action.type) {
       case "touch-inspect-drag-ignore":
@@ -1978,8 +1977,7 @@
         touchInspectMoved = false;
         const inspectConfig = interactionConfig.inspect;
         if (inspectConfig === null) break;
-        const p = plotPoint(event);
-        const match = model?.candidates.nearest(p.x, p.y, {
+        const match = model?.candidates.nearest(endPoint.x, endPoint.y, {
           mode: inspectConfig.mode,
           maxDistance: inspectConfig.maxDistance,
         });
@@ -1999,19 +1997,9 @@
       case "none":
         break;
       case "finish-brush": {
-        // Defensive: pure up-gate already requires hasBrushDraft.
-        if (brushRect === null) break;
-        // Pointer-only: cancel scheduled frames before shared finish effects.
+        // Pure table owns evaluate + select/zoom/end; host cancels then applies.
         reducer.cancelScheduledPointer();
-        const ended = evaluatePointerBrushEnd(brushRect, plotPoint(event));
-        // Pure table carries rect/corners — no host ended.kind re-narrow.
-        applyFinishBrush(
-          resolveFinishBrushAction({
-            ended,
-            activeTool,
-          }),
-          action.source,
-        );
+        applyFinishBrush(action.finish, action.source);
         break;
       }
     }
