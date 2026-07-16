@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784161694115,
+  "lastUpdate": 1784162113309,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -5200,6 +5200,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 160.1553,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c006149255e837c101d733d2fc2384442b09c88b",
+          "message": "Merge pull request #50 from ljodea/feat/legend-focus-r2\n\nfeat: add linked interactive legend focus",
+          "timestamp": "2026-07-15T19:34:39-05:00",
+          "tree_id": "795ef54da3827a00e06a2b4822a498904c47bbc3",
+          "url": "https://github.com/ljodea/ggsvelte/commit/c006149255e837c101d733d2fc2384442b09c88b"
+        },
+        "date": 1784162112932,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 3.2672,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.8862,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 10.6031,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 13.4133,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 82.5389,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 119.4853,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 0.9292,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.152,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 82.5859,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 105.3205,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.5546,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 11.1314,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 111.9819,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.6588,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 26.0493,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.4078,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 31.9375,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 610.2269,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 166.7532,
             "unit": "ms"
           }
         ]
