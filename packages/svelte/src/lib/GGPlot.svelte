@@ -218,7 +218,7 @@
   import {
     createSourceIdentityTracker,
     dataIdentityEpochToken,
-    resolveSemanticKeys,
+    resolveSemanticKeysForPlot,
   } from "./plot-semantic-keys.js";
   import { themeTokensToCss } from "./plot-theme-css.js";
   import {
@@ -233,7 +233,7 @@
   } from "./plot-zoom.js";
   import {
     buildInteractiveLegendEntries,
-    buildLegendEntryKeyIndex,
+    buildLegendEntryKeyIndexForPlot,
     clampLegendRovingIndex,
     findLegendPressedIdentity,
     keysForLegendEntry,
@@ -867,27 +867,24 @@
   // Owned for the component lifetime; resolveSemanticKeys mutates in place.
   const priorKeys = new Map<string, PropertyKey>();
 
-  const semanticKeys = $derived.by(() => {
-    if (model === null)
-      return {
-        keys: new Map<number, PropertyKey | null>(),
-        diagnostics: [] as InteractionDiagnostic[],
-      };
-    return resolveSemanticKeys({
-      model: {
-        candidateCount: model.candidates.size,
-        candidate: (id) => model.candidates.candidate(id),
-        lineageKeys: (lineageId) => model.lineage.keys(lineageId),
-        row: (rowIndex) => model.row(rowIndex),
-        layers: assembled?.layers ?? [],
-      },
+  const semanticKeys = $derived.by(() =>
+    resolveSemanticKeysForPlot({
+      model:
+        model === null
+          ? null
+          : {
+              candidates: model.candidates,
+              lineage: model.lineage,
+              row: (rowIndex) => model.row(rowIndex),
+            },
+      layers: assembled?.layers ?? [],
       datumKey: datumKey as
         string | ((row: never, index: number) => PropertyKey) | undefined,
       priorKeys,
-      rowIdentity: (rowIndex) =>
-        `${sourceIdentity(data)}:${sourceIdentity(spec)}:${rowIndex}`,
-    });
-  });
+      dataToken: sourceIdentity(data),
+      specToken: sourceIdentity(spec),
+    }),
+  );
 
   $effect(() => {
     for (const diagnostic of semanticKeys.diagnostics)
@@ -997,28 +994,22 @@
   }
 
   const legendEntryKeyIndex: ReadonlyMap<string, readonly PropertyKey[]> =
-    $derived.by(() => {
-      if (model === null) return new Map<string, readonly PropertyKey[]>();
-      const current = model;
-      return buildLegendEntryKeyIndex({
-        legends: current.scene.legends,
-        candidates: function* () {
-          for (const candidate of iterateCandidates(current.candidates)) {
-            yield {
-              layerIndex: candidate.layerIndex,
-              lineage: candidate.lineage,
-              rowIndex: candidate.rowIndex,
-            };
-          }
-        },
-        layerFields: (layerIndex) => current.layerFields[layerIndex],
-        layerScaledConstant: (layerIndex, channel) =>
-          current.layerScaledConstants[layerIndex]?.[channel],
-        lineageKeys: (lineageId) => current.lineage.keys(lineageId),
-        row: (rowIndex) => current.row(rowIndex),
+    $derived.by(() =>
+      buildLegendEntryKeyIndexForPlot({
+        model:
+          model === null
+            ? null
+            : {
+                scene: model.scene,
+                candidates: model.candidates,
+                layerFields: model.layerFields,
+                layerScaledConstants: model.layerScaledConstants,
+                lineage: model.lineage,
+                row: (rowIndex) => model.row(rowIndex),
+              },
         semanticKey: (rowIndex) => semanticKeys.keys.get(rowIndex),
-      });
-    });
+      }),
+    );
 
   function keysForLegend(action: LegendEntryAction): readonly PropertyKey[] {
     return keysForLegendEntry(legendEntryKeyIndex, action.identity);
@@ -1848,7 +1839,7 @@
           point: p,
           panelId: panelId(0),
         });
-        if (activeTool === "select-area" && !areaAwaitingSecond) {
+        if (action.emitSelectStart) {
           const startEvent = selectionEvent(
             "start",
             normalizedRect(brushRect),

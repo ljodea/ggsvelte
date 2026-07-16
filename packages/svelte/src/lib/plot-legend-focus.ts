@@ -9,6 +9,7 @@ import type { CellValue, SceneLegend, SceneLegendEntry } from "@ggsvelte/core";
 import { legendValueEqual } from "@ggsvelte/core";
 
 import type { InteractionSource } from "./interaction.js";
+import { iterateCandidates, type CandidateLookup } from "./plot-selection.js";
 
 /** Stable renderer identity for one entry in one discrete legend. */
 export interface LegendEntryIdentity {
@@ -197,6 +198,59 @@ function resolveLegendMatchValue(
   const row = adapter.row(rowIndex);
   if (row === null) return { skip: true };
   return { skip: false, value: row[field] };
+}
+
+/**
+ * GGPlot host surface for legend entry key indexing (null model → empty map).
+ * Candidate walk is id-ascending via `iterateCandidates` (first-seen key order).
+ */
+export type LegendKeyIndexPlotModel = {
+  readonly scene: { readonly legends: readonly SceneLegend[] };
+  readonly candidates: CandidateLookup<{
+    readonly layerIndex: number;
+    readonly lineage: number;
+    readonly rowIndex: number | null;
+  }>;
+  readonly layerFields: ReadonlyArray<
+    | ReadonlyArray<{
+        readonly channel: string;
+        readonly field: string;
+        readonly source?: "stat";
+      }>
+    | undefined
+  >;
+  readonly layerScaledConstants: ReadonlyArray<Readonly<Record<string, unknown>> | undefined>;
+  readonly lineage: { keys(lineageId: number): Iterable<number> };
+  row(rowIndex: number): Record<string, CellValue> | null;
+};
+
+/**
+ * Build the legend entry → semantic keys index for a plot model.
+ * Host keeps `semanticKey` as a callback so `$derived` tracks key map updates.
+ */
+export function buildLegendEntryKeyIndexForPlot(input: {
+  readonly model: LegendKeyIndexPlotModel | null;
+  readonly semanticKey: (rowIndex: number) => PropertyKey | null | undefined;
+}): ReadonlyMap<string, readonly PropertyKey[]> {
+  if (input.model === null) return new Map();
+  const model = input.model;
+  return buildLegendEntryKeyIndex({
+    legends: model.scene.legends,
+    candidates: function* () {
+      for (const candidate of iterateCandidates(model.candidates)) {
+        yield {
+          layerIndex: candidate.layerIndex,
+          lineage: candidate.lineage,
+          rowIndex: candidate.rowIndex,
+        };
+      }
+    },
+    layerFields: (layerIndex) => model.layerFields[layerIndex],
+    layerScaledConstant: (layerIndex, channel) => model.layerScaledConstants[layerIndex]?.[channel],
+    lineageKeys: (lineageId) => model.lineage.keys(lineageId),
+    row: (rowIndex) => model.row(rowIndex),
+    semanticKey: input.semanticKey,
+  });
 }
 
 export function buildLegendEntryKeyIndex(

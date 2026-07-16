@@ -87,6 +87,51 @@ export function dataIdentityEpochToken(input: {
   ])}`;
 }
 
+/** Empty semantic-key bag when there is no render model. */
+function emptySemanticKeysResult(): ResolveSemanticKeysResult {
+  return {
+    keys: new Map<number, PropertyKey | null>(),
+    diagnostics: [],
+  };
+}
+
+export type SemanticKeysPlotModel = {
+  readonly candidates: {
+    readonly size: number;
+    candidate(id: number): SemanticKeyCandidate | null;
+  };
+  readonly lineage: { keys(lineageId: number): Iterable<number> };
+  row(rowIndex: number): Record<string, CellValue> | null;
+};
+
+/**
+ * Resolve semantic keys for a GGPlot host: null model → empty bag; else adapt
+ * the render model into `SemanticKeyModelView` and call `resolveSemanticKeys`.
+ */
+export function resolveSemanticKeysForPlot(input: {
+  readonly model: SemanticKeysPlotModel | null;
+  readonly layers: readonly SemanticKeyLayer[];
+  readonly datumKey: ResolveSemanticKeysInput["datumKey"];
+  readonly priorKeys: Map<string, PropertyKey>;
+  readonly dataToken: string;
+  readonly specToken: string;
+}): ResolveSemanticKeysResult {
+  if (input.model === null) return emptySemanticKeysResult();
+  const model = input.model;
+  return resolveSemanticKeys({
+    model: {
+      candidateCount: model.candidates.size,
+      candidate: (id) => model.candidates.candidate(id),
+      lineageKeys: (lineageId) => model.lineage.keys(lineageId),
+      row: (rowIndex) => model.row(rowIndex),
+      layers: input.layers,
+    },
+    datumKey: input.datumKey,
+    priorKeys: input.priorKeys,
+    rowIdentity: (rowIndex) => `${input.dataToken}:${input.specToken}:${rowIndex}`,
+  });
+}
+
 /**
  * Resolve durable semantic keys for interaction, emitting diagnostics in
  * encounter order: synthetic-rule missing lineage, per-candidate missing

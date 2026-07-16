@@ -96,6 +96,7 @@ describe("resolvePointerDownAction", () => {
       expect(resolvePointerDownAction(down({ activeTool: tool }))).toEqual({
         type: "begin-area",
         extendExisting: false,
+        emitSelectStart: tool === "select-area",
       });
     },
   );
@@ -109,7 +110,11 @@ describe("resolvePointerDownAction", () => {
           hasBrushDraft: true,
         }),
       ),
-    ).toEqual({ type: "begin-area", extendExisting: true });
+    ).toEqual({
+      type: "begin-area",
+      extendExisting: true,
+      emitSelectStart: false,
+    });
   });
 
   it("does not extend when awaiting second corner but draft is missing", () => {
@@ -121,7 +126,11 @@ describe("resolvePointerDownAction", () => {
           hasBrushDraft: false,
         }),
       ),
-    ).toEqual({ type: "begin-area", extendExisting: false });
+    ).toEqual({
+      type: "begin-area",
+      extendExisting: false,
+      emitSelectStart: false,
+    });
   });
 
   it("does not extend when draft exists but reducer is not awaiting second", () => {
@@ -133,7 +142,11 @@ describe("resolvePointerDownAction", () => {
           hasBrushDraft: true,
         }),
       ),
-    ).toEqual({ type: "begin-area", extendExisting: false });
+    ).toEqual({
+      type: "begin-area",
+      extendExisting: false,
+      emitSelectStart: true,
+    });
   });
 });
 

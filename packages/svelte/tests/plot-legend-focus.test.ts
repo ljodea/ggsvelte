@@ -5,6 +5,7 @@ import type { SceneLegend } from "@ggsvelte/core";
 import {
   buildInteractiveLegendEntries,
   buildLegendEntryKeyIndex,
+  buildLegendEntryKeyIndexForPlot,
   clampLegendRovingIndex,
   findLegendPressedIdentity,
   keysForLegendEntry,
@@ -125,6 +126,43 @@ describe("keysForLegendEntry", () => {
     const index = new Map<string, readonly PropertyKey[]>([["fill:0", Object.freeze(["a", "c"])]]);
     expect(keysForLegendEntry(index, { scale: "fill", entryIndex: 0 })).toEqual(["a", "c"]);
     expect(keysForLegendEntry(index, { scale: "fill", entryIndex: 1 })).toEqual([]);
+  });
+});
+
+describe("buildLegendEntryKeyIndexForPlot", () => {
+  it("returns an empty map when model is null", () => {
+    expect(
+      buildLegendEntryKeyIndexForPlot({
+        model: null,
+        semanticKey: () => "k",
+      }).size,
+    ).toBe(0);
+  });
+
+  it("indexes keys from id-ascending candidates with field mappings", () => {
+    const candidates = [
+      { layerIndex: 0, lineage: 0, rowIndex: 0 },
+      { layerIndex: 0, lineage: 1, rowIndex: 1 },
+    ];
+    const index = buildLegendEntryKeyIndexForPlot({
+      model: {
+        scene: { legends: [discreteFill] },
+        candidates: {
+          size: candidates.length,
+          candidate: (id) => candidates[id] ?? null,
+        },
+        layerFields: [[{ channel: "fill", field: "channel" }]],
+        layerScaledConstants: [undefined],
+        lineage: {
+          keys: (lineageId) => (lineageId === 0 ? [0] : lineageId === 1 ? [1] : []),
+        },
+        row: (rowIndex) =>
+          rowIndex === 0 ? { channel: "web" } : rowIndex === 1 ? { channel: "store" } : null,
+      },
+      semanticKey: (rowIndex) => (rowIndex === 0 ? "k-web" : rowIndex === 1 ? "k-store" : null),
+    });
+    expect(keysForLegendEntry(index, { scale: "fill", entryIndex: 0 })).toEqual(["k-web"]);
+    expect(keysForLegendEntry(index, { scale: "fill", entryIndex: 1 })).toEqual(["k-store"]);
   });
 });
 
