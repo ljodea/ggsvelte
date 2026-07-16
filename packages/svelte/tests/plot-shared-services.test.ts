@@ -75,7 +75,7 @@ describe("createSemanticKeyService", () => {
         { width: 400, height: 300 },
       );
     const model = reactiveBox(buildModel());
-    const { sourceIdentity } = createSourceIdentityTracker();
+    const tracker = createSourceIdentityTracker();
     const diagnostics: string[] = [];
 
     const { value: service, destroy } = withFlushedEffectRoot(() =>
@@ -89,7 +89,7 @@ describe("createSemanticKeyService", () => {
         datumKey: () => "id",
         data: () => mutableRows,
         spec: () => null,
-        sourceIdentity,
+        sourceIdentity: (value) => tracker.sourceIdentity(value),
         deliverDiagnostic: (d) => {
           diagnostics.push(d.code);
         },
@@ -113,7 +113,7 @@ describe("createSemanticKeyService", () => {
     // mutated row's key becomes null and an unstable-key diagnostic fires.
     // This also proves the re-render above genuinely re-resolved (the same
     // code path now observably reacts to the model swap).
-    mutableRows[0]!.id = "z";
+    mutableRows[0].id = "z";
     const beforeMutation = model.value;
     model.set(buildModel());
     flushSync();
@@ -143,7 +143,7 @@ describe("createSemanticKeyService", () => {
     const dataBox = reactiveBox(duplicateRows());
     const modelBox = reactiveBox<RenderModel | null>(buildModel(dataBox.value));
     const diagnostics: string[] = [];
-    const { sourceIdentity } = createSourceIdentityTracker();
+    const tracker = createSourceIdentityTracker();
 
     const { destroy } = withFlushedEffectRoot(() =>
       createSemanticKeyService({
@@ -156,7 +156,7 @@ describe("createSemanticKeyService", () => {
         datumKey: () => "id",
         data: () => dataBox.value,
         spec: () => null,
-        sourceIdentity,
+        sourceIdentity: (value) => tracker.sourceIdentity(value),
         deliverDiagnostic: (d) => {
           diagnostics.push(d.code);
         },

@@ -16,7 +16,7 @@ import type { PortableSpec } from "@ggsvelte/spec";
 import { untrack } from "svelte";
 
 import type { LegendFilterClause } from "./legend-filter.js";
-import type { ZoomDomains } from "./interaction.js";
+import type { ReadonlyZoomDomains } from "./interaction.js";
 import { isContainerWidthProp, resolvePlotSize } from "./plot-layout.js";
 import { createPaintLedger, isPlotReady } from "./plot-paint.js";
 
@@ -25,7 +25,7 @@ export type PlotRuntimeDeps = {
   heightProp: () => number | undefined;
   assembled: () => PortableSpec | null;
   effectiveSpec: () => PortableSpec | null;
-  effectiveZoomDomains: () => ZoomDomains | null;
+  effectiveZoomDomains: () => ReadonlyZoomDomains | null;
   effectiveLegendFilters: () => readonly LegendFilterClause[];
   root: () => HTMLDivElement | null;
   /** Component-provided until S4 owns zoom state. */
@@ -64,7 +64,8 @@ export function createPlotRuntime(deps: PlotRuntimeDeps): PlotRuntime {
   let containerHasPositiveWidth = $state(false);
 
   $effect(() => {
-    if (!isContainerWidthProp(deps.widthProp()) || deps.root() === null) return;
+    // No-op cleanup keeps every code path returning a teardown (consistent-return).
+    if (!isContainerWidthProp(deps.widthProp()) || deps.root() === null) return () => {};
     const el = deps.root()!;
     let frame = 0;
     const observer = new ResizeObserver((entries) => {

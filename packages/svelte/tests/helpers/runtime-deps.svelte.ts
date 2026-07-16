@@ -6,7 +6,7 @@
 import type { RenderModel } from "@ggsvelte/core";
 import type { PortableSpec } from "@ggsvelte/spec";
 
-import type { ZoomDomains } from "../../src/lib/interaction.js";
+import type { ReadonlyZoomDomains } from "../../src/lib/interaction.js";
 import type { LegendFilterClause } from "../../src/lib/legend-filter.js";
 import type { PlotRuntimeDeps } from "../../src/lib/plot-runtime.svelte.js";
 
@@ -15,7 +15,7 @@ export type ReactiveRuntimeDeps = PlotRuntimeDeps & {
   setHeight(v: number | undefined): void;
   setAssembled(v: PortableSpec | null): void;
   setEffectiveSpec(v: PortableSpec | null): void;
-  setZoomDomains(v: ZoomDomains | null): void;
+  setZoomDomains(v: ReadonlyZoomDomains | null): void;
   setFilters(v: readonly LegendFilterClause[]): void;
   setRoot(v: HTMLDivElement | null): void;
   setOnrender(v: ((model: RenderModel, spec: PortableSpec) => void) | undefined): void;
@@ -32,7 +32,7 @@ export function createReactiveRuntimeDeps(initial: {
   let height = $state<number | undefined>(initial.height ?? 320);
   let assembled = $state<PortableSpec | null>(initial.assembled);
   let effectiveSpec = $state<PortableSpec | null>(initial.effectiveSpec);
-  let zoomDomains = $state<ZoomDomains | null>(null);
+  let zoomDomains = $state<ReadonlyZoomDomains | null>(null);
   let filters = $state.raw<readonly LegendFilterClause[]>([]);
   let root = $state<HTMLDivElement | null>(null);
   let onrender = $state<((model: RenderModel, spec: PortableSpec) => void) | undefined>();
@@ -46,7 +46,9 @@ export function createReactiveRuntimeDeps(initial: {
     effectiveZoomDomains: () => zoomDomains,
     effectiveLegendFilters: () => filters,
     root: () => root,
-    resetZoom: () => resetZoom(),
+    resetZoom: () => {
+      resetZoom();
+    },
     onrender: () => onrender,
     setWidth: (v) => {
       width = v;

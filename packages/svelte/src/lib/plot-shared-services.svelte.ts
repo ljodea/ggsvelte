@@ -99,10 +99,7 @@ export function createSemanticKeyService(deps: SemanticKeyServiceDeps): Semantic
               row: (rowIndex) => model.row(rowIndex),
             },
       layers: deps.assembled()?.layers ?? [],
-      datumKey: deps.datumKey() as
-        | string
-        | ((row: never, index: number) => PropertyKey)
-        | undefined,
+      datumKey: deps.datumKey(),
       priorKeys,
       dataToken: deps.sourceIdentity(deps.data()),
       specToken: deps.sourceIdentity(deps.spec()),

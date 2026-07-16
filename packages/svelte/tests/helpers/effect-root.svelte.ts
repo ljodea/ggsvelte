@@ -10,7 +10,7 @@ import { flushSync } from "svelte";
  * Does NOT flush — callers that need effects to run should call `flushSync`
  * after construction (or use `withFlushedEffectRoot`).
  */
-export function withEffectRoot<T>(setup: () => T): { readonly value: T; destroy(): void } {
+export function withEffectRoot<T>(setup: () => T): { readonly value: T; destroy: () => void } {
   let value!: T;
   const destroy = $effect.root(() => {
     value = setup();
@@ -19,7 +19,10 @@ export function withEffectRoot<T>(setup: () => T): { readonly value: T; destroy(
 }
 
 /** Like `withEffectRoot`, then `flushSync` so registered effects run once. */
-export function withFlushedEffectRoot<T>(setup: () => T): { readonly value: T; destroy(): void } {
+export function withFlushedEffectRoot<T>(setup: () => T): {
+  readonly value: T;
+  destroy: () => void;
+} {
   const handle = withEffectRoot(setup);
   flushSync();
   return handle;

@@ -34,9 +34,9 @@ describe("GGPlot.svelte size ratchet", () => {
   it("records strictly decreasing ceilings", () => {
     for (let i = 1; i < CEILINGS.length; i++) {
       expect(
-        CEILINGS[i]!.ceiling,
-        `ceiling for ${CEILINGS[i]!.slice} must be < ${CEILINGS[i - 1]!.slice}`,
-      ).toBeLessThan(CEILINGS[i - 1]!.ceiling);
+        CEILINGS[i].ceiling,
+        `ceiling for ${CEILINGS[i].slice} must be < ${CEILINGS[i - 1].slice}`,
+      ).toBeLessThan(CEILINGS[i - 1].ceiling);
     }
   });
 

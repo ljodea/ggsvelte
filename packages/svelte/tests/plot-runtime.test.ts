@@ -136,7 +136,9 @@ describe("createPlotRuntime model production", () => {
         assembled: minimalSpec,
         effectiveSpec: minimalSpec,
       });
-      deps.setResetZoom(resetZoom);
+      deps.setResetZoom(() => {
+        resetZoom();
+      });
       const rt = createPlotRuntime(deps);
       rt.registerModelEffects();
       rt.registerLateEffects();
@@ -317,7 +319,7 @@ describe("createPlotRuntime model production", () => {
       constructor(cb: ResizeObserverCallback) {
         void cb;
       }
-    } as unknown as typeof ResizeObserver;
+    };
     try {
       const { value: runtime, destroy } = withFlushedEffectRoot(() => {
         const deps = createReactiveRuntimeDeps({
