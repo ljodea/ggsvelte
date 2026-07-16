@@ -11,7 +11,8 @@ import {
   resolveColorScale,
   trainAxis,
 } from "../src/pipeline/scale-training.ts";
-import { runPipeline } from "../src/pipeline.ts";
+import { continuousDomainOf } from "../src/pipeline/scale-axis-domain.ts";
+import { PipelineError, runPipeline } from "../src/pipeline.ts";
 import { EDITION_DEFAULTS } from "../src/editions.ts";
 import { ColumnTable } from "../src/table.ts";
 import type { LayerBinding, LayerFrame, PipelineWarning, Advisory } from "../src/pipeline/types.ts";
@@ -126,6 +127,34 @@ describe("trainAxis", () => {
       expect.unreachable("should throw");
     } catch (e) {
       expect((e as { code: string }).code).toBe("invalid-scale-domain");
+    }
+  });
+});
+
+describe("continuousDomainOf", () => {
+  it("returns undefined when domain is omitted", () => {
+    expect(continuousDomainOf(undefined, "x")).toBeUndefined();
+    expect(continuousDomainOf({}, "y")).toBeUndefined();
+  });
+
+  it("parses [min, max] and swaps inverted pairs", () => {
+    expect(continuousDomainOf({ domain: [0, 10] }, "x")).toEqual([0, 10]);
+    expect(continuousDomainOf({ domain: [10, 0] }, "y")).toEqual([0, 10]);
+  });
+
+  it("throws invalid-scale-domain for wrong arity or non-finite values", () => {
+    try {
+      continuousDomainOf({ domain: [1] as unknown as [number, number] }, "x");
+      expect.unreachable("should throw");
+    } catch (e) {
+      expect(e).toBeInstanceOf(PipelineError);
+      expect((e as PipelineError).code).toBe("invalid-scale-domain");
+    }
+    try {
+      continuousDomainOf({ domain: ["nope", "still-nope"] }, "y");
+      expect.unreachable("should throw");
+    } catch (e) {
+      expect((e as PipelineError).code).toBe("invalid-scale-domain");
     }
   });
 });
