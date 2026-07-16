@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784182072277,
+  "lastUpdate": 1784183804009,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -7580,6 +7580,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 160.4191,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "f4fcbf8c731b7c0c987baee59e0205ddc1e53a2b",
+          "message": "fix: harden manual-AT alias CSS combinator and rename audits after #54 (#72)\n\n- Treat star combinator CSS selectors (* +, * >, * ~) as substantive\n  runtime diffs, not JSDoc noise\n- Collect both sides of renames via git diff --name-status so moves out\n  of packages/{svelte,core}/src still fail the packaging-only alias audit\n\nPost-merge Codex also asked to bind aliases to the CI checkout tip; that\nis out of scope for historical packaging evidence (releaseCommit is the\npublished artifact, not every same-version main tip) and is already\ncovered by packageVersionAtCommit binding.",
+          "timestamp": "2026-07-16T01:36:00-05:00",
+          "tree_id": "f5c2eac0065fd937e8e03079aed02389843fc6eb",
+          "url": "https://github.com/ljodea/ggsvelte/commit/f4fcbf8c731b7c0c987baee59e0205ddc1e53a2b"
+        },
+        "date": 1784183803010,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.6733,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.2584,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 12.4848,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 17.1734,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 102.8388,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 143.4966,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.2113,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.4993,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 99.1137,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 130.2673,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 12.1181,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 11.6434,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 132.8559,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.6673,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 29.6317,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 6.9838,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 38.5371,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 660.4099,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 158.1301,
             "unit": "ms"
           }
         ]
