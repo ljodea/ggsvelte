@@ -112,6 +112,7 @@
   } from "./plot-geometry.js";
   import { resolveSurfaceKeyAction } from "./plot-surface-keyboard.js";
   import {
+    buildInspectionCandidateRef,
     resolveInspectionCompleteness,
     resolveInspectionEmitAction,
     resolveInspectionMode,
@@ -143,6 +144,7 @@
     resolveLegendPointerUpAction,
     resolveLegendPreviewDismissAction,
     shouldClearLegendPreviewOnBlur,
+    shouldEmitLegendFocusClear,
     shouldRenderInteractionLiveRegion,
   } from "./plot-legend-surface.js";
   import {
@@ -205,6 +207,7 @@
   } from "./plot-selection.js";
   import {
     createSourceIdentityTracker,
+    dataIdentityEpochToken,
     resolveSemanticKeys,
   } from "./plot-semantic-keys.js";
   import { themeTokensToCss } from "./plot-theme-css.js";
@@ -439,12 +442,11 @@
   // Tracker is owned for the component lifetime (never cleared).
   const { sourceIdentity } = createSourceIdentityTracker();
   const dataIdentityEpoch = $derived(
-    assembled === null
-      ? "no-data"
-      : `${sourceIdentity(data)}:${sourceIdentity(spec)}:${JSON.stringify([
-          assembled.data ?? null,
-          assembled.datasets ?? null,
-        ])}`,
+    dataIdentityEpochToken({
+      assembled,
+      dataToken: sourceIdentity(data),
+      specToken: sourceIdentity(spec),
+    }),
   );
 
   // ------------------------------------------------- container width (RO)
@@ -1063,15 +1065,16 @@
   }
 
   function clearLegendFocus(source: InteractionSource): void {
-    const hadFocus =
-      legendPreview !== null ||
-      legendCommitted !== null ||
-      effectiveEmphasisKeys.length > 0;
+    const emitClear = shouldEmitLegendFocusClear({
+      hasPreview: legendPreview !== null,
+      hasCommitted: legendCommitted !== null,
+      emphasisKeyCount: effectiveEmphasisKeys.length,
+    });
     legendPreview = null;
     legendCommitted = null;
     if (interaction === undefined) localEmphasisKeys = [];
     else interaction.clearEmphasis({ scope: resolvedInteractionScope, source });
-    if (hadFocus)
+    if (emitClear)
       emitLegendFocus({ type: "legend-focus", phase: "clear", source });
   }
 
@@ -1568,13 +1571,14 @@
           return;
         }
         const next = resolved.snapshot;
-        const candidateRef = {
+        const candidateRef = buildInspectionCandidateRef({
           epoch: model?.runId ?? 0,
-          id: candidate?.id ?? traversalHits.indexOf(hit!),
+          candidateId: candidate?.id,
+          fallbackId: () => traversalHits.indexOf(hit!),
           panelId: next.panelId,
           x: hit!.x,
           y: hit!.y,
-        };
+        });
         reducer.dispatch({ type: "inspect", candidate: candidateRef, source });
         if (state === "pinned")
           reducer.dispatch({ type: "toggle-pin", source });
