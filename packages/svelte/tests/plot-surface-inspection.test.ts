@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildInspectionCandidateRef,
+  buildQueuedPointerInspection,
   resolveInspectionCompleteness,
   resolveInspectionEmitAction,
   resolveInspectionMode,
@@ -236,6 +237,54 @@ describe("resolveSetInspectionAction", () => {
         }),
       ),
     ).toEqual({ type: "ignore" });
+  });
+});
+
+describe("buildQueuedPointerInspection", () => {
+  const hit = {
+    layerIndex: 0,
+    panelIndex: 0,
+    rowIndex: 1,
+    x: 10,
+    y: 20,
+    kind: "point" as const,
+  };
+  const match = {
+    id: 3,
+    mode: "xy" as const,
+    autoMode: "xy" as const,
+    layerIndex: 0,
+    panelIndex: 0,
+    rowIndex: 1,
+    lineage: 0,
+    x: 10,
+    y: 20,
+    kind: "point" as const,
+  };
+
+  it("omits mode/candidate when nearest match is null", () => {
+    expect(
+      buildQueuedPointerInspection({
+        hit,
+        source: "pointer",
+        match: null,
+      }),
+    ).toEqual({ hit, source: "pointer" });
+  });
+
+  it("couples concreteMode and candidate from the same match object", () => {
+    expect(
+      buildQueuedPointerInspection({
+        hit,
+        source: "touch",
+        match,
+      }),
+    ).toEqual({
+      hit,
+      source: "touch",
+      concreteMode: "xy",
+      candidate: match,
+    });
   });
 });
 

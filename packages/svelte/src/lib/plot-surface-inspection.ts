@@ -3,9 +3,43 @@
  * Callers own queue mutation, setInspection, and reducer side effects.
  */
 
+import type { CandidateFacts, CandidateMatch } from "@ggsvelte/core";
+import type { SceneHit } from "@ggsvelte/core/dom";
+
 import type { InteractionSource } from "./interaction.js";
 
 type InspectionHostState = "none" | "transient" | "pinned";
+
+/**
+ * Host queue payload for pointer-move / touch-inspect frames and pending pin restore.
+ * `concreteMode` + `candidate` are coupled: both present only when nearest match exists.
+ */
+export type QueuedPointerInspection = {
+  hit: SceneHit | null;
+  source: InteractionSource;
+  concreteMode?: "exact" | "x" | "y" | "xy";
+  candidate?: CandidateFacts;
+};
+
+/**
+ * Build the queued pointer-inspect payload.
+ * Match is a single object: mode and candidate always come from the same nearest hit.
+ */
+export function buildQueuedPointerInspection(input: {
+  readonly hit: SceneHit | null;
+  readonly source: InteractionSource;
+  readonly match: CandidateMatch | null;
+}): QueuedPointerInspection {
+  if (input.match === null) {
+    return { hit: input.hit, source: input.source };
+  }
+  return {
+    hit: input.hit,
+    source: input.source,
+    concreteMode: input.match.mode,
+    candidate: input.match,
+  };
+}
 
 export type QueuedInspectFrameInput = {
   /** True when a snapshotted `queuedPointerInspection` payload exists. */

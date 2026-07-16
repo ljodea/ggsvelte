@@ -7,6 +7,15 @@ import { uniqueKeysFromRowIndexes } from "./plot-selection.js";
 /** Pointer brush-end gate only. Keyboard Enter/Space commits any size. */
 export const BRUSH_MIN_SPAN_PX = 4;
 
+/**
+ * Whether a finished interval selection should remain painted as committed.
+ * Host: `interactionConfig.select?.persistent === true` keeps the end event;
+ * otherwise clear the committed bag (event is still emitted).
+ */
+export function persistentSelectionOrNull<T>(persistent: boolean | undefined, event: T): T | null {
+  return persistent === true ? event : null;
+}
+
 export type SelectAreaMode = "x" | "y" | "xy";
 
 export type IntervalDomain = {

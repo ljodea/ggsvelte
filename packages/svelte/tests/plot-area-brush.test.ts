@@ -4,6 +4,7 @@ import {
   brushAtPoint,
   brushWithEnd,
   evaluatePointerBrushEnd,
+  initialBrushRect,
   nudgeBrushEnd,
   panelCenterAnchor,
 } from "../src/lib/plot-area-brush.js";
@@ -13,6 +14,35 @@ const panel = { x: 10, y: 20, width: 100, height: 50 };
 describe("brushAtPoint", () => {
   it("creates a degenerate brush", () => {
     expect(brushAtPoint({ x: 3, y: 4 })).toEqual({ x0: 3, y0: 4, x1: 3, y1: 4 });
+  });
+});
+
+describe("initialBrushRect", () => {
+  it("starts a degenerate brush when not extending or existing is null", () => {
+    expect(
+      initialBrushRect({
+        extendExisting: false,
+        existing: { x0: 1, y0: 2, x1: 3, y1: 4 },
+        point: { x: 9, y: 8 },
+      }),
+    ).toEqual({ x0: 9, y0: 8, x1: 9, y1: 8 });
+    expect(
+      initialBrushRect({
+        extendExisting: true,
+        existing: null,
+        point: { x: 5, y: 6 },
+      }),
+    ).toEqual({ x0: 5, y0: 6, x1: 5, y1: 6 });
+  });
+
+  it("extends the free corner of an existing draft", () => {
+    expect(
+      initialBrushRect({
+        extendExisting: true,
+        existing: { x0: 1, y0: 2, x1: 3, y1: 4 },
+        point: { x: 9, y: 8 },
+      }),
+    ).toEqual({ x0: 1, y0: 2, x1: 9, y1: 8 });
   });
 });
 
