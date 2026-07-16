@@ -7,6 +7,7 @@ import {
   createSourceIdentityTracker,
   dataIdentityEpochToken,
   resolveSemanticKeys,
+  resolveSemanticKeysForPlot,
   type SemanticKeyCandidate,
   type SemanticKeyModelView,
 } from "../src/lib/plot-semantic-keys.js";
@@ -64,6 +65,43 @@ describe("dataIdentityEpochToken", () => {
         specToken: "s",
       }),
     ).toBe(`d:s:${JSON.stringify([null, null])}`);
+  });
+});
+
+describe("resolveSemanticKeysForPlot", () => {
+  it("returns an empty bag when model is null", () => {
+    const result = resolveSemanticKeysForPlot({
+      model: null,
+      layers: [],
+      datumKey: "id",
+      priorKeys: new Map(),
+      dataToken: "d",
+      specToken: "s",
+    });
+    expect(result.keys.size).toBe(0);
+    expect(result.diagnostics).toEqual([]);
+  });
+
+  it("adapts a plot model and resolves keys with data/spec row identity tokens", () => {
+    const priorKeys = new Map<string, PropertyKey>();
+    const candidates = [{ id: 0, rowIndex: 0, layerIndex: 0, lineage: 0 }];
+    const result = resolveSemanticKeysForPlot({
+      model: {
+        candidates: {
+          size: candidates.length,
+          candidate: (id) => candidates[id] ?? null,
+        },
+        lineage: { keys: (lineageId) => (lineageId === 0 ? [0] : []) },
+        row: (rowIndex) => (rowIndex === 0 ? { id: "row-a" } : null),
+      },
+      layers: [{ geom: "point" }],
+      datumKey: "id",
+      priorKeys,
+      dataToken: "d1",
+      specToken: "s1",
+    });
+    expect(result.keys.get(0)).toBe("row-a");
+    expect(priorKeys.get("d1:s1:0")).toBe("row-a");
   });
 });
 

@@ -17,7 +17,12 @@ export type SurfacePointerDownInput = {
 
 export type SurfacePointerDownAction =
   | { readonly type: "touch-inspect-start" }
-  | { readonly type: "begin-area"; readonly extendExisting: boolean }
+  | {
+      readonly type: "begin-area";
+      readonly extendExisting: boolean;
+      /** Emit select-area start event (not zoom; not second-corner await). */
+      readonly emitSelectStart: boolean;
+    }
   | { readonly type: "none" };
 
 /**
@@ -37,6 +42,7 @@ export function resolvePointerDownAction(input: SurfacePointerDownInput): Surfac
   return {
     type: "begin-area",
     extendExisting: areaAwaitingSecond && hasBrushDraft,
+    emitSelectStart: activeTool === "select-area" && !areaAwaitingSecond,
   };
 }
 
