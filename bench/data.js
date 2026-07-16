@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784211705652,
+  "lastUpdate": 1784212131597,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -13649,6 +13649,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 164.8568,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "dd532a18cdd517c20c3afe60beb4c2e985984e7e",
+          "message": "refactor(core): split geometry paths, axis training, and panel chrome (#126)\n\nExtract coord-flip and mark-count helpers from geometry.ts; line vs area\npath builders from geometry-paths; axis types/domain from scale-axis-train;\nand labs/display/legends from panel-layout-chrome. Facades keep import\npaths stable. Extend scale-training characterization for continuousDomainOf.",
+          "timestamp": "2026-07-16T09:28:13-05:00",
+          "tree_id": "cd1be338f566ab4043b96b94f7efe2c4d3b6ea70",
+          "url": "https://github.com/ljodea/ggsvelte/commit/dd532a18cdd517c20c3afe60beb4c2e985984e7e"
+        },
+        "date": 1784212131165,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.8004,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.3158,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 9.1608,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 13.4313,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 84.4585,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 118.7145,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.0322,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2449,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 95.677,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 111.7889,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.4353,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 13.6049,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 119.2463,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7397,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 27.9077,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.4819,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 33.4141,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 599.2876,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 162.0084,
             "unit": "ms"
           }
         ]
