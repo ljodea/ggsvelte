@@ -127,6 +127,8 @@
     resolveLegendClickAction,
     resolveLegendKeyAction,
     resolveLegendPointerUpAction,
+    shouldClearLegendPreviewOnBlur,
+    shouldRenderInteractionLiveRegion,
   } from "./plot-legend-surface.js";
   import {
     BRUSH_SECOND_CORNER_ANNOUNCEMENT,
@@ -197,6 +199,9 @@
     keysForLegendEntry,
     legendInteractionSource,
     moveLegendRovingIndex,
+    reconcileLegendPreview,
+    resolveLegendEmphasisKeys,
+    resolveLegendPreviewKeysDecision,
     samePropertyKeySet,
     type LegendEntryAction,
     type LegendEntryIdentity,
@@ -698,11 +703,15 @@
   });
   const effectiveEmphasisKeys: readonly PropertyKey[] = $derived.by(() => {
     void controllerRevision;
-    return (
-      legendPreview?.keys ??
-      interaction?.emphasized(resolvedInteractionScope) ??
-      localEmphasisKeys
-    );
+    return resolveLegendEmphasisKeys({
+      legendFocusEnabled: interactionConfig.legendFocus !== null,
+      previewKeys: legendPreview?.keys ?? null,
+      controllerKeys:
+        interaction === undefined
+          ? null
+          : interaction.emphasized(resolvedInteractionScope),
+      localKeys: localEmphasisKeys,
+    });
   });
   let committedInterval = $state<IntervalSelection | null>(null);
   const zoomHasSupportedChannel = $derived.by(() => {
@@ -991,6 +1000,8 @@
           }
         },
         layerFields: (layerIndex) => current.layerFields[layerIndex],
+        layerScaledConstant: (layerIndex, channel) =>
+          current.layerScaledConstants[layerIndex]?.[channel],
         lineageKeys: (lineageId) => current.lineage.keys(lineageId),
         row: (rowIndex) => current.row(rowIndex),
         semanticKey: (rowIndex) => semanticKeys.keys.get(rowIndex),
@@ -1018,9 +1029,13 @@
         emitLegendFocus({ type: "legend-focus", phase: "clear", source });
       return;
     }
-    const keys = keysForLegend(action);
-    if (keys.length === 0) return;
-    legendPreview = { action, keys };
+    const decision = resolveLegendPreviewKeysDecision(keysForLegend(action));
+    if (decision.type === "clear") {
+      // Empty domain entry: do not leave the previous entry's preview active.
+      previewLegend(null);
+      return;
+    }
+    legendPreview = { action, keys: decision.keys };
     emitLegendFocus({
       type: "legend-focus",
       phase: "change",
@@ -1029,7 +1044,7 @@
       scale: action.identity.scale as "color" | "fill",
       value: action.entry.value as CellValue,
       label: action.entry.label,
-      keys,
+      keys: decision.keys,
     });
   }
 
@@ -1205,6 +1220,40 @@
     }
   });
 
+  // Reconcile transient preview when data/domain reshuffles entry membership.
+  $effect(() => {
+    const preview = legendPreview;
+    if (preview === null) return;
+    const next = reconcileLegendPreview({
+      preview: { identity: preview.action.identity, keys: preview.keys },
+      entries: interactiveLegendEntries,
+      keyIndex: legendEntryKeyIndex,
+    });
+    if (next === null) {
+      previewLegend(null);
+      return;
+    }
+    if (samePropertyKeySet(next.keys, preview.keys)) return;
+    legendPreview = {
+      action: { ...preview.action, identity: next.identity },
+      keys: next.keys,
+    };
+  });
+
+  // Drop chart-local emphasis when legend focus is turned off at runtime.
+  $effect(() => {
+    if (interactionConfig.legendFocus !== null) return;
+    if (
+      legendPreview === null &&
+      localEmphasisKeys.length === 0 &&
+      legendCommitted === null
+    )
+      return;
+    legendPreview = null;
+    legendCommitted = null;
+    if (interaction === undefined) localEmphasisKeys = [];
+  });
+
   function legendAction(
     index: number,
     source: LegendEntryAction["source"],
@@ -1313,8 +1362,10 @@
 
   function onLegendBlur(event: FocusEvent): void {
     if (
-      event.relatedTarget instanceof Element &&
-      event.relatedTarget.matches("[data-gg-legend-target]")
+      !shouldClearLegendPreviewOnBlur({
+        relatedTarget: event.relatedTarget,
+        root,
+      })
     )
       return;
     previewLegend(null);
@@ -2370,17 +2421,6 @@
           ? "No active datum"
           : datumLabel(inspection.focus.row)}
       </p>
-      <div
-        id={`${plotId}-live`}
-        class="gg-sr-only"
-        aria-live="polite"
-        aria-atomic="true"
-      >
-        {interactionAnnouncement ||
-          (inspection?.source === "keyboard" || inspection?.source === "touch"
-            ? inspectionLiveText(inspection)
-            : "")}
-      </div>
       {#if areaAwaitingSecond}
         <p class="gg-area-instruction">Choose opposite corner</p>
       {/if}
@@ -2408,6 +2448,19 @@
           onclose={(source) => closeInspection(source, true)}
         />
       {/if}
+    {/if}
+    {#if shouldRenderInteractionLiveRegion( { surfaceInteractive, legendFocusEnabled: interactionConfig.legendFocus !== null } )}
+      <div
+        id={`${plotId}-live`}
+        class="gg-sr-only"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {interactionAnnouncement ||
+          (inspection?.source === "keyboard" || inspection?.source === "touch"
+            ? inspectionLiveText(inspection)
+            : "")}
+      </div>
     {/if}
     {#if emptyPlot}
       <div class="gg-empty-state" role="status">No data to display</div>

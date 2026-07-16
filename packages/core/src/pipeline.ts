@@ -210,6 +210,11 @@ export interface RenderModel {
   layerBackends: LayerBackend[];
   /** Field-mapped channels per layer (drives default tooltip content). */
   layerFields: MappedField[][];
+  /**
+   * Scaled constant aes values per layer (`{ value, scale: true }` on color/fill).
+   * Used by legend-focus key indexing when no field mapping exists for a scale.
+   */
+  layerScaledConstants: ReadonlyArray<Readonly<Partial<Record<string, CellValue>>>>;
   /** Stable baseline plus the domains actually used for this render. */
   domains: Readonly<{ baseline: ScaleDomainSnapshot; effective: ScaleDomainSnapshot }>;
   /** Interned source-row memberships. Public adapters resolve these through keys. */
@@ -3435,6 +3440,19 @@ export function runPipeline(spec: SpecInput | PortableSpec, options: RunOptions)
     return fields;
   });
 
+  // Legend-focus contract: scaled constant channels with no field mapping.
+  const layerScaledConstants: ReadonlyArray<Readonly<Partial<Record<string, CellValue>>>> =
+    Object.freeze(
+      normalized.layers.map((_layer, index) => {
+        const binding = bindings[index];
+        if (binding === undefined) return Object.freeze({});
+        const out: Partial<Record<string, CellValue>> = {};
+        if (binding.color.scaledConstant !== null) out["color"] = binding.color.scaledConstant;
+        if (binding.fill.scaledConstant !== null) out["fill"] = binding.fill.scaledConstant;
+        return Object.freeze(out);
+      }),
+    );
+
   const state: Record<string, ScaleState> = {};
   if (colorResolution.state !== null) state["color"] = colorResolution.state;
   if (fillResolution.state !== null) state["fill"] = fillResolution.state;
@@ -3720,6 +3738,7 @@ export function runPipeline(spec: SpecInput | PortableSpec, options: RunOptions)
     runId,
     layerBackends,
     layerFields,
+    layerScaledConstants,
     domains: Object.freeze({ baseline: baselineDomains, effective: effectiveDomains }),
     lineage,
     candidates,

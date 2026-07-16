@@ -52,6 +52,12 @@ export type LegendKeyIndexAdapter = {
   /** Candidates in id-ascending order (null candidates already filtered). */
   candidates(): Iterable<LegendKeyCandidate>;
   layerFields(layerIndex: number): readonly LegendMappedField[] | undefined;
+  /**
+   * Scaled constant for a layer channel (`aes: { color: { value, scale: true } }`).
+   * When present and no field mapping exists, every row of the layer matches
+   * the legend entry equal to this value.
+   */
+  layerScaledConstant?(layerIndex: number, channel: string): unknown;
   lineageKeys(lineageId: number): Iterable<number>;
   row(rowIndex: number): Record<string, CellValue> | null;
   /** Semantic key for a source row; null/undefined rows are skipped. */
@@ -171,13 +177,28 @@ export function findLegendPressedIdentity(
  * - Pre-seed empty buckets for every discrete entry (unmatched stay []).
  * - Skip ramp legends and null candidates.
  * - Map only non-stat fields whose channel equals the legend scale.
+ * - When no field mapping exists, fall back to layerScaledConstant for that
+ *   channel (scaled constant aes) and match the constant against entries.
  * - Row membership = lineage row indexes (insertion order) then candidate
  *   rowIndex if not already present.
- * - Visit key is scale:layerIndex:field:rowIndex (dedupe repeated candidates).
- * - Skip null rows and null/undefined semantic keys.
+ * - Visit key is scale:layerIndex:field|const:rowIndex (dedupe repeated candidates).
+ * - Skip null rows (field path) / null keys; constant path only needs keys.
  * - Match entry values with legendValueEqual (NaN, Date, -0/0).
  * - Final keys are first-seen unique order, frozen.
  */
+/** Row field value or scaled constant; `skip` when the row is missing. */
+function resolveLegendMatchValue(
+  adapter: LegendKeyIndexAdapter,
+  field: string | undefined,
+  scaledConstant: unknown,
+  rowIndex: number,
+): { readonly skip: true } | { readonly skip: false; readonly value: unknown } {
+  if (field === undefined) return { skip: false, value: scaledConstant };
+  const row = adapter.row(rowIndex);
+  if (row === null) return { skip: true };
+  return { skip: false, value: row[field] };
+}
+
 export function buildLegendEntryKeyIndex(
   adapter: LegendKeyIndexAdapter,
 ): ReadonlyMap<string, readonly PropertyKey[]> {
@@ -194,18 +215,24 @@ export function buildLegendEntryKeyIndex(
       const field = adapter
         .layerFields(candidate.layerIndex)
         ?.find((mapped) => mapped.channel === sceneLegend.scale && mapped.source !== "stat")?.field;
-      if (field === undefined) continue;
+      const scaledConstant =
+        field === undefined
+          ? adapter.layerScaledConstant?.(candidate.layerIndex, sceneLegend.scale)
+          : undefined;
+      if (field === undefined && scaledConstant === undefined) continue;
       const sourceRows = new Set(adapter.lineageKeys(candidate.lineage));
       if (candidate.rowIndex !== null) sourceRows.add(candidate.rowIndex);
       for (const rowIndex of sourceRows) {
-        const visit = `${sceneLegend.scale}:${String(candidate.layerIndex)}:${field}:${String(rowIndex)}`;
+        const visitField = field ?? `const:${String(scaledConstant)}`;
+        const visit = `${sceneLegend.scale}:${String(candidate.layerIndex)}:${visitField}:${String(rowIndex)}`;
         if (visited.has(visit)) continue;
         visited.add(visit);
-        const row = adapter.row(rowIndex);
         const key = adapter.semanticKey(rowIndex);
-        if (row === null || key === null || key === undefined) continue;
+        if (key === null || key === undefined) continue;
+        const matched = resolveLegendMatchValue(adapter, field, scaledConstant, rowIndex);
+        if (matched.skip) continue;
         const entryIndex = sceneLegend.entries.findIndex((entry) =>
-          legendValueEqual(entry.value, row[field]),
+          legendValueEqual(entry.value, matched.value),
         );
         if (entryIndex < 0) continue;
         index.get(legendIdentityKey({ scale: sceneLegend.scale, entryIndex }))?.push(key);
@@ -215,4 +242,58 @@ export function buildLegendEntryKeyIndex(
   return new Map(
     [...index].map(([identity, keys]) => [identity, Object.freeze([...new Set(keys)])]),
   );
+}
+
+/**
+ * Decide what a legend preview attempt should do with resolved keys.
+ * Empty key sets clear any active preview (empty domain entry / stale target)
+ * rather than leaving the previous entry highlighted.
+ */
+export function resolveLegendPreviewKeysDecision(
+  keys: readonly PropertyKey[],
+): { readonly type: "set"; readonly keys: readonly PropertyKey[] } | { readonly type: "clear" } {
+  return keys.length === 0 ? { type: "clear" } : { type: "set", keys };
+}
+
+/**
+ * Emphasis keys shown while legend focus is enabled vs disabled.
+ * When disabled, chart-local preview and local commits must not mute the plot
+ * (controls are gone). Controller emphasis still flows through when present.
+ */
+export function resolveLegendEmphasisKeys(input: {
+  readonly legendFocusEnabled: boolean;
+  readonly previewKeys: readonly PropertyKey[] | null;
+  readonly controllerKeys: readonly PropertyKey[] | null;
+  readonly localKeys: readonly PropertyKey[];
+}): readonly PropertyKey[] {
+  if (!input.legendFocusEnabled) return input.controllerKeys ?? [];
+  return input.previewKeys ?? input.controllerKeys ?? input.localKeys;
+}
+
+export type LegendPreviewState = {
+  readonly identity: LegendEntryIdentity;
+  readonly keys: readonly PropertyKey[];
+};
+
+/**
+ * Reconcile a transient preview against the current entry list / key index.
+ * Clears when the identity disappears or its keys empty; refreshes keys when
+ * membership changes for the same identity.
+ */
+export function reconcileLegendPreview(input: {
+  readonly preview: LegendPreviewState | null;
+  readonly entries: readonly InteractiveLegendEntry[];
+  readonly keyIndex: ReadonlyMap<string, readonly PropertyKey[]>;
+}): LegendPreviewState | null {
+  if (input.preview === null) return null;
+  const current = input.entries.find(
+    ({ identity }) =>
+      identity.scale === input.preview!.identity.scale &&
+      identity.entryIndex === input.preview!.identity.entryIndex,
+  );
+  if (current === undefined) return null;
+  const keys = keysForLegendEntry(input.keyIndex, current.identity);
+  if (keys.length === 0) return null;
+  if (samePropertyKeySet(keys, input.preview.keys)) return input.preview;
+  return { identity: current.identity, keys };
 }
