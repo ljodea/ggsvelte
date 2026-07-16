@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784210058361,
+  "lastUpdate": 1784210359487,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -13054,6 +13054,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 163.3885,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "efa0ec5c777d8aea6511a67bb7acb5e40a6428e2",
+          "message": "refactor(core): split candidate datum, layout chrome, and smooth geometry (#119)\n\nExtract frame-row mapping and aggregate lineage filtering from candidate\ndatums; pull labs/formatters/legends into panel-layout chrome; split smooth\nribbon vs fitted line. Tests pin bin lineage closedness, legend margin, and\nsmooth SE ribbon batches.",
+          "timestamp": "2026-07-16T08:58:35-05:00",
+          "tree_id": "6ab3f604bea94c6ed5ee490c583c51ecfb254525",
+          "url": "https://github.com/ljodea/ggsvelte/commit/efa0ec5c777d8aea6511a67bb7acb5e40a6428e2"
+        },
+        "date": 1784210358888,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 1.9363,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.1439,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 7.467,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 11.1862,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 68.5731,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 98.0084,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 0.7649,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 0.9654,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 70.6047,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 88.5914,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 8.1388,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 7.7592,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 93.252,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.5718,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 20.8081,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 4.5626,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 26.6746,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 686.6527,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 105.9831,
             "unit": "ms"
           }
         ]
