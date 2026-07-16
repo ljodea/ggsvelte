@@ -95,7 +95,7 @@
   .status,
   .summary {
     margin: 0;
-    color: var(--text, #17202a);
+    color: var(--fg, #17202a);
     font: 0.86rem/1.4 var(--gg-font-family, system-ui, sans-serif);
   }
 
