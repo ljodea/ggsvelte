@@ -1965,31 +1965,30 @@
         reducer.cancelScheduledPointer();
         const source = interactionSourceFromPointerType(event.pointerType);
         const ended = evaluatePointerBrushEnd(brushRect, plotPoint(event));
+        // Pure table carries rect/corners — no host ended.kind re-narrow.
         const finish = resolveFinishBrushAction({
-          endedKind: ended.kind,
+          ended,
           activeTool,
         });
         switch (finish.type) {
           case "keep-second-corner":
-            // ended.kind is too-small when pure returns keep-second-corner.
-            if (ended.kind === "too-small") brushRect = ended.corners;
+            brushRect = finish.corners;
             announceInteraction(BRUSH_SECOND_CORNER_ANNOUNCEMENT);
             break;
-          case "select-end":
+          case "select-end": {
             brushRect = null;
-            if (ended.kind === "commit") {
-              const eventValue = selectionEvent("end", ended.rect, source);
-              committedInterval = persistentSelectionOrNull(
-                interactionConfig.select?.persistent,
-                eventValue,
-              );
-              emitSelection(eventValue);
-            }
+            const eventValue = selectionEvent("end", finish.rect, source);
+            committedInterval = persistentSelectionOrNull(
+              interactionConfig.select?.persistent,
+              eventValue,
+            );
+            emitSelection(eventValue);
             reducer.dispatch({ type: "cancel-area" });
             break;
+          }
           case "zoom-end":
             brushRect = null;
-            if (ended.kind === "commit") applyBrushZoom(ended.rect, source);
+            applyBrushZoom(finish.rect, source);
             reducer.dispatch({ type: "cancel-area" });
             break;
           case "end-area":
