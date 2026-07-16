@@ -1,28 +1,12 @@
-<script module lang="ts">
-  import type { SceneLegendEntry } from "@ggsvelte/core";
-
-  /** Stable renderer identity for one entry in one discrete legend. */
-  export interface LegendEntryIdentity {
-    scale: string;
-    entryIndex: number;
-  }
-
-  export type LegendInteractionSource =
-    "pointer" | "touch" | "focus" | "keyboard";
-
-  export interface LegendEntryAction {
-    identity: LegendEntryIdentity;
-    entry: SceneLegendEntry;
-    source: LegendInteractionSource;
-  }
-</script>
-
 <script lang="ts">
   /**
    * One SceneLegend (discrete swatches or continuous ramp), already placed by
    * the layout in plot px. Mirrors renderToSVGString's legend structure (same
    * class names); the gradient id uses $props.id() so several plots on one
    * page never collide.
+   *
+   * Legend interaction types live in plot-legend-focus.ts (pure helpers used
+   * by GGPlot). This component only paints static SVG chrome.
    */
   import type { SceneLegend, ThemeTokens } from "@ggsvelte/core";
   import { LEGEND_ROW_HEIGHT, themeVar } from "@ggsvelte/core";
