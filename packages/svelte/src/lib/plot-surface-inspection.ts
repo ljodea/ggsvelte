@@ -233,3 +233,37 @@ export function shouldClosePinnedOnOutsidePointer(input: {
 }): boolean {
   return input.isPinned && !input.targetInsideRoot;
 }
+
+// ---- inspection emission fingerprint gate ----
+
+export type InspectionEmitAction =
+  | { readonly type: "skip" }
+  | {
+      readonly type: "emit";
+      /**
+       * When non-null, host assigns `lastInspectionFingerprint = updateFingerprint`
+       * before callbacks. When null, host must not mutate the last fingerprint
+       * (undefined fingerprint path — always emit without update).
+       */
+      readonly updateFingerprint: string | null;
+    };
+
+/**
+ * Pure gate for host `emitInspection` after the fingerprint has been resolved
+ * (`clear:*` for clear phase via `clearInspectionFingerprint`, else the
+ * coordinator's semantic fingerprint).
+ *
+ *   undefined fingerprint → emit, do not update last
+ *   fingerprint === last  → skip (includes equal empty string; host inits last to "")
+ *   otherwise             → emit and update last to fingerprint
+ *
+ * Host still owns fingerprint production (clear token vs semantic).
+ */
+export function resolveInspectionEmitAction(input: {
+  readonly fingerprint: string | undefined;
+  readonly lastFingerprint: string;
+}): InspectionEmitAction {
+  if (input.fingerprint === undefined) return { type: "emit", updateFingerprint: null };
+  if (input.fingerprint === input.lastFingerprint) return { type: "skip" };
+  return { type: "emit", updateFingerprint: input.fingerprint };
+}

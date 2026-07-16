@@ -5,6 +5,8 @@ import {
   capabilityStatusText,
   filterAvailableTools,
   legendFocusDiscreteOnlyDiagnostics,
+  resolveChooseToolAction,
+  resolveEffectiveTool,
   zoomScaleDiagnosticsFromChannels,
   zoomSupportsChannel,
 } from "../src/lib/plot-capability.js";
@@ -65,6 +67,65 @@ describe("filterAvailableTools", () => {
   it("leaves non-zoom tools untouched when zoom is unsupported", () => {
     expect(filterAvailableTools(["inspect", "point"], false)).toEqual(["inspect", "point"]);
     expect(filterAvailableTools(["zoom-area"], false)).toEqual([]);
+  });
+});
+
+describe("resolveEffectiveTool", () => {
+  it("keeps the requested tool when it is available", () => {
+    expect(resolveEffectiveTool("point", ["inspect", "point", "select-area"])).toBe("point");
+  });
+
+  it("falls back to the first available tool when requested is unavailable", () => {
+    expect(resolveEffectiveTool("zoom-area", ["inspect", "point"])).toBe("inspect");
+    expect(resolveEffectiveTool("inspect", ["point", "select-area"])).toBe("point");
+  });
+
+  it("falls back to inspect when available is empty (host asymmetry vs chooseTool)", () => {
+    // Host tool $effect dispatches "inspect" even when it is not in availableTools.
+    // chooseTool rejects tools not in availableTools — pin the split intentionally.
+    expect(resolveEffectiveTool("zoom-area", [])).toBe("inspect");
+    expect(resolveEffectiveTool("inspect", [])).toBe("inspect");
+  });
+});
+
+describe("resolveChooseToolAction", () => {
+  const available = ["inspect", "point", "select-area"] as const;
+
+  it("ignores unavailable tools before the controlled check (no callback)", () => {
+    expect(
+      resolveChooseToolAction({
+        next: "zoom-area",
+        available,
+        isControlled: true,
+      }),
+    ).toEqual({ type: "ignore" });
+    expect(
+      resolveChooseToolAction({
+        next: "zoom-area",
+        available,
+        isControlled: false,
+      }),
+    ).toEqual({ type: "ignore" });
+  });
+
+  it("requests only when controlled and available", () => {
+    expect(
+      resolveChooseToolAction({
+        next: "point",
+        available,
+        isControlled: true,
+      }),
+    ).toEqual({ type: "request" });
+  });
+
+  it("applies when local and available", () => {
+    expect(
+      resolveChooseToolAction({
+        next: "point",
+        available,
+        isControlled: false,
+      }),
+    ).toEqual({ type: "apply" });
   });
 });
 

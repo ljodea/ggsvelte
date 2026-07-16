@@ -17,6 +17,45 @@ export function filterAvailableTools(
   return tools.filter((tool) => tool !== "zoom-area" || zoomHasSupportedChannel);
 }
 
+/**
+ * Resolve the tool the host should sync into the reducer.
+ * Priority: requested if available → first available → `"inspect"`.
+ *
+ * Note: empty `available` still yields `"inspect"` (even when inspect is not
+ * listed). That matches the host `$effect` and intentionally diverges from
+ * `resolveChooseToolAction`, which rejects unavailable tools.
+ */
+export function resolveEffectiveTool(
+  requested: InteractionTool,
+  available: readonly InteractionTool[],
+): InteractionTool {
+  if (available.includes(requested)) return requested;
+  return available[0] ?? "inspect";
+}
+
+export type ChooseToolAction =
+  | { readonly type: "ignore" }
+  | { readonly type: "request" }
+  | { readonly type: "apply" };
+
+/**
+ * Pure routing for host `chooseTool`.
+ *
+ * Priority:
+ *   1. ignore — `next` not in `available` (wins over controlled; no callback)
+ *   2. request — controlled prop (`tool !== undefined`): callback only
+ *   3. apply — local: dispatch + clear draft/queue + callback
+ */
+export function resolveChooseToolAction(input: {
+  readonly next: InteractionTool;
+  readonly available: readonly InteractionTool[];
+  readonly isControlled: boolean;
+}): ChooseToolAction {
+  if (!input.available.includes(input.next)) return { type: "ignore" };
+  if (input.isControlled) return { type: "request" };
+  return { type: "apply" };
+}
+
 export type ScaleTypeRef = {
   readonly x: { readonly type: string };
   readonly y: { readonly type: string };
