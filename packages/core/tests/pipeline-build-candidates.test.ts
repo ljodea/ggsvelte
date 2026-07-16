@@ -6,9 +6,48 @@ import { describe, expect, it } from "bun:test";
 
 import { aes, gg } from "@ggsvelte/spec";
 
+import { resolveCandidateLogicalValues } from "../src/pipeline/build-candidates-datum-values.ts";
 import { runPipeline } from "../src/pipeline.ts";
 
 const size = { width: 640, height: 400 };
+
+describe("resolveCandidateLogicalValues", () => {
+  it("prefers annotation intercepts when the layer is an annotation rule", () => {
+    expect(
+      resolveCandidateLogicalValues({
+        annotationRule: true,
+        annotationX: 3,
+        annotationY: null,
+        outlierSourceRow: null,
+        sourceRow: 0,
+        frame: undefined,
+        frameRow: 0,
+        primitiveIndex: 0,
+        sourceValue: () => "ignored",
+        xField: "x",
+        yField: "y",
+      }),
+    ).toEqual({ xValue: 3, yValue: null });
+  });
+
+  it("reads source fields for identity rows and outliers when present", () => {
+    expect(
+      resolveCandidateLogicalValues({
+        annotationRule: false,
+        annotationX: null,
+        annotationY: null,
+        outlierSourceRow: null,
+        sourceRow: 2,
+        frame: undefined,
+        frameRow: 0,
+        primitiveIndex: 0,
+        sourceValue: (field) => (field === "x" ? 11 : field === "y" ? 22 : null),
+        xField: "x",
+        yField: "y",
+      }),
+    ).toEqual({ xValue: 11, yValue: 22 });
+  });
+});
 
 describe("buildPipelineCandidates via runPipeline", () => {
   it("source-backed point layers expose one candidate per mark with lineage", () => {
