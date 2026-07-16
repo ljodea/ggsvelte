@@ -91,4 +91,38 @@ describe("resolveFacet — grid", () => {
       ["x / 1", "x / 2", "y / 1", "y / 2"].toSorted(),
     );
   });
+
+  it("keeps empty grid combinations as empty panels with sourceRows", () => {
+    const sparse = ColumnTable.fromRows([
+      { r: "a", c: "1", x: 1 },
+      { r: "b", c: "2", x: 2 },
+    ]);
+    const layout = resolveFacet({ rows: { field: "r" }, cols: { field: "c" } }, sparse);
+    expect(layout.panels).toHaveLength(4);
+    const empty = layout.panels.filter((p) => p.table.rowCount === 0);
+    expect(empty.length).toBe(2);
+    for (const panel of empty) {
+      expect(panel.sourceRows).toEqual([]);
+    }
+  });
+
+  it("rejects mixing wrap with rows/cols", () => {
+    try {
+      resolveFacet({ wrap: { field: "g" }, rows: { field: "r" } }, table);
+      expect.unreachable("should throw");
+    } catch (e) {
+      expect(e).toBeInstanceOf(PipelineError);
+      expect((e as PipelineError).code).toBe("facet-form-ambiguous");
+    }
+  });
+
+  it("rejects empty facet forms", () => {
+    try {
+      resolveFacet({}, table);
+      expect.unreachable("should throw");
+    } catch (e) {
+      expect(e).toBeInstanceOf(PipelineError);
+      expect((e as PipelineError).code).toBe("facet-form-missing");
+    }
+  });
 });
