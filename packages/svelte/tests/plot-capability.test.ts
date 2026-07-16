@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 
-import { INTERACTION_DIAGNOSTIC_CATALOG } from "../src/lib/interaction.js";
 import {
   bandChannelsForZoom,
   capabilityStatusText,
@@ -153,8 +152,6 @@ describe("capabilityStatusText", () => {
 });
 
 describe("legendFocusDiscreteOnlyDiagnostics", () => {
-  const catalog = INTERACTION_DIAGNOSTIC_CATALOG.INTERACTION_LEGEND_DISCRETE_ONLY;
-
   it("returns empty when disabled or there are no legends", () => {
     expect(legendFocusDiscreteOnlyDiagnostics(false, [{ type: "ramp" }])).toEqual([]);
     expect(legendFocusDiscreteOnlyDiagnostics(true, [])).toEqual([]);
@@ -168,11 +165,25 @@ describe("legendFocusDiscreteOnlyDiagnostics", () => {
   });
 
   it("advises when every legend is non-discrete (ramp or unknown)", () => {
-    expect(legendFocusDiscreteOnlyDiagnostics(true, [{ type: "ramp" }])).toEqual([
-      { ...catalog, actual: ["ramp"] },
+    const rampOnly = legendFocusDiscreteOnlyDiagnostics(true, [{ type: "ramp" }]);
+    expect(rampOnly).toHaveLength(1);
+    const rampDiag = rampOnly[0];
+    expect(rampDiag).toMatchObject({
+      code: "INTERACTION_LEGEND_DISCRETE_ONLY",
+      severity: "advisory",
+      prop: "legendFocus",
+      actual: ["ramp"],
+    });
+    expect(typeof rampDiag.message).toBe("string");
+    expect(rampDiag.message.length).toBeGreaterThan(0);
+
+    const mixed = legendFocusDiscreteOnlyDiagnostics(true, [
+      { type: "ramp" },
+      { type: "continuous" },
     ]);
-    expect(
-      legendFocusDiscreteOnlyDiagnostics(true, [{ type: "ramp" }, { type: "continuous" }]),
-    ).toEqual([{ ...catalog, actual: ["ramp", "continuous"] }]);
+    expect(mixed[0]).toMatchObject({
+      code: "INTERACTION_LEGEND_DISCRETE_ONLY",
+      actual: ["ramp", "continuous"],
+    });
   });
 });
