@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784168104637,
+  "lastUpdate": 1784169264709,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -6271,6 +6271,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 162.072,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "afe2d643cb1907bf93c05c2a2130b6f6fa29cba4",
+          "message": "refactor(svelte): extract pure legend surface event decisions (#62)\n\n* refactor(svelte): extract pure legend surface event decisions\n\nMove legend keydown, pointerup, and click routing into plot-legend-surface\nso priority (roving vs commit vs clear; touch suppress vs detail source)\ncan be unit-tested without mounting GGPlot. Host keeps touch-index,\nsuppress flag, pointercancel, and commit/clear side effects.\n\n* test(svelte): assert legend suppress clears for next click\n\nAfter a touch commit and suppressed compatibility click, a subsequent\nreal click must still activate. Locks host cleanup of suppressLegendClick.\n\n* fix(svelte): drop unused LegendKeyAction export for knip\n\nAction discriminant is still expressed via LegendKeyResolution.action;\nonly the nested alias was unused as a public export.",
+          "timestamp": "2026-07-15T21:33:50-05:00",
+          "tree_id": "e35c1e2b01941bbfea2358def020cab6988caa3e",
+          "url": "https://github.com/ljodea/ggsvelte/commit/afe2d643cb1907bf93c05c2a2130b6f6fa29cba4"
+        },
+        "date": 1784169264371,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.6421,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.1094,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 14.0584,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 14.5027,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 86.0688,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 119.3169,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 0.9785,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2437,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 84.2145,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 108.7095,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.4231,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 13.0164,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 117.0502,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.6629,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 26.5918,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.397,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 32.5744,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 586.8069,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 160.1086,
             "unit": "ms"
           }
         ]
