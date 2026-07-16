@@ -68,6 +68,13 @@ function drag(
 }
 
 describe("R-1/R0 release matrix", () => {
+  // 120s: the /__ggplot-ssr fetch transforms GGPlot's whole SSR module graph
+  // on the suite-shared Vite server, so under full-suite transform contention
+  // (three browsers, 150+ files) it can wait well past 30s on loaded runners.
+  // Its only observed failure mode is this timeout — the render itself is
+  // correct and takes ~10s in isolation. Eagerly warming the graph at server
+  // start is NOT safe: it races dep re-optimization and yields mixed Svelte
+  // server runtimes (lifecycle_outside_component).
   it("hydrates a real server-rendered GGPlot and attaches inspection events", async () => {
     const target = document.createElement("div");
     const response = await fetch("/__ggplot-ssr");
@@ -88,7 +95,7 @@ describe("R-1/R0 release matrix", () => {
 
     await cleanup();
     target.remove();
-  }, 30_000);
+  }, 120_000);
 
   it("keeps IDs and ARIA ownership unique across two interactive charts", async () => {
     const { container } = render(MultipleInteractivePlots);
