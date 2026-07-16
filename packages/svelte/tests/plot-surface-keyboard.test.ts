@@ -13,6 +13,10 @@ const reversedDraft: BrushCorners = { x0: 40, y0: 50, x1: 10, y1: 20 };
 /** Zero-size draft — keyboard still commits (no too-small evaluation). */
 const zeroDraft: BrushCorners = { x0: 5, y0: 5, x1: 5, y1: 5 };
 
+const panel = { x: 0, y: 0, width: 100, height: 80 };
+/** Interior free corner so unclamped ±1/±10 steps stay in-bounds. */
+const draftInterior: BrushCorners = { x0: 10, y0: 20, x1: 50, y1: 40 };
+
 const base = (
   overrides: Partial<SurfaceKeyboardInput> & Pick<SurfaceKeyboardInput, "key" | "activeTool">,
 ): SurfaceKeyboardInput => ({
@@ -23,8 +27,9 @@ const base = (
   // Meaningful only when hasInspection (toggle-point-keys); unused otherwise.
   focusKey: null,
   sourceKeys: [],
-  // Meaningful for begin-area; unused otherwise.
+  // Meaningful for begin-area / nudge; unused otherwise.
   inspectionAnchor: null,
+  inspectionPanel: null,
   firstPanel: undefined,
   ...overrides,
 });
@@ -32,15 +37,23 @@ const base = (
 describe("resolveSurfaceKeyAction", () => {
   describe("area tools with brush draft", () => {
     it.each(["select-area", "zoom-area"] as const)(
-      "%s Arrow keys nudge the free corner (shift steps by 10)",
+      "%s Arrow keys nudge free corner with clamped corners payload (shift steps by 10)",
       (tool) => {
         expect(
           resolveSurfaceKeyAction(
-            base({ key: "ArrowRight", activeTool: tool, brushCorners: draft }),
+            base({
+              key: "ArrowRight",
+              activeTool: tool,
+              brushCorners: draftInterior,
+              firstPanel: panel,
+            }),
           ),
         ).toEqual({
           preventDefault: true,
-          action: { type: "nudge-brush", dx: 1, dy: 0 },
+          action: {
+            type: "nudge-brush",
+            corners: { x0: 10, y0: 20, x1: 51, y1: 40 },
+          },
         });
         expect(
           resolveSurfaceKeyAction(
@@ -48,29 +61,91 @@ describe("resolveSurfaceKeyAction", () => {
               key: "ArrowUp",
               shiftKey: true,
               activeTool: tool,
-              brushCorners: draft,
+              brushCorners: draftInterior,
+              firstPanel: panel,
             }),
           ),
         ).toEqual({
           preventDefault: true,
-          action: { type: "nudge-brush", dx: 0, dy: -10 },
+          action: {
+            type: "nudge-brush",
+            corners: { x0: 10, y0: 20, x1: 50, y1: 30 },
+          },
         });
       },
     );
 
-    it("preserves startsWith('Arrow') for nonstandard keys (zero deltas)", () => {
+    it("prefers inspectionPanel over firstPanel for nudge clamp", () => {
+      const inspectionOnly = { x: 0, y: 0, width: 20, height: 20 };
+      const firstOnly = { x: 0, y: 0, width: 1000, height: 1000 };
+      expect(
+        resolveSurfaceKeyAction(
+          base({
+            key: "ArrowRight",
+            activeTool: "select-area",
+            brushCorners: { x0: 5, y0: 5, x1: 10, y1: 10 },
+            inspectionPanel: inspectionOnly,
+            firstPanel: firstOnly,
+          }),
+        ),
+      ).toEqual({
+        preventDefault: true,
+        action: {
+          type: "nudge-brush",
+          // free corner clamps to inspection panel right edge (20), not 1000
+          corners: { x0: 5, y0: 5, x1: 11, y1: 10 },
+        },
+      });
+      // Prove first-only would not clamp at 20: large step hits inspection edge.
+      expect(
+        resolveSurfaceKeyAction(
+          base({
+            key: "ArrowRight",
+            shiftKey: true,
+            activeTool: "select-area",
+            brushCorners: { x0: 5, y0: 5, x1: 15, y1: 10 },
+            inspectionPanel: inspectionOnly,
+            firstPanel: firstOnly,
+          }),
+        ).action,
+      ).toEqual({
+        type: "nudge-brush",
+        corners: { x0: 5, y0: 5, x1: 20, y1: 10 },
+      });
+    });
+
+    it("preserves startsWith('Arrow') for nonstandard keys (zero deltas, same corners)", () => {
       expect(
         resolveSurfaceKeyAction(
           base({
             key: "ArrowDiagonal",
             activeTool: "select-area",
-            brushCorners: draft,
+            brushCorners: draftInterior,
+            firstPanel: panel,
           }),
         ),
       ).toEqual({
         preventDefault: true,
-        action: { type: "nudge-brush", dx: 0, dy: 0 },
+        action: {
+          type: "nudge-brush",
+          corners: draftInterior,
+        },
       });
+    });
+
+    it("swallows arrow when draft exists but no panel is available", () => {
+      // Keyboard begin-area with no model can leave a draft at {0,0} without panels.
+      expect(
+        resolveSurfaceKeyAction(
+          base({
+            key: "ArrowRight",
+            activeTool: "select-area",
+            brushCorners: draft,
+            inspectionPanel: null,
+            firstPanel: undefined,
+          }),
+        ),
+      ).toEqual({ preventDefault: true, action: { type: "none" } });
     });
 
     it("select-area Enter completes with select-end finish (normalized rect)", () => {
