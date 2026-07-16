@@ -115,6 +115,11 @@
   import { frozenZoomDomains, normalizedRect } from "./plot-geometry.js";
   import { resolveSurfaceKeyAction } from "./plot-surface-keyboard.js";
   import {
+    resolveCaptureClickAction,
+    resolvePointerDownAction,
+    resolvePointerUpAction,
+  } from "./plot-surface-pointer.js";
+  import {
     datumLabel as datumLabelFor,
     inspectionLiveText as inspectionLiveTextFor,
     markLabel as markLabelFor,
@@ -143,8 +148,10 @@
   import { createPaintLedger, isPlotReady } from "./plot-paint.js";
   import {
     anchorsFromCandidateKeys,
+    buildPointSelectionEvent,
     nextPointSelectionKeys,
     rowIndexesForCandidate,
+    sameOrderedPropertyKeys,
     uniqueKeysFromRowIndexes,
   } from "./plot-selection.js";
   import {
@@ -154,6 +161,7 @@
   import { themeTokensToCss } from "./plot-theme-css.js";
   import {
     applyZoomToSpec,
+    buildZoomEvent,
     resolveBrushZoomDomains,
     sanitizePartialZoomDomains,
   } from "./plot-zoom.js";
@@ -746,11 +754,7 @@
     let committed: readonly PropertyKey[];
     if (interaction === undefined) {
       const next = [...new Set(keys)];
-      if (
-        next.length === localSelectedKeys.length &&
-        next.every((key, index) => Object.is(key, localSelectedKeys[index]))
-      )
-        return;
+      if (sameOrderedPropertyKeys(next, localSelectedKeys)) return;
       localSelectedKeys = next;
       committed = localSelectedKeys;
     } else {
@@ -767,15 +771,7 @@
           (selection) => selection.scope === resolvedInteractionScope.keys,
         )?.keys ?? [];
     }
-    emitSelection(
-      Object.freeze({
-        type: "select",
-        phase: committed.length === 0 ? "clear" : "end",
-        mode: "point",
-        keys: Object.freeze([...committed]),
-        source,
-      }),
-    );
+    emitSelection(buildPointSelectionEvent(committed, source));
   }
 
   function clearPointSelection(source: InteractionSource): void {
@@ -1644,38 +1640,57 @@
   }
 
   function onPointerDown(event: PointerEvent): void {
+    // Always cancel queued inspection before pure routing (host cleanup).
     queuedPointerInspection = null;
     reducer.cancelScheduledPointer();
-    if (activeTool === "inspect" && event.pointerType === "touch") {
-      touchInspectStart = plotPoint(event);
-      touchInspectMoved = false;
-      return;
-    }
-    if (
-      event.button !== 0 ||
-      (activeTool !== "select-area" && activeTool !== "zoom-area")
-    )
-      return;
-    const p = plotPoint(event);
-    brushRect =
-      areaAwaitingSecond && brushRect !== null
-        ? brushWithEnd(brushRect, p)
-        : brushAtPoint(p);
-    setInspection(null, event.pointerType === "touch" ? "touch" : "pointer");
-    reducer.dispatch({ type: "begin-area", point: p, panelId: panelId(0) });
-    if (activeTool === "select-area" && !areaAwaitingSecond) {
-      const startEvent = selectionEvent(
-        "start",
-        normalizedRect(brushRect),
-        event.pointerType === "touch" ? "touch" : "pointer",
-      );
-      emitSelection(startEvent);
-    }
-    try {
-      (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
-    } catch {
-      // Synthetic events may not register a browser pointer id. The reducer
-      // still owns cancellation; real pointer streams retain capture.
+    const action = resolvePointerDownAction({
+      pointerType: event.pointerType,
+      button: event.button,
+      activeTool,
+      areaAwaitingSecond,
+      hasBrushDraft: brushRect !== null,
+    });
+    switch (action.type) {
+      case "touch-inspect-start":
+        touchInspectStart = plotPoint(event);
+        touchInspectMoved = false;
+        break;
+      case "none":
+        break;
+      case "begin-area": {
+        const p = plotPoint(event);
+        brushRect =
+          action.extendExisting && brushRect !== null
+            ? brushWithEnd(brushRect, p)
+            : brushAtPoint(p);
+        setInspection(
+          null,
+          event.pointerType === "touch" ? "touch" : "pointer",
+        );
+        reducer.dispatch({
+          type: "begin-area",
+          point: p,
+          panelId: panelId(0),
+        });
+        if (activeTool === "select-area" && !areaAwaitingSecond) {
+          const startEvent = selectionEvent(
+            "start",
+            normalizedRect(brushRect),
+            event.pointerType === "touch" ? "touch" : "pointer",
+          );
+          emitSelection(startEvent);
+        }
+        try {
+          (event.currentTarget as HTMLElement).setPointerCapture(
+            event.pointerId,
+          );
+        } catch {
+          // Synthetic events may not register a browser pointer id. The
+          // reducer still owns cancellation; real pointer streams retain
+          // capture.
+        }
+        break;
+      }
     }
   }
 
@@ -1696,53 +1711,70 @@
   }
 
   function onPointerUp(event: PointerEvent): void {
-    if (
-      activeTool === "inspect" &&
-      event.pointerType === "touch" &&
-      interactionConfig.inspect !== null &&
-      touchInspectStart !== null
-    ) {
-      const wasTap = !touchInspectMoved;
-      touchInspectStart = null;
-      touchInspectMoved = false;
-      if (!wasTap) return;
-      const p = plotPoint(event);
-      const match = model?.candidates.nearest(p.x, p.y, {
-        mode: interactionConfig.inspect.mode,
-        maxDistance: interactionConfig.inspect.maxDistance,
-      });
-      if (match !== null && match !== undefined) {
-        setInspection(
-          hitFromCandidate(match),
-          "touch",
-          interactionConfig.inspect.pin ? "pinned" : "transient",
-          match.mode,
-          match,
-        );
-        suppressClickUntil = performance.now() + 500;
+    const action = resolvePointerUpAction({
+      pointerType: event.pointerType,
+      activeTool,
+      inspectEnabled: interactionConfig.inspect !== null,
+      pinEnabled: interactionConfig.inspect?.pin === true,
+      hasTouchInspectStart: touchInspectStart !== null,
+      touchInspectMoved,
+      brushing,
+      hasBrushDraft: brushRect !== null,
+    });
+    switch (action.type) {
+      case "touch-inspect-drag-ignore":
+        // Always clear touch-inspect start state (host cleanup).
+        touchInspectStart = null;
+        touchInspectMoved = false;
+        break;
+      case "touch-inspect-tap": {
+        touchInspectStart = null;
+        touchInspectMoved = false;
+        const inspectConfig = interactionConfig.inspect;
+        if (inspectConfig === null) break;
+        const p = plotPoint(event);
+        const match = model?.candidates.nearest(p.x, p.y, {
+          mode: inspectConfig.mode,
+          maxDistance: inspectConfig.maxDistance,
+        });
+        if (match !== null && match !== undefined) {
+          setInspection(
+            hitFromCandidate(match),
+            "touch",
+            action.pin ? "pinned" : "transient",
+            match.mode,
+            match,
+          );
+          suppressClickUntil = performance.now() + 500;
+        }
+        break;
       }
-      return;
+      case "none":
+        break;
+      case "finish-brush": {
+        if (brushRect === null) break;
+        reducer.cancelScheduledPointer();
+        const source = event.pointerType === "touch" ? "touch" : "pointer";
+        const ended = evaluatePointerBrushEnd(brushRect, plotPoint(event));
+        if (ended.kind === "too-small") {
+          brushRect = ended.corners;
+          announceInteraction("Choose opposite corner.");
+          break;
+        }
+        brushRect = null;
+        if (activeTool === "select-area") {
+          const eventValue = selectionEvent("end", ended.rect, source);
+          committedInterval = interactionConfig.select?.persistent
+            ? eventValue
+            : null;
+          emitSelection(eventValue);
+        } else if (activeTool === "zoom-area") {
+          applyBrushZoom(ended.rect, source);
+        }
+        reducer.dispatch({ type: "cancel-area" });
+        break;
+      }
     }
-    if (!brushing || brushRect === null) return;
-    reducer.cancelScheduledPointer();
-    const source = event.pointerType === "touch" ? "touch" : "pointer";
-    const ended = evaluatePointerBrushEnd(brushRect, plotPoint(event));
-    if (ended.kind === "too-small") {
-      brushRect = ended.corners;
-      announceInteraction("Choose opposite corner.");
-      return;
-    }
-    brushRect = null;
-    if (activeTool === "select-area") {
-      const eventValue = selectionEvent("end", ended.rect, source);
-      committedInterval = interactionConfig.select?.persistent
-        ? eventValue
-        : null;
-      emitSelection(eventValue);
-    } else if (activeTool === "zoom-area") {
-      applyBrushZoom(ended.rect, source);
-    }
-    reducer.dispatch({ type: "cancel-area" });
   }
 
   function commitZoom(
@@ -1775,12 +1807,7 @@
         });
       }
     }
-    const event: ZoomEvent = Object.freeze({
-      type: "zoom",
-      phase: committed === null ? "clear" : "end",
-      source,
-      domains: committed,
-    });
+    const event = buildZoomEvent(committed, source);
     announceInteraction(committed === null ? "Zoom reset." : "Zoom complete.");
     onzoom?.(event);
     oninteraction?.(event);
@@ -2000,27 +2027,34 @@
   }
 
   function onCaptureClick(event: MouseEvent): void {
-    if (performance.now() < suppressClickUntil) {
-      suppressClickUntil = 0;
-      return;
+    const action = resolveCaptureClickAction({
+      suppressClick: performance.now() < suppressClickUntil,
+      activeTool,
+      pointSelectEnabled: interactionConfig.select?.type === "point",
+      inspectEnabled: interactionConfig.inspect !== null,
+      pinEnabled: interactionConfig.inspect?.pin === true,
+      hasInspection: inspection !== null,
+    });
+    switch (action.type) {
+      case "suppress":
+        suppressClickUntil = 0;
+        break;
+      case "toggle-point": {
+        const point = plotPoint(event);
+        const match = model?.candidates.nearest(point.x, point.y, {
+          mode: "xy",
+          maxDistance: 24,
+        });
+        if (match === null || match === undefined) break;
+        togglePointKeys(candidateSemanticKeys(match), "pointer");
+        break;
+      }
+      case "toggle-pin":
+        toggleInspectionPin("pointer");
+        break;
+      case "none":
+        break;
     }
-    if (activeTool === "point" && interactionConfig.select?.type === "point") {
-      const point = plotPoint(event);
-      const match = model?.candidates.nearest(point.x, point.y, {
-        mode: "xy",
-        maxDistance: 24,
-      });
-      if (match === null || match === undefined) return;
-      togglePointKeys(candidateSemanticKeys(match), "pointer");
-      return;
-    }
-    if (
-      activeTool !== "inspect" ||
-      inspection === null ||
-      !interactionConfig.inspect?.pin
-    )
-      return;
-    toggleInspectionPin("pointer");
   }
 
   // Readiness signal for screenshot tooling (plan: VR waits on
