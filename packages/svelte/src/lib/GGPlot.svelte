@@ -116,11 +116,19 @@
   } from "./plot-area-brush.js";
   import { frozenZoomDomains, normalizedRect } from "./plot-geometry.js";
   import { resolveSurfaceKeyAction } from "./plot-surface-keyboard.js";
+  import { resolveQueuedInspectFrameAction } from "./plot-surface-inspection.js";
   import {
     resolveCaptureClickAction,
+    advanceTouchInspectMoved,
     resolvePointerDownAction,
+    resolvePointerMoveAction,
     resolvePointerUpAction,
   } from "./plot-surface-pointer.js";
+  import {
+    resolveLegendClickAction,
+    resolveLegendKeyAction,
+    resolveLegendPointerUpAction,
+  } from "./plot-legend-surface.js";
   import {
     datumLabel as datumLabelFor,
     inspectionLiveText as inspectionLiveTextFor,
@@ -182,8 +190,10 @@
   import {
     applyZoomToSpec,
     buildZoomEvent,
+    filterZoomDomainsByMode,
     resolveBrushZoomDomains,
     sanitizePartialZoomDomains,
+    stableZoomDomains,
   } from "./plot-zoom.js";
   import {
     buildInteractiveLegendEntries,
@@ -338,6 +348,7 @@
       interaction,
       ...(interactionScope !== undefined && { interactionScope }),
       zoom,
+      faceted: assembled?.facet !== undefined,
       ...(datumKey !== undefined && { datumKey }),
       assembled,
     }),
@@ -375,14 +386,25 @@
 
   // ------------------------------------------------------------ zoom respec
   let localZoomDomains = $state<ZoomDomains | null>(null);
+  // Memoize prior bag so selection/emphasis revisions do not retrain zoom.
+  let previousEffectiveZoomDomains: ZoomDomains | null = null;
   const controllerRevision = $derived(interaction?.revision ?? 0);
   const effectiveZoomDomains: ZoomDomains | null = $derived.by(() => {
     void controllerRevision;
-    if (interaction === undefined) return localZoomDomains;
-    const domains = interaction.zoom(resolvedInteractionScope);
-    return domains.x === undefined && domains.y === undefined
-      ? null
-      : (domains as ZoomDomains);
+    let next: ZoomDomains | null;
+    if (interaction === undefined) {
+      next = localZoomDomains;
+    } else {
+      // Gate shared domains by this plot's resolved zoom mode (null when
+      // disabled / faceted-unsupported) so x-only plots ignore y domains.
+      next = filterZoomDomainsByMode(
+        interaction.zoom(resolvedInteractionScope),
+        interactionConfig.zoom?.mode ?? null,
+      );
+    }
+    next = stableZoomDomains(previousEffectiveZoomDomains, next);
+    previousEffectiveZoomDomains = next;
+    return next;
   });
 
   const effectiveSpec: PortableSpec | null = $derived.by(() => {
@@ -635,28 +657,41 @@
       if (action.type === "move-area") {
         applyAreaMove(action.point, queuedAreaSource);
       } else {
+        // Snapshot then clear queues before pure routing (matches prior host).
         const pending = queuedPointerInspection;
         const token = queuedPointerToken;
         queuedPointerInspection = null;
         queuedPointerToken = null;
-        if (pending === null) return;
-        if (token !== null && !reducer.accepts(token)) return;
-        if (inspection?.state === "pinned") {
-          pendingPinnedPointer = pending;
-          return;
+        // Short-circuit tokenAccepted when no pending so accepts() is not
+        // called for empty frames (Codex plan review).
+        const frameAction = resolveQueuedInspectFrameAction({
+          hasPending: pending !== null,
+          tokenAccepted:
+            pending === null || token === null || reducer.accepts(token),
+          currentState: inspection?.state ?? "none",
+          candidateEpochMismatch:
+            action.candidate !== null &&
+            action.candidate.epoch !== model?.runId,
+        });
+        switch (frameAction.type) {
+          case "none":
+          case "drop":
+            return;
+          case "stash-pending":
+            if (pending === null) return;
+            pendingPinnedPointer = pending;
+            return;
+          case "apply-pending":
+            if (pending === null) return;
+            setInspection(
+              pending.hit,
+              pending.source,
+              "transient",
+              pending.concreteMode,
+              pending.candidate,
+            );
+            break;
         }
-        if (
-          action.candidate !== null &&
-          action.candidate.epoch !== model?.runId
-        )
-          return;
-        setInspection(
-          pending.hit,
-          pending.source,
-          "transient",
-          pending.concreteMode,
-          pending.candidate,
-        );
       }
     },
   });
@@ -833,10 +868,13 @@
       zoomHasSupportedChannel,
     ),
   );
+  const canPublishPointSelection = $derived(
+    interactionConfig.select?.type === "point",
+  );
   const showToolRail = $derived(
     interactive &&
       (availableTools.length > 1 ||
-        effectiveSelectedKeys.length > 0 ||
+        (canPublishPointSelection && effectiveSelectedKeys.length > 0) ||
         effectiveIntervals.length > 0 ||
         effectiveZoomDomains !== null),
   );
@@ -903,7 +941,7 @@
     model === null ? "" : themeTokensToCss(model.scene.theme),
   );
   const rootStyle = $derived(
-    `${hasCanvas || interactive || effectiveEmphasisKeys.length > 0 ? `width:${width === undefined || width === "container" ? "100%" : `${model?.scene.width ?? resolvedWidth}px`};height:${model?.scene.height ?? resolvedHeight}px;` : ""}${themeStyle}` ||
+    `${hasCanvas || interactive || effectiveEmphasisKeys.length > 0 || effectiveSelectedKeys.length > 0 ? `width:${width === undefined || width === "container" ? "100%" : `${model?.scene.width ?? resolvedWidth}px`};height:${model?.scene.height ?? resolvedHeight}px;` : ""}${themeStyle}` ||
       undefined,
   );
   function anchorsForKeys(keys: readonly PropertyKey[]): {
@@ -1615,23 +1653,26 @@
   }
 
   function onLegendKeydown(event: KeyboardEvent, index: number): void {
-    if (
-      event.key === "ArrowRight" ||
-      event.key === "ArrowDown" ||
-      event.key === "ArrowLeft" ||
-      event.key === "ArrowUp" ||
-      event.key === "Home" ||
-      event.key === "End"
-    ) {
-      event.preventDefault();
-      moveLegendFocus(index, event.key);
-    } else if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      const action = legendAction(index, "keyboard");
-      if (action !== null) commitLegend(action);
-    } else if (event.key === "Escape") {
-      event.preventDefault();
-      clearLegendFocus("keyboard");
+    // Decision table is pure (plot-legend-surface); this switch owns side
+    // effects only. Roving move, commit, and clear stay host-owned.
+    const { action, preventDefault } = resolveLegendKeyAction({
+      key: event.key,
+    });
+    if (preventDefault) event.preventDefault();
+    switch (action.type) {
+      case "move":
+        moveLegendFocus(index, action.key);
+        break;
+      case "commit": {
+        const next = legendAction(index, "keyboard");
+        if (next !== null) commitLegend(next);
+        break;
+      }
+      case "clear":
+        clearLegendFocus("keyboard");
+        break;
+      case "none":
+        break;
     }
   }
 
@@ -1640,23 +1681,44 @@
   }
 
   function onLegendPointerUp(event: PointerEvent, index: number): void {
-    if (event.pointerType !== "touch" || legendTouchIndex !== index) return;
-    legendTouchIndex = -1;
-    suppressLegendClick = true;
-    const action = legendAction(index, "touch");
-    if (action !== null) commitLegend(action);
+    // Pure gate: touch + matching legendTouchIndex. Host always clears the
+    // index and sets suppressLegendClick on touch-commit (exact-once with the
+    // synthetic click). pointercancel clears the index in the template.
+    const resolved = resolveLegendPointerUpAction({
+      pointerType: event.pointerType,
+      index,
+      touchIndex: legendTouchIndex,
+    });
+    switch (resolved.type) {
+      case "touch-commit": {
+        legendTouchIndex = -1;
+        suppressLegendClick = true;
+        const next = legendAction(index, "touch");
+        if (next !== null) commitLegend(next);
+        break;
+      }
+      case "none":
+        break;
+    }
   }
 
   function onLegendClick(event: MouseEvent, index: number): void {
-    if (suppressLegendClick) {
-      suppressLegendClick = false;
-      return;
+    // Pure priority: suppress (after touch) outranks detail-classified commit.
+    // detail === 0 is current source classification (not an a11y guarantee).
+    const resolved = resolveLegendClickAction({
+      suppressClick: suppressLegendClick,
+      detail: event.detail,
+    });
+    switch (resolved.type) {
+      case "suppress":
+        suppressLegendClick = false;
+        break;
+      case "commit": {
+        const next = legendAction(index, resolved.source);
+        if (next !== null) commitLegend(next);
+        break;
+      }
     }
-    const action = legendAction(
-      index,
-      event.detail === 0 ? "keyboard" : "pointer",
-    );
-    if (action !== null) commitLegend(action);
   }
 
   function onLegendBlur(event: FocusEvent): void {
@@ -1936,54 +1998,72 @@
 
   function onPointerMove(event: PointerEvent): void {
     const p = plotPoint(event);
+    // Sticky threshold is pure; host only advances on touch + start set.
     if (event.pointerType === "touch" && touchInspectStart !== null) {
-      touchInspectMoved ||=
-        Math.hypot(p.x - touchInspectStart.x, p.y - touchInspectStart.y) >= 4;
-      if (touchInspectMoved && activeTool === "inspect") {
+      touchInspectMoved = advanceTouchInspectMoved(
+        touchInspectMoved,
+        touchInspectStart,
+        p,
+      );
+    }
+    // Decision table is pure (plot-surface-pointer); this switch owns queues.
+    const action = resolvePointerMoveAction({
+      pointerType: event.pointerType,
+      activeTool,
+      touchInspectMoved,
+      hasTouchInspectStart: touchInspectStart !== null,
+      brushing,
+      hasBrushDraft: brushRect !== null,
+      inspectEnabled: interactionConfig.inspect !== null,
+    });
+    switch (action.type) {
+      case "touch-inspect-drag-cancel":
         queuedPointerInspection = null;
         reducer.cancelScheduledPointer();
         return;
-      }
-    }
-    if (brushing && brushRect !== null) {
-      queuedAreaSource = event.pointerType === "touch" ? "touch" : "pointer";
-      reducer.queuePointer({ type: "move-area", point: p });
-      return;
-    }
-    if (activeTool === "inspect" && interactionConfig.inspect !== null) {
-      const match =
-        model?.candidates.nearest(p.x, p.y, {
-          mode: interactionConfig.inspect.mode,
-          maxDistance: interactionConfig.inspect.maxDistance,
-        }) ?? null;
-      const resolvedHit =
-        match === null
-          ? (hitIndex?.hitTest(p.x, p.y) ?? null)
-          : hitFromCandidate(match);
-      const source = event.pointerType === "touch" ? "touch" : "pointer";
-      queuedPointerInspection = {
-        hit: resolvedHit,
-        source,
-        ...(match !== null && {
-          concreteMode: match.mode,
-          candidate: match,
-        }),
-      };
-      queuedPointerToken = reducer.frameToken();
-      reducer.queuePointer({
-        type: "inspect",
-        candidate:
+      case "queue-area-move":
+        queuedAreaSource = action.source;
+        reducer.queuePointer({ type: "move-area", point: p });
+        return;
+      case "queue-inspect": {
+        const inspectConfig = interactionConfig.inspect;
+        if (inspectConfig === null) return;
+        const match =
+          model?.candidates.nearest(p.x, p.y, {
+            mode: inspectConfig.mode,
+            maxDistance: inspectConfig.maxDistance,
+          }) ?? null;
+        const resolvedHit =
           match === null
-            ? null
-            : {
-                epoch: model?.runId ?? 0,
-                id: match.id,
-                panelId: panelId(match.panelIndex),
-                x: match.x,
-                y: match.y,
-              },
-        source,
-      });
+            ? (hitIndex?.hitTest(p.x, p.y) ?? null)
+            : hitFromCandidate(match);
+        queuedPointerInspection = {
+          hit: resolvedHit,
+          source: action.source,
+          ...(match !== null && {
+            concreteMode: match.mode,
+            candidate: match,
+          }),
+        };
+        queuedPointerToken = reducer.frameToken();
+        reducer.queuePointer({
+          type: "inspect",
+          candidate:
+            match === null
+              ? null
+              : {
+                  epoch: model?.runId ?? 0,
+                  id: match.id,
+                  panelId: panelId(match.panelIndex),
+                  x: match.x,
+                  y: match.y,
+                },
+          source: action.source,
+        });
+        break;
+      }
+      case "none":
+        break;
     }
   }
 
@@ -2600,10 +2680,20 @@
   }
 
   // Readiness signal for screenshot tooling (plan: VR waits on
-  // `[data-gg-ready="true"]`). Derived after flush-visible state updates;
-  // canvas strata additionally gate on first paint (decision 0006 / plan).
+  // `[data-gg-ready="true"]`). Split into:
+  // - clientFlush via $effect: never runs during SSR → prerender stays
+  //   data-gg-ready="false" until the first client committed flush (decision 0009)
+  // - derived isPlotReady: updates in the same render when prerequisites flip
+  //   (e.g. model cleared, canvas paint incomplete) so VR cannot accept a
+  //   stale ready=true mid-transition. Canvas strata gate on first paint
+  //   (decision 0006 / plan).
+  let clientFlush = $state(false);
+  $effect(() => {
+    clientFlush = true;
+  });
   const ready = $derived.by(() => {
     void paintEpoch;
+    if (!clientFlush) return false;
     return isPlotReady({
       hasModel: model !== null,
       widthMode:
@@ -2646,7 +2736,8 @@
       {emptyPlot}
       narrow={resolvedWidth < 560}
       zoomDomains={effectiveZoomDomains}
-      hasPointSelection={effectiveSelectedKeys.length > 0}
+      hasPointSelection={canPublishPointSelection &&
+        effectiveSelectedKeys.length > 0}
       hasIntervalSelection={effectiveIntervals.length > 0}
       canSetIntervalBounds={!emptyPlot && preciseIntervalAxes.length > 0}
       canSetZoomBounds={!emptyPlot && preciseZoomAxes.length > 0}
@@ -2822,11 +2913,12 @@
         {/if}
       </fieldset>
     {/if}
-    {#if !interactive && emphasizedAnchors.length > 0}
+    {#if !interactive && (emphasizedAnchors.length > 0 || selectedAnchors.length > 0)}
       <InteractionOverlay
         width={model.scene.width}
         height={model.scene.height}
         interactive={false}
+        {selectedAnchors}
         {emphasizedAnchors}
       />
     {/if}

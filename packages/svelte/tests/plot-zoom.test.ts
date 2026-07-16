@@ -5,8 +5,11 @@ import type { PortableSpec } from "@ggsvelte/spec";
 import {
   applyZoomToSpec,
   buildZoomEvent,
+  filterZoomDomainsByMode,
   resolveBrushZoomDomains,
+  sameZoomDomains,
   sanitizePartialZoomDomains,
+  stableZoomDomains,
 } from "../src/lib/plot-zoom.js";
 
 const continuousScale = (domain: [number, number]) => {
@@ -24,6 +27,55 @@ const bandScale = {
 };
 
 const panel = { x: 0, y: 0, width: 100, height: 100 };
+
+describe("filterZoomDomainsByMode", () => {
+  const domains = {
+    x: [1, 2] as [number, number],
+    y: [3, 4] as [number, number],
+  };
+
+  it("returns null for empty domains and keeps all channels when mode is null", () => {
+    expect(filterZoomDomainsByMode(null, "xy")).toBeNull();
+    expect(filterZoomDomainsByMode({}, "xy")).toBeNull();
+    // No local zoom tool still displays shared controller domains.
+    expect(filterZoomDomainsByMode(domains, null)).toEqual({
+      x: [1, 2],
+      y: [3, 4],
+    });
+  });
+
+  it("keeps only channels the plot opted into", () => {
+    expect(filterZoomDomainsByMode(domains, "x")).toEqual({ x: [1, 2] });
+    expect(filterZoomDomainsByMode(domains, "y")).toEqual({ y: [3, 4] });
+    expect(filterZoomDomainsByMode(domains, "xy")).toEqual({
+      x: [1, 2],
+      y: [3, 4],
+    });
+  });
+
+  it("drops a mode when the matching channel is absent", () => {
+    expect(filterZoomDomainsByMode({ y: [3, 4] }, "x")).toBeNull();
+    expect(filterZoomDomainsByMode({ x: [1, 2] }, "y")).toBeNull();
+  });
+});
+
+describe("sameZoomDomains / stableZoomDomains", () => {
+  it("compares channel endpoints with Object.is", () => {
+    expect(sameZoomDomains({ x: [1, 2] }, { x: [1, 2] })).toBe(true);
+    expect(sameZoomDomains({ x: [1, 2] }, { x: [1, 3] })).toBe(false);
+    expect(sameZoomDomains(null, null)).toBe(true);
+    expect(sameZoomDomains({ x: [1, 2] }, null)).toBe(false);
+    expect(sameZoomDomains({ x: [-0, 1] }, { x: [0, 1] })).toBe(false);
+  });
+
+  it("reuses the previous bag when values match", () => {
+    const previous = { x: [1, 2] as [number, number] };
+    const next = { x: [1, 2] as [number, number] };
+    expect(stableZoomDomains(previous, next)).toBe(previous);
+    expect(stableZoomDomains(previous, { x: [1, 3] })).toEqual({ x: [1, 3] });
+    expect(stableZoomDomains(previous, null)).toBeNull();
+  });
+});
 
 describe("applyZoomToSpec", () => {
   const base = {

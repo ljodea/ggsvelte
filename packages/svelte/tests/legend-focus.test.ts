@@ -143,9 +143,10 @@ describe("linked legend focus", () => {
   it("commits one touch activation and suppresses its compatibility click", async () => {
     const { container } = render(LinkedLegendFocusPlot);
     await until(() => container.querySelectorAll("[data-plot-a] .gg-legend-target").length === 2);
-    const south = container.querySelectorAll<HTMLButtonElement>(
-      "[data-plot-a] .gg-legend-target",
-    )[1];
+    const targets = [
+      ...container.querySelectorAll<HTMLButtonElement>("[data-plot-a] .gg-legend-target"),
+    ];
+    const [north, south] = targets as [HTMLButtonElement, HTMLButtonElement];
 
     south.dispatchEvent(
       new PointerEvent("pointerdown", { bubbles: true, pointerId: 7, pointerType: "touch" }),
@@ -158,6 +159,12 @@ describe("linked legend focus", () => {
     await until(() => state(container)["emphasized"] === "b");
     expect(state(container)["transitions"]).toBe("1");
     expect(south.getAttribute("aria-pressed")).toBe("true");
+
+    // Suppress must clear: a subsequent real click must still activate.
+    north.dispatchEvent(new MouseEvent("click", { bubbles: true, detail: 1 }));
+    await until(() => state(container)["emphasized"] === "a,c");
+    expect(state(container)["transitions"]).toBe("2");
+    expect(north.getAttribute("aria-pressed")).toBe("true");
   });
 
   it("cancels a touch sequence without committing emphasis", async () => {
