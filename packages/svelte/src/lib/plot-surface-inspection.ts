@@ -299,6 +299,74 @@ export function shouldClosePinnedOnOutsidePointer(input: {
   return input.isPinned && !input.targetInsideRoot;
 }
 
+// ---- scene-run inspection reconcile (host $effect) ----
+
+export type SceneInspectReconcilePlan =
+  | { readonly type: "noop" }
+  | { readonly type: "clear-disabled" }
+  | { readonly type: "skip" }
+  | { readonly type: "invalidate-clear-transient" }
+  | { readonly type: "invalidate-idle" }
+  | { readonly type: "invalidate-reconcile-pinned" };
+
+/**
+ * Priority table for the model-run inspection reconcile effect.
+ *
+ *   1. inspect off → clear-disabled when live inspection exists, else noop
+ *   2. no model / same runId as reconciledRun → skip
+ *   3. run advanced + transient → invalidate-clear-transient
+ *   4. run advanced + pinned → invalidate-reconcile-pinned
+ *   5. run advanced + none → invalidate-idle
+ *
+ * Host on every invalidate-*: clear queues, cancel scheduled pointer, set
+ * reconciledRun to the new model runId, then branch-specific side effects.
+ */
+export function planSceneInspectReconcile(input: {
+  readonly inspectionEnabled: boolean;
+  /** Host: `inspection === null ? "none" : inspection.state`. */
+  readonly inspectionState: InspectionHostState;
+  readonly modelRunId: number | null;
+  readonly reconciledRun: number;
+}): SceneInspectReconcilePlan {
+  if (!input.inspectionEnabled) {
+    return input.inspectionState === "none" ? { type: "noop" } : { type: "clear-disabled" };
+  }
+  if (input.modelRunId === null || input.modelRunId === input.reconciledRun) {
+    return { type: "skip" };
+  }
+  if (input.inspectionState === "transient") {
+    return { type: "invalidate-clear-transient" };
+  }
+  if (input.inspectionState === "pinned") {
+    return { type: "invalidate-reconcile-pinned" };
+  }
+  return { type: "invalidate-idle" };
+}
+
+// ---- toggle-pin chrome gates ----
+
+/**
+ * Whether unpinning should announce for a11y (keyboard/touch only).
+ * Host: only after a successful flip-to-transient resolve.
+ */
+export function shouldAnnounceUnpin(input: {
+  readonly state: "transient" | "pinned";
+  readonly source: InteractionSource;
+}): boolean {
+  return input.state === "transient" && (input.source === "keyboard" || input.source === "touch");
+}
+
+/**
+ * Whether to move focus into the interactive pinned tooltip after pin.
+ * Host still runs the querySelector focus in a microtask.
+ */
+export function shouldFocusPinnedInteractiveTooltip(input: {
+  readonly state: "transient" | "pinned";
+  readonly contentMode: "interactive" | "informational" | undefined;
+}): boolean {
+  return input.state === "pinned" && input.contentMode === "interactive";
+}
+
 // ---- inspection emission fingerprint gate ----
 
 export type InspectionEmitAction =

@@ -5,6 +5,7 @@ import {
   isNarrowToolsWidth,
   isTooltipDocked,
   plotRootInlineStyle,
+  plotTooltipDomId,
   resolveClearLegendX,
   resolveCaptureAriaControls,
   resolvePlotSize,
@@ -139,6 +140,12 @@ describe("plotRootInlineStyle", () => {
   });
 });
 
+describe("plotTooltipDomId", () => {
+  it("builds the stable tooltip element id", () => {
+    expect(plotTooltipDomId("plot-a")).toBe("plot-a-tooltip");
+  });
+});
+
 describe("resolveCaptureAriaControls", () => {
   it("returns plot-scoped tooltip id only when pinned and interactive", () => {
     expect(
@@ -147,7 +154,7 @@ describe("resolveCaptureAriaControls", () => {
         interactiveContent: true,
         plotId: "plot-a",
       }),
-    ).toBe("plot-a-tooltip");
+    ).toBe(plotTooltipDomId("plot-a"));
     expect(
       resolveCaptureAriaControls({
         isPinned: true,

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildInspectionCandidateRef,
   buildQueuedPointerInspection,
+  planSceneInspectReconcile,
   resolveInspectionCompleteness,
   resolveInspectionEmitAction,
   resolveInspectionMode,
@@ -10,9 +11,11 @@ import {
   resolveSetInspectionAction,
   resolveSurfaceBlurAction,
   resolveToggleInspectionPinAction,
+  shouldAnnounceUnpin,
   shouldClearInspectionAnnouncement,
   shouldClosePinnedOnOutsidePointer,
   shouldCommitInspection,
+  shouldFocusPinnedInteractiveTooltip,
   type QueuedInspectFrameInput,
   type SetInspectionInput,
   type ToggleInspectionPinInput,
@@ -553,6 +556,103 @@ describe("resolveSurfaceBlurAction", () => {
         inspectionState: "none",
       }),
     ).toEqual({ type: "blur-clear-inspection" });
+  });
+});
+
+describe("planSceneInspectReconcile", () => {
+  it("clears when inspect is disabled only if inspection is live", () => {
+    expect(
+      planSceneInspectReconcile({
+        inspectionEnabled: false,
+        inspectionState: "none",
+        modelRunId: 1,
+        reconciledRun: 0,
+      }),
+    ).toEqual({ type: "noop" });
+    expect(
+      planSceneInspectReconcile({
+        inspectionEnabled: false,
+        inspectionState: "pinned",
+        modelRunId: 1,
+        reconciledRun: 0,
+      }),
+    ).toEqual({ type: "clear-disabled" });
+  });
+
+  it("skips when model is missing or run is already reconciled", () => {
+    expect(
+      planSceneInspectReconcile({
+        inspectionEnabled: true,
+        inspectionState: "pinned",
+        modelRunId: null,
+        reconciledRun: 0,
+      }),
+    ).toEqual({ type: "skip" });
+    expect(
+      planSceneInspectReconcile({
+        inspectionEnabled: true,
+        inspectionState: "transient",
+        modelRunId: 3,
+        reconciledRun: 3,
+      }),
+    ).toEqual({ type: "skip" });
+  });
+
+  it("routes advanced runs by inspection state (enabled-off already handled)", () => {
+    expect(
+      planSceneInspectReconcile({
+        inspectionEnabled: true,
+        inspectionState: "transient",
+        modelRunId: 2,
+        reconciledRun: 1,
+      }),
+    ).toEqual({ type: "invalidate-clear-transient" });
+    expect(
+      planSceneInspectReconcile({
+        inspectionEnabled: true,
+        inspectionState: "pinned",
+        modelRunId: 2,
+        reconciledRun: 1,
+      }),
+    ).toEqual({ type: "invalidate-reconcile-pinned" });
+    expect(
+      planSceneInspectReconcile({
+        inspectionEnabled: true,
+        inspectionState: "none",
+        modelRunId: 2,
+        reconciledRun: 1,
+      }),
+    ).toEqual({ type: "invalidate-idle" });
+  });
+});
+
+describe("shouldAnnounceUnpin / shouldFocusPinnedInteractiveTooltip", () => {
+  it("announces unpin only for transient keyboard/touch", () => {
+    expect(shouldAnnounceUnpin({ state: "transient", source: "keyboard" })).toBe(true);
+    expect(shouldAnnounceUnpin({ state: "transient", source: "touch" })).toBe(true);
+    expect(shouldAnnounceUnpin({ state: "transient", source: "pointer" })).toBe(false);
+    expect(shouldAnnounceUnpin({ state: "pinned", source: "keyboard" })).toBe(false);
+  });
+
+  it("focuses tooltip only when pinned with interactive content", () => {
+    expect(
+      shouldFocusPinnedInteractiveTooltip({
+        state: "pinned",
+        contentMode: "interactive",
+      }),
+    ).toBe(true);
+    expect(
+      shouldFocusPinnedInteractiveTooltip({
+        state: "pinned",
+        contentMode: "informational",
+      }),
+    ).toBe(false);
+    expect(
+      shouldFocusPinnedInteractiveTooltip({
+        state: "transient",
+        contentMode: "interactive",
+      }),
+    ).toBe(false);
   });
 });
 

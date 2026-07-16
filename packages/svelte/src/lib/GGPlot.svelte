@@ -115,6 +115,7 @@
   import {
     buildInspectionCandidateRef,
     buildQueuedPointerInspection,
+    planSceneInspectReconcile,
     resolveInspectionCompleteness,
     resolveInspectionEmitAction,
     resolveInspectionMode,
@@ -122,9 +123,11 @@
     resolveSetInspectionAction,
     resolveSurfaceBlurAction,
     resolveToggleInspectionPinAction,
+    shouldAnnounceUnpin,
     shouldClearInspectionAnnouncement,
     shouldClosePinnedOnOutsidePointer,
     shouldCommitInspection,
+    shouldFocusPinnedInteractiveTooltip,
     type QueuedPointerInspection,
   } from "./plot-surface-inspection.js";
   import {
@@ -164,6 +167,7 @@
     isNarrowToolsWidth,
     isTooltipDocked,
     plotRootInlineStyle,
+    plotTooltipDomId,
     resolveCaptureAriaControls,
     resolveClearLegendX,
     resolvePlotSize,
@@ -1438,9 +1442,17 @@
   let reconciledRun = -1;
   $effect(() => {
     const currentModel = model;
-    const inspectionEnabled = interactionConfig.inspect !== null;
-    if (!inspectionEnabled) {
-      if (inspection !== null) {
+    const plan = planSceneInspectReconcile({
+      inspectionEnabled: interactionConfig.inspect !== null,
+      inspectionState: inspection === null ? "none" : inspection.state,
+      modelRunId: currentModel?.runId ?? null,
+      reconciledRun,
+    });
+    switch (plan.type) {
+      case "noop":
+      case "skip":
+        return;
+      case "clear-disabled":
         inspectionCoordinator.invalidate();
         inspection = null;
         inspectionSeed = null;
@@ -1449,50 +1461,55 @@
           candidate: null,
           source: "programmatic",
         });
+        return;
+      case "invalidate-clear-transient":
+      case "invalidate-idle":
+      case "invalidate-reconcile-pinned": {
+        // currentModel is non-null for invalidate-* (plan requires run advance).
+        const runId = currentModel!.runId;
+        reducer.dispatch({ type: "invalidate", reason: "scene" });
+        queuedPointerInspection = null;
+        pendingPinnedPointer = null;
+        queuedPointerToken = null;
+        reducer.cancelScheduledPointer();
+        reconciledRun = runId;
+        if (plan.type === "invalidate-clear-transient") {
+          inspectionCoordinator.release("transient");
+          inspection = null;
+          inspectionSeed = null;
+          reducer.dispatch({
+            type: "inspect",
+            candidate: null,
+            source: "programmatic",
+          });
+          return;
+        }
+        if (plan.type === "invalidate-idle") return;
+        const reconciled = inspectionCoordinator.reconcilePinned({
+          model: currentModel!,
+          identityEpoch: dataIdentityEpoch,
+          layoutEpoch: runId,
+          source: "programmatic",
+          completeness: "complete",
+        });
+        if (reconciled === null) {
+          reducer.dispatch({ type: "escape", source: "programmatic" });
+          reducer.dispatch({ type: "set-active", candidate: null });
+          emitInspection({
+            type: "inspect",
+            phase: "clear",
+            source: "programmatic",
+          });
+          inspection = null;
+          inspectionSeed = null;
+        } else {
+          inspection = reconciled.snapshot;
+          inspectionSeed = reconciled.seed;
+          if (reconciled.semanticChanged)
+            emitInspection(reconciled.snapshot, reconciled.semanticFingerprint);
+        }
+        break;
       }
-      return;
-    }
-    if (currentModel === null || currentModel.runId === reconciledRun) return;
-    reducer.dispatch({ type: "invalidate", reason: "scene" });
-    queuedPointerInspection = null;
-    pendingPinnedPointer = null;
-    queuedPointerToken = null;
-    reducer.cancelScheduledPointer();
-    reconciledRun = currentModel.runId;
-    if (inspection?.state === "transient") {
-      inspectionCoordinator.release("transient");
-      inspection = null;
-      inspectionSeed = null;
-      reducer.dispatch({
-        type: "inspect",
-        candidate: null,
-        source: "programmatic",
-      });
-      return;
-    }
-    if (inspection?.state !== "pinned") return;
-    const reconciled = inspectionCoordinator.reconcilePinned({
-      model: currentModel,
-      identityEpoch: dataIdentityEpoch,
-      layoutEpoch: currentModel.runId,
-      source: "programmatic",
-      completeness: "complete",
-    });
-    if (reconciled === null) {
-      reducer.dispatch({ type: "escape", source: "programmatic" });
-      reducer.dispatch({ type: "set-active", candidate: null });
-      emitInspection({
-        type: "inspect",
-        phase: "clear",
-        source: "programmatic",
-      });
-      inspection = null;
-      inspectionSeed = null;
-    } else {
-      inspection = reconciled.snapshot;
-      inspectionSeed = reconciled.seed;
-      if (reconciled.semanticChanged)
-        emitInspection(reconciled.snapshot, reconciled.semanticFingerprint);
     }
   });
 
@@ -1652,22 +1669,23 @@
             source,
           });
         if (state === "transient") inspectionCoordinator.release("pinned");
-        if (
-          state === "transient" &&
-          (source === "keyboard" || source === "touch")
-        )
+        if (shouldAnnounceUnpin({ state, source }))
           announceInteraction(
             `${inspectionLiveText(resolved.snapshot)}, unpinned`,
           );
         if (resolved.semanticChanged)
           emitInspection(resolved.snapshot, resolved.semanticFingerprint);
         if (
-          state === "pinned" &&
-          interactionConfig.inspect?.contentMode === "interactive"
+          shouldFocusPinnedInteractiveTooltip({
+            state,
+            contentMode: interactionConfig.inspect?.contentMode,
+          })
         )
           queueMicrotask(() =>
             root
-              ?.querySelector<HTMLElement>(`#${CSS.escape(plotId)}-tooltip`)
+              ?.querySelector<HTMLElement>(
+                `#${CSS.escape(plotTooltipDomId(plotId))}`,
+              )
               ?.focus(),
           );
       }
@@ -2428,7 +2446,7 @@
           clientHeight: root?.clientHeight,
         })}
         <Tooltip
-          id={`${plotId}-tooltip`}
+          id={plotTooltipDomId(plotId)}
           {inspection}
           width={tooltipSize.width}
           height={tooltipSize.height}
