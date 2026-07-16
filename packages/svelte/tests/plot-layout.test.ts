@@ -5,6 +5,7 @@ import {
   isNarrowToolsWidth,
   plotRootInlineStyle,
   resolveClearLegendX,
+  tooltipViewportSize,
 } from "../src/lib/plot-layout.js";
 
 describe("breakpoint helpers", () => {
@@ -78,6 +79,42 @@ describe("plotRootInlineStyle", () => {
         themeStyle: "--t:1",
       }),
     ).toBe("width:100%;height:400px;--t:1");
+  });
+});
+
+describe("tooltipViewportSize", () => {
+  it("falls back to scene dims when client dims are nullish", () => {
+    expect(
+      tooltipViewportSize({
+        sceneWidth: 640,
+        sceneHeight: 400,
+        clientWidth: undefined,
+        clientHeight: null,
+      }),
+    ).toEqual({ width: 640, height: 400 });
+  });
+
+  it("clamps to the smaller of scene and client per axis", () => {
+    expect(
+      tooltipViewportSize({
+        sceneWidth: 640,
+        sceneHeight: 400,
+        clientWidth: 320,
+        clientHeight: 500,
+      }),
+    ).toEqual({ width: 320, height: 400 });
+  });
+
+  it("preserves zero client dims via nullish coalesce (not ||)", () => {
+    // root?.clientWidth ?? scene — laid-out zero must not fall back to scene.
+    expect(
+      tooltipViewportSize({
+        sceneWidth: 640,
+        sceneHeight: 400,
+        clientWidth: 0,
+        clientHeight: 0,
+      }),
+    ).toEqual({ width: 0, height: 0 });
   });
 });
 

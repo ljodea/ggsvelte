@@ -38,6 +38,30 @@ export type ChooseToolAction =
   | { readonly type: "request" }
   | { readonly type: "apply" };
 
+export type ShowToolRailInput = {
+  readonly interactive: boolean;
+  readonly availableToolCount: number;
+  /** Host: `interactionConfig.select?.type === "point"`. */
+  readonly canPublishPointSelection: boolean;
+  readonly selectedKeyCount: number;
+  readonly hasIntervalSelection: boolean;
+  readonly hasZoomDomains: boolean;
+};
+
+/**
+ * Whether the tool rail chrome should mount.
+ * Multi-tool mode, or any recovery control (point clear / interval clear / zoom reset).
+ */
+export function shouldShowToolRail(input: ShowToolRailInput): boolean {
+  return (
+    input.interactive &&
+    (input.availableToolCount > 1 ||
+      (input.canPublishPointSelection && input.selectedKeyCount > 0) ||
+      input.hasIntervalSelection ||
+      input.hasZoomDomains)
+  );
+}
+
 /**
  * Pure routing for host `chooseTool`.
  *
