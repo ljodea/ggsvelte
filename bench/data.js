@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784213129238,
+  "lastUpdate": 1784213585766,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -14125,6 +14125,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 167.4636,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "bdd572b0e1fad1befadb1046e6b96f10f26c42a9",
+          "message": "refactor(svelte): carry pending payload and preview-set source (#128)\n\nExpand restore-pending to include the pending queue payload so GGPlot no\nlonger non-null-asserts pendingPinnedPointer, and expand legend preview-set\nto map entrySource so the last legendInteractionSource call site is pure.",
+          "timestamp": "2026-07-16T09:52:22-05:00",
+          "tree_id": "c6b30b8f013ac67f6af0b1e4f3fd6eeeaee6176e",
+          "url": "https://github.com/ljodea/ggsvelte/commit/bdd572b0e1fad1befadb1046e6b96f10f26c42a9"
+        },
+        "date": 1784213585071,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.3295,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.5609,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 9.3903,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 12.1794,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 81.1979,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 116.3733,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.2567,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.182,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 82.4345,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 105.0878,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 9.9099,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 9.7484,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 107.9298,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7093,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 23.6105,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 5.4303,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 30.972,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 568.2816,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 129.1705,
             "unit": "ms"
           }
         ]
