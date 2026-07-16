@@ -41,11 +41,12 @@ export function isSkippableCommentLine(body: string): boolean {
   if (!trimmed.startsWith("*")) return false;
 
   // JSDoc middle lines are `* text` / lone `*`. CSS universal selectors look like
-  // `* {…}`, `*.class`, `*#id`, `*:hover`, `*, div`, `*[attr]`.
+  // `* {…}`, `*.class`, `*#id`, `*:hover`, `*, div`, `*[attr]`, and combinators
+  // `* + *`, `* > .x`, `* ~ *`.
   const afterStar = trimmed.slice(1).trimStart();
   if (afterStar.length === 0) return true;
   if (afterStar.startsWith("/")) return true; // */
-  if (/^[{.,#:[\]]/.test(afterStar)) return false;
+  if (/^[{.,#:[\]+>~]/.test(afterStar)) return false;
   return true;
 }
 
@@ -81,17 +82,41 @@ function assertAncestor(repoRoot: string, ancestor: string, descendant: string):
   }
 }
 
+/**
+ * Parse `git diff --name-status` stdout into every path involved, including
+ * both sides of renames/copies so moves out of runtime trees stay visible.
+ */
+export function listChangedFilesFromNameStatus(stdout: string): string[] {
+  const paths: string[] = [];
+  for (const line of stdout.split("\n")) {
+    const trimmed = line.trimEnd();
+    if (trimmed.length === 0) continue;
+    // status\tpath  OR  R100\told\tnew  OR  C100\told\tnew
+    const parts = trimmed.split("\t");
+    if (parts.length < 2) continue;
+    const status = parts[0] ?? "";
+    if (status.startsWith("R") || status.startsWith("C")) {
+      const from = parts[1];
+      const to = parts[2];
+      if (from !== undefined && from.length > 0) paths.push(from);
+      if (to !== undefined && to.length > 0) paths.push(to);
+      continue;
+    }
+    const path = parts[1];
+    if (path !== undefined && path.length > 0) paths.push(path);
+  }
+  return [...new Set(paths)];
+}
+
 function listChangedFiles(repoRoot: string, base: string, head: string): string[] {
-  const result = git(repoRoot, ["diff", "--name-only", `${base}..${head}`]);
+  // --name-status (not --name-only) so renames keep both source and destination.
+  const result = git(repoRoot, ["diff", "--name-status", `${base}..${head}`]);
   if (result.status !== 0) {
     throw new Error(
       `git diff ${base}..${head} failed: ${result.stderr.trim() || result.stdout.trim()}`,
     );
   }
-  return result.stdout
-    .split("\n")
-    .map((line) => line.trim())
-    .filter((line) => line.length > 0);
+  return listChangedFilesFromNameStatus(result.stdout);
 }
 
 /** True when the unified diff has non-comment, non-blank added/removed lines. */
