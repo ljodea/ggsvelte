@@ -4,6 +4,7 @@ import {
   isDockedTooltipWidth,
   isNarrowToolsWidth,
   plotRootInlineStyle,
+  resolveClearLegendX,
 } from "../src/lib/plot-layout.js";
 
 describe("breakpoint helpers", () => {
@@ -77,5 +78,50 @@ describe("plotRootInlineStyle", () => {
         themeStyle: "--t:1",
       }),
     ).toBe("width:100%;height:400px;--t:1");
+  });
+});
+
+describe("resolveClearLegendX", () => {
+  const legends = [
+    { scale: "fill", x: 12 },
+    { scale: "color", x: 40 },
+  ];
+
+  it("returns the matching legend x when focus is enabled and pressed", () => {
+    expect(
+      resolveClearLegendX({
+        legendFocusEnabled: true,
+        pressedScale: "color",
+        legends,
+      }),
+    ).toBe(40);
+  });
+
+  it("returns null when legend focus is disabled even if a scale is pressed", () => {
+    // Runtime-disable: controller emphasis can leave a pressed scale briefly.
+    expect(
+      resolveClearLegendX({
+        legendFocusEnabled: false,
+        pressedScale: "fill",
+        legends,
+      }),
+    ).toBeNull();
+  });
+
+  it("returns null when nothing is pressed or no legend matches", () => {
+    expect(
+      resolveClearLegendX({
+        legendFocusEnabled: true,
+        pressedScale: null,
+        legends,
+      }),
+    ).toBeNull();
+    expect(
+      resolveClearLegendX({
+        legendFocusEnabled: true,
+        pressedScale: "size",
+        legends,
+      }),
+    ).toBeNull();
   });
 });

@@ -160,6 +160,7 @@
     isDockedTooltipWidth,
     isNarrowToolsWidth,
     plotRootInlineStyle,
+    resolveClearLegendX,
   } from "./plot-layout.js";
   import {
     bestDirectionalIndex,
@@ -228,6 +229,7 @@
   } from "./plot-legend-focus.js";
   import PlotCanvasA11y from "./PlotCanvasA11y.svelte";
   import PlotLegendTargets from "./PlotLegendTargets.svelte";
+  import PlotStatusChrome from "./PlotStatusChrome.svelte";
   import SceneView from "./SceneView.svelte";
   import Tooltip from "./Tooltip.svelte";
   import ToolRail from "./ToolRail.svelte";
@@ -2409,12 +2411,11 @@
       rovingIndex={legendRovingIndex}
       sceneWidth={model.scene.width}
       sceneHeight={model.scene.height}
-      clearLegendX={interactionConfig.legendFocus !== null &&
-      effectiveLegendPressed !== null
-        ? (model.scene.legends.find(
-            (candidate) => candidate.scale === effectiveLegendPressed.scale,
-          )?.x ?? null)
-        : null}
+      clearLegendX={resolveClearLegendX({
+        legendFocusEnabled: interactionConfig.legendFocus !== null,
+        pressedScale: effectiveLegendPressed?.scale ?? null,
+        legends: model.scene.legends,
+      })}
       onPreviewIndex={(index) => previewLegendIndex(index, "pointer")}
       onPreviewClear={() => previewLegend(null)}
       onPointerDown={onLegendPointerDown}
@@ -2506,18 +2507,6 @@
         onkeydown={onSurfaceKeyDown}
         ondblclick={onDblClick}
       ></div>
-      <p id={`${plotId}-description`} class="gg-sr-only">
-        Use arrow keys to inspect data. Press Enter to pin. Press Escape to
-        dismiss.
-      </p>
-      <p id={`${plotId}-active`} class="gg-sr-only">
-        {inspection === null
-          ? "No active datum"
-          : datumLabel(inspection.focus.row)}
-      </p>
-      {#if areaAwaitingSecond}
-        <p class="gg-area-instruction">Choose opposite corner</p>
-      {/if}
       {#if inspection !== null}
         <Tooltip
           id={`${plotId}-tooltip`}
@@ -2543,26 +2532,26 @@
         />
       {/if}
     {/if}
-    {#if shouldRenderInteractionLiveRegion( { surfaceInteractive, legendFocusEnabled: interactionConfig.legendFocus !== null } )}
-      <div
-        id={`${plotId}-live`}
-        class="gg-sr-only"
-        aria-live="polite"
-        aria-atomic="true"
-      >
-        {resolveInteractionLiveText({
-          announcement: interactionAnnouncement,
-          model,
-          inspection,
-        })}
-      </div>
-    {/if}
-    {#if emptyPlot}
-      <div class="gg-empty-state" role="status">No data to display</div>
-    {/if}
-    {#if capabilityStatus !== null}
-      <p class="gg-capability-status" role="status">{capabilityStatus}</p>
-    {/if}
+    <!-- Status chrome after capture/tooltip; ids stay plot-scoped for
+         aria-describedby. Parent reduced-motion rule does not match child
+         nodes (chrome has no transitions — intentional no-op). -->
+    <PlotStatusChrome
+      {plotId}
+      showInstructions={surfaceInteractive}
+      activeDatumLabel={datumLabel(inspection?.focus.row ?? null)}
+      showAreaInstruction={surfaceInteractive && areaAwaitingSecond}
+      showLiveRegion={shouldRenderInteractionLiveRegion({
+        surfaceInteractive,
+        legendFocusEnabled: interactionConfig.legendFocus !== null,
+      })}
+      liveText={resolveInteractionLiveText({
+        announcement: interactionAnnouncement,
+        model,
+        inspection,
+      })}
+      {emptyPlot}
+      {capabilityStatus}
+    />
   {/if}
 </div>
 
@@ -2626,46 +2615,6 @@
     outline-offset: 2px;
   }
 
-  .gg-area-instruction {
-    position: absolute;
-    right: 8px;
-    bottom: 8px;
-    z-index: 2;
-    margin: 0;
-    border-radius: 3px;
-    padding: 4px 7px;
-    background: var(--gg-tooltipBg, var(--gg-theme-tooltipBg, #fff));
-    color: var(--gg-foreground, var(--gg-theme-foreground, currentColor));
-    font-size: 13px;
-    line-height: 1.25;
-    pointer-events: none;
-  }
-
-  .gg-empty-state {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    color: var(
-      --gg-interactionMuted,
-      var(--gg-theme-interactionMuted, currentColor)
-    );
-    font: 12px/1.4 var(--gg-font-family, sans-serif);
-    pointer-events: none;
-  }
-
-  .gg-capability-status {
-    position: absolute;
-    top: calc(100% + 4px);
-    left: 0;
-    margin: 0;
-    color: var(
-      --gg-interactionMuted,
-      var(--gg-theme-interactionMuted, currentColor)
-    );
-    font: 11px/1.4 var(--gg-font-family, sans-serif);
-  }
-
   @container gg-plot (max-width: 559px) {
     .gg-with-tool-rail {
       margin-top: 96px;
@@ -2678,19 +2627,9 @@
     margin-top: 96px;
   }
 
-  .gg-sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-    border: 0;
-  }
-
   @media (prefers-reduced-motion: reduce) {
+    /* Parent-scoped: does not match PlotStatusChrome nodes. Chrome has no
+       transitions/animations, so this is a no-op for extracted status UI. */
     .gg-plot-root * {
       scroll-behavior: auto;
       transition: none !important;
