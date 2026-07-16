@@ -1992,10 +1992,10 @@
         inspectionCoordinator.invalidate();
         brushRect = null;
         if (action.returnToInspect) chooseTool("inspect");
-        return;
+        break;
       }
       case "none":
-        return;
+        break;
     }
   }
 

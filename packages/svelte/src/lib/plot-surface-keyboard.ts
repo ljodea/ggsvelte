@@ -15,7 +15,7 @@ export type SurfaceKeyboardInput = {
   readonly pinEnabled: boolean;
 };
 
-export type SurfaceKeyAction =
+type SurfaceKeyAction =
   | { readonly type: "nudge-brush"; readonly dx: number; readonly dy: number }
   | { readonly type: "begin-area" }
   | { readonly type: "complete-area" }
@@ -30,7 +30,7 @@ export type SurfaceKeyAction =
   | { readonly type: "escape"; readonly returnToInspect: boolean }
   | { readonly type: "none" };
 
-export type SurfaceKeyResolution = {
+type SurfaceKeyResolution = {
   readonly action: SurfaceKeyAction;
   readonly preventDefault: boolean;
 };
