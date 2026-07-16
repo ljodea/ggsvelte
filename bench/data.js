@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784162113309,
+  "lastUpdate": 1784162418510,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -5319,6 +5319,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 166.7532,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "4cd27ca8fbbceb7e59bf3b383d2cb20a50b52321",
+          "message": "refactor(svelte): extract interval brush geometry and scene query (#53)\n\nMove brush corner geometry (start/update/nudge/pointer-end evaluation) and\ninterval selection scene query (expand → lineage rows → domain invert) out of\nGGPlot into pure modules with characterization tests. Keep brushRect and the\nreducer area FSM in GGPlot so draft state has a single host owner.\n\nPublic GGPlot API is unchanged.",
+          "timestamp": "2026-07-15T19:39:44-05:00",
+          "tree_id": "293e36fe12d0b8b7b7d93087957b5d2a2cc74e7d",
+          "url": "https://github.com/ljodea/ggsvelte/commit/4cd27ca8fbbceb7e59bf3b383d2cb20a50b52321"
+        },
+        "date": 1784162418116,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.8981,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.1248,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 11.5853,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 16.1227,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 86.4915,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 121.1091,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.0725,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2415,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 85.7103,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 110.3065,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 12.8588,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 11.9252,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 119.6731,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.6563,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 27.2564,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.3926,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 30.6732,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 632.2815,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 165.2325,
             "unit": "ms"
           }
         ]
