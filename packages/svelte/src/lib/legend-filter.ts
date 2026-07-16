@@ -18,7 +18,8 @@ export type LegendFilterInput = boolean | LegendFilterOptions;
 
 export interface LegendFilterEvent {
   readonly type: "legend-filter";
-  readonly phase: "change" | "clear";
+  /** `remove` deletes one clause; `clear` resets the entire filter set. */
+  readonly phase: "change" | "remove" | "clear";
   readonly source: "pointer" | "keyboard" | "touch" | "programmatic";
   readonly clause: LegendFilterClause | null;
 }
@@ -40,7 +41,7 @@ export function reconcileLegendFilterValues(
   values: readonly CellValue[],
   catalog: readonly CellValue[],
 ): readonly CellValue[] {
-  const catalogKeys = new Set(catalog.map(encodeKey));
+  const catalogKeys = new Set(catalog.map((value) => encodeKey(value)));
   return Object.freeze(values.filter((value) => catalogKeys.has(encodeKey(value))));
 }
 

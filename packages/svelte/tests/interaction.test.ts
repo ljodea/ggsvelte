@@ -40,6 +40,11 @@ function until(predicate: () => boolean, timeout = 2000): Promise<void> {
   });
 }
 
+function requireModel(model: RenderModel | null): RenderModel {
+  if (model === null) throw new Error("expected render model");
+  return model;
+}
+
 describe("facets + flip through the component", () => {
   it("renders one clipped panel group per facet value with strips", () => {
     const data = rows.map((r, i) => ({ ...r, g: i < 2 ? "p1" : "p2" }));
@@ -107,7 +112,9 @@ describe("facets + flip through the component", () => {
       ...size,
     });
     await until(() => model !== null);
-    const origin = model!.scene.panels[0]!.id;
+    const originPanel = requireModel(model).scene.panels[0];
+    if (originPanel === undefined) throw new Error("expected origin panel");
+    const origin = originPanel.id;
 
     interaction.setInterval(
       {
@@ -146,7 +153,8 @@ describe("facets + flip through the component", () => {
       ...size,
     });
     await until(() => model?.scene.panels.length === 2);
-    for (const panel of model!.scene.panels) {
+    const renderedModel = requireModel(model);
+    for (const panel of renderedModel.scene.panels) {
       interaction.setInterval(
         {
           panelId: panel.id,
@@ -157,10 +165,13 @@ describe("facets + flip through the component", () => {
         { scope: interactionScope },
       );
     }
-    const targetRecord = interaction.intervals(interactionScope)[0]!;
-    const targetLabel = model!.scene.panels.find(
+    const targetRecord = interaction.intervals(interactionScope)[0];
+    if (targetRecord === undefined) throw new Error("expected interval record");
+    const targetPanel = renderedModel.scene.panels.find(
       (panel) => panel.id === targetRecord.panelId,
-    )!.strip;
+    );
+    if (targetPanel === undefined) throw new Error("expected target panel");
+    const targetLabel = targetPanel.strip;
     await until(() =>
       [...container.querySelectorAll<HTMLButtonElement>(".gg-tool-rail button")].some(
         (button) => button.textContent?.trim() === `Clear panel selection: ${targetLabel}`,
@@ -177,6 +188,60 @@ describe("facets + flip through the component", () => {
     clear.click();
     await until(() => interaction.intervals(interactionScope).length === 1);
     expect(interaction.intervals(interactionScope)[0]?.panelId).not.toBe(targetRecord.panelId);
+  });
+
+  it("disambiguates typed facet values with identical strip text", async () => {
+    let model: RenderModel | null = null;
+    const interaction = createPlotInteraction<string>();
+    const interactionScope = {
+      keys: "typed-facet-row",
+      intervals: "typed-facet-controls",
+    } as const;
+    const { container } = render(GGPlot, {
+      data: [
+        { id: "number", facet: 1, x: 1, y: 1 },
+        { id: "text", facet: "1", x: 2, y: 2 },
+      ],
+      aes: { x: "x", y: "y" },
+      layers: [{ geom: "point" }],
+      facet: { wrap: "facet" },
+      key: "id",
+      select: { type: "interval", mode: "x", preset: "union" },
+      interaction,
+      interactionScope,
+      onrender: (next: RenderModel) => {
+        model = next;
+      },
+      ...size,
+    });
+    await until(() => model?.scene.panels.length === 2);
+    const renderedModel = requireModel(model);
+    for (const panel of renderedModel.scene.panels) {
+      interaction.setInterval(
+        {
+          panelId: panel.id,
+          preset: "union",
+          domains: { x: { kind: "linear", domain: [0, 3] } },
+          keys: [panel.id],
+        },
+        { scope: interactionScope },
+      );
+    }
+    const clearButton = () =>
+      [...container.querySelectorAll<HTMLButtonElement>(".gg-tool-rail button")].find((button) =>
+        button.textContent?.trim().startsWith("Clear panel selection:"),
+      );
+    await until(() => clearButton() !== undefined);
+    const firstLabel = clearButton()?.textContent?.trim();
+    clearButton()?.click();
+    await until(
+      () =>
+        interaction.intervals(interactionScope).length === 1 &&
+        clearButton()?.textContent?.trim() !== firstLabel,
+    );
+    const labels = [firstLabel, clearButton()?.textContent?.trim()];
+    expect(labels).toContain("Clear panel selection: 1 (facet: number 1)");
+    expect(labels).toContain("Clear panel selection: 1 (facet: text 1)");
   });
 
   it("restores focus and announces when an edited facet disappears", async () => {
@@ -218,8 +283,14 @@ describe("facets + flip through the component", () => {
         const button = [
           ...view.container.querySelectorAll<HTMLButtonElement>(".gg-tool-rail button"),
         ].find((candidate) => candidate.textContent?.trim() === "Edit x selection bounds: North");
-        if (button !== undefined) return resolve(button);
-        if (performance.now() - started > 2000) return reject(new Error("edit control missing"));
+        if (button !== undefined) {
+          resolve(button);
+          return;
+        }
+        if (performance.now() - started > 2000) {
+          reject(new Error("edit control missing"));
+          return;
+        }
         requestAnimationFrame(find);
       };
       find();
@@ -241,6 +312,19 @@ describe("facets + flip through the component", () => {
     expect(view.container.querySelector("[aria-live='polite']")?.textContent).toContain(
       "Bounds editing cancelled because North is no longer available.",
     );
+    const recoveryButtons = [
+      ...view.container.querySelectorAll<HTMLButtonElement>(".gg-tool-rail button"),
+    ];
+    expect(
+      recoveryButtons.some((button) =>
+        button.textContent?.trim().startsWith("Edit x selection bounds"),
+      ),
+    ).toBe(false);
+    expect(
+      recoveryButtons.some(
+        (button) => button.textContent?.trim() === "Clear panel selection: unavailable panel",
+      ),
+    ).toBe(true);
   });
 });
 
@@ -258,8 +342,10 @@ describe("accessible keyboard instructions", () => {
     });
     const capture = container.querySelector<HTMLElement>(".gg-capture")!;
     const description = () => {
-      const id = capture.getAttribute("aria-describedby")!.split(" ")[0]!;
-      return container.querySelector<HTMLElement>(`#${CSS.escape(id)}`)!.textContent!;
+      const id = capture.getAttribute("aria-describedby")?.split(" ")[0];
+      return id === undefined
+        ? ""
+        : (container.querySelector<HTMLElement>(`#${CSS.escape(id)}`)?.textContent ?? "");
     };
     expect(description()).toContain("Use Arrow keys to inspect data");
     expect(description()).toContain("Enter or Space to pin");
@@ -674,10 +760,10 @@ describe("brush + brush-to-zoom", () => {
     const [lower, upper] = [
       ...container.querySelectorAll<HTMLInputElement>(".gg-bounds-editor input"),
     ];
-    lower!.value = "1.5";
-    lower!.dispatchEvent(new InputEvent("input", { bubbles: true }));
-    upper!.value = "2.5";
-    upper!.dispatchEvent(new InputEvent("input", { bubbles: true }));
+    lower.value = "1.5";
+    lower.dispatchEvent(new InputEvent("input", { bubbles: true }));
+    upper.value = "2.5";
+    upper.dispatchEvent(new InputEvent("input", { bubbles: true }));
     expect(renderCount).toBe(rendersBeforeEdit);
 
     container.querySelector<HTMLButtonElement>('.gg-bounds-editor button[type="submit"]')!.click();
@@ -798,10 +884,10 @@ describe("brush + brush-to-zoom", () => {
     const [lower, upper] = [
       ...container.querySelectorAll<HTMLInputElement>(".gg-bounds-editor input"),
     ];
-    lower!.value = "1.5";
-    lower!.dispatchEvent(new InputEvent("input", { bubbles: true }));
-    upper!.value = "2.5";
-    upper!.dispatchEvent(new InputEvent("input", { bubbles: true }));
+    lower.value = "1.5";
+    lower.dispatchEvent(new InputEvent("input", { bubbles: true }));
+    upper.value = "2.5";
+    upper.dispatchEvent(new InputEvent("input", { bubbles: true }));
     container.querySelector<HTMLButtonElement>('.gg-bounds-editor button[type="submit"]')!.click();
     await until(() => selections.length === 1);
 
@@ -832,10 +918,10 @@ describe("brush + brush-to-zoom", () => {
     const [lower, upper] = [
       ...container.querySelectorAll<HTMLInputElement>(".gg-bounds-editor input"),
     ];
-    lower!.value = "1.5";
-    lower!.dispatchEvent(new InputEvent("input", { bubbles: true }));
-    upper!.value = "2.5";
-    upper!.dispatchEvent(new InputEvent("input", { bubbles: true }));
+    lower.value = "1.5";
+    lower.dispatchEvent(new InputEvent("input", { bubbles: true }));
+    upper.value = "2.5";
+    upper.dispatchEvent(new InputEvent("input", { bubbles: true }));
     const apply = container.querySelector<HTMLButtonElement>(
       '.gg-bounds-editor button[type="submit"]',
     )!;
@@ -917,7 +1003,7 @@ describe("brush + brush-to-zoom", () => {
         view.container.querySelectorAll(`.gg-bounds-editor ${fixture.control}`),
         fixture.name,
       ).toHaveLength(2);
-      await view.unmount();
+      view.unmount();
     }
   });
 
@@ -1009,10 +1095,11 @@ describe("brush + brush-to-zoom", () => {
       },
       ...size,
     });
-    const panels = model!.scene.panels;
+    const panels = requireModel(model).scene.panels;
     expect(panels).toHaveLength(2);
-    const first = panels[0]!;
-    const second = panels[1]!;
+    const first = panels[0];
+    const second = panels[1];
+    if (first === undefined || second === undefined) throw new Error("expected two facet panels");
     const capture = container.querySelector(".gg-capture")!;
     const selectArea = [
       ...container.querySelectorAll<HTMLButtonElement>(".gg-tool-rail button"),

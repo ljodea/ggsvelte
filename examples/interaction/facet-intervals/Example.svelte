@@ -77,7 +77,7 @@
     border: 1px solid color-mix(in srgb, currentColor 18%, transparent);
     border-radius: 0.55rem;
     padding: 0.7rem 0.85rem 0.8rem;
-    color: var(--text, #17202a);
+    color: var(--fg, #17202a);
     font: 0.86rem/1.4 var(--gg-font-family, system-ui, sans-serif);
   }
 

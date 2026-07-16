@@ -56,9 +56,11 @@
     GeometryBatch,
     RenderModel,
     ScaleState,
+    ScenePanel,
   } from "@ggsvelte/core";
   import {
     buildInteractionMasks,
+    decodeKey,
     encodeKey,
     planStrata,
     runPipeline,
@@ -496,7 +498,7 @@
     for (const layer of effectiveSpec.layers) {
       for (const scale of ["color", "fill"] as const) {
         const channel = layer.aes?.[scale] ?? effectiveSpec.aes?.[scale];
-        if (channel != null && "field" in channel)
+        if (channel !== null && channel !== undefined && "field" in channel)
           bindings.add(`${scale}:${channel.field}`);
       }
     }
@@ -860,23 +862,65 @@
     });
   });
   const currentIntervalRecord = $derived.by(() => {
-    const panelId = committedInterval?.panelId;
+    const intervalPanelId = committedInterval?.panelId;
     return (
-      (panelId === null || panelId === undefined
+      (intervalPanelId === null || intervalPanelId === undefined
         ? undefined
-        : effectiveIntervals.find((record) => record.panelId === panelId)) ??
+        : effectiveIntervals.find(
+            (record) => record.panelId === intervalPanelId,
+          )) ??
       effectiveIntervals[0] ??
       null
     );
   });
-  const currentIntervalTargetLabel = $derived.by(() => {
-    if (currentIntervalRecord === null || model === null) return undefined;
-    const panel = model.scene.panels.find(
+  const currentIntervalPanel = $derived.by(() => {
+    if (currentIntervalRecord === null || model === null) return;
+    return model.scene.panels.find(
       (candidate) => candidate.id === currentIntervalRecord.panelId,
     );
-    if (panel === undefined) return currentIntervalRecord.panelId;
-    const label = panel.strip.trim();
-    return label.length > 0 ? label : undefined;
+  });
+
+  function facetIdentityValueLabel(encodedValue: string): string {
+    const value = decodeKey(encodedValue);
+    const kind =
+      value instanceof Date
+        ? "date"
+        : value === null
+          ? "null"
+          : typeof value === "string"
+            ? "text"
+            : typeof value;
+    const display = value instanceof Date ? value.toISOString() : String(value);
+    return `${kind} ${display}`;
+  }
+
+  function intervalPanelLabel(panel: ScenePanel): string {
+    const display = panel.strip.trim() || "panel";
+    if (
+      model === null ||
+      model.scene.panels.filter(
+        (candidate) => candidate.strip.trim() === panel.strip.trim(),
+      ).length < 2
+    )
+      return display;
+    const identity = panel.identity.values
+      .map(
+        (value) =>
+          `${value.field}: ${facetIdentityValueLabel(value.encodedValue)}`,
+      )
+      .join(", ");
+    return identity.length > 0 ? `${display} (${identity})` : display;
+  }
+
+  const currentIntervalTargetLabel = $derived.by(() => {
+    if (currentIntervalRecord === null || model === null) return;
+    if (currentIntervalPanel === undefined) return "unavailable panel";
+    if (
+      currentIntervalPanel.strip.trim().length === 0 &&
+      currentIntervalPanel.identity.values.length === 0
+    )
+      return;
+    return intervalPanelLabel(currentIntervalPanel);
   });
   const boundsEditorInput = $derived.by((): BoundsEditorInput | null => {
     if (boundsEditor === null || model === null) return null;
@@ -894,10 +938,10 @@
       });
     }
     const record = currentIntervalRecord;
-    const panelId = record?.panelId ?? boundsEditor.panelId;
-    if (panelId === undefined) return null;
+    const targetPanelId = record?.panelId ?? boundsEditor.panelId;
+    if (targetPanelId === undefined) return null;
     const panelIndex = model.scene.panels.findIndex(
-      (panel) => panel.id === panelId,
+      (panel) => panel.id === targetPanelId,
     );
     if (panelIndex < 0) return null;
     const scale =
@@ -958,10 +1002,10 @@
       model.scene.batches.every((batch) => batch.rowIndex.length === 0),
   );
   const preciseIntervalAxes = $derived.by((): readonly ("x" | "y")[] => {
-    const select = interactionConfig.select;
-    if (select === null || select.type !== "interval") return [];
+    const selectOptions = interactionConfig.select;
+    if (selectOptions === null || selectOptions.type !== "interval") return [];
     return (["x", "y"] as const).filter(
-      (axis) => select.mode === "xy" || select.mode === axis,
+      (axis) => selectOptions.mode === "xy" || selectOptions.mode === axis,
     );
   });
   const preciseZoomAxes = $derived.by((): readonly ("x" | "y")[] => {
@@ -1100,15 +1144,15 @@
   }
 
   function clearCurrentPanelInterval(source: InteractionSource): void {
-    const panelId =
+    const intervalPanelId =
       committedInterval?.panelId ?? currentIntervalRecord?.panelId;
-    if (panelId === null || panelId === undefined) return;
+    if (intervalPanelId === null || intervalPanelId === undefined) return;
     if (interaction === undefined) {
       localCommittedIntervals = localCommittedIntervals.filter(
-        (interval) => interval.panelId !== panelId,
+        (interval) => interval.panelId !== intervalPanelId,
       );
     } else {
-      interaction.clearInterval(panelId, {
+      interaction.clearInterval(intervalPanelId, {
         scope: resolvedInteractionScope,
         source,
       });
@@ -1116,7 +1160,7 @@
     const event = clearIntervalSelectionEvent(
       committedInterval ?? {
         mode: interactionConfig.select?.mode ?? "xy",
-        panelId,
+        panelId: intervalPanelId,
         pixels: { x0: 0, y0: 0, x1: 0, y1: 0 },
       },
       source,
@@ -1141,7 +1185,9 @@
       return Object.freeze({
         kind: "band",
         values: Object.freeze(
-          scale.rawDomain.slice(lower, upper + 1).map(encodeKey),
+          scale.rawDomain
+            .slice(lower, upper + 1)
+            .map((value) => encodeKey(value)),
         ),
       });
     }
@@ -1181,7 +1227,7 @@
   }
 
   function intervalLineageCount(
-    panelId: string,
+    targetPanelId: string,
     domains: ReadonlyIntervalDomains,
   ): number {
     if (model === null) return 0;
@@ -1190,7 +1236,7 @@
       const candidate = model.candidates.candidate(id);
       if (
         candidate === null ||
-        candidate.panelId !== panelId ||
+        candidate.panelId !== targetPanelId ||
         !candidateInInterval(candidate, domains)
       )
         continue;
@@ -1207,16 +1253,16 @@
     event: IntervalSelection,
     source: InteractionSource,
   ): void {
-    const panelId = event.panelId;
-    if (panelId === null || model === null) return;
+    const targetPanelId = event.panelId;
+    if (targetPanelId === null || model === null) return;
     const panelIndex = model.scene.panels.findIndex(
-      (panel) => panel.id === panelId,
+      (panel) => panel.id === targetPanelId,
     );
     if (panelIndex < 0) return;
     const x = semanticAxis(panelIndex, "x", event.domain.x);
     const y = semanticAxis(panelIndex, "y", event.domain.y);
     const record: PlotInteractionInterval<PublicKey> = Object.freeze({
-      panelId,
+      panelId: targetPanelId,
       preset: interactionConfig.select?.preset ?? "independent",
       domains: Object.freeze({
         ...(x !== undefined && { x }),
@@ -1591,7 +1637,7 @@
         return [];
       const fields = new Set(
         model.layerFields
-          .flatMap((mappedFields) => mappedFields)
+          .flat()
           .filter(
             (mapped) =>
               mapped.channel === sceneLegend.scale && mapped.source !== "stat",
@@ -1634,9 +1680,14 @@
       catalogs.set(key, catalog);
     }
     let next = localLegendFilters;
-    const reconciled: LegendFilterClause[] = [];
+    const reconciled: Array<{
+      clause: LegendFilterClause;
+      removed: boolean;
+    }> = [];
     for (const [key, catalog] of catalogs) {
-      const fingerprint = JSON.stringify(catalog.map(encodeKey));
+      const fingerprint = JSON.stringify(
+        catalog.map((value) => encodeKey(value)),
+      );
       const priorFingerprint = legendCatalogFingerprints.get(key);
       legendCatalogFingerprints.set(key, fingerprint);
       if (priorFingerprint === undefined || priorFingerprint === fingerprint)
@@ -1647,7 +1698,10 @@
       if (index < 0) continue;
       const clause = next[index]!;
       const values = reconcileLegendFilterValues(clause.values, catalog);
-      reconciled.push(Object.freeze({ ...clause, values }));
+      reconciled.push({
+        clause: Object.freeze({ ...clause, values }),
+        removed: values.length === 0,
+      });
       next =
         values.length === 0
           ? next.filter((_, candidateIndex) => candidateIndex !== index)
@@ -1657,14 +1711,14 @@
                 : candidate,
             );
     }
-    for (const key of [...legendCatalogFingerprints.keys()])
+    for (const key of legendCatalogFingerprints.keys())
       if (!catalogs.has(key)) legendCatalogFingerprints.delete(key);
     if (next === localLegendFilters) return;
     localLegendFilters = [...next];
-    for (const clause of reconciled)
+    for (const { clause, removed } of reconciled)
       emitLegendFilter({
         type: "legend-filter",
-        phase: "change",
+        phase: removed ? "remove" : "change",
         source: "programmatic",
         clause,
       });
@@ -2527,17 +2581,15 @@
     boundsReturnFocus = trigger;
     if (action === "select") {
       const panel =
-        (currentIntervalRecord === null
-          ? inspectionPanel
-          : model?.scene.panels.find(
-              (candidate) => candidate.id === currentIntervalRecord.panelId,
-            )) ?? model?.scene.panels[0];
+        currentIntervalRecord === null
+          ? (inspectionPanel ?? model?.scene.panels[0])
+          : currentIntervalPanel;
       if (panel === undefined) return;
       boundsEditor = {
         action,
         axis,
         panelId: panel.id,
-        panelLabel: panel.strip.trim() || panel.id,
+        panelLabel: intervalPanelLabel(panel),
       };
       return;
     }
@@ -2549,7 +2601,7 @@
       if (event.scale === "band") return;
       commitZoom(
         frozenZoomDomains({
-          ...(effectiveZoomDomains ?? {}),
+          ...effectiveZoomDomains,
           [event.axis]: [...event.bounds],
         }),
         event.inputSource,
@@ -2558,25 +2610,26 @@
       return;
     }
     const prior = currentIntervalRecord;
-    const panelId = prior?.panelId ?? boundsEditor?.panelId;
-    if (panelId === null || panelId === undefined || model === null) return;
+    const targetPanelId = prior?.panelId ?? boundsEditor?.panelId;
+    if (targetPanelId === null || targetPanelId === undefined || model === null)
+      return;
     const panelIndex = model.scene.panels.findIndex(
-      (candidate) => candidate.id === panelId,
+      (candidate) => candidate.id === targetPanelId,
     );
     if (panelIndex < 0) return;
     const axis = semanticAxis(panelIndex, event.axis, event.bounds);
     if (axis === undefined) return;
     const domains = Object.freeze({
-      ...(prior?.domains ?? {}),
+      ...prior?.domains,
       [event.axis]: axis,
     });
     const keys = recomputePanelIntervalKeys({
-      panelId,
+      panelId: targetPanelId,
       domains,
       candidates: intervalConsumptionCandidates(),
     }) as readonly PublicKey[];
     const next: PlotInteractionInterval<PublicKey> = Object.freeze({
-      panelId,
+      panelId: targetPanelId,
       preset:
         prior?.preset ?? interactionConfig.select?.preset ?? "independent",
       domains,
@@ -2596,10 +2649,10 @@
     committedInterval = buildIntervalSelection({
       phase: "end",
       mode: interactionConfig.select?.mode ?? "xy",
-      panelId,
+      panelId: targetPanelId,
       domain: eventDomain(panelIndex, domains),
       pixels:
-        committedInterval?.panelId === panelId
+        committedInterval?.panelId === targetPanelId
           ? committedInterval.pixels
           : {
               x0: panel.x,
@@ -2608,7 +2661,7 @@
               y1: panel.y + panel.height,
             },
       keys,
-      lineageCount: intervalLineageCount(panelId, domains),
+      lineageCount: intervalLineageCount(targetPanelId, domains),
       source: event.inputSource,
     });
     emitSelection(committedInterval);
@@ -2924,7 +2977,9 @@
         effectiveSelectedKeys.length > 0}
       hasIntervalSelection={effectiveIntervals.length > 0}
       intervalTargetLabel={currentIntervalTargetLabel}
-      canSetIntervalBounds={!emptyPlot && preciseIntervalAxes.length > 0}
+      canSetIntervalBounds={!emptyPlot &&
+        preciseIntervalAxes.length > 0 &&
+        (currentIntervalRecord === null || currentIntervalPanel !== undefined)}
       canSetZoomBounds={!emptyPlot && preciseZoomAxes.length > 0}
       intervalAxes={preciseIntervalAxes}
       zoomAxes={preciseZoomAxes}
