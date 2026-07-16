@@ -4,11 +4,15 @@
 import type { ColorScaleSpec } from "@ggsvelte/spec";
 
 import type { EditionDefaults } from "../editions.js";
-import { trainSequential, VIRIDIS_RAMP_10 } from "../scales/color.js";
+import { trainSequential } from "../scales/color.js";
 import { finiteExtent } from "../scales/train.js";
 import type { CellValue } from "../table.js";
-import { cellsToNumeric, cellToNumber } from "../table.js";
+import { cellsToNumeric } from "../table.js";
 
+import {
+  resolveSequentialDomain,
+  resolveSequentialRange,
+} from "./scale-color-sequential-domain.js";
 import { resolveSequentialLegendFormat } from "./scale-color-sequential-format.js";
 import type { ColorResolution } from "./scale-color-types.js";
 import type { Advisory, PipelineWarning } from "./types.js";
@@ -42,20 +46,8 @@ export function resolveSequentialColorScale(input: {
   }
   const numeric = cellsToNumeric(values);
   const extent = finiteExtent([numeric]);
-  const domain = config?.domain;
-  const sequentialDomain =
-    domain !== undefined && domain.length === 2
-      ? ([cellToNumber(domain[0] as CellValue), cellToNumber(domain[1] as CellValue)] as [
-          number,
-          number,
-        ])
-      : undefined;
-  // Edition-keyed default ramp: identical to the trainSequential built-in
-  // for edition 1 (pass nothing — keeps behavior byte-stable); a different
-  // edition's ramp is passed explicitly. Explicit config always wins.
-  const editionRamp =
-    editionDefaults.sequentialRamp === VIRIDIS_RAMP_10 ? undefined : editionDefaults.sequentialRamp;
-  const range = config?.range ?? editionRamp;
+  const sequentialDomain = resolveSequentialDomain(config);
+  const range = resolveSequentialRange(config, editionDefaults);
   const scale = trainSequential(extent, {
     ...(sequentialDomain !== undefined && { domain: sequentialDomain }),
     ...(range !== undefined && { range }),

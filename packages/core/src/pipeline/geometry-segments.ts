@@ -2,12 +2,12 @@
  * Rule segment geometry batch builder (annotation intercepts + data-driven).
  */
 import type { SegmentsBatch } from "../scene.js";
-import { cellToNumber } from "../table.js";
 
 import type { LayerFrame, PipelineWarning, ResolvedColorScale } from "./types.js";
-import { colorOf, NO_ROW } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
-import { DEFAULT_RULE_LINEWIDTH, positionOf, removedWarning } from "./geometry-shared.js";
+import { DEFAULT_RULE_LINEWIDTH, removedWarning } from "./geometry-shared.js";
+import { emitAnnotationSegments } from "./geometry-segments-annotation.js";
+import { emitDataSegments } from "./geometry-segments-data.js";
 import { createSegmentEmitters } from "./geometry-segments-emit.js";
 
 export function segmentsBatch(
@@ -35,35 +35,18 @@ export function segmentsBatch(
   });
 
   if (binding.ruleForm === "annotation") {
-    for (const v of frame.xIntercepts) {
-      pushVertical(
-        fx.xScale.type === "band" ? fx.xScale.normalize(v) : fx.xScale.normalize(cellToNumber(v)),
-        NO_ROW,
-      );
-    }
-    for (const v of frame.yIntercepts) {
-      pushHorizontal(
-        fx.yScale.type === "band" ? fx.yScale.normalize(v) : fx.yScale.normalize(cellToNumber(v)),
-        NO_ROW,
-      );
-    }
+    emitAnnotationSegments({ frame, fx, pushVertical, pushHorizontal });
   } else {
-    for (let row = 0; row < frame.n; row++) {
-      const before = rowIndex.length;
-      if (binding.ruleForm === "vertical") {
-        pushVertical(
-          positionOf(fx.xScale, frame.xNumeric, frame.xValues, row),
-          frame.rowIndex[row]!,
-        );
-      } else {
-        pushHorizontal(positionOf(fx.yScale, frame.yNumeric, null, row), frame.rowIndex[row]!);
-      }
-      if (wantsColors && rowIndex.length > before) {
-        const value =
-          frame.colorValues === null ? binding.color.scaledConstant! : frame.colorValues[row]!;
-        perSegmentColors.push(colorOf(color, value));
-      }
-    }
+    emitDataSegments({
+      frame,
+      fx,
+      color,
+      wantsColors,
+      pushVertical,
+      pushHorizontal,
+      rowIndex,
+      perSegmentColors,
+    });
   }
   removedWarning(removed, binding.index, warnings);
   if (rowIndex.length === 0) return null;
