@@ -128,11 +128,14 @@
     type QueuedPointerInspection,
   } from "./plot-surface-inspection.js";
   import {
+    resolveFinishBrushAction,
+    type FinishBrushAction,
+  } from "./plot-brush-finish.js";
+  import {
     resolveCaptureClickAction,
     advanceTouchInspectMoved,
     isAreaAwaitingSecond,
     isAreaBrushing,
-    resolveFinishBrushAction,
     resolveLostPointerCaptureAction,
     resolvePointerDownAction,
     resolvePointerMoveAction,
@@ -140,7 +143,6 @@
     shouldClearInspectionOnPointerLeave,
     POINT_SELECT_NEAREST_MAX_DISTANCE_PX,
     TOUCH_INSPECT_CLICK_SUPPRESS_MS,
-    type FinishBrushAction,
   } from "./plot-surface-pointer.js";
   import {
     resolveLegendClearControlSource,
@@ -2181,12 +2183,13 @@
 
   function onSurfaceKeyDown(event: KeyboardEvent): void {
     // Decision table is pure (plot-surface-keyboard); this switch owns side
-    // effects only. hasBrushDraft tracks brushRect, not reducer brushing.
+    // effects only. brushCorners is the draft source of truth (not reducer
+    // brushing); complete-area carries finish so host only applies.
     const { action, preventDefault } = resolveSurfaceKeyAction({
       key: event.key,
       shiftKey: event.shiftKey,
       activeTool,
-      hasBrushDraft: brushRect !== null,
+      brushCorners: brushRect,
       hasInspection: inspection !== null,
       pinEnabled,
       focusKey: inspection?.focus.key ?? null,
@@ -2197,6 +2200,7 @@
     if (preventDefault) event.preventDefault();
     switch (action.type) {
       case "nudge-brush": {
+        // Pure table emits only when brushCorners was non-null.
         const panel = inspectionPanel ?? model?.scene.panels[0];
         if (panel === undefined || brushRect === null) return;
         brushRect = nudgeBrushEnd(brushRect, action.dx, action.dy, panel);
@@ -2218,15 +2222,8 @@
         return;
       }
       case "complete-area": {
-        if (brushRect === null) return;
-        // Single pure owner with pointer finish-brush for select vs zoom.
-        applyFinishBrush(
-          resolveFinishBrushAction({
-            ended: { kind: "commit", rect: normalizedRect(brushRect) },
-            activeTool,
-          }),
-          "keyboard",
-        );
+        // finish payload is pure-owned (normalize + select/zoom/end routing).
+        applyFinishBrush(action.finish, "keyboard");
         return;
       }
       case "cycle-coincident":
