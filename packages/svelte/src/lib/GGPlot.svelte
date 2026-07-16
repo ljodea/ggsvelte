@@ -169,8 +169,10 @@
   import {
     applyZoomToSpec,
     buildZoomEvent,
+    filterZoomDomainsByMode,
     resolveBrushZoomDomains,
     sanitizePartialZoomDomains,
+    stableZoomDomains,
   } from "./plot-zoom.js";
   import {
     buildInteractiveLegendEntries,
@@ -313,6 +315,7 @@
       interaction,
       ...(interactionScope !== undefined && { interactionScope }),
       zoom,
+      faceted: assembled?.facet !== undefined,
       ...(datumKey !== undefined && { datumKey }),
       assembled,
     }),
@@ -350,14 +353,25 @@
 
   // ------------------------------------------------------------ zoom respec
   let localZoomDomains = $state<ZoomDomains | null>(null);
+  // Memoize prior bag so selection/emphasis revisions do not retrain zoom.
+  let previousEffectiveZoomDomains: ZoomDomains | null = null;
   const controllerRevision = $derived(interaction?.revision ?? 0);
   const effectiveZoomDomains: ZoomDomains | null = $derived.by(() => {
     void controllerRevision;
-    if (interaction === undefined) return localZoomDomains;
-    const domains = interaction.zoom(resolvedInteractionScope);
-    return domains.x === undefined && domains.y === undefined
-      ? null
-      : (domains as ZoomDomains);
+    let next: ZoomDomains | null;
+    if (interaction === undefined) {
+      next = localZoomDomains;
+    } else {
+      // Gate shared domains by this plot's resolved zoom mode (null when
+      // disabled / faceted-unsupported) so x-only plots ignore y domains.
+      next = filterZoomDomainsByMode(
+        interaction.zoom(resolvedInteractionScope),
+        interactionConfig.zoom?.mode ?? null,
+      );
+    }
+    next = stableZoomDomains(previousEffectiveZoomDomains, next);
+    previousEffectiveZoomDomains = next;
+    return next;
   });
 
   const effectiveSpec: PortableSpec | null = $derived.by(() => {
@@ -673,10 +687,13 @@
       zoomHasSupportedChannel,
     ),
   );
+  const canPublishPointSelection = $derived(
+    interactionConfig.select?.type === "point",
+  );
   const showToolRail = $derived(
     interactive &&
       (availableTools.length > 1 ||
-        effectiveSelectedKeys.length > 0 ||
+        (canPublishPointSelection && effectiveSelectedKeys.length > 0) ||
         committedInterval !== null ||
         effectiveZoomDomains !== null),
   );
@@ -727,7 +744,7 @@
     model === null ? "" : themeTokensToCss(model.scene.theme),
   );
   const rootStyle = $derived(
-    `${hasCanvas || interactive || effectiveEmphasisKeys.length > 0 ? `width:${width === undefined || width === "container" ? "100%" : `${model?.scene.width ?? resolvedWidth}px`};height:${model?.scene.height ?? resolvedHeight}px;` : ""}${themeStyle}` ||
+    `${hasCanvas || interactive || effectiveEmphasisKeys.length > 0 || effectiveSelectedKeys.length > 0 ? `width:${width === undefined || width === "container" ? "100%" : `${model?.scene.width ?? resolvedWidth}px`};height:${model?.scene.height ?? resolvedHeight}px;` : ""}${themeStyle}` ||
       undefined,
   );
   function anchorsForKeys(keys: readonly PropertyKey[]): {
@@ -2152,11 +2169,14 @@
       {emptyPlot}
       narrow={resolvedWidth < 560}
       zoomDomains={effectiveZoomDomains}
-      hasPointSelection={effectiveSelectedKeys.length > 0}
+      hasPointSelection={canPublishPointSelection &&
+        effectiveSelectedKeys.length > 0}
       hasIntervalSelection={committedInterval !== null}
       onChooseTool={chooseTool}
       onResetZoom={() => resetZoom("pointer")}
-      onClearPointSelection={() => clearPointSelection("pointer")}
+      onClearPointSelection={() => {
+        if (canPublishPointSelection) clearPointSelection("pointer");
+      }}
       onClearIntervalSelection={() => clearIntervalSelection("pointer")}
     />
   {/if}
@@ -2283,11 +2303,12 @@
         >
       {/if}
     {/if}
-    {#if !interactive && emphasizedAnchors.length > 0}
+    {#if !interactive && (emphasizedAnchors.length > 0 || selectedAnchors.length > 0)}
       <InteractionOverlay
         width={model.scene.width}
         height={model.scene.height}
         interactive={false}
+        {selectedAnchors}
         {emphasizedAnchors}
       />
     {/if}

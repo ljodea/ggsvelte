@@ -107,6 +107,11 @@ export type ResolveInteractionScopeInput = {
   readonly interaction: object | null | undefined;
   readonly interactionScope?: PlotInteractionScope;
   readonly zoom?: ZoomInput;
+  /**
+   * When true, zoom is unsupported (same as normalizeInteractionConfig) and
+   * must not force domain scopes — faceted plots use a diagnostic/no-op path.
+   */
+  readonly faceted?: boolean;
   readonly datumKey?: string | number | symbol | ((...args: never[]) => PropertyKey);
   readonly assembled: PortableSpec | null;
 };
@@ -121,8 +126,16 @@ export function resolveInteractionScope(input: ResolveInteractionScopeInput): Pl
       throw new TypeError(
         "GGPlot requires interactionScope when interaction is supplied so unrelated charts cannot share semantic keys or domains accidentally.",
       );
+    // Mirror normalizeInteractionConfig: faceted zoom is disabled with a
+    // diagnostic, so missing x/y scopes must not hard-fail render.
     const zoomMode =
-      input.zoom === true ? "xy" : typeof input.zoom === "object" ? input.zoom.mode : null;
+      input.faceted === true
+        ? null
+        : input.zoom === true
+          ? "xy"
+          : typeof input.zoom === "object"
+            ? input.zoom.mode
+            : null;
     if (zoomMode !== null) {
       if (zoomMode !== "y" && input.interactionScope.x === undefined)
         throw new TypeError(

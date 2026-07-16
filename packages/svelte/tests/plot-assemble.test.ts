@@ -23,7 +23,10 @@ describe("toLayerInput", () => {
         return aes;
       },
     };
-    expect(toLayerInput(descriptor)).toEqual({ geom: "point", aes: { x: "a" } });
+    expect(toLayerInput(descriptor)).toEqual({
+      geom: "point",
+      aes: { x: "a" },
+    });
     geom = "line";
     aes = undefined;
     expect(toLayerInput(descriptor)).toEqual({ geom: "line" });
@@ -223,6 +226,29 @@ describe("resolveInteractionScope", () => {
         assembled,
       }),
     ).toThrow(/Controlled x zoom requires interactionScope\.x/);
+  });
+
+  it("does not require domain scopes for faceted zoom (unsupported → diagnostic/no-op)", () => {
+    // Faceted interval/zoom is cleared by normalizeInteractionConfig; scope
+    // resolution must not turn that path into a hard render failure.
+    expect(
+      resolveInteractionScope({
+        interaction: {},
+        interactionScope: { keys: "id" },
+        zoom: true,
+        faceted: true,
+        assembled,
+      }),
+    ).toEqual({ keys: "id" });
+    expect(
+      resolveInteractionScope({
+        interaction: {},
+        interactionScope: { keys: "id" },
+        zoom: { mode: "xy" },
+        faceted: true,
+        assembled,
+      }),
+    ).toEqual({ keys: "id" });
   });
 
   it("requires y scope for controlled y zoom", () => {
