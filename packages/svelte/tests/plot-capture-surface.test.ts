@@ -150,6 +150,7 @@ describe("PlotCaptureSurface", () => {
       onDblClick: () => {},
     });
     expect(element).toBeInstanceOf(HTMLDivElement);
-    expect(element?.classList.contains("gg-capture")).toBe(true);
+    if (!(element instanceof HTMLDivElement)) throw new Error("expected bound capture element");
+    expect(element.classList.contains("gg-capture")).toBe(true);
   });
 });

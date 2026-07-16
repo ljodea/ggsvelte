@@ -11,7 +11,7 @@
     plotId,
     activeTool,
     ariaLabel,
-    ariaControls = undefined,
+    ariaControls,
     onFocus,
     onBlur,
     onPointerMove,
