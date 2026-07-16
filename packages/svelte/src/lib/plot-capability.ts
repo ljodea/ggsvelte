@@ -1,4 +1,8 @@
-import type { InteractionDiagnostic, InteractionTool } from "./interaction.js";
+import {
+  INTERACTION_DIAGNOSTIC_CATALOG,
+  type InteractionDiagnostic,
+  type InteractionTool,
+} from "./interaction.js";
 
 export type ZoomAreaMode = "x" | "y" | "xy";
 
@@ -74,4 +78,29 @@ export function capabilityStatusText(input: CapabilityStatusInput): string | nul
   )
     return "No inspectable marks";
   return null;
+}
+
+/** Legend type surface for discrete-only advisory (host maps scene legends). */
+export type LegendTypeRef = {
+  readonly type: string;
+};
+
+/**
+ * When legend focus is enabled and the scene has legends but none are discrete,
+ * return the INTERACTION_LEGEND_DISCRETE_ONLY advisory with `actual` legend types.
+ * Empty when disabled, no legends, or any discrete legend is present.
+ * Contract is "not discrete" (ramps, unknown types, etc.), not ramp-only.
+ */
+export function legendFocusDiscreteOnlyDiagnostics(
+  legendFocusEnabled: boolean,
+  legends: readonly LegendTypeRef[],
+): InteractionDiagnostic[] {
+  if (!legendFocusEnabled || legends.length === 0) return [];
+  if (legends.some((legend) => legend.type === "discrete")) return [];
+  return [
+    {
+      ...INTERACTION_DIAGNOSTIC_CATALOG.INTERACTION_LEGEND_DISCRETE_ONLY,
+      actual: legends.map((legend) => legend.type),
+    },
+  ];
 }

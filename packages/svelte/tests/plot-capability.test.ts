@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 
+import { INTERACTION_DIAGNOSTIC_CATALOG } from "../src/lib/interaction.js";
 import {
   bandChannelsForZoom,
   capabilityStatusText,
   filterAvailableTools,
+  legendFocusDiscreteOnlyDiagnostics,
   zoomScaleDiagnosticsFromChannels,
   zoomSupportsChannel,
 } from "../src/lib/plot-capability.js";
@@ -147,5 +149,30 @@ describe("capabilityStatusText", () => {
         candidateCount: 0,
       }),
     ).toBeNull();
+  });
+});
+
+describe("legendFocusDiscreteOnlyDiagnostics", () => {
+  const catalog = INTERACTION_DIAGNOSTIC_CATALOG.INTERACTION_LEGEND_DISCRETE_ONLY;
+
+  it("returns empty when disabled or there are no legends", () => {
+    expect(legendFocusDiscreteOnlyDiagnostics(false, [{ type: "ramp" }])).toEqual([]);
+    expect(legendFocusDiscreteOnlyDiagnostics(true, [])).toEqual([]);
+  });
+
+  it("returns empty when any legend is discrete", () => {
+    expect(legendFocusDiscreteOnlyDiagnostics(true, [{ type: "discrete" }])).toEqual([]);
+    expect(
+      legendFocusDiscreteOnlyDiagnostics(true, [{ type: "discrete" }, { type: "ramp" }]),
+    ).toEqual([]);
+  });
+
+  it("advises when every legend is non-discrete (ramp or unknown)", () => {
+    expect(legendFocusDiscreteOnlyDiagnostics(true, [{ type: "ramp" }])).toEqual([
+      { ...catalog, actual: ["ramp"] },
+    ]);
+    expect(
+      legendFocusDiscreteOnlyDiagnostics(true, [{ type: "ramp" }, { type: "continuous" }]),
+    ).toEqual([{ ...catalog, actual: ["ramp", "continuous"] }]);
   });
 });

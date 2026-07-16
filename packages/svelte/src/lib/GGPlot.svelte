@@ -154,6 +154,7 @@
     bandChannelsForZoom,
     capabilityStatusText,
     filterAvailableTools,
+    legendFocusDiscreteOnlyDiagnostics,
     zoomScaleDiagnosticsFromChannels,
     zoomSupportsChannel,
   } from "./plot-capability.js";
@@ -735,19 +736,11 @@
     );
   });
   const legendDiagnostics = $derived.by(() => {
-    if (
-      interactionConfig.legendFocus === null ||
-      model === null ||
-      model.scene.legends.length === 0 ||
-      model.scene.legends.some((candidate) => candidate.type === "discrete")
-    )
-      return [] as InteractionDiagnostic[];
-    return [
-      {
-        ...INTERACTION_DIAGNOSTIC_CATALOG.INTERACTION_LEGEND_DISCRETE_ONLY,
-        actual: model.scene.legends.map((candidate) => candidate.type),
-      },
-    ];
+    if (model === null) return [] as InteractionDiagnostic[];
+    return legendFocusDiscreteOnlyDiagnostics(
+      interactionConfig.legendFocus !== null,
+      model.scene.legends,
+    );
   });
   const capabilityStatus = $derived.by(() => {
     const unavailable = interactionConfig.diagnostics.find(
