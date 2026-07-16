@@ -13,6 +13,12 @@
 /** @lifecycle stable-intent */
 export { default as GGPlot } from "./GGPlot.svelte";
 export { default as Tooltip } from "./Tooltip.svelte";
+export type {
+  LegendFilterClause,
+  LegendFilterEvent,
+  LegendFilterInput,
+  LegendFilterOptions,
+} from "./legend-filter.js";
 export { createPlotInteraction } from "./interaction-controller.svelte.js";
 export type {
   CreatePlotInteractionOptions,

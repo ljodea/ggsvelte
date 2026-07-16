@@ -161,6 +161,13 @@
   import type { LegendEntryAction, LegendEntryIdentity } from "./Legend.svelte";
   import Tooltip from "./Tooltip.svelte";
   import ToolRail from "./ToolRail.svelte";
+  import {
+    isLegendValueVisible,
+    nextLegendFilterValues,
+    type LegendFilterClause,
+    type LegendFilterEvent,
+    type LegendFilterInput,
+  } from "./legend-filter.js";
 
   type PublicKey = Identity extends keyof Row
     ? Extract<Row[Identity], PropertyKey>
@@ -205,6 +212,8 @@
     zoom?: ZoomInput;
     /** Opt into discrete legend preview, focus, and linked emphasis. */
     legendFocus?: LegendFocusInput;
+    /** Opt into data-changing filtering through discrete legend controls. */
+    legendFilter?: LegendFilterInput;
     /** Controlled initial/active tool. */
     tool?: InteractionTool;
     /** Optional durable semantic state shared with other plots and Svelte UI. */
@@ -217,6 +226,7 @@
     onselect?: (event: PlotSelection<PublicKey>) => void;
     onzoom?: (event: ZoomEvent) => void;
     onlegendfocus?: (event: LegendFocusEvent<PublicKey>) => void;
+    onlegendfilter?: (event: LegendFilterEvent) => void;
     oninteraction?: (event: PlotInteractionEvent<Row, PublicKey>) => void;
     ondiagnostic?: (diagnostic: InteractionDiagnostic) => void;
     ontoolchange?: (tool: InteractionTool) => void;
@@ -245,6 +255,7 @@
     select = false,
     zoom = false,
     legendFocus = false,
+    legendFilter = false,
     tool,
     interaction,
     interactionScope,
@@ -253,6 +264,7 @@
     onselect,
     onzoom,
     onlegendfocus,
+    onlegendfilter,
     oninteraction,
     ondiagnostic,
     ontoolchange,
@@ -395,6 +407,22 @@
   } = { runId: -1, scales: undefined };
   let scaleEpoch = $state(0);
 
+  const legendFilterOptions = $derived(
+    legendFilter === false
+      ? null
+      : {
+          mode:
+            typeof legendFilter === "object"
+              ? (legendFilter.mode ?? "exclude")
+              : "exclude",
+          multiple:
+            typeof legendFilter === "object"
+              ? (legendFilter.multiple ?? true)
+              : true,
+        },
+  );
+  let localLegendFilters = $state<LegendFilterClause[]>([]);
+
   const model: RenderModel | null = $derived.by(() => {
     void scaleEpoch;
     if (effectiveSpec === null) return null;
@@ -404,6 +432,9 @@
       ...(scaleBox.scales !== undefined && { prevScales: scaleBox.scales }),
       ...(effectiveZoomDomains !== null && {
         baselineScales: assembled?.scales ?? {},
+      }),
+      ...(localLegendFilters.length > 0 && {
+        rowFilters: localLegendFilters,
       }),
     });
     if (m.runId > scaleBox.runId) {
@@ -624,6 +655,7 @@
   let legendClearPointerType: string | null = null;
   let suppressLegendClick = false;
   let suppressLegendFocusPreview = false;
+  let legendFilterPointerType: string | null = null;
   const effectiveSelectedKeys: readonly PropertyKey[] = $derived.by(() => {
     void controllerRevision;
     return interaction?.selected(resolvedInteractionScope) ?? localSelectedKeys;
@@ -1179,6 +1211,115 @@
         : [],
     );
   });
+
+  const filterableLegendEntries = $derived.by(() => {
+    if (model === null || legendFilterOptions === null) return [];
+    return model.scene.legends.flatMap((sceneLegend) => {
+      if (sceneLegend.type !== "discrete") return [];
+      if (sceneLegend.scale !== "color" && sceneLegend.scale !== "fill")
+        return [];
+      const fields = new Set(
+        model.layerFields
+          .flatMap((mappedFields) => mappedFields)
+          .filter(
+            (mapped) =>
+              mapped.channel === sceneLegend.scale && mapped.source !== "stat",
+          )
+          .map((mapped) => mapped.field),
+      );
+      const field = fields.values().next().value as string | undefined;
+      if (field === undefined) return [];
+      const current = localLegendFilters.find(
+        (clause) =>
+          clause.scale === sceneLegend.scale && clause.field === field,
+      );
+      return sceneLegend.entries.map((entry) => ({
+        legend: sceneLegend,
+        entry,
+        field,
+        visible:
+          current === undefined ||
+          isLegendValueVisible(
+            current.values,
+            entry.value as CellValue,
+            current.mode,
+          ),
+      }));
+    });
+  });
+
+  function legendFilterSource(event: MouseEvent): LegendFilterEvent["source"] {
+    if (event.detail === 0) return "keyboard";
+    return legendFilterPointerType === "touch" ? "touch" : "pointer";
+  }
+
+  function toggleLegendFilter(
+    target: (typeof filterableLegendEntries)[number],
+    event: MouseEvent,
+  ): void {
+    if (legendFilterOptions === null) return;
+    // This is a controlled checkbox. Prevent the browser's post-handler
+    // default toggle from racing the reactive checked value.
+    event.preventDefault();
+    const catalog = target.legend.entries.map(
+      (entry) => entry.value as CellValue,
+    );
+    const index = localLegendFilters.findIndex(
+      (clause) =>
+        clause.scale === target.legend.scale && clause.field === target.field,
+    );
+    const current = localLegendFilters[index];
+    const baseline =
+      current?.values ??
+      (legendFilterOptions.mode === "include" ? catalog : []);
+    const values = nextLegendFilterValues(
+      baseline,
+      target.entry.value as CellValue,
+      catalog,
+      legendFilterOptions.mode,
+      legendFilterOptions.multiple,
+    );
+    const clause: LegendFilterClause = Object.freeze({
+      scale: target.legend.scale as "color" | "fill",
+      field: target.field,
+      values,
+      mode: legendFilterOptions.mode,
+    });
+    localLegendFilters =
+      index < 0
+        ? [...localLegendFilters, clause]
+        : localLegendFilters.map((candidate, candidateIndex) =>
+            candidateIndex === index ? clause : candidate,
+          );
+    const source = legendFilterSource(event);
+    legendFilterPointerType = null;
+    const filterEvent: LegendFilterEvent = Object.freeze({
+      type: "legend-filter",
+      phase: "change",
+      source,
+      clause,
+    });
+    onlegendfilter?.(filterEvent);
+    announceInteraction(
+      `${target.entry.label} ${isLegendValueVisible(values, target.entry.value as CellValue, legendFilterOptions.mode) ? "shown" : "hidden"}.`,
+    );
+  }
+
+  function resetLegendFilters(event: MouseEvent): void {
+    if (localLegendFilters.length === 0) return;
+    const source = legendFilterSource(event);
+    localLegendFilters = [];
+    legendFilterPointerType = null;
+    onlegendfilter?.(
+      Object.freeze({
+        type: "legend-filter",
+        phase: "clear",
+        source,
+        clause: null,
+      }),
+    );
+    announceInteraction("Legend filters reset.");
+  }
 
   $effect.pre(() => {
     const count = interactiveLegendEntries.length;
@@ -2127,6 +2268,7 @@
   class:gg-with-tool-rail={showToolRail}
   class:gg-with-legend-clear={interactionConfig.legendFocus !== null &&
     effectiveLegendPressed !== null}
+  class:gg-with-legend-filters={filterableLegendEntries.length > 0}
   class:gg-narrow-tools={resolvedWidth < 560}
   class:gg-with-docked-tooltip={inspection?.state === "pinned" &&
     resolvedWidth < 480}
@@ -2272,6 +2414,35 @@
           onclick={(event) => clearLegendFromControl(event)}>Clear</button
         >
       {/if}
+    {/if}
+    {#if filterableLegendEntries.length > 0}
+      <fieldset class="gg-legend-filters">
+        <legend>Filter legend</legend>
+        {#each filterableLegendEntries as target (`${target.legend.scale}:${target.field}:${target.entry.label}`)}
+          <label>
+            <input
+              type="checkbox"
+              checked={target.visible}
+              aria-label={`Show ${target.entry.label}`}
+              onpointerdown={(event) =>
+                (legendFilterPointerType = event.pointerType)}
+              onpointercancel={() => (legendFilterPointerType = null)}
+              onclick={(event) => toggleLegendFilter(target, event)}
+            />
+            <span>{target.entry.label}</span>
+          </label>
+        {/each}
+        {#if localLegendFilters.length > 0}
+          <button
+            type="button"
+            aria-label="Reset legend filters"
+            onpointerdown={(event) =>
+              (legendFilterPointerType = event.pointerType)}
+            onpointercancel={() => (legendFilterPointerType = null)}
+            onclick={resetLegendFilters}>Reset</button
+          >
+        {/if}
+      </fieldset>
     {/if}
     {#if !interactive && emphasizedAnchors.length > 0}
       <InteractionOverlay
@@ -2419,6 +2590,10 @@
     margin-bottom: 48px;
   }
 
+  .gg-with-legend-filters {
+    margin-bottom: 58px;
+  }
+
   .gg-with-docked-tooltip {
     margin-bottom: 260px;
   }
@@ -2514,6 +2689,62 @@
   }
 
   .gg-legend-clear:focus-visible {
+    outline: 2px solid var(--gg-focusRing, var(--gg-theme-focusRing, Highlight));
+    outline-offset: 2px;
+  }
+
+  .gg-legend-filters {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 4px;
+    z-index: 5;
+    display: flex;
+    min-height: 44px;
+    max-width: calc(100% - 8px);
+    margin: 0;
+    padding: 0;
+    border: 0;
+    gap: 4px;
+    align-items: center;
+    overflow-x: auto;
+    color: var(--gg-ink, var(--gg-theme-ink, currentColor));
+    font: 11px/1.2 var(--gg-font-family, sans-serif);
+    pointer-events: auto;
+  }
+
+  .gg-legend-filters legend {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .gg-legend-filters label,
+  .gg-legend-filters button {
+    display: inline-flex;
+    min-height: 44px;
+    margin: 0;
+    padding: 0 8px;
+    align-items: center;
+    gap: 5px;
+    border: 1px solid
+      var(--gg-tooltipBorder, var(--gg-theme-tooltipBorder, currentColor));
+    border-radius: 3px;
+    background: var(--gg-tooltipPaper, var(--gg-theme-tooltipPaper, white));
+    color: inherit;
+    font: inherit;
+    white-space: nowrap;
+  }
+
+  .gg-legend-filters input {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+  }
+
+  .gg-legend-filters label:has(:focus-visible),
+  .gg-legend-filters button:focus-visible {
     outline: 2px solid var(--gg-focusRing, var(--gg-theme-focusRing, Highlight));
     outline-offset: 2px;
   }
