@@ -120,6 +120,11 @@
     resolvePointerUpAction,
   } from "./plot-surface-pointer.js";
   import {
+    resolveLegendClickAction,
+    resolveLegendKeyAction,
+    resolveLegendPointerUpAction,
+  } from "./plot-legend-surface.js";
+  import {
     datumLabel as datumLabelFor,
     inspectionLiveText as inspectionLiveTextFor,
     markLabel as markLabelFor,
@@ -1205,23 +1210,26 @@
   }
 
   function onLegendKeydown(event: KeyboardEvent, index: number): void {
-    if (
-      event.key === "ArrowRight" ||
-      event.key === "ArrowDown" ||
-      event.key === "ArrowLeft" ||
-      event.key === "ArrowUp" ||
-      event.key === "Home" ||
-      event.key === "End"
-    ) {
-      event.preventDefault();
-      moveLegendFocus(index, event.key);
-    } else if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      const action = legendAction(index, "keyboard");
-      if (action !== null) commitLegend(action);
-    } else if (event.key === "Escape") {
-      event.preventDefault();
-      clearLegendFocus("keyboard");
+    // Decision table is pure (plot-legend-surface); this switch owns side
+    // effects only. Roving move, commit, and clear stay host-owned.
+    const { action, preventDefault } = resolveLegendKeyAction({
+      key: event.key,
+    });
+    if (preventDefault) event.preventDefault();
+    switch (action.type) {
+      case "move":
+        moveLegendFocus(index, action.key);
+        break;
+      case "commit": {
+        const next = legendAction(index, "keyboard");
+        if (next !== null) commitLegend(next);
+        break;
+      }
+      case "clear":
+        clearLegendFocus("keyboard");
+        break;
+      case "none":
+        break;
     }
   }
 
@@ -1230,23 +1238,44 @@
   }
 
   function onLegendPointerUp(event: PointerEvent, index: number): void {
-    if (event.pointerType !== "touch" || legendTouchIndex !== index) return;
-    legendTouchIndex = -1;
-    suppressLegendClick = true;
-    const action = legendAction(index, "touch");
-    if (action !== null) commitLegend(action);
+    // Pure gate: touch + matching legendTouchIndex. Host always clears the
+    // index and sets suppressLegendClick on touch-commit (exact-once with the
+    // synthetic click). pointercancel clears the index in the template.
+    const resolved = resolveLegendPointerUpAction({
+      pointerType: event.pointerType,
+      index,
+      touchIndex: legendTouchIndex,
+    });
+    switch (resolved.type) {
+      case "touch-commit": {
+        legendTouchIndex = -1;
+        suppressLegendClick = true;
+        const next = legendAction(index, "touch");
+        if (next !== null) commitLegend(next);
+        break;
+      }
+      case "none":
+        break;
+    }
   }
 
   function onLegendClick(event: MouseEvent, index: number): void {
-    if (suppressLegendClick) {
-      suppressLegendClick = false;
-      return;
+    // Pure priority: suppress (after touch) outranks detail-classified commit.
+    // detail === 0 is current source classification (not an a11y guarantee).
+    const resolved = resolveLegendClickAction({
+      suppressClick: suppressLegendClick,
+      detail: event.detail,
+    });
+    switch (resolved.type) {
+      case "suppress":
+        suppressLegendClick = false;
+        break;
+      case "commit": {
+        const next = legendAction(index, resolved.source);
+        if (next !== null) commitLegend(next);
+        break;
+      }
     }
-    const action = legendAction(
-      index,
-      event.detail === 0 ? "keyboard" : "pointer",
-    );
-    if (action !== null) commitLegend(action);
   }
 
   function onLegendBlur(event: FocusEvent): void {
