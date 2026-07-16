@@ -130,6 +130,86 @@ describe("bindLayer", () => {
 
     const vert = bindLayer({ geom: "rule", aes: { x: { field: "x" } } }, 0, table, []);
     expect(vert.ruleForm).toBe("vertical");
+
+    const horiz = bindLayer({ geom: "rule", aes: { y: { field: "y" } } }, 0, table, []);
+    expect(horiz.ruleForm).toBe("horizontal");
+  });
+
+  it("rejects rule form that maps both axes", () => {
+    try {
+      bindLayer({ geom: "rule", aes: { x: { field: "x" }, y: { field: "y" } } }, 0, table, []);
+      expect.unreachable("should throw");
+    } catch (e) {
+      expect(e).toBeInstanceOf(PipelineError);
+      expect((e as PipelineError).code).toBe("rule-both-axes");
+    }
+  });
+
+  it("rejects rule that mixes intercepts with mapped channels", () => {
+    try {
+      bindLayer(
+        { geom: "rule", params: { yintercept: 1 }, aes: { x: { field: "x" } } },
+        0,
+        table,
+        [],
+      );
+      expect.unreachable("should throw");
+    } catch (e) {
+      expect(e).toBeInstanceOf(PipelineError);
+      expect((e as PipelineError).code).toBe("rule-form-ambiguous");
+    }
+  });
+
+  it("requires text label channel", () => {
+    try {
+      bindLayer({ geom: "text", aes: { x: { field: "x" }, y: { field: "y" } } }, 0, table, []);
+      expect.unreachable("should throw");
+    } catch (e) {
+      expect(e).toBeInstanceOf(PipelineError);
+      expect((e as PipelineError).code).toBe("missing-channel");
+      expect((e as PipelineError).path).toContain("label");
+    }
+  });
+
+  it("warns color-on-fill-geom and clears color for bar-like geoms", () => {
+    const warnings: { code: string; message: string }[] = [];
+    const binding = bindLayer(
+      {
+        geom: "col",
+        aes: { x: { field: "g" }, y: { field: "y" }, color: { field: "g" }, fill: { field: "g" } },
+      },
+      0,
+      table,
+      warnings,
+    );
+    expect(warnings.some((w) => w.code === "color-on-fill-geom")).toBe(true);
+    expect(binding.color.field).toBeNull();
+    expect(binding.fill.field).toBe("g");
+  });
+
+  it("binds errorbar ymin/ymax identity form", () => {
+    const binding = bindLayer(
+      {
+        geom: "errorbar",
+        aes: { x: { field: "g" }, ymin: { field: "x" }, ymax: { field: "y" } },
+      },
+      0,
+      table,
+      [],
+    );
+    expect(binding.yminField).toBe("x");
+    expect(binding.ymaxField).toBe("y");
+    expect(binding.xField).toBe("g");
+  });
+
+  it("rejects smooth on nominal channels", () => {
+    try {
+      bindLayer({ geom: "smooth", aes: { x: { field: "g" }, y: { field: "y" } } }, 0, table, []);
+      expect.unreachable("should throw");
+    } catch (e) {
+      expect(e).toBeInstanceOf(PipelineError);
+      expect((e as PipelineError).code).toBe("channel-type-mismatch");
+    }
   });
 });
 
