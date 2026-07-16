@@ -193,3 +193,43 @@ export function resolveInspectionMode(input: {
   if (input.requested === "auto") return input.seedAutoMode;
   return input.requested;
 }
+
+// ---- surface blur / outside pointer dismiss ----
+
+export type SurfaceBlurAction =
+  | { readonly type: "ignore" }
+  | { readonly type: "blur-keep-pinned" }
+  | { readonly type: "blur-clear-inspection" };
+
+/**
+ * Pure decision for capture-surface `blur`.
+ *
+ * Host on non-ignore (ordering is load-bearing):
+ *   1. activeTraversalIndex = -1
+ *   2. reducer.dispatch set-active null
+ *   3. only blur-clear-inspection → setInspection(null, "keyboard")
+ *
+ * Host must pass `relatedTargetInsideRoot: root?.contains(related) === true`.
+ * `"none"` and `"transient"` both clear inspection; `"pinned"` keeps it.
+ */
+export function resolveSurfaceBlurAction(input: {
+  readonly relatedTargetInsideRoot: boolean;
+  /** Host: `inspection === null ? "none" : inspection.state`. */
+  readonly inspectionState: InspectionHostState;
+}): SurfaceBlurAction {
+  if (input.relatedTargetInsideRoot) return { type: "ignore" };
+  if (input.inspectionState === "pinned") return { type: "blur-keep-pinned" };
+  return { type: "blur-clear-inspection" };
+}
+
+/**
+ * Whether a window pointerdown outside the plot should close a pinned
+ * inspection. Host: only when `surfaceInteractive` effect is installed.
+ * Host must pass `targetInsideRoot: root?.contains(target) === true`.
+ */
+export function shouldClosePinnedOnOutsidePointer(input: {
+  readonly isPinned: boolean;
+  readonly targetInsideRoot: boolean;
+}): boolean {
+  return input.isPinned && !input.targetInsideRoot;
+}

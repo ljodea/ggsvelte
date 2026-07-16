@@ -118,16 +118,20 @@
     resolveInspectionMode,
     resolveQueuedInspectFrameAction,
     resolveSetInspectionAction,
+    resolveSurfaceBlurAction,
     resolveToggleInspectionPinAction,
     shouldClearInspectionAnnouncement,
+    shouldClosePinnedOnOutsidePointer,
     shouldCommitInspection,
   } from "./plot-surface-inspection.js";
   import {
     resolveCaptureClickAction,
     advanceTouchInspectMoved,
+    resolveFinishBrushAction,
     resolvePointerDownAction,
     resolvePointerMoveAction,
     resolvePointerUpAction,
+    shouldClearInspectionOnPointerLeave,
   } from "./plot-surface-pointer.js";
   import {
     resolveLegendClearControlSource,
@@ -926,8 +930,10 @@
     if (!surfaceInteractive) return;
     const onOutsidePointer = (event: PointerEvent) => {
       if (
-        inspection?.state !== "pinned" ||
-        root?.contains(event.target as Node)
+        !shouldClosePinnedOnOutsidePointer({
+          isPinned: inspection?.state === "pinned",
+          targetInsideRoot: root?.contains(event.target as Node) === true,
+        })
       )
         return;
       closeInspection("pointer", false);
@@ -1796,13 +1802,20 @@
   }
 
   function onPointerLeave(): void {
+    // Evaluate leave clear **inside** the microtask so brushing/tooltip
+    // reflect post-flush state (not leave-time snapshots).
     queueMicrotask(() => {
-      if (!brushing && !tooltipHovered) {
-        queuedPointerInspection = null;
-        pendingPinnedPointer = null;
-        reducer.cancelScheduledPointer();
-        setInspection(null, "pointer");
-      }
+      if (
+        !shouldClearInspectionOnPointerLeave({
+          brushing,
+          tooltipHovered,
+        })
+      )
+        return;
+      queuedPointerInspection = null;
+      pendingPinnedPointer = null;
+      reducer.cancelScheduledPointer();
+      setInspection(null, "pointer");
     });
   }
 
@@ -1919,26 +1932,43 @@
       case "none":
         break;
       case "finish-brush": {
+        // Defensive: pure up-gate already requires hasBrushDraft.
         if (brushRect === null) break;
         reducer.cancelScheduledPointer();
         const source = event.pointerType === "touch" ? "touch" : "pointer";
         const ended = evaluatePointerBrushEnd(brushRect, plotPoint(event));
-        if (ended.kind === "too-small") {
-          brushRect = ended.corners;
-          announceInteraction(BRUSH_SECOND_CORNER_ANNOUNCEMENT);
-          break;
+        const finish = resolveFinishBrushAction({
+          endedKind: ended.kind,
+          activeTool,
+        });
+        switch (finish.type) {
+          case "keep-second-corner":
+            // ended.kind is too-small when pure returns keep-second-corner.
+            if (ended.kind === "too-small") brushRect = ended.corners;
+            announceInteraction(BRUSH_SECOND_CORNER_ANNOUNCEMENT);
+            break;
+          case "select-end":
+            brushRect = null;
+            if (ended.kind === "commit") {
+              const eventValue = selectionEvent("end", ended.rect, source);
+              committedInterval = interactionConfig.select?.persistent
+                ? eventValue
+                : null;
+              emitSelection(eventValue);
+            }
+            reducer.dispatch({ type: "cancel-area" });
+            break;
+          case "zoom-end":
+            brushRect = null;
+            if (ended.kind === "commit") applyBrushZoom(ended.rect, source);
+            reducer.dispatch({ type: "cancel-area" });
+            break;
+          case "end-area":
+            // Commit with non-area tool (e.g. tool changed mid-drag): clear only.
+            brushRect = null;
+            reducer.dispatch({ type: "cancel-area" });
+            break;
         }
-        brushRect = null;
-        if (activeTool === "select-area") {
-          const eventValue = selectionEvent("end", ended.rect, source);
-          committedInterval = interactionConfig.select?.persistent
-            ? eventValue
-            : null;
-          emitSelection(eventValue);
-        } else if (activeTool === "zoom-area") {
-          applyBrushZoom(ended.rect, source);
-        }
-        reducer.dispatch({ type: "cancel-area" });
         break;
       }
     }
@@ -2087,10 +2117,17 @@
   }
 
   function onSurfaceBlur(event: FocusEvent): void {
-    if (root?.contains(event.relatedTarget as Node | null)) return;
+    const blurAction = resolveSurfaceBlurAction({
+      relatedTargetInsideRoot:
+        root?.contains(event.relatedTarget as Node | null) === true,
+      inspectionState: inspection?.state ?? "none",
+    });
+    if (blurAction.type === "ignore") return;
+    // Shared for keep-pinned and clear-inspection (ordering is load-bearing).
     activeTraversalIndex = -1;
     reducer.dispatch({ type: "set-active", candidate: null });
-    if (inspection?.state !== "pinned") setInspection(null, "keyboard");
+    if (blurAction.type === "blur-clear-inspection")
+      setInspection(null, "keyboard");
   }
 
   function togglePointKeys(

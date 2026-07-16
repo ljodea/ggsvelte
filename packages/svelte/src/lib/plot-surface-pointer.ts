@@ -219,3 +219,49 @@ export function resolvePointerMoveAction(input: SurfacePointerMoveInput): Surfac
 
   return { type: "none" };
 }
+
+// ---- pointer leave / finish-brush ----
+
+/**
+ * Whether pointerleave should clear inspection after its microtask flush.
+ * Host must call this **inside** `queueMicrotask` so `brushing` and
+ * `tooltipHovered` reflect post-flush state (not leave-time snapshots).
+ */
+export function shouldClearInspectionOnPointerLeave(input: {
+  readonly brushing: boolean;
+  readonly tooltipHovered: boolean;
+}): boolean {
+  return !input.brushing && !input.tooltipHovered;
+}
+
+/** Matches `PointerBrushEnd["kind"]` from plot-area-brush (no import cycle). */
+export type FinishBrushEndedKind = "too-small" | "commit";
+
+export type FinishBrushAction =
+  | { readonly type: "keep-second-corner" }
+  | { readonly type: "select-end" }
+  | { readonly type: "zoom-end" }
+  | { readonly type: "end-area" };
+
+/**
+ * Pure routing after `evaluatePointerBrushEnd` for pointerup finish-brush.
+ *
+ * Priority:
+ *   1. keep-second-corner — `endedKind === "too-small"` (wins for any tool)
+ *   2. select-end — commit + select-area
+ *   3. zoom-end — commit + zoom-area
+ *   4. end-area — commit + any other tool (clear draft + cancel-area, no emit)
+ *
+ * Host on keep-second-corner: retain corners, announce, do **not** cancel-area.
+ * Host on select-end/zoom-end/end-area: brushRect=null, cancel-area; emit only
+ * for select/zoom. Host keeps its `brushRect === null` defensive break.
+ */
+export function resolveFinishBrushAction(input: {
+  readonly endedKind: FinishBrushEndedKind;
+  readonly activeTool: InteractionTool;
+}): FinishBrushAction {
+  if (input.endedKind === "too-small") return { type: "keep-second-corner" };
+  if (input.activeTool === "select-area") return { type: "select-end" };
+  if (input.activeTool === "zoom-area") return { type: "zoom-end" };
+  return { type: "end-area" };
+}
