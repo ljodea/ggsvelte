@@ -6,6 +6,7 @@ import type { BoxplotParams } from "@ggsvelte/spec";
 import type { LayerFrame, PipelineWarning } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
 import { DEFAULT_BAR_WIDTH, removedWarning } from "./geometry-shared.js";
+import { layoutBoxplotBodyRow } from "./geometry-boxplot-body-row.js";
 
 const DEFAULT_BOX_LINEWIDTH = 1;
 
@@ -60,42 +61,22 @@ export function layoutBoxplotBody(
   const yPx = (v: number) => fx.innerHeight - yScale.normalize(v) * fx.innerHeight;
 
   for (let row = 0; row < n; row++) {
-    const tc = fx.xScale.normalize(frame.xValues?.[row] ?? null);
-    const lo = frame.ymin[row]!;
-    const q1 = box.lower[row]!;
-    const q2 = box.middle[row]!;
-    const q3 = box.upper[row]!;
-    const hi = frame.ymax[row]!;
-    if (
-      tc === undefined ||
-      ![lo, q1, q2, q3, hi].every((v) => Number.isFinite(yScale.normalize(v)))
-    ) {
+    const geom = layoutBoxplotBodyRow({ frame, fx, row, widthFrac, yPx });
+    if (geom === null) {
       removed++;
       centerPx.push(NaN);
       halfPx.push(NaN);
       continue;
     }
-    let center = tc;
-    let w = widthFrac;
-    if (frame.dodgeSlot !== null && frame.dodgeSlotCounts !== null) {
-      const slotCount = Math.max(1, frame.dodgeSlotCounts[row]!);
-      w = widthFrac / slotCount;
-      center = tc + widthFrac * ((frame.dodgeSlot[row]! + 0.5) / slotCount - 0.5);
-    }
-    const cx = center * fx.innerWidth;
-    const half = (w / 2) * fx.innerWidth;
-    centerPx.push(cx);
-    halfPx.push(half);
-    // Box: lower..upper hinges.
-    rects.push(cx - half, Math.min(yPx(q3), yPx(q1)), half * 2, Math.abs(yPx(q1) - yPx(q3)));
-    rectRows.push(frame.rowIndex[row]!);
+    centerPx.push(geom.centerPx);
+    halfPx.push(geom.halfPx);
+    rects.push(...geom.rect);
+    rectRows.push(geom.sourceRow);
     keptRows.push(row);
-    // Whiskers: hinge -> whisker end, both directions.
-    whiskers.push(cx, yPx(q3), cx, yPx(hi), cx, yPx(q1), cx, yPx(lo));
-    whiskerRows.push(frame.rowIndex[row]!, frame.rowIndex[row]!);
-    // Median line across the box.
-    medians.push(cx - half, yPx(q2), cx + half, yPx(q2));
-    medianRows.push(frame.rowIndex[row]!);
+    whiskers.push(...geom.whiskers);
+    whiskerRows.push(geom.sourceRow, geom.sourceRow);
+    medians.push(...geom.median);
+    medianRows.push(geom.sourceRow);
   }
   removedWarning(removed, binding.index, warnings);
   if (keptRows.length === 0) return null;

@@ -9,14 +9,16 @@ import type { CellValue } from "../table.js";
 import type { ColumnTable } from "../table.js";
 
 import {
-  ordinalSeriesRank,
   resolveAnnotationIntercepts,
   resolveOutlierContext,
 } from "./build-candidates-datum-context.js";
+import {
+  resolveCandidateSeries,
+  resolveRepresentedSourceRows,
+} from "./build-candidates-datum-series.js";
 import { resolveCandidateLogicalValues } from "./build-candidates-datum-values.js";
 import { resolveCandidateFrameRow } from "./build-candidates-frame-row.js";
 import type { CandidateIdentityIndex } from "./build-candidates-identity.js";
-import { filterRepresentedSourceRows } from "./build-candidates-lineage.js";
 import type { FacetPanelDef } from "./facets.js";
 import { candidateAutoMode } from "./frame.js";
 import type { MappedField } from "./types.js";
@@ -73,18 +75,17 @@ export function createIdentityCandidateDatumResolver(input: {
     const yField = fields.find((field) => field.channel === "y")?.field;
     const colorField = fields.find((field) => field.channel === "color")?.field;
     const fillField = fields.find((field) => field.channel === "fill")?.field;
-    const group =
-      sourceRow === null
-        ? derivedGroup
-        : (seriesByRow.get(`${facts.panelIndex}:${facts.layerIndex}:${sourceRow}`) ?? 0);
-    const seriesRank = ordinalSeriesRank({
+    const { group, seriesRank } = resolveCandidateSeries({
+      sourceRow,
+      derivedGroup,
+      seriesByRow,
+      panelIndex: facts.panelIndex,
+      layerIndex: facts.layerIndex,
       color,
       fill,
       colorField,
       fillField,
-      sourceRow,
       sourceValue,
-      group,
     });
     const autoMode = candidateAutoMode(
       frame?.binding ?? bindings[facts.layerIndex]!,
@@ -94,18 +95,19 @@ export function createIdentityCandidateDatumResolver(input: {
       frame,
       primitiveIndex: facts.primitiveIndex,
     });
-    let representedRows =
-      outlierSourceRow === null
-        ? (sourceRowsByGroup.get(`${facts.panelIndex}:${facts.layerIndex}:${group}`) ?? [])
-        : [outlierSourceRow];
-    if (sourceRow === null && frame !== undefined) {
-      representedRows = filterRepresentedSourceRows({
-        frame,
-        table,
-        frameRow,
-        baseRows: representedRows,
-      });
-    }
+    const { sourceOrder, lineageKey } = resolveRepresentedSourceRows({
+      outlierSourceRow,
+      sourceRow,
+      group,
+      panelIndex: facts.panelIndex,
+      layerIndex: facts.layerIndex,
+      sourceRowsByGroup,
+      frame,
+      table,
+      frameRow,
+      lineage,
+      primitiveIndex: facts.primitiveIndex,
+    });
     const { xValue, yValue } = resolveCandidateLogicalValues({
       annotationRule,
       annotationX,
@@ -124,8 +126,8 @@ export function createIdentityCandidateDatumResolver(input: {
       yValue,
       seriesId: group,
       seriesRank,
-      sourceOrder: sourceRow ?? outlierSourceRow ?? facts.primitiveIndex,
-      lineage: sourceRow === null ? lineage.intern(representedRows) : lineage.intern([sourceRow]),
+      sourceOrder,
+      lineage: lineageKey,
       autoMode,
     };
   };

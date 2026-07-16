@@ -9,9 +9,26 @@ import { gg, aes } from "@ggsvelte/spec";
 
 import { batchMarkCount, runPipeline } from "../src/pipeline.ts";
 import { flipBatchInPlace } from "../src/pipeline/geometry.ts";
+import { makeErrorbarHalfWidth } from "../src/pipeline/geometry-errorbar-width.ts";
 import type { PathsBatch, PointsBatch, RectsBatch, SegmentsBatch } from "../src/scene.ts";
+import type { LayerFrame } from "../src/pipeline/types.ts";
+import type { Frame } from "../src/pipeline/geometry-shared.ts";
 
 const size = { width: 640, height: 400 };
+
+describe("makeErrorbarHalfWidth", () => {
+  it("uses half band-step for discrete x", () => {
+    const frame = { xNumeric: null } as LayerFrame;
+    const fx = {
+      xScale: { type: "band", step: 0.4, normalize: () => 0 },
+      yScale: { type: "linear", normalize: (v: number) => v },
+      innerWidth: 100,
+      innerHeight: 100,
+    } as Frame;
+    const halfOf = makeErrorbarHalfWidth(frame, fx, 0.5);
+    expect(halfOf(0)).toBeCloseTo(0.1);
+  });
+});
 
 describe("batchMarkCount", () => {
   it("counts points and glyphs by rowIndex length", () => {

@@ -10,6 +10,7 @@ import type { ColumnTable } from "../table.js";
 import type { CandidateStore } from "../candidate-store.js";
 import type { LineageStore } from "../identity.js";
 
+import { createRenderModelLifecycle } from "./assemble-render-model-lifecycle.js";
 import { makeAxisValueFormatter } from "./layout-helpers.js";
 import type {
   Advisory,
@@ -20,7 +21,6 @@ import type {
   ResolvedColorScale,
   ScaleDomainSnapshot,
 } from "./types.js";
-import { NO_ROW } from "./types.js";
 import { dedupeAdvisories, dedupeWarnings } from "./layout-helpers.js";
 
 export function assembleRenderModel(input: {
@@ -50,9 +50,12 @@ export function assembleRenderModel(input: {
   if (input.colorState !== null) state["color"] = input.colorState;
   if (input.fillState !== null) state["fill"] = input.fillState;
 
-  let disposed = false;
-  let retainedTable: ColumnTable | null = input.table;
   const { scene, candidates } = input;
+  const lifecycle = createRenderModelLifecycle({
+    scene,
+    candidates,
+    table: input.table,
+  });
 
   return {
     scene,
@@ -80,23 +83,7 @@ export function assembleRenderModel(input: {
       x: makeAxisValueFormatter(input.xScale, input.formatX),
       y: makeAxisValueFormatter(input.yScale, input.formatY),
     }),
-    row(index: number): Record<string, CellValue> | null {
-      const source = retainedTable;
-      if (source === null || index === NO_ROW || index < 0 || index >= source.rowCount) return null;
-      const out: Record<string, CellValue> = {};
-      for (const field of source.fields) out[field] = source.column(field)[index]!;
-      return out;
-    },
-    dispose(): void {
-      if (disposed) return;
-      disposed = true;
-      candidates.dispose();
-      retainedTable = null;
-      // Release geometry (typed arrays) and per-panel structures; the bound
-      // table and its numeric caches become unreachable with this model.
-      scene.batches.length = 0;
-      scene.panels.length = 0;
-      scene.legends.length = 0;
-    },
+    row: lifecycle.row,
+    dispose: lifecycle.dispose,
   };
 }
