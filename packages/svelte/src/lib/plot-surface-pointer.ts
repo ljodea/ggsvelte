@@ -133,3 +133,89 @@ export function resolveCaptureClickAction(input: SurfaceClickInput): SurfaceClic
 
   return { type: "none" };
 }
+
+// ---- pointer move ----
+
+/** Pixel threshold for sticky touch-inspect drag (plotPoint coordinates). */
+export const TOUCH_INSPECT_MOVE_PX = 4;
+
+/**
+ * Sticky OR of touch-inspect drag past threshold in plotPoint coordinates.
+ * Exactly `TOUCH_INSPECT_MOVE_PX` counts as moved (`>=`).
+ * Host calls only when `pointerType === "touch" && touchInspectStart !== null`.
+ */
+export function advanceTouchInspectMoved(
+  alreadyMoved: boolean,
+  start: Readonly<{ x: number; y: number }>,
+  point: Readonly<{ x: number; y: number }>,
+): boolean {
+  if (alreadyMoved) return true;
+  return Math.hypot(point.x - start.x, point.y - start.y) >= TOUCH_INSPECT_MOVE_PX;
+}
+
+export type SurfacePointerMoveInput = {
+  readonly pointerType: string;
+  readonly activeTool: InteractionTool;
+  /** Host sticky flag after `advanceTouchInspectMoved` (or false if no touch start). */
+  readonly touchInspectMoved: boolean;
+  /** True when `touchInspectStart !== null`. */
+  readonly hasTouchInspectStart: boolean;
+  /** Reducer brushing flag — can diverge from draft. */
+  readonly brushing: boolean;
+  /** True when `brushRect !== null`. */
+  readonly hasBrushDraft: boolean;
+  /** `interactionConfig.inspect !== null`. */
+  readonly inspectEnabled: boolean;
+};
+
+export type SurfacePointerMoveAction =
+  | { readonly type: "touch-inspect-drag-cancel" }
+  | { readonly type: "queue-area-move"; readonly source: "touch" | "pointer" }
+  | { readonly type: "queue-inspect"; readonly source: "touch" | "pointer" }
+  | { readonly type: "none" };
+
+const pointerSource = (pointerType: string): "touch" | "pointer" =>
+  pointerType === "touch" ? "touch" : "pointer";
+
+/**
+ * Pure decision for the plot capture-surface `pointermove` handler.
+ * Priority: touch-inspect drag cancel → queue area move → queue inspect → none.
+ *
+ * Cancel requires `pointerType === "touch"` (mouse/pen with residual start must
+ * not cancel). Cancel does **not** require `inspectEnabled` — only the inspect
+ * tool, matching the current host.
+ *
+ * Host advances `touchInspectMoved` separately on touch+start before calling.
+ * Host on cancel: clear `queuedPointerInspection`, cancel scheduled pointer
+ * (`queuedPointerToken` left untouched). Host on queue-*: use `action.source`.
+ */
+export function resolvePointerMoveAction(input: SurfacePointerMoveInput): SurfacePointerMoveAction {
+  const {
+    pointerType,
+    activeTool,
+    touchInspectMoved,
+    hasTouchInspectStart,
+    brushing,
+    hasBrushDraft,
+    inspectEnabled,
+  } = input;
+
+  if (
+    pointerType === "touch" &&
+    hasTouchInspectStart &&
+    touchInspectMoved &&
+    activeTool === "inspect"
+  ) {
+    return { type: "touch-inspect-drag-cancel" };
+  }
+
+  if (brushing && hasBrushDraft) {
+    return { type: "queue-area-move", source: pointerSource(pointerType) };
+  }
+
+  if (activeTool === "inspect" && inspectEnabled) {
+    return { type: "queue-inspect", source: pointerSource(pointerType) };
+  }
+
+  return { type: "none" };
+}

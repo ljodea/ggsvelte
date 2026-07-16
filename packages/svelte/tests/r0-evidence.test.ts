@@ -179,6 +179,37 @@ describe("R0 interaction evidence", () => {
     expect(changes.at(-1)?.state).toBe("pinned");
   });
 
+  it("drops a queued touch-inspect hover once drag crosses the move threshold", async () => {
+    let model: RenderModel | null = null;
+    const changes: Array<{ phase: string; state?: string }> = [];
+    const { container } = render(GGPlot, {
+      data: rows,
+      aes: { x: "x", y: "y" },
+      layers: [{ geom: "point" }],
+      key: "id",
+      inspect: true,
+      onrender: (next: RenderModel) => (model = next),
+      oninspect: (event: { phase: string; state?: string }) => {
+        if (event.phase === "change") changes.push(event);
+      },
+      ...size,
+    });
+    const capture = container.querySelector<HTMLElement>(".gg-capture")!;
+    const candidate = model!.candidates.candidate(1)!;
+    // Host cleanup under test: unmoved move schedules inspect; drag cancel must
+    // clear the queue and cancel the scheduled frame before it can fire.
+    pointEvent(capture, "pointerdown", candidate.x, candidate.y, "touch", 12);
+    pointEvent(capture, "pointermove", candidate.x, candidate.y, "touch", 12);
+    pointEvent(capture, "pointermove", candidate.x + 40, candidate.y + 40, "touch", 12);
+    await nextFrame();
+    await nextFrame();
+    expect(changes).toHaveLength(0);
+    // pointerup after drag must also not pin (touch-inspect-drag-ignore path).
+    pointEvent(capture, "pointerup", candidate.x + 40, candidate.y + 40, "touch", 12);
+    await nextFrame();
+    expect(changes).toHaveLength(0);
+  });
+
   it("completes touch-drag selection with touch provenance and no JavaScript cancellation", async () => {
     const events: Array<{ phase: string; source: string }> = [];
     const { container } = render(GGPlot, {

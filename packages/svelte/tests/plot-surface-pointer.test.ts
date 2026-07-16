@@ -2,11 +2,15 @@ import { describe, expect, it } from "vitest";
 
 import type { InteractionTool } from "../src/lib/interaction.js";
 import {
+  TOUCH_INSPECT_MOVE_PX,
+  advanceTouchInspectMoved,
   resolveCaptureClickAction,
   resolvePointerDownAction,
+  resolvePointerMoveAction,
   resolvePointerUpAction,
   type SurfaceClickInput,
   type SurfacePointerDownInput,
+  type SurfacePointerMoveInput,
   type SurfacePointerUpInput,
 } from "../src/lib/plot-surface-pointer.js";
 
@@ -41,6 +45,18 @@ const click = (
   inspectEnabled: true,
   pinEnabled: false,
   hasInspection: false,
+  ...overrides,
+});
+
+const move = (
+  overrides: Partial<SurfacePointerMoveInput> & Pick<SurfacePointerMoveInput, "activeTool">,
+): SurfacePointerMoveInput => ({
+  pointerType: "mouse",
+  touchInspectMoved: false,
+  hasTouchInspectStart: false,
+  brushing: false,
+  hasBrushDraft: false,
+  inspectEnabled: true,
   ...overrides,
 });
 
@@ -291,5 +307,171 @@ describe("resolveCaptureClickAction", () => {
         }),
       ),
     ).toEqual({ type: "none" });
+  });
+});
+
+describe("advanceTouchInspectMoved", () => {
+  const start = { x: 0, y: 0 };
+
+  it("stays false under the threshold", () => {
+    expect(
+      advanceTouchInspectMoved(false, start, {
+        x: TOUCH_INSPECT_MOVE_PX - 1,
+        y: 0,
+      }),
+    ).toBe(false);
+  });
+
+  it("becomes true at exactly the threshold (plotPoint coords)", () => {
+    expect(
+      advanceTouchInspectMoved(false, start, {
+        x: TOUCH_INSPECT_MOVE_PX,
+        y: 0,
+      }),
+    ).toBe(true);
+  });
+
+  it("is sticky once true", () => {
+    expect(advanceTouchInspectMoved(true, start, { x: 0, y: 0 })).toBe(true);
+  });
+});
+
+describe("resolvePointerMoveAction", () => {
+  it("cancels touch-inspect drag only for touch + start + moved + inspect tool", () => {
+    expect(
+      resolvePointerMoveAction(
+        move({
+          activeTool: "inspect",
+          pointerType: "touch",
+          hasTouchInspectStart: true,
+          touchInspectMoved: true,
+          brushing: true,
+          hasBrushDraft: true,
+          inspectEnabled: true,
+        }),
+      ),
+    ).toEqual({ type: "touch-inspect-drag-cancel" });
+  });
+
+  it("cancels even when inspect config is disabled (tool-only gate)", () => {
+    expect(
+      resolvePointerMoveAction(
+        move({
+          activeTool: "inspect",
+          pointerType: "touch",
+          hasTouchInspectStart: true,
+          touchInspectMoved: true,
+          inspectEnabled: false,
+        }),
+      ),
+    ).toEqual({ type: "touch-inspect-drag-cancel" });
+  });
+
+  it("does not cancel when pointerType is mouse/pen with residual touch-start state", () => {
+    for (const pointerType of ["mouse", "pen"] as const) {
+      expect(
+        resolvePointerMoveAction(
+          move({
+            activeTool: "inspect",
+            pointerType,
+            hasTouchInspectStart: true,
+            touchInspectMoved: true,
+            inspectEnabled: true,
+          }),
+        ),
+      ).toEqual({ type: "queue-inspect", source: "pointer" });
+    }
+  });
+
+  it("does not cancel when unmoved — falls through to queue-inspect", () => {
+    expect(
+      resolvePointerMoveAction(
+        move({
+          activeTool: "inspect",
+          pointerType: "touch",
+          hasTouchInspectStart: true,
+          touchInspectMoved: false,
+          inspectEnabled: true,
+        }),
+      ),
+    ).toEqual({ type: "queue-inspect", source: "touch" });
+  });
+
+  it("does not cancel when tool is no longer inspect (area wins if brushing)", () => {
+    expect(
+      resolvePointerMoveAction(
+        move({
+          activeTool: "select-area",
+          pointerType: "touch",
+          hasTouchInspectStart: true,
+          touchInspectMoved: true,
+          brushing: true,
+          hasBrushDraft: true,
+        }),
+      ),
+    ).toEqual({ type: "queue-area-move", source: "touch" });
+  });
+
+  it("queues area move when brushing and draft both present", () => {
+    expect(
+      resolvePointerMoveAction(
+        move({
+          activeTool: "zoom-area",
+          brushing: true,
+          hasBrushDraft: true,
+        }),
+      ),
+    ).toEqual({ type: "queue-area-move", source: "pointer" });
+  });
+
+  it("returns none when brushing/draft diverge", () => {
+    expect(
+      resolvePointerMoveAction(
+        move({
+          activeTool: "select-area",
+          brushing: true,
+          hasBrushDraft: false,
+        }),
+      ),
+    ).toEqual({ type: "none" });
+
+    expect(
+      resolvePointerMoveAction(
+        move({
+          activeTool: "select-area",
+          brushing: false,
+          hasBrushDraft: true,
+        }),
+      ),
+    ).toEqual({ type: "none" });
+  });
+
+  it("queues inspect for mouse with pointer source", () => {
+    expect(
+      resolvePointerMoveAction(
+        move({
+          activeTool: "inspect",
+          pointerType: "mouse",
+          inspectEnabled: true,
+        }),
+      ),
+    ).toEqual({ type: "queue-inspect", source: "pointer" });
+  });
+
+  it("returns none for inspect tool when inspect disabled", () => {
+    expect(
+      resolvePointerMoveAction(
+        move({
+          activeTool: "inspect",
+          inspectEnabled: false,
+        }),
+      ),
+    ).toEqual({ type: "none" });
+  });
+
+  it("returns none for non-inspect tools without brush", () => {
+    expect(resolvePointerMoveAction(move({ activeTool: "point" }))).toEqual({
+      type: "none",
+    });
   });
 });
