@@ -1,0 +1,21 @@
+{
+  "title": "Filter with a stable-color legend",
+  "description": "Accessible legend checkboxes explicitly include or exclude data before statistics and scales are trained. Hidden groups remain available in the legend, and each group keeps its original color when it returns.",
+  "tags": ["interaction", "legend", "filter", "stable-color", "keyboard", "touch"],
+  "docsSection": "Interaction",
+  "vrHeight": 720,
+  "journey": {
+    "pointer": "Clear Show Rail, then restore it. The line disappears and returns with the same blue color.",
+    "keyboard": "Tab through the Show group checkboxes, press Space to toggle groups, and use Reset legend filters to restore every group.",
+    "touch": "Tap any Show group checkbox to filter the plotted data; tap Reset to restore the complete dataset.",
+    "references": [
+      { "label": "Interaction guide", "href": "/guide/interactions" },
+      {
+        "label": "Legend focus without filtering",
+        "href": "/examples/interaction/legend-focus"
+      }
+    ],
+    "svelteFirst": true,
+    "fullWidth": true
+  }
+}

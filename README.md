@@ -57,6 +57,8 @@ tested with npm, pnpm, and Bun on Ubuntu and Windows; see the
 
 Try [inspection and pinning](https://ljodea.github.io/ggsvelte/examples/interaction/tooltip)
 or [interval selection and zoom](https://ljodea.github.io/ggsvelte/examples/interaction/brush-zoom),
+then [filter groups without losing their colors](https://ljodea.github.io/ggsvelte/examples/interaction/legend-filter)
+or [coordinate intervals across facets](https://ljodea.github.io/ggsvelte/examples/interaction/facet-intervals),
 bring [your own local JSON rows to the playground](https://ljodea.github.io/ggsvelte/playground),
 then read the [interaction guide](https://ljodea.github.io/ggsvelte/guide/interactions)
 or [searchable event reference](https://ljodea.github.io/ggsvelte/reference/interactions).

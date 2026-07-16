@@ -282,7 +282,8 @@ toolchain. Consumers may use any tested installer above; they do not need Bun.
 export const INTERACTIONS_MD = `# Interactions
 
 ggsvelte keeps static charts static. Opt in to only the behaviors the chart
-needs with \`inspect\`, \`select\`, \`zoom\`, and \`legendFocus\`. Once more than one behavior is
+needs with \`inspect\`, \`select\`, \`zoom\`, \`legendFocus\`, and
+\`legendFilter\`. Once more than one drawing behavior is
 available, the chart renders an accessible tool rail so inspection, selection,
 and zoom never compete for the same drag or click.
 
@@ -295,6 +296,8 @@ Start with the runnable [inspection and pinning example](/examples/interactions/
 the [interval selection and zoom example](/examples/interactions/interval-selection),
 the [linked plots, controls, and table example](/examples/interaction/linked-views),
 the [linked legend focus example](/examples/interaction/legend-focus),
+the [stable-color legend filter example](/examples/interaction/legend-filter),
+the [faceted interval example](/examples/interaction/facet-intervals),
 or [use your own local JSON rows in the playground](/playground). For exact
 props, callbacks, phases, and diagnostics, use the
 [interaction reference](/guide/interaction-reference).
@@ -369,9 +372,17 @@ count for aggregate marks.
 />
 \`\`\`
 
-Interval selection currently requires one unfaceted panel. A faceted request
-emits \`INTERACTION_INTERVAL_FACET_UNSUPPORTED\` through \`ondiagnostic\` and is
-disabled rather than behaving inconsistently.
+Faceted intervals use stable field-and-value panel identities rather than panel
+indices. Choose a preset for the relationship between panels:
+
+- \`independent\` (default) replaces the interval in only the origin panel.
+- \`union\` keeps independently drawn panel intervals and combines their keys.
+- \`cross-panel\` projects one semantic domain through every compatible panel.
+
+\`cross-panel\` intersects the interval with each panel's domain when facet
+scales are free; a disjoint panel selects nothing instead of clamping to an
+unrelated edge. Panel identity survives row reordering and temporary absence.
+See the [runnable facet example](/examples/interaction/facet-intervals).
 
 ## Shared controlled state
 
@@ -417,6 +428,12 @@ overlay without retraining scales or rerunning the render pipeline. Matching
 replaced, call \`reconcileKeys(validKeys, { scope })\` explicitly; a chart never
 guesses whether a temporary subset should erase another view's selection.
 
+Durable facet intervals use their own optional \`interactionScope.intervals\`
+namespace (falling back to \`keys\`). Read them with \`intervals(scope)\`, write
+one with \`setInterval\`, clear one panel with \`clearInterval\`, or clear the
+scope with \`clearIntervals\`. Interval state is semantic data-space state, not
+pixels or renderer indices.
+
 ## Legend focus
 
 \`legendFocus={true}\` adds real HTML controls over discrete color and fill
@@ -432,12 +449,31 @@ Focused and muted marks share one semantic mask across SVG and canvas, and the
 mask does not retrain scales, recompute statistics, change layout, or reassign
 colors. See the [runnable three-view example](/examples/interaction/legend-focus).
 
+## Legend filtering
+
+Legend focus answers “which group should I compare?” without changing data.
+\`legendFilter={true}\` answers “which groups belong in this computation?” by
+adding native Show-group checkboxes to discrete color and fill legends. A
+filter runs before facets, statistics, scales, layout, and rendering. Hidden
+groups remain in the legend catalog and recover the same categorical color when
+shown again.
+
+Use \`legendFilter={{ mode: "exclude", multiple: true }}\` for the default
+independent checkboxes. \`mode: "include"\` stores the shown values instead;
+\`multiple: false\` makes a toggle isolate one group. \`onlegendfilter\` reports
+the raw typed values and field in a \`LegendFilterClause\`. Reset legend filters
+restores the data pipeline; Clear legend focus only removes presentation
+emphasis. See the [stable-color example](/examples/interaction/legend-filter).
+
 ## Brush zoom
 
 \`zoom={true}\` enables two-dimensional brush zoom. Set \`zoom={{ mode: "x" }}\`
 or \`zoom={{ mode: "y" }}\` for a single axis. The tool rail separates Zoom area
 from Select area when both are enabled. A completed zoom emits explicit
 domains; Reset zoom or double-click emits a clear event.
+Faceted interval selection is supported, but faceted brush zoom remains
+disabled with \`INTERACTION_INTERVAL_FACET_UNSUPPORTED\`; use a linked detail
+view when each facet needs a zoomed inspection surface.
 
 \`\`\`svelte
 <GGPlot
@@ -445,6 +481,26 @@ domains; Reset zoom or double-click emits a clear event.
   onzoom={(event) => console.log(event.domains)}
 />
 \`\`\`
+
+## Precise bounds without dragging
+
+After an interval selection or zoom is committed, the tool rail exposes Edit x
+or y bounds alongside its drag controls. The inline HTML form stages edits:
+typing does not rerun the chart, Apply commits once, Cancel or Escape discards
+the draft, and validation focuses the first invalid field. This provides a
+keyboard and assistive-technology path to the same semantic result as brushing.
+
+- Linear and reversed scales accept ascending data-space numbers. Reversal is
+  presentation only, so do not enter screen order.
+- Log scales accept positive ascending numbers.
+- Time scales accept ISO 8601 dates or date-times with \`Z\` or an explicit
+  offset; events store Unix milliseconds.
+- Band scales use two native selects and include both endpoint categories.
+
+Recovery actions are deliberately separate: Clear panel selection removes one
+facet interval, Clear all selections removes interval state, Reset zoom restores
+natural domains, and Reset legend filters restores excluded rows. None of these
+controls silently performs another reset.
 
 ## Event reference
 
@@ -487,6 +543,14 @@ internal renderer indices never leak into callbacks.
 - \`state\` is \`transient\` or \`committed\`. \`value\` is the raw encoded
   domain value while \`keys\` are distinct stable source-row identities.
 - Dismissal emits \`{ type: "legend-focus", phase: "clear", source }\`.
+
+### \`onlegendfilter(event: LegendFilterEvent)\`
+
+- A change emits \`{ type: "legend-filter", phase: "change", source, clause }\`.
+- \`clause\` names the color or fill scale, source field, typed values, and
+  include or exclude mode. Reset emits \`phase: "clear"\` and \`clause: null\`.
+- Filtering is data-changing and intentionally separate from the
+  presentation-only \`onlegendfocus\` event.
 
 \`oninteraction(event: PlotInteractionEvent)\` receives the same objects. It
 does not wrap or duplicate them. A linked chart that consumes shared state
@@ -551,7 +615,10 @@ Supply \`key\` for every row.
 ### Interval selection
 
 \`select={{ type: "interval", mode: "x" | "y" | "xy", persistent: true }}\`
-enables an explicit Select area tool and emits domain and pixel bounds.
+enables an explicit Select area tool and emits domain and pixel bounds. In
+facets, add \`preset: "independent" | "union" | "cross-panel"\` to replace one
+panel, combine panel selections, or project one domain through compatible
+panels.
 
 ### \`zoom\`
 
@@ -564,6 +631,15 @@ Reset zoom and double-click return to the natural domains.
 Use \`legendFocus={{ preview: false }}\` to disable hover/focus preview while
 retaining click, touch, Enter, Space, Escape, and arrow-key controls. It
 requires stable row \`key\` values and does not make continuous ramps interactive.
+
+### \`legendFilter\`
+
+\`legendFilter={true}\` adds native Show-group checkboxes to discrete color and
+fill legends. It changes the rows supplied to facets, statistics, scales, and
+rendering while preserving the full legend catalog and categorical color
+identity. Configure \`mode: "exclude" | "include"\` and \`multiple\`; receive
+typed clauses through \`onlegendfilter\`. It is independent of
+presentation-only \`legendFocus\`.
 
 ## Controlled tool
 
@@ -599,10 +675,11 @@ name the semantic channels with the required
 generic scope or infer x/y channel names from encodings. Controlled zoom
 requires an explicit scope for every active channel (x, y, or both).
 
-- Reads: \`selected(scope)\`, \`emphasized(scope)\`, \`isSelected(key, scope)\`,
-  \`zoom(scope)\`, \`snapshot\`, and \`revision\`.
+- Reads: \`selected(scope)\`, \`emphasized(scope)\`, \`intervals(scope)\`,
+  \`isSelected(key, scope)\`, \`zoom(scope)\`, \`snapshot\`, and \`revision\`.
 - Selection: \`setSelection\`, \`toggleSelection\`, and \`clearSelection\`.
 - Lightweight presentation: \`setEmphasis\` and \`clearEmphasis\`.
+- Facet intervals: \`setInterval\`, \`clearInterval\`, and \`clearIntervals\`.
 - Domains: \`setZoom\` and \`resetZoom\` for finite numeric x/y pairs.
 - Data replacement: \`reconcileKeys(validKeys, { scope })\` explicitly removes
   selected or emphasized keys that no longer exist.
@@ -644,6 +721,13 @@ Receives \`LegendFocusEvent\`: a transient or committed \`change\` carrying the
 raw encoded value, formatted label, scale channel, and stable row keys, or a
 small \`clear\` event. The same object is included in \`oninteraction\`.
 
+### \`onlegendfilter\`
+
+Receives \`LegendFilterEvent\`: a \`change\` with one typed
+\`LegendFilterClause\`, or \`clear\` with \`clause: null\`. Legend filtering
+changes pipeline input and is not folded into the presentation interaction
+union.
+
 ### \`oninteraction\`
 
 Receives the same discriminated \`PlotInteractionEvent\` union emitted by the
@@ -675,6 +759,14 @@ Arrow keys or brackets traverse data; Enter or Space pins or commits the active
 tool; Escape dismisses. A polite live region announces concise state while
 pinned HTML remains labelled, navigable DOM. Area tools remain explicit so
 ordinary page scrolling is available until a user chooses a drag mode.
+
+Committed interval and zoom state exposes precise Edit-bounds buttons in the
+tool rail. Their inline form uses labelled native inputs, stages drafts until
+Apply, validates log/time/category constraints, restores trigger focus after
+Apply or Cancel, and supports Escape. Linear and reversed domains use ascending
+data values; time uses ISO 8601 text; band intervals use inclusive native
+selects. Clear panel selection, Clear all selections, Reset zoom, and Reset
+legend filters remain separate operations.
 `;
 
 export interface InteractionReferenceEntry {
@@ -715,7 +807,7 @@ export const INTERACTION_REFERENCE_INDEX: readonly InteractionReferenceEntry[] =
     summary:
       "Brush an explicit rectangular area and receive domain, pixel, and semantic-key bounds.",
     href: "/guide/interaction-reference#interval-selection",
-    keywords: ["brush", "rectangle", "domain"],
+    keywords: ["brush", "rectangle", "domain", "facet", "union", "cross-panel"],
   },
   {
     id: "zoom",
@@ -730,6 +822,14 @@ export const INTERACTION_REFERENCE_INDEX: readonly InteractionReferenceEntry[] =
     summary: "Preview or commit discrete legend groups across linked SVG and canvas views.",
     href: "/guide/interaction-reference#legendfocus",
     keywords: ["legendFocus", "onlegendfocus", "emphasis", "keyboard", "touch"],
+  },
+  {
+    id: "legend-filter",
+    name: "Legend filtering",
+    summary:
+      "Include or exclude discrete groups before statistics and scales without changing color identity.",
+    href: "/guide/interaction-reference#legendfilter",
+    keywords: ["legendFilter", "onlegendfilter", "filter", "checkbox", "stable color"],
   },
   {
     id: "controlled-tool",
@@ -773,9 +873,9 @@ export const INTERACTION_REFERENCE_INDEX: readonly InteractionReferenceEntry[] =
     id: "accessibility",
     name: "Accessibility",
     summary:
-      "Use keyboard traversal, concise announcements, labelled DOM, and explicit area tools.",
+      "Use keyboard traversal, precise bounds, concise announcements, labelled DOM, and explicit area tools.",
     href: "/guide/interaction-reference#accessibility",
-    keywords: ["screen reader", "keyboard", "live region", "focus"],
+    keywords: ["screen reader", "keyboard", "live region", "focus", "bounds", "ISO 8601"],
   },
 ];
 

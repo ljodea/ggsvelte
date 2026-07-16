@@ -1,0 +1,21 @@
+{
+  "title": "Coordinate intervals across facets",
+  "description": "Choose independent, union, or cross-panel interval semantics, then draw inside a facet. Stable panel identities keep selections attached to their facet even when rows reorder or a panel temporarily disappears.",
+  "tags": ["interaction", "facet", "select", "interval", "brush", "keyboard"],
+  "docsSection": "Interaction",
+  "vrHeight": 760,
+  "journey": {
+    "pointer": "Choose a facet preset, choose Select area, and drag inside one panel. Union accumulates independently drawn panel intervals; cross-panel projects one domain through every compatible panel.",
+    "keyboard": "Choose a preset, tab to Select area, press Enter for the first corner, move with Arrow keys, and press Enter again to commit.",
+    "touch": "Choose Select area, then drag or tap two corners inside one facet panel. Use Clear selection without resetting zoom or filters.",
+    "references": [
+      { "label": "Interaction guide", "href": "/guide/interactions" },
+      {
+        "label": "Selection and zoom",
+        "href": "/examples/interaction/brush-zoom"
+      }
+    ],
+    "svelteFirst": true,
+    "fullWidth": true
+  }
+}

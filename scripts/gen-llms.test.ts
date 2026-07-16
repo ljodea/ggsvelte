@@ -166,6 +166,7 @@ describe("guide sections cover their catalogs", () => {
       "interval-selection",
       "zoom",
       "legend-focus",
+      "legend-filter",
       "controlled-tool",
       "shared-controller",
       "identity",
