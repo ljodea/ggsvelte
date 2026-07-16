@@ -50,7 +50,7 @@
   .status,
   .note {
     margin: 0;
-    color: var(--text, #17202a);
+    color: inherit;
     font: 0.86rem/1.45 var(--gg-font-family, system-ui, sans-serif);
   }
 
@@ -65,6 +65,6 @@
   }
 
   code {
-    color: var(--text, #17202a);
+    color: inherit;
   }
 </style>
