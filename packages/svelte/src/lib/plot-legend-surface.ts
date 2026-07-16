@@ -7,7 +7,11 @@
  */
 
 import type { InteractionSource } from "./interaction.js";
-import type { LegendEntryIdentity } from "./plot-legend-focus.js";
+import {
+  legendInteractionSource,
+  type LegendEntryIdentity,
+  type LegendInteractionSource,
+} from "./plot-legend-focus.js";
 
 // ---- keydown ----
 
@@ -177,9 +181,9 @@ export function shouldRenderInteractionLiveRegion(input: InteractionLiveRegionIn
 // ---- commit / preview dismiss ----
 
 export type LegendCommitAction =
-  | { readonly type: "toggle-clear" }
+  | { readonly type: "toggle-clear"; readonly source: InteractionSource }
   | { readonly type: "ignore" }
-  | { readonly type: "commit" };
+  | { readonly type: "commit"; readonly source: InteractionSource };
 
 /**
  * Pure routing for host `commitLegend` after identity + key lookup.
@@ -189,6 +193,9 @@ export type LegendCommitAction =
  *   2. ignore — keyCount === 0
  *   3. commit
  *
+ * Non-ignore actions carry mapped InteractionSource via `legendInteractionSource`
+ * so the host does not re-map `action.source` after routing.
+ *
  * Host may compute `keysForLegend(action)` before this call (eager Map.get);
  * keys are unused on toggle-clear but O(1). A pressed entry whose domain keys
  * reshuffled empty still toggles clear (does not fall into ignore).
@@ -197,28 +204,35 @@ export function resolveLegendCommitAction(input: {
   readonly pressed: LegendEntryIdentity | null;
   readonly identity: LegendEntryIdentity;
   readonly keyCount: number;
+  /** Host: `action.source` (legend entry interaction source). */
+  readonly entrySource: LegendInteractionSource;
 }): LegendCommitAction {
+  const source = legendInteractionSource(input.entrySource);
   if (
     input.pressed !== null &&
     input.pressed.scale === input.identity.scale &&
     input.pressed.entryIndex === input.identity.entryIndex
   )
-    return { type: "toggle-clear" };
+    return { type: "toggle-clear", source };
   if (input.keyCount === 0) return { type: "ignore" };
-  return { type: "commit" };
+  return { type: "commit", source };
 }
 
 export type LegendPreviewDismissAction =
   | { readonly type: "none" }
-  | { readonly type: "clear-only" }
-  | { readonly type: "clear-and-emit" };
+  | { readonly type: "clear-only"; readonly source: InteractionSource }
+  | { readonly type: "clear-and-emit"; readonly source: InteractionSource };
 
 /**
  * Pure routing for host `previewLegend(null)` (dismiss path only).
  *
- *   none           — no active preview (host returns without mutation)
- *   clear-only     — drop preview, no clear event
- *   clear-and-emit — drop preview and emit legend-focus clear
+ *   none           — `previewSource === null` (no active preview)
+ *   clear-only     — drop preview, no clear event; carries mapped source
+ *   clear-and-emit — drop preview and emit legend-focus clear; carries mapped source
+ *
+ * `previewSource` is host `legendPreview?.action.source ?? null` — a single
+ * discriminant (no separate hasActivePreview boolean) so
+ * `hasActivePreview: true` with null source is unrepresentable.
  *
  * Emit gate uses **committed** emphasis (`interaction?.emphasized(scope) ??
  * localEmphasisKeys`), not `effectiveEmphasisKeys` (which includes preview).
@@ -226,12 +240,14 @@ export type LegendPreviewDismissAction =
  * committed / effective emphasis before emit.
  */
 export function resolveLegendPreviewDismissAction(input: {
-  readonly hasActivePreview: boolean;
+  /** Host: `legendPreview?.action.source ?? null`. */
+  readonly previewSource: LegendInteractionSource | null;
   readonly committedEmphasisEmpty: boolean;
 }): LegendPreviewDismissAction {
-  if (!input.hasActivePreview) return { type: "none" };
-  if (input.committedEmphasisEmpty) return { type: "clear-and-emit" };
-  return { type: "clear-only" };
+  if (input.previewSource === null) return { type: "none" };
+  const source = legendInteractionSource(input.previewSource);
+  if (input.committedEmphasisEmpty) return { type: "clear-and-emit", source };
+  return { type: "clear-only", source };
 }
 
 /**

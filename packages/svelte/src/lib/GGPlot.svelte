@@ -1029,8 +1029,9 @@
     if (action === null) {
       // Decision table is pure (plot-legend-surface); host owns emit + mutation.
       // Emit gate uses committed emphasis, not effectiveEmphasisKeys (preview).
+      // Pure table maps preview source → InteractionSource on non-none actions.
       const dismiss = resolveLegendPreviewDismissAction({
-        hasActivePreview: legendPreview !== null,
+        previewSource: legendPreview?.action.source ?? null,
         committedEmphasisEmpty:
           (
             interaction?.emphasized(resolvedInteractionScope) ??
@@ -1038,10 +1039,13 @@
           ).length === 0,
       });
       if (dismiss.type === "none") return;
-      const source = legendInteractionSource(legendPreview!.action.source);
       legendPreview = null;
       if (dismiss.type === "clear-and-emit")
-        emitLegendFocus({ type: "legend-focus", phase: "clear", source });
+        emitLegendFocus({
+          type: "legend-focus",
+          phase: "clear",
+          source: dismiss.source,
+        });
       return;
     }
     const decision = resolveLegendPreviewKeysDecision(keysForLegend(action));
@@ -1096,17 +1100,17 @@
   }
 
   function commitLegend(action: LegendEntryAction): void {
-    const source = legendInteractionSource(action.source);
     // Eager key lookup (O(1) Map.get) before pure routing; unused on toggle-clear.
     const keys = keysForLegend(action);
     const commit = resolveLegendCommitAction({
       pressed: effectiveLegendPressed,
       identity: action.identity,
       keyCount: keys.length,
+      entrySource: action.source,
     });
     switch (commit.type) {
       case "toggle-clear":
-        clearLegendFocus(source);
+        clearLegendFocus(commit.source);
         break;
       case "ignore":
         break;
@@ -1117,13 +1121,13 @@
         else
           interaction.setEmphasis(keys as readonly PublicKey[], {
             scope: resolvedInteractionScope,
-            source,
+            source: commit.source,
           });
         emitLegendFocus({
           type: "legend-focus",
           phase: "change",
           state: "committed",
-          source,
+          source: commit.source,
           scale: action.identity.scale as "color" | "fill",
           value: action.entry.value as CellValue,
           label: action.entry.label,
