@@ -57,6 +57,9 @@ test("interaction legend focus — committed linked state", async ({ page }) => 
   await firstLegendEntry.click();
   await expect(firstLegendEntry).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByText("3 rows focused")).toBeVisible();
+  // Click can emit a transient preview event before the commit; wait for the
+  // committed status copy so the screenshot cannot race on "previewed here".
+  await expect(page.getByRole("status")).toContainText("pinned across three views");
   // Three SVG points in the first view, then one focused path plus three
   // focused point vertices in the mixed line view. Canvas shares the mask
   // semantics but intentionally exposes no SVG mark nodes to count here.
