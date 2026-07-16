@@ -68,9 +68,17 @@ export type SurfacePointerUpInput = {
 };
 
 export type SurfacePointerUpAction =
-  | { readonly type: "touch-inspect-tap"; readonly pin: boolean }
+  | {
+      readonly type: "touch-inspect-tap";
+      /** Inspection state for setInspection (from pinEnabled). */
+      readonly state: "pinned" | "transient";
+    }
   | { readonly type: "touch-inspect-drag-ignore" }
-  | { readonly type: "finish-brush" }
+  | {
+      readonly type: "finish-brush";
+      /** Interaction source for selection/zoom emission. */
+      readonly source: "touch" | "pointer";
+    }
   | { readonly type: "none" };
 
 /**
@@ -99,11 +107,17 @@ export function resolvePointerUpAction(input: SurfacePointerUpInput): SurfacePoi
     hasTouchInspectStart
   ) {
     if (touchInspectMoved) return { type: "touch-inspect-drag-ignore" };
-    return { type: "touch-inspect-tap", pin: pinEnabled };
+    return {
+      type: "touch-inspect-tap",
+      state: pinEnabled ? "pinned" : "transient",
+    };
   }
 
   if (!brushing || !hasBrushDraft) return { type: "none" };
-  return { type: "finish-brush" };
+  return {
+    type: "finish-brush",
+    source: interactionSourceFromPointerType(pointerType),
+  };
 }
 
 export type SurfaceClickInput = {

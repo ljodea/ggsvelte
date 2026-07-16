@@ -134,7 +134,6 @@
   import {
     resolveCaptureClickAction,
     advanceTouchInspectMoved,
-    interactionSourceFromPointerType,
     isAreaAwaitingSecond,
     isAreaBrushing,
     resolveFinishBrushAction,
@@ -1946,7 +1945,7 @@
           setInspection(
             hitFromCandidate(match),
             "touch",
-            action.pin ? "pinned" : "transient",
+            action.state,
             match.mode,
             match,
           );
@@ -1961,7 +1960,7 @@
         // Defensive: pure up-gate already requires hasBrushDraft.
         if (brushRect === null) break;
         reducer.cancelScheduledPointer();
-        const source = interactionSourceFromPointerType(event.pointerType);
+        const source = action.source;
         const ended = evaluatePointerBrushEnd(brushRect, plotPoint(event));
         // Pure table carries rect/corners — no host ended.kind re-narrow.
         const finish = resolveFinishBrushAction({
