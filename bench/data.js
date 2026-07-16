@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784217568755,
+  "lastUpdate": 1784218016706,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -15553,6 +15553,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 160.5347,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "a1a25a35ab9fede283e5c2ee63277fd898f2eadf",
+          "message": "refactor(core): split candidate attrs, facet cells, closed paths, rects (#141)\n\nExtract identity candidate attrs; boxplot layout types/finalize; facet\npanel size and col/row placement; chrome display flip helpers; shared\nclosed-path multi-group writer for area/smooth; rect emission; geometry\npanel frames; prepare-panels types; render-model domains; sequential\nresult packing. Facades keep import paths stable. Add characterization\ntests for flip helpers, facet panel size, and panel frames.",
+          "timestamp": "2026-07-16T11:06:16-05:00",
+          "tree_id": "652c87374d06c0e9f1e8934a29bdc192c5552bba",
+          "url": "https://github.com/ljodea/ggsvelte/commit/a1a25a35ab9fede283e5c2ee63277fd898f2eadf"
+        },
+        "date": 1784218016254,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.6443,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.835,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 9.6872,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 13.7128,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 82.5356,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 121.2849,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.0248,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.1988,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 87.781,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 109.957,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 14.7216,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 14.0324,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 120.4297,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 1.0018,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 29.2158,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.4238,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 33.08,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 587.4504,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 160.9734,
             "unit": "ms"
           }
         ]
