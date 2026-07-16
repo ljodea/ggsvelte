@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784213585766,
+  "lastUpdate": 1784213915811,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -14244,6 +14244,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 129.1705,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "76ccf4d19cd0f79688789cfcbf79b26647d0e16b",
+          "message": "refactor(core): split position, facet grid, bind, and finalize helpers (#129)\n\nExtract position jitter/boxplot/bar adjustments; facet outer chrome,\nshared margins, and cell geometry; bindLayer y/extras resolution;\ncandidate datum context helpers; finalize contracts; and preparePanels\nframe building. Facades keep import paths stable. Add characterization\ntests for barSlotKeys and ordinalSeriesRank.",
+          "timestamp": "2026-07-16T09:58:00-05:00",
+          "tree_id": "df273bbe5587b8fcdb074928feade41247c3033e",
+          "url": "https://github.com/ljodea/ggsvelte/commit/76ccf4d19cd0f79688789cfcbf79b26647d0e16b"
+        },
+        "date": 1784213915371,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.5971,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.9062,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 10.4959,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 15.9182,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 85.9214,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 122.2116,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.0249,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.282,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 88.8917,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 111.4486,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 15.038,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 13.5464,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 119.6067,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.806,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 27.4788,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.4385,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 29.1033,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 593.2457,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 161.4384,
             "unit": "ms"
           }
         ]
