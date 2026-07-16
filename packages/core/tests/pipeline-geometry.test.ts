@@ -354,3 +354,72 @@ describe("buildBatch dispatch via runPipeline", () => {
     expect(err.scene.batches.every((b) => b.kind === "segments")).toBe(true);
   });
 });
+
+describe("appendClosedBandEdges — shared closed ribbon vertices", () => {
+  it("writes upper edge ascending then lower edge descending", async () => {
+    const { appendClosedBandEdges } = await import("../src/pipeline/geometry-paths-closed.ts");
+    const positions = new Float32Array(16);
+    const rowIndex = new Uint32Array(8);
+    const frame = {
+      xNumeric: new Float64Array([0, 1]),
+      xValues: null,
+      rowIndex: new Uint32Array([10, 11]),
+      ymin: new Float64Array([0.2, 0.3]),
+      ymax: new Float64Array([0.8, 0.9]),
+    } as unknown as LayerFrame;
+    const fx = {
+      innerWidth: 100,
+      innerHeight: 200,
+      xScale: {
+        type: "linear",
+        normalize: (v: number) => v,
+      },
+      yScale: {
+        type: "linear",
+        normalize: (v: number) => v,
+      },
+    } as Frame;
+    const cursor = appendClosedBandEdges({
+      positions,
+      rowIndex,
+      cursor: 0,
+      rows: [0, 1],
+      frame,
+      fx,
+      yTop: frame.ymax!,
+      yBottom: frame.ymin!,
+    });
+    expect(cursor).toBe(4);
+    // upper: row0 (0, 0.8) -> px (0, 200-160)=(0,40); row1 (1,0.9)->(100,20)
+    expect(positions[0]).toBeCloseTo(0);
+    expect(positions[1]).toBeCloseTo(40);
+    expect(positions[2]).toBeCloseTo(100);
+    expect(positions[3]).toBeCloseTo(20);
+    // lower reverse: row1 (1,0.3)->(100,140); row0 (0,0.2)->(0,160)
+    expect(positions[4]).toBeCloseTo(100);
+    expect(positions[5]).toBeCloseTo(140);
+    expect(positions[6]).toBeCloseTo(0);
+    expect(positions[7]).toBeCloseTo(160);
+    expect([...rowIndex.subarray(0, 4)]).toEqual([10, 11, 11, 10]);
+  });
+});
+
+describe("layoutBoxplotBody — hinge/whisker collection", () => {
+  it("returns null when box extras or scales are unsuitable", async () => {
+    const { layoutBoxplotBody } = await import("../src/pipeline/geometry-boxplot-body-layout.ts");
+    const frame = {
+      binding: { index: 0, layer: { params: {} } },
+      n: 1,
+      box: null,
+      ymin: null,
+      ymax: null,
+    } as unknown as LayerFrame;
+    const fx = {
+      xScale: { type: "linear" },
+      yScale: { type: "linear" },
+      innerWidth: 100,
+      innerHeight: 100,
+    } as Frame;
+    expect(layoutBoxplotBody(frame, fx, [])).toBeNull();
+  });
+});

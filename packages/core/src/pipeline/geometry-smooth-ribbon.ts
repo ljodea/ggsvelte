@@ -5,7 +5,7 @@ import type { GeometryBatch } from "../scene.js";
 
 import type { LayerFrame, ResolvedColorScale } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
-import { positionOf } from "./geometry-shared.js";
+import { appendClosedBandEdges } from "./geometry-paths-closed.js";
 import { groupColor, SMOOTH_RIBBON_ALPHA } from "./geometry-smooth-shared.js";
 
 export function buildSmoothRibbonBatch(input: {
@@ -39,23 +39,16 @@ export function buildSmoothRibbonBatch(input: {
   for (let s = 0; s < bandRows.length; s++) {
     pathOffsets[s] = cursor;
     const rows = bandRows[s]!;
-    for (const row of rows) {
-      const tx = positionOf(fx.xScale, frame.xNumeric, frame.xValues, row);
-      const ty = fx.yScale.type === "band" ? NaN : fx.yScale.normalize(frame.ymax[row]!);
-      positions[cursor * 2] = tx * fx.innerWidth;
-      positions[cursor * 2 + 1] = fx.innerHeight - ty * fx.innerHeight;
-      rowIndex[cursor] = frame.rowIndex[row]!;
-      cursor++;
-    }
-    for (let i = rows.length - 1; i >= 0; i--) {
-      const row = rows[i]!;
-      const tx = positionOf(fx.xScale, frame.xNumeric, frame.xValues, row);
-      const ty = fx.yScale.type === "band" ? NaN : fx.yScale.normalize(frame.ymin[row]!);
-      positions[cursor * 2] = tx * fx.innerWidth;
-      positions[cursor * 2 + 1] = fx.innerHeight - ty * fx.innerHeight;
-      rowIndex[cursor] = frame.rowIndex[row]!;
-      cursor++;
-    }
+    cursor = appendClosedBandEdges({
+      positions,
+      rowIndex,
+      cursor,
+      rows,
+      frame,
+      fx,
+      yTop: frame.ymax,
+      yBottom: frame.ymin,
+    });
     const first = rows[0]!;
     // Ribbon tint: fill channel, else the line's color (band matches
     // its line in multi-series smooths), else theme accent.
