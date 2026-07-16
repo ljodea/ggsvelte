@@ -10,8 +10,11 @@ import type { ColumnTable } from "../table.js";
 import type { CandidateStore } from "../candidate-store.js";
 import type { LineageStore } from "../identity.js";
 
+import {
+  buildRenderModelAxisFormatters,
+  buildRenderModelScales,
+} from "./assemble-render-model-scales.js";
 import { createRenderModelLifecycle } from "./assemble-render-model-lifecycle.js";
-import { makeAxisValueFormatter } from "./layout-helpers.js";
 import type {
   Advisory,
   LayerBackend,
@@ -46,10 +49,6 @@ export function assembleRenderModel(input: {
   formatY: TickFormatter | undefined;
   table: ColumnTable;
 }): RenderModel {
-  const state: Record<string, ScaleState> = {};
-  if (input.colorState !== null) state["color"] = input.colorState;
-  if (input.fillState !== null) state["fill"] = input.fillState;
-
   const { scene, candidates } = input;
   const lifecycle = createRenderModelLifecycle({
     scene,
@@ -59,14 +58,7 @@ export function assembleRenderModel(input: {
 
   return {
     scene,
-    scales: {
-      x: input.xScale,
-      y: input.yScale,
-      color: input.color,
-      fill: input.fill,
-      panels: input.panelScales,
-      state,
-    },
+    scales: buildRenderModelScales(input),
     warnings: dedupeWarnings(input.warnings),
     advisories: dedupeAdvisories(input.advisories),
     runId: input.runId,
@@ -79,10 +71,12 @@ export function assembleRenderModel(input: {
     }),
     lineage: input.lineage,
     candidates,
-    axisFormatters: Object.freeze({
-      x: makeAxisValueFormatter(input.xScale, input.formatX),
-      y: makeAxisValueFormatter(input.yScale, input.formatY),
-    }),
+    axisFormatters: buildRenderModelAxisFormatters(
+      input.xScale,
+      input.yScale,
+      input.formatX,
+      input.formatY,
+    ),
     row: lifecycle.row,
     dispose: lifecycle.dispose,
   };

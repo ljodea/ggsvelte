@@ -3,17 +3,12 @@
  * Source-backed layers use the cheap raw resolver; stat/annotation layers use
  * the identity-indexed path that reconstructs represented source rows.
  */
-import { buildCandidateStore } from "../candidate-store.js";
 import type { CandidateStore } from "../candidate-store.js";
 import type { LineageStore } from "../identity.js";
 import type { Scene } from "../scene.js";
 import type { ColumnTable } from "../table.js";
 
-import { createIdentityCandidateDatumResolver } from "./build-candidates-datum.js";
-import {
-  buildCandidateIdentityIndex,
-  type CandidateIdentityIndex,
-} from "./build-candidates-identity.js";
+import { buildIdentityIndexedCandidates } from "./build-candidates-identity-store.js";
 import {
   buildSourceBackedCandidates,
   isAllSourceBacked,
@@ -35,54 +30,8 @@ export function buildPipelineCandidates(input: {
   fill: ResolvedColorScale | null;
   lineage: LineageStore<number>;
 }): CandidateStore {
-  const {
-    scene,
-    runId,
-    flip,
-    bindings,
-    panelFrames,
-    facetPanels,
-    table,
-    layerFields,
-    color,
-    fill,
-    lineage,
-  } = input;
-
-  if (isAllSourceBacked(bindings)) {
-    return buildSourceBackedCandidates({
-      scene,
-      runId,
-      flip,
-      bindings,
-      table,
-      color,
-      fill,
-      lineage,
-    });
+  if (isAllSourceBacked(input.bindings)) {
+    return buildSourceBackedCandidates(input);
   }
-
-  let identityIndex: CandidateIdentityIndex | null = null;
-  const getIdentityIndex = () => {
-    if (identityIndex !== null) return identityIndex;
-    identityIndex = buildCandidateIdentityIndex(panelFrames, facetPanels);
-    return identityIndex;
-  };
-
-  return buildCandidateStore(scene, {
-    epoch: runId,
-    flip,
-    datum: createIdentityCandidateDatumResolver({
-      scene,
-      bindings,
-      panelFrames,
-      facetPanels,
-      table,
-      layerFields,
-      color,
-      fill,
-      lineage,
-      getIdentityIndex,
-    }),
-  });
+  return buildIdentityIndexedCandidates(input);
 }

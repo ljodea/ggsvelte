@@ -1,0 +1,29 @@
+/**
+ * Sequential color domain and range resolution (config vs edition defaults).
+ */
+import type { ColorScaleSpec } from "@ggsvelte/spec";
+
+import type { EditionDefaults } from "../editions.js";
+import { VIRIDIS_RAMP_10 } from "../scales/color.js";
+import type { CellValue } from "../table.js";
+import { cellToNumber } from "../table.js";
+
+export function resolveSequentialDomain(config?: ColorScaleSpec): [number, number] | undefined {
+  const domain = config?.domain;
+  if (domain === undefined || domain.length !== 2) return undefined;
+  return [cellToNumber(domain[0] as CellValue), cellToNumber(domain[1] as CellValue)];
+}
+
+/**
+ * Edition-keyed default ramp: identical to trainSequential built-in for
+ * edition 1 (undefined — keeps behavior byte-stable); other editions pass
+ * their ramp. Explicit config always wins at the call site.
+ */
+export function resolveSequentialRange(
+  config: ColorScaleSpec | undefined,
+  editionDefaults: EditionDefaults,
+): readonly string[] | undefined {
+  const editionRamp =
+    editionDefaults.sequentialRamp === VIRIDIS_RAMP_10 ? undefined : editionDefaults.sequentialRamp;
+  return config?.range ?? editionRamp;
+}
