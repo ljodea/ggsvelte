@@ -1,11 +1,13 @@
 /**
  * Reconstruct represented source rows for aggregate (stat-synthesized) marks.
  */
-import type { BarParams } from "@ggsvelte/spec";
+import { ColumnTable } from "../table.js";
 
-import { bandKey } from "../scales/train.js";
-import { cellToNumber, ColumnTable } from "../table.js";
-
+import {
+  filterAggregateXRows,
+  filterAggregateYRows,
+  filterBinRepresentedRows,
+} from "./build-candidates-lineage-filters.js";
 import type { LayerFrame } from "./types.js";
 
 export function filterRepresentedSourceRows(input: {
@@ -25,36 +27,29 @@ export function filterRepresentedSourceRows(input: {
     outputX !== null &&
     (stat === "count" || stat === "summary" || stat === "boxplot")
   ) {
-    const outputKey = bandKey(outputX);
-    representedRows = representedRows.filter(
-      (row) => bandKey(table.column(aggregateXField)[row]) === outputKey,
-    );
-  } else if (
-    stat === "bin" &&
-    aggregateXField !== null &&
-    frame.xmin !== null &&
-    frame.xmax !== null
-  ) {
-    const hi = frame.xmax[frameRow]!;
-    const lo = frame.xmin[frameRow]!;
-    const closed = ((frame.binding.layer.params ?? {}) as BarParams).closed ?? "right";
-    const frameGroup = frame.groups[frameRow];
-    const firstInGroup = frameRow === 0 || frame.groups[frameRow - 1] !== frameGroup;
-    const lastInGroup = frameRow === frame.n - 1 || frame.groups[frameRow + 1] !== frameGroup;
-    representedRows = representedRows.filter((row) => {
-      const value = cellToNumber(table.column(aggregateXField)[row]!);
-      if (!Number.isFinite(value)) return false;
-      return closed === "right"
-        ? value <= hi && (value > lo || (firstInGroup && value >= lo))
-        : value >= lo && (value < hi || (lastInGroup && value <= hi));
+    representedRows = filterAggregateXRows({
+      table,
+      field: aggregateXField,
+      outputX,
+      baseRows: representedRows,
+    });
+  } else if (stat === "bin" && aggregateXField !== null) {
+    representedRows = filterBinRepresentedRows({
+      frame,
+      table,
+      frameRow,
+      field: aggregateXField,
+      baseRows: representedRows,
     });
   }
 
   const aggregateYField = frame.binding.yField;
   if ((stat === "smooth" || stat === "summary" || stat === "boxplot") && aggregateYField !== null) {
-    representedRows = representedRows.filter((row) =>
-      Number.isFinite(cellToNumber(table.column(aggregateYField)[row]!)),
-    );
+    representedRows = filterAggregateYRows({
+      table,
+      field: aggregateYField,
+      baseRows: representedRows,
+    });
   }
 
   return representedRows;
