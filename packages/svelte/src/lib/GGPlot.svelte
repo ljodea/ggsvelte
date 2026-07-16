@@ -112,6 +112,7 @@
   } from "./plot-geometry.js";
   import { resolveSurfaceKeyAction } from "./plot-surface-keyboard.js";
   import {
+    buildInspectionCandidateRef,
     resolveInspectionCompleteness,
     resolveInspectionEmitAction,
     resolveInspectionMode,
@@ -126,6 +127,8 @@
   import {
     resolveCaptureClickAction,
     advanceTouchInspectMoved,
+    isAreaAwaitingSecond,
+    isAreaBrushing,
     resolveFinishBrushAction,
     resolveLostPointerCaptureAction,
     resolvePointerDownAction,
@@ -141,6 +144,7 @@
     resolveLegendPointerUpAction,
     resolveLegendPreviewDismissAction,
     shouldClearLegendPreviewOnBlur,
+    shouldEmitLegendFocusClear,
     shouldRenderInteractionLiveRegion,
   } from "./plot-legend-surface.js";
   import {
@@ -159,6 +163,7 @@
     plotRootInlineStyle,
     resolveCaptureAriaControls,
     resolveClearLegendX,
+    resolvePlotSize,
     tooltipViewportSize,
   } from "./plot-layout.js";
   import {
@@ -202,6 +207,7 @@
   } from "./plot-selection.js";
   import {
     createSourceIdentityTracker,
+    dataIdentityEpochToken,
     resolveSemanticKeys,
   } from "./plot-semantic-keys.js";
   import { themeTokensToCss } from "./plot-theme-css.js";
@@ -436,12 +442,11 @@
   // Tracker is owned for the component lifetime (never cleared).
   const { sourceIdentity } = createSourceIdentityTracker();
   const dataIdentityEpoch = $derived(
-    assembled === null
-      ? "no-data"
-      : `${sourceIdentity(data)}:${sourceIdentity(spec)}:${JSON.stringify([
-          assembled.data ?? null,
-          assembled.datasets ?? null,
-        ])}`,
+    dataIdentityEpochToken({
+      assembled,
+      dataToken: sourceIdentity(data),
+      specToken: sourceIdentity(spec),
+    }),
   );
 
   // ------------------------------------------------- container width (RO)
@@ -470,12 +475,17 @@
     };
   });
 
-  const resolvedWidth: number = $derived(
-    width === undefined || width === "container"
-      ? (containerWidth ?? assembled?.width ?? 640)
-      : (width ?? assembled?.width ?? 640),
+  const resolvedSize = $derived(
+    resolvePlotSize({
+      width,
+      height,
+      containerWidth,
+      assembledWidth: assembled?.width,
+      assembledHeight: assembled?.height,
+    }),
   );
-  const resolvedHeight: number = $derived(height ?? assembled?.height ?? 400);
+  const resolvedWidth = $derived(resolvedSize.width);
+  const resolvedHeight = $derived(resolvedSize.height);
 
   // Authoritative committed scale state: a plain non-reactive box + run-id
   // gate. Committing only monotonically newer runs keeps stale results from
@@ -660,11 +670,11 @@
   } | null>(null);
   const brushing = $derived.by(() => {
     void reducerRevision;
-    return reducer.state.area.kind !== "idle";
+    return isAreaBrushing(reducer.state.area.kind);
   });
   const areaAwaitingSecond = $derived.by(() => {
     void reducerRevision;
-    return reducer.state.area.kind === "first-corner";
+    return isAreaAwaitingSecond(reducer.state.area.kind);
   });
   let lastInspectionFingerprint = "";
   let activeTraversalIndex = $state(-1);
@@ -1055,15 +1065,16 @@
   }
 
   function clearLegendFocus(source: InteractionSource): void {
-    const hadFocus =
-      legendPreview !== null ||
-      legendCommitted !== null ||
-      effectiveEmphasisKeys.length > 0;
+    const emitClear = shouldEmitLegendFocusClear({
+      hasPreview: legendPreview !== null,
+      hasCommitted: legendCommitted !== null,
+      emphasisKeyCount: effectiveEmphasisKeys.length,
+    });
     legendPreview = null;
     legendCommitted = null;
     if (interaction === undefined) localEmphasisKeys = [];
     else interaction.clearEmphasis({ scope: resolvedInteractionScope, source });
-    if (hadFocus)
+    if (emitClear)
       emitLegendFocus({ type: "legend-focus", phase: "clear", source });
   }
 
@@ -1560,13 +1571,14 @@
           return;
         }
         const next = resolved.snapshot;
-        const candidateRef = {
+        const candidateRef = buildInspectionCandidateRef({
           epoch: model?.runId ?? 0,
-          id: candidate?.id ?? traversalHits.indexOf(hit!),
+          candidateId: candidate?.id,
+          fallbackId: () => traversalHits.indexOf(hit!),
           panelId: next.panelId,
           x: hit!.x,
           y: hit!.y,
-        };
+        });
         reducer.dispatch({ type: "inspect", candidate: candidateRef, source });
         if (state === "pinned")
           reducer.dispatch({ type: "toggle-pin", source });
@@ -2231,6 +2243,35 @@
     }
   }
 
+  /** Pointer-cancel always drops draft/queue/touch-inspect and cancels area. */
+  function onPointerCancel(): void {
+    queuedPointerInspection = null;
+    touchInspectStart = null;
+    touchInspectMoved = false;
+    reducer.cancelScheduledPointer();
+    brushRect = null;
+    reducer.dispatch({ type: "cancel-area" });
+  }
+
+  /**
+   * Lost capture: pure decision table owns keep vs clear draft; host mutates
+   * brushRect and always cancels area when not ignored.
+   */
+  function onLostPointerCapture(): void {
+    const lost = resolveLostPointerCaptureAction(reducer.state.area.kind);
+    switch (lost.type) {
+      case "ignore":
+        break;
+      case "cancel-keep-draft":
+        reducer.dispatch({ type: "cancel-area" });
+        break;
+      case "cancel-clear-draft":
+        brushRect = null;
+        reducer.dispatch({ type: "cancel-area" });
+        break;
+    }
+  }
+
   // Readiness signal for screenshot tooling (plan: VR waits on
   // `[data-gg-ready="true"]`). Split into:
   // - clientFlush via $effect: never runs during SSR → prerender stays
@@ -2373,29 +2414,8 @@
         {onPointerLeave}
         {onPointerDown}
         {onPointerUp}
-        onPointerCancel={() => {
-          queuedPointerInspection = null;
-          touchInspectStart = null;
-          touchInspectMoved = false;
-          reducer.cancelScheduledPointer();
-          brushRect = null;
-          reducer.dispatch({ type: "cancel-area" });
-        }}
-        onLostPointerCapture={() => {
-          // Decision table is pure (plot-surface-pointer); host owns draft + cancel.
-          const lost = resolveLostPointerCaptureAction(reducer.state.area.kind);
-          switch (lost.type) {
-            case "ignore":
-              return;
-            case "cancel-keep-draft":
-              reducer.dispatch({ type: "cancel-area" });
-              return;
-            case "cancel-clear-draft":
-              brushRect = null;
-              reducer.dispatch({ type: "cancel-area" });
-              return;
-          }
-        }}
+        {onPointerCancel}
+        {onLostPointerCapture}
         onClick={onCaptureClick}
         onKeyDown={onSurfaceKeyDown}
         {onDblClick}

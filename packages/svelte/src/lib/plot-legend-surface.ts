@@ -233,3 +233,19 @@ export function resolveLegendPreviewDismissAction(input: {
   if (input.committedEmphasisEmpty) return { type: "clear-and-emit" };
   return { type: "clear-only" };
 }
+
+/**
+ * Whether `clearLegendFocus` should emit a legend-focus clear event.
+ *
+ * Unlike `resolveLegendPreviewDismissAction` (preview dismiss), this gate ORs
+ * active preview, committed legend entry, and **effective** emphasis key count
+ * (preview keys included when present). That matches the host clearing all
+ * focus surfaces, not only a transient preview leave.
+ */
+export function shouldEmitLegendFocusClear(input: {
+  readonly hasPreview: boolean;
+  readonly hasCommitted: boolean;
+  readonly emphasisKeyCount: number;
+}): boolean {
+  return input.hasPreview || input.hasCommitted || input.emphasisKeyCount > 0;
+}
