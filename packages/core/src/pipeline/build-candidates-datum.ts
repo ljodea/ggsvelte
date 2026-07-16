@@ -9,6 +9,7 @@ import { bandKey } from "../scales/train.js";
 import type { CellValue } from "../table.js";
 import type { ColumnTable } from "../table.js";
 
+import { resolveCandidateLogicalValues } from "./build-candidates-datum-values.js";
 import { resolveCandidateFrameRow } from "./build-candidates-frame-row.js";
 import type { CandidateIdentityIndex } from "./build-candidates-identity.js";
 import { filterRepresentedSourceRows } from "./build-candidates-lineage.js";
@@ -102,21 +103,22 @@ export function createIdentityCandidateDatumResolver(input: {
         baseRows: representedRows,
       });
     }
+    const { xValue, yValue } = resolveCandidateLogicalValues({
+      annotationRule,
+      annotationX,
+      annotationY,
+      outlierSourceRow,
+      sourceRow,
+      frame,
+      frameRow,
+      primitiveIndex: facts.primitiveIndex,
+      sourceValue,
+      xField,
+      yField,
+    });
     return {
-      xValue: annotationRule
-        ? annotationX
-        : outlierSourceRow === null
-          ? sourceRow === null
-            ? (frame?.xValues?.[frameRow] ?? frame?.xNumeric?.[frameRow] ?? null)
-            : sourceValue(xField)
-          : (frame?.box?.outlierX[facts.primitiveIndex] ?? null),
-      yValue: annotationRule
-        ? annotationY
-        : outlierSourceRow === null
-          ? sourceRow === null
-            ? (frame?.yNumeric?.[frameRow] ?? frame?.box?.middle[frameRow] ?? null)
-            : sourceValue(yField)
-          : (frame?.box?.outlierY[facts.primitiveIndex] ?? null),
+      xValue,
+      yValue,
       seriesId: group,
       seriesRank: colorRank >= 0 ? colorRank : fillRank >= 0 ? fillRank : group,
       sourceOrder: sourceRow ?? outlierSourceRow ?? facts.primitiveIndex,

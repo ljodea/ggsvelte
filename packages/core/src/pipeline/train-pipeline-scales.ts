@@ -9,6 +9,8 @@ import type { ColumnTable } from "../table.js";
 
 import type { FacetPanelDef } from "./facets.js";
 import { collectAxisInputs, resolveColorScale, trainAxis } from "./scale-training.js";
+import { trainPipelineColorScales } from "./train-pipeline-scales-color.js";
+import { trainPipelinePositionScales } from "./train-pipeline-scales-position.js";
 import type { Advisory, LayerFrame, PipelineWarning, RunOptions } from "./types.js";
 
 export interface TrainedPipelineScales {
@@ -49,69 +51,29 @@ export function trainPipelineScales(input: {
   } = input;
 
   const scalesConfig = normalized.scales ?? {};
-  const allFrames = panelFrames.flat();
-  const xInputs = collectAxisInputs("x", allFrames, scalesConfig.x?.type, advisories);
-  const yInputs = collectAxisInputs("y", allFrames, scalesConfig.y?.type, advisories);
-  const xTraining = trainAxis("x", xInputs, scalesConfig.x);
-  const yTraining = trainAxis("y", yInputs, scalesConfig.y);
-  advisories.push(...xTraining.advisories, ...yTraining.advisories);
-  warnings.push(...xTraining.warnings, ...yTraining.warnings);
-
-  const panelScales: { x: PositionScale; y: PositionScale }[] = facetPanels.map((_, p) => {
-    let px = xTraining.scale;
-    let py = yTraining.scale;
-    const scratch: Advisory[] = [];
-    if (freeX) {
-      const inputs = collectAxisInputs("x", panelFrames[p]!, scalesConfig.x?.type, scratch);
-      const training = trainAxis("x", inputs, { ...scalesConfig.x, type: xTraining.scale.type });
-      warnings.push(...training.warnings);
-      px = training.scale;
-    }
-    if (freeY) {
-      const inputs = collectAxisInputs("y", panelFrames[p]!, scalesConfig.y?.type, scratch);
-      const training = trainAxis("y", inputs, { ...scalesConfig.y, type: yTraining.scale.type });
-      warnings.push(...training.warnings);
-      py = training.scale;
-    }
-    return { x: px, y: py };
+  const position = trainPipelinePositionScales({
+    scalesConfig,
+    facetPanels,
+    panelFrames,
+    freeX,
+    freeY,
+    warnings,
+    advisories,
+  });
+  const color = trainPipelineColorScales({
+    scalesConfig,
+    labs: normalized.labs ?? {},
+    allFrames: position.allFrames,
+    table,
+    options,
+    editionDefaults,
+    warnings,
+    advisories,
   });
 
-  const labs = normalized.labs ?? {};
-  const firstColorField = allFrames.find((f) => f.binding.color.field !== null)?.binding.color
-    .field;
-  const firstFillField = allFrames.find((f) => f.binding.fill.field !== null)?.binding.fill.field;
-  const colorResolution = resolveColorScale(
-    "color",
-    allFrames,
-    table,
-    scalesConfig.color,
-    options.prevScales?.["color"] ?? null,
-    labs.color ?? firstColorField ?? "",
-    warnings,
-    advisories,
-    editionDefaults,
-  );
-  const fillResolution = resolveColorScale(
-    "fill",
-    allFrames,
-    table,
-    scalesConfig.fill,
-    options.prevScales?.["fill"] ?? null,
-    labs.fill ?? firstFillField ?? "",
-    warnings,
-    advisories,
-    editionDefaults,
-  );
-
   return {
-    xTraining,
-    yTraining,
-    panelScales,
-    colorResolution,
-    fillResolution,
-    xInputs,
-    yInputs,
+    ...position,
+    ...color,
     scalesConfig,
-    allFrames,
   };
 }
