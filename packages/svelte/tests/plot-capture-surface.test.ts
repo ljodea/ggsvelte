@@ -127,7 +127,7 @@ describe("PlotCaptureSurface", () => {
 
   it("binds element for host focus restoration", () => {
     let element: HTMLDivElement | null = null;
-    render(PlotCaptureSurface, {
+    const { container } = render(PlotCaptureSurface, {
       get element() {
         return element;
       },
@@ -149,8 +149,8 @@ describe("PlotCaptureSurface", () => {
       onKeyDown: () => {},
       onDblClick: () => {},
     });
+    const capture = container.querySelector(".gg-capture");
     expect(element).toBeInstanceOf(HTMLDivElement);
-    if (!(element instanceof HTMLDivElement)) throw new Error("expected bound capture element");
-    expect(element.classList.contains("gg-capture")).toBe(true);
+    expect(element).toBe(capture);
   });
 });
