@@ -36,8 +36,8 @@ if (files.length === 0) {
 // release.yml's NPM_PUBLISH_ENABLED gate). Filter that one false positive.
 // Remove this when the npm package's checker recognizes `vars`.
 //
-// Custom self-hosted label `ggsvelte` is declared in actionlint.yaml for the
-// Go CLI; the wasm package has no config hook, so filter the runner-label noise.
+// Custom self-hosted label `ggsvelte` is declared in .github/actionlint.yaml
+// for the Go CLI; the wasm package has no config hook, so filter the noise.
 const KNOWN_FALSE_POSITIVES = [/undefined variable "vars"/, /label "ggsvelte" is unknown/];
 
 const lint = await createLinter();

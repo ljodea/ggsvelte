@@ -48,7 +48,9 @@ jobs:
   approve:
     name: verify candidate baselines, commit to vr-update branch
     if: github.event.workflow_run.conclusion == 'success'
-    runs-on: [self-hosted, ggsvelte]
+    # GitHub-hosted: privileged write path (pushes vr-update branches); keep off
+    # the self-hosted pool that runs untrusted PR code.
+    runs-on: ubuntu-latest
     permissions:
       contents: write # push the verified vr-update/pr-<n> branch
       actions: read # download the triggering run's artifact

@@ -2,8 +2,10 @@
 # All third-party actions pinned by full commit SHA (zizmor-enforced).
 #
 # Linux jobs use repo self-hosted runners labeled `ggsvelte` (ops tooling
-# lives outside this FOSS tree). Windows/macOS matrix rows and special
-# hosted-only workflows stay on GitHub-hosted labels.
+# lives outside this FOSS tree). Privileged write/OIDC workflows (release,
+# pages deploy, vr-approve, bench-trend) stay on GitHub-hosted runners so a
+# compromised CI workspace cannot harvest publish credentials. Windows/macOS
+# matrix rows and manual AT stay hosted as well.
 name: CI
 
 on:

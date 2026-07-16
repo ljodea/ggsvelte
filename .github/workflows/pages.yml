@@ -60,7 +60,8 @@ jobs:
   deploy:
     name: deploy GitHub Pages
     needs: build
-    runs-on: [self-hosted, ggsvelte]
+    # GitHub-hosted: pages write + OIDC; keep privileged deploys off self-hosted.
+    runs-on: ubuntu-latest
     permissions:
       pages: write
       id-token: write

@@ -22,7 +22,8 @@ jobs:
   bench-trend:
     name: bench-trend (record datapoint on gh-pages)
     if: github.event_name == 'push'
-    runs-on: [self-hosted, ggsvelte]
+    # GitHub-hosted: needs contents:write to push gh-pages datapoints.
+    runs-on: ubuntu-latest
     permissions:
       contents: write # github-action-benchmark pushes the datapoint to gh-pages
     steps:

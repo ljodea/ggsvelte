@@ -32,7 +32,8 @@ concurrency:
 jobs:
   release:
     name: changesets version-or-publish
-    runs-on: [self-hosted, ggsvelte]
+    # GitHub-hosted: npm trusted publishing (OIDC) is not supported on self-hosted.
+    runs-on: ubuntu-latest
     permissions:
       contents: write # changesets/action pushes version commits + tags
       pull-requests: write # changesets/action opens the Version Packages PR
