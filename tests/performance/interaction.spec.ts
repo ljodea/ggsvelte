@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 interface InteractionBudgets {
-  version: 3;
+  version: 4;
   warmupOperations: number;
   operationsPerSample: number;
   samples: number;
@@ -13,6 +13,7 @@ interface InteractionBudgets {
   legendSamples: number;
   legendNavigationP95Ms: number;
   threeViewPropagationP95Ms: number;
+  r3LegendFilterWarmupOperations: number;
   r3LegendFilterOperations: number;
   r3LegendFilterCommitP95Ms: number;
   r3SelectionApplyMs: number;
@@ -203,51 +204,60 @@ test("R3 filter, cross-panel interval, and precise bounds commits meet separate 
   await expect(fixture).toHaveAttribute("data-zoom-pipeline-commits", "1");
   await expect(fixture).toHaveAttribute("data-zoom-interaction-commits", "0");
 
-  const filterTimings = await page.evaluate(async (operations) => {
-    const fixtureElement = document.querySelector<HTMLElement>("[data-r3-perf-fixture]");
-    const checkbox = document.querySelector<HTMLInputElement>(
-      '[data-perf-plot="filter"] .gg-legend-filters input[type="checkbox"]',
-    );
-    if (!fixtureElement || !checkbox)
-      throw new Error("R3 legend-filter performance fixture is incomplete");
+  expect(budgets.r3LegendFilterWarmupOperations).toBeGreaterThanOrEqual(1);
+  expect(budgets.r3LegendFilterOperations).toBeGreaterThanOrEqual(20);
+  const filterTimings = await page.evaluate(
+    async (config: { warmupOperations: number; operations: number }) => {
+      const fixtureElement = document.querySelector<HTMLElement>("[data-r3-perf-fixture]");
+      const checkbox = document.querySelector<HTMLInputElement>(
+        '[data-perf-plot="filter"] .gg-legend-filters input[type="checkbox"]',
+      );
+      if (!fixtureElement || !checkbox)
+        throw new Error("R3 legend-filter performance fixture is incomplete");
 
-    const commit = async (): Promise<number> => {
-      const before = Number(fixtureElement.dataset["filterPipelineCommits"]);
-      const expected = String(before + 1);
-      const completed = new Promise<void>((resolve) => {
-        const observer = new MutationObserver(() => {
-          if (fixtureElement.dataset["filterPipelineCommits"] !== expected) return;
-          observer.disconnect();
-          resolve();
+      const commit = async (): Promise<number> => {
+        const before = Number(fixtureElement.dataset["filterPipelineCommits"]);
+        const expected = String(before + 1);
+        const completed = new Promise<void>((resolve) => {
+          const observer = new MutationObserver(() => {
+            if (fixtureElement.dataset["filterPipelineCommits"] !== expected) return;
+            observer.disconnect();
+            resolve();
+          });
+          observer.observe(fixtureElement, {
+            attributes: true,
+            attributeFilter: ["data-filter-pipeline-commits"],
+          });
         });
-        observer.observe(fixtureElement, {
-          attributes: true,
-          attributeFilter: ["data-filter-pipeline-commits"],
+        const started = performance.now();
+        checkbox.click();
+        await completed;
+        await new Promise<void>((resolve) => {
+          requestAnimationFrame(() => {
+            resolve();
+          });
         });
-      });
-      const started = performance.now();
-      checkbox.click();
-      await completed;
-      await new Promise<void>((resolve) => {
-        requestAnimationFrame(() => {
-          resolve();
-        });
-      });
-      const after = Number(fixtureElement.dataset["filterPipelineCommits"]);
-      if (after !== before + 1)
-        throw new Error(`Legend filter produced ${String(after - before)} pipeline commits`);
-      return performance.now() - started;
-    };
+        const after = Number(fixtureElement.dataset["filterPipelineCommits"]);
+        if (after !== before + 1)
+          throw new Error(`Legend filter produced ${String(after - before)} pipeline commits`);
+        return performance.now() - started;
+      };
 
-    const timings: number[] = [];
-    for (let index = 0; index < operations; index++) timings.push(await commit());
-    return timings.toSorted((a, b) => a - b);
-  }, budgets.r3LegendFilterOperations);
+      for (let index = 0; index < config.warmupOperations; index++) await commit();
+      const timings: number[] = [];
+      for (let index = 0; index < config.operations; index++) timings.push(await commit());
+      return timings.toSorted((a, b) => a - b);
+    },
+    {
+      warmupOperations: budgets.r3LegendFilterWarmupOperations,
+      operations: budgets.r3LegendFilterOperations,
+    },
+  );
   const filterP95 = filterTimings[Math.floor(filterTimings.length * 0.95)]!;
   expect(filterP95).toBeLessThan(budgets.r3LegendFilterCommitP95Ms);
   await expect(fixture).toHaveAttribute(
     "data-filter-pipeline-commits",
-    String(1 + budgets.r3LegendFilterOperations),
+    String(1 + budgets.r3LegendFilterWarmupOperations + budgets.r3LegendFilterOperations),
   );
 
   const facetPlot = page.locator('[data-perf-plot="facet"]');
