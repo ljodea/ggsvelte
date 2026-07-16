@@ -249,6 +249,17 @@ describe("resolveInteractionScope", () => {
     expect(Object.isFrozen(scope)).toBe(true);
   });
 
+  it("preserves an explicit controlled interval namespace", () => {
+    expect(
+      resolveInteractionScope({
+        interaction: {},
+        interactionScope: { keys: "id", intervals: "facet-intervals" },
+        zoom: false,
+        assembled,
+      }),
+    ).toEqual({ keys: "id", intervals: "facet-intervals" });
+  });
+
   it("accepts empty-string x/y scopes as defined (does not throw)", () => {
     const scope = resolveInteractionScope({
       interaction: {},

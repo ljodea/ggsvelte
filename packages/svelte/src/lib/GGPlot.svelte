@@ -147,6 +147,11 @@
     buildIntervalSelectionFromScene,
     type IntervalQueryScene,
   } from "./plot-interval-query.js";
+  import {
+    consumeIntervalKeys,
+    recomputePanelIntervalKeys,
+    type IntervalConsumptionCandidate,
+  } from "./plot-interval-consumption.js";
   import { createPaintLedger, isPlotReady } from "./plot-paint.js";
   import BoundsEditor from "./BoundsEditor.svelte";
   import type {
@@ -157,6 +162,7 @@
     boundsEditorInputForScale,
     semanticAxisFromBounds,
   } from "./plot-precise-bounds.js";
+  import { nextLocalIntervalRecords } from "./plot-interval-consumption.js";
   import {
     anchorsFromCandidateKeys,
     buildPointSelectionEvent,
@@ -452,6 +458,32 @@
         },
   );
   let localLegendFilters = $state<LegendFilterClause[]>([]);
+  const activeLegendFilterBindings = $derived.by(() => {
+    const bindings = new Set<string>();
+    if (effectiveSpec === null) return bindings;
+    for (const layer of effectiveSpec.layers) {
+      for (const scale of ["color", "fill"] as const) {
+        const channel = layer.aes?.[scale] ?? effectiveSpec.aes?.[scale];
+        if (channel != null && "field" in channel)
+          bindings.add(`${scale}:${channel.field}`);
+      }
+    }
+    return bindings;
+  });
+  const effectiveLegendFilters = $derived(
+    legendFilterOptions === null
+      ? []
+      : localLegendFilters.filter((clause) =>
+          activeLegendFilterBindings.has(`${clause.scale}:${clause.field}`),
+        ),
+  );
+
+  // A disabled capability or a remapped spec must never leave an invisible
+  // filter active. Reconcile chart-local state to the current semantic fields.
+  $effect(() => {
+    if (effectiveLegendFilters.length === localLegendFilters.length) return;
+    localLegendFilters = [...effectiveLegendFilters];
+  });
 
   const model: RenderModel | null = $derived.by(() => {
     void scaleEpoch;
@@ -463,8 +495,8 @@
       ...(effectiveZoomDomains !== null && {
         baselineScales: assembled?.scales ?? {},
       }),
-      ...(localLegendFilters.length > 0 && {
-        rowFilters: localLegendFilters,
+      ...(effectiveLegendFilters.length > 0 && {
+        rowFilters: effectiveLegendFilters,
       }),
     });
     if (m.runId > scaleBox.runId) {
@@ -714,18 +746,28 @@
       localCommittedIntervals
     );
   });
+  function intervalConsumptionCandidates(): IntervalConsumptionCandidate<PublicKey>[] {
+    if (model === null) return [];
+    const candidates: IntervalConsumptionCandidate<PublicKey>[] = [];
+    for (let id = 0; id < model.candidates.size; id++) {
+      const candidate = model.candidates.candidate(id);
+      if (candidate === null) continue;
+      candidates.push({
+        panelId: candidate.panelId,
+        xValue: candidate.xValue,
+        yValue: candidate.yValue,
+        keys: candidateSemanticKeys(candidate) as PublicKey[],
+      });
+    }
+    return candidates;
+  }
   const effectiveIntervalKeys: readonly PropertyKey[] = $derived.by(() => {
-    const records = effectiveIntervals;
-    if (records.length === 0) return [];
-    const visiblePanels = new Set(
-      model?.scene.panels.map((panel) => panel.id) ?? [],
-    );
-    const preset = records[0]?.preset ?? "independent";
-    const consumed =
-      preset === "independent"
-        ? records.filter((record) => visiblePanels.has(record.panelId))
-        : records;
-    return [...new Set(consumed.flatMap((record) => [...record.keys]))];
+    if (model === null) return [];
+    return consumeIntervalKeys({
+      records: effectiveIntervals,
+      panels: model.scene.panels,
+      candidates: intervalConsumptionCandidates(),
+    });
   });
   const currentIntervalRecord = $derived.by(() => {
     const panelId = committedInterval?.panelId;
@@ -993,13 +1035,9 @@
       keys: Object.freeze([...event.keys]) as readonly PublicKey[],
     });
     if (interaction === undefined) {
-      const rest =
-        record.preset === "cross-panel"
-          ? []
-          : localCommittedIntervals.filter(
-              (interval) => interval.panelId !== panelId,
-            );
-      localCommittedIntervals = [...rest, record];
+      localCommittedIntervals = [
+        ...nextLocalIntervalRecords(localCommittedIntervals, record),
+      ];
     } else {
       interaction.setInterval(record, {
         scope: resolvedInteractionScope,
@@ -1371,7 +1409,10 @@
           .map((mapped) => mapped.field),
       );
       const field = fields.values().next().value as string | undefined;
-      if (field === undefined) return [];
+      // One combined scale fed by unlike fields has no honest one-toggle
+      // filtering semantics. Keep the static legend rather than filtering
+      // only whichever field happened to be encountered first.
+      if (field === undefined || fields.size !== 1) return [];
       const current = localLegendFilters.find(
         (clause) =>
           clause.scale === sceneLegend.scale && clause.field === field,
@@ -1450,6 +1491,9 @@
 
   function resetLegendFilters(event: MouseEvent): void {
     if (localLegendFilters.length === 0) return;
+    const returnTarget = root?.querySelector<HTMLElement>(
+      ".gg-legend-filters input",
+    );
     const source = legendFilterSource(event);
     localLegendFilters = [];
     legendFilterPointerType = null;
@@ -1462,6 +1506,7 @@
       }),
     );
     announceInteraction("Legend filters reset.");
+    queueMicrotask(() => returnTarget?.focus());
   }
 
   $effect.pre(() => {
@@ -2020,7 +2065,13 @@
         break;
       case "begin-area": {
         const p = plotPoint(event);
-        const originPanel = panelAtPoint(p);
+        const area = reducer.state.area;
+        const originPanel = action.extendExisting
+          ? area.kind === "idle"
+            ? null
+            : (model?.scene.panels.find((panel) => panel.id === area.panelId) ??
+              null)
+          : panelAtPoint(p);
         if (originPanel === null) break;
         brushRect =
           action.extendExisting && brushRect !== null
@@ -2208,11 +2259,17 @@
     const prior = currentIntervalRecord;
     if (prior === null) return;
     const axis = semanticAxisFromBounds(event.scale, event.bounds);
+    const domains = Object.freeze({ ...prior.domains, [event.axis]: axis });
+    const keys = recomputePanelIntervalKeys({
+      panelId: prior.panelId,
+      domains,
+      candidates: intervalConsumptionCandidates(),
+    }) as readonly PublicKey[];
     const next: PlotInteractionInterval<PublicKey> = Object.freeze({
       panelId: prior.panelId,
       preset: prior.preset,
-      domains: Object.freeze({ ...prior.domains, [event.axis]: axis }),
-      keys: prior.keys as readonly PublicKey[],
+      domains,
+      keys,
     });
     if (interaction === undefined) {
       localCommittedIntervals = localCommittedIntervals.map((record) =>
@@ -2232,6 +2289,8 @@
       committedInterval = Object.freeze({
         ...committedInterval,
         source: "keyboard",
+        keys,
+        lineageCount: keys.length,
         domain: Object.freeze({
           ...committedInterval.domain,
           [event.axis]: Object.freeze([...rawBounds]),

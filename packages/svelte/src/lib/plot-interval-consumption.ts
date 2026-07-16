@@ -77,7 +77,19 @@ export function consumeIntervalKeys<Key extends PropertyKey>(
   if (preset === undefined) return Object.freeze([]);
   const visiblePanels = new Set(input.panels.map((panel) => panel.id));
 
-  if (preset !== "cross-panel") {
+  if (preset === "independent") {
+    return uniqueKeys(
+      input.records
+        .filter((record) => record.preset === "independent" && visiblePanels.has(record.panelId))
+        .flatMap((record) =>
+          input.candidates
+            .filter((candidate) => candidate.panelId === record.panelId)
+            .map((candidate) => candidate.keys.filter((key) => record.keys.includes(key))),
+        ),
+    );
+  }
+
+  if (preset === "union") {
     return uniqueKeys(
       input.records
         .filter((record) => record.preset === preset && visiblePanels.has(record.panelId))
@@ -95,6 +107,22 @@ export function consumeIntervalKeys<Key extends PropertyKey>(
       )
       .map((candidate) => candidate.keys),
   );
+}
+
+/** Apply a chart-local interval commit with the controller's atomic preset
+ * switch semantics. A new preset starts a new record set; otherwise only the
+ * matching origin panel is replaced (cross-panel always has one origin). */
+export function nextLocalIntervalRecords<Key extends PropertyKey>(
+  current: readonly PlotInteractionInterval<Key>[],
+  next: PlotInteractionInterval<Key>,
+): readonly PlotInteractionInterval<Key>[] {
+  const priorPreset = current[0]?.preset;
+  const reset = priorPreset !== undefined && priorPreset !== next.preset;
+  const rest =
+    reset || next.preset === "cross-panel"
+      ? []
+      : current.filter((record) => record.panelId !== next.panelId);
+  return Object.freeze([...rest, next]);
 }
 
 /** Recompute one panel's committed keys after an exact bounds edit. */

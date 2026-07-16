@@ -7,8 +7,10 @@
 import { describe, expect, it, vi } from "vitest";
 
 import type { RenderModel } from "@ggsvelte/core";
+import { encodeKey } from "@ggsvelte/core";
 
 import GGPlot from "../src/lib/GGPlot.svelte";
+import { createPlotInteraction } from "../src/lib/interaction-controller.svelte.js";
 import { render } from "./helpers/render.js";
 
 const rows = [
@@ -76,6 +78,49 @@ describe("facets + flip through the component", () => {
       expect(Number(rect.getAttribute("x"))).toBeCloseTo(0, 3);
       expect(w).toBeGreaterThan(h); // horizontal bars
     }
+  });
+
+  it("projects controller cross-panel domains and preserves typed band identity", async () => {
+    let model: RenderModel | null = null;
+    const interaction = createPlotInteraction<string>();
+    const interactionScope = {
+      keys: "typed-category-id",
+      intervals: "typed-category-facets",
+    } as const;
+    const { container } = render(GGPlot, {
+      data: [
+        { id: "number-north", facet: "north", category: 1, y: 1 },
+        { id: "string-north", facet: "north", category: "1", y: 2 },
+        { id: "number-south", facet: "south", category: 1, y: 3 },
+        { id: "string-south", facet: "south", category: "1", y: 4 },
+      ],
+      aes: { x: "category", y: "y" },
+      layers: [{ geom: "point" }],
+      facet: { wrap: "facet" },
+      key: "id",
+      select: { type: "interval", preset: "cross-panel" },
+      interaction,
+      interactionScope,
+      onrender: (next: RenderModel) => {
+        model = next;
+      },
+      ...size,
+    });
+    await until(() => model !== null);
+    const origin = model!.scene.panels[0]!.id;
+
+    interaction.setInterval(
+      {
+        panelId: origin,
+        preset: "cross-panel",
+        domains: { x: { kind: "band", values: [encodeKey(1)] } },
+        keys: ["stale-origin-key"],
+      },
+      { scope: interactionScope },
+    );
+    await until(() => container.querySelectorAll(".gg-selected-ring").length === 2);
+
+    expect(container.querySelectorAll(".gg-selected-ring")).toHaveLength(2);
   });
 });
 
@@ -492,17 +537,75 @@ describe("brush + brush-to-zoom", () => {
     ].find((button) => button.textContent === "Edit x selection bounds")!;
     editBounds.click();
     await until(() => container.querySelector('.gg-bounds-editor input[id$="-lower"]') !== null);
-    const lower = container.querySelector<HTMLInputElement>(
-      '.gg-bounds-editor input[id$="-lower"]',
+    const upper = container.querySelector<HTMLInputElement>(
+      '.gg-bounds-editor input[id$="-upper"]',
     )!;
-    lower.value = "1.1";
-    lower.dispatchEvent(new InputEvent("input", { bubbles: true }));
+    upper.value = "1.5";
+    upper.dispatchEvent(new InputEvent("input", { bubbles: true }));
     await Promise.resolve();
     expect(renderCount).toBe(rendersAfterBrush);
     container.querySelector<HTMLButtonElement>('.gg-bounds-editor button[type="submit"]')!.click();
     await until(() => selections.length === 2);
+    expect(selections[1]).toEqual([1]);
     expect(renderCount).toBe(rendersAfterBrush);
     expect(document.activeElement).toBe(editBounds);
+  });
+
+  it("keeps the first facet as origin during two-corner pointer selection", async () => {
+    let model: RenderModel | null = null;
+    let endedPanelId: string | null | undefined;
+    const { container } = render(GGPlot, {
+      data: [
+        { id: "north-1", region: "north", x: 1, y: 1 },
+        { id: "south-1", region: "south", x: 2, y: 2 },
+      ],
+      aes: { x: "x", y: "y" },
+      facet: { wrap: "region" },
+      layers: [{ geom: "point" }],
+      key: "id",
+      select: "interval",
+      onselect: (event: { phase: string; panelId?: string | null }) => {
+        if (event.phase === "end") endedPanelId = event.panelId;
+      },
+      onrender: (next: RenderModel) => {
+        model = next;
+      },
+      ...size,
+    });
+    const panels = model!.scene.panels;
+    expect(panels).toHaveLength(2);
+    const first = panels[0]!;
+    const second = panels[1]!;
+    const capture = container.querySelector(".gg-capture")!;
+    const selectArea = [
+      ...container.querySelectorAll<HTMLButtonElement>(".gg-tool-rail button"),
+    ].find((button) => button.textContent === "Select area")!;
+    selectArea.click();
+    await until(() => selectArea.getAttribute("aria-pressed") === "true");
+
+    const bounds = capture.getBoundingClientRect();
+    const pointer = (type: "pointerdown" | "pointerup", x: number, y: number) =>
+      capture.dispatchEvent(
+        new PointerEvent(type, {
+          clientX: bounds.left + (x / size.width) * bounds.width,
+          clientY: bounds.top + (y / size.height) * bounds.height,
+          bubbles: true,
+          button: 0,
+          pointerId: 7,
+        }),
+      );
+    const firstCorner = { x: first.x + first.width / 2, y: first.y + first.height / 2 };
+    const secondCorner = {
+      x: second.x + second.width / 2,
+      y: second.y + second.height / 2,
+    };
+    pointer("pointerdown", firstCorner.x, firstCorner.y);
+    pointer("pointerup", firstCorner.x, firstCorner.y);
+    pointer("pointerdown", secondCorner.x, secondCorner.y);
+    pointer("pointerup", secondCorner.x, secondCorner.y);
+
+    await until(() => endedPanelId !== undefined);
+    expect(endedPanelId).toBe(first.id);
   });
 
   it("brush-to-zoom respecs explicit domains; colors NEVER shift; double-click resets", async () => {

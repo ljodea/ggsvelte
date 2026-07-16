@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   consumeIntervalKeys,
+  nextLocalIntervalRecords,
   recomputePanelIntervalKeys,
   type IntervalConsumptionCandidate,
 } from "../src/lib/plot-interval-consumption.js";
@@ -41,6 +42,33 @@ describe("facet interval consumption", () => {
         candidates,
       }),
     ).toEqual(["n1", "n4"]);
+  });
+
+  it("does not let an independent key follow a row into another panel", () => {
+    expect(
+      consumeIntervalKeys({
+        records: [record("north", "independent", ["moved"])],
+        panels,
+        candidates: [{ panelId: "south", xValue: 2, keys: ["moved"] }],
+      }),
+    ).toEqual([]);
+    expect(
+      consumeIntervalKeys({
+        records: [record("north", "union", ["moved"])],
+        panels,
+        candidates: [{ panelId: "south", xValue: 2, keys: ["moved"] }],
+      }),
+    ).toEqual(["moved"]);
+  });
+
+  it("atomically replaces chart-local records when the preset changes", () => {
+    const independent = [
+      record("north", "independent", ["n1"]),
+      record("south", "independent", ["s2"]),
+    ];
+    expect(nextLocalIntervalRecords(independent, record("south", "union", ["s8"]))).toEqual([
+      record("south", "union", ["s8"]),
+    ]);
   });
 
   it("unions stored keys for visible panels and de-duplicates stable keys", () => {

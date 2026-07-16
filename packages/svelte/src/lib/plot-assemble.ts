@@ -141,6 +141,9 @@ export function resolveInteractionScope(input: ResolveInteractionScopeInput): Pl
       ...(input.interactionScope.y !== undefined && {
         y: input.interactionScope.y,
       }),
+      ...(input.interactionScope.intervals !== undefined && {
+        intervals: input.interactionScope.intervals,
+      }),
     });
   }
   return Object.freeze({
