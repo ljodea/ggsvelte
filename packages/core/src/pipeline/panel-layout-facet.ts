@@ -1,13 +1,12 @@
 /**
  * Facet-grid panel placement: shared margin pass, free-scale edge axes, strips.
  */
-import type { LayoutTheme, PassResult, TickFormatter } from "../layout/layout.js";
-import { layoutPass } from "../layout/layout.js";
+import type { LayoutTheme, TickFormatter } from "../layout/layout.js";
 import type { TextMeasurer } from "../layout/measure.js";
 
 import type { FacetPanelDef } from "./facets.js";
-import { layoutDomain } from "./layout-helpers.js";
 import { computeFacetGridGeometry } from "./panel-layout-facet-margins.js";
+import { placeOneFacetPanel } from "./panel-layout-facet-place-one.js";
 import type { DisplayScalesFn, PanelPlacement } from "./panel-layout-types.js";
 
 export function placeFacetPanels(input: {
@@ -50,29 +49,27 @@ export function placeFacetPanels(input: {
   for (let p = 0; p < facetPanels.length; p++) {
     const def = facetPanels[p]!;
     const { h, v } = displayScales(p);
-    const ticksRun: PassResult = layoutPass(
-      mMax,
-      {
-        width: panelW + mMax.left + mMax.right,
-        height: panelH + mMax.top + mMax.bottom,
-        x: layoutDomain(h, hBreaks),
-        y: layoutDomain(v, vBreaks),
-        ...(formatH !== undefined && { formatX: formatH }),
-        ...(formatV !== undefined && { formatY: formatV }),
+    placements.push(
+      placeOneFacetPanel({
+        def,
+        h,
+        v,
+        mMax,
+        panelW,
+        panelH,
+        colX: colX[def.col]!,
+        rowY: rowY[def.row]!,
+        freeH,
+        freeV,
+        bottomMostRow: bottomMostRow[def.col]!,
+        hBreaks,
+        vBreaks,
+        formatH,
+        formatV,
         measurer,
-      },
-      layoutTheme,
+        layoutTheme,
+      }),
     );
-    placements.push({
-      x: colX[def.col]!,
-      y: rowY[def.row]!,
-      width: panelW,
-      height: panelH,
-      ticksH: ticksRun.x.ticks,
-      ticksV: ticksRun.y.ticks,
-      showAxisX: freeH || def.row === bottomMostRow[def.col]!,
-      showAxisY: freeV || def.col === 0,
-    });
   }
   return placements;
 }

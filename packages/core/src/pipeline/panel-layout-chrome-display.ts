@@ -3,7 +3,6 @@
  */
 import type { PortableSpec } from "@ggsvelte/spec";
 
-import type { TickFormatter } from "../layout/layout.js";
 import type { PositionScale } from "../scales/train.js";
 
 import { makeAxisFormatter } from "./layout-helpers.js";
@@ -14,21 +13,10 @@ import {
   flipDisplayTitles,
   makeDisplayScalesFn,
 } from "./panel-layout-chrome-display-flip.js";
+import type { PanelLayoutDisplay } from "./panel-layout-chrome-display-types.js";
 import type { PipelineWarning } from "./types.js";
 
-export interface PanelLayoutDisplay {
-  hTitle: string;
-  vTitle: string;
-  formatX: TickFormatter | undefined;
-  formatY: TickFormatter | undefined;
-  formatH: TickFormatter | undefined;
-  formatV: TickFormatter | undefined;
-  hBreaks: readonly (number | string)[] | undefined;
-  vBreaks: readonly (number | string)[] | undefined;
-  freeH: boolean;
-  freeV: boolean;
-  displayScales: (p: number) => { h: PositionScale; v: PositionScale };
-}
+export type { PanelLayoutDisplay } from "./panel-layout-chrome-display-types.js";
 
 export function resolvePanelLayoutDisplay(input: {
   flip: boolean;

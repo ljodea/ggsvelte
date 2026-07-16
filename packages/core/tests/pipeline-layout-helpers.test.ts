@@ -157,3 +157,16 @@ describe("axisTicks", () => {
     ]);
   });
 });
+
+describe("singlePanelMarginReserve", () => {
+  it("reserves bottom/left for titles and right for legends", async () => {
+    const { singlePanelMarginReserve } =
+      await import("../src/pipeline/panel-layout-single-reserve.ts");
+    expect(singlePanelMarginReserve("", "", 18, 0)).toEqual({});
+    expect(singlePanelMarginReserve("x", "y", 18, 40)).toEqual({
+      bottom: 18,
+      left: 18,
+      right: 40 + LEGEND_GAP + LEGEND_EDGE_PAD,
+    });
+  });
+});

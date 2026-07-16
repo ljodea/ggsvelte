@@ -7,6 +7,7 @@ import type { ColumnTable } from "../table.js";
 
 import { checkField } from "./bind-layer-helpers.js";
 import { resolveLabelWeightColorFill } from "./bind-layer-extras.js";
+import { makeLayerBinding } from "./bind-layer-result.js";
 import {
   assertRequiredChannels,
   resolveRuleForm,
@@ -50,7 +51,7 @@ export function bindLayer(
 
   const extras = resolveLabelWeightColorFill({ aes, geom, stat, index, table, warnings });
 
-  return {
+  return makeLayerBinding({
     layer,
     index,
     xField,
@@ -64,5 +65,5 @@ export function bindLayer(
     labelConstant: extras.labelConstant,
     weightField: extras.weightField,
     ruleForm,
-  };
+  });
 }
