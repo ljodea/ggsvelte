@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784209724102,
+  "lastUpdate": 1784210058361,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -12935,6 +12935,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 159.8937,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "acdad80ff126acc8090204f1e95cefe175c6a0d8",
+          "message": "refactor(svelte): expand pointerup actions with state and source (#117)\n\nCarry inspection state on touch-inspect-tap and interaction source on\nfinish-brush so GGPlot no longer re-derives those from pinEnabled/pointerType.",
+          "timestamp": "2026-07-16T08:53:38-05:00",
+          "tree_id": "5512483b8eb37928a78f16a097c79d5bdcea1923",
+          "url": "https://github.com/ljodea/ggsvelte/commit/acdad80ff126acc8090204f1e95cefe175c6a0d8"
+        },
+        "date": 1784210057894,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.7856,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.1432,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 10.0703,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 13.6551,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 87.0566,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 125.9688,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.2033,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.4474,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 94.9577,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 111.1079,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 14.4322,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 13.7918,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 119.7247,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7461,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 27.7276,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.5772,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 28.5288,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 628.3738,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 163.3885,
             "unit": "ms"
           }
         ]
