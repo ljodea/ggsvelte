@@ -607,3 +607,48 @@ describe("packFacetPanelPlacement", () => {
     expect(placement.x).toBe(20);
   });
 });
+
+describe("writeSmoothLineGeometry", () => {
+  it("writes one path offset per group and maps y into panel px", async () => {
+    const { writeSmoothLineGeometry } =
+      await import("../src/pipeline/geometry-smooth-line-write.ts");
+    const frame = {
+      binding: { color: { constant: "#abc", scaledConstant: null } },
+      xNumeric: new Float64Array([0, 1]),
+      yNumeric: new Float64Array([0, 1]),
+      xValues: null,
+      colorValues: null,
+      rowIndex: new Uint32Array([10, 11]),
+    } as never;
+    const fx = {
+      xScale: { type: "linear", normalize: (v: number) => v },
+      yScale: { type: "linear", normalize: (v: number) => v },
+      innerWidth: 100,
+      innerHeight: 50,
+    } as never;
+    const geom = writeSmoothLineGeometry({
+      frame,
+      fx,
+      color: null,
+      groupRows: [[0, 1]],
+    });
+    expect([...geom.pathOffsets]).toEqual([0, 2]);
+    expect([...geom.rowIndex]).toEqual([10, 11]);
+    expect(geom.positions[0]).toBe(0);
+    expect(geom.positions[1]).toBe(50);
+    expect(geom.positions[2]).toBe(100);
+    expect(geom.positions[3]).toBe(0);
+    expect(geom.strokes).toEqual(["#abc"]);
+  });
+});
+
+describe("areaGroupFillOf", () => {
+  it("uses the constant fill when no scaled fill is mapped", async () => {
+    const { areaGroupFillOf } = await import("../src/pipeline/geometry-paths-area-fill.ts");
+    const frame = {
+      binding: { fill: { constant: "#cde", scaledConstant: null } },
+      fillValues: null,
+    } as never;
+    expect(areaGroupFillOf(frame, null, [0])).toBe("#cde");
+  });
+});

@@ -10,6 +10,8 @@ import { continuousDomainOf } from "./scale-axis-domain.js";
 import type { AxisInputs, AxisTraining } from "./scale-axis-types.js";
 import type { Advisory, PipelineWarning } from "./types.js";
 import { PipelineError } from "./types.js";
+import { maybeForceZeroForBars } from "./scale-axis-train-continuous-zero.js";
+import { pushContinuousTrainingWarnings } from "./scale-axis-train-continuous-warn.js";
 
 export function trainContinuousAxis(
   axis: "x" | "y",
@@ -19,16 +21,7 @@ export function trainContinuousAxis(
   advisories: Advisory[],
   warnings: PipelineWarning[],
 ): AxisTraining {
-  let zero = config?.zero;
-  if (inputs.barMeasure && type !== "time" && zero === undefined && config?.domain === undefined) {
-    zero = true;
-    advisories.push({
-      code: "zero-forced",
-      path: `scales.${axis}`,
-      chosen: "domain extended to include 0 (bars/areas measure from a zero baseline)",
-      howToOverride: `Set scales.${axis}.zero to false, or pin scales.${axis}.domain.`,
-    });
-  }
+  const zero = maybeForceZeroForBars(axis, inputs, config, type, advisories);
 
   const domain = continuousDomainOf(config, axis);
   const continuousConfig: ContinuousConfig = {
@@ -47,17 +40,6 @@ export function trainContinuousAxis(
     }
     throw error;
   }
-  if (training.empty) {
-    warnings.push({
-      code: "empty-domain",
-      message: `The ${axis} scale has no finite${type === "log" ? " positive" : ""} values; using a default domain.`,
-    });
-  }
-  if (training.nonPositive > 0) {
-    warnings.push({
-      code: "log-nonpositive",
-      message: `Removed ${training.nonPositive} non-positive value(s) from the ${axis} log scale (log10 is undefined at or below zero).`,
-    });
-  }
+  pushContinuousTrainingWarnings(axis, type, training, warnings);
   return { scale: training.scale, advisories, warnings };
 }

@@ -281,3 +281,47 @@ describe("resolveOutlierContext", () => {
     ).toEqual({ outlierLocalRow: null, outlierSourceRow: null });
   });
 });
+
+describe("lineage represented-row filters", () => {
+  it("keeps rows whose band key matches the aggregate x output", async () => {
+    const { filterAggregateXRows } =
+      await import("../src/pipeline/build-candidates-lineage-filters.ts");
+    const { ColumnTable } = await import("../src/table.ts");
+    const table = ColumnTable.fromRows([
+      { g: "a", y: 1 },
+      { g: "b", y: 2 },
+      { g: "a", y: 3 },
+    ]);
+    expect(
+      filterAggregateXRows({
+        table,
+        field: "g",
+        outputX: "a",
+        baseRows: [0, 1, 2],
+      }),
+    ).toEqual([0, 2]);
+  });
+
+  it("filters bin membership with closed=right half-open intervals", async () => {
+    const { filterBinRepresentedRows } =
+      await import("../src/pipeline/build-candidates-lineage-filters.ts");
+    const { ColumnTable } = await import("../src/table.ts");
+    const table = ColumnTable.fromRows([{ x: 0.5 }, { x: 1.5 }, { x: 2.5 }, { x: 3.5 }]);
+    const frame = {
+      xmin: new Float64Array([0, 2]),
+      xmax: new Float64Array([2, 4]),
+      groups: new Uint32Array([0, 0]),
+      n: 2,
+      binding: { layer: { params: { closed: "right" } } },
+    } as never;
+    expect(
+      filterBinRepresentedRows({
+        frame,
+        table,
+        frameRow: 0,
+        field: "x",
+        baseRows: [0, 1, 2, 3],
+      }),
+    ).toEqual([0, 1]);
+  });
+});

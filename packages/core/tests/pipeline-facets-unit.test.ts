@@ -7,6 +7,7 @@ import { describe, expect, it } from "bun:test";
 
 import { PipelineError } from "../src/pipeline.ts";
 import { resolveFacet, SINGLE_PANEL } from "../src/pipeline/facets.ts";
+import { assertFacetForm, facetFreeFlags } from "../src/pipeline/facets-form.ts";
 import { ColumnTable } from "../src/table.ts";
 
 const table = ColumnTable.fromRows([
@@ -123,6 +124,25 @@ describe("resolveFacet — grid", () => {
     } catch (e) {
       expect(e).toBeInstanceOf(PipelineError);
       expect((e as PipelineError).code).toBe("facet-form-missing");
+    }
+  });
+});
+
+describe("facetFreeFlags / assertFacetForm", () => {
+  it("derives free_x and free_y from scales modes", () => {
+    expect(facetFreeFlags()).toEqual({ freeX: false, freeY: false });
+    expect(facetFreeFlags("free")).toEqual({ freeX: true, freeY: true });
+    expect(facetFreeFlags("free_x")).toEqual({ freeX: true, freeY: false });
+    expect(facetFreeFlags("free_y")).toEqual({ freeX: false, freeY: true });
+  });
+
+  it("throws facet-form-ambiguous when wrap mixes with grid fields", () => {
+    try {
+      assertFacetForm({ wrapField: "g", rowsField: "r", colsField: null });
+      expect.unreachable("should throw");
+    } catch (e) {
+      expect(e).toBeInstanceOf(PipelineError);
+      expect((e as PipelineError).code).toBe("facet-form-ambiguous");
     }
   });
 });

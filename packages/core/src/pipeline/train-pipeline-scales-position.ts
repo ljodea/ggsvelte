@@ -8,6 +8,7 @@ import type { PositionScale } from "../scales/train.js";
 import type { FacetPanelDef } from "./facets.js";
 import { collectAxisInputs, trainAxis } from "./scale-training.js";
 import type { Advisory, LayerFrame, PipelineWarning } from "./types.js";
+import { trainFreePanelScales } from "./train-pipeline-scales-position-free.js";
 
 export interface TrainedPositionScales {
   xTraining: ReturnType<typeof trainAxis>;
@@ -37,23 +38,15 @@ export function trainPipelinePositionScales(input: {
   advisories.push(...xTraining.advisories, ...yTraining.advisories);
   warnings.push(...xTraining.warnings, ...yTraining.warnings);
 
-  const panelScales: { x: PositionScale; y: PositionScale }[] = facetPanels.map((_, p) => {
-    let px = xTraining.scale;
-    let py = yTraining.scale;
-    const scratch: Advisory[] = [];
-    if (freeX) {
-      const inputs = collectAxisInputs("x", panelFrames[p]!, scalesConfig.x?.type, scratch);
-      const training = trainAxis("x", inputs, { ...scalesConfig.x, type: xTraining.scale.type });
-      warnings.push(...training.warnings);
-      px = training.scale;
-    }
-    if (freeY) {
-      const inputs = collectAxisInputs("y", panelFrames[p]!, scalesConfig.y?.type, scratch);
-      const training = trainAxis("y", inputs, { ...scalesConfig.y, type: yTraining.scale.type });
-      warnings.push(...training.warnings);
-      py = training.scale;
-    }
-    return { x: px, y: py };
+  const panelScales = trainFreePanelScales({
+    scalesConfig,
+    panelFrames,
+    panelCount: facetPanels.length,
+    freeX,
+    freeY,
+    fixedX: xTraining.scale,
+    fixedY: yTraining.scale,
+    warnings,
   });
 
   return { xTraining, yTraining, panelScales, xInputs, yInputs, allFrames };
