@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784213915811,
+  "lastUpdate": 1784214332762,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -14363,6 +14363,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 161.4384,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "779704cccb7b0fb7836b8b69d9d83734584f32c9",
+          "message": "refactor(svelte): extract isContainerWidthProp for layout chrome (#130)\n\n* refactor(svelte): extract isContainerWidthProp for layout chrome\n\nCentralize container vs fixed width prop classification used by resolvePlotSize,\npaint readiness, root class, ResizeObserver install, and root inline style.\n\n* test(svelte): avoid undefined literal in isContainerWidthProp coverage",
+          "timestamp": "2026-07-16T10:04:55-05:00",
+          "tree_id": "702a6f7fe3f16ad2bd6629d735f4564ad4b7e2c1",
+          "url": "https://github.com/ljodea/ggsvelte/commit/779704cccb7b0fb7836b8b69d9d83734584f32c9"
+        },
+        "date": 1784214332293,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.5515,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.1489,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 13.4662,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 16.0053,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 80.8769,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 116.691,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 0.9624,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.191,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 84.3989,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 107.8172,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 11.9067,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.1771,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 116.9645,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.8205,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 28.1479,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.3902,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 27.8269,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 615.6481,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 167.8274,
             "unit": "ms"
           }
         ]
