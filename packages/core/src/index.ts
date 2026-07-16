@@ -19,6 +19,15 @@ export {
 } from "./table.js";
 export type { CellValue, Columns, Discreteness, FieldType, Rows } from "./table.js";
 
+// Runtime data-changing filters (interactive legends and linked views)
+export { compileRuntimeRowFilter, runtimeFilterValueEqual } from "./runtime-filter.js";
+export type {
+  RuntimeRow,
+  RuntimeRowFilter,
+  RuntimeRowFilterClause,
+  RuntimeRowFilterMode,
+} from "./runtime-filter.js";
+
 // Facet panel identity (typed and independent of display position)
 export { createFacetPanelIdentity } from "./facet-identity.js";
 export type {

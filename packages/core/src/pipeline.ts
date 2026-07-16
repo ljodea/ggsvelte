@@ -70,6 +70,8 @@ import type { SequentialColorScale } from "./scales/color.js";
 import { trainSequential, VIRIDIS_RAMP_10 } from "./scales/color.js";
 import type { ScaleState } from "./scales/state.js";
 import { encodeKey, PaletteExhaustedError } from "./scales/state.js";
+import { compileRuntimeRowFilter } from "./runtime-filter.js";
+import type { RuntimeRowFilterClause } from "./runtime-filter.js";
 import type { ColorScale, ContinuousConfig, PositionScale } from "./scales/train.js";
 import {
   bandKey,
@@ -266,6 +268,9 @@ export interface RunOptions {
     x?: PositionScaleSpec;
     y?: PositionScaleSpec;
   }>;
+  /** Data-changing runtime filters, applied before facets, stats, scales,
+   * layout, candidates, and rendering. Source-row identity is preserved. */
+  rowFilters?: readonly RuntimeRowFilterClause[];
 }
 
 /** Default `render: "auto"` mark-count threshold for the canvas backend. */
@@ -318,6 +323,25 @@ function bindData(spec: PortableSpec, options: RunOptions): ColumnTable {
     "/data/name",
     `Unknown dataset "${name}". Available: ${available.length > 0 ? available.join(", ") : "none"}.`,
   );
+}
+
+function rowRecord(table: ColumnTable, index: number): Record<string, CellValue> {
+  const row: Record<string, CellValue> = {};
+  for (const field of table.fields) row[field] = table.column(field)[index]!;
+  return row;
+}
+
+function applyRuntimeRowFilters(
+  table: ColumnTable,
+  clauses: readonly RuntimeRowFilterClause[] | undefined,
+): { table: ColumnTable; sourceRows: number[] | null } {
+  if (clauses === undefined || clauses.length === 0) return { table, sourceRows: null };
+  const accepts = compileRuntimeRowFilter(clauses);
+  const sourceRows: number[] = [];
+  for (let index = 0; index < table.rowCount; index++) {
+    if (accepts(rowRecord(table, index))) sourceRows.push(index);
+  }
+  return { table: table.subset(sourceRows), sourceRows };
 }
 
 // ---------------------------------------------------------------------------
@@ -1494,7 +1518,9 @@ interface ColorResolution {
 function resolveColorScale(
   name: "color" | "fill",
   frames: readonly LayerFrame[],
+  bindings: readonly LayerBinding[],
   table: ColumnTable,
+  catalogTable: ColumnTable,
   config: ColorScaleSpec | undefined,
   prevState: ScaleState | null,
   legendTitle: string,
@@ -1503,6 +1529,7 @@ function resolveColorScale(
   editionDefaults: EditionDefaults,
 ): ColorResolution {
   const values: CellValue[] = [];
+  const catalogValues: CellValue[] = [];
   let anyDiscreteField = false;
   let anyField = false;
   for (const frame of frames) {
@@ -1519,6 +1546,19 @@ function resolveColorScale(
       anyDiscreteField = true;
       anyField = true;
       values.push(channel.scaledConstant);
+    }
+  }
+  for (const binding of bindings) {
+    const channel = name === "color" ? binding.color : binding.fill;
+    if (channel.field !== null && catalogTable.has(channel.field)) {
+      anyField = true;
+      if (catalogTable.discreteness(channel.field) === "discrete") anyDiscreteField = true;
+      catalogValues.push(...catalogTable.column(channel.field));
+    }
+    if (channel.scaledConstant !== null) {
+      anyDiscreteField = true;
+      anyField = true;
+      catalogValues.push(channel.scaledConstant);
     }
   }
   if (!anyField) return { resolved: null, legendInput: null, state: null };
@@ -1602,9 +1642,10 @@ function resolveColorScale(
   // A named scheme resolves inside trainColor. Edition defaults only apply
   // when the caller supplied neither a scheme nor an explicit range.
   const range = config?.range ?? (scheme === undefined ? editionPalette : undefined);
+  const ordinalValues = catalogValues.length > 0 ? catalogValues : values;
   let scale: ColorScale;
   try {
-    scale = trainColor(values, prevState, {
+    scale = trainColor(ordinalValues, prevState, {
       ...(config?.domain !== undefined && { domain: config.domain }),
       ...(config?.domainMode !== undefined && { domainMode: config.domainMode }),
       ...(range !== undefined && { range }),
@@ -1634,7 +1675,7 @@ function resolveColorScale(
       scale: name,
       title: legendTitle,
       domain: scale.domain,
-      firstSeen: values,
+      firstSeen: ordinalValues,
       colorOf: (v: unknown) => scale.colorOf(v),
     },
     state: scale.state,
@@ -2633,11 +2674,11 @@ function rowsMatching(table: ColumnTable, field: string, value: CellValue): numb
   return rows;
 }
 
-const SINGLE_PANEL = (table: ColumnTable): FacetLayout => {
+const SINGLE_PANEL = (table: ColumnTable, sourceRows: number[] | null = null): FacetLayout => {
   const identity = createFacetPanelIdentity([]);
   return {
     faceted: false,
-    panels: [{ identity, id: identity.key, label: "", row: 0, col: 0, table, sourceRows: null }],
+    panels: [{ identity, id: identity.key, label: "", row: 0, col: 0, table, sourceRows }],
     nrow: 1,
     ncol: 1,
     freeX: false,
@@ -2645,8 +2686,12 @@ const SINGLE_PANEL = (table: ColumnTable): FacetLayout => {
   };
 };
 
-function resolveFacet(facet: FacetSpec | undefined, table: ColumnTable): FacetLayout {
-  if (facet === undefined) return SINGLE_PANEL(table);
+function resolveFacet(
+  facet: FacetSpec | undefined,
+  table: ColumnTable,
+  baseSourceRows: number[] | null = null,
+): FacetLayout {
+  if (facet === undefined) return SINGLE_PANEL(table, baseSourceRows);
   const wrapField = facetField(facet.wrap, "wrap", table);
   const rowsField = facetField(facet.rows, "rows", table);
   const colsField = facetField(facet.cols, "cols", table);
@@ -2670,7 +2715,7 @@ function resolveFacet(facet: FacetSpec | undefined, table: ColumnTable): FacetLa
 
   if (wrapField !== null) {
     const values = facetValues(table, wrapField);
-    if (values.length === 0) return SINGLE_PANEL(table);
+    if (values.length === 0) return SINGLE_PANEL(table, baseSourceRows);
     const ncol = Math.min(values.length, facet.ncol ?? Math.ceil(Math.sqrt(values.length)));
     const nrow = Math.ceil(values.length / ncol);
     const panels = values.map((value, i) => {
@@ -2683,7 +2728,7 @@ function resolveFacet(facet: FacetSpec | undefined, table: ColumnTable): FacetLa
         row: Math.floor(i / ncol),
         col: i % ncol,
         table: table.subset(rows),
-        sourceRows: rows,
+        sourceRows: rows.map((row) => baseSourceRows?.[row] ?? row),
       };
     });
     return { faceted: true, panels, nrow, ncol, freeX, freeY };
@@ -2697,7 +2742,7 @@ function resolveFacet(facet: FacetSpec | undefined, table: ColumnTable): FacetLa
     (rowsField !== null && rowValues.length === 0) ||
     (colsField !== null && colValues.length === 0)
   ) {
-    return SINGLE_PANEL(table);
+    return SINGLE_PANEL(table, baseSourceRows);
   }
   const panels: FacetPanelDef[] = [];
   for (let r = 0; r < rowValues.length; r++) {
@@ -2729,7 +2774,7 @@ function resolveFacet(facet: FacetSpec | undefined, table: ColumnTable): FacetLa
         row: r,
         col: c,
         table: table.subset(rows ?? []),
-        sourceRows: rows ?? [],
+        sourceRows: (rows ?? []).map((row) => baseSourceRows?.[row] ?? row),
       });
     }
   }
@@ -2980,7 +3025,9 @@ export function runPipeline(spec: SpecInput | PortableSpec, options: RunOptions)
 
   // bind + facet partition + per-panel frames
   perfMark("ggsvelte:bind:start");
-  const table = bindData(normalized, options);
+  const sourceTable = bindData(normalized, options);
+  const filtered = applyRuntimeRowFilters(sourceTable, options.rowFilters);
+  const table = filtered.table;
   const emptyData = table.rowCount === 0;
   if (emptyData) {
     warnings.push({
@@ -2989,7 +3036,9 @@ export function runPipeline(spec: SpecInput | PortableSpec, options: RunOptions)
     });
   }
 
-  const facetLayout = emptyData ? SINGLE_PANEL(table) : resolveFacet(normalized.facet, table);
+  const facetLayout = emptyData
+    ? SINGLE_PANEL(table, filtered.sourceRows)
+    : resolveFacet(normalized.facet, table, filtered.sourceRows);
   const { faceted, nrow, ncol } = facetLayout;
   const facetPanels = facetLayout.panels;
   const freeX = faceted && facetLayout.freeX;
@@ -2997,10 +3046,10 @@ export function runPipeline(spec: SpecInput | PortableSpec, options: RunOptions)
 
   const bindings: LayerBinding[] = [];
   const panelFrames: LayerFrame[][] = facetPanels.map(() => []);
+  for (let index = 0; index < normalized.layers.length; index++) {
+    bindings.push(bindLayer(normalized.layers[index]!, index, table, warnings));
+  }
   if (!emptyData) {
-    for (let index = 0; index < normalized.layers.length; index++) {
-      bindings.push(bindLayer(normalized.layers[index]!, index, table, warnings));
-    }
     // Shared bin break grids across panels when the x scale is fixed.
     const binRanges = bindings.map((binding) => {
       const stat = binding.layer.stat ?? "identity";
@@ -3075,7 +3124,9 @@ export function runPipeline(spec: SpecInput | PortableSpec, options: RunOptions)
   const colorResolution = resolveColorScale(
     "color",
     allFrames,
+    bindings,
     table,
+    sourceTable,
     scalesConfig.color,
     options.prevScales?.["color"] ?? null,
     labs.color ?? firstColorField ?? "",
@@ -3086,7 +3137,9 @@ export function runPipeline(spec: SpecInput | PortableSpec, options: RunOptions)
   const fillResolution = resolveColorScale(
     "fill",
     allFrames,
+    bindings,
     table,
+    sourceTable,
     scalesConfig.fill,
     options.prevScales?.["fill"] ?? null,
     labs.fill ?? firstFillField ?? "",
@@ -3708,7 +3761,7 @@ export function runPipeline(spec: SpecInput | PortableSpec, options: RunOptions)
   perfMeasure("ggsvelte:pipeline", "ggsvelte:pipeline:start", "ggsvelte:pipeline:end");
 
   let disposed = false;
-  let retainedTable: ColumnTable | null = table;
+  let retainedTable: ColumnTable | null = sourceTable;
   return {
     scene,
     scales: {
