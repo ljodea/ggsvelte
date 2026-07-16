@@ -2,16 +2,16 @@
  * Stat/annotation candidate datum resolver: reconstructs series, ranks, and
  * represented source-row lineages from layer frames + identity index.
  */
-import type { BarParams } from "@ggsvelte/spec";
-
 import type { CandidateBuildFacts, CandidateDatum } from "../candidate-store.js";
 import type { LineageStore } from "../identity.js";
 import type { Scene } from "../scene.js";
 import { bandKey } from "../scales/train.js";
 import type { CellValue } from "../table.js";
-import { cellToNumber, ColumnTable } from "../table.js";
+import type { ColumnTable } from "../table.js";
 
+import { resolveCandidateFrameRow } from "./build-candidates-frame-row.js";
 import type { CandidateIdentityIndex } from "./build-candidates-identity.js";
+import { filterRepresentedSourceRows } from "./build-candidates-lineage.js";
 import type { FacetPanelDef } from "./facets.js";
 import { candidateAutoMode } from "./frame.js";
 import type { MappedField } from "./types.js";
@@ -57,38 +57,13 @@ export function createIdentityCandidateDatumResolver(input: {
         ? null
         : (facetPanels[facts.panelIndex]?.sourceRows?.[outlierLocalRow] ?? outlierLocalRow);
     const orderedGroups = frameGroups.get(`${facts.panelIndex}:${facts.layerIndex}`) ?? [0];
-    let frameRow = Math.min(facts.primitiveIndex, Math.max(0, (frame?.n ?? 1) - 1));
-    let derivedGroup = frame?.groups[frameRow] ?? 0;
-    if (frame !== undefined && batch.kind === "paths") {
-      let subpath = 0;
-      while (
-        subpath + 1 < batch.pathOffsets.length &&
-        facts.primitiveIndex >= batch.pathOffsets[subpath + 1]!
-      )
-        subpath++;
-      derivedGroup = orderedGroups[Math.min(subpath, orderedGroups.length - 1)] ?? 0;
-      const rowsInGroup = frame.groups
-        .map((group, row) => ({ group, row }))
-        .filter((entry) => entry.group === derivedGroup)
-        .map((entry) => entry.row)
-        .toSorted((a, b) => (frame.xNumeric?.[a] ?? a) - (frame.xNumeric?.[b] ?? b));
-      const local = facts.primitiveIndex - (batch.pathOffsets[subpath] ?? 0);
-      const reflected =
-        local < rowsInGroup.length ? local : Math.max(0, rowsInGroup.length * 2 - 1 - local);
-      frameRow = rowsInGroup[Math.min(reflected, rowsInGroup.length - 1)] ?? frameRow;
-    } else if (frame !== undefined && batch.kind === "segments") {
-      if (frame.binding.layer.geom === "errorbar") frameRow = Math.floor(facts.primitiveIndex / 3);
-      else if (frame.binding.layer.geom === "boxplot" && batch.rowIndex.length >= frame.n * 2)
-        frameRow = Math.floor(facts.primitiveIndex / 2);
-      derivedGroup = frame.groups[Math.min(frameRow, frame.groups.length - 1)] ?? derivedGroup;
-    } else if (
-      frame?.box !== null &&
-      frame?.binding.layer.geom === "boxplot" &&
-      batch.kind === "points"
-    ) {
-      frameRow = frame.box.outlierBox[facts.primitiveIndex] ?? frameRow;
-      derivedGroup = frame.groups[frameRow] ?? derivedGroup;
-    }
+    const { frameRow, derivedGroup } = resolveCandidateFrameRow({
+      frame,
+      batch,
+      primitiveIndex: facts.primitiveIndex,
+      orderedGroups,
+      outlierLocalRow,
+    });
     const sourceValue = (field: string | undefined): CellValue =>
       sourceRow === null || field === undefined ? null : table.column(field)[sourceRow]!;
     const xField = fields.find((field) => field.channel === "x")?.field;
@@ -120,47 +95,12 @@ export function createIdentityCandidateDatumResolver(input: {
         ? (sourceRowsByGroup.get(`${facts.panelIndex}:${facts.layerIndex}:${group}`) ?? [])
         : [outlierSourceRow];
     if (sourceRow === null && frame !== undefined) {
-      const stat = frame.binding.layer.stat ?? "identity";
-      const aggregateXField = frame.binding.xField;
-      const outputX = frame.xValues?.[frameRow] ?? frame.xNumeric?.[frameRow] ?? null;
-      if (
-        aggregateXField !== null &&
-        outputX !== null &&
-        (stat === "count" || stat === "summary" || stat === "boxplot")
-      ) {
-        const outputKey = bandKey(outputX);
-        representedRows = representedRows.filter(
-          (row) => bandKey(table.column(aggregateXField)[row]) === outputKey,
-        );
-      } else if (
-        stat === "bin" &&
-        aggregateXField !== null &&
-        frame.xmin !== null &&
-        frame.xmax !== null
-      ) {
-        const hi = frame.xmax[frameRow]!;
-        const lo = frame.xmin[frameRow]!;
-        const closed = ((frame.binding.layer.params ?? {}) as BarParams).closed ?? "right";
-        const frameGroup = frame.groups[frameRow];
-        const firstInGroup = frameRow === 0 || frame.groups[frameRow - 1] !== frameGroup;
-        const lastInGroup = frameRow === frame.n - 1 || frame.groups[frameRow + 1] !== frameGroup;
-        representedRows = representedRows.filter((row) => {
-          const value = cellToNumber(table.column(aggregateXField)[row]!);
-          if (!Number.isFinite(value)) return false;
-          return closed === "right"
-            ? value <= hi && (value > lo || (firstInGroup && value >= lo))
-            : value >= lo && (value < hi || (lastInGroup && value <= hi));
-        });
-      }
-      const aggregateYField = frame.binding.yField;
-      if (
-        (stat === "smooth" || stat === "summary" || stat === "boxplot") &&
-        aggregateYField !== null
-      ) {
-        representedRows = representedRows.filter((row) =>
-          Number.isFinite(cellToNumber(table.column(aggregateYField)[row]!)),
-        );
-      }
+      representedRows = filterRepresentedSourceRows({
+        frame,
+        table,
+        frameRow,
+        baseRows: representedRows,
+      });
     }
     return {
       xValue: annotationRule
