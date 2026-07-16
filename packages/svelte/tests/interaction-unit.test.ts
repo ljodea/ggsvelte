@@ -83,17 +83,18 @@ describe("interaction capability normalization", () => {
     expect(resolved.zoom).toMatchObject({ mode: "xy", trigger: "brush" });
   });
 
-  it("diagnoses unsupported interval facets without disabling inspection", () => {
+  it("enables faceted interval selection and diagnoses only faceted brush zoom", () => {
     const resolved = normalizeInteractionConfig(
-      { inspect: true, select: "interval" },
+      { inspect: true, select: "interval", zoom: true },
       { faceted: true },
     );
     expect(resolved.inspect).not.toBeNull();
-    expect(resolved.select).toBeNull();
+    expect(resolved.select).toMatchObject({ type: "interval", mode: "xy" });
+    expect(resolved.zoom).toBeNull();
     expect(resolved.diagnostics[0]).toMatchObject({
       code: "INTERACTION_INTERVAL_FACET_UNSUPPORTED",
       severity: "warning",
-      prop: "select",
+      prop: "zoom",
     });
   });
 

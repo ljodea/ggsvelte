@@ -172,9 +172,13 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
   INTERACTION_INTERVAL_FACET_UNSUPPORTED: {
     severity: "warning",
     code: "INTERACTION_INTERVAL_FACET_UNSUPPORTED",
-    message: "Interval selection and brush zoom currently require one unfaceted panel.",
-    prop: "select",
-    suggestions: ["Remove the facet", "Use point inspection", "Track facet intervals in issue #3"],
+    message: "Brush zoom currently requires one unfaceted panel.",
+    prop: "zoom",
+    suggestions: [
+      "Remove the facet",
+      "Use faceted interval selection",
+      "Zoom a linked detail view",
+    ],
     docUrl:
       "https://ljodea.github.io/ggsvelte/guide/interaction-reference#interaction-interval-facet-unsupported",
   },
@@ -355,11 +359,10 @@ export function normalizeInteractionConfig<Row, Key>(
     }
   }
 
-  if (context.faceted === true && (select?.type === "interval" || zoom !== null)) {
+  if (context.faceted === true && zoom !== null) {
     diagnostics.push({
       ...INTERACTION_DIAGNOSTIC_CATALOG.INTERACTION_INTERVAL_FACET_UNSUPPORTED,
     });
-    if (select?.type === "interval") select = null;
     zoom = null;
   }
 
