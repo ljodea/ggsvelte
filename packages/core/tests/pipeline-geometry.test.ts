@@ -168,3 +168,83 @@ describe("geometry via runPipeline (regression anchors)", () => {
     }
   });
 });
+
+describe("buildBatch dispatch via runPipeline", () => {
+  it("point → points batch; line → paths; col → rects", () => {
+    const point = runPipeline(
+      gg(
+        [
+          { x: 1, y: 2 },
+          { x: 2, y: 3 },
+        ],
+        aes({ x: "x", y: "y" }),
+      )
+        .geomPoint()
+        .spec(),
+      size,
+    );
+    expect(point.scene.batches[0]!.kind).toBe("points");
+
+    const line = runPipeline(
+      gg(
+        [
+          { x: 1, y: 2 },
+          { x: 2, y: 3 },
+        ],
+        aes({ x: "x", y: "y" }),
+      )
+        .geomLine()
+        .spec(),
+      size,
+    );
+    expect(line.scene.batches[0]!.kind).toBe("paths");
+
+    const col = runPipeline(
+      gg(
+        [
+          { g: "a", y: 1 },
+          { g: "b", y: 2 },
+        ],
+        aes({ x: "g", y: "y" }),
+      )
+        .geomCol()
+        .spec(),
+      size,
+    );
+    expect(col.scene.batches.some((b) => b.kind === "rects")).toBe(true);
+  });
+
+  it("boxplot emits composite rects + segments; errorbar emits segments", () => {
+    const box = runPipeline(
+      gg(
+        [
+          { g: "a", y: 1 },
+          { g: "a", y: 2 },
+          { g: "a", y: 3 },
+          { g: "a", y: 10 },
+        ],
+        aes({ x: "g", y: "y" }),
+      )
+        .geomBoxplot()
+        .spec(),
+      size,
+    );
+    const kinds = new Set(box.scene.batches.map((b) => b.kind));
+    expect(kinds.has("rects")).toBe(true);
+    expect(kinds.has("segments")).toBe(true);
+
+    const err = runPipeline(
+      gg(
+        [
+          { x: "a", ymin: 1, ymax: 3 },
+          { x: "b", ymin: 2, ymax: 5 },
+        ],
+        aes({ x: "x", ymin: "ymin", ymax: "ymax" }),
+      )
+        .geomErrorbar()
+        .spec(),
+      size,
+    );
+    expect(err.scene.batches.every((b) => b.kind === "segments")).toBe(true);
+  });
+});
