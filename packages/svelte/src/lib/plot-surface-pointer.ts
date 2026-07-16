@@ -265,3 +265,29 @@ export function resolveFinishBrushAction(input: {
   if (input.activeTool === "zoom-area") return { type: "zoom-end" };
   return { type: "end-area" };
 }
+
+// ---- lost pointer capture ----
+
+/** Reducer area.kind values that the host may observe on lostpointercapture. */
+export type AreaKind = "idle" | "first-corner" | "dragging";
+
+export type LostPointerCaptureAction =
+  | { readonly type: "ignore" }
+  | { readonly type: "cancel-keep-draft" }
+  | { readonly type: "cancel-clear-draft" };
+
+/**
+ * Pure routing for capture-surface `lostpointercapture`.
+ *
+ * Takes reducer `area.kind` (not derived booleans) so illegal combos like
+ * `!brushing && areaAwaitingSecond` are unrepresentable.
+ *
+ *   idle         → ignore (no cancel-area)
+ *   first-corner → cancel-keep-draft (dispatch cancel-area; retain brushRect)
+ *   dragging     → cancel-clear-draft (clear brushRect + dispatch cancel-area)
+ */
+export function resolveLostPointerCaptureAction(areaKind: AreaKind): LostPointerCaptureAction {
+  if (areaKind === "idle") return { type: "ignore" };
+  if (areaKind === "first-corner") return { type: "cancel-keep-draft" };
+  return { type: "cancel-clear-draft" };
+}

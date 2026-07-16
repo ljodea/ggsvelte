@@ -115,6 +115,7 @@
   import { resolveSurfaceKeyAction } from "./plot-surface-keyboard.js";
   import {
     resolveInspectionCompleteness,
+    resolveInspectionEmitAction,
     resolveInspectionMode,
     resolveQueuedInspectFrameAction,
     resolveSetInspectionAction,
@@ -128,6 +129,7 @@
     resolveCaptureClickAction,
     advanceTouchInspectMoved,
     resolveFinishBrushAction,
+    resolveLostPointerCaptureAction,
     resolvePointerDownAction,
     resolvePointerMoveAction,
     resolvePointerUpAction,
@@ -169,6 +171,8 @@
     capabilityStatusText,
     filterAvailableTools,
     legendFocusDiscreteOnlyDiagnostics,
+    resolveChooseToolAction,
+    resolveEffectiveTool,
     zoomScaleDiagnosticsFromChannels,
     zoomSupportsChannel,
   } from "./plot-capability.js";
@@ -954,24 +958,34 @@
   });
 
   $effect(() => {
-    const requested = tool ?? interactionConfig.initialTool;
-    const next = availableTools.includes(requested)
-      ? requested
-      : (availableTools[0] ?? "inspect");
+    const next = resolveEffectiveTool(
+      tool ?? interactionConfig.initialTool,
+      availableTools,
+    );
     reducer.dispatch({ type: "set-tool", tool: next });
   });
 
   function chooseTool(next: InteractionTool): void {
-    if (!availableTools.includes(next)) return;
-    if (tool !== undefined) {
-      ontoolchange?.(next);
-      return;
+    // Decision table is pure (plot-capability); this switch owns side effects.
+    const action = resolveChooseToolAction({
+      next,
+      available: availableTools,
+      isControlled: tool !== undefined,
+    });
+    switch (action.type) {
+      case "ignore":
+        return;
+      case "request":
+        ontoolchange?.(next);
+        return;
+      case "apply":
+        reducer.dispatch({ type: "set-tool", tool: next });
+        brushRect = null;
+        queuedPointerInspection = null;
+        reducer.cancelScheduledPointer();
+        ontoolchange?.(next);
+        return;
     }
-    reducer.dispatch({ type: "set-tool", tool: next });
-    brushRect = null;
-    queuedPointerInspection = null;
-    reducer.cancelScheduledPointer();
-    ontoolchange?.(next);
   }
 
   function plotPoint(event: PointerEvent | MouseEvent): {
@@ -1532,10 +1546,14 @@
       next.phase === "clear"
         ? clearInspectionFingerprint(next.source)
         : semanticFingerprint;
-    if (fingerprint !== undefined) {
-      if (fingerprint === lastInspectionFingerprint) return;
-      lastInspectionFingerprint = fingerprint;
-    }
+    // Decision table is pure (plot-surface-inspection); host owns last token.
+    const emit = resolveInspectionEmitAction({
+      fingerprint,
+      lastFingerprint: lastInspectionFingerprint,
+    });
+    if (emit.type === "skip") return;
+    if (emit.updateFingerprint !== null)
+      lastInspectionFingerprint = emit.updateFingerprint;
     oninspect?.(next as unknown as PlotInspection<Row, PublicKey>);
     oninteraction?.(next as unknown as PlotInteractionEvent<Row, PublicKey>);
   }
@@ -2452,9 +2470,19 @@
           reducer.dispatch({ type: "cancel-area" });
         }}
         onlostpointercapture={() => {
-          if (!brushing) return;
-          if (!areaAwaitingSecond) brushRect = null;
-          reducer.dispatch({ type: "cancel-area" });
+          // Decision table is pure (plot-surface-pointer); host owns draft + cancel.
+          const lost = resolveLostPointerCaptureAction(reducer.state.area.kind);
+          switch (lost.type) {
+            case "ignore":
+              return;
+            case "cancel-keep-draft":
+              reducer.dispatch({ type: "cancel-area" });
+              return;
+            case "cancel-clear-draft":
+              brushRect = null;
+              reducer.dispatch({ type: "cancel-area" });
+              return;
+          }
         }}
         onclick={onCaptureClick}
         onkeydown={onSurfaceKeyDown}

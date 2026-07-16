@@ -6,6 +6,7 @@ import {
   advanceTouchInspectMoved,
   resolveCaptureClickAction,
   resolveFinishBrushAction,
+  resolveLostPointerCaptureAction,
   resolvePointerDownAction,
   resolvePointerMoveAction,
   resolvePointerUpAction,
@@ -536,6 +537,24 @@ describe("resolveFinishBrushAction", () => {
     });
     expect(resolveFinishBrushAction({ endedKind: "commit", activeTool: "point" })).toEqual({
       type: "end-area",
+    });
+  });
+});
+
+describe("resolveLostPointerCaptureAction", () => {
+  it("ignores idle (not brushing)", () => {
+    expect(resolveLostPointerCaptureAction("idle")).toEqual({ type: "ignore" });
+  });
+
+  it("keeps draft and cancels area when awaiting second corner", () => {
+    expect(resolveLostPointerCaptureAction("first-corner")).toEqual({
+      type: "cancel-keep-draft",
+    });
+  });
+
+  it("clears draft and cancels area when dragging", () => {
+    expect(resolveLostPointerCaptureAction("dragging")).toEqual({
+      type: "cancel-clear-draft",
     });
   });
 });
