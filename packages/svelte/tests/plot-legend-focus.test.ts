@@ -439,9 +439,12 @@ describe("buildLegendEntryKeyIndex", () => {
 describe("InteractiveLegendEntry typing smoke", () => {
   it("exposes identity and entry for host action builders", () => {
     const entries: InteractiveLegendEntry[] = buildInteractiveLegendEntries([discreteFill]);
+    const first = entries[0];
+    expect(first).toBeDefined();
+    if (first === undefined) return;
     const action = {
-      identity: entries[0]!.identity,
-      entry: entries[0]!.entry,
+      identity: first.identity,
+      entry: first.entry,
       source: "keyboard" as const,
     };
     expect(action.entry.label).toBe("Web");
