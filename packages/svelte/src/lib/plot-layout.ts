@@ -63,6 +63,11 @@ export function isTooltipDocked(input: {
   return input.inspectionState === "pinned" && isDockedTooltipWidth(input.widthPx);
 }
 
+/** Stable DOM id for the plot's inspection tooltip element. */
+export function plotTooltipDomId(plotId: string): string {
+  return `${plotId}-tooltip`;
+}
+
 /**
  * Capture-surface `aria-controls` when a pinned interactive tooltip is up.
  * Undefined otherwise (attribute omitted).
@@ -73,7 +78,7 @@ export function resolveCaptureAriaControls(input: {
   readonly plotId: string;
 }): string | undefined {
   if (!input.isPinned || !input.interactiveContent) return undefined;
-  return `${input.plotId}-tooltip`;
+  return plotTooltipDomId(input.plotId);
 }
 
 export type TooltipViewportSizeInput = {
