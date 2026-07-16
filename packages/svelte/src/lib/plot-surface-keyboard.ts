@@ -1,18 +1,25 @@
 import { isAreaTool, type InteractionTool } from "./interaction.js";
-import { panelCenterAnchor, type PlotPoint } from "./plot-area-brush.js";
-import type { PanelBounds } from "./plot-geometry.js";
+import { panelCenterAnchor, type BrushCorners, type PlotPoint } from "./plot-area-brush.js";
+import { normalizedRect, type PanelBounds } from "./plot-geometry.js";
+import { resolveFinishBrushAction, type FinishBrushAction } from "./plot-brush-finish.js";
 
 /**
- * Capture-surface keyboard decision input. `hasBrushDraft` mirrors
- * `brushRect !== null` in GGPlot — distinct from reducer `brushing`, which can
- * diverge when the draft corners and area machine are out of sync.
+ * Capture-surface keyboard decision input.
+ *
+ * `brushCorners` is the sole draft source of truth (host: `brushRect`).
+ * Distinct from reducer `brushing`, which can diverge when the draft corners
+ * and area machine are out of sync. Null means no draft — no separate
+ * `hasBrushDraft` boolean so illegal combos are unrepresentable.
  */
 export type SurfaceKeyboardInput = {
   readonly key: string;
   readonly shiftKey: boolean;
   readonly activeTool: InteractionTool;
-  /** True when a brush draft corner exists (`brushRect !== null`). */
-  readonly hasBrushDraft: boolean;
+  /**
+   * Host: `brushRect`. Non-null when a draft free corner exists.
+   * Gates nudge-brush, complete-area, and Escape returnToInspect.
+   */
+  readonly brushCorners: BrushCorners | null;
   readonly hasInspection: boolean;
   readonly pinEnabled: boolean;
   /**
@@ -47,10 +54,12 @@ type SurfaceKeyAction =
     }
   | {
       /**
-       * Host: normalize brush rect, then `resolveFinishBrushAction` owns
-       * select-end vs zoom-end (single pure owner with pointer finish-brush).
+       * Pure table owns normalize + select/zoom/end routing (shared finish
+       * owner with pointer). Keyboard always commits the current draft
+       * (`kind: "commit"`) — no free-corner too-small evaluation.
        */
       readonly type: "complete-area";
+      readonly finish: FinishBrushAction;
     }
   | { readonly type: "cycle-coincident"; readonly delta: 1 | -1 }
   | {
@@ -83,7 +92,7 @@ export function resolveSurfaceKeyAction(input: SurfaceKeyboardInput): SurfaceKey
     key,
     shiftKey,
     activeTool,
-    hasBrushDraft,
+    brushCorners,
     hasInspection,
     pinEnabled,
     focusKey,
@@ -92,8 +101,9 @@ export function resolveSurfaceKeyAction(input: SurfaceKeyboardInput): SurfaceKey
     firstPanel,
   } = input;
   const area = isAreaTool(activeTool);
+  const hasDraft = brushCorners !== null;
 
-  if (area && key.startsWith("Arrow") && hasBrushDraft) {
+  if (area && key.startsWith("Arrow") && hasDraft) {
     const step = shiftKey ? 10 : 1;
     const dx = key === "ArrowLeft" ? -step : key === "ArrowRight" ? step : 0;
     const dy = key === "ArrowUp" ? -step : key === "ArrowDown" ? step : 0;
@@ -106,12 +116,21 @@ export function resolveSurfaceKeyAction(input: SurfaceKeyboardInput): SurfaceKey
   if (area && (key === "Enter" || key === " ")) {
     return {
       preventDefault: true,
-      action: hasBrushDraft
-        ? { type: "complete-area" }
-        : {
-            type: "begin-area",
-            anchor: inspectionAnchor ?? panelCenterAnchor(firstPanel),
-          },
+      action:
+        brushCorners === null
+          ? {
+              type: "begin-area",
+              anchor: inspectionAnchor ?? panelCenterAnchor(firstPanel),
+            }
+          : {
+              type: "complete-area",
+              // Keyboard commits the live draft as-is (no free-corner update).
+              // Zero-size drafts still route as commit → select/zoom/end-area.
+              finish: resolveFinishBrushAction({
+                ended: { kind: "commit", rect: normalizedRect(brushCorners) },
+                activeTool,
+              }),
+            },
     };
   }
 
@@ -155,7 +174,7 @@ export function resolveSurfaceKeyAction(input: SurfaceKeyboardInput): SurfaceKey
       preventDefault: true,
       action: {
         type: "escape",
-        returnToInspect: !hasBrushDraft && area,
+        returnToInspect: !hasDraft && area,
       },
     };
   }
