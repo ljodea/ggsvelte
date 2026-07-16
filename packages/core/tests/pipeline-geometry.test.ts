@@ -214,6 +214,30 @@ describe("buildBatch dispatch via runPipeline", () => {
     expect(col.scene.batches.some((b) => b.kind === "rects")).toBe(true);
   });
 
+  it("area emits a closed filled path batch", () => {
+    const area = runPipeline(
+      gg(
+        [
+          { x: 1, y: 2 },
+          { x: 2, y: 4 },
+          { x: 3, y: 3 },
+        ],
+        aes({ x: "x", y: "y" }),
+      )
+        .geomArea()
+        .spec(),
+      size,
+    );
+    const paths = area.scene.batches.find((b) => b.kind === "paths");
+    expect(paths).toBeTruthy();
+    if (paths?.kind === "paths") {
+      expect(paths.closed).toBe(true);
+      expect(paths.fills).toBeTruthy();
+      // closed polygon: upper edge + lower edge = 2 * N vertices
+      expect(paths.positions.length).toBe(3 * 2 * 2);
+    }
+  });
+
   it("text emits glyphs with label texts; annotation rule emits segments", () => {
     const text = runPipeline(
       gg(
