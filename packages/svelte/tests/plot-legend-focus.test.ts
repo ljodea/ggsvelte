@@ -502,9 +502,23 @@ describe("buildLegendEntryKeyIndex", () => {
 });
 
 describe("resolveLegendPreviewKeysDecision", () => {
-  it("clears when the entry has no keys and sets otherwise", () => {
-    expect(resolveLegendPreviewKeysDecision([])).toEqual({ type: "clear" });
-    expect(resolveLegendPreviewKeysDecision(["a"])).toEqual({ type: "set", keys: ["a"] });
+  it("clears when the entry has no keys", () => {
+    expect(resolveLegendPreviewKeysDecision({ keys: [], entrySource: "pointer" })).toEqual({
+      type: "clear",
+    });
+  });
+
+  it("sets keys and maps entrySource to InteractionSource", () => {
+    expect(resolveLegendPreviewKeysDecision({ keys: ["a"], entrySource: "pointer" })).toEqual({
+      type: "set",
+      keys: ["a"],
+      source: "pointer",
+    });
+    expect(resolveLegendPreviewKeysDecision({ keys: ["a", "b"], entrySource: "focus" })).toEqual({
+      type: "set",
+      keys: ["a", "b"],
+      source: "keyboard",
+    });
   });
 });
 

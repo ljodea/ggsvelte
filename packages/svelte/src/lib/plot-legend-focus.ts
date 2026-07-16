@@ -302,11 +302,27 @@ export function buildLegendEntryKeyIndex(
  * Decide what a legend preview attempt should do with resolved keys.
  * Empty key sets clear any active preview (empty domain entry / stale target)
  * rather than leaving the previous entry highlighted.
+ *
+ * Non-empty `set` carries mapped InteractionSource via `legendInteractionSource`
+ * so the host does not re-map `action.source` after the pure decision.
  */
-export function resolveLegendPreviewKeysDecision(
-  keys: readonly PropertyKey[],
-): { readonly type: "set"; readonly keys: readonly PropertyKey[] } | { readonly type: "clear" } {
-  return keys.length === 0 ? { type: "clear" } : { type: "set", keys };
+export function resolveLegendPreviewKeysDecision(input: {
+  readonly keys: readonly PropertyKey[];
+  /** Host: `action.source` (legend entry interaction source). */
+  readonly entrySource: LegendInteractionSource;
+}):
+  | { readonly type: "clear" }
+  | {
+      readonly type: "set";
+      readonly keys: readonly PropertyKey[];
+      readonly source: InteractionSource;
+    } {
+  if (input.keys.length === 0) return { type: "clear" };
+  return {
+    type: "set",
+    keys: input.keys,
+    source: legendInteractionSource(input.entrySource),
+  };
 }
 
 /**

@@ -256,12 +256,17 @@ export type ToggleInspectionPinInput = {
   readonly hasSeed: boolean;
   /** Host: current inspection.state when hasInspection. */
   readonly currentState: "transient" | "pinned";
-  readonly hasPendingPinned: boolean;
+  /** Host: `pendingPinnedPointer` (null when none). */
+  readonly pending: QueuedPointerInspection | null;
 };
 
 export type ToggleInspectionPinAction =
   | { readonly type: "ignore" }
-  | { readonly type: "restore-pending" }
+  | {
+      readonly type: "restore-pending";
+      /** Pending queue payload to restore as transient inspection. */
+      readonly pending: QueuedPointerInspection;
+    }
   | {
       readonly type: "flip";
       /** Target inspection state after toggle-pin dispatch + re-resolve. */
@@ -274,15 +279,19 @@ export type ToggleInspectionPinAction =
  * Host sequencing (preserve exactly):
  *   1. if ignore → return (no reducer dispatch)
  *   2. always `reducer.dispatch({ type: "toggle-pin", source })` first
- *   3. restore-pending → release pinned, clear fields, setInspection(pending…)
+ *   3. restore-pending → release pinned, clear fields, setInspection(action.pending…, "transient")
  *   4. flip → resolveInspection with action.state; if null return with reducer
  *      already toggled (host does not roll back reducer state)
+ *
+ * `pending` replaces a separate `hasPendingPinned` boolean so restore cannot
+ * race a null payload and the host does not non-null-assert after the gate.
  */
 export function resolveToggleInspectionPinAction(
   input: ToggleInspectionPinInput,
 ): ToggleInspectionPinAction {
   if (!input.hasInspection || !input.hasSeed) return { type: "ignore" };
-  if (input.currentState === "pinned" && input.hasPendingPinned) return { type: "restore-pending" };
+  if (input.currentState === "pinned" && input.pending !== null)
+    return { type: "restore-pending", pending: input.pending };
   return {
     type: "flip",
     state: input.currentState === "pinned" ? "transient" : "pinned",
