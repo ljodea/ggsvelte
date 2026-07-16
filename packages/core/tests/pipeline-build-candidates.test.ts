@@ -208,3 +208,35 @@ describe("isAllSourceBacked", () => {
     ).toBe(false);
   });
 });
+
+describe("collectColorChannelValues", () => {
+  it("returns empty when no color mapping is present", async () => {
+    const { collectColorChannelValues } = await import("../src/pipeline/scale-color-collect.ts");
+    const table = { has: () => false, discreteness: () => "continuous" } as never;
+    const frames = [
+      {
+        binding: {
+          color: { field: null, scaledConstant: null },
+          fill: { field: null, scaledConstant: null },
+        },
+        colorValues: null,
+        fillValues: null,
+      },
+    ] as never;
+    expect(collectColorChannelValues("color", frames, table)).toEqual({
+      values: [],
+      anyDiscreteField: false,
+      anyField: false,
+    });
+  });
+});
+
+describe("panelValueToken", () => {
+  it("prefixes values by type and treats -0 as 0", async () => {
+    const { panelValueToken } = await import("../src/pipeline/facets-tokens.ts");
+    expect(panelValueToken(null)).toBe("null");
+    expect(panelValueToken("a")).toBe("s:a");
+    expect(panelValueToken(-0)).toBe("n:0");
+    expect(panelValueToken(true)).toBe("b:true");
+  });
+});

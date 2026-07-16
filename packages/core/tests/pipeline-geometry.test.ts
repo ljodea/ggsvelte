@@ -451,3 +451,42 @@ describe("BOX_MEDIAN_FATTEN", () => {
     expect(BOX_MEDIAN_FATTEN).toBe(2);
   });
 });
+
+describe("collectPointPositions", () => {
+  it("drops NaN positions and keeps finite points", async () => {
+    const { collectPointPositions } = await import("../src/pipeline/geometry-points-collect.ts");
+    const frame = {
+      n: 3,
+      xNumeric: new Float64Array([0, NaN, 1]),
+      yNumeric: new Float64Array([0.5, 0.5, 0.25]),
+      xValues: null,
+      offsetX: null,
+      offsetY: null,
+      rowIndex: new Uint32Array([0, 1, 2]),
+    } as never;
+    const fx = {
+      innerWidth: 100,
+      innerHeight: 200,
+      xScale: { type: "linear", normalize: (v: number) => v },
+      yScale: { type: "linear", normalize: (v: number) => v },
+    } as never;
+    const collected = collectPointPositions(frame, fx);
+    expect(collected.kept).toBe(2);
+    expect([...collected.keptRows.subarray(0, 2)]).toEqual([0, 2]);
+  });
+});
+
+describe("placeSceneLegends", () => {
+  it("offsets legend x by scene width minus block width and edge pad", async () => {
+    const { placeSceneLegends } = await import("../src/pipeline/assemble-scene-legends.ts");
+    const { LEGEND_EDGE_PAD } = await import("../src/pipeline/layout-helpers.ts");
+    const legends = placeSceneLegends({
+      legends: [{ x: 0, y: 5, width: 10, height: 10, title: "", items: [] } as never],
+      legendWidth: 40,
+      sceneWidth: 200,
+      panelY: 12,
+    });
+    expect(legends[0]!.x).toBe(200 - 40 - LEGEND_EDGE_PAD);
+    expect(legends[0]!.y).toBe(5 + 12);
+  });
+});
