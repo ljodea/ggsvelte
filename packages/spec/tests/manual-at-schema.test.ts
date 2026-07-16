@@ -4,6 +4,8 @@ import { basename, join } from "node:path";
 
 import { Ajv2020 } from "ajv/dist/2020.js";
 
+import { auditAliasCommitRange } from "./manual-at-alias-audit.ts";
+
 interface Observation {
   id: string;
   observed: string;
@@ -42,6 +44,7 @@ interface AcceptedIssue {
 
 interface ReleaseRecord {
   release: string;
+  testedCommit: string;
   acceptedIssues: AcceptedIssue[];
   runs: Run[];
 }
@@ -387,7 +390,15 @@ function validateReleaseEvidence(
   ).toBe(true);
   const nextResolving = new Set(resolving).add(evidence.release);
   const inherited = JSON.parse(readFileSync(inheritedFile, "utf8")) as ReleaseRecord | ReleaseAlias;
-  return validateReleaseEvidence(inheritedFile, inherited, nextResolving);
+  const resolved = validateReleaseEvidence(inheritedFile, inherited, nextResolving);
+  const repoRoot = join(manualAtDirectory, "..", "..", "..");
+  auditAliasCommitRange({
+    repoRoot,
+    baseCommit: resolved.testedCommit,
+    releaseCommit: evidence.releaseCommit,
+    releaseVersion: evidence.release,
+  });
+  return resolved;
 }
 
 describe("manual assistive-technology evidence schema", () => {
