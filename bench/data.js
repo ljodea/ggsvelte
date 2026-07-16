@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784198951117,
+  "lastUpdate": 1784199349988,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -9722,6 +9722,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 166.2627,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "85fd843a672cb848a9cc8298ba4ffcda04f8b8f2",
+          "message": "refactor(core): extract runPipeline layout, scene, contracts, candidates (#91)\n\n* refactor(core): extract runPipeline layout, scene, contracts, candidates\n\nPeel the remaining large runPipeline phases into focused modules:\npanel layout, geometry/scene assembly, per-layer contracts, and\ninteraction candidate construction. The orchestrator is now a thin\npipeline of phase calls. Characterization tests cover backends,\ntooltip fields, scaled constants, and facet layout placement.\n\n* fix(core): keep empty-data layer contracts aligned by layer index\n\nresolveLayerFields/ScaledConstants now take layerCount and pad missing\nbindings, matching the pre-extract empty-data indexing contract.\n\n* fix(core): avoid expect.arrayContaining in layer-contracts test",
+          "timestamp": "2026-07-16T05:55:07-05:00",
+          "tree_id": "37db00a75674dfaf0f62cd49489ec34f2fabb48c",
+          "url": "https://github.com/ljodea/ggsvelte/commit/85fd843a672cb848a9cc8298ba4ffcda04f8b8f2"
+        },
+        "date": 1784199348793,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 1.9358,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.1998,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 7.4474,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 9.9198,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 63.1987,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 95.878,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 0.7609,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 0.9583,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 70.0924,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 87.0271,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 8.8937,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 9.1482,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 98.0147,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.6363,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 24.2505,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 5.6174,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 22.1568,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 483.4565,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 130.2195,
             "unit": "ms"
           }
         ]
