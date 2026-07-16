@@ -75,6 +75,25 @@ describe("panel layout via runPipeline", () => {
     expect(withY.length).toBeGreaterThanOrEqual(2);
   });
 
+  it("legend reserves right margin when fill is mapped", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { g: "a", y: 1 },
+          { g: "b", y: 2 },
+        ],
+        aes({ x: "g", y: "y", fill: "g" }),
+      )
+        .geomCol()
+        .spec(),
+      size,
+    );
+    expect(model.scene.legends.length).toBeGreaterThan(0);
+    const panel = model.scene.panels[0]!;
+    // legend occupies right of the plot; panel should not span full width
+    expect(panel.x + panel.width).toBeLessThan(size.width - 8);
+  });
+
   it("labs and flip swap axis title orientation on the scene", () => {
     const model = runPipeline(
       gg(
