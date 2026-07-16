@@ -1,68 +1,21 @@
 /**
  * Positional axis training: type inference, band/continuous training, zero forcing.
  */
-import type { LayerSpec, PositionScaleSpec } from "@ggsvelte/spec";
+import type { PositionScaleSpec } from "@ggsvelte/spec";
 
-import type { ContinuousConfig, PositionScale } from "../scales/train.js";
+import type { ContinuousConfig } from "../scales/train.js";
 import { ScaleConfigError, trainBand, trainContinuous } from "../scales/train.js";
-import type { CellValue } from "../table.js";
-import { cellToNumber } from "../table.js";
 
+import { continuousDomainOf } from "./scale-axis-domain.js";
+import type { AxisInputs, AxisTraining } from "./scale-axis-types.js";
 import type { Advisory, PipelineWarning } from "./types.js";
 import { PipelineError } from "./types.js";
 
-/** Geoms whose marks extend from a zero baseline on the measure (y) axis. */
-export function isBarLike(geom: LayerSpec["geom"]): boolean {
-  return geom === "bar" || geom === "col" || geom === "area";
-}
+export type { AxisInputs, AxisTraining } from "./scale-axis-types.js";
+export { isBarLike } from "./scale-axis-types.js";
 
 const POSITION_TYPE_OVERRIDE =
   'Set scales.AXIS.type ("linear" | "log" | "time" | "band") in the spec.';
-
-function continuousDomainOf(
-  config: PositionScaleSpec | undefined,
-  axis: "x" | "y",
-): [number, number] | undefined {
-  if (config?.domain === undefined) return undefined;
-  if (config.domain.length !== 2) {
-    throw new PipelineError(
-      "invalid-scale-domain",
-      `/scales/${axis}/domain`,
-      `A continuous ${axis} domain needs exactly [min, max] (got ${config.domain.length} entries).`,
-    );
-  }
-  const lo = cellToNumber(config.domain[0] as CellValue);
-  const hi = cellToNumber(config.domain[1] as CellValue);
-  if (!Number.isFinite(lo) || !Number.isFinite(hi)) {
-    throw new PipelineError(
-      "invalid-scale-domain",
-      `/scales/${axis}/domain`,
-      `The ${axis} domain [${String(config.domain[0])}, ${String(config.domain[1])}] does not parse to finite numbers (use numbers, or ISO 8601 strings for time scales).`,
-    );
-  }
-  return lo <= hi ? [lo, hi] : [hi, lo];
-}
-
-export interface AxisTraining {
-  scale: PositionScale;
-  advisories: Advisory[];
-  warnings: PipelineWarning[];
-}
-
-export interface AxisInputs {
-  /** Discrete columns contributing to a band domain. */
-  columns: (readonly CellValue[])[];
-  /** Continuous numeric arrays (post-stat / post-position). */
-  numeric: Float64Array[];
-  /** True when any contributing field is discrete or a geom forces bands. */
-  anyDiscrete: boolean;
-  /** True when every contributing field is temporal (and none discrete). */
-  allTemporal: boolean;
-  /** True when a bar-like geom measures on this axis (zero forcing). */
-  barMeasure: boolean;
-  /** Human-readable description of the evidence (advisory text). */
-  evidence: string;
-}
 
 export function trainAxis(
   axis: "x" | "y",
