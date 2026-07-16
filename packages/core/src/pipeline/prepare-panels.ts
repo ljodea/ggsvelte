@@ -3,26 +3,14 @@
  */
 import type { PortableSpec } from "@ggsvelte/spec";
 
-import type { ColumnTable } from "../table.js";
-
 import { bindData } from "./bind.js";
-import type { FacetLayout, FacetPanelDef } from "./facets.js";
+import type { FacetLayout } from "./facets.js";
 import { resolveFacet, SINGLE_PANEL } from "./facets.js";
 import { buildPanelFrames } from "./prepare-panels-frames.js";
+import type { PreparedPanels } from "./prepare-panels-types.js";
 import type { Advisory, LayerBinding, LayerFrame, PipelineWarning, RunOptions } from "./types.js";
 
-export interface PreparedPanels {
-  table: ColumnTable;
-  emptyData: boolean;
-  faceted: boolean;
-  freeX: boolean;
-  freeY: boolean;
-  nrow: number;
-  ncol: number;
-  facetPanels: FacetPanelDef[];
-  bindings: LayerBinding[];
-  panelFrames: LayerFrame[][];
-}
+export type { PreparedPanels } from "./prepare-panels-types.js";
 
 export function preparePanels(
   normalized: PortableSpec,

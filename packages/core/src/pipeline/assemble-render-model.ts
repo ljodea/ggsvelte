@@ -11,6 +11,10 @@ import type { CandidateStore } from "../candidate-store.js";
 import type { LineageStore } from "../identity.js";
 
 import {
+  dedupeRenderModelDiagnostics,
+  freezeRenderModelDomains,
+} from "./assemble-render-model-domains.js";
+import {
   buildRenderModelAxisFormatters,
   buildRenderModelScales,
 } from "./assemble-render-model-scales.js";
@@ -24,7 +28,6 @@ import type {
   ResolvedColorScale,
   ScaleDomainSnapshot,
 } from "./types.js";
-import { dedupeAdvisories, dedupeWarnings } from "./layout-helpers.js";
 
 export function assembleRenderModel(input: {
   scene: Scene;
@@ -55,20 +58,18 @@ export function assembleRenderModel(input: {
     candidates,
     table: input.table,
   });
+  const diagnostics = dedupeRenderModelDiagnostics(input.warnings, input.advisories);
 
   return {
     scene,
     scales: buildRenderModelScales(input),
-    warnings: dedupeWarnings(input.warnings),
-    advisories: dedupeAdvisories(input.advisories),
+    warnings: diagnostics.warnings,
+    advisories: diagnostics.advisories,
     runId: input.runId,
     layerBackends: input.layerBackends,
     layerFields: input.layerFields,
     layerScaledConstants: input.layerScaledConstants,
-    domains: Object.freeze({
-      baseline: input.baselineDomains,
-      effective: input.effectiveDomains,
-    }),
+    domains: freezeRenderModelDomains(input.baselineDomains, input.effectiveDomains),
     lineage: input.lineage,
     candidates,
     axisFormatters: buildRenderModelAxisFormatters(
