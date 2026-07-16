@@ -48,7 +48,7 @@ jobs:
   compare:
     name: build docs, screenshot, upload candidate baselines
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, ggsvelte]
     permissions:
       contents: read
     container:
@@ -144,7 +144,7 @@ jobs:
       github.event_name == 'issue_comment' &&
       github.event.issue.pull_request &&
       contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, ggsvelte]
     permissions:
       contents: read
       pull-requests: read # resolve the PR head via `gh api` (read-only)
@@ -193,7 +193,7 @@ jobs:
     name: /approve-visuals — regenerate baselines at PR head (pinned container)
     needs: approve-gate
     if: needs.approve-gate.outputs.match == 'true'
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, ggsvelte]
     permissions:
       contents: read # checkout only; this job can write nothing
     container:
