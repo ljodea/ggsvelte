@@ -85,6 +85,43 @@ export function nextPointSelectionKeys(
 }
 
 /**
+ * Candidate store surface used by presentation walks (size + random-access).
+ * Generic so `plot-selection` stays free of core CandidateFacts coupling.
+ */
+export type CandidateLookup<T> = {
+  readonly size: number;
+  candidate(id: number): T | null;
+};
+
+/**
+ * Yield every non-null candidate in id-ascending order (`0 .. size-1`).
+ * Shared walk for anchors, mask projections, legend indexes, and hit match.
+ */
+export function* iterateCandidates<T>(
+  candidates: CandidateLookup<T>,
+): Generator<T, void, undefined> {
+  for (let id = 0; id < candidates.size; id++) {
+    const candidate = candidates.candidate(id);
+    if (candidate !== null) yield candidate;
+  }
+}
+
+/**
+ * Project every non-null candidate (id-ascending) into a new array.
+ * Hosts supply `project` (may close over model / semantic keys).
+ */
+export function collectCandidates<T, R>(
+  candidates: CandidateLookup<T>,
+  project: (candidate: T) => R,
+): R[] {
+  const out: R[] = [];
+  for (const candidate of iterateCandidates(candidates)) {
+    out.push(project(candidate));
+  }
+  return out;
+}
+
+/**
  * Collect unique pixel anchors for selected semantic keys.
  * Candidates must already be in id-ascending order; key resolution stays with
  * the caller. Dedup identity is `${String(x)}:${String(y)}`.

@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import {
   anchorsFromCandidateKeys,
   buildPointSelectionEvent,
+  collectCandidates,
+  iterateCandidates,
   mergePresentationFocusKeys,
   nextPointSelectionKeys,
   rowIndexesForCandidate,
@@ -32,6 +34,49 @@ describe("nextPointSelectionKeys", () => {
 
   it("deduplicates union results", () => {
     expect(nextPointSelectionKeys(["a", "a"], ["b", "b"], true)).toEqual(["a", "b"]);
+  });
+});
+
+describe("iterateCandidates / collectCandidates", () => {
+  function lookup(entries: Array<{ id: number; value: string } | null>): {
+    size: number;
+    candidate(id: number): { id: number; value: string } | null;
+  } {
+    return {
+      size: entries.length,
+      candidate: (id) => entries[id] ?? null,
+    };
+  }
+
+  it("yields non-null candidates in id-ascending order and skips holes", () => {
+    const store = lookup([
+      { id: 0, value: "a" },
+      null,
+      { id: 2, value: "c" },
+      null,
+      { id: 4, value: "e" },
+    ]);
+    expect([...iterateCandidates(store)].map((c) => c.value)).toEqual(["a", "c", "e"]);
+  });
+
+  it("returns empty for size 0", () => {
+    expect([...iterateCandidates(lookup([]))]).toEqual([]);
+    expect(collectCandidates(lookup([]), (c) => c.value)).toEqual([]);
+  });
+
+  it("projects with collectCandidates without shifting past nulls", () => {
+    const store = lookup([{ id: 0, value: "x" }, null, { id: 2, value: "z" }]);
+    expect(collectCandidates(store, (c) => c.value.toUpperCase())).toEqual(["X", "Z"]);
+  });
+
+  it("does not call project for null slots", () => {
+    const store = lookup([null, { id: 1, value: "only" }, null]);
+    const seen: number[] = [];
+    collectCandidates(store, (c) => {
+      seen.push(c.id);
+      return c.value;
+    });
+    expect(seen).toEqual([1]);
   });
 });
 
