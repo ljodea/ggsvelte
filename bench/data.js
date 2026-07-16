@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784234576862,
+  "lastUpdate": 1784235371685,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -17457,6 +17457,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 163.3565,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "11b9698bec0b3e13403cf7a3b7d5865baab0f524",
+          "message": "fix(ci): stop interaction-perf wall-clock flakes from blocking merges (#158)\n\nAbsolute p50/p95 budgets on the shared self-hosted host (4 runners /\n8 vCPU) intermittently failed the required component check — R3 filter\n\"p95\" with n=8 was effectively the max sample (issue #154).\n\n- Move test:interaction-perf into a separate non-required job\n- Add R3 filter warmup and n=20 so p95 is a real percentile\n- Allow one Playwright retry under CI for residual host noise\n- Hard gate remains on run-bench PRs via bench.yml",
+          "timestamp": "2026-07-16T15:55:36-05:00",
+          "tree_id": "574f523bcfc34eb3591cd6d065885ad54cde2a67",
+          "url": "https://github.com/ljodea/ggsvelte/commit/11b9698bec0b3e13403cf7a3b7d5865baab0f524"
+        },
+        "date": 1784235370668,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.5692,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.4179,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 7.2981,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 9.4118,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 65.2036,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 93.826,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.0211,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.0531,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 71.1772,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 85.2287,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 10.9889,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 9.8709,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 89.5563,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.6251,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 20.6874,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 5.8102,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 24.7445,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 488.7041,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 130.6475,
             "unit": "ms"
           }
         ]
