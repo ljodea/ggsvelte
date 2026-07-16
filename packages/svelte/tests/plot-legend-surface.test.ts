@@ -218,15 +218,17 @@ describe("resolveLegendCommitAction", () => {
         pressed: { scale: "fill", entryIndex: 1 },
         identity,
         keyCount: 0,
+        entrySource: "pointer",
       }),
-    ).toEqual({ type: "toggle-clear" });
+    ).toEqual({ type: "toggle-clear", source: "pointer" });
     expect(
       resolveLegendCommitAction({
         pressed: { scale: "fill", entryIndex: 1 },
         identity,
         keyCount: 3,
+        entrySource: "touch",
       }),
-    ).toEqual({ type: "toggle-clear" });
+    ).toEqual({ type: "toggle-clear", source: "touch" });
   });
 
   it("ignores empty keys only when not toggling the pressed entry", () => {
@@ -235,6 +237,7 @@ describe("resolveLegendCommitAction", () => {
         pressed: null,
         identity,
         keyCount: 0,
+        entrySource: "keyboard",
       }),
     ).toEqual({ type: "ignore" });
     expect(
@@ -242,6 +245,7 @@ describe("resolveLegendCommitAction", () => {
         pressed: { scale: "color", entryIndex: 1 },
         identity,
         keyCount: 0,
+        entrySource: "pointer",
       }),
     ).toEqual({ type: "ignore" });
     expect(
@@ -249,53 +253,70 @@ describe("resolveLegendCommitAction", () => {
         pressed: { scale: "fill", entryIndex: 0 },
         identity,
         keyCount: 0,
+        entrySource: "focus",
       }),
     ).toEqual({ type: "ignore" });
   });
 
-  it("commits when keys exist and identity is not already pressed", () => {
+  it("commits when keys exist and identity is not already pressed, mapping source", () => {
     expect(
       resolveLegendCommitAction({
         pressed: null,
         identity,
         keyCount: 2,
+        entrySource: "pointer",
       }),
-    ).toEqual({ type: "commit" });
+    ).toEqual({ type: "commit", source: "pointer" });
+    // focus → keyboard on the public InteractionSource surface
+    expect(
+      resolveLegendCommitAction({
+        pressed: null,
+        identity,
+        keyCount: 1,
+        entrySource: "focus",
+      }),
+    ).toEqual({ type: "commit", source: "keyboard" });
   });
 });
 
 describe("resolveLegendPreviewDismissAction", () => {
-  it("returns none when there is no active preview", () => {
+  it("returns none when previewSource is null (no active preview)", () => {
     expect(
       resolveLegendPreviewDismissAction({
-        hasActivePreview: false,
+        previewSource: null,
         committedEmphasisEmpty: true,
       }),
     ).toEqual({ type: "none" });
     expect(
       resolveLegendPreviewDismissAction({
-        hasActivePreview: false,
+        previewSource: null,
         committedEmphasisEmpty: false,
       }),
     ).toEqual({ type: "none" });
   });
 
-  it("emits clear only when committed emphasis is empty (not effective/preview)", () => {
+  it("emits clear with mapped source when committed emphasis is empty", () => {
     expect(
       resolveLegendPreviewDismissAction({
-        hasActivePreview: true,
+        previewSource: "pointer",
         committedEmphasisEmpty: true,
       }),
-    ).toEqual({ type: "clear-and-emit" });
-  });
-
-  it("clears preview without emit when committed emphasis remains", () => {
+    ).toEqual({ type: "clear-and-emit", source: "pointer" });
     expect(
       resolveLegendPreviewDismissAction({
-        hasActivePreview: true,
+        previewSource: "focus",
+        committedEmphasisEmpty: true,
+      }),
+    ).toEqual({ type: "clear-and-emit", source: "keyboard" });
+  });
+
+  it("clears preview without emit when committed emphasis remains, still carries source", () => {
+    expect(
+      resolveLegendPreviewDismissAction({
+        previewSource: "touch",
         committedEmphasisEmpty: false,
       }),
-    ).toEqual({ type: "clear-only" });
+    ).toEqual({ type: "clear-only", source: "touch" });
   });
 });
 
