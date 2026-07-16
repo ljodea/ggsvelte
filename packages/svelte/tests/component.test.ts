@@ -291,6 +291,28 @@ describe("data-gg-ready readiness signal (M1 VR workstream)", () => {
     await Promise.resolve(); // a microtask later it is STILL not ready
     expect(root?.dataset.ggReady).toBe("false");
   });
+
+  it("clears data-gg-ready in the same update when the plot becomes unready", async () => {
+    const { container, rerender } = render(GGPlot, {
+      data: rows,
+      aes: { x: "x", y: "y" },
+      layers: [{ geom: "point" }],
+      width: 480,
+      height: 320,
+    });
+    const root = container.querySelector<HTMLElement>(".gg-plot-root");
+    await expect.poll(() => root?.dataset.ggReady).toBe("true");
+    // Explicit empty layers → no model → not ready. Derived predicate must
+    // clear the attribute in this commit (not wait for a post-flush $effect).
+    await rerender({
+      data: rows,
+      aes: { x: "x", y: "y" },
+      layers: [],
+      width: 480,
+      height: 320,
+    } as never);
+    expect(root?.dataset.ggReady).toBe("false");
+  });
 });
 
 describe("M2 statistical children components", () => {
