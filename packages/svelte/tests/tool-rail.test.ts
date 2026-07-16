@@ -17,6 +17,9 @@ describe("<ToolRail> recovery input sources", () => {
       zoomDomains: { x: [1, 2] },
       hasPointSelection: true,
       hasIntervalSelection: true,
+      intervalTargetLabel: "North",
+      canSetIntervalBounds: true,
+      intervalAxes: ["x"],
       onChooseTool: vi.fn(),
       onResetZoom: reset,
       onClearPointSelection: clearPoint,
@@ -42,7 +45,7 @@ describe("<ToolRail> recovery input sources", () => {
     clearSelection.click();
     expect(clearPoint).toHaveBeenCalledWith("pointer");
 
-    const clearPanelSelection = button("Clear panel selection");
+    const clearPanelSelection = button("Clear panel selection: North");
     clearPanelSelection.dispatchEvent(
       new PointerEvent("pointerdown", {
         bubbles: true,
@@ -54,5 +57,7 @@ describe("<ToolRail> recovery input sources", () => {
 
     button("Clear all selections").click();
     expect(clearAll).toHaveBeenCalledWith("keyboard");
+
+    expect(button("Edit x selection bounds: North")).not.toBeUndefined();
   });
 });

@@ -12,6 +12,7 @@
     zoomDomains = null,
     hasPointSelection = false,
     hasIntervalSelection = false,
+    intervalTargetLabel,
     canSetIntervalBounds = false,
     canSetZoomBounds = false,
     intervalAxes = [],
@@ -31,6 +32,7 @@
     zoomDomains?: ZoomDomains | null;
     hasPointSelection?: boolean;
     hasIntervalSelection?: boolean;
+    intervalTargetLabel?: string | undefined;
     canSetIntervalBounds?: boolean;
     canSetZoomBounds?: boolean;
     intervalAxes?: readonly ("x" | "y")[];
@@ -76,7 +78,15 @@
     axis: "x" | "y",
     editing: boolean,
   ): string {
-    return `${editing ? "Edit" : "Set"} ${axis} ${action === "select" ? "selection" : "zoom"} bounds`;
+    const target =
+      action === "select" && intervalTargetLabel !== undefined
+        ? `: ${intervalTargetLabel}`
+        : "";
+    return `${editing ? "Edit" : "Set"} ${axis} ${action === "select" ? "selection" : "zoom"} bounds${target}`;
+  }
+
+  function panelClearLabel(): string {
+    return `Clear panel selection${intervalTargetLabel === undefined ? "" : `: ${intervalTargetLabel}`}`;
   }
 </script>
 
@@ -138,7 +148,7 @@
         onpointerdown={captureRecoveryPointer}
         onpointercancel={() => (recoveryPointerType = null)}
         onclick={(event) => onClearCurrentInterval(recoverySource(event))}
-        >Clear panel selection</button
+        >{panelClearLabel()}</button
       >
       <button
         type="button"

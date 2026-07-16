@@ -738,6 +738,17 @@
     void reducerRevision;
     return reducer.state.tool;
   });
+  const surfaceDescription = $derived.by(() => {
+    if (activeTool === "select-area")
+      return "Press Enter or Space to set the first selection corner. Use Arrow keys to move the opposite corner; hold Shift for larger steps. Press Enter or Space to complete the selection. Press Escape to cancel.";
+    if (activeTool === "zoom-area")
+      return "Press Enter or Space to set the first zoom corner. Use Arrow keys to move the opposite corner; hold Shift for larger steps. Press Enter or Space to complete the zoom. Press Escape to cancel.";
+    if (activeTool === "point")
+      return "Use Arrow keys to inspect data. Press Enter or Space to toggle the focused point selection. Press Escape to dismiss.";
+    return interactionConfig.inspect?.pin === true
+      ? "Use Arrow keys to inspect data. Press Enter or Space to pin. Press Escape to dismiss."
+      : "Use Arrow keys to inspect data. Press Escape to dismiss.";
+  });
   let inspection = $state<PlotInspectionChange<
     Record<string, CellValue>,
     PropertyKey
@@ -815,6 +826,7 @@
     action: "select" | "zoom";
     axis: "x" | "y";
     panelId?: string;
+    panelLabel?: string;
   } | null>(null);
   let boundsReturnFocus = $state<HTMLElement | null>(null);
   const effectiveIntervals = $derived.by(() => {
@@ -857,6 +869,15 @@
       null
     );
   });
+  const currentIntervalTargetLabel = $derived.by(() => {
+    if (currentIntervalRecord === null || model === null) return undefined;
+    const panel = model.scene.panels.find(
+      (candidate) => candidate.id === currentIntervalRecord.panelId,
+    );
+    if (panel === undefined) return currentIntervalRecord.panelId;
+    const label = panel.strip.trim();
+    return label.length > 0 ? label : undefined;
+  });
   const boundsEditorInput = $derived.by((): BoundsEditorInput | null => {
     if (boundsEditor === null || model === null) return null;
     if (boundsEditor.action === "zoom") {
@@ -895,6 +916,21 @@
       reversed:
         scale.type !== "band" &&
         scale.normalize(scale.domain[0]) > scale.normalize(scale.domain[1]),
+    });
+  });
+  $effect(() => {
+    if (boundsEditor === null || boundsEditorInput !== null) return;
+    const target = boundsEditor.panelLabel ?? "the target panel";
+    boundsEditor = null;
+    boundsReturnFocus = null;
+    // The original button may have been reused for a different panel. The
+    // capture surface is the stable recovery target for reactive cancellation;
+    // explicit Apply/Cancel still restores the initiating button.
+    queueMicrotask(() => {
+      captureSurface?.focus();
+      announceInteraction(
+        `Bounds editing cancelled because ${target} is no longer available.`,
+      );
     });
   });
   const zoomHasSupportedChannel = $derived.by(() => {
@@ -2497,7 +2533,12 @@
               (candidate) => candidate.id === currentIntervalRecord.panelId,
             )) ?? model?.scene.panels[0];
       if (panel === undefined) return;
-      boundsEditor = { action, axis, panelId: panel.id };
+      boundsEditor = {
+        action,
+        axis,
+        panelId: panel.id,
+        panelLabel: panel.strip.trim() || panel.id,
+      };
       return;
     }
     boundsEditor = { action, axis };
@@ -2882,6 +2923,7 @@
       hasPointSelection={canPublishPointSelection &&
         effectiveSelectedKeys.length > 0}
       hasIntervalSelection={effectiveIntervals.length > 0}
+      intervalTargetLabel={currentIntervalTargetLabel}
       canSetIntervalBounds={!emptyPlot && preciseIntervalAxes.length > 0}
       canSetZoomBounds={!emptyPlot && preciseZoomAxes.length > 0}
       intervalAxes={preciseIntervalAxes}
@@ -3124,8 +3166,7 @@
         ondblclick={onDblClick}
       ></div>
       <p id={`${plotId}-description`} class="gg-sr-only">
-        Use arrow keys to inspect data. Press Enter to pin. Press Escape to
-        dismiss.
+        {surfaceDescription}
       </p>
       <p id={`${plotId}-active`} class="gg-sr-only">
         {inspection === null

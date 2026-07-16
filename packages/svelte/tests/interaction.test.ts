@@ -122,6 +122,166 @@ describe("facets + flip through the component", () => {
 
     expect(container.querySelectorAll(".gg-selected-ring")).toHaveLength(2);
   });
+
+  it("names the passive shared interval targeted by panel recovery controls", async () => {
+    let model: RenderModel | null = null;
+    const interaction = createPlotInteraction<string>();
+    const interactionScope = {
+      keys: "shared-row",
+      intervals: "shared-facets",
+    } as const;
+    const { container } = render(GGPlot, {
+      data: [
+        { id: "north", facet: "North", x: 1, y: 1 },
+        { id: "south", facet: "South", x: 2, y: 2 },
+      ],
+      aes: { x: "x", y: "y" },
+      layers: [{ geom: "point" }],
+      facet: { wrap: "facet" },
+      key: "id",
+      select: { type: "interval", mode: "x", preset: "union" },
+      interaction,
+      interactionScope,
+      onrender: (next: RenderModel) => (model = next),
+      ...size,
+    });
+    await until(() => model?.scene.panels.length === 2);
+    for (const panel of model!.scene.panels) {
+      interaction.setInterval(
+        {
+          panelId: panel.id,
+          preset: "union",
+          domains: { x: { kind: "linear", domain: [0, 3] } },
+          keys: [panel.strip.toLowerCase()],
+        },
+        { scope: interactionScope },
+      );
+    }
+    const targetRecord = interaction.intervals(interactionScope)[0]!;
+    const targetLabel = model!.scene.panels.find(
+      (panel) => panel.id === targetRecord.panelId,
+    )!.strip;
+    await until(() =>
+      [...container.querySelectorAll<HTMLButtonElement>(".gg-tool-rail button")].some(
+        (button) => button.textContent?.trim() === `Clear panel selection: ${targetLabel}`,
+      ),
+    );
+
+    const edit = [...container.querySelectorAll<HTMLButtonElement>(".gg-tool-rail button")].find(
+      (button) => button.textContent?.trim() === `Edit x selection bounds: ${targetLabel}`,
+    );
+    expect(edit).not.toBeUndefined();
+    const clear = [...container.querySelectorAll<HTMLButtonElement>(".gg-tool-rail button")].find(
+      (button) => button.textContent?.trim() === `Clear panel selection: ${targetLabel}`,
+    )!;
+    clear.click();
+    await until(() => interaction.intervals(interactionScope).length === 1);
+    expect(interaction.intervals(interactionScope)[0]?.panelId).not.toBe(targetRecord.panelId);
+  });
+
+  it("restores focus and announces when an edited facet disappears", async () => {
+    let model: RenderModel | null = null;
+    const interaction = createPlotInteraction<string>();
+    const interactionScope = { keys: "row", intervals: "facets" } as const;
+    const base = {
+      aes: { x: "x", y: "y" },
+      layers: [{ geom: "point" as const }],
+      facet: { wrap: "facet" },
+      key: "id",
+      select: { type: "interval" as const, mode: "x" as const },
+      interaction,
+      interactionScope,
+      onrender: (next: RenderModel) => (model = next),
+      ...size,
+    };
+    const view = render(GGPlot, {
+      ...base,
+      data: [
+        { id: "north", facet: "North", x: 1, y: 1 },
+        { id: "south", facet: "South", x: 2, y: 2 },
+      ],
+    });
+    await until(() => model?.scene.panels.length === 2);
+    const north = model!.scene.panels.find((panel) => panel.strip === "North")!;
+    interaction.setInterval(
+      {
+        panelId: north.id,
+        preset: "independent",
+        domains: { x: { kind: "linear", domain: [0, 2] } },
+        keys: ["north"],
+      },
+      { scope: interactionScope },
+    );
+    const edit = await new Promise<HTMLButtonElement>((resolve, reject) => {
+      const started = performance.now();
+      const find = () => {
+        const button = [
+          ...view.container.querySelectorAll<HTMLButtonElement>(".gg-tool-rail button"),
+        ].find((candidate) => candidate.textContent?.trim() === "Edit x selection bounds: North");
+        if (button !== undefined) return resolve(button);
+        if (performance.now() - started > 2000) return reject(new Error("edit control missing"));
+        requestAnimationFrame(find);
+      };
+      find();
+    });
+    edit.click();
+    await until(() => view.container.querySelector(".gg-bounds-editor") !== null);
+
+    await view.rerender({
+      ...base,
+      data: [{ id: "south", facet: "South", x: 2, y: 2 }],
+    });
+    await until(() => view.container.querySelector(".gg-bounds-editor") === null);
+    await until(() =>
+      (view.container.querySelector("[aria-live='polite']")?.textContent ?? "").includes(
+        "Bounds editing cancelled because North is no longer available.",
+      ),
+    );
+    expect(document.activeElement).toBe(view.container.querySelector(".gg-capture"));
+    expect(view.container.querySelector("[aria-live='polite']")?.textContent).toContain(
+      "Bounds editing cancelled because North is no longer available.",
+    );
+  });
+});
+
+describe("accessible keyboard instructions", () => {
+  it("describes inspect, select-area, and zoom-area truthfully", async () => {
+    const { container } = render(GGPlot, {
+      data: rows,
+      aes: { x: "x", y: "y" },
+      layers: [{ geom: "point" }],
+      key: "x",
+      inspect: true,
+      select: { type: "interval" },
+      zoom: true,
+      ...size,
+    });
+    const capture = container.querySelector<HTMLElement>(".gg-capture")!;
+    const description = () => {
+      const id = capture.getAttribute("aria-describedby")!.split(" ")[0]!;
+      return container.querySelector<HTMLElement>(`#${CSS.escape(id)}`)!.textContent!;
+    };
+    expect(description()).toContain("Use Arrow keys to inspect data");
+    expect(description()).toContain("Enter or Space to pin");
+
+    const tool = (label: string) =>
+      [...container.querySelectorAll<HTMLButtonElement>(".gg-tool-rail button")].find(
+        (button) => button.textContent?.trim() === label,
+      )!;
+    tool("Select area").click();
+    await until(() => description().includes("selection corner"));
+    expect(description()).toContain("Enter or Space");
+    expect(description()).toContain("Arrow keys");
+    expect(description()).toContain("Shift");
+    expect(description()).toContain("Escape to cancel");
+
+    tool("Zoom area").click();
+    await until(() => description().includes("zoom corner"));
+    expect(description()).toContain("Enter or Space");
+    expect(description()).toContain("Arrow keys");
+    expect(description()).toContain("Shift");
+    expect(description()).toContain("Escape to cancel");
+  });
 });
 
 describe("canvas strata (decision 0006 graduated)", () => {
@@ -535,7 +695,10 @@ describe("brush + brush-to-zoom", () => {
       keys: readonly PropertyKey[];
     }> = [];
     const interaction = createPlotInteraction<string>();
-    const interactionScope = { keys: "typed-brush", intervals: "typed-brush" } as const;
+    const interactionScope = {
+      keys: "typed-brush",
+      intervals: "typed-brush",
+    } as const;
     const { container } = render(GGPlot, {
       data: [
         { id: "number", x: 1, y: 1 },
@@ -583,9 +746,15 @@ describe("brush + brush-to-zoom", () => {
 
   it("publishes complete shared xy precise domains and source-row lineage", async () => {
     const interaction = createPlotInteraction<string>();
-    const interactionScope = { keys: "precise-xy", intervals: "precise-xy" } as const;
+    const interactionScope = {
+      keys: "precise-xy",
+      intervals: "precise-xy",
+    } as const;
     const selections: Array<{
-      domain: { x?: readonly [unknown, unknown]; y?: readonly [unknown, unknown] };
+      domain: {
+        x?: readonly [unknown, unknown];
+        y?: readonly [unknown, unknown];
+      };
       keys: readonly PropertyKey[];
       lineageCount: number;
     }> = [];
@@ -610,7 +779,10 @@ describe("brush + brush-to-zoom", () => {
       interactionScope,
       onselect: (event: {
         phase: string;
-        domain: { x?: readonly [unknown, unknown]; y?: readonly [unknown, unknown] };
+        domain: {
+          x?: readonly [unknown, unknown];
+          y?: readonly [unknown, unknown];
+        };
         keys: readonly PropertyKey[];
         lineageCount: number;
       }) => {
@@ -859,7 +1031,10 @@ describe("brush + brush-to-zoom", () => {
           pointerId: 7,
         }),
       );
-    const firstCorner = { x: first.x + first.width / 2, y: first.y + first.height / 2 };
+    const firstCorner = {
+      x: first.x + first.width / 2,
+      y: first.y + first.height / 2,
+    };
     const secondCorner = {
       x: second.x + second.width / 2,
       y: second.y + second.height / 2,
