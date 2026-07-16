@@ -613,7 +613,7 @@
               pending.concreteMode,
               pending.candidate,
             );
-            return;
+            break;
         }
       }
     },

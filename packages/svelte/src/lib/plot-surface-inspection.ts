@@ -3,7 +3,7 @@
  * Callers own queue mutation, setInspection, and reducer side effects.
  */
 
-export type InspectionHostState = "none" | "transient" | "pinned";
+type InspectionHostState = "none" | "transient" | "pinned";
 
 export type QueuedInspectFrameInput = {
   /** True when a snapshotted `queuedPointerInspection` payload exists. */
