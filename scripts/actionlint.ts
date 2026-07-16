@@ -11,12 +11,76 @@
  * config hook). Keep labels only in that yaml — this runner derives the
  * "label is unknown" suppressions from it so the two cannot drift.
  *
+ * Load/init failures: fatal under CI (`CI` / `GITHUB_ACTIONS`), soft-skip only
+ * on local machines (arch mismatch, missing wasm). The pre-push hook and the
+ * required `actions-security` job both call this script; CI must never green
+ * on a silent skip.
+ *
  * Usage: bun scripts/actionlint.ts [files...]
  */
 import { readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
 
 const ACTIONLINT_YAML = ".github/actionlint.yaml";
+
+/**
+ * Soft-skip wasm load failures only outside CI. GitHub Actions sets both
+ * `CI=true` and `GITHUB_ACTIONS=true`; local pre-push has neither.
+ */
+export function allowSoftSkipLoadFailure(env: NodeJS.ProcessEnv = process.env): boolean {
+  return env.CI !== "true" && env.GITHUB_ACTIONS !== "true";
+}
+
+/**
+ * Parse a YAML list-item scalar value (the part after `- `).
+ * Strips unquoted inline comments (`ggsvelte # pool` → `ggsvelte`) while
+ * keeping `#` inside quotes (`"ggsvelte # literal"` → `ggsvelte # literal`).
+ */
+export function parseYamlListScalar(raw: string): string {
+  const s = raw.trim();
+  if (s.length === 0) return "";
+
+  if (s.startsWith('"')) {
+    let out = "";
+    for (let i = 1; i < s.length; i++) {
+      const ch = s[i]!;
+      if (ch === "\\" && i + 1 < s.length) {
+        out += s[i + 1]!;
+        i += 1;
+        continue;
+      }
+      if (ch === '"') return out;
+      out += ch;
+    }
+    return out;
+  }
+
+  if (s.startsWith("'")) {
+    // YAML single-quoted: '' is an escaped single quote.
+    let out = "";
+    for (let i = 1; i < s.length; i++) {
+      const ch = s[i]!;
+      if (ch === "'") {
+        if (s[i + 1] === "'") {
+          out += "'";
+          i += 1;
+          continue;
+        }
+        return out;
+      }
+      out += ch;
+    }
+    return out;
+  }
+
+  // Plain scalar: `#` starts a comment only when preceded by whitespace.
+  for (let i = 0; i < s.length; i++) {
+    if (s[i] === "#" && (i === 0 || /\s/.test(s[i - 1]!))) {
+      return s.slice(0, i).trimEnd();
+    }
+  }
+  return s;
+}
 
 /** Parse `self-hosted-runner.labels` from actionlint.yaml without a YAML dep. */
 export function parseSelfHostedLabels(yaml: string): string[] {
@@ -43,7 +107,8 @@ export function parseSelfHostedLabels(yaml: string): string[] {
     if (!inLabels) continue;
     const item = line.match(/^\s+-\s+(.+?)\s*$/);
     if (item) {
-      labels.push(item[1]!.replaceAll(/^['"]|['"]$/g, ""));
+      const label = parseYamlListScalar(item[1]!);
+      if (label.length > 0) labels.push(label);
       continue;
     }
     // Blank / comment lines stay inside the list; any other key ends it.
@@ -100,17 +165,21 @@ async function main(): Promise<void> {
     process.exit(0);
   }
 
-  // Graceful skip when the wasm binding fails to load (arch mismatch, missing
-  // native bits, etc.). CI's actions-security job still enforces actionlint.
+  // Local-only soft-skip when the wasm binding fails to load (arch mismatch,
+  // missing native bits). Under CI the same failure is fatal so the required
+  // actions-security job cannot green without running the linter.
+  const softSkip = allowSoftSkipLoadFailure();
   let createLinter: typeof import("actionlint").createLinter;
   try {
     ({ createLinter } = await import("actionlint"));
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    console.warn(
-      `actionlint: wasm package failed to load — skipping local gate (${msg}). CI actions-security still enforces this.`,
-    );
-    process.exit(0);
+    if (softSkip) {
+      console.warn(`actionlint: wasm package failed to load — skipping local gate (${msg}).`);
+      process.exit(0);
+    }
+    console.error(`actionlint: wasm package failed to load (${msg}).`);
+    process.exit(1);
   }
 
   let lint: (
@@ -127,10 +196,12 @@ async function main(): Promise<void> {
     lint = await createLinter();
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    console.warn(
-      `actionlint: createLinter failed — skipping local gate (${msg}). CI actions-security still enforces this.`,
-    );
-    process.exit(0);
+    if (softSkip) {
+      console.warn(`actionlint: createLinter failed — skipping local gate (${msg}).`);
+      process.exit(0);
+    }
+    console.error(`actionlint: createLinter failed (${msg}).`);
+    process.exit(1);
   }
 
   const knownFalsePositives = buildKnownFalsePositives(await loadSelfHostedLabels());

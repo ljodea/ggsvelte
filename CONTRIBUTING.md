@@ -127,7 +127,7 @@ upstream, `.md`/`.yaml`/`.svelte` can fold back into oxfmt (`.oxfmtrc.json`
 | `Rscript packages/core/tests/fixtures/*/generate.R`   | regenerate the ggplot2-parity fixtures (grouping, stats/positions; needs R + ggplot2)                                                   |
 | `bun run knip`                                        | unused files/exports/dependencies                                                                                                       |
 | `bun run lint:package`                                | publint + attw (esm-only profile) over built packages — build first                                                                     |
-| `bun run lint:actions`                                | actionlint (wasm) over `.github/workflows` (also pre-push when `.github/**` changes; skips if wasm cannot load)                         |
+| `bun run lint:actions`                                | actionlint (wasm) over `.github/workflows` (also pre-push when `.github/**` changes; local soft-skip if wasm cannot load, fatal in CI)  |
 | `bun run lint:actions:security`                       | zizmor over `.github/workflows` (needs `uv tool install zizmor`; pre-push skips if missing)                                             |
 | `bun run test:spikes`                                 | retired M0a browser/ssr spike suites (vitest 4 browser mode)                                                                            |
 | `cd spikes/pure && bun test`                          | retired M0a pure spike suites                                                                                                           |
