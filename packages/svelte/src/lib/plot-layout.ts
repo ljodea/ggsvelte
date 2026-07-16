@@ -6,6 +6,38 @@
 
 const NARROW_TOOLS_MAX_WIDTH_PX = 560;
 const DOCKED_TOOLTIP_MAX_WIDTH_PX = 480;
+const DEFAULT_PLOT_WIDTH_PX = 640;
+const DEFAULT_PLOT_HEIGHT_PX = 400;
+
+export type ResolvePlotSizeInput = {
+  /** Host width prop: fixed px, `"container"`, or omitted (container mode). */
+  readonly width: number | "container" | undefined;
+  readonly height: number | undefined;
+  /** ResizeObserver content width when in container mode; null before first measure. */
+  readonly containerWidth: number | null;
+  /** Assembled spec width fallback. */
+  readonly assembledWidth: number | undefined;
+  /** Assembled spec height fallback. */
+  readonly assembledHeight: number | undefined;
+};
+
+/**
+ * Resolved plot pixel size for the pipeline and root style.
+ * Container mode: measured container width, then assembled, then 640.
+ * Fixed mode: the numeric width prop (assembled fallback is unused once fixed).
+ * Height: height prop, then assembled, then 400.
+ */
+export function resolvePlotSize(input: ResolvePlotSizeInput): {
+  readonly width: number;
+  readonly height: number;
+} {
+  const width =
+    input.width === undefined || input.width === "container"
+      ? (input.containerWidth ?? input.assembledWidth ?? DEFAULT_PLOT_WIDTH_PX)
+      : input.width;
+  const height = input.height ?? input.assembledHeight ?? DEFAULT_PLOT_HEIGHT_PX;
+  return { width, height };
+}
 
 /** True when the tool rail should use the narrow layout (width < 560). */
 export function isNarrowToolsWidth(widthPx: number): boolean {

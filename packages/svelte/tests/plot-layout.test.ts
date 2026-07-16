@@ -7,8 +7,53 @@ import {
   plotRootInlineStyle,
   resolveClearLegendX,
   resolveCaptureAriaControls,
+  resolvePlotSize,
   tooltipViewportSize,
 } from "../src/lib/plot-layout.js";
+
+describe("resolvePlotSize", () => {
+  it("uses container measure then assembled then 640 in container mode", () => {
+    expect(
+      resolvePlotSize({
+        width: "container",
+        height: undefined,
+        containerWidth: 500,
+        assembledWidth: 320,
+        assembledHeight: 200,
+      }),
+    ).toEqual({ width: 500, height: 200 });
+    expect(
+      resolvePlotSize({
+        width: undefined,
+        height: undefined,
+        containerWidth: null,
+        assembledWidth: 320,
+        assembledHeight: undefined,
+      }),
+    ).toEqual({ width: 320, height: 400 });
+    expect(
+      resolvePlotSize({
+        width: "container",
+        height: undefined,
+        containerWidth: null,
+        assembledWidth: undefined,
+        assembledHeight: undefined,
+      }),
+    ).toEqual({ width: 640, height: 400 });
+  });
+
+  it("uses the fixed width prop without assembled fallback", () => {
+    expect(
+      resolvePlotSize({
+        width: 800,
+        height: 300,
+        containerWidth: 100,
+        assembledWidth: 320,
+        assembledHeight: 200,
+      }),
+    ).toEqual({ width: 800, height: 300 });
+  });
+});
 
 describe("breakpoint helpers", () => {
   it("narrow tools is width < 560", () => {

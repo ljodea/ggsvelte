@@ -271,6 +271,16 @@ export function resolveFinishBrushAction(input: {
 /** Reducer area.kind values that the host may observe on lostpointercapture. */
 export type AreaKind = "idle" | "first-corner" | "dragging";
 
+/** True while an area brush session is active (not idle). */
+export function isAreaBrushing(areaKind: AreaKind): boolean {
+  return areaKind !== "idle";
+}
+
+/** True while waiting for the second brush corner (keyboard / too-small path). */
+export function isAreaAwaitingSecond(areaKind: AreaKind): boolean {
+  return areaKind === "first-corner";
+}
+
 export type LostPointerCaptureAction =
   | { readonly type: "ignore" }
   | { readonly type: "cancel-keep-draft" }

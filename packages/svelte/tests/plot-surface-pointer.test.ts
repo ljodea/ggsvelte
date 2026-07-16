@@ -6,6 +6,8 @@ import {
   advanceTouchInspectMoved,
   resolveCaptureClickAction,
   resolveFinishBrushAction,
+  isAreaAwaitingSecond,
+  isAreaBrushing,
   resolveLostPointerCaptureAction,
   resolvePointerDownAction,
   resolvePointerMoveAction,
@@ -538,6 +540,17 @@ describe("resolveFinishBrushAction", () => {
     expect(resolveFinishBrushAction({ endedKind: "commit", activeTool: "point" })).toEqual({
       type: "end-area",
     });
+  });
+});
+
+describe("isAreaBrushing / isAreaAwaitingSecond", () => {
+  it("classifies area.kind for host deriveds", () => {
+    expect(isAreaBrushing("idle")).toBe(false);
+    expect(isAreaBrushing("first-corner")).toBe(true);
+    expect(isAreaBrushing("dragging")).toBe(true);
+    expect(isAreaAwaitingSecond("idle")).toBe(false);
+    expect(isAreaAwaitingSecond("first-corner")).toBe(true);
+    expect(isAreaAwaitingSecond("dragging")).toBe(false);
   });
 });
 

@@ -126,6 +126,8 @@
   import {
     resolveCaptureClickAction,
     advanceTouchInspectMoved,
+    isAreaAwaitingSecond,
+    isAreaBrushing,
     resolveFinishBrushAction,
     resolveLostPointerCaptureAction,
     resolvePointerDownAction,
@@ -159,6 +161,7 @@
     plotRootInlineStyle,
     resolveCaptureAriaControls,
     resolveClearLegendX,
+    resolvePlotSize,
     tooltipViewportSize,
   } from "./plot-layout.js";
   import {
@@ -470,12 +473,17 @@
     };
   });
 
-  const resolvedWidth: number = $derived(
-    width === undefined || width === "container"
-      ? (containerWidth ?? assembled?.width ?? 640)
-      : (width ?? assembled?.width ?? 640),
+  const resolvedSize = $derived(
+    resolvePlotSize({
+      width,
+      height,
+      containerWidth,
+      assembledWidth: assembled?.width,
+      assembledHeight: assembled?.height,
+    }),
   );
-  const resolvedHeight: number = $derived(height ?? assembled?.height ?? 400);
+  const resolvedWidth = $derived(resolvedSize.width);
+  const resolvedHeight = $derived(resolvedSize.height);
 
   // Authoritative committed scale state: a plain non-reactive box + run-id
   // gate. Committing only monotonically newer runs keeps stale results from
@@ -660,11 +668,11 @@
   } | null>(null);
   const brushing = $derived.by(() => {
     void reducerRevision;
-    return reducer.state.area.kind !== "idle";
+    return isAreaBrushing(reducer.state.area.kind);
   });
   const areaAwaitingSecond = $derived.by(() => {
     void reducerRevision;
-    return reducer.state.area.kind === "first-corner";
+    return isAreaAwaitingSecond(reducer.state.area.kind);
   });
   let lastInspectionFingerprint = "";
   let activeTraversalIndex = $state(-1);
@@ -2231,6 +2239,35 @@
     }
   }
 
+  /** Pointer-cancel always drops draft/queue/touch-inspect and cancels area. */
+  function onPointerCancel(): void {
+    queuedPointerInspection = null;
+    touchInspectStart = null;
+    touchInspectMoved = false;
+    reducer.cancelScheduledPointer();
+    brushRect = null;
+    reducer.dispatch({ type: "cancel-area" });
+  }
+
+  /**
+   * Lost capture: pure decision table owns keep vs clear draft; host mutates
+   * brushRect and always cancels area when not ignored.
+   */
+  function onLostPointerCapture(): void {
+    const lost = resolveLostPointerCaptureAction(reducer.state.area.kind);
+    switch (lost.type) {
+      case "ignore":
+        break;
+      case "cancel-keep-draft":
+        reducer.dispatch({ type: "cancel-area" });
+        break;
+      case "cancel-clear-draft":
+        brushRect = null;
+        reducer.dispatch({ type: "cancel-area" });
+        break;
+    }
+  }
+
   // Readiness signal for screenshot tooling (plan: VR waits on
   // `[data-gg-ready="true"]`). Split into:
   // - clientFlush via $effect: never runs during SSR → prerender stays
@@ -2373,29 +2410,8 @@
         {onPointerLeave}
         {onPointerDown}
         {onPointerUp}
-        onPointerCancel={() => {
-          queuedPointerInspection = null;
-          touchInspectStart = null;
-          touchInspectMoved = false;
-          reducer.cancelScheduledPointer();
-          brushRect = null;
-          reducer.dispatch({ type: "cancel-area" });
-        }}
-        onLostPointerCapture={() => {
-          // Decision table is pure (plot-surface-pointer); host owns draft + cancel.
-          const lost = resolveLostPointerCaptureAction(reducer.state.area.kind);
-          switch (lost.type) {
-            case "ignore":
-              return;
-            case "cancel-keep-draft":
-              reducer.dispatch({ type: "cancel-area" });
-              return;
-            case "cancel-clear-draft":
-              brushRect = null;
-              reducer.dispatch({ type: "cancel-area" });
-              return;
-          }
-        }}
+        {onPointerCancel}
+        {onLostPointerCapture}
         onClick={onCaptureClick}
         onKeyDown={onSurfaceKeyDown}
         {onDblClick}
