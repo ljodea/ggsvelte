@@ -128,10 +128,19 @@
     resolveLegendPointerUpAction,
   } from "./plot-legend-surface.js";
   import {
+    BRUSH_SECOND_CORNER_ANNOUNCEMENT,
     datumLabel as datumLabelFor,
     inspectionLiveText as inspectionLiveTextFor,
+    legendFocusAnnouncement,
     markLabel as markLabelFor,
+    selectionAnnouncement,
+    zoomAnnouncement,
   } from "./plot-labels.js";
+  import {
+    isDockedTooltipWidth,
+    isNarrowToolsWidth,
+    plotRootInlineStyle,
+  } from "./plot-layout.js";
   import {
     bestDirectionalIndex,
     buildTraversalHits,
@@ -760,8 +769,17 @@
     model === null ? "" : themeTokensToCss(model.scene.theme),
   );
   const rootStyle = $derived(
-    `${hasCanvas || interactive || effectiveEmphasisKeys.length > 0 || effectiveSelectedKeys.length > 0 ? `width:${width === undefined || width === "container" ? "100%" : `${model?.scene.width ?? resolvedWidth}px`};height:${model?.scene.height ?? resolvedHeight}px;` : ""}${themeStyle}` ||
-      undefined,
+    plotRootInlineStyle({
+      needsSizedBox:
+        hasCanvas ||
+        interactive ||
+        effectiveEmphasisKeys.length > 0 ||
+        effectiveSelectedKeys.length > 0,
+      containerWidth: width === undefined || width === "container",
+      sceneWidth: model?.scene.width ?? resolvedWidth,
+      sceneHeight: model?.scene.height ?? resolvedHeight,
+      themeStyle,
+    }),
   );
   function anchorsForKeys(keys: readonly PropertyKey[]): {
     x: number;
@@ -827,15 +845,8 @@
   }
 
   function emitSelection(event: PlotSelection): void {
-    if (event.phase === "end") {
-      const count =
-        event.mode === "point" ? event.keys.length : event.lineageCount;
-      announceInteraction(
-        `Selection complete, ${String(count)} ${count === 1 ? "datum" : "data"}.`,
-      );
-    } else if (event.phase === "clear") {
-      announceInteraction("Selection cleared.");
-    }
+    const message = selectionAnnouncement(event);
+    if (message !== null) announceInteraction(message);
     onselect?.(event as unknown as PlotSelection<PublicKey>);
     oninteraction?.(event as unknown as PlotInteractionEvent<Row, PublicKey>);
   }
@@ -996,13 +1007,7 @@
   }
 
   function emitLegendFocus(event: LegendFocusEvent<PropertyKey>): void {
-    if (event.phase === "change") {
-      announceInteraction(
-        `${event.label} ${event.state === "committed" ? "focused" : "previewed"}, ${String(event.keys.length)} ${event.keys.length === 1 ? "datum" : "data"}.`,
-      );
-    } else {
-      announceInteraction("Legend focus cleared.");
-    }
+    announceInteraction(legendFocusAnnouncement(event));
     onlegendfocus?.(event as LegendFocusEvent<PublicKey>);
     oninteraction?.(event as PlotInteractionEvent<Row, PublicKey>);
   }
@@ -1810,7 +1815,7 @@
         const ended = evaluatePointerBrushEnd(brushRect, plotPoint(event));
         if (ended.kind === "too-small") {
           brushRect = ended.corners;
-          announceInteraction("Choose opposite corner.");
+          announceInteraction(BRUSH_SECOND_CORNER_ANNOUNCEMENT);
           break;
         }
         brushRect = null;
@@ -1860,7 +1865,7 @@
       }
     }
     const event = buildZoomEvent(committed, source);
-    announceInteraction(committed === null ? "Zoom reset." : "Zoom complete.");
+    announceInteraction(zoomAnnouncement(committed));
     onzoom?.(event);
     oninteraction?.(event);
   }
@@ -2021,7 +2026,7 @@
           point: anchor,
           panelId: panelId(0),
         });
-        announceInteraction("Choose opposite corner.");
+        announceInteraction(BRUSH_SECOND_CORNER_ANNOUNCEMENT);
         return;
       }
       case "complete-area": {
@@ -2150,9 +2155,9 @@
   class:gg-with-tool-rail={showToolRail}
   class:gg-with-legend-clear={interactionConfig.legendFocus !== null &&
     effectiveLegendPressed !== null}
-  class:gg-narrow-tools={resolvedWidth < 560}
+  class:gg-narrow-tools={isNarrowToolsWidth(resolvedWidth)}
   class:gg-with-docked-tooltip={inspection?.state === "pinned" &&
-    resolvedWidth < 480}
+    isDockedTooltipWidth(resolvedWidth)}
   data-gg-ready={ready ? "true" : "false"}
   style={rootStyle}
 >
@@ -2163,7 +2168,7 @@
       {activeTool}
       {ready}
       {emptyPlot}
-      narrow={resolvedWidth < 560}
+      narrow={isNarrowToolsWidth(resolvedWidth)}
       zoomDomains={effectiveZoomDomains}
       hasPointSelection={canPublishPointSelection &&
         effectiveSelectedKeys.length > 0}
@@ -2403,7 +2408,8 @@
           )}
           content={interactionConfig.inspect?.content}
           interactive={interactionConfig.inspect?.contentMode === "interactive"}
-          docked={inspection.state === "pinned" && resolvedWidth < 480}
+          docked={inspection.state === "pinned" &&
+            isDockedTooltipWidth(resolvedWidth)}
           onenter={() => (tooltipHovered = true)}
           onleave={() => {
             tooltipHovered = false;

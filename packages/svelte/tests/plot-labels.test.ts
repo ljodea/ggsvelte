@@ -2,8 +2,22 @@ import { describe, expect, it } from "vitest";
 
 import type { RenderModel } from "@ggsvelte/core";
 
-import type { PlotInspectionChange } from "../src/lib/interaction.js";
-import { datumLabel, inspectionLiveText, markLabel } from "../src/lib/plot-labels.js";
+import type {
+  IntervalSelection,
+  LegendFocusEvent,
+  PlotInspectionChange,
+  PointSelection,
+} from "../src/lib/interaction.js";
+import {
+  BRUSH_SECOND_CORNER_ANNOUNCEMENT,
+  countLabel,
+  datumLabel,
+  inspectionLiveText,
+  legendFocusAnnouncement,
+  markLabel,
+  selectionAnnouncement,
+  zoomAnnouncement,
+} from "../src/lib/plot-labels.js";
 
 function model(opts: {
   layerFields?: { field: string }[][];
@@ -155,5 +169,91 @@ describe("inspectionLiveText", () => {
       ],
     });
     expect(inspectionLiveText(m, value as never)).toBe("x 3.0; 1 datum; focused y 9, color blue");
+  });
+});
+
+describe("countLabel", () => {
+  it("uses singular datum and plural data", () => {
+    expect(countLabel(0)).toBe("0 data");
+    expect(countLabel(1)).toBe("1 datum");
+    expect(countLabel(2)).toBe("2 data");
+  });
+});
+
+describe("selectionAnnouncement", () => {
+  const pointEnd = (keys: PropertyKey[]): PointSelection =>
+    Object.freeze({
+      type: "select",
+      phase: "end",
+      mode: "point",
+      keys: Object.freeze([...keys]),
+      source: "pointer",
+    });
+
+  const interval = (phase: IntervalSelection["phase"], lineageCount: number): IntervalSelection =>
+    Object.freeze({
+      type: "select",
+      phase,
+      mode: "xy",
+      panelId: null,
+      domain: Object.freeze({}),
+      pixels: Object.freeze({ x0: 0, y0: 0, x1: 1, y1: 1 }),
+      keys: Object.freeze([]),
+      lineageCount,
+      source: "pointer",
+    });
+
+  it("announces end with point key count or interval lineage count", () => {
+    expect(selectionAnnouncement(pointEnd(["a"]))).toBe("Selection complete, 1 datum.");
+    expect(selectionAnnouncement(pointEnd(["a", "b"]))).toBe("Selection complete, 2 data.");
+    expect(selectionAnnouncement(interval("end", 3))).toBe("Selection complete, 3 data.");
+  });
+
+  it("announces clear and skips start/change", () => {
+    expect(selectionAnnouncement(interval("clear", 0))).toBe("Selection cleared.");
+    expect(selectionAnnouncement(interval("start", 0))).toBeNull();
+    expect(selectionAnnouncement(interval("change", 1))).toBeNull();
+  });
+});
+
+describe("legendFocusAnnouncement", () => {
+  it("announces committed/previewed change and clear", () => {
+    const committed: LegendFocusEvent = {
+      type: "legend-focus",
+      phase: "change",
+      state: "committed",
+      source: "pointer",
+      scale: "fill",
+      value: "web",
+      label: "Web",
+      keys: ["a"],
+    };
+    const preview: LegendFocusEvent = {
+      ...committed,
+      state: "transient",
+      keys: ["a", "b"],
+    };
+    expect(legendFocusAnnouncement(committed)).toBe("Web focused, 1 datum.");
+    expect(legendFocusAnnouncement(preview)).toBe("Web previewed, 2 data.");
+    expect(
+      legendFocusAnnouncement({
+        type: "legend-focus",
+        phase: "clear",
+        source: "keyboard",
+      }),
+    ).toBe("Legend focus cleared.");
+  });
+});
+
+describe("zoomAnnouncement", () => {
+  it("distinguishes reset from complete via domains nullability", () => {
+    expect(zoomAnnouncement(null)).toBe("Zoom reset.");
+    expect(zoomAnnouncement({ x: [0, 1] })).toBe("Zoom complete.");
+  });
+});
+
+describe("BRUSH_SECOND_CORNER_ANNOUNCEMENT", () => {
+  it("matches the host brush-instruction copy", () => {
+    expect(BRUSH_SECOND_CORNER_ANNOUNCEMENT).toBe("Choose opposite corner.");
   });
 });
