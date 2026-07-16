@@ -1143,9 +1143,9 @@
     switch (commit.type) {
       case "toggle-clear":
         clearLegendFocus(source);
-        return;
+        break;
       case "ignore":
-        return;
+        break;
       case "commit":
         legendPreview = null;
         legendCommitted = { identity: action.identity, keys };
@@ -1165,7 +1165,7 @@
           label: action.entry.label,
           keys,
         });
-        return;
+        break;
     }
   }
 
