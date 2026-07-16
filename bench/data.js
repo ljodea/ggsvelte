@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784212131597,
+  "lastUpdate": 1784212541460,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -13768,6 +13768,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 162.0084,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "a4e05e72fc52dd0492590a3087dda80ff76b2433",
+          "message": "refactor(svelte): carry mapped source on legend commit and preview dismiss (#125)\n\nExpand resolveLegendCommitAction and resolveLegendPreviewDismissAction so\nGGPlot no longer re-maps legendInteractionSource after pure routing. Preview\ndismiss uses previewSource null as the single no-preview discriminant.",
+          "timestamp": "2026-07-16T09:34:56-05:00",
+          "tree_id": "4bba438ee8ccd13fd0bacd461d8b3afb1e992925",
+          "url": "https://github.com/ljodea/ggsvelte/commit/a4e05e72fc52dd0492590a3087dda80ff76b2433"
+        },
+        "date": 1784212540425,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 3.0708,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.905,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 10.3437,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 15.9664,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 84.7024,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 117.1586,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.074,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2507,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 86.1445,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 107.5595,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 14.6827,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 13.4565,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 114.7343,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7469,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 26.4309,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.4644,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 32.3712,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 600.7379,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 159.746,
             "unit": "ms"
           }
         ]
