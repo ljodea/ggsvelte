@@ -39,30 +39,16 @@
 import type { PortableSpec, SpecInput } from "@ggsvelte/spec";
 import { normalize, SpecValidationError, validate } from "@ggsvelte/spec";
 
-import type { ScaleState } from "./scales/state.js";
-import type { CellValue } from "./table.js";
-import type { ColumnTable } from "./table.js";
 import { resolveEditionDefaults } from "./editions.js";
 import type { ThemeTokens } from "./theme.js";
 import { resolveTheme, UnknownThemeError } from "./theme.js";
 import { perfMark, perfMeasure } from "./perf.js";
 import { LineageStore } from "./identity.js";
 
-import type {
-  Advisory,
-  PipelineWarning,
-  RenderModel,
-  RunOptions,
-  ScaleDomainSnapshot,
-} from "./pipeline/types.js";
-import { NO_ROW, PipelineError } from "./pipeline/types.js";
-import { collectAxisInputs, trainAxis } from "./pipeline/scale-training.js";
-import {
-  dedupeAdvisories,
-  dedupeWarnings,
-  makeAxisValueFormatter,
-  scaleDomainSnapshot,
-} from "./pipeline/layout-helpers.js";
+import type { Advisory, PipelineWarning, RenderModel, RunOptions } from "./pipeline/types.js";
+import { PipelineError } from "./pipeline/types.js";
+import { preparePanels } from "./pipeline/prepare-panels.js";
+import { trainPipelineScales } from "./pipeline/train-pipeline-scales.js";
 import { computePanelLayout } from "./pipeline/panel-layout.js";
 import { assembleScene, buildGeometryBatches } from "./pipeline/assemble-scene.js";
 import {
@@ -71,8 +57,8 @@ import {
   resolveLayerScaledConstants,
 } from "./pipeline/layer-contracts.js";
 import { buildPipelineCandidates } from "./pipeline/build-candidates.js";
-import { preparePanels } from "./pipeline/prepare-panels.js";
-import { trainPipelineScales } from "./pipeline/train-pipeline-scales.js";
+import { computeBaselineDomains, computeEffectiveDomains } from "./pipeline/compute-domains.js";
+import { assembleRenderModel } from "./pipeline/assemble-render-model.js";
 
 // Re-export the public pipeline contract (import path stability).
 export type {
@@ -242,60 +228,17 @@ export function runPipeline(spec: SpecInput | PortableSpec, options: RunOptions)
   const layerFields = resolveLayerFields(normalized.layers.length, bindings);
   const layerScaledConstants = resolveLayerScaledConstants(normalized.layers.length, bindings);
 
-  const state: Record<string, ScaleState> = {};
-  if (colorResolution.state !== null) state["color"] = colorResolution.state;
-  if (fillResolution.state !== null) state["fill"] = fillResolution.state;
-
-  const effectiveDomains: ScaleDomainSnapshot = Object.freeze({
-    x: scaleDomainSnapshot(xTraining.scale),
-    y: scaleDomainSnapshot(yTraining.scale),
-    panels: Object.freeze(
-      panelScales.map((panel) =>
-        Object.freeze({ x: scaleDomainSnapshot(panel.x), y: scaleDomainSnapshot(panel.y) }),
-      ),
-    ),
+  const effectiveDomains = computeEffectiveDomains(xTraining.scale, yTraining.scale, panelScales);
+  const baselineDomains = computeBaselineDomains({
+    options,
+    freeX,
+    freeY,
+    facetPanels,
+    panelFrames,
+    xInputs,
+    yInputs,
+    effectiveDomains,
   });
-  let baselineDomains = options.baselineDomains;
-  if (baselineDomains === undefined && options.baselineScales !== undefined) {
-    const baselineX = trainAxis("x", xInputs, options.baselineScales.x).scale;
-    const baselineY = trainAxis("y", yInputs, options.baselineScales.y).scale;
-    const baselinePanels = facetPanels.map((_, panelIndex) => {
-      let x = baselineX;
-      let y = baselineY;
-      const scratch: Advisory[] = [];
-      if (freeX) {
-        const inputs = collectAxisInputs(
-          "x",
-          panelFrames[panelIndex]!,
-          options.baselineScales?.x?.type,
-          scratch,
-        );
-        x = trainAxis("x", inputs, {
-          ...options.baselineScales?.x,
-          type: baselineX.type,
-        }).scale;
-      }
-      if (freeY) {
-        const inputs = collectAxisInputs(
-          "y",
-          panelFrames[panelIndex]!,
-          options.baselineScales?.y?.type,
-          scratch,
-        );
-        y = trainAxis("y", inputs, {
-          ...options.baselineScales?.y,
-          type: baselineY.type,
-        }).scale;
-      }
-      return Object.freeze({ x: scaleDomainSnapshot(x), y: scaleDomainSnapshot(y) });
-    });
-    baselineDomains = Object.freeze({
-      x: scaleDomainSnapshot(baselineX),
-      y: scaleDomainSnapshot(baselineY),
-      panels: Object.freeze(baselinePanels),
-    });
-  }
-  baselineDomains ??= effectiveDomains;
 
   const lineage = new LineageStore<number>();
   const candidates = buildPipelineCandidates({
@@ -315,48 +258,27 @@ export function runPipeline(spec: SpecInput | PortableSpec, options: RunOptions)
   perfMark("ggsvelte:pipeline:end");
   perfMeasure("ggsvelte:pipeline", "ggsvelte:pipeline:start", "ggsvelte:pipeline:end");
 
-  let disposed = false;
-  let retainedTable: ColumnTable | null = table;
-  return {
+  return assembleRenderModel({
     scene,
-    scales: {
-      x: xTraining.scale,
-      y: yTraining.scale,
-      color: colorResolution.resolved,
-      fill: fillResolution.resolved,
-      panels: panelScales,
-      state,
-    },
-    warnings: dedupeWarnings(warnings),
-    advisories: dedupeAdvisories(advisories),
+    xScale: xTraining.scale,
+    yScale: yTraining.scale,
+    color: colorResolution.resolved,
+    fill: fillResolution.resolved,
+    panelScales,
+    colorState: colorResolution.state,
+    fillState: fillResolution.state,
+    warnings,
+    advisories,
     runId,
     layerBackends,
     layerFields,
     layerScaledConstants,
-    domains: Object.freeze({ baseline: baselineDomains, effective: effectiveDomains }),
+    baselineDomains,
+    effectiveDomains,
     lineage,
     candidates,
-    axisFormatters: Object.freeze({
-      x: makeAxisValueFormatter(xTraining.scale, panelLayout.formatX),
-      y: makeAxisValueFormatter(yTraining.scale, panelLayout.formatY),
-    }),
-    row(index: number): Record<string, CellValue> | null {
-      const source = retainedTable;
-      if (source === null || index === NO_ROW || index < 0 || index >= source.rowCount) return null;
-      const out: Record<string, CellValue> = {};
-      for (const field of source.fields) out[field] = source.column(field)[index]!;
-      return out;
-    },
-    dispose(): void {
-      if (disposed) return;
-      disposed = true;
-      candidates.dispose();
-      retainedTable = null;
-      // Release geometry (typed arrays) and per-panel structures; the bound
-      // table and its numeric caches become unreachable with this model.
-      scene.batches.length = 0;
-      scene.panels.length = 0;
-      scene.legends.length = 0;
-    },
-  };
+    formatX: panelLayout.formatX,
+    formatY: panelLayout.formatY,
+    table,
+  });
 }
