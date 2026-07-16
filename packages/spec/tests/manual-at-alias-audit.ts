@@ -34,7 +34,7 @@ export function diffTextIsSubstantive(diff: string): boolean {
 /**
  * Known HTML/SVG type selectors. Used for bare multi-token chains after a
  * combinator so arbitrary English (`minimum latency`) stays documentation while
- * real tag chains (`ul li`, `section a`, `svg linearGradient`) stay CSS.
+ * real tag chains (`ul li`, `a span`, `svg polygon`, `my-widget path`) stay CSS.
  * camelCase SVG names are stored as authored.
  */
 const CSS_TYPE_TOKEN = new Set(
@@ -49,35 +49,39 @@ const CSS_TYPE_TOKEN = new Set(
     "sub summary sup svg table tbody td template text textarea tfoot th thead " +
     "time title tr track u ul var video wbr use defs clipPath linearGradient " +
     "radialGradient stop tspan foreignObject pattern marker symbol switch " +
-    "animate animateTransform set image"
-  ).split(/\s+/),
-);
-
-/**
- * Leading tokens that make a bare multi-word chain read as English even when
- * later tokens are valid tag names (`* + a button`, `* + the table`).
- */
-const BARE_CHAIN_LEAD_BLOCK = new Set(
-  (
-    "a an the and or not is are was were be been being for with from that this " +
-    "these those of to in on at by as if any all each every"
+    "animate animateTransform set image polygon polyline ellipse textPath " +
+    "mask view feBlend feColorMatrix feComponentTransfer feComposite " +
+    "feConvolveMatrix feDiffuseLighting feDisplacementMap feDistantLight " +
+    "feDropShadow feFlood feFuncA feFuncB feFuncG feFuncR feGaussianBlur feImage " +
+    "feMerge feMergeNode feMorphology feOffset fePointLight feSpecularLighting " +
+    "feSpotLight feTile feTurbulence filter"
   ).split(/\s+/),
 );
 
 /**
  * English-first collocations that are HTML tag names but common in JSDoc lists
- * (`* + data table`, `* + source code`).
+ * (`* + data table`, `* + source code`). Not CSS `a span` / `a img`.
  */
 const BARE_CHAIN_PROSE_PAIR = new Set(["data table", "source code", "mark time", "object video"]);
 
+/** HTML custom elements must contain a hyphen (HTML living standard). */
+function isCustomElementToken(token: string): boolean {
+  return /^[a-z][\w]*-[\w-]+$/.test(token);
+}
+
 function isCssTypeToken(token: string): boolean {
-  return token === "*" || CSS_TYPE_TOKEN.has(token) || CSS_TYPE_TOKEN.has(token.toLowerCase());
+  return (
+    token === "*" ||
+    CSS_TYPE_TOKEN.has(token) ||
+    CSS_TYPE_TOKEN.has(token.toLowerCase()) ||
+    isCustomElementToken(token)
+  );
 }
 
 /**
  * After a CSS combinator (`+`, `>`, `~`), is the remainder a selector fragment?
  * Distinguishes `* + * {…}` / `* > .mark` / `* > ul li {…}` / `* > ul *` from
- * JSDoc/Markdown `* + list item`, `* + a button`, and `* > Note`.
+ * JSDoc/Markdown `* + list item` and `* > Note`.
  */
 function isCssSelectorAfterCombinator(rest: string): boolean {
   if (rest.length === 0) return false;
@@ -102,10 +106,8 @@ function isCssSelectorAfterCombinator(rest: string): boolean {
       const only = tokens[0]!;
       return only === "*" || /^[a-z][\w-]*$/.test(only);
     }
-    // Bare multi-token: known HTML/SVG types only (not arbitrary lowercase prose).
-    // Block article-led English and a few tag-word collocations.
-    const leadToken = tokens[0]!.toLowerCase();
-    if (BARE_CHAIN_LEAD_BLOCK.has(leadToken)) return false;
+    // Bare multi-token: HTML/SVG/custom-element types only (not English prose).
+    // Anchor-led chains (`a span`) are real CSS — do not blanket-skip lead `a`.
     if (BARE_CHAIN_PROSE_PAIR.has(tokens.map((t) => t.toLowerCase()).join(" "))) return false;
     return tokens.every((t) => isCssTypeToken(t));
   }
