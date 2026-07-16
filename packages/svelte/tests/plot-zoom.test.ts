@@ -315,14 +315,15 @@ describe("continuousZoomDomainsFromScopes", () => {
       ),
     ).toEqual({});
 
+    const unsetScope: string | undefined = void 0;
     expect(
       continuousZoomDomainsFromScopes(
         {
           x: [{ scope: "plot-a", domain: [0, 1] }],
           y: [{ scope: "plot-b", domain: [2, 3] }],
         },
-        undefined,
-        undefined,
+        unsetScope,
+        unsetScope,
       ),
     ).toEqual({});
   });
