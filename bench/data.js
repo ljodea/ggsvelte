@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784169264709,
+  "lastUpdate": 1784169611720,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -6390,6 +6390,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 160.1086,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "6623b2e269d93486b5a599b63db65876cf24c1d5",
+          "message": "fix: address post-merge Codex findings from #43 (#61)\n\nControlled linked plots no longer hard-fail faceted zoom on missing\ndomain scopes, render passive selection rings, gate Clear selection to\npoint-select publishers, filter shared zoom by plot mode, and keep zoom\ndomain identity stable across selection/emphasis revisions.",
+          "timestamp": "2026-07-15T21:39:31-05:00",
+          "tree_id": "2a1cfac419e7fb6aadc8eccd41c069e9153832dd",
+          "url": "https://github.com/ljodea/ggsvelte/commit/6623b2e269d93486b5a599b63db65876cf24c1d5"
+        },
+        "date": 1784169610754,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 3.9807,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 4.1856,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 11.2463,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 17.0127,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 90.6844,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 119.8804,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.0113,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.207,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 86.3078,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 108.8508,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 15.0584,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.905,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 121.5958,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.6413,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 26.6866,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.4351,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 29.2221,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 594.9323,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 161.4192,
             "unit": "ms"
           }
         ]
