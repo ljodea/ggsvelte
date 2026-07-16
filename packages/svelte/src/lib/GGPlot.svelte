@@ -139,8 +139,10 @@
   import {
     resolveLegendClearControlSource,
     resolveLegendClickAction,
+    resolveLegendCommitAction,
     resolveLegendKeyAction,
     resolveLegendPointerUpAction,
+    resolveLegendPreviewDismissAction,
     shouldClearLegendPreviewOnBlur,
     shouldRenderInteractionLiveRegion,
   } from "./plot-legend-surface.js";
@@ -150,6 +152,7 @@
     inspectionLiveText as inspectionLiveTextFor,
     legendFocusAnnouncement,
     markLabel as markLabelFor,
+    resolveInteractionLiveText,
     selectionAnnouncement,
     zoomAnnouncement,
   } from "./plot-labels.js";
@@ -1061,12 +1064,20 @@
 
   function previewLegend(action: LegendEntryAction | null): void {
     if (action === null) {
-      if (legendPreview === null) return;
-      const source = legendInteractionSource(legendPreview.action.source);
+      // Decision table is pure (plot-legend-surface); host owns emit + mutation.
+      // Emit gate uses committed emphasis, not effectiveEmphasisKeys (preview).
+      const dismiss = resolveLegendPreviewDismissAction({
+        hasActivePreview: legendPreview !== null,
+        committedEmphasisEmpty:
+          (
+            interaction?.emphasized(resolvedInteractionScope) ??
+            localEmphasisKeys
+          ).length === 0,
+      });
+      if (dismiss.type === "none") return;
+      const source = legendInteractionSource(legendPreview!.action.source);
       legendPreview = null;
-      const committed =
-        interaction?.emphasized(resolvedInteractionScope) ?? localEmphasisKeys;
-      if (committed.length === 0)
+      if (dismiss.type === "clear-and-emit")
         emitLegendFocus({ type: "legend-focus", phase: "clear", source });
       return;
     }
@@ -1122,33 +1133,40 @@
 
   function commitLegend(action: LegendEntryAction): void {
     const source = legendInteractionSource(action.source);
-    if (
-      effectiveLegendPressed?.scale === action.identity.scale &&
-      effectiveLegendPressed.entryIndex === action.identity.entryIndex
-    ) {
-      clearLegendFocus(source);
-      return;
-    }
+    // Eager key lookup (O(1) Map.get) before pure routing; unused on toggle-clear.
     const keys = keysForLegend(action);
-    if (keys.length === 0) return;
-    legendPreview = null;
-    legendCommitted = { identity: action.identity, keys };
-    if (interaction === undefined) localEmphasisKeys = [...keys];
-    else
-      interaction.setEmphasis(keys as readonly PublicKey[], {
-        scope: resolvedInteractionScope,
-        source,
-      });
-    emitLegendFocus({
-      type: "legend-focus",
-      phase: "change",
-      state: "committed",
-      source,
-      scale: action.identity.scale as "color" | "fill",
-      value: action.entry.value as CellValue,
-      label: action.entry.label,
-      keys,
+    const commit = resolveLegendCommitAction({
+      pressed: effectiveLegendPressed,
+      identity: action.identity,
+      keyCount: keys.length,
     });
+    switch (commit.type) {
+      case "toggle-clear":
+        clearLegendFocus(source);
+        break;
+      case "ignore":
+        break;
+      case "commit":
+        legendPreview = null;
+        legendCommitted = { identity: action.identity, keys };
+        if (interaction === undefined) localEmphasisKeys = [...keys];
+        else
+          interaction.setEmphasis(keys as readonly PublicKey[], {
+            scope: resolvedInteractionScope,
+            source,
+          });
+        emitLegendFocus({
+          type: "legend-focus",
+          phase: "change",
+          state: "committed",
+          source,
+          scale: action.identity.scale as "color" | "fill",
+          value: action.entry.value as CellValue,
+          label: action.entry.label,
+          keys,
+        });
+        break;
+    }
   }
 
   const presentationFocusKeys: readonly PropertyKey[] = $derived(
@@ -2532,10 +2550,11 @@
         aria-live="polite"
         aria-atomic="true"
       >
-        {interactionAnnouncement ||
-          (inspection?.source === "keyboard" || inspection?.source === "touch"
-            ? inspectionLiveText(inspection)
-            : "")}
+        {resolveInteractionLiveText({
+          announcement: interactionAnnouncement,
+          model,
+          inspection,
+        })}
       </div>
     {/if}
     {#if emptyPlot}

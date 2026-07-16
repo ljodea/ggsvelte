@@ -3,10 +3,11 @@
  *
  * Hosts own DOM handlers, suppress/touch index lifecycle, focus moves,
  * commitLegend side effects, and announcements. This module owns only
- * key routing and touch/click coordination priority.
+ * key routing, touch/click coordination, and commit/preview-dismiss priority.
  */
 
 import type { InteractionSource } from "./interaction.js";
+import type { LegendEntryIdentity } from "./plot-legend-focus.js";
 
 // ---- keydown ----
 
@@ -171,4 +172,64 @@ export type InteractionLiveRegionInput = {
  */
 export function shouldRenderInteractionLiveRegion(input: InteractionLiveRegionInput): boolean {
   return input.surfaceInteractive || input.legendFocusEnabled;
+}
+
+// ---- commit / preview dismiss ----
+
+export type LegendCommitAction =
+  | { readonly type: "toggle-clear" }
+  | { readonly type: "ignore" }
+  | { readonly type: "commit" };
+
+/**
+ * Pure routing for host `commitLegend` after identity + key lookup.
+ *
+ * Priority (load-bearing):
+ *   1. toggle-clear — pressed identity matches action identity
+ *   2. ignore — keyCount === 0
+ *   3. commit
+ *
+ * Host may compute `keysForLegend(action)` before this call (eager Map.get);
+ * keys are unused on toggle-clear but O(1). A pressed entry whose domain keys
+ * reshuffled empty still toggles clear (does not fall into ignore).
+ */
+export function resolveLegendCommitAction(input: {
+  readonly pressed: LegendEntryIdentity | null;
+  readonly identity: LegendEntryIdentity;
+  readonly keyCount: number;
+}): LegendCommitAction {
+  if (
+    input.pressed !== null &&
+    input.pressed.scale === input.identity.scale &&
+    input.pressed.entryIndex === input.identity.entryIndex
+  )
+    return { type: "toggle-clear" };
+  if (input.keyCount === 0) return { type: "ignore" };
+  return { type: "commit" };
+}
+
+export type LegendPreviewDismissAction =
+  | { readonly type: "none" }
+  | { readonly type: "clear-only" }
+  | { readonly type: "clear-and-emit" };
+
+/**
+ * Pure routing for host `previewLegend(null)` (dismiss path only).
+ *
+ *   none           — no active preview (host returns without mutation)
+ *   clear-only     — drop preview, no clear event
+ *   clear-and-emit — drop preview and emit legend-focus clear
+ *
+ * Emit gate uses **committed** emphasis (`interaction?.emphasized(scope) ??
+ * localEmphasisKeys`), not `effectiveEmphasisKeys` (which includes preview).
+ * That differs intentionally from `clearLegendFocus`, which ORs preview /
+ * committed / effective emphasis before emit.
+ */
+export function resolveLegendPreviewDismissAction(input: {
+  readonly hasActivePreview: boolean;
+  readonly committedEmphasisEmpty: boolean;
+}): LegendPreviewDismissAction {
+  if (!input.hasActivePreview) return { type: "none" };
+  if (input.committedEmphasisEmpty) return { type: "clear-and-emit" };
+  return { type: "clear-only" };
 }

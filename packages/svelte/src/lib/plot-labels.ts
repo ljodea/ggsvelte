@@ -93,3 +93,26 @@ export function inspectionLiveText(
     .join(", ");
   return `${value.mode} ${value.axisLabel}; ${countLabel(count)}${focused ? `; focused ${focused}` : ""}${state}`;
 }
+
+/**
+ * Capture live-region text for the interaction ARIA live region.
+ *
+ * Priority (matches host `announcement || fallback`):
+ *   1. non-empty sticky `announcement` (including after microtask fill)
+ *   2. keyboard/touch inspection → `inspectionLiveText` (short-circuited)
+ *   3. otherwise empty string
+ *
+ * Empty-string announcement is falsy and falls through — host
+ * `announceInteraction` briefly sets `""` before the microtask message.
+ */
+export function resolveInteractionLiveText(input: {
+  readonly announcement: string;
+  readonly model: RenderModel | null;
+  readonly inspection: PlotInspectionChange<Record<string, CellValue>, PropertyKey> | null;
+}): string {
+  if (input.announcement) return input.announcement;
+  if (input.inspection === null) return "";
+  if (input.inspection.source === "keyboard" || input.inspection.source === "touch")
+    return inspectionLiveText(input.model, input.inspection);
+  return "";
+}
