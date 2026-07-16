@@ -95,9 +95,10 @@ describe("resolveLayerFields", () => {
       [],
     );
     const fields = resolveLayerFields(1, [binding]);
-    expect(fields[0]!.map((f) => `${f.channel}:${f.field}`)).toEqual(
-      expect.arrayContaining(["x:x", "y:y", "color:g"]),
-    );
+    const labels = fields[0]!.map((f) => `${f.channel}:${f.field}`);
+    expect(labels).toContain("x:x");
+    expect(labels).toContain("y:y");
+    expect(labels).toContain("color:g");
   });
 
   it("marks count-stat y as stat source", () => {
