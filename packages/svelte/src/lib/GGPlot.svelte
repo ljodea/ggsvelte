@@ -234,11 +234,13 @@
   import {
     buildInteractiveLegendEntries,
     buildLegendEntryKeyIndexForPlot,
-    clampLegendRovingIndex,
     findLegendPressedIdentity,
     keysForLegendEntry,
     legendInteractionSource,
     moveLegendRovingIndex,
+    planLegendCommittedReconcile,
+    planLegendFocusDisabledClear,
+    planLegendRovingFocusSync,
     reconcileLegendPreview,
     resolveLegendEmphasisKeys,
     resolveLegendPreviewKeysDecision,
@@ -1180,17 +1182,23 @@
 
   $effect.pre(() => {
     const count = interactiveLegendEntries.length;
-    const nextIndex = clampLegendRovingIndex(legendRovingIndex, count);
     const active = document.activeElement;
+    // Number(dataset.index) may be NaN — pure plan maps non-finite → 0.
     const focusedIndex =
       active instanceof HTMLElement &&
       active.matches("[data-gg-legend-target]") &&
       root?.contains(active)
         ? Number(active.dataset["index"])
         : null;
-    if (nextIndex !== legendRovingIndex) legendRovingIndex = nextIndex;
-    if (focusedIndex === null || count === 0) return;
-    const returnIndex = clampLegendRovingIndex(focusedIndex, count);
+    const plan = planLegendRovingFocusSync({
+      currentRoving: legendRovingIndex,
+      entryCount: count,
+      focusedIndex,
+    });
+    if (plan.nextIndex !== legendRovingIndex)
+      legendRovingIndex = plan.nextIndex;
+    if (plan.type !== "refocus") return;
+    const returnIndex = plan.returnIndex;
     queueMicrotask(() => {
       root
         ?.querySelector<HTMLElement>(
@@ -1201,27 +1209,28 @@
   });
 
   $effect(() => {
-    const committed = legendCommitted;
-    if (committed === null) return;
-    const current = interactiveLegendEntries.find(
-      ({ identity }) =>
-        identity.scale === committed.identity.scale &&
-        identity.entryIndex === committed.identity.entryIndex,
-    );
-    const currentKeys =
-      current === undefined
-        ? []
-        : keysForLegendEntry(legendEntryKeyIndex, current.identity);
-    if (samePropertyKeySet(currentKeys, committed.keys)) return;
-
-    legendCommitted = null;
-    if (interaction === undefined && localEmphasisKeys.length > 0) {
-      localEmphasisKeys = [];
-      emitLegendFocus({
-        type: "legend-focus",
-        phase: "clear",
-        source: "programmatic",
-      });
+    const plan = planLegendCommittedReconcile({
+      committed: legendCommitted,
+      entries: interactiveLegendEntries,
+      keyIndex: legendEntryKeyIndex,
+      usesLocalEmphasis: interaction === undefined,
+      localEmphasisCount: localEmphasisKeys.length,
+    });
+    switch (plan.type) {
+      case "noop":
+        return;
+      case "clear-committed":
+        legendCommitted = null;
+        break;
+      case "clear-committed-local-emit":
+        legendCommitted = null;
+        localEmphasisKeys = [];
+        emitLegendFocus({
+          type: "legend-focus",
+          phase: "clear",
+          source: "programmatic",
+        });
+        break;
     }
   });
 
@@ -1247,16 +1256,26 @@
 
   // Drop chart-local emphasis when legend focus is turned off at runtime.
   $effect(() => {
-    if (interactionConfig.legendFocus !== null) return;
-    if (
-      legendPreview === null &&
-      localEmphasisKeys.length === 0 &&
-      legendCommitted === null
-    )
-      return;
-    legendPreview = null;
-    legendCommitted = null;
-    if (interaction === undefined) localEmphasisKeys = [];
+    const plan = planLegendFocusDisabledClear({
+      legendFocusEnabled: interactionConfig.legendFocus !== null,
+      hasPreview: legendPreview !== null,
+      hasCommitted: legendCommitted !== null,
+      hasLocalEmphasis: localEmphasisKeys.length > 0,
+      usesLocalEmphasis: interaction === undefined,
+    });
+    switch (plan.type) {
+      case "noop":
+        return;
+      case "clear-host":
+        legendPreview = null;
+        legendCommitted = null;
+        break;
+      case "clear-host-local":
+        legendPreview = null;
+        legendCommitted = null;
+        localEmphasisKeys = [];
+        break;
+    }
   });
 
   function legendAction(
