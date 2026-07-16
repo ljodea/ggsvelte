@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784214332762,
+  "lastUpdate": 1784214603835,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -14482,6 +14482,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 167.8274,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "360d4c512eb13e8b4415f4058e3c7128acdf620c",
+          "message": "refactor(core): split finalize, geometry builders, and bind helpers (#131)\n\n* refactor(core): split finalize, geometry builders, and bind helpers\n\nExtract layout vs geometry/scene finalize phases; render-model lifecycle;\nboxplot per-row layout; rect slot resolution; errorbar half-width; bind\nfield/color helpers; baseline domain training; and candidate series\nlineage helpers. Facades keep import paths stable. Add characterization\nfor makeErrorbarHalfWidth.\n\n* fix(core): return normalized y bounds from resolveRectSlot once\n\nAvoid double y-scale normalization per bar/histogram row after the\ngeometry-rects split (Codex P2).",
+          "timestamp": "2026-07-16T10:09:21-05:00",
+          "tree_id": "64192e7b95f8dc3e7acf25a99ceb93a4902a3f87",
+          "url": "https://github.com/ljodea/ggsvelte/commit/360d4c512eb13e8b4415f4058e3c7128acdf620c"
+        },
+        "date": 1784214602799,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 4.1915,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.2779,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 10.7887,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 14.3014,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 81.1515,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 114.8134,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.2093,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2791,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 84.0318,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 104.9818,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.0231,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.3374,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 111.1105,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7933,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 27.1687,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.4467,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 30.6688,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 595.8667,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 160.0211,
             "unit": "ms"
           }
         ]
