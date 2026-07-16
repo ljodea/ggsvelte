@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784200118223,
+  "lastUpdate": 1784200498410,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -10079,6 +10079,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 166.7529,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "aef2312ca8ea77602ee3d1d013a78f939386039d",
+          "message": "refactor(core): split geometry builders and thin runPipeline phases (#94)\n\nBreak the ~1k-line geometry module into shared primitives, simple marks,\nand composite builders, keeping a thin dispatch facade. Also extract\npreparePanels and trainPipelineScales so runPipeline is a short phase\nchain. Characterization tests cover geom dispatch and panel preparation.",
+          "timestamp": "2026-07-16T06:14:16-05:00",
+          "tree_id": "a94bb93ff137b73d8d2c35ca4d00e8e0adc8749c",
+          "url": "https://github.com/ljodea/ggsvelte/commit/aef2312ca8ea77602ee3d1d013a78f939386039d"
+        },
+        "date": 1784200497449,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 3.9301,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.1139,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 10.9188,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 13.5452,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 85.5596,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 122.1087,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 0.994,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2469,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 85.5541,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 106.0995,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.9922,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.8687,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 114.1872,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.8011,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 28.5059,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.3539,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 30.7828,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 598.0466,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 159.9733,
             "unit": "ms"
           }
         ]
