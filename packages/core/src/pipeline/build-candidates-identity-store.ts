@@ -8,10 +8,7 @@ import type { Scene } from "../scene.js";
 import type { ColumnTable } from "../table.js";
 
 import { createIdentityCandidateDatumResolver } from "./build-candidates-datum.js";
-import {
-  buildCandidateIdentityIndex,
-  type CandidateIdentityIndex,
-} from "./build-candidates-identity.js";
+import { createLazyIdentityIndex } from "./build-candidates-identity-lazy.js";
 import type { FacetPanelDef } from "./facets.js";
 import type { MappedField } from "./types.js";
 import type { LayerBinding, LayerFrame, ResolvedColorScale } from "./types.js";
@@ -43,12 +40,7 @@ export function buildIdentityIndexedCandidates(input: {
     lineage,
   } = input;
 
-  let identityIndex: CandidateIdentityIndex | null = null;
-  const getIdentityIndex = () => {
-    if (identityIndex !== null) return identityIndex;
-    identityIndex = buildCandidateIdentityIndex(panelFrames, facetPanels);
-    return identityIndex;
-  };
+  const getIdentityIndex = createLazyIdentityIndex(panelFrames, facetPanels);
 
   return buildCandidateStore(scene, {
     epoch: runId,
