@@ -214,6 +214,44 @@ describe("buildBatch dispatch via runPipeline", () => {
     expect(col.scene.batches.some((b) => b.kind === "rects")).toBe(true);
   });
 
+  it("text emits glyphs with label texts; annotation rule emits segments", () => {
+    const text = runPipeline(
+      gg(
+        [
+          { x: 1, y: 2, label: "a" },
+          { x: 2, y: 3, label: "b" },
+        ],
+        aes({ x: "x", y: "y", label: "label" }),
+      )
+        .geomText()
+        .spec(),
+      size,
+    );
+    const glyphs = text.scene.batches.find((b) => b.kind === "glyphs");
+    expect(glyphs).toBeTruthy();
+    if (glyphs?.kind === "glyphs") {
+      expect(glyphs.texts).toEqual(["a", "b"]);
+      expect(batchMarkCount(glyphs)).toBe(2);
+    }
+
+    const rule = runPipeline(
+      gg(
+        [
+          { x: 1, y: 2 },
+          { x: 2, y: 3 },
+        ],
+        aes({ x: "x", y: "y" }),
+      )
+        .geomRule({ yintercept: 2.5 })
+        .spec(),
+      size,
+    );
+    expect(rule.scene.batches.some((b) => b.kind === "segments")).toBe(true);
+    expect(batchMarkCount(rule.scene.batches.find((b) => b.kind === "segments")!)).toBeGreaterThan(
+      0,
+    );
+  });
+
   it("boxplot emits composite rects + segments; errorbar emits segments", () => {
     const box = runPipeline(
       gg(
