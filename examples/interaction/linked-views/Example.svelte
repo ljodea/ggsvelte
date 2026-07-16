@@ -178,7 +178,7 @@
     justify-content: space-between;
     gap: 1rem;
     padding: 1rem 1.1rem;
-    border: 1px solid color-mix(in srgb, var(--text, #17202a) 16%, transparent);
+    border: 1px solid color-mix(in srgb, var(--fg, #17202a) 16%, transparent);
     border-radius: 0.7rem;
     background: color-mix(in srgb, var(--surface, white) 94%, #287271 6%);
   }
@@ -189,7 +189,7 @@
   }
 
   .eyebrow {
-    color: var(--text, #17202a);
+    color: var(--fg, #17202a);
     font: 650 0.78rem/1.2 var(--gg-font-family, system-ui, sans-serif);
     letter-spacing: 0.05em;
     text-transform: uppercase;
@@ -211,10 +211,10 @@
   button {
     min-height: 2.25rem;
     padding: 0.42rem 0.72rem;
-    border: 1px solid color-mix(in srgb, var(--text, #17202a) 26%, transparent);
+    border: 1px solid color-mix(in srgb, var(--fg, #17202a) 26%, transparent);
     border-radius: 0.42rem;
     background: var(--surface, white);
-    color: var(--text, #17202a);
+    color: var(--fg, #17202a);
     font: 600 0.78rem/1.2 var(--gg-font-family, system-ui, sans-serif);
     cursor: pointer;
   }
@@ -238,7 +238,7 @@
   table {
     width: 100%;
     border-collapse: collapse;
-    color: var(--text, #17202a);
+    color: var(--fg, #17202a);
     font: 0.82rem/1.35 var(--gg-font-family, system-ui, sans-serif);
   }
 
@@ -252,7 +252,7 @@
   td {
     padding: 0.5rem 0.65rem;
     border-bottom: 1px solid
-      color-mix(in srgb, var(--text, #17202a) 12%, transparent);
+      color-mix(in srgb, var(--fg, #17202a) 12%, transparent);
     text-align: left;
   }
 
