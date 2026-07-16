@@ -36,18 +36,14 @@
  * values with a warning and REFUSE non-positive explicit domains.
  */
 
-import type { PortableSpec, SpecInput } from "@ggsvelte/spec";
-import { normalize, SpecValidationError, validate } from "@ggsvelte/spec";
+import type { SpecInput, PortableSpec } from "@ggsvelte/spec";
 
-import { resolveEditionDefaults } from "./editions.js";
-import type { ThemeTokens } from "./theme.js";
-import { resolveTheme, UnknownThemeError } from "./theme.js";
 import { perfMark, perfMeasure } from "./perf.js";
 import { LineageStore } from "./identity.js";
 
 import type { Advisory, PipelineWarning, RenderModel, RunOptions } from "./pipeline/types.js";
-import { PipelineError } from "./pipeline/types.js";
 import { preparePanels } from "./pipeline/prepare-panels.js";
+import { setupPipelineRun } from "./pipeline/setup-run.js";
 import { trainPipelineScales } from "./pipeline/train-pipeline-scales.js";
 import { computePanelLayout } from "./pipeline/panel-layout.js";
 import { assembleScene, buildGeometryBatches } from "./pipeline/assemble-scene.js";
@@ -87,39 +83,14 @@ export function runPipeline(spec: SpecInput | PortableSpec, options: RunOptions)
   const runId = ++nextRunId;
   perfMark("ggsvelte:pipeline:start");
 
-  // normalize + validate (normalize is idempotent; validation is cheap and
-  // makes every entry point honor the agent error contract)
-  const normalized = normalize(spec);
-  const result = validate(normalized);
-  if (!result.ok) throw new SpecValidationError(result.errors);
-
   const warnings: PipelineWarning[] = [];
   const advisories: Advisory[] = [];
 
-  // Defaults edition (Hadley lesson 13): the spec's stamped edition selects
-  // the default theme table + palettes; explicit settings still win.
-  const editionResolution = resolveEditionDefaults(normalized.edition, options.editions);
-  if (editionResolution.unknownRequested !== null) {
-    warnings.push({
-      code: "unknown-edition",
-      message:
-        `The spec targets defaults edition ${editionResolution.unknownRequested}, which this ` +
-        `version of ggsvelte does not know; falling back to edition ${editionResolution.edition} defaults.`,
-    });
-  }
-  const editionDefaults = editionResolution.defaults;
-
-  let theme: ThemeTokens;
-  try {
-    theme = resolveTheme(normalized.theme, editionDefaults.themes);
-  } catch (error) {
-    if (error instanceof UnknownThemeError) {
-      throw new PipelineError("unknown-theme", "/theme", error.message);
-    }
-    throw error;
-  }
-
-  const flip = normalized.coord?.type === "flip";
+  const { normalized, editionDefaults, theme, flip } = setupPipelineRun(
+    spec,
+    options.editions,
+    warnings,
+  );
 
   // bind + facet partition + per-panel frames
   perfMark("ggsvelte:bind:start");
