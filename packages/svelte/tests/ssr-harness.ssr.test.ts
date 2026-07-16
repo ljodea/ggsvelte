@@ -26,6 +26,21 @@ describe("SSR release fixture", () => {
     expect(fixture.html).toMatch(/^<!doctype html>/);
   });
 
+  it('keeps data-gg-ready="false" during SSR for fixed-width SVG plots (decision 0009)', () => {
+    // $effect never runs on the server; prerendered HTML must not claim ready
+    // so VR / screenshot tooling waits for the post-hydration committed flush.
+    const fixture = renderSsrFixture(GGPlot, {
+      data: rows,
+      aes: { x: "x", y: "y" },
+      layers: [{ geom: "point" }],
+      width: 480,
+      height: 320,
+    });
+
+    expect(fixture.body).toContain('data-gg-ready="false"');
+    expect(fixture.body).not.toContain('data-gg-ready="true"');
+  });
+
   it("renders the canonical browser hydration fixture", () => {
     const fixture = renderSsrFixture(HydrationFixture, { label: "Selected", count: 2 });
     expect(fixture.body).toContain('data-hydrated="false"');

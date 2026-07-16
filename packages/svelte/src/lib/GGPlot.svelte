@@ -2138,11 +2138,14 @@
   }
 
   // Readiness signal for screenshot tooling (plan: VR waits on
-  // `[data-gg-ready="true"]`). Derived after flush-visible state updates;
-  // canvas strata additionally gate on first paint (decision 0006 / plan).
-  const ready = $derived.by(() => {
+  // `[data-gg-ready="true"]`). Must use $effect (not pure $derived): effects
+  // never run during SSR, so prerendered HTML stays data-gg-ready="false"
+  // until the first client committed flush (decision 0009). Canvas strata
+  // additionally gate on first paint (decision 0006 / plan).
+  let ready = $state(false);
+  $effect(() => {
     void paintEpoch;
-    return isPlotReady({
+    ready = isPlotReady({
       hasModel: model !== null,
       widthMode:
         width === undefined || width === "container" ? "container" : "fixed",
