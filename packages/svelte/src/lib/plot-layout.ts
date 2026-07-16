@@ -20,6 +20,19 @@ export function isDockedTooltipWidth(widthPx: number): boolean {
   return widthPx < DOCKED_TOOLTIP_MAX_WIDTH_PX;
 }
 
+/**
+ * Capture-surface `aria-controls` when a pinned interactive tooltip is up.
+ * Undefined otherwise (attribute omitted).
+ */
+export function resolveCaptureAriaControls(input: {
+  readonly isPinned: boolean;
+  readonly interactiveContent: boolean;
+  readonly plotId: string;
+}): string | undefined {
+  if (!input.isPinned || !input.interactiveContent) return undefined;
+  return `${input.plotId}-tooltip`;
+}
+
 export type TooltipViewportSizeInput = {
   readonly sceneWidth: number;
   readonly sceneHeight: number;

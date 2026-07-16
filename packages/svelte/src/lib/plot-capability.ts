@@ -62,6 +62,25 @@ export function shouldShowToolRail(input: ShowToolRailInput): boolean {
   );
 }
 
+export type InertSelectionOverlayInput = {
+  /**
+   * Host chart-local `interactive` (tools or legend focus).
+   * Inert overlay is only for non-interactive emphasis/selection paint.
+   */
+  readonly interactive: boolean;
+  readonly selectedAnchorCount: number;
+  readonly emphasizedAnchorCount: number;
+};
+
+/**
+ * Whether to paint the non-interactive selection/emphasis overlay.
+ * Host also must not be in surface-interactive mode; PlotSceneOverlays
+ * enforces that with `{:else if}` so both never mount together.
+ */
+export function shouldShowInertSelectionOverlay(input: InertSelectionOverlayInput): boolean {
+  return !input.interactive && (input.selectedAnchorCount > 0 || input.emphasizedAnchorCount > 0);
+}
+
 /**
  * Pure routing for host `chooseTool`.
  *

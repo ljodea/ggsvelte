@@ -7,6 +7,7 @@ import {
   legendFocusDiscreteOnlyDiagnostics,
   resolveChooseToolAction,
   resolveEffectiveTool,
+  shouldShowInertSelectionOverlay,
   shouldShowToolRail,
   zoomScaleDiagnosticsFromChannels,
   zoomSupportsChannel,
@@ -270,6 +271,42 @@ describe("shouldShowToolRail", () => {
   it("is true when an interval selection or zoom domains are present", () => {
     expect(shouldShowToolRail({ ...base, hasIntervalSelection: true })).toBe(true);
     expect(shouldShowToolRail({ ...base, hasZoomDomains: true })).toBe(true);
+  });
+});
+
+describe("shouldShowInertSelectionOverlay", () => {
+  it("is false when the chart is interactive even with anchors", () => {
+    expect(
+      shouldShowInertSelectionOverlay({
+        interactive: true,
+        selectedAnchorCount: 2,
+        emphasizedAnchorCount: 3,
+      }),
+    ).toBe(false);
+  });
+
+  it("is true only when non-interactive and at least one anchor set is non-empty", () => {
+    expect(
+      shouldShowInertSelectionOverlay({
+        interactive: false,
+        selectedAnchorCount: 1,
+        emphasizedAnchorCount: 0,
+      }),
+    ).toBe(true);
+    expect(
+      shouldShowInertSelectionOverlay({
+        interactive: false,
+        selectedAnchorCount: 0,
+        emphasizedAnchorCount: 2,
+      }),
+    ).toBe(true);
+    expect(
+      shouldShowInertSelectionOverlay({
+        interactive: false,
+        selectedAnchorCount: 0,
+        emphasizedAnchorCount: 0,
+      }),
+    ).toBe(false);
   });
 });
 
