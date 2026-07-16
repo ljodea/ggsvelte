@@ -16,6 +16,9 @@ const base = (
   // Meaningful only when hasInspection (toggle-point-keys); unused otherwise.
   focusKey: null,
   sourceKeys: [],
+  // Meaningful for begin-area; unused otherwise.
+  inspectionAnchor: null,
+  firstPanel: undefined,
   ...overrides,
 });
 
@@ -88,10 +91,42 @@ describe("resolveSurfaceKeyAction", () => {
   });
 
   describe("area tools without draft", () => {
-    it("Enter/Space begins an area brush", () => {
+    it("Enter/Space begins an area brush with inspection anchor when present", () => {
+      expect(
+        resolveSurfaceKeyAction(
+          base({
+            key: "Enter",
+            activeTool: "select-area",
+            inspectionAnchor: { x: 12, y: 34 },
+            firstPanel: { x: 0, y: 0, width: 100, height: 80 },
+          }),
+        ),
+      ).toEqual({
+        preventDefault: true,
+        action: { type: "begin-area", anchor: { x: 12, y: 34 } },
+      });
+    });
+
+    it("begin-area falls back to panel center when no inspection anchor", () => {
+      expect(
+        resolveSurfaceKeyAction(
+          base({
+            key: " ",
+            activeTool: "zoom-area",
+            inspectionAnchor: null,
+            firstPanel: { x: 10, y: 20, width: 100, height: 80 },
+          }),
+        ),
+      ).toEqual({
+        preventDefault: true,
+        action: { type: "begin-area", anchor: { x: 60, y: 60 } },
+      });
+    });
+
+    it("begin-area uses {0,0} when no anchor and no panel", () => {
       expect(resolveSurfaceKeyAction(base({ key: "Enter", activeTool: "select-area" }))).toEqual({
         preventDefault: true,
-        action: { type: "begin-area" },
+        action: { type: "begin-area", anchor: { x: 0, y: 0 } },
       });
     });
 
