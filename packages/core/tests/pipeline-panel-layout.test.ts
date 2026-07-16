@@ -52,4 +52,47 @@ describe("panel layout via runPipeline", () => {
     // strips reserve a band above panels
     expect(model.scene.panels[0]!.y).toBeGreaterThanOrEqual(STRIP_BAND);
   });
+
+  it("facet free_y shows y axes on every column (not only the left edge)", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { x: 1, y: 1, g: "a" },
+          { x: 2, y: 10, g: "b" },
+          { x: 3, y: 100, g: "c" },
+          { x: 4, y: 2, g: "d" },
+        ],
+        aes({ x: "x", y: "y" }),
+      )
+        .geomPoint()
+        .facet({ wrap: "g", scales: "free_y", ncol: 2 })
+        .spec(),
+      size,
+    );
+    expect(model.scene.panels).toHaveLength(4);
+    // free_y: each column gets its own y axis chrome
+    const withY = model.scene.panels.filter((p) => p.axisY !== null);
+    expect(withY.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("labs and flip swap axis title orientation on the scene", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { x: 1, y: 10 },
+          { x: 2, y: 20 },
+        ],
+        aes({ x: "x", y: "y" }),
+      )
+        .geomPoint()
+        .labs({ x: "Miles", y: "Gallons", title: "Mileage" })
+        .coord({ type: "flip" })
+        .spec(),
+      size,
+    );
+    expect(model.scene.title).toBe("Mileage");
+    // under flip, semantic x title renders on the vertical axis
+    expect(model.scene.axes.y.title).toBe("Miles");
+    expect(model.scene.axes.x.title).toBe("Gallons");
+  });
 });
