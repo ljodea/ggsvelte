@@ -104,6 +104,7 @@
     {#if zoomDomains !== null}
       <button
         type="button"
+        disabled={!ready}
         onpointerdown={captureRecoveryPointer}
         onpointercancel={() => (recoveryPointerType = null)}
         onclick={(event) => onResetZoom(recoverySource(event))}
@@ -114,6 +115,7 @@
       {#each zoomAxes as axis (axis)}
         <button
           type="button"
+          disabled={!ready}
           onclick={(event) => onEditBounds("zoom", axis, event.currentTarget)}
           >{boundsLabel("zoom", axis, zoomDomains !== null)}</button
         >
@@ -122,6 +124,7 @@
     {#if hasPointSelection}
       <button
         type="button"
+        disabled={!ready}
         onpointerdown={captureRecoveryPointer}
         onpointercancel={() => (recoveryPointerType = null)}
         onclick={(event) => onClearPointSelection(recoverySource(event))}
@@ -131,6 +134,7 @@
     {#if hasIntervalSelection}
       <button
         type="button"
+        disabled={!ready}
         onpointerdown={captureRecoveryPointer}
         onpointercancel={() => (recoveryPointerType = null)}
         onclick={(event) => onClearCurrentInterval(recoverySource(event))}
@@ -138,6 +142,7 @@
       >
       <button
         type="button"
+        disabled={!ready}
         onpointerdown={captureRecoveryPointer}
         onpointercancel={() => (recoveryPointerType = null)}
         onclick={(event) => onClearIntervalSelection(recoverySource(event))}
@@ -148,6 +153,7 @@
       {#each intervalAxes as axis (axis)}
         <button
           type="button"
+          disabled={!ready}
           onclick={(event) => onEditBounds("select", axis, event.currentTarget)}
           >{boundsLabel("select", axis, hasIntervalSelection)}</button
         >

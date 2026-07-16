@@ -331,7 +331,7 @@ describe("R0 interaction evidence", () => {
     await expect.poll(() => container.querySelector(".gg-tooltip")).toBeNull();
   });
 
-  it("keeps keyed band interval selection available without inventing a continuous domain", async () => {
+  it("keeps keyed band interval selection with inclusive categorical endpoints", async () => {
     const diagnostics: Array<{ code: string; prop: string; actual?: unknown }> = [];
     const selections: Array<{
       keys: readonly PropertyKey[];
@@ -360,7 +360,7 @@ describe("R0 interaction evidence", () => {
     await dragArea(container, { x: 45, y: 50 }, { x: 470, y: 280 });
     await expect.poll(() => selections.length).toBe(1);
     expect(selections[0].keys).toHaveLength(2);
-    expect(selections[0].domain.x).toBeUndefined();
+    expect(selections[0].domain.x).toEqual(["A", "B"]);
     expect(diagnostics.some((item) => item.code === "INTERACTION_INTERVAL_SCALE_UNSUPPORTED")).toBe(
       false,
     );
