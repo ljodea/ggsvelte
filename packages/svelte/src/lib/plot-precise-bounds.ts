@@ -58,8 +58,11 @@ export function semanticAxisFromBounds(
   }
   const first = bounds[0] as number;
   const second = bounds[1] as number;
+  const domain: readonly [number, number] = Object.freeze(
+    first <= second ? [first, second] : [second, first],
+  );
   return Object.freeze({
     kind: scale,
-    domain: Object.freeze(first <= second ? [first, second] : [second, first]),
+    domain,
   });
 }
