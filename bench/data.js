@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784208935627,
+  "lastUpdate": 1784209175242,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -12697,6 +12697,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 167.1955,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b427ac31e7c19efb041295eedd4e9f0bdb2c22e8",
+          "message": "refactor(core): split pipeline types and color scale resolution (#116)\n\nSeparate public contract types from LayerFrame/binding types behind a stable\ntypes barrel. Split sequential vs ordinal color resolution out of\nresolveColorScale. Characterization tests pin sequential inference, explicit\nordinal override, and colorOf unknown fallback.",
+          "timestamp": "2026-07-16T08:38:59-05:00",
+          "tree_id": "f778bfeec0e96821f0bfb635a9e28a3c124b1846",
+          "url": "https://github.com/ljodea/ggsvelte/commit/b427ac31e7c19efb041295eedd4e9f0bdb2c22e8"
+        },
+        "date": 1784209174296,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 1.9386,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.3309,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 8.0679,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 10.6474,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 63.646,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 93.2304,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 0.7715,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 0.9495,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 66.4303,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 86.0139,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 10.3823,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 9.5189,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 92.8841,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.6387,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 23.2658,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 5.7702,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 24.1067,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 496.2291,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 132.0749,
             "unit": "ms"
           }
         ]
