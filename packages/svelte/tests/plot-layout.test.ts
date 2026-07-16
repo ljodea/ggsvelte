@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   isDockedTooltipWidth,
   isNarrowToolsWidth,
+  isTooltipDocked,
   plotRootInlineStyle,
   resolveClearLegendX,
   resolveCaptureAriaControls,
@@ -18,6 +19,16 @@ describe("breakpoint helpers", () => {
   it("docked tooltip is width < 480", () => {
     expect(isDockedTooltipWidth(479)).toBe(true);
     expect(isDockedTooltipWidth(480)).toBe(false);
+  });
+});
+
+describe("isTooltipDocked", () => {
+  it("requires pinned inspection state and docked width", () => {
+    expect(isTooltipDocked({ inspectionState: "pinned", widthPx: 479 })).toBe(true);
+    expect(isTooltipDocked({ inspectionState: "pinned", widthPx: 480 })).toBe(false);
+    expect(isTooltipDocked({ inspectionState: "transient", widthPx: 100 })).toBe(false);
+    expect(isTooltipDocked({ inspectionState: null, widthPx: 100 })).toBe(false);
+    expect(isTooltipDocked({ inspectionState: "none", widthPx: 100 })).toBe(false);
   });
 });
 

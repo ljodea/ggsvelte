@@ -105,7 +105,11 @@
     nudgeBrushEnd,
     panelCenterAnchor,
   } from "./plot-area-brush.js";
-  import { frozenZoomDomains, normalizedRect } from "./plot-geometry.js";
+  import {
+    frozenZoomDomains,
+    normalizedRect,
+    panelContainingAnchor,
+  } from "./plot-geometry.js";
   import { resolveSurfaceKeyAction } from "./plot-surface-keyboard.js";
   import {
     resolveInspectionCompleteness,
@@ -150,8 +154,8 @@
     zoomAnnouncement,
   } from "./plot-labels.js";
   import {
-    isDockedTooltipWidth,
     isNarrowToolsWidth,
+    isTooltipDocked,
     plotRootInlineStyle,
     resolveCaptureAriaControls,
     resolveClearLegendX,
@@ -170,6 +174,7 @@
     bandChannelsForZoom,
     capabilityStatusText,
     filterAvailableTools,
+    isEmptyPlotScene,
     legendFocusDiscreteOnlyDiagnostics,
     resolveChooseToolAction,
     resolveEffectiveTool,
@@ -639,16 +644,7 @@
   let interactionAnnouncement = $state("");
   const inspectionPanel = $derived.by(() => {
     if (inspection === null || model === null) return null;
-    const anchor = inspection.focus.anchor;
-    return (
-      model.scene.panels.find(
-        (panel) =>
-          anchor.x >= panel.x &&
-          anchor.x <= panel.x + panel.width &&
-          anchor.y >= panel.y &&
-          anchor.y <= panel.y + panel.height,
-      ) ?? null
-    );
+    return panelContainingAnchor(model.scene.panels, inspection.focus.anchor);
   });
   const coordFlipped = $derived(assembled?.coord?.type === "flip");
   let tooltipHovered = $state(false);
@@ -734,8 +730,7 @@
     }),
   );
   const emptyPlot = $derived(
-    model !== null &&
-      model.scene.batches.every((batch) => batch.rowIndex.length === 0),
+    model !== null && isEmptyPlotScene(model.scene.batches),
   );
   const areaScaleDiagnostics = $derived.by(() => {
     if (model === null || interactionConfig.zoom === null)
@@ -2278,8 +2273,10 @@
   class:gg-with-legend-clear={interactionConfig.legendFocus !== null &&
     effectiveLegendPressed !== null}
   class:gg-narrow-tools={isNarrowToolsWidth(resolvedWidth)}
-  class:gg-with-docked-tooltip={inspection?.state === "pinned" &&
-    isDockedTooltipWidth(resolvedWidth)}
+  class:gg-with-docked-tooltip={isTooltipDocked({
+    inspectionState: inspection?.state,
+    widthPx: resolvedWidth,
+  })}
   data-gg-ready={ready ? "true" : "false"}
   style={rootStyle}
 >
@@ -2417,8 +2414,10 @@
           height={tooltipSize.height}
           content={interactionConfig.inspect?.content}
           interactive={interactionConfig.inspect?.contentMode === "interactive"}
-          docked={inspection.state === "pinned" &&
-            isDockedTooltipWidth(resolvedWidth)}
+          docked={isTooltipDocked({
+            inspectionState: inspection.state,
+            widthPx: resolvedWidth,
+          })}
           onenter={() => (tooltipHovered = true)}
           onleave={() => {
             tooltipHovered = false;

@@ -6,6 +6,7 @@ import {
   frozenZoomDomains,
   invertedDomain,
   normalizedRect,
+  panelContainingAnchor,
   panelDataDomains,
 } from "../src/lib/plot-geometry.js";
 
@@ -28,6 +29,26 @@ describe("clamp", () => {
     expect(clamp(5, 0, 10)).toBe(5);
     expect(clamp(-1, 0, 10)).toBe(0);
     expect(clamp(11, 0, 10)).toBe(10);
+  });
+});
+
+describe("panelContainingAnchor", () => {
+  const panels = [
+    { id: "a", x: 0, y: 0, width: 100, height: 50 },
+    { id: "b", x: 100, y: 0, width: 100, height: 50 },
+  ];
+
+  it("returns the first panel whose inclusive bounds contain the anchor", () => {
+    expect(panelContainingAnchor(panels, { x: 50, y: 25 })?.id).toBe("a");
+    expect(panelContainingAnchor(panels, { x: 100, y: 0 })?.id).toBe("a"); // shared edge → first
+    expect(panelContainingAnchor(panels, { x: 150, y: 25 })?.id).toBe("b");
+    expect(panelContainingAnchor(panels, { x: 200, y: 50 })?.id).toBe("b"); // far corner inclusive
+  });
+
+  it("returns null when no panel contains the point or panels are empty", () => {
+    expect(panelContainingAnchor(panels, { x: -1, y: 0 })).toBeNull();
+    expect(panelContainingAnchor(panels, { x: 50, y: 51 })).toBeNull();
+    expect(panelContainingAnchor([], { x: 0, y: 0 })).toBeNull();
   });
 });
 

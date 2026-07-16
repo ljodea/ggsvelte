@@ -7,6 +7,7 @@ import {
   legendFocusDiscreteOnlyDiagnostics,
   resolveChooseToolAction,
   resolveEffectiveTool,
+  isEmptyPlotScene,
   shouldShowInertSelectionOverlay,
   shouldShowToolRail,
   zoomScaleDiagnosticsFromChannels,
@@ -211,6 +212,17 @@ describe("capabilityStatusText", () => {
         candidateCount: 0,
       }),
     ).toBeNull();
+  });
+});
+
+describe("isEmptyPlotScene", () => {
+  it("is true when every batch has zero rows, including no batches", () => {
+    expect(isEmptyPlotScene([])).toBe(true);
+    expect(isEmptyPlotScene([{ rowIndex: [] }, { rowIndex: [] }])).toBe(true);
+  });
+
+  it("is false when any batch has rows", () => {
+    expect(isEmptyPlotScene([{ rowIndex: [0] }, { rowIndex: [] }])).toBe(false);
   });
 });
 

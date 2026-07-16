@@ -14,6 +14,25 @@ export type PanelBounds = {
   readonly height: number;
 };
 
+/**
+ * First panel whose inclusive pixel bounds contain the anchor, or null.
+ * Matches host inspection-panel resolution (`>=` / `<=` on each edge).
+ */
+export function panelContainingAnchor<T extends PanelBounds>(
+  panels: readonly T[],
+  anchor: { readonly x: number; readonly y: number },
+): T | null {
+  return (
+    panels.find(
+      (panel) =>
+        anchor.x >= panel.x &&
+        anchor.x <= panel.x + panel.width &&
+        anchor.y >= panel.y &&
+        anchor.y <= panel.y + panel.height,
+    ) ?? null
+  );
+}
+
 /** Continuous zoom domain bag used by brush-to-zoom commit paths. */
 export type ContinuousZoomDomains = {
   x?: [number, number];
