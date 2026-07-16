@@ -452,13 +452,19 @@ describe("shouldCommitInspection", () => {
   });
 });
 
+const samplePending = {
+  hit: null,
+  source: "pointer" as const,
+  concreteMode: "exact" as const,
+};
+
 const toggleInput = (
   overrides: Partial<ToggleInspectionPinInput> = {},
 ): ToggleInspectionPinInput => ({
   hasInspection: true,
   hasSeed: true,
   currentState: "transient",
-  hasPendingPinned: false,
+  pending: null,
   ...overrides,
 });
 
@@ -472,15 +478,15 @@ describe("resolveToggleInspectionPinAction", () => {
     ).toEqual({ type: "ignore" });
   });
 
-  it("restores pending only when pinned with a pending payload", () => {
+  it("restores pending only when pinned with a non-null pending payload", () => {
     expect(
       resolveToggleInspectionPinAction(
         toggleInput({
           currentState: "pinned",
-          hasPendingPinned: true,
+          pending: samplePending,
         }),
       ),
-    ).toEqual({ type: "restore-pending" });
+    ).toEqual({ type: "restore-pending", pending: samplePending });
   });
 
   it("does not restore pending while transient even if pending exists", () => {
@@ -488,18 +494,18 @@ describe("resolveToggleInspectionPinAction", () => {
       resolveToggleInspectionPinAction(
         toggleInput({
           currentState: "transient",
-          hasPendingPinned: true,
+          pending: samplePending,
         }),
       ),
     ).toEqual({ type: "flip", state: "pinned" });
   });
 
-  it("flips pinned → transient when no pending", () => {
+  it("flips pinned → transient when pending is null", () => {
     expect(
       resolveToggleInspectionPinAction(
         toggleInput({
           currentState: "pinned",
-          hasPendingPinned: false,
+          pending: null,
         }),
       ),
     ).toEqual({ type: "flip", state: "transient" });

@@ -238,7 +238,6 @@
     buildLegendEntryKeyIndexForPlot,
     findLegendPressedIdentity,
     keysForLegendEntry,
-    legendInteractionSource,
     moveLegendRovingIndex,
     planLegendCommittedReconcile,
     planLegendFocusDisabledClear,
@@ -1048,7 +1047,10 @@
         });
       return;
     }
-    const decision = resolveLegendPreviewKeysDecision(keysForLegend(action));
+    const decision = resolveLegendPreviewKeysDecision({
+      keys: keysForLegend(action),
+      entrySource: action.source,
+    });
     if (decision.type === "clear") {
       // Empty domain entry: do not leave the previous entry's preview active.
       previewLegend(null);
@@ -1059,7 +1061,7 @@
       type: "legend-focus",
       phase: "change",
       state: "transient",
-      source: legendInteractionSource(action.source),
+      source: decision.source,
       scale: action.identity.scale as "color" | "fill",
       value: action.entry.value as CellValue,
       label: action.entry.label,
@@ -1634,7 +1636,7 @@
       hasInspection: inspection !== null,
       hasSeed: inspectionSeed !== null,
       currentState: inspection?.state ?? "transient",
-      hasPendingPinned: pendingPinnedPointer !== null,
+      pending: pendingPinnedPointer,
     });
     if (pinAction.type === "ignore") return;
     // toggle-pin always runs before restore/flip side effects; if flip
@@ -1642,17 +1644,17 @@
     reducer.dispatch({ type: "toggle-pin", source });
     switch (pinAction.type) {
       case "restore-pending": {
-        const pending = pendingPinnedPointer!;
+        // Pure gate carries pending payload — no host non-null assert.
         pendingPinnedPointer = null;
         inspectionCoordinator.release("pinned");
         inspection = null;
         inspectionSeed = null;
         setInspection(
-          pending.hit,
-          pending.source,
+          pinAction.pending.hit,
+          pinAction.pending.source,
           "transient",
-          pending.concreteMode,
-          pending.candidate,
+          pinAction.pending.concreteMode,
+          pinAction.pending.candidate,
         );
         return;
       }
