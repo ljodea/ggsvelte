@@ -22,6 +22,18 @@ export type ResolvePlotSizeInput = {
 };
 
 /**
+ * True when the width prop is omitted or `"container"` (responsive layout).
+ * Shared by resolvePlotSize, paint readiness widthMode, root class, ResizeObserver
+ * install, and plotRootInlineStyle containerWidth flag.
+ * Type predicate so fixed-mode branches narrow to `number`.
+ */
+export function isContainerWidthProp(
+  width: number | "container" | undefined,
+): width is "container" | undefined {
+  return width === undefined || width === "container";
+}
+
+/**
  * Resolved plot pixel size for the pipeline and root style.
  * Container mode: measured container width, then assembled, then 640.
  * Fixed mode: the numeric width prop (assembled fallback is unused once fixed).
@@ -31,10 +43,9 @@ export function resolvePlotSize(input: ResolvePlotSizeInput): {
   readonly width: number;
   readonly height: number;
 } {
-  const width =
-    input.width === undefined || input.width === "container"
-      ? (input.containerWidth ?? input.assembledWidth ?? DEFAULT_PLOT_WIDTH_PX)
-      : input.width;
+  const width = isContainerWidthProp(input.width)
+    ? (input.containerWidth ?? input.assembledWidth ?? DEFAULT_PLOT_WIDTH_PX)
+    : input.width;
   const height = input.height ?? input.assembledHeight ?? DEFAULT_PLOT_HEIGHT_PX;
   return { width, height };
 }

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  isContainerWidthProp,
   isDockedTooltipWidth,
   isNarrowToolsWidth,
   isTooltipDocked,
@@ -11,6 +12,20 @@ import {
   resolvePlotSize,
   tooltipViewportSize,
 } from "../src/lib/plot-layout.js";
+
+describe("isContainerWidthProp", () => {
+  it("is true for omitted and container width props", () => {
+    // Omitted optional prop (no undefined literal — oxlint unicorn/no-useless-undefined).
+    const props: { width?: number | "container" } = {};
+    expect(isContainerWidthProp(props.width)).toBe(true);
+    expect(isContainerWidthProp("container")).toBe(true);
+  });
+
+  it("is false for fixed numeric widths", () => {
+    expect(isContainerWidthProp(640)).toBe(false);
+    expect(isContainerWidthProp(0)).toBe(false);
+  });
+});
 
 describe("resolvePlotSize", () => {
   it("uses container measure then assembled then 640 in container mode", () => {
