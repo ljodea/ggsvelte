@@ -109,4 +109,17 @@
     white-space: nowrap;
     border: 0;
   }
+
+  /* Mirrors GGPlot root reduced-motion policy for this component scope
+     (parent `.gg-plot-root *` cannot cross Svelte style boundaries). */
+  @media (prefers-reduced-motion: reduce) {
+    .gg-area-instruction,
+    .gg-empty-state,
+    .gg-capability-status,
+    .gg-sr-only {
+      scroll-behavior: auto;
+      transition: none !important;
+      animation: none !important;
+    }
+  }
 </style>

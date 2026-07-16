@@ -87,4 +87,26 @@ describe("PlotStatusChrome", () => {
     expect(container.querySelector("#legend-only-description")).toBeNull();
     expect(container.querySelector("#legend-only-live")?.textContent).toBe("Web focused, 1 datum.");
   });
+
+  it("includes component-scoped reduced-motion resets for chrome classes", () => {
+    render(PlotStatusChrome, {
+      plotId: "rm",
+      showAreaInstruction: true,
+      emptyPlot: true,
+      capabilityStatus: "status",
+    });
+    const cssText = [...document.styleSheets]
+      .flatMap((sheet) => {
+        try {
+          return [...sheet.cssRules].map((rule) => rule.cssText);
+        } catch {
+          return [] as string[];
+        }
+      })
+      .join("\n");
+    expect(cssText).toMatch(/prefers-reduced-motion:\s*reduce/i);
+    expect(cssText).toMatch(/transition:\s*none/i);
+    // CSSOM may serialize `animation: none` as expanded longhands / `auto`.
+    expect(cssText).toMatch(/animation:\s*(none|auto)/i);
+  });
 });
