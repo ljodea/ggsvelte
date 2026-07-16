@@ -72,7 +72,7 @@ export function resolvePointerDownAction(input: SurfacePointerDownInput): Surfac
  * `interactionConfig.inspect`). Pass the domain object, not a pre-derived
  * `inspectEnabled` boolean — matches inspection-state domain convention.
  */
-export type SurfaceInspectConfig = {
+type SurfaceInspectConfig = {
   readonly mode: "auto" | "exact" | "x" | "y" | "xy";
   readonly maxDistance: number;
   readonly pin: boolean;
