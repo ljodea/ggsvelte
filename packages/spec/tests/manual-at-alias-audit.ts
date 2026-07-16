@@ -13,7 +13,7 @@ export function isRuntimeBehaviorPath(path: string): boolean {
 }
 
 export function runtimeBehaviorPaths(paths: readonly string[]): string[] {
-  return paths.filter(isRuntimeBehaviorPath);
+  return paths.filter((path) => isRuntimeBehaviorPath(path));
 }
 
 function git(
@@ -32,14 +32,14 @@ function git(
   };
 }
 
-export function assertGitObjectExists(repoRoot: string, sha: string, label: string): void {
+function assertGitObjectExists(repoRoot: string, sha: string, label: string): void {
   const result = git(repoRoot, ["cat-file", "-e", `${sha}^{commit}`]);
   if (result.status !== 0) {
     throw new Error(`${label} commit ${sha} is not present in this repository`);
   }
 }
 
-export function assertAncestor(repoRoot: string, ancestor: string, descendant: string): void {
+function assertAncestor(repoRoot: string, ancestor: string, descendant: string): void {
   const result = git(repoRoot, ["merge-base", "--is-ancestor", ancestor, descendant]);
   if (result.status !== 0) {
     throw new Error(
@@ -48,7 +48,7 @@ export function assertAncestor(repoRoot: string, ancestor: string, descendant: s
   }
 }
 
-export function listChangedFiles(repoRoot: string, base: string, head: string): string[] {
+function listChangedFiles(repoRoot: string, base: string, head: string): string[] {
   const result = git(repoRoot, ["diff", "--name-only", `${base}..${head}`]);
   if (result.status !== 0) {
     throw new Error(
@@ -62,12 +62,7 @@ export function listChangedFiles(repoRoot: string, base: string, head: string): 
 }
 
 /** True when the unified diff has non-comment, non-blank added/removed lines. */
-export function hasSubstantiveDiff(
-  repoRoot: string,
-  base: string,
-  head: string,
-  path: string,
-): boolean {
+function hasSubstantiveDiff(repoRoot: string, base: string, head: string, path: string): boolean {
   const result = git(repoRoot, ["diff", `${base}..${head}`, "--", path]);
   if (result.status !== 0) {
     throw new Error(
