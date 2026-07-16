@@ -1,12 +1,13 @@
 /**
  * Scene assembly from panel placements, axes, and legends.
  */
-import type { GeometryBatch, Scene, SceneAxis, SceneLegend, ScenePanel } from "../scene.js";
+import type { GeometryBatch, Scene, SceneLegend } from "../scene.js";
 import type { ThemeTokens } from "../theme.js";
 import type { PositionScale } from "../scales/train.js";
 
+import { assembleScenePanels } from "./assemble-scene-panels.js";
 import type { FacetPanelDef } from "./facets.js";
-import { axisTicks, LEGEND_EDGE_PAD } from "./layout-helpers.js";
+import { LEGEND_EDGE_PAD } from "./layout-helpers.js";
 import type { PanelPlacement } from "./panel-layout.js";
 
 export function assembleScene(input: {
@@ -42,27 +43,13 @@ export function assembleScene(input: {
     caption,
   } = input;
 
-  const scenePanels: ScenePanel[] = placements.map((placement, p) => {
-    const { h, v } = displayScales(p);
-    const bottom = axisTicks(h, placement.ticksH, placement.width, false);
-    const left = axisTicks(v, placement.ticksV, placement.height, true);
-    return {
-      id: facetPanels[p]!.id,
-      x: placement.x,
-      y: placement.y,
-      width: placement.width,
-      height: placement.height,
-      strip: facetPanels[p]!.label,
-      axisX: placement.showAxisX ? bottom : null,
-      axisY: placement.showAxisY ? left : null,
-      grid: { x: bottom.map((t) => t.pos), y: left.map((t) => t.pos) },
-    };
+  const { scenePanels, xAxis, yAxis } = assembleScenePanels({
+    placements,
+    facetPanels,
+    displayScales,
+    hTitle,
+    vTitle,
   });
-
-  const firstX = scenePanels.find((p) => p.axisX !== null);
-  const firstY = scenePanels.find((p) => p.axisY !== null);
-  const xAxis: SceneAxis = { ticks: firstX?.axisX ?? [], title: hTitle };
-  const yAxis: SceneAxis = { ticks: firstY?.axisY ?? [], title: vTitle };
 
   const legends: SceneLegend[] = legendBlock.legends.map((legend) => ({
     ...legend,

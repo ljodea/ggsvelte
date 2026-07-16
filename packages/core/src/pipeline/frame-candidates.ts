@@ -4,15 +4,14 @@
 import { bandKey } from "../scales/train.js";
 import type { CellValue } from "../table.js";
 import type { ColumnTable } from "../table.js";
-import type {
-  CandidateBuildFacts,
-  CandidateDatum,
-  ResolvedCandidateInspectMode,
-} from "../candidate-store.js";
+import type { CandidateBuildFacts, CandidateDatum } from "../candidate-store.js";
 import type { LineageStore } from "../identity.js";
 
+import { candidateAutoMode } from "./frame-candidates-auto-mode.js";
 import type { LayerBinding, ResolvedColorScale } from "./types.js";
-import { deriveLayerGroups, interceptList } from "./frame-helpers.js";
+import { deriveLayerGroups } from "./frame-helpers.js";
+
+export { candidateAutoMode } from "./frame-candidates-auto-mode.js";
 
 export function createRawCandidateDatumResolver(
   bindings: readonly LayerBinding[],
@@ -55,33 +54,4 @@ export function createRawCandidateDatumResolver(
       autoMode: candidateAutoMode(binding, facts.primitiveIndex),
     };
   };
-}
-
-export function candidateAutoMode(
-  binding: LayerBinding,
-  primitiveIndex: number,
-): ResolvedCandidateInspectMode {
-  switch (binding.layer.geom) {
-    case "point":
-    case "text":
-      return "xy";
-    case "col":
-    case "bar":
-      return "exact";
-    case "line":
-    case "area":
-    case "density":
-    case "smooth":
-    case "errorbar":
-    case "boxplot":
-      return "x";
-    case "rule": {
-      if (binding.ruleForm === "vertical") return "x";
-      if (binding.ruleForm === "horizontal") return "y";
-      const params = (binding.layer.params ?? {}) as { xintercept?: unknown };
-      return primitiveIndex < interceptList(params.xintercept).length ? "x" : "y";
-    }
-    default:
-      return "xy";
-  }
 }
