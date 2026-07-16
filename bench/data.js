@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784162418510,
+  "lastUpdate": 1784164984180,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -5438,6 +5438,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 165.2325,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "867e16695dafaeefa9733e7b79b1b896bfd6cc4f",
+          "message": "refactor(svelte): extract pure legend-focus helpers from GGPlot (#55)\n\n* refactor(svelte): extract pure legend-focus helpers from GGPlot\n\nLift discrete legend key indexing, pressed-identity resolution, roving\nnavigation, and entry listing into plot-legend-focus.ts with unit tests.\nMove legend interaction types out of the static Legend renderer so GGPlot\nthins to host state and DOM handlers without changing public API.\n\n* fix(svelte): satisfy knip and type-aware lint for legend helpers\n\nDrop unused type exports and remove unnecessary non-null assertions in\nthe pure legend-focus unit tests so pre-push gates pass.\n\n* fix(svelte): drop unnecessary non-null assertions in legend tests\n\nSatisfy oxlint no-unnecessary-type-assertion on the InteractiveLegendEntry\nsmoke test so pre-push type-aware lint passes.",
+          "timestamp": "2026-07-15T20:22:25-05:00",
+          "tree_id": "41e81fbe418a0cd141b609f591f966b57fc066df",
+          "url": "https://github.com/ljodea/ggsvelte/commit/867e16695dafaeefa9733e7b79b1b896bfd6cc4f"
+        },
+        "date": 1784164983340,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.5389,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.8134,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 11.2879,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 12.4464,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 88.5307,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 129.5642,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.334,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2926,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 92.9491,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 110.9207,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 12.9267,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.3234,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 119.1589,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.6393,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 26.5298,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.4001,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 29.7089,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 583.9399,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 162.4165,
             "unit": "ms"
           }
         ]
