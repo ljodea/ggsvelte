@@ -22,6 +22,7 @@ jobs:
   bench-trend:
     name: bench-trend (record datapoint on gh-pages)
     if: github.event_name == 'push'
+    # GitHub-hosted: needs contents:write to push gh-pages datapoints.
     runs-on: ubuntu-latest
     permissions:
       contents: write # github-action-benchmark pushes the datapoint to gh-pages
@@ -59,7 +60,7 @@ jobs:
   bench-label:
     name: bench-label (budget gate on 'run-bench' PRs)
     if: github.event_name == 'pull_request' && github.event.label.name == 'run-bench'
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, ggsvelte]
     container:
       image: mcr.microsoft.com/playwright:v1.61.1-noble
     defaults:

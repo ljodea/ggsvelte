@@ -16,7 +16,7 @@ concurrency:
 jobs:
   build:
     name: build static docs
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, ggsvelte]
     permissions:
       contents: read
     steps:
@@ -60,6 +60,7 @@ jobs:
   deploy:
     name: deploy GitHub Pages
     needs: build
+    # GitHub-hosted: pages write + OIDC; keep privileged deploys off self-hosted.
     runs-on: ubuntu-latest
     permissions:
       pages: write

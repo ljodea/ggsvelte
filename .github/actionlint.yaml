@@ -1,0 +1,5 @@
+# actionlint config (Go CLI). The npm wasm runner in scripts/actionlint.ts
+# cannot load this file; it filters the same custom-label findings instead.
+self-hosted-runner:
+  labels:
+    - ggsvelte
