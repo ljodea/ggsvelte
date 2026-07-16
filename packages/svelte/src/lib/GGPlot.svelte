@@ -59,7 +59,6 @@
   } from "@ggsvelte/core";
   import {
     buildInteractionMasks,
-    legendValueEqual,
     planStrata,
     runPipeline,
     sceneLabel,
@@ -116,6 +115,12 @@
     panelCenterAnchor,
   } from "./plot-area-brush.js";
   import { frozenZoomDomains, normalizedRect } from "./plot-geometry.js";
+  import { resolveSurfaceKeyAction } from "./plot-surface-keyboard.js";
+  import {
+    resolveCaptureClickAction,
+    resolvePointerDownAction,
+    resolvePointerUpAction,
+  } from "./plot-surface-pointer.js";
   import {
     datumLabel as datumLabelFor,
     inspectionLiveText as inspectionLiveTextFor,
@@ -154,8 +159,10 @@
   } from "./plot-precise-bounds.js";
   import {
     anchorsFromCandidateKeys,
+    buildPointSelectionEvent,
     nextPointSelectionKeys,
     rowIndexesForCandidate,
+    sameOrderedPropertyKeys,
     uniqueKeysFromRowIndexes,
   } from "./plot-selection.js";
   import {
@@ -165,11 +172,23 @@
   import { themeTokensToCss } from "./plot-theme-css.js";
   import {
     applyZoomToSpec,
+    buildZoomEvent,
     resolveBrushZoomDomains,
     sanitizePartialZoomDomains,
   } from "./plot-zoom.js";
+  import {
+    buildInteractiveLegendEntries,
+    buildLegendEntryKeyIndex,
+    clampLegendRovingIndex,
+    findLegendPressedIdentity,
+    keysForLegendEntry,
+    legendInteractionSource,
+    moveLegendRovingIndex,
+    samePropertyKeySet,
+    type LegendEntryAction,
+    type LegendEntryIdentity,
+  } from "./plot-legend-focus.js";
   import SceneView from "./SceneView.svelte";
-  import type { LegendEntryAction, LegendEntryIdentity } from "./Legend.svelte";
   import Tooltip from "./Tooltip.svelte";
   import ToolRail from "./ToolRail.svelte";
   import {
@@ -859,11 +878,7 @@
     let committed: readonly PropertyKey[];
     if (interaction === undefined) {
       const next = [...new Set(keys)];
-      if (
-        next.length === localSelectedKeys.length &&
-        next.every((key, index) => Object.is(key, localSelectedKeys[index]))
-      )
-        return;
+      if (sameOrderedPropertyKeys(next, localSelectedKeys)) return;
       localSelectedKeys = next;
       committed = localSelectedKeys;
     } else {
@@ -880,15 +895,7 @@
           (selection) => selection.scope === resolvedInteractionScope.keys,
         )?.keys ?? [];
     }
-    emitSelection(
-      Object.freeze({
-        type: "select",
-        phase: committed.length === 0 ? "clear" : "end",
-        mode: "point",
-        keys: Object.freeze([...committed]),
-        source,
-      }),
-    );
+    emitSelection(buildPointSelectionEvent(committed, source));
   }
 
   function clearPointSelection(source: InteractionSource): void {
@@ -1124,14 +1131,15 @@
   }
 
   function panelAtPoint(point: Readonly<{ x: number; y: number }>) {
+    const panels = model?.scene.panels ?? [];
     return (
-      model?.scene.panels.find(
+      panels.find(
         (panel) =>
           point.x >= panel.x &&
           point.x <= panel.x + panel.width &&
           point.y >= panel.y &&
           point.y <= panel.y + panel.height,
-      ) ?? null
+      ) ?? (panels.length === 1 ? panels[0]! : null)
     );
   }
 
@@ -1156,66 +1164,30 @@
 
   const legendEntryKeyIndex: ReadonlyMap<string, readonly PropertyKey[]> =
     $derived.by(() => {
-      const index = new Map<string, PropertyKey[]>();
-      if (model === null) return index;
-      for (const sceneLegend of model.scene.legends) {
-        if (sceneLegend.type !== "discrete") continue;
-        for (
-          let entryIndex = 0;
-          entryIndex < sceneLegend.entries.length;
-          entryIndex++
-        )
-          index.set(`${sceneLegend.scale}:${String(entryIndex)}`, []);
-      }
-      const visited = new Set<string>();
-      for (let id = 0; id < model.candidates.size; id++) {
-        const candidate = model.candidates.candidate(id);
-        if (candidate === null) continue;
-        for (const sceneLegend of model.scene.legends) {
-          if (sceneLegend.type !== "discrete") continue;
-          const field = model.layerFields[candidate.layerIndex]?.find(
-            (mapped) =>
-              mapped.channel === sceneLegend.scale && mapped.source !== "stat",
-          )?.field;
-          if (field === undefined) continue;
-          const sourceRows = new Set(model.lineage.keys(candidate.lineage));
-          if (candidate.rowIndex !== null) sourceRows.add(candidate.rowIndex);
-          for (const rowIndex of sourceRows) {
-            const visit = `${sceneLegend.scale}:${String(candidate.layerIndex)}:${field}:${String(rowIndex)}`;
-            if (visited.has(visit)) continue;
-            visited.add(visit);
-            const row = model.row(rowIndex);
-            const key = semanticKeys.keys.get(rowIndex);
-            if (row === null || key === null || key === undefined) continue;
-            const entryIndex = sceneLegend.entries.findIndex((entry) =>
-              legendValueEqual(entry.value, row[field]),
-            );
-            if (entryIndex < 0) continue;
-            index.get(`${sceneLegend.scale}:${String(entryIndex)}`)?.push(key);
+      if (model === null) return new Map<string, readonly PropertyKey[]>();
+      const current = model;
+      return buildLegendEntryKeyIndex({
+        legends: current.scene.legends,
+        candidates: function* () {
+          for (let id = 0; id < current.candidates.size; id++) {
+            const candidate = current.candidates.candidate(id);
+            if (candidate === null) continue;
+            yield {
+              layerIndex: candidate.layerIndex,
+              lineage: candidate.lineage,
+              rowIndex: candidate.rowIndex,
+            };
           }
-        }
-      }
-      return new Map(
-        [...index].map(([identity, keys]) => [
-          identity,
-          Object.freeze([...new Set(keys)]),
-        ]),
-      );
+        },
+        layerFields: (layerIndex) => current.layerFields[layerIndex],
+        lineageKeys: (lineageId) => current.lineage.keys(lineageId),
+        row: (rowIndex) => current.row(rowIndex),
+        semanticKey: (rowIndex) => semanticKeys.keys.get(rowIndex),
+      });
     });
 
   function keysForLegend(action: LegendEntryAction): readonly PropertyKey[] {
-    return (
-      legendEntryKeyIndex.get(
-        `${action.identity.scale}:${String(action.identity.entryIndex)}`,
-      ) ?? []
-    );
-  }
-
-  function legendSource(
-    source: LegendEntryAction["source"],
-  ): InteractionSource {
-    if (source === "pointer" || source === "touch") return source;
-    return "keyboard";
+    return keysForLegendEntry(legendEntryKeyIndex, action.identity);
   }
 
   function emitLegendFocus(event: LegendFocusEvent<PropertyKey>): void {
@@ -1233,7 +1205,7 @@
   function previewLegend(action: LegendEntryAction | null): void {
     if (action === null) {
       if (legendPreview === null) return;
-      const source = legendSource(legendPreview.action.source);
+      const source = legendInteractionSource(legendPreview.action.source);
       legendPreview = null;
       const committed =
         interaction?.emphasized(resolvedInteractionScope) ?? localEmphasisKeys;
@@ -1248,7 +1220,7 @@
       type: "legend-focus",
       phase: "change",
       state: "transient",
-      source: legendSource(action.source),
+      source: legendInteractionSource(action.source),
       scale: action.identity.scale as "color" | "fill",
       value: action.entry.value as CellValue,
       label: action.entry.label,
@@ -1290,7 +1262,7 @@
   }
 
   function commitLegend(action: LegendEntryAction): void {
-    const source = legendSource(action.source);
+    const source = legendInteractionSource(action.source);
     if (
       effectiveLegendPressed?.scale === action.identity.scale &&
       effectiveLegendPressed.entryIndex === action.identity.entryIndex
@@ -1365,53 +1337,22 @@
     });
   }
 
-  function sameKeySet(
-    left: readonly PropertyKey[],
-    right: readonly PropertyKey[],
-  ): boolean {
-    if (left.length !== right.length) return false;
-    const values = new Set(right);
-    return left.every((key) => values.has(key));
-  }
+  const interactiveLegendEntries = $derived.by(() => {
+    if (model === null || interactionConfig.legendFocus === null) return [];
+    return buildInteractiveLegendEntries(model.scene.legends);
+  });
 
   const effectiveLegendPressed: LegendEntryIdentity | null = $derived.by(() => {
     const keys =
       interaction?.emphasized(resolvedInteractionScope) ?? localEmphasisKeys;
     if (keys.length === 0 || model === null) return null;
-    if (legendCommitted !== null && sameKeySet(legendCommitted.keys, keys))
-      return legendCommitted.identity;
-    const matches: LegendEntryIdentity[] = [];
-    for (const sceneLegend of model.scene.legends) {
-      if (sceneLegend.type !== "discrete") continue;
-      for (
-        let entryIndex = 0;
-        entryIndex < sceneLegend.entries.length;
-        entryIndex++
-      ) {
-        const entry = sceneLegend.entries[entryIndex]!;
-        const entryKeys = keysForLegend({
-          identity: { scale: sceneLegend.scale, entryIndex },
-          entry,
-          source: "keyboard",
-        });
-        if (sameKeySet(entryKeys, keys))
-          matches.push({ scale: sceneLegend.scale, entryIndex });
-      }
-    }
-    return matches.length === 1 ? matches[0]! : null;
-  });
-
-  const interactiveLegendEntries = $derived.by(() => {
-    if (model === null || interactionConfig.legendFocus === null) return [];
-    return model.scene.legends.flatMap((sceneLegend) =>
-      sceneLegend.type === "discrete"
-        ? sceneLegend.entries.map((entry, entryIndex) => ({
-            legend: sceneLegend,
-            entry,
-            identity: { scale: sceneLegend.scale, entryIndex },
-          }))
-        : [],
-    );
+    // Match against all discrete scene legends (not only interactive targets).
+    return findLegendPressedIdentity({
+      keys,
+      entries: buildInteractiveLegendEntries(model.scene.legends),
+      keyIndex: legendEntryKeyIndex,
+      committed: legendCommitted,
+    });
   });
 
   const filterableLegendEntries = $derived.by(() => {
@@ -1525,7 +1466,7 @@
 
   $effect.pre(() => {
     const count = interactiveLegendEntries.length;
-    const nextIndex = count === 0 ? 0 : Math.min(legendRovingIndex, count - 1);
+    const nextIndex = clampLegendRovingIndex(legendRovingIndex, count);
     const active = document.activeElement;
     const focusedIndex =
       active instanceof HTMLElement &&
@@ -1535,7 +1476,7 @@
         : null;
     if (nextIndex !== legendRovingIndex) legendRovingIndex = nextIndex;
     if (focusedIndex === null || count === 0) return;
-    const returnIndex = Math.min(focusedIndex, count - 1);
+    const returnIndex = clampLegendRovingIndex(focusedIndex, count);
     queueMicrotask(() => {
       root
         ?.querySelector<HTMLElement>(
@@ -1556,12 +1497,8 @@
     const currentKeys =
       current === undefined
         ? []
-        : keysForLegend({
-            identity: current.identity,
-            entry: current.entry,
-            source: "keyboard",
-          });
-    if (sameKeySet(currentKeys, committed.keys)) return;
+        : keysForLegendEntry(legendEntryKeyIndex, current.identity);
+    if (samePropertyKeySet(currentKeys, committed.keys)) return;
 
     legendCommitted = null;
     if (interaction === undefined && localEmphasisKeys.length > 0) {
@@ -1598,14 +1535,11 @@
   }
 
   function moveLegendFocus(index: number, key: string): void {
-    const last = interactiveLegendEntries.length - 1;
-    let next = index;
-    if (key === "ArrowRight" || key === "ArrowDown")
-      next = Math.min(last, index + 1);
-    else if (key === "ArrowLeft" || key === "ArrowUp")
-      next = Math.max(0, index - 1);
-    else if (key === "Home") next = 0;
-    else if (key === "End") next = last;
+    const next = moveLegendRovingIndex(
+      index,
+      key,
+      interactiveLegendEntries.length,
+    );
     legendRovingIndex = next;
     root
       ?.querySelector<HTMLElement>(
@@ -2067,40 +2001,59 @@
   }
 
   function onPointerDown(event: PointerEvent): void {
+    // Always cancel queued inspection before pure routing (host cleanup).
     queuedPointerInspection = null;
     reducer.cancelScheduledPointer();
-    if (activeTool === "inspect" && event.pointerType === "touch") {
-      touchInspectStart = plotPoint(event);
-      touchInspectMoved = false;
-      return;
-    }
-    if (
-      event.button !== 0 ||
-      (activeTool !== "select-area" && activeTool !== "zoom-area")
-    )
-      return;
-    const p = plotPoint(event);
-    const originPanel = panelAtPoint(p);
-    if (originPanel === null) return;
-    brushRect =
-      areaAwaitingSecond && brushRect !== null
-        ? brushWithEnd(brushRect, p)
-        : brushAtPoint(p);
-    setInspection(null, event.pointerType === "touch" ? "touch" : "pointer");
-    reducer.dispatch({ type: "begin-area", point: p, panelId: originPanel.id });
-    if (activeTool === "select-area" && !areaAwaitingSecond) {
-      const startEvent = selectionEvent(
-        "start",
-        normalizedRect(brushRect),
-        event.pointerType === "touch" ? "touch" : "pointer",
-      );
-      emitSelection(startEvent);
-    }
-    try {
-      (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
-    } catch {
-      // Synthetic events may not register a browser pointer id. The reducer
-      // still owns cancellation; real pointer streams retain capture.
+    const action = resolvePointerDownAction({
+      pointerType: event.pointerType,
+      button: event.button,
+      activeTool,
+      areaAwaitingSecond,
+      hasBrushDraft: brushRect !== null,
+    });
+    switch (action.type) {
+      case "touch-inspect-start":
+        touchInspectStart = plotPoint(event);
+        touchInspectMoved = false;
+        break;
+      case "none":
+        break;
+      case "begin-area": {
+        const p = plotPoint(event);
+        const originPanel = panelAtPoint(p);
+        if (originPanel === null) break;
+        brushRect =
+          action.extendExisting && brushRect !== null
+            ? brushWithEnd(brushRect, p)
+            : brushAtPoint(p);
+        setInspection(
+          null,
+          event.pointerType === "touch" ? "touch" : "pointer",
+        );
+        reducer.dispatch({
+          type: "begin-area",
+          point: p,
+          panelId: originPanel.id,
+        });
+        if (activeTool === "select-area" && !areaAwaitingSecond) {
+          const startEvent = selectionEvent(
+            "start",
+            normalizedRect(brushRect),
+            event.pointerType === "touch" ? "touch" : "pointer",
+          );
+          emitSelection(startEvent);
+        }
+        try {
+          (event.currentTarget as HTMLElement).setPointerCapture(
+            event.pointerId,
+          );
+        } catch {
+          // Synthetic events may not register a browser pointer id. The
+          // reducer still owns cancellation; real pointer streams retain
+          // capture.
+        }
+        break;
+      }
     }
   }
 
@@ -2126,55 +2079,72 @@
   }
 
   function onPointerUp(event: PointerEvent): void {
-    if (
-      activeTool === "inspect" &&
-      event.pointerType === "touch" &&
-      interactionConfig.inspect !== null &&
-      touchInspectStart !== null
-    ) {
-      const wasTap = !touchInspectMoved;
-      touchInspectStart = null;
-      touchInspectMoved = false;
-      if (!wasTap) return;
-      const p = plotPoint(event);
-      const match = model?.candidates.nearest(p.x, p.y, {
-        mode: interactionConfig.inspect.mode,
-        maxDistance: interactionConfig.inspect.maxDistance,
-      });
-      if (match !== null && match !== undefined) {
-        setInspection(
-          hitFromCandidate(match),
-          "touch",
-          interactionConfig.inspect.pin ? "pinned" : "transient",
-          match.mode,
-          match,
-        );
-        suppressClickUntil = performance.now() + 500;
+    const action = resolvePointerUpAction({
+      pointerType: event.pointerType,
+      activeTool,
+      inspectEnabled: interactionConfig.inspect !== null,
+      pinEnabled: interactionConfig.inspect?.pin === true,
+      hasTouchInspectStart: touchInspectStart !== null,
+      touchInspectMoved,
+      brushing,
+      hasBrushDraft: brushRect !== null,
+    });
+    switch (action.type) {
+      case "touch-inspect-drag-ignore":
+        // Always clear touch-inspect start state (host cleanup).
+        touchInspectStart = null;
+        touchInspectMoved = false;
+        break;
+      case "touch-inspect-tap": {
+        touchInspectStart = null;
+        touchInspectMoved = false;
+        const inspectConfig = interactionConfig.inspect;
+        if (inspectConfig === null) break;
+        const p = plotPoint(event);
+        const match = model?.candidates.nearest(p.x, p.y, {
+          mode: inspectConfig.mode,
+          maxDistance: inspectConfig.maxDistance,
+        });
+        if (match !== null && match !== undefined) {
+          setInspection(
+            hitFromCandidate(match),
+            "touch",
+            action.pin ? "pinned" : "transient",
+            match.mode,
+            match,
+          );
+          suppressClickUntil = performance.now() + 500;
+        }
+        break;
       }
-      return;
+      case "none":
+        break;
+      case "finish-brush": {
+        if (brushRect === null) break;
+        reducer.cancelScheduledPointer();
+        const source = event.pointerType === "touch" ? "touch" : "pointer";
+        const ended = evaluatePointerBrushEnd(brushRect, plotPoint(event));
+        if (ended.kind === "too-small") {
+          brushRect = ended.corners;
+          announceInteraction("Choose opposite corner.");
+          break;
+        }
+        brushRect = null;
+        if (activeTool === "select-area") {
+          const eventValue = selectionEvent("end", ended.rect, source);
+          committedInterval = interactionConfig.select?.persistent
+            ? eventValue
+            : null;
+          if (interactionConfig.select?.persistent)
+            commitIntervalSelection(eventValue, source);
+          emitSelection(eventValue);
+        } else if (activeTool === "zoom-area") {
+          applyBrushZoom(ended.rect, source);
+        }
+        reducer.dispatch({ type: "cancel-area" });
+        break;
+      }
     }
-    if (!brushing || brushRect === null) return;
-    reducer.cancelScheduledPointer();
-    const source = event.pointerType === "touch" ? "touch" : "pointer";
-    const ended = evaluatePointerBrushEnd(brushRect, plotPoint(event));
-    if (ended.kind === "too-small") {
-      brushRect = ended.corners;
-      announceInteraction("Choose opposite corner.");
-      return;
-    }
-    brushRect = null;
-    if (activeTool === "select-area") {
-      const eventValue = selectionEvent("end", ended.rect, source);
-      committedInterval = interactionConfig.select?.persistent
-        ? eventValue
-        : null;
-      if (interactionConfig.select?.persistent)
-        commitIntervalSelection(eventValue, source);
-      emitSelection(eventValue);
-    } else if (activeTool === "zoom-area") {
-      applyBrushZoom(ended.rect, source);
-    }
-    reducer.dispatch({ type: "cancel-area" });
   }
 
   function commitZoom(
@@ -2207,12 +2177,7 @@
         });
       }
     }
-    const event: ZoomEvent = Object.freeze({
-      type: "zoom",
-      phase: committed === null ? "clear" : "end",
-      source,
-      domains: committed,
-    });
+    const event = buildZoomEvent(committed, source);
     announceInteraction(committed === null ? "Zoom reset." : "Zoom complete.");
     onzoom?.(event);
     oninteraction?.(event);
@@ -2402,39 +2367,32 @@
   }
 
   function onSurfaceKeyDown(event: KeyboardEvent): void {
-    if (
-      (activeTool === "select-area" || activeTool === "zoom-area") &&
-      event.key.startsWith("Arrow") &&
-      brushRect !== null
-    ) {
-      event.preventDefault();
-      const step = event.shiftKey ? 10 : 1;
-      const panel = inspectionPanel ?? model?.scene.panels[0];
-      if (panel === undefined) return;
-      const dx =
-        event.key === "ArrowLeft"
-          ? -step
-          : event.key === "ArrowRight"
-            ? step
-            : 0;
-      const dy =
-        event.key === "ArrowUp" ? -step : event.key === "ArrowDown" ? step : 0;
-      brushRect = nudgeBrushEnd(brushRect, dx, dy, panel);
-      reducer.dispatch({
-        type: "move-area",
-        point: { x: brushRect.x1, y: brushRect.y1 },
-      });
-      return;
-    }
-    if (
-      (activeTool === "select-area" || activeTool === "zoom-area") &&
-      (event.key === "Enter" || event.key === " ")
-    ) {
-      event.preventDefault();
-      const anchor =
-        inspection?.focus.anchor ?? panelCenterAnchor(model?.scene.panels[0]);
-      if (brushRect === null) {
-        const originPanel = anchor === undefined ? null : panelAtPoint(anchor);
+    // Decision table is pure (plot-surface-keyboard); this switch owns side
+    // effects only. hasBrushDraft tracks brushRect, not reducer brushing.
+    const { action, preventDefault } = resolveSurfaceKeyAction({
+      key: event.key,
+      shiftKey: event.shiftKey,
+      activeTool,
+      hasBrushDraft: brushRect !== null,
+      hasInspection: inspection !== null,
+      pinEnabled: interactionConfig.inspect?.pin === true,
+    });
+    if (preventDefault) event.preventDefault();
+    switch (action.type) {
+      case "nudge-brush": {
+        const panel = inspectionPanel ?? model?.scene.panels[0];
+        if (panel === undefined || brushRect === null) return;
+        brushRect = nudgeBrushEnd(brushRect, action.dx, action.dy, panel);
+        reducer.dispatch({
+          type: "move-area",
+          point: { x: brushRect.x1, y: brushRect.y1 },
+        });
+        return;
+      }
+      case "begin-area": {
+        const anchor =
+          inspection?.focus.anchor ?? panelCenterAnchor(model?.scene.panels[0]);
+        const originPanel = panelAtPoint(anchor);
         if (originPanel === null) return;
         brushRect = brushAtPoint(anchor);
         reducer.dispatch({
@@ -2443,7 +2401,10 @@
           panelId: originPanel.id,
         });
         announceInteraction("Choose opposite corner.");
-      } else {
+        return;
+      }
+      case "complete-area": {
+        if (brushRect === null) return;
         const rect = normalizedRect(brushRect);
         brushRect = null;
         if (activeTool === "select-area") {
@@ -2456,76 +2417,77 @@
           emitSelection(selection);
         } else applyBrushZoom(rect, "keyboard");
         reducer.dispatch({ type: "cancel-area" });
+        return;
       }
-      return;
-    }
-    if (event.key === "]" || event.key === "[") {
-      event.preventDefault();
-      cycleCoincident(event.key === "]" ? 1 : -1);
-    } else if (event.key.startsWith("Arrow")) {
-      event.preventDefault();
-      navigateDirection(
-        event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0,
-        event.key === "ArrowDown" ? 1 : event.key === "ArrowUp" ? -1 : 0,
-      );
-    } else if (
-      (event.key === "Enter" || event.key === " ") &&
-      activeTool === "point" &&
-      inspection !== null
-    ) {
-      event.preventDefault();
-      togglePointKeys(
-        inspection.focus.key === null
-          ? inspection.focus.sourceKeys
-          : [inspection.focus.key],
-        "keyboard",
-      );
-    } else if (
-      (event.key === "Enter" || event.key === " ") &&
-      inspection !== null &&
-      interactionConfig.inspect?.pin
-    ) {
-      event.preventDefault();
-      toggleInspectionPin("keyboard");
-    } else if (event.key === "Escape") {
-      event.preventDefault();
-      const returnToInspect =
-        brushRect === null &&
-        (activeTool === "select-area" || activeTool === "zoom-area");
-      reducer.dispatch({ type: "escape", source: "keyboard" });
-      if (inspection !== null)
-        emitInspection({ type: "inspect", phase: "clear", source: "keyboard" });
-      inspection = null;
-      inspectionSeed = null;
-      tooltipHovered = false;
-      inspectionCoordinator.invalidate();
-      brushRect = null;
-      if (returnToInspect) chooseTool("inspect");
+      case "cycle-coincident":
+        cycleCoincident(action.delta);
+        return;
+      case "navigate-direction":
+        navigateDirection(action.dx, action.dy);
+        return;
+      case "toggle-point-keys": {
+        if (inspection === null) return;
+        togglePointKeys(
+          inspection.focus.key === null
+            ? inspection.focus.sourceKeys
+            : [inspection.focus.key],
+          "keyboard",
+        );
+        return;
+      }
+      case "toggle-pin":
+        toggleInspectionPin("keyboard");
+        return;
+      case "escape": {
+        reducer.dispatch({ type: "escape", source: "keyboard" });
+        if (inspection !== null)
+          emitInspection({
+            type: "inspect",
+            phase: "clear",
+            source: "keyboard",
+          });
+        inspection = null;
+        inspectionSeed = null;
+        tooltipHovered = false;
+        inspectionCoordinator.invalidate();
+        brushRect = null;
+        if (action.returnToInspect) chooseTool("inspect");
+        break;
+      }
+      case "none":
+        break;
     }
   }
 
   function onCaptureClick(event: MouseEvent): void {
-    if (performance.now() < suppressClickUntil) {
-      suppressClickUntil = 0;
-      return;
+    const action = resolveCaptureClickAction({
+      suppressClick: performance.now() < suppressClickUntil,
+      activeTool,
+      pointSelectEnabled: interactionConfig.select?.type === "point",
+      inspectEnabled: interactionConfig.inspect !== null,
+      pinEnabled: interactionConfig.inspect?.pin === true,
+      hasInspection: inspection !== null,
+    });
+    switch (action.type) {
+      case "suppress":
+        suppressClickUntil = 0;
+        break;
+      case "toggle-point": {
+        const point = plotPoint(event);
+        const match = model?.candidates.nearest(point.x, point.y, {
+          mode: "xy",
+          maxDistance: 24,
+        });
+        if (match === null || match === undefined) break;
+        togglePointKeys(candidateSemanticKeys(match), "pointer");
+        break;
+      }
+      case "toggle-pin":
+        toggleInspectionPin("pointer");
+        break;
+      case "none":
+        break;
     }
-    if (activeTool === "point" && interactionConfig.select?.type === "point") {
-      const point = plotPoint(event);
-      const match = model?.candidates.nearest(point.x, point.y, {
-        mode: "xy",
-        maxDistance: 24,
-      });
-      if (match === null || match === undefined) return;
-      togglePointKeys(candidateSemanticKeys(match), "pointer");
-      return;
-    }
-    if (
-      activeTool !== "inspect" ||
-      inspection === null ||
-      !interactionConfig.inspect?.pin
-    )
-      return;
-    toggleInspectionPin("pointer");
   }
 
   // Readiness signal for screenshot tooling (plan: VR waits on
