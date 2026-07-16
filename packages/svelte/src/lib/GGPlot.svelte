@@ -185,6 +185,8 @@
   import {
     anchorsFromCandidateKeys,
     buildPointSelectionEvent,
+    collectCandidates,
+    iterateCandidates,
     mergePresentationFocusKeys,
     nextPointSelectionKeys,
     rowIndexesForCandidate,
@@ -773,22 +775,16 @@
     x: number;
     y: number;
   }[] {
+    // Empty filter short-circuits before walking (keysFor can be expensive).
     if (model === null || keys.length === 0) return [];
-    const candidates: {
-      x: number;
-      y: number;
-      keys: readonly PropertyKey[];
-    }[] = [];
-    for (let id = 0; id < model.candidates.size; id++) {
-      const candidate = model.candidates.candidate(id);
-      if (candidate === null) continue;
-      candidates.push({
+    return anchorsFromCandidateKeys(
+      collectCandidates(model.candidates, (candidate) => ({
         x: candidate.x,
         y: candidate.y,
         keys: candidateSemanticKeys(candidate),
-      });
-    }
-    return anchorsFromCandidateKeys(candidates, keys);
+      })),
+      keys,
+    );
   }
   const selectedAnchors = $derived(anchorsForKeys(effectiveSelectedKeys));
   const emphasizedAnchors = $derived(anchorsForKeys(effectiveEmphasisKeys));
@@ -985,9 +981,7 @@
       return buildLegendEntryKeyIndex({
         legends: current.scene.legends,
         candidates: function* () {
-          for (let id = 0; id < current.candidates.size; id++) {
-            const candidate = current.candidates.candidate(id);
-            if (candidate === null) continue;
+          for (const candidate of iterateCandidates(current.candidates)) {
             yield {
               layerIndex: candidate.layerIndex,
               lineage: candidate.lineage,
@@ -1135,17 +1129,11 @@
 
   const semanticCandidateProjections = $derived.by(() => {
     if (model === null) return [];
-    const candidates = [];
-    for (let id = 0; id < model.candidates.size; id++) {
-      const candidate = model.candidates.candidate(id);
-      if (candidate === null) continue;
-      candidates.push({
-        batchIndex: candidate.batchIndex,
-        primitiveIndex: candidate.primitiveIndex,
-        keys: candidateSemanticKeys(candidate),
-      });
-    }
-    return candidates;
+    return collectCandidates(model.candidates, (candidate) => ({
+      batchIndex: candidate.batchIndex,
+      primitiveIndex: candidate.primitiveIndex,
+      keys: candidateSemanticKeys(candidate),
+    }));
   });
 
   const interactionMasks: readonly (BatchInteractionMask | null)[] =
@@ -1383,15 +1371,7 @@
 
   function candidateFromHit(hit: SceneHit): CandidateFacts | null {
     if (model === null) return null;
-    return matchCandidateFromHit(
-      (function* () {
-        for (let id = 0; id < model.candidates.size; id++) {
-          const candidate = model.candidates.candidate(id);
-          if (candidate !== null) yield candidate;
-        }
-      })(),
-      hit,
-    );
+    return matchCandidateFromHit(iterateCandidates(model.candidates), hit);
   }
 
   function resolveInspection(
