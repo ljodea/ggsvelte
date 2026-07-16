@@ -11,6 +11,7 @@ import {
   LEGEND_GAP,
   SUBTITLE_BAND,
   TITLE_BAND,
+  axisTicks,
   dedupeAdvisories,
   dedupeWarnings,
   elementwiseMaxMargins,
@@ -130,5 +131,29 @@ describe("makeAxisValueFormatter", () => {
     const fmt = makeAxisValueFormatter(band);
     expect(fmt("a")).toBe("a");
     expect(fmt(null)).toBe("–");
+  });
+});
+
+describe("axisTicks", () => {
+  it("projects continuous ticks from start of extent", () => {
+    const scale: PositionScale = {
+      type: "linear",
+      domain: [0, 100],
+      range: [0, 1],
+      normalize: (v) => v / 100,
+    };
+    const ticks = axisTicks(
+      scale,
+      [
+        { value: 0, label: "0", labeled: true },
+        { value: 50, label: "50", labeled: true },
+      ],
+      200,
+      false,
+    );
+    expect(ticks).toEqual([
+      { pos: 0, label: "0" },
+      { pos: 100, label: "50" },
+    ]);
   });
 });

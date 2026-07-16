@@ -1,89 +1,13 @@
 /**
  * Shared internal binding / LayerFrame types used across pipeline phases.
  */
-import type { LayerSpec } from "@ggsvelte/spec";
-
-import type { CellValue, ColumnTable } from "../table.js";
+import type { CellValue } from "../table.js";
 
 import type { ResolvedColorScale } from "./types-public.js";
 
-/** Sentinel source-row index for synthesized geometry (stat-only marks). */
-export const NO_ROW = 0xffffffff;
-
-export interface ColorBinding {
-  field: string | null;
-  /** Literal (non-scaled) constant, if any. */
-  constant: string | null;
-  /** Scaled constant ({value, scale: true}), if any. */
-  scaledConstant: CellValue | null;
-}
-
-export type RuleForm = "annotation" | "vertical" | "horizontal";
-
-export interface LayerBinding {
-  layer: LayerSpec;
-  index: number;
-  xField: string | null;
-  yField: string | null;
-  /** The stat-generated column the y channel maps ({ stat: ... }), if any. */
-  yStatColumn: string | null;
-  yminField: string | null;
-  ymaxField: string | null;
-  color: ColorBinding;
-  fill: ColorBinding;
-  labelField: string | null;
-  labelConstant: string | null;
-  weightField: string | null;
-  ruleForm: RuleForm | null;
-}
-
-interface BoxFrame {
-  lower: Float64Array;
-  middle: Float64Array;
-  upper: Float64Array;
-  outlierX: CellValue[];
-  outlierY: Float64Array;
-  /** Box row each outlier belongs to (dodge offsets follow the box). */
-  outlierBox: Uint32Array;
-  /** Original source row represented by each outlier point. */
-  outlierRow: Uint32Array;
-}
-
-export interface LayerFrame {
-  binding: LayerBinding;
-  /** The (facet-panel) table this frame was computed from. */
-  table: ColumnTable;
-  /** Post-stat row count. */
-  n: number;
-  xValues: readonly CellValue[] | null;
-  xNumeric: Float64Array | null;
-  yNumeric: Float64Array | null;
-  groups: readonly number[];
-  /** Source row per post-stat row (NO_ROW for synthesized rows). */
-  rowIndex: Uint32Array;
-  colorValues: readonly CellValue[] | null;
-  fillValues: readonly CellValue[] | null;
-  labelValues: readonly CellValue[] | null;
-  /** Post-position / stat bounds (bars, areas, bands, boxes, errorbars). */
-  ymin: Float64Array | null;
-  ymax: Float64Array | null;
-  /** Bin edges (bin-stat layers; rects span them on a continuous x). */
-  xmin: Float64Array | null;
-  xmax: Float64Array | null;
-  dodgeSlot: Uint32Array | null;
-  /** Per-row dodge slot count (per-x, ggplot2 preserve="total"). */
-  dodgeSlotCounts: Uint32Array | null;
-  /** Jitter/nudge offsets (data units / band-step fractions). */
-  offsetX: Float64Array | null;
-  offsetY: Float64Array | null;
-  /** Boxplot-stat extras. */
-  box: BoxFrame | null;
-  /** Smooth-stat: the layer draws a se ribbon (ymin/ymax are the band). */
-  smoothBand: boolean;
-  /** Annotation-rule intercepts (data units). */
-  xIntercepts: CellValue[];
-  yIntercepts: CellValue[];
-}
+export { NO_ROW } from "./types-no-row.js";
+export type { ColorBinding, LayerBinding, RuleForm } from "./types-binding.js";
+export type { LayerFrame } from "./types-layer-frame.js";
 
 /** Per-mark color lookup over a resolved scale (unknown values render grey). */
 export function colorOf(resolved: ResolvedColorScale, value: CellValue): string {
