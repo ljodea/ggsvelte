@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784199349988,
+  "lastUpdate": 1784199565250,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -9841,6 +9841,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 130.2195,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "320ae5974a41ccfe34c8b5ac7b3db916bd365809",
+          "message": "refactor(svelte): extract tool-rail and tooltip viewport pure helpers (#92)\n\nLift shouldShowToolRail and tooltipViewportSize out of GGPlot, hoist shared\nselection recovery deriveds for ToolRail props, and pin nullish coalesce\nsemantics for zero client sizes.",
+          "timestamp": "2026-07-16T05:58:46-05:00",
+          "tree_id": "bf56545b2990e3fa249bbb624c36d584f2d6ffe3",
+          "url": "https://github.com/ljodea/ggsvelte/commit/320ae5974a41ccfe34c8b5ac7b3db916bd365809"
+        },
+        "date": 1784199564402,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.7551,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.9356,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 11.9909,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 16.1485,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 96.4897,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 144.7448,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.0027,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.3549,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 96.6722,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 123.2026,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 12.1842,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 11.8212,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 128.8602,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7725,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 25.1935,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 6.8955,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 34.6836,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 657.3203,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 156.1116,
             "unit": "ms"
           }
         ]
