@@ -192,3 +192,19 @@ describe("resolveCandidateSeries / resolveRepresentedSourceRows", () => {
     expect(result.group).toBe(4);
   });
 });
+
+describe("isAllSourceBacked", () => {
+  it("is true only when every layer is identity and non-annotation", async () => {
+    const { isAllSourceBacked } = await import("../src/pipeline/build-candidates-source-backed.ts");
+    expect(
+      isAllSourceBacked([
+        { layer: { stat: "identity" }, ruleForm: null },
+        { layer: {}, ruleForm: null },
+      ] as never),
+    ).toBe(true);
+    expect(isAllSourceBacked([{ layer: { stat: "count" }, ruleForm: null }] as never)).toBe(false);
+    expect(
+      isAllSourceBacked([{ layer: { stat: "identity" }, ruleForm: "annotation" }] as never),
+    ).toBe(false);
+  });
+});

@@ -423,3 +423,31 @@ describe("layoutBoxplotBody — hinge/whisker collection", () => {
     expect(layoutBoxplotBody(frame, fx, [])).toBeNull();
   });
 });
+
+describe("buildRenderModelScaleState", () => {
+  it("includes only non-null color/fill state entries", async () => {
+    const { buildRenderModelScaleState } =
+      await import("../src/pipeline/assemble-render-model-scales.ts");
+    const colorState = { domain: ["a"], assigned: { a: 0 } } as never;
+    expect(buildRenderModelScaleState(colorState, null)).toEqual({ color: colorState });
+    expect(buildRenderModelScaleState(null, null)).toEqual({});
+  });
+});
+
+describe("resolveSequentialDomain", () => {
+  it("parses two-element domains and ignores incomplete ones", async () => {
+    const { resolveSequentialDomain } =
+      await import("../src/pipeline/scale-color-sequential-domain.ts");
+    expect(resolveSequentialDomain()).toBeUndefined();
+    expect(resolveSequentialDomain({ domain: [1] })).toBeUndefined();
+    expect(resolveSequentialDomain({ domain: [0, 10] })).toEqual([0, 10]);
+  });
+});
+
+describe("BOX_MEDIAN_FATTEN", () => {
+  it("matches ggplot2 fatten default of 2", async () => {
+    const { BOX_MEDIAN_FATTEN } =
+      await import("../src/pipeline/geometry-boxplot-body-batches-parts.ts");
+    expect(BOX_MEDIAN_FATTEN).toBe(2);
+  });
+});

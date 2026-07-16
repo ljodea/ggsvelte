@@ -3,11 +3,10 @@
  */
 import type { PortableSpec } from "@ggsvelte/spec";
 
-import { LineageStore } from "../identity.js";
 import type { Scene } from "../scene.js";
 
 import { assembleRenderModel } from "./assemble-render-model.js";
-import { buildPipelineCandidates } from "./build-candidates.js";
+import { buildFinalizeCandidates } from "./finalize-model-candidates.js";
 import { resolveFinalizeContracts } from "./finalize-model-contracts.js";
 import type { PanelLayoutResult } from "./panel-layout.js";
 import type { PreparedPanels } from "./prepare-panels.js";
@@ -38,7 +37,6 @@ export function finalizeRenderModel(input: {
     warnings,
     advisories,
   } = input;
-  const { facetPanels, panelFrames, table } = prepared;
   const { xTraining, yTraining, panelScales, colorResolution, fillResolution } = trained;
 
   const contracts = resolveFinalizeContracts({
@@ -50,19 +48,14 @@ export function finalizeRenderModel(input: {
     advisories,
   });
 
-  const lineage = new LineageStore<number>();
-  const candidates = buildPipelineCandidates({
+  const { lineage, candidates } = buildFinalizeCandidates({
     scene,
     runId,
     flip,
+    prepared,
+    trained,
     bindings: contracts.bindings,
-    panelFrames,
-    facetPanels,
-    table,
     layerFields: contracts.layerFields,
-    color: colorResolution.resolved,
-    fill: fillResolution.resolved,
-    lineage,
   });
 
   return assembleRenderModel({
@@ -86,6 +79,6 @@ export function finalizeRenderModel(input: {
     candidates,
     formatX: panelLayout.formatX,
     formatY: panelLayout.formatY,
-    table,
+    table: prepared.table,
   });
 }
