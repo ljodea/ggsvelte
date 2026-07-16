@@ -31,6 +31,23 @@ export function diffTextIsSubstantive(diff: string): boolean {
   return false;
 }
 
+/**
+ * After a CSS combinator (`+`, `>`, `~`), is the remainder a selector fragment?
+ * Distinguishes `* + * {…}` / `* > .mark` from JSDoc/Markdown `* + list item`
+ * and `* > Note`.
+ */
+function isCssSelectorAfterCombinator(rest: string): boolean {
+  if (rest.length === 0) return false;
+  // Universal, class, id, attribute, or pseudo.
+  if (rest.startsWith("*") || /^[.#[]/.test(rest) || rest.startsWith(":")) return true;
+  // Type selector with CSS structure on the same line (`div{`, `div:hover`, …).
+  // Require `::?ident` (no space after `:`) so JSDoc `Note: prose` stays docs.
+  if (/^[A-Za-z_-][\w-]*\s*([{.#[]|::?[\w-]|[,>+~])/.test(rest)) return true;
+  // Bare lowercase type selector (`* + p`, `* + section`) — common when `{` is
+  // on the next line. Capitalized / multi-word text is JSDoc/Markdown.
+  return /^[a-z][\w-]*$/.test(rest);
+}
+
 /** Lines that are blank or documentation-only (not CSS/code). */
 export function isSkippableCommentLine(body: string): boolean {
   const trimmed = body.trim();
@@ -42,11 +59,17 @@ export function isSkippableCommentLine(body: string): boolean {
 
   // JSDoc middle lines are `* text` / lone `*`. CSS universal selectors look like
   // `* {…}`, `*.class`, `*#id`, `*:hover`, `*, div`, `*[attr]`, and combinators
-  // `* + *`, `* > .x`, `* ~ *`.
+  // `* + *`, `* > .x`, `* ~ *`. Markdown list/blockquote markers (`* + …`,
+  // `* > Note`) stay documentation.
   const afterStar = trimmed.slice(1).trimStart();
   if (afterStar.length === 0) return true;
   if (afterStar.startsWith("/")) return true; // */
-  if (/^[{.,#:[\]+>~]/.test(afterStar)) return false;
+  // Unambiguous CSS after `*`.
+  if (/^[{.,#:[]/.test(afterStar)) return false;
+  // Combinators: only substantive when followed by a selector fragment.
+  if (/^[+>~]/.test(afterStar)) {
+    return !isCssSelectorAfterCombinator(afterStar.slice(1).trimStart());
+  }
   return true;
 }
 
