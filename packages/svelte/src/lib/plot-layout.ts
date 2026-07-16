@@ -1,6 +1,7 @@
 /**
- * Pure plot-root layout chrome: inline size/theme style and responsive
- * breakpoint helpers. Hosts own class bindings and tool-rail visibility.
+ * Pure plot-root layout chrome: inline size/theme style, responsive
+ * breakpoint helpers, and legend clear-control anchor lookup.
+ * Hosts own class bindings and tool-rail visibility.
  */
 
 const NARROW_TOOLS_MAX_WIDTH_PX = 560;
@@ -43,4 +44,27 @@ export function plotRootInlineStyle(input: PlotRootStyleInput): string | undefin
     ? `width:${input.containerWidth ? "100%" : `${input.sceneWidth}px`};height:${input.sceneHeight}px;`
     : "";
   return `${sizeCss}${input.themeStyle}` || undefined;
+}
+
+export type ClearLegendXInput = {
+  /**
+   * Host: `interactionConfig.legendFocus !== null`.
+   * Must stay even when `pressedScale` is non-null: controller emphasis can
+   * briefly leave a pressed scale after legend focus is disabled; Clear is
+   * intentionally suppressed then.
+   */
+  readonly legendFocusEnabled: boolean;
+  /** Host: `effectiveLegendPressed?.scale ?? null`. */
+  readonly pressedScale: string | null;
+  /** Scene legends (need scale + x for the clear control anchor). */
+  readonly legends: readonly { readonly scale: string; readonly x: number }[];
+};
+
+/**
+ * X position for the legend clear control, or null to hide it.
+ * null when legend focus is off, nothing is pressed, or no legend matches.
+ */
+export function resolveClearLegendX(input: ClearLegendXInput): number | null {
+  if (!input.legendFocusEnabled || input.pressedScale === null) return null;
+  return input.legends.find((legend) => legend.scale === input.pressedScale)?.x ?? null;
 }
