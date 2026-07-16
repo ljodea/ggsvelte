@@ -5,10 +5,14 @@
 import type { CandidateBuildFacts, CandidateDatum } from "../candidate-store.js";
 import type { LineageStore } from "../identity.js";
 import type { Scene } from "../scene.js";
-import { bandKey } from "../scales/train.js";
 import type { CellValue } from "../table.js";
 import type { ColumnTable } from "../table.js";
 
+import {
+  ordinalSeriesRank,
+  resolveAnnotationIntercepts,
+  resolveOutlierContext,
+} from "./build-candidates-datum-context.js";
 import { resolveCandidateLogicalValues } from "./build-candidates-datum-values.js";
 import { resolveCandidateFrameRow } from "./build-candidates-frame-row.js";
 import type { CandidateIdentityIndex } from "./build-candidates-identity.js";
@@ -49,14 +53,12 @@ export function createIdentityCandidateDatumResolver(input: {
     const sourceRow = facts.rowIndex;
     const frame = panelFrames[facts.panelIndex]?.[facts.layerIndex];
     const batch = scene.batches[facts.batchIndex]!;
-    const outlierLocalRow =
-      frame?.box !== null && frame?.binding.layer.geom === "boxplot" && batch.kind === "points"
-        ? (frame?.box.outlierRow[facts.primitiveIndex] ?? null)
-        : null;
-    const outlierSourceRow =
-      outlierLocalRow === null
-        ? null
-        : (facetPanels[facts.panelIndex]?.sourceRows?.[outlierLocalRow] ?? outlierLocalRow);
+    const { outlierLocalRow, outlierSourceRow } = resolveOutlierContext({
+      frame,
+      batch,
+      primitiveIndex: facts.primitiveIndex,
+      facetPanel: facetPanels[facts.panelIndex],
+    });
     const orderedGroups = frameGroups.get(`${facts.panelIndex}:${facts.layerIndex}`) ?? [0];
     const { frameRow, derivedGroup } = resolveCandidateFrameRow({
       frame,
@@ -75,22 +77,23 @@ export function createIdentityCandidateDatumResolver(input: {
       sourceRow === null
         ? derivedGroup
         : (seriesByRow.get(`${facts.panelIndex}:${facts.layerIndex}:${sourceRow}`) ?? 0);
-    const ordinalRank = (resolved: ResolvedColorScale | null, field: string | undefined) => {
-      if (resolved?.kind !== "ordinal" || field === undefined || sourceRow === null) return -1;
-      const key = bandKey(sourceValue(field));
-      return resolved.scale.domain.findIndex((value) => bandKey(value) === key);
-    };
-    const colorRank = ordinalRank(color, colorField);
-    const fillRank = ordinalRank(fill, fillField);
+    const seriesRank = ordinalSeriesRank({
+      color,
+      fill,
+      colorField,
+      fillField,
+      sourceRow,
+      sourceValue,
+      group,
+    });
     const autoMode = candidateAutoMode(
       frame?.binding ?? bindings[facts.layerIndex]!,
       facts.primitiveIndex,
     );
-    const annotationRule = frame?.binding.ruleForm === "annotation";
-    const annotationX = annotationRule ? (frame.xIntercepts[facts.primitiveIndex] ?? null) : null;
-    const annotationY = annotationRule
-      ? (frame.yIntercepts[facts.primitiveIndex - frame.xIntercepts.length] ?? null)
-      : null;
+    const { annotationRule, annotationX, annotationY } = resolveAnnotationIntercepts({
+      frame,
+      primitiveIndex: facts.primitiveIndex,
+    });
     let representedRows =
       outlierSourceRow === null
         ? (sourceRowsByGroup.get(`${facts.panelIndex}:${facts.layerIndex}:${group}`) ?? [])
@@ -120,7 +123,7 @@ export function createIdentityCandidateDatumResolver(input: {
       xValue,
       yValue,
       seriesId: group,
-      seriesRank: colorRank >= 0 ? colorRank : fillRank >= 0 ? fillRank : group,
+      seriesRank,
       sourceOrder: sourceRow ?? outlierSourceRow ?? facts.primitiveIndex,
       lineage: sourceRow === null ? lineage.intern(representedRows) : lineage.intern([sourceRow]),
       autoMode,
