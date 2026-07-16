@@ -11,6 +11,9 @@ import {
   legendIdentityKey,
   legendInteractionSource,
   moveLegendRovingIndex,
+  reconcileLegendPreview,
+  resolveLegendEmphasisKeys,
+  resolveLegendPreviewKeysDecision,
   samePropertyKeySet,
   type InteractiveLegendEntry,
   type LegendKeyIndexAdapter,
@@ -237,12 +240,14 @@ function adapter(partial: {
     rowIndex: number | null;
   }[];
   fields?: Record<number, readonly { channel: string; field: string; source?: "stat" }[]>;
+  scaledConstants?: Record<number, Record<string, unknown>>;
   lineages?: Record<number, readonly number[]>;
   rows?: Record<number, Record<string, unknown> | null>;
   keys?: Record<number, PropertyKey | null | undefined>;
 }): LegendKeyIndexAdapter {
   const candidates = partial.candidates ?? [];
   const fields = partial.fields ?? {};
+  const scaledConstants = partial.scaledConstants ?? {};
   const lineages = partial.lineages ?? {};
   const rows = partial.rows ?? {};
   const keys = partial.keys ?? {};
@@ -250,6 +255,7 @@ function adapter(partial: {
     legends: partial.legends ?? [discreteFill],
     candidates: () => candidates,
     layerFields: (layerIndex) => fields[layerIndex],
+    layerScaledConstant: (layerIndex, channel) => scaledConstants[layerIndex]?.[channel],
     lineageKeys: (lineageId) => lineages[lineageId] ?? [],
     row: (rowIndex) => (rows[rowIndex] as Record<string, never> | null) ?? null,
     semanticKey: (rowIndex) => keys[rowIndex],
@@ -433,6 +439,117 @@ describe("buildLegendEntryKeyIndex", () => {
       }),
     );
     expect(index.get("fill:0")).toEqual([sym]);
+  });
+
+  it("maps scaled-constant layers onto the matching legend entry", () => {
+    const index = buildLegendEntryKeyIndex(
+      adapter({
+        candidates: [
+          { layerIndex: 0, lineage: 1, rowIndex: null },
+          { layerIndex: 0, lineage: 2, rowIndex: null },
+        ],
+        // No field mapping — constant-only layer.
+        scaledConstants: { 0: { fill: "web" } },
+        lineages: { 1: [0], 2: [1] },
+        rows: { 0: {}, 1: {} },
+        keys: { 0: "const-a", 1: "const-b" },
+      }),
+    );
+    expect(index.get("fill:0")).toEqual(["const-a", "const-b"]);
+    expect(index.get("fill:1")).toEqual([]);
+  });
+});
+
+describe("resolveLegendPreviewKeysDecision", () => {
+  it("clears when the entry has no keys and sets otherwise", () => {
+    expect(resolveLegendPreviewKeysDecision([])).toEqual({ type: "clear" });
+    expect(resolveLegendPreviewKeysDecision(["a"])).toEqual({ type: "set", keys: ["a"] });
+  });
+});
+
+describe("resolveLegendEmphasisKeys", () => {
+  it("drops local/preview emphasis when legend focus is disabled", () => {
+    expect(
+      resolveLegendEmphasisKeys({
+        legendFocusEnabled: false,
+        previewKeys: ["p"],
+        controllerKeys: null,
+        localKeys: ["l"],
+      }),
+    ).toEqual([]);
+    expect(
+      resolveLegendEmphasisKeys({
+        legendFocusEnabled: false,
+        previewKeys: ["p"],
+        controllerKeys: ["c"],
+        localKeys: ["l"],
+      }),
+    ).toEqual(["c"]);
+  });
+
+  it("prefers preview then controller then local when enabled", () => {
+    expect(
+      resolveLegendEmphasisKeys({
+        legendFocusEnabled: true,
+        previewKeys: ["p"],
+        controllerKeys: ["c"],
+        localKeys: ["l"],
+      }),
+    ).toEqual(["p"]);
+    expect(
+      resolveLegendEmphasisKeys({
+        legendFocusEnabled: true,
+        previewKeys: null,
+        controllerKeys: null,
+        localKeys: ["l"],
+      }),
+    ).toEqual(["l"]);
+  });
+});
+
+describe("reconcileLegendPreview", () => {
+  const entries = buildInteractiveLegendEntries([discreteFill]);
+  const keyIndex = new Map<string, readonly PropertyKey[]>([
+    ["fill:0", Object.freeze(["a", "c"])],
+    ["fill:1", Object.freeze(["b"])],
+  ]);
+
+  it("clears when the entry disappears or has empty keys", () => {
+    expect(
+      reconcileLegendPreview({
+        preview: { identity: { scale: "fill", entryIndex: 9 }, keys: ["x"] },
+        entries,
+        keyIndex,
+      }),
+    ).toBeNull();
+    const emptyIndex = new Map<string, readonly PropertyKey[]>([["fill:0", Object.freeze([])]]);
+    expect(
+      reconcileLegendPreview({
+        preview: { identity: { scale: "fill", entryIndex: 0 }, keys: ["a"] },
+        entries,
+        keyIndex: emptyIndex,
+      }),
+    ).toBeNull();
+  });
+
+  it("refreshes keys when membership changes for the same identity", () => {
+    const next = reconcileLegendPreview({
+      preview: { identity: { scale: "fill", entryIndex: 0 }, keys: ["stale"] },
+      entries,
+      keyIndex,
+    });
+    expect(next).toEqual({ identity: { scale: "fill", entryIndex: 0 }, keys: ["a", "c"] });
+  });
+
+  it("keeps the same object when keys still match", () => {
+    const preview = { identity: { scale: "fill", entryIndex: 0 }, keys: ["a", "c"] as const };
+    expect(
+      reconcileLegendPreview({
+        preview,
+        entries,
+        keyIndex,
+      }),
+    ).toBe(preview);
   });
 });
 
