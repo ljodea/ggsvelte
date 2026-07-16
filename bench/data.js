@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784169611720,
+  "lastUpdate": 1784171196698,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -6509,6 +6509,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 161.4192,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b854deaf83ea4dc933bc9c0c3f75cce33a20ca2a",
+          "message": "refactor(svelte): extract pure pointer-move surface decisions (#63)\n\n* refactor(svelte): extract pure pointer-move surface decisions\n\nMove capture-surface pointermove routing (touch-inspect drag cancel,\narea queue, inspect queue) and the sticky 4px threshold into\nplot-surface-pointer so GGPlot's handler is a thin host switch.\n\n* test(svelte): cover host cancel of queued touch-inspect on drag\n\nLock the GGPlot pointermove cleanup contract: after touch-inspect drag\ncrosses the move threshold, a previously queued hover inspect must not\nfire and pointerup must not pin. Also re-oxfmt the pure helper suite.\n\n* fix(svelte): drop useless returns at end of pointermove switch",
+          "timestamp": "2026-07-15T22:05:56-05:00",
+          "tree_id": "66465410c569667d0efba87a9cbf80b354d48ae3",
+          "url": "https://github.com/ljodea/ggsvelte/commit/b854deaf83ea4dc933bc9c0c3f75cce33a20ca2a"
+        },
+        "date": 1784171195918,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.6757,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.8489,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 11.1555,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 14.4572,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 107.8044,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 146.4038,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.1154,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.9671,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 104.4875,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 128.8834,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 12.5521,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 11.5793,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 134.5969,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.6467,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 26.7731,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 6.7103,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 34.5414,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 665.2215,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 158.2876,
             "unit": "ms"
           }
         ]
