@@ -206,6 +206,7 @@
     type LegendEntryAction,
     type LegendEntryIdentity,
   } from "./plot-legend-focus.js";
+  import PlotLegendTargets from "./PlotLegendTargets.svelte";
   import SceneView from "./SceneView.svelte";
   import Tooltip from "./Tooltip.svelte";
   import ToolRail from "./ToolRail.svelte";
@@ -2285,66 +2286,33 @@
         focusMasks={interactionMasks}
       />
     {/if}
-    {#if interactiveLegendEntries.length > 0}
-      <div
-        class="gg-legend-targets"
-        role="group"
-        aria-label="Interactive legends"
-      >
-        {#each interactiveLegendEntries as target, index (`${target.identity.scale}:${target.identity.entryIndex}`)}
-          <button
-            type="button"
-            class="gg-legend-target"
-            class:gg-legend-target-active={legendPreview?.action.identity
-              .scale === target.identity.scale &&
-              legendPreview?.action.identity.entryIndex ===
-                target.identity.entryIndex}
-            aria-label={`${target.legend.title || target.identity.scale}: ${target.entry.label} (${target.identity.scale} legend)`}
-            aria-pressed={effectiveLegendPressed?.scale ===
-              target.identity.scale &&
-              effectiveLegendPressed.entryIndex === target.identity.entryIndex}
-            tabindex={index === legendRovingIndex ? 0 : -1}
-            data-gg-legend-target
-            data-index={index}
-            style:left={`${target.legend.x}px`}
-            style:top={`${target.legend.y + target.entry.y}px`}
-            style:width={`${Math.max(24, target.legend.width)}px`}
-            onpointerenter={(event) => {
-              if (event.pointerType !== "touch")
-                previewLegendIndex(index, "pointer");
-            }}
-            onpointerleave={() => previewLegend(null)}
-            onpointerdown={(event) => onLegendPointerDown(event, index)}
-            onpointerup={(event) => onLegendPointerUp(event, index)}
-            onpointercancel={() => (legendTouchIndex = -1)}
-            onfocus={() => onLegendFocus(index)}
-            onblur={onLegendBlur}
-            onclick={(event) => onLegendClick(event, index)}
-            onkeydown={(event) => onLegendKeydown(event, index)}
-          >
-            <span class="gg-sr-only">{target.entry.label}</span>
-          </button>
-        {/each}
-      </div>
-    {/if}
-    {#if interactionConfig.legendFocus !== null && effectiveLegendPressed !== null}
-      {@const focusedLegend = model.scene.legends.find(
-        (candidate) => candidate.scale === effectiveLegendPressed?.scale,
-      )}
-      {#if focusedLegend !== undefined}
-        <button
-          type="button"
-          class="gg-legend-clear"
-          aria-label="Clear legend focus"
-          style:left={`${Math.max(4, Math.min(focusedLegend.x, model.scene.width - 52))}px`}
-          style:top={`${model.scene.height + 4}px`}
-          onpointerdown={(event) =>
-            (legendClearPointerType = event.pointerType)}
-          onpointercancel={() => (legendClearPointerType = null)}
-          onclick={(event) => clearLegendFromControl(event)}>Clear</button
-        >
-      {/if}
-    {/if}
+    <PlotLegendTargets
+      entries={interactiveLegendEntries}
+      previewIdentity={legendPreview?.action.identity ?? null}
+      pressedIdentity={effectiveLegendPressed}
+      rovingIndex={legendRovingIndex}
+      sceneWidth={model.scene.width}
+      sceneHeight={model.scene.height}
+      clearLegendX={interactionConfig.legendFocus !== null &&
+      effectiveLegendPressed !== null
+        ? (model.scene.legends.find(
+            (candidate) => candidate.scale === effectiveLegendPressed.scale,
+          )?.x ?? null)
+        : null}
+      onPreviewIndex={(index) => previewLegendIndex(index, "pointer")}
+      onPreviewClear={() => previewLegend(null)}
+      onPointerDown={onLegendPointerDown}
+      onPointerUp={onLegendPointerUp}
+      onPointerCancel={() => (legendTouchIndex = -1)}
+      onFocus={onLegendFocus}
+      onBlur={onLegendBlur}
+      onClick={onLegendClick}
+      onKeyDown={onLegendKeydown}
+      onClearPointerDown={(pointerType) =>
+        (legendClearPointerType = pointerType)}
+      onClearPointerCancel={() => (legendClearPointerType = null)}
+      onClearClick={clearLegendFromControl}
+    />
     {#if !interactive && (emphasizedAnchors.length > 0 || selectedAnchors.length > 0)}
       <InteractionOverlay
         width={model.scene.width}
@@ -2535,63 +2503,6 @@
     left: 2px;
     font-size: 11px;
     line-height: 1.2;
-  }
-
-  .gg-legend-clear {
-    position: absolute;
-    z-index: 5;
-    min-width: 44px;
-    min-height: 44px;
-    border: 1px solid
-      var(--gg-tooltipBorder, var(--gg-theme-tooltipBorder, currentColor));
-    border-radius: 3px;
-    padding: 2px 6px;
-    background: var(--gg-tooltipPaper, var(--gg-theme-tooltipPaper, white));
-    color: var(--gg-tooltipInk, var(--gg-theme-tooltipInk, currentColor));
-    font: 11px/1.2 var(--gg-font-family, sans-serif);
-    white-space: nowrap;
-    pointer-events: auto;
-  }
-
-  .gg-legend-targets {
-    position: absolute;
-    inset: 0;
-    z-index: 5;
-    pointer-events: none;
-  }
-
-  .gg-legend-target {
-    position: absolute;
-    min-width: 24px;
-    min-height: 24px;
-    margin: 0;
-    border: 1px solid transparent;
-    border-radius: 3px;
-    padding: 0;
-    background: transparent;
-    color: transparent;
-    pointer-events: auto;
-    touch-action: manipulation;
-  }
-
-  .gg-legend-target:hover,
-  .gg-legend-target-active,
-  .gg-legend-target[aria-pressed="true"] {
-    border-color: var(
-      --gg-interactionInk,
-      var(--gg-theme-interactionInk, currentColor)
-    );
-    background: color-mix(in srgb, currentColor 7%, transparent);
-  }
-
-  .gg-legend-target:focus-visible {
-    outline: 2px solid var(--gg-focusRing, var(--gg-theme-focusRing, Highlight));
-    outline-offset: -2px;
-  }
-
-  .gg-legend-clear:focus-visible {
-    outline: 2px solid var(--gg-focusRing, var(--gg-theme-focusRing, Highlight));
-    outline-offset: 2px;
   }
 
   .gg-a11y-table {
