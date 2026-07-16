@@ -40,8 +40,6 @@ import type { PortableSpec, SpecInput } from "@ggsvelte/spec";
 import { normalize, SpecValidationError, validate } from "@ggsvelte/spec";
 
 import type { ScaleState } from "./scales/state.js";
-import type { PositionScale } from "./scales/train.js";
-import { finiteExtent } from "./scales/train.js";
 import type { CellValue } from "./table.js";
 import type { ColumnTable } from "./table.js";
 import { resolveEditionDefaults } from "./editions.js";
@@ -52,19 +50,13 @@ import { LineageStore } from "./identity.js";
 
 import type {
   Advisory,
-  LayerBinding,
-  LayerFrame,
   PipelineWarning,
   RenderModel,
   RunOptions,
   ScaleDomainSnapshot,
 } from "./pipeline/types.js";
 import { NO_ROW, PipelineError } from "./pipeline/types.js";
-import { resolveFacet, SINGLE_PANEL } from "./pipeline/facets.js";
-import { bindData, bindLayer } from "./pipeline/bind.js";
-import { collectAxisInputs, resolveColorScale, trainAxis } from "./pipeline/scale-training.js";
-import { buildFrame, remapSourceRows } from "./pipeline/frame.js";
-import { applyPosition } from "./pipeline/position.js";
+import { collectAxisInputs, trainAxis } from "./pipeline/scale-training.js";
 import {
   dedupeAdvisories,
   dedupeWarnings,
@@ -79,6 +71,8 @@ import {
   resolveLayerScaledConstants,
 } from "./pipeline/layer-contracts.js";
 import { buildPipelineCandidates } from "./pipeline/build-candidates.js";
+import { preparePanels } from "./pipeline/prepare-panels.js";
+import { trainPipelineScales } from "./pipeline/train-pipeline-scales.js";
 
 // Re-export the public pipeline contract (import path stability).
 export type {
@@ -143,120 +137,36 @@ export function runPipeline(spec: SpecInput | PortableSpec, options: RunOptions)
 
   // bind + facet partition + per-panel frames
   perfMark("ggsvelte:bind:start");
-  const table = bindData(normalized, options);
-  const emptyData = table.rowCount === 0;
-  if (emptyData) {
-    warnings.push({
-      code: "empty-data",
-      message: "The data has no rows; rendering the frame and axes as a placeholder.",
-    });
-  }
-
-  const facetLayout = emptyData ? SINGLE_PANEL(table) : resolveFacet(normalized.facet, table);
-  const { faceted, nrow, ncol } = facetLayout;
-  const facetPanels = facetLayout.panels;
-  const freeX = faceted && facetLayout.freeX;
-  const freeY = faceted && facetLayout.freeY;
-
-  const bindings: LayerBinding[] = [];
-  const panelFrames: LayerFrame[][] = facetPanels.map(() => []);
-  if (!emptyData) {
-    for (let index = 0; index < normalized.layers.length; index++) {
-      bindings.push(bindLayer(normalized.layers[index]!, index, table, warnings));
-    }
-    // Shared bin break grids across panels when the x scale is fixed.
-    const binRanges = bindings.map((binding) => {
-      const stat = binding.layer.stat ?? "identity";
-      if (stat !== "bin" || !faceted || freeX || binding.xField === null) return void 0;
-      return finiteExtent([table.numeric(binding.xField)]) ?? void 0;
-    });
-    for (let p = 0; p < facetPanels.length; p++) {
-      const panelTable = facetPanels[p]!.table;
-      for (let index = 0; index < bindings.length; index++) {
-        const frame = buildFrame(
-          bindings[index]!,
-          panelTable,
-          warnings,
-          advisories,
-          binRanges[index],
-        );
-        applyPosition(frame, advisories, panelTable);
-        remapSourceRows(frame, facetPanels[p]!.sourceRows);
-        panelFrames[p]!.push(frame);
-      }
-    }
-    for (let index = 0; index < bindings.length; index++) {
-      const allEmpty = panelFrames.every((frames) => frames[index]!.n === 0);
-      if (allEmpty && bindings[index]!.ruleForm !== "annotation") {
-        warnings.push({
-          code: "empty-layer",
-          message: `Layer ${index} (${bindings[index]!.layer.geom}) has no drawable rows after its stat; skipping it.`,
-        });
-      }
-    }
-  }
+  const { table, faceted, freeX, freeY, nrow, ncol, facetPanels, bindings, panelFrames } =
+    preparePanels(normalized, options, warnings, advisories);
   perfMark("ggsvelte:bind:end");
   perfMeasure("ggsvelte:bind", "ggsvelte:bind:start", "ggsvelte:bind:end");
 
   // train scales — fixed: union across panels; free: positional domains per
   // panel; discrete color/fill assignment ALWAYS global (one legend).
   perfMark("ggsvelte:scales:start");
-  const scalesConfig = normalized.scales ?? {};
-  const allFrames = panelFrames.flat();
-  const xInputs = collectAxisInputs("x", allFrames, scalesConfig.x?.type, advisories);
-  const yInputs = collectAxisInputs("y", allFrames, scalesConfig.y?.type, advisories);
-  const xTraining = trainAxis("x", xInputs, scalesConfig.x);
-  const yTraining = trainAxis("y", yInputs, scalesConfig.y);
-  advisories.push(...xTraining.advisories, ...yTraining.advisories);
-  warnings.push(...xTraining.warnings, ...yTraining.warnings);
-
-  // Per-panel scales for free dimensions. The scale TYPE is decided once
-  // from the union evidence (panels must agree); domains train per panel.
-  const panelScales: { x: PositionScale; y: PositionScale }[] = facetPanels.map((_, p) => {
-    let px = xTraining.scale;
-    let py = yTraining.scale;
-    const scratch: Advisory[] = [];
-    if (freeX) {
-      const inputs = collectAxisInputs("x", panelFrames[p]!, scalesConfig.x?.type, scratch);
-      const training = trainAxis("x", inputs, { ...scalesConfig.x, type: xTraining.scale.type });
-      warnings.push(...training.warnings);
-      px = training.scale;
-    }
-    if (freeY) {
-      const inputs = collectAxisInputs("y", panelFrames[p]!, scalesConfig.y?.type, scratch);
-      const training = trainAxis("y", inputs, { ...scalesConfig.y, type: yTraining.scale.type });
-      warnings.push(...training.warnings);
-      py = training.scale;
-    }
-    return { x: px, y: py };
+  const {
+    xTraining,
+    yTraining,
+    panelScales,
+    colorResolution,
+    fillResolution,
+    xInputs,
+    yInputs,
+    scalesConfig,
+    allFrames,
+  } = trainPipelineScales({
+    normalized,
+    options,
+    table,
+    facetPanels,
+    panelFrames,
+    freeX,
+    freeY,
+    editionDefaults,
+    warnings,
+    advisories,
   });
-
-  const labs = normalized.labs ?? {};
-  const firstColorField = allFrames.find((f) => f.binding.color.field !== null)?.binding.color
-    .field;
-  const firstFillField = allFrames.find((f) => f.binding.fill.field !== null)?.binding.fill.field;
-  const colorResolution = resolveColorScale(
-    "color",
-    allFrames,
-    table,
-    scalesConfig.color,
-    options.prevScales?.["color"] ?? null,
-    labs.color ?? firstColorField ?? "",
-    warnings,
-    advisories,
-    editionDefaults,
-  );
-  const fillResolution = resolveColorScale(
-    "fill",
-    allFrames,
-    table,
-    scalesConfig.fill,
-    options.prevScales?.["fill"] ?? null,
-    labs.fill ?? firstFillField ?? "",
-    warnings,
-    advisories,
-    editionDefaults,
-  );
   perfMark("ggsvelte:scales:end");
   perfMeasure("ggsvelte:scales", "ggsvelte:scales:start", "ggsvelte:scales:end");
 
@@ -272,7 +182,7 @@ export function runPipeline(spec: SpecInput | PortableSpec, options: RunOptions)
     facetPanels,
     panelScales,
     allFrames,
-    labs,
+    labs: normalized.labs ?? {},
     scalesConfig,
     xScale: xTraining.scale,
     yScale: yTraining.scale,
