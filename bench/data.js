@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784178091177,
+  "lastUpdate": 1784179651172,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -7223,6 +7223,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 161.4805,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "54c55f08462d56ed85aa710c4b3539ce2d044dd7",
+          "message": "refactor(svelte): extract pure scoped zoom domain projection (#69)\n\n* refactor(svelte): extract pure scoped zoom domain projection\n\nMove controller snapshot zoom → continuous domain bag projection out of\nGGPlot commitZoom so scope matching and domain cloning are unit-tested.\n\n* test(svelte): avoid useless undefined in scoped zoom tests\n\nSatisfy unicorn/no-useless-undefined under type-aware oxlint.",
+          "timestamp": "2026-07-16T00:26:57-05:00",
+          "tree_id": "580f967b9a5a99c7dd5ae9513351b615ba6d164c",
+          "url": "https://github.com/ljodea/ggsvelte/commit/54c55f08462d56ed85aa710c4b3539ce2d044dd7"
+        },
+        "date": 1784179650835,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.5558,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.7907,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 9.3608,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 12.9189,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 81.8436,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 122.3229,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.0468,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2388,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 87.6825,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 111.9184,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 14.4835,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.8679,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 120.0442,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.6653,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 26.6668,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 8.218,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 30.1505,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 591.199,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 162.1171,
             "unit": "ms"
           }
         ]
