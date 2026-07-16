@@ -49,6 +49,15 @@ export interface CoordinatedInspection<Row, Key> {
   readonly presentationChanged: boolean;
 }
 
+/**
+ * Stable emit-dedupe token for inspection clear events.
+ * Non-clear emissions must use the coordinator's `semanticFingerprint`
+ * (type-aware key identity); hosts must not invent a second fingerprint.
+ */
+export function clearInspectionFingerprint(source: InteractionSource): string {
+  return `clear:${source}`;
+}
+
 interface ResolvedTarget {
   readonly seed: CandidateFacts;
   readonly members: readonly CandidateFacts[];

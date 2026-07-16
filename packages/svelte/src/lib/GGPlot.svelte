@@ -84,7 +84,10 @@
     type ZoomInput,
   } from "./interaction.js";
   import type { PlotInteractionController } from "./interaction-controller.svelte.js";
-  import { createInspectionCoordinator } from "./inspection-resolver.js";
+  import {
+    clearInspectionFingerprint,
+    createInspectionCoordinator,
+  } from "./inspection-resolver.js";
   import { createInteractionReducer } from "./interaction-reducer.js";
   import { provideRegistry } from "./registry.svelte.js";
   import { a11yRows } from "./canvas-a11y.js";
@@ -108,6 +111,7 @@
   } from "./plot-labels.js";
   import {
     bestDirectionalIndex,
+    buildTraversalHits,
     cycleCoincidentIndex,
     hitFromCandidate,
     matchCandidateFromHit,
@@ -117,15 +121,17 @@
   import {
     bandChannelsForZoom,
     capabilityStatusText,
+    filterAvailableTools,
     zoomScaleDiagnosticsFromChannels,
     zoomSupportsChannel,
   } from "./plot-capability.js";
   import {
-    buildIntervalSelection,
     clearIntervalSelectionEvent,
-    filterDomainBySelectMode,
+    intervalSelectionFromRows,
     isBrushTooSmall,
+    lineageRowIndexesFromCandidates,
   } from "./plot-interval.js";
+  import { createPaintLedger, isPlotReady } from "./plot-paint.js";
   import {
     anchorsFromCandidateKeys,
     nextPointSelectionKeys,
@@ -420,17 +426,15 @@
   );
   const hasCanvas = $derived(canvasCount > 0);
 
-  // Canvas first-paint tracking: data-gg-ready waits for every canvas
-  // stratum of the CURRENT model to have painted at least once.
-  let paintedFor = $state(-1);
-  let paintedCount = $state(0);
-  function notifyPainted(runId: number): void {
-    if (paintedFor === runId) {
-      paintedCount += 1;
-    } else {
-      paintedFor = runId;
-      paintedCount = 1;
-    }
+  // Canvas first-paint tracking: data-gg-ready waits for every distinct
+  // canvas stratum of the CURRENT model to have painted at least once.
+  // paintEpoch bumps so readiness re-derives when the non-reactive ledger
+  // mutates (ledger itself must not be $state — set mutations are invisible).
+  const paintLedger = createPaintLedger();
+  let paintEpoch = $state(0);
+  function notifyPainted(runId: number, stratumKey: string): void {
+    paintLedger.notify(runId, stratumKey);
+    paintEpoch += 1;
   }
 
   // Redraw canvases when the host theme flips (canvas colors resolve from
@@ -449,7 +453,11 @@
   });
 
   /** Svelte attachment: size for DPR, draw the stratum, signal first paint. */
-  function canvasAttachment(m: RenderModel, batches: GeometryBatch[]) {
+  function canvasAttachment(
+    m: RenderModel,
+    batches: GeometryBatch[],
+    stratumKey: string,
+  ) {
     void themeEpoch;
     return (canvas: HTMLCanvasElement) => {
       const ctx = canvas.getContext("2d");
@@ -459,7 +467,7 @@
       drawStratum(ctx, m.scene, batches, cssColorResolver(canvas));
       // untrack: the attachment must WRITE paint state without SUBSCRIBING
       // to it (a tracked read here would re-trigger the attachment -> loop).
-      untrack(() => notifyPainted(m.runId));
+      untrack(() => notifyPainted(m.runId, stratumKey));
     };
   }
 
@@ -583,8 +591,9 @@
     return zoomSupportsChannel(interactionConfig.zoom.mode, model.scales);
   });
   const availableTools = $derived(
-    interactionConfig.availableTools.filter(
-      (available) => available !== "zoom-area" || zoomHasSupportedChannel,
+    filterAvailableTools(
+      interactionConfig.availableTools,
+      zoomHasSupportedChannel,
     ),
   );
   const showToolRail = $derived(
@@ -899,16 +908,7 @@
 
   const traversalHits: SceneHit[] = $derived.by(() => {
     if (model === null) return [];
-    const hits: SceneHit[] = [];
-    let id = model.candidates.traverse(null, "first");
-    const seen = new Set<number>();
-    while (id !== null && !seen.has(id)) {
-      seen.add(id);
-      const candidate = model.candidates.candidate(id);
-      if (candidate !== null) hits.push(hitFromCandidate(candidate));
-      id = model.candidates.traverse(id, "next");
-    }
-    return hits;
+    return buildTraversalHits(model.candidates);
   });
   let reconciledRun = -1;
   $effect(() => {
@@ -975,13 +975,17 @@
     next: PlotInspection<Record<string, CellValue>>,
     semanticFingerprint?: string,
   ): void {
+    // Clear tokens come from the inspection-resolver helper. Non-clear
+    // emissions must carry the coordinator's type-aware semanticFingerprint —
+    // never a host-side String(key) fallback (collides symbols / delimiters).
     const fingerprint =
-      semanticFingerprint ??
-      (next.phase === "clear"
-        ? `clear:${next.source}`
-        : `${next.mode}:${next.state}:${next.panelId}:${String(next.focus.key)}:${next.members.map((m) => `${m.layerIndex}:${String(m.key)}`).join(",")}`);
-    if (fingerprint === lastInspectionFingerprint) return;
-    lastInspectionFingerprint = fingerprint;
+      next.phase === "clear"
+        ? clearInspectionFingerprint(next.source)
+        : semanticFingerprint;
+    if (fingerprint !== undefined) {
+      if (fingerprint === lastInspectionFingerprint) return;
+      lastInspectionFingerprint = fingerprint;
+    }
     oninspect?.(next as unknown as PlotInspection<Row, PublicKey>);
     oninteraction?.(next as unknown as PlotInteractionEvent<Row, PublicKey>);
   }
@@ -1248,27 +1252,24 @@
             .filter(
               (candidate): candidate is CandidateFacts => candidate !== null,
             );
-    const sourceRows = new Set<number>();
-    for (const candidate of candidates)
-      for (const rowIndex of model?.lineage.keys(candidate.lineage) ?? [])
-        sourceRows.add(rowIndex);
-    const keys = uniqueKeysFromRowIndexes(sourceRows, (rowIndex) =>
-      semanticKey(model?.row(rowIndex) ?? null, rowIndex),
+    const sourceRows = lineageRowIndexesFromCandidates(
+      candidates,
+      (lineageId) => model?.lineage.keys(lineageId) ?? [],
     );
     const inverted =
       model !== null && model.scene.panels.length === 1
         ? panelDataDomains(rect, model.scene.panels[0]!, model.scales, flip)
         : {};
-    const domain = filterDomainBySelectMode(inverted, mode);
-    return buildIntervalSelection({
+    return intervalSelectionFromRows({
       phase,
       mode,
       panelId: panelId(0),
-      domain,
       pixels: rect,
-      keys,
-      lineageCount: sourceRows.size,
       source,
+      rowIndexes: sourceRows,
+      keyForRow: (rowIndex) =>
+        semanticKey(model?.row(rowIndex) ?? null, rowIndex),
+      invertedDomain: inverted,
     });
   }
 
@@ -1629,16 +1630,19 @@
   }
 
   // Readiness signal for screenshot tooling (plan: VR waits on
-  // `[data-gg-ready="true"]`). Effects run after the render flush; canvas
-  // strata additionally gate on their first paint (decision 0006 / plan).
-  let ready = $state(false);
-  $effect(() => {
-    ready =
-      model !== null &&
-      ((width !== undefined && width !== "container") ||
-        containerHasPositiveWidth) &&
-      (!hasCanvas ||
-        (paintedFor === model.runId && paintedCount >= canvasCount));
+  // `[data-gg-ready="true"]`). Derived after flush-visible state updates;
+  // canvas strata additionally gate on first paint (decision 0006 / plan).
+  const ready = $derived.by(() => {
+    void paintEpoch;
+    return isPlotReady({
+      hasModel: model !== null,
+      widthMode:
+        width === undefined || width === "container" ? "container" : "fixed",
+      containerHasPositiveWidth,
+      hasCanvas,
+      paintComplete:
+        model !== null && paintLedger.isComplete(model.runId, canvasCount),
+    });
   });
 </script>
 
@@ -1684,7 +1688,7 @@
         {#if stratum.backend === "canvas"}
           <canvas
             class="gg-stratum gg-canvas"
-            {@attach canvasAttachment(model, stratum.batches)}
+            {@attach canvasAttachment(model, stratum.batches, `canvas:${si}`)}
           ></canvas>
           {@const table = a11yRows(model, stratum.batches)}
           <div
