@@ -60,25 +60,6 @@ const CSS_TYPE_TOKEN = new Set(
 );
 
 /**
- * SVG container / context roots. Bare chains under these may use any CSS type
- * identifier for descendants (`svg animateMotion`, `svg mpath`, `g metadata`)
- * so we do not depend on exhaustively listing every SVG element name.
- */
-const SVG_CONTEXT_ROOT = new Set([
-  "svg",
-  "g",
-  "defs",
-  "symbol",
-  "marker",
-  "pattern",
-  "mask",
-  "filter",
-  "switch",
-  "foreignObject",
-  "clipPath",
-]);
-
-/**
  * English-first collocations that are HTML tag names but common in JSDoc lists
  * (`* + data table`, `* + source code`). Not CSS `a span` / `a img`.
  */
@@ -89,34 +70,20 @@ function isCustomElementToken(token: string): boolean {
   return /^[a-z][\w]*-[\w-]+$/.test(token);
 }
 
-/** camelCase identifiers typical of SVG (`animateMotion`, `linearGradient`). */
-function isCamelCaseTypeToken(token: string): boolean {
-  return /^[a-z][\w]*[A-Z][\w-]*$/.test(token);
-}
-
-function isCssTypeIdent(token: string): boolean {
-  return token === "*" || /^[A-Za-z_][\w-]*$/.test(token);
-}
-
 function isCssTypeToken(token: string): boolean {
   return (
     token === "*" ||
     CSS_TYPE_TOKEN.has(token) ||
     CSS_TYPE_TOKEN.has(token.toLowerCase()) ||
-    isCustomElementToken(token) ||
-    isCamelCaseTypeToken(token)
+    isCustomElementToken(token)
   );
 }
 
 /** Bare multi-token chain after a combinator: CSS vs English. */
 function bareMultiTokenChainIsCss(tokens: readonly string[]): boolean {
   if (BARE_CHAIN_PROSE_PAIR.has(tokens.map((t) => t.toLowerCase()).join(" "))) return false;
-  if (tokens.every((t) => isCssTypeToken(t))) return true;
-  // Under an SVG container, accept any type-ident descendants (mpath, metadata, …).
-  if (tokens.some((t) => SVG_CONTEXT_ROOT.has(t) || SVG_CONTEXT_ROOT.has(t.toLowerCase()))) {
-    return tokens.every((t) => isCssTypeIdent(t));
-  }
-  return false;
+  // Allowlist + custom elements only (no global camelCase / no loose SVG-context).
+  return tokens.every((t) => isCssTypeToken(t));
 }
 
 /**

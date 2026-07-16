@@ -74,6 +74,10 @@ describe("manual AT alias commit audit", () => {
     expect(isSkippableCommentLine("* > svg animateMotion")).toBe(false);
     expect(isSkippableCommentLine("* > svg mpath")).toBe(false);
     expect(isSkippableCommentLine("* > svg metadata")).toBe(false);
+    // Do not treat camelCase prose or SVG token mid-phrase as CSS.
+    expect(isSkippableCommentLine("* + minValue maxValue")).toBe(true);
+    expect(isSkippableCommentLine("* + svg fallback content")).toBe(true);
+    expect(isSkippableCommentLine("* + g scale")).toBe(true);
     expect(isSkippableCommentLine("* > my-widget path")).toBe(false);
     expect(isSkippableCommentLine("* + a span")).toBe(false);
     expect(isSkippableCommentLine("* > a img")).toBe(false);
