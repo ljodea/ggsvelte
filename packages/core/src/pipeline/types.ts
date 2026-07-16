@@ -205,7 +205,7 @@ export interface LayerBinding {
   ruleForm: RuleForm | null;
 }
 
-export interface BoxFrame {
+interface BoxFrame {
   lower: Float64Array;
   middle: Float64Array;
   upper: Float64Array;
