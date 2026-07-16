@@ -11,6 +11,7 @@ import type { ThemeTokens } from "../theme.js";
 import type { FacetPanelDef } from "./facets.js";
 import { resolvePanelLayoutChrome } from "./panel-layout-chrome.js";
 import { buildPanelPlacements } from "./panel-layout-placements.js";
+import { panelLayoutResultFromChrome } from "./panel-layout-result.js";
 import type { PanelLayoutResult } from "./panel-layout-types.js";
 import type { LayerFrame, PipelineWarning, RunOptions } from "./types.js";
 
@@ -49,19 +50,5 @@ export function computePanelLayout(input: {
     options,
   });
 
-  return {
-    placements,
-    title: chrome.title,
-    subtitle: chrome.subtitle,
-    caption: chrome.caption,
-    hTitle: chrome.hTitle,
-    vTitle: chrome.vTitle,
-    xTitle: chrome.xTitle,
-    yTitle: chrome.yTitle,
-    topBand: chrome.topBand,
-    formatX: chrome.formatX,
-    formatY: chrome.formatY,
-    displayScales: chrome.displayScales,
-    legendBlock: chrome.legendBlock,
-  };
+  return panelLayoutResultFromChrome(chrome, placements);
 }

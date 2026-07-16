@@ -5,8 +5,8 @@ import type { LayoutTheme, TickFormatter } from "../layout/layout.js";
 import type { TextMeasurer } from "../layout/measure.js";
 
 import type { FacetPanelDef } from "./facets.js";
+import { mapFacetPanelPlacements } from "./panel-layout-facet-map.js";
 import { computeFacetGridGeometry } from "./panel-layout-facet-margins.js";
-import { placeOneFacetPanel } from "./panel-layout-facet-place-one.js";
 import type { DisplayScalesFn, PanelPlacement } from "./panel-layout-types.js";
 
 export function placeFacetPanels(input: {
@@ -30,46 +30,23 @@ export function placeFacetPanels(input: {
   measurer: TextMeasurer;
   layoutTheme: LayoutTheme;
 }): PanelPlacement[] {
-  const {
-    facetPanels,
-    freeH,
-    freeV,
-    displayScales,
-    hBreaks,
-    vBreaks,
-    formatH,
-    formatV,
-    measurer,
-    layoutTheme,
-  } = input;
-
-  const { mMax, panelW, panelH, colX, rowY, bottomMostRow } = computeFacetGridGeometry(input);
-
-  const placements: PanelPlacement[] = [];
-  for (let p = 0; p < facetPanels.length; p++) {
-    const def = facetPanels[p]!;
-    const { h, v } = displayScales(p);
-    placements.push(
-      placeOneFacetPanel({
-        def,
-        h,
-        v,
-        mMax,
-        panelW,
-        panelH,
-        colX: colX[def.col]!,
-        rowY: rowY[def.row]!,
-        freeH,
-        freeV,
-        bottomMostRow: bottomMostRow[def.col]!,
-        hBreaks,
-        vBreaks,
-        formatH,
-        formatV,
-        measurer,
-        layoutTheme,
-      }),
-    );
-  }
-  return placements;
+  const geometry = computeFacetGridGeometry(input);
+  return mapFacetPanelPlacements({
+    facetPanels: input.facetPanels,
+    freeH: input.freeH,
+    freeV: input.freeV,
+    displayScales: input.displayScales,
+    mMax: geometry.mMax,
+    panelW: geometry.panelW,
+    panelH: geometry.panelH,
+    colX: geometry.colX,
+    rowY: geometry.rowY,
+    bottomMostRow: geometry.bottomMostRow,
+    hBreaks: input.hBreaks,
+    vBreaks: input.vBreaks,
+    formatH: input.formatH,
+    formatV: input.formatV,
+    measurer: input.measurer,
+    layoutTheme: input.layoutTheme,
+  });
 }
