@@ -12,6 +12,37 @@ import {
 
 export type ZoomMode = "x" | "y" | "xy";
 
+/** One controller/shared zoom channel entry keyed by interaction scope. */
+export type ScopedZoomChannel = {
+  readonly scope: string;
+  readonly domain: readonly [number, number];
+};
+
+/**
+ * Project controller zoom channel lists into a continuous domain bag for this
+ * plot's interaction scopes. Clones matching domain tuples. Omits missing
+ * channels. Undefined scopes never match (same as PlotInteractionScope.x/y).
+ * May return `{}` when neither scope matches (host freezes via
+ * `frozenZoomDomains`, matching commitZoom after a successful setZoom).
+ */
+export function continuousZoomDomainsFromScopes(
+  channels: {
+    readonly x: readonly ScopedZoomChannel[];
+    readonly y: readonly ScopedZoomChannel[];
+  },
+  scopeX: string | undefined,
+  scopeY: string | undefined,
+): ContinuousZoomDomains {
+  const x =
+    scopeX === undefined ? undefined : channels.x.find((domain) => domain.scope === scopeX)?.domain;
+  const y =
+    scopeY === undefined ? undefined : channels.y.find((domain) => domain.scope === scopeY)?.domain;
+  return {
+    ...(x !== undefined && { x: [x[0], x[1]] as [number, number] }),
+    ...(y !== undefined && { y: [y[0], y[1]] as [number, number] }),
+  };
+}
+
 const zoomScale = (
   config: Scales["x"] | undefined,
   domain: [number, number],

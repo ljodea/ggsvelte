@@ -182,6 +182,7 @@
   import {
     applyZoomToSpec,
     buildZoomEvent,
+    continuousZoomDomainsFromScopes,
     filterZoomDomainsByMode,
     resolveBrushZoomDomains,
     sanitizePartialZoomDomains,
@@ -1845,16 +1846,13 @@
             });
       if (transition === null) return;
       if (domains !== null) {
-        const x = transition.snapshot.zoom.x.find(
-          (domain) => domain.scope === resolvedInteractionScope.x,
-        )?.domain;
-        const y = transition.snapshot.zoom.y.find(
-          (domain) => domain.scope === resolvedInteractionScope.y,
-        )?.domain;
-        committed = frozenZoomDomains({
-          ...(x !== undefined && { x: [...x] }),
-          ...(y !== undefined && { y: [...y] }),
-        });
+        committed = frozenZoomDomains(
+          continuousZoomDomainsFromScopes(
+            transition.snapshot.zoom,
+            resolvedInteractionScope.x,
+            resolvedInteractionScope.y,
+          ),
+        );
       }
     }
     const event = buildZoomEvent(committed, source);

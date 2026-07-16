@@ -5,6 +5,7 @@ import type { PortableSpec } from "@ggsvelte/spec";
 import {
   applyZoomToSpec,
   buildZoomEvent,
+  continuousZoomDomainsFromScopes,
   filterZoomDomainsByMode,
   resolveBrushZoomDomains,
   sameZoomDomains,
@@ -256,5 +257,73 @@ describe("buildZoomEvent", () => {
       domains: null,
     });
     expect(Object.isFrozen(event)).toBe(true);
+  });
+});
+
+describe("continuousZoomDomainsFromScopes", () => {
+  it("picks x and y by scope and clones domain tuples", () => {
+    const xDomain: [number, number] = [0, 1];
+    const yDomain: [number, number] = [2, 3];
+    const result = continuousZoomDomainsFromScopes(
+      {
+        x: [
+          { scope: "plot-a", domain: xDomain },
+          { scope: "other", domain: [9, 10] },
+        ],
+        y: [{ scope: "plot-a", domain: yDomain }],
+      },
+      "plot-a",
+      "plot-a",
+    );
+    expect(result).toEqual({ x: [0, 1], y: [2, 3] });
+    xDomain[0] = 99;
+    yDomain[1] = 88;
+    expect(result).toEqual({ x: [0, 1], y: [2, 3] });
+  });
+
+  it("omits missing channels and returns empty bag when neither matches", () => {
+    expect(
+      continuousZoomDomainsFromScopes(
+        {
+          x: [{ scope: "plot-a", domain: [0, 1] }],
+          y: [],
+        },
+        "plot-a",
+        "plot-b",
+      ),
+    ).toEqual({ x: [0, 1] });
+
+    expect(
+      continuousZoomDomainsFromScopes(
+        {
+          x: [],
+          y: [{ scope: "plot-b", domain: [4, 5] }],
+        },
+        "plot-a",
+        "plot-b",
+      ),
+    ).toEqual({ y: [4, 5] });
+
+    expect(
+      continuousZoomDomainsFromScopes(
+        {
+          x: [{ scope: "other", domain: [0, 1] }],
+          y: [{ scope: "other", domain: [2, 3] }],
+        },
+        "plot-a",
+        "plot-b",
+      ),
+    ).toEqual({});
+
+    expect(
+      continuousZoomDomainsFromScopes(
+        {
+          x: [{ scope: "plot-a", domain: [0, 1] }],
+          y: [{ scope: "plot-b", domain: [2, 3] }],
+        },
+        undefined,
+        undefined,
+      ),
+    ).toEqual({});
   });
 });
