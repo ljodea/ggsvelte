@@ -114,7 +114,7 @@
   import { resolveSurfaceKeyAction } from "./plot-surface-keyboard.js";
   import {
     buildInspectionCandidateRef,
-    buildQueuedPointerInspection,
+    buildQueuedInspectFrame,
     planInspectionDismiss,
     planSceneInspectReconcile,
     resolveInspectionCompleteness,
@@ -134,6 +134,7 @@
   import {
     resolveCaptureClickAction,
     advanceTouchInspectMoved,
+    interactionSourceFromPointerType,
     isAreaAwaitingSecond,
     isAreaBrushing,
     resolveFinishBrushAction,
@@ -142,6 +143,7 @@
     resolvePointerMoveAction,
     resolvePointerUpAction,
     shouldClearInspectionOnPointerLeave,
+    TOUCH_INSPECT_CLICK_SUPPRESS_MS,
   } from "./plot-surface-pointer.js";
   import {
     resolveLegendClearControlSource,
@@ -1782,28 +1784,19 @@
             mode: inspectConfig.mode,
             maxDistance: inspectConfig.maxDistance,
           }) ?? null;
-        const resolvedHit =
-          match === null
-            ? (hitIndex?.hitTest(p.x, p.y) ?? null)
-            : hitFromCandidate(match);
-        queuedPointerInspection = buildQueuedPointerInspection({
-          hit: resolvedHit,
-          source: action.source,
+        // One null branch for hit + reducer candidate (lazy hitTest / panelId).
+        const frame = buildQueuedInspectFrame({
           match,
+          source: action.source,
+          epoch: model?.runId ?? 0,
+          fallbackHit: () => hitIndex?.hitTest(p.x, p.y) ?? null,
+          panelIdForIndex: (index) => panelId(index),
         });
+        queuedPointerInspection = frame.queued;
         queuedPointerToken = reducer.frameToken();
         reducer.queuePointer({
           type: "inspect",
-          candidate:
-            match === null
-              ? null
-              : {
-                  epoch: model?.runId ?? 0,
-                  id: match.id,
-                  panelId: panelId(match.panelIndex),
-                  x: match.x,
-                  y: match.y,
-                },
+          candidate: frame.candidate,
           source: action.source,
         });
         break;
@@ -1879,7 +1872,7 @@
         });
         setInspection(
           null,
-          event.pointerType === "touch" ? "touch" : "pointer",
+          interactionSourceFromPointerType(event.pointerType),
         );
         reducer.dispatch({
           type: "begin-area",
@@ -1890,7 +1883,7 @@
           const startEvent = selectionEvent(
             "start",
             normalizedRect(brushRect),
-            event.pointerType === "touch" ? "touch" : "pointer",
+            interactionSourceFromPointerType(event.pointerType),
           );
           emitSelection(startEvent);
         }
@@ -1959,7 +1952,8 @@
             match.mode,
             match,
           );
-          suppressClickUntil = performance.now() + 500;
+          suppressClickUntil =
+            performance.now() + TOUCH_INSPECT_CLICK_SUPPRESS_MS;
         }
         break;
       }
@@ -1969,7 +1963,7 @@
         // Defensive: pure up-gate already requires hasBrushDraft.
         if (brushRect === null) break;
         reducer.cancelScheduledPointer();
-        const source = event.pointerType === "touch" ? "touch" : "pointer";
+        const source = interactionSourceFromPointerType(event.pointerType);
         const ended = evaluatePointerBrushEnd(brushRect, plotPoint(event));
         const finish = resolveFinishBrushAction({
           endedKind: ended.kind,

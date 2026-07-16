@@ -146,6 +146,12 @@ export function resolveCaptureClickAction(input: SurfaceClickInput): SurfaceClic
 export const TOUCH_INSPECT_MOVE_PX = 4;
 
 /**
+ * Suppress synthetic click after a successful touch-inspect tap (ms).
+ * Host: `suppressClickUntil = performance.now() + TOUCH_INSPECT_CLICK_SUPPRESS_MS`.
+ */
+export const TOUCH_INSPECT_CLICK_SUPPRESS_MS = 500;
+
+/**
  * Sticky OR of touch-inspect drag past threshold in plotPoint coordinates.
  * Exactly `TOUCH_INSPECT_MOVE_PX` counts as moved (`>=`).
  * Host calls only when `pointerType === "touch" && touchInspectStart !== null`.
@@ -180,8 +186,13 @@ export type SurfacePointerMoveAction =
   | { readonly type: "queue-inspect"; readonly source: "touch" | "pointer" }
   | { readonly type: "none" };
 
+/** Map a PointerEvent.pointerType string to InteractionSource surface values. */
+export function interactionSourceFromPointerType(pointerType: string): "touch" | "pointer" {
+  return pointerType === "touch" ? "touch" : "pointer";
+}
+
 const pointerSource = (pointerType: string): "touch" | "pointer" =>
-  pointerType === "touch" ? "touch" : "pointer";
+  interactionSourceFromPointerType(pointerType);
 
 /**
  * Pure decision for the plot capture-surface `pointermove` handler.

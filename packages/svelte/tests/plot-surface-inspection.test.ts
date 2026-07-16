@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildInspectionCandidateRef,
+  buildQueuedInspectFrame,
   buildQueuedPointerInspection,
   planInspectionDismiss,
   planSceneInspectReconcile,
@@ -288,6 +289,94 @@ describe("buildQueuedPointerInspection", () => {
       source: "touch",
       concreteMode: "xy",
       candidate: match,
+    });
+  });
+});
+
+describe("buildQueuedInspectFrame", () => {
+  const match = {
+    id: 3,
+    mode: "xy" as const,
+    autoMode: "xy" as const,
+    layerIndex: 1,
+    panelIndex: 2,
+    rowIndex: 1,
+    lineage: 0,
+    x: 12,
+    y: 24,
+    kind: "point" as const,
+  };
+  const fallback = {
+    layerIndex: 0,
+    panelIndex: 0,
+    rowIndex: 9,
+    x: 1,
+    y: 2,
+    kind: "point" as const,
+  };
+
+  it("uses fallbackHit only when match is null and leaves candidate null", () => {
+    let fallbackCalls = 0;
+    let panelCalls = 0;
+    const built = buildQueuedInspectFrame({
+      match: null,
+      source: "pointer",
+      epoch: 7,
+      fallbackHit: () => {
+        fallbackCalls += 1;
+        return fallback;
+      },
+      panelIdForIndex: () => {
+        panelCalls += 1;
+        return "p0";
+      },
+    });
+    expect(fallbackCalls).toBe(1);
+    expect(panelCalls).toBe(0);
+    expect(built).toEqual({
+      queued: { hit: fallback, source: "pointer" },
+      candidate: null,
+    });
+  });
+
+  it("builds hit + queued mode + candidate from match without calling fallbackHit", () => {
+    let fallbackCalls = 0;
+    let panelCalls = 0;
+    const built = buildQueuedInspectFrame({
+      match,
+      source: "touch",
+      epoch: 11,
+      fallbackHit: () => {
+        fallbackCalls += 1;
+        return fallback;
+      },
+      panelIdForIndex: (panelIndex) => {
+        panelCalls += 1;
+        expect(panelIndex).toBe(2);
+        return "panel-2";
+      },
+    });
+    expect(fallbackCalls).toBe(0);
+    expect(panelCalls).toBe(1);
+    expect(built.queued).toEqual({
+      hit: {
+        layerIndex: 1,
+        panelIndex: 2,
+        rowIndex: 1,
+        x: 12,
+        y: 24,
+        kind: "point",
+      },
+      source: "touch",
+      concreteMode: "xy",
+      candidate: match,
+    });
+    expect(built.candidate).toEqual({
+      epoch: 11,
+      id: 3,
+      panelId: "panel-2",
+      x: 12,
+      y: 24,
     });
   });
 });
