@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildInspectionCandidateRef,
   buildQueuedPointerInspection,
+  planInspectionDismiss,
   planSceneInspectReconcile,
   resolveInspectionCompleteness,
   resolveInspectionEmitAction,
@@ -751,5 +752,72 @@ describe("resolveInspectionEmitAction", () => {
     // same clear token suppresses
     expect(step("clear:keyboard")).toEqual({ type: "skip" });
     expect(last).toBe("clear:keyboard");
+  });
+});
+
+describe("planInspectionDismiss", () => {
+  it("plans escape with invalidate, brush clear, and optional returnToInspect", () => {
+    expect(
+      planInspectionDismiss({
+        kind: "escape",
+        hasInspection: true,
+        returnToInspect: true,
+      }),
+    ).toEqual({
+      emitClear: true,
+      clearPendingPinned: false,
+      coordinator: "invalidate",
+      clearBrush: true,
+      clearTooltipHovered: true,
+      restoreFocus: false,
+      returnToInspect: true,
+    });
+    expect(
+      planInspectionDismiss({
+        kind: "escape",
+        hasInspection: false,
+        returnToInspect: false,
+      }),
+    ).toEqual({
+      emitClear: false,
+      clearPendingPinned: false,
+      coordinator: "invalidate",
+      clearBrush: true,
+      clearTooltipHovered: true,
+      restoreFocus: false,
+      returnToInspect: false,
+    });
+  });
+
+  it("plans close with release-pinned, pending clear, and restoreFocus default true", () => {
+    expect(
+      planInspectionDismiss({
+        kind: "close",
+        hasInspection: true,
+      }),
+    ).toEqual({
+      emitClear: true,
+      clearPendingPinned: true,
+      coordinator: "release-pinned",
+      clearBrush: false,
+      clearTooltipHovered: true,
+      restoreFocus: true,
+      returnToInspect: false,
+    });
+    expect(
+      planInspectionDismiss({
+        kind: "close",
+        hasInspection: false,
+        restoreFocus: false,
+      }),
+    ).toEqual({
+      emitClear: false,
+      clearPendingPinned: true,
+      coordinator: "release-pinned",
+      clearBrush: false,
+      clearTooltipHovered: true,
+      restoreFocus: false,
+      returnToInspect: false,
+    });
   });
 });
