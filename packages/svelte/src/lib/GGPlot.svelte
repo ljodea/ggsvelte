@@ -1654,9 +1654,9 @@
       case "touch-inspect-start":
         touchInspectStart = plotPoint(event);
         touchInspectMoved = false;
-        return;
+        break;
       case "none":
-        return;
+        break;
       case "begin-area": {
         const p = plotPoint(event);
         brushRect =
@@ -1689,7 +1689,7 @@
           // reducer still owns cancellation; real pointer streams retain
           // capture.
         }
-        return;
+        break;
       }
     }
   }
@@ -1726,16 +1726,16 @@
         // Always clear touch-inspect start state (host cleanup).
         touchInspectStart = null;
         touchInspectMoved = false;
-        return;
+        break;
       case "touch-inspect-tap": {
         touchInspectStart = null;
         touchInspectMoved = false;
-        const inspect = interactionConfig.inspect;
-        if (inspect === null) return;
+        const inspectConfig = interactionConfig.inspect;
+        if (inspectConfig === null) break;
         const p = plotPoint(event);
         const match = model?.candidates.nearest(p.x, p.y, {
-          mode: inspect.mode,
-          maxDistance: inspect.maxDistance,
+          mode: inspectConfig.mode,
+          maxDistance: inspectConfig.maxDistance,
         });
         if (match !== null && match !== undefined) {
           setInspection(
@@ -1747,19 +1747,19 @@
           );
           suppressClickUntil = performance.now() + 500;
         }
-        return;
+        break;
       }
       case "none":
-        return;
+        break;
       case "finish-brush": {
-        if (brushRect === null) return;
+        if (brushRect === null) break;
         reducer.cancelScheduledPointer();
         const source = event.pointerType === "touch" ? "touch" : "pointer";
         const ended = evaluatePointerBrushEnd(brushRect, plotPoint(event));
         if (ended.kind === "too-small") {
           brushRect = ended.corners;
           announceInteraction("Choose opposite corner.");
-          return;
+          break;
         }
         brushRect = null;
         if (activeTool === "select-area") {
@@ -1772,7 +1772,7 @@
           applyBrushZoom(ended.rect, source);
         }
         reducer.dispatch({ type: "cancel-area" });
-        return;
+        break;
       }
     }
   }
@@ -2038,22 +2038,22 @@
     switch (action.type) {
       case "suppress":
         suppressClickUntil = 0;
-        return;
+        break;
       case "toggle-point": {
         const point = plotPoint(event);
         const match = model?.candidates.nearest(point.x, point.y, {
           mode: "xy",
           maxDistance: 24,
         });
-        if (match === null || match === undefined) return;
+        if (match === null || match === undefined) break;
         togglePointKeys(candidateSemanticKeys(match), "pointer");
-        return;
+        break;
       }
       case "toggle-pin":
         toggleInspectionPin("pointer");
-        return;
+        break;
       case "none":
-        return;
+        break;
     }
   }
 
