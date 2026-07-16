@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784221666026,
+  "lastUpdate": 1784227446607,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -16743,6 +16743,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 160.6614,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "6855e50548c907b498222238b687d8d164058460",
+          "message": "ci: route Linux workflows to self-hosted ggsvelte runners (#150)\n\n* ci: route Linux workflows to self-hosted ggsvelte runners\n\nPoint Linux jobs at the repo-scoped self-hosted pool labeled ggsvelte so\nCI no longer burns GitHub-hosted minutes. Windows/macOS matrix rows and\nhosted-only manual AT stay on GitHub runners. Teach actionlint about the\ncustom label (config for the Go CLI; wasm filter in scripts/actionlint.ts).\n\n* ci: keep privileged/OIDC jobs on GitHub-hosted runners\n\nAddress Codex review: leave release (npm OIDC), pages deploy, vr-approve,\nand bench-trend write paths on ubuntu-latest so the self-hosted pool only\nruns read-scoped CI. Move actionlint config to .github/actionlint.yaml for\nGo CLI auto-discovery.",
+          "timestamp": "2026-07-16T13:43:28-05:00",
+          "tree_id": "422d3df500a9e2de51b01b0a64ac646d3d0f84bc",
+          "url": "https://github.com/ljodea/ggsvelte/commit/6855e50548c907b498222238b687d8d164058460"
+        },
+        "date": 1784227445918,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.3895,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.6848,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 9.3112,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 12.0473,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 90.2977,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 120.5283,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 0.9811,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.1998,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 85.983,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 117.3527,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 12.9974,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 11.6604,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 116.5695,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.8214,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 25.8119,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.2489,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 35.2495,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 608.5682,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 166.6073,
             "unit": "ms"
           }
         ]
