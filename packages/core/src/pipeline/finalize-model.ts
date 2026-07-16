@@ -8,12 +8,7 @@ import type { Scene } from "../scene.js";
 
 import { assembleRenderModel } from "./assemble-render-model.js";
 import { buildPipelineCandidates } from "./build-candidates.js";
-import { computeBaselineDomains, computeEffectiveDomains } from "./compute-domains.js";
-import {
-  resolveLayerBackends,
-  resolveLayerFields,
-  resolveLayerScaledConstants,
-} from "./layer-contracts.js";
+import { resolveFinalizeContracts } from "./finalize-model-contracts.js";
 import type { PanelLayoutResult } from "./panel-layout.js";
 import type { PreparedPanels } from "./prepare-panels.js";
 import type { TrainedPipelineScales } from "./train-pipeline-scales.js";
@@ -43,30 +38,16 @@ export function finalizeRenderModel(input: {
     warnings,
     advisories,
   } = input;
-  const { freeX, freeY, facetPanels, bindings, panelFrames, table } = prepared;
-  const { xTraining, yTraining, panelScales, colorResolution, fillResolution, xInputs, yInputs } =
-    trained;
+  const { facetPanels, panelFrames, table } = prepared;
+  const { xTraining, yTraining, panelScales, colorResolution, fillResolution } = trained;
 
-  const layerBackends = resolveLayerBackends(
-    normalized.layers,
-    scene.batches,
-    normalized.a11y,
-    options.canvasThreshold,
-    advisories,
-  );
-  const layerFields = resolveLayerFields(normalized.layers.length, bindings);
-  const layerScaledConstants = resolveLayerScaledConstants(normalized.layers.length, bindings);
-
-  const effectiveDomains = computeEffectiveDomains(xTraining.scale, yTraining.scale, panelScales);
-  const baselineDomains = computeBaselineDomains({
+  const contracts = resolveFinalizeContracts({
+    normalized,
     options,
-    freeX,
-    freeY,
-    facetPanels,
-    panelFrames,
-    xInputs,
-    yInputs,
-    effectiveDomains,
+    prepared,
+    trained,
+    scene,
+    advisories,
   });
 
   const lineage = new LineageStore<number>();
@@ -74,11 +55,11 @@ export function finalizeRenderModel(input: {
     scene,
     runId,
     flip,
-    bindings,
+    bindings: contracts.bindings,
     panelFrames,
     facetPanels,
     table,
-    layerFields,
+    layerFields: contracts.layerFields,
     color: colorResolution.resolved,
     fill: fillResolution.resolved,
     lineage,
@@ -96,11 +77,11 @@ export function finalizeRenderModel(input: {
     warnings,
     advisories,
     runId,
-    layerBackends,
-    layerFields,
-    layerScaledConstants,
-    baselineDomains,
-    effectiveDomains,
+    layerBackends: contracts.layerBackends,
+    layerFields: contracts.layerFields,
+    layerScaledConstants: contracts.layerScaledConstants,
+    baselineDomains: contracts.baselineDomains,
+    effectiveDomains: contracts.effectiveDomains,
     lineage,
     candidates,
     formatX: panelLayout.formatX,
