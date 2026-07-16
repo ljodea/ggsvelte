@@ -6,7 +6,8 @@ import type { PathsBatch } from "../scene.js";
 import type { LayerFrame, PipelineWarning, ResolvedColorScale } from "./types.js";
 import { colorOf } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
-import { bucketByGroup, positionOf, xSortKey } from "./geometry-shared.js";
+import { bucketByGroup, xSortKey } from "./geometry-shared.js";
+import { appendClosedBandEdges } from "./geometry-paths-closed.js";
 
 export function areaBatch(
   frame: LayerFrame,
@@ -33,25 +34,16 @@ export function areaBatch(
   for (let s = 0; s < groupRows.length; s++) {
     pathOffsets[s] = cursor;
     const rows = groupRows[s]!;
-    // Upper edge (ymax), x ascending.
-    for (const row of rows) {
-      const tx = positionOf(fx.xScale, frame.xNumeric, frame.xValues, row);
-      const ty = fx.yScale.type === "band" ? NaN : fx.yScale.normalize(frame.ymax[row]!);
-      positions[cursor * 2] = tx * fx.innerWidth;
-      positions[cursor * 2 + 1] = fx.innerHeight - ty * fx.innerHeight;
-      rowIndex[cursor] = frame.rowIndex[row]!;
-      cursor++;
-    }
-    // Lower edge (ymin), x descending.
-    for (let i = rows.length - 1; i >= 0; i--) {
-      const row = rows[i]!;
-      const tx = positionOf(fx.xScale, frame.xNumeric, frame.xValues, row);
-      const ty = fx.yScale.type === "band" ? NaN : fx.yScale.normalize(frame.ymin[row]!);
-      positions[cursor * 2] = tx * fx.innerWidth;
-      positions[cursor * 2 + 1] = fx.innerHeight - ty * fx.innerHeight;
-      rowIndex[cursor] = frame.rowIndex[row]!;
-      cursor++;
-    }
+    cursor = appendClosedBandEdges({
+      positions,
+      rowIndex,
+      cursor,
+      rows,
+      frame,
+      fx,
+      yTop: frame.ymax,
+      yBottom: frame.ymin,
+    });
     let fillColor: string | null = binding.fill.constant;
     if (fill !== null && (frame.fillValues !== null || binding.fill.scaledConstant !== null)) {
       const first = rows[0]!;

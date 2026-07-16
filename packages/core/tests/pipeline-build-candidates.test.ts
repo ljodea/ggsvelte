@@ -152,3 +152,43 @@ describe("buildPipelineCandidates via runPipeline", () => {
     expect(modes.some((m) => m === "x" || m === "y")).toBe(true);
   });
 });
+
+describe("resolveCandidateSeries / resolveRepresentedSourceRows", () => {
+  it("uses derived group when sourceRow is null", async () => {
+    const { resolveCandidateSeries } =
+      await import("../src/pipeline/build-candidates-datum-series.ts");
+    const result = resolveCandidateSeries({
+      sourceRow: null,
+      derivedGroup: 7,
+      seriesByRow: new Map(),
+      panelIndex: 0,
+      layerIndex: 0,
+      color: null,
+      fill: null,
+      colorField: undefined,
+      fillField: undefined,
+      sourceValue: () => null,
+    });
+    expect(result.group).toBe(7);
+    expect(result.seriesRank).toBe(7);
+  });
+
+  it("maps seriesByRow for identity source rows", async () => {
+    const { resolveCandidateSeries } =
+      await import("../src/pipeline/build-candidates-datum-series.ts");
+    const seriesByRow = new Map([["0:0:2", 4]]);
+    const result = resolveCandidateSeries({
+      sourceRow: 2,
+      derivedGroup: 0,
+      seriesByRow,
+      panelIndex: 0,
+      layerIndex: 0,
+      color: null,
+      fill: null,
+      colorField: undefined,
+      fillField: undefined,
+      sourceValue: () => null,
+    });
+    expect(result.group).toBe(4);
+  });
+});

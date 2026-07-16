@@ -6,6 +6,11 @@ import type { BoxplotParams } from "@ggsvelte/spec";
 import type { LayerFrame, PipelineWarning } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
 import { DEFAULT_BAR_WIDTH, removedWarning } from "./geometry-shared.js";
+import {
+  createBoxplotBodyBuffers,
+  pushKeptBoxplotRow,
+  pushRemovedBoxplotRow,
+} from "./geometry-boxplot-body-layout-collect.js";
 import { layoutBoxplotBodyRow } from "./geometry-boxplot-body-row.js";
 
 const DEFAULT_BOX_LINEWIDTH = 1;
@@ -47,50 +52,30 @@ export function layoutBoxplotBody(
   const alpha = params.alpha ?? 1;
   const yScale = fx.yScale;
 
-  const centerPx: number[] = [];
-  const halfPx: number[] = [];
-  const rects: number[] = [];
-  const rectRows: number[] = [];
-  const keptRows: number[] = [];
-  const whiskers: number[] = [];
-  const whiskerRows: number[] = [];
-  const medians: number[] = [];
-  const medianRows: number[] = [];
-  let removed = 0;
-
+  const buffers = createBoxplotBodyBuffers();
   const yPx = (v: number) => fx.innerHeight - yScale.normalize(v) * fx.innerHeight;
 
   for (let row = 0; row < n; row++) {
     const geom = layoutBoxplotBodyRow({ frame, fx, row, widthFrac, yPx });
     if (geom === null) {
-      removed++;
-      centerPx.push(NaN);
-      halfPx.push(NaN);
+      pushRemovedBoxplotRow(buffers);
       continue;
     }
-    centerPx.push(geom.centerPx);
-    halfPx.push(geom.halfPx);
-    rects.push(...geom.rect);
-    rectRows.push(geom.sourceRow);
-    keptRows.push(row);
-    whiskers.push(...geom.whiskers);
-    whiskerRows.push(geom.sourceRow, geom.sourceRow);
-    medians.push(...geom.median);
-    medianRows.push(geom.sourceRow);
+    pushKeptBoxplotRow(buffers, geom, row);
   }
-  removedWarning(removed, binding.index, warnings);
-  if (keptRows.length === 0) return null;
+  removedWarning(buffers.removed, binding.index, warnings);
+  if (buffers.keptRows.length === 0) return null;
 
   return {
-    centerPx,
-    halfPx,
-    rects,
-    rectRows,
-    keptRows,
-    whiskers,
-    whiskerRows,
-    medians,
-    medianRows,
+    centerPx: buffers.centerPx,
+    halfPx: buffers.halfPx,
+    rects: buffers.rects,
+    rectRows: buffers.rectRows,
+    keptRows: buffers.keptRows,
+    whiskers: buffers.whiskers,
+    whiskerRows: buffers.whiskerRows,
+    medians: buffers.medians,
+    medianRows: buffers.medianRows,
     linewidth,
     alpha,
     params,
