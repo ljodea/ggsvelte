@@ -81,4 +81,25 @@ describe("runPipeline runtime row filters", () => {
     expect(model.candidates.size).toBe(1);
     expect(model.row(model.candidates.candidate(0)?.rowIndex ?? -1)?.id).toBe("b");
   });
+
+  test("keeps a recoverable legend when filters remove every row", () => {
+    const model = runPipeline(spec, {
+      ...size,
+      rowFilters: [
+        {
+          scale: "color",
+          field: "group",
+          mode: "exclude",
+          values: ["west", "east"],
+        },
+      ],
+    });
+    const legend = model.scene.legends[0];
+
+    expect(model.candidates.size).toBe(0);
+    expect(model.warnings).toContainEqual(expect.objectContaining({ code: "empty-data" }));
+    expect(legend?.type).toBe("discrete");
+    if (legend?.type === "discrete")
+      expect(legend.entries.map((entry) => entry.value)).toEqual(["west", "east"]);
+  });
 });

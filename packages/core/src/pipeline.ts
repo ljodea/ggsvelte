@@ -3046,8 +3046,10 @@ export function runPipeline(spec: SpecInput | PortableSpec, options: RunOptions)
 
   const bindings: LayerBinding[] = [];
   const panelFrames: LayerFrame[][] = facetPanels.map(() => []);
-  for (let index = 0; index < normalized.layers.length; index++) {
-    bindings.push(bindLayer(normalized.layers[index]!, index, table, warnings));
+  if (!emptyData || sourceTable.fields.length > 0) {
+    for (let index = 0; index < normalized.layers.length; index++) {
+      bindings.push(bindLayer(normalized.layers[index]!, index, table, warnings));
+    }
   }
   if (!emptyData) {
     // Shared bin break grids across panels when the x scale is fixed.
