@@ -7,6 +7,7 @@ import {
   legendFocusDiscreteOnlyDiagnostics,
   resolveChooseToolAction,
   resolveEffectiveTool,
+  shouldShowToolRail,
   zoomScaleDiagnosticsFromChannels,
   zoomSupportsChannel,
 } from "../src/lib/plot-capability.js";
@@ -209,6 +210,66 @@ describe("capabilityStatusText", () => {
         candidateCount: 0,
       }),
     ).toBeNull();
+  });
+});
+
+describe("shouldShowToolRail", () => {
+  const base = {
+    interactive: true,
+    availableToolCount: 1,
+    canPublishPointSelection: false,
+    selectedKeyCount: 0,
+    hasIntervalSelection: false,
+    hasZoomDomains: false,
+  } as const;
+
+  it("is false when interaction is disabled regardless of recovery state", () => {
+    expect(
+      shouldShowToolRail({
+        ...base,
+        interactive: false,
+        availableToolCount: 4,
+        hasIntervalSelection: true,
+        hasZoomDomains: true,
+      }),
+    ).toBe(false);
+  });
+
+  it("is false for a single tool with no selection or zoom recovery", () => {
+    expect(shouldShowToolRail(base)).toBe(false);
+  });
+
+  it("is true when more than one tool is available", () => {
+    expect(shouldShowToolRail({ ...base, availableToolCount: 2 })).toBe(true);
+  });
+
+  it("is true only when point selection is publishable and non-empty", () => {
+    expect(
+      shouldShowToolRail({
+        ...base,
+        canPublishPointSelection: true,
+        selectedKeyCount: 1,
+      }),
+    ).toBe(true);
+    expect(
+      shouldShowToolRail({
+        ...base,
+        canPublishPointSelection: true,
+        selectedKeyCount: 0,
+      }),
+    ).toBe(false);
+    expect(
+      shouldShowToolRail({
+        ...base,
+        canPublishPointSelection: false,
+        selectedKeyCount: 3,
+      }),
+    ).toBe(false);
+  });
+
+  it("is true when an interval selection or zoom domains are present", () => {
+    expect(shouldShowToolRail({ ...base, hasIntervalSelection: true })).toBe(true);
+    expect(shouldShowToolRail({ ...base, hasZoomDomains: true })).toBe(true);
   });
 });
 

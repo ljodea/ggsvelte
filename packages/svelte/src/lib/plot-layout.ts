@@ -1,7 +1,7 @@
 /**
  * Pure plot-root layout chrome: inline size/theme style, responsive
- * breakpoint helpers, and legend clear-control anchor lookup.
- * Hosts own class bindings and tool-rail visibility.
+ * breakpoint helpers, tooltip viewport clamp, and legend clear-control
+ * anchor lookup. Hosts own class bindings and tool-rail visibility.
  */
 
 const NARROW_TOOLS_MAX_WIDTH_PX = 560;
@@ -18,6 +18,30 @@ export function isNarrowToolsWidth(widthPx: number): boolean {
  */
 export function isDockedTooltipWidth(widthPx: number): boolean {
   return widthPx < DOCKED_TOOLTIP_MAX_WIDTH_PX;
+}
+
+export type TooltipViewportSizeInput = {
+  readonly sceneWidth: number;
+  readonly sceneHeight: number;
+  /** Host: `root?.clientWidth` — nullish falls back to scene; 0 is kept. */
+  readonly clientWidth: number | null | undefined;
+  /** Host: `root?.clientHeight` — nullish falls back to scene; 0 is kept. */
+  readonly clientHeight: number | null | undefined;
+};
+
+/**
+ * Tooltip layout box: min(scene, client) per axis.
+ * Uses nullish coalesce so a laid-out zero client size does not fall back
+ * to the scene (matches historical `root?.clientWidth ?? sceneWidth`).
+ */
+export function tooltipViewportSize(input: TooltipViewportSizeInput): {
+  readonly width: number;
+  readonly height: number;
+} {
+  return {
+    width: Math.min(input.sceneWidth, input.clientWidth ?? input.sceneWidth),
+    height: Math.min(input.sceneHeight, input.clientHeight ?? input.sceneHeight),
+  };
 }
 
 export type PlotRootStyleInput = {

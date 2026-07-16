@@ -155,6 +155,7 @@
     isNarrowToolsWidth,
     plotRootInlineStyle,
     resolveClearLegendX,
+    tooltipViewportSize,
   } from "./plot-layout.js";
   import {
     bestDirectionalIndex,
@@ -172,6 +173,7 @@
     legendFocusDiscreteOnlyDiagnostics,
     resolveChooseToolAction,
     resolveEffectiveTool,
+    shouldShowToolRail,
     zoomScaleDiagnosticsFromChannels,
     zoomSupportsChannel,
   } from "./plot-capability.js";
@@ -714,12 +716,21 @@
   const canPublishPointSelection = $derived(
     interactionConfig.select?.type === "point",
   );
+  // Shared by tool-rail visibility and ToolRail recovery props (avoid dual calc).
+  const hasPointSelection = $derived(
+    canPublishPointSelection && effectiveSelectedKeys.length > 0,
+  );
+  const hasIntervalSelection = $derived(committedInterval !== null);
+  const hasZoomDomains = $derived(effectiveZoomDomains !== null);
   const showToolRail = $derived(
-    interactive &&
-      (availableTools.length > 1 ||
-        (canPublishPointSelection && effectiveSelectedKeys.length > 0) ||
-        committedInterval !== null ||
-        effectiveZoomDomains !== null),
+    shouldShowToolRail({
+      interactive,
+      availableToolCount: availableTools.length,
+      canPublishPointSelection,
+      selectedKeyCount: effectiveSelectedKeys.length,
+      hasIntervalSelection,
+      hasZoomDomains,
+    }),
   );
   const emptyPlot = $derived(
     model !== null &&
@@ -2280,9 +2291,8 @@
       {emptyPlot}
       narrow={isNarrowToolsWidth(resolvedWidth)}
       zoomDomains={effectiveZoomDomains}
-      hasPointSelection={canPublishPointSelection &&
-        effectiveSelectedKeys.length > 0}
-      hasIntervalSelection={committedInterval !== null}
+      {hasPointSelection}
+      {hasIntervalSelection}
       onChooseTool={chooseTool}
       onResetZoom={() => resetZoom("pointer")}
       onClearPointSelection={() => {
@@ -2398,17 +2408,17 @@
         {onDblClick}
       />
       {#if inspection !== null}
+        {@const tooltipSize = tooltipViewportSize({
+          sceneWidth: model.scene.width,
+          sceneHeight: model.scene.height,
+          clientWidth: root?.clientWidth,
+          clientHeight: root?.clientHeight,
+        })}
         <Tooltip
           id={`${plotId}-tooltip`}
           {inspection}
-          width={Math.min(
-            model.scene.width,
-            root?.clientWidth ?? model.scene.width,
-          )}
-          height={Math.min(
-            model.scene.height,
-            root?.clientHeight ?? model.scene.height,
-          )}
+          width={tooltipSize.width}
+          height={tooltipSize.height}
           content={interactionConfig.inspect?.content}
           interactive={interactionConfig.inspect?.contentMode === "interactive"}
           docked={inspection.state === "pinned" &&
