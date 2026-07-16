@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784206323694,
+  "lastUpdate": 1784206769810,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -11864,6 +11864,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 161.2743,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "ee240c6ebc3164b95dbebcbc356f9966d49615c7",
+          "message": "refactor(core): split frame-stats and scale-axis modules (#110)\n\nDispatch non-identity LayerFrame stats into binning (count/bin/density) and\nfit (smooth/boxplot/summary) modules; split positional scale train vs evidence\ncollection. Characterization tests pin density/smooth/boxplot/summary frames\nand axis evidence for bars and bins.",
+          "timestamp": "2026-07-16T07:58:55-05:00",
+          "tree_id": "e5940d7630397ef596521c2962aefb8d573bc72a",
+          "url": "https://github.com/ljodea/ggsvelte/commit/ee240c6ebc3164b95dbebcbc356f9966d49615c7"
+        },
+        "date": 1784206768526,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.6153,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.5532,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 8.4795,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 12.3869,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 81.8971,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 117.9038,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 0.906,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.1265,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 90.323,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 106.5544,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 10.3464,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 10.3579,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 108.756,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.6821,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 22.293,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 5.4218,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 30.846,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 563.8437,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 129.0861,
             "unit": "ms"
           }
         ]
