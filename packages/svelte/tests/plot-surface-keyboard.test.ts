@@ -63,7 +63,7 @@ describe("resolveSurfaceKeyAction", () => {
       });
     });
 
-    it("area Enter/Space with draft completes the brush with finish kind", () => {
+    it("area Enter/Space with draft completes the brush (finish owned by resolveFinishBrushAction)", () => {
       expect(
         resolveSurfaceKeyAction(
           base({
@@ -76,13 +76,13 @@ describe("resolveSurfaceKeyAction", () => {
         ),
       ).toEqual({
         preventDefault: true,
-        action: { type: "complete-area", finish: "select" },
+        action: { type: "complete-area" },
       });
       expect(
         resolveSurfaceKeyAction(base({ key: " ", activeTool: "zoom-area", hasBrushDraft: true })),
       ).toEqual({
         preventDefault: true,
-        action: { type: "complete-area", finish: "zoom" },
+        action: { type: "complete-area" },
       });
     });
   });

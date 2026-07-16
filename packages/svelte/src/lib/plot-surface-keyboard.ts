@@ -29,9 +29,11 @@ type SurfaceKeyAction =
   | { readonly type: "nudge-brush"; readonly dx: number; readonly dy: number }
   | { readonly type: "begin-area" }
   | {
+      /**
+       * Host: normalize brush rect, then `resolveFinishBrushAction` owns
+       * select-end vs zoom-end (single pure owner with pointer finish-brush).
+       */
       readonly type: "complete-area";
-      /** Host: select-area → interval end; zoom-area → brush zoom. */
-      readonly finish: "select" | "zoom";
     }
   | { readonly type: "cycle-coincident"; readonly delta: 1 | -1 }
   | {
@@ -85,12 +87,7 @@ export function resolveSurfaceKeyAction(input: SurfaceKeyboardInput): SurfaceKey
   if (area && (key === "Enter" || key === " ")) {
     return {
       preventDefault: true,
-      action: hasBrushDraft
-        ? {
-            type: "complete-area",
-            finish: activeTool === "select-area" ? "select" : "zoom",
-          }
-        : { type: "begin-area" },
+      action: hasBrushDraft ? { type: "complete-area" } : { type: "begin-area" },
     };
   }
 
