@@ -130,8 +130,12 @@ describe("runPipeline runtime row filters", () => {
     expect(model.candidates.size).toBe(0);
     expect(model.warnings.some((warning) => warning.code === "empty-data")).toBe(true);
     expect(legend?.type).toBe("discrete");
-    if (legend?.type === "discrete")
+    if (legend?.type === "discrete") {
       expect(legend.entries.map((entry) => entry.value)).toEqual(["west", "east"]);
+      // The recovery legend keeps its field heading even though no frame
+      // carries the binding: users need the title to know what to restore.
+      expect(legend.title).toBe("group");
+    }
   });
 
   test("filters before count stats, positional scale training, and axis layout", () => {

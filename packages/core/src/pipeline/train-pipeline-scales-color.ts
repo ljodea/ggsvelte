@@ -38,9 +38,14 @@ export function trainPipelineColorScales(input: {
     advisories,
   } = input;
 
-  const firstColorField = allFrames.find((f) => f.binding.color.field !== null)?.binding.color
-    .field;
-  const firstFillField = allFrames.find((f) => f.binding.fill.field !== null)?.binding.fill.field;
+  // Frames vanish when runtime filters remove every row, but the bindings
+  // still name the mapped fields — the recovery legend needs its heading.
+  const firstColorField =
+    allFrames.find((f) => f.binding.color.field !== null)?.binding.color.field ??
+    bindings.find((binding) => binding.color.field !== null)?.color.field;
+  const firstFillField =
+    allFrames.find((f) => f.binding.fill.field !== null)?.binding.fill.field ??
+    bindings.find((binding) => binding.fill.field !== null)?.fill.field;
   const colorResolution = resolveColorScale(
     "color",
     allFrames,

@@ -435,6 +435,30 @@ describe("legends", () => {
     expect(entriesOf(sorted).get("store")).toBe(entriesOf(stable).get("store"));
   });
 
+  it("keeps typed values with colliding labels as distinct, disambiguated entries", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { x: 1, y: 1, g: 1 },
+          { x: 2, y: 2, g: "1" },
+        ],
+        aes({ x: "x", y: "y", color: "g" }),
+      )
+        .geomPoint()
+        .legend({ order: "present-first-seen" })
+        .spec(),
+      size,
+    );
+    const legend = model.scene.legends[0] as SceneDiscreteLegend;
+    expect(legend.type).toBe("discrete");
+    // The ordinal scale assigns 1 and "1" distinct colors; collapsing them
+    // to one entry would make the second group impossible to identify (or
+    // filter). Colliding presentation labels carry a typed qualifier.
+    expect(legend.entries.map((e) => e.value)).toEqual([1, "1"]);
+    expect(legend.entries.map((e) => e.label)).toEqual(["1 (number)", "1 (text)"]);
+    expect(new Set(legend.entries.map((e) => e.color)).size).toBe(2);
+  });
+
   it("no color mapping -> no legends, no reserved right margin beyond labels", () => {
     const model = runPipeline(
       gg(salesRows, aes({ x: "city", y: "sales" }))

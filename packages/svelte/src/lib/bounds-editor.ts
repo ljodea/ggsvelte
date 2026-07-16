@@ -120,16 +120,21 @@ function parseNumber(draft: string, label: string): number | string {
 
 // Date-only input is UTC by ISO definition. Date-time input must carry an
 // explicit Z/offset so a browser locale can never silently change the domain.
+// Fractions beyond milliseconds and colonless offsets (both valid ISO 8601,
+// both common in database/API timestamps) are accepted and normalized to the
+// ECMAScript date-time form before parsing.
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/u;
-const ISO_DATE_TIME =
-  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?(?:Z|[+-]\d{2}:\d{2})$/u;
+const ISO_DATE_TIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})$/u;
 
 function parseTime(draft: string, label: string): number | string {
   const trimmed = draft.trim();
   if (!ISO_DATE.test(trimmed) && !ISO_DATE_TIME.test(trimmed)) {
     return `${label} must be an ISO 8601 date or date-time with a timezone.`;
   }
-  const value = Date.parse(trimmed);
+  const normalized = trimmed
+    .replace(/\.(\d{3})\d+/u, ".$1")
+    .replace(/([+-]\d{2})(\d{2})$/u, "$1:$2");
+  const value = Date.parse(normalized);
   if (!Number.isFinite(value)) return `${label} must be a valid ISO 8601 date.`;
   // The calendar date component must round-trip: Date.parse silently
   // normalizes overflow days (2025-02-30 → March 2) for date-times too, so

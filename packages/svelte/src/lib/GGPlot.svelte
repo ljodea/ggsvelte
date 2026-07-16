@@ -1324,6 +1324,10 @@
     if (panelIndex < 0) return;
     const x = semanticAxis(panelIndex, "x", event.domain.x);
     const y = semanticAxis(panelIndex, "y", event.domain.y);
+    // An empty facet panel trains no band domain, so no semantic axis
+    // survives the selection mode. The controller rejects axis-less
+    // intervals (TypeError) — treat the brush as an empty selection.
+    if (x === undefined && y === undefined) return;
     const record: PlotInteractionInterval<PublicKey> = Object.freeze({
       panelId: targetPanelId,
       preset: interactionConfig.select?.preset ?? "independent",

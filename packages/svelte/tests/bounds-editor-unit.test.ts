@@ -105,6 +105,34 @@ describe("precise bounds drafts", () => {
     expect(valid.ok).toBe(true);
   });
 
+  it("accepts sub-millisecond fractions and colonless offsets from database timestamps", () => {
+    const time = input({
+      axis: "y",
+      action: "zoom",
+      scale: "time",
+      bounds: [Date.UTC(2025, 0, 1), Date.UTC(2025, 5, 1)],
+    });
+    // Both forms are valid ISO 8601 and commonly emitted by databases and
+    // APIs; Date.parse accepts them after normalization.
+    const pasted = validateBoundsDraft(
+      time,
+      "2025-01-01T00:00:00.123456Z",
+      "2025-03-01T00:00:00+0000",
+    );
+    expect(pasted).toEqual({
+      ok: true,
+      event: {
+        source: "precise-bounds",
+        inputSource: "keyboard",
+        action: "zoom",
+        axis: "y",
+        scale: "time",
+        bounds: [Date.UTC(2025, 0, 1, 0, 0, 0, 123), Date.UTC(2025, 2, 1)],
+        reversed: false,
+      },
+    });
+  });
+
   it("returns original typed band values and validates inclusive domain order", () => {
     const band = input({
       scale: "band",

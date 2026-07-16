@@ -944,6 +944,60 @@ describe("brush + brush-to-zoom", () => {
     await until(() => container.querySelector(".gg-selection") === null);
   });
 
+  it("treats a brush on an empty facet panel as an empty selection", async () => {
+    let model: RenderModel | null = null;
+    const interaction = createPlotInteraction<string>();
+    const interactionScope = {
+      keys: "empty-panel",
+      intervals: "empty-panel",
+    } as const;
+    const ended: Array<{ keys: readonly PropertyKey[] }> = [];
+    const { container } = render(GGPlot, {
+      data: [
+        { id: "p", r: "r1", c: "c1", cat: "m", y: 1 },
+        { id: "q", r: "r2", c: "c2", cat: "n", y: 2 },
+      ],
+      aes: { x: "cat", y: "y" },
+      layers: [{ geom: "point" }],
+      scales: { x: { type: "band" } },
+      facet: { rows: "r", cols: "c", scales: "free" },
+      key: "id",
+      select: { type: "interval", mode: "x", persistent: true },
+      interaction,
+      interactionScope,
+      onselect: (event: { phase: string; keys: readonly PropertyKey[] }) => {
+        if (event.phase === "end") ended.push(event);
+      },
+      onrender: (next: RenderModel) => {
+        model = next;
+      },
+      ...size,
+    });
+    await until(() => model !== null);
+    // The r1/c2 combination has no rows: with free scales its band domain is
+    // empty, so no semantic axis survives the x selection mode. Brushing it
+    // must complete as an empty selection instead of committing an axis-less
+    // record (which the controller rejects with a TypeError).
+    const empty = model!.scene.panels.find((panel) => panel.strip === "r1 / c2")!;
+    expect(empty).not.toBeUndefined();
+    const capture = container.querySelector(".gg-capture")!;
+    const selectArea = [
+      ...container.querySelectorAll<HTMLButtonElement>(".gg-tool-rail button"),
+    ].find((button) => button.textContent === "Select area")!;
+    selectArea.click();
+    await until(() => selectArea.getAttribute("aria-pressed") === "true");
+    drag(
+      capture,
+      empty.x + empty.width / 4,
+      empty.y + empty.height / 4,
+      empty.x + (empty.width * 3) / 4,
+      empty.y + (empty.height * 3) / 4,
+    );
+    await until(() => ended.length === 1);
+    expect(ended[0].keys).toEqual([]);
+    expect(interaction.intervals(interactionScope)).toEqual([]);
+  });
+
   it("draws the committed rectangle from the applied precise bounds", async () => {
     let model: RenderModel | null = null;
     const { container } = render(GGPlot, {
