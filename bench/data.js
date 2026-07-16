@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784164984180,
+  "lastUpdate": 1784165568521,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -5557,6 +5557,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 162.4165,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "78d0199a16e4ecd4565b5f521d8ee459e0d97e17",
+          "message": "fix: audit manual AT alias commit ranges for runtime edits (#54)\n\n* fix: audit manual AT alias commit ranges for runtime edits\n\nClose the post-merge Codex finding on #42: aliases declared\nruntimeBehaviorChanged:false without verifying releaseCommit against the\ninherited testedCommit. Resolve both commits, require ancestry, and reject\nsubstantive diffs under packages/svelte/src or packages/core/src. CI unit\njob now fetches full history so the gate can run.\n\n* fix: satisfy type-aware lint and knip for alias audit helpers\n\n* fix(ci): fetch full history for pre-commit parity job\n\nThe checks job also runs bun test via pre-push parity, so alias commit\naudits need the same fetch-depth:0 as the unit job.\n\n* fix: tighten manual AT alias audit against Codex P2s\n\n- bind releaseCommit to the claimed release via package.json version\n- treat binary runtime diffs as substantive\n- stop classifying CSS universal-selector lines as JSDoc noise",
+          "timestamp": "2026-07-15T20:32:14-05:00",
+          "tree_id": "d7a8b240201b4d17ef1c44b64c07c7c1a135f97c",
+          "url": "https://github.com/ljodea/ggsvelte/commit/78d0199a16e4ecd4565b5f521d8ee459e0d97e17"
+        },
+        "date": 1784165568141,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.793,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.0467,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 11.5891,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 12.9526,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 86.1647,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 120.3678,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 0.9382,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2216,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 85.5343,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 110.0751,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 12.2223,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 11.8368,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 115.3636,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.6575,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 28.4352,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.5411,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 31.0464,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 620.2502,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 166.9303,
             "unit": "ms"
           }
         ]
