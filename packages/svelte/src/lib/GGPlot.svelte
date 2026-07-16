@@ -1619,10 +1619,10 @@
                 },
           source: action.source,
         });
-        return;
+        break;
       }
       case "none":
-        return;
+        break;
     }
   }
 
