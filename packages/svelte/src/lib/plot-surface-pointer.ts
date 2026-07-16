@@ -1,11 +1,13 @@
 import { isAreaTool, type InteractionTool } from "./interaction.js";
-import type { BrushCorners, PlotPoint } from "./plot-area-brush.js";
+import { initialBrushRect, type BrushCorners, type PlotPoint } from "./plot-area-brush.js";
 import { resolvePointerFinishBrushAction, type FinishBrushAction } from "./plot-brush-finish.js";
 
 /**
  * Capture-surface pointer decision input for pointerdown.
- * `hasBrushDraft` mirrors `brushRect !== null` and can diverge from
- * reducer `areaAwaitingSecond` (same draft/reducer split as keyboard).
+ *
+ * `brushCorners` is the sole draft source of truth (host: `brushRect`).
+ * Distinct from reducer `areaAwaitingSecond` — both must hold to extend.
+ * `point` is the down-event plot point (host always computes it).
  */
 export type SurfacePointerDownInput = {
   readonly pointerType: string;
@@ -13,15 +15,24 @@ export type SurfacePointerDownInput = {
   readonly activeTool: InteractionTool;
   /** Reducer "awaiting second corner" flag. */
   readonly areaAwaitingSecond: boolean;
-  /** True when a brush draft corner exists (`brushRect !== null`). */
-  readonly hasBrushDraft: boolean;
+  /**
+   * Host: `brushRect`. Non-null when a draft free corner exists.
+   * Extend only when combined with `areaAwaitingSecond`.
+   */
+  readonly brushCorners: BrushCorners | null;
+  /** Host: `plotPoint(event)` — always available on pointerdown. */
+  readonly point: PlotPoint;
 };
 
 export type SurfacePointerDownAction =
   | { readonly type: "touch-inspect-start" }
   | {
       readonly type: "begin-area";
-      readonly extendExisting: boolean;
+      /**
+       * Pure-owned draft corners (fresh degenerate or extended free corner).
+       * Host assigns `brushRect = action.corners` without re-deriving policy.
+       */
+      readonly corners: BrushCorners;
       /** Emit select-area start event (not zoom; not second-corner await). */
       readonly emitSelectStart: boolean;
       /** Interaction source for setInspection clear + select-start emission. */
@@ -32,11 +43,12 @@ export type SurfacePointerDownAction =
 /**
  * Pure decision for the plot capture-surface `pointerdown` handler.
  * Priority: touch-inspect start (before button/tool checks) → primary-button
- * area begin/extend → none. Callers own queued-inspection cancel, draft
- * mutation, reducer dispatch, selection start emission, and capture.
+ * area begin/extend → none. Owns extend-vs-fresh corner policy via
+ * `initialBrushRect`. Callers own queued-inspection cancel, draft mutation,
+ * reducer dispatch, selection start emission, and capture.
  */
 export function resolvePointerDownAction(input: SurfacePointerDownInput): SurfacePointerDownAction {
-  const { pointerType, button, activeTool, areaAwaitingSecond, hasBrushDraft } = input;
+  const { pointerType, button, activeTool, areaAwaitingSecond, brushCorners, point } = input;
 
   if (activeTool === "inspect" && pointerType === "touch") return { type: "touch-inspect-start" };
 
@@ -45,7 +57,11 @@ export function resolvePointerDownAction(input: SurfacePointerDownInput): Surfac
 
   return {
     type: "begin-area",
-    extendExisting: areaAwaitingSecond && hasBrushDraft,
+    corners: initialBrushRect({
+      areaAwaitingSecond,
+      existing: brushCorners,
+      point,
+    }),
     emitSelectStart: activeTool === "select-area" && !areaAwaitingSecond,
     source: interactionSourceFromPointerType(pointerType),
   };

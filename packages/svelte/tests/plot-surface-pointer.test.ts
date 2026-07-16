@@ -21,18 +21,20 @@ import {
   type SurfacePointerUpInput,
 } from "../src/lib/plot-surface-pointer.js";
 
+const downPoint = { x: 9, y: 8 } as const;
+const draftCorners = { x0: 10, y0: 20, x1: 10, y1: 20 } as const;
+const endAt = { x: 40, y: 50 } as const;
+
 const down = (
   overrides: Partial<SurfacePointerDownInput> & Pick<SurfacePointerDownInput, "activeTool">,
 ): SurfacePointerDownInput => ({
   pointerType: "mouse",
   button: 0,
   areaAwaitingSecond: false,
-  hasBrushDraft: false,
+  brushCorners: null,
+  point: downPoint,
   ...overrides,
 });
-
-const draftCorners = { x0: 10, y0: 20, x1: 10, y1: 20 } as const;
-const endAt = { x: 40, y: 50 } as const;
 
 const up = (
   overrides: Partial<SurfacePointerUpInput> & Pick<SurfacePointerUpInput, "activeTool">,
@@ -97,63 +99,67 @@ describe("resolvePointerDownAction", () => {
   });
 
   it.each(["select-area", "zoom-area"] as const)(
-    "%s begins a new area draft when not extending",
+    "%s begins a new area draft with degenerate corners when not extending",
     (tool: InteractionTool) => {
       expect(resolvePointerDownAction(down({ activeTool: tool }))).toEqual({
         type: "begin-area",
-        extendExisting: false,
+        corners: { x0: 9, y0: 8, x1: 9, y1: 8 },
         emitSelectStart: tool === "select-area",
         source: "pointer",
       });
     },
   );
 
-  it("extends only when awaiting second corner AND draft exists", () => {
+  it("extends free corner when awaiting second AND draft exists", () => {
     expect(
       resolvePointerDownAction(
         down({
           activeTool: "select-area",
           areaAwaitingSecond: true,
-          hasBrushDraft: true,
+          brushCorners: { x0: 1, y0: 2, x1: 3, y1: 4 },
+          point: { x: 9, y: 8 },
         }),
       ),
     ).toEqual({
       type: "begin-area",
-      extendExisting: true,
+      corners: { x0: 1, y0: 2, x1: 9, y1: 8 },
       emitSelectStart: false,
       source: "pointer",
     });
   });
 
-  it("does not extend when awaiting second corner but draft is missing", () => {
+  it("starts fresh when awaiting second but draft is missing", () => {
     expect(
       resolvePointerDownAction(
         down({
           activeTool: "zoom-area",
           areaAwaitingSecond: true,
-          hasBrushDraft: false,
+          brushCorners: null,
+          point: { x: 5, y: 6 },
         }),
       ),
     ).toEqual({
       type: "begin-area",
-      extendExisting: false,
+      corners: { x0: 5, y0: 6, x1: 5, y1: 6 },
       emitSelectStart: false,
       source: "pointer",
     });
   });
 
-  it("does not extend when draft exists but reducer is not awaiting second", () => {
+  it("restarts fresh when draft exists but reducer is not awaiting second", () => {
+    // Regression: draft alone must not extend — both gates required.
     expect(
       resolvePointerDownAction(
         down({
           activeTool: "select-area",
           areaAwaitingSecond: false,
-          hasBrushDraft: true,
+          brushCorners: { x0: 1, y0: 2, x1: 3, y1: 4 },
+          point: { x: 9, y: 8 },
         }),
       ),
     ).toEqual({
       type: "begin-area",
-      extendExisting: false,
+      corners: { x0: 9, y0: 8, x1: 9, y1: 8 },
       emitSelectStart: true,
       source: "pointer",
     });
@@ -169,7 +175,7 @@ describe("resolvePointerDownAction", () => {
       ),
     ).toEqual({
       type: "begin-area",
-      extendExisting: false,
+      corners: { x0: 9, y0: 8, x1: 9, y1: 8 },
       emitSelectStart: true,
       source: "touch",
     });
