@@ -3,8 +3,10 @@ import { describe, expect, it } from "vitest";
 import {
   resolveLegendClearControlSource,
   resolveLegendClickAction,
+  resolveLegendCommitAction,
   resolveLegendKeyAction,
   resolveLegendPointerUpAction,
+  resolveLegendPreviewDismissAction,
   shouldClearLegendPreviewOnBlur,
   shouldRenderInteractionLiveRegion,
   type LegendClearControlInput,
@@ -202,5 +204,96 @@ describe("resolveLegendClearControlSource", () => {
     expect(resolveLegendClearControlSource(clear({ detail: 1, pointerType: null }))).toBe(
       "pointer",
     );
+  });
+});
+
+describe("resolveLegendCommitAction", () => {
+  const identity = { scale: "fill", entryIndex: 1 };
+
+  it("toggles clear when pressed identity matches, even with empty keys", () => {
+    // Load-bearing: empty keys after domain reshuffle must not fall into ignore.
+    expect(
+      resolveLegendCommitAction({
+        pressed: { scale: "fill", entryIndex: 1 },
+        identity,
+        keyCount: 0,
+      }),
+    ).toEqual({ type: "toggle-clear" });
+    expect(
+      resolveLegendCommitAction({
+        pressed: { scale: "fill", entryIndex: 1 },
+        identity,
+        keyCount: 3,
+      }),
+    ).toEqual({ type: "toggle-clear" });
+  });
+
+  it("ignores empty keys only when not toggling the pressed entry", () => {
+    expect(
+      resolveLegendCommitAction({
+        pressed: null,
+        identity,
+        keyCount: 0,
+      }),
+    ).toEqual({ type: "ignore" });
+    expect(
+      resolveLegendCommitAction({
+        pressed: { scale: "color", entryIndex: 1 },
+        identity,
+        keyCount: 0,
+      }),
+    ).toEqual({ type: "ignore" });
+    expect(
+      resolveLegendCommitAction({
+        pressed: { scale: "fill", entryIndex: 0 },
+        identity,
+        keyCount: 0,
+      }),
+    ).toEqual({ type: "ignore" });
+  });
+
+  it("commits when keys exist and identity is not already pressed", () => {
+    expect(
+      resolveLegendCommitAction({
+        pressed: null,
+        identity,
+        keyCount: 2,
+      }),
+    ).toEqual({ type: "commit" });
+  });
+});
+
+describe("resolveLegendPreviewDismissAction", () => {
+  it("returns none when there is no active preview", () => {
+    expect(
+      resolveLegendPreviewDismissAction({
+        hasActivePreview: false,
+        committedEmphasisEmpty: true,
+      }),
+    ).toEqual({ type: "none" });
+    expect(
+      resolveLegendPreviewDismissAction({
+        hasActivePreview: false,
+        committedEmphasisEmpty: false,
+      }),
+    ).toEqual({ type: "none" });
+  });
+
+  it("emits clear only when committed emphasis is empty (not effective/preview)", () => {
+    expect(
+      resolveLegendPreviewDismissAction({
+        hasActivePreview: true,
+        committedEmphasisEmpty: true,
+      }),
+    ).toEqual({ type: "clear-and-emit" });
+  });
+
+  it("clears preview without emit when committed emphasis remains", () => {
+    expect(
+      resolveLegendPreviewDismissAction({
+        hasActivePreview: true,
+        committedEmphasisEmpty: false,
+      }),
+    ).toEqual({ type: "clear-only" });
   });
 });

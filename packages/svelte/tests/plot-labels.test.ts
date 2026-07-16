@@ -15,6 +15,7 @@ import {
   inspectionLiveText,
   legendFocusAnnouncement,
   markLabel,
+  resolveInteractionLiveText,
   selectionAnnouncement,
   zoomAnnouncement,
 } from "../src/lib/plot-labels.js";
@@ -169,6 +170,102 @@ describe("inspectionLiveText", () => {
       ],
     });
     expect(inspectionLiveText(m, value as never)).toBe("x 3.0; 1 datum; focused y 9, color blue");
+  });
+});
+
+describe("resolveInteractionLiveText", () => {
+  const m = model({
+    layerFields: [[{ field: "x" }, { field: "y" }]],
+  });
+  const focus = {
+    key: "a",
+    row: { x: 1, y: 2 },
+    sourceKeys: ["a"],
+    lineageCount: 1,
+    layerIndex: 0,
+    panelId: null,
+    fields: [
+      { channel: "x", field: "x", value: 1 },
+      { channel: "y", field: "y", value: 2 },
+    ],
+    anchor: { x: 0, y: 0 },
+  };
+  const members = [
+    {
+      key: "a",
+      row: { x: 1, y: 2 },
+      sourceKeys: ["a"],
+      lineageCount: 1,
+      layerIndex: 0,
+      panelId: null,
+      fields: focus.fields,
+      anchor: { x: 0, y: 0 },
+    },
+  ];
+  const keyboardInspection = {
+    type: "inspect",
+    phase: "change",
+    source: "keyboard",
+    panelId: null,
+    mode: "exact",
+    state: "transient",
+    focus,
+    members,
+  } as PlotInspectionChange<Record<string, unknown>, PropertyKey>;
+
+  it("prefers non-empty sticky announcement over inspection text", () => {
+    expect(
+      resolveInteractionLiveText({
+        announcement: "Zoom complete.",
+        model: m,
+        inspection: keyboardInspection as never,
+      }),
+    ).toBe("Zoom complete.");
+  });
+
+  it("falls through empty announcement (host microtask clear-then-fill)", () => {
+    expect(
+      resolveInteractionLiveText({
+        announcement: "",
+        model: m,
+        inspection: keyboardInspection as never,
+      }),
+    ).toBe(inspectionLiveText(m, keyboardInspection as never));
+  });
+
+  it("uses inspection live text for keyboard and touch sources only", () => {
+    const expected = inspectionLiveText(m, keyboardInspection as never);
+    expect(
+      resolveInteractionLiveText({
+        announcement: "",
+        model: m,
+        inspection: keyboardInspection as never,
+      }),
+    ).toBe(expected);
+    expect(
+      resolveInteractionLiveText({
+        announcement: "",
+        model: m,
+        inspection: { ...keyboardInspection, source: "touch" } as never,
+      }),
+    ).toBe(expected);
+    expect(
+      resolveInteractionLiveText({
+        announcement: "",
+        model: m,
+        inspection: { ...keyboardInspection, source: "pointer" } as never,
+      }),
+    ).toBe("");
+  });
+
+  it("returns empty when inspection is null and announcement is empty", () => {
+    expect(
+      resolveInteractionLiveText({
+        announcement: "",
+        model: m,
+        inspection: null,
+      }),
+    ).toBe("");
   });
 });
 
