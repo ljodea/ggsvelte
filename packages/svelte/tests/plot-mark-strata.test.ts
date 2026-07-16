@@ -125,7 +125,7 @@ describe("PlotMarkStrata", () => {
     // Attachment runs synchronously in testing-library render for attach.
     await Promise.resolve();
     expect(onPainted).toHaveBeenCalled();
-    const keys = onPainted.mock.calls.map((call) => call[1] as string);
+    const keys = onPainted.mock.calls.map((call) => call[1]);
     expect(keys).toContain("canvas:0");
     expect(keys).toContain("canvas:2");
     expect(keys).not.toContain("canvas:1");
