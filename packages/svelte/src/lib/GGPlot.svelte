@@ -113,7 +113,15 @@
   } from "./plot-area-brush.js";
   import { frozenZoomDomains, normalizedRect } from "./plot-geometry.js";
   import { resolveSurfaceKeyAction } from "./plot-surface-keyboard.js";
-  import { resolveQueuedInspectFrameAction } from "./plot-surface-inspection.js";
+  import {
+    resolveInspectionCompleteness,
+    resolveInspectionMode,
+    resolveQueuedInspectFrameAction,
+    resolveSetInspectionAction,
+    resolveToggleInspectionPinAction,
+    shouldClearInspectionAnnouncement,
+    shouldCommitInspection,
+  } from "./plot-surface-inspection.js";
   import {
     resolveCaptureClickAction,
     advanceTouchInspectMoved,
@@ -1408,8 +1416,11 @@
     if (seed === null)
       throw new Error("Inspection hit was not present in the candidate store");
     const requested = interactionConfig.inspect?.mode ?? "auto";
-    const mode =
-      concreteMode ?? (requested === "auto" ? seed.autoMode : requested);
+    const mode = resolveInspectionMode({
+      concreteMode,
+      requested,
+      seedAutoMode: seed.autoMode,
+    });
     return inspectionCoordinator.resolve({
       model,
       seed,
@@ -1418,13 +1429,12 @@
       source,
       identityEpoch: dataIdentityEpoch,
       layoutEpoch: model.runId,
-      completeness:
-        state === "pinned" ||
-        interactionConfig.inspect?.content !== undefined ||
-        oninspect !== undefined ||
-        oninteraction !== undefined
-          ? "complete"
-          : "transient",
+      completeness: resolveInspectionCompleteness({
+        state,
+        hasCustomContent: interactionConfig.inspect?.content !== undefined,
+        hasInspectCallback: oninspect !== undefined,
+        hasInteractionCallback: oninteraction !== undefined,
+      }),
     });
   }
 
@@ -1519,108 +1529,151 @@
     concreteMode?: "exact" | "x" | "y" | "xy",
     candidate?: CandidateFacts,
   ): void {
-    if (hit !== null && (source === "keyboard" || source === "touch"))
-      interactionAnnouncement = "";
-    if (inspection?.state === "pinned" && state === "transient") return;
-    if (hit === null) {
-      if (tooltipHovered || inspection?.state === "pinned") return;
-      reducer.dispatch({ type: "inspect", candidate: null, source });
-      if (inspection !== null)
-        emitInspection({ type: "inspect", phase: "clear", source });
-      inspection = null;
-      inspectionSeed = null;
-      inspectionCoordinator.release("transient");
-      reducer.dispatch({ type: "inspect", candidate: null, source });
-      return;
-    }
-    const resolved = resolveInspection(
-      hit,
-      source,
-      state,
-      concreteMode,
-      candidate,
-    );
-    if (resolved === null) {
-      setInspection(null, source);
-      return;
-    }
-    const next = resolved.snapshot;
-    const candidateRef = {
-      epoch: model?.runId ?? 0,
-      id: candidate?.id ?? traversalHits.indexOf(hit),
-      panelId: next.panelId,
-      x: hit.x,
-      y: hit.y,
-    };
-    reducer.dispatch({ type: "inspect", candidate: candidateRef, source });
-    if (state === "pinned") reducer.dispatch({ type: "toggle-pin", source });
+    // Announcement clear runs before priority gates (including ignored
+    // keyboard/touch requests while pinned).
     if (
-      (state === "transient" &&
-        reducer.state.inspection.kind !== "transient") ||
-      (state === "pinned" && reducer.state.inspection.kind !== "pinned")
+      shouldClearInspectionAnnouncement({
+        hasHit: hit !== null,
+        source,
+      })
     )
-      return;
-    inspection = next;
-    inspectionSeed = resolved.seed;
-    if (resolved.semanticChanged)
-      emitInspection(next, resolved.semanticFingerprint);
+      interactionAnnouncement = "";
+    const action = resolveSetInspectionAction({
+      hasHit: hit !== null,
+      requestedState: state,
+      currentState: inspection?.state ?? "none",
+      tooltipHovered,
+    });
+    switch (action.type) {
+      case "ignore":
+        return;
+      case "clear": {
+        // Preserve both dispatches (before emit/release and after) — do not
+        // dedupe; may be load-bearing for reducer revision counting.
+        reducer.dispatch({ type: "inspect", candidate: null, source });
+        if (inspection !== null)
+          emitInspection({ type: "inspect", phase: "clear", source });
+        inspection = null;
+        inspectionSeed = null;
+        inspectionCoordinator.release("transient");
+        reducer.dispatch({ type: "inspect", candidate: null, source });
+        return;
+      }
+      case "apply": {
+        // hit is non-null when action is apply (pure gate).
+        const resolved = resolveInspection(
+          hit!,
+          source,
+          state,
+          concreteMode,
+          candidate,
+        );
+        // Null resolve re-enters clear gates via setInspection(null, source).
+        if (resolved === null) {
+          setInspection(null, source);
+          return;
+        }
+        const next = resolved.snapshot;
+        const candidateRef = {
+          epoch: model?.runId ?? 0,
+          id: candidate?.id ?? traversalHits.indexOf(hit!),
+          panelId: next.panelId,
+          x: hit!.x,
+          y: hit!.y,
+        };
+        reducer.dispatch({ type: "inspect", candidate: candidateRef, source });
+        if (state === "pinned")
+          reducer.dispatch({ type: "toggle-pin", source });
+        if (
+          !shouldCommitInspection({
+            requestedState: state,
+            reducerKind: reducer.state.inspection.kind,
+          })
+        )
+          return;
+        inspection = next;
+        inspectionSeed = resolved.seed;
+        if (resolved.semanticChanged)
+          emitInspection(next, resolved.semanticFingerprint);
+      }
+    }
   }
 
   function toggleInspectionPin(source: InteractionSource): void {
-    if (inspection === null || inspectionSeed === null) return;
+    const pinAction = resolveToggleInspectionPinAction({
+      hasInspection: inspection !== null,
+      hasSeed: inspectionSeed !== null,
+      currentState: inspection?.state ?? "transient",
+      hasPendingPinned: pendingPinnedPointer !== null,
+    });
+    if (pinAction.type === "ignore") return;
+    // toggle-pin always runs before restore/flip side effects; if flip
+    // resolve returns null the reducer stays toggled (no rollback).
     reducer.dispatch({ type: "toggle-pin", source });
-    if (inspection.state === "pinned" && pendingPinnedPointer !== null) {
-      const pending = pendingPinnedPointer;
-      pendingPinnedPointer = null;
-      inspectionCoordinator.release("pinned");
-      inspection = null;
-      inspectionSeed = null;
-      setInspection(
-        pending.hit,
-        pending.source,
-        "transient",
-        pending.concreteMode,
-        pending.candidate,
-      );
-      return;
+    switch (pinAction.type) {
+      case "restore-pending": {
+        const pending = pendingPinnedPointer!;
+        pendingPinnedPointer = null;
+        inspectionCoordinator.release("pinned");
+        inspection = null;
+        inspectionSeed = null;
+        setInspection(
+          pending.hit,
+          pending.source,
+          "transient",
+          pending.concreteMode,
+          pending.candidate,
+        );
+        return;
+      }
+      case "flip-to-transient":
+      case "flip-to-pinned": {
+        // inspection + seed non-null after non-ignore (pure gate).
+        const state =
+          pinAction.type === "flip-to-transient" ? "transient" : "pinned";
+        const resolved = resolveInspection(
+          hitFromCandidate(inspectionSeed!),
+          source,
+          state,
+          inspection!.mode,
+          inspectionSeed!,
+        );
+        if (resolved === null) return;
+        inspection = resolved.snapshot;
+        inspectionSeed = resolved.seed;
+        if (state === "transient")
+          reducer.dispatch({
+            type: "inspect",
+            candidate: {
+              epoch: model?.runId ?? 0,
+              id: inspectionSeed.id,
+              panelId: resolved.snapshot.panelId,
+              x: inspectionSeed.x,
+              y: inspectionSeed.y,
+            },
+            source,
+          });
+        if (state === "transient") inspectionCoordinator.release("pinned");
+        if (
+          state === "transient" &&
+          (source === "keyboard" || source === "touch")
+        )
+          announceInteraction(
+            `${inspectionLiveText(resolved.snapshot)}, unpinned`,
+          );
+        if (resolved.semanticChanged)
+          emitInspection(resolved.snapshot, resolved.semanticFingerprint);
+        if (
+          state === "pinned" &&
+          interactionConfig.inspect?.contentMode === "interactive"
+        )
+          queueMicrotask(() =>
+            root
+              ?.querySelector<HTMLElement>(`#${CSS.escape(plotId)}-tooltip`)
+              ?.focus(),
+          );
+      }
     }
-    const state = inspection.state === "pinned" ? "transient" : "pinned";
-    const resolved = resolveInspection(
-      hitFromCandidate(inspectionSeed),
-      source,
-      state,
-      inspection.mode,
-      inspectionSeed,
-    );
-    if (resolved === null) return;
-    inspection = resolved.snapshot;
-    inspectionSeed = resolved.seed;
-    if (state === "transient")
-      reducer.dispatch({
-        type: "inspect",
-        candidate: {
-          epoch: model?.runId ?? 0,
-          id: inspectionSeed.id,
-          panelId: resolved.snapshot.panelId,
-          x: inspectionSeed.x,
-          y: inspectionSeed.y,
-        },
-        source,
-      });
-    if (state === "transient") inspectionCoordinator.release("pinned");
-    if (state === "transient" && (source === "keyboard" || source === "touch"))
-      announceInteraction(`${inspectionLiveText(resolved.snapshot)}, unpinned`);
-    if (resolved.semanticChanged)
-      emitInspection(resolved.snapshot, resolved.semanticFingerprint);
-    if (
-      state === "pinned" &&
-      interactionConfig.inspect?.contentMode === "interactive"
-    )
-      queueMicrotask(() =>
-        root
-          ?.querySelector<HTMLElement>(`#${CSS.escape(plotId)}-tooltip`)
-          ?.focus(),
-      );
   }
 
   function closeInspection(
