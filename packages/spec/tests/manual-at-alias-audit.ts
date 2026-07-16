@@ -32,35 +32,64 @@ export function diffTextIsSubstantive(diff: string): boolean {
 }
 
 /**
- * Common HTML/SVG type selectors. Used only for bare multi-token chains after a
- * combinator (`* > ul li`) so English JSDoc (`* + positive values are kept`)
- * stays documentation.
+ * Words that are both plausible HTML/SVG type selectors and common English in
+ * JSDoc/Markdown list lines after `* +` / `* >`. Bare multi-token chains that
+ * include any of these stay documentation (structure-bearing CSS still wins).
  */
-const CSS_TYPE_SELECTOR =
-  /^(?:a|abbr|address|area|article|aside|audio|b|base|bdi|bdo|blockquote|body|br|button|canvas|caption|circle|cite|code|col|colgroup|data|datalist|dd|del|details|dfn|dialog|div|dl|dt|em|embed|fieldset|figcaption|figure|footer|form|g|h[1-6]|head|header|hgroup|hr|html|i|iframe|img|input|ins|kbd|label|legend|li|line|link|main|map|mark|menu|meta|meter|nav|noscript|object|ol|optgroup|option|output|p|param|path|picture|pre|progress|q|rect|rp|rt|ruby|s|samp|script|section|select|slot|small|source|span|strong|style|sub|summary|sup|svg|table|tbody|td|template|text|textarea|tfoot|th|thead|time|title|tr|track|u|ul|var|video|wbr)$/;
+const PROSE_AMBIGUOUS_TYPE = new Set(
+  (
+    "a an the and or not is are was were be been being for with from that this " +
+    "these those of to in on at by as if any all each every values positive kept " +
+    "old new list item domain shared package name data source code table button " +
+    "mark time main link form object video audio track meta base area map menu " +
+    "nav section article header footer figure label output progress summary " +
+    "details dialog template slot small strong em b i u s note"
+  ).split(/\s+/),
+);
 
 /**
  * After a CSS combinator (`+`, `>`, `~`), is the remainder a selector fragment?
- * Distinguishes `* + * {…}` / `* > .mark` / `* > ul li {…}` from JSDoc/Markdown
- * `* + list item` and `* > Note`.
+ * Distinguishes `* + * {…}` / `* > .mark` / `* > ul li {…}` / `* > ul *` from
+ * JSDoc/Markdown `* + list item`, `* + a button`, and `* > Note`.
  */
 function isCssSelectorAfterCombinator(rest: string): boolean {
   if (rest.length === 0) return false;
-  // Universal, class, id, attribute, or pseudo.
+  // Universal, class, id, attribute, or pseudo at the start of the remainder.
   if (rest.startsWith("*") || /^[.#[]/.test(rest) || rest.startsWith(":")) return true;
-  // Type selector chain with CSS structure on the same line (`div{`, `ul li{`,
-  // `section a:hover`, …). Intermediate spaces are descendant combinators.
-  // Require `::?ident` (no space after `:`) so JSDoc `Note: prose` stays docs.
-  if (/^[A-Za-z_-][\w-]*(?:\s+[A-Za-z_-][\w-]*)*\s*([{.#[]|::?[\w-]|[,>+~])/.test(rest)) {
-    return true;
+
+  // Leading type / universal chain (descendant spaces), then optional structure.
+  const lead = rest.match(/^((?:[A-Za-z_-][\w-]*|\*)(?:\s+(?:[A-Za-z_-][\w-]*|\*))*)(.*)$/);
+  if (lead === null) return false;
+  const tokens = lead[1]!.split(/\s+/);
+  const suffix = (lead[2] ?? "").trimStart();
+
+  if (suffix.length === 0) {
+    // Bare single lowercase type (`* + p`, `* + section`) — `{` often next line.
+    if (tokens.length === 1) {
+      const only = tokens[0]!;
+      return only === "*" || /^[a-z][\w-]*$/.test(only);
+    }
+    // Bare multi-token: CSS only when every token is `*` or a lowercase type and
+    // none are prose-ambiguous tag words (`a button`, `data table`, …).
+    // Chains with `*` (`ul *`) or concrete tags (`ul li`, `svg use`) stay CSS.
+    return tokens.every(
+      (t) => t === "*" || (/^[a-z][\w-]*$/.test(t) && !PROSE_AMBIGUOUS_TYPE.has(t)),
+    );
   }
-  // Bare lowercase type selector (`* + p`, `* + section`) — common when `{` is
-  // on the next line.
-  if (/^[a-z][\w-]*$/.test(rest)) return true;
-  // Bare multi-type descendant chain (`* > ul li`) without `{` on this line.
-  // Only known HTML/SVG types so English multi-word JSDoc stays skippable.
-  const tokens = rest.split(/\s+/).filter((t) => t.length > 0);
-  return tokens.length >= 2 && tokens.every((t) => CSS_TYPE_SELECTOR.test(t));
+
+  // Strong CSS structure (not English punctuation / end-of-sentence).
+  // `. Kept` fails; `.class` / `#id` / `::hover` / `{` / `[` pass.
+  const strongStructure =
+    suffix.startsWith("{") ||
+    suffix.startsWith("[") ||
+    /^\.[\w-]/.test(suffix) ||
+    /^#[\w-]/.test(suffix) ||
+    /^::?[\w-]/.test(suffix);
+  if (strongStructure) return true;
+
+  // Weak structure (`,>+~`): single-token only so `div,` is CSS but
+  // `positive values, if any` stays prose.
+  return tokens.length === 1 && /^[,>+~]/.test(suffix);
 }
 
 /** Lines that are blank or documentation-only (not CSS/code). */

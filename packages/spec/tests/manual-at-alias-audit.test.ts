@@ -49,10 +49,19 @@ describe("manual AT alias commit audit", () => {
     expect(isSkippableCommentLine(" * + p")).toBe(false);
     expect(isSkippableCommentLine("* + section")).toBe(false);
     expect(isSkippableCommentLine("* > div")).toBe(false);
-    // Descendant chains after combinators (`ul li`, `section a`) are CSS, not JSDoc.
+    // Descendant chains after combinators with CSS structure are CSS, not JSDoc.
     expect(isSkippableCommentLine("* > ul li { list-style: none; }")).toBe(false);
     expect(isSkippableCommentLine("* + section a { color: red; }")).toBe(false);
-    expect(isSkippableCommentLine("* > ul li")).toBe(false);
+    expect(isSkippableCommentLine("* > ul * { margin: 0; }")).toBe(false);
+    expect(isSkippableCommentLine("* > ul *")).toBe(false);
+    expect(isSkippableCommentLine("* > svg use { fill: currentColor; }")).toBe(false);
+    expect(isSkippableCommentLine("* > svg use")).toBe(false);
+    // Multi-word English / tag-word prose after combinators stays documentation.
+    expect(isSkippableCommentLine("* + positive values, if any")).toBe(true);
+    expect(isSkippableCommentLine("* + positive values. Kept")).toBe(true);
+    expect(isSkippableCommentLine("* + a button")).toBe(true);
+    expect(isSkippableCommentLine("* + data table")).toBe(true);
+    expect(isSkippableCommentLine("* + source code")).toBe(true);
     expect(
       diffTextIsSubstantive(`diff --git a/x.svelte b/x.svelte
 --- a/x.svelte
