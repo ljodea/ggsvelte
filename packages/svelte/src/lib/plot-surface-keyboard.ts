@@ -117,8 +117,12 @@ export function resolveSurfaceKeyAction(input: SurfaceKeyboardInput): SurfaceKey
     return {
       preventDefault: true,
       action:
-        brushCorners !== null
+        brushCorners === null
           ? {
+              type: "begin-area",
+              anchor: inspectionAnchor ?? panelCenterAnchor(firstPanel),
+            }
+          : {
               type: "complete-area",
               // Keyboard commits the live draft as-is (no free-corner update).
               // Zero-size drafts still route as commit → select/zoom/end-area.
@@ -126,10 +130,6 @@ export function resolveSurfaceKeyAction(input: SurfaceKeyboardInput): SurfaceKey
                 ended: { kind: "commit", rect: normalizedRect(brushCorners) },
                 activeTool,
               }),
-            }
-          : {
-              type: "begin-area",
-              anchor: inspectionAnchor ?? panelCenterAnchor(firstPanel),
             },
     };
   }
