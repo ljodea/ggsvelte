@@ -49,6 +49,19 @@ describe("manual AT alias commit audit", () => {
     expect(isSkippableCommentLine(" * + p")).toBe(false);
     expect(isSkippableCommentLine("* + section")).toBe(false);
     expect(isSkippableCommentLine("* > div")).toBe(false);
+    // Descendant chains after combinators (`ul li`, `section a`) are CSS, not JSDoc.
+    expect(isSkippableCommentLine("* > ul li { list-style: none; }")).toBe(false);
+    expect(isSkippableCommentLine("* + section a { color: red; }")).toBe(false);
+    expect(isSkippableCommentLine("* > ul li")).toBe(false);
+    expect(
+      diffTextIsSubstantive(`diff --git a/x.svelte b/x.svelte
+--- a/x.svelte
++++ b/x.svelte
+@@ -1 +1 @@
+-* > ul li { margin: 0; }
++* > ul div { margin: 0; }
+`),
+    ).toBe(true);
     expect(
       diffTextIsSubstantive(`diff --git a/x.ts b/x.ts
 --- a/x.ts

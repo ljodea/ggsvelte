@@ -32,20 +32,35 @@ export function diffTextIsSubstantive(diff: string): boolean {
 }
 
 /**
+ * Common HTML/SVG type selectors. Used only for bare multi-token chains after a
+ * combinator (`* > ul li`) so English JSDoc (`* + positive values are kept`)
+ * stays documentation.
+ */
+const CSS_TYPE_SELECTOR =
+  /^(?:a|abbr|address|area|article|aside|audio|b|base|bdi|bdo|blockquote|body|br|button|canvas|caption|circle|cite|code|col|colgroup|data|datalist|dd|del|details|dfn|dialog|div|dl|dt|em|embed|fieldset|figcaption|figure|footer|form|g|h[1-6]|head|header|hgroup|hr|html|i|iframe|img|input|ins|kbd|label|legend|li|line|link|main|map|mark|menu|meta|meter|nav|noscript|object|ol|optgroup|option|output|p|param|path|picture|pre|progress|q|rect|rp|rt|ruby|s|samp|script|section|select|slot|small|source|span|strong|style|sub|summary|sup|svg|table|tbody|td|template|text|textarea|tfoot|th|thead|time|title|tr|track|u|ul|var|video|wbr)$/;
+
+/**
  * After a CSS combinator (`+`, `>`, `~`), is the remainder a selector fragment?
- * Distinguishes `* + * {…}` / `* > .mark` from JSDoc/Markdown `* + list item`
- * and `* > Note`.
+ * Distinguishes `* + * {…}` / `* > .mark` / `* > ul li {…}` from JSDoc/Markdown
+ * `* + list item` and `* > Note`.
  */
 function isCssSelectorAfterCombinator(rest: string): boolean {
   if (rest.length === 0) return false;
   // Universal, class, id, attribute, or pseudo.
   if (rest.startsWith("*") || /^[.#[]/.test(rest) || rest.startsWith(":")) return true;
-  // Type selector with CSS structure on the same line (`div{`, `div:hover`, …).
+  // Type selector chain with CSS structure on the same line (`div{`, `ul li{`,
+  // `section a:hover`, …). Intermediate spaces are descendant combinators.
   // Require `::?ident` (no space after `:`) so JSDoc `Note: prose` stays docs.
-  if (/^[A-Za-z_-][\w-]*\s*([{.#[]|::?[\w-]|[,>+~])/.test(rest)) return true;
+  if (/^[A-Za-z_-][\w-]*(?:\s+[A-Za-z_-][\w-]*)*\s*([{.#[]|::?[\w-]|[,>+~])/.test(rest)) {
+    return true;
+  }
   // Bare lowercase type selector (`* + p`, `* + section`) — common when `{` is
-  // on the next line. Capitalized / multi-word text is JSDoc/Markdown.
-  return /^[a-z][\w-]*$/.test(rest);
+  // on the next line.
+  if (/^[a-z][\w-]*$/.test(rest)) return true;
+  // Bare multi-type descendant chain (`* > ul li`) without `{` on this line.
+  // Only known HTML/SVG types so English multi-word JSDoc stays skippable.
+  const tokens = rest.split(/\s+/).filter((t) => t.length > 0);
+  return tokens.length >= 2 && tokens.every((t) => CSS_TYPE_SELECTOR.test(t));
 }
 
 /** Lines that are blank or documentation-only (not CSS/code). */
