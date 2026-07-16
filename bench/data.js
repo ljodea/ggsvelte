@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784179651172,
+  "lastUpdate": 1784180671714,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -7342,6 +7342,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 162.1171,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "2e6c2c6bcb103544beee1299015c9fe9546211be",
+          "message": "fix: harden legend-focus preview, keys, and live region after #50 (#70)\n\nAddress unrebutted Codex findings from the legend-focus feature PR:\n\n- Clear transient preview when focus leaves this plot (not only when\n  relatedTarget is a non-legend node)\n- Clear preview when focusing empty legend entries\n- Drop chart-local preview/commit when legendFocus is disabled\n- Reconcile transient preview when entry membership changes\n- Map scaled-constant layers into legend key index via layerScaledConstants\n- Render aria-live for legend-only focus (no surface tools required)\n\nSigned-zero equality stays intentional (legendValueEqual / tests).\nCross-batch SVG focus z-order deferred (panel dual-pass breaks stable mark\nnode identity needed for inspect).",
+          "timestamp": "2026-07-16T00:43:56-05:00",
+          "tree_id": "c2307b275f4fcadf7ab7bde75d947d1d0bf76c67",
+          "url": "https://github.com/ljodea/ggsvelte/commit/2e6c2c6bcb103544beee1299015c9fe9546211be"
+        },
+        "date": 1784180671366,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 3.4007,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 4.6066,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 11.5505,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 16.8075,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 93.8904,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 121.7594,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.0807,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.6203,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 87.4296,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 109.1544,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.3156,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.4809,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 118.639,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.6633,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 26.9794,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.4813,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 31.6197,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 599.4077,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 160.0556,
             "unit": "ms"
           }
         ]
