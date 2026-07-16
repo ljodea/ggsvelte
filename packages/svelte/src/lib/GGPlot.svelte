@@ -890,11 +890,15 @@
     return candidates;
   }
   const effectiveIntervalKeys: readonly PropertyKey[] = $derived.by(() => {
-    if (model === null) return [];
+    if (model === null || effectiveIntervals.length === 0) return [];
+    // Union consumes only stored record keys, and this derived re-runs on
+    // every controller revision — skip the O(candidates) semantic projection
+    // whenever the preset never reads it.
+    const preset = effectiveIntervals[0]?.preset;
     return consumeIntervalKeys({
       records: effectiveIntervals,
       panels: model.scene.panels,
-      candidates: intervalConsumptionCandidates(),
+      candidates: preset === "union" ? [] : intervalConsumptionCandidates(),
     });
   });
   const currentIntervalRecord = $derived.by(() => {
@@ -2829,19 +2833,25 @@
       domains,
       keys,
     });
-    committedIntervalRecord = next;
-    if (interaction === undefined) {
-      localCommittedIntervals = [
-        ...nextLocalIntervalRecords(localCommittedIntervals, next),
-      ];
-    } else {
-      interaction.setInterval(next, {
-        scope: resolvedInteractionScope,
-        source: event.inputSource,
-      });
+    // Precise bounds persist exactly like the brush path: with
+    // `persistent: false` the end event still fires, but no durable record,
+    // committed rectangle, or clear-selection controls appear.
+    const persistent = interactionConfig.select?.persistent === true;
+    if (persistent) {
+      committedIntervalRecord = next;
+      if (interaction === undefined) {
+        localCommittedIntervals = [
+          ...nextLocalIntervalRecords(localCommittedIntervals, next),
+        ];
+      } else {
+        interaction.setInterval(next, {
+          scope: resolvedInteractionScope,
+          source: event.inputSource,
+        });
+      }
     }
     const panel = model.scene.panels[panelIndex]!;
-    committedInterval = buildIntervalSelection({
+    const eventValue = buildIntervalSelection({
       phase: "end",
       mode: interactionConfig.select?.mode ?? "xy",
       panelId: targetPanelId,
@@ -2859,7 +2869,11 @@
       lineageCount: intervalLineageCount(targetPanelId, domains),
       source: event.inputSource,
     });
-    emitSelection(committedInterval);
+    committedInterval = persistentSelectionOrNull(
+      interactionConfig.select?.persistent,
+      eventValue,
+    );
+    emitSelection(eventValue);
     boundsEditor = null;
   }
 

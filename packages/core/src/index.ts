@@ -154,7 +154,7 @@ export type {
 } from "./layout/layout.js";
 
 // Legends
-export { buildLegends, LEGEND_ROW_HEIGHT } from "./legend.js";
+export { buildLegends, disambiguatedLabels, LEGEND_ROW_HEIGHT } from "./legend.js";
 export type {
   DiscreteLegendInput,
   LegendBlock,

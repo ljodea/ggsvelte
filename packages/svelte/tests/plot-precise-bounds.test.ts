@@ -87,9 +87,11 @@ describe("precise plot bounds adapters", () => {
     expect(input).toMatchObject({
       scale: "band",
       bounds: [1, date],
+      // Colliding presentation labels carry a typed qualifier so the two
+      // <select> options stay distinguishable (same rule as the legend).
       categories: [
-        { value: 1, label: "1" },
-        { value: "1", label: "1" },
+        { value: 1, label: "1 (number)" },
+        { value: "1", label: "1 (text)" },
         { value: true, label: "true" },
         { value: false, label: "false" },
         { value: null, label: "(null)" },

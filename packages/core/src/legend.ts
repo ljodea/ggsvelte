@@ -92,12 +92,13 @@ function valueKind(value: unknown): string {
 }
 
 /**
- * Presentation labels for legend values, with a typed qualifier appended to
- * any label shared by more than one typed value (`1` and `"1"` both render
- * as "1"): the qualifier is the only way — visually and for accessible
- * names — to tell the entries apart.
+ * Presentation labels for discrete values, with a typed qualifier appended
+ * to any label shared by more than one typed value (`1` and `"1"` both
+ * render as "1"): the qualifier is the only way — visually and for
+ * accessible names — to tell the entries apart. Shared by legends and the
+ * precise-bounds category selects.
  */
-function disambiguatedLabels(values: readonly unknown[]): string[] {
+export function disambiguatedLabels(values: readonly unknown[]): string[] {
   const raw = values.map((value) => bandKey(value));
   const counts = new Map<string, number>();
   for (const label of raw) counts.set(label, (counts.get(label) ?? 0) + 1);

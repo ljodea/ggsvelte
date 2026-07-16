@@ -159,6 +159,7 @@ export type InteractionDiagnosticCode =
   | "INTERACTION_INTERVAL_FACET_UNSUPPORTED"
   | "INTERACTION_INVALID_MAX_DISTANCE"
   | "INTERACTION_POINT_REQUIRES_KEY"
+  | "INTERACTION_INTERVAL_PRESET_REQUIRES_KEY"
   | "INTERACTION_INVALID_KEY"
   | "INTERACTION_DUPLICATE_KEY"
   | "INTERACTION_UNSTABLE_KEY"
@@ -211,6 +212,16 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
     suggestions: ['Pass key="id"', "Pass a stable key accessor"],
     docUrl:
       "https://ljodea.github.io/ggsvelte/guide/interaction-reference#interaction-point-requires-key",
+  },
+  INTERACTION_INTERVAL_PRESET_REQUIRES_KEY: {
+    severity: "warning",
+    code: "INTERACTION_INTERVAL_PRESET_REQUIRES_KEY",
+    message:
+      "Coordinated interval presets (union, cross-panel) require a stable key field or accessor; without one they combine no rows.",
+    prop: "key",
+    suggestions: ['Pass key="id"', "Pass a stable key accessor"],
+    docUrl:
+      "https://ljodea.github.io/ggsvelte/guide/interaction-reference#interaction-interval-preset-requires-key",
   },
   INTERACTION_INVALID_KEY: {
     severity: "error",
@@ -347,6 +358,14 @@ export function normalizeInteractionConfig<Row, Key>(
     if (value.type === "point" && context.hasKey === false) {
       diagnostics.push({
         ...INTERACTION_DIAGNOSTIC_CATALOG.INTERACTION_POINT_REQUIRES_KEY,
+      });
+    }
+    if (value.type === "interval" && select.preset !== "independent" && context.hasKey === false) {
+      // Union combines stored record keys and cross-panel matches candidate
+      // semantic keys: with keyless rows both silently select nothing
+      // outside the origin rectangle.
+      diagnostics.push({
+        ...INTERACTION_DIAGNOSTIC_CATALOG.INTERACTION_INTERVAL_PRESET_REQUIRES_KEY,
       });
     }
   }

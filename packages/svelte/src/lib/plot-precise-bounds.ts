@@ -1,4 +1,4 @@
-import { encodeKey, type PositionScale } from "@ggsvelte/core";
+import { disambiguatedLabels, encodeKey, type PositionScale } from "@ggsvelte/core";
 
 import type {
   BoundsAction,
@@ -22,9 +22,12 @@ export function boundsEditorInputForScale(
 ): BoundsEditorInput | null {
   const { scale } = options;
   if (scale.type === "band") {
+    // Typed categories can share a presentation label (1 and "1"); qualify
+    // collisions so the two <select> options stay distinguishable.
+    const labels = disambiguatedLabels(scale.rawDomain);
     const categories = scale.rawDomain.map((value, index) => ({
       value: value as BoundsCategoryValue,
-      label: scale.domain[index] ?? String(value),
+      label: labels[index] ?? String(value),
     }));
     const requested = options.bounds;
     const categoryValue = (bound: BoundsCategoryValue): BoundsCategoryValue | undefined => {

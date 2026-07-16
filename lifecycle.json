@@ -1319,6 +1319,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "disambiguatedLabels": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "discretenessOf": {
           "kind": "value",
           "lifecycle": "experimental"

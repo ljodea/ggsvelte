@@ -72,6 +72,18 @@ describe("facet interval consumption", () => {
     ]);
   });
 
+  it("consumes union records without any candidate projection", () => {
+    // Hosts skip the O(candidates) semantic projection for union records —
+    // the union path must read only stored record keys.
+    expect(
+      consumeIntervalKeys({
+        records: [record("north", "union", ["n4", "shared"])],
+        panels,
+        candidates: [],
+      }),
+    ).toEqual(["n4", "shared"]);
+  });
+
   it("unions stored keys for visible panels and de-duplicates stable keys", () => {
     expect(
       consumeIntervalKeys({

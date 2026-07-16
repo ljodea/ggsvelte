@@ -998,6 +998,54 @@ describe("brush + brush-to-zoom", () => {
     expect(interaction.intervals(interactionScope)).toEqual([]);
   });
 
+  it("keeps precise bounds nonpersistent when selection is nonpersistent", async () => {
+    let model: RenderModel | null = null;
+    const interaction = createPlotInteraction<string>();
+    const interactionScope = {
+      keys: "nonpersistent-bounds",
+      intervals: "nonpersistent-bounds",
+    } as const;
+    const ended: Array<{ keys: readonly PropertyKey[] }> = [];
+    const { container } = render(GGPlot, {
+      data: rows,
+      aes: { x: "x", y: "y" },
+      layers: [{ geom: "point" }],
+      key: "x",
+      select: { type: "interval", mode: "x", persistent: false },
+      interaction,
+      interactionScope,
+      onselect: (event: { phase: string; keys: readonly PropertyKey[] }) => {
+        if (event.phase === "end") ended.push(event);
+      },
+      onrender: (next: RenderModel) => {
+        model = next;
+      },
+      ...size,
+    });
+    await until(() => model !== null);
+    const setBounds = [
+      ...container.querySelectorAll<HTMLButtonElement>(".gg-tool-rail button"),
+    ].find((button) => button.textContent?.trim() === "Set x selection bounds")!;
+    setBounds.click();
+    await until(() => container.querySelector('.gg-bounds-editor input[id$="-lower"]') !== null);
+    const [lower, upper] = [
+      ...container.querySelectorAll<HTMLInputElement>(".gg-bounds-editor input"),
+    ];
+    lower.value = "1.5";
+    lower.dispatchEvent(new InputEvent("input", { bubbles: true }));
+    upper.value = "2.5";
+    upper.dispatchEvent(new InputEvent("input", { bubbles: true }));
+    container.querySelector<HTMLButtonElement>('.gg-bounds-editor button[type="submit"]')!.click();
+    await until(() => ended.length === 1);
+
+    // The end event still fires, but `persistent: false` must not leave
+    // durable controller state or a committed rectangle behind — precise
+    // bounds persist exactly like the brush path.
+    expect(ended[0].keys).toEqual([2]);
+    expect(interaction.intervals(interactionScope)).toEqual([]);
+    expect(container.querySelector(".gg-selection")).toBeNull();
+  });
+
   it("draws the committed rectangle from the applied precise bounds", async () => {
     let model: RenderModel | null = null;
     const { container } = render(GGPlot, {
