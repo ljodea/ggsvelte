@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784194400796,
+  "lastUpdate": 1784195251010,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -8770,6 +8770,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 160.8629,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "84e8e56b692b2b3d94ea0d45d5df3280621fa9b8",
+          "message": "refactor(svelte): extract PlotStatusChrome from GGPlot (#83)\n\n* refactor(svelte): extract PlotStatusChrome from GGPlot\n\nMove status/a11y chrome (sr-only instructions, live region, empty state,\ncapability status) and clear-legend x lookup out of GGPlot so the host\nkeeps interaction wiring only. Characterization tests cover gates, ids,\nand the legend-focus runtime-disable clear suppress path.\n\n* fix(svelte): mirror reduced-motion resets in PlotStatusChrome\n\nParent-scoped GGPlot reduced-motion rules no longer match extracted\nchrome nodes; keep the policy component-local with a regression check.",
+          "timestamp": "2026-07-16T04:46:56-05:00",
+          "tree_id": "c6d7f27588b6ef8cda5a0336e22c9952402dbd9a",
+          "url": "https://github.com/ljodea/ggsvelte/commit/84e8e56b692b2b3d94ea0d45d5df3280621fa9b8"
+        },
+        "date": 1784195250592,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 3.3492,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 4.2746,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 10.8676,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 14.3481,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 83.3273,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 121.5426,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.0891,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.3004,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 82.9285,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 111.1573,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 11.6281,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 11.2795,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 116.3905,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.6581,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 28.4921,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.4437,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 29.1703,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 627.6233,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 163.1746,
             "unit": "ms"
           }
         ]
