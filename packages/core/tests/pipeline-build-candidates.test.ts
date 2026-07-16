@@ -6,10 +6,27 @@ import { describe, expect, it } from "bun:test";
 
 import { aes, gg } from "@ggsvelte/spec";
 
+import { ordinalSeriesRank } from "../src/pipeline/build-candidates-datum-context.ts";
 import { resolveCandidateLogicalValues } from "../src/pipeline/build-candidates-datum-values.ts";
 import { runPipeline } from "../src/pipeline.ts";
 
 const size = { width: 640, height: 400 };
+
+describe("ordinalSeriesRank", () => {
+  it("falls back to group when no ordinal color/fill mapping applies", () => {
+    expect(
+      ordinalSeriesRank({
+        color: null,
+        fill: null,
+        colorField: undefined,
+        fillField: undefined,
+        sourceRow: 0,
+        sourceValue: () => "a",
+        group: 3,
+      }),
+    ).toBe(3);
+  });
+});
 
 describe("resolveCandidateLogicalValues", () => {
   it("prefers annotation intercepts when the layer is an annotation rule", () => {
