@@ -187,7 +187,7 @@ describe("resolveSetInspectionAction", () => {
     ).toEqual({ type: "ignore" });
   });
 
-  it("clears when no hit and not blocked (including pinned request)", () => {
+  it("clears when no hit and not blocked; emitClear only when currentState is not none", () => {
     expect(
       resolveSetInspectionAction(
         setInput({
@@ -197,7 +197,7 @@ describe("resolveSetInspectionAction", () => {
           tooltipHovered: false,
         }),
       ),
-    ).toEqual({ type: "clear" });
+    ).toEqual({ type: "clear", emitClear: false });
     expect(
       resolveSetInspectionAction(
         setInput({
@@ -206,7 +206,7 @@ describe("resolveSetInspectionAction", () => {
           currentState: "transient",
         }),
       ),
-    ).toEqual({ type: "clear" });
+    ).toEqual({ type: "clear", emitClear: true });
   });
 
   it("applies when there is a hit and not pinned-blocking-transient", () => {
@@ -491,7 +491,7 @@ describe("resolveToggleInspectionPinAction", () => {
           hasPendingPinned: true,
         }),
       ),
-    ).toEqual({ type: "flip-to-pinned" });
+    ).toEqual({ type: "flip", state: "pinned" });
   });
 
   it("flips pinned → transient when no pending", () => {
@@ -502,12 +502,13 @@ describe("resolveToggleInspectionPinAction", () => {
           hasPendingPinned: false,
         }),
       ),
-    ).toEqual({ type: "flip-to-transient" });
+    ).toEqual({ type: "flip", state: "transient" });
   });
 
   it("flips transient → pinned", () => {
     expect(resolveToggleInspectionPinAction(toggleInput({ currentState: "transient" }))).toEqual({
-      type: "flip-to-pinned",
+      type: "flip",
+      state: "pinned",
     });
   });
 });

@@ -170,7 +170,14 @@ export type SetInspectionInput = {
 
 export type SetInspectionAction =
   | { readonly type: "ignore" }
-  | { readonly type: "clear" }
+  | {
+      readonly type: "clear";
+      /**
+       * Host should emit inspect clear. True when currentState !== "none"
+       * (after clear-gate priority, this is effectively currentState === "transient").
+       */
+      readonly emitClear: boolean;
+    }
   | { readonly type: "apply" };
 
 /**
@@ -179,7 +186,7 @@ export type SetInspectionAction =
  * Priority (matches current host):
  *   1. ignore — current pinned + requested transient
  *   2. ignore — !hasHit && (tooltipHovered || current pinned)
- *   3. clear — !hasHit
+ *   3. clear — !hasHit (emitClear when currentState !== "none")
  *   4. apply — hasHit
  *
  * Host note: `apply` is not terminal. After resolve, a null coordinator
@@ -192,7 +199,7 @@ export function resolveSetInspectionAction(input: SetInspectionInput): SetInspec
     return { type: "ignore" };
   if (!input.hasHit) {
     if (input.tooltipHovered || input.currentState === "pinned") return { type: "ignore" };
-    return { type: "clear" };
+    return { type: "clear", emitClear: input.currentState !== "none" };
   }
   return { type: "apply" };
 }
@@ -254,8 +261,11 @@ export type ToggleInspectionPinInput = {
 export type ToggleInspectionPinAction =
   | { readonly type: "ignore" }
   | { readonly type: "restore-pending" }
-  | { readonly type: "flip-to-transient" }
-  | { readonly type: "flip-to-pinned" };
+  | {
+      readonly type: "flip";
+      /** Target inspection state after toggle-pin dispatch + re-resolve. */
+      readonly state: "transient" | "pinned";
+    };
 
 /**
  * Pure decision for host `toggleInspectionPin` after the null-seed guard.
@@ -264,17 +274,18 @@ export type ToggleInspectionPinAction =
  *   1. if ignore → return (no reducer dispatch)
  *   2. always `reducer.dispatch({ type: "toggle-pin", source })` first
  *   3. restore-pending → release pinned, clear fields, setInspection(pending…)
- *   4. flip → resolveInspection; if null return with reducer already toggled
- *      (host does not roll back reducer state)
+ *   4. flip → resolveInspection with action.state; if null return with reducer
+ *      already toggled (host does not roll back reducer state)
  */
 export function resolveToggleInspectionPinAction(
   input: ToggleInspectionPinInput,
 ): ToggleInspectionPinAction {
   if (!input.hasInspection || !input.hasSeed) return { type: "ignore" };
   if (input.currentState === "pinned" && input.hasPendingPinned) return { type: "restore-pending" };
-  return input.currentState === "pinned"
-    ? { type: "flip-to-transient" }
-    : { type: "flip-to-pinned" };
+  return {
+    type: "flip",
+    state: input.currentState === "pinned" ? "transient" : "pinned",
+  };
 }
 
 /**

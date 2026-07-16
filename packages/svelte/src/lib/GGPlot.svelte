@@ -1583,7 +1583,7 @@
         // Preserve both dispatches (before emit/release and after) — do not
         // dedupe; may be load-bearing for reducer revision counting.
         reducer.dispatch({ type: "inspect", candidate: null, source });
-        if (inspection !== null)
+        if (action.emitClear)
           emitInspection({ type: "inspect", phase: "clear", source });
         inspection = null;
         inspectionSeed = null;
@@ -1659,11 +1659,9 @@
         );
         return;
       }
-      case "flip-to-transient":
-      case "flip-to-pinned": {
+      case "flip": {
         // inspection + seed non-null after non-ignore (pure gate).
-        const state =
-          pinAction.type === "flip-to-transient" ? "transient" : "pinned";
+        const state = pinAction.state;
         const resolved = resolveInspection(
           hitFromCandidate(inspectionSeed!),
           source,
@@ -1873,10 +1871,7 @@
           existing: brushRect,
           point: p,
         });
-        setInspection(
-          null,
-          interactionSourceFromPointerType(event.pointerType),
-        );
+        setInspection(null, action.source);
         reducer.dispatch({
           type: "begin-area",
           point: p,
@@ -1886,7 +1881,7 @@
           const startEvent = selectionEvent(
             "start",
             normalizedRect(brushRect),
-            interactionSourceFromPointerType(event.pointerType),
+            action.source,
           );
           emitSelection(startEvent);
         }
