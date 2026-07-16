@@ -1,3 +1,5 @@
+import type { InteractionSource, PointSelection } from "./interaction.js";
+
 export type CandidateAnchorKeys = {
   readonly x: number;
   readonly y: number;
@@ -7,6 +9,35 @@ export type CandidateAnchorKeys = {
 export type CandidateRowRef = {
   readonly rowIndex: number | null;
 };
+
+/**
+ * Ordered equality for PropertyKey sequences (length + Object.is per index).
+ * Distinct Symbols never equal. Does not dedupe — callers normalize first.
+ */
+export function sameOrderedPropertyKeys(
+  left: readonly PropertyKey[],
+  right: readonly PropertyKey[],
+): boolean {
+  if (left.length !== right.length) return false;
+  return left.every((key, index) => Object.is(key, right[index]));
+}
+
+/**
+ * Build a frozen point-selection payload.
+ * Phase is "clear" when keys is empty. Keys are cloned then frozen.
+ */
+export function buildPointSelectionEvent(
+  keys: readonly PropertyKey[],
+  source: InteractionSource,
+): PointSelection {
+  return Object.freeze({
+    type: "select",
+    phase: keys.length === 0 ? "clear" : "end",
+    mode: "point",
+    keys: Object.freeze([...keys]),
+    source,
+  });
+}
 
 /**
  * Union lineage row indexes with the candidate's own rowIndex when set.

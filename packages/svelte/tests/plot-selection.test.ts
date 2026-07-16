@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import {
   anchorsFromCandidateKeys,
+  buildPointSelectionEvent,
   nextPointSelectionKeys,
   rowIndexesForCandidate,
+  sameOrderedPropertyKeys,
   uniqueKeysFromRowIndexes,
 } from "../src/lib/plot-selection.js";
 
@@ -84,5 +86,50 @@ describe("uniqueKeysFromRowIndexes", () => {
 
   it("returns empty for empty input", () => {
     expect(uniqueKeysFromRowIndexes([], () => "x")).toEqual([]);
+  });
+});
+
+describe("sameOrderedPropertyKeys", () => {
+  it("requires matching length and Object.is per index", () => {
+    expect(sameOrderedPropertyKeys(["a", "b"], ["a", "b"])).toBe(true);
+    expect(sameOrderedPropertyKeys(["a", "b"], ["b", "a"])).toBe(false);
+    expect(sameOrderedPropertyKeys(["a"], ["a", "b"])).toBe(false);
+    expect(sameOrderedPropertyKeys([0], [-0])).toBe(false);
+  });
+
+  it("treats distinct symbols as unequal even with the same description", () => {
+    const a = Symbol("k");
+    const b = Symbol("k");
+    expect(sameOrderedPropertyKeys([a], [a])).toBe(true);
+    expect(sameOrderedPropertyKeys([a], [b])).toBe(false);
+  });
+
+  it("does not dedupe — caller normalizes first", () => {
+    expect(sameOrderedPropertyKeys(["a", "a"], ["a"])).toBe(false);
+  });
+});
+
+describe("buildPointSelectionEvent", () => {
+  it("builds a frozen end payload and clones keys", () => {
+    const keys = ["a", "b"];
+    const event = buildPointSelectionEvent(keys, "pointer");
+    expect(event).toEqual({
+      type: "select",
+      phase: "end",
+      mode: "point",
+      keys: ["a", "b"],
+      source: "pointer",
+    });
+    expect(Object.isFrozen(event)).toBe(true);
+    expect(Object.isFrozen(event.keys)).toBe(true);
+    keys.push("c");
+    expect(event.keys).toEqual(["a", "b"]);
+  });
+
+  it("uses clear phase when keys are empty", () => {
+    const event = buildPointSelectionEvent([], "keyboard");
+    expect(event.phase).toBe("clear");
+    expect(event.keys).toEqual([]);
+    expect(Object.isFrozen(event.keys)).toBe(true);
   });
 });
