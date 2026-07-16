@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784198474532,
+  "lastUpdate": 1784198951117,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -9603,6 +9603,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 163.1208,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "edd9dadb5007c6967e774590ef20980c7ed1bc3c",
+          "message": "refactor(svelte): extract PlotCaptureSurface and shared isAreaTool (#90)\n\n* refactor(svelte): extract PlotCaptureSurface and shared isAreaTool\n\nMove the capture layer markup and styles out of GGPlot, export a single\nisAreaTool predicate from interaction for keyboard/pointer/capture, and\nuse :global reduced-motion under the plot root so child components stay covered.\n\n* fix(svelte): silence type-aware lint on PlotCaptureSurface\n\nDrop useless undefined default and narrow the bindable element assertion.\n\n* fix(svelte): avoid type-aware lint on bind element classList\n\nAssert bind identity against the rendered .gg-capture node instead of\nclassList access on the narrowed local.",
+          "timestamp": "2026-07-16T05:48:31-05:00",
+          "tree_id": "eb21941627bdfd6d90e83e03c298d24ac50c98eb",
+          "url": "https://github.com/ljodea/ggsvelte/commit/edd9dadb5007c6967e774590ef20980c7ed1bc3c"
+        },
+        "date": 1784198950496,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.8518,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.0408,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 11.1263,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 14.3113,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 82.1948,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 122.4503,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 0.9325,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.3744,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 84.4094,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 108.4786,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 11.6816,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 11.5764,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 117.9429,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.6607,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 28.573,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.3858,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 29.5602,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 629.1036,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 166.2627,
             "unit": "ms"
           }
         ]
