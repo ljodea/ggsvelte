@@ -170,6 +170,12 @@ export const TOUCH_INSPECT_MOVE_PX = 4;
 export const TOUCH_INSPECT_CLICK_SUPPRESS_MS = 500;
 
 /**
+ * Nearest-candidate radius (plot px) for capture-surface point-tool click.
+ * Host `onCaptureClick` toggle-point nearest lookup uses this radius.
+ */
+export const POINT_SELECT_NEAREST_MAX_DISTANCE_PX = 24;
+
+/**
  * Sticky OR of touch-inspect drag past threshold in plotPoint coordinates.
  * Exactly `TOUCH_INSPECT_MOVE_PX` counts as moved (`>=`).
  * Host calls only when `pointerType === "touch" && touchInspectStart !== null`.

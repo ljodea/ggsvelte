@@ -13,6 +13,9 @@ const base = (
   hasBrushDraft: false,
   hasInspection: false,
   pinEnabled: false,
+  // Meaningful only when hasInspection (toggle-point-keys); unused otherwise.
+  focusKey: null,
+  sourceKeys: [],
   ...overrides,
 });
 
@@ -121,7 +124,7 @@ describe("resolveSurfaceKeyAction", () => {
   });
 
   describe("Enter / Space priority", () => {
-    it("point tool + inspection toggles point keys (wins over pin)", () => {
+    it("point tool + inspection toggles point keys (wins over pin) with focus key", () => {
       expect(
         resolveSurfaceKeyAction(
           base({
@@ -129,11 +132,30 @@ describe("resolveSurfaceKeyAction", () => {
             activeTool: "point",
             hasInspection: true,
             pinEnabled: true,
+            focusKey: "row-a",
+            sourceKeys: ["row-a", "row-b"],
           }),
         ),
       ).toEqual({
         preventDefault: true,
-        action: { type: "toggle-point-keys" },
+        action: { type: "toggle-point-keys", keys: ["row-a"] },
+      });
+    });
+
+    it("toggle-point-keys uses sourceKeys when focusKey is null", () => {
+      expect(
+        resolveSurfaceKeyAction(
+          base({
+            key: " ",
+            activeTool: "point",
+            hasInspection: true,
+            focusKey: null,
+            sourceKeys: ["group-1", "group-2"],
+          }),
+        ),
+      ).toEqual({
+        preventDefault: true,
+        action: { type: "toggle-point-keys", keys: ["group-1", "group-2"] },
       });
     });
 

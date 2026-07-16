@@ -794,34 +794,61 @@ describe("shouldClosePinnedOnOutsidePointer", () => {
 });
 
 describe("resolveInspectionEmitAction", () => {
-  it("emits without updating last when fingerprint is undefined", () => {
+  it("on change with undefined semanticFingerprint emits without updating last", () => {
     expect(
       resolveInspectionEmitAction({
-        fingerprint: undefined,
+        phase: "change",
+        source: "pointer",
+        semanticFingerprint: undefined,
         lastFingerprint: "sem:a",
       }),
     ).toEqual({ type: "emit", updateFingerprint: null });
   });
 
-  it("skips when fingerprint equals last, including empty string (host inits last to '')", () => {
+  it("on clear builds clear:source fingerprint (ignores semanticFingerprint)", () => {
     expect(
       resolveInspectionEmitAction({
-        fingerprint: "",
+        phase: "clear",
+        source: "keyboard",
+        semanticFingerprint: "sem:ignored",
+        lastFingerprint: "sem:a",
+      }),
+    ).toEqual({ type: "emit", updateFingerprint: "clear:keyboard" });
+  });
+
+  it("skips when resolved fingerprint equals last, including empty string", () => {
+    expect(
+      resolveInspectionEmitAction({
+        phase: "change",
+        source: "pointer",
+        semanticFingerprint: "",
         lastFingerprint: "",
       }),
     ).toEqual({ type: "skip" });
     expect(
       resolveInspectionEmitAction({
-        fingerprint: "sem:a",
+        phase: "change",
+        source: "pointer",
+        semanticFingerprint: "sem:a",
         lastFingerprint: "sem:a",
+      }),
+    ).toEqual({ type: "skip" });
+    expect(
+      resolveInspectionEmitAction({
+        phase: "clear",
+        source: "touch",
+        semanticFingerprint: undefined,
+        lastFingerprint: "clear:touch",
       }),
     ).toEqual({ type: "skip" });
   });
 
-  it("emits and updates when fingerprint changes", () => {
+  it("emits and updates when change fingerprint differs from last", () => {
     expect(
       resolveInspectionEmitAction({
-        fingerprint: "sem:b",
+        phase: "change",
+        source: "pointer",
+        semanticFingerprint: "sem:b",
         lastFingerprint: "sem:a",
       }),
     ).toEqual({ type: "emit", updateFingerprint: "sem:b" });
@@ -829,38 +856,50 @@ describe("resolveInspectionEmitAction", () => {
 
   it("characterizes a stateful sequence including clear tokens", () => {
     let last = "";
-    const step = (fingerprint?: string) => {
-      const action = resolveInspectionEmitAction({ fingerprint, lastFingerprint: last });
+    const step = (
+      phase: "clear" | "change",
+      source: "pointer" | "keyboard" | "touch" | "programmatic",
+      semanticFingerprint?: string,
+    ) => {
+      const action = resolveInspectionEmitAction({
+        phase,
+        source,
+        semanticFingerprint,
+        lastFingerprint: last,
+      });
       if (action.type === "emit" && action.updateFingerprint !== null)
         last = action.updateFingerprint;
       return action;
     };
 
-    // omitted fingerprint never mutates last
-    expect(step()).toEqual({ type: "emit", updateFingerprint: null });
+    // change with omitted semantic never mutates last
+    expect(step("change", "pointer")).toEqual({ type: "emit", updateFingerprint: null });
     expect(last).toBe("");
 
-    // empty fingerprint collides with initial last → skip
-    expect(step("")).toEqual({ type: "skip" });
+    // empty semantic collides with initial last → skip
+    expect(step("change", "pointer", "")).toEqual({ type: "skip" });
     expect(last).toBe("");
 
     // first real fingerprint updates
-    expect(step("sem:1")).toEqual({ type: "emit", updateFingerprint: "sem:1" });
+    expect(step("change", "pointer", "sem:1")).toEqual({
+      type: "emit",
+      updateFingerprint: "sem:1",
+    });
     expect(last).toBe("sem:1");
 
     // equal suppresses
-    expect(step("sem:1")).toEqual({ type: "skip" });
+    expect(step("change", "pointer", "sem:1")).toEqual({ type: "skip" });
     expect(last).toBe("sem:1");
 
-    // clear token after semantic → emit and update
-    expect(step("clear:keyboard")).toEqual({
+    // clear after semantic → emit clear:source and update
+    expect(step("clear", "keyboard")).toEqual({
       type: "emit",
       updateFingerprint: "clear:keyboard",
     });
     expect(last).toBe("clear:keyboard");
 
     // same clear token suppresses
-    expect(step("clear:keyboard")).toEqual({ type: "skip" });
+    expect(step("clear", "keyboard")).toEqual({ type: "skip" });
     expect(last).toBe("clear:keyboard");
   });
 });

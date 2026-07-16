@@ -13,6 +13,16 @@ export type SurfaceKeyboardInput = {
   readonly hasBrushDraft: boolean;
   readonly hasInspection: boolean;
   readonly pinEnabled: boolean;
+  /**
+   * Inspection focus key when `hasInspection` (host: `inspection?.focus.key ?? null`).
+   * Meaningful only for `toggle-point-keys`; unused on other actions.
+   */
+  readonly focusKey: PropertyKey | null;
+  /**
+   * Inspection sourceKeys when `hasInspection` (host: `inspection?.focus.sourceKeys ?? []`).
+   * Meaningful only for `toggle-point-keys`; unused on other actions.
+   */
+  readonly sourceKeys: readonly PropertyKey[];
 };
 
 type SurfaceKeyAction =
@@ -29,7 +39,11 @@ type SurfaceKeyAction =
       readonly dx: number;
       readonly dy: number;
     }
-  | { readonly type: "toggle-point-keys" }
+  | {
+      readonly type: "toggle-point-keys";
+      /** Keys to toggle: `[focusKey]` when non-null, else `sourceKeys`. */
+      readonly keys: readonly PropertyKey[];
+    }
   | { readonly type: "toggle-pin" }
   | { readonly type: "escape"; readonly returnToInspect: boolean }
   | { readonly type: "none" };
@@ -46,7 +60,16 @@ type SurfaceKeyResolution = {
  * Callers own side effects (brush mutation, inspection, tool changes).
  */
 export function resolveSurfaceKeyAction(input: SurfaceKeyboardInput): SurfaceKeyResolution {
-  const { key, shiftKey, activeTool, hasBrushDraft, hasInspection, pinEnabled } = input;
+  const {
+    key,
+    shiftKey,
+    activeTool,
+    hasBrushDraft,
+    hasInspection,
+    pinEnabled,
+    focusKey,
+    sourceKeys,
+  } = input;
   const area = isAreaTool(activeTool);
 
   if (area && key.startsWith("Arrow") && hasBrushDraft) {
@@ -93,7 +116,13 @@ export function resolveSurfaceKeyAction(input: SurfaceKeyboardInput): SurfaceKey
   }
 
   if ((key === "Enter" || key === " ") && activeTool === "point" && hasInspection) {
-    return { preventDefault: true, action: { type: "toggle-point-keys" } };
+    return {
+      preventDefault: true,
+      action: {
+        type: "toggle-point-keys",
+        keys: focusKey === null ? sourceKeys : [focusKey],
+      },
+    };
   }
 
   if ((key === "Enter" || key === " ") && hasInspection && pinEnabled) {
