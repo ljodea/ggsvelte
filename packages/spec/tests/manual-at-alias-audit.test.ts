@@ -44,6 +44,11 @@ describe("manual AT alias commit audit", () => {
     // JSDoc/Markdown list and blockquote markers after `*` are documentation, not CSS.
     expect(isSkippableCommentLine(" * + positive values are kept")).toBe(true);
     expect(isSkippableCommentLine(" * > Note: domain is shared")).toBe(true);
+    expect(isSkippableCommentLine(" * > Note")).toBe(true);
+    // Bare lowercase type selectors (incl. multi-line CSS with `{` on the next line).
+    expect(isSkippableCommentLine(" * + p")).toBe(false);
+    expect(isSkippableCommentLine("* + section")).toBe(false);
+    expect(isSkippableCommentLine("* > div")).toBe(false);
     expect(
       diffTextIsSubstantive(`diff --git a/x.ts b/x.ts
 --- a/x.ts

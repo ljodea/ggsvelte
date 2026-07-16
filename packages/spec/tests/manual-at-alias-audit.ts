@@ -40,9 +40,12 @@ function isCssSelectorAfterCombinator(rest: string): boolean {
   if (rest.length === 0) return false;
   // Universal, class, id, attribute, or pseudo.
   if (rest.startsWith("*") || /^[.#[]/.test(rest) || rest.startsWith(":")) return true;
-  // Type selector only when the same line continues with CSS structure.
+  // Type selector with CSS structure on the same line (`div{`, `div:hover`, …).
   // Require `::?ident` (no space after `:`) so JSDoc `Note: prose` stays docs.
-  return /^[A-Za-z_-][\w-]*\s*([{.#[]|::?[\w-]|[,>+~])/.test(rest);
+  if (/^[A-Za-z_-][\w-]*\s*([{.#[]|::?[\w-]|[,>+~])/.test(rest)) return true;
+  // Bare lowercase type selector (`* + p`, `* + section`) — common when `{` is
+  // on the next line. Capitalized / multi-word text is JSDoc/Markdown.
+  return /^[a-z][\w-]*$/.test(rest);
 }
 
 /** Lines that are blank or documentation-only (not CSS/code). */
