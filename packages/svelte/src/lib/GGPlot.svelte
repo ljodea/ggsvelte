@@ -113,6 +113,7 @@
     panelCenterAnchor,
   } from "./plot-area-brush.js";
   import { frozenZoomDomains, normalizedRect } from "./plot-geometry.js";
+  import { resolveSurfaceKeyAction } from "./plot-surface-keyboard.js";
   import {
     datumLabel as datumLabelFor,
     inspectionLiveText as inspectionLiveTextFor,
@@ -1910,38 +1911,31 @@
   }
 
   function onSurfaceKeyDown(event: KeyboardEvent): void {
-    if (
-      (activeTool === "select-area" || activeTool === "zoom-area") &&
-      event.key.startsWith("Arrow") &&
-      brushRect !== null
-    ) {
-      event.preventDefault();
-      const step = event.shiftKey ? 10 : 1;
-      const panel = inspectionPanel ?? model?.scene.panels[0];
-      if (panel === undefined) return;
-      const dx =
-        event.key === "ArrowLeft"
-          ? -step
-          : event.key === "ArrowRight"
-            ? step
-            : 0;
-      const dy =
-        event.key === "ArrowUp" ? -step : event.key === "ArrowDown" ? step : 0;
-      brushRect = nudgeBrushEnd(brushRect, dx, dy, panel);
-      reducer.dispatch({
-        type: "move-area",
-        point: { x: brushRect.x1, y: brushRect.y1 },
-      });
-      return;
-    }
-    if (
-      (activeTool === "select-area" || activeTool === "zoom-area") &&
-      (event.key === "Enter" || event.key === " ")
-    ) {
-      event.preventDefault();
-      const anchor =
-        inspection?.focus.anchor ?? panelCenterAnchor(model?.scene.panels[0]);
-      if (brushRect === null) {
+    // Decision table is pure (plot-surface-keyboard); this switch owns side
+    // effects only. hasBrushDraft tracks brushRect, not reducer brushing.
+    const { action, preventDefault } = resolveSurfaceKeyAction({
+      key: event.key,
+      shiftKey: event.shiftKey,
+      activeTool,
+      hasBrushDraft: brushRect !== null,
+      hasInspection: inspection !== null,
+      pinEnabled: interactionConfig.inspect?.pin === true,
+    });
+    if (preventDefault) event.preventDefault();
+    switch (action.type) {
+      case "nudge-brush": {
+        const panel = inspectionPanel ?? model?.scene.panels[0];
+        if (panel === undefined || brushRect === null) return;
+        brushRect = nudgeBrushEnd(brushRect, action.dx, action.dy, panel);
+        reducer.dispatch({
+          type: "move-area",
+          point: { x: brushRect.x1, y: brushRect.y1 },
+        });
+        return;
+      }
+      case "begin-area": {
+        const anchor =
+          inspection?.focus.anchor ?? panelCenterAnchor(model?.scene.panels[0]);
         brushRect = brushAtPoint(anchor);
         reducer.dispatch({
           type: "begin-area",
@@ -1949,7 +1943,10 @@
           panelId: panelId(0),
         });
         announceInteraction("Choose opposite corner.");
-      } else {
+        return;
+      }
+      case "complete-area": {
+        if (brushRect === null) return;
         const rect = normalizedRect(brushRect);
         brushRect = null;
         if (activeTool === "select-area") {
@@ -1960,51 +1957,45 @@
           emitSelection(selection);
         } else applyBrushZoom(rect, "keyboard");
         reducer.dispatch({ type: "cancel-area" });
+        return;
       }
-      return;
-    }
-    if (event.key === "]" || event.key === "[") {
-      event.preventDefault();
-      cycleCoincident(event.key === "]" ? 1 : -1);
-    } else if (event.key.startsWith("Arrow")) {
-      event.preventDefault();
-      navigateDirection(
-        event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0,
-        event.key === "ArrowDown" ? 1 : event.key === "ArrowUp" ? -1 : 0,
-      );
-    } else if (
-      (event.key === "Enter" || event.key === " ") &&
-      activeTool === "point" &&
-      inspection !== null
-    ) {
-      event.preventDefault();
-      togglePointKeys(
-        inspection.focus.key === null
-          ? inspection.focus.sourceKeys
-          : [inspection.focus.key],
-        "keyboard",
-      );
-    } else if (
-      (event.key === "Enter" || event.key === " ") &&
-      inspection !== null &&
-      interactionConfig.inspect?.pin
-    ) {
-      event.preventDefault();
-      toggleInspectionPin("keyboard");
-    } else if (event.key === "Escape") {
-      event.preventDefault();
-      const returnToInspect =
-        brushRect === null &&
-        (activeTool === "select-area" || activeTool === "zoom-area");
-      reducer.dispatch({ type: "escape", source: "keyboard" });
-      if (inspection !== null)
-        emitInspection({ type: "inspect", phase: "clear", source: "keyboard" });
-      inspection = null;
-      inspectionSeed = null;
-      tooltipHovered = false;
-      inspectionCoordinator.invalidate();
-      brushRect = null;
-      if (returnToInspect) chooseTool("inspect");
+      case "cycle-coincident":
+        cycleCoincident(action.delta);
+        return;
+      case "navigate-direction":
+        navigateDirection(action.dx, action.dy);
+        return;
+      case "toggle-point-keys": {
+        if (inspection === null) return;
+        togglePointKeys(
+          inspection.focus.key === null
+            ? inspection.focus.sourceKeys
+            : [inspection.focus.key],
+          "keyboard",
+        );
+        return;
+      }
+      case "toggle-pin":
+        toggleInspectionPin("keyboard");
+        return;
+      case "escape": {
+        reducer.dispatch({ type: "escape", source: "keyboard" });
+        if (inspection !== null)
+          emitInspection({
+            type: "inspect",
+            phase: "clear",
+            source: "keyboard",
+          });
+        inspection = null;
+        inspectionSeed = null;
+        tooltipHovered = false;
+        inspectionCoordinator.invalidate();
+        brushRect = null;
+        if (action.returnToInspect) chooseTool("inspect");
+        break;
+      }
+      case "none":
+        break;
     }
   }
 
