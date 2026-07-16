@@ -7,6 +7,7 @@ import type { CandidateFacts, CandidateMatch } from "@ggsvelte/core";
 import type { SceneHit } from "@ggsvelte/core/dom";
 
 import type { InteractionSource } from "./interaction.js";
+import { clearInspectionFingerprint } from "./inspection-resolver.js";
 import { hitFromCandidate } from "./plot-pointer.js";
 
 type InspectionHostState = "none" | "transient" | "pinned";
@@ -447,29 +448,37 @@ export type InspectionEmitAction =
       /**
        * When non-null, host assigns `lastInspectionFingerprint = updateFingerprint`
        * before callbacks. When null, host must not mutate the last fingerprint
-       * (undefined fingerprint path — always emit without update).
+       * (undefined semantic path on change — always emit without update).
        */
       readonly updateFingerprint: string | null;
     };
 
 /**
- * Pure gate for host `emitInspection` after the fingerprint has been resolved
- * (`clear:*` for clear phase via `clearInspectionFingerprint`, else the
- * coordinator's semantic fingerprint).
+ * Pure gate for host `emitInspection`: resolve fingerprint then skip/emit.
  *
+ * Fingerprint production:
+ *   clear  → `clearInspectionFingerprint(source)` (`clear:${source}`)
+ *   change → `semanticFingerprint` (coordinator token; may be undefined)
+ *
+ * `semanticFingerprint` is meaningful only when `phase === "change"`.
+ *
+ * Emit rules after fingerprint is resolved:
  *   undefined fingerprint → emit, do not update last
  *   fingerprint === last  → skip (includes equal empty string; host inits last to "")
  *   otherwise             → emit and update last to fingerprint
- *
- * Host still owns fingerprint production (clear token vs semantic).
  */
 export function resolveInspectionEmitAction(input: {
-  readonly fingerprint: string | undefined;
+  readonly phase: "clear" | "change";
+  readonly source: InteractionSource;
+  /** Coordinator semantic fingerprint; ignored when phase is clear. */
+  readonly semanticFingerprint: string | undefined;
   readonly lastFingerprint: string;
 }): InspectionEmitAction {
-  if (input.fingerprint === undefined) return { type: "emit", updateFingerprint: null };
-  if (input.fingerprint === input.lastFingerprint) return { type: "skip" };
-  return { type: "emit", updateFingerprint: input.fingerprint };
+  const fingerprint =
+    input.phase === "clear" ? clearInspectionFingerprint(input.source) : input.semanticFingerprint;
+  if (fingerprint === undefined) return { type: "emit", updateFingerprint: null };
+  if (fingerprint === input.lastFingerprint) return { type: "skip" };
+  return { type: "emit", updateFingerprint: fingerprint };
 }
 
 // ---- inspection dismiss (escape vs close) ----

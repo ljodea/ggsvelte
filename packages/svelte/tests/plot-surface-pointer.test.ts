@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { InteractionTool } from "../src/lib/interaction.js";
 import {
+  POINT_SELECT_NEAREST_MAX_DISTANCE_PX,
   TOUCH_INSPECT_CLICK_SUPPRESS_MS,
   TOUCH_INSPECT_MOVE_PX,
   advanceTouchInspectMoved,
@@ -640,5 +641,11 @@ describe("interactionSourceFromPointerType", () => {
 describe("TOUCH_INSPECT_CLICK_SUPPRESS_MS", () => {
   it("is the host suppress window after a successful touch-inspect tap", () => {
     expect(TOUCH_INSPECT_CLICK_SUPPRESS_MS).toBe(500);
+  });
+});
+
+describe("POINT_SELECT_NEAREST_MAX_DISTANCE_PX", () => {
+  it("is the nearest-candidate radius for capture-surface point-tool click", () => {
+    expect(POINT_SELECT_NEAREST_MAX_DISTANCE_PX).toBe(24);
   });
 });

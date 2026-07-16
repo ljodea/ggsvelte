@@ -86,10 +86,7 @@
     type ZoomInput,
   } from "./interaction.js";
   import type { PlotInteractionController } from "./interaction-controller.svelte.js";
-  import {
-    clearInspectionFingerprint,
-    createInspectionCoordinator,
-  } from "./inspection-resolver.js";
+  import { createInspectionCoordinator } from "./inspection-resolver.js";
   import { createInteractionReducer } from "./interaction-reducer.js";
   import { provideRegistry } from "./registry.svelte.js";
   import {
@@ -142,6 +139,7 @@
     resolvePointerMoveAction,
     resolvePointerUpAction,
     shouldClearInspectionOnPointerLeave,
+    POINT_SELECT_NEAREST_MAX_DISTANCE_PX,
     TOUCH_INSPECT_CLICK_SUPPRESS_MS,
   } from "./plot-surface-pointer.js";
   import {
@@ -1534,16 +1532,12 @@
     next: PlotInspection<Record<string, CellValue>>,
     semanticFingerprint?: string,
   ): void {
-    // Clear tokens come from the inspection-resolver helper. Non-clear
-    // emissions must carry the coordinator's type-aware semanticFingerprint —
-    // never a host-side String(key) fallback (collides symbols / delimiters).
-    const fingerprint =
-      next.phase === "clear"
-        ? clearInspectionFingerprint(next.source)
-        : semanticFingerprint;
-    // Decision table is pure (plot-surface-inspection); host owns last token.
+    // Pure table owns clear vs semantic fingerprint + skip/emit gate.
+    // Host owns last-token mutation and callbacks only.
     const emit = resolveInspectionEmitAction({
-      fingerprint,
+      phase: next.phase,
+      source: next.source,
+      semanticFingerprint,
       lastFingerprint: lastInspectionFingerprint,
     });
     if (emit.type === "skip") return;
@@ -2174,6 +2168,8 @@
       hasBrushDraft: brushRect !== null,
       hasInspection: inspection !== null,
       pinEnabled: interactionConfig.inspect?.pin === true,
+      focusKey: inspection?.focus.key ?? null,
+      sourceKeys: inspection?.focus.sourceKeys ?? [],
     });
     if (preventDefault) event.preventDefault();
     switch (action.type) {
@@ -2220,16 +2216,9 @@
       case "navigate-direction":
         navigateDirection(action.dx, action.dy);
         return;
-      case "toggle-point-keys": {
-        if (inspection === null) return;
-        togglePointKeys(
-          inspection.focus.key === null
-            ? inspection.focus.sourceKeys
-            : [inspection.focus.key],
-          "keyboard",
-        );
+      case "toggle-point-keys":
+        togglePointKeys(action.keys, "keyboard");
         return;
-      }
       case "toggle-pin":
         toggleInspectionPin("keyboard");
         return;
@@ -2260,7 +2249,7 @@
         const point = plotPoint(event);
         const match = model?.candidates.nearest(point.x, point.y, {
           mode: "xy",
-          maxDistance: 24,
+          maxDistance: POINT_SELECT_NEAREST_MAX_DISTANCE_PX,
         });
         if (match === null || match === undefined) break;
         togglePointKeys(candidateSemanticKeys(match), "pointer");
