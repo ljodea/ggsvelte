@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784211385775,
+  "lastUpdate": 1784211705652,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -13530,6 +13530,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 161.7824,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "7cb9018e16a011960b2d418557e05e3b7de6bc8d",
+          "message": "refactor(core): split bind contracts, scene assembly, and layout helpers (#123)\n\nExtract geom/stat type contracts, required channels, and color-on-fill\nwarnings from bind-layer-geom-contracts; geometry batches and scene\nbuild from assemble-scene; layout constants/formatters/dedupe from\nlayout-helpers; and backends/fields from layer-contracts. Facades keep\nimport paths stable. Add layout-helpers characterization tests.",
+          "timestamp": "2026-07-16T09:21:08-05:00",
+          "tree_id": "baca0188f8af2b4ab26d5aede96daaec7dd17507",
+          "url": "https://github.com/ljodea/ggsvelte/commit/7cb9018e16a011960b2d418557e05e3b7de6bc8d"
+        },
+        "date": 1784211705083,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.4883,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.7656,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 9.6702,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 11.9623,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 81.8736,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 116.3202,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 0.9595,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2257,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 86.772,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 108.8029,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 11.9302,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 11.7402,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 115.7723,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7538,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 28.7252,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.5174,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 30.0879,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 614.5067,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 164.8568,
             "unit": "ms"
           }
         ]
