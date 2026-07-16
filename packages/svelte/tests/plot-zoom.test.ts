@@ -6,6 +6,7 @@ import {
   applyZoomToSpec,
   buildZoomEvent,
   continuousZoomDomainsFromScopes,
+  filterScopeChannelsByZoomMode,
   filterZoomDomainsByMode,
   resolveBrushZoomDomains,
   sameZoomDomains,
@@ -57,6 +58,30 @@ describe("filterZoomDomainsByMode", () => {
   it("drops a mode when the matching channel is absent", () => {
     expect(filterZoomDomainsByMode({ y: [3, 4] }, "x")).toBeNull();
     expect(filterZoomDomainsByMode({ x: [1, 2] }, "y")).toBeNull();
+  });
+});
+
+describe("filterScopeChannelsByZoomMode", () => {
+  const linked = { keys: "id", x: "x-mm", y: "y-mm" };
+
+  it("keeps both channels for xy or null mode", () => {
+    expect(filterScopeChannelsByZoomMode(linked, "xy")).toEqual(linked);
+    expect(filterScopeChannelsByZoomMode(linked, null)).toEqual(linked);
+  });
+
+  it("drops the non-opted channel for single-axis zoom", () => {
+    expect(filterScopeChannelsByZoomMode(linked, "x")).toEqual({
+      keys: "id",
+      x: "x-mm",
+    });
+    expect(filterScopeChannelsByZoomMode(linked, "y")).toEqual({
+      keys: "id",
+      y: "y-mm",
+    });
+  });
+
+  it("freezes the result", () => {
+    expect(Object.isFrozen(filterScopeChannelsByZoomMode(linked, "x"))).toBe(true);
   });
 });
 
