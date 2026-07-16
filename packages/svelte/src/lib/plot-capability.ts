@@ -49,6 +49,16 @@ export type ShowToolRailInput = {
 };
 
 /**
+ * True when every batch has zero rows (including an empty batches list).
+ * Host still requires a live model before calling this.
+ */
+export function isEmptyPlotScene(
+  batches: readonly { readonly rowIndex: { readonly length: number } }[],
+): boolean {
+  return batches.every((batch) => batch.rowIndex.length === 0);
+}
+
+/**
  * Whether the tool rail chrome should mount.
  * Multi-tool mode, or any recovery control (point clear / interval clear / zoom reset).
  */

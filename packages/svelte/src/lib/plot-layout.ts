@@ -14,10 +14,21 @@ export function isNarrowToolsWidth(widthPx: number): boolean {
 
 /**
  * True when a pinned tooltip should dock (width < 480).
- * Host still ANDs with pinned inspection state for the docked binding.
+ * Prefer `isTooltipDocked` at call sites that also gate on pin state.
  */
 export function isDockedTooltipWidth(widthPx: number): boolean {
   return widthPx < DOCKED_TOOLTIP_MAX_WIDTH_PX;
+}
+
+/**
+ * Whether the inspection tooltip (and root docked chrome class) should dock.
+ * Unifies root class and Tooltip `docked` prop (both used pinned + width).
+ */
+export function isTooltipDocked(input: {
+  readonly inspectionState: "transient" | "pinned" | "none" | null | undefined;
+  readonly widthPx: number;
+}): boolean {
+  return input.inspectionState === "pinned" && isDockedTooltipWidth(input.widthPx);
 }
 
 /**
