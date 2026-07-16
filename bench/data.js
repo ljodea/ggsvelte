@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784207477424,
+  "lastUpdate": 1784207715209,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -12221,6 +12221,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 167.1669,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "9eb1cab01ed41ca6a494e2aebf382ef46f433bd2",
+          "message": "refactor(svelte): carry finish-brush rect/corners in pure action (#112)\n\nExpand resolveFinishBrushAction to take the full brush-end discriminant and\nreturn payload-bearing actions so GGPlot no longer re-narrows ended.kind for\nemit/apply.",
+          "timestamp": "2026-07-16T08:14:42-05:00",
+          "tree_id": "85a50af115ea106eb8364f33eb11d8dae284279a",
+          "url": "https://github.com/ljodea/ggsvelte/commit/9eb1cab01ed41ca6a494e2aebf382ef46f433bd2"
+        },
+        "date": 1784207714467,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.225,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.3382,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 8.3478,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 10.9209,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 80.1807,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 114.7619,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 0.8804,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.1341,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 83.723,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 107.9303,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 9.0523,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 10.424,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 94.1827,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.507,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 21.2165,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 4.5335,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 25.96,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 681.6862,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 105.8635,
             "unit": "ms"
           }
         ]
