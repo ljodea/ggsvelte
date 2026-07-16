@@ -105,22 +105,26 @@
   import {
     buildInspectionCandidateRef,
     buildQueuedInspectFrame,
-    planInspectionDismiss,
-    planSceneInspectReconcile,
-    resolveInspectionCompleteness,
-    resolveInspectionEmitAction,
-    resolveInspectionMode,
     resolveQueuedInspectFrameAction,
+    type QueuedPointerInspection,
+  } from "./plot-surface-inspection-frame.js";
+  import {
+    resolveInspectionCompleteness,
+    resolveInspectionMode,
     resolveSetInspectionAction,
-    resolveSurfaceBlurAction,
     resolveToggleInspectionPinAction,
     shouldAnnounceUnpin,
     shouldClearInspectionAnnouncement,
-    shouldClosePinnedOnOutsidePointer,
     shouldCommitInspection,
     shouldFocusPinnedInteractiveTooltip,
-    type QueuedPointerInspection,
-  } from "./plot-surface-inspection.js";
+  } from "./plot-surface-inspection-apply.js";
+  import {
+    planInspectionDismiss,
+    planSceneInspectReconcile,
+    resolveInspectionEmitAction,
+    resolveSurfaceBlurAction,
+    shouldClosePinnedOnOutsidePointer,
+  } from "./plot-surface-inspection-teardown.js";
   import { type FinishBrushAction } from "./plot-brush-finish.js";
   import {
     resolveCaptureClickAction,
