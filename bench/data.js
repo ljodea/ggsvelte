@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784171196698,
+  "lastUpdate": 1784172742511,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -6628,6 +6628,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 158.2876,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "1b79138dfc21dab5b37db706ebc10a5e6cf6e082",
+          "message": "refactor(svelte): extract pure queued-inspect frame decisions (#65)\n\n* refactor(svelte): extract pure queued-inspect frame decisions\n\nMove the rAF onPointerFrame inspect-queue routing (none / drop / stash /\napply) into plot-surface-inspection so the priority table is unit-tested\nand GGPlot only snapshots queues and applies side effects.\n\n* fix: satisfy knip and oxlint on inspection frame extract\n\nDrop unused exported InspectionHostState and replace a terminal\nuseless return with break so pre-push type-aware lint and knip pass.",
+          "timestamp": "2026-07-15T22:31:45-05:00",
+          "tree_id": "6b6095b246404158f97208c1d4545909db6ccccb",
+          "url": "https://github.com/ljodea/ggsvelte/commit/1b79138dfc21dab5b37db706ebc10a5e6cf6e082"
+        },
+        "date": 1784172741608,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.1092,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.4209,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 7.4546,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 10.1173,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 66.5154,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 94.689,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 0.7533,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.0895,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 69.8247,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 84.9007,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 9.1574,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 10.3286,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 89.3104,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.5088,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 21.3431,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 5.681,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 22.1707,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 490.735,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 129.277,
             "unit": "ms"
           }
         ]
