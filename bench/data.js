@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784231773402,
+  "lastUpdate": 1784232250005,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -17100,6 +17100,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 163.7088,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "70b107032c57354cae8eef93144ab8234e5d4c89",
+          "message": "feat: add R3 filtering and facet interval semantics (#79)\n\n* test: define typed legend filter semantics\n\n* feat(svelte): add accessible precise bounds editor\n\n* feat(core): add canonical facet panel identity\n\n* feat(interaction): add semantic facet interval state\n\n* feat(core): filter rows before the grammar pipeline\n\n* feat(interaction): invert brushes within facet panels\n\n* feat(interaction): enable interval selection in facets\n\n* feat(interaction): adapt precise bounds to plot scales\n\n* feat(svelte): add explicit legend filtering\n\n* fix(interaction): preserve precise bounds tuple type\n\n* fix(core): preserve true empty-data fallback under filters\n\n* docs: demonstrate filtering and faceted intervals\n\n* feat: integrate facet intervals and precise bounds\n\n* feat(interaction): consume semantic facet intervals\n\n* fix(examples): inherit dark-theme interaction text\n\n* fix(interaction): consume semantic facet intervals\n\n* feat(interaction): start precise bounds without brushing\n\n* test(interaction): update R3 recovery contracts\n\n* test(perf): gate R3 interaction commit costs\n\n* fix(interaction): preserve typed band bounds\n\n* fix(interaction): reconcile legend filter state\n\n* fix(interaction): preserve typed brush domains\n\n* test(interaction): isolate legend reconciliation\n\n* fix(interaction): clarify accessible facet controls\n\n* fix(interaction): close R3 review gaps\n\n* chore: satisfy R3 release gates\n\n* chore: keep R3 internals private\n\n* fix: address Codex P2 review findings on R3 surfaces\n\n- read candidate values and aggregate lineages through the unfiltered source table so runtime row filters cannot corrupt inspection values\n- honor explicit layer aes null (null-unset) in active legend-filter bindings instead of re-inheriting the plot-level field\n- key legend filter checkboxes by encoded raw value, not display label\n- prune interval record keys in controller reconcileKeys so linked consumers stop publishing invalidated keys\n- honor reversed band scales when inverting brush bounds to categories\n- keep legends fed by scaled constants non-filterable\n- clear the committed brush rectangle when a controller clears or moves this chart's interval record\n- position band-axis ticks through typed rawDomain instead of labels\n- reject ISO date-times whose calendar date does not round-trip\n- render the interaction live region for legend-filter-only plots\n- scroll overflowing tool-rail recovery actions instead of overlapping the mode tabs (caught by the brush-zoom VR gate)\n\nCo-Authored-By: Claude Fable 5 <noreply@anthropic.com>\n\n* fix(vr): update interval clear label expectation; widen R3 filter p95 budget for CI\n\nThe R3 branch renamed the interval clear controls to 'Clear panel\nselection'/'Clear all selections' without updating the responsive VR\nspec (VR only runs in the pinned container). The legend-filter commit\np95 budget (250ms, introduced by this branch) has no headroom on CI\nrunners (observed 250.2ms and 289.6ms vs ~120ms locally); widen to\n320ms.\n\nCo-Authored-By: Claude Fable 5 <noreply@anthropic.com>\n\n* fix: address second-round Codex P2 findings\n\n- key bar/boxplot position slots by encodeKey so typed band categories with colliding labels (1 vs \"1\") stack and dodge in their own bands\n- stack the legend filter fieldset below the Clear-focus button when both are active, reserving both rows\n- raise the open precise-bounds editor above transparent legend hit targets (z-index 6 > 5)\n- return null from boundsEditorInputForScale when a stored band endpoint is missing from the current catalog instead of silently substituting the first category (host already cancels + announces)\n\nCo-Authored-By: Claude Fable 5 <noreply@anthropic.com>\n\n* fix: address third-round Codex review findings\n\n- Index independent interval keys with a Set before scanning candidates (P1)\n- Invalidate the committed brush rectangle when a same-panel record is\n  replaced externally (sameIntervalRecord content comparison)\n- Project applied precise bounds back into panel pixels via\n  intervalPixelsFromDomains instead of reusing stale/full-panel rects\n- Clear legend filter clauses whose legend stopped being filterable\n\nCo-Authored-By: Claude Fable 5 <noreply@anthropic.com>\n\n* fix: address fourth-round Codex P2 findings\n\n- Fall back to layer bindings for legend titles when filters empty the data\n- Dedupe legend entries by typed identity; qualify colliding labels\n- Accept sub-millisecond fractions and colonless ISO offsets in bounds editor\n- Skip interval commits when no semantic axis survives (empty facet panel)\n\nCo-Authored-By: Claude Fable 5 <noreply@anthropic.com>\n\n* fix: address fifth-round Codex P2 findings\n\n- Skip the O(candidates) semantic projection for empty and union interval\n  records (controller revision no longer rescans candidates needlessly)\n- Honor select.persistent in precise bounds: no durable record or\n  committed rectangle when nonpersistent, end event still fires\n- Warn (INTERACTION_INTERVAL_PRESET_REQUIRES_KEY) when union/cross-panel\n  presets run keyless and would silently combine no rows\n- Qualify colliding typed category labels in the bounds editor selects,\n  sharing the legend disambiguation helper\n\nCo-Authored-By: Claude Fable 5 <noreply@anthropic.com>\n\n---------\n\nCo-authored-by: Claude Fable 5 <noreply@anthropic.com>",
+          "timestamp": "2026-07-16T15:03:34-05:00",
+          "tree_id": "6bf1449d56c6f31f9125b5a43e9a53469e741f01",
+          "url": "https://github.com/ljodea/ggsvelte/commit/70b107032c57354cae8eef93144ab8234e5d4c89"
+        },
+        "date": 1784232249549,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 4.1446,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 4.1283,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 12.0893,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 14.4214,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 84.0686,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 119.9042,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.0478,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2833,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 87.4587,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 107.2678,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 15.2702,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 13.677,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 113.1424,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7837,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 26.3142,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.4002,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 28.3468,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 605.5828,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 165.0776,
             "unit": "ms"
           }
         ]
