@@ -31,13 +31,13 @@ export interface InteractiveLegendEntry {
   readonly identity: LegendEntryIdentity;
 }
 
-export type LegendMappedField = {
+type LegendMappedField = {
   readonly channel: string;
   readonly field: string;
   readonly source?: "stat";
 };
 
-export type LegendKeyCandidate = {
+type LegendKeyCandidate = {
   readonly layerIndex: number;
   readonly lineage: number;
   readonly rowIndex: number | null;
