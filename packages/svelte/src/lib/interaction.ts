@@ -86,10 +86,31 @@ export interface ZoomEvent {
   readonly domains: ReadonlyZoomDomains | null;
 }
 
+export interface LegendFocusChange<Key = PropertyKey> {
+  readonly type: "legend-focus";
+  readonly phase: "change";
+  readonly state: "transient" | "committed";
+  readonly source: InteractionSource;
+  readonly scale: "color" | "fill";
+  /** Raw encoded domain value. This is deliberately distinct from row keys. */
+  readonly value: CellValue;
+  readonly label: string;
+  readonly keys: ReadonlyArray<Key>;
+}
+
+export interface LegendFocusClear {
+  readonly type: "legend-focus";
+  readonly phase: "clear";
+  readonly source: InteractionSource;
+}
+
+export type LegendFocusEvent<Key = PropertyKey> = LegendFocusChange<Key> | LegendFocusClear;
+
 export type PlotInteractionEvent<Row, Key = PropertyKey> =
   | PlotInspection<Row, Key>
   | PlotSelection<Key>
-  | ZoomEvent;
+  | ZoomEvent
+  | LegendFocusEvent<Key>;
 
 export interface InspectOptions<Row = Record<string, CellValue>, Key = PropertyKey> {
   readonly mode?: InspectMode;
@@ -116,6 +137,11 @@ export type InspectInput<Row = Record<string, CellValue>, Key = PropertyKey> =
   | InspectOptions<Row, Key>;
 export type SelectInput = false | "point" | "interval" | SelectOptions;
 export type ZoomInput = boolean | ZoomOptions;
+export interface LegendFocusOptions {
+  /** Preview a legend group on pointer hover and DOM focus. */
+  readonly preview?: boolean;
+}
+export type LegendFocusInput = boolean | LegendFocusOptions;
 
 export type InteractionDiagnosticCode =
   | "INTERACTION_INTERVAL_FACET_UNSUPPORTED"
@@ -125,6 +151,8 @@ export type InteractionDiagnosticCode =
   | "INTERACTION_DUPLICATE_KEY"
   | "INTERACTION_UNSTABLE_KEY"
   | "INTERACTION_MISSING_LINEAGE"
+  | "INTERACTION_LEGEND_REQUIRES_KEY"
+  | "INTERACTION_LEGEND_DISCRETE_ONLY"
   | "INTERACTION_INTERVAL_SCALE_UNSUPPORTED"
   | "INTERACTION_TOOL_UNAVAILABLE";
 
@@ -204,6 +232,26 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
     docUrl:
       "https://ljodea.github.io/ggsvelte/guide/interaction-reference#interaction-missing-lineage",
   },
+  INTERACTION_LEGEND_REQUIRES_KEY: {
+    severity: "warning",
+    code: "INTERACTION_LEGEND_REQUIRES_KEY",
+    message:
+      "Legend focus requires stable row keys so encoded legend values never become identities.",
+    prop: "key",
+    suggestions: ['Pass key="id"', "Pass a stable key accessor"],
+    docUrl:
+      "https://ljodea.github.io/ggsvelte/guide/interaction-reference#interaction-legend-requires-key",
+  },
+  INTERACTION_LEGEND_DISCRETE_ONLY: {
+    severity: "advisory",
+    code: "INTERACTION_LEGEND_DISCRETE_ONLY",
+    message:
+      "Legend focus currently applies to discrete color and fill legends; continuous ramps remain static.",
+    prop: "legendFocus",
+    suggestions: ["Use a discrete color or fill mapping", "Keep the continuous ramp static"],
+    docUrl:
+      "https://ljodea.github.io/ggsvelte/guide/interaction-reference#interaction-legend-discrete-only",
+  },
   INTERACTION_INTERVAL_SCALE_UNSUPPORTED: {
     severity: "warning",
     code: "INTERACTION_INTERVAL_SCALE_UNSUPPORTED",
@@ -231,6 +279,7 @@ export interface ResolvedInteractionConfig<Row = Record<string, CellValue>, Key 
   > | null;
   readonly select: Readonly<Required<SelectOptions>> | null;
   readonly zoom: Readonly<Required<ZoomOptions>> | null;
+  readonly legendFocus: Readonly<Required<LegendFocusOptions>> | null;
   readonly initialTool: InteractionTool;
   readonly availableTools: ReadonlyArray<InteractionTool>;
   readonly diagnostics: ReadonlyArray<InteractionDiagnostic>;
@@ -240,6 +289,7 @@ export interface InteractionConfigInput<Row = Record<string, CellValue>, Key = P
   readonly inspect?: InspectInput<Row, Key>;
   readonly select?: SelectInput;
   readonly zoom?: ZoomInput;
+  readonly legendFocus?: LegendFocusInput;
   readonly tool?: InteractionTool;
 }
 
@@ -293,6 +343,18 @@ export function normalizeInteractionConfig<Row, Key>(
     });
   }
 
+  let legendFocus: ResolvedInteractionConfig["legendFocus"] = null;
+  if (input.legendFocus !== undefined && input.legendFocus !== false) {
+    if (context.hasKey === false) {
+      diagnostics.push({
+        ...INTERACTION_DIAGNOSTIC_CATALOG.INTERACTION_LEGEND_REQUIRES_KEY,
+      });
+    } else {
+      const value = input.legendFocus === true ? {} : input.legendFocus;
+      legendFocus = Object.freeze({ preview: value.preview ?? true });
+    }
+  }
+
   if (context.faceted === true && (select?.type === "interval" || zoom !== null)) {
     diagnostics.push({
       ...INTERACTION_DIAGNOSTIC_CATALOG.INTERACTION_INTERVAL_FACET_UNSUPPORTED,
@@ -318,10 +380,11 @@ export function normalizeInteractionConfig<Row, Key>(
   }
 
   return Object.freeze({
-    interactive: availableTools.length > 0,
+    interactive: availableTools.length > 0 || legendFocus !== null,
     inspect,
     select,
     zoom,
+    legendFocus,
     initialTool,
     availableTools: Object.freeze(availableTools),
     diagnostics: Object.freeze(diagnostics),

@@ -13,7 +13,11 @@
    * several plots on a page never collide (unlike the deterministic-by-design
    * ids in renderToSVGString output).
    */
-  import type { GeometryBatch, Scene } from "@ggsvelte/core";
+  import type {
+    BatchInteractionMask,
+    GeometryBatch,
+    Scene,
+  } from "@ggsvelte/core";
   import { sceneLabel, STRIP_BAND, themeVar } from "@ggsvelte/core";
 
   import Axis from "./Axis.svelte";
@@ -28,6 +32,7 @@
     batches = null,
     focusable = false,
     markLabel,
+    focusMasks = [],
   }: {
     scene: Scene;
     mode?: Mode;
@@ -37,6 +42,7 @@
     focusable?: boolean;
     /** Accessible name for one mark's source row (focusable marks). */
     markLabel?: ((row: number) => string) | undefined;
+    focusMasks?: readonly (BatchInteractionMask | null)[];
   } = $props();
 
   const uid = $props.id();
@@ -47,6 +53,11 @@
   const drawTop = $derived(mode === "full" || mode === "chrome-top");
   const drawMarks = $derived(mode === "full" || mode === "marks");
   const markBatches = $derived(batches ?? scene.batches);
+
+  function focusMask(batch: GeometryBatch): BatchInteractionMask | null {
+    const index = scene.batches.indexOf(batch);
+    return index < 0 ? null : (focusMasks[index] ?? null);
+  }
 
   const gridBounds = $derived.by(() => {
     const panels = scene.panels;
@@ -155,7 +166,13 @@
         <g class="gg-marks" clip-path={`url(#${uid}-clip-${i})`}>
           {#each markBatches as batch, bi (bi)}
             {#if batch.panelIndex === i}
-              <Batch {batch} theme={scene.theme} {focusable} {markLabel} />
+              <Batch
+                {batch}
+                theme={scene.theme}
+                {focusable}
+                {markLabel}
+                focusMask={focusMask(batch)}
+              />
             {/if}
           {/each}
         </g>

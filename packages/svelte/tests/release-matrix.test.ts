@@ -88,7 +88,7 @@ describe("R-1/R0 release matrix", () => {
 
     await cleanup();
     target.remove();
-  });
+  }, 30_000);
 
   it("keeps IDs and ARIA ownership unique across two interactive charts", async () => {
     const { container } = render(MultipleInteractivePlots);

@@ -3,11 +3,16 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 interface InteractionBudgets {
-  version: 1;
+  version: 2;
   warmupOperations: number;
   operationsPerSample: number;
   samples: number;
   pointerDispatchP95Ms: number;
+  legendWarmupOperations: number;
+  legendOperationsPerSample: number;
+  legendSamples: number;
+  legendNavigationP95Ms: number;
+  threeViewPropagationP95Ms: number;
 }
 
 const budgets = JSON.parse(
@@ -91,4 +96,88 @@ test("100k-candidate public inspection meets the reviewed 50/500 × 5 p50/p95 ga
       }),
   );
   await expect(fixture).toHaveAttribute("data-pipeline-commits", "1");
+});
+
+test("100k legend navigation and three-view focus propagation meet separate gates", async ({
+  page,
+}) => {
+  await page.goto("/__perf/legend-focus-100k");
+  await expect(page.locator('.gg-plot-root[data-gg-ready="true"]')).toHaveCount(4, {
+    timeout: 30_000,
+  });
+  const fixture = page.locator("[data-legend-perf-fixture]");
+  await expect(fixture).toHaveAttribute("data-row-count", "100000");
+  await expect(fixture).toHaveAttribute("data-linked-row-count", "1000");
+  await expect(fixture).toHaveAttribute("data-commits-a", "1");
+  await expect(fixture).toHaveAttribute("data-commits-b", "1");
+  await expect(fixture).toHaveAttribute("data-commits-c", "1");
+
+  const navigation = await page
+    .locator('[data-perf-plot="navigation"] .gg-legend-target')
+    .first()
+    .evaluate((first, config) => {
+      const timings: number[] = [];
+      (first as HTMLButtonElement).focus();
+      for (let index = 0; index < config.legendWarmupOperations; index++)
+        first.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true }));
+      for (let index = 0; index < config.legendOperationsPerSample; index++) {
+        const started = performance.now();
+        first.dispatchEvent(
+          new KeyboardEvent("keydown", {
+            key: index % 2 === 0 ? "End" : "Home",
+            bubbles: true,
+          }),
+        );
+        timings.push(performance.now() - started);
+      }
+      return timings.toSorted((a, b) => a - b)[Math.floor(timings.length * 0.95)]!;
+    }, budgets);
+  expect(navigation).toBeLessThan(budgets.legendNavigationP95Ms);
+
+  const propagationSamples = await page.evaluate(async (config) => {
+    const fixtureElement = document.querySelector<HTMLElement>("[data-legend-perf-fixture]");
+    const buttons = document.querySelectorAll<HTMLButtonElement>(
+      '[data-perf-plot="A"] .gg-legend-target',
+    );
+    if (!fixtureElement || buttons.length < 2)
+      throw new Error("Legend performance fixture is incomplete");
+
+    const commit = async (button: HTMLButtonElement): Promise<number> => {
+      const expectedRevision = String(Number(fixtureElement.dataset["revision"]) + 1);
+      const completed = new Promise<void>((resolve) => {
+        const observer = new MutationObserver(() => {
+          if (fixtureElement.dataset["revision"] !== expectedRevision) return;
+          observer.disconnect();
+          resolve();
+        });
+        observer.observe(fixtureElement, {
+          attributes: true,
+          attributeFilter: ["data-revision"],
+        });
+      });
+      const started = performance.now();
+      button.click();
+      await completed;
+      return performance.now() - started;
+    };
+
+    const samples: number[] = [];
+    for (let sample = 0; sample < config.legendSamples; sample++) {
+      const timings: number[] = [];
+      for (let operation = 0; operation < config.legendOperationsPerSample; operation++)
+        timings.push(await commit(buttons[operation % 2]!));
+      timings.sort((a, b) => a - b);
+      samples.push(timings[Math.floor(timings.length * 0.95)]!);
+    }
+    return samples;
+  }, budgets);
+  const propagationP95 = median(propagationSamples);
+  test.info().annotations.push({
+    type: "legend-performance",
+    description: `navigation p95 ${navigation.toFixed(3)}ms; three-view propagation p95 ${propagationP95.toFixed(3)}ms`,
+  });
+  expect(propagationP95).toBeLessThan(budgets.threeViewPropagationP95Ms);
+  await expect(fixture).toHaveAttribute("data-commits-a", "1");
+  await expect(fixture).toHaveAttribute("data-commits-b", "1");
+  await expect(fixture).toHaveAttribute("data-commits-c", "1");
 });

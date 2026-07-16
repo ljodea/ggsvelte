@@ -1,8 +1,13 @@
 {
-  "$comment": "R0 public interaction scheduling gate in pinned Playwright Chromium: 50 warm-ups, 500 operations per sample, five samples. The median sample p95 must remain below the absolute threshold.",
-  "version": 1,
+  "$comment": "Pinned Chromium interaction gates. R0 inspection retains its 50/500 x 5 dispatch gate; R2 separately measures 100k legend keyboard navigation and mutation-to-DOM propagation across three linked views.",
+  "version": 2,
   "warmupOperations": 50,
   "operationsPerSample": 500,
   "samples": 5,
-  "pointerDispatchP95Ms": 8
+  "pointerDispatchP95Ms": 8,
+  "legendWarmupOperations": 5,
+  "legendOperationsPerSample": 20,
+  "legendSamples": 3,
+  "legendNavigationP95Ms": 8,
+  "threeViewPropagationP95Ms": 50
 }

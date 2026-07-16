@@ -20,11 +20,32 @@
  * (plan: "axes/grids/legends/text always SVG"); planStrata routes them.
  */
 import type { GeometryBatch, PathsBatch, PointsBatch, Scene } from "../scene.js";
+import type { BatchInteractionMask } from "../interaction-mask.js";
 import type { ThemeTokens } from "../theme.js";
 import { themeVar } from "../theme.js";
 
 /** Resolve a scene color expression to a concrete canvas-usable color. */
 export type ColorResolver = (color: string) => string;
+
+/**
+ * Renderer-neutral focus membership for one geometry batch. Values address
+ * point/rect/segment/glyph primitives, or path subpaths (not path vertices).
+ * Zero means muted and a non-zero value means focused.
+ */
+export type PrimitiveFocusMask = ArrayLike<number> | BatchInteractionMask;
+
+/** Optional focus presentation aligned to the `batches` passed to drawStratum. */
+export interface CanvasFocusPresentation {
+  readonly focusMasks: readonly (PrimitiveFocusMask | null | undefined)[];
+  /** Defaults to the scene theme's interactionMuted token. */
+  readonly mutedAlpha?: number;
+}
+
+function maskIncludes(mask: PrimitiveFocusMask, index: number): boolean {
+  if ("isFocused" in mask) return mask.isFocused(index);
+  const value = mask[index];
+  return value !== undefined && value !== 0;
+}
 
 const VAR_RE = /^var\((--[\w-]+)\s*,\s*(.+)\)$/;
 
@@ -140,6 +161,73 @@ function drawPoints(
   }
 }
 
+function drawPointsSubset(
+  ctx: CanvasRenderingContext2D,
+  batch: PointsBatch,
+  theme: ThemeTokens,
+  resolve: ColorResolver,
+  mask: PrimitiveFocusMask,
+  focused: boolean,
+): void {
+  const includes = (index: number) => maskIncludes(mask, index) === focused;
+  const themeInk = resolve(themeVar("ink", theme));
+  const n = batch.rowIndex.length;
+  if (batch.colors === undefined) {
+    ctx.fillStyle = batch.fill === null ? themeInk : resolve(batch.fill);
+    ctx.beginPath();
+    let traced = false;
+    for (let j = 0; j < n; j++) {
+      if (!includes(j)) continue;
+      tracePoint(ctx, batch, j);
+      traced = true;
+    }
+    if (traced) ctx.fill();
+    return;
+  }
+  // Interactive masks must not turn alternating categorical colors into one
+  // beginPath/fill pair per point. For the normal small categorical case,
+  // batch by first-seen color while retaining the focused-over-muted pass
+  // boundary. Fall back to contiguous runs for high-cardinality colors.
+  const uniqueColors: string[] = [];
+  const seenColors = new Set<string>();
+  for (let j = 0; j < n && uniqueColors.length <= 64; j++) {
+    const color = batch.colors[j] ?? batch.fill ?? themeInk;
+    if (seenColors.has(color)) continue;
+    seenColors.add(color);
+    uniqueColors.push(color);
+  }
+  if (uniqueColors.length <= 64) {
+    for (const color of uniqueColors) {
+      ctx.fillStyle = resolve(color);
+      ctx.beginPath();
+      let traced = false;
+      for (let j = 0; j < n; j++) {
+        if ((batch.colors[j] ?? batch.fill ?? themeInk) !== color || !includes(j)) continue;
+        tracePoint(ctx, batch, j);
+        traced = true;
+      }
+      if (traced) ctx.fill();
+    }
+    return;
+  }
+  let runStart = 0;
+  while (runStart < n) {
+    const color = batch.colors[runStart] ?? batch.fill ?? themeInk;
+    let runEnd = runStart + 1;
+    while (runEnd < n && (batch.colors[runEnd] ?? batch.fill ?? themeInk) === color) runEnd++;
+    ctx.fillStyle = resolve(color);
+    ctx.beginPath();
+    let traced = false;
+    for (let j = runStart; j < runEnd; j++) {
+      if (!includes(j)) continue;
+      tracePoint(ctx, batch, j);
+      traced = true;
+    }
+    if (traced) ctx.fill();
+    runStart = runEnd;
+  }
+}
+
 function traceSubpath(
   ctx: CanvasRenderingContext2D,
   batch: PathsBatch,
@@ -171,6 +259,36 @@ function drawPaths(
   const isArea = batch.fills !== undefined;
   const subpaths = batch.pathOffsets.length - 1;
   for (let s = 0; s < subpaths; s++) {
+    const start = batch.pathOffsets[s]!;
+    const end = batch.pathOffsets[s + 1]!;
+    if (end <= start) continue;
+    ctx.beginPath();
+    traceSubpath(ctx, batch, start, end);
+    if (isArea) {
+      ctx.fillStyle = resolve(batch.fills![s] ?? themeVar("accent", theme));
+      ctx.fill();
+    } else {
+      ctx.strokeStyle = resolve(batch.strokes[s] ?? themeVar("ink", theme));
+      ctx.lineWidth = batch.linewidth;
+      ctx.lineJoin = "round";
+      ctx.lineCap = "round";
+      ctx.stroke();
+    }
+  }
+}
+
+function drawPathsSubset(
+  ctx: CanvasRenderingContext2D,
+  batch: PathsBatch,
+  theme: ThemeTokens,
+  resolve: ColorResolver,
+  mask: PrimitiveFocusMask,
+  focused: boolean,
+): void {
+  const isArea = batch.fills !== undefined;
+  const subpaths = batch.pathOffsets.length - 1;
+  for (let s = 0; s < subpaths; s++) {
+    if (maskIncludes(mask, s) !== focused) continue;
     const start = batch.pathOffsets[s]!;
     const end = batch.pathOffsets[s + 1]!;
     if (end <= start) continue;
@@ -247,6 +365,109 @@ function drawBatchInner(
   }
 }
 
+function drawBatchSubsetInner(
+  ctx: CanvasRenderingContext2D,
+  batch: GeometryBatch,
+  theme: ThemeTokens,
+  resolve: ColorResolver,
+  mask: PrimitiveFocusMask,
+  focused: boolean,
+): void {
+  const includes = (index: number) => maskIncludes(mask, index) === focused;
+  switch (batch.kind) {
+    case "points":
+      drawPointsSubset(ctx, batch, theme, resolve, mask, focused);
+      break;
+    case "paths":
+      drawPathsSubset(ctx, batch, theme, resolve, mask, focused);
+      break;
+    case "rects": {
+      const themeFill = resolve(themeVar(batch.fillRole ?? "accent", theme));
+      const n = batch.rects.length / 4;
+      for (let j = 0; j < n; j++) {
+        if (!includes(j)) continue;
+        const fill = batch.fills?.[j] ?? batch.fill;
+        ctx.fillStyle = fill === null || fill === undefined ? themeFill : resolve(fill);
+        ctx.fillRect(
+          batch.rects[j * 4]!,
+          batch.rects[j * 4 + 1]!,
+          batch.rects[j * 4 + 2]!,
+          batch.rects[j * 4 + 3]!,
+        );
+        if (batch.stroke !== undefined) {
+          ctx.strokeStyle = resolve(batch.stroke ?? themeVar("ink", theme));
+          ctx.lineWidth = batch.strokeWidth ?? 1;
+          ctx.strokeRect(
+            batch.rects[j * 4]!,
+            batch.rects[j * 4 + 1]!,
+            batch.rects[j * 4 + 2]!,
+            batch.rects[j * 4 + 3]!,
+          );
+        }
+      }
+      break;
+    }
+    case "segments": {
+      const themeInk = resolve(themeVar("ink", theme));
+      ctx.lineWidth = batch.linewidth;
+      const n = batch.segments.length / 4;
+      for (let j = 0; j < n; j++) {
+        if (!includes(j)) continue;
+        const stroke = batch.strokes?.[j] ?? batch.stroke;
+        ctx.strokeStyle = stroke === null || stroke === undefined ? themeInk : resolve(stroke);
+        ctx.beginPath();
+        ctx.moveTo(batch.segments[j * 4]!, batch.segments[j * 4 + 1]!);
+        ctx.lineTo(batch.segments[j * 4 + 2]!, batch.segments[j * 4 + 3]!);
+        ctx.stroke();
+      }
+      break;
+    }
+    case "glyphs":
+      // Text always renders as SVG; the mask still addresses glyph primitives
+      // so SVG and canvas callers can share one renderer-neutral mask shape.
+      break;
+  }
+}
+
+function batchPrimitiveCount(batch: GeometryBatch): number {
+  switch (batch.kind) {
+    case "points":
+    case "rects":
+    case "segments":
+    case "glyphs":
+      return batch.rowIndex.length;
+    case "paths":
+      return Math.max(0, batch.pathOffsets.length - 1);
+    default:
+      return 0;
+  }
+}
+
+function maskIsAllFocused(mask: PrimitiveFocusMask, count: number): boolean {
+  if (count === 0) return true;
+  if ("isFocused" in mask && mask.primitiveCount === count)
+    return mask.focusedCount === mask.primitiveCount;
+  for (let index = 0; index < count; index++) {
+    if (!maskIncludes(mask, index)) return false;
+  }
+  return true;
+}
+
+function drawBatchSubset(
+  ctx: CanvasRenderingContext2D,
+  batch: GeometryBatch,
+  theme: ThemeTokens,
+  resolve: ColorResolver,
+  mask: PrimitiveFocusMask,
+  focused: boolean,
+  alphaMultiplier: number,
+): void {
+  const alpha = ctx.globalAlpha;
+  ctx.globalAlpha = alpha * batch.alpha * alphaMultiplier;
+  drawBatchSubsetInner(ctx, batch, theme, resolve, mask, focused);
+  ctx.globalAlpha = alpha;
+}
+
 /** Draw one batch in panel-local coordinates (alpha applied per batch). */
 export function drawBatch(
   ctx: CanvasRenderingContext2D,
@@ -271,16 +492,54 @@ export function drawStratum(
   scene: Scene,
   batches: readonly GeometryBatch[],
   resolve: ColorResolver,
+  presentation?: CanvasFocusPresentation,
 ): void {
   ctx.clearRect(0, 0, scene.width, scene.height);
+  if (presentation === undefined) {
+    // Preserve the original high-volume path completely when focus
+    // presentation is not requested.
+    for (let p = 0; p < scene.panels.length; p++) {
+      const panel = scene.panels[p]!;
+      const panelBatches = batches.filter((batch) => batch.panelIndex === p);
+      if (panelBatches.length === 0) continue;
+      drawClippedToPanel(ctx, panel, () => {
+        ctx.save();
+        ctx.translate(panel.x, panel.y);
+        for (const batch of panelBatches) drawBatch(ctx, batch, scene.theme, resolve);
+        ctx.restore();
+      });
+    }
+    return;
+  }
   for (let p = 0; p < scene.panels.length; p++) {
     const panel = scene.panels[p]!;
-    const panelBatches = batches.filter((b) => b.panelIndex === p);
+    const panelBatches = batches
+      .map((batch, index) => ({ batch, index }))
+      .filter(({ batch }) => batch.panelIndex === p);
     if (panelBatches.length === 0) continue;
     drawClippedToPanel(ctx, panel, () => {
       ctx.save();
       ctx.translate(panel.x, panel.y);
-      for (const batch of panelBatches) drawBatch(ctx, batch, scene.theme, resolve);
+      const mutedAlpha = presentation.mutedAlpha ?? scene.theme.interactionMuted;
+      // Paint all unaffected/muted primitives first across the stratum, then
+      // focused primitives so coincident focused marks remain visible.
+      for (const { batch, index } of panelBatches) {
+        const mask = presentation.focusMasks[index];
+        if (mask === undefined || mask === null) {
+          drawBatch(ctx, batch, scene.theme, resolve);
+        } else if (!maskIsAllFocused(mask, batchPrimitiveCount(batch))) {
+          drawBatchSubset(ctx, batch, scene.theme, resolve, mask, false, mutedAlpha);
+        }
+      }
+      for (const { batch, index } of panelBatches) {
+        const mask = presentation.focusMasks[index];
+        if (mask === undefined || mask === null) continue;
+        if (maskIsAllFocused(mask, batchPrimitiveCount(batch))) {
+          drawBatch(ctx, batch, scene.theme, resolve);
+        } else {
+          drawBatchSubset(ctx, batch, scene.theme, resolve, mask, true, 1);
+        }
+      }
       ctx.restore();
     });
   }

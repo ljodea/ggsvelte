@@ -19,6 +19,7 @@ import { settleVisualState } from "./helpers/deterministic";
 const THEMES = ["light", "dark"] as const;
 const EXPECTED_PLOTS: Readonly<Record<string, number>> = {
   "interaction/linked-views": 2,
+  "interaction/legend-focus": 3,
 };
 
 for (const example of EXAMPLES) {
@@ -46,6 +47,22 @@ test("interaction inspection — pinned state", async ({ page }) => {
   await expect(page.locator(".event-status")).toContainText("Pinned");
   await expect(page.locator(".gg-example-frame")).toHaveScreenshot(
     "interaction-tooltip-pinned-light.png",
+  );
+});
+
+test("interaction legend focus — committed linked state", async ({ page }) => {
+  await page.goto("/examples/interaction/legend-focus?vr&theme=light");
+  await settleVisualState(page, 3);
+  const firstLegendEntry = page.locator(".gg-legend-target").first();
+  await firstLegendEntry.click();
+  await expect(firstLegendEntry).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByText("3 rows focused")).toBeVisible();
+  // Three SVG points in the first view, then one focused path plus three
+  // focused point vertices in the mixed line view. Canvas shares the mask
+  // semantics but intentionally exposes no SVG mark nodes to count here.
+  await expect(page.locator("[data-gg-focused='true']")).toHaveCount(7);
+  await expect(page.locator(".gg-example-frame")).toHaveScreenshot(
+    "interaction-legend-focus-committed-light.png",
   );
 });
 

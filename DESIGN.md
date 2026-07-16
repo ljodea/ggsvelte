@@ -171,8 +171,9 @@ pill shapes.
 - Provide one focusable chart surface with virtual datum navigation rather than one tab
   stop per mark. Tool, legend, tooltip, clear, and reset controls remain intentional tab
   stops with native semantics.
-- Minimum interactive hit regions are 44 by 44 CSS pixels. A visible hairline may use a
-  larger invisible target.
+- Primary tools and free-standing recovery controls use 44 by 44 CSS-pixel hit regions.
+  Dense legend rows may use the WCAG 2.2 24 by 24 minimum when adjacent targets do not
+  overlap; a visible hairline may use a larger invisible target.
 - Focus is always visible and must not be obscured by a tooltip. Escape dismisses or
   cancels the current interaction and restores focus predictably.
 - Polite narration summarizes the active axis value, focused member, member count, and

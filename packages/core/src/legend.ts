@@ -43,7 +43,8 @@ export type LegendInput = DiscreteLegendInput | RampLegendInput;
 // canonical measurer so reserved margins are deterministic).
 const FONT_SIZE = 11;
 const TITLE_HEIGHT = 18;
-const ROW_HEIGHT = 18;
+/** Discrete legend row height; also the WCAG 2.2 minimum pointer target. */
+export const LEGEND_ROW_HEIGHT = 24;
 const SWATCH_SIZE = 10;
 const SWATCH_GAP = 6;
 const PADDING = 4;
@@ -120,7 +121,7 @@ export function buildLegends(
           value: values[i],
           label,
           color: input.colorOf(values[i]) ?? UNKNOWN_COLOR,
-          y: titleHeight + i * ROW_HEIGHT,
+          y: titleHeight + i * LEGEND_ROW_HEIGHT,
         });
       }
       const titleWidth =
@@ -130,7 +131,7 @@ export function buildLegends(
       const boxWidth =
         PADDING * 2 +
         Math.max(SWATCH_SIZE + SWATCH_GAP + Math.ceil(labelWidth), Math.ceil(titleWidth));
-      const boxHeight = titleHeight + entries.length * ROW_HEIGHT + PADDING;
+      const boxHeight = titleHeight + entries.length * LEGEND_ROW_HEIGHT + PADDING;
       legends.push({
         type: "discrete",
         scale: input.scale,

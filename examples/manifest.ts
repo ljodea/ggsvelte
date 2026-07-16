@@ -211,6 +211,28 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "interaction/legend-focus",
+    category: "interaction",
+    name: "legend-focus",
+    title: "Focus and link discrete legend groups",
+    description: "Opt-in legend controls preview locally, commit stable row keys to a shared controller, and de-emphasize unrelated marks without changing scales, statistics, layout, or color identity. The same semantic mask drives SVG and canvas views.",
+    tags: ["interaction", "legend", "focus", "controller", "linked-views", "canvas", "keyboard", "touch"],
+    docsSection: "Interaction",
+    vrHeight: 980,
+    journey: {
+      pointer: "Hover a discrete legend entry to preview one plot, then click to pin the group across all three views.",
+      keyboard: "Tab to a legend entry, use arrow keys or Home and End to move, press Enter or Space to pin, and Escape to clear.",
+      touch: "Tap a legend entry to pin it across the SVG and canvas views; tap the active entry or Clear legend focus to reset.",
+      references: [
+        { label: "Interaction guide", href: "/guide/interactions" },
+        { label: "Linked views", href: "/examples/interaction/linked-views" },
+      ],
+      svelteFirst: true,
+      fullWidth: true,
+    },
+    hasData: true,
+  },
+  {
     id: "interaction/linked-views",
     category: "interaction",
     name: "linked-views",

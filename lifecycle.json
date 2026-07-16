@@ -727,6 +727,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "BatchInteractionMask": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "CANVAS_AUTO_THRESHOLD": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -903,6 +907,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "LEGEND_ROW_HEIGHT": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "LayerBackend": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -928,6 +936,10 @@
           "lifecycle": "experimental"
         },
         "LegendOrder": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "LegendValueMembership": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -1119,6 +1131,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "SemanticCandidateKeys": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "SequentialColorScale": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1211,6 +1227,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "buildInteractionMasks": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "buildLegends": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -1295,6 +1315,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "legendValueEqual": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "linearTicks": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -1352,6 +1376,10 @@
           "lifecycle": "stable-intent"
         },
         "resolveEditionDefaults": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "resolveLegendFocusKeys": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -1426,6 +1454,10 @@
       "entry": "./dom",
       "source": "packages/core/src/dom/index.ts",
       "exports": {
+        "CanvasFocusPresentation": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "ColorResolver": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1435,6 +1467,10 @@
           "lifecycle": "experimental"
         },
         "HitIndexOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PrimitiveFocusMask": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -1674,6 +1710,26 @@
           "lifecycle": "experimental"
         },
         "LayerSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "LegendFocusChange": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "LegendFocusClear": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "LegendFocusEvent": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "LegendFocusInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "LegendFocusOptions": {
           "kind": "type",
           "lifecycle": "experimental"
         },
