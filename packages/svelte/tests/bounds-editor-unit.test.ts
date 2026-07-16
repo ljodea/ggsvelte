@@ -45,18 +45,20 @@ describe("precise bounds drafts", () => {
   });
 
   it("rejects non-finite, descending, and non-positive log bounds", () => {
-    expect(validateBoundsDraft(input(), "nope", "7")).toMatchObject({
-      ok: false,
-      errors: { lower: expect.any(String) },
-    });
-    expect(validateBoundsDraft(input(), "8", "2")).toMatchObject({
-      ok: false,
-      errors: { upper: expect.stringContaining("greater") },
-    });
-    expect(validateBoundsDraft(input({ scale: "log", bounds: [1, 10] }), "0", "10")).toMatchObject({
-      ok: false,
-      errors: { lower: expect.stringContaining("greater than zero") },
-    });
+    const nonFinite = validateBoundsDraft(input(), "nope", "7");
+    expect(nonFinite.ok).toBe(false);
+    if (nonFinite.ok) throw new Error("expected invalid bounds");
+    expect(typeof nonFinite.errors.lower).toBe("string");
+
+    const descending = validateBoundsDraft(input(), "8", "2");
+    expect(descending.ok).toBe(false);
+    if (descending.ok) throw new Error("expected invalid bounds");
+    expect(descending.errors.upper).toContain("greater");
+
+    const nonPositiveLog = validateBoundsDraft(input({ scale: "log", bounds: [1, 10] }), "0", "10");
+    expect(nonPositiveLog.ok).toBe(false);
+    if (nonPositiveLog.ok) throw new Error("expected invalid bounds");
+    expect(nonPositiveLog.errors.lower).toContain("greater than zero");
   });
 
   it("requires unambiguous ISO-8601 time drafts and emits epoch milliseconds", () => {
@@ -66,10 +68,10 @@ describe("precise bounds drafts", () => {
       scale: "time",
       bounds: [Date.UTC(2025, 0, 1), Date.UTC(2025, 0, 2)],
     });
-    expect(validateBoundsDraft(time, "01/01/2025", "2025-01-02")).toMatchObject({
-      ok: false,
-      errors: { lower: expect.stringContaining("ISO 8601") },
-    });
+    const ambiguous = validateBoundsDraft(time, "01/01/2025", "2025-01-02");
+    expect(ambiguous.ok).toBe(false);
+    if (ambiguous.ok) throw new Error("expected invalid bounds");
+    expect(ambiguous.errors.lower).toContain("ISO 8601");
     expect(validateBoundsDraft(time, "2025-01-01", "2025-01-02")).toEqual({
       ok: true,
       event: {
@@ -98,9 +100,9 @@ describe("precise bounds drafts", () => {
       ok: true,
       event: { scale: "band", bounds: [1, true] },
     });
-    expect(validateBoundsDraft(band, "2", "0")).toMatchObject({
-      ok: false,
-      errors: { upper: expect.stringContaining("after") },
-    });
+    const descending = validateBoundsDraft(band, "2", "0");
+    expect(descending.ok).toBe(false);
+    if (descending.ok) throw new Error("expected invalid bounds");
+    expect(descending.errors.upper).toContain("after");
   });
 });

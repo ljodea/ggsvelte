@@ -97,7 +97,7 @@ describe("runPipeline runtime row filters", () => {
     const legend = model.scene.legends[0];
 
     expect(model.candidates.size).toBe(0);
-    expect(model.warnings).toContainEqual(expect.objectContaining({ code: "empty-data" }));
+    expect(model.warnings.some((warning) => warning.code === "empty-data")).toBe(true);
     expect(legend?.type).toBe("discrete");
     if (legend?.type === "discrete")
       expect(legend.entries.map((entry) => entry.value)).toEqual(["west", "east"]);

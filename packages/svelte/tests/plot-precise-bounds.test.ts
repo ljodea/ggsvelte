@@ -93,8 +93,8 @@ describe("precise plot bounds adapters", () => {
     if (input.scale !== "band") throw new Error("expected band bounds");
 
     const numericAxis = semanticAxisFromBounds("band", [
-      input.categories[0]!.value,
-      input.categories[0]!.value,
+      input.categories[0].value,
+      input.categories[0].value,
     ]);
     const candidates = [
       { panelId: "north", xValue: 1, keys: ["number"] },

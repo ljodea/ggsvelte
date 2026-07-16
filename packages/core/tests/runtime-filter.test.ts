@@ -74,7 +74,7 @@ describe("runtime legend row filtering", () => {
       },
     );
 
-    expect([0, 1, 2].filter(filter)).toEqual([0, 2]);
+    expect([0, 1, 2].filter((index) => filter(index))).toEqual([0, 2]);
     expect(requested).toEqual(["group", "kind"]);
     expect(requested).not.toContain("unused");
   });
@@ -84,9 +84,10 @@ describe("runtime legend row filtering", () => {
       { scale: "color", field: "group", mode: "exclude", values: [undefined] },
     ];
     const rows = [{ group: undefined }, { group: null }];
-    expect(rows.filter(compileRuntimeRowFilter(clauses))).toEqual([{ group: null }]);
+    const rowFilter = compileRuntimeRowFilter(clauses);
+    expect(rows.filter((row) => rowFilter(row))).toEqual([{ group: null }]);
 
     const indexed = compileRuntimeRowIndexFilter(clauses, () => [undefined, null]);
-    expect([0, 1].filter(indexed)).toEqual([1]);
+    expect([0, 1].filter((index) => indexed(index))).toEqual([1]);
   });
 });

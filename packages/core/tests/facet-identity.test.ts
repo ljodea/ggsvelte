@@ -34,7 +34,9 @@ describe("canonical facet panel identity", () => {
     expect(model.scene.panels).toHaveLength(2);
     expect(new Set(model.scene.panels.map((panel) => panel.id)).size).toBe(2);
     expect(
-      model.scene.panels.map((panel) => panel.identity.values[0]?.encodedValue).toSorted(),
+      model.scene.panels
+        .map((panel) => panel.identity.values[0]?.encodedValue)
+        .toSorted((left, right) => String(left).localeCompare(String(right))),
     ).toEqual(["@n:-0", "@n:0"]);
   });
 

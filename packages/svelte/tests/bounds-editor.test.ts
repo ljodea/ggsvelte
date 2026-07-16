@@ -35,8 +35,8 @@ describe("<BoundsEditor>", () => {
       onapply: (event: PreciseBoundsApplyEvent) => events.push(event),
     });
     const [lower, upper] = [...container.querySelectorAll("input")];
-    write(lower as HTMLInputElement, "3");
-    write(upper as HTMLInputElement, "7");
+    write(lower, "3");
+    write(upper, "7");
     await tick();
     expect(events).toEqual([]);
     container.querySelector<HTMLButtonElement>("button[type=submit]")!.click();
@@ -53,7 +53,7 @@ describe("<BoundsEditor>", () => {
     ]);
   });
 
-  it("reports the physical input used to activate Apply", async () => {
+  it("reports the physical input used to activate Apply", () => {
     const onapply = vi.fn();
     const { container } = render(BoundsEditor, {
       input: {
@@ -128,7 +128,7 @@ describe("<BoundsEditor>", () => {
     expect(oncancel).toHaveBeenCalledTimes(1);
     expect(document.activeElement).toBe(trigger);
 
-    await unmount();
+    unmount();
     const second = render(BoundsEditor, {
       input: { axis: "y", action: "select", scale: "linear", bounds: [2, 8] },
       onapply: vi.fn(),

@@ -386,7 +386,10 @@ export function createPlotInteraction<Key extends PropertyKey = PropertyKey>(
             (priorPanels.size !== 1 || !priorPanels.has(next.panelId))));
       const prior = replacesScope ? undefined : priorPanels?.get(next.panelId);
       if (!replacesScope && equalInterval(prior, next)) return null;
-      const panels = replacesScope || priorPanels === undefined ? new Map() : priorPanels;
+      const panels =
+        replacesScope || priorPanels === undefined
+          ? new Map<string, ScopedInteractionInterval<Key>>()
+          : priorPanels;
       panels.set(next.panelId, next);
       intervals.set(intervalScope, panels);
       return commit("interval", ["interval"], scope, mutation.source ?? "programmatic");

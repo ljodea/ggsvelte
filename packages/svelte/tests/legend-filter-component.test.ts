@@ -9,12 +9,24 @@ function until(predicate: () => boolean, timeout = 3000): Promise<void> {
   return new Promise((resolve, reject) => {
     const started = performance.now();
     const tick = () => {
-      if (predicate()) return resolve();
-      if (performance.now() - started > timeout) return reject(new Error("until() timed out"));
+      if (predicate()) {
+        resolve();
+        return;
+      }
+      if (performance.now() - started > timeout) {
+        reject(new Error("until() timed out"));
+        return;
+      }
       requestAnimationFrame(tick);
     };
     tick();
   });
+}
+
+function parsedArray<T>(value: string | undefined): T[] {
+  const parsed: unknown = JSON.parse(value ?? "[]");
+  if (!Array.isArray(parsed)) throw new TypeError("Expected a JSON array");
+  return parsed as T[];
 }
 
 function state(container: HTMLElement): DOMStringMap {
@@ -25,7 +37,8 @@ describe("explicit legend filtering", () => {
   it("uses native Show-category checkboxes and filters before one pipeline render", async () => {
     const { container } = render(LegendFilterPlot);
     await until(() => container.querySelectorAll(".gg-legend-filters input").length === 2);
-    const before = { ...state(container) };
+    const beforeRenders = state(container)["renders"];
+    const beforeColors = state(container)["colors"];
     const north = container.querySelector<HTMLInputElement>("input[aria-label='Show north']")!;
 
     expect(north.checked).toBe(true);
@@ -34,9 +47,9 @@ describe("explicit legend filtering", () => {
     await until(() => state(container)["candidates"] === "1");
 
     expect(north.checked).toBe(false);
-    expect(Number(state(container)["renders"])).toBe(Number(before["renders"]) + 1);
-    expect(state(container)["colors"]).toBe(before["colors"]);
-    expect(JSON.parse(state(container)["events"] ?? "[]")).toEqual([
+    expect(Number(state(container)["renders"])).toBe(Number(beforeRenders) + 1);
+    expect(state(container)["colors"]).toBe(beforeColors);
+    expect(parsedArray(state(container)["events"])).toEqual([
       {
         type: "legend-filter",
         phase: "change",
@@ -89,7 +102,7 @@ describe("explicit legend filtering", () => {
         circle.getAttribute("fill"),
       ),
     ).toEqual(initialMarkColors);
-    const events = JSON.parse(state(container)["events"] ?? "[]");
+    const events = parsedArray<Record<string, unknown>>(state(container)["events"]);
     expect(events.at(-1)).toEqual({
       type: "legend-filter",
       phase: "clear",
@@ -112,7 +125,7 @@ describe("explicit legend filtering", () => {
         (input) => input.checked,
       ),
     ).toBe(true);
-    expect(JSON.parse(state(view.container)["events"] ?? "[]").at(-1)).toEqual({
+    expect(parsedArray(state(view.container)["events"]).at(-1)).toEqual({
       type: "legend-filter",
       phase: "clear",
       source: "programmatic",
@@ -130,7 +143,7 @@ describe("explicit legend filtering", () => {
       .click();
     await until(() => state(container)["candidates"] === "3");
 
-    expect(JSON.parse(state(container)["interactionEvents"] ?? "[]")).toEqual([
+    expect(parsedArray(state(container)["interactionEvents"])).toEqual([
       "legend-filter",
       "legend-filter",
     ]);
@@ -151,7 +164,9 @@ describe("explicit legend filtering", () => {
     expect(
       container.querySelector<HTMLInputElement>("input[aria-label='Show north']")!.checked,
     ).toBe(false);
-    expect(JSON.parse(state(container)["events"] ?? "[]")[0]?.source).toBe("keyboard");
+    expect(parsedArray<{ source?: string }>(state(container)["events"])[0]?.source).toBe(
+      "keyboard",
+    );
   });
 
   it("filters canvas marks through the same semantic path", async () => {

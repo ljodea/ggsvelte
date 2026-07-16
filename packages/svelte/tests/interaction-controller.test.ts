@@ -40,7 +40,7 @@ describe("createPlotInteraction", () => {
         keys: ["a", "b"],
       },
     ]);
-    const stored = controller.intervals(intervalScope)[0]!;
+    const stored = controller.intervals(intervalScope)[0];
     expect(Object.isFrozen(stored)).toBe(true);
     expect(Object.isFrozen(stored.domains)).toBe(true);
     expect(Object.isFrozen(stored.domains.x)).toBe(true);
@@ -84,7 +84,9 @@ describe("createPlotInteraction", () => {
   it("clears one panel or an interval namespace with stable no-op revisions", () => {
     const transitions: PlotInteractionTransition<string>[] = [];
     const controller = createPlotInteraction<string>({
-      onchange: (value) => transitions.push(value),
+      onchange: (value) => {
+        transitions.push(value);
+      },
     });
     const options = { scope: { keys: "id", intervals: "facets" } } as const;
     const interval = (panelId: string) => ({

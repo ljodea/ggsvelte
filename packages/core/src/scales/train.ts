@@ -365,7 +365,7 @@ export function trainBand(
   } else {
     for (const value of config.domain) add(value);
   }
-  const domain = rawDomain.map(bandKey);
+  const domain = rawDomain.map((value) => bandKey(value));
   const n = domain.length;
   const reverse = config.reverse === true;
   const indexOf = (value: unknown) => index.get(encodeKey(value));

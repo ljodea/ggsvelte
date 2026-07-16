@@ -229,7 +229,9 @@ test("R3 filter, cross-panel interval, and precise bounds commits meet separate 
       checkbox.click();
       await completed;
       await new Promise<void>((resolve) => {
-        requestAnimationFrame(() => resolve());
+        requestAnimationFrame(() => {
+          resolve();
+        });
       });
       const after = Number(fixtureElement.dataset["filterPipelineCommits"]);
       if (after !== before + 1)
@@ -278,7 +280,9 @@ test("R3 filter, cross-panel interval, and precise bounds commits meet separate 
     apply.click();
     await completed;
     await new Promise<void>((resolve) => {
-      requestAnimationFrame(() => resolve());
+      requestAnimationFrame(() => {
+        resolve();
+      });
     });
     return performance.now() - started;
   });
@@ -339,7 +343,9 @@ test("R3 filter, cross-panel interval, and precise bounds commits meet separate 
     apply.click();
     await completed;
     await new Promise<void>((resolve) => {
-      requestAnimationFrame(() => resolve());
+      requestAnimationFrame(() => {
+        resolve();
+      });
     });
     return performance.now() - started;
   });

@@ -26,9 +26,7 @@ export function boundsEditorInputForScale(
       value: value as BoundsCategoryValue,
       label: scale.domain[index] ?? String(value),
     }));
-    const requested = options.bounds as
-      | readonly [BoundsCategoryValue, BoundsCategoryValue]
-      | undefined;
+    const requested = options.bounds;
     const categoryValue = (bound: BoundsCategoryValue): BoundsCategoryValue => {
       if (typeof bound === "string") {
         const typed = categories.find((category) => encodeKey(category.value) === bound);
@@ -70,7 +68,7 @@ export function semanticAxisFromBounds(
   if (scale === "band") {
     return Object.freeze({
       kind: "band",
-      values: Object.freeze(bounds.map(encodeKey)),
+      values: Object.freeze(bounds.map((bound) => encodeKey(bound))),
     });
   }
   const first = bounds[0] as number;

@@ -163,11 +163,11 @@ describe("resolveIntervalQueryParts", () => {
             type: "band",
             domain: ["a", "b", "c", "d"],
             rawDomain: ["a", "b", "c", "d"],
-            indexOf: () => undefined,
-            normalize: () => undefined,
+            indexOf: () => {},
+            normalize: () => {},
             step: 0.25,
           },
-        } as IntervalQueryScene["scales"],
+        },
       },
     });
     expect(parts.invertedDomain.x).toEqual(["a", "c"]);
@@ -190,10 +190,10 @@ describe("resolveIntervalQueryParts", () => {
             rawDomain,
             indexOf: (value: unknown) =>
               rawDomain.findIndex((candidate) => Object.is(candidate, value)),
-            normalize: () => undefined,
+            normalize: () => {},
             step: 0.2,
           },
-        } as IntervalQueryScene["scales"],
+        },
       },
     });
 
