@@ -2138,10 +2138,20 @@
   }
 
   // Readiness signal for screenshot tooling (plan: VR waits on
-  // `[data-gg-ready="true"]`). Derived after flush-visible state updates;
-  // canvas strata additionally gate on first paint (decision 0006 / plan).
+  // `[data-gg-ready="true"]`). Split into:
+  // - clientFlush via $effect: never runs during SSR → prerender stays
+  //   data-gg-ready="false" until the first client committed flush (decision 0009)
+  // - derived isPlotReady: updates in the same render when prerequisites flip
+  //   (e.g. model cleared, canvas paint incomplete) so VR cannot accept a
+  //   stale ready=true mid-transition. Canvas strata gate on first paint
+  //   (decision 0006 / plan).
+  let clientFlush = $state(false);
+  $effect(() => {
+    clientFlush = true;
+  });
   const ready = $derived.by(() => {
     void paintEpoch;
+    if (!clientFlush) return false;
     return isPlotReady({
       hasModel: model !== null,
       widthMode:
