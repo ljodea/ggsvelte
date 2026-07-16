@@ -141,6 +141,7 @@
     shouldClearInspectionOnPointerLeave,
     POINT_SELECT_NEAREST_MAX_DISTANCE_PX,
     TOUCH_INSPECT_CLICK_SUPPRESS_MS,
+    type FinishBrushAction,
   } from "./plot-surface-pointer.js";
   import {
     resolveLegendClearControlSource,
@@ -1822,10 +1823,45 @@
   /** Map the live render model into the pure interval query scene adapter. */
   function intervalQueryScene(): IntervalQueryScene | null {
     if (model === null) return null;
-    return intervalQuerySceneFromModel(
-      model,
-      assembled?.coord?.type === "flip",
-    );
+    return intervalQuerySceneFromModel(model, coordFlipped);
+  }
+
+  /**
+   * Shared select/zoom/end/keep-second-corner effects after pure finish-brush
+   * routing (pointer finish-brush and keyboard complete-area).
+   * Pointer-only: callers must cancel scheduled pointer before this when needed.
+   */
+  function applyFinishBrush(
+    finish: FinishBrushAction,
+    source: InteractionSource,
+  ): void {
+    switch (finish.type) {
+      case "keep-second-corner":
+        brushRect = finish.corners;
+        announceInteraction(BRUSH_SECOND_CORNER_ANNOUNCEMENT);
+        break;
+      case "select-end": {
+        brushRect = null;
+        const eventValue = selectionEvent("end", finish.rect, source);
+        committedInterval = persistentSelectionOrNull(
+          interactionConfig.select?.persistent,
+          eventValue,
+        );
+        emitSelection(eventValue);
+        reducer.dispatch({ type: "cancel-area" });
+        break;
+      }
+      case "zoom-end":
+        brushRect = null;
+        applyBrushZoom(finish.rect, source);
+        reducer.dispatch({ type: "cancel-area" });
+        break;
+      case "end-area":
+        // Commit with non-area tool (e.g. tool changed mid-drag): clear only.
+        brushRect = null;
+        reducer.dispatch({ type: "cancel-area" });
+        break;
+    }
   }
 
   function onPointerLeave(): void {
@@ -1960,41 +1996,17 @@
       case "finish-brush": {
         // Defensive: pure up-gate already requires hasBrushDraft.
         if (brushRect === null) break;
+        // Pointer-only: cancel scheduled frames before shared finish effects.
         reducer.cancelScheduledPointer();
-        const source = action.source;
         const ended = evaluatePointerBrushEnd(brushRect, plotPoint(event));
         // Pure table carries rect/corners — no host ended.kind re-narrow.
-        const finish = resolveFinishBrushAction({
-          ended,
-          activeTool,
-        });
-        switch (finish.type) {
-          case "keep-second-corner":
-            brushRect = finish.corners;
-            announceInteraction(BRUSH_SECOND_CORNER_ANNOUNCEMENT);
-            break;
-          case "select-end": {
-            brushRect = null;
-            const eventValue = selectionEvent("end", finish.rect, source);
-            committedInterval = persistentSelectionOrNull(
-              interactionConfig.select?.persistent,
-              eventValue,
-            );
-            emitSelection(eventValue);
-            reducer.dispatch({ type: "cancel-area" });
-            break;
-          }
-          case "zoom-end":
-            brushRect = null;
-            applyBrushZoom(finish.rect, source);
-            reducer.dispatch({ type: "cancel-area" });
-            break;
-          case "end-area":
-            // Commit with non-area tool (e.g. tool changed mid-drag): clear only.
-            brushRect = null;
-            reducer.dispatch({ type: "cancel-area" });
-            break;
-        }
+        applyFinishBrush(
+          resolveFinishBrushAction({
+            ended,
+            activeTool,
+          }),
+          action.source,
+        );
         break;
       }
     }
@@ -2076,12 +2088,11 @@
   ): void {
     if (model === null || model.scene.panels.length !== 1) return;
     const panel = model.scene.panels[0]!;
-    const flip = assembled?.coord?.type === "flip";
     const next = resolveBrushZoomDomains(
       rect,
       panel,
       model.scales,
-      flip,
+      coordFlipped,
       interactionConfig.zoom?.mode ?? "xy",
       effectiveZoomDomains,
     );
@@ -2204,17 +2215,14 @@
       }
       case "complete-area": {
         if (brushRect === null) return;
-        const rect = normalizedRect(brushRect);
-        brushRect = null;
-        if (action.finish === "select") {
-          const selection = selectionEvent("end", rect, "keyboard");
-          committedInterval = persistentSelectionOrNull(
-            interactionConfig.select?.persistent,
-            selection,
-          );
-          emitSelection(selection);
-        } else applyBrushZoom(rect, "keyboard");
-        reducer.dispatch({ type: "cancel-area" });
+        // Single pure owner with pointer finish-brush for select vs zoom.
+        applyFinishBrush(
+          resolveFinishBrushAction({
+            ended: { kind: "commit", rect: normalizedRect(brushRect) },
+            activeTool,
+          }),
+          "keyboard",
+        );
         return;
       }
       case "cycle-coincident":
