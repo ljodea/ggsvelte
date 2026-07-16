@@ -490,3 +490,66 @@ describe("placeSceneLegends", () => {
     expect(legends[0]!.y).toBe(5 + 12);
   });
 });
+
+describe("flipDisplayTitles / flipDisplayFreeFlags", () => {
+  it("swaps titles and free flags under coord flip", async () => {
+    const { flipDisplayTitles, flipDisplayFreeFlags } =
+      await import("../src/pipeline/panel-layout-chrome-display-flip.ts");
+    expect(flipDisplayTitles(true, "X", "Y")).toEqual({ hTitle: "Y", vTitle: "X" });
+    expect(flipDisplayTitles(false, "X", "Y")).toEqual({ hTitle: "X", vTitle: "Y" });
+    expect(flipDisplayFreeFlags(true, true, false)).toEqual({ freeH: false, freeV: true });
+  });
+});
+
+describe("computeFacetPanelSize", () => {
+  it("divides remaining grid width across columns", async () => {
+    const { computeFacetPanelSize } =
+      await import("../src/pipeline/panel-layout-facet-cells-size.ts");
+    const panels = computeFacetPanelSize({
+      nrow: 1,
+      ncol: 2,
+      freeH: false,
+      freeV: false,
+      mMax: { top: 0, right: 0, bottom: 0, left: 10 },
+      spacing: 0,
+      strip: 0,
+      gridW: 210,
+      gridH: 100,
+    });
+    // leftCount=1 so left margin once: (210 - 10) / 2 = 100
+    expect(panels.panelW).toBe(100);
+    expect(panels.panelH).toBe(100);
+  });
+});
+
+describe("geometryPanelFrame", () => {
+  it("swaps extents under coord flip", async () => {
+    const { geometryPanelFrame } = await import("../src/pipeline/assemble-geometry-panel-frame.ts");
+    const placement = {
+      x: 0,
+      y: 0,
+      width: 80,
+      height: 40,
+      ticksH: [],
+      ticksV: [],
+      showAxisX: true,
+      showAxisY: true,
+    };
+    const xScale = {
+      type: "linear" as const,
+      domain: [0, 1] as [number, number],
+      range: [0, 1] as [number, number],
+      normalize: (v: number) => v,
+    };
+    const yScale = {
+      type: "linear" as const,
+      domain: [0, 1] as [number, number],
+      range: [0, 1] as [number, number],
+      normalize: (v: number) => v,
+    };
+    const flipped = geometryPanelFrame(placement, { x: xScale, y: yScale }, true);
+    expect(flipped.innerWidth).toBe(40);
+    expect(flipped.innerHeight).toBe(80);
+    expect(flipped.xScale).toBe(xScale);
+  });
+});

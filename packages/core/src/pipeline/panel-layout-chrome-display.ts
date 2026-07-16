@@ -7,6 +7,13 @@ import type { TickFormatter } from "../layout/layout.js";
 import type { PositionScale } from "../scales/train.js";
 
 import { makeAxisFormatter } from "./layout-helpers.js";
+import {
+  flipDisplayBreaks,
+  flipDisplayFormatters,
+  flipDisplayFreeFlags,
+  flipDisplayTitles,
+  makeDisplayScalesFn,
+} from "./panel-layout-chrome-display-flip.js";
 import type { PipelineWarning } from "./types.js";
 
 export interface PanelLayoutDisplay {
@@ -48,20 +55,16 @@ export function resolvePanelLayoutDisplay(input: {
     warnings,
   } = input;
 
-  const hTitle = flip ? yTitle : xTitle;
-  const vTitle = flip ? xTitle : yTitle;
   const formatX = makeAxisFormatter("x", xScale, scalesConfig.x, warnings);
   const formatY = makeAxisFormatter("y", yScale, scalesConfig.y, warnings);
-  const formatH = flip ? formatY : formatX;
-  const formatV = flip ? formatX : formatY;
-  const hBreaks = flip ? scalesConfig.y?.breaks : scalesConfig.x?.breaks;
-  const vBreaks = flip ? scalesConfig.x?.breaks : scalesConfig.y?.breaks;
-  const freeH = flip ? freeY : freeX;
-  const freeV = flip ? freeX : freeY;
-  const displayScales = (p: number): { h: PositionScale; v: PositionScale } => {
-    const s = panelScales[p]!;
-    return flip ? { h: s.y, v: s.x } : { h: s.x, v: s.y };
-  };
+  const { hTitle, vTitle } = flipDisplayTitles(flip, xTitle, yTitle);
+  const { formatH, formatV } = flipDisplayFormatters(flip, formatX, formatY);
+  const { hBreaks, vBreaks } = flipDisplayBreaks(
+    flip,
+    scalesConfig.x?.breaks,
+    scalesConfig.y?.breaks,
+  );
+  const { freeH, freeV } = flipDisplayFreeFlags(flip, freeX, freeY);
 
   return {
     hTitle,
@@ -74,6 +77,6 @@ export function resolvePanelLayoutDisplay(input: {
     vBreaks,
     freeH,
     freeV,
-    displayScales,
+    displayScales: makeDisplayScalesFn(flip, panelScales),
   };
 }

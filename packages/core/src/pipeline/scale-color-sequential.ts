@@ -14,6 +14,7 @@ import {
   resolveSequentialRange,
 } from "./scale-color-sequential-domain.js";
 import { resolveSequentialLegendFormat } from "./scale-color-sequential-format.js";
+import { sequentialColorResolution } from "./scale-color-sequential-result.js";
 import type { ColorResolution } from "./scale-color-types.js";
 import type { Advisory, PipelineWarning } from "./types.js";
 
@@ -62,16 +63,5 @@ export function resolveSequentialColorScale(input: {
     });
   }
   const format = resolveSequentialLegendFormat(scale, config, name, warnings);
-  return {
-    resolved: { kind: "sequential", scale },
-    legendInput: {
-      kind: "ramp",
-      scale: name,
-      title: legendTitle,
-      domain: scale.domain,
-      at: (t: number) => scale.at(t),
-      format,
-    },
-    state: null,
-  };
+  return sequentialColorResolution(name, legendTitle, scale, format);
 }

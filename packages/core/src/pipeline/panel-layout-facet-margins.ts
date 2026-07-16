@@ -1,23 +1,17 @@
 /**
  * Facet grid: outer chrome, shared margin pass, and panel cell geometry.
  */
-import type { LayoutTheme, Margins, TickFormatter } from "../layout/layout.js";
+import type { LayoutTheme, TickFormatter } from "../layout/layout.js";
 import type { TextMeasurer } from "../layout/measure.js";
 
 import type { FacetPanelDef } from "./facets.js";
 import { computeFacetCellGeometry } from "./panel-layout-facet-cells.js";
 import { computeFacetSharedMargins } from "./panel-layout-facet-margins-pass.js";
+import type { FacetGridGeometry } from "./panel-layout-facet-margins-types.js";
 import { computeFacetOuterChrome } from "./panel-layout-facet-outer.js";
 import type { DisplayScalesFn } from "./panel-layout-types.js";
 
-export interface FacetGridGeometry {
-  mMax: Margins;
-  panelW: number;
-  panelH: number;
-  colX: number[];
-  rowY: number[];
-  bottomMostRow: number[];
-}
+export type { FacetGridGeometry } from "./panel-layout-facet-margins-types.js";
 
 export function computeFacetGridGeometry(input: {
   facetPanels: readonly FacetPanelDef[];
