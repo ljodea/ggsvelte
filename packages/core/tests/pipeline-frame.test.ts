@@ -137,6 +137,27 @@ describe("buildFrame — density / smooth / boxplot / summary", () => {
     expect([...frame.ymin!].every((v) => v === 0)).toBe(true);
   });
 
+  it("density drops singleton groups with a warning", () => {
+    const table = ColumnTable.fromRows([
+      { x: 1, g: "a" },
+      { x: 2, g: "a" },
+      { x: 3, g: "b" }, // singleton group
+    ]);
+    const warnings: PipelineWarning[] = [];
+    const binding = bindLayer(
+      {
+        geom: "density",
+        aes: { x: { field: "x" }, group: { field: "g" } },
+        stat: "density",
+      },
+      0,
+      table,
+      warnings,
+    );
+    buildFrame(binding, table, warnings, []);
+    expect(warnings.some((w) => w.code === "density-group-dropped")).toBe(true);
+  });
+
   it("smooth emits fitted y and optional band advisories path", () => {
     const table = ColumnTable.fromRows([
       { x: 1, y: 2 },

@@ -53,6 +53,27 @@ describe("panel layout via runPipeline", () => {
     expect(model.scene.panels[0]!.y).toBeGreaterThanOrEqual(STRIP_BAND);
   });
 
+  it("facet free_x shows x axes on more than the bottom edge row", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { x: 1, y: 1, g: "a" },
+          { x: 10, y: 2, g: "b" },
+          { x: 100, y: 3, g: "c" },
+          { x: 2, y: 4, g: "d" },
+        ],
+        aes({ x: "x", y: "y" }),
+      )
+        .geomPoint()
+        .facet({ wrap: "g", scales: "free_x", ncol: 2 })
+        .spec(),
+      size,
+    );
+    expect(model.scene.panels).toHaveLength(4);
+    const withX = model.scene.panels.filter((p) => p.axisX !== null);
+    expect(withX.length).toBeGreaterThanOrEqual(2);
+  });
+
   it("facet free_y shows y axes on every column (not only the left edge)", () => {
     const model = runPipeline(
       gg(
