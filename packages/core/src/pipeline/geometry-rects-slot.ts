@@ -1,5 +1,5 @@
 /**
- * Resolve bar/col rect center and width in normalized [0,1] x space.
+ * Resolve bar/col rect center/width and y-bounds in normalized [0,1] space.
  */
 import type { LayerFrame } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
@@ -10,7 +10,7 @@ export function resolveRectSlot(input: {
   row: number;
   binned: boolean;
   widthFrac: number;
-}): { center: number; w: number } | null {
+}): { center: number; w: number; t0: number; t1: number } | null {
   const { frame, fx, row, binned, widthFrac } = input;
   const t0 = fx.yScale.type === "band" ? NaN : fx.yScale.normalize(frame.ymin![row]!);
   const t1 = fx.yScale.type === "band" ? NaN : fx.yScale.normalize(frame.ymax![row]!);
@@ -41,5 +41,5 @@ export function resolveRectSlot(input: {
     w = full / slotCount;
     center = center + full * ((frame.dodgeSlot[row]! + 0.5) / slotCount - 0.5);
   }
-  return { center, w };
+  return { center, w, t0, t1 };
 }

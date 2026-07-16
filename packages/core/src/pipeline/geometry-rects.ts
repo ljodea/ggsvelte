@@ -33,16 +33,10 @@ export function rectsBatch(
       removed++;
       continue;
     }
-    const t0 = fx.yScale.type === "band" ? NaN : fx.yScale.normalize(frame.ymin[row]!);
-    const t1 = fx.yScale.type === "band" ? NaN : fx.yScale.normalize(frame.ymax[row]!);
-    if (Number.isNaN(t0) || Number.isNaN(t1)) {
-      removed++;
-      continue;
-    }
     const xPx = (slot.center - slot.w / 2) * fx.innerWidth;
     const wPx = slot.w * fx.innerWidth;
-    const y0 = fx.innerHeight - t0 * fx.innerHeight;
-    const y1 = fx.innerHeight - t1 * fx.innerHeight;
+    const y0 = fx.innerHeight - slot.t0 * fx.innerHeight;
+    const y1 = fx.innerHeight - slot.t1 * fx.innerHeight;
     rects.push(xPx, Math.min(y0, y1), wPx, Math.abs(y1 - y0));
     rowIndexKept.push(frame.rowIndex[row]!);
     keptRows.push(row);
