@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784189814726,
+  "lastUpdate": 1784190330293,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -8056,6 +8056,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 160.5213,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "eb3ff9744064dcb48fccf34e4fb8daf5066bbc77",
+          "message": "fix: limit zoom reset/write scope by mode and detect facet prop early after #61 (#76)\n\n- filterScopeChannelsByZoomMode so x-only linked plots do not clear shared\n  y domains on Reset / commitZoom / resetScales\n- Detect faceted intent from the raw facet prop (not assembled.facet) so\n  declaration-only children take the diagnostic/no-op path before layers\n  register",
+          "timestamp": "2026-07-16T03:24:51-05:00",
+          "tree_id": "69630d1a93309cf79a363e4c1887b112be109791",
+          "url": "https://github.com/ljodea/ggsvelte/commit/eb3ff9744064dcb48fccf34e4fb8daf5066bbc77"
+        },
+        "date": 1784190329277,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 1.9654,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.3336,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 7.9072,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 11.0629,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 70.0807,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 98.4173,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 0.8448,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 0.964,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 71.9089,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 87.5172,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 9.4735,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 9.6817,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 91.5394,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.5125,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 21.7089,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 5.7864,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 23.166,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 500.8487,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 131.1218,
             "unit": "ms"
           }
         ]
