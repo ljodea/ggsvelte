@@ -11,7 +11,7 @@ import { aes, gg, type PortableSpec } from "@ggsvelte/spec";
 import GGPlot from "../src/lib/GGPlot.svelte";
 import type { LegendFilterEvent } from "../src/lib/legend-filter.js";
 import { createLegendFilterState } from "../src/lib/legend-filter-state.svelte.js";
-import { createPlotRuntime } from "../src/lib/plot-runtime.svelte.js";
+import { createPlotRuntime, type PlotRuntime } from "../src/lib/plot-runtime.svelte.js";
 import { withEffectRoot, withFlushedEffectRoot } from "./helpers/effect-root.svelte.js";
 import { reactiveBox } from "./helpers/reactive-box.svelte.js";
 import { createReactiveRuntimeDeps } from "./helpers/runtime-deps.svelte.js";
@@ -25,10 +25,7 @@ const filterRows = [
 
 type FilterCb = ((event: LegendFilterEvent) => void) | undefined;
 /** Getter that supplies no host callback. */
-const noCallback: () => FilterCb = () => {
-  const absent: FilterCb = undefined;
-  return absent;
-};
+const noCallback = (): FilterCb => undefined;
 
 function colorSpec(
   data: readonly { x: number; y: number; group: string }[] = filterRows,
@@ -64,9 +61,16 @@ describe("createLegendFilterState construction", () => {
     );
 
     expect(modelCalls).toBe(0);
+    // Client deriveds are lazy, so the construction-time assertion alone
+    // cannot catch a model-reading $derived added to the factory. Force
+    // every exposed accessor and one effect flush, then re-assert — that is
+    // the closest client-side stand-in for Svelte 5.29's SSR behavior,
+    // where such a derived evaluates eagerly at construction (TDZ hazard).
     expect(state.options).not.toBeNull();
     expect(state.filters).toEqual([]);
     expect(state.hasActiveFilters).toBe(false);
+    flushSync();
+    expect(modelCalls).toBe(0);
     destroy();
   });
 });
@@ -325,31 +329,34 @@ describe("createLegendFilterState catalog reconciliation", () => {
 describe("runtime + legend-filter real cycle", () => {
   it("toggling a filter retrains the model via rowFilters", () => {
     const spec = colorSpec();
-    const modelBox = reactiveBox<RenderModel | null>(null);
 
     const { value, destroy } = withFlushedEffectRoot(() => {
       const runtimeDeps = createReactiveRuntimeDeps({
         assembled: spec,
         effectiveSpec: spec,
       });
+      // Host wiring: the controller is constructed BEFORE the runtime and
+      // reads the model through a getter closure over the later-declared
+      // runtime (never invoked during construction), so the catalog effect
+      // always sees the freshly retrained model — no manual re-sync.
+      let runtimeRef: PlotRuntime | null = null;
       const controller = createLegendFilterState({
         effectiveSpec: () => spec,
         legendFilterProp: () => true,
         onlegendfilter: noCallback,
         oninteraction: noCallback,
         announce: () => {},
-        model: () => modelBox.value,
+        model: () => runtimeRef?.model ?? null,
       });
-      // Runtime reads effective filters from the controller.
-      runtimeDeps.setFilters([]);
       const runtime = createPlotRuntime({
         ...runtimeDeps,
         effectiveLegendFilters: () => controller.filters,
       });
+      runtimeRef = runtime;
+      // Host registration order (GGPlot.svelte): model -> catalog -> late.
       runtime.registerModelEffects();
-      runtime.registerLateEffects();
-      modelBox.set(runtime.model);
       controller.registerCatalogEffects(() => controller.computeEntries(runtime.model));
+      runtime.registerLateEffects();
       return { runtime, controller };
     });
 
@@ -361,10 +368,7 @@ describe("runtime + legend-filter real cycle", () => {
       .computeEntries(runtime.model)
       .find((entry) => entry.entry.value === "north")!;
     controller.toggle(north, clickEvent());
-    // Force model re-evaluation through the filter dep.
-    void runtime.model;
     flushSync();
-    modelBox.set(runtime.model);
 
     expect(controller.filters).toHaveLength(1);
     expect(runtime.model).not.toBeNull();

@@ -22,7 +22,7 @@ import {
 // Public types
 // ---------------------------------------------------------------------------
 
-export type ResolvedLegendFilterOptions = {
+type ResolvedLegendFilterOptions = {
   readonly mode: "exclude" | "include";
   readonly multiple: boolean;
 };

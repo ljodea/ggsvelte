@@ -26,6 +26,10 @@
   let fieldsetEl = $state<HTMLFieldSetElement | null>(null);
 
   function onReset(event: MouseEvent): void {
+    // Mirror the controller's no-op guard: a reset with no active filters
+    // must not move keyboard focus (original resetLegendFilters early-
+    // returned before capturing the return target).
+    if (!controller.hasActiveFilters) return;
     // Capture first checkbox before reset (which may unmount the button).
     // Controller retains zero DOM/querySelector behavior.
     const returnTarget = fieldsetEl?.querySelector<HTMLElement>("input");

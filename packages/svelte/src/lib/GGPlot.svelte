@@ -1502,6 +1502,13 @@
     });
   });
 
+  // Single source for "the legend clear row is shown": the root class and
+  // the filter fieldset's below-clear offset must flip together (the S2
+  // layout test pins their combined geometry).
+  const legendClearActive = $derived(
+    legendFocusEnabled && effectiveLegendPressed !== null,
+  );
+
   // Host-side derived: must not live in the factory (server-eager model TDZ).
   const filterableLegendEntries = $derived(
     legendFilterState.computeEntries(model),
@@ -2753,8 +2760,7 @@
   class="gg-plot-root"
   class:gg-container-width={isContainerWidthProp(width)}
   class:gg-with-tool-rail={showToolRail}
-  class:gg-with-legend-clear={legendFocusEnabled &&
-    effectiveLegendPressed !== null}
+  class:gg-with-legend-clear={legendClearActive}
   class:gg-with-legend-filters={filterableLegendEntries.length > 0}
   class:gg-narrow-tools={isNarrowToolsWidth(resolvedWidth)}
   class:gg-with-docked-tooltip={isTooltipDocked({
@@ -2839,7 +2845,7 @@
     <PlotLegendFilters
       controller={legendFilterState}
       entries={filterableLegendEntries}
-      belowClearFocus={legendFocusEnabled && effectiveLegendPressed !== null}
+      belowClearFocus={legendClearActive}
     />
     <PlotSceneOverlays
       width={model.scene.width}
