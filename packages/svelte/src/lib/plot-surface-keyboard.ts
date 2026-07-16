@@ -1,4 +1,6 @@
 import { isAreaTool, type InteractionTool } from "./interaction.js";
+import { panelCenterAnchor, type PlotPoint } from "./plot-area-brush.js";
+import type { PanelBounds } from "./plot-geometry.js";
 
 /**
  * Capture-surface keyboard decision input. `hasBrushDraft` mirrors
@@ -23,11 +25,26 @@ export type SurfaceKeyboardInput = {
    * Meaningful only for `toggle-point-keys`; unused on other actions.
    */
   readonly sourceKeys: readonly PropertyKey[];
+  /**
+   * Host: `inspection?.focus.anchor ?? null`.
+   * Meaningful for `begin-area` (preferred over firstPanel center).
+   */
+  readonly inspectionAnchor: PlotPoint | null;
+  /**
+   * Host: `model?.scene.panels[0]`. Panel-center fallback for `begin-area`
+   * when no inspection anchor. Host still uses `panelId(0)` for dispatch
+   * (index-based, not derived from this panel reference).
+   */
+  readonly firstPanel: PanelBounds | undefined;
 };
 
 type SurfaceKeyAction =
   | { readonly type: "nudge-brush"; readonly dx: number; readonly dy: number }
-  | { readonly type: "begin-area" }
+  | {
+      readonly type: "begin-area";
+      /** Inspection anchor if present, else panel center (or {0,0}). */
+      readonly anchor: PlotPoint;
+    }
   | {
       /**
        * Host: normalize brush rect, then `resolveFinishBrushAction` owns
@@ -71,6 +88,8 @@ export function resolveSurfaceKeyAction(input: SurfaceKeyboardInput): SurfaceKey
     pinEnabled,
     focusKey,
     sourceKeys,
+    inspectionAnchor,
+    firstPanel,
   } = input;
   const area = isAreaTool(activeTool);
 
@@ -87,7 +106,12 @@ export function resolveSurfaceKeyAction(input: SurfaceKeyboardInput): SurfaceKey
   if (area && (key === "Enter" || key === " ")) {
     return {
       preventDefault: true,
-      action: hasBrushDraft ? { type: "complete-area" } : { type: "begin-area" },
+      action: hasBrushDraft
+        ? { type: "complete-area" }
+        : {
+            type: "begin-area",
+            anchor: inspectionAnchor ?? panelCenterAnchor(firstPanel),
+          },
     };
   }
 

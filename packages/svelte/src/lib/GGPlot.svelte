@@ -101,7 +101,6 @@
     evaluatePointerBrushEnd,
     initialBrushRect,
     nudgeBrushEnd,
-    panelCenterAnchor,
   } from "./plot-area-brush.js";
   import {
     frozenZoomDomains,
@@ -706,10 +705,14 @@
     void controllerRevision;
     return interaction?.selected(resolvedInteractionScope) ?? localSelectedKeys;
   });
+  // Shared enablement predicates (avoid re-typing the same config gates).
+  const inspectEnabled = $derived(interactionConfig.inspect !== null);
+  const pinEnabled = $derived(interactionConfig.inspect?.pin === true);
+  const legendFocusEnabled = $derived(interactionConfig.legendFocus !== null);
   const effectiveEmphasisKeys: readonly PropertyKey[] = $derived.by(() => {
     void controllerRevision;
     return resolveLegendEmphasisKeys({
-      legendFocusEnabled: interactionConfig.legendFocus !== null,
+      legendFocusEnabled,
       previewKeys: legendPreview?.keys ?? null,
       controllerKeys:
         interaction === undefined
@@ -762,7 +765,7 @@
   const legendDiagnostics = $derived.by(() => {
     if (model === null) return [] as InteractionDiagnostic[];
     return legendFocusDiscreteOnlyDiagnostics(
-      interactionConfig.legendFocus !== null,
+      legendFocusEnabled,
       model.scene.legends,
     );
   });
@@ -1267,7 +1270,7 @@
   // Drop chart-local emphasis when legend focus is turned off at runtime.
   $effect(() => {
     const plan = planLegendFocusDisabledClear({
-      legendFocusEnabled: interactionConfig.legendFocus !== null,
+      legendFocusEnabled,
       hasPreview: legendPreview !== null,
       hasCommitted: legendCommitted !== null,
       hasLocalEmphasis: localEmphasisKeys.length > 0,
@@ -1463,7 +1466,7 @@
   $effect(() => {
     const currentModel = model;
     const plan = planSceneInspectReconcile({
-      inspectionEnabled: interactionConfig.inspect !== null,
+      inspectionEnabled: inspectEnabled,
       // Thunk: do not read `inspection` on the same-run skip path so hover
       // updates are not effect dependencies of scene-run reconcile.
       getInspectionState: () =>
@@ -1767,7 +1770,7 @@
       hasTouchInspectStart: touchInspectStart !== null,
       brushing,
       hasBrushDraft: brushRect !== null,
-      inspectEnabled: interactionConfig.inspect !== null,
+      inspectEnabled,
     });
     switch (action.type) {
       case "touch-inspect-drag-cancel":
@@ -1955,8 +1958,8 @@
     const action = resolvePointerUpAction({
       pointerType: event.pointerType,
       activeTool,
-      inspectEnabled: interactionConfig.inspect !== null,
-      pinEnabled: interactionConfig.inspect?.pin === true,
+      inspectEnabled,
+      pinEnabled,
       hasTouchInspectStart: touchInspectStart !== null,
       touchInspectMoved,
       brushing,
@@ -2185,9 +2188,11 @@
       activeTool,
       hasBrushDraft: brushRect !== null,
       hasInspection: inspection !== null,
-      pinEnabled: interactionConfig.inspect?.pin === true,
+      pinEnabled,
       focusKey: inspection?.focus.key ?? null,
       sourceKeys: inspection?.focus.sourceKeys ?? [],
+      inspectionAnchor: inspection?.focus.anchor ?? null,
+      firstPanel: model?.scene.panels[0],
     });
     if (preventDefault) event.preventDefault();
     switch (action.type) {
@@ -2202,12 +2207,11 @@
         return;
       }
       case "begin-area": {
-        const anchor =
-          inspection?.focus.anchor ?? panelCenterAnchor(model?.scene.panels[0]);
-        brushRect = brushAtPoint(anchor);
+        // Pure table owns inspection-anchor vs panel-center policy.
+        brushRect = brushAtPoint(action.anchor);
         reducer.dispatch({
           type: "begin-area",
-          point: anchor,
+          point: action.anchor,
           panelId: panelId(0),
         });
         announceInteraction(BRUSH_SECOND_CORNER_ANNOUNCEMENT);
@@ -2251,9 +2255,9 @@
     const action = resolveCaptureClickAction({
       suppressClick: performance.now() < suppressClickUntil,
       activeTool,
-      pointSelectEnabled: interactionConfig.select?.type === "point",
-      inspectEnabled: interactionConfig.inspect !== null,
-      pinEnabled: interactionConfig.inspect?.pin === true,
+      pointSelectEnabled: canPublishPointSelection,
+      inspectEnabled,
+      pinEnabled,
       hasInspection: inspection !== null,
     });
     switch (action.type) {
@@ -2345,7 +2349,7 @@
   class="gg-plot-root"
   class:gg-container-width={isContainerWidthProp(width)}
   class:gg-with-tool-rail={showToolRail}
-  class:gg-with-legend-clear={interactionConfig.legendFocus !== null &&
+  class:gg-with-legend-clear={legendFocusEnabled &&
     effectiveLegendPressed !== null}
   class:gg-narrow-tools={isNarrowToolsWidth(resolvedWidth)}
   class:gg-with-docked-tooltip={isTooltipDocked({
@@ -2392,7 +2396,7 @@
       sceneWidth={model.scene.width}
       sceneHeight={model.scene.height}
       clearLegendX={resolveClearLegendX({
-        legendFocusEnabled: interactionConfig.legendFocus !== null,
+        legendFocusEnabled,
         pressedScale: effectiveLegendPressed?.scale ?? null,
         legends: model.scene.legends,
       })}
@@ -2490,7 +2494,7 @@
       showAreaInstruction={surfaceInteractive && areaAwaitingSecond}
       showLiveRegion={shouldRenderInteractionLiveRegion({
         surfaceInteractive,
-        legendFocusEnabled: interactionConfig.legendFocus !== null,
+        legendFocusEnabled,
       })}
       liveText={resolveInteractionLiveText({
         announcement: interactionAnnouncement,
