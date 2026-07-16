@@ -100,6 +100,35 @@ describe("interaction prelanding regressions", () => {
     expect(event.domain).not.toHaveProperty("y");
   });
 
+  it("scrolls overflowing recovery actions instead of overlapping the mode tabs", async () => {
+    let model: RenderModel | null = null;
+    const { container } = render(GGPlot, {
+      data: [
+        { id: "a", x: 1, y: 1 },
+        { id: "b", x: 2, y: 2 },
+      ],
+      aes: { x: "x", y: "y" },
+      layers: [{ geom: "point" }],
+      key: "id",
+      select: { type: "interval", mode: "xy" },
+      onrender: (next: RenderModel) => (model = next),
+      ...size,
+    });
+    await expect.poll(() => model !== null).toBe(true);
+    await expect
+      .poll(() => container.querySelectorAll(".gg-tool-recovery-actions button").length)
+      .toBeGreaterThan(0);
+
+    // R3 bounds/recovery buttons can outgrow any plot width; the actions
+    // track scrolls while the mode tabs keep their full labels.
+    const actions = container.querySelector<HTMLElement>(".gg-tool-recovery-actions")!;
+    expect(getComputedStyle(actions).overflowX).toBe("auto");
+    for (const button of container.querySelectorAll<HTMLButtonElement>(".gg-tool-modes button")) {
+      expect(getComputedStyle(button).whiteSpace).toBe("nowrap");
+      expect(button.scrollWidth).toBeLessThanOrEqual(button.clientWidth + 1);
+    }
+  });
+
   it("x zoom writes only the configured x domain", async () => {
     const zoomed = vi.fn<(event: ZoomEvent) => void>();
     const { container } = render(GGPlot, {

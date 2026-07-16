@@ -168,14 +168,16 @@ export function shouldClearLegendPreviewOnBlur(input: LegendBlurInput): boolean 
 export type InteractionLiveRegionInput = {
   readonly surfaceInteractive: boolean;
   readonly legendFocusEnabled: boolean;
+  readonly legendFilterEnabled?: boolean;
 };
 
 /**
- * Live region is required for surface tools **or** legend-only focus so
- * keyboard commits/clears still announce when inspect/select/zoom are off.
+ * Live region is required for surface tools, legend-only focus, **or** legend
+ * filtering so keyboard commits/clears and programmatic filter reconciliation
+ * still announce when inspect/select/zoom are off.
  */
 export function shouldRenderInteractionLiveRegion(input: InteractionLiveRegionInput): boolean {
-  return input.surfaceInteractive || input.legendFocusEnabled;
+  return input.surfaceInteractive || input.legendFocusEnabled || input.legendFilterEnabled === true;
 }
 
 // ---- commit / preview dismiss ----

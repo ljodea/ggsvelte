@@ -43,8 +43,9 @@ bun add @ggsvelte/svelte        # or: npm install @ggsvelte/svelte
 ```
 
 `<GGPlot>` supports `facet`, `coord`, `theme`, opt-in `inspect`, point or
-interval `select`, brush `zoom`, `width="container"`, per-layer
-`render="canvas"`, and `a11y="force-svg"`.
+faceted interval `select`, brush `zoom`, visual `legendFocus`, data-changing
+`legendFilter`, `width="container"`, per-layer `render="canvas"`, and
+`a11y="force-svg"`.
 
 ```svelte
 <GGPlot
@@ -52,7 +53,8 @@ interval `select`, brush `zoom`, `width="container"`, per-layer
   aes={{ x: "date", y: "value", color: "series" }}
   key="id"
   inspect={{ mode: "x" }}
-  select={{ type: "interval", mode: "xy" }}
+  select={{ type: "interval", mode: "xy", preset: "cross-panel" }}
+  legendFilter
   oninteraction={(event) => console.log(event)}
 >
   <GeomPoint />
@@ -60,8 +62,14 @@ interval `select`, brush `zoom`, `width="container"`, per-layer
 ```
 
 Inspection includes the HTML tooltip, semantic crosshair, keyboard traversal,
-and pinning. Selection and zoom use separate accessible tools when both are
-enabled. See the [interaction guide and typed event reference](https://ljodea.github.io/ggsvelte/guide/interactions).
+and pinning. Selection and zoom use separate accessible tools and expose exact
+labelled bounds entry after a commit. Legend focus only emphasizes groups;
+legend filtering reruns the grammar over included rows while preserving stable
+categorical colors. Filter changes, clause removals, and clears are delivered to both
+`onlegendfilter` and the unified `oninteraction` callback. Changing filter
+mode clears prior clauses; values removed from a changing data catalog are
+pruned and return visible by default. `resetScales()` resets trained scale
+state without clearing active filters. See the [interaction guide and typed event reference](https://ljodea.github.io/ggsvelte/guide/interactions).
 
 ## Headless + CLI
 

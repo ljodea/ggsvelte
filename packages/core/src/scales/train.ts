@@ -20,7 +20,7 @@
 import { tickStep } from "../layout/ticks.js";
 import { VIRIDIS_RAMP_10 } from "./color.js";
 import type { ScaleState, ScaleWarning, TrainResult } from "./state.js";
-import { trainDiscrete } from "./state.js";
+import { encodeKey, trainDiscrete } from "./state.js";
 
 /**
  * Default categorical palette: 10 colors in the Observable 10 family.
@@ -131,8 +131,10 @@ export interface ContinuousScale {
 
 export interface BandScale {
   type: "band";
-  /** Categories: pinned (explicit domain) or present first-seen order. */
+  /** Presentation labels for categories, parallel to `rawDomain`. */
   domain: readonly string[];
+  /** Typed categories: pinned (explicit domain) or present first-seen order. */
+  rawDomain: readonly unknown[];
   /** Band index of a value (undefined = not in the domain). */
   indexOf(value: unknown): number | undefined;
   /** Center of a band in [0, 1] (undefined = not in the domain). */
@@ -351,26 +353,26 @@ export function trainBand(
   config: BandConfig = {},
 ): BandScale {
   const index = new Map<string, number>();
+  const rawDomain: unknown[] = [];
+  const add = (value: unknown): void => {
+    const key = encodeKey(value);
+    if (index.has(key)) return;
+    index.set(key, index.size);
+    rawDomain.push(value);
+  };
   if (config.domain === undefined) {
-    for (const column of columns) {
-      for (const v of column) {
-        const key = bandKey(v);
-        if (!index.has(key)) index.set(key, index.size);
-      }
-    }
+    for (const column of columns) for (const value of column) add(value);
   } else {
-    for (const v of config.domain) {
-      const key = bandKey(v);
-      if (!index.has(key)) index.set(key, index.size);
-    }
+    for (const value of config.domain) add(value);
   }
-  const domain = [...index.keys()];
+  const domain = rawDomain.map((value) => bandKey(value));
   const n = domain.length;
   const reverse = config.reverse === true;
-  const indexOf = (value: unknown) => index.get(bandKey(value));
+  const indexOf = (value: unknown) => index.get(encodeKey(value));
   return {
     type: "band",
-    domain,
+    domain: Object.freeze(domain),
+    rawDomain: Object.freeze(rawDomain),
     indexOf,
     step: n === 0 ? 1 : 1 / n,
     normalize: (value: unknown) => {

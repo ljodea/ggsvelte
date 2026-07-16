@@ -26,6 +26,7 @@ export function assembleScenePanels(input: {
     const bottom = axisTicks(h, placement.ticksH, placement.width, false);
     const left = axisTicks(v, placement.ticksV, placement.height, true);
     return {
+      identity: facetPanels[p]!.identity,
       id: facetPanels[p]!.id,
       x: placement.x,
       y: placement.y,

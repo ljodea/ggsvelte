@@ -54,10 +54,26 @@ describe("trainBand", () => {
   it("assigns first-seen band positions (centers)", () => {
     const scale = trainBand([["b", "a", "c", "a"]]);
     expect(scale.domain).toEqual(["b", "a", "c"]);
+    expect(scale.rawDomain).toEqual(["b", "a", "c"]);
     expect(scale.indexOf("b")).toBe(0);
     expect(scale.normalize("b")).toBeCloseTo(1 / 6);
     expect(scale.normalize("a")).toBeCloseTo(3 / 6);
     expect(scale.normalize("zzz")).toBeUndefined();
+  });
+
+  it("preserves typed categories even when their display labels collide", () => {
+    const date = new Date("2025-01-02T00:00:00.000Z");
+    const scale = trainBand([[1, "1", true, "true", false, null, date]]);
+
+    expect(scale.domain).toEqual(["1", "1", "true", "true", "false", "(null)", date.toISOString()]);
+    expect(scale.rawDomain).toEqual([1, "1", true, "true", false, null, date]);
+    expect(scale.indexOf(1)).toBe(0);
+    expect(scale.indexOf("1")).toBe(1);
+    expect(scale.indexOf(true)).toBe(2);
+    expect(scale.indexOf("true")).toBe(3);
+    expect(scale.indexOf(false)).toBe(4);
+    expect(scale.indexOf(null)).toBe(5);
+    expect(scale.indexOf(new Date(date))).toBe(6);
   });
 });
 

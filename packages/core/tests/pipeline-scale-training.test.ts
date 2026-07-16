@@ -170,6 +170,8 @@ describe("resolveColorScale", () => {
     const result = resolveColorScale(
       "color",
       [pointFrame(table)],
+      [],
+      table,
       table,
       undefined,
       null,
@@ -196,6 +198,8 @@ describe("resolveColorScale", () => {
     const result = resolveColorScale(
       "color",
       [frame],
+      [],
+      table,
       table,
       undefined,
       null,
@@ -223,6 +227,8 @@ describe("resolveColorScale", () => {
     const result = resolveColorScale(
       "color",
       [frame],
+      [],
+      table,
       table,
       undefined,
       null,
@@ -249,6 +255,8 @@ describe("resolveColorScale", () => {
     const result = resolveColorScale(
       "color",
       [frame],
+      [],
+      table,
       table,
       { type: "ordinal" },
       null,

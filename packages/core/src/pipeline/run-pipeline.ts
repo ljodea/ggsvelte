@@ -38,6 +38,8 @@ export function runPipeline(spec: SpecInput | PortableSpec, options: RunOptions)
     normalized,
     options,
     table: prepared.table,
+    sourceTable: prepared.sourceTable,
+    bindings: prepared.bindings,
     facetPanels: prepared.facetPanels,
     panelFrames: prepared.panelFrames,
     freeX: prepared.freeX,

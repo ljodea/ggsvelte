@@ -16,8 +16,12 @@ import { resolveFacetWrap } from "./facets-wrap.js";
 export type { FacetPanelDef, FacetLayout } from "./facets-types.js";
 export { SINGLE_PANEL } from "./facets-types.js";
 
-export function resolveFacet(facet: FacetSpec | undefined, table: ColumnTable): FacetLayout {
-  if (facet === undefined) return SINGLE_PANEL(table);
+export function resolveFacet(
+  facet: FacetSpec | undefined,
+  table: ColumnTable,
+  baseSourceRows: number[] | null = null,
+): FacetLayout {
+  if (facet === undefined) return SINGLE_PANEL(table, baseSourceRows);
   const wrapField = facetField(facet.wrap, "wrap", table);
   const rowsField = facetField(facet.rows, "rows", table);
   const colsField = facetField(facet.cols, "cols", table);
@@ -31,6 +35,7 @@ export function resolveFacet(facet: FacetSpec | undefined, table: ColumnTable): 
       ncol: facet.ncol,
       freeX,
       freeY,
+      baseSourceRows,
     });
   }
 
@@ -40,5 +45,6 @@ export function resolveFacet(facet: FacetSpec | undefined, table: ColumnTable): 
     colsField,
     freeX,
     freeY,
+    baseSourceRows,
   });
 }

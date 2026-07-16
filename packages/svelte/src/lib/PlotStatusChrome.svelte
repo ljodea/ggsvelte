@@ -9,6 +9,7 @@
   const {
     plotId,
     showInstructions = false,
+    description = "Use arrow keys to inspect data. Press Enter to pin. Press Escape to dismiss.",
     activeDatumLabel = "No active datum",
     showAreaInstruction = false,
     showLiveRegion = false,
@@ -19,6 +20,8 @@
     plotId: string;
     /** When true, render description + active datum sr-only pair. */
     showInstructions?: boolean;
+    /** Keyboard-usage description for the capture surface (tool-specific). */
+    description?: string;
     activeDatumLabel?: string;
     showAreaInstruction?: boolean;
     showLiveRegion?: boolean;
@@ -30,7 +33,7 @@
 
 {#if showInstructions}
   <p id={`${plotId}-description`} class="gg-sr-only">
-    Use arrow keys to inspect data. Press Enter to pin. Press Escape to dismiss.
+    {description}
   </p>
   <p id={`${plotId}-active`} class="gg-sr-only">
     {activeDatumLabel}

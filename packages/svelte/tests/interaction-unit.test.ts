@@ -81,6 +81,38 @@ describe("interaction capability normalization", () => {
     expect(withoutKey.interactive).toBe(false);
   });
 
+  it("warns when coordinated interval presets have no stable key", () => {
+    // Union combines stored record keys and cross-panel matches candidate
+    // semantic keys — keyless rows silently select nothing beyond the
+    // origin rectangle, so surface it like keyless point selection.
+    for (const preset of ["union", "cross-panel"] as const) {
+      const withoutKey = normalizeInteractionConfig(
+        { select: { type: "interval", preset } },
+        { hasKey: false },
+      );
+      expect(withoutKey.diagnostics).toContainEqual(
+        expect.objectContaining({
+          code: "INTERACTION_INTERVAL_PRESET_REQUIRES_KEY",
+          prop: "key",
+        }),
+      );
+    }
+    const independent = normalizeInteractionConfig(
+      { select: { type: "interval" } },
+      { hasKey: false },
+    );
+    expect(
+      independent.diagnostics.some(
+        (diagnostic) => diagnostic.code === "INTERACTION_INTERVAL_PRESET_REQUIRES_KEY",
+      ),
+    ).toBe(false);
+    const keyed = normalizeInteractionConfig(
+      { select: { type: "interval", preset: "union" } },
+      { hasKey: true },
+    );
+    expect(keyed.diagnostics).toEqual([]);
+  });
+
   it("starts interval capabilities in Inspect and never arms a drag implicitly", () => {
     const resolved = normalizeInteractionConfig({
       inspect: true,
@@ -93,17 +125,18 @@ describe("interaction capability normalization", () => {
     expect(resolved.zoom).toMatchObject({ mode: "xy", trigger: "brush" });
   });
 
-  it("diagnoses unsupported interval facets without disabling inspection", () => {
+  it("enables faceted interval selection and diagnoses only faceted brush zoom", () => {
     const resolved = normalizeInteractionConfig(
-      { inspect: true, select: "interval" },
+      { inspect: true, select: "interval", zoom: true },
       { faceted: true },
     );
     expect(resolved.inspect).not.toBeNull();
-    expect(resolved.select).toBeNull();
+    expect(resolved.select).toMatchObject({ type: "interval", mode: "xy" });
+    expect(resolved.zoom).toBeNull();
     expect(resolved.diagnostics[0]).toMatchObject({
       code: "INTERACTION_INTERVAL_FACET_UNSUPPORTED",
       severity: "warning",
-      prop: "select",
+      prop: "zoom",
     });
   });
 

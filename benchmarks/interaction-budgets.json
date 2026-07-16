@@ -1,6 +1,6 @@
 {
-  "$comment": "Pinned Chromium interaction gates. R0 inspection retains its 50/500 x 5 dispatch gate; R2 separately measures 100k legend keyboard navigation and mutation-to-DOM propagation across three linked views.",
-  "version": 2,
+  "$comment": "Pinned Chromium interaction gates. R0 inspection retains its 50/500 x 5 dispatch gate; R2 measures 100k legend navigation and linked propagation; R3 measures filter-to-pipeline and precise-bounds apply latency while independently asserting exact commit counts.",
+  "version": 3,
   "warmupOperations": 50,
   "operationsPerSample": 500,
   "samples": 5,
@@ -9,5 +9,9 @@
   "legendOperationsPerSample": 20,
   "legendSamples": 3,
   "legendNavigationP95Ms": 8,
-  "threeViewPropagationP95Ms": 50
+  "threeViewPropagationP95Ms": 50,
+  "r3LegendFilterOperations": 8,
+  "r3LegendFilterCommitP95Ms": 320,
+  "r3SelectionApplyMs": 100,
+  "r3ZoomApplyMs": 100
 }

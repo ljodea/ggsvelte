@@ -1,10 +1,11 @@
 /**
  * Facet wrap partition: one panel per distinct value, near-square ncol default.
  */
+import { createFacetPanelIdentity } from "../facet-identity.js";
 import { bandKey } from "../scales/train.js";
 import type { ColumnTable } from "../table.js";
 
-import { facetValues, panelValueToken, rowsMatching } from "./facets-helpers.js";
+import { facetValues, rowsMatching } from "./facets-helpers.js";
 import type { FacetLayout } from "./facets-types.js";
 import { SINGLE_PANEL } from "./facets-types.js";
 
@@ -14,21 +15,24 @@ export function resolveFacetWrap(input: {
   ncol: number | undefined;
   freeX: boolean;
   freeY: boolean;
+  baseSourceRows: number[] | null;
 }): FacetLayout {
-  const { table, wrapField, freeX, freeY } = input;
+  const { table, wrapField, freeX, freeY, baseSourceRows } = input;
   const values = facetValues(table, wrapField);
-  if (values.length === 0) return SINGLE_PANEL(table);
+  if (values.length === 0) return SINGLE_PANEL(table, baseSourceRows);
   const ncol = Math.min(values.length, input.ncol ?? Math.ceil(Math.sqrt(values.length)));
   const nrow = Math.ceil(values.length / ncol);
   const panels = values.map((value, i) => {
     const rows = rowsMatching(table, wrapField, value);
+    const identity = createFacetPanelIdentity([{ role: "wrap", field: wrapField, value }]);
     return {
-      id: `panel:wrap:${wrapField}=${panelValueToken(value)}`,
+      identity,
+      id: identity.key,
       label: bandKey(value),
       row: Math.floor(i / ncol),
       col: i % ncol,
       table: table.subset(rows),
-      sourceRows: rows,
+      sourceRows: rows.map((row) => baseSourceRows?.[row] ?? row),
     };
   });
   return { faceted: true, panels, nrow, ncol, freeX, freeY };

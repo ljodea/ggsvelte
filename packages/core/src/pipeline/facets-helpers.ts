@@ -3,13 +3,14 @@
  */
 import { didYouMean } from "@ggsvelte/spec";
 
+import { encodeKey } from "../scales/state.js";
 import { bandKey } from "../scales/train.js";
 import type { CellValue } from "../table.js";
 import { cellToNumber, ColumnTable } from "../table.js";
 
 import { PipelineError } from "./types.js";
 
-export { panelComponentToken, panelValueToken, rowsMatching } from "./facets-tokens.js";
+export { rowsMatching } from "./facets-tokens.js";
 
 export function facetField(
   ref: { field: string } | undefined,
@@ -37,7 +38,7 @@ export function facetField(
 export function facetValues(table: ColumnTable, field: string): CellValue[] {
   const seen = new Map<string, CellValue>();
   for (const v of table.column(field)) {
-    const key = bandKey(v);
+    const key = encodeKey(v);
     if (!seen.has(key)) seen.set(key, v);
   }
   const values = [...seen.values()];
@@ -48,6 +49,7 @@ export function facetValues(table: ColumnTable, field: string): CellValue[] {
     if (numeric) return cellToNumber(a) - cellToNumber(b);
     const ka = bandKey(a);
     const kb = bandKey(b);
+    if (ka === kb) return encodeKey(a).localeCompare(encodeKey(b), "en");
     return ka < kb ? -1 : ka > kb ? 1 : 0;
   });
   return values;

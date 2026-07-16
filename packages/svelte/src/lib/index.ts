@@ -13,6 +13,12 @@
 /** @lifecycle stable-intent */
 export { default as GGPlot } from "./GGPlot.svelte";
 export { default as Tooltip } from "./Tooltip.svelte";
+export type {
+  LegendFilterClause,
+  LegendFilterEvent,
+  LegendFilterInput,
+  LegendFilterOptions,
+} from "./legend-filter.js";
 export { createPlotInteraction } from "./interaction-controller.svelte.js";
 export type {
   CreatePlotInteractionOptions,
@@ -24,6 +30,7 @@ export { INTERACTION_DIAGNOSTIC_CATALOG, normalizeInteractionConfig } from "./in
 export type {
   AreaMode,
   BrushSelection,
+  FacetIntervalPreset,
   InspectInput,
   InspectMode,
   InspectOptions,
@@ -44,18 +51,22 @@ export type {
   PlotInspectionClear,
   PlotInteractionEvent,
   PlotInteractionChange,
+  PlotInteractionInterval,
   PlotInteractionScope,
   PlotInteractionSnapshot,
   PlotInteractionTransition,
   PlotSelection,
   PointSelection,
   ReadonlyZoomDomains,
+  ReadonlyIntervalDomains,
   ResolvedInspectMode,
   ResolvedInteractionConfig,
   SelectInput,
   SelectOptions,
   ScopedInteractionDomain,
+  ScopedInteractionInterval,
   ScopedInteractionKeys,
+  SemanticIntervalAxis,
   TooltipContext,
   TooltipField,
   ZoomDomains,

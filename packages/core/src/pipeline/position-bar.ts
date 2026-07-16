@@ -2,14 +2,16 @@
  * Bar-like stack/fill/dodge position adjustments (from zero baseline).
  */
 import { positionDodge, positionStack } from "../positions/positions.js";
-import { bandKey } from "../scales/train.js";
+import { encodeKey } from "../scales/state.js";
 
 import { isBarLike } from "./scale-training.js";
 import type { LayerFrame } from "./types.js";
 
-/** Per-row slot keys: band categories, or bin centers for binned bars. */
+/** Per-row slot keys: band categories, or bin centers for binned bars.
+ * `encodeKey` matches the band scale's typed identity, so categories with
+ * colliding labels (`1` vs `"1"`) occupy distinct slots. */
 export function barSlotKeys(frame: LayerFrame): (number | string)[] | null {
-  if (frame.xValues !== null) return frame.xValues.map((v) => bandKey(v));
+  if (frame.xValues !== null) return frame.xValues.map((v) => encodeKey(v));
   if (frame.xNumeric !== null) return Array.from(frame.xNumeric);
   return null;
 }

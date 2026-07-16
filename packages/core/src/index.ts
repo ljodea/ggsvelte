@@ -19,6 +19,29 @@ export {
 } from "./table.js";
 export type { CellValue, Columns, Discreteness, FieldType, Rows } from "./table.js";
 
+// Runtime data-changing filters (interactive legends and linked views)
+export {
+  compileRuntimeRowFilter,
+  compileRuntimeRowIndexFilter,
+  runtimeFilterValueEqual,
+} from "./runtime-filter.js";
+export type {
+  RuntimeRow,
+  RuntimeRowFilter,
+  RuntimeRowIndexFilter,
+  RuntimeRowFilterClause,
+  RuntimeRowFilterMode,
+} from "./runtime-filter.js";
+
+// Facet panel identity (typed and independent of display position)
+export { createFacetPanelIdentity } from "./facet-identity.js";
+export type {
+  FacetPanelIdentity,
+  FacetPanelIdentityInput,
+  FacetPanelRole,
+  FacetPanelValueIdentity,
+} from "./facet-identity.js";
+
 // Grouping (decision 0005)
 export { deriveGroups, inferDiscreteness } from "./grouping.js";
 export type { AesMapping, DeclaredDiscreteness, GroupDerivation } from "./grouping.js";
@@ -131,7 +154,7 @@ export type {
 } from "./layout/layout.js";
 
 // Legends
-export { buildLegends, LEGEND_ROW_HEIGHT } from "./legend.js";
+export { buildLegends, disambiguatedLabels, LEGEND_ROW_HEIGHT } from "./legend.js";
 export type {
   DiscreteLegendInput,
   LegendBlock,

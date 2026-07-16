@@ -58,6 +58,8 @@ export function assembleFinalizeRenderModel(input: {
     candidates: input.candidates,
     formatX: panelLayout.formatX,
     formatY: panelLayout.formatY,
-    table: prepared.table,
+    // Retain the unfiltered source table: model.row() resolves source-row
+    // indices, which runtime filters preserve against the original data.
+    table: prepared.sourceTable,
   });
 }

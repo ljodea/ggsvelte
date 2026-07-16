@@ -231,16 +231,6 @@ describe("collectColorChannelValues", () => {
   });
 });
 
-describe("panelValueToken", () => {
-  it("prefixes values by type and treats -0 as 0", async () => {
-    const { panelValueToken } = await import("../src/pipeline/facets-tokens.ts");
-    expect(panelValueToken(null)).toBe("null");
-    expect(panelValueToken("a")).toBe("s:a");
-    expect(panelValueToken(-0)).toBe("n:0");
-    expect(panelValueToken(true)).toBe("b:true");
-  });
-});
-
 describe("createLazyIdentityIndex", () => {
   it("builds the index once and reuses it", async () => {
     const { createLazyIdentityIndex } =

@@ -133,7 +133,7 @@ describe("DESIGN.md interaction presentation", () => {
     );
   });
 
-  it("preserves chart chrome and reports empty and unavailable states", () => {
+  it("preserves chart chrome, reports empty state, and supports faceted intervals", () => {
     const empty = render(GGPlot, {
       data: [],
       aes: { x: "x", y: "y" },
@@ -157,9 +157,8 @@ describe("DESIGN.md interaction presentation", () => {
       width: 480,
       height: 320,
     });
-    const status = unavailable.container.querySelector(".gg-capability-status");
-    expect(status?.textContent).toContain("unavailable");
-    expect(status?.getAttribute("role")).toBe("status");
+    expect(unavailable.container.querySelector(".gg-capability-status")).toBeNull();
+    expect(unavailable.container.textContent).toContain("Select area");
   });
 
   it("keeps all 1,000 pinned members in labelled, navigable DOM", () => {

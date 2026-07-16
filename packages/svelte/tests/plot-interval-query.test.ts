@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildIntervalSelectionFromScene,
+  intervalPixelsFromDomains,
   intervalQuerySceneFromModel,
   resolveIntervalQueryParts,
   type IntervalQueryModelPort,
@@ -12,7 +13,13 @@ function scene(partial: {
   panel?: IntervalQueryScene["panel"];
   singlePanel?: boolean;
   flip?: boolean;
-  candidates?: readonly { lineage: number; x0: number; y0: number; x1: number; y1: number }[];
+  candidates?: readonly {
+    lineage: number;
+    x0: number;
+    y0: number;
+    x1: number;
+    y1: number;
+  }[];
   lineage?: Record<number, number[]>;
 }): IntervalQueryScene {
   const panel =
@@ -107,6 +114,233 @@ describe("resolveIntervalQueryParts", () => {
       scene: scene({ singlePanel: false }),
     });
     expect(parts.invertedDomain).toEqual({});
+  });
+
+  it("uses the requested facet panel identity and its local scales", () => {
+    const base = scene({ singlePanel: false });
+    const parts = resolveIntervalQueryParts({
+      pixels: { x0: 110, y0: 0, x1: 150, y1: 50 },
+      mode: "xy",
+      panelId: "panel:east",
+      scene: {
+        ...base,
+        panels: [
+          {
+            x: 0,
+            y: 0,
+            width: 100,
+            height: 100,
+            id: "panel:west",
+            scales: base.scales,
+          },
+          {
+            x: 100,
+            y: 0,
+            width: 100,
+            height: 100,
+            id: "panel:east",
+            scales: {
+              x: { type: "linear", invert: (t: number) => 100 + t * 100 },
+              y: { type: "linear", invert: (t: number) => 1000 - t * 1000 },
+            } as IntervalQueryScene["scales"],
+          },
+        ],
+      },
+    });
+
+    expect(parts.panelId).toBe("panel:east");
+    expect(parts.invertedDomain.x).toEqual([110, 150]);
+    expect(parts.invertedDomain.y).toEqual([0, 500]);
+  });
+
+  it("returns inclusive band endpoints for categorical interval selection", () => {
+    const base = scene({});
+    const parts = resolveIntervalQueryParts({
+      pixels: { x0: 20, y0: 0, x1: 70, y1: 100 },
+      mode: "x",
+      scene: {
+        ...base,
+        scales: {
+          ...base.scales,
+          x: {
+            type: "band",
+            domain: ["a", "b", "c", "d"],
+            rawDomain: ["a", "b", "c", "d"],
+            indexOf: () => {},
+            normalize: () => {},
+            step: 0.25,
+          },
+        },
+      },
+    });
+    expect(parts.invertedDomain.x).toEqual(["a", "c"]);
+  });
+
+  it("honors reversed band scales when inverting brush bounds", () => {
+    const base = scene({});
+    const rawDomain = ["a", "b", "c", "d"] as const;
+    const parts = resolveIntervalQueryParts({
+      // Screen fractions [0.2, 0.7]; with reverse the domain runs right-to-
+      // left, so the brushed categories are the mirrored [0.3, 0.8] → b..d.
+      pixels: { x0: 20, y0: 0, x1: 70, y1: 100 },
+      mode: "x",
+      scene: {
+        ...base,
+        scales: {
+          ...base.scales,
+          x: {
+            type: "band",
+            domain: ["a", "b", "c", "d"],
+            rawDomain,
+            indexOf: (value: unknown) =>
+              rawDomain.findIndex((candidate) => Object.is(candidate, value)),
+            normalize: (value: unknown) => {
+              const i = rawDomain.findIndex((candidate) => Object.is(candidate, value));
+              return i < 0 ? undefined : 1 - (i + 0.5) / rawDomain.length;
+            },
+            step: 0.25,
+          },
+        },
+      },
+    });
+    expect(parts.invertedDomain.x).toEqual(["b", "d"]);
+  });
+
+  it("returns raw typed band endpoints instead of colliding display labels", () => {
+    const base = scene({});
+    const date = new Date("2025-01-02T00:00:00.000Z");
+    const rawDomain = [1, "1", true, null, date] as const;
+    const parts = resolveIntervalQueryParts({
+      pixels: { x0: 0, y0: 0, x1: 39, y1: 100 },
+      mode: "x",
+      scene: {
+        ...base,
+        scales: {
+          ...base.scales,
+          x: {
+            type: "band",
+            domain: ["1", "1", "true", "(null)", date.toISOString()],
+            rawDomain,
+            indexOf: (value: unknown) =>
+              rawDomain.findIndex((candidate) => Object.is(candidate, value)),
+            normalize: () => {},
+            step: 0.2,
+          },
+        },
+      },
+    });
+
+    expect(parts.invertedDomain.x).toEqual([1, "1"]);
+  });
+});
+
+describe("intervalPixelsFromDomains", () => {
+  const panel = { x: 10, y: 20, width: 100, height: 200 };
+  const linearScales = {
+    x: { type: "linear", normalize: (v: number) => v / 10 },
+    y: { type: "linear", normalize: (v: number) => v / 20 },
+  } as IntervalQueryScene["scales"];
+  const bandRaw = ["a", "b", "c", "d"] as const;
+  const bandScale = {
+    type: "band",
+    domain: ["a", "b", "c", "d"],
+    rawDomain: bandRaw,
+    indexOf: (value: unknown) => {
+      const i = bandRaw.findIndex((candidate) => Object.is(candidate, value));
+      return i < 0 ? undefined : i;
+    },
+    normalize: (value: unknown) => {
+      const i = bandRaw.findIndex((candidate) => Object.is(candidate, value));
+      return i < 0 ? undefined : (i + 0.5) / bandRaw.length;
+    },
+    step: 0.25,
+  };
+
+  it("maps continuous domains through normalize on both axes", () => {
+    expect(
+      intervalPixelsFromDomains({
+        domains: {
+          x: { kind: "linear", domain: [2, 6] },
+          y: { kind: "linear", domain: [5, 10] },
+        },
+        panel,
+        scales: linearScales,
+        flipped: false,
+      }),
+    ).toEqual({ x0: 30, y0: 120, x1: 70, y1: 170 });
+  });
+
+  it("spans the full panel on the unconstrained axis", () => {
+    expect(
+      intervalPixelsFromDomains({
+        domains: { x: { kind: "linear", domain: [2, 6] } },
+        panel,
+        scales: linearScales,
+        flipped: false,
+      }),
+    ).toEqual({ x0: 30, y0: 20, x1: 70, y1: 220 });
+  });
+
+  it("covers selected band categories edge to edge", () => {
+    expect(
+      intervalPixelsFromDomains({
+        domains: { x: { kind: "band", values: ["b", "c"] } },
+        panel,
+        scales: { ...linearScales, x: bandScale } as IntervalQueryScene["scales"],
+        flipped: false,
+      }),
+    ).toEqual({ x0: 35, y0: 20, x1: 85, y1: 220 });
+  });
+
+  it("mirrors reversed band scales through normalize", () => {
+    const reversed = {
+      ...bandScale,
+      normalize: (value: unknown) => {
+        const i = bandRaw.findIndex((candidate) => Object.is(candidate, value));
+        return i < 0 ? undefined : 1 - (i + 0.5) / bandRaw.length;
+      },
+    };
+    expect(
+      intervalPixelsFromDomains({
+        domains: { x: { kind: "band", values: ["a"] } },
+        panel,
+        scales: { ...linearScales, x: reversed } as IntervalQueryScene["scales"],
+        flipped: false,
+      }),
+    ).toEqual({ x0: 85, y0: 20, x1: 110, y1: 220 });
+  });
+
+  it("swaps channels under coord flip", () => {
+    expect(
+      intervalPixelsFromDomains({
+        domains: {
+          x: { kind: "linear", domain: [2, 6] },
+          y: { kind: "linear", domain: [5, 10] },
+        },
+        panel,
+        scales: linearScales,
+        flipped: true,
+      }),
+    ).toEqual({ x0: 35, y0: 100, x1: 60, y1: 180 });
+  });
+
+  it("falls back to the full panel for unmappable domains", () => {
+    expect(
+      intervalPixelsFromDomains({
+        domains: { x: { kind: "band", values: ["missing"] } },
+        panel,
+        scales: { ...linearScales, x: bandScale } as IntervalQueryScene["scales"],
+        flipped: false,
+      }),
+    ).toEqual({ x0: 10, y0: 20, x1: 110, y1: 220 });
+    expect(
+      intervalPixelsFromDomains({
+        domains: { y: { kind: "band", values: ["a"] } },
+        panel,
+        scales: linearScales,
+        flipped: false,
+      }),
+    ).toEqual({ x0: 10, y0: 20, x1: 110, y1: 220 });
   });
 });
 

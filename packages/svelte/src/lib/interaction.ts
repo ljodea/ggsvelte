@@ -1,6 +1,8 @@
 import type { CellValue } from "@ggsvelte/core";
 import type { Snippet } from "svelte";
 
+import type { LegendFilterEvent } from "./legend-filter.js";
+
 export type InteractionSource = "pointer" | "keyboard" | "touch" | "programmatic";
 export type InspectMode = "auto" | "exact" | "x" | "y" | "xy";
 export type ResolvedInspectMode = Exclude<InspectMode, "auto">;
@@ -117,7 +119,8 @@ export type PlotInteractionEvent<Row, Key = PropertyKey> =
   | PlotInspection<Row, Key>
   | PlotSelection<Key>
   | ZoomEvent
-  | LegendFocusEvent<Key>;
+  | LegendFocusEvent<Key>
+  | LegendFilterEvent;
 
 export interface InspectOptions<Row = Record<string, CellValue>, Key = PropertyKey> {
   readonly mode?: InspectMode;
@@ -132,6 +135,8 @@ export interface SelectOptions {
   readonly mode?: AreaMode;
   readonly multiple?: boolean;
   readonly persistent?: boolean;
+  /** Facet coordination semantics for durable interval selections. */
+  readonly preset?: FacetIntervalPreset;
 }
 
 export interface ZoomOptions {
@@ -154,6 +159,7 @@ export type InteractionDiagnosticCode =
   | "INTERACTION_INTERVAL_FACET_UNSUPPORTED"
   | "INTERACTION_INVALID_MAX_DISTANCE"
   | "INTERACTION_POINT_REQUIRES_KEY"
+  | "INTERACTION_INTERVAL_PRESET_REQUIRES_KEY"
   | "INTERACTION_INVALID_KEY"
   | "INTERACTION_DUPLICATE_KEY"
   | "INTERACTION_UNSTABLE_KEY"
@@ -179,9 +185,13 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
   INTERACTION_INTERVAL_FACET_UNSUPPORTED: {
     severity: "warning",
     code: "INTERACTION_INTERVAL_FACET_UNSUPPORTED",
-    message: "Interval selection and brush zoom currently require one unfaceted panel.",
-    prop: "select",
-    suggestions: ["Remove the facet", "Use point inspection", "Track facet intervals in issue #3"],
+    message: "Brush zoom currently requires one unfaceted panel.",
+    prop: "zoom",
+    suggestions: [
+      "Remove the facet",
+      "Use faceted interval selection",
+      "Zoom a linked detail view",
+    ],
     docUrl:
       "https://ljodea.github.io/ggsvelte/guide/interaction-reference#interaction-interval-facet-unsupported",
   },
@@ -202,6 +212,16 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
     suggestions: ['Pass key="id"', "Pass a stable key accessor"],
     docUrl:
       "https://ljodea.github.io/ggsvelte/guide/interaction-reference#interaction-point-requires-key",
+  },
+  INTERACTION_INTERVAL_PRESET_REQUIRES_KEY: {
+    severity: "warning",
+    code: "INTERACTION_INTERVAL_PRESET_REQUIRES_KEY",
+    message:
+      "Coordinated interval presets (union, cross-panel) require a stable key field or accessor; without one they combine no rows.",
+    prop: "key",
+    suggestions: ['Pass key="id"', "Pass a stable key accessor"],
+    docUrl:
+      "https://ljodea.github.io/ggsvelte/guide/interaction-reference#interaction-interval-preset-requires-key",
   },
   INTERACTION_INVALID_KEY: {
     severity: "error",
@@ -333,10 +353,19 @@ export function normalizeInteractionConfig<Row, Key>(
       mode: value.mode ?? "xy",
       multiple: value.multiple ?? false,
       persistent: value.persistent ?? true,
+      preset: value.preset ?? "independent",
     });
     if (value.type === "point" && context.hasKey === false) {
       diagnostics.push({
         ...INTERACTION_DIAGNOSTIC_CATALOG.INTERACTION_POINT_REQUIRES_KEY,
+      });
+    }
+    if (value.type === "interval" && select.preset !== "independent" && context.hasKey === false) {
+      // Union combines stored record keys and cross-panel matches candidate
+      // semantic keys: with keyless rows both silently select nothing
+      // outside the origin rectangle.
+      diagnostics.push({
+        ...INTERACTION_DIAGNOSTIC_CATALOG.INTERACTION_INTERVAL_PRESET_REQUIRES_KEY,
       });
     }
   }
@@ -362,11 +391,10 @@ export function normalizeInteractionConfig<Row, Key>(
     }
   }
 
-  if (context.faceted === true && (select?.type === "interval" || zoom !== null)) {
+  if (context.faceted === true && zoom !== null) {
     diagnostics.push({
       ...INTERACTION_DIAGNOSTIC_CATALOG.INTERACTION_INTERVAL_FACET_UNSUPPORTED,
     });
-    if (select?.type === "interval") select = null;
     zoom = null;
   }
 
@@ -410,9 +438,51 @@ export interface PlotInteractionScope {
   readonly keys: string;
   readonly x?: string;
   readonly y?: string;
+  /** Namespace for semantic facet intervals. Defaults to `keys` when omitted. */
+  readonly intervals?: string;
 }
 
-export type PlotInteractionChange = "selection" | "emphasis" | "zoom";
+export type PlotInteractionChange = "selection" | "emphasis" | "interval" | "zoom";
+
+/** How facet interval state is consumed by coordinated panels.
+ *
+ * - independent: only the matching panel consumes its interval
+ * - union: matching rows from every stored panel interval are combined
+ * - cross-panel: the sole origin interval is projected into compatible panels
+ */
+export type FacetIntervalPreset = "independent" | "union" | "cross-panel";
+
+export type SemanticIntervalAxis =
+  | Readonly<{
+      kind: "linear" | "log" | "time";
+      /** Ascending data-space values; time values are Unix milliseconds. */
+      domain: readonly [number, number];
+    }>
+  | Readonly<{
+      kind: "band";
+      /** Ordered, encoded category identities. Labels are presentation-only. */
+      values: ReadonlyArray<string>;
+    }>;
+
+export interface ReadonlyIntervalDomains {
+  readonly x?: SemanticIntervalAxis;
+  readonly y?: SemanticIntervalAxis;
+}
+
+export interface PlotInteractionInterval<Key extends PropertyKey> {
+  /** Stable structured facet identity, never a panel index. */
+  readonly panelId: string;
+  readonly preset: FacetIntervalPreset;
+  readonly domains: ReadonlyIntervalDomains;
+  /** Stable source-row identities selected by this panel interval. */
+  readonly keys: ReadonlyArray<Key>;
+}
+
+export interface ScopedInteractionInterval<
+  Key extends PropertyKey,
+> extends PlotInteractionInterval<Key> {
+  readonly scope: string;
+}
 
 export interface ScopedInteractionKeys<Key extends PropertyKey> {
   readonly scope: string;
@@ -430,6 +500,7 @@ export interface PlotInteractionSnapshot<Key extends PropertyKey> {
   readonly revision: number;
   readonly selections: ReadonlyArray<ScopedInteractionKeys<Key>>;
   readonly emphases: ReadonlyArray<ScopedInteractionKeys<Key>>;
+  readonly intervals: ReadonlyArray<ScopedInteractionInterval<Key>>;
   readonly zoom: Readonly<{
     x: ReadonlyArray<ScopedInteractionDomain>;
     y: ReadonlyArray<ScopedInteractionDomain>;

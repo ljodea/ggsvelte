@@ -887,6 +887,22 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "FacetPanelIdentity": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "FacetPanelIdentityInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "FacetPanelRole": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "FacetPanelValueIdentity": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "FieldType": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1064,6 +1080,26 @@
           "lifecycle": "experimental"
         },
         "RunOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RuntimeRow": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RuntimeRowFilter": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RuntimeRowFilterClause": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RuntimeRowFilterMode": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RuntimeRowIndexFilter": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -1247,7 +1283,19 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "compileRuntimeRowFilter": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "compileRuntimeRowIndexFilter": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "countMarks": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "createFacetPanelIdentity": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -1268,6 +1316,10 @@
           "lifecycle": "experimental"
         },
         "deriveGroups": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "disambiguatedLabels": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -1392,6 +1444,10 @@
           "lifecycle": "experimental"
         },
         "runPipeline": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "runtimeFilterValueEqual": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -1585,6 +1641,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "FacetIntervalPreset": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "FacetScales": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1713,6 +1773,22 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "LegendFilterClause": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "LegendFilterEvent": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "LegendFilterInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "LegendFilterOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "LegendFocusChange": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1781,6 +1857,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "PlotInteractionInterval": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "PlotInteractionMutationOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1822,6 +1902,10 @@
           "lifecycle": "experimental"
         },
         "PositionScaleSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ReadonlyIntervalDomains": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -1877,6 +1961,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "ScopedInteractionInterval": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "ScopedInteractionKeys": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1886,6 +1974,10 @@
           "lifecycle": "experimental"
         },
         "SelectOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SemanticIntervalAxis": {
           "kind": "type",
           "lifecycle": "experimental"
         },

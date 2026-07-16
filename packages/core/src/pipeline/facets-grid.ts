@@ -1,10 +1,11 @@
 /**
  * Facet grid partition: rows × cols combinations (empty combos kept).
  */
+import { createFacetPanelIdentity } from "../facet-identity.js";
 import { bandKey } from "../scales/train.js";
 import type { ColumnTable } from "../table.js";
 
-import { facetValues, panelComponentToken, rowsMatching } from "./facets-helpers.js";
+import { facetValues, rowsMatching } from "./facets-helpers.js";
 import type { FacetLayout, FacetPanelDef } from "./facets-types.js";
 import { SINGLE_PANEL } from "./facets-types.js";
 
@@ -14,8 +15,9 @@ export function resolveFacetGrid(input: {
   colsField: string | null;
   freeX: boolean;
   freeY: boolean;
+  baseSourceRows: number[] | null;
 }): FacetLayout {
-  const { table, rowsField, colsField, freeX, freeY } = input;
+  const { table, rowsField, colsField, freeX, freeY, baseSourceRows } = input;
   // Grid form: rows x cols, ALL combinations (empty combos render as empty
   // panels — ggplot2 keeps the full grid).
   const rowValues = rowsField === null ? [null] : facetValues(table, rowsField);
@@ -24,7 +26,7 @@ export function resolveFacetGrid(input: {
     (rowsField !== null && rowValues.length === 0) ||
     (colsField !== null && colValues.length === 0)
   ) {
-    return SINGLE_PANEL(table);
+    return SINGLE_PANEL(table, baseSourceRows);
   }
   const panels: FacetPanelDef[] = [];
   for (let r = 0; r < rowValues.length; r++) {
@@ -41,16 +43,22 @@ export function resolveFacetGrid(input: {
       const parts: string[] = [];
       if (rowsField !== null) parts.push(bandKey(rowValues[r]!));
       if (colsField !== null) parts.push(bandKey(colValues[c]!));
+      const identity = createFacetPanelIdentity([
+        ...(rowsField === null
+          ? []
+          : [{ role: "rows" as const, field: rowsField, value: rowValues[r] }]),
+        ...(colsField === null
+          ? []
+          : [{ role: "cols" as const, field: colsField, value: colValues[c] }]),
+      ]);
       panels.push({
-        id: `panel:grid:${[
-          ...(rowsField === null ? [] : [panelComponentToken(rowsField, rowValues[r]!)]),
-          ...(colsField === null ? [] : [panelComponentToken(colsField, colValues[c]!)]),
-        ].join("|")}`,
+        identity,
+        id: identity.key,
         label: parts.join(" / "),
         row: r,
         col: c,
         table: table.subset(rows ?? []),
-        sourceRows: rows ?? [],
+        sourceRows: (rows ?? []).map((row) => baseSourceRows?.[row] ?? row),
       });
     }
   }

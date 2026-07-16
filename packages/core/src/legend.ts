@@ -10,6 +10,7 @@
  */
 import { linearTicks, tickStep } from "./layout/ticks.js";
 import type { TextMeasurer } from "./layout/measure.js";
+import { encodeKey } from "./scales/state.js";
 import { bandKey } from "./scales/train.js";
 import type { SceneLegend, SceneLegendEntry } from "./scene.js";
 
@@ -64,10 +65,12 @@ export interface LegendBlock {
 function orderedValues(input: DiscreteLegendInput, order: LegendOrder): unknown[] {
   switch (order) {
     case "present-first-seen": {
+      // Dedupe by typed identity, not presentation label: the ordinal scale
+      // gives 1 and "1" distinct assignments, so both must appear.
       const seen = new Set<string>();
       const out: unknown[] = [];
       for (const v of input.firstSeen) {
-        const key = bandKey(v);
+        const key = encodeKey(v);
         if (seen.has(key)) continue;
         seen.add(key);
         out.push(v);
@@ -79,6 +82,29 @@ function orderedValues(input: DiscreteLegendInput, order: LegendOrder): unknown[
     default:
       return [...input.domain];
   }
+}
+
+function valueKind(value: unknown): string {
+  if (value instanceof Date) return "date";
+  if (value === null) return "null";
+  if (typeof value === "string") return "text";
+  return typeof value;
+}
+
+/**
+ * Presentation labels for discrete values, with a typed qualifier appended
+ * to any label shared by more than one typed value (`1` and `"1"` both
+ * render as "1"): the qualifier is the only way — visually and for
+ * accessible names — to tell the entries apart. Shared by legends and the
+ * precise-bounds category selects.
+ */
+export function disambiguatedLabels(values: readonly unknown[]): string[] {
+  const raw = values.map((value) => bandKey(value));
+  const counts = new Map<string, number>();
+  for (const label of raw) counts.set(label, (counts.get(label) ?? 0) + 1);
+  return raw.map((label, index) =>
+    (counts.get(label) ?? 0) > 1 ? `${label} (${valueKind(values[index])})` : label,
+  );
 }
 
 function truncate(label: string, maxWidth: number, measurer: TextMeasurer): string {
@@ -110,12 +136,13 @@ export function buildLegends(
   for (const input of inputs) {
     if (input.kind === "discrete") {
       const values = orderedValues(input, order);
+      const displayLabels = disambiguatedLabels(values);
       const titleHeight = input.title === "" ? 0 : TITLE_HEIGHT;
       const maxLabelWidth = Math.max(1, maxWidth - PADDING * 2 - SWATCH_SIZE - SWATCH_GAP);
       const entries: SceneLegendEntry[] = [];
       let labelWidth = 0;
       for (let i = 0; i < values.length; i++) {
-        const label = truncate(bandKey(values[i]), maxLabelWidth, measurer);
+        const label = truncate(displayLabels[i]!, maxLabelWidth, measurer);
         labelWidth = Math.max(labelWidth, measurer.measureWidth(label, FONT_SIZE));
         entries.push({
           value: values[i],

@@ -1,10 +1,13 @@
 import type {
   InteractionSource,
   PlotInteractionChange,
+  PlotInteractionInterval,
   PlotInteractionScope,
   PlotInteractionSnapshot,
   PlotInteractionTransition,
+  ReadonlyIntervalDomains,
   ReadonlyZoomDomains,
+  ScopedInteractionInterval,
   ScopedInteractionDomain,
   ScopedInteractionKeys,
 } from "./interaction.js";
@@ -45,6 +48,16 @@ export interface PlotInteractionController<Key extends PropertyKey> {
     options: PlotInteractionMutationOptions,
   ): PlotInteractionTransition<Key> | null;
   clearEmphasis(options: PlotInteractionMutationOptions): PlotInteractionTransition<Key> | null;
+  intervals(scope: KeyScope): ReadonlyArray<ScopedInteractionInterval<Key>>;
+  setInterval(
+    interval: PlotInteractionInterval<Key>,
+    options: PlotInteractionMutationOptions,
+  ): PlotInteractionTransition<Key> | null;
+  clearInterval(
+    panelId: string,
+    options: PlotInteractionMutationOptions,
+  ): PlotInteractionTransition<Key> | null;
+  clearIntervals(options: PlotInteractionMutationOptions): PlotInteractionTransition<Key> | null;
   zoom(scope: PlotInteractionScope): ReadonlyZoomDomains;
   setZoom(
     domains: ReadonlyZoomDomains,
@@ -69,10 +82,12 @@ function normalizedScope(scope: KeyScope): PlotInteractionScope {
   assertScope(value.keys, "keys");
   if (value.x !== undefined) assertScope(value.x, "x");
   if (value.y !== undefined) assertScope(value.y, "y");
+  if (value.intervals !== undefined) assertScope(value.intervals, "intervals");
   return Object.freeze({
     keys: value.keys,
     ...(value.x !== undefined && { x: value.x }),
     ...(value.y !== undefined && { y: value.y }),
+    ...(value.intervals !== undefined && { intervals: value.intervals }),
   });
 }
 
@@ -124,6 +139,61 @@ function canonicalDomain(domain: readonly [number, number]): readonly [number, n
   return Object.freeze(first <= second ? [first, second] : [second, first]);
 }
 
+function canonicalIntervalAxis(axis: ReadonlyIntervalDomains["x"]): ReadonlyIntervalDomains["x"] {
+  if (axis === undefined) return undefined;
+  if (axis.kind === "band") {
+    if (!Array.isArray(axis.values) || axis.values.length === 0)
+      throw new TypeError("Interaction band intervals must contain at least one encoded value.");
+    for (const value of axis.values) {
+      if (typeof value !== "string")
+        throw new TypeError("Interaction band interval values must be encoded strings.");
+    }
+    return Object.freeze({ kind: "band", values: Object.freeze([...new Set(axis.values)]) });
+  }
+  const domain = canonicalDomain(axis.domain);
+  if (axis.kind === "log" && domain[0] <= 0)
+    throw new TypeError("Interaction log interval domains must contain positive values.");
+  return Object.freeze({ kind: axis.kind, domain });
+}
+
+function canonicalIntervalDomains(domains: ReadonlyIntervalDomains): ReadonlyIntervalDomains {
+  const x = canonicalIntervalAxis(domains.x);
+  const y = canonicalIntervalAxis(domains.y);
+  if (x === undefined && y === undefined)
+    throw new TypeError("Interaction intervals must contain an x or y domain.");
+  return Object.freeze({ ...(x !== undefined && { x }), ...(y !== undefined && { y }) });
+}
+
+function equalIntervalAxis(
+  left: ReadonlyIntervalDomains["x"],
+  right: ReadonlyIntervalDomains["x"],
+): boolean {
+  if (left === right) return true;
+  if (left === undefined || right === undefined || left.kind !== right.kind) return false;
+  if (left.kind === "band" && right.kind === "band") {
+    return (
+      left.values.length === right.values.length &&
+      left.values.every((value, index) => value === right.values[index])
+    );
+  }
+  if (left.kind === "band" || right.kind === "band") return false;
+  return equalDomain(left.domain, right.domain);
+}
+
+function equalInterval<Key extends PropertyKey>(
+  left: ScopedInteractionInterval<Key> | undefined,
+  right: ScopedInteractionInterval<Key>,
+): boolean {
+  return (
+    left !== undefined &&
+    left.panelId === right.panelId &&
+    left.preset === right.preset &&
+    equalIntervalAxis(left.domains.x, right.domains.x) &&
+    equalIntervalAxis(left.domains.y, right.domains.y) &&
+    equalKeys(left.keys, right.keys)
+  );
+}
+
 function equalDomain(
   left: readonly [number, number] | undefined,
   right: readonly [number, number] | undefined,
@@ -153,6 +223,7 @@ export function createPlotInteraction<Key extends PropertyKey = PropertyKey>(
   let revision = $state(0);
   const selections = new Map<string, ReadonlyArray<Key>>();
   const emphases = new Map<string, ReadonlyArray<Key>>();
+  const intervals = new Map<string, Map<string, ScopedInteractionInterval<Key>>>();
   const zoomX = new Map<string, readonly [number, number]>();
   const zoomY = new Map<string, readonly [number, number]>();
   let notifying = false;
@@ -174,11 +245,19 @@ export function createPlotInteraction<Key extends PropertyKey = PropertyKey>(
   ): ReadonlyArray<ScopedInteractionDomain> =>
     Object.freeze(sortedScopes(values).map(([scope, domain]) => Object.freeze({ scope, domain })));
 
+  const scopedIntervals = (): ReadonlyArray<ScopedInteractionInterval<Key>> =>
+    Object.freeze(
+      sortedScopes(intervals).flatMap(([, panels]) =>
+        sortedScopes(panels).map(([, interval]) => interval),
+      ),
+    );
+
   const currentSnapshot = (): PlotInteractionSnapshot<Key> =>
     Object.freeze({
       revision,
       selections: scopedKeys(selections),
       emphases: scopedKeys(emphases),
+      intervals: scopedIntervals(),
       zoom: Object.freeze({
         x: scopedDomains(zoomX),
         y: scopedDomains(zoomY),
@@ -269,6 +348,70 @@ export function createPlotInteraction<Key extends PropertyKey = PropertyKey>(
     clearEmphasis(mutation) {
       return controller.setEmphasis([], mutation);
     },
+    intervals(inputScope) {
+      void revision;
+      const scope = normalizedScope(inputScope);
+      const intervalScope = scope.intervals ?? scope.keys;
+      const panels = intervals.get(intervalScope);
+      if (panels === undefined) return EMPTY_KEYS;
+      return Object.freeze(sortedScopes(panels).map(([, interval]) => interval));
+    },
+    setInterval(input, mutation) {
+      assertMutationAllowed();
+      const scope = normalizedScope(mutation.scope);
+      const intervalScope = scope.intervals ?? scope.keys;
+      assertScope(input.panelId, "interval panel");
+      if (
+        input.preset !== "independent" &&
+        input.preset !== "union" &&
+        input.preset !== "cross-panel"
+      )
+        throw new TypeError(
+          "Interaction interval preset must be independent, union, or cross-panel.",
+        );
+      const next = Object.freeze({
+        scope: intervalScope,
+        panelId: input.panelId,
+        preset: input.preset,
+        domains: canonicalIntervalDomains(input.domains),
+        keys: canonicalKeys(input.keys),
+      });
+      const priorPanels = intervals.get(intervalScope);
+      const priorPreset = priorPanels?.values().next().value?.preset;
+      const replacesScope =
+        priorPanels !== undefined &&
+        priorPreset !== undefined &&
+        (priorPreset !== next.preset ||
+          (next.preset === "cross-panel" &&
+            (priorPanels.size !== 1 || !priorPanels.has(next.panelId))));
+      const prior = replacesScope ? undefined : priorPanels?.get(next.panelId);
+      if (!replacesScope && equalInterval(prior, next)) return null;
+      const panels =
+        replacesScope || priorPanels === undefined
+          ? new Map<string, ScopedInteractionInterval<Key>>()
+          : priorPanels;
+      panels.set(next.panelId, next);
+      intervals.set(intervalScope, panels);
+      return commit("interval", ["interval"], scope, mutation.source ?? "programmatic");
+    },
+    clearInterval(panelId, mutation) {
+      assertMutationAllowed();
+      const scope = normalizedScope(mutation.scope);
+      const intervalScope = scope.intervals ?? scope.keys;
+      assertScope(panelId, "interval panel");
+      const panels = intervals.get(intervalScope);
+      if (panels === undefined || !panels.has(panelId)) return null;
+      panels.delete(panelId);
+      if (panels.size === 0) intervals.delete(intervalScope);
+      return commit("interval", ["interval"], scope, mutation.source ?? "programmatic");
+    },
+    clearIntervals(mutation) {
+      assertMutationAllowed();
+      const scope = normalizedScope(mutation.scope);
+      const intervalScope = scope.intervals ?? scope.keys;
+      if (!intervals.delete(intervalScope)) return null;
+      return commit("interval", ["interval"], scope, mutation.source ?? "programmatic");
+    },
     zoom(inputScope) {
       void revision;
       const scope = normalizedScope(inputScope);
@@ -313,7 +456,21 @@ export function createPlotInteraction<Key extends PropertyKey = PropertyKey>(
       const nextEmphasis = Object.freeze(priorEmphasis.filter((key) => valid.has(key)));
       const selectionChanged = !equalKeys(priorSelection, nextSelection);
       const emphasisChanged = !equalKeys(priorEmphasis, nextEmphasis);
-      if (!selectionChanged && !emphasisChanged) return null;
+      // Interval records in the same key scope carry captured keys too;
+      // reconciliation must prune them or union consumption keeps
+      // publishing keys the owner declared invalid.
+      const intervalScope = scope.intervals ?? scope.keys;
+      const priorPanels = intervals.get(intervalScope);
+      let intervalChanged = false;
+      if (priorPanels !== undefined) {
+        for (const [panelId, interval] of priorPanels) {
+          const nextKeys = Object.freeze(interval.keys.filter((key) => valid.has(key)));
+          if (equalKeys(interval.keys, nextKeys)) continue;
+          intervalChanged = true;
+          priorPanels.set(panelId, Object.freeze({ ...interval, keys: nextKeys }));
+        }
+      }
+      if (!selectionChanged && !emphasisChanged && !intervalChanged) return null;
       if (selectionChanged) {
         if (nextSelection.length === 0) selections.delete(scope.keys);
         else selections.set(scope.keys, nextSelection);
@@ -325,6 +482,7 @@ export function createPlotInteraction<Key extends PropertyKey = PropertyKey>(
       const changes = Object.freeze([
         ...(selectionChanged ? (["selection"] as const) : []),
         ...(emphasisChanged ? (["emphasis"] as const) : []),
+        ...(intervalChanged ? (["interval"] as const) : []),
       ]);
       return commit("reconcile", changes, scope, mutation.source ?? "programmatic");
     },

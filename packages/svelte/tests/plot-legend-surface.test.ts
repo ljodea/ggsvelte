@@ -171,6 +171,23 @@ describe("shouldRenderInteractionLiveRegion", () => {
       }),
     ).toBe(false);
   });
+
+  it("renders for legend-filter-only plots so announcements stay audible", () => {
+    expect(
+      shouldRenderInteractionLiveRegion({
+        surfaceInteractive: false,
+        legendFocusEnabled: false,
+        legendFilterEnabled: true,
+      }),
+    ).toBe(true);
+    expect(
+      shouldRenderInteractionLiveRegion({
+        surfaceInteractive: false,
+        legendFocusEnabled: false,
+        legendFilterEnabled: false,
+      }),
+    ).toBe(false);
+  });
 });
 
 describe("resolveLegendClearControlSource", () => {

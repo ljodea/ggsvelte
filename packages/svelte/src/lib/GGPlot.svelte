@@ -55,9 +55,12 @@
     CellValue,
     RenderModel,
     ScaleState,
+    ScenePanel,
   } from "@ggsvelte/core";
   import {
     buildInteractionMasks,
+    decodeKey,
+    encodeKey,
     planStrata,
     runPipeline,
     sceneLabel,
@@ -73,6 +76,8 @@
     type InteractionSource,
     type InteractionTool,
     type IntervalSelection,
+    type PlotInteractionInterval,
+    type SemanticIntervalAxis,
     type LegendFocusEvent,
     type LegendFocusInput,
     type PlotInspection,
@@ -80,6 +85,7 @@
     type PlotInteractionEvent,
     type PlotInteractionScope,
     type PlotSelection,
+    type ReadonlyIntervalDomains,
     type SelectInput,
     type ZoomDomains,
     type ZoomEvent,
@@ -195,15 +201,35 @@
     zoomSupportsChannel,
   } from "./plot-capability.js";
   import {
+    buildIntervalSelection,
     clearIntervalSelectionEvent,
     persistentSelectionOrNull,
+    type IntervalDomain,
   } from "./plot-interval.js";
   import {
     buildIntervalSelectionFromScene,
+    intervalPixelsFromDomains,
     intervalQuerySceneFromModel,
     type IntervalQueryScene,
   } from "./plot-interval-query.js";
+  import {
+    candidateInInterval,
+    consumeIntervalKeys,
+    recomputePanelIntervalKeys,
+    sameIntervalRecord,
+    type IntervalConsumptionCandidate,
+  } from "./plot-interval-consumption.js";
   import { createPaintLedger, isPlotReady } from "./plot-paint.js";
+  import BoundsEditor from "./BoundsEditor.svelte";
+  import type {
+    BoundsEditorInput,
+    PreciseBoundsApplyEvent,
+  } from "./bounds-editor.js";
+  import {
+    boundsEditorInputForScale,
+    semanticAxisFromBounds,
+  } from "./plot-precise-bounds.js";
+  import { nextLocalIntervalRecords } from "./plot-interval-consumption.js";
   import {
     anchorsFromCandidateKeys,
     buildPointSelectionEvent,
@@ -254,6 +280,14 @@
   import PlotStatusChrome from "./PlotStatusChrome.svelte";
   import Tooltip from "./Tooltip.svelte";
   import ToolRail from "./ToolRail.svelte";
+  import {
+    isLegendValueVisible,
+    nextLegendFilterValues,
+    reconcileLegendFilterValues,
+    type LegendFilterClause,
+    type LegendFilterEvent,
+    type LegendFilterInput,
+  } from "./legend-filter.js";
 
   type PublicKey = Identity extends keyof Row
     ? Extract<Row[Identity], PropertyKey>
@@ -298,6 +332,8 @@
     zoom?: ZoomInput;
     /** Opt into discrete legend preview, focus, and linked emphasis. */
     legendFocus?: LegendFocusInput;
+    /** Opt into data-changing filtering through discrete legend controls. */
+    legendFilter?: LegendFilterInput;
     /** Controlled initial/active tool. */
     tool?: InteractionTool;
     /** Optional durable semantic state shared with other plots and Svelte UI. */
@@ -310,6 +346,7 @@
     onselect?: (event: PlotSelection<PublicKey>) => void;
     onzoom?: (event: ZoomEvent) => void;
     onlegendfocus?: (event: LegendFocusEvent<PublicKey>) => void;
+    onlegendfilter?: (event: LegendFilterEvent) => void;
     oninteraction?: (event: PlotInteractionEvent<Row, PublicKey>) => void;
     ondiagnostic?: (diagnostic: InteractionDiagnostic) => void;
     ontoolchange?: (tool: InteractionTool) => void;
@@ -338,6 +375,7 @@
     select = false,
     zoom = false,
     legendFocus = false,
+    legendFilter = false,
     tool,
     interaction,
     interactionScope,
@@ -346,6 +384,7 @@
     onselect,
     onzoom,
     onlegendfocus,
+    onlegendfilter,
     oninteraction,
     ondiagnostic,
     ontoolchange,
@@ -508,6 +547,86 @@
   } = { runId: -1, scales: undefined };
   let scaleEpoch = $state(0);
 
+  const legendFilterOptions = $derived(
+    legendFilter === false
+      ? null
+      : {
+          mode:
+            typeof legendFilter === "object"
+              ? (legendFilter.mode ?? "exclude")
+              : "exclude",
+          multiple:
+            typeof legendFilter === "object"
+              ? (legendFilter.multiple ?? true)
+              : true,
+        },
+  );
+  let localLegendFilters = $state<LegendFilterClause[]>([]);
+  let appliedLegendFilterMode = $state<"exclude" | "include" | null>(null);
+  const legendCatalogFingerprints = new Map<string, string>();
+  const activeLegendFilterBindings = $derived.by(() => {
+    const bindings = new Set<string>();
+    if (effectiveSpec === null) return bindings;
+    for (const layer of effectiveSpec.layers) {
+      for (const scale of ["color", "fill"] as const) {
+        const own = layer.aes?.[scale];
+        // Explicit null is an unset (normalize's null-unset semantics): the
+        // layer deliberately removed the plot-level binding — never inherit.
+        if (own === null) continue;
+        const channel = own ?? effectiveSpec.aes?.[scale];
+        if (channel !== null && channel !== undefined && "field" in channel)
+          bindings.add(`${scale}:${channel.field}`);
+      }
+    }
+    return bindings;
+  });
+  const effectiveLegendFilters = $derived(
+    legendFilterOptions === null
+      ? []
+      : localLegendFilters.filter((clause) =>
+          activeLegendFilterBindings.has(`${clause.scale}:${clause.field}`),
+        ),
+  );
+
+  // A disabled capability or a remapped spec must never leave an invisible
+  // filter active. Reset the chart-local filter set atomically so the public
+  // `clear` event always describes the actual resulting state.
+  $effect(() => {
+    if (effectiveLegendFilters.length === localLegendFilters.length) return;
+    localLegendFilters = [];
+    emitLegendFilter({
+      type: "legend-filter",
+      phase: "clear",
+      source: "programmatic",
+      clause: null,
+    });
+    announceInteraction(
+      "Legend filters reset after the filter capability changed.",
+    );
+  });
+
+  // Mode changes are controlled API changes, not reinterpretations of old
+  // state. Reset active clauses so an exclude set can never become a stale
+  // include set (or vice versa).
+  $effect(() => {
+    const mode = legendFilterOptions?.mode ?? null;
+    if (appliedLegendFilterMode === null) {
+      appliedLegendFilterMode = mode;
+      return;
+    }
+    if (mode === appliedLegendFilterMode) return;
+    appliedLegendFilterMode = mode;
+    if (localLegendFilters.length === 0) return;
+    localLegendFilters = [];
+    emitLegendFilter({
+      type: "legend-filter",
+      phase: "clear",
+      source: "programmatic",
+      clause: null,
+    });
+    announceInteraction("Legend filters reset after the filter mode changed.");
+  });
+
   const model: RenderModel | null = $derived.by(() => {
     void scaleEpoch;
     if (effectiveSpec === null) return null;
@@ -517,6 +636,9 @@
       ...(scaleBox.scales !== undefined && { prevScales: scaleBox.scales }),
       ...(effectiveZoomDomains !== null && {
         baselineScales: assembled?.scales ?? {},
+      }),
+      ...(effectiveLegendFilters.length > 0 && {
+        rowFilters: effectiveLegendFilters,
       }),
     });
     if (m.runId > scaleBox.runId) {
@@ -651,6 +773,17 @@
     void reducerRevision;
     return reducer.state.tool;
   });
+  const surfaceDescription = $derived.by(() => {
+    if (activeTool === "select-area")
+      return "Press Enter or Space to set the first selection corner. Use Arrow keys to move the opposite corner; hold Shift for larger steps. Press Enter or Space to complete the selection. Press Escape to cancel.";
+    if (activeTool === "zoom-area")
+      return "Press Enter or Space to set the first zoom corner. Use Arrow keys to move the opposite corner; hold Shift for larger steps. Press Enter or Space to complete the zoom. Press Escape to cancel.";
+    if (activeTool === "point")
+      return "Use Arrow keys to inspect data. Press Enter or Space to toggle the focused point selection. Press Escape to dismiss.";
+    return interactionConfig.inspect?.pin === true
+      ? "Use Arrow keys to inspect data. Press Enter or Space to pin. Press Escape to dismiss."
+      : "Use Arrow keys to inspect data. Press Escape to dismiss.";
+  });
   let inspection = $state<PlotInspectionChange<
     Record<string, CellValue>,
     PropertyKey
@@ -698,6 +831,7 @@
   let legendClearPointerType: string | null = null;
   let suppressLegendClick = false;
   let suppressLegendFocusPreview = false;
+  let legendFilterPointerType: string | null = null;
   const effectiveSelectedKeys: readonly PropertyKey[] = $derived.by(() => {
     void controllerRevision;
     return interaction?.selected(resolvedInteractionScope) ?? localSelectedKeys;
@@ -719,6 +853,190 @@
     });
   });
   let committedInterval = $state<IntervalSelection | null>(null);
+  // Semantic snapshot of the record backing `committedInterval`, so external
+  // same-panel replacements are detected by content, not just presence.
+  let committedIntervalRecord =
+    $state<PlotInteractionInterval<PublicKey> | null>(null);
+  let localCommittedIntervals = $state<PlotInteractionInterval<PublicKey>[]>(
+    [],
+  );
+  let boundsEditor = $state<{
+    action: "select" | "zoom";
+    axis: "x" | "y";
+    panelId?: string;
+    panelLabel?: string;
+  } | null>(null);
+  let boundsReturnFocus = $state<HTMLElement | null>(null);
+  const effectiveIntervals = $derived.by(() => {
+    void controllerRevision;
+    return (
+      interaction?.intervals(resolvedInteractionScope) ??
+      localCommittedIntervals
+    );
+  });
+  function intervalConsumptionCandidates(): IntervalConsumptionCandidate<PublicKey>[] {
+    if (model === null) return [];
+    const candidates: IntervalConsumptionCandidate<PublicKey>[] = [];
+    for (let id = 0; id < model.candidates.size; id++) {
+      const candidate = model.candidates.candidate(id);
+      if (candidate === null) continue;
+      candidates.push({
+        panelId: candidate.panelId,
+        xValue: candidate.xValue,
+        yValue: candidate.yValue,
+        keys: candidateSemanticKeys(candidate) as PublicKey[],
+      });
+    }
+    return candidates;
+  }
+  const effectiveIntervalKeys: readonly PropertyKey[] = $derived.by(() => {
+    if (model === null || effectiveIntervals.length === 0) return [];
+    // Union consumes only stored record keys, and this derived re-runs on
+    // every controller revision — skip the O(candidates) semantic projection
+    // whenever the preset never reads it.
+    const preset = effectiveIntervals[0]?.preset;
+    return consumeIntervalKeys({
+      records: effectiveIntervals,
+      panels: model.scene.panels,
+      candidates: preset === "union" ? [] : intervalConsumptionCandidates(),
+    });
+  });
+  const currentIntervalRecord = $derived.by(() => {
+    const intervalPanelId = committedInterval?.panelId;
+    return (
+      (intervalPanelId === null || intervalPanelId === undefined
+        ? undefined
+        : effectiveIntervals.find(
+            (record) => record.panelId === intervalPanelId,
+          )) ??
+      effectiveIntervals[0] ??
+      null
+    );
+  });
+  const currentIntervalPanel = $derived.by(() => {
+    if (currentIntervalRecord === null || model === null) return;
+    return model.scene.panels.find(
+      (candidate) => candidate.id === currentIntervalRecord.panelId,
+    );
+  });
+
+  // A shared controller can clear or replace this chart's interval from
+  // outside (a linked plot, programmatic reconcile). The local pixel
+  // rectangle must not outlive its semantic record — including a same-panel
+  // record whose domains or keys were replaced under it.
+  $effect(() => {
+    const current = committedInterval;
+    if (current === null) return;
+    const record = effectiveIntervals.find(
+      (candidate) => candidate.panelId === current.panelId,
+    );
+    if (
+      record !== undefined &&
+      (committedIntervalRecord === null ||
+        sameIntervalRecord(committedIntervalRecord, record))
+    )
+      return;
+    committedInterval = null;
+    committedIntervalRecord = null;
+  });
+
+  function facetIdentityValueLabel(encodedValue: string): string {
+    const value = decodeKey(encodedValue);
+    const kind =
+      value instanceof Date
+        ? "date"
+        : value === null
+          ? "null"
+          : typeof value === "string"
+            ? "text"
+            : typeof value;
+    const display = value instanceof Date ? value.toISOString() : String(value);
+    return `${kind} ${display}`;
+  }
+
+  function intervalPanelLabel(panel: ScenePanel): string {
+    const display = panel.strip.trim() || "panel";
+    if (
+      model === null ||
+      model.scene.panels.filter(
+        (candidate) => candidate.strip.trim() === panel.strip.trim(),
+      ).length < 2
+    )
+      return display;
+    const identity = panel.identity.values
+      .map(
+        (value) =>
+          `${value.field}: ${facetIdentityValueLabel(value.encodedValue)}`,
+      )
+      .join(", ");
+    return identity.length > 0 ? `${display} (${identity})` : display;
+  }
+
+  const currentIntervalTargetLabel = $derived.by(() => {
+    if (currentIntervalRecord === null || model === null) return;
+    if (currentIntervalPanel === undefined) return "unavailable panel";
+    if (
+      currentIntervalPanel.strip.trim().length === 0 &&
+      currentIntervalPanel.identity.values.length === 0
+    )
+      return;
+    return intervalPanelLabel(currentIntervalPanel);
+  });
+  const boundsEditorInput = $derived.by((): BoundsEditorInput | null => {
+    if (boundsEditor === null || model === null) return null;
+    if (boundsEditor.action === "zoom") {
+      const scale = model.scales[boundsEditor.axis];
+      if (scale.type === "band") return null;
+      const bounds = effectiveZoomDomains?.[boundsEditor.axis] ?? scale.domain;
+      return boundsEditorInputForScale({
+        axis: boundsEditor.axis,
+        action: "zoom",
+        scale,
+        bounds,
+        reversed:
+          scale.normalize(scale.domain[0]) > scale.normalize(scale.domain[1]),
+      });
+    }
+    const record = currentIntervalRecord;
+    const targetPanelId = record?.panelId ?? boundsEditor.panelId;
+    if (targetPanelId === undefined) return null;
+    const panelIndex = model.scene.panels.findIndex(
+      (panel) => panel.id === targetPanelId,
+    );
+    if (panelIndex < 0) return null;
+    const scale =
+      model.scales.panels[panelIndex]?.[boundsEditor.axis] ??
+      model.scales[boundsEditor.axis];
+    const semantic = record?.domains[boundsEditor.axis];
+    const bounds =
+      semantic?.kind === "band"
+        ? ([semantic.values[0] ?? "", semantic.values.at(-1) ?? ""] as const)
+        : semantic?.domain;
+    return boundsEditorInputForScale({
+      axis: boundsEditor.axis,
+      action: "select",
+      scale,
+      ...(bounds !== undefined && { bounds }),
+      reversed:
+        scale.type !== "band" &&
+        scale.normalize(scale.domain[0]) > scale.normalize(scale.domain[1]),
+    });
+  });
+  $effect(() => {
+    if (boundsEditor === null || boundsEditorInput !== null) return;
+    const target = boundsEditor.panelLabel ?? "the target panel";
+    boundsEditor = null;
+    boundsReturnFocus = null;
+    // The original button may have been reused for a different panel. The
+    // capture surface is the stable recovery target for reactive cancellation;
+    // explicit Apply/Cancel still restores the initiating button.
+    queueMicrotask(() => {
+      captureSurface?.focus();
+      announceInteraction(
+        `Bounds editing cancelled because ${target} is no longer available.`,
+      );
+    });
+  });
   const zoomHasSupportedChannel = $derived.by(() => {
     if (interactionConfig.zoom === null || model === null) return true;
     return zoomSupportsChannel(interactionConfig.zoom.mode, model.scales);
@@ -736,7 +1054,9 @@
   const hasPointSelection = $derived(
     canPublishPointSelection && effectiveSelectedKeys.length > 0,
   );
-  const hasIntervalSelection = $derived(committedInterval !== null);
+  // R3: interval presence covers dormant panel intervals, not just the
+  // committed one (effectiveIntervals), so recovery controls stay reachable.
+  const hasIntervalSelection = $derived(effectiveIntervals.length > 0);
   const hasZoomDomains = $derived(effectiveZoomDomains !== null);
   const showToolRail = $derived(
     shouldShowToolRail({
@@ -751,6 +1071,22 @@
   const emptyPlot = $derived(
     model !== null && isEmptyPlotScene(model.scene.batches),
   );
+  const preciseIntervalAxes = $derived.by((): readonly ("x" | "y")[] => {
+    const selectOptions = interactionConfig.select;
+    if (selectOptions === null || selectOptions.type !== "interval") return [];
+    return (["x", "y"] as const).filter(
+      (axis) => selectOptions.mode === "xy" || selectOptions.mode === axis,
+    );
+  });
+  const preciseZoomAxes = $derived.by((): readonly ("x" | "y")[] => {
+    if (interactionConfig.zoom === null || model === null) return [];
+    return (["x", "y"] as const).filter(
+      (axis) =>
+        (interactionConfig.zoom?.mode === "xy" ||
+          interactionConfig.zoom?.mode === axis) &&
+        model.scales[axis].type !== "band",
+    );
+  });
   const areaScaleDiagnostics = $derived.by(() => {
     if (model === null || interactionConfig.zoom === null)
       return [] as InteractionDiagnostic[];
@@ -813,7 +1149,11 @@
       keys,
     );
   }
-  const selectedAnchors = $derived(anchorsForKeys(effectiveSelectedKeys));
+  const selectedAnchors = $derived(
+    anchorsForKeys([
+      ...new Set([...effectiveSelectedKeys, ...effectiveIntervalKeys]),
+    ]),
+  );
   const emphasizedAnchors = $derived(anchorsForKeys(effectiveEmphasisKeys));
 
   function commitPointSelection(
@@ -849,10 +1189,169 @@
   }
 
   function clearIntervalSelection(source: InteractionSource): void {
-    if (committedInterval === null) return;
-    const event = clearIntervalSelectionEvent(committedInterval, source);
+    const current = committedInterval;
+    if (current === null && effectiveIntervals.length === 0) return;
+    if (interaction === undefined) {
+      localCommittedIntervals = [];
+    } else {
+      interaction.clearIntervals({ scope: resolvedInteractionScope, source });
+    }
+    const event = clearIntervalSelectionEvent(
+      current ?? {
+        mode: interactionConfig.select?.mode ?? "xy",
+        panelId: null,
+        pixels: { x0: 0, y0: 0, x1: 0, y1: 0 },
+      },
+      source,
+    );
     committedInterval = null;
+    committedIntervalRecord = null;
     emitSelection(event);
+  }
+
+  function clearCurrentPanelInterval(source: InteractionSource): void {
+    const intervalPanelId =
+      committedInterval?.panelId ?? currentIntervalRecord?.panelId;
+    if (intervalPanelId === null || intervalPanelId === undefined) return;
+    if (interaction === undefined) {
+      localCommittedIntervals = localCommittedIntervals.filter(
+        (interval) => interval.panelId !== intervalPanelId,
+      );
+    } else {
+      interaction.clearInterval(intervalPanelId, {
+        scope: resolvedInteractionScope,
+        source,
+      });
+    }
+    const event = clearIntervalSelectionEvent(
+      committedInterval ?? {
+        mode: interactionConfig.select?.mode ?? "xy",
+        panelId: intervalPanelId,
+        pixels: { x0: 0, y0: 0, x1: 0, y1: 0 },
+      },
+      source,
+    );
+    committedInterval = null;
+    committedIntervalRecord = null;
+    emitSelection(event);
+  }
+
+  function semanticAxis(
+    panelIndex: number,
+    axis: "x" | "y",
+    bounds: readonly [unknown, unknown] | undefined,
+  ): SemanticIntervalAxis | undefined {
+    if (bounds === undefined || model === null) return undefined;
+    const scale = model.scales.panels[panelIndex]?.[axis] ?? model.scales[axis];
+    if (scale.type === "band") {
+      const first = scale.indexOf(bounds[0]);
+      const last = scale.indexOf(bounds[1]);
+      if (first === undefined || last === undefined) return undefined;
+      const lower = Math.min(first, last);
+      const upper = Math.max(first, last);
+      return Object.freeze({
+        kind: "band",
+        values: Object.freeze(
+          scale.rawDomain
+            .slice(lower, upper + 1)
+            .map((value) => encodeKey(value)),
+        ),
+      });
+    }
+    return semanticAxisFromBounds(scale.type, [
+      Number(bounds[0]),
+      Number(bounds[1]),
+    ]);
+  }
+
+  function eventAxisBounds(
+    panelIndex: number,
+    axis: "x" | "y",
+    semantic: SemanticIntervalAxis | undefined,
+  ): readonly [CellValue, CellValue] | undefined {
+    if (semantic === undefined || model === null) return undefined;
+    if (semantic.kind !== "band") return semantic.domain;
+    const scale = model.scales.panels[panelIndex]?.[axis] ?? model.scales[axis];
+    if (scale.type !== "band" || semantic.values.length === 0) return undefined;
+    const values = semantic.values
+      .map((encoded) =>
+        scale.rawDomain.find((value) => encodeKey(value) === encoded),
+      )
+      .filter((value): value is CellValue => value !== undefined);
+    return values.length === 0 ? undefined : [values[0]!, values.at(-1)!];
+  }
+
+  function eventDomain(
+    panelIndex: number,
+    domains: ReadonlyIntervalDomains,
+  ): IntervalDomain {
+    const x = eventAxisBounds(panelIndex, "x", domains.x);
+    const y = eventAxisBounds(panelIndex, "y", domains.y);
+    return {
+      ...(x !== undefined && { x }),
+      ...(y !== undefined && { y }),
+    };
+  }
+
+  function intervalLineageCount(
+    targetPanelId: string,
+    domains: ReadonlyIntervalDomains,
+  ): number {
+    if (model === null) return 0;
+    const rows = new Set<number>();
+    for (let id = 0; id < model.candidates.size; id++) {
+      const candidate = model.candidates.candidate(id);
+      if (
+        candidate === null ||
+        candidate.panelId !== targetPanelId ||
+        !candidateInInterval(candidate, domains)
+      )
+        continue;
+      for (const rowIndex of rowIndexesForCandidate(
+        candidate,
+        model.lineage.keys(candidate.lineage),
+      ))
+        rows.add(rowIndex);
+    }
+    return rows.size;
+  }
+
+  function commitIntervalSelection(
+    event: IntervalSelection,
+    source: InteractionSource,
+  ): void {
+    const targetPanelId = event.panelId;
+    if (targetPanelId === null || model === null) return;
+    const panelIndex = model.scene.panels.findIndex(
+      (panel) => panel.id === targetPanelId,
+    );
+    if (panelIndex < 0) return;
+    const x = semanticAxis(panelIndex, "x", event.domain.x);
+    const y = semanticAxis(panelIndex, "y", event.domain.y);
+    // An empty facet panel trains no band domain, so no semantic axis
+    // survives the selection mode. The controller rejects axis-less
+    // intervals (TypeError) — treat the brush as an empty selection.
+    if (x === undefined && y === undefined) return;
+    const record: PlotInteractionInterval<PublicKey> = Object.freeze({
+      panelId: targetPanelId,
+      preset: interactionConfig.select?.preset ?? "independent",
+      domains: Object.freeze({
+        ...(x !== undefined && { x }),
+        ...(y !== undefined && { y }),
+      }),
+      keys: Object.freeze([...event.keys]) as readonly PublicKey[],
+    });
+    committedIntervalRecord = record;
+    if (interaction === undefined) {
+      localCommittedIntervals = [
+        ...nextLocalIntervalRecords(localCommittedIntervals, record),
+      ];
+    } else {
+      interaction.setInterval(record, {
+        scope: resolvedInteractionScope,
+        source,
+      });
+    }
   }
 
   function emitSelection(event: PlotSelection): void {
@@ -977,6 +1476,19 @@
     const panel = model?.scene.panels[index];
     if (panel === undefined) return null;
     return panel.id;
+  }
+
+  function panelAtPoint(point: Readonly<{ x: number; y: number }>) {
+    const panels = model?.scene.panels ?? [];
+    return (
+      panels.find(
+        (panel) =>
+          point.x >= panel.x &&
+          point.x <= panel.x + panel.width &&
+          point.y >= panel.y &&
+          point.y <= panel.y + panel.height,
+      ) ?? (panels.length === 1 ? panels[0]! : null)
+    );
   }
 
   function semanticKey(
@@ -1189,6 +1701,208 @@
       committed: legendCommitted,
     });
   });
+
+  const filterableLegendEntries = $derived.by(() => {
+    if (model === null || legendFilterOptions === null) return [];
+    return model.scene.legends.flatMap((sceneLegend) => {
+      if (sceneLegend.type !== "discrete") return [];
+      if (sceneLegend.scale !== "color" && sceneLegend.scale !== "fill")
+        return [];
+      const fields = new Set(
+        model.layerFields
+          .flat()
+          .filter(
+            (mapped) =>
+              mapped.channel === sceneLegend.scale && mapped.source !== "stat",
+          )
+          .map((mapped) => mapped.field),
+      );
+      const field = fields.values().next().value as string | undefined;
+      // One combined scale fed by unlike fields has no honest one-toggle
+      // filtering semantics. Keep the static legend rather than filtering
+      // only whichever field happened to be encountered first.
+      if (field === undefined || fields.size !== 1) return [];
+      // A scaled constant (aes { value, scale: true }) feeds this legend
+      // without a field: toggling its entry would filter an unrelated field
+      // while the constant-colored layer stays rendered. Keep it static.
+      if (
+        model.layerScaledConstants.some(
+          (constants) => constants[sceneLegend.scale] !== undefined,
+        )
+      )
+        return [];
+      const current = localLegendFilters.find(
+        (clause) =>
+          clause.scale === sceneLegend.scale && clause.field === field,
+      );
+      return sceneLegend.entries.map((entry) => ({
+        legend: sceneLegend,
+        entry,
+        field,
+        visible:
+          current === undefined ||
+          isLegendValueVisible(
+            current.values,
+            entry.value as CellValue,
+            current.mode,
+          ),
+      }));
+    });
+  });
+
+  // Catalog changes prune values that no longer exist. An emptied clause is
+  // removed, so a category that disappears and later returns is visible by
+  // default. resetScales() deliberately does not alter this filter state.
+  $effect(() => {
+    const catalogs = new Map<string, CellValue[]>();
+    for (const target of filterableLegendEntries) {
+      const key = `${target.legend.scale}:${target.field}`;
+      const catalog = catalogs.get(key) ?? [];
+      catalog.push(target.entry.value as CellValue);
+      catalogs.set(key, catalog);
+    }
+    let next = localLegendFilters;
+    const reconciled: Array<{
+      clause: LegendFilterClause;
+      removed: boolean;
+    }> = [];
+    // A clause whose field is still mapped but whose legend stopped being
+    // filterable (second unlike field on the scale, a scaled constant, a
+    // non-discrete legend) has no checkbox or reset control left — remove it
+    // rather than filtering rows invisibly. Unmapped fields are handled by
+    // the capability reset above.
+    if (model !== null && legendFilterOptions !== null) {
+      for (const clause of next.filter(
+        (candidate) =>
+          activeLegendFilterBindings.has(
+            `${candidate.scale}:${candidate.field}`,
+          ) && !catalogs.has(`${candidate.scale}:${candidate.field}`),
+      )) {
+        next = next.filter((candidate) => candidate !== clause);
+        reconciled.push({ clause, removed: true });
+      }
+    }
+    for (const [key, catalog] of catalogs) {
+      const fingerprint = JSON.stringify(
+        catalog.map((value) => encodeKey(value)),
+      );
+      const priorFingerprint = legendCatalogFingerprints.get(key);
+      legendCatalogFingerprints.set(key, fingerprint);
+      if (priorFingerprint === undefined || priorFingerprint === fingerprint)
+        continue;
+      const index = next.findIndex(
+        (clause) => `${clause.scale}:${clause.field}` === key,
+      );
+      if (index < 0) continue;
+      const clause = next[index]!;
+      const values = reconcileLegendFilterValues(clause.values, catalog);
+      reconciled.push({
+        clause: Object.freeze({ ...clause, values }),
+        removed: values.length === 0,
+      });
+      next =
+        values.length === 0
+          ? next.filter((_, candidateIndex) => candidateIndex !== index)
+          : next.map((candidate, candidateIndex) =>
+              candidateIndex === index
+                ? Object.freeze({ ...candidate, values })
+                : candidate,
+            );
+    }
+    for (const key of legendCatalogFingerprints.keys())
+      if (!catalogs.has(key)) legendCatalogFingerprints.delete(key);
+    if (next === localLegendFilters) return;
+    localLegendFilters = [...next];
+    for (const { clause, removed } of reconciled)
+      emitLegendFilter({
+        type: "legend-filter",
+        phase: removed ? "remove" : "change",
+        source: "programmatic",
+        clause,
+      });
+    announceInteraction("Legend filters reconciled with the available groups.");
+  });
+
+  function legendFilterSource(event: MouseEvent): LegendFilterEvent["source"] {
+    if (event.detail === 0) return "keyboard";
+    return legendFilterPointerType === "touch" ? "touch" : "pointer";
+  }
+
+  function emitLegendFilter(event: LegendFilterEvent): void {
+    onlegendfilter?.(event);
+    oninteraction?.(event);
+  }
+
+  function toggleLegendFilter(
+    target: (typeof filterableLegendEntries)[number],
+    event: MouseEvent,
+  ): void {
+    if (legendFilterOptions === null) return;
+    // This is a controlled checkbox. Prevent the browser's post-handler
+    // default toggle from racing the reactive checked value.
+    event.preventDefault();
+    const catalog = target.legend.entries.map(
+      (entry) => entry.value as CellValue,
+    );
+    const index = localLegendFilters.findIndex(
+      (clause) =>
+        clause.scale === target.legend.scale && clause.field === target.field,
+    );
+    const current = localLegendFilters[index];
+    const baseline =
+      current?.values ??
+      (legendFilterOptions.mode === "include" ? catalog : []);
+    const values = nextLegendFilterValues(
+      baseline,
+      target.entry.value as CellValue,
+      catalog,
+      legendFilterOptions.mode,
+      legendFilterOptions.multiple,
+    );
+    const clause: LegendFilterClause = Object.freeze({
+      scale: target.legend.scale as "color" | "fill",
+      field: target.field,
+      values,
+      mode: legendFilterOptions.mode,
+    });
+    localLegendFilters =
+      index < 0
+        ? [...localLegendFilters, clause]
+        : localLegendFilters.map((candidate, candidateIndex) =>
+            candidateIndex === index ? clause : candidate,
+          );
+    const source = legendFilterSource(event);
+    legendFilterPointerType = null;
+    const filterEvent: LegendFilterEvent = Object.freeze({
+      type: "legend-filter",
+      phase: "change",
+      source,
+      clause,
+    });
+    emitLegendFilter(filterEvent);
+    announceInteraction(
+      `${target.entry.label} ${isLegendValueVisible(values, target.entry.value as CellValue, legendFilterOptions.mode) ? "shown" : "hidden"}.`,
+    );
+  }
+
+  function resetLegendFilters(event: MouseEvent): void {
+    if (localLegendFilters.length === 0) return;
+    const returnTarget = root?.querySelector<HTMLElement>(
+      ".gg-legend-filters input",
+    );
+    const source = legendFilterSource(event);
+    localLegendFilters = [];
+    legendFilterPointerType = null;
+    emitLegendFilter(
+      Object.freeze({
+        type: "legend-filter",
+        phase: "clear",
+        source,
+        clause: null,
+      }),
+    );
+    queueMicrotask(() => returnTarget?.focus());
+  }
 
   $effect.pre(() => {
     const count = interactiveLegendEntries.length;
@@ -1846,6 +2560,9 @@
           interactionConfig.select?.persistent,
           eventValue,
         );
+        // R3: persistent selections reconcile into the typed interval set.
+        if (interactionConfig.select?.persistent)
+          commitIntervalSelection(eventValue, source);
         emitSelection(eventValue);
         reducer.dispatch({ type: "cancel-area" });
         break;
@@ -1903,13 +2620,24 @@
       case "none":
         break;
       case "begin-area": {
+        // R3: the brush is panel-scoped — extending stays on the origin
+        // panel from the reducer; a fresh brush anchors to the hit panel.
+        const area = reducer.state.area;
+        const extending = areaAwaitingSecond && brushRect !== null;
+        const originPanel = extending
+          ? area.kind === "idle"
+            ? null
+            : (model?.scene.panels.find((panel) => panel.id === area.panelId) ??
+              null)
+          : panelAtPoint(p);
+        if (originPanel === null) break;
         // Pure table owns fresh vs extend corner policy.
         brushRect = action.corners;
         setInspection(null, action.source);
         reducer.dispatch({
           type: "begin-area",
           point: p,
-          panelId: panelId(0),
+          panelId: originPanel.id,
         });
         if (action.emitSelectStart) {
           const startEvent = selectionEvent(
@@ -1938,12 +2666,17 @@
     rect: ReturnType<typeof normalizedRect>,
     source: InteractionSource,
   ): IntervalSelection {
+    const originPanelId =
+      reducer.state.area.kind === "idle"
+        ? committedInterval?.panelId
+        : reducer.state.area.panelId;
     return buildIntervalSelectionFromScene({
       phase,
       mode: interactionConfig.select?.mode ?? "xy",
       source,
       pixels: rect,
       scene: intervalQueryScene(),
+      ...(originPanelId !== undefined && { panelId: originPanelId }),
       keyForRow: (rowIndex) =>
         semanticKey(model?.row(rowIndex) ?? null, rowIndex),
     });
@@ -2036,6 +2769,112 @@
     announceInteraction(zoomAnnouncement(committed));
     onzoom?.(event);
     oninteraction?.(event);
+  }
+
+  function openBoundsEditor(
+    action: "select" | "zoom",
+    axis: "x" | "y",
+    trigger: HTMLElement,
+  ): void {
+    boundsReturnFocus = trigger;
+    if (action === "select") {
+      const panel =
+        currentIntervalRecord === null
+          ? (inspectionPanel ?? model?.scene.panels[0])
+          : currentIntervalPanel;
+      if (panel === undefined) return;
+      boundsEditor = {
+        action,
+        axis,
+        panelId: panel.id,
+        panelLabel: intervalPanelLabel(panel),
+      };
+      return;
+    }
+    boundsEditor = { action, axis };
+  }
+
+  function applyPreciseBounds(event: PreciseBoundsApplyEvent): void {
+    if (event.action === "zoom") {
+      if (event.scale === "band") return;
+      commitZoom(
+        frozenZoomDomains({
+          ...effectiveZoomDomains,
+          [event.axis]: [...event.bounds],
+        }),
+        event.inputSource,
+      );
+      boundsEditor = null;
+      return;
+    }
+    const prior = currentIntervalRecord;
+    const targetPanelId = prior?.panelId ?? boundsEditor?.panelId;
+    if (targetPanelId === null || targetPanelId === undefined || model === null)
+      return;
+    const panelIndex = model.scene.panels.findIndex(
+      (candidate) => candidate.id === targetPanelId,
+    );
+    if (panelIndex < 0) return;
+    const axis = semanticAxis(panelIndex, event.axis, event.bounds);
+    if (axis === undefined) return;
+    const domains = Object.freeze({
+      ...prior?.domains,
+      [event.axis]: axis,
+    });
+    const keys = recomputePanelIntervalKeys({
+      panelId: targetPanelId,
+      domains,
+      candidates: intervalConsumptionCandidates(),
+    }) as readonly PublicKey[];
+    const next: PlotInteractionInterval<PublicKey> = Object.freeze({
+      panelId: targetPanelId,
+      preset:
+        prior?.preset ?? interactionConfig.select?.preset ?? "independent",
+      domains,
+      keys,
+    });
+    // Precise bounds persist exactly like the brush path: with
+    // `persistent: false` the end event still fires, but no durable record,
+    // committed rectangle, or clear-selection controls appear.
+    const persistent = interactionConfig.select?.persistent === true;
+    if (persistent) {
+      committedIntervalRecord = next;
+      if (interaction === undefined) {
+        localCommittedIntervals = [
+          ...nextLocalIntervalRecords(localCommittedIntervals, next),
+        ];
+      } else {
+        interaction.setInterval(next, {
+          scope: resolvedInteractionScope,
+          source: event.inputSource,
+        });
+      }
+    }
+    const panel = model.scene.panels[panelIndex]!;
+    const eventValue = buildIntervalSelection({
+      phase: "end",
+      mode: interactionConfig.select?.mode ?? "xy",
+      panelId: targetPanelId,
+      domain: eventDomain(panelIndex, domains),
+      // The overlay must depict the interval that was actually applied, so
+      // project the edited domains back into pixels rather than reusing the
+      // pre-edit rectangle (or defaulting to the whole panel).
+      pixels: intervalPixelsFromDomains({
+        domains,
+        panel,
+        scales: model.scales.panels[panelIndex] ?? model.scales,
+        flipped: coordFlipped,
+      }),
+      keys,
+      lineageCount: intervalLineageCount(targetPanelId, domains),
+      source: event.inputSource,
+    });
+    committedInterval = persistentSelectionOrNull(
+      interactionConfig.select?.persistent,
+      eventValue,
+    );
+    emitSelection(eventValue);
+    boundsEditor = null;
   }
 
   function resetZoom(source: InteractionSource = "programmatic"): void {
@@ -2193,11 +3032,14 @@
       }
       case "begin-area": {
         // Pure table owns inspection-anchor vs panel-center policy.
+        // R3: the brush is panel-scoped — anchor to the panel under it.
+        const originPanel = panelAtPoint(action.anchor);
+        if (originPanel === null) return;
         brushRect = brushAtPoint(action.anchor);
         reducer.dispatch({
           type: "begin-area",
           point: action.anchor,
-          panelId: panelId(0),
+          panelId: originPanel.id,
         });
         announceInteraction(BRUSH_SECOND_CORNER_ANNOUNCEMENT);
         return;
@@ -2329,6 +3171,7 @@
   class:gg-with-tool-rail={showToolRail}
   class:gg-with-legend-clear={legendFocusEnabled &&
     effectiveLegendPressed !== null}
+  class:gg-with-legend-filters={filterableLegendEntries.length > 0}
   class:gg-narrow-tools={isNarrowToolsWidth(resolvedWidth)}
   class:gg-with-docked-tooltip={isTooltipDocked({
     inspectionState: inspection?.state,
@@ -2348,13 +3191,30 @@
       zoomDomains={effectiveZoomDomains}
       {hasPointSelection}
       {hasIntervalSelection}
+      intervalTargetLabel={currentIntervalTargetLabel}
+      canSetIntervalBounds={!emptyPlot &&
+        preciseIntervalAxes.length > 0 &&
+        (currentIntervalRecord === null || currentIntervalPanel !== undefined)}
+      canSetZoomBounds={!emptyPlot && preciseZoomAxes.length > 0}
+      intervalAxes={preciseIntervalAxes}
+      zoomAxes={preciseZoomAxes}
       onChooseTool={chooseTool}
-      onResetZoom={() => resetZoom("pointer")}
-      onClearPointSelection={() => {
-        if (canPublishPointSelection) clearPointSelection("pointer");
-      }}
-      onClearIntervalSelection={() => clearIntervalSelection("pointer")}
+      onResetZoom={resetZoom}
+      onClearPointSelection={clearPointSelection}
+      onClearIntervalSelection={clearIntervalSelection}
+      onClearCurrentInterval={clearCurrentPanelInterval}
+      onEditBounds={openBoundsEditor}
     />
+  {/if}
+  {#if boundsEditorInput !== null}
+    <div class="gg-precise-bounds">
+      <BoundsEditor
+        input={boundsEditorInput}
+        returnFocus={boundsReturnFocus}
+        onapply={applyPreciseBounds}
+        oncancel={() => (boundsEditor = null)}
+      />
+    </div>
   {/if}
   {#if model !== null}
     <PlotMarkStrata
@@ -2392,6 +3252,35 @@
       onClearPointerCancel={() => (legendClearPointerType = null)}
       onClearClick={clearLegendFromControl}
     />
+    {#if filterableLegendEntries.length > 0}
+      <fieldset class="gg-legend-filters">
+        <legend>Filter legend</legend>
+        {#each filterableLegendEntries as target (`${target.legend.scale}:${target.field}:${encodeKey(target.entry.value)}`)}
+          <label>
+            <input
+              type="checkbox"
+              checked={target.visible}
+              aria-label={`Show ${target.entry.label}`}
+              onpointerdown={(event) =>
+                (legendFilterPointerType = event.pointerType)}
+              onpointercancel={() => (legendFilterPointerType = null)}
+              onclick={(event) => toggleLegendFilter(target, event)}
+            />
+            <span>{target.entry.label}</span>
+          </label>
+        {/each}
+        {#if localLegendFilters.length > 0}
+          <button
+            type="button"
+            aria-label="Reset legend filters"
+            onpointerdown={(event) =>
+              (legendFilterPointerType = event.pointerType)}
+            onpointercancel={() => (legendFilterPointerType = null)}
+            onclick={resetLegendFilters}>Reset</button
+          >
+        {/if}
+      </fieldset>
+    {/if}
     <PlotSceneOverlays
       width={model.scene.width}
       height={model.scene.height}
@@ -2468,11 +3357,13 @@
     <PlotStatusChrome
       {plotId}
       showInstructions={surfaceInteractive}
+      description={surfaceDescription}
       activeDatumLabel={datumLabel(inspection?.focus.row ?? null)}
       showAreaInstruction={surfaceInteractive && areaAwaitingSecond}
       showLiveRegion={shouldRenderInteractionLiveRegion({
         surfaceInteractive,
         legendFocusEnabled,
+        legendFilterEnabled: legendFilterOptions !== null,
       })}
       liveText={resolveInteractionLiveText({
         announcement: interactionAnnouncement,
@@ -2486,6 +3377,22 @@
 </div>
 
 <style>
+  .gg-precise-bounds {
+    position: absolute;
+    /* Above the transparent legend hit targets (z-index 5): the open editor
+       must be the top interactive layer or invisible legend buttons
+       intercept pointer input meant for its fields. */
+    z-index: 6;
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    max-width: 560px;
+    padding: 8px;
+    background: var(--gg-panelBg, var(--gg-theme-panelBg, Canvas));
+    box-shadow: 0 2px 12px color-mix(in srgb, currentColor 18%, transparent);
+    pointer-events: auto;
+  }
+
   .gg-plot-root {
     position: relative;
     display: inline-block;
@@ -2509,6 +3416,21 @@
     margin-bottom: 48px;
   }
 
+  .gg-with-legend-filters {
+    margin-bottom: 58px;
+  }
+
+  /* Both control sets active: the Clear-focus button keeps the first row;
+     the filter fieldset moves to its own row below so its labels can never
+     cover the button. Reserve both rows. */
+  .gg-with-legend-clear.gg-with-legend-filters {
+    margin-bottom: 106px;
+  }
+
+  .gg-with-legend-clear.gg-with-legend-filters .gg-legend-filters {
+    top: calc(100% + 52px);
+  }
+
   .gg-with-docked-tooltip {
     margin-bottom: 260px;
   }
@@ -2521,6 +3443,62 @@
     position: absolute;
     inset: 0;
     pointer-events: none;
+  }
+
+  .gg-legend-filters {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 4px;
+    z-index: 5;
+    display: flex;
+    min-height: 44px;
+    max-width: calc(100% - 8px);
+    margin: 0;
+    padding: 0;
+    border: 0;
+    gap: 4px;
+    align-items: center;
+    overflow-x: auto;
+    color: var(--gg-ink, var(--gg-theme-ink, currentColor));
+    font: 11px/1.2 var(--gg-font-family, sans-serif);
+    pointer-events: auto;
+  }
+
+  .gg-legend-filters legend {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .gg-legend-filters label,
+  .gg-legend-filters button {
+    display: inline-flex;
+    min-height: 44px;
+    margin: 0;
+    padding: 0 8px;
+    align-items: center;
+    gap: 5px;
+    border: 1px solid
+      var(--gg-tooltipBorder, var(--gg-theme-tooltipBorder, currentColor));
+    border-radius: 3px;
+    background: var(--gg-tooltipPaper, var(--gg-theme-tooltipPaper, white));
+    color: inherit;
+    font: inherit;
+    white-space: nowrap;
+  }
+
+  .gg-legend-filters input {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+  }
+
+  .gg-legend-filters label:has(:focus-visible),
+  .gg-legend-filters button:focus-visible {
+    outline: 2px solid var(--gg-focusRing, var(--gg-theme-focusRing, Highlight));
+    outline-offset: 2px;
   }
 
   @container gg-plot (max-width: 559px) {

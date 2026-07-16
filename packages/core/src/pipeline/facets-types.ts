@@ -1,10 +1,14 @@
 /**
  * Facet partition result types.
  */
+import { createFacetPanelIdentity } from "../facet-identity.js";
+import type { FacetPanelIdentity } from "../facet-identity.js";
 import type { ColumnTable } from "../table.js";
 
 export interface FacetPanelDef {
   /** Stable facet field/value identity; independent of display position. */
+  identity: FacetPanelIdentity;
+  /** Alias for `identity.key`, retained for existing interaction consumers. */
   id: string;
   /** Strip label ("" = no strip; the unfaceted single panel). */
   label: string;
@@ -24,11 +28,17 @@ export interface FacetLayout {
   freeY: boolean;
 }
 
-export const SINGLE_PANEL = (table: ColumnTable): FacetLayout => ({
-  faceted: false,
-  panels: [{ id: "panel:all", label: "", row: 0, col: 0, table, sourceRows: null }],
-  nrow: 1,
-  ncol: 1,
-  freeX: false,
-  freeY: false,
-});
+export const SINGLE_PANEL = (
+  table: ColumnTable,
+  sourceRows: number[] | null = null,
+): FacetLayout => {
+  const identity = createFacetPanelIdentity([]);
+  return {
+    faceted: false,
+    panels: [{ identity, id: identity.key, label: "", row: 0, col: 0, table, sourceRows }],
+    nrow: 1,
+    ncol: 1,
+    freeX: false,
+    freeY: false,
+  };
+};

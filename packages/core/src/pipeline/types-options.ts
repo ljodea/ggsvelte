@@ -3,6 +3,7 @@
  */
 import type { PositionScaleSpec } from "@ggsvelte/spec";
 
+import type { RuntimeRowFilterClause } from "../runtime-filter.js";
 import type { ScaleState } from "../scales/state.js";
 import type { Columns, Rows } from "../table.js";
 import type { TextMeasurer } from "../layout/measure.js";
@@ -44,4 +45,7 @@ export interface RunOptions {
     x?: PositionScaleSpec;
     y?: PositionScaleSpec;
   }>;
+  /** Data-changing runtime filters, applied before facets, stats, scales,
+   * layout, candidates, and rendering. Source-row identity is preserved. */
+  rowFilters?: readonly RuntimeRowFilterClause[];
 }

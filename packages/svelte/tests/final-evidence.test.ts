@@ -110,7 +110,7 @@ describe("final R-1/R0 evidence locks", () => {
     expect(container.querySelector("[aria-live='polite']")?.textContent).toMatch(
       /^Selection complete, /,
     );
-    button(container, "Clear selection").click();
+    button(container, "Clear panel selection").click();
     await tick();
     expect(container.querySelector("[aria-live='polite']")?.textContent).toBe("Selection cleared.");
 
@@ -359,7 +359,7 @@ describe("final R-1/R0 evidence locks", () => {
     pointer(intervalSurface, "pointermove", 340, 250);
     pointer(intervalSurface, "pointerup", 340, 250);
     await expect.poll(() => intervalEvents.some((event) => event.phase === "end")).toBe(true);
-    button(intervalView.container, "Clear selection").click();
+    button(intervalView.container, "Clear panel selection").click();
     await expect.poll(() => intervalEvents.some((event) => event.phase === "clear")).toBe(true);
     const clear = intervalEvents.find((event) => event.phase === "clear")!;
     expect(Object.isFrozen(clear)).toBe(true);

@@ -1,6 +1,8 @@
 <script lang="ts">
   import type { InteractionTool, ZoomDomains } from "./interaction.js";
 
+  type RecoveryInputSource = "keyboard" | "pointer" | "touch";
+
   const {
     availableTools,
     activeTool,
@@ -10,10 +12,17 @@
     zoomDomains = null,
     hasPointSelection = false,
     hasIntervalSelection = false,
+    intervalTargetLabel,
+    canSetIntervalBounds = false,
+    canSetZoomBounds = false,
+    intervalAxes = [],
+    zoomAxes = [],
     onChooseTool,
     onResetZoom,
     onClearPointSelection,
     onClearIntervalSelection,
+    onClearCurrentInterval,
+    onEditBounds,
   }: {
     availableTools: readonly InteractionTool[];
     activeTool: InteractionTool;
@@ -23,17 +32,61 @@
     zoomDomains?: ZoomDomains | null;
     hasPointSelection?: boolean;
     hasIntervalSelection?: boolean;
+    intervalTargetLabel?: string | undefined;
+    canSetIntervalBounds?: boolean;
+    canSetZoomBounds?: boolean;
+    intervalAxes?: readonly ("x" | "y")[];
+    zoomAxes?: readonly ("x" | "y")[];
     onChooseTool: (tool: InteractionTool) => void;
-    onResetZoom: () => void;
-    onClearPointSelection: () => void;
-    onClearIntervalSelection: () => void;
+    onResetZoom: (source: RecoveryInputSource) => void;
+    onClearPointSelection: (source: RecoveryInputSource) => void;
+    onClearIntervalSelection: (source: RecoveryInputSource) => void;
+    onClearCurrentInterval: (source: RecoveryInputSource) => void;
+    onEditBounds: (
+      action: "select" | "zoom",
+      axis: "x" | "y",
+      trigger: HTMLElement,
+    ) => void;
   } = $props();
+
+  let recoveryPointerType: string | null = null;
+
+  function recoverySource(event: MouseEvent): RecoveryInputSource {
+    const source =
+      recoveryPointerType === "touch"
+        ? "touch"
+        : recoveryPointerType === null && event.detail === 0
+          ? "keyboard"
+          : "pointer";
+    recoveryPointerType = null;
+    return source;
+  }
+
+  function captureRecoveryPointer(event: PointerEvent): void {
+    recoveryPointerType = event.pointerType;
+  }
 
   function labelFor(tool: InteractionTool): string {
     if (tool === "select-area") return "Select area";
     if (tool === "zoom-area") return "Zoom area";
     if (tool === "point") return "Select point";
     return "Inspect";
+  }
+
+  function boundsLabel(
+    action: "select" | "zoom",
+    axis: "x" | "y",
+    editing: boolean,
+  ): string {
+    const target =
+      action === "select" && intervalTargetLabel !== undefined
+        ? `: ${intervalTargetLabel}`
+        : "";
+    return `${editing ? "Edit" : "Set"} ${axis} ${action === "select" ? "selection" : "zoom"} bounds${target}`;
+  }
+
+  function panelClearLabel(): string {
+    return `Clear panel selection${intervalTargetLabel === undefined ? "" : `: ${intervalTargetLabel}`}`;
   }
 </script>
 
@@ -59,17 +112,62 @@
   </div>
   <div class="gg-tool-recovery-actions">
     {#if zoomDomains !== null}
-      <button type="button" onclick={onResetZoom}>Reset zoom</button>
+      <button
+        type="button"
+        disabled={!ready}
+        onpointerdown={captureRecoveryPointer}
+        onpointercancel={() => (recoveryPointerType = null)}
+        onclick={(event) => onResetZoom(recoverySource(event))}
+        >Reset zoom</button
+      >
+    {/if}
+    {#if canSetZoomBounds}
+      {#each zoomAxes as axis (axis)}
+        <button
+          type="button"
+          disabled={!ready}
+          onclick={(event) => onEditBounds("zoom", axis, event.currentTarget)}
+          >{boundsLabel("zoom", axis, zoomDomains !== null)}</button
+        >
+      {/each}
     {/if}
     {#if hasPointSelection}
-      <button type="button" onclick={onClearPointSelection}
+      <button
+        type="button"
+        disabled={!ready}
+        onpointerdown={captureRecoveryPointer}
+        onpointercancel={() => (recoveryPointerType = null)}
+        onclick={(event) => onClearPointSelection(recoverySource(event))}
         >Clear selection</button
       >
     {/if}
     {#if hasIntervalSelection}
-      <button type="button" onclick={onClearIntervalSelection}
-        >Clear selection</button
+      <button
+        type="button"
+        disabled={!ready}
+        onpointerdown={captureRecoveryPointer}
+        onpointercancel={() => (recoveryPointerType = null)}
+        onclick={(event) => onClearCurrentInterval(recoverySource(event))}
+        >{panelClearLabel()}</button
       >
+      <button
+        type="button"
+        disabled={!ready}
+        onpointerdown={captureRecoveryPointer}
+        onpointercancel={() => (recoveryPointerType = null)}
+        onclick={(event) => onClearIntervalSelection(recoverySource(event))}
+        >Clear all selections</button
+      >
+    {/if}
+    {#if canSetIntervalBounds}
+      {#each intervalAxes as axis (axis)}
+        <button
+          type="button"
+          disabled={!ready}
+          onclick={(event) => onEditBounds("select", axis, event.currentTarget)}
+          >{boundsLabel("select", axis, hasIntervalSelection)}</button
+        >
+      {/each}
     {/if}
   </div>
 </div>
@@ -81,7 +179,10 @@
     right: 8px;
     top: -48px;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    /* Modes keep their content width; R3 recovery/bounds actions can outgrow
+       any plot width, so their track shrinks and scrolls instead of
+       overlapping the mode tabs. */
+    grid-template-columns: auto minmax(0, 1fr);
     gap: 4px;
     align-items: center;
     z-index: 1;
@@ -94,6 +195,10 @@
     display: flex;
     align-items: center;
     gap: 4px;
+  }
+
+  .gg-tool-recovery-actions {
+    overflow-x: auto;
   }
 
   .gg-tool-rail button {
@@ -110,6 +215,8 @@
     );
     font: inherit;
     font-size: 14px;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 
   .gg-tool-rail button:focus-visible {

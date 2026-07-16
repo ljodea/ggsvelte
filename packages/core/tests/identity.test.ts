@@ -1,6 +1,7 @@
 import { describe, expect, it } from "bun:test";
 
 import { LineageStore } from "../src/identity.ts";
+import { createFacetPanelIdentity } from "../src/facet-identity.ts";
 import { runPipeline } from "../src/pipeline.ts";
 
 describe("LineageStore", () => {
@@ -169,8 +170,8 @@ describe("pipeline semantic identity", () => {
     );
 
     expect(model.scene.panels.map((panel) => panel.id)).toEqual([
-      "panel:wrap:facet=s:north",
-      "panel:wrap:facet=s:south",
+      createFacetPanelIdentity([{ role: "wrap", field: "facet", value: "north" }]).key,
+      createFacetPanelIdentity([{ role: "wrap", field: "facet", value: "south" }]).key,
     ]);
     const legend = model.scene.legends.find((item) => item.type === "discrete");
     expect(legend?.entries.map((entry) => entry.value)).toEqual(["A", "B"]);
@@ -292,7 +293,7 @@ describe("pipeline semantic identity", () => {
     expect(model.candidates.candidate(0)).toMatchObject({
       xValue: 1,
       yValue: 2,
-      panelId: "panel:wrap:facet=s:a",
+      panelId: createFacetPanelIdentity([{ role: "wrap", field: "facet", value: "a" }]).key,
     });
     const firstPanel = model.candidates.group(0, "x");
     expect(firstPanel?.memberIds).toHaveLength(2);
