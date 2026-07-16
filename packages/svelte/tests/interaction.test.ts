@@ -484,6 +484,157 @@ describe("brush + brush-to-zoom", () => {
     capture.dispatchEvent(new PointerEvent("pointerup", opts(x1, y1)));
   }
 
+  it("starts an interval from precise bounds without a brush", async () => {
+    let renderCount = 0;
+    const selections: Array<{
+      keys: readonly PropertyKey[];
+      source: string;
+    }> = [];
+    const { container } = render(GGPlot, {
+      data: rows,
+      aes: { x: "x", y: "y" },
+      layers: [{ geom: "point" }],
+      key: "x",
+      select: { type: "interval", mode: "x" },
+      onselect: (event: { phase: string; keys: readonly PropertyKey[]; source: string }) => {
+        if (event.phase === "end") selections.push(event);
+      },
+      onrender: () => {
+        renderCount += 1;
+      },
+      ...size,
+    });
+    const setBounds = [
+      ...container.querySelectorAll<HTMLButtonElement>(".gg-tool-rail button"),
+    ].find((button) => button.textContent?.trim() === "Set x selection bounds")!;
+    expect(setBounds).not.toBeUndefined();
+    const rendersBeforeEdit = renderCount;
+    setBounds.click();
+    await until(() => container.querySelector('.gg-bounds-editor input[id$="-lower"]') !== null);
+    const [lower, upper] = [
+      ...container.querySelectorAll<HTMLInputElement>(".gg-bounds-editor input"),
+    ];
+    lower!.value = "1.5";
+    lower!.dispatchEvent(new InputEvent("input", { bubbles: true }));
+    upper!.value = "2.5";
+    upper!.dispatchEvent(new InputEvent("input", { bubbles: true }));
+    expect(renderCount).toBe(rendersBeforeEdit);
+
+    container.querySelector<HTMLButtonElement>('.gg-bounds-editor button[type="submit"]')!.click();
+    await until(() => selections.length === 1);
+
+    expect(selections[0]).toMatchObject({ keys: [2], source: "keyboard" });
+    expect(renderCount).toBe(rendersBeforeEdit);
+    expect(document.activeElement).toBe(setBounds);
+  });
+
+  it("starts zoom from precise bounds and preserves pointer modality", async () => {
+    const zooms: Array<{ source: string; domains: unknown }> = [];
+    const { container } = render(GGPlot, {
+      data: rows,
+      aes: { x: "x", y: "y" },
+      layers: [{ geom: "point" }],
+      zoom: { mode: "x" },
+      onzoom: (event: { source: string; domains: unknown }) => zooms.push(event),
+      ...size,
+    });
+    const setBounds = [
+      ...container.querySelectorAll<HTMLButtonElement>(".gg-tool-rail button"),
+    ].find((button) => button.textContent?.trim() === "Set x zoom bounds")!;
+    setBounds.click();
+    await until(() => container.querySelector('.gg-bounds-editor input[id$="-lower"]') !== null);
+    const [lower, upper] = [
+      ...container.querySelectorAll<HTMLInputElement>(".gg-bounds-editor input"),
+    ];
+    lower!.value = "1.5";
+    lower!.dispatchEvent(new InputEvent("input", { bubbles: true }));
+    upper!.value = "2.5";
+    upper!.dispatchEvent(new InputEvent("input", { bubbles: true }));
+    const apply = container.querySelector<HTMLButtonElement>(
+      '.gg-bounds-editor button[type="submit"]',
+    )!;
+    apply.dispatchEvent(
+      new PointerEvent("pointerdown", {
+        bubbles: true,
+        pointerType: "touch",
+      }),
+    );
+    apply.click();
+    await until(() => zooms.length === 1);
+
+    expect(zooms[0]).toEqual({
+      type: "zoom",
+      phase: "end",
+      source: "touch",
+      domains: { x: [1.5, 2.5] },
+    });
+  });
+
+  it("opens dedicated precise controls for log, time, reversed, and band scales", async () => {
+    const fixtures = [
+      {
+        name: "log",
+        data: [
+          { x: 1, y: 1 },
+          { x: 100, y: 2 },
+        ],
+        scales: { x: { type: "log" as const } },
+        control: "input[type=number]",
+      },
+      {
+        name: "time",
+        data: [
+          { x: "2025-01-01T00:00:00.000Z", y: 1 },
+          { x: "2025-01-03T00:00:00.000Z", y: 2 },
+        ],
+        scales: { x: { type: "time" as const } },
+        control: "input[type=text]",
+      },
+      {
+        name: "reversed",
+        data: [
+          { x: 1, y: 1 },
+          { x: 3, y: 2 },
+        ],
+        scales: { x: { type: "linear" as const, reverse: true } },
+        control: "input[type=number]",
+      },
+      {
+        name: "band",
+        data: [
+          { x: "north", y: 1 },
+          { x: "south", y: 2 },
+        ],
+        scales: { x: { type: "band" as const } },
+        control: "select",
+      },
+    ];
+
+    for (const fixture of fixtures) {
+      const view = render(GGPlot, {
+        data: fixture.data,
+        aes: { x: "x", y: "y" },
+        layers: [{ geom: "point" }],
+        scales: fixture.scales,
+        select: { type: "interval", mode: "x" },
+        ...size,
+      } as never);
+      const setBounds = [
+        ...view.container.querySelectorAll<HTMLButtonElement>(".gg-tool-rail button"),
+      ].find((button) => button.textContent?.trim() === "Set x selection bounds");
+      expect(setBounds, fixture.name).not.toBeUndefined();
+      setBounds!.click();
+      await until(
+        () => view.container.querySelector(`.gg-bounds-editor ${fixture.control}`) !== null,
+      );
+      expect(
+        view.container.querySelectorAll(`.gg-bounds-editor ${fixture.control}`),
+        fixture.name,
+      ).toHaveLength(2);
+      await view.unmount();
+    }
+  });
+
   it("brush selects row indices via the hit-index rect query", async () => {
     let model: RenderModel | null = null;
     let renderCount = 0;

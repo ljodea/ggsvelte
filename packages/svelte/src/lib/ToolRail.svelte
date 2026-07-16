@@ -1,6 +1,8 @@
 <script lang="ts">
   import type { InteractionTool, ZoomDomains } from "./interaction.js";
 
+  type RecoveryInputSource = "keyboard" | "pointer" | "touch";
+
   const {
     availableTools,
     activeTool,
@@ -10,6 +12,8 @@
     zoomDomains = null,
     hasPointSelection = false,
     hasIntervalSelection = false,
+    canSetIntervalBounds = false,
+    canSetZoomBounds = false,
     intervalAxes = [],
     zoomAxes = [],
     onChooseTool,
@@ -27,13 +31,15 @@
     zoomDomains?: ZoomDomains | null;
     hasPointSelection?: boolean;
     hasIntervalSelection?: boolean;
+    canSetIntervalBounds?: boolean;
+    canSetZoomBounds?: boolean;
     intervalAxes?: readonly ("x" | "y")[];
     zoomAxes?: readonly ("x" | "y")[];
     onChooseTool: (tool: InteractionTool) => void;
-    onResetZoom: () => void;
-    onClearPointSelection: () => void;
-    onClearIntervalSelection: () => void;
-    onClearCurrentInterval: () => void;
+    onResetZoom: (source: RecoveryInputSource) => void;
+    onClearPointSelection: (source: RecoveryInputSource) => void;
+    onClearIntervalSelection: (source: RecoveryInputSource) => void;
+    onClearCurrentInterval: (source: RecoveryInputSource) => void;
     onEditBounds: (
       action: "select" | "zoom",
       axis: "x" | "y",
@@ -41,11 +47,36 @@
     ) => void;
   } = $props();
 
+  let recoveryPointerType: string | null = null;
+
+  function recoverySource(event: MouseEvent): RecoveryInputSource {
+    const source =
+      recoveryPointerType === "touch"
+        ? "touch"
+        : recoveryPointerType === null && event.detail === 0
+          ? "keyboard"
+          : "pointer";
+    recoveryPointerType = null;
+    return source;
+  }
+
+  function captureRecoveryPointer(event: PointerEvent): void {
+    recoveryPointerType = event.pointerType;
+  }
+
   function labelFor(tool: InteractionTool): string {
     if (tool === "select-area") return "Select area";
     if (tool === "zoom-area") return "Zoom area";
     if (tool === "point") return "Select point";
     return "Inspect";
+  }
+
+  function boundsLabel(
+    action: "select" | "zoom",
+    axis: "x" | "y",
+    editing: boolean,
+  ): string {
+    return `${editing ? "Edit" : "Set"} ${axis} ${action === "select" ? "selection" : "zoom"} bounds`;
   }
 </script>
 
@@ -71,32 +102,54 @@
   </div>
   <div class="gg-tool-recovery-actions">
     {#if zoomDomains !== null}
-      <button type="button" onclick={onResetZoom}>Reset zoom</button>
+      <button
+        type="button"
+        onpointerdown={captureRecoveryPointer}
+        onpointercancel={() => (recoveryPointerType = null)}
+        onclick={(event) => onResetZoom(recoverySource(event))}
+        >Reset zoom</button
+      >
+    {/if}
+    {#if canSetZoomBounds}
       {#each zoomAxes as axis (axis)}
         <button
           type="button"
           onclick={(event) => onEditBounds("zoom", axis, event.currentTarget)}
-          >Edit {axis} zoom bounds</button
+          >{boundsLabel("zoom", axis, zoomDomains !== null)}</button
         >
       {/each}
     {/if}
     {#if hasPointSelection}
-      <button type="button" onclick={onClearPointSelection}
+      <button
+        type="button"
+        onpointerdown={captureRecoveryPointer}
+        onpointercancel={() => (recoveryPointerType = null)}
+        onclick={(event) => onClearPointSelection(recoverySource(event))}
         >Clear selection</button
       >
     {/if}
     {#if hasIntervalSelection}
-      <button type="button" onclick={onClearCurrentInterval}
+      <button
+        type="button"
+        onpointerdown={captureRecoveryPointer}
+        onpointercancel={() => (recoveryPointerType = null)}
+        onclick={(event) => onClearCurrentInterval(recoverySource(event))}
         >Clear panel selection</button
       >
-      <button type="button" onclick={onClearIntervalSelection}
+      <button
+        type="button"
+        onpointerdown={captureRecoveryPointer}
+        onpointercancel={() => (recoveryPointerType = null)}
+        onclick={(event) => onClearIntervalSelection(recoverySource(event))}
         >Clear all selections</button
       >
+    {/if}
+    {#if canSetIntervalBounds}
       {#each intervalAxes as axis (axis)}
         <button
           type="button"
           onclick={(event) => onEditBounds("select", axis, event.currentTarget)}
-          >Edit {axis} selection bounds</button
+          >{boundsLabel("select", axis, hasIntervalSelection)}</button
         >
       {/each}
     {/if}

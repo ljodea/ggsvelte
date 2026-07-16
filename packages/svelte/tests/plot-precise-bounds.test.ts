@@ -53,5 +53,9 @@ describe("precise plot bounds adapters", () => {
       kind: "band",
       values: ["south", "north"],
     });
+    expect(semanticAxisFromBounds("band", [1, "1"])).toEqual({
+      kind: "band",
+      values: ["@n:1", "1"],
+    });
   });
 });

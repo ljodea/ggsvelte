@@ -34,6 +34,7 @@ describe("precise bounds drafts", () => {
       ok: true,
       event: {
         source: "precise-bounds",
+        inputSource: "keyboard",
         action: "select",
         axis: "x",
         scale: "linear",
@@ -73,6 +74,7 @@ describe("precise bounds drafts", () => {
       ok: true,
       event: {
         source: "precise-bounds",
+        inputSource: "keyboard",
         action: "zoom",
         axis: "y",
         scale: "time",

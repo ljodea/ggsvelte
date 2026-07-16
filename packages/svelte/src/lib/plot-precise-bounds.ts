@@ -1,4 +1,4 @@
-import type { PositionScale } from "@ggsvelte/core";
+import { encodeKey, type PositionScale } from "@ggsvelte/core";
 
 import type {
   BoundsAction,
@@ -56,7 +56,7 @@ export function semanticAxisFromBounds(
   if (scale === "band") {
     return Object.freeze({
       kind: "band",
-      values: Object.freeze(bounds.map(String)),
+      values: Object.freeze(bounds.map(encodeKey)),
     });
   }
   const first = bounds[0] as number;

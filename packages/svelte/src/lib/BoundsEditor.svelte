@@ -6,6 +6,7 @@
     validateBoundsDraft,
     type BoundsDraftErrors,
     type BoundsEditorInput,
+    type BoundsInputSource,
     type PreciseBoundsApplyEvent,
   } from "./bounds-editor.js";
 
@@ -29,6 +30,7 @@
   let lowerControl = $state<HTMLInputElement | HTMLSelectElement | null>(null);
   let upperControl = $state<HTMLInputElement | HTMLSelectElement | null>(null);
   let finished = false;
+  let pendingInputSource: BoundsInputSource = "keyboard";
 
   const axisName = $derived(input.axis === "x" ? "horizontal" : "vertical");
   const actionName = $derived(input.action === "select" ? "selection" : "zoom");
@@ -71,7 +73,14 @@
   }
 
   async function apply(): Promise<void> {
-    const result = validateBoundsDraft(input, lowerDraft, upperDraft);
+    const inputSource = pendingInputSource;
+    pendingInputSource = "keyboard";
+    const result = validateBoundsDraft(
+      input,
+      lowerDraft,
+      upperDraft,
+      inputSource,
+    );
     if (!result.ok) {
       errors = result.errors;
       await tick();
@@ -205,7 +214,14 @@
       </div>
     </div>
     <div class="gg-bounds-actions">
-      <button type="submit">Apply</button>
+      <button
+        type="submit"
+        onpointerdown={(event) => {
+          pendingInputSource =
+            event.pointerType === "touch" ? "touch" : "pointer";
+        }}
+        onpointercancel={() => (pendingInputSource = "keyboard")}>Apply</button
+      >
       <button type="button" onclick={cancel}>Cancel</button>
     </div>
   </fieldset>

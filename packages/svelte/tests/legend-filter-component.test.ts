@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import GGPlot from "../src/lib/GGPlot.svelte";
 import LegendFilterPlot from "./fixtures/LegendFilterPlot.svelte";
 import { expectAccessible } from "./helpers/accessibility.js";
 import { render } from "./helpers/render.js";
@@ -67,6 +68,9 @@ describe("explicit legend filtering", () => {
     reset.click();
     await until(() => state(container)["candidates"] === "3");
 
+    expect(document.activeElement).toBe(
+      container.querySelector<HTMLInputElement>("input[aria-label='Show north']"),
+    );
     expect(
       [...container.querySelectorAll<HTMLInputElement>(".gg-legend-filters input")].every(
         (input) => input.checked,
@@ -105,5 +109,51 @@ describe("explicit legend filtering", () => {
     container.querySelector<HTMLInputElement>("input[aria-label='Show north']")!.click();
     await until(() => state(container)["candidates"] === "1");
     expect(container.querySelector("canvas.gg-canvas")).not.toBeNull();
+  });
+
+  it("removes invisible filter state when filtering is disabled", async () => {
+    let candidates = 0;
+    const props = {
+      data: [
+        { x: 1, y: 1, group: "north" },
+        { x: 2, y: 2, group: "south" },
+      ],
+      aes: { x: "x", y: "y", color: "group" },
+      layers: [{ geom: "point" as const }],
+      legendFilter: true,
+      width: 360,
+      height: 260,
+      onrender: (model: { candidates: { size: number } }) => {
+        candidates = model.candidates.size;
+      },
+    };
+    const view = render(GGPlot, props);
+    await until(() => view.container.querySelectorAll(".gg-legend-filters input").length === 2);
+    view.container.querySelector<HTMLInputElement>("input[aria-label='Show north']")!.click();
+    await until(() => candidates === 1);
+
+    await view.rerender({ ...props, legendFilter: false });
+    await until(() => candidates === 2);
+
+    expect(view.container.querySelector(".gg-legend-filters")).toBeNull();
+  });
+
+  it("does not offer a misleading filter for one scale fed by multiple fields", async () => {
+    const { container } = render(GGPlot, {
+      data: [
+        { x: 1, y: 1, group: "north", kind: "actual" },
+        { x: 2, y: 2, group: "south", kind: "forecast" },
+      ],
+      layers: [
+        { geom: "point", aes: { x: "x", y: "y", color: "group" } },
+        { geom: "point", aes: { x: "x", y: "y", color: "kind" } },
+      ],
+      legendFilter: true,
+      width: 360,
+      height: 260,
+    });
+    await until(() => container.querySelector(".gg-plot-root") !== null);
+
+    expect(container.querySelector(".gg-legend-filters")).toBeNull();
   });
 });

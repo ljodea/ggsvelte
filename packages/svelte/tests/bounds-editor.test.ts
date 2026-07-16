@@ -43,6 +43,7 @@ describe("<BoundsEditor>", () => {
     expect(events).toEqual([
       {
         source: "precise-bounds",
+        inputSource: "keyboard",
         action: "zoom",
         axis: "x",
         scale: "linear",
@@ -50,6 +51,34 @@ describe("<BoundsEditor>", () => {
         reversed: false,
       },
     ]);
+  });
+
+  it("reports the physical input used to activate Apply", async () => {
+    const onapply = vi.fn();
+    const { container } = render(BoundsEditor, {
+      input: {
+        axis: "x",
+        action: "select",
+        scale: "linear",
+        bounds: [1, 10],
+      },
+      onapply,
+    });
+    const apply = container.querySelector<HTMLButtonElement>("button[type=submit]")!;
+    apply.dispatchEvent(
+      new PointerEvent("pointerdown", {
+        bubbles: true,
+        pointerType: "touch",
+      }),
+    );
+    apply.click();
+
+    expect(onapply).toHaveBeenCalledWith(
+      expect.objectContaining({
+        source: "precise-bounds",
+        inputSource: "touch",
+      }),
+    );
   });
 
   it("resets an uncommitted draft when the parent supplies new bounds", async () => {

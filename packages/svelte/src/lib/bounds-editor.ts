@@ -1,6 +1,7 @@
 export type BoundsAxis = "x" | "y";
 export type BoundsAction = "select" | "zoom";
 export type BoundsScale = "linear" | "log" | "time" | "band";
+export type BoundsInputSource = "keyboard" | "pointer" | "touch";
 
 export type BoundsCategoryValue = string | number | boolean | bigint | null | undefined | Date;
 
@@ -42,6 +43,8 @@ export type BoundsEditorInput =
 
 interface PreciseBoundsApplyEventBase {
   readonly source: "precise-bounds";
+  /** Physical input that activated Apply. */
+  readonly inputSource: BoundsInputSource;
   readonly action: BoundsAction;
   readonly axis: BoundsAxis;
   readonly reversed: boolean;
@@ -96,9 +99,13 @@ export function formatBoundsDraft(input: BoundsEditorInput): BoundsDraft {
   return { lower: String(input.bounds[0]), upper: String(input.bounds[1]) };
 }
 
-function baseEvent(input: BoundsEditorInput): PreciseBoundsApplyEventBase {
+function baseEvent(
+  input: BoundsEditorInput,
+  inputSource: BoundsInputSource,
+): PreciseBoundsApplyEventBase {
   return {
     source: "precise-bounds",
+    inputSource,
     action: input.action,
     axis: input.axis,
     reversed: input.reversed ?? false,
@@ -134,6 +141,7 @@ export function validateBoundsDraft(
   input: BoundsEditorInput,
   lowerDraft: string,
   upperDraft: string,
+  inputSource: BoundsInputSource = "keyboard",
 ): BoundsDraftValidation {
   if (input.scale === "band") {
     const lowerIndex = Number(lowerDraft);
@@ -151,7 +159,7 @@ export function validateBoundsDraft(
     return {
       ok: true,
       event: {
-        ...baseEvent(input),
+        ...baseEvent(input, inputSource),
         scale: "band",
         bounds: [input.categories[lowerIndex]!.value, input.categories[upperIndex]!.value],
       },
@@ -185,7 +193,7 @@ export function validateBoundsDraft(
   return {
     ok: true,
     event: {
-      ...baseEvent(input),
+      ...baseEvent(input, inputSource),
       scale: input.scale,
       bounds: [lower as number, upper as number],
     },
