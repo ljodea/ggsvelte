@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784166654220,
+  "lastUpdate": 1784167373940,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -5914,6 +5914,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 160.5705,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "7ca6d0079dbbabf75556f6a085fb75388515bfd7",
+          "message": "vr: re-sync baselines for PR #57 @ 26766bd\n\nCo-authored-by: ggsvelte-vr-bot <vr-bot@users.noreply.github.com>",
+          "timestamp": "2026-07-15T21:02:20-05:00",
+          "tree_id": "03e0cefaf5ef178dd53a80ff2897c099d0fb23f4",
+          "url": "https://github.com/ljodea/ggsvelte/commit/7ca6d0079dbbabf75556f6a085fb75388515bfd7"
+        },
+        "date": 1784167373476,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.4174,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.9142,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 9.3173,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 12.1307,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 82.8612,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 121.5177,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 0.9352,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.5113,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 85.8795,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 112.7741,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.3738,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 11.6835,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 118.7879,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.658,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 27.968,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.3807,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 28.4645,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 614.7639,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 166.6559,
             "unit": "ms"
           }
         ]
