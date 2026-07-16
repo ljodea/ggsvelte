@@ -59,7 +59,6 @@
   } from "@ggsvelte/core";
   import {
     buildInteractionMasks,
-    legendValueEqual,
     planStrata,
     runPipeline,
     sceneLabel,
@@ -157,8 +156,19 @@
     resolveBrushZoomDomains,
     sanitizePartialZoomDomains,
   } from "./plot-zoom.js";
+  import {
+    buildInteractiveLegendEntries,
+    buildLegendEntryKeyIndex,
+    clampLegendRovingIndex,
+    findLegendPressedIdentity,
+    keysForLegendEntry,
+    legendInteractionSource,
+    moveLegendRovingIndex,
+    samePropertyKeySet,
+    type LegendEntryAction,
+    type LegendEntryIdentity,
+  } from "./plot-legend-focus.js";
   import SceneView from "./SceneView.svelte";
-  import type { LegendEntryAction, LegendEntryIdentity } from "./Legend.svelte";
   import Tooltip from "./Tooltip.svelte";
   import ToolRail from "./ToolRail.svelte";
 
@@ -922,66 +932,30 @@
 
   const legendEntryKeyIndex: ReadonlyMap<string, readonly PropertyKey[]> =
     $derived.by(() => {
-      const index = new Map<string, PropertyKey[]>();
-      if (model === null) return index;
-      for (const sceneLegend of model.scene.legends) {
-        if (sceneLegend.type !== "discrete") continue;
-        for (
-          let entryIndex = 0;
-          entryIndex < sceneLegend.entries.length;
-          entryIndex++
-        )
-          index.set(`${sceneLegend.scale}:${String(entryIndex)}`, []);
-      }
-      const visited = new Set<string>();
-      for (let id = 0; id < model.candidates.size; id++) {
-        const candidate = model.candidates.candidate(id);
-        if (candidate === null) continue;
-        for (const sceneLegend of model.scene.legends) {
-          if (sceneLegend.type !== "discrete") continue;
-          const field = model.layerFields[candidate.layerIndex]?.find(
-            (mapped) =>
-              mapped.channel === sceneLegend.scale && mapped.source !== "stat",
-          )?.field;
-          if (field === undefined) continue;
-          const sourceRows = new Set(model.lineage.keys(candidate.lineage));
-          if (candidate.rowIndex !== null) sourceRows.add(candidate.rowIndex);
-          for (const rowIndex of sourceRows) {
-            const visit = `${sceneLegend.scale}:${String(candidate.layerIndex)}:${field}:${String(rowIndex)}`;
-            if (visited.has(visit)) continue;
-            visited.add(visit);
-            const row = model.row(rowIndex);
-            const key = semanticKeys.keys.get(rowIndex);
-            if (row === null || key === null || key === undefined) continue;
-            const entryIndex = sceneLegend.entries.findIndex((entry) =>
-              legendValueEqual(entry.value, row[field]),
-            );
-            if (entryIndex < 0) continue;
-            index.get(`${sceneLegend.scale}:${String(entryIndex)}`)?.push(key);
+      if (model === null) return new Map<string, readonly PropertyKey[]>();
+      const current = model;
+      return buildLegendEntryKeyIndex({
+        legends: current.scene.legends,
+        candidates: function* () {
+          for (let id = 0; id < current.candidates.size; id++) {
+            const candidate = current.candidates.candidate(id);
+            if (candidate === null) continue;
+            yield {
+              layerIndex: candidate.layerIndex,
+              lineage: candidate.lineage,
+              rowIndex: candidate.rowIndex,
+            };
           }
-        }
-      }
-      return new Map(
-        [...index].map(([identity, keys]) => [
-          identity,
-          Object.freeze([...new Set(keys)]),
-        ]),
-      );
+        },
+        layerFields: (layerIndex) => current.layerFields[layerIndex],
+        lineageKeys: (lineageId) => current.lineage.keys(lineageId),
+        row: (rowIndex) => current.row(rowIndex),
+        semanticKey: (rowIndex) => semanticKeys.keys.get(rowIndex),
+      });
     });
 
   function keysForLegend(action: LegendEntryAction): readonly PropertyKey[] {
-    return (
-      legendEntryKeyIndex.get(
-        `${action.identity.scale}:${String(action.identity.entryIndex)}`,
-      ) ?? []
-    );
-  }
-
-  function legendSource(
-    source: LegendEntryAction["source"],
-  ): InteractionSource {
-    if (source === "pointer" || source === "touch") return source;
-    return "keyboard";
+    return keysForLegendEntry(legendEntryKeyIndex, action.identity);
   }
 
   function emitLegendFocus(event: LegendFocusEvent<PropertyKey>): void {
@@ -999,7 +973,7 @@
   function previewLegend(action: LegendEntryAction | null): void {
     if (action === null) {
       if (legendPreview === null) return;
-      const source = legendSource(legendPreview.action.source);
+      const source = legendInteractionSource(legendPreview.action.source);
       legendPreview = null;
       const committed =
         interaction?.emphasized(resolvedInteractionScope) ?? localEmphasisKeys;
@@ -1014,7 +988,7 @@
       type: "legend-focus",
       phase: "change",
       state: "transient",
-      source: legendSource(action.source),
+      source: legendInteractionSource(action.source),
       scale: action.identity.scale as "color" | "fill",
       value: action.entry.value as CellValue,
       label: action.entry.label,
@@ -1056,7 +1030,7 @@
   }
 
   function commitLegend(action: LegendEntryAction): void {
-    const source = legendSource(action.source);
+    const source = legendInteractionSource(action.source);
     if (
       effectiveLegendPressed?.scale === action.identity.scale &&
       effectiveLegendPressed.entryIndex === action.identity.entryIndex
@@ -1131,58 +1105,27 @@
     });
   }
 
-  function sameKeySet(
-    left: readonly PropertyKey[],
-    right: readonly PropertyKey[],
-  ): boolean {
-    if (left.length !== right.length) return false;
-    const values = new Set(right);
-    return left.every((key) => values.has(key));
-  }
+  const interactiveLegendEntries = $derived.by(() => {
+    if (model === null || interactionConfig.legendFocus === null) return [];
+    return buildInteractiveLegendEntries(model.scene.legends);
+  });
 
   const effectiveLegendPressed: LegendEntryIdentity | null = $derived.by(() => {
     const keys =
       interaction?.emphasized(resolvedInteractionScope) ?? localEmphasisKeys;
     if (keys.length === 0 || model === null) return null;
-    if (legendCommitted !== null && sameKeySet(legendCommitted.keys, keys))
-      return legendCommitted.identity;
-    const matches: LegendEntryIdentity[] = [];
-    for (const sceneLegend of model.scene.legends) {
-      if (sceneLegend.type !== "discrete") continue;
-      for (
-        let entryIndex = 0;
-        entryIndex < sceneLegend.entries.length;
-        entryIndex++
-      ) {
-        const entry = sceneLegend.entries[entryIndex]!;
-        const entryKeys = keysForLegend({
-          identity: { scale: sceneLegend.scale, entryIndex },
-          entry,
-          source: "keyboard",
-        });
-        if (sameKeySet(entryKeys, keys))
-          matches.push({ scale: sceneLegend.scale, entryIndex });
-      }
-    }
-    return matches.length === 1 ? matches[0]! : null;
-  });
-
-  const interactiveLegendEntries = $derived.by(() => {
-    if (model === null || interactionConfig.legendFocus === null) return [];
-    return model.scene.legends.flatMap((sceneLegend) =>
-      sceneLegend.type === "discrete"
-        ? sceneLegend.entries.map((entry, entryIndex) => ({
-            legend: sceneLegend,
-            entry,
-            identity: { scale: sceneLegend.scale, entryIndex },
-          }))
-        : [],
-    );
+    // Match against all discrete scene legends (not only interactive targets).
+    return findLegendPressedIdentity({
+      keys,
+      entries: buildInteractiveLegendEntries(model.scene.legends),
+      keyIndex: legendEntryKeyIndex,
+      committed: legendCommitted,
+    });
   });
 
   $effect.pre(() => {
     const count = interactiveLegendEntries.length;
-    const nextIndex = count === 0 ? 0 : Math.min(legendRovingIndex, count - 1);
+    const nextIndex = clampLegendRovingIndex(legendRovingIndex, count);
     const active = document.activeElement;
     const focusedIndex =
       active instanceof HTMLElement &&
@@ -1192,7 +1135,7 @@
         : null;
     if (nextIndex !== legendRovingIndex) legendRovingIndex = nextIndex;
     if (focusedIndex === null || count === 0) return;
-    const returnIndex = Math.min(focusedIndex, count - 1);
+    const returnIndex = clampLegendRovingIndex(focusedIndex, count);
     queueMicrotask(() => {
       root
         ?.querySelector<HTMLElement>(
@@ -1213,12 +1156,8 @@
     const currentKeys =
       current === undefined
         ? []
-        : keysForLegend({
-            identity: current.identity,
-            entry: current.entry,
-            source: "keyboard",
-          });
-    if (sameKeySet(currentKeys, committed.keys)) return;
+        : keysForLegendEntry(legendEntryKeyIndex, current.identity);
+    if (samePropertyKeySet(currentKeys, committed.keys)) return;
 
     legendCommitted = null;
     if (interaction === undefined && localEmphasisKeys.length > 0) {
@@ -1255,14 +1194,11 @@
   }
 
   function moveLegendFocus(index: number, key: string): void {
-    const last = interactiveLegendEntries.length - 1;
-    let next = index;
-    if (key === "ArrowRight" || key === "ArrowDown")
-      next = Math.min(last, index + 1);
-    else if (key === "ArrowLeft" || key === "ArrowUp")
-      next = Math.max(0, index - 1);
-    else if (key === "Home") next = 0;
-    else if (key === "End") next = last;
+    const next = moveLegendRovingIndex(
+      index,
+      key,
+      interactiveLegendEntries.length,
+    );
     legendRovingIndex = next;
     root
       ?.querySelector<HTMLElement>(
