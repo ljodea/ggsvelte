@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784192597670,
+  "lastUpdate": 1784193726261,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -8532,6 +8532,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 160.3991,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "964aa6f15c732c95886c277bebfcf83a645e5984",
+          "message": "refactor(svelte): extract pure legend commit, preview-dismiss, and live-text decisions (#81)\n\n* refactor(svelte): extract pure legend commit, preview-dismiss, and live-text decisions\n\nMove commitLegend routing, previewLegend(null) dismiss policy, and\ninteraction live-region text precedence into pure helpers so GGPlot hosts\nonly own side effects. Characterization tests pin toggle-before-empty-keys\nand committed-vs-effective emphasis asymmetry.\n\n* fix(svelte): drop redundant switch returns in commitLegend\n\nSatisfy no-useless-return on the pure-seam host switch.",
+          "timestamp": "2026-07-16T04:21:29-05:00",
+          "tree_id": "1aae60fde22b1a32158f9aa7cec6158be9c677fc",
+          "url": "https://github.com/ljodea/ggsvelte/commit/964aa6f15c732c95886c277bebfcf83a645e5984"
+        },
+        "date": 1784193725272,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.1867,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.7148,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 10.0095,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 13.1709,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 81.3942,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 112.1395,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 0.854,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.0927,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 80.476,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 100.9349,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 9.3028,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 9.0002,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 107.8618,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.565,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 23.3208,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 5.4968,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 29.4922,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 545.3548,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 128.3359,
             "unit": "ms"
           }
         ]
