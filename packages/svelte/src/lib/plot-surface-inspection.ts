@@ -400,3 +400,61 @@ export function resolveInspectionEmitAction(input: {
   if (input.fingerprint === input.lastFingerprint) return { type: "skip" };
   return { type: "emit", updateFingerprint: input.fingerprint };
 }
+
+// ---- inspection dismiss (escape vs close) ----
+
+export type InspectionDismissKind = "escape" | "close";
+
+/**
+ * Host side-effect plan for dismissing inspection.
+ * Used by a single host `dismissInspection` that Escape and closeInspection share.
+ *
+ * Escape (keyboard): invalidate coordinator, clear brush, optional returnToInspect;
+ * does **not** clear pendingPinnedPointer (preserved host behavior — may be
+ * intentional for pin-restore after tool reset).
+ * Close: release pinned, clear pending, optional restore focus to capture surface.
+ */
+export type InspectionDismissPlan = {
+  readonly emitClear: boolean;
+  readonly clearPendingPinned: boolean;
+  readonly coordinator: "invalidate" | "release-pinned";
+  readonly clearBrush: boolean;
+  readonly clearTooltipHovered: boolean;
+  readonly restoreFocus: boolean;
+  readonly returnToInspect: boolean;
+};
+
+/**
+ * Pure plan for unified inspection dismiss.
+ * Host always dispatches reducer `{ type: "escape", source }` first, then applies
+ * this plan for field clears / coordinator / focus / tool.
+ */
+export function planInspectionDismiss(input: {
+  readonly kind: InspectionDismissKind;
+  readonly hasInspection: boolean;
+  /** Close only; defaults to true when omitted (matches closeInspection default). */
+  readonly restoreFocus?: boolean;
+  /** Escape only; from `resolveSurfaceKeyAction` escape.returnToInspect. */
+  readonly returnToInspect?: boolean;
+}): InspectionDismissPlan {
+  if (input.kind === "escape") {
+    return {
+      emitClear: input.hasInspection,
+      clearPendingPinned: false,
+      coordinator: "invalidate",
+      clearBrush: true,
+      clearTooltipHovered: true,
+      restoreFocus: false,
+      returnToInspect: input.returnToInspect === true,
+    };
+  }
+  return {
+    emitClear: input.hasInspection,
+    clearPendingPinned: true,
+    coordinator: "release-pinned",
+    clearBrush: false,
+    clearTooltipHovered: true,
+    restoreFocus: input.restoreFocus !== false,
+    returnToInspect: false,
+  };
+}

@@ -18,7 +18,11 @@ export type SurfaceKeyboardInput = {
 type SurfaceKeyAction =
   | { readonly type: "nudge-brush"; readonly dx: number; readonly dy: number }
   | { readonly type: "begin-area" }
-  | { readonly type: "complete-area" }
+  | {
+      readonly type: "complete-area";
+      /** Host: select-area → interval end; zoom-area → brush zoom. */
+      readonly finish: "select" | "zoom";
+    }
   | { readonly type: "cycle-coincident"; readonly delta: 1 | -1 }
   | {
       readonly type: "navigate-direction";
@@ -58,7 +62,12 @@ export function resolveSurfaceKeyAction(input: SurfaceKeyboardInput): SurfaceKey
   if (area && (key === "Enter" || key === " ")) {
     return {
       preventDefault: true,
-      action: { type: hasBrushDraft ? "complete-area" : "begin-area" },
+      action: hasBrushDraft
+        ? {
+            type: "complete-area",
+            finish: activeTool === "select-area" ? "select" : "zoom",
+          }
+        : { type: "begin-area" },
     };
   }
 

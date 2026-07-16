@@ -115,6 +115,7 @@
   import {
     buildInspectionCandidateRef,
     buildQueuedPointerInspection,
+    planInspectionDismiss,
     planSceneInspectReconcile,
     resolveInspectionCompleteness,
     resolveInspectionEmitAction,
@@ -180,6 +181,8 @@
     hitFromCandidate,
     matchCandidateFromHit,
     nextTraversalIndex,
+    planCycleCoincident,
+    planDirectionalNavigate,
     plotPointFromClient,
   } from "./plot-pointer.js";
   import {
@@ -1702,19 +1705,44 @@
     }
   }
 
+  /**
+   * Shared dismiss path for Escape and closeInspection.
+   * Pure plan owns escape-vs-close differences; host owns dispatch/emit/DOM.
+   */
+  function dismissInspection(
+    kind: "escape" | "close",
+    source: InteractionSource,
+    opts: { restoreFocus?: boolean; returnToInspect?: boolean } = {},
+  ): void {
+    const plan = planInspectionDismiss({
+      kind,
+      hasInspection: inspection !== null,
+      ...(opts.restoreFocus !== undefined && {
+        restoreFocus: opts.restoreFocus,
+      }),
+      ...(opts.returnToInspect !== undefined && {
+        returnToInspect: opts.returnToInspect,
+      }),
+    });
+    reducer.dispatch({ type: "escape", source });
+    if (plan.emitClear)
+      emitInspection({ type: "inspect", phase: "clear", source });
+    inspection = null;
+    inspectionSeed = null;
+    if (plan.clearTooltipHovered) tooltipHovered = false;
+    if (plan.clearPendingPinned) pendingPinnedPointer = null;
+    if (plan.coordinator === "invalidate") inspectionCoordinator.invalidate();
+    else inspectionCoordinator.release("pinned");
+    if (plan.clearBrush) brushRect = null;
+    if (plan.restoreFocus) queueMicrotask(() => captureSurface?.focus());
+    if (plan.returnToInspect) chooseTool("inspect");
+  }
+
   function closeInspection(
     source: InteractionSource,
     restoreFocus = true,
   ): void {
-    reducer.dispatch({ type: "escape", source });
-    if (inspection !== null)
-      emitInspection({ type: "inspect", phase: "clear", source });
-    inspection = null;
-    inspectionSeed = null;
-    tooltipHovered = false;
-    pendingPinnedPointer = null;
-    inspectionCoordinator.release("pinned");
-    if (restoreFocus) queueMicrotask(() => captureSurface?.focus());
+    dismissInspection("close", source, { restoreFocus });
   }
 
   function onPointerMove(event: PointerEvent): void {
@@ -2080,47 +2108,43 @@
     value: PlotInspectionChange<Record<string, CellValue>, PropertyKey>,
   ) => inspectionLiveTextFor(model, value);
 
+  function applyTraversalIndex(index: number): void {
+    activeTraversalIndex = index;
+    setInspection(traversalHits[index]!, "keyboard");
+  }
+
   function navigate(delta: number): void {
     if (traversalHits.length === 0) return;
-    activeTraversalIndex = nextTraversalIndex(
-      activeTraversalIndex,
-      delta,
-      traversalHits.length,
+    applyTraversalIndex(
+      nextTraversalIndex(activeTraversalIndex, delta, traversalHits.length),
     );
-    setInspection(traversalHits[activeTraversalIndex]!, "keyboard");
   }
 
   function navigateDirection(dx: number, dy: number): void {
-    if (traversalHits.length === 0) return;
-    if (inspection === null) {
-      navigate(1);
-      return;
-    }
-    const bestIndex = bestDirectionalIndex(
-      inspection.focus.anchor,
-      traversalHits,
-      dx,
-      dy,
-    );
-    if (bestIndex < 0) return;
-    activeTraversalIndex = bestIndex;
-    setInspection(traversalHits[bestIndex]!, "keyboard");
+    const plan = planDirectionalNavigate({
+      hitCount: traversalHits.length,
+      hasInspection: inspection !== null,
+      currentIndex: activeTraversalIndex,
+      bestIndex: () =>
+        bestDirectionalIndex(inspection!.focus.anchor, traversalHits, dx, dy),
+    });
+    if (plan.type === "set-index") applyTraversalIndex(plan.index);
   }
 
   function cycleCoincident(delta: number): void {
-    if (inspection === null) {
-      navigate(1);
-      return;
-    }
-    const nextIndex = cycleCoincidentIndex(
-      inspection.focus.anchor,
-      traversalHits,
-      activeTraversalIndex,
-      delta,
-    );
-    if (nextIndex < 0) return;
-    activeTraversalIndex = nextIndex;
-    setInspection(traversalHits[nextIndex]!, "keyboard");
+    const plan = planCycleCoincident({
+      hasInspection: inspection !== null,
+      hitCount: traversalHits.length,
+      currentIndex: activeTraversalIndex,
+      nextIndex: () =>
+        cycleCoincidentIndex(
+          inspection!.focus.anchor,
+          traversalHits,
+          activeTraversalIndex,
+          delta,
+        ),
+    });
+    if (plan.type === "set-index") applyTraversalIndex(plan.index);
   }
 
   function onSurfaceBlur(event: FocusEvent): void {
@@ -2189,7 +2213,7 @@
         if (brushRect === null) return;
         const rect = normalizedRect(brushRect);
         brushRect = null;
-        if (activeTool === "select-area") {
+        if (action.finish === "select") {
           const selection = selectionEvent("end", rect, "keyboard");
           committedInterval = persistentSelectionOrNull(
             interactionConfig.select?.persistent,
@@ -2219,22 +2243,11 @@
       case "toggle-pin":
         toggleInspectionPin("keyboard");
         return;
-      case "escape": {
-        reducer.dispatch({ type: "escape", source: "keyboard" });
-        if (inspection !== null)
-          emitInspection({
-            type: "inspect",
-            phase: "clear",
-            source: "keyboard",
-          });
-        inspection = null;
-        inspectionSeed = null;
-        tooltipHovered = false;
-        inspectionCoordinator.invalidate();
-        brushRect = null;
-        if (action.returnToInspect) chooseTool("inspect");
+      case "escape":
+        dismissInspection("escape", "keyboard", {
+          returnToInspect: action.returnToInspect,
+        });
         break;
-      }
       case "none":
         break;
     }
