@@ -32,7 +32,7 @@ concurrency:
 jobs:
   release:
     name: changesets version-or-publish
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, ggsvelte]
     permissions:
       contents: write # changesets/action pushes version commits + tags
       pull-requests: write # changesets/action opens the Version Packages PR

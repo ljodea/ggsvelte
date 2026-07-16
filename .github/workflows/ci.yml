@@ -1,5 +1,9 @@
 # ggsvelte CI (plan M0b). Parallel jobs after a cached bun install.
 # All third-party actions pinned by full commit SHA (zizmor-enforced).
+#
+# Linux jobs use repo self-hosted runners labeled `ggsvelte` (ops tooling
+# lives outside this FOSS tree). Windows/macOS matrix rows and special
+# hosted-only workflows stay on GitHub-hosted labels.
 name: CI
 
 on:
@@ -22,7 +26,7 @@ env:
 jobs:
   checks:
     name: checks (pre-commit parity, both stages)
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, ggsvelte]
     permissions:
       contents: read
     steps:
@@ -49,7 +53,7 @@ jobs:
 
   unit:
     name: unit (bun test spec + core)
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, ggsvelte]
     permissions:
       contents: read
     steps:
@@ -73,7 +77,7 @@ jobs:
 
   compatibility-matrix:
     name: compatibility matrix (machine-checked source)
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, ggsvelte]
     permissions:
       contents: read
     outputs:
@@ -97,7 +101,8 @@ jobs:
       fail-fast: false
       max-parallel: 4
       matrix: ${{ fromJSON(needs.compatibility-matrix.outputs.matrix) }}
-    runs-on: ${{ matrix.os }}
+    # Linux rows use the private self-hosted pool; Windows/macOS stay on GitHub-hosted.
+    runs-on: ${{ startsWith(matrix.os, 'ubuntu') && fromJSON('["self-hosted","ggsvelte"]') || matrix.os }}
     timeout-minutes: 20
     permissions:
       contents: read
@@ -125,7 +130,7 @@ jobs:
 
   component:
     name: component (vitest browser mode, pinned Playwright container)
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, ggsvelte]
     env:
       # GitHub runs the container as root, while /github/home belongs to
       # pwuser. Firefox refuses that ownership mismatch.
@@ -202,7 +207,7 @@ jobs:
 
   build:
     name: build (tsc -b, packaging lint)
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, ggsvelte]
     permissions:
       contents: read
     steps:
@@ -236,7 +241,7 @@ jobs:
 
   actions-security:
     name: actions-security (actionlint + zizmor)
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, ggsvelte]
     permissions:
       contents: read
     steps:
@@ -260,7 +265,7 @@ jobs:
 
   bench-smoke:
     name: bench-smoke (mitata, 1k workload)
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, ggsvelte]
     permissions:
       contents: read
     steps:
@@ -292,7 +297,7 @@ jobs:
     # merge gate.
     name: vr-baseline-guard (baselines land only via vr-approve)
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, ggsvelte]
     permissions:
       contents: read
     steps:

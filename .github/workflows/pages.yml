@@ -16,7 +16,7 @@ concurrency:
 jobs:
   build:
     name: build static docs
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, ggsvelte]
     permissions:
       contents: read
     steps:
@@ -60,7 +60,7 @@ jobs:
   deploy:
     name: deploy GitHub Pages
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, ggsvelte]
     permissions:
       pages: write
       id-token: write
