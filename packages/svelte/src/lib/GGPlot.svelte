@@ -271,17 +271,15 @@
     type LegendEntryIdentity,
   } from "./plot-legend-focus.js";
   import PlotCaptureSurface from "./PlotCaptureSurface.svelte";
+  import PlotLegendFilters from "./PlotLegendFilters.svelte";
   import PlotLegendTargets from "./PlotLegendTargets.svelte";
   import PlotMarkStrata from "./PlotMarkStrata.svelte";
   import PlotSceneOverlays from "./PlotSceneOverlays.svelte";
   import PlotStatusChrome from "./PlotStatusChrome.svelte";
   import Tooltip from "./Tooltip.svelte";
   import ToolRail from "./ToolRail.svelte";
+  import { createLegendFilterState } from "./legend-filter-state.svelte.js";
   import {
-    isLegendValueVisible,
-    nextLegendFilterValues,
-    reconcileLegendFilterValues,
-    type LegendFilterClause,
     type LegendFilterEvent,
     type LegendFilterInput,
   } from "./legend-filter.js";
@@ -500,84 +498,19 @@
   // Live-region announcer (owned early so legend-reset effects can call it).
   const announcer = createPlotAnnouncer();
 
-  const legendFilterOptions = $derived(
-    legendFilter === false
-      ? null
-      : {
-          mode:
-            typeof legendFilter === "object"
-              ? (legendFilter.mode ?? "exclude")
-              : "exclude",
-          multiple:
-            typeof legendFilter === "object"
-              ? (legendFilter.multiple ?? true)
-              : true,
-        },
-  );
-  let localLegendFilters = $state<LegendFilterClause[]>([]);
-  let appliedLegendFilterMode = $state<"exclude" | "include" | null>(null);
-  const legendCatalogFingerprints = new Map<string, string>();
-  const activeLegendFilterBindings = $derived.by(() => {
-    const bindings = new Set<string>();
-    if (effectiveSpec === null) return bindings;
-    for (const layer of effectiveSpec.layers) {
-      for (const scale of ["color", "fill"] as const) {
-        const own = layer.aes?.[scale];
-        // Explicit null is an unset (normalize's null-unset semantics): the
-        // layer deliberately removed the plot-level binding — never inherit.
-        if (own === null) continue;
-        const channel = own ?? effectiveSpec.aes?.[scale];
-        if (channel !== null && channel !== undefined && "field" in channel)
-          bindings.add(`${scale}:${channel.field}`);
-      }
-    }
-    return bindings;
-  });
-  const effectiveLegendFilters = $derived(
-    legendFilterOptions === null
-      ? []
-      : localLegendFilters.filter((clause) =>
-          activeLegendFilterBindings.has(`${clause.scale}:${clause.field}`),
-        ),
-  );
-
-  // A disabled capability or a remapped spec must never leave an invisible
-  // filter active. Reset the chart-local filter set atomically so the public
-  // `clear` event always describes the actual resulting state.
-  $effect(() => {
-    if (effectiveLegendFilters.length === localLegendFilters.length) return;
-    localLegendFilters = [];
-    emitLegendFilter({
-      type: "legend-filter",
-      phase: "clear",
-      source: "programmatic",
-      clause: null,
-    });
-    announcer.announce(
-      "Legend filters reset after the filter capability changed.",
-    );
-  });
-
-  // Mode changes are controlled API changes, not reinterpretations of old
-  // state. Reset active clauses so an exclude set can never become a stale
-  // include set (or vice versa).
-  $effect(() => {
-    const mode = legendFilterOptions?.mode ?? null;
-    if (appliedLegendFilterMode === null) {
-      appliedLegendFilterMode = mode;
-      return;
-    }
-    if (mode === appliedLegendFilterMode) return;
-    appliedLegendFilterMode = mode;
-    if (localLegendFilters.length === 0) return;
-    localLegendFilters = [];
-    emitLegendFilter({
-      type: "legend-filter",
-      phase: "clear",
-      source: "programmatic",
-      clause: null,
-    });
-    announcer.announce("Legend filters reset after the filter mode changed.");
+  // ------------------------------------------------- legend filter (S2)
+  // Factory sits at the original legend-filter region (before the runtime).
+  // Construction-time deriveds read legendFilter/effectiveSpec only — never
+  // model (Svelte 5.29 server evaluates $derived eagerly at construction).
+  const legendFilterState = createLegendFilterState({
+    effectiveSpec: () => effectiveSpec,
+    legendFilterProp: () => legendFilter,
+    onlegendfilter: () => onlegendfilter,
+    oninteraction: () => oninteraction,
+    announce: (message) => announcer.announce(message),
+    // model is declared after the runtime; the getter is only invoked from
+    // late catalog effects (never at construction).
+    model: () => model,
   });
 
   /**
@@ -602,7 +535,7 @@
     assembled: () => assembled,
     effectiveSpec: () => effectiveSpec,
     effectiveZoomDomains: () => effectiveZoomDomains,
-    effectiveLegendFilters: () => effectiveLegendFilters,
+    effectiveLegendFilters: () => legendFilterState.filters,
     root: () => root,
     resetZoom: () => {
       if (interaction === undefined) localZoomDomains = null;
@@ -756,7 +689,6 @@
   let legendClearPointerType: string | null = null;
   let suppressLegendClick = false;
   let suppressLegendFocusPreview = false;
-  let legendFilterPointerType: string | null = null;
   const effectiveSelectedKeys: readonly PropertyKey[] = $derived.by(() => {
     void controllerRevision;
     return interaction?.selected(resolvedInteractionScope) ?? localSelectedKeys;
@@ -1570,207 +1502,12 @@
     });
   });
 
-  const filterableLegendEntries = $derived.by(() => {
-    if (model === null || legendFilterOptions === null) return [];
-    return model.scene.legends.flatMap((sceneLegend) => {
-      if (sceneLegend.type !== "discrete") return [];
-      if (sceneLegend.scale !== "color" && sceneLegend.scale !== "fill")
-        return [];
-      const fields = new Set(
-        model.layerFields
-          .flat()
-          .filter(
-            (mapped) =>
-              mapped.channel === sceneLegend.scale && mapped.source !== "stat",
-          )
-          .map((mapped) => mapped.field),
-      );
-      const field = fields.values().next().value as string | undefined;
-      // One combined scale fed by unlike fields has no honest one-toggle
-      // filtering semantics. Keep the static legend rather than filtering
-      // only whichever field happened to be encountered first.
-      if (field === undefined || fields.size !== 1) return [];
-      // A scaled constant (aes { value, scale: true }) feeds this legend
-      // without a field: toggling its entry would filter an unrelated field
-      // while the constant-colored layer stays rendered. Keep it static.
-      if (
-        model.layerScaledConstants.some(
-          (constants) => constants[sceneLegend.scale] !== undefined,
-        )
-      )
-        return [];
-      const current = localLegendFilters.find(
-        (clause) =>
-          clause.scale === sceneLegend.scale && clause.field === field,
-      );
-      return sceneLegend.entries.map((entry) => ({
-        legend: sceneLegend,
-        entry,
-        field,
-        visible:
-          current === undefined ||
-          isLegendValueVisible(
-            current.values,
-            entry.value as CellValue,
-            current.mode,
-          ),
-      }));
-    });
-  });
-
-  // Catalog changes prune values that no longer exist. An emptied clause is
-  // removed, so a category that disappears and later returns is visible by
-  // default. resetScales() deliberately does not alter this filter state.
-  $effect(() => {
-    const catalogs = new Map<string, CellValue[]>();
-    for (const target of filterableLegendEntries) {
-      const key = `${target.legend.scale}:${target.field}`;
-      const catalog = catalogs.get(key) ?? [];
-      catalog.push(target.entry.value as CellValue);
-      catalogs.set(key, catalog);
-    }
-    let next = localLegendFilters;
-    const reconciled: Array<{
-      clause: LegendFilterClause;
-      removed: boolean;
-    }> = [];
-    // A clause whose field is still mapped but whose legend stopped being
-    // filterable (second unlike field on the scale, a scaled constant, a
-    // non-discrete legend) has no checkbox or reset control left — remove it
-    // rather than filtering rows invisibly. Unmapped fields are handled by
-    // the capability reset above.
-    if (model !== null && legendFilterOptions !== null) {
-      for (const clause of next.filter(
-        (candidate) =>
-          activeLegendFilterBindings.has(
-            `${candidate.scale}:${candidate.field}`,
-          ) && !catalogs.has(`${candidate.scale}:${candidate.field}`),
-      )) {
-        next = next.filter((candidate) => candidate !== clause);
-        reconciled.push({ clause, removed: true });
-      }
-    }
-    for (const [key, catalog] of catalogs) {
-      const fingerprint = JSON.stringify(
-        catalog.map((value) => encodeKey(value)),
-      );
-      const priorFingerprint = legendCatalogFingerprints.get(key);
-      legendCatalogFingerprints.set(key, fingerprint);
-      if (priorFingerprint === undefined || priorFingerprint === fingerprint)
-        continue;
-      const index = next.findIndex(
-        (clause) => `${clause.scale}:${clause.field}` === key,
-      );
-      if (index < 0) continue;
-      const clause = next[index]!;
-      const values = reconcileLegendFilterValues(clause.values, catalog);
-      reconciled.push({
-        clause: Object.freeze({ ...clause, values }),
-        removed: values.length === 0,
-      });
-      next =
-        values.length === 0
-          ? next.filter((_, candidateIndex) => candidateIndex !== index)
-          : next.map((candidate, candidateIndex) =>
-              candidateIndex === index
-                ? Object.freeze({ ...candidate, values })
-                : candidate,
-            );
-    }
-    for (const key of legendCatalogFingerprints.keys())
-      if (!catalogs.has(key)) legendCatalogFingerprints.delete(key);
-    if (next === localLegendFilters) return;
-    localLegendFilters = [...next];
-    for (const { clause, removed } of reconciled)
-      emitLegendFilter({
-        type: "legend-filter",
-        phase: removed ? "remove" : "change",
-        source: "programmatic",
-        clause,
-      });
-    announcer.announce("Legend filters reconciled with the available groups.");
-  });
-
-  function legendFilterSource(event: MouseEvent): LegendFilterEvent["source"] {
-    if (event.detail === 0) return "keyboard";
-    return legendFilterPointerType === "touch" ? "touch" : "pointer";
-  }
-
-  function emitLegendFilter(event: LegendFilterEvent): void {
-    onlegendfilter?.(event);
-    oninteraction?.(event);
-  }
-
-  function toggleLegendFilter(
-    target: (typeof filterableLegendEntries)[number],
-    event: MouseEvent,
-  ): void {
-    if (legendFilterOptions === null) return;
-    // This is a controlled checkbox. Prevent the browser's post-handler
-    // default toggle from racing the reactive checked value.
-    event.preventDefault();
-    const catalog = target.legend.entries.map(
-      (entry) => entry.value as CellValue,
-    );
-    const index = localLegendFilters.findIndex(
-      (clause) =>
-        clause.scale === target.legend.scale && clause.field === target.field,
-    );
-    const current = localLegendFilters[index];
-    const baseline =
-      current?.values ??
-      (legendFilterOptions.mode === "include" ? catalog : []);
-    const values = nextLegendFilterValues(
-      baseline,
-      target.entry.value as CellValue,
-      catalog,
-      legendFilterOptions.mode,
-      legendFilterOptions.multiple,
-    );
-    const clause: LegendFilterClause = Object.freeze({
-      scale: target.legend.scale as "color" | "fill",
-      field: target.field,
-      values,
-      mode: legendFilterOptions.mode,
-    });
-    localLegendFilters =
-      index < 0
-        ? [...localLegendFilters, clause]
-        : localLegendFilters.map((candidate, candidateIndex) =>
-            candidateIndex === index ? clause : candidate,
-          );
-    const source = legendFilterSource(event);
-    legendFilterPointerType = null;
-    const filterEvent: LegendFilterEvent = Object.freeze({
-      type: "legend-filter",
-      phase: "change",
-      source,
-      clause,
-    });
-    emitLegendFilter(filterEvent);
-    announcer.announce(
-      `${target.entry.label} ${isLegendValueVisible(values, target.entry.value as CellValue, legendFilterOptions.mode) ? "shown" : "hidden"}.`,
-    );
-  }
-
-  function resetLegendFilters(event: MouseEvent): void {
-    if (localLegendFilters.length === 0) return;
-    const returnTarget = root?.querySelector<HTMLElement>(
-      ".gg-legend-filters input",
-    );
-    const source = legendFilterSource(event);
-    localLegendFilters = [];
-    legendFilterPointerType = null;
-    emitLegendFilter(
-      Object.freeze({
-        type: "legend-filter",
-        phase: "clear",
-        source,
-        clause: null,
-      }),
-    );
-    queueMicrotask(() => returnTarget?.focus());
-  }
+  // Host-side derived: must not live in the factory (server-eager model TDZ).
+  const filterableLegendEntries = $derived(
+    legendFilterState.computeEntries(model),
+  );
+  // Catalog-reconcile effect at its original position (after model effects).
+  legendFilterState.registerCatalogEffects(() => filterableLegendEntries);
 
   $effect.pre(() => {
     const count = interactiveLegendEntries.length;
@@ -3099,35 +2836,11 @@
       onClearPointerCancel={() => (legendClearPointerType = null)}
       onClearClick={clearLegendFromControl}
     />
-    {#if filterableLegendEntries.length > 0}
-      <fieldset class="gg-legend-filters">
-        <legend>Filter legend</legend>
-        {#each filterableLegendEntries as target (`${target.legend.scale}:${target.field}:${encodeKey(target.entry.value)}`)}
-          <label>
-            <input
-              type="checkbox"
-              checked={target.visible}
-              aria-label={`Show ${target.entry.label}`}
-              onpointerdown={(event) =>
-                (legendFilterPointerType = event.pointerType)}
-              onpointercancel={() => (legendFilterPointerType = null)}
-              onclick={(event) => toggleLegendFilter(target, event)}
-            />
-            <span>{target.entry.label}</span>
-          </label>
-        {/each}
-        {#if localLegendFilters.length > 0}
-          <button
-            type="button"
-            aria-label="Reset legend filters"
-            onpointerdown={(event) =>
-              (legendFilterPointerType = event.pointerType)}
-            onpointercancel={() => (legendFilterPointerType = null)}
-            onclick={resetLegendFilters}>Reset</button
-          >
-        {/if}
-      </fieldset>
-    {/if}
+    <PlotLegendFilters
+      controller={legendFilterState}
+      entries={filterableLegendEntries}
+      belowClearFocus={legendFocusEnabled && effectiveLegendPressed !== null}
+    />
     <PlotSceneOverlays
       width={model.scene.width}
       height={model.scene.height}
@@ -3210,7 +2923,7 @@
       showLiveRegion={shouldRenderInteractionLiveRegion({
         surfaceInteractive,
         legendFocusEnabled,
-        legendFilterEnabled: legendFilterOptions !== null,
+        legendFilterEnabled: legendFilterState.options !== null,
       })}
       liveText={resolveInteractionLiveText({
         announcement: announcer.text,
@@ -3274,10 +2987,6 @@
     margin-bottom: 106px;
   }
 
-  .gg-with-legend-clear.gg-with-legend-filters .gg-legend-filters {
-    top: calc(100% + 52px);
-  }
-
   .gg-with-docked-tooltip {
     margin-bottom: 260px;
   }
@@ -3290,62 +2999,6 @@
     position: absolute;
     inset: 0;
     pointer-events: none;
-  }
-
-  .gg-legend-filters {
-    position: absolute;
-    top: calc(100% + 4px);
-    left: 4px;
-    z-index: 5;
-    display: flex;
-    min-height: 44px;
-    max-width: calc(100% - 8px);
-    margin: 0;
-    padding: 0;
-    border: 0;
-    gap: 4px;
-    align-items: center;
-    overflow-x: auto;
-    color: var(--gg-ink, var(--gg-theme-ink, currentColor));
-    font: 11px/1.2 var(--gg-font-family, sans-serif);
-    pointer-events: auto;
-  }
-
-  .gg-legend-filters legend {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-  }
-
-  .gg-legend-filters label,
-  .gg-legend-filters button {
-    display: inline-flex;
-    min-height: 44px;
-    margin: 0;
-    padding: 0 8px;
-    align-items: center;
-    gap: 5px;
-    border: 1px solid
-      var(--gg-tooltipBorder, var(--gg-theme-tooltipBorder, currentColor));
-    border-radius: 3px;
-    background: var(--gg-tooltipPaper, var(--gg-theme-tooltipPaper, white));
-    color: inherit;
-    font: inherit;
-    white-space: nowrap;
-  }
-
-  .gg-legend-filters input {
-    width: 18px;
-    height: 18px;
-    margin: 0;
-  }
-
-  .gg-legend-filters label:has(:focus-visible),
-  .gg-legend-filters button:focus-visible {
-    outline: 2px solid var(--gg-focusRing, var(--gg-theme-focusRing, Highlight));
-    outline-offset: 2px;
   }
 
   @container gg-plot (max-width: 559px) {
