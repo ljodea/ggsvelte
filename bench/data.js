@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784197385104,
+  "lastUpdate": 1784197961088,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -9365,6 +9365,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 159.8031,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "24e37ebcbea068216ed012c7f8276d3bc1800d0b",
+          "message": "refactor(core): extract pipeline frame, position, and layout helpers (#89)\n\n* refactor(core): extract pipeline frame, position, and layout helpers\n\nSplit post-bind stats/frame construction, data-space position adjust,\nand layout/scene helper functions out of the pipeline orchestrator.\nrunPipeline is now primarily orchestration over focused modules.\nCharacterization tests pin buildFrame stats contracts and stack/dodge/jitter.\n\n* fix(core): drop unnecessary non-null assertion in position test",
+          "timestamp": "2026-07-16T05:32:06-05:00",
+          "tree_id": "7117dc09dca4b76af79b59a263fd7dde8ef39e23",
+          "url": "https://github.com/ljodea/ggsvelte/commit/24e37ebcbea068216ed012c7f8276d3bc1800d0b"
+        },
+        "date": 1784197960687,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 3.136,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 4.4454,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 17.4024,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 16.0501,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 84.5963,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 130.6811,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 0.921,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.6737,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 84.8197,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 110.8826,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 11.5279,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 11.312,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 117.9787,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.6566,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 28.2097,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.627,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 32.4088,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 624.6896,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 167.1529,
             "unit": "ms"
           }
         ]
