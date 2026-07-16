@@ -128,3 +128,23 @@ repos:
         pass_filenames: false
         always_run: true
         stages: [pre-push]
+
+      # Workflow lint: only when .github/** is in the push set (or --all-files).
+      # actionlint uses the lockfile wasm build; skips gracefully if it cannot
+      # load. zizmor is an optional uv tool — skip if missing. CI still runs
+      # both in the dedicated actions-security job (contract, not optional).
+      - id: actionlint
+        name: actionlint (.github/workflows)
+        entry: bun run lint:actions
+        language: system
+        pass_filenames: false
+        files: ^\.github/
+        stages: [pre-push]
+
+      - id: zizmor
+        name: zizmor (.github/workflows security)
+        entry: scripts/guards/zizmor-or-skip.sh
+        language: system
+        pass_filenames: false
+        files: ^\.github/
+        stages: [pre-push]
