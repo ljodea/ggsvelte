@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784197961088,
+  "lastUpdate": 1784198474532,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -9484,6 +9484,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 167.1529,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "12d2987b0375fc091fcf7fd0acb4c1b88228d7e8",
+          "message": "fix: treat CSS descendant chains after combinators as substantive after #82 (#88)\n\n* fix: treat CSS descendant chains after combinators as substantive\n\nCodex P2 on #82: `* > ul li {…}` / `* + section a {…}` were classified as\nJSDoc noise because the post-combinator check stopped at the first type\nselector. Allow type chains with CSS structure, and bare multi-type chains\nwhen every token is a known HTML/SVG type so English multi-word docs stay\nskippable.\n\n* fix: tighten post-combinator CSS vs JSDoc classification\n\nAddress Codex P2s on #88:\n- multi-word prose with weak punctuation (`,`, `. Kept`) stays docs\n- tag-word English (`a button`, `data table`) stays docs via prose denylist\n- universal in descendant chains (`ul *`) is CSS\n- bare multi-token CSS types (incl. svg use) when not prose-ambiguous",
+          "timestamp": "2026-07-16T05:40:37-05:00",
+          "tree_id": "21ab1eee6ff1a044fb409e1089abf3f47c1749b7",
+          "url": "https://github.com/ljodea/ggsvelte/commit/12d2987b0375fc091fcf7fd0acb4c1b88228d7e8"
+        },
+        "date": 1784198474092,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.7738,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.3906,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 10.3568,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 14.5687,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 83.4694,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 122.1191,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 0.953,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.228,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 87.8852,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 111.1157,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.6826,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 11.8642,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 118.5582,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.6553,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 28.6862,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.294,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 29.4821,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 624.0657,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 163.1208,
             "unit": "ms"
           }
         ]
