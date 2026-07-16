@@ -239,3 +239,42 @@ export function resolveBrushZoomDomains(
   if (next.x === undefined && next.y === undefined) return null;
   return next;
 }
+
+/**
+ * Minimal model surface for brush-to-zoom commit (M2 single-panel only).
+ * Accepts full `RenderModel` structurally.
+ */
+export type BrushZoomModel = {
+  readonly scene: { readonly panels: readonly PanelBounds[] };
+  readonly scales: Pick<RenderModel["scales"], "x" | "y">;
+};
+
+/**
+ * Commit-ready domains for brush-to-zoom from a live model.
+ *
+ * Owns the M2 single-panel gate (`panels.length === 1`), domain invert via
+ * `resolveBrushZoomDomains`, and deep freeze for host `commitZoom`.
+ * Returns null when model is missing, multi-panel/faceted, or domains cannot
+ * be inverted. Mode is caller-supplied (`interactionConfig.zoom?.mode ?? "xy"`).
+ */
+export function resolveBrushZoomFromModel(input: {
+  readonly model: BrushZoomModel | null;
+  readonly rect: PlotRect;
+  readonly flipped: boolean;
+  readonly mode: ZoomMode;
+  readonly current: ContinuousZoomDomains | null;
+}): ContinuousZoomDomains | null {
+  if (input.model === null) return null;
+  if (input.model.scene.panels.length !== 1) return null;
+  const panel = input.model.scene.panels[0]!;
+  const next = resolveBrushZoomDomains(
+    input.rect,
+    panel,
+    input.model.scales,
+    input.flipped,
+    input.mode,
+    input.current,
+  );
+  if (next === null) return null;
+  return frozenZoomDomains(next);
+}

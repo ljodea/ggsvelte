@@ -223,7 +223,7 @@
     continuousZoomDomainsFromScopes,
     filterScopeChannelsByZoomMode,
     filterZoomDomainsByMode,
-    resolveBrushZoomDomains,
+    resolveBrushZoomFromModel,
     sanitizePartialZoomDomains,
     stableZoomDomains,
   } from "./plot-zoom.js";
@@ -2062,7 +2062,8 @@
   /**
    * Brush-to-zoom = an intentional respec: invert the brushed plot-px rect
    * through the trained scales into explicit continuous domains. Band axes
-   * and faceted plots are skipped (documented M2 limitation).
+   * and faceted plots are skipped (documented M2 limitation) inside
+   * `resolveBrushZoomFromModel`.
    */
   function applyBrushZoom(
     rect: {
@@ -2073,18 +2074,16 @@
     },
     source: InteractionSource,
   ): void {
-    if (model === null || model.scene.panels.length !== 1) return;
-    const panel = model.scene.panels[0]!;
-    const next = resolveBrushZoomDomains(
+    // Pure owns null/multi-panel gate, invert, and freeze for commit.
+    const next = resolveBrushZoomFromModel({
+      model,
       rect,
-      panel,
-      model.scales,
-      coordFlipped,
-      interactionConfig.zoom?.mode ?? "xy",
-      effectiveZoomDomains,
-    );
+      flipped: coordFlipped,
+      mode: interactionConfig.zoom?.mode ?? "xy",
+      current: effectiveZoomDomains,
+    });
     if (next === null) return;
-    commitZoom(frozenZoomDomains(next), source);
+    commitZoom(next, source);
   }
 
   // Stable SceneView callback identity when model is unchanged.
