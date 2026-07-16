@@ -2,25 +2,21 @@
  * Resolve layer contracts and domain snapshots for the finalize phase.
  */
 import type { PortableSpec } from "@ggsvelte/spec";
+import type { CellValue } from "../table.js";
+import type { Scene } from "../scene.js";
 
-import { computeBaselineDomains, computeEffectiveDomains } from "./compute-domains.js";
-import {
-  resolveLayerBackends,
-  resolveLayerFields,
-  resolveLayerScaledConstants,
-} from "./layer-contracts.js";
+import { resolveFinalizeDomainSnapshots } from "./finalize-model-contracts-domains.js";
+import { resolveFinalizeLayerContracts } from "./finalize-model-contracts-layers.js";
 import type { PreparedPanels } from "./prepare-panels.js";
 import type { TrainedPipelineScales } from "./train-pipeline-scales.js";
 import type {
   Advisory,
   LayerBackend,
+  LayerBinding,
   MappedField,
   RunOptions,
   ScaleDomainSnapshot,
 } from "./types.js";
-import type { CellValue } from "../table.js";
-import type { Scene } from "../scene.js";
-import type { LayerBinding } from "./types.js";
 
 export function resolveFinalizeContracts(input: {
   normalized: PortableSpec;
@@ -37,38 +33,7 @@ export function resolveFinalizeContracts(input: {
   baselineDomains: ScaleDomainSnapshot;
   bindings: readonly LayerBinding[];
 } {
-  const { normalized, options, prepared, trained, scene, advisories } = input;
-  const { freeX, freeY, facetPanels, bindings, panelFrames } = prepared;
-  const { xTraining, yTraining, panelScales, xInputs, yInputs } = trained;
-
-  const layerBackends = resolveLayerBackends(
-    normalized.layers,
-    scene.batches,
-    normalized.a11y,
-    options.canvasThreshold,
-    advisories,
-  );
-  const layerFields = resolveLayerFields(normalized.layers.length, bindings);
-  const layerScaledConstants = resolveLayerScaledConstants(normalized.layers.length, bindings);
-
-  const effectiveDomains = computeEffectiveDomains(xTraining.scale, yTraining.scale, panelScales);
-  const baselineDomains = computeBaselineDomains({
-    options,
-    freeX,
-    freeY,
-    facetPanels,
-    panelFrames,
-    xInputs,
-    yInputs,
-    effectiveDomains,
-  });
-
-  return {
-    layerBackends,
-    layerFields,
-    layerScaledConstants,
-    effectiveDomains,
-    baselineDomains,
-    bindings,
-  };
+  const layers = resolveFinalizeLayerContracts(input);
+  const domains = resolveFinalizeDomainSnapshots(input);
+  return { ...layers, ...domains };
 }
