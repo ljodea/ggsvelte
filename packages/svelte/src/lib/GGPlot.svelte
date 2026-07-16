@@ -1763,7 +1763,7 @@
       hasTouchInspectStart: touchInspectStart !== null,
       brushing,
       hasBrushDraft: brushRect !== null,
-      inspectEnabled,
+      inspect: interactionConfig.inspect,
     });
     switch (action.type) {
       case "touch-inspect-drag-cancel":
@@ -1775,12 +1775,11 @@
         reducer.queuePointer({ type: "move-area", point: p });
         return;
       case "queue-inspect": {
-        const inspectConfig = interactionConfig.inspect;
-        if (inspectConfig === null) return;
+        // mode/maxDistance from pure snapshot — no inspect config re-gate.
         const match =
           model?.candidates.nearest(p.x, p.y, {
-            mode: inspectConfig.mode,
-            maxDistance: inspectConfig.maxDistance,
+            mode: action.mode,
+            maxDistance: action.maxDistance,
           }) ?? null;
         // One null branch for hit + reducer candidate (lazy hitTest / panelId).
         const frame = buildQueuedInspectFrame({
@@ -1952,8 +1951,7 @@
     const action = resolvePointerUpAction({
       pointerType: event.pointerType,
       activeTool,
-      inspectEnabled,
-      pinEnabled,
+      inspect: interactionConfig.inspect,
       hasTouchInspectStart: touchInspectStart !== null,
       touchInspectMoved,
       brushing,
@@ -1969,11 +1967,10 @@
       case "touch-inspect-tap": {
         touchInspectStart = null;
         touchInspectMoved = false;
-        const inspectConfig = interactionConfig.inspect;
-        if (inspectConfig === null) break;
+        // mode/maxDistance/state from pure inspect snapshot — no re-gate.
         const match = model?.candidates.nearest(endPoint.x, endPoint.y, {
-          mode: inspectConfig.mode,
-          maxDistance: inspectConfig.maxDistance,
+          mode: action.mode,
+          maxDistance: action.maxDistance,
         });
         if (match !== null && match !== undefined) {
           setInspection(

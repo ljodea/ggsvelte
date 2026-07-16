@@ -36,12 +36,17 @@ const down = (
   ...overrides,
 });
 
+const defaultInspect = {
+  mode: "auto" as const,
+  maxDistance: 24,
+  pin: false,
+};
+
 const up = (
   overrides: Partial<SurfacePointerUpInput> & Pick<SurfacePointerUpInput, "activeTool">,
 ): SurfacePointerUpInput => ({
   pointerType: "mouse",
-  inspectEnabled: true,
-  pinEnabled: false,
+  inspect: defaultInspect,
   hasTouchInspectStart: false,
   touchInspectMoved: false,
   brushing: false,
@@ -69,7 +74,7 @@ const move = (
   hasTouchInspectStart: false,
   brushing: false,
   hasBrushDraft: false,
-  inspectEnabled: true,
+  inspect: defaultInspect,
   ...overrides,
 });
 
@@ -183,32 +188,40 @@ describe("resolvePointerDownAction", () => {
 });
 
 describe("resolvePointerUpAction", () => {
-  it("resolves touch inspect tap with inspection state from pinEnabled", () => {
+  it("resolves touch inspect tap with state/mode/maxDistance from inspect snapshot", () => {
     expect(
       resolvePointerUpAction(
         up({
           activeTool: "inspect",
           pointerType: "touch",
-          inspectEnabled: true,
+          inspect: { mode: "xy", maxDistance: 16, pin: true },
           hasTouchInspectStart: true,
           touchInspectMoved: false,
-          pinEnabled: true,
         }),
       ),
-    ).toEqual({ type: "touch-inspect-tap", state: "pinned" });
+    ).toEqual({
+      type: "touch-inspect-tap",
+      state: "pinned",
+      mode: "xy",
+      maxDistance: 16,
+    });
 
     expect(
       resolvePointerUpAction(
         up({
           activeTool: "inspect",
           pointerType: "touch",
-          inspectEnabled: true,
+          inspect: { mode: "auto", maxDistance: 24, pin: false },
           hasTouchInspectStart: true,
           touchInspectMoved: false,
-          pinEnabled: false,
         }),
       ),
-    ).toEqual({ type: "touch-inspect-tap", state: "transient" });
+    ).toEqual({
+      type: "touch-inspect-tap",
+      state: "transient",
+      mode: "auto",
+      maxDistance: 24,
+    });
   });
 
   it("ignores touch inspect drag (moved past threshold)", () => {
@@ -217,7 +230,7 @@ describe("resolvePointerUpAction", () => {
         up({
           activeTool: "inspect",
           pointerType: "touch",
-          inspectEnabled: true,
+          inspect: defaultInspect,
           hasTouchInspectStart: true,
           touchInspectMoved: true,
         }),
@@ -225,12 +238,12 @@ describe("resolvePointerUpAction", () => {
     ).toEqual({ type: "touch-inspect-drag-ignore" });
   });
 
-  it("does not take touch-inspect path when inspect disabled or tool changed", () => {
+  it("does not take touch-inspect path when inspect null or tool changed", () => {
     const finishTouch = resolvePointerUpAction(
       up({
         activeTool: "inspect",
         pointerType: "touch",
-        inspectEnabled: false,
+        inspect: null,
         hasTouchInspectStart: true,
         brushing: true,
         brushCorners: draftCorners,
@@ -246,7 +259,7 @@ describe("resolvePointerUpAction", () => {
       up({
         activeTool: "select-area",
         pointerType: "touch",
-        inspectEnabled: true,
+        inspect: defaultInspect,
         hasTouchInspectStart: true,
         brushing: true,
         brushCorners: draftCorners,
@@ -453,13 +466,13 @@ describe("resolvePointerMoveAction", () => {
           touchInspectMoved: true,
           brushing: true,
           hasBrushDraft: true,
-          inspectEnabled: true,
+          inspect: defaultInspect,
         }),
       ),
     ).toEqual({ type: "touch-inspect-drag-cancel" });
   });
 
-  it("cancels even when inspect config is disabled (tool-only gate)", () => {
+  it("cancels even when inspect config is null (tool-only gate)", () => {
     expect(
       resolvePointerMoveAction(
         move({
@@ -467,7 +480,7 @@ describe("resolvePointerMoveAction", () => {
           pointerType: "touch",
           hasTouchInspectStart: true,
           touchInspectMoved: true,
-          inspectEnabled: false,
+          inspect: null,
         }),
       ),
     ).toEqual({ type: "touch-inspect-drag-cancel" });
@@ -482,14 +495,19 @@ describe("resolvePointerMoveAction", () => {
             pointerType,
             hasTouchInspectStart: true,
             touchInspectMoved: true,
-            inspectEnabled: true,
+            inspect: { mode: "x", maxDistance: 12, pin: true },
           }),
         ),
-      ).toEqual({ type: "queue-inspect", source: "pointer" });
+      ).toEqual({
+        type: "queue-inspect",
+        source: "pointer",
+        mode: "x",
+        maxDistance: 12,
+      });
     }
   });
 
-  it("does not cancel when unmoved — falls through to queue-inspect", () => {
+  it("does not cancel when unmoved — falls through to queue-inspect with payload", () => {
     expect(
       resolvePointerMoveAction(
         move({
@@ -497,10 +515,15 @@ describe("resolvePointerMoveAction", () => {
           pointerType: "touch",
           hasTouchInspectStart: true,
           touchInspectMoved: false,
-          inspectEnabled: true,
+          inspect: { mode: "auto", maxDistance: 24, pin: false },
         }),
       ),
-    ).toEqual({ type: "queue-inspect", source: "touch" });
+    ).toEqual({
+      type: "queue-inspect",
+      source: "touch",
+      mode: "auto",
+      maxDistance: 24,
+    });
   });
 
   it("does not cancel when tool is no longer inspect (area wins if brushing)", () => {
@@ -552,24 +575,29 @@ describe("resolvePointerMoveAction", () => {
     ).toEqual({ type: "none" });
   });
 
-  it("queues inspect for mouse with pointer source", () => {
+  it("queues inspect for mouse with pointer source and inspect snapshot fields", () => {
     expect(
       resolvePointerMoveAction(
         move({
           activeTool: "inspect",
           pointerType: "mouse",
-          inspectEnabled: true,
+          inspect: { mode: "xy", maxDistance: 8, pin: true },
         }),
       ),
-    ).toEqual({ type: "queue-inspect", source: "pointer" });
+    ).toEqual({
+      type: "queue-inspect",
+      source: "pointer",
+      mode: "xy",
+      maxDistance: 8,
+    });
   });
 
-  it("returns none for inspect tool when inspect disabled", () => {
+  it("returns none for inspect tool when inspect config is null", () => {
     expect(
       resolvePointerMoveAction(
         move({
           activeTool: "inspect",
-          inspectEnabled: false,
+          inspect: null,
         }),
       ),
     ).toEqual({ type: "none" });
