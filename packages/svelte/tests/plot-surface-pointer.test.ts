@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import type { InteractionTool } from "../src/lib/interaction.js";
 import {
+  TOUCH_INSPECT_CLICK_SUPPRESS_MS,
   TOUCH_INSPECT_MOVE_PX,
   advanceTouchInspectMoved,
+  interactionSourceFromPointerType,
   resolveCaptureClickAction,
   resolveFinishBrushAction,
   isAreaAwaitingSecond,
@@ -582,5 +584,20 @@ describe("resolveLostPointerCaptureAction", () => {
     expect(resolveLostPointerCaptureAction("dragging")).toEqual({
       type: "cancel-clear-draft",
     });
+  });
+});
+
+describe("interactionSourceFromPointerType", () => {
+  it("maps touch to touch and everything else to pointer", () => {
+    expect(interactionSourceFromPointerType("touch")).toBe("touch");
+    expect(interactionSourceFromPointerType("mouse")).toBe("pointer");
+    expect(interactionSourceFromPointerType("pen")).toBe("pointer");
+    expect(interactionSourceFromPointerType("")).toBe("pointer");
+  });
+});
+
+describe("TOUCH_INSPECT_CLICK_SUPPRESS_MS", () => {
+  it("is the host suppress window after a successful touch-inspect tap", () => {
+    expect(TOUCH_INSPECT_CLICK_SUPPRESS_MS).toBe(500);
   });
 });

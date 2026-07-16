@@ -7,6 +7,7 @@ import type { CandidateFacts, CandidateMatch } from "@ggsvelte/core";
 import type { SceneHit } from "@ggsvelte/core/dom";
 
 import type { InteractionSource } from "./interaction.js";
+import { hitFromCandidate } from "./plot-pointer.js";
 
 type InspectionHostState = "none" | "transient" | "pinned";
 
@@ -38,6 +39,57 @@ export function buildQueuedPointerInspection(input: {
     source: input.source,
     concreteMode: input.match.mode,
     candidate: input.match,
+  };
+}
+
+/**
+ * Cohesive queue-inspect frame payload for host `onPointerMove` queue-inspect.
+ *
+ * Owns the single `match === null` branch for hit resolution + reducer
+ * candidate ref (avoids three separate null checks / eager hitTest).
+ * `fallbackHit` and `panelIdForIndex` are thunks evaluated only on the path
+ * that needs them.
+ */
+export type QueuedInspectFrameBuild = {
+  readonly queued: QueuedPointerInspection;
+  readonly candidate: InspectionCandidateRef | null;
+};
+
+export function buildQueuedInspectFrame(input: {
+  readonly match: CandidateMatch | null;
+  readonly source: InteractionSource;
+  readonly epoch: number;
+  /** Evaluated only when match is null. */
+  readonly fallbackHit: () => SceneHit | null;
+  /** Evaluated only when match is non-null. */
+  readonly panelIdForIndex: (panelIndex: number) => string | null;
+}): QueuedInspectFrameBuild {
+  if (input.match === null) {
+    const hit = input.fallbackHit();
+    return {
+      queued: buildQueuedPointerInspection({
+        hit,
+        source: input.source,
+        match: null,
+      }),
+      candidate: null,
+    };
+  }
+  const match = input.match;
+  const hit = hitFromCandidate(match);
+  return {
+    queued: buildQueuedPointerInspection({
+      hit,
+      source: input.source,
+      match,
+    }),
+    candidate: {
+      epoch: input.epoch,
+      id: match.id,
+      panelId: input.panelIdForIndex(match.panelIndex),
+      x: match.x,
+      y: match.y,
+    },
   };
 }
 
