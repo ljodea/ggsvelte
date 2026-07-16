@@ -12,7 +12,7 @@ export type LegendKeyInput = {
   readonly key: string;
 };
 
-export type LegendKeyAction =
+type LegendKeyAction =
   | { readonly type: "move"; readonly key: string }
   | { readonly type: "commit" }
   | { readonly type: "clear" }
