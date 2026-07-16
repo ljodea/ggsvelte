@@ -102,6 +102,7 @@
     brushAtPoint,
     brushWithEnd,
     evaluatePointerBrushEnd,
+    initialBrushRect,
     nudgeBrushEnd,
     panelCenterAnchor,
   } from "./plot-area-brush.js";
@@ -113,6 +114,7 @@
   import { resolveSurfaceKeyAction } from "./plot-surface-keyboard.js";
   import {
     buildInspectionCandidateRef,
+    buildQueuedPointerInspection,
     resolveInspectionCompleteness,
     resolveInspectionEmitAction,
     resolveInspectionMode,
@@ -123,6 +125,7 @@
     shouldClearInspectionAnnouncement,
     shouldClosePinnedOnOutsidePointer,
     shouldCommitInspection,
+    type QueuedPointerInspection,
   } from "./plot-surface-inspection.js";
   import {
     resolveCaptureClickAction,
@@ -187,7 +190,10 @@
     zoomScaleDiagnosticsFromChannels,
     zoomSupportsChannel,
   } from "./plot-capability.js";
-  import { clearIntervalSelectionEvent } from "./plot-interval.js";
+  import {
+    clearIntervalSelectionEvent,
+    persistentSelectionOrNull,
+  } from "./plot-interval.js";
   import {
     buildIntervalSelectionFromScene,
     intervalQuerySceneFromModel,
@@ -585,12 +591,6 @@
     readonly epoch: number;
     readonly revision: number;
   } | null = null;
-  type QueuedPointerInspection = {
-    hit: SceneHit | null;
-    source: InteractionSource;
-    concreteMode?: "exact" | "x" | "y" | "xy";
-    candidate?: CandidateFacts;
-  };
   let queuedPointerInspection: QueuedPointerInspection | null = null;
   let pendingPinnedPointer: QueuedPointerInspection | null = null;
   let queuedAreaSource: InteractionSource = "pointer";
@@ -1730,14 +1730,11 @@
           match === null
             ? (hitIndex?.hitTest(p.x, p.y) ?? null)
             : hitFromCandidate(match);
-        queuedPointerInspection = {
+        queuedPointerInspection = buildQueuedPointerInspection({
           hit: resolvedHit,
           source: action.source,
-          ...(match !== null && {
-            concreteMode: match.mode,
-            candidate: match,
-          }),
-        };
+          match,
+        });
         queuedPointerToken = reducer.frameToken();
         reducer.queuePointer({
           type: "inspect",
@@ -1819,10 +1816,11 @@
         break;
       case "begin-area": {
         const p = plotPoint(event);
-        brushRect =
-          action.extendExisting && brushRect !== null
-            ? brushWithEnd(brushRect, p)
-            : brushAtPoint(p);
+        brushRect = initialBrushRect({
+          extendExisting: action.extendExisting,
+          existing: brushRect,
+          point: p,
+        });
         setInspection(
           null,
           event.pointerType === "touch" ? "touch" : "pointer",
@@ -1931,9 +1929,10 @@
             brushRect = null;
             if (ended.kind === "commit") {
               const eventValue = selectionEvent("end", ended.rect, source);
-              committedInterval = interactionConfig.select?.persistent
-                ? eventValue
-                : null;
+              committedInterval = persistentSelectionOrNull(
+                interactionConfig.select?.persistent,
+                eventValue,
+              );
               emitSelection(eventValue);
             }
             reducer.dispatch({ type: "cancel-area" });
@@ -2164,9 +2163,10 @@
         brushRect = null;
         if (activeTool === "select-area") {
           const selection = selectionEvent("end", rect, "keyboard");
-          committedInterval = interactionConfig.select?.persistent
-            ? selection
-            : null;
+          committedInterval = persistentSelectionOrNull(
+            interactionConfig.select?.persistent,
+            selection,
+          );
           emitSelection(selection);
         } else applyBrushZoom(rect, "keyboard");
         reducer.dispatch({ type: "cancel-area" });
