@@ -22,7 +22,7 @@ export function buildFrame(
   const n = table.rowCount;
 
   if (binding.ruleForm === "annotation") {
-    const params = (layer.params ?? {}) as { xintercept?: unknown; yintercept?: unknown };
+    const params = (binding.layer.params ?? {}) as { xintercept?: unknown; yintercept?: unknown };
     return {
       binding,
       table,
