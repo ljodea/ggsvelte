@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784201545594,
+  "lastUpdate": 1784202057974,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -10555,6 +10555,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 160.3507,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c7ab917f5cfe05dbdd6ad19837e844667ab59900",
+          "message": "refactor(svelte): extract data-identity, legend-clear, and inspect-ref helpers (#99)\n\nLift dataIdentityEpochToken, shouldEmitLegendFocusClear (documented vs\npreview-dismiss emphasis source), and lazy buildInspectionCandidateRef so\nhot pointer apply paths avoid eager indexOf when candidate ids are present.",
+          "timestamp": "2026-07-16T06:40:24-05:00",
+          "tree_id": "5592ee26366d385e4cfadca735fd0a86f9513deb",
+          "url": "https://github.com/ljodea/ggsvelte/commit/c7ab917f5cfe05dbdd6ad19837e844667ab59900"
+        },
+        "date": 1784202057528,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.5221,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.8178,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 10.6845,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 14.0116,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 84.8378,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 118.6713,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 0.9616,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.1884,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 84.6951,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 108.21,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.5676,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.5502,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 115.7135,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7656,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 28.2763,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.3486,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 28.9244,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 622.9635,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 167.2815,
             "unit": "ms"
           }
         ]
