@@ -173,7 +173,7 @@ describe("resolvePointerDownAction", () => {
 });
 
 describe("resolvePointerUpAction", () => {
-  it("resolves touch inspect tap with pin flag", () => {
+  it("resolves touch inspect tap with inspection state from pinEnabled", () => {
     expect(
       resolvePointerUpAction(
         up({
@@ -185,7 +185,7 @@ describe("resolvePointerUpAction", () => {
           pinEnabled: true,
         }),
       ),
-    ).toEqual({ type: "touch-inspect-tap", pin: true });
+    ).toEqual({ type: "touch-inspect-tap", state: "pinned" });
 
     expect(
       resolvePointerUpAction(
@@ -198,7 +198,7 @@ describe("resolvePointerUpAction", () => {
           pinEnabled: false,
         }),
       ),
-    ).toEqual({ type: "touch-inspect-tap", pin: false });
+    ).toEqual({ type: "touch-inspect-tap", state: "transient" });
   });
 
   it("ignores touch inspect drag (moved past threshold)", () => {
@@ -227,7 +227,7 @@ describe("resolvePointerUpAction", () => {
           hasBrushDraft: true,
         }),
       ),
-    ).toEqual({ type: "finish-brush" });
+    ).toEqual({ type: "finish-brush", source: "touch" });
 
     expect(
       resolvePointerUpAction(
@@ -240,7 +240,7 @@ describe("resolvePointerUpAction", () => {
           hasBrushDraft: true,
         }),
       ),
-    ).toEqual({ type: "finish-brush" });
+    ).toEqual({ type: "finish-brush", source: "touch" });
   });
 
   it("finishes brush only when both brushing and draft exist", () => {
@@ -252,7 +252,20 @@ describe("resolvePointerUpAction", () => {
           hasBrushDraft: true,
         }),
       ),
-    ).toEqual({ type: "finish-brush" });
+    ).toEqual({ type: "finish-brush", source: "pointer" });
+  });
+
+  it("maps finish-brush source from pointerType", () => {
+    expect(
+      resolvePointerUpAction(
+        up({
+          activeTool: "zoom-area",
+          pointerType: "touch",
+          brushing: true,
+          hasBrushDraft: true,
+        }),
+      ),
+    ).toEqual({ type: "finish-brush", source: "touch" });
   });
 
   it("returns none when brushing/draft state diverges", () => {
