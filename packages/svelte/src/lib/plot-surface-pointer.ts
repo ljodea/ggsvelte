@@ -1,4 +1,5 @@
 import { isAreaTool, type InteractionTool } from "./interaction.js";
+import type { PlotRect } from "./plot-geometry.js";
 
 /**
  * Capture-surface pointer decision input for pointerdown.
@@ -251,35 +252,50 @@ export function shouldClearInspectionOnPointerLeave(input: {
   return !input.brushing && !input.tooltipHovered;
 }
 
-/** Matches `PointerBrushEnd["kind"]` from plot-area-brush (no import cycle). */
-export type FinishBrushEndedKind = "too-small" | "commit";
+/**
+ * Matches `PointerBrushEnd` from plot-area-brush without importing that module
+ * (local mirror; plot-area-brush does not import this file — no cycle risk,
+ * but keep the payload shape self-contained for the pure pointer table).
+ */
+export type FinishBrushEnded =
+  | { readonly kind: "too-small"; readonly corners: PlotRect }
+  | { readonly kind: "commit"; readonly rect: PlotRect };
 
 export type FinishBrushAction =
-  | { readonly type: "keep-second-corner" }
-  | { readonly type: "select-end" }
-  | { readonly type: "zoom-end" }
+  | { readonly type: "keep-second-corner"; readonly corners: PlotRect }
+  | { readonly type: "select-end"; readonly rect: PlotRect }
+  | { readonly type: "zoom-end"; readonly rect: PlotRect }
   | { readonly type: "end-area" };
 
 /**
  * Pure routing after `evaluatePointerBrushEnd` for pointerup finish-brush.
  *
+ * Takes the full ended discriminant so actions carry rect/corners payloads —
+ * host must not re-narrow `ended.kind` for emit/apply.
+ *
  * Priority:
- *   1. keep-second-corner — `endedKind === "too-small"` (wins for any tool)
- *   2. select-end — commit + select-area
- *   3. zoom-end — commit + zoom-area
+ *   1. keep-second-corner — too-small (wins for any tool); carries corners
+ *   2. select-end — commit + select-area; carries rect
+ *   3. zoom-end — commit + zoom-area; carries rect
  *   4. end-area — commit + any other tool (clear draft + cancel-area, no emit)
  *
- * Host on keep-second-corner: retain corners, announce, do **not** cancel-area.
- * Host on select-end/zoom-end/end-area: brushRect=null, cancel-area; emit only
- * for select/zoom. Host keeps its `brushRect === null` defensive break.
+ * Host on keep-second-corner: brushRect = action.corners, announce, no cancel-area.
+ * Host on select-end/zoom-end/end-area: brushRect=null, cancel-area; emit/apply
+ * using action.rect when present. Host keeps `brushRect === null` defensive break.
  */
 export function resolveFinishBrushAction(input: {
-  readonly endedKind: FinishBrushEndedKind;
+  readonly ended: FinishBrushEnded;
   readonly activeTool: InteractionTool;
 }): FinishBrushAction {
-  if (input.endedKind === "too-small") return { type: "keep-second-corner" };
-  if (input.activeTool === "select-area") return { type: "select-end" };
-  if (input.activeTool === "zoom-area") return { type: "zoom-end" };
+  if (input.ended.kind === "too-small") {
+    return { type: "keep-second-corner", corners: input.ended.corners };
+  }
+  if (input.activeTool === "select-area") {
+    return { type: "select-end", rect: input.ended.rect };
+  }
+  if (input.activeTool === "zoom-area") {
+    return { type: "zoom-end", rect: input.ended.rect };
+  }
   return { type: "end-area" };
 }
 
