@@ -16,6 +16,39 @@ export function runtimeBehaviorPaths(paths: readonly string[]): string[] {
   return paths.filter((path) => isRuntimeBehaviorPath(path));
 }
 
+/**
+ * True when a unified (or binary) diff contains non-comment behavior changes.
+ * JSDoc/block-comment noise is ignored; CSS universal selectors and code are not.
+ */
+export function diffTextIsSubstantive(diff: string): boolean {
+  if (diff.includes("Binary files ") || diff.includes("GIT binary patch")) return true;
+
+  for (const line of diff.split("\n")) {
+    if (!(line.startsWith("+") || line.startsWith("-"))) continue;
+    if (line.startsWith("+++") || line.startsWith("---")) continue;
+    if (!isSkippableCommentLine(line.slice(1))) return true;
+  }
+  return false;
+}
+
+/** Lines that are blank or documentation-only (not CSS/code). */
+export function isSkippableCommentLine(body: string): boolean {
+  const trimmed = body.trim();
+  if (trimmed.length === 0) return true;
+  if (trimmed.startsWith("//")) return true;
+  if (trimmed.startsWith("/*")) return true;
+  if (trimmed === "*/" || trimmed.startsWith("*/")) return true;
+  if (!trimmed.startsWith("*")) return false;
+
+  // JSDoc middle lines are `* text` / lone `*`. CSS universal selectors look like
+  // `* {…}`, `*.class`, `*#id`, `*:hover`, `*, div`, `*[attr]`.
+  const afterStar = trimmed.slice(1).trimStart();
+  if (afterStar.length === 0) return true;
+  if (afterStar.startsWith("/")) return true; // */
+  if (/^[{.,#:[\]]/.test(afterStar)) return false;
+  return true;
+}
+
 function git(
   repoRoot: string,
   args: readonly string[],
@@ -69,16 +102,25 @@ function hasSubstantiveDiff(repoRoot: string, base: string, head: string, path: 
       `git diff ${base}..${head} -- ${path} failed: ${result.stderr.trim() || result.stdout.trim()}`,
     );
   }
-  for (const line of result.stdout.split("\n")) {
-    if (!(line.startsWith("+") || line.startsWith("-"))) continue;
-    if (line.startsWith("+++") || line.startsWith("---")) continue;
-    const body = line.slice(1).trim();
-    if (body.length === 0) continue;
-    if (body.startsWith("//")) continue;
-    if (body.startsWith("/*") || body.startsWith("*") || body.startsWith("*/")) continue;
-    return true;
+  return diffTextIsSubstantive(result.stdout);
+}
+
+export function packageVersionAtCommit(
+  repoRoot: string,
+  commit: string,
+  packageJsonPath = "packages/svelte/package.json",
+): string {
+  const result = git(repoRoot, ["show", `${commit}:${packageJsonPath}`]);
+  if (result.status !== 0) {
+    throw new Error(
+      `cannot read ${packageJsonPath} at ${commit}: ${result.stderr.trim() || result.stdout.trim()}`,
+    );
   }
-  return false;
+  const parsed = JSON.parse(result.stdout) as { version?: unknown };
+  if (typeof parsed.version !== "string" || parsed.version.length === 0) {
+    throw new Error(`${packageJsonPath} at ${commit} has no version field`);
+  }
+  return parsed.version;
 }
 
 export function findSubstantiveRuntimePaths(
@@ -96,11 +138,20 @@ export function auditAliasCommitRange(input: {
   repoRoot: string;
   baseCommit: string;
   releaseCommit: string;
+  releaseVersion: string;
 }): void {
-  const { repoRoot, baseCommit, releaseCommit } = input;
+  const { repoRoot, baseCommit, releaseCommit, releaseVersion } = input;
   assertGitObjectExists(repoRoot, baseCommit, "inherited tested");
   assertGitObjectExists(repoRoot, releaseCommit, "alias release");
   assertAncestor(repoRoot, baseCommit, releaseCommit);
+
+  const versionAtTip = packageVersionAtCommit(repoRoot, releaseCommit);
+  if (versionAtTip !== releaseVersion) {
+    throw new Error(
+      `alias release ${releaseVersion} points at commit ${releaseCommit} where @ggsvelte/svelte is ${versionAtTip}`,
+    );
+  }
+
   const offenders = findSubstantiveRuntimePaths(repoRoot, baseCommit, releaseCommit);
   if (offenders.length > 0) {
     throw new Error(

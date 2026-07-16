@@ -396,6 +396,7 @@ function validateReleaseEvidence(
     repoRoot,
     baseCommit: resolved.testedCommit,
     releaseCommit: evidence.releaseCommit,
+    releaseVersion: evidence.release,
   });
   return resolved;
 }

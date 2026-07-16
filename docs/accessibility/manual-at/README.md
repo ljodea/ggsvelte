@@ -34,7 +34,9 @@ automation, `records/v<release>.json` may instead use
 line. The alias must identify the release commit, declare that runtime behavior
 did not change, and explain why the inherited matrix remains applicable. The
 schema test resolves that commit range against the inherited record's
-`testedCommit`, requires the base to be an ancestor of the release tip, and
-rejects substantive edits under `packages/svelte/src/` or `packages/core/src/`.
-Any runtime or interaction change requires a new complete record; an alias must
-never be used to represent unperformed manual testing as new evidence.
+`testedCommit`, requires the base to be an ancestor of the release tip, checks
+that `@ggsvelte/svelte` at `releaseCommit` matches the alias release version,
+and rejects substantive (non-documentation) edits under `packages/svelte/src/`
+or `packages/core/src/`, including binary assets. Any runtime or interaction
+change requires a new complete record; an alias must never be used to represent
+unperformed manual testing as new evidence.
