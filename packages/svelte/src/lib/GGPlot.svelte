@@ -92,7 +92,6 @@
   } from "./inspection-resolver.js";
   import { createInteractionReducer } from "./interaction-reducer.js";
   import { provideRegistry } from "./registry.svelte.js";
-  import InteractionOverlay from "./InteractionOverlay.svelte";
   import {
     assemblePortableSpec,
     isFacetedPlotIntent,
@@ -154,6 +153,7 @@
     isDockedTooltipWidth,
     isNarrowToolsWidth,
     plotRootInlineStyle,
+    resolveCaptureAriaControls,
     resolveClearLegendX,
     tooltipViewportSize,
   } from "./plot-layout.js";
@@ -228,6 +228,7 @@
   import PlotCaptureSurface from "./PlotCaptureSurface.svelte";
   import PlotLegendTargets from "./PlotLegendTargets.svelte";
   import PlotMarkStrata from "./PlotMarkStrata.svelte";
+  import PlotSceneOverlays from "./PlotSceneOverlays.svelte";
   import PlotStatusChrome from "./PlotStatusChrome.svelte";
   import Tooltip from "./Tooltip.svelte";
   import ToolRail from "./ToolRail.svelte";
@@ -2337,29 +2338,22 @@
       onClearPointerCancel={() => (legendClearPointerType = null)}
       onClearClick={clearLegendFromControl}
     />
-    {#if !interactive && (emphasizedAnchors.length > 0 || selectedAnchors.length > 0)}
-      <InteractionOverlay
-        width={model.scene.width}
-        height={model.scene.height}
-        interactive={false}
-        {selectedAnchors}
-        {emphasizedAnchors}
-      />
-    {/if}
+    <PlotSceneOverlays
+      width={model.scene.width}
+      height={model.scene.height}
+      {interactive}
+      {surfaceInteractive}
+      {inspection}
+      {inspectionPanel}
+      {coordFlipped}
+      {selectedAnchors}
+      {emphasizedAnchors}
+      {brushRect}
+      {activeTool}
+      {areaAwaitingSecond}
+      {committedInterval}
+    />
     {#if surfaceInteractive}
-      <InteractionOverlay
-        width={model.scene.width}
-        height={model.scene.height}
-        {inspection}
-        {inspectionPanel}
-        {coordFlipped}
-        {selectedAnchors}
-        {emphasizedAnchors}
-        {brushRect}
-        {activeTool}
-        {areaAwaitingSecond}
-        {committedInterval}
-      />
       <!-- Order (document = paint): overlay → capture → Tooltip → status chrome. -->
       <PlotCaptureSurface
         bind:element={captureSurface}
@@ -2368,10 +2362,12 @@
         ariaLabel={ariaLabel ??
           assembled?.labs?.title ??
           sceneLabel(model.scene)}
-        ariaControls={inspection?.state === "pinned" &&
-        interactionConfig.inspect?.contentMode === "interactive"
-          ? `${plotId}-tooltip`
-          : undefined}
+        ariaControls={resolveCaptureAriaControls({
+          isPinned: inspection?.state === "pinned",
+          interactiveContent:
+            interactionConfig.inspect?.contentMode === "interactive",
+          plotId,
+        })}
         onFocus={() => {
           if (inspection === null) navigate(1);
         }}
