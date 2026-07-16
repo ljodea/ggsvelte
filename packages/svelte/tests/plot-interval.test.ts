@@ -6,7 +6,9 @@ import {
   clearIntervalSelectionEvent,
   filterDomainBySelectMode,
   freezeIntervalDomain,
+  intervalSelectionFromRows,
   isBrushTooSmall,
+  lineageRowIndexesFromCandidates,
 } from "../src/lib/plot-interval.js";
 
 describe("isBrushTooSmall (pointer brush-end gate)", () => {
@@ -104,6 +106,62 @@ describe("buildIntervalSelection", () => {
     expect(Object.isFrozen(event.domain)).toBe(true);
     expect(Object.isFrozen(event.domain.x)).toBe(true);
     expect(Object.isFrozen(event.domain.y)).toBe(true);
+  });
+});
+
+describe("lineageRowIndexesFromCandidates", () => {
+  it("unions lineage keys across candidates without duplicating rows", () => {
+    const lineage = new Map<number, number[]>([
+      [10, [1, 2]],
+      [20, [2, 3]],
+    ]);
+    const rows = lineageRowIndexesFromCandidates(
+      [{ lineage: 10 }, { lineage: 20 }, { lineage: 10 }],
+      (id) => lineage.get(id) ?? [],
+    );
+    expect([...rows]).toEqual([1, 2, 3]);
+  });
+
+  it("returns empty set when there are no candidates", () => {
+    expect([...lineageRowIndexesFromCandidates([], () => [1])]).toEqual([]);
+  });
+});
+
+describe("intervalSelectionFromRows", () => {
+  it("resolves keys, filters domain by mode, and freezes the payload", () => {
+    const event = intervalSelectionFromRows({
+      phase: "end",
+      mode: "x",
+      panelId: "p0",
+      pixels: { x0: 0, y0: 0, x1: 10, y1: 10 },
+      source: "pointer",
+      rowIndexes: [0, 1, 0, 2],
+      keyForRow: (rowIndex) => (rowIndex === 1 ? null : `k${String(rowIndex)}`),
+      invertedDomain: { x: [0, 5], y: [1, 9] },
+    });
+    expect(event.mode).toBe("x");
+    expect(event.domain).toEqual({ x: [0, 5] });
+    expect(event.keys).toEqual(["k0", "k2"]);
+    expect(event.lineageCount).toBe(3); // unique row indexes before null-key drop
+    expect(Object.isFrozen(event)).toBe(true);
+    expect(Object.isFrozen(event.keys)).toBe(true);
+  });
+
+  it("preserves start/change phases and empty key sets", () => {
+    const start = intervalSelectionFromRows({
+      phase: "start",
+      mode: "xy",
+      panelId: null,
+      pixels: { x0: 1, y0: 2, x1: 3, y1: 4 },
+      source: "keyboard",
+      rowIndexes: [],
+      keyForRow: () => "x",
+      invertedDomain: {},
+    });
+    expect(start.phase).toBe("start");
+    expect(start.keys).toEqual([]);
+    expect(start.lineageCount).toBe(0);
+    expect(start.source).toBe("keyboard");
   });
 });
 

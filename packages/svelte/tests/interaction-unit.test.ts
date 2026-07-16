@@ -11,7 +11,11 @@ import {
   createInteractionReducer,
   type InteractionCandidateRef,
 } from "../src/lib/interaction-reducer.js";
-import { createInspectionCoordinator, resolveInspection } from "../src/lib/inspection-resolver.js";
+import {
+  clearInspectionFingerprint,
+  createInspectionCoordinator,
+  resolveInspection,
+} from "../src/lib/inspection-resolver.js";
 
 const candidate = (id: number): InteractionCandidateRef => ({
   epoch: 1,
@@ -174,6 +178,15 @@ describe("chart-local interaction reducer", () => {
     reducer.dispatch({ type: "set-tool", tool: "zoom-area" });
     expect(frame).toBeNull();
     expect(reducer.state.inspection.candidate?.id).toBe(2);
+  });
+});
+
+describe("clearInspectionFingerprint", () => {
+  it("scopes clear dedupe tokens by interaction source", () => {
+    expect(clearInspectionFingerprint("pointer")).toBe("clear:pointer");
+    expect(clearInspectionFingerprint("keyboard")).toBe("clear:keyboard");
+    expect(clearInspectionFingerprint("programmatic")).toBe("clear:programmatic");
+    expect(clearInspectionFingerprint("pointer")).not.toBe(clearInspectionFingerprint("touch"));
   });
 });
 
