@@ -14,8 +14,11 @@ import {
   buildCandidateIdentityIndex,
   type CandidateIdentityIndex,
 } from "./build-candidates-identity.js";
+import {
+  buildSourceBackedCandidates,
+  isAllSourceBacked,
+} from "./build-candidates-source-backed.js";
 import type { FacetPanelDef } from "./facets.js";
-import { createRawCandidateDatumResolver } from "./frame.js";
 import type { MappedField } from "./types.js";
 import type { LayerBinding, LayerFrame, ResolvedColorScale } from "./types.js";
 
@@ -46,16 +49,16 @@ export function buildPipelineCandidates(input: {
     lineage,
   } = input;
 
-  const allSourceBacked = bindings.every(
-    (binding) =>
-      (binding.layer.stat ?? "identity") === "identity" && binding.ruleForm !== "annotation",
-  );
-
-  if (allSourceBacked) {
-    return buildCandidateStore(scene, {
-      epoch: runId,
+  if (isAllSourceBacked(bindings)) {
+    return buildSourceBackedCandidates({
+      scene,
+      runId,
       flip,
-      datum: createRawCandidateDatumResolver(bindings, table, color, fill, lineage),
+      bindings,
+      table,
+      color,
+      fill,
+      lineage,
     });
   }
 

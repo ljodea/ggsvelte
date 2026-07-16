@@ -1,13 +1,13 @@
 /**
- * Series identity, rank, and represented-row lineage for identity candidates.
+ * Series identity and ordinal rank for identity candidates.
+ * Represented-row lineage lives in build-candidates-datum-represented.
  */
-import type { LineageStore } from "../identity.js";
 import type { CellValue } from "../table.js";
-import type { ColumnTable } from "../table.js";
 
 import { ordinalSeriesRank } from "./build-candidates-datum-context.js";
-import { filterRepresentedSourceRows } from "./build-candidates-lineage.js";
-import type { LayerFrame, ResolvedColorScale } from "./types.js";
+import type { ResolvedColorScale } from "./types.js";
+
+export { resolveRepresentedSourceRows } from "./build-candidates-datum-represented.js";
 
 export function resolveCandidateSeries(input: {
   sourceRow: number | null;
@@ -47,50 +47,4 @@ export function resolveCandidateSeries(input: {
     group,
   });
   return { group, seriesRank };
-}
-
-export function resolveRepresentedSourceRows(input: {
-  outlierSourceRow: number | null;
-  sourceRow: number | null;
-  group: number;
-  panelIndex: number;
-  layerIndex: number;
-  sourceRowsByGroup: Map<string, number[]>;
-  frame: LayerFrame | undefined;
-  table: ColumnTable;
-  frameRow: number;
-  lineage: LineageStore<number>;
-  primitiveIndex: number;
-}): { representedRows: number[]; sourceOrder: number; lineageKey: number } {
-  const {
-    outlierSourceRow,
-    sourceRow,
-    group,
-    panelIndex,
-    layerIndex,
-    sourceRowsByGroup,
-    frame,
-    table,
-    frameRow,
-    lineage,
-    primitiveIndex,
-  } = input;
-
-  let representedRows =
-    outlierSourceRow === null
-      ? (sourceRowsByGroup.get(`${panelIndex}:${layerIndex}:${group}`) ?? [])
-      : [outlierSourceRow];
-  if (sourceRow === null && frame !== undefined) {
-    representedRows = filterRepresentedSourceRows({
-      frame,
-      table,
-      frameRow,
-      baseRows: representedRows,
-    });
-  }
-  return {
-    representedRows,
-    sourceOrder: sourceRow ?? outlierSourceRow ?? primitiveIndex,
-    lineageKey: sourceRow === null ? lineage.intern(representedRows) : lineage.intern([sourceRow]),
-  };
 }
