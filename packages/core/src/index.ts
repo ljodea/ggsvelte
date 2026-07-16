@@ -19,6 +19,15 @@ export {
 } from "./table.js";
 export type { CellValue, Columns, Discreteness, FieldType, Rows } from "./table.js";
 
+// Facet panel identity (typed and independent of display position)
+export { createFacetPanelIdentity } from "./facet-identity.js";
+export type {
+  FacetPanelIdentity,
+  FacetPanelIdentityInput,
+  FacetPanelRole,
+  FacetPanelValueIdentity,
+} from "./facet-identity.js";
+
 // Grouping (decision 0005)
 export { deriveGroups, inferDiscreteness } from "./grouping.js";
 export type { AesMapping, DeclaredDiscreteness, GroupDerivation } from "./grouping.js";

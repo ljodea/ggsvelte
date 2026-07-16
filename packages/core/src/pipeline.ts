@@ -53,6 +53,8 @@ import type {
 import { didYouMean, normalize, SpecValidationError, validate } from "@ggsvelte/spec";
 
 import { deriveGroups } from "./grouping.js";
+import { createFacetPanelIdentity } from "./facet-identity.js";
+import type { FacetPanelIdentity } from "./facet-identity.js";
 import { FONT_METRICS } from "./layout/font-metrics.js";
 import type { Domain, LayoutResult, Margins, PassResult, TickFormatter } from "./layout/layout.js";
 import { DEFAULT_LAYOUT_THEME, layout, layoutPass } from "./layout/layout.js";
@@ -67,7 +69,7 @@ import { buildLegends } from "./legend.js";
 import type { SequentialColorScale } from "./scales/color.js";
 import { trainSequential, VIRIDIS_RAMP_10 } from "./scales/color.js";
 import type { ScaleState } from "./scales/state.js";
-import { PaletteExhaustedError } from "./scales/state.js";
+import { encodeKey, PaletteExhaustedError } from "./scales/state.js";
 import type { ColorScale, ContinuousConfig, PositionScale } from "./scales/train.js";
 import {
   bandKey,
@@ -2557,6 +2559,8 @@ function buildBatch(
 
 interface FacetPanelDef {
   /** Stable facet field/value identity; independent of display position. */
+  identity: FacetPanelIdentity;
+  /** Alias for `identity.key`, retained for existing interaction consumers. */
   id: string;
   /** Strip label ("" = no strip; the unfaceted single panel). */
   label: string;
@@ -2602,7 +2606,7 @@ function facetField(
 function facetValues(table: ColumnTable, field: string): CellValue[] {
   const seen = new Map<string, CellValue>();
   for (const v of table.column(field)) {
-    const key = bandKey(v);
+    const key = encodeKey(v);
     if (!seen.has(key)) seen.set(key, v);
   }
   const values = [...seen.values()];
@@ -2613,42 +2617,33 @@ function facetValues(table: ColumnTable, field: string): CellValue[] {
     if (numeric) return cellToNumber(a) - cellToNumber(b);
     const ka = bandKey(a);
     const kb = bandKey(b);
+    if (ka === kb) return encodeKey(a).localeCompare(encodeKey(b), "en");
     return ka < kb ? -1 : ka > kb ? 1 : 0;
   });
   return values;
 }
 
-function panelValueToken(value: CellValue): string {
-  if (value instanceof Date) return `d:${value.getTime()}`;
-  if (value === null) return "null";
-  if (typeof value === "string") return `s:${value}`;
-  if (typeof value === "number") return `n:${Object.is(value, -0) ? 0 : value}`;
-  return `b:${value}`;
-}
-
-function panelComponentToken(field: string, value: CellValue): string {
-  const token = panelValueToken(value);
-  return `${field.length}:${field}=${token.length}:${token}`;
-}
-
 function rowsMatching(table: ColumnTable, field: string, value: CellValue): number[] {
-  const key = bandKey(value);
+  const key = encodeKey(value);
   const column = table.column(field);
   const rows: number[] = [];
   for (let i = 0; i < column.length; i++) {
-    if (bandKey(column[i]!) === key) rows.push(i);
+    if (encodeKey(column[i]!) === key) rows.push(i);
   }
   return rows;
 }
 
-const SINGLE_PANEL = (table: ColumnTable): FacetLayout => ({
-  faceted: false,
-  panels: [{ id: "panel:all", label: "", row: 0, col: 0, table, sourceRows: null }],
-  nrow: 1,
-  ncol: 1,
-  freeX: false,
-  freeY: false,
-});
+const SINGLE_PANEL = (table: ColumnTable): FacetLayout => {
+  const identity = createFacetPanelIdentity([]);
+  return {
+    faceted: false,
+    panels: [{ identity, id: identity.key, label: "", row: 0, col: 0, table, sourceRows: null }],
+    nrow: 1,
+    ncol: 1,
+    freeX: false,
+    freeY: false,
+  };
+};
 
 function resolveFacet(facet: FacetSpec | undefined, table: ColumnTable): FacetLayout {
   if (facet === undefined) return SINGLE_PANEL(table);
@@ -2680,8 +2675,10 @@ function resolveFacet(facet: FacetSpec | undefined, table: ColumnTable): FacetLa
     const nrow = Math.ceil(values.length / ncol);
     const panels = values.map((value, i) => {
       const rows = rowsMatching(table, wrapField, value);
+      const identity = createFacetPanelIdentity([{ role: "wrap", field: wrapField, value }]);
       return {
-        id: `panel:wrap:${wrapField}=${panelValueToken(value)}`,
+        identity,
+        id: identity.key,
         label: bandKey(value),
         row: Math.floor(i / ncol),
         col: i % ncol,
@@ -2717,11 +2714,17 @@ function resolveFacet(facet: FacetSpec | undefined, table: ColumnTable): FacetLa
       const parts: string[] = [];
       if (rowsField !== null) parts.push(bandKey(rowValues[r]!));
       if (colsField !== null) parts.push(bandKey(colValues[c]!));
+      const identity = createFacetPanelIdentity([
+        ...(rowsField === null
+          ? []
+          : [{ role: "rows" as const, field: rowsField, value: rowValues[r] }]),
+        ...(colsField === null
+          ? []
+          : [{ role: "cols" as const, field: colsField, value: colValues[c] }]),
+      ]);
       panels.push({
-        id: `panel:grid:${[
-          ...(rowsField === null ? [] : [panelComponentToken(rowsField, rowValues[r]!)]),
-          ...(colsField === null ? [] : [panelComponentToken(colsField, colValues[c]!)]),
-        ].join("|")}`,
+        identity,
+        id: identity.key,
         label: parts.join(" / "),
         row: r,
         col: c,
@@ -3340,6 +3343,7 @@ export function runPipeline(spec: SpecInput | PortableSpec, options: RunOptions)
     const bottom = axisTicks(h, placement.ticksH, placement.width, false);
     const left = axisTicks(v, placement.ticksV, placement.height, true);
     return {
+      identity: facetPanels[p]!.identity,
       id: facetPanels[p]!.id,
       x: placement.x,
       y: placement.y,

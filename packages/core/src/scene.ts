@@ -142,7 +142,9 @@ export interface SceneAxis {
 }
 
 export interface ScenePanel {
-  /** Stable semantic identity derived from facet field/value identity. */
+  /** Structured, typed identity derived from facet field/value identity. */
+  identity: import("./facet-identity.js").FacetPanelIdentity;
+  /** Stable key alias for `identity.key`, retained for interaction compatibility. */
   id: string;
   /** Panel origin/size in plot px. */
   x: number;
