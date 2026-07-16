@@ -211,6 +211,27 @@ describe("bindLayer", () => {
       expect((e as PipelineError).code).toBe("channel-type-mismatch");
     }
   });
+
+  it("rejects boxplot with continuous x", () => {
+    try {
+      bindLayer({ geom: "boxplot", aes: { x: { field: "x" }, y: { field: "y" } } }, 0, table, []);
+      expect.unreachable("should throw");
+    } catch (e) {
+      expect(e).toBeInstanceOf(PipelineError);
+      expect((e as PipelineError).code).toBe("channel-type-mismatch");
+      expect((e as PipelineError).path).toContain("x");
+    }
+  });
+
+  it("requires ymin/ymax for identity errorbar", () => {
+    try {
+      bindLayer({ geom: "errorbar", aes: { x: { field: "g" } } }, 0, table, []);
+      expect.unreachable("should throw");
+    } catch (e) {
+      expect(e).toBeInstanceOf(PipelineError);
+      expect((e as PipelineError).code).toBe("missing-channel");
+    }
+  });
 });
 
 describe("bind via runPipeline (regression anchors)", () => {
