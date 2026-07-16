@@ -110,3 +110,40 @@ export function resolveLegendClickAction(input: LegendClickInput): LegendClickAc
     source: input.detail === 0 ? "keyboard" : "pointer",
   };
 }
+
+// ---- blur (preview clear gate) ----
+
+export type LegendBlurInput = {
+  readonly relatedTarget: EventTarget | null;
+  /** Host plot root; null when unmounted. */
+  readonly root: ParentNode | null;
+};
+
+/**
+ * Whether blur should clear transient legend preview.
+ *
+ * Retain preview only when focus moves to another legend target **inside this
+ * plot's root**. Cross-plot moves to another `[data-gg-legend-target]` must
+ * clear, or the previous plot stays muted with a stale preview.
+ */
+export function shouldClearLegendPreviewOnBlur(input: LegendBlurInput): boolean {
+  if (!(input.relatedTarget instanceof Element)) return true;
+  if (!input.relatedTarget.matches("[data-gg-legend-target]")) return true;
+  if (input.root === null) return true;
+  return !input.root.contains(input.relatedTarget);
+}
+
+// ---- live region gate ----
+
+export type InteractionLiveRegionInput = {
+  readonly surfaceInteractive: boolean;
+  readonly legendFocusEnabled: boolean;
+};
+
+/**
+ * Live region is required for surface tools **or** legend-only focus so
+ * keyboard commits/clears still announce when inspect/select/zoom are off.
+ */
+export function shouldRenderInteractionLiveRegion(input: InteractionLiveRegionInput): boolean {
+  return input.surfaceInteractive || input.legendFocusEnabled;
+}

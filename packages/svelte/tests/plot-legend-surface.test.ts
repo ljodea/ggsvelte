@@ -4,6 +4,8 @@ import {
   resolveLegendClickAction,
   resolveLegendKeyAction,
   resolveLegendPointerUpAction,
+  shouldClearLegendPreviewOnBlur,
+  shouldRenderInteractionLiveRegion,
   type LegendClickInput,
   type LegendKeyInput,
   type LegendPointerUpInput,
@@ -118,5 +120,50 @@ describe("resolveLegendClickAction", () => {
       type: "commit",
       source: "pointer",
     });
+  });
+});
+
+describe("shouldClearLegendPreviewOnBlur", () => {
+  it("clears when relatedTarget is null or not a legend target", () => {
+    const root = document.createElement("div");
+    expect(shouldClearLegendPreviewOnBlur({ relatedTarget: null, root })).toBe(true);
+    const other = document.createElement("button");
+    expect(shouldClearLegendPreviewOnBlur({ relatedTarget: other, root })).toBe(true);
+  });
+
+  it("retains only when the next legend target is inside this plot root", () => {
+    const root = document.createElement("div");
+    const inside = document.createElement("button");
+    inside.dataset.ggLegendTarget = "";
+    root.append(inside);
+    const outside = document.createElement("button");
+    outside.dataset.ggLegendTarget = "";
+    document.body.append(outside);
+    expect(shouldClearLegendPreviewOnBlur({ relatedTarget: inside, root })).toBe(false);
+    expect(shouldClearLegendPreviewOnBlur({ relatedTarget: outside, root })).toBe(true);
+    outside.remove();
+  });
+});
+
+describe("shouldRenderInteractionLiveRegion", () => {
+  it("renders for surface tools or legend-only focus", () => {
+    expect(
+      shouldRenderInteractionLiveRegion({
+        surfaceInteractive: false,
+        legendFocusEnabled: true,
+      }),
+    ).toBe(true);
+    expect(
+      shouldRenderInteractionLiveRegion({
+        surfaceInteractive: true,
+        legendFocusEnabled: false,
+      }),
+    ).toBe(true);
+    expect(
+      shouldRenderInteractionLiveRegion({
+        surfaceInteractive: false,
+        legendFocusEnabled: false,
+      }),
+    ).toBe(false);
   });
 });
