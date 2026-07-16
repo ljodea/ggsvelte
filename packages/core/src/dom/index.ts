@@ -16,6 +16,7 @@ export {
   sizeCanvasForDpr,
 } from "./canvas.js";
 export type { ColorResolver } from "./canvas.js";
+export type { CanvasFocusPresentation, PrimitiveFocusMask } from "./canvas.js";
 
 export { buildHitIndex, DEFAULT_HIT_TOLERANCE } from "./hit-index.js";
 export type { HitIndexOptions, SceneHit, SceneHitIndex } from "./hit-index.js";

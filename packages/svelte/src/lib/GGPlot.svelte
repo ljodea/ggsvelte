@@ -51,12 +51,19 @@
   } from "@ggsvelte/spec";
   import type {
     CandidateFacts,
+    BatchInteractionMask,
     CellValue,
     GeometryBatch,
     RenderModel,
     ScaleState,
   } from "@ggsvelte/core";
-  import { planStrata, runPipeline, sceneLabel } from "@ggsvelte/core";
+  import {
+    buildInteractionMasks,
+    legendValueEqual,
+    planStrata,
+    runPipeline,
+    sceneLabel,
+  } from "@ggsvelte/core";
   import type { SceneHit, SceneHitIndex } from "@ggsvelte/core/dom";
   import {
     buildHitIndex,
@@ -73,6 +80,8 @@
     type InteractionSource,
     type InteractionTool,
     type IntervalSelection,
+    type LegendFocusEvent,
+    type LegendFocusInput,
     type PlotInspection,
     type PlotInspectionChange,
     type PlotInteractionEvent,
@@ -143,6 +152,7 @@
     sanitizePartialZoomDomains,
   } from "./plot-zoom.js";
   import SceneView from "./SceneView.svelte";
+  import type { LegendEntryAction, LegendEntryIdentity } from "./Legend.svelte";
   import Tooltip from "./Tooltip.svelte";
   import ToolRail from "./ToolRail.svelte";
 
@@ -187,6 +197,8 @@
     select?: SelectInput;
     /** Opt into brush zoom. */
     zoom?: ZoomInput;
+    /** Opt into discrete legend preview, focus, and linked emphasis. */
+    legendFocus?: LegendFocusInput;
     /** Controlled initial/active tool. */
     tool?: InteractionTool;
     /** Optional durable semantic state shared with other plots and Svelte UI. */
@@ -198,6 +210,7 @@
     oninspect?: (event: PlotInspection<Row, PublicKey>) => void;
     onselect?: (event: PlotSelection<PublicKey>) => void;
     onzoom?: (event: ZoomEvent) => void;
+    onlegendfocus?: (event: LegendFocusEvent<PublicKey>) => void;
     oninteraction?: (event: PlotInteractionEvent<Row, PublicKey>) => void;
     ondiagnostic?: (diagnostic: InteractionDiagnostic) => void;
     ontoolchange?: (tool: InteractionTool) => void;
@@ -225,6 +238,7 @@
     inspect = false,
     select = false,
     zoom = false,
+    legendFocus = false,
     tool,
     interaction,
     interactionScope,
@@ -232,6 +246,7 @@
     oninspect,
     onselect,
     onzoom,
+    onlegendfocus,
     oninteraction,
     ondiagnostic,
     ontoolchange,
@@ -273,7 +288,13 @@
 
   const interactionConfig = $derived(
     normalizeInteractionConfig(
-      { inspect, select, zoom, ...(tool !== undefined && { tool }) },
+      {
+        inspect,
+        select,
+        zoom,
+        legendFocus,
+        ...(tool !== undefined && { tool }),
+      },
       {
         faceted: assembled?.facet !== undefined,
         hasKey: datumKey !== undefined,
@@ -451,12 +472,21 @@
   /** Svelte attachment: size for DPR, draw the stratum, signal first paint. */
   function canvasAttachment(m: RenderModel, batches: GeometryBatch[]) {
     void themeEpoch;
+    const focusMasks = masksForBatches(batches);
     return (canvas: HTMLCanvasElement) => {
       const ctx = canvas.getContext("2d");
       if (ctx === null) return;
       const dpr = window.devicePixelRatio || 1;
       sizeCanvasForDpr(canvas, ctx, m.scene.width, m.scene.height, dpr);
-      drawStratum(ctx, m.scene, batches, cssColorResolver(canvas));
+      drawStratum(
+        ctx,
+        m.scene,
+        batches,
+        cssColorResolver(canvas),
+        focusMasks.length > 0
+          ? { focusMasks, mutedAlpha: m.scene.theme.interactionMuted }
+          : undefined,
+      );
       // untrack: the attachment must WRITE paint state without SUBSCRIBING
       // to it (a tracked read here would re-trigger the attachment -> loop).
       untrack(() => notifyPainted(m.runId));
@@ -470,8 +500,11 @@
   // chart-local reducer -> tooltip/crosshair/tools/callbacks. Presentation
   // consumes one resolved inspection and never reconstructs grouping itself.
   const interactive = $derived(interactionConfig.interactive);
+  const surfaceInteractive = $derived(
+    interactionConfig.availableTools.length > 0,
+  );
   const hitIndex: SceneHitIndex | null = $derived.by(() =>
-    interactive && model !== null ? buildHitIndex(model.scene) : null,
+    surfaceInteractive && model !== null ? buildHitIndex(model.scene) : null,
   );
 
   let reducerRevision = $state(0);
@@ -569,13 +602,31 @@
   let lastInspectionFingerprint = "";
   let activeTraversalIndex = $state(-1);
   let localSelectedKeys = $state<PropertyKey[]>([]);
+  let localEmphasisKeys = $state<PropertyKey[]>([]);
+  let legendPreview = $state<{
+    action: LegendEntryAction;
+    keys: readonly PropertyKey[];
+  } | null>(null);
+  let legendCommitted = $state<{
+    identity: LegendEntryIdentity;
+    keys: readonly PropertyKey[];
+  } | null>(null);
+  let legendRovingIndex = $state(0);
+  let legendTouchIndex = -1;
+  let legendClearPointerType: string | null = null;
+  let suppressLegendClick = false;
+  let suppressLegendFocusPreview = false;
   const effectiveSelectedKeys: readonly PropertyKey[] = $derived.by(() => {
     void controllerRevision;
     return interaction?.selected(resolvedInteractionScope) ?? localSelectedKeys;
   });
   const effectiveEmphasisKeys: readonly PropertyKey[] = $derived.by(() => {
     void controllerRevision;
-    return interaction?.emphasized(resolvedInteractionScope) ?? [];
+    return (
+      legendPreview?.keys ??
+      interaction?.emphasized(resolvedInteractionScope) ??
+      localEmphasisKeys
+    );
   });
   let committedInterval = $state<IntervalSelection | null>(null);
   const zoomHasSupportedChannel = $derived.by(() => {
@@ -605,6 +656,21 @@
       bandChannelsForZoom(interactionConfig.zoom.mode, model.scales),
       INTERACTION_DIAGNOSTIC_CATALOG.INTERACTION_INTERVAL_SCALE_UNSUPPORTED,
     );
+  });
+  const legendDiagnostics = $derived.by(() => {
+    if (
+      interactionConfig.legendFocus === null ||
+      model === null ||
+      model.scene.legends.length === 0 ||
+      model.scene.legends.some((candidate) => candidate.type === "discrete")
+    )
+      return [] as InteractionDiagnostic[];
+    return [
+      {
+        ...INTERACTION_DIAGNOSTIC_CATALOG.INTERACTION_LEGEND_DISCRETE_ONLY,
+        actual: model.scene.legends.map((candidate) => candidate.type),
+      },
+    ];
   });
   const capabilityStatus = $derived.by(() => {
     const unavailable = interactionConfig.diagnostics.find(
@@ -761,7 +827,11 @@
   });
 
   $effect(() => {
-    if (!interactive) return;
+    for (const diagnostic of legendDiagnostics) deliverDiagnostic(diagnostic);
+  });
+
+  $effect(() => {
+    if (!surfaceInteractive) return;
     const onOutsidePointer = (event: PointerEvent) => {
       if (
         inspection?.state !== "pinned" ||
@@ -841,6 +911,411 @@
     );
   }
 
+  const legendEntryKeyIndex: ReadonlyMap<string, readonly PropertyKey[]> =
+    $derived.by(() => {
+      const index = new Map<string, PropertyKey[]>();
+      if (model === null) return index;
+      for (const sceneLegend of model.scene.legends) {
+        if (sceneLegend.type !== "discrete") continue;
+        for (
+          let entryIndex = 0;
+          entryIndex < sceneLegend.entries.length;
+          entryIndex++
+        )
+          index.set(`${sceneLegend.scale}:${String(entryIndex)}`, []);
+      }
+      const visited = new Set<string>();
+      for (let id = 0; id < model.candidates.size; id++) {
+        const candidate = model.candidates.candidate(id);
+        if (candidate === null) continue;
+        for (const sceneLegend of model.scene.legends) {
+          if (sceneLegend.type !== "discrete") continue;
+          const field = model.layerFields[candidate.layerIndex]?.find(
+            (mapped) =>
+              mapped.channel === sceneLegend.scale && mapped.source !== "stat",
+          )?.field;
+          if (field === undefined) continue;
+          const sourceRows = new Set(model.lineage.keys(candidate.lineage));
+          if (candidate.rowIndex !== null) sourceRows.add(candidate.rowIndex);
+          for (const rowIndex of sourceRows) {
+            const visit = `${sceneLegend.scale}:${String(candidate.layerIndex)}:${field}:${String(rowIndex)}`;
+            if (visited.has(visit)) continue;
+            visited.add(visit);
+            const row = model.row(rowIndex);
+            const key = semanticKeys.keys.get(rowIndex);
+            if (row === null || key === null || key === undefined) continue;
+            const entryIndex = sceneLegend.entries.findIndex((entry) =>
+              legendValueEqual(entry.value, row[field]),
+            );
+            if (entryIndex < 0) continue;
+            index.get(`${sceneLegend.scale}:${String(entryIndex)}`)?.push(key);
+          }
+        }
+      }
+      return new Map(
+        [...index].map(([identity, keys]) => [
+          identity,
+          Object.freeze([...new Set(keys)]),
+        ]),
+      );
+    });
+
+  function keysForLegend(action: LegendEntryAction): readonly PropertyKey[] {
+    return (
+      legendEntryKeyIndex.get(
+        `${action.identity.scale}:${String(action.identity.entryIndex)}`,
+      ) ?? []
+    );
+  }
+
+  function legendSource(
+    source: LegendEntryAction["source"],
+  ): InteractionSource {
+    if (source === "pointer" || source === "touch") return source;
+    return "keyboard";
+  }
+
+  function emitLegendFocus(event: LegendFocusEvent<PropertyKey>): void {
+    if (event.phase === "change") {
+      announceInteraction(
+        `${event.label} ${event.state === "committed" ? "focused" : "previewed"}, ${String(event.keys.length)} ${event.keys.length === 1 ? "datum" : "data"}.`,
+      );
+    } else {
+      announceInteraction("Legend focus cleared.");
+    }
+    onlegendfocus?.(event as LegendFocusEvent<PublicKey>);
+    oninteraction?.(event as PlotInteractionEvent<Row, PublicKey>);
+  }
+
+  function previewLegend(action: LegendEntryAction | null): void {
+    if (action === null) {
+      if (legendPreview === null) return;
+      const source = legendSource(legendPreview.action.source);
+      legendPreview = null;
+      const committed =
+        interaction?.emphasized(resolvedInteractionScope) ?? localEmphasisKeys;
+      if (committed.length === 0)
+        emitLegendFocus({ type: "legend-focus", phase: "clear", source });
+      return;
+    }
+    const keys = keysForLegend(action);
+    if (keys.length === 0) return;
+    legendPreview = { action, keys };
+    emitLegendFocus({
+      type: "legend-focus",
+      phase: "change",
+      state: "transient",
+      source: legendSource(action.source),
+      scale: action.identity.scale as "color" | "fill",
+      value: action.entry.value as CellValue,
+      label: action.entry.label,
+      keys,
+    });
+  }
+
+  function clearLegendFocus(source: InteractionSource): void {
+    const hadFocus =
+      legendPreview !== null ||
+      legendCommitted !== null ||
+      effectiveEmphasisKeys.length > 0;
+    legendPreview = null;
+    legendCommitted = null;
+    if (interaction === undefined) localEmphasisKeys = [];
+    else interaction.clearEmphasis({ scope: resolvedInteractionScope, source });
+    if (hadFocus)
+      emitLegendFocus({ type: "legend-focus", phase: "clear", source });
+  }
+
+  function clearLegendFromControl(event: MouseEvent): void {
+    const returnTarget = root?.querySelector<HTMLElement>(
+      ".gg-legend-target[aria-pressed='true']",
+    );
+    const source: InteractionSource =
+      event.detail === 0
+        ? "keyboard"
+        : legendClearPointerType === "touch"
+          ? "touch"
+          : "pointer";
+    legendClearPointerType = null;
+    clearLegendFocus(source);
+    queueMicrotask(() => {
+      if (returnTarget === null || returnTarget === undefined) return;
+      suppressLegendFocusPreview = true;
+      returnTarget.focus();
+      suppressLegendFocusPreview = false;
+    });
+  }
+
+  function commitLegend(action: LegendEntryAction): void {
+    const source = legendSource(action.source);
+    if (
+      effectiveLegendPressed?.scale === action.identity.scale &&
+      effectiveLegendPressed.entryIndex === action.identity.entryIndex
+    ) {
+      clearLegendFocus(source);
+      return;
+    }
+    const keys = keysForLegend(action);
+    if (keys.length === 0) return;
+    legendPreview = null;
+    legendCommitted = { identity: action.identity, keys };
+    if (interaction === undefined) localEmphasisKeys = [...keys];
+    else
+      interaction.setEmphasis(keys as readonly PublicKey[], {
+        scope: resolvedInteractionScope,
+        source,
+      });
+    emitLegendFocus({
+      type: "legend-focus",
+      phase: "change",
+      state: "committed",
+      source,
+      scale: action.identity.scale as "color" | "fill",
+      value: action.entry.value as CellValue,
+      label: action.entry.label,
+      keys,
+    });
+  }
+
+  const presentationFocusKeys: readonly PropertyKey[] = $derived.by(() => {
+    if (effectiveEmphasisKeys.length === 0 || inspection === null)
+      return effectiveEmphasisKeys;
+    return Object.freeze([
+      ...new Set([
+        ...effectiveEmphasisKeys,
+        ...inspection.focus.sourceKeys,
+        ...(inspection.focus.key === null ? [] : [inspection.focus.key]),
+      ]),
+    ]);
+  });
+
+  const semanticCandidateProjections = $derived.by(() => {
+    if (model === null) return [];
+    const candidates = [];
+    for (let id = 0; id < model.candidates.size; id++) {
+      const candidate = model.candidates.candidate(id);
+      if (candidate === null) continue;
+      candidates.push({
+        batchIndex: candidate.batchIndex,
+        primitiveIndex: candidate.primitiveIndex,
+        keys: candidateSemanticKeys(candidate),
+      });
+    }
+    return candidates;
+  });
+
+  const interactionMasks: readonly (BatchInteractionMask | null)[] =
+    $derived.by(() => {
+      if (model === null || presentationFocusKeys.length === 0) return [];
+      return buildInteractionMasks(
+        model.scene.batches,
+        presentationFocusKeys,
+        semanticCandidateProjections,
+      );
+    });
+
+  function masksForBatches(batches: readonly GeometryBatch[]) {
+    if (model === null || interactionMasks.length === 0) return [];
+    return batches.map((batch) => {
+      const index = model.scene.batches.indexOf(batch);
+      return index < 0 ? null : (interactionMasks[index] ?? null);
+    });
+  }
+
+  function sameKeySet(
+    left: readonly PropertyKey[],
+    right: readonly PropertyKey[],
+  ): boolean {
+    if (left.length !== right.length) return false;
+    const values = new Set(right);
+    return left.every((key) => values.has(key));
+  }
+
+  const effectiveLegendPressed: LegendEntryIdentity | null = $derived.by(() => {
+    const keys =
+      interaction?.emphasized(resolvedInteractionScope) ?? localEmphasisKeys;
+    if (keys.length === 0 || model === null) return null;
+    if (legendCommitted !== null && sameKeySet(legendCommitted.keys, keys))
+      return legendCommitted.identity;
+    const matches: LegendEntryIdentity[] = [];
+    for (const sceneLegend of model.scene.legends) {
+      if (sceneLegend.type !== "discrete") continue;
+      for (
+        let entryIndex = 0;
+        entryIndex < sceneLegend.entries.length;
+        entryIndex++
+      ) {
+        const entry = sceneLegend.entries[entryIndex]!;
+        const entryKeys = keysForLegend({
+          identity: { scale: sceneLegend.scale, entryIndex },
+          entry,
+          source: "keyboard",
+        });
+        if (sameKeySet(entryKeys, keys))
+          matches.push({ scale: sceneLegend.scale, entryIndex });
+      }
+    }
+    return matches.length === 1 ? matches[0]! : null;
+  });
+
+  const interactiveLegendEntries = $derived.by(() => {
+    if (model === null || interactionConfig.legendFocus === null) return [];
+    return model.scene.legends.flatMap((sceneLegend) =>
+      sceneLegend.type === "discrete"
+        ? sceneLegend.entries.map((entry, entryIndex) => ({
+            legend: sceneLegend,
+            entry,
+            identity: { scale: sceneLegend.scale, entryIndex },
+          }))
+        : [],
+    );
+  });
+
+  $effect.pre(() => {
+    const count = interactiveLegendEntries.length;
+    const nextIndex = count === 0 ? 0 : Math.min(legendRovingIndex, count - 1);
+    const active = document.activeElement;
+    const focusedIndex =
+      active instanceof HTMLElement &&
+      active.matches("[data-gg-legend-target]") &&
+      root?.contains(active)
+        ? Number(active.dataset["index"])
+        : null;
+    if (nextIndex !== legendRovingIndex) legendRovingIndex = nextIndex;
+    if (focusedIndex === null || count === 0) return;
+    const returnIndex = Math.min(focusedIndex, count - 1);
+    queueMicrotask(() => {
+      root
+        ?.querySelector<HTMLElement>(
+          `[data-gg-legend-target][data-index="${String(returnIndex)}"]`,
+        )
+        ?.focus();
+    });
+  });
+
+  $effect(() => {
+    const committed = legendCommitted;
+    if (committed === null) return;
+    const current = interactiveLegendEntries.find(
+      ({ identity }) =>
+        identity.scale === committed.identity.scale &&
+        identity.entryIndex === committed.identity.entryIndex,
+    );
+    const currentKeys =
+      current === undefined
+        ? []
+        : keysForLegend({
+            identity: current.identity,
+            entry: current.entry,
+            source: "keyboard",
+          });
+    if (sameKeySet(currentKeys, committed.keys)) return;
+
+    legendCommitted = null;
+    if (interaction === undefined && localEmphasisKeys.length > 0) {
+      localEmphasisKeys = [];
+      emitLegendFocus({
+        type: "legend-focus",
+        phase: "clear",
+        source: "programmatic",
+      });
+    }
+  });
+
+  function legendAction(
+    index: number,
+    source: LegendEntryAction["source"],
+  ): LegendEntryAction | null {
+    const target = interactiveLegendEntries[index];
+    return target === undefined
+      ? null
+      : { identity: target.identity, entry: target.entry, source };
+  }
+
+  function previewLegendIndex(
+    index: number,
+    source: "pointer" | "focus",
+  ): void {
+    if (interactionConfig.legendFocus?.preview !== true) return;
+    previewLegend(legendAction(index, source));
+  }
+
+  function onLegendFocus(index: number): void {
+    if (suppressLegendFocusPreview) return;
+    previewLegendIndex(index, "focus");
+  }
+
+  function moveLegendFocus(index: number, key: string): void {
+    const last = interactiveLegendEntries.length - 1;
+    let next = index;
+    if (key === "ArrowRight" || key === "ArrowDown")
+      next = Math.min(last, index + 1);
+    else if (key === "ArrowLeft" || key === "ArrowUp")
+      next = Math.max(0, index - 1);
+    else if (key === "Home") next = 0;
+    else if (key === "End") next = last;
+    legendRovingIndex = next;
+    root
+      ?.querySelector<HTMLElement>(
+        `[data-gg-legend-target][data-index="${String(next)}"]`,
+      )
+      ?.focus();
+  }
+
+  function onLegendKeydown(event: KeyboardEvent, index: number): void {
+    if (
+      event.key === "ArrowRight" ||
+      event.key === "ArrowDown" ||
+      event.key === "ArrowLeft" ||
+      event.key === "ArrowUp" ||
+      event.key === "Home" ||
+      event.key === "End"
+    ) {
+      event.preventDefault();
+      moveLegendFocus(index, event.key);
+    } else if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      const action = legendAction(index, "keyboard");
+      if (action !== null) commitLegend(action);
+    } else if (event.key === "Escape") {
+      event.preventDefault();
+      clearLegendFocus("keyboard");
+    }
+  }
+
+  function onLegendPointerDown(event: PointerEvent, index: number): void {
+    if (event.pointerType === "touch") legendTouchIndex = index;
+  }
+
+  function onLegendPointerUp(event: PointerEvent, index: number): void {
+    if (event.pointerType !== "touch" || legendTouchIndex !== index) return;
+    legendTouchIndex = -1;
+    suppressLegendClick = true;
+    const action = legendAction(index, "touch");
+    if (action !== null) commitLegend(action);
+  }
+
+  function onLegendClick(event: MouseEvent, index: number): void {
+    if (suppressLegendClick) {
+      suppressLegendClick = false;
+      return;
+    }
+    const action = legendAction(
+      index,
+      event.detail === 0 ? "keyboard" : "pointer",
+    );
+    if (action !== null) commitLegend(action);
+  }
+
+  function onLegendBlur(event: FocusEvent): void {
+    if (
+      event.relatedTarget instanceof Element &&
+      event.relatedTarget.matches("[data-gg-legend-target]")
+    )
+      return;
+    previewLegend(null);
+  }
+
   const inspectionCoordinator = createInspectionCoordinator<
     Record<string, CellValue>,
     PropertyKey
@@ -898,7 +1373,7 @@
   }
 
   const traversalHits: SceneHit[] = $derived.by(() => {
-    if (model === null) return [];
+    if (!surfaceInteractive || model === null) return [];
     const hits: SceneHit[] = [];
     let id = model.candidates.traverse(null, "first");
     const seen = new Set<number>();
@@ -1654,6 +2129,8 @@
   class="gg-plot-root"
   class:gg-container-width={width === undefined || width === "container"}
   class:gg-with-tool-rail={showToolRail}
+  class:gg-with-legend-clear={interactionConfig.legendFocus !== null &&
+    effectiveLegendPressed !== null}
   class:gg-narrow-tools={resolvedWidth < 560}
   class:gg-with-docked-tooltip={inspection?.state === "pinned" &&
     resolvedWidth < 480}
@@ -1727,12 +2204,78 @@
             batches={stratum.batches}
             focusable={false}
             {markLabel}
+            focusMasks={interactionMasks}
           />
         {/if}
       {/each}
       <SceneView scene={model.scene} mode="chrome-top" />
     {:else}
-      <SceneView scene={model.scene} focusable={false} {markLabel} />
+      <SceneView
+        scene={model.scene}
+        focusable={false}
+        {markLabel}
+        focusMasks={interactionMasks}
+      />
+    {/if}
+    {#if interactiveLegendEntries.length > 0}
+      <div
+        class="gg-legend-targets"
+        role="group"
+        aria-label="Interactive legends"
+      >
+        {#each interactiveLegendEntries as target, index (`${target.identity.scale}:${target.identity.entryIndex}`)}
+          <button
+            type="button"
+            class="gg-legend-target"
+            class:gg-legend-target-active={legendPreview?.action.identity
+              .scale === target.identity.scale &&
+              legendPreview?.action.identity.entryIndex ===
+                target.identity.entryIndex}
+            aria-label={`${target.legend.title || target.identity.scale}: ${target.entry.label} (${target.identity.scale} legend)`}
+            aria-pressed={effectiveLegendPressed?.scale ===
+              target.identity.scale &&
+              effectiveLegendPressed.entryIndex === target.identity.entryIndex}
+            tabindex={index === legendRovingIndex ? 0 : -1}
+            data-gg-legend-target
+            data-index={index}
+            style:left={`${target.legend.x}px`}
+            style:top={`${target.legend.y + target.entry.y}px`}
+            style:width={`${Math.max(24, target.legend.width)}px`}
+            onpointerenter={(event) => {
+              if (event.pointerType !== "touch")
+                previewLegendIndex(index, "pointer");
+            }}
+            onpointerleave={() => previewLegend(null)}
+            onpointerdown={(event) => onLegendPointerDown(event, index)}
+            onpointerup={(event) => onLegendPointerUp(event, index)}
+            onpointercancel={() => (legendTouchIndex = -1)}
+            onfocus={() => onLegendFocus(index)}
+            onblur={onLegendBlur}
+            onclick={(event) => onLegendClick(event, index)}
+            onkeydown={(event) => onLegendKeydown(event, index)}
+          >
+            <span class="gg-sr-only">{target.entry.label}</span>
+          </button>
+        {/each}
+      </div>
+    {/if}
+    {#if interactionConfig.legendFocus !== null && effectiveLegendPressed !== null}
+      {@const focusedLegend = model.scene.legends.find(
+        (candidate) => candidate.scale === effectiveLegendPressed?.scale,
+      )}
+      {#if focusedLegend !== undefined}
+        <button
+          type="button"
+          class="gg-legend-clear"
+          aria-label="Clear legend focus"
+          style:left={`${Math.max(4, Math.min(focusedLegend.x, model.scene.width - 52))}px`}
+          style:top={`${model.scene.height + 4}px`}
+          onpointerdown={(event) =>
+            (legendClearPointerType = event.pointerType)}
+          onpointercancel={() => (legendClearPointerType = null)}
+          onclick={(event) => clearLegendFromControl(event)}>Clear</button
+        >
+      {/if}
     {/if}
     {#if !interactive && emphasizedAnchors.length > 0}
       <InteractionOverlay
@@ -1742,7 +2285,7 @@
         {emphasizedAnchors}
       />
     {/if}
-    {#if interactive}
+    {#if surfaceInteractive}
       <InteractionOverlay
         width={model.scene.width}
         height={model.scene.height}
@@ -1876,6 +2419,10 @@
     margin-top: 52px;
   }
 
+  .gg-with-legend-clear {
+    margin-bottom: 48px;
+  }
+
   .gg-with-docked-tooltip {
     margin-bottom: 260px;
   }
@@ -1916,6 +2463,63 @@
     left: 2px;
     font-size: 11px;
     line-height: 1.2;
+  }
+
+  .gg-legend-clear {
+    position: absolute;
+    z-index: 5;
+    min-width: 44px;
+    min-height: 44px;
+    border: 1px solid
+      var(--gg-tooltipBorder, var(--gg-theme-tooltipBorder, currentColor));
+    border-radius: 3px;
+    padding: 2px 6px;
+    background: var(--gg-tooltipPaper, var(--gg-theme-tooltipPaper, white));
+    color: var(--gg-tooltipInk, var(--gg-theme-tooltipInk, currentColor));
+    font: 11px/1.2 var(--gg-font-family, sans-serif);
+    white-space: nowrap;
+    pointer-events: auto;
+  }
+
+  .gg-legend-targets {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+  }
+
+  .gg-legend-target {
+    position: absolute;
+    min-width: 24px;
+    min-height: 24px;
+    margin: 0;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    padding: 0;
+    background: transparent;
+    color: transparent;
+    pointer-events: auto;
+    touch-action: manipulation;
+  }
+
+  .gg-legend-target:hover,
+  .gg-legend-target-active,
+  .gg-legend-target[aria-pressed="true"] {
+    border-color: var(
+      --gg-interactionInk,
+      var(--gg-theme-interactionInk, currentColor)
+    );
+    background: color-mix(in srgb, currentColor 7%, transparent);
+  }
+
+  .gg-legend-target:focus-visible {
+    outline: 2px solid var(--gg-focusRing, var(--gg-theme-focusRing, Highlight));
+    outline-offset: -2px;
+  }
+
+  .gg-legend-clear:focus-visible {
+    outline: 2px solid var(--gg-focusRing, var(--gg-theme-focusRing, Highlight));
+    outline-offset: 2px;
   }
 
   .gg-a11y-table {

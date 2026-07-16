@@ -28,6 +28,7 @@ describe("interaction capability normalization", () => {
       inspect: null,
       select: null,
       zoom: null,
+      legendFocus: null,
       initialTool: "inspect",
     });
 
@@ -40,6 +41,30 @@ describe("interaction capability normalization", () => {
       },
       initialTool: "inspect",
     });
+  });
+
+  it("keeps legend focus opt-in and enables previews by default", () => {
+    expect(normalizeInteractionConfig({ legendFocus: true })).toMatchObject({
+      interactive: true,
+      legendFocus: { preview: true },
+      availableTools: [],
+      initialTool: "inspect",
+    });
+
+    expect(normalizeInteractionConfig({ legendFocus: { preview: false } })).toMatchObject({
+      interactive: true,
+      legendFocus: { preview: false },
+    });
+
+    const withoutKey = normalizeInteractionConfig({ legendFocus: true }, { hasKey: false });
+    expect(withoutKey.diagnostics).toContainEqual(
+      expect.objectContaining({
+        code: "INTERACTION_LEGEND_REQUIRES_KEY",
+        prop: "key",
+      }),
+    );
+    expect(withoutKey.legendFocus).toBeNull();
+    expect(withoutKey.interactive).toBe(false);
   });
 
   it("starts interval capabilities in Inspect and never arms a drag implicitly", () => {

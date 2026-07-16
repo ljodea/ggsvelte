@@ -282,7 +282,7 @@ toolchain. Consumers may use any tested installer above; they do not need Bun.
 export const INTERACTIONS_MD = `# Interactions
 
 ggsvelte keeps static charts static. Opt in to only the behaviors the chart
-needs with \`inspect\`, \`select\`, and \`zoom\`. Once more than one behavior is
+needs with \`inspect\`, \`select\`, \`zoom\`, and \`legendFocus\`. Once more than one behavior is
 available, the chart renders an accessible tool rail so inspection, selection,
 and zoom never compete for the same drag or click.
 
@@ -294,6 +294,7 @@ tables, or other Svelte components should share semantic state.
 Start with the runnable [inspection and pinning example](/examples/interactions/inspection),
 the [interval selection and zoom example](/examples/interactions/interval-selection),
 the [linked plots, controls, and table example](/examples/interaction/linked-views),
+the [linked legend focus example](/examples/interaction/legend-focus),
 or [use your own local JSON rows in the playground](/playground). For exact
 props, callbacks, phases, and diagnostics, use the
 [interaction reference](/guide/interaction-reference).
@@ -416,6 +417,21 @@ overlay without retraining scales or rerunning the render pipeline. Matching
 replaced, call \`reconcileKeys(validKeys, { scope })\` explicitly; a chart never
 guesses whether a temporary subset should erase another view's selection.
 
+## Legend focus
+
+\`legendFocus={true}\` adds real HTML controls over discrete color and fill
+legends. Hover and DOM focus preview one chart without mutating shared state.
+Click, touch, Enter, or Space commits the matching stable row keys; the active
+entry or Escape clears them. Arrow keys traverse entries in rendered legend
+order, with Home and End moving to the boundaries.
+
+\`legendFocus={{ preview: false }}\` keeps committed activation but disables
+transient previews. Continuous ramps remain static. A stable \`key\` is required:
+encoded legend values are reported as values, never used as controller keys.
+Focused and muted marks share one semantic mask across SVG and canvas, and the
+mask does not retrain scales, recompute statistics, change layout, or reassign
+colors. See the [runnable three-view example](/examples/interaction/legend-focus).
+
 ## Brush zoom
 
 \`zoom={true}\` enables two-dimensional brush zoom. Set \`zoom={{ mode: "x" }}\`
@@ -463,6 +479,14 @@ internal renderer indices never leak into callbacks.
 
 - Zoom completion is \`{ type: "zoom", phase: "end", source, domains }\`.
 - Reset is \`{ type: "zoom", phase: "clear", source, domains: null }\`.
+
+### \`onlegendfocus(event: LegendFocusEvent)\`
+
+- Preview and commit emit \`{ type: "legend-focus", phase: "change", state,
+  source, scale, value, label, keys }\`.
+- \`state\` is \`transient\` or \`committed\`. \`value\` is the raw encoded
+  domain value while \`keys\` are distinct stable source-row identities.
+- Dismissal emits \`{ type: "legend-focus", phase: "clear", source }\`.
 
 \`oninteraction(event: PlotInteractionEvent)\` receives the same objects. It
 does not wrap or duplicate them. A linked chart that consumes shared state
@@ -533,6 +557,13 @@ enables an explicit Select area tool and emits domain and pixel bounds.
 
 \`zoom={{ mode: "x" | "y" | "xy" }}\` enables the explicit Zoom area tool.
 Reset zoom and double-click return to the natural domains.
+
+### \`legendFocus\`
+
+\`legendFocus={true}\` enables discrete legend preview and committed focus.
+Use \`legendFocus={{ preview: false }}\` to disable hover/focus preview while
+retaining click, touch, Enter, Space, Escape, and arrow-key controls. It
+requires stable row \`key\` values and does not make continuous ramps interactive.
 
 ## Controlled tool
 
@@ -606,6 +637,12 @@ Interval selection emits \`start\`, \`change\`, \`end\`, and \`clear\`.
 
 Receives \`ZoomEvent\`: \`end\` with explicit domains or \`clear\` with null
 domains.
+
+### \`onlegendfocus\`
+
+Receives \`LegendFocusEvent\`: a transient or committed \`change\` carrying the
+raw encoded value, formatted label, scale channel, and stable row keys, or a
+small \`clear\` event. The same object is included in \`oninteraction\`.
 
 ### \`oninteraction\`
 
@@ -686,6 +723,13 @@ export const INTERACTION_REFERENCE_INDEX: readonly InteractionReferenceEntry[] =
     summary: "Zoom one or both axes with an explicit area tool and a predictable reset path.",
     href: "/guide/interaction-reference#zoom",
     keywords: ["domain", "reset", "double click"],
+  },
+  {
+    id: "legend-focus",
+    name: "Legend focus",
+    summary: "Preview or commit discrete legend groups across linked SVG and canvas views.",
+    href: "/guide/interaction-reference#legendfocus",
+    keywords: ["legendFocus", "onlegendfocus", "emphasis", "keyboard", "touch"],
   },
   {
     id: "controlled-tool",

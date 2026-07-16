@@ -32,6 +32,7 @@ import type {
   SegmentsBatch,
 } from "./scene.js";
 import { STRIP_BAND } from "./scene.js";
+import { LEGEND_ROW_HEIGHT } from "./legend.js";
 import type { ThemeTokens } from "./theme.js";
 import { themeVar } from "./theme.js";
 
@@ -373,10 +374,10 @@ function renderLegend(legend: SceneLegend, theme: ThemeTokens, gradientId: strin
       contentY = 0;
     }
     for (const entry of legend.entries) {
-      const swatchY = entry.y + contentY + (18 - legend.swatchSize) / 2;
+      const swatchY = entry.y + contentY + (LEGEND_ROW_HEIGHT - legend.swatchSize) / 2;
       parts.push(
         `<rect class="gg-legend-swatch" x="4" y="${px(swatchY)}" width="${px(legend.swatchSize)}" height="${px(legend.swatchSize)}" fill="${entry.color}"/>`,
-        `<text class="gg-legend-label" x="${px(4 + legend.swatchSize + 6)}" y="${px(entry.y + contentY + 9)}" dy="0.32em" fill="${ink}">${escapeXML(entry.label)}</text>`,
+        `<text class="gg-legend-label" x="${px(4 + legend.swatchSize + 6)}" y="${px(entry.y + contentY + LEGEND_ROW_HEIGHT / 2)}" dy="0.32em" fill="${ink}">${escapeXML(entry.label)}</text>`,
       );
     }
   } else {

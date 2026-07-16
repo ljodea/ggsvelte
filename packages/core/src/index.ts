@@ -131,7 +131,7 @@ export type {
 } from "./layout/layout.js";
 
 // Legends
-export { buildLegends } from "./legend.js";
+export { buildLegends, LEGEND_ROW_HEIGHT } from "./legend.js";
 export type {
   DiscreteLegendInput,
   LegendBlock,
@@ -172,6 +172,16 @@ export type {
   CanonicalAxisToken,
   TraversalDirection,
 } from "./candidate-store.js";
+export {
+  buildInteractionMasks,
+  legendValueEqual,
+  resolveLegendFocusKeys,
+} from "./interaction-mask.js";
+export type {
+  BatchInteractionMask,
+  LegendValueMembership,
+  SemanticCandidateKeys,
+} from "./interaction-mask.js";
 export { PANEL_SPACING, STRIP_BAND } from "./scene.js";
 export type {
   GeometryBatch,

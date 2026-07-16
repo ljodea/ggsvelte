@@ -1,3 +1,22 @@
+<script module lang="ts">
+  import type { SceneLegendEntry } from "@ggsvelte/core";
+
+  /** Stable renderer identity for one entry in one discrete legend. */
+  export interface LegendEntryIdentity {
+    scale: string;
+    entryIndex: number;
+  }
+
+  export type LegendInteractionSource =
+    "pointer" | "touch" | "focus" | "keyboard";
+
+  export interface LegendEntryAction {
+    identity: LegendEntryIdentity;
+    entry: SceneLegendEntry;
+    source: LegendInteractionSource;
+  }
+</script>
+
 <script lang="ts">
   /**
    * One SceneLegend (discrete swatches or continuous ramp), already placed by
@@ -6,7 +25,7 @@
    * page never collide.
    */
   import type { SceneLegend, ThemeTokens } from "@ggsvelte/core";
-  import { themeVar } from "@ggsvelte/core";
+  import { LEGEND_ROW_HEIGHT, themeVar } from "@ggsvelte/core";
 
   const { legend, theme }: { legend: SceneLegend; theme: ThemeTokens } =
     $props();
@@ -31,7 +50,7 @@
       <rect
         class="gg-legend-swatch"
         x="4"
-        y={entry.y + (18 - legend.swatchSize) / 2}
+        y={entry.y + (LEGEND_ROW_HEIGHT - legend.swatchSize) / 2}
         width={legend.swatchSize}
         height={legend.swatchSize}
         fill={entry.color}
@@ -39,7 +58,7 @@
       <text
         class="gg-legend-label"
         x={4 + legend.swatchSize + 6}
-        y={entry.y + 9}
+        y={entry.y + LEGEND_ROW_HEIGHT / 2}
         dy="0.32em"
         fill={ink}>{entry.label}</text
       >
