@@ -4,10 +4,10 @@
 import type { PathsBatch } from "../scene.js";
 
 import type { LayerFrame, PipelineWarning, ResolvedColorScale } from "./types.js";
-import { colorOf } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
 import { bucketByGroup, xSortKey } from "./geometry-shared.js";
 import { writeClosedPathGroups } from "./geometry-paths-closed-batch.js";
+import { areaGroupFillOf } from "./geometry-paths-area-fill.js";
 
 export function areaBatch(
   frame: LayerFrame,
@@ -29,16 +29,7 @@ export function areaBatch(
     groupRows,
     yTop: frame.ymax,
     yBottom: frame.ymin,
-    fillOf: (rows) => {
-      let fillColor: string | null = binding.fill.constant;
-      if (fill !== null && (frame.fillValues !== null || binding.fill.scaledConstant !== null)) {
-        const first = rows[0]!;
-        const value =
-          frame.fillValues === null ? binding.fill.scaledConstant! : frame.fillValues[first]!;
-        fillColor = colorOf(fill, value);
-      }
-      return fillColor;
-    },
+    fillOf: (rows) => areaGroupFillOf(frame, fill, rows),
   });
 
   const params: { alpha?: number } =
