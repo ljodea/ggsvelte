@@ -30,6 +30,60 @@ export type IntervalQueryScene = {
   lineageKeys(lineageId: number): Iterable<number>;
 };
 
+/**
+ * Structural port for building an IntervalQueryScene without requiring a full
+ * RenderModel (tests use plain objects; production passes the live model).
+ */
+export type IntervalQueryModelPort = {
+  readonly scene: {
+    readonly panels: readonly (PanelBounds & {
+      readonly id: string | null;
+    })[];
+  };
+  readonly scales: Pick<RenderModel["scales"], "x" | "y">;
+  readonly candidates: {
+    queryRect(x0: number, y0: number, x1: number, y1: number): Iterable<number>;
+    candidate(id: number): { readonly lineage: number } | null;
+  };
+  readonly lineage: {
+    keys(lineageId: number): Iterable<number>;
+  };
+};
+
+/**
+ * Map a model port + flip flag into the interval query scene adapter.
+ * Hosts keep the `model === null` gate; this helper assumes a live model.
+ */
+export function intervalQuerySceneFromModel(
+  model: IntervalQueryModelPort,
+  flip: boolean,
+): IntervalQueryScene {
+  const panel = model.scene.panels[0];
+  return {
+    panel:
+      panel === undefined
+        ? null
+        : {
+            x: panel.x,
+            y: panel.y,
+            width: panel.width,
+            height: panel.height,
+            id: panel.id,
+          },
+    singlePanel: model.scene.panels.length === 1,
+    flip,
+    scales: model.scales,
+    queryCandidates(expanded) {
+      return [...model.candidates.queryRect(expanded.x0, expanded.y0, expanded.x1, expanded.y1)]
+        .map((id) => model.candidates.candidate(id))
+        .filter((candidate): candidate is { readonly lineage: number } => candidate !== null);
+    },
+    lineageKeys(lineageId) {
+      return model.lineage.keys(lineageId);
+    },
+  };
+}
+
 export type ResolveIntervalQueryPartsInput = {
   readonly pixels: PlotRect;
   readonly mode: SelectAreaMode;

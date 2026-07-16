@@ -151,12 +151,14 @@
   import { clearIntervalSelectionEvent } from "./plot-interval.js";
   import {
     buildIntervalSelectionFromScene,
+    intervalQuerySceneFromModel,
     type IntervalQueryScene,
   } from "./plot-interval-query.js";
   import { createPaintLedger, isPlotReady } from "./plot-paint.js";
   import {
     anchorsFromCandidateKeys,
     buildPointSelectionEvent,
+    mergePresentationFocusKeys,
     nextPointSelectionKeys,
     rowIndexesForCandidate,
     sameOrderedPropertyKeys,
@@ -1095,17 +1097,17 @@
     });
   }
 
-  const presentationFocusKeys: readonly PropertyKey[] = $derived.by(() => {
-    if (effectiveEmphasisKeys.length === 0 || inspection === null)
-      return effectiveEmphasisKeys;
-    return Object.freeze([
-      ...new Set([
-        ...effectiveEmphasisKeys,
-        ...inspection.focus.sourceKeys,
-        ...(inspection.focus.key === null ? [] : [inspection.focus.key]),
-      ]),
-    ]);
-  });
+  const presentationFocusKeys: readonly PropertyKey[] = $derived(
+    mergePresentationFocusKeys(
+      effectiveEmphasisKeys,
+      inspection === null
+        ? null
+        : {
+            sourceKeys: inspection.focus.sourceKeys,
+            key: inspection.focus.key,
+          },
+    ),
+  );
 
   const semanticCandidateProjections = $derived.by(() => {
     if (model === null) return [];
@@ -1671,41 +1673,11 @@
 
   /** Map the live render model into the pure interval query scene adapter. */
   function intervalQueryScene(): IntervalQueryScene | null {
-    const current = model;
-    if (current === null) return null;
-    const panel = current.scene.panels[0];
-    return {
-      panel:
-        panel === undefined
-          ? null
-          : {
-              x: panel.x,
-              y: panel.y,
-              width: panel.width,
-              height: panel.height,
-              id: panel.id,
-            },
-      singlePanel: current.scene.panels.length === 1,
-      flip: assembled?.coord?.type === "flip",
-      scales: current.scales,
-      queryCandidates(expanded) {
-        return [
-          ...current.candidates.queryRect(
-            expanded.x0,
-            expanded.y0,
-            expanded.x1,
-            expanded.y1,
-          ),
-        ]
-          .map((id) => current.candidates.candidate(id))
-          .filter(
-            (candidate): candidate is CandidateFacts => candidate !== null,
-          );
-      },
-      lineageKeys(lineageId) {
-        return current.lineage.keys(lineageId);
-      },
-    };
+    if (model === null) return null;
+    return intervalQuerySceneFromModel(
+      model,
+      assembled?.coord?.type === "flip",
+    );
   }
 
   function onPointerLeave(): void {
