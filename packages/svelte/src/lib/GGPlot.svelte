@@ -116,7 +116,9 @@
   import { resolveSurfaceKeyAction } from "./plot-surface-keyboard.js";
   import {
     resolveCaptureClickAction,
+    advanceTouchInspectMoved,
     resolvePointerDownAction,
+    resolvePointerMoveAction,
     resolvePointerUpAction,
   } from "./plot-surface-pointer.js";
   import {
@@ -1555,54 +1557,72 @@
 
   function onPointerMove(event: PointerEvent): void {
     const p = plotPoint(event);
+    // Sticky threshold is pure; host only advances on touch + start set.
     if (event.pointerType === "touch" && touchInspectStart !== null) {
-      touchInspectMoved ||=
-        Math.hypot(p.x - touchInspectStart.x, p.y - touchInspectStart.y) >= 4;
-      if (touchInspectMoved && activeTool === "inspect") {
+      touchInspectMoved = advanceTouchInspectMoved(
+        touchInspectMoved,
+        touchInspectStart,
+        p,
+      );
+    }
+    // Decision table is pure (plot-surface-pointer); this switch owns queues.
+    const action = resolvePointerMoveAction({
+      pointerType: event.pointerType,
+      activeTool,
+      touchInspectMoved,
+      hasTouchInspectStart: touchInspectStart !== null,
+      brushing,
+      hasBrushDraft: brushRect !== null,
+      inspectEnabled: interactionConfig.inspect !== null,
+    });
+    switch (action.type) {
+      case "touch-inspect-drag-cancel":
         queuedPointerInspection = null;
         reducer.cancelScheduledPointer();
         return;
-      }
-    }
-    if (brushing && brushRect !== null) {
-      queuedAreaSource = event.pointerType === "touch" ? "touch" : "pointer";
-      reducer.queuePointer({ type: "move-area", point: p });
-      return;
-    }
-    if (activeTool === "inspect" && interactionConfig.inspect !== null) {
-      const match =
-        model?.candidates.nearest(p.x, p.y, {
-          mode: interactionConfig.inspect.mode,
-          maxDistance: interactionConfig.inspect.maxDistance,
-        }) ?? null;
-      const resolvedHit =
-        match === null
-          ? (hitIndex?.hitTest(p.x, p.y) ?? null)
-          : hitFromCandidate(match);
-      const source = event.pointerType === "touch" ? "touch" : "pointer";
-      queuedPointerInspection = {
-        hit: resolvedHit,
-        source,
-        ...(match !== null && {
-          concreteMode: match.mode,
-          candidate: match,
-        }),
-      };
-      queuedPointerToken = reducer.frameToken();
-      reducer.queuePointer({
-        type: "inspect",
-        candidate:
+      case "queue-area-move":
+        queuedAreaSource = action.source;
+        reducer.queuePointer({ type: "move-area", point: p });
+        return;
+      case "queue-inspect": {
+        const inspectConfig = interactionConfig.inspect;
+        if (inspectConfig === null) return;
+        const match =
+          model?.candidates.nearest(p.x, p.y, {
+            mode: inspectConfig.mode,
+            maxDistance: inspectConfig.maxDistance,
+          }) ?? null;
+        const resolvedHit =
           match === null
-            ? null
-            : {
-                epoch: model?.runId ?? 0,
-                id: match.id,
-                panelId: panelId(match.panelIndex),
-                x: match.x,
-                y: match.y,
-              },
-        source,
-      });
+            ? (hitIndex?.hitTest(p.x, p.y) ?? null)
+            : hitFromCandidate(match);
+        queuedPointerInspection = {
+          hit: resolvedHit,
+          source: action.source,
+          ...(match !== null && {
+            concreteMode: match.mode,
+            candidate: match,
+          }),
+        };
+        queuedPointerToken = reducer.frameToken();
+        reducer.queuePointer({
+          type: "inspect",
+          candidate:
+            match === null
+              ? null
+              : {
+                  epoch: model?.runId ?? 0,
+                  id: match.id,
+                  panelId: panelId(match.panelIndex),
+                  x: match.x,
+                  y: match.y,
+                },
+          source: action.source,
+        });
+        return;
+      }
+      case "none":
+        return;
     }
   }
 
