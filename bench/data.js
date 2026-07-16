@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784167373940,
+  "lastUpdate": 1784167684487,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -6033,6 +6033,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 166.6559,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "a06844d023023621b77b22bf8be21b0cdcbba18e",
+          "message": "refactor(svelte): extract pure capture-surface pointer decisions (#59)\n\n* refactor(svelte): extract pure capture-surface pointer decisions\n\nMove GGPlot pointerdown/up/click routing into plot-surface-pointer with\nunit coverage for touch-inspect priority, draft/reducer divergence, and\nsuppress-vs-point-vs-pin click order. Also extract frozen point-selection\nand zoom event builders plus ordered key equality for local no-ops.\nGGPlot keeps host cleanup and side effects only.\n\n* fix(svelte): clear shadow and useless-return lint on pointer switches\n\nRename inspect config binding and use break instead of trailing returns\nso type-aware oxlint passes under --deny-warnings.",
+          "timestamp": "2026-07-15T21:07:24-05:00",
+          "tree_id": "d7d905ea231be77caf277e6afe81e08c9b6a238f",
+          "url": "https://github.com/ljodea/ggsvelte/commit/a06844d023023621b77b22bf8be21b0cdcbba18e"
+        },
+        "date": 1784167683675,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.4619,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.9088,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 9.7689,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 12.8231,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 86.1255,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 127.013,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.1216,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2261,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 84.4758,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 106.5677,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.2595,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.9392,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 120.9472,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.633,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 26.6313,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.3539,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 29.6331,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 590.1217,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 160.4163,
             "unit": "ms"
           }
         ]
