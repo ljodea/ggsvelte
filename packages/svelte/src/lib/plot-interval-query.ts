@@ -25,6 +25,12 @@ export type IntervalQueryScene = {
   readonly singlePanel: boolean;
   readonly flip: boolean;
   readonly scales: Pick<RenderModel["scales"], "x" | "y">;
+  /** Faceted panels with their own trained positional scales. When present,
+   * the requested stable panel identity enables local semantic inversion. */
+  readonly panels?: readonly (PanelBounds & {
+    readonly id: string;
+    readonly scales: Pick<RenderModel["scales"], "x" | "y">;
+  })[];
   /** Candidates intersecting an already-expanded plot-px query rect. */
   queryCandidates(expanded: PlotRect): readonly { readonly lineage: number }[];
   lineageKeys(lineageId: number): Iterable<number>;
@@ -34,6 +40,8 @@ export type ResolveIntervalQueryPartsInput = {
   readonly pixels: PlotRect;
   readonly mode: SelectAreaMode;
   readonly scene: IntervalQueryScene | null;
+  /** Stable origin panel identity captured when the brush starts. */
+  readonly panelId?: string | null;
 };
 
 /**
@@ -53,15 +61,21 @@ export function resolveIntervalQueryParts(input: ResolveIntervalQueryPartsInput)
       invertedDomain: {},
     };
   }
-  const expanded = expandIntervalQuery(input.pixels, scene.panel, input.mode, scene.flip);
+  const requestedPanel =
+    input.panelId === undefined || input.panelId === null
+      ? undefined
+      : scene.panels?.find((panel) => panel.id === input.panelId);
+  const panel = requestedPanel ?? scene.panel;
+  const expanded = expandIntervalQuery(input.pixels, panel, input.mode, scene.flip);
   const candidates = scene.queryCandidates(expanded);
   const rowIndexes = lineageRowIndexesFromCandidates(candidates, (id) => scene.lineageKeys(id));
-  const invertedDomain = scene.singlePanel
-    ? panelDataDomains(input.pixels, scene.panel, scene.scales, scene.flip)
-    : {};
+  const invertedDomain =
+    scene.singlePanel || requestedPanel !== undefined
+      ? panelDataDomains(input.pixels, panel, requestedPanel?.scales ?? scene.scales, scene.flip)
+      : {};
   return {
     rowIndexes,
-    panelId: scene.panel.id,
+    panelId: panel.id,
     invertedDomain,
   };
 }
@@ -72,6 +86,7 @@ export type BuildIntervalSelectionFromSceneInput = {
   readonly source: InteractionSource;
   readonly pixels: PlotRect;
   readonly scene: IntervalQueryScene | null;
+  readonly panelId?: string | null;
   readonly keyForRow: (rowIndex: number) => PropertyKey | null;
 };
 
@@ -83,6 +98,7 @@ export function buildIntervalSelectionFromScene(
     pixels: input.pixels,
     mode: input.mode,
     scene: input.scene,
+    ...(input.panelId !== undefined && { panelId: input.panelId }),
   });
   return intervalSelectionFromRows({
     phase: input.phase,

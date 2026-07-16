@@ -106,6 +106,43 @@ describe("resolveIntervalQueryParts", () => {
     });
     expect(parts.invertedDomain).toEqual({});
   });
+
+  it("uses the requested facet panel identity and its local scales", () => {
+    const base = scene({ singlePanel: false });
+    const parts = resolveIntervalQueryParts({
+      pixels: { x0: 110, y0: 0, x1: 150, y1: 50 },
+      mode: "xy",
+      panelId: "panel:east",
+      scene: {
+        ...base,
+        panels: [
+          {
+            x: 0,
+            y: 0,
+            width: 100,
+            height: 100,
+            id: "panel:west",
+            scales: base.scales,
+          },
+          {
+            x: 100,
+            y: 0,
+            width: 100,
+            height: 100,
+            id: "panel:east",
+            scales: {
+              x: { type: "linear", invert: (t: number) => 100 + t * 100 },
+              y: { type: "linear", invert: (t: number) => 1000 - t * 1000 },
+            } as IntervalQueryScene["scales"],
+          },
+        ],
+      },
+    });
+
+    expect(parts.panelId).toBe("panel:east");
+    expect(parts.invertedDomain.x).toEqual([110, 150]);
+    expect(parts.invertedDomain.y).toEqual([0, 500]);
+  });
 });
 
 describe("buildIntervalSelectionFromScene", () => {
