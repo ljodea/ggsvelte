@@ -179,6 +179,58 @@ describe("resolveColorScale", () => {
     expect(result.legendInput?.kind).toBe("discrete");
     expect(advisories.some((a) => a.code === "palette-inferred")).toBe(true);
   });
+
+  it("trains a sequential color scale for continuous fields", () => {
+    const table = ColumnTable.fromRows([
+      { x: 1, y: 10, z: 0.1 },
+      { x: 2, y: 20, z: 0.9 },
+    ]);
+    const frame = pointFrame(table);
+    frame.binding.color.field = "z";
+    frame.colorValues = table.column("z");
+    const warnings: PipelineWarning[] = [];
+    const advisories: Advisory[] = [];
+    const edition = Object.values(EDITION_DEFAULTS)[0]!;
+    const result = resolveColorScale(
+      "color",
+      [frame],
+      table,
+      undefined,
+      null,
+      "z",
+      warnings,
+      advisories,
+      edition,
+    );
+    expect(result.resolved?.kind).toBe("sequential");
+    expect(result.legendInput?.kind).toBe("ramp");
+    expect(result.state).toBeNull();
+    expect(advisories.some((a) => a.code === "palette-inferred")).toBe(true);
+  });
+
+  it("honors explicit ordinal type over continuous field inference", () => {
+    const table = ColumnTable.fromRows([
+      { x: 1, y: 10, z: 1 },
+      { x: 2, y: 20, z: 2 },
+    ]);
+    const frame = pointFrame(table);
+    frame.binding.color.field = "z";
+    frame.colorValues = table.column("z");
+    const edition = Object.values(EDITION_DEFAULTS)[0]!;
+    const result = resolveColorScale(
+      "color",
+      [frame],
+      table,
+      { type: "ordinal" },
+      null,
+      "z",
+      [],
+      [],
+      edition,
+    );
+    expect(result.resolved?.kind).toBe("ordinal");
+    expect(result.legendInput?.kind).toBe("discrete");
+  });
 });
 
 describe("collectAxisInputs — evidence collection", () => {
