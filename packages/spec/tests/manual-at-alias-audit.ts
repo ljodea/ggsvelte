@@ -32,20 +32,47 @@ export function diffTextIsSubstantive(diff: string): boolean {
 }
 
 /**
- * Words that are both plausible HTML/SVG type selectors and common English in
- * JSDoc/Markdown list lines after `* +` / `* >`. Bare multi-token chains that
- * include any of these stay documentation (structure-bearing CSS still wins).
+ * Known HTML/SVG type selectors. Used for bare multi-token chains after a
+ * combinator so arbitrary English (`minimum latency`) stays documentation while
+ * real tag chains (`ul li`, `section a`, `svg linearGradient`) stay CSS.
+ * camelCase SVG names are stored as authored.
  */
-const PROSE_AMBIGUOUS_TYPE = new Set(
+const CSS_TYPE_TOKEN = new Set(
   (
-    "a an the and or not is are was were be been being for with from that this " +
-    "these those of to in on at by as if any all each every values positive kept " +
-    "old new list item domain shared package name data source code table button " +
-    "mark time main link form object video audio track meta base area map menu " +
-    "nav section article header footer figure label output progress summary " +
-    "details dialog template slot small strong em b i u s note"
+    "a abbr address area article aside audio b base bdi bdo blockquote body br " +
+    "button canvas caption circle cite code col colgroup data datalist dd del " +
+    "details dfn dialog div dl dt em embed fieldset figcaption figure footer " +
+    "form g h1 h2 h3 h4 h5 h6 head header hgroup hr html i iframe img input ins " +
+    "kbd label legend li line link main map mark menu meta meter nav noscript " +
+    "object ol optgroup option output p param path picture pre progress q rect " +
+    "rp rt ruby s samp script section select slot small source span strong style " +
+    "sub summary sup svg table tbody td template text textarea tfoot th thead " +
+    "time title tr track u ul var video wbr use defs clipPath linearGradient " +
+    "radialGradient stop tspan foreignObject pattern marker symbol switch " +
+    "animate animateTransform set image"
   ).split(/\s+/),
 );
+
+/**
+ * Leading tokens that make a bare multi-word chain read as English even when
+ * later tokens are valid tag names (`* + a button`, `* + the table`).
+ */
+const BARE_CHAIN_LEAD_BLOCK = new Set(
+  (
+    "a an the and or not is are was were be been being for with from that this " +
+    "these those of to in on at by as if any all each every"
+  ).split(/\s+/),
+);
+
+/**
+ * English-first collocations that are HTML tag names but common in JSDoc lists
+ * (`* + data table`, `* + source code`).
+ */
+const BARE_CHAIN_PROSE_PAIR = new Set(["data table", "source code", "mark time", "object video"]);
+
+function isCssTypeToken(token: string): boolean {
+  return token === "*" || CSS_TYPE_TOKEN.has(token) || CSS_TYPE_TOKEN.has(token.toLowerCase());
+}
 
 /**
  * After a CSS combinator (`+`, `>`, `~`), is the remainder a selector fragment?
@@ -57,8 +84,14 @@ function isCssSelectorAfterCombinator(rest: string): boolean {
   // Universal, class, id, attribute, or pseudo at the start of the remainder.
   if (rest.startsWith("*") || /^[.#[]/.test(rest) || rest.startsWith(":")) return true;
 
+  // Strong CSS structure anywhere (not English end-of-sentence `. Kept`).
+  if (/[{[]/.test(rest)) return true;
+  if (/(?:^|[\s>+~,])[.#][\w-]/.test(rest)) return true;
+  // Pseudo requires ident immediately after `:` so `Note: prose` stays docs.
+  if (/::?[\w-]/.test(rest)) return true;
+
   // Leading type / universal chain (descendant spaces), then optional structure.
-  const lead = rest.match(/^((?:[A-Za-z_-][\w-]*|\*)(?:\s+(?:[A-Za-z_-][\w-]*|\*))*)(.*)$/);
+  const lead = rest.match(/^((?:[A-Za-z_][\w-]*|\*)(?:\s+(?:[A-Za-z_][\w-]*|\*))*)(.*)$/);
   if (lead === null) return false;
   const tokens = lead[1]!.split(/\s+/);
   const suffix = (lead[2] ?? "").trimStart();
@@ -69,27 +102,23 @@ function isCssSelectorAfterCombinator(rest: string): boolean {
       const only = tokens[0]!;
       return only === "*" || /^[a-z][\w-]*$/.test(only);
     }
-    // Bare multi-token: CSS only when every token is `*` or a lowercase type and
-    // none are prose-ambiguous tag words (`a button`, `data table`, …).
-    // Chains with `*` (`ul *`) or concrete tags (`ul li`, `svg use`) stay CSS.
-    return tokens.every(
-      (t) => t === "*" || (/^[a-z][\w-]*$/.test(t) && !PROSE_AMBIGUOUS_TYPE.has(t)),
-    );
+    // Bare multi-token: known HTML/SVG types only (not arbitrary lowercase prose).
+    // Block article-led English and a few tag-word collocations.
+    const leadToken = tokens[0]!.toLowerCase();
+    if (BARE_CHAIN_LEAD_BLOCK.has(leadToken)) return false;
+    if (BARE_CHAIN_PROSE_PAIR.has(tokens.map((t) => t.toLowerCase()).join(" "))) return false;
+    return tokens.every((t) => isCssTypeToken(t));
   }
 
-  // Strong CSS structure (not English punctuation / end-of-sentence).
-  // `. Kept` fails; `.class` / `#id` / `::hover` / `{` / `[` pass.
-  const strongStructure =
-    suffix.startsWith("{") ||
-    suffix.startsWith("[") ||
-    /^\.[\w-]/.test(suffix) ||
-    /^#[\w-]/.test(suffix) ||
-    /^::?[\w-]/.test(suffix);
-  if (strongStructure) return true;
+  // Weak structure (`,>+~`): recurse so `ul li, ol li` and `ul li > a` count as
+  // CSS while `positive values, if any` stays prose via the bare-chain rules.
+  if (/^[,>+~]/.test(suffix)) {
+    const afterComb = suffix.slice(1).trimStart();
+    if (afterComb.length === 0) return tokens.length === 1;
+    return isCssSelectorAfterCombinator(afterComb);
+  }
 
-  // Weak structure (`,>+~`): single-token only so `div,` is CSS but
-  // `positive values, if any` stays prose.
-  return tokens.length === 1 && /^[,>+~]/.test(suffix);
+  return false;
 }
 
 /** Lines that are blank or documentation-only (not CSS/code). */

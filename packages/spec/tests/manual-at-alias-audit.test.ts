@@ -62,6 +62,17 @@ describe("manual AT alias commit audit", () => {
     expect(isSkippableCommentLine("* + a button")).toBe(true);
     expect(isSkippableCommentLine("* + data table")).toBe(true);
     expect(isSkippableCommentLine("* + source code")).toBe(true);
+    // Arbitrary lowercase prose (not HTML/SVG tags) is documentation.
+    expect(isSkippableCommentLine("* + minimum latency")).toBe(true);
+    expect(isSkippableCommentLine("* > fallback content")).toBe(true);
+    // Real bare HTML/SVG tag chains (incl. camelCase SVG) stay CSS.
+    expect(isSkippableCommentLine("* + section a")).toBe(false);
+    expect(isSkippableCommentLine("* > main nav")).toBe(false);
+    expect(isSkippableCommentLine("* > svg linearGradient")).toBe(false);
+    // Continuations after multi-token chains (comma / nested combinators).
+    expect(isSkippableCommentLine("* > ul li, ol li { margin: 0; }")).toBe(false);
+    expect(isSkippableCommentLine("* > ul li > a { color: red; }")).toBe(false);
+    expect(isSkippableCommentLine("* > ul li > a")).toBe(false);
     expect(
       diffTextIsSubstantive(`diff --git a/x.svelte b/x.svelte
 --- a/x.svelte
