@@ -53,7 +53,6 @@
     CandidateFacts,
     BatchInteractionMask,
     CellValue,
-    GeometryBatch,
     RenderModel,
     ScaleState,
   } from "@ggsvelte/core";
@@ -64,12 +63,7 @@
     sceneLabel,
   } from "@ggsvelte/core";
   import type { SceneHit, SceneHitIndex } from "@ggsvelte/core/dom";
-  import {
-    buildHitIndex,
-    cssColorResolver,
-    drawStratum,
-    sizeCanvasForDpr,
-  } from "@ggsvelte/core/dom";
+  import { buildHitIndex } from "@ggsvelte/core/dom";
 
   import {
     INTERACTION_DIAGNOSTIC_CATALOG,
@@ -227,10 +221,9 @@
     type LegendEntryAction,
     type LegendEntryIdentity,
   } from "./plot-legend-focus.js";
-  import PlotCanvasA11y from "./PlotCanvasA11y.svelte";
   import PlotLegendTargets from "./PlotLegendTargets.svelte";
+  import PlotMarkStrata from "./PlotMarkStrata.svelte";
   import PlotStatusChrome from "./PlotStatusChrome.svelte";
-  import SceneView from "./SceneView.svelte";
   import Tooltip from "./Tooltip.svelte";
   import ToolRail from "./ToolRail.svelte";
 
@@ -550,49 +543,6 @@
   function notifyPainted(runId: number, stratumKey: string): void {
     paintLedger.notify(runId, stratumKey);
     paintEpoch += 1;
-  }
-
-  // Redraw canvases when the host theme flips (canvas colors resolve from
-  // computed style at draw time; SVG re-resolves via CSS automatically).
-  let themeEpoch = $state(0);
-  $effect(() => {
-    if (!hasCanvas) return;
-    const observer = new MutationObserver(() => {
-      themeEpoch++;
-    });
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["data-theme", "class"],
-    });
-    return () => observer.disconnect();
-  });
-
-  /** Svelte attachment: size for DPR, draw the stratum, signal first paint. */
-  function canvasAttachment(
-    m: RenderModel,
-    batches: GeometryBatch[],
-    stratumKey: string,
-  ) {
-    void themeEpoch;
-    const focusMasks = masksForBatches(batches);
-    return (canvas: HTMLCanvasElement) => {
-      const ctx = canvas.getContext("2d");
-      if (ctx === null) return;
-      const dpr = window.devicePixelRatio || 1;
-      sizeCanvasForDpr(canvas, ctx, m.scene.width, m.scene.height, dpr);
-      drawStratum(
-        ctx,
-        m.scene,
-        batches,
-        cssColorResolver(canvas),
-        focusMasks.length > 0
-          ? { focusMasks, mutedAlpha: m.scene.theme.interactionMuted }
-          : undefined,
-      );
-      // untrack: the attachment must WRITE paint state without SUBSCRIBING
-      // to it (a tracked read here would re-trigger the attachment -> loop).
-      untrack(() => notifyPainted(m.runId, stratumKey));
-    };
   }
 
   let a11yTableOpen = $state(false);
@@ -1207,14 +1157,6 @@
         semanticCandidateProjections,
       );
     });
-
-  function masksForBatches(batches: readonly GeometryBatch[]) {
-    if (model === null || interactionMasks.length === 0) return [];
-    return batches.map((batch) => {
-      const index = model.scene.batches.indexOf(batch);
-      return index < 0 ? null : (interactionMasks[index] ?? null);
-    });
-  }
 
   const interactiveLegendEntries = $derived.by(() => {
     if (model === null || interactionConfig.legendFocus === null) return [];
@@ -2369,41 +2311,15 @@
     />
   {/if}
   {#if model !== null}
-    {#if hasCanvas}
-      <SceneView scene={model.scene} mode="chrome-bottom" />
-      {#each strata as stratum, si (si)}
-        {#if stratum.backend === "canvas"}
-          <canvas
-            class="gg-stratum gg-canvas"
-            {@attach canvasAttachment(model, stratum.batches, `canvas:${si}`)}
-          ></canvas>
-          <PlotCanvasA11y
-            {model}
-            batches={stratum.batches}
-            sceneLabelText={sceneLabel(model.scene)}
-            open={a11yTableOpen}
-            onToggle={() => (a11yTableOpen = !a11yTableOpen)}
-          />
-        {:else}
-          <SceneView
-            scene={model.scene}
-            mode="marks"
-            batches={stratum.batches}
-            focusable={false}
-            {markLabel}
-            focusMasks={interactionMasks}
-          />
-        {/if}
-      {/each}
-      <SceneView scene={model.scene} mode="chrome-top" />
-    {:else}
-      <SceneView
-        scene={model.scene}
-        focusable={false}
-        {markLabel}
-        focusMasks={interactionMasks}
-      />
-    {/if}
+    <PlotMarkStrata
+      {model}
+      {strata}
+      {markLabel}
+      {interactionMasks}
+      {a11yTableOpen}
+      onA11yToggle={() => (a11yTableOpen = !a11yTableOpen)}
+      onPainted={notifyPainted}
+    />
     <PlotLegendTargets
       entries={interactiveLegendEntries}
       previewIdentity={legendPreview?.action.identity ?? null}
@@ -2591,10 +2507,6 @@
     position: absolute;
     inset: 0;
     pointer-events: none;
-  }
-
-  canvas.gg-stratum {
-    display: block;
   }
 
   .gg-capture {
