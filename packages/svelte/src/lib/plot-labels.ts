@@ -1,6 +1,46 @@
 import type { CellValue, RenderModel } from "@ggsvelte/core";
 
-import type { PlotInspectionChange } from "./interaction.js";
+import type {
+  LegendFocusEvent,
+  PlotInspectionChange,
+  PlotSelection,
+  ZoomDomains,
+} from "./interaction.js";
+
+/** Shared a11y count phrase: "1 datum" / "N data". */
+export function countLabel(count: number): string {
+  return `${String(count)} ${count === 1 ? "datum" : "data"}`;
+}
+
+/** Live message when the brush needs a second corner (pointer or keyboard). */
+export const BRUSH_SECOND_CORNER_ANNOUNCEMENT = "Choose opposite corner." as const;
+
+/**
+ * Live message for selection emission, or null when the phase does not announce
+ * (interval start/change).
+ */
+export function selectionAnnouncement(event: PlotSelection): string | null {
+  if (event.phase === "end") {
+    const count = event.mode === "point" ? event.keys.length : event.lineageCount;
+    return `Selection complete, ${countLabel(count)}.`;
+  }
+  if (event.phase === "clear") return "Selection cleared.";
+  return null;
+}
+
+/** Live message for legend-focus change/clear events. */
+export function legendFocusAnnouncement(event: LegendFocusEvent): string {
+  if (event.phase === "change") {
+    const verb = event.state === "committed" ? "focused" : "previewed";
+    return `${event.label} ${verb}, ${countLabel(event.keys.length)}.`;
+  }
+  return "Legend focus cleared.";
+}
+
+/** Live message after a zoom commit or reset (`null` domains → reset). */
+export function zoomAnnouncement(domains: ZoomDomains | null): string {
+  return domains === null ? "Zoom reset." : "Zoom complete.";
+}
 
 /** Accessible per-mark label from the layer's mapped fields. */
 export function markLabel(model: RenderModel | null, row: number): string {
@@ -41,7 +81,7 @@ export function inspectionLiveText(
   const count = value.members.length;
   const state = value.state === "pinned" ? ", pinned" : "";
   if (value.mode !== "x" && value.mode !== "y")
-    return `${datumLabel(model, value.focus.row)}; ${String(count)} ${count === 1 ? "datum" : "data"}${state}`;
+    return `${datumLabel(model, value.focus.row)}; ${countLabel(count)}${state}`;
   const seen = new Set<string>();
   const focused = value.focus.fields
     .filter((field) => {
@@ -51,5 +91,5 @@ export function inspectionLiveText(
     })
     .map((field) => `${field.field} ${String(field.value ?? "")}`)
     .join(", ");
-  return `${value.mode} ${value.axisLabel}; ${String(count)} ${count === 1 ? "datum" : "data"}${focused ? `; focused ${focused}` : ""}${state}`;
+  return `${value.mode} ${value.axisLabel}; ${countLabel(count)}${focused ? `; focused ${focused}` : ""}${state}`;
 }
