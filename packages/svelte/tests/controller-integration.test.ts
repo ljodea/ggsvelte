@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import LinkedControllerPlot from "./fixtures/LinkedControllerPlot.svelte";
 import MissingControllerScopePlot from "./fixtures/MissingControllerScopePlot.svelte";
+import PassiveControllerConsumerPlot from "./fixtures/PassiveControllerConsumerPlot.svelte";
 import { expectAccessible } from "./helpers/accessibility.js";
 import { render } from "./helpers/render.js";
 
@@ -110,5 +111,42 @@ describe("linked semantic interaction controller", () => {
     expect(state(container)["rendersOther"]).toBe(beforeRendersOther);
     expect(state(container)["callbacksA"]).toBe("0");
     expect(state(container)["callbacksB"]).toBe("0");
+  });
+
+  it("renders selection rings for passive consumers without Clear selection", async () => {
+    const { container } = render(PassiveControllerConsumerPlot);
+    container.querySelector<HTMLButtonElement>("[data-select-a]")!.click();
+    await until(
+      () => container.querySelectorAll("[data-plot-passive] .gg-selected-ring").length === 1,
+    );
+
+    expect(container.querySelectorAll("[data-plot-publisher] .gg-selected-ring")).toHaveLength(1);
+    expect(container.querySelectorAll("[data-plot-passive] .gg-selected-ring")).toHaveLength(1);
+    // Inspect-only / passive plots must not expose Clear selection for shared state.
+    const clearButtons = [...container.querySelectorAll("button")].filter((button) =>
+      /Clear selection/i.test(button.textContent ?? ""),
+    );
+    expect(clearButtons).toHaveLength(1); // publisher only
+    expect(clearButtons[0]?.closest("[data-plot-publisher]")).not.toBeNull();
+    expect(container.querySelector("[data-plot-passive] .gg-tool-rail")).toBeNull();
+    expect(container.querySelector("[data-plot-inspect-only] .gg-tool-rail")).toBeNull();
+  });
+
+  it("does not retrain zoomed plots when only selection changes", async () => {
+    const { container } = render(PassiveControllerConsumerPlot);
+    const passiveState = () =>
+      container.querySelector<HTMLElement>("[data-passive-state]")!.dataset;
+
+    // Shared zoom respecs the passive consumer once (linked display).
+    container.querySelector<HTMLButtonElement>("[data-zoom-xy]")!.click();
+    await until(() => Number(passiveState()["rendersPassive"]) >= 1);
+    const afterZoomRenders = Number(passiveState()["rendersPassive"]);
+    expect(passiveState()["transitions"]).toBe("1");
+
+    // Selection must not re-trigger the zoom pipeline (stable domain identity).
+    container.querySelector<HTMLButtonElement>("[data-select-after-zoom]")!.click();
+    await until(() => passiveState()["transitions"] === "2");
+    expect(Number(passiveState()["rendersPassive"])).toBe(afterZoomRenders);
+    expect(container.querySelectorAll("[data-plot-passive] .gg-selected-ring")).toHaveLength(1);
   });
 });

@@ -22,6 +22,76 @@ const zoomScale = (
 });
 
 /**
+ * Restrict controller/shared zoom domains to channels this plot opted into.
+ *
+ * - `mode === null`: plot has no local zoom tool; still apply every controller
+ *   domain present (linked display without publishing zoom tools).
+ * - `mode === "x" | "y" | "xy"`: drop channels the plot did not opt into so an
+ *   x-only plot cannot be rescaled by a shared y domain.
+ *
+ * Returns null when nothing remains to apply.
+ */
+export function filterZoomDomainsByMode(
+  domains:
+    | ContinuousZoomDomains
+    | null
+    | Readonly<{
+        x?: readonly [number, number];
+        y?: readonly [number, number];
+      }>,
+  mode: ZoomMode | null,
+): ContinuousZoomDomains | null {
+  if (domains === null) return null;
+  const takeX = mode === null || mode !== "y";
+  const takeY = mode === null || mode !== "x";
+  const next: ContinuousZoomDomains = {
+    ...(takeX &&
+      domains.x !== undefined && {
+        x: [domains.x[0], domains.x[1]] as [number, number],
+      }),
+    ...(takeY &&
+      domains.y !== undefined && {
+        y: [domains.y[0], domains.y[1]] as [number, number],
+      }),
+  };
+  if (next.x === undefined && next.y === undefined) return null;
+  return next;
+}
+
+function sameZoomChannel(
+  a: readonly [number, number] | undefined,
+  b: readonly [number, number] | undefined,
+): boolean {
+  return (
+    a === b ||
+    (a !== undefined && b !== undefined && Object.is(a[0], b[0]) && Object.is(a[1], b[1]))
+  );
+}
+
+/** Value equality for continuous zoom domain bags (Object.is per endpoint). */
+export function sameZoomDomains(
+  left: ContinuousZoomDomains | null | undefined,
+  right: ContinuousZoomDomains | null | undefined,
+): boolean {
+  if (left === right) return true;
+  if (left === null || left === undefined || right === null || right === undefined) {
+    return (left === null || left === undefined) && (right === null || right === undefined);
+  }
+  return sameZoomChannel(left.x, right.x) && sameZoomChannel(left.y, right.y);
+}
+
+/**
+ * Prefer the previous domain bag when values match so `$derived` identity stays
+ * stable across controller revisions that only change selection/emphasis.
+ */
+export function stableZoomDomains(
+  previous: ContinuousZoomDomains | null,
+  next: ContinuousZoomDomains | null,
+): ContinuousZoomDomains | null {
+  return sameZoomDomains(previous, next) ? previous : next;
+}
+
+/**
  * Merge continuous zoom domains into a portable spec's scales.
  * Returns `spec` by reference when domains are null/empty so callers can
  * keep `$derived` identity stable and avoid pipeline re-runs.
