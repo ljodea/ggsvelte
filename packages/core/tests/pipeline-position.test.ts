@@ -10,7 +10,7 @@ import { buildFrame } from "../src/pipeline/frame.ts";
 import { barSlotKeys } from "../src/pipeline/position-bar.ts";
 import { applyPosition } from "../src/pipeline/position.ts";
 import { runPipeline } from "../src/pipeline.ts";
-import { ColumnTable } from "../src/table.ts";
+import { ColumnTable, type CellValue } from "../src/table.ts";
 import type { Advisory, LayerFrame } from "../src/pipeline/types.ts";
 
 const size = { width: 640, height: 400 };
@@ -18,11 +18,14 @@ const size = { width: 640, height: 400 };
 describe("barSlotKeys", () => {
   it("prefers band categories, then numeric centers, else null", () => {
     const base = {
-      xValues: null as string[] | null,
+      xValues: null as CellValue[] | null,
       xNumeric: null as Float64Array | null,
     };
     expect(barSlotKeys(base as LayerFrame)).toBeNull();
     expect(barSlotKeys({ ...base, xValues: ["a", "b"] } as LayerFrame)).toEqual(["a", "b"]);
+    // Typed categories with colliding labels occupy distinct slots, matching
+    // the band scale's typed identity (encodeKey: strings pass through).
+    expect(barSlotKeys({ ...base, xValues: [1, "1"] } as LayerFrame)).toEqual(["@n:1", "1"]);
     expect(barSlotKeys({ ...base, xNumeric: Float64Array.of(1.5, 2.5) } as LayerFrame)).toEqual([
       1.5, 2.5,
     ]);

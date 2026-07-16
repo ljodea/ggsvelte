@@ -53,6 +53,28 @@ describe("precise plot bounds adapters", () => {
     });
   });
 
+  it("returns null for band bounds missing from the current scale", () => {
+    const scale = trainBand([["north", "south"]]);
+    // A stored endpoint whose category disappeared (data update, linked plot
+    // with a different catalog) must not silently map to the first option.
+    expect(
+      boundsEditorInputForScale({
+        axis: "x",
+        action: "select",
+        scale,
+        bounds: ["east", "south"],
+      }),
+    ).toBeNull();
+    expect(
+      boundsEditorInputForScale({
+        axis: "x",
+        action: "select",
+        scale,
+        bounds: ["north", "@n:1"],
+      }),
+    ).toBeNull();
+  });
+
   it("round-trips typed band categories through precise and cross-panel selection", () => {
     const date = new Date("2025-01-02T00:00:00.000Z");
     const scale = trainBand([[1, "1", true, false, null, date]]);
@@ -90,7 +112,7 @@ describe("precise plot bounds adapters", () => {
         bounds: ["@null", `@d:${String(date.getTime())}`],
       }),
     ).toMatchObject({ bounds: [null, date] });
-    if (input.scale !== "band") throw new Error("expected band bounds");
+    if (input?.scale !== "band") throw new Error("expected band bounds");
 
     const numericAxis = semanticAxisFromBounds("band", [
       input.categories[0].value,

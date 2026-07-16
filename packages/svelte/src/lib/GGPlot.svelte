@@ -3327,7 +3327,10 @@
 <style>
   .gg-precise-bounds {
     position: absolute;
-    z-index: 4;
+    /* Above the transparent legend hit targets (z-index 5): the open editor
+       must be the top interactive layer or invisible legend buttons
+       intercept pointer input meant for its fields. */
+    z-index: 6;
     top: 8px;
     left: 8px;
     right: 8px;
@@ -3363,6 +3366,17 @@
 
   .gg-with-legend-filters {
     margin-bottom: 58px;
+  }
+
+  /* Both control sets active: the Clear-focus button keeps the first row;
+     the filter fieldset moves to its own row below so its labels can never
+     cover the button. Reserve both rows. */
+  .gg-with-legend-clear.gg-with-legend-filters {
+    margin-bottom: 106px;
+  }
+
+  .gg-with-legend-clear.gg-with-legend-filters .gg-legend-filters {
+    top: calc(100% + 52px);
   }
 
   .gg-with-docked-tooltip {

@@ -19,7 +19,7 @@ export interface BoundsEditorInputForScaleOptions {
 
 export function boundsEditorInputForScale(
   options: BoundsEditorInputForScaleOptions,
-): BoundsEditorInput {
+): BoundsEditorInput | null {
   const { scale } = options;
   if (scale.type === "band") {
     const categories = scale.rawDomain.map((value, index) => ({
@@ -27,17 +27,25 @@ export function boundsEditorInputForScale(
       label: scale.domain[index] ?? String(value),
     }));
     const requested = options.bounds;
-    const categoryValue = (bound: BoundsCategoryValue): BoundsCategoryValue => {
+    const categoryValue = (bound: BoundsCategoryValue): BoundsCategoryValue | undefined => {
       if (typeof bound === "string") {
         const typed = categories.find((category) => encodeKey(category.value) === bound);
         if (typed !== undefined) return typed.value;
       }
-      return categories.find((category) => Object.is(category.value, bound))?.value ?? bound;
+      return categories.find((category) => Object.is(category.value, bound))?.value;
     };
-    const bounds =
-      requested === undefined
-        ? ([categories[0]?.value ?? "", categories.at(-1)?.value ?? ""] as const)
-        : ([categoryValue(requested[0]), categoryValue(requested[1])] as const);
+    let bounds: readonly [BoundsCategoryValue, BoundsCategoryValue];
+    if (requested === undefined) {
+      bounds = [categories[0]?.value ?? "", categories.at(-1)?.value ?? ""] as const;
+    } else {
+      const lower = categoryValue(requested[0]);
+      const upper = categoryValue(requested[1]);
+      // A stored interval endpoint that no longer exists in the current band
+      // catalog must not silently map to the first category — precise
+      // editing is unavailable until the interval is reconciled.
+      if (lower === undefined || upper === undefined) return null;
+      bounds = [lower, upper] as const;
+    }
     return {
       axis: options.axis,
       action: options.action,
