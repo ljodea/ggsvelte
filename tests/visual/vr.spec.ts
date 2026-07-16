@@ -161,7 +161,8 @@ test("interaction responsive — two-row rail and docked pinned tooltip", async 
   await page.mouse.down();
   await page.mouse.move(captureBox.x + 180, captureBox.y + 180);
   await page.mouse.up();
-  await expect(page.getByRole("button", { name: "Clear selection" })).toBeVisible();
+  // R3 renamed the interval clear controls to panel-scoped + clear-all.
+  await expect(page.getByRole("button", { name: "Clear all selections" })).toBeVisible();
   const modes = await page.locator(".gg-tool-modes").boundingBox();
   const recovery = await page.locator(".gg-tool-recovery-actions").boundingBox();
   if (modes === null || recovery === null) throw new Error("expected deterministic tool rows");

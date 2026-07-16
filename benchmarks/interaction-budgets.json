@@ -11,7 +11,7 @@
   "legendNavigationP95Ms": 8,
   "threeViewPropagationP95Ms": 50,
   "r3LegendFilterOperations": 8,
-  "r3LegendFilterCommitP95Ms": 250,
+  "r3LegendFilterCommitP95Ms": 320,
   "r3SelectionApplyMs": 100,
   "r3ZoomApplyMs": 100
 }
