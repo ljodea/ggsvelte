@@ -11,24 +11,13 @@ import {
   pushKeptBoxplotRow,
   pushRemovedBoxplotRow,
 } from "./geometry-boxplot-body-layout-collect.js";
+import { finalizeBoxplotBodyLayout } from "./geometry-boxplot-body-layout-finalize.js";
+import type { BoxplotBodyLayout } from "./geometry-boxplot-body-layout-types.js";
 import { layoutBoxplotBodyRow } from "./geometry-boxplot-body-row.js";
 
-const DEFAULT_BOX_LINEWIDTH = 1;
+export type { BoxplotBodyLayout } from "./geometry-boxplot-body-layout-types.js";
 
-export interface BoxplotBodyLayout {
-  centerPx: number[];
-  halfPx: number[];
-  rects: number[];
-  rectRows: number[];
-  keptRows: number[];
-  whiskers: number[];
-  whiskerRows: number[];
-  medians: number[];
-  medianRows: number[];
-  linewidth: number;
-  alpha: number;
-  params: BoxplotParams;
-}
+const DEFAULT_BOX_LINEWIDTH = 1;
 
 export function layoutBoxplotBody(
   frame: LayerFrame,
@@ -64,20 +53,5 @@ export function layoutBoxplotBody(
     pushKeptBoxplotRow(buffers, geom, row);
   }
   removedWarning(buffers.removed, binding.index, warnings);
-  if (buffers.keptRows.length === 0) return null;
-
-  return {
-    centerPx: buffers.centerPx,
-    halfPx: buffers.halfPx,
-    rects: buffers.rects,
-    rectRows: buffers.rectRows,
-    keptRows: buffers.keptRows,
-    whiskers: buffers.whiskers,
-    whiskerRows: buffers.whiskerRows,
-    medians: buffers.medians,
-    medianRows: buffers.medianRows,
-    linewidth,
-    alpha,
-    params,
-  };
+  return finalizeBoxplotBodyLayout(buffers, linewidth, alpha, params);
 }
