@@ -4,12 +4,12 @@
 import type { ErrorbarParams } from "@ggsvelte/spec";
 
 import type { SegmentsBatch } from "../scene.js";
-import { resolution as resolutionOf } from "../stats/numeric.js";
 
 import type { LayerFrame, PipelineWarning, ResolvedColorScale } from "./types.js";
 import { colorOf } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
 import { DEFAULT_RULE_LINEWIDTH, positionOf, removedWarning } from "./geometry-shared.js";
+import { makeErrorbarHalfWidth } from "./geometry-errorbar-width.js";
 
 const DEFAULT_ERRORBAR_WIDTH = 0.9;
 
@@ -26,20 +26,7 @@ export function errorbarBatch(
   const wantsColors =
     color !== null && (frame.colorValues !== null || binding.color.scaledConstant !== null);
 
-  // Cap half-width in normalized [0,1] units.
-  let halfOf: (row: number) => number;
-  if (fx.xScale.type === "band") {
-    const half = (widthParam * fx.xScale.step) / 2;
-    halfOf = () => half;
-  } else {
-    const res = frame.xNumeric === null ? 0 : resolutionOf(frame.xNumeric);
-    const scale = fx.xScale;
-    halfOf = (row: number) => {
-      if (res === 0 || frame.xNumeric === null) return 0.01; // lone x: 2% of panel
-      const v = frame.xNumeric[row]!;
-      return Math.abs(scale.normalize(v + (widthParam * res) / 2) - scale.normalize(v));
-    };
-  }
+  const halfOf = makeErrorbarHalfWidth(frame, fx, widthParam);
 
   const segments: number[] = [];
   const rowIndex: number[] = [];
