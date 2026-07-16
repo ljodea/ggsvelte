@@ -4,6 +4,7 @@ import type { PortableSpec } from "@ggsvelte/spec";
 
 import {
   applyZoomToSpec,
+  buildZoomEvent,
   resolveBrushZoomDomains,
   sanitizePartialZoomDomains,
 } from "../src/lib/plot-zoom.js";
@@ -176,5 +177,32 @@ describe("resolveBrushZoomDomains", () => {
     );
     expect(domains?.x).toEqual([0, 100]);
     expect(domains?.y).toEqual([0, 50]);
+  });
+});
+
+describe("buildZoomEvent", () => {
+  it("builds a frozen end payload and freezes nested domain tuples", () => {
+    const x: [number, number] = [1, 2];
+    const event = buildZoomEvent({ x }, "pointer");
+    expect(event.type).toBe("zoom");
+    expect(event.phase).toBe("end");
+    expect(event.source).toBe("pointer");
+    expect(event.domains?.x).toEqual([1, 2]);
+    expect(Object.isFrozen(event)).toBe(true);
+    expect(Object.isFrozen(event.domains)).toBe(true);
+    expect(Object.isFrozen(event.domains?.x)).toBe(true);
+    x[0] = 99;
+    expect(event.domains?.x).toEqual([1, 2]);
+  });
+
+  it("uses clear phase when domains are null", () => {
+    const event = buildZoomEvent(null, "programmatic");
+    expect(event).toEqual({
+      type: "zoom",
+      phase: "clear",
+      source: "programmatic",
+      domains: null,
+    });
+    expect(Object.isFrozen(event)).toBe(true);
   });
 });

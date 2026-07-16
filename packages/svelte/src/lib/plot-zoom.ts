@@ -1,7 +1,9 @@
 import type { RenderModel } from "@ggsvelte/core";
 import type { PortableSpec, Scales } from "@ggsvelte/spec";
 
+import type { InteractionSource, ZoomEvent } from "./interaction.js";
 import {
+  frozenZoomDomains,
   panelDataDomains,
   type ContinuousZoomDomains,
   type PanelBounds,
@@ -67,6 +69,23 @@ export function sanitizePartialZoomDomains(
   }
   if (next.x === undefined && next.y === undefined) return null;
   return next;
+}
+
+/**
+ * Build a frozen zoom event payload.
+ * Phase is "clear" when domains is null. Non-null domains are re-frozen via
+ * `frozenZoomDomains` so nested tuples are cloned (not merely wrapper-frozen).
+ */
+export function buildZoomEvent(
+  domains: ContinuousZoomDomains | null,
+  source: InteractionSource,
+): ZoomEvent {
+  return Object.freeze({
+    type: "zoom",
+    phase: domains === null ? "clear" : "end",
+    source,
+    domains: domains === null ? null : frozenZoomDomains(domains),
+  });
 }
 
 /**
