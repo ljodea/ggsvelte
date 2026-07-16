@@ -164,6 +164,7 @@
     zoomAnnouncement,
   } from "./plot-labels.js";
   import {
+    isContainerWidthProp,
     isNarrowToolsWidth,
     isTooltipDocked,
     plotRootInlineStyle,
@@ -468,7 +469,7 @@
   let root = $state<HTMLDivElement | null>(null);
 
   $effect(() => {
-    if ((width !== undefined && width !== "container") || root === null) return;
+    if (!isContainerWidthProp(width) || root === null) return;
     const el = root;
     let frame = 0;
     const observer = new ResizeObserver((entries) => {
@@ -790,7 +791,7 @@
         interactive ||
         effectiveEmphasisKeys.length > 0 ||
         effectiveSelectedKeys.length > 0,
-      containerWidth: width === undefined || width === "container",
+      containerWidth: isContainerWidthProp(width),
       sceneWidth: model?.scene.width ?? resolvedWidth,
       sceneHeight: model?.scene.height ?? resolvedHeight,
       themeStyle,
@@ -2315,8 +2316,7 @@
     if (!clientFlush) return false;
     return isPlotReady({
       hasModel: model !== null,
-      widthMode:
-        width === undefined || width === "container" ? "container" : "fixed",
+      widthMode: isContainerWidthProp(width) ? "container" : "fixed",
       containerHasPositiveWidth,
       hasCanvas,
       paintComplete:
@@ -2335,7 +2335,7 @@
 <div
   bind:this={root}
   class="gg-plot-root"
-  class:gg-container-width={width === undefined || width === "container"}
+  class:gg-container-width={isContainerWidthProp(width)}
   class:gg-with-tool-rail={showToolRail}
   class:gg-with-legend-clear={interactionConfig.legendFocus !== null &&
     effectiveLegendPressed !== null}
