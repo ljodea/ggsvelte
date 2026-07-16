@@ -7,6 +7,13 @@ export type ResolvedInspectMode = Exclude<InspectMode, "auto">;
 export type AreaMode = "x" | "y" | "xy";
 export type InteractionTool = "inspect" | "point" | "select-area" | "zoom-area";
 
+/** Brush tools that need crosshair cursor and touch-action: none on capture. */
+export type AreaInteractionTool = "select-area" | "zoom-area";
+
+export function isAreaTool(tool: InteractionTool): tool is AreaInteractionTool {
+  return tool === "select-area" || tool === "zoom-area";
+}
+
 export interface TooltipField {
   readonly channel: string;
   readonly field: string;

@@ -1,4 +1,4 @@
-import type { InteractionTool } from "./interaction.js";
+import { isAreaTool, type InteractionTool } from "./interaction.js";
 
 /**
  * Capture-surface pointer decision input for pointerdown.
@@ -32,7 +32,7 @@ export function resolvePointerDownAction(input: SurfacePointerDownInput): Surfac
   if (activeTool === "inspect" && pointerType === "touch") return { type: "touch-inspect-start" };
 
   if (button !== 0) return { type: "none" };
-  if (activeTool !== "select-area" && activeTool !== "zoom-area") return { type: "none" };
+  if (!isAreaTool(activeTool)) return { type: "none" };
 
   return {
     type: "begin-area",
