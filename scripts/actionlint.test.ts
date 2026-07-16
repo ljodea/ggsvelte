@@ -51,6 +51,10 @@ labels:
     expect(parseYamlListScalar("'it''s fine'")).toBe("it's fine");
     expect(parseYamlListScalar("foo#notcomment")).toBe("foo#notcomment");
     expect(parseYamlListScalar('"a\\"b"')).toBe('a"b');
+    // Codex P2 on #157: double-quoted YAML escapes must decode, not strip `\`.
+    expect(parseYamlListScalar('"runner\\u002darm"')).toBe("runner-arm");
+    expect(parseYamlListScalar('"runner\\x2darm"')).toBe("runner-arm");
+    expect(parseYamlListScalar('"tab\\tsep"')).toBe("tab\tsep");
   });
 
   it("builds wasm suppressions from labels plus the vars gap", () => {
