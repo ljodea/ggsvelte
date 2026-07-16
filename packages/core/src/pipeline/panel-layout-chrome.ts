@@ -3,43 +3,17 @@
  */
 import type { PortableSpec } from "@ggsvelte/spec";
 
-import type { LayoutTheme, TickFormatter } from "../layout/layout.js";
-import type { TextMeasurer } from "../layout/measure.js";
 import type { LegendInput, LegendOrder } from "../legend.js";
-import type { buildLegends } from "../legend.js";
 import type { PositionScale } from "../scales/train.js";
 import type { ThemeTokens } from "../theme.js";
 
 import { resolvePanelLayoutDisplay } from "./panel-layout-chrome-display.js";
 import { resolvePanelLayoutLabs } from "./panel-layout-chrome-labs.js";
 import { resolvePanelLayoutLegends } from "./panel-layout-chrome-legends.js";
+import type { PanelLayoutChrome } from "./panel-layout-chrome-types.js";
 import type { LayerFrame, PipelineWarning, RunOptions } from "./types.js";
 
-export interface PanelLayoutChrome {
-  title: string;
-  subtitle: string;
-  caption: string;
-  xTitle: string;
-  yTitle: string;
-  hTitle: string;
-  vTitle: string;
-  topBand: number;
-  bottomBand: number;
-  axisTitleBand: number;
-  layoutHeight: number;
-  formatX: TickFormatter | undefined;
-  formatY: TickFormatter | undefined;
-  formatH: TickFormatter | undefined;
-  formatV: TickFormatter | undefined;
-  hBreaks: readonly (number | string)[] | undefined;
-  vBreaks: readonly (number | string)[] | undefined;
-  freeH: boolean;
-  freeV: boolean;
-  displayScales: (p: number) => { h: PositionScale; v: PositionScale };
-  measurer: TextMeasurer;
-  layoutTheme: LayoutTheme;
-  legendBlock: ReturnType<typeof buildLegends>;
-}
+export type { PanelLayoutChrome } from "./panel-layout-chrome-types.js";
 
 export function resolvePanelLayoutChrome(input: {
   flip: boolean;

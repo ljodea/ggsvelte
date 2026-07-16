@@ -5,7 +5,7 @@ import type { PortableSpec } from "@ggsvelte/spec";
 
 import type { Scene } from "../scene.js";
 
-import { assembleRenderModel } from "./assemble-render-model.js";
+import { assembleFinalizeRenderModel } from "./finalize-model-assemble.js";
 import { buildFinalizeCandidates } from "./finalize-model-candidates.js";
 import { resolveFinalizeContracts } from "./finalize-model-contracts.js";
 import type { PanelLayoutResult } from "./panel-layout.js";
@@ -37,7 +37,6 @@ export function finalizeRenderModel(input: {
     warnings,
     advisories,
   } = input;
-  const { xTraining, yTraining, panelScales, colorResolution, fillResolution } = trained;
 
   const contracts = resolveFinalizeContracts({
     normalized,
@@ -58,18 +57,14 @@ export function finalizeRenderModel(input: {
     layerFields: contracts.layerFields,
   });
 
-  return assembleRenderModel({
+  return assembleFinalizeRenderModel({
     scene,
-    xScale: xTraining.scale,
-    yScale: yTraining.scale,
-    color: colorResolution.resolved,
-    fill: fillResolution.resolved,
-    panelScales,
-    colorState: colorResolution.state,
-    fillState: fillResolution.state,
+    trained,
+    prepared,
+    panelLayout,
+    runId,
     warnings,
     advisories,
-    runId,
     layerBackends: contracts.layerBackends,
     layerFields: contracts.layerFields,
     layerScaledConstants: contracts.layerScaledConstants,
@@ -77,8 +72,5 @@ export function finalizeRenderModel(input: {
     effectiveDomains: contracts.effectiveDomains,
     lineage,
     candidates,
-    formatX: panelLayout.formatX,
-    formatY: panelLayout.formatY,
-    table: prepared.table,
   });
 }
