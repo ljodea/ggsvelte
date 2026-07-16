@@ -10,6 +10,151 @@ const scope = {
 } as const;
 
 describe("createPlotInteraction", () => {
+  it("stores frozen semantic intervals per stable panel identity", () => {
+    const controller = createPlotInteraction<string>();
+    const intervalScope = { ...scope, intervals: "penguin-facets" } as const;
+
+    const transition = controller.setInterval(
+      {
+        panelId: "facet:v1:species=Adelie",
+        preset: "independent",
+        domains: {
+          x: { kind: "linear", domain: [210, 180] },
+          y: { kind: "band", values: ["s:Female", "s:Male", "s:Female"] },
+        },
+        keys: ["b", "a", "b"],
+      },
+      { scope: intervalScope, source: "keyboard" },
+    );
+
+    expect(transition).toMatchObject({ kind: "interval", changes: ["interval"] });
+    expect(controller.intervals(intervalScope)).toEqual([
+      {
+        scope: "penguin-facets",
+        panelId: "facet:v1:species=Adelie",
+        preset: "independent",
+        domains: {
+          x: { kind: "linear", domain: [180, 210] },
+          y: { kind: "band", values: ["s:Female", "s:Male"] },
+        },
+        keys: ["a", "b"],
+      },
+    ]);
+    const stored = controller.intervals(intervalScope)[0]!;
+    expect(Object.isFrozen(stored)).toBe(true);
+    expect(Object.isFrozen(stored.domains)).toBe(true);
+    expect(Object.isFrozen(stored.domains.x)).toBe(true);
+    expect(Object.isFrozen(stored.domains.x!.domain)).toBe(true);
+    expect(Object.isFrozen(stored.domains.y!.values)).toBe(true);
+    expect(Object.isFrozen(stored.keys)).toBe(true);
+    expect(JSON.stringify(stored)).not.toMatch(/pixel|renderer|node|candidate|row/i);
+  });
+
+  it("supports independent and union panel records while cross-panel has one origin", () => {
+    const controller = createPlotInteraction<number>();
+    const options = { scope: { keys: "id", intervals: "facets" } } as const;
+    const make = (panelId: string, preset: "independent" | "union" | "cross-panel") => ({
+      panelId,
+      preset,
+      domains: { x: { kind: "time" as const, domain: [200, 100] as const } },
+      keys: [panelId.length],
+    });
+
+    controller.setInterval(make("a", "independent"), options);
+    controller.setInterval(make("b", "independent"), options);
+    expect(controller.intervals(options.scope).map(({ panelId }) => panelId)).toEqual(["a", "b"]);
+
+    // A preset switch is atomic and cannot leave ambiguous consumption semantics.
+    controller.setInterval(make("b", "union"), options);
+    expect(controller.intervals(options.scope)).toMatchObject([{ panelId: "b", preset: "union" }]);
+    controller.setInterval(make("a", "union"), options);
+    expect(controller.intervals(options.scope).map(({ panelId }) => panelId)).toEqual(["a", "b"]);
+
+    controller.setInterval(make("origin", "cross-panel"), options);
+    expect(controller.intervals(options.scope)).toMatchObject([
+      { panelId: "origin", preset: "cross-panel" },
+    ]);
+    expect(controller.setInterval(make("origin", "cross-panel"), options)).toBeNull();
+    controller.setInterval(make("new-origin", "cross-panel"), options);
+    expect(controller.intervals(options.scope)).toMatchObject([
+      { panelId: "new-origin", preset: "cross-panel" },
+    ]);
+  });
+
+  it("clears one panel or an interval namespace with stable no-op revisions", () => {
+    const transitions: PlotInteractionTransition<string>[] = [];
+    const controller = createPlotInteraction<string>({
+      onchange: (value) => transitions.push(value),
+    });
+    const options = { scope: { keys: "id", intervals: "facets" } } as const;
+    const interval = (panelId: string) => ({
+      panelId,
+      preset: "union" as const,
+      domains: { y: { kind: "log" as const, domain: [100, 10] as const } },
+      keys: [panelId],
+    });
+    controller.setInterval(interval("a"), options);
+    controller.setInterval(interval("b"), options);
+
+    expect(controller.clearInterval("missing", options)).toBeNull();
+    expect(controller.clearInterval("a", options)?.kind).toBe("interval");
+    expect(controller.intervals(options.scope).map(({ panelId }) => panelId)).toEqual(["b"]);
+    expect(controller.clearIntervals(options)?.kind).toBe("interval");
+    expect(controller.clearIntervals(options)).toBeNull();
+    expect(controller.revision).toBe(4);
+    expect(transitions).toHaveLength(4);
+  });
+
+  it("rejects invalid semantic intervals and reentrant interval mutations", () => {
+    const options = { scope: { keys: "id", intervals: "facets" } } as const;
+    let controller: ReturnType<typeof createPlotInteraction<string>>;
+    let reentrantError: unknown;
+    controller = createPlotInteraction<string>({
+      onchange: () => {
+        try {
+          controller.clearIntervals(options);
+        } catch (error) {
+          reentrantError = error;
+        }
+      },
+    });
+    controller.setInterval(
+      {
+        panelId: "a",
+        preset: "independent",
+        domains: { x: { kind: "linear", domain: [0, 1] } },
+        keys: [],
+      },
+      options,
+    );
+    expect(reentrantError).toBeInstanceOf(TypeError);
+    expect(controller.intervals(options.scope)).toHaveLength(1);
+
+    expect(() =>
+      controller.setInterval(
+        {
+          panelId: "a",
+          preset: "independent",
+          domains: { x: { kind: "log", domain: [0, 1] } },
+          keys: [],
+        },
+        options,
+      ),
+    ).toThrow(/positive/);
+    expect(() =>
+      controller.setInterval(
+        {
+          panelId: "a",
+          preset: "independent",
+          domains: {},
+          keys: [],
+        },
+        options,
+      ),
+    ).toThrow(/x or y/);
+    expect(controller.revision).toBe(1);
+  });
+
   it("canonicalizes stable keys and emits one immutable transition per actual mutation", () => {
     const transitions: PlotInteractionTransition<string>[] = [];
     const controller = createPlotInteraction<string>({
@@ -154,9 +299,11 @@ describe("createPlotInteraction", () => {
         { scope: "z-scope", keys: ["z"] },
       ],
       emphases: [{ scope: "z-scope", keys: ["e"] }],
+      intervals: [],
       zoom: { x: [{ scope: "x-value", domain: [1, 4] }], y: [] },
     });
     expect(Object.isFrozen(controller.snapshot.selections)).toBe(true);
+    expect(Object.isFrozen(controller.snapshot.intervals)).toBe(true);
     expect(Object.isFrozen(controller.snapshot.selections[0])).toBe(true);
     expect(Object.isFrozen(controller.snapshot.selections[0]?.keys)).toBe(true);
     expect(JSON.stringify(controller.snapshot)).not.toMatch(/row|candidate|pixel|renderer|node/i);

@@ -403,9 +403,51 @@ export interface PlotInteractionScope {
   readonly keys: string;
   readonly x?: string;
   readonly y?: string;
+  /** Namespace for semantic facet intervals. Defaults to `keys` when omitted. */
+  readonly intervals?: string;
 }
 
-export type PlotInteractionChange = "selection" | "emphasis" | "zoom";
+export type PlotInteractionChange = "selection" | "emphasis" | "interval" | "zoom";
+
+/** How facet interval state is consumed by coordinated panels.
+ *
+ * - independent: only the matching panel consumes its interval
+ * - union: matching rows from every stored panel interval are combined
+ * - cross-panel: the sole origin interval is projected into compatible panels
+ */
+export type FacetIntervalPreset = "independent" | "union" | "cross-panel";
+
+export type SemanticIntervalAxis =
+  | Readonly<{
+      kind: "linear" | "log" | "time";
+      /** Ascending data-space values; time values are Unix milliseconds. */
+      domain: readonly [number, number];
+    }>
+  | Readonly<{
+      kind: "band";
+      /** Ordered, encoded category identities. Labels are presentation-only. */
+      values: ReadonlyArray<string>;
+    }>;
+
+export interface ReadonlyIntervalDomains {
+  readonly x?: SemanticIntervalAxis;
+  readonly y?: SemanticIntervalAxis;
+}
+
+export interface PlotInteractionInterval<Key extends PropertyKey> {
+  /** Stable structured facet identity, never a panel index. */
+  readonly panelId: string;
+  readonly preset: FacetIntervalPreset;
+  readonly domains: ReadonlyIntervalDomains;
+  /** Stable source-row identities selected by this panel interval. */
+  readonly keys: ReadonlyArray<Key>;
+}
+
+export interface ScopedInteractionInterval<
+  Key extends PropertyKey,
+> extends PlotInteractionInterval<Key> {
+  readonly scope: string;
+}
 
 export interface ScopedInteractionKeys<Key extends PropertyKey> {
   readonly scope: string;
@@ -423,6 +465,7 @@ export interface PlotInteractionSnapshot<Key extends PropertyKey> {
   readonly revision: number;
   readonly selections: ReadonlyArray<ScopedInteractionKeys<Key>>;
   readonly emphases: ReadonlyArray<ScopedInteractionKeys<Key>>;
+  readonly intervals: ReadonlyArray<ScopedInteractionInterval<Key>>;
   readonly zoom: Readonly<{
     x: ReadonlyArray<ScopedInteractionDomain>;
     y: ReadonlyArray<ScopedInteractionDomain>;
