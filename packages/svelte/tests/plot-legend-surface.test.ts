@@ -1,9 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  resolveLegendClearControlSource,
   resolveLegendClickAction,
   resolveLegendKeyAction,
   resolveLegendPointerUpAction,
+  shouldClearLegendPreviewOnBlur,
+  shouldRenderInteractionLiveRegion,
+  type LegendClearControlInput,
   type LegendClickInput,
   type LegendKeyInput,
   type LegendPointerUpInput,
@@ -118,5 +122,85 @@ describe("resolveLegendClickAction", () => {
       type: "commit",
       source: "pointer",
     });
+  });
+});
+
+describe("shouldClearLegendPreviewOnBlur", () => {
+  it("clears when relatedTarget is null or not a legend target", () => {
+    const root = document.createElement("div");
+    expect(shouldClearLegendPreviewOnBlur({ relatedTarget: null, root })).toBe(true);
+    const other = document.createElement("button");
+    expect(shouldClearLegendPreviewOnBlur({ relatedTarget: other, root })).toBe(true);
+  });
+
+  it("retains only when the next legend target is inside this plot root", () => {
+    const root = document.createElement("div");
+    const inside = document.createElement("button");
+    inside.dataset.ggLegendTarget = "";
+    root.append(inside);
+    const outside = document.createElement("button");
+    outside.dataset.ggLegendTarget = "";
+    document.body.append(outside);
+    expect(shouldClearLegendPreviewOnBlur({ relatedTarget: inside, root })).toBe(false);
+    expect(shouldClearLegendPreviewOnBlur({ relatedTarget: outside, root })).toBe(true);
+    outside.remove();
+  });
+});
+
+describe("shouldRenderInteractionLiveRegion", () => {
+  it("renders for surface tools or legend-only focus", () => {
+    expect(
+      shouldRenderInteractionLiveRegion({
+        surfaceInteractive: false,
+        legendFocusEnabled: true,
+      }),
+    ).toBe(true);
+    expect(
+      shouldRenderInteractionLiveRegion({
+        surfaceInteractive: true,
+        legendFocusEnabled: false,
+      }),
+    ).toBe(true);
+    expect(
+      shouldRenderInteractionLiveRegion({
+        surfaceInteractive: false,
+        legendFocusEnabled: false,
+      }),
+    ).toBe(false);
+  });
+});
+
+describe("resolveLegendClearControlSource", () => {
+  const clear = (overrides: Partial<LegendClearControlInput> = {}): LegendClearControlInput => ({
+    detail: 1,
+    pointerType: null,
+    ...overrides,
+  });
+
+  it("classifies detail === 0 as keyboard even when pointerType is touch", () => {
+    expect(resolveLegendClearControlSource(clear({ detail: 0, pointerType: null }))).toBe(
+      "keyboard",
+    );
+    expect(resolveLegendClearControlSource(clear({ detail: 0, pointerType: "touch" }))).toBe(
+      "keyboard",
+    );
+  });
+
+  it("classifies touch pointerType when detail > 0", () => {
+    expect(resolveLegendClearControlSource(clear({ detail: 1, pointerType: "touch" }))).toBe(
+      "touch",
+    );
+  });
+
+  it("classifies non-touch detail > 0 as pointer", () => {
+    expect(resolveLegendClearControlSource(clear({ detail: 1, pointerType: "mouse" }))).toBe(
+      "pointer",
+    );
+    expect(resolveLegendClearControlSource(clear({ detail: 2, pointerType: "pen" }))).toBe(
+      "pointer",
+    );
+    expect(resolveLegendClearControlSource(clear({ detail: 1, pointerType: null }))).toBe(
+      "pointer",
+    );
   });
 });

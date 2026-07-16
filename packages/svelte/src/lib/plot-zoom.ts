@@ -1,7 +1,7 @@
 import type { RenderModel } from "@ggsvelte/core";
 import type { PortableSpec, Scales } from "@ggsvelte/spec";
 
-import type { InteractionSource, ZoomEvent } from "./interaction.js";
+import type { InteractionSource, PlotInteractionScope, ZoomEvent } from "./interaction.js";
 import {
   frozenZoomDomains,
   panelDataDomains,
@@ -11,6 +11,37 @@ import {
 } from "./plot-geometry.js";
 
 export type ZoomMode = "x" | "y" | "xy";
+
+/** One controller/shared zoom channel entry keyed by interaction scope. */
+export type ScopedZoomChannel = {
+  readonly scope: string;
+  readonly domain: readonly [number, number];
+};
+
+/**
+ * Project controller zoom channel lists into a continuous domain bag for this
+ * plot's interaction scopes. Clones matching domain tuples. Omits missing
+ * channels. Undefined scopes never match (same as PlotInteractionScope.x/y).
+ * May return `{}` when neither scope matches (host freezes via
+ * `frozenZoomDomains`, matching commitZoom after a successful setZoom).
+ */
+export function continuousZoomDomainsFromScopes(
+  channels: {
+    readonly x: readonly ScopedZoomChannel[];
+    readonly y: readonly ScopedZoomChannel[];
+  },
+  scopeX: string | undefined,
+  scopeY: string | undefined,
+): ContinuousZoomDomains {
+  const x =
+    scopeX === undefined ? undefined : channels.x.find((domain) => domain.scope === scopeX)?.domain;
+  const y =
+    scopeY === undefined ? undefined : channels.y.find((domain) => domain.scope === scopeY)?.domain;
+  return {
+    ...(x !== undefined && { x: [x[0], x[1]] as [number, number] }),
+    ...(y !== undefined && { y: [y[0], y[1]] as [number, number] }),
+  };
+}
 
 const zoomScale = (
   config: Scales["x"] | undefined,
@@ -56,6 +87,29 @@ export function filterZoomDomainsByMode(
   };
   if (next.x === undefined && next.y === undefined) return null;
   return next;
+}
+
+/**
+ * Restrict controller mutation scopes to zoom channels this plot opted into.
+ *
+ * Linked plots often share `{ keys, x, y }` while an individual chart uses
+ * `zoom={{ mode: "x" }}`. Reading already filters domains by mode; resets and
+ * writes must too, or Reset on an x-only plot would clear the shared y domain.
+ *
+ * - `mode === null | "xy"`: keep every defined channel on `scope`
+ * - `mode === "x" | "y"`: drop the other positional channel
+ */
+export function filterScopeChannelsByZoomMode(
+  scope: PlotInteractionScope,
+  mode: ZoomMode | null,
+): PlotInteractionScope {
+  const takeX = mode === null || mode !== "y";
+  const takeY = mode === null || mode !== "x";
+  return Object.freeze({
+    keys: scope.keys,
+    ...(takeX && scope.x !== undefined && { x: scope.x }),
+    ...(takeY && scope.y !== undefined && { y: scope.y }),
+  });
 }
 
 function sameZoomChannel(

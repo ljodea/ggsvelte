@@ -5,9 +5,11 @@ import {
   TOUCH_INSPECT_MOVE_PX,
   advanceTouchInspectMoved,
   resolveCaptureClickAction,
+  resolveFinishBrushAction,
   resolvePointerDownAction,
   resolvePointerMoveAction,
   resolvePointerUpAction,
+  shouldClearInspectionOnPointerLeave,
   type SurfaceClickInput,
   type SurfacePointerDownInput,
   type SurfacePointerMoveInput,
@@ -472,6 +474,68 @@ describe("resolvePointerMoveAction", () => {
   it("returns none for non-inspect tools without brush", () => {
     expect(resolvePointerMoveAction(move({ activeTool: "point" }))).toEqual({
       type: "none",
+    });
+  });
+});
+
+describe("shouldClearInspectionOnPointerLeave", () => {
+  it("clears only when idle brush and tooltip not hovered", () => {
+    expect(shouldClearInspectionOnPointerLeave({ brushing: false, tooltipHovered: false })).toBe(
+      true,
+    );
+  });
+
+  it("holds while brushing", () => {
+    expect(shouldClearInspectionOnPointerLeave({ brushing: true, tooltipHovered: false })).toBe(
+      false,
+    );
+  });
+
+  it("holds while tooltip is hovered", () => {
+    expect(shouldClearInspectionOnPointerLeave({ brushing: false, tooltipHovered: true })).toBe(
+      false,
+    );
+  });
+
+  it("holds when both brushing and tooltip hovered", () => {
+    expect(shouldClearInspectionOnPointerLeave({ brushing: true, tooltipHovered: true })).toBe(
+      false,
+    );
+  });
+});
+
+describe("resolveFinishBrushAction", () => {
+  it("keeps second corner on too-small for any tool", () => {
+    for (const activeTool of [
+      "select-area",
+      "zoom-area",
+      "inspect",
+      "point",
+    ] as const satisfies readonly InteractionTool[]) {
+      expect(resolveFinishBrushAction({ endedKind: "too-small", activeTool })).toEqual({
+        type: "keep-second-corner",
+      });
+    }
+  });
+
+  it("routes commit + select-area to select-end", () => {
+    expect(resolveFinishBrushAction({ endedKind: "commit", activeTool: "select-area" })).toEqual({
+      type: "select-end",
+    });
+  });
+
+  it("routes commit + zoom-area to zoom-end", () => {
+    expect(resolveFinishBrushAction({ endedKind: "commit", activeTool: "zoom-area" })).toEqual({
+      type: "zoom-end",
+    });
+  });
+
+  it("routes commit + non-area tools to end-area (clear draft, no emit)", () => {
+    expect(resolveFinishBrushAction({ endedKind: "commit", activeTool: "inspect" })).toEqual({
+      type: "end-area",
+    });
+    expect(resolveFinishBrushAction({ endedKind: "commit", activeTool: "point" })).toEqual({
+      type: "end-area",
     });
   });
 });

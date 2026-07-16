@@ -6,6 +6,8 @@
  * key routing and touch/click coordination priority.
  */
 
+import type { InteractionSource } from "./interaction.js";
+
 // ---- keydown ----
 
 export type LegendKeyInput = {
@@ -109,4 +111,64 @@ export function resolveLegendClickAction(input: LegendClickInput): LegendClickAc
     type: "commit",
     source: input.detail === 0 ? "keyboard" : "pointer",
   };
+}
+
+// ---- clear control click ----
+
+export type LegendClearControlInput = {
+  /** MouseEvent.detail from the clear control click. */
+  readonly detail: number;
+  /**
+   * Host `legendClearPointerType` from pointerdown on the clear control
+   * (null when never set / after cancel).
+   */
+  readonly pointerType: string | null;
+};
+
+/**
+ * Pure InteractionSource for the legend clear control `click`.
+ * Priority: detail === 0 → keyboard; pointerType === "touch" → touch; else pointer.
+ * Host still clears `legendClearPointerType` after classification.
+ */
+export function resolveLegendClearControlSource(input: LegendClearControlInput): InteractionSource {
+  if (input.detail === 0) return "keyboard";
+  if (input.pointerType === "touch") return "touch";
+  return "pointer";
+}
+
+// ---- blur (preview clear gate) ----
+
+export type LegendBlurInput = {
+  readonly relatedTarget: EventTarget | null;
+  /** Host plot root; null when unmounted. */
+  readonly root: ParentNode | null;
+};
+
+/**
+ * Whether blur should clear transient legend preview.
+ *
+ * Retain preview only when focus moves to another legend target **inside this
+ * plot's root**. Cross-plot moves to another `[data-gg-legend-target]` must
+ * clear, or the previous plot stays muted with a stale preview.
+ */
+export function shouldClearLegendPreviewOnBlur(input: LegendBlurInput): boolean {
+  if (!(input.relatedTarget instanceof Element)) return true;
+  if (!input.relatedTarget.matches("[data-gg-legend-target]")) return true;
+  if (input.root === null) return true;
+  return !input.root.contains(input.relatedTarget);
+}
+
+// ---- live region gate ----
+
+export type InteractionLiveRegionInput = {
+  readonly surfaceInteractive: boolean;
+  readonly legendFocusEnabled: boolean;
+};
+
+/**
+ * Live region is required for surface tools **or** legend-only focus so
+ * keyboard commits/clears still announce when inspect/select/zoom are off.
+ */
+export function shouldRenderInteractionLiveRegion(input: InteractionLiveRegionInput): boolean {
+  return input.surfaceInteractive || input.legendFocusEnabled;
 }

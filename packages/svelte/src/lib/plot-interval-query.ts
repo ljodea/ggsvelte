@@ -77,6 +77,94 @@ function bandDomains(
   };
 }
 
+/**
+ * Structural port for building an IntervalQueryScene without requiring a full
+ * RenderModel (tests use plain objects; production passes the live model).
+ */
+export type IntervalQueryModelPort = {
+  readonly scene: {
+    readonly panels: readonly (PanelBounds & {
+      readonly id: string | null;
+    })[];
+  };
+  readonly scales: Pick<RenderModel["scales"], "x" | "y"> & {
+    readonly panels?: readonly Pick<RenderModel["scales"], "x" | "y">[];
+  };
+  readonly candidates: {
+    queryRect(x0: number, y0: number, x1: number, y1: number): Iterable<number>;
+    candidate(id: number): {
+      readonly lineage: number;
+      readonly panelIndex?: number;
+    } | null;
+  };
+  readonly lineage: {
+    keys(lineageId: number): Iterable<number>;
+  };
+};
+
+/**
+ * Map a model port + flip flag into the interval query scene adapter.
+ * Hosts keep the `model === null` gate; this helper assumes a live model.
+ */
+export function intervalQuerySceneFromModel(
+  model: IntervalQueryModelPort,
+  flip: boolean,
+): IntervalQueryScene {
+  const panel = model.scene.panels[0];
+  return {
+    panel:
+      panel === undefined
+        ? null
+        : {
+            x: panel.x,
+            y: panel.y,
+            width: panel.width,
+            height: panel.height,
+            id: panel.id,
+          },
+    singlePanel: model.scene.panels.length === 1,
+    flip,
+    scales: model.scales,
+    panels: model.scene.panels.flatMap((scenePanel, index) =>
+      scenePanel.id === null
+        ? []
+        : [
+            {
+              x: scenePanel.x,
+              y: scenePanel.y,
+              width: scenePanel.width,
+              height: scenePanel.height,
+              id: scenePanel.id,
+              scales: model.scales.panels?.[index] ?? model.scales,
+            },
+          ],
+    ),
+    queryCandidates(expanded, requestedPanelId) {
+      const requestedPanelIndex =
+        requestedPanelId === undefined || requestedPanelId === null
+          ? -1
+          : model.scene.panels.findIndex((candidate) => candidate.id === requestedPanelId);
+      return [...model.candidates.queryRect(expanded.x0, expanded.y0, expanded.x1, expanded.y1)]
+        .map((id) => model.candidates.candidate(id))
+        .filter(
+          (
+            candidate,
+          ): candidate is {
+            readonly lineage: number;
+            readonly panelIndex?: number;
+          } =>
+            candidate !== null &&
+            (requestedPanelIndex < 0 ||
+              candidate.panelIndex === undefined ||
+              candidate.panelIndex === requestedPanelIndex),
+        );
+    },
+    lineageKeys(lineageId) {
+      return model.lineage.keys(lineageId);
+    },
+  };
+}
+
 export type ResolveIntervalQueryPartsInput = {
   readonly pixels: PlotRect;
   readonly mode: SelectAreaMode;

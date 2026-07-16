@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   anchorsFromCandidateKeys,
   buildPointSelectionEvent,
+  mergePresentationFocusKeys,
   nextPointSelectionKeys,
   rowIndexesForCandidate,
   sameOrderedPropertyKeys,
@@ -131,5 +132,42 @@ describe("buildPointSelectionEvent", () => {
     expect(event.phase).toBe("clear");
     expect(event.keys).toEqual([]);
     expect(Object.isFrozen(event.keys)).toBe(true);
+  });
+});
+
+describe("mergePresentationFocusKeys", () => {
+  it("returns the same emphasis reference when emphasis is empty", () => {
+    const empty: PropertyKey[] = [];
+    expect(mergePresentationFocusKeys(empty, { sourceKeys: ["a"], key: null })).toBe(empty);
+  });
+
+  it("returns the same emphasis reference when inspection is null", () => {
+    const emphasis = ["a", "b"] as const;
+    expect(mergePresentationFocusKeys(emphasis, null)).toBe(emphasis);
+  });
+
+  it("unions emphasis then sourceKeys then optional key, dedupes, and freezes", () => {
+    const result = mergePresentationFocusKeys(["a"], {
+      sourceKeys: ["b", "a"],
+      key: "c",
+    });
+    expect(result).toEqual(["a", "b", "c"]);
+    expect(Object.isFrozen(result)).toBe(true);
+  });
+
+  it("omits null focus key and dedupes when key already present", () => {
+    expect(mergePresentationFocusKeys(["a"], { sourceKeys: ["b"], key: null })).toEqual(["a", "b"]);
+    expect(mergePresentationFocusKeys(["a"], { sourceKeys: ["b"], key: "a" })).toEqual(["a", "b"]);
+  });
+
+  it("uses Set/Object.is semantics for symbols", () => {
+    const a = Symbol("row");
+    const b = Symbol("row");
+    const result = mergePresentationFocusKeys([a], {
+      sourceKeys: [b, a],
+      key: b,
+    });
+    expect(result).toEqual([a, b]);
+    expect(Object.isFrozen(result)).toBe(true);
   });
 });

@@ -104,7 +104,6 @@
   } from "./inspection-resolver.js";
   import { createInteractionReducer } from "./interaction-reducer.js";
   import { provideRegistry } from "./registry.svelte.js";
-  import { a11yRows } from "./canvas-a11y.js";
   import InteractionOverlay from "./InteractionOverlay.svelte";
   import {
     assemblePortableSpec,
@@ -120,24 +119,48 @@
   } from "./plot-area-brush.js";
   import { frozenZoomDomains, normalizedRect } from "./plot-geometry.js";
   import { resolveSurfaceKeyAction } from "./plot-surface-keyboard.js";
-  import { resolveQueuedInspectFrameAction } from "./plot-surface-inspection.js";
+  import {
+    resolveInspectionCompleteness,
+    resolveInspectionMode,
+    resolveQueuedInspectFrameAction,
+    resolveSetInspectionAction,
+    resolveSurfaceBlurAction,
+    resolveToggleInspectionPinAction,
+    shouldClearInspectionAnnouncement,
+    shouldClosePinnedOnOutsidePointer,
+    shouldCommitInspection,
+  } from "./plot-surface-inspection.js";
   import {
     resolveCaptureClickAction,
     advanceTouchInspectMoved,
+    resolveFinishBrushAction,
     resolvePointerDownAction,
     resolvePointerMoveAction,
     resolvePointerUpAction,
+    shouldClearInspectionOnPointerLeave,
   } from "./plot-surface-pointer.js";
   import {
+    resolveLegendClearControlSource,
     resolveLegendClickAction,
     resolveLegendKeyAction,
     resolveLegendPointerUpAction,
+    shouldClearLegendPreviewOnBlur,
+    shouldRenderInteractionLiveRegion,
   } from "./plot-legend-surface.js";
   import {
+    BRUSH_SECOND_CORNER_ANNOUNCEMENT,
     datumLabel as datumLabelFor,
     inspectionLiveText as inspectionLiveTextFor,
+    legendFocusAnnouncement,
     markLabel as markLabelFor,
+    selectionAnnouncement,
+    zoomAnnouncement,
   } from "./plot-labels.js";
+  import {
+    isDockedTooltipWidth,
+    isNarrowToolsWidth,
+    plotRootInlineStyle,
+  } from "./plot-layout.js";
   import {
     bestDirectionalIndex,
     buildTraversalHits,
@@ -151,6 +174,7 @@
     bandChannelsForZoom,
     capabilityStatusText,
     filterAvailableTools,
+    legendFocusDiscreteOnlyDiagnostics,
     zoomScaleDiagnosticsFromChannels,
     zoomSupportsChannel,
   } from "./plot-capability.js";
@@ -161,6 +185,7 @@
   } from "./plot-interval.js";
   import {
     buildIntervalSelectionFromScene,
+    intervalQuerySceneFromModel,
     type IntervalQueryScene,
   } from "./plot-interval-query.js";
   import {
@@ -183,6 +208,7 @@
   import {
     anchorsFromCandidateKeys,
     buildPointSelectionEvent,
+    mergePresentationFocusKeys,
     nextPointSelectionKeys,
     rowIndexesForCandidate,
     sameOrderedPropertyKeys,
@@ -196,6 +222,8 @@
   import {
     applyZoomToSpec,
     buildZoomEvent,
+    continuousZoomDomainsFromScopes,
+    filterScopeChannelsByZoomMode,
     filterZoomDomainsByMode,
     resolveBrushZoomDomains,
     sanitizePartialZoomDomains,
@@ -209,10 +237,15 @@
     keysForLegendEntry,
     legendInteractionSource,
     moveLegendRovingIndex,
+    reconcileLegendPreview,
+    resolveLegendEmphasisKeys,
+    resolveLegendPreviewKeysDecision,
     samePropertyKeySet,
     type LegendEntryAction,
     type LegendEntryIdentity,
   } from "./plot-legend-focus.js";
+  import PlotCanvasA11y from "./PlotCanvasA11y.svelte";
+  import PlotLegendTargets from "./PlotLegendTargets.svelte";
   import SceneView from "./SceneView.svelte";
   import Tooltip from "./Tooltip.svelte";
   import ToolRail from "./ToolRail.svelte";
@@ -350,12 +383,17 @@
     });
   });
 
+  // Facet intent comes from the raw prop — not assembled.facet — so declaration-
+  // only children still take the faceted diagnostic path before layers register
+  // and assembled becomes non-null on a later flush.
+  const facetedPlot = $derived(facet !== undefined);
+
   const resolvedInteractionScope: PlotInteractionScope = $derived(
     resolveInteractionScope({
       interaction,
       ...(interactionScope !== undefined && { interactionScope }),
       zoom,
-      faceted: assembled?.facet !== undefined,
+      faceted: facetedPlot,
       ...(datumKey !== undefined && { datumKey }),
       assembled,
     }),
@@ -371,7 +409,7 @@
         ...(tool !== undefined && { tool }),
       },
       {
-        faceted: assembled?.facet !== undefined,
+        faceted: facetedPlot,
         hasKey: datumKey !== undefined,
       },
     ),
@@ -581,7 +619,13 @@
     scaleBox.runId = -1;
     scaleBox.scales = undefined;
     if (interaction === undefined) localZoomDomains = null;
-    else interaction.resetZoom({ scope: resolvedInteractionScope });
+    else
+      interaction.resetZoom({
+        scope: filterScopeChannelsByZoomMode(
+          resolvedInteractionScope,
+          interactionConfig.zoom?.mode ?? null,
+        ),
+      });
     scaleEpoch++;
   }
 
@@ -814,11 +858,15 @@
   });
   const effectiveEmphasisKeys: readonly PropertyKey[] = $derived.by(() => {
     void controllerRevision;
-    return (
-      legendPreview?.keys ??
-      interaction?.emphasized(resolvedInteractionScope) ??
-      localEmphasisKeys
-    );
+    return resolveLegendEmphasisKeys({
+      legendFocusEnabled: interactionConfig.legendFocus !== null,
+      previewKeys: legendPreview?.keys ?? null,
+      controllerKeys:
+        interaction === undefined
+          ? null
+          : interaction.emphasized(resolvedInteractionScope),
+      localKeys: localEmphasisKeys,
+    });
   });
   let committedInterval = $state<IntervalSelection | null>(null);
   let localCommittedIntervals = $state<PlotInteractionInterval<PublicKey>[]>(
@@ -1026,19 +1074,11 @@
     );
   });
   const legendDiagnostics = $derived.by(() => {
-    if (
-      interactionConfig.legendFocus === null ||
-      model === null ||
-      model.scene.legends.length === 0 ||
-      model.scene.legends.some((candidate) => candidate.type === "discrete")
-    )
-      return [] as InteractionDiagnostic[];
-    return [
-      {
-        ...INTERACTION_DIAGNOSTIC_CATALOG.INTERACTION_LEGEND_DISCRETE_ONLY,
-        actual: model.scene.legends.map((candidate) => candidate.type),
-      },
-    ];
+    if (model === null) return [] as InteractionDiagnostic[];
+    return legendFocusDiscreteOnlyDiagnostics(
+      interactionConfig.legendFocus !== null,
+      model.scene.legends,
+    );
   });
   const capabilityStatus = $derived.by(() => {
     const unavailable = interactionConfig.diagnostics.find(
@@ -1060,8 +1100,17 @@
     model === null ? "" : themeTokensToCss(model.scene.theme),
   );
   const rootStyle = $derived(
-    `${hasCanvas || interactive || effectiveEmphasisKeys.length > 0 || effectiveSelectedKeys.length > 0 ? `width:${width === undefined || width === "container" ? "100%" : `${model?.scene.width ?? resolvedWidth}px`};height:${model?.scene.height ?? resolvedHeight}px;` : ""}${themeStyle}` ||
-      undefined,
+    plotRootInlineStyle({
+      needsSizedBox:
+        hasCanvas ||
+        interactive ||
+        effectiveEmphasisKeys.length > 0 ||
+        effectiveSelectedKeys.length > 0,
+      containerWidth: width === undefined || width === "container",
+      sceneWidth: model?.scene.width ?? resolvedWidth,
+      sceneHeight: model?.scene.height ?? resolvedHeight,
+      themeStyle,
+    }),
   );
   function anchorsForKeys(keys: readonly PropertyKey[]): {
     x: number;
@@ -1283,15 +1332,8 @@
   }
 
   function emitSelection(event: PlotSelection): void {
-    if (event.phase === "end") {
-      const count =
-        event.mode === "point" ? event.keys.length : event.lineageCount;
-      announceInteraction(
-        `Selection complete, ${String(count)} ${count === 1 ? "datum" : "data"}.`,
-      );
-    } else if (event.phase === "clear") {
-      announceInteraction("Selection cleared.");
-    }
+    const message = selectionAnnouncement(event);
+    if (message !== null) announceInteraction(message);
     onselect?.(event as unknown as PlotSelection<PublicKey>);
     oninteraction?.(event as unknown as PlotInteractionEvent<Row, PublicKey>);
   }
@@ -1346,8 +1388,10 @@
     if (!surfaceInteractive) return;
     const onOutsidePointer = (event: PointerEvent) => {
       if (
-        inspection?.state !== "pinned" ||
-        root?.contains(event.target as Node)
+        !shouldClosePinnedOnOutsidePointer({
+          isPinned: inspection?.state === "pinned",
+          targetInsideRoot: root?.contains(event.target as Node) === true,
+        })
       )
         return;
       closeInspection("pointer", false);
@@ -1454,6 +1498,8 @@
           }
         },
         layerFields: (layerIndex) => current.layerFields[layerIndex],
+        layerScaledConstant: (layerIndex, channel) =>
+          current.layerScaledConstants[layerIndex]?.[channel],
         lineageKeys: (lineageId) => current.lineage.keys(lineageId),
         row: (rowIndex) => current.row(rowIndex),
         semanticKey: (rowIndex) => semanticKeys.keys.get(rowIndex),
@@ -1465,13 +1511,7 @@
   }
 
   function emitLegendFocus(event: LegendFocusEvent<PropertyKey>): void {
-    if (event.phase === "change") {
-      announceInteraction(
-        `${event.label} ${event.state === "committed" ? "focused" : "previewed"}, ${String(event.keys.length)} ${event.keys.length === 1 ? "datum" : "data"}.`,
-      );
-    } else {
-      announceInteraction("Legend focus cleared.");
-    }
+    announceInteraction(legendFocusAnnouncement(event));
     onlegendfocus?.(event as LegendFocusEvent<PublicKey>);
     oninteraction?.(event as PlotInteractionEvent<Row, PublicKey>);
   }
@@ -1487,9 +1527,13 @@
         emitLegendFocus({ type: "legend-focus", phase: "clear", source });
       return;
     }
-    const keys = keysForLegend(action);
-    if (keys.length === 0) return;
-    legendPreview = { action, keys };
+    const decision = resolveLegendPreviewKeysDecision(keysForLegend(action));
+    if (decision.type === "clear") {
+      // Empty domain entry: do not leave the previous entry's preview active.
+      previewLegend(null);
+      return;
+    }
+    legendPreview = { action, keys: decision.keys };
     emitLegendFocus({
       type: "legend-focus",
       phase: "change",
@@ -1498,7 +1542,7 @@
       scale: action.identity.scale as "color" | "fill",
       value: action.entry.value as CellValue,
       label: action.entry.label,
-      keys,
+      keys: decision.keys,
     });
   }
 
@@ -1519,12 +1563,10 @@
     const returnTarget = root?.querySelector<HTMLElement>(
       ".gg-legend-target[aria-pressed='true']",
     );
-    const source: InteractionSource =
-      event.detail === 0
-        ? "keyboard"
-        : legendClearPointerType === "touch"
-          ? "touch"
-          : "pointer";
+    const source = resolveLegendClearControlSource({
+      detail: event.detail,
+      pointerType: legendClearPointerType,
+    });
     legendClearPointerType = null;
     clearLegendFocus(source);
     queueMicrotask(() => {
@@ -1566,17 +1608,17 @@
     });
   }
 
-  const presentationFocusKeys: readonly PropertyKey[] = $derived.by(() => {
-    if (effectiveEmphasisKeys.length === 0 || inspection === null)
-      return effectiveEmphasisKeys;
-    return Object.freeze([
-      ...new Set([
-        ...effectiveEmphasisKeys,
-        ...inspection.focus.sourceKeys,
-        ...(inspection.focus.key === null ? [] : [inspection.focus.key]),
-      ]),
-    ]);
-  });
+  const presentationFocusKeys: readonly PropertyKey[] = $derived(
+    mergePresentationFocusKeys(
+      effectiveEmphasisKeys,
+      inspection === null
+        ? null
+        : {
+            sourceKeys: inspection.focus.sourceKeys,
+            key: inspection.focus.key,
+          },
+    ),
+  );
 
   const semanticCandidateProjections = $derived.by(() => {
     if (model === null) return [];
@@ -1853,6 +1895,40 @@
     }
   });
 
+  // Reconcile transient preview when data/domain reshuffles entry membership.
+  $effect(() => {
+    const preview = legendPreview;
+    if (preview === null) return;
+    const next = reconcileLegendPreview({
+      preview: { identity: preview.action.identity, keys: preview.keys },
+      entries: interactiveLegendEntries,
+      keyIndex: legendEntryKeyIndex,
+    });
+    if (next === null) {
+      previewLegend(null);
+      return;
+    }
+    if (samePropertyKeySet(next.keys, preview.keys)) return;
+    legendPreview = {
+      action: { ...preview.action, identity: next.identity },
+      keys: next.keys,
+    };
+  });
+
+  // Drop chart-local emphasis when legend focus is turned off at runtime.
+  $effect(() => {
+    if (interactionConfig.legendFocus !== null) return;
+    if (
+      legendPreview === null &&
+      localEmphasisKeys.length === 0 &&
+      legendCommitted === null
+    )
+      return;
+    legendPreview = null;
+    legendCommitted = null;
+    if (interaction === undefined) localEmphasisKeys = [];
+  });
+
   function legendAction(
     index: number,
     source: LegendEntryAction["source"],
@@ -1961,8 +2037,10 @@
 
   function onLegendBlur(event: FocusEvent): void {
     if (
-      event.relatedTarget instanceof Element &&
-      event.relatedTarget.matches("[data-gg-legend-target]")
+      !shouldClearLegendPreviewOnBlur({
+        relatedTarget: event.relatedTarget,
+        root,
+      })
     )
       return;
     previewLegend(null);
@@ -2004,8 +2082,11 @@
     if (seed === null)
       throw new Error("Inspection hit was not present in the candidate store");
     const requested = interactionConfig.inspect?.mode ?? "auto";
-    const mode =
-      concreteMode ?? (requested === "auto" ? seed.autoMode : requested);
+    const mode = resolveInspectionMode({
+      concreteMode,
+      requested,
+      seedAutoMode: seed.autoMode,
+    });
     return inspectionCoordinator.resolve({
       model,
       seed,
@@ -2014,13 +2095,12 @@
       source,
       identityEpoch: dataIdentityEpoch,
       layoutEpoch: model.runId,
-      completeness:
-        state === "pinned" ||
-        interactionConfig.inspect?.content !== undefined ||
-        oninspect !== undefined ||
-        oninteraction !== undefined
-          ? "complete"
-          : "transient",
+      completeness: resolveInspectionCompleteness({
+        state,
+        hasCustomContent: interactionConfig.inspect?.content !== undefined,
+        hasInspectCallback: oninspect !== undefined,
+        hasInteractionCallback: oninteraction !== undefined,
+      }),
     });
   }
 
@@ -2115,108 +2195,151 @@
     concreteMode?: "exact" | "x" | "y" | "xy",
     candidate?: CandidateFacts,
   ): void {
-    if (hit !== null && (source === "keyboard" || source === "touch"))
-      interactionAnnouncement = "";
-    if (inspection?.state === "pinned" && state === "transient") return;
-    if (hit === null) {
-      if (tooltipHovered || inspection?.state === "pinned") return;
-      reducer.dispatch({ type: "inspect", candidate: null, source });
-      if (inspection !== null)
-        emitInspection({ type: "inspect", phase: "clear", source });
-      inspection = null;
-      inspectionSeed = null;
-      inspectionCoordinator.release("transient");
-      reducer.dispatch({ type: "inspect", candidate: null, source });
-      return;
-    }
-    const resolved = resolveInspection(
-      hit,
-      source,
-      state,
-      concreteMode,
-      candidate,
-    );
-    if (resolved === null) {
-      setInspection(null, source);
-      return;
-    }
-    const next = resolved.snapshot;
-    const candidateRef = {
-      epoch: model?.runId ?? 0,
-      id: candidate?.id ?? traversalHits.indexOf(hit),
-      panelId: next.panelId,
-      x: hit.x,
-      y: hit.y,
-    };
-    reducer.dispatch({ type: "inspect", candidate: candidateRef, source });
-    if (state === "pinned") reducer.dispatch({ type: "toggle-pin", source });
+    // Announcement clear runs before priority gates (including ignored
+    // keyboard/touch requests while pinned).
     if (
-      (state === "transient" &&
-        reducer.state.inspection.kind !== "transient") ||
-      (state === "pinned" && reducer.state.inspection.kind !== "pinned")
+      shouldClearInspectionAnnouncement({
+        hasHit: hit !== null,
+        source,
+      })
     )
-      return;
-    inspection = next;
-    inspectionSeed = resolved.seed;
-    if (resolved.semanticChanged)
-      emitInspection(next, resolved.semanticFingerprint);
+      interactionAnnouncement = "";
+    const action = resolveSetInspectionAction({
+      hasHit: hit !== null,
+      requestedState: state,
+      currentState: inspection?.state ?? "none",
+      tooltipHovered,
+    });
+    switch (action.type) {
+      case "ignore":
+        return;
+      case "clear": {
+        // Preserve both dispatches (before emit/release and after) — do not
+        // dedupe; may be load-bearing for reducer revision counting.
+        reducer.dispatch({ type: "inspect", candidate: null, source });
+        if (inspection !== null)
+          emitInspection({ type: "inspect", phase: "clear", source });
+        inspection = null;
+        inspectionSeed = null;
+        inspectionCoordinator.release("transient");
+        reducer.dispatch({ type: "inspect", candidate: null, source });
+        return;
+      }
+      case "apply": {
+        // hit is non-null when action is apply (pure gate).
+        const resolved = resolveInspection(
+          hit!,
+          source,
+          state,
+          concreteMode,
+          candidate,
+        );
+        // Null resolve re-enters clear gates via setInspection(null, source).
+        if (resolved === null) {
+          setInspection(null, source);
+          return;
+        }
+        const next = resolved.snapshot;
+        const candidateRef = {
+          epoch: model?.runId ?? 0,
+          id: candidate?.id ?? traversalHits.indexOf(hit!),
+          panelId: next.panelId,
+          x: hit!.x,
+          y: hit!.y,
+        };
+        reducer.dispatch({ type: "inspect", candidate: candidateRef, source });
+        if (state === "pinned")
+          reducer.dispatch({ type: "toggle-pin", source });
+        if (
+          !shouldCommitInspection({
+            requestedState: state,
+            reducerKind: reducer.state.inspection.kind,
+          })
+        )
+          return;
+        inspection = next;
+        inspectionSeed = resolved.seed;
+        if (resolved.semanticChanged)
+          emitInspection(next, resolved.semanticFingerprint);
+      }
+    }
   }
 
   function toggleInspectionPin(source: InteractionSource): void {
-    if (inspection === null || inspectionSeed === null) return;
+    const pinAction = resolveToggleInspectionPinAction({
+      hasInspection: inspection !== null,
+      hasSeed: inspectionSeed !== null,
+      currentState: inspection?.state ?? "transient",
+      hasPendingPinned: pendingPinnedPointer !== null,
+    });
+    if (pinAction.type === "ignore") return;
+    // toggle-pin always runs before restore/flip side effects; if flip
+    // resolve returns null the reducer stays toggled (no rollback).
     reducer.dispatch({ type: "toggle-pin", source });
-    if (inspection.state === "pinned" && pendingPinnedPointer !== null) {
-      const pending = pendingPinnedPointer;
-      pendingPinnedPointer = null;
-      inspectionCoordinator.release("pinned");
-      inspection = null;
-      inspectionSeed = null;
-      setInspection(
-        pending.hit,
-        pending.source,
-        "transient",
-        pending.concreteMode,
-        pending.candidate,
-      );
-      return;
+    switch (pinAction.type) {
+      case "restore-pending": {
+        const pending = pendingPinnedPointer!;
+        pendingPinnedPointer = null;
+        inspectionCoordinator.release("pinned");
+        inspection = null;
+        inspectionSeed = null;
+        setInspection(
+          pending.hit,
+          pending.source,
+          "transient",
+          pending.concreteMode,
+          pending.candidate,
+        );
+        return;
+      }
+      case "flip-to-transient":
+      case "flip-to-pinned": {
+        // inspection + seed non-null after non-ignore (pure gate).
+        const state =
+          pinAction.type === "flip-to-transient" ? "transient" : "pinned";
+        const resolved = resolveInspection(
+          hitFromCandidate(inspectionSeed!),
+          source,
+          state,
+          inspection!.mode,
+          inspectionSeed!,
+        );
+        if (resolved === null) return;
+        inspection = resolved.snapshot;
+        inspectionSeed = resolved.seed;
+        if (state === "transient")
+          reducer.dispatch({
+            type: "inspect",
+            candidate: {
+              epoch: model?.runId ?? 0,
+              id: inspectionSeed.id,
+              panelId: resolved.snapshot.panelId,
+              x: inspectionSeed.x,
+              y: inspectionSeed.y,
+            },
+            source,
+          });
+        if (state === "transient") inspectionCoordinator.release("pinned");
+        if (
+          state === "transient" &&
+          (source === "keyboard" || source === "touch")
+        )
+          announceInteraction(
+            `${inspectionLiveText(resolved.snapshot)}, unpinned`,
+          );
+        if (resolved.semanticChanged)
+          emitInspection(resolved.snapshot, resolved.semanticFingerprint);
+        if (
+          state === "pinned" &&
+          interactionConfig.inspect?.contentMode === "interactive"
+        )
+          queueMicrotask(() =>
+            root
+              ?.querySelector<HTMLElement>(`#${CSS.escape(plotId)}-tooltip`)
+              ?.focus(),
+          );
+      }
     }
-    const state = inspection.state === "pinned" ? "transient" : "pinned";
-    const resolved = resolveInspection(
-      hitFromCandidate(inspectionSeed),
-      source,
-      state,
-      inspection.mode,
-      inspectionSeed,
-    );
-    if (resolved === null) return;
-    inspection = resolved.snapshot;
-    inspectionSeed = resolved.seed;
-    if (state === "transient")
-      reducer.dispatch({
-        type: "inspect",
-        candidate: {
-          epoch: model?.runId ?? 0,
-          id: inspectionSeed.id,
-          panelId: resolved.snapshot.panelId,
-          x: inspectionSeed.x,
-          y: inspectionSeed.y,
-        },
-        source,
-      });
-    if (state === "transient") inspectionCoordinator.release("pinned");
-    if (state === "transient" && (source === "keyboard" || source === "touch"))
-      announceInteraction(`${inspectionLiveText(resolved.snapshot)}, unpinned`);
-    if (resolved.semanticChanged)
-      emitInspection(resolved.snapshot, resolved.semanticFingerprint);
-    if (
-      state === "pinned" &&
-      interactionConfig.inspect?.contentMode === "interactive"
-    )
-      queueMicrotask(() =>
-        root
-          ?.querySelector<HTMLElement>(`#${CSS.escape(plotId)}-tooltip`)
-          ?.focus(),
-      );
   }
 
   function closeInspection(
@@ -2319,68 +2442,28 @@
 
   /** Map the live render model into the pure interval query scene adapter. */
   function intervalQueryScene(): IntervalQueryScene | null {
-    const current = model;
-    if (current === null) return null;
-    const panel = current.scene.panels[0];
-    return {
-      panel:
-        panel === undefined
-          ? null
-          : {
-              x: panel.x,
-              y: panel.y,
-              width: panel.width,
-              height: panel.height,
-              id: panel.id,
-            },
-      singlePanel: current.scene.panels.length === 1,
-      flip: assembled?.coord?.type === "flip",
-      scales: current.scales,
-      panels: current.scene.panels.map((scenePanel, index) => ({
-        x: scenePanel.x,
-        y: scenePanel.y,
-        width: scenePanel.width,
-        height: scenePanel.height,
-        id: scenePanel.id,
-        scales: current.scales.panels[index] ?? current.scales,
-      })),
-      queryCandidates(expanded, requestedPanelId) {
-        const requestedPanelIndex =
-          requestedPanelId === undefined || requestedPanelId === null
-            ? -1
-            : current.scene.panels.findIndex(
-                (candidate) => candidate.id === requestedPanelId,
-              );
-        return [
-          ...current.candidates.queryRect(
-            expanded.x0,
-            expanded.y0,
-            expanded.x1,
-            expanded.y1,
-          ),
-        ]
-          .map((id) => current.candidates.candidate(id))
-          .filter(
-            (candidate): candidate is CandidateFacts =>
-              candidate !== null &&
-              (requestedPanelIndex < 0 ||
-                candidate.panelIndex === requestedPanelIndex),
-          );
-      },
-      lineageKeys(lineageId) {
-        return current.lineage.keys(lineageId);
-      },
-    };
+    if (model === null) return null;
+    return intervalQuerySceneFromModel(
+      model,
+      assembled?.coord?.type === "flip",
+    );
   }
 
   function onPointerLeave(): void {
+    // Evaluate leave clear **inside** the microtask so brushing/tooltip
+    // reflect post-flush state (not leave-time snapshots).
     queueMicrotask(() => {
-      if (!brushing && !tooltipHovered) {
-        queuedPointerInspection = null;
-        pendingPinnedPointer = null;
-        reducer.cancelScheduledPointer();
-        setInspection(null, "pointer");
-      }
+      if (
+        !shouldClearInspectionOnPointerLeave({
+          brushing,
+          tooltipHovered,
+        })
+      )
+        return;
+      queuedPointerInspection = null;
+      pendingPinnedPointer = null;
+      reducer.cancelScheduledPointer();
+      setInspection(null, "pointer");
     });
   }
 
@@ -2510,28 +2593,45 @@
       case "none":
         break;
       case "finish-brush": {
+        // Defensive: pure up-gate already requires hasBrushDraft.
         if (brushRect === null) break;
         reducer.cancelScheduledPointer();
         const source = event.pointerType === "touch" ? "touch" : "pointer";
         const ended = evaluatePointerBrushEnd(brushRect, plotPoint(event));
-        if (ended.kind === "too-small") {
-          brushRect = ended.corners;
-          announceInteraction("Choose opposite corner.");
-          break;
+        const finish = resolveFinishBrushAction({
+          endedKind: ended.kind,
+          activeTool,
+        });
+        switch (finish.type) {
+          case "keep-second-corner":
+            // ended.kind is too-small when pure returns keep-second-corner.
+            if (ended.kind === "too-small") brushRect = ended.corners;
+            announceInteraction(BRUSH_SECOND_CORNER_ANNOUNCEMENT);
+            break;
+          case "select-end":
+            brushRect = null;
+            if (ended.kind === "commit") {
+              const eventValue = selectionEvent("end", ended.rect, source);
+              committedInterval = interactionConfig.select?.persistent
+                ? eventValue
+                : null;
+              if (interactionConfig.select?.persistent)
+                commitIntervalSelection(eventValue, source);
+              emitSelection(eventValue);
+            }
+            reducer.dispatch({ type: "cancel-area" });
+            break;
+          case "zoom-end":
+            brushRect = null;
+            if (ended.kind === "commit") applyBrushZoom(ended.rect, source);
+            reducer.dispatch({ type: "cancel-area" });
+            break;
+          case "end-area":
+            // Commit with non-area tool (e.g. tool changed mid-drag): clear only.
+            brushRect = null;
+            reducer.dispatch({ type: "cancel-area" });
+            break;
         }
-        brushRect = null;
-        if (activeTool === "select-area") {
-          const eventValue = selectionEvent("end", ended.rect, source);
-          committedInterval = interactionConfig.select?.persistent
-            ? eventValue
-            : null;
-          if (interactionConfig.select?.persistent)
-            commitIntervalSelection(eventValue, source);
-          emitSelection(eventValue);
-        } else if (activeTool === "zoom-area") {
-          applyBrushZoom(ended.rect, source);
-        }
-        reducer.dispatch({ type: "cancel-area" });
         break;
       }
     }
@@ -2546,29 +2646,31 @@
       if (domains === null && localZoomDomains === null) return;
       localZoomDomains = domains;
     } else {
+      // Match filterZoomDomainsByMode: x-only plots must not mutate shared y.
+      const mutationScope = filterScopeChannelsByZoomMode(
+        resolvedInteractionScope,
+        interactionConfig.zoom?.mode ?? null,
+      );
       const transition =
         domains === null
-          ? interaction.resetZoom({ scope: resolvedInteractionScope, source })
+          ? interaction.resetZoom({ scope: mutationScope, source })
           : interaction.setZoom(domains, {
-              scope: resolvedInteractionScope,
+              scope: mutationScope,
               source,
             });
       if (transition === null) return;
       if (domains !== null) {
-        const x = transition.snapshot.zoom.x.find(
-          (domain) => domain.scope === resolvedInteractionScope.x,
-        )?.domain;
-        const y = transition.snapshot.zoom.y.find(
-          (domain) => domain.scope === resolvedInteractionScope.y,
-        )?.domain;
-        committed = frozenZoomDomains({
-          ...(x !== undefined && { x: [...x] }),
-          ...(y !== undefined && { y: [...y] }),
-        });
+        committed = frozenZoomDomains(
+          continuousZoomDomainsFromScopes(
+            transition.snapshot.zoom,
+            mutationScope.x,
+            mutationScope.y,
+          ),
+        );
       }
     }
     const event = buildZoomEvent(committed, source);
-    announceInteraction(committed === null ? "Zoom reset." : "Zoom complete.");
+    announceInteraction(zoomAnnouncement(committed));
     onzoom?.(event);
     oninteraction?.(event);
   }
@@ -2773,10 +2875,17 @@
   }
 
   function onSurfaceBlur(event: FocusEvent): void {
-    if (root?.contains(event.relatedTarget as Node | null)) return;
+    const blurAction = resolveSurfaceBlurAction({
+      relatedTargetInsideRoot:
+        root?.contains(event.relatedTarget as Node | null) === true,
+      inspectionState: inspection?.state ?? "none",
+    });
+    if (blurAction.type === "ignore") return;
+    // Shared for keep-pinned and clear-inspection (ordering is load-bearing).
     activeTraversalIndex = -1;
     reducer.dispatch({ type: "set-active", candidate: null });
-    if (inspection?.state !== "pinned") setInspection(null, "keyboard");
+    if (blurAction.type === "blur-clear-inspection")
+      setInspection(null, "keyboard");
   }
 
   function togglePointKeys(
@@ -2826,7 +2935,7 @@
           point: anchor,
           panelId: originPanel.id,
         });
-        announceInteraction("Choose opposite corner.");
+        announceInteraction(BRUSH_SECOND_CORNER_ANNOUNCEMENT);
         return;
       }
       case "complete-area": {
@@ -2958,9 +3067,9 @@
   class:gg-with-legend-clear={interactionConfig.legendFocus !== null &&
     effectiveLegendPressed !== null}
   class:gg-with-legend-filters={filterableLegendEntries.length > 0}
-  class:gg-narrow-tools={resolvedWidth < 560}
+  class:gg-narrow-tools={isNarrowToolsWidth(resolvedWidth)}
   class:gg-with-docked-tooltip={inspection?.state === "pinned" &&
-    resolvedWidth < 480}
+    isDockedTooltipWidth(resolvedWidth)}
   data-gg-ready={ready ? "true" : "false"}
   style={rootStyle}
 >
@@ -2971,7 +3080,7 @@
       {activeTool}
       {ready}
       {emptyPlot}
-      narrow={resolvedWidth < 560}
+      narrow={isNarrowToolsWidth(resolvedWidth)}
       zoomDomains={effectiveZoomDomains}
       hasPointSelection={canPublishPointSelection &&
         effectiveSelectedKeys.length > 0}
@@ -3010,40 +3119,13 @@
             class="gg-stratum gg-canvas"
             {@attach canvasAttachment(model, stratum.batches, `canvas:${si}`)}
           ></canvas>
-          {@const table = a11yRows(model, stratum.batches)}
-          <div
-            class="gg-canvas-a11y"
-            role="img"
-            aria-label={`${sceneLabel(model.scene)} — ${String(table.total)} canvas-rendered marks. Canvas marks are not individually focusable; use the data table.`}
-          ></div>
-          <button
-            type="button"
-            class="gg-a11y-toggle"
-            aria-expanded={a11yTableOpen}
-            onclick={() => (a11yTableOpen = !a11yTableOpen)}
-            >{a11yTableOpen ? "Hide data table" : "Show data table"}</button
-          >
-          {#if a11yTableOpen}
-            <div class="gg-a11y-table">
-              <table>
-                <thead>
-                  <tr>
-                    {#each table.fields as field (field)}<th>{field}</th>{/each}
-                  </tr>
-                </thead>
-                <tbody>
-                  {#each table.rows as row, ri (ri)}
-                    <tr>
-                      {#each row as cell, ci (ci)}<td>{cell}</td>{/each}
-                    </tr>
-                  {/each}
-                </tbody>
-              </table>
-              {#if table.total > table.rows.length}
-                <p>First {table.rows.length} of {table.total} rows.</p>
-              {/if}
-            </div>
-          {/if}
+          <PlotCanvasA11y
+            {model}
+            batches={stratum.batches}
+            sceneLabelText={sceneLabel(model.scene)}
+            open={a11yTableOpen}
+            onToggle={() => (a11yTableOpen = !a11yTableOpen)}
+          />
         {:else}
           <SceneView
             scene={model.scene}
@@ -3064,66 +3146,33 @@
         focusMasks={interactionMasks}
       />
     {/if}
-    {#if interactiveLegendEntries.length > 0}
-      <div
-        class="gg-legend-targets"
-        role="group"
-        aria-label="Interactive legends"
-      >
-        {#each interactiveLegendEntries as target, index (`${target.identity.scale}:${target.identity.entryIndex}`)}
-          <button
-            type="button"
-            class="gg-legend-target"
-            class:gg-legend-target-active={legendPreview?.action.identity
-              .scale === target.identity.scale &&
-              legendPreview?.action.identity.entryIndex ===
-                target.identity.entryIndex}
-            aria-label={`${target.legend.title || target.identity.scale}: ${target.entry.label} (${target.identity.scale} legend)`}
-            aria-pressed={effectiveLegendPressed?.scale ===
-              target.identity.scale &&
-              effectiveLegendPressed.entryIndex === target.identity.entryIndex}
-            tabindex={index === legendRovingIndex ? 0 : -1}
-            data-gg-legend-target
-            data-index={index}
-            style:left={`${target.legend.x}px`}
-            style:top={`${target.legend.y + target.entry.y}px`}
-            style:width={`${Math.max(24, target.legend.width)}px`}
-            onpointerenter={(event) => {
-              if (event.pointerType !== "touch")
-                previewLegendIndex(index, "pointer");
-            }}
-            onpointerleave={() => previewLegend(null)}
-            onpointerdown={(event) => onLegendPointerDown(event, index)}
-            onpointerup={(event) => onLegendPointerUp(event, index)}
-            onpointercancel={() => (legendTouchIndex = -1)}
-            onfocus={() => onLegendFocus(index)}
-            onblur={onLegendBlur}
-            onclick={(event) => onLegendClick(event, index)}
-            onkeydown={(event) => onLegendKeydown(event, index)}
-          >
-            <span class="gg-sr-only">{target.entry.label}</span>
-          </button>
-        {/each}
-      </div>
-    {/if}
-    {#if interactionConfig.legendFocus !== null && effectiveLegendPressed !== null}
-      {@const focusedLegend = model.scene.legends.find(
-        (candidate) => candidate.scale === effectiveLegendPressed?.scale,
-      )}
-      {#if focusedLegend !== undefined}
-        <button
-          type="button"
-          class="gg-legend-clear"
-          aria-label="Clear legend focus"
-          style:left={`${Math.max(4, Math.min(focusedLegend.x, model.scene.width - 52))}px`}
-          style:top={`${model.scene.height + 4}px`}
-          onpointerdown={(event) =>
-            (legendClearPointerType = event.pointerType)}
-          onpointercancel={() => (legendClearPointerType = null)}
-          onclick={(event) => clearLegendFromControl(event)}>Clear</button
-        >
-      {/if}
-    {/if}
+    <PlotLegendTargets
+      entries={interactiveLegendEntries}
+      previewIdentity={legendPreview?.action.identity ?? null}
+      pressedIdentity={effectiveLegendPressed}
+      rovingIndex={legendRovingIndex}
+      sceneWidth={model.scene.width}
+      sceneHeight={model.scene.height}
+      clearLegendX={interactionConfig.legendFocus !== null &&
+      effectiveLegendPressed !== null
+        ? (model.scene.legends.find(
+            (candidate) => candidate.scale === effectiveLegendPressed.scale,
+          )?.x ?? null)
+        : null}
+      onPreviewIndex={(index) => previewLegendIndex(index, "pointer")}
+      onPreviewClear={() => previewLegend(null)}
+      onPointerDown={onLegendPointerDown}
+      onPointerUp={onLegendPointerUp}
+      onPointerCancel={() => (legendTouchIndex = -1)}
+      onFocus={onLegendFocus}
+      onBlur={onLegendBlur}
+      onClick={onLegendClick}
+      onKeyDown={onLegendKeydown}
+      onClearPointerDown={(pointerType) =>
+        (legendClearPointerType = pointerType)}
+      onClearPointerCancel={() => (legendClearPointerType = null)}
+      onClearClick={clearLegendFromControl}
+    />
     {#if filterableLegendEntries.length > 0}
       <fieldset class="gg-legend-filters">
         <legend>Filter legend</legend>
@@ -3228,17 +3277,6 @@
           ? "No active datum"
           : datumLabel(inspection.focus.row)}
       </p>
-      <div
-        id={`${plotId}-live`}
-        class="gg-sr-only"
-        aria-live="polite"
-        aria-atomic="true"
-      >
-        {interactionAnnouncement ||
-          (inspection?.source === "keyboard" || inspection?.source === "touch"
-            ? inspectionLiveText(inspection)
-            : "")}
-      </div>
       {#if areaAwaitingSecond}
         <p class="gg-area-instruction">Choose opposite corner</p>
       {/if}
@@ -3256,7 +3294,8 @@
           )}
           content={interactionConfig.inspect?.content}
           interactive={interactionConfig.inspect?.contentMode === "interactive"}
-          docked={inspection.state === "pinned" && resolvedWidth < 480}
+          docked={inspection.state === "pinned" &&
+            isDockedTooltipWidth(resolvedWidth)}
           onenter={() => (tooltipHovered = true)}
           onleave={() => {
             tooltipHovered = false;
@@ -3265,6 +3304,19 @@
           onclose={(source) => closeInspection(source, true)}
         />
       {/if}
+    {/if}
+    {#if shouldRenderInteractionLiveRegion( { surfaceInteractive, legendFocusEnabled: interactionConfig.legendFocus !== null } )}
+      <div
+        id={`${plotId}-live`}
+        class="gg-sr-only"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {interactionAnnouncement ||
+          (inspection?.source === "keyboard" || inspection?.source === "touch"
+            ? inspectionLiveText(inspection)
+            : "")}
+      </div>
     {/if}
     {#if emptyPlot}
       <div class="gg-empty-state" role="status">No data to display</div>
@@ -3324,8 +3376,7 @@
      (no z-index anywhere — decision 0006). All inert; the capture layer
      owns pointer events. Parent-owned so extracted overlay SVGs with
      class gg-stratum stay absolutely positioned. */
-  .gg-plot-root :global(.gg-stratum),
-  .gg-canvas-a11y {
+  .gg-plot-root :global(.gg-stratum) {
     position: absolute;
     inset: 0;
     pointer-events: none;
@@ -3333,86 +3384,6 @@
 
   canvas.gg-stratum {
     display: block;
-  }
-
-  /* sr-only pattern (NOT display:none — must stay in the a11y tree). */
-  .gg-canvas-a11y,
-  .gg-a11y-toggle:not(:focus) {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    margin: -1px;
-    padding: 0;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-    border: 0;
-  }
-
-  .gg-a11y-toggle {
-    pointer-events: auto;
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    font-size: 11px;
-    line-height: 1.2;
-  }
-
-  .gg-legend-clear {
-    position: absolute;
-    z-index: 5;
-    min-width: 44px;
-    min-height: 44px;
-    border: 1px solid
-      var(--gg-tooltipBorder, var(--gg-theme-tooltipBorder, currentColor));
-    border-radius: 3px;
-    padding: 2px 6px;
-    background: var(--gg-tooltipPaper, var(--gg-theme-tooltipPaper, white));
-    color: var(--gg-tooltipInk, var(--gg-theme-tooltipInk, currentColor));
-    font: 11px/1.2 var(--gg-font-family, sans-serif);
-    white-space: nowrap;
-    pointer-events: auto;
-  }
-
-  .gg-legend-targets {
-    position: absolute;
-    inset: 0;
-    z-index: 5;
-    pointer-events: none;
-  }
-
-  .gg-legend-target {
-    position: absolute;
-    min-width: 24px;
-    min-height: 24px;
-    margin: 0;
-    border: 1px solid transparent;
-    border-radius: 3px;
-    padding: 0;
-    background: transparent;
-    color: transparent;
-    pointer-events: auto;
-    touch-action: manipulation;
-  }
-
-  .gg-legend-target:hover,
-  .gg-legend-target-active,
-  .gg-legend-target[aria-pressed="true"] {
-    border-color: var(
-      --gg-interactionInk,
-      var(--gg-theme-interactionInk, currentColor)
-    );
-    background: color-mix(in srgb, currentColor 7%, transparent);
-  }
-
-  .gg-legend-target:focus-visible {
-    outline: 2px solid var(--gg-focusRing, var(--gg-theme-focusRing, Highlight));
-    outline-offset: -2px;
-  }
-
-  .gg-legend-clear:focus-visible {
-    outline: 2px solid var(--gg-focusRing, var(--gg-theme-focusRing, Highlight));
-    outline-offset: 2px;
   }
 
   .gg-legend-filters {
@@ -3470,29 +3441,6 @@
     outline: 2px solid var(--gg-focusRing, var(--gg-theme-focusRing, Highlight));
     outline-offset: 2px;
   }
-
-  .gg-a11y-table {
-    position: absolute;
-    inset: 0;
-    overflow: auto;
-    background: var(--gg-paper, #fff);
-    color: var(--gg-ink, #1f2328);
-    font-size: 11px;
-    line-height: 1.4;
-    pointer-events: auto;
-  }
-
-  .gg-a11y-table table {
-    border-collapse: collapse;
-  }
-
-  .gg-a11y-table th,
-  .gg-a11y-table td {
-    border: 1px solid var(--gg-grid, rgba(128, 128, 128, 0.4));
-    padding: 2px 6px;
-    text-align: left;
-  }
-
   .gg-capture {
     position: absolute;
     inset: 0;

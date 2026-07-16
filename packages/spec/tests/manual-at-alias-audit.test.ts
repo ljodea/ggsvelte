@@ -7,6 +7,7 @@ import {
   findSubstantiveRuntimePaths,
   isRuntimeBehaviorPath,
   isSkippableCommentLine,
+  listChangedFilesFromNameStatus,
   packageVersionAtCommit,
   runtimeBehaviorPaths,
 } from "./manual-at-alias-audit.ts";
@@ -36,6 +37,10 @@ describe("manual AT alias commit audit", () => {
     expect(isSkippableCommentLine(" // re-export surface")).toBe(true);
     expect(isSkippableCommentLine(" * { pointer-events: none; }")).toBe(false);
     expect(isSkippableCommentLine("*.mark { opacity: 0.4; }")).toBe(false);
+    // Combinators after `*` must stay substantive (not JSDoc).
+    expect(isSkippableCommentLine(" * + * { margin: 0; }")).toBe(false);
+    expect(isSkippableCommentLine("* > .mark { opacity: 1; }")).toBe(false);
+    expect(isSkippableCommentLine("* ~ * { display: none; }")).toBe(false);
     expect(
       diffTextIsSubstantive(`diff --git a/x.svelte b/x.svelte
 --- a/x.svelte
@@ -43,6 +48,15 @@ describe("manual AT alias commit audit", () => {
 @@ -1 +1 @@
 -* { pointer-events: auto; }
 +* { pointer-events: none; }
+`),
+    ).toBe(true);
+    expect(
+      diffTextIsSubstantive(`diff --git a/x.svelte b/x.svelte
+--- a/x.svelte
++++ b/x.svelte
+@@ -1 +1 @@
+-* + * { margin: 0; }
++* + * { margin: 4px; }
 `),
     ).toBe(true);
     expect(
@@ -108,5 +122,27 @@ describe("manual AT alias commit audit", () => {
         releaseVersion: packageVersionAtCommit(repoRoot, withRuntime),
       });
     }).toThrow(/requires a complete record/);
+  });
+
+  it("lists both sides of renames when collecting changed paths", () => {
+    // Rename out of packages/svelte/src must still surface the source path.
+    expect(
+      listChangedFilesFromNameStatus(
+        [
+          "M\tpackages/spec/src/artifact.ts",
+          "R100\tpackages/svelte/src/lib/Old.svelte\tpackages/docs/Old.svelte",
+          "A\tpackages/core/src/new.ts",
+          "D\tpackages/core/src/gone.ts",
+        ].join("\n"),
+      ).toSorted(),
+    ).toEqual(
+      [
+        "packages/spec/src/artifact.ts",
+        "packages/svelte/src/lib/Old.svelte",
+        "packages/docs/Old.svelte",
+        "packages/core/src/new.ts",
+        "packages/core/src/gone.ts",
+      ].toSorted(),
+    );
   });
 });

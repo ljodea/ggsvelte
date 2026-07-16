@@ -5,6 +5,8 @@ import type { PortableSpec } from "@ggsvelte/spec";
 import {
   applyZoomToSpec,
   buildZoomEvent,
+  continuousZoomDomainsFromScopes,
+  filterScopeChannelsByZoomMode,
   filterZoomDomainsByMode,
   resolveBrushZoomDomains,
   sameZoomDomains,
@@ -56,6 +58,30 @@ describe("filterZoomDomainsByMode", () => {
   it("drops a mode when the matching channel is absent", () => {
     expect(filterZoomDomainsByMode({ y: [3, 4] }, "x")).toBeNull();
     expect(filterZoomDomainsByMode({ x: [1, 2] }, "y")).toBeNull();
+  });
+});
+
+describe("filterScopeChannelsByZoomMode", () => {
+  const linked = { keys: "id", x: "x-mm", y: "y-mm" };
+
+  it("keeps both channels for xy or null mode", () => {
+    expect(filterScopeChannelsByZoomMode(linked, "xy")).toEqual(linked);
+    expect(filterScopeChannelsByZoomMode(linked, null)).toEqual(linked);
+  });
+
+  it("drops the non-opted channel for single-axis zoom", () => {
+    expect(filterScopeChannelsByZoomMode(linked, "x")).toEqual({
+      keys: "id",
+      x: "x-mm",
+    });
+    expect(filterScopeChannelsByZoomMode(linked, "y")).toEqual({
+      keys: "id",
+      y: "y-mm",
+    });
+  });
+
+  it("freezes the result", () => {
+    expect(Object.isFrozen(filterScopeChannelsByZoomMode(linked, "x"))).toBe(true);
   });
 });
 
@@ -256,5 +282,74 @@ describe("buildZoomEvent", () => {
       domains: null,
     });
     expect(Object.isFrozen(event)).toBe(true);
+  });
+});
+
+describe("continuousZoomDomainsFromScopes", () => {
+  it("picks x and y by scope and clones domain tuples", () => {
+    const xDomain: [number, number] = [0, 1];
+    const yDomain: [number, number] = [2, 3];
+    const result = continuousZoomDomainsFromScopes(
+      {
+        x: [
+          { scope: "plot-a", domain: xDomain },
+          { scope: "other", domain: [9, 10] },
+        ],
+        y: [{ scope: "plot-a", domain: yDomain }],
+      },
+      "plot-a",
+      "plot-a",
+    );
+    expect(result).toEqual({ x: [0, 1], y: [2, 3] });
+    xDomain[0] = 99;
+    yDomain[1] = 88;
+    expect(result).toEqual({ x: [0, 1], y: [2, 3] });
+  });
+
+  it("omits missing channels and returns empty bag when neither matches", () => {
+    expect(
+      continuousZoomDomainsFromScopes(
+        {
+          x: [{ scope: "plot-a", domain: [0, 1] }],
+          y: [],
+        },
+        "plot-a",
+        "plot-b",
+      ),
+    ).toEqual({ x: [0, 1] });
+
+    expect(
+      continuousZoomDomainsFromScopes(
+        {
+          x: [],
+          y: [{ scope: "plot-b", domain: [4, 5] }],
+        },
+        "plot-a",
+        "plot-b",
+      ),
+    ).toEqual({ y: [4, 5] });
+
+    expect(
+      continuousZoomDomainsFromScopes(
+        {
+          x: [{ scope: "other", domain: [0, 1] }],
+          y: [{ scope: "other", domain: [2, 3] }],
+        },
+        "plot-a",
+        "plot-b",
+      ),
+    ).toEqual({});
+
+    const unsetScope: string | undefined = void 0;
+    expect(
+      continuousZoomDomainsFromScopes(
+        {
+          x: [{ scope: "plot-a", domain: [0, 1] }],
+          y: [{ scope: "plot-b", domain: [2, 3] }],
+        },
+        unsetScope,
+        unsetScope,
+      ),
+    ).toEqual({});
   });
 });

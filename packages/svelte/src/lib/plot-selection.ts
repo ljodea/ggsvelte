@@ -112,3 +112,29 @@ export function anchorsFromCandidateKeys(
   }
   return anchors;
 }
+
+/** Inspection focus fields needed for interaction-mask presentation keys. */
+export type PresentationInspectionFocus = {
+  readonly sourceKeys: readonly PropertyKey[];
+  readonly key: PropertyKey | null;
+};
+
+/**
+ * Keys used for interaction mask presentation when emphasis is active.
+ * Short-circuit: if emphasis is empty OR inspection is null, return emphasis
+ * (same reference). Otherwise freeze the Set-union of emphasis, sourceKeys,
+ * and the optional focus key (insertion order: emphasis → sourceKeys → key).
+ */
+export function mergePresentationFocusKeys(
+  emphasisKeys: readonly PropertyKey[],
+  inspection: PresentationInspectionFocus | null,
+): readonly PropertyKey[] {
+  if (emphasisKeys.length === 0 || inspection === null) return emphasisKeys;
+  return Object.freeze([
+    ...new Set([
+      ...emphasisKeys,
+      ...inspection.sourceKeys,
+      ...(inspection.key === null ? [] : [inspection.key]),
+    ]),
+  ]);
+}

@@ -441,6 +441,32 @@ describe("canvas strata (decision 0006 graduated)", () => {
     expect([...table.querySelectorAll("th")].map((t) => t.textContent)).toEqual(["x", "y"]);
   });
 
+  it("canvas a11y open state is shared across interleaved canvas strata", async () => {
+    // canvas → svg → canvas yields two canvas strata (contiguous same-backend merges).
+    const { container } = render(GGPlot, {
+      data: rows,
+      aes: { x: "x", y: "y" },
+      layers: [
+        { geom: "point" as const, render: "canvas" as const, params: { size: 6 } },
+        { geom: "line" as const },
+        { geom: "point" as const, render: "canvas" as const, params: { size: 4 } },
+      ],
+      theme: "light" as const,
+      ...size,
+    });
+    const toggles = [...container.querySelectorAll<HTMLButtonElement>(".gg-a11y-toggle")];
+    expect(toggles).toHaveLength(2);
+    expect(toggles.every((t) => t.getAttribute("aria-expanded") === "false")).toBe(true);
+    expect(container.querySelectorAll(".gg-a11y-table")).toHaveLength(0);
+    toggles[0]?.click();
+    await until(() => container.querySelectorAll(".gg-a11y-table").length === 2);
+    expect(
+      [...container.querySelectorAll(".gg-a11y-toggle")].every(
+        (t) => t.getAttribute("aria-expanded") === "true",
+      ),
+    ).toBe(true);
+  });
+
   it('a11y "force-svg" keeps marks in SVG with one virtual-navigation surface', () => {
     const { container } = render(GGPlot, {
       ...canvasProps,
