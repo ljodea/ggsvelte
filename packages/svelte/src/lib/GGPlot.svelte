@@ -95,11 +95,7 @@
     resolveInteractionScope,
     toLayerInput,
   } from "./plot-assemble.js";
-  import {
-    brushAtPoint,
-    brushWithEnd,
-    nudgeBrushEnd,
-  } from "./plot-area-brush.js";
+  import { brushAtPoint, brushWithEnd } from "./plot-area-brush.js";
   import {
     frozenZoomDomains,
     normalizedRect,
@@ -2170,7 +2166,7 @@
   function onSurfaceKeyDown(event: KeyboardEvent): void {
     // Decision table is pure (plot-surface-keyboard); this switch owns side
     // effects only. brushCorners is the draft source of truth (not reducer
-    // brushing); complete-area carries finish so host only applies.
+    // brushing); nudge/complete-area carry pure payloads so host only applies.
     const { action, preventDefault } = resolveSurfaceKeyAction({
       key: event.key,
       shiftKey: event.shiftKey,
@@ -2181,18 +2177,17 @@
       focusKey: inspection?.focus.key ?? null,
       sourceKeys: inspection?.focus.sourceKeys ?? [],
       inspectionAnchor: inspection?.focus.anchor ?? null,
+      inspectionPanel,
       firstPanel: model?.scene.panels[0],
     });
     if (preventDefault) event.preventDefault();
     switch (action.type) {
       case "nudge-brush": {
-        // Pure table emits only when brushCorners was non-null.
-        const panel = inspectionPanel ?? model?.scene.panels[0];
-        if (panel === undefined || brushRect === null) return;
-        brushRect = nudgeBrushEnd(brushRect, action.dx, action.dy, panel);
+        // Pure table owns clamp panel policy and free-corner nudge.
+        brushRect = action.corners;
         reducer.dispatch({
           type: "move-area",
-          point: { x: brushRect.x1, y: brushRect.y1 },
+          point: { x: action.corners.x1, y: action.corners.y1 },
         });
         return;
       }

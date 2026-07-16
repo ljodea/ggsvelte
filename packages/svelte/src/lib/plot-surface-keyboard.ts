@@ -1,5 +1,10 @@
 import { isAreaTool, type InteractionTool } from "./interaction.js";
-import { panelCenterAnchor, type BrushCorners, type PlotPoint } from "./plot-area-brush.js";
+import {
+  nudgeBrushEnd,
+  panelCenterAnchor,
+  type BrushCorners,
+  type PlotPoint,
+} from "./plot-area-brush.js";
 import { normalizedRect, type PanelBounds } from "./plot-geometry.js";
 import { resolveFinishBrushAction, type FinishBrushAction } from "./plot-brush-finish.js";
 
@@ -38,15 +43,24 @@ export type SurfaceKeyboardInput = {
    */
   readonly inspectionAnchor: PlotPoint | null;
   /**
+   * Host: panel containing inspection focus anchor, or null.
+   * Preferred clamp panel for nudge-brush over `firstPanel`.
+   */
+  readonly inspectionPanel: PanelBounds | null;
+  /**
    * Host: `model?.scene.panels[0]`. Panel-center fallback for `begin-area`
-   * when no inspection anchor. Host still uses `panelId(0)` for dispatch
-   * (index-based, not derived from this panel reference).
+   * when no inspection anchor; also nudge clamp fallback after inspectionPanel.
+   * Host still uses `panelId(0)` for dispatch (index-based).
    */
   readonly firstPanel: PanelBounds | undefined;
 };
 
 type SurfaceKeyAction =
-  | { readonly type: "nudge-brush"; readonly dx: number; readonly dy: number }
+  | {
+      readonly type: "nudge-brush";
+      /** Clamped draft after free-corner nudge; host assigns brushRect. */
+      readonly corners: BrushCorners;
+    }
   | {
       readonly type: "begin-area";
       /** Inspection anchor if present, else panel center (or {0,0}). */
@@ -98,6 +112,7 @@ export function resolveSurfaceKeyAction(input: SurfaceKeyboardInput): SurfaceKey
     focusKey,
     sourceKeys,
     inspectionAnchor,
+    inspectionPanel,
     firstPanel,
   } = input;
   const area = isAreaTool(activeTool);
@@ -107,9 +122,18 @@ export function resolveSurfaceKeyAction(input: SurfaceKeyboardInput): SurfaceKey
     const step = shiftKey ? 10 : 1;
     const dx = key === "ArrowLeft" ? -step : key === "ArrowRight" ? step : 0;
     const dy = key === "ArrowUp" ? -step : key === "ArrowDown" ? step : 0;
+    // Prefer inspection panel, else first panel (host previously inspectionPanel ?? panels[0]).
+    const panel = inspectionPanel ?? firstPanel;
+    if (panel === undefined) {
+      // Draft without a panel: swallow the key (preventDefault) without mutating.
+      return { preventDefault: true, action: { type: "none" } };
+    }
     return {
       preventDefault: true,
-      action: { type: "nudge-brush", dx, dy },
+      action: {
+        type: "nudge-brush",
+        corners: nudgeBrushEnd(brushCorners, dx, dy, panel),
+      },
     };
   }
 
