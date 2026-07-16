@@ -329,8 +329,8 @@ export function runPipeline(spec: SpecInput | PortableSpec, options: RunOptions)
     options.canvasThreshold,
     advisories,
   );
-  const layerFields = resolveLayerFields(bindings);
-  const layerScaledConstants = resolveLayerScaledConstants(bindings);
+  const layerFields = resolveLayerFields(normalized.layers.length, bindings);
+  const layerScaledConstants = resolveLayerScaledConstants(normalized.layers.length, bindings);
 
   const state: Record<string, ScaleState> = {};
   if (colorResolution.state !== null) state["color"] = colorResolution.state;

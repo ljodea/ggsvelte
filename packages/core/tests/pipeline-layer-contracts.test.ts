@@ -94,7 +94,7 @@ describe("resolveLayerFields", () => {
       table,
       [],
     );
-    const fields = resolveLayerFields([binding]);
+    const fields = resolveLayerFields(1, [binding]);
     expect(fields[0]!.map((f) => `${f.channel}:${f.field}`)).toEqual(
       expect.arrayContaining(["x:x", "y:y", "color:g"]),
     );
@@ -111,10 +111,17 @@ describe("resolveLayerFields", () => {
       table,
       [],
     );
-    const fields = resolveLayerFields([binding])[0]!;
+    const fields = resolveLayerFields(1, [binding])[0]!;
     const y = fields.find((f) => f.channel === "y");
     expect(y?.field).toBe("count");
     expect(y?.source).toBe("stat");
+  });
+
+  it("pads empty bindings to declared layer count (empty-data contract)", () => {
+    const fields = resolveLayerFields(2, []);
+    expect(fields).toHaveLength(2);
+    expect(fields[0]).toEqual([]);
+    expect(fields[1]).toEqual([]);
   });
 });
 
@@ -133,7 +140,14 @@ describe("resolveLayerScaledConstants", () => {
       table,
       [],
     );
-    const constants = resolveLayerScaledConstants([binding]);
+    const constants = resolveLayerScaledConstants(1, [binding]);
     expect(constants[0]?.["color"]).toBe("steelblue");
+  });
+
+  it("pads empty bindings to declared layer count (empty-data contract)", () => {
+    const constants = resolveLayerScaledConstants(2, []);
+    expect(constants).toHaveLength(2);
+    expect(constants[0]).toEqual({});
+    expect(constants[1]).toEqual({});
   });
 });

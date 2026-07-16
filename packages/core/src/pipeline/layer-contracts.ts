@@ -41,8 +41,18 @@ export function resolveLayerBackends(
   });
 }
 
-export function resolveLayerFields(bindings: readonly LayerBinding[]): MappedField[][] {
-  return bindings.map((binding) => {
+/**
+ * One entry per declared layer index. When bindings are shorter (empty data
+ * skips bindLayer), missing indices yield empty field maps so layer-indexed
+ * consumers stay aligned with `normalized.layers` / `layerBackends`.
+ */
+export function resolveLayerFields(
+  layerCount: number,
+  bindings: readonly LayerBinding[],
+): MappedField[][] {
+  return Array.from({ length: layerCount }, (_, index) => {
+    const binding = bindings[index];
+    if (binding === undefined) return [];
     const fields: MappedField[] = [];
     const push = (channel: string, field: string | null, source?: "stat") => {
       if (field !== null)
@@ -74,11 +84,17 @@ export function resolveLayerFields(bindings: readonly LayerBinding[]): MappedFie
   });
 }
 
+/**
+ * One entry per declared layer index (same empty-data padding as fields).
+ */
 export function resolveLayerScaledConstants(
+  layerCount: number,
   bindings: readonly LayerBinding[],
 ): ReadonlyArray<Readonly<Partial<Record<string, CellValue>>>> {
   return Object.freeze(
-    bindings.map((binding) => {
+    Array.from({ length: layerCount }, (_, index) => {
+      const binding = bindings[index];
+      if (binding === undefined) return Object.freeze({});
       const out: Partial<Record<string, CellValue>> = {};
       if (binding.color.scaledConstant !== null) out["color"] = binding.color.scaledConstant;
       if (binding.fill.scaledConstant !== null) out["fill"] = binding.fill.scaledConstant;
