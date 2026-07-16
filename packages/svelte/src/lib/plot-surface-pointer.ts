@@ -68,6 +68,17 @@ export function resolvePointerDownAction(input: SurfacePointerDownInput): Surfac
 }
 
 /**
+ * Domain inspect snapshot for pointer move/up (host: resolved
+ * `interactionConfig.inspect`). Pass the domain object, not a pre-derived
+ * `inspectEnabled` boolean — matches inspection-state domain convention.
+ */
+export type SurfaceInspectConfig = {
+  readonly mode: "auto" | "exact" | "x" | "y" | "xy";
+  readonly maxDistance: number;
+  readonly pin: boolean;
+} | null;
+
+/**
  * Capture-surface pointerup decision input.
  * Touch-inspect fields only matter when tool is inspect + pointer is touch.
  *
@@ -78,8 +89,8 @@ export function resolvePointerDownAction(input: SurfacePointerDownInput): Surfac
 export type SurfacePointerUpInput = {
   readonly pointerType: string;
   readonly activeTool: InteractionTool;
-  readonly inspectEnabled: boolean;
-  readonly pinEnabled: boolean;
+  /** Host: resolved `interactionConfig.inspect`. */
+  readonly inspect: SurfaceInspectConfig;
   readonly hasTouchInspectStart: boolean;
   readonly touchInspectMoved: boolean;
   /** Reducer brushing flag — can diverge from draft. */
@@ -96,8 +107,11 @@ export type SurfacePointerUpInput = {
 export type SurfacePointerUpAction =
   | {
       readonly type: "touch-inspect-tap";
-      /** Inspection state for setInspection (from pinEnabled). */
+      /** Inspection state for setInspection (from inspect.pin). */
       readonly state: "pinned" | "transient";
+      /** Nearest-query params from inspect snapshot at decision time. */
+      readonly mode: "auto" | "exact" | "x" | "y" | "xy";
+      readonly maxDistance: number;
     }
   | { readonly type: "touch-inspect-drag-ignore" }
   | {
@@ -124,8 +138,7 @@ export function resolvePointerUpAction(input: SurfacePointerUpInput): SurfacePoi
   const {
     pointerType,
     activeTool,
-    inspectEnabled,
-    pinEnabled,
+    inspect,
     hasTouchInspectStart,
     touchInspectMoved,
     brushing,
@@ -136,13 +149,15 @@ export function resolvePointerUpAction(input: SurfacePointerUpInput): SurfacePoi
   if (
     activeTool === "inspect" &&
     pointerType === "touch" &&
-    inspectEnabled &&
+    inspect !== null &&
     hasTouchInspectStart
   ) {
     if (touchInspectMoved) return { type: "touch-inspect-drag-ignore" };
     return {
       type: "touch-inspect-tap",
-      state: pinEnabled ? "pinned" : "transient",
+      state: inspect.pin ? "pinned" : "transient",
+      mode: inspect.mode,
+      maxDistance: inspect.maxDistance,
     };
   }
 
@@ -238,14 +253,20 @@ export type SurfacePointerMoveInput = {
   readonly brushing: boolean;
   /** True when `brushRect !== null`. */
   readonly hasBrushDraft: boolean;
-  /** `interactionConfig.inspect !== null`. */
-  readonly inspectEnabled: boolean;
+  /** Host: resolved `interactionConfig.inspect` (domain object, not a boolean). */
+  readonly inspect: SurfaceInspectConfig;
 };
 
 export type SurfacePointerMoveAction =
   | { readonly type: "touch-inspect-drag-cancel" }
   | { readonly type: "queue-area-move"; readonly source: "touch" | "pointer" }
-  | { readonly type: "queue-inspect"; readonly source: "touch" | "pointer" }
+  | {
+      readonly type: "queue-inspect";
+      readonly source: "touch" | "pointer";
+      /** Nearest-query params from inspect snapshot at decision time. */
+      readonly mode: "auto" | "exact" | "x" | "y" | "xy";
+      readonly maxDistance: number;
+    }
   | { readonly type: "none" };
 
 /** Map a PointerEvent.pointerType string to InteractionSource surface values. */
@@ -261,12 +282,13 @@ const pointerSource = (pointerType: string): "touch" | "pointer" =>
  * Priority: touch-inspect drag cancel → queue area move → queue inspect → none.
  *
  * Cancel requires `pointerType === "touch"` (mouse/pen with residual start must
- * not cancel). Cancel does **not** require `inspectEnabled` — only the inspect
+ * not cancel). Cancel does **not** require inspect config — only the inspect
  * tool, matching the current host.
  *
  * Host advances `touchInspectMoved` separately on touch+start before calling.
  * Host on cancel: clear `queuedPointerInspection`, cancel scheduled pointer
- * (`queuedPointerToken` left untouched). Host on queue-*: use `action.source`.
+ * (`queuedPointerToken` left untouched). Host on queue-inspect: nearest with
+ * action.mode / action.maxDistance (no config re-read).
  */
 export function resolvePointerMoveAction(input: SurfacePointerMoveInput): SurfacePointerMoveAction {
   const {
@@ -276,7 +298,7 @@ export function resolvePointerMoveAction(input: SurfacePointerMoveInput): Surfac
     hasTouchInspectStart,
     brushing,
     hasBrushDraft,
-    inspectEnabled,
+    inspect,
   } = input;
 
   if (
@@ -292,8 +314,13 @@ export function resolvePointerMoveAction(input: SurfacePointerMoveInput): Surfac
     return { type: "queue-area-move", source: pointerSource(pointerType) };
   }
 
-  if (activeTool === "inspect" && inspectEnabled) {
-    return { type: "queue-inspect", source: pointerSource(pointerType) };
+  if (activeTool === "inspect" && inspect !== null) {
+    return {
+      type: "queue-inspect",
+      source: pointerSource(pointerType),
+      mode: inspect.mode,
+      maxDistance: inspect.maxDistance,
+    };
   }
 
   return { type: "none" };
