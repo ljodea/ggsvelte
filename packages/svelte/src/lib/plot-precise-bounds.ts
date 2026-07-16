@@ -22,15 +22,29 @@ export function boundsEditorInputForScale(
 ): BoundsEditorInput {
   const { scale } = options;
   if (scale.type === "band") {
-    const categories = scale.domain.map((value) => ({ value, label: value }));
+    const categories = scale.rawDomain.map((value, index) => ({
+      value: value as BoundsCategoryValue,
+      label: scale.domain[index] ?? String(value),
+    }));
     const requested = options.bounds as
       | readonly [BoundsCategoryValue, BoundsCategoryValue]
       | undefined;
+    const categoryValue = (bound: BoundsCategoryValue): BoundsCategoryValue => {
+      if (typeof bound === "string") {
+        const typed = categories.find((category) => encodeKey(category.value) === bound);
+        if (typed !== undefined) return typed.value;
+      }
+      return categories.find((category) => Object.is(category.value, bound))?.value ?? bound;
+    };
+    const bounds =
+      requested === undefined
+        ? ([categories[0]?.value ?? "", categories.at(-1)?.value ?? ""] as const)
+        : ([categoryValue(requested[0]), categoryValue(requested[1])] as const);
     return {
       axis: options.axis,
       action: options.action,
       scale: "band",
-      bounds: requested ?? [scale.domain[0] ?? "", scale.domain.at(-1) ?? ""],
+      bounds,
       categories,
       reversed: options.reversed ?? false,
     };
