@@ -314,13 +314,21 @@ describe("advanceTouchInspectMoved", () => {
   const start = { x: 0, y: 0 };
 
   it("stays false under the threshold", () => {
-    expect(advanceTouchInspectMoved(false, start, { x: TOUCH_INSPECT_MOVE_PX - 1, y: 0 })).toBe(
-      false,
-    );
+    expect(
+      advanceTouchInspectMoved(false, start, {
+        x: TOUCH_INSPECT_MOVE_PX - 1,
+        y: 0,
+      }),
+    ).toBe(false);
   });
 
   it("becomes true at exactly the threshold (plotPoint coords)", () => {
-    expect(advanceTouchInspectMoved(false, start, { x: TOUCH_INSPECT_MOVE_PX, y: 0 })).toBe(true);
+    expect(
+      advanceTouchInspectMoved(false, start, {
+        x: TOUCH_INSPECT_MOVE_PX,
+        y: 0,
+      }),
+    ).toBe(true);
   });
 
   it("is sticky once true", () => {
@@ -462,6 +470,8 @@ describe("resolvePointerMoveAction", () => {
   });
 
   it("returns none for non-inspect tools without brush", () => {
-    expect(resolvePointerMoveAction(move({ activeTool: "point" }))).toEqual({ type: "none" });
+    expect(resolvePointerMoveAction(move({ activeTool: "point" }))).toEqual({
+      type: "none",
+    });
   });
 });
