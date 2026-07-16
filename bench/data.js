@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784173227796,
+  "lastUpdate": 1784174876288,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -6866,6 +6866,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 159.5394,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "3cfb9c255f893d5369b075fe621133c911461139",
+          "message": "refactor(svelte): extract pure presentation and interval-scene adapters (#66)\n\n* refactor(svelte): extract pure presentation and interval-scene adapters\n\nMove mergePresentationFocusKeys and intervalQuerySceneFromModel out of\nGGPlot so mask key union and interval query scene mapping are unit-tested\npure helpers with a narrow model port.\n\n* test(svelte): assert interval queryRect forwards expanded bounds\n\nCodex pre-PR P2: the adapter stub ignored queryRect arguments.",
+          "timestamp": "2026-07-15T23:07:19-05:00",
+          "tree_id": "6c69f84925d87a71012e511a5ce5f9ebbc7d0ee3",
+          "url": "https://github.com/ljodea/ggsvelte/commit/3cfb9c255f893d5369b075fe621133c911461139"
+        },
+        "date": 1784174875671,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 3.0206,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 4.7074,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 13.9962,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 17.2605,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 96.6037,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 149.7886,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.0487,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.3178,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 95.2171,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 123.2629,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 11.5483,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 11.2477,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 126.7303,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.6966,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 28.1903,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 6.6695,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 32.0285,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 644.7378,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 155.3047,
             "unit": "ms"
           }
         ]
