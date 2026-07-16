@@ -101,6 +101,7 @@
   import InteractionOverlay from "./InteractionOverlay.svelte";
   import {
     assemblePortableSpec,
+    isFacetedPlotIntent,
     resolveInteractionScope,
     toLayerInput,
   } from "./plot-assemble.js";
@@ -348,10 +349,9 @@
     });
   });
 
-  // Facet intent comes from the raw prop — not assembled.facet — so declaration-
-  // only children still take the faceted diagnostic path before layers register
-  // and assembled becomes non-null on a later flush.
-  const facetedPlot = $derived(facet !== undefined);
+  // Facet intent: raw prop (declaration-only children before layers register)
+  // OR assembled.facet (portable-spec plots that embed facet without a prop).
+  const facetedPlot = $derived(isFacetedPlotIntent({ facet, assembled }));
 
   const resolvedInteractionScope: PlotInteractionScope = $derived(
     resolveInteractionScope({
