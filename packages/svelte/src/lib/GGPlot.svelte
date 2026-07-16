@@ -208,6 +208,7 @@
   } from "./plot-interval.js";
   import {
     buildIntervalSelectionFromScene,
+    intervalPixelsFromDomains,
     intervalQuerySceneFromModel,
     type IntervalQueryScene,
   } from "./plot-interval-query.js";
@@ -215,6 +216,7 @@
     candidateInInterval,
     consumeIntervalKeys,
     recomputePanelIntervalKeys,
+    sameIntervalRecord,
     type IntervalConsumptionCandidate,
   } from "./plot-interval-consumption.js";
   import { createPaintLedger, isPlotReady } from "./plot-paint.js";
@@ -851,6 +853,10 @@
     });
   });
   let committedInterval = $state<IntervalSelection | null>(null);
+  // Semantic snapshot of the record backing `committedInterval`, so external
+  // same-panel replacements are detected by content, not just presence.
+  let committedIntervalRecord =
+    $state<PlotInteractionInterval<PublicKey> | null>(null);
   let localCommittedIntervals = $state<PlotInteractionInterval<PublicKey>[]>(
     [],
   );
@@ -912,14 +918,22 @@
 
   // A shared controller can clear or replace this chart's interval from
   // outside (a linked plot, programmatic reconcile). The local pixel
-  // rectangle must not outlive its semantic record.
+  // rectangle must not outlive its semantic record — including a same-panel
+  // record whose domains or keys were replaced under it.
   $effect(() => {
     const current = committedInterval;
     if (current === null) return;
     const record = effectiveIntervals.find(
       (candidate) => candidate.panelId === current.panelId,
     );
-    if (record === undefined) committedInterval = null;
+    if (
+      record !== undefined &&
+      (committedIntervalRecord === null ||
+        sameIntervalRecord(committedIntervalRecord, record))
+    )
+      return;
+    committedInterval = null;
+    committedIntervalRecord = null;
   });
 
   function facetIdentityValueLabel(encodedValue: string): string {
@@ -1187,6 +1201,7 @@
       source,
     );
     committedInterval = null;
+    committedIntervalRecord = null;
     emitSelection(event);
   }
 
@@ -1213,6 +1228,7 @@
       source,
     );
     committedInterval = null;
+    committedIntervalRecord = null;
     emitSelection(event);
   }
 
@@ -1317,6 +1333,7 @@
       }),
       keys: Object.freeze([...event.keys]) as readonly PublicKey[],
     });
+    committedIntervalRecord = record;
     if (interaction === undefined) {
       localCommittedIntervals = [
         ...nextLocalIntervalRecords(localCommittedIntervals, record),
@@ -1741,6 +1758,22 @@
       clause: LegendFilterClause;
       removed: boolean;
     }> = [];
+    // A clause whose field is still mapped but whose legend stopped being
+    // filterable (second unlike field on the scale, a scaled constant, a
+    // non-discrete legend) has no checkbox or reset control left — remove it
+    // rather than filtering rows invisibly. Unmapped fields are handled by
+    // the capability reset above.
+    if (model !== null && legendFilterOptions !== null) {
+      for (const clause of next.filter(
+        (candidate) =>
+          activeLegendFilterBindings.has(
+            `${candidate.scale}:${candidate.field}`,
+          ) && !catalogs.has(`${candidate.scale}:${candidate.field}`),
+      )) {
+        next = next.filter((candidate) => candidate !== clause);
+        reconciled.push({ clause, removed: true });
+      }
+    }
     for (const [key, catalog] of catalogs) {
       const fingerprint = JSON.stringify(
         catalog.map((value) => encodeKey(value)),
@@ -2792,6 +2825,7 @@
       domains,
       keys,
     });
+    committedIntervalRecord = next;
     if (interaction === undefined) {
       localCommittedIntervals = [
         ...nextLocalIntervalRecords(localCommittedIntervals, next),
@@ -2808,15 +2842,15 @@
       mode: interactionConfig.select?.mode ?? "xy",
       panelId: targetPanelId,
       domain: eventDomain(panelIndex, domains),
-      pixels:
-        committedInterval?.panelId === targetPanelId
-          ? committedInterval.pixels
-          : {
-              x0: panel.x,
-              y0: panel.y,
-              x1: panel.x + panel.width,
-              y1: panel.y + panel.height,
-            },
+      // The overlay must depict the interval that was actually applied, so
+      // project the edited domains back into pixels rather than reusing the
+      // pre-edit rectangle (or defaulting to the whole panel).
+      pixels: intervalPixelsFromDomains({
+        domains,
+        panel,
+        scales: model.scales.panels[panelIndex] ?? model.scales,
+        flipped: coordFlipped,
+      }),
       keys,
       lineageCount: intervalLineageCount(targetPanelId, domains),
       source: event.inputSource,

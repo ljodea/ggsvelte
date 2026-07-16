@@ -4,6 +4,7 @@ import {
   consumeIntervalKeys,
   nextLocalIntervalRecords,
   recomputePanelIntervalKeys,
+  sameIntervalRecord,
   type IntervalConsumptionCandidate,
 } from "../src/lib/plot-interval-consumption.js";
 import type { PlotInteractionInterval } from "../src/lib/interaction.js";
@@ -161,6 +162,70 @@ describe("facet interval consumption", () => {
         ],
       }),
     ).toEqual(["number"]);
+  });
+
+  it("treats records as the same across key order and controller canonicalization", () => {
+    const committed = record("north", "independent", ["n4", "n1"]);
+    const canonical: PlotInteractionInterval<string> = {
+      panelId: "north",
+      preset: "independent",
+      domains: { x: { kind: "linear", domain: [1, 5] } },
+      keys: ["n1", "n4"],
+    };
+    expect(sameIntervalRecord(committed, canonical)).toBe(true);
+    expect(
+      sameIntervalRecord(
+        {
+          ...committed,
+          domains: {
+            x: { kind: "band", values: ["@n:1", "1"] },
+            y: { kind: "log", domain: [1, 100] },
+          },
+        },
+        {
+          ...canonical,
+          domains: {
+            x: { kind: "band", values: ["@n:1", "1"] },
+            y: { kind: "log", domain: [1, 100] },
+          },
+        },
+      ),
+    ).toBe(true);
+  });
+
+  it("detects replaced records by panel, preset, domain, or key changes", () => {
+    const committed = record("north", "independent", ["n1"]);
+    expect(sameIntervalRecord(null, committed)).toBe(false);
+    expect(sameIntervalRecord(committed, record("south", "independent", ["n1"]))).toBe(false);
+    expect(sameIntervalRecord(committed, record("north", "union", ["n1"]))).toBe(false);
+    expect(sameIntervalRecord(committed, record("north", "independent", ["n1", "n4"]))).toBe(false);
+    expect(
+      sameIntervalRecord(committed, {
+        ...record("north", "independent", ["n1"]),
+        domains: { x: { kind: "linear", domain: [1, 9] } },
+      }),
+    ).toBe(false);
+    expect(
+      sameIntervalRecord(committed, {
+        ...record("north", "independent", ["n1"]),
+        domains: {
+          x: { kind: "linear", domain: [1, 5] },
+          y: { kind: "band", values: ["low"] },
+        },
+      }),
+    ).toBe(false);
+    expect(
+      sameIntervalRecord(
+        {
+          ...record("north", "independent", ["n1"]),
+          domains: { x: { kind: "band", values: ["a", "b"] } },
+        },
+        {
+          ...record("north", "independent", ["n1"]),
+          domains: { x: { kind: "band", values: ["b", "a"] } },
+        },
+      ),
+    ).toBe(false);
   });
 
   it("recomputes precise-bound keys in only the edited panel", () => {

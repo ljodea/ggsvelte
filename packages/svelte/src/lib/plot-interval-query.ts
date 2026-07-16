@@ -1,6 +1,11 @@
-import type { CellValue, RenderModel } from "@ggsvelte/core";
+import { encodeKey, type CellValue, type RenderModel } from "@ggsvelte/core";
 
-import type { InteractionSource, IntervalSelection } from "./interaction.js";
+import type {
+  InteractionSource,
+  IntervalSelection,
+  ReadonlyIntervalDomains,
+  SemanticIntervalAxis,
+} from "./interaction.js";
 import {
   expandIntervalQuery,
   panelDataDomains,
@@ -217,6 +222,61 @@ export function resolveIntervalQueryParts(input: ResolveIntervalQueryPartsInput)
     rowIndexes,
     panelId: panel.id,
     invertedDomain,
+  };
+}
+
+/** Normalized [tMin, tMax] screen fraction of a semantic axis, or the full
+ *  span when the axis is absent or cannot be mapped through the scale. */
+function normalizedAxisSpan(
+  scale: RenderModel["scales"]["x"],
+  axis: SemanticIntervalAxis | undefined,
+): readonly [number, number] {
+  if (axis === undefined) return [0, 1];
+  if (axis.kind === "band") {
+    if (scale.type !== "band") return [0, 1];
+    const centers = axis.values.flatMap((encoded) => {
+      const value = scale.rawDomain.find((candidate) => encodeKey(candidate) === encoded);
+      const center = value === undefined ? undefined : scale.normalize(value);
+      return center === undefined ? [] : [center];
+    });
+    if (centers.length === 0) return [0, 1];
+    const half = scale.step / 2;
+    return [Math.max(0, Math.min(...centers) - half), Math.min(1, Math.max(...centers) + half)];
+  }
+  if (scale.type === "band") return [0, 1];
+  const t0 = scale.normalize(axis.domain[0]);
+  const t1 = scale.normalize(axis.domain[1]);
+  if (!Number.isFinite(t0) || !Number.isFinite(t1)) return [0, 1];
+  return [Math.max(0, Math.min(t0, t1)), Math.min(1, Math.max(t0, t1))];
+}
+
+export type IntervalPixelsFromDomainsInput = {
+  readonly domains: ReadonlyIntervalDomains;
+  readonly panel: PanelBounds;
+  readonly scales: Pick<RenderModel["scales"], "x" | "y">;
+  readonly flipped: boolean;
+};
+
+/**
+ * Project semantic interval domains back into panel pixels — the inverse of
+ * `panelDataDomains`/`bandDomains`. An absent or unmappable axis spans the
+ * whole panel, matching interval select-mode expansion. Keeps a committed
+ * brush rectangle honest after precise-bounds edits or external replacement.
+ */
+export function intervalPixelsFromDomains(input: IntervalPixelsFromDomainsInput): PlotRect {
+  const horizontal = normalizedAxisSpan(
+    input.flipped ? input.scales.y : input.scales.x,
+    input.flipped ? input.domains.y : input.domains.x,
+  );
+  const vertical = normalizedAxisSpan(
+    input.flipped ? input.scales.x : input.scales.y,
+    input.flipped ? input.domains.x : input.domains.y,
+  );
+  return {
+    x0: input.panel.x + horizontal[0] * input.panel.width,
+    x1: input.panel.x + horizontal[1] * input.panel.width,
+    y0: input.panel.y + (1 - vertical[1]) * input.panel.height,
+    y1: input.panel.y + (1 - vertical[0]) * input.panel.height,
   };
 }
 

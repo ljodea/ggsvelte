@@ -895,6 +895,97 @@ describe("brush + brush-to-zoom", () => {
     await until(() => container.querySelector(".gg-selection") === null);
   });
 
+  it("clears the committed brush rectangle when a linked chart replaces the same-panel interval", async () => {
+    let model: RenderModel | null = null;
+    const interaction = createPlotInteraction<string>();
+    const interactionScope = {
+      keys: "replaced-rect",
+      intervals: "replaced-rect",
+    } as const;
+    const { container } = render(GGPlot, {
+      data: rows,
+      aes: { x: "x", y: "y" },
+      layers: [{ geom: "point" }],
+      key: "x",
+      select: { type: "interval", mode: "x", persistent: true },
+      interaction,
+      interactionScope,
+      onrender: (next: RenderModel) => {
+        model = next;
+      },
+      ...size,
+    });
+    await until(() => model !== null);
+    const capture = container.querySelector(".gg-capture")!;
+    const selectArea = [
+      ...container.querySelectorAll<HTMLButtonElement>(".gg-tool-rail button"),
+    ].find((button) => button.textContent === "Select area")!;
+    selectArea.click();
+    await until(() => selectArea.getAttribute("aria-pressed") === "true");
+    const first = model!.candidates.candidate(0)!;
+    const last = model!.candidates.candidate(2)!;
+    drag(capture, first.x - 5, first.y - 10, last.x + 5, last.y + 10);
+    await until(() => interaction.intervals(interactionScope).length === 1);
+    await until(() => container.querySelector(".gg-selection") !== null);
+
+    // A linked chart replaces this panel's interval with new domains: the
+    // old pixels no longer depict the semantic record, so the rectangle
+    // must clear even though a record still exists for the panel.
+    const record = interaction.intervals(interactionScope)[0];
+    interaction.setInterval(
+      {
+        panelId: record.panelId,
+        preset: record.preset,
+        domains: { x: { kind: "linear", domain: [1, 2] } },
+        keys: ["replacement"],
+      },
+      { scope: interactionScope },
+    );
+    await until(() => container.querySelector(".gg-selection") === null);
+  });
+
+  it("draws the committed rectangle from the applied precise bounds", async () => {
+    let model: RenderModel | null = null;
+    const { container } = render(GGPlot, {
+      data: rows,
+      aes: { x: "x", y: "y" },
+      layers: [{ geom: "point" }],
+      key: "x",
+      select: { type: "interval", mode: "x", persistent: true },
+      onrender: (next: RenderModel) => {
+        model = next;
+      },
+      ...size,
+    });
+    await until(() => model !== null);
+    const setBounds = [
+      ...container.querySelectorAll<HTMLButtonElement>(".gg-tool-rail button"),
+    ].find((button) => button.textContent?.trim() === "Set x selection bounds")!;
+    setBounds.click();
+    await until(() => container.querySelector('.gg-bounds-editor input[id$="-lower"]') !== null);
+    const [lower, upper] = [
+      ...container.querySelectorAll<HTMLInputElement>(".gg-bounds-editor input"),
+    ];
+    lower.value = "1.5";
+    lower.dispatchEvent(new InputEvent("input", { bubbles: true }));
+    upper.value = "2.5";
+    upper.dispatchEvent(new InputEvent("input", { bubbles: true }));
+    container.querySelector<HTMLButtonElement>('.gg-bounds-editor button[type="submit"]')!.click();
+    await until(() => container.querySelector(".gg-selection") !== null);
+
+    // The overlay depicts the applied [1.5, 2.5] interval, not the whole
+    // panel: pixel positions are affine in x, so the rect edges sit halfway
+    // between adjacent candidate centers.
+    const c0 = model!.candidates.candidate(0)!;
+    const c1 = model!.candidates.candidate(1)!;
+    const c2 = model!.candidates.candidate(2)!;
+    const selection = container.querySelector(".gg-selection")!;
+    const x = Number(selection.getAttribute("x"));
+    const width = Number(selection.getAttribute("width"));
+    expect(x).toBeCloseTo((c0.x + c1.x) / 2, 0);
+    expect(x + width).toBeCloseTo((c1.x + c2.x) / 2, 0);
+  });
+
   it("publishes complete shared xy precise domains and source-row lineage", async () => {
     const interaction = createPlotInteraction<string>();
     const interactionScope = {

@@ -81,11 +81,14 @@ export function consumeIntervalKeys<Key extends PropertyKey>(
     return uniqueKeys(
       input.records
         .filter((record) => record.preset === "independent" && visiblePanels.has(record.panelId))
-        .flatMap((record) =>
-          input.candidates
+        .flatMap((record) => {
+          // Indexed lookup: a persistent brush can hold tens of thousands of
+          // keys, and a linear includes() per candidate key is quadratic.
+          const recordKeys = new Set<Key>(record.keys);
+          return input.candidates
             .filter((candidate) => candidate.panelId === record.panelId)
-            .map((candidate) => candidate.keys.filter((key) => record.keys.includes(key))),
-        ),
+            .map((candidate) => candidate.keys.filter((key) => recordKeys.has(key)));
+        }),
     );
   }
 
@@ -107,6 +110,42 @@ export function consumeIntervalKeys<Key extends PropertyKey>(
       )
       .map((candidate) => candidate.keys),
   );
+}
+
+function sameIntervalAxis(
+  left: SemanticIntervalAxis | undefined,
+  right: SemanticIntervalAxis | undefined,
+): boolean {
+  if (left === right) return true;
+  if (left === undefined || right === undefined || left.kind !== right.kind) return false;
+  if (left.kind === "band" || right.kind === "band") {
+    return (
+      left.kind === "band" &&
+      right.kind === "band" &&
+      left.values.length === right.values.length &&
+      left.values.every((value, index) => value === right.values[index])
+    );
+  }
+  return Object.is(left.domain[0], right.domain[0]) && Object.is(left.domain[1], right.domain[1]);
+}
+
+/**
+ * Semantic-content equality between a locally committed record and a record
+ * observed in the interval set. Keys compare as sets because the controller
+ * canonicalizes (sorts and de-duplicates) key order on storage; band values
+ * compare in order because both sides derive from the scale's domain order.
+ */
+export function sameIntervalRecord<Key extends PropertyKey>(
+  left: PlotInteractionInterval<Key> | null,
+  right: PlotInteractionInterval<Key>,
+): boolean {
+  if (left === null) return false;
+  if (left.panelId !== right.panelId || left.preset !== right.preset) return false;
+  if (!sameIntervalAxis(left.domains.x, right.domains.x)) return false;
+  if (!sameIntervalAxis(left.domains.y, right.domains.y)) return false;
+  if (left.keys.length !== right.keys.length) return false;
+  const rightKeys = new Set(right.keys);
+  return left.keys.every((key) => rightKeys.has(key));
 }
 
 /** Apply a chart-local interval commit with the controller's atomic preset
