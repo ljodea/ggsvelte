@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784172742511,
+  "lastUpdate": 1784173227796,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -6747,6 +6747,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 129.277,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "3635fcc3f8206e1b1cbffe266762da43b53deb81",
+          "message": "fix: keep data-gg-ready false during SSR after #51 (#64)\n\n* fix: keep data-gg-ready false during SSR after #51\n\nRestore the $effect gate so prerendered fixed-width SVG plots stay\ndata-gg-ready=\"false\" until the first client committed flush (decision 0009).\n$derived was emitting ready=true on SSR, which can race VR screenshot waits.\n\n* fix: clear data-gg-ready synchronously when unready\n\nPair the SSR clientFlush $effect gate with a derived isPlotReady predicate\nso readiness drops in the same render when the model/paint prerequisites\nfail (Codex P2 on #64), while prerender still stays false until client flush.",
+          "timestamp": "2026-07-15T22:39:48-05:00",
+          "tree_id": "fe987e8b53ce4cc34991dbf1931563011c8c60e8",
+          "url": "https://github.com/ljodea/ggsvelte/commit/3635fcc3f8206e1b1cbffe266762da43b53deb81"
+        },
+        "date": 1784173226932,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.4499,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.8842,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 9.0209,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 13.5741,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 83.6575,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 130.6644,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.0108,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2109,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 84.1186,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 106.7268,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 12.8305,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.4846,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 113.0829,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.6628,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 26.4078,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.5768,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 27.9376,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 582.5512,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 159.5394,
             "unit": "ms"
           }
         ]
