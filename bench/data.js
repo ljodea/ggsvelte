@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784212541460,
+  "lastUpdate": 1784212839907,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -13887,6 +13887,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 159.746,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "8d30b5473687a314a199df3020758c466a0d0dc2",
+          "message": "fix: treat SVG-context bare type chains as CSS after #104 (#124)\n\n* fix: treat SVG-context bare type chains as CSS after #104\n\nCodex P2: incomplete SVG allowlist still skipped bare multi-token\nselectors like `svg animateMotion` / `svg mpath` / `svg metadata`.\n\nAccept camelCase SVG-ish idents and any type-ident under SVG container\nroots so alias audit does not miss runtime CSS when `{` is on the next line.\n\n* fix: keep SVG bare-chain matching allowlist-scoped after #124 review\n\nDrop global camelCase and loose SVG-context heuristics that misclassified\nJSDoc (`minValue maxValue`, `svg fallback content`). Keep expanded SVG\nallowlist (animateMotion, mpath, metadata, …) plus custom elements.",
+          "timestamp": "2026-07-16T09:40:00-05:00",
+          "tree_id": "647d5c2e42f3a36dd86593042fe8f2745a3f62bc",
+          "url": "https://github.com/ljodea/ggsvelte/commit/8d30b5473687a314a199df3020758c466a0d0dc2"
+        },
+        "date": 1784212839208,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.7933,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.0086,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 10.4901,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 13.9621,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 87.3144,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 125.7333,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.1431,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2547,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 93.9396,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 108.8159,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 14.863,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 13.335,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 118.1073,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.794,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 26.7017,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.3712,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 28.3361,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 596.6,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 160.4425,
             "unit": "ms"
           }
         ]
