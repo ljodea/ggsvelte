@@ -294,6 +294,9 @@ describe("buildBatch dispatch via runPipeline", () => {
     const kinds = new Set(box.scene.batches.map((b) => b.kind));
     expect(kinds.has("rects")).toBe(true);
     expect(kinds.has("segments")).toBe(true);
+    // whiskers + median = two segment batches; outlier points when present
+    expect(box.scene.batches.filter((b) => b.kind === "segments").length).toBeGreaterThanOrEqual(2);
+    expect(box.scene.batches.some((b) => b.kind === "points")).toBe(true);
 
     const err = runPipeline(
       gg(
