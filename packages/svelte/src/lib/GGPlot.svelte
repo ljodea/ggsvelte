@@ -59,6 +59,7 @@
   } from "@ggsvelte/core";
   import {
     buildInteractionMasks,
+    encodeKey,
     planStrata,
     runPipeline,
     sceneLabel,
@@ -153,12 +154,14 @@
   import {
     buildIntervalSelection,
     clearIntervalSelectionEvent,
+    type IntervalDomain,
   } from "./plot-interval.js";
   import {
     buildIntervalSelectionFromScene,
     type IntervalQueryScene,
   } from "./plot-interval-query.js";
   import {
+    candidateInInterval,
     consumeIntervalKeys,
     recomputePanelIntervalKeys,
     type IntervalConsumptionCandidate,
@@ -213,6 +216,7 @@
   import {
     isLegendValueVisible,
     nextLegendFilterValues,
+    reconcileLegendFilterValues,
     type LegendFilterClause,
     type LegendFilterEvent,
     type LegendFilterInput,
@@ -483,6 +487,8 @@
         },
   );
   let localLegendFilters = $state<LegendFilterClause[]>([]);
+  let appliedLegendFilterMode = $state<"exclude" | "include" | null>(null);
+  const legendCatalogFingerprints = new Map<string, string>();
   const activeLegendFilterBindings = $derived.by(() => {
     const bindings = new Set<string>();
     if (effectiveSpec === null) return bindings;
@@ -504,10 +510,42 @@
   );
 
   // A disabled capability or a remapped spec must never leave an invisible
-  // filter active. Reconcile chart-local state to the current semantic fields.
+  // filter active. Reset the chart-local filter set atomically so the public
+  // `clear` event always describes the actual resulting state.
   $effect(() => {
     if (effectiveLegendFilters.length === localLegendFilters.length) return;
-    localLegendFilters = [...effectiveLegendFilters];
+    localLegendFilters = [];
+    emitLegendFilter({
+      type: "legend-filter",
+      phase: "clear",
+      source: "programmatic",
+      clause: null,
+    });
+    announceInteraction(
+      "Legend filters reset after the filter capability changed.",
+    );
+  });
+
+  // Mode changes are controlled API changes, not reinterpretations of old
+  // state. Reset active clauses so an exclude set can never become a stale
+  // include set (or vice versa).
+  $effect(() => {
+    const mode = legendFilterOptions?.mode ?? null;
+    if (appliedLegendFilterMode === null) {
+      appliedLegendFilterMode = mode;
+      return;
+    }
+    if (mode === appliedLegendFilterMode) return;
+    appliedLegendFilterMode = mode;
+    if (localLegendFilters.length === 0) return;
+    localLegendFilters = [];
+    emitLegendFilter({
+      type: "legend-filter",
+      phase: "clear",
+      source: "programmatic",
+      clause: null,
+    });
+    announceInteraction("Legend filters reset after the filter mode changed.");
   });
 
   const model: RenderModel | null = $derived.by(() => {
@@ -1058,18 +1096,74 @@
     if (bounds === undefined || model === null) return undefined;
     const scale = model.scales.panels[panelIndex]?.[axis] ?? model.scales[axis];
     if (scale.type === "band") {
-      const first = scale.domain.indexOf(String(bounds[0]));
-      const last = scale.domain.indexOf(String(bounds[1]));
-      if (first < 0 || last < 0) return undefined;
-      return semanticAxisFromBounds("band", [
-        scale.domain[Math.min(first, last)]!,
-        scale.domain[Math.max(first, last)]!,
-      ]);
+      const first = scale.indexOf(bounds[0]);
+      const last = scale.indexOf(bounds[1]);
+      if (first === undefined || last === undefined) return undefined;
+      const lower = Math.min(first, last);
+      const upper = Math.max(first, last);
+      return Object.freeze({
+        kind: "band",
+        values: Object.freeze(
+          scale.rawDomain.slice(lower, upper + 1).map(encodeKey),
+        ),
+      });
     }
     return semanticAxisFromBounds(scale.type, [
       Number(bounds[0]),
       Number(bounds[1]),
     ]);
+  }
+
+  function eventAxisBounds(
+    panelIndex: number,
+    axis: "x" | "y",
+    semantic: SemanticIntervalAxis | undefined,
+  ): readonly [CellValue, CellValue] | undefined {
+    if (semantic === undefined || model === null) return undefined;
+    if (semantic.kind !== "band") return semantic.domain;
+    const scale = model.scales.panels[panelIndex]?.[axis] ?? model.scales[axis];
+    if (scale.type !== "band" || semantic.values.length === 0) return undefined;
+    const values = semantic.values
+      .map((encoded) =>
+        scale.rawDomain.find((value) => encodeKey(value) === encoded),
+      )
+      .filter((value): value is CellValue => value !== undefined);
+    return values.length === 0 ? undefined : [values[0]!, values.at(-1)!];
+  }
+
+  function eventDomain(
+    panelIndex: number,
+    domains: ReadonlyIntervalDomains,
+  ): IntervalDomain {
+    const x = eventAxisBounds(panelIndex, "x", domains.x);
+    const y = eventAxisBounds(panelIndex, "y", domains.y);
+    return {
+      ...(x !== undefined && { x }),
+      ...(y !== undefined && { y }),
+    };
+  }
+
+  function intervalLineageCount(
+    panelId: string,
+    domains: ReadonlyIntervalDomains,
+  ): number {
+    if (model === null) return 0;
+    const rows = new Set<number>();
+    for (let id = 0; id < model.candidates.size; id++) {
+      const candidate = model.candidates.candidate(id);
+      if (
+        candidate === null ||
+        candidate.panelId !== panelId ||
+        !candidateInInterval(candidate, domains)
+      )
+        continue;
+      for (const rowIndex of rowIndexesForCandidate(
+        candidate,
+        model.lineage.keys(candidate.lineage),
+      ))
+        rows.add(rowIndex);
+    }
+    return rows.size;
   }
 
   function commitIntervalSelection(
@@ -1491,9 +1585,63 @@
     });
   });
 
+  // Catalog changes prune values that no longer exist. An emptied clause is
+  // removed, so a category that disappears and later returns is visible by
+  // default. resetScales() deliberately does not alter this filter state.
+  $effect(() => {
+    const catalogs = new Map<string, CellValue[]>();
+    for (const target of filterableLegendEntries) {
+      const key = `${target.legend.scale}:${target.field}`;
+      const catalog = catalogs.get(key) ?? [];
+      catalog.push(target.entry.value as CellValue);
+      catalogs.set(key, catalog);
+    }
+    let next = localLegendFilters;
+    const reconciled: LegendFilterClause[] = [];
+    for (const [key, catalog] of catalogs) {
+      const fingerprint = JSON.stringify(catalog.map(encodeKey));
+      const priorFingerprint = legendCatalogFingerprints.get(key);
+      legendCatalogFingerprints.set(key, fingerprint);
+      if (priorFingerprint === undefined || priorFingerprint === fingerprint)
+        continue;
+      const index = next.findIndex(
+        (clause) => `${clause.scale}:${clause.field}` === key,
+      );
+      if (index < 0) continue;
+      const clause = next[index]!;
+      const values = reconcileLegendFilterValues(clause.values, catalog);
+      reconciled.push(Object.freeze({ ...clause, values }));
+      next =
+        values.length === 0
+          ? next.filter((_, candidateIndex) => candidateIndex !== index)
+          : next.map((candidate, candidateIndex) =>
+              candidateIndex === index
+                ? Object.freeze({ ...candidate, values })
+                : candidate,
+            );
+    }
+    for (const key of [...legendCatalogFingerprints.keys()])
+      if (!catalogs.has(key)) legendCatalogFingerprints.delete(key);
+    if (next === localLegendFilters) return;
+    localLegendFilters = [...next];
+    for (const clause of reconciled)
+      emitLegendFilter({
+        type: "legend-filter",
+        phase: "change",
+        source: "programmatic",
+        clause,
+      });
+    announceInteraction("Legend filters reconciled with the available groups.");
+  });
+
   function legendFilterSource(event: MouseEvent): LegendFilterEvent["source"] {
     if (event.detail === 0) return "keyboard";
     return legendFilterPointerType === "touch" ? "touch" : "pointer";
+  }
+
+  function emitLegendFilter(event: LegendFilterEvent): void {
+    onlegendfilter?.(event);
+    oninteraction?.(event);
   }
 
   function toggleLegendFilter(
@@ -1542,7 +1690,7 @@
       source,
       clause,
     });
-    onlegendfilter?.(filterEvent);
+    emitLegendFilter(filterEvent);
     announceInteraction(
       `${target.entry.label} ${isLegendValueVisible(values, target.entry.value as CellValue, legendFilterOptions.mode) ? "shown" : "hidden"}.`,
     );
@@ -1556,7 +1704,7 @@
     const source = legendFilterSource(event);
     localLegendFilters = [];
     legendFilterPointerType = null;
-    onlegendfilter?.(
+    emitLegendFilter(
       Object.freeze({
         type: "legend-filter",
         phase: "clear",
@@ -1564,7 +1712,6 @@
         clause: null,
       }),
     );
-    announceInteraction("Legend filters reset.");
     queueMicrotask(() => returnTarget?.focus());
   }
 
@@ -2371,7 +2518,12 @@
     const prior = currentIntervalRecord;
     const panelId = prior?.panelId ?? boundsEditor?.panelId;
     if (panelId === null || panelId === undefined || model === null) return;
-    const axis = semanticAxisFromBounds(event.scale, event.bounds);
+    const panelIndex = model.scene.panels.findIndex(
+      (candidate) => candidate.id === panelId,
+    );
+    if (panelIndex < 0) return;
+    const axis = semanticAxis(panelIndex, event.axis, event.bounds);
+    if (axis === undefined) return;
     const domains = Object.freeze({
       ...(prior?.domains ?? {}),
       [event.axis]: axis,
@@ -2398,22 +2550,12 @@
         source: event.inputSource,
       });
     }
-    const rawBounds = Object.freeze([...event.bounds]) as readonly [
-      CellValue,
-      CellValue,
-    ];
-    const panel = model.scene.panels.find(
-      (candidate) => candidate.id === panelId,
-    );
-    if (panel === undefined) return;
+    const panel = model.scene.panels[panelIndex]!;
     committedInterval = buildIntervalSelection({
       phase: "end",
       mode: interactionConfig.select?.mode ?? "xy",
       panelId,
-      domain: {
-        ...(committedInterval?.domain ?? {}),
-        [event.axis]: rawBounds,
-      },
+      domain: eventDomain(panelIndex, domains),
       pixels:
         committedInterval?.panelId === panelId
           ? committedInterval.pixels
@@ -2424,7 +2566,7 @@
               y1: panel.y + panel.height,
             },
       keys,
-      lineageCount: keys.length,
+      lineageCount: intervalLineageCount(panelId, domains),
       source: event.inputSource,
     });
     emitSelection(committedInterval);

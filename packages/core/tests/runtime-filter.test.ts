@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 
 import {
   compileRuntimeRowFilter,
+  compileRuntimeRowIndexFilter,
   runtimeFilterValueEqual,
   type RuntimeRowFilterClause,
 } from "../src/runtime-filter.ts";
@@ -52,5 +53,40 @@ describe("runtime legend row filtering", () => {
 
     expect(filter({ group: "hidden" })).toBe(false);
     expect(filter({ group: "later" })).toBe(true);
+  });
+
+  test("columnar filters resolve only required fields once without row allocation", () => {
+    const requested: string[] = [];
+    const columns = {
+      group: ["west", "east", "west"],
+      kind: ["actual", "forecast", "actual"],
+      unused: [1, 2, 3],
+    } as const;
+    const filter = compileRuntimeRowIndexFilter(
+      [
+        { scale: "color", field: "group", mode: "include", values: ["west"] },
+        { scale: "fill", field: "kind", mode: "exclude", values: ["forecast"] },
+        { scale: "color", field: "group", mode: "exclude", values: ["gone"] },
+      ],
+      (field) => {
+        requested.push(field);
+        return columns[field as keyof typeof columns];
+      },
+    );
+
+    expect([0, 1, 2].filter(filter)).toEqual([0, 2]);
+    expect(requested).toEqual(["group", "kind"]);
+    expect(requested).not.toContain("unused");
+  });
+
+  test("keeps undefined distinct from null in row and columnar filters", () => {
+    const clauses: RuntimeRowFilterClause[] = [
+      { scale: "color", field: "group", mode: "exclude", values: [undefined] },
+    ];
+    const rows = [{ group: undefined }, { group: null }];
+    expect(rows.filter(compileRuntimeRowFilter(clauses))).toEqual([{ group: null }]);
+
+    const indexed = compileRuntimeRowIndexFilter(clauses, () => [undefined, null]);
+    expect([0, 1].filter(indexed)).toEqual([1]);
   });
 });

@@ -65,7 +65,11 @@ Inspection includes the HTML tooltip, semantic crosshair, keyboard traversal,
 and pinning. Selection and zoom use separate accessible tools and expose exact
 labelled bounds entry after a commit. Legend focus only emphasizes groups;
 legend filtering reruns the grammar over included rows while preserving stable
-categorical colors. See the [interaction guide and typed event reference](https://ljodea.github.io/ggsvelte/guide/interactions).
+categorical colors. Filter changes and clears are delivered to both
+`onlegendfilter` and the unified `oninteraction` callback. Changing filter
+mode clears prior clauses; values removed from a changing data catalog are
+pruned and return visible by default. `resetScales()` resets trained scale
+state without clearing active filters. See the [interaction guide and typed event reference](https://ljodea.github.io/ggsvelte/guide/interactions).
 
 ## Headless + CLI
 

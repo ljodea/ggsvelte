@@ -55,8 +55,16 @@ describe("explicit legend filtering", () => {
   it("can hide every category and recover with a separate reset control", async () => {
     const { container } = render(LegendFilterPlot);
     await until(() => container.querySelectorAll(".gg-legend-filters input").length === 2);
+    const initialMarkColors = [
+      ...container.querySelectorAll<SVGCircleElement>(".gg-points circle"),
+    ].map((circle) => circle.getAttribute("fill"));
     container.querySelector<HTMLInputElement>("input[aria-label='Show north']")!.click();
     await until(() => state(container)["candidates"] === "1");
+    expect(
+      [...container.querySelectorAll<SVGCircleElement>(".gg-points circle")].map((circle) =>
+        circle.getAttribute("fill"),
+      ),
+    ).toEqual([initialMarkColors[1]]);
     container.querySelector<HTMLInputElement>("input[aria-label='Show south']")!.click();
     await until(() => state(container)["candidates"] === "0");
 
@@ -76,6 +84,11 @@ describe("explicit legend filtering", () => {
         (input) => input.checked,
       ),
     ).toBe(true);
+    expect(
+      [...container.querySelectorAll<SVGCircleElement>(".gg-points circle")].map((circle) =>
+        circle.getAttribute("fill"),
+      ),
+    ).toEqual(initialMarkColors);
     const events = JSON.parse(state(container)["events"] ?? "[]");
     expect(events.at(-1)).toEqual({
       type: "legend-filter",
@@ -83,6 +96,83 @@ describe("explicit legend filtering", () => {
       source: "keyboard",
       clause: null,
     });
+  });
+
+  it("resets old clauses when the controlled filter mode changes", async () => {
+    const view = render(LegendFilterPlot, { mode: "exclude" });
+    await until(() => view.container.querySelectorAll(".gg-legend-filters input").length === 2);
+    view.container.querySelector<HTMLInputElement>("input[aria-label='Show north']")!.click();
+    await until(() => state(view.container)["candidates"] === "1");
+
+    await view.rerender({ mode: "include" });
+    await until(() => state(view.container)["candidates"] === "3");
+
+    expect(
+      [...view.container.querySelectorAll<HTMLInputElement>(".gg-legend-filters input")].every(
+        (input) => input.checked,
+      ),
+    ).toBe(true);
+    expect(JSON.parse(state(view.container)["events"] ?? "[]").at(-1)).toEqual({
+      type: "legend-filter",
+      phase: "clear",
+      source: "programmatic",
+      clause: null,
+    });
+  });
+
+  it("sends change and clear through the unified interaction callback", async () => {
+    const { container } = render(LegendFilterPlot);
+    await until(() => container.querySelectorAll(".gg-legend-filters input").length === 2);
+    container.querySelector<HTMLInputElement>("input[aria-label='Show north']")!.click();
+    await until(() => state(container)["candidates"] === "1");
+    container
+      .querySelector<HTMLButtonElement>("button[aria-label='Reset legend filters']")!
+      .click();
+    await until(() => state(container)["candidates"] === "3");
+
+    expect(JSON.parse(state(container)["interactionEvents"] ?? "[]")).toEqual([
+      "legend-filter",
+      "legend-filter",
+    ]);
+  });
+
+  it("prunes disappeared values so they return visible, while resetScales keeps active filters", async () => {
+    let candidates = 0;
+    const base = {
+      aes: { x: "x", y: "y", color: "group" },
+      layers: [{ geom: "point" as const }],
+      legendFilter: true,
+      width: 360,
+      height: 260,
+      onrender: (model: { candidates: { size: number } }) => {
+        candidates = model.candidates.size;
+      },
+    };
+    const both = [
+      { x: 1, y: 1, group: "north" },
+      { x: 2, y: 2, group: "south" },
+    ];
+    const view = render(GGPlot, { ...base, data: both });
+    await until(() => view.container.querySelectorAll(".gg-legend-filters input").length === 2);
+    view.container.querySelector<HTMLInputElement>("input[aria-label='Show north']")!.click();
+    await until(() => candidates === 1);
+
+    await view.rerender({ ...base, data: [both[1]!] });
+    await until(() => view.container.querySelectorAll(".gg-legend-filters input").length === 1);
+    await view.rerender({ ...base, data: both });
+    await until(() => view.container.querySelectorAll(".gg-legend-filters input").length === 2);
+    expect(
+      view.container.querySelector<HTMLInputElement>("input[aria-label='Show north']")!.checked,
+    ).toBe(true);
+    expect(candidates).toBe(2);
+
+    view.container.querySelector<HTMLInputElement>("input[aria-label='Show south']")!.click();
+    await until(() => candidates === 1);
+    (view as unknown as { component: { resetScales(): void } }).component.resetScales();
+    await until(() => candidates === 1);
+    expect(
+      view.container.querySelector<HTMLInputElement>("input[aria-label='Show south']")!.checked,
+    ).toBe(false);
   });
 
   it("supports include/single mode and keyboard activation", async () => {

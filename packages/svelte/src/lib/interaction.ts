@@ -1,6 +1,8 @@
 import type { CellValue } from "@ggsvelte/core";
 import type { Snippet } from "svelte";
 
+import type { LegendFilterEvent } from "./legend-filter.js";
+
 export type InteractionSource = "pointer" | "keyboard" | "touch" | "programmatic";
 export type InspectMode = "auto" | "exact" | "x" | "y" | "xy";
 export type ResolvedInspectMode = Exclude<InspectMode, "auto">;
@@ -110,7 +112,8 @@ export type PlotInteractionEvent<Row, Key = PropertyKey> =
   | PlotInspection<Row, Key>
   | PlotSelection<Key>
   | ZoomEvent
-  | LegendFocusEvent<Key>;
+  | LegendFocusEvent<Key>
+  | LegendFilterEvent;
 
 export interface InspectOptions<Row = Record<string, CellValue>, Key = PropertyKey> {
   readonly mode?: InspectMode;

@@ -70,7 +70,7 @@ import type { SequentialColorScale } from "./scales/color.js";
 import { trainSequential, VIRIDIS_RAMP_10 } from "./scales/color.js";
 import type { ScaleState } from "./scales/state.js";
 import { encodeKey, PaletteExhaustedError } from "./scales/state.js";
-import { compileRuntimeRowFilter } from "./runtime-filter.js";
+import { compileRuntimeRowIndexFilter } from "./runtime-filter.js";
 import type { RuntimeRowFilterClause } from "./runtime-filter.js";
 import type { ColorScale, ContinuousConfig, PositionScale } from "./scales/train.js";
 import {
@@ -325,21 +325,17 @@ function bindData(spec: PortableSpec, options: RunOptions): ColumnTable {
   );
 }
 
-function rowRecord(table: ColumnTable, index: number): Record<string, CellValue> {
-  const row: Record<string, CellValue> = {};
-  for (const field of table.fields) row[field] = table.column(field)[index]!;
-  return row;
-}
-
 function applyRuntimeRowFilters(
   table: ColumnTable,
   clauses: readonly RuntimeRowFilterClause[] | undefined,
 ): { table: ColumnTable; sourceRows: number[] | null } {
   if (clauses === undefined || clauses.length === 0) return { table, sourceRows: null };
-  const accepts = compileRuntimeRowFilter(clauses);
+  const accepts = compileRuntimeRowIndexFilter(clauses, (field) =>
+    table.has(field) ? table.column(field) : [],
+  );
   const sourceRows: number[] = [];
   for (let index = 0; index < table.rowCount; index++) {
-    if (accepts(rowRecord(table, index))) sourceRows.push(index);
+    if (accepts(index)) sourceRows.push(index);
   }
   return { table: table.subset(sourceRows), sourceRows };
 }
@@ -1530,6 +1526,13 @@ function resolveColorScale(
 ): ColorResolution {
   const values: CellValue[] = [];
   const catalogValues: CellValue[] = [];
+  const catalogKeys = new Set<string>();
+  const addCatalogValue = (value: CellValue): void => {
+    const key = encodeKey(value);
+    if (catalogKeys.has(key)) return;
+    catalogKeys.add(key);
+    catalogValues.push(value);
+  };
   let anyDiscreteField = false;
   let anyField = false;
   for (const frame of frames) {
@@ -1553,12 +1556,12 @@ function resolveColorScale(
     if (channel.field !== null && catalogTable.has(channel.field)) {
       anyField = true;
       if (catalogTable.discreteness(channel.field) === "discrete") anyDiscreteField = true;
-      catalogValues.push(...catalogTable.column(channel.field));
+      for (const value of catalogTable.column(channel.field)) addCatalogValue(value);
     }
     if (channel.scaledConstant !== null) {
       anyDiscreteField = true;
       anyField = true;
-      catalogValues.push(channel.scaledConstant);
+      addCatalogValue(channel.scaledConstant);
     }
   }
   if (!anyField) return { resolved: null, legendInput: null, state: null };

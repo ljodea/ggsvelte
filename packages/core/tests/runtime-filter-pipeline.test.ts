@@ -102,4 +102,29 @@ describe("runPipeline runtime row filters", () => {
     if (legend?.type === "discrete")
       expect(legend.entries.map((entry) => entry.value)).toEqual(["west", "east"]);
   });
+
+  test("filters before count stats, positional scale training, and axis layout", () => {
+    const countSpec = {
+      data: { values: rows },
+      aes: { x: "group" },
+      layers: [{ geom: "bar" as const }],
+    };
+    const initial = runPipeline(countSpec, size);
+    const filtered = runPipeline(countSpec, {
+      ...size,
+      rowFilters: [{ scale: "fill", field: "group", mode: "exclude", values: ["west"] }],
+    });
+
+    expect(initial.scales.x.type).toBe("band");
+    expect(filtered.scales.x.type).toBe("band");
+    if (initial.scales.x.type === "band" && filtered.scales.x.type === "band") {
+      expect(initial.scales.x.domain).toEqual(["west", "east"]);
+      expect(filtered.scales.x.domain).toEqual(["east"]);
+    }
+    expect(initial.scales.y.type).toBe("linear");
+    expect(filtered.scales.y.type).toBe("linear");
+    if (initial.scales.y.type !== "band" && filtered.scales.y.type !== "band")
+      expect(filtered.scales.y.domain[1]).toBeLessThan(initial.scales.y.domain[1]);
+    expect(filtered.scene.panels[0]?.axisX?.map((tick) => tick.label)).toEqual(["east"]);
+  });
 });

@@ -20,10 +20,15 @@ export {
 export type { CellValue, Columns, Discreteness, FieldType, Rows } from "./table.js";
 
 // Runtime data-changing filters (interactive legends and linked views)
-export { compileRuntimeRowFilter, runtimeFilterValueEqual } from "./runtime-filter.js";
+export {
+  compileRuntimeRowFilter,
+  compileRuntimeRowIndexFilter,
+  runtimeFilterValueEqual,
+} from "./runtime-filter.js";
 export type {
   RuntimeRow,
   RuntimeRowFilter,
+  RuntimeRowIndexFilter,
   RuntimeRowFilterClause,
   RuntimeRowFilterMode,
 } from "./runtime-filter.js";

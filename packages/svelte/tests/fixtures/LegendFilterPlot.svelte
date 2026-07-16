@@ -19,6 +19,7 @@
   let renders = $state(0);
   let candidates = $state(0);
   let events = $state<LegendFilterEvent[]>([]);
+  let interactionEvents = $state<string[]>([]);
   let colors = $state("");
 </script>
 
@@ -27,6 +28,7 @@
   data-renders={renders}
   data-candidates={candidates}
   data-events={JSON.stringify(events)}
+  data-interaction-events={JSON.stringify(interactionEvents)}
   data-colors={colors}
 >
   <GGPlot
@@ -38,6 +40,8 @@
     height={260}
     ariaLabel="Legend filter plot"
     onlegendfilter={(event) => (events = [...events, event])}
+    oninteraction={(event) =>
+      (interactionEvents = [...interactionEvents, event.type])}
     onrender={(model) => {
       renders += 1;
       candidates = 0;
