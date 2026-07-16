@@ -9,6 +9,8 @@ import { cellToNumber, ColumnTable } from "../table.js";
 
 import { PipelineError } from "./types.js";
 
+export { panelComponentToken, panelValueToken, rowsMatching } from "./facets-tokens.js";
+
 export function facetField(
   ref: { field: string } | undefined,
   key: "wrap" | "rows" | "cols",
@@ -49,27 +51,4 @@ export function facetValues(table: ColumnTable, field: string): CellValue[] {
     return ka < kb ? -1 : ka > kb ? 1 : 0;
   });
   return values;
-}
-
-export function panelValueToken(value: CellValue): string {
-  if (value instanceof Date) return `d:${value.getTime()}`;
-  if (value === null) return "null";
-  if (typeof value === "string") return `s:${value}`;
-  if (typeof value === "number") return `n:${Object.is(value, -0) ? 0 : value}`;
-  return `b:${value}`;
-}
-
-export function panelComponentToken(field: string, value: CellValue): string {
-  const token = panelValueToken(value);
-  return `${field.length}:${field}=${token.length}:${token}`;
-}
-
-export function rowsMatching(table: ColumnTable, field: string, value: CellValue): number[] {
-  const key = bandKey(value);
-  const column = table.column(field);
-  const rows: number[] = [];
-  for (let i = 0; i < column.length; i++) {
-    if (bandKey(column[i]!) === key) rows.push(i);
-  }
-  return rows;
 }

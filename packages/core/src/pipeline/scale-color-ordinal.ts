@@ -7,9 +7,10 @@ import type { EditionDefaults } from "../editions.js";
 import type { ScaleState } from "../scales/state.js";
 import { PaletteExhaustedError } from "../scales/state.js";
 import type { ColorScale } from "../scales/train.js";
-import { CATEGORICAL_PALETTE_10, trainColor } from "../scales/train.js";
+import { trainColor } from "../scales/train.js";
 import type { CellValue } from "../table.js";
 
+import { resolveOrdinalColorRange } from "./scale-color-ordinal-range.js";
 import type { ColorResolution } from "./scale-color-types.js";
 import type { Advisory, PipelineWarning } from "./types.js";
 import { PipelineError } from "./types.js";
@@ -28,16 +29,7 @@ export function resolveOrdinalColorScale(input: {
     input;
 
   const scheme = config?.scheme;
-  // Edition-keyed default palette: for edition 1 nothing is passed (trainColor
-  // keeps its "observable10" scheme fingerprint — byte-stable with pre-edition
-  // state); other editions pass their palette as an explicit range.
-  const editionPalette =
-    editionDefaults.categoricalPalette === CATEGORICAL_PALETTE_10
-      ? undefined
-      : editionDefaults.categoricalPalette;
-  // A named scheme resolves inside trainColor. Edition defaults only apply
-  // when the caller supplied neither a scheme nor an explicit range.
-  const range = config?.range ?? (scheme === undefined ? editionPalette : undefined);
+  const range = resolveOrdinalColorRange(config, editionDefaults);
   let scale: ColorScale;
   try {
     scale = trainColor(values, prevState, {

@@ -5,9 +5,9 @@ import type { GeometryBatch, Scene, SceneLegend } from "../scene.js";
 import type { ThemeTokens } from "../theme.js";
 import type { PositionScale } from "../scales/train.js";
 
+import { placeSceneLegends } from "./assemble-scene-legends.js";
 import { assembleScenePanels } from "./assemble-scene-panels.js";
 import type { FacetPanelDef } from "./facets.js";
-import { LEGEND_EDGE_PAD } from "./layout-helpers.js";
 import type { PanelPlacement } from "./panel-layout.js";
 
 export function assembleScene(input: {
@@ -51,11 +51,12 @@ export function assembleScene(input: {
     vTitle,
   });
 
-  const legends: SceneLegend[] = legendBlock.legends.map((legend) => ({
-    ...legend,
-    x: legend.x + width - legendBlock.width - LEGEND_EDGE_PAD,
-    y: legend.y + (scenePanels[0]?.y ?? topBand),
-  }));
+  const legends = placeSceneLegends({
+    legends: legendBlock.legends,
+    legendWidth: legendBlock.width,
+    sceneWidth: width,
+    panelY: scenePanels[0]?.y ?? topBand,
+  });
 
   return {
     width,
