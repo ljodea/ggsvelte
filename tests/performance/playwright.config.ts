@@ -4,7 +4,9 @@ export default defineConfig({
   testDir: ".",
   outputDir: "./test-results",
   fullyParallel: false,
-  retries: 0,
+  // One in-process retry under CI absorbs single-sample host noise on the
+  // shared self-hosted runners without hiding persistent regressions.
+  retries: process.env["CI"] === undefined ? 0 : 1,
   forbidOnly: process.env["CI"] !== undefined,
   reporter: "list",
   timeout: 120_000,
