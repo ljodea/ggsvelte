@@ -1,4 +1,4 @@
-import type { InteractionTool } from "./interaction.js";
+import { isAreaTool, type InteractionTool } from "./interaction.js";
 
 /**
  * Capture-surface keyboard decision input. `hasBrushDraft` mirrors
@@ -34,9 +34,6 @@ type SurfaceKeyResolution = {
   readonly action: SurfaceKeyAction;
   readonly preventDefault: boolean;
 };
-
-const isAreaTool = (tool: InteractionTool): tool is "select-area" | "zoom-area" =>
-  tool === "select-area" || tool === "zoom-area";
 
 /**
  * Pure decision table for the plot capture-surface `keydown` handler.
