@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784214895259,
+  "lastUpdate": 1784215202172,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -14720,6 +14720,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 161.3073,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "07dffa46b1c9834d68a04527d688229277833f7d",
+          "message": "refactor(core): split layout formatters, axis train, segments, and types (#133)\n\nExtract layout domain/formatters/ticks; band vs continuous axis training;\nsegment emitters; frame binding/LayerFrame types; geom/stat contracts;\ncandidate auto-mode; scene panel assembly; panel placements; sequential\nlegend format; and candidate field-channel helpers. Facades keep import\npaths stable. Add axisTicks characterization.",
+          "timestamp": "2026-07-16T10:19:20-05:00",
+          "tree_id": "2a7b99b6e9bd455b09826ec64cfea1d46442676e",
+          "url": "https://github.com/ljodea/ggsvelte/commit/07dffa46b1c9834d68a04527d688229277833f7d"
+        },
+        "date": 1784215201232,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.8138,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.9802,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 9.8683,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 14.21,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 84.4419,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 122.9294,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.1269,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2345,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 87.6565,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 108.3511,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.5859,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.6245,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 117.7698,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7277,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 27.8906,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.5254,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 30.6411,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 609.9741,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 162.6346,
             "unit": "ms"
           }
         ]
