@@ -161,6 +161,7 @@ describe("intervalQuerySceneFromModel", () => {
     panels?: IntervalQueryModelPort["scene"]["panels"];
     byId?: Record<number, { lineage: number } | null>;
     lineage?: Record<number, number[]>;
+    onQueryRect?: (x0: number, y0: number, x1: number, y1: number) => void;
   }): IntervalQueryModelPort {
     const byId = partial.byId ?? {
       0: { lineage: 1 },
@@ -174,7 +175,8 @@ describe("intervalQuerySceneFromModel", () => {
       },
       scales,
       candidates: {
-        queryRect() {
+        queryRect(x0, y0, x1, y1) {
+          partial.onQueryRect?.(x0, y0, x1, y1);
           return Object.keys(byId).map(Number);
         },
         candidate(id) {
@@ -216,12 +218,21 @@ describe("intervalQuerySceneFromModel", () => {
     expect(empty.singlePanel).toBe(false);
   });
 
-  it("queryCandidates filters null candidates and lineageKeys delegates", () => {
-    const adapted = intervalQuerySceneFromModel(port({}), false);
-    expect(adapted.queryCandidates({ x0: 0, y0: 0, x1: 1, y1: 1 })).toEqual([
+  it("queryCandidates forwards expanded bounds, filters nulls, and lineageKeys delegates", () => {
+    const seen: number[][] = [];
+    const adapted = intervalQuerySceneFromModel(
+      port({
+        onQueryRect(x0, y0, x1, y1) {
+          seen.push([x0, y0, x1, y1]);
+        },
+      }),
+      false,
+    );
+    expect(adapted.queryCandidates({ x0: 3, y0: 4, x1: 5, y1: 6 })).toEqual([
       { lineage: 1 },
       { lineage: 2 },
     ]);
+    expect(seen).toEqual([[3, 4, 5, 6]]);
     expect([...adapted.lineageKeys(2)]).toEqual([20, 21]);
     expect([...adapted.lineageKeys(99)]).toEqual([]);
   });
