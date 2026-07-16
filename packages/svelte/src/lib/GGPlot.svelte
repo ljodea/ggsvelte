@@ -107,12 +107,13 @@
     toLayerInput,
   } from "./plot-assemble.js";
   import {
-    clamp,
-    expandIntervalQuery,
-    frozenZoomDomains,
-    normalizedRect,
-    panelDataDomains,
-  } from "./plot-geometry.js";
+    brushAtPoint,
+    brushWithEnd,
+    evaluatePointerBrushEnd,
+    nudgeBrushEnd,
+    panelCenterAnchor,
+  } from "./plot-area-brush.js";
+  import { frozenZoomDomains, normalizedRect } from "./plot-geometry.js";
   import {
     datumLabel as datumLabelFor,
     inspectionLiveText as inspectionLiveTextFor,
@@ -134,12 +135,11 @@
     zoomScaleDiagnosticsFromChannels,
     zoomSupportsChannel,
   } from "./plot-capability.js";
+  import { clearIntervalSelectionEvent } from "./plot-interval.js";
   import {
-    clearIntervalSelectionEvent,
-    intervalSelectionFromRows,
-    isBrushTooSmall,
-    lineageRowIndexesFromCandidates,
-  } from "./plot-interval.js";
+    buildIntervalSelectionFromScene,
+    type IntervalQueryScene,
+  } from "./plot-interval-query.js";
   import { createPaintLedger, isPlotReady } from "./plot-paint.js";
   import {
     anchorsFromCandidateKeys,
@@ -1649,11 +1649,50 @@
     source: InteractionSource,
   ): void {
     if (!brushing || brushRect === null) return;
-    brushRect = { ...brushRect, x1: point.x, y1: point.y };
+    brushRect = brushWithEnd(brushRect, point);
     if (activeTool === "select-area")
       emitSelection(
         selectionEvent("change", normalizedRect(brushRect), source),
       );
+  }
+
+  /** Map the live render model into the pure interval query scene adapter. */
+  function intervalQueryScene(): IntervalQueryScene | null {
+    const current = model;
+    if (current === null) return null;
+    const panel = current.scene.panels[0];
+    return {
+      panel:
+        panel === undefined
+          ? null
+          : {
+              x: panel.x,
+              y: panel.y,
+              width: panel.width,
+              height: panel.height,
+              id: panel.id,
+            },
+      singlePanel: current.scene.panels.length === 1,
+      flip: assembled?.coord?.type === "flip",
+      scales: current.scales,
+      queryCandidates(expanded) {
+        return [
+          ...current.candidates.queryRect(
+            expanded.x0,
+            expanded.y0,
+            expanded.x1,
+            expanded.y1,
+          ),
+        ]
+          .map((id) => current.candidates.candidate(id))
+          .filter(
+            (candidate): candidate is CandidateFacts => candidate !== null,
+          );
+      },
+      lineageKeys(lineageId) {
+        return current.lineage.keys(lineageId);
+      },
+    };
   }
 
   function onPointerLeave(): void {
@@ -1683,8 +1722,8 @@
     const p = plotPoint(event);
     brushRect =
       areaAwaitingSecond && brushRect !== null
-        ? { ...brushRect, x1: p.x, y1: p.y }
-        : { x0: p.x, y0: p.y, x1: p.x, y1: p.y };
+        ? brushWithEnd(brushRect, p)
+        : brushAtPoint(p);
     setInspection(null, event.pointerType === "touch" ? "touch" : "pointer");
     reducer.dispatch({ type: "begin-area", point: p, panelId: panelId(0) });
     if (activeTool === "select-area" && !areaAwaitingSecond) {
@@ -1708,43 +1747,14 @@
     rect: ReturnType<typeof normalizedRect>,
     source: InteractionSource,
   ): IntervalSelection {
-    const mode = interactionConfig.select?.mode ?? "xy";
-    const panel = model?.scene.panels[0];
-    const flip = assembled?.coord?.type === "flip";
-    const query = expandIntervalQuery(rect, panel, mode, flip);
-    const candidates =
-      model === null
-        ? []
-        : [
-            ...model.candidates.queryRect(
-              query.x0,
-              query.y0,
-              query.x1,
-              query.y1,
-            ),
-          ]
-            .map((id) => model!.candidates.candidate(id))
-            .filter(
-              (candidate): candidate is CandidateFacts => candidate !== null,
-            );
-    const sourceRows = lineageRowIndexesFromCandidates(
-      candidates,
-      (lineageId) => model?.lineage.keys(lineageId) ?? [],
-    );
-    const inverted =
-      model !== null && model.scene.panels.length === 1
-        ? panelDataDomains(rect, model.scene.panels[0]!, model.scales, flip)
-        : {};
-    return intervalSelectionFromRows({
+    return buildIntervalSelectionFromScene({
       phase,
-      mode,
-      panelId: panelId(0),
-      pixels: rect,
+      mode: interactionConfig.select?.mode ?? "xy",
       source,
-      rowIndexes: sourceRows,
+      pixels: rect,
+      scene: intervalQueryScene(),
       keyForRow: (rowIndex) =>
         semanticKey(model?.row(rowIndex) ?? null, rowIndex),
-      invertedDomain: inverted,
     });
   }
 
@@ -1779,29 +1789,21 @@
     if (!brushing || brushRect === null) return;
     reducer.cancelScheduledPointer();
     const source = event.pointerType === "touch" ? "touch" : "pointer";
-    const rect = normalizedRect({
-      ...brushRect,
-      ...Object.fromEntries(
-        Object.entries(plotPoint(event)).map(([k, v]) => [
-          k === "x" ? "x1" : "y1",
-          v,
-        ]),
-      ),
-    } as { x0: number; y0: number; x1: number; y1: number });
-    if (isBrushTooSmall(rect)) {
-      brushRect = rect;
+    const ended = evaluatePointerBrushEnd(brushRect, plotPoint(event));
+    if (ended.kind === "too-small") {
+      brushRect = ended.corners;
       announceInteraction("Choose opposite corner.");
       return;
     }
     brushRect = null;
     if (activeTool === "select-area") {
-      const eventValue = selectionEvent("end", rect, source);
+      const eventValue = selectionEvent("end", ended.rect, source);
       committedInterval = interactionConfig.select?.persistent
         ? eventValue
         : null;
       emitSelection(eventValue);
     } else if (activeTool === "zoom-area") {
-      applyBrushZoom(rect, source);
+      applyBrushZoom(ended.rect, source);
     }
     reducer.dispatch({ type: "cancel-area" });
   }
@@ -1989,11 +1991,7 @@
             : 0;
       const dy =
         event.key === "ArrowUp" ? -step : event.key === "ArrowDown" ? step : 0;
-      brushRect = {
-        ...brushRect,
-        x1: clamp(brushRect.x1 + dx, panel.x, panel.x + panel.width),
-        y1: clamp(brushRect.y1 + dy, panel.y, panel.y + panel.height),
-      };
+      brushRect = nudgeBrushEnd(brushRect, dx, dy, panel);
       reducer.dispatch({
         type: "move-area",
         point: { x: brushRect.x1, y: brushRect.y1 },
@@ -2006,15 +2004,9 @@
     ) {
       event.preventDefault();
       const anchor =
-        inspection?.focus.anchor ??
-        (() => {
-          const panel = model?.scene.panels[0];
-          return panel === undefined
-            ? { x: 0, y: 0 }
-            : { x: panel.x + panel.width / 2, y: panel.y + panel.height / 2 };
-        })();
+        inspection?.focus.anchor ?? panelCenterAnchor(model?.scene.panels[0]);
       if (brushRect === null) {
-        brushRect = { x0: anchor.x, y0: anchor.y, x1: anchor.x, y1: anchor.y };
+        brushRect = brushAtPoint(anchor);
         reducer.dispatch({
           type: "begin-area",
           point: anchor,
