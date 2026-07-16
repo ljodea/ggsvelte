@@ -15,7 +15,9 @@ import {
 
 describe("isContainerWidthProp", () => {
   it("is true for omitted and container width props", () => {
-    expect(isContainerWidthProp(undefined)).toBe(true);
+    // Omitted optional prop (no undefined literal — oxlint unicorn/no-useless-undefined).
+    const props: { width?: number | "container" } = {};
+    expect(isContainerWidthProp(props.width)).toBe(true);
     expect(isContainerWidthProp("container")).toBe(true);
   });
 
