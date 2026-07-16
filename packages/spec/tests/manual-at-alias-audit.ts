@@ -49,12 +49,13 @@ const CSS_TYPE_TOKEN = new Set(
     "sub summary sup svg table tbody td template text textarea tfoot th thead " +
     "time title tr track u ul var video wbr use defs clipPath linearGradient " +
     "radialGradient stop tspan foreignObject pattern marker symbol switch " +
-    "animate animateTransform set image polygon polyline ellipse textPath " +
-    "mask view feBlend feColorMatrix feComponentTransfer feComposite " +
-    "feConvolveMatrix feDiffuseLighting feDisplacementMap feDistantLight " +
-    "feDropShadow feFlood feFuncA feFuncB feFuncG feFuncR feGaussianBlur feImage " +
-    "feMerge feMergeNode feMorphology feOffset fePointLight feSpecularLighting " +
-    "feSpotLight feTile feTurbulence filter"
+    "animate animateTransform animateMotion mpath metadata set image polygon " +
+    "polyline ellipse textPath mask view feBlend feColorMatrix " +
+    "feComponentTransfer feComposite feConvolveMatrix feDiffuseLighting " +
+    "feDisplacementMap feDistantLight feDropShadow feFlood feFuncA feFuncB " +
+    "feFuncG feFuncR feGaussianBlur feImage feMerge feMergeNode feMorphology " +
+    "feOffset fePointLight feSpecularLighting feSpotLight feTile feTurbulence " +
+    "filter"
   ).split(/\s+/),
 );
 
@@ -76,6 +77,13 @@ function isCssTypeToken(token: string): boolean {
     CSS_TYPE_TOKEN.has(token.toLowerCase()) ||
     isCustomElementToken(token)
   );
+}
+
+/** Bare multi-token chain after a combinator: CSS vs English. */
+function bareMultiTokenChainIsCss(tokens: readonly string[]): boolean {
+  if (BARE_CHAIN_PROSE_PAIR.has(tokens.map((t) => t.toLowerCase()).join(" "))) return false;
+  // Allowlist + custom elements only (no global camelCase / no loose SVG-context).
+  return tokens.every((t) => isCssTypeToken(t));
 }
 
 /**
@@ -108,8 +116,7 @@ function isCssSelectorAfterCombinator(rest: string): boolean {
     }
     // Bare multi-token: HTML/SVG/custom-element types only (not English prose).
     // Anchor-led chains (`a span`) are real CSS — do not blanket-skip lead `a`.
-    if (BARE_CHAIN_PROSE_PAIR.has(tokens.map((t) => t.toLowerCase()).join(" "))) return false;
-    return tokens.every((t) => isCssTypeToken(t));
+    return bareMultiTokenChainIsCss(tokens);
   }
 
   // Weak structure (`,>+~`): recurse so `ul li, ol li` and `ul li > a` count as
