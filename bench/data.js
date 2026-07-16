@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784220236296,
+  "lastUpdate": 1784220696362,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -16386,6 +16386,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 160.8214,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "0a77ff09146fc1df96d941a104292649bd21d2ad",
+          "message": "refactor(svelte): pass inspect domain config on pointer move and up (#147)\n\n* refactor(svelte): pass inspect domain config on pointer move and up\n\nReplace inspectEnabled/pinEnabled booleans with the resolved inspect\ndomain object so queue-inspect and touch-inspect-tap carry mode,\nmaxDistance, and pin state — host no longer re-gates config or re-reads\nnearest params after pure routing.\n\n* fix(svelte): keep SurfaceInspectConfig private for knip",
+          "timestamp": "2026-07-16T11:50:57-05:00",
+          "tree_id": "eec44d9337e8e10466a72d38b46c7f351335252a",
+          "url": "https://github.com/ljodea/ggsvelte/commit/0a77ff09146fc1df96d941a104292649bd21d2ad"
+        },
+        "date": 1784220695871,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.9795,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 5.9129,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 12.5066,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 16.5793,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 84.2007,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 118.5074,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.1204,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2525,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 85.9458,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 107.4231,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 14.3366,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.6679,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 114.6796,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 1.1406,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 28.2678,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.3748,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 35.144,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 596.0879,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 161.4856,
             "unit": "ms"
           }
         ]
