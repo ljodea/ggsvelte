@@ -456,7 +456,21 @@ export function createPlotInteraction<Key extends PropertyKey = PropertyKey>(
       const nextEmphasis = Object.freeze(priorEmphasis.filter((key) => valid.has(key)));
       const selectionChanged = !equalKeys(priorSelection, nextSelection);
       const emphasisChanged = !equalKeys(priorEmphasis, nextEmphasis);
-      if (!selectionChanged && !emphasisChanged) return null;
+      // Interval records in the same key scope carry captured keys too;
+      // reconciliation must prune them or union consumption keeps
+      // publishing keys the owner declared invalid.
+      const intervalScope = scope.intervals ?? scope.keys;
+      const priorPanels = intervals.get(intervalScope);
+      let intervalChanged = false;
+      if (priorPanels !== undefined) {
+        for (const [panelId, interval] of priorPanels) {
+          const nextKeys = Object.freeze(interval.keys.filter((key) => valid.has(key)));
+          if (equalKeys(interval.keys, nextKeys)) continue;
+          intervalChanged = true;
+          priorPanels.set(panelId, Object.freeze({ ...interval, keys: nextKeys }));
+        }
+      }
+      if (!selectionChanged && !emphasisChanged && !intervalChanged) return null;
       if (selectionChanged) {
         if (nextSelection.length === 0) selections.delete(scope.keys);
         else selections.set(scope.keys, nextSelection);
@@ -468,6 +482,7 @@ export function createPlotInteraction<Key extends PropertyKey = PropertyKey>(
       const changes = Object.freeze([
         ...(selectionChanged ? (["selection"] as const) : []),
         ...(emphasisChanged ? (["emphasis"] as const) : []),
+        ...(intervalChanged ? (["interval"] as const) : []),
       ]);
       return commit("reconcile", changes, scope, mutation.source ?? "programmatic");
     },

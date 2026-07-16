@@ -86,6 +86,25 @@ describe("precise bounds drafts", () => {
     });
   });
 
+  it("rejects normalized invalid ISO date-times instead of committing shifted dates", () => {
+    const time = input({
+      axis: "y",
+      action: "zoom",
+      scale: "time",
+      bounds: [Date.UTC(2025, 0, 1), Date.UTC(2025, 5, 1)],
+    });
+    // Date.parse silently normalizes overflow days (2025-02-30 → March 2);
+    // committing that would apply a different date than the user entered.
+    const overflow = validateBoundsDraft(time, "2025-02-30T00:00Z", "2025-04-31T12:00+00:00");
+    expect(overflow.ok).toBe(false);
+    if (overflow.ok) throw new Error("expected invalid bounds");
+    expect(overflow.errors.lower).toContain("valid ISO 8601");
+    expect(overflow.errors.upper).toContain("valid ISO 8601");
+
+    const valid = validateBoundsDraft(time, "2024-02-29T00:00Z", "2025-04-30T12:00+00:00");
+    expect(valid.ok).toBe(true);
+  });
+
   it("returns original typed band values and validates inclusive domain order", () => {
     const band = input({
       scale: "band",

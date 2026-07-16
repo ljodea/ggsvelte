@@ -156,6 +156,24 @@ describe("axisTicks", () => {
       { pos: 100, label: "50" },
     ]);
   });
+
+  it("positions typed band categories through rawDomain, not labels", async () => {
+    const { trainBand } = await import("../src/scales/train.ts");
+    // Numeric 1 and string "1" share the presentation label "1"; boolean and
+    // null categories never match their labels through encodeKey either.
+    const scale = trainBand([[1, "1", true]]);
+    const ticks = axisTicks(
+      scale,
+      scale.domain.map((label) => ({ value: label, label, labeled: true })),
+      300,
+      false,
+    );
+    expect(ticks).toEqual([
+      { pos: 50, label: "1" },
+      { pos: 150, label: "1" },
+      { pos: 250, label: "true" },
+    ]);
+  });
 });
 
 describe("singlePanelMarginReserve", () => {

@@ -222,4 +222,25 @@ describe("explicit legend filtering", () => {
 
     expect(container.querySelector(".gg-legend-filters")).toBeNull();
   });
+
+  it("keeps legends containing scaled constants non-filterable", async () => {
+    const { container } = render(GGPlot, {
+      data: [
+        { x: 1, y: 1, group: "north" },
+        { x: 2, y: 2, group: "south" },
+      ],
+      layers: [
+        { geom: "point", aes: { x: "x", y: "y", color: "group" } },
+        // A scaled constant feeds the same legend without a field mapping;
+        // toggling its entry would filter `group` while this layer stays.
+        { geom: "line", aes: { x: "x", y: "y", color: { value: "reference", scale: true } } },
+      ],
+      legendFilter: true,
+      width: 360,
+      height: 260,
+    });
+    await until(() => container.querySelector(".gg-plot-root") !== null);
+
+    expect(container.querySelector(".gg-legend-filters")).toBeNull();
+  });
 });

@@ -287,6 +287,30 @@ describe("createPlotInteraction", () => {
     expect(controller.revision).toBe(3);
   });
 
+  it("prunes interval record keys during reconciliation", () => {
+    const controller = createPlotInteraction<string>();
+    controller.setInterval(
+      {
+        panelId: "panel:all",
+        preset: "union",
+        domains: { x: { kind: "linear", domain: [0, 10] } },
+        keys: ["a", "b", "c"],
+      },
+      { scope },
+    );
+
+    const transition = controller.reconcileKeys(["b"], {
+      scope,
+      source: "programmatic",
+    });
+
+    expect(transition).toMatchObject({ kind: "reconcile" });
+    expect(transition!.changes).toContain("interval");
+    expect(controller.intervals(scope)[0]?.keys).toEqual(["b"]);
+    expect(controller.snapshot.intervals[0]?.keys).toEqual(["b"]);
+    expect(controller.reconcileKeys(["b"], { scope })).toBeNull();
+  });
+
   it("publishes deterministic frozen snapshots without row or renderer state", () => {
     const controller = createPlotInteraction<string>();
     controller.setSelection(["z"], { scope: "z-scope" });

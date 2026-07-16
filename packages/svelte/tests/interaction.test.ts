@@ -856,6 +856,45 @@ describe("brush + brush-to-zoom", () => {
     });
   });
 
+  it("clears the committed brush rectangle when the controller clears the interval", async () => {
+    let model: RenderModel | null = null;
+    const interaction = createPlotInteraction<string>();
+    const interactionScope = {
+      keys: "stale-rect",
+      intervals: "stale-rect",
+    } as const;
+    const { container } = render(GGPlot, {
+      data: rows,
+      aes: { x: "x", y: "y" },
+      layers: [{ geom: "point" }],
+      key: "x",
+      select: { type: "interval", mode: "x", persistent: true },
+      interaction,
+      interactionScope,
+      onrender: (next: RenderModel) => {
+        model = next;
+      },
+      ...size,
+    });
+    await until(() => model !== null);
+    const capture = container.querySelector(".gg-capture")!;
+    const selectArea = [
+      ...container.querySelectorAll<HTMLButtonElement>(".gg-tool-rail button"),
+    ].find((button) => button.textContent === "Select area")!;
+    selectArea.click();
+    await until(() => selectArea.getAttribute("aria-pressed") === "true");
+    const first = model!.candidates.candidate(0)!;
+    const last = model!.candidates.candidate(2)!;
+    drag(capture, first.x - 5, first.y - 10, last.x + 5, last.y + 10);
+    await until(() => interaction.intervals(interactionScope).length === 1);
+    await until(() => container.querySelector(".gg-selection") !== null);
+
+    // A linked chart (here: programmatic) clears the shared interval; the
+    // local pixel rectangle must not outlive its semantic record.
+    interaction.clearIntervals({ scope: interactionScope });
+    await until(() => container.querySelector(".gg-selection") === null);
+  });
+
   it("publishes complete shared xy precise domains and source-row lineage", async () => {
     const interaction = createPlotInteraction<string>();
     const interactionScope = {

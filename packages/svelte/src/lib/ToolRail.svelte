@@ -179,7 +179,10 @@
     right: 8px;
     top: -48px;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    /* Modes keep their content width; R3 recovery/bounds actions can outgrow
+       any plot width, so their track shrinks and scrolls instead of
+       overlapping the mode tabs. */
+    grid-template-columns: auto minmax(0, 1fr);
     gap: 4px;
     align-items: center;
     z-index: 1;
@@ -192,6 +195,10 @@
     display: flex;
     align-items: center;
     gap: 4px;
+  }
+
+  .gg-tool-recovery-actions {
+    overflow-x: auto;
   }
 
   .gg-tool-rail button {
@@ -208,6 +215,8 @@
     );
     font: inherit;
     font-size: 14px;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 
   .gg-tool-rail button:focus-visible {

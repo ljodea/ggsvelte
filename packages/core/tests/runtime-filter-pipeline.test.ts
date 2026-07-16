@@ -42,6 +42,37 @@ describe("runPipeline runtime row filters", () => {
     expect(model.lineage.keys(candidate?.lineage ?? -1)).toEqual([1]);
   });
 
+  test("reads candidate logical values through source rows after filtering", () => {
+    const model = runPipeline(spec, {
+      ...size,
+      rowFilters: [{ scale: "color", field: "group", mode: "exclude", values: ["west"] }],
+    });
+    const candidate = model.candidates.candidate(0);
+
+    // Row "b" is source row 1; its values must come from the source table,
+    // not from index 1 of the compacted filtered table (which has one row).
+    expect(candidate?.xValue).toBe(2);
+    expect(candidate?.yValue).toBe(4);
+  });
+
+  test("reconstructs aggregate lineages from source rows after filtering", () => {
+    const model = runPipeline(
+      {
+        data: { values: rows },
+        aes: { x: "group" },
+        layers: [{ geom: "bar" as const }],
+      },
+      {
+        ...size,
+        rowFilters: [{ scale: "fill", field: "group", mode: "exclude", values: ["west"] }],
+      },
+    );
+    const candidate = model.candidates.candidate(0);
+
+    expect(model.candidates.size).toBe(1);
+    expect(model.lineage.keys(candidate?.lineage ?? -1)).toEqual([1]);
+  });
+
   test("keeps the complete categorical legend and color assignments stable", () => {
     const initial = runPipeline(spec, size);
     const before = initial.scene.legends[0];

@@ -28,7 +28,9 @@ export function buildFinalizeCandidates(input: {
     bindings,
     panelFrames: prepared.panelFrames,
     facetPanels: prepared.facetPanels,
-    table: prepared.table,
+    // Candidate sourceRow indexes and lineage rows are source-table based
+    // (runtime filters preserve identity), so value lookups must be too.
+    table: prepared.sourceTable,
     layerFields,
     color: trained.colorResolution.resolved,
     fill: trained.fillResolution.resolved,

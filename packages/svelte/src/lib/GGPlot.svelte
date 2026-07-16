@@ -567,7 +567,11 @@
     if (effectiveSpec === null) return bindings;
     for (const layer of effectiveSpec.layers) {
       for (const scale of ["color", "fill"] as const) {
-        const channel = layer.aes?.[scale] ?? effectiveSpec.aes?.[scale];
+        const own = layer.aes?.[scale];
+        // Explicit null is an unset (normalize's null-unset semantics): the
+        // layer deliberately removed the plot-level binding — never inherit.
+        if (own === null) continue;
+        const channel = own ?? effectiveSpec.aes?.[scale];
         if (channel !== null && channel !== undefined && "field" in channel)
           bindings.add(`${scale}:${channel.field}`);
       }
@@ -904,6 +908,18 @@
     return model.scene.panels.find(
       (candidate) => candidate.id === currentIntervalRecord.panelId,
     );
+  });
+
+  // A shared controller can clear or replace this chart's interval from
+  // outside (a linked plot, programmatic reconcile). The local pixel
+  // rectangle must not outlive its semantic record.
+  $effect(() => {
+    const current = committedInterval;
+    if (current === null) return;
+    const record = effectiveIntervals.find(
+      (candidate) => candidate.panelId === current.panelId,
+    );
+    if (record === undefined) committedInterval = null;
   });
 
   function facetIdentityValueLabel(encodedValue: string): string {
@@ -1681,6 +1697,15 @@
       // filtering semantics. Keep the static legend rather than filtering
       // only whichever field happened to be encountered first.
       if (field === undefined || fields.size !== 1) return [];
+      // A scaled constant (aes { value, scale: true }) feeds this legend
+      // without a field: toggling its entry would filter an unrelated field
+      // while the constant-colored layer stays rendered. Keep it static.
+      if (
+        model.layerScaledConstants.some(
+          (constants) => constants[sceneLegend.scale] !== undefined,
+        )
+      )
+        return [];
       const current = localLegendFilters.find(
         (clause) =>
           clause.scale === sceneLegend.scale && clause.field === field,
@@ -3178,7 +3203,7 @@
     {#if filterableLegendEntries.length > 0}
       <fieldset class="gg-legend-filters">
         <legend>Filter legend</legend>
-        {#each filterableLegendEntries as target (`${target.legend.scale}:${target.field}:${target.entry.label}`)}
+        {#each filterableLegendEntries as target (`${target.legend.scale}:${target.field}:${encodeKey(target.entry.value)}`)}
           <label>
             <input
               type="checkbox"
@@ -3286,6 +3311,7 @@
       showLiveRegion={shouldRenderInteractionLiveRegion({
         surfaceInteractive,
         legendFocusEnabled,
+        legendFilterEnabled: legendFilterOptions !== null,
       })}
       liveText={resolveInteractionLiveText({
         announcement: interactionAnnouncement,

@@ -61,6 +61,43 @@ test("disappeared filter values return visible while resetScales keeps active fi
   ).toBe(false);
 });
 
+test("explicit layer aes null clears active filters instead of silently filtering", async () => {
+  let candidates = 0;
+  const events: LegendFilterEvent[] = [];
+  const both = [
+    { x: 1, y: 1, group: "north" },
+    { x: 2, y: 2, group: "south" },
+  ];
+  const base = {
+    aes: { x: "x", y: "y", color: "group" },
+    layers: [{ geom: "point" as const }],
+    legendFilter: true,
+    width: 360,
+    height: 260,
+    onrender: (model: { candidates: { size: number } }) => {
+      candidates = model.candidates.size;
+    },
+    onlegendfilter: (event: LegendFilterEvent) => {
+      events.push(event);
+    },
+  };
+  const view = render(GGPlot, { ...base, data: both });
+  await until(() => view.container.querySelectorAll(".gg-legend-filters input").length === 2);
+  view.container.querySelector<HTMLInputElement>("input[aria-label='Show north']")!.click();
+  await until(() => candidates === 1);
+
+  // The layer explicitly unsets color (null-unset semantics): the old global
+  // binding is gone, so the active filter must clear rather than keep
+  // filtering rows with no visible legend control.
+  await view.rerender({
+    ...base,
+    data: both,
+    layers: [{ geom: "point" as const, aes: { color: null } }],
+  });
+  await until(() => events.some((event) => event.phase === "clear"));
+  await until(() => candidates === 2);
+});
+
 test("include reconciliation reports clause removal instead of an empty include change", async () => {
   let candidates = 0;
   const events: LegendFilterEvent[] = [];

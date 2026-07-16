@@ -131,7 +131,11 @@ function parseTime(draft: string, label: string): number | string {
   }
   const value = Date.parse(trimmed);
   if (!Number.isFinite(value)) return `${label} must be a valid ISO 8601 date.`;
-  if (ISO_DATE.test(trimmed) && new Date(value).toISOString().slice(0, 10) !== trimmed) {
+  // The calendar date component must round-trip: Date.parse silently
+  // normalizes overflow days (2025-02-30 → March 2) for date-times too, so
+  // validate the date as written, independent of the time and offset.
+  const datePart = trimmed.slice(0, 10);
+  if (new Date(Date.parse(datePart)).toISOString().slice(0, 10) !== datePart) {
     return `${label} must be a valid ISO 8601 date.`;
   }
   return value;

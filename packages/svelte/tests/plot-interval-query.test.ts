@@ -175,6 +175,36 @@ describe("resolveIntervalQueryParts", () => {
     expect(parts.invertedDomain.x).toEqual(["a", "c"]);
   });
 
+  it("honors reversed band scales when inverting brush bounds", () => {
+    const base = scene({});
+    const rawDomain = ["a", "b", "c", "d"] as const;
+    const parts = resolveIntervalQueryParts({
+      // Screen fractions [0.2, 0.7]; with reverse the domain runs right-to-
+      // left, so the brushed categories are the mirrored [0.3, 0.8] → b..d.
+      pixels: { x0: 20, y0: 0, x1: 70, y1: 100 },
+      mode: "x",
+      scene: {
+        ...base,
+        scales: {
+          ...base.scales,
+          x: {
+            type: "band",
+            domain: ["a", "b", "c", "d"],
+            rawDomain,
+            indexOf: (value: unknown) =>
+              rawDomain.findIndex((candidate) => Object.is(candidate, value)),
+            normalize: (value: unknown) => {
+              const i = rawDomain.findIndex((candidate) => Object.is(candidate, value));
+              return i < 0 ? undefined : 1 - (i + 0.5) / rawDomain.length;
+            },
+            step: 0.25,
+          },
+        },
+      },
+    });
+    expect(parts.invertedDomain.x).toEqual(["b", "d"]);
+  });
+
   it("returns raw typed band endpoints instead of colliding display labels", () => {
     const base = scene({});
     const date = new Date("2025-01-02T00:00:00.000Z");

@@ -45,13 +45,17 @@ function bandDomain(
   t1: number,
 ): readonly [CellValue, CellValue] | undefined {
   if (scale.type !== "band" || scale.rawDomain.length === 0) return undefined;
+  const n = scale.rawDomain.length;
   const lo = Math.max(0, Math.min(1, Math.min(t0, t1)));
   const hi = Math.max(0, Math.min(1, Math.max(t0, t1)));
-  const first = Math.min(scale.rawDomain.length - 1, Math.floor(lo * scale.rawDomain.length));
-  const last = Math.min(
-    scale.rawDomain.length - 1,
-    Math.max(first, Math.ceil(hi * scale.rawDomain.length) - 1),
-  );
+  // `reverse: true` flips normalize() output, putting the first category at
+  // the far end. Detect it from the first band center and mirror the screen
+  // range back into domain order before indexing rawDomain.
+  const reversed = n > 1 && (scale.normalize(scale.rawDomain[0]) ?? 0) > 0.5;
+  const d0 = reversed ? 1 - hi : lo;
+  const d1 = reversed ? 1 - lo : hi;
+  const first = Math.min(n - 1, Math.floor(d0 * n));
+  const last = Math.min(n - 1, Math.max(first, Math.ceil(d1 * n) - 1));
   return [scale.rawDomain[first] as CellValue, scale.rawDomain[last] as CellValue];
 }
 
