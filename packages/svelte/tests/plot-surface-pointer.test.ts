@@ -99,6 +99,7 @@ describe("resolvePointerDownAction", () => {
         type: "begin-area",
         extendExisting: false,
         emitSelectStart: tool === "select-area",
+        source: "pointer",
       });
     },
   );
@@ -116,6 +117,7 @@ describe("resolvePointerDownAction", () => {
       type: "begin-area",
       extendExisting: true,
       emitSelectStart: false,
+      source: "pointer",
     });
   });
 
@@ -132,6 +134,7 @@ describe("resolvePointerDownAction", () => {
       type: "begin-area",
       extendExisting: false,
       emitSelectStart: false,
+      source: "pointer",
     });
   });
 
@@ -148,6 +151,23 @@ describe("resolvePointerDownAction", () => {
       type: "begin-area",
       extendExisting: false,
       emitSelectStart: true,
+      source: "pointer",
+    });
+  });
+
+  it("maps begin-area source from pointerType (touch vs mouse)", () => {
+    expect(
+      resolvePointerDownAction(
+        down({
+          activeTool: "select-area",
+          pointerType: "touch",
+        }),
+      ),
+    ).toEqual({
+      type: "begin-area",
+      extendExisting: false,
+      emitSelectStart: true,
+      source: "touch",
     });
   });
 });

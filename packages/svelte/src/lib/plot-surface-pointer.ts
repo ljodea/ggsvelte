@@ -23,6 +23,8 @@ export type SurfacePointerDownAction =
       readonly extendExisting: boolean;
       /** Emit select-area start event (not zoom; not second-corner await). */
       readonly emitSelectStart: boolean;
+      /** Interaction source for setInspection clear + select-start emission. */
+      readonly source: "touch" | "pointer";
     }
   | { readonly type: "none" };
 
@@ -44,6 +46,7 @@ export function resolvePointerDownAction(input: SurfacePointerDownInput): Surfac
     type: "begin-area",
     extendExisting: areaAwaitingSecond && hasBrushDraft,
     emitSelectStart: activeTool === "select-area" && !areaAwaitingSecond,
+    source: interactionSourceFromPointerType(pointerType),
   };
 }
 
