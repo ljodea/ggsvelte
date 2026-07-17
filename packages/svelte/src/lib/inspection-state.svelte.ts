@@ -73,7 +73,7 @@ import {
 // Public types
 // ---------------------------------------------------------------------------
 
-/** Component-held reducer shape — factory-only export from interaction-reducer. */
+/** Component-held reducer shape — factory-only export from interaction/reducer. */
 type InteractionReducer = ReturnType<typeof createInteractionReducer>;
 
 /** Inspect frame action delivered to onPointerFrame (non-move-area branch). */

@@ -203,7 +203,7 @@ describe("createPlotZoomState local mode", () => {
     state.commitZoom(domains, "pointer");
     flushSync();
     expect(state.effectiveZoomDomains).toEqual(domains);
-    // Pin the ACTUAL buildZoomEvent literal (plot-zoom.ts) — not a recompute.
+    // Pin the ACTUAL buildZoomEvent literal (zoom/zoom.ts) — not a recompute.
     expect(zoomEvents[0]).toEqual({
       type: "zoom",
       phase: "end",

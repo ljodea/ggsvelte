@@ -120,7 +120,7 @@ export type SurfacePointerUpAction =
       readonly source: "touch" | "pointer";
       /**
        * Pure-owned too-small/commit + select/zoom/end routing (shared with
-       * keyboard complete-area via plot-brush-finish).
+       * keyboard complete-area via surface/brush-finish).
        */
       readonly finish: FinishBrushAction;
     }

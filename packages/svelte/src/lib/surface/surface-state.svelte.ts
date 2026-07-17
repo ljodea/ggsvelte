@@ -218,7 +218,7 @@ export function createSurfaceState(deps: SurfaceStateDeps): SurfaceState {
   }
 
   function chooseTool(next: InteractionTool): void {
-    // Decision table is pure (plot-capability); this switch owns side effects.
+    // Decision table is pure (interaction/capability); this switch owns side effects.
     const action = resolveChooseToolAction({
       next,
       available: deps.availableTools(),
@@ -270,7 +270,7 @@ export function createSurfaceState(deps: SurfaceStateDeps): SurfaceState {
     if (event.pointerType === "touch" && touchInspectStart !== null) {
       touchInspectMoved = advanceTouchInspectMoved(touchInspectMoved, touchInspectStart, p);
     }
-    // Decision table is pure (plot-surface-pointer); this switch owns queues.
+    // Decision table is pure (surface/pointer); this switch owns queues.
     const action = resolvePointerMoveAction({
       pointerType: event.pointerType,
       activeTool,
@@ -524,7 +524,7 @@ export function createSurfaceState(deps: SurfaceStateDeps): SurfaceState {
   }
 
   function onSurfaceKeyDown(event: KeyboardEvent): void {
-    // Decision table is pure (plot-surface-keyboard); this switch owns side
+    // Decision table is pure (surface/keyboard); this switch owns side
     // effects only. brushCorners is the draft source of truth (not reducer
     // brushing); nudge/complete-area carry pure payloads so host only applies.
     const inspection = deps.inspection();
