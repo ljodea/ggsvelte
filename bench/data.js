@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784328767877,
+  "lastUpdate": 1784330597307,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -20075,6 +20075,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 129.6665,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "86aa6a5b2d91a8c65ed3892577ed5697a971129c",
+          "message": "perf(core): partition facet panels in one O(n) pass (#188)\n\n* perf(core): partition facet panels in one O(n) pass\n\nFacet wrap/grid previously re-scanned the full table once per panel\n(or twice per grid cell) via rowsMatching. Partition by encodeKey once\nper field, then assemble panels from buckets — O(n+v) wrap and\nO(n + R·C intersection) grid, with ggplot2 empty-combo parity preserved.\n\nCloses #183\n\n* fix(core): drop unused rowsMatching; fix unbound-method in facet tests\n\nRemove the dead per-value scan helper after partitionByField adoption\n(knip). Count column reads via the property descriptor so oxlint\nunbound-method stays clean on the complexity spies.\n\n* test(core): cover rows-only and cols-only facet grid partition\n\nLocks single-dimension grid paths that now read pre-partitioned buckets\ninstead of re-scanning via rowsMatching.\n\n* perf(core): partition facet grid by composite key in one O(n) pass\n\nAddress review of #188:\n\n- Grid: replace per-cell bucket intersection (O(n·(R+C))) with a single\n  composite (row, col) partition — partitionByFields, O(n) + O(R·C) reads.\n  Hoist the row-dimension lookup out of the inner column loop.\n- Drop unreachable `?? []` fallbacks in wrap and grid single-dimension\n  paths: every panel value comes from facetValues() over the same column,\n  so its bucket always exists — assert loudly instead of masking the\n  contract. The full-grid `?? []` remains, now genuine empty combinations.\n- Cover partitionByFields (composite buckets, number/string key parity,\n  one read per column).\n\nCo-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>\n\n---------\n\nCo-authored-by: Claude Opus 4.8 <noreply@anthropic.com>",
+          "timestamp": "2026-07-17T18:22:34-05:00",
+          "tree_id": "130f515eda513db9f9fe1bffe72093d0935af12c",
+          "url": "https://github.com/ljodea/ggsvelte/commit/86aa6a5b2d91a8c65ed3892577ed5697a971129c"
+        },
+        "date": 1784330596134,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.4901,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.8721,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 11.0838,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 12.001,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 84.3267,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 115.6788,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.3172,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.3566,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 85.751,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 105.7772,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.2026,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.2339,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 113.5983,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7943,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 27.8037,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.3539,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 31.9601,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 606.1969,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 160.4333,
             "unit": "ms"
           }
         ]
