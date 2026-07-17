@@ -55,15 +55,19 @@ export function rowIndexesForCandidate(
 
 /**
  * Map row indexes through a key resolver, keeping first-seen unique non-null keys.
+ * Uses a Set for O(1) membership so large brushes / lineages stay O(n).
  */
 export function uniqueKeysFromRowIndexes(
   rowIndexes: Iterable<number>,
   keyForRow: (rowIndex: number) => PropertyKey | null,
 ): PropertyKey[] {
+  const seen = new Set<PropertyKey>();
   const keys: PropertyKey[] = [];
   for (const rowIndex of rowIndexes) {
     const key = keyForRow(rowIndex);
-    if (key !== null && !keys.includes(key)) keys.push(key);
+    if (key === null || seen.has(key)) continue;
+    seen.add(key);
+    keys.push(key);
   }
   return keys;
 }
@@ -71,6 +75,7 @@ export function uniqueKeysFromRowIndexes(
 /**
  * Point-selection set algebra for toggle-on-click/keyboard.
  * Empty toggled keys leave the current selection unchanged.
+ * Membership uses Sets so multi-select of large key sets stays O(n+m).
  */
 export function nextPointSelectionKeys(
   current: readonly PropertyKey[],
@@ -78,8 +83,12 @@ export function nextPointSelectionKeys(
   multiple: boolean,
 ): PropertyKey[] {
   if (toggled.length === 0) return [...current];
-  const allSelected = toggled.every((key) => current.includes(key));
-  if (allSelected) return current.filter((key) => !toggled.includes(key));
+  const currentSet = new Set(current);
+  const allSelected = toggled.every((key) => currentSet.has(key));
+  if (allSelected) {
+    const toggledSet = new Set(toggled);
+    return current.filter((key) => !toggledSet.has(key));
+  }
   if (multiple) return [...new Set([...current, ...toggled])];
   return [...toggled];
 }
