@@ -209,10 +209,11 @@
     border-radius: 0;
     padding: 0 10px;
     background: transparent;
-    color: var(
-      --gg-interactionMuted,
-      var(--gg-theme-interactionMuted, currentColor)
-    );
+    /* --gg-theme-interactionMuted is a NUMERIC alpha token (theme.ts
+       interactionMuted: 0.36) — substituting it here made this declaration
+       invalid at computed-value time, so only --gg-interactionMuted (a
+       consumer-supplied color) may appear in a color position. */
+    color: var(--gg-interactionMuted, currentColor);
     font: inherit;
     font-size: 14px;
     white-space: nowrap;
@@ -272,6 +273,19 @@
     .gg-tool-rail button.active {
       border-bottom-color: Highlight;
       color: ButtonText;
+    }
+
+    /* Chromium does not repaint a button's forced text/border color when
+       `disabled` is removed unless the COMPUTED value changes with the state
+       (these buttons render disabled during SSR and are enabled after
+       hydration, so without this rule they froze race-dependently on the
+       disabled GrayText paint — PR #160's vr flake). Both properties are
+       needed: the base rule's `transparent` border is also forced-painted.
+       Placed after `.active` so a disabled active tool still reads as
+       disabled. */
+    .gg-tool-rail button:disabled {
+      border-bottom-color: GrayText;
+      color: GrayText;
     }
   }
 </style>

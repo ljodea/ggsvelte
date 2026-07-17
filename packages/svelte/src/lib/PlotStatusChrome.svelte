@@ -80,10 +80,9 @@
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    color: var(
-      --gg-interactionMuted,
-      var(--gg-theme-interactionMuted, currentColor)
-    );
+    /* --gg-theme-interactionMuted is a numeric alpha token — invalid in a
+       color position (see ToolRail.svelte). */
+    color: var(--gg-interactionMuted, currentColor);
     font: 12px/1.4 var(--gg-font-family, sans-serif);
     pointer-events: none;
   }
@@ -93,10 +92,8 @@
     top: calc(100% + 4px);
     left: 0;
     margin: 0;
-    color: var(
-      --gg-interactionMuted,
-      var(--gg-theme-interactionMuted, currentColor)
-    );
+    /* Numeric alpha token — invalid in a color position (see ToolRail). */
+    color: var(--gg-interactionMuted, currentColor);
     font: 11px/1.4 var(--gg-font-family, sans-serif);
   }
 
