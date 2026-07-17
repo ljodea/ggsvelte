@@ -50,21 +50,15 @@
     ThemeName,
     ThemeSpec,
   } from "@ggsvelte/spec";
-  import type {
-    BatchInteractionMask,
-    CellValue,
-    RenderModel,
-  } from "@ggsvelte/core";
-  import { buildInteractionMasks, sceneLabel } from "@ggsvelte/core";
+  import type { CellValue, RenderModel } from "@ggsvelte/core";
+  import { sceneLabel } from "@ggsvelte/core";
   import type { SceneHitIndex } from "@ggsvelte/core/dom";
   import { buildHitIndex } from "@ggsvelte/core/dom";
 
   import {
-    INTERACTION_DIAGNOSTIC_CATALOG,
     normalizeInteractionConfig,
     type InspectInput,
     type InteractionDiagnostic,
-    type InteractionSource,
     type InteractionTool,
     type LegendFocusEvent,
     type LegendFocusInput,
@@ -86,41 +80,17 @@
     toLayerInput,
   } from "./plot-assemble.js";
   import { shouldRenderInteractionLiveRegion } from "./plot-legend-surface.js";
-  import {
-    datumLabel as datumLabelFor,
-    markLabel as markLabelFor,
-    resolveInteractionLiveText,
-    selectionAnnouncement,
-  } from "./plot-labels.js";
+  import { resolveInteractionLiveText } from "./plot-labels.js";
   import {
     isContainerWidthProp,
     isNarrowToolsWidth,
     isTooltipDocked,
-    plotRootInlineStyle,
     plotTooltipDomId,
     resolveCaptureAriaControls,
     resolveClearLegendX,
     tooltipViewportSize,
   } from "./plot-layout.js";
-  import {
-    bandChannelsForZoom,
-    capabilityStatusText,
-    filterAvailableTools,
-    isEmptyPlotScene,
-    legendFocusDiscreteOnlyDiagnostics,
-    shouldShowToolRail,
-    zoomScaleDiagnosticsFromChannels,
-    zoomSupportsChannel,
-  } from "./plot-capability.js";
   import BoundsEditor from "./BoundsEditor.svelte";
-  import {
-    anchorsFromCandidateKeys,
-    buildPointSelectionEvent,
-    collectCandidates,
-    mergePresentationFocusKeys,
-    nextPointSelectionKeys,
-    sameOrderedPropertyKeys,
-  } from "./plot-selection.js";
   import {
     createSourceIdentityTracker,
     dataIdentityEpochToken,
@@ -130,7 +100,6 @@
     createSemanticKeyService,
   } from "./plot-shared-services.svelte.js";
   import { createPlotRuntime } from "./plot-runtime.svelte.js";
-  import { themeTokensToCss } from "./plot-theme-css.js";
   import type { LegendEntryIdentity } from "./plot-legend-focus.js";
   import PlotCaptureSurface from "./PlotCaptureSurface.svelte";
   import PlotLegendFilters from "./PlotLegendFilters.svelte";
@@ -146,6 +115,8 @@
   import { createIntervalState } from "./interval-state.svelte.js";
   import { createInspectionState } from "./inspection-state.svelte.js";
   import { createSurfaceState } from "./surface-state.svelte.js";
+  import { createSelectionState } from "./selection-state.svelte.js";
+  import { createPlotChromeState } from "./plot-chrome-state.svelte.js";
   import {
     type LegendFilterEvent,
     type LegendFilterInput,
@@ -347,8 +318,7 @@
   // runtime). Construction-time deriveds read interaction/scope/zoomConfig/
   // assembled only — never model/coordFlipped/announce (Svelte 5.29 server
   // evaluates $derived eagerly at construction).
-  // controllerRevision has non-zoom consumers (selection/intervals) and stays.
-  const controllerRevision = $derived(interaction?.revision ?? 0);
+  // controllerRevision deleted in S8 (selection reads revision directly).
   const zoomState = createPlotZoomState({
     interaction: () => factoryInteraction,
     resolvedInteractionScope: () => resolvedInteractionScope,
@@ -506,12 +476,12 @@
     root: () => root,
     toolProp: () => tool,
     initialTool: () => interactionConfig.initialTool,
-    // Deferred: availableTools is declared after interval (handler/effect only).
-    availableTools: () => availableTools,
+    // Deferred: chrome availableTools (handler/effect only).
+    availableTools: () => chromeState.availableTools,
     inspectConfig: () => interactionConfig.inspect,
     selectConfig: () => interactionConfig.select,
-    // Deferred: canPublishPointSelection is declared later (handler only).
-    pointSelectEnabled: () => canPublishPointSelection,
+    // Deferred: chrome canPublishPointSelection (handler only).
+    pointSelectEnabled: () => chromeState.canPublishPointSelection,
     ontoolchange: () => ontoolchange,
     surfaceInteractive: () => surfaceInteractive,
     hitIndex: () => hitIndex,
@@ -521,10 +491,13 @@
     // Deferred: interval is declared after surface (handler only).
     interval: () => intervalState,
     zoom: () => zoomState,
-    emitSelection,
+    // Deferred: selection controller is declared after surface (handler only).
+    emitSelection: (event) => selectionState.emitSelection(event),
     // Deferred: semantic-key service is declared later (handler only).
     semanticKey: (row, index) => semanticKey(row, index),
-    togglePointKeys,
+    // Deferred: selection controller is declared after surface (handler only).
+    togglePointKeys: (keys, source) =>
+      selectionState.togglePointKeys(keys, source),
     tooltipHovered: () => tooltipHovered,
     announce: announceSink,
   });
@@ -538,11 +511,35 @@
   let captureSurface = $state<HTMLDivElement | null>(null);
   const brushRect = $derived(surfaceState.brushRect);
   const areaAwaitingSecond = $derived(surfaceState.areaAwaitingSecond);
-  let localSelectedKeys = $state<PropertyKey[]>([]);
-  const effectiveSelectedKeys: readonly PropertyKey[] = $derived.by(() => {
-    void controllerRevision;
-    return interaction?.selected(resolvedInteractionScope) ?? localSelectedKeys;
+  // ------------------------------------------------- selection (S8)
+  // Factory at the original localSelectedKeys position. Construction-time
+  // effectiveSelectedKeys reads earlier interaction/scope only. Anchors and
+  // masks are methods (later-declared inputs).
+  const selectionState = createSelectionState({
+    model: () => model,
+    interaction: () => factoryInteraction,
+    resolvedInteractionScope: () => resolvedInteractionScope,
+    selectConfig: () => interactionConfig.select,
+    // Deferred: interval alias is declared after this factory (method only).
+    effectiveIntervalKeys: () => effectiveIntervalKeys,
+    // Deferred: legend-focus alias is declared after this factory (method only).
+    effectiveEmphasisKeys: () => effectiveEmphasisKeys,
+    // Deferred method-only projection of inspection focus for presentation masks.
+    inspectionFocus: () =>
+      inspection === null
+        ? null
+        : {
+            sourceKeys: inspection.focus.sourceKeys,
+            key: inspection.focus.key,
+          },
+    // Deferred: semantic-key alias initializes later (#165).
+    candidateSemanticKeys: (candidate) => candidateSemanticKeys(candidate),
+    onselect: () => onselect as ((event: PlotSelection) => void) | undefined,
+    oninteraction: () => factoryOninteraction,
+    announce: announceSink,
   });
+  // Host one-liner at original position for chrome / anchors / markup.
+  const effectiveSelectedKeys = $derived(selectionState.effectiveSelectedKeys);
   // Shared enablement predicates (avoid re-typing the same config gates).
   const inspectEnabled = $derived(interactionConfig.inspect !== null);
   const legendFocusEnabled = $derived(interactionConfig.legendFocus !== null);
@@ -588,170 +585,54 @@
     captureSurface: () => captureSurface,
     candidateSemanticKeys: (candidate) => candidateSemanticKeys(candidate),
     inspectionPanel: () => inspectionPanel,
-    emitSelection,
+    // Selection is already constructed (interval is after selection).
+    emitSelection: selectionState.emitSelection,
     announce: announceSink,
   });
   // Host one-liners at original positions for later consumers.
   const effectiveIntervals = $derived(intervalState.effectiveIntervals);
   const effectiveIntervalKeys = $derived(intervalState.effectiveIntervalKeys);
-  const committedInterval = $derived(intervalState.committedInterval);
-  const zoomHasSupportedChannel = $derived.by(() => {
-    if (interactionConfig.zoom === null || model === null) return true;
-    return zoomSupportsChannel(interactionConfig.zoom.mode, model.scales);
+  // ------------------------------------------------- plot chrome (S8)
+  // Factory at the original chrome region. All inputs earlier-declared
+  // (including effectiveSelectedKeys host alias). Pure construction-time
+  // deriveds — no $state/handlers/effects.
+  const chromeState = createPlotChromeState({
+    model: () => model,
+    zoomConfig: () => interactionConfig.zoom,
+    selectConfig: () => interactionConfig.select,
+    configuredAvailableTools: () => interactionConfig.availableTools,
+    interactionDiagnostics: () => interactionConfig.diagnostics,
+    interactive: () => interactive,
+    effectiveZoomDomains: () => effectiveZoomDomains,
+    effectiveIntervals: () => effectiveIntervals,
+    effectiveSelectedKeys: () => effectiveSelectedKeys,
+    effectiveEmphasisKeys: () => effectiveEmphasisKeys,
+    legendFocusEnabled: () => legendFocusEnabled,
+    hasCanvas: () => hasCanvas,
+    width: () => width,
+    resolvedWidth: () => resolvedWidth,
+    resolvedHeight: () => resolvedHeight,
   });
-  const availableTools = $derived(
-    filterAvailableTools(
-      interactionConfig.availableTools,
-      zoomHasSupportedChannel,
-    ),
-  );
-  const canPublishPointSelection = $derived(
-    interactionConfig.select?.type === "point",
-  );
-  // Shared by tool-rail visibility and ToolRail recovery props (avoid dual calc).
-  const hasPointSelection = $derived(
-    canPublishPointSelection && effectiveSelectedKeys.length > 0,
-  );
-  // R3: interval presence covers dormant panel intervals, not just the
-  // committed one (effectiveIntervals), so recovery controls stay reachable.
-  const hasIntervalSelection = $derived(effectiveIntervals.length > 0);
-  const hasZoomDomains = $derived(effectiveZoomDomains !== null);
-  const showToolRail = $derived(
-    shouldShowToolRail({
-      interactive,
-      availableToolCount: availableTools.length,
-      canPublishPointSelection,
-      selectedKeyCount: effectiveSelectedKeys.length,
-      hasIntervalSelection,
-      hasZoomDomains,
-    }),
-  );
-  const emptyPlot = $derived(
-    model !== null && isEmptyPlotScene(model.scene.batches),
-  );
-  const preciseIntervalAxes = $derived.by((): readonly ("x" | "y")[] => {
-    const selectOptions = interactionConfig.select;
-    if (selectOptions === null || selectOptions.type !== "interval") return [];
-    return (["x", "y"] as const).filter(
-      (axis) => selectOptions.mode === "xy" || selectOptions.mode === axis,
-    );
-  });
-  const preciseZoomAxes = $derived.by((): readonly ("x" | "y")[] => {
-    if (interactionConfig.zoom === null || model === null) return [];
-    return (["x", "y"] as const).filter(
-      (axis) =>
-        (interactionConfig.zoom?.mode === "xy" ||
-          interactionConfig.zoom?.mode === axis) &&
-        model.scales[axis].type !== "band",
-    );
-  });
-  const areaScaleDiagnostics = $derived.by(() => {
-    if (model === null || interactionConfig.zoom === null)
-      return [] as InteractionDiagnostic[];
-    return zoomScaleDiagnosticsFromChannels(
-      bandChannelsForZoom(interactionConfig.zoom.mode, model.scales),
-      INTERACTION_DIAGNOSTIC_CATALOG.INTERACTION_INTERVAL_SCALE_UNSUPPORTED,
-    );
-  });
-  const legendDiagnostics = $derived.by(() => {
-    if (model === null) return [] as InteractionDiagnostic[];
-    return legendFocusDiscreteOnlyDiagnostics(
-      legendFocusEnabled,
-      model.scene.legends,
-    );
-  });
-  const capabilityStatus = $derived.by(() => {
-    const unavailable = interactionConfig.diagnostics.find(
-      (diagnostic) =>
-        diagnostic.code === "INTERACTION_INTERVAL_FACET_UNSUPPORTED",
-    );
-    return capabilityStatusText({
-      ...(unavailable !== undefined && {
-        facetUnavailableMessage: unavailable.message,
-      }),
-      areaDiagnostics: areaScaleDiagnostics,
-      zoomSupported: zoomHasSupportedChannel,
-      interactive,
-      emptyPlot,
-      candidateCount: model === null ? null : model.candidates.size,
-    });
-  });
-  const themeStyle = $derived.by(() =>
-    model === null ? "" : themeTokensToCss(model.scene.theme),
-  );
-  const rootStyle = $derived(
-    plotRootInlineStyle({
-      needsSizedBox:
-        hasCanvas ||
-        interactive ||
-        effectiveEmphasisKeys.length > 0 ||
-        effectiveSelectedKeys.length > 0,
-      containerWidth: isContainerWidthProp(width),
-      sceneWidth: model?.scene.width ?? resolvedWidth,
-      sceneHeight: model?.scene.height ?? resolvedHeight,
-      themeStyle,
-    }),
-  );
-  function anchorsForKeys(keys: readonly PropertyKey[]): {
-    x: number;
-    y: number;
-  }[] {
-    // Empty filter short-circuits before walking (keysFor can be expensive).
-    if (model === null || keys.length === 0) return [];
-    return anchorsFromCandidateKeys(
-      collectCandidates(model.candidates, (candidate) => ({
-        x: candidate.x,
-        y: candidate.y,
-        keys: candidateSemanticKeys(candidate),
-      })),
-      keys,
-    );
-  }
-  const selectedAnchors = $derived(
-    anchorsForKeys([
-      ...new Set([...effectiveSelectedKeys, ...effectiveIntervalKeys]),
-    ]),
-  );
-  const emphasizedAnchors = $derived(anchorsForKeys(effectiveEmphasisKeys));
-
-  function commitPointSelection(
-    keys: readonly PropertyKey[],
-    source: InteractionSource,
-  ): void {
-    let committed: readonly PropertyKey[];
-    if (interaction === undefined) {
-      const next = [...new Set(keys)];
-      if (sameOrderedPropertyKeys(next, localSelectedKeys)) return;
-      localSelectedKeys = next;
-      committed = localSelectedKeys;
-    } else {
-      const transition = interaction.setSelection(
-        keys as readonly PublicKey[],
-        {
-          scope: resolvedInteractionScope,
-          source,
-        },
-      );
-      if (transition === null) return;
-      committed =
-        transition.snapshot.selections.find(
-          (selection) => selection.scope === resolvedInteractionScope.keys,
-        )?.keys ?? [];
-    }
-    emitSelection(buildPointSelectionEvent(committed, source));
-  }
-
-  function clearPointSelection(source: InteractionSource): void {
-    if (effectiveSelectedKeys.length === 0) return;
-    commitPointSelection([], source);
-  }
-
-  function emitSelection(event: PlotSelection): void {
-    const message = selectionAnnouncement(event);
-    if (message !== null) announcer.announce(message);
-    onselect?.(event as unknown as PlotSelection<PublicKey>);
-    oninteraction?.(event as unknown as PlotInteractionEvent<Row, PublicKey>);
-  }
+  // Host one-liners at original positions for markup consumers. Surface's
+  // availableTools / pointSelectEnabled read chromeState accessors directly
+  // (deferred closures). Diagnostics aliases feed the host effects below.
+  const availableTools = $derived(chromeState.availableTools);
+  const hasPointSelection = $derived(chromeState.hasPointSelection);
+  const hasIntervalSelection = $derived(chromeState.hasIntervalSelection);
+  const showToolRail = $derived(chromeState.showToolRail);
+  const emptyPlot = $derived(chromeState.emptyPlot);
+  const preciseIntervalAxes = $derived(chromeState.preciseIntervalAxes);
+  const preciseZoomAxes = $derived(chromeState.preciseZoomAxes);
+  // Public accessors — host diagnostic effects stay at their positions
+  // (registration order semantic service → diagnostic effects is load-bearing).
+  const areaScaleDiagnostics = $derived(chromeState.areaScaleDiagnostics);
+  const legendDiagnostics = $derived(chromeState.legendDiagnostics);
+  const capabilityStatus = $derived(chromeState.capabilityStatus);
+  const rootStyle = $derived(chromeState.rootStyle);
+  // Anchors: methods with host one-liner deriveds at original positions
+  // (server-eager order preserved; later-declared inputs).
+  const selectedAnchors = $derived(selectionState.computeSelectedAnchors());
+  const emphasizedAnchors = $derived(selectionState.computeEmphasizedAnchors());
 
   const plotId = $props.id();
   // Preserve the semantic diagnostics effect's original registration order.
@@ -770,36 +651,21 @@
   // (after diagnostics, before catalog/focus/inspection registrations).
   surfaceState.registerSurfaceEffects();
 
-  const presentationFocusKeys: readonly PropertyKey[] = $derived(
-    mergePresentationFocusKeys(
-      effectiveEmphasisKeys,
-      inspection === null
-        ? null
-        : {
-            sourceKeys: inspection.focus.sourceKeys,
-            key: inspection.focus.key,
-          },
+  // Three separate host derived aliases at original 768–798 positions —
+  // intermediate memo boundaries live here (do NOT fold into one method).
+  const presentationFocusKeys = $derived(
+    selectionState.computePresentationFocusKeys(),
+  );
+  const semanticCandidateProjections = $derived(
+    selectionState.computeSemanticCandidateProjections(),
+  );
+  const interactionMasks = $derived(
+    selectionState.computeInteractionMasks(
+      presentationFocusKeys,
+      // Thunk: with empty focus (idle), the projections derived is never read.
+      () => semanticCandidateProjections,
     ),
   );
-
-  const semanticCandidateProjections = $derived.by(() => {
-    if (model === null) return [];
-    return collectCandidates(model.candidates, (candidate) => ({
-      batchIndex: candidate.batchIndex,
-      primitiveIndex: candidate.primitiveIndex,
-      keys: candidateSemanticKeys(candidate),
-    }));
-  });
-
-  const interactionMasks: readonly (BatchInteractionMask | null)[] =
-    $derived.by(() => {
-      if (model === null || presentationFocusKeys.length === 0) return [];
-      return buildInteractionMasks(
-        model.scene.batches,
-        presentationFocusKeys,
-        semanticCandidateProjections,
-      );
-    });
 
   // Host-side deriveds: must not live in the factory (server-eager model TDZ).
   const interactiveLegendEntries = $derived(
@@ -835,25 +701,10 @@
     zoomState.setZoomDomains(domains);
   }
 
-  // Stable SceneView callback identity when model is unchanged.
-  const markLabel = $derived.by(
-    () => (row: number) => markLabelFor(model, row),
-  );
-  const datumLabel = (values: Record<string, CellValue> | null) =>
-    datumLabelFor(model, values);
-
-  function togglePointKeys(
-    keys: readonly PropertyKey[],
-    source: InteractionSource,
-  ): void {
-    if (keys.length === 0) return;
-    const next = nextPointSelectionKeys(
-      effectiveSelectedKeys,
-      keys,
-      interactionConfig.select?.multiple ?? false,
-    );
-    commitPointSelection(next, source);
-  }
+  // Host one-liners at original markLabel/datumLabel positions
+  // (datumLabel is a plain method reference — chromeState is constructed).
+  const markLabel = $derived(chromeState.markLabel);
+  const datumLabel = chromeState.datumLabel;
 
   // Phase 3: clientFlush/ready effect at the end of the script (late registration).
   runtime.registerLateEffects();
@@ -902,7 +753,7 @@
       zoomAxes={preciseZoomAxes}
       onChooseTool={surfaceState.chooseTool}
       onResetZoom={zoomState.resetZoom}
-      onClearPointSelection={clearPointSelection}
+      onClearPointSelection={selectionState.clearPointSelection}
       onClearIntervalSelection={intervalState.clearIntervalSelection}
       onClearCurrentInterval={intervalState.clearCurrentPanelInterval}
       onEditBounds={intervalState.openBoundsEditor}
