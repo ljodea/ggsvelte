@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784316757791,
+  "lastUpdate": 1784319231795,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -19242,6 +19242,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 168.3027,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "2fcac08e7ce59b74e4131298d0b5512ff71f23e7",
+          "message": "refactor(svelte): S12 — coverage tooling; geoms/, assembly/, chrome/, a11y/ directories (#176)\n\n* test(svelte): add v8 coverage tooling (non-gating)\n\n* refactor(svelte): move geoms/, assembly/, chrome/, a11y/ into feature directories\n\n* test(svelte): direct coverage for registry, factory, and geom declarations\n\n* test(svelte): scope geom mark assertions to mark layers; de-dup coverage base\n\nReview findings: the geom smoke test's fallback selectors (', rect',\n', line', bare 'text') matched always-rendered chrome (panel rects,\ngridlines, axis labels), so an empty mark layer could not fail the\n'no silent empty plot' assertion for 7 of 12 geoms — selectors are now\nscoped to the mark-batch classes only (.gg-points/.gg-rects/.gg-segments/\n.gg-areas/.gg-paths/.gg-glyphs). Also: LayerRegistry construction needs\nno effect root (class-field $state), trackLayerCount reuses the\nwithEffectRoot helper, and the browser/SSR coverage blocks share one\ncoverageBase so the two reports can never drift to different file sets.\n\nCo-Authored-By: Claude Fable 5 <noreply@anthropic.com>\n\n* test(svelte): harden coverage and relocation checks\n\n---------\n\nCo-authored-by: Claude Fable 5 <noreply@anthropic.com>",
+          "timestamp": "2026-07-17T15:13:14-05:00",
+          "tree_id": "82e62c6f3bb6077713ba43933b50472ce2704459",
+          "url": "https://github.com/ljodea/ggsvelte/commit/2fcac08e7ce59b74e4131298d0b5512ff71f23e7"
+        },
+        "date": 1784319230571,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 1.8298,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.5517,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 9.3746,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 11.5694,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 69.4082,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 92.8214,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 0.9919,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.0193,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 67.1051,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 86.0504,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 10.668,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 10.6262,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 89.4814,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.6262,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 20.4033,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 5.8051,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 20.5976,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 489.7496,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 126.2412,
             "unit": "ms"
           }
         ]
