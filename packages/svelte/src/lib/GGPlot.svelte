@@ -51,13 +51,12 @@
     ThemeSpec,
   } from "@ggsvelte/spec";
   import type {
-    CandidateFacts,
     BatchInteractionMask,
     CellValue,
     RenderModel,
   } from "@ggsvelte/core";
   import { buildInteractionMasks, sceneLabel } from "@ggsvelte/core";
-  import type { SceneHit, SceneHitIndex } from "@ggsvelte/core/dom";
+  import type { SceneHitIndex } from "@ggsvelte/core/dom";
   import { buildHitIndex } from "@ggsvelte/core/dom";
 
   import {
@@ -71,7 +70,6 @@
     type LegendFocusEvent,
     type LegendFocusInput,
     type PlotInspection,
-    type PlotInspectionChange,
     type PlotInteractionEvent,
     type PlotInteractionScope,
     type PlotSelection,
@@ -81,7 +79,6 @@
     type ZoomInput,
   } from "./interaction.js";
   import type { PlotInteractionController } from "./interaction-controller.svelte.js";
-  import { createInspectionCoordinator } from "./inspection-resolver.js";
   import { createInteractionReducer } from "./interaction-reducer.js";
   import { provideRegistry } from "./registry.svelte.js";
   import {
@@ -91,28 +88,10 @@
     toLayerInput,
   } from "./plot-assemble.js";
   import { brushAtPoint, brushWithEnd } from "./plot-area-brush.js";
-  import { normalizedRect, panelContainingAnchor } from "./plot-geometry.js";
+  import { normalizedRect } from "./plot-geometry.js";
   import { resolveSurfaceKeyAction } from "./plot-surface-keyboard.js";
+  import { buildQueuedInspectFrame } from "./plot-surface-inspection-frame.js";
   import {
-    buildInspectionCandidateRef,
-    buildQueuedInspectFrame,
-    resolveQueuedInspectFrameAction,
-    type QueuedPointerInspection,
-  } from "./plot-surface-inspection-frame.js";
-  import {
-    resolveInspectionCompleteness,
-    resolveInspectionMode,
-    resolveSetInspectionAction,
-    resolveToggleInspectionPinAction,
-    shouldAnnounceUnpin,
-    shouldClearInspectionAnnouncement,
-    shouldCommitInspection,
-    shouldFocusPinnedInteractiveTooltip,
-  } from "./plot-surface-inspection-apply.js";
-  import {
-    planInspectionDismiss,
-    planSceneInspectReconcile,
-    resolveInspectionEmitAction,
     resolveSurfaceBlurAction,
     shouldClosePinnedOnOutsidePointer,
   } from "./plot-surface-inspection-teardown.js";
@@ -134,7 +113,6 @@
   import {
     BRUSH_SECOND_CORNER_ANNOUNCEMENT,
     datumLabel as datumLabelFor,
-    inspectionLiveText as inspectionLiveTextFor,
     markLabel as markLabelFor,
     resolveInteractionLiveText,
     selectionAnnouncement,
@@ -149,17 +127,7 @@
     resolveClearLegendX,
     tooltipViewportSize,
   } from "./plot-layout.js";
-  import {
-    bestDirectionalIndex,
-    buildTraversalHits,
-    cycleCoincidentIndex,
-    hitFromCandidate,
-    matchCandidateFromHit,
-    nextTraversalIndex,
-    planCycleCoincident,
-    planDirectionalNavigate,
-    plotPointFromClient,
-  } from "./plot-pointer.js";
+  import { hitFromCandidate, plotPointFromClient } from "./plot-pointer.js";
   import {
     bandChannelsForZoom,
     capabilityStatusText,
@@ -182,7 +150,6 @@
     anchorsFromCandidateKeys,
     buildPointSelectionEvent,
     collectCandidates,
-    iterateCandidates,
     mergePresentationFocusKeys,
     nextPointSelectionKeys,
     sameOrderedPropertyKeys,
@@ -210,6 +177,7 @@
   import { createLegendFocusState } from "./legend-focus-state.svelte.js";
   import { createPlotZoomState } from "./plot-zoom-state.svelte.js";
   import { createIntervalState } from "./interval-state.svelte.js";
+  import { createInspectionState } from "./inspection-state.svelte.js";
   import {
     type LegendFilterEvent,
     type LegendFilterInput,
@@ -397,6 +365,10 @@
         ) => void)
       | undefined,
   );
+  const factoryOninspect = $derived(
+    oninspect as
+      ((event: PlotInspection<Record<string, CellValue>>) => void) | undefined,
+  );
   // Announcer is declared later; the sink is handler-only (never construction).
   const announceSink = (message: string): void => {
     announcer.announce(message);
@@ -525,12 +497,39 @@
   );
 
   let reducerRevision = $state(0);
-  let queuedPointerToken: {
-    readonly epoch: number;
-    readonly revision: number;
-  } | null = null;
-  let queuedPointerInspection: QueuedPointerInspection | null = null;
-  let pendingPinnedPointer: QueuedPointerInspection | null = null;
+  // ------------------------------------------------- inspection (S6)
+  // Factory at the original queue-vars position (before the component-held
+  // reducer). Construction-time deriveds may read model / surfaceInteractive
+  // (both earlier). Phased effects register later at the original coordinator
+  // site via registerInspectionEffects().
+  // queuedAreaSource stays host-owned (written by surface pointer routing,
+  // read by the reducer's move-area branch — S7 territory).
+  const inspectionState = createInspectionState({
+    model: () => model,
+    // Deferred: reducer is declared immediately below (handler/effect only).
+    reducer: () => reducer,
+    inspectConfig: () => interactionConfig.inspect,
+    surfaceInteractive: () => surfaceInteractive,
+    inspectEnabled: () => inspectEnabled,
+    dataIdentityEpoch: () => dataIdentityEpoch,
+    // Deferred: semantic-key service is declared later (handler only).
+    keyAt: (index) => semanticKeys.keyAt(index),
+    root: () => root,
+    captureSurface: () => captureSurface,
+    plotId: () => plotId,
+    tooltipHovered: () => tooltipHovered,
+    clearTooltipHovered: () => {
+      tooltipHovered = false;
+    },
+    clearBrush: () => {
+      brushRect = null;
+    },
+    chooseTool: (next) => chooseTool(next),
+    oninspect: () => factoryOninspect,
+    oninteraction: () => factoryOninteraction,
+    announce: announceSink,
+    clearAnnouncement: () => announcer.clear(),
+  });
   let queuedAreaSource: InteractionSource = "pointer";
   const reducer = createInteractionReducer({
     onChange: () => {
@@ -542,41 +541,7 @@
       if (action.type === "move-area") {
         applyAreaMove(action.point, queuedAreaSource);
       } else {
-        // Snapshot then clear queues before pure routing (matches prior host).
-        const pending = queuedPointerInspection;
-        const token = queuedPointerToken;
-        queuedPointerInspection = null;
-        queuedPointerToken = null;
-        // Short-circuit tokenAccepted when no pending so accepts() is not
-        // called for empty frames (Codex plan review).
-        const frameAction = resolveQueuedInspectFrameAction({
-          hasPending: pending !== null,
-          tokenAccepted:
-            pending === null || token === null || reducer.accepts(token),
-          currentState: inspection?.state ?? "none",
-          candidateEpochMismatch:
-            action.candidate !== null &&
-            action.candidate.epoch !== model?.runId,
-        });
-        switch (frameAction.type) {
-          case "none":
-          case "drop":
-            return;
-          case "stash-pending":
-            if (pending === null) return;
-            pendingPinnedPointer = pending;
-            return;
-          case "apply-pending":
-            if (pending === null) return;
-            setInspection(
-              pending.hit,
-              pending.source,
-              "transient",
-              pending.concreteMode,
-              pending.candidate,
-            );
-            break;
-        }
+        inspectionState.applyQueuedInspectFrame(action);
       }
     },
   });
@@ -595,15 +560,9 @@
       ? "Use Arrow keys to inspect data. Press Enter or Space to pin. Press Escape to dismiss."
       : "Use Arrow keys to inspect data. Press Escape to dismiss.";
   });
-  let inspection = $state<PlotInspectionChange<
-    Record<string, CellValue>,
-    PropertyKey
-  > | null>(null);
-  let inspectionSeed: CandidateFacts | null = null;
-  const inspectionPanel = $derived.by(() => {
-    if (inspection === null || model === null) return null;
-    return panelContainingAnchor(model.scene.panels, inspection.focus.anchor);
-  });
+  // Host one-liners at original positions so every consumer stays unchanged.
+  const inspection = $derived(inspectionState.inspection);
+  const inspectionPanel = $derived(inspectionState.inspectionPanel);
   const coordFlipped = $derived(assembled?.coord?.type === "flip");
   let tooltipHovered = $state(false);
   let captureSurface = $state<HTMLDivElement | null>(null);
@@ -624,8 +583,6 @@
     void reducerRevision;
     return isAreaAwaitingSecond(reducer.state.area.kind);
   });
-  let lastInspectionFingerprint = "";
-  let activeTraversalIndex = $state(-1);
   let localSelectedKeys = $state<PropertyKey[]>([]);
   const effectiveSelectedKeys: readonly PropertyKey[] = $derived.by(() => {
     void controllerRevision;
@@ -865,11 +822,11 @@
         })
       )
         return;
-      closeInspection("pointer", false);
+      inspectionState.closeInspection("pointer", false);
     };
     const cancelDraft = () => {
       brushRect = null;
-      queuedPointerInspection = null;
+      inspectionState.clearQueuedPointer();
       touchInspectStart = null;
       reducer.cancelScheduledPointer();
       reducer.dispatch({ type: "cancel-area" });
@@ -906,7 +863,7 @@
       case "apply":
         reducer.dispatch({ type: "set-tool", tool: next });
         brushRect = null;
-        queuedPointerInspection = null;
+        inspectionState.clearQueuedPointer();
         reducer.cancelScheduledPointer();
         ontoolchange?.(next);
         break;
@@ -997,350 +954,9 @@
   legendFilterState.registerCatalogEffects(() => filterableLegendEntries);
   // Legend-focus reconcile effects at their original position (after S2 catalog).
   legendFocusState.registerReconcileEffects();
-
-  const inspectionCoordinator = createInspectionCoordinator<
-    Record<string, CellValue>,
-    PropertyKey
-  >((_row, index) => semanticKeys.keyAt(index));
-
-  $effect(() => () => inspectionCoordinator.invalidate());
-
-  function candidateFromHit(hit: SceneHit): CandidateFacts | null {
-    if (model === null) return null;
-    return matchCandidateFromHit(iterateCandidates(model.candidates), hit);
-  }
-
-  function resolveInspection(
-    hit: SceneHit,
-    source: InteractionSource,
-    state: "transient" | "pinned" = "transient",
-    concreteMode?: "exact" | "x" | "y" | "xy",
-    candidate?: CandidateFacts,
-  ) {
-    if (model === null)
-      throw new Error("Cannot resolve inspection without a render model");
-    const seed =
-      candidate ??
-      candidateFromHit(hit) ??
-      model.candidates.nearest(hit.x, hit.y, { mode: "exact", maxDistance: 0 });
-    if (seed === null)
-      throw new Error("Inspection hit was not present in the candidate store");
-    const requested = interactionConfig.inspect?.mode ?? "auto";
-    const mode = resolveInspectionMode({
-      concreteMode,
-      requested,
-      seedAutoMode: seed.autoMode,
-    });
-    return inspectionCoordinator.resolve({
-      model,
-      seed,
-      mode,
-      state,
-      source,
-      identityEpoch: dataIdentityEpoch,
-      layoutEpoch: model.runId,
-      completeness: resolveInspectionCompleteness({
-        state,
-        hasCustomContent: interactionConfig.inspect?.content !== undefined,
-        hasInspectCallback: oninspect !== undefined,
-        hasInteractionCallback: oninteraction !== undefined,
-      }),
-    });
-  }
-
-  const traversalHits: SceneHit[] = $derived.by(() => {
-    if (!surfaceInteractive || model === null) return [];
-    return buildTraversalHits(model.candidates);
-  });
-  let reconciledRun = -1;
-  $effect(() => {
-    const currentModel = model;
-    const plan = planSceneInspectReconcile({
-      inspectionEnabled: inspectEnabled,
-      // Thunk: do not read `inspection` on the same-run skip path so hover
-      // updates are not effect dependencies of scene-run reconcile.
-      getInspectionState: () =>
-        inspection === null ? "none" : inspection.state,
-      modelRunId: currentModel?.runId ?? null,
-      reconciledRun,
-    });
-    switch (plan.type) {
-      case "noop":
-      case "skip":
-        return;
-      case "clear-disabled":
-        inspectionCoordinator.invalidate();
-        inspection = null;
-        inspectionSeed = null;
-        reducer.dispatch({
-          type: "inspect",
-          candidate: null,
-          source: "programmatic",
-        });
-        return;
-      case "invalidate-clear-transient":
-      case "invalidate-idle":
-      case "invalidate-reconcile-pinned": {
-        // currentModel is non-null for invalidate-* (plan requires run advance).
-        const runId = currentModel!.runId;
-        reducer.dispatch({ type: "invalidate", reason: "scene" });
-        queuedPointerInspection = null;
-        pendingPinnedPointer = null;
-        queuedPointerToken = null;
-        reducer.cancelScheduledPointer();
-        reconciledRun = runId;
-        if (plan.type === "invalidate-clear-transient") {
-          inspectionCoordinator.release("transient");
-          inspection = null;
-          inspectionSeed = null;
-          reducer.dispatch({
-            type: "inspect",
-            candidate: null,
-            source: "programmatic",
-          });
-          return;
-        }
-        if (plan.type === "invalidate-idle") return;
-        const reconciled = inspectionCoordinator.reconcilePinned({
-          model: currentModel!,
-          identityEpoch: dataIdentityEpoch,
-          layoutEpoch: runId,
-          source: "programmatic",
-          completeness: "complete",
-        });
-        if (reconciled === null) {
-          reducer.dispatch({ type: "escape", source: "programmatic" });
-          reducer.dispatch({ type: "set-active", candidate: null });
-          emitInspection({
-            type: "inspect",
-            phase: "clear",
-            source: "programmatic",
-          });
-          inspection = null;
-          inspectionSeed = null;
-        } else {
-          inspection = reconciled.snapshot;
-          inspectionSeed = reconciled.seed;
-          if (reconciled.semanticChanged)
-            emitInspection(reconciled.snapshot, reconciled.semanticFingerprint);
-        }
-        break;
-      }
-    }
-  });
-
-  function emitInspection(
-    next: PlotInspection<Record<string, CellValue>>,
-    semanticFingerprint?: string,
-  ): void {
-    // Pure table owns clear vs semantic fingerprint + skip/emit gate.
-    // Host owns last-token mutation and callbacks only.
-    const emit = resolveInspectionEmitAction({
-      phase: next.phase,
-      source: next.source,
-      semanticFingerprint,
-      lastFingerprint: lastInspectionFingerprint,
-    });
-    if (emit.type === "skip") return;
-    if (emit.updateFingerprint !== null)
-      lastInspectionFingerprint = emit.updateFingerprint;
-    oninspect?.(next as unknown as PlotInspection<Row, PublicKey>);
-    oninteraction?.(next as unknown as PlotInteractionEvent<Row, PublicKey>);
-  }
-
-  function setInspection(
-    hit: SceneHit | null,
-    source: InteractionSource,
-    state: "transient" | "pinned" = "transient",
-    concreteMode?: "exact" | "x" | "y" | "xy",
-    candidate?: CandidateFacts,
-  ): void {
-    // Announcement clear runs before priority gates (including ignored
-    // keyboard/touch requests while pinned).
-    if (
-      shouldClearInspectionAnnouncement({
-        hasHit: hit !== null,
-        source,
-      })
-    )
-      announcer.clear();
-    const action = resolveSetInspectionAction({
-      hasHit: hit !== null,
-      requestedState: state,
-      currentState: inspection?.state ?? "none",
-      tooltipHovered,
-    });
-    switch (action.type) {
-      case "ignore":
-        return;
-      case "clear": {
-        // Preserve both dispatches (before emit/release and after) — do not
-        // dedupe; may be load-bearing for reducer revision counting.
-        reducer.dispatch({ type: "inspect", candidate: null, source });
-        if (action.emitClear)
-          emitInspection({ type: "inspect", phase: "clear", source });
-        inspection = null;
-        inspectionSeed = null;
-        inspectionCoordinator.release("transient");
-        reducer.dispatch({ type: "inspect", candidate: null, source });
-        return;
-      }
-      case "apply": {
-        // hit is non-null when action is apply (pure gate).
-        const resolved = resolveInspection(
-          hit!,
-          source,
-          state,
-          concreteMode,
-          candidate,
-        );
-        // Null resolve re-enters clear gates via setInspection(null, source).
-        if (resolved === null) {
-          setInspection(null, source);
-          return;
-        }
-        const next = resolved.snapshot;
-        const candidateRef = buildInspectionCandidateRef({
-          epoch: model?.runId ?? 0,
-          candidateId: candidate?.id,
-          fallbackId: () => traversalHits.indexOf(hit!),
-          panelId: next.panelId,
-          x: hit!.x,
-          y: hit!.y,
-        });
-        reducer.dispatch({ type: "inspect", candidate: candidateRef, source });
-        if (state === "pinned")
-          reducer.dispatch({ type: "toggle-pin", source });
-        if (
-          !shouldCommitInspection({
-            requestedState: state,
-            reducerKind: reducer.state.inspection.kind,
-          })
-        )
-          return;
-        inspection = next;
-        inspectionSeed = resolved.seed;
-        if (resolved.semanticChanged)
-          emitInspection(next, resolved.semanticFingerprint);
-      }
-    }
-  }
-
-  function toggleInspectionPin(source: InteractionSource): void {
-    const pinAction = resolveToggleInspectionPinAction({
-      hasInspection: inspection !== null,
-      hasSeed: inspectionSeed !== null,
-      currentState: inspection?.state ?? "transient",
-      pending: pendingPinnedPointer,
-    });
-    if (pinAction.type === "ignore") return;
-    // toggle-pin always runs before restore/flip side effects; if flip
-    // resolve returns null the reducer stays toggled (no rollback).
-    reducer.dispatch({ type: "toggle-pin", source });
-    switch (pinAction.type) {
-      case "restore-pending": {
-        // Pure gate carries pending payload — no host non-null assert.
-        pendingPinnedPointer = null;
-        inspectionCoordinator.release("pinned");
-        inspection = null;
-        inspectionSeed = null;
-        setInspection(
-          pinAction.pending.hit,
-          pinAction.pending.source,
-          "transient",
-          pinAction.pending.concreteMode,
-          pinAction.pending.candidate,
-        );
-        return;
-      }
-      case "flip": {
-        // inspection + seed non-null after non-ignore (pure gate).
-        const state = pinAction.state;
-        const resolved = resolveInspection(
-          hitFromCandidate(inspectionSeed!),
-          source,
-          state,
-          inspection!.mode,
-          inspectionSeed!,
-        );
-        if (resolved === null) return;
-        inspection = resolved.snapshot;
-        inspectionSeed = resolved.seed;
-        if (state === "transient")
-          reducer.dispatch({
-            type: "inspect",
-            candidate: {
-              epoch: model?.runId ?? 0,
-              id: inspectionSeed.id,
-              panelId: resolved.snapshot.panelId,
-              x: inspectionSeed.x,
-              y: inspectionSeed.y,
-            },
-            source,
-          });
-        if (state === "transient") inspectionCoordinator.release("pinned");
-        if (shouldAnnounceUnpin({ state, source }))
-          announcer.announce(
-            `${inspectionLiveText(resolved.snapshot)}, unpinned`,
-          );
-        if (resolved.semanticChanged)
-          emitInspection(resolved.snapshot, resolved.semanticFingerprint);
-        if (
-          shouldFocusPinnedInteractiveTooltip({
-            state,
-            contentMode: interactionConfig.inspect?.contentMode,
-          })
-        )
-          queueMicrotask(() =>
-            root
-              ?.querySelector<HTMLElement>(
-                `#${CSS.escape(plotTooltipDomId(plotId))}`,
-              )
-              ?.focus(),
-          );
-      }
-    }
-  }
-
-  /**
-   * Shared dismiss path for Escape and closeInspection.
-   * Pure plan owns escape-vs-close differences; host owns dispatch/emit/DOM.
-   */
-  function dismissInspection(
-    kind: "escape" | "close",
-    source: InteractionSource,
-    opts: { restoreFocus?: boolean; returnToInspect?: boolean } = {},
-  ): void {
-    const plan = planInspectionDismiss({
-      kind,
-      hasInspection: inspection !== null,
-      ...(opts.restoreFocus !== undefined && {
-        restoreFocus: opts.restoreFocus,
-      }),
-      ...(opts.returnToInspect !== undefined && {
-        returnToInspect: opts.returnToInspect,
-      }),
-    });
-    reducer.dispatch({ type: "escape", source });
-    if (plan.emitClear)
-      emitInspection({ type: "inspect", phase: "clear", source });
-    inspection = null;
-    inspectionSeed = null;
-    if (plan.clearTooltipHovered) tooltipHovered = false;
-    if (plan.clearPendingPinned) pendingPinnedPointer = null;
-    if (plan.coordinator === "invalidate") inspectionCoordinator.invalidate();
-    else inspectionCoordinator.release("pinned");
-    if (plan.clearBrush) brushRect = null;
-    if (plan.restoreFocus) queueMicrotask(() => captureSurface?.focus());
-    if (plan.returnToInspect) chooseTool("inspect");
-  }
-
-  function closeInspection(
-    source: InteractionSource,
-    restoreFocus = true,
-  ): void {
-    dismissInspection("close", source, { restoreFocus });
-  }
+  // Inspection disposal + scene-reconcile effects at the original coordinator
+  // position (after legend-focus reconcile).
+  inspectionState.registerInspectionEffects();
 
   function onPointerMove(event: PointerEvent): void {
     const p = plotPoint(event);
@@ -1364,7 +980,7 @@
     });
     switch (action.type) {
       case "touch-inspect-drag-cancel":
-        queuedPointerInspection = null;
+        inspectionState.clearQueuedPointer();
         reducer.cancelScheduledPointer();
         return;
       case "queue-area-move":
@@ -1386,8 +1002,7 @@
           fallbackHit: () => hitIndex?.hitTest(p.x, p.y) ?? null,
           panelIdForIndex: (index) => panelId(index),
         });
-        queuedPointerInspection = frame.queued;
-        queuedPointerToken = reducer.frameToken();
+        inspectionState.queuePointerFrame(frame.queued, reducer.frameToken());
         reducer.queuePointer({
           type: "inspect",
           candidate: frame.candidate,
@@ -1466,16 +1081,16 @@
         })
       )
         return;
-      queuedPointerInspection = null;
-      pendingPinnedPointer = null;
+      inspectionState.clearQueuedPointer();
+      inspectionState.clearPendingPinned();
       reducer.cancelScheduledPointer();
-      setInspection(null, "pointer");
+      inspectionState.setInspection(null, "pointer");
     });
   }
 
   function onPointerDown(event: PointerEvent): void {
     // Always cancel queued inspection before pure routing (host cleanup).
-    queuedPointerInspection = null;
+    inspectionState.clearQueuedPointer();
     reducer.cancelScheduledPointer();
     // point always computed (pure begin-area needs it; touch/none ignore).
     const p = plotPoint(event);
@@ -1508,7 +1123,7 @@
         if (originPanel === null) break;
         // Pure table owns fresh vs extend corner policy.
         brushRect = action.corners;
-        setInspection(null, action.source);
+        inspectionState.setInspection(null, action.source);
         reducer.dispatch({
           type: "begin-area",
           point: p,
@@ -1585,7 +1200,7 @@
           maxDistance: action.maxDistance,
         });
         if (match !== null && match !== undefined) {
-          setInspection(
+          inspectionState.setInspection(
             hitFromCandidate(match),
             "touch",
             action.state,
@@ -1620,48 +1235,6 @@
   );
   const datumLabel = (values: Record<string, CellValue> | null) =>
     datumLabelFor(model, values);
-  const inspectionLiveText = (
-    value: PlotInspectionChange<Record<string, CellValue>, PropertyKey>,
-  ) => inspectionLiveTextFor(model, value);
-
-  function applyTraversalIndex(index: number): void {
-    activeTraversalIndex = index;
-    setInspection(traversalHits[index]!, "keyboard");
-  }
-
-  function navigate(delta: number): void {
-    if (traversalHits.length === 0) return;
-    applyTraversalIndex(
-      nextTraversalIndex(activeTraversalIndex, delta, traversalHits.length),
-    );
-  }
-
-  function navigateDirection(dx: number, dy: number): void {
-    const plan = planDirectionalNavigate({
-      hitCount: traversalHits.length,
-      hasInspection: inspection !== null,
-      currentIndex: activeTraversalIndex,
-      bestIndex: () =>
-        bestDirectionalIndex(inspection!.focus.anchor, traversalHits, dx, dy),
-    });
-    if (plan.type === "set-index") applyTraversalIndex(plan.index);
-  }
-
-  function cycleCoincident(delta: number): void {
-    const plan = planCycleCoincident({
-      hasInspection: inspection !== null,
-      hitCount: traversalHits.length,
-      currentIndex: activeTraversalIndex,
-      nextIndex: () =>
-        cycleCoincidentIndex(
-          inspection!.focus.anchor,
-          traversalHits,
-          activeTraversalIndex,
-          delta,
-        ),
-    });
-    if (plan.type === "set-index") applyTraversalIndex(plan.index);
-  }
 
   function onSurfaceBlur(event: FocusEvent): void {
     const blurAction = resolveSurfaceBlurAction({
@@ -1671,10 +1244,10 @@
     });
     if (blurAction.type === "ignore") return;
     // Shared for keep-pinned and clear-inspection (ordering is load-bearing).
-    activeTraversalIndex = -1;
+    inspectionState.resetTraversalIndex();
     reducer.dispatch({ type: "set-active", candidate: null });
     if (blurAction.type === "blur-clear-inspection")
-      setInspection(null, "keyboard");
+      inspectionState.setInspection(null, "keyboard");
   }
 
   function togglePointKeys(
@@ -1738,19 +1311,19 @@
         return;
       }
       case "cycle-coincident":
-        cycleCoincident(action.delta);
+        inspectionState.cycleCoincident(action.delta);
         return;
       case "navigate-direction":
-        navigateDirection(action.dx, action.dy);
+        inspectionState.navigateDirection(action.dx, action.dy);
         return;
       case "toggle-point-keys":
         togglePointKeys(action.keys, "keyboard");
         return;
       case "toggle-pin":
-        toggleInspectionPin("keyboard");
+        inspectionState.toggleInspectionPin("keyboard");
         return;
       case "escape":
-        dismissInspection("escape", "keyboard", {
+        inspectionState.dismissInspection("escape", "keyboard", {
           returnToInspect: action.returnToInspect,
         });
         break;
@@ -1783,7 +1356,7 @@
         break;
       }
       case "toggle-pin":
-        toggleInspectionPin("pointer");
+        inspectionState.toggleInspectionPin("pointer");
         break;
       case "none":
         break;
@@ -1792,7 +1365,7 @@
 
   /** Pointer-cancel always drops draft/queue/touch-inspect and cancels area. */
   function onPointerCancel(): void {
-    queuedPointerInspection = null;
+    inspectionState.clearQueuedPointer();
     touchInspectStart = null;
     touchInspectMoved = false;
     reducer.cancelScheduledPointer();
@@ -1952,7 +1525,7 @@
           plotId,
         })}
         onFocus={() => {
-          if (inspection === null) navigate(1);
+          if (inspection === null) inspectionState.navigate(1);
         }}
         onBlur={onSurfaceBlur}
         {onPointerMove}
@@ -1986,9 +1559,10 @@
           onenter={() => (tooltipHovered = true)}
           onleave={() => {
             tooltipHovered = false;
-            if (inspection?.state !== "pinned") setInspection(null, "pointer");
+            if (inspection?.state !== "pinned")
+              inspectionState.setInspection(null, "pointer");
           }}
-          onclose={(source) => closeInspection(source, true)}
+          onclose={(source) => inspectionState.closeInspection(source, true)}
         />
       {/if}
     {/if}
