@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784311743246,
+  "lastUpdate": 1784316757791,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -19123,6 +19123,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 160.9728,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "36b77058056f1c6d80d5f4b33dbbb6512090b271",
+          "message": "refactor(svelte): S11 — extract plot orchestrator (#174)\n\n* refactor(svelte): move Props interface to plot-props.ts\n\n* refactor(svelte): extract createPlotOrchestrator\n\n* test(svelte): append S11 ratchet ceiling\n\n* refactor(svelte): tighten orchestrator boundary after review\n\nReview + type-aware lint findings on the extraction: delete the vestigial\nfactory* no-op casts (the PublicKey→PropertyKey widening lives at the\nGGPlot call site; handler contravariance covers the narrower per-event\ndep types), drop the dead semanticKeys member from the public\nPlotOrchestrator surface, use the destructured stable refs in\nresetScales/setZoom, import RenderModel at top level, and satisfy\nunbound-method/void-expression rules with braced arrow wrappers\n(plot-orchestrator.svelte.ts is the first wiring code covered by\ntype-aware lint — GGPlot.svelte was exempt as a .svelte file).\n\nCo-Authored-By: Claude Fable 5 <noreply@anthropic.com>\n\n* test(svelte): pin orchestrator lifecycle order\n\n---------\n\nCo-authored-by: Claude Fable 5 <noreply@anthropic.com>",
+          "timestamp": "2026-07-17T14:32:02-05:00",
+          "tree_id": "0998aec83c7e82ece6213b4a4f8a80aa0b6fc469",
+          "url": "https://github.com/ljodea/ggsvelte/commit/36b77058056f1c6d80d5f4b33dbbb6512090b271"
+        },
+        "date": 1784316757257,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 3.4385,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.4169,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 10.7687,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 13.9122,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 83.5324,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 117.5384,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.0258,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2737,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 83.9471,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 105.3755,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 12.2426,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.2723,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 115.1427,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.8097,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 26.3283,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.4043,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 28.6138,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 623.0998,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 168.3027,
             "unit": "ms"
           }
         ]
