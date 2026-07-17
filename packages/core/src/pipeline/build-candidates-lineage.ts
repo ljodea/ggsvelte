@@ -42,34 +42,28 @@ export function filterRepresentedSourceRows(input: {
     outputX !== null &&
     (stat === "count" || stat === "summary" || stat === "boxplot")
   ) {
-    const indexed =
-      indexKeyPrefix !== null && input.sourceRowsByGroupX !== undefined
+    representedRows =
+      (indexKeyPrefix !== null && input.sourceRowsByGroupX !== undefined
         ? input.sourceRowsByGroupX.get(`${indexKeyPrefix}:${bandKey(outputX)}`)
-        : undefined;
-    representedRows =
-      indexed === undefined
-        ? filterAggregateXRows({
-            table,
-            field: aggregateXField,
-            outputX,
-            baseRows: representedRows,
-          })
-        : indexed;
+        : undefined) ??
+      filterAggregateXRows({
+        table,
+        field: aggregateXField,
+        outputX,
+        baseRows: representedRows,
+      });
   } else if (stat === "bin" && aggregateXField !== null) {
-    const indexed =
-      indexKeyPrefix !== null && input.sourceRowsByGroupBin !== undefined
-        ? input.sourceRowsByGroupBin.get(`${indexKeyPrefix}:${frameRow}`)
-        : undefined;
     representedRows =
-      indexed === undefined
-        ? filterBinRepresentedRows({
-            frame,
-            table,
-            frameRow,
-            field: aggregateXField,
-            baseRows: representedRows,
-          })
-        : indexed;
+      (indexKeyPrefix !== null && input.sourceRowsByGroupBin !== undefined
+        ? input.sourceRowsByGroupBin.get(`${indexKeyPrefix}:${frameRow}`)
+        : undefined) ??
+      filterBinRepresentedRows({
+        frame,
+        table,
+        frameRow,
+        field: aggregateXField,
+        baseRows: representedRows,
+      });
   }
 
   const aggregateYField = frame.binding.yField;
