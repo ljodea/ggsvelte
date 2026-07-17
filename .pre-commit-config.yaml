@@ -60,7 +60,7 @@ repos:
         name: block test/visual output dirs
         entry: scripts/guards/block-output-paths.sh
         language: system
-        files: (^|/)(test-results|playwright-report|\.vitest-attachments|__screenshots__)(/|$)
+        files: (^|/)(test-results|playwright-report|\.vitest-attachments|__screenshots__|coverage)(/|$)
         # VR baselines (tests/visual/__screenshots__) land only via the
         # audited vr-update/pr-N branch. The hook checks the staged diff so
         # clean committed baselines do not break `pre-commit run --all-files`.

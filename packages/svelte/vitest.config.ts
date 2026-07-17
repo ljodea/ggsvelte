@@ -18,6 +18,15 @@ export default defineConfig({
     include: ["tests/**/*.test.ts"],
     exclude: ["tests/**/*.ssr.test.ts"],
     retry: process.env.CI === "true" ? 1 : 0,
+    // Opt-in via --coverage. Browser collection runs on Chromium only
+    // (v8-over-CDP); invoke with --project chromium so firefox/webkit
+    // are not asked to report coverage.
+    coverage: {
+      provider: "v8",
+      reportsDirectory: "coverage/browser",
+      include: ["src/lib/**"],
+      enabled: false,
+    },
     browser: {
       enabled: true,
       provider: playwright(),
