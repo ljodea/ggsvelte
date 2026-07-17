@@ -69,9 +69,9 @@
     },
     "packages/core": {
       "name": "@ggsvelte/core",
-      "version": "0.0.0",
+      "version": "0.1.1",
       "dependencies": {
-        "@ggsvelte/spec": "workspace:*",
+        "@ggsvelte/spec": "^0.1.1",
       },
       "devDependencies": {
         "typescript": "^6.0.3",
@@ -79,7 +79,7 @@
     },
     "packages/spec": {
       "name": "@ggsvelte/spec",
-      "version": "0.0.0",
+      "version": "0.1.1",
       "dependencies": {
         "@sinclair/typebox": "^0.34.0",
       },
@@ -90,13 +90,13 @@
     },
     "packages/svelte": {
       "name": "@ggsvelte/svelte",
-      "version": "0.0.0",
+      "version": "0.1.1",
       "bin": {
-        "ggsvelte-render": "./bin/ggsvelte-render.js",
+        "ggsvelte-render": "bin/ggsvelte-render.js",
       },
       "dependencies": {
-        "@ggsvelte/core": "workspace:*",
-        "@ggsvelte/spec": "workspace:*",
+        "@ggsvelte/core": "^0.1.1",
+        "@ggsvelte/spec": "^0.1.1",
       },
       "devDependencies": {
         "@sveltejs/package": "^2.5.8",
@@ -112,7 +112,7 @@
         "vitest": "^4.1.10",
       },
       "peerDependencies": {
-        "svelte": "^5.29.0",
+        "svelte": "^5.33.1",
       },
     },
     "spikes/browser": {
