@@ -6,8 +6,8 @@ import {
   recomputePanelIntervalKeys,
   sameIntervalRecord,
   type IntervalConsumptionCandidate,
-} from "../src/lib/plot-interval-consumption.js";
-import type { PlotInteractionInterval } from "../src/lib/interaction/interaction.js";
+} from "../../src/lib/interval/consumption.js";
+import type { PlotInteractionInterval } from "../../src/lib/interaction/interaction.js";
 
 const panels = [{ id: "north" }, { id: "south" }] as const;
 const candidates: readonly IntervalConsumptionCandidate<string>[] = [

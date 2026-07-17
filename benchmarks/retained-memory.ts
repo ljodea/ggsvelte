@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 
 import { runPipeline } from "@ggsvelte/core";
 
-import { createInspectionCoordinator } from "../packages/svelte/src/lib/inspection-resolver";
+import { createInspectionCoordinator } from "../packages/svelte/src/lib/inspection/resolver";
 import { buildWorkloads } from "./workloads";
 
 export interface MemoryBaselineFile {

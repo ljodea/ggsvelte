@@ -21,22 +21,22 @@
 import type { CandidateFacts, CellValue, RenderModel, ScenePanel } from "@ggsvelte/core";
 import type { SceneHit } from "@ggsvelte/core/dom";
 
-import { createInspectionCoordinator } from "./inspection-resolver.js";
+import { createInspectionCoordinator } from "./resolver.js";
 import type {
   createInteractionReducer,
   InteractionAction,
   InteractionFrameToken,
-} from "./interaction/reducer.js";
+} from "../interaction/reducer.js";
 import type {
   InteractionSource,
   PlotInspection,
   PlotInspectionChange,
   PlotInteractionEvent,
   ResolvedInteractionConfig,
-} from "./interaction/interaction.js";
-import { inspectionLiveText as inspectionLiveTextFor } from "./assembly/labels.js";
-import { plotTooltipDomId } from "./assembly/layout.js";
-import { panelContainingAnchor } from "./scene/geometry.js";
+} from "../interaction/interaction.js";
+import { inspectionLiveText as inspectionLiveTextFor } from "../assembly/labels.js";
+import { plotTooltipDomId } from "../assembly/layout.js";
+import { panelContainingAnchor } from "../scene/geometry.js";
 import {
   bestDirectionalIndex,
   buildTraversalHits,
@@ -46,13 +46,13 @@ import {
   nextTraversalIndex,
   planCycleCoincident,
   planDirectionalNavigate,
-} from "./surface/plot-px.js";
-import { iterateCandidates } from "./selection/selection.js";
+} from "../surface/plot-px.js";
+import { iterateCandidates } from "../selection/selection.js";
 import {
   buildInspectionCandidateRef,
   resolveQueuedInspectFrameAction,
   type QueuedPointerInspection,
-} from "./plot-surface-inspection-frame.js";
+} from "./frame.js";
 import {
   resolveInspectionCompleteness,
   resolveInspectionMode,
@@ -62,12 +62,12 @@ import {
   shouldClearInspectionAnnouncement,
   shouldCommitInspection,
   shouldFocusPinnedInteractiveTooltip,
-} from "./plot-surface-inspection-apply.js";
+} from "./apply.js";
 import {
   planInspectionDismiss,
   planSceneInspectReconcile,
   resolveInspectionEmitAction,
-} from "./plot-surface-inspection-teardown.js";
+} from "./teardown.js";
 
 // ---------------------------------------------------------------------------
 // Public types

@@ -16,7 +16,7 @@ import {
   clearInspectionFingerprint,
   createInspectionCoordinator,
   resolveInspection,
-} from "../../src/lib/inspection-resolver.js";
+} from "../../src/lib/inspection/resolver.js";
 
 const candidate = (id: number): InteractionCandidateRef => ({
   epoch: 1,

@@ -1,9 +1,9 @@
 import { tick } from "svelte";
 import { describe, expect, it, vi } from "vitest";
 
-import BoundsEditor from "../src/lib/BoundsEditor.svelte";
-import type { PreciseBoundsApplyEvent } from "../src/lib/bounds-editor.js";
-import { render } from "./helpers/render.js";
+import BoundsEditor from "../../src/lib/interval/BoundsEditor.svelte";
+import type { PreciseBoundsApplyEvent } from "../../src/lib/interval/bounds-editor.js";
+import { render } from "../helpers/render.js";
 
 function write(input: HTMLInputElement, value: string): void {
   input.value = value;

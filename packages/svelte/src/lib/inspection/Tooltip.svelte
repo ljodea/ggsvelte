@@ -3,7 +3,7 @@
 
   import type { CellValue } from "@ggsvelte/core";
 
-  import type { PlotInspectionChange } from "./interaction/interaction.js";
+  import type { PlotInspectionChange } from "../interaction/interaction.js";
 
   const {
     inspection,

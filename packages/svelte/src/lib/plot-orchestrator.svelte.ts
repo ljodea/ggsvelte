@@ -76,8 +76,11 @@ import {
 } from "./legend-filter-state.svelte.js";
 import { createLegendFocusState, type LegendFocusState } from "./legend-focus-state.svelte.js";
 import { createPlotZoomState, type PlotZoomState } from "./zoom/zoom-state.svelte.js";
-import { createIntervalState, type IntervalState } from "./interval-state.svelte.js";
-import { createInspectionState, type InspectionState } from "./inspection-state.svelte.js";
+import { createIntervalState, type IntervalState } from "./interval/interval-state.svelte.js";
+import {
+  createInspectionState,
+  type InspectionState,
+} from "./inspection/inspection-state.svelte.js";
 import { createSurfaceState, type SurfaceState } from "./surface/surface-state.svelte.js";
 import { createSelectionState, type SelectionState } from "./selection/selection-state.svelte.js";
 import { createPlotChromeState, type PlotChromeState } from "./chrome/chrome-state.svelte.js";

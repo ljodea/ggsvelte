@@ -15,14 +15,17 @@ import type {
   PlotInteractionScope,
   PlotSelection,
   ResolvedInteractionConfig,
-} from "../src/lib/interaction/interaction.js";
-import { createPlotInteraction } from "../src/lib/interaction/controller.svelte.js";
-import { createIntervalState, type IntervalStateDeps } from "../src/lib/interval-state.svelte.js";
-import type { ContinuousZoomDomains } from "../src/lib/scene/geometry.js";
-import { buildIntervalSelection } from "../src/lib/plot-interval.js";
-import { withEffectRoot, withFlushedEffectRoot } from "./helpers/effect-root.svelte.js";
-import { modelFor } from "./helpers/model.js";
-import { reactiveBox } from "./helpers/reactive-box.svelte.js";
+} from "../../src/lib/interaction/interaction.js";
+import { createPlotInteraction } from "../../src/lib/interaction/controller.svelte.js";
+import {
+  createIntervalState,
+  type IntervalStateDeps,
+} from "../../src/lib/interval/interval-state.svelte.js";
+import type { ContinuousZoomDomains } from "../../src/lib/scene/geometry.js";
+import { buildIntervalSelection } from "../../src/lib/interval/interval.js";
+import { withEffectRoot, withFlushedEffectRoot } from "../helpers/effect-root.svelte.js";
+import { modelFor } from "../helpers/model.js";
+import { reactiveBox } from "../helpers/reactive-box.svelte.js";
 
 const continuousRows = [
   { id: "a", x: 1, y: 1 },

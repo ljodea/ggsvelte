@@ -59,7 +59,7 @@
     resolveClearLegendX,
     tooltipViewportSize,
   } from "./assembly/layout.js";
-  import BoundsEditor from "./BoundsEditor.svelte";
+  import BoundsEditor from "./interval/BoundsEditor.svelte";
   import type { GGPlotProps } from "./plot-props.js";
   import { createPlotOrchestrator } from "./plot-orchestrator.svelte.js";
   import CaptureSurface from "./surface/CaptureSurface.svelte";
@@ -68,7 +68,7 @@
   import MarkStrata from "./scene/MarkStrata.svelte";
   import SceneOverlays from "./scene/SceneOverlays.svelte";
   import StatusChrome from "./chrome/StatusChrome.svelte";
-  import Tooltip from "./Tooltip.svelte";
+  import Tooltip from "./inspection/Tooltip.svelte";
   import ToolRail from "./chrome/ToolRail.svelte";
 
   const {
