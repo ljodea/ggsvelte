@@ -138,6 +138,9 @@
     legendFocus: () => legendFocus,
     legendFilter: () => legendFilter,
     tool: () => tool,
+    // The PublicKey → PropertyKey widening casts live HERE (component-local
+    // generic erased at the orchestrator boundary; same widening the pre-S11
+    // factory* aliases performed).
     interaction: () =>
       interaction as PlotInteractionController<PropertyKey> | undefined,
     interactionScope: () => interactionScope,
@@ -184,13 +187,13 @@
    * that drop categories whose reserved colors should not persist.
    */
   export function resetScales(): void {
-    engine.runtime.resetScales();
+    runtime.resetScales();
   }
 
   /** Replace one or both continuous zoom domains without disturbing the
    *  other channel. This is the controlled linking/programmatic-zoom path. */
   export function setZoom(domains: Partial<ZoomDomains>): void {
-    engine.zoomState.setZoomDomains(domains);
+    zoomState.setZoomDomains(domains);
   }
 </script>
 

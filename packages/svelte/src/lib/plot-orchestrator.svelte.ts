@@ -20,7 +20,7 @@
  * registers in the component effect tree. No `$props`, `$props.id()`, or
  * context calls live here.
  */
-import type { BatchInteractionMask, CellValue } from "@ggsvelte/core";
+import type { BatchInteractionMask, CellValue, RenderModel } from "@ggsvelte/core";
 import { buildHitIndex, type SceneHitIndex } from "@ggsvelte/core/dom";
 import type {
   A11yMode,
@@ -125,21 +125,17 @@ export type OrchestratorInputs<
   // Widened to PropertyKey at the boundary — PublicKey is component-local.
   interaction: () => PlotInteractionController<PropertyKey> | undefined;
   interactionScope: () => PlotInteractionScope | undefined;
-  oninspect: () =>
-    | ((event: PlotInspection<Record<string, CellValue>, PropertyKey>) => void)
-    | undefined;
-  onselect: () => ((event: PlotSelection<PropertyKey>) => void) | undefined;
+  oninspect: () => ((event: PlotInspection<Record<string, CellValue>>) => void) | undefined;
+  onselect: () => ((event: PlotSelection) => void) | undefined;
   onzoom: () => ((event: ZoomEvent) => void) | undefined;
-  onlegendfocus: () => ((event: LegendFocusEvent<PropertyKey>) => void) | undefined;
+  onlegendfocus: () => ((event: LegendFocusEvent) => void) | undefined;
   onlegendfilter: () => ((event: LegendFilterEvent) => void) | undefined;
   oninteraction: () =>
-    | ((event: PlotInteractionEvent<Record<string, CellValue>, PropertyKey>) => void)
+    | ((event: PlotInteractionEvent<Record<string, CellValue>>) => void)
     | undefined;
   ondiagnostic: () => ((diagnostic: InteractionDiagnostic) => void) | undefined;
   ontoolchange: () => ((tool: InteractionTool) => void) | undefined;
-  onrender: () =>
-    | ((model: import("@ggsvelte/core").RenderModel, spec: PortableSpec) => void)
-    | undefined;
+  onrender: () => ((model: RenderModel, spec: PortableSpec) => void) | undefined;
 };
 
 /**
@@ -152,7 +148,6 @@ export type PlotOrchestrator = {
   readonly zoomState: PlotZoomState;
   readonly legendFilterState: LegendFilterState;
   readonly runtime: PlotRuntime;
-  readonly semanticKeys: SemanticKeyService;
   readonly inspectionState: InspectionState;
   readonly surfaceState: SurfaceState;
   readonly selectionState: SelectionState;
@@ -206,7 +201,7 @@ export function createPlotOrchestrator<
     const labs = inputs.labs();
     const a11y = inputs.a11y();
     return assemblePortableSpec({
-      ...(data !== undefined && { data: data as DataInput | readonly Row[] }),
+      ...(data !== undefined && { data }),
       ...(mapping !== undefined && { aes: mapping }),
       layers: layers ?? inputs.registry.layers.map(toLayerInput),
       ...(facet !== undefined && { facet }),
@@ -272,19 +267,10 @@ export function createPlotOrchestrator<
     for (const diagnostic of interactionConfig.diagnostics) deliverDiagnostic(diagnostic);
   });
 
-  // Shared controller-factory dep aliases: ONE place for the PublicKey →
-  // PropertyKey widening casts every extracted controller (S2–S8) wires.
-  const factoryInteraction = $derived(
-    inputs.interaction() as PlotInteractionController<PropertyKey> | undefined,
-  );
-  const factoryOninteraction = $derived(
-    inputs.oninteraction() as
-      | ((event: PlotInteractionEvent<Record<string, CellValue>, PropertyKey>) => void)
-      | undefined,
-  );
-  const factoryOninspect = $derived(
-    inputs.oninspect() as ((event: PlotInspection<Record<string, CellValue>>) => void) | undefined,
-  );
+  // The PublicKey → PropertyKey widening casts live at the GGPlot call site;
+  // OrchestratorInputs is already declared in the widened form, so controller
+  // deps consume inputs.interaction / inputs.oninteraction / inputs.oninspect
+  // directly (handler contravariance covers the narrower per-event deps).
   // Announcer is declared later; the sink is handler-only (never construction).
   const announceSink = (message: string): void => {
     announcer.announce(message);
@@ -298,7 +284,7 @@ export function createPlotOrchestrator<
   // Construction-time deriveds read interaction/scope/zoomConfig/assembled
   // only — model/coordFlipped/announce are deferred getters (later-declared).
   const zoomState = createPlotZoomState({
-    interaction: () => factoryInteraction,
+    interaction: inputs.interaction,
     resolvedInteractionScope: () => resolvedInteractionScope,
     zoomConfig: () => interactionConfig.zoom,
     assembled: () => assembled,
@@ -306,19 +292,19 @@ export function createPlotOrchestrator<
     model: () => runtime.model,
     coordFlipped: () => coordFlipped,
     onzoom: () => inputs.onzoom(),
-    oninteraction: () => factoryOninteraction,
+    oninteraction: inputs.oninteraction,
     announce: announceSink,
   });
 
   // Source identity/order epoch: stable through responsive layout and zoom
   // respecs, different when normalized inline data or data references change.
   // Tracker is owned for the component lifetime (never cleared).
-  const { sourceIdentity } = createSourceIdentityTracker();
+  const identityTracker = createSourceIdentityTracker();
   const dataIdentityEpoch = $derived(
     dataIdentityEpochToken({
       assembled,
-      dataToken: sourceIdentity(inputs.data()),
-      specToken: sourceIdentity(inputs.spec()),
+      dataToken: identityTracker.sourceIdentity(inputs.data()),
+      specToken: identityTracker.sourceIdentity(inputs.spec()),
     }),
   );
 
@@ -332,7 +318,7 @@ export function createPlotOrchestrator<
     effectiveSpec: () => zoomState.effectiveSpec,
     legendFilterProp: () => inputs.legendFilter(),
     onlegendfilter: () => inputs.onlegendfilter(),
-    oninteraction: () => inputs.oninteraction() as ((event: LegendFilterEvent) => void) | undefined,
+    oninteraction: inputs.oninteraction,
     announce: announceSink,
     // model is declared after the runtime; the getter is only invoked from
     // late catalog effects (never at construction).
@@ -353,7 +339,9 @@ export function createPlotOrchestrator<
     effectiveZoomDomains: () => zoomState.effectiveZoomDomains,
     effectiveLegendFilters: () => legendFilterState.filters,
     root: inputs.root,
-    resetZoom: () => zoomState.resetForScales(),
+    resetZoom: () => {
+      zoomState.resetForScales();
+    },
     onrender: () => inputs.onrender(),
   });
   // Model dispose + onrender effects (after the legend-reset effects that
@@ -367,15 +355,16 @@ export function createPlotOrchestrator<
   const semanticKeys = createSemanticKeyService({
     model: () => runtime.model,
     assembled: () => assembled,
-    datumKey: () =>
-      inputs.datumKey() as string | ((row: never, index: number) => PropertyKey) | undefined,
+    datumKey: () => inputs.datumKey(),
     data: () => inputs.data(),
     spec: () => inputs.spec(),
-    sourceIdentity,
+    sourceIdentity: (value: unknown) => identityTracker.sourceIdentity(value),
     deliverDiagnostic,
   });
-  const semanticKey = semanticKeys.semanticKey;
-  const candidateSemanticKeys = semanticKeys.candidateSemanticKeys;
+  const semanticKey: SemanticKeyService["semanticKey"] = (...args) =>
+    semanticKeys.semanticKey(...args);
+  const candidateSemanticKeys: SemanticKeyService["candidateSemanticKeys"] = (...args) =>
+    semanticKeys.candidateSemanticKeys(...args);
 
   // ---------------------------------------------------------- interaction
   // source rows/spec -> pipeline/scene -> hit index -> semantic resolver ->
@@ -409,12 +398,18 @@ export function createPlotOrchestrator<
     clearTooltipHovered: () => {
       tooltipHovered = false;
     },
-    clearBrush: () => surfaceState.clearBrush(),
-    chooseTool: (next) => surfaceState.chooseTool(next),
-    oninspect: () => factoryOninspect,
-    oninteraction: () => factoryOninteraction,
+    clearBrush: () => {
+      surfaceState.clearBrush();
+    },
+    chooseTool: (next) => {
+      surfaceState.chooseTool(next);
+    },
+    oninspect: inputs.oninspect,
+    oninteraction: inputs.oninteraction,
     announce: announceSink,
-    clearAnnouncement: () => announcer.clear(),
+    clearAnnouncement: () => {
+      announcer.clear();
+    },
   });
   // ------------------------------------------------- surface
   // Construction-time deriveds read module-internal state + inspectConfig.
@@ -442,11 +437,15 @@ export function createPlotOrchestrator<
     interval: () => intervalState,
     zoom: () => zoomState,
     // Deferred: selection controller is declared after surface (handler only).
-    emitSelection: (event) => selectionState.emitSelection(event),
+    emitSelection: (event) => {
+      selectionState.emitSelection(event);
+    },
     // Deferred: semantic-key service is declared later (handler only).
     semanticKey: (row, index) => semanticKey(row, index),
     // Deferred: selection controller is declared after surface (handler only).
-    togglePointKeys: (keys, source) => selectionState.togglePointKeys(keys, source),
+    togglePointKeys: (keys, source) => {
+      selectionState.togglePointKeys(keys, source);
+    },
     tooltipHovered: () => tooltipHovered,
     announce: announceSink,
   });
@@ -457,7 +456,7 @@ export function createPlotOrchestrator<
   // only. Anchors and masks are methods (later-declared inputs).
   const selectionState = createSelectionState({
     model: () => runtime.model,
-    interaction: () => factoryInteraction,
+    interaction: inputs.interaction,
     resolvedInteractionScope: () => resolvedInteractionScope,
     selectConfig: () => interactionConfig.select,
     // Deferred: interval is declared after this factory (method only).
@@ -476,8 +475,8 @@ export function createPlotOrchestrator<
     },
     // Deferred: semantic-key service initializes later (#165).
     candidateSemanticKeys: (candidate) => candidateSemanticKeys(candidate),
-    onselect: () => inputs.onselect() as ((event: PlotSelection) => void) | undefined,
-    oninteraction: () => factoryOninteraction,
+    onselect: inputs.onselect,
+    oninteraction: inputs.oninteraction,
     announce: announceSink,
   });
   // Shared enablement predicates (avoid re-typing the same config gates).
@@ -487,7 +486,7 @@ export function createPlotOrchestrator<
   // Factory sits after the enablement cluster so construction-time
   // effectiveEmphasisKeys closes over earlier bindings only.
   const legendFocusState = createLegendFocusState({
-    interaction: () => factoryInteraction,
+    interaction: inputs.interaction,
     resolvedInteractionScope: () => resolvedInteractionScope,
     legendFocusEnabled: () => legendFocusEnabled,
     legendFocusPreviewEnabled: () => interactionConfig.legendFocus?.preview === true,
@@ -496,9 +495,8 @@ export function createPlotOrchestrator<
     entries: () => interactiveLegendEntries,
     // Deferred read of the later-declared cached derived (handlers only).
     pressed: () => effectiveLegendPressed,
-    onlegendfocus: () =>
-      inputs.onlegendfocus() as ((event: LegendFocusEvent<PropertyKey>) => void) | undefined,
-    oninteraction: () => factoryOninteraction,
+    onlegendfocus: inputs.onlegendfocus,
+    oninteraction: inputs.oninteraction,
     announce: announceSink,
   });
   // ------------------------------------------------- interval selection
@@ -507,18 +505,22 @@ export function createPlotOrchestrator<
   // model effects < interval effects < semantic diagnostics.
   const intervalState = createIntervalState({
     model: () => runtime.model,
-    interaction: () => factoryInteraction,
+    interaction: inputs.interaction,
     resolvedInteractionScope: () => resolvedInteractionScope,
     selectConfig: () => interactionConfig.select,
     effectiveZoomDomains: () => zoomState.effectiveZoomDomains,
     // Direct construction edges (not deferred thunks): zoom + selection
     // are already constructed when interval is built.
-    commitZoom: zoomState.commitZoom,
+    commitZoom: (...args: Parameters<PlotZoomState["commitZoom"]>) => {
+      zoomState.commitZoom(...args);
+    },
     coordFlipped: () => coordFlipped,
     captureSurface: inputs.captureSurface,
     candidateSemanticKeys: (candidate) => candidateSemanticKeys(candidate),
     inspectionPanel: () => inspectionState.inspectionPanel,
-    emitSelection: selectionState.emitSelection,
+    emitSelection: (...args: Parameters<SelectionState["emitSelection"]>) => {
+      selectionState.emitSelection(...args);
+    },
     announce: announceSink,
   });
   // ------------------------------------------------- plot chrome
@@ -606,7 +608,6 @@ export function createPlotOrchestrator<
     zoomState,
     legendFilterState,
     runtime,
-    semanticKeys,
     inspectionState,
     surfaceState,
     selectionState,
