@@ -665,7 +665,6 @@
   // effectiveEmphasisKeys closes over earlier bindings only (Svelte 5.29
   // server evaluates $derived eagerly at construction).
   const legendFocusState = createLegendFocusState({
-    model: () => model,
     interaction: () =>
       interaction as PlotInteractionController<PropertyKey> | undefined,
     resolvedInteractionScope: () => resolvedInteractionScope,
@@ -675,6 +674,8 @@
     root: () => root,
     semanticKeys: () => semanticKeys,
     entries: () => interactiveLegendEntries,
+    // Deferred read of the later-declared cached derived (handlers only).
+    pressed: () => effectiveLegendPressed,
     onlegendfocus: () =>
       onlegendfocus as
         ((event: LegendFocusEvent<PropertyKey>) => void) | undefined,

@@ -12,13 +12,13 @@ import GGPlot from "../src/lib/GGPlot.svelte";
 import type { LegendFocusEvent, PlotInteractionScope } from "../src/lib/interaction.js";
 import { createPlotInteraction } from "../src/lib/interaction-controller.svelte.js";
 import { createLegendFocusState } from "../src/lib/legend-focus-state.svelte.js";
-import { createPlotRuntime, type PlotRuntime } from "../src/lib/plot-runtime.svelte.js";
+import { createPlotRuntime } from "../src/lib/plot-runtime.svelte.js";
 import { createSourceIdentityTracker } from "../src/lib/plot-semantic-keys.js";
 import {
   createSemanticKeyService,
   type SemanticKeyService,
 } from "../src/lib/plot-shared-services.svelte.js";
-import type { InteractiveLegendEntry } from "../src/lib/plot-legend-focus.js";
+import type { InteractiveLegendEntry, LegendEntryIdentity } from "../src/lib/plot-legend-focus.js";
 import { withEffectRoot, withFlushedEffectRoot } from "./helpers/effect-root.svelte.js";
 import { reactiveBox } from "./helpers/reactive-box.svelte.js";
 import { createReactiveRuntimeDeps } from "./helpers/runtime-deps.svelte.js";
@@ -30,6 +30,8 @@ const focusRows = [
   { id: "b", x: 2, y: 2, group: "south" },
   { id: "c", x: 3, y: 3, group: "north" },
 ];
+
+type FocusRow = (typeof focusRows)[number];
 
 type FocusCb = ((event: LegendFocusEvent) => void) | undefined;
 const noCallback = (): FocusCb => undefined;
@@ -62,93 +64,75 @@ function keyEvent(key: string): KeyboardEvent {
 
 type FocusHarness = {
   state: ReturnType<typeof createLegendFocusState>;
-  model: RenderModel;
-  semanticKeys: SemanticKeyService;
-  entries: () => readonly InteractiveLegendEntry[];
+  model: () => RenderModel;
   destroy: () => void;
 };
 
-function mountFocusController(options: {
-  model?: RenderModel;
-  interaction?: ReturnType<typeof createPlotInteraction<PropertyKey>> | undefined;
-  legendFocusEnabled?: boolean;
-  legendFocusPreviewEnabled?: boolean;
-  onlegendfocus?: FocusCb;
-  oninteraction?: FocusCb;
-  announce?: (message: string) => void;
-  root?: HTMLDivElement | null;
-  registerEffects?: boolean;
-}): FocusHarness {
-  const model = options.model ?? modelFor(colorSpec());
-  const enabled = reactiveBox(options.legendFocusEnabled ?? true);
-  const previewEnabled = reactiveBox(options.legendFocusPreviewEnabled ?? true);
-  const interactionBox = reactiveBox(options.interaction);
-  const focusCb = reactiveBox<FocusCb>(options.onlegendfocus);
-  const interactionCb = reactiveBox<FocusCb>(options.oninteraction);
-  const rootBox = reactiveBox<HTMLDivElement | null>(options.root ?? null);
+/**
+ * Mount the controller with production-shaped deps: every reactive dep is a
+ * getter (mirroring LegendFocusStateDeps). Tests that need reactivity pass
+ * getters over their own reactive boxes; omitted options get static defaults.
+ */
+function mountFocusController(
+  options: {
+    model?: () => RenderModel;
+    data?: () => readonly FocusRow[];
+    interaction?: () => MaybeController;
+    legendFocusEnabled?: () => boolean;
+    onlegendfocus?: () => FocusCb;
+    oninteraction?: () => FocusCb;
+    announce?: (message: string) => void;
+    root?: HTMLDivElement | null;
+  } = {},
+): FocusHarness {
+  const defaultModel = modelFor(colorSpec());
+  const model = options.model ?? (() => defaultModel);
+  const data = options.data ?? ((): readonly FocusRow[] => focusRows);
   const tracker = createSourceIdentityTracker();
-  const data = focusRows;
 
-  const { value, destroy } = withFlushedEffectRoot(() => {
+  const { value: state, destroy } = withFlushedEffectRoot(() => {
     const semanticKeys = createSemanticKeyService({
-      model: () => model,
-      assembled: () => colorSpec(),
+      model,
+      assembled: () => colorSpec(data()),
       datumKey: () => "id",
-      data: () => data,
+      data,
       spec: () => null,
       sourceIdentity: (v) => tracker.sourceIdentity(v),
       deliverDiagnostic: () => {},
     });
     let entriesRef: () => readonly InteractiveLegendEntry[] = () => [];
+    let pressedRef: () => LegendEntryIdentity | null = () => null;
     const controller = createLegendFocusState({
-      model: () => model,
-      interaction: () => interactionBox.value,
+      interaction: options.interaction ?? noController,
       resolvedInteractionScope: () => defaultScope,
-      legendFocusEnabled: () => enabled.value,
-      legendFocusPreviewEnabled: () => previewEnabled.value,
-      root: () => rootBox.value,
+      legendFocusEnabled: options.legendFocusEnabled ?? (() => true),
+      legendFocusPreviewEnabled: () => true,
+      root: () => options.root ?? null,
       semanticKeys: () => semanticKeys,
       entries: () => entriesRef(),
-      onlegendfocus: () => focusCb.value,
-      oninteraction: () => interactionCb.value,
+      pressed: () => pressedRef(),
+      onlegendfocus: options.onlegendfocus ?? noCallback,
+      oninteraction: options.oninteraction ?? noCallback,
       announce: options.announce ?? (() => {}),
     });
-    entriesRef = () => controller.computeInteractiveEntries(model);
-    if (options.registerEffects !== false) controller.registerReconcileEffects();
-    return {
-      controller,
-      semanticKeys,
-      entriesRef,
-      enabled,
-      previewEnabled,
-      focusCb,
-      interactionCb,
-      rootBox,
-    };
+    // Deferred refs mirror the host's later-declared deriveds.
+    entriesRef = () => controller.computeInteractiveEntries(model());
+    pressedRef = () => controller.computeLegendPressed(model());
+    controller.registerReconcileEffects();
+    return controller;
   });
 
-  return {
-    state: value.controller,
-    model,
-    semanticKeys: value.semanticKeys,
-    entries: () => value.entriesRef(),
-    destroy,
-  };
+  return { state, model, destroy };
 }
 
 describe("createLegendFocusState construction", () => {
   it("does not invoke armed later-declared getters during construction (before first flush)", () => {
-    let modelCalls = 0;
     let semanticCalls = 0;
     let entriesCalls = 0;
-    const tracker = createSourceIdentityTracker();
+    let pressedCalls = 0;
 
     const { value: state, destroy } = withEffectRoot(() =>
       createLegendFocusState({
-        model: () => {
-          modelCalls++;
-          return null;
-        },
         interaction: noController,
         resolvedInteractionScope: () => defaultScope,
         legendFocusEnabled: () => true,
@@ -165,29 +149,32 @@ describe("createLegendFocusState construction", () => {
           entriesCalls++;
           return [];
         },
+        pressed: () => {
+          pressedCalls++;
+          return null;
+        },
         onlegendfocus: noCallback,
         oninteraction: noCallback,
         announce: () => {},
       }),
     );
 
-    expect(modelCalls).toBe(0);
     expect(semanticCalls).toBe(0);
     expect(entriesCalls).toBe(0);
-    // Client deriveds are lazy, so the construction-time assertion alone
-    // cannot catch a model-reading $derived added to the factory. Force
-    // every exposed accessor and one effect flush, then re-assert — that is
-    // the closest client-side stand-in for Svelte 5.29's SSR behavior,
-    // where such a derived evaluates eagerly at construction (TDZ hazard).
+    expect(pressedCalls).toBe(0);
+    // Client deriveds are lazy, so this guard only proves the exposed
+    // accessors reach no armed getter (reads + one flush below). A
+    // construction-time $derived that reads an armed dep WITHOUT being
+    // reachable from an accessor would pass here yet still crash Svelte 5.29
+    // SSR, where deriveds evaluate eagerly at construction (TDZ) — the .ssr
+    // suites and compat:consumer are the gate for that case.
     expect(state.effectiveEmphasisKeys).toEqual([]);
     expect(state.previewIdentity).toBeNull();
     expect(state.rovingIndex).toBe(0);
     flushSync();
-    expect(modelCalls).toBe(0);
     expect(semanticCalls).toBe(0);
     expect(entriesCalls).toBe(0);
-    // Silence unused tracker (pattern mirrors semantic-service tests).
-    void tracker;
+    expect(pressedCalls).toBe(0);
     destroy();
   });
 });
@@ -197,7 +184,7 @@ describe("createLegendFocusState preview → commit cycle", () => {
     const events: LegendFocusEvent[] = [];
     const announcements: string[] = [];
     const { state, model, destroy } = mountFocusController({
-      onlegendfocus: (event) => {
+      onlegendfocus: () => (event) => {
         events.push(event);
       },
       announce: (message) => {
@@ -205,7 +192,7 @@ describe("createLegendFocusState preview → commit cycle", () => {
       },
     });
 
-    const entries = state.computeInteractiveEntries(model);
+    const entries = state.computeInteractiveEntries(model());
     expect(entries).toHaveLength(2);
     const northIndex = entries.findIndex((entry) => entry.entry.value === "north");
     expect(northIndex).toBeGreaterThanOrEqual(0);
@@ -215,6 +202,7 @@ describe("createLegendFocusState preview → commit cycle", () => {
 
     expect(state.effectiveEmphasisKeys).toEqual(["a", "c"]);
     expect(state.previewIdentity).toEqual({ scale: "color", entryIndex: northIndex });
+    // Focus preview source is "focus" → maps to keyboard InteractionSource.
     expect(events).toEqual([
       {
         type: "legend-focus",
@@ -227,14 +215,6 @@ describe("createLegendFocusState preview → commit cycle", () => {
         keys: ["a", "c"],
       },
     ]);
-    // Focus preview source is "focus" → maps to keyboard InteractionSource.
-    expect(events[0]).toMatchObject({
-      phase: "change",
-      state: "transient",
-      scale: "color",
-      value: "north",
-      keys: ["a", "c"],
-    });
     expect(announcements.at(-1)).toMatch(/previewed/);
 
     state.onLegendKeydown(keyEvent("Enter"), northIndex);
@@ -255,7 +235,7 @@ describe("createLegendFocusState preview → commit cycle", () => {
     });
     expect(state.previewIdentity).toBeNull();
     expect(state.effectiveEmphasisKeys).toEqual(["a", "c"]);
-    expect(state.computeLegendPressed(model)).toEqual({
+    expect(state.computeLegendPressed(model())).toEqual({
       scale: "color",
       entryIndex: northIndex,
     });
@@ -266,23 +246,23 @@ describe("createLegendFocusState preview → commit cycle", () => {
 });
 
 describe("createLegendFocusState local vs controller emphasis", () => {
-  it("local mode: commit writes local keys; clear empties them and emits", () => {
+  it("local mode: commit writes local keys; Escape clears them and emits", () => {
     const events: LegendFocusEvent[] = [];
     const { state, model, destroy } = mountFocusController({
-      interaction: undefined,
-      onlegendfocus: (event) => {
+      onlegendfocus: () => (event) => {
         events.push(event);
       },
     });
 
     const northIndex = state
-      .computeInteractiveEntries(model)
+      .computeInteractiveEntries(model())
       .findIndex((entry) => entry.entry.value === "north");
     state.onLegendClick(clickEvent(), northIndex);
     flushSync();
     expect(state.effectiveEmphasisKeys).toEqual(["a", "c"]);
 
-    state.clearLegendFocus("keyboard");
+    // Escape routes through resolveLegendKeyAction → clear with "keyboard".
+    state.onLegendKeydown(keyEvent("Escape"), northIndex);
     flushSync();
     expect(state.effectiveEmphasisKeys).toEqual([]);
     expect(events.filter((event) => event.phase === "clear")).toEqual([
@@ -292,60 +272,25 @@ describe("createLegendFocusState local vs controller emphasis", () => {
     destroy();
   });
 
-  it("controller mode: local keys untouched; revision drives emphasis recompute", () => {
+  it("controller mode: local keys untouched; controller revision drives emphasis recompute", () => {
     const controller = createPlotInteraction();
-    const interactionBox = reactiveBox(controller);
-    const revisionDriver = reactiveBox(0);
-    const model = modelFor(colorSpec());
-    const tracker = createSourceIdentityTracker();
-
-    const { value: state, destroy } = withFlushedEffectRoot(() => {
-      const semanticKeys = createSemanticKeyService({
-        model: () => model,
-        assembled: () => colorSpec(),
-        datumKey: () => "id",
-        data: () => focusRows,
-        spec: () => null,
-        sourceIdentity: (v) => tracker.sourceIdentity(v),
-        deliverDiagnostic: () => {},
-      });
-      let entriesRef: () => readonly InteractiveLegendEntry[] = () => [];
-      const focus = createLegendFocusState({
-        model: () => model,
-        // Re-read revision via reactive box so effectiveEmphasisKeys tracks it.
-        interaction: () => {
-          void revisionDriver.value;
-          return interactionBox.value;
-        },
-        resolvedInteractionScope: () => defaultScope,
-        legendFocusEnabled: () => true,
-        legendFocusPreviewEnabled: () => true,
-        root: () => null,
-        semanticKeys: () => semanticKeys,
-        entries: () => entriesRef(),
-        onlegendfocus: noCallback,
-        oninteraction: noCallback,
-        announce: () => {},
-      });
-      entriesRef = () => focus.computeInteractiveEntries(model);
-      focus.registerReconcileEffects();
-      return focus;
+    // Production-shaped plain getter: recompute must flow from the
+    // controller's own revision tracking, not test scaffolding.
+    const { state, model, destroy } = mountFocusController({
+      interaction: () => controller,
     });
 
     expect(state.effectiveEmphasisKeys).toEqual([]);
     controller.setEmphasis(["b"], { scope: defaultScope, source: "programmatic" });
-    revisionDriver.set(controller.revision);
     flushSync();
     expect(state.effectiveEmphasisKeys).toEqual(["b"]);
 
     // Committing an UNPRESSED entry writes THROUGH to the controller
     // (commitLegend calls interaction.setEmphasis) — local keys never used.
     const northIndex = state
-      .computeInteractiveEntries(model)
+      .computeInteractiveEntries(model())
       .findIndex((entry) => entry.entry.value === "north");
     state.onLegendClick(clickEvent(), northIndex);
-    flushSync();
-    revisionDriver.set(controller.revision);
     flushSync();
     expect(controller.emphasized(defaultScope)).toEqual(["a", "c"]);
     expect(state.effectiveEmphasisKeys).toEqual(["a", "c"]);
@@ -353,8 +298,6 @@ describe("createLegendFocusState local vs controller emphasis", () => {
     // Clicking the now-pressed entry is a toggle-clear: clearEmphasis on the
     // controller, not a local mutation.
     state.onLegendClick(clickEvent(), northIndex);
-    flushSync();
-    revisionDriver.set(controller.revision);
     flushSync();
     expect(controller.emphasized(defaultScope)).toEqual([]);
     expect(state.effectiveEmphasisKeys).toEqual([]);
@@ -367,39 +310,15 @@ describe("createLegendFocusState roving focus reconcile", () => {
   it("entry count shrink relocates roving index and queues refocus", async () => {
     const both = focusRows;
     const onlyNorth = [focusRows[0], focusRows[2]];
-    const dataBox = reactiveBox(both);
+    const dataBox = reactiveBox<readonly FocusRow[]>(both);
     const modelBox = reactiveBox(modelFor(colorSpec(dataBox.value)));
     const root = document.createElement("div");
     document.body.append(root);
 
-    const tracker = createSourceIdentityTracker();
-    const { value, destroy } = withFlushedEffectRoot(() => {
-      const semanticKeys = createSemanticKeyService({
-        model: () => modelBox.value,
-        assembled: () => colorSpec(dataBox.value),
-        datumKey: () => "id",
-        data: () => dataBox.value,
-        spec: () => null,
-        sourceIdentity: (v) => tracker.sourceIdentity(v),
-        deliverDiagnostic: () => {},
-      });
-      let entriesRef: () => readonly InteractiveLegendEntry[] = () => [];
-      const focus = createLegendFocusState({
-        model: () => modelBox.value,
-        interaction: noController,
-        resolvedInteractionScope: () => defaultScope,
-        legendFocusEnabled: () => true,
-        legendFocusPreviewEnabled: () => true,
-        root: () => root,
-        semanticKeys: () => semanticKeys,
-        entries: () => entriesRef(),
-        onlegendfocus: noCallback,
-        oninteraction: noCallback,
-        announce: () => {},
-      });
-      entriesRef = () => focus.computeInteractiveEntries(modelBox.value);
-      focus.registerReconcileEffects();
-      return focus;
+    const { state, destroy } = mountFocusController({
+      model: () => modelBox.value,
+      data: () => dataBox.value,
+      root,
     });
 
     // Mount two real legend targets so refocus has a destination.
@@ -409,18 +328,18 @@ describe("createLegendFocusState roving focus reconcile", () => {
         const btn = document.createElement("button");
         btn.className = "gg-legend-target";
         btn.dataset["ggLegendTarget"] = "";
-        btn.dataset["ggLegendTarget"] = "";
         btn.dataset["index"] = String(i);
-        btn.tabIndex = i === value.rovingIndex ? 0 : -1;
+        btn.tabIndex = i === state.rovingIndex ? 0 : -1;
         root.append(btn);
       }
     };
     paintTargets(2);
     const south = root.querySelector<HTMLElement>('[data-index="1"]')!;
     south.focus();
-    value.moveLegendFocus(0, "End");
+    // "End" routes through resolveLegendKeyAction → move to the last entry.
+    state.onLegendKeydown(keyEvent("End"), 0);
     flushSync();
-    expect(value.rovingIndex).toBe(1);
+    expect(state.rovingIndex).toBe(1);
     expect(document.activeElement).toBe(south);
 
     dataBox.set(onlyNorth);
@@ -434,13 +353,13 @@ describe("createLegendFocusState roving focus reconcile", () => {
     stale.focus();
     flushSync();
 
-    await until(() => value.rovingIndex === 0);
+    await until(() => state.rovingIndex === 0);
     await until(
       () =>
         document.activeElement ===
         root.querySelector<HTMLElement>('[data-gg-legend-target][data-index="0"]'),
     );
-    expect(value.rovingIndex).toBe(0);
+    expect(state.rovingIndex).toBe(0);
 
     destroy();
     root.remove();
@@ -451,40 +370,16 @@ describe("createLegendFocusState committed-reconcile", () => {
   it("catalog reshuffle drops committed identity with a single programmatic clear", () => {
     const both = focusRows;
     const onlySouth = [focusRows[1]];
-    const dataBox = reactiveBox(both);
+    const dataBox = reactiveBox<readonly FocusRow[]>(both);
     const modelBox = reactiveBox(modelFor(colorSpec(dataBox.value)));
     const events: LegendFocusEvent[] = [];
-    const tracker = createSourceIdentityTracker();
 
-    const { value: state, destroy } = withFlushedEffectRoot(() => {
-      const semanticKeys = createSemanticKeyService({
-        model: () => modelBox.value,
-        assembled: () => colorSpec(dataBox.value),
-        datumKey: () => "id",
-        data: () => dataBox.value,
-        spec: () => null,
-        sourceIdentity: (v) => tracker.sourceIdentity(v),
-        deliverDiagnostic: () => {},
-      });
-      let entriesRef: () => readonly InteractiveLegendEntry[] = () => [];
-      const focus = createLegendFocusState({
-        model: () => modelBox.value,
-        interaction: noController,
-        resolvedInteractionScope: () => defaultScope,
-        legendFocusEnabled: () => true,
-        legendFocusPreviewEnabled: () => true,
-        root: () => null,
-        semanticKeys: () => semanticKeys,
-        entries: () => entriesRef(),
-        onlegendfocus: () => (event) => {
-          events.push(event);
-        },
-        oninteraction: noCallback,
-        announce: () => {},
-      });
-      entriesRef = () => focus.computeInteractiveEntries(modelBox.value);
-      focus.registerReconcileEffects();
-      return focus;
+    const { state, destroy } = mountFocusController({
+      model: () => modelBox.value,
+      data: () => dataBox.value,
+      onlegendfocus: () => (event) => {
+        events.push(event);
+      },
     });
 
     const northIndex = state
@@ -518,40 +413,16 @@ describe("createLegendFocusState preview-reconcile", () => {
     // Same two groups, different row membership for north (drop c).
     const remapped = [focusRows[0], focusRows[1]];
     const onlySouth = [focusRows[1]];
-    const dataBox = reactiveBox(both);
+    const dataBox = reactiveBox<readonly FocusRow[]>(both);
     const modelBox = reactiveBox(modelFor(colorSpec(dataBox.value)));
     const events: LegendFocusEvent[] = [];
-    const tracker = createSourceIdentityTracker();
 
-    const { value: state, destroy } = withFlushedEffectRoot(() => {
-      const semanticKeys = createSemanticKeyService({
-        model: () => modelBox.value,
-        assembled: () => colorSpec(dataBox.value),
-        datumKey: () => "id",
-        data: () => dataBox.value,
-        spec: () => null,
-        sourceIdentity: (v) => tracker.sourceIdentity(v),
-        deliverDiagnostic: () => {},
-      });
-      let entriesRef: () => readonly InteractiveLegendEntry[] = () => [];
-      const focus = createLegendFocusState({
-        model: () => modelBox.value,
-        interaction: noController,
-        resolvedInteractionScope: () => defaultScope,
-        legendFocusEnabled: () => true,
-        legendFocusPreviewEnabled: () => true,
-        root: () => null,
-        semanticKeys: () => semanticKeys,
-        entries: () => entriesRef(),
-        onlegendfocus: () => (event) => {
-          events.push(event);
-        },
-        oninteraction: noCallback,
-        announce: () => {},
-      });
-      entriesRef = () => focus.computeInteractiveEntries(modelBox.value);
-      focus.registerReconcileEffects();
-      return focus;
+    const { state, destroy } = mountFocusController({
+      model: () => modelBox.value,
+      data: () => dataBox.value,
+      onlegendfocus: () => (event) => {
+        events.push(event);
+      },
     });
 
     const northIndex = state
@@ -611,42 +482,16 @@ describe("createLegendFocusState focus-disabled effect", () => {
   it("flipping legendFocus off clears committed/local with one programmatic clear (committed-reconcile)", () => {
     const enabled = reactiveBox(true);
     const events: LegendFocusEvent[] = [];
-    const model = modelFor(colorSpec());
-    const tracker = createSourceIdentityTracker();
 
-    const { value: state, destroy } = withFlushedEffectRoot(() => {
-      const semanticKeys = createSemanticKeyService({
-        model: () => model,
-        assembled: () => colorSpec(),
-        datumKey: () => "id",
-        data: () => focusRows,
-        spec: () => null,
-        sourceIdentity: (v) => tracker.sourceIdentity(v),
-        deliverDiagnostic: () => {},
-      });
-      let entriesRef: () => readonly InteractiveLegendEntry[] = () => [];
-      const focus = createLegendFocusState({
-        model: () => model,
-        interaction: noController,
-        resolvedInteractionScope: () => defaultScope,
-        legendFocusEnabled: () => enabled.value,
-        legendFocusPreviewEnabled: () => true,
-        root: () => null,
-        semanticKeys: () => semanticKeys,
-        entries: () => entriesRef(),
-        onlegendfocus: () => (event) => {
-          events.push(event);
-        },
-        oninteraction: noCallback,
-        announce: () => {},
-      });
-      entriesRef = () => focus.computeInteractiveEntries(model);
-      focus.registerReconcileEffects();
-      return focus;
+    const { state, model, destroy } = mountFocusController({
+      legendFocusEnabled: () => enabled.value,
+      onlegendfocus: () => (event) => {
+        events.push(event);
+      },
     });
 
     const northIndex = state
-      .computeInteractiveEntries(model)
+      .computeInteractiveEntries(model())
       .findIndex((entry) => entry.entry.value === "north");
     state.onLegendClick(clickEvent(), northIndex);
     flushSync();
@@ -662,7 +507,7 @@ describe("createLegendFocusState focus-disabled effect", () => {
     // focus-disabled plan then finds nothing left and no-ops.
     expect(state.effectiveEmphasisKeys).toEqual([]);
     expect(state.previewIdentity).toBeNull();
-    expect(state.computeLegendPressed(model)).toBeNull();
+    expect(state.computeLegendPressed(model())).toBeNull();
     expect(events.slice(afterCommit)).toEqual([
       { type: "legend-focus", phase: "clear", source: "programmatic" },
     ]);
@@ -675,13 +520,13 @@ describe("createLegendFocusState suppress interplay", () => {
   it("touch pointerdown → pointerup commits once and suppresses synthetic click", () => {
     const events: LegendFocusEvent[] = [];
     const { state, model, destroy } = mountFocusController({
-      onlegendfocus: (event) => {
+      onlegendfocus: () => (event) => {
         events.push(event);
       },
     });
 
     const southIndex = state
-      .computeInteractiveEntries(model)
+      .computeInteractiveEntries(model())
       .findIndex((entry) => entry.entry.value === "south");
 
     state.onLegendPointerDown(
@@ -722,13 +567,13 @@ describe("createLegendFocusState suppress interplay", () => {
 
     const { state, model, destroy } = mountFocusController({
       root,
-      onlegendfocus: (event) => {
+      onlegendfocus: () => (event) => {
         events.push(event);
       },
     });
 
     const northIndex = state
-      .computeInteractiveEntries(model)
+      .computeInteractiveEntries(model())
       .findIndex((entry) => entry.entry.value === "north");
     state.onLegendClick(clickEvent(), northIndex);
     flushSync();
@@ -784,13 +629,13 @@ describe("runtime + legend-focus real cycle", () => {
         assembled: initialSpec,
         effectiveSpec: initialSpec,
       });
-      // Host wiring: focus controller after enablement cluster; model via
-      // getter over later runtime (never at construction).
-      let runtimeRef: PlotRuntime | null = null;
+      // Host wiring: focus controller after enablement cluster; entries and
+      // pressed via getters over the later-declared runtime (never at
+      // construction).
       let entriesRef: () => readonly InteractiveLegendEntry[] = () => [];
+      let pressedRef: () => LegendEntryIdentity | null = () => null;
       let semanticKeysRef: SemanticKeyService | null = null;
       const focus = createLegendFocusState({
-        model: () => runtimeRef?.model ?? null,
         interaction: noController,
         resolvedInteractionScope: () => defaultScope,
         legendFocusEnabled: () => true,
@@ -798,6 +643,7 @@ describe("runtime + legend-focus real cycle", () => {
         root: () => null,
         semanticKeys: () => semanticKeysRef!,
         entries: () => entriesRef(),
+        pressed: () => pressedRef(),
         onlegendfocus: () => (event) => {
           events.push(event);
         },
@@ -808,7 +654,6 @@ describe("runtime + legend-focus real cycle", () => {
         ...runtimeDeps,
         effectiveLegendFilters: () => [],
       });
-      runtimeRef = runtime;
       const semanticKeys = createSemanticKeyService({
         model: () => runtime.model,
         assembled: () => runtimeDeps.assembled(),
@@ -820,6 +665,7 @@ describe("runtime + legend-focus real cycle", () => {
       });
       semanticKeysRef = semanticKeys;
       entriesRef = () => focus.computeInteractiveEntries(runtime.model);
+      pressedRef = () => focus.computeLegendPressed(runtime.model);
       // Host registration order: model -> catalog(S2) -> reconcile(S3) -> late.
       runtime.registerModelEffects();
       focus.registerReconcileEffects();
@@ -917,40 +763,14 @@ describe("createLegendFocusState callback replacement", () => {
     const interactionBox = reactiveBox<FocusCb>((event) => {
       firstInteraction.push(event);
     });
-    const model = modelFor(colorSpec());
-    const tracker = createSourceIdentityTracker();
 
-    const { value: state, destroy } = withFlushedEffectRoot(() => {
-      const semanticKeys = createSemanticKeyService({
-        model: () => model,
-        assembled: () => colorSpec(),
-        datumKey: () => "id",
-        data: () => focusRows,
-        spec: () => null,
-        sourceIdentity: (v) => tracker.sourceIdentity(v),
-        deliverDiagnostic: () => {},
-      });
-      let entriesRef: () => readonly InteractiveLegendEntry[] = () => [];
-      const focus = createLegendFocusState({
-        model: () => model,
-        interaction: noController,
-        resolvedInteractionScope: () => defaultScope,
-        legendFocusEnabled: () => true,
-        legendFocusPreviewEnabled: () => true,
-        root: () => null,
-        semanticKeys: () => semanticKeys,
-        entries: () => entriesRef(),
-        onlegendfocus: () => focusBox.value,
-        oninteraction: () => interactionBox.value,
-        announce: () => {},
-      });
-      entriesRef = () => focus.computeInteractiveEntries(model);
-      focus.registerReconcileEffects();
-      return focus;
+    const { state, model, destroy } = mountFocusController({
+      onlegendfocus: () => focusBox.value,
+      oninteraction: () => interactionBox.value,
     });
 
     const northIndex = state
-      .computeInteractiveEntries(model)
+      .computeInteractiveEntries(model())
       .findIndex((entry) => entry.entry.value === "north");
     state.onLegendClick(clickEvent(), northIndex);
     flushSync();

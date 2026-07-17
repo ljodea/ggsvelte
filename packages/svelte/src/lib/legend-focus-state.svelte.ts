@@ -49,11 +49,6 @@ import type { SemanticKeyService } from "./plot-shared-services.svelte.js";
 // ---------------------------------------------------------------------------
 
 export type LegendFocusStateDeps = {
-  /**
-   * Used ONLY inside methods/handlers/effects (never at construction). Armed-
-   * getter construction tests enforce this for Svelte 5.29 server-eager deriveds.
-   */
-  model: () => RenderModel | null;
   interaction: () => PlotInteractionController<PropertyKey> | undefined;
   resolvedInteractionScope: () => PlotInteractionScope;
   legendFocusEnabled: () => boolean;
@@ -69,6 +64,12 @@ export type LegendFocusStateDeps = {
    * Component-side interactive entries derived. Read only in effects/handlers.
    */
   entries: () => readonly InteractiveLegendEntry[];
+  /**
+   * Host's cached `effectiveLegendPressed` derived (computeLegendPressed over
+   * the current model). Called only from commit handlers — never at
+   * construction — so it may close over a later-declared host binding.
+   */
+  pressed: () => LegendEntryIdentity | null;
   onlegendfocus: () => ((event: LegendFocusEvent) => void) | undefined;
   oninteraction: () =>
     | ((event: PlotInteractionEvent<Record<string, CellValue>>) => void)
@@ -86,7 +87,6 @@ export type LegendFocusState = {
   onPreviewIndex(index: number): void;
   onPreviewClear(): void;
   onLegendFocus(index: number): void;
-  moveLegendFocus(index: number, key: string): void;
   onLegendKeydown(event: KeyboardEvent, index: number): void;
   onLegendPointerDown(event: PointerEvent, index: number): void;
   onLegendPointerUp(event: PointerEvent, index: number): void;
@@ -95,7 +95,6 @@ export type LegendFocusState = {
   clearLegendFromControl(event: MouseEvent): void;
   setTouchIndexCleared(): void;
   setClearPointerType(type: string | null): void;
-  clearLegendFocus(source: InteractionSource): void;
   /** Register reconcile effects at their original host position. */
   registerReconcileEffects(): void;
 };
@@ -246,9 +245,10 @@ export function createLegendFocusState(deps: LegendFocusStateDeps): LegendFocusS
   function commitLegend(action: LegendEntryAction): void {
     // Eager key lookup (O(1) Map.get) before pure routing; unused on toggle-clear.
     const keys = deps.semanticKeys().keysForLegend(action);
-    // Effective pressed identity at call time (folds emphasis/committed/keyIndex).
+    // Host's cached effectiveLegendPressed derived — the single source of
+    // truth shared with aria-pressed, not a per-commit recompute.
     const commit = resolveLegendCommitAction({
-      pressed: computeLegendPressed(deps.model()),
+      pressed: deps.pressed(),
       identity: action.identity,
       keyCount: keys.length,
       entrySource: action.source,
@@ -520,7 +520,6 @@ export function createLegendFocusState(deps: LegendFocusStateDeps): LegendFocusS
     onPreviewIndex,
     onPreviewClear,
     onLegendFocus,
-    moveLegendFocus,
     onLegendKeydown,
     onLegendPointerDown,
     onLegendPointerUp,
@@ -529,7 +528,6 @@ export function createLegendFocusState(deps: LegendFocusStateDeps): LegendFocusS
     clearLegendFromControl,
     setTouchIndexCleared,
     setClearPointerType,
-    clearLegendFocus,
     registerReconcileEffects,
   };
 }
