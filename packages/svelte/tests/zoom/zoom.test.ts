@@ -13,7 +13,7 @@ import {
   sameZoomDomains,
   sanitizePartialZoomDomains,
   stableZoomDomains,
-} from "../src/lib/plot-zoom.js";
+} from "../../src/lib/zoom/zoom.js";
 
 const continuousScale = (domain: [number, number]) => {
   const [d0, d1] = domain;

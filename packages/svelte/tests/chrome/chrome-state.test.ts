@@ -13,8 +13,8 @@ import type {
   InteractionTool,
   PlotInteractionInterval,
   ResolvedInteractionConfig,
-} from "../../src/lib/interaction.js";
-import { INTERACTION_DIAGNOSTIC_CATALOG } from "../../src/lib/interaction.js";
+} from "../../src/lib/interaction/interaction.js";
+import { INTERACTION_DIAGNOSTIC_CATALOG } from "../../src/lib/interaction/interaction.js";
 import type { ContinuousZoomDomains } from "../../src/lib/scene/geometry.js";
 import { createPlotChromeState } from "../../src/lib/chrome/chrome-state.svelte.js";
 import { withEffectRoot, withFlushedEffectRoot } from "../helpers/effect-root.svelte.js";

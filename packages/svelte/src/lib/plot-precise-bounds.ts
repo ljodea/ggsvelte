@@ -7,7 +7,7 @@ import type {
   BoundsEditorInput,
   BoundsScale,
 } from "./bounds-editor.js";
-import type { SemanticIntervalAxis } from "./interaction.js";
+import type { SemanticIntervalAxis } from "./interaction/interaction.js";
 
 export interface BoundsEditorInputForScaleOptions {
   readonly axis: BoundsAxis;

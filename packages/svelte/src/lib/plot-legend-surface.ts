@@ -6,7 +6,7 @@
  * key routing, touch/click coordination, and commit/preview-dismiss priority.
  */
 
-import type { InteractionSource } from "./interaction.js";
+import type { InteractionSource } from "./interaction/interaction.js";
 import {
   legendInteractionSource,
   type LegendEntryIdentity,

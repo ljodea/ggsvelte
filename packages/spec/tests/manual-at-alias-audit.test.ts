@@ -24,11 +24,11 @@ describe("manual AT alias commit audit", () => {
     expect(
       runtimeBehaviorPaths([
         "packages/svelte/package.json",
-        "packages/svelte/src/lib/interaction.ts",
+        "packages/svelte/src/lib/interaction/interaction.ts",
         "packages/core/CHANGELOG.md",
         "packages/core/src/theme.ts",
       ]),
-    ).toEqual(["packages/svelte/src/lib/interaction.ts", "packages/core/src/theme.ts"]);
+    ).toEqual(["packages/svelte/src/lib/interaction/interaction.ts", "packages/core/src/theme.ts"]);
   });
 
   it("does not treat CSS universal-selector edits as JSDoc noise", () => {

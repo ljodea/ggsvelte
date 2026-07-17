@@ -45,8 +45,8 @@
     PlotInteractionEvent,
     PlotSelection,
     ZoomDomains,
-  } from "./interaction.js";
-  import type { PlotInteractionController } from "./interaction-controller.svelte.js";
+  } from "./interaction/interaction.js";
+  import type { PlotInteractionController } from "./interaction/controller.svelte.js";
   import { provideRegistry } from "./geoms/registry.svelte.js";
   import { shouldRenderInteractionLiveRegion } from "./plot-legend-surface.js";
   import { resolveInteractionLiveText } from "./assembly/labels.js";
@@ -62,7 +62,7 @@
   import BoundsEditor from "./BoundsEditor.svelte";
   import type { GGPlotProps } from "./plot-props.js";
   import { createPlotOrchestrator } from "./plot-orchestrator.svelte.js";
-  import PlotCaptureSurface from "./PlotCaptureSurface.svelte";
+  import CaptureSurface from "./surface/CaptureSurface.svelte";
   import PlotLegendFilters from "./PlotLegendFilters.svelte";
   import PlotLegendTargets from "./PlotLegendTargets.svelte";
   import MarkStrata from "./scene/MarkStrata.svelte";
@@ -314,7 +314,7 @@
     />
     {#if engine.surfaceInteractive}
       <!-- Order (document = paint): overlay → capture → Tooltip → status chrome. -->
-      <PlotCaptureSurface
+      <CaptureSurface
         bind:element={captureSurface}
         {plotId}
         activeTool={surfaceState.activeTool}

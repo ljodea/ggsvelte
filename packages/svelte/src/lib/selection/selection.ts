@@ -1,4 +1,4 @@
-import type { InteractionSource, PointSelection } from "./interaction.js";
+import type { InteractionSource, PointSelection } from "../interaction/interaction.js";
 
 export type CandidateAnchorKeys = {
   readonly x: number;
@@ -86,7 +86,7 @@ export function nextPointSelectionKeys(
 
 /**
  * Candidate store surface used by presentation walks (size + random-access).
- * Generic so `plot-selection` stays free of core CandidateFacts coupling.
+ * Generic so this module stays free of core CandidateFacts coupling.
  */
 export type CandidateLookup<T> = {
   readonly size: number;

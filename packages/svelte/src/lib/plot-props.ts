@@ -34,8 +34,8 @@ import type {
   SelectInput,
   ZoomEvent,
   ZoomInput,
-} from "./interaction.js";
-import type { PlotInteractionController } from "./interaction-controller.svelte.js";
+} from "./interaction/interaction.js";
+import type { PlotInteractionController } from "./interaction/controller.svelte.js";
 import type { LegendFilterEvent, LegendFilterInput } from "./legend-filter.js";
 
 type PublicKey<

@@ -1,7 +1,7 @@
 import type { CellValue } from "@ggsvelte/core";
 import type { Snippet } from "svelte";
 
-import type { LegendFilterEvent } from "./legend-filter.js";
+import type { LegendFilterEvent } from "../legend-filter.js";
 
 export type InteractionSource = "pointer" | "keyboard" | "touch" | "programmatic";
 export type InspectMode = "auto" | "exact" | "x" | "y" | "xy";

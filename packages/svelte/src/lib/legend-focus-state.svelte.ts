@@ -9,13 +9,13 @@
  */
 import type { CellValue, RenderModel } from "@ggsvelte/core";
 
-import type { PlotInteractionController } from "./interaction-controller.svelte.js";
+import type { PlotInteractionController } from "./interaction/controller.svelte.js";
 import type {
   InteractionSource,
   LegendFocusEvent,
   PlotInteractionEvent,
   PlotInteractionScope,
-} from "./interaction.js";
+} from "./interaction/interaction.js";
 import { legendFocusAnnouncement } from "./assembly/labels.js";
 import {
   buildInteractiveLegendEntries,

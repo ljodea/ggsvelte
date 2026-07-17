@@ -26,14 +26,14 @@ import type {
   createInteractionReducer,
   InteractionAction,
   InteractionFrameToken,
-} from "./interaction-reducer.js";
+} from "./interaction/reducer.js";
 import type {
   InteractionSource,
   PlotInspection,
   PlotInspectionChange,
   PlotInteractionEvent,
   ResolvedInteractionConfig,
-} from "./interaction.js";
+} from "./interaction/interaction.js";
 import { inspectionLiveText as inspectionLiveTextFor } from "./assembly/labels.js";
 import { plotTooltipDomId } from "./assembly/layout.js";
 import { panelContainingAnchor } from "./scene/geometry.js";
@@ -46,8 +46,8 @@ import {
   nextTraversalIndex,
   planCycleCoincident,
   planDirectionalNavigate,
-} from "./plot-pointer.js";
-import { iterateCandidates } from "./plot-selection.js";
+} from "./surface/plot-px.js";
+import { iterateCandidates } from "./selection/selection.js";
 import {
   buildInspectionCandidateRef,
   resolveQueuedInspectFrameAction,
@@ -73,7 +73,7 @@ import {
 // Public types
 // ---------------------------------------------------------------------------
 
-/** Component-held reducer shape — factory-only export from interaction-reducer. */
+/** Component-held reducer shape — factory-only export from interaction/reducer. */
 type InteractionReducer = ReturnType<typeof createInteractionReducer>;
 
 /** Inspect frame action delivered to onPointerFrame (non-move-area branch). */

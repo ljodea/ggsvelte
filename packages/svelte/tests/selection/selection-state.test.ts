@@ -13,16 +13,16 @@ import type {
   PlotInteractionScope,
   PlotSelection,
   ResolvedInteractionConfig,
-} from "../src/lib/interaction.js";
-import { createPlotInteraction } from "../src/lib/interaction-controller.svelte.js";
-import { buildPointSelectionEvent } from "../src/lib/plot-selection.js";
+} from "../../src/lib/interaction/interaction.js";
+import { createPlotInteraction } from "../../src/lib/interaction/controller.svelte.js";
+import { buildPointSelectionEvent } from "../../src/lib/selection/selection.js";
 import {
   createSelectionState,
   type SelectionStateDeps,
-} from "../src/lib/selection-state.svelte.js";
-import { withEffectRoot, withFlushedEffectRoot } from "./helpers/effect-root.svelte.js";
-import { modelFor } from "./helpers/model.js";
-import { derivedBox, reactiveBox } from "./helpers/reactive-box.svelte.js";
+} from "../../src/lib/selection/selection-state.svelte.js";
+import { withEffectRoot, withFlushedEffectRoot } from "../helpers/effect-root.svelte.js";
+import { modelFor } from "../helpers/model.js";
+import { derivedBox, reactiveBox } from "../helpers/reactive-box.svelte.js";
 
 const continuousRows = [
   { id: "a", x: 1, y: 1 },

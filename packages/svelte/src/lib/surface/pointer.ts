@@ -1,6 +1,6 @@
-import { isAreaTool, type InteractionTool } from "./interaction.js";
-import { initialBrushRect, type BrushCorners, type PlotPoint } from "./plot-area-brush.js";
-import { resolvePointerFinishBrushAction, type FinishBrushAction } from "./plot-brush-finish.js";
+import { isAreaTool, type InteractionTool } from "../interaction/interaction.js";
+import { initialBrushRect, type BrushCorners, type PlotPoint } from "./area-brush.js";
+import { resolvePointerFinishBrushAction, type FinishBrushAction } from "./brush-finish.js";
 
 /**
  * Capture-surface pointer decision input for pointerdown.
@@ -120,7 +120,7 @@ export type SurfacePointerUpAction =
       readonly source: "touch" | "pointer";
       /**
        * Pure-owned too-small/commit + select/zoom/end routing (shared with
-       * keyboard complete-area via plot-brush-finish).
+       * keyboard complete-area via surface/brush-finish).
        */
       readonly finish: FinishBrushAction;
     }

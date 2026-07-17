@@ -1,6 +1,6 @@
 <script lang="ts">
   import GGPlot from "../../src/lib/GGPlot.svelte";
-  import { createPlotInteraction } from "../../src/lib/interaction-controller.svelte.js";
+  import { createPlotInteraction } from "../../src/lib/interaction/controller.svelte.js";
 
   const interaction = createPlotInteraction<string>();
 </script>

@@ -10,7 +10,7 @@ import { join } from "node:path";
 
 import { ADVISORY_CATALOG, PIPELINE_ERROR_CATALOG, PIPELINE_WARNING_CATALOG } from "@ggsvelte/core";
 import { ERROR_CATALOG, LINT_CATALOG } from "@ggsvelte/spec";
-import { INTERACTION_DIAGNOSTIC_CATALOG } from "../packages/svelte/src/lib/interaction.ts";
+import { INTERACTION_DIAGNOSTIC_CATALOG } from "../packages/svelte/src/lib/interaction/interaction.ts";
 
 import { EXAMPLES } from "../examples/manifest.ts";
 import type { LifecycleDoc } from "./gen-llms.ts";

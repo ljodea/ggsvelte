@@ -9,7 +9,7 @@ import type { CellValue } from "@ggsvelte/core";
 import { runPipeline, type RenderModel } from "@ggsvelte/core";
 import { aes, gg } from "@ggsvelte/spec";
 
-import { INTERACTION_DIAGNOSTIC_CATALOG } from "../../src/lib/interaction.js";
+import { INTERACTION_DIAGNOSTIC_CATALOG } from "../../src/lib/interaction/interaction.js";
 import {
   createSourceIdentityTracker,
   createSemanticKeyService,

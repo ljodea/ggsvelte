@@ -4,7 +4,7 @@ import type {
   PlotInteractionInterval,
   ReadonlyIntervalDomains,
   SemanticIntervalAxis,
-} from "./interaction.js";
+} from "./interaction/interaction.js";
 
 /** The stable identity surface needed to decide whether stored state is live. */
 interface IntervalConsumptionPanel {

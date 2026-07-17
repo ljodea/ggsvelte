@@ -7,7 +7,7 @@ import type {
   LegendFocusEvent,
   PlotInspectionChange,
   PointSelection,
-} from "../../src/lib/interaction.js";
+} from "../../src/lib/interaction/interaction.js";
 import {
   BRUSH_SECOND_CORNER_ANNOUNCEMENT,
   countLabel,

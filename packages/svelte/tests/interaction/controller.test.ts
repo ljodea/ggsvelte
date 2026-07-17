@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { createPlotInteraction } from "../src/lib/interaction-controller.svelte.js";
-import type { PlotInteractionTransition } from "../src/lib/interaction.js";
+import { createPlotInteraction } from "../../src/lib/interaction/controller.svelte.js";
+import type { PlotInteractionTransition } from "../../src/lib/interaction/interaction.js";
 
 const scope = {
   keys: "penguin-id",

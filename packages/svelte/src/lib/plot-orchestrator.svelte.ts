@@ -52,8 +52,8 @@ import type {
   SelectInput,
   ZoomEvent,
   ZoomInput,
-} from "./interaction.js";
-import type { PlotInteractionController } from "./interaction-controller.svelte.js";
+} from "./interaction/interaction.js";
+import type { PlotInteractionController } from "./interaction/controller.svelte.js";
 import {
   assemblePortableSpec,
   isFacetedPlotIntent,
@@ -75,15 +75,15 @@ import {
   type LegendFilterState,
 } from "./legend-filter-state.svelte.js";
 import { createLegendFocusState, type LegendFocusState } from "./legend-focus-state.svelte.js";
-import { createPlotZoomState, type PlotZoomState } from "./plot-zoom-state.svelte.js";
+import { createPlotZoomState, type PlotZoomState } from "./zoom/zoom-state.svelte.js";
 import { createIntervalState, type IntervalState } from "./interval-state.svelte.js";
 import { createInspectionState, type InspectionState } from "./inspection-state.svelte.js";
-import { createSurfaceState, type SurfaceState } from "./surface-state.svelte.js";
-import { createSelectionState, type SelectionState } from "./selection-state.svelte.js";
+import { createSurfaceState, type SurfaceState } from "./surface/surface-state.svelte.js";
+import { createSelectionState, type SelectionState } from "./selection/selection-state.svelte.js";
 import { createPlotChromeState, type PlotChromeState } from "./chrome/chrome-state.svelte.js";
 import type { LegendFilterEvent, LegendFilterInput } from "./legend-filter.js";
 import type { LayerRegistry } from "./geoms/registry.svelte.js";
-import { normalizeInteractionConfig } from "./interaction.js";
+import { normalizeInteractionConfig } from "./interaction/interaction.js";
 
 // ---------------------------------------------------------------------------
 // Inputs / return type

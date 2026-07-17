@@ -23,7 +23,7 @@ import {
   PIPELINE_WARNING_CATALOG,
 } from "@ggsvelte/core";
 import { ERROR_CATALOG, LINT_CATALOG } from "@ggsvelte/spec";
-import { INTERACTION_DIAGNOSTIC_CATALOG } from "../packages/svelte/src/lib/interaction";
+import { INTERACTION_DIAGNOSTIC_CATALOG } from "../packages/svelte/src/lib/interaction/interaction";
 import supportMatrix from "../support-matrix.json";
 
 // ---------------------------------------------------------------------------

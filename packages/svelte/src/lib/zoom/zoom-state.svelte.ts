@@ -9,16 +9,16 @@
 import type { CellValue, RenderModel } from "@ggsvelte/core";
 import type { PortableSpec } from "@ggsvelte/spec";
 
-import type { PlotInteractionController } from "./interaction-controller.svelte.js";
+import type { PlotInteractionController } from "../interaction/controller.svelte.js";
 import type {
   InteractionSource,
   PlotInteractionEvent,
   PlotInteractionScope,
   ResolvedInteractionConfig,
   ZoomEvent,
-} from "./interaction.js";
-import { frozenZoomDomains, type ContinuousZoomDomains } from "./scene/geometry.js";
-import { zoomAnnouncement } from "./assembly/labels.js";
+} from "../interaction/interaction.js";
+import { frozenZoomDomains, type ContinuousZoomDomains } from "../scene/geometry.js";
+import { zoomAnnouncement } from "../assembly/labels.js";
 import {
   applyZoomToSpec,
   buildZoomEvent,
@@ -28,7 +28,7 @@ import {
   resolveBrushZoomFromModel,
   sanitizePartialZoomDomains,
   stableZoomDomains,
-} from "./plot-zoom.js";
+} from "./zoom.js";
 
 // ---------------------------------------------------------------------------
 // Public types

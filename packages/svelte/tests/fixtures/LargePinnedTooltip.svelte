@@ -2,7 +2,7 @@
   import type {
     PlotDatum,
     PlotInspectionChange,
-  } from "../../src/lib/interaction.js";
+  } from "../../src/lib/interaction/interaction.js";
   import Tooltip from "../../src/lib/Tooltip.svelte";
 
   const members = Array.from({ length: 1_000 }, (_, index) => ({

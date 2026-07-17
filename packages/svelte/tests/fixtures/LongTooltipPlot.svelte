@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { RenderModel } from "@ggsvelte/core";
   import GGPlot from "../../src/lib/GGPlot.svelte";
-  import type { PlotInspectionChange } from "../../src/lib/interaction.js";
+  import type { PlotInspectionChange } from "../../src/lib/interaction/interaction.js";
 
   const data = [
     { id: "bottom-left", x: 0, y: 0 },

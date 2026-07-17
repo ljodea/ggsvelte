@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { InteractionTool } from "../src/lib/interaction.js";
+import type { InteractionTool } from "../../src/lib/interaction/interaction.js";
 import {
   POINT_SELECT_NEAREST_MAX_DISTANCE_PX,
   TOUCH_INSPECT_CLICK_SUPPRESS_MS,
@@ -19,7 +19,7 @@ import {
   type SurfacePointerDownInput,
   type SurfacePointerMoveInput,
   type SurfacePointerUpInput,
-} from "../src/lib/plot-surface-pointer.js";
+} from "../../src/lib/surface/pointer.js";
 
 const downPoint = { x: 9, y: 8 } as const;
 const draftCorners = { x0: 10, y0: 20, x1: 10, y1: 20 } as const;

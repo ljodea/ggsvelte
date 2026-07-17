@@ -5,7 +5,7 @@
     InteractionTool,
     IntervalSelection,
     PlotInspectionChange,
-  } from "../interaction.js";
+  } from "../interaction/interaction.js";
   import { normalizedRect } from "./geometry.js";
 
   type Anchor = { readonly x: number; readonly y: number };

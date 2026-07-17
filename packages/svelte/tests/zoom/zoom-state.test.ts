@@ -13,15 +13,15 @@ import type {
   PlotInteractionScope,
   ResolvedInteractionConfig,
   ZoomEvent,
-} from "../src/lib/interaction.js";
-import { createPlotInteraction } from "../src/lib/interaction-controller.svelte.js";
-import type { ContinuousZoomDomains } from "../src/lib/scene/geometry.js";
-import { createPlotRuntime } from "../src/lib/runtime/runtime.svelte.js";
-import { createPlotZoomState } from "../src/lib/plot-zoom-state.svelte.js";
-import { withEffectRoot, withFlushedEffectRoot } from "./helpers/effect-root.svelte.js";
-import { modelFor } from "./helpers/model.js";
-import { reactiveBox } from "./helpers/reactive-box.svelte.js";
-import { createReactiveRuntimeDeps } from "./helpers/runtime-deps.svelte.js";
+} from "../../src/lib/interaction/interaction.js";
+import { createPlotInteraction } from "../../src/lib/interaction/controller.svelte.js";
+import type { ContinuousZoomDomains } from "../../src/lib/scene/geometry.js";
+import { createPlotRuntime } from "../../src/lib/runtime/runtime.svelte.js";
+import { createPlotZoomState } from "../../src/lib/zoom/zoom-state.svelte.js";
+import { withEffectRoot, withFlushedEffectRoot } from "../helpers/effect-root.svelte.js";
+import { modelFor } from "../helpers/model.js";
+import { reactiveBox } from "../helpers/reactive-box.svelte.js";
+import { createReactiveRuntimeDeps } from "../helpers/runtime-deps.svelte.js";
 
 const zoomRows = [
   { id: "a", x: 1, y: 1 },
@@ -203,7 +203,7 @@ describe("createPlotZoomState local mode", () => {
     state.commitZoom(domains, "pointer");
     flushSync();
     expect(state.effectiveZoomDomains).toEqual(domains);
-    // Pin the ACTUAL buildZoomEvent literal (plot-zoom.ts) — not a recompute.
+    // Pin the ACTUAL buildZoomEvent literal (zoom/zoom.ts) — not a recompute.
     expect(zoomEvents[0]).toEqual({
       type: "zoom",
       phase: "end",

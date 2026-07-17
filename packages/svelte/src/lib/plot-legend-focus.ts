@@ -8,8 +8,8 @@
 import type { CellValue, SceneLegend, SceneLegendEntry } from "@ggsvelte/core";
 import { legendValueEqual } from "@ggsvelte/core";
 
-import type { InteractionSource } from "./interaction.js";
-import { iterateCandidates, type CandidateLookup } from "./plot-selection.js";
+import type { InteractionSource } from "./interaction/interaction.js";
+import { iterateCandidates, type CandidateLookup } from "./selection/selection.js";
 
 /** Stable renderer identity for one entry in one discrete legend. */
 export interface LegendEntryIdentity {

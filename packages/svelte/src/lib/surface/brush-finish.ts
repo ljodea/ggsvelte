@@ -1,11 +1,11 @@
-import type { InteractionTool } from "./interaction.js";
+import type { InteractionTool } from "../interaction/interaction.js";
 import {
   evaluatePointerBrushEnd,
   type BrushCorners,
   type PlotPoint,
   type PointerBrushEnd,
-} from "./plot-area-brush.js";
-import type { PlotRect } from "./scene/geometry.js";
+} from "./area-brush.js";
+import type { PlotRect } from "../scene/geometry.js";
 
 export type FinishBrushAction =
   | { readonly type: "keep-second-corner"; readonly corners: PlotRect }

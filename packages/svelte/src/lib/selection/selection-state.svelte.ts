@@ -17,15 +17,15 @@
 import type { BatchInteractionMask, CandidateFacts, CellValue, RenderModel } from "@ggsvelte/core";
 import { buildInteractionMasks } from "@ggsvelte/core";
 
-import type { PlotInteractionController } from "./interaction-controller.svelte.js";
+import type { PlotInteractionController } from "../interaction/controller.svelte.js";
 import type {
   InteractionSource,
   PlotInteractionEvent,
   PlotInteractionScope,
   PlotSelection,
   ResolvedInteractionConfig,
-} from "./interaction.js";
-import { selectionAnnouncement } from "./assembly/labels.js";
+} from "../interaction/interaction.js";
+import { selectionAnnouncement } from "../assembly/labels.js";
 import {
   anchorsFromCandidateKeys,
   buildPointSelectionEvent,
@@ -34,7 +34,7 @@ import {
   nextPointSelectionKeys,
   sameOrderedPropertyKeys,
   type PresentationInspectionFocus,
-} from "./plot-selection.js";
+} from "./selection.js";
 
 // ---------------------------------------------------------------------------
 // Public types

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import GGPlot from "../src/lib/GGPlot.svelte";
-import { createPlotInteraction } from "../src/lib/interaction-controller.svelte.js";
+import { createPlotInteraction } from "../src/lib/interaction/controller.svelte.js";
 import GGPlotHydrationFixture from "./fixtures/GGPlotHydrationFixture.svelte";
 import HydrationFixture from "./fixtures/HydrationFixture.svelte";
 import { renderSsrFixture } from "./helpers/ssr.js";
