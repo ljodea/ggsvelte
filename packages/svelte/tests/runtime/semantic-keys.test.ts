@@ -5,9 +5,7 @@
 import { flushSync } from "svelte";
 import { describe, expect, it } from "vitest";
 
-import type { CellValue } from "@ggsvelte/core";
-import { runPipeline, type RenderModel } from "@ggsvelte/core";
-import { aes, gg } from "@ggsvelte/spec";
+import type { CellValue, RenderModel } from "@ggsvelte/core";
 
 import { INTERACTION_DIAGNOSTIC_CATALOG } from "../../src/lib/interaction/interaction.js";
 import {
@@ -58,10 +56,6 @@ function modelView(options: {
 // ---------------------------------------------------------------------------
 // Pure helpers (from plot-semantic-keys.test.ts)
 // ---------------------------------------------------------------------------
-
-/** One point-geom model builder for the service tests (aes/size vary per case). */
-// Shared with tests/legend/entry-key-index.test.ts — one fixture shape.
-// (imported below)
 
 describe("dataIdentityEpochToken", () => {
   it("returns no-data when assembled is null", () => {

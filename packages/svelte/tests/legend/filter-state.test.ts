@@ -374,7 +374,7 @@ describe("runtime + legend-filter real cycle", () => {
   });
 });
 
-describe("PlotLegendFilters component layout and pointer source", () => {
+describe("LegendFilters component layout and pointer source", () => {
   it("combined legend-focus clear + filters reserves both rows", async () => {
     const view = render(GGPlot, {
       data: [
