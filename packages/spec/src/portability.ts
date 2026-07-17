@@ -110,10 +110,11 @@ function walk(
     return;
   }
   seen.add(value);
-  // Lazy own-key walk: Object.entries eagerly Gets every value (defeating
-  // stopAfter on later getters); Object.keys materializes the full key list
-  // and would still Get deleted-by-earlier-getter keys as undefined. for…in
-  // yields keys lazily and skips properties removed before we reach them.
+  // Prefer for…in over Object.entries: entries eagerly Gets every property
+  // value (including later getters), defeating stopAfter. Engines still list
+  // own keys up front (OwnPropertyKeys); the short-circuit here is on value
+  // Gets and recursive walks — not on key listing. for…in also skips keys
+  // deleted by an earlier getter before we reach them.
   for (const key in value) {
     if (!Object.hasOwn(value, key)) continue;
     walk(value[key], `${path}/${key}`, seen, issues, stopAfter);
