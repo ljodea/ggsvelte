@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
-import ToolRail from "../src/lib/ToolRail.svelte";
-import { render } from "./helpers/render.js";
+import ToolRail from "../../src/lib/chrome/ToolRail.svelte";
+import { render } from "../helpers/render.js";
 
 function toolRailProps(
   overrides: Partial<{

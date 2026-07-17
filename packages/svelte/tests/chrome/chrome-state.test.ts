@@ -13,13 +13,13 @@ import type {
   InteractionTool,
   PlotInteractionInterval,
   ResolvedInteractionConfig,
-} from "../src/lib/interaction.js";
-import { INTERACTION_DIAGNOSTIC_CATALOG } from "../src/lib/interaction.js";
-import type { ContinuousZoomDomains } from "../src/lib/plot-geometry.js";
-import { createPlotChromeState } from "../src/lib/plot-chrome-state.svelte.js";
-import { withEffectRoot, withFlushedEffectRoot } from "./helpers/effect-root.svelte.js";
-import { modelFor } from "./helpers/model.js";
-import { reactiveBox } from "./helpers/reactive-box.svelte.js";
+} from "../../src/lib/interaction.js";
+import { INTERACTION_DIAGNOSTIC_CATALOG } from "../../src/lib/interaction.js";
+import type { ContinuousZoomDomains } from "../../src/lib/plot-geometry.js";
+import { createPlotChromeState } from "../../src/lib/chrome/chrome-state.svelte.js";
+import { withEffectRoot, withFlushedEffectRoot } from "../helpers/effect-root.svelte.js";
+import { modelFor } from "../helpers/model.js";
+import { reactiveBox } from "../helpers/reactive-box.svelte.js";
 
 const continuousRows = [
   { id: "a", x: 1, y: 1 },

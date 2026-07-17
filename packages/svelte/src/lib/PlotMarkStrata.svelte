@@ -17,7 +17,7 @@
     paintCanvasStratum,
     resolveBatchFocusMasks,
   } from "./plot-stratum-paint.js";
-  import PlotCanvasA11y from "./PlotCanvasA11y.svelte";
+  import CanvasA11y from "./a11y/CanvasA11y.svelte";
   import SceneView from "./SceneView.svelte";
 
   const {
@@ -91,7 +91,7 @@
         class="gg-stratum gg-canvas"
         {@attach canvasAttachment(model, stratum.batches, `canvas:${si}`)}
       ></canvas>
-      <PlotCanvasA11y
+      <CanvasA11y
         {model}
         batches={stratum.batches}
         sceneLabelText={sceneLabel(model.scene)}

@@ -25,7 +25,7 @@ import type {
   PlotSelection,
   ResolvedInteractionConfig,
 } from "./interaction.js";
-import { selectionAnnouncement } from "./plot-labels.js";
+import { selectionAnnouncement } from "./assembly/labels.js";
 import {
   anchorsFromCandidateKeys,
   buildPointSelectionEvent,

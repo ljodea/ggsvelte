@@ -7,7 +7,7 @@ import type {
   LegendFocusEvent,
   PlotInspectionChange,
   PointSelection,
-} from "../src/lib/interaction.js";
+} from "../../src/lib/interaction.js";
 import {
   BRUSH_SECOND_CORNER_ANNOUNCEMENT,
   countLabel,
@@ -18,7 +18,7 @@ import {
   resolveInteractionLiveText,
   selectionAnnouncement,
   zoomAnnouncement,
-} from "../src/lib/plot-labels.js";
+} from "../../src/lib/assembly/labels.js";
 
 function model(opts: {
   layerFields?: { field: string }[][];

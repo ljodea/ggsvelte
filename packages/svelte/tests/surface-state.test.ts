@@ -19,7 +19,7 @@ import { normalizeInteractionConfig } from "../src/lib/interaction.js";
 import { createPlotInteraction } from "../src/lib/interaction-controller.svelte.js";
 import { createInspectionState, type InspectionState } from "../src/lib/inspection-state.svelte.js";
 import { createIntervalState, type IntervalState } from "../src/lib/interval-state.svelte.js";
-import { BRUSH_SECOND_CORNER_ANNOUNCEMENT } from "../src/lib/plot-labels.js";
+import { BRUSH_SECOND_CORNER_ANNOUNCEMENT } from "../src/lib/assembly/labels.js";
 import { hitFromCandidate } from "../src/lib/plot-pointer.js";
 import type { QueuedPointerInspection } from "../src/lib/plot-surface-inspection-frame.js";
 import { TOUCH_INSPECT_CLICK_SUPPRESS_MS } from "../src/lib/plot-surface-pointer.js";

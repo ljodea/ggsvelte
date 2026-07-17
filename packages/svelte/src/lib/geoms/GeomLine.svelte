@@ -5,7 +5,7 @@
    */
   import type { AesInput, LineParams } from "@ggsvelte/spec";
 
-  import { createGeomLayer } from "./geom-factory.svelte.js";
+  import { createGeomLayer } from "./factory.svelte.js";
 
   interface Props extends LineParams {
     /** Layer-level aes (bare-string shorthand allowed); merges over plot aes. */
