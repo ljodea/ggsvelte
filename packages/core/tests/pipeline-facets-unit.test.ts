@@ -267,4 +267,32 @@ describe("resolveFacet — O(n) partition (issue #183)", () => {
     expect(byLabel["a / 2"]).toEqual([]);
     expect(byLabel["b / 1"]).toEqual([]);
   });
+
+  it("grid rows-only partitions by row field in ascending table order", () => {
+    const t = ColumnTable.fromRows([
+      { r: "b", x: 1 },
+      { r: "a", x: 2 },
+      { r: "b", x: 3 },
+    ]);
+    const layout = resolveFacet({ rows: { field: "r" } }, t);
+    expect(layout.nrow).toBe(2);
+    expect(layout.ncol).toBe(1);
+    expect(layout.panels.map((p) => p.label)).toEqual(["a", "b"]);
+    expect(layout.panels[0]!.sourceRows).toEqual([1]);
+    expect(layout.panels[1]!.sourceRows).toEqual([0, 2]);
+  });
+
+  it("grid cols-only partitions by col field in ascending table order", () => {
+    const t = ColumnTable.fromRows([
+      { c: "2", x: 1 },
+      { c: "1", x: 2 },
+      { c: "2", x: 3 },
+    ]);
+    const layout = resolveFacet({ cols: { field: "c" } }, t);
+    expect(layout.nrow).toBe(1);
+    expect(layout.ncol).toBe(2);
+    expect(layout.panels.map((p) => p.label)).toEqual(["1", "2"]);
+    expect(layout.panels[0]!.sourceRows).toEqual([1]);
+    expect(layout.panels[1]!.sourceRows).toEqual([0, 2]);
+  });
 });
