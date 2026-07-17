@@ -18,7 +18,7 @@ export type {
   LegendFilterEvent,
   LegendFilterInput,
   LegendFilterOptions,
-} from "./legend-filter.js";
+} from "./legend/filter.js";
 export { createPlotInteraction } from "./interaction/controller.svelte.js";
 export type {
   CreatePlotInteractionOptions,

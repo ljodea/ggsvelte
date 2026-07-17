@@ -5,7 +5,7 @@
    * class names); the gradient id uses $props.id() so several plots on one
    * page never collide.
    *
-   * Legend interaction types live in plot-legend-focus.ts (pure helpers used
+   * Legend interaction types live in legend/focus.ts (pure helpers used
    * by GGPlot). This component only paints static SVG chrome.
    */
   import type { SceneLegend, ThemeTokens } from "@ggsvelte/core";

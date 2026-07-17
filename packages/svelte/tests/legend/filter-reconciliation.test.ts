@@ -1,9 +1,9 @@
 import { expect, test } from "vitest";
 
-import GGPlot from "../src/lib/GGPlot.svelte";
-import type { LegendFilterEvent } from "../src/lib/legend-filter.js";
-import { render } from "./helpers/render.js";
-import { until } from "./helpers/until.js";
+import GGPlot from "../../src/lib/GGPlot.svelte";
+import type { LegendFilterEvent } from "../../src/lib/legend/filter.js";
+import { render } from "../helpers/render.js";
+import { until } from "../helpers/until.js";
 
 test("disappeared filter values return visible while resetScales keeps active filters", async () => {
   let candidates = 0;

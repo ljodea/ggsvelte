@@ -27,6 +27,7 @@ describe("plot orchestrator lifecycle contract", () => {
       "const legendFilterState = createLegendFilterState(",
       "const runtime = createPlotRuntime(",
       "const semanticKeys = createSemanticKeyService(",
+      "const legendEntryKeys = createLegendEntryKeyIndex(",
       "const inspectionState = createInspectionState(",
       "const surfaceState = createSurfaceState(",
       "const selectionState = createSelectionState(",

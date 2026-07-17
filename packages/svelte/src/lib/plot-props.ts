@@ -36,7 +36,7 @@ import type {
   ZoomInput,
 } from "./interaction/interaction.js";
 import type { PlotInteractionController } from "./interaction/controller.svelte.js";
-import type { LegendFilterEvent, LegendFilterInput } from "./legend-filter.js";
+import type { LegendFilterEvent, LegendFilterInput } from "./legend/filter.js";
 
 type PublicKey<
   Row extends Record<string, CellValue>,

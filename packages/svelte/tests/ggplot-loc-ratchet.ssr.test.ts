@@ -15,7 +15,7 @@ const CEILINGS: readonly { readonly slice: string; readonly ceiling: number }[] 
   { slice: "s1-target", ceiling: 3400 },
   // Post-extraction ratchet: actual line count + 20 headroom.
   { slice: "s1-final", ceiling: 3390 },
-  // S2 legend-filter controller + PlotLegendFilters: actual 3025 + 20.
+  // S2 legend-filter controller + LegendFilters: actual 3025 + 20.
   { slice: "s2-final", ceiling: 3045 },
   // S3 legend-focus controller: actual 2668 + 20.
   { slice: "s3-final", ceiling: 2688 },

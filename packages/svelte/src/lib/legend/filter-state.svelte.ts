@@ -17,7 +17,7 @@ import {
   type LegendFilterClause,
   type LegendFilterEvent,
   type LegendFilterInput,
-} from "./legend-filter.js";
+} from "./filter.js";
 // ---------------------------------------------------------------------------
 // Public types
 // ---------------------------------------------------------------------------

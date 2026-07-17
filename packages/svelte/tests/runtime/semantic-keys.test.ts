@@ -5,9 +5,7 @@
 import { flushSync } from "svelte";
 import { describe, expect, it } from "vitest";
 
-import type { CellValue } from "@ggsvelte/core";
-import { runPipeline, type RenderModel } from "@ggsvelte/core";
-import { aes, gg } from "@ggsvelte/spec";
+import type { CellValue, RenderModel } from "@ggsvelte/core";
 
 import { INTERACTION_DIAGNOSTIC_CATALOG } from "../../src/lib/interaction/interaction.js";
 import {
@@ -20,6 +18,7 @@ import {
   type SemanticKeyModelView,
 } from "../../src/lib/runtime/semantic-keys.svelte.js";
 import { withEffectRoot, withFlushedEffectRoot } from "../helpers/effect-root.svelte.js";
+import { buildPointModel } from "../helpers/point-model.js";
 import { reactiveBox } from "../helpers/reactive-box.svelte.js";
 
 const rows = [
@@ -57,15 +56,6 @@ function modelView(options: {
 // ---------------------------------------------------------------------------
 // Pure helpers (from plot-semantic-keys.test.ts)
 // ---------------------------------------------------------------------------
-
-/** One point-geom model builder for the service tests (aes/size vary per case). */
-const defaultAes: Parameters<typeof aes>[0] = { x: "x", y: "y", color: "id" };
-const defaultSize = { width: 400, height: 300 };
-const buildPointModel = (
-  data: { id: string; x: number; y: number }[],
-  aesSpec: Parameters<typeof aes>[0] = defaultAes,
-  size: { width: number; height: number } = defaultSize,
-) => runPipeline(gg(data, aes(aesSpec)).geomPoint().spec(), size);
 
 describe("dataIdentityEpochToken", () => {
   it("returns no-data when assembled is null", () => {
@@ -451,6 +441,49 @@ describe("createSemanticKeyService", () => {
     destroy();
   });
 
+  it("keyAt re-resolves against a wholly new data token", () => {
+    // Restored from the pre-S16 access-contract test: a FULL dataset
+    // replacement (new data token) must re-resolve keys — a service that
+    // pins keys from the first token would keep answering with stale keys.
+    const dataA = [
+      { id: "a", x: 1, y: 10 },
+      { id: "b", x: 2, y: 20 },
+    ];
+    const dataB = [
+      { id: "c", x: 3, y: 30 },
+      { id: "d", x: 4, y: 40 },
+    ];
+    const dataBox = reactiveBox(dataA);
+    const model = reactiveBox(buildPointModel(dataA));
+    const tracker = createSourceIdentityTracker();
+
+    const { value: service, destroy } = withFlushedEffectRoot(() => {
+      const created = createSemanticKeyService({
+        model: () => model.value,
+        assembled: () => null,
+        datumKey: () => "id",
+        data: () => dataBox.value,
+        spec: () => null,
+        sourceIdentity: (value) => tracker.sourceIdentity(value),
+        deliverDiagnostic: () => {},
+      });
+      created.registerEffects();
+      return created;
+    });
+
+    expect([service.keyAt(0), service.keyAt(1)]).toEqual(["a", "b"]);
+
+    const previous = model.value;
+    dataBox.set(dataB);
+    model.set(buildPointModel(dataB));
+    flushSync();
+    expect([service.keyAt(0), service.keyAt(1)]).toEqual(["c", "d"]);
+
+    previous.dispose();
+    model.value.dispose();
+    destroy();
+  });
+
   it("delivers diagnostics once per change (behavior, not implementation)", () => {
     const duplicateRows = () => [
       { id: "a", x: 1, y: 1 },
@@ -528,72 +561,5 @@ describe("createSemanticKeyService", () => {
     expect(calls).toBe(0);
     destroy();
     model.dispose();
-  });
-
-  it("legendEntryKeyIndex getter and keysForLegend both re-resolve on model change", () => {
-    // ACCESS CONTRACT: legendEntryKeyIndex is a reactive getter (not a plain
-    // property snapshot). Mutating the model dep must refresh BOTH the getter
-    // and keysForLegend — a snapped Map would leave both paths stale.
-    const buildModel = buildPointModel;
-    const dataA = [
-      { id: "a", x: 1, y: 10 },
-      { id: "b", x: 2, y: 20 },
-    ];
-    const dataB = [
-      { id: "c", x: 3, y: 30 },
-      { id: "d", x: 4, y: 40 },
-    ];
-    const dataBox = reactiveBox(dataA);
-    const modelBox = reactiveBox(buildModel(dataBox.value));
-    const tracker = createSourceIdentityTracker();
-
-    const { value: service, destroy } = withFlushedEffectRoot(() => {
-      const created = createSemanticKeyService({
-        model: () => modelBox.value,
-        assembled: () => ({
-          data: dataBox.value,
-          layers: [{ geom: "point" }],
-          aes: { x: { field: "x" }, y: { field: "y" }, color: { field: "id" } },
-        }),
-        datumKey: () => "id",
-        data: () => dataBox.value,
-        spec: () => null,
-        sourceIdentity: (value) => tracker.sourceIdentity(value),
-        deliverDiagnostic: () => {},
-      });
-      created.registerEffects();
-      return created;
-    });
-
-    const action = {
-      identity: { scale: "color", entryIndex: 0 },
-      entry: { value: "a", label: "a" },
-      source: "keyboard" as const,
-    };
-    // Discrete color legend: entry 0 maps to first category's semantic key.
-    const indexBefore = service.legendEntryKeyIndex;
-    expect(indexBefore.size).toBeGreaterThan(0);
-    const keysBefore = service.keysForLegend(action);
-    expect(keysBefore).toEqual(["a"]);
-    // Snapshot identity of the Map itself — a plain property would pin this.
-    const mapRefBefore = indexBefore;
-
-    const previous = modelBox.value;
-    dataBox.set(dataB);
-    modelBox.set(buildModel(dataBox.value));
-    flushSync();
-
-    const indexAfter = service.legendEntryKeyIndex;
-    const keysAfter = service.keysForLegend(action);
-    // Getter must re-read the derived Map (not return a construction-time snap).
-    expect(indexAfter).not.toBe(mapRefBefore);
-    // Keys for entry 0 must follow the new model categories (c, not a).
-    expect(keysAfter).toEqual(["c"]);
-    expect(service.keyAt(0)).toBe("c");
-    expect(service.keyAt(1)).toBe("d");
-
-    previous.dispose();
-    modelBox.value.dispose();
-    destroy();
   });
 });
