@@ -35,6 +35,21 @@ describe("nextPointSelectionKeys", () => {
   it("deduplicates union results", () => {
     expect(nextPointSelectionKeys(["a", "a"], ["b", "b"], true)).toEqual(["a", "b"]);
   });
+
+  it("deselects with symbol keys by identity", () => {
+    const a = Symbol("a");
+    const b = Symbol("b");
+    expect(nextPointSelectionKeys([a, b], [a], true)).toEqual([b]);
+  });
+
+  // The all-selected deselect path is O(n) via Set membership (currentSet.has /
+  // toggledSet.has) rather than an includes-scan. This is a structural property
+  // of the implementation; perf-regression coverage lives in the bench-smoke
+  // job, not a wall-clock unit assertion (which flakes under CI contention).
+  it("deselects a fully-selected set via Set membership", () => {
+    const current = Array.from({ length: 1_000 }, (_, i) => i);
+    expect(nextPointSelectionKeys(current, current.slice(), true)).toEqual([]);
+  });
 });
 
 describe("iterateCandidates / collectCandidates", () => {
@@ -132,6 +147,33 @@ describe("uniqueKeysFromRowIndexes", () => {
 
   it("returns empty for empty input", () => {
     expect(uniqueKeysFromRowIndexes([], () => "x")).toEqual([]);
+  });
+
+  it("preserves first-seen order for symbol and number keys", () => {
+    const a = Symbol("a");
+    const b = Symbol("b");
+    const keyForRow = (rowIndex: number): PropertyKey | null => {
+      if (rowIndex === 0) return a;
+      if (rowIndex === 1) return 0;
+      if (rowIndex === 2) return b;
+      if (rowIndex === 3) return a;
+      if (rowIndex === 4) return 0;
+      return null;
+    };
+    expect(uniqueKeysFromRowIndexes([0, 1, 2, 3, 4, 5], keyForRow)).toEqual([a, 0, b]);
+  });
+
+  // Dedup uses Set membership (seen.has) rather than an includes-scan, so the
+  // all-unique worst case stays O(n). This is a structural property of the
+  // implementation; perf-regression coverage lives in the bench-smoke job, not
+  // a wall-clock unit assertion (which flakes under CI contention).
+  it("dedups an all-unique worst case in first-seen order", () => {
+    const n = 5_000;
+    const rows = Array.from({ length: n }, (_, i) => i);
+    const keys = uniqueKeysFromRowIndexes(rows, (i) => i);
+    expect(keys).toHaveLength(n);
+    expect(keys[0]).toBe(0);
+    expect(keys[n - 1]).toBe(n - 1);
   });
 });
 
