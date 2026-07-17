@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784310699628,
+  "lastUpdate": 1784311743246,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -19004,6 +19004,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 150.5452,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "38d03d693131e60e77bbccaab5a907f1c1aa9498",
+          "message": "refactor(svelte): S10 — dissolve alias scaffolding in GGPlot (#173)\n\n* chore(svelte): raise Svelte floor data to 5.33.1\n\n* chore(svelte): rewrite obsolete 5.29 eager-SSR comments\n\n* chore: changeset for Svelte floor bump\n\n* chore(svelte): make floor-bump comments and compat default fully truthful\n\nReview findings on the S9 comment rewrites: at the 5.33.1 lazy-derived\nfloor, an unreached construction-time \\$derived is no longer a crash\nhazard on any platform, so comments claiming the .ssr suites or\ncompat:consumer \"gate\" that case were stale, and the interval-state\nhazard note described a construction-time TDZ mechanism the floor bump\nremoved. Reworded to the live contract: armed-getter suites enforce\nconstruction-read discipline; only direct construction-time reads TDZ.\n\nAlso single-source the consumer-compat Svelte default from\nsupport-matrix.json (the floor now lives in one place) and replace the\nretired 5.29.0 pass-through fixture literal with 0.0.0-fixture.\n\nCo-Authored-By: Claude Fable 5 <noreply@anthropic.com>\n\n* refactor(svelte): inline controller reads, delete alias deriveds\n\n* refactor(svelte): delete extraction-era stage markers and stale scaffolding comments\n\n* test(svelte): append S10 ratchet ceiling\n\n* refactor(svelte): correct model-effects registration-order comment\n\nReview finding: the rewritten comment inverted the load-bearing order —\nlegend-reset effects register during legendFilterState construction,\nbefore registerModelEffects(), not after it.\n\nCo-Authored-By: Claude Fable 5 <noreply@anthropic.com>\n\n---------\n\nCo-authored-by: Claude Fable 5 <noreply@anthropic.com>",
+          "timestamp": "2026-07-17T13:08:21-05:00",
+          "tree_id": "e64a0344cb4f05944584f8a6f8ca026b09e8d0bc",
+          "url": "https://github.com/ljodea/ggsvelte/commit/38d03d693131e60e77bbccaab5a907f1c1aa9498"
+        },
+        "date": 1784311741756,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.3711,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.875,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 10.3377,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 13.5666,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 100.087,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 119.018,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.0853,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2657,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 85.9399,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 106.7079,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 15.5876,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 13.8586,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 110.3225,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7891,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 24.6445,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.3852,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 29.6851,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 591.9731,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 160.9728,
             "unit": "ms"
           }
         ]
