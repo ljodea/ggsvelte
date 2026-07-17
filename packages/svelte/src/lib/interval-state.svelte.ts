@@ -16,7 +16,8 @@
  * `effectiveIntervalKeys` reaches `candidateSemanticKeys` at construction ONLY
  * when a shared controller arrives pre-populated with non-union intervals AND
  * model is non-null — the base branch TDZs identically on Svelte 5.29 SSR via
- * the host alias at GGPlot.svelte:1205. This module preserves that behavior
+ * the host's `candidateSemanticKeys` alias (initialized with the semantic-key
+ * service, declared after the interval region). This module preserves that behavior
  * bit-for-bit via a deferred closure; do NOT "fix" by reordering the semantic
  * key service (that changes diagnostics effect order; candidate for S6/S7).
  */
@@ -480,7 +481,11 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
     // Snapshot once (drift-safe under reactive selectConfig replacement).
     const persistent = deps.selectConfig()?.persistent;
     committedInterval = persistentSelectionOrNull(persistent, eventValue);
-    if (persistent === true) commitIntervalSelection(eventValue, source);
+    // TRUTHY guard, exactly as the host's select-end branch — untyped JS
+    // consumers may pass truthy non-boolean `persistent` values, which the
+    // config normalizer forwards unchanged. `?? false` only maps nullish
+    // (already falsy) values, so runtime truthiness is identical.
+    if (persistent ?? false) commitIntervalSelection(eventValue, source);
   }
 
   function openBoundsEditor(

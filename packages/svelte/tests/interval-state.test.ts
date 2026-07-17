@@ -187,10 +187,13 @@ describe("createIntervalState construction", () => {
     let announceCalls = 0;
     let inspectionPanelCalls = 0;
     let candidateSemanticKeysCalls = 0;
+    // One stable model, as the host getter supplies (a fresh pipeline run per
+    // read is not production-shaped and would defeat identity assertions).
+    const constructionModel = modelFor(continuousSpec());
 
     const { value: state, destroy } = withEffectRoot(() =>
       createIntervalState({
-        model: () => modelFor(continuousSpec()),
+        model: () => constructionModel,
         interaction: noController,
         resolvedInteractionScope: () => defaultScope,
         selectConfig: persistentSelect,
@@ -359,6 +362,66 @@ describe("createIntervalState controller mode", () => {
 
     destroy();
   });
+
+  it("module clear paths write through the controller with the right scope and panel", () => {
+    const model = modelFor(facetSpec());
+    const north = model.scene.panels[0];
+    const south = model.scene.panels[1];
+    if (north === undefined || south === undefined) {
+      throw new Error("expected two facet panels");
+    }
+    const controller = createPlotInteraction();
+    const events: PlotSelection[] = [];
+
+    const { state, destroy } = mountIntervalController({
+      model: () => model,
+      interaction: () => controller,
+      selectConfig: persistentSelect,
+      emitSelection: (event) => {
+        events.push(event);
+      },
+    });
+
+    state.applyBrushSelectEnd(
+      brushEvent(model, {
+        panelId: north.id,
+        domain: { x: [0.5, 1.5], y: [0.5, 1.5] },
+        keys: ["n"],
+      }),
+      "pointer",
+    );
+    state.applyBrushSelectEnd(
+      brushEvent(model, {
+        panelId: south.id,
+        domain: { x: [1.5, 2.5], y: [1.5, 2.5] },
+        keys: ["s"],
+      }),
+      "pointer",
+    );
+    flushSync();
+    expect(controller.intervals(defaultScope)).toHaveLength(2);
+
+    // clearCurrentPanelInterval → interaction.clearInterval(panelId): only
+    // the current (south) record leaves the shared controller.
+    events.length = 0;
+    state.clearCurrentPanelInterval("pointer");
+    flushSync();
+    expect(controller.intervals(defaultScope)).toHaveLength(1);
+    expect(controller.intervals(defaultScope)[0]?.panelId).toBe(north.id);
+    expect(events).toHaveLength(1);
+    expect(events[0]?.panelId).toBe(south.id);
+
+    // clearIntervalSelection → interaction.clearIntervals(scope): all gone.
+    events.length = 0;
+    state.clearIntervalSelection("keyboard");
+    flushSync();
+    expect(controller.intervals(defaultScope)).toEqual([]);
+    expect(state.effectiveIntervals).toEqual([]);
+    expect(events).toHaveLength(1);
+    expect(events[0]?.phase).toBe("clear");
+
+    destroy();
+  });
 });
 
 describe("createIntervalState clearCurrentPanelInterval", () => {
@@ -375,6 +438,11 @@ describe("createIntervalState clearCurrentPanelInterval", () => {
       model: () => model,
       selectConfig: persistentSelect,
       emitSelection: (event) => {
+        // Write-before-emit (host order: null committed state, THEN emit) —
+        // the sink must observe the already-cleared committed rect.
+        if (event.phase === "clear") {
+          expect(state.committedInterval).toBeNull();
+        }
         events.push(event);
       },
     });
@@ -420,6 +488,48 @@ describe("createIntervalState clearCurrentPanelInterval", () => {
     flushSync();
     expect(events).toEqual([]);
     expect(state.effectiveIntervals).toEqual([]);
+
+    destroy();
+  });
+});
+
+describe("createIntervalState interval target availability", () => {
+  it("panel loss flips intervalBoundsTargetAvailable false and labels the target unavailable", () => {
+    const facetModel = modelFor(facetSpec());
+    const north = facetModel.scene.panels[0];
+    if (north === undefined) throw new Error("expected facet panel");
+    const swappedModel = modelFor(continuousSpec());
+    // Precondition for the swap below: the replacement model must not reuse
+    // the facet panel's id, or the lookup would still succeed.
+    expect(swappedModel.scene.panels[0]?.id).not.toBe(north.id);
+    const modelBox = reactiveBox<RenderModel | null>(facetModel);
+
+    const { state, destroy } = mountIntervalController({
+      model: () => modelBox.value,
+      selectConfig: persistentSelect,
+    });
+
+    state.applyBrushSelectEnd(
+      brushEvent(facetModel, {
+        panelId: north.id,
+        domain: { x: [0.5, 1.5], y: [0.5, 1.5] },
+        keys: ["north"],
+      }),
+      "pointer",
+    );
+    flushSync();
+    // Record present and its panel exists → target available, facet label.
+    expect(state.intervalBoundsTargetAvailable).toBe(true);
+    expect(state.currentIntervalTargetLabel).toContain("North");
+
+    // Swap to a model without that panel: the LOCAL record survives (records
+    // are model-independent), but the panel lookup now fails — ToolRail must
+    // see the precise-bounds target as unavailable.
+    modelBox.set(swappedModel);
+    flushSync();
+    expect(state.effectiveIntervals).toHaveLength(1);
+    expect(state.intervalBoundsTargetAvailable).toBe(false);
+    expect(state.currentIntervalTargetLabel).toBe("unavailable panel");
 
     destroy();
   });
