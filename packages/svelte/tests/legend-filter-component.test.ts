@@ -94,6 +94,18 @@ describe("explicit legend filtering", () => {
     });
   });
 
+  it("uses tooltip colors for filter controls when the plot ink is light", async () => {
+    const { container } = render(LegendFilterPlot);
+    container.style.setProperty("--gg-ink", "#e6e8eb");
+    container.style.setProperty("--gg-tooltipPaper", "#ffffff");
+    container.style.setProperty("--gg-tooltipInk", "#262626");
+    await until(() => container.querySelector(".gg-legend-filters label") !== null);
+
+    const label = container.querySelector<HTMLElement>(".gg-legend-filters label")!;
+    expect(getComputedStyle(label).color).toBe("rgb(38, 38, 38)");
+    expect(getComputedStyle(label).backgroundColor).toBe("rgb(255, 255, 255)");
+  });
+
   it("resets old clauses when the controlled filter mode changes", async () => {
     const view = render(LegendFilterPlot, { mode: "exclude" });
     await until(() => view.container.querySelectorAll(".gg-legend-filters input").length === 2);
