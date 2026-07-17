@@ -74,6 +74,7 @@ import {
   type FilterableLegendEntry,
   type LegendFilterState,
 } from "./legend/filter-state.svelte.js";
+import { createLegendEntryKeyIndex } from "./legend/entry-key-index.svelte.js";
 import { createLegendFocusState, type LegendFocusState } from "./legend/focus-state.svelte.js";
 import { createPlotZoomState, type PlotZoomState } from "./zoom/zoom-state.svelte.js";
 import { createIntervalState, type IntervalState } from "./interval/interval-state.svelte.js";
@@ -369,6 +370,14 @@ export function createPlotOrchestrator<
   const candidateSemanticKeys: SemanticKeyService["candidateSemanticKeys"] = (...args) =>
     semanticKeys.candidateSemanticKeys(...args);
 
+  // Legend entry → key index (lifted from semantic-keys in S16). Same relative
+  // construction position as the derived it replaces — after semanticKeys,
+  // before inspection — so the construction-order DAG is unchanged.
+  const legendEntryKeys = createLegendEntryKeyIndex({
+    model: () => runtime.model,
+    keyAt: (i) => semanticKeys.keyAt(i),
+  });
+
   // ---------------------------------------------------------- interaction
   // source rows/spec -> pipeline/scene -> hit index -> semantic resolver ->
   // chart-local reducer -> tooltip/crosshair/tools/callbacks. Presentation
@@ -494,7 +503,7 @@ export function createPlotOrchestrator<
     legendFocusEnabled: () => legendFocusEnabled,
     legendFocusPreviewEnabled: () => interactionConfig.legendFocus?.preview === true,
     root: inputs.root,
-    semanticKeys: () => semanticKeys,
+    entryKeys: () => legendEntryKeys,
     entries: () => interactiveLegendEntries,
     // Deferred read of the later-declared cached derived (handlers only).
     pressed: () => effectiveLegendPressed,

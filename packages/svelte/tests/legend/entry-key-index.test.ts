@@ -1,12 +1,9 @@
 /**
- * Red-first spec for the legend entry-key-index service (S16).
+ * Spec for the legend entry-key-index service (S16).
  *
- * Import targets the not-yet-existing factory module. Commit 2 is intentionally
- * RED (module not found); commit 3 lands the implementation and turns this GREEN.
- *
- * Approach: commit 2 does not pass svelte-check — the red import is test-only
- * and both vitest and check fail until the module exists. No @ts-expect-error
- * workaround; the red-run capture documents the expected failure.
+ * Red-first in commit 2 (module missing → vitest/check fail); GREEN once
+ * legend/entry-key-index.svelte.ts lands. Pins the S13 access contract:
+ * reactive legendEntryKeyIndex getter + keysForLegend re-resolve on model change.
  */
 import { flushSync } from "svelte";
 import { describe, expect, it } from "vitest";
