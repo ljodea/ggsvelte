@@ -126,4 +126,22 @@ describe("CanvasA11y", () => {
       `First ${String(A11Y_TABLE_CAP)} of ${String(A11Y_TABLE_CAP + 10)} rows.`,
     );
   });
+
+  it("opens an empty table without a truncation note when there are no canvas rows", async () => {
+    const emptyModel = model({ layerFields: { 0: [{ field: "x" }] }, rows: {} });
+    const { container } = render(CanvasA11y, {
+      model: emptyModel,
+      batches: [batch({ layerIndex: 0, rowIndex: [] })],
+      sceneLabelText: "Empty",
+      open: true,
+      onToggle: () => {},
+    });
+    await until(() => container.querySelector(".gg-a11y-table") !== null);
+    const table = container.querySelector(".gg-a11y-table");
+    expect(table?.querySelectorAll("tbody tr")).toHaveLength(0);
+    expect(table?.querySelector("p")).toBeNull();
+    expect(container.querySelector(".gg-canvas-a11y")?.getAttribute("aria-label")).toBe(
+      "Empty — 0 canvas-rendered marks. Canvas marks are not individually focusable; use the data table.",
+    );
+  });
 });

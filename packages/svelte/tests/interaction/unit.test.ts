@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { runPipeline } from "@ggsvelte/core";
+import { runPipeline, type CandidateFacts, type RenderModel } from "@ggsvelte/core";
 import { aes, gg } from "@ggsvelte/spec";
 
 import {
@@ -25,6 +25,15 @@ const candidate = (id: number): InteractionCandidateRef => ({
   x: 10 + id,
   y: 20 + id,
 });
+
+function sameKindBatchOrdinal(model: RenderModel, seed: CandidateFacts): number {
+  return (
+    model.scene.batches
+      .slice(0, seed.batchIndex + 1)
+      .filter((batch) => batch.layerIndex === seed.layerIndex && batch.kind === seed.kind).length -
+    1
+  );
+}
 
 describe("isAreaTool", () => {
   it("is true only for select-area and zoom-area", () => {
@@ -142,7 +151,10 @@ describe("interaction capability normalization", () => {
 
   it("catalogues every emitted diagnostic", () => {
     const result = normalizeInteractionConfig(
-      { select: { type: "interval", mode: "xy" }, zoom: { mode: "xy", trigger: "brush" } },
+      {
+        select: { type: "interval", mode: "xy" },
+        zoom: { mode: "xy", trigger: "brush" },
+      },
       { faceted: true },
     );
     for (const diagnostic of result.diagnostics) {
@@ -159,14 +171,26 @@ describe("chart-local interaction reducer", () => {
         onChange();
       },
     });
-    reducer.dispatch({ type: "inspect", candidate: candidate(1), source: "pointer" });
-    reducer.dispatch({ type: "inspect", candidate: candidate(1), source: "pointer" });
+    reducer.dispatch({
+      type: "inspect",
+      candidate: candidate(1),
+      source: "pointer",
+    });
+    reducer.dispatch({
+      type: "inspect",
+      candidate: candidate(1),
+      source: "pointer",
+    });
     expect(onChange).toHaveBeenCalledTimes(1);
     expect(reducer.state.inspection.kind).toBe("transient");
 
     reducer.dispatch({ type: "toggle-pin", source: "pointer" });
     expect(reducer.state.inspection.kind).toBe("pinned");
-    reducer.dispatch({ type: "inspect", candidate: candidate(2), source: "pointer" });
+    reducer.dispatch({
+      type: "inspect",
+      candidate: candidate(2),
+      source: "pointer",
+    });
     expect(reducer.state.inspection.candidate?.id).toBe(1);
     reducer.dispatch({ type: "escape", source: "keyboard" });
     expect(reducer.state.inspection.kind).toBe("idle");
@@ -175,9 +199,16 @@ describe("chart-local interaction reducer", () => {
   it("keeps Select area and Zoom area mutually exclusive", () => {
     const reducer = createInteractionReducer();
     reducer.dispatch({ type: "set-tool", tool: "select-area" });
-    reducer.dispatch({ type: "begin-area", point: { x: 10, y: 10 }, panelId: "panel:all" });
+    reducer.dispatch({
+      type: "begin-area",
+      point: { x: 10, y: 10 },
+      panelId: "panel:all",
+    });
     reducer.dispatch({ type: "move-area", point: { x: 40, y: 50 } });
-    expect(reducer.state.area).toMatchObject({ kind: "dragging", tool: "select-area" });
+    expect(reducer.state.area).toMatchObject({
+      kind: "dragging",
+      tool: "select-area",
+    });
 
     reducer.dispatch({ type: "set-tool", tool: "zoom-area" });
     expect(reducer.state.area.kind).toBe("idle");
@@ -210,14 +241,26 @@ describe("chart-local interaction reducer", () => {
         changes.push(state.revision);
       },
     });
-    reducer.queuePointer({ type: "inspect", candidate: candidate(1), source: "pointer" });
-    reducer.queuePointer({ type: "inspect", candidate: candidate(2), source: "pointer" });
+    reducer.queuePointer({
+      type: "inspect",
+      candidate: candidate(1),
+      source: "pointer",
+    });
+    reducer.queuePointer({
+      type: "inspect",
+      candidate: candidate(2),
+      source: "pointer",
+    });
     expect(changes).toHaveLength(0);
     (frame as (() => void) | null)?.();
     expect(reducer.state.inspection.candidate?.id).toBe(2);
     expect(changes).toHaveLength(1);
 
-    reducer.queuePointer({ type: "inspect", candidate: candidate(3), source: "pointer" });
+    reducer.queuePointer({
+      type: "inspect",
+      candidate: candidate(3),
+      source: "pointer",
+    });
     reducer.dispatch({ type: "set-tool", tool: "zoom-area" });
     expect(frame).toBeNull();
     expect(reducer.state.inspection.candidate?.id).toBe(2);
@@ -505,12 +548,6 @@ describe("semantic inspection resolver", () => {
       );
       expect(collidingSeeds.length).toBeGreaterThanOrEqual(2);
 
-      const batchRole = (model: typeof first, seed: (typeof collidingSeeds)[number]) =>
-        model.scene.batches
-          .slice(0, seed.batchIndex + 1)
-          .filter((batch) => batch.layerIndex === seed.layerIndex && batch.kind === seed.kind)
-          .length - 1;
-
       for (const seed of collidingSeeds) {
         const coordinator = createInspectionCoordinator(() => null);
         coordinator.resolve({
@@ -528,10 +565,164 @@ describe("semantic inspection resolver", () => {
           layoutEpoch: resized.runId,
         });
         expect(reconciled).not.toBeNull();
-        expect(batchRole(resized, reconciled!.seed)).toBe(batchRole(first, seed));
+        expect(sameKindBatchOrdinal(resized, reconciled!.seed)).toBe(
+          sameKindBatchOrdinal(first, seed),
+        );
       }
       first.dispose();
       resized.dispose();
     }
+  });
+
+  it("fingerprints null/Date/-0 cells and symbol keys in coordinated snapshots", () => {
+    const data = [
+      { id: "a", x: 1, y: 2 },
+      { id: "b", x: 1, y: 3 },
+    ];
+    const model = runPipeline(
+      gg(data, aes({ x: "x", y: "y", color: "id" }))
+        .geomPoint()
+        .spec(),
+      { width: 400, height: 300 },
+    );
+    // Inject cell shapes cellToken handles specially (null / Date / -0) without
+    // going through PortableSpec validation, which rejects Date/null payloads.
+    const originalRow = model.row.bind(model);
+    vi.spyOn(model, "row").mockImplementation((index: number) => {
+      const base = originalRow(index);
+      if (base === null) return null;
+      return {
+        ...base,
+        note: index === 0 ? null : "ok",
+        when: new Date("2020-01-01T00:00:00Z"),
+        y: index === 1 ? -0 : base["y"],
+      };
+    });
+    const symbols = new Map<string, symbol>([
+      ["a", Symbol("a")],
+      ["b", Symbol("b")],
+    ]);
+    const coordinator = createInspectionCoordinator((row) => {
+      const id = String(row.id);
+      return symbols.get(id) ?? null;
+    });
+    const epoch = Symbol("layout");
+    const resolved = coordinator.resolve({
+      model,
+      seed: model.candidates.candidate(0)!,
+      mode: "x",
+      state: "transient",
+      source: "pointer",
+      identityEpoch: 1,
+      layoutEpoch: epoch,
+    });
+    expect(resolved).not.toBeNull();
+    expect(resolved!.snapshot.members.length).toBeGreaterThanOrEqual(1);
+    // Symbol keys must stay distinct across the same string identity.
+    expect([...new Set(resolved!.semanticFingerprint.match(/symbol:\d+/g) ?? [])]).toEqual([
+      "symbol:0",
+      "symbol:1",
+    ]);
+    // null/Date/-0 all contribute typed cell tokens to the fingerprint payload.
+    expect(resolved!.semanticFingerprint).toContain("note=null");
+    expect(resolved!.semanticFingerprint).toContain("when=date:1577836800000");
+    expect(resolved!.semanticFingerprint).toContain("y=number:0");
+    // Re-resolve with the same symbol layout epoch must hit the memo slot.
+    expect(
+      coordinator.resolve({
+        model,
+        seed: model.candidates.candidate(0)!,
+        mode: "x",
+        state: "transient",
+        source: "pointer",
+        identityEpoch: 1,
+        layoutEpoch: epoch,
+      }),
+    ).toBe(resolved);
+    model.dispose();
+  });
+
+  it("falls back to a single-member snapshot when axis grouping has no bucket", () => {
+    const model = runPipeline(
+      gg([{ id: "a", x: 1, y: 2 }], aes({ x: "x", y: "y" }))
+        .geomPoint()
+        .spec(),
+      { width: 300, height: 200 },
+    );
+    const seed = model.candidates.candidate(0)!;
+    // group() owns bucket validity; force a null group so resolveInspection's
+    // total fallback materializes a single-member axis snapshot.
+    vi.spyOn(model.candidates, "group").mockReturnValue(null);
+    const inspection = resolveInspection({
+      model,
+      seed: { ...seed, xValue: null, yValue: null },
+      mode: "x",
+      state: "pinned",
+      source: "keyboard",
+      keyOf: (row) => row.id as string,
+    });
+    expect(inspection.mode).toBe("x");
+    expect(inspection.members).toHaveLength(1);
+    expect(inspection.focus.key).toBe("a");
+    expect(inspection.axisValue).toBeNull();
+    expect(inspection.axisLabel).toBe("–");
+    model.dispose();
+  });
+
+  it("returns null from reconcilePinned when no pin is active", () => {
+    const model = runPipeline(
+      gg([{ id: "a", x: 1, y: 2 }], aes({ x: "x", y: "y" }))
+        .geomPoint()
+        .spec(),
+      { width: 300, height: 200 },
+    );
+    const coordinator = createInspectionCoordinator((row) => row.id as string);
+    expect(
+      coordinator.reconcilePinned({
+        model,
+        identityEpoch: 1,
+        layoutEpoch: 1,
+      }),
+    ).toBeNull();
+    model.dispose();
+  });
+
+  it("disambiguates multi-match pins that share one source row via batch role", () => {
+    const smoothSpec = gg(
+      [
+        { x: 0, y: 1 },
+        { x: 1, y: 3 },
+        { x: 2, y: 5 },
+      ],
+      aes({ x: "x", y: "y" }),
+    )
+      .geomSmooth({ method: "lm" })
+      .spec();
+    const first = runPipeline(smoothSpec, { width: 400, height: 300 });
+    const resized = runPipeline(smoothSpec, { width: 700, height: 300 });
+    // Keyed coordinator with a constant key so every candidate maps to the same key —
+    // reconcile then uses seedKind/batchRole/primitiveIndex to pick one match.
+    const coordinator = createInspectionCoordinator(() => "smooth");
+    const seed = first.candidates.candidate(0)!;
+    coordinator.resolve({
+      model: first,
+      seed,
+      mode: "exact",
+      state: "pinned",
+      source: "pointer",
+      identityEpoch: "same-data",
+      layoutEpoch: first.runId,
+    });
+    const reconciled = coordinator.reconcilePinned({
+      model: resized,
+      identityEpoch: "same-data",
+      layoutEpoch: resized.runId,
+    });
+    expect(reconciled).not.toBeNull();
+    expect(reconciled!.seed.kind).toBe(seed.kind);
+    expect(reconciled!.seed.primitiveIndex).toBe(seed.primitiveIndex);
+    expect(sameKindBatchOrdinal(resized, reconciled!.seed)).toBe(sameKindBatchOrdinal(first, seed));
+    first.dispose();
+    resized.dispose();
   });
 });

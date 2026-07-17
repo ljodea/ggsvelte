@@ -67,4 +67,15 @@ describe("static Legend", () => {
     ).toEqual(["10", "0"]);
     expect(container.querySelector("foreignObject, button")).toBeNull();
   });
+
+  it("omits the title node and pins the ramp at y=0 when title is empty", () => {
+    const untitled = { ...ramp, title: "" } satisfies SceneLegend;
+    const { container } = render(LegendHarness, { legend: untitled, theme });
+    expect(container.querySelector(".gg-legend-title")).toBeNull();
+    const bar = container.querySelector(".gg-legend-ramp");
+    expect(bar?.getAttribute("y")).toBe("0");
+    // Tick labels are placed relative to rampTop=0 (not the titled offset of 18).
+    const labels = [...container.querySelectorAll(".gg-legend-label")];
+    expect(labels.map((label) => label.getAttribute("y"))).toEqual(["0", "80"]);
+  });
 });

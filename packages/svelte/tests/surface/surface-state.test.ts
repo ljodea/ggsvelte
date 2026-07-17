@@ -648,6 +648,17 @@ describe("createSurfaceState tool cycle", () => {
     h.destroy();
   });
 
+  it("ignores chooseTool for tools not in availableTools", () => {
+    // Default harness enables inspect + interval + zoom — not point selection.
+    const h = mountSurfaceComposite({ registerEffects: false });
+    expect(h.surface.activeTool).toBe("inspect");
+    h.surface.chooseTool("point");
+    flushSync();
+    expect(h.surface.activeTool).toBe("inspect");
+    expect(h.toolChanges).toEqual([]);
+    h.destroy();
+  });
+
   it("tool-sync effect resolves initial tool into the reducer", () => {
     const config = normalizeInteractionConfig({
       inspect: { pin: true },
@@ -1280,6 +1291,75 @@ describe("createSurfaceState pointer cancel vs lost capture", () => {
       y: second.y,
     });
 
+    h.destroy();
+  });
+
+  it("lost capture while idle is a no-op (ignore branch)", () => {
+    const h = mountSurfaceComposite({ registerEffects: false });
+    expect(h.surface.reducer.state.area.kind).toBe("idle");
+    expect(h.surface.brushRect).toBeNull();
+    h.surface.onLostPointerCapture();
+    flushSync();
+    expect(h.surface.reducer.state.area.kind).toBe("idle");
+    expect(h.surface.brushRect).toBeNull();
+    h.destroy();
+  });
+
+  it("non-primary pointerdown and non-inspect move take the none action paths", () => {
+    const h = mountSurfaceComposite({ registerEffects: false });
+    h.surface.chooseTool("select-area");
+    flushSync();
+    const start = panelCenterClient(h.model);
+
+    // Right-click must not begin a brush.
+    h.surface.onPointerDown(
+      pointerEvent("pointerdown", h.capture, {
+        clientX: start.x,
+        clientY: start.y,
+        button: 2,
+      }),
+    );
+    flushSync();
+    expect(h.surface.brushRect).toBeNull();
+    expect(h.surface.reducer.state.area.kind).toBe("idle");
+
+    // Move while select-area (not brushing) queues nothing.
+    h.surface.onPointerMove(
+      pointerEvent("pointermove", h.capture, {
+        clientX: start.x + 5,
+        clientY: start.y + 5,
+      }),
+    );
+    suitePump.flush();
+    flushSync();
+    expect(h.surface.brushRect).toBeNull();
+    expect(h.inspection.inspection).toBeNull();
+    h.destroy();
+  });
+
+  it("capture click on point tool with no nearby candidate is a no-op", () => {
+    const config = normalizeInteractionConfig({
+      inspect: true,
+      select: { type: "point" },
+    });
+    const h = mountSurfaceComposite({
+      interactionConfig: config,
+      registerEffects: false,
+    });
+    h.surface.chooseTool("point");
+    flushSync();
+    expect(h.surface.activeTool).toBe("point");
+    // Far outside the plot — nearest lookup must miss.
+    const click = new MouseEvent("click", {
+      bubbles: true,
+      cancelable: true,
+      clientX: -1000,
+      clientY: -1000,
+    });
+    Object.defineProperty(click, "currentTarget", { value: h.capture, configurable: true });
+    h.surface.onCaptureClick(click);
+    flushSync();
+    expect(h.toggleCalls).toEqual([]);
     h.destroy();
   });
 });

@@ -10,14 +10,18 @@
   const {
     batch,
     theme,
-    focusMask,
+    focusMask = null,
+    focusable = false,
+    markLabel,
   }: {
     batch: GeometryBatch;
     theme: ThemeTokens;
-    focusMask: BatchInteractionMask;
+    focusMask?: BatchInteractionMask | null;
+    focusable?: boolean;
+    markLabel?: (row: number) => string;
   } = $props();
 </script>
 
 <svg width="100" height="100">
-  <Batch {batch} {theme} {focusMask} />
+  <Batch {batch} {theme} {focusMask} {focusable} {markLabel} />
 </svg>
