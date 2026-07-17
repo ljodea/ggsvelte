@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784325562024,
+  "lastUpdate": 1784326191871,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -19718,6 +19718,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 159.7352,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "32cf20e1607e5dfda7bc131faa7c85e46513cc29",
+          "message": "refactor(svelte): S16 — legend/ directory; entry-key-index ownership (#180)\n\n* refactor(svelte): move legend/ into a feature directory\n\nCo-locate legend focus, filter, surface, and component modules under\nlegend/ with short feature-local names. Rewrite importers and mirror\ntests under tests/legend/. Public legend-filter export names unchanged.\n\n* test(svelte): red-first spec for legend entry-key-index service\n\nPins the createLegendEntryKeyIndex factory contract before the module\nexists: discrete-legend index Map, keysForLegend resolution, reactive\nre-resolve on model change (S13 access contract), and empty/null model.\n\n* refactor(svelte): move legend entry-key index out of semantic-keys\n\nLift the reactive entry→key index into legend/entry-key-index.svelte.ts,\nwire it from the orchestrator after semanticKeys, and rename focus-state\ndeps to entryKeys. runtime/semantic-keys no longer imports legend modules.\n\n* test(svelte): harden entry-key-index spec; restore keyAt data-token coverage\n\nReview findings: the new spec's keyAt stub mutated in lockstep with the\nmodel swap, so the keyAt reactive channel was never exercised — keyAt now\nlives in a reactive box with a keyAt-ONLY re-resolution assertion (model\nheld constant). The migration had also dropped the real-service\nkeyAt-after-full-data-replacement assertions — restored as a dedicated\nsemantic-keys test. Point-model builder deduplicated into\ntests/helpers/point-model.ts; stale RED-phase comments removed;\ntests/legend/legend-targets.test.ts → targets.test.ts for naming\nconsistency.\n\nCo-Authored-By: Claude Fable 5 <noreply@anthropic.com>\n\n* test(svelte): refresh legend test references\n\n---------\n\nCo-authored-by: Claude Fable 5 <noreply@anthropic.com>",
+          "timestamp": "2026-07-17T17:09:15-05:00",
+          "tree_id": "7bc94df3e6d2d8c3f25e79768add120918cfa5d5",
+          "url": "https://github.com/ljodea/ggsvelte/commit/32cf20e1607e5dfda7bc131faa7c85e46513cc29"
+        },
+        "date": 1784326191298,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.3789,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 4.3733,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 11.5461,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 17.6421,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 85.6427,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 116.3114,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.0295,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2306,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 84.9318,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 107.9251,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.4922,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.2929,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 109.7249,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.8202,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 26.2325,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.401,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 28.5792,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 628.2205,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 170.3093,
             "unit": "ms"
           }
         ]
