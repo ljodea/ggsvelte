@@ -70,6 +70,15 @@ function modelView(options: {
 // Pure helpers (from plot-semantic-keys.test.ts)
 // ---------------------------------------------------------------------------
 
+/** One point-geom model builder for the service tests (aes/size vary per case). */
+const defaultAes: Parameters<typeof aes>[0] = { x: "x", y: "y", color: "id" };
+const defaultSize = { width: 400, height: 300 };
+const buildPointModel = (
+  data: { id: string; x: number; y: number }[],
+  aesSpec: Parameters<typeof aes>[0] = defaultAes,
+  size: { width: number; height: number } = defaultSize,
+) => runPipeline(gg(data, aes(aesSpec)).geomPoint().spec(), size);
+
 describe("dataIdentityEpochToken", () => {
   it("returns no-data when assembled is null", () => {
     expect(
@@ -400,13 +409,7 @@ describe("createSemanticKeyService", () => {
       { id: "a", x: 1, y: 10 },
       { id: "b", x: 2, y: 20 },
     ];
-    const buildModel = () =>
-      runPipeline(
-        gg(mutableRows, aes({ x: "x", y: "y", color: "id" }))
-          .geomPoint()
-          .spec(),
-        { width: 400, height: 300 },
-      );
+    const buildModel = () => buildPointModel(mutableRows);
     const model = reactiveBox(buildModel());
     const tracker = createSourceIdentityTracker();
     const diagnostics: string[] = [];
@@ -466,15 +469,7 @@ describe("createSemanticKeyService", () => {
       { id: "a", x: 2, y: 2 },
     ];
     const buildModel = (data: { id: string; x: number; y: number }[]) =>
-      runPipeline(
-        gg(data, aes({ x: "x", y: "y" }))
-          .geomPoint()
-          .spec(),
-        {
-          width: 200,
-          height: 200,
-        },
-      );
+      buildPointModel(data, { x: "x", y: "y" }, { width: 200, height: 200 });
     const dataBox = reactiveBox(duplicateRows());
     const modelBox = reactiveBox<RenderModel | null>(buildModel(dataBox.value));
     const diagnostics: string[] = [];
@@ -551,13 +546,7 @@ describe("createSemanticKeyService", () => {
     // ACCESS CONTRACT: legendEntryKeyIndex is a reactive getter (not a plain
     // property snapshot). Mutating the model dep must refresh BOTH the getter
     // and keysForLegend — a snapped Map would leave both paths stale.
-    const buildModel = (data: { id: string; x: number; y: number }[]) =>
-      runPipeline(
-        gg(data, aes({ x: "x", y: "y", color: "id" }))
-          .geomPoint()
-          .spec(),
-        { width: 400, height: 300 },
-      );
+    const buildModel = buildPointModel;
     const dataA = [
       { id: "a", x: 1, y: 10 },
       { id: "b", x: 2, y: 20 },
