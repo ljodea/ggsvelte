@@ -27,7 +27,9 @@ export function resolveFacetWrap(input: {
   // One O(n) partition, then O(v) panel assembly (issue #183).
   const buckets = partitionByField(table, wrapField);
   const panels = values.map((value, i) => {
-    const rows = buckets.get(encodeKey(value)) ?? [];
+    // Every value came from facetValues() over this column, so its bucket
+    // exists; a missing one is a broken contract and asserts loudly.
+    const rows = buckets.get(encodeKey(value))!;
     const identity = createFacetPanelIdentity([{ role: "wrap", field: wrapField, value }]);
     return {
       identity,

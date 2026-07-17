@@ -7,30 +7,9 @@ import { bandKey } from "../scales/train.js";
 import type { ColumnTable } from "../table.js";
 
 import { facetValues } from "./facets-helpers.js";
-import { partitionByField } from "./facets-tokens.js";
+import { partitionByField, partitionByFields } from "./facets-tokens.js";
 import type { FacetLayout, FacetPanelDef } from "./facets-types.js";
 import { SINGLE_PANEL } from "./facets-types.js";
-
-/** Intersect two ascending row-index lists (table order is ascending within buckets). */
-function intersectSorted(a: readonly number[], b: readonly number[]): number[] {
-  const out: number[] = [];
-  let i = 0;
-  let j = 0;
-  while (i < a.length && j < b.length) {
-    const av = a[i]!;
-    const bv = b[j]!;
-    if (av === bv) {
-      out.push(av);
-      i += 1;
-      j += 1;
-    } else if (av < bv) {
-      i += 1;
-    } else {
-      j += 1;
-    }
-  }
-  return out;
-}
 
 export function resolveFacetGrid(input: {
   table: ColumnTable;
@@ -51,22 +30,36 @@ export function resolveFacetGrid(input: {
   ) {
     return SINGLE_PANEL(table, baseSourceRows);
   }
-  // Pre-partition once per dimension — O(n) each, then per-cell intersection
-  // over bucket sizes (issue #183). Avoids O(R·C·n) full-table re-scans.
-  const rowBuckets = rowsField === null ? null : partitionByField(table, rowsField);
-  const colBuckets = colsField === null ? null : partitionByField(table, colsField);
+  // Partition rows once (issue #183): a full grid by the composite (row, col)
+  // key, or a single dimension when only one field is set — O(n), then O(R·C)
+  // bucket reads. Every rowValue/colValue comes from facetValues() over the
+  // same column, so its bucket always exists; a missing one is a broken
+  // contract and asserts loudly rather than silently emptying a panel. In the
+  // full grid, an absent inner bucket is a genuine empty combination (`?? []`).
+  const grid =
+    rowsField !== null && colsField !== null
+      ? partitionByFields(table, rowsField, colsField)
+      : null;
+  const rowBuckets =
+    rowsField !== null && colsField === null ? partitionByField(table, rowsField) : null;
+  const colBuckets =
+    colsField !== null && rowsField === null ? partitionByField(table, colsField) : null;
   const panels: FacetPanelDef[] = [];
   for (let r = 0; r < rowValues.length; r++) {
+    // Row-dimension lookup is loop-invariant across the col loop — hoist it.
+    const rowInner = grid === null ? null : grid.get(encodeKey(rowValues[r]!))!;
+    const rowOnly = rowBuckets === null ? null : rowBuckets.get(encodeKey(rowValues[r]!))!;
     for (let c = 0; c < colValues.length; c++) {
-      let rows: number[] = [];
-      if (rowBuckets !== null && colBuckets !== null) {
-        const rb = rowBuckets.get(encodeKey(rowValues[r]!)) ?? [];
-        const cb = colBuckets.get(encodeKey(colValues[c]!)) ?? [];
-        rows = intersectSorted(rb, cb);
-      } else if (rowBuckets !== null) {
-        rows = rowBuckets.get(encodeKey(rowValues[r]!)) ?? [];
-      } else if (colBuckets !== null) {
-        rows = colBuckets.get(encodeKey(colValues[c]!)) ?? [];
+      let rows: number[];
+      if (rowInner !== null) {
+        rows = rowInner.get(encodeKey(colValues[c]!)) ?? [];
+      } else if (rowOnly !== null) {
+        rows = rowOnly;
+      } else if (colBuckets === null) {
+        // Unreachable: assertFacetForm guarantees ≥1 grid field once wrap is null.
+        throw new Error("facet grid resolved with neither rows nor cols field");
+      } else {
+        rows = colBuckets.get(encodeKey(colValues[c]!))!;
       }
       const parts: string[] = [];
       if (rowsField !== null) parts.push(bandKey(rowValues[r]!));

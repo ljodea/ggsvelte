@@ -22,3 +22,30 @@ export function partitionByField(table: ColumnTable, field: string): Map<string,
   }
   return map;
 }
+
+/**
+ * Single-pass partition of table rows by the composite encodeKey of two facet
+ * fields (grid rows × cols). Outer map keyed by `fieldA`, inner by `fieldB`;
+ * row indices within each bucket preserve table order. Empty (a, b)
+ * combinations are simply absent — a missing bucket is the caller's empty panel.
+ * O(n), replacing per-cell bucket intersection over R·C cells (issue #183).
+ */
+export function partitionByFields(
+  table: ColumnTable,
+  fieldA: string,
+  fieldB: string,
+): Map<string, Map<string, number[]>> {
+  const map = new Map<string, Map<string, number[]>>();
+  const colA = table.column(fieldA);
+  const colB = table.column(fieldB);
+  for (let i = 0; i < colA.length; i++) {
+    const ka = encodeKey(colA[i]!);
+    const kb = encodeKey(colB[i]!);
+    let inner = map.get(ka);
+    if (inner === undefined) map.set(ka, (inner = new Map<string, number[]>()));
+    let bucket = inner.get(kb);
+    if (bucket === undefined) inner.set(kb, (bucket = []));
+    bucket.push(i);
+  }
+  return map;
+}

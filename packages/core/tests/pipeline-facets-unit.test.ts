@@ -14,7 +14,7 @@ import { encodeKey } from "../src/scales/state.ts";
 import { PipelineError } from "../src/pipeline.ts";
 import { resolveFacet, SINGLE_PANEL } from "../src/pipeline/facets.ts";
 import { assertFacetForm, facetFreeFlags } from "../src/pipeline/facets-form.ts";
-import { partitionByField } from "../src/pipeline/facets-tokens.ts";
+import { partitionByField, partitionByFields } from "../src/pipeline/facets-tokens.ts";
 import { ColumnTable } from "../src/table.ts";
 
 const table = ColumnTable.fromRows([
@@ -206,6 +206,49 @@ describe("partitionByField — single-pass buckets", () => {
       partitionByField(t, "g");
     });
     expect(reads).toBe(1);
+  });
+});
+
+describe("partitionByFields — single-pass composite buckets", () => {
+  it("groups row indices by (a, b) encodeKey in table order", () => {
+    const t = ColumnTable.fromRows([
+      { r: "a", c: "1", x: 0 },
+      { r: "a", c: "2", x: 1 },
+      { r: "b", c: "1", x: 2 },
+      { r: "a", c: "1", x: 3 },
+      { r: "b", c: "1", x: 4 },
+    ]);
+    const grid = partitionByFields(t, "r", "c");
+    expect(grid.get(encodeKey("a"))?.get(encodeKey("1"))).toEqual([0, 3]);
+    expect(grid.get(encodeKey("a"))?.get(encodeKey("2"))).toEqual([1]);
+    expect(grid.get(encodeKey("b"))?.get(encodeKey("1"))).toEqual([2, 4]);
+    // absent (b, 2) combination — no bucket at all
+    expect(grid.get(encodeKey("b"))?.get(encodeKey("2"))).toBeUndefined();
+  });
+
+  it("keeps number/string keys distinct on both axes", () => {
+    const t = ColumnTable.fromRows([
+      { r: 1, c: "1", x: 0 },
+      { r: "1", c: 1, x: 1 },
+    ]);
+    const grid = partitionByFields(t, "r", "c");
+    expect(grid.get(encodeKey(1))?.get(encodeKey("1"))).toEqual([0]);
+    expect(grid.get(encodeKey("1"))?.get(encodeKey(1))).toEqual([1]);
+    expect(grid.get(encodeKey(1))?.get(encodeKey(1))).toBeUndefined();
+  });
+
+  it("reads each facet column once", () => {
+    const t = ColumnTable.fromRows(
+      Array.from({ length: 40 }, (_, i) => ({ r: `r${i % 5}`, c: `c${i % 8}`, x: i })),
+    );
+    const rReads = countColumnReads("r", () => {
+      partitionByFields(t, "r", "c");
+    });
+    const cReads = countColumnReads("c", () => {
+      partitionByFields(t, "r", "c");
+    });
+    expect(rReads).toBe(1);
+    expect(cReads).toBe(1);
   });
 });
 
