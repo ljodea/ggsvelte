@@ -151,6 +151,42 @@ describe("buildPipelineCandidates via runPipeline", () => {
     );
     expect(modes.some((m) => m === "x" || m === "y")).toBe(true);
   });
+
+  it("identity-indexed multi-series lines map path vertices via precomputed group rows", () => {
+    // Annotation layer forces the identity-indexed candidate path (not
+    // source-backed). Path vertices must resolve to x-sorted frame rows per
+    // series without rebuilding the group index on every call.
+    const model = runPipeline(
+      gg(
+        [
+          { x: 2, y: 10, s: "a" },
+          { x: 1, y: 20, s: "b" },
+          { x: 1, y: 30, s: "a" },
+          { x: 2, y: 40, s: "b" },
+        ],
+        aes({ x: "x", y: "y", color: "s" }),
+      )
+        .geomLine()
+        .geomRule({ yintercept: 25 })
+        .spec(),
+      size,
+    );
+    const linePoints = Array.from(
+      { length: model.candidates.size },
+      (_, id) => model.candidates.candidate(id)!,
+    ).filter((c) => c.kind === "paths");
+    expect(linePoints).toHaveLength(4);
+    expect(linePoints.map((c) => c.yValue).toSorted((a, b) => Number(a) - Number(b))).toEqual([
+      10, 20, 30, 40,
+    ]);
+    expect(new Set(linePoints.map((c) => c.seriesId)).size).toBe(2);
+    // Within each series, vertices are ordered by x (sorted group rows).
+    const bySeries = Map.groupBy(linePoints, (c) => c.seriesId);
+    for (const seriesPoints of bySeries.values()) {
+      const xs = seriesPoints.map((c) => Number(c.xValue));
+      expect(xs).toEqual([...xs].toSorted((a, b) => a - b));
+    }
+  });
 });
 
 describe("resolveCandidateSeries / resolveRepresentedSourceRows", () => {
@@ -244,6 +280,119 @@ describe("createLazyIdentityIndex", () => {
     expect(a).toBe(b);
     // silence unused
     expect(calls).toBe(0);
+  });
+});
+
+describe("buildPathGroupSortedRows", () => {
+  it("groups frame rows and sorts each group by xNumeric (fallback row index)", async () => {
+    const { buildPathGroupSortedRows } =
+      await import("../src/pipeline/build-candidates-frame-row.ts");
+    // rows: group 1 at x=3, group 0 at x=2, group 1 at x=1, group 0 at x=0
+    // → group 0 sorted [3, 1]; group 1 sorted [2, 0]
+    const frame = {
+      groups: [1, 0, 1, 0],
+      xNumeric: new Float64Array([3, 2, 1, 0]),
+    } as never;
+    const byGroup = buildPathGroupSortedRows(frame);
+    expect([...byGroup.get(0)!]).toEqual([3, 1]);
+    expect([...byGroup.get(1)!]).toEqual([2, 0]);
+  });
+
+  it("falls back to row index order when xNumeric is null", async () => {
+    const { buildPathGroupSortedRows } =
+      await import("../src/pipeline/build-candidates-frame-row.ts");
+    const frame = { groups: [0, 0, 0], xNumeric: null } as never;
+    expect([...buildPathGroupSortedRows(frame).get(0)!]).toEqual([0, 1, 2]);
+  });
+});
+
+describe("getPathGroupSortedRows", () => {
+  it("returns the same Map for the same frame (precomputed once)", async () => {
+    const { getPathGroupSortedRows } =
+      await import("../src/pipeline/build-candidates-frame-row.ts");
+    const frame = {
+      groups: [0, 0, 1],
+      xNumeric: new Float64Array([0, 1, 2]),
+    } as never;
+    const a = getPathGroupSortedRows(frame);
+    const b = getPathGroupSortedRows(frame);
+    expect(a).toBe(b);
+    expect([...a.get(0)!]).toEqual([0, 1]);
+    expect([...a.get(1)!]).toEqual([2]);
+  });
+});
+
+describe("resolveCandidateFrameRow paths", () => {
+  it("maps path vertices to x-sorted frame rows and reflects closed-path reverse legs", async () => {
+    const { resolveCandidateFrameRow } =
+      await import("../src/pipeline/build-candidates-frame-row.ts");
+    // Two groups interleaved: g0 rows {0,2} with x 2,0 → sorted [2,0];
+    // g1 rows {1,3} with x 3,1 → sorted [3,1]
+    const frame = {
+      n: 4,
+      groups: [0, 1, 0, 1],
+      xNumeric: new Float64Array([2, 3, 0, 1]),
+      binding: { layer: { geom: "area" } },
+    } as never;
+    // Two subpaths, each 4 vertices (forward + reverse for closed area):
+    // subpath 0: offsets [0, 4), subpath 1: [4, 8)
+    const batch = {
+      kind: "paths",
+      pathOffsets: new Uint32Array([0, 4, 8]),
+    } as never;
+    const orderedGroups = [0, 1];
+
+    // Forward: local 0 → first sorted row of group 0 = 2
+    expect(
+      resolveCandidateFrameRow({
+        frame,
+        batch,
+        primitiveIndex: 0,
+        orderedGroups,
+        outlierLocalRow: null,
+      }),
+    ).toEqual({ frameRow: 2, derivedGroup: 0 });
+    // Forward: local 1 → second sorted row of group 0 = 0
+    expect(
+      resolveCandidateFrameRow({
+        frame,
+        batch,
+        primitiveIndex: 1,
+        orderedGroups,
+        outlierLocalRow: null,
+      }),
+    ).toEqual({ frameRow: 0, derivedGroup: 0 });
+    // Reverse leg: local 2 → reflected 2*2-1-2 = 1 → same as local 1 = 0
+    expect(
+      resolveCandidateFrameRow({
+        frame,
+        batch,
+        primitiveIndex: 2,
+        orderedGroups,
+        outlierLocalRow: null,
+      }),
+    ).toEqual({ frameRow: 0, derivedGroup: 0 });
+    // Reverse leg: local 3 → reflected 0 → row 2
+    expect(
+      resolveCandidateFrameRow({
+        frame,
+        batch,
+        primitiveIndex: 3,
+        orderedGroups,
+        outlierLocalRow: null,
+      }),
+    ).toEqual({ frameRow: 2, derivedGroup: 0 });
+
+    // Second subpath (group 1): local 0 → first sorted = 3
+    expect(
+      resolveCandidateFrameRow({
+        frame,
+        batch,
+        primitiveIndex: 4,
+        orderedGroups,
+        outlierLocalRow: null,
+      }),
+    ).toEqual({ frameRow: 3, derivedGroup: 1 });
   });
 });
 
