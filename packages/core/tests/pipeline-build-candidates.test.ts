@@ -315,3 +315,145 @@ describe("lineage represented-row filters", () => {
     ).toEqual([0, 1]);
   });
 });
+
+describe("aggregate lineage index (issue #184)", () => {
+  it("pre-buckets group source rows by x band key for O(1) mark resolve", async () => {
+    const { preparePanels } = await import("../src/pipeline/prepare-panels.ts");
+    const { buildCandidateIdentityIndex } =
+      await import("../src/pipeline/build-candidates-identity.ts");
+    const { bandKey } = await import("../src/scales/train.ts");
+    const { normalize } = await import("@ggsvelte/spec");
+
+    // Continuous (numeric) x does not participate in grouping, so count expands
+    // many x levels inside one group — the O(k·g) case the index must fix.
+    const prepared = preparePanels(
+      normalize(
+        gg([{ x: 1 }, { x: 2 }, { x: 1 }, { x: 3 }], aes({ x: "x" }))
+          .geomBar()
+          .spec(),
+      ),
+      size,
+      [],
+      [],
+    );
+    const index = buildCandidateIdentityIndex(prepared.panelFrames, prepared.facetPanels);
+
+    const groupKey = "0:0:0";
+    expect(index.sourceRowsByGroup.get(groupKey)?.toSorted((a, b) => a - b)).toEqual([0, 1, 2, 3]);
+    expect(index.sourceRowsByGroupX.get(`${groupKey}:${bandKey(1)}`)).toEqual([0, 2]);
+    expect(index.sourceRowsByGroupX.get(`${groupKey}:${bandKey(2)}`)).toEqual([1]);
+    expect(index.sourceRowsByGroupX.get(`${groupKey}:${bandKey(3)}`)).toEqual([3]);
+  });
+
+  it("pre-buckets bin memberships per frame row so resolve does not re-scan", async () => {
+    const { preparePanels } = await import("../src/pipeline/prepare-panels.ts");
+    const { buildCandidateIdentityIndex } =
+      await import("../src/pipeline/build-candidates-identity.ts");
+    const { normalize } = await import("@ggsvelte/spec");
+
+    const prepared = preparePanels(
+      normalize({
+        data: { values: [{ x: 0 }, { x: 0.2 }, { x: 1.2 }] },
+        layers: [
+          {
+            geom: "histogram",
+            aes: { x: { field: "x" } },
+            params: { binwidth: 1, boundary: 0, closed: "right" },
+          },
+        ],
+      }),
+      size,
+      [],
+      [],
+    );
+    const index = buildCandidateIdentityIndex(prepared.panelFrames, prepared.facetPanels);
+    const frame = prepared.panelFrames[0]![0]!;
+    expect(frame.n).toBeGreaterThanOrEqual(2);
+
+    // closed=right: [0,1] owns rows 0,1; (1,2] owns row 2.
+    expect(index.sourceRowsByGroupBin.get("0:0:0:0")).toEqual([0, 1]);
+    expect(index.sourceRowsByGroupBin.get("0:0:0:1")).toEqual([2]);
+  });
+
+  it("keeps boxplot outlier lineage as the single source row (not the full box)", () => {
+    const model = runPipeline(
+      {
+        data: {
+          values: [
+            { group: "a", y: 1 },
+            { group: "a", y: 2 },
+            { group: "a", y: 3 },
+            { group: "a", y: 100 },
+          ],
+        },
+        layers: [
+          {
+            geom: "boxplot",
+            stat: "boxplot",
+            aes: { x: { field: "group" }, y: { field: "y" } },
+          },
+        ],
+      },
+      size,
+    );
+    const candidates = Array.from({ length: model.candidates.size }, (_, id) =>
+      model.candidates.candidate(id),
+    );
+    const outlier = candidates.find((candidate) => candidate?.kind === "points");
+    expect(outlier).toBeDefined();
+    expect([...model.lineage.keys(outlier!.lineage)].toSorted((a, b) => a - b)).toEqual([3]);
+  });
+
+  it("resolveRepresentedSourceRows uses index lookups and matches filter parity", async () => {
+    const { preparePanels } = await import("../src/pipeline/prepare-panels.ts");
+    const { buildCandidateIdentityIndex } =
+      await import("../src/pipeline/build-candidates-identity.ts");
+    const { resolveRepresentedSourceRows } =
+      await import("../src/pipeline/build-candidates-datum-represented.ts");
+    const { filterRepresentedSourceRows } =
+      await import("../src/pipeline/build-candidates-lineage.ts");
+    const { LineageStore } = await import("../src/identity.ts");
+    const { normalize } = await import("@ggsvelte/spec");
+
+    const prepared = preparePanels(
+      normalize(
+        gg([{ x: 1 }, { x: 2 }, { x: 1 }, { x: 3 }], aes({ x: "x" }))
+          .geomBar()
+          .spec(),
+      ),
+      size,
+      [],
+      [],
+    );
+    const index = buildCandidateIdentityIndex(prepared.panelFrames, prepared.facetPanels);
+    const frame = prepared.panelFrames[0]![0]!;
+    const lineage = new LineageStore<number>();
+
+    for (let frameRow = 0; frameRow < frame.n; frameRow++) {
+      const group = frame.groups[frameRow] ?? 0;
+      const viaIndex = resolveRepresentedSourceRows({
+        outlierSourceRow: null,
+        sourceRow: null,
+        group,
+        panelIndex: 0,
+        layerIndex: 0,
+        sourceRowsByGroup: index.sourceRowsByGroup,
+        sourceRowsByGroupX: index.sourceRowsByGroupX,
+        sourceRowsByGroupBin: index.sourceRowsByGroupBin,
+        frame,
+        table: prepared.table,
+        frameRow,
+        lineage,
+        primitiveIndex: frameRow,
+      });
+      const baseRows = index.sourceRowsByGroup.get(`0:0:${group}`) ?? [];
+      const viaFilter = filterRepresentedSourceRows({
+        frame,
+        table: prepared.table,
+        frameRow,
+        baseRows,
+      });
+      expect(viaIndex.representedRows).toEqual(viaFilter);
+    }
+  });
+});

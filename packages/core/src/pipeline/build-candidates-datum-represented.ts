@@ -14,6 +14,8 @@ export function resolveRepresentedSourceRows(input: {
   panelIndex: number;
   layerIndex: number;
   sourceRowsByGroup: Map<string, number[]>;
+  sourceRowsByGroupX?: Map<string, number[]>;
+  sourceRowsByGroupBin?: Map<string, number[]>;
   frame: LayerFrame | undefined;
   table: ColumnTable;
   frameRow: number;
@@ -27,6 +29,8 @@ export function resolveRepresentedSourceRows(input: {
     panelIndex,
     layerIndex,
     sourceRowsByGroup,
+    sourceRowsByGroupX,
+    sourceRowsByGroupBin,
     frame,
     table,
     frameRow,
@@ -34,17 +38,25 @@ export function resolveRepresentedSourceRows(input: {
     primitiveIndex,
   } = input;
 
+  // Outliers already pin an exact source row — do not re-expand via aggregate
+  // group×x / bin indexes (those buckets contain every row the box represents).
   let representedRows =
     outlierSourceRow === null
       ? (sourceRowsByGroup.get(`${panelIndex}:${layerIndex}:${group}`) ?? [])
       : [outlierSourceRow];
-  if (sourceRow === null && frame !== undefined) {
-    representedRows = filterRepresentedSourceRows({
+  if (sourceRow === null && outlierSourceRow === null && frame !== undefined) {
+    const filterInput: Parameters<typeof filterRepresentedSourceRows>[0] = {
       frame,
       table,
       frameRow,
       baseRows: representedRows,
-    });
+      group,
+      panelIndex,
+      layerIndex,
+    };
+    if (sourceRowsByGroupX) filterInput.sourceRowsByGroupX = sourceRowsByGroupX;
+    if (sourceRowsByGroupBin) filterInput.sourceRowsByGroupBin = sourceRowsByGroupBin;
+    representedRows = filterRepresentedSourceRows(filterInput);
   }
   return {
     representedRows,
