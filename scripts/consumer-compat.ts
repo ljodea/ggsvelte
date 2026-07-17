@@ -14,7 +14,7 @@ interface CommandStep {
 }
 
 const fixtureDependencies = [
-  // The compatibility fixture must itself support the Svelte 5.29 floor.
+  // The compatibility fixture must itself support the Svelte 5.33.1 floor.
   // Plugin 7 requires Svelte 5.46+, which would make the minimum row a test
   // of fixture peer resolution rather than a test of ggsvelte.
   "@sveltejs/vite-plugin-svelte@5.1.1",
@@ -44,7 +44,7 @@ export function resolveConsumerOptions(
 ) {
   return {
     packageManager: (args[0] ?? environment.PACKAGE_MANAGER ?? "npm") as PackageManager,
-    svelteVersion: args[1] ?? environment.SVELTE_VERSION ?? "5.29.0",
+    svelteVersion: args[1] ?? environment.SVELTE_VERSION ?? "5.33.1",
     packageManagerVersion: args[2] ?? environment.PACKAGE_MANAGER_VERSION,
   };
 }

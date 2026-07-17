@@ -10,6 +10,7 @@ import {
   packageTarballNames,
   resolveConsumerOptions,
 } from "./consumer-compat.js";
+import { loadSupportMatrix } from "./support-matrix.js";
 
 describe("packed consumer compatibility harness", () => {
   test("installs every publishable tarball rather than workspace source", () => {
@@ -47,6 +48,10 @@ describe("packed consumer compatibility harness", () => {
       packageManagerVersion: "11.13.0",
       svelteVersion: "5.56.5",
     });
+  });
+
+  test("default Svelte version matches the support-matrix floor", () => {
+    expect(resolveConsumerOptions([], {}).svelteVersion).toBe(loadSupportMatrix().svelte.minimum);
   });
 
   test("invokes the pinned pnpm CLI without relying on an installer-generated shim", () => {
