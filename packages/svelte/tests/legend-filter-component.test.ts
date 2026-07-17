@@ -4,24 +4,7 @@ import GGPlot from "../src/lib/GGPlot.svelte";
 import LegendFilterPlot from "./fixtures/LegendFilterPlot.svelte";
 import { expectAccessible } from "./helpers/accessibility.js";
 import { render } from "./helpers/render.js";
-
-function until(predicate: () => boolean, timeout = 3000): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const started = performance.now();
-    const tick = () => {
-      if (predicate()) {
-        resolve();
-        return;
-      }
-      if (performance.now() - started > timeout) {
-        reject(new Error("until() timed out"));
-        return;
-      }
-      requestAnimationFrame(tick);
-    };
-    tick();
-  });
-}
+import { until } from "./helpers/until.js";
 
 function parsedArray<T>(value: string | undefined): T[] {
   const parsed: unknown = JSON.parse(value ?? "[]");

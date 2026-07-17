@@ -3,24 +3,7 @@ import { expect, test } from "vitest";
 import GGPlot from "../src/lib/GGPlot.svelte";
 import type { LegendFilterEvent } from "../src/lib/legend-filter.js";
 import { render } from "./helpers/render.js";
-
-function until(predicate: () => boolean, timeout = 3000): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const started = performance.now();
-    const tick = () => {
-      if (predicate()) {
-        resolve();
-        return;
-      }
-      if (performance.now() - started > timeout) {
-        reject(new Error("until() timed out"));
-        return;
-      }
-      requestAnimationFrame(tick);
-    };
-    tick();
-  });
-}
+import { until } from "./helpers/until.js";
 
 test("disappeared filter values return visible while resetScales keeps active filters", async () => {
   let candidates = 0;

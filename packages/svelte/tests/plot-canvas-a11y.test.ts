@@ -5,6 +5,7 @@ import type { GeometryBatch, RenderModel } from "@ggsvelte/core";
 import { A11Y_TABLE_CAP, a11yRows } from "../src/lib/canvas-a11y.js";
 import PlotCanvasA11y from "../src/lib/PlotCanvasA11y.svelte";
 import { render } from "./helpers/render.js";
+import { until } from "./helpers/until.js";
 
 function batch(partial: { layerIndex: number; rowIndex: number[] }): GeometryBatch {
   return {
@@ -34,24 +35,6 @@ const sampleModel = model({
   },
 });
 const sampleBatches = [batch({ layerIndex: 0, rowIndex: [0, 1, 2, 3] })];
-
-function until(predicate: () => boolean, timeout = 2000): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const started = performance.now();
-    const tick = () => {
-      if (predicate()) {
-        resolve();
-        return;
-      }
-      if (performance.now() - started > timeout) {
-        reject(new Error("until() timed out"));
-        return;
-      }
-      requestAnimationFrame(tick);
-    };
-    tick();
-  });
-}
 
 describe("PlotCanvasA11y", () => {
   it("renders role=img summary with scene label and canvas mark total", () => {
