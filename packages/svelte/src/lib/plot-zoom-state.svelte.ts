@@ -40,7 +40,10 @@ export type PlotZoomStateDeps = {
   /** Narrow getter over `interactionConfig.zoom` (mode + null gate). */
   zoomConfig: () => ResolvedInteractionConfig["zoom"];
   assembled: () => PortableSpec | null;
-  /** Deferred: declared after the factory (runtime alias / line 632). */
+  /**
+   * Deferred: the runtime model alias and the coord-flip derived are declared
+   * after createPlotRuntime in the host — handler-only reads.
+   */
   model: () => RenderModel | null;
   coordFlipped: () => boolean;
   onzoom: () => ((event: ZoomEvent) => void) | undefined;

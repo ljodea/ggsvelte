@@ -5,7 +5,7 @@
 import { flushSync } from "svelte";
 import { describe, expect, it } from "vitest";
 
-import { runPipeline, type RenderModel } from "@ggsvelte/core";
+import type { RenderModel } from "@ggsvelte/core";
 import { aes, gg, type PortableSpec } from "@ggsvelte/spec";
 
 import GGPlot from "../src/lib/GGPlot.svelte";
@@ -20,6 +20,7 @@ import {
 } from "../src/lib/plot-shared-services.svelte.js";
 import type { InteractiveLegendEntry, LegendEntryIdentity } from "../src/lib/plot-legend-focus.js";
 import { withEffectRoot, withFlushedEffectRoot } from "./helpers/effect-root.svelte.js";
+import { modelFor } from "./helpers/model.js";
 import { reactiveBox } from "./helpers/reactive-box.svelte.js";
 import { createReactiveRuntimeDeps } from "./helpers/runtime-deps.svelte.js";
 import { render } from "./helpers/render.js";
@@ -48,10 +49,6 @@ function colorSpec(
   return gg([...data], aes({ x: "x", y: "y", color: "group" }))
     .geomPoint()
     .spec();
-}
-
-function modelFor(spec: PortableSpec): RenderModel {
-  return runPipeline(spec, { width: 360, height: 260 });
 }
 
 function clickEvent(detail = 1): MouseEvent {

@@ -421,6 +421,23 @@
       deliverDiagnostic(diagnostic);
   });
 
+  // Shared controller-factory dep aliases: ONE place for the PublicKey →
+  // PropertyKey widening casts every extracted controller (S2–S8) wires.
+  const factoryInteraction = $derived(
+    interaction as PlotInteractionController<PropertyKey> | undefined,
+  );
+  const factoryOninteraction = $derived(
+    oninteraction as
+      | ((
+          event: PlotInteractionEvent<Record<string, CellValue>, PropertyKey>,
+        ) => void)
+      | undefined,
+  );
+  // Announcer is declared later; the sink is handler-only (never construction).
+  const announceSink = (message: string): void => {
+    announcer.announce(message);
+  };
+
   // ------------------------------------------------------------ zoom respec (S4)
   // Factory sits at the original zoom-respec region (before announcer /
   // runtime). Construction-time deriveds read interaction/scope/zoomConfig/
@@ -429,8 +446,7 @@
   // controllerRevision has non-zoom consumers (selection/intervals) and stays.
   const controllerRevision = $derived(interaction?.revision ?? 0);
   const zoomState = createPlotZoomState({
-    interaction: () =>
-      interaction as PlotInteractionController<PropertyKey> | undefined,
+    interaction: () => factoryInteraction,
     resolvedInteractionScope: () => resolvedInteractionScope,
     zoomConfig: () => interactionConfig.zoom,
     assembled: () => assembled,
@@ -438,14 +454,8 @@
     model: () => model,
     coordFlipped: () => coordFlipped,
     onzoom: () => onzoom,
-    oninteraction: () =>
-      oninteraction as
-        | ((
-            event: PlotInteractionEvent<Record<string, CellValue>, PropertyKey>,
-          ) => void)
-        | undefined,
-    // announcer is declared later (handler-only sink).
-    announce: (message) => announcer.announce(message),
+    oninteraction: () => factoryOninteraction,
+    announce: announceSink,
   });
   // One-line host aliases at original positions (server-eager order).
   const effectiveZoomDomains = $derived(zoomState.effectiveZoomDomains);
@@ -476,7 +486,7 @@
     legendFilterProp: () => legendFilter,
     onlegendfilter: () => onlegendfilter,
     oninteraction: () => oninteraction,
-    announce: (message) => announcer.announce(message),
+    announce: announceSink,
     // model is declared after the runtime; the getter is only invoked from
     // late catalog effects (never at construction).
     model: () => model,
@@ -648,8 +658,7 @@
   // effectiveEmphasisKeys closes over earlier bindings only (Svelte 5.29
   // server evaluates $derived eagerly at construction).
   const legendFocusState = createLegendFocusState({
-    interaction: () =>
-      interaction as PlotInteractionController<PropertyKey> | undefined,
+    interaction: () => factoryInteraction,
     resolvedInteractionScope: () => resolvedInteractionScope,
     legendFocusEnabled: () => legendFocusEnabled,
     legendFocusPreviewEnabled: () =>
@@ -662,13 +671,8 @@
     onlegendfocus: () =>
       onlegendfocus as
         ((event: LegendFocusEvent<PropertyKey>) => void) | undefined,
-    oninteraction: () =>
-      oninteraction as
-        | ((
-            event: PlotInteractionEvent<Record<string, CellValue>, PropertyKey>,
-          ) => void)
-        | undefined,
-    announce: (message) => announcer.announce(message),
+    oninteraction: () => factoryOninteraction,
+    announce: announceSink,
   });
   // Host one-liner: downstream server-eager deriveds (capability gate,
   // emphasizedAnchors, presentationFocusKeys) read this at original sites.

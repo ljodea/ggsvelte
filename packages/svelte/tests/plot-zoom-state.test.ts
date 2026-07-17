@@ -5,7 +5,7 @@
 import { flushSync } from "svelte";
 import { describe, expect, it } from "vitest";
 
-import { runPipeline, type RenderModel } from "@ggsvelte/core";
+import type { RenderModel } from "@ggsvelte/core";
 import { aes, gg, type PortableSpec } from "@ggsvelte/spec";
 
 import type {
@@ -19,6 +19,7 @@ import type { ContinuousZoomDomains } from "../src/lib/plot-geometry.js";
 import { createPlotRuntime } from "../src/lib/plot-runtime.svelte.js";
 import { createPlotZoomState } from "../src/lib/plot-zoom-state.svelte.js";
 import { withEffectRoot, withFlushedEffectRoot } from "./helpers/effect-root.svelte.js";
+import { modelFor } from "./helpers/model.js";
 import { reactiveBox } from "./helpers/reactive-box.svelte.js";
 import { createReactiveRuntimeDeps } from "./helpers/runtime-deps.svelte.js";
 
@@ -86,10 +87,6 @@ function flippedSpec(): PortableSpec {
     .geomPoint()
     .coord("flip")
     .spec();
-}
-
-function modelFor(spec: PortableSpec): RenderModel {
-  return runPipeline(spec, { width: 360, height: 260 });
 }
 
 type ZoomHarness = {
@@ -218,11 +215,11 @@ describe("createPlotZoomState local mode", () => {
     expect(order).toEqual(["announce", "onzoom", "oninteraction"]);
     expect(announcements).toEqual(["Zoom complete."]);
 
-    // resetZoom with domains null → early return, NO event.
+    // resetZoom WITH active domains → null-commit: full clear emission
+    // (the early-return case is the second reset below, once effective is null).
     order.length = 0;
     zoomEvents.length = 0;
     announcements.length = 0;
-    // Clear first so effective is null, then reset again.
     state.resetZoom();
     flushSync();
     expect(state.effectiveZoomDomains).toBeNull();
@@ -449,21 +446,40 @@ describe("createPlotZoomState applyBrushZoom", () => {
     expect(zoomEvents[0]?.domains?.x).toBeUndefined();
     expect(zoomEvents[0]?.domains?.y).toBeDefined();
 
-    // coordFlipped getter: flipped model still produces domains (axes inverted).
+    // coordFlipped getter: with an ASYMMETRIC rect (60% of the horizontal
+    // span, 20% of the vertical span), flip swaps which data channel each
+    // screen axis selects — the x data domain must come from the NARROW
+    // vertical band and the y data domain from the WIDE horizontal band.
+    // (Any "some domain is defined" assertion would be tautological: it
+    // passes even when the flipped flag is ignored.)
     zoomEvents.length = 0;
     state.resetZoom();
     flushSync();
     zoomEvents.length = 0;
-    contModel.set(modelFor(flippedSpec()));
+    const flippedModel = modelFor(flippedSpec());
+    contModel.set(flippedModel);
     flipped.set(true);
     flushSync();
-    state.applyBrushZoom(rect, "pointer");
+    const flippedPanel = flippedModel.scene.panels[0];
+    const asymRect = {
+      x0: flippedPanel.x + flippedPanel.width * 0.2,
+      y0: flippedPanel.y + flippedPanel.height * 0.4,
+      x1: flippedPanel.x + flippedPanel.width * 0.8,
+      y1: flippedPanel.y + flippedPanel.height * 0.6,
+    };
+    state.applyBrushZoom(asymRect, "pointer");
     flushSync();
     expect(zoomEvents).toHaveLength(1);
-    expect(zoomEvents[0]?.domains).not.toBeNull();
-    expect(zoomEvents[0]?.domains?.x !== undefined || zoomEvents[0]?.domains?.y !== undefined).toBe(
-      true,
-    );
+    const fx = zoomEvents[0].domains!.x!;
+    const fy = zoomEvents[0].domains!.y!;
+    const [tx0, tx1] = flippedModel.scales.x.domain as [number, number];
+    const [ty0, ty1] = flippedModel.scales.y.domain as [number, number];
+    const xFraction = (fx[1] - fx[0]) / (tx1 - tx0);
+    const yFraction = (fy[1] - fy[0]) / (ty1 - ty0);
+    // Narrow (~0.2) x span vs wide (~0.6) y span — fails if flip is ignored
+    // (the spans would then mirror the rect: ~0.6 x, ~0.2 y).
+    expect(xFraction).toBeLessThan(0.35);
+    expect(yFraction).toBeGreaterThan(0.45);
 
     destroy();
   });
