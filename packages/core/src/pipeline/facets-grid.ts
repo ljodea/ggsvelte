@@ -2,10 +2,12 @@
  * Facet grid partition: rows × cols combinations (empty combos kept).
  */
 import { createFacetPanelIdentity } from "../facet-identity.js";
+import { encodeKey } from "../scales/state.js";
 import { bandKey } from "../scales/train.js";
 import type { ColumnTable } from "../table.js";
 
-import { facetValues, rowsMatching } from "./facets-helpers.js";
+import { facetValues } from "./facets-helpers.js";
+import { partitionByField, partitionByFields } from "./facets-tokens.js";
 import type { FacetLayout, FacetPanelDef } from "./facets-types.js";
 import { SINGLE_PANEL } from "./facets-types.js";
 
@@ -28,17 +30,36 @@ export function resolveFacetGrid(input: {
   ) {
     return SINGLE_PANEL(table, baseSourceRows);
   }
+  // Partition rows once (issue #183): a full grid by the composite (row, col)
+  // key, or a single dimension when only one field is set — O(n), then O(R·C)
+  // bucket reads. Every rowValue/colValue comes from facetValues() over the
+  // same column, so its bucket always exists; a missing one is a broken
+  // contract and asserts loudly rather than silently emptying a panel. In the
+  // full grid, an absent inner bucket is a genuine empty combination (`?? []`).
+  const grid =
+    rowsField !== null && colsField !== null
+      ? partitionByFields(table, rowsField, colsField)
+      : null;
+  const rowBuckets =
+    rowsField !== null && colsField === null ? partitionByField(table, rowsField) : null;
+  const colBuckets =
+    colsField !== null && rowsField === null ? partitionByField(table, colsField) : null;
   const panels: FacetPanelDef[] = [];
   for (let r = 0; r < rowValues.length; r++) {
+    // Row-dimension lookup is loop-invariant across the col loop — hoist it.
+    const rowInner = grid === null ? null : grid.get(encodeKey(rowValues[r]!))!;
+    const rowOnly = rowBuckets === null ? null : rowBuckets.get(encodeKey(rowValues[r]!))!;
     for (let c = 0; c < colValues.length; c++) {
-      let rows: number[] | null = null;
-      if (rowsField !== null) rows = rowsMatching(table, rowsField, rowValues[r]!);
-      if (colsField !== null) {
-        const colRows = new Set(rowsMatching(table, colsField, colValues[c]!));
-        rows =
-          rows === null
-            ? [...colRows].toSorted((a, b) => a - b)
-            : rows.filter((i) => colRows.has(i));
+      let rows: number[];
+      if (rowInner !== null) {
+        rows = rowInner.get(encodeKey(colValues[c]!)) ?? [];
+      } else if (rowOnly !== null) {
+        rows = rowOnly;
+      } else if (colBuckets === null) {
+        // Unreachable: assertFacetForm guarantees ≥1 grid field once wrap is null.
+        throw new Error("facet grid resolved with neither rows nor cols field");
+      } else {
+        rows = colBuckets.get(encodeKey(colValues[c]!))!;
       }
       const parts: string[] = [];
       if (rowsField !== null) parts.push(bandKey(rowValues[r]!));
@@ -57,8 +78,8 @@ export function resolveFacetGrid(input: {
         label: parts.join(" / "),
         row: r,
         col: c,
-        table: table.subset(rows ?? []),
-        sourceRows: (rows ?? []).map((row) => baseSourceRows?.[row] ?? row),
+        table: table.subset(rows),
+        sourceRows: rows.map((row) => baseSourceRows?.[row] ?? row),
       });
     }
   }
