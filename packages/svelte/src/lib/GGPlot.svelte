@@ -66,7 +66,6 @@
     type InteractionDiagnostic,
     type InteractionSource,
     type InteractionTool,
-    type IntervalSelection,
     type LegendFocusEvent,
     type LegendFocusInput,
     type PlotInspection,
@@ -79,7 +78,6 @@
     type ZoomInput,
   } from "./interaction.js";
   import type { PlotInteractionController } from "./interaction-controller.svelte.js";
-  import { createInteractionReducer } from "./interaction-reducer.js";
   import { provideRegistry } from "./registry.svelte.js";
   import {
     assemblePortableSpec,
@@ -87,31 +85,8 @@
     resolveInteractionScope,
     toLayerInput,
   } from "./plot-assemble.js";
-  import { brushAtPoint, brushWithEnd } from "./plot-area-brush.js";
-  import { normalizedRect } from "./plot-geometry.js";
-  import { resolveSurfaceKeyAction } from "./plot-surface-keyboard.js";
-  import { buildQueuedInspectFrame } from "./plot-surface-inspection-frame.js";
-  import {
-    resolveSurfaceBlurAction,
-    shouldClosePinnedOnOutsidePointer,
-  } from "./plot-surface-inspection-teardown.js";
-  import { type FinishBrushAction } from "./plot-brush-finish.js";
-  import {
-    resolveCaptureClickAction,
-    advanceTouchInspectMoved,
-    isAreaAwaitingSecond,
-    isAreaBrushing,
-    resolveLostPointerCaptureAction,
-    resolvePointerDownAction,
-    resolvePointerMoveAction,
-    resolvePointerUpAction,
-    shouldClearInspectionOnPointerLeave,
-    POINT_SELECT_NEAREST_MAX_DISTANCE_PX,
-    TOUCH_INSPECT_CLICK_SUPPRESS_MS,
-  } from "./plot-surface-pointer.js";
   import { shouldRenderInteractionLiveRegion } from "./plot-legend-surface.js";
   import {
-    BRUSH_SECOND_CORNER_ANNOUNCEMENT,
     datumLabel as datumLabelFor,
     markLabel as markLabelFor,
     resolveInteractionLiveText,
@@ -127,24 +102,16 @@
     resolveClearLegendX,
     tooltipViewportSize,
   } from "./plot-layout.js";
-  import { hitFromCandidate, plotPointFromClient } from "./plot-pointer.js";
   import {
     bandChannelsForZoom,
     capabilityStatusText,
     filterAvailableTools,
     isEmptyPlotScene,
     legendFocusDiscreteOnlyDiagnostics,
-    resolveChooseToolAction,
-    resolveEffectiveTool,
     shouldShowToolRail,
     zoomScaleDiagnosticsFromChannels,
     zoomSupportsChannel,
   } from "./plot-capability.js";
-  import {
-    buildIntervalSelectionFromScene,
-    intervalQuerySceneFromModel,
-    type IntervalQueryScene,
-  } from "./plot-interval-query.js";
   import BoundsEditor from "./BoundsEditor.svelte";
   import {
     anchorsFromCandidateKeys,
@@ -178,6 +145,7 @@
   import { createPlotZoomState } from "./plot-zoom-state.svelte.js";
   import { createIntervalState } from "./interval-state.svelte.js";
   import { createInspectionState } from "./inspection-state.svelte.js";
+  import { createSurfaceState } from "./surface-state.svelte.js";
   import {
     type LegendFilterEvent,
     type LegendFilterInput,
@@ -496,18 +464,17 @@
     surfaceInteractive && model !== null ? buildHitIndex(model.scene) : null,
   );
 
-  let reducerRevision = $state(0);
   // ------------------------------------------------- inspection (S6)
-  // Factory at the original queue-vars position (before the component-held
-  // reducer). Construction-time deriveds may read model / surfaceInteractive
-  // (both earlier). Phased effects register later at the original coordinator
-  // site via registerInspectionEffects().
-  // queuedAreaSource stays host-owned (written by surface pointer routing,
-  // read by the reducer's move-area branch — S7 territory).
+  // Factory at the original void-vars position (before the surface controller
+  // that now owns the reducer). Construction-time deriveds may read model /
+  // surfaceInteractive (both earlier). Phased effects register later at the
+  // original coordinator site via registerInspectionEffects().
+  // Reversed deps (S7): reducer / clearBrush / chooseTool close over the
+  // later-declared surfaceState (handler/effect-only; construction guard).
   const inspectionState = createInspectionState({
     model: () => model,
-    // Deferred: reducer is declared immediately below (handler/effect only).
-    reducer: () => reducer,
+    // Deferred: surface owns the reducer (handler/effect only).
+    reducer: () => surfaceState.reducer,
     inspectConfig: () => interactionConfig.inspect,
     surfaceInteractive: () => surfaceInteractive,
     inspectEnabled: () => inspectEnabled,
@@ -521,68 +488,56 @@
     clearTooltipHovered: () => {
       tooltipHovered = false;
     },
-    clearBrush: () => {
-      brushRect = null;
-    },
-    chooseTool: (next) => chooseTool(next),
+    clearBrush: () => surfaceState.clearBrush(),
+    chooseTool: (next) => surfaceState.chooseTool(next),
     oninspect: () => factoryOninspect,
     oninteraction: () => factoryOninteraction,
     announce: announceSink,
     clearAnnouncement: () => announcer.clear(),
   });
-  let queuedAreaSource: InteractionSource = "pointer";
-  const reducer = createInteractionReducer({
-    onChange: () => {
-      reducerRevision += 1;
-    },
-    scheduleFrame: (callback) => requestAnimationFrame(callback),
-    cancelFrame: (handle) => cancelAnimationFrame(handle as number),
-    onPointerFrame: (action) => {
-      if (action.type === "move-area") {
-        applyAreaMove(action.point, queuedAreaSource);
-      } else {
-        inspectionState.applyQueuedInspectFrame(action);
-      }
-    },
+  // ------------------------------------------------- surface (S7)
+  // Factory at the original reducer position. Construction-time deriveds read
+  // only module-internal state + inspectConfig. Sibling controllers, sinks,
+  // and chrome getters are handler/effect-only. Phased effects register later
+  // at the original line-810 site via registerSurfaceEffects().
+  const surfaceState = createSurfaceState({
+    model: () => model,
+    coordFlipped: () => coordFlipped,
+    root: () => root,
+    toolProp: () => tool,
+    initialTool: () => interactionConfig.initialTool,
+    // Deferred: availableTools is declared after interval (handler/effect only).
+    availableTools: () => availableTools,
+    inspectConfig: () => interactionConfig.inspect,
+    selectConfig: () => interactionConfig.select,
+    // Deferred: canPublishPointSelection is declared later (handler only).
+    pointSelectEnabled: () => canPublishPointSelection,
+    ontoolchange: () => ontoolchange,
+    surfaceInteractive: () => surfaceInteractive,
+    hitIndex: () => hitIndex,
+    // Deferred: semantic-key alias initializes later (issue #165).
+    candidateSemanticKeys: (candidate) => candidateSemanticKeys(candidate),
+    inspection: () => inspectionState,
+    // Deferred: interval is declared after surface (handler only).
+    interval: () => intervalState,
+    zoom: () => zoomState,
+    emitSelection,
+    // Deferred: semantic-key service is declared later (handler only).
+    semanticKey: (row, index) => semanticKey(row, index),
+    togglePointKeys,
+    tooltipHovered: () => tooltipHovered,
+    announce: announceSink,
   });
-  const activeTool = $derived.by(() => {
-    void reducerRevision;
-    return reducer.state.tool;
-  });
-  const surfaceDescription = $derived.by(() => {
-    if (activeTool === "select-area")
-      return "Press Enter or Space to set the first selection corner. Use Arrow keys to move the opposite corner; hold Shift for larger steps. Press Enter or Space to complete the selection. Press Escape to cancel.";
-    if (activeTool === "zoom-area")
-      return "Press Enter or Space to set the first zoom corner. Use Arrow keys to move the opposite corner; hold Shift for larger steps. Press Enter or Space to complete the zoom. Press Escape to cancel.";
-    if (activeTool === "point")
-      return "Use Arrow keys to inspect data. Press Enter or Space to toggle the focused point selection. Press Escape to dismiss.";
-    return interactionConfig.inspect?.pin === true
-      ? "Use Arrow keys to inspect data. Press Enter or Space to pin. Press Escape to dismiss."
-      : "Use Arrow keys to inspect data. Press Escape to dismiss.";
-  });
-  // Host one-liners at original positions so every consumer stays unchanged.
+  // Host one-liners at original positions for stays-behind consumers.
+  const activeTool = $derived(surfaceState.activeTool);
+  const surfaceDescription = $derived(surfaceState.surfaceDescription);
   const inspection = $derived(inspectionState.inspection);
   const inspectionPanel = $derived(inspectionState.inspectionPanel);
   const coordFlipped = $derived(assembled?.coord?.type === "flip");
   let tooltipHovered = $state(false);
   let captureSurface = $state<HTMLDivElement | null>(null);
-  let touchInspectStart: { x: number; y: number } | null = null;
-  let touchInspectMoved = false;
-  let suppressClickUntil = 0;
-  let brushRect = $state<{
-    x0: number;
-    y0: number;
-    x1: number;
-    y1: number;
-  } | null>(null);
-  const brushing = $derived.by(() => {
-    void reducerRevision;
-    return isAreaBrushing(reducer.state.area.kind);
-  });
-  const areaAwaitingSecond = $derived.by(() => {
-    void reducerRevision;
-    return isAreaAwaitingSecond(reducer.state.area.kind);
-  });
+  const brushRect = $derived(surfaceState.brushRect);
+  const areaAwaitingSecond = $derived(surfaceState.areaAwaitingSecond);
   let localSelectedKeys = $state<PropertyKey[]>([]);
   const effectiveSelectedKeys: readonly PropertyKey[] = $derived.by(() => {
     void controllerRevision;
@@ -590,7 +545,6 @@
   });
   // Shared enablement predicates (avoid re-typing the same config gates).
   const inspectEnabled = $derived(interactionConfig.inspect !== null);
-  const pinEnabled = $derived(interactionConfig.inspect?.pin === true);
   const legendFocusEnabled = $derived(interactionConfig.legendFocus !== null);
   // ------------------------------------------------- legend focus (S3)
   // Factory sits AFTER the enablement cluster: construction-time
@@ -812,92 +766,9 @@
     for (const diagnostic of legendDiagnostics) deliverDiagnostic(diagnostic);
   });
 
-  $effect(() => {
-    if (!surfaceInteractive) return;
-    const onOutsidePointer = (event: PointerEvent) => {
-      if (
-        !shouldClosePinnedOnOutsidePointer({
-          inspectionState: inspection?.state,
-          targetInsideRoot: root?.contains(event.target as Node) === true,
-        })
-      )
-        return;
-      inspectionState.closeInspection("pointer", false);
-    };
-    const cancelDraft = () => {
-      brushRect = null;
-      inspectionState.clearQueuedPointer();
-      touchInspectStart = null;
-      reducer.cancelScheduledPointer();
-      reducer.dispatch({ type: "cancel-area" });
-    };
-    window.addEventListener("pointerdown", onOutsidePointer);
-    window.addEventListener("blur", cancelDraft);
-    return () => {
-      window.removeEventListener("pointerdown", onOutsidePointer);
-      window.removeEventListener("blur", cancelDraft);
-    };
-  });
-
-  $effect(() => {
-    const next = resolveEffectiveTool(
-      tool ?? interactionConfig.initialTool,
-      availableTools,
-    );
-    reducer.dispatch({ type: "set-tool", tool: next });
-  });
-
-  function chooseTool(next: InteractionTool): void {
-    // Decision table is pure (plot-capability); this switch owns side effects.
-    const action = resolveChooseToolAction({
-      next,
-      available: availableTools,
-      isControlled: tool !== undefined,
-    });
-    switch (action.type) {
-      case "ignore":
-        return;
-      case "request":
-        ontoolchange?.(next);
-        return;
-      case "apply":
-        reducer.dispatch({ type: "set-tool", tool: next });
-        brushRect = null;
-        inspectionState.clearQueuedPointer();
-        reducer.cancelScheduledPointer();
-        ontoolchange?.(next);
-        break;
-    }
-  }
-
-  function plotPoint(event: PointerEvent | MouseEvent): {
-    x: number;
-    y: number;
-  } {
-    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
-    const scene = model?.scene;
-    if (scene === undefined) return { x: 0, y: 0 };
-    return plotPointFromClient(event.clientX, event.clientY, rect, scene);
-  }
-
-  function panelId(index: number): string | null {
-    const panel = model?.scene.panels[index];
-    if (panel === undefined) return null;
-    return panel.id;
-  }
-
-  function panelAtPoint(point: Readonly<{ x: number; y: number }>) {
-    const panels = model?.scene.panels ?? [];
-    return (
-      panels.find(
-        (panel) =>
-          point.x >= panel.x &&
-          point.x <= panel.x + panel.width &&
-          point.y >= panel.y &&
-          point.y <= panel.y + panel.height,
-      ) ?? (panels.length === 1 ? panels[0]! : null)
-    );
-  }
+  // Surface window-teardown + tool-sync effects at the original line-810 site
+  // (after diagnostics, before catalog/focus/inspection registrations).
+  surfaceState.registerSurfaceEffects();
 
   const presentationFocusKeys: readonly PropertyKey[] = $derived(
     mergePresentationFocusKeys(
@@ -958,271 +829,6 @@
   // position (after legend-focus reconcile).
   inspectionState.registerInspectionEffects();
 
-  function onPointerMove(event: PointerEvent): void {
-    const p = plotPoint(event);
-    // Sticky threshold is pure; host only advances on touch + start set.
-    if (event.pointerType === "touch" && touchInspectStart !== null) {
-      touchInspectMoved = advanceTouchInspectMoved(
-        touchInspectMoved,
-        touchInspectStart,
-        p,
-      );
-    }
-    // Decision table is pure (plot-surface-pointer); this switch owns queues.
-    const action = resolvePointerMoveAction({
-      pointerType: event.pointerType,
-      activeTool,
-      touchInspectMoved,
-      hasTouchInspectStart: touchInspectStart !== null,
-      brushing,
-      hasBrushDraft: brushRect !== null,
-      inspect: interactionConfig.inspect,
-    });
-    switch (action.type) {
-      case "touch-inspect-drag-cancel":
-        inspectionState.clearQueuedPointer();
-        reducer.cancelScheduledPointer();
-        return;
-      case "queue-area-move":
-        queuedAreaSource = action.source;
-        reducer.queuePointer({ type: "move-area", point: p });
-        return;
-      case "queue-inspect": {
-        // mode/maxDistance from pure snapshot — no inspect config re-gate.
-        const match =
-          model?.candidates.nearest(p.x, p.y, {
-            mode: action.mode,
-            maxDistance: action.maxDistance,
-          }) ?? null;
-        // One null branch for hit + reducer candidate (lazy hitTest / panelId).
-        const frame = buildQueuedInspectFrame({
-          match,
-          source: action.source,
-          epoch: model?.runId ?? 0,
-          fallbackHit: () => hitIndex?.hitTest(p.x, p.y) ?? null,
-          panelIdForIndex: (index) => panelId(index),
-        });
-        inspectionState.queuePointerFrame(frame.queued, reducer.frameToken());
-        reducer.queuePointer({
-          type: "inspect",
-          candidate: frame.candidate,
-          source: action.source,
-        });
-        break;
-      }
-      case "none":
-        break;
-    }
-  }
-
-  function applyAreaMove(
-    point: Readonly<{ x: number; y: number }>,
-    source: InteractionSource,
-  ): void {
-    if (!brushing || brushRect === null) return;
-    brushRect = brushWithEnd(brushRect, point);
-    if (activeTool === "select-area")
-      emitSelection(
-        selectionEvent("change", normalizedRect(brushRect), source),
-      );
-  }
-
-  /** Map the live render model into the pure interval query scene adapter. */
-  function intervalQueryScene(): IntervalQueryScene | null {
-    if (model === null) return null;
-    return intervalQuerySceneFromModel(model, coordFlipped);
-  }
-
-  /**
-   * Shared select/zoom/end/keep-second-corner effects after pure finish-brush
-   * routing (pointer finish-brush and keyboard complete-area).
-   * Pointer-only: callers must cancel scheduled pointer before this when needed.
-   */
-  function applyFinishBrush(
-    finish: FinishBrushAction,
-    source: InteractionSource,
-  ): void {
-    switch (finish.type) {
-      case "keep-second-corner":
-        brushRect = finish.corners;
-        announcer.announce(BRUSH_SECOND_CORNER_ANNOUNCEMENT);
-        break;
-      case "select-end": {
-        brushRect = null;
-        const eventValue = selectionEvent("end", finish.rect, source);
-        // Writes (committedInterval + conditional record) then host emit —
-        // order unchanged from the pre-extraction select-end branch.
-        intervalState.applyBrushSelectEnd(eventValue, source);
-        emitSelection(eventValue);
-        reducer.dispatch({ type: "cancel-area" });
-        break;
-      }
-      case "zoom-end":
-        brushRect = null;
-        zoomState.applyBrushZoom(finish.rect, source);
-        reducer.dispatch({ type: "cancel-area" });
-        break;
-      case "end-area":
-        // Commit with non-area tool (e.g. tool changed mid-drag): clear only.
-        brushRect = null;
-        reducer.dispatch({ type: "cancel-area" });
-        break;
-    }
-  }
-
-  function onPointerLeave(): void {
-    // Evaluate leave clear **inside** the microtask so brushing/tooltip
-    // reflect post-flush state (not leave-time snapshots).
-    queueMicrotask(() => {
-      if (
-        !shouldClearInspectionOnPointerLeave({
-          brushing,
-          tooltipHovered,
-        })
-      )
-        return;
-      inspectionState.clearQueuedPointer();
-      inspectionState.clearPendingPinned();
-      reducer.cancelScheduledPointer();
-      inspectionState.setInspection(null, "pointer");
-    });
-  }
-
-  function onPointerDown(event: PointerEvent): void {
-    // Always cancel queued inspection before pure routing (host cleanup).
-    inspectionState.clearQueuedPointer();
-    reducer.cancelScheduledPointer();
-    // point always computed (pure begin-area needs it; touch/none ignore).
-    const p = plotPoint(event);
-    const action = resolvePointerDownAction({
-      pointerType: event.pointerType,
-      button: event.button,
-      activeTool,
-      areaAwaitingSecond,
-      brushCorners: brushRect,
-      point: p,
-    });
-    switch (action.type) {
-      case "touch-inspect-start":
-        touchInspectStart = p;
-        touchInspectMoved = false;
-        break;
-      case "none":
-        break;
-      case "begin-area": {
-        // R3: the brush is panel-scoped — extending stays on the origin
-        // panel from the reducer; a fresh brush anchors to the hit panel.
-        const area = reducer.state.area;
-        const extending = areaAwaitingSecond && brushRect !== null;
-        const originPanel = extending
-          ? area.kind === "idle"
-            ? null
-            : (model?.scene.panels.find((panel) => panel.id === area.panelId) ??
-              null)
-          : panelAtPoint(p);
-        if (originPanel === null) break;
-        // Pure table owns fresh vs extend corner policy.
-        brushRect = action.corners;
-        inspectionState.setInspection(null, action.source);
-        reducer.dispatch({
-          type: "begin-area",
-          point: p,
-          panelId: originPanel.id,
-        });
-        if (action.emitSelectStart) {
-          const startEvent = selectionEvent(
-            "start",
-            normalizedRect(action.corners),
-            action.source,
-          );
-          emitSelection(startEvent);
-        }
-        try {
-          (event.currentTarget as HTMLElement).setPointerCapture(
-            event.pointerId,
-          );
-        } catch {
-          // Synthetic events may not register a browser pointer id. The
-          // reducer still owns cancellation; real pointer streams retain
-          // capture.
-        }
-        break;
-      }
-    }
-  }
-
-  function selectionEvent(
-    phase: IntervalSelection["phase"],
-    rect: ReturnType<typeof normalizedRect>,
-    source: InteractionSource,
-  ): IntervalSelection {
-    const originPanelId =
-      reducer.state.area.kind === "idle"
-        ? committedInterval?.panelId
-        : reducer.state.area.panelId;
-    return buildIntervalSelectionFromScene({
-      phase,
-      mode: interactionConfig.select?.mode ?? "xy",
-      source,
-      pixels: rect,
-      scene: intervalQueryScene(),
-      ...(originPanelId !== undefined && { panelId: originPanelId }),
-      keyForRow: (rowIndex) =>
-        semanticKey(model?.row(rowIndex) ?? null, rowIndex),
-    });
-  }
-
-  function onPointerUp(event: PointerEvent): void {
-    // endPoint always computed (pure finish-brush needs it; touch paths ignore).
-    const endPoint = plotPoint(event);
-    const action = resolvePointerUpAction({
-      pointerType: event.pointerType,
-      activeTool,
-      inspect: interactionConfig.inspect,
-      hasTouchInspectStart: touchInspectStart !== null,
-      touchInspectMoved,
-      brushing,
-      brushCorners: brushRect,
-      endPoint,
-    });
-    switch (action.type) {
-      case "touch-inspect-drag-ignore":
-        // Always clear touch-inspect start state (host cleanup).
-        touchInspectStart = null;
-        touchInspectMoved = false;
-        break;
-      case "touch-inspect-tap": {
-        touchInspectStart = null;
-        touchInspectMoved = false;
-        // mode/maxDistance/state from pure inspect snapshot — no re-gate.
-        const match = model?.candidates.nearest(endPoint.x, endPoint.y, {
-          mode: action.mode,
-          maxDistance: action.maxDistance,
-        });
-        if (match !== null && match !== undefined) {
-          inspectionState.setInspection(
-            hitFromCandidate(match),
-            "touch",
-            action.state,
-            match.mode,
-            match,
-          );
-          suppressClickUntil =
-            performance.now() + TOUCH_INSPECT_CLICK_SUPPRESS_MS;
-        }
-        break;
-      }
-      case "none":
-        break;
-      case "finish-brush": {
-        // Pure table owns evaluate + select/zoom/end; host cancels then applies.
-        reducer.cancelScheduledPointer();
-        applyFinishBrush(action.finish, action.source);
-        break;
-      }
-    }
-  }
-
   /** Replace one or both continuous zoom domains without disturbing the
    *  other channel. This is the controlled linking/programmatic-zoom path. */
   export function setZoom(domains: Partial<ZoomDomains>): void {
@@ -1236,20 +842,6 @@
   const datumLabel = (values: Record<string, CellValue> | null) =>
     datumLabelFor(model, values);
 
-  function onSurfaceBlur(event: FocusEvent): void {
-    const blurAction = resolveSurfaceBlurAction({
-      relatedTargetInsideRoot:
-        root?.contains(event.relatedTarget as Node | null) === true,
-      inspectionState: inspection?.state ?? "none",
-    });
-    if (blurAction.type === "ignore") return;
-    // Shared for keep-pinned and clear-inspection (ordering is load-bearing).
-    inspectionState.resetTraversalIndex();
-    reducer.dispatch({ type: "set-active", candidate: null });
-    if (blurAction.type === "blur-clear-inspection")
-      inspectionState.setInspection(null, "keyboard");
-  }
-
   function togglePointKeys(
     keys: readonly PropertyKey[],
     source: InteractionSource,
@@ -1261,135 +853,6 @@
       interactionConfig.select?.multiple ?? false,
     );
     commitPointSelection(next, source);
-  }
-
-  function onSurfaceKeyDown(event: KeyboardEvent): void {
-    // Decision table is pure (plot-surface-keyboard); this switch owns side
-    // effects only. brushCorners is the draft source of truth (not reducer
-    // brushing); nudge/complete-area carry pure payloads so host only applies.
-    const { action, preventDefault } = resolveSurfaceKeyAction({
-      key: event.key,
-      shiftKey: event.shiftKey,
-      activeTool,
-      brushCorners: brushRect,
-      hasInspection: inspection !== null,
-      pinEnabled,
-      focusKey: inspection?.focus.key ?? null,
-      sourceKeys: inspection?.focus.sourceKeys ?? [],
-      inspectionAnchor: inspection?.focus.anchor ?? null,
-      inspectionPanel,
-      firstPanel: model?.scene.panels[0],
-    });
-    if (preventDefault) event.preventDefault();
-    switch (action.type) {
-      case "nudge-brush": {
-        // Pure table owns clamp panel policy and free-corner nudge.
-        brushRect = action.corners;
-        reducer.dispatch({
-          type: "move-area",
-          point: { x: action.corners.x1, y: action.corners.y1 },
-        });
-        return;
-      }
-      case "begin-area": {
-        // Pure table owns inspection-anchor vs panel-center policy.
-        // R3: the brush is panel-scoped — anchor to the panel under it.
-        const originPanel = panelAtPoint(action.anchor);
-        if (originPanel === null) return;
-        brushRect = brushAtPoint(action.anchor);
-        reducer.dispatch({
-          type: "begin-area",
-          point: action.anchor,
-          panelId: originPanel.id,
-        });
-        announcer.announce(BRUSH_SECOND_CORNER_ANNOUNCEMENT);
-        return;
-      }
-      case "complete-area": {
-        // finish payload is pure-owned (normalize + select/zoom/end routing).
-        applyFinishBrush(action.finish, "keyboard");
-        return;
-      }
-      case "cycle-coincident":
-        inspectionState.cycleCoincident(action.delta);
-        return;
-      case "navigate-direction":
-        inspectionState.navigateDirection(action.dx, action.dy);
-        return;
-      case "toggle-point-keys":
-        togglePointKeys(action.keys, "keyboard");
-        return;
-      case "toggle-pin":
-        inspectionState.toggleInspectionPin("keyboard");
-        return;
-      case "escape":
-        inspectionState.dismissInspection("escape", "keyboard", {
-          returnToInspect: action.returnToInspect,
-        });
-        break;
-      case "none":
-        break;
-    }
-  }
-
-  function onCaptureClick(event: MouseEvent): void {
-    const action = resolveCaptureClickAction({
-      suppressClick: performance.now() < suppressClickUntil,
-      activeTool,
-      pointSelectEnabled: canPublishPointSelection,
-      inspectEnabled,
-      pinEnabled,
-      hasInspection: inspection !== null,
-    });
-    switch (action.type) {
-      case "suppress":
-        suppressClickUntil = 0;
-        break;
-      case "toggle-point": {
-        const point = plotPoint(event);
-        const match = model?.candidates.nearest(point.x, point.y, {
-          mode: "xy",
-          maxDistance: POINT_SELECT_NEAREST_MAX_DISTANCE_PX,
-        });
-        if (match === null || match === undefined) break;
-        togglePointKeys(candidateSemanticKeys(match), "pointer");
-        break;
-      }
-      case "toggle-pin":
-        inspectionState.toggleInspectionPin("pointer");
-        break;
-      case "none":
-        break;
-    }
-  }
-
-  /** Pointer-cancel always drops draft/queue/touch-inspect and cancels area. */
-  function onPointerCancel(): void {
-    inspectionState.clearQueuedPointer();
-    touchInspectStart = null;
-    touchInspectMoved = false;
-    reducer.cancelScheduledPointer();
-    brushRect = null;
-    reducer.dispatch({ type: "cancel-area" });
-  }
-
-  /**
-   * Lost capture: pure decision table owns keep vs clear draft; host mutates
-   * brushRect and always cancels area when not ignored.
-   */
-  function onLostPointerCapture(): void {
-    const lost = resolveLostPointerCaptureAction(reducer.state.area.kind);
-    switch (lost.type) {
-      case "ignore":
-        break;
-      case "cancel-keep-draft":
-        reducer.dispatch({ type: "cancel-area" });
-        break;
-      case "cancel-clear-draft":
-        brushRect = null;
-        reducer.dispatch({ type: "cancel-area" });
-        break;
-    }
   }
 
   // Phase 3: clientFlush/ready effect at the end of the script (late registration).
@@ -1437,7 +900,7 @@
       canSetZoomBounds={!emptyPlot && preciseZoomAxes.length > 0}
       intervalAxes={preciseIntervalAxes}
       zoomAxes={preciseZoomAxes}
-      onChooseTool={chooseTool}
+      onChooseTool={surfaceState.chooseTool}
       onResetZoom={zoomState.resetZoom}
       onClearPointSelection={clearPointSelection}
       onClearIntervalSelection={intervalState.clearIntervalSelection}
@@ -1527,15 +990,15 @@
         onFocus={() => {
           if (inspection === null) inspectionState.navigate(1);
         }}
-        onBlur={onSurfaceBlur}
-        {onPointerMove}
-        {onPointerLeave}
-        {onPointerDown}
-        {onPointerUp}
-        {onPointerCancel}
-        {onLostPointerCapture}
-        onClick={onCaptureClick}
-        onKeyDown={onSurfaceKeyDown}
+        onBlur={surfaceState.onSurfaceBlur}
+        onPointerMove={surfaceState.onPointerMove}
+        onPointerLeave={surfaceState.onPointerLeave}
+        onPointerDown={surfaceState.onPointerDown}
+        onPointerUp={surfaceState.onPointerUp}
+        onPointerCancel={surfaceState.onPointerCancel}
+        onLostPointerCapture={surfaceState.onLostPointerCapture}
+        onClick={surfaceState.onCaptureClick}
+        onKeyDown={surfaceState.onSurfaceKeyDown}
         onDblClick={zoomState.onDblClick}
       />
       {#if inspection !== null}
