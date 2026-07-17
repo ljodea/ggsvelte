@@ -203,10 +203,10 @@ describe("createIntervalState construction", () => {
         },
         coordFlipped: () => false,
         captureSurface: () => null,
-        // Known hazard (issue #165): pre-populated non-union controller +
-        // non-null model DOES reach this at construction on Svelte 5.29 SSR
-        // and TDZs identically on the base branch. This guard pins the common
-        // empty-intervals construction path only.
+        // Issue #165 history: under the retired eager-SSR floor, a
+        // pre-populated non-union controller + non-null model reached this
+        // at construction. Deriveds are lazy at the 5.33.1 floor, so this
+        // guard pins the common empty-intervals construction path only.
         candidateSemanticKeys: (candidate) => {
           candidateSemanticKeysCalls++;
           return identityCandidateKeys(candidate);
@@ -229,12 +229,10 @@ describe("createIntervalState construction", () => {
     expect(announceCalls).toBe(0);
     expect(inspectionPanelCalls).toBe(0);
     expect(candidateSemanticKeysCalls).toBe(0);
-    // Client deriveds are lazy, so this guard only proves the exposed
-    // accessors reach no armed getter (reads + one flush below). A
-    // construction-time $derived that reads an armed dep WITHOUT being
-    // reachable from an accessor would pass here yet still crash Svelte 5.29
-    // SSR, where deriveds evaluate eagerly at construction (TDZ) — the .ssr
-    // suites and compat:consumer are the gate for that case.
+    // Deriveds are lazy on client and server at the 5.33.1 floor, so this
+    // guard proves the exposed accessors reach no armed getter (reads + one
+    // flush below) — the construction-read discipline. Direct (non-derived)
+    // construction-time reads of armed deps would throw right here.
     expect(state.committedInterval).toBeNull();
     expect(state.effectiveIntervals).toEqual([]);
     expect(state.effectiveIntervalKeys).toEqual([]);

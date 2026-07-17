@@ -12,10 +12,11 @@
  * for the construction guard: emitSelection, commitZoom, announce,
  * inspectionPanel, candidateSemanticKeys.
  *
- * The host constructs semantic-key resolution before this factory so Svelte
- * 5.29's eager server evaluation can safely project pre-populated non-union
- * intervals. Semantic diagnostics retain their later effect-registration
- * position through the service's phased `registerEffects()` API (#165).
+ * The host constructs semantic-key resolution before this factory
+ * (construction-order convention; deriveds are lazy at the 5.33.1 floor, so
+ * interval projection evaluates on first read, not at construction).
+ * Semantic diagnostics retain their later effect-registration position
+ * through the service's phased `registerEffects()` API (#165).
  */
 import {
   decodeKey,

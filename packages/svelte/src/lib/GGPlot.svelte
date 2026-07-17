@@ -316,8 +316,8 @@
   // ------------------------------------------------------------ zoom respec (S4)
   // Factory sits at the original zoom-respec region (before announcer /
   // runtime). Construction-time deriveds read interaction/scope/zoomConfig/
-  // assembled only — never model/coordFlipped/announce (Svelte 5.29 server
-  // evaluates $derived eagerly at construction).
+  // assembled only — never model/coordFlipped/announce (those are later-
+  // declared; construction-order DAG keeps them as deferred getters).
   // controllerRevision deleted in S8 (selection reads revision directly).
   const zoomState = createPlotZoomState({
     interaction: () => factoryInteraction,
@@ -331,7 +331,7 @@
     oninteraction: () => factoryOninteraction,
     announce: announceSink,
   });
-  // One-line host aliases at original positions (server-eager order).
+  // One-line host aliases at original positions (construction-order DAG).
   const effectiveZoomDomains = $derived(zoomState.effectiveZoomDomains);
   const effectiveSpec = $derived(zoomState.effectiveSpec);
 
@@ -354,7 +354,7 @@
   // ------------------------------------------------- legend filter (S2)
   // Factory sits at the original legend-filter region (before the runtime).
   // Construction-time deriveds read legendFilter/effectiveSpec only — never
-  // model (Svelte 5.29 server evaluates $derived eagerly at construction).
+  // model (model is declared after the runtime; construction-order DAG).
   const legendFilterState = createLegendFilterState({
     effectiveSpec: () => effectiveSpec,
     legendFilterProp: () => legendFilter,
@@ -377,11 +377,11 @@
 
   // ------------------------------------------------- plot runtime (S1)
   // The factory call sits AFTER the zoom-respec and legend-filter blocks:
-  // on the oldest supported Svelte, SERVER deriveds evaluate eagerly at
-  // construction, so every binding a dep getter closes over must already be
-  // initialized here (consumer-compat SSR smoke enforces this). Client-side,
-  // the ResizeObserver effect now registers after the legend-reset effects —
-  // safe: the observer callback is async and shares no state with them.
+  // every binding a dep getter closes over must already be initialized here
+  // (construction-order DAG; direct construction-time reads TDZ).
+  // Client-side, the ResizeObserver effect now registers after the
+  // legend-reset effects — safe: the observer callback is async and shares
+  // no state with them.
   const runtime = createPlotRuntime({
     widthProp: () => width,
     heightProp: () => height,
@@ -404,8 +404,8 @@
 
   // Construct semantic resolution as soon as the runtime model exists. The
   // diagnostics effect is still registered at its original later position.
-  // This ordering makes server-eager interval projection safe when a shared
-  // controller arrives with pre-populated non-union intervals (#165).
+  // This ordering makes interval projection safe when a shared controller
+  // arrives with pre-populated non-union intervals (#165).
   const semanticKeys = createSemanticKeyService({
     model: () => model,
     assembled: () => assembled,
@@ -545,8 +545,8 @@
   const legendFocusEnabled = $derived(interactionConfig.legendFocus !== null);
   // ------------------------------------------------- legend focus (S3)
   // Factory sits AFTER the enablement cluster: construction-time
-  // effectiveEmphasisKeys closes over earlier bindings only (Svelte 5.29
-  // server evaluates $derived eagerly at construction).
+  // effectiveEmphasisKeys closes over earlier bindings only
+  // (construction-order DAG).
   const legendFocusState = createLegendFocusState({
     interaction: () => factoryInteraction,
     resolvedInteractionScope: () => resolvedInteractionScope,
@@ -564,7 +564,7 @@
     oninteraction: () => factoryOninteraction,
     announce: announceSink,
   });
-  // Host one-liner: downstream server-eager deriveds (capability gate,
+  // Host one-liner: downstream deriveds (capability gate,
   // emphasizedAnchors, presentationFocusKeys) read this at original sites.
   const effectiveEmphasisKeys = $derived(
     legendFocusState.effectiveEmphasisKeys,
@@ -630,7 +630,7 @@
   const capabilityStatus = $derived(chromeState.capabilityStatus);
   const rootStyle = $derived(chromeState.rootStyle);
   // Anchors: methods with host one-liner deriveds at original positions
-  // (server-eager order preserved; later-declared inputs).
+  // (construction-order DAG; later-declared inputs).
   const selectedAnchors = $derived(selectionState.computeSelectedAnchors());
   const emphasizedAnchors = $derived(selectionState.computeEmphasizedAnchors());
 
@@ -667,7 +667,8 @@
     ),
   );
 
-  // Host-side deriveds: must not live in the factory (server-eager model TDZ).
+  // Host-side deriveds: must not live in the factory (model is later-
+  // declared; keep construction-time factory free of that read).
   const interactiveLegendEntries = $derived(
     legendFocusState.computeInteractiveEntries(model),
   );
@@ -683,7 +684,8 @@
     legendFocusEnabled && effectiveLegendPressed !== null,
   );
 
-  // Host-side derived: must not live in the factory (server-eager model TDZ).
+  // Host-side derived: must not live in the factory (model is later-
+  // declared; keep construction-time factory free of that read).
   const filterableLegendEntries = $derived(
     legendFilterState.computeEntries(model),
   );

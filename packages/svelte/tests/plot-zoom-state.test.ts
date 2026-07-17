@@ -163,12 +163,10 @@ describe("createPlotZoomState construction", () => {
     expect(modelCalls).toBe(0);
     expect(coordFlippedCalls).toBe(0);
     expect(announceCalls).toBe(0);
-    // Client deriveds are lazy, so this guard only proves the exposed
-    // accessors reach no armed getter (reads + one flush below). A
-    // construction-time $derived that reads an armed dep WITHOUT being
-    // reachable from an accessor would pass here yet still crash Svelte 5.29
-    // SSR, where deriveds evaluate eagerly at construction (TDZ) — the .ssr
-    // suites and compat:consumer are the gate for that case.
+    // Deriveds are lazy on client and server at the 5.33.1 floor, so this
+    // guard proves the exposed accessors reach no armed getter (reads + one
+    // flush below) — the construction-read discipline. Direct (non-derived)
+    // construction-time reads of armed deps would throw right here.
     expect(state.effectiveZoomDomains).toBeNull();
     expect(state.effectiveSpec).not.toBeNull();
     flushSync();
@@ -605,7 +603,7 @@ describe("runtime + zoom real cycle", () => {
         oninteraction: noInteractionCallback,
         announce: () => {},
       });
-      // Host aliases (server-eager order).
+      // Host aliases (construction-order DAG).
       const effectiveZoomDomains = () => zoom.effectiveZoomDomains;
       const effectiveSpec = () => zoom.effectiveSpec;
       const runtimeDeps = createReactiveRuntimeDeps({

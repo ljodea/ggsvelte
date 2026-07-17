@@ -3,9 +3,9 @@
  *
  * Owns chart-local emphasis, preview/commit state, roving/touch suppress flags,
  * interaction handlers, and phased reconcile effects. Construction-time
- * deriveds must NOT read model/semanticKeys/entries (Svelte 5.29 server-eager
- * $derived TDZ). Those are methods/effects registered after the host declares
- * the later bindings.
+ * deriveds must NOT read model/semanticKeys/entries (construction-order DAG).
+ * Those are methods/effects registered after the host declares the later
+ * bindings.
  */
 import type { CellValue, RenderModel } from "@ggsvelte/core";
 

@@ -98,7 +98,7 @@ describe("guide sections cover their catalogs", () => {
 
   it("documents the machine-checked packed-consumer support contract", () => {
     expect(COMPATIBILITY_MD).toContain("Node.js 22");
-    expect(COMPATIBILITY_MD).toContain("Svelte 5.29.0");
+    expect(COMPATIBILITY_MD).toContain("Svelte 5.33.1");
     expect(COMPATIBILITY_MD).toContain("npm bundled with Node");
     expect(COMPATIBILITY_MD).toContain("pnpm 11.13.0");
     expect(COMPATIBILITY_MD).toContain("Bun 1.3.14");

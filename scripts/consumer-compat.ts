@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { basename, join, relative, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 
-import type { PackageManager } from "./support-matrix.js";
+import { loadSupportMatrix, type PackageManager } from "./support-matrix.js";
 
 interface CommandStep {
   label: string;
@@ -14,7 +14,7 @@ interface CommandStep {
 }
 
 const fixtureDependencies = [
-  // The compatibility fixture must itself support the Svelte 5.29 floor.
+  // The compatibility fixture must itself support the Svelte 5.33.1 floor.
   // Plugin 7 requires Svelte 5.46+, which would make the minimum row a test
   // of fixture peer resolution rather than a test of ggsvelte.
   "@sveltejs/vite-plugin-svelte@5.1.1",
@@ -44,7 +44,8 @@ export function resolveConsumerOptions(
 ) {
   return {
     packageManager: (args[0] ?? environment.PACKAGE_MANAGER ?? "npm") as PackageManager,
-    svelteVersion: args[1] ?? environment.SVELTE_VERSION ?? "5.29.0",
+    // Single-sourced from support-matrix.json — the floor lives in one place.
+    svelteVersion: args[1] ?? environment.SVELTE_VERSION ?? loadSupportMatrix().svelte.minimum,
     packageManagerVersion: args[2] ?? environment.PACKAGE_MANAGER_VERSION,
   };
 }

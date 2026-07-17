@@ -10,6 +10,7 @@ import {
   packageTarballNames,
   resolveConsumerOptions,
 } from "./consumer-compat.js";
+import { loadSupportMatrix } from "./support-matrix.js";
 
 describe("packed consumer compatibility harness", () => {
   test("installs every publishable tarball rather than workspace source", () => {
@@ -49,6 +50,10 @@ describe("packed consumer compatibility harness", () => {
     });
   });
 
+  test("default Svelte version matches the support-matrix floor", () => {
+    expect(resolveConsumerOptions([], {}).svelteVersion).toBe(loadSupportMatrix().svelte.minimum);
+  });
+
   test("invokes the pinned pnpm CLI without relying on an installer-generated shim", () => {
     expect(commandInvocation("pnpm", ["--version"], "/repo", "linux")).toEqual({
       command: "node",
@@ -74,7 +79,7 @@ describe("packed consumer compatibility harness", () => {
 
   test("names every local tarball in the consumer manifest", () => {
     const manifest = fixtureManifest(
-      "5.29.0",
+      "0.0.0-fixture",
       [
         join("artifacts", "ggsvelte-spec-0.0.0.tgz"),
         join("artifacts", "ggsvelte-core-0.0.0.tgz"),
@@ -82,7 +87,7 @@ describe("packed consumer compatibility harness", () => {
       ],
       "/consumer",
     );
-    expect(manifest.dependencies.svelte).toBe("5.29.0");
+    expect(manifest.dependencies.svelte).toBe("0.0.0-fixture");
     expect(manifest.dependencies["@ggsvelte/spec"]).toContain("ggsvelte-spec-0.0.0.tgz");
     expect(manifest.dependencies["@ggsvelte/core"]).toContain("ggsvelte-core-0.0.0.tgz");
     expect(manifest.dependencies["@ggsvelte/svelte"]).toContain("ggsvelte-svelte-0.0.0.tgz");
