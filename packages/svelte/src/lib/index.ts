@@ -74,22 +74,22 @@ export type {
   ZoomInput,
   ZoomOptions,
 } from "./interaction.js";
-export { default as GeomPoint } from "./GeomPoint.svelte";
-export { default as GeomLine } from "./GeomLine.svelte";
-export { default as GeomCol } from "./GeomCol.svelte";
-export { default as GeomBar } from "./GeomBar.svelte";
-export { default as GeomArea } from "./GeomArea.svelte";
-export { default as GeomRule } from "./GeomRule.svelte";
-export { default as GeomText } from "./GeomText.svelte";
-export { default as GeomHistogram } from "./GeomHistogram.svelte";
-export { default as GeomSmooth } from "./GeomSmooth.svelte";
-export { default as GeomBoxplot } from "./GeomBoxplot.svelte";
-export { default as GeomDensity } from "./GeomDensity.svelte";
-export { default as GeomErrorbar } from "./GeomErrorbar.svelte";
-export { registerLayer } from "./registry.svelte.js";
-export type { LayerDescriptor, LayerRegistry } from "./registry.svelte.js";
-export { createGeomLayer } from "./geom-factory.svelte.js";
-export type { GeomProps } from "./geom-factory.svelte.js";
+export { default as GeomPoint } from "./geoms/GeomPoint.svelte";
+export { default as GeomLine } from "./geoms/GeomLine.svelte";
+export { default as GeomCol } from "./geoms/GeomCol.svelte";
+export { default as GeomBar } from "./geoms/GeomBar.svelte";
+export { default as GeomArea } from "./geoms/GeomArea.svelte";
+export { default as GeomRule } from "./geoms/GeomRule.svelte";
+export { default as GeomText } from "./geoms/GeomText.svelte";
+export { default as GeomHistogram } from "./geoms/GeomHistogram.svelte";
+export { default as GeomSmooth } from "./geoms/GeomSmooth.svelte";
+export { default as GeomBoxplot } from "./geoms/GeomBoxplot.svelte";
+export { default as GeomDensity } from "./geoms/GeomDensity.svelte";
+export { default as GeomErrorbar } from "./geoms/GeomErrorbar.svelte";
+export { registerLayer } from "./geoms/registry.svelte.js";
+export type { LayerDescriptor, LayerRegistry } from "./geoms/registry.svelte.js";
+export { createGeomLayer } from "./geoms/factory.svelte.js";
+export type { GeomProps } from "./geoms/factory.svelte.js";
 
 // Spec surface (builder + canonicalizer + validation)
 export {

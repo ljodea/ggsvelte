@@ -1,4 +1,5 @@
 import { svelte } from "@sveltejs/vite-plugin-svelte";
+import { coverageBase } from "./vitest.coverage.js";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
@@ -8,5 +9,9 @@ export default defineConfig({
     name: "ssr",
     environment: "node",
     include: ["tests/**/*.ssr.test.ts"],
+    coverage: {
+      ...coverageBase,
+      reportsDirectory: "coverage/ssr",
+    },
   },
 });

@@ -34,8 +34,8 @@ import type {
   PlotInteractionEvent,
   ResolvedInteractionConfig,
 } from "./interaction.js";
-import { inspectionLiveText as inspectionLiveTextFor } from "./plot-labels.js";
-import { plotTooltipDomId } from "./plot-layout.js";
+import { inspectionLiveText as inspectionLiveTextFor } from "./assembly/labels.js";
+import { plotTooltipDomId } from "./assembly/layout.js";
 import { panelContainingAnchor } from "./plot-geometry.js";
 import {
   bestDirectionalIndex,

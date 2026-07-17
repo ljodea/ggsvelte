@@ -1,0 +1,118 @@
+import type { CellValue, RenderModel } from "@ggsvelte/core";
+
+import type {
+  LegendFocusEvent,
+  PlotInspectionChange,
+  PlotSelection,
+  ReadonlyZoomDomains,
+} from "../interaction.js";
+
+/** Shared a11y count phrase: "1 datum" / "N data". */
+export function countLabel(count: number): string {
+  return `${String(count)} ${count === 1 ? "datum" : "data"}`;
+}
+
+/** Live message when the brush needs a second corner (pointer or keyboard). */
+export const BRUSH_SECOND_CORNER_ANNOUNCEMENT = "Choose opposite corner." as const;
+
+/**
+ * Live message for selection emission, or null when the phase does not announce
+ * (interval start/change).
+ */
+export function selectionAnnouncement(event: PlotSelection): string | null {
+  if (event.phase === "end") {
+    const count = event.mode === "point" ? event.keys.length : event.lineageCount;
+    return `Selection complete, ${countLabel(count)}.`;
+  }
+  if (event.phase === "clear") return "Selection cleared.";
+  return null;
+}
+
+/** Live message for legend-focus change/clear events. */
+export function legendFocusAnnouncement(event: LegendFocusEvent): string {
+  if (event.phase === "change") {
+    const verb = event.state === "committed" ? "focused" : "previewed";
+    return `${event.label} ${verb}, ${countLabel(event.keys.length)}.`;
+  }
+  return "Legend focus cleared.";
+}
+
+/** Live message after a zoom commit or reset (`null` domains → reset). */
+export function zoomAnnouncement(domains: ReadonlyZoomDomains | null): string {
+  return domains === null ? "Zoom reset." : "Zoom complete.";
+}
+
+/** Accessible per-mark label from the layer's mapped fields. */
+export function markLabel(model: RenderModel | null, row: number): string {
+  if (model === null) return `data point ${row + 1}`;
+  const values = model.row(row);
+  if (values === null) return `data point ${row + 1}`;
+  const fields = model.layerFields.flat();
+  const seen = new Set<string>();
+  const parts: string[] = [];
+  for (const f of fields) {
+    if (seen.has(f.field)) continue;
+    seen.add(f.field);
+    parts.push(`${f.field} ${String(values[f.field] ?? "")}`);
+  }
+  return parts.join(", ") || `data point ${row + 1}`;
+}
+
+export function datumLabel(
+  model: RenderModel | null,
+  values: Record<string, CellValue> | null,
+): string {
+  if (values === null) return "No active datum";
+  const fields = model?.layerFields.flat() ?? [];
+  const seen = new Set<string>();
+  const parts: string[] = [];
+  for (const field of fields) {
+    if (seen.has(field.field)) continue;
+    seen.add(field.field);
+    parts.push(`${field.field} ${String(values[field.field] ?? "")}`);
+  }
+  return parts.join(", ") || "Active datum";
+}
+
+export function inspectionLiveText(
+  model: RenderModel | null,
+  value: PlotInspectionChange<Record<string, CellValue>, PropertyKey>,
+): string {
+  const count = value.members.length;
+  const state = value.state === "pinned" ? ", pinned" : "";
+  if (value.mode !== "x" && value.mode !== "y")
+    return `${datumLabel(model, value.focus.row)}; ${countLabel(count)}${state}`;
+  const seen = new Set<string>();
+  const focused = value.focus.fields
+    .filter((field) => {
+      if (field.channel === value.mode || seen.has(field.field)) return false;
+      seen.add(field.field);
+      return true;
+    })
+    .map((field) => `${field.field} ${String(field.value ?? "")}`)
+    .join(", ");
+  return `${value.mode} ${value.axisLabel}; ${countLabel(count)}${focused ? `; focused ${focused}` : ""}${state}`;
+}
+
+/**
+ * Capture live-region text for the interaction ARIA live region.
+ *
+ * Priority (matches host `announcement || fallback`):
+ *   1. non-empty sticky `announcement` (including after microtask fill)
+ *   2. keyboard/touch inspection → `inspectionLiveText` (short-circuited)
+ *   3. otherwise empty string
+ *
+ * Empty-string announcement is falsy and falls through — host
+ * `announceInteraction` briefly sets `""` before the microtask message.
+ */
+export function resolveInteractionLiveText(input: {
+  readonly announcement: string;
+  readonly model: RenderModel | null;
+  readonly inspection: PlotInspectionChange<Record<string, CellValue>, PropertyKey> | null;
+}): string {
+  if (input.announcement) return input.announcement;
+  if (input.inspection === null) return "";
+  if (input.inspection.source === "keyboard" || input.inspection.source === "touch")
+    return inspectionLiveText(input.model, input.inspection);
+  return "";
+}

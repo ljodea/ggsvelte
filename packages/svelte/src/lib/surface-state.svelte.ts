@@ -36,7 +36,7 @@ import {
   intervalQuerySceneFromModel,
   type IntervalQueryScene,
 } from "./plot-interval-query.js";
-import { BRUSH_SECOND_CORNER_ANNOUNCEMENT } from "./plot-labels.js";
+import { BRUSH_SECOND_CORNER_ANNOUNCEMENT } from "./assembly/labels.js";
 import { hitFromCandidate, plotPointFromClient } from "./plot-pointer.js";
 import { buildQueuedInspectFrame } from "./plot-surface-inspection-frame.js";
 import {

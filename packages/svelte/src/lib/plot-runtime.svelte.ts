@@ -17,7 +17,7 @@ import { untrack } from "svelte";
 
 import type { LegendFilterClause } from "./legend-filter.js";
 import type { ReadonlyZoomDomains } from "./interaction.js";
-import { isContainerWidthProp, resolvePlotSize } from "./plot-layout.js";
+import { isContainerWidthProp, resolvePlotSize } from "./assembly/layout.js";
 import { createPaintLedger, isPlotReady } from "./plot-paint.js";
 
 export type PlotRuntimeDeps = {

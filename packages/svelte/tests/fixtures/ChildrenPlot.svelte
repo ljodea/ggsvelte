@@ -1,8 +1,8 @@
 <script lang="ts">
   import type { PortableSpec, RenderModel } from "../../src/lib/index.js";
   import GGPlot from "../../src/lib/GGPlot.svelte";
-  import GeomLine from "../../src/lib/GeomLine.svelte";
-  import GeomPoint from "../../src/lib/GeomPoint.svelte";
+  import GeomLine from "../../src/lib/geoms/GeomLine.svelte";
+  import GeomPoint from "../../src/lib/geoms/GeomPoint.svelte";
 
   interface Row {
     x: number;
