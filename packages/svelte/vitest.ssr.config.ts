@@ -8,5 +8,11 @@ export default defineConfig({
     name: "ssr",
     environment: "node",
     include: ["tests/**/*.ssr.test.ts"],
+    coverage: {
+      provider: "v8",
+      reportsDirectory: "coverage/ssr",
+      include: ["src/lib/**"],
+      enabled: false,
+    },
   },
 });
