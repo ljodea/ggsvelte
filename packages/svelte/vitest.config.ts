@@ -25,6 +25,16 @@ export default defineConfig({
     coverage: {
       ...coverageBase,
       reportsDirectory: "coverage/browser",
+      // Browser-only gate: keep thresholds on this config (not coverageBase)
+      // so the structurally-low SSR report is not blocked. Values sit ≥5pp
+      // under current mature browser totals to ratchet regressions without
+      // flake. CI adoption of test:coverage is a follow-up decision.
+      thresholds: {
+        statements: 90,
+        branches: 80,
+        functions: 90,
+        lines: 90,
+      },
     },
     browser: {
       enabled: true,
