@@ -258,7 +258,7 @@
 <style>
   @font-face {
     font-family: "Roboto Condensed";
-    src: url("./fonts/RobotoCondensed-Light.ttf") format("truetype");
+    src: url("../fonts/RobotoCondensed-Light.ttf") format("truetype");
     font-style: normal;
     font-weight: 300;
     font-display: swap;
@@ -266,7 +266,7 @@
 
   @font-face {
     font-family: "Roboto Condensed";
-    src: url("./fonts/RobotoCondensed-Regular.ttf") format("truetype");
+    src: url("../fonts/RobotoCondensed-Regular.ttf") format("truetype");
     font-style: normal;
     font-weight: 400;
     font-display: swap;
@@ -274,7 +274,7 @@
 
   @font-face {
     font-family: "Roboto Condensed";
-    src: url("./fonts/RobotoCondensed-Bold.ttf") format("truetype");
+    src: url("../fonts/RobotoCondensed-Bold.ttf") format("truetype");
     font-style: normal;
     font-weight: 700;
     font-display: swap;
