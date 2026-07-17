@@ -153,9 +153,8 @@ export type SurfaceState = {
  * construction-time deriveds. Call `registerSurfaceEffects` at the original
  * line-810 position (after diagnostics, before catalog/focus/inspection).
  *
- * Client-lazy note: on the client, $derived evaluation is lazy until first
- * read; Svelte 5.29 SSR evaluates construction-time deriveds eagerly. Armed
- * deps must not be reached from construction-time deriveds (compat:consumer).
+ * Construction-order note: armed deps must not be reached from
+ * construction-time deriveds (construction-order DAG; compat:consumer).
  */
 export function createSurfaceState(deps: SurfaceStateDeps): SurfaceState {
   let reducerRevision = $state(0);

@@ -204,9 +204,9 @@ describe("createIntervalState construction", () => {
         coordFlipped: () => false,
         captureSurface: () => null,
         // Known hazard (issue #165): pre-populated non-union controller +
-        // non-null model DOES reach this at construction on Svelte 5.29 SSR
-        // and TDZs identically on the base branch. This guard pins the common
-        // empty-intervals construction path only.
+        // non-null model can reach this at construction and TDZ if semantic
+        // keys are not yet declared. This guard pins the common empty-
+        // intervals construction path only.
         candidateSemanticKeys: (candidate) => {
           candidateSemanticKeysCalls++;
           return identityCandidateKeys(candidate);
@@ -232,9 +232,9 @@ describe("createIntervalState construction", () => {
     // Client deriveds are lazy, so this guard only proves the exposed
     // accessors reach no armed getter (reads + one flush below). A
     // construction-time $derived that reads an armed dep WITHOUT being
-    // reachable from an accessor would pass here yet still crash Svelte 5.29
-    // SSR, where deriveds evaluate eagerly at construction (TDZ) — the .ssr
-    // suites and compat:consumer are the gate for that case.
+    // reachable from an accessor would pass here yet still violate the
+    // construction-order DAG — the .ssr suites and compat:consumer are the
+    // gate for that case.
     expect(state.committedInterval).toBeNull();
     expect(state.effectiveIntervals).toEqual([]);
     expect(state.effectiveIntervalKeys).toEqual([]);

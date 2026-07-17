@@ -60,8 +60,8 @@ describe("createLegendFilterState construction", () => {
     // Client deriveds are lazy, so the construction-time assertion alone
     // cannot catch a model-reading $derived added to the factory. Force
     // every exposed accessor and one effect flush, then re-assert — that is
-    // the closest client-side stand-in for Svelte 5.29's SSR behavior,
-    // where such a derived evaluates eagerly at construction (TDZ hazard).
+    // the closest client-side stand-in for the construction-order DAG
+    // contract (model must not be read at construction).
     expect(state.options).not.toBeNull();
     expect(state.filters).toEqual([]);
     expect(state.hasActiveFilters).toBe(false);

@@ -16,7 +16,7 @@
  * oninspect, oninteraction.
  *
  * Effects register via registerInspectionEffects() at the original coordinator
- * site (after legend-focus reconcile), matching Svelte 5.29 server-eager rules.
+ * site (after legend-focus reconcile); effect-registration order is load-bearing.
  */
 import type { CandidateFacts, CellValue, RenderModel, ScenePanel } from "@ggsvelte/core";
 import type { SceneHit } from "@ggsvelte/core/dom";
@@ -158,9 +158,8 @@ export type InspectionState = {
  * `registerInspectionEffects` at the original coordinator position after
  * legend-focus reconcile effects.
  *
- * Client-lazy note: on the client, $derived evaluation is lazy until first
- * read; Svelte 5.29 SSR evaluates construction-time deriveds eagerly. Armed
- * deps must not be reached from construction-time deriveds (compat:consumer).
+ * Construction-order note: armed deps must not be reached from
+ * construction-time deriveds (construction-order DAG; compat:consumer).
  */
 export function createInspectionState(deps: InspectionStateDeps): InspectionState {
   let inspection = $state<PlotInspectionChange<Record<string, CellValue>, PropertyKey> | null>(

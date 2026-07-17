@@ -302,7 +302,8 @@ describe("createInspectionState construction", () => {
     expect(oninteractionCalls).toBe(0);
     expect(plotIdCalls).toBe(0);
     // Client-lazy: accessors + one flush must not reach armed getters.
-    // SSR-eager deriveds are gated by .ssr suites and compat:consumer.
+    // Construction-order DAG regressions are gated by .ssr suites and
+    // compat:consumer.
     expect(state.inspection).toBeNull();
     expect(state.inspectionPanel).toBeNull();
     flushSync();

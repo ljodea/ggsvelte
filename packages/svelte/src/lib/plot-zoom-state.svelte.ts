@@ -3,8 +3,8 @@
  *
  * Owns chart-local zoom domains, effective-domain / effective-spec deriveds,
  * and zoom commit/reset/brush/set handlers. Construction-time deriveds must
- * NOT read model/coordFlipped/announce (Svelte 5.29 server-eager $derived TDZ).
- * Those are handler-only deferred getters.
+ * NOT read model/coordFlipped/announce (later-declared / handler-only;
+ * construction-order DAG). Those are handler-only deferred getters.
  */
 import type { CellValue, RenderModel } from "@ggsvelte/core";
 import type { PortableSpec } from "@ggsvelte/spec";

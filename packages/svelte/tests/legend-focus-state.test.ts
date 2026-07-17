@@ -162,9 +162,9 @@ describe("createLegendFocusState construction", () => {
     // Client deriveds are lazy, so this guard only proves the exposed
     // accessors reach no armed getter (reads + one flush below). A
     // construction-time $derived that reads an armed dep WITHOUT being
-    // reachable from an accessor would pass here yet still crash Svelte 5.29
-    // SSR, where deriveds evaluate eagerly at construction (TDZ) — the .ssr
-    // suites and compat:consumer are the gate for that case.
+    // reachable from an accessor would pass here yet still violate the
+    // construction-order DAG — the .ssr suites and compat:consumer are the
+    // gate for that case.
     expect(state.effectiveEmphasisKeys).toEqual([]);
     expect(state.previewIdentity).toBeNull();
     expect(state.rovingIndex).toBe(0);

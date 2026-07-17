@@ -3,8 +3,8 @@
  *
  * Owns chart-local filter clauses, mode/capability reset effects, catalog
  * reconciliation (phased registration), and toggle/reset side effects.
- * Construction-time deriveds must NOT read `model` — on Svelte 5.29 the
- * server evaluates $derived eagerly at factory construction (SSR TDZ).
+ * Construction-time deriveds must NOT read `model` (declared later;
+ * construction-order DAG — model is used only from late catalog effects).
  */
 import type { CellValue, RenderModel, SceneDiscreteLegend, SceneLegendEntry } from "@ggsvelte/core";
 import { encodeKey } from "@ggsvelte/core";
@@ -44,7 +44,7 @@ export type LegendFilterStateDeps = {
   announce: (message: string) => void;
   /**
    * Used ONLY inside late catalog effects (never at construction). Armed-getter
-   * construction tests enforce this for Svelte 5.29 server-eager deriveds.
+   * construction tests enforce this construction-order DAG contract.
    */
   model: () => RenderModel | null;
 };
