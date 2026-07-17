@@ -70,6 +70,30 @@ describe("isPortable early exit", () => {
     expect(laterTouched).toBe(true);
     expect(issues.some((i) => i.path === "/width")).toBe(true);
   });
+
+  it("does not report own properties deleted by an earlier getter", () => {
+    // Matches Object.entries / JSON semantics: a key removed mid-walk is omitted,
+    // not reported as undefined.
+    const spec: Record<string, unknown> = {
+      layers: [{ geom: "point" }],
+    };
+    Object.defineProperty(spec, "a", {
+      enumerable: true,
+      configurable: true,
+      get() {
+        delete spec["b"];
+        return 1;
+      },
+    });
+    Object.defineProperty(spec, "b", {
+      enumerable: true,
+      configurable: true,
+      value: 2,
+      writable: true,
+    });
+    expect(portabilityIssues(spec)).toEqual([]);
+    expect(isPortable(spec as unknown as RuntimeSpec)).toBe(true);
+  });
 });
 
 describe("toPortable", () => {

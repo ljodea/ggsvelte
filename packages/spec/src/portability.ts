@@ -110,9 +110,12 @@ function walk(
     return;
   }
   seen.add(value);
-  // Object.keys then value[key]: Object.entries eagerly evaluates every
-  // property value (including getters), which would defeat stopAfter.
-  for (const key of Object.keys(value)) {
+  // Lazy own-key walk: Object.entries eagerly Gets every value (defeating
+  // stopAfter on later getters); Object.keys materializes the full key list
+  // and would still Get deleted-by-earlier-getter keys as undefined. for…in
+  // yields keys lazily and skips properties removed before we reach them.
+  for (const key in value) {
+    if (!Object.hasOwn(value, key)) continue;
     walk(value[key], `${path}/${key}`, seen, issues, stopAfter);
     if (stopAfter !== undefined && issues.length >= stopAfter) break;
   }
