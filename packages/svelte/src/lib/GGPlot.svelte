@@ -33,43 +33,21 @@
    * on commit ($effect cleanup — runs after the DOM has moved to the new
    * model) and the last one on unmount.
    */
-  import type { Snippet } from "svelte";
-
-  import type {
-    A11yMode,
-    AesInput,
-    CoordSpec,
-    DataInput,
-    FacetInput,
-    Labs,
-    LayerInput,
-    LegendSpec,
-    PortableSpec,
-    Scales,
-    SpecInput,
-    ThemeName,
-    ThemeSpec,
-  } from "@ggsvelte/spec";
-  import type { CellValue, RenderModel } from "@ggsvelte/core";
+  import type { CellValue } from "@ggsvelte/core";
   import { sceneLabel } from "@ggsvelte/core";
   import type { SceneHitIndex } from "@ggsvelte/core/dom";
   import { buildHitIndex } from "@ggsvelte/core/dom";
+  import type { DataInput, PortableSpec } from "@ggsvelte/spec";
 
   import {
     normalizeInteractionConfig,
-    type InspectInput,
     type InteractionDiagnostic,
-    type InteractionTool,
     type LegendFocusEvent,
-    type LegendFocusInput,
     type PlotInspection,
     type PlotInteractionEvent,
     type PlotInteractionScope,
     type PlotSelection,
-    type SelectInput,
     type ZoomDomains,
-    type ZoomEvent,
-    type ZoomInput,
   } from "./interaction.js";
   import type { PlotInteractionController } from "./interaction-controller.svelte.js";
   import { provideRegistry } from "./registry.svelte.js";
@@ -101,6 +79,7 @@
   } from "./plot-shared-services.svelte.js";
   import { createPlotRuntime } from "./plot-runtime.svelte.js";
   import type { LegendEntryIdentity } from "./plot-legend-focus.js";
+  import type { GGPlotProps } from "./plot-props.js";
   import PlotCaptureSurface from "./PlotCaptureSurface.svelte";
   import PlotLegendFilters from "./PlotLegendFilters.svelte";
   import PlotLegendTargets from "./PlotLegendTargets.svelte";
@@ -117,77 +96,6 @@
   import { createSurfaceState } from "./surface-state.svelte.js";
   import { createSelectionState } from "./selection-state.svelte.js";
   import { createPlotChromeState } from "./plot-chrome-state.svelte.js";
-  import {
-    type LegendFilterEvent,
-    type LegendFilterInput,
-  } from "./legend-filter.js";
-
-  type PublicKey = Identity extends keyof Row
-    ? Extract<Row[Identity], PropertyKey>
-    : Identity extends (row: Row, index: number) => infer Key
-      ? Extract<Key, PropertyKey>
-      : never;
-
-  interface Props {
-    /** A complete spec (bare-string channel shorthand allowed). Wins over the other props. */
-    spec?: SpecInput;
-    /** Data rows, columns, or a DataRef ({values}/{columns}/{name}). */
-    data?: DataInput | readonly Row[];
-    /** Plot-level aesthetic mapping (inherited by every layer). */
-    aes?: AesInput;
-    /** Layers (props-first canonical form). Wins over declaration-only children. */
-    layers?: LayerInput[];
-    /** Facet into small multiples (wrap or rows/cols grid). */
-    facet?: FacetInput;
-    /** Coordinate system ("flip" shorthand accepted). */
-    coord?: CoordSpec | "flip";
-    /** Per-scale configuration (types, domains, schemes, breaks, labels). */
-    scales?: Scales;
-    /** Legend options (order). */
-    legend?: LegendSpec;
-    /** Theme: a registered name or an object with role overrides. */
-    theme?: ThemeName | ThemeSpec;
-    /** Titles and axis labels. */
-    labs?: Labs;
-    /** Accessibility mode ("force-svg" keeps every layer as SVG marks). */
-    a11y?: A11yMode;
-    /** Plot width in px. Omitted is container-responsive. */
-    width?: number | "container";
-    /** Plot height in px (falls back to spec.height, then 400). */
-    height?: number;
-    /** Stable semantic identity used by public interaction payloads. */
-    key?: Identity;
-    /** Opt into inspection, its semantic crosshair, tooltip, and pinning. */
-    inspect?: InspectInput;
-    /** Opt into point or interval selection. */
-    select?: SelectInput;
-    /** Opt into brush zoom. */
-    zoom?: ZoomInput;
-    /** Opt into discrete legend preview, focus, and linked emphasis. */
-    legendFocus?: LegendFocusInput;
-    /** Opt into data-changing filtering through discrete legend controls. */
-    legendFilter?: LegendFilterInput;
-    /** Controlled initial/active tool. */
-    tool?: InteractionTool;
-    /** Optional durable semantic state shared with other plots and Svelte UI. */
-    interaction?: PlotInteractionController<PublicKey>;
-    /** Semantic identity for linked keys and positional domains. */
-    interactionScope?: PlotInteractionScope;
-    /** Accessible chart name; falls back to the plot title/generated label. */
-    ariaLabel?: string;
-    oninspect?: (event: PlotInspection<Row, PublicKey>) => void;
-    onselect?: (event: PlotSelection<PublicKey>) => void;
-    onzoom?: (event: ZoomEvent) => void;
-    onlegendfocus?: (event: LegendFocusEvent<PublicKey>) => void;
-    onlegendfilter?: (event: LegendFilterEvent) => void;
-    oninteraction?: (event: PlotInteractionEvent<Row, PublicKey>) => void;
-    ondiagnostic?: (diagnostic: InteractionDiagnostic) => void;
-    ontoolchange?: (tool: InteractionTool) => void;
-    /** Called after each committed render with the model (warnings,
-     *  advisories, scales) and the normalized PortableSpec. */
-    onrender?: (model: RenderModel, spec: PortableSpec) => void;
-    children?: Snippet;
-  }
 
   const {
     spec,
@@ -223,7 +131,7 @@
     ontoolchange,
     onrender,
     children,
-  }: Props = $props();
+  }: GGPlotProps<Row, Identity> = $props();
 
   const registry = provideRegistry();
 
