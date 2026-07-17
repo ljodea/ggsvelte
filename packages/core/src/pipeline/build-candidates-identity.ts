@@ -77,5 +77,9 @@ export function buildCandidateIdentityIndex(
       }
     }
   }
+  // Seal bucket arrays so resolve-time consumers cannot mutate shared lineage.
+  for (const map of [sourceRowsByGroup, sourceRowsByGroupX, sourceRowsByGroupBin]) {
+    for (const [key, rows] of map) map.set(key, Object.freeze(rows) as number[]);
+  }
   return { seriesByRow, sourceRowsByGroup, sourceRowsByGroupX, sourceRowsByGroupBin, frameGroups };
 }
