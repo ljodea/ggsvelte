@@ -10,8 +10,6 @@ import { cellToNumber, ColumnTable } from "../table.js";
 
 import { PipelineError } from "./types.js";
 
-export { partitionByField, rowsMatching } from "./facets-tokens.js";
-
 export function facetField(
   ref: { field: string } | undefined,
   key: "wrap" | "rows" | "cols",

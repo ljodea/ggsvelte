@@ -26,14 +26,18 @@ const table = ColumnTable.fromRows([
 
 /** Count ColumnTable.column(field) calls during fn (restored after). */
 function countColumnReads(field: string, fn: () => void): number {
-  const original = ColumnTable.prototype.column;
   let reads = 0;
+  const desc = Object.getOwnPropertyDescriptor(ColumnTable.prototype, "column");
+  if (desc?.value === undefined) {
+    throw new Error("ColumnTable.prototype.column is not a data property");
+  }
+  const impl = desc.value as (this: ColumnTable, name: string) => readonly unknown[];
   const spy = spyOn(ColumnTable.prototype, "column").mockImplementation(function (
     this: ColumnTable,
     name: string,
   ) {
     if (name === field) reads += 1;
-    return original.call(this, name);
+    return impl.call(this, name);
   });
   try {
     fn();
