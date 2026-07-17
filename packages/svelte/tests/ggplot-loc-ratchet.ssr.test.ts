@@ -30,6 +30,8 @@ const CEILINGS: readonly { readonly slice: string; readonly ceiling: number }[] 
   // S8 selection + chrome controllers: ceiling = min(actual + 20, 999).
   // Program target: GGPlot.svelte must stay strictly under 1000 lines.
   { slice: "s8-final", ceiling: 999 },
+  // S10 dissolve alias scaffolding: actual 951 + 20.
+  { slice: "s10-descaffold", ceiling: 971 },
 ];
 
 // Resolve via import.meta (never CWD). Node SSR suite only — uses node:fs.
