@@ -7,7 +7,7 @@ import {
   resolveIntervalQueryParts,
   type IntervalQueryModelPort,
   type IntervalQueryScene,
-} from "../src/lib/plot-interval-query.js";
+} from "../../src/lib/interval/query.js";
 
 function scene(partial: {
   panel?: IntervalQueryScene["panel"];

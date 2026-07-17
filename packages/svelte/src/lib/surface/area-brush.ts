@@ -1,5 +1,5 @@
 import { clamp, normalizedRect, type PanelBounds, type PlotRect } from "../scene/geometry.js";
-import { isBrushTooSmall } from "../plot-interval.js";
+import { isBrushTooSmall } from "../interval/interval.js";
 
 /** Live brush corners; may be denormalized while dragging (x0>x1 or y0>y1). */
 export type BrushCorners = {

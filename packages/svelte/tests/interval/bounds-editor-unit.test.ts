@@ -4,7 +4,7 @@ import {
   formatBoundsDraft,
   validateBoundsDraft,
   type BoundsEditorInput,
-} from "../src/lib/bounds-editor.js";
+} from "../../src/lib/interval/bounds-editor.js";
 
 const input = (overrides: Partial<BoundsEditorInput> = {}): BoundsEditorInput =>
   ({

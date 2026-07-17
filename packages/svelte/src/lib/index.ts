@@ -12,7 +12,7 @@
 // Components
 /** @lifecycle stable-intent */
 export { default as GGPlot } from "./GGPlot.svelte";
-export { default as Tooltip } from "./Tooltip.svelte";
+export { default as Tooltip } from "./inspection/Tooltip.svelte";
 export type {
   LegendFilterClause,
   LegendFilterEvent,
