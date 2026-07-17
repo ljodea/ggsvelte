@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784326191871,
+  "lastUpdate": 1784327330641,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -19837,6 +19837,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 170.3093,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "4d9cf3c06e39aac4d09a543f25a084f68397610c",
+          "message": "test(svelte): S17 — coverage thresholds, gap closure, directory docs (#181)\n\n* test(svelte): close the remaining browser branch gaps\n\nReport-driven gap closure for Legend, Batch, CanvasA11y, inspection\nresolver, and surface-state: behavioral cases for empty legend titles,\nmark shapes/focusable a11y, resolver fingerprints/fallbacks, and surface\nignore/none action paths.\n\n* test(svelte): enforce coverage thresholds (browser config)\n\nAdd statements/branches/functions/lines thresholds (90/80/90/90) to the\nbrowser vitest coverage block only, after the coverageBase spread, so\nthe SSR report stays threshold-free.\n\n* docs: document the svelte package layout and coverage workflow\n\nMap packages/svelte/src/lib feature directories and root files, the no\nper-directory barrels rule, tests-mirror-src layout, and the browser\ncoverage thresholds workflow (local/optional, not CI yet).\n\n* test(svelte): strengthen inspection reconciliation coverage",
+          "timestamp": "2026-07-17T17:28:15-05:00",
+          "tree_id": "ca7ff8106c656c0fc908c5b888e1a03691bc5208",
+          "url": "https://github.com/ljodea/ggsvelte/commit/4d9cf3c06e39aac4d09a543f25a084f68397610c"
+        },
+        "date": 1784327330119,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.2748,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.9666,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 10.4341,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 16.1686,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 82.7404,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 120.1355,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.2523,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2617,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 83.7167,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 105.5503,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 12.9422,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.1934,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 114.7094,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.8061,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 28.0874,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.5329,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 26.322,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 625.1416,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 165.7395,
             "unit": "ms"
           }
         ]
