@@ -19,6 +19,8 @@ const CEILINGS: readonly { readonly slice: string; readonly ceiling: number }[] 
   { slice: "s2-final", ceiling: 3045 },
   // S3 legend-focus controller: actual 2668 + 20.
   { slice: "s3-final", ceiling: 2688 },
+  // S4 zoom controller: actual 2570 + 20.
+  { slice: "s4-final", ceiling: 2590 },
 ];
 
 // Resolve via import.meta (never CWD). Node SSR suite only — uses node:fs.
