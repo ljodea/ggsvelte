@@ -42,7 +42,7 @@ import {
   shouldClearLegendPreviewOnBlur,
   shouldEmitLegendFocusClear,
 } from "./plot-legend-surface.js";
-import type { SemanticKeyService } from "./plot-shared-services.svelte.js";
+import type { SemanticKeyService } from "./runtime/semantic-keys.svelte.js";
 
 // ---------------------------------------------------------------------------
 // Public types

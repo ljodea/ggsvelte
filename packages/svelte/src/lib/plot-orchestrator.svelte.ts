@@ -60,13 +60,13 @@ import {
   resolveInteractionScope,
   toLayerInput,
 } from "./assembly/assemble.js";
-import { createSourceIdentityTracker, dataIdentityEpochToken } from "./plot-semantic-keys.js";
+import { createPlotAnnouncer, type PlotAnnouncer } from "./runtime/announcer.svelte.js";
 import {
-  createPlotAnnouncer,
+  createSourceIdentityTracker,
   createSemanticKeyService,
-  type PlotAnnouncer,
+  dataIdentityEpochToken,
   type SemanticKeyService,
-} from "./plot-shared-services.svelte.js";
+} from "./runtime/semantic-keys.svelte.js";
 import { createPlotRuntime, type PlotRuntime } from "./runtime/runtime.svelte.js";
 import { type InteractiveLegendEntry, type LegendEntryIdentity } from "./plot-legend-focus.js";
 import {
