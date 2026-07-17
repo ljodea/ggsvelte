@@ -76,12 +76,15 @@ export type SemanticKeyService = {
   keysForLegend(action: LegendEntryAction): readonly PropertyKey[];
   /** Direct map lookup (inspection coordinator / mask paths). */
   keyAt(index: number): PropertyKey | null;
+  /** Register diagnostics delivery at the host's original effect position. */
+  registerEffects(): void;
 };
 
 /**
  * Owns priorKeys, semantic key resolution, diagnostics delivery, and the
- * legend entry → key index. Call at the original GGPlot registration site
- * so the diagnostics `$effect` keeps its relative order.
+ * legend entry → key index. Construction may happen as soon as the runtime
+ * model exists; call `registerEffects` at the original GGPlot registration
+ * site so the diagnostics `$effect` keeps its relative order.
  */
 export function createSemanticKeyService(deps: SemanticKeyServiceDeps): SemanticKeyService {
   // Owned for the component lifetime; resolveSemanticKeys mutates in place.
@@ -106,9 +109,11 @@ export function createSemanticKeyService(deps: SemanticKeyServiceDeps): Semantic
     });
   });
 
-  $effect(() => {
-    for (const diagnostic of semanticKeys.diagnostics) deps.deliverDiagnostic(diagnostic);
-  });
+  function registerEffects(): void {
+    $effect(() => {
+      for (const diagnostic of semanticKeys.diagnostics) deps.deliverDiagnostic(diagnostic);
+    });
+  }
 
   function semanticKey(
     row: Record<string, CellValue> | null,
@@ -157,5 +162,6 @@ export function createSemanticKeyService(deps: SemanticKeyServiceDeps): Semantic
     keyAt(index: number): PropertyKey | null {
       return semanticKeys.keys.get(index) ?? null;
     },
+    registerEffects,
   };
 }
