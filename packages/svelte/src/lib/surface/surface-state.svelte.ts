@@ -17,33 +17,33 @@
 import type { CandidateFacts, CellValue, RenderModel } from "@ggsvelte/core";
 import type { SceneHitIndex } from "@ggsvelte/core/dom";
 
-import type { InspectionState } from "./inspection-state.svelte.js";
-import type { IntervalState } from "./interval-state.svelte.js";
+import type { InspectionState } from "../inspection-state.svelte.js";
+import type { IntervalState } from "../interval-state.svelte.js";
 import type {
   InteractionSource,
   InteractionTool,
   IntervalSelection,
   PlotSelection,
   ResolvedInteractionConfig,
-} from "./interaction.js";
-import { createInteractionReducer } from "./interaction-reducer.js";
-import { brushAtPoint, brushWithEnd } from "./plot-area-brush.js";
-import type { FinishBrushAction } from "./plot-brush-finish.js";
-import { resolveChooseToolAction, resolveEffectiveTool } from "./plot-capability.js";
-import { normalizedRect, panelContainingAnchor } from "./scene/geometry.js";
+} from "../interaction/interaction.js";
+import { createInteractionReducer } from "../interaction/reducer.js";
+import { brushAtPoint, brushWithEnd } from "./area-brush.js";
+import type { FinishBrushAction } from "./brush-finish.js";
+import { resolveChooseToolAction, resolveEffectiveTool } from "../interaction/capability.js";
+import { normalizedRect, panelContainingAnchor } from "../scene/geometry.js";
 import {
   buildIntervalSelectionFromScene,
   intervalQuerySceneFromModel,
   type IntervalQueryScene,
-} from "./plot-interval-query.js";
-import { BRUSH_SECOND_CORNER_ANNOUNCEMENT } from "./assembly/labels.js";
+} from "../plot-interval-query.js";
+import { BRUSH_SECOND_CORNER_ANNOUNCEMENT } from "../assembly/labels.js";
 import { hitFromCandidate, plotPointFromClient } from "./plot-pointer.js";
-import { buildQueuedInspectFrame } from "./plot-surface-inspection-frame.js";
+import { buildQueuedInspectFrame } from "../plot-surface-inspection-frame.js";
 import {
   resolveSurfaceBlurAction,
   shouldClosePinnedOnOutsidePointer,
-} from "./plot-surface-inspection-teardown.js";
-import { resolveSurfaceKeyAction } from "./plot-surface-keyboard.js";
+} from "../plot-surface-inspection-teardown.js";
+import { resolveSurfaceKeyAction } from "./keyboard.js";
 import {
   advanceTouchInspectMoved,
   isAreaAwaitingSecond,
@@ -56,8 +56,8 @@ import {
   resolvePointerUpAction,
   shouldClearInspectionOnPointerLeave,
   TOUCH_INSPECT_CLICK_SUPPRESS_MS,
-} from "./plot-surface-pointer.js";
-import type { PlotZoomState } from "./plot-zoom-state.svelte.js";
+} from "./pointer.js";
+import type { PlotZoomState } from "../zoom/zoom-state.svelte.js";
 
 // ---------------------------------------------------------------------------
 // Public types

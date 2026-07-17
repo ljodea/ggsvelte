@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 
 import type { RenderModel } from "@ggsvelte/core";
-import type { IntervalSelection, ZoomEvent } from "../src/lib/interaction.js";
+import type { IntervalSelection, ZoomEvent } from "../src/lib/interaction/interaction.js";
 
 import GGPlot from "../src/lib/GGPlot.svelte";
-import { normalizeInteractionConfig } from "../src/lib/interaction.js";
+import { normalizeInteractionConfig } from "../src/lib/interaction/interaction.js";
 import { render } from "./helpers/render.js";
 
 const size = { width: 480, height: 320 };

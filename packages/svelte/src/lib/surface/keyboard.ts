@@ -1,12 +1,12 @@
-import { isAreaTool, type InteractionTool } from "./interaction.js";
+import { isAreaTool, type InteractionTool } from "../interaction/interaction.js";
 import {
   nudgeBrushEnd,
   panelCenterAnchor,
   type BrushCorners,
   type PlotPoint,
-} from "./plot-area-brush.js";
-import { normalizedRect, type PanelBounds } from "./scene/geometry.js";
-import { resolveFinishBrushAction, type FinishBrushAction } from "./plot-brush-finish.js";
+} from "./area-brush.js";
+import { normalizedRect, type PanelBounds } from "../scene/geometry.js";
+import { resolveFinishBrushAction, type FinishBrushAction } from "./brush-finish.js";
 
 /**
  * Capture-surface keyboard decision input.

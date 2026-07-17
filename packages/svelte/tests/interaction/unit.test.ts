@@ -7,16 +7,16 @@ import {
   INTERACTION_DIAGNOSTIC_CATALOG,
   isAreaTool,
   normalizeInteractionConfig,
-} from "../src/lib/interaction.js";
+} from "../../src/lib/interaction/interaction.js";
 import {
   createInteractionReducer,
   type InteractionCandidateRef,
-} from "../src/lib/interaction-reducer.js";
+} from "../../src/lib/interaction/reducer.js";
 import {
   clearInspectionFingerprint,
   createInspectionCoordinator,
   resolveInspection,
-} from "../src/lib/inspection-resolver.js";
+} from "../../src/lib/inspection-resolver.js";
 
 const candidate = (id: number): InteractionCandidateRef => ({
   epoch: 1,

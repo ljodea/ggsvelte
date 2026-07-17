@@ -12,7 +12,7 @@ import {
   shouldShowToolRail,
   zoomScaleDiagnosticsFromChannels,
   zoomSupportsChannel,
-} from "../src/lib/plot-capability.js";
+} from "../../src/lib/interaction/capability.js";
 
 const continuous = { x: { type: "linear" }, y: { type: "linear" } };
 const bandX = { x: { type: "band" }, y: { type: "linear" } };

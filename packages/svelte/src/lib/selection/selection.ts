@@ -1,4 +1,4 @@
-import type { InteractionSource, PointSelection } from "./interaction.js";
+import type { InteractionSource, PointSelection } from "../interaction/interaction.js";
 
 export type CandidateAnchorKeys = {
   readonly x: number;

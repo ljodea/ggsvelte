@@ -15,8 +15,8 @@ import type {
   PlotInteractionScope,
   PlotSelection,
   ResolvedInteractionConfig,
-} from "../src/lib/interaction.js";
-import { createPlotInteraction } from "../src/lib/interaction-controller.svelte.js";
+} from "../src/lib/interaction/interaction.js";
+import { createPlotInteraction } from "../src/lib/interaction/controller.svelte.js";
 import { createIntervalState, type IntervalStateDeps } from "../src/lib/interval-state.svelte.js";
 import type { ContinuousZoomDomains } from "../src/lib/scene/geometry.js";
 import { buildIntervalSelection } from "../src/lib/plot-interval.js";

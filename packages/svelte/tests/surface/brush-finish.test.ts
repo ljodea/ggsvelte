@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import type { InteractionTool } from "../src/lib/interaction.js";
+import type { InteractionTool } from "../../src/lib/interaction/interaction.js";
 import {
   resolveFinishBrushAction,
   resolvePointerFinishBrushAction,
-} from "../src/lib/plot-brush-finish.js";
+} from "../../src/lib/surface/brush-finish.js";
 
 describe("resolveFinishBrushAction", () => {
   const corners = { x0: 1, y0: 2, x1: 3, y1: 4 } as const;

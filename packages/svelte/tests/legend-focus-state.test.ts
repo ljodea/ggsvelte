@@ -9,8 +9,8 @@ import type { RenderModel } from "@ggsvelte/core";
 import { aes, gg, type PortableSpec } from "@ggsvelte/spec";
 
 import GGPlot from "../src/lib/GGPlot.svelte";
-import type { LegendFocusEvent, PlotInteractionScope } from "../src/lib/interaction.js";
-import { createPlotInteraction } from "../src/lib/interaction-controller.svelte.js";
+import type { LegendFocusEvent, PlotInteractionScope } from "../src/lib/interaction/interaction.js";
+import { createPlotInteraction } from "../src/lib/interaction/controller.svelte.js";
 import { createLegendFocusState } from "../src/lib/legend-focus-state.svelte.js";
 import { createPlotRuntime } from "../src/lib/runtime/runtime.svelte.js";
 import {

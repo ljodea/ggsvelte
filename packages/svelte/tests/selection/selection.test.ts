@@ -10,7 +10,7 @@ import {
   rowIndexesForCandidate,
   sameOrderedPropertyKeys,
   uniqueKeysFromRowIndexes,
-} from "../src/lib/plot-selection.js";
+} from "../../src/lib/selection/selection.js";
 
 describe("nextPointSelectionKeys", () => {
   it("no-ops on empty toggle input", () => {

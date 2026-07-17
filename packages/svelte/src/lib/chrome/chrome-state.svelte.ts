@@ -16,7 +16,7 @@ import {
   type InteractionTool,
   type PlotInteractionInterval,
   type ResolvedInteractionConfig,
-} from "../interaction.js";
+} from "../interaction/interaction.js";
 import {
   bandChannelsForZoom,
   capabilityStatusText,
@@ -26,7 +26,7 @@ import {
   shouldShowToolRail,
   zoomScaleDiagnosticsFromChannels,
   zoomSupportsChannel,
-} from "../plot-capability.js";
+} from "../interaction/capability.js";
 import type { ContinuousZoomDomains } from "../scene/geometry.js";
 import { datumLabel as datumLabelFor, markLabel as markLabelFor } from "../assembly/labels.js";
 import { isContainerWidthProp, plotRootInlineStyle } from "../assembly/layout.js";

@@ -20,7 +20,7 @@ import type {
 } from "@ggsvelte/spec";
 import { gg, normalize } from "@ggsvelte/spec";
 
-import type { PlotInteractionScope, ZoomInput } from "../interaction.js";
+import type { PlotInteractionScope, ZoomInput } from "../interaction/interaction.js";
 
 /**
  * Structural registry descriptor (live getters allowed). Kept local so this

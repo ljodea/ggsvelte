@@ -1,14 +1,18 @@
 import type { RenderModel } from "@ggsvelte/core";
 import type { PortableSpec, Scales } from "@ggsvelte/spec";
 
-import type { InteractionSource, PlotInteractionScope, ZoomEvent } from "./interaction.js";
+import type {
+  InteractionSource,
+  PlotInteractionScope,
+  ZoomEvent,
+} from "../interaction/interaction.js";
 import {
   frozenZoomDomains,
   panelDataDomains,
   type ContinuousZoomDomains,
   type PanelBounds,
   type PlotRect,
-} from "./scene/geometry.js";
+} from "../scene/geometry.js";
 
 export type ZoomMode = "x" | "y" | "xy";
 

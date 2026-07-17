@@ -5,7 +5,7 @@ import type {
   IntervalSelection,
   ReadonlyIntervalDomains,
   SemanticIntervalAxis,
-} from "./interaction.js";
+} from "./interaction/interaction.js";
 import {
   expandIntervalQuery,
   panelDataDomains,

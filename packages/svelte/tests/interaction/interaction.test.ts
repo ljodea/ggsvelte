@@ -9,10 +9,10 @@ import { describe, expect, it, vi } from "vitest";
 import type { RenderModel } from "@ggsvelte/core";
 import { encodeKey } from "@ggsvelte/core";
 
-import GGPlot from "../src/lib/GGPlot.svelte";
-import { createPlotInteraction } from "../src/lib/interaction-controller.svelte.js";
-import { render } from "./helpers/render.js";
-import { until } from "./helpers/until.js";
+import GGPlot from "../../src/lib/GGPlot.svelte";
+import { createPlotInteraction } from "../../src/lib/interaction/controller.svelte.js";
+import { render } from "../helpers/render.js";
+import { until } from "../helpers/until.js";
 
 const rows = [
   { x: 1, y: 10, cls: "a" },

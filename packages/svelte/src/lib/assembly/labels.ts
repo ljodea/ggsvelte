@@ -5,7 +5,7 @@ import type {
   PlotInspectionChange,
   PlotSelection,
   ReadonlyZoomDomains,
-} from "../interaction.js";
+} from "../interaction/interaction.js";
 
 /** Shared a11y count phrase: "1 datum" / "N data". */
 export function countLabel(count: number): string {

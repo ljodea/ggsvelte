@@ -4,7 +4,7 @@
  * Callers own reducer dispatch, field clears, coordinator, and focus.
  */
 
-import type { InteractionSource } from "./interaction.js";
+import type { InteractionSource } from "./interaction/interaction.js";
 import { clearInspectionFingerprint } from "./inspection-resolver.js";
 import type { InspectionHostState } from "./plot-surface-inspection-frame.js";
 

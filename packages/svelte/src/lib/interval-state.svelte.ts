@@ -27,7 +27,7 @@ import {
   type ScenePanel,
 } from "@ggsvelte/core";
 
-import type { PlotInteractionController } from "./interaction-controller.svelte.js";
+import type { PlotInteractionController } from "./interaction/controller.svelte.js";
 import type {
   InteractionSource,
   IntervalSelection,
@@ -37,7 +37,7 @@ import type {
   ReadonlyIntervalDomains,
   ResolvedInteractionConfig,
   SemanticIntervalAxis,
-} from "./interaction.js";
+} from "./interaction/interaction.js";
 import type { BoundsEditorInput, PreciseBoundsApplyEvent } from "./bounds-editor.js";
 import { frozenZoomDomains, type ContinuousZoomDomains } from "./scene/geometry.js";
 import {
@@ -56,7 +56,7 @@ import {
 } from "./plot-interval-consumption.js";
 import { intervalPixelsFromDomains } from "./plot-interval-query.js";
 import { boundsEditorInputForScale, semanticAxisFromBounds } from "./plot-precise-bounds.js";
-import { rowIndexesForCandidate } from "./plot-selection.js";
+import { rowIndexesForCandidate } from "./selection/selection.js";
 
 // ---------------------------------------------------------------------------
 // Public types

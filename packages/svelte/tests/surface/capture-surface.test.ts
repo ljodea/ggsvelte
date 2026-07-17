@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
-import PlotCaptureSurface from "../src/lib/PlotCaptureSurface.svelte";
-import { render } from "./helpers/render.js";
+import PlotCaptureSurface from "../../src/lib/surface/CaptureSurface.svelte";
+import { render } from "../helpers/render.js";
 
 describe("PlotCaptureSurface", () => {
   it("renders group capture with plot-scoped aria-describedby", () => {

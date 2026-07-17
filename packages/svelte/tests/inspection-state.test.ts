@@ -12,14 +12,14 @@ import type {
   PlotInspection,
   PlotInteractionEvent,
   ResolvedInteractionConfig,
-} from "../src/lib/interaction.js";
-import { normalizeInteractionConfig } from "../src/lib/interaction.js";
-import { createInteractionReducer } from "../src/lib/interaction-reducer.js";
+} from "../src/lib/interaction/interaction.js";
+import { normalizeInteractionConfig } from "../src/lib/interaction/interaction.js";
+import { createInteractionReducer } from "../src/lib/interaction/reducer.js";
 import {
   createInspectionState,
   type InspectionStateDeps,
 } from "../src/lib/inspection-state.svelte.js";
-import { hitFromCandidate } from "../src/lib/plot-pointer.js";
+import { hitFromCandidate } from "../src/lib/surface/plot-pointer.js";
 import type { QueuedPointerInspection } from "../src/lib/plot-surface-inspection-frame.js";
 import { withEffectRoot, withFlushedEffectRoot } from "./helpers/effect-root.svelte.js";
 import { modelFor } from "./helpers/model.js";

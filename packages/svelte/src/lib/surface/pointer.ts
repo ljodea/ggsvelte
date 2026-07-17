@@ -1,6 +1,6 @@
-import { isAreaTool, type InteractionTool } from "./interaction.js";
-import { initialBrushRect, type BrushCorners, type PlotPoint } from "./plot-area-brush.js";
-import { resolvePointerFinishBrushAction, type FinishBrushAction } from "./plot-brush-finish.js";
+import { isAreaTool, type InteractionTool } from "../interaction/interaction.js";
+import { initialBrushRect, type BrushCorners, type PlotPoint } from "./area-brush.js";
+import { resolvePointerFinishBrushAction, type FinishBrushAction } from "./brush-finish.js";
 
 /**
  * Capture-surface pointer decision input for pointerdown.

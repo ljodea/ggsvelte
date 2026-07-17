@@ -4,7 +4,10 @@
    * Host owns handlers, inspection/tool state, and focus restoration.
    * Capture is a single absolutely positioned root under `.gg-plot-root`.
    */
-  import { isAreaTool, type InteractionTool } from "./interaction.js";
+  import {
+    isAreaTool,
+    type InteractionTool,
+  } from "../interaction/interaction.js";
 
   let {
     element = $bindable(null as HTMLDivElement | null),

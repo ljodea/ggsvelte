@@ -14,24 +14,31 @@ import type { CandidateFacts, CellValue, RenderModel } from "@ggsvelte/core";
 import { buildHitIndex } from "@ggsvelte/core/dom";
 import { aes, gg, type PortableSpec } from "@ggsvelte/spec";
 
-import type { InteractionSource, InteractionTool, PlotSelection } from "../src/lib/interaction.js";
-import { normalizeInteractionConfig } from "../src/lib/interaction.js";
-import { createPlotInteraction } from "../src/lib/interaction-controller.svelte.js";
-import { createInspectionState, type InspectionState } from "../src/lib/inspection-state.svelte.js";
-import { createIntervalState, type IntervalState } from "../src/lib/interval-state.svelte.js";
-import { BRUSH_SECOND_CORNER_ANNOUNCEMENT } from "../src/lib/assembly/labels.js";
-import { hitFromCandidate } from "../src/lib/plot-pointer.js";
-import type { QueuedPointerInspection } from "../src/lib/plot-surface-inspection-frame.js";
-import { TOUCH_INSPECT_CLICK_SUPPRESS_MS } from "../src/lib/plot-surface-pointer.js";
-import { createPlotZoomState, type PlotZoomState } from "../src/lib/plot-zoom-state.svelte.js";
+import type {
+  InteractionSource,
+  InteractionTool,
+  PlotSelection,
+} from "../../src/lib/interaction/interaction.js";
+import { normalizeInteractionConfig } from "../../src/lib/interaction/interaction.js";
+import { createPlotInteraction } from "../../src/lib/interaction/controller.svelte.js";
+import {
+  createInspectionState,
+  type InspectionState,
+} from "../../src/lib/inspection-state.svelte.js";
+import { createIntervalState, type IntervalState } from "../../src/lib/interval-state.svelte.js";
+import { BRUSH_SECOND_CORNER_ANNOUNCEMENT } from "../../src/lib/assembly/labels.js";
+import { hitFromCandidate } from "../../src/lib/surface/plot-pointer.js";
+import type { QueuedPointerInspection } from "../../src/lib/plot-surface-inspection-frame.js";
+import { TOUCH_INSPECT_CLICK_SUPPRESS_MS } from "../../src/lib/surface/pointer.js";
+import { createPlotZoomState, type PlotZoomState } from "../../src/lib/zoom/zoom-state.svelte.js";
 import {
   createSurfaceState,
   type SurfaceState,
   type SurfaceStateDeps,
-} from "../src/lib/surface-state.svelte.js";
-import { withEffectRoot, withFlushedEffectRoot } from "./helpers/effect-root.svelte.js";
-import { modelFor } from "./helpers/model.js";
-import { reactiveBox } from "./helpers/reactive-box.svelte.js";
+} from "../../src/lib/surface/surface-state.svelte.js";
+import { withEffectRoot, withFlushedEffectRoot } from "../helpers/effect-root.svelte.js";
+import { modelFor } from "../helpers/model.js";
+import { reactiveBox } from "../helpers/reactive-box.svelte.js";
 
 const continuousRows = [
   { id: "a", x: 1, y: 1 },

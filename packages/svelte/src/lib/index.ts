@@ -19,14 +19,17 @@ export type {
   LegendFilterInput,
   LegendFilterOptions,
 } from "./legend-filter.js";
-export { createPlotInteraction } from "./interaction-controller.svelte.js";
+export { createPlotInteraction } from "./interaction/controller.svelte.js";
 export type {
   CreatePlotInteractionOptions,
   PlotInteractionController,
   PlotInteractionMutationOptions,
   PlotInteractionZoomOptions,
-} from "./interaction-controller.svelte.js";
-export { INTERACTION_DIAGNOSTIC_CATALOG, normalizeInteractionConfig } from "./interaction.js";
+} from "./interaction/controller.svelte.js";
+export {
+  INTERACTION_DIAGNOSTIC_CATALOG,
+  normalizeInteractionConfig,
+} from "./interaction/interaction.js";
 export type {
   AreaMode,
   BrushSelection,
@@ -73,7 +76,7 @@ export type {
   ZoomEvent,
   ZoomInput,
   ZoomOptions,
-} from "./interaction.js";
+} from "./interaction/interaction.js";
 export { default as GeomPoint } from "./geoms/GeomPoint.svelte";
 export { default as GeomLine } from "./geoms/GeomLine.svelte";
 export { default as GeomCol } from "./geoms/GeomCol.svelte";

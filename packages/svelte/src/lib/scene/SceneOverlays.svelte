@@ -12,9 +12,9 @@
     InteractionTool,
     IntervalSelection,
     PlotInspectionChange,
-  } from "../interaction.js";
+  } from "../interaction/interaction.js";
   import InteractionOverlay from "./InteractionOverlay.svelte";
-  import { shouldShowInertSelectionOverlay } from "../plot-capability.js";
+  import { shouldShowInertSelectionOverlay } from "../interaction/capability.js";
 
   type Anchor = { readonly x: number; readonly y: number };
   type Panel = {

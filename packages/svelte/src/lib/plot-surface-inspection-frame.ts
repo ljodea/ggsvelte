@@ -7,8 +7,8 @@
 import type { CandidateFacts, CandidateMatch } from "@ggsvelte/core";
 import type { SceneHit } from "@ggsvelte/core/dom";
 
-import type { InteractionSource } from "./interaction.js";
-import { hitFromCandidate } from "./plot-pointer.js";
+import type { InteractionSource } from "./interaction/interaction.js";
+import { hitFromCandidate } from "./surface/plot-pointer.js";
 
 /** Host inspection lifecycle state used across pure inspection tables. */
 export type InspectionHostState = "none" | "transient" | "pinned";

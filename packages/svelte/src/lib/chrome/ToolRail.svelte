@@ -1,5 +1,8 @@
 <script lang="ts">
-  import type { InteractionTool, ZoomDomains } from "../interaction.js";
+  import type {
+    InteractionTool,
+    ZoomDomains,
+  } from "../interaction/interaction.js";
 
   type RecoveryInputSource = "keyboard" | "pointer" | "touch";
 

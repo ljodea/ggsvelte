@@ -11,14 +11,14 @@
 import type { CandidateFacts, CellValue, RenderModel } from "@ggsvelte/core";
 import type { PortableSpec } from "@ggsvelte/spec";
 
-import type { InteractionDiagnostic } from "../interaction.js";
-import { INTERACTION_DIAGNOSTIC_CATALOG } from "../interaction.js";
+import type { InteractionDiagnostic } from "../interaction/interaction.js";
+import { INTERACTION_DIAGNOSTIC_CATALOG } from "../interaction/interaction.js";
 import {
   buildLegendEntryKeyIndexForPlot,
   keysForLegendEntry,
   type LegendEntryAction,
 } from "../plot-legend-focus.js";
-import { rowIndexesForCandidate, uniqueKeysFromRowIndexes } from "../plot-selection.js";
+import { rowIndexesForCandidate, uniqueKeysFromRowIndexes } from "../selection/selection.js";
 
 // ---------------------------------------------------------------------------
 // Pure helpers (from plot-semantic-keys.ts)

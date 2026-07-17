@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import type { InteractionTool } from "../src/lib/interaction.js";
-import type { BrushCorners } from "../src/lib/plot-area-brush.js";
+import type { InteractionTool } from "../../src/lib/interaction/interaction.js";
+import type { BrushCorners } from "../../src/lib/surface/area-brush.js";
 import {
   resolveSurfaceKeyAction,
   type SurfaceKeyboardInput,
-} from "../src/lib/plot-surface-keyboard.js";
+} from "../../src/lib/surface/keyboard.js";
 
 const draft: BrushCorners = { x0: 10, y0: 20, x1: 40, y1: 50 };
 /** Reversed corners — pure table must normalize before finish routing. */

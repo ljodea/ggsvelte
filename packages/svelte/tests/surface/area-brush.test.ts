@@ -7,7 +7,7 @@ import {
   initialBrushRect,
   nudgeBrushEnd,
   panelCenterAnchor,
-} from "../src/lib/plot-area-brush.js";
+} from "../../src/lib/surface/area-brush.js";
 
 const panel = { x: 10, y: 20, width: 100, height: 50 };
 
