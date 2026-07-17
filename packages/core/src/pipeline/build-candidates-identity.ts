@@ -39,8 +39,11 @@ export function buildCandidateIdentityIndex(
       const frameKey = `${panelIndex}:${layerIndex}`;
       frameGroups.set(frameKey, [...new Set(frame.groups)]);
       const inputGroups = deriveLayerGroups(frame.binding, frame.table);
+      const stat = frame.binding.layer.stat ?? "identity";
+      // Only count/summary/boxplot resolve via group×x buckets; skip for other layers.
+      const bucketByX = stat === "count" || stat === "summary" || stat === "boxplot";
       const xField = frame.binding.xField;
-      const xColumn = xField === null ? null : frame.table.column(xField);
+      const xColumn = bucketByX && xField !== null ? frame.table.column(xField) : null;
       for (let localRow = 0; localRow < inputGroups.length; localRow++) {
         const group = inputGroups[localRow]!;
         const sourceRow = facetPanels[panelIndex]!.sourceRows?.[localRow] ?? localRow;
@@ -59,7 +62,6 @@ export function buildCandidateIdentityIndex(
           });
         }
       }
-      const stat = frame.binding.layer.stat ?? "identity";
       if (stat === "bin") {
         buildBinLineageBuckets({
           frame,
