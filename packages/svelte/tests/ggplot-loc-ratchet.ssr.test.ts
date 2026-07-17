@@ -32,6 +32,8 @@ const CEILINGS: readonly { readonly slice: string; readonly ceiling: number }[] 
   { slice: "s8-final", ceiling: 999 },
   // S10 dissolve alias scaffolding: actual 951 + 20.
   { slice: "s10-descaffold", ceiling: 971 },
+  // S11 extract plot orchestrator: actual 485 + 20.
+  { slice: "s11-orchestrator", ceiling: 505 },
 ];
 
 // Resolve via import.meta (never CWD). Node SSR suite only — uses node:fs.
