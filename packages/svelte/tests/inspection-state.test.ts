@@ -118,6 +118,27 @@ function applyInspect(
   );
 }
 
+/** Wrap a reducer so inspect-null dispatches are logged (shared spy). */
+function wrapReducerWithLog(
+  base: InteractionReducer,
+  onInspectNull: (count: number) => void,
+): InteractionReducer {
+  let nullDispatches = 0;
+  return {
+    ...base,
+    dispatch: (action) => {
+      if (action.type === "inspect" && action.candidate === null) {
+        nullDispatches++;
+        onInspectNull(nullDispatches);
+      }
+      base.dispatch(action);
+    },
+    get state() {
+      return base.state;
+    },
+  };
+}
+
 type InspectionHarness = {
   state: ReturnType<typeof createInspectionState>;
   reducer: InteractionReducer;
@@ -211,6 +232,7 @@ describe("createInspectionState construction", () => {
     let clearBrushCalls = 0;
     let oninspectCalls = 0;
     let oninteractionCalls = 0;
+    let plotIdCalls = 0;
 
     const constructionModel = modelFor(continuousSpec());
     const reducer = createInteractionReducer();
@@ -238,7 +260,10 @@ describe("createInspectionState construction", () => {
           captureSurfaceCalls++;
           return null;
         },
-        plotId: () => "plot",
+        plotId: () => {
+          plotIdCalls++;
+          return "plot";
+        },
         tooltipHovered: () => {
           tooltipHoveredCalls++;
           return false;
@@ -275,6 +300,7 @@ describe("createInspectionState construction", () => {
     expect(clearBrushCalls).toBe(0);
     expect(oninspectCalls).toBe(0);
     expect(oninteractionCalls).toBe(0);
+    expect(plotIdCalls).toBe(0);
     // Client-lazy: accessors + one flush must not reach armed getters.
     // SSR-eager deriveds are gated by .ssr suites and compat:consumer.
     expect(state.inspection).toBeNull();
@@ -290,6 +316,7 @@ describe("createInspectionState construction", () => {
     expect(clearBrushCalls).toBe(0);
     expect(oninspectCalls).toBe(0);
     expect(oninteractionCalls).toBe(0);
+    expect(plotIdCalls).toBe(0);
     destroy();
   });
 });
@@ -325,48 +352,6 @@ describe("createInspectionState setInspection", () => {
     expect(state.inspection).toBeNull();
     expect(events).toHaveLength(2);
     expect(events[1]?.phase).toBe("clear");
-
-    destroy();
-  });
-
-  it("dispatches inspect-null twice on clear (load-bearing dual dispatch)", () => {
-    const model = modelFor(continuousSpec());
-    const base = createInteractionReducer();
-    const dispatches: unknown[] = [];
-    const wrapped: InteractionReducer = {
-      ...base,
-      dispatch: (action) => {
-        dispatches.push(action);
-        base.dispatch(action);
-      },
-      get state() {
-        return base.state;
-      },
-    };
-
-    const { state, destroy } = mountInspectionController({
-      model: () => model,
-      reducer: () => wrapped,
-      registerEffects: false,
-    });
-
-    const { candidate, hit } = candidateHit(model);
-    state.setInspection(hit, "pointer", "transient", "xy", candidate);
-    flushSync();
-    dispatches.length = 0;
-
-    state.setInspection(null, "pointer");
-    flushSync();
-    const inspectNulls = dispatches.filter(
-      (action) =>
-        typeof action === "object" &&
-        action !== null &&
-        "type" in action &&
-        action.type === "inspect" &&
-        "candidate" in action &&
-        action.candidate === null,
-    );
-    expect(inspectNulls).toHaveLength(2);
 
     destroy();
   });
@@ -462,8 +447,12 @@ describe("createInspectionState pin cycle", () => {
 describe("createInspectionState applyQueuedInspectFrame", () => {
   it("drops stale token, stashes when pinned, applies when fresh, drops on epoch mismatch; always clears queues first", () => {
     const model = modelFor(continuousSpec());
+    const announcements: string[] = [];
     const { state, reducer, destroy } = mountInspectionController({
       model: () => model,
+      announce: (message) => {
+        announcements.push(message);
+      },
       registerEffects: false,
     });
     const { candidate, hit } = candidateHit(model);
@@ -548,35 +537,52 @@ describe("createInspectionState applyQueuedInspectFrame", () => {
       candidate: other,
     };
     state.queuePointerFrame(otherQueued, reducer.frameToken());
+    const otherFrame = {
+      epoch: model.runId,
+      id: other.id,
+      panelId: other.panelId,
+      x: other.x,
+      y: other.y,
+    };
     state.applyQueuedInspectFrame({
       type: "inspect",
-      candidate: {
-        epoch: model.runId,
-        id: other.id,
-        panelId: other.panelId,
-        x: other.x,
-        y: other.y,
-      },
+      candidate: otherFrame,
       source: "pointer",
     });
     flushSync();
     expect(state.inspection?.state).toBe("pinned");
-    // Queues cleared after stash; second apply is empty (no double-stash).
+    // Queues cleared ON the stash path: a second apply must be an empty frame
+    // (no double-stash). Discriminator below: restore-pending consumes the
+    // SINGLE stash silently, so the NEXT unpin after re-pinning must take the
+    // flip branch — which is the only branch that announces "unpinned".
     state.applyQueuedInspectFrame({
       type: "inspect",
-      candidate: {
-        epoch: model.runId,
-        id: other.id,
-        panelId: other.panelId,
-        x: other.x,
-        y: other.y,
-      },
+      candidate: otherFrame,
       source: "pointer",
     });
-
-    // Epoch mismatch → drop (after unpin for a clean transient base).
-    state.toggleInspectionPin("pointer");
     flushSync();
+    expect(state.inspection?.state).toBe("pinned");
+    // Unpin #1 (keyboard — the announcing source class): restore-pending
+    // consumes the stash and never announces; transient lands on the stashed
+    // candidate's anchor.
+    announcements.length = 0;
+    state.toggleInspectionPin("keyboard");
+    flushSync();
+    expect(state.inspection?.state).toBe("transient");
+    expect(state.inspection?.focus.anchor).toEqual({ x: other.x, y: other.y });
+    expect(announcements.some((m) => m.includes("unpinned"))).toBe(false);
+    // Re-pin, unpin #2 (keyboard): with the stash gone (single-stash), this
+    // is the FLIP branch, which announces for keyboard. A double-stash
+    // regression would restore again silently instead.
+    state.toggleInspectionPin("keyboard");
+    flushSync();
+    announcements.length = 0;
+    state.toggleInspectionPin("keyboard");
+    flushSync();
+    expect(state.inspection?.state).toBe("transient");
+    expect(announcements.some((m) => m.includes("unpinned"))).toBe(true);
+
+    // Epoch mismatch → drop (from a clean transient base).
     state.setInspection(null, "pointer");
     flushSync();
     state.queuePointerFrame(queued, reducer.frameToken());
@@ -587,6 +593,61 @@ describe("createInspectionState applyQueuedInspectFrame", () => {
     });
     flushSync();
     expect(state.inspection).toBeNull();
+
+    destroy();
+  });
+
+  it("host-facing mutators: clearQueuedPointer drops the payload; clearPendingPinned drops the stash", () => {
+    const model = modelFor(continuousSpec());
+    const announcements: string[] = [];
+    const { state, reducer, destroy } = mountInspectionController({
+      model: () => model,
+      announce: (message) => {
+        announcements.push(message);
+      },
+      registerEffects: false,
+    });
+    const { candidate, hit } = candidateHit(model);
+    const queued: QueuedPointerInspection = {
+      hit,
+      source: "pointer",
+      concreteMode: "xy",
+      candidate,
+    };
+    const frame = {
+      epoch: model.runId,
+      id: candidate.id,
+      panelId: candidate.panelId,
+      x: candidate.x,
+      y: candidate.y,
+    };
+
+    // clearQueuedPointer clears ONLY the payload (host leave/cancel paths):
+    // a fresh-token frame that would otherwise apply must become empty.
+    state.queuePointerFrame(queued, reducer.frameToken());
+    state.clearQueuedPointer();
+    state.applyQueuedInspectFrame({ type: "inspect", candidate: frame, source: "pointer" });
+    flushSync();
+    expect(state.inspection).toBeNull();
+
+    // clearPendingPinned drops a stashed pending: the next unpin must take
+    // the announcing FLIP branch instead of a silent restore.
+    state.queuePointerFrame(queued, reducer.frameToken());
+    state.applyQueuedInspectFrame({ type: "inspect", candidate: frame, source: "pointer" });
+    flushSync();
+    expect(state.inspection?.state).toBe("transient");
+    state.toggleInspectionPin("pointer");
+    flushSync();
+    state.queuePointerFrame(queued, reducer.frameToken());
+    state.applyQueuedInspectFrame({ type: "inspect", candidate: frame, source: "pointer" });
+    flushSync();
+    expect(state.inspection?.state).toBe("pinned");
+    state.clearPendingPinned();
+    announcements.length = 0;
+    state.toggleInspectionPin("keyboard");
+    flushSync();
+    expect(state.inspection?.state).toBe("transient");
+    expect(announcements.some((m) => m.includes("unpinned"))).toBe(true);
 
     destroy();
   });
@@ -609,7 +670,7 @@ describe("createInspectionState scene-reconcile effect", () => {
     const enabledBox = reactiveBox(true);
     const events: PlotInspection<Record<string, CellValue>>[] = [];
 
-    const { state, destroy } = mountInspectionController({
+    const { state, reducer, destroy } = mountInspectionController({
       model: () => modelBox.value,
       inspectEnabled: () => enabledBox.value,
       oninspect: () => (event) => {
@@ -629,7 +690,11 @@ describe("createInspectionState scene-reconcile effect", () => {
     flushSync();
     expect(state.inspection).toBeNull();
 
-    // Pin on modelB, swap back → reconcile-pinned (or clear if seed gone).
+    // Reconcile-pinned SUCCESS path, deterministic: a "responsive relayout"
+    // clone of the SAME model (same data/identity, bumped runId). The pinned
+    // snapshot must survive and — because nothing semantic changed — emit
+    // NOTHING (duplicate change events after relayouts are the drift this
+    // pins).
     const b = candidateHit(modelB);
     applyInspect(state, b.candidate);
     flushSync();
@@ -637,19 +702,47 @@ describe("createInspectionState scene-reconcile effect", () => {
     flushSync();
     expect(state.inspection?.state).toBe("pinned");
     events.length = 0;
-    Object.defineProperty(modelA, "runId", { value: 3, configurable: true });
+    const relayout = Object.create(
+      Object.getPrototypeOf(modelB) as object,
+      Object.getOwnPropertyDescriptors(modelB),
+    ) as RenderModel;
+    Object.defineProperty(relayout, "runId", { value: 4, configurable: true });
+    modelBox.set(relayout);
+    flushSync();
+    expect(state.inspection).not.toBeNull();
+    expect(state.inspection?.state).toBe("pinned");
+    expect(events).toEqual([]);
+
+    // Reconcile-pinned CLEAR path, deterministic: swap to a model with
+    // DISJOINT row ids (keyAt cannot find the pinned seed) → one programmatic
+    // clear emit + teardown of any queued/pending frames.
+    const pendingQueued: QueuedPointerInspection = {
+      hit: hitFromCandidate(b.candidate),
+      source: "pointer",
+      concreteMode: "xy",
+      candidate: b.candidate,
+    };
+    state.queuePointerFrame(pendingQueued, reducer.frameToken());
+    events.length = 0;
+    Object.defineProperty(modelA, "runId", { value: 5, configurable: true });
     modelBox.set(modelA);
     flushSync();
-    // Identity may fail across unrelated models → clear emit OR snapshot swap.
-    // Either path must not leave a dangling transient on the old model.
-    if (state.inspection === null) {
-      expect(events.some((event) => event.phase === "clear")).toBe(true);
-      const again = candidateHit(modelA);
-      applyInspect(state, again.candidate);
-      flushSync();
-    } else {
-      expect(state.inspection.state).toBe("pinned");
-    }
+    expect(state.inspection).toBeNull();
+    expect(events.some((event) => event.phase === "clear")).toBe(true);
+    // Invalidate teardown cleared the queued frame: a fresh apply is empty.
+    state.applyQueuedInspectFrame({
+      type: "inspect",
+      candidate: {
+        epoch: modelA.runId,
+        id: b.candidate.id,
+        panelId: b.candidate.panelId,
+        x: b.candidate.x,
+        y: b.candidate.y,
+      },
+      source: "pointer",
+    });
+    flushSync();
+    expect(state.inspection).toBeNull();
 
     // Disable inspect → clear-disabled.
     enabledBox.set(false);
@@ -745,6 +838,12 @@ describe("createInspectionState traversal", () => {
     state.resetTraversalIndex();
     // Reset alone does not clear inspection — only the index (blur path).
     expect(state.inspection).not.toBeNull();
+    // The reset's OBSERVABLE effect: the next navigate(1) starts over from
+    // the FIRST traversal hit (index -1 → 0), not from the stale mid-set
+    // position — a no-op reset would land elsewhere.
+    state.navigate(1);
+    flushSync();
+    expect(state.inspection!.focus.anchor).toEqual(firstAnchor);
 
     // Directional navigate requires an active inspection.
     state.navigateDirection(1, 0);
@@ -756,24 +855,18 @@ describe("createInspectionState traversal", () => {
 });
 
 describe("createInspectionState setInspection(null) clear ordering", () => {
-  it("pins ordered sequence: dispatch1 → emit while still non-null → clear+release → dispatch2", () => {
+  it("pins ordered sequence: dispatch1(non-null) → emit while still non-null → clear → dispatch2(null)", () => {
     const model = modelFor(continuousSpec());
     const log: string[] = [];
-    let nullDispatches = 0;
+    // controllerRef lets both spies record inspection-nullness AT CALL TIME —
+    // that positional evidence is what discriminates the ordering (a refactor
+    // moving the state clear after the second dispatch flips dispatch-2's tag).
+    let controllerRef: ReturnType<typeof createInspectionState> | null = null;
+    const stateTag = (): string => (controllerRef?.inspection === null ? "null" : "non-null");
     const base = createInteractionReducer();
-    const wrapped: InteractionReducer = {
-      ...base,
-      dispatch: (action) => {
-        if (action.type === "inspect" && action.candidate === null && action.source === "pointer") {
-          nullDispatches++;
-          log.push(`dispatch-inspect-null-${nullDispatches}`);
-        }
-        base.dispatch(action);
-      },
-      get state() {
-        return base.state;
-      },
-    };
+    const wrapped = wrapReducerWithLog(base, (count) => {
+      log.push(`dispatch-${count}-inspection-${stateTag()}`);
+    });
 
     const handle = withFlushedEffectRoot(() => {
       const controller = createInspectionState({
@@ -792,18 +885,13 @@ describe("createInspectionState setInspection(null) clear ordering", () => {
         clearBrush: () => {},
         chooseTool: () => {},
         oninspect: () => (event) => {
-          if (event.phase === "clear") {
-            log.push(
-              controller.inspection === null
-                ? "emit-clear-while-null"
-                : "emit-clear-while-non-null",
-            );
-          }
+          if (event.phase === "clear") log.push(`emit-clear-inspection-${stateTag()}`);
         },
         oninteraction: noInteraction,
         announce: () => {},
         clearAnnouncement: () => {},
       });
+      controllerRef = controller;
       return controller;
     });
 
@@ -811,21 +899,21 @@ describe("createInspectionState setInspection(null) clear ordering", () => {
     handle.value.setInspection(hit, "pointer", "transient", "xy", candidate);
     flushSync();
     log.length = 0;
-    nullDispatches = 0;
 
     handle.value.setInspection(null, "pointer");
-    // After clear completes, state is null (step 3 side effect of clear path).
-    log.push(handle.value.inspection === null ? "state-cleared" : "state-still-set");
 
-    // Exact host order (1173–1180): first inspect-null dispatch, clear emit while
-    // inspection is still non-null, state cleared + coordinator release (between
-    // emit and second dispatch), second inspect-null dispatch.
+    // Exact host order (base 1173-1180): first inspect-null dispatch and the
+    // clear emit both observe a STILL NON-NULL inspection; the state clear +
+    // coordinator release happen between the emit and the SECOND dispatch, so
+    // dispatch-2 observes null. (The transient coordinator release itself is
+    // module-private and not observable without API widening; its position is
+    // pinned transitively by the state-clear tag on dispatch-2.)
     expect(log).toEqual([
-      "dispatch-inspect-null-1",
-      "emit-clear-while-non-null",
-      "dispatch-inspect-null-2",
-      "state-cleared",
+      "dispatch-1-inspection-non-null",
+      "emit-clear-inspection-non-null",
+      "dispatch-2-inspection-null",
     ]);
+    expect(handle.value.inspection).toBeNull();
 
     handle.destroy();
   });

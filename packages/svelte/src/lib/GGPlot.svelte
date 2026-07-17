@@ -365,6 +365,10 @@
         ) => void)
       | undefined,
   );
+  const factoryOninspect = $derived(
+    oninspect as
+      ((event: PlotInspection<Record<string, CellValue>>) => void) | undefined,
+  );
   // Announcer is declared later; the sink is handler-only (never construction).
   const announceSink = (message: string): void => {
     announcer.announce(message);
@@ -503,10 +507,7 @@
       brushRect = null;
     },
     chooseTool: (next) => chooseTool(next),
-    oninspect: () =>
-      oninspect as
-        | ((event: PlotInspection<Record<string, CellValue>>) => void)
-        | undefined,
+    oninspect: () => factoryOninspect,
     oninteraction: () => factoryOninteraction,
     announce: announceSink,
     clearAnnouncement: () => announcer.clear(),
