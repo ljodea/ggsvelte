@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784330597307,
+  "lastUpdate": 1784331261543,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -20194,6 +20194,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 160.4333,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c9b2f89e8450d489e2eb933080b70e468aaffee1",
+          "message": "perf(core): O(1) aggregate candidate lineage via group×x/bin indexes (#189)\n\n* perf(core): O(1) aggregate candidate lineage via group×x/bin indexes\n\nPre-bucket represented source rows by (panel, layer, group, xKey) and by\nbin frame row when building the identity index, so count/summary/boxplot/bin\nmark resolve no longer re-filters the full group per output mark (O(k·g) →\nO(n) build + O(1) lookup). Preserve lineage parity, including singleton\nboxplot outlier memberships.\n\nFixes #184\n\n* fix(core): satisfy prefer-nullish-coalescing on lineage index lookup\n\n* fix(core): freeze aggregate lineage bucket arrays after index build\n\n* fix(core): O(n log k) bin lineage assign; gate group×x to aggregate stats\n\nAddress Codex P1/P2 on #189: assign each source row to a bin once via\nbinary search on ordered edges instead of re-scanning the group per bin,\nand only build sourceRowsByGroupX for count/summary/boxplot consumers.",
+          "timestamp": "2026-07-17T18:33:39-05:00",
+          "tree_id": "085dcb6c62ca1cf596aa41364e0602a66a056e1f",
+          "url": "https://github.com/ljodea/ggsvelte/commit/c9b2f89e8450d489e2eb933080b70e468aaffee1"
+        },
+        "date": 1784331260406,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.3412,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.7088,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 10.8241,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 14.9587,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 88.0804,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 119.9769,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.1518,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.295,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 87.562,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 107.9487,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 15.5475,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 13.6038,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 116.5863,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.8018,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 27.439,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.2809,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 30.4913,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 615.2038,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 161.189,
             "unit": "ms"
           }
         ]
