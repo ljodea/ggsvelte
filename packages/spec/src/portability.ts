@@ -62,7 +62,20 @@ function issueFor(value: unknown): string | null {
   }
 }
 
-function walk(value: unknown, path: string, seen: Set<object>, issues: PortabilityIssue[]): void {
+/**
+ * Walk a value tree, collecting portability issues.
+ * When `stopAfter` is set, stop once that many issues are recorded (used by
+ * `isPortable` for an early-exit existence check).
+ */
+function walk(
+  value: unknown,
+  path: string,
+  seen: Set<object>,
+  issues: PortabilityIssue[],
+  stopAfter?: number,
+): void {
+  if (stopAfter !== undefined && issues.length >= stopAfter) return;
+
   const primitiveIssue = issueFor(value);
   if (primitiveIssue !== null) {
     issues.push({ path, reason: primitiveIssue });
@@ -82,7 +95,10 @@ function walk(value: unknown, path: string, seen: Set<object>, issues: Portabili
   }
   if (Array.isArray(value)) {
     seen.add(value);
-    for (let i = 0; i < value.length; i++) walk(value[i], `${path}/${i}`, seen, issues);
+    for (let i = 0; i < value.length; i++) {
+      walk(value[i], `${path}/${i}`, seen, issues, stopAfter);
+      if (stopAfter !== undefined && issues.length >= stopAfter) break;
+    }
     seen.delete(value);
     return;
   }
@@ -95,7 +111,8 @@ function walk(value: unknown, path: string, seen: Set<object>, issues: Portabili
   }
   seen.add(value);
   for (const [key, v] of Object.entries(value)) {
-    walk(v, `${path}/${key}`, seen, issues);
+    walk(v, `${path}/${key}`, seen, issues, stopAfter);
+    if (stopAfter !== undefined && issues.length >= stopAfter) break;
   }
   seen.delete(value);
 }
@@ -109,7 +126,9 @@ export function portabilityIssues(value: unknown): PortabilityIssue[] {
 
 /** True when `spec` contains only strictly-JSON values (narrowing type guard). */
 export function isPortable(spec: RuntimeSpec | PortableSpec): spec is PortableSpec {
-  return portabilityIssues(spec).length === 0;
+  const issues: PortabilityIssue[] = [];
+  walk(spec, "", new Set(), issues, 1);
+  return issues.length === 0;
 }
 
 /** Thrown by toPortable(): lists EVERY unserializable path, not just the first. */

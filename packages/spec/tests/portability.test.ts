@@ -47,6 +47,33 @@ describe("portabilityIssues", () => {
   });
 });
 
+describe("isPortable early exit", () => {
+  it("stops walking after the first issue", () => {
+    let deepTouched = false;
+    const bomb = {
+      get x() {
+        deepTouched = true;
+        return 1;
+      },
+    };
+    // `width` is visited before `data` in insertion order; NaN is unportable.
+    const spec = {
+      layers: [{ geom: "point" }],
+      width: Number.NaN,
+      data: { values: [bomb] },
+    } as unknown as RuntimeSpec;
+
+    expect(isPortable(spec)).toBe(false);
+    expect(deepTouched).toBe(false);
+
+    // Full enumeration still visits everything (and reports every path).
+    deepTouched = false;
+    const issues = portabilityIssues(spec);
+    expect(deepTouched).toBe(true);
+    expect(issues.some((i) => i.path === "/width")).toBe(true);
+  });
+});
+
 describe("toPortable", () => {
   it("returns a deep copy for portable specs", () => {
     const copy = toPortable(portable);
