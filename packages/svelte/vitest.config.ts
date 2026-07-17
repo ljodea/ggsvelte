@@ -2,6 +2,7 @@
 // the same harness pattern as the retired spikes/browser suites. Versions are
 // pinned together with the CI Playwright container (asserted in CI).
 import { svelte } from "@sveltejs/vite-plugin-svelte";
+import { coverageBase } from "./vitest.coverage.js";
 import { playwright } from "@vitest/browser-playwright";
 import { defineConfig } from "vitest/config";
 
@@ -22,10 +23,8 @@ export default defineConfig({
     // (v8-over-CDP); invoke with --project chromium so firefox/webkit
     // are not asked to report coverage.
     coverage: {
-      provider: "v8",
+      ...coverageBase,
       reportsDirectory: "coverage/browser",
-      include: ["src/lib/**"],
-      enabled: false,
     },
     browser: {
       enabled: true,
