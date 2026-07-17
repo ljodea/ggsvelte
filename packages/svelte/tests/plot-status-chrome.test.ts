@@ -109,4 +109,26 @@ describe("PlotStatusChrome", () => {
     // CSSOM may serialize `animation: none` as expanded longhands / `auto`.
     expect(cssText).toMatch(/animation:\s*(none|auto)/i);
   });
+
+  it("keeps muted chrome color free of the numeric theme alpha token (#161)", () => {
+    render(PlotStatusChrome, {
+      plotId: "muted-color",
+      emptyPlot: true,
+      capabilityStatus: "status",
+    });
+    const cssText = [...document.styleSheets]
+      .flatMap((sheet) => {
+        try {
+          return [...sheet.cssRules].map((rule) => rule.cssText);
+        } catch {
+          return [] as string[];
+        }
+      })
+      .join("\n");
+    // --gg-theme-interactionMuted is a numeric alpha; invalid in color position.
+    expect(cssText).toMatch(/color:\s*var\(--gg-interactionMuted,\s*currentColor\)/i);
+    expect(cssText).not.toMatch(
+      /color:\s*var\(\s*--gg-interactionMuted\s*,\s*var\(\s*--gg-theme-interactionMuted/i,
+    );
+  });
 });
