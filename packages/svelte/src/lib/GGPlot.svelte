@@ -569,7 +569,7 @@
     candidateSemanticKeys: (candidate) => candidateSemanticKeys(candidate),
     inspectionPanel: () => inspectionPanel,
     // Selection is already constructed (interval is after selection).
-    emitSelection: (event) => selectionState.emitSelection(event),
+    emitSelection: selectionState.emitSelection,
     announce: announceSink,
   });
   // Host one-liners at original positions for later consumers.
@@ -657,7 +657,8 @@
   const interactionMasks = $derived(
     selectionState.computeInteractionMasks(
       presentationFocusKeys,
-      semanticCandidateProjections,
+      // Thunk: with empty focus (idle), the projections derived is never read.
+      () => semanticCandidateProjections,
     ),
   );
 
@@ -695,10 +696,10 @@
     zoomState.setZoomDomains(domains);
   }
 
-  // Host one-liners at original markLabel/datumLabel positions.
+  // Host one-liners at original markLabel/datumLabel positions
+  // (datumLabel is a plain method reference — chromeState is constructed).
   const markLabel = $derived(chromeState.markLabel);
-  const datumLabel = (values: Record<string, CellValue> | null) =>
-    chromeState.datumLabel(values);
+  const datumLabel = chromeState.datumLabel;
 
   // Phase 3: clientFlush/ready effect at the end of the script (late registration).
   runtime.registerLateEffects();

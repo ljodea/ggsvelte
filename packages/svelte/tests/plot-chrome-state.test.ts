@@ -134,7 +134,8 @@ describe("createPlotChromeState value smoke", () => {
     // Use a fully band model path: scale type band on the blocking channel.
     // zoomSupportsChannel(xy) is true when EITHER channel is non-band.
     // For a pure band-x continuous-y model, zoom tools remain.
-    expect(band.state.zoomHasSupportedChannel).toBe(true);
+    // zoomHasSupportedChannel is private — its effect is observable through
+    // availableTools filtering.
     expect(band.state.availableTools).toContain("zoom-area");
     band.destroy();
 
@@ -145,7 +146,6 @@ describe("createPlotChromeState value smoke", () => {
       configuredAvailableTools: () => ["inspect", "zoom-area", "point"],
       selectConfig: pointSelect,
     });
-    expect(bandXOnly.state.zoomHasSupportedChannel).toBe(false);
     expect(bandXOnly.state.availableTools).toEqual(["inspect", "point"]);
     expect(bandXOnly.state.availableTools).not.toContain("zoom-area");
     bandXOnly.destroy();
@@ -168,13 +168,12 @@ describe("createPlotChromeState value smoke", () => {
     expect(state.canPublishPointSelection).toBe(true);
     expect(state.hasPointSelection).toBe(false);
     expect(state.hasIntervalSelection).toBe(false);
-    expect(state.hasZoomDomains).toBe(false);
     expect(state.emptyPlot).toBe(false);
     expect(state.preciseZoomAxes).toEqual(["x", "y"]);
     expect(state.preciseIntervalAxes).toEqual([]);
     expect(state.capabilityStatus).toBe(`Area interaction unavailable: ${facetDiag.message}`);
-    expect(state.themeStyle).toContain("--gg-theme-");
-    expect(typeof state.rootStyle).toBe("string");
+    // themeStyle/hasZoomDomains are private — themeStyle feeds rootStyle.
+    expect(state.rootStyle).toContain("--gg-theme-");
     expect(state.markLabel(0)).toMatch(/x|y|data point/i);
     expect(state.datumLabel(null)).toBe("No active datum");
     expect(state.datumLabel({ x: 1, y: 2 })).toMatch(/x|y|Active datum/i);

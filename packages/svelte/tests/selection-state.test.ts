@@ -5,7 +5,7 @@
 import { flushSync } from "svelte";
 import { describe, expect, it } from "vitest";
 
-import type { CandidateFacts, RenderModel } from "@ggsvelte/core";
+import type { CellValue, CandidateFacts, RenderModel } from "@ggsvelte/core";
 import { aes, gg, type PortableSpec } from "@ggsvelte/spec";
 
 import type {
@@ -47,12 +47,11 @@ const defaultScope: PlotInteractionScope = {
 };
 
 const noController = (): MaybeController => undefined;
-const noSelect = (): SelectCb => undefined;
-const noInteraction = (): InteractionCb => undefined;
 
 const pointSelectSingle = (): SelectConfig =>
   Object.freeze({
     type: "point" as const,
+    mode: "xy" as const,
     multiple: false,
     persistent: true,
     preset: "independent" as const,
@@ -61,6 +60,7 @@ const pointSelectSingle = (): SelectConfig =>
 const pointSelectMultiple = (): SelectConfig =>
   Object.freeze({
     type: "point" as const,
+    mode: "xy" as const,
     multiple: true,
     persistent: true,
     preset: "independent" as const,
@@ -111,8 +111,8 @@ function mountSelectionController(
       effectiveEmphasisKeys: options.effectiveEmphasisKeys ?? (() => []),
       inspectionFocus: options.inspectionFocus ?? (() => null),
       candidateSemanticKeys: options.candidateSemanticKeys ?? identityCandidateKeys,
-      onselect: options.onselect ?? noSelect,
-      oninteraction: options.oninteraction ?? noInteraction,
+      onselect: options.onselect ?? noSelectCb,
+      oninteraction: options.oninteraction ?? noInteractionCb,
       announce: options.announce ?? (() => {}),
     }),
   );
@@ -425,14 +425,14 @@ describe("createSelectionState masks", () => {
     expect(state.computePresentationFocusKeys()).toEqual([]);
     const projections = state.computeSemanticCandidateProjections();
     expect(projections.length).toBeGreaterThan(0);
-    expect(state.computeInteractionMasks([], projections)).toEqual([]);
+    expect(state.computeInteractionMasks([], () => projections)).toEqual([]);
 
     // Emphasis alone
     emphasisBox.set(["0"]);
     flushSync();
     const focusKeys = state.computePresentationFocusKeys();
     expect(focusKeys).toEqual(["0"]);
-    const masks = state.computeInteractionMasks(focusKeys, projections);
+    const masks = state.computeInteractionMasks(focusKeys, () => projections);
     expect(masks.length).toBeGreaterThan(0);
     expect(masks.some((m) => m !== null)).toBe(true);
 
@@ -463,15 +463,17 @@ describe("createSelectionState masks", () => {
           candidateCalls++;
           return identityCandidateKeys(candidate);
         },
-        onselect: noSelect,
-        oninteraction: noInteraction,
+        onselect: noSelectCb,
+        oninteraction: noInteractionCb,
         announce: () => {},
       });
       // Host-shaped independent memo boundaries (three separate deriveds,
       // via the rune-backed helper — runes are unavailable in .test.ts).
       const focus = derivedBox(() => state.computePresentationFocusKeys());
       const projections = derivedBox(() => state.computeSemanticCandidateProjections());
-      const masks = derivedBox(() => state.computeInteractionMasks(focus.value, projections.value));
+      const masks = derivedBox(() =>
+        state.computeInteractionMasks(focus.value, () => projections.value),
+      );
       return {
         state,
         get focus() {
@@ -486,7 +488,16 @@ describe("createSelectionState masks", () => {
       };
     });
 
-    // Initial read materializes projections
+    // IDLE REGRESSION GUARD: with empty focus, reading masks must NOT
+    // materialize the projections walk (the thunk stays uninvoked).
+    emphasisBox.set([]);
+    flushSync();
+    expect(value.masks).toEqual([]);
+    expect(candidateCalls).toBe(0);
+    emphasisBox.set(["0"]);
+    flushSync();
+
+    // Initial focused read materializes projections
     void value.focus;
     void value.projections;
     void value.masks;

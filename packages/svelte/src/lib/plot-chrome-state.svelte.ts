@@ -61,12 +61,10 @@ export type PlotChromeStateDeps = {
 };
 
 export type PlotChromeState = {
-  readonly zoomHasSupportedChannel: boolean;
   readonly availableTools: readonly InteractionTool[];
   readonly canPublishPointSelection: boolean;
   readonly hasPointSelection: boolean;
   readonly hasIntervalSelection: boolean;
-  readonly hasZoomDomains: boolean;
   readonly showToolRail: boolean;
   readonly emptyPlot: boolean;
   readonly preciseIntervalAxes: readonly ("x" | "y")[];
@@ -74,7 +72,6 @@ export type PlotChromeState = {
   readonly areaScaleDiagnostics: readonly InteractionDiagnostic[];
   readonly legendDiagnostics: readonly InteractionDiagnostic[];
   readonly capabilityStatus: string | null;
-  readonly themeStyle: string;
   readonly rootStyle: string | undefined;
   /**
    * Derived function accessor — callback identity changes only when `model`
@@ -215,9 +212,6 @@ export function createPlotChromeState(deps: PlotChromeStateDeps): PlotChromeStat
   }
 
   return {
-    get zoomHasSupportedChannel() {
-      return zoomHasSupportedChannel;
-    },
     get availableTools() {
       return availableTools;
     },
@@ -229,9 +223,6 @@ export function createPlotChromeState(deps: PlotChromeStateDeps): PlotChromeStat
     },
     get hasIntervalSelection() {
       return hasIntervalSelection;
-    },
-    get hasZoomDomains() {
-      return hasZoomDomains;
     },
     get showToolRail() {
       return showToolRail;
@@ -253,9 +244,6 @@ export function createPlotChromeState(deps: PlotChromeStateDeps): PlotChromeStat
     },
     get capabilityStatus() {
       return capabilityStatus;
-    },
-    get themeStyle() {
-      return themeStyle;
     },
     get rootStyle() {
       return rootStyle;

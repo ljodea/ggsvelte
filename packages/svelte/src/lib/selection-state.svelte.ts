@@ -97,7 +97,7 @@ export type SelectionState = {
    */
   computeInteractionMasks(
     presentationFocusKeys: readonly PropertyKey[],
-    semanticCandidateProjections: readonly SemanticCandidateProjection[],
+    getSemanticCandidateProjections: () => readonly SemanticCandidateProjection[],
   ): readonly (BatchInteractionMask | null)[];
 };
 
@@ -205,14 +205,18 @@ export function createSelectionState(deps: SelectionStateDeps): SelectionState {
 
   function computeInteractionMasks(
     presentationFocusKeys: readonly PropertyKey[],
-    semanticCandidateProjections: readonly SemanticCandidateProjection[],
+    // THUNK, not a value: the empty-focus guard below must short-circuit
+    // BEFORE the projections derived is read, exactly as the base host did —
+    // an eager parameter would run the O(candidates) semantic-key walk on
+    // every model update (and every SSR render) in the idle no-focus state.
+    getSemanticCandidateProjections: () => readonly SemanticCandidateProjection[],
   ): readonly (BatchInteractionMask | null)[] {
     const model = deps.model();
     if (model === null || presentationFocusKeys.length === 0) return [];
     return buildInteractionMasks(
       model.scene.batches,
       presentationFocusKeys,
-      semanticCandidateProjections,
+      getSemanticCandidateProjections(),
     );
   }
 
