@@ -5,7 +5,7 @@
     ThemeTokens,
   } from "@ggsvelte/core";
 
-  import Batch from "../../src/lib/Batch.svelte";
+  import Batch from "../../src/lib/scene/Batch.svelte";
 
   const {
     batch,

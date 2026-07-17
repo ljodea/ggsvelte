@@ -11,7 +11,7 @@ import {
   panelDataDomains,
   type PanelBounds,
   type PlotRect,
-} from "./plot-geometry.js";
+} from "./scene/geometry.js";
 import {
   intervalSelectionFromRows,
   lineageRowIndexesFromCandidates,

@@ -8,7 +8,7 @@ import {
   type ContinuousZoomDomains,
   type PanelBounds,
   type PlotRect,
-} from "./plot-geometry.js";
+} from "./scene/geometry.js";
 
 export type ZoomMode = "x" | "y" | "xy";
 

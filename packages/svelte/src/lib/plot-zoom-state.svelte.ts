@@ -17,7 +17,7 @@ import type {
   ResolvedInteractionConfig,
   ZoomEvent,
 } from "./interaction.js";
-import { frozenZoomDomains, type ContinuousZoomDomains } from "./plot-geometry.js";
+import { frozenZoomDomains, type ContinuousZoomDomains } from "./scene/geometry.js";
 import { zoomAnnouncement } from "./assembly/labels.js";
 import {
   applyZoomToSpec,

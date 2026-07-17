@@ -15,10 +15,10 @@ import {
 import type { PortableSpec } from "@ggsvelte/spec";
 import { untrack } from "svelte";
 
-import type { LegendFilterClause } from "./legend-filter.js";
-import type { ReadonlyZoomDomains } from "./interaction.js";
-import { isContainerWidthProp, resolvePlotSize } from "./assembly/layout.js";
-import { createPaintLedger, isPlotReady } from "./plot-paint.js";
+import type { LegendFilterClause } from "../legend-filter.js";
+import type { ReadonlyZoomDomains } from "../interaction.js";
+import { isContainerWidthProp, resolvePlotSize } from "../assembly/layout.js";
+import { createPaintLedger, isPlotReady } from "./paint.js";
 
 export type PlotRuntimeDeps = {
   widthProp: () => number | "container" | undefined;

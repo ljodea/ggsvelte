@@ -5,7 +5,7 @@ import {
   type BrushCorners,
   type PlotPoint,
 } from "./plot-area-brush.js";
-import { normalizedRect, type PanelBounds } from "./plot-geometry.js";
+import { normalizedRect, type PanelBounds } from "./scene/geometry.js";
 import { resolveFinishBrushAction, type FinishBrushAction } from "./plot-brush-finish.js";
 
 /**

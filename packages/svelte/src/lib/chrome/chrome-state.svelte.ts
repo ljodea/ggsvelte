@@ -27,7 +27,7 @@ import {
   zoomScaleDiagnosticsFromChannels,
   zoomSupportsChannel,
 } from "../plot-capability.js";
-import type { ContinuousZoomDomains } from "../plot-geometry.js";
+import type { ContinuousZoomDomains } from "../scene/geometry.js";
 import { datumLabel as datumLabelFor, markLabel as markLabelFor } from "../assembly/labels.js";
 import { isContainerWidthProp, plotRootInlineStyle } from "../assembly/layout.js";
 import { themeTokensToCss } from "./theme-css.js";

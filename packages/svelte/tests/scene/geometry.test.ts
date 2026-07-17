@@ -8,7 +8,7 @@ import {
   normalizedRect,
   panelContainingAnchor,
   panelDataDomains,
-} from "../src/lib/plot-geometry.js";
+} from "../../src/lib/scene/geometry.js";
 
 const continuousScale = (domain: [number, number]) => {
   const [d0, d1] = domain;

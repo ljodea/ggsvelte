@@ -5,7 +5,7 @@ import {
   type PlotPoint,
   type PointerBrushEnd,
 } from "./plot-area-brush.js";
-import type { PlotRect } from "./plot-geometry.js";
+import type { PlotRect } from "./scene/geometry.js";
 
 export type FinishBrushAction =
   | { readonly type: "keep-second-corner"; readonly corners: PlotRect }

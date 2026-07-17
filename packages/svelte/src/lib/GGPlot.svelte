@@ -65,8 +65,8 @@
   import PlotCaptureSurface from "./PlotCaptureSurface.svelte";
   import PlotLegendFilters from "./PlotLegendFilters.svelte";
   import PlotLegendTargets from "./PlotLegendTargets.svelte";
-  import PlotMarkStrata from "./PlotMarkStrata.svelte";
-  import PlotSceneOverlays from "./PlotSceneOverlays.svelte";
+  import MarkStrata from "./scene/MarkStrata.svelte";
+  import SceneOverlays from "./scene/SceneOverlays.svelte";
   import StatusChrome from "./chrome/StatusChrome.svelte";
   import Tooltip from "./Tooltip.svelte";
   import ToolRail from "./chrome/ToolRail.svelte";
@@ -258,7 +258,7 @@
   {/if}
   {#if runtime.model !== null}
     {@const currentModel = runtime.model}
-    <PlotMarkStrata
+    <MarkStrata
       model={currentModel}
       strata={runtime.strata}
       markLabel={chromeState.markLabel}
@@ -297,7 +297,7 @@
       entries={engine.filterableLegendEntries}
       belowClearFocus={engine.legendClearActive}
     />
-    <PlotSceneOverlays
+    <SceneOverlays
       width={currentModel.scene.width}
       height={currentModel.scene.height}
       interactive={engine.interactive}

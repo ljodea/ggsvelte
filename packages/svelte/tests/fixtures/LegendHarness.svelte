@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { SceneLegend, ThemeTokens } from "@ggsvelte/core";
 
-  import Legend from "../../src/lib/Legend.svelte";
+  import Legend from "../../src/lib/scene/Legend.svelte";
 
   const {
     legend,

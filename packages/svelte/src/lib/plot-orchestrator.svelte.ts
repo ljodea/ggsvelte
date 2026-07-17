@@ -67,7 +67,7 @@ import {
   type PlotAnnouncer,
   type SemanticKeyService,
 } from "./plot-shared-services.svelte.js";
-import { createPlotRuntime, type PlotRuntime } from "./plot-runtime.svelte.js";
+import { createPlotRuntime, type PlotRuntime } from "./runtime/runtime.svelte.js";
 import { type InteractiveLegendEntry, type LegendEntryIdentity } from "./plot-legend-focus.js";
 import {
   createLegendFilterState,

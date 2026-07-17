@@ -10,7 +10,7 @@ import { aes, gg, type PortableSpec } from "@ggsvelte/spec";
 import GGPlot from "../src/lib/GGPlot.svelte";
 import type { LegendFilterEvent } from "../src/lib/legend-filter.js";
 import { createLegendFilterState } from "../src/lib/legend-filter-state.svelte.js";
-import { createPlotRuntime, type PlotRuntime } from "../src/lib/plot-runtime.svelte.js";
+import { createPlotRuntime, type PlotRuntime } from "../src/lib/runtime/runtime.svelte.js";
 import { withEffectRoot, withFlushedEffectRoot } from "./helpers/effect-root.svelte.js";
 import { modelFor } from "./helpers/model.js";
 import { reactiveBox } from "./helpers/reactive-box.svelte.js";

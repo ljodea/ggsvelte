@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import PlotSceneOverlays from "../src/lib/PlotSceneOverlays.svelte";
-import { render } from "./helpers/render.js";
+import SceneOverlays from "../../src/lib/scene/SceneOverlays.svelte";
+import { render } from "../helpers/render.js";
 
 const anchors = [{ x: 10, y: 20 }];
 
-describe("PlotSceneOverlays", () => {
+describe("SceneOverlays", () => {
   it("renders the interactive overlay when surfaceInteractive", () => {
-    const { container } = render(PlotSceneOverlays, {
+    const { container } = render(SceneOverlays, {
       width: 100,
       height: 80,
       interactive: true,
@@ -20,7 +20,7 @@ describe("PlotSceneOverlays", () => {
   });
 
   it("renders the inert overlay when non-interactive with anchors", () => {
-    const { container } = render(PlotSceneOverlays, {
+    const { container } = render(SceneOverlays, {
       width: 100,
       height: 80,
       interactive: false,
@@ -32,7 +32,7 @@ describe("PlotSceneOverlays", () => {
   });
 
   it("renders nothing when non-interactive with empty anchors", () => {
-    const { container } = render(PlotSceneOverlays, {
+    const { container } = render(SceneOverlays, {
       width: 100,
       height: 80,
       interactive: false,
@@ -45,7 +45,7 @@ describe("PlotSceneOverlays", () => {
 
   it("never mounts both overlays when surfaceInteractive even with inert-looking flags", () => {
     // Structural exclusivity: surface branch wins over inert eligibility.
-    const { container } = render(PlotSceneOverlays, {
+    const { container } = render(SceneOverlays, {
       width: 100,
       height: 80,
       interactive: false,
