@@ -2,12 +2,19 @@
  * Characterization tests for the facet partition module.
  * Exercises resolveFacet / SINGLE_PANEL directly so the extraction stays
  * pinned to ggplot2 panel order and free-scale contracts.
+ *
+ * Seams under test (issue #183):
+ * - partitionByField: single O(n) pass → Map<encodeKey, row indices>
+ * - resolveFacet wrap/grid: panel membership + empty-grid parity
+ * - complexity: facet-field column() reads stay O(1) in distinct levels
  */
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it, spyOn } from "bun:test";
 
+import { encodeKey } from "../src/scales/state.ts";
 import { PipelineError } from "../src/pipeline.ts";
 import { resolveFacet, SINGLE_PANEL } from "../src/pipeline/facets.ts";
 import { assertFacetForm, facetFreeFlags } from "../src/pipeline/facets-form.ts";
+import { partitionByField } from "../src/pipeline/facets-tokens.ts";
 import { ColumnTable } from "../src/table.ts";
 
 const table = ColumnTable.fromRows([
@@ -16,6 +23,25 @@ const table = ColumnTable.fromRows([
   { g: "c", r: "x", c: "1", x: 3 },
   { g: "a", r: "x", c: "2", x: 4 },
 ]);
+
+/** Count ColumnTable.column(field) calls during fn (restored after). */
+function countColumnReads(field: string, fn: () => void): number {
+  const original = ColumnTable.prototype.column;
+  let reads = 0;
+  const spy = spyOn(ColumnTable.prototype, "column").mockImplementation(function (
+    this: ColumnTable,
+    name: string,
+  ) {
+    if (name === field) reads += 1;
+    return original.call(this, name);
+  });
+  try {
+    fn();
+    return reads;
+  } finally {
+    spy.mockRestore();
+  }
+}
 
 describe("SINGLE_PANEL", () => {
   it("returns one unfaceted panel with identity sourceRows", () => {
@@ -144,5 +170,97 @@ describe("facetFreeFlags / assertFacetForm", () => {
       expect(e).toBeInstanceOf(PipelineError);
       expect((e as PipelineError).code).toBe("facet-form-ambiguous");
     }
+  });
+});
+
+describe("partitionByField — single-pass buckets", () => {
+  it("groups row indices by encodeKey in table order", () => {
+    const t = ColumnTable.fromRows([
+      { g: "b", x: 0 },
+      { g: "a", x: 1 },
+      { g: "b", x: 2 },
+      { g: "a", x: 3 },
+      { g: null, x: 4 },
+      { g: 1, x: 5 },
+      { g: "1", x: 6 },
+    ]);
+    const buckets = partitionByField(t, "g");
+    expect(buckets.get(encodeKey("b"))).toEqual([0, 2]);
+    expect(buckets.get(encodeKey("a"))).toEqual([1, 3]);
+    expect(buckets.get(encodeKey(null))).toEqual([4]);
+    // number 1 and string "1" stay distinct panels
+    expect(buckets.get(encodeKey(1))).toEqual([5]);
+    expect(buckets.get(encodeKey("1"))).toEqual([6]);
+    expect(buckets.size).toBe(5);
+  });
+
+  it("reads the facet column once", () => {
+    const t = ColumnTable.fromRows(
+      Array.from({ length: 40 }, (_, i) => ({ g: `v${i % 10}`, x: i })),
+    );
+    const reads = countColumnReads("g", () => {
+      partitionByField(t, "g");
+    });
+    expect(reads).toBe(1);
+  });
+});
+
+describe("resolveFacet — O(n) partition (issue #183)", () => {
+  it("wrap: column reads stay bounded as distinct levels grow", () => {
+    const levels = 40;
+    const rows = Array.from({ length: levels * 5 }, (_, i) => ({
+      g: `g${i % levels}`,
+      x: i,
+    }));
+    const t = ColumnTable.fromRows(rows);
+    const reads = countColumnReads("g", () => {
+      resolveFacet({ wrap: { field: "g" } }, t);
+    });
+    // facetValues + partitionByField (+ optional fieldType via column) — not per level
+    expect(reads).toBeLessThanOrEqual(4);
+    expect(reads).toBeLessThan(levels);
+  });
+
+  it("grid: row/col column reads stay bounded as the cartesian grid grows", () => {
+    const R = 12;
+    const C = 12;
+    const rows = Array.from({ length: R * C }, (_, i) => ({
+      r: `r${i % R}`,
+      c: `c${Math.floor(i / R) % C}`,
+      x: i,
+    }));
+    const t = ColumnTable.fromRows(rows);
+    const rowReads = countColumnReads("r", () => {
+      resolveFacet({ rows: { field: "r" }, cols: { field: "c" } }, t);
+    });
+    const colReads = countColumnReads("c", () => {
+      resolveFacet({ rows: { field: "r" }, cols: { field: "c" } }, t);
+    });
+    // Not one scan per row-level / col-level / cell
+    expect(rowReads).toBeLessThanOrEqual(4);
+    expect(colReads).toBeLessThanOrEqual(4);
+    expect(rowReads).toBeLessThan(R);
+    expect(colReads).toBeLessThan(C);
+  });
+
+  it("wrap still assigns every source row to exactly one panel", () => {
+    const layout = resolveFacet({ wrap: { field: "g" } }, table);
+    const assigned = layout.panels.flatMap((p) => p.sourceRows ?? []);
+    expect(assigned.toSorted((a, b) => a - b)).toEqual([0, 1, 2, 3]);
+  });
+
+  it("grid still intersects row/col buckets and keeps empty combos", () => {
+    const sparse = ColumnTable.fromRows([
+      { r: "a", c: "1", x: 1 },
+      { r: "a", c: "1", x: 2 },
+      { r: "b", c: "2", x: 3 },
+    ]);
+    const layout = resolveFacet({ rows: { field: "r" }, cols: { field: "c" } }, sparse);
+    expect(layout.panels).toHaveLength(4);
+    const byLabel = Object.fromEntries(layout.panels.map((p) => [p.label, p.sourceRows]));
+    expect(byLabel["a / 1"]).toEqual([0, 1]);
+    expect(byLabel["b / 2"]).toEqual([2]);
+    expect(byLabel["a / 2"]).toEqual([]);
+    expect(byLabel["b / 1"]).toEqual([]);
   });
 });

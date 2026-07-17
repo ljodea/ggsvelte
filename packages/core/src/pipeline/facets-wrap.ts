@@ -2,10 +2,12 @@
  * Facet wrap partition: one panel per distinct value, near-square ncol default.
  */
 import { createFacetPanelIdentity } from "../facet-identity.js";
+import { encodeKey } from "../scales/state.js";
 import { bandKey } from "../scales/train.js";
 import type { ColumnTable } from "../table.js";
 
-import { facetValues, rowsMatching } from "./facets-helpers.js";
+import { facetValues } from "./facets-helpers.js";
+import { partitionByField } from "./facets-tokens.js";
 import type { FacetLayout } from "./facets-types.js";
 import { SINGLE_PANEL } from "./facets-types.js";
 
@@ -22,8 +24,10 @@ export function resolveFacetWrap(input: {
   if (values.length === 0) return SINGLE_PANEL(table, baseSourceRows);
   const ncol = Math.min(values.length, input.ncol ?? Math.ceil(Math.sqrt(values.length)));
   const nrow = Math.ceil(values.length / ncol);
+  // One O(n) partition, then O(v) panel assembly (issue #183).
+  const buckets = partitionByField(table, wrapField);
   const panels = values.map((value, i) => {
-    const rows = rowsMatching(table, wrapField, value);
+    const rows = buckets.get(encodeKey(value)) ?? [];
     const identity = createFacetPanelIdentity([{ role: "wrap", field: wrapField, value }]);
     return {
       identity,
