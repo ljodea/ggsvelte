@@ -2,8 +2,8 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { GeometryBatch, RenderModel, Stratum } from "@ggsvelte/core";
 
-import PlotMarkStrata from "../src/lib/PlotMarkStrata.svelte";
-import { render } from "./helpers/render.js";
+import MarkStrata from "../../src/lib/scene/MarkStrata.svelte";
+import { render } from "../helpers/render.js";
 
 function model(partial: {
   runId?: number;
@@ -49,9 +49,9 @@ const emptyCanvasStratum: Stratum = {
   batches: [],
 };
 
-describe("PlotMarkStrata", () => {
+describe("MarkStrata", () => {
   it("renders a single full SceneView for svg-only strata (no canvas sandwich)", () => {
-    const { container } = render(PlotMarkStrata, {
+    const { container } = render(MarkStrata, {
       model: model({}),
       strata: [emptySvgStratum],
       markLabel: () => "m",
@@ -66,7 +66,7 @@ describe("PlotMarkStrata", () => {
   });
 
   it("preserves document-order sandwich for interleaved canvas/svg strata", () => {
-    const { container } = render(PlotMarkStrata, {
+    const { container } = render(MarkStrata, {
       model: model({}),
       strata: [emptyCanvasStratum, emptySvgStratum, emptyCanvasStratum],
       markLabel: () => "m",
@@ -96,7 +96,7 @@ describe("PlotMarkStrata", () => {
     const onPainted = vi.fn();
     const spy = vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(null);
     try {
-      render(PlotMarkStrata, {
+      render(MarkStrata, {
         model: model({ runId: 9 }),
         strata: [emptyCanvasStratum],
         markLabel: () => "m",
@@ -113,7 +113,7 @@ describe("PlotMarkStrata", () => {
 
   it("notifies onPainted with canvas:${si} keys after successful paint", async () => {
     const onPainted = vi.fn<(runId: number, stratumKey: string) => void>();
-    render(PlotMarkStrata, {
+    render(MarkStrata, {
       model: model({ runId: 3 }),
       strata: [emptyCanvasStratum, emptySvgStratum, emptyCanvasStratum],
       markLabel: () => "m",
@@ -137,7 +137,7 @@ describe("PlotMarkStrata", () => {
   it("repaints canvas when document theme attributes flip", async () => {
     const onPainted = vi.fn<(runId: number, stratumKey: string) => void>();
     try {
-      render(PlotMarkStrata, {
+      render(MarkStrata, {
         model: model({ runId: 1 }),
         strata: [emptyCanvasStratum],
         markLabel: () => "m",

@@ -16,8 +16,8 @@
   import {
     paintCanvasStratum,
     resolveBatchFocusMasks,
-  } from "./plot-stratum-paint.js";
-  import CanvasA11y from "./a11y/CanvasA11y.svelte";
+  } from "./stratum-paint.js";
+  import CanvasA11y from "../a11y/CanvasA11y.svelte";
   import SceneView from "./SceneView.svelte";
 
   const {

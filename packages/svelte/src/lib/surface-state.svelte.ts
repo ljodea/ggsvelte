@@ -30,7 +30,7 @@ import { createInteractionReducer } from "./interaction-reducer.js";
 import { brushAtPoint, brushWithEnd } from "./plot-area-brush.js";
 import type { FinishBrushAction } from "./plot-brush-finish.js";
 import { resolveChooseToolAction, resolveEffectiveTool } from "./plot-capability.js";
-import { normalizedRect, panelContainingAnchor } from "./plot-geometry.js";
+import { normalizedRect, panelContainingAnchor } from "./scene/geometry.js";
 import {
   buildIntervalSelectionFromScene,
   intervalQuerySceneFromModel,

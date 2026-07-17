@@ -7,15 +7,15 @@ import { describe, expect, it, vi } from "vitest";
 
 import { aes, gg, type PortableSpec } from "@ggsvelte/spec";
 
-import GGPlot from "../src/lib/GGPlot.svelte";
-import { createPlotRuntime } from "../src/lib/plot-runtime.svelte.js";
-import { withEffectRoot, withFlushedEffectRoot } from "./helpers/effect-root.svelte.js";
+import GGPlot from "../../src/lib/GGPlot.svelte";
+import { createPlotRuntime } from "../../src/lib/runtime/runtime.svelte.js";
+import { withEffectRoot, withFlushedEffectRoot } from "../helpers/effect-root.svelte.js";
 import {
   createReactiveRuntimeDeps,
   type ReactiveRuntimeDeps,
-} from "./helpers/runtime-deps.svelte.js";
-import { render } from "./helpers/render.js";
-import { until } from "./helpers/until.js";
+} from "../helpers/runtime-deps.svelte.js";
+import { render } from "../helpers/render.js";
+import { until } from "../helpers/until.js";
 
 const minimalSpec: PortableSpec = gg(
   [
@@ -238,7 +238,7 @@ describe("createPlotRuntime model production", () => {
     flushSync();
     expect(runtime.ready).toBe(false);
 
-    // Stratum keys match PlotMarkStrata: index in the strata array as string.
+    // Stratum keys match MarkStrata: index in the strata array as string.
     runtime.strata.forEach((stratum, index) => {
       if (stratum.backend === "canvas") runtime.notifyPainted(runId, String(index));
     });

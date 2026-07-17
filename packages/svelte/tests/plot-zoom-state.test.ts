@@ -15,8 +15,8 @@ import type {
   ZoomEvent,
 } from "../src/lib/interaction.js";
 import { createPlotInteraction } from "../src/lib/interaction-controller.svelte.js";
-import type { ContinuousZoomDomains } from "../src/lib/plot-geometry.js";
-import { createPlotRuntime } from "../src/lib/plot-runtime.svelte.js";
+import type { ContinuousZoomDomains } from "../src/lib/scene/geometry.js";
+import { createPlotRuntime } from "../src/lib/runtime/runtime.svelte.js";
 import { createPlotZoomState } from "../src/lib/plot-zoom-state.svelte.js";
 import { withEffectRoot, withFlushedEffectRoot } from "./helpers/effect-root.svelte.js";
 import { modelFor } from "./helpers/model.js";

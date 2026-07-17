@@ -15,7 +15,7 @@ import type {
   ResolvedInteractionConfig,
 } from "../../src/lib/interaction.js";
 import { INTERACTION_DIAGNOSTIC_CATALOG } from "../../src/lib/interaction.js";
-import type { ContinuousZoomDomains } from "../../src/lib/plot-geometry.js";
+import type { ContinuousZoomDomains } from "../../src/lib/scene/geometry.js";
 import { createPlotChromeState } from "../../src/lib/chrome/chrome-state.svelte.js";
 import { withEffectRoot, withFlushedEffectRoot } from "../helpers/effect-root.svelte.js";
 import { modelFor } from "../helpers/model.js";

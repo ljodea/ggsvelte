@@ -36,7 +36,7 @@ import type {
 } from "./interaction.js";
 import { inspectionLiveText as inspectionLiveTextFor } from "./assembly/labels.js";
 import { plotTooltipDomId } from "./assembly/layout.js";
-import { panelContainingAnchor } from "./plot-geometry.js";
+import { panelContainingAnchor } from "./scene/geometry.js";
 import {
   bestDirectionalIndex,
   buildTraversalHits,

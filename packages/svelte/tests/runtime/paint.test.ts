@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { createPaintLedger, isPlotReady } from "../src/lib/plot-paint.js";
+import { createPaintLedger, isPlotReady } from "../../src/lib/runtime/paint.js";
 
 describe("isPlotReady", () => {
   const readyBase = {

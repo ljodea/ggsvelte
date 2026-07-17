@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { GeometryBatch } from "@ggsvelte/core";
 
-import { paintCanvasStratum, resolveBatchFocusMasks } from "../src/lib/plot-stratum-paint.js";
+import { paintCanvasStratum, resolveBatchFocusMasks } from "../../src/lib/scene/stratum-paint.js";
 
 describe("resolveBatchFocusMasks", () => {
   const a = { id: "a" } as unknown as GeometryBatch;

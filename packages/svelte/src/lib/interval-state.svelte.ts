@@ -39,7 +39,7 @@ import type {
   SemanticIntervalAxis,
 } from "./interaction.js";
 import type { BoundsEditorInput, PreciseBoundsApplyEvent } from "./bounds-editor.js";
-import { frozenZoomDomains, type ContinuousZoomDomains } from "./plot-geometry.js";
+import { frozenZoomDomains, type ContinuousZoomDomains } from "./scene/geometry.js";
 import {
   buildIntervalSelection,
   clearIntervalSelectionEvent,

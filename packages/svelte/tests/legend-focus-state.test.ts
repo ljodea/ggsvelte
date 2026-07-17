@@ -12,12 +12,12 @@ import GGPlot from "../src/lib/GGPlot.svelte";
 import type { LegendFocusEvent, PlotInteractionScope } from "../src/lib/interaction.js";
 import { createPlotInteraction } from "../src/lib/interaction-controller.svelte.js";
 import { createLegendFocusState } from "../src/lib/legend-focus-state.svelte.js";
-import { createPlotRuntime } from "../src/lib/plot-runtime.svelte.js";
-import { createSourceIdentityTracker } from "../src/lib/plot-semantic-keys.js";
+import { createPlotRuntime } from "../src/lib/runtime/runtime.svelte.js";
 import {
+  createSourceIdentityTracker,
   createSemanticKeyService,
   type SemanticKeyService,
-} from "../src/lib/plot-shared-services.svelte.js";
+} from "../src/lib/runtime/semantic-keys.svelte.js";
 import type { InteractiveLegendEntry, LegendEntryIdentity } from "../src/lib/plot-legend-focus.js";
 import { withEffectRoot, withFlushedEffectRoot } from "./helpers/effect-root.svelte.js";
 import { modelFor } from "./helpers/model.js";

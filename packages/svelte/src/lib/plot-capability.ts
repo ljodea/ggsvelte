@@ -84,7 +84,7 @@ export type InertSelectionOverlayInput = {
 
 /**
  * Whether to paint the non-interactive selection/emphasis overlay.
- * Host also must not be in surface-interactive mode; PlotSceneOverlays
+ * Host also must not be in surface-interactive mode; SceneOverlays
  * enforces that with `{:else if}` so both never mount together.
  */
 export function shouldShowInertSelectionOverlay(input: InertSelectionOverlayInput): boolean {

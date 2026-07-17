@@ -8,7 +8,7 @@ import type { PortableSpec } from "@ggsvelte/spec";
 
 import type { ReadonlyZoomDomains } from "../../src/lib/interaction.js";
 import type { LegendFilterClause } from "../../src/lib/legend-filter.js";
-import type { PlotRuntimeDeps } from "../../src/lib/plot-runtime.svelte.js";
+import type { PlotRuntimeDeps } from "../../src/lib/runtime/runtime.svelte.js";
 
 export type ReactiveRuntimeDeps = PlotRuntimeDeps & {
   setWidth(v: number | "container" | undefined): void;

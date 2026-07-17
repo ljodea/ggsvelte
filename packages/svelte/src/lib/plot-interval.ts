@@ -1,7 +1,7 @@
 import type { CellValue } from "@ggsvelte/core";
 
 import type { InteractionSource, IntervalSelection } from "./interaction.js";
-import type { PlotRect } from "./plot-geometry.js";
+import type { PlotRect } from "./scene/geometry.js";
 import { uniqueKeysFromRowIndexes } from "./plot-selection.js";
 
 /** Pointer brush-end gate only. Keyboard Enter/Space commits any size. */
