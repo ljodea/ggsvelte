@@ -18,4 +18,6 @@ export interface LocatedIdentityCandidate {
   fillField: string | undefined;
   seriesByRow: Map<string, number>;
   sourceRowsByGroup: Map<string, number[]>;
+  sourceRowsByGroupX: Map<string, number[]>;
+  sourceRowsByGroupBin: Map<string, number[]>;
 }

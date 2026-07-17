@@ -21,7 +21,15 @@ export function resolveIdentityLineageAndAnnotation(
   annotationX: CellValue;
   annotationY: CellValue;
 } {
-  const { sourceRow, frame, outlierSourceRow, frameRow, sourceRowsByGroup } = located;
+  const {
+    sourceRow,
+    frame,
+    outlierSourceRow,
+    frameRow,
+    sourceRowsByGroup,
+    sourceRowsByGroupX,
+    sourceRowsByGroupBin,
+  } = located;
   const { annotationRule, annotationX, annotationY } = resolveAnnotationIntercepts({
     frame,
     primitiveIndex: facts.primitiveIndex,
@@ -33,6 +41,8 @@ export function resolveIdentityLineageAndAnnotation(
     panelIndex: facts.panelIndex,
     layerIndex: facts.layerIndex,
     sourceRowsByGroup,
+    sourceRowsByGroupX,
+    sourceRowsByGroupBin,
     frame,
     table: ctx.table,
     frameRow,
