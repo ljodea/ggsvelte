@@ -111,6 +111,7 @@ upstream, `.md`/`.yaml`/`.svelte` can fold back into oxfmt (`.oxfmtrc.json`
 | `bun run fmt` / `bun run fmt:check`                   | oxfmt (ts/js/json/css/toml) + prettier (.svelte/.md/.yaml)                                                                              |
 | `bun run test`                                        | bun unit tests (spec + core + scripts + evals harness; needs `bun run check` first)                                                     |
 | `bun run test:components`                             | packages/svelte component tests (Chromium, Firefox, WebKit) followed by the Node SSR suite                                              |
+| `cd packages/svelte && bun run test:coverage`         | browser (chromium) + SSR coverage reports; browser config enforces thresholds (local/optional — not wired into CI yet)                  |
 | `bun run check:examples`                              | tsc over the examples corpus's .ts files (needs `bun run check` first: dist types)                                                      |
 | `bun run check:docs`                                  | svelte-kit sync + svelte-check for apps/docs (needs `bun run build` first)                                                              |
 | `bun run build:docs`                                  | static docs site → `apps/docs/build/` (needs `bun run build` first; the VR target)                                                      |
@@ -139,6 +140,70 @@ parity (both stages) plus unit / component / build / actions-security /
 bench-smoke jobs. **CI is the contract; the git hooks are a convenience
 mirror.** If pre-push ever feels too slow, checks move to CI-required — they
 are never disabled.
+
+## packages/svelte layout and coverage
+
+### `src/lib` map
+
+The Svelte package is organized by feature under `packages/svelte/src/lib/`:
+
+| Directory / file              | Role                                                                                                                             |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `geoms/`                      | Declaration-only geom children (`GeomPoint`, …) and the geom factory/registry                                                    |
+| `assembly/`                   | Labels, layout helpers, chrome-adjacent pure assembly                                                                            |
+| `runtime/`                    | Runtime paint, announcer, semantic-key services                                                                                  |
+| `scene/`                      | SVG scene tree (`SceneView`, `Batch`, axes, legends paint, strata)                                                               |
+| `a11y/`                       | Canvas-stratum accessibility surface + row materialization                                                                       |
+| `interaction/`                | Tools, reducer, capability, controller                                                                                           |
+| `surface/`                    | Capture surface controller (pointer/keyboard/brush)                                                                              |
+| `inspection/`                 | Tooltip, inspection coordinator/resolver, inspection state                                                                       |
+| `selection/`                  | Point-selection state                                                                                                            |
+| `interval/`                   | Interval selection, bounds editor, query                                                                                         |
+| `zoom/`                       | Brush-zoom state                                                                                                                 |
+| `legend/`                     | Legend filter/focus controllers, targets, pure surface helpers                                                                   |
+| `chrome/`                     | Tool rail, status chrome, theme CSS, chrome state                                                                                |
+| `fonts/`                      | Packaged font assets (not TypeScript sources)                                                                                    |
+| `GGPlot.svelte`               | Public component shell                                                                                                           |
+| `plot-orchestrator.svelte.ts` | Controller wiring; owns the construction/effect-order DAG contract (read the file header before reordering factories or effects) |
+| `plot-props.ts`               | GGPlot's **internal** props contract — not re-exported from `index.ts`                                                           |
+| `index.ts`                    | The **only** public package entry                                                                                                |
+
+### No per-directory barrels
+
+Feature directories do **not** ship `index.ts` re-export barrels. Imports use
+direct relative specifiers with extensions
+(e.g. `../inspection/resolver.js`). Rationale: knip can flag dead exports
+without barrel noise; the published `dist/` shape stays flat and intentional;
+and hub-style barrels invite import cycles across feature controllers.
+
+### Tests mirror `src`
+
+- Feature suites live under `packages/svelte/tests/<feature>/` and track
+  `src/lib/<feature>/` (e.g. `tests/surface/` ↔ `src/lib/surface/`).
+- Cross-cutting suites (`component.test.ts`, harnesses, release matrix) sit
+  at `packages/svelte/tests/` root.
+- Shared helpers and fixtures: `tests/helpers/`, `tests/fixtures/`.
+
+### Coverage workflow
+
+```sh
+cd packages/svelte && bun run test:coverage
+```
+
+That runs:
+
+1. **Browser** coverage (`vitest --coverage --project chromium`) →
+   `packages/svelte/coverage/browser/`. Thresholds live in
+   `vitest.config.ts` (after the `coverageBase` spread): statements 90,
+   branches 80, functions 90, lines 90. They ratchet against regression on
+   the mature browser report; they are **not** in `coverageBase` so the SSR
+   config stays threshold-free.
+2. **SSR** coverage (`vitest.ssr.config.ts`) →
+   `packages/svelte/coverage/ssr/`. Numbers are structurally lower (SSR
+   paths only) — do not chase SSR-report gaps or put thresholds there.
+
+`test:coverage` is a local / optional gate today. Wiring it into CI is a
+follow-up decision (it is intentionally not part of the CI contract yet).
 
 ## Formatting policy
 
