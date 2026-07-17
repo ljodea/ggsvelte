@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784323347813,
+  "lastUpdate": 1784324162161,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -19480,6 +19480,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 161.0516,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "52a6ee7db7a8f27bc3fbbddf545a9f1b3ec8d23a",
+          "message": "refactor(svelte): S14 — interaction/, surface/, selection/, zoom/ directories (#178)\n\n* refactor(svelte): move interaction/, surface/, selection/, zoom/ into feature directories\n\n* refactor(svelte): finish CaptureSurface rename; disambiguate plot-px module\n\nReview findings: the mirrored capture-surface test still bound the\ncomponent as PlotCaptureSurface (8 stale references); and surface/ held\nboth pointer.ts and plot-pointer.ts after prefix-dropping erased the old\nplot-surface-pointer vs plot-pointer distinction — the coordinate-helper\nmodule is now plot-px.ts, matching what its name always meant.\n\nCo-Authored-By: Claude Fable 5 <noreply@anthropic.com>\n\n* docs(svelte): refresh moved-module references\n\n---------\n\nCo-authored-by: Claude Fable 5 <noreply@anthropic.com>",
+          "timestamp": "2026-07-17T16:35:19-05:00",
+          "tree_id": "30c827d05d833689448cd3c4a76c6e0e97af16d6",
+          "url": "https://github.com/ljodea/ggsvelte/commit/52a6ee7db7a8f27bc3fbbddf545a9f1b3ec8d23a"
+        },
+        "date": 1784324160998,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.5119,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.128,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 9.5306,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 16.4961,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 98.5724,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 133.933,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.1206,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.3933,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 98.6051,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 121.0281,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 11.863,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.1443,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 124.077,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7773,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 25.0653,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 6.1297,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 36.1381,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 658.0045,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 148.4099,
             "unit": "ms"
           }
         ]
