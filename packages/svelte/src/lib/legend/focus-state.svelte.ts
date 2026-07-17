@@ -9,14 +9,14 @@
  */
 import type { CellValue, RenderModel } from "@ggsvelte/core";
 
-import type { PlotInteractionController } from "./interaction/controller.svelte.js";
+import type { PlotInteractionController } from "../interaction/controller.svelte.js";
 import type {
   InteractionSource,
   LegendFocusEvent,
   PlotInteractionEvent,
   PlotInteractionScope,
-} from "./interaction/interaction.js";
-import { legendFocusAnnouncement } from "./assembly/labels.js";
+} from "../interaction/interaction.js";
+import { legendFocusAnnouncement } from "../assembly/labels.js";
 import {
   buildInteractiveLegendEntries,
   findLegendPressedIdentity,
@@ -31,7 +31,7 @@ import {
   type InteractiveLegendEntry,
   type LegendEntryAction,
   type LegendEntryIdentity,
-} from "./plot-legend-focus.js";
+} from "./focus.js";
 import {
   resolveLegendClearControlSource,
   resolveLegendClickAction,
@@ -41,8 +41,8 @@ import {
   resolveLegendPreviewDismissAction,
   shouldClearLegendPreviewOnBlur,
   shouldEmitLegendFocusClear,
-} from "./plot-legend-surface.js";
-import type { SemanticKeyService } from "./runtime/semantic-keys.svelte.js";
+} from "./surface.js";
+import type { SemanticKeyService } from "../runtime/semantic-keys.svelte.js";
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -148,7 +148,7 @@ export function createLegendFocusState(deps: LegendFocusStateDeps): LegendFocusS
 
   function previewLegend(action: LegendEntryAction | null): void {
     if (action === null) {
-      // Decision table is pure (plot-legend-surface); host owns emit + mutation.
+      // Decision table is pure (legend/surface); host owns emit + mutation.
       // Emit gate uses committed emphasis, not effectiveEmphasisKeys (preview).
       // Pure table maps preview source → InteractionSource on non-none actions.
       const dismiss = resolveLegendPreviewDismissAction({
@@ -310,7 +310,7 @@ export function createLegendFocusState(deps: LegendFocusStateDeps): LegendFocusS
   }
 
   function onLegendKeydown(event: KeyboardEvent, index: number): void {
-    // Decision table is pure (plot-legend-surface); this switch owns side
+    // Decision table is pure (legend/surface); this switch owns side
     // effects only. Roving move, commit, and clear stay host-owned.
     const { action, preventDefault } = resolveLegendKeyAction({
       key: event.key,

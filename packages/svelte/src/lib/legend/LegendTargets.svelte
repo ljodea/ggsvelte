@@ -3,10 +3,7 @@
    * Interactive legend hit targets + clear control for GGPlot.
    * Host owns focus state machine, key index, and commit/preview side effects.
    */
-  import type {
-    InteractiveLegendEntry,
-    LegendEntryIdentity,
-  } from "./plot-legend-focus.js";
+  import type { InteractiveLegendEntry, LegendEntryIdentity } from "./focus.js";
 
   const {
     entries,

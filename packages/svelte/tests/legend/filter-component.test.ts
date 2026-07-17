@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import GGPlot from "../src/lib/GGPlot.svelte";
-import LegendFilterPlot from "./fixtures/LegendFilterPlot.svelte";
-import { expectAccessible } from "./helpers/accessibility.js";
-import { render } from "./helpers/render.js";
-import { until } from "./helpers/until.js";
+import GGPlot from "../../src/lib/GGPlot.svelte";
+import LegendFilterPlot from "../fixtures/LegendFilterPlot.svelte";
+import { expectAccessible } from "../helpers/accessibility.js";
+import { render } from "../helpers/render.js";
+import { until } from "../helpers/until.js";
 
 function parsedArray<T>(value: string | undefined): T[] {
   const parsed: unknown = JSON.parse(value ?? "[]");

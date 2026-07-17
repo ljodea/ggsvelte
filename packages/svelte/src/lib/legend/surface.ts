@@ -6,12 +6,12 @@
  * key routing, touch/click coordination, and commit/preview-dismiss priority.
  */
 
-import type { InteractionSource } from "./interaction/interaction.js";
+import type { InteractionSource } from "../interaction/interaction.js";
 import {
   legendInteractionSource,
   type LegendEntryIdentity,
   type LegendInteractionSource,
-} from "./plot-legend-focus.js";
+} from "./focus.js";
 
 // ---- keydown ----
 

@@ -17,7 +17,7 @@ import {
   buildLegendEntryKeyIndexForPlot,
   keysForLegendEntry,
   type LegendEntryAction,
-} from "../plot-legend-focus.js";
+} from "../legend/focus.js";
 import { rowIndexesForCandidate, uniqueKeysFromRowIndexes } from "../selection/selection.js";
 
 // ---------------------------------------------------------------------------

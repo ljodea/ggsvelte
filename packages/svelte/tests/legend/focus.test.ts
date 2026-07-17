@@ -21,7 +21,7 @@ import {
   samePropertyKeySet,
   type InteractiveLegendEntry,
   type LegendKeyIndexAdapter,
-} from "../src/lib/plot-legend-focus.js";
+} from "../../src/lib/legend/focus.js";
 
 const discreteFill: SceneLegend = {
   type: "discrete",

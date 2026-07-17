@@ -10,7 +10,7 @@
   import type {
     FilterableLegendEntry,
     LegendFilterState,
-  } from "./legend-filter-state.svelte.js";
+  } from "./filter-state.svelte.js";
 
   const {
     controller,

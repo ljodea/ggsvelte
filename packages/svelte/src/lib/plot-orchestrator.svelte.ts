@@ -68,13 +68,13 @@ import {
   type SemanticKeyService,
 } from "./runtime/semantic-keys.svelte.js";
 import { createPlotRuntime, type PlotRuntime } from "./runtime/runtime.svelte.js";
-import { type InteractiveLegendEntry, type LegendEntryIdentity } from "./plot-legend-focus.js";
+import { type InteractiveLegendEntry, type LegendEntryIdentity } from "./legend/focus.js";
 import {
   createLegendFilterState,
   type FilterableLegendEntry,
   type LegendFilterState,
-} from "./legend-filter-state.svelte.js";
-import { createLegendFocusState, type LegendFocusState } from "./legend-focus-state.svelte.js";
+} from "./legend/filter-state.svelte.js";
+import { createLegendFocusState, type LegendFocusState } from "./legend/focus-state.svelte.js";
 import { createPlotZoomState, type PlotZoomState } from "./zoom/zoom-state.svelte.js";
 import { createIntervalState, type IntervalState } from "./interval/interval-state.svelte.js";
 import {
@@ -84,7 +84,7 @@ import {
 import { createSurfaceState, type SurfaceState } from "./surface/surface-state.svelte.js";
 import { createSelectionState, type SelectionState } from "./selection/selection-state.svelte.js";
 import { createPlotChromeState, type PlotChromeState } from "./chrome/chrome-state.svelte.js";
-import type { LegendFilterEvent, LegendFilterInput } from "./legend-filter.js";
+import type { LegendFilterEvent, LegendFilterInput } from "./legend/filter.js";
 import type { LayerRegistry } from "./geoms/registry.svelte.js";
 import { normalizeInteractionConfig } from "./interaction/interaction.js";
 

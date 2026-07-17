@@ -8,23 +8,26 @@ import { describe, expect, it } from "vitest";
 import type { RenderModel } from "@ggsvelte/core";
 import { aes, gg, type PortableSpec } from "@ggsvelte/spec";
 
-import GGPlot from "../src/lib/GGPlot.svelte";
-import type { LegendFocusEvent, PlotInteractionScope } from "../src/lib/interaction/interaction.js";
-import { createPlotInteraction } from "../src/lib/interaction/controller.svelte.js";
-import { createLegendFocusState } from "../src/lib/legend-focus-state.svelte.js";
-import { createPlotRuntime } from "../src/lib/runtime/runtime.svelte.js";
+import GGPlot from "../../src/lib/GGPlot.svelte";
+import type {
+  LegendFocusEvent,
+  PlotInteractionScope,
+} from "../../src/lib/interaction/interaction.js";
+import { createPlotInteraction } from "../../src/lib/interaction/controller.svelte.js";
+import { createLegendFocusState } from "../../src/lib/legend/focus-state.svelte.js";
+import { createPlotRuntime } from "../../src/lib/runtime/runtime.svelte.js";
 import {
   createSourceIdentityTracker,
   createSemanticKeyService,
   type SemanticKeyService,
-} from "../src/lib/runtime/semantic-keys.svelte.js";
-import type { InteractiveLegendEntry, LegendEntryIdentity } from "../src/lib/plot-legend-focus.js";
-import { withEffectRoot, withFlushedEffectRoot } from "./helpers/effect-root.svelte.js";
-import { modelFor } from "./helpers/model.js";
-import { reactiveBox } from "./helpers/reactive-box.svelte.js";
-import { createReactiveRuntimeDeps } from "./helpers/runtime-deps.svelte.js";
-import { render } from "./helpers/render.js";
-import { until } from "./helpers/until.js";
+} from "../../src/lib/runtime/semantic-keys.svelte.js";
+import type { InteractiveLegendEntry, LegendEntryIdentity } from "../../src/lib/legend/focus.js";
+import { withEffectRoot, withFlushedEffectRoot } from "../helpers/effect-root.svelte.js";
+import { modelFor } from "../helpers/model.js";
+import { reactiveBox } from "../helpers/reactive-box.svelte.js";
+import { createReactiveRuntimeDeps } from "../helpers/runtime-deps.svelte.js";
+import { render } from "../helpers/render.js";
+import { until } from "../helpers/until.js";
 
 const focusRows = [
   { id: "a", x: 1, y: 1, group: "north" },

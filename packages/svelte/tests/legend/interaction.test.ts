@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import type { SceneLegend, ThemeTokens } from "@ggsvelte/core";
 
-import LegendHarness from "./fixtures/LegendHarness.svelte";
-import { render } from "./helpers/render.js";
+import LegendHarness from "../fixtures/LegendHarness.svelte";
+import { render } from "../helpers/render.js";
 
 const theme = {} as ThemeTokens;
 const discrete = {

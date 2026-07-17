@@ -4,7 +4,7 @@ import {
   isLegendValueVisible,
   nextLegendFilterValues,
   reconcileLegendFilterValues,
-} from "../src/lib/legend-filter.ts";
+} from "../../src/lib/legend/filter.ts";
 
 const catalog = ["west", "east", "north"] as const;
 
