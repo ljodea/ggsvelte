@@ -325,15 +325,12 @@
     zoomConfig: () => interactionConfig.zoom,
     assembled: () => assembled,
     // model / coordFlipped declared after the runtime; handlers only.
-    model: () => model,
+    model: () => runtime.model,
     coordFlipped: () => coordFlipped,
     onzoom: () => onzoom,
     oninteraction: () => factoryOninteraction,
     announce: announceSink,
   });
-  // One-line host aliases at original positions (construction-order DAG).
-  const effectiveZoomDomains = $derived(zoomState.effectiveZoomDomains);
-  const effectiveSpec = $derived(zoomState.effectiveSpec);
 
   // Source identity/order epoch: stable through responsive layout and zoom
   // respecs, different when normalized inline data or data references change.
@@ -356,14 +353,14 @@
   // Construction-time deriveds read legendFilter/effectiveSpec only — never
   // model (model is declared after the runtime; construction-order DAG).
   const legendFilterState = createLegendFilterState({
-    effectiveSpec: () => effectiveSpec,
+    effectiveSpec: () => zoomState.effectiveSpec,
     legendFilterProp: () => legendFilter,
     onlegendfilter: () => onlegendfilter,
     oninteraction: () => oninteraction,
     announce: announceSink,
     // model is declared after the runtime; the getter is only invoked from
     // late catalog effects (never at construction).
-    model: () => model,
+    model: () => runtime.model,
   });
 
   /**
@@ -386,19 +383,13 @@
     widthProp: () => width,
     heightProp: () => height,
     assembled: () => assembled,
-    effectiveSpec: () => effectiveSpec,
-    effectiveZoomDomains: () => effectiveZoomDomains,
+    effectiveSpec: () => zoomState.effectiveSpec,
+    effectiveZoomDomains: () => zoomState.effectiveZoomDomains,
     effectiveLegendFilters: () => legendFilterState.filters,
     root: () => root,
     resetZoom: () => zoomState.resetForScales(),
     onrender: () => onrender,
   });
-  // Mechanical alias so existing call sites stay unchanged in S1.
-  const model = $derived(runtime.model);
-  const resolvedWidth = $derived(runtime.resolvedWidth);
-  const resolvedHeight = $derived(runtime.resolvedHeight);
-  const strata = $derived(runtime.strata);
-  const hasCanvas = $derived(runtime.hasCanvas);
   // Phase 2: dispose + onrender after legend-reset effects (effect-order).
   runtime.registerModelEffects();
 
@@ -407,7 +398,7 @@
   // This ordering makes interval projection safe when a shared controller
   // arrives with pre-populated non-union intervals (#165).
   const semanticKeys = createSemanticKeyService({
-    model: () => model,
+    model: () => runtime.model,
     assembled: () => assembled,
     datumKey: () =>
       datumKey as
@@ -431,7 +422,9 @@
     interactionConfig.availableTools.length > 0,
   );
   const hitIndex: SceneHitIndex | null = $derived.by(() =>
-    surfaceInteractive && model !== null ? buildHitIndex(model.scene) : null,
+    surfaceInteractive && runtime.model !== null
+      ? buildHitIndex(runtime.model.scene)
+      : null,
   );
 
   // ------------------------------------------------- inspection (S6)
@@ -442,7 +435,7 @@
   // Reversed deps (S7): reducer / clearBrush / chooseTool close over the
   // later-declared surfaceState (handler/effect-only; construction guard).
   const inspectionState = createInspectionState({
-    model: () => model,
+    model: () => runtime.model,
     // Deferred: surface owns the reducer (handler/effect only).
     reducer: () => surfaceState.reducer,
     inspectConfig: () => interactionConfig.inspect,
@@ -471,7 +464,7 @@
   // and chrome getters are handler/effect-only. Phased effects register later
   // at the original line-810 site via registerSurfaceEffects().
   const surfaceState = createSurfaceState({
-    model: () => model,
+    model: () => runtime.model,
     coordFlipped: () => coordFlipped,
     root: () => root,
     toolProp: () => tool,
@@ -501,45 +494,38 @@
     tooltipHovered: () => tooltipHovered,
     announce: announceSink,
   });
-  // Host one-liners at original positions for stays-behind consumers.
-  const activeTool = $derived(surfaceState.activeTool);
-  const surfaceDescription = $derived(surfaceState.surfaceDescription);
-  const inspection = $derived(inspectionState.inspection);
-  const inspectionPanel = $derived(inspectionState.inspectionPanel);
   const coordFlipped = $derived(assembled?.coord?.type === "flip");
   let tooltipHovered = $state(false);
   let captureSurface = $state<HTMLDivElement | null>(null);
-  const brushRect = $derived(surfaceState.brushRect);
-  const areaAwaitingSecond = $derived(surfaceState.areaAwaitingSecond);
   // ------------------------------------------------- selection (S8)
   // Factory at the original localSelectedKeys position. Construction-time
   // effectiveSelectedKeys reads earlier interaction/scope only. Anchors and
   // masks are methods (later-declared inputs).
   const selectionState = createSelectionState({
-    model: () => model,
+    model: () => runtime.model,
     interaction: () => factoryInteraction,
     resolvedInteractionScope: () => resolvedInteractionScope,
     selectConfig: () => interactionConfig.select,
-    // Deferred: interval alias is declared after this factory (method only).
-    effectiveIntervalKeys: () => effectiveIntervalKeys,
-    // Deferred: legend-focus alias is declared after this factory (method only).
-    effectiveEmphasisKeys: () => effectiveEmphasisKeys,
+    // Deferred: interval is declared after this factory (method only).
+    effectiveIntervalKeys: () => intervalState.effectiveIntervalKeys,
+    // Deferred: legend-focus is declared after this factory (method only).
+    effectiveEmphasisKeys: () => legendFocusState.effectiveEmphasisKeys,
     // Deferred method-only projection of inspection focus for presentation masks.
-    inspectionFocus: () =>
-      inspection === null
+    inspectionFocus: () => {
+      const current = inspectionState.inspection;
+      return current === null
         ? null
         : {
-            sourceKeys: inspection.focus.sourceKeys,
-            key: inspection.focus.key,
-          },
+            sourceKeys: current.focus.sourceKeys,
+            key: current.focus.key,
+          };
+    },
     // Deferred: semantic-key alias initializes later (#165).
     candidateSemanticKeys: (candidate) => candidateSemanticKeys(candidate),
     onselect: () => onselect as ((event: PlotSelection) => void) | undefined,
     oninteraction: () => factoryOninteraction,
     announce: announceSink,
   });
-  // Host one-liner at original position for chrome / anchors / markup.
-  const effectiveSelectedKeys = $derived(selectionState.effectiveSelectedKeys);
   // Shared enablement predicates (avoid re-typing the same config gates).
   const inspectEnabled = $derived(interactionConfig.inspect !== null);
   const legendFocusEnabled = $derived(interactionConfig.legendFocus !== null);
@@ -564,71 +550,47 @@
     oninteraction: () => factoryOninteraction,
     announce: announceSink,
   });
-  // Host one-liner: downstream deriveds (capability gate,
-  // emphasizedAnchors, presentationFocusKeys) read this at original sites.
-  const effectiveEmphasisKeys = $derived(
-    legendFocusState.effectiveEmphasisKeys,
-  );
   // ------------------------------------------------- interval selection (S5)
   // Factory at the original interval region (after runtime + legend-focus).
   // Construction-time deriveds may read model/effectiveZoomDomains (both
   // earlier-declared). Both effects register here — relative order is
   // runtime model effects (529) < interval effects < semantic diagnostics.
   const intervalState = createIntervalState({
-    model: () => model,
+    model: () => runtime.model,
     interaction: () => factoryInteraction,
     resolvedInteractionScope: () => resolvedInteractionScope,
     selectConfig: () => interactionConfig.select,
-    effectiveZoomDomains: () => effectiveZoomDomains,
+    effectiveZoomDomains: () => zoomState.effectiveZoomDomains,
     commitZoom: zoomState.commitZoom,
     coordFlipped: () => coordFlipped,
     captureSurface: () => captureSurface,
     candidateSemanticKeys: (candidate) => candidateSemanticKeys(candidate),
-    inspectionPanel: () => inspectionPanel,
+    inspectionPanel: () => inspectionState.inspectionPanel,
     // Selection is already constructed (interval is after selection).
     emitSelection: selectionState.emitSelection,
     announce: announceSink,
   });
-  // Host one-liners at original positions for later consumers.
-  const effectiveIntervals = $derived(intervalState.effectiveIntervals);
-  const effectiveIntervalKeys = $derived(intervalState.effectiveIntervalKeys);
   // ------------------------------------------------- plot chrome (S8)
   // Factory at the original chrome region. All inputs earlier-declared
-  // (including effectiveSelectedKeys host alias). Pure construction-time
+  // (including effectiveSelectedKeys). Pure construction-time
   // deriveds — no $state/handlers/effects.
   const chromeState = createPlotChromeState({
-    model: () => model,
+    model: () => runtime.model,
     zoomConfig: () => interactionConfig.zoom,
     selectConfig: () => interactionConfig.select,
     configuredAvailableTools: () => interactionConfig.availableTools,
     interactionDiagnostics: () => interactionConfig.diagnostics,
     interactive: () => interactive,
-    effectiveZoomDomains: () => effectiveZoomDomains,
-    effectiveIntervals: () => effectiveIntervals,
-    effectiveSelectedKeys: () => effectiveSelectedKeys,
-    effectiveEmphasisKeys: () => effectiveEmphasisKeys,
+    effectiveZoomDomains: () => zoomState.effectiveZoomDomains,
+    effectiveIntervals: () => intervalState.effectiveIntervals,
+    effectiveSelectedKeys: () => selectionState.effectiveSelectedKeys,
+    effectiveEmphasisKeys: () => legendFocusState.effectiveEmphasisKeys,
     legendFocusEnabled: () => legendFocusEnabled,
-    hasCanvas: () => hasCanvas,
+    hasCanvas: () => runtime.hasCanvas,
     width: () => width,
-    resolvedWidth: () => resolvedWidth,
-    resolvedHeight: () => resolvedHeight,
+    resolvedWidth: () => runtime.resolvedWidth,
+    resolvedHeight: () => runtime.resolvedHeight,
   });
-  // Host one-liners at original positions for markup consumers. Surface's
-  // availableTools / pointSelectEnabled read chromeState accessors directly
-  // (deferred closures). Diagnostics aliases feed the host effects below.
-  const availableTools = $derived(chromeState.availableTools);
-  const hasPointSelection = $derived(chromeState.hasPointSelection);
-  const hasIntervalSelection = $derived(chromeState.hasIntervalSelection);
-  const showToolRail = $derived(chromeState.showToolRail);
-  const emptyPlot = $derived(chromeState.emptyPlot);
-  const preciseIntervalAxes = $derived(chromeState.preciseIntervalAxes);
-  const preciseZoomAxes = $derived(chromeState.preciseZoomAxes);
-  // Public accessors — host diagnostic effects stay at their positions
-  // (registration order semantic service → diagnostic effects is load-bearing).
-  const areaScaleDiagnostics = $derived(chromeState.areaScaleDiagnostics);
-  const legendDiagnostics = $derived(chromeState.legendDiagnostics);
-  const capabilityStatus = $derived(chromeState.capabilityStatus);
-  const rootStyle = $derived(chromeState.rootStyle);
   // Anchors: methods with host one-liner deriveds at original positions
   // (construction-order DAG; later-declared inputs).
   const selectedAnchors = $derived(selectionState.computeSelectedAnchors());
@@ -639,12 +601,13 @@
   semanticKeys.registerEffects();
 
   $effect(() => {
-    for (const diagnostic of areaScaleDiagnostics)
+    for (const diagnostic of chromeState.areaScaleDiagnostics)
       deliverDiagnostic(diagnostic);
   });
 
   $effect(() => {
-    for (const diagnostic of legendDiagnostics) deliverDiagnostic(diagnostic);
+    for (const diagnostic of chromeState.legendDiagnostics)
+      deliverDiagnostic(diagnostic);
   });
 
   // Surface window-teardown + tool-sync effects at the original line-810 site
@@ -670,11 +633,11 @@
   // Host-side deriveds: must not live in the factory (model is later-
   // declared; keep construction-time factory free of that read).
   const interactiveLegendEntries = $derived(
-    legendFocusState.computeInteractiveEntries(model),
+    legendFocusState.computeInteractiveEntries(runtime.model),
   );
 
   const effectiveLegendPressed: LegendEntryIdentity | null = $derived(
-    legendFocusState.computeLegendPressed(model),
+    legendFocusState.computeLegendPressed(runtime.model),
   );
 
   // Single source for "the legend clear row is shown": the root class and
@@ -687,7 +650,7 @@
   // Host-side derived: must not live in the factory (model is later-
   // declared; keep construction-time factory free of that read).
   const filterableLegendEntries = $derived(
-    legendFilterState.computeEntries(model),
+    legendFilterState.computeEntries(runtime.model),
   );
   // Catalog-reconcile effect at its original position (after model effects).
   legendFilterState.registerCatalogEffects(() => filterableLegendEntries);
@@ -703,14 +666,8 @@
     zoomState.setZoomDomains(domains);
   }
 
-  // Host one-liners at original markLabel/datumLabel positions
-  // (datumLabel is a plain method reference — chromeState is constructed).
-  const markLabel = $derived(chromeState.markLabel);
-  const datumLabel = chromeState.datumLabel;
-
   // Phase 3: clientFlush/ready effect at the end of the script (late registration).
   runtime.registerLateEffects();
-  const ready = $derived(runtime.ready);
 </script>
 
 <!-- Children MUST render before any registry-consuming markup: SSR evaluates
@@ -724,35 +681,36 @@
   bind:this={root}
   class="gg-plot-root"
   class:gg-container-width={isContainerWidthProp(width)}
-  class:gg-with-tool-rail={showToolRail}
+  class:gg-with-tool-rail={chromeState.showToolRail}
   class:gg-with-legend-clear={legendClearActive}
   class:gg-with-legend-filters={filterableLegendEntries.length > 0}
-  class:gg-narrow-tools={isNarrowToolsWidth(resolvedWidth)}
+  class:gg-narrow-tools={isNarrowToolsWidth(runtime.resolvedWidth)}
   class:gg-with-docked-tooltip={isTooltipDocked({
-    inspectionState: inspection?.state,
-    widthPx: resolvedWidth,
+    inspectionState: inspectionState.inspection?.state,
+    widthPx: runtime.resolvedWidth,
   })}
-  data-gg-ready={ready ? "true" : "false"}
-  style={rootStyle}
+  data-gg-ready={runtime.ready ? "true" : "false"}
+  style={chromeState.rootStyle}
 >
   {@render children?.()}
-  {#if showToolRail}
+  {#if chromeState.showToolRail}
     <ToolRail
-      {availableTools}
-      {activeTool}
-      {ready}
-      {emptyPlot}
-      narrow={isNarrowToolsWidth(resolvedWidth)}
-      zoomDomains={effectiveZoomDomains}
-      {hasPointSelection}
-      {hasIntervalSelection}
+      availableTools={chromeState.availableTools}
+      activeTool={surfaceState.activeTool}
+      ready={runtime.ready}
+      emptyPlot={chromeState.emptyPlot}
+      narrow={isNarrowToolsWidth(runtime.resolvedWidth)}
+      zoomDomains={zoomState.effectiveZoomDomains}
+      hasPointSelection={chromeState.hasPointSelection}
+      hasIntervalSelection={chromeState.hasIntervalSelection}
       intervalTargetLabel={intervalState.currentIntervalTargetLabel}
-      canSetIntervalBounds={!emptyPlot &&
-        preciseIntervalAxes.length > 0 &&
+      canSetIntervalBounds={!chromeState.emptyPlot &&
+        chromeState.preciseIntervalAxes.length > 0 &&
         intervalState.intervalBoundsTargetAvailable}
-      canSetZoomBounds={!emptyPlot && preciseZoomAxes.length > 0}
-      intervalAxes={preciseIntervalAxes}
-      zoomAxes={preciseZoomAxes}
+      canSetZoomBounds={!chromeState.emptyPlot &&
+        chromeState.preciseZoomAxes.length > 0}
+      intervalAxes={chromeState.preciseIntervalAxes}
+      zoomAxes={chromeState.preciseZoomAxes}
       onChooseTool={surfaceState.chooseTool}
       onResetZoom={zoomState.resetZoom}
       onClearPointSelection={selectionState.clearPointSelection}
@@ -771,11 +729,12 @@
       />
     </div>
   {/if}
-  {#if model !== null}
+  {#if runtime.model !== null}
+    {@const currentModel = runtime.model}
     <PlotMarkStrata
-      {model}
-      {strata}
-      {markLabel}
+      model={currentModel}
+      strata={runtime.strata}
+      markLabel={chromeState.markLabel}
       {interactionMasks}
       {a11yTableOpen}
       onA11yToggle={() => (a11yTableOpen = !a11yTableOpen)}
@@ -786,12 +745,12 @@
       previewIdentity={legendFocusState.previewIdentity}
       pressedIdentity={effectiveLegendPressed}
       rovingIndex={legendFocusState.rovingIndex}
-      sceneWidth={model.scene.width}
-      sceneHeight={model.scene.height}
+      sceneWidth={currentModel.scene.width}
+      sceneHeight={currentModel.scene.height}
       clearLegendX={resolveClearLegendX({
         legendFocusEnabled,
         pressedScale: effectiveLegendPressed?.scale ?? null,
-        legends: model.scene.legends,
+        legends: currentModel.scene.legends,
       })}
       onPreviewIndex={legendFocusState.onPreviewIndex}
       onPreviewClear={legendFocusState.onPreviewClear}
@@ -812,18 +771,18 @@
       belowClearFocus={legendClearActive}
     />
     <PlotSceneOverlays
-      width={model.scene.width}
-      height={model.scene.height}
+      width={currentModel.scene.width}
+      height={currentModel.scene.height}
       {interactive}
       {surfaceInteractive}
-      {inspection}
-      {inspectionPanel}
+      inspection={inspectionState.inspection}
+      inspectionPanel={inspectionState.inspectionPanel}
       {coordFlipped}
       {selectedAnchors}
       {emphasizedAnchors}
-      {brushRect}
-      {activeTool}
-      {areaAwaitingSecond}
+      brushRect={surfaceState.brushRect}
+      activeTool={surfaceState.activeTool}
+      areaAwaitingSecond={surfaceState.areaAwaitingSecond}
       committedInterval={intervalState.committedInterval}
     />
     {#if surfaceInteractive}
@@ -831,17 +790,17 @@
       <PlotCaptureSurface
         bind:element={captureSurface}
         {plotId}
-        {activeTool}
+        activeTool={surfaceState.activeTool}
         ariaLabel={ariaLabel ??
           assembled?.labs?.title ??
-          sceneLabel(model.scene)}
+          sceneLabel(currentModel.scene)}
         ariaControls={resolveCaptureAriaControls({
-          inspectionState: inspection?.state,
+          inspectionState: inspectionState.inspection?.state,
           contentMode: interactionConfig.inspect?.contentMode,
           plotId,
         })}
         onFocus={() => {
-          if (inspection === null) inspectionState.navigate(1);
+          if (inspectionState.inspection === null) inspectionState.navigate(1);
         }}
         onBlur={surfaceState.onSurfaceBlur}
         onPointerMove={surfaceState.onPointerMove}
@@ -854,28 +813,29 @@
         onKeyDown={surfaceState.onSurfaceKeyDown}
         onDblClick={zoomState.onDblClick}
       />
-      {#if inspection !== null}
+      {#if inspectionState.inspection !== null}
+        {@const currentInspection = inspectionState.inspection}
         {@const tooltipSize = tooltipViewportSize({
-          sceneWidth: model.scene.width,
-          sceneHeight: model.scene.height,
+          sceneWidth: currentModel.scene.width,
+          sceneHeight: currentModel.scene.height,
           clientWidth: root?.clientWidth,
           clientHeight: root?.clientHeight,
         })}
         <Tooltip
           id={plotTooltipDomId(plotId)}
-          {inspection}
+          inspection={currentInspection}
           width={tooltipSize.width}
           height={tooltipSize.height}
           content={interactionConfig.inspect?.content}
           interactive={interactionConfig.inspect?.contentMode === "interactive"}
           docked={isTooltipDocked({
-            inspectionState: inspection.state,
-            widthPx: resolvedWidth,
+            inspectionState: currentInspection.state,
+            widthPx: runtime.resolvedWidth,
           })}
           onenter={() => (tooltipHovered = true)}
           onleave={() => {
             tooltipHovered = false;
-            if (inspection?.state !== "pinned")
+            if (inspectionState.inspection?.state !== "pinned")
               inspectionState.setInspection(null, "pointer");
           }}
           onclose={(source) => inspectionState.closeInspection(source, true)}
@@ -888,9 +848,12 @@
     <PlotStatusChrome
       {plotId}
       showInstructions={surfaceInteractive}
-      description={surfaceDescription}
-      activeDatumLabel={datumLabel(inspection?.focus.row ?? null)}
-      showAreaInstruction={surfaceInteractive && areaAwaitingSecond}
+      description={surfaceState.surfaceDescription}
+      activeDatumLabel={chromeState.datumLabel(
+        inspectionState.inspection?.focus.row ?? null,
+      )}
+      showAreaInstruction={surfaceInteractive &&
+        surfaceState.areaAwaitingSecond}
       showLiveRegion={shouldRenderInteractionLiveRegion({
         surfaceInteractive,
         legendFocusEnabled,
@@ -898,11 +861,11 @@
       })}
       liveText={resolveInteractionLiveText({
         announcement: announcer.text,
-        model,
-        inspection,
+        model: currentModel,
+        inspection: inspectionState.inspection,
       })}
-      {emptyPlot}
-      {capabilityStatus}
+      emptyPlot={chromeState.emptyPlot}
+      capabilityStatus={chromeState.capabilityStatus}
     />
   {/if}
 </div>
