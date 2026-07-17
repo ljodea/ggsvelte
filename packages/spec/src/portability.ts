@@ -110,8 +110,10 @@ function walk(
     return;
   }
   seen.add(value);
-  for (const [key, v] of Object.entries(value)) {
-    walk(v, `${path}/${key}`, seen, issues, stopAfter);
+  // Object.keys then value[key]: Object.entries eagerly evaluates every
+  // property value (including getters), which would defeat stopAfter.
+  for (const key of Object.keys(value)) {
+    walk(value[key], `${path}/${key}`, seen, issues, stopAfter);
     if (stopAfter !== undefined && issues.length >= stopAfter) break;
   }
   seen.delete(value);

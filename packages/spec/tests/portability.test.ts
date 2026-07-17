@@ -48,28 +48,26 @@ describe("portabilityIssues", () => {
 });
 
 describe("isPortable early exit", () => {
-  it("stops walking after the first issue", () => {
-    let deepTouched = false;
-    const bomb = {
-      get x() {
-        deepTouched = true;
-        return 1;
-      },
-    };
-    // `width` is visited before `data` in insertion order; NaN is unportable.
+  it("stops walking after the first issue without reading later getters", () => {
+    let laterTouched = false;
+    // Sibling getter after the unportable property: Object.entries would
+    // evaluate it before the loop, defeating stopAfter. Keys must be read lazily.
     const spec = {
       layers: [{ geom: "point" }],
       width: Number.NaN,
-      data: { values: [bomb] },
+      get later() {
+        laterTouched = true;
+        return 1;
+      },
     } as unknown as RuntimeSpec;
 
     expect(isPortable(spec)).toBe(false);
-    expect(deepTouched).toBe(false);
+    expect(laterTouched).toBe(false);
 
-    // Full enumeration still visits everything (and reports every path).
-    deepTouched = false;
+    // Full enumeration still visits every path (and runs the getter).
+    laterTouched = false;
     const issues = portabilityIssues(spec);
-    expect(deepTouched).toBe(true);
+    expect(laterTouched).toBe(true);
     expect(issues.some((i) => i.path === "/width")).toBe(true);
   });
 });
