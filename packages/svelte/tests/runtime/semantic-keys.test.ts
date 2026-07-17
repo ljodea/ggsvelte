@@ -27,18 +27,6 @@ const rows = [
   { id: "b", x: 2, y: 20 },
 ];
 
-function minimalModel(): RenderModel {
-  return runPipeline(
-    gg(rows, aes({ x: "x", y: "y", color: "id" }))
-      .geomPoint()
-      .spec(),
-    {
-      width: 400,
-      height: 300,
-    },
-  );
-}
-
 function modelView(options: {
   candidates?: SemanticKeyCandidate[];
   rows?: Array<Record<string, CellValue> | null>;
@@ -520,7 +508,7 @@ describe("createSemanticKeyService", () => {
       calls++;
       return value;
     };
-    const model = minimalModel();
+    const model = buildPointModel(rows);
     const { destroy } = withEffectRoot(() =>
       createSemanticKeyService({
         model: () => counting(model),

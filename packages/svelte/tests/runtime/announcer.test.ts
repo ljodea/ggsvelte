@@ -1,7 +1,4 @@
-/**
- * Unit tests for the plot live-region announcer.
- * Factories own effects — instantiate under `$effect.root` and destroy.
- */
+/** Unit tests for the plot live-region announcer. */
 import { describe, expect, it } from "vitest";
 
 import { createPlotAnnouncer } from "../../src/lib/runtime/announcer.svelte.js";
