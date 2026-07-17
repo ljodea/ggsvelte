@@ -30,7 +30,7 @@ import { createInteractionReducer } from "./interaction-reducer.js";
 import { brushAtPoint, brushWithEnd } from "./plot-area-brush.js";
 import type { FinishBrushAction } from "./plot-brush-finish.js";
 import { resolveChooseToolAction, resolveEffectiveTool } from "./plot-capability.js";
-import { normalizedRect } from "./plot-geometry.js";
+import { normalizedRect, panelContainingAnchor } from "./plot-geometry.js";
 import {
   buildIntervalSelectionFromScene,
   intervalQuerySceneFromModel,
@@ -76,6 +76,11 @@ export type SurfaceStateDeps = {
   availableTools: () => readonly InteractionTool[];
   inspectConfig: () => ResolvedInteractionConfig["inspect"];
   selectConfig: () => ResolvedInteractionConfig["select"];
+  /**
+   * Host's `canPublishPointSelection` derived (declared after this factory —
+   * handler-only). Single source of truth with ToolRail/chrome consumers.
+   */
+  pointSelectEnabled: () => boolean;
   ontoolchange: () => ((tool: InteractionTool) => void) | undefined;
   /**
    * Required by the window-teardown effect — NOT derivable from filtered
@@ -255,15 +260,9 @@ export function createSurfaceState(deps: SurfaceStateDeps): SurfaceState {
 
   function panelAtPoint(point: Readonly<{ x: number; y: number }>) {
     const panels = deps.model()?.scene.panels ?? [];
-    return (
-      panels.find(
-        (panel) =>
-          point.x >= panel.x &&
-          point.x <= panel.x + panel.width &&
-          point.y >= panel.y &&
-          point.y <= panel.y + panel.height,
-      ) ?? (panels.length === 1 ? panels[0]! : null)
-    );
+    // Same inclusive-bounds find as inspection-panel resolution (DRY),
+    // plus the surface-only single-panel fallback.
+    return panelContainingAnchor(panels, point) ?? (panels.length === 1 ? panels[0]! : null);
   }
 
   function onPointerMove(event: PointerEvent): void {
@@ -600,7 +599,7 @@ export function createSurfaceState(deps: SurfaceStateDeps): SurfaceState {
     const action = resolveCaptureClickAction({
       suppressClick: performance.now() < suppressClickUntil,
       activeTool,
-      pointSelectEnabled: deps.selectConfig()?.type === "point",
+      pointSelectEnabled: deps.pointSelectEnabled(),
       inspectEnabled: deps.inspectConfig() !== null,
       pinEnabled: deps.inspectConfig()?.pin === true,
       hasInspection: inspection.inspection !== null,

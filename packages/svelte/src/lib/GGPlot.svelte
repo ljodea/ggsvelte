@@ -492,6 +492,8 @@
     availableTools: () => availableTools,
     inspectConfig: () => interactionConfig.inspect,
     selectConfig: () => interactionConfig.select,
+    // Deferred: canPublishPointSelection is declared later (handler only).
+    pointSelectEnabled: () => canPublishPointSelection,
     ontoolchange: () => ontoolchange,
     surfaceInteractive: () => surfaceInteractive,
     hitIndex: () => hitIndex,

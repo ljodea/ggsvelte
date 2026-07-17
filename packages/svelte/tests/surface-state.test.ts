@@ -19,6 +19,7 @@ import { normalizeInteractionConfig } from "../src/lib/interaction.js";
 import { createPlotInteraction } from "../src/lib/interaction-controller.svelte.js";
 import { createInspectionState, type InspectionState } from "../src/lib/inspection-state.svelte.js";
 import { createIntervalState, type IntervalState } from "../src/lib/interval-state.svelte.js";
+import { BRUSH_SECOND_CORNER_ANNOUNCEMENT } from "../src/lib/plot-labels.js";
 import { hitFromCandidate } from "../src/lib/plot-pointer.js";
 import type { QueuedPointerInspection } from "../src/lib/plot-surface-inspection-frame.js";
 import { TOUCH_INSPECT_CLICK_SUPPRESS_MS } from "../src/lib/plot-surface-pointer.js";
@@ -112,6 +113,7 @@ function createFramePump(): {
   scheduleFrame: (callback: () => void) => number;
   cancelFrame: (handle: number) => void;
   flush: () => void;
+  discard: () => void;
 } {
   let nextId = 1;
   const pending = new Map<number, () => void>();
@@ -128,6 +130,9 @@ function createFramePump(): {
       const callbacks = [...pending.values()];
       pending.clear();
       for (const callback of callbacks) callback();
+    },
+    discard: () => {
+      pending.clear();
     },
   };
 }
@@ -200,7 +205,8 @@ type SurfaceHarness = {
   model: RenderModel;
   capture: HTMLDivElement;
   root: HTMLDivElement;
-  framePump: ReturnType<typeof createFramePump>;
+  /** Flush the suite's deferred rAF pump (the controller's real scheduler). */
+  flushFrames: () => void;
   selectionEvents: PlotSelection[];
   toolChanges: InteractionTool[];
   toggleCalls: { keys: readonly PropertyKey[]; source: InteractionSource }[];
@@ -221,8 +227,6 @@ function mountSurfaceComposite(
     toolProp?: InteractionTool | undefined;
     surfaceInteractive?: boolean;
     registerEffects?: boolean;
-    /** Override scheduleFrame (default: deferred pump). */
-    useDeferredFramePump?: boolean;
   } = {},
 ): SurfaceHarness {
   const model = modelFor(options.spec ?? continuousSpec());
@@ -233,8 +237,6 @@ function mountSurfaceComposite(
       select: { type: "interval", mode: "xy" },
       zoom: true,
     });
-  const framePump = createFramePump();
-
   const selectionEvents: PlotSelection[] = [];
   const toolChanges: InteractionTool[] = [];
   const toggleCalls: { keys: readonly PropertyKey[]; source: InteractionSource }[] = [];
@@ -322,6 +324,7 @@ function mountSurfaceComposite(
       availableTools: () => config.availableTools,
       inspectConfig: () => config.inspect,
       selectConfig: () => config.select,
+      pointSelectEnabled: () => config.select?.type === "point",
       ontoolchange: () => onToolChangeBox.value,
       surfaceInteractive: () => options.surfaceInteractive ?? true,
       hitIndex: () => hitIndex,
@@ -381,7 +384,9 @@ function mountSurfaceComposite(
     model,
     capture,
     root,
-    framePump,
+    flushFrames: () => {
+      suitePump.flush();
+    },
     selectionEvents,
     toolChanges,
     toggleCalls,
@@ -407,8 +412,9 @@ const originalRaf = globalThis.requestAnimationFrame;
 const originalCaf = globalThis.cancelAnimationFrame;
 
 afterEach(() => {
-  // Drain any leftover frames between tests.
-  suitePump.flush();
+  // DISCARD leftover frames — invoking them here would run callbacks into
+  // already-destroyed effect roots (cross-test pollution hazard).
+  suitePump.discard();
 });
 
 // Patch once for the module — restore is not needed (test process isolation).
@@ -439,6 +445,7 @@ describe("createSurfaceState construction", () => {
     let semanticKeyCalls = 0;
     let candidateSemanticKeysCalls = 0;
     let togglePointKeysCalls = 0;
+    let pointSelectEnabledCalls = 0;
     let ontoolchangeCalls = 0;
     let availableToolsCalls = 0;
     let toolPropCalls = 0;
@@ -526,6 +533,10 @@ describe("createSurfaceState construction", () => {
         },
         inspectConfig: () => config.inspect,
         selectConfig: () => config.select,
+        pointSelectEnabled: () => {
+          pointSelectEnabledCalls++;
+          return false;
+        },
         ontoolchange: () => {
           ontoolchangeCalls++;
         },
@@ -586,6 +597,7 @@ describe("createSurfaceState construction", () => {
     expect(semanticKeyCalls).toBe(0);
     expect(candidateSemanticKeysCalls).toBe(0);
     expect(togglePointKeysCalls).toBe(0);
+    expect(pointSelectEnabledCalls).toBe(0);
     expect(ontoolchangeCalls).toBe(0);
     expect(availableToolsCalls).toBe(0);
     expect(toolPropCalls).toBe(0);
@@ -666,21 +678,17 @@ describe("createSurfaceState brush lifecycle", () => {
     h.surface.onPointerMove(
       pointerEvent("pointermove", h.capture, { clientX: end.x, clientY: end.y }),
     );
-    // Before flush: draft corners may still be start corners until frame runs.
-    const beforeFlush = h.surface.brushRect;
-    expect(beforeFlush).not.toBeNull();
+    // Before flush: draft corners are still the start corners (frame pending).
+    const beforeFlush = { ...h.surface.brushRect! };
     suitePump.flush();
     flushSync();
     const afterFlush = h.surface.brushRect;
     expect(afterFlush).not.toBeNull();
-    // Rectangle grew (or at least end corner moved) after the deferred frame.
-    expect(
-      afterFlush!.x1 !== beforeFlush!.x1 ||
-        afterFlush!.y1 !== beforeFlush!.y1 ||
-        afterFlush!.x0 !== beforeFlush!.x0 ||
-        afterFlush!.y0 !== beforeFlush!.y0 ||
-        h.selectionEvents.some((e) => e.phase === "change"),
-    ).toBe(true);
+    // The END corner moved to the pointer after the deferred frame — a strict
+    // conjunction: a change event alone must NOT satisfy this (the draft
+    // rectangle itself has to grow).
+    expect(afterFlush!.x1).not.toBe(beforeFlush.x1);
+    expect(afterFlush!.y1).not.toBe(beforeFlush.y1);
     expect(h.interval.committedInterval).toBeNull();
     expect(h.selectionEvents.some((e) => e.phase === "change")).toBe(true);
 
@@ -723,39 +731,78 @@ describe("createSurfaceState brush lifecycle", () => {
     h.destroy();
   });
 
-  it("keyboard keep-second-corner announces when brush is too small", () => {
-    const h = mountSurfaceComposite({ registerEffects: false });
+  it("too-small pointer finish takes keep-second-corner: draft + area retained, announcement, no end", () => {
+    const h = mountSurfaceComposite();
     h.surface.chooseTool("select-area");
     flushSync();
 
-    // Begin keyboard area at panel center.
-    const center = panelCenterClient(h.model);
-    // Seed inspection so keyboard begin-area can use an anchor if needed.
+    const start = panelCenterClient(h.model);
+    h.surface.onPointerDown(
+      pointerEvent("pointerdown", h.capture, { clientX: start.x, clientY: start.y }),
+    );
+    flushSync();
+    h.announcements.length = 0;
+    const eventsBefore = h.selectionEvents.length;
+
+    // 1px away is below the too-small threshold for every tool.
+    h.surface.onPointerUp(
+      pointerEvent("pointerup", h.capture, { clientX: start.x + 1, clientY: start.y + 1 }),
+    );
+    flushSync();
+
+    // keep-second-corner: the draft and reducer area SURVIVE, the exact
+    // second-corner announcement fires, and neither an end event nor a
+    // durable interval commit happens.
+    expect(h.surface.brushRect).not.toBeNull();
+    expect(h.surface.reducer.state.area.kind).not.toBe("idle");
+    expect(h.announcements).toContain(BRUSH_SECOND_CORNER_ANNOUNCEMENT);
+    expect(h.selectionEvents.slice(eventsBefore).every((e) => e.phase !== "end")).toBe(true);
+    expect(h.interval.committedInterval).toBeNull();
+
+    h.destroy();
+  });
+});
+
+describe("createSurfaceState onPointerLeave", () => {
+  it("leave clears transient inspection and queues via the deferred microtask", async () => {
+    const h = mountSurfaceComposite({ registerEffects: false });
     const candidate = firstCandidate(h.model);
     h.inspection.setInspection(
       hitFromCandidate(candidate),
-      "keyboard",
+      "pointer",
       "transient",
       "xy",
       candidate,
     );
     flushSync();
+    expect(h.inspection.inspection).not.toBeNull();
 
-    // Enter begins first corner when select-area + no draft.
-    h.surface.onSurfaceKeyDown(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    h.surface.onPointerLeave();
+    // The clear is microtask-deferred (evaluates post-flush state).
+    await Promise.resolve();
+    flushSync();
+    expect(h.inspection.inspection).toBeNull();
+
+    h.destroy();
+  });
+
+  it("leave while brushing keeps the draft and inspection teardown does not run", async () => {
+    const h = mountSurfaceComposite();
+    h.surface.chooseTool("select-area");
+    flushSync();
+    const start = panelCenterClient(h.model);
+    h.surface.onPointerDown(
+      pointerEvent("pointerdown", h.capture, { clientX: start.x, clientY: start.y }),
+    );
     flushSync();
     expect(h.surface.brushRect).not.toBeNull();
-    expect(h.announcements.some((m) => m.includes("opposite corner"))).toBe(true);
 
-    // Complete without moving far enough → keep-second-corner path announces again.
-    h.announcements.length = 0;
-    h.surface.onSurfaceKeyDown(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    h.surface.onPointerLeave();
+    await Promise.resolve();
     flushSync();
-    // Either keep-second-corner (announce) or select-end (commit) depending on
-    // keyboard complete policy; keyboard complete always commits in pure table.
-    // Assert no crash + tool still select-area.
-    expect(h.surface.activeTool).toBe("select-area");
-    void center;
+    // Brushing gates the leave-clear: draft survives.
+    expect(h.surface.brushRect).not.toBeNull();
+
     h.destroy();
   });
 });
@@ -822,10 +869,16 @@ describe("createSurfaceState selectionEvent origin panel", () => {
 });
 
 describe("createSurfaceState keyboard surface", () => {
-  it("Arrow keys move the inspection anchor via directional navigation", () => {
+  it("ArrowRight moves the inspection anchor to a candidate with greater x", () => {
     const h = mountSurfaceComposite({ registerEffects: false });
-    const first = firstCandidate(h.model);
-    h.inspection.setInspection(hitFromCandidate(first), "keyboard", "transient", "xy", first);
+    // Seed on the LEFTMOST candidate so a +x directional pick must move.
+    let leftmost: CandidateFacts | null = null;
+    for (let id = 0; id < h.model.candidates.size; id++) {
+      const c = h.model.candidates.candidate(id);
+      if (c !== null && (leftmost === null || c.x < leftmost.x)) leftmost = c;
+    }
+    if (leftmost === null) throw new Error("expected candidates");
+    h.inspection.setInspection(hitFromCandidate(leftmost), "keyboard", "transient", "xy", leftmost);
     flushSync();
     const before = h.inspection.inspection?.focus.anchor;
     expect(before).toBeDefined();
@@ -833,11 +886,11 @@ describe("createSurfaceState keyboard surface", () => {
     h.surface.onSurfaceKeyDown(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true }));
     flushSync();
     const after = h.inspection.inspection?.focus.anchor;
-    // Anchor may move to another candidate, or stay if no better match —
-    // at minimum navigation does not clear inspection.
-    expect(h.inspection.inspection).not.toBeNull();
     expect(after).toBeDefined();
-    void before;
+    // Discriminating: dropping the navigate-direction route would leave the
+    // anchor unchanged; the directional pick from the leftmost point must
+    // land on a strictly greater x.
+    expect(after!.x).toBeGreaterThan(before!.x);
     h.destroy();
   });
 
@@ -1056,6 +1109,42 @@ describe("createSurfaceState touch inspect path", () => {
     expect(h.inspection.inspection?.state).toBe(stateBefore);
 
     vi.restoreAllMocks();
+    h.destroy();
+  });
+
+  it("touch drag past the sticky threshold cancels the tap-inspect (drag-ignore)", () => {
+    const h = mountSurfaceComposite({ registerEffects: false });
+    const candidate = firstCandidate(h.model);
+    const start = { x: candidate.x, y: candidate.y };
+
+    h.surface.onPointerDown(
+      pointerEvent("pointerdown", h.capture, {
+        clientX: start.x,
+        clientY: start.y,
+        pointerType: "touch",
+      }),
+    );
+    flushSync();
+    // Drag far beyond any sticky threshold before lifting.
+    h.surface.onPointerMove(
+      pointerEvent("pointermove", h.capture, {
+        clientX: start.x + 60,
+        clientY: start.y + 60,
+        pointerType: "touch",
+      }),
+    );
+    flushSync();
+    h.surface.onPointerUp(
+      pointerEvent("pointerup", h.capture, {
+        clientX: start.x + 60,
+        clientY: start.y + 60,
+        pointerType: "touch",
+      }),
+    );
+    flushSync();
+    // Drag-ignore: the moved touch must NOT commit an inspection.
+    expect(h.inspection.inspection).toBeNull();
+
     h.destroy();
   });
 });

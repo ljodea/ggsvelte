@@ -25,8 +25,8 @@ const CEILINGS: readonly { readonly slice: string; readonly ceiling: number }[] 
   { slice: "s5-final", ceiling: 2121 },
   // S6 inspection controller: actual 1675 + 20.
   { slice: "s6-final", ceiling: 1695 },
-  // S7 surface controller: actual 1136 + 20 (strictly < 1695).
-  { slice: "s7-final", ceiling: 1156 },
+  // S7 surface controller: actual 1138 + 20 (strictly < 1695).
+  { slice: "s7-final", ceiling: 1158 },
 ];
 
 // Resolve via import.meta (never CWD). Node SSR suite only — uses node:fs.
