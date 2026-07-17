@@ -78,8 +78,8 @@ describe("createSemanticKeyService", () => {
     const tracker = createSourceIdentityTracker();
     const diagnostics: string[] = [];
 
-    const { value: service, destroy } = withFlushedEffectRoot(() =>
-      createSemanticKeyService({
+    const { value: service, destroy } = withFlushedEffectRoot(() => {
+      const created = createSemanticKeyService({
         model: () => model.value,
         assembled: () => ({
           data: mutableRows,
@@ -93,8 +93,10 @@ describe("createSemanticKeyService", () => {
         deliverDiagnostic: (d) => {
           diagnostics.push(d.code);
         },
-      }),
-    );
+      });
+      created.registerEffects();
+      return created;
+    });
 
     const first = [service.keyAt(0), service.keyAt(1)];
     expect(first).toEqual(["a", "b"]);
@@ -145,8 +147,8 @@ describe("createSemanticKeyService", () => {
     const diagnostics: string[] = [];
     const tracker = createSourceIdentityTracker();
 
-    const { destroy } = withFlushedEffectRoot(() =>
-      createSemanticKeyService({
+    const { destroy } = withFlushedEffectRoot(() => {
+      const created = createSemanticKeyService({
         model: () => modelBox.value,
         assembled: () => ({
           data: dataBox.value,
@@ -160,8 +162,10 @@ describe("createSemanticKeyService", () => {
         deliverDiagnostic: (d) => {
           diagnostics.push(d.code);
         },
-      }),
-    );
+      });
+      created.registerEffects();
+      return created;
+    });
 
     // Duplicate "a"/"a" keys → exactly one duplicate diagnostic on first resolve.
     expect(diagnostics).toEqual(["INTERACTION_DUPLICATE_KEY"]);

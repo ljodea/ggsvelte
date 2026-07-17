@@ -402,6 +402,24 @@
   // Phase 2: dispose + onrender after legend-reset effects (effect-order).
   runtime.registerModelEffects();
 
+  // Construct semantic resolution as soon as the runtime model exists. The
+  // diagnostics effect is still registered at its original later position.
+  // This ordering makes server-eager interval projection safe when a shared
+  // controller arrives with pre-populated non-union intervals (#165).
+  const semanticKeys = createSemanticKeyService({
+    model: () => model,
+    assembled: () => assembled,
+    datumKey: () =>
+      datumKey as
+        string | ((row: never, index: number) => PropertyKey) | undefined,
+    data: () => data,
+    spec: () => spec,
+    sourceIdentity,
+    deliverDiagnostic,
+  });
+  const semanticKey = semanticKeys.semanticKey;
+  const candidateSemanticKeys = semanticKeys.candidateSemanticKeys;
+
   let a11yTableOpen = $state(false);
 
   // ---------------------------------------------------------- interaction
@@ -565,7 +583,6 @@
     commitZoom: zoomState.commitZoom,
     coordFlipped: () => coordFlipped,
     captureSurface: () => captureSurface,
-    // Deferred: host alias initializes after semantic-key service (issue #165).
     candidateSemanticKeys: (candidate) => candidateSemanticKeys(candidate),
     inspectionPanel: () => inspectionPanel,
     // Selection is already constructed (interval is after selection).
@@ -618,20 +635,8 @@
   const emphasizedAnchors = $derived(selectionState.computeEmphasizedAnchors());
 
   const plotId = $props.id();
-  // Semantic-key service at the original registration site (diagnostics effect order).
-  const semanticKeys = createSemanticKeyService({
-    model: () => model,
-    assembled: () => assembled,
-    datumKey: () =>
-      datumKey as
-        string | ((row: never, index: number) => PropertyKey) | undefined,
-    data: () => data,
-    spec: () => spec,
-    sourceIdentity,
-    deliverDiagnostic,
-  });
-  const semanticKey = semanticKeys.semanticKey;
-  const candidateSemanticKeys = semanticKeys.candidateSemanticKeys;
+  // Preserve the semantic diagnostics effect's original registration order.
+  semanticKeys.registerEffects();
 
   $effect(() => {
     for (const diagnostic of areaScaleDiagnostics)
