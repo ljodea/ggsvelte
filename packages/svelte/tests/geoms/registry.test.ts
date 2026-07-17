@@ -9,7 +9,6 @@ import { describe, expect, it } from "vitest";
 import { LayerRegistry, type LayerDescriptor } from "../../src/lib/geoms/registry.svelte.js";
 import RegistryLayerChild from "../fixtures/RegistryLayerChild.svelte";
 import RegistryPair from "../fixtures/RegistryPair.svelte";
-import { withEffectRoot } from "../helpers/effect-root.svelte.js";
 import { render } from "../helpers/render.js";
 import { trackLayerCount } from "../helpers/track-layers.svelte.js";
 
@@ -22,7 +21,7 @@ function desc(geom: LayerDescriptor["geom"], tag?: string): LayerDescriptor {
 
 describe("LayerRegistry (module-level)", () => {
   it("preserves insertion order across register/unregister", () => {
-    const { value: registry, destroy } = withEffectRoot(() => new LayerRegistry());
+    const registry = new LayerRegistry();
     const a = registry.register(desc("point", "a"));
     const b = registry.register(desc("line", "b"));
     const c = registry.register(desc("col", "c"));
@@ -38,11 +37,10 @@ describe("LayerRegistry (module-level)", () => {
     registry.unregister(c);
     registry.unregister(d);
     expect(registry.layers).toEqual([]);
-    destroy();
   });
 
   it("bumps the version counter so layers reads are reactive", () => {
-    const { value: registry, destroy: destroyRegistry } = withEffectRoot(() => new LayerRegistry());
+    const registry = new LayerRegistry();
     const { seen, destroy: destroyTrack } = trackLayerCount(registry);
     flushSync();
     expect(seen).toEqual([0]);
@@ -59,7 +57,6 @@ describe("LayerRegistry (module-level)", () => {
     flushSync();
     expect(seen).toEqual([0, 1, 2, 1]);
     destroyTrack();
-    destroyRegistry();
   });
 });
 

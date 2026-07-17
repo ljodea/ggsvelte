@@ -77,7 +77,7 @@ const cases: readonly GeomCase[] = [
     geomProps: { size: 5, alpha: 0.8 },
     paramKey: "size",
     paramValue: 5,
-    markSelector: "circle",
+    markSelector: ".gg-points circle",
   },
   {
     name: "GeomLine",
@@ -88,7 +88,7 @@ const cases: readonly GeomCase[] = [
     geomProps: { linewidth: 2, alpha: 0.9 },
     paramKey: "linewidth",
     paramValue: 2,
-    markSelector: ".gg-paths path, path",
+    markSelector: ".gg-paths path",
   },
   {
     name: "GeomCol",
@@ -99,7 +99,7 @@ const cases: readonly GeomCase[] = [
     geomProps: { width: 0.7, alpha: 0.85 },
     paramKey: "width",
     paramValue: 0.7,
-    markSelector: ".gg-rects rect, rect",
+    markSelector: ".gg-rects rect",
   },
   {
     name: "GeomBar",
@@ -110,7 +110,7 @@ const cases: readonly GeomCase[] = [
     geomProps: { width: 0.6, alpha: 0.7 },
     paramKey: "width",
     paramValue: 0.6,
-    markSelector: ".gg-rects rect, rect",
+    markSelector: ".gg-rects rect",
   },
   {
     name: "GeomArea",
@@ -121,7 +121,7 @@ const cases: readonly GeomCase[] = [
     geomProps: { alpha: 0.4 },
     paramKey: "alpha",
     paramValue: 0.4,
-    markSelector: ".gg-areas path, path",
+    markSelector: ".gg-areas path",
   },
   {
     name: "GeomRule",
@@ -132,7 +132,7 @@ const cases: readonly GeomCase[] = [
     geomProps: { yintercept: 15, linewidth: 1.5 },
     paramKey: "yintercept",
     paramValue: 15,
-    markSelector: ".gg-segments line, line",
+    markSelector: ".gg-segments line",
   },
   {
     name: "GeomText",
@@ -143,7 +143,7 @@ const cases: readonly GeomCase[] = [
     geomProps: { size: 12, alpha: 0.95 },
     paramKey: "size",
     paramValue: 12,
-    markSelector: "text",
+    markSelector: ".gg-glyphs text",
   },
   {
     name: "GeomHistogram",
@@ -155,7 +155,7 @@ const cases: readonly GeomCase[] = [
     geomProps: { bins: 4, alpha: 0.6 },
     paramKey: "bins",
     paramValue: 4,
-    markSelector: ".gg-rects rect, rect",
+    markSelector: ".gg-rects rect",
   },
   {
     name: "GeomSmooth",
@@ -166,7 +166,7 @@ const cases: readonly GeomCase[] = [
     geomProps: { method: "lm", level: 0.9, alpha: 0.3 },
     paramKey: "method",
     paramValue: "lm",
-    markSelector: ".gg-areas path, .gg-paths path, path",
+    markSelector: ".gg-areas path, .gg-paths path",
   },
   {
     name: "GeomBoxplot",
@@ -177,7 +177,7 @@ const cases: readonly GeomCase[] = [
     geomProps: { width: 0.5, alpha: 0.8 },
     paramKey: "width",
     paramValue: 0.5,
-    markSelector: ".gg-rects rect, rect",
+    markSelector: ".gg-rects rect",
   },
   {
     name: "GeomDensity",
@@ -188,7 +188,7 @@ const cases: readonly GeomCase[] = [
     geomProps: { n: 64, alpha: 0.35 },
     paramKey: "n",
     paramValue: 64,
-    markSelector: ".gg-areas path, path",
+    markSelector: ".gg-areas path",
   },
   {
     name: "GeomErrorbar",
@@ -199,7 +199,7 @@ const cases: readonly GeomCase[] = [
     geomProps: { width: 0.2, linewidth: 1.2 },
     paramKey: "width",
     paramValue: 0.2,
-    markSelector: ".gg-segments line, line",
+    markSelector: ".gg-segments line",
   },
 ];
 
