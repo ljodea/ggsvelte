@@ -15,7 +15,7 @@ updates — all with no `untrack()` hacks and no deferred-first-paint fallback.
 
 ## What was built
 
-- `src/registry.svelte.ts` — `LayerRegistry` provided via `setContext` by `<GGPlot>`;
+- `src/lib/geoms/registry.svelte.ts` — `LayerRegistry` provided via `setContext` by `<GGPlot>`;
   geoms call `registerLayer()` **during component init** (never in `$effect`/`$effect.pre`)
   and unregister in `onDestroy`. Registered descriptors are **live objects whose properties
   are getters over the child's `$props`**, so prop changes flow into the parent's reactive

@@ -68,4 +68,10 @@ describe("block-output-paths guard", () => {
     expect(result.status).toBe(1);
     expect(result.stderr).toContain("coverage");
   });
+
+  it("blocks coverage reports on audited visual-update branches", () => {
+    const result = runGuard("vr-update/pr-11", coverageArtifact, coverageArtifact);
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain("coverage");
+  });
 });

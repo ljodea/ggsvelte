@@ -4,6 +4,7 @@
    * components do: live $props proxy + param-key whitelist.
    */
   import type { GeomName } from "@ggsvelte/spec";
+  import { untrack } from "svelte";
 
   import {
     createGeomLayer,
@@ -19,8 +20,8 @@
 
   const props: Props = $props();
   createGeomLayer(
-    props.geom,
+    untrack(() => props.geom),
     () => props,
-    props.paramKeys as readonly (keyof Props & string)[],
+    untrack(() => props.paramKeys) as readonly (keyof Props & string)[],
   );
 </script>

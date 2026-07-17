@@ -77,21 +77,21 @@ describe("createGeomLayer", () => {
     });
     expect(registry).toBeDefined();
     expect(registry.layers).toHaveLength(1);
-    expect(toLayerInput(registry.layers[0]).params).toEqual({ size: 3 });
+    const descriptor = registry.layers[0];
+    expect(toLayerInput(descriptor).params).toEqual({ size: 3 });
 
     await view.rerender({
       geom: "point",
       paramKeys: ["alpha", "size"],
       size: 9,
       alpha: 0.25,
-      // Same capture identity so a remount would overwrite; stable host keeps
-      // the original registry reference.
       capture: (r: LayerRegistry) => {
         registry = r;
       },
     });
     expect(registry.layers).toHaveLength(1);
     // Same descriptor instance when host is stable; getters see new props.
+    expect(registry.layers[0]).toBe(descriptor);
     expect(toLayerInput(registry.layers[0]).params).toEqual({ size: 9, alpha: 0.25 });
   });
 });

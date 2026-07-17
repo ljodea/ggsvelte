@@ -5,6 +5,8 @@
  */
 export const coverageBase = {
   provider: "v8",
-  include: ["src/lib/**"],
+  // Keep the uncovered-file pass on executable sources. The package also
+  // ships fonts and notices under src/lib, which are not coverage targets.
+  include: ["src/lib/**/*.{ts,svelte}"],
   enabled: false,
 } as const;

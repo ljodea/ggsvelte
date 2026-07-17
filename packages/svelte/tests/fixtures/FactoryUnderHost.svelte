@@ -4,6 +4,7 @@
    * under provideRegistry and live prop updates share one registry instance.
    */
   import type { GeomName } from "@ggsvelte/spec";
+  import { untrack } from "svelte";
 
   import type { LayerRegistry } from "../../src/lib/geoms/registry.svelte.js";
   import { provideRegistry } from "../../src/lib/geoms/registry.svelte.js";
@@ -25,7 +26,8 @@
   } = $props();
 
   const registry = provideRegistry();
-  capture?.(registry);
+  // The registry is intentionally exposed once during component init.
+  untrack(() => capture?.(registry));
 </script>
 
 <FactoryProbe {geom} {paramKeys} render={layerRender} {...rest} />

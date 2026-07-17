@@ -9,6 +9,7 @@
     type LayerDescriptor,
     type LayerRegistry,
   } from "../../src/lib/geoms/registry.svelte.js";
+  import { untrack } from "svelte";
   import RegistryLayerChild from "./RegistryLayerChild.svelte";
 
   const {
@@ -20,7 +21,8 @@
   } = $props();
 
   const registry = provideRegistry();
-  capture?.(registry);
+  // The registry is intentionally exposed once during component init.
+  untrack(() => capture?.(registry));
 </script>
 
 {#each descriptors as descriptor, i (i)}

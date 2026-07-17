@@ -7,14 +7,14 @@
 
 ## What was graduated vs rewritten
 
-| Spike module (`spikes/pure/src`)  | Landed as                                           | Changes                                                                                                                                                        |
-| --------------------------------- | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `scale-state.ts` (M0a-2)          | `@ggsvelte/core` `src/scales/state.ts`              | Near-verbatim. Lint-driven mechanical edits only (`codePointAt`, explicit null checks); codec, fingerprint, and training semantics untouched.                  |
-| `grouping.ts` (M0a-5)             | `src/grouping.ts`                                   | Adapted to the spec's canonical `ChannelValue` forms: `{ stat }` channels and `null` channels never participate (pre-stat by construction). R fixtures ported. |
-| `measure.ts` / `font-metrics.ts`  | `src/layout/measure.ts` / `layout/font-metrics.ts`  | Verbatim. The metrics table is still the macOS-Chromium/Helvetica one from the spike — regeneration in the pinned container is an M1 follow-up (see below).    |
-| `ticks.ts` / `layout.ts` (M0a-3)  | `src/layout/ticks.ts` / `layout/layout.ts`          | Verbatim algorithmically; two `if/else` branches restructured to hoist shared trailing code (behavior-identical, sweep still 98.4% converged).                 |
-| spike tests (6 suites)            | `packages/core/tests/*` + `tests/fixtures/grouping` | Ported nearly verbatim (paths/imports; `Columns` type rename). All 87 pass.                                                                                    |
-| `spikes/browser` registry (M0a-1) | `@ggsvelte/svelte` `src/lib/registry.svelte.ts`     | Rewritten to the production shape but mechanism-identical: non-reactive Map + monotonic version `$state`, init-time registration, live getter descriptors.     |
+| Spike module (`spikes/pure/src`)  | Landed as                                             | Changes                                                                                                                                                        |
+| --------------------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `scale-state.ts` (M0a-2)          | `@ggsvelte/core` `src/scales/state.ts`                | Near-verbatim. Lint-driven mechanical edits only (`codePointAt`, explicit null checks); codec, fingerprint, and training semantics untouched.                  |
+| `grouping.ts` (M0a-5)             | `src/grouping.ts`                                     | Adapted to the spec's canonical `ChannelValue` forms: `{ stat }` channels and `null` channels never participate (pre-stat by construction). R fixtures ported. |
+| `measure.ts` / `font-metrics.ts`  | `src/layout/measure.ts` / `layout/font-metrics.ts`    | Verbatim. The metrics table is still the macOS-Chromium/Helvetica one from the spike — regeneration in the pinned container is an M1 follow-up (see below).    |
+| `ticks.ts` / `layout.ts` (M0a-3)  | `src/layout/ticks.ts` / `layout/layout.ts`            | Verbatim algorithmically; two `if/else` branches restructured to hoist shared trailing code (behavior-identical, sweep still 98.4% converged).                 |
+| spike tests (6 suites)            | `packages/core/tests/*` + `tests/fixtures/grouping`   | Ported nearly verbatim (paths/imports; `Columns` type rename). All 87 pass.                                                                                    |
+| `spikes/browser` registry (M0a-1) | `@ggsvelte/svelte` `src/lib/geoms/registry.svelte.ts` | Rewritten to the production shape but mechanism-identical: non-reactive Map + monotonic version `$state`, init-time registration, live getter descriptors.     |
 
 Everything else (schema, normalize, validate, builder, portability,
 ColumnTable, pipeline, renderers, components) is new M0c code built on the
