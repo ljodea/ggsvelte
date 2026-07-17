@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784235371685,
+  "lastUpdate": 1784247802806,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -17576,6 +17576,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 130.6475,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "f4eeefe76d2c46c382d60e726a6290e2c728ae0b",
+          "message": "fix(svelte): deterministic forced-colors paint for disabled-at-SSR tool buttons (#161)\n\n* fix(svelte): deterministic forced-colors paint for disabled-at-SSR tool buttons\n\nThe vr forced-colors screenshot (interaction-zoom-draft-forced-colors) was\nmachine-dependent: idle tool-rail buttons painted either GrayText or\nButtonText depending on scheduling. Two defects combined:\n\n1. ToolRail rendered its buttons disabled during SSR (ready is false until\n   hydration's client flush) and Chromium does not repaint a control's\n   FORCED text/border color when `disabled` is removed unless the computed\n   author value changes with the state. Whichever paint happened first\n   (disabled GrayText vs enabled ButtonText) stuck for the rest of the\n   page's life. Fix: an explicit `:disabled { color: GrayText;\n   border-bottom-color: GrayText }` rule inside the existing\n   forced-colors media block, so the computed values genuinely change on\n   the disabled->enabled flip and invalidation fires. This also gives\n   genuinely disabled tools (empty plot) a correct high-contrast\n   disabled affordance.\n\n2. ToolRail and PlotStatusChrome consumed --gg-theme-interactionMuted in a\n   color position, but that theme token is a NUMERIC alpha (theme.ts\n   interactionMuted: 0.36) - `color: 0.36` is invalid at computed-value\n   time and silently fell back to the inherited color. The color chains now\n   use only the consumer-facing --gg-interactionMuted override with a\n   currentColor fallback (pixel-identical to the shipped rendering).\n\nVerified: 8 consecutive local --update-snapshots runs of the forced-colors\ntest produce zero GrayText pixels, and a full update->compare cycle of the\n82-shot vr suite passes byte-identically. Note: this PR's own vr-compare\nstill fails against the stale pre-R3 committed baselines (#153); baselines\nregenerate via /approve-visuals once this lands.\n\nCo-Authored-By: Claude Fable 5 <noreply@anthropic.com>\n\n* test(svelte): lock forced-colors disabled paint contracts for #161\n\nGuard the ToolRail GrayText :disabled rules and the no-numeric-alpha\ncolor chain in ToolRail/PlotStatusChrome so the Chromium repaint fix\ncannot regress silently.\n\n---------\n\nCo-authored-by: Claude Fable 5 <noreply@anthropic.com>",
+          "timestamp": "2026-07-16T19:22:42-05:00",
+          "tree_id": "257d4487006c46281f1656ba31dfb7ecd2464779",
+          "url": "https://github.com/ljodea/ggsvelte/commit/f4eeefe76d2c46c382d60e726a6290e2c728ae0b"
+        },
+        "date": 1784247802112,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.564,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.0404,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 10.0473,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 13.9557,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 90.9144,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 120.7764,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.3695,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.3449,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 85.3741,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 107.3482,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 14.6063,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 13.9354,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 115.0879,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7902,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 25.6567,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.5685,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 27.1897,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 601.4191,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 159.5586,
             "unit": "ms"
           }
         ]
