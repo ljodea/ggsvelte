@@ -502,9 +502,11 @@ export function groupBatchesByPanel(
   for (let i = 0; i < batches.length; i++) {
     const batch = batches[i]!;
     const p = batch.panelIndex;
-    // Out-of-range panelIndex is a pipeline bug; skip rather than throw so a
-    // bad batch cannot take down the whole stratum draw.
-    if (p < 0 || p >= panelCount) continue;
+    // Malformed panelIndex (NaN, non-integer, out of range) is a pipeline bug;
+    // skip rather than throw so a bad batch cannot take down the whole stratum
+    // draw. Integer check matters: `byPanel[1.5]` / `byPanel[NaN]` are not
+    // real buckets, and the old filter path silently dropped those too.
+    if (!Number.isInteger(p) || p < 0 || p >= panelCount) continue;
     byPanel[p]!.push(batch);
     indices?.[p]!.push(i);
   }

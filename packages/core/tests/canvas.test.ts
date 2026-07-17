@@ -362,6 +362,18 @@ describe("drawStratum multi-panel batch routing", () => {
     expect(byPanel[1]).toHaveLength(0);
     expect(indices![0]).toEqual([0]);
   });
+
+  it("groupBatchesByPanel skips NaN and non-integer panelIndex without throwing", () => {
+    // Regression for Codex P2 on #192: bounds-only guards let NaN/1.5 through
+    // to `byPanel[p]!.push`, which throws because those keys are not buckets.
+    const nan: PointsBatch = { ...points, panelIndex: Number.NaN };
+    const frac: PointsBatch = { ...points, layerIndex: 1, panelIndex: 1.5 };
+    const { byPanel, indices } = groupBatchesByPanel(2, [points, nan, frac], true);
+    expect(byPanel[0]).toHaveLength(1);
+    expect(byPanel[1]).toHaveLength(0);
+    expect(indices![0]).toEqual([0]);
+    expect(Object.keys(byPanel).filter((k) => k !== "0" && k !== "1")).toEqual([]);
+  });
 });
 
 describe("drawStratum focus presentation", () => {
