@@ -151,7 +151,6 @@
     markLabel as markLabelFor,
     resolveInteractionLiveText,
     selectionAnnouncement,
-    zoomAnnouncement,
   } from "./plot-labels.js";
   import {
     isContainerWidthProp,
@@ -235,16 +234,6 @@
   } from "./plot-shared-services.svelte.js";
   import { createPlotRuntime } from "./plot-runtime.svelte.js";
   import { themeTokensToCss } from "./plot-theme-css.js";
-  import {
-    applyZoomToSpec,
-    buildZoomEvent,
-    continuousZoomDomainsFromScopes,
-    filterScopeChannelsByZoomMode,
-    filterZoomDomainsByMode,
-    resolveBrushZoomFromModel,
-    sanitizePartialZoomDomains,
-    stableZoomDomains,
-  } from "./plot-zoom.js";
   import type { LegendEntryIdentity } from "./plot-legend-focus.js";
   import PlotCaptureSurface from "./PlotCaptureSurface.svelte";
   import PlotLegendFilters from "./PlotLegendFilters.svelte";
@@ -256,6 +245,7 @@
   import ToolRail from "./ToolRail.svelte";
   import { createLegendFilterState } from "./legend-filter-state.svelte.js";
   import { createLegendFocusState } from "./legend-focus-state.svelte.js";
+  import { createPlotZoomState } from "./plot-zoom-state.svelte.js";
   import {
     type LegendFilterEvent,
     type LegendFilterInput,
@@ -431,33 +421,45 @@
       deliverDiagnostic(diagnostic);
   });
 
-  // ------------------------------------------------------------ zoom respec
-  let localZoomDomains = $state<ZoomDomains | null>(null);
-  // Memoize prior bag so selection/emphasis revisions do not retrain zoom.
-  let previousEffectiveZoomDomains: ZoomDomains | null = null;
-  const controllerRevision = $derived(interaction?.revision ?? 0);
-  const effectiveZoomDomains: ZoomDomains | null = $derived.by(() => {
-    void controllerRevision;
-    let next: ZoomDomains | null;
-    if (interaction === undefined) {
-      next = localZoomDomains;
-    } else {
-      // Gate shared domains by this plot's resolved zoom mode (null when
-      // disabled / faceted-unsupported) so x-only plots ignore y domains.
-      next = filterZoomDomainsByMode(
-        interaction.zoom(resolvedInteractionScope),
-        interactionConfig.zoom?.mode ?? null,
-      );
-    }
-    next = stableZoomDomains(previousEffectiveZoomDomains, next);
-    previousEffectiveZoomDomains = next;
-    return next;
-  });
+  // Shared controller-factory dep aliases: ONE place for the PublicKey →
+  // PropertyKey widening casts every extracted controller (S2–S8) wires.
+  const factoryInteraction = $derived(
+    interaction as PlotInteractionController<PropertyKey> | undefined,
+  );
+  const factoryOninteraction = $derived(
+    oninteraction as
+      | ((
+          event: PlotInteractionEvent<Record<string, CellValue>, PropertyKey>,
+        ) => void)
+      | undefined,
+  );
+  // Announcer is declared later; the sink is handler-only (never construction).
+  const announceSink = (message: string): void => {
+    announcer.announce(message);
+  };
 
-  const effectiveSpec: PortableSpec | null = $derived.by(() => {
-    if (assembled === null || effectiveZoomDomains === null) return assembled;
-    return applyZoomToSpec(assembled, effectiveZoomDomains);
+  // ------------------------------------------------------------ zoom respec (S4)
+  // Factory sits at the original zoom-respec region (before announcer /
+  // runtime). Construction-time deriveds read interaction/scope/zoomConfig/
+  // assembled only — never model/coordFlipped/announce (Svelte 5.29 server
+  // evaluates $derived eagerly at construction).
+  // controllerRevision has non-zoom consumers (selection/intervals) and stays.
+  const controllerRevision = $derived(interaction?.revision ?? 0);
+  const zoomState = createPlotZoomState({
+    interaction: () => factoryInteraction,
+    resolvedInteractionScope: () => resolvedInteractionScope,
+    zoomConfig: () => interactionConfig.zoom,
+    assembled: () => assembled,
+    // model / coordFlipped declared after the runtime; handlers only.
+    model: () => model,
+    coordFlipped: () => coordFlipped,
+    onzoom: () => onzoom,
+    oninteraction: () => factoryOninteraction,
+    announce: announceSink,
   });
+  // One-line host aliases at original positions (server-eager order).
+  const effectiveZoomDomains = $derived(zoomState.effectiveZoomDomains);
+  const effectiveSpec = $derived(zoomState.effectiveSpec);
 
   // Source identity/order epoch: stable through responsive layout and zoom
   // respecs, different when normalized inline data or data references change.
@@ -484,7 +486,7 @@
     legendFilterProp: () => legendFilter,
     onlegendfilter: () => onlegendfilter,
     oninteraction: () => oninteraction,
-    announce: (message) => announcer.announce(message),
+    announce: announceSink,
     // model is declared after the runtime; the getter is only invoked from
     // late catalog effects (never at construction).
     model: () => model,
@@ -514,16 +516,7 @@
     effectiveZoomDomains: () => effectiveZoomDomains,
     effectiveLegendFilters: () => legendFilterState.filters,
     root: () => root,
-    resetZoom: () => {
-      if (interaction === undefined) localZoomDomains = null;
-      else
-        interaction.resetZoom({
-          scope: filterScopeChannelsByZoomMode(
-            resolvedInteractionScope,
-            interactionConfig.zoom?.mode ?? null,
-          ),
-        });
-    },
+    resetZoom: () => zoomState.resetForScales(),
     onrender: () => onrender,
   });
   // Mechanical alias so existing call sites stay unchanged in S1.
@@ -665,8 +658,7 @@
   // effectiveEmphasisKeys closes over earlier bindings only (Svelte 5.29
   // server evaluates $derived eagerly at construction).
   const legendFocusState = createLegendFocusState({
-    interaction: () =>
-      interaction as PlotInteractionController<PropertyKey> | undefined,
+    interaction: () => factoryInteraction,
     resolvedInteractionScope: () => resolvedInteractionScope,
     legendFocusEnabled: () => legendFocusEnabled,
     legendFocusPreviewEnabled: () =>
@@ -679,13 +671,8 @@
     onlegendfocus: () =>
       onlegendfocus as
         ((event: LegendFocusEvent<PropertyKey>) => void) | undefined,
-    oninteraction: () =>
-      oninteraction as
-        | ((
-            event: PlotInteractionEvent<Record<string, CellValue>, PropertyKey>,
-          ) => void)
-        | undefined,
-    announce: (message) => announcer.announce(message),
+    oninteraction: () => factoryOninteraction,
+    announce: announceSink,
   });
   // Host one-liner: downstream server-eager deriveds (capability gate,
   // emphasizedAnchors, presentationFocusKeys) read this at original sites.
@@ -1819,7 +1806,7 @@
       }
       case "zoom-end":
         brushRect = null;
-        applyBrushZoom(finish.rect, source);
+        zoomState.applyBrushZoom(finish.rect, source);
         reducer.dispatch({ type: "cancel-area" });
         break;
       case "end-area":
@@ -1983,44 +1970,6 @@
     }
   }
 
-  function commitZoom(
-    domains: ZoomDomains | null,
-    source: InteractionSource,
-  ): void {
-    let committed: ZoomDomains | null = domains;
-    if (interaction === undefined) {
-      if (domains === null && localZoomDomains === null) return;
-      localZoomDomains = domains;
-    } else {
-      // Match filterZoomDomainsByMode: x-only plots must not mutate shared y.
-      const mutationScope = filterScopeChannelsByZoomMode(
-        resolvedInteractionScope,
-        interactionConfig.zoom?.mode ?? null,
-      );
-      const transition =
-        domains === null
-          ? interaction.resetZoom({ scope: mutationScope, source })
-          : interaction.setZoom(domains, {
-              scope: mutationScope,
-              source,
-            });
-      if (transition === null) return;
-      if (domains !== null) {
-        committed = frozenZoomDomains(
-          continuousZoomDomainsFromScopes(
-            transition.snapshot.zoom,
-            mutationScope.x,
-            mutationScope.y,
-          ),
-        );
-      }
-    }
-    const event = buildZoomEvent(committed, source);
-    announcer.announce(zoomAnnouncement(committed));
-    onzoom?.(event);
-    oninteraction?.(event);
-  }
-
   function openBoundsEditor(
     action: "select" | "zoom",
     axis: "x" | "y",
@@ -2047,7 +1996,7 @@
   function applyPreciseBounds(event: PreciseBoundsApplyEvent): void {
     if (event.action === "zoom") {
       if (event.scale === "band") return;
-      commitZoom(
+      zoomState.commitZoom(
         frozenZoomDomains({
           ...effectiveZoomDomains,
           [event.axis]: [...event.bounds],
@@ -2127,53 +2076,10 @@
     boundsEditor = null;
   }
 
-  function resetZoom(source: InteractionSource = "programmatic"): void {
-    if (effectiveZoomDomains === null) return;
-    commitZoom(null, source);
-  }
-
   /** Replace one or both continuous zoom domains without disturbing the
    *  other channel. This is the controlled linking/programmatic-zoom path. */
   export function setZoom(domains: Partial<ZoomDomains>): void {
-    const next = sanitizePartialZoomDomains(
-      domains,
-      model?.scales,
-      effectiveZoomDomains,
-    );
-    if (next === null) return;
-    commitZoom(frozenZoomDomains(next), "programmatic");
-  }
-
-  function onDblClick(): void {
-    if (interactionConfig.zoom === null) return;
-    resetZoom("pointer");
-  }
-
-  /**
-   * Brush-to-zoom = an intentional respec: invert the brushed plot-px rect
-   * through the trained scales into explicit continuous domains. Band axes
-   * and faceted plots are skipped (documented M2 limitation) inside
-   * `resolveBrushZoomFromModel`.
-   */
-  function applyBrushZoom(
-    rect: {
-      x0: number;
-      y0: number;
-      x1: number;
-      y1: number;
-    },
-    source: InteractionSource,
-  ): void {
-    // Pure owns null/multi-panel gate, invert, and freeze for commit.
-    const next = resolveBrushZoomFromModel({
-      model,
-      rect,
-      flipped: coordFlipped,
-      mode: interactionConfig.zoom?.mode ?? "xy",
-      current: effectiveZoomDomains,
-    });
-    if (next === null) return;
-    commitZoom(next, source);
+    zoomState.setZoomDomains(domains);
   }
 
   // Stable SceneView callback identity when model is unchanged.
@@ -2427,7 +2333,7 @@
       intervalAxes={preciseIntervalAxes}
       zoomAxes={preciseZoomAxes}
       onChooseTool={chooseTool}
-      onResetZoom={resetZoom}
+      onResetZoom={zoomState.resetZoom}
       onClearPointSelection={clearPointSelection}
       onClearIntervalSelection={clearIntervalSelection}
       onClearCurrentInterval={clearCurrentPanelInterval}
@@ -2525,7 +2431,7 @@
         {onLostPointerCapture}
         onClick={onCaptureClick}
         onKeyDown={onSurfaceKeyDown}
-        {onDblClick}
+        onDblClick={zoomState.onDblClick}
       />
       {#if inspection !== null}
         {@const tooltipSize = tooltipViewportSize({

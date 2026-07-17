@@ -28,7 +28,7 @@ export type PlotRuntimeDeps = {
   effectiveZoomDomains: () => ReadonlyZoomDomains | null;
   effectiveLegendFilters: () => readonly LegendFilterClause[];
   root: () => HTMLDivElement | null;
-  /** Component-provided until S4 owns zoom state. */
+  /** Silent zoom clear owned by the S4 zoom controller (`resetForScales`). */
   resetZoom: () => void;
   /**
    * Getter for the onrender callback. The dispose/onrender effects wrap the
