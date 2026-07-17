@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import GGPlot from "../src/lib/GGPlot.svelte";
+import { createPlotInteraction } from "../src/lib/interaction-controller.svelte.js";
 import GGPlotHydrationFixture from "./fixtures/GGPlotHydrationFixture.svelte";
 import HydrationFixture from "./fixtures/HydrationFixture.svelte";
 import { renderSsrFixture } from "./helpers/ssr.js";
@@ -55,5 +56,36 @@ describe("SSR release fixture", () => {
     expect(fixture.body).toContain('aria-label="Hydrated scatter plot"');
     expect(fixture.body).toContain("gg-capture");
     expect(fixture.body).toContain("<!--[-->");
+  });
+
+  it("server-renders with pre-populated non-union interval state (#165)", () => {
+    const interaction = createPlotInteraction<number>();
+    const interactionScope = { keys: "row-id", intervals: "restored-brush" } as const;
+    interaction.setInterval(
+      {
+        panelId: "restored-panel",
+        preset: "independent",
+        domains: { x: { kind: "linear", domain: [1, 2] } },
+        keys: [1],
+      },
+      { scope: interactionScope, source: "programmatic" },
+    );
+
+    const fixture = renderSsrFixture(GGPlot, {
+      data: [
+        { id: 1, x: 1, y: 2 },
+        { id: 2, x: 2, y: 4 },
+      ],
+      aes: { x: "x", y: "y" },
+      layers: [{ geom: "point" }],
+      key: "id",
+      select: { type: "interval", persistent: true },
+      interaction,
+      interactionScope,
+      width: 480,
+      height: 320,
+    });
+
+    expect(fixture.body).toContain("gg-plot-root");
   });
 });

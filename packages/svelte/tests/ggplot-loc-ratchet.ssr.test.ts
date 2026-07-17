@@ -21,6 +21,8 @@ const CEILINGS: readonly { readonly slice: string; readonly ceiling: number }[] 
   { slice: "s3-final", ceiling: 2688 },
   // S4 zoom controller: actual 2574 + 20.
   { slice: "s4-final", ceiling: 2594 },
+  // S5 interval-selection controller: actual 2101 + 20.
+  { slice: "s5-final", ceiling: 2121 },
 ];
 
 // Resolve via import.meta (never CWD). Node SSR suite only — uses node:fs.
