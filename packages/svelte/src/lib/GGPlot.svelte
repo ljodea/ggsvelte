@@ -143,22 +143,11 @@
     POINT_SELECT_NEAREST_MAX_DISTANCE_PX,
     TOUCH_INSPECT_CLICK_SUPPRESS_MS,
   } from "./plot-surface-pointer.js";
-  import {
-    resolveLegendClearControlSource,
-    resolveLegendClickAction,
-    resolveLegendCommitAction,
-    resolveLegendKeyAction,
-    resolveLegendPointerUpAction,
-    resolveLegendPreviewDismissAction,
-    shouldClearLegendPreviewOnBlur,
-    shouldEmitLegendFocusClear,
-    shouldRenderInteractionLiveRegion,
-  } from "./plot-legend-surface.js";
+  import { shouldRenderInteractionLiveRegion } from "./plot-legend-surface.js";
   import {
     BRUSH_SECOND_CORNER_ANNOUNCEMENT,
     datumLabel as datumLabelFor,
     inspectionLiveText as inspectionLiveTextFor,
-    legendFocusAnnouncement,
     markLabel as markLabelFor,
     resolveInteractionLiveText,
     selectionAnnouncement,
@@ -256,20 +245,7 @@
     sanitizePartialZoomDomains,
     stableZoomDomains,
   } from "./plot-zoom.js";
-  import {
-    buildInteractiveLegendEntries,
-    findLegendPressedIdentity,
-    moveLegendRovingIndex,
-    planLegendCommittedReconcile,
-    planLegendFocusDisabledClear,
-    planLegendRovingFocusSync,
-    reconcileLegendPreview,
-    resolveLegendEmphasisKeys,
-    resolveLegendPreviewKeysDecision,
-    samePropertyKeySet,
-    type LegendEntryAction,
-    type LegendEntryIdentity,
-  } from "./plot-legend-focus.js";
+  import type { LegendEntryIdentity } from "./plot-legend-focus.js";
   import PlotCaptureSurface from "./PlotCaptureSurface.svelte";
   import PlotLegendFilters from "./PlotLegendFilters.svelte";
   import PlotLegendTargets from "./PlotLegendTargets.svelte";
@@ -279,6 +255,7 @@
   import Tooltip from "./Tooltip.svelte";
   import ToolRail from "./ToolRail.svelte";
   import { createLegendFilterState } from "./legend-filter-state.svelte.js";
+  import { createLegendFocusState } from "./legend-focus-state.svelte.js";
   import {
     type LegendFilterEvent,
     type LegendFilterInput,
@@ -675,20 +652,6 @@
   let lastInspectionFingerprint = "";
   let activeTraversalIndex = $state(-1);
   let localSelectedKeys = $state<PropertyKey[]>([]);
-  let localEmphasisKeys = $state<PropertyKey[]>([]);
-  let legendPreview = $state<{
-    action: LegendEntryAction;
-    keys: readonly PropertyKey[];
-  } | null>(null);
-  let legendCommitted = $state<{
-    identity: LegendEntryIdentity;
-    keys: readonly PropertyKey[];
-  } | null>(null);
-  let legendRovingIndex = $state(0);
-  let legendTouchIndex = -1;
-  let legendClearPointerType: string | null = null;
-  let suppressLegendClick = false;
-  let suppressLegendFocusPreview = false;
   const effectiveSelectedKeys: readonly PropertyKey[] = $derived.by(() => {
     void controllerRevision;
     return interaction?.selected(resolvedInteractionScope) ?? localSelectedKeys;
@@ -697,18 +660,38 @@
   const inspectEnabled = $derived(interactionConfig.inspect !== null);
   const pinEnabled = $derived(interactionConfig.inspect?.pin === true);
   const legendFocusEnabled = $derived(interactionConfig.legendFocus !== null);
-  const effectiveEmphasisKeys: readonly PropertyKey[] = $derived.by(() => {
-    void controllerRevision;
-    return resolveLegendEmphasisKeys({
-      legendFocusEnabled,
-      previewKeys: legendPreview?.keys ?? null,
-      controllerKeys:
-        interaction === undefined
-          ? null
-          : interaction.emphasized(resolvedInteractionScope),
-      localKeys: localEmphasisKeys,
-    });
+  // ------------------------------------------------- legend focus (S3)
+  // Factory sits AFTER the enablement cluster: construction-time
+  // effectiveEmphasisKeys closes over earlier bindings only (Svelte 5.29
+  // server evaluates $derived eagerly at construction).
+  const legendFocusState = createLegendFocusState({
+    interaction: () =>
+      interaction as PlotInteractionController<PropertyKey> | undefined,
+    resolvedInteractionScope: () => resolvedInteractionScope,
+    legendFocusEnabled: () => legendFocusEnabled,
+    legendFocusPreviewEnabled: () =>
+      interactionConfig.legendFocus?.preview === true,
+    root: () => root,
+    semanticKeys: () => semanticKeys,
+    entries: () => interactiveLegendEntries,
+    // Deferred read of the later-declared cached derived (handlers only).
+    pressed: () => effectiveLegendPressed,
+    onlegendfocus: () =>
+      onlegendfocus as
+        ((event: LegendFocusEvent<PropertyKey>) => void) | undefined,
+    oninteraction: () =>
+      oninteraction as
+        | ((
+            event: PlotInteractionEvent<Record<string, CellValue>, PropertyKey>,
+          ) => void)
+        | undefined,
+    announce: (message) => announcer.announce(message),
   });
+  // Host one-liner: downstream server-eager deriveds (capability gate,
+  // emphasizedAnchors, presentationFocusKeys) read this at original sites.
+  const effectiveEmphasisKeys = $derived(
+    legendFocusState.effectiveEmphasisKeys,
+  );
   let committedInterval = $state<IntervalSelection | null>(null);
   // Semantic snapshot of the record backing `committedInterval`, so external
   // same-panel replacements are detected by content, not just presence.
@@ -1233,8 +1216,6 @@
   });
   const semanticKey = semanticKeys.semanticKey;
   const candidateSemanticKeys = semanticKeys.candidateSemanticKeys;
-  const legendEntryKeyIndex = $derived(semanticKeys.legendEntryKeyIndex);
-  const keysForLegend = semanticKeys.keysForLegend;
 
   $effect(() => {
     for (const diagnostic of areaScaleDiagnostics)
@@ -1332,127 +1313,6 @@
     );
   }
 
-  function emitLegendFocus(event: LegendFocusEvent<PropertyKey>): void {
-    announcer.announce(legendFocusAnnouncement(event));
-    onlegendfocus?.(event as LegendFocusEvent<PublicKey>);
-    oninteraction?.(event as PlotInteractionEvent<Row, PublicKey>);
-  }
-
-  function previewLegend(action: LegendEntryAction | null): void {
-    if (action === null) {
-      // Decision table is pure (plot-legend-surface); host owns emit + mutation.
-      // Emit gate uses committed emphasis, not effectiveEmphasisKeys (preview).
-      // Pure table maps preview source → InteractionSource on non-none actions.
-      const dismiss = resolveLegendPreviewDismissAction({
-        previewSource: legendPreview?.action.source ?? null,
-        committedEmphasisEmpty:
-          (
-            interaction?.emphasized(resolvedInteractionScope) ??
-            localEmphasisKeys
-          ).length === 0,
-      });
-      if (dismiss.type === "none") return;
-      legendPreview = null;
-      if (dismiss.type === "clear-and-emit")
-        emitLegendFocus({
-          type: "legend-focus",
-          phase: "clear",
-          source: dismiss.source,
-        });
-      return;
-    }
-    const decision = resolveLegendPreviewKeysDecision({
-      keys: keysForLegend(action),
-      entrySource: action.source,
-    });
-    if (decision.type === "clear") {
-      // Empty domain entry: do not leave the previous entry's preview active.
-      previewLegend(null);
-      return;
-    }
-    legendPreview = { action, keys: decision.keys };
-    emitLegendFocus({
-      type: "legend-focus",
-      phase: "change",
-      state: "transient",
-      source: decision.source,
-      scale: action.identity.scale as "color" | "fill",
-      value: action.entry.value as CellValue,
-      label: action.entry.label,
-      keys: decision.keys,
-    });
-  }
-
-  function clearLegendFocus(source: InteractionSource): void {
-    const emitClear = shouldEmitLegendFocusClear({
-      hasPreview: legendPreview !== null,
-      hasCommitted: legendCommitted !== null,
-      emphasisKeyCount: effectiveEmphasisKeys.length,
-    });
-    legendPreview = null;
-    legendCommitted = null;
-    if (interaction === undefined) localEmphasisKeys = [];
-    else interaction.clearEmphasis({ scope: resolvedInteractionScope, source });
-    if (emitClear)
-      emitLegendFocus({ type: "legend-focus", phase: "clear", source });
-  }
-
-  function clearLegendFromControl(event: MouseEvent): void {
-    const returnTarget = root?.querySelector<HTMLElement>(
-      ".gg-legend-target[aria-pressed='true']",
-    );
-    const source = resolveLegendClearControlSource({
-      detail: event.detail,
-      pointerType: legendClearPointerType,
-    });
-    legendClearPointerType = null;
-    clearLegendFocus(source);
-    queueMicrotask(() => {
-      if (returnTarget === null || returnTarget === undefined) return;
-      suppressLegendFocusPreview = true;
-      returnTarget.focus();
-      suppressLegendFocusPreview = false;
-    });
-  }
-
-  function commitLegend(action: LegendEntryAction): void {
-    // Eager key lookup (O(1) Map.get) before pure routing; unused on toggle-clear.
-    const keys = keysForLegend(action);
-    const commit = resolveLegendCommitAction({
-      pressed: effectiveLegendPressed,
-      identity: action.identity,
-      keyCount: keys.length,
-      entrySource: action.source,
-    });
-    switch (commit.type) {
-      case "toggle-clear":
-        clearLegendFocus(commit.source);
-        break;
-      case "ignore":
-        break;
-      case "commit":
-        legendPreview = null;
-        legendCommitted = { identity: action.identity, keys };
-        if (interaction === undefined) localEmphasisKeys = [...keys];
-        else
-          interaction.setEmphasis(keys as readonly PublicKey[], {
-            scope: resolvedInteractionScope,
-            source: commit.source,
-          });
-        emitLegendFocus({
-          type: "legend-focus",
-          phase: "change",
-          state: "committed",
-          source: commit.source,
-          scale: action.identity.scale as "color" | "fill",
-          value: action.entry.value as CellValue,
-          label: action.entry.label,
-          keys,
-        });
-        break;
-    }
-  }
-
   const presentationFocusKeys: readonly PropertyKey[] = $derived(
     mergePresentationFocusKeys(
       effectiveEmphasisKeys,
@@ -1484,23 +1344,14 @@
       );
     });
 
-  const interactiveLegendEntries = $derived.by(() => {
-    if (model === null || interactionConfig.legendFocus === null) return [];
-    return buildInteractiveLegendEntries(model.scene.legends);
-  });
+  // Host-side deriveds: must not live in the factory (server-eager model TDZ).
+  const interactiveLegendEntries = $derived(
+    legendFocusState.computeInteractiveEntries(model),
+  );
 
-  const effectiveLegendPressed: LegendEntryIdentity | null = $derived.by(() => {
-    const keys =
-      interaction?.emphasized(resolvedInteractionScope) ?? localEmphasisKeys;
-    if (keys.length === 0 || model === null) return null;
-    // Match against all discrete scene legends (not only interactive targets).
-    return findLegendPressedIdentity({
-      keys,
-      entries: buildInteractiveLegendEntries(model.scene.legends),
-      keyIndex: legendEntryKeyIndex,
-      committed: legendCommitted,
-    });
-  });
+  const effectiveLegendPressed: LegendEntryIdentity | null = $derived(
+    legendFocusState.computeLegendPressed(model),
+  );
 
   // Single source for "the legend clear row is shown": the root class and
   // the filter fieldset's below-clear offset must flip together (the S2
@@ -1515,221 +1366,8 @@
   );
   // Catalog-reconcile effect at its original position (after model effects).
   legendFilterState.registerCatalogEffects(() => filterableLegendEntries);
-
-  $effect.pre(() => {
-    const count = interactiveLegendEntries.length;
-    const active = document.activeElement;
-    // Number(dataset.index) may be NaN — pure plan maps non-finite → 0.
-    const focusedIndex =
-      active instanceof HTMLElement &&
-      active.matches("[data-gg-legend-target]") &&
-      root?.contains(active)
-        ? Number(active.dataset["index"])
-        : null;
-    const plan = planLegendRovingFocusSync({
-      currentRoving: legendRovingIndex,
-      entryCount: count,
-      focusedIndex,
-    });
-    if (plan.nextIndex !== legendRovingIndex)
-      legendRovingIndex = plan.nextIndex;
-    if (plan.type !== "refocus") return;
-    const returnIndex = plan.returnIndex;
-    queueMicrotask(() => {
-      root
-        ?.querySelector<HTMLElement>(
-          `[data-gg-legend-target][data-index="${String(returnIndex)}"]`,
-        )
-        ?.focus();
-    });
-  });
-
-  $effect(() => {
-    const plan = planLegendCommittedReconcile({
-      committed: legendCommitted,
-      entries: interactiveLegendEntries,
-      keyIndex: legendEntryKeyIndex,
-      usesLocalEmphasis: interaction === undefined,
-      localEmphasisCount: localEmphasisKeys.length,
-    });
-    switch (plan.type) {
-      case "noop":
-        return;
-      case "clear-committed":
-        legendCommitted = null;
-        break;
-      case "clear-committed-local-emit":
-        legendCommitted = null;
-        localEmphasisKeys = [];
-        emitLegendFocus({
-          type: "legend-focus",
-          phase: "clear",
-          source: "programmatic",
-        });
-        break;
-    }
-  });
-
-  // Reconcile transient preview when data/domain reshuffles entry membership.
-  $effect(() => {
-    const preview = legendPreview;
-    if (preview === null) return;
-    const next = reconcileLegendPreview({
-      preview: { identity: preview.action.identity, keys: preview.keys },
-      entries: interactiveLegendEntries,
-      keyIndex: legendEntryKeyIndex,
-    });
-    if (next === null) {
-      previewLegend(null);
-      return;
-    }
-    if (samePropertyKeySet(next.keys, preview.keys)) return;
-    legendPreview = {
-      action: { ...preview.action, identity: next.identity },
-      keys: next.keys,
-    };
-  });
-
-  // Drop chart-local emphasis when legend focus is turned off at runtime.
-  $effect(() => {
-    const plan = planLegendFocusDisabledClear({
-      legendFocusEnabled,
-      hasPreview: legendPreview !== null,
-      hasCommitted: legendCommitted !== null,
-      hasLocalEmphasis: localEmphasisKeys.length > 0,
-      usesLocalEmphasis: interaction === undefined,
-    });
-    switch (plan.type) {
-      case "noop":
-        return;
-      case "clear-host":
-        legendPreview = null;
-        legendCommitted = null;
-        break;
-      case "clear-host-local":
-        legendPreview = null;
-        legendCommitted = null;
-        localEmphasisKeys = [];
-        break;
-    }
-  });
-
-  function legendAction(
-    index: number,
-    source: LegendEntryAction["source"],
-  ): LegendEntryAction | null {
-    const target = interactiveLegendEntries[index];
-    return target === undefined
-      ? null
-      : { identity: target.identity, entry: target.entry, source };
-  }
-
-  function previewLegendIndex(
-    index: number,
-    source: "pointer" | "focus",
-  ): void {
-    if (interactionConfig.legendFocus?.preview !== true) return;
-    previewLegend(legendAction(index, source));
-  }
-
-  function onLegendFocus(index: number): void {
-    if (suppressLegendFocusPreview) return;
-    previewLegendIndex(index, "focus");
-  }
-
-  function moveLegendFocus(index: number, key: string): void {
-    const next = moveLegendRovingIndex(
-      index,
-      key,
-      interactiveLegendEntries.length,
-    );
-    legendRovingIndex = next;
-    root
-      ?.querySelector<HTMLElement>(
-        `[data-gg-legend-target][data-index="${String(next)}"]`,
-      )
-      ?.focus();
-  }
-
-  function onLegendKeydown(event: KeyboardEvent, index: number): void {
-    // Decision table is pure (plot-legend-surface); this switch owns side
-    // effects only. Roving move, commit, and clear stay host-owned.
-    const { action, preventDefault } = resolveLegendKeyAction({
-      key: event.key,
-    });
-    if (preventDefault) event.preventDefault();
-    switch (action.type) {
-      case "move":
-        moveLegendFocus(index, action.key);
-        break;
-      case "commit": {
-        const next = legendAction(index, "keyboard");
-        if (next !== null) commitLegend(next);
-        break;
-      }
-      case "clear":
-        clearLegendFocus("keyboard");
-        break;
-      case "none":
-        break;
-    }
-  }
-
-  function onLegendPointerDown(event: PointerEvent, index: number): void {
-    if (event.pointerType === "touch") legendTouchIndex = index;
-  }
-
-  function onLegendPointerUp(event: PointerEvent, index: number): void {
-    // Pure gate: touch + matching legendTouchIndex. Host always clears the
-    // index and sets suppressLegendClick on touch-commit (exact-once with the
-    // synthetic click). pointercancel clears the index in the template.
-    const resolved = resolveLegendPointerUpAction({
-      pointerType: event.pointerType,
-      index,
-      touchIndex: legendTouchIndex,
-    });
-    switch (resolved.type) {
-      case "touch-commit": {
-        legendTouchIndex = -1;
-        suppressLegendClick = true;
-        const next = legendAction(index, "touch");
-        if (next !== null) commitLegend(next);
-        break;
-      }
-      case "none":
-        break;
-    }
-  }
-
-  function onLegendClick(event: MouseEvent, index: number): void {
-    // Pure priority: suppress (after touch) outranks detail-classified commit.
-    // detail === 0 is current source classification (not an a11y guarantee).
-    const resolved = resolveLegendClickAction({
-      suppressClick: suppressLegendClick,
-      detail: event.detail,
-    });
-    switch (resolved.type) {
-      case "suppress":
-        suppressLegendClick = false;
-        break;
-      case "commit": {
-        const next = legendAction(index, resolved.source);
-        if (next !== null) commitLegend(next);
-        break;
-      }
-    }
-  }
-
-  function onLegendBlur(event: FocusEvent): void {
-    if (
-      !shouldClearLegendPreviewOnBlur({
-        relatedTarget: event.relatedTarget,
-        root,
-      })
-    )
-      return;
-    previewLegend(null);
-  }
+  // Legend-focus reconcile effects at their original position (after S2 catalog).
+  legendFocusState.registerReconcileEffects();
 
   const inspectionCoordinator = createInspectionCoordinator<
     Record<string, CellValue>,
@@ -2818,9 +2456,9 @@
     />
     <PlotLegendTargets
       entries={interactiveLegendEntries}
-      previewIdentity={legendPreview?.action.identity ?? null}
+      previewIdentity={legendFocusState.previewIdentity}
       pressedIdentity={effectiveLegendPressed}
-      rovingIndex={legendRovingIndex}
+      rovingIndex={legendFocusState.rovingIndex}
       sceneWidth={model.scene.width}
       sceneHeight={model.scene.height}
       clearLegendX={resolveClearLegendX({
@@ -2828,19 +2466,18 @@
         pressedScale: effectiveLegendPressed?.scale ?? null,
         legends: model.scene.legends,
       })}
-      onPreviewIndex={(index) => previewLegendIndex(index, "pointer")}
-      onPreviewClear={() => previewLegend(null)}
-      onPointerDown={onLegendPointerDown}
-      onPointerUp={onLegendPointerUp}
-      onPointerCancel={() => (legendTouchIndex = -1)}
-      onFocus={onLegendFocus}
-      onBlur={onLegendBlur}
-      onClick={onLegendClick}
-      onKeyDown={onLegendKeydown}
-      onClearPointerDown={(pointerType) =>
-        (legendClearPointerType = pointerType)}
-      onClearPointerCancel={() => (legendClearPointerType = null)}
-      onClearClick={clearLegendFromControl}
+      onPreviewIndex={legendFocusState.onPreviewIndex}
+      onPreviewClear={legendFocusState.onPreviewClear}
+      onPointerDown={legendFocusState.onLegendPointerDown}
+      onPointerUp={legendFocusState.onLegendPointerUp}
+      onPointerCancel={legendFocusState.setTouchIndexCleared}
+      onFocus={legendFocusState.onLegendFocus}
+      onBlur={legendFocusState.onLegendBlur}
+      onClick={legendFocusState.onLegendClick}
+      onKeyDown={legendFocusState.onLegendKeydown}
+      onClearPointerDown={legendFocusState.setClearPointerType}
+      onClearPointerCancel={() => legendFocusState.setClearPointerType(null)}
+      onClearClick={legendFocusState.clearLegendFromControl}
     />
     <PlotLegendFilters
       controller={legendFilterState}
