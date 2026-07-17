@@ -12,14 +12,10 @@
  * for the construction guard: emitSelection, commitZoom, announce,
  * inspectionPanel, candidateSemanticKeys.
  *
- * KNOWN PRE-EXISTING SSR HAZARD (issue #165, bug-compatible by design):
- * `effectiveIntervalKeys` reaches `candidateSemanticKeys` at construction ONLY
- * when a shared controller arrives pre-populated with non-union intervals AND
- * model is non-null — the base branch TDZs identically on Svelte 5.29 SSR via
- * the host's `candidateSemanticKeys` alias (initialized with the semantic-key
- * service, declared after the interval region). This module preserves that behavior
- * bit-for-bit via a deferred closure; do NOT "fix" by reordering the semantic
- * key service (that changes diagnostics effect order; candidate for S6/S7).
+ * The host constructs semantic-key resolution before this factory so Svelte
+ * 5.29's eager server evaluation can safely project pre-populated non-union
+ * intervals. Semantic diagnostics retain their later effect-registration
+ * position through the service's phased `registerEffects()` API (#165).
  */
 import {
   decodeKey,
@@ -77,11 +73,7 @@ export type IntervalStateDeps = {
   commitZoom: (domains: ContinuousZoomDomains | null, source: InteractionSource) => void;
   coordFlipped: () => boolean;
   captureSurface: () => HTMLDivElement | null;
-  /**
-   * Deferred: host alias initializes after the factory. Construction-time
-   * reads only occur on the pre-populated-controller path (see module header /
-   * issue #165). The common empty-intervals construction never invokes this.
-   */
+  /** Semantic candidate projection, initialized before factory construction. */
   candidateSemanticKeys: (candidate: CandidateFacts) => PropertyKey[];
   /**
    * Handler-only: `openBoundsEditor` select branch reads the host's inspection
