@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { basename, join, relative, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 
-import type { PackageManager } from "./support-matrix.js";
+import { loadSupportMatrix, type PackageManager } from "./support-matrix.js";
 
 interface CommandStep {
   label: string;
@@ -44,7 +44,8 @@ export function resolveConsumerOptions(
 ) {
   return {
     packageManager: (args[0] ?? environment.PACKAGE_MANAGER ?? "npm") as PackageManager,
-    svelteVersion: args[1] ?? environment.SVELTE_VERSION ?? "5.33.1",
+    // Single-sourced from support-matrix.json — the floor lives in one place.
+    svelteVersion: args[1] ?? environment.SVELTE_VERSION ?? loadSupportMatrix().svelte.minimum,
     packageManagerVersion: args[2] ?? environment.PACKAGE_MANAGER_VERSION,
   };
 }

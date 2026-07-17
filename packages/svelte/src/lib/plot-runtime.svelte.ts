@@ -59,7 +59,7 @@ export type PlotRuntime = {
  * original host positions. Dep getters must not be invoked during construction
  * for construction-time deriveds; the host must declare every binding a dep
  * getter closes over BEFORE calling this factory (declaration order is the
- * topological order; the consumer-compat SSR smoke enforces it).
+ * topological order; direct construction-time reads of later bindings TDZ).
  */
 export function createPlotRuntime(deps: PlotRuntimeDeps): PlotRuntime {
   // ------------------------------------------------- container width (RO)

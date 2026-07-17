@@ -79,7 +79,7 @@ describe("packed consumer compatibility harness", () => {
 
   test("names every local tarball in the consumer manifest", () => {
     const manifest = fixtureManifest(
-      "5.29.0",
+      "0.0.0-fixture",
       [
         join("artifacts", "ggsvelte-spec-0.0.0.tgz"),
         join("artifacts", "ggsvelte-core-0.0.0.tgz"),
@@ -87,7 +87,7 @@ describe("packed consumer compatibility harness", () => {
       ],
       "/consumer",
     );
-    expect(manifest.dependencies.svelte).toBe("5.29.0");
+    expect(manifest.dependencies.svelte).toBe("0.0.0-fixture");
     expect(manifest.dependencies["@ggsvelte/spec"]).toContain("ggsvelte-spec-0.0.0.tgz");
     expect(manifest.dependencies["@ggsvelte/core"]).toContain("ggsvelte-core-0.0.0.tgz");
     expect(manifest.dependencies["@ggsvelte/svelte"]).toContain("ggsvelte-svelte-0.0.0.tgz");

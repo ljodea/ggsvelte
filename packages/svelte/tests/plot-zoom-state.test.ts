@@ -163,12 +163,10 @@ describe("createPlotZoomState construction", () => {
     expect(modelCalls).toBe(0);
     expect(coordFlippedCalls).toBe(0);
     expect(announceCalls).toBe(0);
-    // Client deriveds are lazy, so this guard only proves the exposed
-    // accessors reach no armed getter (reads + one flush below). A
-    // construction-time $derived that reads an armed dep WITHOUT being
-    // reachable from an accessor would pass here yet still violate the
-    // construction-order DAG — the .ssr suites and compat:consumer are the
-    // gate for that case.
+    // Deriveds are lazy on client and server at the 5.33.1 floor, so this
+    // guard proves the exposed accessors reach no armed getter (reads + one
+    // flush below) — the construction-read discipline. Direct (non-derived)
+    // construction-time reads of armed deps would throw right here.
     expect(state.effectiveZoomDomains).toBeNull();
     expect(state.effectiveSpec).not.toBeNull();
     flushSync();

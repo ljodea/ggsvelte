@@ -378,7 +378,7 @@
   // ------------------------------------------------- plot runtime (S1)
   // The factory call sits AFTER the zoom-respec and legend-filter blocks:
   // every binding a dep getter closes over must already be initialized here
-  // (construction-order DAG; consumer-compat SSR smoke enforces this).
+  // (construction-order DAG; direct construction-time reads TDZ).
   // Client-side, the ResizeObserver effect now registers after the
   // legend-reset effects — safe: the observer callback is async and shares
   // no state with them.

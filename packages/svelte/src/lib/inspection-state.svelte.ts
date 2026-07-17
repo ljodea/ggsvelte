@@ -158,8 +158,8 @@ export type InspectionState = {
  * `registerInspectionEffects` at the original coordinator position after
  * legend-focus reconcile effects.
  *
- * Construction-order note: armed deps must not be reached from
- * construction-time deriveds (construction-order DAG; compat:consumer).
+ * Construction-order note: deps must not be invoked during construction —
+ * construction-read discipline enforced by the armed-getter suite.
  */
 export function createInspectionState(deps: InspectionStateDeps): InspectionState {
   let inspection = $state<PlotInspectionChange<Record<string, CellValue>, PropertyKey> | null>(

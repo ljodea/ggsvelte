@@ -153,8 +153,8 @@ export type SurfaceState = {
  * construction-time deriveds. Call `registerSurfaceEffects` at the original
  * line-810 position (after diagnostics, before catalog/focus/inspection).
  *
- * Construction-order note: armed deps must not be reached from
- * construction-time deriveds (construction-order DAG; compat:consumer).
+ * Construction-order note: deps must not be invoked during construction —
+ * construction-read discipline enforced by the armed-getter suite.
  */
 export function createSurfaceState(deps: SurfaceStateDeps): SurfaceState {
   let reducerRevision = $state(0);
