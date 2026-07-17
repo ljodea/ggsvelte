@@ -389,7 +389,8 @@
     resetZoom: () => zoomState.resetForScales(),
     onrender: () => onrender,
   });
-  // Model dispose + onrender effects (before legend-reset / late effects).
+  // Model dispose + onrender effects (after the legend-reset effects that
+  // registered during legendFilterState construction; before late effects).
   runtime.registerModelEffects();
 
   // Semantic resolution as soon as the runtime model exists. Diagnostics
