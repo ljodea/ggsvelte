@@ -19,7 +19,7 @@ import {
   createInspectionState,
   type InspectionStateDeps,
 } from "../src/lib/inspection-state.svelte.js";
-import { hitFromCandidate } from "../src/lib/surface/plot-pointer.js";
+import { hitFromCandidate } from "../src/lib/surface/plot-px.js";
 import type { QueuedPointerInspection } from "../src/lib/plot-surface-inspection-frame.js";
 import { withEffectRoot, withFlushedEffectRoot } from "./helpers/effect-root.svelte.js";
 import { modelFor } from "./helpers/model.js";

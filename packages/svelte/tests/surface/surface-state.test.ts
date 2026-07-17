@@ -27,7 +27,7 @@ import {
 } from "../../src/lib/inspection-state.svelte.js";
 import { createIntervalState, type IntervalState } from "../../src/lib/interval-state.svelte.js";
 import { BRUSH_SECOND_CORNER_ANNOUNCEMENT } from "../../src/lib/assembly/labels.js";
-import { hitFromCandidate } from "../../src/lib/surface/plot-pointer.js";
+import { hitFromCandidate } from "../../src/lib/surface/plot-px.js";
 import type { QueuedPointerInspection } from "../../src/lib/plot-surface-inspection-frame.js";
 import { TOUCH_INSPECT_CLICK_SUPPRESS_MS } from "../../src/lib/surface/pointer.js";
 import { createPlotZoomState, type PlotZoomState } from "../../src/lib/zoom/zoom-state.svelte.js";

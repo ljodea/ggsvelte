@@ -46,7 +46,7 @@ import {
   nextTraversalIndex,
   planCycleCoincident,
   planDirectionalNavigate,
-} from "./surface/plot-pointer.js";
+} from "./surface/plot-px.js";
 import { iterateCandidates } from "./selection/selection.js";
 import {
   buildInspectionCandidateRef,

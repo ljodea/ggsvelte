@@ -1,11 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 
-import PlotCaptureSurface from "../../src/lib/surface/CaptureSurface.svelte";
+import CaptureSurface from "../../src/lib/surface/CaptureSurface.svelte";
 import { render } from "../helpers/render.js";
 
-describe("PlotCaptureSurface", () => {
+describe("CaptureSurface", () => {
   it("renders group capture with plot-scoped aria-describedby", () => {
-    const { container } = render(PlotCaptureSurface, {
+    const { container } = render(CaptureSurface, {
       plotId: "plot-a",
       activeTool: "inspect",
       ariaLabel: "Chart",
@@ -31,7 +31,7 @@ describe("PlotCaptureSurface", () => {
   });
 
   it("sets aria-controls when provided and area-tool class for brush tools", () => {
-    const select = render(PlotCaptureSurface, {
+    const select = render(CaptureSurface, {
       plotId: "p",
       activeTool: "select-area",
       ariaLabel: "A",
@@ -52,7 +52,7 @@ describe("PlotCaptureSurface", () => {
     expect(el?.getAttribute("aria-controls")).toBe("p-tooltip");
     expect(el?.classList.contains("gg-area-tool")).toBe(true);
 
-    const inspect = render(PlotCaptureSurface, {
+    const inspect = render(CaptureSurface, {
       plotId: "p",
       activeTool: "inspect",
       ariaLabel: "A",
@@ -74,7 +74,7 @@ describe("PlotCaptureSurface", () => {
   });
 
   it("applies absolute fill positioning and area-tool touch styles", () => {
-    const { container } = render(PlotCaptureSurface, {
+    const { container } = render(CaptureSurface, {
       plotId: "p",
       activeTool: "zoom-area",
       ariaLabel: "A",
@@ -102,7 +102,7 @@ describe("PlotCaptureSurface", () => {
   it("forwards click and keydown to host handlers", () => {
     const onClick = vi.fn();
     const onKeyDown = vi.fn();
-    const { container } = render(PlotCaptureSurface, {
+    const { container } = render(CaptureSurface, {
       plotId: "p",
       activeTool: "inspect",
       ariaLabel: "A",
@@ -127,7 +127,7 @@ describe("PlotCaptureSurface", () => {
 
   it("binds element for host focus restoration", () => {
     let element: HTMLDivElement | null = null;
-    const { container } = render(PlotCaptureSurface, {
+    const { container } = render(CaptureSurface, {
       get element() {
         return element;
       },

@@ -14,7 +14,7 @@ import {
   planCycleCoincident,
   planDirectionalNavigate,
   plotPointFromClient,
-} from "../../src/lib/surface/plot-pointer.js";
+} from "../../src/lib/surface/plot-px.js";
 
 const hit = (x: number, y: number, extras: Partial<SceneHit> = {}): SceneHit => ({
   layerIndex: 0,
