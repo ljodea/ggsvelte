@@ -4,11 +4,8 @@
  * Callers own resolve, reducer, emit, and DOM side effects.
  */
 
-import type { InteractionSource } from "./interaction/interaction.js";
-import type {
-  InspectionHostState,
-  QueuedPointerInspection,
-} from "./plot-surface-inspection-frame.js";
+import type { InteractionSource } from "../interaction/interaction.js";
+import type { InspectionHostState, QueuedPointerInspection } from "./frame.js";
 
 /**
  * Whether the host should clear the sticky live-region announcement text

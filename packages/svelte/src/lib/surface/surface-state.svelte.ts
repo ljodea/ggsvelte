@@ -17,8 +17,8 @@
 import type { CandidateFacts, CellValue, RenderModel } from "@ggsvelte/core";
 import type { SceneHitIndex } from "@ggsvelte/core/dom";
 
-import type { InspectionState } from "../inspection-state.svelte.js";
-import type { IntervalState } from "../interval-state.svelte.js";
+import type { InspectionState } from "../inspection/inspection-state.svelte.js";
+import type { IntervalState } from "../interval/interval-state.svelte.js";
 import type {
   InteractionSource,
   InteractionTool,
@@ -35,14 +35,14 @@ import {
   buildIntervalSelectionFromScene,
   intervalQuerySceneFromModel,
   type IntervalQueryScene,
-} from "../plot-interval-query.js";
+} from "../interval/query.js";
 import { BRUSH_SECOND_CORNER_ANNOUNCEMENT } from "../assembly/labels.js";
 import { hitFromCandidate, plotPointFromClient } from "./plot-px.js";
-import { buildQueuedInspectFrame } from "../plot-surface-inspection-frame.js";
+import { buildQueuedInspectFrame } from "../inspection/frame.js";
 import {
   resolveSurfaceBlurAction,
   shouldClosePinnedOnOutsidePointer,
-} from "../plot-surface-inspection-teardown.js";
+} from "../inspection/teardown.js";
 import { resolveSurfaceKeyAction } from "./keyboard.js";
 import {
   advanceTouchInspectMoved,

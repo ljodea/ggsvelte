@@ -1,8 +1,8 @@
 import type { CellValue } from "@ggsvelte/core";
 
-import type { InteractionSource, IntervalSelection } from "./interaction/interaction.js";
-import type { PlotRect } from "./scene/geometry.js";
-import { uniqueKeysFromRowIndexes } from "./selection/selection.js";
+import type { InteractionSource, IntervalSelection } from "../interaction/interaction.js";
+import type { PlotRect } from "../scene/geometry.js";
+import { uniqueKeysFromRowIndexes } from "../selection/selection.js";
 
 /** Pointer brush-end gate only. Keyboard Enter/Space commits any size. */
 export const BRUSH_MIN_SPAN_PX = 4;

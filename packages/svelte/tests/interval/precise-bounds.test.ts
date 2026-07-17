@@ -5,11 +5,11 @@ import { trainBand, type PositionScale } from "@ggsvelte/core";
 import {
   boundsEditorInputForScale,
   semanticAxisFromBounds,
-} from "../src/lib/plot-precise-bounds.js";
+} from "../../src/lib/interval/precise-bounds.js";
 import {
   consumeIntervalKeys,
   recomputePanelIntervalKeys,
-} from "../src/lib/plot-interval-consumption.js";
+} from "../../src/lib/interval/consumption.js";
 
 describe("precise plot bounds adapters", () => {
   it.each(["linear", "log", "time"] as const)(

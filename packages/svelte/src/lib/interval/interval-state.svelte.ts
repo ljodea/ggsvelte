@@ -27,7 +27,7 @@ import {
   type ScenePanel,
 } from "@ggsvelte/core";
 
-import type { PlotInteractionController } from "./interaction/controller.svelte.js";
+import type { PlotInteractionController } from "../interaction/controller.svelte.js";
 import type {
   InteractionSource,
   IntervalSelection,
@@ -37,15 +37,15 @@ import type {
   ReadonlyIntervalDomains,
   ResolvedInteractionConfig,
   SemanticIntervalAxis,
-} from "./interaction/interaction.js";
+} from "../interaction/interaction.js";
 import type { BoundsEditorInput, PreciseBoundsApplyEvent } from "./bounds-editor.js";
-import { frozenZoomDomains, type ContinuousZoomDomains } from "./scene/geometry.js";
+import { frozenZoomDomains, type ContinuousZoomDomains } from "../scene/geometry.js";
 import {
   buildIntervalSelection,
   clearIntervalSelectionEvent,
   persistentSelectionOrNull,
   type IntervalDomain,
-} from "./plot-interval.js";
+} from "./interval.js";
 import {
   candidateInInterval,
   consumeIntervalKeys,
@@ -53,10 +53,10 @@ import {
   recomputePanelIntervalKeys,
   sameIntervalRecord,
   type IntervalConsumptionCandidate,
-} from "./plot-interval-consumption.js";
-import { intervalPixelsFromDomains } from "./plot-interval-query.js";
-import { boundsEditorInputForScale, semanticAxisFromBounds } from "./plot-precise-bounds.js";
-import { rowIndexesForCandidate } from "./selection/selection.js";
+} from "./consumption.js";
+import { intervalPixelsFromDomains } from "./query.js";
+import { boundsEditorInputForScale, semanticAxisFromBounds } from "./precise-bounds.js";
+import { rowIndexesForCandidate } from "../selection/selection.js";
 
 // ---------------------------------------------------------------------------
 // Public types

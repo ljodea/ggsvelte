@@ -11,7 +11,7 @@ import type {
   PlotDatum,
   PlotInspectionChange,
   ResolvedInspectMode,
-} from "./interaction/interaction.js";
+} from "../interaction/interaction.js";
 
 export interface ResolveInspectionInput<
   Row extends Record<string, CellValue>,

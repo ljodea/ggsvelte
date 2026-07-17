@@ -12,18 +12,18 @@ import type {
   PlotInspection,
   PlotInteractionEvent,
   ResolvedInteractionConfig,
-} from "../src/lib/interaction/interaction.js";
-import { normalizeInteractionConfig } from "../src/lib/interaction/interaction.js";
-import { createInteractionReducer } from "../src/lib/interaction/reducer.js";
+} from "../../src/lib/interaction/interaction.js";
+import { normalizeInteractionConfig } from "../../src/lib/interaction/interaction.js";
+import { createInteractionReducer } from "../../src/lib/interaction/reducer.js";
 import {
   createInspectionState,
   type InspectionStateDeps,
-} from "../src/lib/inspection-state.svelte.js";
-import { hitFromCandidate } from "../src/lib/surface/plot-px.js";
-import type { QueuedPointerInspection } from "../src/lib/plot-surface-inspection-frame.js";
-import { withEffectRoot, withFlushedEffectRoot } from "./helpers/effect-root.svelte.js";
-import { modelFor } from "./helpers/model.js";
-import { reactiveBox } from "./helpers/reactive-box.svelte.js";
+} from "../../src/lib/inspection/inspection-state.svelte.js";
+import { hitFromCandidate } from "../../src/lib/surface/plot-px.js";
+import type { QueuedPointerInspection } from "../../src/lib/inspection/frame.js";
+import { withEffectRoot, withFlushedEffectRoot } from "../helpers/effect-root.svelte.js";
+import { modelFor } from "../helpers/model.js";
+import { reactiveBox } from "../helpers/reactive-box.svelte.js";
 
 const continuousRows = [
   { id: "a", x: 1, y: 1 },

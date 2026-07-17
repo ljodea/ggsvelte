@@ -6,7 +6,7 @@ import {
   buildQueuedPointerInspection,
   resolveQueuedInspectFrameAction,
   type QueuedInspectFrameInput,
-} from "../src/lib/plot-surface-inspection-frame.js";
+} from "../../src/lib/inspection/frame.js";
 import {
   resolveInspectionCompleteness,
   resolveInspectionMode,
@@ -18,14 +18,14 @@ import {
   shouldFocusPinnedInteractiveTooltip,
   type SetInspectionInput,
   type ToggleInspectionPinInput,
-} from "../src/lib/plot-surface-inspection-apply.js";
+} from "../../src/lib/inspection/apply.js";
 import {
   planInspectionDismiss,
   planSceneInspectReconcile,
   resolveInspectionEmitAction,
   resolveSurfaceBlurAction,
   shouldClosePinnedOnOutsidePointer,
-} from "../src/lib/plot-surface-inspection-teardown.js";
+} from "../../src/lib/inspection/teardown.js";
 
 const frame = (overrides: Partial<QueuedInspectFrameInput> = {}): QueuedInspectFrameInput => ({
   hasPending: true,

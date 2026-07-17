@@ -5,19 +5,19 @@ import type {
   IntervalSelection,
   ReadonlyIntervalDomains,
   SemanticIntervalAxis,
-} from "./interaction/interaction.js";
+} from "../interaction/interaction.js";
 import {
   expandIntervalQuery,
   panelDataDomains,
   type PanelBounds,
   type PlotRect,
-} from "./scene/geometry.js";
+} from "../scene/geometry.js";
 import {
   intervalSelectionFromRows,
   lineageRowIndexesFromCandidates,
   type IntervalDomain,
   type SelectAreaMode,
-} from "./plot-interval.js";
+} from "./interval.js";
 
 /**
  * Narrow scene surface for interval query: one panel's geometry/scales plus

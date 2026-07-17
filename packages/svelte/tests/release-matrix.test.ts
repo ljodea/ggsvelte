@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 import { runPipeline } from "@ggsvelte/core";
 
 import GGPlot from "../src/lib/GGPlot.svelte";
-import { resolveInspection } from "../src/lib/inspection-resolver.js";
+import { resolveInspection } from "../src/lib/inspection/resolver.js";
 import type { IntervalSelection, ZoomEvent } from "../src/lib/interaction/interaction.js";
 import GGPlotHydrationFixture from "./fixtures/GGPlotHydrationFixture.svelte";
 import MultipleInteractivePlots from "./fixtures/MultipleInteractivePlots.svelte";

@@ -10,7 +10,7 @@ import {
   isBrushTooSmall,
   lineageRowIndexesFromCandidates,
   persistentSelectionOrNull,
-} from "../src/lib/plot-interval.js";
+} from "../../src/lib/interval/interval.js";
 
 describe("persistentSelectionOrNull", () => {
   it("keeps the event only when persistent is strictly true", () => {
