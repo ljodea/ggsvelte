@@ -23,6 +23,8 @@ const CEILINGS: readonly { readonly slice: string; readonly ceiling: number }[] 
   { slice: "s4-final", ceiling: 2594 },
   // S5 interval-selection controller: actual 2101 + 20.
   { slice: "s5-final", ceiling: 2121 },
+  // S6 inspection controller: measured after extraction + 20 headroom (strictly < 2121).
+  { slice: "s6-final", ceiling: 1694 },
 ];
 
 // Resolve via import.meta (never CWD). Node SSR suite only — uses node:fs.
