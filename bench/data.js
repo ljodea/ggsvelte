@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784327330641,
+  "lastUpdate": 1784328767877,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -19956,6 +19956,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 165.7395,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "059f6defa47512ba4ee7cd1be31b8923c5125294",
+          "message": "fix(svelte): O(n) selection key membership via Set (#182)\n\n* fix(svelte): use Set membership for selection key helpers\n\nuniqueKeysFromRowIndexes and nextPointSelectionKeys used array includes\nfor dedup/membership, which is O(n²) on large brushes and multi-select.\nSwitch to Set lookups (O(n) / O(n+m)) while preserving first-seen order\nand existing toggle algebra. Add scale-ratio regression tests.\n\n* test(svelte): replace wall-clock complexity guards with deterministic large-input checks\n\nThe two ratio<35 timing guards on nextPointSelectionKeys and\nuniqueKeysFromRowIndexes flaked on webkit under CI contention (observed\nratios 40/53/90/210 vs a <35 bound) — the noise floor of dividing two\nsub-ms performance.now() samples on a saturated runner exceeds any bound\nthat still distinguishes O(n) from O(n²). The O(n) guarantee is structural\n(Set membership) and perf-regression coverage belongs to the bench-smoke\njob, not a gating browser unit assertion. Behavioral coverage at scale is\nretained via deterministic large-input dedup/deselect checks.\n\nCo-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>\n\n---------\n\nCo-authored-by: Claude Opus 4.8 <noreply@anthropic.com>",
+          "timestamp": "2026-07-17T17:52:12-05:00",
+          "tree_id": "1ead7637a587a43679b92e208f53f45bedeaef2d",
+          "url": "https://github.com/ljodea/ggsvelte/commit/059f6defa47512ba4ee7cd1be31b8923c5125294"
+        },
+        "date": 1784328766821,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 1.7658,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.2209,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 8.0577,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 10.7557,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 65.4218,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 94.3124,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 0.8519,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 0.9809,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 68.9714,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 87.5717,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 10.7294,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 10.5174,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 89.1734,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.6301,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 22.5174,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 5.6953,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 24.9501,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 496.5307,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 129.6665,
             "unit": "ms"
           }
         ]
