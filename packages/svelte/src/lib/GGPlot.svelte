@@ -55,14 +55,8 @@
     BatchInteractionMask,
     CellValue,
     RenderModel,
-    ScenePanel,
   } from "@ggsvelte/core";
-  import {
-    buildInteractionMasks,
-    decodeKey,
-    encodeKey,
-    sceneLabel,
-  } from "@ggsvelte/core";
+  import { buildInteractionMasks, sceneLabel } from "@ggsvelte/core";
   import type { SceneHit, SceneHitIndex } from "@ggsvelte/core/dom";
   import { buildHitIndex } from "@ggsvelte/core/dom";
 
@@ -74,8 +68,6 @@
     type InteractionSource,
     type InteractionTool,
     type IntervalSelection,
-    type PlotInteractionInterval,
-    type SemanticIntervalAxis,
     type LegendFocusEvent,
     type LegendFocusInput,
     type PlotInspection,
@@ -83,7 +75,6 @@
     type PlotInteractionEvent,
     type PlotInteractionScope,
     type PlotSelection,
-    type ReadonlyIntervalDomains,
     type SelectInput,
     type ZoomDomains,
     type ZoomEvent,
@@ -100,11 +91,7 @@
     toLayerInput,
   } from "./plot-assemble.js";
   import { brushAtPoint, brushWithEnd } from "./plot-area-brush.js";
-  import {
-    frozenZoomDomains,
-    normalizedRect,
-    panelContainingAnchor,
-  } from "./plot-geometry.js";
+  import { normalizedRect, panelContainingAnchor } from "./plot-geometry.js";
   import { resolveSurfaceKeyAction } from "./plot-surface-keyboard.js";
   import {
     buildInspectionCandidateRef,
@@ -186,34 +173,11 @@
     zoomSupportsChannel,
   } from "./plot-capability.js";
   import {
-    buildIntervalSelection,
-    clearIntervalSelectionEvent,
-    persistentSelectionOrNull,
-    type IntervalDomain,
-  } from "./plot-interval.js";
-  import {
     buildIntervalSelectionFromScene,
-    intervalPixelsFromDomains,
     intervalQuerySceneFromModel,
     type IntervalQueryScene,
   } from "./plot-interval-query.js";
-  import {
-    candidateInInterval,
-    consumeIntervalKeys,
-    recomputePanelIntervalKeys,
-    sameIntervalRecord,
-    type IntervalConsumptionCandidate,
-  } from "./plot-interval-consumption.js";
   import BoundsEditor from "./BoundsEditor.svelte";
-  import type {
-    BoundsEditorInput,
-    PreciseBoundsApplyEvent,
-  } from "./bounds-editor.js";
-  import {
-    boundsEditorInputForScale,
-    semanticAxisFromBounds,
-  } from "./plot-precise-bounds.js";
-  import { nextLocalIntervalRecords } from "./plot-interval-consumption.js";
   import {
     anchorsFromCandidateKeys,
     buildPointSelectionEvent,
@@ -221,7 +185,6 @@
     iterateCandidates,
     mergePresentationFocusKeys,
     nextPointSelectionKeys,
-    rowIndexesForCandidate,
     sameOrderedPropertyKeys,
   } from "./plot-selection.js";
   import {
@@ -246,6 +209,7 @@
   import { createLegendFilterState } from "./legend-filter-state.svelte.js";
   import { createLegendFocusState } from "./legend-focus-state.svelte.js";
   import { createPlotZoomState } from "./plot-zoom-state.svelte.js";
+  import { createIntervalState } from "./interval-state.svelte.js";
   import {
     type LegendFilterEvent,
     type LegendFilterInput,
@@ -679,191 +643,30 @@
   const effectiveEmphasisKeys = $derived(
     legendFocusState.effectiveEmphasisKeys,
   );
-  let committedInterval = $state<IntervalSelection | null>(null);
-  // Semantic snapshot of the record backing `committedInterval`, so external
-  // same-panel replacements are detected by content, not just presence.
-  let committedIntervalRecord =
-    $state<PlotInteractionInterval<PublicKey> | null>(null);
-  let localCommittedIntervals = $state<PlotInteractionInterval<PublicKey>[]>(
-    [],
-  );
-  let boundsEditor = $state<{
-    action: "select" | "zoom";
-    axis: "x" | "y";
-    panelId?: string;
-    panelLabel?: string;
-  } | null>(null);
-  let boundsReturnFocus = $state<HTMLElement | null>(null);
-  const effectiveIntervals = $derived.by(() => {
-    void controllerRevision;
-    return (
-      interaction?.intervals(resolvedInteractionScope) ??
-      localCommittedIntervals
-    );
+  // ------------------------------------------------- interval selection (S5)
+  // Factory at the original interval region (after runtime + legend-focus).
+  // Construction-time deriveds may read model/effectiveZoomDomains (both
+  // earlier-declared). Both effects register here — relative order is
+  // runtime model effects (529) < interval effects < semantic diagnostics.
+  const intervalState = createIntervalState({
+    model: () => model,
+    interaction: () => factoryInteraction,
+    resolvedInteractionScope: () => resolvedInteractionScope,
+    selectConfig: () => interactionConfig.select,
+    effectiveZoomDomains: () => effectiveZoomDomains,
+    commitZoom: zoomState.commitZoom,
+    coordFlipped: () => coordFlipped,
+    captureSurface: () => captureSurface,
+    // Deferred: host alias initializes after semantic-key service (issue #165).
+    candidateSemanticKeys: (candidate) => candidateSemanticKeys(candidate),
+    inspectionPanel: () => inspectionPanel,
+    emitSelection,
+    announce: announceSink,
   });
-  function intervalConsumptionCandidates(): IntervalConsumptionCandidate<PublicKey>[] {
-    if (model === null) return [];
-    const candidates: IntervalConsumptionCandidate<PublicKey>[] = [];
-    for (let id = 0; id < model.candidates.size; id++) {
-      const candidate = model.candidates.candidate(id);
-      if (candidate === null) continue;
-      candidates.push({
-        panelId: candidate.panelId,
-        xValue: candidate.xValue,
-        yValue: candidate.yValue,
-        keys: candidateSemanticKeys(candidate) as PublicKey[],
-      });
-    }
-    return candidates;
-  }
-  const effectiveIntervalKeys: readonly PropertyKey[] = $derived.by(() => {
-    if (model === null || effectiveIntervals.length === 0) return [];
-    // Union consumes only stored record keys, and this derived re-runs on
-    // every controller revision — skip the O(candidates) semantic projection
-    // whenever the preset never reads it.
-    const preset = effectiveIntervals[0]?.preset;
-    return consumeIntervalKeys({
-      records: effectiveIntervals,
-      panels: model.scene.panels,
-      candidates: preset === "union" ? [] : intervalConsumptionCandidates(),
-    });
-  });
-  const currentIntervalRecord = $derived.by(() => {
-    const intervalPanelId = committedInterval?.panelId;
-    return (
-      (intervalPanelId === null || intervalPanelId === undefined
-        ? undefined
-        : effectiveIntervals.find(
-            (record) => record.panelId === intervalPanelId,
-          )) ??
-      effectiveIntervals[0] ??
-      null
-    );
-  });
-  const currentIntervalPanel = $derived.by(() => {
-    if (currentIntervalRecord === null || model === null) return;
-    return model.scene.panels.find(
-      (candidate) => candidate.id === currentIntervalRecord.panelId,
-    );
-  });
-
-  // A shared controller can clear or replace this chart's interval from
-  // outside (a linked plot, programmatic reconcile). The local pixel
-  // rectangle must not outlive its semantic record — including a same-panel
-  // record whose domains or keys were replaced under it.
-  $effect(() => {
-    const current = committedInterval;
-    if (current === null) return;
-    const record = effectiveIntervals.find(
-      (candidate) => candidate.panelId === current.panelId,
-    );
-    if (
-      record !== undefined &&
-      (committedIntervalRecord === null ||
-        sameIntervalRecord(committedIntervalRecord, record))
-    )
-      return;
-    committedInterval = null;
-    committedIntervalRecord = null;
-  });
-
-  function facetIdentityValueLabel(encodedValue: string): string {
-    const value = decodeKey(encodedValue);
-    const kind =
-      value instanceof Date
-        ? "date"
-        : value === null
-          ? "null"
-          : typeof value === "string"
-            ? "text"
-            : typeof value;
-    const display = value instanceof Date ? value.toISOString() : String(value);
-    return `${kind} ${display}`;
-  }
-
-  function intervalPanelLabel(panel: ScenePanel): string {
-    const display = panel.strip.trim() || "panel";
-    if (
-      model === null ||
-      model.scene.panels.filter(
-        (candidate) => candidate.strip.trim() === panel.strip.trim(),
-      ).length < 2
-    )
-      return display;
-    const identity = panel.identity.values
-      .map(
-        (value) =>
-          `${value.field}: ${facetIdentityValueLabel(value.encodedValue)}`,
-      )
-      .join(", ");
-    return identity.length > 0 ? `${display} (${identity})` : display;
-  }
-
-  const currentIntervalTargetLabel = $derived.by(() => {
-    if (currentIntervalRecord === null || model === null) return;
-    if (currentIntervalPanel === undefined) return "unavailable panel";
-    if (
-      currentIntervalPanel.strip.trim().length === 0 &&
-      currentIntervalPanel.identity.values.length === 0
-    )
-      return;
-    return intervalPanelLabel(currentIntervalPanel);
-  });
-  const boundsEditorInput = $derived.by((): BoundsEditorInput | null => {
-    if (boundsEditor === null || model === null) return null;
-    if (boundsEditor.action === "zoom") {
-      const scale = model.scales[boundsEditor.axis];
-      if (scale.type === "band") return null;
-      const bounds = effectiveZoomDomains?.[boundsEditor.axis] ?? scale.domain;
-      return boundsEditorInputForScale({
-        axis: boundsEditor.axis,
-        action: "zoom",
-        scale,
-        bounds,
-        reversed:
-          scale.normalize(scale.domain[0]) > scale.normalize(scale.domain[1]),
-      });
-    }
-    const record = currentIntervalRecord;
-    const targetPanelId = record?.panelId ?? boundsEditor.panelId;
-    if (targetPanelId === undefined) return null;
-    const panelIndex = model.scene.panels.findIndex(
-      (panel) => panel.id === targetPanelId,
-    );
-    if (panelIndex < 0) return null;
-    const scale =
-      model.scales.panels[panelIndex]?.[boundsEditor.axis] ??
-      model.scales[boundsEditor.axis];
-    const semantic = record?.domains[boundsEditor.axis];
-    const bounds =
-      semantic?.kind === "band"
-        ? ([semantic.values[0] ?? "", semantic.values.at(-1) ?? ""] as const)
-        : semantic?.domain;
-    return boundsEditorInputForScale({
-      axis: boundsEditor.axis,
-      action: "select",
-      scale,
-      ...(bounds !== undefined && { bounds }),
-      reversed:
-        scale.type !== "band" &&
-        scale.normalize(scale.domain[0]) > scale.normalize(scale.domain[1]),
-    });
-  });
-  $effect(() => {
-    if (boundsEditor === null || boundsEditorInput !== null) return;
-    const target = boundsEditor.panelLabel ?? "the target panel";
-    boundsEditor = null;
-    boundsReturnFocus = null;
-    // The original button may have been reused for a different panel. The
-    // capture surface is the stable recovery target for reactive cancellation;
-    // explicit Apply/Cancel still restores the initiating button.
-    queueMicrotask(() => {
-      captureSurface?.focus();
-      announcer.announce(
-        `Bounds editing cancelled because ${target} is no longer available.`,
-      );
-    });
-  });
+  // Host one-liners at original positions for later consumers.
+  const effectiveIntervals = $derived(intervalState.effectiveIntervals);
+  const effectiveIntervalKeys = $derived(intervalState.effectiveIntervalKeys);
+  const committedInterval = $derived(intervalState.committedInterval);
   const zoomHasSupportedChannel = $derived.by(() => {
     if (interactionConfig.zoom === null || model === null) return true;
     return zoomSupportsChannel(interactionConfig.zoom.mode, model.scales);
@@ -1013,172 +816,6 @@
   function clearPointSelection(source: InteractionSource): void {
     if (effectiveSelectedKeys.length === 0) return;
     commitPointSelection([], source);
-  }
-
-  function clearIntervalSelection(source: InteractionSource): void {
-    const current = committedInterval;
-    if (current === null && effectiveIntervals.length === 0) return;
-    if (interaction === undefined) {
-      localCommittedIntervals = [];
-    } else {
-      interaction.clearIntervals({ scope: resolvedInteractionScope, source });
-    }
-    const event = clearIntervalSelectionEvent(
-      current ?? {
-        mode: interactionConfig.select?.mode ?? "xy",
-        panelId: null,
-        pixels: { x0: 0, y0: 0, x1: 0, y1: 0 },
-      },
-      source,
-    );
-    committedInterval = null;
-    committedIntervalRecord = null;
-    emitSelection(event);
-  }
-
-  function clearCurrentPanelInterval(source: InteractionSource): void {
-    const intervalPanelId =
-      committedInterval?.panelId ?? currentIntervalRecord?.panelId;
-    if (intervalPanelId === null || intervalPanelId === undefined) return;
-    if (interaction === undefined) {
-      localCommittedIntervals = localCommittedIntervals.filter(
-        (interval) => interval.panelId !== intervalPanelId,
-      );
-    } else {
-      interaction.clearInterval(intervalPanelId, {
-        scope: resolvedInteractionScope,
-        source,
-      });
-    }
-    const event = clearIntervalSelectionEvent(
-      committedInterval ?? {
-        mode: interactionConfig.select?.mode ?? "xy",
-        panelId: intervalPanelId,
-        pixels: { x0: 0, y0: 0, x1: 0, y1: 0 },
-      },
-      source,
-    );
-    committedInterval = null;
-    committedIntervalRecord = null;
-    emitSelection(event);
-  }
-
-  function semanticAxis(
-    panelIndex: number,
-    axis: "x" | "y",
-    bounds: readonly [unknown, unknown] | undefined,
-  ): SemanticIntervalAxis | undefined {
-    if (bounds === undefined || model === null) return undefined;
-    const scale = model.scales.panels[panelIndex]?.[axis] ?? model.scales[axis];
-    if (scale.type === "band") {
-      const first = scale.indexOf(bounds[0]);
-      const last = scale.indexOf(bounds[1]);
-      if (first === undefined || last === undefined) return undefined;
-      const lower = Math.min(first, last);
-      const upper = Math.max(first, last);
-      return Object.freeze({
-        kind: "band",
-        values: Object.freeze(
-          scale.rawDomain
-            .slice(lower, upper + 1)
-            .map((value) => encodeKey(value)),
-        ),
-      });
-    }
-    return semanticAxisFromBounds(scale.type, [
-      Number(bounds[0]),
-      Number(bounds[1]),
-    ]);
-  }
-
-  function eventAxisBounds(
-    panelIndex: number,
-    axis: "x" | "y",
-    semantic: SemanticIntervalAxis | undefined,
-  ): readonly [CellValue, CellValue] | undefined {
-    if (semantic === undefined || model === null) return undefined;
-    if (semantic.kind !== "band") return semantic.domain;
-    const scale = model.scales.panels[panelIndex]?.[axis] ?? model.scales[axis];
-    if (scale.type !== "band" || semantic.values.length === 0) return undefined;
-    const values = semantic.values
-      .map((encoded) =>
-        scale.rawDomain.find((value) => encodeKey(value) === encoded),
-      )
-      .filter((value): value is CellValue => value !== undefined);
-    return values.length === 0 ? undefined : [values[0]!, values.at(-1)!];
-  }
-
-  function eventDomain(
-    panelIndex: number,
-    domains: ReadonlyIntervalDomains,
-  ): IntervalDomain {
-    const x = eventAxisBounds(panelIndex, "x", domains.x);
-    const y = eventAxisBounds(panelIndex, "y", domains.y);
-    return {
-      ...(x !== undefined && { x }),
-      ...(y !== undefined && { y }),
-    };
-  }
-
-  function intervalLineageCount(
-    targetPanelId: string,
-    domains: ReadonlyIntervalDomains,
-  ): number {
-    if (model === null) return 0;
-    const rows = new Set<number>();
-    for (let id = 0; id < model.candidates.size; id++) {
-      const candidate = model.candidates.candidate(id);
-      if (
-        candidate === null ||
-        candidate.panelId !== targetPanelId ||
-        !candidateInInterval(candidate, domains)
-      )
-        continue;
-      for (const rowIndex of rowIndexesForCandidate(
-        candidate,
-        model.lineage.keys(candidate.lineage),
-      ))
-        rows.add(rowIndex);
-    }
-    return rows.size;
-  }
-
-  function commitIntervalSelection(
-    event: IntervalSelection,
-    source: InteractionSource,
-  ): void {
-    const targetPanelId = event.panelId;
-    if (targetPanelId === null || model === null) return;
-    const panelIndex = model.scene.panels.findIndex(
-      (panel) => panel.id === targetPanelId,
-    );
-    if (panelIndex < 0) return;
-    const x = semanticAxis(panelIndex, "x", event.domain.x);
-    const y = semanticAxis(panelIndex, "y", event.domain.y);
-    // An empty facet panel trains no band domain, so no semantic axis
-    // survives the selection mode. The controller rejects axis-less
-    // intervals (TypeError) — treat the brush as an empty selection.
-    if (x === undefined && y === undefined) return;
-    const record: PlotInteractionInterval<PublicKey> = Object.freeze({
-      panelId: targetPanelId,
-      preset: interactionConfig.select?.preset ?? "independent",
-      domains: Object.freeze({
-        ...(x !== undefined && { x }),
-        ...(y !== undefined && { y }),
-      }),
-      keys: Object.freeze([...event.keys]) as readonly PublicKey[],
-    });
-    committedIntervalRecord = record;
-    if (interaction === undefined) {
-      localCommittedIntervals = [
-        ...nextLocalIntervalRecords(localCommittedIntervals, record),
-      ];
-    } else {
-      interaction.setInterval(record, {
-        scope: resolvedInteractionScope,
-        source,
-      });
-    }
   }
 
   function emitSelection(event: PlotSelection): void {
@@ -1793,13 +1430,9 @@
       case "select-end": {
         brushRect = null;
         const eventValue = selectionEvent("end", finish.rect, source);
-        committedInterval = persistentSelectionOrNull(
-          interactionConfig.select?.persistent,
-          eventValue,
-        );
-        // R3: persistent selections reconcile into the typed interval set.
-        if (interactionConfig.select?.persistent)
-          commitIntervalSelection(eventValue, source);
+        // Writes (committedInterval + conditional record) then host emit —
+        // order unchanged from the pre-extraction select-end branch.
+        intervalState.applyBrushSelectEnd(eventValue, source);
         emitSelection(eventValue);
         reducer.dispatch({ type: "cancel-area" });
         break;
@@ -1968,112 +1601,6 @@
         break;
       }
     }
-  }
-
-  function openBoundsEditor(
-    action: "select" | "zoom",
-    axis: "x" | "y",
-    trigger: HTMLElement,
-  ): void {
-    boundsReturnFocus = trigger;
-    if (action === "select") {
-      const panel =
-        currentIntervalRecord === null
-          ? (inspectionPanel ?? model?.scene.panels[0])
-          : currentIntervalPanel;
-      if (panel === undefined) return;
-      boundsEditor = {
-        action,
-        axis,
-        panelId: panel.id,
-        panelLabel: intervalPanelLabel(panel),
-      };
-      return;
-    }
-    boundsEditor = { action, axis };
-  }
-
-  function applyPreciseBounds(event: PreciseBoundsApplyEvent): void {
-    if (event.action === "zoom") {
-      if (event.scale === "band") return;
-      zoomState.commitZoom(
-        frozenZoomDomains({
-          ...effectiveZoomDomains,
-          [event.axis]: [...event.bounds],
-        }),
-        event.inputSource,
-      );
-      boundsEditor = null;
-      return;
-    }
-    const prior = currentIntervalRecord;
-    const targetPanelId = prior?.panelId ?? boundsEditor?.panelId;
-    if (targetPanelId === null || targetPanelId === undefined || model === null)
-      return;
-    const panelIndex = model.scene.panels.findIndex(
-      (candidate) => candidate.id === targetPanelId,
-    );
-    if (panelIndex < 0) return;
-    const axis = semanticAxis(panelIndex, event.axis, event.bounds);
-    if (axis === undefined) return;
-    const domains = Object.freeze({
-      ...prior?.domains,
-      [event.axis]: axis,
-    });
-    const keys = recomputePanelIntervalKeys({
-      panelId: targetPanelId,
-      domains,
-      candidates: intervalConsumptionCandidates(),
-    }) as readonly PublicKey[];
-    const next: PlotInteractionInterval<PublicKey> = Object.freeze({
-      panelId: targetPanelId,
-      preset:
-        prior?.preset ?? interactionConfig.select?.preset ?? "independent",
-      domains,
-      keys,
-    });
-    // Precise bounds persist exactly like the brush path: with
-    // `persistent: false` the end event still fires, but no durable record,
-    // committed rectangle, or clear-selection controls appear.
-    const persistent = interactionConfig.select?.persistent === true;
-    if (persistent) {
-      committedIntervalRecord = next;
-      if (interaction === undefined) {
-        localCommittedIntervals = [
-          ...nextLocalIntervalRecords(localCommittedIntervals, next),
-        ];
-      } else {
-        interaction.setInterval(next, {
-          scope: resolvedInteractionScope,
-          source: event.inputSource,
-        });
-      }
-    }
-    const panel = model.scene.panels[panelIndex]!;
-    const eventValue = buildIntervalSelection({
-      phase: "end",
-      mode: interactionConfig.select?.mode ?? "xy",
-      panelId: targetPanelId,
-      domain: eventDomain(panelIndex, domains),
-      // The overlay must depict the interval that was actually applied, so
-      // project the edited domains back into pixels rather than reusing the
-      // pre-edit rectangle (or defaulting to the whole panel).
-      pixels: intervalPixelsFromDomains({
-        domains,
-        panel,
-        scales: model.scales.panels[panelIndex] ?? model.scales,
-        flipped: coordFlipped,
-      }),
-      keys,
-      lineageCount: intervalLineageCount(targetPanelId, domains),
-      source: event.inputSource,
-    });
-    committedInterval = persistentSelectionOrNull(
-      interactionConfig.select?.persistent,
-      eventValue,
-    );
-    emitSelection(eventValue);
-    boundsEditor = null;
   }
 
   /** Replace one or both continuous zoom domains without disturbing the
@@ -2325,28 +1852,28 @@
       zoomDomains={effectiveZoomDomains}
       {hasPointSelection}
       {hasIntervalSelection}
-      intervalTargetLabel={currentIntervalTargetLabel}
+      intervalTargetLabel={intervalState.currentIntervalTargetLabel}
       canSetIntervalBounds={!emptyPlot &&
         preciseIntervalAxes.length > 0 &&
-        (currentIntervalRecord === null || currentIntervalPanel !== undefined)}
+        intervalState.intervalBoundsTargetAvailable}
       canSetZoomBounds={!emptyPlot && preciseZoomAxes.length > 0}
       intervalAxes={preciseIntervalAxes}
       zoomAxes={preciseZoomAxes}
       onChooseTool={chooseTool}
       onResetZoom={zoomState.resetZoom}
       onClearPointSelection={clearPointSelection}
-      onClearIntervalSelection={clearIntervalSelection}
-      onClearCurrentInterval={clearCurrentPanelInterval}
-      onEditBounds={openBoundsEditor}
+      onClearIntervalSelection={intervalState.clearIntervalSelection}
+      onClearCurrentInterval={intervalState.clearCurrentPanelInterval}
+      onEditBounds={intervalState.openBoundsEditor}
     />
   {/if}
-  {#if boundsEditorInput !== null}
+  {#if intervalState.boundsEditorInput !== null}
     <div class="gg-precise-bounds">
       <BoundsEditor
-        input={boundsEditorInput}
-        returnFocus={boundsReturnFocus}
-        onapply={applyPreciseBounds}
-        oncancel={() => (boundsEditor = null)}
+        input={intervalState.boundsEditorInput}
+        returnFocus={intervalState.boundsReturnFocus}
+        onapply={intervalState.applyPreciseBounds}
+        oncancel={intervalState.cancelBoundsEditor}
       />
     </div>
   {/if}
@@ -2403,7 +1930,7 @@
       {brushRect}
       {activeTool}
       {areaAwaitingSecond}
-      {committedInterval}
+      committedInterval={intervalState.committedInterval}
     />
     {#if surfaceInteractive}
       <!-- Order (document = paint): overlay → capture → Tooltip → status chrome. -->
