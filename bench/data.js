@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784319231795,
+  "lastUpdate": 1784323347813,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -19361,6 +19361,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 126.2412,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "9178d0c0d8af0cd7ef7335ce50cbc100ea4a71fa",
+          "message": "refactor(svelte): S13 — runtime/, scene/ directories; split shared services (#177)\n\n* refactor(svelte): move runtime/ and scene/ into feature directories\n\n* refactor(svelte): split plot-shared-services into announcer and semantic-keys\n\n* test(svelte): scene coverage per report\n\n* test(svelte): table-drive axis orient cases; single point-model builder\n\nReview findings: the y-axis test duplicated the x-axis body (40 lines,\nonly orient/transform/anchor varying) — now one it.each over an orient\ntable; the three near-identical buildModel closures in the semantic-keys\nsuite collapse into one buildPointModel helper.\n\nCo-Authored-By: Claude Fable 5 <noreply@anthropic.com>\n\n* fix(svelte): correct SceneView font URLs for scene/ directory depth\n\nS13 moved SceneView.svelte into scene/ without updating the @font-face\nurl(\"./fonts/...\") references, which now resolved to a nonexistent\nscene/fonts/. Point them at ../fonts/.\n\nCo-Authored-By: Claude Fable 5 <noreply@anthropic.com>\n\n* test(svelte): remove stale runtime test boilerplate\n\n---------\n\nCo-authored-by: Claude Fable 5 <noreply@anthropic.com>",
+          "timestamp": "2026-07-17T16:21:52-05:00",
+          "tree_id": "939b05e51c84eeaebd514a082c90f386acb8e811",
+          "url": "https://github.com/ljodea/ggsvelte/commit/9178d0c0d8af0cd7ef7335ce50cbc100ea4a71fa"
+        },
+        "date": 1784323347292,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.3821,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.9596,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 10.4987,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 12.9494,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 91.44,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 121.3994,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.2901,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.3837,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 86.3225,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 109.2897,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 14.5124,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 13.7546,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 116.7415,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7924,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 27.8923,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.5807,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 37.4969,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 606.9218,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 161.0516,
             "unit": "ms"
           }
         ]
