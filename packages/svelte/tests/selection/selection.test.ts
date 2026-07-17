@@ -35,6 +35,33 @@ describe("nextPointSelectionKeys", () => {
   it("deduplicates union results", () => {
     expect(nextPointSelectionKeys(["a", "a"], ["b", "b"], true)).toEqual(["a", "b"]);
   });
+
+  it("deselects with symbol keys by identity", () => {
+    const a = Symbol("a");
+    const b = Symbol("b");
+    expect(nextPointSelectionKeys([a, b], [a], true)).toEqual([b]);
+  });
+
+  /**
+   * Complexity guard on the all-selected deselect path (every + filter membership).
+   * O(n) stays near 10× when n grows 10×; O(n²) approaches 100×.
+   */
+  it("stays near-linear on large multi-select deselect", () => {
+    const run = (n: number): number => {
+      const current = Array.from({ length: n }, (_, i) => i);
+      const toggled = current.slice();
+      const t0 = performance.now();
+      const next = nextPointSelectionKeys(current, toggled, true);
+      const ms = performance.now() - t0;
+      expect(next).toEqual([]);
+      return ms;
+    };
+    run(500);
+    const small = run(2_000);
+    const large = run(20_000); // 10×
+    const ratio = large / Math.max(small, 0.1);
+    expect(ratio).toBeLessThan(35);
+  });
 });
 
 describe("iterateCandidates / collectCandidates", () => {
@@ -132,6 +159,42 @@ describe("uniqueKeysFromRowIndexes", () => {
 
   it("returns empty for empty input", () => {
     expect(uniqueKeysFromRowIndexes([], () => "x")).toEqual([]);
+  });
+
+  it("preserves first-seen order for symbol and number keys", () => {
+    const a = Symbol("a");
+    const b = Symbol("b");
+    const keyForRow = (rowIndex: number): PropertyKey | null => {
+      if (rowIndex === 0) return a;
+      if (rowIndex === 1) return 0;
+      if (rowIndex === 2) return b;
+      if (rowIndex === 3) return a;
+      if (rowIndex === 4) return 0;
+      return null;
+    };
+    expect(uniqueKeysFromRowIndexes([0, 1, 2, 3, 4, 5], keyForRow)).toEqual([a, 0, b]);
+  });
+
+  /**
+   * Complexity guard: unique-key count grows with n (worst case for includes-based
+   * dedup). O(n) stays near 10× when n grows 10×; O(n²) approaches 100×.
+   */
+  it("stays near-linear as unique key count grows", () => {
+    const run = (n: number): number => {
+      const rows = Array.from({ length: n }, (_, i) => i);
+      const t0 = performance.now();
+      const keys = uniqueKeysFromRowIndexes(rows, (i) => i);
+      const ms = performance.now() - t0;
+      expect(keys).toHaveLength(n);
+      expect(keys[0]).toBe(0);
+      expect(keys[n - 1]).toBe(n - 1);
+      return ms;
+    };
+    run(500); // warm JIT / browser
+    const small = run(2_500);
+    const large = run(25_000); // 10×
+    const ratio = large / Math.max(small, 0.1);
+    expect(ratio).toBeLessThan(35);
   });
 });
 
