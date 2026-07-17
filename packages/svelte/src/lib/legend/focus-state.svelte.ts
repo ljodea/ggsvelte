@@ -3,20 +3,20 @@
  *
  * Owns chart-local emphasis, preview/commit state, roving/touch suppress flags,
  * interaction handlers, and phased reconcile effects. Construction-time
- * deriveds must NOT read model/semanticKeys/entries (construction-order DAG).
+ * deriveds must NOT read model/entryKeys/entries (construction-order DAG).
  * Those are methods/effects registered after the host declares the later
  * bindings.
  */
 import type { CellValue, RenderModel } from "@ggsvelte/core";
 
-import type { PlotInteractionController } from "./interaction/controller.svelte.js";
+import type { PlotInteractionController } from "../interaction/controller.svelte.js";
 import type {
   InteractionSource,
   LegendFocusEvent,
   PlotInteractionEvent,
   PlotInteractionScope,
-} from "./interaction/interaction.js";
-import { legendFocusAnnouncement } from "./assembly/labels.js";
+} from "../interaction/interaction.js";
+import { legendFocusAnnouncement } from "../assembly/labels.js";
 import {
   buildInteractiveLegendEntries,
   findLegendPressedIdentity,
@@ -31,7 +31,8 @@ import {
   type InteractiveLegendEntry,
   type LegendEntryAction,
   type LegendEntryIdentity,
-} from "./plot-legend-focus.js";
+} from "./focus.js";
+import type { LegendEntryKeyAccess } from "./entry-key-index.svelte.js";
 import {
   resolveLegendClearControlSource,
   resolveLegendClickAction,
@@ -41,8 +42,7 @@ import {
   resolveLegendPreviewDismissAction,
   shouldClearLegendPreviewOnBlur,
   shouldEmitLegendFocusClear,
-} from "./plot-legend-surface.js";
-import type { SemanticKeyService } from "./runtime/semantic-keys.svelte.js";
+} from "./surface.js";
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -56,10 +56,10 @@ export type LegendFocusStateDeps = {
   legendFocusPreviewEnabled: () => boolean;
   root: () => HTMLDivElement | null;
   /**
-   * Narrow Pick of the semantic-key service. Accessed only inside methods /
+   * Legend entry → semantic-key access. Accessed only inside methods /
    * effects / handlers (declared after the factory in the host).
    */
-  semanticKeys: () => Pick<SemanticKeyService, "legendEntryKeyIndex" | "keysForLegend">;
+  entryKeys: () => LegendEntryKeyAccess;
   /**
    * Component-side interactive entries derived. Read only in effects/handlers.
    */
@@ -148,7 +148,7 @@ export function createLegendFocusState(deps: LegendFocusStateDeps): LegendFocusS
 
   function previewLegend(action: LegendEntryAction | null): void {
     if (action === null) {
-      // Decision table is pure (plot-legend-surface); host owns emit + mutation.
+      // Decision table is pure (legend/surface); host owns emit + mutation.
       // Emit gate uses committed emphasis, not effectiveEmphasisKeys (preview).
       // Pure table maps preview source → InteractionSource on non-none actions.
       const dismiss = resolveLegendPreviewDismissAction({
@@ -168,7 +168,7 @@ export function createLegendFocusState(deps: LegendFocusStateDeps): LegendFocusS
       return;
     }
     const decision = resolveLegendPreviewKeysDecision({
-      keys: deps.semanticKeys().keysForLegend(action),
+      keys: deps.entryKeys().keysForLegend(action),
       entrySource: action.source,
     });
     if (decision.type === "clear") {
@@ -237,14 +237,14 @@ export function createLegendFocusState(deps: LegendFocusStateDeps): LegendFocusS
     return findLegendPressedIdentity({
       keys,
       entries: buildInteractiveLegendEntries(model.scene.legends),
-      keyIndex: deps.semanticKeys().legendEntryKeyIndex,
+      keyIndex: deps.entryKeys().legendEntryKeyIndex,
       committed: legendCommitted,
     });
   }
 
   function commitLegend(action: LegendEntryAction): void {
     // Eager key lookup (O(1) Map.get) before pure routing; unused on toggle-clear.
-    const keys = deps.semanticKeys().keysForLegend(action);
+    const keys = deps.entryKeys().keysForLegend(action);
     // Host's cached effectiveLegendPressed derived — the single source of
     // truth shared with aria-pressed, not a per-commit recompute.
     const commit = resolveLegendCommitAction({
@@ -310,7 +310,7 @@ export function createLegendFocusState(deps: LegendFocusStateDeps): LegendFocusS
   }
 
   function onLegendKeydown(event: KeyboardEvent, index: number): void {
-    // Decision table is pure (plot-legend-surface); this switch owns side
+    // Decision table is pure (legend/surface); this switch owns side
     // effects only. Roving move, commit, and clear stay host-owned.
     const { action, preventDefault } = resolveLegendKeyAction({
       key: event.key,
@@ -438,7 +438,7 @@ export function createLegendFocusState(deps: LegendFocusStateDeps): LegendFocusS
       const plan = planLegendCommittedReconcile({
         committed: legendCommitted,
         entries: deps.entries(),
-        keyIndex: deps.semanticKeys().legendEntryKeyIndex,
+        keyIndex: deps.entryKeys().legendEntryKeyIndex,
         usesLocalEmphasis: deps.interaction() === undefined,
         localEmphasisCount: localEmphasisKeys.length,
       });
@@ -467,7 +467,7 @@ export function createLegendFocusState(deps: LegendFocusStateDeps): LegendFocusS
       const next = reconcileLegendPreview({
         preview: { identity: preview.action.identity, keys: preview.keys },
         entries: deps.entries(),
-        keyIndex: deps.semanticKeys().legendEntryKeyIndex,
+        keyIndex: deps.entryKeys().legendEntryKeyIndex,
       });
       if (next === null) {
         previewLegend(null);

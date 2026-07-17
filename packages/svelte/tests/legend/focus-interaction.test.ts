@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vitest";
 
-import CoincidentLegendFocusPlot from "./fixtures/CoincidentLegendFocusPlot.svelte";
-import LinkedLegendFocusPlot from "./fixtures/LinkedLegendFocusPlot.svelte";
-import LegendClearGeometryPlot from "./fixtures/LegendClearGeometryPlot.svelte";
-import LocalLegendFocusPlot from "./fixtures/LocalLegendFocusPlot.svelte";
-import { expectAccessible } from "./helpers/accessibility.js";
-import { render } from "./helpers/render.js";
-import { GGPlot } from "../src/lib/index.js";
-import type { LegendFocusEvent } from "../src/lib/index.js";
-import { until } from "./helpers/until.js";
+import CoincidentLegendFocusPlot from "../fixtures/CoincidentLegendFocusPlot.svelte";
+import LinkedLegendFocusPlot from "../fixtures/LinkedLegendFocusPlot.svelte";
+import LegendClearGeometryPlot from "../fixtures/LegendClearGeometryPlot.svelte";
+import LocalLegendFocusPlot from "../fixtures/LocalLegendFocusPlot.svelte";
+import { expectAccessible } from "../helpers/accessibility.js";
+import { render } from "../helpers/render.js";
+import { GGPlot } from "../../src/lib/index.js";
+import type { LegendFocusEvent } from "../../src/lib/index.js";
+import { until } from "../helpers/until.js";
 
 function state(container: HTMLElement): DOMStringMap {
   return container.querySelector<HTMLElement>("[data-legend-state]")!.dataset;

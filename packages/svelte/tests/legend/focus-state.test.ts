@@ -8,23 +8,26 @@ import { describe, expect, it } from "vitest";
 import type { RenderModel } from "@ggsvelte/core";
 import { aes, gg, type PortableSpec } from "@ggsvelte/spec";
 
-import GGPlot from "../src/lib/GGPlot.svelte";
-import type { LegendFocusEvent, PlotInteractionScope } from "../src/lib/interaction/interaction.js";
-import { createPlotInteraction } from "../src/lib/interaction/controller.svelte.js";
-import { createLegendFocusState } from "../src/lib/legend-focus-state.svelte.js";
-import { createPlotRuntime } from "../src/lib/runtime/runtime.svelte.js";
+import GGPlot from "../../src/lib/GGPlot.svelte";
+import type {
+  LegendFocusEvent,
+  PlotInteractionScope,
+} from "../../src/lib/interaction/interaction.js";
+import { createPlotInteraction } from "../../src/lib/interaction/controller.svelte.js";
+import { createLegendEntryKeyIndex } from "../../src/lib/legend/entry-key-index.svelte.js";
+import { createLegendFocusState } from "../../src/lib/legend/focus-state.svelte.js";
+import type { InteractiveLegendEntry, LegendEntryIdentity } from "../../src/lib/legend/focus.js";
+import { createPlotRuntime } from "../../src/lib/runtime/runtime.svelte.js";
 import {
   createSourceIdentityTracker,
   createSemanticKeyService,
-  type SemanticKeyService,
-} from "../src/lib/runtime/semantic-keys.svelte.js";
-import type { InteractiveLegendEntry, LegendEntryIdentity } from "../src/lib/plot-legend-focus.js";
-import { withEffectRoot, withFlushedEffectRoot } from "./helpers/effect-root.svelte.js";
-import { modelFor } from "./helpers/model.js";
-import { reactiveBox } from "./helpers/reactive-box.svelte.js";
-import { createReactiveRuntimeDeps } from "./helpers/runtime-deps.svelte.js";
-import { render } from "./helpers/render.js";
-import { until } from "./helpers/until.js";
+} from "../../src/lib/runtime/semantic-keys.svelte.js";
+import { withEffectRoot, withFlushedEffectRoot } from "../helpers/effect-root.svelte.js";
+import { modelFor } from "../helpers/model.js";
+import { reactiveBox } from "../helpers/reactive-box.svelte.js";
+import { createReactiveRuntimeDeps } from "../helpers/runtime-deps.svelte.js";
+import { render } from "../helpers/render.js";
+import { until } from "../helpers/until.js";
 
 const focusRows = [
   { id: "a", x: 1, y: 1, group: "north" },
@@ -97,6 +100,10 @@ function mountFocusController(
       sourceIdentity: (v) => tracker.sourceIdentity(v),
       deliverDiagnostic: () => {},
     });
+    const entryKeys = createLegendEntryKeyIndex({
+      model,
+      keyAt: (i) => semanticKeys.keyAt(i),
+    });
     let entriesRef: () => readonly InteractiveLegendEntry[] = () => [];
     let pressedRef: () => LegendEntryIdentity | null = () => null;
     const controller = createLegendFocusState({
@@ -105,7 +112,7 @@ function mountFocusController(
       legendFocusEnabled: options.legendFocusEnabled ?? (() => true),
       legendFocusPreviewEnabled: () => true,
       root: () => options.root ?? null,
-      semanticKeys: () => semanticKeys,
+      entryKeys: () => entryKeys,
       entries: () => entriesRef(),
       pressed: () => pressedRef(),
       onlegendfocus: options.onlegendfocus ?? noCallback,
@@ -124,7 +131,7 @@ function mountFocusController(
 
 describe("createLegendFocusState construction", () => {
   it("does not invoke armed later-declared getters during construction (before first flush)", () => {
-    let semanticCalls = 0;
+    let entryKeysCalls = 0;
     let entriesCalls = 0;
     let pressedCalls = 0;
 
@@ -135,8 +142,8 @@ describe("createLegendFocusState construction", () => {
         legendFocusEnabled: () => true,
         legendFocusPreviewEnabled: () => true,
         root: () => null,
-        semanticKeys: () => {
-          semanticCalls++;
+        entryKeys: () => {
+          entryKeysCalls++;
           return {
             legendEntryKeyIndex: new Map(),
             keysForLegend: () => [],
@@ -156,7 +163,7 @@ describe("createLegendFocusState construction", () => {
       }),
     );
 
-    expect(semanticCalls).toBe(0);
+    expect(entryKeysCalls).toBe(0);
     expect(entriesCalls).toBe(0);
     expect(pressedCalls).toBe(0);
     // Deriveds are lazy on client and server at the 5.33.1 floor, so this
@@ -167,7 +174,7 @@ describe("createLegendFocusState construction", () => {
     expect(state.previewIdentity).toBeNull();
     expect(state.rovingIndex).toBe(0);
     flushSync();
-    expect(semanticCalls).toBe(0);
+    expect(entryKeysCalls).toBe(0);
     expect(entriesCalls).toBe(0);
     expect(pressedCalls).toBe(0);
     destroy();
@@ -629,14 +636,14 @@ describe("runtime + legend-focus real cycle", () => {
       // construction).
       let entriesRef: () => readonly InteractiveLegendEntry[] = () => [];
       let pressedRef: () => LegendEntryIdentity | null = () => null;
-      let semanticKeysRef: SemanticKeyService | null = null;
+      let entryKeysRef: ReturnType<typeof createLegendEntryKeyIndex> | null = null;
       const focus = createLegendFocusState({
         interaction: noController,
         resolvedInteractionScope: () => defaultScope,
         legendFocusEnabled: () => true,
         legendFocusPreviewEnabled: () => true,
         root: () => null,
-        semanticKeys: () => semanticKeysRef!,
+        entryKeys: () => entryKeysRef!,
         entries: () => entriesRef(),
         pressed: () => pressedRef(),
         onlegendfocus: () => (event) => {
@@ -658,7 +665,10 @@ describe("runtime + legend-focus real cycle", () => {
         sourceIdentity: (v) => tracker.sourceIdentity(v),
         deliverDiagnostic: () => {},
       });
-      semanticKeysRef = semanticKeys;
+      entryKeysRef = createLegendEntryKeyIndex({
+        model: () => runtime.model,
+        keyAt: (i) => semanticKeys.keyAt(i),
+      });
       entriesRef = () => focus.computeInteractiveEntries(runtime.model);
       pressedRef = () => focus.computeLegendPressed(runtime.model);
       // Host registration order: model -> catalog(S2) -> reconcile(S3) -> late.

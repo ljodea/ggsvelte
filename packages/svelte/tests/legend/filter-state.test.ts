@@ -7,16 +7,16 @@ import { describe, expect, it } from "vitest";
 
 import { aes, gg, type PortableSpec } from "@ggsvelte/spec";
 
-import GGPlot from "../src/lib/GGPlot.svelte";
-import type { LegendFilterEvent } from "../src/lib/legend-filter.js";
-import { createLegendFilterState } from "../src/lib/legend-filter-state.svelte.js";
-import { createPlotRuntime, type PlotRuntime } from "../src/lib/runtime/runtime.svelte.js";
-import { withEffectRoot, withFlushedEffectRoot } from "./helpers/effect-root.svelte.js";
-import { modelFor } from "./helpers/model.js";
-import { reactiveBox } from "./helpers/reactive-box.svelte.js";
-import { createReactiveRuntimeDeps } from "./helpers/runtime-deps.svelte.js";
-import { render } from "./helpers/render.js";
-import { until } from "./helpers/until.js";
+import GGPlot from "../../src/lib/GGPlot.svelte";
+import type { LegendFilterEvent } from "../../src/lib/legend/filter.js";
+import { createLegendFilterState } from "../../src/lib/legend/filter-state.svelte.js";
+import { createPlotRuntime, type PlotRuntime } from "../../src/lib/runtime/runtime.svelte.js";
+import { withEffectRoot, withFlushedEffectRoot } from "../helpers/effect-root.svelte.js";
+import { modelFor } from "../helpers/model.js";
+import { reactiveBox } from "../helpers/reactive-box.svelte.js";
+import { createReactiveRuntimeDeps } from "../helpers/runtime-deps.svelte.js";
+import { render } from "../helpers/render.js";
+import { until } from "../helpers/until.js";
 
 const filterRows = [
   { x: 1, y: 1, group: "north" },
@@ -374,7 +374,7 @@ describe("runtime + legend-filter real cycle", () => {
   });
 });
 
-describe("PlotLegendFilters component layout and pointer source", () => {
+describe("LegendFilters component layout and pointer source", () => {
   it("combined legend-focus clear + filters reserves both rows", async () => {
     const view = render(GGPlot, {
       data: [

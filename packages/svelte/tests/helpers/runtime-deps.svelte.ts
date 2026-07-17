@@ -7,7 +7,7 @@ import type { RenderModel } from "@ggsvelte/core";
 import type { PortableSpec } from "@ggsvelte/spec";
 
 import type { ReadonlyZoomDomains } from "../../src/lib/interaction/interaction.js";
-import type { LegendFilterClause } from "../../src/lib/legend-filter.js";
+import type { LegendFilterClause } from "../../src/lib/legend/filter.js";
 import type { PlotRuntimeDeps } from "../../src/lib/runtime/runtime.svelte.js";
 
 export type ReactiveRuntimeDeps = PlotRuntimeDeps & {

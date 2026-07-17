@@ -1,23 +1,17 @@
 /**
  * Semantic-key resolution for GGPlot: pure helpers (source identity, key
- * resolution, diagnostics) plus the reactive service that owns priorKeys,
- * legend entry → key index, and diagnostics delivery.
+ * resolution, diagnostics) plus the reactive service that owns priorKeys and
+ * diagnostics delivery.
  *
  * Pure refactor host: fold-in of plot-semantic-keys + createSemanticKeyService
- * from plot-shared-services; no behavior change. legendEntryKeyIndex stays
- * here for S13 (S16 re-homes); ACCESS CONTRACT is a reactive GETTER backed by
- * `$derived.by` — not a plain property snapshot of the derived Map.
+ * from plot-shared-services. Entry→key index for discrete scale groups lives
+ * under the feature module that owns that surface (S16 ownership).
  */
 import type { CandidateFacts, CellValue, RenderModel } from "@ggsvelte/core";
 import type { PortableSpec } from "@ggsvelte/spec";
 
 import type { InteractionDiagnostic } from "../interaction/interaction.js";
 import { INTERACTION_DIAGNOSTIC_CATALOG } from "../interaction/interaction.js";
-import {
-  buildLegendEntryKeyIndexForPlot,
-  keysForLegendEntry,
-  type LegendEntryAction,
-} from "../plot-legend-focus.js";
 import { rowIndexesForCandidate, uniqueKeysFromRowIndexes } from "../selection/selection.js";
 
 // ---------------------------------------------------------------------------
@@ -266,8 +260,6 @@ export type SemanticKeyServiceDeps = {
 export type SemanticKeyService = {
   semanticKey(row: Record<string, CellValue> | null, index: number | null): PropertyKey | null;
   candidateSemanticKeys(candidate: CandidateFacts): PropertyKey[];
-  readonly legendEntryKeyIndex: ReadonlyMap<string, readonly PropertyKey[]>;
-  keysForLegend(action: LegendEntryAction): readonly PropertyKey[];
   /** Direct map lookup (inspection coordinator / mask paths). */
   keyAt(index: number): PropertyKey | null;
   /** Register diagnostics delivery at the host's original effect position. */
@@ -275,10 +267,10 @@ export type SemanticKeyService = {
 };
 
 /**
- * Owns priorKeys, semantic key resolution, diagnostics delivery, and the
- * legend entry → key index. Construction may happen as soon as the runtime
- * model exists; call `registerEffects` at the original GGPlot registration
- * site so the diagnostics `$effect` keeps its relative order.
+ * Owns priorKeys, semantic key resolution, and diagnostics delivery.
+ * Construction may happen as soon as the runtime model exists; call
+ * `registerEffects` at the original GGPlot registration site so the
+ * diagnostics `$effect` keeps its relative order.
  */
 export function createSemanticKeyService(deps: SemanticKeyServiceDeps): SemanticKeyService {
   // Owned for the component lifetime; resolveSemanticKeys mutates in place.
@@ -324,35 +316,9 @@ export function createSemanticKeyService(deps: SemanticKeyServiceDeps): Semantic
     return uniqueKeysFromRowIndexes(rows, (rowIndex) => semanticKey(model.row(rowIndex), rowIndex));
   }
 
-  const legendEntryKeyIndex: ReadonlyMap<string, readonly PropertyKey[]> = $derived.by(() => {
-    const model = deps.model();
-    return buildLegendEntryKeyIndexForPlot({
-      model:
-        model === null
-          ? null
-          : {
-              scene: model.scene,
-              candidates: model.candidates,
-              layerFields: model.layerFields,
-              layerScaledConstants: model.layerScaledConstants,
-              lineage: model.lineage,
-              row: (rowIndex) => model.row(rowIndex),
-            },
-      semanticKey: (rowIndex) => semanticKeys.keys.get(rowIndex),
-    });
-  });
-
-  function keysForLegend(action: LegendEntryAction): readonly PropertyKey[] {
-    return keysForLegendEntry(legendEntryKeyIndex, action.identity);
-  }
-
   return {
     semanticKey,
     candidateSemanticKeys,
-    get legendEntryKeyIndex() {
-      return legendEntryKeyIndex;
-    },
-    keysForLegend,
     keyAt(index: number): PropertyKey | null {
       return semanticKeys.keys.get(index) ?? null;
     },

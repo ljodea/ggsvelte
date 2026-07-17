@@ -48,7 +48,7 @@
   } from "./interaction/interaction.js";
   import type { PlotInteractionController } from "./interaction/controller.svelte.js";
   import { provideRegistry } from "./geoms/registry.svelte.js";
-  import { shouldRenderInteractionLiveRegion } from "./plot-legend-surface.js";
+  import { shouldRenderInteractionLiveRegion } from "./legend/surface.js";
   import { resolveInteractionLiveText } from "./assembly/labels.js";
   import {
     isContainerWidthProp,
@@ -63,8 +63,8 @@
   import type { GGPlotProps } from "./plot-props.js";
   import { createPlotOrchestrator } from "./plot-orchestrator.svelte.js";
   import CaptureSurface from "./surface/CaptureSurface.svelte";
-  import PlotLegendFilters from "./PlotLegendFilters.svelte";
-  import PlotLegendTargets from "./PlotLegendTargets.svelte";
+  import LegendFilters from "./legend/LegendFilters.svelte";
+  import LegendTargets from "./legend/LegendTargets.svelte";
   import MarkStrata from "./scene/MarkStrata.svelte";
   import SceneOverlays from "./scene/SceneOverlays.svelte";
   import StatusChrome from "./chrome/StatusChrome.svelte";
@@ -267,7 +267,7 @@
       onA11yToggle={() => (a11yTableOpen = !a11yTableOpen)}
       onPainted={runtime.notifyPainted}
     />
-    <PlotLegendTargets
+    <LegendTargets
       entries={engine.interactiveLegendEntries}
       previewIdentity={legendFocusState.previewIdentity}
       pressedIdentity={engine.effectiveLegendPressed}
@@ -292,7 +292,7 @@
       onClearPointerCancel={() => legendFocusState.setClearPointerType(null)}
       onClearClick={legendFocusState.clearLegendFromControl}
     />
-    <PlotLegendFilters
+    <LegendFilters
       controller={legendFilterState}
       entries={engine.filterableLegendEntries}
       belowClearFocus={engine.legendClearActive}

@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 
-import type { InteractiveLegendEntry } from "../src/lib/plot-legend-focus.js";
-import PlotLegendTargets from "../src/lib/PlotLegendTargets.svelte";
-import { render } from "./helpers/render.js";
+import type { InteractiveLegendEntry } from "../../src/lib/legend/focus.js";
+import LegendTargets from "../../src/lib/legend/LegendTargets.svelte";
+import { render } from "../helpers/render.js";
 
 const webEntry = { value: "web", label: "Web", color: "#123456", y: 18 };
 const storeEntry = { value: "store", label: "Store", color: "#654321", y: 42 };
@@ -47,9 +47,9 @@ const noopHandlers = {
   onClearClick: () => {},
 };
 
-describe("PlotLegendTargets", () => {
+describe("LegendTargets", () => {
   it("renders one hit target per entry and hides clear when clearLegendX is null", () => {
-    const { container } = render(PlotLegendTargets, {
+    const { container } = render(LegendTargets, {
       entries,
       sceneWidth: 400,
       sceneHeight: 300,
@@ -61,7 +61,7 @@ describe("PlotLegendTargets", () => {
   });
 
   it("shows clear control at clamped left and sceneHeight+4 top", () => {
-    const { container } = render(PlotLegendTargets, {
+    const { container } = render(LegendTargets, {
       entries,
       sceneWidth: 400,
       sceneHeight: 300,
@@ -76,7 +76,7 @@ describe("PlotLegendTargets", () => {
   });
 
   it("clamps clear left into [4, sceneWidth-52]", () => {
-    const low = render(PlotLegendTargets, {
+    const low = render(LegendTargets, {
       entries,
       sceneWidth: 400,
       sceneHeight: 200,
@@ -86,7 +86,7 @@ describe("PlotLegendTargets", () => {
     const lowClear = low.container.querySelector<HTMLButtonElement>(".gg-legend-clear");
     expect(lowClear?.style.left).toBe("4px");
 
-    const high = render(PlotLegendTargets, {
+    const high = render(LegendTargets, {
       entries,
       sceneWidth: 400,
       sceneHeight: 200,
@@ -98,7 +98,7 @@ describe("PlotLegendTargets", () => {
   });
 
   it("applies min target width of 24 when legend width is smaller", () => {
-    const { container } = render(PlotLegendTargets, {
+    const { container } = render(LegendTargets, {
       entries,
       sceneWidth: 400,
       sceneHeight: 300,
@@ -113,7 +113,7 @@ describe("PlotLegendTargets", () => {
 
   it("wires preview enter for non-touch pointers", () => {
     const onPreviewIndex = vi.fn();
-    const { container } = render(PlotLegendTargets, {
+    const { container } = render(LegendTargets, {
       entries,
       sceneWidth: 400,
       sceneHeight: 300,

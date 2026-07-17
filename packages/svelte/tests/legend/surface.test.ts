@@ -14,7 +14,7 @@ import {
   type LegendClickInput,
   type LegendKeyInput,
   type LegendPointerUpInput,
-} from "../src/lib/plot-legend-surface.js";
+} from "../../src/lib/legend/surface.js";
 
 const key = (overrides: Partial<LegendKeyInput> = {}): LegendKeyInput => ({
   key: "a",
