@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784264684081,
+  "lastUpdate": 1784265267688,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -18647,6 +18647,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 159.6268,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "0c1104abcb4c2b894453d7828c8b86501347ef1e",
+          "message": "Merge pull request #170 from ljodea/ggr/s7-surface\n\nrefactor(svelte): S7 — extract surface controller",
+          "timestamp": "2026-07-17T00:13:51-05:00",
+          "tree_id": "be0d4475ace90594cf25bc8755a7883dbd602019",
+          "url": "https://github.com/ljodea/ggsvelte/commit/0c1104abcb4c2b894453d7828c8b86501347ef1e"
+        },
+        "date": 1784265266581,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 1.9242,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.508,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 8.3461,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 10.4958,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 70.454,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 103.2522,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 0.8594,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.0893,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 74.9596,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 88.6941,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 9.9786,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 10.0711,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 93.3768,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.632,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 20.9594,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 5.715,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 25.3333,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 500.61,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 131.8282,
             "unit": "ms"
           }
         ]
