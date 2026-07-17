@@ -181,7 +181,12 @@ describe("buildPipelineCandidates via runPipeline", () => {
     ]);
     expect(new Set(linePoints.map((c) => c.seriesId)).size).toBe(2);
     // Within each series, vertices are ordered by x (sorted group rows).
-    const bySeries = Map.groupBy(linePoints, (c) => c.seriesId);
+    const bySeries = new Map<number, typeof linePoints>();
+    for (const c of linePoints) {
+      const series = bySeries.get(c.seriesId);
+      if (series === undefined) bySeries.set(c.seriesId, [c]);
+      else series.push(c);
+    }
     for (const seriesPoints of bySeries.values()) {
       const xs = seriesPoints.map((c) => Number(c.xValue));
       expect(xs).toEqual([...xs].toSorted((a, b) => a - b));
