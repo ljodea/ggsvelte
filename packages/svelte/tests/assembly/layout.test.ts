@@ -11,7 +11,7 @@ import {
   resolveCaptureAriaControls,
   resolvePlotSize,
   tooltipViewportSize,
-} from "../src/lib/plot-layout.js";
+} from "../../src/lib/assembly/layout.js";
 
 describe("isContainerWidthProp", () => {
   it("is true for omitted and container width props", () => {

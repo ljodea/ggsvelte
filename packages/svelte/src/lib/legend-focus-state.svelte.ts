@@ -16,7 +16,7 @@ import type {
   PlotInteractionEvent,
   PlotInteractionScope,
 } from "./interaction.js";
-import { legendFocusAnnouncement } from "./plot-labels.js";
+import { legendFocusAnnouncement } from "./assembly/labels.js";
 import {
   buildInteractiveLegendEntries,
   findLegendPressedIdentity,

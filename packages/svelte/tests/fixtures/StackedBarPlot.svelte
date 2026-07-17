@@ -6,8 +6,8 @@
     RenderModel,
   } from "../../src/lib/index.js";
   import GGPlot from "../../src/lib/GGPlot.svelte";
-  import GeomCol from "../../src/lib/GeomCol.svelte";
-  import GeomRule from "../../src/lib/GeomRule.svelte";
+  import GeomCol from "../../src/lib/geoms/GeomCol.svelte";
+  import GeomRule from "../../src/lib/geoms/GeomRule.svelte";
 
   const {
     data,

@@ -47,9 +47,9 @@
     ZoomDomains,
   } from "./interaction.js";
   import type { PlotInteractionController } from "./interaction-controller.svelte.js";
-  import { provideRegistry } from "./registry.svelte.js";
+  import { provideRegistry } from "./geoms/registry.svelte.js";
   import { shouldRenderInteractionLiveRegion } from "./plot-legend-surface.js";
-  import { resolveInteractionLiveText } from "./plot-labels.js";
+  import { resolveInteractionLiveText } from "./assembly/labels.js";
   import {
     isContainerWidthProp,
     isNarrowToolsWidth,
@@ -58,7 +58,7 @@
     resolveCaptureAriaControls,
     resolveClearLegendX,
     tooltipViewportSize,
-  } from "./plot-layout.js";
+  } from "./assembly/layout.js";
   import BoundsEditor from "./BoundsEditor.svelte";
   import type { GGPlotProps } from "./plot-props.js";
   import { createPlotOrchestrator } from "./plot-orchestrator.svelte.js";
@@ -67,9 +67,9 @@
   import PlotLegendTargets from "./PlotLegendTargets.svelte";
   import PlotMarkStrata from "./PlotMarkStrata.svelte";
   import PlotSceneOverlays from "./PlotSceneOverlays.svelte";
-  import PlotStatusChrome from "./PlotStatusChrome.svelte";
+  import StatusChrome from "./chrome/StatusChrome.svelte";
   import Tooltip from "./Tooltip.svelte";
-  import ToolRail from "./ToolRail.svelte";
+  import ToolRail from "./chrome/ToolRail.svelte";
 
   const {
     spec,
@@ -373,7 +373,7 @@
     <!-- Status chrome after capture/tooltip; ids stay plot-scoped for
          aria-describedby. Parent reduced-motion rule does not match child
          nodes (chrome has no transitions — intentional no-op). -->
-    <PlotStatusChrome
+    <StatusChrome
       {plotId}
       showInstructions={engine.surfaceInteractive}
       description={surfaceState.surfaceDescription}

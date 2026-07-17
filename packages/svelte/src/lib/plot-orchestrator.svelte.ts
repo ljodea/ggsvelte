@@ -59,7 +59,7 @@ import {
   isFacetedPlotIntent,
   resolveInteractionScope,
   toLayerInput,
-} from "./plot-assemble.js";
+} from "./assembly/assemble.js";
 import { createSourceIdentityTracker, dataIdentityEpochToken } from "./plot-semantic-keys.js";
 import {
   createPlotAnnouncer,
@@ -80,9 +80,9 @@ import { createIntervalState, type IntervalState } from "./interval-state.svelte
 import { createInspectionState, type InspectionState } from "./inspection-state.svelte.js";
 import { createSurfaceState, type SurfaceState } from "./surface-state.svelte.js";
 import { createSelectionState, type SelectionState } from "./selection-state.svelte.js";
-import { createPlotChromeState, type PlotChromeState } from "./plot-chrome-state.svelte.js";
+import { createPlotChromeState, type PlotChromeState } from "./chrome/chrome-state.svelte.js";
 import type { LegendFilterEvent, LegendFilterInput } from "./legend-filter.js";
-import type { LayerRegistry } from "./registry.svelte.js";
+import type { LayerRegistry } from "./geoms/registry.svelte.js";
 import { normalizeInteractionConfig } from "./interaction.js";
 
 // ---------------------------------------------------------------------------

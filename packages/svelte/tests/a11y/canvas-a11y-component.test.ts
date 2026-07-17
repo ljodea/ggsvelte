@@ -2,10 +2,10 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { GeometryBatch, RenderModel } from "@ggsvelte/core";
 
-import { A11Y_TABLE_CAP, a11yRows } from "../src/lib/canvas-a11y.js";
-import PlotCanvasA11y from "../src/lib/PlotCanvasA11y.svelte";
-import { render } from "./helpers/render.js";
-import { until } from "./helpers/until.js";
+import { A11Y_TABLE_CAP, a11yRows } from "../../src/lib/a11y/canvas-a11y.js";
+import CanvasA11y from "../../src/lib/a11y/CanvasA11y.svelte";
+import { render } from "../helpers/render.js";
+import { until } from "../helpers/until.js";
 
 function batch(partial: { layerIndex: number; rowIndex: number[] }): GeometryBatch {
   return {
@@ -36,9 +36,9 @@ const sampleModel = model({
 });
 const sampleBatches = [batch({ layerIndex: 0, rowIndex: [0, 1, 2, 3] })];
 
-describe("PlotCanvasA11y", () => {
+describe("CanvasA11y", () => {
   it("renders role=img summary with scene label and canvas mark total", () => {
-    const { container } = render(PlotCanvasA11y, {
+    const { container } = render(CanvasA11y, {
       model: sampleModel,
       batches: sampleBatches,
       sceneLabelText: "Scatter plot",
@@ -55,7 +55,7 @@ describe("PlotCanvasA11y", () => {
 
   it("starts closed; toggle reports expanded and label text from open prop", async () => {
     const onToggle = vi.fn();
-    const closed = render(PlotCanvasA11y, {
+    const closed = render(CanvasA11y, {
       model: sampleModel,
       batches: sampleBatches,
       sceneLabelText: "Plot",
@@ -70,7 +70,7 @@ describe("PlotCanvasA11y", () => {
     toggle?.click();
     expect(onToggle).toHaveBeenCalledTimes(1);
 
-    const opened = render(PlotCanvasA11y, {
+    const opened = render(CanvasA11y, {
       model: sampleModel,
       batches: sampleBatches,
       sceneLabelText: "Plot",
@@ -84,7 +84,7 @@ describe("PlotCanvasA11y", () => {
   });
 
   it("renders field headers and body rows from a11yRows", async () => {
-    const { container } = render(PlotCanvasA11y, {
+    const { container } = render(CanvasA11y, {
       model: sampleModel,
       batches: sampleBatches,
       sceneLabelText: "Plot",
@@ -113,7 +113,7 @@ describe("PlotCanvasA11y", () => {
       rows,
     });
     const largeBatches = [batch({ layerIndex: 0, rowIndex: indices })];
-    const { container } = render(PlotCanvasA11y, {
+    const { container } = render(CanvasA11y, {
       model: largeModel,
       batches: largeBatches,
       sceneLabelText: "Large",

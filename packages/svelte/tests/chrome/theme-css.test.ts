@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { themeTokensToCss } from "../src/lib/plot-theme-css.js";
+import { themeTokensToCss } from "../../src/lib/chrome/theme-css.js";
 
 describe("themeTokensToCss", () => {
   it("emits custom properties in the stable role order", () => {

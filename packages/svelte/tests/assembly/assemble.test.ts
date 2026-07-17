@@ -6,7 +6,7 @@ import {
   mappedChannelField,
   resolveInteractionScope,
   toLayerInput,
-} from "../src/lib/plot-assemble.js";
+} from "../../src/lib/assembly/assemble.js";
 
 describe("toLayerInput", () => {
   it("copies geom and omits undefined optional fields", () => {

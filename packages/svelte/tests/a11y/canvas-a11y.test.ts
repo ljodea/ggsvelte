@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { GeometryBatch, RenderModel } from "@ggsvelte/core";
 
-import { A11Y_TABLE_CAP, a11yRows } from "../src/lib/canvas-a11y.js";
+import { A11Y_TABLE_CAP, a11yRows } from "../../src/lib/a11y/canvas-a11y.js";
 
 function batch(partial: { layerIndex: number; rowIndex: number[] }): GeometryBatch {
   return {

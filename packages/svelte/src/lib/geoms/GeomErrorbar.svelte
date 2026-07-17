@@ -8,7 +8,7 @@
    */
   import type { AesInput, ErrorbarParams } from "@ggsvelte/spec";
 
-  import { createGeomLayer } from "./geom-factory.svelte.js";
+  import { createGeomLayer } from "./factory.svelte.js";
 
   interface Props extends ErrorbarParams {
     /** Layer-level aes (bare-string shorthand allowed); merges over plot aes. */

@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import PlotStatusChrome from "../src/lib/PlotStatusChrome.svelte";
-import { render } from "./helpers/render.js";
+import StatusChrome from "../../src/lib/chrome/StatusChrome.svelte";
+import { render } from "../helpers/render.js";
 
-describe("PlotStatusChrome", () => {
+describe("StatusChrome", () => {
   it("renders plot-scoped instruction ids only when showInstructions", () => {
-    const off = render(PlotStatusChrome, {
+    const off = render(StatusChrome, {
       plotId: "plot-a",
       showInstructions: false,
       activeDatumLabel: "x 1",
@@ -13,7 +13,7 @@ describe("PlotStatusChrome", () => {
     expect(off.container.querySelector("#plot-a-description")).toBeNull();
     expect(off.container.querySelector("#plot-a-active")).toBeNull();
 
-    const on = render(PlotStatusChrome, {
+    const on = render(StatusChrome, {
       plotId: "plot-a",
       showInstructions: true,
       activeDatumLabel: "x 1, y 2",
@@ -25,12 +25,12 @@ describe("PlotStatusChrome", () => {
   });
 
   it("keeps instruction ids unique across two plot instances", () => {
-    const first = render(PlotStatusChrome, {
+    const first = render(StatusChrome, {
       plotId: "p1",
       showInstructions: true,
       activeDatumLabel: "a",
     });
-    const second = render(PlotStatusChrome, {
+    const second = render(StatusChrome, {
       plotId: "p2",
       showInstructions: true,
       activeDatumLabel: "b",
@@ -44,7 +44,7 @@ describe("PlotStatusChrome", () => {
   });
 
   it("renders area instruction, live region, empty, and capability gates", () => {
-    const empty = render(PlotStatusChrome, {
+    const empty = render(StatusChrome, {
       plotId: "plot-b",
       showAreaInstruction: false,
       showLiveRegion: false,
@@ -56,7 +56,7 @@ describe("PlotStatusChrome", () => {
     expect(empty.container.querySelector(".gg-empty-state")).toBeNull();
     expect(empty.container.querySelector(".gg-capability-status")).toBeNull();
 
-    const full = render(PlotStatusChrome, {
+    const full = render(StatusChrome, {
       plotId: "plot-b",
       showAreaInstruction: true,
       showLiveRegion: true,
@@ -78,7 +78,7 @@ describe("PlotStatusChrome", () => {
   });
 
   it("can render live region without surface instructions (legend-only focus)", () => {
-    const { container } = render(PlotStatusChrome, {
+    const { container } = render(StatusChrome, {
       plotId: "legend-only",
       showInstructions: false,
       showLiveRegion: true,
@@ -89,7 +89,7 @@ describe("PlotStatusChrome", () => {
   });
 
   it("includes component-scoped reduced-motion resets for chrome classes", () => {
-    render(PlotStatusChrome, {
+    render(StatusChrome, {
       plotId: "rm",
       showAreaInstruction: true,
       emptyPlot: true,
@@ -111,7 +111,7 @@ describe("PlotStatusChrome", () => {
   });
 
   it("keeps muted chrome color free of the numeric theme alpha token (#161)", () => {
-    render(PlotStatusChrome, {
+    render(StatusChrome, {
       plotId: "muted-color",
       emptyPlot: true,
       capabilityStatus: "status",
