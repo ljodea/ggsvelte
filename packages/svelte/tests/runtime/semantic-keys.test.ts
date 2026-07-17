@@ -20,6 +20,7 @@ import {
   type SemanticKeyModelView,
 } from "../../src/lib/runtime/semantic-keys.svelte.js";
 import { withEffectRoot, withFlushedEffectRoot } from "../helpers/effect-root.svelte.js";
+import { buildPointModel } from "../helpers/point-model.js";
 import { reactiveBox } from "../helpers/reactive-box.svelte.js";
 
 const rows = [
@@ -59,13 +60,8 @@ function modelView(options: {
 // ---------------------------------------------------------------------------
 
 /** One point-geom model builder for the service tests (aes/size vary per case). */
-const defaultAes: Parameters<typeof aes>[0] = { x: "x", y: "y", color: "id" };
-const defaultSize = { width: 400, height: 300 };
-const buildPointModel = (
-  data: { id: string; x: number; y: number }[],
-  aesSpec: Parameters<typeof aes>[0] = defaultAes,
-  size: { width: number; height: number } = defaultSize,
-) => runPipeline(gg(data, aes(aesSpec)).geomPoint().spec(), size);
+// Shared with tests/legend/entry-key-index.test.ts — one fixture shape.
+// (imported below)
 
 describe("dataIdentityEpochToken", () => {
   it("returns no-data when assembled is null", () => {
@@ -447,6 +443,49 @@ describe("createSemanticKeyService", () => {
     expect(service.keyAt(1)).toBe("b");
     expect(diagnostics).toContain("INTERACTION_UNSTABLE_KEY");
     beforeMutation.dispose();
+    model.value.dispose();
+    destroy();
+  });
+
+  it("keyAt re-resolves against a wholly new data token", () => {
+    // Restored from the pre-S16 access-contract test: a FULL dataset
+    // replacement (new data token) must re-resolve keys — a service that
+    // pins keys from the first token would keep answering with stale keys.
+    const dataA = [
+      { id: "a", x: 1, y: 10 },
+      { id: "b", x: 2, y: 20 },
+    ];
+    const dataB = [
+      { id: "c", x: 3, y: 30 },
+      { id: "d", x: 4, y: 40 },
+    ];
+    const dataBox = reactiveBox(dataA);
+    const model = reactiveBox(buildPointModel(dataA));
+    const tracker = createSourceIdentityTracker();
+
+    const { value: service, destroy } = withFlushedEffectRoot(() => {
+      const created = createSemanticKeyService({
+        model: () => model.value,
+        assembled: () => null,
+        datumKey: () => "id",
+        data: () => dataBox.value,
+        spec: () => null,
+        sourceIdentity: (value) => tracker.sourceIdentity(value),
+        deliverDiagnostic: () => {},
+      });
+      created.registerEffects();
+      return created;
+    });
+
+    expect([service.keyAt(0), service.keyAt(1)]).toEqual(["a", "b"]);
+
+    const previous = model.value;
+    dataBox.set(dataB);
+    model.set(buildPointModel(dataB));
+    flushSync();
+    expect([service.keyAt(0), service.keyAt(1)]).toEqual(["c", "d"]);
+
+    previous.dispose();
     model.value.dispose();
     destroy();
   });

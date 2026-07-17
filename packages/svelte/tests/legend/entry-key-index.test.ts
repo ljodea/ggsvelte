@@ -1,30 +1,18 @@
 /**
  * Spec for the legend entry-key-index service (S16).
  *
- * Red-first in commit 2 (module missing → vitest/check fail); GREEN once
- * legend/entry-key-index.svelte.ts lands. Pins the S13 access contract:
- * reactive legendEntryKeyIndex getter + keysForLegend re-resolve on model change.
+ * Pins the S13 access contract: reactive legendEntryKeyIndex getter +
+ * keysForLegend re-resolve when either dep channel (model, keyAt) changes.
  */
 import { flushSync } from "svelte";
 import { describe, expect, it } from "vitest";
 
-import { runPipeline, type RenderModel } from "@ggsvelte/core";
-import { aes, gg } from "@ggsvelte/spec";
+import { type RenderModel } from "@ggsvelte/core";
 
-// Intentionally missing until commit 3 — RED module resolution failure.
 import { createLegendEntryKeyIndex } from "../../src/lib/legend/entry-key-index.svelte.js";
 import { withFlushedEffectRoot } from "../helpers/effect-root.svelte.js";
+import { buildPointModel } from "../helpers/point-model.js";
 import { reactiveBox } from "../helpers/reactive-box.svelte.js";
-
-const defaultAes: Parameters<typeof aes>[0] = { x: "x", y: "y", color: "id" };
-const defaultSize = { width: 400, height: 300 };
-
-/** Point-geom model with a discrete color legend (mirrors semantic-keys suite). */
-const buildPointModel = (
-  data: { id: string; x: number; y: number }[],
-  aesSpec: Parameters<typeof aes>[0] = defaultAes,
-  size: { width: number; height: number } = defaultSize,
-): RenderModel => runPipeline(gg(data, aes(aesSpec)).geomPoint().spec(), size);
 
 describe("createLegendEntryKeyIndex", () => {
   it("returns the index Map for a discrete legend, keysForLegend resolves entries, both re-resolve on model change, and null model is empty", () => {
@@ -39,14 +27,16 @@ describe("createLegendEntryKeyIndex", () => {
       { id: "c", x: 3, y: 30 },
       { id: "d", x: 4, y: 40 },
     ];
-    // Stub per-row keys: mirror semanticKeys.keys.get(i) / keyAt(i).
-    const stubKeys: (PropertyKey | null)[] = ["a", "b"];
+    // Stub per-row keys in a REACTIVE box: keyAt is its own dependency
+    // channel of the derived — it can change while the model object does not
+    // (e.g. the datumKey prop toggles without a pipeline rerun).
+    const keysBox = reactiveBox<(PropertyKey | null)[]>(["a", "b"]);
     const modelBox = reactiveBox<RenderModel | null>(buildPointModel(dataA));
 
     const { value: service, destroy } = withFlushedEffectRoot(() =>
       createLegendEntryKeyIndex({
         model: () => modelBox.value,
-        keyAt: (i) => stubKeys[i] ?? null,
+        keyAt: (i) => keysBox.value[i] ?? null,
       }),
     );
 
@@ -65,16 +55,24 @@ describe("createLegendEntryKeyIndex", () => {
     // Snapshot identity of the Map itself — a plain property would pin this.
     const mapRefBefore = indexBefore;
 
-    // (c) Model dep change re-resolves BOTH access paths.
+    // (c) keyAt-ONLY change (model held constant) re-resolves both paths —
+    // the regression a lockstep stub cannot catch: a refactor that snapshots
+    // keys at construction or hoists the keyAt read out of the derived.
+    keysBox.set(["a2", "b2"]);
+    flushSync();
+    expect(service.keysForLegend(action)).toEqual(["a2"]);
+    expect(service.legendEntryKeyIndex).not.toBe(mapRefBefore);
+    const mapRefAfterKeys = service.legendEntryKeyIndex;
+
+    // (c2) Model dep change re-resolves BOTH access paths.
     const previous = modelBox.value;
-    stubKeys[0] = "c";
-    stubKeys[1] = "d";
+    keysBox.set(["c", "d"]);
     modelBox.set(buildPointModel(dataB));
     flushSync();
 
     const indexAfter = service.legendEntryKeyIndex;
     const keysAfter = service.keysForLegend(action);
-    expect(indexAfter).not.toBe(mapRefBefore);
+    expect(indexAfter).not.toBe(mapRefAfterKeys);
     // Keys for entry 0 follow the new model categories (c, not a).
     expect(keysAfter).toEqual(["c"]);
 
