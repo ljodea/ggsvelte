@@ -118,7 +118,13 @@
       var(--gg-tooltipBorder, var(--gg-theme-tooltipBorder, currentColor));
     border-radius: 3px;
     background: var(--gg-tooltipPaper, var(--gg-theme-tooltipPaper, white));
-    color: inherit;
+    color: var(
+      --gg-tooltipInk,
+      var(
+        --gg-tooltip-foreground,
+        var(--gg-theme-tooltipInk, var(--gg-ink, #1f2328))
+      )
+    );
     font: inherit;
     white-space: nowrap;
   }
