@@ -1,6 +1,7 @@
 /**
  * Map a scene primitive back to a post-stat frame row and series group.
  */
+import { pathSubpathIndex } from "../candidate-geometry.js";
 import type { GeometryBatch } from "../scene.js";
 
 import type { LayerFrame } from "./types.js";
@@ -54,18 +55,17 @@ export function resolveCandidateFrameRow(input: {
   let derivedGroup = frame?.groups[frameRow] ?? 0;
 
   if (frame !== undefined && batch.kind === "paths") {
-    let subpath = 0;
-    while (
-      subpath + 1 < batch.pathOffsets.length &&
-      primitiveIndex >= batch.pathOffsets[subpath + 1]!
-    )
-      subpath++;
-    derivedGroup = orderedGroups[Math.min(subpath, orderedGroups.length - 1)] ?? 0;
-    const rowsInGroup = getPathGroupSortedRows(frame).get(derivedGroup) ?? [];
-    const local = primitiveIndex - (batch.pathOffsets[subpath] ?? 0);
-    const reflected =
-      local < rowsInGroup.length ? local : Math.max(0, rowsInGroup.length * 2 - 1 - local);
-    frameRow = rowsInGroup[Math.min(reflected, rowsInGroup.length - 1)] ?? frameRow;
+    // O(log P) subpath lookup (was linear O(P) per vertex → O(V·P) at build).
+    // Null = OOB / empty offsets: keep default frameRow/derivedGroup (codex P1).
+    const subpath = pathSubpathIndex(batch.pathOffsets, primitiveIndex);
+    if (subpath !== null) {
+      derivedGroup = orderedGroups[Math.min(subpath, orderedGroups.length - 1)] ?? 0;
+      const rowsInGroup = getPathGroupSortedRows(frame).get(derivedGroup) ?? [];
+      const local = primitiveIndex - (batch.pathOffsets[subpath] ?? 0);
+      const reflected =
+        local < rowsInGroup.length ? local : Math.max(0, rowsInGroup.length * 2 - 1 - local);
+      frameRow = rowsInGroup[Math.min(reflected, rowsInGroup.length - 1)] ?? frameRow;
+    }
   } else if (frame !== undefined && batch.kind === "segments") {
     if (frame.binding.layer.geom === "errorbar") frameRow = Math.floor(primitiveIndex / 3);
     else if (frame.binding.layer.geom === "boxplot" && batch.rowIndex.length >= frame.n * 2)
