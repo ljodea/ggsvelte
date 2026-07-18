@@ -37,8 +37,10 @@ export function createRawCandidateDatumResolver(
     const value = (field: string | null): CellValue =>
       field === null ? null : table.column(field)[sourceRow]!;
     const group = groupsFor(facts.layerIndex)[sourceRow] ?? 0;
-    const colorRank = ordinalColorRank(color, binding.color.field, value(binding.color.field));
-    const fillRank = ordinalColorRank(fill, binding.fill.field, value(binding.fill.field));
+    const colorRank = ordinalColorRank(color, binding.color.field, () =>
+      value(binding.color.field),
+    );
+    const fillRank = ordinalColorRank(fill, binding.fill.field, () => value(binding.fill.field));
     return {
       xValue: value(binding.xField),
       yValue: value(binding.yField),

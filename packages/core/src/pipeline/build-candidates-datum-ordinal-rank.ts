@@ -10,14 +10,17 @@ import type { CellValue } from "../table.js";
 
 import type { ResolvedColorScale } from "./types.js";
 
-/** O(1) assignment rank, or -1 when scale/field does not apply. */
+/**
+ * O(1) assignment rank, or -1 when scale/field does not apply.
+ * `readValue` is a thunk so sequential/null scales never force a cell read.
+ */
 export function ordinalColorRank(
   resolved: ResolvedColorScale | null,
   field: string | null | undefined,
-  value: CellValue,
+  readValue: () => CellValue,
 ): number {
   if (resolved?.kind !== "ordinal" || field === null || field === undefined) return -1;
-  return resolved.scale.indexOf(value) ?? -1;
+  return resolved.scale.indexOf(readValue()) ?? -1;
 }
 
 export function ordinalSeriesRank(input: {
@@ -31,7 +34,7 @@ export function ordinalSeriesRank(input: {
 }): number {
   const { color, fill, colorField, fillField, sourceRow, sourceValue, group } = input;
   if (sourceRow === null) return group;
-  const colorRank = ordinalColorRank(color, colorField, sourceValue(colorField));
-  const fillRank = ordinalColorRank(fill, fillField, sourceValue(fillField));
+  const colorRank = ordinalColorRank(color, colorField, () => sourceValue(colorField));
+  const fillRank = ordinalColorRank(fill, fillField, () => sourceValue(fillField));
   return colorRank >= 0 ? colorRank : fillRank >= 0 ? fillRank : group;
 }

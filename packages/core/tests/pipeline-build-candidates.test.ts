@@ -57,6 +57,31 @@ describe("ordinalSeriesRank", () => {
     ).toBe(3);
   });
 
+  it("does not read source cells when color/fill are non-ordinal", () => {
+    // Sequential/null scales must not force table.column / sourceValue lookups
+    // for seriesRank (eager arg evaluation would regress continuous color paths).
+    let reads = 0;
+    const sequential = {
+      kind: "sequential" as const,
+      scale: { domain: [0, 1] as [number, number], colorOf: () => "#000" },
+    };
+    expect(
+      ordinalSeriesRank({
+        color: sequential,
+        fill: sequential,
+        colorField: "c",
+        fillField: "f",
+        sourceRow: 0,
+        sourceValue: () => {
+          reads += 1;
+          return "x";
+        },
+        group: 4,
+      }),
+    ).toBe(4);
+    expect(reads).toBe(0);
+  });
+
   it("returns encodeKey assignment ranks from the ordinal color scale", () => {
     // 1 vs "1" must not collapse under presentation bandKey.
     const scale = trainColor([1, "1", "b"]);
