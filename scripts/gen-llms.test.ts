@@ -26,6 +26,7 @@ import {
   INTERACTION_REFERENCE_MD,
   INTERACTION_REFERENCE_INDEX,
   MIGRATING_PRE_0_1_MD,
+  UPGRADING_MD,
   guidePages,
   pruneSpecData,
   renderMarkdown,
@@ -188,6 +189,26 @@ describe("guide sections cover their catalogs", () => {
     expect(MIGRATING_PRE_0_1_MD).toContain("`TooltipContext` → `PlotInspectionChange`");
     expect(MIGRATING_PRE_0_1_MD).toContain("`BrushSelection` → `IntervalSelection`");
   });
+
+  it("provides a rolling upgrading guide with a stable per-transition anchor", () => {
+    // One section per release transition; changesets link these anchors, so
+    // heading ids must come from the same renderer the docs site uses.
+    expect(UPGRADING_MD).toContain("## 0.1 to 0.2");
+    expect(renderMarkdown(UPGRADING_MD)).toContain('id="0-1-to-0-2"');
+  });
+
+  it("states the 0.1→0.2 upgrade contract: additive, controller optional", () => {
+    expect(UPGRADING_MD).toContain("No source changes are required");
+    // Controller adoption is optional — both APIs remain supported.
+    expect(UPGRADING_MD).toContain("createPlotInteraction");
+    expect(UPGRADING_MD).toContain("optional");
+    // Deprecated aliases predate 0.2 and point at their own migration page.
+    expect(UPGRADING_MD).toContain("`BrushSelection` → `IntervalSelection`");
+    expect(UPGRADING_MD).toContain("`TooltipContext` → `PlotInspectionChange`");
+    expect(UPGRADING_MD).toContain("`ZoomDomains` → `ReadonlyZoomDomains`");
+    expect(UPGRADING_MD).toContain("deprecated since 0.1.0");
+    expect(UPGRADING_MD).toContain("/guide/migrating-pre-0-1");
+  });
 });
 
 describe("pruneSpecData", () => {
@@ -234,6 +255,7 @@ describe("llms surfaces", () => {
     expect(pages.map((page) => page.slug)).toContain("interactions");
     expect(pages.map((page) => page.slug)).toContain("interaction-reference");
     expect(pages.map((page) => page.slug)).toContain("migrating-pre-0-1");
+    expect(pages.map((page) => page.slug)).toContain("upgrading");
     expect(pages.map((page) => page.slug)).toContain("compatibility");
   });
 

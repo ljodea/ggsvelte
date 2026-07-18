@@ -381,12 +381,21 @@ export interface PlotInteractionTransition<Key extends PropertyKey> {
   readonly snapshot: PlotInteractionSnapshot<Key>;
 }
 
-/** @deprecated Use IntervalSelection. Kept as a source migration alias only. */
+/**
+ * @deprecated since 0.1.0 — use IntervalSelection. Kept as a source migration
+ * alias only: https://ljodea.github.io/ggsvelte/guide/migrating-pre-0-1#migrate-custom-tooltip-snippets
+ */
 export type BrushSelection = IntervalSelection;
-/** @deprecated Use PlotInspectionChange. */
+/**
+ * @deprecated since 0.1.0 — use PlotInspectionChange. Kept as a source
+ * migration alias only: https://ljodea.github.io/ggsvelte/guide/migrating-pre-0-1#migrate-custom-tooltip-snippets
+ */
 export type TooltipContext<
   Row = Record<string, CellValue>,
   Key = PropertyKey,
 > = PlotInspectionChange<Row, Key>;
-/** @deprecated Use ReadonlyZoomDomains. */
+/**
+ * @deprecated since 0.1.0 — use ReadonlyZoomDomains. Kept as a source
+ * migration alias only: https://ljodea.github.io/ggsvelte/guide/migrating-pre-0-1#migrate-custom-tooltip-snippets
+ */
 export type ZoomDomains = { x?: [number, number]; y?: [number, number] };

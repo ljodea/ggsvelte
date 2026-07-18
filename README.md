@@ -134,6 +134,7 @@ CLI: `ggsvelte-render spec.json > chart.svg` (JSON-line diagnostics on stderr).
 - [Guide and examples](https://ljodea.github.io/ggsvelte/)
 - [Interactions and event reference](https://ljodea.github.io/ggsvelte/guide/interactions)
 - [Local data playground](https://ljodea.github.io/ggsvelte/playground)
+- [Upgrading between releases](https://ljodea.github.io/ggsvelte/guide/upgrading)
 - [Pre-0.1 interaction migration](https://ljodea.github.io/ggsvelte/guide/migrating-pre-0-1)
 - [Lifecycle and editions](https://ljodea.github.io/ggsvelte/guide/lifecycle)
 

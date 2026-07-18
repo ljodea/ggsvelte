@@ -6,5 +6,5 @@
     "noEmit": true,
     "lib": ["es2023", "dom", "dom.iterable"]
   },
-  "include": ["src/**/*", "svelte.config.js"]
+  "include": ["src/**/*", "svelte.config.js", "tests/migrations/**/*"]
 }

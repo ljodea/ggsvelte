@@ -337,7 +337,10 @@ staleness-tested). The docs lifecycle page and llms surfaces render from it.
 - **stable-intent** — the agent core path: `PortableSpec`, `normalize`,
   `validate` (+ `ValidateResult`/`SpecError` contracts), `renderToSVGString`,
   `GGPlot`. Not frozen pre-1.0, but changes are treated as breaking: they get
-  a changeset, a migration note, and a deprecation window where feasible.
+  a changeset with a `Migration:` marker, an upgrading-guide section, and a
+  deprecation window of at least one full minor release. The precise rules
+  (windows, fixtures, runtime checks, codemod bar) are decision 0013
+  (`docs/decisions/0013-post-0-1-migration-policy.md`).
 - **stable** — committed API under semver. Nothing is `stable` pre-0.1.0.
 - **superseded** — keeps working but stops being recommended; docs point at
   the replacement. This tag exists to protect agent-generated code from

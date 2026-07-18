@@ -6,6 +6,7 @@ export const requiredPages = [
   "guide/interactions.html",
   "guide/interaction-reference.html",
   "guide/migrating-pre-0-1.html",
+  "guide/upgrading.html",
   "playground.html",
   "reference/interactions.html",
   "examples/interaction/tooltip.html",

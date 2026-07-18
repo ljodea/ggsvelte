@@ -10,3 +10,5 @@ the library no longer carries wiring constraints for the 5.29 eager behavior.
 Only the eager-derived declaration constraint is removed — internal controller
 construction order and effect-registration order are unchanged. Consumers on
 Svelte 5.29.0–5.33.0 must upgrade Svelte to take this release.
+
+Migration: <https://ljodea.github.io/ggsvelte/guide/upgrading#0-1-to-0-2>
