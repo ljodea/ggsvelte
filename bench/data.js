@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784346045014,
+  "lastUpdate": 1784346098722,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -22574,6 +22574,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 161.08,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "a3ecb140f8ddd519295fc59d13c82c12927dbbfe",
+          "message": "perf(core): cache finite-y lineage per group for smooth/summary/boxplot (#226)\n\n* perf(core): cache finite-y lineage per group for smooth/summary/boxplot\n\nFixes #216: precompute sourceRowsByGroupY once in the identity index so\nsmooth evaluation-grid marks (n≈80) reuse finite-y source rows instead of\nre-filtering O(g) per mark. LineageStore also short-circuits intern for\nshared frozen membership arrays so identical smooth lineages intern once.\n\n* fix(core): facet-local finite-y cache and skip baseRows clone\n\nAddress Codex P2 review on #226:\n- Build sourceRowsByGroupY with panel-local yColumn[localRow] while\n  storing source-table row ids (facet-safe).\n- Return the finite-y cache before cloning baseRows so smooth resolve\n  stays O(1) per evaluation-grid mark.",
+          "timestamp": "2026-07-17T22:40:59-05:00",
+          "tree_id": "ac88bd2dbc8d36338db80e0b013c150b6fe42fcf",
+          "url": "https://github.com/ljodea/ggsvelte/commit/a3ecb140f8ddd519295fc59d13c82c12927dbbfe"
+        },
+        "date": 1784346097666,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.31,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.8348,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 8.9197,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 13.0154,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 85.3016,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 129.6437,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.1418,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2667,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 86.8616,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 108.2158,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 12.6643,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.918,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 112.0825,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7947,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 26.4613,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.5402,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 37.5327,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 592.6235,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 161.4796,
             "unit": "ms"
           }
         ]
