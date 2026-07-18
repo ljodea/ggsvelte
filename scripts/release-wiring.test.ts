@@ -172,3 +172,9 @@ it("thins expensive jobs on main push (issue #244)", () => {
   expect(ci).toContain("main push: thinned expensive jobs (issue #244)");
   expect(ci).toContain("packages_dist=false");
 });
+
+it("tiers the PR consumer matrix (issue #246)", () => {
+  const ci = read(".github/workflows/ci.yml");
+  expect(ci).toContain("run-compat");
+  expect(ci).toContain("flavor=pr");
+});
