@@ -718,6 +718,122 @@ describe("buildLegendEntryKeyIndex", () => {
       expect(index.get(`fill:${i}`)).toHaveLength(rowsPerEntry);
     }
   });
+
+  it("indexes first non-stat field per channel (skips leading stat, first non-stat wins)", () => {
+    const index = buildLegendEntryKeyIndex(
+      adapter({
+        candidates: [{ layerIndex: 0, lineage: 1, rowIndex: null }],
+        fields: {
+          0: [
+            { channel: "fill", field: "stat_fill", source: "stat" },
+            { channel: "fill", field: "real_fill" },
+            { channel: "fill", field: "second_fill" },
+          ],
+        },
+        lineages: { 1: [0] },
+        rows: { 0: { real_fill: "web", second_fill: "store", stat_fill: "ignored" } },
+        keys: { 0: "k" },
+      }),
+    );
+    // First non-stat mapping for fill is real_fill → "web" → entry 0.
+    expect(index.get("fill:0")).toEqual(["k"]);
+    expect(index.get("fill:1")).toEqual([]);
+  });
+
+  it("maps one candidate across field and scaled-constant discrete legends", () => {
+    const colorLegend: SceneLegend = {
+      type: "discrete",
+      scale: "color",
+      title: "Color",
+      x: 0,
+      y: 0,
+      width: 40,
+      height: 40,
+      swatchSize: 12,
+      entries: [
+        { label: "red", value: "red", color: "#f00" },
+        { label: "blue", value: "blue", color: "#00f" },
+      ],
+    };
+    const index = buildLegendEntryKeyIndex(
+      adapter({
+        legends: [discreteFill, colorLegend],
+        candidates: [{ layerIndex: 0, lineage: 1, rowIndex: null }],
+        fields: { 0: [{ channel: "fill", field: "channel" }] },
+        scaledConstants: { 0: { color: "blue" } },
+        lineages: { 1: [0, 1] },
+        rows: {
+          0: { channel: "web" },
+          1: { channel: "store" },
+        },
+        keys: { 0: "a", 1: "b" },
+      }),
+    );
+    expect(index.get("fill:0")).toEqual(["a"]);
+    expect(index.get("fill:1")).toEqual(["b"]);
+    // Scaled-constant color maps every lineage row to the same entry.
+    expect(index.get("color:1")).toEqual(["a", "b"]);
+    expect(index.get("color:0")).toEqual([]);
+  });
+
+  it("calls layerFields once per distinct layer and lineageKeys once per applicable candidate", () => {
+    let layerFieldsCalls = 0;
+    let lineageKeysCalls = 0;
+    const dualLegend: SceneLegend = {
+      type: "discrete",
+      scale: "color",
+      title: "C",
+      x: 0,
+      y: 0,
+      width: 40,
+      height: 40,
+      swatchSize: 12,
+      entries: [{ label: "x", value: "x", color: "#000" }],
+    };
+    const clean: LegendKeyIndexAdapter = {
+      legends: [discreteFill, dualLegend],
+      candidates: () => [
+        { layerIndex: 0, lineage: 1, rowIndex: null },
+        { layerIndex: 0, lineage: 2, rowIndex: null },
+        { layerIndex: 1, lineage: 3, rowIndex: null },
+      ],
+      layerFields() {
+        layerFieldsCalls += 1;
+        return [{ channel: "fill", field: "channel" }];
+      },
+      layerScaledConstant: (_layerIndex, channel) => (channel === "color" ? "x" : undefined),
+      lineageKeys(lineageId) {
+        lineageKeysCalls += 1;
+        return lineageId === 1 ? [0] : lineageId === 2 ? [1] : [2];
+      },
+      row: (rowIndex) => (rowIndex === 2 ? { channel: "store" } : { channel: "web" }),
+      semanticKey: (rowIndex) => (rowIndex === 0 ? "a" : rowIndex === 1 ? "b" : "c"),
+    };
+    const index = buildLegendEntryKeyIndex(clean);
+    expect(index.get("fill:0")).toEqual(["a", "b"]);
+    expect(index.get("color:0")).toEqual(["a", "b", "c"]);
+    // One layerFields call per distinct layerIndex (0 and 1), not per candidate×legend.
+    expect(layerFieldsCalls).toBe(2);
+    // One lineageKeys call per candidate (all three apply at least one legend).
+    expect(lineageKeysCalls).toBe(3);
+  });
+
+  it("does not call lineageKeys when no discrete legend applies to the candidate", () => {
+    let lineageKeysCalls = 0;
+    const index = buildLegendEntryKeyIndex({
+      legends: [discreteFill],
+      candidates: () => [{ layerIndex: 0, lineage: 99, rowIndex: null }],
+      layerFields: () => [{ channel: "color", field: "other" }], // fill legend only
+      lineageKeys: () => {
+        lineageKeysCalls += 1;
+        return [0];
+      },
+      row: () => ({ other: "x" }),
+      semanticKey: () => "k",
+    });
+    expect(index.get("fill:0")).toEqual([]);
+    expect(lineageKeysCalls).toBe(0);
+  });
 });
 
 describe("resolveLegendPreviewKeysDecision", () => {
