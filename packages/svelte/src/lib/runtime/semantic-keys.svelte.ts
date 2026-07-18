@@ -106,31 +106,33 @@ export function dataContentOrderToken(
   }
   if (typeof data === "object") {
     const record = data as Record<string, unknown>;
-    if (Array.isArray(record.values)) {
-      const rows = record.values;
-      let token = `v:${rows.length}`;
-      for (let index = 0; index < rows.length; index++) token += `:${sourceIdentity(rows[index])}`;
+    const values = record["values"];
+    if (Array.isArray(values)) {
+      let token = `v:${values.length}`;
+      for (let index = 0; index < values.length; index++)
+        token += `:${sourceIdentity(values[index])}`;
       return token;
     }
-    if (
-      record.columns !== null &&
-      typeof record.columns === "object" &&
-      !Array.isArray(record.columns)
-    )
-      return `c:${sourceIdentity(record.columns)}`;
-    if (typeof record.name === "string") {
+    const columns = record["columns"];
+    if (columns !== null && typeof columns === "object" && !Array.isArray(columns))
+      return `c:${sourceIdentity(columns)}`;
+    const name = record["name"];
+    if (typeof name === "string") {
       const keys = Object.keys(record);
-      if (keys.length === 1 && keys[0] === "name") return `n:${record.name}`;
+      if (keys.length === 1 && keys[0] === "name") return `n:${name}`;
     }
     return `o:${sourceIdentity(data)}`;
   }
-  return `p:${String(data)}`;
+  if (typeof data === "string" || typeof data === "number" || typeof data === "boolean")
+    return `p:${String(data)}`;
+  if (typeof data === "bigint") return `p:${data.toString()}`;
+  return `p:${sourceIdentity(data)}`;
 }
 
 function datasetsOrderToken(datasets: unknown, sourceIdentity: (value: unknown) => string): string {
   if (datasets === null || datasets === undefined) return "null";
   if (typeof datasets !== "object") return sourceIdentity(datasets);
-  const keys = Object.keys(datasets as object).toSorted();
+  const keys = Object.keys(datasets).toSorted();
   let token = `d:${keys.length}`;
   for (const key of keys) {
     token += `|${key}=${dataContentOrderToken(

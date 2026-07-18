@@ -11,6 +11,7 @@ import { INTERACTION_DIAGNOSTIC_CATALOG } from "../../src/lib/interaction/intera
 import {
   createSourceIdentityTracker,
   createSemanticKeyService,
+  dataContentOrderToken,
   dataIdentityEpochToken,
   resolveSemanticKeys,
   resolveSemanticKeysForPlot,
@@ -156,6 +157,8 @@ describe("dataIdentityEpochToken", () => {
       sourceIdentity: id,
     });
     expect(token.startsWith("d:s:")).toBe(true);
+    // Content order is O(R) row refs — same helper used standalone.
+    expect(dataContentOrderToken(largeRows, id).startsWith("v:2000:")).toBe(true);
     // May stringify nothing, or only incidental non-data uses — never the full row array.
     for (const call of spy.mock.calls) {
       expect(call[0]).not.toBe(largeRows);
