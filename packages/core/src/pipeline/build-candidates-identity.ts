@@ -12,7 +12,6 @@ import {
   buildBinLineageBuckets,
 } from "./build-candidates-identity-aggregate.js";
 import type { FacetPanelDef } from "./facets.js";
-import { deriveLayerGroups } from "./frame.js";
 import type { LayerFrame } from "./types.js";
 import { NO_ROW } from "./types.js";
 
@@ -47,7 +46,8 @@ export function buildCandidateIdentityIndex(
       const layerIndex = frame.binding.index;
       const frameKey = `${panelIndex}:${layerIndex}`;
       frameGroups.set(frameKey, [...new Set(frame.groups)]);
-      const inputGroups = deriveLayerGroups(frame.binding, frame.table);
+      // Pre-stat groups cached on the frame during buildFrame (issue #217).
+      const inputGroups = frame.inputGroups;
       const stat = frame.binding.layer.stat ?? "identity";
       // Only count/summary/boxplot resolve via group×x buckets; skip for other layers.
       const bucketByX = stat === "count" || stat === "summary" || stat === "boxplot";

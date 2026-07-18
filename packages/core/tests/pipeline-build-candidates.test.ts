@@ -14,6 +14,7 @@ import { aes, gg } from "@ggsvelte/spec";
 import { ordinalSeriesRank } from "../src/pipeline/build-candidates-datum-context.ts";
 import { resolveCandidateLogicalValues } from "../src/pipeline/build-candidates-datum-values.ts";
 import { runPipeline } from "../src/pipeline.ts";
+import { trainColor } from "../src/scales/train.ts";
 import { ColumnTable } from "../src/table.ts";
 
 const size = { width: 640, height: 400 };
@@ -54,6 +55,129 @@ describe("ordinalSeriesRank", () => {
         group: 3,
       }),
     ).toBe(3);
+  });
+
+  it("does not read source cells when color/fill are non-ordinal", () => {
+    // Sequential/null scales must not force table.column / sourceValue lookups
+    // for seriesRank (eager arg evaluation would regress continuous color paths).
+    let reads = 0;
+    const sequential = {
+      kind: "sequential" as const,
+      scale: { domain: [0, 1] as [number, number], colorOf: () => "#000" },
+    };
+    expect(
+      ordinalSeriesRank({
+        color: sequential,
+        fill: sequential,
+        colorField: "c",
+        fillField: "f",
+        sourceRow: 0,
+        sourceValue: () => {
+          reads += 1;
+          return "x";
+        },
+        group: 4,
+      }),
+    ).toBe(4);
+    expect(reads).toBe(0);
+  });
+
+  it("returns encodeKey assignment ranks from the ordinal color scale", () => {
+    // 1 vs "1" must not collapse under presentation bandKey.
+    const scale = trainColor([1, "1", "b"]);
+    expect(
+      ordinalSeriesRank({
+        color: { kind: "ordinal", scale },
+        fill: null,
+        colorField: "c",
+        fillField: undefined,
+        sourceRow: 0,
+        sourceValue: (field) => (field === "c" ? "1" : null),
+        group: 99,
+      }),
+    ).toBe(1);
+    expect(
+      ordinalSeriesRank({
+        color: { kind: "ordinal", scale },
+        fill: null,
+        colorField: "c",
+        fillField: undefined,
+        sourceRow: 0,
+        sourceValue: (field) => (field === "c" ? 1 : null),
+        group: 99,
+      }),
+    ).toBe(0);
+  });
+
+  it("prefers color rank over fill; falls back to fill then group", () => {
+    const color = trainColor(["red-series"]);
+    const fill = trainColor(["a", "b", "c"]);
+    expect(
+      ordinalSeriesRank({
+        color: { kind: "ordinal", scale: color },
+        fill: { kind: "ordinal", scale: fill },
+        colorField: "color",
+        fillField: "fill",
+        sourceRow: 0,
+        sourceValue: (field) => (field === "color" ? "red-series" : "c"),
+        group: 5,
+      }),
+    ).toBe(0);
+    expect(
+      ordinalSeriesRank({
+        color: null,
+        fill: { kind: "ordinal", scale: fill },
+        colorField: undefined,
+        fillField: "fill",
+        sourceRow: 0,
+        sourceValue: (field) => (field === "fill" ? "c" : null),
+        group: 5,
+      }),
+    ).toBe(2);
+    expect(
+      ordinalSeriesRank({
+        color: { kind: "ordinal", scale: color },
+        fill: { kind: "ordinal", scale: fill },
+        colorField: "color",
+        fillField: "fill",
+        sourceRow: 0,
+        sourceValue: () => "unknown",
+        group: 5,
+      }),
+    ).toBe(5);
+  });
+
+  it("does not linear-scan the ordinal domain per candidate", () => {
+    const domain = Array.from({ length: 50 }, (_, i) => `s${i}`);
+    const scale = trainColor(domain);
+    const findIndexSpy = spyOn(Array.prototype, "findIndex").mockImplementation(function (
+      this: unknown[],
+      ...args: Parameters<Array<unknown>["findIndex"]>
+    ) {
+      // Only fail if the scan targets the scale domain (the O(n·d) path).
+      if (this === scale.domain || this === domain) {
+        throw new Error(`ordinalSeriesRank used domain.findIndex(${String(args[0])})`);
+      }
+      return Array.prototype.findIndex.apply(this, args as never);
+    });
+    try {
+      for (let i = 0; i < domain.length; i++) {
+        const value = domain[i]!;
+        expect(
+          ordinalSeriesRank({
+            color: { kind: "ordinal", scale },
+            fill: null,
+            colorField: "c",
+            fillField: undefined,
+            sourceRow: i,
+            sourceValue: () => value,
+            group: 0,
+          }),
+        ).toBe(i);
+      }
+    } finally {
+      findIndexSpy.mockRestore();
+    }
   });
 });
 
@@ -116,6 +240,34 @@ describe("buildPipelineCandidates via runPipeline", () => {
     expect(c0!.xValue).toBe(1);
     expect(c0!.yValue).toBe(10);
     expect(model.lineage.count(c0!.lineage)).toBe(1);
+  });
+
+  it("ordinal color seriesRank matches encodeKey assignment order (1 vs '1')", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { x: 0, y: 1, c: 1 },
+          { x: 1, y: 2, c: "1" },
+          { x: 2, y: 3, c: "b" },
+        ],
+        aes({ x: "x", y: "y", color: "c" }),
+      )
+        .geomPoint()
+        .spec(),
+      size,
+    );
+    const ranks = Array.from({ length: model.candidates.size }, (_, id) => {
+      const c = model.candidates.candidate(id)!;
+      return { c: c.xValue, rank: c.seriesRank };
+    }).toSorted((a, b) => Number(a.c) - Number(b.c));
+    // First-seen color values: 1 → rank 0, "1" → rank 1, "b" → rank 2
+    expect(ranks.map((r) => r.rank)).toEqual([0, 1, 2]);
+    expect(model.scales.color?.kind).toBe("ordinal");
+    if (model.scales.color?.kind === "ordinal") {
+      expect(model.scales.color.scale.indexOf(1)).toBe(0);
+      expect(model.scales.color.scale.indexOf("1")).toBe(1);
+      expect(model.scales.color.scale.indexOf("b")).toBe(2);
+    }
   });
 
   it("count bars reconstruct aggregate lineages for represented source rows", () => {
@@ -1124,5 +1276,74 @@ describe("finite-y lineage cache (issue #216)", () => {
       });
       expect(viaIndex.representedRows).toEqual(viaFilter);
     }
+  });
+});
+
+describe("pre-stat inputGroups cache (issue #217)", () => {
+  it("identity index buckets source rows from frame.inputGroups (not re-derived)", async () => {
+    const { preparePanels } = await import("../src/pipeline/prepare-panels.ts");
+    const { buildCandidateIdentityIndex } =
+      await import("../src/pipeline/build-candidates-identity.ts");
+    const { normalize } = await import("@ggsvelte/spec");
+
+    const prepared = preparePanels(
+      normalize(
+        gg(
+          [
+            { g: "a", c: "x" },
+            { g: "a", c: "y" },
+            { g: "b", c: "x" },
+          ],
+          aes({ x: "g", fill: "c" }),
+        )
+          .geomBar()
+          .spec(),
+      ),
+      size,
+      [],
+      [],
+    );
+    const frame = prepared.panelFrames[0]![0]!;
+    // Replace cached pre-stat groups with a distinctive assignment; the index
+    // must follow the cache (proves no second deriveLayerGroups pass).
+    const forced = [7, 7, 8] as const;
+    (frame as { inputGroups: readonly number[] }).inputGroups = forced;
+
+    const index = buildCandidateIdentityIndex(prepared.panelFrames, prepared.facetPanels);
+    expect(index.sourceRowsByGroup.get("0:0:7")?.toSorted((a, b) => a - b)).toEqual([0, 1]);
+    expect(index.sourceRowsByGroup.get("0:0:8")).toEqual([2]);
+    // Natural group ids from derive must not appear if cache is honored.
+    expect(index.sourceRowsByGroup.has("0:0:0")).toBe(false);
+  });
+
+  it("bin lineage assign uses frame.inputGroups for source-row membership", async () => {
+    const { preparePanels } = await import("../src/pipeline/prepare-panels.ts");
+    const { buildCandidateIdentityIndex } =
+      await import("../src/pipeline/build-candidates-identity.ts");
+    const { normalize } = await import("@ggsvelte/spec");
+
+    const prepared = preparePanels(
+      normalize({
+        data: { values: [{ x: 0 }, { x: 1 }, { x: 2 }] },
+        layers: [
+          {
+            geom: "histogram",
+            aes: { x: { field: "x" } },
+            params: { binwidth: 1, boundary: 0, closed: "right" },
+          },
+        ],
+      }),
+      size,
+      [],
+      [],
+    );
+    const frame = prepared.panelFrames[0]![0]!;
+    expect(frame.inputGroups).toHaveLength(3);
+    // Single group for continuous x with no discrete aesthetics.
+    expect([...new Set(frame.inputGroups)]).toEqual([0]);
+
+    const index = buildCandidateIdentityIndex(prepared.panelFrames, prepared.facetPanels);
+    const allBinRows = [...index.sourceRowsByGroupBin.values()].flat();
+    expect(allBinRows.toSorted((a, b) => a - b)).toEqual([0, 1, 2]);
   });
 });

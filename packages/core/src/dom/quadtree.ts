@@ -1,13 +1,13 @@
 /**
- * Static point quadtree for the hit index.
+ * Static point quadtree for the hit index and CandidateStore nearest/queryRect.
  *
- * HAND-ROLLED, not a d3-quadtree port (documented decision): the hit index
- * only needs build-once + radius/rect queries over immutable Float32Array
- * positions — d3-quadtree's incremental add/remove/cover machinery is dead
- * weight here, and zero runtime dependencies is a project constraint
- * (@sinclair/typebox is the only one). The structure is the classic
- * recursive bucket quadtree: leaf buckets of 16, max depth 12, bbox pruning
- * on every visit. Build is O(n log n); queries are O(log n + k).
+ * HAND-ROLLED, not a d3-quadtree port (documented decision): consumers only
+ * need build-once + radius/rect queries over immutable plot-px positions —
+ * d3-quadtree's incremental add/remove/cover machinery is dead weight here,
+ * and zero runtime dependencies is a project constraint (@sinclair/typebox is
+ * the only one). The structure is the classic recursive bucket quadtree: leaf
+ * buckets of 16, max depth 12, bbox pruning on every visit. Build is O(n log n);
+ * queries are O(log n + k). Pure (no DOM) — safe from the core pure entry.
  */
 
 interface QuadNode {

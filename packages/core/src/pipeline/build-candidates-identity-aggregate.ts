@@ -8,7 +8,6 @@ import type { BarParams } from "@ggsvelte/spec";
 import { cellToNumber } from "../table.js";
 
 import type { FacetPanelDef } from "./facets.js";
-import { deriveLayerGroups } from "./frame.js";
 import type { LayerFrame } from "./types.js";
 
 export function appendSourceRowByGroupX(input: {
@@ -60,7 +59,8 @@ export function buildBinLineageBuckets(input: {
   const field = frame.binding.xField;
   if (field === null) return;
 
-  const inputGroups = deriveLayerGroups(frame.binding, frame.table);
+  // Pre-stat groups cached on the frame during buildFrame (issue #217).
+  const inputGroups = frame.inputGroups;
   const closed = ((frame.binding.layer.params ?? {}) as BarParams).closed ?? "right";
   const binsByGroup = new Map<number, BinEdge[]>();
 
