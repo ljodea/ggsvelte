@@ -334,16 +334,15 @@ export function buildCandidateStoreEager(
   tokenIndex.clear();
 
   // Spatial index over plot-px anchors (reuse StaticQuadtree). Point-like
-  // candidates shortlist via the tree; rects/segments/paths use a second
-  // index over AABB *centers* expanded by max half-extents so hit regions
-  // far from anchors (tall bars, long segments, filled paths) still shortlist
-  // in O(log E + k) instead of force-adding every extended id.
+  // candidates shortlist via the tree; rects/segments/paths/glyphs use
+  // size-classed AABB-center trees so hit regions far from anchors still
+  // shortlist without force-adding every extended id. Classes bucket by
+  // log2(max half-extent) so one giant AABB cannot expand every query to O(E).
   const spatialXs = Float64Array.from(xs);
   const spatialYs = Float64Array.from(ys);
   const spatial = n > 0 ? new StaticQuadtree(spatialXs, spatialYs) : null;
   const isPoint = new Uint8Array(n);
   const extendedIds: number[] = [];
-  // Per-extended-id plot-space AABB (filled after the classify pass).
   const extMinXBuild: number[] = [];
   const extMinYBuild: number[] = [];
   const extMaxXBuild: number[] = [];
@@ -384,8 +383,8 @@ export function buildCandidateStoreEager(
       minY = Math.min(y1, y2) - pad;
       maxX = Math.max(x1, x2) + pad;
       maxY = Math.max(y1, y2) + pad;
-    } else {
-      // paths: subpath AABB (fill + stroke can sit far from one vertex anchor).
+    } else if (batch.kind === "paths") {
+      // Subpath AABB (fill + stroke can sit far from one vertex anchor).
       const range = pathRange(batch, i);
       if (range === null) {
         minX = xs[id]!;
@@ -428,6 +427,14 @@ export function buildCandidateStoreEager(
         maxX = box[2];
         maxY = box[3];
       }
+    } else {
+      // glyphs: text is not a hit target (hit-index), but still needs a finite
+      // AABB so store init never pathRange()'s a non-path batch (Codex P1).
+      const pad = batch.size + 3;
+      minX = xs[id]! - pad;
+      minY = ys[id]! - pad;
+      maxX = xs[id]! + pad;
+      maxY = ys[id]! + pad;
     }
     extMinXBuild.push(minX);
     extMinYBuild.push(minY);
@@ -441,23 +448,51 @@ export function buildCandidateStoreEager(
   const extMinY = Float64Array.from(extMinYBuild);
   const extMaxX = Float64Array.from(extMaxXBuild);
   const extMaxY = Float64Array.from(extMaxYBuild);
-  const extCx = new Float64Array(extN);
-  const extCy = new Float64Array(extN);
-  let maxHalfW = 0;
-  let maxHalfH = 0;
-  for (let ei = 0; ei < extN; ei++) {
-    const halfW = (extMaxX[ei]! - extMinX[ei]!) / 2;
-    const halfH = (extMaxY[ei]! - extMinY[ei]!) / 2;
-    extCx[ei] = (extMinX[ei]! + extMaxX[ei]!) / 2;
-    extCy[ei] = (extMinY[ei]! + extMaxY[ei]!) / 2;
-    if (halfW > maxHalfW) maxHalfW = halfW;
-    if (halfH > maxHalfH) maxHalfH = halfH;
-  }
-  const extendedSpatial = extN > 0 ? new StaticQuadtree(extCx, extCy) : null;
   extMinXBuild.length = 0;
   extMinYBuild.length = 0;
   extMaxXBuild.length = 0;
   extMaxYBuild.length = 0;
+
+  // Size-class trees: class key = ceil(log2(max half-extent)).
+  type ExtendedClass = {
+    readonly eis: readonly number[];
+    readonly maxHalfW: number;
+    readonly maxHalfH: number;
+    readonly spatial: StaticQuadtree;
+  };
+  const classBuckets = new Map<number, number[]>();
+  for (let ei = 0; ei < extN; ei++) {
+    const halfW = (extMaxX[ei]! - extMinX[ei]!) / 2;
+    const halfH = (extMaxY[ei]! - extMinY[ei]!) / 2;
+    const m = Math.max(halfW, halfH, 1e-9);
+    const key = Math.min(31, Math.ceil(Math.log2(m)));
+    const bucket = classBuckets.get(key);
+    if (bucket === undefined) classBuckets.set(key, [ei]);
+    else bucket.push(ei);
+  }
+  const extendedClasses: ExtendedClass[] = [];
+  for (const eis of classBuckets.values()) {
+    const cxs = new Float64Array(eis.length);
+    const cys = new Float64Array(eis.length);
+    let maxHalfW = 0;
+    let maxHalfH = 0;
+    for (let j = 0; j < eis.length; j++) {
+      const ei = eis[j]!;
+      const halfW = (extMaxX[ei]! - extMinX[ei]!) / 2;
+      const halfH = (extMaxY[ei]! - extMinY[ei]!) / 2;
+      cxs[j] = (extMinX[ei]! + extMaxX[ei]!) / 2;
+      cys[j] = (extMinY[ei]! + extMaxY[ei]!) / 2;
+      if (halfW > maxHalfW) maxHalfW = halfW;
+      if (halfH > maxHalfH) maxHalfH = halfH;
+    }
+    extendedClasses.push({
+      eis,
+      maxHalfW,
+      maxHalfH,
+      spatial: new StaticQuadtree(cxs, cys),
+    });
+  }
+  classBuckets.clear();
 
   /** Add extended ids whose AABB intersects the axis-aligned query box. */
   const addExtendedIntersecting = (
@@ -467,19 +502,22 @@ export function buildCandidateStoreEager(
     hiY: number,
     into: Set<number> | number[],
   ): void => {
-    if (extendedSpatial === null) return;
-    // Any AABB that intersects [lo,hi] has its center within the query expanded
-    // by that AABB's half-extents; expand by the global max for one tree query.
-    const qx0 = loX - maxHalfW;
-    const qy0 = loY - maxHalfH;
-    const qx1 = hiX + maxHalfW;
-    const qy1 = hiY + maxHalfH;
-    for (const ei of extendedSpatial.queryRect(qx0, qy0, qx1, qy1)) {
-      if (extMaxX[ei]! < loX || extMinX[ei]! > hiX || extMaxY[ei]! < loY || extMinY[ei]! > hiY)
-        continue;
-      const id = extendedIds[ei]!;
-      if (Array.isArray(into)) into.push(id);
-      else into.add(id);
+    for (const cls of extendedClasses) {
+      // Intersecting AABBs have centers inside query expanded by *this class's*
+      // half-extents — not the global max (avoids one giant bar scanning all E).
+      for (const j of cls.spatial.queryRect(
+        loX - cls.maxHalfW,
+        loY - cls.maxHalfH,
+        hiX + cls.maxHalfW,
+        hiY + cls.maxHalfH,
+      )) {
+        const ei = cls.eis[j]!;
+        if (extMaxX[ei]! < loX || extMinX[ei]! > hiX || extMaxY[ei]! < loY || extMinY[ei]! > hiY)
+          continue;
+        const id = extendedIds[ei]!;
+        if (Array.isArray(into)) into.push(id);
+        else into.add(id);
+      }
     }
   };
 
