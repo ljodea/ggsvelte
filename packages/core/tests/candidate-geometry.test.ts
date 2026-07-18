@@ -1,6 +1,12 @@
 import { describe, expect, it, spyOn } from "bun:test";
 
-import { closestOrthInRange, pathRange, samePath } from "../src/candidate-geometry.ts";
+import {
+  closestOrthInRange,
+  directionalNearestInOrder,
+  panelRangeInOrder,
+  pathRange,
+  samePath,
+} from "../src/candidate-geometry.ts";
 import type { PathsBatch } from "../src/scene.ts";
 
 /** Minimal paths batch with the given offsets and enough vertices. */
@@ -154,5 +160,67 @@ describe("closestOrthInRange", () => {
     } finally {
       absSpy.mockRestore();
     }
+  });
+});
+
+describe("directionalNearestInOrder / panelRangeInOrder", () => {
+  it("finds nearest in-direction with lower id on full orth ties", () => {
+    // order by primary (x): ids at x=0,10,10,20
+    const order = [0, 1, 2, 3];
+    const primary = [0, 10, 10, 20];
+    const orth = [0, 5, 3, 0]; // at x=10, id2 has smaller orth to seed y=0 than id1
+    // right from id0 (0,0): nearest primary is x=10; min orth is id2 (3)
+    expect(directionalNearestInOrder(order, primary, orth, 0, 4, 0, 0, 0, true)).toBe(2);
+    // left from id3: nearest is x=10 run; min orth id2
+    expect(directionalNearestInOrder(order, primary, orth, 0, 4, 3, 20, 0, false)).toBe(2);
+    // full orth tie at x=10: both orth 5 → lower id
+    expect(directionalNearestInOrder(order, primary, [0, 5, 5, 0], 0, 4, 0, 0, 0, true)).toBe(1);
+  });
+
+  it("returns seed when nothing lies in-direction or seed primary is non-finite", () => {
+    const order = [0, 1];
+    const primary = [0, 10];
+    const orth = [0, 0];
+    expect(directionalNearestInOrder(order, primary, orth, 0, 2, 1, 10, 0, true)).toBe(1);
+    expect(directionalNearestInOrder(order, primary, orth, 0, 2, 0, Number.NaN, 0, true)).toBe(0);
+  });
+
+  it("probes O(log n + k) order indices on a large single-panel line", () => {
+    const n = 4096;
+    const order = Uint32Array.from({ length: n }, (_, i) => i);
+    const primary = Float32Array.from({ length: n }, (_, i) => i);
+    const orth = new Float32Array(n);
+    let probes = 0;
+    const next = directionalNearestInOrder(order, primary, orth, 0, n, 100, 100, 0, true, () => {
+      probes += 1;
+    });
+    expect(next).toBe(101);
+    // log2(4096)=12; equal-primary run k=1; allow headroom for panel/primary bounds.
+    expect(probes).toBeLessThan(80);
+  });
+
+  it("does not linear-skip a dense seed-primary stack (upper_bound)", () => {
+    const stack = 2000;
+    const n = stack + 1;
+    const order = Uint32Array.from({ length: n }, (_, i) => i);
+    const primary = Float32Array.from({ length: n }, (_, i) => (i < stack ? 0 : 1));
+    const orth = new Float32Array(n);
+    let probes = 0;
+    const next = directionalNearestInOrder(order, primary, orth, 0, n, 500, 0, 0, true, () => {
+      probes += 1;
+    });
+    expect(next).toBe(stack);
+    expect(probes).toBeLessThan(80);
+    expect(probes).toBeLessThan(stack / 2);
+  });
+
+  it("panelRangeInOrder isolates a panel segment", () => {
+    // order: panel0, panel0, panel1, panel1, panel2
+    const order = [0, 1, 2, 3, 4];
+    const panels = [0, 0, 1, 1, 2];
+    expect(panelRangeInOrder(order, panels, 0)).toEqual([0, 2]);
+    expect(panelRangeInOrder(order, panels, 1)).toEqual([2, 4]);
+    expect(panelRangeInOrder(order, panels, 2)).toEqual([4, 5]);
+    expect(panelRangeInOrder(order, panels, 9)).toEqual([5, 5]);
   });
 });
