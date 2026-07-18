@@ -309,11 +309,35 @@ export function createSemanticKeyService(deps: SemanticKeyServiceDeps): Semantic
     return semanticKeys.keys.get(index) ?? null;
   }
 
-  function candidateSemanticKeys(candidate: CandidateFacts): PropertyKey[] {
+  /**
+   * Shared candidate→semantic-keys cache for the current model/key epoch.
+   * Interval, selection anchors, and interaction masks all used to re-walk
+   * lineage independently (~3× O(C×L) per reactive turn). Entries fill lazily
+   * on first lookup so single-candidate paths (point toggle) stay O(L); full
+   * store consumers still share one projection after the first walk. The Map
+   * is mutated after the derived produces it — intentional memoization, not
+   * reactive state. Fresh bag when model or row keys change.
+   */
+  const candidateKeysEpoch = $derived.by(() => {
     const model = deps.model();
+    // Depend on the row-key bag so key invalidation clears the cache.
+    const rowKeys = semanticKeys.keys;
+    return {
+      model,
+      rowKeys,
+      cache: new Map<number, PropertyKey[]>(),
+    };
+  });
+
+  function candidateSemanticKeys(candidate: CandidateFacts): PropertyKey[] {
+    const { model, rowKeys, cache } = candidateKeysEpoch;
     if (model === null) return [];
+    const hit = cache.get(candidate.id);
+    if (hit !== undefined) return hit;
     const rows = rowIndexesForCandidate(candidate, model.lineage.keys(candidate.lineage));
-    return uniqueKeysFromRowIndexes(rows, (rowIndex) => semanticKey(model.row(rowIndex), rowIndex));
+    const keys = uniqueKeysFromRowIndexes(rows, (rowIndex) => rowKeys.get(rowIndex) ?? null);
+    cache.set(candidate.id, keys);
+    return keys;
   }
 
   return {

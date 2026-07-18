@@ -3,7 +3,7 @@
  * Factories own effects — instantiate under `$effect.root` and destroy.
  */
 import { flushSync } from "svelte";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import type { CellValue, RenderModel } from "@ggsvelte/core";
 
@@ -559,6 +559,220 @@ describe("createSemanticKeyService", () => {
       }),
     );
     expect(calls).toBe(0);
+    destroy();
+    model.dispose();
+  });
+
+  it("returns per-candidate semantic keys from lineage + row keys", () => {
+    const model = buildPointModel(rows);
+    const tracker = createSourceIdentityTracker();
+    const { value: service, destroy } = withFlushedEffectRoot(() =>
+      createSemanticKeyService({
+        model: () => model,
+        assembled: () => null,
+        datumKey: () => "id",
+        data: () => rows,
+        spec: () => null,
+        sourceIdentity: (value) => tracker.sourceIdentity(value),
+        deliverDiagnostic: () => {},
+      }),
+    );
+
+    const keysById: PropertyKey[][] = [];
+    for (let id = 0; id < model.candidates.size; id++) {
+      const candidate = model.candidates.candidate(id);
+      expect(candidate).not.toBeNull();
+      keysById.push(service.candidateSemanticKeys(candidate!));
+    }
+    expect(keysById).toEqual([["a"], ["b"]]);
+
+    destroy();
+    model.dispose();
+  });
+
+  it("shares one candidate→keys projection across repeated full-store walks", () => {
+    // Interval + selection + masks each used to re-walk lineage per candidate.
+    // Within one model/key epoch, N full walks must not re-pay O(C×L).
+    const model = buildPointModel(rows);
+    const keysSpy = vi.spyOn(model.lineage, "keys");
+    const tracker = createSourceIdentityTracker();
+    const { value: service, destroy } = withFlushedEffectRoot(() =>
+      createSemanticKeyService({
+        model: () => model,
+        assembled: () => null,
+        datumKey: () => "id",
+        data: () => rows,
+        spec: () => null,
+        sourceIdentity: (value) => tracker.sourceIdentity(value),
+        deliverDiagnostic: () => {},
+      }),
+    );
+
+    const walkAll = () => {
+      const out: PropertyKey[][] = [];
+      for (let id = 0; id < model.candidates.size; id++) {
+        const candidate = model.candidates.candidate(id);
+        if (candidate === null) continue;
+        out.push(service.candidateSemanticKeys(candidate));
+      }
+      return out;
+    };
+
+    const first = walkAll();
+    const callsAfterFirstWalk = keysSpy.mock.calls.length;
+    expect(first).toEqual([["a"], ["b"]]);
+    // At least one lineage resolution per candidate on the cold walk.
+    expect(callsAfterFirstWalk).toBeGreaterThanOrEqual(model.candidates.size);
+
+    // Two more full walks (interval + selection consumers) must reuse the
+    // shared projection — no additional lineage.keys work.
+    expect(walkAll()).toEqual(first);
+    expect(walkAll()).toEqual(first);
+    expect(keysSpy.mock.calls.length).toBe(callsAfterFirstWalk);
+
+    keysSpy.mockRestore();
+    destroy();
+    model.dispose();
+  });
+
+  it("rebuilds the candidate projection when the model is replaced", () => {
+    const dataA = [
+      { id: "a", x: 1, y: 10 },
+      { id: "b", x: 2, y: 20 },
+    ];
+    const dataB = [
+      { id: "x", x: 3, y: 30 },
+      { id: "y", x: 4, y: 40 },
+    ];
+    const dataBox = reactiveBox(dataA);
+    const modelBox = reactiveBox(buildPointModel(dataA));
+    const tracker = createSourceIdentityTracker();
+
+    const { value: service, destroy } = withFlushedEffectRoot(() =>
+      createSemanticKeyService({
+        model: () => modelBox.value,
+        assembled: () => null,
+        datumKey: () => "id",
+        data: () => dataBox.value,
+        spec: () => null,
+        sourceIdentity: (value) => tracker.sourceIdentity(value),
+        deliverDiagnostic: () => {},
+      }),
+    );
+
+    const keysFor = (m: RenderModel) => {
+      const out: PropertyKey[][] = [];
+      for (let id = 0; id < m.candidates.size; id++) {
+        const candidate = m.candidates.candidate(id);
+        if (candidate === null) continue;
+        out.push(service.candidateSemanticKeys(candidate));
+      }
+      return out;
+    };
+
+    expect(keysFor(modelBox.value)).toEqual([["a"], ["b"]]);
+
+    const previous = modelBox.value;
+    dataBox.set(dataB);
+    modelBox.set(buildPointModel(dataB));
+    flushSync();
+    expect(keysFor(modelBox.value)).toEqual([["x"], ["y"]]);
+
+    previous.dispose();
+    modelBox.value.dispose();
+    destroy();
+  });
+
+  it("does not project candidate keys until candidateSemanticKeys is read", () => {
+    // Interval union / empty-focus short-circuits never call
+    // candidateSemanticKeys — the shared projection must stay lazy so idle
+    // plots do not pay O(C×L) on every model tick.
+    const model = buildPointModel(rows);
+    const keysSpy = vi.spyOn(model.lineage, "keys");
+    const tracker = createSourceIdentityTracker();
+    const { value: service, destroy } = withFlushedEffectRoot(() =>
+      createSemanticKeyService({
+        model: () => model,
+        assembled: () => null,
+        datumKey: () => "id",
+        data: () => rows,
+        spec: () => null,
+        sourceIdentity: (value) => tracker.sourceIdentity(value),
+        deliverDiagnostic: () => {},
+      }),
+    );
+
+    // Row-key resolution walks lineage once per candidate.
+    expect(service.keyAt(0)).toBe("a");
+    expect(service.keyAt(1)).toBe("b");
+    const afterRowKeys = keysSpy.mock.calls.length;
+    expect(afterRowKeys).toBeGreaterThanOrEqual(model.candidates.size);
+
+    // No candidateSemanticKeys → no second projection walk.
+    flushSync();
+    expect(keysSpy.mock.calls.length).toBe(afterRowKeys);
+
+    keysSpy.mockRestore();
+    destroy();
+    model.dispose();
+  });
+
+  it("resolves only the requested candidate on first candidateSemanticKeys call", () => {
+    // Point-toggle (surface) hits one candidate. Eager full-store fill would
+    // regress click cost from O(L) to O(C×L); cache must fill per id.
+    const model = buildPointModel(rows);
+    const keysSpy = vi.spyOn(model.lineage, "keys");
+    const tracker = createSourceIdentityTracker();
+    const { value: service, destroy } = withFlushedEffectRoot(() =>
+      createSemanticKeyService({
+        model: () => model,
+        assembled: () => null,
+        datumKey: () => "id",
+        data: () => rows,
+        spec: () => null,
+        sourceIdentity: (value) => tracker.sourceIdentity(value),
+        deliverDiagnostic: () => {},
+      }),
+    );
+
+    // Warm row keys first so subsequent lineage.keys calls are projection-only.
+    expect(service.keyAt(0)).toBe("a");
+    const afterRowKeys = keysSpy.mock.calls.length;
+
+    const first = model.candidates.candidate(0);
+    expect(first).not.toBeNull();
+    expect(service.candidateSemanticKeys(first!)).toEqual(["a"]);
+    // Exactly one extra lineage walk for the hit candidate — not a full store.
+    expect(keysSpy.mock.calls.length).toBe(afterRowKeys + 1);
+
+    keysSpy.mockRestore();
+    destroy();
+    model.dispose();
+  });
+
+  it("returns empty keys when model becomes null", () => {
+    const model = buildPointModel(rows);
+    const candidate = model.candidates.candidate(0);
+    expect(candidate).not.toBeNull();
+    const modelBox = reactiveBox<RenderModel | null>(model);
+    const tracker = createSourceIdentityTracker();
+    const { value: service, destroy } = withFlushedEffectRoot(() =>
+      createSemanticKeyService({
+        model: () => modelBox.value,
+        assembled: () => null,
+        datumKey: () => "id",
+        data: () => rows,
+        spec: () => null,
+        sourceIdentity: (value) => tracker.sourceIdentity(value),
+        deliverDiagnostic: () => {},
+      }),
+    );
+
+    expect(service.candidateSemanticKeys(candidate!)).toEqual(["a"]);
+    modelBox.set(null);
+    flushSync();
+    expect(service.candidateSemanticKeys(candidate!)).toEqual([]);
+
     destroy();
     model.dispose();
   });
