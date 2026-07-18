@@ -222,6 +222,23 @@ describe("findLegendPressedIdentity", () => {
     ).toBeNull();
   });
 
+  // Ramp-only / no discrete legends: nothing to match, so skip Set allocation
+  // even when emphasis keys are large (issue #209).
+  it("does not allocate a Set when entries are empty and committed is null", () => {
+    const largeKeys = Array.from({ length: 5_000 }, (_, i) => `k${i}`);
+    withCountingSet((constructions) => {
+      expect(
+        findLegendPressedIdentity({
+          keys: largeKeys,
+          entries: [],
+          keyIndex: new Map(),
+          committed: null,
+        }),
+      ).toBeNull();
+      expect(constructions()).toBe(0);
+    });
+  });
+
   it("prefers committed identity when its keys still match", () => {
     expect(
       findLegendPressedIdentity({
@@ -347,15 +364,7 @@ describe("findLegendPressedIdentity", () => {
       Object.freeze(matchingKeys),
     );
 
-    const RealSet = globalThis.Set;
-    let constructions = 0;
-    globalThis.Set = class CountingSet<T> extends RealSet<T> {
-      constructor(iterable?: Iterable<T>) {
-        super(iterable);
-        constructions += 1;
-      }
-    } as SetConstructor;
-    try {
+    withCountingSet((constructions) => {
       const result = findLegendPressedIdentity({
         keys: matchingKeys,
         entries: largeEntries,
@@ -364,13 +373,28 @@ describe("findLegendPressedIdentity", () => {
       });
       expect(result).toEqual({ scale: "fill", entryIndex: E - 1 });
       // One Set for input.keys (plus at most a small constant). Not 2×E.
-      expect(constructions).toBeLessThanOrEqual(2);
-      expect(constructions).toBeLessThan(E);
-    } finally {
-      globalThis.Set = RealSet;
-    }
+      expect(constructions()).toBeLessThanOrEqual(2);
+      expect(constructions()).toBeLessThan(E);
+    });
   });
 });
+
+/** Spy `globalThis.Set` constructions for allocation-path tests (single class for max-classes-per-file). */
+function withCountingSet(run: (constructions: () => number) => void): void {
+  const RealSet = globalThis.Set;
+  let constructions = 0;
+  globalThis.Set = class CountingSet<T> extends RealSet<T> {
+    constructor(iterable?: Iterable<T>) {
+      super(iterable);
+      constructions += 1;
+    }
+  } as SetConstructor;
+  try {
+    run(() => constructions);
+  } finally {
+    globalThis.Set = RealSet;
+  }
+}
 
 function adapter(partial: {
   legends?: readonly SceneLegend[];
