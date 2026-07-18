@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784385876238,
+  "lastUpdate": 1784387006316,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -27810,6 +27810,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 160.995,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "fc49ce68cc98e18f4b79d91641e4e93914d33e44",
+          "message": "perf(core): O(log E+k) stroked path hit via edge AABB shortlist (#280)\n\n* perf(core): O(log E+k) stroked path hit via edge AABB shortlist\n\nAfter #277 subpath shortlist, dense single-series polylines still refined\nevery edge O(E). Index consecutive edges with the shared size-class AABB\ntrees; shortlist then exact distance. Fill still uses subpath shortlist.\n\n* fix(core): skip path edge indexes for filled area batches\n\nFilled hitTest never queries edges; building edge AABB trees was pure\noverhead for geomArea/ribbon (Codex #280 P2).",
+          "timestamp": "2026-07-18T10:02:51-05:00",
+          "tree_id": "0ed2e4194c0f8f4c7269c9264936f7a4ff3a8fd1",
+          "url": "https://github.com/ljodea/ggsvelte/commit/fc49ce68cc98e18f4b79d91641e4e93914d33e44"
+        },
+        "date": 1784387005654,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 3.14,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 4.4553,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 10.6333,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 13.032,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 83.5202,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 117.3171,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.0816,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.26,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 84.006,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 104.5742,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.0749,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.3486,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 114.5584,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7918,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 26.7996,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.4834,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 30.3719,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 592.7962,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 159.0553,
             "unit": "ms"
           }
         ]
