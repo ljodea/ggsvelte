@@ -122,7 +122,34 @@ be added for pure-TS spec files if the transform demands it.
 | Unsupported transformations explain the manual change | N/A post-0.1 — none exist     | Required guide subsection per future migration                                  |
 | Release notes link migration guidance                 | Met for 0.2                   | `Migration:` markers in all pending minors; wiring test                         |
 
-## Ambiguity-audit candidates (verdicts land with the audit)
+## Ambiguity audit — verdicts
+
+Audited against `resolveInteractionScope` (`assembly/assemble.ts`),
+`normalizeInteractionConfig` (`interaction/interaction.ts`), the orchestrator
+wiring (`plot-orchestrator.svelte.ts`), and `legend/filter-state.svelte.ts`.
+Capabilities are strictly opt-in (`undefined`/`false` ⇒ off; `legendFilter`
+defaults to `false` in `GGPlot`).
+
+| Combination                                                                                             | Behavior                                            | Verdict                                                                                                                                                                                              |
+| ------------------------------------------------------------------------------------------------------- | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `interaction` without `interactionScope`                                                                | `TypeError` at render                               | Loud by design — no diagnostic                                                                                                                                                                       |
+| Controlled zoom without `interactionScope.x`/`.y`                                                       | `TypeError` at render                               | Loud by design — no diagnostic                                                                                                                                                                       |
+| `interactionScope` without `interaction`                                                                | Prop silently ignored; scope derived from `key`/aes | **`INTERACTION_SCOPE_WITHOUT_CONTROLLER` (advisory)**                                                                                                                                                |
+| Handler prop with its capability off (`oninspect`/`onselect`/`onzoom`/`onlegendfocus`/`onlegendfilter`) | Handler never fires, silently                       | **`INTERACTION_HANDLER_WITHOUT_CAPABILITY` (advisory)**, `prop` = handler, `actual` = capability to enable; keyed on capability _requested_, so requires-key/faceted degradations never advise twice |
+| Controller state + locally disabled capability                                                          | Documented passive-consumer linked-view pattern     | Intentional — no diagnostic                                                                                                                                                                          |
+| `oninteraction` with no capability and no controller                                                    | Unified stream is empty                             | Covered by the per-handler advisories above; no separate code                                                                                                                                        |
+| `ontoolchange` with no tools available                                                                  | No tool events                                      | Follows from capability opt-in; tool rail shows unavailability — no code                                                                                                                             |
+| `tool` naming an unavailable capability                                                                 | Tool not activated                                  | Already `INTERACTION_TOOL_UNAVAILABLE`                                                                                                                                                               |
+| `select` point / non-independent interval preset without `key`                                          | Selection not durable / combines nothing            | Already `INTERACTION_POINT_REQUIRES_KEY` / `INTERACTION_INTERVAL_PRESET_REQUIRES_KEY`                                                                                                                |
+| `legendFocus` without `key` / without discrete legends                                                  | Degraded                                            | Already `INTERACTION_LEGEND_REQUIRES_KEY` / `INTERACTION_LEGEND_DISCRETE_ONLY`                                                                                                                       |
+| `zoom` on faceted plots                                                                                 | Disabled                                            | Already `INTERACTION_INTERVAL_FACET_UNSUPPORTED`                                                                                                                                                     |
+
+The two new advisories are delivered through the ordinary diagnostic channel
+once per prop per plot instance (`wiringDiagnostics` in the orchestrator),
+and are component-tested in
+`packages/svelte/tests/interaction/wiring-diagnostics.test.ts`.
+
+## Ambiguity-audit candidates (superseded by the verdicts above)
 
 Checks for ambiguous capability combinations are added only where an audit
 confirms silently surprising behavior — diagnostics are conditional output,
@@ -148,8 +175,9 @@ skipped.
 ## References
 
 - Issue #7 (scope + acceptance criteria for this record).
-- Follow-up issues (filed with this record): runtime deprecation diagnostics
-  (triggered by the first runtime-observable deprecation); codemod runner +
-  fixture harness (triggered by the first migration meeting the bar).
+- Follow-up issues (filed with this record): #289 runtime deprecation
+  diagnostics (triggered by the first runtime-observable deprecation);
+  #290 codemod runner + fixture harness (triggered by the first migration
+  meeting the bar).
 - CONTRIBUTING.md "Deprecation policy"; `lifecycle.json` lifecycle tags;
   ADR 0011/0012 for the interaction and release-automation background.
