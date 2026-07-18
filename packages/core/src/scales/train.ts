@@ -433,7 +433,7 @@ export function trainColor(
   return {
     type: "ordinal",
     domain: result.domain,
-    indexOf: result.indexOf,
+    indexOf: (value: unknown) => result.indexOf(value),
     colorOf: (value: unknown) => result.rangeValueOf(value) as string | undefined,
     state: result.state,
     warnings: result.warnings,
