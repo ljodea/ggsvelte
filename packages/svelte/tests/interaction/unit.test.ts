@@ -725,4 +725,130 @@ describe("semantic inspection resolver", () => {
     first.dispose();
     resized.dispose();
   });
+
+  it("dedups aggregate sourceKeys in first-seen order and skips null keyOf results", () => {
+    // keyOf maps: skip → null, a2 → "a", b2 → "b", else id.
+    // Unique non-null keys are {a,b,c}; order follows first lineage appearance.
+    const data = [
+      { id: "a", g: "g" },
+      { id: "skip", g: "g" },
+      { id: "b", g: "g" },
+      { id: "a2", g: "g" },
+      { id: "c", g: "g" },
+      { id: "b2", g: "g" },
+    ];
+    const model = runPipeline(
+      {
+        data: { values: data },
+        layers: [{ geom: "bar", aes: { x: { field: "g" } } }],
+      },
+      { width: 400, height: 300 },
+    );
+    const seed = model.candidates.candidate(0)!;
+    const keyOf = (row: { id: string }): string | null => {
+      if (row.id === "skip") return null;
+      if (row.id === "a2") return "a";
+      if (row.id === "b2") return "b";
+      return row.id;
+    };
+    // Oracle: first-seen non-null keys along the published lineage order.
+    const firstSeen: string[] = [];
+    for (const rowIndex of model.lineage.keys(seed.lineage)) {
+      const row = model.row(rowIndex) as { id: string } | null;
+      if (row === null) continue;
+      const key = keyOf(row);
+      if (key !== null && !firstSeen.includes(key)) firstSeen.push(key);
+    }
+    expect(new Set(firstSeen)).toEqual(new Set(["a", "b", "c"]));
+    expect(firstSeen).toHaveLength(3);
+
+    const inspection = resolveInspection({
+      model,
+      seed,
+      mode: "exact",
+      state: "transient",
+      source: "pointer",
+      keyOf: (row) => keyOf(row as { id: string }),
+    });
+    expect(inspection.focus.sourceKeys).toEqual(firstSeen);
+    expect(inspection.focus.lineageCount).toBe(6);
+    model.dispose();
+  });
+
+  // Source-key dedup uses uniqueKeysFromRowIndexes (Set membership), not
+  // Array#includes on the growing list — O(R) instead of O(R²) for large
+  // aggregate lineages (#200). Wall-clock ratio guards flake under CI
+  // contention; structural O(R) is owned by the shared helper (selection #182).
+  it("materializes all-unique large lineage sourceKeys in first-seen order", () => {
+    const n = 2_000;
+    const data = Array.from({ length: n }, (_, index) => ({
+      id: `row-${index}`,
+      g: "g",
+    }));
+    const model = runPipeline(
+      {
+        data: { values: data },
+        layers: [{ geom: "bar", aes: { x: { field: "g" } } }],
+      },
+      { width: 400, height: 300 },
+    );
+    const seed = model.candidates.candidate(0)!;
+    expect(model.lineage.count(seed.lineage)).toBe(n);
+    const lineageRows = model.lineage.keys(seed.lineage);
+    const firstId = (model.row(lineageRows[0]) as { id: string }).id;
+    const lastId = (model.row(lineageRows[n - 1]) as { id: string }).id;
+
+    const inspection = resolveInspection({
+      model,
+      seed,
+      mode: "exact",
+      state: "transient",
+      source: "pointer",
+      keyOf: (row) => row.id as string,
+    });
+    expect(inspection.focus.sourceKeys).toHaveLength(n);
+    expect(inspection.focus.sourceKeys[0]).toBe(firstId);
+    expect(inspection.focus.sourceKeys[n - 1]).toBe(lastId);
+    model.dispose();
+  });
+
+  // uniqueKeysFromRowIndexes builds one membership Set for the lineage walk
+  // (issue #200). Array#includes-based first-seen would construct zero Sets.
+  it("allocates a membership Set when materializing aggregate sourceKeys", () => {
+    const data = Array.from({ length: 40 }, (_, index) => ({
+      id: `row-${index}`,
+      g: "g",
+    }));
+    const model = runPipeline(
+      {
+        data: { values: data },
+        layers: [{ geom: "bar", aes: { x: { field: "g" } } }],
+      },
+      { width: 400, height: 300 },
+    );
+    const seed = model.candidates.candidate(0)!;
+    const RealSet = globalThis.Set;
+    let constructions = 0;
+    globalThis.Set = class CountingSet<T> extends RealSet<T> {
+      constructor(iterable?: Iterable<T>) {
+        super(iterable);
+        constructions += 1;
+      }
+    } as SetConstructor;
+    try {
+      const inspection = resolveInspection({
+        model,
+        seed,
+        mode: "exact",
+        state: "transient",
+        source: "pointer",
+        keyOf: (row) => row.id as string,
+      });
+      expect(inspection.focus.sourceKeys).toHaveLength(40);
+      expect(constructions).toBeGreaterThanOrEqual(1);
+    } finally {
+      globalThis.Set = RealSet;
+      model.dispose();
+    }
+  });
 });
