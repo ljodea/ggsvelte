@@ -1,0 +1,131 @@
+# Success-marker content-hash restore (issue #245).
+# Compute hash → restore exact-key marker cache → validate marker.
+# Callers gate work on steps.<id>.outputs.hit != 'true' and write via
+# ci-content-hash-write when hit is false and bypass is false.
+name: CI content-hash restore
+description: >
+  Bypass-aware content-hash for a cacheable execution: hash inputs, restore
+  the success-marker cache (exact key only), and validate the marker.
+
+inputs:
+  execution:
+    description: CacheableExecution name (unit, build, component_svelte, consumer, …)
+    required: true
+  bypass:
+    description: detect-changes.outputs.bypass_content_cache
+    required: true
+  disable:
+    description: vars.CI_DISABLE_CONTENT_HASH (set to 1 to force full run)
+    required: false
+    default: ""
+  container_tag:
+    description: Optional Playwright container tag for component shards
+    required: false
+    default: ""
+  matrix_node:
+    description: Optional consumer matrix node major (with other matrix_* inputs)
+    required: false
+    default: ""
+  matrix_pm:
+    description: Optional consumer matrix package manager
+    required: false
+    default: ""
+  matrix_pm_version:
+    description: Optional consumer matrix package manager version
+    required: false
+    default: ""
+  matrix_svelte:
+    description: Optional consumer matrix Svelte version
+    required: false
+    default: ""
+  runtime_node_version:
+    description: Optional resolved node -v (consumer; resolve in the job)
+    required: false
+    default: ""
+  runtime_pm_version:
+    description: Optional resolved package-manager -v (consumer; resolve in the job)
+    required: false
+    default: ""
+
+outputs:
+  bypass:
+    description: true when content-hash short-circuit is disabled for this run
+    value: ${{ steps.compute.outputs.bypass }}
+  hit:
+    description: true when a validated success marker matches the content hash
+    # Prefer validate output; fall back to compute (sets hit=false on bypass).
+    value: ${{ steps.validate.outputs.hit || steps.compute.outputs.hit }}
+  hash:
+    description: Content hash hex (empty when bypassed)
+    value: ${{ steps.compute.outputs.hash }}
+
+runs:
+  using: composite
+  steps:
+    - id: compute
+      name: compute content-hash (${{ inputs.execution }})
+      shell: bash
+      env:
+        # env-indirection: inputs must not expand into the script body (zizmor).
+        BYPASS: ${{ inputs.bypass }}
+        DISABLE: ${{ inputs.disable }}
+        EXECUTION: ${{ inputs.execution }}
+        CONTAINER_TAG: ${{ inputs.container_tag }}
+        MATRIX_NODE: ${{ inputs.matrix_node }}
+        MATRIX_PM: ${{ inputs.matrix_pm }}
+        MATRIX_PM_VERSION: ${{ inputs.matrix_pm_version }}
+        MATRIX_SVELTE: ${{ inputs.matrix_svelte }}
+        RUNTIME_NODE_VERSION: ${{ inputs.runtime_node_version }}
+        RUNTIME_PM_VERSION: ${{ inputs.runtime_pm_version }}
+      run: |
+        set -euo pipefail
+        if [ "${BYPASS:-}" = "true" ] || [ "${DISABLE:-}" = "1" ]; then
+          {
+            echo "bypass=true"
+            echo "hit=false"
+          } >> "$GITHUB_OUTPUT"
+          echo "content-hash bypassed for ${EXECUTION}"
+          exit 0
+        fi
+        echo "bypass=false" >> "$GITHUB_OUTPUT"
+        args=(--execution "${EXECUTION}" --os "${RUNNER_OS}")
+        if [ -n "${CONTAINER_TAG}" ]; then
+          args+=(--container-tag "${CONTAINER_TAG}")
+        fi
+        if [ -n "${MATRIX_NODE}" ]; then
+          args+=(
+            --matrix-node "${MATRIX_NODE}"
+            --matrix-pm "${MATRIX_PM}"
+            --matrix-pm-version "${MATRIX_PM_VERSION}"
+            --matrix-svelte "${MATRIX_SVELTE}"
+          )
+        fi
+        if [ -n "${RUNTIME_NODE_VERSION}" ]; then
+          args+=(
+            --runtime-node-version "${RUNTIME_NODE_VERSION}"
+            --runtime-pm-version "${RUNTIME_PM_VERSION}"
+          )
+        fi
+        bun scripts/ci-routing.ts hash-inputs "${args[@]}"
+
+    - id: marker_cache
+      name: restore ${{ inputs.execution }} success-marker cache
+      if: steps.compute.outputs.bypass != 'true'
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: .ci-content-hash/${{ inputs.execution }}.ok
+        # Exact key only (no restore-keys) — incomplete or wrong-tree hits are unsafe.
+        key: ${{ steps.compute.outputs.cache_key }}
+
+    - id: validate
+      name: validate ${{ inputs.execution }} success marker
+      if: steps.compute.outputs.bypass != 'true' && steps.marker_cache.outputs.cache-hit == 'true'
+      shell: bash
+      env:
+        # env-indirection: step outputs must not expand into the script body (zizmor).
+        CONTENT_HASH: ${{ steps.compute.outputs.hash }}
+        EXECUTION: ${{ inputs.execution }}
+      run: |
+        set -euo pipefail
+        bun scripts/ci-routing.ts validate-success-marker \
+          --execution "${EXECUTION}" --hash "${CONTENT_HASH}"

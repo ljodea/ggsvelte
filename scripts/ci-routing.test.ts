@@ -169,6 +169,19 @@ describe("planJobs", () => {
     expect(plan.unit).toBe(true);
   });
 
+  test("composite action changes force the full CI surface (no false-green on recipe-only edits)", () => {
+    const plan = planJobs(
+      classifyChangedPaths([".github/actions/ci-content-hash-restore/action.yml"]),
+    );
+    expect(plan.unit).toBe(true);
+    expect(plan.component).toBe(true);
+    expect(plan.consumer).toBe(true);
+    expect(plan.build).toBe(true);
+    expect(plan.bench_smoke).toBe(true);
+    expect(plan.actions_security).toBe(true);
+    expect(plan.packages_dist).toBe(true);
+  });
+
   test("ci.yml self-changes force the full CI surface so routing cannot silently shrink", () => {
     const plan = planJobs(classifyChangedPaths([".github/workflows/ci.yml"]));
     expect(plan.unit).toBe(true);
@@ -352,12 +365,14 @@ describe("content-hash inputs", () => {
       "package.json",
       ".github/workflows/ci.yml",
       "scripts/ci-routing.ts",
+      ".github/actions/ci-content-hash-restore/action.yml",
     ]);
     expect(paths).toContain("packages/core/src/x.ts");
     expect(paths).toContain("packages/svelte/src/lib/Plot.svelte");
     expect(paths).toContain("bun.lock");
     expect(paths).toContain(".github/workflows/ci.yml");
     expect(paths).toContain("scripts/ci-routing.ts");
+    expect(paths).toContain(".github/actions/ci-content-hash-restore/action.yml");
     expect(paths).not.toContain("spikes/browser/foo.ts");
     expect(paths).not.toContain("tests/visual/vr.spec.ts");
     expect(paths).not.toContain("README.md");
@@ -452,11 +467,16 @@ describe("hashJobInputs (fail-closed)", () => {
 });
 
 describe("shouldBypassContentCache", () => {
-  test("true for forceAll, lockfile, ci.yml, and ci-routing changes", () => {
+  test("true for forceAll, lockfile, ci.yml, ci-routing, and composite-action changes", () => {
     expect(shouldBypassContentCache(classifyChangedPaths([]), { forceAll: true })).toBe(true);
     expect(shouldBypassContentCache(classifyChangedPaths(["bun.lock"]))).toBe(true);
     expect(shouldBypassContentCache(classifyChangedPaths([".github/workflows/ci.yml"]))).toBe(true);
     expect(shouldBypassContentCache(classifyChangedPaths(["scripts/ci-routing.ts"]))).toBe(true);
+    expect(
+      shouldBypassContentCache(
+        classifyChangedPaths([".github/actions/ci-content-hash-restore/action.yml"]),
+      ),
+    ).toBe(true);
     expect(shouldBypassContentCache(classifyChangedPaths(["packages/core/src/x.ts"]))).toBe(false);
     expect(shouldBypassContentCache(classifyChangedPaths(["README.md"]))).toBe(false);
   });

@@ -106,11 +106,30 @@ describe("R0 release wiring", () => {
 
   it("content-hash skips scheduled jobs via physical execution keys (issue #245)", () => {
     const ci = read(".github/workflows/ci.yml");
-    // detect-changes exports bypass covering force-all / lockfile / ci.yml / router.
+    const restore = read(".github/actions/ci-content-hash-restore/action.yml");
+    const write = read(".github/actions/ci-content-hash-write/action.yml");
+
+    // Protocol lives in composites (single source of truth).
+    expect(restore).toContain("hash-inputs");
+    expect(restore).toContain("validate-success-marker");
+    expect(restore).toContain(".ci-content-hash/");
+    expect(restore).toContain("shell: bash");
+    // Exact key only — no restore-keys on the success-marker cache step.
+    const markerCache = restore.slice(
+      restore.indexOf("path: .ci-content-hash/"),
+      restore.indexOf("validate-success-marker"),
+    );
+    expect(markerCache).toContain("key:");
+    expect(markerCache).not.toContain("restore-keys:");
+    expect(write).toContain("write-success-marker");
+    expect(write).toContain("shell: bash");
+
+    // detect-changes exports bypass covering force-all / lockfile / ci.yml / router / actions.
     const detect = ci.slice(ci.indexOf("  detect-changes:"), ci.indexOf("  packages-dist:"));
     expect(detect).toContain("bypass_content_cache:");
     expect(detect).toContain("emit-github-output");
 
+    // packages-dist keeps its specialized dist-payload protocol (not the marker composite).
     const producerJob = ci.slice(
       ci.indexOf("  packages-dist:\n    name: packages-dist"),
       ci.indexOf("  checks:\n    name: checks"),
@@ -119,23 +138,22 @@ describe("R0 release wiring", () => {
     expect(producerJob).toContain(".packages-dist-cache");
     expect(producerJob).toContain("steps.restore_dist.outputs.hit != 'true'");
     expect(producerJob).toContain("stage content-hash cache payload");
-    // Exact key only — no restore-keys on the content-hash cache step.
     const distCacheStep = producerJob.slice(
       producerJob.indexOf("restore packages-dist content-hash cache"),
       producerJob.indexOf("materialize packages/*/dist from content-hash cache"),
     );
     expect(distCacheStep).toContain("key: ${{ steps.content_hash.outputs.cache_key }}");
     expect(distCacheStep).not.toContain("restore-keys:");
+    expect(producerJob).not.toContain("ci-content-hash-restore");
 
     const unitJob = ci.slice(
       ci.indexOf("  unit:\n    name: unit"),
       ci.indexOf("  compatibility-matrix:\n    name: compatibility matrix"),
     );
-    expect(unitJob).toContain("hash-inputs --execution unit");
-    expect(unitJob).toContain("write-success-marker");
-    expect(unitJob).toContain("validate-success-marker");
-    expect(unitJob).toContain(".ci-content-hash/unit.ok");
-    expect(unitJob).toContain("steps.validate_marker.outputs.hit != 'true'");
+    expect(unitJob).toContain("uses: ./.github/actions/ci-content-hash-restore");
+    expect(unitJob).toContain("uses: ./.github/actions/ci-content-hash-write");
+    expect(unitJob).toContain("execution: unit");
+    expect(unitJob).toContain("steps.content_hash.outputs.hit != 'true'");
     expect(unitJob).toContain("bypass_content_cache");
     expect(unitJob).toContain("CI_DISABLE_CONTENT_HASH");
 
@@ -148,31 +166,55 @@ describe("R0 release wiring", () => {
       const start = ci.indexOf(`  ${job}:\n`);
       expect(start).toBeGreaterThan(-1);
       const slice = ci.slice(start, start + 4500);
-      expect(slice).toContain(`hash-inputs --execution ${execution}`);
-      expect(slice).toContain(`.ci-content-hash/${execution}.ok`);
-      expect(slice).toContain("--container-tag");
+      expect(slice).toContain("uses: ./.github/actions/ci-content-hash-restore");
+      expect(slice).toContain(`execution: ${execution}`);
+      expect(slice).toContain("container_tag:");
+      expect(slice).toContain("uses: ./.github/actions/ci-content-hash-write");
     }
 
-    // Consumer matrix dimensions are part of the cache key (Codex P1).
+    // Consumer: runtime resolution stays in the job; matrix dims pass into restore composite.
     const consumerJob = ci.slice(
       ci.indexOf("  consumer-compat:\n    name: packed consumer"),
       ci.indexOf("  component-svelte:\n    name: component-svelte"),
     );
-    expect(consumerJob).toContain("hash-inputs --execution consumer");
-    expect(consumerJob).toContain("--matrix-node");
-    expect(consumerJob).toContain("--matrix-pm");
-    expect(consumerJob).toContain("--matrix-svelte");
-    expect(consumerJob).toContain("--runtime-node-version");
-    expect(consumerJob).toContain("--runtime-pm-version");
+    expect(consumerJob).toContain("uses: ./.github/actions/ci-content-hash-restore");
+    expect(consumerJob).toContain("execution: consumer");
+    expect(consumerJob).toContain("matrix_node:");
+    expect(consumerJob).toContain("matrix_pm:");
+    expect(consumerJob).toContain("matrix_svelte:");
+    expect(consumerJob).toContain("runtime_node_version:");
+    expect(consumerJob).toContain("runtime_pm_version:");
     expect(consumerJob).toContain("node -v");
-    expect(consumerJob).toContain(".ci-content-hash/consumer.ok");
+    expect(consumerJob).toContain("uses: ./.github/actions/ci-content-hash-write");
 
-    // Router module documents invalidation + schema.
+    // Marker jobs share the composite (not only unit).
+    for (const jobMarker of [
+      "  build:\n    name: build",
+      "  actions-security:\n    name: actions-security",
+      "  bench-smoke:\n    name: bench-smoke",
+    ]) {
+      const start = ci.indexOf(jobMarker);
+      expect(start).toBeGreaterThan(-1);
+      const slice = ci.slice(start, start + 3500);
+      expect(slice).toContain("uses: ./.github/actions/ci-content-hash-restore");
+      expect(slice).toContain("uses: ./.github/actions/ci-content-hash-write");
+    }
+
+    // actions-security scans composites after extraction (zizmor path scope).
+    const actionsSecurity = ci.slice(
+      ci.indexOf("  actions-security:\n    name: actions-security"),
+      ci.indexOf("  bench-smoke:\n    name: bench-smoke"),
+    );
+    expect(actionsSecurity).toMatch(/zizmor==1\.26\.1 \.github\/workflows \.github\/actions/);
+
+    // Router module documents invalidation + schema + composite recipe inputs.
     const routing = read("scripts/ci-routing.ts");
     expect(routing).toContain("CONTENT_HASH_SCHEMA");
     expect(routing).toContain("JOB_CONTENT_INPUTS");
     expect(routing).toContain("bypass_content_cache");
     expect(routing).toContain("CI_DISABLE_CONTENT_HASH");
+    expect(routing).toContain(".github/actions/**");
+    expect(routing).toContain("ci_actions");
     expect(read("CONTRIBUTING.md")).toContain("content-hash");
   });
 
