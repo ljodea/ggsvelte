@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784342525258,
+  "lastUpdate": 1784343992232,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -21979,6 +21979,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 160.2847,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "ab6636e5fc6015bef04cba6148147418f94429d7",
+          "message": "perf(core): hoist table.column() out of lineage filter row callbacks (#221)\n\nFallback aggregate lineage filters re-fetched the field column on every\nbase-row iteration. Hoist the column once per call for lower constant cost\non group-sized scans; filter predicates are unchanged.\n\nCloses #220",
+          "timestamp": "2026-07-17T22:05:47-05:00",
+          "tree_id": "b8342f22f0531a6f0d56f6f64e48fa624e43154f",
+          "url": "https://github.com/ljodea/ggsvelte/commit/ab6636e5fc6015bef04cba6148147418f94429d7"
+        },
+        "date": 1784343991193,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.5348,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.3416,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 11.7329,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 14.3051,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 85.5695,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 116.1878,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.2961,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.3984,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 84.6428,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 108.7899,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 15.6737,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 13.8198,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 116.3306,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.9056,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 27.5139,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.5595,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 30.5841,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 625.4331,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 161.7,
             "unit": "ms"
           }
         ]
