@@ -490,6 +490,9 @@ function buildCandidateStoreEager(
         primitiveIds[a]! - primitiveIds[b]!,
     ),
   );
+  // Dense inverse of `traversal`: candidate id → sequential rank (O(1) next/previous).
+  const traversalRank = new Uint32Array(n);
+  for (let i = 0; i < n; i++) traversalRank[traversal[i]!] = i;
   const permutations: Record<"x" | "y", Uint32Array> = {
     x: new Uint32Array(0),
     y: new Uint32Array(0),
@@ -777,10 +780,13 @@ function buildCandidateStoreEager(
       if (n === 0) return null;
       if (direction === "first" || startId === null) return traversal[0]!;
       if (direction === "last") return traversal[n - 1]!;
-      const at = traversal.indexOf(startId);
-      if (at < 0) return traversal[0]!;
-      if (direction === "next") return traversal[(at + 1) % n]!;
-      if (direction === "previous") return traversal[(at - 1 + n) % n]!;
+      if (direction === "next" || direction === "previous") {
+        if (!Number.isInteger(startId) || startId < 0 || startId >= n) return traversal[0]!;
+        const at = traversalRank[startId]!;
+        if (direction === "next") return traversal[(at + 1) % n]!;
+        return traversal[(at - 1 + n) % n]!;
+      }
+      if (!Number.isInteger(startId) || startId < 0 || startId >= n) return traversal[0]!;
       let best = -1;
       let primaryBest = Infinity;
       let orthBest = Infinity;
