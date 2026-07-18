@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784393572235,
+  "lastUpdate": 1784394104676,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -28524,6 +28524,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 163.7429,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "f171d835ea24e0034886b0aabe8632b78de2e8b1",
+          "message": "chore: backfill changesets for spec fix/perf and v0.1.1→v0.2.0 work (#286)\n\nRelease PR #45 covered only the 4 PRs that added changeset files. This adds:\n\n- a patch changeset for @ggsvelte/spec so the standalone lintSpec\n  options.limits fix (#210) and lint perf work (#190, #191) actually\n  publish — spec had 7 unreleased src commits since @ggsvelte/spec@0.1.1\n  but no changeset, so changesets was not going to republish it\n- a patch-level summary changeset for @ggsvelte/core and @ggsvelte/svelte\n  so the 0.2.0 CHANGELOG reflects the ~200 perf/fix/refactor PRs merged\n  without individual changesets\n\nWith the linked group, spec now releases as 0.2.0 alongside core and\nsvelte, and core/svelte dependency ranges on spec update accordingly.\n\nCo-authored-by: Claude Fable 5 <noreply@anthropic.com>",
+          "timestamp": "2026-07-18T12:01:06-05:00",
+          "tree_id": "45c1363d21d6a40aaec9e2ded3dd9bcfc9281194",
+          "url": "https://github.com/ljodea/ggsvelte/commit/f171d835ea24e0034886b0aabe8632b78de2e8b1"
+        },
+        "date": 1784394103732,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.2125,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.9885,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 10.3701,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 14.2136,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 83.2895,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 120.9509,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.1297,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2731,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 87.1736,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 107.3569,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 12.4256,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 11.418,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 116.5886,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.8095,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 28.697,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 8.6498,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 30.4644,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 626.5044,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 167.422,
             "unit": "ms"
           }
         ]
