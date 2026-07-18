@@ -7,7 +7,6 @@ import {
   localAnchor,
   pathRange,
   primitiveCount,
-  samePath,
   segmentDistance,
   segmentIntersectsRect,
 } from "./candidate-geometry.js";
@@ -369,6 +368,7 @@ export function buildCandidateStoreEager(
       return d <= batch.linewidth / 2 + 3 ? d : null;
     }
     if (batch.kind === "paths") {
+      // One O(log P) range lookup; reuse for fill containment and stroke neighbors.
       const range = pathRange(batch, i);
       if (batch.fills !== undefined && range !== null) {
         const containmentKey = `${batchIds[id]}:${range[0]}:${range[1]}`;
@@ -380,8 +380,9 @@ export function buildCandidateStoreEager(
         if (contained) return Math.hypot(px - xs[id]!, py - ys[id]!);
       }
       let d = Infinity;
-      for (const other of [i - 1, i + 1])
-        if (other >= 0 && other < batch.rowIndex.length && samePath(batch, i, other))
+      if (range !== null) {
+        for (const other of [i - 1, i + 1]) {
+          if (other < range[0] || other >= range[1]) continue;
           d = Math.min(
             d,
             segmentDistance(
@@ -393,6 +394,8 @@ export function buildCandidateStoreEager(
               batch.positions[other * 2 + 1]!,
             ),
           );
+        }
+      }
       return d <= batch.linewidth / 2 + 3 ? d : null;
     }
     return null;
@@ -417,17 +420,19 @@ export function buildCandidateStoreEager(
     }
     if (batch.kind === "paths") {
       if (xs[id]! >= loX && xs[id]! <= hiX && ys[id]! >= loY && ys[id]! <= hiY) return true;
-      for (const other of [i - 1, i + 1])
-        if (other >= 0 && other < batch.rowIndex.length && samePath(batch, i, other)) {
+      const range = pathRange(batch, i);
+      if (range !== null) {
+        for (const other of [i - 1, i + 1]) {
+          if (other < range[0] || other >= range[1]) continue;
           const ox = panel.x + batch.positions[other * 2]!;
           const oy = panel.y + batch.positions[other * 2 + 1]!;
           if (segmentIntersectsRect(xs[id]!, ys[id]!, ox, oy, loX, loY, hiX, hiY)) return true;
         }
-      const range = pathRange(batch, i);
-      if (batch.fills !== undefined && range !== null) {
-        const centerX = (loX + hiX) / 2 - panel.x;
-        const centerY = (loY + hiY) / 2 - panel.y;
-        if (insidePath(batch, range[0], range[1], centerX, centerY)) return true;
+        if (batch.fills !== undefined) {
+          const centerX = (loX + hiX) / 2 - panel.x;
+          const centerY = (loY + hiY) / 2 - panel.y;
+          if (insidePath(batch, range[0], range[1], centerX, centerY)) return true;
+        }
       }
       return false;
     }
