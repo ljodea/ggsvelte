@@ -853,6 +853,46 @@ describe("createInspectionState traversal", () => {
 
     destroy();
   });
+
+  it("keyboard navigate O(1)-fetches by retained id (no full-store rematch)", () => {
+    // applyTraversalIndex must use candidates.candidate(id) for the selected
+    // index only — not matchCandidateFromHit over iterateCandidates (O(C)).
+    // Count candidate() calls after the first navigate has built the traversal
+    // list: a second navigate should call candidate once (the selected id),
+    // not once per store entry.
+    const model = modelFor(continuousSpec());
+    const realCandidate = model.candidates.candidate.bind(model.candidates);
+    let candidateCalls = 0;
+    let countCalls = false;
+    model.candidates.candidate = (id: number) => {
+      if (countCalls) candidateCalls += 1;
+      return realCandidate(id);
+    };
+    const storeSize = model.candidates.size;
+    expect(storeSize).toBeGreaterThan(1);
+
+    const { state, destroy } = mountInspectionController({
+      model: () => model,
+      registerEffects: false,
+    });
+
+    state.navigate(1);
+    flushSync();
+    expect(state.inspection).not.toBeNull();
+    const firstKey = state.inspection!.focus.key;
+
+    candidateCalls = 0;
+    countCalls = true;
+    state.navigate(1);
+    flushSync();
+    expect(state.inspection).not.toBeNull();
+    expect(state.inspection!.focus.key).not.toEqual(firstKey);
+    // O(1) id fetch — not a full-store walk (would be ≥ storeSize).
+    expect(candidateCalls).toBeLessThan(storeSize);
+    expect(candidateCalls).toBeGreaterThan(0);
+
+    destroy();
+  });
 });
 
 describe("createInspectionState setInspection(null) clear ordering", () => {

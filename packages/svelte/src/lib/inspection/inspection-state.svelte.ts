@@ -39,7 +39,7 @@ import { plotTooltipDomId } from "../assembly/layout.js";
 import { panelContainingAnchor } from "../scene/geometry.js";
 import {
   bestDirectionalIndex,
-  buildTraversalHits,
+  buildTraversalEntries,
   cycleCoincidentIndex,
   hitFromCandidate,
   matchCandidateFromHit,
@@ -182,10 +182,16 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
     return panelContainingAnchor(deps.model()!.scene.panels, inspection.focus.anchor);
   });
 
-  const traversalHits: SceneHit[] = $derived.by(() => {
-    if (!deps.surfaceInteractive() || deps.model() === null) return [];
-    return buildTraversalHits(deps.model()!.candidates);
+  // Parallel hits + candidate ids: keyboard apply O(1)-fetches
+  // candidates.candidate(id) so resolveInspection does not re-scan the full
+  // store (O(C) matchCandidateFromHit). Ids only — not full CandidateFacts —
+  // so large charts do not retain every facts object for the model lifetime.
+  const traversal = $derived.by(() => {
+    if (!deps.surfaceInteractive() || deps.model() === null)
+      return { hits: [] as SceneHit[], candidateIds: [] as number[] };
+    return buildTraversalEntries(deps.model()!.candidates);
   });
+  const traversalHits: SceneHit[] = $derived(traversal.hits);
 
   // Coordinator closes over keyAt — handler-only invocation (deferred).
   const inspectionCoordinator = createInspectionCoordinator<Record<string, CellValue>, PropertyKey>(
@@ -440,7 +446,14 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
   /** Private — no remaining external consumer (codex r2 P2-3). */
   function applyTraversalIndex(index: number): void {
     activeTraversalIndex = index;
-    setInspection(traversalHits[index]!, "keyboard");
+    // O(1) id → facts for the selected index only (not full-store rematch).
+    const model = deps.model();
+    const id = traversal.candidateIds[index];
+    const candidate =
+      model === null || id === undefined
+        ? undefined
+        : (model.candidates.candidate(id) ?? undefined);
+    setInspection(traversal.hits[index]!, "keyboard", "transient", undefined, candidate);
   }
 
   function navigate(delta: number): void {
