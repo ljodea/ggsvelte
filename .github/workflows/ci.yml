@@ -31,6 +31,12 @@ concurrency:
 # compatibility-matrix, ci-gate) run freely. Heavy container / matrix work uses
 # job-level concurrency groups so Playwright containers do not oversubscribe
 # the shared 8-vCPU self-hosted host.
+# - Shared groups use `queue: max` so pending jobs wait (up to 100) instead of
+#   the default single-pending slot replacing earlier required runs.
+# - Required component shards share `heavy-component`; informational
+#   interaction-perf uses its own group so it cannot hold the gate.
+# - Consumer throttle applies only to Ubuntu self-hosted rows; hosted
+#   Windows/macOS rows get a per-run unique group (no cross-PR serialization).
 
 env:
   # Keep in sync with: spikes/browser devDependency "playwright" and the
@@ -126,6 +132,7 @@ jobs:
     concurrency:
       group: heavy-packages-dist
       cancel-in-progress: false
+      queue: max
     permissions:
       contents: read
     steps:
@@ -270,10 +277,12 @@ jobs:
       matrix: ${{ fromJSON(needs.compatibility-matrix.outputs.matrix) }}
     # Linux rows use the private self-hosted pool; Windows/macOS stay on GitHub-hosted.
     runs-on: ${{ startsWith(matrix.os, 'ubuntu') && fromJSON('["self-hosted","ggsvelte"]') || matrix.os }}
-    # Cap concurrent heavy work on the shared self-hosted host (#247).
+    # Cap concurrent Ubuntu/self-hosted consumer rows only (#247). Hosted
+    # Windows/macOS rows get a unique group so they are not serialized.
     concurrency:
-      group: heavy-consumer-${{ matrix.os }}-${{ matrix.node }}-${{ matrix.packageManager }}
+      group: ${{ startsWith(matrix.os, 'ubuntu') && 'heavy-consumer-ubuntu' || format('heavy-consumer-hosted-{0}-{1}-{2}-{3}', matrix.os, matrix.node, matrix.packageManager, github.run_id) }}
       cancel-in-progress: false
+      queue: max
     timeout-minutes: 20
     permissions:
       contents: read
@@ -327,10 +336,11 @@ jobs:
       needs.detect-changes.outputs.component == 'true' &&
       needs.packages-dist.result == 'success'
     runs-on: [self-hosted, ggsvelte]
-    # Cap concurrent heavy work on the shared self-hosted host (#247).
+    # Shared with other required component shards (#247); not interaction-perf.
     concurrency:
-      group: heavy-component-svelte
+      group: heavy-component
       cancel-in-progress: false
+      queue: max
     env:
       # GitHub runs the container as root, while /github/home belongs to
       # pwuser. Firefox refuses that ownership mismatch.
@@ -409,10 +419,11 @@ jobs:
       needs.detect-changes.outputs.component == 'true' &&
       needs.packages-dist.result == 'success'
     runs-on: [self-hosted, ggsvelte]
-    # Cap concurrent heavy work on the shared self-hosted host (#247).
+    # Shared with other required component shards (#247); not interaction-perf.
     concurrency:
-      group: heavy-component-spikes
+      group: heavy-component
       cancel-in-progress: false
+      queue: max
     env:
       # GitHub runs the container as root, while /github/home belongs to
       # pwuser. Firefox refuses that ownership mismatch.
@@ -491,10 +502,11 @@ jobs:
       needs.detect-changes.outputs.component == 'true' &&
       needs.packages-dist.result == 'success'
     runs-on: [self-hosted, ggsvelte]
-    # Cap concurrent heavy work on the shared self-hosted host (#247).
+    # Shared with other required component shards (#247); not interaction-perf.
     concurrency:
-      group: heavy-component-journeys
+      group: heavy-component
       cancel-in-progress: false
+      queue: max
     env:
       # GitHub runs the container as root, while /github/home belongs to
       # pwuser. Firefox refuses that ownership mismatch.
@@ -579,10 +591,11 @@ jobs:
       needs.detect-changes.outputs.interaction_perf == 'true' &&
       needs.packages-dist.result == 'success'
     runs-on: [self-hosted, ggsvelte]
-    # Cap concurrent heavy work on the shared self-hosted host (#247).
+    # Separate from heavy-component so informational perf cannot hold the gate.
     concurrency:
-      group: heavy-component-interaction-perf
+      group: heavy-interaction-perf
       cancel-in-progress: false
+      queue: max
     env:
       HOME: /root
     container:

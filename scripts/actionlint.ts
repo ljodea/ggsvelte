@@ -170,12 +170,24 @@ export function parseSelfHostedLabels(yaml: string): string[] {
   return labels;
 }
 
+/**
+ * Prepare workflow source for the lagging wasm actionlint checker.
+ * Strips concurrency `queue: max` (GitHub Actions, May 2026) — actionlint
+ * 2.0.6 / Go ≤1.7.12 reject the key and the wasm build panics mid-lint.
+ * Real workflows keep `queue: max`; only the linter input is rewritten.
+ */
+export function prepareSourceForLint(source: string): string {
+  return source.replace(/^[ \t]*queue:\s*max\s*(?:#.*)?\r?$/gm, "");
+}
+
 /** Build the message-filter list used against wasm findings. */
 export function buildKnownFalsePositives(selfHostedLabels: string[]): RegExp[] {
   // The npm wasm build (2.0.6) lags the Go actionlint and does not know the
   // `vars` context (GitHub "configuration variables", valid since 2022; used by
   // release.yml's NPM_PUBLISH_ENABLED gate). Filter that one false positive.
   // Remove this when the npm package's checker recognizes `vars`.
+  // Note: concurrency `queue: max` is stripped in prepareSourceForLint (not
+  // filtered here) because the wasm build panics on that unknown key.
   const patterns: RegExp[] = [/undefined variable "vars"/];
   for (const label of selfHostedLabels) {
     // Escape regex metacharacters in labels so "ggsvelte" stays literal.
@@ -261,7 +273,7 @@ async function main(): Promise<void> {
   let findings = 0;
   let suppressed = 0;
   for (const file of files) {
-    const source = await readFile(file, "utf8");
+    const source = prepareSourceForLint(await readFile(file, "utf8"));
     for (const r of lint(source, file)) {
       if (knownFalsePositives.some((re) => re.test(r.message))) {
         suppressed += 1;
