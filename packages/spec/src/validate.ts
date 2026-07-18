@@ -56,6 +56,7 @@ import {
   DEFAULT_VALIDATE_LIMITS,
   effectiveChannel,
   jsonDepth,
+  resolveFieldEvidence,
 } from "./validate-data.js";
 
 export type ValidateResult =
@@ -605,13 +606,20 @@ export function validate(input: unknown, options?: ValidateOptions): ValidateRes
     }
   }
 
-  // --- tier 2 (opt-in): data-aware checks -----------------------------------
+  // --- tier 2 (opt-in): data-aware checks + optional lint --------------------
+  // Resolve field evidence once so dataChecks and lintSpec share the same
+  // pivot + type-inference pass over large inline data.
+  let advisories: SpecAdvisory[] | undefined;
   if (options !== undefined && isRecord(input)) {
-    errors.push(...dataChecks(input, options, limits));
+    const resolved = resolveFieldEvidence(input, options, limits);
+    errors.push(...dataChecks(input, options, limits, resolved));
+    if (options.lint === true) {
+      // Reuse the map on success; on none/errors pass null so lint does not
+      // re-scan data that data-aware validation already refused or lacked.
+      const shared = resolved.status === "ok" ? resolved.fields : null;
+      advisories = lintSpec(input, options, shared);
+    }
   }
-
-  // --- spec lint (opt-in via options.lint): advisories, never errors ---------
-  const advisories = options?.lint === true ? lintSpec(input, options) : undefined;
   const withAdvisories = advisories !== undefined && advisories.length > 0 ? { advisories } : {};
 
   if (errors.length > limits.maxDiagnostics) {
