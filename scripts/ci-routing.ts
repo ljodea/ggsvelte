@@ -782,20 +782,25 @@ export function formatTreeEntryDigest(mode: string, oid: string): string {
  * Playwright container jobs may run as root while the checkout is owned by
  * the Actions runner user — git then refuses `ls-tree` with "dubious ownership".
  * Mark the worktree safe before hashing (idempotent).
+ *
+ * Do not discover the path via `git rev-parse`: that command is itself rejected
+ * under dubious ownership (empty topOut → no-op → ls-tree still fails). Use
+ * process.cwd() and GITHUB_WORKSPACE instead.
  */
 async function ensureGitSafeDirectory(): Promise<void> {
-  const top = Bun.spawn(["git", "rev-parse", "--show-toplevel"], {
-    stdout: "pipe",
-    stderr: "pipe",
-  });
-  const topOut = (await new Response(top.stdout).text()).trim();
-  await top.exited;
-  if (topOut.length === 0) return;
-  const mark = Bun.spawn(["git", "config", "--global", "--add", "safe.directory", topOut], {
-    stdout: "pipe",
-    stderr: "pipe",
-  });
-  await mark.exited;
+  const dirs = new Set<string>();
+  const cwd = process.cwd();
+  if (cwd.length > 0) dirs.add(cwd);
+  const workspace = process.env.GITHUB_WORKSPACE;
+  if (workspace !== undefined && workspace.length > 0) dirs.add(workspace);
+
+  for (const dir of dirs) {
+    const mark = Bun.spawn(["git", "config", "--global", "--add", "safe.directory", dir], {
+      stdout: "pipe",
+      stderr: "pipe",
+    });
+    await mark.exited;
+  }
 }
 
 /**
