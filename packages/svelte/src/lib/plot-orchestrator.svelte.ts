@@ -68,7 +68,7 @@ import {
   type SemanticKeyService,
 } from "./runtime/semantic-keys.svelte.js";
 import { createPlotRuntime, type PlotRuntime } from "./runtime/runtime.svelte.js";
-import { type InteractiveLegendEntry, type LegendEntryIdentity } from "./legend/focus.js";
+import type { InteractiveLegendEntry, LegendEntryIdentity } from "./legend/focus.js";
 import {
   createLegendFilterState,
   type FilterableLegendEntry,
