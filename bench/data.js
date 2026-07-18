@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784414007734,
+  "lastUpdate": 1784414045164,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -30428,6 +30428,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 161.9843,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "5ebdadc48669b0ed78c6dee03919a4daac08d497",
+          "message": "deps-dev(deps-dev): bump svelte in / (#299)\n\nBumps [svelte](https://github.com/sveltejs/svelte/tree/HEAD/packages/svelte) in `/` from 5.56.4 to 5.56.5.\n\n\nUpdates `svelte` from 5.56.4 to 5.56.5\n- [Release notes](https://github.com/sveltejs/svelte/releases)\n- [Changelog](https://github.com/sveltejs/svelte/blob/main/packages/svelte/CHANGELOG.md)\n- [Commits](https://github.com/sveltejs/svelte/commits/svelte@5.56.5/packages/svelte)\n\nUpdates `svelte` from 5.56.4 to 5.56.5\n- [Release notes](https://github.com/sveltejs/svelte/releases)\n- [Changelog](https://github.com/sveltejs/svelte/blob/main/packages/svelte/CHANGELOG.md)\n- [Commits](https://github.com/sveltejs/svelte/commits/svelte@5.56.5/packages/svelte)\n\nUpdates `svelte` from 5.56.4 to 5.56.5\n- [Release notes](https://github.com/sveltejs/svelte/releases)\n- [Changelog](https://github.com/sveltejs/svelte/blob/main/packages/svelte/CHANGELOG.md)\n- [Commits](https://github.com/sveltejs/svelte/commits/svelte@5.56.5/packages/svelte)\n\nUpdates `svelte` from 5.56.4 to 5.56.5\n- [Release notes](https://github.com/sveltejs/svelte/releases)\n- [Changelog](https://github.com/sveltejs/svelte/blob/main/packages/svelte/CHANGELOG.md)\n- [Commits](https://github.com/sveltejs/svelte/commits/svelte@5.56.5/packages/svelte)\n\n---\nupdated-dependencies:\n- dependency-name: svelte\n  dependency-version: 5.56.5\n  dependency-type: direct:development\n  update-type: version-update:semver-patch\n  dependency-group: bun\n- dependency-name: svelte\n  dependency-version: 5.56.5\n  dependency-type: direct:development\n  update-type: version-update:semver-patch\n  dependency-group: bun\n- dependency-name: svelte\n  dependency-version: 5.56.5\n  dependency-type: direct:development\n  update-type: version-update:semver-patch\n  dependency-group: bun\n- dependency-name: svelte\n  dependency-version: 5.56.5\n  dependency-type: direct:development\n  update-type: version-update:semver-patch\n  dependency-group: bun\n...\n\nSigned-off-by: dependabot[bot] <support@github.com>\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>\nCo-authored-by: Liam O'Dea <liam.j.odea@gmail.com>",
+          "timestamp": "2026-07-18T17:33:26-05:00",
+          "tree_id": "57ea3eb419c6fddf405307096e5b20f4339c7a7e",
+          "url": "https://github.com/ljodea/ggsvelte/commit/5ebdadc48669b0ed78c6dee03919a4daac08d497"
+        },
+        "date": 1784414044439,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.5035,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.0801,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 10.0362,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 13.1486,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 85.9013,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 120.6085,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.1291,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.326,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 87.0221,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 110.7721,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.3575,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 13.3628,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 117.6636,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7937,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 27.5319,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 8.1381,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 38.3963,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 607.5432,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 161.975,
             "unit": "ms"
           }
         ]
