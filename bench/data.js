@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784367159166,
+  "lastUpdate": 1784369092666,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -25311,6 +25311,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 160.8908,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "f9a9c1f0a5559d75488a7e7d361182b02710581b",
+          "message": "perf(core): O(log n+k) directional traverse via panel-sorted indexes (#259)\n\n* perf(core): O(log n+k) directional traverse via panel-sorted indexes\n\nleft/right/up/down traverse scanned every candidate O(n). Build a\npanel-then-x order (reuse traversal for y) and lower_bound the first\nin-direction primary, scanning only the equal-primary run. Same panel,\nmin orth, lower id on full ties; non-finite seed primary returns seed.\n\n* fix(core): upper_bound past seed-primary run in directional traverse\n\nAvoid O(m) linear skip over dense equal-primary stacks when moving\nright/down — binary search for first primary > seedPrimary instead.\n\n* fix(ci): mark worktree safe before content-hash git ls-tree\n\nPlaywright container jobs run as root while the checkout is runner-owned;\nhash-inputs then fails with dubious ownership. Set safe.directory from\nrev-parse --show-toplevel before ls-tree (unblocks component shards).\n\n* fix(ci): mark safe.directory without git rev-parse\n\nrev-parse itself is rejected under dubious ownership, so the previous\nhelper could no-op and leave ls-tree broken. Use process.cwd() and\nGITHUB_WORKSPACE instead (Codex P2 on #259).",
+          "timestamp": "2026-07-18T05:04:14-05:00",
+          "tree_id": "658276c3ce87c8382f0c3745de1acff5a213ce72",
+          "url": "https://github.com/ljodea/ggsvelte/commit/f9a9c1f0a5559d75488a7e7d361182b02710581b"
+        },
+        "date": 1784369091888,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.5046,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.1951,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 9.5351,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 14.0725,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 85.2333,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 120.8307,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.2761,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.3432,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 98.304,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 110.6775,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.2159,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.7586,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 118.7774,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.8108,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 28.1157,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 8.5787,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 35.8633,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 607.2782,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 160.9227,
             "unit": "ms"
           }
         ]
