@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784338232226,
+  "lastUpdate": 1784341205052,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -21622,6 +21622,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 168.8396,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "02489f74b0135f5260443a05e56b9bcfd707a7c8",
+          "message": "fix(spec): honor options.limits in standalone lintSpec (#208) (#210)\n\nbuildEvidence always passed DEFAULT_VALIDATE_LIMITS to resolveFieldEvidence,\nso raising or lowering maxRows/maxBytes via options.limits had no effect.\nMerge options.limits the same way validate() does.",
+          "timestamp": "2026-07-17T21:19:29-05:00",
+          "tree_id": "b4fddd9b06019d629516604b5fc77a4c50f48c48",
+          "url": "https://github.com/ljodea/ggsvelte/commit/02489f74b0135f5260443a05e56b9bcfd707a7c8"
+        },
+        "date": 1784341204286,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.8242,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.0055,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 9.3933,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 12.5316,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 97.8214,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 134.312,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.621,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.6669,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 103.2326,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 123.4952,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 11.039,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 10.7851,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 128.2094,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.8362,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 27.3084,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 6.1952,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 36.581,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 651.6201,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 149.0904,
             "unit": "ms"
           }
         ]
