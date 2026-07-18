@@ -193,12 +193,15 @@ export type FindLegendPressedIdentityInput = {
  *
  * Complexity: O(K + E) — one Set for the emphasis keys, then per-entry size
  * short-circuit + membership (no Set rebuild per entry). Multi-match returns
- * null as soon as a second hit is found.
+ * null as soon as a second hit is found. Empty keys, or empty entries with no
+ * committed identity, return before allocating the Set.
  */
 export function findLegendPressedIdentity(
   input: FindLegendPressedIdentityInput,
 ): LegendEntryIdentity | null {
   if (input.keys.length === 0) return null;
+  // Ramp-only / no discrete legends and no commit: nothing to match (issue #209).
+  if (input.entries.length === 0 && input.committed === null) return null;
   const inputSet = new Set(input.keys);
   if (input.committed !== null && uniqueKeysMatchSet(input.committed.keys, inputSet))
     return input.committed.identity;
