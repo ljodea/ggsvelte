@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784380273566,
+  "lastUpdate": 1784380801647,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -26858,6 +26858,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 129.9024,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b793175229fc6b00ff0e2b0e23a816f4d1b138a0",
+          "message": "fix(svelte): require role match on keyed seedId pin rebind (#273)\n\nSame identityEpoch can still change primitives (layer-prop geom swaps).\nKeyed O(1) fast path must check kind/batch/primitive like multi-match\ndisambiguation, not only layer+key (Codex #272 P2).",
+          "timestamp": "2026-07-18T08:19:23-05:00",
+          "tree_id": "66e29a2d999202be6d56a26ff41c1f8395f79482",
+          "url": "https://github.com/ljodea/ggsvelte/commit/b793175229fc6b00ff0e2b0e23a816f4d1b138a0"
+        },
+        "date": 1784380800350,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 1.7407,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.2158,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 9.1094,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 13.3994,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 69.9378,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 101.7294,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.0061,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.0513,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 69.4594,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 87.5495,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 9.099,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 9.324,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 90.5232,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.6307,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 21.9892,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 6.6748,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 26.3374,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 496.0727,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 130.667,
             "unit": "ms"
           }
         ]
