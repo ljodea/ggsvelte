@@ -20,3 +20,8 @@ tests/visual/.local-baselines/
 /bench-results.json
 tests/evals/out/
 .gstack/
+
+# CI content-hash skip markers / dist cache (issue #245)
+.ci-content-hash/
+.packages-dist-cache/
+.packages-dist-upload/
