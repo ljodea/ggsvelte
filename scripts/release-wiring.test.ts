@@ -162,6 +162,9 @@ describe("R0 release wiring", () => {
     expect(consumerJob).toContain("--matrix-node");
     expect(consumerJob).toContain("--matrix-pm");
     expect(consumerJob).toContain("--matrix-svelte");
+    expect(consumerJob).toContain("--runtime-node-version");
+    expect(consumerJob).toContain("--runtime-pm-version");
+    expect(consumerJob).toContain("node -v");
     expect(consumerJob).toContain(".ci-content-hash/consumer.ok");
 
     // Router module documents invalidation + schema.

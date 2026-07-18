@@ -8,9 +8,11 @@ import {
   contentHashCacheKey,
   evaluateGate,
   formatGithubOutputs,
+  formatTreeEntryDigest,
   hashJobInputs,
   listJobContentPaths,
   matchPathPattern,
+  parseGitLsTreeLine,
   parseNameStatusList,
   parseSuccessMarker,
   planJobs,
@@ -502,6 +504,77 @@ describe("contentHashCacheKey", () => {
     expect(consumerKey).toContain("npm");
     expect(consumerKey).toContain("svelte5.0.0");
     expect(consumerKey).toContain("deadbeef");
+  });
+
+  test("consumer key includes resolved runtime node and package-manager versions", () => {
+    const base = {
+      execution: "consumer" as const,
+      hash: "deadbeef",
+      os: "Linux",
+      matrix: {
+        node: "22",
+        packageManager: "npm",
+        packageManagerVersion: "bundled with Node",
+        svelte: "5.56.5",
+      },
+    };
+    const a = contentHashCacheKey({
+      ...base,
+      runtime: { nodeVersion: "v22.14.0", packageManagerVersion: "10.9.2" },
+    });
+    const b = contentHashCacheKey({
+      ...base,
+      runtime: { nodeVersion: "v22.15.0", packageManagerVersion: "10.9.2" },
+    });
+    const c = contentHashCacheKey({
+      ...base,
+      runtime: { nodeVersion: "v22.14.0", packageManagerVersion: "10.9.3" },
+    });
+    expect(a).toContain("runtime-nodev22.14.0");
+    expect(a).toContain("runtime-pm10.9.2");
+    expect(a).not.toBe(b);
+    expect(a).not.toBe(c);
+  });
+});
+
+describe("git ls-tree digests include mode", () => {
+  test("mode-only change changes the entry digest", () => {
+    const blob = parseGitLsTreeLine(
+      "100644 blob abcdef0123456789\tpackages/svelte/bin/ggsvelte-render.js",
+    );
+    const exec = parseGitLsTreeLine(
+      "100755 blob abcdef0123456789\tpackages/svelte/bin/ggsvelte-render.js",
+    );
+    expect(blob).not.toBeNull();
+    expect(exec).not.toBeNull();
+    expect(formatTreeEntryDigest(blob!.mode, blob!.oid)).toBe("100644:abcdef0123456789");
+    expect(formatTreeEntryDigest(exec!.mode, exec!.oid)).toBe("100755:abcdef0123456789");
+    expect(formatTreeEntryDigest(blob!.mode, blob!.oid)).not.toBe(
+      formatTreeEntryDigest(exec!.mode, exec!.oid),
+    );
+
+    const path = "packages/svelte/bin/ggsvelte-render.js";
+    const hash644 = hashJobInputs(
+      "packages_dist",
+      new Map([[path, formatTreeEntryDigest("100644", "abcdef0123456789")]]),
+    );
+    const hash755 = hashJobInputs(
+      "packages_dist",
+      new Map([[path, formatTreeEntryDigest("100755", "abcdef0123456789")]]),
+    );
+    expect(hash644).not.toBe(hash755);
+  });
+});
+
+describe("unit content inputs cover actionlint config", () => {
+  test("unit includes .github/actionlint.yaml (scripts/actionlint.test.ts reads it)", () => {
+    const paths = listJobContentPaths("unit", [
+      ".github/actionlint.yaml",
+      ".github/workflows/ci.yml",
+      "scripts/actionlint.test.ts",
+    ]);
+    expect(paths).toContain(".github/actionlint.yaml");
+    expect(JOB_CONTENT_INPUTS.unit).toContain(".github/actionlint.yaml");
   });
 });
 

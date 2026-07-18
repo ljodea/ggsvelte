@@ -463,6 +463,8 @@ export const JOB_CONTENT_INPUTS: Record<CacheableExecution, readonly string[]> =
     "apps/docs/**",
     "examples/**",
     ".github/workflows/**",
+    // scripts/actionlint.test.ts asserts self-hosted labels against this file.
+    ".github/actionlint.yaml",
     "support-matrix.json",
     ".oxlintrc.json",
     ".oxfmtrc.json",
@@ -655,6 +657,14 @@ export type ContentHashCacheKeyInput = {
     packageManagerVersion: string;
     svelte: string;
   };
+  /**
+   * Resolved toolchain versions after setup-node / setup-bun (consumer).
+   * Matrix majors alone are not enough: Node/npm patch bumps must miss cache.
+   */
+  runtime?: {
+    nodeVersion: string;
+    packageManagerVersion: string;
+  };
   /** Playwright / container pin when relevant. */
   containerTag?: string;
 };
@@ -670,6 +680,12 @@ export function contentHashCacheKey(input: ContentHashCacheKeyInput): string {
       sanitizeKeyPart(input.matrix.packageManager),
       `pm${sanitizeKeyPart(input.matrix.packageManagerVersion)}`,
       `svelte${sanitizeKeyPart(input.matrix.svelte)}`,
+    );
+  }
+  if (input.runtime !== undefined) {
+    parts.push(
+      `runtime-node${sanitizeKeyPart(input.runtime.nodeVersion)}`,
+      `runtime-pm${sanitizeKeyPart(input.runtime.packageManagerVersion)}`,
     );
   }
   parts.push(input.hash);
@@ -727,9 +743,44 @@ export function successMarkerPath(execution: CacheableExecution): string {
   return `.ci-content-hash/${execution}.ok`;
 }
 
+/** Parse one `git ls-tree -r` line into mode/type/oid/path. */
+export function parseGitLsTreeLine(
+  line: string,
+): { mode: string; type: string; oid: string; path: string } | null {
+  if (line.length === 0) return null;
+  // <mode> <type> <oid>\t<path>
+  const tab = line.indexOf("\t");
+  if (tab < 0) return null;
+  const meta = line.slice(0, tab);
+  const path = line.slice(tab + 1);
+  const parts = meta.split(" ");
+  if (parts.length < 3) return null;
+  const mode = parts[0];
+  const type = parts[1];
+  const oid = parts[2];
+  if (
+    mode === undefined ||
+    type === undefined ||
+    oid === undefined ||
+    oid.length === 0 ||
+    path.length === 0
+  ) {
+    return null;
+  }
+  return { mode, type, oid, path };
+}
+
+/**
+ * Tree-entry digest includes mode so executable-bit flips miss the cache
+ * (blob OID alone is unchanged on mode-only edits).
+ */
+export function formatTreeEntryDigest(mode: string, oid: string): string {
+  return `${mode}:${oid}`;
+}
+
 /**
  * Collect blob digests for HEAD via `git ls-tree -r`. Fail-closed on git errors
- * or missing digests for matched paths.
+ * or missing digests for matched paths. Digests are `mode:oid` (not oid alone).
  */
 export async function collectGitHeadInputDigests(
   execution: CacheableExecution,
@@ -747,19 +798,10 @@ export async function collectGitHeadInputDigests(
 
   const allDigests = new Map<string, string>();
   for (const line of stdout.split(/\r?\n/)) {
-    if (line.length === 0) continue;
-    // <mode> <type> <oid>\t<path>
-    const tab = line.indexOf("\t");
-    if (tab < 0) continue;
-    const meta = line.slice(0, tab);
-    const path = line.slice(tab + 1);
-    const parts = meta.split(" ");
-    if (parts.length < 3) continue;
-    const type = parts[1];
-    const oid = parts[2];
-    if (type !== "blob" || oid === undefined || oid.length === 0) continue;
-    if (path.length === 0) continue;
-    allDigests.set(path, oid);
+    const entry = parseGitLsTreeLine(line);
+    if (entry === null) continue;
+    if (entry.type !== "blob") continue;
+    allDigests.set(entry.path, formatTreeEntryDigest(entry.mode, entry.oid));
   }
 
   const paths = listJobContentPaths(execution, [...allDigests.keys()]);
@@ -853,7 +895,7 @@ function printHelp(): void {
   bun scripts/ci-routing.ts classify [--files f1 f2 | --from-git --base <ref> | --stdin]
   bun scripts/ci-routing.ts plan [--files ... | --from-git --base <ref> | --stdin] [--force-all]
   bun scripts/ci-routing.ts emit-github-output [--files ... | --from-git --base <ref> | --stdin] [--force-all]
-  bun scripts/ci-routing.ts hash-inputs --execution <name> [--os <runner.os>] [--container-tag <tag>] [--matrix-node N --matrix-pm NAME --matrix-pm-version V --matrix-svelte V]
+  bun scripts/ci-routing.ts hash-inputs --execution <name> [--os <runner.os>] [--container-tag <tag>] [--matrix-node N --matrix-pm NAME --matrix-pm-version V --matrix-svelte V] [--runtime-node-version V --runtime-pm-version V]
   bun scripts/ci-routing.ts write-success-marker --execution <name> --hash <hex>
   bun scripts/ci-routing.ts validate-success-marker --execution <name> --hash <hex>
   bun scripts/ci-routing.ts gate --required <file|-> --results <file|->
@@ -884,6 +926,8 @@ async function runHashInputsCli(args: string[]): Promise<void> {
   const matrixPm = flagValue(args, "--matrix-pm");
   const matrixPmVersion = flagValue(args, "--matrix-pm-version");
   const matrixSvelte = flagValue(args, "--matrix-svelte");
+  const runtimeNodeVersion = flagValue(args, "--runtime-node-version");
+  const runtimePmVersion = flagValue(args, "--runtime-pm-version");
 
   const { hash, paths } = await collectGitHeadInputDigests(execution);
   const matrix =
@@ -899,12 +943,27 @@ async function runHashInputsCli(args: string[]): Promise<void> {
         }
       : undefined;
 
+  const runtime =
+    runtimeNodeVersion !== undefined &&
+    runtimeNodeVersion.length > 0 &&
+    runtimePmVersion !== undefined &&
+    runtimePmVersion.length > 0
+      ? { nodeVersion: runtimeNodeVersion, packageManagerVersion: runtimePmVersion }
+      : undefined;
+
+  if (execution === "consumer" && (matrix === undefined || runtime === undefined)) {
+    throw new Error(
+      "hash-inputs consumer requires --matrix-* and --runtime-node-version / --runtime-pm-version",
+    );
+  }
+
   const cacheKey = contentHashCacheKey({
     execution,
     hash,
     os,
     containerTag: containerTag ?? undefined,
     matrix,
+    runtime,
   });
   const marker = successMarkerPath(execution);
   const body = [

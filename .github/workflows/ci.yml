@@ -470,11 +470,28 @@ jobs:
             exit 0
           fi
           echo "bypass=false" >> "$GITHUB_OUTPUT"
+          # Resolved toolchain versions (not matrix majors alone) — Node/npm patch
+          # bumps must miss the consumer success-marker cache (Codex P2 on #245).
+          RUNTIME_NODE="$(node -v)"
+          case "${MATRIX_PM}" in
+            npm) RUNTIME_PM_VER="$(npm -v)" ;;
+            bun) RUNTIME_PM_VER="$(bun -v)" ;;
+            pnpm)
+              if command -v pnpm >/dev/null 2>&1; then
+                RUNTIME_PM_VER="$(pnpm -v)"
+              else
+                RUNTIME_PM_VER="${MATRIX_PM_VERSION}"
+              fi
+              ;;
+            *) RUNTIME_PM_VER="${MATRIX_PM_VERSION}" ;;
+          esac
           bun scripts/ci-routing.ts hash-inputs --execution consumer --os "${RUNNER_OS}" \
             --matrix-node "${MATRIX_NODE}" \
             --matrix-pm "${MATRIX_PM}" \
             --matrix-pm-version "${MATRIX_PM_VERSION}" \
-            --matrix-svelte "${MATRIX_SVELTE}"
+            --matrix-svelte "${MATRIX_SVELTE}" \
+            --runtime-node-version "${RUNTIME_NODE}" \
+            --runtime-pm-version "${RUNTIME_PM_VER}"
       - id: marker_cache
         name: restore consumer success-marker cache
         if: steps.content_hash.outputs.bypass != 'true'
