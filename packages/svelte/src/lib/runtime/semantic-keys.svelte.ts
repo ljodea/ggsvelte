@@ -309,11 +309,34 @@ export function createSemanticKeyService(deps: SemanticKeyServiceDeps): Semantic
     return semanticKeys.keys.get(index) ?? null;
   }
 
-  function candidateSemanticKeys(candidate: CandidateFacts): PropertyKey[] {
+  /**
+   * Shared candidate→semantic-keys projection for the current model/key epoch.
+   * Interval, selection anchors, and interaction masks all used to re-walk
+   * lineage independently (~3× O(C×L) per reactive turn). Built once when
+   * first read; subsequent lookups are O(1) Map gets until model or row keys
+   * change. Preserves lazy short-circuits: consumers that never call
+   * candidateSemanticKeys never pay the walk.
+   */
+  const candidateKeysById = $derived.by(() => {
     const model = deps.model();
-    if (model === null) return [];
-    const rows = rowIndexesForCandidate(candidate, model.lineage.keys(candidate.lineage));
-    return uniqueKeysFromRowIndexes(rows, (rowIndex) => semanticKey(model.row(rowIndex), rowIndex));
+    if (model === null) return new Map<number, PropertyKey[]>();
+    // Depend on the row-key bag so key invalidation rebuilds the projection.
+    const rowKeys = semanticKeys.keys;
+    const map = new Map<number, PropertyKey[]>();
+    for (let id = 0; id < model.candidates.size; id++) {
+      const candidate = model.candidates.candidate(id);
+      if (candidate === null) continue;
+      const rows = rowIndexesForCandidate(candidate, model.lineage.keys(candidate.lineage));
+      map.set(
+        id,
+        uniqueKeysFromRowIndexes(rows, (rowIndex) => rowKeys.get(rowIndex) ?? null),
+      );
+    }
+    return map;
+  });
+
+  function candidateSemanticKeys(candidate: CandidateFacts): PropertyKey[] {
+    return candidateKeysById.get(candidate.id) ?? [];
   }
 
   return {
