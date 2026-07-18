@@ -47,9 +47,9 @@ import {
   type IntervalDomain,
 } from "./interval.js";
 import {
-  candidateInInterval,
   consumeIntervalKeys,
   nextLocalIntervalRecords,
+  prepareCandidateInInterval,
   recomputePanelIntervalKeys,
   sameIntervalRecord,
   type IntervalConsumptionCandidate,
@@ -419,14 +419,12 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
   function intervalLineageCount(targetPanelId: string, domains: ReadonlyIntervalDomains): number {
     const model = deps.model();
     if (model === null) return 0;
+    // Band Sets once for the scan — not includes() per candidate.
+    const inInterval = prepareCandidateInInterval(domains);
     const rows = new Set<number>();
     for (let id = 0; id < model.candidates.size; id++) {
       const candidate = model.candidates.candidate(id);
-      if (
-        candidate === null ||
-        candidate.panelId !== targetPanelId ||
-        !candidateInInterval(candidate, domains)
-      )
+      if (candidate === null || candidate.panelId !== targetPanelId || !inInterval(candidate))
         continue;
       for (const rowIndex of rowIndexesForCandidate(
         candidate,
