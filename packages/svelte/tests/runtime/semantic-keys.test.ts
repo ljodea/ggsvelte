@@ -161,6 +161,20 @@ describe("dataIdentityEpochToken", () => {
     expect(dataContentOrderToken(columns, id)).not.toBe(bare);
   });
 
+  it("does not treat a multi-field map with a values column as a DataRef", () => {
+    const tracker = createSourceIdentityTracker();
+    const id = (value: unknown) => tracker.sourceIdentity(value);
+    const values = [1, 2];
+    const y = [3, 4];
+    const bare = { values, y };
+    const first = dataContentOrderToken(bare, id);
+    expect(first.startsWith("c:")).toBe(true);
+    expect(first).toContain(id(values));
+    expect(first).toContain(id(y));
+    bare.y = [9, 9];
+    expect(dataContentOrderToken(bare, id)).not.toBe(first);
+  });
+
   it("does not deep-serialize large row payloads (no JSON.stringify of cells)", () => {
     const tracker = createSourceIdentityTracker();
     const id = (value: unknown) => tracker.sourceIdentity(value);

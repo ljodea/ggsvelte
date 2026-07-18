@@ -106,24 +106,29 @@ export function dataContentOrderToken(
   }
   if (typeof data === "object") {
     const record = data as Record<string, unknown>;
-    const values = record["values"];
-    if (Array.isArray(values)) {
+    const fieldKeys = Object.keys(record);
+    // DataRef shapes only when single-key (matches packages/spec isDataRef).
+    // A bare column map may own a field named `values`/`columns` alongside
+    // other arrays and must not short-circuit (Codex P2).
+    if (fieldKeys.length === 1 && fieldKeys[0] === "values" && Array.isArray(record["values"])) {
+      const values = record["values"] as unknown[];
       let token = `v:${values.length}`;
       for (let index = 0; index < values.length; index++)
         token += `:${sourceIdentity(values[index])}`;
       return token;
     }
-    const columns = record["columns"];
-    if (columns !== null && typeof columns === "object" && !Array.isArray(columns))
-      return `c:${columnMapOrderToken(columns as Record<string, unknown>, sourceIdentity)}`;
-    const name = record["name"];
-    if (typeof name === "string") {
-      const keys = Object.keys(record);
-      if (keys.length === 1 && keys[0] === "name") return `n:${name}`;
-    }
+    if (
+      fieldKeys.length === 1 &&
+      fieldKeys[0] === "columns" &&
+      record["columns"] !== null &&
+      typeof record["columns"] === "object" &&
+      !Array.isArray(record["columns"])
+    )
+      return `c:${columnMapOrderToken(record["columns"] as Record<string, unknown>, sourceIdentity)}`;
+    if (fieldKeys.length === 1 && fieldKeys[0] === "name" && typeof record["name"] === "string")
+      return `n:${record["name"]}`;
     // Bare column-oriented object (gg() wraps as { columns }) — fingerprint
     // each field's array identity so in-place column replacement bumps epoch.
-    const fieldKeys = Object.keys(record);
     if (fieldKeys.length > 0 && fieldKeys.every((key) => Array.isArray(record[key])))
       return `c:${columnMapOrderToken(record, sourceIdentity)}`;
     return `o:${sourceIdentity(data)}`;

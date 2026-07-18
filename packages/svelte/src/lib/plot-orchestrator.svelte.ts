@@ -313,11 +313,10 @@ export function createPlotOrchestrator<
     // Ready without reading `assembled` so chrome-only respecs do not re-enter.
     const ready = spec !== undefined || layerCount > 0;
     const sourceIdentity = (value: unknown) => identityTracker.sourceIdentity(value);
+    // assemblePortableSpec: explicit `spec` wins and ignores the data prop —
+    // fingerprint the rendered source only (Codex P2).
     const contentData =
-      data ??
-      (spec !== undefined && typeof spec === "object"
-        ? (spec as { data?: unknown }).data
-        : undefined);
+      spec !== undefined && typeof spec === "object" ? (spec as { data?: unknown }).data : data;
     const contentDatasets =
       spec !== undefined && typeof spec === "object"
         ? (spec as { datasets?: unknown }).datasets
