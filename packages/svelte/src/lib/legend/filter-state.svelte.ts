@@ -11,7 +11,9 @@ import { encodeKey } from "@ggsvelte/core";
 import type { PortableSpec } from "@ggsvelte/spec";
 
 import {
+  isLegendValueKeyVisible,
   isLegendValueVisible,
+  legendFilterValueKeys,
   nextLegendFilterValues,
   reconcileLegendFilterValues,
   type LegendFilterClause,
@@ -183,13 +185,22 @@ export function createLegendFilterState(deps: LegendFilterStateDeps): LegendFilt
       const current = localLegendFilters.find(
         (clause) => clause.scale === sceneLegend.scale && clause.field === field,
       );
+      if (current === undefined) {
+        return sceneLegend.entries.map((entry) => ({
+          legend: sceneLegend,
+          entry,
+          field,
+          visible: true,
+        }));
+      }
+      // One Set per clause, then O(1) membership per entry (O(E+V) not O(E×V)).
+      const valueKeys = legendFilterValueKeys(current.values);
+      const mode = current.mode;
       return sceneLegend.entries.map((entry) => ({
         legend: sceneLegend,
         entry,
         field,
-        visible:
-          current === undefined ||
-          isLegendValueVisible(current.values, entry.value as CellValue, current.mode),
+        visible: isLegendValueKeyVisible(valueKeys, entry.value as CellValue, mode),
       }));
     });
   }
