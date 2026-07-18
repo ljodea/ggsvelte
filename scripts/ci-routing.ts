@@ -24,6 +24,7 @@ export type ChangeLane =
   | "evals"
   | "workflows"
   | "ci_workflow"
+  | "ci_routing"
   | "visual"
   | "spikes"
   | "lockfile"
@@ -52,14 +53,15 @@ export type JobResult = "success" | "failure" | "cancelled" | "skipped" | "unkno
 export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
   spec: ["packages/spec/**"],
   core: ["packages/core/**"],
-  svelte: ["packages/svelte/**"],
+  svelte: ["packages/svelte/**", "skills/ggsvelte/**"],
   docs: ["apps/docs/**"],
   examples: ["examples/**"],
   benchmarks: ["benchmarks/**"],
-  scripts: ["scripts/**"],
+  scripts: ["scripts/**", "lifecycle.json"],
   evals: ["tests/evals/**"],
   workflows: [".github/workflows/**", ".github/actionlint.yaml"],
   ci_workflow: [".github/workflows/ci.yml"],
+  ci_routing: ["scripts/ci-routing.ts", "scripts/ci-routing.test.ts"],
   visual: ["tests/visual/**"],
   performance: ["tests/performance/**"],
   spikes: ["spikes/**"],
@@ -177,7 +179,7 @@ export function planJobs(changes: ChangeFlags, options: PlanOptions = {}): JobPl
     return all;
   }
 
-  const force = changes.lockfile || changes.ci_workflow;
+  const force = changes.lockfile || changes.ci_workflow || changes.ci_routing;
   const packageSurface = changes.spec || changes.core || changes.svelte || force;
   const docsSurface = changes.docs || changes.examples || force;
   const browserSurface =

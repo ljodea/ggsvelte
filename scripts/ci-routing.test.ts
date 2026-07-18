@@ -117,6 +117,23 @@ describe("planJobs", () => {
     expect(plan.vr).toBe(true);
   });
 
+  test("ci-routing module self-changes force the full surface", () => {
+    const plan = planJobs(classifyChangedPaths(["scripts/ci-routing.ts"]));
+    expect(plan.unit).toBe(true);
+    expect(plan.component).toBe(true);
+    expect(plan.consumer).toBe(true);
+    expect(plan.build).toBe(true);
+    expect(plan.actions_security).toBe(true);
+    expect(plan.vr).toBe(true);
+  });
+
+  test("root skill source changes schedule the svelte package surface", () => {
+    const plan = planJobs(classifyChangedPaths(["skills/ggsvelte/SKILL.md"]));
+    expect(plan.component).toBe(true);
+    expect(plan.build).toBe(true);
+    expect(plan.consumer).toBe(true);
+  });
+
   test("lockfile changes force package-touching jobs", () => {
     const plan = planJobs(classifyChangedPaths(["bun.lock"]));
     expect(plan.unit).toBe(true);
