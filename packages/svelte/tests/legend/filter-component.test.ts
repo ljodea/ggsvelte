@@ -106,6 +106,43 @@ describe("explicit legend filtering", () => {
     expect(getComputedStyle(label).backgroundColor).toBe("rgb(255, 255, 255)");
   });
 
+  it("honors kebab-case tooltip background/foreground aliases on filter chips", async () => {
+    // Consumer path from #207: only the kebab pair is set (no camelCase tokens).
+    // Without --gg-tooltip-background in the CSS chain, white text on a white
+    // fallback surface becomes unreadable.
+    const { container } = render(LegendFilterPlot);
+    container.style.setProperty("--gg-tooltip-background", "#111111");
+    container.style.setProperty("--gg-tooltip-foreground", "#ffffff");
+    await until(() => container.querySelector(".gg-legend-filters label") !== null);
+
+    const label = container.querySelector<HTMLElement>(".gg-legend-filters label")!;
+    expect(getComputedStyle(label).backgroundColor).toBe("rgb(17, 17, 17)");
+    expect(getComputedStyle(label).color).toBe("rgb(255, 255, 255)");
+
+    container.querySelector<HTMLInputElement>("input[aria-label='Show north']")!.click();
+    await until(
+      () => container.querySelector("button[aria-label='Reset legend filters']") !== null,
+    );
+    const reset = container.querySelector<HTMLButtonElement>(
+      "button[aria-label='Reset legend filters']",
+    )!;
+    expect(getComputedStyle(reset).backgroundColor).toBe("rgb(17, 17, 17)");
+    expect(getComputedStyle(reset).color).toBe("rgb(255, 255, 255)");
+  });
+
+  it("prefers camelCase tooltip tokens over kebab-case aliases on filter chips", async () => {
+    const { container } = render(LegendFilterPlot);
+    container.style.setProperty("--gg-tooltipPaper", "#ffffff");
+    container.style.setProperty("--gg-tooltipInk", "#262626");
+    container.style.setProperty("--gg-tooltip-background", "#111111");
+    container.style.setProperty("--gg-tooltip-foreground", "#ffffff");
+    await until(() => container.querySelector(".gg-legend-filters label") !== null);
+
+    const label = container.querySelector<HTMLElement>(".gg-legend-filters label")!;
+    expect(getComputedStyle(label).backgroundColor).toBe("rgb(255, 255, 255)");
+    expect(getComputedStyle(label).color).toBe("rgb(38, 38, 38)");
+  });
+
   it("resets old clauses when the controlled filter mode changes", async () => {
     const view = render(LegendFilterPlot, { mode: "exclude" });
     await until(() => view.container.querySelectorAll(".gg-legend-filters input").length === 2);

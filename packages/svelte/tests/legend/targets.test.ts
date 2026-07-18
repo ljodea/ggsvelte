@@ -75,6 +75,44 @@ describe("LegendTargets", () => {
     expect(clear?.style.top).toBe("304px");
   });
 
+  it("honors kebab-case tooltip background/foreground aliases on clear control", () => {
+    // Same chrome family as filter chips (#207): kebab-only theme path must
+    // not fall through to a white surface under light text.
+    const { container } = render(LegendTargets, {
+      entries,
+      sceneWidth: 400,
+      sceneHeight: 300,
+      clearLegendX: 100,
+      pressedIdentity: { scale: "fill", entryIndex: 0 },
+      ...noopHandlers,
+    });
+    container.style.setProperty("--gg-tooltip-background", "#111111");
+    container.style.setProperty("--gg-tooltip-foreground", "#ffffff");
+
+    const clear = container.querySelector<HTMLButtonElement>(".gg-legend-clear")!;
+    expect(getComputedStyle(clear).backgroundColor).toBe("rgb(17, 17, 17)");
+    expect(getComputedStyle(clear).color).toBe("rgb(255, 255, 255)");
+  });
+
+  it("prefers camelCase tooltip tokens over kebab-case aliases on clear control", () => {
+    const { container } = render(LegendTargets, {
+      entries,
+      sceneWidth: 400,
+      sceneHeight: 300,
+      clearLegendX: 100,
+      pressedIdentity: { scale: "fill", entryIndex: 0 },
+      ...noopHandlers,
+    });
+    container.style.setProperty("--gg-tooltipPaper", "#ffffff");
+    container.style.setProperty("--gg-tooltipInk", "#262626");
+    container.style.setProperty("--gg-tooltip-background", "#111111");
+    container.style.setProperty("--gg-tooltip-foreground", "#ffffff");
+
+    const clear = container.querySelector<HTMLButtonElement>(".gg-legend-clear")!;
+    expect(getComputedStyle(clear).backgroundColor).toBe("rgb(255, 255, 255)");
+    expect(getComputedStyle(clear).color).toBe("rgb(38, 38, 38)");
+  });
+
   it("clamps clear left into [4, sceneWidth-52]", () => {
     const low = render(LegendTargets, {
       entries,
