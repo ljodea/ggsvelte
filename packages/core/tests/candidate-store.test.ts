@@ -803,4 +803,126 @@ describe("candidate spatial query hot path (issue #214)", () => {
     expect(store.queryRect(140, 70, 160, 90)).toEqual(new Uint32Array([0]));
     expect(store.queryRect(0, 0, 10, 10)).toEqual(new Uint32Array([0, 1]));
   });
+
+  it("exact nearest does not refine every far rect on a large bar field", () => {
+    // Complexity guard: extended geometry used to force-add all E rects into the
+    // shortlist. AABB spatial shortlist must keep refine O(log E + k).
+    const count = 4_000;
+    const rects = new Float32Array(count * 4);
+    for (let i = 0; i < count; i++) {
+      // 2×2 bars spaced on a grid far from the probe at (5,5).
+      const col = i % 50;
+      const row = Math.floor(i / 50);
+      rects[i * 4] = 100 + col * 10;
+      rects[i * 4 + 1] = 100 + row * 10;
+      rects[i * 4 + 2] = 2;
+      rects[i * 4 + 3] = 2;
+    }
+    // One bar covering the probe, anchor far from (10,10).
+    rects[0] = 0;
+    rects[1] = 0;
+    rects[2] = 20;
+    rects[3] = 20;
+    const plotScene = scene();
+    plotScene.batches = [
+      {
+        kind: "rects",
+        layerIndex: 0,
+        panelIndex: 0,
+        rects,
+        rowIndex: Uint32Array.from({ length: count }, (_, index) => index),
+        fill: null,
+        alpha: 1,
+      },
+    ];
+    let batchIndexReads = 0;
+    const batches = new Proxy(plotScene.batches, {
+      get(target, property, receiver): unknown {
+        if (typeof property === "string" && /^\d+$/.test(property)) batchIndexReads++;
+        return Reflect.get(target, property, receiver) as unknown;
+      },
+    });
+    plotScene.batches = batches;
+    const store = buildCandidateStore(plotScene, {
+      datum: () => ({ xValue: 1, yValue: 2, autoMode: "exact" }),
+    });
+    void store.x;
+    batchIndexReads = 0;
+
+    const hit = store.nearest(10, 10, { mode: "exact", maxDistance: 0 });
+    expect(hit?.id).toBe(0);
+    // Linear extended scan would touch batches once per rect (~count).
+    expect(batchIndexReads).toBeLessThan(200);
+    expect(batchIndexReads).toBeLessThan(count / 10);
+  });
+
+  it("one giant rect does not force-refine every small far rect", () => {
+    // Size-classed AABB trees: a full-plot bar must not expand the small-bar class.
+    const count = 2_000;
+    const rects = new Float32Array((count + 1) * 4);
+    // Giant bar covering most of the panel (own size class).
+    rects[0] = 0;
+    rects[1] = 0;
+    rects[2] = 200;
+    rects[3] = 120;
+    for (let i = 0; i < count; i++) {
+      const col = i % 40;
+      const row = Math.floor(i / 40);
+      rects[(i + 1) * 4] = 300 + col * 8;
+      rects[(i + 1) * 4 + 1] = 300 + row * 8;
+      rects[(i + 1) * 4 + 2] = 2;
+      rects[(i + 1) * 4 + 3] = 2;
+    }
+    const plotScene = scene();
+    plotScene.batches = [
+      {
+        kind: "rects",
+        layerIndex: 0,
+        panelIndex: 0,
+        rects,
+        rowIndex: Uint32Array.from({ length: count + 1 }, (_, index) => index),
+        fill: null,
+        alpha: 1,
+      },
+    ];
+    let batchIndexReads = 0;
+    plotScene.batches = new Proxy(plotScene.batches, {
+      get(target, property, receiver): unknown {
+        if (typeof property === "string" && /^\d+$/.test(property)) batchIndexReads++;
+        return Reflect.get(target, property, receiver) as unknown;
+      },
+    });
+    const store = buildCandidateStore(plotScene, {
+      datum: () => ({ xValue: 1, yValue: 2, autoMode: "exact" }),
+    });
+    void store.x;
+    batchIndexReads = 0;
+    // Probe on the giant bar; far small rects must stay out of refine.
+    expect(store.nearest(100, 60, { mode: "exact", maxDistance: 0 })?.id).toBe(0);
+    expect(batchIndexReads).toBeLessThan(50);
+    expect(batchIndexReads).toBeLessThan(count / 20);
+  });
+
+  it("builds stores that include glyph batches without throwing", () => {
+    const plotScene = scene();
+    plotScene.batches = [
+      {
+        kind: "glyphs",
+        layerIndex: 0,
+        panelIndex: 0,
+        positions: new Float32Array([10, 20, 30, 40]),
+        rowIndex: new Uint32Array([0, 1]),
+        texts: ["a", "b"],
+        color: null,
+        size: 12,
+        anchor: "start",
+        alpha: 1,
+      },
+    ];
+    const store = buildCandidateStore(plotScene, {
+      datum: () => ({ xValue: 1, yValue: 2 }),
+    });
+    expect(store.size).toBe(2);
+    expect(store.nearest(10, 20, { mode: "exact", maxDistance: 0 })).toBeNull();
+  });
 });
