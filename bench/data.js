@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784335041937,
+  "lastUpdate": 1784335243700,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -20670,6 +20670,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 161.274,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "4b24689d1298c3c18209c9e5f5bb046f78170963",
+          "message": "perf(spec): short-circuit isPortable on first issue (#190)\n\n* perf(spec): short-circuit isPortable on first issue\n\nisPortable only needs a boolean, but it previously ran a full\nportabilityIssues walk over the entire tree (including large inline\ndata). Walk now accepts an optional stopAfter so the type guard exits\nafter the first issue; portabilityIssues and toPortable still collect\nevery path.\n\n* fix(spec): lazy key iteration for isPortable early exit\n\nObject.entries eagerly evaluates every property (including getters)\nbefore the loop, so stopAfter could not skip later sibling getters.\nIterate Object.keys and read values one at a time; strengthen the\nearly-exit test to put a bomb getter on the same object.\n\n* fix(spec): lazy for-in walk for portability early exit\n\nUse for…in + Object.hasOwn so key enumeration is lazy (no full\nObject.keys array before stopAfter can break) and properties deleted\nby earlier getters are skipped, matching Object.entries/JSON omit\nsemantics. Regression test covers the delete-mid-walk case.\n\n* docs(spec): clarify isPortable stopAfter only defers value Gets\n\nEngines still list own keys before for…in yields; the early-exit win\nis skipping later property Gets and recursive walks, not OwnPropertyKeys.",
+          "timestamp": "2026-07-17T19:40:03-05:00",
+          "tree_id": "6094395fd70c1dc46ce34138ddb7a27f2da684b0",
+          "url": "https://github.com/ljodea/ggsvelte/commit/4b24689d1298c3c18209c9e5f5bb046f78170963"
+        },
+        "date": 1784335242955,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 3.0532,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.4758,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 10.4064,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 15.021,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 88.7732,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 121.7253,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.3235,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.3941,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 87.5439,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 110.2215,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 14.5729,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 13.0361,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 121.3346,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7913,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 32.0254,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.9231,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 27.6548,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 619.4621,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 162.7315,
             "unit": "ms"
           }
         ]
