@@ -99,7 +99,6 @@ export {
   resolveFieldEvidence,
   type FieldEvidenceEntry,
   type FieldEvidenceMap,
-  type ResolveFieldEvidenceResult,
 } from "./validate-data-evidence.js";
 
 export { dataChecks, STAT_COLUMNS } from "./validate-data-checks.js";
