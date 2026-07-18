@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784343992232,
+  "lastUpdate": 1784345933458,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -22098,6 +22098,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 161.7,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "dd88ab335302b99741515de3ff8c48409f5f761d",
+          "message": "perf(core): O(1) CandidateStore.cycle via prebuilt coincident stacks (#222)\n\n* perf(core): O(1) CandidateStore.cycle via prebuilt coincident stacks (#219)\n\nGroup candidates by panel/x/y at store build and cycle with modular\narithmetic so keyboard/multi-mark stacking no longer rescans the store.\n\n* fix(core): harden CandidateStore.cycle for review feedback (#219)\n\nReject non-integer seeds, skip singleton stack retention, and restore\nthe seed fallback for non-integral/non-finite steps.",
+          "timestamp": "2026-07-17T22:38:09-05:00",
+          "tree_id": "82ae83df6c2476bb0df6d656a4df34da4c96a2d0",
+          "url": "https://github.com/ljodea/ggsvelte/commit/dd88ab335302b99741515de3ff8c48409f5f761d"
+        },
+        "date": 1784345932246,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.6442,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.921,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 10.9318,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 12.8677,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 81.953,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 114.6503,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.0763,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2729,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 84.8409,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 104.1439,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 12.9027,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 11.8998,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 110.5161,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7593,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 24.6438,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.4727,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 34.9666,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 586.5771,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 159.6733,
             "unit": "ms"
           }
         ]
