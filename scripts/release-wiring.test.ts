@@ -166,3 +166,9 @@ describe("R0 release wiring", () => {
     });
   });
 });
+
+it("thins expensive jobs on main push (issue #244)", () => {
+  const ci = read(".github/workflows/ci.yml");
+  expect(ci).toContain("main push: thinned expensive jobs (issue #244)");
+  expect(ci).toContain("packages_dist=false");
+});
