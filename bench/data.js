@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784352267713,
+  "lastUpdate": 1784352886697,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -23764,6 +23764,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 156.0371,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "fa0d58cd0d1bea5daaa7aad575f0ccd6b7ebbb65",
+          "message": "refactor(core): split render-svg into focused modules (#240)\n\nExtract the 530-line pure SVG renderer into format helpers, mark emitters,\nscene/chrome assembly, and a thin public barrel. Capture a pre-split kitchen-\nsink golden fixture so vertical extracts cannot drift markup, class names, or\nids. Public API (countMarks, pathData, renderToSVGString, sceneLabel,\nsceneToSVGString, RenderSVGOptions) stays on the package root via the barrel.",
+          "timestamp": "2026-07-18T00:34:07-05:00",
+          "tree_id": "5425d3a2ccc8e211ed076dce91148d217b7032a2",
+          "url": "https://github.com/ljodea/ggsvelte/commit/fa0d58cd0d1bea5daaa7aad575f0ccd6b7ebbb65"
+        },
+        "date": 1784352885506,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.8285,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.1867,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 11.4682,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 14.732,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 83.7249,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 132.8269,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.1332,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2622,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 85.9596,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 106.1153,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 11.6538,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 11.1325,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 115.0348,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.8058,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 28.1913,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 8.5251,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 28.9929,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 623.3463,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 163.2424,
             "unit": "ms"
           }
         ]
