@@ -65,6 +65,37 @@ function pathSubpathAabb(
   return [minX - pad, minY - pad, maxX + pad, maxY + pad];
 }
 
+/**
+ * Plot-space AABB for the stroke segments incident on vertex `i` within
+ * half-open subpath [start, end). Used for stroked (non-fill) path candidates
+ * so one long series does not land every vertex in a plot-sized size class
+ * (hit-index edge shortlist pattern). Pad = linewidth/2 + hit tol.
+ */
+function pathVertexStrokeAabb(
+  batch: Extract<GeometryBatch, { kind: "paths" }>,
+  panelX: number,
+  panelY: number,
+  i: number,
+  start: number,
+  end: number,
+): readonly [number, number, number, number] {
+  const pad = batch.linewidth / 2 + 3;
+  let minX = panelX + batch.positions[i * 2]!;
+  let minY = panelY + batch.positions[i * 2 + 1]!;
+  let maxX = minX;
+  let maxY = minY;
+  for (const other of [i - 1, i + 1]) {
+    if (other < start || other >= end) continue;
+    const ox = panelX + batch.positions[other * 2]!;
+    const oy = panelY + batch.positions[other * 2 + 1]!;
+    if (ox < minX) minX = ox;
+    if (oy < minY) minY = oy;
+    if (ox > maxX) maxX = ox;
+    if (oy > maxY) maxY = oy;
+  }
+  return [minX - pad, minY - pad, maxX + pad, maxY + pad];
+}
+
 export function buildCandidateStoreEager(
   scene: Scene,
   options: CandidateStoreOptions = {},
@@ -411,13 +442,22 @@ export function buildCandidateStoreEager(
       maxX = Math.max(x1, x2) + pad;
       maxY = Math.max(y1, y2) + pad;
     } else if (batch.kind === "paths") {
-      // Subpath AABB (fill + stroke can sit far from one vertex anchor).
+      // Filled paths: full subpath AABB (containment far from any vertex).
+      // Stroked paths: AABB of incident edges only — a plot-spanning series
+      // used to tag every vertex with the same giant box, forcing Θ(V) refine
+      // on nearest/exact (hit-index already edge-shortlists strokes).
       const range = pathRange(batch, i);
       if (range === null) {
         minX = xs[id]!;
         minY = ys[id]!;
         maxX = minX;
         maxY = minY;
+      } else if (batch.fills === undefined) {
+        const box = pathVertexStrokeAabb(batch, panel.x, panel.y, i, range[0], range[1]);
+        minX = box[0];
+        minY = box[1];
+        maxX = box[2];
+        maxY = box[3];
       } else {
         const cacheKey = `${batchIds[id]}:${range[0]}:${range[1]}`;
         let box = pathAabbCache.get(cacheKey);
