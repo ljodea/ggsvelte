@@ -5,7 +5,7 @@
    */
   import type { GeometryBatch, RenderModel } from "@ggsvelte/core";
 
-  import { a11yRows } from "./canvas-a11y.js";
+  import { a11yMarkCount, a11yRows } from "./canvas-a11y.js";
 
   const {
     model,
@@ -21,9 +21,13 @@
     onToggle: () => void;
   } = $props();
 
-  const table = $derived(a11yRows(model, batches));
+  // Closed: O(P) distinct-index count only (aria-label). Open: full sort +
+  // row materialisation for the capped table. Avoids O(R log R) + model.row
+  // work on every model update while the table stays closed.
+  const total = $derived(a11yMarkCount(batches));
+  const table = $derived(open ? a11yRows(model, batches) : null);
   const ariaLabel = $derived(
-    `${sceneLabelText} — ${String(table.total)} canvas-rendered marks. Canvas marks are not individually focusable; use the data table.`,
+    `${sceneLabelText} — ${String(total)} canvas-rendered marks. Canvas marks are not individually focusable; use the data table.`,
   );
 </script>
 
@@ -35,7 +39,7 @@
   onclick={() => onToggle()}
   >{open ? "Hide data table" : "Show data table"}</button
 >
-{#if open}
+{#if open && table !== null}
   <div class="gg-a11y-table">
     <table>
       <thead>
