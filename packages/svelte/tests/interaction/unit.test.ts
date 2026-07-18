@@ -906,6 +906,93 @@ describe("semantic inspection resolver", () => {
     resized.dispose();
   });
 
+  // Layout-only rebind (same identityEpoch) must revalidate via stored seedId
+  // instead of scanning every candidate (O(C) keyOf / cheap-filter walk).
+  it("does not scan every candidate on layout-only keyed pin rebind", () => {
+    const count = 2_000;
+    const data = Array.from({ length: count }, (_, index) => ({
+      id: `r${index}`,
+      x: index,
+      y: (index % 11) + 1,
+    }));
+    const makeModel = (width: number) =>
+      runPipeline(
+        gg(data, aes({ x: "x", y: "y" }))
+          .geomPoint()
+          .spec(),
+        { width, height: 300 },
+      );
+    const first = makeModel(400);
+    const resized = makeModel(700);
+    expect(resized.candidates.size).toBe(count);
+
+    const coordinator = createInspectionCoordinator((row) => (row as { id: string }).id);
+    coordinator.resolve({
+      model: first,
+      seed: first.candidates.candidate(0)!,
+      mode: "exact",
+      state: "pinned",
+      source: "pointer",
+      identityEpoch: "layout-stable",
+      layoutEpoch: 1,
+    });
+
+    const candidateSpy = vi.spyOn(resized.candidates, "candidate");
+    const reconciled = coordinator.reconcilePinned({
+      model: resized,
+      identityEpoch: "layout-stable",
+      layoutEpoch: 2,
+    });
+    expect(reconciled).not.toBeNull();
+    expect(reconciled!.snapshot.focus.key).toBe("r0");
+    // seedId O(1) + materialize; a full rebind walk is ~C candidate() lookups.
+    expect(candidateSpy.mock.calls.length).toBeLessThan(32);
+    expect(candidateSpy.mock.calls.length).toBeLessThan(count / 20);
+    first.dispose();
+    resized.dispose();
+  });
+
+  it("does not scan every candidate on layout-only keyless pin rebind", () => {
+    const count = 2_000;
+    const data = Array.from({ length: count }, (_, index) => ({
+      id: `r${index}`,
+      x: index,
+      y: (index % 11) + 1,
+    }));
+    const makeModel = (width: number) =>
+      runPipeline(
+        gg(data, aes({ x: "x", y: "y" }))
+          .geomPoint()
+          .spec(),
+        { width, height: 300 },
+      );
+    const first = makeModel(400);
+    const resized = makeModel(700);
+
+    const coordinator = createInspectionCoordinator(() => null);
+    coordinator.resolve({
+      model: first,
+      seed: first.candidates.candidate(7)!,
+      mode: "exact",
+      state: "pinned",
+      source: "pointer",
+      identityEpoch: "layout-stable",
+      layoutEpoch: 1,
+    });
+
+    const candidateSpy = vi.spyOn(resized.candidates, "candidate");
+    const reconciled = coordinator.reconcilePinned({
+      model: resized,
+      identityEpoch: "layout-stable",
+      layoutEpoch: 2,
+    });
+    expect(reconciled).not.toBeNull();
+    expect(candidateSpy.mock.calls.length).toBeLessThan(32);
+    expect(candidateSpy.mock.calls.length).toBeLessThan(count / 20);
+    first.dispose();
+    resized.dispose();
+  });
+
   // uniqueKeysFromRowIndexes builds one membership Set for the lineage walk
   // (issue #200). Array#includes-based first-seen would construct zero Sets.
   it("allocates a membership Set when materializing aggregate sourceKeys", () => {
