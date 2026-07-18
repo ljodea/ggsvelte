@@ -117,7 +117,13 @@
     border: 1px solid
       var(--gg-tooltipBorder, var(--gg-theme-tooltipBorder, currentColor));
     border-radius: 3px;
-    background: var(--gg-tooltipPaper, var(--gg-theme-tooltipPaper, white));
+    background: var(
+      --gg-tooltipPaper,
+      var(
+        --gg-tooltip-background,
+        var(--gg-theme-tooltipPaper, var(--gg-paper, #fff))
+      )
+    );
     color: var(
       --gg-tooltipInk,
       var(

@@ -47,14 +47,14 @@ import {
   type IntervalDomain,
 } from "./interval.js";
 import {
-  candidateInInterval,
   consumeIntervalKeys,
   nextLocalIntervalRecords,
+  prepareCandidateInInterval,
   recomputePanelIntervalKeys,
   sameIntervalRecord,
   type IntervalConsumptionCandidate,
 } from "./consumption.js";
-import { intervalPixelsFromDomains } from "./query.js";
+import { bandDomainValuesFromKeys, intervalPixelsFromDomains } from "./query.js";
 import { boundsEditorInputForScale, semanticAxisFromBounds } from "./precise-bounds.js";
 import { rowIndexesForCandidate } from "../selection/selection.js";
 
@@ -401,9 +401,7 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
     const model = deps.model()!;
     const scale = model.scales.panels[panelIndex]?.[axis] ?? model.scales[axis];
     if (scale.type !== "band" || semantic.values.length === 0) return undefined;
-    const values = semantic.values
-      .map((encoded) => scale.rawDomain.find((value) => encodeKey(value) === encoded))
-      .filter((value): value is CellValue => value !== undefined);
+    const values = bandDomainValuesFromKeys(scale.rawDomain, semantic.values);
     return values.length === 0 ? undefined : [values[0]!, values.at(-1)!];
   }
 
@@ -419,14 +417,12 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
   function intervalLineageCount(targetPanelId: string, domains: ReadonlyIntervalDomains): number {
     const model = deps.model();
     if (model === null) return 0;
+    // Band Sets once for the scan — not includes() per candidate.
+    const inInterval = prepareCandidateInInterval(domains);
     const rows = new Set<number>();
     for (let id = 0; id < model.candidates.size; id++) {
       const candidate = model.candidates.candidate(id);
-      if (
-        candidate === null ||
-        candidate.panelId !== targetPanelId ||
-        !candidateInInterval(candidate, domains)
-      )
+      if (candidate === null || candidate.panelId !== targetPanelId || !inInterval(candidate))
         continue;
       for (const rowIndex of rowIndexesForCandidate(
         candidate,

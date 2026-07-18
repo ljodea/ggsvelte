@@ -8,6 +8,7 @@ import { describe, expect, it } from "bun:test";
 
 import { LINT_CATALOG, lintSpec } from "../src/lint.ts";
 import type { LintAdvisoryCode } from "../src/lint.ts";
+import { DEFAULT_VALIDATE_LIMITS } from "../src/validate-data.ts";
 import { validate } from "../src/validate.ts";
 
 const firedCodes = new Set<LintAdvisoryCode>();
@@ -147,6 +148,62 @@ describe("log-nonpositive-data", () => {
   it("silent for all-positive data or a linear scale", () => {
     expect(lintSpec(spec([1, 2, 3]))).toEqual([]);
     expect(lintSpec(spec([5, -1, 10], "linear"))).toEqual([]);
+  });
+});
+
+describe("lintSpec options.limits", () => {
+  /** Line-over-nominal-x fixture with `rows` nominal categories cycling a/b/c. */
+  const nominalLineSpec = (rows: number) => {
+    const cats = ["a", "b", "c"] as const;
+    return {
+      data: {
+        columns: {
+          x: Array.from({ length: rows }, (_, i) => cats[i % 3]!),
+          y: Array.from({ length: rows }, (_, i) => i),
+        },
+      },
+      aes: { x: { field: "x" }, y: { field: "y" } },
+      layers: [{ geom: "line" }],
+    };
+  };
+
+  it("raises maxRows so data above the default still yields data-backed advisories", () => {
+    // Default maxRows is 100_000; one past that is skipped under defaults.
+    const rows = DEFAULT_VALIDATE_LIMITS.maxRows + 1;
+    const spec = nominalLineSpec(rows);
+
+    expect(codesOf(lintSpec(spec))).not.toContain("line-over-nominal-x");
+
+    const raised = lintSpec(spec, { limits: { maxRows: rows } });
+    expect(codesOf(raised)).toContain("line-over-nominal-x");
+  });
+
+  it("lowers maxRows so over-limit inline data skips data-backed rules", () => {
+    const spec = nominalLineSpec(15);
+
+    // Under defaults (100k), the advisory fires.
+    expect(codesOf(lintSpec(spec))).toContain("line-over-nominal-x");
+
+    // Lowered limit: evidence is null, lint skips (never fabricates a complaint).
+    expect(lintSpec(spec, { limits: { maxRows: 10 } })).toEqual([]);
+  });
+
+  it("lowers maxBytes so oversized inline data skips data-backed rules", () => {
+    // Wide strings so a tiny maxBytes trips while row count stays small.
+    const big = "x".repeat(200);
+    const spec = {
+      data: {
+        columns: {
+          x: [big, big, big],
+          y: [1, 2, 3],
+        },
+      },
+      aes: { x: { field: "x" }, y: { field: "y" } },
+      layers: [{ geom: "line" }],
+    };
+
+    expect(codesOf(lintSpec(spec))).toContain("line-over-nominal-x");
+    expect(lintSpec(spec, { limits: { maxBytes: 50 } })).toEqual([]);
   });
 });
 

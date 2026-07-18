@@ -124,8 +124,20 @@
       var(--gg-tooltipBorder, var(--gg-theme-tooltipBorder, currentColor));
     border-radius: 3px;
     padding: 2px 6px;
-    background: var(--gg-tooltipPaper, var(--gg-theme-tooltipPaper, white));
-    color: var(--gg-tooltipInk, var(--gg-theme-tooltipInk, currentColor));
+    background: var(
+      --gg-tooltipPaper,
+      var(
+        --gg-tooltip-background,
+        var(--gg-theme-tooltipPaper, var(--gg-paper, #fff))
+      )
+    );
+    color: var(
+      --gg-tooltipInk,
+      var(
+        --gg-tooltip-foreground,
+        var(--gg-theme-tooltipInk, var(--gg-ink, #1f2328))
+      )
+    );
     font: 11px/1.2 var(--gg-font-family, sans-serif);
     white-space: nowrap;
     pointer-events: auto;

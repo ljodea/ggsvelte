@@ -225,6 +225,33 @@ export function resolveIntervalQueryParts(input: ResolveIntervalQueryPartsInput)
   };
 }
 
+/**
+ * Resolve encoded band identity keys to typed `rawDomain` values.
+ *
+ * Builds a key→value Map once (O(D)), then O(1) gets per selected key — not
+ * `rawDomain.find` per value (O(V·D)). First domain entry wins when encodeKeys
+ * collide, matching prior `.find` semantics. Missing keys are skipped so
+ * callers keep the same partial-match behavior as before.
+ */
+export function bandDomainValuesFromKeys(
+  rawDomain: readonly unknown[],
+  encodedKeys: readonly string[],
+): CellValue[] {
+  const byKey = new Map<string, CellValue>();
+  for (const value of rawDomain) {
+    const key = encodeKey(value);
+    if (!byKey.has(key)) byKey.set(key, value as CellValue);
+  }
+  const resolved: CellValue[] = [];
+  for (const encoded of encodedKeys) {
+    const value = byKey.get(encoded);
+    // Same as prior `.find` + `!== undefined` filter: a domain entry of
+    // `undefined` is indistinguishable from a miss and is skipped.
+    if (value !== undefined) resolved.push(value);
+  }
+  return resolved;
+}
+
 /** Normalized [tMin, tMax] screen fraction of a semantic axis, or the full
  *  span when the axis is absent or cannot be mapped through the scale. */
 function normalizedAxisSpan(
@@ -234,9 +261,8 @@ function normalizedAxisSpan(
   if (axis === undefined) return [0, 1];
   if (axis.kind === "band") {
     if (scale.type !== "band") return [0, 1];
-    const centers = axis.values.flatMap((encoded) => {
-      const value = scale.rawDomain.find((candidate) => encodeKey(candidate) === encoded);
-      const center = value === undefined ? undefined : scale.normalize(value);
+    const centers = bandDomainValuesFromKeys(scale.rawDomain, axis.values).flatMap((value) => {
+      const center = scale.normalize(value);
       return center === undefined ? [] : [center];
     });
     if (centers.length === 0) return [0, 1];

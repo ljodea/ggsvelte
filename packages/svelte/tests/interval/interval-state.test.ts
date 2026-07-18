@@ -593,6 +593,63 @@ describe("createIntervalState semanticAxis (public behavior)", () => {
 });
 
 describe("createIntervalState bounds editor select path", () => {
+  it("band precise-bounds emit typed domain endpoints from encoded identities", () => {
+    // semanticAxis stores encodeKey tokens; eventDomain must decode them back
+    // to typed rawDomain values for the public IntervalSelection.domain payload.
+    const bandModel = modelFor(bandXSpec());
+    const events: PlotSelection[] = [];
+    const trigger = document.createElement("button");
+    const { state, destroy } = mountIntervalController({
+      model: () => bandModel,
+      selectConfig: persistentSelect,
+      emitSelection: (event) => {
+        events.push(event);
+      },
+    });
+
+    state.applyBrushSelectEnd(
+      brushEvent(bandModel, {
+        domain: { x: ["north", "south"], y: [0, 20] },
+        keys: ["0", "1"],
+      }),
+      "pointer",
+    );
+    flushSync();
+    expect(state.effectiveIntervals[0]?.domains.x).toMatchObject({
+      kind: "band",
+      values: [encodeKey("north"), encodeKey("south")],
+    });
+
+    state.openBoundsEditor("select", "x", trigger);
+    flushSync();
+    expect(state.boundsEditorInput?.scale).toBe("band");
+
+    events.length = 0;
+    state.applyPreciseBounds({
+      source: "precise-bounds",
+      inputSource: "keyboard",
+      action: "select",
+      axis: "x",
+      reversed: false,
+      scale: "band",
+      bounds: ["north", "south"],
+    });
+    flushSync();
+    expect(events).toHaveLength(1);
+    const endEvent = events[0];
+    expect(endEvent !== undefined && "domain" in endEvent ? endEvent.domain.x : undefined).toEqual([
+      "north",
+      "south",
+    ]);
+    // Missing / partial endpoints still project pixels from the resolved band span.
+    expect(state.committedInterval).not.toBeNull();
+    expect(state.committedInterval?.pixels.x1).toBeGreaterThan(
+      state.committedInterval?.pixels.x0 ?? 0,
+    );
+
+    destroy();
+  });
+
   it("open → input; apply updates record (persistent) and emits once; non-persistent emits without record", () => {
     const model = modelFor(continuousSpec());
     const events: PlotSelection[] = [];

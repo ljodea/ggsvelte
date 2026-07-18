@@ -105,14 +105,16 @@ function isRecord(v: unknown): v is Record<string, unknown> {
 
 /**
  * Standalone evidence build (lintSpec without a shared map from validate).
- * Uses resolveFieldEvidence with default limits so behavior matches tier-2
- * when the same inline data is huge (data-aware rules skip over-limit).
+ * Merges options.limits into DEFAULT_VALIDATE_LIMITS the same way validate()
+ * does, so callers can raise or lower maxRows/maxBytes and data-aware rules
+ * honor the override (skip over-limit; never fabricate a complaint).
  */
 function buildEvidence(
   spec: Record<string, unknown>,
   options: ValidateOptions | undefined,
 ): FieldEvidenceMap | null {
-  const resolved = resolveFieldEvidence(spec, options ?? {}, DEFAULT_VALIDATE_LIMITS);
+  const limits = { ...DEFAULT_VALIDATE_LIMITS, ...options?.limits };
+  const resolved = resolveFieldEvidence(spec, options ?? {}, limits);
   return resolved.status === "ok" ? resolved.fields : null;
 }
 
@@ -125,8 +127,10 @@ const DISCRETE: ReadonlySet<ProfileFieldType> = new Set(["nominal", "ordinal"]);
 /**
  * Lint a spec for valid-but-questionable constructs. `options` mirrors
  * validate(): pass `{ profile }` to lint against out-of-band data, or let the
- * spec's inline data provide the evidence. Rules whose evidence is missing
- * skip silently — lint never fabricates a complaint.
+ * spec's inline data provide the evidence; `options.limits` merges over
+ * DEFAULT_VALIDATE_LIMITS the same way validate() does. Rules whose evidence
+ * is missing (including over-limit inline data) skip silently — lint never
+ * fabricates a complaint.
  *
  * When called from validate({ lint: true }), pass `sharedEvidence` so field
  * types/columns are not rebuilt after dataChecks already resolved them.
