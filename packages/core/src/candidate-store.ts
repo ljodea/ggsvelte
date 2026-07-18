@@ -882,14 +882,19 @@ function buildCandidateStoreEager(
       if (spatial === null || n === 0) return EMPTY_UINT32;
       // Point anchors: exact rect membership via the tree. Extended geometry
       // (rects/segments/paths) can intersect far from the anchor — always refine.
-      const pointHits = new Set(spatial.queryRect(loX, loY, hiX, hiY));
-      return Uint32Array.from(
-        traversal.filter((id) => {
-          if (panelId !== undefined && scene.panels[panelIds[id]!]!.id !== panelId) return false;
-          if (isPoint[id] === 1) return pointHits.has(id);
-          return intersects(id, loX, loY, hiX, hiY);
-        }),
-      );
+      // Collect hits then order by traversal rank (preserves prior contract).
+      const hits: number[] = [];
+      for (const id of spatial.queryRect(loX, loY, hiX, hiY)) {
+        if (isPoint[id] !== 1) continue;
+        if (panelId !== undefined && scene.panels[panelIds[id]!]!.id !== panelId) continue;
+        hits.push(id);
+      }
+      for (const id of extendedIds) {
+        if (panelId !== undefined && scene.panels[panelIds[id]!]!.id !== panelId) continue;
+        if (intersects(id, loX, loY, hiX, hiY)) hits.push(id);
+      }
+      hits.sort((a, b) => traversalRank[a]! - traversalRank[b]!);
+      return Uint32Array.from(hits);
     },
     dispose() {},
   };
