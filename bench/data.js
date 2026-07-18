@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784412755285,
+  "lastUpdate": 1784413950389,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -30190,6 +30190,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 160.8743,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "507ca3251662089223640062af33094b40c3f612",
+          "message": "deps-dev: bump oxfmt from 0.58.0 to 0.59.0 (#306)\n\nReplacement for Dependabot #302 after bun.lock conflicted with the\noxlint 1.74 land. Includes the two Array.from reformats oxfmt 0.59\napplies so pre-commit --all-files stays green.",
+          "timestamp": "2026-07-18T17:31:46-05:00",
+          "tree_id": "2fcb9f1576d47cbe76d047f16fdbbd172def8166",
+          "url": "https://github.com/ljodea/ggsvelte/commit/507ca3251662089223640062af33094b40c3f612"
+        },
+        "date": 1784413949020,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.5267,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.9096,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 11.9491,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 13.1808,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 85.2618,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 116.9044,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.1121,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2977,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 85.2704,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 106.808,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.3534,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 13.1048,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 114.2257,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7909,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 27.0528,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.7452,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 37.4881,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 597.1969,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 161.3033,
             "unit": "ms"
           }
         ]
