@@ -300,17 +300,36 @@ export function createPlotOrchestrator<
     announce: announceSink,
   });
 
-  // Source identity/order epoch: stable through responsive layout and zoom
-  // respecs, different when normalized inline data or data references change.
+  // Source identity/order epoch: O(R) row-ref order over data/spec *props*
+  // (not assembled shells). Theme/labs/scales respecs do not re-walk cells;
+  // new prop references or in-place row-order changes still bump the epoch.
   // Tracker is owned for the component lifetime (never cleared).
   const identityTracker = createSourceIdentityTracker();
-  const dataIdentityEpoch = $derived(
-    dataIdentityEpochToken({
-      assembled,
-      dataToken: identityTracker.sourceIdentity(inputs.data()),
-      specToken: identityTracker.sourceIdentity(inputs.spec()),
-    }),
-  );
+  const dataIdentityEpoch = $derived.by(() => {
+    const data = inputs.data();
+    const spec = inputs.spec();
+    const layers = inputs.layers();
+    const layerCount = layers === undefined ? inputs.registry.layers.length : layers.length;
+    // Ready without reading `assembled` so chrome-only respecs do not re-enter.
+    const ready = spec !== undefined || layerCount > 0;
+    const sourceIdentity = (value: unknown) => identityTracker.sourceIdentity(value);
+    // assemblePortableSpec: explicit `spec` wins and ignores the data prop —
+    // fingerprint the rendered source only (Codex P2).
+    const contentData =
+      spec !== undefined && typeof spec === "object" ? (spec as { data?: unknown }).data : data;
+    const contentDatasets =
+      spec !== undefined && typeof spec === "object"
+        ? (spec as { datasets?: unknown }).datasets
+        : undefined;
+    return dataIdentityEpochToken({
+      ready,
+      dataToken: sourceIdentity(data),
+      specToken: sourceIdentity(spec),
+      data: contentData ?? null,
+      datasets: contentDatasets ?? null,
+      sourceIdentity,
+    });
+  });
 
   // Live-region announcer (owned early so legend-reset effects can call it).
   const announcer = createPlotAnnouncer();

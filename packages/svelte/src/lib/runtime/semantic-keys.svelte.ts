@@ -88,19 +88,109 @@ export type ResolveSemanticKeysResult = {
 };
 
 /**
+ * O(R) order fingerprint for plot data — row *references* and length, not
+ * deep cell values. In-place reverse bumps the token; in-place cell edits on
+ * the same row objects do not (hosts should replace rows/arrays for identity).
+ *
+ * Avoids the former O(R·F) `JSON.stringify` of every cell on each epoch read.
+ */
+export function dataContentOrderToken(
+  data: unknown,
+  sourceIdentity: (value: unknown) => string,
+): string {
+  if (data === null || data === undefined) return "null";
+  if (Array.isArray(data)) {
+    let token = `v:${data.length}`;
+    for (let index = 0; index < data.length; index++) token += `:${sourceIdentity(data[index])}`;
+    return token;
+  }
+  if (typeof data === "object") {
+    const record = data as Record<string, unknown>;
+    const fieldKeys = Object.keys(record);
+    // DataRef shapes only when single-key (matches packages/spec isDataRef).
+    // A bare column map may own a field named `values`/`columns` alongside
+    // other arrays and must not short-circuit (Codex P2).
+    if (fieldKeys.length === 1 && fieldKeys[0] === "values" && Array.isArray(record["values"])) {
+      const values = record["values"] as unknown[];
+      let token = `v:${values.length}`;
+      for (let index = 0; index < values.length; index++)
+        token += `:${sourceIdentity(values[index])}`;
+      return token;
+    }
+    if (
+      fieldKeys.length === 1 &&
+      fieldKeys[0] === "columns" &&
+      record["columns"] !== null &&
+      typeof record["columns"] === "object" &&
+      !Array.isArray(record["columns"])
+    )
+      return `c:${columnMapOrderToken(record["columns"] as Record<string, unknown>, sourceIdentity)}`;
+    if (fieldKeys.length === 1 && fieldKeys[0] === "name" && typeof record["name"] === "string")
+      return `n:${record["name"]}`;
+    // Bare column-oriented object (gg() wraps as { columns }) — fingerprint
+    // each field's array identity so in-place column replacement bumps epoch.
+    if (fieldKeys.length > 0 && fieldKeys.every((key) => Array.isArray(record[key])))
+      return `c:${columnMapOrderToken(record, sourceIdentity)}`;
+    return `o:${sourceIdentity(data)}`;
+  }
+  if (typeof data === "string" || typeof data === "number" || typeof data === "boolean")
+    return `p:${String(data)}`;
+  if (typeof data === "bigint") return `p:${data.toString()}`;
+  return `p:${sourceIdentity(data)}`;
+}
+
+/** O(fields) fingerprint: each column array's identity (+ length), not cells. */
+function columnMapOrderToken(
+  columns: Record<string, unknown>,
+  sourceIdentity: (value: unknown) => string,
+): string {
+  const keys = Object.keys(columns).toSorted();
+  let token = `${keys.length}`;
+  for (const key of keys) {
+    const column = columns[key];
+    token += `|${key}=${sourceIdentity(column)}`;
+    if (Array.isArray(column)) token += `@${column.length}`;
+  }
+  return token;
+}
+
+function datasetsOrderToken(datasets: unknown, sourceIdentity: (value: unknown) => string): string {
+  if (datasets === null || datasets === undefined) return "null";
+  if (typeof datasets !== "object") return sourceIdentity(datasets);
+  const keys = Object.keys(datasets).toSorted();
+  let token = `d:${keys.length}`;
+  for (const key of keys) {
+    token += `|${key}=${dataContentOrderToken(
+      (datasets as Record<string, unknown>)[key],
+      sourceIdentity,
+    )}`;
+  }
+  return token;
+}
+
+/**
  * Stable data/spec identity token for inspection reconcile epochs.
- * Host supplies sourceIdentity tokens for the raw `data` / `spec` props.
+ *
+ * Host supplies:
+ * - `dataToken` / `specToken` — WeakMap identity of the raw `data` / `spec` props
+ * - `data` / `datasets` — content to order-fingerprint (prefer **prop** values,
+ *   not a freshly assembled PortableSpec shell, so theme/labs respecs do not
+ *   force a re-walk)
+ * - `sourceIdentity` — stable object ids for the O(R) order fingerprint
+ *
+ * Ready=false (no plot yet) → `"no-data"`. Complexity: O(R) over row refs,
+ * not O(R·F) deep cell serialization.
  */
 export function dataIdentityEpochToken(input: {
-  readonly assembled: { readonly data?: unknown; readonly datasets?: unknown } | null;
+  readonly ready: boolean;
   readonly dataToken: string;
   readonly specToken: string;
+  readonly data: unknown;
+  readonly datasets: unknown;
+  readonly sourceIdentity: (value: unknown) => string;
 }): string {
-  if (input.assembled === null) return "no-data";
-  return `${input.dataToken}:${input.specToken}:${JSON.stringify([
-    input.assembled.data ?? null,
-    input.assembled.datasets ?? null,
-  ])}`;
+  if (!input.ready) return "no-data";
+  return `${input.dataToken}:${input.specToken}:${dataContentOrderToken(input.data, input.sourceIdentity)}:${datasetsOrderToken(input.datasets, input.sourceIdentity)}`;
 }
 
 /** Empty semantic-key bag when there is no render model. */

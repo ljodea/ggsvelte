@@ -11,6 +11,7 @@ import { INTERACTION_DIAGNOSTIC_CATALOG } from "../../src/lib/interaction/intera
 import {
   createSourceIdentityTracker,
   createSemanticKeyService,
+  dataContentOrderToken,
   dataIdentityEpochToken,
   resolveSemanticKeys,
   resolveSemanticKeysForPlot,
@@ -58,31 +59,146 @@ function modelView(options: {
 // ---------------------------------------------------------------------------
 
 describe("dataIdentityEpochToken", () => {
-  it("returns no-data when assembled is null", () => {
+  it("returns no-data when not ready", () => {
+    const tracker = createSourceIdentityTracker();
     expect(
       dataIdentityEpochToken({
-        assembled: null,
+        ready: false,
         dataToken: "1",
         specToken: "2",
+        data: null,
+        datasets: null,
+        sourceIdentity: (value) => tracker.sourceIdentity(value),
       }),
     ).toBe("no-data");
   });
 
-  it("joins source tokens with JSON of data and datasets (nullish → null)", () => {
+  it("joins prop tokens with O(R) row-reference order, not deep JSON of cells", () => {
+    const tracker = createSourceIdentityTracker();
+    const id = (value: unknown) => tracker.sourceIdentity(value);
+    const rowA = { a: 1 };
+    const rowB = { a: 2 };
+    const data = [rowA, rowB];
+    const first = dataIdentityEpochToken({
+      ready: true,
+      dataToken: "d",
+      specToken: "s",
+      data,
+      datasets: null,
+      sourceIdentity: id,
+    });
+    // Same row references / order → same epoch (theme-style respecs keep prop identity).
     expect(
       dataIdentityEpochToken({
-        assembled: { data: [{ a: 1 }], datasets: undefined },
+        ready: true,
         dataToken: "d",
         specToken: "s",
+        data,
+        datasets: null,
+        sourceIdentity: id,
       }),
-    ).toBe(`d:s:${JSON.stringify([[{ a: 1 }], null])}`);
+    ).toBe(first);
+    // In-place reverse of the same row objects bumps the order fingerprint.
+    data.reverse();
+    const reversed = dataIdentityEpochToken({
+      ready: true,
+      dataToken: "d",
+      specToken: "s",
+      data,
+      datasets: null,
+      sourceIdentity: id,
+    });
+    expect(reversed).not.toBe(first);
+    // Deep cell edits on the same row objects do not walk cells — token stays put.
+    rowA.a = 99;
     expect(
       dataIdentityEpochToken({
-        assembled: {},
+        ready: true,
         dataToken: "d",
         specToken: "s",
+        data,
+        datasets: null,
+        sourceIdentity: id,
       }),
-    ).toBe(`d:s:${JSON.stringify([null, null])}`);
+    ).toBe(reversed);
+    // New dataToken (new prop reference) changes the epoch even with empty content.
+    expect(
+      dataIdentityEpochToken({
+        ready: true,
+        dataToken: "d2",
+        specToken: "s",
+        data: null,
+        datasets: null,
+        sourceIdentity: id,
+      }),
+    ).not.toBe(
+      dataIdentityEpochToken({
+        ready: true,
+        dataToken: "d",
+        specToken: "s",
+        data: null,
+        datasets: null,
+        sourceIdentity: id,
+      }),
+    );
+  });
+
+  it("fingerprints column-array identities (not only the columns wrapper)", () => {
+    const tracker = createSourceIdentityTracker();
+    const id = (value: unknown) => tracker.sourceIdentity(value);
+    const x = [1, 2];
+    const y = [3, 4];
+    const columns = { x, y };
+    const bare = dataContentOrderToken(columns, id);
+    const wrapped = dataContentOrderToken({ columns }, id);
+    // Both forms include each column array's identity (Codex P2).
+    expect(bare).toContain(id(x));
+    expect(bare).toContain(id(y));
+    expect(wrapped).toContain(id(x));
+    expect(wrapped).toContain(id(y));
+    // Replace one column array on the map → content token changes.
+    columns.y = [5, 6];
+    expect(dataContentOrderToken(columns, id)).not.toBe(bare);
+  });
+
+  it("does not treat a multi-field map with a values column as a DataRef", () => {
+    const tracker = createSourceIdentityTracker();
+    const id = (value: unknown) => tracker.sourceIdentity(value);
+    const values = [1, 2];
+    const y = [3, 4];
+    const bare = { values, y };
+    const first = dataContentOrderToken(bare, id);
+    expect(first.startsWith("c:")).toBe(true);
+    expect(first).toContain(id(values));
+    expect(first).toContain(id(y));
+    bare.y = [9, 9];
+    expect(dataContentOrderToken(bare, id)).not.toBe(first);
+  });
+
+  it("does not deep-serialize large row payloads (no JSON.stringify of cells)", () => {
+    const tracker = createSourceIdentityTracker();
+    const id = (value: unknown) => tracker.sourceIdentity(value);
+    const largeRows = Array.from({ length: 2000 }, (_, i) => ({ i, pad: "x".repeat(64) }));
+    const spy = vi.spyOn(JSON, "stringify");
+    const token = dataIdentityEpochToken({
+      ready: true,
+      dataToken: "d",
+      specToken: "s",
+      data: largeRows,
+      datasets: null,
+      sourceIdentity: id,
+    });
+    expect(token.startsWith("d:s:")).toBe(true);
+    // Content order is O(R) row refs — same helper used standalone.
+    expect(dataContentOrderToken(largeRows, id).startsWith("v:2000:")).toBe(true);
+    // May stringify nothing, or only incidental non-data uses — never the full row array.
+    for (const call of spy.mock.calls) {
+      expect(call[0]).not.toBe(largeRows);
+      if (Array.isArray(call[0])) {
+        expect(call[0]).not.toContain(largeRows[0]);
+      }
+    }
+    spy.mockRestore();
   });
 });
 
