@@ -76,6 +76,8 @@ export type LegendKeyIndexAdapter = {
  * - Skip null rows (field path) / null keys; constant path only needs keys.
  * - Match entry values via pre-built token→index maps (legendValueEqual
  *   semantics: NaN, Date, -0/0); O(E) prep + O(1) per row, not findIndex.
+ * - Layer field maps built once per layer (first non-stat channel → field);
+ *   lineage Sets once per candidate when any discrete legend applies.
  * - Final keys are first-seen unique order, frozen.
  */
 /** Row field value or scaled constant; `skip` when the row is missing. */
@@ -144,10 +146,29 @@ export function buildLegendEntryKeyIndexForPlot(input: {
   });
 }
 
+/**
+ * First non-stat field per channel for one layer — same selection as
+ * `fields.find(m => m.channel === scale && m.source !== "stat")`.
+ * Built once per layer so candidate×legend walks are O(1) field lookups.
+ */
+function indexLayerFieldsByChannel(
+  fields: readonly LegendMappedField[] | undefined,
+): ReadonlyMap<string, string> {
+  const byChannel = new Map<string, string>();
+  if (fields === undefined) return byChannel;
+  for (const mapped of fields) {
+    if (mapped.source === "stat") continue;
+    if (!byChannel.has(mapped.channel)) byChannel.set(mapped.channel, mapped.field);
+  }
+  return byChannel;
+}
+
 export function buildLegendEntryKeyIndex(
   adapter: LegendKeyIndexAdapter,
 ): ReadonlyMap<string, readonly PropertyKey[]> {
   const index = new Map<string, PropertyKey[]>();
+  /** Discrete legends only — ramp legends never contribute buckets. */
+  const discreteLegends: Extract<SceneLegend, { type: "discrete" }>[] = [];
   /** Per discrete legend: value-token → first matching entryIndex. */
   const entryLookupByLegend = new Map<
     Extract<SceneLegend, { type: "discrete" }>,
@@ -155,26 +176,44 @@ export function buildLegendEntryKeyIndex(
   >();
   for (const sceneLegend of adapter.legends) {
     if (sceneLegend.type !== "discrete") continue;
+    discreteLegends.push(sceneLegend);
     for (let entryIndex = 0; entryIndex < sceneLegend.entries.length; entryIndex++)
       index.set(legendIdentityKey({ scale: sceneLegend.scale, entryIndex }), []);
     entryLookupByLegend.set(sceneLegend, buildEntryIndexByToken(sceneLegend.entries));
   }
+  // Lazy: layerIndex → channel → first non-stat field (O(F) once per layer).
+  const fieldsByLayer = new Map<number, ReadonlyMap<string, string>>();
+  const fieldFor = (layerIndex: number, scale: string): string | undefined => {
+    let byChannel = fieldsByLayer.get(layerIndex);
+    if (byChannel === undefined) {
+      byChannel = indexLayerFieldsByChannel(adapter.layerFields(layerIndex));
+      fieldsByLayer.set(layerIndex, byChannel);
+    }
+    return byChannel.get(scale);
+  };
+
   const visited = new Set<string>();
   for (const candidate of adapter.candidates()) {
-    for (const sceneLegend of adapter.legends) {
-      if (sceneLegend.type !== "discrete") continue;
-      const field = adapter
-        .layerFields(candidate.layerIndex)
-        ?.find((mapped) => mapped.channel === sceneLegend.scale && mapped.source !== "stat")?.field;
+    // Lineage Set once per candidate when any discrete legend applies —
+    // not once per legend (was O(C·L·R) Set construction).
+    let sourceRows: Set<number> | null = null;
+    const rowsForCandidate = (): Set<number> => {
+      if (sourceRows === null) {
+        sourceRows = new Set(adapter.lineageKeys(candidate.lineage));
+        if (candidate.rowIndex !== null) sourceRows.add(candidate.rowIndex);
+      }
+      return sourceRows;
+    };
+
+    for (const sceneLegend of discreteLegends) {
+      const field = fieldFor(candidate.layerIndex, sceneLegend.scale);
       const scaledConstant =
         field === undefined
           ? adapter.layerScaledConstant?.(candidate.layerIndex, sceneLegend.scale)
           : undefined;
       if (field === undefined && scaledConstant === undefined) continue;
       const entryByToken = entryLookupByLegend.get(sceneLegend)!;
-      const sourceRows = new Set(adapter.lineageKeys(candidate.lineage));
-      if (candidate.rowIndex !== null) sourceRows.add(candidate.rowIndex);
-      for (const rowIndex of sourceRows) {
+      for (const rowIndex of rowsForCandidate()) {
         const visitField = field ?? `const:${String(scaledConstant)}`;
         const visit = `${sceneLegend.scale}:${String(candidate.layerIndex)}:${visitField}:${String(rowIndex)}`;
         if (visited.has(visit)) continue;
