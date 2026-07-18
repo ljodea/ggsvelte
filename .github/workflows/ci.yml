@@ -284,6 +284,10 @@ jobs:
     name: interaction-perf (p50/p95, informational)
     needs: detect-changes
     if: needs.detect-changes.outputs.interaction_perf == 'true'
+    # Never block merge: wall-clock budgets flake on the shared self-hosted host.
+    # ci-gate intentionally ignores this job; continue-on-error keeps the check
+    # green when branch protection requires all checks.
+    continue-on-error: true
     runs-on: [self-hosted, ggsvelte]
     env:
       HOME: /root
