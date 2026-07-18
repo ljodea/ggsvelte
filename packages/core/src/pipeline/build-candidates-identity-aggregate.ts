@@ -8,7 +8,6 @@ import type { BarParams } from "@ggsvelte/spec";
 import { cellToNumber } from "../table.js";
 
 import type { FacetPanelDef } from "./facets.js";
-import { deriveLayerGroups } from "./frame.js";
 import type { LayerFrame } from "./types.js";
 
 export function appendSourceRowByGroupX(input: {
@@ -23,6 +22,16 @@ export function appendSourceRowByGroupX(input: {
   const members = input.sourceRowsByGroupX.get(key);
   if (members === undefined) input.sourceRowsByGroupX.set(key, [input.sourceRow]);
   else members.push(input.sourceRow);
+}
+
+export function appendSourceRowByGroupKey(
+  map: Map<string, number[]>,
+  key: string,
+  sourceRow: number,
+): void {
+  const members = map.get(key);
+  if (members === undefined) map.set(key, [sourceRow]);
+  else members.push(sourceRow);
 }
 
 interface BinEdge {
@@ -52,7 +61,8 @@ export function buildBinLineageBuckets(input: {
   const field = frame.binding.xField;
   if (field === null) return;
 
-  const inputGroups = deriveLayerGroups(frame.binding, frame.table);
+  // Pre-stat groups cached on the frame during buildFrame (issue #217).
+  const inputGroups = frame.inputGroups;
   const closed = ((frame.binding.layer.params ?? {}) as BarParams).closed ?? "right";
   const binsByGroup = new Map<number, BinEdge[]>();
   const missingEdges = frame.xmin === null || frame.xmax === null;

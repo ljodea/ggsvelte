@@ -18,8 +18,14 @@ export function locateIdentityCandidate(
   ctx: IdentityCandidateResolveContext,
   facts: CandidateBuildFacts,
 ): LocatedIdentityCandidate {
-  const { seriesByRow, sourceRowsByGroup, sourceRowsByGroupX, sourceRowsByGroupBin, frameGroups } =
-    ctx.getIdentityIndex();
+  const {
+    seriesByRow,
+    sourceRowsByGroup,
+    sourceRowsByGroupX,
+    sourceRowsByGroupBin,
+    sourceRowsByGroupY,
+    frameGroups,
+  } = ctx.getIdentityIndex();
   const fields = ctx.layerFields[facts.layerIndex] ?? [];
   const sourceRow = facts.rowIndex;
   const frame = ctx.panelFrames[facts.panelIndex]?.[facts.layerIndex];
@@ -55,5 +61,6 @@ export function locateIdentityCandidate(
     sourceRowsByGroup,
     sourceRowsByGroupX,
     sourceRowsByGroupBin,
+    sourceRowsByGroupY,
   };
 }

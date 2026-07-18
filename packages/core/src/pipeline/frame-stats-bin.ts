@@ -43,5 +43,5 @@ export function buildBinFrame(
       howToOverride: `Set params.binwidth (preferred — a width meaningful for the data) or params.bins on layer ${index}.`,
     });
   }
-  return packBinLayerFrame(binding, table, result, columnOf);
+  return packBinLayerFrame(binding, table, result, columnOf, groups);
 }

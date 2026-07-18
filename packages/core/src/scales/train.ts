@@ -149,6 +149,11 @@ export interface ColorScale {
   type: "ordinal";
   /** Present domain values in stable assignment order. */
   domain: readonly unknown[];
+  /**
+   * Assignment rank of a value (undefined = unknown). O(1) via the training
+   * encodeKey map — same keying as `colorOf`, not presentation `bandKey`.
+   */
+  indexOf(value: unknown): number | undefined;
   /** Resolved color for a value (undefined = unknown). */
   colorOf(value: unknown): string | undefined;
   /** Serializable value-stable state — commit only for the latest run. */
@@ -428,6 +433,7 @@ export function trainColor(
   return {
     type: "ordinal",
     domain: result.domain,
+    indexOf: (value: unknown) => result.indexOf(value),
     colorOf: (value: unknown) => result.rangeValueOf(value) as string | undefined,
     state: result.state,
     warnings: result.warnings,
