@@ -16,8 +16,9 @@
  *  - segments: size-classed AABB-center shortlist (endpoint box), then exact
  *    point-to-segment distance <= linewidth/2 + tolerance. Same size-class
  *    pattern as rects so one long rule cannot expand every short-segment query.
- *  - stroked paths (lines): size-classed subpath AABB shortlist, then per-edge
- *    point-to-segment distance (pad by linewidth/2 + tolerance).
+ *  - stroked paths (lines): size-classed *edge* AABB shortlist, then exact
+ *    point-to-segment distance (pad by linewidth/2 + tolerance). Edge shortlist
+ *    keeps long single-series polylines O(log E + k), not O(E).
  *  - filled paths (areas/ribbons): size-classed subpath AABB shortlist, then
  *    even-odd point-in-polygon; the reported row is the nearest vertex's row.
  *    queryRect uses a vertex StaticQuadtree (O(log V + k)).
@@ -104,34 +105,6 @@ function pointInSubpath(
     if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
   }
   return inside;
-}
-
-/**
- * First edge of [start, end) within linewidth/2 + tolerance of (lx, ly);
- * returns the NEARER endpoint's vertex index, or -1.
- */
-function nearestStrokeVertex(
-  batch: PathsBatch,
-  start: number,
-  end: number,
-  lx: number,
-  ly: number,
-  tolerance: number,
-): number {
-  const slop = batch.linewidth / 2 + tolerance;
-  const slop2 = slop * slop;
-  for (let i = start; i < end - 1; i++) {
-    const x1 = batch.positions[i * 2]!;
-    const y1 = batch.positions[i * 2 + 1]!;
-    const x2 = batch.positions[(i + 1) * 2]!;
-    const y2 = batch.positions[(i + 1) * 2 + 1]!;
-    if (segmentDist2(lx, ly, x1, y1, x2, y2) <= slop2) {
-      const d1 = (lx - x1) ** 2 + (ly - y1) ** 2;
-      const d2 = (lx - x2) ** 2 + (ly - y2) ** 2;
-      return d1 <= d2 ? i : i + 1;
-    }
-  }
-  return -1;
 }
 
 /** Vertex of [start, end) nearest to (lx, ly). */
@@ -277,9 +250,19 @@ function buildSegmentsIndex(
   return buildAabbIndex(minX, minY, maxX, maxY);
 }
 
-/** Subpath AABB shortlist + vertex tree for brush queries (plot px). */
+/**
+ * Path spatial indexes (plot px):
+ *  - subpaths: fill hitTest shortlist
+ *  - edges: stroke hitTest shortlist (one AABB per consecutive vertex pair)
+ *  - vertices: queryRect brush shortlist
+ */
 interface PathsIndexEntry {
   readonly subpaths: AabbIndexEntry;
+  readonly edges: AabbIndexEntry;
+  /** Edge index → start vertex i (edge runs i → i+1). */
+  readonly edgeStart: Uint32Array;
+  /** Edge index → subpath s (for topmost / first-edge-in-subpath ties). */
+  readonly edgeSubpath: Uint32Array;
   readonly vertices: PointsIndexEntry;
 }
 
@@ -292,9 +275,12 @@ function buildPathsIndex(
   const minY = new Float64Array(nSub);
   const maxX = new Float64Array(nSub);
   const maxY = new Float64Array(nSub);
+  // First pass: count edges and compute subpath AABBs.
+  let edgeCount = 0;
   for (let s = 0; s < nSub; s++) {
     const start = batch.pathOffsets[s]!;
     const end = batch.pathOffsets[s + 1]!;
+    if (end > start + 1) edgeCount += end - start - 1;
     let sMinX = Infinity;
     let sMinY = Infinity;
     let sMaxX = -Infinity;
@@ -308,7 +294,6 @@ function buildPathsIndex(
       if (vy > sMaxY) sMaxY = vy;
     }
     if (end <= start) {
-      // Empty subpath: degenerate AABB at origin (never matches finite queries).
       minX[s] = 0;
       minY[s] = 0;
       maxX[s] = 0;
@@ -320,6 +305,30 @@ function buildPathsIndex(
       maxY[s] = sMaxY;
     }
   }
+  const eMinX = new Float64Array(edgeCount);
+  const eMinY = new Float64Array(edgeCount);
+  const eMaxX = new Float64Array(edgeCount);
+  const eMaxY = new Float64Array(edgeCount);
+  const edgeStart = new Uint32Array(edgeCount);
+  const edgeSubpath = new Uint32Array(edgeCount);
+  let e = 0;
+  for (let s = 0; s < nSub; s++) {
+    const start = batch.pathOffsets[s]!;
+    const end = batch.pathOffsets[s + 1]!;
+    for (let i = start; i < end - 1; i++) {
+      const x1 = panel.x + batch.positions[i * 2]!;
+      const y1 = panel.y + batch.positions[i * 2 + 1]!;
+      const x2 = panel.x + batch.positions[(i + 1) * 2]!;
+      const y2 = panel.y + batch.positions[(i + 1) * 2 + 1]!;
+      eMinX[e] = Math.min(x1, x2);
+      eMinY[e] = Math.min(y1, y2);
+      eMaxX[e] = Math.max(x1, x2);
+      eMaxY[e] = Math.max(y1, y2);
+      edgeStart[e] = i;
+      edgeSubpath[e] = s;
+      e++;
+    }
+  }
   const nVert = batch.rowIndex.length;
   const xs = new Float64Array(nVert);
   const ys = new Float64Array(nVert);
@@ -329,6 +338,9 @@ function buildPathsIndex(
   }
   return {
     subpaths: buildAabbIndex(minX, minY, maxX, maxY),
+    edges: buildAabbIndex(eMinX, eMinY, eMaxX, eMaxY),
+    edgeStart,
+    edgeSubpath,
     vertices: { quadtree: new StaticQuadtree(xs, ys), xs, ys },
   };
 }
@@ -487,33 +499,27 @@ export function buildHitIndex(scene: Scene, options: HitIndexOptions = {}): Scen
         };
       }
       case "paths": {
-        // Size-class subpath AABB shortlist, then exact fill/stroke; topmost = highest s.
+        // Fill: subpath AABB shortlist + point-in-polygon.
+        // Stroke: edge AABB shortlist + exact distance (dense polylines stay
+        // O(log E + k), not O(E)). Topmost = highest subpath; within a subpath
+        // the first edge in vertex order wins (matches nearestStrokeVertex).
         const entry = pathsIndex.get(batch);
         if (entry === undefined) return null;
         const filled = batch.fills !== undefined;
-        const pad = filled ? 0 : batch.linewidth / 2 + tolerance;
-        let bestS = -1;
-        let bestVertex = -1;
-        for (const s of shortlistAabbIntersecting(entry.subpaths, x, y, x, y, pad)) {
-          const start = batch.pathOffsets[s]!;
-          const end = batch.pathOffsets[s + 1]!;
-          if (end <= start) continue;
-          if (filled) {
+        if (filled) {
+          let bestS = -1;
+          let bestVertex = -1;
+          for (const s of shortlistAabbIntersecting(entry.subpaths, x, y, x, y, 0)) {
+            const start = batch.pathOffsets[s]!;
+            const end = batch.pathOffsets[s + 1]!;
+            if (end <= start) continue;
             if (!pointInSubpath(batch, start, end, lx, ly)) continue;
             if (s > bestS) {
               bestS = s;
               bestVertex = nearestVertex(batch, start, end, lx, ly);
             }
-          } else {
-            const at = nearestStrokeVertex(batch, start, end, lx, ly, tolerance);
-            if (at !== -1 && s > bestS) {
-              bestS = s;
-              bestVertex = at;
-            }
           }
-        }
-        if (bestS < 0 || bestVertex < 0) return null;
-        if (filled) {
+          if (bestS < 0 || bestVertex < 0) return null;
           return {
             layerIndex: batch.layerIndex,
             panelIndex: batch.panelIndex,
@@ -523,6 +529,28 @@ export function buildHitIndex(scene: Scene, options: HitIndexOptions = {}): Scen
             kind: "paths",
           };
         }
+        const pad = batch.linewidth / 2 + tolerance;
+        const slop2 = pad * pad;
+        let bestS = -1;
+        let bestEdgeStart = -1;
+        let bestVertex = -1;
+        for (const e of shortlistAabbIntersecting(entry.edges, x, y, x, y, pad)) {
+          const i = entry.edgeStart[e]!;
+          const s = entry.edgeSubpath[e]!;
+          const x1 = batch.positions[i * 2]!;
+          const y1 = batch.positions[i * 2 + 1]!;
+          const x2 = batch.positions[(i + 1) * 2]!;
+          const y2 = batch.positions[(i + 1) * 2 + 1]!;
+          if (segmentDist2(lx, ly, x1, y1, x2, y2) > slop2) continue;
+          if (s < bestS) continue;
+          if (s === bestS && i >= bestEdgeStart && bestEdgeStart >= 0) continue;
+          const d1 = (lx - x1) ** 2 + (ly - y1) ** 2;
+          const d2 = (lx - x2) ** 2 + (ly - y2) ** 2;
+          bestS = s;
+          bestEdgeStart = i;
+          bestVertex = d1 <= d2 ? i : i + 1;
+        }
+        if (bestVertex < 0) return null;
         return {
           layerIndex: batch.layerIndex,
           panelIndex: batch.panelIndex,
