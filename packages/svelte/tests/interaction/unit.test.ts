@@ -603,7 +603,7 @@ describe("semantic inspection resolver", () => {
       rowReads++;
       return originalRow(index);
     });
-    const coordinator = createInspectionCoordinator((row) => String((row as { id: string }).id));
+    const coordinator = createInspectionCoordinator((row) => (row as { id: string }).id);
     rowReads = 0;
     const resolved = coordinator.resolve({
       model,

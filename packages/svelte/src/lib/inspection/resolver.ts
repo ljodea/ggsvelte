@@ -318,7 +318,7 @@ export function createInspectionCoordinator<
       const payload =
         row === null
           ? `${axisToken(candidate.xToken)},${axisToken(candidate.yToken)}`
-          : rowCellPayload(row as Record<string, CellValue>);
+          : rowCellPayload(row);
       return `${semanticKeyToken(key, fallback)}{${payload}}`;
     });
     const focusRow = input.seed.rowIndex === null ? null : input.model.row(input.seed.rowIndex);
