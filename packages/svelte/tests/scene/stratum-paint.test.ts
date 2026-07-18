@@ -26,6 +26,34 @@ describe("resolveBatchFocusMasks", () => {
     const orphan = { id: "orphan" } as unknown as GeometryBatch;
     expect(resolveBatchFocusMasks(sceneBatches, [orphan], masks as never)).toEqual([null]);
   });
+
+  it("treats missing mask slots as null when masks are shorter than the scene", () => {
+    // Scene index 2 has no corresponding mask entry.
+    expect(resolveBatchFocusMasks(sceneBatches, [c, a], [masks[0]] as never)).toEqual([
+      null,
+      masks[0],
+    ]);
+  });
+
+  // Projection builds a batch→index Map once (O(S + B)) rather than indexOf per
+  // batch (O(B·S)). Structural property of the implementation; wall-clock ratio
+  // guards flake under CI contention — large-input identity mapping locks the
+  // public contract instead.
+  it("projects a large subset by scene identity in reverse order", () => {
+    const n = 2_000;
+    const scene = Array.from({ length: n }, (_, i) => ({ id: i }) as unknown as GeometryBatch);
+    const interactionMasks = scene.map((_, i) =>
+      i % 3 === 0 ? ({ primitives: new Set([i]) } as never) : null,
+    );
+    // Known scene indices (every 7th, reversed) — expected masks come from that
+    // construction, not from re-deriving indices via indexOf.
+    const subsetIndices: number[] = [];
+    for (let i = 0; i < n; i++) if (i % 7 === 0) subsetIndices.push(i);
+    subsetIndices.reverse();
+    const subset = subsetIndices.map((i) => scene[i]!);
+    const projected = resolveBatchFocusMasks(scene, subset, interactionMasks);
+    expect(projected).toEqual(subsetIndices.map((i) => interactionMasks[i]!));
+  });
 });
 
 describe("paintCanvasStratum", () => {

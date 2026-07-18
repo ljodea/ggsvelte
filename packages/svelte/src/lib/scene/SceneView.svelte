@@ -23,6 +23,7 @@
   import Axis from "./Axis.svelte";
   import Batch from "./Batch.svelte";
   import Legend from "./Legend.svelte";
+  import { resolveBatchFocusMasks } from "./stratum-paint.js";
 
   type Mode = "full" | "chrome-bottom" | "marks" | "chrome-top";
 
@@ -53,11 +54,11 @@
   const drawTop = $derived(mode === "full" || mode === "chrome-top");
   const drawMarks = $derived(mode === "full" || mode === "marks");
   const markBatches = $derived(batches ?? scene.batches);
-
-  function focusMask(batch: GeometryBatch): BatchInteractionMask | null {
-    const index = scene.batches.indexOf(batch);
-    return index < 0 ? null : (focusMasks[index] ?? null);
-  }
+  // Project once per (scene, markBatches, focusMasks) — O(S + B) via Map, not
+  // indexOf per batch during panel loops.
+  const markFocusMasks = $derived(
+    resolveBatchFocusMasks(scene.batches, markBatches, focusMasks),
+  );
 
   const gridBounds = $derived.by(() => {
     const panels = scene.panels;
@@ -171,7 +172,7 @@
                 theme={scene.theme}
                 {focusable}
                 {markLabel}
-                focusMask={focusMask(batch)}
+                focusMask={markFocusMasks[bi] ?? null}
               />
             {/if}
           {/each}

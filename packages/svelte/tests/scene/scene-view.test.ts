@@ -1,10 +1,13 @@
 /**
  * SceneView ARIA surface (role / aria-label / aria-hidden by mode).
  * Axis has no aria of its own — role/label live on the SVG root here.
+ * Focus-mask projection maps full-scene masks onto mark batch subsets by
+ * identity (shared with resolveBatchFocusMasks).
  */
 import { describe, expect, it } from "vitest";
 
-import { sceneLabel, type Scene } from "@ggsvelte/core";
+import type { BatchInteractionMask, Scene } from "@ggsvelte/core";
+import { sceneLabel } from "@ggsvelte/core";
 import { aes, gg } from "@ggsvelte/spec";
 
 import SceneView from "../../src/lib/scene/SceneView.svelte";
@@ -28,6 +31,30 @@ function liveScene(): { scene: Scene; dispose: () => void } {
     dispose() {
       model.dispose();
     },
+  };
+}
+
+/** Two layers → two scene batches (points + paths) for mask index alignment. */
+function multiLayerScene(): { scene: Scene; dispose: () => void } {
+  const model = modelFor(
+    gg(rows, aes({ x: "x", y: "y", color: "cls" }))
+      .geomPoint()
+      .geomLine()
+      .spec(),
+  );
+  return {
+    scene: model.scene,
+    dispose() {
+      model.dispose();
+    },
+  };
+}
+
+function focusFirstPrimitive(): BatchInteractionMask {
+  return {
+    primitiveCount: 2,
+    focusedCount: 1,
+    isFocused: (index) => index === 0,
   };
 }
 
@@ -85,6 +112,44 @@ describe("SceneView ARIA surface", () => {
     const caption = container.querySelector("text.gg-caption");
     expect(caption?.textContent).toBe("Plot caption");
     expect(caption?.getAttribute("text-anchor")).toBe("end");
+    dispose();
+  });
+});
+
+describe("SceneView focus-mask projection", () => {
+  it("applies full-scene masks by batch identity on a marks subset", () => {
+    const { scene, dispose } = multiLayerScene();
+    expect(scene.batches.length).toBe(2);
+    const points = scene.batches[0]!;
+    const paths = scene.batches[1]!;
+    const mask = focusFirstPrimitive();
+    // Full-scene masks: focus only the path layer (index 1).
+    const focusMasks: (BatchInteractionMask | null)[] = [null, mask];
+
+    const { container } = render(SceneView, {
+      scene,
+      mode: "marks",
+      // Subset is reverse of scene order — must not use subset index.
+      batches: [paths, points],
+      focusMasks,
+    });
+
+    const pathMarks = container.querySelectorAll(".gg-batch.gg-paths [data-gg-focused]");
+    const pointMarks = container.querySelectorAll(".gg-batch.gg-points [data-gg-focused]");
+    // Paths carry the mask (focused attrs present); points had null mask.
+    expect(pathMarks.length).toBeGreaterThan(0);
+    expect(pointMarks.length).toBe(0);
+    dispose();
+  });
+
+  it("short-circuits when focusMasks is empty (no data-gg-focused attrs)", () => {
+    const { scene, dispose } = multiLayerScene();
+    const { container } = render(SceneView, {
+      scene,
+      mode: "full",
+      focusMasks: [],
+    });
+    expect(container.querySelectorAll("[data-gg-focused]").length).toBe(0);
     dispose();
   });
 });
