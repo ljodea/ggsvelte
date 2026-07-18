@@ -1,3 +1,4 @@
+import { fromPartial } from "@total-typescript/shoehorn";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -7,13 +8,13 @@ import {
 } from "../../src/lib/interval/bounds-editor.js";
 
 const input = (overrides: Partial<BoundsEditorInput> = {}): BoundsEditorInput =>
-  ({
+  fromPartial<BoundsEditorInput>({
     axis: "x",
     action: "select",
     scale: "linear",
     bounds: [2, 8],
     ...overrides,
-  }) as BoundsEditorInput;
+  });
 
 describe("precise bounds drafts", () => {
   it("formats continuous and time values without local-time conversion", () => {

@@ -1,3 +1,4 @@
+import { fromAny } from "@total-typescript/shoehorn";
 import { describe, expect, it, vi } from "vitest";
 
 import type { GeometryBatch, RenderModel, Stratum } from "@ggsvelte/core";
@@ -11,7 +12,7 @@ function model(partial: {
   height?: number;
   batches?: GeometryBatch[];
 }): RenderModel {
-  return {
+  return fromAny<RenderModel>({
     runId: partial.runId ?? 1,
     scene: {
       width: partial.width ?? 80,
@@ -36,7 +37,7 @@ function model(partial: {
     },
     layerBackends: [],
     candidates: { size: 0, candidate: () => null },
-  } as unknown as RenderModel;
+  });
 }
 
 const emptySvgStratum: Stratum = {

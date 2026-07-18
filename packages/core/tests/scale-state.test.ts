@@ -1,3 +1,4 @@
+import { fromAny } from "@total-typescript/shoehorn";
 import { describe, expect, test } from "bun:test";
 import {
   adoptScaleState,
@@ -129,7 +130,7 @@ describe("persistence round-trip", () => {
 
   test("a future-version state degrades to fresh with a version-mismatch warning", () => {
     const r1 = trainDiscrete(["a"], spec());
-    const future = { ...r1.state, version: 99 } as unknown as ScaleState;
+    const future = fromAny<ScaleState>({ ...r1.state, version: 99 });
     const r2 = trainDiscrete(["a"], spec(), future);
     expect(r2.warnings.map((w) => w.code)).toEqual(["version-mismatch"]);
     expect(r2.indexOf("a")).toBe(0);

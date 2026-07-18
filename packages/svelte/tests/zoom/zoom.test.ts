@@ -1,3 +1,4 @@
+import { fromAny } from "@total-typescript/shoehorn";
 import { describe, expect, it } from "vitest";
 
 import type { PortableSpec } from "@ggsvelte/spec";
@@ -105,14 +106,14 @@ describe("sameZoomDomains / stableZoomDomains", () => {
 });
 
 describe("applyZoomToSpec", () => {
-  const base = {
+  const base = fromAny<PortableSpec>({
     aes: {},
     layers: [{ geom: "point" }],
     scales: {
       x: { type: "continuous", nice: true },
       y: { type: "continuous", nice: true },
     },
-  } as unknown as PortableSpec;
+  });
 
   it("returns the same reference when domains are null or empty", () => {
     expect(applyZoomToSpec(base, null)).toBe(base);
@@ -136,10 +137,10 @@ describe("applyZoomToSpec", () => {
   });
 
   it("handles absent scale configs via spread of undefined", () => {
-    const bare = {
+    const bare = fromAny<PortableSpec>({
       aes: {},
       layers: [{ geom: "point" }],
-    } as unknown as PortableSpec;
+    });
     const next = applyZoomToSpec(bare, { y: [0, 1] });
     expect(next.scales?.y).toEqual({ domain: [0, 1], nice: false });
     expect(next.scales?.x).toBeUndefined();
@@ -153,7 +154,7 @@ describe("sanitizePartialZoomDomains", () => {
   };
 
   it("keeps finite continuous channels and drops band/non-finite", () => {
-    expect(sanitizePartialZoomDomains({ x: [5, 15], y: [0, 1] }, scales as never, null)).toEqual({
+    expect(sanitizePartialZoomDomains({ x: [5, 15], y: [0, 1] }, fromAny(scales), null)).toEqual({
       x: [5, 15],
     });
   });
@@ -162,10 +163,10 @@ describe("sanitizePartialZoomDomains", () => {
     expect(
       sanitizePartialZoomDomains(
         { x: [1, 2] },
-        {
+        fromAny({
           x: continuousScale([0, 10]),
           y: continuousScale([0, 10]),
-        } as never,
+        }),
         { y: [3, 4] },
       ),
     ).toEqual({ x: [1, 2], y: [3, 4] });
@@ -175,15 +176,15 @@ describe("sanitizePartialZoomDomains", () => {
     expect(
       sanitizePartialZoomDomains(
         { x: [Number.NaN, 1], y: [0, Number.POSITIVE_INFINITY] },
-        {
+        fromAny({
           x: continuousScale([0, 1]),
           y: continuousScale([0, 1]),
-        } as never,
+        }),
         null,
       ),
     ).toBeNull();
     expect(
-      sanitizePartialZoomDomains({ x: [0, 1] }, { x: bandScale, y: bandScale } as never, null),
+      sanitizePartialZoomDomains({ x: [0, 1] }, fromAny({ x: bandScale, y: bandScale }), null),
     ).toBeNull();
   });
 });
@@ -199,7 +200,7 @@ describe("resolveBrushZoomDomains", () => {
       resolveBrushZoomDomains(
         { x0: 10, y0: 10, x1: 10, y1: 10 },
         panel,
-        scales as never,
+        fromAny(scales),
         false,
         "xy",
         null,
@@ -211,7 +212,7 @@ describe("resolveBrushZoomDomains", () => {
     const domains = resolveBrushZoomDomains(
       { x0: 10, y0: 20, x1: 10, y1: 80 },
       panel,
-      scales as never,
+      fromAny(scales),
       false,
       "xy",
       null,
@@ -224,7 +225,7 @@ describe("resolveBrushZoomDomains", () => {
     const xOnly = resolveBrushZoomDomains(
       { x0: 10, y0: 10, x1: 90, y1: 90 },
       panel,
-      scales as never,
+      fromAny(scales),
       false,
       "x",
       { y: [1, 2] },
@@ -235,7 +236,7 @@ describe("resolveBrushZoomDomains", () => {
     const yOnly = resolveBrushZoomDomains(
       { x0: 10, y0: 10, x1: 90, y1: 90 },
       panel,
-      scales as never,
+      fromAny(scales),
       false,
       "y",
       null,
@@ -249,7 +250,7 @@ describe("resolveBrushZoomDomains", () => {
     const domains = resolveBrushZoomDomains(
       { x0: 0, y0: 0, x1: 100, y1: 100 },
       panel,
-      scales as never,
+      fromAny(scales),
       true,
       "xy",
       null,
@@ -266,7 +267,7 @@ describe("resolveBrushZoomFromModel", () => {
   };
   const single = {
     scene: { panels: [panel] },
-    scales: scales as never,
+    scales: fromAny(scales),
   };
   const rect = { x0: 10, y0: 10, x1: 90, y1: 90 };
 
@@ -287,7 +288,7 @@ describe("resolveBrushZoomFromModel", () => {
       resolveBrushZoomFromModel({
         model: {
           scene: { panels: [panel, { x: 100, y: 0, width: 100, height: 100 }] },
-          scales: scales as never,
+          scales: fromAny(scales),
         },
         rect,
         flipped: false,
@@ -300,7 +301,7 @@ describe("resolveBrushZoomFromModel", () => {
   it("returns null when there are zero panels", () => {
     expect(
       resolveBrushZoomFromModel({
-        model: { scene: { panels: [] }, scales: scales as never },
+        model: { scene: { panels: [] }, scales: fromAny(scales) },
         rect,
         flipped: false,
         mode: "xy",

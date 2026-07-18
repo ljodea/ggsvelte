@@ -211,6 +211,11 @@ and hub-style barrels invite import cycles across feature controllers.
 - Cross-cutting suites (`component.test.ts`, harnesses, release matrix) sit
   at `packages/svelte/tests/` root.
 - Shared helpers and fixtures: `tests/helpers/`, `tests/fixtures/`.
+- Prefer `@total-typescript/shoehorn` for partial test fixtures instead of `as`
+  / `as unknown as` / `as never` on object literals:
+  - `fromPartial({ ... })` when the shape is a valid deep-partial of the target type
+  - `fromAny({ ... })` when the data is intentionally wrong or untyped for the test
+  - Keep `as const`, error/DOM narrowing, and post-pipeline batch narrowing as-is
 
 ### Coverage workflow
 

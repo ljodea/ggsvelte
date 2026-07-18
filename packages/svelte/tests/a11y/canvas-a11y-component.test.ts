@@ -1,3 +1,4 @@
+import { fromAny } from "@total-typescript/shoehorn";
 import { describe, expect, it, vi } from "vitest";
 
 import type { GeometryBatch, RenderModel } from "@ggsvelte/core";
@@ -8,21 +9,21 @@ import { render } from "../helpers/render.js";
 import { until } from "../helpers/until.js";
 
 function batch(partial: { layerIndex: number; rowIndex: number[] }): GeometryBatch {
-  return {
+  return fromAny<GeometryBatch>({
     layerIndex: partial.layerIndex,
     geom: "point",
     rowIndex: new Uint32Array(partial.rowIndex),
-  } as unknown as GeometryBatch;
+  });
 }
 
 function model(opts: {
   layerFields: Record<number, { field: string }[]>;
   rows: Record<number, Record<string, unknown> | null>;
 }): RenderModel {
-  return {
+  return fromAny<RenderModel>({
     layerFields: opts.layerFields,
     row: (index: number) => opts.rows[index] ?? null,
-  } as unknown as RenderModel;
+  });
 }
 
 const sampleModel = model({
@@ -85,15 +86,15 @@ describe("CanvasA11y", () => {
 
   it("closed→open on the same mount materialises rows only after open becomes true", async () => {
     const row = vi.fn((index: number) => {
-      const body = (sampleModel as { row: (i: number) => Record<string, unknown> | null }).row(
+      const body = fromAny<{ row: (i: number) => Record<string, unknown> | null }>(sampleModel).row(
         index,
       );
       return body;
     });
-    const spyModel = {
-      layerFields: (sampleModel as { layerFields: unknown }).layerFields,
+    const spyModel = fromAny<RenderModel>({
+      layerFields: fromAny<{ layerFields: unknown }>(sampleModel).layerFields,
       row,
-    } as unknown as RenderModel;
+    });
 
     const props = {
       model: spyModel,

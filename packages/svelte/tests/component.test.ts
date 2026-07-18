@@ -8,6 +8,7 @@
  *  - equivalence gate (a): children-assembled spec === builder output ===
  *    hand-written PortableSpec after normalize
  */
+import { fromPartial } from "@total-typescript/shoehorn";
 import { describe, expect, it } from "vitest";
 
 import { aes, gg, normalize } from "@ggsvelte/spec";
@@ -83,11 +84,11 @@ describe("scale stability through the component (THE flagship behavior)", () => 
     expect(initial.a).not.toBe(initial.b);
 
     // remove series "a" -> "b" keeps its color (SveltePlot's flagship defect, fixed)
-    await rerender({ data: rows.filter((r) => r.cls === "b") } as never);
+    await rerender(fromPartial({ data: rows.filter((r) => r.cls === "b") }));
     expect(circleFills(container)).toEqual([initial.b, initial.b]);
 
     // re-add "a" -> it gets its ORIGINAL color back
-    await rerender({ data: rows } as never);
+    await rerender(fromPartial({ data: rows }));
     expect(byClass()).toEqual(initial);
   });
 });
@@ -142,11 +143,11 @@ describe("stacked bars + legend (M1)", () => {
     expect(initial.web).not.toBe(initial.store);
 
     // remove the "web" series -> "store" keeps its color
-    await rerender({ data: salesRows.filter((r) => r.kind === "store") } as never);
+    await rerender(fromPartial({ data: salesRows.filter((r) => r.kind === "store") }));
     expect(rectFills(container)).toEqual([initial.store, initial.store]);
 
     // re-add "web" -> its ORIGINAL color returns
-    await rerender({ data: salesRows } as never);
+    await rerender(fromPartial({ data: salesRows }));
     expect(byKind()).toEqual(initial);
   });
 
@@ -304,13 +305,15 @@ describe("data-gg-ready readiness signal (M1 VR workstream)", () => {
     await expect.poll(() => root?.dataset.ggReady).toBe("true");
     // Explicit empty layers → no model → not ready. Derived predicate must
     // clear the attribute in this commit (not wait for a post-flush $effect).
-    await rerender({
-      data: rows,
-      aes: { x: "x", y: "y" },
-      layers: [],
-      width: 480,
-      height: 320,
-    } as never);
+    await rerender(
+      fromPartial({
+        data: rows,
+        aes: { x: "x", y: "y" },
+        layers: [],
+        width: 480,
+        height: 320,
+      }),
+    );
     expect(root?.dataset.ggReady).toBe("false");
   });
 });

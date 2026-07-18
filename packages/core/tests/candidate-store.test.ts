@@ -1,3 +1,4 @@
+import { fromPartial } from "@total-typescript/shoehorn";
 import { describe, expect, it, spyOn } from "bun:test";
 
 import {
@@ -51,7 +52,7 @@ function scene(): Scene {
     axes: { x: { ticks: [], title: "" }, y: { ticks: [], title: "" } },
     grid: { x: [], y: [] },
     legends: [],
-    theme: {} as Scene["theme"],
+    theme: fromPartial<Scene["theme"]>({}),
     title: "",
     subtitle: "",
     caption: "",

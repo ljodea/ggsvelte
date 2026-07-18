@@ -4,6 +4,7 @@
  * all-null columns, stat columns, scale/type compatibility) against inline
  * data or a DataProfile, under documented input limits.
  */
+import { fromAny } from "@total-typescript/shoehorn";
 import { describe, expect, it } from "bun:test";
 
 import type { DataProfile } from "../src/validate-data.ts";
@@ -213,7 +214,7 @@ describe("tier 2 — DataProfile", () => {
     expect(
       codesOf(
         { layers: [{ geom: "point", aes: { x: { field: "a" }, y: { field: "b" } } }] },
-        { profile: { fields: [{ name: "a", type: "numeric" }] } as never },
+        { profile: fromAny({ fields: [{ name: "a", type: "numeric" }] }) },
       ),
     ).toEqual(["invalid-data-profile"]);
   });
@@ -304,7 +305,7 @@ describe("tier 2 — cross-stage error ordering (characterization)", () => {
         layers: [{ geom: "point", aes: { x: { field: "xx" } } }],
         facet: { wrap: { field: "g" }, rows: { field: "h" } },
       },
-      { profile: { fields: [{ name: "a", type: "numeric" }] } as never },
+      { profile: fromAny({ fields: [{ name: "a", type: "numeric" }] }) },
     );
     expect(errors.map((e) => e.code)).toEqual([
       "missing-required-channel",

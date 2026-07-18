@@ -4,6 +4,7 @@
  * one place. Adding a catalog code without a trigger — or a trigger whose
  * code silently changes — fails this test.
  */
+import { fromAny } from "@total-typescript/shoehorn";
 import { describe, expect, it } from "bun:test";
 
 import { ERROR_CATALOG, ERROR_CODES } from "../src/errors.ts";
@@ -101,7 +102,8 @@ const TRIGGERS: Record<SpecErrorCode, Trigger> = {
   },
   "invalid-data-profile": {
     spec: { layers: [point] },
-    options: { profile: { fields: [{ name: "x", type: "numeric" }] } as never },
+    // Intentionally malformed profile type (not a valid DataProfile field type).
+    options: { profile: fromAny({ fields: [{ name: "x", type: "numeric" }] }) },
   },
   "validation-limit": {
     spec: { data: { values: [{ x: 1 }, { x: 2 }] }, layers: [point] },

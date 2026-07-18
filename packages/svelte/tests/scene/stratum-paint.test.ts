@@ -1,3 +1,4 @@
+import { fromAny, fromPartial } from "@total-typescript/shoehorn";
 import { describe, expect, it, vi } from "vitest";
 
 import type { GeometryBatch } from "@ggsvelte/core";
@@ -5,9 +6,9 @@ import type { GeometryBatch } from "@ggsvelte/core";
 import { paintCanvasStratum, resolveBatchFocusMasks } from "../../src/lib/scene/stratum-paint.js";
 
 describe("resolveBatchFocusMasks", () => {
-  const a = { id: "a" } as unknown as GeometryBatch;
-  const b = { id: "b" } as unknown as GeometryBatch;
-  const c = { id: "c" } as unknown as GeometryBatch;
+  const a = fromAny<GeometryBatch>({ id: "a" });
+  const b = fromAny<GeometryBatch>({ id: "b" });
+  const c = fromAny<GeometryBatch>({ id: "c" });
   const sceneBatches = [a, b, c];
   const masks = [{ primitives: new Set([0]) }, null, { primitives: new Set([1]) }] as const;
 
@@ -16,20 +17,20 @@ describe("resolveBatchFocusMasks", () => {
   });
 
   it("maps subset batches by scene identity, not subset index", () => {
-    expect(resolveBatchFocusMasks(sceneBatches, [c, a], masks as never)).toEqual([
+    expect(resolveBatchFocusMasks(sceneBatches, [c, a], fromAny(masks))).toEqual([
       masks[2],
       masks[0],
     ]);
   });
 
   it("returns null for batches absent from the scene list", () => {
-    const orphan = { id: "orphan" } as unknown as GeometryBatch;
-    expect(resolveBatchFocusMasks(sceneBatches, [orphan], masks as never)).toEqual([null]);
+    const orphan = fromAny<GeometryBatch>({ id: "orphan" });
+    expect(resolveBatchFocusMasks(sceneBatches, [orphan], fromAny(masks))).toEqual([null]);
   });
 
   it("treats missing mask slots as null when masks are shorter than the scene", () => {
     // Scene index 2 has no corresponding mask entry.
-    expect(resolveBatchFocusMasks(sceneBatches, [c, a], [masks[0]] as never)).toEqual([
+    expect(resolveBatchFocusMasks(sceneBatches, [c, a], fromAny([masks[0]]))).toEqual([
       null,
       masks[0],
     ]);
@@ -41,9 +42,9 @@ describe("resolveBatchFocusMasks", () => {
   // public contract instead.
   it("projects a large subset by scene identity in reverse order", () => {
     const n = 2_000;
-    const scene = Array.from({ length: n }, (_, i) => ({ id: i }) as unknown as GeometryBatch);
+    const scene = Array.from({ length: n }, (_, i) => fromAny<GeometryBatch>({ id: i }));
     const interactionMasks = scene.map((_, i) =>
-      i % 3 === 0 ? ({ primitives: new Set([i]) } as never) : null,
+      i % 3 === 0 ? fromAny({ primitives: new Set([i]) }) : null,
     );
     // Known scene indices (every 7th, reversed) — expected masks come from that
     // construction, not from re-deriving indices via indexOf.
@@ -62,12 +63,12 @@ describe("paintCanvasStratum", () => {
     const getContext = vi.spyOn(canvas, "getContext").mockReturnValue(null);
     const ok = paintCanvasStratum({
       canvas,
-      scene: {
+      scene: fromPartial({
         width: 100,
         height: 50,
         theme: { interactionMuted: 0.35 },
         batches: [],
-      } as never,
+      }),
       batches: [],
       focusMasks: [],
     });
@@ -80,7 +81,7 @@ describe("paintCanvasStratum", () => {
     // Real browser 2d context — sizing/drawing exercise the core path.
     const ok = paintCanvasStratum({
       canvas,
-      scene: {
+      scene: fromPartial({
         width: 40,
         height: 20,
         theme: { interactionMuted: 0.4 },
@@ -93,7 +94,7 @@ describe("paintCanvasStratum", () => {
         title: null,
         subtitle: null,
         caption: null,
-      } as never,
+      }),
       batches: [],
       focusMasks: [],
     });

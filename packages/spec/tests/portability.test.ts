@@ -1,3 +1,4 @@
+import { fromAny } from "@total-typescript/shoehorn";
 import { describe, expect, it } from "bun:test";
 
 import {
@@ -21,7 +22,8 @@ describe("portabilityIssues", () => {
   });
 
   it("reports every offending path with a reason", () => {
-    const spec = {
+    // Intentionally unportable values (fn, Date, bigint, NaN, undefined).
+    const spec = fromAny<RuntimeSpec>({
       layers: [
         {
           geom: "point",
@@ -32,7 +34,7 @@ describe("portabilityIssues", () => {
       when: new Date(0),
       big: 1n,
       gone: undefined,
-    } as unknown as RuntimeSpec;
+    });
     const issues = portabilityIssues(spec);
     const paths = issues.map((i) => i.path).toSorted();
     expect(paths).toEqual(["/big", "/gone", "/layers/0/aes/x/fn", "/when", "/width"]);
@@ -52,14 +54,14 @@ describe("isPortable early exit", () => {
     let laterTouched = false;
     // Sibling getter after the unportable property: Object.entries would
     // evaluate it before the loop, defeating stopAfter. Keys must be read lazily.
-    const spec = {
+    const spec = fromAny<RuntimeSpec>({
       layers: [{ geom: "point" }],
       width: Number.NaN,
       get later() {
         laterTouched = true;
         return 1;
       },
-    } as unknown as RuntimeSpec;
+    });
 
     expect(isPortable(spec)).toBe(false);
     expect(laterTouched).toBe(false);
@@ -92,23 +94,23 @@ describe("isPortable early exit", () => {
       writable: true,
     });
     expect(portabilityIssues(spec)).toEqual([]);
-    expect(isPortable(spec as unknown as RuntimeSpec)).toBe(true);
+    expect(isPortable(fromAny(spec))).toBe(true);
   });
 });
 
 describe("toPortable", () => {
   it("returns a deep copy for portable specs", () => {
     const copy = toPortable(portable);
-    expect(copy).toEqual(portable as never);
-    expect(copy).not.toBe(portable as never);
-    expect(copy.layers).not.toBe(portable.layers as never);
+    expect(copy).toEqual(portable);
+    expect(copy).not.toBe(portable);
+    expect(copy.layers).not.toBe(portable.layers);
   });
 
   it("REJECTS with every unserializable path (never strips)", () => {
-    const spec = {
+    const spec = fromAny<RuntimeSpec>({
       layers: [{ geom: "point", aes: { x: { fn: () => 1 } } }],
       width: Infinity,
-    } as unknown as RuntimeSpec;
+    });
     let error: UnportableSpecError | undefined;
     try {
       toPortable(spec);
@@ -123,20 +125,20 @@ describe("toPortable", () => {
 
 describe("toPortableLossy", () => {
   it("strips fn accessors and reports dropped paths", () => {
-    const spec = {
+    const spec = fromAny<RuntimeSpec>({
       layers: [{ geom: "point", aes: { x: { fn: () => 1 }, y: { field: "y" } } }],
-    } as unknown as RuntimeSpec;
+    });
     const { spec: out, dropped } = toPortableLossy(spec);
     expect(dropped).toEqual(["/layers/0/aes/x/fn"]);
     // the fn key is gone; the (now empty) channel object remains
-    expect(out.layers[0]).toEqual({ geom: "point", aes: { x: {}, y: { field: "y" } } } as never);
+    expect(out.layers[0]).toEqual({ geom: "point", aes: { x: {}, y: { field: "y" } } });
   });
 
   it("coerces dates to ISO strings and non-finite numbers to null (not drops)", () => {
-    const spec = {
+    const spec = fromAny<RuntimeSpec>({
       data: { values: [{ t: new Date("2026-07-10T00:00:00Z"), v: NaN }] },
       layers: [{ geom: "point" }],
-    } as unknown as RuntimeSpec;
+    });
     const { spec: out, dropped } = toPortableLossy(spec);
     expect(dropped).toEqual([]);
     expect(out.data).toEqual({

@@ -3,6 +3,7 @@
  * config surface (types, domains, zero forcing, breaks, labels), color/fill
  * legends (incl. the order option), theme wiring, and the failure policy.
  */
+import { fromAny } from "@total-typescript/shoehorn";
 import { describe, expect, it } from "bun:test";
 
 import { aes, gg } from "@ggsvelte/spec";
@@ -598,11 +599,11 @@ describe("theme wiring", () => {
   it("unknown theme names throw a structured tier-1 error", () => {
     try {
       runPipeline(
-        {
+        fromAny({
           data: { values: salesRows },
           theme: "darkk",
           layers: [{ geom: "point", aes: { x: { field: "city" }, y: { field: "sales" } } }],
-        } as never,
+        }),
         size,
       );
       throw new Error("should have thrown");

@@ -1,3 +1,4 @@
+import { fromAny } from "@total-typescript/shoehorn";
 import { describe, expect, it, vi } from "vitest";
 
 import { createPlotInteraction } from "../../src/lib/interaction/controller.svelte.js";
@@ -366,7 +367,7 @@ describe("createPlotInteraction", () => {
 
   it("rejects invalid runtime keys and non-finite domains without transitions", () => {
     const controller = createPlotInteraction();
-    expect(() => controller.setSelection([{} as unknown as PropertyKey], { scope: "id" })).toThrow(
+    expect(() => controller.setSelection([fromAny<PropertyKey>({})], { scope: "id" })).toThrow(
       TypeError,
     );
     expect(() =>

@@ -3,6 +3,7 @@
  * Public/observable contracts only — batch mark counts and coord-flip vertex
  * mapping — so the split can move freely without rewriting these specs.
  */
+import { fromAny, fromPartial } from "@total-typescript/shoehorn";
 import { describe, expect, it } from "bun:test";
 
 import { gg, aes } from "@ggsvelte/spec";
@@ -18,13 +19,13 @@ const size = { width: 640, height: 400 };
 
 describe("makeErrorbarHalfWidth", () => {
   it("uses half band-step for discrete x", () => {
-    const frame = { xNumeric: null } as LayerFrame;
-    const fx = {
+    const frame = fromPartial<LayerFrame>({ xNumeric: null });
+    const fx = fromPartial<Frame>({
       xScale: { type: "band", step: 0.4, normalize: () => 0 },
       yScale: { type: "linear", normalize: (v: number) => v },
       innerWidth: 100,
       innerHeight: 100,
-    } as Frame;
+    });
     const halfOf = makeErrorbarHalfWidth(frame, fx, 0.5);
     expect(halfOf(0)).toBeCloseTo(0.1);
   });
@@ -360,14 +361,14 @@ describe("appendClosedBandEdges — shared closed ribbon vertices", () => {
     const { appendClosedBandEdges } = await import("../src/pipeline/geometry-paths-closed.ts");
     const positions = new Float32Array(16);
     const rowIndex = new Uint32Array(8);
-    const frame = {
+    const frame = fromAny<LayerFrame>({
       xNumeric: new Float64Array([0, 1]),
       xValues: null,
       rowIndex: new Uint32Array([10, 11]),
       ymin: new Float64Array([0.2, 0.3]),
       ymax: new Float64Array([0.8, 0.9]),
-    } as unknown as LayerFrame;
-    const fx = {
+    });
+    const fx = fromPartial<Frame>({
       innerWidth: 100,
       innerHeight: 200,
       xScale: {
@@ -378,7 +379,7 @@ describe("appendClosedBandEdges — shared closed ribbon vertices", () => {
         type: "linear",
         normalize: (v: number) => v,
       },
-    } as Frame;
+    });
     const cursor = appendClosedBandEdges({
       positions,
       rowIndex,
@@ -407,19 +408,19 @@ describe("appendClosedBandEdges — shared closed ribbon vertices", () => {
 describe("layoutBoxplotBody — hinge/whisker collection", () => {
   it("returns null when box extras or scales are unsuitable", async () => {
     const { layoutBoxplotBody } = await import("../src/pipeline/geometry-boxplot-body-layout.ts");
-    const frame = {
+    const frame = fromAny<LayerFrame>({
       binding: { index: 0, layer: { params: {} } },
       n: 1,
       box: null,
       ymin: null,
       ymax: null,
-    } as unknown as LayerFrame;
-    const fx = {
+    });
+    const fx = fromPartial<Frame>({
       xScale: { type: "linear" },
       yScale: { type: "linear" },
       innerWidth: 100,
       innerHeight: 100,
-    } as Frame;
+    });
     expect(layoutBoxplotBody(frame, fx, [])).toBeNull();
   });
 });
@@ -428,7 +429,7 @@ describe("buildRenderModelScaleState", () => {
   it("includes only non-null color/fill state entries", async () => {
     const { buildRenderModelScaleState } =
       await import("../src/pipeline/assemble-render-model-scales.ts");
-    const colorState = { domain: ["a"], assigned: { a: 0 } } as never;
+    const colorState = fromAny({ domain: ["a"], assigned: { a: 0 } });
     expect(buildRenderModelScaleState(colorState, null)).toEqual({ color: colorState });
     expect(buildRenderModelScaleState(null, null)).toEqual({});
   });
@@ -455,7 +456,7 @@ describe("BOX_MEDIAN_FATTEN", () => {
 describe("collectPointPositions", () => {
   it("drops NaN positions and keeps finite points", async () => {
     const { collectPointPositions } = await import("../src/pipeline/geometry-points-collect.ts");
-    const frame = {
+    const frame = fromAny({
       n: 3,
       xNumeric: new Float64Array([0, NaN, 1]),
       yNumeric: new Float64Array([0.5, 0.5, 0.25]),
@@ -463,13 +464,13 @@ describe("collectPointPositions", () => {
       offsetX: null,
       offsetY: null,
       rowIndex: new Uint32Array([0, 1, 2]),
-    } as never;
-    const fx = {
+    });
+    const fx = fromAny({
       innerWidth: 100,
       innerHeight: 200,
       xScale: { type: "linear", normalize: (v: number) => v },
       yScale: { type: "linear", normalize: (v: number) => v },
-    } as never;
+    });
     const collected = collectPointPositions(frame, fx);
     expect(collected.kept).toBe(2);
     expect([...collected.keptRows.subarray(0, 2)]).toEqual([0, 2]);
@@ -481,7 +482,7 @@ describe("placeSceneLegends", () => {
     const { placeSceneLegends } = await import("../src/pipeline/assemble-scene-legends.ts");
     const { LEGEND_EDGE_PAD } = await import("../src/pipeline/layout-helpers.ts");
     const legends = placeSceneLegends({
-      legends: [{ x: 0, y: 5, width: 10, height: 10, title: "", items: [] } as never],
+      legends: [fromAny({ x: 0, y: 5, width: 10, height: 10, title: "", items: [] })],
       legendWidth: 40,
       sceneWidth: 200,
       panelY: 12,
@@ -557,14 +558,14 @@ describe("geometryPanelFrame", () => {
 describe("packSegmentsBatch", () => {
   it("returns null for empty rowIndex and builds a segments batch otherwise", async () => {
     const { packSegmentsBatch } = await import("../src/pipeline/geometry-segments-pack.ts");
-    const frame = {
+    const frame = fromAny({
       binding: {
         index: 0,
         color: { constant: "#111" },
         layer: { params: {} },
         ruleForm: "vertical",
       },
-    } as never;
+    });
     expect(
       packSegmentsBatch({
         frame,
@@ -592,7 +593,7 @@ describe("packFacetPanelPlacement", () => {
     const { packFacetPanelPlacement } =
       await import("../src/pipeline/panel-layout-facet-place-pack.ts");
     const placement = packFacetPanelPlacement({
-      def: { col: 1, row: 0 } as never,
+      def: fromAny({ col: 1, row: 0 }),
       colX: 20,
       rowY: 10,
       panelW: 100,
@@ -600,7 +601,7 @@ describe("packFacetPanelPlacement", () => {
       freeH: false,
       freeV: false,
       bottomMostRow: 0,
-      ticksRun: { x: { ticks: [1] }, y: { ticks: [2] } } as never,
+      ticksRun: fromAny({ x: { ticks: [1] }, y: { ticks: [2] } }),
     });
     expect(placement.showAxisX).toBe(true);
     expect(placement.showAxisY).toBe(false);
@@ -612,20 +613,20 @@ describe("writeSmoothLineGeometry", () => {
   it("writes one path offset per group and maps y into panel px", async () => {
     const { writeSmoothLineGeometry } =
       await import("../src/pipeline/geometry-smooth-line-write.ts");
-    const frame = {
+    const frame = fromAny({
       binding: { color: { constant: "#abc", scaledConstant: null } },
       xNumeric: new Float64Array([0, 1]),
       yNumeric: new Float64Array([0, 1]),
       xValues: null,
       colorValues: null,
       rowIndex: new Uint32Array([10, 11]),
-    } as never;
-    const fx = {
+    });
+    const fx = fromAny({
       xScale: { type: "linear", normalize: (v: number) => v },
       yScale: { type: "linear", normalize: (v: number) => v },
       innerWidth: 100,
       innerHeight: 50,
-    } as never;
+    });
     const geom = writeSmoothLineGeometry({
       frame,
       fx,
@@ -645,10 +646,10 @@ describe("writeSmoothLineGeometry", () => {
 describe("areaGroupFillOf", () => {
   it("uses the constant fill when no scaled fill is mapped", async () => {
     const { areaGroupFillOf } = await import("../src/pipeline/geometry-paths-area-fill.ts");
-    const frame = {
+    const frame = fromAny({
       binding: { fill: { constant: "#cde", scaledConstant: null } },
       fillValues: null,
-    } as never;
+    });
     expect(areaGroupFillOf(frame, null, [0])).toBe("#cde");
   });
 });

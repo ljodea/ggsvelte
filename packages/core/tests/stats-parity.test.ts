@@ -15,6 +15,7 @@
  *    5e-4 relative. Bandwidth (bw.nrd0) and grid endpoints are exact (1e-9).
  *  - bin / boxplot / summary: exact algorithms — 1e-9.
  */
+import { fromAny } from "@total-typescript/shoehorn";
 import { describe, expect, it } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -281,9 +282,7 @@ describe("boxplot stat — ggplot2 parity (R fixtures)", () => {
           .filter((o) => o.boxRow === i)
           .map((o) => o.y)
           .toSorted((a, b) => a - b);
-        const want = Array.isArray(row.outliers)
-          ? row.outliers
-          : [row.outliers as unknown as number];
+        const want = Array.isArray(row.outliers) ? row.outliers : [fromAny<number>(row.outliers)];
         expect(got.length).toBe(want.length);
         for (let j = 0; j < want.length; j++) expect(got[j]!).toBeCloseTo(want[j]!, 9);
       }
