@@ -353,9 +353,8 @@ describe("buildPipelineCandidates via runPipeline", () => {
         .spec(),
       size,
     );
-    const linePoints = Array.from(
-      { length: model.candidates.size },
-      (_, id) => model.candidates.candidate(id)!,
+    const linePoints = Array.from({ length: model.candidates.size }, (_, id) =>
+      model.candidates.candidate(id)!,
     ).filter((c) => c.kind === "paths");
     expect(linePoints).toHaveLength(4);
     expect(linePoints.map((c) => c.yValue).toSorted((a, b) => Number(a) - Number(b))).toEqual([
