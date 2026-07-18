@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784357574600,
+  "lastUpdate": 1784358172638,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -24240,6 +24240,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 161.4709,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "0fd011efc3a44e21c3540f60725d20e07bfee0c8",
+          "message": "fix(ci): close path-routing coverage gaps from Codex #242 (#249)\n\n* fix(ci): close path-routing coverage gaps from Codex review on #242\n\nRestore unit/history, rename-aware diffs, and lane→job edges so path\nrouting no longer skips tests/jobs that previously ran on every PR\n(manual-AT, skill-sync, lifecycle, consumer harness, actionlint, Pages).\n\n* fix(ci): keep path-routed Pages skips out of deploy concurrency\n\nWorkflow-level concurrency still lets a pages=false skip replace a\npending deploy run. Serialize only the deploy job so skip-only runs\nnever enter that group.\n\n* fix(ci): serialize Pages deploy job concurrency\n\nComplete the prior fix: only the deploy job joins pages-deploy so\npath-routed skips never displace a pending production deploy.",
+          "timestamp": "2026-07-18T02:02:15-05:00",
+          "tree_id": "d7e0283484d1c160aee84accb2d341afdc9fa0d1",
+          "url": "https://github.com/ljodea/ggsvelte/commit/0fd011efc3a44e21c3540f60725d20e07bfee0c8"
+        },
+        "date": 1784358171852,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.3398,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.0058,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 9.0599,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 14.5235,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 83.5438,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 130.7629,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.3868,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.3947,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 89.9479,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 106.5418,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.2385,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.748,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 116.0053,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.756,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 27.4113,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.6649,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 37.1262,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 596.1239,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 161.0179,
             "unit": "ms"
           }
         ]
