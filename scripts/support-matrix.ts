@@ -33,6 +33,15 @@ export function nightlyConsumerRows(matrix: SupportMatrix): ConsumerRow[] {
   return matrix.nightly;
 }
 
+/** PR default tier (issue #246): one Linux required row — full required via run-compat / nightly. */
+export function prDefaultConsumerRows(matrix: SupportMatrix): ConsumerRow[] {
+  const linux = matrix.required.find((row) => row.os === "ubuntu-latest");
+  if (linux === undefined) {
+    throw new Error("support-matrix required rows must include at least one ubuntu-latest row");
+  }
+  return [linux];
+}
+
 export function validateSupportMatrix(matrix: SupportMatrix): string[] {
   const errors: string[] = [];
   if (matrix.schemaVersion !== 1) errors.push("schemaVersion must be 1");
@@ -114,7 +123,9 @@ if (import.meta.main) {
     }));
   if (flavor === "required")
     console.log(JSON.stringify({ include: withVersions(matrix.required) }));
-  else if (flavor === "nightly") {
+  else if (flavor === "pr") {
+    console.log(JSON.stringify({ include: withVersions(prDefaultConsumerRows(matrix)) }));
+  } else if (flavor === "nightly") {
     console.log(JSON.stringify({ include: withVersions([...matrix.required, ...matrix.nightly]) }));
   } else console.log("support-matrix: valid");
 }

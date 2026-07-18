@@ -6,12 +6,21 @@ import {
   loadSupportMatrix,
   requiredConsumerRows,
   nightlyConsumerRows,
+  prDefaultConsumerRows,
   validateSupportMatrix,
 } from "./support-matrix.js";
 
 const root = join(import.meta.dir, "..");
 
 describe("consumer support matrix", () => {
+  test("PR default tier is a single Linux required row (issue #246)", () => {
+    const matrix = loadSupportMatrix();
+    const pr = prDefaultConsumerRows(matrix);
+    expect(pr).toHaveLength(1);
+    expect(pr[0]?.os).toBe("ubuntu-latest");
+    expect(requiredConsumerRows(matrix).some((r) => r.os === "ubuntu-latest")).toBe(true);
+  });
+
   test("is valid and has a bounded required/full nightly split", () => {
     const matrix = loadSupportMatrix(root);
     expect(validateSupportMatrix(matrix)).toEqual([]);
