@@ -79,6 +79,37 @@ function segmentScene(
   ]);
 }
 
+/**
+ * Synthetic multi-subpath line batch. `pathOffsets` length = subpathCount + 1.
+ * Positions are panel-local interleaved x,y.
+ */
+function pathScene(
+  positions: Float32Array,
+  pathOffsets: Uint32Array,
+  options: {
+    linewidth?: number;
+    rowIndex?: Uint32Array;
+    fills?: (string | null)[];
+  } = {},
+): Scene {
+  const n = positions.length / 2;
+  return basePanelScene([
+    {
+      kind: "paths",
+      layerIndex: 0,
+      panelIndex: 0,
+      positions,
+      rowIndex: options.rowIndex ?? Uint32Array.from({ length: n }, (_, i) => i),
+      pathOffsets,
+      strokes: Array.from({ length: pathOffsets.length - 1 }, () => null),
+      ...(options.fills !== undefined && { fills: options.fills }),
+      linewidth: options.linewidth ?? 1,
+      alpha: 1,
+      curve: "linear",
+    },
+  ]);
+}
+
 /** Count numeric index reads on a Float32Array (complexity guard). */
 function instrumentReads(source: Float32Array): {
   view: Float32Array;
@@ -499,6 +530,125 @@ describe("buildHitIndex", () => {
     expect(brushed.map((h) => h.rowIndex)).toEqual([0]);
     expect(instrumented.reads()).toBeLessThan(32);
     expect(instrumented.reads()).toBeLessThan(count / 20);
+  });
+
+  it("paths topmost subpath wins when stacked strokes overlap", () => {
+    // Two horizontal strokes at the same y; later subpath is topmost.
+    const positions = new Float32Array([
+      10,
+      50,
+      100,
+      50, // subpath 0
+      10,
+      50,
+      100,
+      50, // subpath 1
+    ]);
+    const pathOffsets = new Uint32Array([0, 2, 4]);
+    const scene = pathScene(positions, pathOffsets, { linewidth: 2 });
+    const index = buildHitIndex(scene, { tolerance: 2 });
+    const hit = index.hitTest(50, 50);
+    expect(hit?.kind).toBe("paths");
+    expect(hit?.rowIndex).toBe(2); // first vertex of subpath 1
+    expect(index.hitTest(50, 60)).toBeNull();
+  });
+
+  it("queryRect returns path vertices inside the brush via vertex tree", () => {
+    const positions = new Float32Array([
+      10,
+      10,
+      20,
+      10, // in brush
+      200,
+      200,
+      210,
+      200, // far
+    ]);
+    const pathOffsets = new Uint32Array([0, 2, 4]);
+    const scene = pathScene(positions, pathOffsets);
+    const index = buildHitIndex(scene);
+    const hits = index.queryRect(0, 0, 25, 25);
+    expect(hits.map((h) => h.rowIndex).toSorted((a, b) => a! - b!)).toEqual([0, 1]);
+    expect(index.queryRect(50, 50, 60, 60)).toEqual([]);
+  });
+
+  it("hitTest does not refine every far path subpath on a dense multi-series field", () => {
+    // Many short horizontal subpaths far from the probe; one under (10, 10).
+    const subpaths = 2_000;
+    const positions = new Float32Array(subpaths * 4); // 2 verts each
+    const pathOffsets = new Uint32Array(subpaths + 1);
+    for (let s = 0; s < subpaths; s++) {
+      pathOffsets[s] = s * 2;
+      const col = s % 40;
+      const row = Math.floor(s / 40);
+      const x = 100 + col * 10;
+      const y = 100 + row * 10;
+      positions[s * 4] = x;
+      positions[s * 4 + 1] = y;
+      positions[s * 4 + 2] = x + 4;
+      positions[s * 4 + 3] = y;
+    }
+    pathOffsets[subpaths] = subpaths * 2;
+    // Subpath 0 under the probe.
+    positions[0] = 0;
+    positions[1] = 10;
+    positions[2] = 20;
+    positions[3] = 10;
+
+    const instrumented = instrumentReads(positions);
+    const scene = pathScene(instrumented.view, pathOffsets, { linewidth: 1 });
+    const index = buildHitIndex(scene, { tolerance: 2 });
+    instrumented.reset();
+
+    const hit = index.hitTest(10, 10);
+    expect(hit?.rowIndex).toBe(0);
+    // Exact stroke test only on shortlisted subpaths (not every far series).
+    expect(instrumented.reads()).toBeLessThan(64);
+    expect(instrumented.reads()).toBeLessThan(subpaths / 10);
+
+    instrumented.reset();
+    expect(index.hitTest(50, 50)).toBeNull();
+    expect(instrumented.reads()).toBe(0);
+  });
+
+  it("one giant path subpath does not force-scan every small far series", () => {
+    const far = 1_500;
+    // Subpath 0: long diagonal covering most of the left panel.
+    // Subpaths 1..far: short segments in the far corner.
+    const positions = new Float32Array((far + 1) * 4);
+    const pathOffsets = new Uint32Array(far + 2);
+    pathOffsets[0] = 0;
+    positions[0] = 0;
+    positions[1] = 0;
+    positions[2] = 200;
+    positions[3] = 120;
+    pathOffsets[1] = 2;
+    for (let s = 0; s < far; s++) {
+      pathOffsets[s + 1] = 2 + s * 2;
+      const col = s % 30;
+      const row = Math.floor(s / 30);
+      const x = 300 + col * 8;
+      const y = 300 + row * 8;
+      positions[(s + 1) * 4] = x;
+      positions[(s + 1) * 4 + 1] = y;
+      positions[(s + 1) * 4 + 2] = x + 2;
+      positions[(s + 1) * 4 + 3] = y;
+    }
+    pathOffsets[far + 1] = 2 + far * 2;
+
+    const instrumented = instrumentReads(positions);
+    const scene = pathScene(instrumented.view, pathOffsets, { linewidth: 1 });
+    const index = buildHitIndex(scene, { tolerance: 1 });
+    instrumented.reset();
+
+    const hit = index.hitTest(100, 60);
+    expect(hit?.rowIndex).toBe(0);
+    expect(instrumented.reads()).toBeLessThan(64);
+
+    instrumented.reset();
+    const brushed = index.queryRect(0, 0, 5, 5);
+    expect(brushed.some((h) => h.rowIndex === 0)).toBe(true);
+    expect(instrumented.reads()).toBe(0); // vertices come from index arrays, not batch.positions
   });
 });
 

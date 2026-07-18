@@ -16,10 +16,11 @@
  *  - segments: size-classed AABB-center shortlist (endpoint box), then exact
  *    point-to-segment distance <= linewidth/2 + tolerance. Same size-class
  *    pattern as rects so one long rule cannot expand every short-segment query.
- *  - stroked paths (lines): per-edge point-to-segment distance, same rule
- *    (linear per subpath for now — follow-up shortlist).
- *  - filled paths (areas/ribbons): even-odd point-in-polygon containment;
- *    the reported row is the nearest subpath vertex's row.
+ *  - stroked paths (lines): size-classed subpath AABB shortlist, then per-edge
+ *    point-to-segment distance (pad by linewidth/2 + tolerance).
+ *  - filled paths (areas/ribbons): size-classed subpath AABB shortlist, then
+ *    even-odd point-in-polygon; the reported row is the nearest vertex's row.
+ *    queryRect uses a vertex StaticQuadtree (O(log V + k)).
  *  - glyphs (text): NOT hit targets in M2 (documented limitation — labels
  *    annotate marks; hovering the mark is the interaction).
  *
@@ -276,6 +277,62 @@ function buildSegmentsIndex(
   return buildAabbIndex(minX, minY, maxX, maxY);
 }
 
+/** Subpath AABB shortlist + vertex tree for brush queries (plot px). */
+interface PathsIndexEntry {
+  readonly subpaths: AabbIndexEntry;
+  readonly vertices: PointsIndexEntry;
+}
+
+function buildPathsIndex(
+  batch: Extract<GeometryBatch, { kind: "paths" }>,
+  panel: ScenePanel,
+): PathsIndexEntry {
+  const nSub = Math.max(0, batch.pathOffsets.length - 1);
+  const minX = new Float64Array(nSub);
+  const minY = new Float64Array(nSub);
+  const maxX = new Float64Array(nSub);
+  const maxY = new Float64Array(nSub);
+  for (let s = 0; s < nSub; s++) {
+    const start = batch.pathOffsets[s]!;
+    const end = batch.pathOffsets[s + 1]!;
+    let sMinX = Infinity;
+    let sMinY = Infinity;
+    let sMaxX = -Infinity;
+    let sMaxY = -Infinity;
+    for (let i = start; i < end; i++) {
+      const vx = panel.x + batch.positions[i * 2]!;
+      const vy = panel.y + batch.positions[i * 2 + 1]!;
+      if (vx < sMinX) sMinX = vx;
+      if (vy < sMinY) sMinY = vy;
+      if (vx > sMaxX) sMaxX = vx;
+      if (vy > sMaxY) sMaxY = vy;
+    }
+    if (end <= start) {
+      // Empty subpath: degenerate AABB at origin (never matches finite queries).
+      minX[s] = 0;
+      minY[s] = 0;
+      maxX[s] = 0;
+      maxY[s] = 0;
+    } else {
+      minX[s] = sMinX;
+      minY[s] = sMinY;
+      maxX[s] = sMaxX;
+      maxY[s] = sMaxY;
+    }
+  }
+  const nVert = batch.rowIndex.length;
+  const xs = new Float64Array(nVert);
+  const ys = new Float64Array(nVert);
+  for (let i = 0; i < nVert; i++) {
+    xs[i] = panel.x + batch.positions[i * 2]!;
+    ys[i] = panel.y + batch.positions[i * 2 + 1]!;
+  }
+  return {
+    subpaths: buildAabbIndex(minX, minY, maxX, maxY),
+    vertices: { quadtree: new StaticQuadtree(xs, ys), xs, ys },
+  };
+}
+
 /**
  * Primitive indices whose AABB intersects [loX,hiX]×[loY,hiY] (plot px).
  * Optional pad expands the query (stroke slop around segments).
@@ -319,10 +376,11 @@ export function buildHitIndex(scene: Scene, options: HitIndexOptions = {}): Scen
   const tolerance = options.tolerance ?? DEFAULT_HIT_TOLERANCE;
   const panels = scene.panels;
 
-  // Per points-batch quadtrees; per rects/segments size-classed AABB trees.
+  // Per points-batch quadtrees; per rects/segments/paths size-classed AABB trees.
   const pointsIndex = new Map<GeometryBatch, PointsIndexEntry>();
   const rectsIndex = new Map<GeometryBatch, AabbIndexEntry>();
   const segmentsIndex = new Map<GeometryBatch, AabbIndexEntry>();
+  const pathsIndex = new Map<GeometryBatch, PathsIndexEntry>();
   for (const batch of scene.batches) {
     const panel = panels[batch.panelIndex];
     if (panel === undefined) continue;
@@ -339,6 +397,8 @@ export function buildHitIndex(scene: Scene, options: HitIndexOptions = {}): Scen
       rectsIndex.set(batch, buildRectsIndex(batch, panel));
     } else if (batch.kind === "segments") {
       segmentsIndex.set(batch, buildSegmentsIndex(batch, panel));
+    } else if (batch.kind === "paths") {
+      pathsIndex.set(batch, buildPathsIndex(batch, panel));
     }
   }
 
@@ -427,38 +487,50 @@ export function buildHitIndex(scene: Scene, options: HitIndexOptions = {}): Scen
         };
       }
       case "paths": {
+        // Size-class subpath AABB shortlist, then exact fill/stroke; topmost = highest s.
+        const entry = pathsIndex.get(batch);
+        if (entry === undefined) return null;
         const filled = batch.fills !== undefined;
-        for (let s = batch.pathOffsets.length - 2; s >= 0; s--) {
+        const pad = filled ? 0 : batch.linewidth / 2 + tolerance;
+        let bestS = -1;
+        let bestVertex = -1;
+        for (const s of shortlistAabbIntersecting(entry.subpaths, x, y, x, y, pad)) {
           const start = batch.pathOffsets[s]!;
           const end = batch.pathOffsets[s + 1]!;
           if (end <= start) continue;
           if (filled) {
             if (!pointInSubpath(batch, start, end, lx, ly)) continue;
-            // Nearest vertex's row anchors the hit (areas span many rows).
-            const best = nearestVertex(batch, start, end, lx, ly);
-            return {
-              layerIndex: batch.layerIndex,
-              panelIndex: batch.panelIndex,
-              rowIndex: rowOf(batch.rowIndex[best]!),
-              x: x,
-              y: y,
-              kind: "paths",
-            };
-          }
-          // Stroked line: per-edge proximity with the documented tolerance.
-          const at = nearestStrokeVertex(batch, start, end, lx, ly, tolerance);
-          if (at !== -1) {
-            return {
-              layerIndex: batch.layerIndex,
-              panelIndex: batch.panelIndex,
-              rowIndex: rowOf(batch.rowIndex[at]!),
-              x: panel.x + batch.positions[at * 2]!,
-              y: panel.y + batch.positions[at * 2 + 1]!,
-              kind: "paths",
-            };
+            if (s > bestS) {
+              bestS = s;
+              bestVertex = nearestVertex(batch, start, end, lx, ly);
+            }
+          } else {
+            const at = nearestStrokeVertex(batch, start, end, lx, ly, tolerance);
+            if (at !== -1 && s > bestS) {
+              bestS = s;
+              bestVertex = at;
+            }
           }
         }
-        return null;
+        if (bestS < 0 || bestVertex < 0) return null;
+        if (filled) {
+          return {
+            layerIndex: batch.layerIndex,
+            panelIndex: batch.panelIndex,
+            rowIndex: rowOf(batch.rowIndex[bestVertex]!),
+            x: x,
+            y: y,
+            kind: "paths",
+          };
+        }
+        return {
+          layerIndex: batch.layerIndex,
+          panelIndex: batch.panelIndex,
+          rowIndex: rowOf(batch.rowIndex[bestVertex]!),
+          x: panel.x + batch.positions[bestVertex * 2]!,
+          y: panel.y + batch.positions[bestVertex * 2 + 1]!,
+          kind: "paths",
+        };
       }
       case "glyphs":
         // Text marks are not hit targets in M2 (module docs).
@@ -539,12 +611,11 @@ export function buildHitIndex(scene: Scene, options: HitIndexOptions = {}): Scen
             break;
           }
           case "paths": {
-            for (let i = 0; i < batch.rowIndex.length; i++) {
-              const vx = panel.x + batch.positions[i * 2]!;
-              const vy = panel.y + batch.positions[i * 2 + 1]!;
-              if (vx >= lo.x && vx <= hi.x && vy >= lo.y && vy <= hi.y) {
-                push(batch, batch.rowIndex[i]!, vx, vy);
-              }
+            // Vertex quadtree shortlist (same brush membership as linear scan).
+            const entry = pathsIndex.get(batch);
+            if (entry === undefined) break;
+            for (const i of entry.vertices.quadtree.queryRect(lo.x, lo.y, hi.x, hi.y)) {
+              push(batch, batch.rowIndex[i]!, entry.vertices.xs[i]!, entry.vertices.ys[i]!);
             }
             break;
           }
