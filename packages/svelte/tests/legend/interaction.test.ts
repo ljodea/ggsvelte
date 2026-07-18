@@ -1,3 +1,4 @@
+import { fromPartial } from "@total-typescript/shoehorn";
 import { describe, expect, it } from "vitest";
 
 import type { SceneLegend, ThemeTokens } from "@ggsvelte/core";
@@ -5,7 +6,7 @@ import type { SceneLegend, ThemeTokens } from "@ggsvelte/core";
 import LegendHarness from "../fixtures/LegendHarness.svelte";
 import { render } from "../helpers/render.js";
 
-const theme = {} as ThemeTokens;
+const theme = fromPartial<ThemeTokens>({});
 const discrete = {
   type: "discrete",
   scale: "fill",

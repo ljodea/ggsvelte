@@ -1,6 +1,7 @@
 /**
  * Characterization tests for pipeline run setup (normalize/edition/theme/flip).
  */
+import { fromAny } from "@total-typescript/shoehorn";
 import { describe, expect, it } from "bun:test";
 
 import { aes, gg } from "@ggsvelte/spec";
@@ -40,11 +41,11 @@ describe("setupPipelineRun", () => {
   it("rejects unknown theme names as tier-1 structured errors", () => {
     try {
       runPipeline(
-        {
+        fromAny({
           data: { values: [{ x: 1, y: 2 }] },
           layers: [{ geom: "point", aes: { x: { field: "x" }, y: { field: "y" } } }],
           theme: "definitely-not-a-real-theme",
-        } as never,
+        }),
         { width: 100, height: 100 },
       );
       expect.unreachable("should throw");

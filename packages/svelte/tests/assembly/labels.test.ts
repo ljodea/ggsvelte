@@ -1,3 +1,4 @@
+import { fromAny, fromPartial } from "@total-typescript/shoehorn";
 import { describe, expect, it } from "vitest";
 
 import type { RenderModel } from "@ggsvelte/core";
@@ -24,10 +25,10 @@ function model(opts: {
   layerFields?: { field: string }[][];
   rows?: Record<number, Record<string, unknown> | null>;
 }): RenderModel {
-  return {
+  return fromAny<RenderModel>({
     layerFields: opts.layerFields ?? [[{ field: "x" }, { field: "y" }]],
     row: (index: number) => opts.rows?.[index] ?? null,
-  } as unknown as RenderModel;
+  });
 }
 
 describe("markLabel", () => {
@@ -81,13 +82,13 @@ describe("inspectionLiveText", () => {
         "mode" | "focus" | "members" | "state"
       >,
   ): PlotInspectionChange<Record<string, unknown>, PropertyKey> {
-    return {
+    return fromPartial<PlotInspectionChange<Record<string, unknown>, PropertyKey>>({
       type: "inspect",
       phase: "change",
       source: "keyboard",
       panelId: null,
       ...partial,
-    } as PlotInspectionChange<Record<string, unknown>, PropertyKey>;
+    });
   }
 
   it("uses singular/plural and optional pinned suffix for exact mode", () => {
@@ -123,14 +124,14 @@ describe("inspectionLiveText", () => {
         },
       ],
     });
-    expect(inspectionLiveText(m, one as never)).toBe("x 1, y 2; 1 datum");
+    expect(inspectionLiveText(m, fromAny(one))).toBe("x 1, y 2; 1 datum");
 
     const pinned = {
       ...one,
       state: "pinned" as const,
       members: [one.members[0], one.members[0]],
     };
-    expect(inspectionLiveText(m, pinned as never)).toBe("x 1, y 2; 2 data, pinned");
+    expect(inspectionLiveText(m, fromAny(pinned))).toBe("x 1, y 2; 2 data, pinned");
   });
 
   it("excludes the axis channel from focused fields for x/y modes", () => {
@@ -169,7 +170,7 @@ describe("inspectionLiveText", () => {
         },
       ],
     });
-    expect(inspectionLiveText(m, value as never)).toBe("x 3.0; 1 datum; focused y 9, color blue");
+    expect(inspectionLiveText(m, fromAny(value))).toBe("x 3.0; 1 datum; focused y 9, color blue");
   });
 });
 
@@ -202,7 +203,9 @@ describe("resolveInteractionLiveText", () => {
       anchor: { x: 0, y: 0 },
     },
   ];
-  const keyboardInspection = {
+  const keyboardInspection = fromPartial<
+    PlotInspectionChange<Record<string, unknown>, PropertyKey>
+  >({
     type: "inspect",
     phase: "change",
     source: "keyboard",
@@ -211,14 +214,14 @@ describe("resolveInteractionLiveText", () => {
     state: "transient",
     focus,
     members,
-  } as PlotInspectionChange<Record<string, unknown>, PropertyKey>;
+  });
 
   it("prefers non-empty sticky announcement over inspection text", () => {
     expect(
       resolveInteractionLiveText({
         announcement: "Zoom complete.",
         model: m,
-        inspection: keyboardInspection as never,
+        inspection: fromAny(keyboardInspection),
       }),
     ).toBe("Zoom complete.");
   });
@@ -228,32 +231,32 @@ describe("resolveInteractionLiveText", () => {
       resolveInteractionLiveText({
         announcement: "",
         model: m,
-        inspection: keyboardInspection as never,
+        inspection: fromAny(keyboardInspection),
       }),
-    ).toBe(inspectionLiveText(m, keyboardInspection as never));
+    ).toBe(inspectionLiveText(m, fromAny(keyboardInspection)));
   });
 
   it("uses inspection live text for keyboard and touch sources only", () => {
-    const expected = inspectionLiveText(m, keyboardInspection as never);
+    const expected = inspectionLiveText(m, fromAny(keyboardInspection));
     expect(
       resolveInteractionLiveText({
         announcement: "",
         model: m,
-        inspection: keyboardInspection as never,
+        inspection: fromAny(keyboardInspection),
       }),
     ).toBe(expected);
     expect(
       resolveInteractionLiveText({
         announcement: "",
         model: m,
-        inspection: { ...keyboardInspection, source: "touch" } as never,
+        inspection: fromAny({ ...keyboardInspection, source: "touch" }),
       }),
     ).toBe(expected);
     expect(
       resolveInteractionLiveText({
         announcement: "",
         model: m,
-        inspection: { ...keyboardInspection, source: "pointer" } as never,
+        inspection: fromAny({ ...keyboardInspection, source: "pointer" }),
       }),
     ).toBe("");
   });

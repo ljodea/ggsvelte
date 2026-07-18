@@ -1,3 +1,4 @@
+import { fromAny, fromPartial } from "@total-typescript/shoehorn";
 import { describe, expect, it } from "vitest";
 
 import type { CandidateFacts } from "@ggsvelte/core";
@@ -84,14 +85,14 @@ describe("plotPointFromClient", () => {
 
 describe("hitFromCandidate", () => {
   it("copies hit fields from a candidate", () => {
-    const candidate = {
+    const candidate = fromPartial<CandidateFacts>({
       layerIndex: 2,
       panelIndex: 1,
       rowIndex: 7,
       x: 12.5,
       y: 44,
       kind: "line",
-    } as CandidateFacts;
+    });
     expect(hitFromCandidate(candidate)).toEqual({
       layerIndex: 2,
       panelIndex: 1,
@@ -150,7 +151,7 @@ describe("bestDirectionalIndex", () => {
 
 describe("buildTraversalHits / buildTraversalEntries", () => {
   const asCandidate = (id: number, partial: Partial<CandidateFacts> = {}): CandidateFacts =>
-    ({
+    fromPartial<CandidateFacts>({
       id,
       layerIndex: 0,
       panelIndex: 0,
@@ -161,7 +162,7 @@ describe("buildTraversalHits / buildTraversalEntries", () => {
       autoMode: "exact",
       lineage: id,
       ...partial,
-    }) as CandidateFacts;
+    });
 
   it("walks first/next order and projects candidates to hits", () => {
     const order = [2, 0, 1];
@@ -398,10 +399,10 @@ describe("matchCandidateFromHit", () => {
   };
 
   const asCandidate = (partial: Partial<typeof base> & { id: number }): CandidateFacts =>
-    ({
+    fromPartial<CandidateFacts>({
       ...base,
       ...partial,
-    }) as CandidateFacts;
+    });
 
   it("matches on layer/panel/row/kind within exclusive 0.5 tolerance", () => {
     const candidates = [
@@ -424,7 +425,7 @@ describe("matchCandidateFromHit", () => {
   });
 
   it("requires kind and row identity", () => {
-    const candidates = [asCandidate({ id: 0, kind: "line" as never })];
+    const candidates = [asCandidate({ id: 0, kind: fromAny("line") })];
     expect(
       matchCandidateFromHit(candidates, hit(10, 20, { rowIndex: 1, kind: "point" })),
     ).toBeNull();

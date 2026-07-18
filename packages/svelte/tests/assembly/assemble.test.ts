@@ -1,3 +1,4 @@
+import { fromAny } from "@total-typescript/shoehorn";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -149,8 +150,8 @@ describe("mappedChannelField", () => {
         },
       ],
     };
-    expect(mappedChannelField(assembled as never, "x")).toBe("a");
-    expect(mappedChannelField(assembled as never, "y")).toBe("b");
+    expect(mappedChannelField(fromAny(assembled), "x")).toBe("a");
+    expect(mappedChannelField(fromAny(assembled), "y")).toBe("b");
   });
 
   it("falls through to the first layer with a non-null channel field", () => {

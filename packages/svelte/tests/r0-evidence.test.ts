@@ -1,3 +1,4 @@
+import { fromPartial } from "@total-typescript/shoehorn";
 import { describe, expect, it } from "vitest";
 
 import type { RenderModel } from "@ggsvelte/core";
@@ -814,12 +815,14 @@ describe("R0 interaction evidence", () => {
       candidate.x,
       candidate.y,
     );
-    await view.rerender({
-      data: [
-        { id: "new-a", x: 100, y: 1 },
-        { id: "new-b", x: 200, y: 2 },
-      ],
-    } as never);
+    await view.rerender(
+      fromPartial({
+        data: [
+          { id: "new-a", x: 100, y: 1 },
+          { id: "new-b", x: 200, y: 2 },
+        ],
+      }),
+    );
     await expect.poll(() => model?.runId).not.toBe(staleModel.runId);
     await nextFrame();
     expect(changes).toHaveLength(0);
@@ -847,7 +850,7 @@ describe("R0 interaction evidence", () => {
       )
       .toBe(true);
 
-    await view.rerender({ data: rows.map((row) => ({ ...row })) } as never);
+    await view.rerender(fromPartial({ data: rows.map((row) => ({ ...row })) }));
     await expect.poll(() => view.container.querySelector(".gg-tooltip")).toBeNull();
     const second = model!.candidates.candidate(1)!;
     pointEvent(capture, "pointermove", second.x, second.y);
@@ -1009,7 +1012,7 @@ describe("R0 interaction evidence", () => {
       { id: "n2", x: 200, y: 2 },
       { id: "n3", x: 400, y: 3 },
     ];
-    await view.rerender({ data: replacement } as never);
+    await view.rerender(fromPartial({ data: replacement }));
     await expect.poll(() => model?.runId).not.toBe(zoomed.runId);
     expect(model!.domains.baseline.x.at(-1)).toBeGreaterThanOrEqual(400);
     const reset = tool(view.container, "Reset zoom");
@@ -1061,7 +1064,7 @@ describe("R0 interaction evidence", () => {
     close.focus();
     expect(document.activeElement).toBe(close);
     await expectAccessible(view.container);
-    await view.rerender({ height: 360 } as never);
+    await view.rerender(fromPartial({ height: 360 }));
     await expect
       .poll(() => view.container.querySelector("svg.gg-plot")?.getAttribute("height"))
       .toBe("360");

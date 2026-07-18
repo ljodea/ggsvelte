@@ -4,6 +4,7 @@
  * color stability, a11y attributes, container resize through run ids, and
  * model disposal.
  */
+import { fromPartial } from "@total-typescript/shoehorn";
 import { describe, expect, it, vi } from "vitest";
 
 import type { RenderModel } from "@ggsvelte/core";
@@ -1224,14 +1225,17 @@ describe("brush + brush-to-zoom", () => {
     ];
 
     for (const fixture of fixtures) {
-      const view = render(GGPlot, {
-        data: fixture.data,
-        aes: { x: "x", y: "y" },
-        layers: [{ geom: "point" }],
-        scales: fixture.scales,
-        select: { type: "interval", mode: "x" },
-        ...size,
-      } as never);
+      const view = render(
+        GGPlot,
+        fromPartial({
+          data: fixture.data,
+          aes: { x: "x", y: "y" },
+          layers: [{ geom: "point" }],
+          scales: fixture.scales,
+          select: { type: "interval", mode: "x" },
+          ...size,
+        }),
+      );
       const setBounds = [
         ...view.container.querySelectorAll<HTMLButtonElement>(".gg-tool-rail button"),
       ].find((button) => button.textContent?.trim() === "Set x selection bounds");
@@ -1511,7 +1515,7 @@ describe("container width + run ids + disposal", () => {
       onrender: (m: RenderModel) => models.push(m),
       ...size,
     });
-    await second.rerender({ data: rows.slice(0, 2) } as never);
+    await second.rerender(fromPartial({ data: rows.slice(0, 2) }));
     await until(() => models.length >= 2);
     const [first, latest] = [models[0], models.at(-1)];
     expect(latest).not.toBe(first);

@@ -7,6 +7,7 @@
  *   public row-filter contracts
  * - complexity: each filter reads table.column(field) once, not per base row
  */
+import { fromAny } from "@total-typescript/shoehorn";
 import { describe, expect, it, spyOn } from "bun:test";
 
 import { aes, gg } from "@ggsvelte/spec";
@@ -419,14 +420,16 @@ describe("isAllSourceBacked", () => {
   it("is true only when every layer is identity and non-annotation", async () => {
     const { isAllSourceBacked } = await import("../src/pipeline/build-candidates-source-backed.ts");
     expect(
-      isAllSourceBacked([
-        { layer: { stat: "identity" }, ruleForm: null },
-        { layer: {}, ruleForm: null },
-      ] as never),
+      isAllSourceBacked(
+        fromAny([
+          { layer: { stat: "identity" }, ruleForm: null },
+          { layer: {}, ruleForm: null },
+        ]),
+      ),
     ).toBe(true);
-    expect(isAllSourceBacked([{ layer: { stat: "count" }, ruleForm: null }] as never)).toBe(false);
+    expect(isAllSourceBacked(fromAny([{ layer: { stat: "count" }, ruleForm: null }]))).toBe(false);
     expect(
-      isAllSourceBacked([{ layer: { stat: "identity" }, ruleForm: "annotation" }] as never),
+      isAllSourceBacked(fromAny([{ layer: { stat: "identity" }, ruleForm: "annotation" }])),
     ).toBe(false);
   });
 });
@@ -434,8 +437,8 @@ describe("isAllSourceBacked", () => {
 describe("collectColorChannelValues", () => {
   it("returns empty when no color mapping is present", async () => {
     const { collectColorChannelValues } = await import("../src/pipeline/scale-color-collect.ts");
-    const table = { has: () => false, discreteness: () => "continuous" } as never;
-    const frames = [
+    const table = fromAny({ has: () => false, discreteness: () => "continuous" });
+    const frames = fromAny([
       {
         binding: {
           color: { field: null, scaledConstant: null },
@@ -444,7 +447,7 @@ describe("collectColorChannelValues", () => {
         colorValues: null,
         fillValues: null,
       },
-    ] as never;
+    ]);
     expect(collectColorChannelValues("color", frames, table)).toEqual({
       values: [],
       anyDiscreteField: false,
@@ -475,10 +478,10 @@ describe("buildPathGroupSortedRows", () => {
       await import("../src/pipeline/build-candidates-frame-row.ts");
     // rows: group 1 at x=3, group 0 at x=2, group 1 at x=1, group 0 at x=0
     // → group 0 sorted [3, 1]; group 1 sorted [2, 0]
-    const frame = {
+    const frame = fromAny({
       groups: [1, 0, 1, 0],
       xNumeric: new Float64Array([3, 2, 1, 0]),
-    } as never;
+    });
     const byGroup = buildPathGroupSortedRows(frame);
     expect([...byGroup.get(0)!]).toEqual([3, 1]);
     expect([...byGroup.get(1)!]).toEqual([2, 0]);
@@ -487,7 +490,7 @@ describe("buildPathGroupSortedRows", () => {
   it("falls back to row index order when xNumeric is null", async () => {
     const { buildPathGroupSortedRows } =
       await import("../src/pipeline/build-candidates-frame-row.ts");
-    const frame = { groups: [0, 0, 0], xNumeric: null } as never;
+    const frame = fromAny({ groups: [0, 0, 0], xNumeric: null });
     expect([...buildPathGroupSortedRows(frame).get(0)!]).toEqual([0, 1, 2]);
   });
 });
@@ -496,10 +499,10 @@ describe("getPathGroupSortedRows", () => {
   it("returns the same Map for the same frame (precomputed once)", async () => {
     const { getPathGroupSortedRows } =
       await import("../src/pipeline/build-candidates-frame-row.ts");
-    const frame = {
+    const frame = fromAny({
       groups: [0, 0, 1],
       xNumeric: new Float64Array([0, 1, 2]),
-    } as never;
+    });
     const a = getPathGroupSortedRows(frame);
     const b = getPathGroupSortedRows(frame);
     expect(a).toBe(b);
@@ -514,18 +517,18 @@ describe("resolveCandidateFrameRow paths", () => {
       await import("../src/pipeline/build-candidates-frame-row.ts");
     // Two groups interleaved: g0 rows {0,2} with x 2,0 → sorted [2,0];
     // g1 rows {1,3} with x 3,1 → sorted [3,1]
-    const frame = {
+    const frame = fromAny({
       n: 4,
       groups: [0, 1, 0, 1],
       xNumeric: new Float64Array([2, 3, 0, 1]),
       binding: { layer: { geom: "area" } },
-    } as never;
+    });
     // Two subpaths, each 4 vertices (forward + reverse for closed area):
     // subpath 0: offsets [0, 4), subpath 1: [4, 8)
-    const batch = {
+    const batch = fromAny({
       kind: "paths",
       pathOffsets: new Uint32Array([0, 4, 8]),
-    } as never;
+    });
     const orderedGroups = [0, 1];
 
     // Forward: local 0 → first sorted row of group 0 = 2
@@ -595,13 +598,13 @@ describe("resolveCandidateFrameRow paths", () => {
       xNumeric[s * 2] = 0;
       xNumeric[s * 2 + 1] = 1;
     }
-    const frame = {
+    const frame = fromAny({
       n: P * 2,
       groups,
       xNumeric,
       binding: { layer: { geom: "line" } },
-    } as never;
-    const batch = { kind: "paths", pathOffsets: offsets } as never;
+    });
+    const batch = fromAny({ kind: "paths", pathOffsets: offsets });
     const orderedGroups = Array.from({ length: P }, (_, s) => s);
 
     // Binary search correctness on first / mid / last subpath
@@ -641,7 +644,7 @@ describe("resolveOutlierContext", () => {
     expect(
       resolveOutlierContext({
         frame: undefined,
-        batch: { kind: "points" } as never,
+        batch: fromAny({ kind: "points" }),
         primitiveIndex: 0,
         facetPanel: undefined,
       }),
@@ -672,13 +675,13 @@ describe("lineage represented-row filters", () => {
     const { filterBinRepresentedRows } =
       await import("../src/pipeline/build-candidates-lineage-filters.ts");
     const table = ColumnTable.fromRows([{ x: 0.5 }, { x: 1.5 }, { x: 2.5 }, { x: 3.5 }]);
-    const frame = {
+    const frame = fromAny({
       xmin: new Float64Array([0, 2]),
       xmax: new Float64Array([2, 4]),
       groups: new Uint32Array([0, 0]),
       n: 2,
       binding: { layer: { params: { closed: "right" } } },
-    } as never;
+    });
     expect(
       filterBinRepresentedRows({
         frame,
@@ -728,13 +731,13 @@ describe("lineage filter column hoist (issue #220)", () => {
     const { filterBinRepresentedRows } =
       await import("../src/pipeline/build-candidates-lineage-filters.ts");
     const table = ColumnTable.fromRows(Array.from({ length: 40 }, (_, i) => ({ x: i * 0.1 })));
-    const frame = {
+    const frame = fromAny({
       xmin: new Float64Array([0]),
       xmax: new Float64Array([2]),
       groups: new Uint32Array([0]),
       n: 1,
       binding: { layer: { params: { closed: "right" } } },
-    } as never;
+    });
     const baseRows = Array.from({ length: 40 }, (_, i) => i);
     const reads = countColumnReads("x", () => {
       filterBinRepresentedRows({
@@ -1003,7 +1006,7 @@ describe("buildBinLineageBuckets missing-edges fallback (issue #218)", () => {
     const inputGroups = [0, 1, 0, 1, 0];
     // Two empty-edge output marks per group (0=a, 1=b).
     const groups = [0, 0, 1, 1];
-    const frame = {
+    const frame = fromAny({
       binding: binBinding("g"),
       table,
       n: groups.length,
@@ -1011,13 +1014,13 @@ describe("buildBinLineageBuckets missing-edges fallback (issue #218)", () => {
       inputGroups,
       xmin: null,
       xmax: null,
-    } as never;
+    });
     const sourceRowsByGroupBin = new Map<string, number[]>();
     buildBinLineageBuckets({
       frame,
       panelIndex: 0,
       layerIndex: 0,
-      facetPanel: { sourceRows: null } as never,
+      facetPanel: fromAny({ sourceRows: null }),
       sourceRowsByGroupBin,
     });
 
@@ -1036,7 +1039,7 @@ describe("buildBinLineageBuckets missing-edges fallback (issue #218)", () => {
     ]);
     const inputGroups = [0, 0, 1];
     const groups = [0, 1];
-    const frame = {
+    const frame = fromAny({
       binding: binBinding("g"),
       table,
       n: groups.length,
@@ -1044,13 +1047,13 @@ describe("buildBinLineageBuckets missing-edges fallback (issue #218)", () => {
       inputGroups,
       xmin: null,
       xmax: null,
-    } as never;
+    });
     const sourceRowsByGroupBin = new Map<string, number[]>();
     buildBinLineageBuckets({
       frame,
       panelIndex: 2,
       layerIndex: 1,
-      facetPanel: { sourceRows: [10, 20, 30] } as never,
+      facetPanel: fromAny({ sourceRows: [10, 20, 30] }),
       sourceRowsByGroupBin,
     });
 
@@ -1072,7 +1075,7 @@ describe("buildBinLineageBuckets missing-edges fallback (issue #218)", () => {
         return Reflect.get(target, property, receiver) as unknown;
       },
     });
-    const frame = {
+    const frame = fromAny({
       binding: binBinding(null),
       table,
       n: k,
@@ -1080,13 +1083,13 @@ describe("buildBinLineageBuckets missing-edges fallback (issue #218)", () => {
       inputGroups,
       xmin: null,
       xmax: null,
-    } as never;
+    });
     const sourceRowsByGroupBin = new Map<string, number[]>();
     buildBinLineageBuckets({
       frame,
       panelIndex: 0,
       layerIndex: 0,
-      facetPanel: { sourceRows: null } as never,
+      facetPanel: fromAny({ sourceRows: null }),
       sourceRowsByGroupBin,
     });
 

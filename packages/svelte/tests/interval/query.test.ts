@@ -1,3 +1,4 @@
+import { fromPartial } from "@total-typescript/shoehorn";
 import { describe, expect, it } from "vitest";
 
 import { encodeKey } from "@ggsvelte/core";
@@ -34,7 +35,7 @@ function scene(partial: {
     panel,
     singlePanel: partial.singlePanel ?? true,
     flip,
-    scales: {
+    scales: fromPartial<IntervalQueryScene["scales"]>({
       x: {
         type: "linear",
         invert: (t: number) => (flip ? 1 - t : t) * 10,
@@ -43,7 +44,7 @@ function scene(partial: {
         type: "linear",
         invert: (t: number) => (flip ? t : 1 - t) * 20,
       },
-    } as IntervalQueryScene["scales"],
+    }),
     queryCandidates(expanded) {
       // Production uses the hit index; tests approximate with axis-aligned bounds.
       return candidates
@@ -142,10 +143,10 @@ describe("resolveIntervalQueryParts", () => {
             width: 100,
             height: 100,
             id: "panel:east",
-            scales: {
+            scales: fromPartial<IntervalQueryScene["scales"]>({
               x: { type: "linear", invert: (t: number) => 100 + t * 100 },
               y: { type: "linear", invert: (t: number) => 1000 - t * 1000 },
-            } as IntervalQueryScene["scales"],
+            }),
           },
         ],
       },
@@ -239,10 +240,10 @@ describe("resolveIntervalQueryParts", () => {
 
 describe("intervalPixelsFromDomains", () => {
   const panel = { x: 10, y: 20, width: 100, height: 200 };
-  const linearScales = {
+  const linearScales = fromPartial<IntervalQueryScene["scales"]>({
     x: { type: "linear", normalize: (v: number) => v / 10 },
     y: { type: "linear", normalize: (v: number) => v / 20 },
-  } as IntervalQueryScene["scales"];
+  });
   const bandRaw = ["a", "b", "c", "d"] as const;
   const bandScale = {
     type: "band",
@@ -289,7 +290,7 @@ describe("intervalPixelsFromDomains", () => {
       intervalPixelsFromDomains({
         domains: { x: { kind: "band", values: ["b", "c"] } },
         panel,
-        scales: { ...linearScales, x: bandScale } as IntervalQueryScene["scales"],
+        scales: fromPartial<IntervalQueryScene["scales"]>({ ...linearScales, x: bandScale }),
         flipped: false,
       }),
     ).toEqual({ x0: 35, y0: 20, x1: 85, y1: 220 });
@@ -307,7 +308,7 @@ describe("intervalPixelsFromDomains", () => {
       intervalPixelsFromDomains({
         domains: { x: { kind: "band", values: ["a"] } },
         panel,
-        scales: { ...linearScales, x: reversed } as IntervalQueryScene["scales"],
+        scales: fromPartial<IntervalQueryScene["scales"]>({ ...linearScales, x: reversed }),
         flipped: false,
       }),
     ).toEqual({ x0: 85, y0: 20, x1: 110, y1: 220 });
@@ -332,7 +333,7 @@ describe("intervalPixelsFromDomains", () => {
       intervalPixelsFromDomains({
         domains: { x: { kind: "band", values: ["missing"] } },
         panel,
-        scales: { ...linearScales, x: bandScale } as IntervalQueryScene["scales"],
+        scales: fromPartial<IntervalQueryScene["scales"]>({ ...linearScales, x: bandScale }),
         flipped: false,
       }),
     ).toEqual({ x0: 10, y0: 20, x1: 110, y1: 220 });
@@ -371,7 +372,7 @@ describe("intervalPixelsFromDomains", () => {
           x: { kind: "band", values: [encodeKey(1), encodeKey(true)] },
         },
         panel,
-        scales: { ...linearScales, x: typedScale } as IntervalQueryScene["scales"],
+        scales: fromPartial<IntervalQueryScene["scales"]>({ ...linearScales, x: typedScale }),
         flipped: false,
       }),
     ).toEqual({ x0: 10, y0: 20, x1: 110, y1: 220 });
@@ -382,7 +383,7 @@ describe("intervalPixelsFromDomains", () => {
       intervalPixelsFromDomains({
         domains: { x: { kind: "band", values: [encodeKey("1")] } },
         panel,
-        scales: { ...linearScales, x: typedScale } as IntervalQueryScene["scales"],
+        scales: fromPartial<IntervalQueryScene["scales"]>({ ...linearScales, x: typedScale }),
         flipped: false,
       }),
     ).toEqual({
@@ -425,7 +426,7 @@ describe("intervalPixelsFromDomains", () => {
       intervalPixelsFromDomains({
         domains: { x: { kind: "band", values: selected } },
         panel,
-        scales: { ...linearScales, x: largeScale } as IntervalQueryScene["scales"],
+        scales: fromPartial<IntervalQueryScene["scales"]>({ ...linearScales, x: largeScale }),
         flipped: false,
       }),
     ).toEqual({ x0: 10, y0: 20, x1: 110, y1: 220 });
@@ -504,10 +505,10 @@ describe("buildIntervalSelectionFromScene", () => {
 });
 
 describe("intervalQuerySceneFromModel", () => {
-  const scales = {
+  const scales = fromPartial<IntervalQueryScene["scales"]>({
     x: { type: "linear", invert: (t: number) => t * 10 },
     y: { type: "linear", invert: (t: number) => (1 - t) * 20 },
-  } as IntervalQueryScene["scales"];
+  });
 
   function port(partial: {
     panels?: IntervalQueryModelPort["scene"]["panels"];

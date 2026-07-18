@@ -1,6 +1,7 @@
 /**
  * Characterization tests for data-space position adjustments on LayerFrames.
  */
+import { fromPartial } from "@total-typescript/shoehorn";
 import { describe, expect, it } from "bun:test";
 
 import { aes, gg } from "@ggsvelte/spec";
@@ -21,14 +22,20 @@ describe("barSlotKeys", () => {
       xValues: null as CellValue[] | null,
       xNumeric: null as Float64Array | null,
     };
-    expect(barSlotKeys(base as LayerFrame)).toBeNull();
-    expect(barSlotKeys({ ...base, xValues: ["a", "b"] } as LayerFrame)).toEqual(["a", "b"]);
+    expect(barSlotKeys(fromPartial<LayerFrame>(base))).toBeNull();
+    expect(barSlotKeys(fromPartial<LayerFrame>({ ...base, xValues: ["a", "b"] }))).toEqual([
+      "a",
+      "b",
+    ]);
     // Typed categories with colliding labels occupy distinct slots, matching
     // the band scale's typed identity (encodeKey: strings pass through).
-    expect(barSlotKeys({ ...base, xValues: [1, "1"] } as LayerFrame)).toEqual(["@n:1", "1"]);
-    expect(barSlotKeys({ ...base, xNumeric: Float64Array.of(1.5, 2.5) } as LayerFrame)).toEqual([
-      1.5, 2.5,
+    expect(barSlotKeys(fromPartial<LayerFrame>({ ...base, xValues: [1, "1"] }))).toEqual([
+      "@n:1",
+      "1",
     ]);
+    expect(
+      barSlotKeys(fromPartial<LayerFrame>({ ...base, xNumeric: Float64Array.of(1.5, 2.5) })),
+    ).toEqual([1.5, 2.5]);
   });
 });
 

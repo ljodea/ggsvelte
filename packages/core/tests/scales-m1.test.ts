@@ -3,6 +3,7 @@
  * pinning, nice, zero, reverse), time/log tick generation, label format
  * strings, sequential color ramps, and the theme registry.
  */
+import { fromAny } from "@total-typescript/shoehorn";
 import { describe, expect, it } from "bun:test";
 
 import { formatTime, numberFormatter } from "../src/layout/format.ts";
@@ -257,7 +258,7 @@ describe("theme registry", () => {
   });
 
   it("unknown names throw (tier-1 error) and themeVar wraps --gg-* vars", () => {
-    expect(() => resolveTheme("darkk" as never)).toThrow(UnknownThemeError);
+    expect(() => resolveTheme(fromAny("darkk"))).toThrow(UnknownThemeError);
     expect(themeVar("ink", BUILTIN_THEMES.default)).toBe("var(--gg-ink, #262626)");
   });
 

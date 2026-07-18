@@ -2,6 +2,7 @@
  * Interval-selection + bounds-editor controller tests (S5 extraction).
  * Factories own deriveds + effects — instantiate under `$effect.root` and destroy.
  */
+import { fromAny, fromPartial } from "@total-typescript/shoehorn";
 import { flushSync } from "svelte";
 import { describe, expect, it } from "vitest";
 
@@ -724,7 +725,7 @@ describe("createIntervalState bounds editor select path", () => {
     let keyCalls = 0;
     let candidateReads = 0;
     const rawCandidates = model.candidates;
-    const spyModel = {
+    const spyModel = fromPartial<RenderModel>({
       ...model,
       candidates: {
         get size() {
@@ -735,7 +736,7 @@ describe("createIntervalState bounds editor select path", () => {
           return rawCandidates.candidate(id);
         },
       },
-    } as RenderModel;
+    });
     const events: PlotSelection[] = [];
     const { state, destroy } = mountIntervalController({
       model: () => spyModel,
@@ -985,7 +986,7 @@ describe("createIntervalState bounds-cancel effect", () => {
 describe("createIntervalState write-before-emit", () => {
   it("clearIntervalSelection: committedInterval is already null when emitSelection runs", () => {
     const model = modelFor(continuousSpec());
-    let observedAtEmit: IntervalSelection | null | undefined = "unset" as never;
+    let observedAtEmit: IntervalSelection | null | undefined = fromAny("unset");
     const { state, destroy } = mountIntervalController({
       model: () => model,
       selectConfig: persistentSelect,

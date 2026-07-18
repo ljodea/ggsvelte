@@ -1,3 +1,4 @@
+import { fromPartial } from "@total-typescript/shoehorn";
 import { describe, expect, it } from "bun:test";
 
 import { drawStratum, groupBatchesByPanel } from "../src/dom/canvas.ts";
@@ -125,17 +126,17 @@ function scene(batches: readonly GeometryBatch[], panelCount = 1): Scene {
     axisY: null,
     grid: { x: [], y: [] },
   }));
-  return {
+  return fromPartial<Scene>({
     width: Math.max(20, panelCount * 30),
     height: 20,
     panels,
     batches: [...batches],
     legends: [],
-    theme: { ink: "black", accent: "blue", interactionMuted: 0.36 } as Scene["theme"],
+    theme: { ink: "black", accent: "blue", interactionMuted: 0.36 },
     title: "",
     subtitle: "",
     caption: "",
-  } as Scene;
+  });
 }
 
 const resolve = (color: string) => color;

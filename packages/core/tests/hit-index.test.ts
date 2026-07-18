@@ -3,6 +3,7 @@
  * These are pure computations over Scene geometry — no DOM — so they run
  * under bun; the browser-level event wiring is covered by component tests.
  */
+import { fromPartial } from "@total-typescript/shoehorn";
 import { describe, expect, it } from "bun:test";
 
 import { gg, aes } from "@ggsvelte/spec";
@@ -36,7 +37,7 @@ function basePanelScene(batches: Scene["batches"]): Scene {
     axes: { x: { ticks: [], title: "" }, y: { ticks: [], title: "" } },
     grid: { x: [], y: [] },
     legends: [],
-    theme: {} as Scene["theme"],
+    theme: fromPartial<Scene["theme"]>({}),
     title: "",
     subtitle: "",
     caption: "",

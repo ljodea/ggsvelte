@@ -1,6 +1,7 @@
 /**
  * Characterization tests for axis/color scale training extracted from the pipeline.
  */
+import { fromAny } from "@total-typescript/shoehorn";
 import { describe, expect, it } from "bun:test";
 
 import { aes, gg } from "@ggsvelte/spec";
@@ -125,7 +126,7 @@ describe("trainAxis", () => {
     ]);
     const inputs = collectAxisInputs("x", [pointFrame(table)], "linear", []);
     try {
-      trainAxis("x", inputs, { type: "linear", domain: [1] as unknown as [number, number] });
+      trainAxis("x", inputs, { type: "linear", domain: fromAny<[number, number]>([1]) });
       expect.unreachable("should throw");
     } catch (e) {
       expect((e as { code: string }).code).toBe("invalid-scale-domain");
@@ -146,7 +147,7 @@ describe("continuousDomainOf", () => {
 
   it("throws invalid-scale-domain for wrong arity or non-finite values", () => {
     try {
-      continuousDomainOf({ domain: [1] as unknown as [number, number] }, "x");
+      continuousDomainOf({ domain: fromAny<[number, number]>([1]) }, "x");
       expect.unreachable("should throw");
     } catch (e) {
       expect(e).toBeInstanceOf(PipelineError);

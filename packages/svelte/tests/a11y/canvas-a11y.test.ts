@@ -1,3 +1,4 @@
+import { fromAny } from "@total-typescript/shoehorn";
 import { describe, expect, it, vi } from "vitest";
 
 import type { GeometryBatch, RenderModel } from "@ggsvelte/core";
@@ -10,21 +11,21 @@ import {
 } from "../../src/lib/a11y/canvas-a11y.js";
 
 function batch(partial: { layerIndex: number; rowIndex: number[] }): GeometryBatch {
-  return {
+  return fromAny<GeometryBatch>({
     layerIndex: partial.layerIndex,
     geom: "point",
     rowIndex: new Uint32Array(partial.rowIndex),
-  } as unknown as GeometryBatch;
+  });
 }
 
 function model(opts: {
   layerFields: Record<number, { field: string }[]>;
   rows: Record<number, Record<string, unknown> | null>;
 }): RenderModel {
-  return {
+  return fromAny<RenderModel>({
     layerFields: opts.layerFields,
     row: (index: number) => opts.rows[index] ?? null,
-  } as unknown as RenderModel;
+  });
 }
 
 describe("a11yRows", () => {
@@ -158,10 +159,10 @@ describe("a11yRows", () => {
 
   it("a11yMarkCount never calls model.row", () => {
     const row = vi.fn(() => ({ x: 1 }));
-    const m = {
+    const m = fromAny<RenderModel>({
       layerFields: { 0: [{ field: "x" }] },
       row,
-    } as unknown as RenderModel;
+    });
     const batches = [batch({ layerIndex: 0, rowIndex: [0, 1, 2, 0xffffffff, 1] })];
     expect(a11yMarkCount(batches)).toBe(3);
     expect(row).not.toHaveBeenCalled();
