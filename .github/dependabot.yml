@@ -1,0 +1,125 @@
+# Dependabot for ggsvelte — Bun monorepo + GitHub Actions.
+#
+# Ecosystems in use:
+#   - bun: root workspace tooling + package/app/spike manifests (single bun.lock)
+#   - github-actions: workflows under .github/workflows and composite actions
+#
+# Not configured (no manifests / no value here):
+#   docker, docker-compose, gomod, cargo, uv
+#   pre-commit — hooks are repo-local `language: system` only (no remote revs)
+#
+# Playwright / @playwright/test are fully ignored: exact pins must stay in
+# lockstep with mcr.microsoft.com/playwright:vX.Y.Z-noble (asserted in CI and
+# documented in CONTRIBUTING.md). Bump them in a human-authored PR that updates
+# package pins + every container tag together.
+#
+# Majors for svelte / vite / @sveltejs/* / typescript / vitest / @types/* are
+# ignored so Dependabot does not open breaking migration PRs automatically.
+
+version: 2
+updates:
+  # Bun monorepo — Monday 09:00 UTC
+  # One multi-directory entry so the same dependency (e.g. typescript, svelte)
+  # lands as a single PR across every package.json that lists it.
+  - package-ecosystem: "bun"
+    directories:
+      - "/"
+      - "/packages/core"
+      - "/packages/spec"
+      - "/packages/svelte"
+      - "/apps/docs"
+      - "/examples"
+      - "/benchmarks"
+      - "/spikes/browser"
+      - "/spikes/pure"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 5
+    assignees:
+      - "ljodea"
+    commit-message:
+      prefix: "deps"
+      prefix-development: "deps-dev"
+      include: "scope"
+    cooldown:
+      default-days: 3
+      semver-major-days: 7
+    groups:
+      # Keep related toolchain bumps reviewable together (still one PR per
+      # dependency name across directories via group-by).
+      svelte-ecosystem:
+        patterns: ["svelte", "@sveltejs/*"]
+        group-by: dependency-name
+      vitest-ecosystem:
+        patterns: ["vitest", "@vitest/*", "vitest-browser-svelte"]
+        group-by: dependency-name
+      oxlint-ecosystem:
+        patterns: ["oxfmt", "oxlint", "oxlint-tsgolint"]
+        group-by: dependency-name
+      prettier-ecosystem:
+        patterns: ["prettier", "prettier-plugin-svelte"]
+        group-by: dependency-name
+      # Everything else: one PR per dependency, aligned across the monorepo.
+      other-dependencies:
+        patterns: ["*"]
+        exclude-patterns:
+          - "svelte"
+          - "@sveltejs/*"
+          - "vitest"
+          - "@vitest/*"
+          - "vitest-browser-svelte"
+          - "oxfmt"
+          - "oxlint"
+          - "oxlint-tsgolint"
+          - "prettier"
+          - "prettier-plugin-svelte"
+          - "playwright"
+          - "@playwright/test"
+        group-by: dependency-name
+    ignore:
+      - dependency-name: "svelte"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "vite"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@sveltejs/*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "vitest"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@vitest/*"
+        update-types: ["version-update:semver-major"]
+      # @types/node majors track the Node line we choose to support (engines >=22).
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+      # @types/bun majors track packageManager / mise.toml bun pins.
+      - dependency-name: "@types/bun"
+        update-types: ["version-update:semver-major"]
+      # Container lockstep — see header comment and CONTRIBUTING.md tool roster.
+      - dependency-name: "playwright"
+      - dependency-name: "@playwright/test"
+
+  # GitHub Actions (workflows + .github/actions) — Tuesday 09:00 UTC
+  # Actions are SHA-pinned (zizmor-enforced). Dependabot updates the pin SHA
+  # and keeps the version comment current when present.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 3
+    assignees:
+      - "ljodea"
+    commit-message:
+      prefix: "deps-ci"
+    cooldown:
+      default-days: 3
+    groups:
+      # One weekly PR for all action bumps — keeps the review surface small.
+      github-actions:
+        patterns: ["*"]

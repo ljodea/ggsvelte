@@ -258,6 +258,32 @@ describe("R0 release wiring", () => {
     expect(approvalJob).toContain("shell: bash");
   });
 
+  it("wires Dependabot for bun workspaces and GitHub Actions", () => {
+    const dependabot = read(".github/dependabot.yml");
+    expect(dependabot).toContain('package-ecosystem: "bun"');
+    expect(dependabot).toContain('package-ecosystem: "github-actions"');
+    // Monorepo manifests Dependabot should visit (single bun.lock at root).
+    for (const directory of [
+      '"/"',
+      '"/packages/core"',
+      '"/packages/spec"',
+      '"/packages/svelte"',
+      '"/apps/docs"',
+      '"/examples"',
+      '"/benchmarks"',
+      '"/spikes/browser"',
+      '"/spikes/pure"',
+    ]) {
+      expect(dependabot).toContain(directory);
+    }
+    // Playwright stays human-authored: package pins + container tag lockstep.
+    expect(dependabot).toContain('dependency-name: "playwright"');
+    expect(dependabot).toContain('dependency-name: "@playwright/test"');
+    // Action bumps batch into one weekly PR.
+    expect(dependabot).toContain("github-actions:");
+    expect(dependabot).toContain('patterns: ["*"]');
+  });
+
   it("versions only publishable packages", () => {
     const config = JSON.parse(read(".changeset/config.json")) as {
       linked?: string[][];

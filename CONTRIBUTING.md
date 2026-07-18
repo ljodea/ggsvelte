@@ -98,6 +98,23 @@ upstream, `.md`/`.yaml`/`.svelte` can fold back into oxfmt (`.oxfmtrc.json`
 | svelte / vite / @sveltejs/vite-plugin-svelte | 5.56.4 / 8.1.4 / 7.2.0 | spike + adapter toolchain                                                             |
 | pre-commit                                   | 4.6.0                  | hook framework (both stages)                                                          |
 
+## Dependency updates (Dependabot)
+
+[`.github/dependabot.yml`](.github/dependabot.yml) opens weekly PRs for:
+
+- **Bun** workspace manifests (root + packages/apps/examples/benchmarks/spikes)
+  on Mondays — grouped so one dependency update lands across every `package.json`
+  that lists it.
+- **GitHub Actions** (workflows + composite actions) on Tuesdays — batched into
+  a single PR because third-party actions are SHA-pinned (zizmor-enforced).
+
+Dependabot does **not** bump `playwright` / `@playwright/test`: those exact
+pins must stay aligned with every `mcr.microsoft.com/playwright:v…-noble`
+container tag (asserted in CI). Bump them in a human-authored PR that updates
+package pins and container tags together. Majors for `svelte`, `vite`,
+`@sveltejs/*`, `typescript`, and `vitest` are also ignored — land those as
+deliberate migrations.
+
 ## Running the checks
 
 | Command                                               | What it does                                                                                                                                      |
