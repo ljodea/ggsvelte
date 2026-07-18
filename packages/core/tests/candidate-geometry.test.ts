@@ -104,12 +104,36 @@ describe("closestOrthInRange", () => {
     expect(closestOrthInRange(ids(3), [2, 2, 2], [1, 3, 2], [0, 5, 1], 0, 3, 2)).toBe(1);
   });
 
-  it("returns the first id when seedOrth is non-finite (linear-scan NaN contract)", () => {
-    // Linear scan started at start and never improved when every |Δ| is NaN.
+  it("handles non-finite seedOrth like the linear scan", () => {
+    // NaN distances never improve → keep the first member.
     expect(closestOrthInRange(ids(3), [1, 2, 3], [0, 9, 8], [0, 0, 0], 0, 3, Number.NaN)).toBe(0);
+    // ±Infinity seed: every finite member has distance Infinity; batch/source ties apply.
     expect(
       closestOrthInRange(ids(3), [1, 2, 3], [0, 9, 8], [0, 0, 0], 0, 3, Number.POSITIVE_INFINITY),
-    ).toBe(0);
+    ).toBe(1); // highest batchId among equal Infinity distances
+    expect(
+      closestOrthInRange(ids(3), [1, 2, 3], [1, 1, 1], [5, 1, 3], 0, 3, Number.NEGATIVE_INFINITY),
+    ).toBe(1); // same batch → lowest source
+  });
+
+  it("keeps the first full-tie member on the lower-side equal-orth run", () => {
+    // seed 10: both orth 0 have dist 10; identical batch/source → first id wins.
+    expect(closestOrthInRange(ids(3), [0, 0, 20], [1, 1, 1], [0, 0, 0], 0, 3, 10)).toBe(0);
+  });
+
+  it("picks the largest finite orth when +Infinity follows in the series", () => {
+    // seed 50: finite 40 is closer than +Infinity; must not skip past 40.
+    expect(
+      closestOrthInRange(
+        ids(3),
+        [10, 40, Number.POSITIVE_INFINITY],
+        [0, 0, 0],
+        [0, 0, 0],
+        0,
+        3,
+        50,
+      ),
+    ).toBe(1);
   });
 
   it("uses O(log M + T) Math.abs probes on a large sorted series", () => {

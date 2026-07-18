@@ -555,7 +555,12 @@ export function buildCandidateStoreEager(
           memberIds[boundaryIndex] = seedId;
           continue;
         }
-        // Series ranges are sorted by orth — O(log M + T) closest, not O(M).
+        // Bucket sort orders ranks before orth. A single layer/series boundary
+        // is orth-sorted only when rank is constant across the range; otherwise
+        // fall back to linear closest (preserves prior group() semantics).
+        const firstId = permutation[boundary.start]!;
+        const lastId = permutation[boundary.end - 1]!;
+        const orthSorted = ranks[firstId] === ranks[lastId];
         memberIds[boundaryIndex] = closestOrthInRange(
           permutation,
           orth,
@@ -564,6 +569,7 @@ export function buildCandidateStoreEager(
           boundary.start,
           boundary.end,
           seedOrth,
+          orthSorted,
         );
       }
       return {
