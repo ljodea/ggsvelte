@@ -16,6 +16,7 @@ export function resolveRepresentedSourceRows(input: {
   sourceRowsByGroup: Map<string, number[]>;
   sourceRowsByGroupX?: Map<string, number[]>;
   sourceRowsByGroupBin?: Map<string, number[]>;
+  sourceRowsByGroupY?: Map<string, number[]>;
   frame: LayerFrame | undefined;
   table: ColumnTable;
   frameRow: number;
@@ -31,6 +32,7 @@ export function resolveRepresentedSourceRows(input: {
     sourceRowsByGroup,
     sourceRowsByGroupX,
     sourceRowsByGroupBin,
+    sourceRowsByGroupY,
     frame,
     table,
     frameRow,
@@ -56,6 +58,7 @@ export function resolveRepresentedSourceRows(input: {
     };
     if (sourceRowsByGroupX) filterInput.sourceRowsByGroupX = sourceRowsByGroupX;
     if (sourceRowsByGroupBin) filterInput.sourceRowsByGroupBin = sourceRowsByGroupBin;
+    if (sourceRowsByGroupY) filterInput.sourceRowsByGroupY = sourceRowsByGroupY;
     representedRows = filterRepresentedSourceRows(filterInput);
   }
   return {

@@ -24,6 +24,16 @@ export function appendSourceRowByGroupX(input: {
   else members.push(input.sourceRow);
 }
 
+export function appendSourceRowByGroupKey(
+  map: Map<string, number[]>,
+  key: string,
+  sourceRow: number,
+): void {
+  const members = map.get(key);
+  if (members === undefined) map.set(key, [sourceRow]);
+  else members.push(sourceRow);
+}
+
 interface BinEdge {
   frameRow: number;
   lo: number;
@@ -37,6 +47,8 @@ interface BinEdge {
  * Assign each source row to at most one bin in a single pass over the panel
  * rows (O(n log k) per group via binary search on ordered bin edges), instead
  * of re-scanning the full group once per output bin (O(k·g)).
+ * When bin edges are absent, every mark represents the full group: members are
+ * collected once per group and shared across that group's frame rows (O(n+k)).
  */
 export function buildBinLineageBuckets(input: {
   frame: LayerFrame;
@@ -53,18 +65,26 @@ export function buildBinLineageBuckets(input: {
   const inputGroups = frame.inputGroups;
   const closed = ((frame.binding.layer.params ?? {}) as BarParams).closed ?? "right";
   const binsByGroup = new Map<number, BinEdge[]>();
+  const missingEdges = frame.xmin === null || frame.xmax === null;
+  /** group → frame rows (missing-edges path only; enables O(n+k) fill). */
+  const frameRowsByGroup = missingEdges ? new Map<number, number[]>() : null;
 
   for (let frameRow = 0; frameRow < frame.n; frameRow++) {
     const group = frame.groups[frameRow] ?? 0;
+    if (frameRowsByGroup !== null) {
+      const rows = frameRowsByGroup.get(group);
+      if (rows === undefined) frameRowsByGroup.set(group, [frameRow]);
+      else rows.push(frameRow);
+      continue;
+    }
     const bucket: number[] = [];
     sourceRowsByGroupBin.set(`${panelIndex}:${layerIndex}:${group}:${frameRow}`, bucket);
-    if (frame.xmin === null || frame.xmax === null) continue;
     const first = frameRow === 0 || frame.groups[frameRow - 1] !== group;
     const last = frameRow === frame.n - 1 || frame.groups[frameRow + 1] !== group;
     const edge: BinEdge = {
       frameRow,
-      lo: frame.xmin[frameRow]!,
-      hi: frame.xmax[frameRow]!,
+      lo: frame.xmin![frameRow]!,
+      hi: frame.xmax![frameRow]!,
       first,
       last,
       bucket,
@@ -75,15 +95,20 @@ export function buildBinLineageBuckets(input: {
   }
 
   // No bin edges: every output mark represents the full group (filter fallback).
-  if (frame.xmin === null || frame.xmax === null) {
+  // Pre-index group → frame rows, collect members O(n), share one array per group O(k).
+  if (frameRowsByGroup !== null) {
+    const membersByGroup = new Map<number, number[]>();
     for (let localRow = 0; localRow < inputGroups.length; localRow++) {
       const group = inputGroups[localRow]!;
       const sourceRow = facetPanel.sourceRows?.[localRow] ?? localRow;
-      for (let frameRow = 0; frameRow < frame.n; frameRow++) {
-        if ((frame.groups[frameRow] ?? 0) !== group) continue;
-        sourceRowsByGroupBin
-          .get(`${panelIndex}:${layerIndex}:${group}:${frameRow}`)
-          ?.push(sourceRow);
+      const members = membersByGroup.get(group);
+      if (members === undefined) membersByGroup.set(group, [sourceRow]);
+      else members.push(sourceRow);
+    }
+    for (const [group, frameRows] of frameRowsByGroup) {
+      const members = membersByGroup.get(group) ?? [];
+      for (const frameRow of frameRows) {
+        sourceRowsByGroupBin.set(`${panelIndex}:${layerIndex}:${group}:${frameRow}`, members);
       }
     }
     return;

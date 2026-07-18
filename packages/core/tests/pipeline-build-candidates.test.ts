@@ -891,6 +891,524 @@ describe("aggregate lineage index (issue #184)", () => {
         sourceRowsByGroup: index.sourceRowsByGroup,
         sourceRowsByGroupX: index.sourceRowsByGroupX,
         sourceRowsByGroupBin: index.sourceRowsByGroupBin,
+        sourceRowsByGroupY: index.sourceRowsByGroupY,
+        frame,
+        table: prepared.table,
+        frameRow,
+        lineage,
+        primitiveIndex: frameRow,
+      });
+      const baseRows = index.sourceRowsByGroup.get(`0:0:${group}`) ?? [];
+      const viaFilter = filterRepresentedSourceRows({
+        frame,
+        table: prepared.table,
+        frameRow,
+        baseRows,
+      });
+      expect(viaIndex.representedRows).toEqual(viaFilter);
+    }
+  });
+});
+
+/**
+ * Seams under test (issue #218):
+ * - buildBinLineageBuckets missing-edges path: full-group membership per frame row
+ * - multi-group isolation + first-seen source-row order + facet sourceRows remap
+ * - complexity: frame.groups index reads stay O(k), not O(n·k)
+ */
+describe("buildBinLineageBuckets missing-edges fallback (issue #218)", () => {
+  async function loadBuildBinLineageBuckets() {
+    const { buildBinLineageBuckets } =
+      await import("../src/pipeline/build-candidates-identity-aggregate.ts");
+    return buildBinLineageBuckets;
+  }
+
+  function binBinding(colorField: string | null = null) {
+    return {
+      layer: {
+        geom: "histogram",
+        stat: "bin",
+        aes: {
+          x: { field: "x" },
+          ...(colorField === null ? {} : { color: { field: colorField } }),
+        },
+      },
+      index: 0,
+      xField: "x",
+      yField: null,
+      yStatColumn: null,
+      yminField: null,
+      ymaxField: null,
+      color: { field: colorField, constant: null, scaledConstant: null },
+      fill: { field: null, constant: null, scaledConstant: null },
+      labelField: null,
+      labelConstant: null,
+      weightField: null,
+      ruleForm: null,
+    };
+  }
+
+  it("assigns every source row of a group into each of that group's frame rows", async () => {
+    const buildBinLineageBuckets = await loadBuildBinLineageBuckets();
+    const table = ColumnTable.fromRows([
+      { g: "a", x: 1 },
+      { g: "b", x: 2 },
+      { g: "a", x: 3 },
+      { g: "b", x: 4 },
+      { g: "a", x: 5 },
+    ]);
+    // Pre-stat groups: a→0, b→1 (matches frame.inputGroups cache contract).
+    const inputGroups = [0, 1, 0, 1, 0];
+    // Two empty-edge output marks per group (0=a, 1=b).
+    const groups = [0, 0, 1, 1];
+    const frame = {
+      binding: binBinding("g"),
+      table,
+      n: groups.length,
+      groups,
+      inputGroups,
+      xmin: null,
+      xmax: null,
+    } as never;
+    const sourceRowsByGroupBin = new Map<string, number[]>();
+    buildBinLineageBuckets({
+      frame,
+      panelIndex: 0,
+      layerIndex: 0,
+      facetPanel: { sourceRows: null } as never,
+      sourceRowsByGroupBin,
+    });
+
+    expect(sourceRowsByGroupBin.get("0:0:0:0")).toEqual([0, 2, 4]);
+    expect(sourceRowsByGroupBin.get("0:0:0:1")).toEqual([0, 2, 4]);
+    expect(sourceRowsByGroupBin.get("0:0:1:2")).toEqual([1, 3]);
+    expect(sourceRowsByGroupBin.get("0:0:1:3")).toEqual([1, 3]);
+  });
+
+  it("remaps through facetPanel.sourceRows in first-seen order", async () => {
+    const buildBinLineageBuckets = await loadBuildBinLineageBuckets();
+    const table = ColumnTable.fromRows([
+      { g: "a", x: 1 },
+      { g: "a", x: 2 },
+      { g: "b", x: 3 },
+    ]);
+    const inputGroups = [0, 0, 1];
+    const groups = [0, 1];
+    const frame = {
+      binding: binBinding("g"),
+      table,
+      n: groups.length,
+      groups,
+      inputGroups,
+      xmin: null,
+      xmax: null,
+    } as never;
+    const sourceRowsByGroupBin = new Map<string, number[]>();
+    buildBinLineageBuckets({
+      frame,
+      panelIndex: 2,
+      layerIndex: 1,
+      facetPanel: { sourceRows: [10, 20, 30] } as never,
+      sourceRowsByGroupBin,
+    });
+
+    expect(sourceRowsByGroupBin.get("2:1:0:0")).toEqual([10, 20]);
+    expect(sourceRowsByGroupBin.get("2:1:1:1")).toEqual([30]);
+  });
+
+  it("reads frame.groups O(k) times, not O(n·k), when edges are missing", async () => {
+    const buildBinLineageBuckets = await loadBuildBinLineageBuckets();
+    const n = 40;
+    const k = 40;
+    const table = ColumnTable.fromRows(Array.from({ length: n }, (_, i) => ({ x: i })));
+    const inputGroups = Array.from({ length: n }, () => 0);
+    const rawGroups = Array.from({ length: k }, () => 0);
+    let groupIndexReads = 0;
+    const groups = new Proxy(rawGroups, {
+      get(target, property, receiver): unknown {
+        if (typeof property === "string" && /^\d+$/.test(property)) groupIndexReads += 1;
+        return Reflect.get(target, property, receiver) as unknown;
+      },
+    });
+    const frame = {
+      binding: binBinding(null),
+      table,
+      n: k,
+      groups,
+      inputGroups,
+      xmin: null,
+      xmax: null,
+    } as never;
+    const sourceRowsByGroupBin = new Map<string, number[]>();
+    buildBinLineageBuckets({
+      frame,
+      panelIndex: 0,
+      layerIndex: 0,
+      facetPanel: { sourceRows: null } as never,
+      sourceRowsByGroupBin,
+    });
+
+    // Setup walk over k frame rows is enough; nested O(n·k) would read ~n·k times.
+    expect(groupIndexReads).toBeLessThanOrEqual(k * 2);
+    expect(groupIndexReads).toBeLessThan((n * k) / 2);
+    expect(sourceRowsByGroupBin.get("0:0:0:0")).toEqual(Array.from({ length: n }, (_, i) => i));
+    expect(sourceRowsByGroupBin.get(`0:0:0:${k - 1}`)).toEqual(
+      Array.from({ length: n }, (_, i) => i),
+    );
+  });
+});
+
+describe("finite-y lineage cache (issue #216)", () => {
+  it("precomputes finite-y source rows once per group for smooth layers", async () => {
+    const { preparePanels } = await import("../src/pipeline/prepare-panels.ts");
+    const { buildCandidateIdentityIndex } =
+      await import("../src/pipeline/build-candidates-identity.ts");
+    const { filterAggregateYRows } =
+      await import("../src/pipeline/build-candidates-lineage-filters.ts");
+    const { normalize } = await import("@ggsvelte/spec");
+
+    const prepared = preparePanels(
+      normalize({
+        data: {
+          values: [
+            { x: 1, y: 10 },
+            { x: 2, y: 20 },
+            { x: 3, y: Number.NaN },
+            { x: 4, y: 40 },
+          ],
+        },
+        layers: [
+          {
+            geom: "smooth",
+            stat: "smooth",
+            aes: { x: { field: "x" }, y: { field: "y" } },
+            params: { method: "lm", n: 5 },
+          },
+        ],
+      }),
+      size,
+      [],
+      [],
+    );
+    const index = buildCandidateIdentityIndex(prepared.panelFrames, prepared.facetPanels);
+    const groupKey = "0:0:0";
+    const baseRows = index.sourceRowsByGroup.get(groupKey) ?? [];
+    expect(baseRows.toSorted((a, b) => a - b)).toEqual([0, 1, 2, 3]);
+
+    const viaFilter = filterAggregateYRows({
+      table: prepared.table,
+      field: "y",
+      baseRows,
+    });
+    // Non-finite y (row 2) must be excluded; cache must match pure filter.
+    expect(viaFilter).toEqual([0, 1, 3]);
+    expect(index.sourceRowsByGroupY.get(groupKey)).toEqual(viaFilter);
+  });
+
+  it("filterRepresentedSourceRows reuses finite-y cache for every smooth mark", async () => {
+    const { preparePanels } = await import("../src/pipeline/prepare-panels.ts");
+    const { buildCandidateIdentityIndex } =
+      await import("../src/pipeline/build-candidates-identity.ts");
+    const { filterRepresentedSourceRows } =
+      await import("../src/pipeline/build-candidates-lineage.ts");
+    const { normalize } = await import("@ggsvelte/spec");
+
+    const prepared = preparePanels(
+      normalize({
+        data: {
+          values: [
+            { x: 1, y: 10 },
+            { x: 2, y: 20 },
+            { x: 3, y: Number.NaN },
+            { x: 4, y: 40 },
+          ],
+        },
+        layers: [
+          {
+            geom: "smooth",
+            stat: "smooth",
+            aes: { x: { field: "x" }, y: { field: "y" } },
+            params: { method: "lm", n: 5 },
+          },
+        ],
+      }),
+      size,
+      [],
+      [],
+    );
+    const index = buildCandidateIdentityIndex(prepared.panelFrames, prepared.facetPanels);
+    const frame = prepared.panelFrames[0]![0]!;
+    const baseRows = index.sourceRowsByGroup.get("0:0:0") ?? [];
+    const expected = index.sourceRowsByGroupY.get("0:0:0");
+    expect(expected).toEqual([0, 1, 3]);
+
+    // Every evaluation-grid mark must resolve to the same finite-y list.
+    expect(frame.n).toBeGreaterThan(1);
+    for (let frameRow = 0; frameRow < frame.n; frameRow++) {
+      const viaIndex = filterRepresentedSourceRows({
+        frame,
+        table: prepared.table,
+        frameRow,
+        baseRows,
+        group: 0,
+        panelIndex: 0,
+        layerIndex: 0,
+        sourceRowsByGroupY: index.sourceRowsByGroupY,
+      });
+      const viaFilter = filterRepresentedSourceRows({
+        frame,
+        table: prepared.table,
+        frameRow,
+        baseRows,
+      });
+      expect(viaIndex).toEqual(viaFilter);
+      expect(viaIndex).toEqual(expected);
+      // Shared frozen array — no per-mark re-filter allocation.
+      expect(viaIndex).toBe(expected);
+    }
+  });
+
+  it("does not build finite-y buckets for identity or count layers", async () => {
+    const { preparePanels } = await import("../src/pipeline/prepare-panels.ts");
+    const { buildCandidateIdentityIndex } =
+      await import("../src/pipeline/build-candidates-identity.ts");
+    const { normalize } = await import("@ggsvelte/spec");
+
+    const prepared = preparePanels(
+      normalize({
+        data: {
+          values: [
+            { g: "a", y: 1 },
+            { g: "b", y: 2 },
+          ],
+        },
+        layers: [
+          { geom: "point", aes: { x: { field: "g" }, y: { field: "y" } } },
+          { geom: "bar", aes: { x: { field: "g" } }, stat: "count" },
+        ],
+      }),
+      size,
+      [],
+      [],
+    );
+    const index = buildCandidateIdentityIndex(prepared.panelFrames, prepared.facetPanels);
+    expect(index.sourceRowsByGroupY.size).toBe(0);
+  });
+
+  it("resolveRepresentedSourceRows matches pure filter and reuses lineage for smooth marks", async () => {
+    const { preparePanels } = await import("../src/pipeline/prepare-panels.ts");
+    const { buildCandidateIdentityIndex } =
+      await import("../src/pipeline/build-candidates-identity.ts");
+    const { resolveRepresentedSourceRows } =
+      await import("../src/pipeline/build-candidates-datum-represented.ts");
+    const { filterRepresentedSourceRows } =
+      await import("../src/pipeline/build-candidates-lineage.ts");
+    const { LineageStore } = await import("../src/identity.ts");
+    const { normalize } = await import("@ggsvelte/spec");
+
+    const prepared = preparePanels(
+      normalize({
+        data: {
+          values: [
+            { x: 1, y: 10 },
+            { x: 2, y: 20 },
+            { x: 3, y: Number.NaN },
+            { x: 4, y: 40 },
+          ],
+        },
+        layers: [
+          {
+            geom: "smooth",
+            stat: "smooth",
+            aes: { x: { field: "x" }, y: { field: "y" } },
+            params: { method: "lm", n: 8 },
+          },
+        ],
+      }),
+      size,
+      [],
+      [],
+    );
+    const index = buildCandidateIdentityIndex(prepared.panelFrames, prepared.facetPanels);
+    const frame = prepared.panelFrames[0]![0]!;
+    const lineage = new LineageStore<number>();
+    const baseRows = index.sourceRowsByGroup.get("0:0:0") ?? [];
+
+    const lineageKeys: number[] = [];
+    for (let frameRow = 0; frameRow < frame.n; frameRow++) {
+      const viaIndex = resolveRepresentedSourceRows({
+        outlierSourceRow: null,
+        sourceRow: null,
+        group: 0,
+        panelIndex: 0,
+        layerIndex: 0,
+        sourceRowsByGroup: index.sourceRowsByGroup,
+        sourceRowsByGroupX: index.sourceRowsByGroupX,
+        sourceRowsByGroupBin: index.sourceRowsByGroupBin,
+        sourceRowsByGroupY: index.sourceRowsByGroupY,
+        frame,
+        table: prepared.table,
+        frameRow,
+        lineage,
+        primitiveIndex: frameRow,
+      });
+      const viaFilter = filterRepresentedSourceRows({
+        frame,
+        table: prepared.table,
+        frameRow,
+        baseRows,
+      });
+      expect(viaIndex.representedRows).toEqual(viaFilter);
+      expect(viaIndex.representedRows).toEqual([0, 1, 3]);
+      lineageKeys.push(viaIndex.lineageKey);
+    }
+    expect(frame.n).toBeGreaterThan(1);
+    // All evaluation-grid marks share one interned lineage membership.
+    expect(new Set(lineageKeys).size).toBe(1);
+    expect([...lineage.keys(lineageKeys[0]!)].toSorted((a, b) => a - b)).toEqual([0, 1, 3]);
+  });
+
+  it("pipeline smooth candidates share one lineage membership per group", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { x: 1, y: 10 },
+          { x: 2, y: 20 },
+          { x: 3, y: null },
+          { x: 4, y: 40 },
+          { x: 5, y: 50 },
+        ],
+        aes({ x: "x", y: "y" }),
+      )
+        .geomSmooth({ method: "lm", n: 10 })
+        .spec(),
+      size,
+    );
+    const candidates = Array.from({ length: model.candidates.size }, (_, id) =>
+      model.candidates.candidate(id),
+    ).flatMap((candidate) => (candidate === null ? [] : [candidate]));
+    expect(candidates.length).toBeGreaterThan(1);
+    const first = candidates[0];
+    if (first === undefined) throw new Error("expected at least one smooth candidate");
+    const lineageRefs = new Set(candidates.map((candidate) => candidate.lineage));
+    expect(lineageRefs.size).toBe(1);
+    const keys = [...model.lineage.keys(first.lineage)].toSorted((a, b) => a - b);
+    // Row 2 has null y and is not represented by the smooth fit lineage.
+    expect(keys).toEqual([0, 1, 3, 4]);
+  });
+
+  it("finite-y cache uses panel-local y values under facet wrap", async () => {
+    const { preparePanels } = await import("../src/pipeline/prepare-panels.ts");
+    const { buildCandidateIdentityIndex } =
+      await import("../src/pipeline/build-candidates-identity.ts");
+    const { filterRepresentedSourceRows } =
+      await import("../src/pipeline/build-candidates-lineage.ts");
+    const { normalize } = await import("@ggsvelte/spec");
+
+    const prepared = preparePanels(
+      normalize(
+        gg(
+          [
+            { f: "A", x: 1, y: 10 },
+            { f: "A", x: 2, y: null },
+            { f: "A", x: 3, y: 30 },
+            { f: "B", x: 1, y: 100 },
+            { f: "B", x: 2, y: 200 },
+          ],
+          aes({ x: "x", y: "y" }),
+        )
+          .geomSmooth({ method: "lm", n: 4 })
+          .facet({ wrap: "f" })
+          .spec(),
+      ),
+      size,
+      [],
+      [],
+    );
+    const index = buildCandidateIdentityIndex(prepared.panelFrames, prepared.facetPanels);
+
+    // Panel B maps source rows 3,4 → panel-local 0,1. Cache must not index frame.table
+    // with source-table indexes (that empties or corrupts the finite-y list).
+    expect(index.sourceRowsByGroupY.get("0:0:0")).toEqual([0, 2]);
+    expect(index.sourceRowsByGroupY.get("1:0:0")).toEqual([3, 4]);
+
+    for (let panelIndex = 0; panelIndex < prepared.panelFrames.length; panelIndex++) {
+      const frame = prepared.panelFrames[panelIndex]![0]!;
+      const groupKey = `${panelIndex}:0:0`;
+      const baseRows = index.sourceRowsByGroup.get(groupKey) ?? [];
+      const viaFilter = filterRepresentedSourceRows({
+        frame,
+        table: prepared.table,
+        frameRow: 0,
+        baseRows,
+      });
+      expect(index.sourceRowsByGroupY.get(groupKey)).toEqual(viaFilter);
+      const viaIndex = filterRepresentedSourceRows({
+        frame,
+        table: prepared.table,
+        frameRow: 0,
+        baseRows,
+        group: 0,
+        panelIndex,
+        layerIndex: 0,
+        sourceRowsByGroupY: index.sourceRowsByGroupY,
+      });
+      expect(viaIndex).toEqual(viaFilter);
+      expect(viaIndex).toBe(index.sourceRowsByGroupY.get(groupKey));
+    }
+  });
+
+  it("summary finite-y cache matches pure filter after group×x resolve", async () => {
+    const { preparePanels } = await import("../src/pipeline/prepare-panels.ts");
+    const { buildCandidateIdentityIndex } =
+      await import("../src/pipeline/build-candidates-identity.ts");
+    const { resolveRepresentedSourceRows } =
+      await import("../src/pipeline/build-candidates-datum-represented.ts");
+    const { filterRepresentedSourceRows } =
+      await import("../src/pipeline/build-candidates-lineage.ts");
+    const { LineageStore } = await import("../src/identity.ts");
+    const { normalize } = await import("@ggsvelte/spec");
+
+    const prepared = preparePanels(
+      normalize({
+        data: {
+          values: [
+            { g: "a", y: 1 },
+            { g: "a", y: Number.NaN },
+            { g: "a", y: 3 },
+            { g: "b", y: 4 },
+          ],
+        },
+        layers: [
+          {
+            geom: "pointrange",
+            stat: "summary",
+            aes: { x: { field: "g" }, y: { field: "y" } },
+          },
+        ],
+      }),
+      size,
+      [],
+      [],
+    );
+    const index = buildCandidateIdentityIndex(prepared.panelFrames, prepared.facetPanels);
+    expect(index.sourceRowsByGroupY.get("0:0:0")).toEqual([0, 2]);
+    expect(index.sourceRowsByGroupY.get("0:0:1")).toEqual([3]);
+
+    const frame = prepared.panelFrames[0]![0]!;
+    const lineage = new LineageStore<number>();
+    for (let frameRow = 0; frameRow < frame.n; frameRow++) {
+      const group = frame.groups[frameRow] ?? 0;
+      const viaIndex = resolveRepresentedSourceRows({
+        outlierSourceRow: null,
+        sourceRow: null,
+        group,
+        panelIndex: 0,
+        layerIndex: 0,
+        sourceRowsByGroup: index.sourceRowsByGroup,
+        sourceRowsByGroupX: index.sourceRowsByGroupX,
+        sourceRowsByGroupBin: index.sourceRowsByGroupBin,
+        sourceRowsByGroupY: index.sourceRowsByGroupY,
         frame,
         table: prepared.table,
         frameRow,
