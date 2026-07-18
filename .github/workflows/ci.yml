@@ -280,7 +280,7 @@ jobs:
     # Cap concurrent Ubuntu/self-hosted consumer rows only (#247). Hosted
     # Windows/macOS rows get a unique group so they are not serialized.
     concurrency:
-      group: ${{ startsWith(matrix.os, 'ubuntu') && 'heavy-consumer-ubuntu' || format('heavy-consumer-hosted-{0}-{1}-{2}-{3}', matrix.os, matrix.node, matrix.packageManager, github.run_id) }}
+      group: ${{ startsWith(matrix.os, 'ubuntu') && 'heavy-consumer-ubuntu' || format('heavy-consumer-hosted-{0}', github.run_id) }}
       cancel-in-progress: false
       queue: max
     timeout-minutes: 20

@@ -274,7 +274,32 @@ async function main(): Promise<void> {
   let suppressed = 0;
   for (const file of files) {
     const source = prepareSourceForLint(await readFile(file, "utf8"));
-    for (const r of lint(source, file)) {
+    // Recreate the linter per file: the wasm build can OOB-crash after
+    // schema rejections or large workflows when reusing one instance.
+    try {
+      lint = await createLinter();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error(`actionlint: createLinter failed for ${file} (${msg}).`);
+      process.exit(1);
+    }
+    let fileFindings: Array<{
+      file: string;
+      line: number;
+      column: number;
+      message: string;
+      kind: string;
+    }>;
+    try {
+      fileFindings = [...lint(source, file)];
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      // queue: max is stripped above; residual wasm panics on other new
+      // syntax should still fail CI rather than soft-skip.
+      console.error(`actionlint: wasm panic while linting ${file}: ${msg}`);
+      process.exit(1);
+    }
+    for (const r of fileFindings) {
       if (knownFalsePositives.some((re) => re.test(r.message))) {
         suppressed += 1;
         continue;
