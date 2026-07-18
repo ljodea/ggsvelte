@@ -25,6 +25,7 @@ export function packBinLayerFrame(
   table: ColumnTable,
   result: BinResult,
   columnOf: ReturnType<typeof makeColumnOf>,
+  inputGroups: readonly number[],
 ): LayerFrame {
   const columns: Record<string, Float64Array> = {
     count: result.count,
@@ -41,6 +42,7 @@ export function packBinLayerFrame(
     xNumeric: result.x,
     yNumeric: columns[binding.yStatColumn ?? "count"] ?? result.count,
     groups: result.groups,
+    inputGroups,
     rowIndex: Uint32Array.from({ length: result.x.length }, () => NO_ROW),
     colorValues: col(binding.color.field),
     fillValues: col(binding.fill.field),

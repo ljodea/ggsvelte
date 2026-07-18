@@ -27,6 +27,12 @@ export interface LayerFrame {
   xNumeric: Float64Array | null;
   yNumeric: Float64Array | null;
   groups: readonly number[];
+  /**
+   * Pre-stat group id per input table row (canonical first-seen order).
+   * Identity index and bin lineage reuse this instead of re-deriving.
+   * Length is always `table.rowCount` (empty for annotation frames with no rows).
+   */
+  inputGroups: readonly number[];
   /** Source row per post-stat row (NO_ROW for synthesized rows). */
   rowIndex: Uint32Array;
   colorValues: readonly CellValue[] | null;

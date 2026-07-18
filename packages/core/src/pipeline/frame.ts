@@ -21,15 +21,24 @@ export function buildFrame(
   advisories: Advisory[],
   binRange?: [number, number],
 ): LayerFrame {
+  // Derive once per frame; identity index + bin lineage consume frame.inputGroups.
+  const inputGroups = deriveLayerGroups(binding, table);
+
   if (binding.ruleForm === "annotation") {
-    return buildAnnotationFrame(binding, table);
+    return { ...buildAnnotationFrame(binding, table), inputGroups };
   }
 
-  const groups = deriveLayerGroups(binding, table);
-  const nonIdentity = buildNonIdentityFrame(binding, table, groups, warnings, advisories, binRange);
-  if (nonIdentity !== null) return nonIdentity;
+  const nonIdentity = buildNonIdentityFrame(
+    binding,
+    table,
+    inputGroups,
+    warnings,
+    advisories,
+    binRange,
+  );
+  if (nonIdentity !== null) return { ...nonIdentity, inputGroups };
 
-  return buildIdentityFrame(binding, table, groups);
+  return { ...buildIdentityFrame(binding, table, inputGroups), inputGroups };
 }
 
 /**

@@ -9,7 +9,7 @@ import type { LayerBinding, LayerFrame } from "./types.js";
 export function buildIdentityFrame(
   binding: LayerBinding,
   table: ColumnTable,
-  groups: number[],
+  groups: readonly number[],
 ): LayerFrame {
   const n = table.rowCount;
   return {
@@ -20,6 +20,7 @@ export function buildIdentityFrame(
     xNumeric: binding.xField === null ? null : table.numeric(binding.xField),
     yNumeric: binding.yField === null ? null : table.numeric(binding.yField),
     groups,
+    inputGroups: groups,
     rowIndex: Uint32Array.from({ length: n }, (_, i) => i),
     colorValues: binding.color.field === null ? null : table.column(binding.color.field),
     fillValues: binding.fill.field === null ? null : table.column(binding.fill.field),

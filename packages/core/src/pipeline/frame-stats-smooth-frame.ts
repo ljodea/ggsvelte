@@ -24,6 +24,7 @@ export function packSmoothLayerFrame(
   table: ColumnTable,
   result: SmoothResult,
   columnOf: CarriedColumnOf,
+  inputGroups: readonly number[],
 ): LayerFrame {
   const col = columnOf(result, null);
   return {
@@ -34,6 +35,7 @@ export function packSmoothLayerFrame(
     xNumeric: result.x,
     yNumeric: result.y,
     groups: result.groups,
+    inputGroups,
     rowIndex: Uint32Array.from({ length: result.x.length }, () => NO_ROW),
     colorValues: col(binding.color.field),
     fillValues: col(binding.fill.field),

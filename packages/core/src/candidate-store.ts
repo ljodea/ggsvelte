@@ -494,6 +494,37 @@ function buildCandidateStoreEager(
   // Dense inverse of `traversal`: candidate id → sequential rank (O(1) next/previous).
   const traversalRank = new Uint32Array(n);
   for (let i = 0; i < n; i++) traversalRank[traversal[i]!] = i;
+
+  // Coincident multi-member stacks by (panel, x, y) in paint/source order (ascending id).
+  // Singletons are omitted so dense plots do not retain n one-element Uint32Arrays;
+  // `cycle` treats a missing stack as identity. Multi-member stacks make cycle O(1).
+  const coincidentStack: (Uint32Array | undefined)[] = Array.from({ length: n });
+  const coincidentAt = new Uint32Array(n);
+  {
+    const groups = new Map<string, number[]>();
+    for (let id = 0; id < n; id++) {
+      const key = `${panelIds[id]!}|${xs[id]!}|${ys[id]!}`;
+      let members = groups.get(key);
+      if (members === undefined) {
+        members = [];
+        groups.set(key, members);
+      }
+      members.push(id);
+    }
+    for (const members of groups.values()) {
+      if (members.length >= 2) {
+        // Typed arrays are not freezeable in all runtimes; treat as immutable by convention.
+        const stack = Uint32Array.from(members);
+        for (let i = 0; i < members.length; i++) {
+          const id = members[i]!;
+          coincidentStack[id] = stack;
+          coincidentAt[id] = i;
+        }
+      }
+      members.length = 0;
+    }
+    groups.clear();
+  }
   const permutations: Record<"x" | "y", Uint32Array> = {
     x: new Uint32Array(0),
     y: new Uint32Array(0),
@@ -875,15 +906,14 @@ function buildCandidateStoreEager(
       return best < 0 ? startId : best;
     },
     cycle(seedId, step = 1) {
-      if (seedId < 0 || seedId >= n) return null;
-      const coincident: number[] = [];
-      for (let id = 0; id < n; id++) {
-        if (panelIds[id] === panelIds[seedId] && xs[id] === xs[seedId] && ys[id] === ys[seedId])
-          coincident.push(id);
-      }
-      const at = coincident.indexOf(seedId);
-      const next = (((at + step) % coincident.length) + coincident.length) % coincident.length;
-      return coincident[next] ?? seedId;
+      if (!Number.isInteger(seedId) || seedId < 0 || seedId >= n) return null;
+      const stack = coincidentStack[seedId];
+      // No multi-member stack → singleton; step is a no-op.
+      if (stack === undefined) return seedId;
+      const at = coincidentAt[seedId]!;
+      const next = (((at + step) % stack.length) + stack.length) % stack.length;
+      // Non-finite / non-integral step yields a non-element index; fall back to seed.
+      return stack[next] ?? seedId;
     },
     queryRect(x0, y0, x1, y1, panelId) {
       const loX = Math.min(x0, x1);
