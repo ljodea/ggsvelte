@@ -23,6 +23,8 @@ export function filterRepresentedSourceRows(input: {
   layerIndex?: number;
   sourceRowsByGroupX?: Map<string, number[]>;
   sourceRowsByGroupBin?: Map<string, number[]>;
+  /** Precomputed finite-y rows per `${panel}:${layer}:${group}` (smooth/summary/boxplot). */
+  sourceRowsByGroupY?: Map<string, number[]>;
 }): number[] {
   const { frame, table, frameRow } = input;
   let representedRows = [...input.baseRows];
@@ -37,6 +39,7 @@ export function filterRepresentedSourceRows(input: {
       ? `${panelIndex}:${layerIndex}:${group}`
       : null;
 
+  let narrowedByXOrBin = false;
   if (
     aggregateXField !== null &&
     outputX !== null &&
@@ -52,6 +55,7 @@ export function filterRepresentedSourceRows(input: {
         outputX,
         baseRows: representedRows,
       });
+    narrowedByXOrBin = true;
   } else if (stat === "bin" && aggregateXField !== null) {
     representedRows =
       (indexKeyPrefix !== null && input.sourceRowsByGroupBin !== undefined
@@ -64,15 +68,24 @@ export function filterRepresentedSourceRows(input: {
         field: aggregateXField,
         baseRows: representedRows,
       });
+    narrowedByXOrBin = true;
   }
 
   const aggregateYField = frame.binding.yField;
   if ((stat === "smooth" || stat === "summary" || stat === "boxplot") && aggregateYField !== null) {
-    representedRows = filterAggregateYRows({
-      table,
-      field: aggregateYField,
-      baseRows: representedRows,
-    });
+    // Full-group path (smooth, or summary/boxplot without x/bin narrowing): reuse
+    // the once-per-group finite-y list. After x/bin narrowing, filter the smaller set.
+    const cachedY =
+      !narrowedByXOrBin && indexKeyPrefix !== null && input.sourceRowsByGroupY !== undefined
+        ? input.sourceRowsByGroupY.get(indexKeyPrefix)
+        : undefined;
+    representedRows =
+      cachedY ??
+      filterAggregateYRows({
+        table,
+        field: aggregateYField,
+        baseRows: representedRows,
+      });
   }
 
   return representedRows;

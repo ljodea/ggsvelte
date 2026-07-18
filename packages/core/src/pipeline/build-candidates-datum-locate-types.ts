@@ -20,4 +20,5 @@ export interface LocatedIdentityCandidate {
   sourceRowsByGroup: Map<string, number[]>;
   sourceRowsByGroupX: Map<string, number[]>;
   sourceRowsByGroupBin: Map<string, number[]>;
+  sourceRowsByGroupY: Map<string, number[]>;
 }
