@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784331261543,
+  "lastUpdate": 1784332809011,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -20313,6 +20313,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 161.189,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b4c36110d1e8c9405f49e701ce4537ca1f51f25f",
+          "message": "perf(core): precompute path group sorted rows for candidate resolve (#193)\n\n* perf(core): precompute path group sorted rows for candidate resolve\n\nresolveCandidateFrameRow rebuilt and sorted every group's frame rows on\neach path-vertex lookup (O(G·n log n) during identity-indexed store\nbuild). Build Map<groupId, sortedRows> once per LayerFrame (WeakMap\ncache) and look up derivedGroup — O(n log n + G).\n\nFrame-row / reflected local mapping for lines, areas, and smooth paths\nis unchanged. Closes #186.\n\n* test(core): avoid Map.groupBy for type-aware oxlint\n\nRewrite series bucketing in the path-group candidate test with a plain\nMap loop so oxlint --type-aware stays clean under deny-warnings.",
+          "timestamp": "2026-07-17T18:59:30-05:00",
+          "tree_id": "e2c3f350e35e79aeeb5f01c0ac24439596c2a631",
+          "url": "https://github.com/ljodea/ggsvelte/commit/b4c36110d1e8c9405f49e701ce4537ca1f51f25f"
+        },
+        "date": 1784332808397,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.378,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.0388,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 13.0767,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 14.0654,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 90.7812,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 122.8841,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.0263,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2548,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 88.5054,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 114.1252,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 11.8803,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 11.5264,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 118.3479,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.8166,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 27.7599,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.3593,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 30.3809,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 627.0677,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 169.1975,
             "unit": "ms"
           }
         ]
