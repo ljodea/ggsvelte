@@ -75,7 +75,14 @@ export type SelectionStateDeps = {
   announce: (message: string) => void;
 };
 
-type SemanticCandidateProjection = {
+/**
+ * One candidate projection for anchors + interaction masks.
+ * Built once per reactive need so selected/emphasized/mask paths do not each
+ * re-walk the store (was O(2–3C) when several are live).
+ */
+type SharedCandidateProjection = {
+  readonly x: number;
+  readonly y: number;
   readonly batchIndex: number;
   readonly primitiveIndex: number;
   readonly keys: readonly PropertyKey[];
@@ -86,10 +93,21 @@ export type SelectionState = {
   clearPointSelection(source: InteractionSource): void;
   togglePointKeys(keys: readonly PropertyKey[], source: InteractionSource): void;
   emitSelection(event: PlotSelection): void;
-  computeSelectedAnchors(): { x: number; y: number }[];
-  computeEmphasizedAnchors(): { x: number; y: number }[];
+  /**
+   * Full-store projection (x/y + mask fields + keys). Host should `$derived`
+   * this once when any anchor or mask consumer is live, then pass the array
+   * into the shared-projection overloads below.
+   */
+  computeSharedCandidateProjection(): SharedCandidateProjection[];
+  computeSelectedAnchors(
+    sharedProjection?: readonly SharedCandidateProjection[],
+  ): { x: number; y: number }[];
+  computeEmphasizedAnchors(
+    sharedProjection?: readonly SharedCandidateProjection[],
+  ): { x: number; y: number }[];
   computePresentationFocusKeys(): readonly PropertyKey[];
-  computeSemanticCandidateProjections(): SemanticCandidateProjection[];
+  /** Alias of computeSharedCandidateProjection (tests / masks). */
+  computeSemanticCandidateProjections(): SharedCandidateProjection[];
   /**
    * Takes BOTH upstream values as parameters so the host's three separate
    * derived aliases preserve independent memo boundaries (focus-only changes
@@ -97,7 +115,7 @@ export type SelectionState = {
    */
   computeInteractionMasks(
     presentationFocusKeys: readonly PropertyKey[],
-    getSemanticCandidateProjections: () => readonly SemanticCandidateProjection[],
+    getSemanticCandidateProjections: () => readonly SharedCandidateProjection[],
   ): readonly (BatchInteractionMask | null)[];
 };
 
@@ -120,18 +138,27 @@ export function createSelectionState(deps: SelectionStateDeps): SelectionState {
     return deps.interaction()?.selected(deps.resolvedInteractionScope()) ?? localSelectedKeys;
   });
 
-  function anchorsForKeys(keys: readonly PropertyKey[]): { x: number; y: number }[] {
-    // Empty filter short-circuits before walking (keysFor can be expensive).
+  function projectCandidates(): SharedCandidateProjection[] {
     const model = deps.model();
-    if (model === null || keys.length === 0) return [];
-    return anchorsFromCandidateKeys(
-      collectCandidates(model.candidates, (candidate) => ({
-        x: candidate.x,
-        y: candidate.y,
-        keys: deps.candidateSemanticKeys(candidate),
-      })),
-      keys,
-    );
+    if (model === null) return [];
+    return collectCandidates(model.candidates, (candidate) => ({
+      x: candidate.x,
+      y: candidate.y,
+      batchIndex: candidate.batchIndex,
+      primitiveIndex: candidate.primitiveIndex,
+      keys: deps.candidateSemanticKeys(candidate),
+    }));
+  }
+
+  function anchorsForKeys(
+    keys: readonly PropertyKey[],
+    sharedProjection?: readonly SharedCandidateProjection[],
+  ): { x: number; y: number }[] {
+    // Empty filter short-circuits before walking (keysFor can be expensive).
+    if (keys.length === 0) return [];
+    if (deps.model() === null) return [];
+    const candidates = sharedProjection ?? projectCandidates();
+    return anchorsFromCandidateKeys(candidates, keys);
   }
 
   /** Private — only clear/toggle call this; no external caller (P2-7). */
@@ -179,28 +206,31 @@ export function createSelectionState(deps: SelectionStateDeps): SelectionState {
     commitPointSelection(next, source);
   }
 
-  function computeSelectedAnchors(): { x: number; y: number }[] {
-    return anchorsForKeys([
-      ...new Set([...effectiveSelectedKeys, ...deps.effectiveIntervalKeys()]),
-    ]);
+  function computeSharedCandidateProjection(): SharedCandidateProjection[] {
+    return projectCandidates();
   }
 
-  function computeEmphasizedAnchors(): { x: number; y: number }[] {
-    return anchorsForKeys(deps.effectiveEmphasisKeys());
+  function computeSelectedAnchors(
+    sharedProjection?: readonly SharedCandidateProjection[],
+  ): { x: number; y: number }[] {
+    return anchorsForKeys(
+      [...new Set([...effectiveSelectedKeys, ...deps.effectiveIntervalKeys()])],
+      sharedProjection,
+    );
+  }
+
+  function computeEmphasizedAnchors(
+    sharedProjection?: readonly SharedCandidateProjection[],
+  ): { x: number; y: number }[] {
+    return anchorsForKeys(deps.effectiveEmphasisKeys(), sharedProjection);
   }
 
   function computePresentationFocusKeys(): readonly PropertyKey[] {
     return mergePresentationFocusKeys(deps.effectiveEmphasisKeys(), deps.inspectionFocus());
   }
 
-  function computeSemanticCandidateProjections(): SemanticCandidateProjection[] {
-    const model = deps.model();
-    if (model === null) return [];
-    return collectCandidates(model.candidates, (candidate) => ({
-      batchIndex: candidate.batchIndex,
-      primitiveIndex: candidate.primitiveIndex,
-      keys: deps.candidateSemanticKeys(candidate),
-    }));
+  function computeSemanticCandidateProjections(): SharedCandidateProjection[] {
+    return projectCandidates();
   }
 
   function computeInteractionMasks(
@@ -209,7 +239,7 @@ export function createSelectionState(deps: SelectionStateDeps): SelectionState {
     // BEFORE the projections derived is read, exactly as the base host did —
     // an eager parameter would run the O(candidates) semantic-key walk on
     // every model update (and every SSR render) in the idle no-focus state.
-    getSemanticCandidateProjections: () => readonly SemanticCandidateProjection[],
+    getSemanticCandidateProjections: () => readonly SharedCandidateProjection[],
   ): readonly (BatchInteractionMask | null)[] {
     const model = deps.model();
     if (model === null || presentationFocusKeys.length === 0) return [];
@@ -227,6 +257,7 @@ export function createSelectionState(deps: SelectionStateDeps): SelectionState {
     clearPointSelection,
     togglePointKeys,
     emitSelection,
+    computeSharedCandidateProjection,
     computeSelectedAnchors,
     computeEmphasizedAnchors,
     computePresentationFocusKeys,

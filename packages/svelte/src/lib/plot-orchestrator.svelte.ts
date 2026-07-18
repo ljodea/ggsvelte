@@ -574,10 +574,6 @@ export function createPlotOrchestrator<
     resolvedWidth: () => runtime.resolvedWidth,
     resolvedHeight: () => runtime.resolvedHeight,
   });
-  // Method-call deriveds (not pure aliases) — keep as intermediate memos.
-  const selectedAnchors = $derived(selectionState.computeSelectedAnchors());
-  const emphasizedAnchors = $derived(selectionState.computeEmphasizedAnchors());
-
   // Semantic diagnostics effects (before host diagnostic / surface effects).
   semanticKeys.registerEffects();
 
@@ -593,17 +589,32 @@ export function createPlotOrchestrator<
   // focus/inspection registrations).
   surfaceState.registerSurfaceEffects();
 
-  // Three separate host deriveds — intermediate memo boundaries live here
-  // (do NOT fold into one method).
+  // Focus keys first (no candidate walk) so shared projection can short-circuit
+  // when idle. One full-store projection feeds selected/emphasized anchors and
+  // interaction masks — was O(2–3C) separate collectCandidates walks.
+  // Liveness uses *counts* (Object.is-stable when keys swap but stay non-empty)
+  // so focus-only key changes rebuild masks/anchors without re-walking C (Codex P2).
   const presentationFocusKeys = $derived(selectionState.computePresentationFocusKeys());
-  const semanticCandidateProjections = $derived(
-    selectionState.computeSemanticCandidateProjections(),
+  const selectedKeyCount = $derived(selectionState.effectiveSelectedKeys.length);
+  const intervalKeyCount = $derived(intervalState.effectiveIntervalKeys.length);
+  const emphasisKeyCount = $derived(legendFocusState.effectiveEmphasisKeys.length);
+  const presentationFocusKeyCount = $derived(presentationFocusKeys.length);
+  const sharedCandidateProjection = $derived.by(() => {
+    if (selectedKeyCount + intervalKeyCount + emphasisKeyCount + presentationFocusKeyCount === 0)
+      return [];
+    return selectionState.computeSharedCandidateProjection();
+  });
+  const selectedAnchors = $derived(
+    selectionState.computeSelectedAnchors(sharedCandidateProjection),
+  );
+  const emphasizedAnchors = $derived(
+    selectionState.computeEmphasizedAnchors(sharedCandidateProjection),
   );
   const interactionMasks = $derived(
     selectionState.computeInteractionMasks(
       presentationFocusKeys,
-      // Thunk: with empty focus (idle), the projections derived is never read.
-      () => semanticCandidateProjections,
+      // Thunk: with empty focus (idle), shared projection is never forced for masks.
+      () => sharedCandidateProjection,
     ),
   );
 
