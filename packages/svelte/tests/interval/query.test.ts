@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
+import { encodeKey } from "@ggsvelte/core";
+
 import {
+  bandDomainValuesFromKeys,
   buildIntervalSelectionFromScene,
   intervalPixelsFromDomains,
   intervalQuerySceneFromModel,
@@ -341,6 +344,121 @@ describe("intervalPixelsFromDomains", () => {
         flipped: false,
       }),
     ).toEqual({ x0: 10, y0: 20, x1: 110, y1: 220 });
+  });
+
+  it("resolves encodeKey tokens against typed rawDomain values", () => {
+    // Production stores encoded identities (encodeKey), not display labels.
+    // 1 vs "1" must not collide — only the numeric band is selected.
+    const typedRaw = [1, "1", true] as const;
+    const typedScale = {
+      type: "band",
+      domain: ["1", "1", "true"],
+      rawDomain: typedRaw,
+      indexOf: (value: unknown) => {
+        const i = typedRaw.findIndex((candidate) => Object.is(candidate, value));
+        return i < 0 ? undefined : i;
+      },
+      normalize: (value: unknown) => {
+        const i = typedRaw.findIndex((candidate) => Object.is(candidate, value));
+        return i < 0 ? undefined : (i + 0.5) / typedRaw.length;
+      },
+      step: 1 / 3,
+    };
+    // Centers at 1/6 and 5/6; half-step = 1/6 → span [0, 1] on the panel width.
+    expect(
+      intervalPixelsFromDomains({
+        domains: {
+          x: { kind: "band", values: [encodeKey(1), encodeKey(true)] },
+        },
+        panel,
+        scales: { ...linearScales, x: typedScale } as IntervalQueryScene["scales"],
+        flipped: false,
+      }),
+    ).toEqual({ x0: 10, y0: 20, x1: 110, y1: 220 });
+    // Single middle category "1" (string): center 0.5 ± half-step.
+    const half = (1 / 3 / 2) * panel.width;
+    const center = panel.x + 0.5 * panel.width;
+    expect(
+      intervalPixelsFromDomains({
+        domains: { x: { kind: "band", values: [encodeKey("1")] } },
+        panel,
+        scales: { ...linearScales, x: typedScale } as IntervalQueryScene["scales"],
+        flipped: false,
+      }),
+    ).toEqual({
+      x0: center - half,
+      y0: 20,
+      x1: center + half,
+      y1: 220,
+    });
+  });
+
+  // Lookup builds a key→value Map once per scale (O(D) prep + O(V) get), not
+  // find over rawDomain per selected value. Structural O(V+D); behavioral
+  // coverage at scale lives here (wall-clock ratios flake under CI contention).
+  it("projects a large band selection without dropping endpoints", () => {
+    const domainSize = 400;
+    const rawDomain = Array.from({ length: domainSize }, (_, i) => `cat-${i}`);
+    const largeScale = {
+      type: "band",
+      domain: rawDomain,
+      rawDomain,
+      indexOf: (value: unknown) => {
+        const i = rawDomain.indexOf(value as string);
+        return i < 0 ? undefined : i;
+      },
+      normalize: (value: unknown) => {
+        const i = rawDomain.indexOf(value as string);
+        return i < 0 ? undefined : (i + 0.5) / domainSize;
+      },
+      step: 1 / domainSize,
+    };
+    // Sparse selection: first, middle, last — order of values must not matter
+    // for the edge-to-edge span (min/max centers ± half step).
+    const selected = [
+      encodeKey(`cat-${domainSize - 1}`),
+      encodeKey("cat-0"),
+      encodeKey(`cat-${Math.floor(domainSize / 2)}`),
+    ];
+    // First center (0.5/D) − half-step = 0; last center ((D−0.5)/D) + half = 1.
+    expect(
+      intervalPixelsFromDomains({
+        domains: { x: { kind: "band", values: selected } },
+        panel,
+        scales: { ...linearScales, x: largeScale } as IntervalQueryScene["scales"],
+        flipped: false,
+      }),
+    ).toEqual({ x0: 10, y0: 20, x1: 110, y1: 220 });
+  });
+});
+
+describe("bandDomainValuesFromKeys", () => {
+  it("returns typed rawDomain values in selection order via encodeKey", () => {
+    const date = new Date("2025-01-02T00:00:00.000Z");
+    const rawDomain = [1, "1", true, null, date] as const;
+    expect(
+      bandDomainValuesFromKeys(rawDomain, [
+        encodeKey(true),
+        encodeKey(1),
+        encodeKey("missing"),
+        encodeKey(null),
+      ]),
+    ).toEqual([true, 1, null]);
+  });
+
+  it("keeps the first rawDomain entry when encodeKeys collide", () => {
+    // Band domains are normally unique by encodeKey; if they are not, Map
+    // indexing must match prior find semantics (first match wins).
+    const rawDomain = [0, -0] as const;
+    // encodeKey distinguishes -0 from 0, so both resolve; exercise first-wins
+    // with a deliberate duplicate key by reusing the same value twice.
+    expect(bandDomainValuesFromKeys([0, 0], [encodeKey(0)])).toEqual([0]);
+    expect(bandDomainValuesFromKeys(rawDomain, [encodeKey(0), encodeKey(-0)])).toEqual([0, -0]);
+  });
+
+  it("returns empty when nothing matches", () => {
+    expect(bandDomainValuesFromKeys(["a", "b"], [encodeKey("z")])).toEqual([]);
+    expect(bandDomainValuesFromKeys([], [encodeKey("a")])).toEqual([]);
   });
 });
 
