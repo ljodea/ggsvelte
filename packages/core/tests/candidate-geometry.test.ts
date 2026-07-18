@@ -1,6 +1,6 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it, spyOn } from "bun:test";
 
-import { pathRange, samePath } from "../src/candidate-geometry.ts";
+import { closestOrthInRange, pathRange, samePath } from "../src/candidate-geometry.ts";
 import type { PathsBatch } from "../src/scene.ts";
 
 /** Minimal paths batch with the given offsets and enough vertices. */
@@ -71,5 +71,64 @@ describe("samePath", () => {
     // Vertex 3 is last of first path; vertex 4 is first of second — not samePath.
     expect(samePath(batch, 3, 4)).toBe(false);
     expect(samePath(batch, 4, 3)).toBe(false);
+  });
+});
+
+describe("closestOrthInRange", () => {
+  // permutation is identity; orth/batch/source are per id.
+  const ids = (n: number) => Uint32Array.from({ length: n }, (_, i) => i);
+
+  it("returns the only member of a singleton range", () => {
+    expect(closestOrthInRange(ids(1), [10], [0], [0], 0, 1, 99)).toBe(0);
+  });
+
+  it("picks an exact orth match and the closer of two neighbors", () => {
+    const orth = [1, 3, 5, 9];
+    const batch = [0, 0, 0, 0];
+    const source = [0, 1, 2, 3];
+    const perm = ids(4);
+    expect(closestOrthInRange(perm, orth, batch, source, 0, 4, 5)).toBe(2);
+    // Strictly closer to one neighbor (midpoints are equidistant and use ties).
+    expect(closestOrthInRange(perm, orth, batch, source, 0, 4, 4.1)).toBe(2);
+    expect(closestOrthInRange(perm, orth, batch, source, 0, 4, 2.1)).toBe(1);
+    expect(closestOrthInRange(perm, orth, batch, source, 0, 4, 0)).toBe(0);
+    expect(closestOrthInRange(perm, orth, batch, source, 0, 4, 100)).toBe(3);
+  });
+
+  it("breaks equidistant orth ties by higher batchId then lower source", () => {
+    // target 5: id0 orth=4 (dist1) batch0; id1 orth=6 (dist1) batch2 → batch wins
+    expect(closestOrthInRange(ids(2), [4, 6], [0, 2], [0, 0], 0, 2, 5)).toBe(1);
+    // same batch: lower source wins
+    expect(closestOrthInRange(ids(2), [4, 6], [1, 1], [3, 1], 0, 2, 5)).toBe(1);
+    // equal orth run: scan the whole run for best batch/source
+    expect(closestOrthInRange(ids(3), [2, 2, 2], [1, 3, 2], [0, 5, 1], 0, 3, 2)).toBe(1);
+  });
+
+  it("returns the first id when seedOrth is non-finite (linear-scan NaN contract)", () => {
+    // Linear scan started at start and never improved when every |Δ| is NaN.
+    expect(closestOrthInRange(ids(3), [1, 2, 3], [0, 9, 8], [0, 0, 0], 0, 3, Number.NaN)).toBe(0);
+    expect(
+      closestOrthInRange(ids(3), [1, 2, 3], [0, 9, 8], [0, 0, 0], 0, 3, Number.POSITIVE_INFINITY),
+    ).toBe(0);
+  });
+
+  it("uses O(log M + T) Math.abs probes on a large sorted series", () => {
+    // Structural complexity guard: linear scan would call Math.abs ~2*(M-1) times
+    // per series (distance + priorDistance). Binary search + tie expand is O(log M).
+    const M = 4096;
+    const orth = Float32Array.from({ length: M }, (_, i) => i);
+    const batch = new Uint32Array(M);
+    const source = Uint32Array.from({ length: M }, (_, i) => i);
+    const perm = ids(M);
+    const absSpy = spyOn(Math, "abs");
+    try {
+      // Seed orth at the middle of the range (id 2048).
+      expect(closestOrthInRange(perm, orth, batch, source, 0, M, 2048)).toBe(2048);
+      // log2(4096)=12; allow generous headroom for bound probes + expand.
+      expect(absSpy.mock.calls.length).toBeLessThan(64);
+      expect(absSpy.mock.calls.length).toBeGreaterThan(0);
+    } finally {
+      absSpy.mockRestore();
+    }
   });
 });
