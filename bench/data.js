@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784369691796,
+  "lastUpdate": 1784371392709,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -25549,6 +25549,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 160.2087,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "1e794064a1d0e3e75e90bf49450eb07d3d080e80",
+          "message": "refactor(spec): split validate-data into evidence + checks modules (#262)\n\n* refactor(spec): split validate-data into evidence + checks modules\n\nExtract FieldEvidence construction (resolveFieldEvidence, effectiveChannel)\nand the tier-2 dataChecks walk (STAT_COLUMNS) from the 531-line validate-data\nbarrel so evidence can be shared with lint without dragging the check walk.\nPublic package exports stay on validate-data.js. Characterization covers\nmaxBytes short-circuit and evidence-failure ordering with structural stages.\n\n* fix(spec): drop unused ResolveFieldEvidenceResult re-export\n\nKnip flags the barrel re-export; checks import the type from evidence\ndirectly. Keep FieldEvidence* for lint.",
+          "timestamp": "2026-07-18T05:42:31-05:00",
+          "tree_id": "5de6b3ecb4c5f9cafc15a3342e7f04131c38d5ff",
+          "url": "https://github.com/ljodea/ggsvelte/commit/1e794064a1d0e3e75e90bf49450eb07d3d080e80"
+        },
+        "date": 1784371391611,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.7742,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.9876,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 10.0928,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 17.794,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 87.082,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 117.5566,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.3602,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.3354,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 85.4366,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 107.1308,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 14.2461,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 13.6223,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 117.0335,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7977,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 27.9445,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 8.6715,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 31.2651,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 606.6032,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 162.1612,
             "unit": "ms"
           }
         ]
