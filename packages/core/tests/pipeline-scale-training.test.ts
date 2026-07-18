@@ -66,6 +66,7 @@ function pointFrame(table: ColumnTable): LayerFrame {
     weightField: null,
     ruleForm: null,
   };
+  const groups = Array.from({ length: table.rowCount }, () => 0);
   return {
     binding,
     table,
@@ -73,7 +74,8 @@ function pointFrame(table: ColumnTable): LayerFrame {
     xValues: null,
     xNumeric: table.numeric("x"),
     yNumeric: table.numeric("y"),
-    groups: Array.from({ length: table.rowCount }, () => 0),
+    groups,
+    inputGroups: groups,
     rowIndex: Uint32Array.from({ length: table.rowCount }, (_, i) => i),
     colorValues: null,
     fillValues: null,
@@ -299,6 +301,7 @@ describe("collectAxisInputs — evidence collection", () => {
       xNumeric: null,
       yNumeric: table.numeric("y"),
       groups: [0, 1],
+      inputGroups: [0, 1],
       rowIndex: new Uint32Array([0, 1]),
       colorValues: null,
       fillValues: null,
@@ -340,6 +343,7 @@ describe("collectAxisInputs — evidence collection", () => {
       xNumeric: null,
       yNumeric: Float64Array.of(1, 1),
       groups: [0, 0],
+      inputGroups: [0, 0, 0],
       rowIndex: new Uint32Array([0xffffffff, 0xffffffff]),
       colorValues: null,
       fillValues: null,

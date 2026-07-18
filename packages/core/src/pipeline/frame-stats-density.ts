@@ -49,6 +49,7 @@ export function buildDensityFrame(
     xNumeric: result.x,
     yNumeric,
     groups: result.groups,
+    inputGroups: groups,
     rowIndex: Uint32Array.from({ length: outN }, () => NO_ROW),
     colorValues: col(binding.color.field),
     fillValues: col(binding.fill.field),
