@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784334529731,
+  "lastUpdate": 1784335041937,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -20551,6 +20551,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 166.8509,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "e8456cc70663923c1e2fc3ab08e5832a9cc3d903",
+          "message": "perf(core): index drawStratum batches by panel in one O(B) pass (#192)\n\n* perf(core): index drawStratum batches by panel in one O(B) pass\n\ndrawStratum re-filtered the full batch list once per panel (O(P·B)), and\nthe focus path also map+filtered per panel. Group batches (and original\nindices for focus masks) once, then walk panels — O(B+P) with paint order\nand mask index alignment preserved.\n\nCloses #185\n\n* fix(core): reject non-integer panelIndex in groupBatchesByPanel\n\nNaN and fractional panelIndex bypassed the range guard (comparisons are\nfalse), then byPanel[p]!.push threw. Match the old filter path: skip\nmalformed indices so a bad batch cannot abort the stratum draw.\n\nAddresses Codex P2 on #192.",
+          "timestamp": "2026-07-17T19:36:40-05:00",
+          "tree_id": "b760de447b7fd96f54356c1176d5243652d7523e",
+          "url": "https://github.com/ljodea/ggsvelte/commit/e8456cc70663923c1e2fc3ab08e5832a9cc3d903"
+        },
+        "date": 1784335040813,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.9452,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.4354,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 12.9667,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 15.9408,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 82.5225,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 116.2993,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.0865,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2913,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 85.7458,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 106.2674,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.6176,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.7,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 114.6933,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7658,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 27.6654,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.407,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 27.3362,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 606.6958,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 161.274,
             "unit": "ms"
           }
         ]
