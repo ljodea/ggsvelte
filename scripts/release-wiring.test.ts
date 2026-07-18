@@ -241,3 +241,15 @@ it("thins expensive jobs on main push (issue #244)", () => {
   expect(ci).toContain("main push: thinned expensive jobs (issue #244)");
   expect(ci).toContain("packages_dist=false");
 });
+
+it("caps heavy self-hosted jobs with concurrency groups (issue #247)", () => {
+  const ci = read(".github/workflows/ci.yml");
+  // Required component shards share one group; informational perf is separate.
+  expect(ci).toContain("group: heavy-component");
+  expect(ci).toContain("group: heavy-interaction-perf");
+  expect(ci).toContain("group: heavy-packages-dist");
+  expect(ci).toContain("heavy-consumer-ubuntu");
+  // Pending jobs queue instead of replacing each other (GitHub queue: max).
+  expect(ci).toContain("queue: max");
+  expect(ci).toContain("Heavy-job pool policy");
+});
