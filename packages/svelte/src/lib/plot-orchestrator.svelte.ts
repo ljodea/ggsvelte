@@ -21,7 +21,6 @@
  * context calls live here.
  */
 import type { BatchInteractionMask, CellValue, RenderModel } from "@ggsvelte/core";
-import { buildHitIndex, type SceneHitIndex } from "@ggsvelte/core/dom";
 import type {
   A11yMode,
   AesInput,
@@ -441,14 +440,11 @@ export function createPlotOrchestrator<
   });
 
   // ---------------------------------------------------------- interaction
-  // source rows/spec -> pipeline/scene -> hit index -> semantic resolver ->
-  // chart-local reducer -> tooltip/crosshair/tools/callbacks. Presentation
+  // source rows/spec -> pipeline/scene + CandidateStore -> semantic resolver
+  // -> chart-local reducer -> tooltip/crosshair/tools/callbacks. Presentation
   // consumes one resolved inspection and never reconstructs grouping itself.
   const interactive = $derived(interactionConfig.interactive);
   const surfaceInteractive = $derived(interactionConfig.availableTools.length > 0);
-  const hitIndex: SceneHitIndex | null = $derived.by(() =>
-    surfaceInteractive && runtime.model !== null ? buildHitIndex(runtime.model.scene) : null,
-  );
 
   // ------------------------------------------------- inspection
   // Construction-time deriveds may read model / surfaceInteractive (both
@@ -503,7 +499,6 @@ export function createPlotOrchestrator<
     pointSelectEnabled: () => chromeState.canPublishPointSelection,
     ontoolchange: () => inputs.ontoolchange(),
     surfaceInteractive: () => surfaceInteractive,
-    hitIndex: () => hitIndex,
     // Deferred: semantic-key service initializes later (issue #165).
     candidateSemanticKeys: (candidate) => candidateSemanticKeys(candidate),
     inspection: () => inspectionState,

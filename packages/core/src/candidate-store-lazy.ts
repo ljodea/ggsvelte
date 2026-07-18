@@ -62,6 +62,10 @@ class LazyCandidateStore implements CandidateStore {
     return this.#ready()?.candidate(id) ?? null;
   }
 
+  hitTest(x: number, y: number): CandidateFacts | null {
+    return this.#ready()?.hitTest(x, y) ?? null;
+  }
+
   nearest(
     x: number,
     y: number,
