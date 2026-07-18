@@ -658,3 +658,145 @@ describe("aggregate lineage index (issue #184)", () => {
     }
   });
 });
+
+/**
+ * Seams under test (issue #218):
+ * - buildBinLineageBuckets missing-edges path: full-group membership per frame row
+ * - multi-group isolation + first-seen source-row order + facet sourceRows remap
+ * - complexity: frame.groups index reads stay O(k), not O(n·k)
+ */
+describe("buildBinLineageBuckets missing-edges fallback (issue #218)", () => {
+  async function load() {
+    const { buildBinLineageBuckets } =
+      await import("../src/pipeline/build-candidates-identity-aggregate.ts");
+    const { ColumnTable } = await import("../src/table.ts");
+    return { buildBinLineageBuckets, ColumnTable };
+  }
+
+  function binBinding(colorField: string | null = null) {
+    return {
+      layer: {
+        geom: "histogram",
+        stat: "bin",
+        aes: {
+          x: { field: "x" },
+          ...(colorField === null ? {} : { color: { field: colorField } }),
+        },
+      },
+      index: 0,
+      xField: "x",
+      yField: null,
+      yStatColumn: null,
+      yminField: null,
+      ymaxField: null,
+      color: { field: colorField, constant: null, scaledConstant: null },
+      fill: { field: null, constant: null, scaledConstant: null },
+      labelField: null,
+      labelConstant: null,
+      weightField: null,
+      ruleForm: null,
+    };
+  }
+
+  it("assigns every source row of a group into each of that group's frame rows", async () => {
+    const { buildBinLineageBuckets, ColumnTable } = await load();
+    const table = ColumnTable.fromRows([
+      { g: "a", x: 1 },
+      { g: "b", x: 2 },
+      { g: "a", x: 3 },
+      { g: "b", x: 4 },
+      { g: "a", x: 5 },
+    ]);
+    // Two empty-edge output marks per group (0=a, 1=b).
+    const groups = [0, 0, 1, 1];
+    const frame = {
+      binding: binBinding("g"),
+      table,
+      n: groups.length,
+      groups,
+      xmin: null,
+      xmax: null,
+    } as never;
+    const sourceRowsByGroupBin = new Map<string, number[]>();
+    buildBinLineageBuckets({
+      frame,
+      panelIndex: 0,
+      layerIndex: 0,
+      facetPanel: { sourceRows: null } as never,
+      sourceRowsByGroupBin,
+    });
+
+    expect(sourceRowsByGroupBin.get("0:0:0:0")).toEqual([0, 2, 4]);
+    expect(sourceRowsByGroupBin.get("0:0:0:1")).toEqual([0, 2, 4]);
+    expect(sourceRowsByGroupBin.get("0:0:1:2")).toEqual([1, 3]);
+    expect(sourceRowsByGroupBin.get("0:0:1:3")).toEqual([1, 3]);
+  });
+
+  it("remaps through facetPanel.sourceRows in first-seen order", async () => {
+    const { buildBinLineageBuckets, ColumnTable } = await load();
+    const table = ColumnTable.fromRows([
+      { g: "a", x: 1 },
+      { g: "a", x: 2 },
+      { g: "b", x: 3 },
+    ]);
+    const groups = [0, 1];
+    const frame = {
+      binding: binBinding("g"),
+      table,
+      n: groups.length,
+      groups,
+      xmin: null,
+      xmax: null,
+    } as never;
+    const sourceRowsByGroupBin = new Map<string, number[]>();
+    buildBinLineageBuckets({
+      frame,
+      panelIndex: 2,
+      layerIndex: 1,
+      facetPanel: { sourceRows: [10, 20, 30] } as never,
+      sourceRowsByGroupBin,
+    });
+
+    expect(sourceRowsByGroupBin.get("2:1:0:0")).toEqual([10, 20]);
+    expect(sourceRowsByGroupBin.get("2:1:1:1")).toEqual([30]);
+  });
+
+  it("reads frame.groups O(k) times, not O(n·k), when edges are missing", async () => {
+    const { buildBinLineageBuckets, ColumnTable } = await load();
+    const n = 40;
+    const k = 40;
+    const table = ColumnTable.fromRows(Array.from({ length: n }, (_, i) => ({ x: i })));
+    const rawGroups = Array.from({ length: k }, () => 0);
+    let groupIndexReads = 0;
+    const groups = new Proxy(rawGroups, {
+      get(target, property, receiver): unknown {
+        if (typeof property === "string" && /^\d+$/.test(property)) groupIndexReads += 1;
+        return Reflect.get(target, property, receiver) as unknown;
+      },
+    });
+    const frame = {
+      binding: binBinding(null),
+      table,
+      n: k,
+      groups,
+      xmin: null,
+      xmax: null,
+    } as never;
+    const sourceRowsByGroupBin = new Map<string, number[]>();
+    buildBinLineageBuckets({
+      frame,
+      panelIndex: 0,
+      layerIndex: 0,
+      facetPanel: { sourceRows: null } as never,
+      sourceRowsByGroupBin,
+    });
+
+    // Setup walk over k frame rows is enough; nested O(n·k) would read ~n·k times.
+    expect(groupIndexReads).toBeLessThanOrEqual(k * 2);
+    expect(groupIndexReads).toBeLessThan((n * k) / 2);
+    expect(sourceRowsByGroupBin.get("0:0:0:0")).toEqual(Array.from({ length: n }, (_, i) => i));
+    expect(sourceRowsByGroupBin.get(`0:0:0:${k - 1}`)).toEqual(
+      Array.from({ length: n }, (_, i) => i),
+    );
+  });
+});
