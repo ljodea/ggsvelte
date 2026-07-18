@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784394104676,
+  "lastUpdate": 1784394214959,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -28643,6 +28643,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 167.422,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c9f6e6bb4a87d4d0bede34f6f894f348f46e91d3",
+          "message": "feat(ci): non-blocking changeset visibility comment on PRs (#287)\n\nChangesets only records PRs that add a .changeset/*.md file; every other\nPR merges silently with no CHANGELOG entry (release PR #45 shipped ~200\nPRs with 4 entries). This adds an in-repo changeset-bot equivalent:\n\n- scripts/changeset-check.ts — pure decision logic: verdict is\n  changeset-present / not-needed / missing, where missing means the PR\n  touches npm-published surfaces (packages/* npm files dirs +\n  package.json, minus colocated test files) without a changeset.\n  Published packages are discovered from packages/*/package.json, so\n  scope follows the workspace. Unit + CLI + workflow-wiring tests in\n  scripts/changeset-check.test.ts (bun test scripts).\n- .github/workflows/changeset-check.yml — computes the PR diff via\n  event SHAs (same protocol as ci.yml routing) and syncs one sticky\n  marker comment via gh api. Skips the Version Packages PR and forks.\n\nDeliberately NOT a merge gate: internal-only changes stay silent and\nnothing forces empty changesets; the job succeeds on every verdict.\n\nCo-authored-by: Claude Fable 5 <noreply@anthropic.com>",
+          "timestamp": "2026-07-18T12:02:56-05:00",
+          "tree_id": "90876dd928b839d67c088b6e2b41d06fd1d75e47",
+          "url": "https://github.com/ljodea/ggsvelte/commit/c9f6e6bb4a87d4d0bede34f6f894f348f46e91d3"
+        },
+        "date": 1784394214265,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.5308,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.2069,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 10.2105,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 13.5858,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 83.5864,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 118.9272,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.1261,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.3797,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 91.66,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 108.4379,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 14.0255,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 13.6011,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 121.5815,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7912,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 28.9082,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 9.7217,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 32.093,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 611.0143,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 163.1349,
             "unit": "ms"
           }
         ]
