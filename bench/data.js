@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784351425038,
+  "lastUpdate": 1784352267713,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -23645,6 +23645,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 160.9443,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c35342802a9e79dfd80137166420d7c18b5d1968",
+          "message": "refactor(svelte): split legend/focus pure helpers by domain (#239)\n\nExtract entry-key-index, focus-emphasis, and focus-plans from focus.ts so\neach file has one pure responsibility. Characterization tests unchanged;\nimport paths only.",
+          "timestamp": "2026-07-18T00:23:53-05:00",
+          "tree_id": "974ba774928a9586ff09f879abb47e32e28bcf1d",
+          "url": "https://github.com/ljodea/ggsvelte/commit/c35342802a9e79dfd80137166420d7c18b5d1968"
+        },
+        "date": 1784352267149,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.4734,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.6497,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 9.8284,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 14.6876,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 84.6051,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 113.6114,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.449,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2799,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 81.964,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 103.3301,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.143,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.0182,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 109.6098,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7568,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 26.9815,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.7466,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 29.1518,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 593.1748,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 156.0371,
             "unit": "ms"
           }
         ]
