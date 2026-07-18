@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784374402331,
+  "lastUpdate": 1784375180583,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -26144,6 +26144,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 162.3613,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c41b94990262c3ef5a09ed0ea0f30008977509b6",
+          "message": "perf(svelte): cap transient inspect fingerprint at member limit (#266)\n\n* perf(svelte): cap transient inspect fingerprint at member limit\n\nPointer inspect built a full-group semantic fingerprint (Object.keys +\nsort per member) before the coordinator slot cache — O(M·F log F) on\nevery resolve. Transient/completeness=transient now fingerprints the\nsame TRANSIENT_MEMBER_LIMIT window materialize uses; pins stay complete.\nDrop per-row key sort (stable insertion order).\n\n* fix(svelte): drop unnecessary type assertions for fingerprint lint",
+          "timestamp": "2026-07-18T06:45:38-05:00",
+          "tree_id": "6d347643bad00db3e7c8befb299e1a74e43d987a",
+          "url": "https://github.com/ljodea/ggsvelte/commit/c41b94990262c3ef5a09ed0ea0f30008977509b6"
+        },
+        "date": 1784375179533,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.4706,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.0266,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 15.0947,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 14.0719,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 86.2676,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 118.2414,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.1223,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2846,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 85.8185,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 107.2044,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.2938,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 13.188,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 116.8586,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7921,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 28.4371,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.7454,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 32.8085,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 616.5656,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 163.6404,
             "unit": "ms"
           }
         ]
