@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784363948849,
+  "lastUpdate": 1784365138672,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -24835,6 +24835,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 161.4244,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "99e918dd9c0ee48c08d960acccf970087695c734",
+          "message": "perf(svelte): O(1) legend field lookup + one lineage Set per candidate (#257)\n\nbuildLegendEntryKeyIndex re-scanned layerFields with find() for every\ncandidate×discrete-legend pair and rebuilt lineage Sets per legend.\nIndex first non-stat field per channel once per layer, and build the\nlineage Set once per candidate when any legend applies.",
+          "timestamp": "2026-07-18T03:58:24-05:00",
+          "tree_id": "4038df4b8b56f6203d82c67d32daf58a1a160cc9",
+          "url": "https://github.com/ljodea/ggsvelte/commit/99e918dd9c0ee48c08d960acccf970087695c734"
+        },
+        "date": 1784365137853,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.0102,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.5006,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 7.6602,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 12.1032,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 79.4859,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 109.3276,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.2122,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2341,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 82.5183,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 100.4738,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 10.2528,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 8.995,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 105.4052,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7044,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 23.0937,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 6.4983,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 33.7094,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 542.4061,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 128.0334,
             "unit": "ms"
           }
         ]
