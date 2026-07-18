@@ -5,6 +5,7 @@ import {
   consumeIntervalKeys,
   nextLocalIntervalRecords,
   recomputePanelIntervalKeys,
+  recomputePanelIntervalProjection,
   sameIntervalRecord,
   type IntervalConsumptionCandidate,
 } from "../../src/lib/interval/consumption.js";
@@ -354,6 +355,55 @@ describe("facet interval consumption", () => {
         candidates,
       }),
     ).toEqual(["s2", "shared"]);
+  });
+
+  it("recomputePanelIntervalProjection returns keys and lineageCount in one pass", () => {
+    const projection = recomputePanelIntervalProjection({
+      panelId: "south",
+      domains: {
+        x: { kind: "linear", domain: [1, 3] },
+        y: { kind: "band", values: ["low"] },
+      },
+      candidates: [
+        {
+          panelId: "south",
+          xValue: 2,
+          yValue: "low",
+          keys: ["s2", "shared"],
+          sourceRows: [10, 11, 10],
+        },
+        {
+          panelId: "south",
+          xValue: 2,
+          yValue: "low",
+          keys: ["s3"],
+          sourceRows: [11, 12],
+        },
+        {
+          panelId: "north",
+          xValue: 2,
+          yValue: "low",
+          keys: ["n1"],
+          sourceRows: [99],
+        },
+      ],
+    });
+    expect(projection.keys).toEqual(["s2", "shared", "s3"]);
+    // Unique source rows on south only: 10, 11, 12
+    expect(projection.lineageCount).toBe(3);
+  });
+
+  it("recomputePanelIntervalProjection lineageCount is 0 when sourceRows omitted", () => {
+    const projection = recomputePanelIntervalProjection({
+      panelId: "south",
+      domains: {
+        x: { kind: "linear", domain: [1, 3] },
+        y: { kind: "band", values: ["low"] },
+      },
+      candidates,
+    });
+    expect(projection.keys).toEqual(["s2", "shared"]);
+    expect(projection.lineageCount).toBe(0);
   });
 
   it("recomputes panel keys against a large band domain via Set membership", () => {
