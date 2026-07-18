@@ -853,6 +853,40 @@ describe("createInspectionState traversal", () => {
 
     destroy();
   });
+
+  it("keyboard navigate resolves from retained candidates (no hit rematch)", () => {
+    // Host keeps CandidateFacts alongside SceneHits. If applyTraversalIndex
+    // forgot to pass the candidate, resolve would fall back to
+    // matchCandidateFromHit(iterateCandidates(...)) — which walks the store.
+    // Force that fallback to fail: after the first navigate builds traversal
+    // entries, gate candidate() so identity rematch returns null. The second
+    // navigate must still advance using the retained facts.
+    const model = modelFor(continuousSpec());
+    let allowLookup = true;
+    const realCandidate = model.candidates.candidate.bind(model.candidates);
+    model.candidates.candidate = (id: number) => {
+      if (!allowLookup) return null;
+      return realCandidate(id);
+    };
+    const { state, destroy } = mountInspectionController({
+      model: () => model,
+      registerEffects: false,
+    });
+
+    state.navigate(1);
+    flushSync();
+    expect(state.inspection).not.toBeNull();
+    const firstKey = state.inspection!.focus.key;
+
+    allowLookup = false;
+    state.navigate(1);
+    flushSync();
+    // Still resolved — retained candidate, not rematch.
+    expect(state.inspection).not.toBeNull();
+    expect(state.inspection!.focus.key).not.toEqual(firstKey);
+
+    destroy();
+  });
 });
 
 describe("createInspectionState setInspection(null) clear ordering", () => {

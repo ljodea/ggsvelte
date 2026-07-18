@@ -78,20 +78,39 @@ export type TraversalCandidateStore = {
 };
 
 /**
- * Build the ordered SceneHit list used by keyboard navigation.
+ * Ordered keyboard-traversal projection: SceneHits plus the live CandidateFacts
+ * that produced them (same length/order). Hosts pass `candidates[i]` into
+ * inspection resolve so keyboard navigation does not re-scan the store O(C)
+ * to recover identity already known at build time.
+ *
  * Stops on cycle (duplicate id) or null terminator; skips missing candidates.
  */
-export function buildTraversalHits(store: TraversalCandidateStore): SceneHit[] {
+export function buildTraversalEntries(store: TraversalCandidateStore): {
+  readonly hits: SceneHit[];
+  readonly candidates: CandidateFacts[];
+} {
   const hits: SceneHit[] = [];
+  const candidates: CandidateFacts[] = [];
   let id = store.traverse(null, "first");
   const seen = new Set<number>();
   while (id !== null && !seen.has(id)) {
     seen.add(id);
     const candidate = store.candidate(id);
-    if (candidate !== null) hits.push(hitFromCandidate(candidate));
+    if (candidate !== null) {
+      hits.push(hitFromCandidate(candidate));
+      candidates.push(candidate);
+    }
     id = store.traverse(id, "next");
   }
-  return hits;
+  return { hits, candidates };
+}
+
+/**
+ * Build the ordered SceneHit list used by keyboard navigation.
+ * Prefer `buildTraversalEntries` when the host also needs CandidateFacts.
+ */
+export function buildTraversalHits(store: TraversalCandidateStore): SceneHit[] {
+  return buildTraversalEntries(store).hits;
 }
 
 /** Modular wrap for keyboard traversal across a hit list. */

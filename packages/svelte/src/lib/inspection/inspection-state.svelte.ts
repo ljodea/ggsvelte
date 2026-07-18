@@ -39,7 +39,7 @@ import { plotTooltipDomId } from "../assembly/layout.js";
 import { panelContainingAnchor } from "../scene/geometry.js";
 import {
   bestDirectionalIndex,
-  buildTraversalHits,
+  buildTraversalEntries,
   cycleCoincidentIndex,
   hitFromCandidate,
   matchCandidateFromHit,
@@ -182,10 +182,15 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
     return panelContainingAnchor(deps.model()!.scene.panels, inspection.focus.anchor);
   });
 
-  const traversalHits: SceneHit[] = $derived.by(() => {
-    if (!deps.surfaceInteractive() || deps.model() === null) return [];
-    return buildTraversalHits(deps.model()!.candidates);
+  // Parallel hits + CandidateFacts: keyboard apply passes candidates[i] so
+  // resolveInspection does not re-scan the full store (O(C)) to recover the
+  // facts already known when the traversal list was built.
+  const traversal = $derived.by(() => {
+    if (!deps.surfaceInteractive() || deps.model() === null)
+      return { hits: [] as SceneHit[], candidates: [] as CandidateFacts[] };
+    return buildTraversalEntries(deps.model()!.candidates);
   });
+  const traversalHits: SceneHit[] = $derived(traversal.hits);
 
   // Coordinator closes over keyAt — handler-only invocation (deferred).
   const inspectionCoordinator = createInspectionCoordinator<Record<string, CellValue>, PropertyKey>(
@@ -440,7 +445,15 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
   /** Private — no remaining external consumer (codex r2 P2-3). */
   function applyTraversalIndex(index: number): void {
     activeTraversalIndex = index;
-    setInspection(traversalHits[index]!, "keyboard");
+    // Pass the retained candidate: avoids O(C) matchCandidateFromHit on every
+    // arrow/cycle step (pointer/touch already supply a concrete candidate).
+    setInspection(
+      traversal.hits[index]!,
+      "keyboard",
+      "transient",
+      undefined,
+      traversal.candidates[index],
+    );
   }
 
   function navigate(delta: number): void {

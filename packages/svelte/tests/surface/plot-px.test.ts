@@ -5,6 +5,7 @@ import type { SceneHit } from "@ggsvelte/core/dom";
 
 import {
   bestDirectionalIndex,
+  buildTraversalEntries,
   buildTraversalHits,
   CANDIDATE_HIT_TOLERANCE,
   cycleCoincidentIndex,
@@ -147,7 +148,7 @@ describe("bestDirectionalIndex", () => {
   });
 });
 
-describe("buildTraversalHits", () => {
+describe("buildTraversalHits / buildTraversalEntries", () => {
   const asCandidate = (id: number, partial: Partial<CandidateFacts> = {}): CandidateFacts =>
     ({
       id,
@@ -204,6 +205,53 @@ describe("buildTraversalHits", () => {
         candidate: () => null,
       }),
     ).toEqual([]);
+  });
+
+  it("keeps parallel CandidateFacts so hosts avoid O(C) hit rematch", () => {
+    // Structural contract: entries.candidates[i] is the live facts for
+    // entries.hits[i] (same object reference from the store), same length,
+    // same traversal order. Keyboard resolve can pass candidates[i] instead
+    // of re-scanning the store via matchCandidateFromHit.
+    const order = [5, 1, 9];
+    const byId = new Map(order.map((id) => [id, asCandidate(id)]));
+    const store = {
+      traverse(fromId: number | null, direction: "first" | "next"): number | null {
+        if (direction === "first") return order[0] ?? null;
+        if (fromId === null) return null;
+        const index = order.indexOf(fromId);
+        return index < 0 ? null : (order[index + 1] ?? null);
+      },
+      candidate(id: number): CandidateFacts | null {
+        return byId.get(id) ?? null;
+      },
+    };
+    const entries = buildTraversalEntries(store);
+    expect(entries.hits).toEqual(buildTraversalHits(store));
+    expect(entries.candidates.map((c) => c.id)).toEqual(order);
+    expect(entries.hits).toHaveLength(entries.candidates.length);
+    for (const [i, id] of order.entries()) {
+      const candidate = entries.candidates[i];
+      if (candidate === undefined) throw new Error(`missing candidate at ${String(i)}`);
+      expect(candidate).toBe(byId.get(id));
+      expect(entries.hits[i]).toEqual(hitFromCandidate(candidate));
+    }
+  });
+
+  it("skips null candidates in both parallel arrays together", () => {
+    const store = {
+      traverse(fromId: number | null, direction: "first" | "next"): number | null {
+        if (direction === "first") return 0;
+        if (fromId === 0) return 1;
+        if (fromId === 1) return 2;
+        return null;
+      },
+      candidate(id: number): CandidateFacts | null {
+        return id === 1 ? null : asCandidate(id);
+      },
+    };
+    const entries = buildTraversalEntries(store);
+    expect(entries.candidates.map((c) => c.id)).toEqual([0, 2]);
+    expect(entries.hits).toHaveLength(2);
   });
 });
 
