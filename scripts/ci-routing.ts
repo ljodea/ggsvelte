@@ -779,12 +779,33 @@ export function formatTreeEntryDigest(mode: string, oid: string): string {
 }
 
 /**
+ * Playwright container jobs may run as root while the checkout is owned by
+ * the Actions runner user — git then refuses `ls-tree` with "dubious ownership".
+ * Mark the worktree safe before hashing (idempotent).
+ */
+async function ensureGitSafeDirectory(): Promise<void> {
+  const top = Bun.spawn(["git", "rev-parse", "--show-toplevel"], {
+    stdout: "pipe",
+    stderr: "pipe",
+  });
+  const topOut = (await new Response(top.stdout).text()).trim();
+  await top.exited;
+  if (topOut.length === 0) return;
+  const mark = Bun.spawn(["git", "config", "--global", "--add", "safe.directory", topOut], {
+    stdout: "pipe",
+    stderr: "pipe",
+  });
+  await mark.exited;
+}
+
+/**
  * Collect blob digests for HEAD via `git ls-tree -r`. Fail-closed on git errors
  * or missing digests for matched paths. Digests are `mode:oid` (not oid alone).
  */
 export async function collectGitHeadInputDigests(
   execution: CacheableExecution,
 ): Promise<{ paths: string[]; digests: Map<string, string>; hash: string }> {
+  await ensureGitSafeDirectory();
   const proc = Bun.spawn(["git", "ls-tree", "-r", "HEAD"], {
     stdout: "pipe",
     stderr: "pipe",
