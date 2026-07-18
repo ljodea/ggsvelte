@@ -47,7 +47,6 @@ import {
   planCycleCoincident,
   planDirectionalNavigate,
 } from "../surface/plot-px.js";
-import { iterateCandidates } from "../selection/selection.js";
 import {
   buildInspectionCandidateRef,
   resolveQueuedInspectFrameAction,
@@ -203,7 +202,10 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
   function candidateFromHit(hit: SceneHit): CandidateFacts | null {
     const model = deps.model();
     if (model === null) return null;
-    return matchCandidateFromHit(iterateCandidates(model.candidates), hit);
+    // Spatial shortlist via CandidateStore.queryRect (O(log C + k)); do not
+    // walk iterateCandidates O(C) on large charts.
+    const panelId = model.scene.panels[hit.panelIndex]?.id;
+    return matchCandidateFromHit(model.candidates, hit, undefined, panelId);
   }
 
   function resolveInspection(

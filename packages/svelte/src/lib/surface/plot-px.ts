@@ -45,25 +45,73 @@ export function hitFromCandidate(candidate: CandidateFacts): SceneHit {
 export const CANDIDATE_HIT_TOLERANCE = 0.5;
 
 /**
+ * Spatial candidate store surface for hit→facts rematch.
+ * `queryRect` shortlists by anchor/extended AABB (O(log C + k)); `candidate`
+ * materializes facts. Production uses the real CandidateStore.
+ */
+export type SpatialCandidateSource = {
+  queryRect(
+    x0: number,
+    y0: number,
+    x1: number,
+    y1: number,
+    panelId?: string,
+  ): Uint32Array | readonly number[];
+  candidate(id: number): CandidateFacts | null;
+};
+
+function isSpatialCandidateSource(
+  value: Iterable<CandidateFacts> | SpatialCandidateSource,
+): value is SpatialCandidateSource {
+  if (typeof value !== "object" || value === null) return false;
+  const record = value as Record<string, unknown>;
+  return typeof record["queryRect"] === "function" && typeof record["candidate"] === "function";
+}
+
+function candidateMatchesHit(candidate: CandidateFacts, hit: SceneHit, tolerance: number): boolean {
+  return (
+    candidate.layerIndex === hit.layerIndex &&
+    candidate.panelIndex === hit.panelIndex &&
+    candidate.rowIndex === hit.rowIndex &&
+    candidate.kind === hit.kind &&
+    Math.abs(candidate.x - hit.x) < tolerance &&
+    Math.abs(candidate.y - hit.y) < tolerance
+  );
+}
+
+/**
  * Find the first candidate matching a SceneHit identity + proximity.
- * Iteration order is caller-owned (production walks id-ascending).
+ *
+ * - **Iterable:** caller-owned order (production used id-ascending walks).
+ * - **Spatial store:** `queryRect` shortlist around the hit, then exact filters
+ *   — O(log C + k) instead of O(C). Prefer this on large charts.
+ *
  * Tolerance is exclusive: |Δ| < tol matches; |Δ| === tol does not.
+ * Optional `panelId` scopes the spatial shortlist (store panel filter).
  */
 export function matchCandidateFromHit(
-  candidates: Iterable<CandidateFacts>,
+  candidates: Iterable<CandidateFacts> | SpatialCandidateSource,
   hit: SceneHit,
   tolerance: number = CANDIDATE_HIT_TOLERANCE,
+  panelId?: string,
 ): CandidateFacts | null {
+  if (isSpatialCandidateSource(candidates)) {
+    const ids = candidates.queryRect(
+      hit.x - tolerance,
+      hit.y - tolerance,
+      hit.x + tolerance,
+      hit.y + tolerance,
+      panelId,
+    );
+    // Store queryRect orders by traversal rank (id-ascending among hits).
+    for (const id of ids) {
+      const candidate = candidates.candidate(id);
+      if (candidate !== null && candidateMatchesHit(candidate, hit, tolerance)) return candidate;
+    }
+    return null;
+  }
   for (const candidate of candidates) {
-    if (
-      candidate.layerIndex === hit.layerIndex &&
-      candidate.panelIndex === hit.panelIndex &&
-      candidate.rowIndex === hit.rowIndex &&
-      candidate.kind === hit.kind &&
-      Math.abs(candidate.x - hit.x) < tolerance &&
-      Math.abs(candidate.y - hit.y) < tolerance
-    )
-      return candidate;
+    if (candidateMatchesHit(candidate, hit, tolerance)) return candidate;
   }
   return null;
 }

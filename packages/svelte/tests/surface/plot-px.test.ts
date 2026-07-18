@@ -429,4 +429,54 @@ describe("matchCandidateFromHit", () => {
       matchCandidateFromHit(candidates, hit(10, 20, { rowIndex: 1, kind: "point" })),
     ).toBeNull();
   });
+
+  it("spatial shortlist does not materialize every far candidate", () => {
+    // Complexity: linear Iterable walk is O(C); SpatialCandidateSource uses
+    // queryRect shortlist then O(k) candidate() materializations.
+    const count = 4_000;
+    const xs = new Float64Array(count);
+    const ys = new Float64Array(count);
+    const facts: CandidateFacts[] = [];
+    for (let i = 0; i < count; i++) {
+      const col = i % 50;
+      const row = Math.floor(i / 50);
+      const x = 100 + col * 10;
+      const y = 100 + row * 10;
+      xs[i] = x;
+      ys[i] = y;
+      facts.push(asCandidate({ id: i, x, y, rowIndex: i }));
+    }
+    // One candidate under the probe at (10, 20).
+    xs[0] = 10;
+    ys[0] = 20;
+    facts[0] = asCandidate({ id: 0, x: 10, y: 20, rowIndex: 1 });
+
+    let candidateCalls = 0;
+    const spatial = {
+      queryRect(x0: number, y0: number, x1: number, y1: number): number[] {
+        const out: number[] = [];
+        for (let i = 0; i < count; i++) {
+          const x = xs[i];
+          const y = ys[i];
+          if (x >= x0 && x <= x1 && y >= y0 && y <= y1) out.push(i);
+        }
+        return out;
+      },
+      candidate(id: number): CandidateFacts | null {
+        candidateCalls++;
+        return facts[id] ?? null;
+      },
+    };
+
+    candidateCalls = 0;
+    const matched = matchCandidateFromHit(spatial, hit(10, 20, { rowIndex: 1 }));
+    expect(matched?.id).toBe(0);
+    // Shortlist is tiny; linear walk would call candidate() ~count times.
+    expect(candidateCalls).toBeLessThan(16);
+    expect(candidateCalls).toBeLessThan(count / 50);
+
+    candidateCalls = 0;
+    expect(matchCandidateFromHit(spatial, hit(50, 50, { rowIndex: 1 }))).toBeNull();
+    expect(candidateCalls).toBe(0);
+  });
 });
