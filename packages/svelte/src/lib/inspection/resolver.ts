@@ -12,6 +12,7 @@ import type {
   PlotInspectionChange,
   ResolvedInspectMode,
 } from "../interaction/interaction.js";
+import { uniqueKeysFromRowIndexes } from "../selection/selection.js";
 
 export interface ResolveInspectionInput<
   Row extends Record<string, CellValue>,
@@ -100,14 +101,13 @@ function datum<Row extends Record<string, CellValue>, Key extends PropertyKey>(
 ): PlotDatum<Row, Key> {
   const row = candidate.rowIndex === null ? null : (model.row(candidate.rowIndex) as Row | null);
   const key = row === null || candidate.rowIndex === null ? null : keyOf(row, candidate.rowIndex);
-  const lineageRows = model.lineage.keys(candidate.lineage);
-  const sourceKeys: Key[] = [];
-  for (const rowIndex of lineageRows) {
+  // Set-based first-seen dedup (O(R)) — same pattern as selection helpers.
+  // Array#includes here was O(R²) for large aggregate/stat lineages (#200).
+  const sourceKeys = uniqueKeysFromRowIndexes(model.lineage.keys(candidate.lineage), (rowIndex) => {
     const source = model.row(rowIndex);
-    if (source === null) continue;
-    const sourceKey = keyOf(source as Row, rowIndex);
-    if (sourceKey !== null && !sourceKeys.includes(sourceKey)) sourceKeys.push(sourceKey);
-  }
+    if (source === null) return null;
+    return keyOf(source as Row, rowIndex);
+  }) as Key[];
   const fields = (model.layerFields[candidate.layerIndex] ?? []).map((field) => ({
     ...field,
     value:
