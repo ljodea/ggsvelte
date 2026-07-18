@@ -45,6 +45,51 @@ ndensity`; density→`density, scaled`; smooth→`y, ymin, ymax, se`;
   `renderToSVGString(spec, {width, height})` (headless, Node-safe),
   `ggsvelte-render spec.json > out.svg` (CLI; JSON-line diagnostics on stderr).
 
+## Svelte interactions (v0.2+)
+
+`@ggsvelte/svelte` requires Svelte `^5.33.1`. Interactions are opt-in props on
+`<GGPlot>`; always provide a stable `key` field when selection or linked views
+must survive filtering, reordering, or data refreshes.
+
+```svelte
+<script lang="ts">
+  import { createPlotInteraction, GGPlot } from "@ggsvelte/svelte";
+
+  const interaction = createPlotInteraction<number>();
+  const scope = { keys: "sales-rows", intervals: "sales-range" } as const;
+</script>
+
+<GGPlot
+  data={rows}
+  aes={{ x: "date", y: "value", color: "series" }}
+  layers={[{ geom: "point" }]}
+  facet={{ wrap: "region", ncol: 3 }}
+  key="id"
+  select={{ type: "interval", mode: "x", preset: "cross-panel" }}
+  legendFocus
+  legendFilter
+  {interaction}
+  interactionScope={scope}
+  oninteraction={(event) => console.log(event)}
+/>
+```
+
+- `inspect` adds tooltip, crosshair, keyboard traversal, and pinning; `select`
+  supports point or interval selection; `zoom` enables brush zoom.
+- Faceted interval presets are `independent`, `union`, and `cross-panel`.
+  After an interval or zoom commit, accessible controls accept exact bounds.
+- `legendFocus` only emphasizes a discrete group. `legendFilter` changes the
+  included rows and reruns the grammar while preserving stable color identity.
+- Share one `createPlotInteraction()` controller between plots to link semantic
+  selection, emphasis, interval, and zoom state. Give plots matching
+  `interactionScope` channels only when they should coordinate.
+- Use controlled controller methods such as `setSelection`, `setInterval`, and
+  `setZoom` for external controls. Observe all interaction kinds through
+  `oninteraction`, or use capability-specific handlers such as `onselect`,
+  `onzoom`, `onlegendfocus`, and `onlegendfilter`.
+- A handler without its matching capability prop, or `interactionScope` without
+  an `interaction` controller, is inert and emits a development advisory.
+
 ## The validation contract (use it!)
 
 `validate(spec)` = schema shape. `validate(spec, { profile })` adds
