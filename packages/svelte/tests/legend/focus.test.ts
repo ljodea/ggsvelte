@@ -271,6 +271,105 @@ describe("findLegendPressedIdentity", () => {
       }),
     ).toEqual({ scale: "fill", entryIndex: 1 });
   });
+
+  it("matches unique large key sets and rejects size mismatches", () => {
+    // Deterministic large-input coverage (issue #198). Structural O(K+E)
+    // comes from a single input Set + size short-circuits; wall-clock ratio
+    // guards flake under CI contention (see selection #182 follow-up).
+    const K = 2_000;
+    const E = 40;
+    const matchingKeys = Array.from({ length: K }, (_, i) => `k${i}`);
+    const largeEntries: InteractiveLegendEntry[] = Array.from({ length: E }, (_, entryIndex) => ({
+      legend: discreteFill,
+      entry: {
+        value: `v${entryIndex}`,
+        label: `L${entryIndex}`,
+        color: "#000",
+        y: entryIndex * 12,
+      },
+      identity: { scale: "fill", entryIndex },
+    }));
+    const largeIndex = new Map<string, readonly PropertyKey[]>();
+    for (let entryIndex = 0; entryIndex < E - 1; entryIndex++) {
+      // Wrong cardinality → must not match the emphasis set.
+      largeIndex.set(
+        legendIdentityKey({ scale: "fill", entryIndex }),
+        Object.freeze([`solo-${entryIndex}`]),
+      );
+    }
+    largeIndex.set(
+      legendIdentityKey({ scale: "fill", entryIndex: E - 1 }),
+      Object.freeze(matchingKeys),
+    );
+
+    expect(
+      findLegendPressedIdentity({
+        keys: matchingKeys,
+        entries: largeEntries,
+        keyIndex: largeIndex,
+        committed: null,
+      }),
+    ).toEqual({ scale: "fill", entryIndex: E - 1 });
+
+    expect(
+      findLegendPressedIdentity({
+        keys: matchingKeys.slice(0, K - 1),
+        entries: largeEntries,
+        keyIndex: largeIndex,
+        committed: null,
+      }),
+    ).toBeNull();
+  });
+
+  // Pressed-identity resolution builds one Set for the emphasis keys and
+  // compares with size short-circuits + membership — not a fresh pair of
+  // Sets per legend entry (issue #198, O(E·K) → O(K+E)).
+  it("allocates a constant number of Sets relative to entry count", () => {
+    const K = 500;
+    const E = 30;
+    const matchingKeys = Array.from({ length: K }, (_, i) => i);
+    const largeEntries: InteractiveLegendEntry[] = Array.from({ length: E }, (_, entryIndex) => ({
+      legend: discreteFill,
+      entry: {
+        value: entryIndex,
+        label: String(entryIndex),
+        color: "#000",
+        y: entryIndex * 12,
+      },
+      identity: { scale: "fill", entryIndex },
+    }));
+    const largeIndex = new Map<string, readonly PropertyKey[]>();
+    for (let entryIndex = 0; entryIndex < E - 1; entryIndex++) {
+      largeIndex.set(legendIdentityKey({ scale: "fill", entryIndex }), Object.freeze([entryIndex]));
+    }
+    largeIndex.set(
+      legendIdentityKey({ scale: "fill", entryIndex: E - 1 }),
+      Object.freeze(matchingKeys),
+    );
+
+    const RealSet = globalThis.Set;
+    let constructions = 0;
+    globalThis.Set = class CountingSet<T> extends RealSet<T> {
+      constructor(iterable?: Iterable<T>) {
+        super(iterable);
+        constructions += 1;
+      }
+    } as SetConstructor;
+    try {
+      const result = findLegendPressedIdentity({
+        keys: matchingKeys,
+        entries: largeEntries,
+        keyIndex: largeIndex,
+        committed: null,
+      });
+      expect(result).toEqual({ scale: "fill", entryIndex: E - 1 });
+      // One Set for input.keys (plus at most a small constant). Not 2×E.
+      expect(constructions).toBeLessThanOrEqual(2);
+      expect(constructions).toBeLessThan(E);
+    } finally {
+      globalThis.Set = RealSet;
+    }
+  });
 });
 
 function adapter(partial: {
