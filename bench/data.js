@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784332809011,
+  "lastUpdate": 1784334529731,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -20432,6 +20432,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 169.1975,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "68aa494f60a38038ff95a487494fe41701c72fc4",
+          "message": "perf(core): O(1) rank lookup for candidate-store next/previous traverse (#194)\n\nFixes #187. Build a dense inverse rank of the sequential traversal once\nat store construction so keyboard next/previous navigation is O(1)\ninstead of O(n) indexOf per step. Spatial directions are unchanged.",
+          "timestamp": "2026-07-17T19:28:11-05:00",
+          "tree_id": "698f5b757fa1f3dbc65db705f304e3089f5f9b43",
+          "url": "https://github.com/ljodea/ggsvelte/commit/68aa494f60a38038ff95a487494fe41701c72fc4"
+        },
+        "date": 1784334528866,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.2177,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.7313,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 10.0073,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 13.4957,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 84.2,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 125.7461,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.0656,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2328,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 86.0631,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 107.5038,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 11.3477,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 10.9606,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 113.5062,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.8079,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 28.0401,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.4169,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 27.283,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 616.834,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 166.8509,
             "unit": "ms"
           }
         ]
