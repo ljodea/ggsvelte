@@ -242,6 +242,16 @@ it("thins expensive jobs on main push (issue #244)", () => {
   expect(ci).toContain("packages_dist=false");
 });
 
+it("tiers the PR consumer matrix (issue #246)", () => {
+  const ci = read(".github/workflows/ci.yml");
+  expect(ci).toContain("run-compat");
+  expect(ci).toContain("flavor=pr");
+  // Label must force consumer even when path routing would skip (Codex P2).
+  expect(ci).toContain("run-compat: forced consumer + packages_dist");
+  // Main push stays thinned per #244; full required is PR+label or nightly.
+  expect(ci).not.toMatch(/full required[\s\S]{0,40}push\/main/i);
+});
+
 it("caps heavy self-hosted jobs with concurrency groups (issue #247)", () => {
   const ci = read(".github/workflows/ci.yml");
   // Required component shards share one group; informational perf is separate.
