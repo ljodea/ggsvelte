@@ -231,6 +231,35 @@ describe("createPlotInteraction", () => {
     expect(controller.revision).toBe(3);
   });
 
+  // Membership Sets keep isSelected / toggleSelection O(1) in K, not O(K)
+  // Array#includes. Large multi-selects (brush) must stay correct without
+  // rescanning the ordered list on every probe.
+  it("isSelected and toggle membership handle large multi-selects", () => {
+    const controller = createPlotInteraction<number>();
+    const count = 5_000;
+    const keys = Array.from({ length: count }, (_, i) => i);
+    controller.setSelection(keys, { scope: "row-id" });
+    expect(controller.isSelected(count - 1, "row-id")).toBe(true);
+    expect(controller.isSelected(count, "row-id")).toBe(false);
+    controller.toggleSelection(0, { scope: "row-id" });
+    expect(controller.isSelected(0, "row-id")).toBe(false);
+    expect(controller.selected("row-id")).toHaveLength(count - 1);
+    // Reconcile must keep the membership set in sync with the ordered list.
+    controller.reconcileKeys(keys.slice(1, 100), { scope: "row-id" });
+    expect(controller.isSelected(50, "row-id")).toBe(true);
+    expect(controller.isSelected(0, "row-id")).toBe(false);
+    expect(controller.isSelected(200, "row-id")).toBe(false);
+  });
+
+  it("isSelected treats NaN as a single membership key", () => {
+    const controller = createPlotInteraction<number>();
+    controller.setSelection([Number.NaN, 1], { scope: "row-id" });
+    expect(controller.isSelected(Number.NaN, "row-id")).toBe(true);
+    controller.toggleSelection(Number.NaN, { scope: "row-id" });
+    expect(controller.isSelected(Number.NaN, "row-id")).toBe(false);
+    expect(controller.selected("row-id")).toEqual([1]);
+  });
+
   it("treats PropertyKey collections as sets even for opaque symbols", () => {
     const first = Symbol("same-description");
     const second = Symbol("same-description");

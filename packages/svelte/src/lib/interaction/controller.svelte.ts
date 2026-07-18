@@ -83,6 +83,22 @@ export interface PlotInteractionController<Key extends PropertyKey> {
 
 const EMPTY_KEYS = Object.freeze([]) as readonly never[];
 
+/** Keep ordered key lists and parallel membership Sets in sync. */
+function writeKeyList<Key extends PropertyKey>(
+  values: Map<string, ReadonlyArray<Key>>,
+  sets: Map<string, Set<Key>>,
+  scopeKeys: string,
+  next: ReadonlyArray<Key>,
+): void {
+  if (next.length === 0) {
+    values.delete(scopeKeys);
+    sets.delete(scopeKeys);
+  } else {
+    values.set(scopeKeys, next);
+    sets.set(scopeKeys, new Set(next));
+  }
+}
+
 /** Create chart-independent, semantic interaction state for Svelte 5.
  *
  * The controller owns stable keys and scoped data domains only. A chart is
@@ -95,6 +111,11 @@ export function createPlotInteraction<Key extends PropertyKey = PropertyKey>(
   let revision = $state(0);
   const selections = new Map<string, ReadonlyArray<Key>>();
   const emphases = new Map<string, ReadonlyArray<Key>>();
+  // Parallel membership sets for O(1) isSelected / toggleSelection (not O(K)
+  // Array#includes). Set uses SameValueZero so NaN keys work without the
+  // Number.isNaN special-case used when filtering arrays.
+  const selectionSets = new Map<string, Set<Key>>();
+  const emphasisSets = new Map<string, Set<Key>>();
   const intervals = new Map<string, Map<string, ScopedInteractionInterval<Key>>>();
   const zoomX = new Map<string, readonly [number, number]>();
   const zoomY = new Map<string, readonly [number, number]>();
@@ -154,6 +175,7 @@ export function createPlotInteraction<Key extends PropertyKey = PropertyKey>(
 
   const replaceKeys = (
     values: Map<string, ReadonlyArray<Key>>,
+    sets: Map<string, Set<Key>>,
     nextKeys: ReadonlyArray<Key>,
     mutation: PlotInteractionMutationOptions,
     kind: "selection" | "emphasis",
@@ -162,8 +184,7 @@ export function createPlotInteraction<Key extends PropertyKey = PropertyKey>(
     const next = canonicalKeys(nextKeys);
     const prior = values.get(scope.keys) ?? EMPTY_KEYS;
     if (equalKeys(prior, next)) return null;
-    if (next.length === 0) values.delete(scope.keys);
-    else values.set(scope.keys, next);
+    writeKeyList(values, sets, scope.keys, next);
     return commit(kind, [kind], scope, mutation.source ?? "programmatic");
   };
 
@@ -184,17 +205,22 @@ export function createPlotInteraction<Key extends PropertyKey = PropertyKey>(
     },
     isSelected(key, scope) {
       assertKey(key);
-      return controller.selected(scope).includes(key);
+      // Track revision so $derived/template consumers invalidate on mutation
+      // (selectionSets itself is not $state — Codex #278 P2).
+      void revision;
+      return selectionSets.get(keyScope(scope))?.has(key) ?? false;
     },
     setSelection(keys, mutation) {
       assertMutationAllowed();
-      return replaceKeys(selections, keys, mutation, "selection");
+      return replaceKeys(selections, selectionSets, keys, mutation, "selection");
     },
     toggleSelection(key, mutation) {
       assertKey(key);
+      const scopeKey = keyScope(mutation.scope);
       const current = controller.selected(mutation.scope);
+      const selected = selectionSets.get(scopeKey)?.has(key) ?? false;
       return controller.setSelection(
-        current.includes(key)
+        selected
           ? current.filter((value) => value !== key && !(Number.isNaN(value) && Number.isNaN(key)))
           : [...current, key],
         mutation,
@@ -205,7 +231,7 @@ export function createPlotInteraction<Key extends PropertyKey = PropertyKey>(
     },
     setEmphasis(keys, mutation) {
       assertMutationAllowed();
-      return replaceKeys(emphases, keys, mutation, "emphasis");
+      return replaceKeys(emphases, emphasisSets, keys, mutation, "emphasis");
     },
     clearEmphasis(mutation) {
       return controller.setEmphasis([], mutation);
@@ -333,14 +359,8 @@ export function createPlotInteraction<Key extends PropertyKey = PropertyKey>(
         }
       }
       if (!selectionChanged && !emphasisChanged && !intervalChanged) return null;
-      if (selectionChanged) {
-        if (nextSelection.length === 0) selections.delete(scope.keys);
-        else selections.set(scope.keys, nextSelection);
-      }
-      if (emphasisChanged) {
-        if (nextEmphasis.length === 0) emphases.delete(scope.keys);
-        else emphases.set(scope.keys, nextEmphasis);
-      }
+      if (selectionChanged) writeKeyList(selections, selectionSets, scope.keys, nextSelection);
+      if (emphasisChanged) writeKeyList(emphases, emphasisSets, scope.keys, nextEmphasis);
       const changes = Object.freeze([
         ...(selectionChanged ? (["selection"] as const) : []),
         ...(emphasisChanged ? (["emphasis"] as const) : []),
