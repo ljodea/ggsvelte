@@ -205,6 +205,9 @@ export function createPlotInteraction<Key extends PropertyKey = PropertyKey>(
     },
     isSelected(key, scope) {
       assertKey(key);
+      // Track revision so $derived/template consumers invalidate on mutation
+      // (selectionSets itself is not $state — Codex #278 P2).
+      void revision;
       return selectionSets.get(keyScope(scope))?.has(key) ?? false;
     },
     setSelection(keys, mutation) {
