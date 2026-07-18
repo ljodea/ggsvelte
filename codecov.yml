@@ -1,0 +1,77 @@
+# Codecov config for the ggsvelte monorepo.
+# Coverage is produced by CI (unit job: bun --coverage; component-svelte:
+# vitest --coverage) and uploaded via codecov/codecov-action.
+#
+# Package badges use components (path filters on a shared upload) so we do not
+# need one upload per package. Flags mark which job produced the report and
+# carry forward when path routing / content-hash skip omits a job.
+#
+# Validate: curl -X POST --data-binary @codecov.yml https://codecov.io/validate
+
+coverage:
+  status:
+    project:
+      default:
+        # Informational until we have a stable baseline on main.
+        target: auto
+        threshold: 2%
+    patch:
+      default:
+        target: auto
+        threshold: 2%
+
+comment:
+  layout: "header, diff, flags, components, files"
+  behavior: default
+  require_changes: false
+
+# Ignore non-product paths so package components reflect library sources.
+ignore:
+  - "**/tests/**"
+  - "**/*.test.ts"
+  - "**/*.ssr.test.ts"
+  - "**/vitest*.ts"
+  - "benchmarks/**"
+  - "scripts/**"
+  - "spikes/**"
+  - "apps/**"
+  - "examples/**"
+  - "tests/**"
+  - "artifacts/**"
+  - "docs/**"
+  - "**/dist/**"
+  - "**/coverage/**"
+  - "packages/svelte/bin/**"
+  - "packages/svelte/skills/**"
+  - "packages/core/tests/**"
+  - "packages/spec/tests/**"
+  - "packages/spec/scripts/**"
+
+flag_management:
+  default_rules:
+    carryforward: true
+  individual_flags:
+    - name: unit
+      paths:
+        - packages/spec/**
+        - packages/core/**
+      carryforward: true
+    - name: svelte
+      paths:
+        - packages/svelte/**
+      carryforward: true
+
+component_management:
+  individual_components:
+    - component_id: packages-spec
+      name: packages-spec
+      paths:
+        - packages/spec/**
+    - component_id: packages-core
+      name: packages-core
+      paths:
+        - packages/core/**
+    - component_id: packages-svelte
+      name: packages-svelte
+      paths:
+        - packages/svelte/**

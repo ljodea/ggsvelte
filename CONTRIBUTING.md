@@ -100,40 +100,40 @@ upstream, `.md`/`.yaml`/`.svelte` can fold back into oxfmt (`.oxfmtrc.json`
 
 ## Running the checks
 
-| Command                                               | What it does                                                                                                                            |
-| ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `bun run check`                                       | `tsc -b` project references (packages/spec, packages/core) — EMITS `dist/` since M0c                                                    |
-| `bun run build`                                       | `bun run check` + `svelte-package` for packages/svelte (everything the publish shape needs)                                             |
-| `bun run check:svelte`                                | svelte-check `--fail-on-warnings` in packages/svelte (needs `bun run check` first: dist types)                                          |
-| `bun run lint`                                        | oxlint over the repo (`.oxlintrc.json`; spikes excluded)                                                                                |
-| `bun run lint:md`                                     | markdownlint-cli2 over `**/*.md` (`.markdownlint-cli2.jsonc`; spikes + node_modules ignored)                                            |
-| `bun run lint:type-aware`                             | oxlint `--type-aware --deny-warnings` (tsgolint; permanent CI gate)                                                                     |
-| `bun run fmt` / `bun run fmt:check`                   | oxfmt (ts/js/json/css/toml) + prettier (.svelte/.md/.yaml)                                                                              |
-| `bun run test`                                        | bun unit tests (spec + core + scripts + evals harness; needs `bun run check` first)                                                     |
-| `bun run test:components`                             | packages/svelte component tests (Chromium, Firefox, WebKit) followed by the Node SSR suite                                              |
-| `cd packages/svelte && bun run test:coverage`         | browser (chromium) + SSR coverage reports; browser config enforces thresholds (local/optional — not wired into CI yet)                  |
-| `bun run check:examples`                              | tsc over the examples corpus's .ts files (needs `bun run check` first: dist types)                                                      |
-| `bun run check:docs`                                  | svelte-kit sync + svelte-check for apps/docs (needs `bun run build` first)                                                              |
-| `bun run build:docs`                                  | static docs site → `apps/docs/build/` (needs `bun run build` first; the VR target)                                                      |
-| `bun run manifest:gen` / `bun run manifest:check`     | (re)generate / staleness-check `examples/manifest.ts` from the corpus                                                                   |
-| `bun run test:visual`                                 | Playwright VR suite against `apps/docs/build` (see the VR workflow section)                                                             |
-| `bun run schema:emit`                                 | regenerate `packages/spec/schema/v0.json` (staleness-guarded by a spec test)                                                            |
-| `bun run lifecycle:gen` / `bun run lifecycle:check`   | (re)generate / staleness-check `lifecycle.json` from the index-file lifecycle tags                                                      |
-| `bun run evals`                                       | held-out NL→spec eval harness (tests/evals; OpenRouter API, model via EVAL_MODEL; dry-run with a mock model without OPENROUTER_API_KEY) |
-| `bun run bench:json`                                  | run the named workloads once, write `bench-results.json` (github-action-benchmark format)                                               |
-| `bun run bench:budgets`                               | compare `bench-results.json` against `benchmarks/budgets.json` (provisional budgets, +50%)                                              |
-| `bun run bench:memory` / `bun run bench:memory:check` | capture the forced-GC retained-memory sample / enforce `benchmarks/memory-baselines.json`                                               |
-| `bun run bench` / `bun run bench:smoke`               | mitata pipeline+renderer benchmarks (full / 1k CI smoke)                                                                                |
-| `bun packages/svelte/bin/ggsvelte-render.js`          | the `ggsvelte-render` CLI (spec JSON -> SVG on stdout; JSON-line diagnostics on stderr)                                                 |
-| `Rscript packages/core/tests/fixtures/*/generate.R`   | regenerate the ggplot2-parity fixtures (grouping, stats/positions; needs R + ggplot2)                                                   |
-| `bun run knip`                                        | unused files/exports/dependencies                                                                                                       |
-| `bun run lint:package`                                | publint + attw (esm-only profile) over built packages — build first                                                                     |
-| `bun run lint:actions`                                | actionlint (wasm) over `.github/workflows` (also pre-push when `.github/**` changes; local soft-skip if wasm cannot load, fatal in CI)  |
-| `bun run lint:actions:security`                       | zizmor over `.github/workflows` (needs `uv tool install zizmor`; pre-push skips if missing)                                             |
-| `bun run test:spikes`                                 | retired M0a browser/ssr spike suites (vitest 4 browser mode)                                                                            |
-| `cd spikes/pure && bun test`                          | retired M0a pure spike suites                                                                                                           |
-| `pre-commit run --all-files`                          | everything the pre-commit stage runs                                                                                                    |
-| `pre-commit run --all-files --hook-stage pre-push`    | everything the pre-push stage runs (tsc-build runs first — later hooks need dist/)                                                      |
+| Command                                               | What it does                                                                                                                                      |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bun run check`                                       | `tsc -b` project references (packages/spec, packages/core) — EMITS `dist/` since M0c                                                              |
+| `bun run build`                                       | `bun run check` + `svelte-package` for packages/svelte (everything the publish shape needs)                                                       |
+| `bun run check:svelte`                                | svelte-check `--fail-on-warnings` in packages/svelte (needs `bun run check` first: dist types)                                                    |
+| `bun run lint`                                        | oxlint over the repo (`.oxlintrc.json`; spikes excluded)                                                                                          |
+| `bun run lint:md`                                     | markdownlint-cli2 over `**/*.md` (`.markdownlint-cli2.jsonc`; spikes + node_modules ignored)                                                      |
+| `bun run lint:type-aware`                             | oxlint `--type-aware --deny-warnings` (tsgolint; permanent CI gate)                                                                               |
+| `bun run fmt` / `bun run fmt:check`                   | oxfmt (ts/js/json/css/toml) + prettier (.svelte/.md/.yaml)                                                                                        |
+| `bun run test`                                        | bun unit tests (spec + core + scripts + evals harness; needs `bun run check` first)                                                               |
+| `bun run test:components`                             | packages/svelte component tests (Chromium, Firefox, WebKit) followed by the Node SSR suite                                                        |
+| `cd packages/svelte && bun run test:coverage`         | browser (chromium) + SSR coverage reports; browser config enforces thresholds; CI runs the same chromium+ssr coverage and uploads lcov to Codecov |
+| `bun run check:examples`                              | tsc over the examples corpus's .ts files (needs `bun run check` first: dist types)                                                                |
+| `bun run check:docs`                                  | svelte-kit sync + svelte-check for apps/docs (needs `bun run build` first)                                                                        |
+| `bun run build:docs`                                  | static docs site → `apps/docs/build/` (needs `bun run build` first; the VR target)                                                                |
+| `bun run manifest:gen` / `bun run manifest:check`     | (re)generate / staleness-check `examples/manifest.ts` from the corpus                                                                             |
+| `bun run test:visual`                                 | Playwright VR suite against `apps/docs/build` (see the VR workflow section)                                                                       |
+| `bun run schema:emit`                                 | regenerate `packages/spec/schema/v0.json` (staleness-guarded by a spec test)                                                                      |
+| `bun run lifecycle:gen` / `bun run lifecycle:check`   | (re)generate / staleness-check `lifecycle.json` from the index-file lifecycle tags                                                                |
+| `bun run evals`                                       | held-out NL→spec eval harness (tests/evals; OpenRouter API, model via EVAL_MODEL; dry-run with a mock model without OPENROUTER_API_KEY)           |
+| `bun run bench:json`                                  | run the named workloads once, write `bench-results.json` (github-action-benchmark format)                                                         |
+| `bun run bench:budgets`                               | compare `bench-results.json` against `benchmarks/budgets.json` (provisional budgets, +50%)                                                        |
+| `bun run bench:memory` / `bun run bench:memory:check` | capture the forced-GC retained-memory sample / enforce `benchmarks/memory-baselines.json`                                                         |
+| `bun run bench` / `bun run bench:smoke`               | mitata pipeline+renderer benchmarks (full / 1k CI smoke)                                                                                          |
+| `bun packages/svelte/bin/ggsvelte-render.js`          | the `ggsvelte-render` CLI (spec JSON -> SVG on stdout; JSON-line diagnostics on stderr)                                                           |
+| `Rscript packages/core/tests/fixtures/*/generate.R`   | regenerate the ggplot2-parity fixtures (grouping, stats/positions; needs R + ggplot2)                                                             |
+| `bun run knip`                                        | unused files/exports/dependencies                                                                                                                 |
+| `bun run lint:package`                                | publint + attw (esm-only profile) over built packages — build first                                                                               |
+| `bun run lint:actions`                                | actionlint (wasm) over `.github/workflows` (also pre-push when `.github/**` changes; local soft-skip if wasm cannot load, fatal in CI)            |
+| `bun run lint:actions:security`                       | zizmor over `.github/workflows` (needs `uv tool install zizmor`; pre-push skips if missing)                                                       |
+| `bun run test:spikes`                                 | retired M0a browser/ssr spike suites (vitest 4 browser mode)                                                                                      |
+| `cd spikes/pure && bun test`                          | retired M0a pure spike suites                                                                                                                     |
+| `pre-commit run --all-files`                          | everything the pre-commit stage runs                                                                                                              |
+| `pre-commit run --all-files --hook-stage pre-push`    | everything the pre-push stage runs (tsc-build runs first — later hooks need dist/)                                                                |
 
 CI (`.github/workflows/ci.yml`) runs a `checks` job with exact pre-commit
 parity (both stages) plus unit / component / build / actions-security /
@@ -235,8 +235,14 @@ That runs:
    `packages/svelte/coverage/ssr/`. Numbers are structurally lower (SSR
    paths only) — do not chase SSR-report gaps or put thresholds there.
 
-`test:coverage` is a local / optional gate today. Wiring it into CI is a
-follow-up decision (it is intentionally not part of the CI contract yet).
+CI (`.github/workflows/ci.yml`) runs chromium + SSR coverage on the
+`component-svelte` job and unit-suite coverage (`bun test --coverage`) on the
+`unit` job, then uploads lcov to Codecov via `codecov/codecov-action` (flags
+`unit` / `svelte`, path components for package badges). Content-hash skips omit
+uploads; Codecov carryforward keeps flag totals stable. `fail_ci_if_error: true`
+on the upload steps — set `CODECOV_TOKEN` in repo secrets. Package badges live
+in the package READMEs (`component=packages-spec|packages-core|packages-svelte`);
+the monorepo root badge is overall project coverage.
 
 ## Formatting policy
 

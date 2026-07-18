@@ -1,5 +1,7 @@
 # @ggsvelte/spec
 
+[![codecov](https://codecov.io/gh/ljodea/ggsvelte/branch/main/graph/badge.svg?component=packages-spec)](https://app.codecov.io/gh/ljodea/ggsvelte/tree/main/packages%2Fspec)
+
 The ggsvelte plot specification: `PortableSpec` types, the published JSON
 Schema (`schema/v0.json`), the `normalize()` canonicalizer, two-tier
 `validate()` with the agent error contract (`{ code, path, message,

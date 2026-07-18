@@ -1,5 +1,7 @@
 # @ggsvelte/core
 
+[![codecov](https://codecov.io/gh/ljodea/ggsvelte/branch/main/graph/badge.svg?component=packages-core)](https://app.codecov.io/gh/ljodea/ggsvelte/tree/main/packages%2Fcore)
+
 The framework-agnostic ggsvelte engine: the grammar-of-graphics pipeline
 (stats, positions, panel-aware facets, value-stable scales, two-pass layout)
 and the pure SVG-string renderer. The main entry has no DOM dependency —
