@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784398967091,
+  "lastUpdate": 1784399471277,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -29000,6 +29000,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 167.2422,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "9de810033060d146bd6c26422a11bce28f3cdd39",
+          "message": "feat(svelte): advise on silently-inert interaction wiring (#7) (#292)\n\nThe ADR 0013 ambiguity audit (verdict table appended to the record) found\nexactly two prop combinations that silently do nothing; both now emit\nadvisory diagnostics through the existing ondiagnostic channel:\n\n- INTERACTION_SCOPE_WITHOUT_CONTROLLER: interactionScope without an\n  interaction controller is ignored (resolveInteractionScope derives\n  chart-local scope from key/aes) and now says so.\n- INTERACTION_HANDLER_WITHOUT_CAPABILITY: a handler prop (oninspect/\n  onselect/onzoom/onlegendfocus/onlegendfilter) whose capability prop is\n  not enabled never fires and now says so, with `prop` = the handler and\n  `actual` = the capability to enable. Keyed on capability *requested*\n  (undefined/false = off) so requested-but-degraded configs — which get\n  requires-key or faceted-zoom diagnostics — are never advised twice.\n\nUnlike config diagnostics, wiring advisories deliver once per prop per\nplot instance (deduped Set), so reactive updates cannot spam consumers.\nCombos audited as intentional stay silent: controller state with locally\ndisabled capabilities (the passive-consumer linked-view pattern), and\nloud-by-design TypeErrors (interaction without interactionScope).\n\nComponent tests (vitest browser) cover delivery shape, silence for clean\nand passive patterns, once-per-instance dedup across rerenders, and the\ndev console fallback. The interaction-reference guide sections regenerate\nfrom the catalog. Follow-ups #289 (runtime deprecation diagnostics) and\n#290 (codemod runner) are now referenced from the ADR.\n\nMigration: none — additive (patch changeset included).\n\nCo-authored-by: Claude Fable 5 <noreply@anthropic.com>",
+          "timestamp": "2026-07-18T13:30:35-05:00",
+          "tree_id": "cfdd6abccf30f98d5bb29490e1122bd68089479f",
+          "url": "https://github.com/ljodea/ggsvelte/commit/9de810033060d146bd6c26422a11bce28f3cdd39"
+        },
+        "date": 1784399470577,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.5105,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.2127,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 12.1809,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 13.4938,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 93.2126,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 118.1828,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.1089,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.3404,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 88.2913,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 107.7804,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.8288,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.9732,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 116.8971,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7723,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 27.2961,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.8382,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 31.3635,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 595.0952,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 161.3559,
             "unit": "ms"
           }
         ]
