@@ -1,12 +1,12 @@
 /**
  * Candidate-store datum factories derived from bound layers.
  */
-import { bandKey } from "../scales/train.js";
 import type { CellValue } from "../table.js";
 import type { ColumnTable } from "../table.js";
 import type { CandidateBuildFacts, CandidateDatum } from "../candidate-store.js";
 import type { LineageStore } from "../identity.js";
 
+import { ordinalColorRank } from "./build-candidates-datum-ordinal-rank.js";
 import { candidateAutoMode } from "./frame-candidates-auto-mode.js";
 import type { LayerBinding, ResolvedColorScale } from "./types.js";
 import { deriveLayerGroups } from "./frame-helpers.js";
@@ -37,13 +37,10 @@ export function createRawCandidateDatumResolver(
     const value = (field: string | null): CellValue =>
       field === null ? null : table.column(field)[sourceRow]!;
     const group = groupsFor(facts.layerIndex)[sourceRow] ?? 0;
-    const ordinalRank = (resolved: ResolvedColorScale | null, field: string | null) => {
-      if (resolved?.kind !== "ordinal" || field === null) return -1;
-      const key = bandKey(value(field));
-      return resolved.scale.domain.findIndex((domainValue) => bandKey(domainValue) === key);
-    };
-    const colorRank = ordinalRank(color, binding.color.field);
-    const fillRank = ordinalRank(fill, binding.fill.field);
+    const colorRank = ordinalColorRank(color, binding.color.field, () =>
+      value(binding.color.field),
+    );
+    const fillRank = ordinalColorRank(fill, binding.fill.field, () => value(binding.fill.field));
     return {
       xValue: value(binding.xField),
       yValue: value(binding.yField),

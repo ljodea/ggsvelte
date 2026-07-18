@@ -161,4 +161,19 @@ describe("trainColor (value-stable, decision 0002)", () => {
     const second = trainColor(["y", "z"], revived);
     expect(second.colorOf("y")).toBe(first.colorOf("y"));
   });
+
+  it("exposes O(1) indexOf keyed like color assignment (encodeKey)", () => {
+    // Rank must match palette assignment: 1 and "1" are distinct categories.
+    const scale = trainColor([1, "1", true, "true"]);
+    expect(scale.indexOf(1)).toBe(0);
+    expect(scale.indexOf("1")).toBe(1);
+    expect(scale.indexOf(true)).toBe(2);
+    expect(scale.indexOf("true")).toBe(3);
+    expect(scale.indexOf("missing")).toBeUndefined();
+    // Value-stable: removed series keep assignment ranks for survivors.
+    const afterDrop = trainColor([1, true], scale.state);
+    expect(afterDrop.indexOf(1)).toBe(0);
+    expect(afterDrop.indexOf(true)).toBe(2);
+    expect(afterDrop.indexOf("1")).toBe(1); // still in assignment map
+  });
 });
