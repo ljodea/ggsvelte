@@ -28,7 +28,10 @@
       "project": ["src/**", "tests/**"],
     },
     "packages/svelte": {
-      "entry": ["tests/**/*.test.ts"],
+      // tests/migrations are upgrade-guide fixtures: read by
+      // scripts/migration-fixtures.test.ts via the filesystem (not imports)
+      // and type-checked by svelte-check — invisible to knip's graph.
+      "entry": ["tests/**/*.test.ts", "tests/migrations/**"],
       "project": ["src/**", "tests/**"],
     },
     "benchmarks": {

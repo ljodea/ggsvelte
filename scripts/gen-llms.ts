@@ -954,6 +954,109 @@ See [Interactions](/guide/interactions) for current options, event shapes,
 keyboard behavior, and identity requirements.
 `;
 
+export const UPGRADING_MD = `# Upgrading ggsvelte
+
+One section per released 0.x transition, newest first. Each heading is a
+stable anchor that changesets and release notes link to. Pre-1.0, breaking
+changes ride minor releases; every deprecation or removal ships with a
+migration note here. The pre-release API has its own page:
+[Migrating pre-0.1 interactions](/guide/migrating-pre-0-1).
+
+## 0.1 to 0.2
+
+No source changes are required: every 0.1 prop, callback, and export keeps
+working in 0.2. One environment requirement changed: the \`svelte\` peer
+dependency floor rose from \`^5.29.0\` to \`^5.33.1\`, so upgrade Svelte first.
+The additions below are optional to adopt.
+
+### Optional: shared interaction state with a controller
+
+0.2 adds \`createPlotInteraction\` for linked views: selection, emphasis, and
+zoom state shared across plots, controls, and tables. Chart-local props and
+callbacks remain fully supported — reach for a controller only when more than
+one surface consumes the same interaction state.
+
+Chart-local (unchanged from 0.1):
+
+\`\`\`svelte
+<script lang="ts">
+  import {
+    GeomPoint,
+    GGPlot,
+    type PlotSelection,
+  } from "@ggsvelte/svelte";
+
+  const rows = [
+    { id: "a", flipper: 181, mass: 3750, species: "Adelie" },
+    { id: "b", flipper: 195, mass: 3800, species: "Chinstrap" },
+    { id: "c", flipper: 217, mass: 4500, species: "Gentoo" },
+  ];
+  let selection = $state<PlotSelection<string> | null>(null);
+</script>
+
+<GGPlot
+  data={rows}
+  aes={{ x: "flipper", y: "mass", color: "species" }}
+  key="id"
+  select={{ type: "point", multiple: true }}
+  onselect={(event) => (selection = event)}
+>
+  <GeomPoint />
+</GGPlot>
+
+<p>{selection === null ? 0 : selection.keys.length} selected</p>
+\`\`\`
+
+Shared controller (new in 0.2, optional):
+
+\`\`\`svelte
+<script lang="ts">
+  import {
+    createPlotInteraction,
+    GeomPoint,
+    GGPlot,
+  } from "@ggsvelte/svelte";
+
+  const rows = [
+    { id: "a", flipper: 181, mass: 3750, species: "Adelie" },
+    { id: "b", flipper: 195, mass: 3800, species: "Chinstrap" },
+    { id: "c", flipper: 217, mass: 4500, species: "Gentoo" },
+  ];
+  const scope = { keys: "row-id", x: "flipper-mm", y: "mass-g" } as const;
+  const interaction = createPlotInteraction<string>();
+  const selected = $derived(interaction.selected(scope));
+</script>
+
+<GGPlot
+  data={rows}
+  aes={{ x: "flipper", y: "mass", color: "species" }}
+  key="id"
+  select={{ type: "point", multiple: true }}
+  {interaction}
+  interactionScope={scope}
+>
+  <GeomPoint />
+</GGPlot>
+
+<p>{selected.length} selected</p>
+\`\`\`
+
+See the [linked views example](/examples/interaction/linked-views) and
+[Interactions](/guide/interactions) for the full controller contract.
+
+### Deprecated type aliases
+
+Unchanged in 0.2: these pre-0.1 names have been deprecated since 0.1.0 and
+still compile. Replace them when convenient:
+
+- \`BrushSelection\` → \`IntervalSelection\`
+- \`TooltipContext\` → \`PlotInspectionChange\`
+- \`ZoomDomains\` → \`ReadonlyZoomDomains\`
+
+The payload changes behind these renames are documented in
+[Migrating pre-0.1 interactions](/guide/migrating-pre-0-1#migrate-custom-tooltip-snippets).
+`;
+
 function catalogSection(
   title: string,
   intro: string,
@@ -1173,6 +1276,12 @@ export function guidePages(lifecycle: LifecycleDoc): GuidePage[] {
       title: "Migrating pre-0.1 interactions",
       description: "Move from tooltip and brush props to semantic interaction capabilities.",
       markdown: MIGRATING_PRE_0_1_MD,
+    },
+    {
+      slug: "upgrading",
+      title: "Upgrading ggsvelte",
+      description: "Per-release upgrade notes: what changed, what is optional, what to replace.",
+      markdown: UPGRADING_MD,
     },
   ];
 }

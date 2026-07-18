@@ -86,6 +86,7 @@ ggsvelte-render spec.json --width 640 --height 400 > chart.svg
 
 - Docs + examples: <https://ljodea.github.io/ggsvelte/>
 - Repository: <https://github.com/ljodea/ggsvelte>
+- Upgrading between releases: <https://ljodea.github.io/ggsvelte/guide/upgrading>
 - Pre-0.1 interaction migration: <https://ljodea.github.io/ggsvelte/guide/migrating-pre-0-1>
 - Spec package: [`@ggsvelte/spec`](https://www.npmjs.com/package/@ggsvelte/spec)
 - Core package: [`@ggsvelte/core`](https://www.npmjs.com/package/@ggsvelte/core)
