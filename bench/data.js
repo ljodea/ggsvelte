@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784338171165,
+  "lastUpdate": 1784338232226,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -21503,6 +21503,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 160.5542,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "a34ce9ced5523b19a0db6036bad9fb9d2116b985",
+          "message": "perf(svelte): O(V+D) band domain encodeKey lookup via Map (#205)\n\nBand semantic values resolved with rawDomain.find per selected value\n(O(V·D)) in pixel projection and event axis bounds. Index the domain\nonce with encodeKey → Map, then O(1) get per value. Shared helper keeps\nfirst-match semantics and missing-key skips.\n\nCloses #199",
+          "timestamp": "2026-07-17T20:29:53-05:00",
+          "tree_id": "76099445c4392423a53ed51ed720b9584647350a",
+          "url": "https://github.com/ljodea/ggsvelte/commit/a34ce9ced5523b19a0db6036bad9fb9d2116b985"
+        },
+        "date": 1784338231525,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.4469,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.9485,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 11.3747,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 14.6563,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 87.2407,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 133.5844,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.2459,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.5557,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 90.9661,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 109.122,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 11.7332,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 11.715,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 118.6109,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.8072,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 31.0708,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.5754,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 36.2558,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 626.5968,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 168.8396,
             "unit": "ms"
           }
         ]
