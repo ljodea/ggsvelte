@@ -19,7 +19,7 @@
  * Glyph (text) batches are NOT drawn here: text always renders as SVG
  * (plan: "axes/grids/legends/text always SVG"); planStrata routes them.
  */
-import type { GeometryBatch, PathsBatch, PointsBatch, Scene } from "../scene.js";
+import type { GeometryBatch, PathsBatch, PointsBatch, Scene, SegmentsBatch } from "../scene.js";
 import type { BatchInteractionMask } from "../interaction-mask.js";
 import type { ThemeTokens } from "../theme.js";
 import { themeVar } from "../theme.js";
@@ -307,6 +307,80 @@ function drawPathsSubset(
   }
 }
 
+/**
+ * Trace one segment as a disconnected subpath (moveTo + lineTo).
+ * Multiple segments share one path + stroke when strokeStyle matches —
+ * same multi-subpath contract points use for mono/run fills (overlapping
+ * antialiasing / alpha compositing differs from per-primitive stroke()).
+ */
+function traceSegment(ctx: CanvasRenderingContext2D, batch: SegmentsBatch, j: number): void {
+  const o = j * 4;
+  ctx.moveTo(batch.segments[o]!, batch.segments[o + 1]!);
+  ctx.lineTo(batch.segments[o + 2]!, batch.segments[o + 3]!);
+}
+
+function segmentStrokeAt(
+  batch: SegmentsBatch,
+  j: number,
+  themeInk: string,
+  resolve: ColorResolver,
+): string {
+  const stroke = batch.strokes?.[j] ?? batch.stroke;
+  return stroke === null || stroke === undefined ? themeInk : resolve(stroke);
+}
+
+/**
+ * Draw segments with Θ(runs) stroke() calls: mono batches (no per-segment
+ * `strokes`) are one path; per-segment colors collapse contiguous same-color
+ * runs. Optional `includes` skips primitives for focus-mask subset passes.
+ */
+function drawSegments(
+  ctx: CanvasRenderingContext2D,
+  batch: SegmentsBatch,
+  theme: ThemeTokens,
+  resolve: ColorResolver,
+  includes?: (index: number) => boolean,
+): void {
+  const themeInk = resolve(themeVar("ink", theme));
+  ctx.lineWidth = batch.linewidth;
+  const n = batch.segments.length / 4;
+  if (n === 0) return;
+
+  if (batch.strokes === undefined) {
+    ctx.strokeStyle = segmentStrokeAt(batch, 0, themeInk, resolve);
+    ctx.beginPath();
+    let traced = false;
+    for (let j = 0; j < n; j++) {
+      if (includes !== undefined && !includes(j)) continue;
+      traceSegment(ctx, batch, j);
+      traced = true;
+    }
+    if (traced) ctx.stroke();
+    return;
+  }
+
+  let runStart = 0;
+  while (runStart < n) {
+    if (includes !== undefined && !includes(runStart)) {
+      runStart++;
+      continue;
+    }
+    const color = segmentStrokeAt(batch, runStart, themeInk, resolve);
+    let runEnd = runStart + 1;
+    while (runEnd < n && segmentStrokeAt(batch, runEnd, themeInk, resolve) === color) runEnd++;
+    ctx.strokeStyle = color;
+    ctx.beginPath();
+    let traced = false;
+    for (let j = runStart; j < runEnd; j++) {
+      if (includes !== undefined && !includes(j)) continue;
+      traceSegment(ctx, batch, j);
+      traced = true;
+    }
+    if (traced) ctx.stroke();
+    runStart = runEnd;
+  }
+}
+
 function drawBatchInner(
   ctx: CanvasRenderingContext2D,
   batch: GeometryBatch,
@@ -345,20 +419,9 @@ function drawBatchInner(
       }
       break;
     }
-    case "segments": {
-      const themeInk = resolve(themeVar("ink", theme));
-      ctx.lineWidth = batch.linewidth;
-      const n = batch.segments.length / 4;
-      for (let j = 0; j < n; j++) {
-        const stroke = batch.strokes?.[j] ?? batch.stroke;
-        ctx.strokeStyle = stroke === null || stroke === undefined ? themeInk : resolve(stroke);
-        ctx.beginPath();
-        ctx.moveTo(batch.segments[j * 4]!, batch.segments[j * 4 + 1]!);
-        ctx.lineTo(batch.segments[j * 4 + 2]!, batch.segments[j * 4 + 3]!);
-        ctx.stroke();
-      }
+    case "segments":
+      drawSegments(ctx, batch, theme, resolve);
       break;
-    }
     case "glyphs":
       // Text always renders as SVG (module docs); nothing to draw.
       break;
@@ -407,21 +470,9 @@ function drawBatchSubsetInner(
       }
       break;
     }
-    case "segments": {
-      const themeInk = resolve(themeVar("ink", theme));
-      ctx.lineWidth = batch.linewidth;
-      const n = batch.segments.length / 4;
-      for (let j = 0; j < n; j++) {
-        if (!includes(j)) continue;
-        const stroke = batch.strokes?.[j] ?? batch.stroke;
-        ctx.strokeStyle = stroke === null || stroke === undefined ? themeInk : resolve(stroke);
-        ctx.beginPath();
-        ctx.moveTo(batch.segments[j * 4]!, batch.segments[j * 4 + 1]!);
-        ctx.lineTo(batch.segments[j * 4 + 2]!, batch.segments[j * 4 + 3]!);
-        ctx.stroke();
-      }
+    case "segments":
+      drawSegments(ctx, batch, theme, resolve, includes);
       break;
-    }
     case "glyphs":
       // Text always renders as SVG; the mask still addresses glyph primitives
       // so SVG and canvas callers can share one renderer-neutral mask shape.
