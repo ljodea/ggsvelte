@@ -52,7 +52,7 @@
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "0.18.5",
-    "@changesets/cli": "2.31.0",
+    "@changesets/cli": "2.31.1",
     "@ggsvelte/core": "workspace:*",
     "@ggsvelte/spec": "workspace:*",
     "@playwright/test": "1.61.1",
