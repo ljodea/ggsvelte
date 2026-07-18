@@ -253,16 +253,15 @@ function buildSegmentsIndex(
 /**
  * Path spatial indexes (plot px):
  *  - subpaths: fill hitTest shortlist
- *  - edges: stroke hitTest shortlist (one AABB per consecutive vertex pair)
+ *  - edges: stroke hitTest shortlist only (omitted for filled area batches)
  *  - vertices: queryRect brush shortlist
  */
 interface PathsIndexEntry {
   readonly subpaths: AabbIndexEntry;
-  readonly edges: AabbIndexEntry;
-  /** Edge index → start vertex i (edge runs i → i+1). */
-  readonly edgeStart: Uint32Array;
-  /** Edge index → subpath s (for topmost / first-edge-in-subpath ties). */
-  readonly edgeSubpath: Uint32Array;
+  /** Present only for stroked (non-fill) path batches. */
+  readonly edges: AabbIndexEntry | null;
+  readonly edgeStart: Uint32Array | null;
+  readonly edgeSubpath: Uint32Array | null;
   readonly vertices: PointsIndexEntry;
 }
 
@@ -275,12 +274,13 @@ function buildPathsIndex(
   const minY = new Float64Array(nSub);
   const maxX = new Float64Array(nSub);
   const maxY = new Float64Array(nSub);
-  // First pass: count edges and compute subpath AABBs.
+  const filled = batch.fills !== undefined;
+  // Count stroke edges only when the batch is stroke-tested (not area fill).
   let edgeCount = 0;
   for (let s = 0; s < nSub; s++) {
     const start = batch.pathOffsets[s]!;
     const end = batch.pathOffsets[s + 1]!;
-    if (end > start + 1) edgeCount += end - start - 1;
+    if (!filled && end > start + 1) edgeCount += end - start - 1;
     let sMinX = Infinity;
     let sMinY = Infinity;
     let sMaxX = -Infinity;
@@ -305,29 +305,35 @@ function buildPathsIndex(
       maxY[s] = sMaxY;
     }
   }
-  const eMinX = new Float64Array(edgeCount);
-  const eMinY = new Float64Array(edgeCount);
-  const eMaxX = new Float64Array(edgeCount);
-  const eMaxY = new Float64Array(edgeCount);
-  const edgeStart = new Uint32Array(edgeCount);
-  const edgeSubpath = new Uint32Array(edgeCount);
-  let e = 0;
-  for (let s = 0; s < nSub; s++) {
-    const start = batch.pathOffsets[s]!;
-    const end = batch.pathOffsets[s + 1]!;
-    for (let i = start; i < end - 1; i++) {
-      const x1 = panel.x + batch.positions[i * 2]!;
-      const y1 = panel.y + batch.positions[i * 2 + 1]!;
-      const x2 = panel.x + batch.positions[(i + 1) * 2]!;
-      const y2 = panel.y + batch.positions[(i + 1) * 2 + 1]!;
-      eMinX[e] = Math.min(x1, x2);
-      eMinY[e] = Math.min(y1, y2);
-      eMaxX[e] = Math.max(x1, x2);
-      eMaxY[e] = Math.max(y1, y2);
-      edgeStart[e] = i;
-      edgeSubpath[e] = s;
-      e++;
+  let edges: AabbIndexEntry | null = null;
+  let edgeStart: Uint32Array | null = null;
+  let edgeSubpath: Uint32Array | null = null;
+  if (!filled && edgeCount > 0) {
+    const eMinX = new Float64Array(edgeCount);
+    const eMinY = new Float64Array(edgeCount);
+    const eMaxX = new Float64Array(edgeCount);
+    const eMaxY = new Float64Array(edgeCount);
+    edgeStart = new Uint32Array(edgeCount);
+    edgeSubpath = new Uint32Array(edgeCount);
+    let e = 0;
+    for (let s = 0; s < nSub; s++) {
+      const start = batch.pathOffsets[s]!;
+      const end = batch.pathOffsets[s + 1]!;
+      for (let i = start; i < end - 1; i++) {
+        const x1 = panel.x + batch.positions[i * 2]!;
+        const y1 = panel.y + batch.positions[i * 2 + 1]!;
+        const x2 = panel.x + batch.positions[(i + 1) * 2]!;
+        const y2 = panel.y + batch.positions[(i + 1) * 2 + 1]!;
+        eMinX[e] = Math.min(x1, x2);
+        eMinY[e] = Math.min(y1, y2);
+        eMaxX[e] = Math.max(x1, x2);
+        eMaxY[e] = Math.max(y1, y2);
+        edgeStart[e] = i;
+        edgeSubpath[e] = s;
+        e++;
+      }
     }
+    edges = buildAabbIndex(eMinX, eMinY, eMaxX, eMaxY);
   }
   const nVert = batch.rowIndex.length;
   const xs = new Float64Array(nVert);
@@ -338,7 +344,7 @@ function buildPathsIndex(
   }
   return {
     subpaths: buildAabbIndex(minX, minY, maxX, maxY),
-    edges: buildAabbIndex(eMinX, eMinY, eMaxX, eMaxY),
+    edges,
     edgeStart,
     edgeSubpath,
     vertices: { quadtree: new StaticQuadtree(xs, ys), xs, ys },
@@ -529,6 +535,8 @@ export function buildHitIndex(scene: Scene, options: HitIndexOptions = {}): Scen
             kind: "paths",
           };
         }
+        if (entry.edges === null || entry.edgeStart === null || entry.edgeSubpath === null)
+          return null;
         const pad = batch.linewidth / 2 + tolerance;
         const slop2 = pad * pad;
         let bestS = -1;
