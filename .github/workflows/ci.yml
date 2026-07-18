@@ -1,4 +1,4 @@
-# ggsvelte CI (plan M0b). Parallel jobs after a cached bun install.
+# ggsvelte CI (plan M0b + path routing). Parallel jobs after a cached bun install.
 # All third-party actions pinned by full commit SHA (zizmor-enforced).
 #
 # Linux jobs use repo self-hosted runners labeled `ggsvelte` (ops tooling
@@ -6,6 +6,12 @@
 # pages deploy, vr-approve, bench-trend) stay on GitHub-hosted runners so a
 # compromised CI workspace cannot harvest publish credentials. Windows/macOS
 # matrix rows and manual AT stay hosted as well.
+#
+# Path routing: scripts/ci-routing.ts classifies the changed file set and
+# emits per-job flags. Expensive jobs are skipped when their inputs did not
+# change (docs-only, workflow-only, markdown-only, …). The `ci-gate` job is
+# the single required aggregator so skipped jobs do not look like missing
+# checks. Changing this file forces the full surface (see ci_workflow lane).
 name: CI
 
 on:
@@ -26,16 +32,75 @@ env:
   PLAYWRIGHT_CONTAINER_TAG: v1.61.1-noble
 
 jobs:
+  detect-changes:
+    name: detect-changes (path routing)
+    runs-on: [self-hosted, ggsvelte]
+    permissions:
+      contents: read
+      # pull-requests:read not required — we use event SHAs, not the API.
+    outputs:
+      checks: ${{ steps.route.outputs.checks }}
+      unit: ${{ steps.route.outputs.unit }}
+      component: ${{ steps.route.outputs.component }}
+      consumer: ${{ steps.route.outputs.consumer }}
+      build: ${{ steps.route.outputs.build }}
+      actions_security: ${{ steps.route.outputs.actions_security }}
+      bench_smoke: ${{ steps.route.outputs.bench_smoke }}
+      interaction_perf: ${{ steps.route.outputs.interaction_perf }}
+      vr: ${{ steps.route.outputs.vr }}
+      pages: ${{ steps.route.outputs.pages }}
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.3.14
+      - id: route
+        name: classify changed paths → job flags
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          # PR base SHA is trustworthy; push uses the pre-push tip (may be zeros
+          # on a newly created branch — force-all in that case).
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          zero="0000000000000000000000000000000000000000"
+          if [ -z "${BASE_SHA}" ] || [ "${BASE_SHA}" = "${zero}" ]; then
+            echo "no usable base SHA — force-all"
+            bun scripts/ci-routing.ts emit-github-output --force-all
+            exit 0
+          fi
+          # Ensure the base object exists for the three-dot diff.
+          git fetch --no-tags --depth=1 origin "${BASE_SHA}" 2>/dev/null || true
+          if ! git cat-file -e "${BASE_SHA}^{commit}" 2>/dev/null; then
+            echo "base SHA ${BASE_SHA} not resolvable — force-all"
+            bun scripts/ci-routing.ts emit-github-output --force-all
+            exit 0
+          fi
+          mapfile -t files < <(git diff --name-only "${BASE_SHA}...${HEAD_SHA}" || true)
+          if [ "${#files[@]}" -eq 0 ]; then
+            # Empty diff (empty commit / metadata-only): still run cheap checks.
+            echo "empty changed-file set — checks-only routing"
+            printf '' | bun scripts/ci-routing.ts emit-github-output --stdin
+            exit 0
+          fi
+          printf '%s\n' "${files[@]}" | bun scripts/ci-routing.ts emit-github-output --stdin
+          echo "event=${EVENT_NAME} base=${BASE_SHA} head=${HEAD_SHA} files=${#files[@]}"
+
   checks:
-    name: checks (pre-commit parity, both stages)
+    name: checks (pre-commit stage)
+    needs: detect-changes
+    if: needs.detect-changes.outputs.checks == 'true'
     runs-on: [self-hosted, ggsvelte]
     permissions:
       contents: read
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
-          # Full history: pre-push parity runs manual-AT alias commit-range audits.
-          fetch-depth: 0
           persist-credentials: false
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
@@ -48,21 +113,22 @@ jobs:
       - run: bun install --frozen-lockfile
       - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
       - run: uv tool install pre-commit
+      # Pre-commit stage only. Pre-push parity (build, unit, svelte-check, knip,
+      # type-aware lint, examples/docs check) is covered by dedicated jobs so we
+      # do not pay for them twice on every PR.
       - name: pre-commit stage (parity)
         run: pre-commit run --all-files --show-diff-on-failure
-      - name: pre-push stage (parity)
-        run: pre-commit run --all-files --hook-stage pre-push
 
   unit:
     name: unit (bun test spec + core)
+    needs: detect-changes
+    if: needs.detect-changes.outputs.unit == 'true'
     runs-on: [self-hosted, ggsvelte]
     permissions:
       contents: read
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
-          # Full history: manual-AT alias records audit releaseCommit ranges.
-          fetch-depth: 0
           persist-credentials: false
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
@@ -79,6 +145,8 @@ jobs:
 
   compatibility-matrix:
     name: compatibility matrix (machine-checked source)
+    needs: detect-changes
+    if: needs.detect-changes.outputs.consumer == 'true'
     runs-on: [self-hosted, ggsvelte]
     permissions:
       contents: read
@@ -98,7 +166,8 @@ jobs:
 
   consumer-compat:
     name: packed consumer (${{ matrix.os }}, Node ${{ matrix.node }}, ${{ matrix.packageManager }}, Svelte ${{ matrix.svelte }})
-    needs: compatibility-matrix
+    needs: [detect-changes, compatibility-matrix]
+    if: needs.detect-changes.outputs.consumer == 'true' && needs.compatibility-matrix.result == 'success'
     strategy:
       fail-fast: false
       max-parallel: 4
@@ -132,6 +201,8 @@ jobs:
 
   component:
     name: component (vitest browser mode, pinned Playwright container)
+    needs: detect-changes
+    if: needs.detect-changes.outputs.component == 'true'
     runs-on: [self-hosted, ggsvelte]
     env:
       # GitHub runs the container as root, while /github/home belongs to
@@ -204,14 +275,15 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
-  # Informational only — not a required status check.
+  # Informational only — not a required status check (excluded from ci-gate).
   # Absolute wall-clock p50/p95 budgets are noisy on the shared self-hosted
-  # host (4 concurrent runners on 8 vCPU). Keeping them out of `component`
-  # stops timing flakes from blocking merges while still surfacing regressions
-  # as a dedicated red check. Hard gate remains on `run-bench` PRs via bench.yml.
+  # host (4 concurrent runners on 8 vCPU). Path-gated and independent of the
+  # component job so it does not serialize the critical path. Hard gate remains
+  # on `run-bench` PRs via bench.yml.
   interaction-perf:
     name: interaction-perf (p50/p95, informational)
-    needs: [component]
+    needs: detect-changes
+    if: needs.detect-changes.outputs.interaction_perf == 'true'
     runs-on: [self-hosted, ggsvelte]
     env:
       HOME: /root
@@ -239,10 +311,22 @@ jobs:
       - run: bun install --frozen-lockfile
       - name: build packages and docs for interaction performance fixtures
         run: bun run build && BASE_PATH=/ggsvelte bun run build:docs
-      - name: interaction performance p50/p95 gate
-        run: bun run test:interaction-perf
+      - name: interaction performance p50/p95 (informational — never fail the check)
+        id: perf
+        # Wall-clock budgets flake on the shared self-hosted host. Hard gate is
+        # bench.yml on `run-bench` PRs. Soft-fail here so branch protection that
+        # requires all checks cannot block merges; ci-gate also ignores this job.
+        run: |
+          set +e
+          bun run test:interaction-perf
+          code=$?
+          echo "code=${code}" >> "$GITHUB_OUTPUT"
+          if [ "${code}" -ne 0 ]; then
+            echo "::warning::interaction-perf budgets failed (informational; exit ${code})"
+          fi
+          exit 0
       - name: upload interaction-perf failure artifacts
-        if: failure()
+        if: steps.perf.outputs.code != '0'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: interaction-perf-failure-artifacts
@@ -251,7 +335,9 @@ jobs:
           retention-days: 7
 
   build:
-    name: build (tsc -b, packaging lint)
+    name: build (tsc -b, packaging lint, static analysis)
+    needs: detect-changes
+    if: needs.detect-changes.outputs.build == 'true'
     runs-on: [self-hosted, ggsvelte]
     permissions:
       contents: read
@@ -270,6 +356,17 @@ jobs:
       - run: bun install --frozen-lockfile
       - name: build packages (tsc -b + svelte-package)
         run: bun run build
+      # Former pre-push hooks that are not duplicated by unit/component jobs.
+      - name: svelte-check (packages/svelte)
+        run: bun run check:svelte
+      - name: svelte-check (apps/docs)
+        run: bun run check:docs
+      - name: tsc examples corpus
+        run: bun run check:examples
+      - name: oxlint --type-aware
+        run: bun run lint:type-aware
+      - name: knip
+        run: bun run knip
       - name: publint + attw (real gate — exports point at dist/)
         run: bun run lint:package
       - name: build static docs site (adapter-static; the deployable/VR target)
@@ -286,6 +383,8 @@ jobs:
 
   actions-security:
     name: actions-security (actionlint + zizmor)
+    needs: detect-changes
+    if: needs.detect-changes.outputs.actions_security == 'true'
     runs-on: [self-hosted, ggsvelte]
     permissions:
       contents: read
@@ -310,6 +409,8 @@ jobs:
 
   bench-smoke:
     name: bench-smoke (mitata, 1k workload)
+    needs: detect-changes
+    if: needs.detect-changes.outputs.bench_smoke == 'true'
     runs-on: [self-hosted, ggsvelte]
     permissions:
       contents: read
@@ -339,7 +440,7 @@ jobs:
     # pushes same-repo vr-update/pr-<n> branches as ggsvelte-vr-bot. Any
     # other PR touching tests/visual/__screenshots__/ is rejected — this
     # closes the `SKIP=block-output-paths` local-commit loophole at the
-    # merge gate.
+    # merge gate. Always runs on PRs (cheap git-diff check); not path-routed.
     name: vr-baseline-guard (baselines land only via vr-approve)
     if: github.event_name == 'pull_request'
     runs-on: [self-hosted, ggsvelte]
@@ -372,3 +473,102 @@ jobs:
           fi
           echo "::error::this PR changes tests/visual/__screenshots__/ but is not a same-repo vr-update/pr-<n> branch. Baselines are container-generated only: have a maintainer comment /approve-visuals on the PR, then merge the resulting vr-update branch (see vr-approve.yml and docs/decisions/0009)."
           exit 1
+
+  # Single required aggregator. Skipped jobs are OK when routing disabled them;
+  # a required job that is skipped/failed/cancelled fails the gate.
+  # interaction-perf is intentionally excluded (informational only).
+  ci-gate:
+    name: ci-gate (required aggregator)
+    if: always()
+    needs:
+      - detect-changes
+      - checks
+      - unit
+      - compatibility-matrix
+      - consumer-compat
+      - component
+      - build
+      - actions-security
+      - bench-smoke
+      - vr-baseline-guard
+    runs-on: [self-hosted, ggsvelte]
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.3.14
+      - name: evaluate required jobs
+        env:
+          DETECT_RESULT: ${{ needs.detect-changes.result }}
+          CHECKS_REQ: ${{ needs.detect-changes.outputs.checks }}
+          UNIT_REQ: ${{ needs.detect-changes.outputs.unit }}
+          COMPONENT_REQ: ${{ needs.detect-changes.outputs.component }}
+          CONSUMER_REQ: ${{ needs.detect-changes.outputs.consumer }}
+          BUILD_REQ: ${{ needs.detect-changes.outputs.build }}
+          ACTIONS_REQ: ${{ needs.detect-changes.outputs.actions_security }}
+          BENCH_REQ: ${{ needs.detect-changes.outputs.bench_smoke }}
+          CHECKS_RES: ${{ needs.checks.result }}
+          UNIT_RES: ${{ needs.unit.result }}
+          COMPONENT_RES: ${{ needs.component.result }}
+          CONSUMER_RES: ${{ needs.consumer-compat.result }}
+          BUILD_RES: ${{ needs.build.result }}
+          ACTIONS_RES: ${{ needs.actions-security.result }}
+          BENCH_RES: ${{ needs.bench-smoke.result }}
+          VR_GUARD_RES: ${{ needs.vr-baseline-guard.result }}
+          EVENT_NAME: ${{ github.event_name }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${DETECT_RESULT}" != "success" ]; then
+            echo "::error::detect-changes failed — cannot trust routing"
+            exit 1
+          fi
+          # vr/pages are enforced by their own workflows; interaction_perf is informational.
+          # vr-baseline-guard is always required on pull_request.
+          bun -e '
+            import { evaluateGate, type JobName, type JobPlan, type JobResult } from "./scripts/ci-routing.ts";
+            const env = process.env;
+            const req = (k: string) => env[k] === "true";
+            const required: JobPlan = {
+              checks: req("CHECKS_REQ"),
+              unit: req("UNIT_REQ"),
+              component: req("COMPONENT_REQ"),
+              consumer: req("CONSUMER_REQ"),
+              build: req("BUILD_REQ"),
+              actions_security: req("ACTIONS_REQ"),
+              bench_smoke: req("BENCH_REQ"),
+              interaction_perf: false,
+              vr: false,
+              pages: false,
+            };
+            const results: Partial<Record<JobName, JobResult>> = {
+              checks: env.CHECKS_RES as JobResult,
+              unit: env.UNIT_RES as JobResult,
+              component: env.COMPONENT_RES as JobResult,
+              consumer: env.CONSUMER_RES as JobResult,
+              build: env.BUILD_RES as JobResult,
+              actions_security: env.ACTIONS_RES as JobResult,
+              bench_smoke: env.BENCH_RES as JobResult,
+            };
+            const gate = evaluateGate(required, results);
+            const failures = [...gate.failures];
+            if (env.EVENT_NAME === "pull_request") {
+              const guard = env.VR_GUARD_RES;
+              if (guard !== "success" && guard !== "skipped") {
+                // skipped only if the job if: filtered it out; on PR it always schedules.
+                failures.push(`vr-baseline-guard:${guard}`);
+              }
+              if (guard === "skipped") {
+                failures.push("vr-baseline-guard:skipped");
+              }
+            }
+            if (failures.length) {
+              console.error("ci-gate failed:", failures.join(", "));
+              process.exit(1);
+            }
+            console.log("ci-gate ok");
+          '

@@ -37,8 +37,11 @@ describe("R0 release wiring", () => {
     expect(componentJob).not.toContain("bun run test:interaction-perf");
     expect(componentJob).toContain("interaction-accessibility.spec.ts");
     expect(interactionPerfJob).toContain("bun run test:interaction-perf");
-    expect(interactionPerfJob).toContain("needs: [component]");
+    // Independent of component so it does not serialize the critical path;
+    // still path-gated and informational (hard gate remains on run-bench).
+    expect(interactionPerfJob).not.toContain("needs: [component]");
     expect(interactionPerfJob).toContain("informational");
+    expect(interactionPerfJob).toContain("interaction_perf == 'true'");
     expect(bench).toContain("mcr.microsoft.com/playwright:v1.61.1-noble");
     expect(bench).toContain("bun run test:interaction-perf");
     expect(read("package.json")).toContain('"test:interaction-perf"');
@@ -48,8 +51,29 @@ describe("R0 release wiring", () => {
     );
   });
 
-  it("enforces retained memory on every CI run", () => {
-    expect(read(".github/workflows/ci.yml")).toContain("bun run bench:memory:check");
+  it("enforces retained memory on path-routed bench-smoke CI jobs", () => {
+    const ci = read(".github/workflows/ci.yml");
+    expect(ci).toContain("bun run bench:memory:check");
+    expect(ci).toContain("bench_smoke == 'true'");
+  });
+
+  it("path-routes CI jobs through scripts/ci-routing.ts and a ci-gate aggregator", () => {
+    const ci = read(".github/workflows/ci.yml");
+    expect(ci).toContain("scripts/ci-routing.ts emit-github-output");
+    expect(ci).toContain("  detect-changes:");
+    expect(ci).toContain("  ci-gate:");
+    // Pre-push mega-suite must not double-run on the checks job.
+    expect(ci).not.toContain("hook-stage pre-push");
+    expect(ci).toContain("pre-commit run --all-files --show-diff-on-failure");
+    // Static analysis formerly on pre-push now lives on the build job.
+    expect(ci).toContain("bun run lint:type-aware");
+    expect(ci).toContain("bun run knip");
+    expect(read(".github/workflows/pages.yml")).toContain(
+      "scripts/ci-routing.ts emit-github-output",
+    );
+    expect(read(".github/workflows/vr-compare.yml")).toContain(
+      "scripts/ci-routing.ts emit-github-output",
+    );
   });
 
   it("uses bash for the containerized visual approval job", () => {
