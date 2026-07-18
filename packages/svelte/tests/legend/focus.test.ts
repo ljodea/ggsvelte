@@ -3,24 +3,30 @@ import { describe, expect, it } from "vitest";
 import type { SceneLegend } from "@ggsvelte/core";
 
 import {
-  buildInteractiveLegendEntries,
   buildLegendEntryKeyIndex,
   buildLegendEntryKeyIndexForPlot,
-  clampLegendRovingIndex,
+  type LegendKeyIndexAdapter,
+} from "../../src/lib/legend/entry-key-index.js";
+import {
   findLegendPressedIdentity,
+  reconcileLegendPreview,
+  resolveLegendEmphasisKeys,
+  resolveLegendPreviewKeysDecision,
+} from "../../src/lib/legend/focus-emphasis.js";
+import {
+  planLegendCommittedReconcile,
+  planLegendFocusDisabledClear,
+  planLegendRovingFocusSync,
+} from "../../src/lib/legend/focus-plans.js";
+import {
+  buildInteractiveLegendEntries,
+  clampLegendRovingIndex,
   keysForLegendEntry,
   legendIdentityKey,
   legendInteractionSource,
   moveLegendRovingIndex,
-  planLegendCommittedReconcile,
-  planLegendFocusDisabledClear,
-  planLegendRovingFocusSync,
-  reconcileLegendPreview,
-  resolveLegendEmphasisKeys,
-  resolveLegendPreviewKeysDecision,
   samePropertyKeySet,
   type InteractiveLegendEntry,
-  type LegendKeyIndexAdapter,
 } from "../../src/lib/legend/focus.js";
 
 const discreteFill: SceneLegend = {
