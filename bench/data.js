@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784362120131,
+  "lastUpdate": 1784363948849,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -24716,6 +24716,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 167.2839,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "02d89f5c533932bba257f2368f40f5b700d76266",
+          "message": "perf(core): O(log M) group() closest orth via binary search (#256)\n\n* perf(core): O(log M) group() closest orth via binary search\n\nCandidateStore.group() scanned every member of each non-seed series to pick\nthe nearest orthogonal coordinate. Series ranges are already sorted by orth\nat build time — use lower_bound + equal-distance expand (same batch/source\ntie-break as the linear scan). Non-finite seedOrth keeps the first-member\ncontract.\n\n* fix(core): harden group closest-orth binary search vs rank and ties\n\nAddress Codex review: rank-blocked series ranges fall back to linear;\nnon-finite seedOrth keeps batch/source ties; full orth ties keep first\nmember; +Infinity orth no longer skipped as a lower-bound sentinel.",
+          "timestamp": "2026-07-18T03:38:32-05:00",
+          "tree_id": "b4f820bb218fe30b2ea7e6344906d4110fc81418",
+          "url": "https://github.com/ljodea/ggsvelte/commit/02d89f5c533932bba257f2368f40f5b700d76266"
+        },
+        "date": 1784363948267,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 4.1853,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 4.2205,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 15.6295,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 13.5133,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 88.8028,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 122.2185,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.1702,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.3312,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 91.334,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 110.377,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.9569,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.692,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 120.7622,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7917,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 28.1018,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 9.1824,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 39.0183,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 608.5892,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 161.4244,
             "unit": "ms"
           }
         ]
