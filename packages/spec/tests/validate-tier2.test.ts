@@ -232,6 +232,21 @@ describe("tier 2 — input limits", () => {
     expect(errors[0]?.message).toContain("maxRows");
   });
 
+  it("byte limit skips data checks with a validation-limit diagnostic", () => {
+    // Wide strings force estimateBytes over a tiny maxBytes without many rows.
+    const fat = "x".repeat(2000);
+    const spec = {
+      data: { columns: { x: [fat, fat], y: [1, 2] } },
+      aes: { x: { field: "missing" }, y: { field: "y" } },
+      layers: [{ geom: "point" }],
+    };
+    const errors = errorsOf(spec, { limits: { maxBytes: 100 } });
+    expect(errors.map((e) => e.code)).toEqual(["validation-limit"]);
+    expect(errors[0]?.message).toContain("maxBytes");
+    // Evidence short-circuit: no unknown-field for "missing".
+    expect(errors.some((e) => e.code === "unknown-field")).toBe(false);
+  });
+
   it("depth limit refuses pathological nesting", () => {
     let nested: Record<string, unknown> = { field: "x" };
     for (let i = 0; i < 50; i++) nested = { wrap: nested };
@@ -279,6 +294,23 @@ describe("tier 2 — cross-stage error ordering (characterization)", () => {
       "validation-limit",
     ]);
     expect(errors.at(-1)?.path).toBe("");
+  });
+
+  it("evidence failure still reports structural errors first, then invalid-data-profile", () => {
+    // Structural stages run before resolveFieldEvidence; a bad profile must
+    // not erase earlier grammar diagnostics or reorder them after data errors.
+    const errors = errorsOf(
+      {
+        layers: [{ geom: "point", aes: { x: { field: "xx" } } }],
+        facet: { wrap: { field: "g" }, rows: { field: "h" } },
+      },
+      { profile: { fields: [{ name: "a", type: "numeric" }] } as never },
+    );
+    expect(errors.map((e) => e.code)).toEqual([
+      "missing-required-channel",
+      "facet-form-ambiguous",
+      "invalid-data-profile",
+    ]);
   });
 });
 
