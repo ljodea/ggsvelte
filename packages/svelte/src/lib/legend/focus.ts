@@ -6,10 +6,29 @@
  * semantic key indexing, pressed-state resolution, and roving-index math.
  */
 import type { CellValue, SceneLegend, SceneLegendEntry } from "@ggsvelte/core";
-import { legendValueEqual } from "@ggsvelte/core";
+import { encodeKey } from "@ggsvelte/core";
 
 import type { InteractionSource } from "../interaction/interaction.js";
 import { iterateCandidates, type CandidateLookup } from "../selection/selection.js";
+
+/**
+ * Stable Map key with the same equality as `legendValueEqual`:
+ * Date by getTime, NaN ≡ NaN, and `-0` ≡ `0` (unlike raw `encodeKey`).
+ */
+function legendValueToken(value: unknown): string {
+  if (typeof value === "number" && Object.is(value, -0)) return encodeKey(0);
+  return encodeKey(value);
+}
+
+/** First-match entryIndex map for one discrete legend (findIndex semantics). */
+function buildEntryIndexByToken(entries: readonly SceneLegendEntry[]): ReadonlyMap<string, number> {
+  const byToken = new Map<string, number>();
+  for (let entryIndex = 0; entryIndex < entries.length; entryIndex++) {
+    const token = legendValueToken(entries[entryIndex]!.value);
+    if (!byToken.has(token)) byToken.set(token, entryIndex);
+  }
+  return byToken;
+}
 
 /** Stable renderer identity for one entry in one discrete legend. */
 export interface LegendEntryIdentity {
@@ -184,7 +203,8 @@ export function findLegendPressedIdentity(
  *   rowIndex if not already present.
  * - Visit key is scale:layerIndex:field|const:rowIndex (dedupe repeated candidates).
  * - Skip null rows (field path) / null keys; constant path only needs keys.
- * - Match entry values with legendValueEqual (NaN, Date, -0/0).
+ * - Match entry values via pre-built token→index maps (legendValueEqual
+ *   semantics: NaN, Date, -0/0); O(E) prep + O(1) per row, not findIndex.
  * - Final keys are first-seen unique order, frozen.
  */
 /** Row field value or scaled constant; `skip` when the row is missing. */
@@ -257,10 +277,16 @@ export function buildLegendEntryKeyIndex(
   adapter: LegendKeyIndexAdapter,
 ): ReadonlyMap<string, readonly PropertyKey[]> {
   const index = new Map<string, PropertyKey[]>();
+  /** Per discrete legend: value-token → first matching entryIndex. */
+  const entryLookupByLegend = new Map<
+    Extract<SceneLegend, { type: "discrete" }>,
+    ReadonlyMap<string, number>
+  >();
   for (const sceneLegend of adapter.legends) {
     if (sceneLegend.type !== "discrete") continue;
     for (let entryIndex = 0; entryIndex < sceneLegend.entries.length; entryIndex++)
       index.set(legendIdentityKey({ scale: sceneLegend.scale, entryIndex }), []);
+    entryLookupByLegend.set(sceneLegend, buildEntryIndexByToken(sceneLegend.entries));
   }
   const visited = new Set<string>();
   for (const candidate of adapter.candidates()) {
@@ -274,6 +300,7 @@ export function buildLegendEntryKeyIndex(
           ? adapter.layerScaledConstant?.(candidate.layerIndex, sceneLegend.scale)
           : undefined;
       if (field === undefined && scaledConstant === undefined) continue;
+      const entryByToken = entryLookupByLegend.get(sceneLegend)!;
       const sourceRows = new Set(adapter.lineageKeys(candidate.lineage));
       if (candidate.rowIndex !== null) sourceRows.add(candidate.rowIndex);
       for (const rowIndex of sourceRows) {
@@ -285,10 +312,8 @@ export function buildLegendEntryKeyIndex(
         if (key === null || key === undefined) continue;
         const matched = resolveLegendMatchValue(adapter, field, scaledConstant, rowIndex);
         if (matched.skip) continue;
-        const entryIndex = sceneLegend.entries.findIndex((entry) =>
-          legendValueEqual(entry.value, matched.value),
-        );
-        if (entryIndex < 0) continue;
+        const entryIndex = entryByToken.get(legendValueToken(matched.value));
+        if (entryIndex === undefined) continue;
         index.get(legendIdentityKey({ scale: sceneLegend.scale, entryIndex }))?.push(key);
       }
     }
