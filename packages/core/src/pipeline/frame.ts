@@ -21,12 +21,15 @@ export function buildFrame(
   advisories: Advisory[],
   binRange?: [number, number],
 ): LayerFrame {
+  // Annotation frames are rowless (n=0, empty inputGroups). Do not derive or
+  // overwrite pre-stat groups — identity index would otherwise retain O(n)
+  // source memberships for a layer with no source rows.
+  if (binding.ruleForm === "annotation") {
+    return buildAnnotationFrame(binding, table);
+  }
+
   // Derive once per frame; identity index + bin lineage consume frame.inputGroups.
   const inputGroups = deriveLayerGroups(binding, table);
-
-  if (binding.ruleForm === "annotation") {
-    return { ...buildAnnotationFrame(binding, table), inputGroups };
-  }
 
   const nonIdentity = buildNonIdentityFrame(
     binding,
