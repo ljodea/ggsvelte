@@ -25,10 +25,19 @@
  * source "spec-lint").
  */
 import type { JSONValue } from "./portability.js";
-import type { Aes, CellValue, ChannelName, PositionScaleSpec } from "./schema.js";
+import type { Aes, ChannelName, PositionScaleSpec } from "./schema.js";
 import { GEOM_DEFAULTS } from "./schema.js";
-import type { ProfileFieldType, ValidateOptions } from "./validate-data.js";
-import { effectiveChannel, inferProfileType, inlineColumns } from "./validate-data.js";
+import type {
+  FieldEvidenceEntry,
+  FieldEvidenceMap,
+  ProfileFieldType,
+  ValidateOptions,
+} from "./validate-data.js";
+import {
+  DEFAULT_VALIDATE_LIMITS,
+  effectiveChannel,
+  resolveFieldEvidence,
+} from "./validate-data.js";
 
 /** One lint advisory: never an error, always actionable. */
 export interface SpecAdvisory {
@@ -90,37 +99,21 @@ export type LintAdvisoryCode = keyof typeof LINT_CATALOG;
 // Field-type evidence (inline data or DataProfile; absent = rules skip)
 // ---------------------------------------------------------------------------
 
-interface FieldEvidence {
-  type: ProfileFieldType | null;
-  /** Raw column values (inline data only; null for profile-backed fields). */
-  values: readonly CellValue[] | null;
-}
-
 function isRecord(v: unknown): v is Record<string, unknown> {
   return typeof v === "object" && v !== null && !Array.isArray(v);
 }
 
+/**
+ * Standalone evidence build (lintSpec without a shared map from validate).
+ * Uses resolveFieldEvidence with default limits so behavior matches tier-2
+ * when the same inline data is huge (data-aware rules skip over-limit).
+ */
 function buildEvidence(
   spec: Record<string, unknown>,
   options: ValidateOptions | undefined,
-): Map<string, FieldEvidence> | null {
-  const fields = new Map<string, FieldEvidence>();
-  if (options?.profile !== undefined) {
-    const profile = options.profile;
-    if (!Array.isArray(profile.fields)) return null;
-    for (const f of profile.fields) {
-      if (isRecord(f) && typeof f.name === "string") {
-        fields.set(f.name, { type: f.type ?? null, values: null });
-      }
-    }
-    return fields;
-  }
-  const columns = inlineColumns(spec);
-  if (columns === null) return null;
-  for (const [name, values] of Object.entries(columns)) {
-    fields.set(name, { type: inferProfileType(values), values });
-  }
-  return fields;
+): FieldEvidenceMap | null {
+  const resolved = resolveFieldEvidence(spec, options ?? {}, DEFAULT_VALIDATE_LIMITS);
+  return resolved.status === "ok" ? resolved.fields : null;
 }
 
 const DISCRETE: ReadonlySet<ProfileFieldType> = new Set(["nominal", "ordinal"]);
@@ -134,11 +127,18 @@ const DISCRETE: ReadonlySet<ProfileFieldType> = new Set(["nominal", "ordinal"]);
  * validate(): pass `{ profile }` to lint against out-of-band data, or let the
  * spec's inline data provide the evidence. Rules whose evidence is missing
  * skip silently — lint never fabricates a complaint.
+ *
+ * When called from validate({ lint: true }), pass `sharedEvidence` so field
+ * types/columns are not rebuilt after dataChecks already resolved them.
  */
-export function lintSpec(spec: unknown, options?: ValidateOptions): SpecAdvisory[] {
+export function lintSpec(
+  spec: unknown,
+  options?: ValidateOptions,
+  sharedEvidence?: FieldEvidenceMap | null,
+): SpecAdvisory[] {
   if (!isRecord(spec) || !Array.isArray(spec["layers"])) return [];
   const advisories: SpecAdvisory[] = [];
-  const evidence = buildEvidence(spec, options);
+  const evidence = sharedEvidence === undefined ? buildEvidence(spec, options) : sharedEvidence;
   const plotAes = isRecord(spec["aes"]) ? (spec["aes"] as Aes) : undefined;
   const layers = spec["layers"] as unknown[];
   const scales = isRecord(spec["scales"]) ? spec["scales"] : undefined;
@@ -146,7 +146,7 @@ export function lintSpec(spec: unknown, options?: ValidateOptions): SpecAdvisory
   const fieldOf = (
     layerAes: Aes | undefined,
     channel: ChannelName,
-  ): { field: string; info: FieldEvidence } | null => {
+  ): { field: string; info: FieldEvidenceEntry } | null => {
     const mapped = effectiveChannel(plotAes, layerAes, channel);
     if (mapped === undefined || !("field" in mapped)) return null;
     const info = evidence?.get(mapped.field);
