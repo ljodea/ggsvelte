@@ -242,6 +242,125 @@ export function closestOrthInRange(
   return best;
 }
 
+/**
+ * Nearest candidate in one axis direction within a panel-sorted order.
+ *
+ * `order[panelStart, panelEnd)` must be sorted by ascending primary coordinate,
+ * then id. Prefer min primary > 0 (strictly in-direction), then min orthogonal
+ * distance, then lower id — matching a linear 0..n-1 scan.
+ *
+ * Non-finite seed primary → return seedId (linear never updates from NaN primary).
+ * Complexity: O(log n + k) probes into `order` for a finite seed (k = equal-primary run).
+ *
+ * Optional `onProbe` is for tests that count inspected order indices.
+ */
+export function directionalNearestInOrder(
+  order: ArrayLike<number>,
+  primary: ArrayLike<number>,
+  orth: ArrayLike<number>,
+  panelStart: number,
+  panelEnd: number,
+  startId: number,
+  seedPrimary: number,
+  seedOrth: number,
+  /** true = increasing primary (right/down); false = decreasing (left/up). */
+  forward: boolean,
+  onProbe?: (orderIndex: number) => void,
+): number {
+  if (panelStart >= panelEnd) return startId;
+  if (!Number.isFinite(seedPrimary)) return startId;
+
+  // lower_bound: first index with primary >= seedPrimary (forward) or > seedPrimary after which we step back
+  let lo = panelStart;
+  let hi = panelEnd;
+  while (lo < hi) {
+    const mid = (lo + hi) >>> 1;
+    onProbe?.(mid);
+    if (primary[order[mid]!]! < seedPrimary) lo = mid + 1;
+    else hi = mid;
+  }
+
+  // First candidate strictly in-direction.
+  let runStart: number;
+  if (forward) {
+    // Skip primary === seedPrimary (primary delta 0).
+    runStart = lo;
+    while (runStart < panelEnd && primary[order[runStart]!]! <= seedPrimary) {
+      onProbe?.(runStart);
+      runStart++;
+    }
+    if (runStart >= panelEnd) return startId;
+  } else {
+    // Last with primary < seedPrimary.
+    runStart = lo - 1;
+    if (runStart < panelStart) return startId;
+    onProbe?.(runStart);
+  }
+
+  const targetPrimary = primary[order[runStart]!]!;
+  if (!Number.isFinite(targetPrimary)) return startId;
+
+  // Walk the equal-primary run (forward: ascending indices; backward: descending).
+  let best = -1;
+  let bestOrth = Number.POSITIVE_INFINITY;
+  if (forward) {
+    for (let i = runStart; i < panelEnd; i++) {
+      onProbe?.(i);
+      const id = order[i]!;
+      if (primary[id]! !== targetPrimary) break;
+      if (id === startId) continue;
+      const o = Math.abs(orth[id]! - seedOrth);
+      if (!Number.isFinite(o)) continue;
+      if (best < 0 || o < bestOrth || (o === bestOrth && id < best)) {
+        best = id;
+        bestOrth = o;
+      }
+    }
+  } else {
+    for (let i = runStart; i >= panelStart; i--) {
+      onProbe?.(i);
+      const id = order[i]!;
+      if (primary[id]! !== targetPrimary) break;
+      if (id === startId) continue;
+      const o = Math.abs(orth[id]! - seedOrth);
+      if (!Number.isFinite(o)) continue;
+      if (best < 0 || o < bestOrth || (o === bestOrth && id < best)) {
+        best = id;
+        bestOrth = o;
+      }
+    }
+  }
+  return best < 0 ? startId : best;
+}
+
+/** Panel half-open range [start, end) in an array sorted by panelId then … */
+export function panelRangeInOrder(
+  order: ArrayLike<number>,
+  panelIds: ArrayLike<number>,
+  panelId: number,
+  onProbe?: (orderIndex: number) => void,
+): readonly [number, number] {
+  const n = order.length;
+  // lower_bound panelId
+  let lo = 0;
+  let hi = n;
+  while (lo < hi) {
+    const mid = (lo + hi) >>> 1;
+    onProbe?.(mid);
+    if (panelIds[order[mid]!]! < panelId) lo = mid + 1;
+    else hi = mid;
+  }
+  const start = lo;
+  hi = n;
+  while (lo < hi) {
+    const mid = (lo + hi) >>> 1;
+    onProbe?.(mid);
+    if (panelIds[order[mid]!]! <= panelId) lo = mid + 1;
+    else hi = mid;
+  }
+  return [start, lo];
+}
+
 export function insidePath(
   batch: Extract<GeometryBatch, { kind: "paths" }>,
   start: number,

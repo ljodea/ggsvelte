@@ -4,8 +4,10 @@ import type { CanonicalAxisToken } from "./candidate-axis-token.js";
 import {
   closestOrthInRange,
   defaultAutoMode,
+  directionalNearestInOrder,
   insidePath,
   localAnchor,
+  panelRangeInOrder,
   pathRange,
   primitiveCount,
   segmentDistance,
@@ -191,6 +193,24 @@ export function buildCandidateStoreEager(
   // Dense inverse of `traversal`: candidate id → sequential rank (O(1) next/previous).
   const traversalRank = new Uint32Array(n);
   for (let i = 0; i < n; i++) traversalRank[traversal[i]!] = i;
+
+  // Panel-then-x order for left/right directional traverse (O(log n + k)).
+  // Up/down reuses `traversal` (already sorted panel → y → x → …).
+  // Non-finite primary coords sort after finite so lower_bound stays valid.
+  const orderByX = Uint32Array.from({ length: n }, (_, id) => id);
+  orderByX.sort((a, b) => {
+    const panelDelta = panelIds[a]! - panelIds[b]!;
+    if (panelDelta !== 0) return panelDelta;
+    const xa = xs[a]!;
+    const xb = xs[b]!;
+    const aFinite = Number.isFinite(xa);
+    const bFinite = Number.isFinite(xb);
+    if (aFinite && bFinite) {
+      const d = xa - xb;
+      if (d !== 0) return d;
+    } else if (aFinite !== bFinite) return aFinite ? -1 : 1;
+    return a - b;
+  });
 
   // Coincident multi-member stacks by (panel, x, y) in paint/source order (ascending id).
   // Singletons are omitted so dense plots do not retain n one-element Uint32Arrays;
@@ -592,24 +612,36 @@ export function buildCandidateStoreEager(
         return traversal[(at - 1 + n) % n]!;
       }
       if (!Number.isInteger(startId) || startId < 0 || startId >= n) return traversal[0]!;
-      let best = -1;
-      let primaryBest = Infinity;
-      let orthBest = Infinity;
-      for (let id = 0; id < n; id++) {
-        if (id === startId || panelIds[id] !== panelIds[startId]) continue;
-        const dx = xs[id]! - xs[startId]!;
-        const dy = ys[id]! - ys[startId]!;
-        const primary =
-          direction === "left" ? -dx : direction === "right" ? dx : direction === "up" ? -dy : dy;
-        if (primary <= 0) continue;
-        const orth = direction === "left" || direction === "right" ? Math.abs(dy) : Math.abs(dx);
-        if (primary < primaryBest || (primary === primaryBest && orth < orthBest)) {
-          best = id;
-          primaryBest = primary;
-          orthBest = orth;
-        }
+      // left/right/up/down: O(log n + k) via panel-sorted primary axis indexes
+      // (not a full O(n) scan). Same panel; min primary > 0; min orth; lower id.
+      const panel = panelIds[startId]!;
+      if (direction === "left" || direction === "right") {
+        const [panelStart, panelEnd] = panelRangeInOrder(orderByX, panelIds, panel);
+        return directionalNearestInOrder(
+          orderByX,
+          xs,
+          ys,
+          panelStart,
+          panelEnd,
+          startId,
+          xs[startId]!,
+          ys[startId]!,
+          direction === "right",
+        );
       }
-      return best < 0 ? startId : best;
+      // up/down: reuse traversal (panel → y → x → …).
+      const [panelStart, panelEnd] = panelRangeInOrder(traversal, panelIds, panel);
+      return directionalNearestInOrder(
+        traversal,
+        ys,
+        xs,
+        panelStart,
+        panelEnd,
+        startId,
+        ys[startId]!,
+        xs[startId]!,
+        direction === "down",
+      );
     },
     cycle(seedId, step = 1) {
       if (!Number.isInteger(seedId) || seedId < 0 || seedId >= n) return null;
