@@ -1,3 +1,4 @@
+import { StaticQuadtree } from "./dom/quadtree.js";
 import type { LineageRef } from "./identity.js";
 import type { GeometryBatch, Scene } from "./scene.js";
 import type { CellValue } from "./table.js";
@@ -584,6 +585,28 @@ function buildCandidateStoreEager(
     buffer.length = 0;
   tokenIndex.clear();
 
+  // Spatial index over plot-px anchors (reuse StaticQuadtree). Point-like
+  // candidates shortlist via the tree; rects/segments/paths are refined from a
+  // compact extended-geometry list because their hit region can sit far from
+  // the stored anchor (bars, long segments, filled paths).
+  const spatialXs = Float64Array.from(xs);
+  const spatialYs = Float64Array.from(ys);
+  const spatial = n > 0 ? new StaticQuadtree(spatialXs, spatialYs) : null;
+  const isPoint = new Uint8Array(n);
+  const extendedIds: number[] = [];
+  let maxPointReach = 0;
+  for (let id = 0; id < n; id++) {
+    const batch = scene.batches[batchIds[id]!]!;
+    if (batch.kind === "points") {
+      isPoint[id] = 1;
+      maxPointReach = Math.max(maxPointReach, batch.size + 3);
+    } else {
+      extendedIds.push(id);
+    }
+  }
+  // Far-plane strip bounds: StaticQuadtree prunes on the finite axis only.
+  const STRIP = 1e30;
+
   const exactDistance = (
     id: number,
     px: number,
@@ -683,6 +706,38 @@ function buildCandidateStoreEager(
     return xs[id]! >= loX && xs[id]! <= hiX && ys[id]! >= loY && ys[id]! <= hiY;
   };
 
+  /** Shortlist candidate ids for a nearest query (reverse-id order for topmost ties). */
+  const shortlistNearest = (
+    px: number,
+    py: number,
+    mode: CandidateInspectMode,
+    maxDistance: number,
+  ): number[] => {
+    if (spatial === null || n === 0) return [];
+    const consider = new Set<number>();
+    const addRect = (x0: number, y0: number, x1: number, y1: number) => {
+      for (const id of spatial.queryRect(x0, y0, x1, y1)) consider.add(id);
+    };
+    if (mode === "xy") {
+      addRect(px - maxDistance, py - maxDistance, px + maxDistance, py + maxDistance);
+    } else if (mode === "x") {
+      // Dominant-axis distance is along semantic x (screen y when coord_flip).
+      // Axis token maps stay for group(); nearest uses spatial strips.
+      if (flip) addRect(-STRIP, py - maxDistance, STRIP, py + maxDistance);
+      else addRect(px - maxDistance, -STRIP, px + maxDistance, STRIP);
+    } else if (mode === "y") {
+      if (flip) addRect(px - maxDistance, -STRIP, px + maxDistance, STRIP);
+      else addRect(-STRIP, py - maxDistance, STRIP, py + maxDistance);
+    } else {
+      // exact / auto: point anchors within hit reach + all extended geometry
+      // (rects/segments/paths can match far from their stored anchors).
+      const r = mode === "auto" ? Math.max(maxDistance, maxPointReach) : maxPointReach;
+      addRect(px - r, py - r, px + r, py + r);
+      for (const id of extendedIds) consider.add(id);
+    }
+    return [...consider].toSorted((a, b) => b - a);
+  };
+
   return {
     epoch,
     size: n,
@@ -693,43 +748,45 @@ function buildCandidateStoreEager(
       let best = -1,
         bestDistance = Infinity,
         bestOrth = Infinity;
-      let resultMode: ResolvedCandidateInspectMode = search.mode === "auto" ? "exact" : search.mode;
+      const mode: ResolvedCandidateInspectMode = search.mode === "auto" ? "exact" : search.mode;
+      let resultMode: ResolvedCandidateInspectMode = mode;
       const pathContainment = new Map<string, boolean>();
-      const scan = (mode: ResolvedCandidateInspectMode, resolveAuto = false) => {
-        for (let id = n - 1; id >= 0; id--) {
-          if (search.panelId !== undefined && scene.panels[panelIds[id]!]!.id !== search.panelId)
-            continue;
-          const candidateMode = resolveAuto ? AUTO_MODES[autoModes[id]!]! : mode;
-          if (
-            (candidateMode === "x" && xTokenIds[id] === -1) ||
-            (candidateMode === "y" && yTokenIds[id] === -1)
-          )
-            continue;
-          const distance =
-            candidateMode === "exact"
-              ? exactDistance(id, px, py, pathContainment)
-              : candidateMode === "x"
-                ? Math.abs((flip ? ys[id] : xs[id])! - (flip ? py : px))
-                : candidateMode === "y"
-                  ? Math.abs((flip ? xs[id] : ys[id])! - (flip ? px : py))
-                  : Math.hypot(xs[id]! - px, ys[id]! - py);
-          if (distance === null || (candidateMode !== "exact" && distance > search.maxDistance))
-            continue;
-          const orth =
-            candidateMode === "x"
-              ? Math.abs((flip ? xs[id] : ys[id])! - (flip ? px : py))
+      const ids =
+        spatial === null
+          ? Array.from({ length: n }, (_, id) => n - 1 - id)
+          : shortlistNearest(px, py, search.mode, search.maxDistance);
+      for (const id of ids) {
+        if (search.panelId !== undefined && scene.panels[panelIds[id]!]!.id !== search.panelId)
+          continue;
+        const candidateMode = search.mode === "auto" ? AUTO_MODES[autoModes[id]!]! : mode;
+        if (
+          (candidateMode === "x" && xTokenIds[id] === -1) ||
+          (candidateMode === "y" && yTokenIds[id] === -1)
+        )
+          continue;
+        const distance =
+          candidateMode === "exact"
+            ? exactDistance(id, px, py, pathContainment)
+            : candidateMode === "x"
+              ? Math.abs((flip ? ys[id] : xs[id])! - (flip ? py : px))
               : candidateMode === "y"
-                ? Math.abs((flip ? ys[id] : xs[id])! - (flip ? py : px))
-                : 0;
-          if (distance < bestDistance || (distance === bestDistance && orth < bestOrth)) {
-            best = id;
-            bestDistance = distance;
-            bestOrth = orth;
-            resultMode = candidateMode;
-          }
+                ? Math.abs((flip ? xs[id] : ys[id])! - (flip ? px : py))
+                : Math.hypot(xs[id]! - px, ys[id]! - py);
+        if (distance === null || (candidateMode !== "exact" && distance > search.maxDistance))
+          continue;
+        const orth =
+          candidateMode === "x"
+            ? Math.abs((flip ? xs[id] : ys[id])! - (flip ? px : py))
+            : candidateMode === "y"
+              ? Math.abs((flip ? ys[id] : xs[id])! - (flip ? py : px))
+              : 0;
+        if (distance < bestDistance || (distance === bestDistance && orth < bestOrth)) {
+          best = id;
+          bestDistance = distance;
+          bestOrth = orth;
+          resultMode = candidateMode;
         }
-      };
-      scan(resultMode, search.mode === "auto");
+      }
       const found = fact(best);
       return found === null ? null : { ...found, distance: bestDistance, mode: resultMode };
     },
@@ -822,12 +879,16 @@ function buildCandidateStoreEager(
       const hiX = Math.max(x0, x1);
       const loY = Math.min(y0, y1);
       const hiY = Math.max(y0, y1);
+      if (spatial === null || n === 0) return EMPTY_UINT32;
+      // Point anchors: exact rect membership via the tree. Extended geometry
+      // (rects/segments/paths) can intersect far from the anchor — always refine.
+      const pointHits = new Set(spatial.queryRect(loX, loY, hiX, hiY));
       return Uint32Array.from(
-        traversal.filter(
-          (id) =>
-            (panelId === undefined || scene.panels[panelIds[id]!]!.id === panelId) &&
-            intersects(id, loX, loY, hiX, hiY),
-        ),
+        traversal.filter((id) => {
+          if (panelId !== undefined && scene.panels[panelIds[id]!]!.id !== panelId) return false;
+          if (isPoint[id] === 1) return pointHits.has(id);
+          return intersects(id, loX, loY, hiX, hiY);
+        }),
       );
     },
     dispose() {},
