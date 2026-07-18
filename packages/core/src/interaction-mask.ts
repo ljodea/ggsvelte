@@ -1,3 +1,4 @@
+import { pathSubpathIndex } from "./candidate-geometry.js";
 import type { GeometryBatch } from "./scene.js";
 
 /** Semantic source-row keys associated with one renderer candidate. */
@@ -34,18 +35,7 @@ function pathForVertex(offsets: Uint32Array, vertexIndex: number): number | null
     vertexIndex >= offsets.at(-1)!
   )
     return null;
-
-  let low = 0;
-  let high = offsets.length - 2;
-  while (low <= high) {
-    const middle = (low + high) >>> 1;
-    const start = offsets[middle]!;
-    const end = offsets[middle + 1]!;
-    if (vertexIndex < start) high = middle - 1;
-    else if (vertexIndex >= end) low = middle + 1;
-    else return middle;
-  }
-  return null;
+  return pathSubpathIndex(offsets, vertexIndex);
 }
 
 function rendererPrimitive(batch: GeometryBatch, candidateIndex: number): number | null {
