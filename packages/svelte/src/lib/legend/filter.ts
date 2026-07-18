@@ -24,24 +24,35 @@ export interface LegendFilterEvent {
   readonly clause: LegendFilterClause | null;
 }
 
-function sameValue(left: CellValue, right: CellValue): boolean {
-  return encodeKey(left) === encodeKey(right);
+/** Build encodeKey membership once per clause for O(1) visibility checks. */
+export function legendFilterValueKeys(values: readonly CellValue[]): ReadonlySet<string> {
+  return new Set(values.map((value) => encodeKey(value)));
 }
 
+/** O(1) membership against a prebuilt clause key set. */
+export function isLegendValueKeyVisible(
+  valueKeys: ReadonlySet<string>,
+  value: CellValue,
+  mode: "exclude" | "include",
+): boolean {
+  const present = valueKeys.has(encodeKey(value));
+  return mode === "include" ? present : !present;
+}
+
+/** Single-shot visibility (builds a Set). Prefer `isLegendValueKeyVisible` in loops. */
 export function isLegendValueVisible(
   values: readonly CellValue[],
   value: CellValue,
   mode: "exclude" | "include",
 ): boolean {
-  const present = values.some((candidate) => sameValue(candidate, value));
-  return mode === "include" ? present : !present;
+  return isLegendValueKeyVisible(legendFilterValueKeys(values), value, mode);
 }
 
 export function reconcileLegendFilterValues(
   values: readonly CellValue[],
   catalog: readonly CellValue[],
 ): readonly CellValue[] {
-  const catalogKeys = new Set(catalog.map((value) => encodeKey(value)));
+  const catalogKeys = legendFilterValueKeys(catalog);
   return Object.freeze(values.filter((value) => catalogKeys.has(encodeKey(value))));
 }
 
@@ -53,15 +64,16 @@ export function nextLegendFilterValues(
   mode: "exclude" | "include",
   multiple: boolean,
 ): readonly CellValue[] {
+  const key = encodeKey(value);
   if (!multiple) {
     return Object.freeze(
-      mode === "include" ? [value] : catalog.filter((candidate) => !sameValue(candidate, value)),
+      mode === "include" ? [value] : catalog.filter((candidate) => encodeKey(candidate) !== key),
     );
   }
 
   const baseline = current;
-  const found = baseline.some((candidate) => sameValue(candidate, value));
+  const found = baseline.some((candidate) => encodeKey(candidate) === key);
   return Object.freeze(
-    found ? baseline.filter((candidate) => !sameValue(candidate, value)) : [...baseline, value],
+    found ? baseline.filter((candidate) => encodeKey(candidate) !== key) : [...baseline, value],
   );
 }
