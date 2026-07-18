@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784345974238,
+  "lastUpdate": 1784346014451,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -22336,6 +22336,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 134.0631,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "d0bab6797dc59a347847930114a3375f0617c7ce",
+          "message": "perf(core): spatial index for CandidateStore nearest/queryRect (#225)\n\n* perf(core): spatial index for CandidateStore nearest/queryRect\n\nBuild a StaticQuadtree over plot-px anchors once at store construction so\npointer nearest and brush queryRect are O(log n + k) on large point clouds\ninstead of scanning every candidate. Extended geometry (rects/segments/paths)\nis refined separately so large bars still hit when the probe is far from the\nanchor. Preserves topmost ties, panel filters, and mode distance semantics.\n\nCloses #214\n\n* perf(core): build queryRect hits from shortlist, not full traversal\n\nCollect point hits from the quadtree and refine extended geometry only,\nthen order by traversal rank. Avoids an O(n) walk of every candidate on\neach brush query while preserving result order.\n\n* fix(core): include axis strips in auto-mode nearest shortlist\n\nWhen nearest runs with mode \"auto\", candidates may resolve to x/y (e.g.\nboxplot outliers). Shortlist with dominant-axis strips in addition to the\neuclidean square so orthogonal distance cannot drop a valid axis hit.\n\nAddresses Codex P2 on #225.",
+          "timestamp": "2026-07-17T22:39:31-05:00",
+          "tree_id": "c1cda8c4d2e213f8c860919915b3bf84636b76ea",
+          "url": "https://github.com/ljodea/ggsvelte/commit/d0bab6797dc59a347847930114a3375f0617c7ce"
+        },
+        "date": 1784346013293,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.8904,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.9164,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 10.3385,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 15.3199,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 85.6819,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 120.3327,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.3549,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.4153,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 87.3002,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 108.7217,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 14.2792,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 13.3061,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 119.6186,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7914,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 28.79,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 9.2414,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 37.3116,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 615.1678,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 161.5799,
             "unit": "ms"
           }
         ]
