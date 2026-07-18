@@ -63,6 +63,49 @@ describe("facet interval consumption", () => {
     ).toEqual(["moved"]);
   });
 
+  // Independent consumption indexes candidates by panelId once (O(C + R·c_panel)),
+  // not re-filters the full candidate list per record (O(R·C)). Structural
+  // property of the implementation; perf-regression coverage lives in the
+  // bench-smoke job, not a wall-clock unit assertion (flakes under CI contention).
+  it("intersects independent keys only with same-panel candidates across many panels", () => {
+    const panelCount = 40;
+    const candidatesPerPanel = 80;
+    // Keep first 10 candidate keys per panel; also inject foreign keys that
+    // only exist on the next panel so a wrong-panel scan would leak them.
+    const keptPerPanel = 10;
+    const multiPanels = Array.from({ length: panelCount }, (_, p) => ({ id: `p${p}` }));
+    const multiCandidates: IntervalConsumptionCandidate<string>[] = multiPanels.flatMap(
+      (panel, p) =>
+        Array.from({ length: candidatesPerPanel }, (_, j) => ({
+          panelId: panel.id,
+          xValue: j,
+          keys: [`p${p}-c${j}`],
+        })),
+    );
+    const multiRecords = multiPanels.map((panel, p) => {
+      const ownKeys = Array.from({ length: keptPerPanel }, (_, j) => `p${p}-c${j}`);
+      const foreignKeys = Array.from({ length: 5 }, (_, j) => `p${(p + 1) % panelCount}-c${j}`);
+      return record(panel.id, "independent", [...ownKeys, ...foreignKeys]);
+    });
+    // Dormant panel brush must not contribute even if its keys exist elsewhere.
+    multiRecords.push(record("dormant", "independent", ["p0-c0", "ghost"]));
+
+    const keys = consumeIntervalKeys({
+      records: multiRecords,
+      panels: multiPanels,
+      candidates: multiCandidates,
+    });
+
+    // 40 panels × 10 same-panel keys each; foreign and dormant keys excluded.
+    const expected = multiPanels.flatMap((panel, p) =>
+      Array.from({ length: keptPerPanel }, (_, j) => `p${p}-c${j}`),
+    );
+    expect(keys).toEqual(expected);
+    expect(keys).toHaveLength(panelCount * keptPerPanel);
+    expect(keys).not.toContain("ghost");
+    expect(keys).not.toContain("p0-c10");
+  });
+
   it("atomically replaces chart-local records when the preset changes", () => {
     const independent = [
       record("north", "independent", ["n1"]),

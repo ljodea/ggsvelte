@@ -395,19 +395,17 @@ export function createInspectionCoordinator<
       const matches: CandidateFacts[] = [];
       for (let id = 0; id < input.model.candidates.size; id++) {
         const candidate = input.model.candidates.candidate(id);
-        const logicalIdentity =
-          candidate === null
-            ? ""
-            : `${axisToken(candidate.xToken)}|${axisToken(candidate.yToken)}|${input.model.lineage.keys(candidate.lineage).join(",")}`;
-        if (
-          candidate?.layerIndex === prior.layerIndex &&
-          candidate.rowIndex === prior.seedRow &&
-          candidate.kind === prior.seedKind &&
-          candidateBatchRole(input.model, candidate) === prior.seedBatchRole &&
-          candidate.primitiveIndex === prior.seedPrimitiveIndex &&
-          logicalIdentity === prior.seedLogicalIdentity
-        )
-          matches.push(candidate);
+        // Cheap filters first — lineage.keys join is O(L) and only needed for
+        // survivors that already match layer/row/kind/role/primitive (#229).
+        if (candidate === null) continue;
+        if (candidate.layerIndex !== prior.layerIndex) continue;
+        if (candidate.rowIndex !== prior.seedRow) continue;
+        if (candidate.kind !== prior.seedKind) continue;
+        if (candidate.primitiveIndex !== prior.seedPrimitiveIndex) continue;
+        if (candidateBatchRole(input.model, candidate) !== prior.seedBatchRole) continue;
+        const logicalIdentity = `${axisToken(candidate.xToken)}|${axisToken(candidate.yToken)}|${input.model.lineage.keys(candidate.lineage).join(",")}`;
+        if (logicalIdentity !== prior.seedLogicalIdentity) continue;
+        matches.push(candidate);
       }
       seed = matches.length === 1 ? matches[0]! : null;
     } else {

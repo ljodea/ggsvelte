@@ -812,6 +812,52 @@ describe("semantic inspection resolver", () => {
     model.dispose();
   });
 
+  // Keyless reconcilePinned must apply cheap layer/row/kind filters before
+  // materializing lineage identity joins (issue #229). Without early exit,
+  // every candidate pays O(L) join cost even when it cannot match.
+  it("skips lineage.keys for keyless pin candidates that fail cheap filters", () => {
+    const data = Array.from({ length: 40 }, (_, index) => ({
+      id: `r${index}`,
+      x: index,
+      y: (index % 7) + 1,
+    }));
+    const makeModel = (width: number) =>
+      runPipeline(
+        gg(data, aes({ x: "x", y: "y" }))
+          .geomPoint()
+          .spec(),
+        { width, height: 300 },
+      );
+    const first = makeModel(400);
+    const resized = makeModel(700);
+    expect(first.candidates.size).toBeGreaterThan(10);
+
+    const coordinator = createInspectionCoordinator(() => null);
+    const seed = first.candidates.candidate(0)!;
+    coordinator.resolve({
+      model: first,
+      seed,
+      mode: "exact",
+      state: "pinned",
+      source: "pointer",
+      identityEpoch: "same-data",
+      layoutEpoch: 1,
+    });
+
+    const keysSpy = vi.spyOn(resized.lineage, "keys");
+    const reconciled = coordinator.reconcilePinned({
+      model: resized,
+      identityEpoch: "same-data",
+      layoutEpoch: 2,
+    });
+    expect(reconciled).not.toBeNull();
+    // Cheap-filter survivors are O(matches); a full-store join walk is O(C).
+    // Materialization may call keys a few more times for the matched seed.
+    expect(keysSpy.mock.calls.length).toBeLessThan(resized.candidates.size);
+    first.dispose();
+    resized.dispose();
+  });
+
   // uniqueKeysFromRowIndexes builds one membership Set for the lineage walk
   // (issue #200). Array#includes-based first-seen would construct zero Sets.
   it("allocates a membership Set when materializing aggregate sourceKeys", () => {
