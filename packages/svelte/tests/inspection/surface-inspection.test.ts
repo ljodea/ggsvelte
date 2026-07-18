@@ -311,22 +311,37 @@ describe("buildQueuedInspectFrame", () => {
     kind: "point" as const,
   };
   const fallback = {
+    id: 8,
+    epoch: 7,
+    candidateIndex: 8,
+    batchIndex: 0,
+    primitiveIndex: 0,
     layerIndex: 0,
     panelIndex: 0,
+    panelId: "p0",
     rowIndex: 9,
+    lineage: 0,
     x: 1,
     y: 2,
-    kind: "point" as const,
+    xValue: 1,
+    yValue: 2,
+    xToken: { kind: "number" as const, value: 1 },
+    yToken: { kind: "number" as const, value: 2 },
+    seriesId: 0,
+    seriesRank: 0,
+    sourceOrder: 9,
+    autoMode: "exact" as const,
+    kind: "points" as const,
   };
 
-  it("uses fallbackHit only when match is null and leaves candidate null", () => {
+  it("uses fallback candidate identity when semantic nearest misses", () => {
     let fallbackCalls = 0;
     let panelCalls = 0;
     const built = buildQueuedInspectFrame({
       match: null,
       source: "pointer",
       epoch: 7,
-      fallbackHit: () => {
+      fallbackCandidate: () => {
         fallbackCalls += 1;
         return fallback;
       },
@@ -336,21 +351,38 @@ describe("buildQueuedInspectFrame", () => {
       },
     });
     expect(fallbackCalls).toBe(1);
-    expect(panelCalls).toBe(0);
+    expect(panelCalls).toBe(1);
     expect(built).toEqual({
-      queued: { hit: fallback, source: "pointer" },
-      candidate: null,
+      queued: {
+        hit: {
+          layerIndex: 0,
+          panelIndex: 0,
+          rowIndex: 9,
+          x: 1,
+          y: 2,
+          kind: "points",
+        },
+        source: "pointer",
+        candidate: fallback,
+      },
+      candidate: {
+        epoch: 7,
+        id: 8,
+        panelId: "p0",
+        x: 1,
+        y: 2,
+      },
     });
   });
 
-  it("builds hit + queued mode + candidate from match without calling fallbackHit", () => {
+  it("builds hit + queued mode + candidate from match without calling fallback", () => {
     let fallbackCalls = 0;
     let panelCalls = 0;
     const built = buildQueuedInspectFrame({
       match,
       source: "touch",
       epoch: 11,
-      fallbackHit: () => {
+      fallbackCandidate: () => {
         fallbackCalls += 1;
         return fallback;
       },

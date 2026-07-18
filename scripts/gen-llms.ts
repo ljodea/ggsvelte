@@ -962,6 +962,64 @@ changes ride minor releases; every deprecation or removal ships with a
 migration note here. The pre-release API has its own page:
 [Migrating pre-0.1 interactions](/guide/migrating-pre-0-1).
 
+## 0.2 to 0.3
+
+### Replace custom hit indexes with CandidateStore
+
+The experimental \`buildHitIndex\` export and its \`SceneHitIndex\` types have been
+removed. Every render model already owns a lazy \`CandidateStore\` with the same exact
+geometry hit behavior, so custom browser hosts no longer build and retain a second
+spatial index.
+
+Before 0.3:
+
+\`\`\`ts
+import { buildHitIndex } from "@ggsvelte/core/dom";
+
+const hitIndex = buildHitIndex(model.scene);
+const hit = hitIndex.hitTest(plotX, plotY);
+\`\`\`
+
+In 0.3, use the model-owned candidate identity directly. \`hitTest()\` follows
+paint order, honors panel clipping, and returns \`CandidateFacts\`. Rectangle
+queries remain available as \`model.candidates.queryRect(...)\` candidate ids.
+
+\`\`\`svelte
+<script lang="ts">
+  import { GeomPoint, GGPlot, type RenderModel } from "@ggsvelte/svelte";
+
+  const rows = [
+    { id: "a", x: 1, y: 3 },
+    { id: "b", x: 2, y: 4 },
+  ];
+  let model = $state<RenderModel | null>(null);
+  let hitRow = $state<number | null>(null);
+
+  function inspectPlotPixel(x: number, y: number): void {
+    hitRow = model?.candidates.hitTest(x, y)?.rowIndex ?? null;
+  }
+</script>
+
+<GGPlot
+  data={rows}
+  aes={{ x: "x", y: "y" }}
+  key="id"
+  inspect
+  onrender={(next) => (model = next)}
+>
+  <GeomPoint />
+</GGPlot>
+
+<button type="button" onclick={() => inspectPlotPixel(100, 100)}>
+  Resolve plot pixel
+</button>
+<p>{hitRow === null ? "No hit" : \`Row \${hitRow}\`}</p>
+\`\`\`
+
+For a separately constructed scene, call \`buildCandidateStore(scene, {
+hitTolerance })\` from \`@ggsvelte/core\`. The old tolerance default remains 3
+plot pixels.
+
 ## 0.1 to 0.2
 
 No source changes are required: every 0.1 prop, callback, and export keeps

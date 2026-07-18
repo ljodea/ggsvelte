@@ -13,8 +13,8 @@
  *
  * Data is generated from a seeded PRNG so runs are comparable.
  */
-import { planStrata, renderToSVGString, runPipeline } from "@ggsvelte/core";
-import { buildHitIndex, drawStratum } from "@ggsvelte/core/dom";
+import { buildCandidateStore, planStrata, renderToSVGString, runPipeline } from "@ggsvelte/core";
+import { drawStratum } from "@ggsvelte/core/dom";
 import { aes, gg } from "@ggsvelte/spec";
 import type { PortableSpec } from "@ggsvelte/spec";
 
@@ -296,14 +296,14 @@ export function buildWorkloads(smoke: boolean): Workload[] {
       {
         id: `canvas cold scatter ${label}`,
         group: groupLabel,
-        bench: `canvas cold ${label} (pipeline + plan + draw + hit index)`,
+        bench: `canvas cold ${label} (pipeline + plan + draw + candidate index)`,
         fn: () => {
           const m = runPipeline(spec, opts);
           const plan = planStrata(m.scene, m.layerBackends);
           for (const stratum of plan) {
             if (stratum.backend === "canvas") drawStratum(ctx, m.scene, stratum.batches, resolve);
           }
-          buildHitIndex(m.scene);
+          m.candidates.hitTest(400, 250);
         },
       },
       {
@@ -317,8 +317,8 @@ export function buildWorkloads(smoke: boolean): Workload[] {
       {
         id: `hit-index build ${label}`,
         group: groupLabel,
-        bench: `hit index build ${label} points`,
-        fn: () => buildHitIndex(model.scene),
+        bench: `candidate index build ${label} points`,
+        fn: () => buildCandidateStore(model.scene).hitTest(400, 250),
       },
       {
         id: `candidate lookup ${label}`,

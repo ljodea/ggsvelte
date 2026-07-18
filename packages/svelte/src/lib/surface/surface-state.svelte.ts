@@ -15,7 +15,6 @@
  * position (after diagnostics effects, before catalog/focus/inspection).
  */
 import type { CandidateFacts, CellValue, RenderModel } from "@ggsvelte/core";
-import type { SceneHitIndex } from "@ggsvelte/core/dom";
 
 import type { InspectionState } from "../inspection/inspection-state.svelte.js";
 import type { IntervalState } from "../interval/interval-state.svelte.js";
@@ -87,8 +86,6 @@ export type SurfaceStateDeps = {
    * availableTools (codex P1-4).
    */
   surfaceInteractive: () => boolean;
-  /** Pointer-move nearest-candidate fallback reads it. */
-  hitIndex: () => SceneHitIndex | null;
   /** Capture-click reads it — deferred closure, same #165 pattern. */
   candidateSemanticKeys: (candidate: CandidateFacts) => PropertyKey[];
   /** Sibling controllers (handler-only; inspection earlier, interval later). */
@@ -297,12 +294,12 @@ export function createSurfaceState(deps: SurfaceStateDeps): SurfaceState {
             mode: action.mode,
             maxDistance: action.maxDistance,
           }) ?? null;
-        // One null branch for hit + reducer candidate (lazy hitTest / panelId).
+        // One null branch for exact-geometry fallback + reducer candidate.
         const frame = buildQueuedInspectFrame({
           match,
           source: action.source,
           epoch: model?.runId ?? 0,
-          fallbackHit: () => deps.hitIndex()?.hitTest(p.x, p.y) ?? null,
+          fallbackCandidate: () => model?.candidates.hitTest(p.x, p.y) ?? null,
           panelIdForIndex: (index) => panelId(index),
         });
         deps.inspection().queuePointerFrame(frame.queued, reducer.frameToken());

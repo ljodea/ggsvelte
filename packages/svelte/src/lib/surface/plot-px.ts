@@ -1,5 +1,14 @@
-import type { CandidateFacts } from "@ggsvelte/core";
-import type { SceneHit } from "@ggsvelte/core/dom";
+import type { CandidateFacts, GeometryBatch } from "@ggsvelte/core";
+
+/** Lightweight interaction projection of a model-owned candidate. */
+export type SceneHit = {
+  readonly layerIndex: number;
+  readonly panelIndex: number;
+  readonly rowIndex: number | null;
+  readonly x: number;
+  readonly y: number;
+  readonly kind: GeometryBatch["kind"];
+};
 
 export type ClientRectSize = {
   readonly left: number;
@@ -39,81 +48,6 @@ export function hitFromCandidate(candidate: CandidateFacts): SceneHit {
     y: candidate.y,
     kind: candidate.kind,
   };
-}
-
-/** Pixel tolerance for matching a hit back to a stored candidate (both axes). */
-export const CANDIDATE_HIT_TOLERANCE = 0.5;
-
-/**
- * Spatial candidate store surface for hit→facts rematch.
- * `queryRect` shortlists by anchor/extended AABB (O(log C + k)); `candidate`
- * materializes facts. Production uses the real CandidateStore.
- */
-export type SpatialCandidateSource = {
-  queryRect(
-    x0: number,
-    y0: number,
-    x1: number,
-    y1: number,
-    panelId?: string,
-  ): Uint32Array | readonly number[];
-  candidate(id: number): CandidateFacts | null;
-};
-
-function isSpatialCandidateSource(
-  value: Iterable<CandidateFacts> | SpatialCandidateSource,
-): value is SpatialCandidateSource {
-  if (typeof value !== "object" || value === null) return false;
-  const record = value as Record<string, unknown>;
-  return typeof record["queryRect"] === "function" && typeof record["candidate"] === "function";
-}
-
-function candidateMatchesHit(candidate: CandidateFacts, hit: SceneHit, tolerance: number): boolean {
-  return (
-    candidate.layerIndex === hit.layerIndex &&
-    candidate.panelIndex === hit.panelIndex &&
-    candidate.rowIndex === hit.rowIndex &&
-    candidate.kind === hit.kind &&
-    Math.abs(candidate.x - hit.x) < tolerance &&
-    Math.abs(candidate.y - hit.y) < tolerance
-  );
-}
-
-/**
- * Find the first candidate matching a SceneHit identity + proximity.
- *
- * - **Iterable:** caller-owned order (production used id-ascending walks).
- * - **Spatial store:** `queryRect` shortlist around the hit, then exact filters
- *   — O(log C + k) instead of O(C). Prefer this on large charts.
- *
- * Tolerance is exclusive: |Δ| < tol matches; |Δ| === tol does not.
- * Optional `panelId` scopes the spatial shortlist (store panel filter).
- */
-export function matchCandidateFromHit(
-  candidates: Iterable<CandidateFacts> | SpatialCandidateSource,
-  hit: SceneHit,
-  tolerance: number = CANDIDATE_HIT_TOLERANCE,
-  panelId?: string,
-): CandidateFacts | null {
-  if (isSpatialCandidateSource(candidates)) {
-    const ids = candidates.queryRect(
-      hit.x - tolerance,
-      hit.y - tolerance,
-      hit.x + tolerance,
-      hit.y + tolerance,
-      panelId,
-    );
-    // Store queryRect orders by traversal rank (id-ascending among hits).
-    for (const id of ids) {
-      const candidate = candidates.candidate(id);
-      if (candidate !== null && candidateMatchesHit(candidate, hit, tolerance)) return candidate;
-    }
-    return null;
-  }
-  for (const candidate of candidates) {
-    if (candidateMatchesHit(candidate, hit, tolerance)) return candidate;
-  }
-  return null;
 }
 
 /**

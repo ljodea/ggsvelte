@@ -41,6 +41,8 @@ export interface CandidateStoreOptions {
   readonly epoch?: number;
   /** coord_flip maps semantic x to screen y and semantic y to screen x. */
   readonly flip?: boolean;
+  /** Pointer hit slop around points and strokes in plot pixels (default 3). */
+  readonly hitTolerance?: number;
   readonly datum?: (facts: CandidateBuildFacts) => CandidateDatum | undefined;
 }
 export interface CandidateFacts extends CandidateBuildFacts {
@@ -84,6 +86,8 @@ export interface CandidateStore {
   readonly x: Float32Array;
   readonly y: Float32Array;
   candidate(id: number): CandidateFacts | null;
+  /** Topmost painted candidate at a plot-pixel position, or null. */
+  hitTest(x: number, y: number): CandidateFacts | null;
   nearest(
     x: number,
     y: number,
