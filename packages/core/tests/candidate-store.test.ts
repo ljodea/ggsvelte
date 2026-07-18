@@ -284,12 +284,18 @@ describe("CandidateStore", () => {
     expect(store.cycle(4, -1)).toBe(3);
     expect(store.cycle(3, 2)).toBe(3);
     expect(store.cycle(3, 0)).toBe(3);
-    // Singleton stack: step is a no-op.
+    // Singleton stack: step is a no-op (no retained one-element stack required).
     expect(store.cycle(0, 1)).toBe(0);
     expect(store.cycle(0, -3)).toBe(0);
-    // Invalid seed returns null (bounds only; same contract as before).
+    // Invalid seed returns null (bounds + non-integer, matching other store entry points).
     expect(store.cycle(-1, 1)).toBeNull();
     expect(store.cycle(5, 1)).toBeNull();
+    expect(store.cycle(1.5, 1)).toBeNull();
+    expect(store.cycle(Number.NaN, 1)).toBeNull();
+    // Non-finite / non-integral step falls back to the seed (prior contract).
+    expect(store.cycle(3, Number.NaN)).toBe(3);
+    expect(store.cycle(3, Number.POSITIVE_INFINITY)).toBe(3);
+    expect(store.cycle(3, 1.5)).toBe(3);
     expect(store.traverse(0, "down")).toBe(3);
     expect(store.queryRect(5, 15, 15, 45)).toEqual(new Uint32Array([0, 3, 4, 1]));
   });

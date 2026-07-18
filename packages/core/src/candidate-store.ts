@@ -494,9 +494,10 @@ function buildCandidateStoreEager(
   const traversalRank = new Uint32Array(n);
   for (let i = 0; i < n; i++) traversalRank[traversal[i]!] = i;
 
-  // Coincident stacks by (panel, x, y) in paint/source order (ascending id), so
-  // `cycle` is modular arithmetic over a prebuilt stack instead of an O(n) rescan.
-  const coincidentStack: Uint32Array[] = Array.from({ length: n });
+  // Coincident multi-member stacks by (panel, x, y) in paint/source order (ascending id).
+  // Singletons are omitted so dense plots do not retain n one-element Uint32Arrays;
+  // `cycle` treats a missing stack as identity. Multi-member stacks make cycle O(1).
+  const coincidentStack: (Uint32Array | undefined)[] = Array.from({ length: n });
   const coincidentAt = new Uint32Array(n);
   {
     const groups = new Map<string, number[]>();
@@ -510,12 +511,14 @@ function buildCandidateStoreEager(
       members.push(id);
     }
     for (const members of groups.values()) {
-      // Typed arrays are not freezeable in all runtimes; treat as immutable by convention.
-      const stack = Uint32Array.from(members);
-      for (let i = 0; i < members.length; i++) {
-        const id = members[i]!;
-        coincidentStack[id] = stack;
-        coincidentAt[id] = i;
+      if (members.length >= 2) {
+        // Typed arrays are not freezeable in all runtimes; treat as immutable by convention.
+        const stack = Uint32Array.from(members);
+        for (let i = 0; i < members.length; i++) {
+          const id = members[i]!;
+          coincidentStack[id] = stack;
+          coincidentAt[id] = i;
+        }
       }
       members.length = 0;
     }
@@ -835,11 +838,14 @@ function buildCandidateStoreEager(
       return best < 0 ? startId : best;
     },
     cycle(seedId, step = 1) {
-      if (seedId < 0 || seedId >= n) return null;
-      const stack = coincidentStack[seedId]!;
+      if (!Number.isInteger(seedId) || seedId < 0 || seedId >= n) return null;
+      const stack = coincidentStack[seedId];
+      // No multi-member stack → singleton; step is a no-op.
+      if (stack === undefined) return seedId;
       const at = coincidentAt[seedId]!;
       const next = (((at + step) % stack.length) + stack.length) % stack.length;
-      return stack[next]!;
+      // Non-finite / non-integral step yields a non-element index; fall back to seed.
+      return stack[next] ?? seedId;
     },
     queryRect(x0, y0, x1, y1, panelId) {
       const loX = Math.min(x0, x1);
