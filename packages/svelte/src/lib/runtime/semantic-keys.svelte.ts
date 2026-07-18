@@ -88,19 +88,82 @@ export type ResolveSemanticKeysResult = {
 };
 
 /**
+ * O(R) order fingerprint for plot data — row *references* and length, not
+ * deep cell values. In-place reverse bumps the token; in-place cell edits on
+ * the same row objects do not (hosts should replace rows/arrays for identity).
+ *
+ * Avoids the former O(R·F) `JSON.stringify` of every cell on each epoch read.
+ */
+export function dataContentOrderToken(
+  data: unknown,
+  sourceIdentity: (value: unknown) => string,
+): string {
+  if (data === null || data === undefined) return "null";
+  if (Array.isArray(data)) {
+    let token = `v:${data.length}`;
+    for (let index = 0; index < data.length; index++) token += `:${sourceIdentity(data[index])}`;
+    return token;
+  }
+  if (typeof data === "object") {
+    const record = data as Record<string, unknown>;
+    if (Array.isArray(record.values)) {
+      const rows = record.values;
+      let token = `v:${rows.length}`;
+      for (let index = 0; index < rows.length; index++) token += `:${sourceIdentity(rows[index])}`;
+      return token;
+    }
+    if (
+      record.columns !== null &&
+      typeof record.columns === "object" &&
+      !Array.isArray(record.columns)
+    )
+      return `c:${sourceIdentity(record.columns)}`;
+    if (typeof record.name === "string") {
+      const keys = Object.keys(record);
+      if (keys.length === 1 && keys[0] === "name") return `n:${record.name}`;
+    }
+    return `o:${sourceIdentity(data)}`;
+  }
+  return `p:${String(data)}`;
+}
+
+function datasetsOrderToken(datasets: unknown, sourceIdentity: (value: unknown) => string): string {
+  if (datasets === null || datasets === undefined) return "null";
+  if (typeof datasets !== "object") return sourceIdentity(datasets);
+  const keys = Object.keys(datasets as object).toSorted();
+  let token = `d:${keys.length}`;
+  for (const key of keys) {
+    token += `|${key}=${dataContentOrderToken(
+      (datasets as Record<string, unknown>)[key],
+      sourceIdentity,
+    )}`;
+  }
+  return token;
+}
+
+/**
  * Stable data/spec identity token for inspection reconcile epochs.
- * Host supplies sourceIdentity tokens for the raw `data` / `spec` props.
+ *
+ * Host supplies:
+ * - `dataToken` / `specToken` — WeakMap identity of the raw `data` / `spec` props
+ * - `data` / `datasets` — content to order-fingerprint (prefer **prop** values,
+ *   not a freshly assembled PortableSpec shell, so theme/labs respecs do not
+ *   force a re-walk)
+ * - `sourceIdentity` — stable object ids for the O(R) order fingerprint
+ *
+ * Ready=false (no plot yet) → `"no-data"`. Complexity: O(R) over row refs,
+ * not O(R·F) deep cell serialization.
  */
 export function dataIdentityEpochToken(input: {
-  readonly assembled: { readonly data?: unknown; readonly datasets?: unknown } | null;
+  readonly ready: boolean;
   readonly dataToken: string;
   readonly specToken: string;
+  readonly data: unknown;
+  readonly datasets: unknown;
+  readonly sourceIdentity: (value: unknown) => string;
 }): string {
-  if (input.assembled === null) return "no-data";
-  return `${input.dataToken}:${input.specToken}:${JSON.stringify([
-    input.assembled.data ?? null,
-    input.assembled.datasets ?? null,
-  ])}`;
+  if (!input.ready) return "no-data";
+  return `${input.dataToken}:${input.specToken}:${dataContentOrderToken(input.data, input.sourceIdentity)}:${datasetsOrderToken(input.datasets, input.sourceIdentity)}`;
 }
 
 /** Empty semantic-key bag when there is no render model. */
