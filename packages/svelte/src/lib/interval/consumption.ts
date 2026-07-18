@@ -99,6 +99,15 @@ export function consumeIntervalKeys<Key extends PropertyKey>(
   const visiblePanels = new Set(input.panels.map((panel) => panel.id));
 
   if (preset === "independent") {
+    // Index candidates once by panelId so multi-record independent brushes
+    // scan only that panel's candidates (O(C + R·c_panel)), not the full
+    // store per record (O(R·C)).
+    const candidatesByPanel = new Map<string, IntervalConsumptionCandidate<Key>[]>();
+    for (const candidate of input.candidates) {
+      const list = candidatesByPanel.get(candidate.panelId);
+      if (list === undefined) candidatesByPanel.set(candidate.panelId, [candidate]);
+      else list.push(candidate);
+    }
     return uniqueKeys(
       input.records
         .filter((record) => record.preset === "independent" && visiblePanels.has(record.panelId))
@@ -106,9 +115,11 @@ export function consumeIntervalKeys<Key extends PropertyKey>(
           // Indexed lookup: a persistent brush can hold tens of thousands of
           // keys, and a linear includes() per candidate key is quadratic.
           const recordKeys = new Set<Key>(record.keys);
-          return input.candidates
-            .filter((candidate) => candidate.panelId === record.panelId)
-            .map((candidate) => candidate.keys.filter((key) => recordKeys.has(key)));
+          const panelCandidates = candidatesByPanel.get(record.panelId);
+          if (panelCandidates === undefined) return [];
+          return panelCandidates.map((candidate) =>
+            candidate.keys.filter((key) => recordKeys.has(key)),
+          );
         }),
     );
   }
