@@ -8,11 +8,9 @@
  */
 import type { RenderModel } from "@ggsvelte/core";
 
-import {
-  buildLegendEntryKeyIndexForPlot,
-  keysForLegendEntry,
-  type LegendEntryAction,
-} from "./focus.js";
+import { buildLegendEntryKeyIndexForPlot } from "./entry-key-index.js";
+import { keysForLegendEntry } from "./focus.js";
+import type { LegendEntryAction } from "./focus.js";
 
 export type LegendEntryKeyIndexDeps = {
   /** Reactive model source (thunk so `$derived` tracks host model updates). */
