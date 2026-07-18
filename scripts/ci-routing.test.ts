@@ -7,7 +7,6 @@ import {
   matchPathPattern,
   planJobs,
   type JobName,
-  type JobResult,
 } from "./ci-routing.ts";
 
 describe("matchPathPattern", () => {
@@ -173,7 +172,7 @@ describe("planJobs", () => {
 describe("evaluateGate", () => {
   test("passes when required jobs succeed and others are skipped", () => {
     const required = planJobs(classifyChangedPaths(["apps/docs/src/app.css"]));
-    const results: Record<JobName, JobResult> = {
+    const results: Record<JobName, string> = {
       checks: "success",
       unit: "skipped",
       component: "skipped",
@@ -192,7 +191,7 @@ describe("evaluateGate", () => {
 
   test("fails when a required job fails or is cancelled", () => {
     const required = planJobs(classifyChangedPaths(["packages/core/src/x.ts"]));
-    const results: Partial<Record<JobName, JobResult>> = {
+    const results: Partial<Record<JobName, string>> = {
       checks: "success",
       unit: "failure",
       component: "success",
@@ -209,7 +208,7 @@ describe("evaluateGate", () => {
 
   test("fails when a required job was skipped (routing/workflow mismatch)", () => {
     const required = planJobs(classifyChangedPaths(["packages/svelte/src/lib/Plot.svelte"]));
-    const results: Partial<Record<JobName, JobResult>> = {
+    const results: Partial<Record<JobName, string>> = {
       checks: "success",
       component: "skipped",
       build: "success",

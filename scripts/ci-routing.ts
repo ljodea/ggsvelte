@@ -134,7 +134,12 @@ export function matchPathPattern(pattern: string, filePath: string): boolean {
 
   if (pat.includes("*")) {
     if (pat.includes("/")) return false;
-    const re = new RegExp(`^${pat.split("*").map(escapeRegExp).join(".*")}$`);
+    const re = new RegExp(
+      `^${pat
+        .split("*")
+        .map((part) => escapeRegExp(part))
+        .join(".*")}$`,
+    );
     return re.test(path) && !path.includes("/");
   }
 
@@ -142,7 +147,7 @@ export function matchPathPattern(pattern: string, filePath: string): boolean {
 }
 
 function escapeRegExp(s: string): string {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return s.replaceAll(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 export function classifyChangedPaths(files: readonly string[]): ChangeFlags {
@@ -173,7 +178,7 @@ export type PlanOptions = {
  * spec → core consumers; core → svelte; packages → VR/pages/build/consumer.
  */
 export function planJobs(changes: ChangeFlags, options: PlanOptions = {}): JobPlan {
-  if (options.forceAll) {
+  if (options.forceAll === true) {
     const all = {} as JobPlan;
     for (const job of JOB_NAMES) all[job] = true;
     return all;
@@ -222,7 +227,7 @@ export type GateEvaluation = {
  */
 export function evaluateGate(
   required: JobPlan,
-  results: Partial<Record<JobName, JobResult | string | undefined>>,
+  results: Partial<Record<JobName, string | undefined>>,
 ): GateEvaluation {
   const failures: string[] = [];
   for (const job of JOB_NAMES) {
@@ -239,12 +244,12 @@ export function evaluateGate(
   return { ok: failures.length === 0, failures };
 }
 
-function normalizeResult(value: JobResult | string | undefined): JobResult {
+function normalizeResult(value: string | undefined): JobResult {
   if (value === "success" || value === "failure" || value === "cancelled" || value === "skipped") {
     return value;
   }
   // GitHub exposes empty string when a needed job was skipped due to an upstream skip.
-  if (value === "" || value === undefined || value === null) return "skipped";
+  if (value === undefined || value === "") return "skipped";
   return "unknown";
 }
 
@@ -299,7 +304,7 @@ async function main(argv: string[]): Promise<void> {
     const plan = planJobs(classifyChangedPaths(files), { forceAll });
     const body = formatGithubOutputs(plan);
     const outPath = process.env.GITHUB_OUTPUT;
-    if (outPath) {
+    if (typeof outPath === "string" && outPath.length > 0) {
       const { appendFileSync } = await import("node:fs");
       appendFileSync(outPath, body);
     }
@@ -310,7 +315,7 @@ async function main(argv: string[]): Promise<void> {
   if (cmd === "gate") {
     const requiredPath = flagValue(args, "--required");
     const resultsPath = flagValue(args, "--results");
-    if (!requiredPath || !resultsPath) {
+    if (requiredPath === undefined || resultsPath === undefined) {
       throw new Error("gate requires --required <json-file-or--> and --results <json-file-or-->");
     }
     const required = JSON.parse(await readArg(requiredPath)) as JobPlan;
@@ -356,7 +361,9 @@ async function resolveFiles(args: string[]): Promise<string[]> {
 
   if (args.includes("--from-git")) {
     const base = flagValue(args, "--base");
-    if (!base) throw new Error("--from-git requires --base <ref>");
+    if (base === undefined || base === "") {
+      throw new Error("--from-git requires --base <ref>");
+    }
     const proc = Bun.spawn(["git", "diff", "--name-only", `${base}...HEAD`], {
       stdout: "pipe",
       stderr: "pipe",
@@ -380,14 +387,16 @@ function flagValue(args: string[], flag: string): string | undefined {
   return args[i + 1];
 }
 
-async function readArg(path: string): Promise<string> {
+function readArg(path: string): Promise<string> {
   if (path === "-") return new Response(Bun.stdin.stream()).text();
   return Bun.file(path).text();
 }
 
 if (import.meta.main) {
-  main(process.argv).catch((err: unknown) => {
+  try {
+    await main(process.argv);
+  } catch (err: unknown) {
     process.stderr.write(`${err instanceof Error ? err.message : String(err)}\n`);
     process.exitCode = 1;
-  });
+  }
 }
