@@ -14,10 +14,10 @@ import { loadSupportMatrix } from "./support-matrix.js";
 
 describe("packed consumer compatibility harness", () => {
   test("installs every publishable tarball rather than workspace source", () => {
-    expect(packageTarballNames("0.1.0")).toEqual([
-      "ggsvelte-spec-0.1.0.tgz",
-      "ggsvelte-core-0.1.0.tgz",
-      "ggsvelte-svelte-0.1.0.tgz",
+    expect(packageTarballNames({ spec: "0.2.0", core: "0.2.0", svelte: "0.2.1" })).toEqual([
+      "ggsvelte-spec-0.2.0.tgz",
+      "ggsvelte-core-0.2.0.tgz",
+      "ggsvelte-svelte-0.2.1.tgz",
     ]);
   });
 
