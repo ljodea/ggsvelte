@@ -282,6 +282,71 @@ describe("CandidateStore", () => {
     expect(store.traverse(0, "down")).toBe(3);
     expect(store.queryRect(5, 15, 15, 45)).toEqual(new Uint32Array([0, 3, 4, 1]));
   });
+
+  // Traversal order for this fixture (panel → y → x → batch → primitive):
+  // [0, 3, 4, 2, 1]
+  it("walks next/previous with wrap-around and falls back for unknown start ids", () => {
+    expect(store.traverse(null, "next")).toBe(0);
+    expect(store.traverse(0, "first")).toBe(0);
+    expect(store.traverse(0, "last")).toBe(1);
+    expect(store.traverse(0, "next")).toBe(3);
+    expect(store.traverse(3, "next")).toBe(4);
+    expect(store.traverse(4, "next")).toBe(2);
+    expect(store.traverse(2, "next")).toBe(1);
+    expect(store.traverse(1, "next")).toBe(0);
+    expect(store.traverse(0, "previous")).toBe(1);
+    expect(store.traverse(1, "previous")).toBe(2);
+    expect(store.traverse(2, "previous")).toBe(4);
+    expect(store.traverse(999, "next")).toBe(0);
+    expect(store.traverse(-1, "previous")).toBe(0);
+  });
+
+  it("keeps spatial directions independent of sequential rank", () => {
+    // Spatial uses geometry, not traversal order.
+    expect(store.traverse(0, "down")).toBe(3);
+    expect(store.traverse(0, "right")).toBe(2);
+    // From (50,30), nearest left is the coincident pair at x=10 (ids 3 then 4); lower id wins ties.
+    expect(store.traverse(2, "left")).toBe(3);
+    expect(store.traverse(1, "up")).toBe(2);
+  });
+});
+
+describe("candidate traversal hot path", () => {
+  it("uses O(1) rank lookup for next/previous without scanning traversal", () => {
+    const plotScene = sceneWithPoints([
+      [10, 10],
+      [20, 20],
+      [30, 30],
+      [40, 40],
+    ]);
+    const hot = buildCandidateStore(plotScene, {
+      datum: ({ primitiveIndex }) => ({
+        xValue: primitiveIndex,
+        yValue: primitiveIndex,
+      }),
+    });
+    // Force the lazy construction boundary before policing resolution.
+    void hot.x;
+    const indexOfSpy = spyOn(Uint32Array.prototype, "indexOf").mockImplementation(function (
+      this: Uint32Array,
+      ...args: Parameters<Uint32Array["indexOf"]>
+    ) {
+      throw new Error(`traverse used linear indexOf(${String(args[0])})`);
+    });
+    try {
+      expect(hot.traverse(0, "next")).toBe(1);
+      expect(hot.traverse(1, "previous")).toBe(0);
+      expect(hot.traverse(3, "next")).toBe(0);
+      expect(hot.traverse(0, "previous")).toBe(3);
+      expect(hot.traverse(null)).toBe(0);
+      expect(hot.traverse(0, "first")).toBe(0);
+      expect(hot.traverse(0, "last")).toBe(3);
+      // Spatial still allowed to scan candidates by id; only sequential rank is constrained.
+      expect(hot.traverse(0, "down")).toBe(1);
+    } finally {
+      indexOfSpy.mockRestore();
+    }
+  });
 });
 
 describe("candidate grouping hot path", () => {

@@ -482,6 +482,38 @@ export function drawBatch(
 }
 
 /**
+ * Group geometry batches by panel once (issue #185): O(B) instead of
+ * re-filtering the full list per panel (O(P·B)). Within each panel bucket,
+ * order matches the original batch list so paint order is preserved.
+ * When `withIndices` is true, also record each batch's original list index
+ * for focus-mask alignment on the presentation path.
+ *
+ * Exported for unit tests that lock the single-pass complexity contract.
+ */
+export function groupBatchesByPanel(
+  panelCount: number,
+  batches: readonly GeometryBatch[],
+  withIndices: boolean,
+): { byPanel: GeometryBatch[][]; indices: number[][] | null } {
+  const byPanel: GeometryBatch[][] = Array.from({ length: panelCount }, () => []);
+  const indices: number[][] | null = withIndices
+    ? Array.from({ length: panelCount }, () => [])
+    : null;
+  for (let i = 0; i < batches.length; i++) {
+    const batch = batches[i]!;
+    const p = batch.panelIndex;
+    // Malformed panelIndex (NaN, non-integer, out of range) is a pipeline bug;
+    // skip rather than throw so a bad batch cannot take down the whole stratum
+    // draw. Integer check matters: `byPanel[1.5]` / `byPanel[NaN]` are not
+    // real buckets, and the old filter path silently dropped those too.
+    if (!Number.isInteger(p) || p < 0 || p >= panelCount) continue;
+    byPanel[p]!.push(batch);
+    indices?.[p]!.push(i);
+  }
+  return { byPanel, indices };
+}
+
+/**
  * Draw a canvas stratum's batches, clipped per panel (one canvas per
  * stratum; panels are clipped regions inside it — decision 0006). The ctx
  * must already carry the dpr transform (sizeCanvasForDpr); this clears the
@@ -495,12 +527,14 @@ export function drawStratum(
   presentation?: CanvasFocusPresentation,
 ): void {
   ctx.clearRect(0, 0, scene.width, scene.height);
+  const needIndices = presentation !== undefined;
+  const { byPanel, indices } = groupBatchesByPanel(scene.panels.length, batches, needIndices);
   if (presentation === undefined) {
     // Preserve the original high-volume path completely when focus
     // presentation is not requested.
     for (let p = 0; p < scene.panels.length; p++) {
       const panel = scene.panels[p]!;
-      const panelBatches = batches.filter((batch) => batch.panelIndex === p);
+      const panelBatches = byPanel[p]!;
       if (panelBatches.length === 0) continue;
       drawClippedToPanel(ctx, panel, () => {
         ctx.save();
@@ -513,9 +547,8 @@ export function drawStratum(
   }
   for (let p = 0; p < scene.panels.length; p++) {
     const panel = scene.panels[p]!;
-    const panelBatches = batches
-      .map((batch, index) => ({ batch, index }))
-      .filter(({ batch }) => batch.panelIndex === p);
+    const panelBatches = byPanel[p]!;
+    const panelIndices = indices![p]!;
     if (panelBatches.length === 0) continue;
     drawClippedToPanel(ctx, panel, () => {
       ctx.save();
@@ -523,7 +556,9 @@ export function drawStratum(
       const mutedAlpha = presentation.mutedAlpha ?? scene.theme.interactionMuted;
       // Paint all unaffected/muted primitives first across the stratum, then
       // focused primitives so coincident focused marks remain visible.
-      for (const { batch, index } of panelBatches) {
+      for (let k = 0; k < panelBatches.length; k++) {
+        const batch = panelBatches[k]!;
+        const index = panelIndices[k]!;
         const mask = presentation.focusMasks[index];
         if (mask === undefined || mask === null) {
           drawBatch(ctx, batch, scene.theme, resolve);
@@ -531,7 +566,9 @@ export function drawStratum(
           drawBatchSubset(ctx, batch, scene.theme, resolve, mask, false, mutedAlpha);
         }
       }
-      for (const { batch, index } of panelBatches) {
+      for (let k = 0; k < panelBatches.length; k++) {
+        const batch = panelBatches[k]!;
+        const index = panelIndices[k]!;
         const mask = presentation.focusMasks[index];
         if (mask === undefined || mask === null) continue;
         if (maskIsAllFocused(mask, batchPrimitiveCount(batch))) {

@@ -151,6 +151,47 @@ describe("buildPipelineCandidates via runPipeline", () => {
     );
     expect(modes.some((m) => m === "x" || m === "y")).toBe(true);
   });
+
+  it("identity-indexed multi-series lines map path vertices via precomputed group rows", () => {
+    // Annotation layer forces the identity-indexed candidate path (not
+    // source-backed). Path vertices must resolve to x-sorted frame rows per
+    // series without rebuilding the group index on every call.
+    const model = runPipeline(
+      gg(
+        [
+          { x: 2, y: 10, s: "a" },
+          { x: 1, y: 20, s: "b" },
+          { x: 1, y: 30, s: "a" },
+          { x: 2, y: 40, s: "b" },
+        ],
+        aes({ x: "x", y: "y", color: "s" }),
+      )
+        .geomLine()
+        .geomRule({ yintercept: 25 })
+        .spec(),
+      size,
+    );
+    const linePoints = Array.from(
+      { length: model.candidates.size },
+      (_, id) => model.candidates.candidate(id)!,
+    ).filter((c) => c.kind === "paths");
+    expect(linePoints).toHaveLength(4);
+    expect(linePoints.map((c) => c.yValue).toSorted((a, b) => Number(a) - Number(b))).toEqual([
+      10, 20, 30, 40,
+    ]);
+    expect(new Set(linePoints.map((c) => c.seriesId)).size).toBe(2);
+    // Within each series, vertices are ordered by x (sorted group rows).
+    const bySeries = new Map<number, typeof linePoints>();
+    for (const c of linePoints) {
+      const series = bySeries.get(c.seriesId);
+      if (series === undefined) bySeries.set(c.seriesId, [c]);
+      else series.push(c);
+    }
+    for (const seriesPoints of bySeries.values()) {
+      const xs = seriesPoints.map((c) => Number(c.xValue));
+      expect(xs).toEqual([...xs].toSorted((a, b) => a - b));
+    }
+  });
 });
 
 describe("resolveCandidateSeries / resolveRepresentedSourceRows", () => {
@@ -247,6 +288,119 @@ describe("createLazyIdentityIndex", () => {
   });
 });
 
+describe("buildPathGroupSortedRows", () => {
+  it("groups frame rows and sorts each group by xNumeric (fallback row index)", async () => {
+    const { buildPathGroupSortedRows } =
+      await import("../src/pipeline/build-candidates-frame-row.ts");
+    // rows: group 1 at x=3, group 0 at x=2, group 1 at x=1, group 0 at x=0
+    // → group 0 sorted [3, 1]; group 1 sorted [2, 0]
+    const frame = {
+      groups: [1, 0, 1, 0],
+      xNumeric: new Float64Array([3, 2, 1, 0]),
+    } as never;
+    const byGroup = buildPathGroupSortedRows(frame);
+    expect([...byGroup.get(0)!]).toEqual([3, 1]);
+    expect([...byGroup.get(1)!]).toEqual([2, 0]);
+  });
+
+  it("falls back to row index order when xNumeric is null", async () => {
+    const { buildPathGroupSortedRows } =
+      await import("../src/pipeline/build-candidates-frame-row.ts");
+    const frame = { groups: [0, 0, 0], xNumeric: null } as never;
+    expect([...buildPathGroupSortedRows(frame).get(0)!]).toEqual([0, 1, 2]);
+  });
+});
+
+describe("getPathGroupSortedRows", () => {
+  it("returns the same Map for the same frame (precomputed once)", async () => {
+    const { getPathGroupSortedRows } =
+      await import("../src/pipeline/build-candidates-frame-row.ts");
+    const frame = {
+      groups: [0, 0, 1],
+      xNumeric: new Float64Array([0, 1, 2]),
+    } as never;
+    const a = getPathGroupSortedRows(frame);
+    const b = getPathGroupSortedRows(frame);
+    expect(a).toBe(b);
+    expect([...a.get(0)!]).toEqual([0, 1]);
+    expect([...a.get(1)!]).toEqual([2]);
+  });
+});
+
+describe("resolveCandidateFrameRow paths", () => {
+  it("maps path vertices to x-sorted frame rows and reflects closed-path reverse legs", async () => {
+    const { resolveCandidateFrameRow } =
+      await import("../src/pipeline/build-candidates-frame-row.ts");
+    // Two groups interleaved: g0 rows {0,2} with x 2,0 → sorted [2,0];
+    // g1 rows {1,3} with x 3,1 → sorted [3,1]
+    const frame = {
+      n: 4,
+      groups: [0, 1, 0, 1],
+      xNumeric: new Float64Array([2, 3, 0, 1]),
+      binding: { layer: { geom: "area" } },
+    } as never;
+    // Two subpaths, each 4 vertices (forward + reverse for closed area):
+    // subpath 0: offsets [0, 4), subpath 1: [4, 8)
+    const batch = {
+      kind: "paths",
+      pathOffsets: new Uint32Array([0, 4, 8]),
+    } as never;
+    const orderedGroups = [0, 1];
+
+    // Forward: local 0 → first sorted row of group 0 = 2
+    expect(
+      resolveCandidateFrameRow({
+        frame,
+        batch,
+        primitiveIndex: 0,
+        orderedGroups,
+        outlierLocalRow: null,
+      }),
+    ).toEqual({ frameRow: 2, derivedGroup: 0 });
+    // Forward: local 1 → second sorted row of group 0 = 0
+    expect(
+      resolveCandidateFrameRow({
+        frame,
+        batch,
+        primitiveIndex: 1,
+        orderedGroups,
+        outlierLocalRow: null,
+      }),
+    ).toEqual({ frameRow: 0, derivedGroup: 0 });
+    // Reverse leg: local 2 → reflected 2*2-1-2 = 1 → same as local 1 = 0
+    expect(
+      resolveCandidateFrameRow({
+        frame,
+        batch,
+        primitiveIndex: 2,
+        orderedGroups,
+        outlierLocalRow: null,
+      }),
+    ).toEqual({ frameRow: 0, derivedGroup: 0 });
+    // Reverse leg: local 3 → reflected 0 → row 2
+    expect(
+      resolveCandidateFrameRow({
+        frame,
+        batch,
+        primitiveIndex: 3,
+        orderedGroups,
+        outlierLocalRow: null,
+      }),
+    ).toEqual({ frameRow: 2, derivedGroup: 0 });
+
+    // Second subpath (group 1): local 0 → first sorted = 3
+    expect(
+      resolveCandidateFrameRow({
+        frame,
+        batch,
+        primitiveIndex: 4,
+        orderedGroups,
+        outlierLocalRow: null,
+      }),
+    ).toEqual({ frameRow: 3, derivedGroup: 1 });
+  });
+});
+
 describe("allocatePipelineRunId", () => {
   it("returns increasing positive integers", async () => {
     const { allocatePipelineRunId } = await import("../src/pipeline/run-id.ts");
@@ -313,5 +467,194 @@ describe("lineage represented-row filters", () => {
         baseRows: [0, 1, 2, 3],
       }),
     ).toEqual([0, 1]);
+  });
+});
+
+describe("aggregate lineage index (issue #184)", () => {
+  it("pre-buckets group source rows by x band key for O(1) mark resolve", async () => {
+    const { preparePanels } = await import("../src/pipeline/prepare-panels.ts");
+    const { buildCandidateIdentityIndex } =
+      await import("../src/pipeline/build-candidates-identity.ts");
+    const { bandKey } = await import("../src/scales/train.ts");
+    const { normalize } = await import("@ggsvelte/spec");
+
+    // Continuous (numeric) x does not participate in grouping, so count expands
+    // many x levels inside one group — the O(k·g) case the index must fix.
+    const prepared = preparePanels(
+      normalize(
+        gg([{ x: 1 }, { x: 2 }, { x: 1 }, { x: 3 }], aes({ x: "x" }))
+          .geomBar()
+          .spec(),
+      ),
+      size,
+      [],
+      [],
+    );
+    const index = buildCandidateIdentityIndex(prepared.panelFrames, prepared.facetPanels);
+
+    const groupKey = "0:0:0";
+    expect(index.sourceRowsByGroup.get(groupKey)?.toSorted((a, b) => a - b)).toEqual([0, 1, 2, 3]);
+    expect(index.sourceRowsByGroupX.get(`${groupKey}:${bandKey(1)}`)).toEqual([0, 2]);
+    expect(index.sourceRowsByGroupX.get(`${groupKey}:${bandKey(2)}`)).toEqual([1]);
+    expect(index.sourceRowsByGroupX.get(`${groupKey}:${bandKey(3)}`)).toEqual([3]);
+  });
+
+  it("pre-buckets bin memberships per frame row so resolve does not re-scan", async () => {
+    const { preparePanels } = await import("../src/pipeline/prepare-panels.ts");
+    const { buildCandidateIdentityIndex } =
+      await import("../src/pipeline/build-candidates-identity.ts");
+    const { filterBinRepresentedRows } =
+      await import("../src/pipeline/build-candidates-lineage-filters.ts");
+    const { normalize } = await import("@ggsvelte/spec");
+
+    for (const closed of ["right", "left"] as const) {
+      const prepared = preparePanels(
+        normalize({
+          data: { values: [{ x: 0 }, { x: 1 }, { x: 2 }] },
+          layers: [
+            {
+              geom: "histogram",
+              aes: { x: { field: "x" } },
+              params: { binwidth: 1, boundary: 0, closed },
+            },
+          ],
+        }),
+        size,
+        [],
+        [],
+      );
+      const index = buildCandidateIdentityIndex(prepared.panelFrames, prepared.facetPanels);
+      const frame = prepared.panelFrames[0]![0]!;
+      expect(frame.n).toBeGreaterThanOrEqual(2);
+
+      // Single-pass assignment must match pure filter membership for every bin.
+      for (let frameRow = 0; frameRow < frame.n; frameRow++) {
+        const group = frame.groups[frameRow] ?? 0;
+        const baseRows = index.sourceRowsByGroup.get(`0:0:${group}`) ?? [];
+        const viaFilter = filterBinRepresentedRows({
+          frame,
+          table: prepared.table,
+          frameRow,
+          field: "x",
+          baseRows,
+        });
+        expect(index.sourceRowsByGroupBin.get(`0:0:${group}:${frameRow}`)).toEqual(viaFilter);
+      }
+    }
+  });
+
+  it("does not build group×x buckets for identity layers that never consume them", async () => {
+    const { preparePanels } = await import("../src/pipeline/prepare-panels.ts");
+    const { buildCandidateIdentityIndex } =
+      await import("../src/pipeline/build-candidates-identity.ts");
+    const { normalize } = await import("@ggsvelte/spec");
+
+    // Mixed layers force identity-indexed path; only count should fill group×x.
+    const prepared = preparePanels(
+      normalize({
+        data: {
+          values: [
+            { g: "a", y: 1 },
+            { g: "b", y: 2 },
+          ],
+        },
+        layers: [
+          { geom: "point", aes: { x: { field: "g" }, y: { field: "y" } } },
+          { geom: "bar", aes: { x: { field: "g" } }, stat: "count" },
+        ],
+      }),
+      size,
+      [],
+      [],
+    );
+    const index = buildCandidateIdentityIndex(prepared.panelFrames, prepared.facetPanels);
+    // Layer 0 is identity point — no group×x keys with layerIndex 0.
+    for (const key of index.sourceRowsByGroupX.keys()) {
+      expect(key.startsWith("0:0:")).toBe(false);
+    }
+    // Layer 1 is count bar — has group×x keys.
+    expect([...index.sourceRowsByGroupX.keys()].some((key) => key.startsWith("0:1:"))).toBe(true);
+  });
+
+  it("keeps boxplot outlier lineage as the single source row (not the full box)", () => {
+    const model = runPipeline(
+      {
+        data: {
+          values: [
+            { group: "a", y: 1 },
+            { group: "a", y: 2 },
+            { group: "a", y: 3 },
+            { group: "a", y: 100 },
+          ],
+        },
+        layers: [
+          {
+            geom: "boxplot",
+            stat: "boxplot",
+            aes: { x: { field: "group" }, y: { field: "y" } },
+          },
+        ],
+      },
+      size,
+    );
+    const candidates = Array.from({ length: model.candidates.size }, (_, id) =>
+      model.candidates.candidate(id),
+    );
+    const outlier = candidates.find((candidate) => candidate?.kind === "points");
+    expect(outlier).toBeDefined();
+    expect([...model.lineage.keys(outlier!.lineage)].toSorted((a, b) => a - b)).toEqual([3]);
+  });
+
+  it("resolveRepresentedSourceRows uses index lookups and matches filter parity", async () => {
+    const { preparePanels } = await import("../src/pipeline/prepare-panels.ts");
+    const { buildCandidateIdentityIndex } =
+      await import("../src/pipeline/build-candidates-identity.ts");
+    const { resolveRepresentedSourceRows } =
+      await import("../src/pipeline/build-candidates-datum-represented.ts");
+    const { filterRepresentedSourceRows } =
+      await import("../src/pipeline/build-candidates-lineage.ts");
+    const { LineageStore } = await import("../src/identity.ts");
+    const { normalize } = await import("@ggsvelte/spec");
+
+    const prepared = preparePanels(
+      normalize(
+        gg([{ x: 1 }, { x: 2 }, { x: 1 }, { x: 3 }], aes({ x: "x" }))
+          .geomBar()
+          .spec(),
+      ),
+      size,
+      [],
+      [],
+    );
+    const index = buildCandidateIdentityIndex(prepared.panelFrames, prepared.facetPanels);
+    const frame = prepared.panelFrames[0]![0]!;
+    const lineage = new LineageStore<number>();
+
+    for (let frameRow = 0; frameRow < frame.n; frameRow++) {
+      const group = frame.groups[frameRow] ?? 0;
+      const viaIndex = resolveRepresentedSourceRows({
+        outlierSourceRow: null,
+        sourceRow: null,
+        group,
+        panelIndex: 0,
+        layerIndex: 0,
+        sourceRowsByGroup: index.sourceRowsByGroup,
+        sourceRowsByGroupX: index.sourceRowsByGroupX,
+        sourceRowsByGroupBin: index.sourceRowsByGroupBin,
+        frame,
+        table: prepared.table,
+        frameRow,
+        lineage,
+        primitiveIndex: frameRow,
+      });
+      const baseRows = index.sourceRowsByGroup.get(`0:0:${group}`) ?? [];
+      const viaFilter = filterRepresentedSourceRows({
+        frame,
+        table: prepared.table,
+        frameRow,
+        baseRows,
+      });
+      expect(viaIndex.representedRows).toEqual(viaFilter);
+    }
   });
 });
