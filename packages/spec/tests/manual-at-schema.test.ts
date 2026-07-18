@@ -81,14 +81,6 @@ const aliasSchema = JSON.parse(
 const template = JSON.parse(
   readFileSync(join(manualAtDirectory, "template.json"), "utf8"),
 ) as object;
-const packageVersion = (
-  JSON.parse(
-    readFileSync(
-      join(manualAtDirectory, "..", "..", "..", "packages", "svelte", "package.json"),
-      "utf8",
-    ),
-  ) as { version: string }
-).version;
 const procedures = (
   JSON.parse(readFileSync(join(manualAtDirectory, "procedures.json"), "utf8")) as {
     flows: Procedure[];
@@ -429,17 +421,6 @@ describe("manual assistive-technology evidence schema", () => {
     expect(validate(alias), JSON.stringify(validate.errors, null, 2)).toBe(true);
     expect(validate({ ...alias, runtimeBehaviorChanged: true })).toBe(false);
     expect(validate({ ...alias, rationale: "" })).toBe(false);
-  });
-
-  it("requires a complete manifest before a non-placeholder package version can ship", () => {
-    if (packageVersion === "0.0.0") return;
-    const recordsDirectory = join(manualAtDirectory, "records");
-    const file = join(recordsDirectory, `v${packageVersion}.json`);
-    expect(existsSync(file), `missing the v${packageVersion} manual AT release record`).toBe(true);
-    validateReleaseEvidence(
-      file,
-      JSON.parse(readFileSync(file, "utf8")) as ReleaseRecord | ReleaseAlias,
-    );
   });
 
   it("validates every committed release manifest", () => {

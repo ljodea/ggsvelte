@@ -1,8 +1,8 @@
 # Windows NVDA evidence harness
 
 The Windows job in `manual-at.yml` runs the real, installed NVDA 2026.1.1
-screen reader against headed Chrome and Firefox on `windows-2022`. It is a
-manual release gate, not ordinary pull-request CI.
+screen reader against headed Chrome and Firefox on `windows-2022`. It is an
+opt-in evidence workflow, not ordinary pull-request CI or a publication gate.
 
 ## Reproducibility and trust boundaries
 
