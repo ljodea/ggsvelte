@@ -8,6 +8,7 @@ import { describe, expect, it } from "bun:test";
 
 import { LINT_CATALOG, lintSpec } from "../src/lint.ts";
 import type { LintAdvisoryCode } from "../src/lint.ts";
+import { DEFAULT_VALIDATE_LIMITS } from "../src/validate-data.ts";
 import { validate } from "../src/validate.ts";
 
 const firedCodes = new Set<LintAdvisoryCode>();
@@ -147,6 +148,42 @@ describe("log-nonpositive-data", () => {
   it("silent for all-positive data or a linear scale", () => {
     expect(lintSpec(spec([1, 2, 3]))).toEqual([]);
     expect(lintSpec(spec([5, -1, 10], "linear"))).toEqual([]);
+  });
+});
+
+describe("lintSpec options.limits (standalone evidence)", () => {
+  /** Nominal-x line: data-backed advisory when evidence is available. */
+  const nominalLine = (rowCount: number) => ({
+    data: {
+      columns: {
+        x: Array.from({ length: rowCount }, (_, i) => `cat-${i % 5}`),
+        y: Array.from({ length: rowCount }, (_, i) => i),
+      },
+    },
+    aes: { x: { field: "x" }, y: { field: "y" } },
+    layers: [{ geom: "line" }],
+  });
+
+  it("honors a raised maxRows so data-backed advisories still fire", () => {
+    const n = DEFAULT_VALIDATE_LIMITS.maxRows + 1;
+    const spec = nominalLine(n);
+
+    // Default limits: over-limit evidence is dropped → silent skip.
+    expect(lintSpec(spec)).toEqual([]);
+
+    // Raised limits: same data yields the data-backed advisory.
+    const advisories = lintSpec(spec, { limits: { maxRows: n } });
+    expect(codesOf(advisories)).toContain("line-over-nominal-x");
+  });
+
+  it("honors a lowered maxRows by skipping data-backed rules (no fabricated complaints)", () => {
+    const spec = nominalLine(50);
+
+    // Under default limits, the advisory fires.
+    expect(codesOf(lintSpec(spec))).toContain("line-over-nominal-x");
+
+    // Lowered limit drops evidence the same way validate does — silent skip.
+    expect(lintSpec(spec, { limits: { maxRows: 10 } })).toEqual([]);
   });
 });
 
