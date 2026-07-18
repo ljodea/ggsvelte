@@ -718,6 +718,76 @@ describe("createIntervalState bounds editor select path", () => {
     destroy();
   });
 
+  it("applyPreciseBounds resolves keys and lineageCount with one candidate key walk", () => {
+    const model = modelFor(continuousSpec());
+    const trigger = document.createElement("button");
+    let keyCalls = 0;
+    let candidateReads = 0;
+    const rawCandidates = model.candidates;
+    const spyModel = {
+      ...model,
+      candidates: {
+        get size() {
+          return rawCandidates.size;
+        },
+        candidate(id: number) {
+          candidateReads++;
+          return rawCandidates.candidate(id);
+        },
+      },
+    } as RenderModel;
+    const events: PlotSelection[] = [];
+    const { state, destroy } = mountIntervalController({
+      model: () => spyModel,
+      selectConfig: persistentSelect,
+      candidateSemanticKeys: (candidate) => {
+        keyCalls++;
+        return identityCandidateKeys(candidate);
+      },
+      emitSelection: (event) => {
+        events.push(event);
+      },
+    });
+
+    // Wide domain so both continuous points remain in-interval after the edit.
+    state.applyBrushSelectEnd(
+      brushEvent(spyModel, {
+        domain: { x: [0, 20], y: [0, 30] },
+        keys: ["0", "1"],
+      }),
+      "pointer",
+    );
+    flushSync();
+    state.openBoundsEditor("select", "x", trigger);
+    flushSync();
+
+    keyCalls = 0;
+    candidateReads = 0;
+    events.length = 0;
+    state.applyPreciseBounds({
+      source: "precise-bounds",
+      inputSource: "keyboard",
+      action: "select",
+      axis: "x",
+      reversed: false,
+      scale: "linear",
+      bounds: [0, 15],
+    });
+    flushSync();
+
+    // One store pass for keys+lineage (was consumption bag + lineage scan).
+    expect(candidateReads).toBe(rawCandidates.size);
+    expect(keyCalls).toBeGreaterThan(0);
+    expect(keyCalls).toBeLessThanOrEqual(rawCandidates.size);
+    expect(events).toHaveLength(1);
+    const end = events[0];
+    expect(
+      end !== undefined && "lineageCount" in end ? end.lineageCount : -1,
+    ).toBeGreaterThanOrEqual(0);
+
+    destroy();
+  });
+
   it("open → input; apply updates record (persistent) and emits once; non-persistent emits without record", () => {
     const model = modelFor(continuousSpec());
     const events: PlotSelection[] = [];

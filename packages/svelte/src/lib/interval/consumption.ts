@@ -31,6 +31,21 @@ export interface RecomputePanelIntervalKeysInput<Key extends PropertyKey> {
   readonly candidates: readonly IntervalConsumptionCandidate<Key>[];
 }
 
+/**
+ * Candidate bag for a single-pass panel recompute: consumption fields plus
+ * optional source-row indexes (lineage ∪ rowIndex) for lineageCount.
+ */
+type PanelIntervalProjectionCandidate<Key extends PropertyKey> =
+  IntervalConsumptionCandidate<Key> & {
+    readonly sourceRows?: Iterable<number>;
+  };
+
+export interface RecomputePanelIntervalProjectionInput<Key extends PropertyKey> {
+  readonly panelId: string;
+  readonly domains: ReadonlyIntervalDomains;
+  readonly candidates: readonly PanelIntervalProjectionCandidate<Key>[];
+}
+
 function numericAxisContains(axis: SemanticIntervalAxis, value: CellValue): boolean {
   if (axis.kind === "band") return false;
   const numeric = cellToNumber(value);
@@ -195,14 +210,35 @@ export function nextLocalIntervalRecords<Key extends PropertyKey>(
   return Object.freeze([...rest, next]);
 }
 
+/**
+ * Single-pass panel recompute after an exact bounds edit: unique semantic keys
+ * and optional lineage row count. Callers that need both keys and lineageCount
+ * must supply `sourceRows` on each candidate so the store is not scanned twice
+ * (interval-state precise-bounds path).
+ */
+export function recomputePanelIntervalProjection<Key extends PropertyKey>(
+  input: RecomputePanelIntervalProjectionInput<Key>,
+): { readonly keys: readonly Key[]; readonly lineageCount: number } {
+  const inInterval = prepareCandidateInInterval(input.domains);
+  const keys = new Set<Key>();
+  const rows = new Set<number>();
+  let trackRows = false;
+  for (const candidate of input.candidates) {
+    if (candidate.panelId !== input.panelId || !inInterval(candidate)) continue;
+    for (const key of candidate.keys) keys.add(key);
+    if (candidate.sourceRows === undefined) continue;
+    trackRows = true;
+    for (const rowIndex of candidate.sourceRows) rows.add(rowIndex);
+  }
+  return {
+    keys: Object.freeze([...keys]),
+    lineageCount: trackRows ? rows.size : 0,
+  };
+}
+
 /** Recompute one panel's committed keys after an exact bounds edit. */
 export function recomputePanelIntervalKeys<Key extends PropertyKey>(
   input: RecomputePanelIntervalKeysInput<Key>,
 ): readonly Key[] {
-  const inInterval = prepareCandidateInInterval(input.domains);
-  return uniqueKeys(
-    input.candidates
-      .filter((candidate) => candidate.panelId === input.panelId && inInterval(candidate))
-      .map((candidate) => candidate.keys),
-  );
+  return recomputePanelIntervalProjection(input).keys;
 }
