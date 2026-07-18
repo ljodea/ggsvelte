@@ -316,10 +316,13 @@ jobs:
         name: validate unit success marker
         if: steps.content_hash.outputs.bypass != 'true' && steps.marker_cache.outputs.cache-hit == 'true'
         shell: bash
+        env:
+          # env-indirection: step outputs must not expand into the script body (zizmor).
+          CONTENT_HASH: ${{ steps.content_hash.outputs.hash }}
         run: |
           set -euo pipefail
           bun scripts/ci-routing.ts validate-success-marker \
-            --execution unit --hash "${{ steps.content_hash.outputs.hash }}"
+            --execution unit --hash "${CONTENT_HASH}"
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: steps.validate_marker.outputs.hit != 'true'
         with:
@@ -336,10 +339,13 @@ jobs:
       - name: write unit success marker
         if: steps.validate_marker.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
         shell: bash
+        env:
+          # env-indirection: step outputs must not expand into the script body (zizmor).
+          CONTENT_HASH: ${{ steps.content_hash.outputs.hash }}
         run: |
           set -euo pipefail
           bun scripts/ci-routing.ts write-success-marker \
-            --execution unit --hash "${{ steps.content_hash.outputs.hash }}"
+            --execution unit --hash "${CONTENT_HASH}"
 
   compatibility-matrix:
     name: compatibility matrix (machine-checked source)
@@ -393,6 +399,11 @@ jobs:
         env:
           BYPASS: ${{ needs.detect-changes.outputs.bypass_content_cache }}
           DISABLE: ${{ vars.CI_DISABLE_CONTENT_HASH }}
+          # env-indirection: matrix values must not expand into the script body (zizmor).
+          MATRIX_NODE: ${{ matrix.node }}
+          MATRIX_PM: ${{ matrix.packageManager }}
+          MATRIX_PM_VERSION: ${{ matrix.packageManagerVersion }}
+          MATRIX_SVELTE: ${{ matrix.svelte }}
         shell: bash
         run: |
           set -euo pipefail
@@ -405,7 +416,11 @@ jobs:
             exit 0
           fi
           echo "bypass=false" >> "$GITHUB_OUTPUT"
-          bun scripts/ci-routing.ts hash-inputs --execution consumer --os "${RUNNER_OS}" --matrix-node "${{ matrix.node }}" --matrix-pm "${{ matrix.packageManager }}" --matrix-pm-version "${{ matrix.packageManagerVersion }}" --matrix-svelte "${{ matrix.svelte }}"
+          bun scripts/ci-routing.ts hash-inputs --execution consumer --os "${RUNNER_OS}" \
+            --matrix-node "${MATRIX_NODE}" \
+            --matrix-pm "${MATRIX_PM}" \
+            --matrix-pm-version "${MATRIX_PM_VERSION}" \
+            --matrix-svelte "${MATRIX_SVELTE}"
       - id: marker_cache
         name: restore consumer success-marker cache
         if: steps.content_hash.outputs.bypass != 'true'
@@ -417,10 +432,13 @@ jobs:
         name: validate consumer success marker
         if: steps.content_hash.outputs.bypass != 'true' && steps.marker_cache.outputs.cache-hit == 'true'
         shell: bash
+        env:
+          # env-indirection: step outputs must not expand into the script body (zizmor).
+          CONTENT_HASH: ${{ steps.content_hash.outputs.hash }}
         run: |
           set -euo pipefail
           bun scripts/ci-routing.ts validate-success-marker \
-            --execution consumer --hash "${{ steps.content_hash.outputs.hash }}"
+            --execution consumer --hash "${CONTENT_HASH}"
       - if: steps.validate_marker.outputs.hit != 'true'
         run: bun install --frozen-lockfile
       - name: download shared packages/*/dist
@@ -461,10 +479,13 @@ jobs:
       - name: write consumer success marker
         if: steps.validate_marker.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
         shell: bash
+        env:
+          # env-indirection: step outputs must not expand into the script body (zizmor).
+          CONTENT_HASH: ${{ steps.content_hash.outputs.hash }}
         run: |
           set -euo pipefail
           bun scripts/ci-routing.ts write-success-marker \
-            --execution consumer --hash "${{ steps.content_hash.outputs.hash }}"
+            --execution consumer --hash "${CONTENT_HASH}"
 
   component-svelte:
     name: component-svelte (packages/svelte vitest browser + ssr)
@@ -525,10 +546,13 @@ jobs:
         name: validate component_svelte success marker
         if: steps.content_hash.outputs.bypass != 'true' && steps.marker_cache.outputs.cache-hit == 'true'
         shell: bash
+        env:
+          # env-indirection: step outputs must not expand into the script body (zizmor).
+          CONTENT_HASH: ${{ steps.content_hash.outputs.hash }}
         run: |
           set -euo pipefail
           bun scripts/ci-routing.ts validate-success-marker \
-            --execution component_svelte --hash "${{ steps.content_hash.outputs.hash }}"
+            --execution component_svelte --hash "${CONTENT_HASH}"
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: steps.validate_marker.outputs.hit != 'true'
         with:
@@ -577,10 +601,13 @@ jobs:
       - name: write component_svelte success marker
         if: steps.validate_marker.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
         shell: bash
+        env:
+          # env-indirection: step outputs must not expand into the script body (zizmor).
+          CONTENT_HASH: ${{ steps.content_hash.outputs.hash }}
         run: |
           set -euo pipefail
           bun scripts/ci-routing.ts write-success-marker \
-            --execution component_svelte --hash "${{ steps.content_hash.outputs.hash }}"
+            --execution component_svelte --hash "${CONTENT_HASH}"
       - name: upload packages/svelte failure artifacts
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -649,10 +676,13 @@ jobs:
         name: validate component_spikes success marker
         if: steps.content_hash.outputs.bypass != 'true' && steps.marker_cache.outputs.cache-hit == 'true'
         shell: bash
+        env:
+          # env-indirection: step outputs must not expand into the script body (zizmor).
+          CONTENT_HASH: ${{ steps.content_hash.outputs.hash }}
         run: |
           set -euo pipefail
           bun scripts/ci-routing.ts validate-success-marker \
-            --execution component_spikes --hash "${{ steps.content_hash.outputs.hash }}"
+            --execution component_spikes --hash "${CONTENT_HASH}"
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: steps.validate_marker.outputs.hit != 'true'
         with:
@@ -701,10 +731,13 @@ jobs:
       - name: write component_spikes success marker
         if: steps.validate_marker.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
         shell: bash
+        env:
+          # env-indirection: step outputs must not expand into the script body (zizmor).
+          CONTENT_HASH: ${{ steps.content_hash.outputs.hash }}
         run: |
           set -euo pipefail
           bun scripts/ci-routing.ts write-success-marker \
-            --execution component_spikes --hash "${{ steps.content_hash.outputs.hash }}"
+            --execution component_spikes --hash "${CONTENT_HASH}"
       - name: upload spikes failure artifacts
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -773,10 +806,13 @@ jobs:
         name: validate component_journeys success marker
         if: steps.content_hash.outputs.bypass != 'true' && steps.marker_cache.outputs.cache-hit == 'true'
         shell: bash
+        env:
+          # env-indirection: step outputs must not expand into the script body (zizmor).
+          CONTENT_HASH: ${{ steps.content_hash.outputs.hash }}
         run: |
           set -euo pipefail
           bun scripts/ci-routing.ts validate-success-marker \
-            --execution component_journeys --hash "${{ steps.content_hash.outputs.hash }}"
+            --execution component_journeys --hash "${CONTENT_HASH}"
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: steps.validate_marker.outputs.hit != 'true'
         with:
@@ -826,10 +862,13 @@ jobs:
       - name: write component_journeys success marker
         if: steps.validate_marker.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
         shell: bash
+        env:
+          # env-indirection: step outputs must not expand into the script body (zizmor).
+          CONTENT_HASH: ${{ steps.content_hash.outputs.hash }}
         run: |
           set -euo pipefail
           bun scripts/ci-routing.ts write-success-marker \
-            --execution component_journeys --hash "${{ steps.content_hash.outputs.hash }}"
+            --execution component_journeys --hash "${CONTENT_HASH}"
       - name: upload journey failure artifacts
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -965,10 +1004,13 @@ jobs:
         name: validate build success marker
         if: steps.content_hash.outputs.bypass != 'true' && steps.marker_cache.outputs.cache-hit == 'true'
         shell: bash
+        env:
+          # env-indirection: step outputs must not expand into the script body (zizmor).
+          CONTENT_HASH: ${{ steps.content_hash.outputs.hash }}
         run: |
           set -euo pipefail
           bun scripts/ci-routing.ts validate-success-marker \
-            --execution build --hash "${{ steps.content_hash.outputs.hash }}"
+            --execution build --hash "${CONTENT_HASH}"
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: steps.validate_marker.outputs.hit != 'true'
         with:
@@ -1008,10 +1050,13 @@ jobs:
       - name: write build success marker
         if: steps.validate_marker.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
         shell: bash
+        env:
+          # env-indirection: step outputs must not expand into the script body (zizmor).
+          CONTENT_HASH: ${{ steps.content_hash.outputs.hash }}
         run: |
           set -euo pipefail
           bun scripts/ci-routing.ts write-success-marker \
-            --execution build --hash "${{ steps.content_hash.outputs.hash }}"
+            --execution build --hash "${CONTENT_HASH}"
       # packages/*/dist for consumers is produced by packages-dist (issue #241).
       # This job keeps an independent build so publint/attw always re-validate
       # a fresh tree alongside knip/type-aware analysis.
@@ -1059,10 +1104,13 @@ jobs:
         name: validate actions_security success marker
         if: steps.content_hash.outputs.bypass != 'true' && steps.marker_cache.outputs.cache-hit == 'true'
         shell: bash
+        env:
+          # env-indirection: step outputs must not expand into the script body (zizmor).
+          CONTENT_HASH: ${{ steps.content_hash.outputs.hash }}
         run: |
           set -euo pipefail
           bun scripts/ci-routing.ts validate-success-marker \
-            --execution actions_security --hash "${{ steps.content_hash.outputs.hash }}"
+            --execution actions_security --hash "${CONTENT_HASH}"
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: steps.validate_marker.outputs.hit != 'true'
         with:
@@ -1082,10 +1130,13 @@ jobs:
       - name: write actions_security success marker
         if: steps.validate_marker.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
         shell: bash
+        env:
+          # env-indirection: step outputs must not expand into the script body (zizmor).
+          CONTENT_HASH: ${{ steps.content_hash.outputs.hash }}
         run: |
           set -euo pipefail
           bun scripts/ci-routing.ts write-success-marker \
-            --execution actions_security --hash "${{ steps.content_hash.outputs.hash }}"
+            --execution actions_security --hash "${CONTENT_HASH}"
 
   bench-smoke:
     name: bench-smoke (mitata, 1k workload)
@@ -1130,10 +1181,13 @@ jobs:
         name: validate bench_smoke success marker
         if: steps.content_hash.outputs.bypass != 'true' && steps.marker_cache.outputs.cache-hit == 'true'
         shell: bash
+        env:
+          # env-indirection: step outputs must not expand into the script body (zizmor).
+          CONTENT_HASH: ${{ steps.content_hash.outputs.hash }}
         run: |
           set -euo pipefail
           bun scripts/ci-routing.ts validate-success-marker \
-            --execution bench_smoke --hash "${{ steps.content_hash.outputs.hash }}"
+            --execution bench_smoke --hash "${CONTENT_HASH}"
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: steps.validate_marker.outputs.hit != 'true'
         with:
@@ -1154,10 +1208,13 @@ jobs:
       - name: write bench_smoke success marker
         if: steps.validate_marker.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
         shell: bash
+        env:
+          # env-indirection: step outputs must not expand into the script body (zizmor).
+          CONTENT_HASH: ${{ steps.content_hash.outputs.hash }}
         run: |
           set -euo pipefail
           bun scripts/ci-routing.ts write-success-marker \
-            --execution bench_smoke --hash "${{ steps.content_hash.outputs.hash }}"
+            --execution bench_smoke --hash "${CONTENT_HASH}"
 
   vr-baseline-guard:
     # Container-only baseline policy (decision 0009): committed baselines may
