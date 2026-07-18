@@ -12,6 +12,15 @@
 # change (docs-only, workflow-only, markdown-only, …). The `ci-gate` job is
 # the single required aggregator so skipped jobs do not look like missing
 # checks. Changing this file forces the full surface (see ci_workflow lane).
+#
+# Content-hash skip (issue #245): when a job is still scheduled, it may
+# early-exit success if a validated success marker / packages-dist cache
+# exists for the same physical execution identity (content hash of
+# JOB_CONTENT_INPUTS + recipe). bypass_content_cache disables short-circuit
+# under force-all / lockfile / ci.yml / ci-routing changes. Invalidate by
+# bumping CONTENT_HASH_SCHEMA, editing a matched input, or setting repo
+# variable CI_DISABLE_CONTENT_HASH=1. GHA cache is ref-scoped (not a cross-PR
+# registry). Exact cache keys only — no restore-keys fallback for job markers.
 name: CI
 
 on:
@@ -63,6 +72,7 @@ jobs:
       packages_dist: ${{ steps.route.outputs.packages_dist }}
       vr: ${{ steps.route.outputs.vr }}
       pages: ${{ steps.route.outputs.pages }}
+      bypass_content_cache: ${{ steps.route.outputs.bypass_content_cache }}
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
@@ -156,13 +166,63 @@ jobs:
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version: 1.3.14
+      - id: content_hash
+        name: compute content-hash (packages_dist)
+        env:
+          BYPASS: ${{ needs.detect-changes.outputs.bypass_content_cache }}
+          DISABLE: ${{ vars.CI_DISABLE_CONTENT_HASH }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${BYPASS:-}" = "true" ] || [ "${DISABLE:-}" = "1" ]; then
+            {
+              echo "bypass=true"
+              echo "hit=false"
+            } >> "$GITHUB_OUTPUT"
+            echo "content-hash bypassed for packages_dist"
+            exit 0
+          fi
+          echo "bypass=false" >> "$GITHUB_OUTPUT"
+          bun scripts/ci-routing.ts hash-inputs --execution packages_dist --os "${RUNNER_OS}"
+      - id: dist_cache
+        name: restore packages-dist content-hash cache
+        if: steps.content_hash.outputs.bypass != 'true'
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          # Exact key only (no restore-keys) — incomplete or wrong-tree hits are unsafe.
+          path: .packages-dist-cache
+          key: ${{ steps.content_hash.outputs.cache_key }}
+      - id: restore_dist
+        name: materialize packages/*/dist from content-hash cache
+        if: steps.content_hash.outputs.bypass != 'true' && steps.dist_cache.outputs.cache-hit == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          for pkg in spec core svelte; do
+            src=".packages-dist-cache/packages/${pkg}/dist"
+            if [ ! -d "${src}" ]; then
+              echo "incomplete content-hash cache (missing ${src}) — will rebuild"
+              echo "hit=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          done
+          mkdir -p packages/spec packages/core packages/svelte
+          rm -rf packages/spec/dist packages/core/dist packages/svelte/dist
+          cp -a .packages-dist-cache/packages/spec/dist packages/spec/
+          cp -a .packages-dist-cache/packages/core/dist packages/core/
+          cp -a .packages-dist-cache/packages/svelte/dist packages/svelte/
+          echo "hit=true" >> "$GITHUB_OUTPUT"
+          echo "packages-dist: restored from content-hash cache"
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: steps.restore_dist.outputs.hit != 'true'
         with:
           path: ~/.bun/install/cache
           key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
           restore-keys: bun-${{ runner.os }}-
-      - run: bun install --frozen-lockfile
+      - if: steps.restore_dist.outputs.hit != 'true'
+        run: bun install --frozen-lockfile
       - name: build packages (tsc -b + svelte-package)
+        if: steps.restore_dist.outputs.hit != 'true'
         run: bun run build
       - name: verify required package dist outputs
         shell: bash
@@ -191,11 +251,22 @@ jobs:
           cp -a packages/spec/dist .packages-dist-upload/packages/spec/
           cp -a packages/core/dist .packages-dist-upload/packages/core/
           cp -a packages/svelte/dist .packages-dist-upload/packages/svelte/
+      - name: stage content-hash cache payload for save
+        if: steps.restore_dist.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .packages-dist-cache
+          mkdir -p .packages-dist-cache/packages/spec \
+            .packages-dist-cache/packages/core \
+            .packages-dist-cache/packages/svelte
+          cp -a packages/spec/dist .packages-dist-cache/packages/spec/
+          cp -a packages/core/dist .packages-dist-cache/packages/core/
+          cp -a packages/svelte/dist .packages-dist-cache/packages/svelte/
       - name: upload packages/*/dist for same-run consumers
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          # Run-scoped identity (same commit as this workflow run). Not a
-          # content-hash cache across runs — see issue #245 for that.
+          # Same-run artifact identity. Cross-run reuse is the content-hash cache above.
           name: packages-dist
           # Single directory root → download path: packages restores packages/*/dist.
           path: .packages-dist-upload/packages
@@ -247,15 +318,65 @@ jobs:
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version: 1.3.14
+      - id: content_hash
+        name: compute content-hash (unit)
+        env:
+          BYPASS: ${{ needs.detect-changes.outputs.bypass_content_cache }}
+          DISABLE: ${{ vars.CI_DISABLE_CONTENT_HASH }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${BYPASS:-}" = "true" ] || [ "${DISABLE:-}" = "1" ]; then
+            {
+              echo "bypass=true"
+              echo "hit=false"
+            } >> "$GITHUB_OUTPUT"
+            echo "content-hash bypassed for unit"
+            exit 0
+          fi
+          echo "bypass=false" >> "$GITHUB_OUTPUT"
+          bun scripts/ci-routing.ts hash-inputs --execution unit --os "${RUNNER_OS}"
+      - id: marker_cache
+        name: restore unit success-marker cache
+        if: steps.content_hash.outputs.bypass != 'true'
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .ci-content-hash/unit.ok
+          key: ${{ steps.content_hash.outputs.cache_key }}
+      - id: validate_marker
+        name: validate unit success marker
+        if: steps.content_hash.outputs.bypass != 'true' && steps.marker_cache.outputs.cache-hit == 'true'
+        shell: bash
+        env:
+          # env-indirection: step outputs must not expand into the script body (zizmor).
+          CONTENT_HASH: ${{ steps.content_hash.outputs.hash }}
+        run: |
+          set -euo pipefail
+          bun scripts/ci-routing.ts validate-success-marker \
+            --execution unit --hash "${CONTENT_HASH}"
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: steps.validate_marker.outputs.hit != 'true'
         with:
           path: ~/.bun/install/cache
           key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
           restore-keys: bun-${{ runner.os }}-
-      - run: bun install --frozen-lockfile
+      - if: steps.validate_marker.outputs.hit != 'true'
+        run: bun install --frozen-lockfile
       - name: build spec/core dist (package exports point at dist/)
+        if: steps.validate_marker.outputs.hit != 'true'
         run: bun run check
-      - run: bun test packages/spec packages/core benchmarks scripts tests/evals
+      - if: steps.validate_marker.outputs.hit != 'true'
+        run: bun test packages/spec packages/core benchmarks scripts tests/evals
+      - name: write unit success marker
+        if: steps.validate_marker.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
+        shell: bash
+        env:
+          # env-indirection: step outputs must not expand into the script body (zizmor).
+          CONTENT_HASH: ${{ steps.content_hash.outputs.hash }}
+        run: |
+          set -euo pipefail
+          bun scripts/ci-routing.ts write-success-marker \
+            --execution unit --hash "${CONTENT_HASH}"
 
   compatibility-matrix:
     name: compatibility matrix (machine-checked source)
@@ -327,14 +448,79 @@ jobs:
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version: 1.3.14
-      - run: bun install --frozen-lockfile
+      - id: content_hash
+        name: compute content-hash (consumer)
+        env:
+          BYPASS: ${{ needs.detect-changes.outputs.bypass_content_cache }}
+          DISABLE: ${{ vars.CI_DISABLE_CONTENT_HASH }}
+          # env-indirection: matrix values must not expand into the script body (zizmor).
+          MATRIX_NODE: ${{ matrix.node }}
+          MATRIX_PM: ${{ matrix.packageManager }}
+          MATRIX_PM_VERSION: ${{ matrix.packageManagerVersion }}
+          MATRIX_SVELTE: ${{ matrix.svelte }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${BYPASS:-}" = "true" ] || [ "${DISABLE:-}" = "1" ]; then
+            {
+              echo "bypass=true"
+              echo "hit=false"
+            } >> "$GITHUB_OUTPUT"
+            echo "content-hash bypassed for consumer"
+            exit 0
+          fi
+          echo "bypass=false" >> "$GITHUB_OUTPUT"
+          # Resolved toolchain versions (not matrix majors alone) — Node/npm patch
+          # bumps must miss the consumer success-marker cache (Codex P2 on #245).
+          RUNTIME_NODE="$(node -v)"
+          case "${MATRIX_PM}" in
+            npm) RUNTIME_PM_VER="$(npm -v)" ;;
+            bun) RUNTIME_PM_VER="$(bun -v)" ;;
+            pnpm)
+              if command -v pnpm >/dev/null 2>&1; then
+                RUNTIME_PM_VER="$(pnpm -v)"
+              else
+                RUNTIME_PM_VER="${MATRIX_PM_VERSION}"
+              fi
+              ;;
+            *) RUNTIME_PM_VER="${MATRIX_PM_VERSION}" ;;
+          esac
+          bun scripts/ci-routing.ts hash-inputs --execution consumer --os "${RUNNER_OS}" \
+            --matrix-node "${MATRIX_NODE}" \
+            --matrix-pm "${MATRIX_PM}" \
+            --matrix-pm-version "${MATRIX_PM_VERSION}" \
+            --matrix-svelte "${MATRIX_SVELTE}" \
+            --runtime-node-version "${RUNTIME_NODE}" \
+            --runtime-pm-version "${RUNTIME_PM_VER}"
+      - id: marker_cache
+        name: restore consumer success-marker cache
+        if: steps.content_hash.outputs.bypass != 'true'
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .ci-content-hash/consumer.ok
+          key: ${{ steps.content_hash.outputs.cache_key }}
+      - id: validate_marker
+        name: validate consumer success marker
+        if: steps.content_hash.outputs.bypass != 'true' && steps.marker_cache.outputs.cache-hit == 'true'
+        shell: bash
+        env:
+          # env-indirection: step outputs must not expand into the script body (zizmor).
+          CONTENT_HASH: ${{ steps.content_hash.outputs.hash }}
+        run: |
+          set -euo pipefail
+          bun scripts/ci-routing.ts validate-success-marker \
+            --execution consumer --hash "${CONTENT_HASH}"
+      - if: steps.validate_marker.outputs.hit != 'true'
+        run: bun install --frozen-lockfile
       - name: download shared packages/*/dist
+        if: steps.validate_marker.outputs.hit != 'true'
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: packages-dist
           # Producer uploads .packages-dist-upload/packages → extract as packages/.
           path: packages
       - name: verify downloaded package dist entrypoints
+        if: steps.validate_marker.outputs.hit != 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -349,16 +535,29 @@ jobs:
             fi
           done
       - name: type-check Svelte package source
+        if: steps.validate_marker.outputs.hit != 'true'
         run: bun run check:svelte
       - name: install tarballs in a clean consumer and exercise types, build, SSR, Node, and CLI
+        if: steps.validate_marker.outputs.hit != 'true'
         env:
           PACKAGE_MANAGER: ${{ matrix.packageManager }}
           PACKAGE_MANAGER_VERSION: ${{ matrix.packageManagerVersion }}
           SVELTE_VERSION: ${{ matrix.svelte }}
         run: bun scripts/consumer-compat.ts
 
-  # Component surface is split for wall-clock (issue #243). All three schedule
-  # when routing sets component=true; ci-gate requires every shard to succeed.
+      # Component surface is split for wall-clock (issue #243). All three schedule
+      # when routing sets component=true; ci-gate requires every shard to succeed.
+      - name: write consumer success marker
+        if: steps.validate_marker.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
+        shell: bash
+        env:
+          # env-indirection: step outputs must not expand into the script body (zizmor).
+          CONTENT_HASH: ${{ steps.content_hash.outputs.hash }}
+        run: |
+          set -euo pipefail
+          bun scripts/ci-routing.ts write-success-marker \
+            --execution consumer --hash "${CONTENT_HASH}"
+
   component-svelte:
     name: component-svelte (packages/svelte vitest browser + ssr)
 
@@ -394,19 +593,59 @@ jobs:
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version: 1.3.14
+      - id: content_hash
+        name: compute content-hash (component_svelte)
+        env:
+          BYPASS: ${{ needs.detect-changes.outputs.bypass_content_cache }}
+          DISABLE: ${{ vars.CI_DISABLE_CONTENT_HASH }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${BYPASS:-}" = "true" ] || [ "${DISABLE:-}" = "1" ]; then
+            {
+              echo "bypass=true"
+              echo "hit=false"
+            } >> "$GITHUB_OUTPUT"
+            echo "content-hash bypassed for component_svelte"
+            exit 0
+          fi
+          echo "bypass=false" >> "$GITHUB_OUTPUT"
+          bun scripts/ci-routing.ts hash-inputs --execution component_svelte --os "${RUNNER_OS}" --container-tag "${PLAYWRIGHT_CONTAINER_TAG}"
+      - id: marker_cache
+        name: restore component_svelte success-marker cache
+        if: steps.content_hash.outputs.bypass != 'true'
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .ci-content-hash/component_svelte.ok
+          key: ${{ steps.content_hash.outputs.cache_key }}
+      - id: validate_marker
+        name: validate component_svelte success marker
+        if: steps.content_hash.outputs.bypass != 'true' && steps.marker_cache.outputs.cache-hit == 'true'
+        shell: bash
+        env:
+          # env-indirection: step outputs must not expand into the script body (zizmor).
+          CONTENT_HASH: ${{ steps.content_hash.outputs.hash }}
+        run: |
+          set -euo pipefail
+          bun scripts/ci-routing.ts validate-success-marker \
+            --execution component_svelte --hash "${CONTENT_HASH}"
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: steps.validate_marker.outputs.hit != 'true'
         with:
           path: ~/.bun/install/cache
           key: bun-container-${{ runner.os }}-${{ hashFiles('bun.lock') }}
           restore-keys: bun-container-${{ runner.os }}-
-      - run: bun install --frozen-lockfile
+      - if: steps.validate_marker.outputs.hit != 'true'
+        run: bun install --frozen-lockfile
       - name: download shared packages/*/dist
+        if: steps.validate_marker.outputs.hit != 'true'
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: packages-dist
           # Producer uploads .packages-dist-upload/packages → extract as packages/.
           path: packages
       - name: verify downloaded package dist entrypoints
+        if: steps.validate_marker.outputs.hit != 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -421,6 +660,7 @@ jobs:
             fi
           done
       - name: assert playwright npm/container version sync (packages/svelte)
+        if: steps.validate_marker.outputs.hit != 'true'
         run: |
           set -euo pipefail
           npm_version="$(cd packages/svelte && bun -e 'console.log(require("playwright/package.json").version)')"
@@ -431,8 +671,19 @@ jobs:
             exit 1
           fi
       - name: component tests (packages/svelte, vitest browser mode + ssr)
+        if: steps.validate_marker.outputs.hit != 'true'
         working-directory: packages/svelte
         run: bun run --bun test
+      - name: write component_svelte success marker
+        if: steps.validate_marker.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
+        shell: bash
+        env:
+          # env-indirection: step outputs must not expand into the script body (zizmor).
+          CONTENT_HASH: ${{ steps.content_hash.outputs.hash }}
+        run: |
+          set -euo pipefail
+          bun scripts/ci-routing.ts write-success-marker \
+            --execution component_svelte --hash "${CONTENT_HASH}"
       - name: upload packages/svelte failure artifacts
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -477,19 +728,59 @@ jobs:
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version: 1.3.14
+      - id: content_hash
+        name: compute content-hash (component_spikes)
+        env:
+          BYPASS: ${{ needs.detect-changes.outputs.bypass_content_cache }}
+          DISABLE: ${{ vars.CI_DISABLE_CONTENT_HASH }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${BYPASS:-}" = "true" ] || [ "${DISABLE:-}" = "1" ]; then
+            {
+              echo "bypass=true"
+              echo "hit=false"
+            } >> "$GITHUB_OUTPUT"
+            echo "content-hash bypassed for component_spikes"
+            exit 0
+          fi
+          echo "bypass=false" >> "$GITHUB_OUTPUT"
+          bun scripts/ci-routing.ts hash-inputs --execution component_spikes --os "${RUNNER_OS}" --container-tag "${PLAYWRIGHT_CONTAINER_TAG}"
+      - id: marker_cache
+        name: restore component_spikes success-marker cache
+        if: steps.content_hash.outputs.bypass != 'true'
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .ci-content-hash/component_spikes.ok
+          key: ${{ steps.content_hash.outputs.cache_key }}
+      - id: validate_marker
+        name: validate component_spikes success marker
+        if: steps.content_hash.outputs.bypass != 'true' && steps.marker_cache.outputs.cache-hit == 'true'
+        shell: bash
+        env:
+          # env-indirection: step outputs must not expand into the script body (zizmor).
+          CONTENT_HASH: ${{ steps.content_hash.outputs.hash }}
+        run: |
+          set -euo pipefail
+          bun scripts/ci-routing.ts validate-success-marker \
+            --execution component_spikes --hash "${CONTENT_HASH}"
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: steps.validate_marker.outputs.hit != 'true'
         with:
           path: ~/.bun/install/cache
           key: bun-container-${{ runner.os }}-${{ hashFiles('bun.lock') }}
           restore-keys: bun-container-${{ runner.os }}-
-      - run: bun install --frozen-lockfile
+      - if: steps.validate_marker.outputs.hit != 'true'
+        run: bun install --frozen-lockfile
       - name: download shared packages/*/dist
+        if: steps.validate_marker.outputs.hit != 'true'
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: packages-dist
           # Producer uploads .packages-dist-upload/packages → extract as packages/.
           path: packages
       - name: verify downloaded package dist entrypoints
+        if: steps.validate_marker.outputs.hit != 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -504,6 +795,7 @@ jobs:
             fi
           done
       - name: assert playwright npm/container version sync (spikes/browser)
+        if: steps.validate_marker.outputs.hit != 'true'
         run: |
           set -euo pipefail
           npm_version="$(cd spikes/browser && bun -e 'console.log(require("playwright/package.json").version)')"
@@ -514,8 +806,19 @@ jobs:
             exit 1
           fi
       - name: retired spike suites (browser + ssr projects)
+        if: steps.validate_marker.outputs.hit != 'true'
         working-directory: spikes/browser
         run: bun run --bun test
+      - name: write component_spikes success marker
+        if: steps.validate_marker.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
+        shell: bash
+        env:
+          # env-indirection: step outputs must not expand into the script body (zizmor).
+          CONTENT_HASH: ${{ steps.content_hash.outputs.hash }}
+        run: |
+          set -euo pipefail
+          bun scripts/ci-routing.ts write-success-marker \
+            --execution component_spikes --hash "${CONTENT_HASH}"
       - name: upload spikes failure artifacts
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -560,19 +863,59 @@ jobs:
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version: 1.3.14
+      - id: content_hash
+        name: compute content-hash (component_journeys)
+        env:
+          BYPASS: ${{ needs.detect-changes.outputs.bypass_content_cache }}
+          DISABLE: ${{ vars.CI_DISABLE_CONTENT_HASH }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${BYPASS:-}" = "true" ] || [ "${DISABLE:-}" = "1" ]; then
+            {
+              echo "bypass=true"
+              echo "hit=false"
+            } >> "$GITHUB_OUTPUT"
+            echo "content-hash bypassed for component_journeys"
+            exit 0
+          fi
+          echo "bypass=false" >> "$GITHUB_OUTPUT"
+          bun scripts/ci-routing.ts hash-inputs --execution component_journeys --os "${RUNNER_OS}" --container-tag "${PLAYWRIGHT_CONTAINER_TAG}"
+      - id: marker_cache
+        name: restore component_journeys success-marker cache
+        if: steps.content_hash.outputs.bypass != 'true'
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .ci-content-hash/component_journeys.ok
+          key: ${{ steps.content_hash.outputs.cache_key }}
+      - id: validate_marker
+        name: validate component_journeys success marker
+        if: steps.content_hash.outputs.bypass != 'true' && steps.marker_cache.outputs.cache-hit == 'true'
+        shell: bash
+        env:
+          # env-indirection: step outputs must not expand into the script body (zizmor).
+          CONTENT_HASH: ${{ steps.content_hash.outputs.hash }}
+        run: |
+          set -euo pipefail
+          bun scripts/ci-routing.ts validate-success-marker \
+            --execution component_journeys --hash "${CONTENT_HASH}"
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: steps.validate_marker.outputs.hit != 'true'
         with:
           path: ~/.bun/install/cache
           key: bun-container-${{ runner.os }}-${{ hashFiles('bun.lock') }}
           restore-keys: bun-container-${{ runner.os }}-
-      - run: bun install --frozen-lockfile
+      - if: steps.validate_marker.outputs.hit != 'true'
+        run: bun install --frozen-lockfile
       - name: download shared packages/*/dist
+        if: steps.validate_marker.outputs.hit != 'true'
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: packages-dist
           # Producer uploads .packages-dist-upload/packages → extract as packages/.
           path: packages
       - name: verify downloaded package dist entrypoints
+        if: steps.validate_marker.outputs.hit != 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -587,6 +930,7 @@ jobs:
             fi
           done
       - name: assert playwright npm/container version sync (root @playwright/test)
+        if: steps.validate_marker.outputs.hit != 'true'
         run: |
           set -euo pipefail
           vr_version="$(bun -e 'console.log(require("@playwright/test/package.json").version)')"
@@ -596,9 +940,21 @@ jobs:
             exit 1
           fi
       - name: build packaged interaction test target
+        if: steps.validate_marker.outputs.hit != 'true'
         run: BASE_PATH=/ggsvelte bun run build:docs
       - name: interaction and safe-playground accessibility journeys
+        if: steps.validate_marker.outputs.hit != 'true'
         run: bun run test:visual -- interaction-accessibility.spec.ts playground.spec.ts
+      - name: write component_journeys success marker
+        if: steps.validate_marker.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
+        shell: bash
+        env:
+          # env-indirection: step outputs must not expand into the script body (zizmor).
+          CONTENT_HASH: ${{ steps.content_hash.outputs.hash }}
+        run: |
+          set -euo pipefail
+          bun scripts/ci-routing.ts write-success-marker \
+            --execution component_journeys --hash "${CONTENT_HASH}"
       - name: upload journey failure artifacts
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -710,31 +1066,88 @@ jobs:
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version: 1.3.14
+      - id: content_hash
+        name: compute content-hash (build)
+        env:
+          BYPASS: ${{ needs.detect-changes.outputs.bypass_content_cache }}
+          DISABLE: ${{ vars.CI_DISABLE_CONTENT_HASH }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${BYPASS:-}" = "true" ] || [ "${DISABLE:-}" = "1" ]; then
+            {
+              echo "bypass=true"
+              echo "hit=false"
+            } >> "$GITHUB_OUTPUT"
+            echo "content-hash bypassed for build"
+            exit 0
+          fi
+          echo "bypass=false" >> "$GITHUB_OUTPUT"
+          bun scripts/ci-routing.ts hash-inputs --execution build --os "${RUNNER_OS}"
+      - id: marker_cache
+        name: restore build success-marker cache
+        if: steps.content_hash.outputs.bypass != 'true'
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .ci-content-hash/build.ok
+          key: ${{ steps.content_hash.outputs.cache_key }}
+      - id: validate_marker
+        name: validate build success marker
+        if: steps.content_hash.outputs.bypass != 'true' && steps.marker_cache.outputs.cache-hit == 'true'
+        shell: bash
+        env:
+          # env-indirection: step outputs must not expand into the script body (zizmor).
+          CONTENT_HASH: ${{ steps.content_hash.outputs.hash }}
+        run: |
+          set -euo pipefail
+          bun scripts/ci-routing.ts validate-success-marker \
+            --execution build --hash "${CONTENT_HASH}"
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: steps.validate_marker.outputs.hit != 'true'
         with:
           path: ~/.bun/install/cache
           key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
           restore-keys: bun-${{ runner.os }}-
-      - run: bun install --frozen-lockfile
+      - if: steps.validate_marker.outputs.hit != 'true'
+        run: bun install --frozen-lockfile
       - name: build packages (tsc -b + svelte-package)
+        if: steps.validate_marker.outputs.hit != 'true'
         run: bun run build
       # Former pre-push hooks that are not duplicated by unit/component jobs.
       - name: svelte-check (packages/svelte)
+        if: steps.validate_marker.outputs.hit != 'true'
         run: bun run check:svelte
       - name: svelte-check (apps/docs)
+        if: steps.validate_marker.outputs.hit != 'true'
         run: bun run check:docs
       - name: tsc examples corpus
+        if: steps.validate_marker.outputs.hit != 'true'
         run: bun run check:examples
       - name: oxlint --type-aware
+        if: steps.validate_marker.outputs.hit != 'true'
         run: bun run lint:type-aware
       - name: knip
+        if: steps.validate_marker.outputs.hit != 'true'
         run: bun run knip
       - name: publint + attw (real gate — exports point at dist/)
+        if: steps.validate_marker.outputs.hit != 'true'
         run: bun run lint:package
       - name: build static docs site (adapter-static; the deployable/VR target)
+        if: steps.validate_marker.outputs.hit != 'true'
         run: bun run build:docs
       - name: verify packed Pages links and required R0 journeys
+        if: steps.validate_marker.outputs.hit != 'true'
         run: bun run check:pages-links
+      - name: write build success marker
+        if: steps.validate_marker.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
+        shell: bash
+        env:
+          # env-indirection: step outputs must not expand into the script body (zizmor).
+          CONTENT_HASH: ${{ steps.content_hash.outputs.hash }}
+        run: |
+          set -euo pipefail
+          bun scripts/ci-routing.ts write-success-marker \
+            --execution build --hash "${CONTENT_HASH}"
       # packages/*/dist for consumers is produced by packages-dist (issue #241).
       # This job keeps an independent build so publint/attw always re-validate
       # a fresh tree alongside knip/type-aware analysis.
@@ -753,17 +1166,68 @@ jobs:
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version: 1.3.14
+      - id: content_hash
+        name: compute content-hash (actions_security)
+        env:
+          BYPASS: ${{ needs.detect-changes.outputs.bypass_content_cache }}
+          DISABLE: ${{ vars.CI_DISABLE_CONTENT_HASH }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${BYPASS:-}" = "true" ] || [ "${DISABLE:-}" = "1" ]; then
+            {
+              echo "bypass=true"
+              echo "hit=false"
+            } >> "$GITHUB_OUTPUT"
+            echo "content-hash bypassed for actions_security"
+            exit 0
+          fi
+          echo "bypass=false" >> "$GITHUB_OUTPUT"
+          bun scripts/ci-routing.ts hash-inputs --execution actions_security --os "${RUNNER_OS}"
+      - id: marker_cache
+        name: restore actions_security success-marker cache
+        if: steps.content_hash.outputs.bypass != 'true'
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .ci-content-hash/actions_security.ok
+          key: ${{ steps.content_hash.outputs.cache_key }}
+      - id: validate_marker
+        name: validate actions_security success marker
+        if: steps.content_hash.outputs.bypass != 'true' && steps.marker_cache.outputs.cache-hit == 'true'
+        shell: bash
+        env:
+          # env-indirection: step outputs must not expand into the script body (zizmor).
+          CONTENT_HASH: ${{ steps.content_hash.outputs.hash }}
+        run: |
+          set -euo pipefail
+          bun scripts/ci-routing.ts validate-success-marker \
+            --execution actions_security --hash "${CONTENT_HASH}"
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: steps.validate_marker.outputs.hit != 'true'
         with:
           path: ~/.bun/install/cache
           key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
           restore-keys: bun-${{ runner.os }}-
-      - run: bun install --frozen-lockfile
+      - if: steps.validate_marker.outputs.hit != 'true'
+        run: bun install --frozen-lockfile
       - name: actionlint (lockfile-installed wasm build)
+        if: steps.validate_marker.outputs.hit != 'true'
         run: bun run lint:actions
       - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
+        if: steps.validate_marker.outputs.hit != 'true'
       - name: zizmor
+        if: steps.validate_marker.outputs.hit != 'true'
         run: uvx zizmor==1.26.1 .github/workflows
+      - name: write actions_security success marker
+        if: steps.validate_marker.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
+        shell: bash
+        env:
+          # env-indirection: step outputs must not expand into the script body (zizmor).
+          CONTENT_HASH: ${{ steps.content_hash.outputs.hash }}
+        run: |
+          set -euo pipefail
+          bun scripts/ci-routing.ts write-success-marker \
+            --execution actions_security --hash "${CONTENT_HASH}"
 
   bench-smoke:
     name: bench-smoke (mitata, 1k workload)
@@ -779,18 +1243,69 @@ jobs:
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version: 1.3.14
+      - id: content_hash
+        name: compute content-hash (bench_smoke)
+        env:
+          BYPASS: ${{ needs.detect-changes.outputs.bypass_content_cache }}
+          DISABLE: ${{ vars.CI_DISABLE_CONTENT_HASH }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${BYPASS:-}" = "true" ] || [ "${DISABLE:-}" = "1" ]; then
+            {
+              echo "bypass=true"
+              echo "hit=false"
+            } >> "$GITHUB_OUTPUT"
+            echo "content-hash bypassed for bench_smoke"
+            exit 0
+          fi
+          echo "bypass=false" >> "$GITHUB_OUTPUT"
+          bun scripts/ci-routing.ts hash-inputs --execution bench_smoke --os "${RUNNER_OS}"
+      - id: marker_cache
+        name: restore bench_smoke success-marker cache
+        if: steps.content_hash.outputs.bypass != 'true'
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .ci-content-hash/bench_smoke.ok
+          key: ${{ steps.content_hash.outputs.cache_key }}
+      - id: validate_marker
+        name: validate bench_smoke success marker
+        if: steps.content_hash.outputs.bypass != 'true' && steps.marker_cache.outputs.cache-hit == 'true'
+        shell: bash
+        env:
+          # env-indirection: step outputs must not expand into the script body (zizmor).
+          CONTENT_HASH: ${{ steps.content_hash.outputs.hash }}
+        run: |
+          set -euo pipefail
+          bun scripts/ci-routing.ts validate-success-marker \
+            --execution bench_smoke --hash "${CONTENT_HASH}"
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: steps.validate_marker.outputs.hit != 'true'
         with:
           path: ~/.bun/install/cache
           key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
           restore-keys: bun-${{ runner.os }}-
-      - run: bun install --frozen-lockfile
+      - if: steps.validate_marker.outputs.hit != 'true'
+        run: bun install --frozen-lockfile
       - name: build spec/core dist (benchmarks import the packages)
+        if: steps.validate_marker.outputs.hit != 'true'
         run: bun run check
       - name: bench smoke (1k points; informal numbers, not a gate on values)
+        if: steps.validate_marker.outputs.hit != 'true'
         run: bun run bench:smoke
       - name: retained-memory absolute and 20% regression gate
+        if: steps.validate_marker.outputs.hit != 'true'
         run: bun run bench:memory:check
+      - name: write bench_smoke success marker
+        if: steps.validate_marker.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
+        shell: bash
+        env:
+          # env-indirection: step outputs must not expand into the script body (zizmor).
+          CONTENT_HASH: ${{ steps.content_hash.outputs.hash }}
+        run: |
+          set -euo pipefail
+          bun scripts/ci-routing.ts write-success-marker \
+            --execution bench_smoke --hash "${CONTENT_HASH}"
 
   vr-baseline-guard:
     # Container-only baseline policy (decision 0009): committed baselines may

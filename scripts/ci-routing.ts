@@ -1,8 +1,8 @@
 /**
- * CI path routing — single source of truth for which expensive jobs a change
- * should schedule. Workflows call the CLI to emit GITHUB_OUTPUT flags; unit
- * tests lock the classification + dependency edges so routing cannot silently
- * shrink coverage.
+ * CI path routing + content-hash skip — single source of truth for which
+ * expensive jobs a change should schedule, and (issue #245) when a scheduled
+ * job may short-circuit because its input tree already passed under the same
+ * content hash.
  *
  * Design notes:
  * - Prefer pure functions over third-party path-filter actions so filters are
@@ -11,7 +11,26 @@
  *   event.before, shallow history, etc.).
  * - Changing `.github/workflows/ci.yml` itself forces the full CI surface so a
  *   routing edit cannot land without exercising the jobs it controls.
+ *
+ * Content-hash skip (issue #245):
+ * - Path routing decides whether a job is *scheduled*. Content-hash decides
+ *   whether a scheduled job may *early-exit success* after restoring a validated
+ *   success marker / packages-dist cache for that execution identity.
+ * - Hashes are fail-closed: every matched input path must have a digest; empty
+ *   digest maps throw. Expanding JOB_CONTENT_INPUTS changes the patterns string
+ *   inside the digest and invalidates old caches.
+ * - `bypass_content_cache` is true under force-all or lockfile / ci.yml /
+ *   ci-routing changes — jobs must not short-circuit when it is set.
+ * - Cache identity is per *physical execution* (component shards, consumer
+ *   matrix cells), not only logical routing names.
+ * - Invalidation: bump CONTENT_HASH_SCHEMA, edit a matched input, change
+ *   JOB_CONTENT_INPUTS patterns, or set repo variable CI_DISABLE_CONTENT_HASH=1.
+ * - GHA cache is ref-scoped; reuse is best-effort for re-runs / default-branch
+ *   restore, not a guaranteed cross-PR registry.
  */
+
+import { createHash } from "node:crypto";
+import { appendFileSync, mkdirSync, writeFileSync } from "node:fs";
 
 export type ChangeLane =
   | "spec"
@@ -311,10 +330,16 @@ function normalizeResult(value: string | undefined): JobResult {
   return "unknown";
 }
 
-export function formatGithubOutputs(plan: JobPlan): string {
+export function formatGithubOutputs(
+  plan: JobPlan,
+  options: FormatGithubOutputOptions = {},
+): string {
   const lines: string[] = [];
   for (const job of JOB_NAMES) {
     lines.push(`${job}=${plan[job] ? "true" : "false"}`);
+  }
+  if (options.bypassContentCache !== undefined) {
+    lines.push(`bypass_content_cache=${options.bypassContentCache ? "true" : "false"}`);
   }
   return `${lines.join("\n")}\n`;
 }
@@ -359,6 +384,436 @@ export function jobNames(): readonly JobName[] {
 }
 
 // ---------------------------------------------------------------------------
+// Content-hash skip (issue #245)
+// ---------------------------------------------------------------------------
+
+/** Bump to globally invalidate all content-hash caches. */
+export const CONTENT_HASH_SCHEMA = 1;
+
+/**
+ * Physical CI executions that may content-hash short-circuit.
+ * Distinct from JobName: component is three shards; consumer is matrixed.
+ */
+export type CacheableExecution =
+  | "packages_dist"
+  | "unit"
+  | "build"
+  | "actions_security"
+  | "bench_smoke"
+  | "interaction_perf"
+  | "component_svelte"
+  | "component_spikes"
+  | "component_journeys"
+  | "consumer";
+
+export const CACHEABLE_EXECUTIONS: readonly CacheableExecution[] = [
+  "packages_dist",
+  "unit",
+  "build",
+  "actions_security",
+  "bench_smoke",
+  "interaction_perf",
+  "component_svelte",
+  "component_spikes",
+  "component_journeys",
+  "consumer",
+] as const;
+
+/**
+ * Toolchain + recipe files folded into every hashable execution so a workflow
+ * or router change cannot reuse results produced under a different recipe.
+ */
+const UNIVERSAL_CONTENT_INPUTS: readonly string[] = [
+  ".github/workflows/ci.yml",
+  "scripts/ci-routing.ts",
+  "scripts/ci-routing.test.ts",
+  "bun.lock",
+  "package.json",
+  "tsconfig.json",
+  "tsconfig.base.json",
+  "bunfig.toml",
+];
+
+/**
+ * Conservative content inputs per physical execution.
+ * Patterns use the same matcher as path routing (no negation). Prefer broad
+ * trees over incomplete maps that could false-green.
+ */
+export const JOB_CONTENT_INPUTS: Record<CacheableExecution, readonly string[]> = {
+  packages_dist: [
+    ...UNIVERSAL_CONTENT_INPUTS,
+    "packages/spec/**",
+    "packages/core/**",
+    "packages/svelte/**",
+  ],
+  unit: [
+    ...UNIVERSAL_CONTENT_INPUTS,
+    "packages/spec/**",
+    "packages/core/**",
+    "packages/svelte/**",
+    "benchmarks/**",
+    "scripts/**",
+    "tests/evals/**",
+    "docs/accessibility/**",
+    ".github/ISSUE_TEMPLATE/**",
+    ".github/DISCUSSION_TEMPLATE/**",
+    ".changeset/**",
+    "skills/**",
+    "lifecycle.json",
+    "apps/docs/**",
+    "examples/**",
+    ".github/workflows/**",
+    // scripts/actionlint.test.ts asserts self-hosted labels against this file.
+    ".github/actionlint.yaml",
+    "support-matrix.json",
+    ".oxlintrc.json",
+    ".oxfmtrc.json",
+    ".markdownlint-cli2.jsonc",
+    "knip.jsonc",
+    ".pre-commit-config.yaml",
+  ],
+  build: [
+    ...UNIVERSAL_CONTENT_INPUTS,
+    "packages/spec/**",
+    "packages/core/**",
+    "packages/svelte/**",
+    "apps/docs/**",
+    "examples/**",
+    "scripts/**",
+    "tests/evals/**",
+    "skills/**",
+    "lifecycle.json",
+    "support-matrix.json",
+    ".oxlintrc.json",
+    ".oxfmtrc.json",
+    ".markdownlint-cli2.jsonc",
+    "knip.jsonc",
+    ".pre-commit-config.yaml",
+    ".github/workflows/**",
+  ],
+  actions_security: [
+    ...UNIVERSAL_CONTENT_INPUTS,
+    ".github/workflows/**",
+    ".github/actionlint.yaml",
+    "scripts/actionlint.ts",
+    "scripts/actionlint.test.ts",
+  ],
+  bench_smoke: [
+    ...UNIVERSAL_CONTENT_INPUTS,
+    "benchmarks/**",
+    "packages/spec/**",
+    "packages/core/**",
+    "packages/svelte/**",
+  ],
+  interaction_perf: [
+    ...UNIVERSAL_CONTENT_INPUTS,
+    "tests/performance/**",
+    "apps/docs/src/routes/__perf/**",
+    "benchmarks/interaction-budgets.json",
+    "packages/spec/**",
+    "packages/core/**",
+    "packages/svelte/**",
+    "apps/docs/**",
+    "examples/**",
+  ],
+  component_svelte: [
+    ...UNIVERSAL_CONTENT_INPUTS,
+    "packages/spec/**",
+    "packages/core/**",
+    "packages/svelte/**",
+    "skills/ggsvelte/**",
+  ],
+  component_spikes: [
+    ...UNIVERSAL_CONTENT_INPUTS,
+    "packages/spec/**",
+    "packages/core/**",
+    "packages/svelte/**",
+    "spikes/**",
+  ],
+  component_journeys: [
+    ...UNIVERSAL_CONTENT_INPUTS,
+    "packages/spec/**",
+    "packages/core/**",
+    "packages/svelte/**",
+    "apps/docs/**",
+    "examples/**",
+    "tests/visual/**",
+    "skills/ggsvelte/**",
+    "lifecycle.json",
+    "scripts/gen-llms.ts",
+    "scripts/gen-manifest.ts",
+    "scripts/gen-lifecycle.ts",
+  ],
+  consumer: [
+    ...UNIVERSAL_CONTENT_INPUTS,
+    "packages/spec/**",
+    "packages/core/**",
+    "packages/svelte/**",
+    "scripts/consumer-compat.ts",
+    "scripts/consumer-compat.test.ts",
+    "scripts/support-matrix.ts",
+    "scripts/support-matrix.test.ts",
+    "support-matrix.json",
+  ],
+};
+
+export function listJobContentPaths(
+  execution: CacheableExecution,
+  allPaths: readonly string[],
+): string[] {
+  const patterns = JOB_CONTENT_INPUTS[execution];
+  const matched = new Set<string>();
+  for (const raw of allPaths) {
+    const file = raw.replaceAll("\\", "/").replace(/^\.\//, "");
+    if (!file || file === ".") continue;
+    for (const pattern of patterns) {
+      if (matchPathPattern(pattern, file)) {
+        matched.add(file);
+        break;
+      }
+    }
+  }
+  return [...matched].toSorted();
+}
+
+export type HashJobInputsOptions = {
+  /** Override schema (tests only). Production always uses CONTENT_HASH_SCHEMA. */
+  schema?: number;
+};
+
+/**
+ * Fail-closed content hash. `digests` must be non-empty and is hashed as-is
+ * (caller filters via listJobContentPaths + requireJobInputDigests).
+ */
+export function hashJobInputs(
+  execution: CacheableExecution,
+  digests: ReadonlyMap<string, string>,
+  options: HashJobInputsOptions = {},
+): string {
+  if (digests.size === 0) {
+    throw new Error(`hashJobInputs(${execution}): no input digests`);
+  }
+  const schema = options.schema ?? CONTENT_HASH_SCHEMA;
+  const patterns = JOB_CONTENT_INPUTS[execution];
+  const lines: string[] = [
+    `schema=${schema}`,
+    `execution=${execution}`,
+    `patterns=${patterns.join("\0")}`,
+  ];
+  const paths = [...digests.keys()].toSorted();
+  for (const path of paths) {
+    const digest = digests.get(path);
+    if (digest === undefined || digest.length === 0) {
+      throw new Error(`hashJobInputs(${execution}): missing digest for ${path}`);
+    }
+    lines.push(`${path}\0${digest}`);
+  }
+  return createHash("sha256").update(lines.join("\n"), "utf8").digest("hex");
+}
+
+/**
+ * Fail-closed filter: every path in `requiredPaths` must have a non-empty digest.
+ */
+export function requireJobInputDigests(
+  execution: CacheableExecution,
+  requiredPaths: readonly string[],
+  digests: ReadonlyMap<string, string>,
+): Map<string, string> {
+  const out = new Map<string, string>();
+  const missing: string[] = [];
+  for (const path of requiredPaths) {
+    const digest = digests.get(path);
+    if (digest === undefined || digest.length === 0) {
+      missing.push(path);
+      continue;
+    }
+    out.set(path, digest);
+  }
+  if (missing.length > 0) {
+    throw new Error(
+      `requireJobInputDigests(${execution}): missing digest for ${missing.join(", ")}`,
+    );
+  }
+  return out;
+}
+
+export function shouldBypassContentCache(changes: ChangeFlags, options: PlanOptions = {}): boolean {
+  if (options.forceAll === true) return true;
+  return changes.lockfile || changes.ci_workflow || changes.ci_routing;
+}
+
+export type FormatGithubOutputOptions = {
+  bypassContentCache?: boolean;
+};
+
+export type ContentHashCacheKeyInput = {
+  execution: CacheableExecution;
+  hash: string;
+  os: string;
+  /** Extra dimensions for matrixed jobs (consumer). */
+  matrix?: {
+    node: string;
+    packageManager: string;
+    packageManagerVersion: string;
+    svelte: string;
+  };
+  /**
+   * Resolved toolchain versions after setup-node / setup-bun (consumer).
+   * Matrix majors alone are not enough: Node/npm patch bumps must miss cache.
+   */
+  runtime?: {
+    nodeVersion: string;
+    packageManagerVersion: string;
+  };
+  /** Playwright / container pin when relevant. */
+  containerTag?: string;
+};
+
+export function contentHashCacheKey(input: ContentHashCacheKeyInput): string {
+  const parts = [`ggsvelte-ch-v${CONTENT_HASH_SCHEMA}`, input.execution, sanitizeKeyPart(input.os)];
+  if (input.containerTag !== undefined && input.containerTag.length > 0) {
+    parts.push(sanitizeKeyPart(input.containerTag));
+  }
+  if (input.matrix !== undefined) {
+    parts.push(
+      `node${sanitizeKeyPart(input.matrix.node)}`,
+      sanitizeKeyPart(input.matrix.packageManager),
+      `pm${sanitizeKeyPart(input.matrix.packageManagerVersion)}`,
+      `svelte${sanitizeKeyPart(input.matrix.svelte)}`,
+    );
+  }
+  if (input.runtime !== undefined) {
+    parts.push(
+      `runtime-node${sanitizeKeyPart(input.runtime.nodeVersion)}`,
+      `runtime-pm${sanitizeKeyPart(input.runtime.packageManagerVersion)}`,
+    );
+  }
+  parts.push(input.hash);
+  return parts.join("-");
+}
+
+function sanitizeKeyPart(value: string): string {
+  return value.replaceAll(/[^a-zA-Z0-9._-]+/g, "");
+}
+
+export type SuccessMarker = {
+  schema: number;
+  execution: CacheableExecution;
+  hash: string;
+};
+
+export function serializeSuccessMarker(marker: SuccessMarker): string {
+  return `${JSON.stringify(marker)}\n`;
+}
+
+export function parseSuccessMarker(body: string): SuccessMarker | null {
+  try {
+    const parsed: unknown = JSON.parse(body);
+    if (parsed === null || typeof parsed !== "object") return null;
+    const obj = parsed as Record<string, unknown>;
+    if (typeof obj.schema !== "number") return null;
+    if (typeof obj.execution !== "string") return null;
+    if (typeof obj.hash !== "string" || obj.hash.length === 0) return null;
+    if (!(CACHEABLE_EXECUTIONS as readonly string[]).includes(obj.execution)) return null;
+    return {
+      schema: obj.schema,
+      execution: obj.execution as CacheableExecution,
+      hash: obj.hash,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export function validateSuccessMarker(
+  marker: SuccessMarker | null,
+  expected: { execution: CacheableExecution; hash: string; schema?: number },
+): boolean {
+  if (marker === null) return false;
+  const schema = expected.schema ?? CONTENT_HASH_SCHEMA;
+  return (
+    marker.schema === schema &&
+    marker.execution === expected.execution &&
+    marker.hash === expected.hash
+  );
+}
+
+/** Success-marker path relative to repo root (actions/cache path). */
+export function successMarkerPath(execution: CacheableExecution): string {
+  return `.ci-content-hash/${execution}.ok`;
+}
+
+/** Parse one `git ls-tree -r` line into mode/type/oid/path. */
+export function parseGitLsTreeLine(
+  line: string,
+): { mode: string; type: string; oid: string; path: string } | null {
+  if (line.length === 0) return null;
+  // <mode> <type> <oid>\t<path>
+  const tab = line.indexOf("\t");
+  if (tab < 0) return null;
+  const meta = line.slice(0, tab);
+  const path = line.slice(tab + 1);
+  const parts = meta.split(" ");
+  if (parts.length < 3) return null;
+  const mode = parts[0];
+  const type = parts[1];
+  const oid = parts[2];
+  if (
+    mode === undefined ||
+    type === undefined ||
+    oid === undefined ||
+    oid.length === 0 ||
+    path.length === 0
+  ) {
+    return null;
+  }
+  return { mode, type, oid, path };
+}
+
+/**
+ * Tree-entry digest includes mode so executable-bit flips miss the cache
+ * (blob OID alone is unchanged on mode-only edits).
+ */
+export function formatTreeEntryDigest(mode: string, oid: string): string {
+  return `${mode}:${oid}`;
+}
+
+/**
+ * Collect blob digests for HEAD via `git ls-tree -r`. Fail-closed on git errors
+ * or missing digests for matched paths. Digests are `mode:oid` (not oid alone).
+ */
+export async function collectGitHeadInputDigests(
+  execution: CacheableExecution,
+): Promise<{ paths: string[]; digests: Map<string, string>; hash: string }> {
+  const proc = Bun.spawn(["git", "ls-tree", "-r", "HEAD"], {
+    stdout: "pipe",
+    stderr: "pipe",
+  });
+  const stdout = await new Response(proc.stdout).text();
+  const stderr = await new Response(proc.stderr).text();
+  const code = await proc.exited;
+  if (code !== 0) {
+    throw new Error(`git ls-tree failed (exit ${code}): ${stderr.trim()}`);
+  }
+
+  const allDigests = new Map<string, string>();
+  for (const line of stdout.split(/\r?\n/)) {
+    const entry = parseGitLsTreeLine(line);
+    if (entry === null) continue;
+    if (entry.type !== "blob") continue;
+    allDigests.set(entry.path, formatTreeEntryDigest(entry.mode, entry.oid));
+  }
+
+  const paths = listJobContentPaths(execution, [...allDigests.keys()]);
+  if (paths.length === 0) {
+    throw new Error(`collectGitHeadInputDigests(${execution}): no paths matched content inputs`);
+  }
+  const digests = requireJobInputDigests(execution, paths, allDigests);
+  const hash = hashJobInputs(execution, digests);
+  return { paths, digests, hash };
+}
+
+// ---------------------------------------------------------------------------
 // CLI
 // ---------------------------------------------------------------------------
 
@@ -387,14 +842,30 @@ async function main(argv: string[]): Promise<void> {
 
   if (cmd === "emit-github-output") {
     const { files, forceAll } = await resolvePlanArgs(args.slice(1));
-    const plan = planJobs(classifyChangedPaths(files), { forceAll });
-    const body = formatGithubOutputs(plan);
+    const changes = classifyChangedPaths(files);
+    const plan = planJobs(changes, { forceAll });
+    const bypassContentCache = shouldBypassContentCache(changes, { forceAll });
+    const body = formatGithubOutputs(plan, { bypassContentCache });
     const outPath = process.env.GITHUB_OUTPUT;
     if (typeof outPath === "string" && outPath.length > 0) {
-      const { appendFileSync } = await import("node:fs");
       appendFileSync(outPath, body);
     }
     process.stdout.write(body);
+    return;
+  }
+
+  if (cmd === "hash-inputs") {
+    await runHashInputsCli(args.slice(1));
+    return;
+  }
+
+  if (cmd === "write-success-marker") {
+    runWriteSuccessMarkerCli(args.slice(1));
+    return;
+  }
+
+  if (cmd === "validate-success-marker") {
+    await runValidateSuccessMarkerCli(args.slice(1));
     return;
   }
 
@@ -424,11 +895,138 @@ function printHelp(): void {
   bun scripts/ci-routing.ts classify [--files f1 f2 | --from-git --base <ref> | --stdin]
   bun scripts/ci-routing.ts plan [--files ... | --from-git --base <ref> | --stdin] [--force-all]
   bun scripts/ci-routing.ts emit-github-output [--files ... | --from-git --base <ref> | --stdin] [--force-all]
+  bun scripts/ci-routing.ts hash-inputs --execution <name> [--os <runner.os>] [--container-tag <tag>] [--matrix-node N --matrix-pm NAME --matrix-pm-version V --matrix-svelte V] [--runtime-node-version V --runtime-pm-version V]
+  bun scripts/ci-routing.ts write-success-marker --execution <name> --hash <hex>
+  bun scripts/ci-routing.ts validate-success-marker --execution <name> --hash <hex>
   bun scripts/ci-routing.ts gate --required <file|-> --results <file|->
 
   --from-git uses git diff --name-status (rename source + dest).
   --stdin accepts plain paths or name-status lines (tab-separated).
+  hash-inputs uses git ls-tree -r HEAD (fail-closed). Emits hash + cache_key (+ GITHUB_OUTPUT).
 `);
+}
+
+function parseCacheableExecution(raw: string | undefined): CacheableExecution {
+  if (raw === undefined || raw.length === 0) {
+    throw new Error("--execution <name> is required");
+  }
+  if (!(CACHEABLE_EXECUTIONS as readonly string[]).includes(raw)) {
+    throw new Error(
+      `unknown execution "${raw}"; expected one of: ${CACHEABLE_EXECUTIONS.join(", ")}`,
+    );
+  }
+  return raw as CacheableExecution;
+}
+
+async function runHashInputsCli(args: string[]): Promise<void> {
+  const execution = parseCacheableExecution(flagValue(args, "--execution"));
+  const os = flagValue(args, "--os") ?? process.env.RUNNER_OS ?? "unknown";
+  const containerTag = flagValue(args, "--container-tag");
+  const matrixNode = flagValue(args, "--matrix-node");
+  const matrixPm = flagValue(args, "--matrix-pm");
+  const matrixPmVersion = flagValue(args, "--matrix-pm-version");
+  const matrixSvelte = flagValue(args, "--matrix-svelte");
+  const runtimeNodeVersion = flagValue(args, "--runtime-node-version");
+  const runtimePmVersion = flagValue(args, "--runtime-pm-version");
+
+  const { hash, paths } = await collectGitHeadInputDigests(execution);
+  const matrix =
+    matrixNode !== undefined &&
+    matrixPm !== undefined &&
+    matrixPmVersion !== undefined &&
+    matrixSvelte !== undefined
+      ? {
+          node: matrixNode,
+          packageManager: matrixPm,
+          packageManagerVersion: matrixPmVersion,
+          svelte: matrixSvelte,
+        }
+      : undefined;
+
+  const runtime =
+    runtimeNodeVersion !== undefined &&
+    runtimeNodeVersion.length > 0 &&
+    runtimePmVersion !== undefined &&
+    runtimePmVersion.length > 0
+      ? { nodeVersion: runtimeNodeVersion, packageManagerVersion: runtimePmVersion }
+      : undefined;
+
+  if (execution === "consumer" && (matrix === undefined || runtime === undefined)) {
+    throw new Error(
+      "hash-inputs consumer requires --matrix-* and --runtime-node-version / --runtime-pm-version",
+    );
+  }
+
+  const cacheKey = contentHashCacheKey({
+    execution,
+    hash,
+    os,
+    containerTag: containerTag ?? undefined,
+    matrix,
+    runtime,
+  });
+  const marker = successMarkerPath(execution);
+  const body = [
+    `hash=${hash}`,
+    `cache_key=${cacheKey}`,
+    `marker_path=${marker}`,
+    `path_count=${paths.length}`,
+    `execution=${execution}`,
+  ].join("\n");
+
+  const outPath = process.env.GITHUB_OUTPUT;
+  if (typeof outPath === "string" && outPath.length > 0) {
+    appendFileSync(outPath, `${body}\n`);
+  }
+  process.stdout.write(`${body}\n`);
+}
+
+function runWriteSuccessMarkerCli(args: string[]): void {
+  const execution = parseCacheableExecution(flagValue(args, "--execution"));
+  const hash = flagValue(args, "--hash");
+  if (hash === undefined || hash.length === 0) {
+    throw new Error("write-success-marker requires --hash <hex>");
+  }
+  const path = successMarkerPath(execution);
+  const dir = path.slice(0, path.lastIndexOf("/"));
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(
+    path,
+    serializeSuccessMarker({ schema: CONTENT_HASH_SCHEMA, execution, hash }),
+    "utf8",
+  );
+  process.stdout.write(`${path}\n`);
+}
+
+async function runValidateSuccessMarkerCli(args: string[]): Promise<void> {
+  const execution = parseCacheableExecution(flagValue(args, "--execution"));
+  const hash = flagValue(args, "--hash");
+  if (hash === undefined || hash.length === 0) {
+    throw new Error("validate-success-marker requires --hash <hex>");
+  }
+  const path = successMarkerPath(execution);
+  const file = Bun.file(path);
+  if (!(await file.exists())) {
+    process.stdout.write("hit=false\n");
+    writeGithubOutput("hit=false\n");
+    return;
+  }
+  const body = await file.text();
+  const marker = parseSuccessMarker(body);
+  const ok = validateSuccessMarker(marker, { execution, hash });
+  const line = `hit=${ok ? "true" : "false"}\n`;
+  process.stdout.write(line);
+  writeGithubOutput(line);
+  if (!ok) {
+    process.exitCode = 0; // miss is not a failure — caller runs full job
+  }
+}
+
+function writeGithubOutput(body: string): void {
+  const outPath = process.env.GITHUB_OUTPUT;
+  if (typeof outPath === "string" && outPath.length > 0) {
+    appendFileSync(outPath, body);
+  }
 }
 
 async function resolvePlanArgs(args: string[]): Promise<{ files: string[]; forceAll: boolean }> {
