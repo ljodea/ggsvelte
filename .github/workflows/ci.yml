@@ -132,16 +132,27 @@ jobs:
             fi
           done
           echo "packages-dist: verified spec/core/svelte dist entrypoints"
+      - name: stage packages/*/dist under a single upload root
+        # Multi-path upload strips the common prefix, so consumers would see
+        # spec/dist instead of packages/spec/dist. Stage once and upload that tree.
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .packages-dist-upload
+          mkdir -p .packages-dist-upload/packages/spec \
+            .packages-dist-upload/packages/core \
+            .packages-dist-upload/packages/svelte
+          cp -a packages/spec/dist .packages-dist-upload/packages/spec/
+          cp -a packages/core/dist .packages-dist-upload/packages/core/
+          cp -a packages/svelte/dist .packages-dist-upload/packages/svelte/
       - name: upload packages/*/dist for same-run consumers
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           # Run-scoped identity (same commit as this workflow run). Not a
           # content-hash cache across runs — see issue #245 for that.
           name: packages-dist
-          path: |
-            packages/spec/dist
-            packages/core/dist
-            packages/svelte/dist
+          # Single directory root → download path: packages restores packages/*/dist.
+          path: .packages-dist-upload/packages
           if-no-files-found: error
           retention-days: 1
 
@@ -252,8 +263,8 @@ jobs:
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: packages-dist
-          # Artifact paths are workspace-relative (packages/*/dist); extract at repo root.
-          path: .
+          # Producer uploads .packages-dist-upload/packages → extract as packages/.
+          path: packages
       - name: verify downloaded package dist entrypoints
         shell: bash
         run: |
@@ -264,6 +275,7 @@ jobs:
             packages/svelte/dist/index.js; do
             if [ ! -f "${path}" ]; then
               echo "::error::packages-dist artifact missing ${path} after download"
+              find packages -maxdepth 3 -type d 2>/dev/null | head -40 || true
               exit 1
             fi
           done
@@ -315,8 +327,8 @@ jobs:
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: packages-dist
-          # Artifact paths are workspace-relative (packages/*/dist); extract at repo root.
-          path: .
+          # Producer uploads .packages-dist-upload/packages → extract as packages/.
+          path: packages
       - name: verify downloaded package dist entrypoints
         shell: bash
         run: |
@@ -327,6 +339,7 @@ jobs:
             packages/svelte/dist/index.js; do
             if [ ! -f "${path}" ]; then
               echo "::error::packages-dist artifact missing ${path} after download"
+              find packages -maxdepth 3 -type d 2>/dev/null | head -40 || true
               exit 1
             fi
           done
@@ -411,8 +424,8 @@ jobs:
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: packages-dist
-          # Artifact paths are workspace-relative (packages/*/dist); extract at repo root.
-          path: .
+          # Producer uploads .packages-dist-upload/packages → extract as packages/.
+          path: packages
       - name: verify downloaded package dist entrypoints
         shell: bash
         run: |
@@ -423,6 +436,7 @@ jobs:
             packages/svelte/dist/index.js; do
             if [ ! -f "${path}" ]; then
               echo "::error::packages-dist artifact missing ${path} after download"
+              find packages -maxdepth 3 -type d 2>/dev/null | head -40 || true
               exit 1
             fi
           done
