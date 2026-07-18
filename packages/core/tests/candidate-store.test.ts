@@ -200,6 +200,49 @@ describe("CandidateStore", () => {
     expect(areaStore.nearest(25, 25, { mode: "exact", maxDistance: 0 })?.id).toBe(0);
   });
 
+  it("does not form stroke segments across multi-subpath boundaries", () => {
+    // Two disjoint horizontal strokes. The last vertex of path 0 is (20,0);
+    // the first of path 1 is (0,50). A false edge between them would pass near (10,25).
+    const multi = scene();
+    multi.batches = [
+      {
+        kind: "paths",
+        layerIndex: 0,
+        panelIndex: 0,
+        positions: new Float32Array([0, 0, 10, 0, 20, 0, 0, 50, 10, 50, 20, 50]),
+        rowIndex: new Uint32Array([0, 1, 2, 3, 4, 5]),
+        pathOffsets: new Uint32Array([0, 3, 6]),
+        strokes: [null, null],
+        linewidth: 2,
+        alpha: 1,
+        curve: "linear",
+      },
+    ];
+    const multiStore = buildCandidateStore(multi, {
+      datum: ({ primitiveIndex }) => ({
+        xValue: primitiveIndex,
+        yValue: primitiveIndex < 3 ? 0 : 50,
+        // Force exact geometry so pathRange/samePath are on the refine path.
+        autoMode: "exact",
+      }),
+    });
+    // Midpoint of the false cross-boundary edge must not hit.
+    expect(multiStore.nearest(10, 25, { mode: "exact", maxDistance: 3 })).toBeNull();
+    // Real stroke on path 0 (probe near the middle vertex of the first subpath).
+    const onPath0 = multiStore.nearest(10, 1, { mode: "exact", maxDistance: 3 });
+    expect(onPath0).not.toBeNull();
+    expect(onPath0!.id).toBeLessThan(3);
+    // Real stroke on path 1.
+    const onPath1 = multiStore.nearest(10, 51, { mode: "exact", maxDistance: 3 });
+    expect(onPath1).not.toBeNull();
+    expect(onPath1!.id).toBeGreaterThanOrEqual(3);
+    // Brush covering only the false edge should be empty; covering a real edge is not.
+    expect(multiStore.queryRect(8, 20, 12, 30)).toEqual(new Uint32Array());
+    const brushed = multiStore.queryRect(8, -2, 12, 2);
+    expect([...brushed].every((id) => id < 3)).toBe(true);
+    expect(brushed.length).toBeGreaterThan(0);
+  });
+
   it("rejects segment bounding boxes that do not geometrically intersect a brush", () => {
     const segmentScene = scene();
     segmentScene.batches = [

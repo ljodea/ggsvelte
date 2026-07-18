@@ -77,21 +77,36 @@ export function segmentIntersectsRect(
   return true;
 }
 
-export function samePath(batch: GeometryBatch, a: number, b: number): boolean {
-  if (batch.kind !== "paths") return false;
-  for (let p = 0; p < batch.pathOffsets.length - 1; p++)
-    if (a >= batch.pathOffsets[p]! && a < batch.pathOffsets[p + 1]!)
-      return b >= batch.pathOffsets[p]! && b < batch.pathOffsets[p + 1]!;
-  return false;
-}
-
-export function pathRange(batch: Extract<GeometryBatch, { kind: "paths" }>, vertex: number) {
-  for (let p = 0; p < batch.pathOffsets.length - 1; p++) {
-    const start = batch.pathOffsets[p]!;
-    const end = batch.pathOffsets[p + 1]!;
-    if (vertex >= start && vertex < end) return [start, end] as const;
+/**
+ * Half-open subpath range [start, end) containing `vertex`, or null.
+ * Binary search on monotonic pathOffsets — O(log P) vs linear O(P).
+ * Preserves the linear-scan contract: fractional vertices are allowed;
+ * zero-length spans never match.
+ */
+export function pathRange(
+  batch: Extract<GeometryBatch, { kind: "paths" }>,
+  vertex: number,
+): readonly [number, number] | null {
+  const offsets = batch.pathOffsets;
+  if (offsets.length < 2) return null;
+  let low = 0;
+  let high = offsets.length - 2;
+  while (low <= high) {
+    const mid = (low + high) >>> 1;
+    const start = offsets[mid]!;
+    const end = offsets[mid + 1]!;
+    if (vertex < start) high = mid - 1;
+    else if (vertex >= end) low = mid + 1;
+    else return [start, end] as const;
   }
   return null;
+}
+
+/** True when a and b lie in the same half-open pathOffsets subpath. */
+export function samePath(batch: GeometryBatch, a: number, b: number): boolean {
+  if (batch.kind !== "paths") return false;
+  const range = pathRange(batch, a);
+  return range !== null && b >= range[0] && b < range[1];
 }
 
 export function insidePath(
