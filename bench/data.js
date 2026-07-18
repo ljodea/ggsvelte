@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784394214959,
+  "lastUpdate": 1784397558626,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -28762,6 +28762,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 163.1349,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "2a946735d9565f28ba08aa9b4bf7b18cd6c0d9e1",
+          "message": "docs+test: post-0.1 migration policy, upgrading guide, migration fixtures (#7) (#288)\n\nADR 0013 records the versioned migration policy: pre-1.0 support windows\n(stable-intent surfaces get >=1 full minor of deprecation), per-migration\nrequirements (changeset Migration: marker, guide section backed by\ntype-checked fixtures, runtime diagnostic when runtime-observable), the\nchecks-never-rewrite invariant, the codemod decision factors and ACs\n(deferred until a mechanical migration exists), and an honest\nacceptance-criteria applicability matrix for issue #7.\n\nLive artifacts enforcing the policy today:\n\n- /guide/upgrading: rolling per-transition upgrade page (0.1 -> 0.2:\n  additive, Svelte peer floor 5.29 -> 5.33.1, optional controller adoption,\n  deprecated alias table), linked from both READMEs and required in the\n  packed-pages check.\n- packages/svelte/tests/migrations/: real Svelte fixtures embedded verbatim\n  in the guide (sync-tested) and type-checked by svelte-check via a new\n  tsconfig include; plus a compile-time assignability fixture for the three\n  deprecated aliases.\n- scripts/deprecation-wiring.test.ts: every @deprecated JSDoc carries\n  \"since <version>\" plus a guide URL whose page/anchor resolve (anchors from\n  the docs renderer itself); every minor/major changeset carries an explicit\n  Migration: marker. All four pending 0.2 minors now comply -- the\n  controller and svelte-floor changesets link the upgrading guide, so the\n  0.2 release notes satisfy the release-linkage criterion.\n- Alias @deprecated metadata corrected to \"since 0.1.0\" (they shipped\n  deprecated in 0.1.0; saying 0.2.0 would falsify release history).\n\nSKIP=markdownlint-cli2: hook lints untracked local artifacts/*.md scratch\nfiles; all committed markdown passes markdownlint-cli2 directly.\n\nCo-authored-by: Claude Fable 5 <noreply@anthropic.com>",
+          "timestamp": "2026-07-18T12:58:37-05:00",
+          "tree_id": "58c478d6d8e1b22844c0e3fc22020fa035c61133",
+          "url": "https://github.com/ljodea/ggsvelte/commit/2a946735d9565f28ba08aa9b4bf7b18cd6c0d9e1"
+        },
+        "date": 1784397557247,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.6337,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.1996,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 9.5236,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 13.6337,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 84.8319,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 124.6463,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.1767,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.3855,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 83.6869,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 104.9087,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.5657,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.5571,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 114.6455,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.792,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 27.1712,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 8.4066,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 37.6165,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 615.4012,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 160.5568,
             "unit": "ms"
           }
         ]
