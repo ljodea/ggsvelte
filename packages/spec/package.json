@@ -41,7 +41,7 @@
     "provenance": true
   },
   "dependencies": {
-    "@sinclair/typebox": "^0.34.0"
+    "@sinclair/typebox": "^0.34.52"
   },
   "devDependencies": {
     "ajv": "^8.20.0",

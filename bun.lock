@@ -4,6 +4,9 @@
   "workspaces": {
     "": {
       "name": "ggsvelte-monorepo",
+      "dependencies": {
+        "@sinclair/typebox": "^0.34.52",
+      },
       "devDependencies": {
         "@arethetypeswrong/cli": "0.18.5",
         "@changesets/cli": "2.31.0",
@@ -70,7 +73,7 @@
     },
     "packages/core": {
       "name": "@ggsvelte/core",
-      "version": "0.1.1",
+      "version": "0.2.0",
       "dependencies": {
         "@ggsvelte/spec": "^0.1.1",
       },
@@ -80,7 +83,7 @@
     },
     "packages/spec": {
       "name": "@ggsvelte/spec",
-      "version": "0.1.1",
+      "version": "0.2.0",
       "dependencies": {
         "@sinclair/typebox": "^0.34.0",
       },
@@ -91,7 +94,7 @@
     },
     "packages/svelte": {
       "name": "@ggsvelte/svelte",
-      "version": "0.1.1",
+      "version": "0.2.0",
       "bin": {
         "ggsvelte-render": "bin/ggsvelte-render.js",
       },
@@ -456,7 +459,7 @@
 
     "@rolldown/pluginutils": ["@rolldown/pluginutils@1.0.1", "", {}, "sha512-2j9bGt5Jh8hj+vPtgzPtl72j0yRxHAyumoo6TNfAjsLB04UtpSvPbPcDcBMxz7n+9CYB0c1GxQFxYRg2jimqGw=="],
 
-    "@sinclair/typebox": ["@sinclair/typebox@0.34.50", "", {}, "sha512-ydBWw0G6WFwWHzh9RK4B5c690UkreOG0llq0r+DaI7LgKgxigf8mhHzIPI3S0850g1BPkq/zpuCfrq4QFgUlTQ=="],
+    "@sinclair/typebox": ["@sinclair/typebox@0.34.52", "", {}, "sha512-XiMQh7qqVlxZzcVD+kkGMNGMzcTrDMLWI7S4x7z1MkCkbDPrekpZXEUK0eZqZFMuHQg2a2DZOcDIh9o5v3Gonw=="],
 
     "@sindresorhus/is": ["@sindresorhus/is@4.6.0", "", {}, "sha512-t09vSN3MdfsyCHoFcTRCH/iUtG7OJ0CsjzB8cjAmKc/va/kIgeDI/TxsigdncE/4be734m0cvIYwNaV4i2XqAw=="],
 
