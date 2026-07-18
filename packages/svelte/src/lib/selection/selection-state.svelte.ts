@@ -80,7 +80,7 @@ export type SelectionStateDeps = {
  * Built once per reactive need so selected/emphasized/mask paths do not each
  * re-walk the store (was O(2–3C) when several are live).
  */
-export type SharedCandidateProjection = {
+type SharedCandidateProjection = {
   readonly x: number;
   readonly y: number;
   readonly batchIndex: number;
@@ -96,7 +96,7 @@ export type SelectionState = {
   /**
    * Full-store projection (x/y + mask fields + keys). Host should `$derived`
    * this once when any anchor or mask consumer is live, then pass the array
-   * into the From-shared helpers below.
+   * into the shared-projection overloads below.
    */
   computeSharedCandidateProjection(): SharedCandidateProjection[];
   computeSelectedAnchors(
@@ -106,7 +106,7 @@ export type SelectionState = {
     sharedProjection?: readonly SharedCandidateProjection[],
   ): { x: number; y: number }[];
   computePresentationFocusKeys(): readonly PropertyKey[];
-  /** @deprecated Prefer computeSharedCandidateProjection + masks From shared. */
+  /** Alias of computeSharedCandidateProjection (tests / masks). */
   computeSemanticCandidateProjections(): SharedCandidateProjection[];
   /**
    * Takes BOTH upstream values as parameters so the host's three separate
