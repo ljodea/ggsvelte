@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784366344371,
+  "lastUpdate": 1784367159166,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -25192,6 +25192,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 162.6756,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "e0cec8c5dbc83b9ebd97ac149d046c14d71bd390",
+          "message": "ci: content-hash skip for unchanged job inputs (#245) (#258)\n\n* ci: content-hash skip for unchanged job inputs (#245)\n\nAdd fail-closed content hashing of per-execution inputs so scheduled CI\njobs can early-exit when a validated success marker (or packages-dist\ncache) already exists for the same physical execution identity. Covers\nCodex review requirements: distinct component/consumer keys, bypass under\nforce-all/lockfile/ci.yml/router, recipe files in the digest, and\ndocumented invalidation.\n\n* ci: env-indirect content-hash outputs for zizmor\n\nPass step hash and consumer matrix fields via env: so run scripts do not\nexpand GitHub expressions (template-injection medium findings).\n\n* ci: address Codex P2s on content-hash skip\n\n- Include tree mode in digests (mode:oid) so executable-bit flips miss cache\n- Add .github/actionlint.yaml to unit JOB_CONTENT_INPUTS\n- Fold resolved node/npm/bun versions into consumer cache keys",
+          "timestamp": "2026-07-18T04:32:01-05:00",
+          "tree_id": "7d88f2f2a1492b7cfbbb7215ec3bb0ac301e338a",
+          "url": "https://github.com/ljodea/ggsvelte/commit/e0cec8c5dbc83b9ebd97ac149d046c14d71bd390"
+        },
+        "date": 1784367158563,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.3218,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.7786,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 9.6652,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 11.9752,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 81.9402,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 117.5404,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.0636,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2901,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 87.8936,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 106.0882,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.3073,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.846,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 111.8247,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7967,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 27.7257,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.3635,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 35.8759,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 591.3719,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 160.8908,
             "unit": "ms"
           }
         ]
