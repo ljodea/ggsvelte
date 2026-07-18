@@ -9,7 +9,8 @@ import { cssColorResolver, drawStratum, sizeCanvasForDpr } from "@ggsvelte/core/
 
 /**
  * Project full-scene interaction masks onto a stratum batch subset using
- * scene batch identity (`indexOf`), matching host masksForBatches.
+ * scene batch identity. Builds a batch→index Map once (O(S + B)) rather than
+ * `indexOf` per batch (O(B · S)), matching host masksForBatches semantics.
  * Empty interactionMasks → empty result (no focus styling).
  */
 export function resolveBatchFocusMasks(
@@ -18,9 +19,10 @@ export function resolveBatchFocusMasks(
   interactionMasks: readonly (BatchInteractionMask | null)[],
 ): (BatchInteractionMask | null)[] {
   if (interactionMasks.length === 0) return [];
+  const indexByBatch = new Map(sceneBatches.map((batch, index) => [batch, index]));
   return batches.map((batch) => {
-    const index = sceneBatches.indexOf(batch);
-    return index < 0 ? null : (interactionMasks[index] ?? null);
+    const index = indexByBatch.get(batch);
+    return index === undefined ? null : (interactionMasks[index] ?? null);
   });
 }
 

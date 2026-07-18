@@ -39,21 +39,42 @@ function numericAxisContains(axis: SemanticIntervalAxis, value: CellValue): bool
   return numeric >= axis.domain[0] && numeric <= axis.domain[1];
 }
 
-function axisContains(axis: SemanticIntervalAxis, value: CellValue | undefined): boolean {
-  if (value === undefined) return false;
-  return axis.kind === "band"
-    ? axis.values.includes(encodeKey(value))
-    : numericAxisContains(axis, value);
+/**
+ * Build a membership predicate for one axis. Band axes precompute a Set so
+ * multi-candidate scans are O(C + V) rather than O(C × V) via includes().
+ */
+function prepareAxisContains(
+  axis: SemanticIntervalAxis,
+): (value: CellValue | undefined) => boolean {
+  if (axis.kind === "band") {
+    // Indexed lookup: high-cardinality categoricals can hold thousands of
+    // selected values, and a linear includes() per candidate is quadratic.
+    const bandKeys = new Set(axis.values);
+    return (value) => value !== undefined && bandKeys.has(encodeKey(value));
+  }
+  return (value) => value !== undefined && numericAxisContains(axis, value);
+}
+
+/**
+ * Precompute axis membership (band Sets once) for multi-candidate scans.
+ * Hot paths — cross-panel consumption, panel recompute, lineage counts —
+ * must call this once per domains object, then test each candidate.
+ */
+export function prepareCandidateInInterval(
+  domains: ReadonlyIntervalDomains,
+): (candidate: Pick<IntervalConsumptionCandidate<PropertyKey>, "xValue" | "yValue">) => boolean {
+  const xContains = domains.x === undefined ? undefined : prepareAxisContains(domains.x);
+  const yContains = domains.y === undefined ? undefined : prepareAxisContains(domains.y);
+  return (candidate) =>
+    (xContains === undefined || xContains(candidate.xValue)) &&
+    (yContains === undefined || yContains(candidate.yValue));
 }
 
 export function candidateInInterval(
   candidate: Pick<IntervalConsumptionCandidate<PropertyKey>, "xValue" | "yValue">,
   domains: ReadonlyIntervalDomains,
 ): boolean {
-  return (
-    (domains.x === undefined || axisContains(domains.x, candidate.xValue)) &&
-    (domains.y === undefined || axisContains(domains.y, candidate.yValue))
-  );
+  return prepareCandidateInInterval(domains)(candidate);
 }
 
 function uniqueKeys<Key extends PropertyKey>(candidates: Iterable<readonly Key[]>): readonly Key[] {
@@ -102,12 +123,11 @@ export function consumeIntervalKeys<Key extends PropertyKey>(
 
   const origin = input.records.find((record) => record.preset === "cross-panel");
   if (origin === undefined) return Object.freeze([]);
+  // Band Sets are built once for the origin domains, not per candidate.
+  const inInterval = prepareCandidateInInterval(origin.domains);
   return uniqueKeys(
     input.candidates
-      .filter(
-        (candidate) =>
-          visiblePanels.has(candidate.panelId) && candidateInInterval(candidate, origin.domains),
-      )
+      .filter((candidate) => visiblePanels.has(candidate.panelId) && inInterval(candidate))
       .map((candidate) => candidate.keys),
   );
 }
@@ -168,12 +188,10 @@ export function nextLocalIntervalRecords<Key extends PropertyKey>(
 export function recomputePanelIntervalKeys<Key extends PropertyKey>(
   input: RecomputePanelIntervalKeysInput<Key>,
 ): readonly Key[] {
+  const inInterval = prepareCandidateInInterval(input.domains);
   return uniqueKeys(
     input.candidates
-      .filter(
-        (candidate) =>
-          candidate.panelId === input.panelId && candidateInInterval(candidate, input.domains),
-      )
+      .filter((candidate) => candidate.panelId === input.panelId && inInterval(candidate))
       .map((candidate) => candidate.keys),
   );
 }
