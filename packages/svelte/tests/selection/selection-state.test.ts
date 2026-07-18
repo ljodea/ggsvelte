@@ -404,6 +404,42 @@ describe("createSelectionState anchors", () => {
     empty.destroy();
     destroy();
   });
+
+  it("shared projection serves selected + emphasized anchors with one key walk", () => {
+    const model = modelFor(continuousSpec());
+    let candidateCalls = 0;
+    const { state, destroy } = mountSelectionController({
+      model: () => model,
+      selectConfig: pointSelectMultiple,
+      effectiveEmphasisKeys: () => ["1"],
+      candidateSemanticKeys: (candidate) => {
+        candidateCalls++;
+        return identityCandidateKeys(candidate);
+      },
+    });
+    state.togglePointKeys(["0"], "pointer");
+    flushSync();
+
+    candidateCalls = 0;
+    const shared = state.computeSharedCandidateProjection();
+    const once = candidateCalls;
+    expect(once).toBeGreaterThan(0);
+
+    const selected = state.computeSelectedAnchors(shared);
+    const emphasized = state.computeEmphasizedAnchors(shared);
+    // No second store walk: key resolver not invoked again for anchors.
+    expect(candidateCalls).toBe(once);
+    expect(selected.length).toBeGreaterThan(0);
+    expect(emphasized.length).toBeGreaterThan(0);
+
+    // Without sharing, two independent calls would double the key work.
+    candidateCalls = 0;
+    state.computeSelectedAnchors();
+    state.computeEmphasizedAnchors();
+    expect(candidateCalls).toBeGreaterThanOrEqual(once * 2);
+
+    destroy();
+  });
 });
 
 describe("createSelectionState masks", () => {

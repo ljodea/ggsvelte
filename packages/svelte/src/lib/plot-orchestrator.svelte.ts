@@ -574,10 +574,6 @@ export function createPlotOrchestrator<
     resolvedWidth: () => runtime.resolvedWidth,
     resolvedHeight: () => runtime.resolvedHeight,
   });
-  // Method-call deriveds (not pure aliases) — keep as intermediate memos.
-  const selectedAnchors = $derived(selectionState.computeSelectedAnchors());
-  const emphasizedAnchors = $derived(selectionState.computeEmphasizedAnchors());
-
   // Semantic diagnostics effects (before host diagnostic / surface effects).
   semanticKeys.registerEffects();
 
@@ -593,17 +589,30 @@ export function createPlotOrchestrator<
   // focus/inspection registrations).
   surfaceState.registerSurfaceEffects();
 
-  // Three separate host deriveds — intermediate memo boundaries live here
-  // (do NOT fold into one method).
+  // Focus keys first (no candidate walk) so shared projection can short-circuit
+  // when idle. One full-store projection feeds selected/emphasized anchors and
+  // interaction masks — was O(2–3C) separate collectCandidates walks.
   const presentationFocusKeys = $derived(selectionState.computePresentationFocusKeys());
-  const semanticCandidateProjections = $derived(
-    selectionState.computeSemanticCandidateProjections(),
+  const sharedCandidateProjection = $derived.by(() => {
+    const needAnchors =
+      selectionState.effectiveSelectedKeys.length > 0 ||
+      intervalState.effectiveIntervalKeys.length > 0 ||
+      legendFocusState.effectiveEmphasisKeys.length > 0;
+    const needMasks = presentationFocusKeys.length > 0;
+    if (!needAnchors && !needMasks) return [];
+    return selectionState.computeSharedCandidateProjection();
+  });
+  const selectedAnchors = $derived(
+    selectionState.computeSelectedAnchors(sharedCandidateProjection),
+  );
+  const emphasizedAnchors = $derived(
+    selectionState.computeEmphasizedAnchors(sharedCandidateProjection),
   );
   const interactionMasks = $derived(
     selectionState.computeInteractionMasks(
       presentationFocusKeys,
-      // Thunk: with empty focus (idle), the projections derived is never read.
-      () => semanticCandidateProjections,
+      // Thunk: with empty focus (idle), shared projection is never forced for masks.
+      () => sharedCandidateProjection,
     ),
   );
 
