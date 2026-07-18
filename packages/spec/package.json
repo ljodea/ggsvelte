@@ -1,6 +1,6 @@
 {
   "name": "@ggsvelte/spec",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "ggsvelte plot spec: TypeBox schemas, PortableSpec types, normalize(), validate() with agent errors, fluent builder, JSON Schema artifact.",
   "keywords": [
     "agents",
