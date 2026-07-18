@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784391375697,
+  "lastUpdate": 1784393572235,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -28405,6 +28405,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 163.1427,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "5195ffe325295e906f23655d999bd9d8046e7365",
+          "message": "perf(svelte): single-pass precise-bounds keys + lineageCount (#285)\n\napplyPreciseBounds walked the candidate store twice (consumption bag for\nkeys, then intervalLineageCount for row set). One pass now collects both;\nrecomputePanelIntervalProjection exposes the pure fused form for tests.",
+          "timestamp": "2026-07-18T11:52:16-05:00",
+          "tree_id": "9d4d3c11fe8c6c44367d7a478d9d3ea42eff8da9",
+          "url": "https://github.com/ljodea/ggsvelte/commit/5195ffe325295e906f23655d999bd9d8046e7365"
+        },
+        "date": 1784393571511,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.919,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.3715,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 12.1143,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 16.4941,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 85.4244,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 122.928,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.0907,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.307,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 85.6402,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 109.4492,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 12.5172,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 11.7852,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 119.139,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.8076,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 28.8978,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 11.4756,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 26.8536,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 642.7575,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 163.7429,
             "unit": "ms"
           }
         ]
