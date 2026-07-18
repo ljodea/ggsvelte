@@ -764,11 +764,10 @@ describe("aggregate lineage index (issue #184)", () => {
  * - complexity: frame.groups index reads stay O(k), not O(n·k)
  */
 describe("buildBinLineageBuckets missing-edges fallback (issue #218)", () => {
-  async function load() {
+  async function loadBuildBinLineageBuckets() {
     const { buildBinLineageBuckets } =
       await import("../src/pipeline/build-candidates-identity-aggregate.ts");
-    const { ColumnTable } = await import("../src/table.ts");
-    return { buildBinLineageBuckets, ColumnTable };
+    return buildBinLineageBuckets;
   }
 
   function binBinding(colorField: string | null = null) {
@@ -797,7 +796,7 @@ describe("buildBinLineageBuckets missing-edges fallback (issue #218)", () => {
   }
 
   it("assigns every source row of a group into each of that group's frame rows", async () => {
-    const { buildBinLineageBuckets, ColumnTable } = await load();
+    const buildBinLineageBuckets = await loadBuildBinLineageBuckets();
     const table = ColumnTable.fromRows([
       { g: "a", x: 1 },
       { g: "b", x: 2 },
@@ -831,7 +830,7 @@ describe("buildBinLineageBuckets missing-edges fallback (issue #218)", () => {
   });
 
   it("remaps through facetPanel.sourceRows in first-seen order", async () => {
-    const { buildBinLineageBuckets, ColumnTable } = await load();
+    const buildBinLineageBuckets = await loadBuildBinLineageBuckets();
     const table = ColumnTable.fromRows([
       { g: "a", x: 1 },
       { g: "a", x: 2 },
@@ -860,7 +859,7 @@ describe("buildBinLineageBuckets missing-edges fallback (issue #218)", () => {
   });
 
   it("reads frame.groups O(k) times, not O(n·k), when edges are missing", async () => {
-    const { buildBinLineageBuckets, ColumnTable } = await load();
+    const buildBinLineageBuckets = await loadBuildBinLineageBuckets();
     const n = 40;
     const k = 40;
     const table = ColumnTable.fromRows(Array.from({ length: n }, (_, i) => ({ x: i })));
