@@ -143,6 +143,24 @@ describe("dataIdentityEpochToken", () => {
     );
   });
 
+  it("fingerprints column-array identities (not only the columns wrapper)", () => {
+    const tracker = createSourceIdentityTracker();
+    const id = (value: unknown) => tracker.sourceIdentity(value);
+    const x = [1, 2];
+    const y = [3, 4];
+    const columns = { x, y };
+    const bare = dataContentOrderToken(columns, id);
+    const wrapped = dataContentOrderToken({ columns }, id);
+    // Both forms include each column array's identity (Codex P2).
+    expect(bare).toContain(id(x));
+    expect(bare).toContain(id(y));
+    expect(wrapped).toContain(id(x));
+    expect(wrapped).toContain(id(y));
+    // Replace one column array on the map → content token changes.
+    columns.y = [5, 6];
+    expect(dataContentOrderToken(columns, id)).not.toBe(bare);
+  });
+
   it("does not deep-serialize large row payloads (no JSON.stringify of cells)", () => {
     const tracker = createSourceIdentityTracker();
     const id = (value: unknown) => tracker.sourceIdentity(value);

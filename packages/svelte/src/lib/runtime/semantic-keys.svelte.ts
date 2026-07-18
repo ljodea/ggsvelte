@@ -115,18 +115,38 @@ export function dataContentOrderToken(
     }
     const columns = record["columns"];
     if (columns !== null && typeof columns === "object" && !Array.isArray(columns))
-      return `c:${sourceIdentity(columns)}`;
+      return `c:${columnMapOrderToken(columns as Record<string, unknown>, sourceIdentity)}`;
     const name = record["name"];
     if (typeof name === "string") {
       const keys = Object.keys(record);
       if (keys.length === 1 && keys[0] === "name") return `n:${name}`;
     }
+    // Bare column-oriented object (gg() wraps as { columns }) — fingerprint
+    // each field's array identity so in-place column replacement bumps epoch.
+    const fieldKeys = Object.keys(record);
+    if (fieldKeys.length > 0 && fieldKeys.every((key) => Array.isArray(record[key])))
+      return `c:${columnMapOrderToken(record, sourceIdentity)}`;
     return `o:${sourceIdentity(data)}`;
   }
   if (typeof data === "string" || typeof data === "number" || typeof data === "boolean")
     return `p:${String(data)}`;
   if (typeof data === "bigint") return `p:${data.toString()}`;
   return `p:${sourceIdentity(data)}`;
+}
+
+/** O(fields) fingerprint: each column array's identity (+ length), not cells. */
+function columnMapOrderToken(
+  columns: Record<string, unknown>,
+  sourceIdentity: (value: unknown) => string,
+): string {
+  const keys = Object.keys(columns).toSorted();
+  let token = `${keys.length}`;
+  for (const key of keys) {
+    const column = columns[key];
+    token += `|${key}=${sourceIdentity(column)}`;
+    if (Array.isArray(column)) token += `@${column.length}`;
+  }
+  return token;
 }
 
 function datasetsOrderToken(datasets: unknown, sourceIdentity: (value: unknown) => string): string {
