@@ -37,6 +37,11 @@ describe("plot orchestrator lifecycle contract", () => {
     ]);
   });
 
+  it("uses the model-owned CandidateStore without constructing a second hit index", () => {
+    expect(source).not.toContain("buildHitIndex");
+    expect(source).not.toContain("SceneHitIndex");
+  });
+
   it("keeps phased effects in registration order", () => {
     expectOrdered(source, [
       "runtime.registerModelEffects();",

@@ -1,5 +1,14 @@
 # @ggsvelte/svelte
 
+## 0.2.1
+
+### Patch Changes
+
+- d724578: # Update the packaged agent skill for v0.2
+
+  Document linked interaction controllers, legend focus and filtering, faceted
+  intervals, exact bounds, and the current Svelte peer requirement.
+
 ## 0.2.0
 
 ### Minor Changes

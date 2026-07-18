@@ -1,21 +1,18 @@
-import { fromAny, fromPartial } from "@total-typescript/shoehorn";
+import { fromPartial } from "@total-typescript/shoehorn";
 import { describe, expect, it } from "vitest";
 
 import type { CandidateFacts } from "@ggsvelte/core";
-import type { SceneHit } from "@ggsvelte/core/dom";
-
 import {
   bestDirectionalIndex,
   buildTraversalEntries,
   buildTraversalHits,
-  CANDIDATE_HIT_TOLERANCE,
   cycleCoincidentIndex,
   hitFromCandidate,
-  matchCandidateFromHit,
   nextTraversalIndex,
   planCycleCoincident,
   planDirectionalNavigate,
   plotPointFromClient,
+  type SceneHit,
 } from "../../src/lib/surface/plot-px.js";
 
 const hit = (x: number, y: number, extras: Partial<SceneHit> = {}): SceneHit => ({
@@ -382,102 +379,5 @@ describe("planCycleCoincident", () => {
         nextIndex: () => -1,
       }),
     ).toEqual({ type: "none" });
-  });
-});
-
-describe("matchCandidateFromHit", () => {
-  const base = {
-    id: 0,
-    layerIndex: 0,
-    panelIndex: 0,
-    rowIndex: 1 as number | null,
-    x: 10,
-    y: 20,
-    kind: "point" as const,
-    autoMode: "exact" as const,
-    lineage: 0,
-  };
-
-  const asCandidate = (partial: Partial<typeof base> & { id: number }): CandidateFacts =>
-    fromPartial<CandidateFacts>({
-      ...base,
-      ...partial,
-    });
-
-  it("matches on layer/panel/row/kind within exclusive 0.5 tolerance", () => {
-    const candidates = [
-      asCandidate({ id: 0, x: 10.49, y: 20.49 }),
-      asCandidate({ id: 1, x: 10, y: 20, rowIndex: 2 }),
-    ];
-    const matched = matchCandidateFromHit(candidates, hit(10, 20, { rowIndex: 1 }));
-    expect(matched?.id).toBe(0);
-  });
-
-  it("rejects |Δ| === CANDIDATE_HIT_TOLERANCE (exclusive bound)", () => {
-    expect(CANDIDATE_HIT_TOLERANCE).toBe(0.5);
-    const candidates = [asCandidate({ id: 0, x: 10 + CANDIDATE_HIT_TOLERANCE, y: 20 })];
-    expect(matchCandidateFromHit(candidates, hit(10, 20, { rowIndex: 1 }))).toBeNull();
-  });
-
-  it("returns the first match in iteration order", () => {
-    const candidates = [asCandidate({ id: 0, x: 10, y: 20 }), asCandidate({ id: 1, x: 10, y: 20 })];
-    expect(matchCandidateFromHit(candidates, hit(10, 20, { rowIndex: 1 }))?.id).toBe(0);
-  });
-
-  it("requires kind and row identity", () => {
-    const candidates = [asCandidate({ id: 0, kind: fromAny("line") })];
-    expect(
-      matchCandidateFromHit(candidates, hit(10, 20, { rowIndex: 1, kind: "point" })),
-    ).toBeNull();
-  });
-
-  it("spatial shortlist does not materialize every far candidate", () => {
-    // Complexity: linear Iterable walk is O(C); SpatialCandidateSource uses
-    // queryRect shortlist then O(k) candidate() materializations.
-    const count = 4_000;
-    const xs = new Float64Array(count);
-    const ys = new Float64Array(count);
-    const facts: CandidateFacts[] = [];
-    for (let i = 0; i < count; i++) {
-      const col = i % 50;
-      const row = Math.floor(i / 50);
-      const x = 100 + col * 10;
-      const y = 100 + row * 10;
-      xs[i] = x;
-      ys[i] = y;
-      facts.push(asCandidate({ id: i, x, y, rowIndex: i }));
-    }
-    // One candidate under the probe at (10, 20).
-    xs[0] = 10;
-    ys[0] = 20;
-    facts[0] = asCandidate({ id: 0, x: 10, y: 20, rowIndex: 1 });
-
-    let candidateCalls = 0;
-    const spatial = {
-      queryRect(x0: number, y0: number, x1: number, y1: number): number[] {
-        const out: number[] = [];
-        for (let i = 0; i < count; i++) {
-          const x = xs[i];
-          const y = ys[i];
-          if (x >= x0 && x <= x1 && y >= y0 && y <= y1) out.push(i);
-        }
-        return out;
-      },
-      candidate(id: number): CandidateFacts | null {
-        candidateCalls++;
-        return facts[id] ?? null;
-      },
-    };
-
-    candidateCalls = 0;
-    const matched = matchCandidateFromHit(spatial, hit(10, 20, { rowIndex: 1 }));
-    expect(matched?.id).toBe(0);
-    // Shortlist is tiny; linear walk would call candidate() ~count times.
-    expect(candidateCalls).toBeLessThan(16);
-    expect(candidateCalls).toBeLessThan(count / 50);
-
-    candidateCalls = 0;
-    expect(matchCandidateFromHit(spatial, hit(50, 50, { rowIndex: 1 }))).toBeNull();
-    expect(candidateCalls).toBe(0);
   });
 });

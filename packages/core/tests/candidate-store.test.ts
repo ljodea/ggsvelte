@@ -126,6 +126,196 @@ describe("CandidateStore", () => {
     expect(resolutions).toBe(5);
   });
 
+  it("hit-tests points through the lazy store with tolerance and panel clipping", () => {
+    let resolutions = 0;
+    const lazy = buildCandidateStore(sceneWithPoints([[0, 20]]), {
+      datum: () => {
+        resolutions++;
+        return {};
+      },
+    });
+    expect(resolutions).toBe(0);
+    expect(lazy.hitTest(5.5, 20)?.id).toBe(0);
+    expect(resolutions).toBe(1);
+    expect(lazy.hitTest(6.5, 20)).toBeNull();
+    // The rendered mark is clipped at the panel edge even though its radius
+    // extends around the point anchor.
+    expect(lazy.hitTest(-1, 20)).toBeNull();
+
+    const exactRadius = buildCandidateStore(sceneWithPoints([[10, 20]]), {
+      hitTolerance: 0,
+    });
+    expect(exactRadius.hitTest(12.5, 20)?.id).toBe(0);
+    expect(exactRadius.hitTest(13.5, 20)).toBeNull();
+  });
+
+  it("hitTest follows reverse paint order for overlapping exact geometry", () => {
+    const points = scene();
+    points.batches = [
+      {
+        kind: "points",
+        layerIndex: 0,
+        panelIndex: 0,
+        positions: new Float32Array([10, 20]),
+        rowIndex: new Uint32Array([0]),
+        size: 5,
+        alpha: 1,
+        shape: "circle",
+        fill: null,
+      },
+      {
+        kind: "points",
+        layerIndex: 1,
+        panelIndex: 0,
+        positions: new Float32Array([14, 20]),
+        rowIndex: new Uint32Array([1]),
+        size: 5,
+        alpha: 1,
+        shape: "circle",
+        fill: null,
+      },
+    ];
+    // The later-painted point wins even though the earlier point is closer.
+    expect(buildCandidateStore(points).hitTest(10, 20)?.id).toBe(1);
+
+    const rects = scene();
+    rects.batches = [0, 1].map((layerIndex) => ({
+      kind: "rects" as const,
+      layerIndex,
+      panelIndex: 0,
+      rects: new Float32Array([10, 10, 40, 40]),
+      rowIndex: new Uint32Array([layerIndex]),
+      fill: null,
+      alpha: 1,
+    }));
+    expect(buildCandidateStore(rects).hitTest(20, 20)?.id).toBe(1);
+    expect(buildCandidateStore(rects).hitTest(5, 20)).toBeNull();
+    rects.batches = [
+      {
+        kind: "rects",
+        layerIndex: 0,
+        panelIndex: 0,
+        rects: new Float32Array([50, 50, -40, -40]),
+        rowIndex: new Uint32Array([0]),
+        fill: null,
+        alpha: 1,
+      },
+    ];
+    const negativeRectStore = buildCandidateStore(rects);
+    expect(negativeRectStore.hitTest(20, 20)?.id).toBe(0);
+    expect(negativeRectStore.queryRect(15, 15, 25, 25)).toEqual(new Uint32Array([0]));
+
+    const segments = scene();
+    segments.batches = [0, 1].map((layerIndex) => ({
+      kind: "segments" as const,
+      layerIndex,
+      panelIndex: 0,
+      segments: new Float32Array([10, 20, 80, 20]),
+      rowIndex: new Uint32Array([layerIndex]),
+      stroke: null,
+      linewidth: 2,
+      alpha: 1,
+    }));
+    expect(buildCandidateStore(segments, { hitTolerance: 2 }).hitTest(40, 22)?.id).toBe(1);
+    expect(buildCandidateStore(segments, { hitTolerance: 2 }).hitTest(40, 24)).toBeNull();
+  });
+
+  it("hitTest resolves paths by paint order and stable nearest vertex, never glyphs", () => {
+    const paths = scene();
+    paths.batches = [
+      {
+        kind: "paths",
+        layerIndex: 0,
+        panelIndex: 0,
+        positions: new Float32Array([10, 20, 30, 20, 10, 20, 30, 20]),
+        rowIndex: new Uint32Array([0, 1, 2, 3]),
+        pathOffsets: new Uint32Array([0, 2, 4]),
+        strokes: [null, null],
+        linewidth: 2,
+        alpha: 1,
+        curve: "linear",
+      },
+    ];
+    // Later subpath wins; an equidistant edge chooses its first vertex.
+    expect(buildCandidateStore(paths).hitTest(20, 20)?.id).toBe(2);
+
+    const folded = scene();
+    folded.batches = [
+      {
+        kind: "paths",
+        layerIndex: 0,
+        panelIndex: 0,
+        positions: new Float32Array([0, 10, 20, 10, 10, 11]),
+        rowIndex: new Uint32Array([0, 1, 2]),
+        pathOffsets: new Uint32Array([0, 3]),
+        strokes: [null],
+        linewidth: 2,
+        alpha: 1,
+        curve: "linear",
+      },
+    ];
+    // Both edges are in tolerance. Paint compatibility chooses the first edge,
+    // then its first endpoint on an equal endpoint-distance tie.
+    expect(buildCandidateStore(folded).hitTest(10, 10)?.id).toBe(0);
+
+    const area = scene();
+    area.batches = [
+      {
+        kind: "paths",
+        layerIndex: 0,
+        panelIndex: 0,
+        positions: new Float32Array([20, 20, 80, 20, 50, 80]),
+        rowIndex: new Uint32Array([0, 1, 2]),
+        pathOffsets: new Uint32Array([0, 3]),
+        strokes: [null],
+        fills: [null],
+        closed: true,
+        linewidth: 0,
+        alpha: 1,
+        curve: "linear",
+      },
+    ];
+    const areaStore = buildCandidateStore(area);
+    expect(areaStore.hitTest(25, 25)?.id).toBe(0);
+    // Filled areas have no visible stroke; pointer tolerance must not create
+    // an invisible interactive band outside the polygon.
+    expect(areaStore.hitTest(50, 18)).toBeNull();
+
+    const glyphs = scene();
+    glyphs.batches = [
+      {
+        kind: "glyphs",
+        layerIndex: 0,
+        panelIndex: 0,
+        positions: new Float32Array([20, 20]),
+        rowIndex: new Uint32Array([0]),
+        text: ["label"],
+        fill: null,
+        size: 12,
+        alpha: 1,
+      },
+    ];
+    expect(buildCandidateStore(glyphs).hitTest(20, 20)).toBeNull();
+  });
+
+  it("hitTest preserves exact containment when semantic nearest is too far", () => {
+    const largeRect = scene();
+    largeRect.batches = [
+      {
+        kind: "rects",
+        layerIndex: 0,
+        panelIndex: 0,
+        rects: new Float32Array([10, 10, 160, 90]),
+        rowIndex: new Uint32Array([0]),
+        fill: null,
+        alpha: 1,
+      },
+    ];
+    const candidates = buildCandidateStore(largeRect);
+    expect(candidates.nearest(20, 90, { mode: "xy", maxDistance: 5 })).toBeNull();
+    expect(candidates.hitTest(20, 90)?.id).toBe(0);
+  });
+
   it("uses exact geometry for containment and rectangle intersections", () => {
     const rectScene = scene();
     rectScene.batches = [
@@ -636,6 +826,47 @@ describe("candidate spatial query hot path (issue #214)", () => {
     }
   });
 
+  it("hitTest does not expand a dense point query by one oversized point", () => {
+    const count = 10_000;
+    const dense = new Float32Array(count * 2);
+    for (let i = 0; i < count; i++) {
+      dense[i * 2] = i % 100;
+      dense[i * 2 + 1] = Math.floor(i / 100);
+    }
+    const plotScene = scene();
+    plotScene.batches = [
+      {
+        kind: "points",
+        layerIndex: 0,
+        panelIndex: 0,
+        positions: dense,
+        rowIndex: Uint32Array.from({ length: count }, (_, index) => index),
+        size: 1,
+        alpha: 1,
+        shape: "circle",
+        fill: null,
+      },
+      {
+        kind: "points",
+        layerIndex: 1,
+        panelIndex: 0,
+        positions: new Float32Array([190, 100]),
+        rowIndex: new Uint32Array([count]),
+        size: 1_000,
+        alpha: 1,
+        shape: "circle",
+        fill: null,
+      },
+    ];
+    const store = buildCandidateStore(plotScene);
+    void store.x;
+    const hypot = spyOn(Math, "hypot");
+    hypot.mockClear();
+    expect(store.hitTest(10, 10)?.id).toBe(count);
+    expect(hypot).toHaveBeenCalledTimes(1);
+    hypot.mockRestore();
+  });
+
   it("queryRect does not read every batch for a tight brush on a large point cloud", () => {
     const count = 8_000;
     const cols = Math.ceil(Math.sqrt(count));
@@ -855,6 +1086,48 @@ describe("candidate spatial query hot path (issue #214)", () => {
     // Linear extended scan would touch batches once per rect (~count).
     expect(batchIndexReads).toBeLessThan(200);
     expect(batchIndexReads).toBeLessThan(count / 10);
+
+    batchIndexReads = 0;
+    expect(store.hitTest(10, 10)?.id).toBe(0);
+    expect(batchIndexReads).toBeLessThan(200);
+    expect(batchIndexReads).toBeLessThan(count / 10);
+  });
+
+  it("hitTest does not refine every far segment on a dense field", () => {
+    const count = 4_000;
+    const segments = new Float32Array(count * 4);
+    for (let i = 0; i < count; i++) {
+      const x = 100 + (i % 50) * 10;
+      const y = 100 + Math.floor(i / 50) * 10;
+      segments.set([x, y, x + 2, y], i * 4);
+    }
+    segments.set([0, 10, 20, 10], 0);
+    const plotScene = scene();
+    plotScene.batches = [
+      {
+        kind: "segments",
+        layerIndex: 0,
+        panelIndex: 0,
+        segments,
+        rowIndex: Uint32Array.from({ length: count }, (_, index) => index),
+        stroke: null,
+        linewidth: 1,
+        alpha: 1,
+      },
+    ];
+    let batchIndexReads = 0;
+    plotScene.batches = new Proxy(plotScene.batches, {
+      get(target, property, receiver): unknown {
+        if (typeof property === "string" && /^\d+$/.test(property)) batchIndexReads++;
+        return Reflect.get(target, property, receiver) as unknown;
+      },
+    });
+    const store = buildCandidateStore(plotScene);
+    void store.x;
+    batchIndexReads = 0;
+    expect(store.hitTest(10, 10)?.id).toBe(0);
+    expect(batchIndexReads).toBeLessThan(200);
+    expect(batchIndexReads).toBeLessThan(count / 10);
   });
 
   it("one giant rect does not force-refine every small far rect", () => {
@@ -986,6 +1259,11 @@ describe("candidate spatial query hot path (issue #214)", () => {
     // Linear extended scan would touch the batch once per far vertex (~count).
     expect(batchIndexReads).toBeLessThan(200);
     expect(batchIndexReads).toBeLessThan(count / 10);
+
+    batchIndexReads = 0;
+    expect(store.hitTest(10, 10)?.id).toBeLessThan(4);
+    expect(batchIndexReads).toBeLessThan(200);
+    expect(batchIndexReads).toBeLessThan(count / 10);
   });
 
   it("filled path still uses subpath AABB so interior probes hit", () => {
@@ -1012,6 +1290,7 @@ describe("candidate spatial query hot path (issue #214)", () => {
       datum: () => ({ xValue: 1, yValue: 2, autoMode: "exact" }),
     });
     expect(areaStore.nearest(100, 50, { mode: "exact", maxDistance: 0 })?.id).toBeDefined();
+    expect(areaStore.hitTest(100, 50)?.id).toBeDefined();
   });
 
   it("builds stores that include glyph batches without throwing", () => {

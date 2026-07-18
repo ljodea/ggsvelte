@@ -1,7 +1,7 @@
 /// <reference lib="dom" />
 // @ggsvelte/core/dom — DOM entrypoint: canvas batch renderers (decision 0006
-// strata recipes) and the unified hit index. Browser-only; never imported by
-// the pure entry. The Svelte adapter composes these into the strata DOM;
+// strata recipes). Browser-only; never imported by the pure entry. The Svelte
+// adapter composes these into the strata DOM;
 // renderToSVGString never touches this module (always all-SVG).
 //
 // Lifecycle (Hadley lesson 13; meanings in CONTRIBUTING.md): tags collected
@@ -17,8 +17,5 @@ export {
 } from "./canvas.js";
 export type { ColorResolver } from "./canvas.js";
 export type { CanvasFocusPresentation, PrimitiveFocusMask } from "./canvas.js";
-
-export { buildHitIndex, DEFAULT_HIT_TOLERANCE } from "./hit-index.js";
-export type { HitIndexOptions, SceneHit, SceneHitIndex } from "./hit-index.js";
 
 export { StaticQuadtree } from "./quadtree.js";

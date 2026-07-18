@@ -1518,31 +1518,11 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
-        "DEFAULT_HIT_TOLERANCE": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
-        "HitIndexOptions": {
-          "kind": "type",
-          "lifecycle": "experimental"
-        },
         "PrimitiveFocusMask": {
           "kind": "type",
           "lifecycle": "experimental"
         },
-        "SceneHit": {
-          "kind": "type",
-          "lifecycle": "experimental"
-        },
-        "SceneHitIndex": {
-          "kind": "type",
-          "lifecycle": "experimental"
-        },
         "StaticQuadtree": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
-        "buildHitIndex": {
           "kind": "value",
           "lifecycle": "experimental"
         },
