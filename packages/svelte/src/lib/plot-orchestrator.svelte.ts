@@ -548,6 +548,9 @@ export function createPlotOrchestrator<
     coordFlipped: () => coordFlipped,
     captureSurface: inputs.captureSurface,
     candidateSemanticKeys: (candidate) => candidateSemanticKeys(candidate),
+    // Deferred: fused projection is declared after this factory (method only).
+    // When non-null, non-union interval keys reuse the host's single store walk.
+    sharedConsumptionCandidates: () => fusedConsumptionCandidates,
     inspectionPanel: () => inspectionState.inspectionPanel,
     emitSelection: (...args: Parameters<SelectionState["emitSelection"]>) => {
       selectionState.emitSelection(...args);
@@ -590,19 +593,41 @@ export function createPlotOrchestrator<
   surfaceState.registerSurfaceEffects();
 
   // Focus keys first (no candidate walk) so shared projection can short-circuit
-  // when idle. One full-store projection feeds selected/emphasized anchors and
-  // interaction masks — was O(2–3C) separate collectCandidates walks.
+  // when idle. One full-store projection feeds selected/emphasized anchors,
+  // interaction masks, AND non-union interval key consumption — was O(2C) when
+  // a non-union interval was live (interval consumption walk + anchors walk).
   // Liveness uses *counts* (Object.is-stable when keys swap but stay non-empty)
   // so focus-only key changes rebuild masks/anchors without re-walking C (Codex P2).
   const presentationFocusKeys = $derived(selectionState.computePresentationFocusKeys());
   const selectedKeyCount = $derived(selectionState.effectiveSelectedKeys.length);
-  const intervalKeyCount = $derived(intervalState.effectiveIntervalKeys.length);
   const emphasisKeyCount = $derived(legendFocusState.effectiveEmphasisKeys.length);
   const presentationFocusKeyCount = $derived(presentationFocusKeys.length);
+  // Gate without reading effectiveIntervalKeys (those depend on the fused bag
+  // for non-union presets — reading keys here would circular-depend).
+  const needIntervalConsumptionWalk = $derived(
+    intervalState.effectiveIntervals.length > 0 &&
+      intervalState.effectiveIntervals[0]?.preset !== "union",
+  );
+  // Union interval keys come from stored records only (no walk). Safe to read
+  // for the selection/anchor gate after the non-union path is handled above.
+  const intervalKeyCount = $derived(intervalState.effectiveIntervalKeys.length);
   const sharedCandidateProjection = $derived.by(() => {
+    if (needIntervalConsumptionWalk) return selectionState.computeSharedCandidateProjection();
     if (selectedKeyCount + intervalKeyCount + emphasisKeyCount + presentationFocusKeyCount === 0)
       return [];
     return selectionState.computeSharedCandidateProjection();
+  });
+  // Map once for interval consumption; null when the bag was not built for
+  // interval (union / idle). Interval falls back to its local walk only when
+  // this is null AND non-union — which should not happen under the host gate.
+  const fusedConsumptionCandidates = $derived.by(() => {
+    if (!needIntervalConsumptionWalk) return null;
+    return sharedCandidateProjection.map((entry) => ({
+      panelId: entry.panelId,
+      keys: entry.keys,
+      ...(entry.xValue !== undefined && { xValue: entry.xValue }),
+      ...(entry.yValue !== undefined && { yValue: entry.yValue }),
+    }));
   });
   const selectedAnchors = $derived(
     selectionState.computeSelectedAnchors(sharedCandidateProjection),

@@ -76,9 +76,10 @@ export type SelectionStateDeps = {
 };
 
 /**
- * One candidate projection for anchors + interaction masks.
- * Built once per reactive need so selected/emphasized/mask paths do not each
- * re-walk the store (was O(2–3C) when several are live).
+ * One candidate projection for anchors, interaction masks, and interval
+ * consumption. Built once per reactive need so those consumers do not each
+ * re-walk the store (was O(2–3C) when several are live; non-union intervals
+ * previously added a second full walk for panelId/xValue/yValue/keys).
  */
 type SharedCandidateProjection = {
   readonly x: number;
@@ -86,6 +87,10 @@ type SharedCandidateProjection = {
   readonly batchIndex: number;
   readonly primitiveIndex: number;
   readonly keys: readonly PropertyKey[];
+  /** Panel identity for interval consumption (independent / cross-panel). */
+  readonly panelId: string;
+  readonly xValue?: CellValue;
+  readonly yValue?: CellValue;
 };
 
 export type SelectionState = {
@@ -147,6 +152,9 @@ export function createSelectionState(deps: SelectionStateDeps): SelectionState {
       batchIndex: candidate.batchIndex,
       primitiveIndex: candidate.primitiveIndex,
       keys: deps.candidateSemanticKeys(candidate),
+      panelId: candidate.panelId,
+      ...(candidate.xValue !== undefined && { xValue: candidate.xValue }),
+      ...(candidate.yValue !== undefined && { yValue: candidate.yValue }),
     }));
   }
 

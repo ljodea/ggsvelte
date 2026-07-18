@@ -424,6 +424,8 @@ describe("createSelectionState anchors", () => {
     const shared = state.computeSharedCandidateProjection();
     const once = candidateCalls;
     expect(once).toBeGreaterThan(0);
+    // Interval consumption fields travel on the same bag (host fuses walks).
+    expect(shared.every((entry) => typeof entry.panelId === "string")).toBe(true);
 
     const selected = state.computeSelectedAnchors(shared);
     const emphasized = state.computeEmphasizedAnchors(shared);
