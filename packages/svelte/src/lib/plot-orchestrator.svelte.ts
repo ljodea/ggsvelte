@@ -592,14 +592,16 @@ export function createPlotOrchestrator<
   // Focus keys first (no candidate walk) so shared projection can short-circuit
   // when idle. One full-store projection feeds selected/emphasized anchors and
   // interaction masks — was O(2–3C) separate collectCandidates walks.
+  // Liveness uses *counts* (Object.is-stable when keys swap but stay non-empty)
+  // so focus-only key changes rebuild masks/anchors without re-walking C (Codex P2).
   const presentationFocusKeys = $derived(selectionState.computePresentationFocusKeys());
+  const selectedKeyCount = $derived(selectionState.effectiveSelectedKeys.length);
+  const intervalKeyCount = $derived(intervalState.effectiveIntervalKeys.length);
+  const emphasisKeyCount = $derived(legendFocusState.effectiveEmphasisKeys.length);
+  const presentationFocusKeyCount = $derived(presentationFocusKeys.length);
   const sharedCandidateProjection = $derived.by(() => {
-    const needAnchors =
-      selectionState.effectiveSelectedKeys.length > 0 ||
-      intervalState.effectiveIntervalKeys.length > 0 ||
-      legendFocusState.effectiveEmphasisKeys.length > 0;
-    const needMasks = presentationFocusKeys.length > 0;
-    if (!needAnchors && !needMasks) return [];
+    if (selectedKeyCount + intervalKeyCount + emphasisKeyCount + presentationFocusKeyCount === 0)
+      return [];
     return selectionState.computeSharedCandidateProjection();
   });
   const selectedAnchors = $derived(
