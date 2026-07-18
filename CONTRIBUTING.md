@@ -235,14 +235,17 @@ That runs:
    `packages/svelte/coverage/ssr/`. Numbers are structurally lower (SSR
    paths only) — do not chase SSR-report gaps or put thresholds there.
 
-CI (`.github/workflows/ci.yml`) runs chromium + SSR coverage on the
+CI (`.github/workflows/ci.yml`) runs chromium browser coverage on the
 `component-svelte` job and unit-suite coverage (`bun test --coverage`) on the
 `unit` job, then uploads lcov to Codecov via `codecov/codecov-action` (flags
-`unit` / `svelte`, path components for package badges). Content-hash skips omit
-uploads; Codecov carryforward keeps flag totals stable. `fail_ci_if_error: true`
-on the upload steps — set `CODECOV_TOKEN` in repo secrets. Package badges live
-in the package READMEs (`component=packages-spec|packages-core|packages-svelte`);
-the monorepo root badge is overall project coverage.
+`unit` / `svelte`, path components for package badges). SSR coverage is **not**
+collected in CI: `@vitest/coverage-v8` needs Node inspector Coverage APIs that
+bun does not implement; use local `test:coverage` (under node) if you need the
+SSR report. Content-hash skips omit uploads; Codecov carryforward keeps flag
+totals stable. `fail_ci_if_error: true` on the upload steps — set
+`CODECOV_TOKEN` in repo secrets. Package badges live in the package READMEs
+(`component=packages-spec|packages-core|packages-svelte`); the monorepo root
+badge is overall project coverage.
 
 ## Formatting policy
 

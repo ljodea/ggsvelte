@@ -600,9 +600,11 @@ jobs:
             echo "::error::playwright npm version in packages/svelte (${npm_version}) does not match pinned container tag (${PLAYWRIGHT_CONTAINER_TAG})"
             exit 1
           fi
-      # Chromium collects v8 coverage (and enforces thresholds); firefox/webkit
-      # still run without --coverage so the three-engine matrix stays intact.
-      # SSR gets its own coverage report. Both lcov files upload under flag=svelte.
+      # Chromium collects browser v8 coverage (CDP; works under bun) and enforces
+      # thresholds. Firefox/webkit stay coverage-free. SSR runs under bun without
+      # --coverage: @vitest/coverage-v8 needs Node inspector Coverage APIs that
+      # bun does not implement ("Coverage APIs are not supported"). Local
+      # `test:coverage` can still collect SSR lcov under node for offline use.
       - name: component tests (packages/svelte, chromium + coverage)
         if: steps.content_hash.outputs.hit != 'true'
         working-directory: packages/svelte
@@ -611,10 +613,10 @@ jobs:
         if: steps.content_hash.outputs.hit != 'true'
         working-directory: packages/svelte
         run: bunx --bun vitest run --project firefox --project webkit
-      - name: component tests (packages/svelte, SSR + coverage)
+      - name: component tests (packages/svelte, SSR)
         if: steps.content_hash.outputs.hit != 'true'
         working-directory: packages/svelte
-        run: bunx --bun vitest run --coverage --config vitest.ssr.config.ts
+        run: bunx --bun vitest run --config vitest.ssr.config.ts
       - name: rewrite svelte lcov paths to monorepo root
         # vitest writes SF:src/lib/... relative to packages/svelte; Codecov
         # components filter packages/svelte/** so paths must be repo-rooted.
@@ -622,16 +624,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in packages/svelte/coverage/browser/lcov.info \
-            packages/svelte/coverage/ssr/lcov.info; do
-            if [ ! -f "${f}" ]; then
-              echo "::error::missing coverage file ${f}"
-              exit 1
-            fi
-            # Idempotent: only prefix bare package-relative src/ paths.
-            sed -i 's|^SF:src/|SF:packages/svelte/src/|' "${f}"
-            sed -i 's|^SF:\./src/|SF:packages/svelte/src/|' "${f}"
-          done
+          f=packages/svelte/coverage/browser/lcov.info
+          if [ ! -f "${f}" ]; then
+            echo "::error::missing coverage file ${f}"
+            exit 1
+          fi
+          # Idempotent: only prefix bare package-relative src/ paths.
+          sed -i 's|^SF:src/|SF:packages/svelte/src/|' "${f}"
+          sed -i 's|^SF:\./src/|SF:packages/svelte/src/|' "${f}"
       - name: ensure gpg for Codecov uploader (Playwright image)
         if: success() && steps.content_hash.outputs.hit != 'true'
         run: |
@@ -647,7 +647,7 @@ jobs:
         uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: packages/svelte/coverage/browser/lcov.info,packages/svelte/coverage/ssr/lcov.info
+          files: packages/svelte/coverage/browser/lcov.info
           flags: svelte
           name: svelte
           disable_search: true
