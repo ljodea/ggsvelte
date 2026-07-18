@@ -4,6 +4,9 @@
   "workspaces": {
     "": {
       "name": "ggsvelte-monorepo",
+      "dependencies": {
+        "@sveltejs/kit": "^2.70.0",
+      },
       "devDependencies": {
         "@arethetypeswrong/cli": "0.18.5",
         "@changesets/cli": "2.31.0",
@@ -70,9 +73,9 @@
     },
     "packages/core": {
       "name": "@ggsvelte/core",
-      "version": "0.1.1",
+      "version": "0.2.0",
       "dependencies": {
-        "@ggsvelte/spec": "^0.1.1",
+        "@ggsvelte/spec": "^0.2.0",
       },
       "devDependencies": {
         "typescript": "^6.0.3",
@@ -80,7 +83,7 @@
     },
     "packages/spec": {
       "name": "@ggsvelte/spec",
-      "version": "0.1.1",
+      "version": "0.2.0",
       "dependencies": {
         "@sinclair/typebox": "^0.34.0",
       },
@@ -91,13 +94,13 @@
     },
     "packages/svelte": {
       "name": "@ggsvelte/svelte",
-      "version": "0.1.1",
+      "version": "0.2.0",
       "bin": {
         "ggsvelte-render": "bin/ggsvelte-render.js",
       },
       "dependencies": {
-        "@ggsvelte/core": "^0.1.1",
-        "@ggsvelte/spec": "^0.1.1",
+        "@ggsvelte/core": "^0.2.0",
+        "@ggsvelte/spec": "^0.2.0",
       },
       "devDependencies": {
         "@sveltejs/package": "^2.5.8",
@@ -468,7 +471,7 @@
 
     "@sveltejs/adapter-static": ["@sveltejs/adapter-static@3.0.10", "", { "peerDependencies": { "@sveltejs/kit": "^2.0.0" } }, "sha512-7D9lYFWJmB7zxZyTE/qxjksvMqzMuYrrsyh1f4AlZqeZeACPRySjbC3aFiY55wb1tWUaKOQG9PVbm74JcN2Iew=="],
 
-    "@sveltejs/kit": ["@sveltejs/kit@2.69.2", "", { "dependencies": { "@standard-schema/spec": "^1.0.0", "@sveltejs/acorn-typescript": "^1.0.9", "@types/cookie": "^0.6.0", "acorn": "^8.16.0", "cookie": "^0.6.0", "devalue": "^5.8.1", "esm-env": "^1.2.2", "kleur": "^4.1.5", "magic-string": "^0.30.5", "mrmime": "^2.0.0", "set-cookie-parser": "^3.0.0", "sirv": "^3.0.0" }, "peerDependencies": { "@opentelemetry/api": "^1.0.0", "@sveltejs/vite-plugin-svelte": "^3.0.0 || ^4.0.0-next.1 || ^5.0.0 || ^6.0.0-next.0 || ^7.0.0", "svelte": "^4.0.0 || ^5.0.0-next.0", "typescript": "^5.3.3 || ^6.0.0", "vite": "^5.0.3 || ^6.0.0 || ^7.0.0-beta.0 || ^8.0.0" }, "optionalPeers": ["@opentelemetry/api", "typescript"], "bin": { "svelte-kit": "svelte-kit.js" } }, "sha512-CMdPDbYjRwRu4KXTxBVMuOpFPCt1i/v0ANennotec+K9Cmb2e3w2yYzJiC6Vh/WSvm9Khi5sJMZa0rJPqfHlDw=="],
+    "@sveltejs/kit": ["@sveltejs/kit@2.70.0", "", { "dependencies": { "@standard-schema/spec": "^1.0.0", "@sveltejs/acorn-typescript": "^1.0.9", "@types/cookie": "^0.6.0", "acorn": "^8.16.0", "cookie": "^0.6.0", "devalue": "^5.8.1", "esm-env": "^1.2.2", "kleur": "^4.1.5", "magic-string": "^0.30.5", "mrmime": "^2.0.0", "set-cookie-parser": "^3.0.0", "sirv": "^3.0.0" }, "peerDependencies": { "@opentelemetry/api": "^1.0.0", "@sveltejs/vite-plugin-svelte": "^3.0.0 || ^4.0.0-next.1 || ^5.0.0 || ^6.0.0-next.0 || ^7.0.0", "svelte": "^4.0.0 || ^5.0.0-next.0", "typescript": "^5.3.3 || ^6.0.0", "vite": "^5.0.3 || ^6.0.0 || ^7.0.0-beta.0 || ^8.0.0" }, "optionalPeers": ["@opentelemetry/api", "typescript"], "bin": { "svelte-kit": "svelte-kit.js" } }, "sha512-5pBnJwdNzxbrxp1TLK1NPMFF0Cx57iZUDKInznKcfifYR9m9poWfZI2Tfhw6BZIjYor5dXvcibt4EQgar3k6ww=="],
 
     "@sveltejs/load-config": ["@sveltejs/load-config@0.2.0", "", {}, "sha512-1LgZ/qUqSoq+QorD83lk2hka79Px0wXNW2q5V1nZlxGhQgw1jrsIbVz5YiCeucVLo4XvFLjXukUaQjIiqowkcg=="],
 
