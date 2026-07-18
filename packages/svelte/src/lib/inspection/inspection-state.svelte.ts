@@ -182,12 +182,13 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
     return panelContainingAnchor(deps.model()!.scene.panels, inspection.focus.anchor);
   });
 
-  // Parallel hits + CandidateFacts: keyboard apply passes candidates[i] so
-  // resolveInspection does not re-scan the full store (O(C)) to recover the
-  // facts already known when the traversal list was built.
+  // Parallel hits + candidate ids: keyboard apply O(1)-fetches
+  // candidates.candidate(id) so resolveInspection does not re-scan the full
+  // store (O(C) matchCandidateFromHit). Ids only — not full CandidateFacts —
+  // so large charts do not retain every facts object for the model lifetime.
   const traversal = $derived.by(() => {
     if (!deps.surfaceInteractive() || deps.model() === null)
-      return { hits: [] as SceneHit[], candidates: [] as CandidateFacts[] };
+      return { hits: [] as SceneHit[], candidateIds: [] as number[] };
     return buildTraversalEntries(deps.model()!.candidates);
   });
   const traversalHits: SceneHit[] = $derived(traversal.hits);
@@ -445,15 +446,14 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
   /** Private — no remaining external consumer (codex r2 P2-3). */
   function applyTraversalIndex(index: number): void {
     activeTraversalIndex = index;
-    // Pass the retained candidate: avoids O(C) matchCandidateFromHit on every
-    // arrow/cycle step (pointer/touch already supply a concrete candidate).
-    setInspection(
-      traversal.hits[index]!,
-      "keyboard",
-      "transient",
-      undefined,
-      traversal.candidates[index],
-    );
+    // O(1) id → facts for the selected index only (not full-store rematch).
+    const model = deps.model();
+    const id = traversal.candidateIds[index];
+    const candidate =
+      model === null || id === undefined
+        ? undefined
+        : (model.candidates.candidate(id) ?? undefined);
+    setInspection(traversal.hits[index]!, "keyboard", "transient", undefined, candidate);
   }
 
   function navigate(delta: number): void {

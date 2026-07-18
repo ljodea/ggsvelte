@@ -207,11 +207,10 @@ describe("buildTraversalHits / buildTraversalEntries", () => {
     ).toEqual([]);
   });
 
-  it("keeps parallel CandidateFacts so hosts avoid O(C) hit rematch", () => {
-    // Structural contract: entries.candidates[i] is the live facts for
-    // entries.hits[i] (same object reference from the store), same length,
-    // same traversal order. Keyboard resolve can pass candidates[i] instead
-    // of re-scanning the store via matchCandidateFromHit.
+  it("keeps parallel candidate ids so hosts avoid O(C) hit rematch", () => {
+    // Structural contract: entries.candidateIds[i] identifies hits[i]. Hosts
+    // O(1)-fetch store.candidate(id) on apply instead of matchCandidateFromHit
+    // (full scan). Ids only — do not retain every CandidateFacts object.
     const order = [5, 1, 9];
     const byId = new Map(order.map((id) => [id, asCandidate(id)]));
     const store = {
@@ -227,13 +226,12 @@ describe("buildTraversalHits / buildTraversalEntries", () => {
     };
     const entries = buildTraversalEntries(store);
     expect(entries.hits).toEqual(buildTraversalHits(store));
-    expect(entries.candidates.map((c) => c.id)).toEqual(order);
-    expect(entries.hits).toHaveLength(entries.candidates.length);
+    expect(entries.candidateIds).toEqual(order);
+    expect(entries.hits).toHaveLength(entries.candidateIds.length);
     for (const [i, id] of order.entries()) {
-      const candidate = entries.candidates[i];
-      if (candidate === undefined) throw new Error(`missing candidate at ${String(i)}`);
-      expect(candidate).toBe(byId.get(id));
-      expect(entries.hits[i]).toEqual(hitFromCandidate(candidate));
+      const facts = byId.get(id);
+      if (facts === undefined) throw new Error(`missing facts for id ${String(id)}`);
+      expect(entries.hits[i]).toEqual(hitFromCandidate(facts));
     }
   });
 
@@ -250,7 +248,7 @@ describe("buildTraversalHits / buildTraversalEntries", () => {
       },
     };
     const entries = buildTraversalEntries(store);
-    expect(entries.candidates.map((c) => c.id)).toEqual([0, 2]);
+    expect(entries.candidateIds).toEqual([0, 2]);
     expect(entries.hits).toHaveLength(2);
   });
 });
