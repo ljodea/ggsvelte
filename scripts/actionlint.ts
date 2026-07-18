@@ -177,7 +177,7 @@ export function parseSelfHostedLabels(yaml: string): string[] {
  * Real workflows keep `queue: max`; only the linter input is rewritten.
  */
 export function prepareSourceForLint(source: string): string {
-  return source.replace(/^[ \t]*queue:\s*max\s*(?:#.*)?\r?$/gm, "");
+  return source.replaceAll(/^[ \t]*queue:\s*max\s*(?:#.*)?\r?$/gm, "");
 }
 
 /** Build the message-filter list used against wasm findings. */
