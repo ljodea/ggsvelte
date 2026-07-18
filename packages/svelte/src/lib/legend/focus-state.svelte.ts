@@ -19,19 +19,21 @@ import type {
 import { legendFocusAnnouncement } from "../assembly/labels.js";
 import {
   buildInteractiveLegendEntries,
-  findLegendPressedIdentity,
   moveLegendRovingIndex,
-  planLegendCommittedReconcile,
-  planLegendFocusDisabledClear,
-  planLegendRovingFocusSync,
+  samePropertyKeySet,
+} from "./focus.js";
+import type { InteractiveLegendEntry, LegendEntryAction, LegendEntryIdentity } from "./focus.js";
+import {
+  findLegendPressedIdentity,
   reconcileLegendPreview,
   resolveLegendEmphasisKeys,
   resolveLegendPreviewKeysDecision,
-  samePropertyKeySet,
-  type InteractiveLegendEntry,
-  type LegendEntryAction,
-  type LegendEntryIdentity,
-} from "./focus.js";
+} from "./focus-emphasis.js";
+import {
+  planLegendCommittedReconcile,
+  planLegendFocusDisabledClear,
+  planLegendRovingFocusSync,
+} from "./focus-plans.js";
 import type { LegendEntryKeyAccess } from "./entry-key-index.svelte.js";
 import {
   resolveLegendClearControlSource,

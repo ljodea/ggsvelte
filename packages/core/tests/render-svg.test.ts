@@ -104,4 +104,44 @@ describe("renderToSVGString — determinism + equivalence (M0c gate)", () => {
       }),
     ).toThrow(PipelineError);
   });
+
+  it("maxMarks raises max-marks-exceeded with path and message", () => {
+    try {
+      renderToSVGString(gg(rows, aes({ x: "x", y: "y" })).geomPoint(), {
+        width: 640,
+        height: 400,
+        maxMarks: 3,
+      });
+      expect.unreachable("expected PipelineError");
+    } catch (error) {
+      expect(error).toBeInstanceOf(PipelineError);
+      const pe = error as PipelineError;
+      expect(pe.code).toBe("max-marks-exceeded");
+      expect(pe.path).toBe("/layers");
+      expect(pe.message).toContain("maxMarks");
+      expect(pe.message).toContain("3");
+    }
+  });
+});
+
+describe("render-svg public facade", () => {
+  it("exposes only the known runtime exports", async () => {
+    const facade = await import("../src/render-svg.ts");
+    expect(Object.keys(facade).toSorted()).toEqual(
+      ["countMarks", "pathData", "renderToSVGString", "sceneLabel", "sceneToSVGString"].toSorted(),
+    );
+  });
+
+  it("package root re-exports the same values and RenderSVGOptions type", async () => {
+    const root = await import("../src/index.ts");
+    expect(typeof root.countMarks).toBe("function");
+    expect(typeof root.pathData).toBe("function");
+    expect(typeof root.renderToSVGString).toBe("function");
+    expect(typeof root.sceneLabel).toBe("function");
+    expect(typeof root.sceneToSVGString).toBe("function");
+    // Type-only freeze: RenderSVGOptions must remain importable from the package root.
+    type _Opts = import("../src/index.ts").RenderSVGOptions;
+    const opts: _Opts = { width: 1, height: 1 };
+    expect(opts.width).toBe(1);
+  });
 });
