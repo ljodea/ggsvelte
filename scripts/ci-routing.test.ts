@@ -191,6 +191,14 @@ describe("planJobs", () => {
     expect(plan.bench_smoke).toBe(true);
     expect(plan.component).toBe(true);
     expect(plan.consumer).toBe(true);
+    expect(plan.packages_dist).toBe(true);
+  });
+
+  test("packages_dist follows component/consumer/interaction_perf consumers, not unit-only", () => {
+    expect(planJobs(classifyChangedPaths(["scripts/gen-lifecycle.ts"])).packages_dist).toBe(false);
+    expect(planJobs(classifyChangedPaths(["packages/core/src/x.ts"])).packages_dist).toBe(true);
+    expect(planJobs(classifyChangedPaths(["spikes/browser/foo.ts"])).packages_dist).toBe(true);
+    expect(planJobs(classifyChangedPaths(["scripts/consumer-compat.ts"])).packages_dist).toBe(true);
   });
 
   test("consumer harness scripts schedule the packed-consumer matrix", () => {
@@ -266,6 +274,7 @@ describe("evaluateGate", () => {
       actions_security: "skipped",
       bench_smoke: "skipped",
       interaction_perf: "skipped",
+      packages_dist: "skipped",
       vr: "success",
       pages: "success",
     };

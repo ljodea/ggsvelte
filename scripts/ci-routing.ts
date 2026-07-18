@@ -43,6 +43,7 @@ export type JobName =
   | "actions_security"
   | "bench_smoke"
   | "interaction_perf"
+  | "packages_dist"
   | "vr"
   | "pages";
 
@@ -123,6 +124,7 @@ const JOB_NAMES: readonly JobName[] = [
   "actions_security",
   "bench_smoke",
   "interaction_perf",
+  "packages_dist",
   "vr",
   "pages",
 ] as const;
@@ -233,6 +235,17 @@ export function planJobs(changes: ChangeFlags, options: PlanOptions = {}): JobPl
   const staticAnalysisSurface =
     packageSurface || docsSurface || changes.scripts || changes.evals || force;
 
+  // Shared packages/*/dist artifact for jobs that previously each ran
+  // `bun run build`. Unit/bench-smoke stay on the cheaper `bun run check`
+  // (spec/core only) and do not wait on the full Svelte package build.
+  const packagesDist =
+    packageSurface ||
+    changes.spikes ||
+    changes.visual ||
+    changes.performance ||
+    changes.consumer_tools ||
+    force;
+
   return {
     // Cheap format/lint parity — always on so markdown-only PRs still get oxfmt/prettier.
     checks: true,
@@ -255,6 +268,7 @@ export function planJobs(changes: ChangeFlags, options: PlanOptions = {}): JobPl
     bench_smoke: changes.benchmarks || changes.spec || changes.core || changes.svelte || force,
     // Informational only; path-gated and independent of the component job.
     interaction_perf: browserSurface,
+    packages_dist: packagesDist,
     vr: packageSurface || docsSurface || changes.visual || force,
     pages: packageSurface || docsSurface || force,
   };
