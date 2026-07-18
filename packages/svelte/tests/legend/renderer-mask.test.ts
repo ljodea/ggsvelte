@@ -1,3 +1,4 @@
+import { fromPartial } from "@total-typescript/shoehorn";
 import { describe, expect, it } from "vitest";
 
 import type { BatchInteractionMask, GeometryBatch, ThemeTokens } from "@ggsvelte/core";
@@ -5,13 +6,13 @@ import type { BatchInteractionMask, GeometryBatch, ThemeTokens } from "@ggsvelte
 import BatchFocusHarness from "../fixtures/BatchFocusHarness.svelte";
 import { render } from "../helpers/render.js";
 
-const theme = {
+const theme = fromPartial<ThemeTokens>({
   ink: "#111111",
   accent: "#3366ff",
   paper: "#ffffff",
   interactionMuted: 0.25,
   fontFamily: "sans-serif",
-} as ThemeTokens;
+});
 
 const focusFirst: BatchInteractionMask = {
   primitiveCount: 2,

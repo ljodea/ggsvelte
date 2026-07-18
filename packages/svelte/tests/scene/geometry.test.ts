@@ -1,3 +1,4 @@
+import { fromAny } from "@total-typescript/shoehorn";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -54,18 +55,18 @@ describe("panelContainingAnchor", () => {
 
 describe("invertedDomain", () => {
   it("returns undefined for band scales", () => {
-    expect(invertedDomain(bandScale as never, 0.2, 0.8)).toBeUndefined();
+    expect(invertedDomain(fromAny(bandScale), 0.2, 0.8)).toBeUndefined();
   });
 
   it("inverts continuous domains and sorts endpoints", () => {
     const scale = continuousScale([0, 100]);
-    expect(invertedDomain(scale as never, 0.2, 0.8)).toEqual([20, 80]);
-    expect(invertedDomain(scale as never, 0.8, 0.2)).toEqual([20, 80]);
+    expect(invertedDomain(fromAny(scale), 0.2, 0.8)).toEqual([20, 80]);
+    expect(invertedDomain(fromAny(scale), 0.8, 0.2)).toEqual([20, 80]);
   });
 
   it("handles reversed continuous domains", () => {
     const scale = continuousScale([100, 0]);
-    expect(invertedDomain(scale as never, 0.25, 0.75)).toEqual([25, 75]);
+    expect(invertedDomain(fromAny(scale), 0.25, 0.75)).toEqual([25, 75]);
   });
 });
 
@@ -108,8 +109,8 @@ describe("normalizedRect", () => {
 describe("panelDataDomains", () => {
   const panel = { x: 40, y: 20, width: 200, height: 100 };
   const scales = {
-    x: continuousScale([0, 10]) as never,
-    y: continuousScale([0, 50]) as never,
+    x: fromAny(continuousScale([0, 10])),
+    y: fromAny(continuousScale([0, 50])),
   };
 
   it("maps a full panel rect to full scale domains", () => {
@@ -141,8 +142,8 @@ describe("panelDataDomains", () => {
 
   it("omits band-scale channels", () => {
     const mixed = {
-      x: bandScale as never,
-      y: continuousScale([0, 50]) as never,
+      x: fromAny(bandScale),
+      y: fromAny(continuousScale([0, 50])),
     };
     const domains = panelDataDomains({ x0: 40, y0: 20, x1: 240, y1: 120 }, panel, mixed, false);
     expect(domains.x).toBeUndefined();

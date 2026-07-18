@@ -56,6 +56,7 @@
     "@ggsvelte/core": "workspace:*",
     "@ggsvelte/spec": "workspace:*",
     "@playwright/test": "1.61.1",
+    "@total-typescript/shoehorn": "^0.1.2",
     "@types/bun": "^1.3.14",
     "@types/node": "^26.1.1",
     "actionlint": "2.0.6",

@@ -1,3 +1,4 @@
+import { fromPartial } from "@total-typescript/shoehorn";
 import { describe, expect, it } from "vitest";
 
 import { trainBand, type PositionScale } from "@ggsvelte/core";
@@ -18,7 +19,7 @@ describe("precise plot bounds adapters", () => {
       const input = boundsEditorInputForScale({
         axis: "x",
         action: "select",
-        scale: { type, domain: [1, 100] } as PositionScale,
+        scale: fromPartial<PositionScale>({ type, domain: [1, 100] }),
         bounds: [90, 10],
         reversed: true,
       });
@@ -36,12 +37,12 @@ describe("precise plot bounds adapters", () => {
     const input = boundsEditorInputForScale({
       axis: "y",
       action: "select",
-      scale: {
+      scale: fromPartial<PositionScale>({
         type: "band",
         domain: ["north", "south"],
         rawDomain: ["north", "south"],
         step: 0.5,
-      } as PositionScale,
+      }),
     });
     expect(input).toMatchObject({
       scale: "band",

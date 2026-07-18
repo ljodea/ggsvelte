@@ -2,6 +2,7 @@
  * Unit tests for semantic-key pure helpers + reactive service.
  * Factories own effects — instantiate under `$effect.root` and destroy.
  */
+import { fromAny } from "@total-typescript/shoehorn";
 import { flushSync } from "svelte";
 import { describe, expect, it, vi } from "vitest";
 
@@ -361,7 +362,7 @@ describe("resolveSemanticKeys", () => {
         ]),
       }),
       datumKey: (row: Record<string, CellValue>, index: number) =>
-        index === 0 ? String(row.n) : ({ bad: true } as unknown as PropertyKey),
+        index === 0 ? String(row.n) : fromAny<PropertyKey>({ bad: true }),
       priorKeys: new Map(),
       rowIdentity: (rowIndex) => `r:${rowIndex}`,
     });

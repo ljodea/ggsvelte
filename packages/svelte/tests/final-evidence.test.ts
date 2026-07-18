@@ -1,3 +1,4 @@
+import { fromAny, fromPartial } from "@total-typescript/shoehorn";
 import { tick } from "svelte";
 import { describe, expect, it, vi } from "vitest";
 
@@ -195,10 +196,10 @@ describe("final R-1/R0 evidence locks", () => {
     await expect.poll(() => view.container.querySelector(".gg-tooltip")).not.toBeNull();
     expect(view.container.querySelector(".gg-tooltip")?.classList).toContain("gg-tooltip-pinned");
 
-    await view.rerender({ height: 360 } as never);
+    await view.rerender(fromPartial({ height: 360 }));
     expect(view.container.querySelector(".gg-tooltip")?.classList).toContain("gg-tooltip-pinned");
 
-    await view.rerender({ data: data.map((row) => ({ ...row })) } as never);
+    await view.rerender(fromPartial({ data: data.map((row) => ({ ...row })) }));
     await expect.poll(() => view.container.querySelector(".gg-tooltip")).toBeNull();
 
     const reorderData = [
@@ -217,7 +218,7 @@ describe("final R-1/R0 evidence locks", () => {
     keydown(reorderSurface, "Enter");
     await expect.poll(() => reorderView.container.querySelector(".gg-tooltip")).not.toBeNull();
     reorderData.reverse();
-    await reorderView.rerender({ data: reorderData } as never);
+    await reorderView.rerender(fromPartial({ data: reorderData }));
     await expect.poll(() => reorderView.container.querySelector(".gg-tooltip")).toBeNull();
   });
 
@@ -233,7 +234,7 @@ describe("final R-1/R0 evidence locks", () => {
       ondiagnostic: (diagnostic: InteractionDiagnostic) => diagnostics.push(diagnostic),
       ...size,
     });
-    await unstable.rerender({ key: () => "row-2" } as never);
+    await unstable.rerender(fromPartial({ key: () => "row-2" }));
     await expect
       .poll(() => diagnostics.map((diagnostic) => diagnostic.code))
       .toContain("INTERACTION_UNSTABLE_KEY");
@@ -269,7 +270,7 @@ describe("final R-1/R0 evidence locks", () => {
     render(GGPlot, {
       data: [row],
       layers: [{ geom: "point", aes: { x: "x", y: "y" } }],
-      key: (() => null) as never,
+      key: fromAny(() => null),
       inspect: true,
       ...size,
     });

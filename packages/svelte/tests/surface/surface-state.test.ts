@@ -7,6 +7,7 @@
  *   zoom → inspection → surface → interval → registerSurfaceEffects
  *   → registerInspectionEffects
  */
+import { fromAny } from "@total-typescript/shoehorn";
 import { flushSync } from "svelte";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -465,7 +466,9 @@ describe("createSurfaceState construction", () => {
     let surfaceInteractiveCalls = 0;
 
     // Minimal stubs so construction can close the cycle without real siblings.
-    const stubInspection = {
+    const stubInspection = fromAny<
+      SurfaceStateDeps["inspection"] extends () => infer R ? R : never
+    >({
       get inspection() {
         inspectionCalls++;
         return null;
@@ -507,9 +510,9 @@ describe("createSurfaceState construction", () => {
       resetTraversalIndex: () => {
         inspectionCalls++;
       },
-    } as unknown as SurfaceStateDeps["inspection"] extends () => infer R ? R : never;
+    });
 
-    const stubInterval = {
+    const stubInterval = fromAny<SurfaceStateDeps["interval"] extends () => infer R ? R : never>({
       get committedInterval() {
         intervalCalls++;
         return null;
@@ -517,13 +520,13 @@ describe("createSurfaceState construction", () => {
       applyBrushSelectEnd: () => {
         intervalCalls++;
       },
-    } as unknown as SurfaceStateDeps["interval"] extends () => infer R ? R : never;
+    });
 
-    const stubZoom = {
+    const stubZoom = fromAny<SurfaceStateDeps["zoom"] extends () => infer R ? R : never>({
       applyBrushZoom: () => {
         zoomCalls++;
       },
-    } as unknown as SurfaceStateDeps["zoom"] extends () => infer R ? R : never;
+    });
 
     const { value: state, destroy } = withEffectRoot(() =>
       createSurfaceState({

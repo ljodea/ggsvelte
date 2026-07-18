@@ -1,3 +1,4 @@
+import { fromAny } from "@total-typescript/shoehorn";
 import { expect, test } from "vitest";
 
 import GGPlot from "../../src/lib/GGPlot.svelte";
@@ -37,7 +38,7 @@ test("disappeared filter values return visible while resetScales keeps active fi
 
   view.container.querySelector<HTMLInputElement>("input[aria-label='Show south']")!.click();
   await until(() => candidates === 1);
-  (view as unknown as { component: { resetScales(): void } }).component.resetScales();
+  fromAny<{ component: { resetScales(): void } }>(view).component.resetScales();
   await until(() => candidates === 1);
   expect(
     view.container.querySelector<HTMLInputElement>("input[aria-label='Show south']")!.checked,
