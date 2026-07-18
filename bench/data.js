@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784355091597,
+  "lastUpdate": 1784357574600,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -24121,6 +24121,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 162.0604,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "35ad6190b8c9fda9e1b08a27dd50cac63b546cd3",
+          "message": "perf(svelte): O(1) keyboard inspect via retained traversal candidates (#250)\n\n* perf(svelte): O(1) keyboard inspect via retained traversal candidates\n\nKeyboard navigation discarded CandidateFacts when building SceneHits, then\nre-scanned the full candidate store (O(C)) on every arrow/cycle step via\nmatchCandidateFromHit. buildTraversalEntries keeps parallel candidates so\napplyTraversalIndex can pass the concrete seed like pointer/touch already do.\n\n* perf(svelte): store traversal candidate ids, not full facts\n\nAddress Codex P2: keep compact id list for keyboard navigation and O(1)\nfetch facts only for the selected index. Avoids retaining every\nCandidateFacts object for the model lifetime on large plots.",
+          "timestamp": "2026-07-18T01:52:09-05:00",
+          "tree_id": "e024f44b559721a8d21d922f0ddd1cee2303c9b7",
+          "url": "https://github.com/ljodea/ggsvelte/commit/35ad6190b8c9fda9e1b08a27dd50cac63b546cd3"
+        },
+        "date": 1784357573422,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.4091,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.0127,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 9.8293,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 13.2964,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 89.8901,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 120.4448,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.1055,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.343,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 89.3296,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 111.0195,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.4152,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.6149,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 116.7547,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7888,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 27.9353,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 8.1077,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 32.7144,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 618.1239,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 161.4709,
             "unit": "ms"
           }
         ]
