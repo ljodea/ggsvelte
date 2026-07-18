@@ -23,9 +23,17 @@ describe("R0 release wiring", () => {
   it("runs the Playwright interaction performance gate with benchmark budgets", () => {
     const ci = read(".github/workflows/ci.yml");
     const bench = read(".github/workflows/bench.yml");
-    // Slice from job name headers (not detect-changes output keys).
-    const componentJob = ci.slice(
-      ci.indexOf("  component:\n    name: component"),
+    // Issue #243: component surface is three parallel jobs (svelte / spikes / journeys).
+    const svelteJob = ci.slice(
+      ci.indexOf("  component-svelte:\n    name: component-svelte"),
+      ci.indexOf("  component-spikes:\n    name: component-spikes"),
+    );
+    const spikesJob = ci.slice(
+      ci.indexOf("  component-spikes:\n    name: component-spikes"),
+      ci.indexOf("  component-journeys:\n    name: component-journeys"),
+    );
+    const journeysJob = ci.slice(
+      ci.indexOf("  component-journeys:\n    name: component-journeys"),
       ci.indexOf("  interaction-perf:\n    name: interaction-perf"),
     );
     const interactionPerfJob = ci.slice(
@@ -34,16 +42,24 @@ describe("R0 release wiring", () => {
     );
     expect(ci).toContain("mcr.microsoft.com/playwright:v1.61.1-noble");
     expect(ci).toContain("HOME: /root");
-    // Component downloads shared packages/*/dist (issue #241); does not rebuild packages.
-    expect(componentJob).toContain("download-artifact");
-    expect(componentJob).toContain("packages-dist");
-    expect(componentJob).not.toContain("run: bun run build");
-    // Absolute wall-clock gates stay out of the required `component` check
+    // Each shard downloads shared packages/*/dist (issue #241); does not rebuild packages.
+    for (const job of [svelteJob, spikesJob, journeysJob]) {
+      expect(job).toContain("download-artifact");
+      expect(job).toContain("packages-dist");
+      expect(job).not.toContain("run: bun run build");
+    }
+    expect(svelteJob).toContain("working-directory: packages/svelte");
+    expect(spikesJob).toContain("working-directory: spikes/browser");
+    // Absolute wall-clock gates stay out of the required component surface
     // so multi-runner host noise cannot block merges (issue #154).
-    expect(componentJob).not.toContain("bun run test:interaction-perf");
-    expect(componentJob).toContain("interaction-accessibility.spec.ts");
+    expect(journeysJob).not.toContain("bun run test:interaction-perf");
+    expect(journeysJob).toContain("interaction-accessibility.spec.ts");
+    // ci-gate aggregates the three shards into the component routing flag.
+    expect(ci).toContain("COMPONENT_SVELTE_RES");
+    expect(ci).toContain("COMPONENT_SPIKES_RES");
+    expect(ci).toContain("COMPONENT_JOURNEYS_RES");
     expect(interactionPerfJob).toContain("bun run test:interaction-perf");
-    // Independent of component so it does not serialize the critical path;
+    // Independent of component shards so it does not serialize the critical path;
     // still path-gated and informational (hard gate remains on run-bench).
     expect(interactionPerfJob).not.toContain("needs: [component]");
     expect(interactionPerfJob).toContain("informational");
@@ -74,7 +90,7 @@ describe("R0 release wiring", () => {
     // Consumers download instead of rebuilding packages.
     const consumerJob = ci.slice(
       ci.indexOf("  consumer-compat:\n    name: packed consumer"),
-      ci.indexOf("  component:\n    name: component"),
+      ci.indexOf("  component-svelte:\n    name: component-svelte"),
     );
     expect(consumerJob).toContain("download-artifact");
     expect(consumerJob).toContain("packages-dist");

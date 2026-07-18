@@ -288,8 +288,11 @@ jobs:
           SVELTE_VERSION: ${{ matrix.svelte }}
         run: bun scripts/consumer-compat.ts
 
-  component:
-    name: component (vitest browser mode, pinned Playwright container)
+  # Component surface is split for wall-clock (issue #243). All three schedule
+  # when routing sets component=true; ci-gate requires every shard to succeed.
+  component-svelte:
+    name: component-svelte (packages/svelte vitest browser + ssr)
+
     needs: [detect-changes, packages-dist]
     if: >-
       needs.detect-changes.outputs.component == 'true' &&
@@ -343,42 +346,181 @@ jobs:
               exit 1
             fi
           done
-      - name: assert playwright npm/container version sync
+      - name: assert playwright npm/container version sync (packages/svelte)
         run: |
           set -euo pipefail
-          for pkg in spikes/browser packages/svelte; do
-            npm_version="$(cd "$pkg" && bun -e 'console.log(require("playwright/package.json").version)')"
-            expected="v${npm_version}-noble"
-            echo "$pkg playwright: ${npm_version}; container tag: ${PLAYWRIGHT_CONTAINER_TAG}"
-            if [ "${expected}" != "${PLAYWRIGHT_CONTAINER_TAG}" ]; then
-              echo "::error::playwright npm version in ${pkg} (${npm_version}) does not match pinned container tag (${PLAYWRIGHT_CONTAINER_TAG})"
+          npm_version="$(cd packages/svelte && bun -e 'console.log(require("playwright/package.json").version)')"
+          expected="v${npm_version}-noble"
+          echo "packages/svelte playwright: ${npm_version}; container tag: ${PLAYWRIGHT_CONTAINER_TAG}"
+          if [ "${expected}" != "${PLAYWRIGHT_CONTAINER_TAG}" ]; then
+            echo "::error::playwright npm version in packages/svelte (${npm_version}) does not match pinned container tag (${PLAYWRIGHT_CONTAINER_TAG})"
+            exit 1
+          fi
+      - name: component tests (packages/svelte, vitest browser mode + ssr)
+        working-directory: packages/svelte
+        run: bun run --bun test
+      - name: upload packages/svelte failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: component-svelte-failure-artifacts
+          path: packages/svelte/test-results/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  component-spikes:
+    name: component-spikes (spikes/browser vitest)
+
+    needs: [detect-changes, packages-dist]
+    if: >-
+      needs.detect-changes.outputs.component == 'true' &&
+      needs.packages-dist.result == 'success'
+    runs-on: [self-hosted, ggsvelte]
+    env:
+      # GitHub runs the container as root, while /github/home belongs to
+      # pwuser. Firefox refuses that ownership mismatch.
+      HOME: /root
+    container:
+      # Keep in sync with env.PLAYWRIGHT_CONTAINER_TAG above.
+      image: mcr.microsoft.com/playwright:v1.61.1-noble
+    defaults:
+      run:
+        # The container's /bin/sh is dash, which rejects `set -o pipefail`.
+        shell: bash
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - name: install unzip (playwright image lacks it; setup-bun needs it)
+        run: apt-get update && apt-get install -y --no-install-recommends unzip
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.3.14
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.bun/install/cache
+          key: bun-container-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-container-${{ runner.os }}-
+      - run: bun install --frozen-lockfile
+      - name: download shared packages/*/dist
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: packages-dist
+          # Producer uploads .packages-dist-upload/packages → extract as packages/.
+          path: packages
+      - name: verify downloaded package dist entrypoints
+        shell: bash
+        run: |
+          set -euo pipefail
+          for path in \
+            packages/spec/dist/index.js \
+            packages/core/dist/index.js \
+            packages/svelte/dist/index.js; do
+            if [ ! -f "${path}" ]; then
+              echo "::error::packages-dist artifact missing ${path} after download"
+              find packages -maxdepth 3 -type d 2>/dev/null | head -40 || true
               exit 1
             fi
           done
+      - name: assert playwright npm/container version sync (spikes/browser)
+        run: |
+          set -euo pipefail
+          npm_version="$(cd spikes/browser && bun -e 'console.log(require("playwright/package.json").version)')"
+          expected="v${npm_version}-noble"
+          echo "spikes/browser playwright: ${npm_version}; container tag: ${PLAYWRIGHT_CONTAINER_TAG}"
+          if [ "${expected}" != "${PLAYWRIGHT_CONTAINER_TAG}" ]; then
+            echo "::error::playwright npm version in spikes/browser (${npm_version}) does not match pinned container tag (${PLAYWRIGHT_CONTAINER_TAG})"
+            exit 1
+          fi
+      - name: retired spike suites (browser + ssr projects)
+        working-directory: spikes/browser
+        run: bun run --bun test
+      - name: upload spikes failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: component-spikes-failure-artifacts
+          path: spikes/browser/test-results/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  component-journeys:
+    name: component-journeys (docs a11y playwright)
+
+    needs: [detect-changes, packages-dist]
+    if: >-
+      needs.detect-changes.outputs.component == 'true' &&
+      needs.packages-dist.result == 'success'
+    runs-on: [self-hosted, ggsvelte]
+    env:
+      # GitHub runs the container as root, while /github/home belongs to
+      # pwuser. Firefox refuses that ownership mismatch.
+      HOME: /root
+    container:
+      # Keep in sync with env.PLAYWRIGHT_CONTAINER_TAG above.
+      image: mcr.microsoft.com/playwright:v1.61.1-noble
+    defaults:
+      run:
+        # The container's /bin/sh is dash, which rejects `set -o pipefail`.
+        shell: bash
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - name: install unzip (playwright image lacks it; setup-bun needs it)
+        run: apt-get update && apt-get install -y --no-install-recommends unzip
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.3.14
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.bun/install/cache
+          key: bun-container-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-container-${{ runner.os }}-
+      - run: bun install --frozen-lockfile
+      - name: download shared packages/*/dist
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: packages-dist
+          # Producer uploads .packages-dist-upload/packages → extract as packages/.
+          path: packages
+      - name: verify downloaded package dist entrypoints
+        shell: bash
+        run: |
+          set -euo pipefail
+          for path in \
+            packages/spec/dist/index.js \
+            packages/core/dist/index.js \
+            packages/svelte/dist/index.js; do
+            if [ ! -f "${path}" ]; then
+              echo "::error::packages-dist artifact missing ${path} after download"
+              find packages -maxdepth 3 -type d 2>/dev/null | head -40 || true
+              exit 1
+            fi
+          done
+      - name: assert playwright npm/container version sync (root @playwright/test)
+        run: |
+          set -euo pipefail
           vr_version="$(bun -e 'console.log(require("@playwright/test/package.json").version)')"
           echo "root @playwright/test (VR suite): ${vr_version}; container tag: ${PLAYWRIGHT_CONTAINER_TAG}"
           if [ "v${vr_version}-noble" != "${PLAYWRIGHT_CONTAINER_TAG}" ]; then
             echo "::error::@playwright/test version (${vr_version}) does not match pinned container tag (${PLAYWRIGHT_CONTAINER_TAG})"
             exit 1
           fi
-      - name: component tests (packages/svelte, vitest browser mode)
-        working-directory: packages/svelte
-        run: bun run --bun test
-      - name: retired spike suites (browser + ssr projects)
-        working-directory: spikes/browser
-        run: bun run --bun test
       - name: build packaged interaction test target
         run: BASE_PATH=/ggsvelte bun run build:docs
       - name: interaction and safe-playground accessibility journeys
         run: bun run test:visual -- interaction-accessibility.spec.ts playground.spec.ts
-      - name: upload browser traces, screenshots, and reports on failure
+      - name: upload journey failure artifacts
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: component-browser-failure-artifacts
+          name: component-journeys-failure-artifacts
           path: |
-            packages/svelte/test-results/
-            spikes/browser/test-results/
             tests/visual/test-results/
             tests/visual/playwright-report/
           if-no-files-found: ignore
@@ -614,7 +756,9 @@ jobs:
       - unit
       - compatibility-matrix
       - consumer-compat
-      - component
+      - component-svelte
+      - component-spikes
+      - component-journeys
       - build
       - actions-security
       - bench-smoke
@@ -642,7 +786,9 @@ jobs:
           PACKAGES_DIST_REQ: ${{ needs.detect-changes.outputs.packages_dist }}
           CHECKS_RES: ${{ needs.checks.result }}
           UNIT_RES: ${{ needs.unit.result }}
-          COMPONENT_RES: ${{ needs.component.result }}
+          COMPONENT_SVELTE_RES: ${{ needs.component-svelte.result }}
+          COMPONENT_SPIKES_RES: ${{ needs.component-spikes.result }}
+          COMPONENT_JOURNEYS_RES: ${{ needs.component-journeys.result }}
           CONSUMER_RES: ${{ needs.consumer-compat.result }}
           BUILD_RES: ${{ needs.build.result }}
           ACTIONS_RES: ${{ needs.actions-security.result }}
@@ -676,10 +822,23 @@ jobs:
               vr: false,
               pages: false,
             };
+            const shard = (k: string): JobResult => (env[k] as JobResult) || "skipped";
+            const componentShards = [
+              shard("COMPONENT_SVELTE_RES"),
+              shard("COMPONENT_SPIKES_RES"),
+              shard("COMPONENT_JOURNEYS_RES"),
+            ];
+            // Issue #243: component is success only when every shard succeeds.
+            let componentResult: JobResult = "skipped";
+            if (componentShards.every((r) => r === "skipped")) componentResult = "skipped";
+            else if (componentShards.every((r) => r === "success")) componentResult = "success";
+            else if (componentShards.some((r) => r === "failure" || r === "cancelled"))
+              componentResult = "failure";
+            else componentResult = "unknown";
             const results: Partial<Record<JobName, JobResult>> = {
               checks: env.CHECKS_RES as JobResult,
               unit: env.UNIT_RES as JobResult,
-              component: env.COMPONENT_RES as JobResult,
+              component: componentResult,
               consumer: env.CONSUMER_RES as JobResult,
               build: env.BUILD_RES as JobResult,
               actions_security: env.ACTIONS_RES as JobResult,
