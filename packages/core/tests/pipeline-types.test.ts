@@ -25,9 +25,17 @@ describe("pipeline types contract", () => {
     const resolved: ResolvedColorScale = {
       kind: "ordinal",
       scale: {
+        type: "ordinal",
         domain: ["a"],
+        indexOf: (v: unknown) => (v === "a" ? 0 : undefined),
         colorOf: (v: unknown) => (v === "a" ? "#111111" : undefined),
-        state: { domain: ["a"], assignments: { a: 0 }, scheme: "test", reverse: false },
+        state: {
+          version: 1,
+          fingerprint: "test",
+          assignments: [["a", 0]],
+          nextIndex: 1,
+          exhaustWarned: false,
+        },
         warnings: [],
       },
     };
