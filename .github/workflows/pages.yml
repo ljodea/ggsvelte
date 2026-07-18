@@ -11,12 +11,10 @@ on:
 
 permissions: {}
 
-concurrency:
-  group: pages
-  # Do not cancel in-flight deploys: a later path-routed skip would otherwise
-  # cancel a docs/package Pages build and then skip build/deploy itself,
-  # leaving GitHub Pages stale until another routed push.
-  cancel-in-progress: false
+# Concurrency is intentionally NOT workflow-level. A path-routed `pages=false`
+# run that only executes detect-changes must not enter the deploy group and
+# displace a pending real deploy (GitHub keeps only one pending run per group).
+# Serialize production deploys on the deploy job alone (see below).
 
 jobs:
   detect-changes:
