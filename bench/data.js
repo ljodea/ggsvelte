@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784346014451,
+  "lastUpdate": 1784346045014,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -22455,6 +22455,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 161.5799,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b939b56760feb7950455fc61ea56bd2f965d9ec4",
+          "message": "perf(core): O(1) ordinal seriesRank via ColorScale.indexOf (#224)\n\n* perf(core): O(1) ordinal seriesRank via ColorScale.indexOf\n\nDuring candidate build, seriesRank scanned the ordinal color/fill domain\nwith findIndex + bandKey (O(n·d) and type-collapsing). Expose the existing\nencodeKey assignment map as ColorScale.indexOf and use it for ranks so\nlookups are O(1) and match color assignment (1 vs \"1\" stay distinct).\n\nCloses #215\n\n* fix(core): wrap ColorScale.indexOf to satisfy unbound-method lint\n\n* fix(core): lazy cell reads for non-ordinal seriesRank\n\nPass value getters into ordinalColorRank so sequential/null color/fill\nscales never force table.column or sourceValue lookups per candidate.",
+          "timestamp": "2026-07-17T22:40:09-05:00",
+          "tree_id": "1644e7682e44943d41bdb11fb44f81802e3d02b6",
+          "url": "https://github.com/ljodea/ggsvelte/commit/b939b56760feb7950455fc61ea56bd2f965d9ec4"
+        },
+        "date": 1784346044436,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 3.0125,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.3382,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 13.7843,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 16.5452,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 85.3097,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 119.0895,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.2679,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.4076,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 87.2018,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 107.6882,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 14.3711,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 13.0855,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 114.7928,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 1.3886,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 26.9819,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.621,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 33.5428,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 609.895,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 161.08,
             "unit": "ms"
           }
         ]
