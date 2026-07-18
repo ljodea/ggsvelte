@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784337965672,
+  "lastUpdate": 1784338135733,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -21265,6 +21265,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 173.2069,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "0cbd2885011977b26815b5e9890d5ef06c1e3e34",
+          "message": "perf(svelte): O(S+B) batch focus-mask projection via Map (#202)\n\n* perf(svelte): O(S+B) batch focus-mask projection via Map\n\nresolveBatchFocusMasks no longer indexOf-scans the full scene batch list\nper stratum batch (O(B·S)). Build a batch→index Map once and look up —\nO(S+B). SceneView reuses the same helper (with empty-mask short-circuit)\nso SVG mark render stays aligned with canvas paint.\n\nCloses #196\n\n* test(svelte): drop unnecessary non-null assertions for oxlint type-aware",
+          "timestamp": "2026-07-17T20:28:14-05:00",
+          "tree_id": "7a1f32d2221aad46602f3d2ca669e47927fa5e68",
+          "url": "https://github.com/ljodea/ggsvelte/commit/0cbd2885011977b26815b5e9890d5ef06c1e3e34"
+        },
+        "date": 1784338134425,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.4738,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.9494,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 10.0309,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 14.3428,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 89.3081,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 123.4846,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.2357,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.4089,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 89.8931,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 112.4324,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 10.4321,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 10.3999,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 114.085,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7262,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 24.7917,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 5.5739,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 31.0654,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 594.3178,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 142.8451,
             "unit": "ms"
           }
         ]
