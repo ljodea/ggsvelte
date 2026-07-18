@@ -199,6 +199,21 @@ describe("directionalNearestInOrder / panelRangeInOrder", () => {
     expect(probes).toBeLessThan(80);
   });
 
+  it("does not linear-skip a dense seed-primary stack (upper_bound)", () => {
+    const stack = 2000;
+    const n = stack + 1;
+    const order = Uint32Array.from({ length: n }, (_, i) => i);
+    const primary = Float32Array.from({ length: n }, (_, i) => (i < stack ? 0 : 1));
+    const orth = new Float32Array(n);
+    let probes = 0;
+    const next = directionalNearestInOrder(order, primary, orth, 0, n, 500, 0, 0, true, () => {
+      probes += 1;
+    });
+    expect(next).toBe(stack);
+    expect(probes).toBeLessThan(80);
+    expect(probes).toBeLessThan(stack / 2);
+  });
+
   it("panelRangeInOrder isolates a panel segment", () => {
     // order: panel0, panel0, panel1, panel1, panel2
     const order = [0, 1, 2, 3, 4];

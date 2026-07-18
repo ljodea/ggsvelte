@@ -270,29 +270,22 @@ export function directionalNearestInOrder(
   if (panelStart >= panelEnd) return startId;
   if (!Number.isFinite(seedPrimary)) return startId;
 
-  // lower_bound: first index with primary >= seedPrimary (forward) or > seedPrimary after which we step back
+  // First candidate strictly in-direction via binary search (not a linear skip
+  // over the seed's equal-primary run — that would be O(m) for dense stacks).
   let lo = panelStart;
   let hi = panelEnd;
   while (lo < hi) {
     const mid = (lo + hi) >>> 1;
     onProbe?.(mid);
-    if (primary[order[mid]!]! < seedPrimary) lo = mid + 1;
+    // forward: upper_bound (primary > seed); backward: lower_bound (primary >= seed)
+    const value = primary[order[mid]!]!;
+    if (forward ? value <= seedPrimary : value < seedPrimary) lo = mid + 1;
     else hi = mid;
   }
-
-  // First candidate strictly in-direction.
-  let runStart: number;
+  const runStart = forward ? lo : lo - 1;
   if (forward) {
-    // Skip primary === seedPrimary (primary delta 0).
-    runStart = lo;
-    while (runStart < panelEnd && primary[order[runStart]!]! <= seedPrimary) {
-      onProbe?.(runStart);
-      runStart++;
-    }
     if (runStart >= panelEnd) return startId;
   } else {
-    // Last with primary < seedPrimary.
-    runStart = lo - 1;
     if (runStart < panelStart) return startId;
     onProbe?.(runStart);
   }
