@@ -18,7 +18,9 @@ export type InteractionDiagnosticCode =
   | "INTERACTION_LEGEND_REQUIRES_KEY"
   | "INTERACTION_LEGEND_DISCRETE_ONLY"
   | "INTERACTION_INTERVAL_SCALE_UNSUPPORTED"
-  | "INTERACTION_TOOL_UNAVAILABLE";
+  | "INTERACTION_TOOL_UNAVAILABLE"
+  | "INTERACTION_SCOPE_WITHOUT_CONTROLLER"
+  | "INTERACTION_HANDLER_WITHOUT_CAPABILITY";
 
 export interface InteractionDiagnostic {
   readonly severity: "error" | "warning" | "advisory";
@@ -147,5 +149,33 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
     suggestions: ["Enable the matching capability", "Choose an available interaction tool"],
     docUrl:
       "https://ljodea.github.io/ggsvelte/guide/interaction-reference#interaction-tool-unavailable",
+  },
+  INTERACTION_SCOPE_WITHOUT_CONTROLLER: {
+    severity: "advisory",
+    code: "INTERACTION_SCOPE_WITHOUT_CONTROLLER",
+    message:
+      "interactionScope is ignored without an interaction controller; chart-local scope is derived from key and aes.",
+    prop: "interactionScope",
+    suggestions: [
+      "Pass interaction={createPlotInteraction()} to control this plot",
+      "Remove interactionScope from uncontrolled plots",
+    ],
+    docUrl:
+      "https://ljodea.github.io/ggsvelte/guide/interaction-reference#interaction-scope-without-controller",
+  },
+  INTERACTION_HANDLER_WITHOUT_CAPABILITY: {
+    severity: "advisory",
+    code: "INTERACTION_HANDLER_WITHOUT_CAPABILITY",
+    // Emitted with `prop` overridden to the concrete handler name and
+    // `actual` naming the capability prop that would enable it.
+    message:
+      "An interaction handler is set but its capability prop is not enabled, so the handler never fires.",
+    prop: "oninspect / onselect / onzoom / onlegendfocus / onlegendfilter",
+    suggestions: [
+      "Enable the matching capability prop (for example select for onselect)",
+      "Remove the unused handler",
+    ],
+    docUrl:
+      "https://ljodea.github.io/ggsvelte/guide/interaction-reference#interaction-handler-without-capability",
   },
 });

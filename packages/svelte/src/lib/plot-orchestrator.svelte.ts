@@ -87,7 +87,10 @@ import { createSelectionState, type SelectionState } from "./selection/selection
 import { createPlotChromeState, type PlotChromeState } from "./chrome/chrome-state.svelte.js";
 import type { LegendFilterEvent, LegendFilterInput } from "./legend/filter.js";
 import type { LayerRegistry } from "./geoms/registry.svelte.js";
-import { normalizeInteractionConfig } from "./interaction/interaction.js";
+import {
+  INTERACTION_DIAGNOSTIC_CATALOG,
+  normalizeInteractionConfig,
+} from "./interaction/interaction.js";
 
 // ---------------------------------------------------------------------------
 // Inputs / return type
@@ -269,6 +272,46 @@ export function createPlotOrchestrator<
 
   $effect(() => {
     for (const diagnostic of interactionConfig.diagnostics) deliverDiagnostic(diagnostic);
+  });
+
+  // Wiring advisories (ADR 0013 audit): prop combinations that silently do
+  // nothing. Unlike config diagnostics (re-delivered per recompute), these
+  // fire once per prop per plot instance — a later capability toggle must
+  // not re-advise.
+  const wiringDiagnostics = $derived.by((): InteractionDiagnostic[] => {
+    const list: InteractionDiagnostic[] = [];
+    if (inputs.interactionScope() !== undefined && inputs.interaction() === undefined)
+      list.push({ ...INTERACTION_DIAGNOSTIC_CATALOG.INTERACTION_SCOPE_WITHOUT_CONTROLLER });
+    const handlerCapabilityPairs = [
+      ["oninspect", "inspect", inputs.oninspect(), inputs.inspect()],
+      ["onselect", "select", inputs.onselect(), inputs.select()],
+      ["onzoom", "zoom", inputs.onzoom(), inputs.zoom()],
+      ["onlegendfocus", "legendFocus", inputs.onlegendfocus(), inputs.legendFocus()],
+      ["onlegendfilter", "legendFilter", inputs.onlegendfilter(), inputs.legendFilter()],
+    ] as const;
+    for (const [handler, capability, handlerValue, capabilityValue] of handlerCapabilityPairs) {
+      if (handlerValue === undefined) continue;
+      // Capability "requested" (any value but undefined/false) is enough:
+      // requested-but-degraded configs already get their own diagnostics
+      // (requires-key, faceted zoom, ...) — never advise twice for one
+      // mistake.
+      if (capabilityValue !== undefined && capabilityValue !== false) continue;
+      list.push({
+        ...INTERACTION_DIAGNOSTIC_CATALOG.INTERACTION_HANDLER_WITHOUT_CAPABILITY,
+        prop: handler,
+        actual: capability,
+      });
+    }
+    return list;
+  });
+  const deliveredWiring = new Set<string>();
+  $effect(() => {
+    for (const diagnostic of wiringDiagnostics) {
+      const dedupKey = `${diagnostic.code}:${diagnostic.prop}`;
+      if (deliveredWiring.has(dedupKey)) continue;
+      deliveredWiring.add(dedupKey);
+      deliverDiagnostic(diagnostic);
+    }
   });
 
   // The PublicKey → PropertyKey widening casts live at the GGPlot call site;
