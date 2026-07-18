@@ -540,9 +540,8 @@ describe("semantic inspection resolver", () => {
     for (const spec of [smoothSpec, boxSpec]) {
       const first = runPipeline(spec, { width: 400, height: 300 });
       const resized = runPipeline(spec, { width: 700, height: 300 });
-      const collidingSeeds = Array.from(
-        { length: first.candidates.size },
-        (_, id) => first.candidates.candidate(id)!,
+      const collidingSeeds = Array.from({ length: first.candidates.size }, (_, id) =>
+        first.candidates.candidate(id)!,
       ).filter((fact, _, all) =>
         all.some(
           (other) =>
