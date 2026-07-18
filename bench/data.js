@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784348279643,
+  "lastUpdate": 1784348291611,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -22931,6 +22931,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 160.4657,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "8a1c84aebc03fdad7293bef0c7eeff6260db9781",
+          "message": "perf(svelte): early-exit before lineage join in reconcilePinned (#234)\n\nOn the null-seedKey pin reconcile path, apply cheap layer/row/kind/role\nfilters before materializing O(L) lineage identity joins so non-matching\ncandidates no longer pay full join cost. Matches the seedKey branch style.\n\nCloses #229",
+          "timestamp": "2026-07-17T23:17:29-05:00",
+          "tree_id": "d3de2e79c69ce47a372f0b96c729b444113aebe1",
+          "url": "https://github.com/ljodea/ggsvelte/commit/8a1c84aebc03fdad7293bef0c7eeff6260db9781"
+        },
+        "date": 1784348290449,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 4.1217,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 4.1636,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 9.4317,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 14.1576,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 89.5636,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 118.5513,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.2741,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.4448,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 86.0706,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 108.8681,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.172,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.4254,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 117.0246,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7963,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 27.3954,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.4164,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 38.4131,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 594.7251,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 161.3728,
             "unit": "ms"
           }
         ]
