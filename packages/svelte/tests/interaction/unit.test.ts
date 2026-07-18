@@ -952,6 +952,49 @@ describe("semantic inspection resolver", () => {
     resized.dispose();
   });
 
+  // Same identityEpoch can still change primitives (layer-prop geom swap).
+  // Fast path must require kind/batch/primitive, not only layer+key (#272 P2).
+  it("rejects keyed seedId fast path when primitive role no longer matches", () => {
+    const data = [{ id: "a", x: 1, y: 2, ymin: 1, ymax: 3 }];
+    const points = runPipeline(
+      gg(data, aes({ x: "x", y: "y" }))
+        .geomPoint()
+        .spec(),
+      { width: 400, height: 300 },
+    );
+    const errorbars = runPipeline(
+      gg(data, aes({ x: "x", y: "y", ymin: "ymin", ymax: "ymax" }))
+        .geomErrorbar()
+        .spec(),
+      { width: 400, height: 300 },
+    );
+    const coordinator = createInspectionCoordinator((row) => (row as { id: string }).id);
+    const seed = points.candidates.candidate(0)!;
+    expect(seed.kind).toBe("points");
+    coordinator.resolve({
+      model: points,
+      seed,
+      mode: "exact",
+      state: "pinned",
+      source: "pointer",
+      identityEpoch: "same-epoch",
+      layoutEpoch: 1,
+    });
+    // Same epoch token, different geom at seedId — role mismatch must not pin.
+    const atSameId = errorbars.candidates.candidate(seed.id);
+    expect(atSameId).not.toBeNull();
+    expect(atSameId!.kind).not.toBe("points");
+    const reconciled = coordinator.reconcilePinned({
+      model: errorbars,
+      identityEpoch: "same-epoch",
+      layoutEpoch: 2,
+    });
+    // Full scan finds no points-role match for key "a" → clear pin.
+    expect(reconciled).toBeNull();
+    points.dispose();
+    errorbars.dispose();
+  });
+
   it("does not scan every candidate on layout-only keyless pin rebind", () => {
     const count = 2_000;
     const data = Array.from({ length: count }, (_, index) => ({

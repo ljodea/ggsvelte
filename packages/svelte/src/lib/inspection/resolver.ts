@@ -412,6 +412,18 @@ export function createInspectionCoordinator<
     return row !== null && keyOf(row as Row, candidate.rowIndex) === prior.seedKey;
   };
 
+  /**
+   * Strict keyed rebind for the seedId fast path: key match plus kind / batch
+   * role / primitive (same filters as multi-match disambiguation). Same-epoch
+   * is not always pure layout — layer-prop swaps can keep the identity token
+   * while changing primitives that reuse an id (Codex #272 P2).
+   */
+  const keyedPinRoleMatch = (model: RenderModel, prior: Slot, candidate: CandidateFacts): boolean =>
+    keyedPinMatch(model, prior, candidate) &&
+    candidate.kind === prior.seedKind &&
+    candidate.primitiveIndex === prior.seedPrimitiveIndex &&
+    candidateBatchRole(model, candidate) === prior.seedBatchRole;
+
   const reconcilePinned = (
     input: Readonly<{
       model: RenderModel;
@@ -424,17 +436,17 @@ export function createInspectionCoordinator<
     const prior = pinned;
     if (prior === null) return null;
     let seed: CandidateFacts | null = null;
-    // Layout-only rebind (same data identity): candidate ids are stable for the
-    // same construction order. O(1) seedId revalidation avoids O(C) store walks.
-    // Uniqueness was proven at pin time; identityEpoch equality preserves it.
-    // On identity change, keyed path still full-scans (ambiguity may appear);
-    // keyless path clears immediately below.
+    // Same identityEpoch: O(1) seedId revalidation when id + role still match.
+    // Keyed path requires kind/batch/primitive (not only layer+key) so geom
+    // swaps that reuse seedId cannot pin the wrong primitive. Fall through to
+    // full scan on miss. Identity-change keyed still full-scans for ambiguity;
+    // keyless identity-change clears immediately below.
     if (prior.identityEpoch === input.identityEpoch) {
       const preferred = input.model.candidates.candidate(prior.seedId);
       if (preferred !== null) {
         if (prior.seedKey === null) {
           if (keylessPinMatch(input.model, prior, preferred)) seed = preferred;
-        } else if (keyedPinMatch(input.model, prior, preferred)) {
+        } else if (keyedPinRoleMatch(input.model, prior, preferred)) {
           seed = preferred;
         }
       }
