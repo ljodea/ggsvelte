@@ -12,7 +12,6 @@ import { flushSync } from "svelte";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { CandidateFacts, CellValue, RenderModel } from "@ggsvelte/core";
-import { buildHitIndex } from "@ggsvelte/core/dom";
 import { aes, gg, type PortableSpec } from "@ggsvelte/spec";
 
 import type {
@@ -264,7 +263,6 @@ function mountSurfaceComposite(
   const capture = mountCaptureTarget(model);
   root.append(capture);
 
-  const hitIndex = buildHitIndex(model.scene);
   const keyAt = identityKeyAt(model);
   const semanticKey = identitySemanticKey();
 
@@ -338,7 +336,6 @@ function mountSurfaceComposite(
       pointSelectEnabled: () => config.select?.type === "point",
       ontoolchange: () => onToolChangeBox.value,
       surfaceInteractive: () => options.surfaceInteractive ?? true,
-      hitIndex: () => hitIndex,
       candidateSemanticKeys: identityCandidateKeys,
       inspection: () => inspection,
       interval: () => interval,
@@ -462,7 +459,6 @@ describe("createSurfaceState construction", () => {
     let toolPropCalls = 0;
     let tooltipHoveredCalls = 0;
     let coordFlippedCalls = 0;
-    let hitIndexCalls = 0;
     let surfaceInteractiveCalls = 0;
 
     // Minimal stubs so construction can close the cycle without real siblings.
@@ -557,10 +553,6 @@ describe("createSurfaceState construction", () => {
           surfaceInteractiveCalls++;
           return true;
         },
-        hitIndex: () => {
-          hitIndexCalls++;
-          return null;
-        },
         candidateSemanticKeys: () => {
           candidateSemanticKeysCalls++;
           return [];
@@ -616,7 +608,6 @@ describe("createSurfaceState construction", () => {
     expect(toolPropCalls).toBe(0);
     expect(tooltipHoveredCalls).toBe(0);
     expect(coordFlippedCalls).toBe(0);
-    expect(hitIndexCalls).toBe(0);
     expect(surfaceInteractiveCalls).toBe(0);
 
     destroy();

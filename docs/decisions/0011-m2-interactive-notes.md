@@ -240,3 +240,13 @@ budgets anticipate; formal budget gating remains M3.
 6. Tooltip positioning across page-scrolled/transformed ancestors uses
    getBoundingClientRect on the capture layer — audit under CSS zoom.
 7. Roving tabindex for large SVG batches (current: hard 100-mark cap).
+
+## Amendment (2026-07-18): hit resolution deepened into CandidateStore
+
+The separate experimental `buildHitIndex(scene)` implementation was removed in
+0.3. `RenderModel.candidates` is now the single model-owned geometry index:
+`CandidateStore.hitTest()` preserves paint-ordered pointer resolution and exact
+panel-clipped geometry, while `nearest()`, `queryRect()`, grouping, and traversal
+share the same lazy typed-array and spatial indexes. The decision's plot-pixel,
+DOM-independent, stratum-independent seam is unchanged; only its implementation
+ownership moved from `@ggsvelte/core/dom` into the core CandidateStore.

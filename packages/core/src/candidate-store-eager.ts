@@ -47,8 +47,9 @@ function pathSubpathAabb(
   end: number,
   fallbackX: number,
   fallbackY: number,
+  hitTolerance: number,
 ): readonly [number, number, number, number] {
-  const pad = batch.linewidth / 2 + 3;
+  const pad = batch.linewidth / 2 + hitTolerance;
   let minX = Infinity;
   let minY = Infinity;
   let maxX = -Infinity;
@@ -78,8 +79,9 @@ function pathVertexStrokeAabb(
   i: number,
   start: number,
   end: number,
+  hitTolerance: number,
 ): readonly [number, number, number, number] {
-  const pad = batch.linewidth / 2 + 3;
+  const pad = batch.linewidth / 2 + hitTolerance;
   let minX = panelX + batch.positions[i * 2]!;
   let minY = panelY + batch.positions[i * 2 + 1]!;
   let maxX = minX;
@@ -102,6 +104,7 @@ export function buildCandidateStoreEager(
 ): CandidateStore {
   const epoch = options.epoch ?? 0;
   const flip = options.flip ?? false;
+  const hitTolerance = options.hitTolerance ?? 3;
   const batchList: number[] = [];
   const primitiveList: number[] = [];
   const panelList: number[] = [];
@@ -400,6 +403,7 @@ export function buildCandidateStoreEager(
   const spatialYs = Float64Array.from(ys);
   const spatial = n > 0 ? new StaticQuadtree(spatialXs, spatialYs) : null;
   const isPoint = new Uint8Array(n);
+  const pointIdsByBatch = new Map<number, number[]>();
   const extendedIds: number[] = [];
   const extMinXBuild: number[] = [];
   const extMinYBuild: number[] = [];
@@ -412,7 +416,10 @@ export function buildCandidateStoreEager(
     const batch = scene.batches[batchIds[id]!]!;
     if (batch.kind === "points") {
       isPoint[id] = 1;
-      maxPointReach = Math.max(maxPointReach, batch.size + 3);
+      maxPointReach = Math.max(maxPointReach, batch.size + hitTolerance);
+      const ids = pointIdsByBatch.get(batchIds[id]!);
+      if (ids === undefined) pointIdsByBatch.set(batchIds[id]!, [id]);
+      else ids.push(id);
       continue;
     }
     extendedIds.push(id);
@@ -432,7 +439,7 @@ export function buildCandidateStoreEager(
       maxX = Math.max(rx, rx + rw);
       maxY = Math.max(ry, ry + rh);
     } else if (batch.kind === "segments") {
-      const pad = batch.linewidth / 2 + 3;
+      const pad = batch.linewidth / 2 + hitTolerance;
       const x1 = panel.x + batch.segments[i * 4]!;
       const y1 = panel.y + batch.segments[i * 4 + 1]!;
       const x2 = panel.x + batch.segments[i * 4 + 2]!;
@@ -453,7 +460,15 @@ export function buildCandidateStoreEager(
         maxX = minX;
         maxY = minY;
       } else if (batch.fills === undefined) {
-        const box = pathVertexStrokeAabb(batch, panel.x, panel.y, i, range[0], range[1]);
+        const box = pathVertexStrokeAabb(
+          batch,
+          panel.x,
+          panel.y,
+          i,
+          range[0],
+          range[1],
+          hitTolerance,
+        );
         minX = box[0];
         minY = box[1];
         maxX = box[2];
@@ -462,7 +477,16 @@ export function buildCandidateStoreEager(
         const cacheKey = `${batchIds[id]}:${range[0]}:${range[1]}`;
         let box = pathAabbCache.get(cacheKey);
         if (box === undefined) {
-          box = pathSubpathAabb(batch, panel.x, panel.y, range[0], range[1], xs[id]!, ys[id]!);
+          box = pathSubpathAabb(
+            batch,
+            panel.x,
+            panel.y,
+            range[0],
+            range[1],
+            xs[id]!,
+            ys[id]!,
+            hitTolerance,
+          );
           pathAabbCache.set(cacheKey, box);
         }
         minX = box[0];
@@ -473,7 +497,7 @@ export function buildCandidateStoreEager(
     } else {
       // glyphs: text is not a hit target (hit-index), but still needs a finite
       // AABB so store init never pathRange()'s a non-path batch (Codex P1).
-      const pad = batch.size + 3;
+      const pad = batch.size + hitTolerance;
       minX = xs[id]! - pad;
       minY = ys[id]! - pad;
       maxX = xs[id]! + pad;
@@ -485,6 +509,24 @@ export function buildCandidateStoreEager(
     extMaxYBuild.push(maxY);
   }
   pathAabbCache.clear();
+
+  // Pointer hit testing preserves reverse paint order and per-batch point
+  // radius without expanding every query by the largest point in the scene.
+  // This mirrors paint batches while remaining private to CandidateStore.
+  const pointBatchIndexes = [...pointIdsByBatch.entries()].map(([batchIndex, ids]) => {
+    const pointXs = new Float64Array(ids.length);
+    const pointYs = new Float64Array(ids.length);
+    for (let i = 0; i < ids.length; i++) {
+      pointXs[i] = xs[ids[i]!]!;
+      pointYs[i] = ys[ids[i]!]!;
+    }
+    return {
+      batchIndex,
+      ids,
+      spatial: new StaticQuadtree(pointXs, pointYs),
+    };
+  });
+  pointIdsByBatch.clear();
 
   const extN = extendedIds.length;
   const extMinX = Float64Array.from(extMinXBuild);
@@ -580,14 +622,19 @@ export function buildCandidateStoreEager(
     const y = py - panel.y;
     if (batch.kind === "points") {
       const d = Math.hypot(px - xs[id]!, py - ys[id]!);
-      return d <= batch.size + 3 ? d : null;
+      return d <= batch.size + hitTolerance ? d : null;
     }
     if (batch.kind === "rects") {
       const rx = batch.rects[i * 4]!;
       const ry = batch.rects[i * 4 + 1]!;
       const rw = batch.rects[i * 4 + 2]!;
       const rh = batch.rects[i * 4 + 3]!;
-      return x >= rx && x <= rx + rw && y >= ry && y <= ry + rh ? 0 : null;
+      return x >= Math.min(rx, rx + rw) &&
+        x <= Math.max(rx, rx + rw) &&
+        y >= Math.min(ry, ry + rh) &&
+        y <= Math.max(ry, ry + rh)
+        ? 0
+        : null;
     }
     if (batch.kind === "segments") {
       const d = segmentDistance(
@@ -598,7 +645,7 @@ export function buildCandidateStoreEager(
         batch.segments[i * 4 + 2]!,
         batch.segments[i * 4 + 3]!,
       );
-      return d <= batch.linewidth / 2 + 3 ? d : null;
+      return d <= batch.linewidth / 2 + hitTolerance ? d : null;
     }
     if (batch.kind === "paths") {
       // One O(log P) range lookup; reuse for fill containment and stroke neighbors.
@@ -611,6 +658,7 @@ export function buildCandidateStoreEager(
           pathContainment.set(containmentKey, contained);
         }
         if (contained) return Math.hypot(px - xs[id]!, py - ys[id]!);
+        return null;
       }
       let d = Infinity;
       if (range !== null) {
@@ -629,7 +677,7 @@ export function buildCandidateStoreEager(
           );
         }
       }
-      return d <= batch.linewidth / 2 + 3 ? d : null;
+      return d <= batch.linewidth / 2 + hitTolerance ? d : null;
     }
     return null;
   };
@@ -642,7 +690,14 @@ export function buildCandidateStoreEager(
       const y = panel.y + batch.rects[i * 4 + 1]!;
       const w = batch.rects[i * 4 + 2]!;
       const h = batch.rects[i * 4 + 3]!;
-      return x <= hiX && x + w >= loX && y <= hiY && y + h >= loY;
+      const otherX = x + w;
+      const otherY = y + h;
+      return (
+        Math.min(x, otherX) <= hiX &&
+        Math.max(x, otherX) >= loX &&
+        Math.min(y, otherY) <= hiY &&
+        Math.max(y, otherY) >= loY
+      );
     }
     if (batch.kind === "segments") {
       const x1 = panel.x + batch.segments[i * 4]!;
@@ -724,6 +779,111 @@ export function buildCandidateStoreEager(
     x: xs,
     y: ys,
     candidate: fact,
+    hitTest(px, py) {
+      let best = -1;
+      let bestBatch = -1;
+      let bestDistance = Infinity;
+      let bestPathStart = -1;
+      let bestPathEdge = Infinity;
+      const pathContainment = new Map<string, boolean>();
+
+      for (let index = pointBatchIndexes.length - 1; index >= 0; index--) {
+        const entry = pointBatchIndexes[index]!;
+        const batch = scene.batches[entry.batchIndex]!;
+        if (batch.kind !== "points") continue;
+        const panel = scene.panels[batch.panelIndex];
+        if (
+          panel === undefined ||
+          px < panel.x ||
+          px > panel.x + panel.width ||
+          py < panel.y ||
+          py > panel.y + panel.height
+        )
+          continue;
+        const localId = entry.spatial.nearestWithin(px, py, batch.size + hitTolerance);
+        if (localId < 0) continue;
+        best = entry.ids[localId]!;
+        bestBatch = entry.batchIndex;
+        bestDistance = Math.hypot(xs[best]! - px, ys[best]! - py);
+        break;
+      }
+
+      const extended: number[] = [];
+      addExtendedIntersecting(px, py, px, py, extended);
+      extended.sort((a, b) => b - a);
+      for (const id of extended) {
+        const batchIndex = batchIds[id]!;
+        if (batchIndex < bestBatch) continue;
+        const batch = scene.batches[batchIndex]!;
+        if (batch.kind === "glyphs") continue;
+        const panel = scene.panels[panelIds[id]!]!;
+        if (
+          px < panel.x ||
+          px > panel.x + panel.width ||
+          py < panel.y ||
+          py > panel.y + panel.height
+        )
+          continue;
+        const distance = exactDistance(id, px, py, pathContainment);
+        if (distance === null) continue;
+        const sameBatch = batchIndex === bestBatch;
+        const primitive = primitiveIds[id]!;
+        const range = batch.kind === "paths" ? pathRange(batch, primitive) : null;
+        const pathStart = range?.[0] ?? -1;
+        let pathEdge = Infinity;
+        let candidateId = id;
+        let anchorDistance = Math.hypot(xs[id]! - px, ys[id]! - py);
+        if (batch.kind === "paths" && batch.fills === undefined && range !== null) {
+          const localX = px - panel.x;
+          const localY = py - panel.y;
+          const slop = batch.linewidth / 2 + hitTolerance;
+          for (const edge of [primitive - 1, primitive]) {
+            if (edge < range[0] || edge + 1 >= range[1]) continue;
+            if (
+              segmentDistance(
+                localX,
+                localY,
+                batch.positions[edge * 2]!,
+                batch.positions[edge * 2 + 1]!,
+                batch.positions[(edge + 1) * 2]!,
+                batch.positions[(edge + 1) * 2 + 1]!,
+              ) <= slop
+            )
+              pathEdge = Math.min(pathEdge, edge);
+          }
+          if (!Number.isFinite(pathEdge)) continue;
+          const firstDistance = Math.hypot(
+            batch.positions[pathEdge * 2]! - localX,
+            batch.positions[pathEdge * 2 + 1]! - localY,
+          );
+          const secondDistance = Math.hypot(
+            batch.positions[(pathEdge + 1) * 2]! - localX,
+            batch.positions[(pathEdge + 1) * 2 + 1]! - localY,
+          );
+          const chosenPrimitive = firstDistance <= secondDistance ? pathEdge : pathEdge + 1;
+          candidateId = id - primitive + chosenPrimitive;
+          anchorDistance = Math.min(firstDistance, secondDistance);
+        }
+        const improvesWithinBatch =
+          batch.kind === "paths"
+            ? pathStart > bestPathStart ||
+              (pathStart === bestPathStart &&
+                (batch.fills === undefined
+                  ? pathEdge < bestPathEdge
+                  : anchorDistance < bestDistance ||
+                    (anchorDistance === bestDistance &&
+                      primitive < (best < 0 ? Infinity : primitiveIds[best]!))))
+            : primitive > (best < 0 ? -1 : primitiveIds[best]!);
+        if (batchIndex > bestBatch || (sameBatch && improvesWithinBatch)) {
+          best = candidateId;
+          bestBatch = batchIndex;
+          bestDistance = batch.kind === "paths" ? anchorDistance : distance;
+          bestPathStart = pathStart;
+          bestPathEdge = pathEdge;
+        }
+      }
+      return fact(best);
+    },
     nearest(px, py, search) {
       let best = -1,
         bestDistance = Infinity,

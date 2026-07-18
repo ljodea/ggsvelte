@@ -43,10 +43,13 @@ model.advisories; // every heuristic decision, with how-to-override
 model.warnings; // degraded-but-rendered conditions
 ```
 
-Browser half:
+Browser rendering:
 
 ```ts
-import { buildHitIndex, drawStratum } from "@ggsvelte/core/dom";
+import { drawStratum } from "@ggsvelte/core/dom";
+
+// Hit resolution uses the model-owned CandidateStore; no second index build.
+const candidate = model.candidates.hitTest(plotX, plotY);
 ```
 
 Specs are validated via [`@ggsvelte/spec`](https://www.npmjs.com/package/@ggsvelte/spec)

@@ -19,7 +19,6 @@
  * site (after legend-focus reconcile); effect-registration order is load-bearing.
  */
 import type { CandidateFacts, CellValue, RenderModel, ScenePanel } from "@ggsvelte/core";
-import type { SceneHit } from "@ggsvelte/core/dom";
 
 import { createInspectionCoordinator } from "./resolver.js";
 import type {
@@ -42,8 +41,8 @@ import {
   buildTraversalEntries,
   cycleCoincidentIndex,
   hitFromCandidate,
-  matchCandidateFromHit,
   nextTraversalIndex,
+  type SceneHit,
   planCycleCoincident,
   planDirectionalNavigate,
 } from "../surface/plot-px.js";
@@ -199,15 +198,6 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
 
   let reconciledRun = -1;
 
-  function candidateFromHit(hit: SceneHit): CandidateFacts | null {
-    const model = deps.model();
-    if (model === null) return null;
-    // Spatial shortlist via CandidateStore.queryRect (O(log C + k)); do not
-    // walk iterateCandidates O(C) on large charts.
-    const panelId = model.scene.panels[hit.panelIndex]?.id;
-    return matchCandidateFromHit(model.candidates, hit, undefined, panelId);
-  }
-
   function resolveInspection(
     hit: SceneHit,
     source: InteractionSource,
@@ -218,9 +208,7 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
     const model = deps.model();
     if (model === null) throw new Error("Cannot resolve inspection without a render model");
     const seed =
-      candidate ??
-      candidateFromHit(hit) ??
-      model.candidates.nearest(hit.x, hit.y, { mode: "exact", maxDistance: 0 });
+      candidate ?? model.candidates.nearest(hit.x, hit.y, { mode: "exact", maxDistance: 0 });
     if (seed === null) throw new Error("Inspection hit was not present in the candidate store");
     const requested = deps.inspectConfig()?.mode ?? "auto";
     const mode = resolveInspectionMode({

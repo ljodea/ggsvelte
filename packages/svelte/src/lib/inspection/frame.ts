@@ -5,10 +5,9 @@
  */
 
 import type { CandidateFacts, CandidateMatch } from "@ggsvelte/core";
-import type { SceneHit } from "@ggsvelte/core/dom";
 
 import type { InteractionSource } from "../interaction/interaction.js";
-import { hitFromCandidate } from "../surface/plot-px.js";
+import { hitFromCandidate, type SceneHit } from "../surface/plot-px.js";
 
 /** Host inspection lifecycle state used across pure inspection tables. */
 export type InspectionHostState = "none" | "transient" | "pinned";
@@ -49,8 +48,8 @@ export function buildQueuedPointerInspection(input: {
  *
  * Owns the single `match === null` branch for hit resolution + reducer
  * candidate ref (avoids three separate null checks / eager hitTest).
- * `fallbackHit` and `panelIdForIndex` are thunks evaluated only on the path
- * that needs them.
+ * `fallbackCandidate` and `panelIdForIndex` are thunks evaluated only on the
+ * path that needs them.
  */
 export type QueuedInspectFrameBuild = {
   readonly queued: QueuedPointerInspection;
@@ -62,19 +61,27 @@ export function buildQueuedInspectFrame(input: {
   readonly source: InteractionSource;
   readonly epoch: number;
   /** Evaluated only when match is null. */
-  readonly fallbackHit: () => SceneHit | null;
-  /** Evaluated only when match is non-null. */
+  readonly fallbackCandidate: () => CandidateFacts | null;
+  /** Evaluated only when a candidate is found. */
   readonly panelIdForIndex: (panelIndex: number) => string | null;
 }): QueuedInspectFrameBuild {
   if (input.match === null) {
-    const hit = input.fallbackHit();
+    const fallback = input.fallbackCandidate();
+    if (fallback === null)
+      return {
+        queued: { hit: null, source: input.source },
+        candidate: null,
+      };
+    const hit = hitFromCandidate(fallback);
     return {
-      queued: buildQueuedPointerInspection({
-        hit,
-        source: input.source,
-        match: null,
-      }),
-      candidate: null,
+      queued: { hit, source: input.source, candidate: fallback },
+      candidate: {
+        epoch: input.epoch,
+        id: fallback.id,
+        panelId: input.panelIdForIndex(fallback.panelIndex),
+        x: fallback.x,
+        y: fallback.y,
+      },
     };
   }
   const match = input.match;
