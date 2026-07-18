@@ -79,7 +79,8 @@ jobs:
             bun scripts/ci-routing.ts emit-github-output --force-all
             exit 0
           fi
-          mapfile -t files < <(git diff --name-only "${BASE_SHA}...${HEAD_SHA}" || true)
+          # --name-status keeps rename/copy source paths for classification.
+          mapfile -t files < <(git diff --name-status "${BASE_SHA}...${HEAD_SHA}" || true)
           if [ "${#files[@]}" -eq 0 ]; then
             printf '' | bun scripts/ci-routing.ts emit-github-output --stdin
           else

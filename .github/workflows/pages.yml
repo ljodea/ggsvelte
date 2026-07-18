@@ -11,9 +11,10 @@ on:
 
 permissions: {}
 
-concurrency:
-  group: pages
-  cancel-in-progress: true
+# Concurrency is intentionally NOT workflow-level. A path-routed `pages=false`
+# run that only executes detect-changes must not enter the deploy group and
+# displace a pending real deploy (GitHub keeps only one pending run per group).
+# Serialize production deploys on the deploy job alone (see below).
 
 jobs:
   detect-changes:
@@ -55,7 +56,8 @@ jobs:
             bun scripts/ci-routing.ts emit-github-output --force-all
             exit 0
           fi
-          mapfile -t files < <(git diff --name-only "${BASE_SHA}...${HEAD_SHA}" || true)
+          # --name-status keeps rename/copy source paths for classification.
+          mapfile -t files < <(git diff --name-status "${BASE_SHA}...${HEAD_SHA}" || true)
           if [ "${#files[@]}" -eq 0 ]; then
             printf '' | bun scripts/ci-routing.ts emit-github-output --stdin
           else
@@ -111,6 +113,11 @@ jobs:
     name: deploy GitHub Pages
     needs: [detect-changes, build]
     if: needs.detect-changes.outputs.pages == 'true' && needs.build.result == 'success'
+    # Serialize production deploys only — skip-only runs never reach this job,
+    # so they cannot cancel or displace a pending deploy of a docs/package push.
+    concurrency:
+      group: pages-deploy
+      cancel-in-progress: false
     # GitHub-hosted: pages write + OIDC; keep privileged deploys off self-hosted.
     runs-on: ubuntu-latest
     permissions:

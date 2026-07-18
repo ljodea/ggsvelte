@@ -81,7 +81,8 @@ jobs:
             bun scripts/ci-routing.ts emit-github-output --force-all
             exit 0
           fi
-          mapfile -t files < <(git diff --name-only "${BASE_SHA}...${HEAD_SHA}" || true)
+          # --name-status keeps rename/copy source paths for classification.
+          mapfile -t files < <(git diff --name-status "${BASE_SHA}...${HEAD_SHA}" || true)
           if [ "${#files[@]}" -eq 0 ]; then
             # Empty diff (empty commit / metadata-only): still run cheap checks.
             echo "empty changed-file set — checks-only routing"
@@ -129,6 +130,9 @@ jobs:
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
+          # Full history: packages/spec manual-AT alias audit tests git-show
+          # hard-coded historical commits (shallow clone would fail unit).
+          fetch-depth: 0
           persist-credentials: false
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
