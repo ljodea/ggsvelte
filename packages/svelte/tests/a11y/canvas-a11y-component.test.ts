@@ -83,6 +83,39 @@ describe("CanvasA11y", () => {
     expect(openToggle?.textContent).toBe("Hide data table");
   });
 
+  it("closed→open on the same mount materialises rows only after open becomes true", async () => {
+    const row = vi.fn((index: number) => {
+      const body = (sampleModel as { row: (i: number) => Record<string, unknown> | null }).row(
+        index,
+      );
+      return body;
+    });
+    const spyModel = {
+      layerFields: (sampleModel as { layerFields: unknown }).layerFields,
+      row,
+    } as unknown as RenderModel;
+
+    const props = {
+      model: spyModel,
+      batches: sampleBatches,
+      sceneLabelText: "Plot",
+      open: false,
+      onToggle: () => {},
+    };
+    const view = render(CanvasA11y, props);
+
+    expect(view.container.querySelector(".gg-a11y-table")).toBeNull();
+    expect(row).not.toHaveBeenCalled();
+    expect(view.container.querySelector(".gg-canvas-a11y")?.getAttribute("aria-label")).toContain(
+      "4 canvas-rendered marks",
+    );
+
+    await view.rerender({ ...props, open: true });
+    await until(() => view.container.querySelector(".gg-a11y-table") !== null);
+    expect(row).toHaveBeenCalled();
+    expect(view.container.querySelectorAll(".gg-a11y-table tbody tr").length).toBe(4);
+  });
+
   it("renders field headers and body rows from a11yRows", async () => {
     const { container } = render(CanvasA11y, {
       model: sampleModel,
