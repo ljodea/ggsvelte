@@ -20,6 +20,7 @@ tests/visual/.local-baselines/
 /bench-results.json
 tests/evals/out/
 .gstack/
+/.pi/settings.json
 
 # CI content-hash skip markers / dist cache (issue #245)
 .ci-content-hash/
