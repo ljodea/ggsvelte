@@ -50,13 +50,11 @@ import {
   consumeIntervalKeys,
   nextLocalIntervalRecords,
   prepareCandidateInInterval,
-  recomputePanelIntervalKeys,
   sameIntervalRecord,
   type IntervalConsumptionCandidate,
 } from "./consumption.js";
 import { bandDomainValuesFromKeys, intervalPixelsFromDomains } from "./query.js";
 import { boundsEditorInputForScale, semanticAxisFromBounds } from "./precise-bounds.js";
-import { rowIndexesForCandidate } from "../selection/selection.js";
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -430,23 +428,29 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
     };
   }
 
-  function intervalLineageCount(targetPanelId: string, domains: ReadonlyIntervalDomains): number {
+  /**
+   * One full-store pass for precise-bounds apply: semantic keys + lineage row
+   * count for the target panel/domains. Was two walks (consumption bag then
+   * intervalLineageCount) with intermediate rowIndexesForCandidate arrays.
+   */
+  function recomputePanelIntervalSelection(
+    targetPanelId: string,
+    domains: ReadonlyIntervalDomains,
+  ): { readonly keys: readonly PropertyKey[]; readonly lineageCount: number } {
     const model = deps.model();
-    if (model === null) return 0;
-    // Band Sets once for the scan — not includes() per candidate.
+    if (model === null) return { keys: Object.freeze([]), lineageCount: 0 };
     const inInterval = prepareCandidateInInterval(domains);
+    const keys = new Set<PropertyKey>();
     const rows = new Set<number>();
     for (let id = 0; id < model.candidates.size; id++) {
       const candidate = model.candidates.candidate(id);
       if (candidate === null || candidate.panelId !== targetPanelId || !inInterval(candidate))
         continue;
-      for (const rowIndex of rowIndexesForCandidate(
-        candidate,
-        model.lineage.keys(candidate.lineage),
-      ))
-        rows.add(rowIndex);
+      for (const key of deps.candidateSemanticKeys(candidate)) keys.add(key);
+      for (const rowIndex of model.lineage.keys(candidate.lineage)) rows.add(rowIndex);
+      if (candidate.rowIndex !== null) rows.add(candidate.rowIndex);
     }
-    return rows.size;
+    return { keys: Object.freeze([...keys]), lineageCount: rows.size };
   }
 
   /** Private — no remaining external consumer (codex P2-7). */
@@ -541,11 +545,9 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
       ...prior?.domains,
       [event.axis]: axis,
     });
-    const keys = recomputePanelIntervalKeys({
-      panelId: targetPanelId,
-      domains,
-      candidates: intervalConsumptionCandidates(),
-    });
+    // Keys + lineageCount from one candidate-store pass (not consumption then
+    // a second lineage scan).
+    const { keys, lineageCount } = recomputePanelIntervalSelection(targetPanelId, domains);
     const next: PlotInteractionInterval<PropertyKey> = Object.freeze({
       panelId: targetPanelId,
       preset: prior?.preset ?? deps.selectConfig()?.preset ?? "independent",
@@ -583,7 +585,7 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
         flipped: deps.coordFlipped(),
       }),
       keys,
-      lineageCount: intervalLineageCount(targetPanelId, domains),
+      lineageCount,
       source: event.inputSource,
     });
     committedInterval = persistentSelectionOrNull(deps.selectConfig()?.persistent, eventValue);
