@@ -5,6 +5,43 @@ import type { GeometryBatch } from "../scene.js";
 
 import type { LayerFrame } from "./types.js";
 
+/**
+ * Build per-group frame-row indices sorted by xNumeric (fallback: row index).
+ * Path candidate resolution looks up local vertex → frame row from this index.
+ */
+export function buildPathGroupSortedRows(
+  frame: Pick<LayerFrame, "groups" | "xNumeric">,
+): Map<number, number[]> {
+  const byGroup = new Map<number, number[]>();
+  for (let row = 0; row < frame.groups.length; row++) {
+    const group = frame.groups[row]!;
+    const rows = byGroup.get(group);
+    if (rows === undefined) byGroup.set(group, [row]);
+    else rows.push(row);
+  }
+  for (const rows of byGroup.values()) {
+    rows.sort((a, b) => (frame.xNumeric?.[a] ?? a) - (frame.xNumeric?.[b] ?? b));
+  }
+  return byGroup;
+}
+
+/** One sorted-row index per LayerFrame for the duration of candidate construction. */
+const pathGroupSortedRowsCache = new WeakMap<
+  Pick<LayerFrame, "groups" | "xNumeric">,
+  Map<number, number[]>
+>();
+
+/** Return the cached per-group sorted rows for `frame`, building once if needed. */
+export function getPathGroupSortedRows(
+  frame: Pick<LayerFrame, "groups" | "xNumeric">,
+): Map<number, number[]> {
+  let cached = pathGroupSortedRowsCache.get(frame);
+  if (cached !== undefined) return cached;
+  cached = buildPathGroupSortedRows(frame);
+  pathGroupSortedRowsCache.set(frame, cached);
+  return cached;
+}
+
 export function resolveCandidateFrameRow(input: {
   frame: LayerFrame | undefined;
   batch: GeometryBatch;
@@ -24,11 +61,7 @@ export function resolveCandidateFrameRow(input: {
     )
       subpath++;
     derivedGroup = orderedGroups[Math.min(subpath, orderedGroups.length - 1)] ?? 0;
-    const rowsInGroup = frame.groups
-      .map((group, row) => ({ group, row }))
-      .filter((entry) => entry.group === derivedGroup)
-      .map((entry) => entry.row)
-      .toSorted((a, b) => (frame.xNumeric?.[a] ?? a) - (frame.xNumeric?.[b] ?? b));
+    const rowsInGroup = getPathGroupSortedRows(frame).get(derivedGroup) ?? [];
     const local = primitiveIndex - (batch.pathOffsets[subpath] ?? 0);
     const reflected =
       local < rowsInGroup.length ? local : Math.max(0, rowsInGroup.length * 2 - 1 - local);
