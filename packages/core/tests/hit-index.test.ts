@@ -15,9 +15,7 @@ import { planStrata } from "../src/strata.ts";
 
 const size = { width: 640, height: 400 };
 
-/** Minimal scene for synthetic rect batches (panel origin at 0,0). */
-function rectScene(rects: Float32Array, rowIndex?: Uint32Array): Scene {
-  const n = rects.length / 4;
+function basePanelScene(batches: Scene["batches"]): Scene {
   return {
     width: 640,
     height: 400,
@@ -34,17 +32,7 @@ function rectScene(rects: Float32Array, rowIndex?: Uint32Array): Scene {
         grid: { x: [], y: [] },
       },
     ],
-    batches: [
-      {
-        kind: "rects",
-        layerIndex: 0,
-        panelIndex: 0,
-        rects,
-        rowIndex: rowIndex ?? Uint32Array.from({ length: n }, (_, i) => i),
-        fill: null,
-        alpha: 1,
-      },
-    ],
+    batches,
     axes: { x: { ticks: [], title: "" }, y: { ticks: [], title: "" } },
     grid: { x: [], y: [] },
     legends: [],
@@ -53,6 +41,42 @@ function rectScene(rects: Float32Array, rowIndex?: Uint32Array): Scene {
     subtitle: "",
     caption: "",
   };
+}
+
+/** Minimal scene for synthetic rect batches (panel origin at 0,0). */
+function rectScene(rects: Float32Array, rowIndex?: Uint32Array): Scene {
+  const n = rects.length / 4;
+  return basePanelScene([
+    {
+      kind: "rects",
+      layerIndex: 0,
+      panelIndex: 0,
+      rects,
+      rowIndex: rowIndex ?? Uint32Array.from({ length: n }, (_, i) => i),
+      fill: null,
+      alpha: 1,
+    },
+  ]);
+}
+
+/** Minimal scene for synthetic segment batches (panel origin at 0,0). */
+function segmentScene(
+  segments: Float32Array,
+  options: { linewidth?: number; rowIndex?: Uint32Array } = {},
+): Scene {
+  const n = segments.length / 4;
+  return basePanelScene([
+    {
+      kind: "segments",
+      layerIndex: 0,
+      panelIndex: 0,
+      segments,
+      rowIndex: options.rowIndex ?? Uint32Array.from({ length: n }, (_, i) => i),
+      stroke: null,
+      linewidth: options.linewidth ?? 1,
+      alpha: 1,
+    },
+  ]);
 }
 
 /** Count numeric index reads on a Float32Array (complexity guard). */
@@ -368,6 +392,111 @@ describe("buildHitIndex", () => {
     const brushed = index.queryRect(10, 10, 20, 20);
     expect(brushed.map((h) => h.rowIndex)).toEqual([0]);
     // queryRect only reads batch.rects for shortlisted hits (3 components each).
+    expect(instrumented.reads()).toBeLessThan(32);
+    expect(instrumented.reads()).toBeLessThan(count / 20);
+  });
+
+  it("segments hit by stroke proximity; topmost wins when stacked", () => {
+    // Two horizontal rules through the same y; later index is topmost.
+    const segments = new Float32Array([
+      10,
+      50,
+      100,
+      50, // row 0
+      10,
+      50,
+      100,
+      50, // row 1 (on top)
+    ]);
+    const scene = segmentScene(segments, { linewidth: 2 });
+    const index = buildHitIndex(scene, { tolerance: 2 });
+    const hit = index.hitTest(50, 50);
+    expect(hit?.rowIndex).toBe(1);
+    expect(hit?.kind).toBe("segments");
+    expect(index.hitTest(50, 60)).toBeNull(); // beyond slop
+  });
+
+  it("queryRect includes segments with an endpoint in the brush", () => {
+    const segments = new Float32Array([
+      10,
+      10,
+      90,
+      10, // endpoint (10,10) in brush
+      200,
+      200,
+      250,
+      250, // far
+    ]);
+    const scene = segmentScene(segments);
+    const index = buildHitIndex(scene);
+    expect(index.queryRect(0, 0, 20, 20).map((h) => h.rowIndex)).toEqual([0]);
+    expect(index.queryRect(50, 50, 60, 60)).toEqual([]); // mid-edge not endpoint
+  });
+
+  it("hitTest does not scan every far segment on a dense field", () => {
+    const count = 4_000;
+    const raw = new Float32Array(count * 4);
+    for (let i = 0; i < count; i++) {
+      const col = i % 50;
+      const row = Math.floor(i / 50);
+      const x = 100 + col * 10;
+      const y = 100 + row * 10;
+      raw[i * 4] = x;
+      raw[i * 4 + 1] = y;
+      raw[i * 4 + 2] = x + 2;
+      raw[i * 4 + 3] = y;
+    }
+    // Segment under probe at (10,10).
+    raw[0] = 0;
+    raw[1] = 10;
+    raw[2] = 20;
+    raw[3] = 10;
+    const instrumented = instrumentReads(raw);
+    const scene = segmentScene(instrumented.view, { linewidth: 1 });
+    const index = buildHitIndex(scene, { tolerance: 2 });
+    instrumented.reset();
+
+    const hit = index.hitTest(10, 10);
+    expect(hit?.rowIndex).toBe(0);
+    // Winner reads 4 endpoints; linear scan would touch ~4*S.
+    expect(instrumented.reads()).toBeLessThan(32);
+    expect(instrumented.reads()).toBeLessThan(count / 50);
+
+    instrumented.reset();
+    expect(index.hitTest(50, 50)).toBeNull();
+    expect(instrumented.reads()).toBe(0);
+  });
+
+  it("one long segment does not force-scan every short far segment", () => {
+    const count = 2_000;
+    const raw = new Float32Array((count + 1) * 4);
+    // Giant diagonal (own size class).
+    raw[0] = 0;
+    raw[1] = 0;
+    raw[2] = 200;
+    raw[3] = 120;
+    for (let i = 0; i < count; i++) {
+      const col = i % 40;
+      const row = Math.floor(i / 40);
+      const x = 300 + col * 8;
+      const y = 300 + row * 8;
+      raw[(i + 1) * 4] = x;
+      raw[(i + 1) * 4 + 1] = y;
+      raw[(i + 1) * 4 + 2] = x + 2;
+      raw[(i + 1) * 4 + 3] = y;
+    }
+    const instrumented = instrumentReads(raw);
+    const scene = segmentScene(instrumented.view, { linewidth: 1 });
+    const index = buildHitIndex(scene, { tolerance: 1 });
+    instrumented.reset();
+
+    const hit = index.hitTest(100, 60);
+    expect(hit?.rowIndex).toBe(0);
+    expect(instrumented.reads()).toBeLessThan(32);
+
+    instrumented.reset();
+    const brushed = index.queryRect(0, 0, 5, 5);
+    expect(brushed.map((h) => h.rowIndex)).toEqual([0]);
     expect(instrumented.reads()).toBeLessThan(32);
     expect(instrumented.reads()).toBeLessThan(count / 20);
   });

@@ -13,8 +13,11 @@
  *    (no slop — bars abut). Size classes prevent one giant bar from
  *    expanding every small-bar query to O(R) — same pattern as CandidateStore
  *    extended geometry (#264).
- *  - segments: exact point-to-segment distance <= linewidth/2 + tolerance.
- *  - stroked paths (lines): per-edge point-to-segment distance, same rule.
+ *  - segments: size-classed AABB-center shortlist (endpoint box), then exact
+ *    point-to-segment distance <= linewidth/2 + tolerance. Same size-class
+ *    pattern as rects so one long rule cannot expand every short-segment query.
+ *  - stroked paths (lines): per-edge point-to-segment distance, same rule
+ *    (linear per subpath for now — follow-up shortlist).
  *  - filled paths (areas/ribbons): even-odd point-in-polygon containment;
  *    the reported row is the nearest subpath vertex's row.
  *  - glyphs (text): NOT hit targets in M2 (documented limitation — labels
@@ -167,43 +170,34 @@ interface PointsIndexEntry {
   ys: Float64Array;
 }
 
-/** One size class of rect AABB centers (plot px). */
-interface RectSizeClass {
+/** One size class of AABB centers (plot px) — rects and segments. */
+interface AabbSizeClass {
   readonly indices: readonly number[];
   readonly maxHalfW: number;
   readonly maxHalfH: number;
   readonly spatial: StaticQuadtree;
 }
 
-/** Size-classed AABB-center trees for rect batches (plot px). */
-interface RectsIndexEntry {
+/** Size-classed AABB-center trees (plot px). */
+interface AabbIndexEntry {
   readonly minX: Float64Array;
   readonly minY: Float64Array;
   readonly maxX: Float64Array;
   readonly maxY: Float64Array;
-  readonly classes: readonly RectSizeClass[];
+  readonly classes: readonly AabbSizeClass[];
 }
 
-function buildRectsIndex(
-  batch: Extract<GeometryBatch, { kind: "rects" }>,
-  panel: ScenePanel,
-): RectsIndexEntry {
-  const n = batch.rects.length / 4;
-  const minX = new Float64Array(n);
-  const minY = new Float64Array(n);
-  const maxX = new Float64Array(n);
-  const maxY = new Float64Array(n);
-  for (let j = 0; j < n; j++) {
-    const rx = panel.x + batch.rects[j * 4]!;
-    const ry = panel.y + batch.rects[j * 4 + 1]!;
-    const rw = batch.rects[j * 4 + 2]!;
-    const rh = batch.rects[j * 4 + 3]!;
-    minX[j] = Math.min(rx, rx + rw);
-    minY[j] = Math.min(ry, ry + rh);
-    maxX[j] = Math.max(rx, rx + rw);
-    maxY[j] = Math.max(ry, ry + rh);
-  }
-  // Size classes so one giant bar cannot expand every small-bar query to O(n).
+/**
+ * Bucket AABBs by ceil(log2(max half-extent)) and build a center quadtree per
+ * class so one giant box cannot expand every small-primitive query to O(n).
+ */
+function buildAabbIndex(
+  minX: Float64Array,
+  minY: Float64Array,
+  maxX: Float64Array,
+  maxY: Float64Array,
+): AabbIndexEntry {
+  const n = minX.length;
   const buckets = new Map<number, number[]>();
   for (let j = 0; j < n; j++) {
     const halfW = (maxX[j]! - minX[j]!) / 2;
@@ -213,7 +207,7 @@ function buildRectsIndex(
     if (list === undefined) buckets.set(key, [j]);
     else list.push(j);
   }
-  const classes: RectSizeClass[] = [];
+  const classes: AabbSizeClass[] = [];
   for (const indices of buckets.values()) {
     const cxs = new Float64Array(indices.length);
     const cys = new Float64Array(indices.length);
@@ -238,28 +232,80 @@ function buildRectsIndex(
   return { minX, minY, maxX, maxY, classes };
 }
 
-/** Rect indices whose AABB intersects [loX,hiX]×[loY,hiY] (plot px). */
-function shortlistRectsIntersecting(
-  entry: RectsIndexEntry,
+function buildRectsIndex(
+  batch: Extract<GeometryBatch, { kind: "rects" }>,
+  panel: ScenePanel,
+): AabbIndexEntry {
+  const n = batch.rects.length / 4;
+  const minX = new Float64Array(n);
+  const minY = new Float64Array(n);
+  const maxX = new Float64Array(n);
+  const maxY = new Float64Array(n);
+  for (let j = 0; j < n; j++) {
+    const rx = panel.x + batch.rects[j * 4]!;
+    const ry = panel.y + batch.rects[j * 4 + 1]!;
+    const rw = batch.rects[j * 4 + 2]!;
+    const rh = batch.rects[j * 4 + 3]!;
+    minX[j] = Math.min(rx, rx + rw);
+    minY[j] = Math.min(ry, ry + rh);
+    maxX[j] = Math.max(rx, rx + rw);
+    maxY[j] = Math.max(ry, ry + rh);
+  }
+  return buildAabbIndex(minX, minY, maxX, maxY);
+}
+
+function buildSegmentsIndex(
+  batch: Extract<GeometryBatch, { kind: "segments" }>,
+  panel: ScenePanel,
+): AabbIndexEntry {
+  const n = batch.segments.length / 4;
+  const minX = new Float64Array(n);
+  const minY = new Float64Array(n);
+  const maxX = new Float64Array(n);
+  const maxY = new Float64Array(n);
+  for (let j = 0; j < n; j++) {
+    const x1 = panel.x + batch.segments[j * 4]!;
+    const y1 = panel.y + batch.segments[j * 4 + 1]!;
+    const x2 = panel.x + batch.segments[j * 4 + 2]!;
+    const y2 = panel.y + batch.segments[j * 4 + 3]!;
+    minX[j] = Math.min(x1, x2);
+    minY[j] = Math.min(y1, y2);
+    maxX[j] = Math.max(x1, x2);
+    maxY[j] = Math.max(y1, y2);
+  }
+  return buildAabbIndex(minX, minY, maxX, maxY);
+}
+
+/**
+ * Primitive indices whose AABB intersects [loX,hiX]×[loY,hiY] (plot px).
+ * Optional pad expands the query (stroke slop around segments).
+ */
+function shortlistAabbIntersecting(
+  entry: AabbIndexEntry,
   loX: number,
   loY: number,
   hiX: number,
   hiY: number,
+  pad = 0,
 ): number[] {
   const out: number[] = [];
+  const qLoX = loX - pad;
+  const qLoY = loY - pad;
+  const qHiX = hiX + pad;
+  const qHiY = hiY + pad;
   for (const cls of entry.classes) {
     for (const k of cls.spatial.queryRect(
-      loX - cls.maxHalfW,
-      loY - cls.maxHalfH,
-      hiX + cls.maxHalfW,
-      hiY + cls.maxHalfH,
+      qLoX - cls.maxHalfW,
+      qLoY - cls.maxHalfH,
+      qHiX + cls.maxHalfW,
+      qHiY + cls.maxHalfH,
     )) {
       const j = cls.indices[k]!;
       if (
-        entry.maxX[j]! < loX ||
-        entry.minX[j]! > hiX ||
-        entry.maxY[j]! < loY ||
-        entry.minY[j]! > hiY
+        entry.maxX[j]! < qLoX ||
+        entry.minX[j]! > qHiX ||
+        entry.maxY[j]! < qLoY ||
+        entry.minY[j]! > qHiY
       )
         continue;
       out.push(j);
@@ -273,9 +319,10 @@ export function buildHitIndex(scene: Scene, options: HitIndexOptions = {}): Scen
   const tolerance = options.tolerance ?? DEFAULT_HIT_TOLERANCE;
   const panels = scene.panels;
 
-  // Per points-batch quadtrees over PLOT-px positions.
+  // Per points-batch quadtrees; per rects/segments size-classed AABB trees.
   const pointsIndex = new Map<GeometryBatch, PointsIndexEntry>();
-  const rectsIndex = new Map<GeometryBatch, RectsIndexEntry>();
+  const rectsIndex = new Map<GeometryBatch, AabbIndexEntry>();
+  const segmentsIndex = new Map<GeometryBatch, AabbIndexEntry>();
   for (const batch of scene.batches) {
     const panel = panels[batch.panelIndex];
     if (panel === undefined) continue;
@@ -290,6 +337,8 @@ export function buildHitIndex(scene: Scene, options: HitIndexOptions = {}): Scen
       pointsIndex.set(batch, { quadtree: new StaticQuadtree(xs, ys), xs, ys });
     } else if (batch.kind === "rects") {
       rectsIndex.set(batch, buildRectsIndex(batch, panel));
+    } else if (batch.kind === "segments") {
+      segmentsIndex.set(batch, buildSegmentsIndex(batch, panel));
     }
   }
 
@@ -353,25 +402,29 @@ export function buildHitIndex(scene: Scene, options: HitIndexOptions = {}): Scen
         };
       }
       case "segments": {
+        // Size-class AABB shortlist (pad by stroke slop), then exact distance;
+        // topmost = highest j among hits.
+        const entry = segmentsIndex.get(batch);
+        if (entry === undefined) return null;
         const slop = batch.linewidth / 2 + tolerance;
         const slop2 = slop * slop;
-        for (let j = batch.segments.length / 4 - 1; j >= 0; j--) {
+        let best = -1;
+        for (const j of shortlistAabbIntersecting(entry, x, y, x, y, slop)) {
           const x1 = batch.segments[j * 4]!;
           const y1 = batch.segments[j * 4 + 1]!;
           const x2 = batch.segments[j * 4 + 2]!;
           const y2 = batch.segments[j * 4 + 3]!;
-          if (segmentDist2(lx, ly, x1, y1, x2, y2) <= slop2) {
-            return {
-              layerIndex: batch.layerIndex,
-              panelIndex: batch.panelIndex,
-              rowIndex: rowOf(batch.rowIndex[j]!),
-              x: x,
-              y: y,
-              kind: "segments",
-            };
-          }
+          if (segmentDist2(lx, ly, x1, y1, x2, y2) <= slop2 && j > best) best = j;
         }
-        return null;
+        if (best < 0) return null;
+        return {
+          layerIndex: batch.layerIndex,
+          panelIndex: batch.panelIndex,
+          rowIndex: rowOf(batch.rowIndex[best]!),
+          x: x,
+          y: y,
+          kind: "segments",
+        };
       }
       case "paths": {
         const filled = batch.fills !== undefined;
@@ -459,7 +512,7 @@ export function buildHitIndex(scene: Scene, options: HitIndexOptions = {}): Scen
           case "rects": {
             const entry = rectsIndex.get(batch);
             if (entry === undefined) break;
-            for (const j of shortlistRectsIntersecting(entry, lo.x, lo.y, hi.x, hi.y)) {
+            for (const j of shortlistAabbIntersecting(entry, lo.x, lo.y, hi.x, hi.y)) {
               // Anchor matches hitTest / pre-index behavior: panel + raw origin.
               const rx = batch.rects[j * 4]!;
               const ry = batch.rects[j * 4 + 1]!;
@@ -469,13 +522,16 @@ export function buildHitIndex(scene: Scene, options: HitIndexOptions = {}): Scen
             break;
           }
           case "segments": {
-            for (let j = 0; j < batch.segments.length / 4; j++) {
+            // Shortlist by endpoint AABB, then preserve endpoint-in-rect semantics.
+            const entry = segmentsIndex.get(batch);
+            if (entry === undefined) break;
+            for (const j of shortlistAabbIntersecting(entry, lo.x, lo.y, hi.x, hi.y)) {
               const sx1 = panel.x + batch.segments[j * 4]!;
               const sy1 = panel.y + batch.segments[j * 4 + 1]!;
               const sx2 = panel.x + batch.segments[j * 4 + 2]!;
               const sy2 = panel.y + batch.segments[j * 4 + 3]!;
-              const inRect = (x: number, y: number) =>
-                x >= lo.x && x <= hi.x && y >= lo.y && y <= hi.y;
+              const inRect = (px: number, py: number) =>
+                px >= lo.x && px <= hi.x && py >= lo.y && py <= hi.y;
               if (inRect(sx1, sy1) || inRect(sx2, sy2)) {
                 push(batch, batch.rowIndex[j]!, sx1, sy1);
               }
