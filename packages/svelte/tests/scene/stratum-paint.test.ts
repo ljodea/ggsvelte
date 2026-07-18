@@ -50,9 +50,9 @@ describe("resolveBatchFocusMasks", () => {
     const subsetIndices: number[] = [];
     for (let i = 0; i < n; i++) if (i % 7 === 0) subsetIndices.push(i);
     subsetIndices.reverse();
-    const subset = subsetIndices.map((i) => scene[i]!);
+    const subset = subsetIndices.map((i) => scene[i]);
     const projected = resolveBatchFocusMasks(scene, subset, interactionMasks);
-    expect(projected).toEqual(subsetIndices.map((i) => interactionMasks[i]!));
+    expect(projected).toEqual(subsetIndices.map((i) => interactionMasks[i]));
   });
 });
 

@@ -120,8 +120,8 @@ describe("SceneView focus-mask projection", () => {
   it("applies full-scene masks by batch identity on a marks subset", () => {
     const { scene, dispose } = multiLayerScene();
     expect(scene.batches.length).toBe(2);
-    const points = scene.batches[0]!;
-    const paths = scene.batches[1]!;
+    const points = scene.batches[0];
+    const paths = scene.batches[1];
     const mask = focusFirstPrimitive();
     // Full-scene masks: focus only the path layer (index 1).
     const focusMasks: (BatchInteractionMask | null)[] = [null, mask];
