@@ -64,7 +64,7 @@ function instrumentReads(source: Float32Array): {
   let reads = 0;
   // TypedArray methods reject Proxy as `this`; forward length/methods to the
   // underlying buffer and only trap numeric element gets for the guard.
-  const view = new Proxy(source, {
+  const view: Float32Array = new Proxy(source, {
     get(target, property): unknown {
       if (typeof property === "string" && /^\d+$/.test(property)) {
         reads++;
@@ -76,7 +76,7 @@ function instrumentReads(source: Float32Array): {
         ? (value as (...a: unknown[]) => unknown).bind(target)
         : value;
     },
-  }) as Float32Array;
+  });
   return {
     view,
     reads: () => reads,

@@ -167,18 +167,21 @@ interface PointsIndexEntry {
   ys: Float64Array;
 }
 
+/** One size class of rect AABB centers (plot px). */
+interface RectSizeClass {
+  readonly indices: readonly number[];
+  readonly maxHalfW: number;
+  readonly maxHalfH: number;
+  readonly spatial: StaticQuadtree;
+}
+
 /** Size-classed AABB-center trees for rect batches (plot px). */
 interface RectsIndexEntry {
   readonly minX: Float64Array;
   readonly minY: Float64Array;
   readonly maxX: Float64Array;
   readonly maxY: Float64Array;
-  readonly classes: readonly {
-    readonly indices: readonly number[];
-    readonly maxHalfW: number;
-    readonly maxHalfH: number;
-    readonly spatial: StaticQuadtree;
-  }[];
+  readonly classes: readonly RectSizeClass[];
 }
 
 function buildRectsIndex(
@@ -210,7 +213,7 @@ function buildRectsIndex(
     if (list === undefined) buckets.set(key, [j]);
     else list.push(j);
   }
-  const classes: RectsIndexEntry["classes"] = [];
+  const classes: RectSizeClass[] = [];
   for (const indices of buckets.values()) {
     const cxs = new Float64Array(indices.length);
     const cys = new Float64Array(indices.length);
@@ -233,6 +236,36 @@ function buildRectsIndex(
     });
   }
   return { minX, minY, maxX, maxY, classes };
+}
+
+/** Rect indices whose AABB intersects [loX,hiX]×[loY,hiY] (plot px). */
+function shortlistRectsIntersecting(
+  entry: RectsIndexEntry,
+  loX: number,
+  loY: number,
+  hiX: number,
+  hiY: number,
+): number[] {
+  const out: number[] = [];
+  for (const cls of entry.classes) {
+    for (const k of cls.spatial.queryRect(
+      loX - cls.maxHalfW,
+      loY - cls.maxHalfH,
+      hiX + cls.maxHalfW,
+      hiY + cls.maxHalfH,
+    )) {
+      const j = cls.indices[k]!;
+      if (
+        entry.maxX[j]! < loX ||
+        entry.minX[j]! > hiX ||
+        entry.maxY[j]! < loY ||
+        entry.minY[j]! > hiY
+      )
+        continue;
+      out.push(j);
+    }
+  }
+  return out;
 }
 
 /** Build the unified hit index for a committed scene. */
@@ -426,27 +459,12 @@ export function buildHitIndex(scene: Scene, options: HitIndexOptions = {}): Scen
           case "rects": {
             const entry = rectsIndex.get(batch);
             if (entry === undefined) break;
-            for (const cls of entry.classes) {
-              for (const k of cls.spatial.queryRect(
-                lo.x - cls.maxHalfW,
-                lo.y - cls.maxHalfH,
-                hi.x + cls.maxHalfW,
-                hi.y + cls.maxHalfH,
-              )) {
-                const j = cls.indices[k]!;
-                if (
-                  entry.maxX[j]! < lo.x ||
-                  entry.minX[j]! > hi.x ||
-                  entry.maxY[j]! < lo.y ||
-                  entry.minY[j]! > hi.y
-                )
-                  continue;
-                // Anchor matches hitTest / pre-index behavior: panel + raw origin.
-                const rx = batch.rects[j * 4]!;
-                const ry = batch.rects[j * 4 + 1]!;
-                const rw = batch.rects[j * 4 + 2]!;
-                push(batch, batch.rowIndex[j]!, panel.x + rx + rw / 2, panel.y + ry);
-              }
+            for (const j of shortlistRectsIntersecting(entry, lo.x, lo.y, hi.x, hi.y)) {
+              // Anchor matches hitTest / pre-index behavior: panel + raw origin.
+              const rx = batch.rects[j * 4]!;
+              const ry = batch.rects[j * 4 + 1]!;
+              const rw = batch.rects[j * 4 + 2]!;
+              push(batch, batch.rowIndex[j]!, panel.x + rx + rw / 2, panel.y + ry);
             }
             break;
           }
