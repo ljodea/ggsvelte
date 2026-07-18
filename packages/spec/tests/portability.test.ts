@@ -47,6 +47,55 @@ describe("portabilityIssues", () => {
   });
 });
 
+describe("isPortable early exit", () => {
+  it("stops walking after the first issue without reading later getters", () => {
+    let laterTouched = false;
+    // Sibling getter after the unportable property: Object.entries would
+    // evaluate it before the loop, defeating stopAfter. Keys must be read lazily.
+    const spec = {
+      layers: [{ geom: "point" }],
+      width: Number.NaN,
+      get later() {
+        laterTouched = true;
+        return 1;
+      },
+    } as unknown as RuntimeSpec;
+
+    expect(isPortable(spec)).toBe(false);
+    expect(laterTouched).toBe(false);
+
+    // Full enumeration still visits every path (and runs the getter).
+    laterTouched = false;
+    const issues = portabilityIssues(spec);
+    expect(laterTouched).toBe(true);
+    expect(issues.some((i) => i.path === "/width")).toBe(true);
+  });
+
+  it("does not report own properties deleted by an earlier getter", () => {
+    // Matches Object.entries / JSON semantics: a key removed mid-walk is omitted,
+    // not reported as undefined.
+    const spec: Record<string, unknown> = {
+      layers: [{ geom: "point" }],
+    };
+    Object.defineProperty(spec, "a", {
+      enumerable: true,
+      configurable: true,
+      get() {
+        delete spec["b"];
+        return 1;
+      },
+    });
+    Object.defineProperty(spec, "b", {
+      enumerable: true,
+      configurable: true,
+      value: 2,
+      writable: true,
+    });
+    expect(portabilityIssues(spec)).toEqual([]);
+    expect(isPortable(spec as unknown as RuntimeSpec)).toBe(true);
+  });
+});
+
 describe("toPortable", () => {
   it("returns a deep copy for portable specs", () => {
     const copy = toPortable(portable);
