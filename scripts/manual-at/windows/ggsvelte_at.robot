@@ -1,5 +1,5 @@
 *** Settings ***
-Documentation	Real NVDA journeys for ggsvelte's release-blocking interaction fixtures.
+Documentation	Real NVDA journeys for ggsvelte's interaction evidence fixtures.
 Force Tags	NVDA	ggsvelte_at	browser
 
 Library	NvdaLib.py

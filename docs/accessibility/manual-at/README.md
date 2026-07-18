@@ -1,9 +1,11 @@
 # Manual assistive-technology verification
 
-Automated axe and semantic tests are the release floor, not a substitute for
-screen-reader verification. A release record is one atomic manifest at
-`records/v<release>.json`; it must cover the complete pairing and settings
-matrix enforced by `packages/spec/tests/manual-at-schema.test.ts`.
+Automated axe and semantic tests are the release floor. Manual screen-reader
+verification provides deeper evidence when a release warrants it, but it does
+not block package publication. A completed evidence record is one atomic
+manifest at `records/v<release>.json`; when present, it must cover the complete
+pairing and settings matrix enforced by
+`packages/spec/tests/manual-at-schema.test.ts`.
 
 Use the versioned steps and assertions in `procedures.json`. Record the exact
 platform, browser and assistive-technology versions, relevant speech or visual
@@ -25,8 +27,8 @@ The reproducible evidence harnesses are documented for
 [VoiceOver on macOS](./macos-voiceover.md),
 [NVDA on Windows](./harness/windows-nvda.md), and
 [TalkBack on Android](./mobile-harness.md). Their retained transcripts and
-screenshots support review; only the complete versioned manifest is the release
-gate.
+screenshots support review. Committed manifests are validated in ordinary CI,
+but a manifest is not required for every package version.
 
 For a patch release that changes only packaging, documentation, or release
 automation, `records/v<release>.json` may instead use
