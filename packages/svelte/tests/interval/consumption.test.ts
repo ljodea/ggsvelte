@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  candidateInInterval,
   consumeIntervalKeys,
   nextLocalIntervalRecords,
   recomputePanelIntervalKeys,
@@ -176,6 +177,65 @@ describe("facet interval consumption", () => {
     ).toEqual(["number"]);
   });
 
+  // Band membership is O(1) amortized via a Set built once per axis (not
+  // includes() per candidate). This is a structural property of the
+  // implementation; perf-regression coverage lives in the bench-smoke job,
+  // not a wall-clock unit assertion (which flakes under CI contention).
+  it("projects large band domains across many candidates without losing matches", () => {
+    const selectedCount = 200;
+    const candidateCount = 2_000;
+    // Encoded band keys for numbers 0..selectedCount-1 (canonical @n: form).
+    const values = Array.from({ length: selectedCount }, (_, i) => `@n:${i}`);
+    const cross: PlotInteractionInterval<string> = {
+      panelId: "north",
+      preset: "cross-panel",
+      domains: { x: { kind: "band", values } },
+      keys: [],
+    };
+    const bandCandidates: IntervalConsumptionCandidate<string>[] = Array.from(
+      { length: candidateCount },
+      (_, i) => ({
+        panelId: i % 2 === 0 ? "north" : "south",
+        // Mix selected tail, unselected head, and typed string lookalikes.
+        xValue: i < selectedCount ? i : i < selectedCount * 2 ? String(i % selectedCount) : i,
+        keys: [`k${i}`],
+      }),
+    );
+    const keys = consumeIntervalKeys({
+      records: [cross],
+      panels,
+      candidates: bandCandidates,
+    });
+    // Only numeric values whose encodeKey is in the selected band set match.
+    // Candidates with xValue in [0, selectedCount) match; string/"lookalike"
+    // and out-of-band numbers do not.
+    expect(keys).toHaveLength(selectedCount);
+    expect(keys[0]).toBe("k0");
+    expect(keys[selectedCount - 1]).toBe(`k${selectedCount - 1}`);
+    expect(keys).not.toContain(`k${selectedCount}`);
+  });
+
+  it("candidateInInterval rejects undefined axis values and keeps numeric axes", () => {
+    expect(
+      candidateInInterval(
+        { xValue: undefined, yValue: "low" },
+        { x: { kind: "band", values: ["low"] }, y: { kind: "band", values: ["low"] } },
+      ),
+    ).toBe(false);
+    expect(
+      candidateInInterval(
+        { xValue: 3, yValue: 10 },
+        { x: { kind: "linear", domain: [1, 5] }, y: { kind: "log", domain: [1, 100] } },
+      ),
+    ).toBe(true);
+    expect(
+      candidateInInterval(
+        { xValue: 3, yValue: -1 },
+        { x: { kind: "linear", domain: [1, 5] }, y: { kind: "log", domain: [1, 100] } },
+      ),
+    ).toBe(false);
+  });
+
   it("treats records as the same across key order and controller canonicalization", () => {
     const committed = record("north", "independent", ["n4", "n1"]);
     const canonical: PlotInteractionInterval<string> = {
@@ -251,5 +311,30 @@ describe("facet interval consumption", () => {
         candidates,
       }),
     ).toEqual(["s2", "shared"]);
+  });
+
+  it("recomputes panel keys against a large band domain via Set membership", () => {
+    const selectedCount = 150;
+    const values = Array.from({ length: selectedCount }, (_, i) => `@n:${i}`);
+    // 500 south + 500 north. south xValue = i % 300, so matches are:
+    // i=0..149 and i=300..449 (xValue in [0, 150)).
+    const panelCandidates: IntervalConsumptionCandidate<string>[] = Array.from(
+      { length: 1_000 },
+      (_, i) => ({
+        panelId: i < 500 ? "south" : "north",
+        xValue: i % 300,
+        keys: [`p${i}`],
+      }),
+    );
+    const keys = recomputePanelIntervalKeys({
+      panelId: "south",
+      domains: { x: { kind: "band", values } },
+      candidates: panelCandidates,
+    });
+    const expected = [
+      ...Array.from({ length: 150 }, (_, i) => `p${i}`),
+      ...Array.from({ length: 150 }, (_, i) => `p${300 + i}`),
+    ];
+    expect(keys).toEqual(expected);
   });
 });
