@@ -120,17 +120,18 @@ jobs:
                 echo "event=${EVENT_NAME} base=${BASE_SHA} head=${HEAD_SHA} files=${#files[@]}"
                 # Issue #244: main push re-running the full suite saturates the pool.
                 # Keep thinner main surface (checks/unit/build/actions-security);
-                # consumer/component/bench stay PR-primary. force-all paths still
-                # full-suite when base is missing.
+                # consumer/bench stay PR-primary. force-all paths still full-suite
+                # when base is missing.
+                # Keep packages_dist + component path-routed on main so Codecov
+                # can refresh the packages/svelte flag for branch/main badges
+                # (carryforward cannot bootstrap a first main-branch report).
                 if [ "${EVENT_NAME}" = "push" ] && [ "${GITHUB_REF}" = "refs/heads/main" ]; then
                   {
-                    echo "component=false"
                     echo "consumer=false"
                     echo "bench_smoke=false"
                     echo "interaction_perf=false"
-                    echo "packages_dist=false"
                   } >> "$GITHUB_OUTPUT"
-                  echo "main push: thinned expensive jobs (issue #244)"
+                  echo "main push: thinned consumer/bench (issue #244); packages_dist+component stay path-routed for coverage"
                 fi
               fi
             fi
@@ -354,6 +355,8 @@ jobs:
           files: coverage/unit/lcov.info
           flags: unit
           name: unit
+          # Pin the uploader binary; the action's default is "latest".
+          version: v11.3.1
           disable_search: true
           fail_ci_if_error: true
       - uses: ./.github/actions/ci-content-hash-write
@@ -650,6 +653,8 @@ jobs:
           files: packages/svelte/coverage/browser/lcov.info
           flags: svelte
           name: svelte
+          # Pin the uploader binary; the action's default is "latest".
+          version: v11.3.1
           disable_search: true
           fail_ci_if_error: true
       - uses: ./.github/actions/ci-content-hash-write

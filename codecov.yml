@@ -13,12 +13,15 @@ coverage:
     project:
       default:
         # Informational until we have a stable baseline on main.
+        # Without informational: true, target/threshold still post failing checks.
         target: auto
         threshold: 2%
+        informational: true
     patch:
       default:
         target: auto
         threshold: 2%
+        informational: true
 
 comment:
   layout: "header, diff, flags, components, files"

@@ -291,8 +291,19 @@ describe("R0 release wiring", () => {
 
 it("thins expensive jobs on main push (issue #244)", () => {
   const ci = read(".github/workflows/ci.yml");
-  expect(ci).toContain("main push: thinned expensive jobs (issue #244)");
-  expect(ci).toContain("packages_dist=false");
+  // Consumer/bench stay PR-primary; packages_dist+component remain path-routed
+  // so Codecov can refresh packages/svelte coverage on main.
+  expect(ci).toContain("main push: thinned consumer/bench (issue #244)");
+  expect(ci).toContain('echo "consumer=false"');
+  expect(ci).toContain('echo "bench_smoke=false"');
+  expect(ci).toContain('echo "interaction_perf=false"');
+  // Must NOT force-off component/packages_dist on main (Codecov main badges).
+  const mainThin = ci.slice(
+    ci.indexOf("main push: thinned consumer/bench"),
+    ci.indexOf("main push: thinned consumer/bench") + 400,
+  );
+  expect(mainThin).not.toContain("component=false");
+  expect(mainThin).not.toContain("packages_dist=false");
 });
 
 it("tiers the PR consumer matrix (issue #246)", () => {
