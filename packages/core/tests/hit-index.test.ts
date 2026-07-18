@@ -611,6 +611,35 @@ describe("buildHitIndex", () => {
     expect(instrumented.reads()).toBe(0);
   });
 
+  it("hitTest does not walk every edge of a dense single polyline", () => {
+    // One long stroked path inside the panel: edge AABB shortlist keeps refine
+    // O(log E + k). Spaced densely across x ∈ [0, 600] at y=50.
+    const verts = 4_000;
+    const positions = new Float32Array(verts * 2);
+    for (let i = 0; i < verts; i++) {
+      positions[i * 2] = (i / (verts - 1)) * 600;
+      positions[i * 2 + 1] = 50;
+    }
+    const pathOffsets = new Uint32Array([0, verts]);
+    const instrumented = instrumentReads(positions);
+    const scene = pathScene(instrumented.view, pathOffsets, { linewidth: 1 });
+    const index = buildHitIndex(scene, { tolerance: 2 });
+    instrumented.reset();
+
+    // Mid-polyline probe (x≈300).
+    const hit = index.hitTest(300, 50);
+    expect(hit?.kind).toBe("paths");
+    expect(hit).not.toBeNull();
+    // Linear nearestStrokeVertex would read ~4 components per edge (~16k).
+    // Shortlist may touch a few same-size edges near the probe; still ≪ E.
+    expect(instrumented.reads()).toBeLessThan(256);
+    expect(instrumented.reads()).toBeLessThan(verts / 10);
+
+    instrumented.reset();
+    expect(index.hitTest(300, 80)).toBeNull();
+    expect(instrumented.reads()).toBe(0);
+  });
+
   it("one giant path subpath does not force-scan every small far series", () => {
     const far = 1_500;
     // Subpath 0: long diagonal covering most of the left panel.
