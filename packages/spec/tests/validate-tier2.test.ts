@@ -248,6 +248,40 @@ describe("tier 2 — input limits", () => {
   });
 });
 
+describe("tier 2 — cross-stage error ordering (characterization)", () => {
+  // Locks layer-structural → facet → data order so extract refactors cannot
+  // reorder pipeline stages without a deliberate test update.
+  it("reports structural, then facet, then data errors in that order", () => {
+    const errors = errorsOf({
+      data: { values: [{ x: 1, y: 2 }] },
+      layers: [{ geom: "point", aes: { x: { field: "xx" } } }],
+      facet: { wrap: { field: "g" }, rows: { field: "h" } },
+    });
+    expect(errors.map((e) => ({ code: e.code, path: e.path }))).toEqual([
+      { code: "missing-required-channel", path: "/layers/0/aes/y" },
+      { code: "facet-form-ambiguous", path: "/facet" },
+      { code: "unknown-field", path: "/layers/0/aes/x" },
+    ]);
+  });
+
+  it("truncation sentinel stays last when the cap crosses stage boundaries", () => {
+    const errors = errorsOf(
+      {
+        data: { values: [{ x: 1, y: 2 }] },
+        layers: [{ geom: "point", aes: { x: { field: "xx" } } }],
+        facet: { wrap: { field: "g" }, rows: { field: "h" } },
+      },
+      { limits: { maxDiagnostics: 2 } },
+    );
+    expect(errors.map((e) => e.code)).toEqual([
+      "missing-required-channel",
+      "facet-form-ambiguous",
+      "validation-limit",
+    ]);
+    expect(errors.at(-1)?.path).toBe("");
+  });
+});
+
 describe("tier 2 — M2 statistical layer (snapshot-tested messages)", () => {
   it("histogram y mapped to a field -> computed-y-mapped", () => {
     const errors = errorsOf({
