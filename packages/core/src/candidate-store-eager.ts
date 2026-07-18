@@ -21,7 +21,7 @@ import type {
   CandidateStoreOptions,
   ResolvedCandidateInspectMode,
 } from "./candidate-store-types.js";
-import type { Scene } from "./scene.js";
+import type { GeometryBatch, Scene } from "./scene.js";
 import type { CellValue } from "./table.js";
 
 const NO_ROW = 0xffffffff;
@@ -37,6 +37,33 @@ const AUTO_MODES = [
   "y",
   "xy",
 ] as const satisfies readonly ResolvedCandidateInspectMode[];
+
+/** Plot-space AABB for a path subpath range, padded by stroke half-width + hit tol. */
+function pathSubpathAabb(
+  batch: Extract<GeometryBatch, { kind: "paths" }>,
+  panelX: number,
+  panelY: number,
+  start: number,
+  end: number,
+  fallbackX: number,
+  fallbackY: number,
+): readonly [number, number, number, number] {
+  const pad = batch.linewidth / 2 + 3;
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  for (let v = start; v < end; v++) {
+    const px = panelX + batch.positions[v * 2]!;
+    const py = panelY + batch.positions[v * 2 + 1]!;
+    if (px < minX) minX = px;
+    if (py < minY) minY = py;
+    if (px > maxX) maxX = px;
+    if (py > maxY) maxY = py;
+  }
+  if (minX > maxX) return [fallbackX, fallbackY, fallbackX, fallbackY];
+  return [minX - pad, minY - pad, maxX + pad, maxY + pad];
+}
 
 export function buildCandidateStoreEager(
   scene: Scene,
@@ -334,24 +361,169 @@ export function buildCandidateStoreEager(
   tokenIndex.clear();
 
   // Spatial index over plot-px anchors (reuse StaticQuadtree). Point-like
-  // candidates shortlist via the tree; rects/segments/paths are refined from a
-  // compact extended-geometry list because their hit region can sit far from
-  // the stored anchor (bars, long segments, filled paths).
+  // candidates shortlist via the tree; rects/segments/paths/glyphs use
+  // size-classed AABB-center trees so hit regions far from anchors still
+  // shortlist without force-adding every extended id. Classes bucket by
+  // log2(max half-extent) so one giant AABB cannot expand every query to O(E).
   const spatialXs = Float64Array.from(xs);
   const spatialYs = Float64Array.from(ys);
   const spatial = n > 0 ? new StaticQuadtree(spatialXs, spatialYs) : null;
   const isPoint = new Uint8Array(n);
   const extendedIds: number[] = [];
+  const extMinXBuild: number[] = [];
+  const extMinYBuild: number[] = [];
+  const extMaxXBuild: number[] = [];
+  const extMaxYBuild: number[] = [];
+  // Subpath AABB cache: `${batchIndex}:${start}:${end}` → box (plot px).
+  const pathAabbCache = new Map<string, readonly [number, number, number, number]>();
   let maxPointReach = 0;
   for (let id = 0; id < n; id++) {
     const batch = scene.batches[batchIds[id]!]!;
     if (batch.kind === "points") {
       isPoint[id] = 1;
       maxPointReach = Math.max(maxPointReach, batch.size + 3);
-    } else {
-      extendedIds.push(id);
+      continue;
     }
+    extendedIds.push(id);
+    const panel = scene.panels[panelIds[id]!]!;
+    const i = primitiveIds[id]!;
+    let minX: number;
+    let minY: number;
+    let maxX: number;
+    let maxY: number;
+    if (batch.kind === "rects") {
+      const rx = panel.x + batch.rects[i * 4]!;
+      const ry = panel.y + batch.rects[i * 4 + 1]!;
+      const rw = batch.rects[i * 4 + 2]!;
+      const rh = batch.rects[i * 4 + 3]!;
+      minX = Math.min(rx, rx + rw);
+      minY = Math.min(ry, ry + rh);
+      maxX = Math.max(rx, rx + rw);
+      maxY = Math.max(ry, ry + rh);
+    } else if (batch.kind === "segments") {
+      const pad = batch.linewidth / 2 + 3;
+      const x1 = panel.x + batch.segments[i * 4]!;
+      const y1 = panel.y + batch.segments[i * 4 + 1]!;
+      const x2 = panel.x + batch.segments[i * 4 + 2]!;
+      const y2 = panel.y + batch.segments[i * 4 + 3]!;
+      minX = Math.min(x1, x2) - pad;
+      minY = Math.min(y1, y2) - pad;
+      maxX = Math.max(x1, x2) + pad;
+      maxY = Math.max(y1, y2) + pad;
+    } else if (batch.kind === "paths") {
+      // Subpath AABB (fill + stroke can sit far from one vertex anchor).
+      const range = pathRange(batch, i);
+      if (range === null) {
+        minX = xs[id]!;
+        minY = ys[id]!;
+        maxX = minX;
+        maxY = minY;
+      } else {
+        const cacheKey = `${batchIds[id]}:${range[0]}:${range[1]}`;
+        let box = pathAabbCache.get(cacheKey);
+        if (box === undefined) {
+          box = pathSubpathAabb(batch, panel.x, panel.y, range[0], range[1], xs[id]!, ys[id]!);
+          pathAabbCache.set(cacheKey, box);
+        }
+        minX = box[0];
+        minY = box[1];
+        maxX = box[2];
+        maxY = box[3];
+      }
+    } else {
+      // glyphs: text is not a hit target (hit-index), but still needs a finite
+      // AABB so store init never pathRange()'s a non-path batch (Codex P1).
+      const pad = batch.size + 3;
+      minX = xs[id]! - pad;
+      minY = ys[id]! - pad;
+      maxX = xs[id]! + pad;
+      maxY = ys[id]! + pad;
+    }
+    extMinXBuild.push(minX);
+    extMinYBuild.push(minY);
+    extMaxXBuild.push(maxX);
+    extMaxYBuild.push(maxY);
   }
+  pathAabbCache.clear();
+
+  const extN = extendedIds.length;
+  const extMinX = Float64Array.from(extMinXBuild);
+  const extMinY = Float64Array.from(extMinYBuild);
+  const extMaxX = Float64Array.from(extMaxXBuild);
+  const extMaxY = Float64Array.from(extMaxYBuild);
+  extMinXBuild.length = 0;
+  extMinYBuild.length = 0;
+  extMaxXBuild.length = 0;
+  extMaxYBuild.length = 0;
+
+  // Size-class trees: class key = ceil(log2(max half-extent)).
+  type ExtendedClass = {
+    readonly eis: readonly number[];
+    readonly maxHalfW: number;
+    readonly maxHalfH: number;
+    readonly spatial: StaticQuadtree;
+  };
+  const classBuckets = new Map<number, number[]>();
+  for (let ei = 0; ei < extN; ei++) {
+    const halfW = (extMaxX[ei]! - extMinX[ei]!) / 2;
+    const halfH = (extMaxY[ei]! - extMinY[ei]!) / 2;
+    const m = Math.max(halfW, halfH, 1e-9);
+    const key = Math.min(31, Math.ceil(Math.log2(m)));
+    const bucket = classBuckets.get(key);
+    if (bucket === undefined) classBuckets.set(key, [ei]);
+    else bucket.push(ei);
+  }
+  const extendedClasses: ExtendedClass[] = [];
+  for (const eis of classBuckets.values()) {
+    const cxs = new Float64Array(eis.length);
+    const cys = new Float64Array(eis.length);
+    let maxHalfW = 0;
+    let maxHalfH = 0;
+    for (let j = 0; j < eis.length; j++) {
+      const ei = eis[j]!;
+      const halfW = (extMaxX[ei]! - extMinX[ei]!) / 2;
+      const halfH = (extMaxY[ei]! - extMinY[ei]!) / 2;
+      cxs[j] = (extMinX[ei]! + extMaxX[ei]!) / 2;
+      cys[j] = (extMinY[ei]! + extMaxY[ei]!) / 2;
+      if (halfW > maxHalfW) maxHalfW = halfW;
+      if (halfH > maxHalfH) maxHalfH = halfH;
+    }
+    extendedClasses.push({
+      eis,
+      maxHalfW,
+      maxHalfH,
+      spatial: new StaticQuadtree(cxs, cys),
+    });
+  }
+  classBuckets.clear();
+
+  /** Add extended ids whose AABB intersects the axis-aligned query box. */
+  const addExtendedIntersecting = (
+    loX: number,
+    loY: number,
+    hiX: number,
+    hiY: number,
+    into: Set<number> | number[],
+  ): void => {
+    for (const cls of extendedClasses) {
+      // Intersecting AABBs have centers inside query expanded by *this class's*
+      // half-extents — not the global max (avoids one giant bar scanning all E).
+      for (const j of cls.spatial.queryRect(
+        loX - cls.maxHalfW,
+        loY - cls.maxHalfH,
+        hiX + cls.maxHalfW,
+        hiY + cls.maxHalfH,
+      )) {
+        const ei = cls.eis[j]!;
+        if (extMaxX[ei]! < loX || extMinX[ei]! > hiX || extMaxY[ei]! < loY || extMinY[ei]! > hiY)
+          continue;
+        const id = extendedIds[ei]!;
+        if (Array.isArray(into)) into.push(id);
+        else into.add(id);
+      }
+    }
+  };
+
   // Far-plane strip bounds: StaticQuadtree prunes on the finite axis only.
   const STRIP = 1e30;
 
@@ -483,8 +655,8 @@ export function buildCandidateStoreEager(
       if (flip) addRect(px - maxDistance, -STRIP, px + maxDistance, STRIP);
       else addRect(-STRIP, py - maxDistance, STRIP, py + maxDistance);
     } else {
-      // exact / auto: point anchors within hit reach + all extended geometry
-      // (rects/segments/paths can match far from their stored anchors).
+      // exact / auto: point anchors within hit reach + extended geometry whose
+      // AABB meets the probe (rects/segments/paths can sit far from anchors).
       const r = mode === "auto" ? Math.max(maxDistance, maxPointReach) : maxPointReach;
       addRect(px - r, py - r, px + r, py + r);
       if (mode === "auto") {
@@ -498,7 +670,10 @@ export function buildCandidateStoreEager(
           addRect(-STRIP, py - maxDistance, STRIP, py + maxDistance);
         }
       }
-      for (const id of extendedIds) consider.add(id);
+      // exact containment uses the point AABB; auto still needs maxDistance pad
+      // for dominant-axis extended matches that refine after shortlist.
+      const pad = mode === "auto" ? maxDistance : 0;
+      addExtendedIntersecting(px - pad, py - pad, px + pad, py + pad, consider);
     }
     return [...consider].toSorted((a, b) => b - a);
   };
@@ -668,7 +843,9 @@ export function buildCandidateStoreEager(
         if (panelId !== undefined && scene.panels[panelIds[id]!]!.id !== panelId) continue;
         hits.push(id);
       }
-      for (const id of extendedIds) {
+      const extendedHits: number[] = [];
+      addExtendedIntersecting(loX, loY, hiX, hiY, extendedHits);
+      for (const id of extendedHits) {
         if (panelId !== undefined && scene.panels[panelIds[id]!]!.id !== panelId) continue;
         if (intersects(id, loX, loY, hiX, hiY)) hits.push(id);
       }
