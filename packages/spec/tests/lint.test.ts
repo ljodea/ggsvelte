@@ -178,6 +178,44 @@ describe("validate({ lint: true }) wiring", () => {
     };
     expect(validate(sound, { lint: true }).advisories).toBeUndefined();
   });
+
+  it("does not double-scan row-shaped inline data when lint is also on", () => {
+    // Instrumented getters: each cell read increments. validate() with lint
+    // must pivot/type-scan the rows once (same order of magnitude as without
+    // lint), not rebuild columns a second time for lintSpec.
+    let accesses = 0;
+    const rows = Array.from({ length: 40 }, (_, i) => ({
+      get x() {
+        accesses++;
+        return i % 3 === 0 ? "a" : i % 3 === 1 ? "b" : "c";
+      },
+      get y() {
+        accesses++;
+        return i;
+      },
+    }));
+    const spec = {
+      data: { values: rows },
+      aes: { x: { field: "x" }, y: { field: "y" } },
+      layers: [{ geom: "line", stat: "identity", position: "identity" }],
+    };
+
+    accesses = 0;
+    const withoutLint = validate(spec, {});
+    const accessesWithout = accesses;
+    expect(withoutLint.ok).toBe(true);
+
+    accesses = 0;
+    const withLint = validate(spec, { lint: true });
+    const accessesWith = accesses;
+    expect(withLint.ok).toBe(true);
+    expect(withLint.advisories?.map((a) => a.code)).toEqual(["line-over-nominal-x"]);
+
+    // Without sharing, lint rebuilds columns via a second full row walk (~2×).
+    // With one shared pivot, access counts stay comparable.
+    expect(accessesWith).toBeLessThanOrEqual(accessesWithout * 1.15);
+    expect(accessesWith).toBeGreaterThan(0);
+  });
 });
 
 describe("LINT_CATALOG coverage", () => {
