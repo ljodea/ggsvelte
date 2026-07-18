@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784352886697,
+  "lastUpdate": 1784354512905,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -23883,6 +23883,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 163.2424,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "e156cc6dc56f35fbde5014f935bc378d570c2748",
+          "message": "perf(core): O(log P) pathRange/samePath via binary search (#248)\n\npathOffsets lookups on the exact nearest/queryRect path were linear in\nsubpath count. Binary-search pathRange (and reuse one range per candidate\nfor stroke neighbors) drops O(E·P) offset walks to O(E log P) for multi-\nseries path plots without changing half-open range semantics.",
+          "timestamp": "2026-07-18T01:01:17-05:00",
+          "tree_id": "bb51a2774389132a3352f4fb7c2fae5a02904b35",
+          "url": "https://github.com/ljodea/ggsvelte/commit/e156cc6dc56f35fbde5014f935bc378d570c2748"
+        },
+        "date": 1784354512107,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.1175,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.6189,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 9.2502,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 12.769,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 85.8407,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 114.1835,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.0069,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.1785,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 83.8852,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 106.4343,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 10.2823,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 9.805,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 106.4274,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7603,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 22.588,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 6.6642,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 32.9174,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 585.7144,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 129.3417,
             "unit": "ms"
           }
         ]
