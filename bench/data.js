@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784408112374,
+  "lastUpdate": 1784409458481,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -29595,6 +29595,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 161.6379,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "a9bad4d121b8c5b3f6eef77a123895c702106de8",
+          "message": "ci: add Dependabot for Bun workspaces and GitHub Actions (#297)\n\n* ci: add Dependabot for Bun workspaces and GitHub Actions\n\nWeekly bun updates across monorepo package.jsons (grouped by toolchain /\ndependency name) and batched GitHub Actions SHA pin bumps. Ignore\nPlaywright package bumps so they stay lockstep with the CI container tag;\nignore majors for svelte/vite/typescript/vitest and related types.\n\n* ci: address Dependabot review (composites, pnpm, @ggsvelte)\n\nCodex P2s: scan .github/actions/* for github-actions updates; ignore pnpm\n(support-matrix lockstep) and @ggsvelte/* (Changesets-owned publish ranges).",
+          "timestamp": "2026-07-18T16:16:58-05:00",
+          "tree_id": "ee894bddc82936a06ac31f93b7db68843fe1d13b",
+          "url": "https://github.com/ljodea/ggsvelte/commit/a9bad4d121b8c5b3f6eef77a123895c702106de8"
+        },
+        "date": 1784409457123,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.4187,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.0844,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 9.644,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 13.5603,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 88.7253,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 126.2007,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.3222,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.4516,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 85.7057,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 105.3945,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.7533,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.2314,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 114.3554,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7913,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 26.8392,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.5002,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 29.51,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 601.9762,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 158.8936,
             "unit": "ms"
           }
         ]
