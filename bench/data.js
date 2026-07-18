@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784345933458,
+  "lastUpdate": 1784345974238,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -22217,6 +22217,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 159.6733,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "300a89140ef2a56b3f2e6243dc9417016a89c921",
+          "message": "perf(core): cache pre-stat inputGroups once per frame (#223)\n\nderiveLayerGroups was recomputed 2–3× per layer (buildFrame, identity\nindex, bin lineage). Store pre-stat groups on LayerFrame.inputGroups and\nreuse them so source-row lineage keeps first-seen ids without re-derive.\n\nFixes #217",
+          "timestamp": "2026-07-17T22:38:55-05:00",
+          "tree_id": "04ae167c6a6179dde8d092de781e29824f835636",
+          "url": "https://github.com/ljodea/ggsvelte/commit/300a89140ef2a56b3f2e6243dc9417016a89c921"
+        },
+        "date": 1784345973011,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.403,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.7148,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 8.7499,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 10.6522,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 88.4473,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 131.2503,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.5752,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.6198,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 89.5646,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 116.5829,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 9.704,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 10.8997,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 113.9804,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7464,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 22.9328,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 5.6792,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 33.2458,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 598.2601,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 134.0631,
             "unit": "ms"
           }
         ]
