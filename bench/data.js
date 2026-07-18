@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784372970082,
+  "lastUpdate": 1784373695150,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -25906,6 +25906,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 161.0752,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "2463da500c74bd4fa3f006becf1736d11e5e9b8c",
+          "message": "perf(core): O(log E+k) extended-geometry shortlist via AABB index (#264)\n\n* perf(core): O(log E+k) extended-geometry shortlist via AABB index\n\nRects/segments/paths were force-added to every exact/auto nearest and\nqueryRect shortlist (O(E)). Index AABB centers in StaticQuadtree, expand\nqueries by max half-extents, and refine only intersecting k. Tall bars\nfar from their anchors still hit; dense far bars no longer pay O(E).\n\n* fix(core): size-class AABB trees; handle glyph batches\n\nCodex P1: glyphs are not paths — finite anchor AABB, no pathRange.\nSize-class log2 half-extent buckets so one giant AABB cannot expand\nevery small-bar query to O(E). Add mixed-size and glyph regression tests.\n\n* fix(core): extract pathSubpathAabb to satisfy max-depth lint",
+          "timestamp": "2026-07-18T06:20:50-05:00",
+          "tree_id": "3c483dd348ceabccc538490a3df9d969acc0b469",
+          "url": "https://github.com/ljodea/ggsvelte/commit/2463da500c74bd4fa3f006becf1736d11e5e9b8c"
+        },
+        "date": 1784373693989,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.4195,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.1091,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 10.1461,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 12.9729,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 84.5552,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 115.6179,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.1565,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.3179,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 85.4443,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 106.6665,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 14.0566,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.74,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 113.6276,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7918,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 27.6946,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 8.5604,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 26.3574,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 610.003,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 161.2819,
             "unit": "ms"
           }
         ]
