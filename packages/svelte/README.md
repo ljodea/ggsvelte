@@ -1,5 +1,7 @@
 # ggsvelte
 
+[![codecov](https://codecov.io/gh/ljodea/ggsvelte/branch/main/graph/badge.svg?component=packages-svelte)](https://app.codecov.io/gh/ljodea/ggsvelte/tree/main/packages%2Fsvelte)
+
 Svelte 5 adapter for the ggsvelte layered grammar of graphics — plus the
 whole `@ggsvelte/spec` + `@ggsvelte/core` surface re-exported, and the
 `ggsvelte-render` CLI. The v0.1 API is intentionally early (lifecycle tags in the

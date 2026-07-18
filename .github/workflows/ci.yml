@@ -120,17 +120,18 @@ jobs:
                 echo "event=${EVENT_NAME} base=${BASE_SHA} head=${HEAD_SHA} files=${#files[@]}"
                 # Issue #244: main push re-running the full suite saturates the pool.
                 # Keep thinner main surface (checks/unit/build/actions-security);
-                # consumer/component/bench stay PR-primary. force-all paths still
-                # full-suite when base is missing.
+                # consumer/bench stay PR-primary. force-all paths still full-suite
+                # when base is missing.
+                # Keep packages_dist + component path-routed on main so Codecov
+                # can refresh the packages/svelte flag for branch/main badges
+                # (carryforward cannot bootstrap a first main-branch report).
                 if [ "${EVENT_NAME}" = "push" ] && [ "${GITHUB_REF}" = "refs/heads/main" ]; then
                   {
-                    echo "component=false"
                     echo "consumer=false"
                     echo "bench_smoke=false"
                     echo "interaction_perf=false"
-                    echo "packages_dist=false"
                   } >> "$GITHUB_OUTPUT"
-                  echo "main push: thinned expensive jobs (issue #244)"
+                  echo "main push: thinned consumer/bench (issue #244); packages_dist+component stay path-routed for coverage"
                 fi
               fi
             fi
@@ -338,10 +339,29 @@ jobs:
       - name: build spec/core dist (package exports point at dist/)
         if: steps.content_hash.outputs.hit != 'true'
         run: bun run check
+      # lcov for Codecov; text reporter still prints a summary in the log.
       - if: steps.content_hash.outputs.hit != 'true'
-        run: bun test packages/spec packages/core benchmarks scripts tests/evals
+        run: >
+          bun test --coverage --coverage-reporter=lcov
+          --coverage-dir=coverage/unit
+          packages/spec packages/core benchmarks scripts tests/evals
+      - name: Upload unit coverage to Codecov
+        # Custom if overrides default success() — keep the success gate so a
+        # failed suite does not upload a partial report or count as green.
+        if: success() && steps.content_hash.outputs.hit != 'true'
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage/unit/lcov.info
+          flags: unit
+          name: unit
+          # Pin the uploader binary; the action's default is "latest".
+          version: v11.3.1
+          disable_search: true
+          fail_ci_if_error: true
       - uses: ./.github/actions/ci-content-hash-write
-        if: steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
+        # Require success so a Codecov upload failure cannot green-cache the job.
+        if: success() && steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
         with:
           execution: unit
           hash: ${{ steps.content_hash.outputs.hash }}
@@ -583,12 +603,63 @@ jobs:
             echo "::error::playwright npm version in packages/svelte (${npm_version}) does not match pinned container tag (${PLAYWRIGHT_CONTAINER_TAG})"
             exit 1
           fi
-      - name: component tests (packages/svelte, vitest browser mode + ssr)
+      # Chromium collects browser v8 coverage (CDP; works under bun) and enforces
+      # thresholds. Firefox/webkit stay coverage-free. SSR runs under bun without
+      # --coverage: @vitest/coverage-v8 needs Node inspector Coverage APIs that
+      # bun does not implement ("Coverage APIs are not supported"). Local
+      # `test:coverage` can still collect SSR lcov under node for offline use.
+      - name: component tests (packages/svelte, chromium + coverage)
         if: steps.content_hash.outputs.hit != 'true'
         working-directory: packages/svelte
-        run: bun run --bun test
+        run: bunx --bun vitest run --coverage --project chromium
+      - name: component tests (packages/svelte, firefox + webkit)
+        if: steps.content_hash.outputs.hit != 'true'
+        working-directory: packages/svelte
+        run: bunx --bun vitest run --project firefox --project webkit
+      - name: component tests (packages/svelte, SSR)
+        if: steps.content_hash.outputs.hit != 'true'
+        working-directory: packages/svelte
+        run: bunx --bun vitest run --config vitest.ssr.config.ts
+      - name: rewrite svelte lcov paths to monorepo root
+        # vitest writes SF:src/lib/... relative to packages/svelte; Codecov
+        # components filter packages/svelte/** so paths must be repo-rooted.
+        if: success() && steps.content_hash.outputs.hit != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          f=packages/svelte/coverage/browser/lcov.info
+          if [ ! -f "${f}" ]; then
+            echo "::error::missing coverage file ${f}"
+            exit 1
+          fi
+          # Idempotent: only prefix bare package-relative src/ paths.
+          sed -i 's|^SF:src/|SF:packages/svelte/src/|' "${f}"
+          sed -i 's|^SF:\./src/|SF:packages/svelte/src/|' "${f}"
+      - name: ensure gpg for Codecov uploader (Playwright image)
+        if: success() && steps.content_hash.outputs.hit != 'true'
+        run: |
+          set -euo pipefail
+          if ! command -v gpg >/dev/null 2>&1; then
+            apt-get update
+            apt-get install -y --no-install-recommends gnupg
+          fi
+      - name: Upload packages/svelte coverage to Codecov
+        # Custom if overrides default success() — keep the success gate so a
+        # failed suite does not upload a partial report or count as green.
+        if: success() && steps.content_hash.outputs.hit != 'true'
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: packages/svelte/coverage/browser/lcov.info
+          flags: svelte
+          name: svelte
+          # Pin the uploader binary; the action's default is "latest".
+          version: v11.3.1
+          disable_search: true
+          fail_ci_if_error: true
       - uses: ./.github/actions/ci-content-hash-write
-        if: steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
+        # Require success so a Codecov upload failure cannot green-cache the job.
+        if: success() && steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
         with:
           execution: component_svelte
           hash: ${{ steps.content_hash.outputs.hash }}

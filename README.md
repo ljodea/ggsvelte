@@ -1,5 +1,7 @@
 # ggsvelte
 
+[![codecov](https://codecov.io/gh/ljodea/ggsvelte/branch/main/graph/badge.svg)](https://app.codecov.io/gh/ljodea/ggsvelte)
+
 A layered grammar of graphics for JavaScript — ggplot2 semantics (aes, geom,
 stat, scale, coord, facet, theme, position), a strictly-JSON spec at the
 center, Svelte 5 runes-native components, and hybrid SVG/canvas rendering.

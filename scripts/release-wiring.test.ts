@@ -7,9 +7,15 @@ const read = (path: string) => readFileSync(join(root, path), "utf8");
 
 describe("R0 release wiring", () => {
   it("runs benchmark unit tests in CI and pre-push parity", () => {
-    expect(read(".github/workflows/ci.yml")).toContain(
-      "bun test packages/spec packages/core benchmarks scripts tests/evals",
-    );
+    const ci = read(".github/workflows/ci.yml");
+    // CI collects lcov for Codecov; pre-push stays plain (no coverage overhead).
+    expect(ci).toContain("packages/spec packages/core benchmarks scripts tests/evals");
+    expect(ci).toContain("--coverage-reporter=lcov");
+    expect(ci).toContain("coverage/unit");
+    expect(ci).toContain("codecov/codecov-action@");
+    expect(ci).toContain("flags: unit");
+    expect(ci).toContain("flags: svelte");
+    expect(read("codecov.yml")).toContain("component_id: packages-spec");
     expect(read(".pre-commit-config.yaml")).toContain(
       "bun test packages/spec packages/core benchmarks scripts tests/evals",
     );
@@ -158,6 +164,8 @@ describe("R0 release wiring", () => {
     expect(unitJob).toContain("CI_DISABLE_CONTENT_HASH");
 
     // Distinct physical keys for component shards (Codex P1).
+    // component-svelte is longer (coverage + Codecov upload steps) — use a
+    // generous window so the content-hash write is still inside the slice.
     for (const [job, execution] of [
       ["component-svelte", "component_svelte"],
       ["component-spikes", "component_spikes"],
@@ -165,7 +173,7 @@ describe("R0 release wiring", () => {
     ] as const) {
       const start = ci.indexOf(`  ${job}:\n`);
       expect(start).toBeGreaterThan(-1);
-      const slice = ci.slice(start, start + 4500);
+      const slice = ci.slice(start, start + 8000);
       expect(slice).toContain("uses: ./.github/actions/ci-content-hash-restore");
       expect(slice).toContain(`execution: ${execution}`);
       expect(slice).toContain("container_tag:");
@@ -283,8 +291,19 @@ describe("R0 release wiring", () => {
 
 it("thins expensive jobs on main push (issue #244)", () => {
   const ci = read(".github/workflows/ci.yml");
-  expect(ci).toContain("main push: thinned expensive jobs (issue #244)");
-  expect(ci).toContain("packages_dist=false");
+  // Consumer/bench stay PR-primary; packages_dist+component remain path-routed
+  // so Codecov can refresh packages/svelte coverage on main.
+  expect(ci).toContain("main push: thinned consumer/bench (issue #244)");
+  expect(ci).toContain('echo "consumer=false"');
+  expect(ci).toContain('echo "bench_smoke=false"');
+  expect(ci).toContain('echo "interaction_perf=false"');
+  // Must NOT force-off component/packages_dist on main (Codecov main badges).
+  const mainThin = ci.slice(
+    ci.indexOf("main push: thinned consumer/bench"),
+    ci.indexOf("main push: thinned consumer/bench") + 400,
+  );
+  expect(mainThin).not.toContain("component=false");
+  expect(mainThin).not.toContain("packages_dist=false");
 });
 
 it("tiers the PR consumer matrix (issue #246)", () => {
