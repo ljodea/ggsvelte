@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784354512905,
+  "lastUpdate": 1784355091597,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -24002,6 +24002,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 129.3417,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c31e1d65cd218a23356414aab98f20386a4514f5",
+          "message": "ci: path-route expensive jobs to cut queue pressure (#242)\n\n* ci: path-route expensive jobs to cut self-hosted queue pressure\n\nAdd a pure TypeScript router (scripts/ci-routing.ts) that classifies\nchanged paths and decides which jobs to schedule. Wire detect-changes +\nper-job ifs into CI, Pages, and VR Compare; slim the checks job to the\npre-commit stage; move knip/type-aware/docs/examples checks onto build;\ndrop interaction-perf's serial needs on component; and add a ci-gate\naggregator so skipped jobs do not look like missing required checks.\n\nChanging ci.yml itself still forces the full surface so routing edits\ncannot land untested.\n\n* fix(ci): force full suite when path-routing module changes\n\nCodex review: edits to scripts/ci-routing.ts could otherwise only run\nunit+build (scripts lane) while changing which heavy jobs schedule.\nTreat the router like ci.yml. Also map lifecycle.json and the root skill\nsource into the right surfaces.\n\n* fix(ci): satisfy type-aware lint in path router\n\nAddress oxlint --type-aware findings (replaceAll, strict boolean\nguards, top-level await, redundant union constituents) so pre-push\nparity and the build-job static analysis gate stay green.\n\n* fix(ci): never block merge on informational interaction-perf\n\ncontinue-on-error so branch protection that requires all checks still\nallows merge when wall-clock budgets flake on the shared host. ci-gate\nalready excludes this job from the required aggregator.\n\n* fix(ci): soft-pass interaction-perf so it cannot block merges\n\nAlways exit 0 after recording the real exit code; emit a warning and\nupload artifacts when budgets fail. Hard gate remains on run-bench.",
+          "timestamp": "2026-07-18T01:10:48-05:00",
+          "tree_id": "81a1398d2cf046adfa5fbb4d5ed20b5d6502fe77",
+          "url": "https://github.com/ljodea/ggsvelte/commit/c31e1d65cd218a23356414aab98f20386a4514f5"
+        },
+        "date": 1784355090432,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.3985,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.0251,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 10.8502,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 13.2896,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 86.8552,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 119.9652,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.1734,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.3255,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 88.4225,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 110.3466,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.8252,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 13.0831,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 117.6865,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7942,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 27.4054,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 8.9319,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 32.5471,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 612.9505,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 162.0604,
             "unit": "ms"
           }
         ]
