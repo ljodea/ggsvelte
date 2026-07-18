@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784371392709,
+  "lastUpdate": 1784372193865,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -25668,6 +25668,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 162.1612,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "8085dd012f9ac7682ee162af16b098fcf1adf08c",
+          "message": "perf(svelte): O(R) data-identity epoch via row-ref order (#261)\n\n* perf(svelte): O(R) data-identity epoch via row-ref order\n\nReplace O(R·F) JSON.stringify of assembled data/datasets on every\nPortableSpec respec with prop WeakMap tokens plus an O(R) row-reference\norder fingerprint. Theme/labs/scales no longer re-walk cells; in-place\nrow reorder still bumps the epoch; deep cell edits need new row/array\nrefs (Codex plan review).\n\n* fix(svelte): satisfy type-aware lint for data content tokens\n\n* fix(svelte): fingerprint column array identities in data epoch\n\nCodex P2: bare columns and {columns} DataRefs now include each field\narray identity (and length), so replacing a column array bumps the\nepoch without deep cell walks.\n\n* fix(svelte): DataRef single-key shapes; fingerprint spec when it wins\n\nCodex P2s on #261:\n- only treat {values}/{columns}/{name} as DataRefs when single-key\n- when both spec and data props exist, epoch follows rendered spec data",
+          "timestamp": "2026-07-18T05:55:47-05:00",
+          "tree_id": "fd4679fca64dbfc2ffb3c02ac46dd974b0f0446f",
+          "url": "https://github.com/ljodea/ggsvelte/commit/8085dd012f9ac7682ee162af16b098fcf1adf08c"
+        },
+        "date": 1784372192554,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.5601,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.1689,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 10.8052,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 14.7371,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 83.9182,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 116.8451,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.2529,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.313,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 84.6877,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 106.0326,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.5915,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.8194,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 113.2966,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7926,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 28.9007,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 8.1647,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 30.2573,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 610.2168,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 160.3986,
             "unit": "ms"
           }
         ]
