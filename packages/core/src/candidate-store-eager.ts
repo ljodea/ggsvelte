@@ -21,7 +21,7 @@ import type {
   CandidateStoreOptions,
   ResolvedCandidateInspectMode,
 } from "./candidate-store-types.js";
-import type { Scene } from "./scene.js";
+import type { GeometryBatch, Scene } from "./scene.js";
 import type { CellValue } from "./table.js";
 
 const NO_ROW = 0xffffffff;
@@ -37,6 +37,33 @@ const AUTO_MODES = [
   "y",
   "xy",
 ] as const satisfies readonly ResolvedCandidateInspectMode[];
+
+/** Plot-space AABB for a path subpath range, padded by stroke half-width + hit tol. */
+function pathSubpathAabb(
+  batch: Extract<GeometryBatch, { kind: "paths" }>,
+  panelX: number,
+  panelY: number,
+  start: number,
+  end: number,
+  fallbackX: number,
+  fallbackY: number,
+): readonly [number, number, number, number] {
+  const pad = batch.linewidth / 2 + 3;
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  for (let v = start; v < end; v++) {
+    const px = panelX + batch.positions[v * 2]!;
+    const py = panelY + batch.positions[v * 2 + 1]!;
+    if (px < minX) minX = px;
+    if (py < minY) minY = py;
+    if (px > maxX) maxX = px;
+    if (py > maxY) maxY = py;
+  }
+  if (minX > maxX) return [fallbackX, fallbackY, fallbackX, fallbackY];
+  return [minX - pad, minY - pad, maxX + pad, maxY + pad];
+}
 
 export function buildCandidateStoreEager(
   scene: Scene,
@@ -395,31 +422,7 @@ export function buildCandidateStoreEager(
         const cacheKey = `${batchIds[id]}:${range[0]}:${range[1]}`;
         let box = pathAabbCache.get(cacheKey);
         if (box === undefined) {
-          const pad = batch.linewidth / 2 + 3;
-          let pMinX = Infinity;
-          let pMinY = Infinity;
-          let pMaxX = -Infinity;
-          let pMaxY = -Infinity;
-          for (let v = range[0]; v < range[1]; v++) {
-            const px = panel.x + batch.positions[v * 2]!;
-            const py = panel.y + batch.positions[v * 2 + 1]!;
-            if (px < pMinX) pMinX = px;
-            if (py < pMinY) pMinY = py;
-            if (px > pMaxX) pMaxX = px;
-            if (py > pMaxY) pMaxY = py;
-          }
-          if (pMinX > pMaxX) {
-            pMinX = xs[id]!;
-            pMinY = ys[id]!;
-            pMaxX = pMinX;
-            pMaxY = pMinY;
-          } else {
-            pMinX -= pad;
-            pMinY -= pad;
-            pMaxX += pad;
-            pMaxY += pad;
-          }
-          box = [pMinX, pMinY, pMaxX, pMaxY];
+          box = pathSubpathAabb(batch, panel.x, panel.y, range[0], range[1], xs[id]!, ys[id]!);
           pathAabbCache.set(cacheKey, box);
         }
         minX = box[0];
