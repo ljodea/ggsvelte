@@ -16,6 +16,7 @@ export function buildAnnotationFrame(binding: LayerBinding, table: ColumnTable):
     xNumeric: null,
     yNumeric: null,
     groups: [],
+    inputGroups: [],
     rowIndex: new Uint32Array(0),
     colorValues: null,
     fillValues: null,

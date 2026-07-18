@@ -44,5 +44,5 @@ export function buildSmoothFrame(
       howToOverride: `Set params.method ("lm" | "loess") on layer ${index}.`,
     });
   }
-  return packSmoothLayerFrame(binding, table, result, columnOf);
+  return packSmoothLayerFrame(binding, table, result, columnOf, groups);
 }
