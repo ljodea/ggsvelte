@@ -23,12 +23,16 @@ const fixtureDependencies = [
   "vite@6.4.3",
 ];
 
-export function packageTarballNames(version: string): string[] {
-  return [
-    `ggsvelte-spec-${version}.tgz`,
-    `ggsvelte-core-${version}.tgz`,
-    `ggsvelte-svelte-${version}.tgz`,
-  ];
+const publishablePackageDirectories = ["spec", "core", "svelte"] as const;
+
+type PublishablePackageVersions = Readonly<
+  Record<(typeof publishablePackageDirectories)[number], string>
+>;
+
+export function packageTarballNames(versions: PublishablePackageVersions): string[] {
+  return publishablePackageDirectories.map(
+    (packageDirectory) => `ggsvelte-${packageDirectory}-${versions[packageDirectory]}.tgz`,
+  );
 }
 
 export function commandExecutable(command: string, platform = process.platform): string {
@@ -309,13 +313,20 @@ function verifyPackageManagerVersion(
   console.log(`consumer-compat: ${packageManager} ${actualVersion}`);
 }
 
+function packageVersion(root: string, packageDirectory: string): string {
+  const manifest = JSON.parse(
+    readFileSync(join(root, "packages", packageDirectory, "package.json"), "utf8"),
+  ) as { version: string };
+  return manifest.version;
+}
+
 function pack(root: string, artifacts: string): string[] {
-  const version = (
-    JSON.parse(readFileSync(join(root, "packages/spec/package.json"), "utf8")) as {
-      version: string;
-    }
-  ).version;
-  for (const packageDirectory of ["spec", "core", "svelte"]) {
+  const versions: PublishablePackageVersions = {
+    spec: packageVersion(root, "spec"),
+    core: packageVersion(root, "core"),
+    svelte: packageVersion(root, "svelte"),
+  };
+  for (const packageDirectory of publishablePackageDirectories) {
     const invocation = packagePackInvocation(artifacts);
     const result = spawnSync(invocation.command, invocation.args, {
       cwd: join(root, "packages", packageDirectory),
@@ -324,7 +335,7 @@ function pack(root: string, artifacts: string): string[] {
     });
     if (result.status !== 0) throw new Error(`packing packages/${packageDirectory} failed`);
   }
-  const tarballs = packageTarballNames(version).map((name) => join(artifacts, name));
+  const tarballs = packageTarballNames(versions).map((name) => join(artifacts, name));
   for (const tarball of tarballs) {
     if (!existsSync(tarball)) throw new Error(`expected packed artifact ${basename(tarball)}`);
   }
