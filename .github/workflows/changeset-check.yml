@@ -1,0 +1,92 @@
+# Changeset visibility — non-blocking, in-repo changeset-bot equivalent.
+# All third-party actions pinned by full commit SHA (zizmor-enforced).
+#
+# Changesets only records PRs that add a .changeset/*.md file; every other PR
+# merges silently with no CHANGELOG entry and no version-bump influence
+# (release PR #45 shipped ~200 PRs with 4 entries). Decision logic and the
+# comment body live in scripts/changeset-check.ts (unit tested by
+# scripts/changeset-check.test.ts); this workflow only computes the PR diff
+# and syncs one sticky comment.
+#
+# Deliberately NOT a merge gate: internal-only changes are the common case in
+# this repo, and forcing contributors to commit empty changesets is worse
+# than an ignorable comment. The job succeeds on every verdict.
+name: Changeset check
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions: {}
+
+concurrency:
+  group: changeset-check-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  comment:
+    name: changeset visibility comment
+    # Skip the changesets bot's own Version Packages PR (its whole point is
+    # consuming changesets) and fork PRs (fork tokens are read-only, so the
+    # comment sync below could not write anyway).
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.head.ref != 'changeset-release/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.3.14
+      # No bun install: the script uses only bun/node builtins.
+      - id: decide
+        name: classify PR diff → changeset verdict
+        env:
+          # PR base SHA is trustworthy; github.sha is the merge commit that
+          # actions/checkout checked out (same protocol as ci.yml routing).
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Ensure the base object exists for the three-dot diff.
+          git fetch --no-tags --depth=1 origin "${BASE_SHA}" 2>/dev/null || true
+          git diff --name-only "${BASE_SHA}...${HEAD_SHA}" |
+            bun scripts/changeset-check.ts emit --stdin --body-out "${RUNNER_TEMP}/changeset-comment.md"
+      - name: sync sticky comment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERDICT: ${{ steps.decide.outputs.verdict }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Keep in sync with COMMENT_MARKER in scripts/changeset-check.ts
+          # (asserted by scripts/changeset-check.test.ts).
+          existing_id=$(gh api "repos/${REPO}/issues/${PR_NUMBER}/comments" --paginate \
+            --jq '.[] | select(.body | contains("<!-- ggsvelte-changeset-check -->")) | .id' |
+            head -n1)
+          body_file="${RUNNER_TEMP}/changeset-comment.md"
+          if [ "${VERDICT}" = "missing" ]; then
+            if [ -n "${existing_id}" ]; then
+              gh api --method PATCH "repos/${REPO}/issues/comments/${existing_id}" -F "body=@${body_file}" > /dev/null
+            else
+              gh api --method POST "repos/${REPO}/issues/${PR_NUMBER}/comments" -F "body=@${body_file}" > /dev/null
+            fi
+            echo "verdict=missing — sticky comment synced"
+          elif [ -n "${existing_id}" ]; then
+            # A comment from an earlier push is stale — update it to the
+            # resolved wording instead of leaving a false warning.
+            gh api --method PATCH "repos/${REPO}/issues/comments/${existing_id}" -F "body=@${body_file}" > /dev/null
+            echo "verdict=${VERDICT} — stale comment updated"
+          else
+            echo "verdict=${VERDICT} — nothing to comment"
+          fi
