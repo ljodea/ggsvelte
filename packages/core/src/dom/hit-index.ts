@@ -9,7 +9,10 @@
  * Per-kind tests (plan round-2 fix — bbox alone cannot hit-test paths):
  *  - points: hand-rolled static quadtree (see quadtree.ts for why it is not
  *    a d3-quadtree port); hit radius = mark radius + tolerance, nearest wins.
- *  - rects: panel shortlist, then EXACT containment (no slop — bars abut).
+ *  - rects: size-classed AABB-center shortlist, then EXACT containment
+ *    (no slop — bars abut). Size classes prevent one giant bar from
+ *    expanding every small-bar query to O(R) — same pattern as CandidateStore
+ *    extended geometry (#264).
  *  - segments: exact point-to-segment distance <= linewidth/2 + tolerance.
  *  - stroked paths (lines): per-edge point-to-segment distance, same rule.
  *  - filled paths (areas/ribbons): even-odd point-in-polygon containment;
@@ -164,6 +167,74 @@ interface PointsIndexEntry {
   ys: Float64Array;
 }
 
+/** Size-classed AABB-center trees for rect batches (plot px). */
+interface RectsIndexEntry {
+  readonly minX: Float64Array;
+  readonly minY: Float64Array;
+  readonly maxX: Float64Array;
+  readonly maxY: Float64Array;
+  readonly classes: readonly {
+    readonly indices: readonly number[];
+    readonly maxHalfW: number;
+    readonly maxHalfH: number;
+    readonly spatial: StaticQuadtree;
+  }[];
+}
+
+function buildRectsIndex(
+  batch: Extract<GeometryBatch, { kind: "rects" }>,
+  panel: ScenePanel,
+): RectsIndexEntry {
+  const n = batch.rects.length / 4;
+  const minX = new Float64Array(n);
+  const minY = new Float64Array(n);
+  const maxX = new Float64Array(n);
+  const maxY = new Float64Array(n);
+  for (let j = 0; j < n; j++) {
+    const rx = panel.x + batch.rects[j * 4]!;
+    const ry = panel.y + batch.rects[j * 4 + 1]!;
+    const rw = batch.rects[j * 4 + 2]!;
+    const rh = batch.rects[j * 4 + 3]!;
+    minX[j] = Math.min(rx, rx + rw);
+    minY[j] = Math.min(ry, ry + rh);
+    maxX[j] = Math.max(rx, rx + rw);
+    maxY[j] = Math.max(ry, ry + rh);
+  }
+  // Size classes so one giant bar cannot expand every small-bar query to O(n).
+  const buckets = new Map<number, number[]>();
+  for (let j = 0; j < n; j++) {
+    const halfW = (maxX[j]! - minX[j]!) / 2;
+    const halfH = (maxY[j]! - minY[j]!) / 2;
+    const key = Math.min(31, Math.ceil(Math.log2(Math.max(halfW, halfH, 1e-9))));
+    const list = buckets.get(key);
+    if (list === undefined) buckets.set(key, [j]);
+    else list.push(j);
+  }
+  const classes: RectsIndexEntry["classes"] = [];
+  for (const indices of buckets.values()) {
+    const cxs = new Float64Array(indices.length);
+    const cys = new Float64Array(indices.length);
+    let maxHalfW = 0;
+    let maxHalfH = 0;
+    for (let k = 0; k < indices.length; k++) {
+      const j = indices[k]!;
+      const halfW = (maxX[j]! - minX[j]!) / 2;
+      const halfH = (maxY[j]! - minY[j]!) / 2;
+      cxs[k] = (minX[j]! + maxX[j]!) / 2;
+      cys[k] = (minY[j]! + maxY[j]!) / 2;
+      if (halfW > maxHalfW) maxHalfW = halfW;
+      if (halfH > maxHalfH) maxHalfH = halfH;
+    }
+    classes.push({
+      indices,
+      maxHalfW,
+      maxHalfH,
+      spatial: new StaticQuadtree(cxs, cys),
+    });
+  }
+  return { minX, minY, maxX, maxY, classes };
+}
+
 /** Build the unified hit index for a committed scene. */
 export function buildHitIndex(scene: Scene, options: HitIndexOptions = {}): SceneHitIndex {
   const tolerance = options.tolerance ?? DEFAULT_HIT_TOLERANCE;
@@ -171,18 +242,22 @@ export function buildHitIndex(scene: Scene, options: HitIndexOptions = {}): Scen
 
   // Per points-batch quadtrees over PLOT-px positions.
   const pointsIndex = new Map<GeometryBatch, PointsIndexEntry>();
+  const rectsIndex = new Map<GeometryBatch, RectsIndexEntry>();
   for (const batch of scene.batches) {
-    if (batch.kind !== "points") continue;
     const panel = panels[batch.panelIndex];
     if (panel === undefined) continue;
-    const n = batch.rowIndex.length;
-    const xs = new Float64Array(n);
-    const ys = new Float64Array(n);
-    for (let i = 0; i < n; i++) {
-      xs[i] = panel.x + batch.positions[i * 2]!;
-      ys[i] = panel.y + batch.positions[i * 2 + 1]!;
+    if (batch.kind === "points") {
+      const n = batch.rowIndex.length;
+      const xs = new Float64Array(n);
+      const ys = new Float64Array(n);
+      for (let i = 0; i < n; i++) {
+        xs[i] = panel.x + batch.positions[i * 2]!;
+        ys[i] = panel.y + batch.positions[i * 2 + 1]!;
+      }
+      pointsIndex.set(batch, { quadtree: new StaticQuadtree(xs, ys), xs, ys });
+    } else if (batch.kind === "rects") {
+      rectsIndex.set(batch, buildRectsIndex(batch, panel));
     }
-    pointsIndex.set(batch, { quadtree: new StaticQuadtree(xs, ys), xs, ys });
   }
 
   function hitBatch(batch: GeometryBatch, x: number, y: number): SceneHit | null {
@@ -209,24 +284,40 @@ export function buildHitIndex(scene: Scene, options: HitIndexOptions = {}): Scen
         };
       }
       case "rects": {
-        // Exact containment, topmost (= last drawn) rect first.
-        for (let j = batch.rects.length / 4 - 1; j >= 0; j--) {
-          const rx = batch.rects[j * 4]!;
-          const ry = batch.rects[j * 4 + 1]!;
-          const rw = batch.rects[j * 4 + 2]!;
-          const rh = batch.rects[j * 4 + 3]!;
-          if (lx >= rx && lx <= rx + rw && ly >= ry && ly <= ry + rh) {
-            return {
-              layerIndex: batch.layerIndex,
-              panelIndex: batch.panelIndex,
-              rowIndex: rowOf(batch.rowIndex[j]!),
-              x: panel.x + rx + rw / 2,
-              y: panel.y + ry,
-              kind: "rects",
-            };
+        // Size-class AABB shortlist, then exact containment; topmost = highest j.
+        const entry = rectsIndex.get(batch);
+        if (entry === undefined) return null;
+        let best = -1;
+        for (const cls of entry.classes) {
+          for (const k of cls.spatial.queryRect(
+            x - cls.maxHalfW,
+            y - cls.maxHalfH,
+            x + cls.maxHalfW,
+            y + cls.maxHalfH,
+          )) {
+            const j = cls.indices[k]!;
+            if (
+              x >= entry.minX[j]! &&
+              x <= entry.maxX[j]! &&
+              y >= entry.minY[j]! &&
+              y <= entry.maxY[j]! &&
+              j > best
+            )
+              best = j;
           }
         }
-        return null;
+        if (best < 0) return null;
+        const rx = batch.rects[best * 4]!;
+        const ry = batch.rects[best * 4 + 1]!;
+        const rw = batch.rects[best * 4 + 2]!;
+        return {
+          layerIndex: batch.layerIndex,
+          panelIndex: batch.panelIndex,
+          rowIndex: rowOf(batch.rowIndex[best]!),
+          x: panel.x + rx + rw / 2,
+          y: panel.y + ry,
+          kind: "rects",
+        };
       }
       case "segments": {
         const slop = batch.linewidth / 2 + tolerance;
@@ -333,13 +424,28 @@ export function buildHitIndex(scene: Scene, options: HitIndexOptions = {}): Scen
             break;
           }
           case "rects": {
-            for (let j = 0; j < batch.rects.length / 4; j++) {
-              const rx = panel.x + batch.rects[j * 4]!;
-              const ry = panel.y + batch.rects[j * 4 + 1]!;
-              const rw = batch.rects[j * 4 + 2]!;
-              const rh = batch.rects[j * 4 + 3]!;
-              if (rx <= hi.x && rx + rw >= lo.x && ry <= hi.y && ry + rh >= lo.y) {
-                push(batch, batch.rowIndex[j]!, rx + rw / 2, ry);
+            const entry = rectsIndex.get(batch);
+            if (entry === undefined) break;
+            for (const cls of entry.classes) {
+              for (const k of cls.spatial.queryRect(
+                lo.x - cls.maxHalfW,
+                lo.y - cls.maxHalfH,
+                hi.x + cls.maxHalfW,
+                hi.y + cls.maxHalfH,
+              )) {
+                const j = cls.indices[k]!;
+                if (
+                  entry.maxX[j]! < lo.x ||
+                  entry.minX[j]! > hi.x ||
+                  entry.maxY[j]! < lo.y ||
+                  entry.minY[j]! > hi.y
+                )
+                  continue;
+                // Anchor matches hitTest / pre-index behavior: panel + raw origin.
+                const rx = batch.rects[j * 4]!;
+                const ry = batch.rects[j * 4 + 1]!;
+                const rw = batch.rects[j * 4 + 2]!;
+                push(batch, batch.rowIndex[j]!, panel.x + rx + rw / 2, panel.y + ry);
               }
             }
             break;

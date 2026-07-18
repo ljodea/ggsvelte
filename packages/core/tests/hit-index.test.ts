@@ -10,10 +10,81 @@ import { gg, aes } from "@ggsvelte/spec";
 import { buildHitIndex } from "../src/dom/hit-index.ts";
 import { StaticQuadtree } from "../src/dom/quadtree.ts";
 import { runPipeline } from "../src/pipeline.ts";
-import type { PointsBatch } from "../src/scene.ts";
+import type { PointsBatch, Scene } from "../src/scene.ts";
 import { planStrata } from "../src/strata.ts";
 
 const size = { width: 640, height: 400 };
+
+/** Minimal scene for synthetic rect batches (panel origin at 0,0). */
+function rectScene(rects: Float32Array, rowIndex?: Uint32Array): Scene {
+  const n = rects.length / 4;
+  return {
+    width: 640,
+    height: 400,
+    panels: [
+      {
+        id: "panel:all",
+        x: 0,
+        y: 0,
+        width: 640,
+        height: 400,
+        strip: "",
+        axisX: [],
+        axisY: [],
+        grid: { x: [], y: [] },
+      },
+    ],
+    batches: [
+      {
+        kind: "rects",
+        layerIndex: 0,
+        panelIndex: 0,
+        rects,
+        rowIndex: rowIndex ?? Uint32Array.from({ length: n }, (_, i) => i),
+        fill: null,
+        alpha: 1,
+      },
+    ],
+    axes: { x: { ticks: [], title: "" }, y: { ticks: [], title: "" } },
+    grid: { x: [], y: [] },
+    legends: [],
+    theme: {} as Scene["theme"],
+    title: "",
+    subtitle: "",
+    caption: "",
+  };
+}
+
+/** Count numeric index reads on a Float32Array (complexity guard). */
+function instrumentReads(source: Float32Array): {
+  view: Float32Array;
+  reads: () => number;
+  reset: () => void;
+} {
+  let reads = 0;
+  // TypedArray methods reject Proxy as `this`; forward length/methods to the
+  // underlying buffer and only trap numeric element gets for the guard.
+  const view = new Proxy(source, {
+    get(target, property): unknown {
+      if (typeof property === "string" && /^\d+$/.test(property)) {
+        reads++;
+        return target[Number(property)];
+      }
+      if (property === "length") return target.length;
+      const value = (target as unknown as Record<string | symbol, unknown>)[property];
+      return typeof value === "function"
+        ? (value as (...a: unknown[]) => unknown).bind(target)
+        : value;
+    },
+  }) as Float32Array;
+  return {
+    view,
+    reads: () => reads,
+    reset: () => {
+      reads = 0;
+    },
+  };
+}
 
 describe("StaticQuadtree", () => {
   it("nearestWithin finds the closest point inside the radius, exactly", () => {
@@ -209,6 +280,96 @@ describe("buildHitIndex", () => {
     expect(all.map((h) => h.rowIndex).toSorted((a, b) => a! - b!)).toEqual([0, 1, 2, 3]);
     const none = index.queryRect(0, 0, 5, 5);
     expect(none).toEqual([]);
+  });
+
+  it("queryRect includes rects that intersect the brush (anchor at raw origin)", () => {
+    // Two bars: one under the brush, one far away. Negative height still hits via AABB.
+    const rects = new Float32Array([
+      10,
+      50,
+      20,
+      -30, // covers y 20..50, x 10..30 — brush at 15..25, 30..40
+      200,
+      10,
+      10,
+      10, // far
+    ]);
+    const scene = rectScene(rects);
+    const index = buildHitIndex(scene);
+    const hits = index.queryRect(15, 30, 25, 40);
+    expect(hits.map((h) => h.rowIndex)).toEqual([0]);
+    expect(hits[0]!.x).toBe(20); // 10 + 20/2
+    expect(hits[0]!.y).toBe(50); // raw origin y (not minY)
+  });
+
+  it("hitTest does not scan every far rect on a dense bar field", () => {
+    // Complexity: linear rects walk was O(R); size-class AABB shortlist is O(log R + k).
+    const count = 4_000;
+    const raw = new Float32Array(count * 4);
+    for (let i = 0; i < count; i++) {
+      const col = i % 50;
+      const row = Math.floor(i / 50);
+      raw[i * 4] = 100 + col * 10;
+      raw[i * 4 + 1] = 100 + row * 10;
+      raw[i * 4 + 2] = 2;
+      raw[i * 4 + 3] = 2;
+    }
+    // One bar covering the probe at (10,10).
+    raw[0] = 0;
+    raw[1] = 0;
+    raw[2] = 20;
+    raw[3] = 20;
+    const instrumented = instrumentReads(raw);
+    const scene = rectScene(instrumented.view);
+    const index = buildHitIndex(scene);
+    instrumented.reset();
+
+    const hit = index.hitTest(10, 10);
+    expect(hit?.rowIndex).toBe(0);
+    // Winner reads 3 components of batch.rects (x,y,w); linear scan would read ~4*R.
+    expect(instrumented.reads()).toBeLessThan(32);
+    expect(instrumented.reads()).toBeLessThan(count / 50);
+
+    instrumented.reset();
+    // Empty pocket between the cover bar (0..20) and the far grid (≥100).
+    expect(index.hitTest(50, 50)).toBeNull();
+    // Miss must not walk every far bar via batch.rects.
+    expect(instrumented.reads()).toBe(0);
+  });
+
+  it("one giant rect does not force-scan every small far rect", () => {
+    // Size classes: a full-plot bar must not expand the small-bar class query.
+    const count = 2_000;
+    const raw = new Float32Array((count + 1) * 4);
+    raw[0] = 0;
+    raw[1] = 0;
+    raw[2] = 200;
+    raw[3] = 120;
+    for (let i = 0; i < count; i++) {
+      const col = i % 40;
+      const row = Math.floor(i / 40);
+      raw[(i + 1) * 4] = 300 + col * 8;
+      raw[(i + 1) * 4 + 1] = 300 + row * 8;
+      raw[(i + 1) * 4 + 2] = 2;
+      raw[(i + 1) * 4 + 3] = 2;
+    }
+    const instrumented = instrumentReads(raw);
+    const scene = rectScene(instrumented.view);
+    const index = buildHitIndex(scene);
+    instrumented.reset();
+
+    // Probe inside the giant only — small far bars must not be refined via batch.rects.
+    const hit = index.hitTest(50, 50);
+    expect(hit?.rowIndex).toBe(0);
+    expect(instrumented.reads()).toBeLessThan(32);
+
+    instrumented.reset();
+    // Tight brush over empty left corner of giant (still only giant class hits).
+    const brushed = index.queryRect(10, 10, 20, 20);
+    expect(brushed.map((h) => h.rowIndex)).toEqual([0]);
+    // queryRect only reads batch.rects for shortlisted hits (3 components each).
+    expect(instrumented.reads()).toBeLessThan(32);
+    expect(instrumented.reads()).toBeLessThan(count / 20);
   });
 });
 
