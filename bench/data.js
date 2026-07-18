@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784376292539,
+  "lastUpdate": 1784377204723,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -26382,6 +26382,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 129.7495,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "1c61325d3b077b9d7e9aa9a53a62ce39517f29d8",
+          "message": "refactor(spec): extract normalize-input types from normalize.ts (#267)\n\nMove builder-level ChannelInput/AesInput/*LayerInput/SpecInput into\nnormalize-input.ts so the input surface is separate from canonicalize\nlogic. Public ./normalize.js re-exports keep index, builder, and tests\non a stable path.",
+          "timestamp": "2026-07-18T07:19:21-05:00",
+          "tree_id": "8ac835b712309c300d4fe3e3fab7a141c1fda68b",
+          "url": "https://github.com/ljodea/ggsvelte/commit/1c61325d3b077b9d7e9aa9a53a62ce39517f29d8"
+        },
+        "date": 1784377203380,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 3.0483,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 4.3727,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 13.2501,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 16.6899,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 107.1933,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 139.8901,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.3355,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.4301,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 106.1536,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 130.1235,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 11.7182,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 11.1644,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 134.9888,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.8678,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 29.7154,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 8.6606,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 38.6495,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 708.6644,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 155.1268,
             "unit": "ms"
           }
         ]
