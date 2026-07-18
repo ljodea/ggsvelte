@@ -62,6 +62,7 @@ jobs:
         name: classify changed paths → job flags
         env:
           EVENT_NAME: ${{ github.event_name }}
+          GITHUB_REF: ${{ github.ref }}
           # PR base SHA is trustworthy; push uses the pre-push tip (may be zeros
           # on a newly created branch — force-all in that case).
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
@@ -92,6 +93,20 @@ jobs:
           fi
           printf '%s\n' "${files[@]}" | bun scripts/ci-routing.ts emit-github-output --stdin
           echo "event=${EVENT_NAME} base=${BASE_SHA} head=${HEAD_SHA} files=${#files[@]}"
+          # Issue #244: main push re-running the full suite saturates the pool.
+          # Keep thinner main surface (checks/unit/build/actions-security);
+          # consumer/component/bench stay PR-primary. force-all paths still
+          # full-suite when base is missing.
+          if [ "${EVENT_NAME}" = "push" ] && [ "${GITHUB_REF}" = "refs/heads/main" ]; then
+            {
+              echo "component=false"
+              echo "consumer=false"
+              echo "bench_smoke=false"
+              echo "interaction_perf=false"
+              echo "packages_dist=false"
+            } >> "$GITHUB_OUTPUT"
+            echo "main push: thinned expensive jobs (issue #244)"
+          fi
 
   # Early package build shared by component / consumer / interaction-perf
   # (issue #241). Unit and bench-smoke keep the cheaper `bun run check`
