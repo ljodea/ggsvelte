@@ -25,6 +25,16 @@ export function appendSourceRowByGroupX(input: {
   else members.push(input.sourceRow);
 }
 
+export function appendSourceRowByGroupKey(
+  map: Map<string, number[]>,
+  key: string,
+  sourceRow: number,
+): void {
+  const members = map.get(key);
+  if (members === undefined) map.set(key, [sourceRow]);
+  else members.push(sourceRow);
+}
+
 interface BinEdge {
   frameRow: number;
   lo: number;

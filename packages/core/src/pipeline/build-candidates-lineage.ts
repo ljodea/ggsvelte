@@ -27,9 +27,9 @@ export function filterRepresentedSourceRows(input: {
   sourceRowsByGroupY?: Map<string, number[]>;
 }): number[] {
   const { frame, table, frameRow } = input;
-  let representedRows = [...input.baseRows];
   const stat = frame.binding.layer.stat ?? "identity";
   const aggregateXField = frame.binding.xField;
+  const aggregateYField = frame.binding.yField;
   const outputX = frame.xValues?.[frameRow] ?? frame.xNumeric?.[frameRow] ?? null;
   const group = input.group ?? frame.groups[frameRow] ?? 0;
   const panelIndex = input.panelIndex;
@@ -39,12 +39,23 @@ export function filterRepresentedSourceRows(input: {
       ? `${panelIndex}:${layerIndex}:${group}`
       : null;
 
-  let narrowedByXOrBin = false;
-  if (
+  const needsX =
     aggregateXField !== null &&
     outputX !== null &&
-    (stat === "count" || stat === "summary" || stat === "boxplot")
-  ) {
+    (stat === "count" || stat === "summary" || stat === "boxplot");
+  const needsBin = stat === "bin" && aggregateXField !== null;
+  const needsY =
+    (stat === "smooth" || stat === "summary" || stat === "boxplot") && aggregateYField !== null;
+
+  // Full-group finite-y path (smooth; summary/boxplot without x/bin): return the
+  // shared cached array before cloning baseRows — keeps resolve O(1) per mark.
+  if (needsY && !needsX && !needsBin && indexKeyPrefix !== null && input.sourceRowsByGroupY) {
+    const cachedY = input.sourceRowsByGroupY.get(indexKeyPrefix);
+    if (cachedY !== undefined) return cachedY;
+  }
+
+  let representedRows = [...input.baseRows];
+  if (needsX) {
     representedRows =
       (indexKeyPrefix !== null && input.sourceRowsByGroupX !== undefined
         ? input.sourceRowsByGroupX.get(`${indexKeyPrefix}:${bandKey(outputX)}`)
@@ -55,8 +66,7 @@ export function filterRepresentedSourceRows(input: {
         outputX,
         baseRows: representedRows,
       });
-    narrowedByXOrBin = true;
-  } else if (stat === "bin" && aggregateXField !== null) {
+  } else if (needsBin) {
     representedRows =
       (indexKeyPrefix !== null && input.sourceRowsByGroupBin !== undefined
         ? input.sourceRowsByGroupBin.get(`${indexKeyPrefix}:${frameRow}`)
@@ -68,24 +78,14 @@ export function filterRepresentedSourceRows(input: {
         field: aggregateXField,
         baseRows: representedRows,
       });
-    narrowedByXOrBin = true;
   }
 
-  const aggregateYField = frame.binding.yField;
-  if ((stat === "smooth" || stat === "summary" || stat === "boxplot") && aggregateYField !== null) {
-    // Full-group path (smooth, or summary/boxplot without x/bin narrowing): reuse
-    // the once-per-group finite-y list. After x/bin narrowing, filter the smaller set.
-    const cachedY =
-      !narrowedByXOrBin && indexKeyPrefix !== null && input.sourceRowsByGroupY !== undefined
-        ? input.sourceRowsByGroupY.get(indexKeyPrefix)
-        : undefined;
-    representedRows =
-      cachedY ??
-      filterAggregateYRows({
-        table,
-        field: aggregateYField,
-        baseRows: representedRows,
-      });
+  if (needsY) {
+    representedRows = filterAggregateYRows({
+      table,
+      field: aggregateYField,
+      baseRows: representedRows,
+    });
   }
 
   return representedRows;

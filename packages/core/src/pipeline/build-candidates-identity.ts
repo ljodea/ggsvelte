@@ -7,6 +7,7 @@ import { bandKey } from "../scales/train.js";
 import { cellToNumber } from "../table.js";
 
 import {
+  appendSourceRowByGroupKey,
   appendSourceRowByGroupX,
   buildBinLineageBuckets,
 } from "./build-candidates-identity-aggregate.js";
@@ -52,16 +53,17 @@ export function buildCandidateIdentityIndex(
       const bucketByX = stat === "count" || stat === "summary" || stat === "boxplot";
       const xField = frame.binding.xField;
       const xColumn = bucketByX && xField !== null ? frame.table.column(xField) : null;
-      const groupKeysThisFrame: string[] = [];
+      // Finite-y membership uses panel-local table indexes (localRow), then stores
+      // source-table rows — same mapping as sourceRowsByGroup itself.
+      const yField = frame.binding.yField;
+      const finiteY =
+        (stat === "smooth" || stat === "summary" || stat === "boxplot") && yField !== null;
+      const yColumn = finiteY ? frame.table.column(yField) : null;
       for (let localRow = 0; localRow < inputGroups.length; localRow++) {
         const group = inputGroups[localRow]!;
         const sourceRow = facetPanels[panelIndex]!.sourceRows?.[localRow] ?? localRow;
         const key = `${frameKey}:${group}`;
-        const members = sourceRowsByGroup.get(key);
-        if (members === undefined) {
-          sourceRowsByGroup.set(key, [sourceRow]);
-          groupKeysThisFrame.push(key);
-        } else members.push(sourceRow);
+        appendSourceRowByGroupKey(sourceRowsByGroup, key, sourceRow);
         if (xColumn !== null) {
           appendSourceRowByGroupX({
             sourceRowsByGroupX,
@@ -72,6 +74,9 @@ export function buildCandidateIdentityIndex(
             sourceRow,
           });
         }
+        if (yColumn !== null && Number.isFinite(cellToNumber(yColumn[localRow]!))) {
+          appendSourceRowByGroupKey(sourceRowsByGroupY, key, sourceRow);
+        }
       }
       if (stat === "bin") {
         buildBinLineageBuckets({
@@ -81,18 +86,6 @@ export function buildCandidateIdentityIndex(
           facetPanel: facetPanels[panelIndex]!,
           sourceRowsByGroupBin,
         });
-      }
-      // Once-per-group finite-y lists for stats that drop non-finite y in lineage.
-      const yField = frame.binding.yField;
-      if ((stat === "smooth" || stat === "summary" || stat === "boxplot") && yField !== null) {
-        const yColumn = frame.table.column(yField);
-        for (const key of groupKeysThisFrame) {
-          const rows = sourceRowsByGroup.get(key)!;
-          sourceRowsByGroupY.set(
-            key,
-            rows.filter((row) => Number.isFinite(cellToNumber(yColumn[row]!))),
-          );
-        }
       }
       for (let i = 0; i < frame.rowIndex.length; i++) {
         const sourceRow = frame.rowIndex[i]!;
