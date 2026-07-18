@@ -6,6 +6,7 @@ import {
   buildKnownFalsePositives,
   parseSelfHostedLabels,
   parseYamlListScalar,
+  prepareSourceForLint,
 } from "./actionlint.ts";
 
 const root = join(import.meta.dir, "..");
@@ -62,6 +63,22 @@ labels:
     expect(patterns.some((re) => re.test('undefined variable "vars"'))).toBe(true);
     expect(patterns.some((re) => re.test('label "ggsvelte" is unknown'))).toBe(true);
     expect(patterns.some((re) => re.test('label "other" is unknown'))).toBe(false);
+  });
+
+  it("strips concurrency queue: max for lint-only source (actionlint wasm gap)", () => {
+    const raw = `concurrency:
+  group: heavy-component
+  cancel-in-progress: false
+  queue: max
+  # comment stays
+jobs: {}
+`;
+    const prepared = prepareSourceForLint(raw);
+    expect(prepared).not.toContain("queue: max");
+    expect(prepared).toContain("group: heavy-component");
+    expect(prepared).toContain("cancel-in-progress: false");
+    // Real workflow file still has queue: max; only lint input is rewritten.
+    expect(read(".github/workflows/ci.yml")).toContain("queue: max");
   });
 
   it("keeps .github/actionlint.yaml labels wired into the wasm runner", () => {
