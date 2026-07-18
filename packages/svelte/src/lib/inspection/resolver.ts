@@ -80,6 +80,19 @@ function cellToken(value: CellValue): string {
   return `${typeof value}:${String(value)}`;
 }
 
+/**
+ * Stable cell payload for semantic fingerprints. Insertion order of Object.keys
+ * is used (no O(F log F) sort): same row object is stable; content-equal clones
+ * with different key order may re-emit (safe over-emit, not under-emit).
+ */
+function rowCellPayload(row: Record<string, CellValue>): string {
+  const parts: string[] = [];
+  for (const field of Object.keys(row)) {
+    parts.push(`${field}=${cellToken(row[field] ?? null)}`);
+  }
+  return parts.join(",");
+}
+
 function resolvedTarget(
   model: RenderModel,
   seed: CandidateFacts,
@@ -291,7 +304,13 @@ export function createInspectionCoordinator<
     if (target === null) return null;
     const completeness =
       input.state === "pinned" ? "complete" : (input.completeness ?? "transient");
-    const semanticMembers = target.members.map((candidate) => {
+    // Pin/complete fingerprints the full group; transient matches materialize's
+    // TRANSIENT_MEMBER_LIMIT so pointer inspect is O(min(M,8)·F), not O(M·F log F).
+    const fingerprintMembers =
+      completeness === "complete"
+        ? target.members
+        : target.members.slice(0, TRANSIENT_MEMBER_LIMIT);
+    const semanticMembers = fingerprintMembers.map((candidate) => {
       const row = candidate.rowIndex === null ? null : input.model.row(candidate.rowIndex);
       const key =
         row === null || candidate.rowIndex === null ? null : keyOf(row as Row, candidate.rowIndex);
@@ -299,10 +318,7 @@ export function createInspectionCoordinator<
       const payload =
         row === null
           ? `${axisToken(candidate.xToken)},${axisToken(candidate.yToken)}`
-          : Object.keys(row)
-              .toSorted()
-              .map((field) => `${field}=${cellToken(row[field] ?? null)}`)
-              .join(",");
+          : rowCellPayload(row as Record<string, CellValue>);
       return `${semanticKeyToken(key, fallback)}{${payload}}`;
     });
     const focusRow = input.seed.rowIndex === null ? null : input.model.row(input.seed.rowIndex);
@@ -329,13 +345,18 @@ export function createInspectionCoordinator<
       input.state,
     ].join("|");
     const range = target.group?.range;
+    // Mirror fingerprintMembers: transient pinches presentation id to the same
+    // member window as materialize (layoutEpoch + range already cover the bucket).
+    const presentationMembers = fingerprintMembers;
     const presentationIdentity = [
       epochToken(input.layoutEpoch),
       PRESENTATION_ORDERING_VERSION,
       range === undefined
         ? `candidate:${input.seed.id}`
         : `${range.axis}:${range.start}:${range.end}`,
-      target.members.map((candidate) => `${candidate.id}@${candidate.x},${candidate.y}`).join(";"),
+      presentationMembers
+        .map((candidate) => `${candidate.id}@${candidate.x},${candidate.y}`)
+        .join(";"),
     ].join("|");
     const cacheKey = `${epochToken(input.layoutEpoch)}|${presentationIdentity}|${semanticFingerprint}|${completeness}|${input.source}`;
     const current = input.state === "pinned" ? pinned : transient;

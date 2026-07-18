@@ -582,6 +582,46 @@ describe("semantic inspection resolver", () => {
     }
   });
 
+  it("transient fingerprint does not read every row in a large axis group", () => {
+    // Complexity: fingerprint used to walk all M members (Object.keys each row)
+    // before the slot cache check. Transient now caps at TRANSIENT_MEMBER_LIMIT (8).
+    const n = 400;
+    const data = Array.from({ length: n }, (_, i) => ({
+      id: `r${i}`,
+      x: 1,
+      y: i,
+    }));
+    const model = runPipeline(
+      gg(data, aes({ x: "x", y: "y", color: "id" }))
+        .geomPoint()
+        .spec(),
+      { width: 400, height: 300 },
+    );
+    const originalRow = model.row.bind(model);
+    let rowReads = 0;
+    vi.spyOn(model, "row").mockImplementation((index: number) => {
+      rowReads++;
+      return originalRow(index);
+    });
+    const coordinator = createInspectionCoordinator((row) => String((row as { id: string }).id));
+    rowReads = 0;
+    const resolved = coordinator.resolve({
+      model,
+      seed: model.candidates.candidate(0)!,
+      mode: "x",
+      state: "transient",
+      source: "pointer",
+      identityEpoch: 1,
+      layoutEpoch: "layout-1",
+      completeness: "transient",
+    });
+    expect(resolved).not.toBeNull();
+    // Full-group fingerprint would read ~n member rows (+ focus). Cap ≈ 8 members + focus + materialize.
+    expect(rowReads).toBeLessThan(40);
+    expect(rowReads).toBeLessThan(n / 5);
+    model.dispose();
+  });
+
   it("fingerprints null/Date/-0 cells and symbol keys in coordinated snapshots", () => {
     const data = [
       { id: "a", x: 1, y: 2 },
