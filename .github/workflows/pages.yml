@@ -113,6 +113,11 @@ jobs:
     name: deploy GitHub Pages
     needs: [detect-changes, build]
     if: needs.detect-changes.outputs.pages == 'true' && needs.build.result == 'success'
+    # Serialize production deploys only — skip-only runs never reach this job,
+    # so they cannot cancel or displace a pending deploy of a docs/package push.
+    concurrency:
+      group: pages-deploy
+      cancel-in-progress: false
     # GitHub-hosted: pages write + OIDC; keep privileged deploys off self-hosted.
     runs-on: ubuntu-latest
     permissions:
