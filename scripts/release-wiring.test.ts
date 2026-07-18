@@ -172,3 +172,10 @@ it("thins expensive jobs on main push (issue #244)", () => {
   expect(ci).toContain("main push: thinned expensive jobs (issue #244)");
   expect(ci).toContain("packages_dist=false");
 });
+
+it("caps heavy self-hosted jobs with concurrency groups (issue #247)", () => {
+  const ci = read(".github/workflows/ci.yml");
+  expect(ci).toContain("group: heavy-component-svelte");
+  expect(ci).toContain("group: heavy-consumer-");
+  expect(ci).toContain("Heavy-job pool policy");
+});

@@ -26,6 +26,12 @@ concurrency:
   # Cancel superseded runs on PRs/branches; never cancel main.
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
+# Heavy-job pool policy (issue #247):
+# Light jobs (detect-changes, checks, unit, actions-security, vr-baseline-guard,
+# compatibility-matrix, ci-gate) run freely. Heavy container / matrix work uses
+# job-level concurrency groups so Playwright containers do not oversubscribe
+# the shared 8-vCPU self-hosted host.
+
 env:
   # Keep in sync with: spikes/browser devDependency "playwright" and the
   # `component` job's container image below. The sync is asserted in a step.
@@ -116,6 +122,10 @@ jobs:
     needs: detect-changes
     if: needs.detect-changes.outputs.packages_dist == 'true'
     runs-on: [self-hosted, ggsvelte]
+    # Cap concurrent heavy work on the shared self-hosted host (#247).
+    concurrency:
+      group: heavy-packages-dist
+      cancel-in-progress: false
     permissions:
       contents: read
     steps:
@@ -260,6 +270,10 @@ jobs:
       matrix: ${{ fromJSON(needs.compatibility-matrix.outputs.matrix) }}
     # Linux rows use the private self-hosted pool; Windows/macOS stay on GitHub-hosted.
     runs-on: ${{ startsWith(matrix.os, 'ubuntu') && fromJSON('["self-hosted","ggsvelte"]') || matrix.os }}
+    # Cap concurrent heavy work on the shared self-hosted host (#247).
+    concurrency:
+      group: heavy-consumer-${{ matrix.os }}-${{ matrix.node }}-${{ matrix.packageManager }}
+      cancel-in-progress: false
     timeout-minutes: 20
     permissions:
       contents: read
@@ -313,6 +327,10 @@ jobs:
       needs.detect-changes.outputs.component == 'true' &&
       needs.packages-dist.result == 'success'
     runs-on: [self-hosted, ggsvelte]
+    # Cap concurrent heavy work on the shared self-hosted host (#247).
+    concurrency:
+      group: heavy-component-svelte
+      cancel-in-progress: false
     env:
       # GitHub runs the container as root, while /github/home belongs to
       # pwuser. Firefox refuses that ownership mismatch.
@@ -391,6 +409,10 @@ jobs:
       needs.detect-changes.outputs.component == 'true' &&
       needs.packages-dist.result == 'success'
     runs-on: [self-hosted, ggsvelte]
+    # Cap concurrent heavy work on the shared self-hosted host (#247).
+    concurrency:
+      group: heavy-component-spikes
+      cancel-in-progress: false
     env:
       # GitHub runs the container as root, while /github/home belongs to
       # pwuser. Firefox refuses that ownership mismatch.
@@ -469,6 +491,10 @@ jobs:
       needs.detect-changes.outputs.component == 'true' &&
       needs.packages-dist.result == 'success'
     runs-on: [self-hosted, ggsvelte]
+    # Cap concurrent heavy work on the shared self-hosted host (#247).
+    concurrency:
+      group: heavy-component-journeys
+      cancel-in-progress: false
     env:
       # GitHub runs the container as root, while /github/home belongs to
       # pwuser. Firefox refuses that ownership mismatch.
@@ -553,6 +579,10 @@ jobs:
       needs.detect-changes.outputs.interaction_perf == 'true' &&
       needs.packages-dist.result == 'success'
     runs-on: [self-hosted, ggsvelte]
+    # Cap concurrent heavy work on the shared self-hosted host (#247).
+    concurrency:
+      group: heavy-component-interaction-perf
+      cancel-in-progress: false
     env:
       HOME: /root
     container:
