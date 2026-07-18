@@ -47,6 +47,7 @@ jobs:
       actions_security: ${{ steps.route.outputs.actions_security }}
       bench_smoke: ${{ steps.route.outputs.bench_smoke }}
       interaction_perf: ${{ steps.route.outputs.interaction_perf }}
+      packages_dist: ${{ steps.route.outputs.packages_dist }}
       vr: ${{ steps.route.outputs.vr }}
       pages: ${{ steps.route.outputs.pages }}
     steps:
@@ -91,6 +92,69 @@ jobs:
           fi
           printf '%s\n' "${files[@]}" | bun scripts/ci-routing.ts emit-github-output --stdin
           echo "event=${EVENT_NAME} base=${BASE_SHA} head=${HEAD_SHA} files=${#files[@]}"
+
+  # Early package build shared by component / consumer / interaction-perf
+  # (issue #241). Unit and bench-smoke keep the cheaper `bun run check`
+  # (spec/core only) and do not wait on this job.
+  packages-dist:
+    name: packages-dist (build + upload packages/*/dist)
+    needs: detect-changes
+    if: needs.detect-changes.outputs.packages_dist == 'true'
+    runs-on: [self-hosted, ggsvelte]
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.3.14
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-
+      - run: bun install --frozen-lockfile
+      - name: build packages (tsc -b + svelte-package)
+        run: bun run build
+      - name: verify required package dist outputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          for path in \
+            packages/spec/dist/index.js \
+            packages/core/dist/index.js \
+            packages/svelte/dist/index.js; do
+            if [ ! -f "${path}" ]; then
+              echo "::error::missing required dist output: ${path}"
+              exit 1
+            fi
+          done
+          echo "packages-dist: verified spec/core/svelte dist entrypoints"
+      - name: stage packages/*/dist under a single upload root
+        # Multi-path upload strips the common prefix, so consumers would see
+        # spec/dist instead of packages/spec/dist. Stage once and upload that tree.
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .packages-dist-upload
+          mkdir -p .packages-dist-upload/packages/spec \
+            .packages-dist-upload/packages/core \
+            .packages-dist-upload/packages/svelte
+          cp -a packages/spec/dist .packages-dist-upload/packages/spec/
+          cp -a packages/core/dist .packages-dist-upload/packages/core/
+          cp -a packages/svelte/dist .packages-dist-upload/packages/svelte/
+      - name: upload packages/*/dist for same-run consumers
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          # Run-scoped identity (same commit as this workflow run). Not a
+          # content-hash cache across runs — see issue #245 for that.
+          name: packages-dist
+          # Single directory root → download path: packages restores packages/*/dist.
+          path: .packages-dist-upload/packages
+          if-no-files-found: error
+          retention-days: 1
 
   checks:
     name: checks (pre-commit stage)
@@ -170,8 +234,11 @@ jobs:
 
   consumer-compat:
     name: packed consumer (${{ matrix.os }}, Node ${{ matrix.node }}, ${{ matrix.packageManager }}, Svelte ${{ matrix.svelte }})
-    needs: [detect-changes, compatibility-matrix]
-    if: needs.detect-changes.outputs.consumer == 'true' && needs.compatibility-matrix.result == 'success'
+    needs: [detect-changes, compatibility-matrix, packages-dist]
+    if: >-
+      needs.detect-changes.outputs.consumer == 'true' &&
+      needs.compatibility-matrix.result == 'success' &&
+      needs.packages-dist.result == 'success'
     strategy:
       fail-fast: false
       max-parallel: 4
@@ -192,8 +259,26 @@ jobs:
         with:
           bun-version: 1.3.14
       - run: bun install --frozen-lockfile
-      - name: build release-shaped package contents
-        run: bun run build
+      - name: download shared packages/*/dist
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: packages-dist
+          # Producer uploads .packages-dist-upload/packages → extract as packages/.
+          path: packages
+      - name: verify downloaded package dist entrypoints
+        shell: bash
+        run: |
+          set -euo pipefail
+          for path in \
+            packages/spec/dist/index.js \
+            packages/core/dist/index.js \
+            packages/svelte/dist/index.js; do
+            if [ ! -f "${path}" ]; then
+              echo "::error::packages-dist artifact missing ${path} after download"
+              find packages -maxdepth 3 -type d 2>/dev/null | head -40 || true
+              exit 1
+            fi
+          done
       - name: type-check Svelte package source
         run: bun run check:svelte
       - name: install tarballs in a clean consumer and exercise types, build, SSR, Node, and CLI
@@ -205,8 +290,10 @@ jobs:
 
   component:
     name: component (vitest browser mode, pinned Playwright container)
-    needs: detect-changes
-    if: needs.detect-changes.outputs.component == 'true'
+    needs: [detect-changes, packages-dist]
+    if: >-
+      needs.detect-changes.outputs.component == 'true' &&
+      needs.packages-dist.result == 'success'
     runs-on: [self-hosted, ggsvelte]
     env:
       # GitHub runs the container as root, while /github/home belongs to
@@ -236,6 +323,26 @@ jobs:
           key: bun-container-${{ runner.os }}-${{ hashFiles('bun.lock') }}
           restore-keys: bun-container-${{ runner.os }}-
       - run: bun install --frozen-lockfile
+      - name: download shared packages/*/dist
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: packages-dist
+          # Producer uploads .packages-dist-upload/packages → extract as packages/.
+          path: packages
+      - name: verify downloaded package dist entrypoints
+        shell: bash
+        run: |
+          set -euo pipefail
+          for path in \
+            packages/spec/dist/index.js \
+            packages/core/dist/index.js \
+            packages/svelte/dist/index.js; do
+            if [ ! -f "${path}" ]; then
+              echo "::error::packages-dist artifact missing ${path} after download"
+              find packages -maxdepth 3 -type d 2>/dev/null | head -40 || true
+              exit 1
+            fi
+          done
       - name: assert playwright npm/container version sync
         run: |
           set -euo pipefail
@@ -254,8 +361,6 @@ jobs:
             echo "::error::@playwright/test version (${vr_version}) does not match pinned container tag (${PLAYWRIGHT_CONTAINER_TAG})"
             exit 1
           fi
-      - name: build all packages for browser and docs targets
-        run: bun run build
       - name: component tests (packages/svelte, vitest browser mode)
         working-directory: packages/svelte
         run: bun run --bun test
@@ -286,8 +391,10 @@ jobs:
   # on `run-bench` PRs via bench.yml.
   interaction-perf:
     name: interaction-perf (p50/p95, informational)
-    needs: detect-changes
-    if: needs.detect-changes.outputs.interaction_perf == 'true'
+    needs: [detect-changes, packages-dist]
+    if: >-
+      needs.detect-changes.outputs.interaction_perf == 'true' &&
+      needs.packages-dist.result == 'success'
     runs-on: [self-hosted, ggsvelte]
     env:
       HOME: /root
@@ -313,8 +420,28 @@ jobs:
           key: bun-container-${{ runner.os }}-${{ hashFiles('bun.lock') }}
           restore-keys: bun-container-${{ runner.os }}-
       - run: bun install --frozen-lockfile
-      - name: build packages and docs for interaction performance fixtures
-        run: bun run build && BASE_PATH=/ggsvelte bun run build:docs
+      - name: download shared packages/*/dist
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: packages-dist
+          # Producer uploads .packages-dist-upload/packages → extract as packages/.
+          path: packages
+      - name: verify downloaded package dist entrypoints
+        shell: bash
+        run: |
+          set -euo pipefail
+          for path in \
+            packages/spec/dist/index.js \
+            packages/core/dist/index.js \
+            packages/svelte/dist/index.js; do
+            if [ ! -f "${path}" ]; then
+              echo "::error::packages-dist artifact missing ${path} after download"
+              find packages -maxdepth 3 -type d 2>/dev/null | head -40 || true
+              exit 1
+            fi
+          done
+      - name: build docs for interaction performance fixtures
+        run: BASE_PATH=/ggsvelte bun run build:docs
       - name: interaction performance p50/p95 (informational — never fail the check)
         id: perf
         # Wall-clock budgets flake on the shared self-hosted host. Hard gate is
@@ -377,13 +504,9 @@ jobs:
         run: bun run build:docs
       - name: verify packed Pages links and required R0 journeys
         run: bun run check:pages-links
-      - name: upload built package output (when present)
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: packages-dist
-          path: packages/*/dist
-          if-no-files-found: ignore
-          retention-days: 7
+      # packages/*/dist for consumers is produced by packages-dist (issue #241).
+      # This job keeps an independent build so publint/attw always re-validate
+      # a fresh tree alongside knip/type-aware analysis.
 
   actions-security:
     name: actions-security (actionlint + zizmor)
@@ -486,6 +609,7 @@ jobs:
     if: always()
     needs:
       - detect-changes
+      - packages-dist
       - checks
       - unit
       - compatibility-matrix
@@ -515,6 +639,7 @@ jobs:
           BUILD_REQ: ${{ needs.detect-changes.outputs.build }}
           ACTIONS_REQ: ${{ needs.detect-changes.outputs.actions_security }}
           BENCH_REQ: ${{ needs.detect-changes.outputs.bench_smoke }}
+          PACKAGES_DIST_REQ: ${{ needs.detect-changes.outputs.packages_dist }}
           CHECKS_RES: ${{ needs.checks.result }}
           UNIT_RES: ${{ needs.unit.result }}
           COMPONENT_RES: ${{ needs.component.result }}
@@ -522,6 +647,7 @@ jobs:
           BUILD_RES: ${{ needs.build.result }}
           ACTIONS_RES: ${{ needs.actions-security.result }}
           BENCH_RES: ${{ needs.bench-smoke.result }}
+          PACKAGES_DIST_RES: ${{ needs.packages-dist.result }}
           VR_GUARD_RES: ${{ needs.vr-baseline-guard.result }}
           EVENT_NAME: ${{ github.event_name }}
         shell: bash
@@ -546,6 +672,7 @@ jobs:
               actions_security: req("ACTIONS_REQ"),
               bench_smoke: req("BENCH_REQ"),
               interaction_perf: false,
+              packages_dist: req("PACKAGES_DIST_REQ"),
               vr: false,
               pages: false,
             };
@@ -557,6 +684,7 @@ jobs:
               build: env.BUILD_RES as JobResult,
               actions_security: env.ACTIONS_RES as JobResult,
               bench_smoke: env.BENCH_RES as JobResult,
+              packages_dist: env.PACKAGES_DIST_RES as JobResult,
             };
             const gate = evaluateGate(required, results);
             const failures = [...gate.failures];

@@ -23,15 +23,21 @@ describe("R0 release wiring", () => {
   it("runs the Playwright interaction performance gate with benchmark budgets", () => {
     const ci = read(".github/workflows/ci.yml");
     const bench = read(".github/workflows/bench.yml");
-    const componentJob = ci.slice(ci.indexOf("  component:"), ci.indexOf("\n  interaction-perf:"));
+    // Slice from job name headers (not detect-changes output keys).
+    const componentJob = ci.slice(
+      ci.indexOf("  component:\n    name: component"),
+      ci.indexOf("  interaction-perf:\n    name: interaction-perf"),
+    );
     const interactionPerfJob = ci.slice(
-      ci.indexOf("  interaction-perf:"),
-      ci.indexOf("\n  build:"),
+      ci.indexOf("  interaction-perf:\n    name: interaction-perf"),
+      ci.indexOf("  build:\n    name: build"),
     );
     expect(ci).toContain("mcr.microsoft.com/playwright:v1.61.1-noble");
     expect(ci).toContain("HOME: /root");
-    expect(componentJob).toContain("name: build all packages for browser and docs targets");
-    expect(componentJob).toContain("run: bun run build");
+    // Component downloads shared packages/*/dist (issue #241); does not rebuild packages.
+    expect(componentJob).toContain("download-artifact");
+    expect(componentJob).toContain("packages-dist");
+    expect(componentJob).not.toContain("run: bun run build");
     // Absolute wall-clock gates stay out of the required `component` check
     // so multi-runner host noise cannot block merges (issue #154).
     expect(componentJob).not.toContain("bun run test:interaction-perf");
@@ -42,6 +48,8 @@ describe("R0 release wiring", () => {
     expect(interactionPerfJob).not.toContain("needs: [component]");
     expect(interactionPerfJob).toContain("informational");
     expect(interactionPerfJob).toContain("interaction_perf == 'true'");
+    expect(interactionPerfJob).toContain("download-artifact");
+    expect(interactionPerfJob).toContain("packages-dist");
     expect(bench).toContain("mcr.microsoft.com/playwright:v1.61.1-noble");
     expect(bench).toContain("bun run test:interaction-perf");
     expect(read("package.json")).toContain('"test:interaction-perf"');
@@ -49,6 +57,35 @@ describe("R0 release wiring", () => {
     expect(read("apps/docs/src/routes/__perf/interaction-100k/+page.svelte")).toContain(
       "length: 100_000",
     );
+  });
+
+  it("shares packages/*/dist via a packages-dist producer job (issue #241)", () => {
+    const ci = read(".github/workflows/ci.yml");
+    const producerJob = ci.slice(
+      ci.indexOf("  packages-dist:\n    name: packages-dist"),
+      ci.indexOf("  checks:\n    name: checks"),
+    );
+    expect(producerJob).toContain("packages_dist == 'true'");
+    expect(producerJob).toContain("if-no-files-found: error");
+    expect(producerJob).toContain("packages/spec/dist");
+    expect(producerJob).toContain("packages/core/dist");
+    expect(producerJob).toContain("packages/svelte/dist");
+    expect(producerJob).toContain("run: bun run build");
+    // Consumers download instead of rebuilding packages.
+    const consumerJob = ci.slice(
+      ci.indexOf("  consumer-compat:\n    name: packed consumer"),
+      ci.indexOf("  component:\n    name: component"),
+    );
+    expect(consumerJob).toContain("download-artifact");
+    expect(consumerJob).toContain("packages-dist");
+    expect(consumerJob).not.toContain("run: bun run build");
+    // Unit and bench-smoke keep the cheaper bun run check path (Codex plan review).
+    const unitJob = ci.slice(
+      ci.indexOf("  unit:\n    name: unit"),
+      ci.indexOf("  compatibility-matrix:\n    name: compatibility matrix"),
+    );
+    expect(unitJob).toContain("bun run check");
+    expect(unitJob).not.toContain("download-artifact");
   });
 
   it("enforces retained memory on path-routed bench-smoke CI jobs", () => {
