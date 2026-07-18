@@ -276,12 +276,18 @@ describe("R0 release wiring", () => {
     ]) {
       expect(dependabot).toContain(directory);
     }
-    // Playwright stays human-authored: package pins + container tag lockstep.
+    // github-actions "/" only covers workflows; composites need their own dirs.
+    expect(dependabot).toContain('"/.github/actions/ci-content-hash-restore"');
+    expect(dependabot).toContain('"/.github/actions/ci-content-hash-write"');
+    // Human-authored locksteps / Changesets-owned internal ranges.
     expect(dependabot).toContain('dependency-name: "playwright"');
     expect(dependabot).toContain('dependency-name: "@playwright/test"');
-    // Action bumps batch into one weekly PR.
+    expect(dependabot).toContain('dependency-name: "pnpm"');
+    expect(dependabot).toContain('dependency-name: "@ggsvelte/*"');
+    // Action bumps group by dependency name across workflows + composites.
     expect(dependabot).toContain("github-actions:");
     expect(dependabot).toContain('patterns: ["*"]');
+    expect(dependabot).toContain("group-by: dependency-name");
   });
 
   it("versions only publishable packages", () => {

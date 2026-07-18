@@ -2,16 +2,19 @@
 #
 # Ecosystems in use:
 #   - bun: root workspace tooling + package/app/spike manifests (single bun.lock)
-#   - github-actions: workflows under .github/workflows and composite actions
+#   - github-actions: workflows under .github/workflows and local composite actions
 #
 # Not configured (no manifests / no value here):
 #   docker, docker-compose, gomod, cargo, uv
 #   pre-commit — hooks are repo-local `language: system` only (no remote revs)
 #
-# Playwright / @playwright/test are fully ignored: exact pins must stay in
-# lockstep with mcr.microsoft.com/playwright:vX.Y.Z-noble (asserted in CI and
-# documented in CONTRIBUTING.md). Bump them in a human-authored PR that updates
-# package pins + every container tag together.
+# Human-authored locksteps (ignored here):
+#   - playwright / @playwright/test — must match mcr.microsoft.com/playwright:v…-noble
+#     (asserted in CI; see CONTRIBUTING.md tool roster)
+#   - pnpm — root pin must match support-matrix.json packageManagers.pnpm
+#     (asserted in scripts/support-matrix.test.ts)
+#   - @ggsvelte/* — publish-range deps in packages/* are owned by Changesets,
+#     not Dependabot registry bumps
 #
 # Majors for svelte / vite / @sveltejs/* / typescript / vitest / @types/* are
 # ignored so Dependabot does not open breaking migration PRs automatically.
@@ -78,6 +81,8 @@ updates:
           - "prettier-plugin-svelte"
           - "playwright"
           - "@playwright/test"
+          - "pnpm"
+          - "@ggsvelte/*"
         group-by: dependency-name
     ignore:
       - dependency-name: "svelte"
@@ -101,12 +106,22 @@ updates:
       # Container lockstep — see header comment and CONTRIBUTING.md tool roster.
       - dependency-name: "playwright"
       - dependency-name: "@playwright/test"
+      # support-matrix.json packageManagers.pnpm lockstep (support-matrix.test.ts).
+      - dependency-name: "pnpm"
+      # Internal publish ranges are Changesets-owned, not registry bumps.
+      - dependency-name: "@ggsvelte/*"
 
-  # GitHub Actions (workflows + .github/actions) — Tuesday 09:00 UTC
+  # GitHub Actions — Tuesday 09:00 UTC
+  # directory: "/" covers .github/workflows (+ root action.yml if present).
+  # Composite actions under .github/actions/* need their own directories —
+  # Dependabot does not walk them from "/".
   # Actions are SHA-pinned (zizmor-enforced). Dependabot updates the pin SHA
   # and keeps the version comment current when present.
   - package-ecosystem: "github-actions"
-    directory: "/"
+    directories:
+      - "/"
+      - "/.github/actions/ci-content-hash-restore"
+      - "/.github/actions/ci-content-hash-write"
     schedule:
       interval: "weekly"
       day: "tuesday"
@@ -120,6 +135,7 @@ updates:
     cooldown:
       default-days: 3
     groups:
-      # One weekly PR for all action bumps — keeps the review surface small.
+      # One PR per action name, aligned across workflows + composite actions.
       github-actions:
         patterns: ["*"]
+        group-by: dependency-name

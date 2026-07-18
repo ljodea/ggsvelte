@@ -105,15 +105,22 @@ upstream, `.md`/`.yaml`/`.svelte` can fold back into oxfmt (`.oxfmtrc.json`
 - **Bun** workspace manifests (root + packages/apps/examples/benchmarks/spikes)
   on Mondays — grouped so one dependency update lands across every `package.json`
   that lists it.
-- **GitHub Actions** (workflows + composite actions) on Tuesdays — batched into
-  a single PR because third-party actions are SHA-pinned (zizmor-enforced).
+- **GitHub Actions** on Tuesdays — workflows plus local composites under
+  `.github/actions/*` (Dependabot does not walk composites from `/` alone).
+  Third-party actions are SHA-pinned (zizmor-enforced); bumps group by action
+  name across every pin site.
 
-Dependabot does **not** bump `playwright` / `@playwright/test`: those exact
-pins must stay aligned with every `mcr.microsoft.com/playwright:v…-noble`
-container tag (asserted in CI). Bump them in a human-authored PR that updates
-package pins and container tags together. Majors for `svelte`, `vite`,
-`@sveltejs/*`, `typescript`, and `vitest` are also ignored — land those as
-deliberate migrations.
+Dependabot does **not** auto-bump these (human-authored locksteps / release flow):
+
+- `playwright` / `@playwright/test` — exact pins must match every
+  `mcr.microsoft.com/playwright:v…-noble` container tag (asserted in CI).
+- `pnpm` — root pin must match `support-matrix.json` `packageManagers.pnpm`
+  (asserted in `scripts/support-matrix.test.ts`).
+- `@ggsvelte/*` — internal publish ranges are owned by Changesets, not registry
+  bumps from Dependabot.
+
+Majors for `svelte`, `vite`, `@sveltejs/*`, `typescript`, and `vitest` are also
+ignored — land those as deliberate migrations.
 
 ## Running the checks
 
