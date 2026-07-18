@@ -96,6 +96,15 @@ describe("canonicalAxisToken", () => {
   });
 });
 
+describe("candidate-store public facade", () => {
+  it("exposes only buildCandidateStore and canonicalAxisToken at runtime", async () => {
+    const facade = await import("../src/candidate-store.ts");
+    expect(Object.keys(facade).toSorted()).toEqual(
+      ["buildCandidateStore", "canonicalAxisToken"].toSorted(),
+    );
+  });
+});
+
 describe("CandidateStore", () => {
   const store = buildCandidateStore(scene(), {
     epoch: 7,
