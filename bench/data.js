@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784337658612,
+  "lastUpdate": 1784337678152,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -20908,6 +20908,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 159.7219,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "6f453998794967952cf5453a345b16a91c1dcc07",
+          "message": "perf(svelte): O(R) inspection sourceKeys dedup via uniqueKeysFromRowIndexes (#206)\n\nReplace Array#includes membership in PlotDatum source-key collection with\nthe shared Set-based first-seen helper (O(R) instead of O(R²) for large\naggregate/stat lineages). Preserve first-seen order and null-skipping;\nadd behavioral + structural scale tests.\n\nCloses #200",
+          "timestamp": "2026-07-17T20:20:34-05:00",
+          "tree_id": "fe7bd4568ae5789f41d1c6d921c49c8baeea1f4a",
+          "url": "https://github.com/ljodea/ggsvelte/commit/6f453998794967952cf5453a345b16a91c1dcc07"
+        },
+        "date": 1784337676731,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.7839,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.1589,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 11.5631,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 15.7536,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 98.5855,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 125.5637,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.2558,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.3518,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 96.9287,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 117.167,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 10.6626,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 10.3964,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 122.1611,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7835,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 26.5909,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 5.9087,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 32.3016,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 621.1435,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 140.2469,
             "unit": "ms"
           }
         ]
