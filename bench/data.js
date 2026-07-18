@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784415125415,
+  "lastUpdate": 1784415512520,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -30904,6 +30904,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 160.7767,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b66091ec530299fb5916fb6902b7f4232ecf3b1b",
+          "message": "deps-dev: bump @sveltejs/kit 2.69.2 → 2.69.3 (#309)\n\nReplacement for conflicted Dependabot PR #300, rebased onto current main.\nKeeps the docs pin at ^2.69.3 and resolves bun.lock to @sveltejs/kit@2.69.3.",
+          "timestamp": "2026-07-18T17:57:54-05:00",
+          "tree_id": "34c3a48175db0775ae80e5b74374248dd0bbba5d",
+          "url": "https://github.com/ljodea/ggsvelte/commit/b66091ec530299fb5916fb6902b7f4232ecf3b1b"
+        },
+        "date": 1784415511597,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.2421,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.9988,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 10.4011,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 13.3274,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 82.5528,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 117.7398,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.4111,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.9012,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 86.0906,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 106.4558,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.6469,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.3655,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 114.0349,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7945,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 25.5978,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.7576,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 32.4634,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 595.1119,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 159.8105,
             "unit": "ms"
           }
         ]
