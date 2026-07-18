@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784360201487,
+  "lastUpdate": 1784362120131,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -24597,6 +24597,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 160.8706,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c05fb69815fadc10ff7a47f49c8ae24b99bd1531",
+          "message": "ci: thin expensive jobs on main push after PR validation (#244) (#255)\n\nKeep checks/unit/build/actions-security on main; skip consumer/component/\nbench/packages-dist so merge bursts do not re-saturate the self-hosted pool.",
+          "timestamp": "2026-07-18T03:08:01-05:00",
+          "tree_id": "51254c799766a0f9d3657b4a6e8a6644a3d6a7e5",
+          "url": "https://github.com/ljodea/ggsvelte/commit/c05fb69815fadc10ff7a47f49c8ae24b99bd1531"
+        },
+        "date": 1784362119235,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.2855,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 4.3034,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 9.9845,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 13.6039,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 85.0029,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 121.2363,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.4358,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.3132,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 93.2817,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 109.3179,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 12.1809,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.3045,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 118.014,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.8054,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 29.8359,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 8.9269,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 28.2517,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 623.6798,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 167.2839,
             "unit": "ms"
           }
         ]
