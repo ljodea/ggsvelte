@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784414045164,
+  "lastUpdate": 1784414098425,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -30547,6 +30547,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 161.975,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "1f6c551db5bc5ea7025a168f0d63094fdc6611a9",
+          "message": "deps-dev(deps-dev): bump @changesets/cli in / (#307)\n\nBumps [@changesets/cli](https://github.com/changesets/changesets) in `/` from 2.31.0 to 2.31.1.\n\n\nUpdates `@changesets/cli` from 2.31.0 to 2.31.1\n- [Release notes](https://github.com/changesets/changesets/releases)\n- [Commits](https://github.com/changesets/changesets/compare/@changesets/cli@2.31.0...@changesets/cli@2.31.1)\n\n---\nupdated-dependencies:\n- dependency-name: \"@changesets/cli\"\n  dependency-version: 2.31.1\n  dependency-type: direct:development\n  update-type: version-update:semver-patch\n  dependency-group: bun\n...\n\nSigned-off-by: dependabot[bot] <support@github.com>\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>\nCo-authored-by: Liam O'Dea <liam.j.odea@gmail.com>",
+          "timestamp": "2026-07-18T17:34:19-05:00",
+          "tree_id": "3ebe3e89ffd89efac63fe7b92503c7ddaee87729",
+          "url": "https://github.com/ljodea/ggsvelte/commit/1f6c551db5bc5ea7025a168f0d63094fdc6611a9"
+        },
+        "date": 1784414097494,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.4514,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.8476,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 9.9986,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 13.0865,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 81.4274,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 115.5933,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.2833,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.3593,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 82.4079,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 104.1013,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.5657,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 13.6093,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 115.0381,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7563,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 26.5237,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.4255,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 30.9132,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 605.4279,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 159.5723,
             "unit": "ms"
           }
         ]
