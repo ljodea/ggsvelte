@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784379228761,
+  "lastUpdate": 1784380273566,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -26739,6 +26739,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 162.365,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "f0daeae62a86bf0bf9880bd05c7f7a4f2068638c",
+          "message": "perf(svelte): O(1) layout-only pin rebind via stored seedId (#272)\n\nreconcilePinned scanned all candidates O(C) on every scene rebind.\nStore seedId at pin time and revalidate in O(1) when identityEpoch is\nunchanged (layout-only); fall back to the full scan for id remaps and\nkeyed identity changes that may introduce ambiguity.",
+          "timestamp": "2026-07-18T08:10:38-05:00",
+          "tree_id": "b531e50405fc541a7f4655ac9108be130171cdd5",
+          "url": "https://github.com/ljodea/ggsvelte/commit/f0daeae62a86bf0bf9880bd05c7f7a4f2068638c"
+        },
+        "date": 1784380272432,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 1.6936,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.1718,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 7.2808,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 9.0668,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 66.993,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 95.1794,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 0.8774,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.0378,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 70.6755,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 86.5813,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 9.9251,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 9.4367,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 95.7166,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.8359,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 20.2739,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 6.52,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 25.1327,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 479.7192,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 129.9024,
             "unit": "ms"
           }
         ]
