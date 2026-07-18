@@ -15,9 +15,8 @@ export function filterAggregateXRows(input: {
   baseRows: readonly number[];
 }): number[] {
   const outputKey = bandKey(input.outputX);
-  return input.baseRows.filter(
-    (row) => bandKey(input.table.column(input.field)[row]) === outputKey,
-  );
+  const col = input.table.column(input.field);
+  return input.baseRows.filter((row) => bandKey(col[row]) === outputKey);
 }
 
 export function filterBinRepresentedRows(input: {
@@ -35,8 +34,9 @@ export function filterBinRepresentedRows(input: {
   const frameGroup = frame.groups[frameRow];
   const firstInGroup = frameRow === 0 || frame.groups[frameRow - 1] !== frameGroup;
   const lastInGroup = frameRow === frame.n - 1 || frame.groups[frameRow + 1] !== frameGroup;
+  const col = table.column(field);
   return baseRows.filter((row) => {
-    const value = cellToNumber(table.column(field)[row]!);
+    const value = cellToNumber(col[row]!);
     if (!Number.isFinite(value)) return false;
     return closed === "right"
       ? value <= hi && (value > lo || (firstInGroup && value >= lo))
@@ -49,7 +49,6 @@ export function filterAggregateYRows(input: {
   field: string;
   baseRows: readonly number[];
 }): number[] {
-  return input.baseRows.filter((row) =>
-    Number.isFinite(cellToNumber(input.table.column(input.field)[row]!)),
-  );
+  const col = input.table.column(input.field);
+  return input.baseRows.filter((row) => Number.isFinite(cellToNumber(col[row]!)));
 }
