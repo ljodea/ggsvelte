@@ -733,6 +733,17 @@ function buildCandidateStoreEager(
       // (rects/segments/paths can match far from their stored anchors).
       const r = mode === "auto" ? Math.max(maxDistance, maxPointReach) : maxPointReach;
       addRect(px - r, py - r, px + r, py + r);
+      if (mode === "auto") {
+        // Per-candidate autoMode can still be x/y (e.g. boxplot outliers):
+        // include dominant-axis strips so orthogonal distance does not drop them.
+        if (flip) {
+          addRect(-STRIP, py - maxDistance, STRIP, py + maxDistance);
+          addRect(px - maxDistance, -STRIP, px + maxDistance, STRIP);
+        } else {
+          addRect(px - maxDistance, -STRIP, px + maxDistance, STRIP);
+          addRect(-STRIP, py - maxDistance, STRIP, py + maxDistance);
+        }
+      }
       for (const id of extendedIds) consider.add(id);
     }
     return [...consider].toSorted((a, b) => b - a);

@@ -537,6 +537,31 @@ describe("candidate spatial query hot path (issue #214)", () => {
     expect([...store.queryRect(205, 5, 215, 15, "b")]).toEqual([2]);
   });
 
+  it("auto mode still finds dominant-axis point hits far from the probe orthogonally", () => {
+    // Boxplot outliers and similar points can inherit autoMode "x": match on
+    // dominant-axis distance only. Spatial shortlist must include x/y strips,
+    // not only a euclidean square around maxPointReach.
+    const plotScene = sceneWithPoints([
+      [50, 10],
+      [50, 200],
+    ]);
+    const store = buildCandidateStore(plotScene, {
+      datum: ({ primitiveIndex }) => ({
+        xValue: 50,
+        yValue: primitiveIndex === 0 ? 10 : 200,
+        autoMode: "x",
+      }),
+    });
+    // Probe at same x as both points, but 150px from the nearer in y — outside
+    // size+3 euclidean reach, yet within x maxDistance of 5.
+    expect(store.nearest(52, 100, { mode: "auto", maxDistance: 5 })).toMatchObject({
+      id: 0,
+      mode: "x",
+      distance: 2,
+    });
+    expect(store.nearest(52, 100, { mode: "x", maxDistance: 5 })?.id).toBe(0);
+  });
+
   it("exact nearest still hits large rects whose anchors are far from the probe", () => {
     const rectScene = scene();
     rectScene.batches = [
