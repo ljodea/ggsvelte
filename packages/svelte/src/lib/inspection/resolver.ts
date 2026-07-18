@@ -258,6 +258,8 @@ export function createInspectionCoordinator<
   type Slot = Readonly<{
     key: string;
     value: CoordinatedInspection<Row, Key>;
+    /** Candidate id at pin time — O(1) rebind when identityEpoch is unchanged. */
+    seedId: number;
     seedKey: Key | null;
     seedRow: number | null;
     seedKind: CandidateFacts["kind"];
@@ -373,6 +375,7 @@ export function createInspectionCoordinator<
     const slot: Slot = {
       key: cacheKey,
       value,
+      seedId: input.seed.id,
       seedKey: focusKey,
       seedRow: input.seed.rowIndex,
       seedKind: input.seed.kind,
@@ -391,6 +394,24 @@ export function createInspectionCoordinator<
     return value;
   };
 
+  /** Keyless pin match: cheap filters then O(L) logical identity (#229). */
+  const keylessPinMatch = (model: RenderModel, prior: Slot, candidate: CandidateFacts): boolean => {
+    if (candidate.layerIndex !== prior.layerIndex) return false;
+    if (candidate.rowIndex !== prior.seedRow) return false;
+    if (candidate.kind !== prior.seedKind) return false;
+    if (candidate.primitiveIndex !== prior.seedPrimitiveIndex) return false;
+    if (candidateBatchRole(model, candidate) !== prior.seedBatchRole) return false;
+    const logicalIdentity = `${axisToken(candidate.xToken)}|${axisToken(candidate.yToken)}|${model.lineage.keys(candidate.lineage).join(",")}`;
+    return logicalIdentity === prior.seedLogicalIdentity;
+  };
+
+  /** Keyed pin match: layer + non-null row whose keyOf equals the pinned key. */
+  const keyedPinMatch = (model: RenderModel, prior: Slot, candidate: CandidateFacts): boolean => {
+    if (candidate.layerIndex !== prior.layerIndex || candidate.rowIndex === null) return false;
+    const row = model.row(candidate.rowIndex);
+    return row !== null && keyOf(row as Row, candidate.rowIndex) === prior.seedKey;
+  };
+
   const reconcilePinned = (
     input: Readonly<{
       model: RenderModel;
@@ -403,7 +424,22 @@ export function createInspectionCoordinator<
     const prior = pinned;
     if (prior === null) return null;
     let seed: CandidateFacts | null = null;
-    if (prior.seedKey === null) {
+    // Layout-only rebind (same data identity): candidate ids are stable for the
+    // same construction order. O(1) seedId revalidation avoids O(C) store walks.
+    // Uniqueness was proven at pin time; identityEpoch equality preserves it.
+    // On identity change, keyed path still full-scans (ambiguity may appear);
+    // keyless path clears immediately below.
+    if (prior.identityEpoch === input.identityEpoch) {
+      const preferred = input.model.candidates.candidate(prior.seedId);
+      if (preferred !== null) {
+        if (prior.seedKey === null) {
+          if (keylessPinMatch(input.model, prior, preferred)) seed = preferred;
+        } else if (keyedPinMatch(input.model, prior, preferred)) {
+          seed = preferred;
+        }
+      }
+    }
+    if (seed === null && prior.seedKey === null) {
       if (prior.identityEpoch !== input.identityEpoch) {
         pinned = null;
         if (lastSlot === "pinned") {
@@ -416,27 +452,18 @@ export function createInspectionCoordinator<
       const matches: CandidateFacts[] = [];
       for (let id = 0; id < input.model.candidates.size; id++) {
         const candidate = input.model.candidates.candidate(id);
-        // Cheap filters first — lineage.keys join is O(L) and only needed for
-        // survivors that already match layer/row/kind/role/primitive (#229).
         if (candidate === null) continue;
-        if (candidate.layerIndex !== prior.layerIndex) continue;
-        if (candidate.rowIndex !== prior.seedRow) continue;
-        if (candidate.kind !== prior.seedKind) continue;
-        if (candidate.primitiveIndex !== prior.seedPrimitiveIndex) continue;
-        if (candidateBatchRole(input.model, candidate) !== prior.seedBatchRole) continue;
-        const logicalIdentity = `${axisToken(candidate.xToken)}|${axisToken(candidate.yToken)}|${input.model.lineage.keys(candidate.lineage).join(",")}`;
-        if (logicalIdentity !== prior.seedLogicalIdentity) continue;
+        if (!keylessPinMatch(input.model, prior, candidate)) continue;
         matches.push(candidate);
       }
       seed = matches.length === 1 ? matches[0]! : null;
-    } else {
+    } else if (seed === null) {
       const matches: CandidateFacts[] = [];
       for (let id = 0; id < input.model.candidates.size; id++) {
         const candidate = input.model.candidates.candidate(id);
-        if (candidate?.layerIndex !== prior.layerIndex || candidate.rowIndex === null) continue;
-        const row = input.model.row(candidate.rowIndex);
-        if (row !== null && keyOf(row as Row, candidate.rowIndex) === prior.seedKey)
-          matches.push(candidate);
+        if (candidate === null) continue;
+        if (!keyedPinMatch(input.model, prior, candidate)) continue;
+        matches.push(candidate);
       }
       if (matches.length === 1) seed = matches[0]!;
       else if (matches.length > 1) {
