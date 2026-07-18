@@ -13,7 +13,10 @@ permissions: {}
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  # Do not cancel in-flight deploys: a later path-routed skip would otherwise
+  # cancel a docs/package Pages build and then skip build/deploy itself,
+  # leaving GitHub Pages stale until another routed push.
+  cancel-in-progress: false
 
 jobs:
   detect-changes:
@@ -55,7 +58,8 @@ jobs:
             bun scripts/ci-routing.ts emit-github-output --force-all
             exit 0
           fi
-          mapfile -t files < <(git diff --name-only "${BASE_SHA}...${HEAD_SHA}" || true)
+          # --name-status keeps rename/copy source paths for classification.
+          mapfile -t files < <(git diff --name-status "${BASE_SHA}...${HEAD_SHA}" || true)
           if [ "${#files[@]}" -eq 0 ]; then
             printf '' | bun scripts/ci-routing.ts emit-github-output --stdin
           else

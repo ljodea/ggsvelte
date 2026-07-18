@@ -29,7 +29,8 @@ export type ChangeLane =
   | "spikes"
   | "lockfile"
   | "markdown"
-  | "performance";
+  | "performance"
+  | "consumer_tools";
 
 export type ChangeFlags = Record<ChangeLane, boolean>;
 
@@ -54,17 +55,49 @@ export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
   spec: ["packages/spec/**"],
   core: ["packages/core/**"],
   svelte: ["packages/svelte/**", "skills/ggsvelte/**"],
-  docs: ["apps/docs/**"],
+  docs: [
+    "apps/docs/**",
+    // Docs app imports `$scripts/gen-llms` and ships lifecycle-driven guide content.
+    "scripts/gen-llms.ts",
+    "scripts/gen-llms.test.ts",
+    "lifecycle.json",
+  ],
   examples: ["examples/**"],
   benchmarks: ["benchmarks/**"],
-  scripts: ["scripts/**", "lifecycle.json"],
+  scripts: [
+    "scripts/**",
+    "lifecycle.json",
+    // Unit suite validates manual-AT evidence + community forms + Changesets config.
+    "docs/accessibility/manual-at/**",
+    ".github/ISSUE_TEMPLATE/**",
+    ".github/DISCUSSION_TEMPLATE/**",
+    ".changeset/**",
+  ],
   evals: ["tests/evals/**"],
-  workflows: [".github/workflows/**", ".github/actionlint.yaml"],
+  workflows: [
+    ".github/workflows/**",
+    ".github/actionlint.yaml",
+    // Only the actions-security job runs the real actionlint runner against workflows.
+    "scripts/actionlint.ts",
+    "scripts/actionlint.test.ts",
+  ],
   ci_workflow: [".github/workflows/ci.yml"],
   ci_routing: ["scripts/ci-routing.ts", "scripts/ci-routing.test.ts"],
   visual: ["tests/visual/**"],
-  performance: ["tests/performance/**"],
+  performance: [
+    "tests/performance/**",
+    // Direct inputs to the Playwright interaction-perf job.
+    "apps/docs/src/routes/__perf/**",
+    "benchmarks/interaction-budgets.json",
+  ],
   spikes: ["spikes/**"],
+  // Packed-consumer harness (not the whole scripts/ tree — matrix is expensive).
+  consumer_tools: [
+    "scripts/consumer-compat.ts",
+    "scripts/consumer-compat.test.ts",
+    "scripts/support-matrix.ts",
+    "scripts/support-matrix.test.ts",
+  ],
   lockfile: [
     "bun.lock",
     "package.json",
@@ -176,6 +209,12 @@ export type PlanOptions = {
 /**
  * Map change lanes → jobs, including monorepo dependency edges:
  * spec → core consumers; core → svelte; packages → VR/pages/build/consumer.
+ *
+ * Coverage edges restored after path-routing (Codex review on #242):
+ * - unit also covers docs/examples/workflows/svelte (script tests live only there)
+ * - consumer follows consumer harness scripts as well as packages
+ * - bench_smoke follows svelte (retained-memory imports inspection)
+ * - docs generators (gen-llms / lifecycle.json) sit on the docs lane → pages/vr
  */
 export function planJobs(changes: ChangeFlags, options: PlanOptions = {}): JobPlan {
   if (options.forceAll === true) {
@@ -200,15 +239,20 @@ export function planJobs(changes: ChangeFlags, options: PlanOptions = {}): JobPl
     unit:
       changes.spec ||
       changes.core ||
+      changes.svelte ||
       changes.scripts ||
       changes.benchmarks ||
       changes.evals ||
+      changes.docs ||
+      changes.examples ||
+      changes.workflows ||
       force,
     component: browserSurface,
-    consumer: packageSurface,
+    consumer: packageSurface || changes.consumer_tools || force,
     build: staticAnalysisSurface,
     actions_security: changes.workflows || force,
-    bench_smoke: changes.benchmarks || changes.spec || changes.core || force,
+    // retained-memory imports packages/svelte inspection coordinator.
+    bench_smoke: changes.benchmarks || changes.spec || changes.core || changes.svelte || force,
     // Informational only; path-gated and independent of the component job.
     interaction_perf: browserSurface,
     vr: packageSurface || docsSurface || changes.visual || force,
@@ -266,6 +310,34 @@ export function parseFileList(text: string): string[] {
     .split(/\r?\n/)
     .map((line) => line.trim())
     .filter((line) => line.length > 0 && !line.startsWith("#"));
+}
+
+/**
+ * Parse `git diff --name-status` stdout into every path involved, including
+ * both sides of renames/copies. `--name-only` drops the source path of a
+ * rename, so a move out of `packages/svelte/**` into docs could skip package
+ * jobs while the package file was effectively removed.
+ */
+export function parseNameStatusList(text: string): string[] {
+  const paths: string[] = [];
+  for (const line of text.split(/\r?\n/)) {
+    const trimmed = line.trimEnd();
+    if (trimmed.length === 0 || trimmed.startsWith("#")) continue;
+    // status\tpath  OR  R100\told\tnew  OR  C100\told\tnew
+    const parts = trimmed.split("\t");
+    if (parts.length < 2) continue;
+    const status = parts[0] ?? "";
+    if (status.startsWith("R") || status.startsWith("C")) {
+      const from = parts[1];
+      const to = parts[2];
+      if (from !== undefined && from.length > 0) paths.push(from);
+      if (to !== undefined && to.length > 0) paths.push(to);
+      continue;
+    }
+    const path = parts[1];
+    if (path !== undefined && path.length > 0) paths.push(path);
+  }
+  return [...new Set(paths)];
 }
 
 export function jobNames(): readonly JobName[] {
@@ -339,6 +411,9 @@ function printHelp(): void {
   bun scripts/ci-routing.ts plan [--files ... | --from-git --base <ref> | --stdin] [--force-all]
   bun scripts/ci-routing.ts emit-github-output [--files ... | --from-git --base <ref> | --stdin] [--force-all]
   bun scripts/ci-routing.ts gate --required <file|-> --results <file|->
+
+  --from-git uses git diff --name-status (rename source + dest).
+  --stdin accepts plain paths or name-status lines (tab-separated).
 `);
 }
 
@@ -351,6 +426,11 @@ async function resolvePlanArgs(args: string[]): Promise<{ files: string[]; force
 async function resolveFiles(args: string[]): Promise<string[]> {
   if (args.includes("--stdin")) {
     const text = await new Response(Bun.stdin.stream()).text();
+    // Workflows pass `git diff --name-status` lines so renames keep both paths.
+    // Plain path lists (one path per line, no tabs) still work via parseFileList.
+    if (text.includes("\t") || /^[AMDCRT?]+\d*\t/m.test(text)) {
+      return parseNameStatusList(text);
+    }
     return parseFileList(text);
   }
 
@@ -364,7 +444,8 @@ async function resolveFiles(args: string[]): Promise<string[]> {
     if (base === undefined || base === "") {
       throw new Error("--from-git requires --base <ref>");
     }
-    const proc = Bun.spawn(["git", "diff", "--name-only", `${base}...HEAD`], {
+    // --name-status keeps rename/copy source paths for classification.
+    const proc = Bun.spawn(["git", "diff", "--name-status", `${base}...HEAD`], {
       stdout: "pipe",
       stderr: "pipe",
     });
@@ -374,7 +455,7 @@ async function resolveFiles(args: string[]): Promise<string[]> {
     if (code !== 0) {
       throw new Error(`git diff failed (exit ${code}): ${stderr.trim()}`);
     }
-    return parseFileList(stdout);
+    return parseNameStatusList(stdout);
   }
 
   // Default: empty list (caller should pass --force-all when appropriate).

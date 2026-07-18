@@ -5,6 +5,7 @@ import {
   evaluateGate,
   formatGithubOutputs,
   matchPathPattern,
+  parseNameStatusList,
   planJobs,
   type JobName,
 } from "./ci-routing.ts";
@@ -67,11 +68,40 @@ describe("classifyChangedPaths", () => {
   });
 });
 
+describe("parseNameStatusList", () => {
+  test("includes both sides of renames and copies", () => {
+    const paths = parseNameStatusList(
+      [
+        "M\tpackages/core/src/x.ts",
+        "R100\tpackages/svelte/src/lib/Old.svelte\tapps/docs/src/lib/Old.svelte",
+        "C050\tscripts/a.ts\tscripts/b.ts",
+        "A\tscripts/new.ts",
+      ].join("\n"),
+    );
+    expect(paths).toContain("packages/core/src/x.ts");
+    expect(paths).toContain("packages/svelte/src/lib/Old.svelte");
+    expect(paths).toContain("apps/docs/src/lib/Old.svelte");
+    expect(paths).toContain("scripts/a.ts");
+    expect(paths).toContain("scripts/b.ts");
+    expect(paths).toContain("scripts/new.ts");
+  });
+
+  test("rename source keeps package surface when destination alone would not", () => {
+    const files = parseNameStatusList(
+      "R100\tpackages/svelte/src/lib/X.svelte\tdocs/notes/X.svelte\n",
+    );
+    const plan = planJobs(classifyChangedPaths(files));
+    expect(plan.component).toBe(true);
+    expect(plan.consumer).toBe(true);
+    expect(plan.build).toBe(true);
+  });
+});
+
 describe("planJobs", () => {
-  test("docs-site-only changes skip unit/component/consumer/bench but keep build+vr+pages", () => {
+  test("docs-site changes run unit+build+vr+pages (script tests cover docs behavior)", () => {
     const plan = planJobs(classifyChangedPaths(["apps/docs/src/routes/guide/+page.svelte"]));
     expect(plan.checks).toBe(true);
-    expect(plan.unit).toBe(false);
+    expect(plan.unit).toBe(true);
     expect(plan.component).toBe(false);
     expect(plan.consumer).toBe(false);
     expect(plan.bench_smoke).toBe(false);
@@ -80,6 +110,21 @@ describe("planJobs", () => {
     expect(plan.vr).toBe(true);
     expect(plan.pages).toBe(true);
     expect(plan.interaction_perf).toBe(false);
+  });
+
+  test("docs generators schedule pages/vr (not scripts-only)", () => {
+    const plan = planJobs(classifyChangedPaths(["scripts/gen-llms.ts"]));
+    expect(plan.unit).toBe(true);
+    expect(plan.pages).toBe(true);
+    expect(plan.vr).toBe(true);
+    expect(plan.component).toBe(false);
+  });
+
+  test("lifecycle.json schedules pages/vr via docs surface", () => {
+    const plan = planJobs(classifyChangedPaths(["lifecycle.json"]));
+    expect(plan.pages).toBe(true);
+    expect(plan.vr).toBe(true);
+    expect(plan.unit).toBe(true);
   });
 
   test("spec changes pull core unit, component, consumer, build, bench, and vr", () => {
@@ -94,15 +139,21 @@ describe("planJobs", () => {
     expect(plan.actions_security).toBe(false);
   });
 
-  test("workflow-only changes run actions-security and checks, not the full suite", () => {
+  test("workflow-only changes run actions-security + unit (release-wiring) without full suite", () => {
     const plan = planJobs(classifyChangedPaths([".github/workflows/pages.yml"]));
     expect(plan.actions_security).toBe(true);
     expect(plan.checks).toBe(true);
-    expect(plan.unit).toBe(false);
+    expect(plan.unit).toBe(true);
     expect(plan.component).toBe(false);
     expect(plan.consumer).toBe(false);
     expect(plan.vr).toBe(false);
     expect(plan.pages).toBe(false);
+  });
+
+  test("actionlint runner changes schedule actions-security", () => {
+    const plan = planJobs(classifyChangedPaths(["scripts/actionlint.ts"]));
+    expect(plan.actions_security).toBe(true);
+    expect(plan.unit).toBe(true);
   });
 
   test("ci.yml self-changes force the full CI surface so routing cannot silently shrink", () => {
@@ -126,11 +177,44 @@ describe("planJobs", () => {
     expect(plan.vr).toBe(true);
   });
 
-  test("root skill source changes schedule the svelte package surface", () => {
+  test("root skill source changes schedule unit (skill-sync) and svelte package surface", () => {
     const plan = planJobs(classifyChangedPaths(["skills/ggsvelte/SKILL.md"]));
+    expect(plan.unit).toBe(true);
     expect(plan.component).toBe(true);
     expect(plan.build).toBe(true);
     expect(plan.consumer).toBe(true);
+  });
+
+  test("svelte-only changes run unit (lifecycle) and bench_smoke (retained-memory)", () => {
+    const plan = planJobs(classifyChangedPaths(["packages/svelte/src/lib/index.ts"]));
+    expect(plan.unit).toBe(true);
+    expect(plan.bench_smoke).toBe(true);
+    expect(plan.component).toBe(true);
+    expect(plan.consumer).toBe(true);
+  });
+
+  test("consumer harness scripts schedule the packed-consumer matrix", () => {
+    const plan = planJobs(classifyChangedPaths(["scripts/consumer-compat.ts"]));
+    expect(plan.consumer).toBe(true);
+    expect(plan.unit).toBe(true);
+  });
+
+  test("manual-AT evidence and community forms schedule unit", () => {
+    expect(
+      planJobs(classifyChangedPaths(["docs/accessibility/manual-at/procedures.json"])).unit,
+    ).toBe(true);
+    expect(planJobs(classifyChangedPaths([".github/ISSUE_TEMPLATE/bug.yml"])).unit).toBe(true);
+    expect(planJobs(classifyChangedPaths([".changeset/config.json"])).unit).toBe(true);
+  });
+
+  test("interaction budgets and docs perf fixtures schedule interaction_perf", () => {
+    expect(
+      planJobs(classifyChangedPaths(["benchmarks/interaction-budgets.json"])).interaction_perf,
+    ).toBe(true);
+    expect(
+      planJobs(classifyChangedPaths(["apps/docs/src/routes/__perf/interaction-100k/+page.svelte"]))
+        .interaction_perf,
+    ).toBe(true);
   });
 
   test("lockfile changes force package-touching jobs", () => {
@@ -171,10 +255,11 @@ describe("planJobs", () => {
 
 describe("evaluateGate", () => {
   test("passes when required jobs succeed and others are skipped", () => {
+    // Docs-site change: unit+build+vr+pages required; browser/consumer skipped.
     const required = planJobs(classifyChangedPaths(["apps/docs/src/app.css"]));
     const results: Record<JobName, string> = {
       checks: "success",
-      unit: "skipped",
+      unit: "success",
       component: "skipped",
       consumer: "skipped",
       build: "success",
@@ -227,7 +312,7 @@ describe("formatGithubOutputs", () => {
     const text = formatGithubOutputs(plan);
     expect(text).toContain("checks=true\n");
     expect(text).toContain("actions_security=true\n");
-    expect(text).toContain("unit=false\n");
+    expect(text).toContain("unit=true\n");
     expect(text).toContain("component=false\n");
   });
 });
