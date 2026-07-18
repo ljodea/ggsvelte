@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784365138672,
+  "lastUpdate": 1784365671572,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -24954,6 +24954,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 128.0334,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "de12e1a783fe756c9e5f91164c41c8b1fa570e30",
+          "message": "ci: concurrency groups for heavy self-hosted jobs (#247) (#253)\n\n* ci: concurrency groups for heavy self-hosted jobs (#247)\n\nCap packages-dist, component shards, consumer matrix cells, and\ninteraction-perf with job-level concurrency groups on the shared host.\n\n* fix(ci): harden heavy-job concurrency for Codex #247 review\n\nShare required component shards under heavy-component with queue:max,\nisolate interaction-perf, throttle only Ubuntu consumer rows, and strip\nqueue:max for lagging actionlint wasm so the gate still passes.\n\n* fix(ci): use replaceAll in actionlint queue strip\n\nSatisfies unicorn/prefer-string-replace-all on the lint-only rewriter.\n\n* fix(ci): isolate actionlint wasm per workflow file\n\nRecreate the linter per file and catch panics so a single large workflow\ncannot OOB-crash the whole actions-security gate. Simplify hosted\nconsumer concurrency keys.",
+          "timestamp": "2026-07-18T04:07:10-05:00",
+          "tree_id": "3f024701f64b39440a786a51d1d9be009babc781",
+          "url": "https://github.com/ljodea/ggsvelte/commit/de12e1a783fe756c9e5f91164c41c8b1fa570e30"
+        },
+        "date": 1784365670751,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.66,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 4.2877,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 10.2222,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 15.9484,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 96.0918,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 130.8292,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.2878,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.3705,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 96.5972,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 119.0366,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 11.2497,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 11.2322,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 125.0455,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.8017,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 24.9903,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.2975,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 35.1188,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 649.3519,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 151.9394,
             "unit": "ms"
           }
         ]
