@@ -161,6 +161,14 @@ describe("interaction capability normalization", () => {
       expect(INTERACTION_DIAGNOSTIC_CATALOG[diagnostic.code]).toBeDefined();
     }
   });
+
+  it("keeps each catalog entry's code equal to its key (characterization)", () => {
+    // Locks the catalog object shape so extract refactors cannot drift entry.code
+    // away from the Record key (agents and docs look up by both).
+    for (const [key, entry] of Object.entries(INTERACTION_DIAGNOSTIC_CATALOG)) {
+      expect(entry.code).toBe(key);
+    }
+  });
 });
 
 describe("chart-local interaction reducer", () => {
