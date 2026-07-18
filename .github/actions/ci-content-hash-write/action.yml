@@ -1,0 +1,28 @@
+# Write success marker after a cacheable job body succeeds (issue #245).
+# Call only when restore outputs.hit != 'true' and outputs.bypass != 'true'.
+name: CI content-hash write
+description: >
+  Write a validated success marker for a cacheable execution so subsequent
+  runs with the same content hash can short-circuit.
+
+inputs:
+  execution:
+    description: CacheableExecution name (unit, build, component_svelte, consumer, …)
+    required: true
+  hash:
+    description: Content hash from ci-content-hash-restore
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: write ${{ inputs.execution }} success marker
+      shell: bash
+      env:
+        # env-indirection: inputs must not expand into the script body (zizmor).
+        CONTENT_HASH: ${{ inputs.hash }}
+        EXECUTION: ${{ inputs.execution }}
+      run: |
+        set -euo pipefail
+        bun scripts/ci-routing.ts write-success-marker \
+          --execution "${EXECUTION}" --hash "${CONTENT_HASH}"

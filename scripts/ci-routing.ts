@@ -44,6 +44,7 @@ export type ChangeLane =
   | "workflows"
   | "ci_workflow"
   | "ci_routing"
+  | "ci_actions"
   | "visual"
   | "spikes"
   | "lockfile"
@@ -103,6 +104,9 @@ export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
   ],
   ci_workflow: [".github/workflows/ci.yml"],
   ci_routing: ["scripts/ci-routing.ts", "scripts/ci-routing.test.ts"],
+  // Local composite actions used by ci.yml (content-hash restore/write). A change
+  // here is a CI recipe change and must force the full surface + bypass cache.
+  ci_actions: [".github/actions/**"],
   visual: ["tests/visual/**"],
   performance: [
     "tests/performance/**",
@@ -244,7 +248,7 @@ export function planJobs(changes: ChangeFlags, options: PlanOptions = {}): JobPl
     return all;
   }
 
-  const force = changes.lockfile || changes.ci_workflow || changes.ci_routing;
+  const force = changes.lockfile || changes.ci_workflow || changes.ci_routing || changes.ci_actions;
   const packageSurface = changes.spec || changes.core || changes.svelte || force;
   const docsSurface = changes.docs || changes.examples || force;
   const browserSurface =
@@ -425,6 +429,8 @@ export const CACHEABLE_EXECUTIONS: readonly CacheableExecution[] = [
  */
 const UNIVERSAL_CONTENT_INPUTS: readonly string[] = [
   ".github/workflows/ci.yml",
+  // Composite actions hold the success-marker protocol after extraction from ci.yml.
+  ".github/actions/**",
   "scripts/ci-routing.ts",
   "scripts/ci-routing.test.ts",
   "bun.lock",
@@ -639,7 +645,7 @@ export function requireJobInputDigests(
 
 export function shouldBypassContentCache(changes: ChangeFlags, options: PlanOptions = {}): boolean {
   if (options.forceAll === true) return true;
-  return changes.lockfile || changes.ci_workflow || changes.ci_routing;
+  return changes.lockfile || changes.ci_workflow || changes.ci_routing || changes.ci_actions;
 }
 
 export type FormatGithubOutputOptions = {

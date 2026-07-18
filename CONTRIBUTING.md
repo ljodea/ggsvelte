@@ -147,15 +147,21 @@ Path routing (`scripts/ci-routing.ts`) schedules jobs from the changed-file
 set. Content-hash skip (issue #245) is a second layer: when a job is still
 scheduled, it may early-exit success if a validated success marker (or
 `packages-dist` cache) exists for the same **physical execution identity**
-(content hash of `JOB_CONTENT_INPUTS` + recipe files including `ci.yml`).
+(content hash of `JOB_CONTENT_INPUTS` + recipe files including `ci.yml` and
+`.github/actions/**`).
 
-| Control                                                  | Effect                                         |
-| -------------------------------------------------------- | ---------------------------------------------- |
-| Change any path in that execution’s `JOB_CONTENT_INPUTS` | New hash → cache miss → full run               |
-| Expand/edit `JOB_CONTENT_INPUTS` patterns                | Patterns are inside the digest → miss          |
-| Bump `CONTENT_HASH_SCHEMA` in `scripts/ci-routing.ts`    | Global bust of all content-hash caches         |
-| force-all, lockfile, `ci.yml`, or `ci-routing` change    | `bypass_content_cache=true` → no short-circuit |
-| Repo variable `CI_DISABLE_CONTENT_HASH=1`                | Disable short-circuit for all jobs             |
+The success-marker protocol is implemented once in local composite actions
+(`.github/actions/ci-content-hash-restore`, `ci-content-hash-write`); `ci.yml`
+jobs call those instead of pasting the steps. The `packages-dist` producer keeps
+its specialized dist-payload cache path.
+
+| Control                                                    | Effect                                         |
+| ---------------------------------------------------------- | ---------------------------------------------- |
+| Change any path in that execution’s `JOB_CONTENT_INPUTS`   | New hash → cache miss → full run               |
+| Expand/edit `JOB_CONTENT_INPUTS` patterns                  | Patterns are inside the digest → miss          |
+| Bump `CONTENT_HASH_SCHEMA` in `scripts/ci-routing.ts`      | Global bust of all content-hash caches         |
+| force-all, lockfile, `ci.yml`, `ci-routing`, or composites | `bypass_content_cache=true` → no short-circuit |
+| Repo variable `CI_DISABLE_CONTENT_HASH=1`                  | Disable short-circuit for all jobs             |
 
 Hashes are fail-closed (missing digests abort). Component shards and each
 consumer matrix cell have distinct cache keys. GHA cache is ref-scoped —
