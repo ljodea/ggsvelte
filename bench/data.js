@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784397558626,
+  "lastUpdate": 1784398967091,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -28881,6 +28881,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 160.5568,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "bfe6b4ae5ac05a6dfcee5586cb2d9cb35bcc5e4e",
+          "message": "test: migrate partial fixtures to @total-typescript/shoehorn (#291)\n\nReplace object-literal `as Type` / `as unknown as` / `as never` casts in\nunit tests with `fromPartial` and `fromAny` so partial fixtures stay typed\nwithout double-as workarounds. Install shoehorn as a root devDependency and\ndocument the convention in CONTRIBUTING.\n\nLeft alone on purpose: `as const`, error/DOM narrowing, post-pipeline batch\nnarrowing, and a few non-fixture casts (CanvasRenderingContext2D proxy,\napply arity, Reflect get target).\n\nVerified: bun test packages/{spec,core}; packages/svelte test:browser (2898).",
+          "timestamp": "2026-07-18T13:22:10-05:00",
+          "tree_id": "da79e4874f34f27d2768b73f79fd8c45806c47ef",
+          "url": "https://github.com/ljodea/ggsvelte/commit/bfe6b4ae5ac05a6dfcee5586cb2d9cb35bcc5e4e"
+        },
+        "date": 1784398966189,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.2255,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.9757,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 9.7744,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 13.4989,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 88.8732,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 117.2872,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.0508,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2654,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 84.6994,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 106.5974,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 11.3388,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 11.0004,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 114.8114,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.8097,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 28.5043,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 8.32,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 32.1505,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 617.5386,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 167.2422,
             "unit": "ms"
           }
         ]
