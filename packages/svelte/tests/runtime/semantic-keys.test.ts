@@ -717,6 +717,39 @@ describe("createSemanticKeyService", () => {
     model.dispose();
   });
 
+  it("resolves only the requested candidate on first candidateSemanticKeys call", () => {
+    // Point-toggle (surface) hits one candidate. Eager full-store fill would
+    // regress click cost from O(L) to O(C×L); cache must fill per id.
+    const model = buildPointModel(rows);
+    const keysSpy = vi.spyOn(model.lineage, "keys");
+    const tracker = createSourceIdentityTracker();
+    const { value: service, destroy } = withFlushedEffectRoot(() =>
+      createSemanticKeyService({
+        model: () => model,
+        assembled: () => null,
+        datumKey: () => "id",
+        data: () => rows,
+        spec: () => null,
+        sourceIdentity: (value) => tracker.sourceIdentity(value),
+        deliverDiagnostic: () => {},
+      }),
+    );
+
+    // Warm row keys first so subsequent lineage.keys calls are projection-only.
+    expect(service.keyAt(0)).toBe("a");
+    const afterRowKeys = keysSpy.mock.calls.length;
+
+    const first = model.candidates.candidate(0);
+    expect(first).not.toBeNull();
+    expect(service.candidateSemanticKeys(first!)).toEqual(["a"]);
+    // Exactly one extra lineage walk for the hit candidate — not a full store.
+    expect(keysSpy.mock.calls.length).toBe(afterRowKeys + 1);
+
+    keysSpy.mockRestore();
+    destroy();
+    model.dispose();
+  });
+
   it("returns empty keys when model becomes null", () => {
     const model = buildPointModel(rows);
     const candidate = model.candidates.candidate(0);

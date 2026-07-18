@@ -310,33 +310,34 @@ export function createSemanticKeyService(deps: SemanticKeyServiceDeps): Semantic
   }
 
   /**
-   * Shared candidate→semantic-keys projection for the current model/key epoch.
+   * Shared candidate→semantic-keys cache for the current model/key epoch.
    * Interval, selection anchors, and interaction masks all used to re-walk
-   * lineage independently (~3× O(C×L) per reactive turn). Built once when
-   * first read; subsequent lookups are O(1) Map gets until model or row keys
-   * change. Preserves lazy short-circuits: consumers that never call
-   * candidateSemanticKeys never pay the walk.
+   * lineage independently (~3× O(C×L) per reactive turn). Entries fill lazily
+   * on first lookup so single-candidate paths (point toggle) stay O(L); full
+   * store consumers still share one projection after the first walk. The Map
+   * is mutated after the derived produces it — intentional memoization, not
+   * reactive state. Fresh bag when model or row keys change.
    */
-  const candidateKeysById = $derived.by(() => {
+  const candidateKeysEpoch = $derived.by(() => {
     const model = deps.model();
-    if (model === null) return new Map<number, PropertyKey[]>();
-    // Depend on the row-key bag so key invalidation rebuilds the projection.
+    // Depend on the row-key bag so key invalidation clears the cache.
     const rowKeys = semanticKeys.keys;
-    const map = new Map<number, PropertyKey[]>();
-    for (let id = 0; id < model.candidates.size; id++) {
-      const candidate = model.candidates.candidate(id);
-      if (candidate === null) continue;
-      const rows = rowIndexesForCandidate(candidate, model.lineage.keys(candidate.lineage));
-      map.set(
-        id,
-        uniqueKeysFromRowIndexes(rows, (rowIndex) => rowKeys.get(rowIndex) ?? null),
-      );
-    }
-    return map;
+    return {
+      model,
+      rowKeys,
+      cache: new Map<number, PropertyKey[]>(),
+    };
   });
 
   function candidateSemanticKeys(candidate: CandidateFacts): PropertyKey[] {
-    return candidateKeysById.get(candidate.id) ?? [];
+    const { model, rowKeys, cache } = candidateKeysEpoch;
+    if (model === null) return [];
+    const hit = cache.get(candidate.id);
+    if (hit !== undefined) return hit;
+    const rows = rowIndexesForCandidate(candidate, model.lineage.keys(candidate.lineage));
+    const keys = uniqueKeysFromRowIndexes(rows, (rowIndex) => rowKeys.get(rowIndex) ?? null);
+    cache.set(candidate.id, keys);
+    return keys;
   }
 
   return {
