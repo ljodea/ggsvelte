@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784348291611,
+  "lastUpdate": 1784348322169,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -23050,6 +23050,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 161.3728,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "da0f66fe47c82ffe79a9fd9373c91e69446fc7ec",
+          "message": "fix(core): keep annotation frames rowless for inputGroups (#232)\n\nPost-merge Codex finding on #223: buildFrame overwrote\nbuildAnnotationFrame's empty inputGroups with full-table pre-stat\ngroups. That retained O(source rows) memberships per annotation\nlayer/facet and polluted identity-index lineage for a rowless layer.\n\nReturn annotation frames before deriving groups. Regression test\nasserts inputGroups stays empty over a non-empty source table.",
+          "timestamp": "2026-07-17T23:17:57-05:00",
+          "tree_id": "815f69c0094b31aefcd9b66fbd8aa9ec8089d8f1",
+          "url": "https://github.com/ljodea/ggsvelte/commit/da0f66fe47c82ffe79a9fd9373c91e69446fc7ec"
+        },
+        "date": 1784348320903,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 3.6768,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 4.3159,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 14.6574,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 13.9542,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 84.9484,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 120.7654,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.13,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.3361,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 85.6544,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 106.9982,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 14.0866,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 13.0947,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 115.9751,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7957,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 29.1977,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 10.3415,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 37.1091,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 618.2352,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 161.9349,
             "unit": "ms"
           }
         ]
