@@ -77,6 +77,13 @@ export type IntervalStateDeps = {
   /** Semantic candidate projection, initialized before factory construction. */
   candidateSemanticKeys: (candidate: CandidateFacts) => PropertyKey[];
   /**
+   * Deferred host bag for non-union interval key consumption. When the host
+   * already walked the store for anchors/masks (shared projection), return that
+   * bag here so `effectiveIntervalKeys` does not re-walk O(C). `null`/omitted
+   * falls back to the local full-store projection (tests / non-orchestrator).
+   */
+  sharedConsumptionCandidates?: () => readonly IntervalConsumptionCandidate<PropertyKey>[] | null;
+  /**
    * Handler-only: `openBoundsEditor` select branch reads the host's inspection
    * panel as its fallback target. Host derived is earlier than the factory and
    * returns `ScenePanel | null`.
@@ -187,10 +194,19 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
     // every controller revision — skip the O(candidates) semantic projection
     // whenever the preset never reads it.
     const preset = effectiveIntervals[0]?.preset;
+    if (preset === "union")
+      return consumeIntervalKeys({
+        records: effectiveIntervals,
+        panels: model.scene.panels,
+        candidates: [],
+      });
+    // Prefer host shared bag (one store walk with anchors/masks) over a second
+    // local full-store projection when non-union intervals are live.
+    const shared = deps.sharedConsumptionCandidates?.() ?? null;
     return consumeIntervalKeys({
       records: effectiveIntervals,
       panels: model.scene.panels,
-      candidates: preset === "union" ? [] : intervalConsumptionCandidates(),
+      candidates: shared ?? intervalConsumptionCandidates(),
     });
   });
 

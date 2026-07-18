@@ -156,6 +156,7 @@ function mountIntervalController(
     coordFlipped?: () => boolean;
     captureSurface?: () => HTMLDivElement | null;
     candidateSemanticKeys?: (candidate: CandidateFacts) => PropertyKey[];
+    sharedConsumptionCandidates?: IntervalStateDeps["sharedConsumptionCandidates"];
     inspectionPanel?: () => ScenePanel | null;
     emitSelection?: (event: PlotSelection) => void;
     announce?: (message: string) => void;
@@ -174,6 +175,9 @@ function mountIntervalController(
       coordFlipped: options.coordFlipped ?? (() => false),
       captureSurface: options.captureSurface ?? (() => null),
       candidateSemanticKeys: options.candidateSemanticKeys ?? identityCandidateKeys,
+      ...(options.sharedConsumptionCandidates !== undefined && {
+        sharedConsumptionCandidates: options.sharedConsumptionCandidates,
+      }),
       inspectionPanel: options.inspectionPanel ?? (() => null),
       emitSelection: options.emitSelection ?? (() => {}),
       announce: options.announce ?? (() => {}),
@@ -249,6 +253,70 @@ describe("createIntervalState construction", () => {
     expect(announceCalls).toBe(0);
     expect(inspectionPanelCalls).toBe(0);
     expect(candidateSemanticKeysCalls).toBe(0);
+    destroy();
+  });
+});
+
+describe("createIntervalState shared consumption bag", () => {
+  it("uses sharedConsumptionCandidates and skips candidateSemanticKeys walk for non-union keys", () => {
+    const model = modelFor(continuousSpec());
+    const panelId = model.scene.panels[0]?.id;
+    if (panelId === undefined) throw new Error("expected panel");
+    let keyCalls = 0;
+    const sharedBag = [
+      {
+        panelId,
+        xValue: 1 as const,
+        yValue: 1 as const,
+        keys: ["0"] as const,
+      },
+      {
+        panelId,
+        xValue: 10 as const,
+        yValue: 20 as const,
+        keys: ["1"] as const,
+      },
+    ];
+    const { state, destroy } = mountIntervalController({
+      model: () => model,
+      selectConfig: persistentSelect,
+      candidateSemanticKeys: (candidate) => {
+        keyCalls++;
+        return identityCandidateKeys(candidate);
+      },
+      sharedConsumptionCandidates: () => sharedBag,
+    });
+
+    state.applyBrushSelectEnd(brushEvent(model, { keys: ["0", "1"] }), "pointer");
+    flushSync();
+    keyCalls = 0;
+    const keys = state.effectiveIntervalKeys;
+    expect(keys.length).toBeGreaterThan(0);
+    // Shared bag supplied all candidates — no local full-store key walk.
+    expect(keyCalls).toBe(0);
+
+    destroy();
+  });
+
+  it("falls back to local walk when shared bag is null", () => {
+    const model = modelFor(continuousSpec());
+    let keyCalls = 0;
+    const { state, destroy } = mountIntervalController({
+      model: () => model,
+      selectConfig: persistentSelect,
+      candidateSemanticKeys: (candidate) => {
+        keyCalls++;
+        return identityCandidateKeys(candidate);
+      },
+      sharedConsumptionCandidates: () => null,
+    });
+
+    state.applyBrushSelectEnd(brushEvent(model), "pointer");
+    flushSync();
+    keyCalls = 0;
+    expect(state.effectiveIntervalKeys.length).toBeGreaterThan(0);
+    expect(keyCalls).toBeGreaterThan(0);
+
     destroy();
   });
 });
