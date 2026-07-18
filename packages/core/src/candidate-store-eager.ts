@@ -2,6 +2,7 @@ import { StaticQuadtree } from "./dom/quadtree.js";
 import { canonicalAxisToken, compareTokens, tokenKey } from "./candidate-axis-token.js";
 import type { CanonicalAxisToken } from "./candidate-axis-token.js";
 import {
+  closestOrthInRange,
   defaultAutoMode,
   insidePath,
   localAnchor,
@@ -547,26 +548,29 @@ export function buildCandidateStoreEager(
       const orth = axis === "x" ? (flip ? xs : ys) : flip ? ys : xs;
       const seedLayer = scene.batches[batchIds[seedId]!]!.layerIndex;
       const memberIds = new Uint32Array(tuple.series.length);
+      const seedOrth = orth[seedId]!;
       for (let boundaryIndex = 0; boundaryIndex < tuple.series.length; boundaryIndex++) {
         const boundary: SeriesBoundary = tuple.series[boundaryIndex]!;
         if (boundary.layerIndex === seedLayer && boundary.seriesId === series[seedId]) {
           memberIds[boundaryIndex] = seedId;
           continue;
         }
-        let chosen = permutation[boundary.start]!;
-        for (let cursor = boundary.start + 1; cursor < boundary.end; cursor++) {
-          const id = permutation[cursor]!;
-          const distance = Math.abs(orth[id]! - orth[seedId]!);
-          const priorDistance = Math.abs(orth[chosen]! - orth[seedId]!);
-          if (
-            distance < priorDistance ||
-            (distance === priorDistance &&
-              (batchIds[id]! > batchIds[chosen]! ||
-                (batchIds[id] === batchIds[chosen] && sources[id]! < sources[chosen]!)))
-          )
-            chosen = id;
-        }
-        memberIds[boundaryIndex] = chosen;
+        // Bucket sort orders ranks before orth. A single layer/series boundary
+        // is orth-sorted only when rank is constant across the range; otherwise
+        // fall back to linear closest (preserves prior group() semantics).
+        const firstId = permutation[boundary.start]!;
+        const lastId = permutation[boundary.end - 1]!;
+        const orthSorted = ranks[firstId] === ranks[lastId];
+        memberIds[boundaryIndex] = closestOrthInRange(
+          permutation,
+          orth,
+          batchIds,
+          sources,
+          boundary.start,
+          boundary.end,
+          seedOrth,
+          orthSorted,
+        );
       }
       return {
         axis,
