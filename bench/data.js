@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784358172638,
+  "lastUpdate": 1784359470439,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -24359,6 +24359,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 161.0179,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "89352fd35633d516f7509d9f985a0048da29f6a0",
+          "message": "ci: share packages/*/dist via packages-dist artifact (#241) (#251)\n\n* ci: share packages/*/dist via packages-dist artifact (#241)\n\nAdd an early packages-dist producer for component/consumer/interaction-perf\nand download dist instead of rebuilding. Unit and bench-smoke keep the\ncheaper bun run check path (Codex plan review).\n\n* fix(ci): stage packages-dist upload so download keeps packages/*/dist\n\nMulti-path upload-artifact strips the common packages/ prefix; stage a\nsingle packages tree so consumers extract to packages/spec|core|svelte/dist.",
+          "timestamp": "2026-07-18T02:23:50-05:00",
+          "tree_id": "5ee8abc67a7d39b2449aaabf3cf7762d348775b0",
+          "url": "https://github.com/ljodea/ggsvelte/commit/89352fd35633d516f7509d9f985a0048da29f6a0"
+        },
+        "date": 1784359469435,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.3129,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.8263,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 9.2334,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 14.0705,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 86.2939,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 125.27,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.2966,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.315,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 85.5811,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 107.1848,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.4768,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.3566,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 113.7573,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7931,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 26.9078,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.5539,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 36.9952,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 604.2306,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 161.9819,
             "unit": "ms"
           }
         ]
