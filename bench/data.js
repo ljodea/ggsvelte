@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784348322169,
+  "lastUpdate": 1784348388591,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -23169,6 +23169,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 161.9349,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "80fa2db8fd731246ea21489ea96fa7534417a3af",
+          "message": "perf(svelte): share one candidate→semantic-keys projection (#230) (#235)\n\n* perf(svelte): share candidate→semantic-keys projection once per epoch\n\nInterval, selection anchors, and interaction masks each re-walked lineage\nfor every candidate (~3× O(C×L) per reactive turn). Cache one Map per\nmodel/key epoch inside createSemanticKeyService so consumers share a single\nO(C×L) build and O(1) lookups, while keeping the projection lazy when\nshort-circuits never call candidateSemanticKeys.\n\nCloses #230\n\n* fix(svelte): lazy-fill candidate semantic-keys cache per id\n\nEager full-store projection on first candidateSemanticKeys call regressed\npoint-toggle from O(L) to O(C×L). Cache still shares one projection across\ninterval/selection/mask walks, but entries populate on demand.\n\nAddresses Codex P2 on #235.",
+          "timestamp": "2026-07-17T23:19:17-05:00",
+          "tree_id": "24491273296b299b16cff0b9eb1ec36a70576a12",
+          "url": "https://github.com/ljodea/ggsvelte/commit/80fa2db8fd731246ea21489ea96fa7534417a3af"
+        },
+        "date": 1784348387934,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 1.7923,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.1814,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 8.591,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 9.3792,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 65.0732,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 92.1178,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 0.9081,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.0578,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 70.4289,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 85.4708,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 8.8993,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 8.8669,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 91.6731,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.6273,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 21.2364,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 6.5487,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 28.5046,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 492.3188,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 130.4964,
             "unit": "ms"
           }
         ]
