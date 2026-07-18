@@ -78,6 +78,26 @@ export function segmentIntersectsRect(
 }
 
 /**
+ * Subpath index in `pathOffsets` for a vertex (0 .. subpathCount-1), or null.
+ * Binary search on monotonic half-open spans — O(log P) vs linear O(P).
+ * Fractional vertices allowed; zero-length spans never match.
+ */
+export function pathSubpathIndex(offsets: ArrayLike<number>, vertex: number): number | null {
+  if (offsets.length < 2) return null;
+  let low = 0;
+  let high = offsets.length - 2;
+  while (low <= high) {
+    const mid = (low + high) >>> 1;
+    const start = offsets[mid]!;
+    const end = offsets[mid + 1]!;
+    if (vertex < start) high = mid - 1;
+    else if (vertex >= end) low = mid + 1;
+    else return mid;
+  }
+  return null;
+}
+
+/**
  * Half-open subpath range [start, end) containing `vertex`, or null.
  * Binary search on monotonic pathOffsets — O(log P) vs linear O(P).
  * Preserves the linear-scan contract: fractional vertices are allowed;
@@ -88,18 +108,9 @@ export function pathRange(
   vertex: number,
 ): readonly [number, number] | null {
   const offsets = batch.pathOffsets;
-  if (offsets.length < 2) return null;
-  let low = 0;
-  let high = offsets.length - 2;
-  while (low <= high) {
-    const mid = (low + high) >>> 1;
-    const start = offsets[mid]!;
-    const end = offsets[mid + 1]!;
-    if (vertex < start) high = mid - 1;
-    else if (vertex >= end) low = mid + 1;
-    else return [start, end] as const;
-  }
-  return null;
+  const mid = pathSubpathIndex(offsets, vertex);
+  if (mid === null) return null;
+  return [offsets[mid]!, offsets[mid + 1]!] as const;
 }
 
 /** True when a and b lie in the same half-open pathOffsets subpath. */

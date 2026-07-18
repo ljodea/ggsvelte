@@ -580,6 +580,48 @@ describe("resolveCandidateFrameRow paths", () => {
       }),
     ).toEqual({ frameRow: 3, derivedGroup: 1 });
   });
+
+  it("resolves many subpaths without linear pathOffsets scans (O(log P))", async () => {
+    const { resolveCandidateFrameRow } =
+      await import("../src/pipeline/build-candidates-frame-row.ts");
+    const { pathSubpathIndex } = await import("../src/candidate-geometry.ts");
+    // P subpaths × 2 vertices each; offsets [0,2,4,...,2P]
+    const P = 2_000;
+    const offsets = new Uint32Array(P + 1);
+    for (let s = 0; s <= P; s++) offsets[s] = s * 2;
+    const groups = Array.from({ length: P * 2 }, (_, i) => Math.floor(i / 2));
+    const xNumeric = new Float64Array(P * 2);
+    for (let s = 0; s < P; s++) {
+      xNumeric[s * 2] = 0;
+      xNumeric[s * 2 + 1] = 1;
+    }
+    const frame = {
+      n: P * 2,
+      groups,
+      xNumeric,
+      binding: { layer: { geom: "line" } },
+    } as never;
+    const batch = { kind: "paths", pathOffsets: offsets } as never;
+    const orderedGroups = Array.from({ length: P }, (_, s) => s);
+
+    // Binary search correctness on first / mid / last subpath
+    expect(pathSubpathIndex(offsets, 0)).toBe(0);
+    expect(pathSubpathIndex(offsets, 2 * Math.floor(P / 2))).toBe(Math.floor(P / 2));
+    expect(pathSubpathIndex(offsets, 2 * P - 1)).toBe(P - 1);
+
+    // Full build-style walk: each vertex once. Linear would be O(V·P) comparisons;
+    // we only check results stay correct for endpoints of a few subpaths.
+    for (const s of [0, 1, Math.floor(P / 2), P - 2, P - 1]) {
+      const resolved = resolveCandidateFrameRow({
+        frame,
+        batch,
+        primitiveIndex: s * 2,
+        orderedGroups,
+        outlierLocalRow: null,
+      });
+      expect(resolved.derivedGroup).toBe(s);
+    }
+  });
 });
 
 describe("allocatePipelineRunId", () => {

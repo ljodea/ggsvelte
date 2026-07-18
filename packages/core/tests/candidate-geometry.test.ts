@@ -5,6 +5,7 @@ import {
   directionalNearestInOrder,
   panelRangeInOrder,
   pathRange,
+  pathSubpathIndex,
   samePath,
 } from "../src/candidate-geometry.ts";
 import type { PathsBatch } from "../src/scene.ts";
@@ -26,11 +27,17 @@ function pathsBatch(pathOffsets: readonly number[]): PathsBatch {
   };
 }
 
-describe("pathRange", () => {
+describe("pathSubpathIndex / pathRange", () => {
   const offsets = [0, 3, 5, 9] as const;
   const batch = pathsBatch(offsets);
 
-  it("returns first, middle, and last subpath ranges", () => {
+  it("returns first, middle, and last subpath indexes and ranges", () => {
+    expect(pathSubpathIndex(offsets, 0)).toBe(0);
+    expect(pathSubpathIndex(offsets, 2)).toBe(0);
+    expect(pathSubpathIndex(offsets, 3)).toBe(1);
+    expect(pathSubpathIndex(offsets, 4)).toBe(1);
+    expect(pathSubpathIndex(offsets, 5)).toBe(2);
+    expect(pathSubpathIndex(offsets, 8)).toBe(2);
     expect(pathRange(batch, 0)).toEqual([0, 3]);
     expect(pathRange(batch, 2)).toEqual([0, 3]);
     expect(pathRange(batch, 3)).toEqual([3, 5]);
@@ -40,6 +47,11 @@ describe("pathRange", () => {
   });
 
   it("returns null for out-of-range vertices and empty offsets", () => {
+    expect(pathSubpathIndex(offsets, -1)).toBeNull();
+    expect(pathSubpathIndex(offsets, 9)).toBeNull();
+    expect(pathSubpathIndex(offsets, 100)).toBeNull();
+    expect(pathSubpathIndex([], 0)).toBeNull();
+    expect(pathSubpathIndex([0], 0)).toBeNull();
     expect(pathRange(batch, -1)).toBeNull();
     expect(pathRange(batch, 9)).toBeNull();
     expect(pathRange(batch, 100)).toBeNull();
@@ -49,6 +61,8 @@ describe("pathRange", () => {
 
   it("skips zero-length spans and accepts fractional vertices like the linear scan", () => {
     const withEmpty = pathsBatch([0, 2, 2, 5]);
+    expect(pathSubpathIndex(withEmpty.pathOffsets, 1)).toBe(0);
+    expect(pathSubpathIndex(withEmpty.pathOffsets, 2)).toBe(2);
     expect(pathRange(withEmpty, 1)).toEqual([0, 2]);
     // vertex 2 falls in the third span [2, 5) because [2, 2) is empty.
     expect(pathRange(withEmpty, 2)).toEqual([2, 5]);
