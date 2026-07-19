@@ -4,7 +4,6 @@
   "description": "A ggsvelte plot specification (schema v0 — UNSTABLE; served from the repo until schema hosting exists).",
   "$defs": {
     "CellValue": {
-      "description": "A single data cell: string, number, boolean, or null. Dates travel as ISO 8601 strings (e.g. \"2026-07-10\"); non-finite numbers travel as null.",
       "anyOf": [
         {
           "type": "string"
@@ -18,66 +17,66 @@
         {
           "type": "null"
         }
-      ]
+      ],
+      "description": "A single data cell: string, number, boolean, or null. Dates travel as ISO 8601 strings (e.g. \"2026-07-10\"); non-finite numbers travel as null."
     },
     "DataValues": {
-      "additionalProperties": false,
-      "description": "Inline row-oriented data. Example: {\"values\": [{\"x\": 1, \"y\": 2}]}.",
       "type": "object",
       "required": [
         "values"
       ],
       "properties": {
         "values": {
-          "description": "Row-oriented inline data: an array of row objects sharing field names.",
           "type": "array",
           "items": {
+            "type": "object",
+            "properties": {},
             "additionalProperties": {
               "$ref": "#/$defs/CellValue"
             },
-            "description": "One data row: an object mapping field names to cell values.",
-            "type": "object",
-            "properties": {}
-          }
+            "description": "One data row: an object mapping field names to cell values."
+          },
+          "description": "Row-oriented inline data: an array of row objects sharing field names."
         }
-      }
+      },
+      "additionalProperties": false,
+      "description": "Inline row-oriented data. Example: {\"values\": [{\"x\": 1, \"y\": 2}]}."
     },
     "DataColumns": {
-      "additionalProperties": false,
-      "description": "Inline column-oriented data. Example: {\"columns\": {\"x\": [1, 2], \"y\": [3, 4]}}.",
       "type": "object",
       "required": [
         "columns"
       ],
       "properties": {
         "columns": {
-          "description": "Column-oriented inline data: an object mapping each field name to an array of cell values. All arrays must have the same length.",
           "type": "object",
           "additionalProperties": {
             "type": "array",
             "items": {
               "$ref": "#/$defs/CellValue"
             }
-          }
+          },
+          "description": "Column-oriented inline data: an object mapping each field name to an array of cell values. All arrays must have the same length."
         }
-      }
+      },
+      "additionalProperties": false,
+      "description": "Inline column-oriented data. Example: {\"columns\": {\"x\": [1, 2], \"y\": [3, 4]}}."
     },
     "DataName": {
-      "additionalProperties": false,
-      "description": "A reference to a named dataset. Example: {\"name\": \"cars\"}.",
       "type": "object",
       "required": [
         "name"
       ],
       "properties": {
         "name": {
-          "description": "Name of a dataset provided out-of-band: either a key of the spec's top-level `datasets`, or a dataset passed by the host at render time.",
-          "type": "string"
+          "type": "string",
+          "description": "Name of a dataset provided out-of-band: either a key of the spec's top-level `datasets`, or a dataset passed by the host at render time."
         }
-      }
+      },
+      "additionalProperties": false,
+      "description": "A reference to a named dataset. Example: {\"name\": \"cars\"}."
     },
     "DataRef": {
-      "description": "Where a plot's data comes from: inline rows ({values}), inline columns ({columns}), or a named dataset ({name}). Exactly one form.",
       "anyOf": [
         {
           "$ref": "#/$defs/DataValues"
@@ -88,10 +87,10 @@
         {
           "$ref": "#/$defs/DataName"
         }
-      ]
+      ],
+      "description": "Where a plot's data comes from: inline rows ({values}), inline columns ({columns}), or a named dataset ({name}). Exactly one form."
     },
     "InlineData": {
-      "description": "Inline data only ({values} or {columns}); used for entries of `datasets`.",
       "anyOf": [
         {
           "$ref": "#/$defs/DataValues"
@@ -99,32 +98,30 @@
         {
           "$ref": "#/$defs/DataColumns"
         }
-      ]
+      ],
+      "description": "Inline data only ({values} or {columns}); used for entries of `datasets`."
     },
     "FieldRef": {
-      "additionalProperties": false,
-      "description": "Map this channel to a data field (column). Example: {\"field\": \"displ\"}. This is the canonical form — bare strings are NOT valid channel values.",
       "type": "object",
       "required": [
         "field"
       ],
       "properties": {
         "field": {
-          "description": "Name of the data column this channel reads from.",
-          "type": "string"
+          "type": "string",
+          "description": "Name of the data column this channel reads from."
         }
-      }
+      },
+      "additionalProperties": false,
+      "description": "Map this channel to a data field (column). Example: {\"field\": \"displ\"}. This is the canonical form — bare strings are NOT valid channel values."
     },
     "ValueRef": {
-      "additionalProperties": false,
-      "description": "Map this channel to a constant. Example: {\"value\": \"steelblue\"} sets a literal color; {\"value\": \"treatment\", \"scale\": true} routes the constant through the scale.",
       "type": "object",
       "required": [
         "value"
       ],
       "properties": {
         "value": {
-          "description": "The constant value applied to every mark.",
           "anyOf": [
             {
               "type": "string"
@@ -135,30 +132,32 @@
             {
               "type": "boolean"
             }
-          ]
+          ],
+          "description": "The constant value applied to every mark."
         },
         "scale": {
-          "description": "If true, the constant is passed THROUGH the channel's scale (like a data value). Default false: the constant is used literally (e.g. a CSS color).",
-          "type": "boolean"
+          "type": "boolean",
+          "description": "If true, the constant is passed THROUGH the channel's scale (like a data value). Default false: the constant is used literally (e.g. a CSS color)."
         }
-      }
+      },
+      "additionalProperties": false,
+      "description": "Map this channel to a constant. Example: {\"value\": \"steelblue\"} sets a literal color; {\"value\": \"treatment\", \"scale\": true} routes the constant through the scale."
     },
     "StatRef": {
-      "additionalProperties": false,
-      "description": "Map this channel to a column generated by the layer's stat (after-stat form). Example: {\"stat\": \"count\"}.",
       "type": "object",
       "required": [
         "stat"
       ],
       "properties": {
         "stat": {
-          "description": "Name of a stat-generated column computed after the layer's stat runs (e.g. \"count\" for the count stat). ggplot2's after_stat().",
-          "type": "string"
+          "type": "string",
+          "description": "Name of a stat-generated column computed after the layer's stat runs (e.g. \"count\" for the count stat). ggplot2's after_stat()."
         }
-      }
+      },
+      "additionalProperties": false,
+      "description": "Map this channel to a column generated by the layer's stat (after-stat form). Example: {\"stat\": \"count\"}."
     },
     "ChannelValue": {
-      "description": "How one aesthetic channel gets its value: a data field ({field}), a constant ({value, scale?}), a stat output ({stat}), or null to UNSET a channel inherited from the plot-level mapping. Bare strings are not valid.",
       "anyOf": [
         {
           "$ref": "#/$defs/FieldRef"
@@ -172,451 +171,451 @@
         {
           "type": "null"
         }
-      ]
+      ],
+      "description": "How one aesthetic channel gets its value: a data field ({field}), a constant ({value, scale?}), a stat output ({stat}), or null to UNSET a channel inherited from the plot-level mapping. Bare strings are not valid."
     },
     "Aes": {
-      "additionalProperties": false,
-      "description": "Aesthetic mapping: which channels read which data fields/constants. Plot-level aes is inherited by every layer; a layer's aes overrides per channel, and null unsets an inherited channel.",
       "type": "object",
       "properties": {
         "x": {
-          "description": "Horizontal position channel.",
-          "$ref": "#/$defs/ChannelValue"
+          "$ref": "#/$defs/ChannelValue",
+          "description": "Horizontal position channel."
         },
         "y": {
-          "description": "Vertical position channel.",
-          "$ref": "#/$defs/ChannelValue"
+          "$ref": "#/$defs/ChannelValue",
+          "description": "Vertical position channel."
         },
         "color": {
-          "description": "Stroke/point color channel. Discrete fields get a categorical palette; quantitative fields get a sequential ramp.",
-          "$ref": "#/$defs/ChannelValue"
+          "$ref": "#/$defs/ChannelValue",
+          "description": "Stroke/point color channel. Discrete fields get a categorical palette; quantitative fields get a sequential ramp."
         },
         "fill": {
-          "description": "Fill color channel (areas, bars, filled shapes). Discrete fields get a categorical palette; quantitative fields get a sequential ramp.",
-          "$ref": "#/$defs/ChannelValue"
+          "$ref": "#/$defs/ChannelValue",
+          "description": "Fill color channel (areas, bars, filled shapes). Discrete fields get a categorical palette; quantitative fields get a sequential ramp."
         },
         "size": {
-          "description": "Mark size channel (AREA-scaled — sqrt scale; use `linewidth` for stroke width, which scales linearly).",
-          "$ref": "#/$defs/ChannelValue"
+          "$ref": "#/$defs/ChannelValue",
+          "description": "Mark size channel (AREA-scaled — sqrt scale; use `linewidth` for stroke width, which scales linearly)."
         },
         "linewidth": {
-          "description": "Stroke width channel (LENGTH-scaled — linear; distinct from `size`, which scales by area).",
-          "$ref": "#/$defs/ChannelValue"
+          "$ref": "#/$defs/ChannelValue",
+          "description": "Stroke width channel (LENGTH-scaled — linear; distinct from `size`, which scales by area)."
         },
         "alpha": {
-          "description": "Opacity channel, 0 (transparent) to 1 (opaque).",
-          "$ref": "#/$defs/ChannelValue"
+          "$ref": "#/$defs/ChannelValue",
+          "description": "Opacity channel, 0 (transparent) to 1 (opaque)."
         },
         "group": {
-          "description": "Explicit grouping channel. Overrides the default grouping (the interaction of all discrete mapped aesthetics). A constant (e.g. {\"value\": 1}) forces a single group.",
-          "$ref": "#/$defs/ChannelValue"
+          "$ref": "#/$defs/ChannelValue",
+          "description": "Explicit grouping channel. Overrides the default grouping (the interaction of all discrete mapped aesthetics). A constant (e.g. {\"value\": 1}) forces a single group."
         },
         "label": {
-          "description": "Text label channel (used by the text geom; never participates in grouping).",
-          "$ref": "#/$defs/ChannelValue"
+          "$ref": "#/$defs/ChannelValue",
+          "description": "Text label channel (used by the text geom; never participates in grouping)."
         },
         "weight": {
-          "description": "Statistical weight channel. The count, bin, and density stats sum weights instead of counting rows. Never participates in grouping.",
-          "$ref": "#/$defs/ChannelValue"
+          "$ref": "#/$defs/ChannelValue",
+          "description": "Statistical weight channel. The count, bin, and density stats sum weights instead of counting rows. Never participates in grouping."
         },
         "ymin": {
-          "description": "Lower bound channel (errorbar with the identity stat). Quantitative values only.",
-          "$ref": "#/$defs/ChannelValue"
+          "$ref": "#/$defs/ChannelValue",
+          "description": "Lower bound channel (errorbar with the identity stat). Quantitative values only."
         },
         "ymax": {
-          "description": "Upper bound channel (errorbar with the identity stat). Quantitative values only.",
-          "$ref": "#/$defs/ChannelValue"
+          "$ref": "#/$defs/ChannelValue",
+          "description": "Upper bound channel (errorbar with the identity stat). Quantitative values only."
         }
-      }
+      },
+      "additionalProperties": false,
+      "description": "Aesthetic mapping: which channels read which data fields/constants. Plot-level aes is inherited by every layer; a layer's aes overrides per channel, and null unsets an inherited channel."
     },
     "PointParams": {
-      "additionalProperties": false,
-      "description": "Styling parameters for the point geom.",
       "type": "object",
       "properties": {
         "alpha": {
+          "type": "number",
           "minimum": 0,
           "maximum": 1,
-          "description": "Point opacity. Must be between 0 and 1 (inclusive). Default 1.",
-          "type": "number"
+          "description": "Point opacity. Must be between 0 and 1 (inclusive). Default 1."
         },
         "size": {
+          "type": "number",
           "exclusiveMinimum": 0,
-          "description": "Point radius in px. Must be greater than 0. Default 2.5.",
-          "type": "number"
+          "description": "Point radius in px. Must be greater than 0. Default 2.5."
         },
         "shape": {
-          "description": "Point shape. One of \"circle\", \"square\", \"triangle\". Default \"circle\".",
           "anyOf": [
             {
-              "const": "circle",
-              "type": "string"
+              "type": "string",
+              "const": "circle"
             },
             {
-              "const": "square",
-              "type": "string"
+              "type": "string",
+              "const": "square"
             },
             {
-              "const": "triangle",
-              "type": "string"
+              "type": "string",
+              "const": "triangle"
             }
-          ]
+          ],
+          "description": "Point shape. One of \"circle\", \"square\", \"triangle\". Default \"circle\"."
         }
-      }
+      },
+      "additionalProperties": false,
+      "description": "Styling parameters for the point geom."
     },
     "LineParams": {
-      "additionalProperties": false,
-      "description": "Styling parameters for the line geom.",
       "type": "object",
       "properties": {
         "alpha": {
+          "type": "number",
           "minimum": 0,
           "maximum": 1,
-          "description": "Line opacity. Must be between 0 and 1 (inclusive). Default 1.",
-          "type": "number"
+          "description": "Line opacity. Must be between 0 and 1 (inclusive). Default 1."
         },
         "linewidth": {
+          "type": "number",
           "exclusiveMinimum": 0,
-          "description": "Stroke width in px. Must be greater than 0. Default 1.5.",
-          "type": "number"
+          "description": "Stroke width in px. Must be greater than 0. Default 1.5."
         },
         "curve": {
-          "description": "Interpolation between points: \"linear\" (straight segments, default) or \"step\" (horizontal-then-vertical steps, changing at the midpoint between x positions).",
           "anyOf": [
             {
-              "const": "linear",
-              "type": "string"
+              "type": "string",
+              "const": "linear"
             },
             {
-              "const": "step",
-              "type": "string"
+              "type": "string",
+              "const": "step"
             }
-          ]
+          ],
+          "description": "Interpolation between points: \"linear\" (straight segments, default) or \"step\" (horizontal-then-vertical steps, changing at the midpoint between x positions)."
         }
-      }
+      },
+      "additionalProperties": false,
+      "description": "Styling parameters for the line geom."
     },
     "ColParams": {
-      "additionalProperties": false,
-      "description": "Styling parameters for the col geom.",
       "type": "object",
       "properties": {
         "alpha": {
+          "type": "number",
           "minimum": 0,
           "maximum": 1,
-          "description": "Bar opacity. Must be between 0 and 1 (inclusive). Default 1.",
-          "type": "number"
+          "description": "Bar opacity. Must be between 0 and 1 (inclusive). Default 1."
         },
         "width": {
+          "type": "number",
           "exclusiveMinimum": 0,
           "maximum": 1,
-          "description": "Bar width as a fraction of the band step. Must be greater than 0 and at most 1. Default 0.9.",
-          "type": "number"
+          "description": "Bar width as a fraction of the band step. Must be greater than 0 and at most 1. Default 0.9."
         }
-      }
+      },
+      "additionalProperties": false,
+      "description": "Styling parameters for the col geom."
     },
     "BarParams": {
-      "additionalProperties": false,
-      "description": "Parameters for the bar and histogram geoms: styling (alpha, width) plus stat-bin binning controls (bins, binwidth, boundary, center, closed).",
       "type": "object",
       "properties": {
         "alpha": {
+          "type": "number",
           "minimum": 0,
           "maximum": 1,
-          "description": "Bar opacity. Must be between 0 and 1 (inclusive). Default 1.",
-          "type": "number"
+          "description": "Bar opacity. Must be between 0 and 1 (inclusive). Default 1."
         },
         "width": {
+          "type": "number",
           "exclusiveMinimum": 0,
           "maximum": 1,
-          "description": "Bar width as a fraction of the band step (count-stat bars only; binned bars span their bin). Must be greater than 0 and at most 1. Default 0.9.",
-          "type": "number"
+          "description": "Bar width as a fraction of the band step (count-stat bars only; binned bars span their bin). Must be greater than 0 and at most 1. Default 0.9."
         },
         "bins": {
+          "type": "integer",
           "minimum": 1,
-          "description": "STAT BIN ONLY: number of bins (an integer of at least 1). Default 30 — an advisory reminds you to pick a real value. Overridden by binwidth.",
-          "type": "integer"
+          "description": "STAT BIN ONLY: number of bins (an integer of at least 1). Default 30 — an advisory reminds you to pick a real value. Overridden by binwidth."
         },
         "binwidth": {
+          "type": "number",
           "exclusiveMinimum": 0,
-          "description": "STAT BIN ONLY: bin width in data units (must be greater than 0). Takes precedence over bins. Usually the better knob: pick a width meaningful for the data.",
-          "type": "number"
+          "description": "STAT BIN ONLY: bin width in data units (must be greater than 0). Takes precedence over bins. Usually the better knob: pick a width meaningful for the data."
         },
         "boundary": {
-          "description": "STAT BIN ONLY: align a bin EDGE with this x value (e.g. 0 puts bin edges at multiples of the width). Mutually exclusive with center.",
-          "type": "number"
+          "type": "number",
+          "description": "STAT BIN ONLY: align a bin EDGE with this x value (e.g. 0 puts bin edges at multiples of the width). Mutually exclusive with center."
         },
         "center": {
-          "description": "STAT BIN ONLY: align a bin CENTER with this x value. Mutually exclusive with boundary.",
-          "type": "number"
+          "type": "number",
+          "description": "STAT BIN ONLY: align a bin CENTER with this x value. Mutually exclusive with boundary."
         },
         "closed": {
-          "description": "STAT BIN ONLY: which edge of each bin is inclusive: \"right\" (default, matches ggplot2) or \"left\".",
           "anyOf": [
             {
-              "const": "right",
-              "type": "string"
+              "type": "string",
+              "const": "right"
             },
             {
-              "const": "left",
-              "type": "string"
+              "type": "string",
+              "const": "left"
             }
-          ]
+          ],
+          "description": "STAT BIN ONLY: which edge of each bin is inclusive: \"right\" (default, matches ggplot2) or \"left\"."
         }
-      }
+      },
+      "additionalProperties": false,
+      "description": "Parameters for the bar and histogram geoms: styling (alpha, width) plus stat-bin binning controls (bins, binwidth, boundary, center, closed)."
     },
     "SmoothParams": {
-      "additionalProperties": false,
-      "description": "Parameters for the smooth geom (fitted trend line + optional se ribbon).",
       "type": "object",
       "properties": {
         "method": {
-          "description": "Smoothing method: \"lm\" (least-squares line) or \"loess\" (local polynomial regression). Omit to infer: loess for fewer than 1000 rows, lm above (an advisory reports the choice).",
           "anyOf": [
             {
-              "const": "lm",
-              "type": "string"
+              "type": "string",
+              "const": "lm"
             },
             {
-              "const": "loess",
-              "type": "string"
+              "type": "string",
+              "const": "loess"
             }
-          ]
+          ],
+          "description": "Smoothing method: \"lm\" (least-squares line) or \"loess\" (local polynomial regression). Omit to infer: loess for fewer than 1000 rows, lm above (an advisory reports the choice)."
         },
         "se": {
-          "description": "Draw the confidence-interval ribbon around the fit. Default true.",
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Draw the confidence-interval ribbon around the fit. Default true."
         },
         "level": {
+          "type": "number",
           "exclusiveMinimum": 0,
           "exclusiveMaximum": 1,
-          "description": "Confidence level of the ribbon, strictly between 0 and 1. Default 0.95.",
-          "type": "number"
+          "description": "Confidence level of the ribbon, strictly between 0 and 1. Default 0.95."
         },
         "span": {
+          "type": "number",
           "exclusiveMinimum": 0,
           "maximum": 1,
-          "description": "LOESS ONLY: fraction of points in each local neighborhood, greater than 0 and at most 1. Default 0.75. Smaller = wigglier.",
-          "type": "number"
+          "description": "LOESS ONLY: fraction of points in each local neighborhood, greater than 0 and at most 1. Default 0.75. Smaller = wigglier."
         },
         "degree": {
-          "description": "LOESS ONLY: degree of the local polynomial, 1 or 2. Default 2 (the R default).",
           "anyOf": [
             {
-              "const": 1,
-              "type": "number"
+              "type": "number",
+              "const": 1
             },
             {
-              "const": 2,
-              "type": "number"
+              "type": "number",
+              "const": 2
             }
-          ]
+          ],
+          "description": "LOESS ONLY: degree of the local polynomial, 1 or 2. Default 2 (the R default)."
         },
         "n": {
+          "type": "integer",
           "minimum": 2,
           "maximum": 5000,
-          "description": "Number of evaluation points along x (an integer between 2 and 5000). Default 80.",
-          "type": "integer"
+          "description": "Number of evaluation points along x (an integer between 2 and 5000). Default 80."
         },
         "linewidth": {
+          "type": "number",
           "exclusiveMinimum": 0,
-          "description": "Stroke width of the fitted line in px. Must be greater than 0. Default 1.",
-          "type": "number"
+          "description": "Stroke width of the fitted line in px. Must be greater than 0. Default 1."
         },
         "alpha": {
+          "type": "number",
           "minimum": 0,
           "maximum": 1,
-          "description": "Line opacity. Must be between 0 and 1 (inclusive). Default 1.",
-          "type": "number"
+          "description": "Line opacity. Must be between 0 and 1 (inclusive). Default 1."
         }
-      }
+      },
+      "additionalProperties": false,
+      "description": "Parameters for the smooth geom (fitted trend line + optional se ribbon)."
     },
     "BoxplotParams": {
-      "additionalProperties": false,
-      "description": "Styling parameters for the boxplot geom.",
       "type": "object",
       "properties": {
         "width": {
+          "type": "number",
           "exclusiveMinimum": 0,
           "maximum": 1,
-          "description": "Box width as a fraction of the band step. Must be greater than 0 and at most 1. Default 0.9.",
-          "type": "number"
+          "description": "Box width as a fraction of the band step. Must be greater than 0 and at most 1. Default 0.9."
         },
         "coef": {
+          "type": "number",
           "minimum": 0,
-          "description": "Whisker length as a multiple of the IQR (values beyond it are outliers). Must be at least 0. Default 1.5.",
-          "type": "number"
+          "description": "Whisker length as a multiple of the IQR (values beyond it are outliers). Must be at least 0. Default 1.5."
         },
         "linewidth": {
+          "type": "number",
           "exclusiveMinimum": 0,
-          "description": "Stroke width of the box, whiskers, and median line in px (the median draws at twice this). Must be greater than 0. Default 1.",
-          "type": "number"
+          "description": "Stroke width of the box, whiskers, and median line in px (the median draws at twice this). Must be greater than 0. Default 1."
         },
         "outlierSize": {
+          "type": "number",
           "exclusiveMinimum": 0,
-          "description": "Outlier point radius in px. Must be greater than 0. Default 1.5.",
-          "type": "number"
+          "description": "Outlier point radius in px. Must be greater than 0. Default 1.5."
         },
         "alpha": {
+          "type": "number",
           "minimum": 0,
           "maximum": 1,
-          "description": "Layer opacity. Must be between 0 and 1 (inclusive). Default 1.",
-          "type": "number"
+          "description": "Layer opacity. Must be between 0 and 1 (inclusive). Default 1."
         }
-      }
+      },
+      "additionalProperties": false,
+      "description": "Styling parameters for the boxplot geom."
     },
     "DensityParams": {
-      "additionalProperties": false,
-      "description": "Parameters for the density geom (gaussian kernel density estimate).",
       "type": "object",
       "properties": {
         "bw": {
+          "type": "number",
           "exclusiveMinimum": 0,
-          "description": "Kernel bandwidth in data units (must be greater than 0). Omit for R's bw.nrd0 rule-of-thumb default.",
-          "type": "number"
+          "description": "Kernel bandwidth in data units (must be greater than 0). Omit for R's bw.nrd0 rule-of-thumb default."
         },
         "adjust": {
+          "type": "number",
           "exclusiveMinimum": 0,
-          "description": "Bandwidth multiplier (must be greater than 0). Default 1. 0.5 = half the default bandwidth (wigglier), 2 = double (smoother).",
-          "type": "number"
+          "description": "Bandwidth multiplier (must be greater than 0). Default 1. 0.5 = half the default bandwidth (wigglier), 2 = double (smoother)."
         },
         "n": {
+          "type": "integer",
           "minimum": 2,
           "maximum": 4096,
-          "description": "Number of grid points the density is evaluated at (an integer between 2 and 4096). Default 512 (the R default).",
-          "type": "integer"
+          "description": "Number of grid points the density is evaluated at (an integer between 2 and 4096). Default 512 (the R default)."
         },
         "cut": {
+          "type": "number",
           "minimum": 0,
-          "description": "The grid extends cut * bandwidth beyond the data extremes (at least 0). Default 3 (the R default).",
-          "type": "number"
+          "description": "The grid extends cut * bandwidth beyond the data extremes (at least 0). Default 3 (the R default)."
         },
         "alpha": {
+          "type": "number",
           "minimum": 0,
           "maximum": 1,
-          "description": "Area fill opacity. Must be between 0 and 1 (inclusive). Default 1.",
-          "type": "number"
+          "description": "Area fill opacity. Must be between 0 and 1 (inclusive). Default 1."
         }
-      }
+      },
+      "additionalProperties": false,
+      "description": "Parameters for the density geom (gaussian kernel density estimate)."
     },
     "SummaryFun": {
-      "description": "A summary function: \"mean\", \"median\", \"sum\", \"min\", or \"max\".",
       "anyOf": [
         {
-          "const": "mean",
-          "type": "string"
+          "type": "string",
+          "const": "mean"
         },
         {
-          "const": "median",
-          "type": "string"
+          "type": "string",
+          "const": "median"
         },
         {
-          "const": "sum",
-          "type": "string"
+          "type": "string",
+          "const": "sum"
         },
         {
-          "const": "min",
-          "type": "string"
+          "type": "string",
+          "const": "min"
         },
         {
-          "const": "max",
-          "type": "string"
+          "type": "string",
+          "const": "max"
         }
-      ]
+      ],
+      "description": "A summary function: \"mean\", \"median\", \"sum\", \"min\", or \"max\"."
     },
     "ErrorbarParams": {
-      "additionalProperties": false,
-      "description": "Parameters for the errorbar geom: styling plus the summary-stat functions (fun, funMin, funMax) used when stat is \"summary\".",
       "type": "object",
       "properties": {
         "width": {
+          "type": "number",
           "exclusiveMinimum": 0,
           "maximum": 1,
-          "description": "Cap width as a fraction of the band step. Must be greater than 0 and at most 1. Default 0.9.",
-          "type": "number"
+          "description": "Cap width as a fraction of the band step. Must be greater than 0 and at most 1. Default 0.9."
         },
         "linewidth": {
+          "type": "number",
           "exclusiveMinimum": 0,
-          "description": "Stroke width in px. Must be greater than 0. Default 1.",
-          "type": "number"
+          "description": "Stroke width in px. Must be greater than 0. Default 1."
         },
         "alpha": {
+          "type": "number",
           "minimum": 0,
           "maximum": 1,
-          "description": "Errorbar opacity. Must be between 0 and 1 (inclusive). Default 1.",
-          "type": "number"
+          "description": "Errorbar opacity. Must be between 0 and 1 (inclusive). Default 1."
         },
         "fun": {
-          "description": "STAT SUMMARY ONLY: the center summary of y per x group: \"mean\" (default), \"median\", or \"sum\". With \"mean\" and no funMin/funMax, the bounds default to mean ± standard error (ggplot2's mean_se).",
           "anyOf": [
             {
-              "const": "mean",
-              "type": "string"
+              "type": "string",
+              "const": "mean"
             },
             {
-              "const": "median",
-              "type": "string"
+              "type": "string",
+              "const": "median"
             },
             {
-              "const": "sum",
-              "type": "string"
+              "type": "string",
+              "const": "sum"
             }
-          ]
+          ],
+          "description": "STAT SUMMARY ONLY: the center summary of y per x group: \"mean\" (default), \"median\", or \"sum\". With \"mean\" and no funMin/funMax, the bounds default to mean ± standard error (ggplot2's mean_se)."
         },
         "funMin": {
-          "description": "STAT SUMMARY ONLY: summary function for the lower bound (ymin). Overrides the mean_se default.",
-          "$ref": "#/$defs/SummaryFun"
+          "$ref": "#/$defs/SummaryFun",
+          "description": "STAT SUMMARY ONLY: summary function for the lower bound (ymin). Overrides the mean_se default."
         },
         "funMax": {
-          "description": "STAT SUMMARY ONLY: summary function for the upper bound (ymax). Overrides the mean_se default.",
-          "$ref": "#/$defs/SummaryFun"
+          "$ref": "#/$defs/SummaryFun",
+          "description": "STAT SUMMARY ONLY: summary function for the upper bound (ymax). Overrides the mean_se default."
         }
-      }
+      },
+      "additionalProperties": false,
+      "description": "Parameters for the errorbar geom: styling plus the summary-stat functions (fun, funMin, funMax) used when stat is \"summary\"."
     },
     "PositionParams": {
-      "additionalProperties": false,
-      "description": "Parameters for the jitter (width, height, seed) and nudge (x, y) position adjustments.",
       "type": "object",
       "properties": {
         "width": {
+          "type": "number",
           "minimum": 0,
-          "description": "JITTER ONLY: maximum horizontal jitter amount — data units on continuous x, band-step fractions on discrete x. Default 40% of the data resolution.",
-          "type": "number"
+          "description": "JITTER ONLY: maximum horizontal jitter amount — data units on continuous x, band-step fractions on discrete x. Default 40% of the data resolution."
         },
         "height": {
+          "type": "number",
           "minimum": 0,
-          "description": "JITTER ONLY: maximum vertical jitter amount — data units on continuous y, band-step fractions on discrete y. Default 40% of the data resolution.",
-          "type": "number"
+          "description": "JITTER ONLY: maximum vertical jitter amount — data units on continuous y, band-step fractions on discrete y. Default 40% of the data resolution."
         },
         "seed": {
+          "type": "integer",
           "minimum": 0,
-          "description": "JITTER ONLY: RNG seed (a non-negative integer). Default 42. ggsvelte jitter is ALWAYS seeded so renders are reproducible (deliberate divergence from ggplot2's random jitter).",
-          "type": "integer"
+          "description": "JITTER ONLY: RNG seed (a non-negative integer). Default 42. ggsvelte jitter is ALWAYS seeded so renders are reproducible (deliberate divergence from ggplot2's random jitter)."
         },
         "x": {
-          "description": "NUDGE ONLY: horizontal offset — data units on continuous x, band-step fractions on discrete x. Default 0.",
-          "type": "number"
+          "type": "number",
+          "description": "NUDGE ONLY: horizontal offset — data units on continuous x, band-step fractions on discrete x. Default 0."
         },
         "y": {
-          "description": "NUDGE ONLY: vertical offset — data units on continuous y, band-step fractions on discrete y. Default 0.",
-          "type": "number"
+          "type": "number",
+          "description": "NUDGE ONLY: vertical offset — data units on continuous y, band-step fractions on discrete y. Default 0."
         }
-      }
+      },
+      "additionalProperties": false,
+      "description": "Parameters for the jitter (width, height, seed) and nudge (x, y) position adjustments."
     },
     "AreaParams": {
-      "additionalProperties": false,
-      "description": "Styling parameters for the area geom.",
       "type": "object",
       "properties": {
         "alpha": {
+          "type": "number",
           "minimum": 0,
           "maximum": 1,
-          "description": "Area fill opacity. Must be between 0 and 1 (inclusive). Default 1.",
-          "type": "number"
+          "description": "Area fill opacity. Must be between 0 and 1 (inclusive). Default 1."
         }
-      }
+      },
+      "additionalProperties": false,
+      "description": "Styling parameters for the area geom."
     },
     "RuleIntercept": {
-      "description": "A fixed intercept (or array of intercepts) in data units. Numbers for linear/log scales; ISO 8601 date strings (e.g. \"2026-01-01\") for time scales; category strings for band scales.",
       "anyOf": [
         {
           "type": "number"
@@ -625,7 +624,6 @@
           "type": "string"
         },
         {
-          "minItems": 1,
           "type": "array",
           "items": {
             "anyOf": [
@@ -636,151 +634,151 @@
                 "type": "string"
               }
             ]
-          }
+          },
+          "minItems": 1
         }
-      ]
+      ],
+      "description": "A fixed intercept (or array of intercepts) in data units. Numbers for linear/log scales; ISO 8601 date strings (e.g. \"2026-01-01\") for time scales; category strings for band scales."
     },
     "RuleParams": {
-      "additionalProperties": false,
-      "description": "Styling parameters for the rule geom. The annotation form sets xintercept and/or yintercept here; the data-driven form maps aes.x OR aes.y instead (never both forms at once).",
       "type": "object",
       "properties": {
         "xintercept": {
-          "description": "ANNOTATION FORM ONLY: draw a vertical rule at each of these fixed x positions. Mutually exclusive with mapping aes.x/aes.y on this layer.",
-          "$ref": "#/$defs/RuleIntercept"
+          "$ref": "#/$defs/RuleIntercept",
+          "description": "ANNOTATION FORM ONLY: draw a vertical rule at each of these fixed x positions. Mutually exclusive with mapping aes.x/aes.y on this layer."
         },
         "yintercept": {
-          "description": "ANNOTATION FORM ONLY: draw a horizontal rule at each of these fixed y positions. Mutually exclusive with mapping aes.x/aes.y on this layer.",
-          "$ref": "#/$defs/RuleIntercept"
+          "$ref": "#/$defs/RuleIntercept",
+          "description": "ANNOTATION FORM ONLY: draw a horizontal rule at each of these fixed y positions. Mutually exclusive with mapping aes.x/aes.y on this layer."
         },
         "alpha": {
+          "type": "number",
           "minimum": 0,
           "maximum": 1,
-          "description": "Rule opacity. Must be between 0 and 1 (inclusive). Default 1.",
-          "type": "number"
+          "description": "Rule opacity. Must be between 0 and 1 (inclusive). Default 1."
         },
         "linewidth": {
+          "type": "number",
           "exclusiveMinimum": 0,
-          "description": "Stroke width in px. Must be greater than 0. Default 1.",
-          "type": "number"
+          "description": "Stroke width in px. Must be greater than 0. Default 1."
         }
-      }
+      },
+      "additionalProperties": false,
+      "description": "Styling parameters for the rule geom. The annotation form sets xintercept and/or yintercept here; the data-driven form maps aes.x OR aes.y instead (never both forms at once)."
     },
     "TextParams": {
-      "additionalProperties": false,
-      "description": "Styling parameters for the text geom (no collision detection: labels draw exactly where placed).",
       "type": "object",
       "properties": {
         "alpha": {
+          "type": "number",
           "minimum": 0,
           "maximum": 1,
-          "description": "Text opacity. Must be between 0 and 1 (inclusive). Default 1.",
-          "type": "number"
+          "description": "Text opacity. Must be between 0 and 1 (inclusive). Default 1."
         },
         "size": {
+          "type": "number",
           "exclusiveMinimum": 0,
-          "description": "Font size in px. Must be greater than 0. Default 11.",
-          "type": "number"
+          "description": "Font size in px. Must be greater than 0. Default 11."
         },
         "anchor": {
-          "description": "Horizontal text anchor relative to the (x, y) position: \"start\", \"middle\" (default), or \"end\".",
           "anyOf": [
             {
-              "const": "start",
-              "type": "string"
+              "type": "string",
+              "const": "start"
             },
             {
-              "const": "middle",
-              "type": "string"
+              "type": "string",
+              "const": "middle"
             },
             {
-              "const": "end",
-              "type": "string"
+              "type": "string",
+              "const": "end"
             }
-          ]
+          ],
+          "description": "Horizontal text anchor relative to the (x, y) position: \"start\", \"middle\" (default), or \"end\"."
         },
         "dx": {
-          "description": "Horizontal offset in px applied after positioning. Default 0.",
-          "type": "number"
+          "type": "number",
+          "description": "Horizontal offset in px applied after positioning. Default 0."
         },
         "dy": {
-          "description": "Vertical offset in px applied after positioning (positive = down). Default 0.",
-          "type": "number"
+          "type": "number",
+          "description": "Vertical offset in px applied after positioning (positive = down). Default 0."
         }
-      }
+      },
+      "additionalProperties": false,
+      "description": "Styling parameters for the text geom (no collision detection: labels draw exactly where placed)."
     },
     "RenderBackend": {
-      "description": "Rendering backend for this layer: \"svg\" (DOM marks — accessible, copyable), \"canvas\" (fast raster for high mark counts), or \"auto\" (default — canvas above the mark-count threshold of 2000, with an advisory). Text layers always render as SVG. renderToSVGString ignores this and renders everything as SVG.",
       "anyOf": [
         {
-          "const": "svg",
-          "type": "string"
+          "type": "string",
+          "const": "svg"
         },
         {
-          "const": "canvas",
-          "type": "string"
+          "type": "string",
+          "const": "canvas"
         },
         {
-          "const": "auto",
-          "type": "string"
+          "type": "string",
+          "const": "auto"
         }
-      ]
+      ],
+      "description": "Rendering backend for this layer: \"svg\" (DOM marks — accessible, copyable), \"canvas\" (fast raster for high mark counts), or \"auto\" (default — canvas above the mark-count threshold of 2000, with an advisory). Text layers always render as SVG. renderToSVGString ignores this and renders everything as SVG."
     },
     "StackablePosition": {
-      "description": "Position adjustment: \"stack\" piles grouped values (positive up, negative down), \"fill\" stacks to proportions of 1, \"dodge\" places groups side by side, \"identity\" leaves positions unchanged.",
       "anyOf": [
         {
-          "const": "stack",
-          "type": "string"
+          "type": "string",
+          "const": "stack"
         },
         {
-          "const": "fill",
-          "type": "string"
+          "type": "string",
+          "const": "fill"
         },
         {
-          "const": "dodge",
-          "type": "string"
+          "type": "string",
+          "const": "dodge"
         },
         {
-          "const": "identity",
-          "type": "string"
+          "type": "string",
+          "const": "identity"
         }
-      ]
+      ],
+      "description": "Position adjustment: \"stack\" piles grouped values (positive up, negative down), \"fill\" stacks to proportions of 1, \"dodge\" places groups side by side, \"identity\" leaves positions unchanged."
     },
     "PointLayer": {
-      "additionalProperties": false,
-      "description": "A scatter/point layer. Requires x and y channels (inherited from plot aes or set in the layer's aes).",
       "type": "object",
       "required": [
         "geom"
       ],
       "properties": {
         "geom": {
-          "description": "Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, correlation views.",
+          "type": "string",
           "const": "point",
-          "type": "string"
+          "description": "Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, correlation views."
         },
         "stat": {
-          "description": "Point layers draw the data as-is.",
+          "type": "string",
           "const": "identity",
-          "type": "string"
+          "description": "Point layers draw the data as-is."
         },
         "position": {
-          "description": "Position adjustment: \"identity\" (default), \"jitter\" (seeded random offsets — configure with positionParams.width/height/seed), or \"nudge\" (fixed offsets — positionParams.x/y).",
           "anyOf": [
             {
-              "const": "identity",
-              "type": "string"
+              "type": "string",
+              "const": "identity"
             },
             {
-              "const": "jitter",
-              "type": "string"
+              "type": "string",
+              "const": "jitter"
             },
             {
-              "const": "nudge",
-              "type": "string"
+              "type": "string",
+              "const": "nudge"
             }
-          ]
+          ],
+          "description": "Position adjustment: \"identity\" (default), \"jitter\" (seeded random offsets — configure with positionParams.width/height/seed), or \"nudge\" (fixed offsets — positionParams.x/y)."
         },
         "positionParams": {
           "$ref": "#/$defs/PositionParams"
@@ -794,30 +792,30 @@
         "params": {
           "$ref": "#/$defs/PointParams"
         }
-      }
+      },
+      "additionalProperties": false,
+      "description": "A scatter/point layer. Requires x and y channels (inherited from plot aes or set in the layer's aes)."
     },
     "LineLayer": {
-      "additionalProperties": false,
-      "description": "A line layer. Requires x and y channels; rows are sorted by x within each group before connecting.",
       "type": "object",
       "required": [
         "geom"
       ],
       "properties": {
         "geom": {
-          "description": "Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, line charts.",
+          "type": "string",
           "const": "line",
-          "type": "string"
+          "description": "Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, line charts."
         },
         "stat": {
-          "description": "Line layers draw the data as-is.",
+          "type": "string",
           "const": "identity",
-          "type": "string"
+          "description": "Line layers draw the data as-is."
         },
         "position": {
-          "description": "Line layers use identity positioning.",
+          "type": "string",
           "const": "identity",
-          "type": "string"
+          "description": "Line layers use identity positioning."
         },
         "render": {
           "$ref": "#/$defs/RenderBackend"
@@ -828,25 +826,25 @@
         "params": {
           "$ref": "#/$defs/LineParams"
         }
-      }
+      },
+      "additionalProperties": false,
+      "description": "A line layer. Requires x and y channels; rows are sorted by x within each group before connecting."
     },
     "ColLayer": {
-      "additionalProperties": false,
-      "description": "A column (pre-computed bar) layer. Requires x (discrete) and y (the bar height) channels. Default position \"stack\".",
       "type": "object",
       "required": [
         "geom"
       ],
       "properties": {
         "geom": {
-          "description": "Column geometry: one rectangle per data row, from the y baseline (zero) to the row's y value. Use when the data already contains the bar heights (ggplot2's geom_col).",
+          "type": "string",
           "const": "col",
-          "type": "string"
+          "description": "Column geometry: one rectangle per data row, from the y baseline (zero) to the row's y value. Use when the data already contains the bar heights (ggplot2's geom_col)."
         },
         "stat": {
-          "description": "Col layers draw the given y values as-is.",
+          "type": "string",
           "const": "identity",
-          "type": "string"
+          "description": "Col layers draw the given y values as-is."
         },
         "position": {
           "$ref": "#/$defs/StackablePosition"
@@ -860,33 +858,33 @@
         "params": {
           "$ref": "#/$defs/ColParams"
         }
-      }
+      },
+      "additionalProperties": false,
+      "description": "A column (pre-computed bar) layer. Requires x (discrete) and y (the bar height) channels. Default position \"stack\"."
     },
     "BarLayer": {
-      "additionalProperties": false,
-      "description": "A counting/binning bar layer. Requires the x channel; y is computed by the stat. Default position \"stack\". Use geom \"col\" when the data already contains the heights.",
       "type": "object",
       "required": [
         "geom"
       ],
       "properties": {
         "geom": {
-          "description": "Bar geometry with counting or binning: one rectangle per distinct x value (stat count, discrete x) or per bin (stat bin, continuous x). Do NOT map aes.y — the stat computes it (ggplot2's geom_bar / geom_histogram).",
+          "type": "string",
           "const": "bar",
-          "type": "string"
+          "description": "Bar geometry with counting or binning: one rectangle per distinct x value (stat count, discrete x) or per bin (stat bin, continuous x). Do NOT map aes.y — the stat computes it (ggplot2's geom_bar / geom_histogram)."
         },
         "stat": {
-          "description": "The bar layer's stat: \"count\" (default — rows counted per distinct x value and group) or \"bin\" (continuous x binned; the canonical form of the histogram geom). Map aes.weight to sum weights instead of counting. y defaults to {\"stat\": \"count\"}.",
           "anyOf": [
             {
-              "const": "count",
-              "type": "string"
+              "type": "string",
+              "const": "count"
             },
             {
-              "const": "bin",
-              "type": "string"
+              "type": "string",
+              "const": "bin"
             }
-          ]
+          ],
+          "description": "The bar layer's stat: \"count\" (default — rows counted per distinct x value and group) or \"bin\" (continuous x binned; the canonical form of the histogram geom). Map aes.weight to sum weights instead of counting. y defaults to {\"stat\": \"count\"}."
         },
         "position": {
           "$ref": "#/$defs/StackablePosition"
@@ -900,25 +898,25 @@
         "params": {
           "$ref": "#/$defs/BarParams"
         }
-      }
+      },
+      "additionalProperties": false,
+      "description": "A counting/binning bar layer. Requires the x channel; y is computed by the stat. Default position \"stack\". Use geom \"col\" when the data already contains the heights."
     },
     "HistogramLayer": {
-      "additionalProperties": false,
-      "description": "A histogram layer (alias for bar + stat bin). Requires a continuous x channel; y is computed by the bin stat. Default position \"stack\". Set params.binwidth or params.bins (default 30, with an advisory).",
       "type": "object",
       "required": [
         "geom"
       ],
       "properties": {
         "geom": {
-          "description": "Histogram geometry: a continuous x variable divided into bins, one bar per bin whose height is the count of rows (or the sum of aes.weight). Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a bar layer with stat bin.",
+          "type": "string",
           "const": "histogram",
-          "type": "string"
+          "description": "Histogram geometry: a continuous x variable divided into bins, one bar per bin whose height is the count of rows (or the sum of aes.weight). Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a bar layer with stat bin."
         },
         "stat": {
-          "description": "Histogram layers bin continuous x values. y defaults to {\"stat\": \"count\"}; set y to {\"stat\": \"density\"} for a normalized histogram.",
+          "type": "string",
           "const": "bin",
-          "type": "string"
+          "description": "Histogram layers bin continuous x values. y defaults to {\"stat\": \"count\"}; set y to {\"stat\": \"density\"} for a normalized histogram."
         },
         "position": {
           "$ref": "#/$defs/StackablePosition"
@@ -932,30 +930,30 @@
         "params": {
           "$ref": "#/$defs/BarParams"
         }
-      }
+      },
+      "additionalProperties": false,
+      "description": "A histogram layer (alias for bar + stat bin). Requires a continuous x channel; y is computed by the bin stat. Default position \"stack\". Set params.binwidth or params.bins (default 30, with an advisory)."
     },
     "SmoothLayer": {
-      "additionalProperties": false,
-      "description": "A fitted-trend layer. Requires quantitative x and y channels. Usually layered over a point layer of the same data.",
       "type": "object",
       "required": [
         "geom"
       ],
       "properties": {
         "geom": {
-          "description": "Smooth geometry: a fitted trend line (with an optional confidence ribbon) over an x/y scatter, one fit per group. Use to reveal trends (ggplot2's geom_smooth).",
+          "type": "string",
           "const": "smooth",
-          "type": "string"
+          "description": "Smooth geometry: a fitted trend line (with an optional confidence ribbon) over an x/y scatter, one fit per group. Use to reveal trends (ggplot2's geom_smooth)."
         },
         "stat": {
-          "description": "Smooth layers fit lm or loess per group and evaluate the fit at params.n points.",
+          "type": "string",
           "const": "smooth",
-          "type": "string"
+          "description": "Smooth layers fit lm or loess per group and evaluate the fit at params.n points."
         },
         "position": {
-          "description": "Smooth layers use identity positioning.",
+          "type": "string",
           "const": "identity",
-          "type": "string"
+          "description": "Smooth layers use identity positioning."
         },
         "render": {
           "$ref": "#/$defs/RenderBackend"
@@ -966,38 +964,38 @@
         "params": {
           "$ref": "#/$defs/SmoothParams"
         }
-      }
+      },
+      "additionalProperties": false,
+      "description": "A fitted-trend layer. Requires quantitative x and y channels. Usually layered over a point layer of the same data."
     },
     "BoxplotLayer": {
-      "additionalProperties": false,
-      "description": "A boxplot layer. Requires a discrete x channel and a quantitative y channel.",
       "type": "object",
       "required": [
         "geom"
       ],
       "properties": {
         "geom": {
-          "description": "Box-and-whisker geometry: one box per x category (per group) summarizing the y distribution — hinges at the quartiles, whiskers to the furthest points within coef × IQR, outliers drawn individually.",
+          "type": "string",
           "const": "boxplot",
-          "type": "string"
+          "description": "Box-and-whisker geometry: one box per x category (per group) summarizing the y distribution — hinges at the quartiles, whiskers to the furthest points within coef × IQR, outliers drawn individually."
         },
         "stat": {
-          "description": "Boxplot layers compute five-number summaries (type-7 quantiles, the R default) per group.",
+          "type": "string",
           "const": "boxplot",
-          "type": "string"
+          "description": "Boxplot layers compute five-number summaries (type-7 quantiles, the R default) per group."
         },
         "position": {
-          "description": "Position adjustment: \"dodge\" (default — grouped boxes sit side by side within each x band) or \"identity\".",
           "anyOf": [
             {
-              "const": "dodge",
-              "type": "string"
+              "type": "string",
+              "const": "dodge"
             },
             {
-              "const": "identity",
-              "type": "string"
+              "type": "string",
+              "const": "identity"
             }
-          ]
+          ],
+          "description": "Position adjustment: \"dodge\" (default — grouped boxes sit side by side within each x band) or \"identity\"."
         },
         "render": {
           "$ref": "#/$defs/RenderBackend"
@@ -1008,30 +1006,30 @@
         "params": {
           "$ref": "#/$defs/BoxplotParams"
         }
-      }
+      },
+      "additionalProperties": false,
+      "description": "A boxplot layer. Requires a discrete x channel and a quantitative y channel."
     },
     "DensityLayer": {
-      "additionalProperties": false,
-      "description": "A kernel-density layer. Requires a continuous x channel; y is computed by the density stat. Map fill (with alpha) for overlaid group comparisons.",
       "type": "object",
       "required": [
         "geom"
       ],
       "properties": {
         "geom": {
-          "description": "Density geometry: a smooth kernel density estimate of a continuous x variable, drawn as a filled area — a smoothed histogram alternative. One curve per group. Do NOT map aes.y — the density stat computes it.",
+          "type": "string",
           "const": "density",
-          "type": "string"
+          "description": "Density geometry: a smooth kernel density estimate of a continuous x variable, drawn as a filled area — a smoothed histogram alternative. One curve per group. Do NOT map aes.y — the density stat computes it."
         },
         "stat": {
-          "description": "Density layers run a gaussian KDE per group (bandwidth: R's bw.nrd0 unless params.bw is set). y defaults to {\"stat\": \"density\"}; set y to {\"stat\": \"count\"} for count scaling.",
+          "type": "string",
           "const": "density",
-          "type": "string"
+          "description": "Density layers run a gaussian KDE per group (bandwidth: R's bw.nrd0 unless params.bw is set). y defaults to {\"stat\": \"density\"}; set y to {\"stat\": \"count\"} for count scaling."
         },
         "position": {
-          "description": "Density layers use identity positioning.",
+          "type": "string",
           "const": "identity",
-          "type": "string"
+          "description": "Density layers use identity positioning."
         },
         "render": {
           "$ref": "#/$defs/RenderBackend"
@@ -1042,38 +1040,38 @@
         "params": {
           "$ref": "#/$defs/DensityParams"
         }
-      }
+      },
+      "additionalProperties": false,
+      "description": "A kernel-density layer. Requires a continuous x channel; y is computed by the density stat. Map fill (with alpha) for overlaid group comparisons."
     },
     "ErrorbarLayer": {
-      "additionalProperties": false,
-      "description": "An errorbar layer. Identity stat: requires x, ymin, and ymax channels. Summary stat: requires x and y channels (bounds computed by params.fun/funMin/funMax, default mean_se).",
       "type": "object",
       "required": [
         "geom"
       ],
       "properties": {
         "geom": {
-          "description": "Errorbar geometry: a vertical range with caps at ymin and ymax, one per data row (identity stat) or per x group (summary stat).",
+          "type": "string",
           "const": "errorbar",
-          "type": "string"
+          "description": "Errorbar geometry: a vertical range with caps at ymin and ymax, one per data row (identity stat) or per x group (summary stat)."
         },
         "stat": {
-          "description": "The errorbar's stat: \"identity\" (default — map aes.ymin and aes.ymax to data fields) or \"summary\" (compute y/ymin/ymax per x group from aes.y; default mean ± standard error, ggplot2's mean_se).",
           "anyOf": [
             {
-              "const": "identity",
-              "type": "string"
+              "type": "string",
+              "const": "identity"
             },
             {
-              "const": "summary",
-              "type": "string"
+              "type": "string",
+              "const": "summary"
             }
-          ]
+          ],
+          "description": "The errorbar's stat: \"identity\" (default — map aes.ymin and aes.ymax to data fields) or \"summary\" (compute y/ymin/ymax per x group from aes.y; default mean ± standard error, ggplot2's mean_se)."
         },
         "position": {
-          "description": "Errorbar layers use identity positioning.",
+          "type": "string",
           "const": "identity",
-          "type": "string"
+          "description": "Errorbar layers use identity positioning."
         },
         "render": {
           "$ref": "#/$defs/RenderBackend"
@@ -1084,25 +1082,25 @@
         "params": {
           "$ref": "#/$defs/ErrorbarParams"
         }
-      }
+      },
+      "additionalProperties": false,
+      "description": "An errorbar layer. Identity stat: requires x, ymin, and ymax channels. Summary stat: requires x and y channels (bounds computed by params.fun/funMin/funMax, default mean_se)."
     },
     "AreaLayer": {
-      "additionalProperties": false,
-      "description": "An area layer. Requires x and y channels; rows are sorted by x within each group. Default position \"stack\".",
       "type": "object",
       "required": [
         "geom"
       ],
       "properties": {
         "geom": {
-          "description": "Area geometry: a filled region from the y baseline (zero) to the y value, connected in x order per group. Use for stacked composition-over-time charts.",
+          "type": "string",
           "const": "area",
-          "type": "string"
+          "description": "Area geometry: a filled region from the y baseline (zero) to the y value, connected in x order per group. Use for stacked composition-over-time charts."
         },
         "stat": {
-          "description": "Area layers draw the data as-is.",
+          "type": "string",
           "const": "identity",
-          "type": "string"
+          "description": "Area layers draw the data as-is."
         },
         "position": {
           "$ref": "#/$defs/StackablePosition"
@@ -1116,30 +1114,30 @@
         "params": {
           "$ref": "#/$defs/AreaParams"
         }
-      }
+      },
+      "additionalProperties": false,
+      "description": "An area layer. Requires x and y channels; rows are sorted by x within each group. Default position \"stack\"."
     },
     "RuleLayer": {
-      "additionalProperties": false,
-      "description": "A reference-line layer (ggplot2's geom_vline/geom_hline, unified). Annotation form: fixed intercepts in params. Data-driven form: map aes.x OR aes.y.",
       "type": "object",
       "required": [
         "geom"
       ],
       "properties": {
         "geom": {
-          "description": "Rule geometry: reference lines spanning the panel. TWO HONEST FORMS: (1) annotation — set params.xintercept and/or params.yintercept to fixed data values and map neither aes.x nor aes.y; (2) data-driven — map exactly ONE of aes.x (vertical rules) or aes.y (horizontal rules) to a field. Never mix the forms in one layer.",
+          "type": "string",
           "const": "rule",
-          "type": "string"
+          "description": "Rule geometry: reference lines spanning the panel. TWO HONEST FORMS: (1) annotation — set params.xintercept and/or params.yintercept to fixed data values and map neither aes.x nor aes.y; (2) data-driven — map exactly ONE of aes.x (vertical rules) or aes.y (horizontal rules) to a field. Never mix the forms in one layer."
         },
         "stat": {
-          "description": "Rule layers draw the given positions as-is.",
+          "type": "string",
           "const": "identity",
-          "type": "string"
+          "description": "Rule layers draw the given positions as-is."
         },
         "position": {
-          "description": "Rule layers use identity positioning.",
+          "type": "string",
           "const": "identity",
-          "type": "string"
+          "description": "Rule layers use identity positioning."
         },
         "render": {
           "$ref": "#/$defs/RenderBackend"
@@ -1150,38 +1148,38 @@
         "params": {
           "$ref": "#/$defs/RuleParams"
         }
-      }
+      },
+      "additionalProperties": false,
+      "description": "A reference-line layer (ggplot2's geom_vline/geom_hline, unified). Annotation form: fixed intercepts in params. Data-driven form: map aes.x OR aes.y."
     },
     "TextLayer": {
-      "additionalProperties": false,
-      "description": "A text-label layer. Requires x, y, and label channels.",
       "type": "object",
       "required": [
         "geom"
       ],
       "properties": {
         "geom": {
-          "description": "Text geometry: one label per data row at (x, y). No collision detection — labels draw exactly where placed. Requires x, y, and label channels.",
+          "type": "string",
           "const": "text",
-          "type": "string"
+          "description": "Text geometry: one label per data row at (x, y). No collision detection — labels draw exactly where placed. Requires x, y, and label channels."
         },
         "stat": {
-          "description": "Text layers draw the data as-is.",
+          "type": "string",
           "const": "identity",
-          "type": "string"
+          "description": "Text layers draw the data as-is."
         },
         "position": {
-          "description": "Position adjustment: \"identity\" (default) or \"nudge\" (fixed offsets from the anchor — set positionParams.x/y; useful for labels beside marks).",
           "anyOf": [
             {
-              "const": "identity",
-              "type": "string"
+              "type": "string",
+              "const": "identity"
             },
             {
-              "const": "nudge",
-              "type": "string"
+              "type": "string",
+              "const": "nudge"
             }
-          ]
+          ],
+          "description": "Position adjustment: \"identity\" (default) or \"nudge\" (fixed offsets from the anchor — set positionParams.x/y; useful for labels beside marks)."
         },
         "positionParams": {
           "$ref": "#/$defs/PositionParams"
@@ -1195,10 +1193,11 @@
         "params": {
           "$ref": "#/$defs/TextParams"
         }
-      }
+      },
+      "additionalProperties": false,
+      "description": "A text-label layer. Requires x, y, and label channels."
     },
     "LayerSpec": {
-      "description": "One plot layer. The `geom` field selects the geometry and determines which stat, position, and params are allowed.",
       "anyOf": [
         {
           "$ref": "#/$defs/PointLayer"
@@ -1236,10 +1235,10 @@
         {
           "$ref": "#/$defs/ErrorbarLayer"
         }
-      ]
+      ],
+      "description": "One plot layer. The `geom` field selects the geometry and determines which stat, position, and params are allowed."
     },
     "DomainValue": {
-      "description": "One domain entry: a number (linear/log), an ISO 8601 date string (time), or a category value (band/ordinal).",
       "anyOf": [
         {
           "type": "string"
@@ -1253,57 +1252,54 @@
         {
           "type": "null"
         }
-      ]
+      ],
+      "description": "One domain entry: a number (linear/log), an ISO 8601 date string (time), or a category value (band/ordinal)."
     },
     "PositionScaleSpec": {
-      "additionalProperties": false,
-      "description": "Configuration for a positional (x or y) scale.",
       "type": "object",
       "properties": {
         "type": {
-          "description": "Scale type: \"linear\" (default for numbers), \"log\" (base 10; the whole domain must be positive), \"time\" (temporal fields; ISO strings or Date values), \"band\" (discrete categories). Omit to infer from the field type.",
           "anyOf": [
             {
-              "const": "linear",
-              "type": "string"
+              "type": "string",
+              "const": "linear"
             },
             {
-              "const": "log",
-              "type": "string"
+              "type": "string",
+              "const": "log"
             },
             {
-              "const": "time",
-              "type": "string"
+              "type": "string",
+              "const": "time"
             },
             {
-              "const": "band",
-              "type": "string"
+              "type": "string",
+              "const": "band"
             }
-          ]
+          ],
+          "description": "Scale type: \"linear\" (default for numbers), \"log\" (base 10; the whole domain must be positive), \"time\" (temporal fields; ISO strings or Date values), \"band\" (discrete categories). Omit to infer from the field type."
         },
         "domain": {
-          "minItems": 1,
-          "description": "Explicit domain, PINNING the scale: [min, max] for continuous scales (numbers, or ISO date strings for time); the full category list for band scales. Data outside the domain is dropped with a warning.",
           "type": "array",
           "items": {
             "$ref": "#/$defs/DomainValue"
-          }
+          },
+          "minItems": 1,
+          "description": "Explicit domain, PINNING the scale: [min, max] for continuous scales (numbers, or ISO date strings for time); the full category list for band scales. Data outside the domain is dropped with a warning."
         },
         "nice": {
-          "description": "Round the inferred domain to tick-friendly bounds. Default true. Ignored when `domain` is set.",
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Round the inferred domain to tick-friendly bounds. Default true. Ignored when `domain` is set."
         },
         "zero": {
-          "description": "Force the domain to include zero. Bars, columns, and areas force this to true on the measure axis; set false explicitly to override. Ignored when `domain` is set.",
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Force the domain to include zero. Bars, columns, and areas force this to true on the measure axis; set false explicitly to override. Ignored when `domain` is set."
         },
         "reverse": {
-          "description": "Reverse the scale's output direction. Default false.",
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Reverse the scale's output direction. Default false."
         },
         "breaks": {
-          "minItems": 1,
-          "description": "Explicit tick positions in data units (numbers, or ISO date strings for time scales). Omit for automatic ticks.",
           "type": "array",
           "items": {
             "anyOf": [
@@ -1314,116 +1310,118 @@
                 "type": "string"
               }
             ]
-          }
+          },
+          "minItems": 1,
+          "description": "Explicit tick positions in data units (numbers, or ISO date strings for time scales). Omit for automatic ticks."
         },
         "labels": {
-          "description": "Tick label format string. Time scales: strftime-style (\"%Y-%m\", \"%b %d\", \"%H:%M\"). Numeric scales: \",d\" (grouped integer), \".1f\" (fixed decimals), \".0%\" (percent), \"~s\" (SI prefix). Omit for automatic formatting.",
-          "type": "string"
+          "type": "string",
+          "description": "Tick label format string. Time scales: strftime-style (\"%Y-%m\", \"%b %d\", \"%H:%M\"). Numeric scales: \",d\" (grouped integer), \".1f\" (fixed decimals), \".0%\" (percent), \"~s\" (SI prefix). Omit for automatic formatting."
         }
-      }
+      },
+      "additionalProperties": false,
+      "description": "Configuration for a positional (x or y) scale."
     },
     "ColorScaleSpec": {
-      "additionalProperties": false,
-      "description": "Configuration for a color or fill scale.",
       "type": "object",
       "properties": {
         "type": {
-          "description": "Color scale type: \"ordinal\" (discrete categories, default for discrete fields) or \"sequential\" (continuous ramp, default for quantitative fields).",
           "anyOf": [
             {
-              "const": "ordinal",
-              "type": "string"
+              "type": "string",
+              "const": "ordinal"
             },
             {
-              "const": "sequential",
-              "type": "string"
+              "type": "string",
+              "const": "sequential"
             }
-          ]
+          ],
+          "description": "Color scale type: \"ordinal\" (discrete categories, default for discrete fields) or \"sequential\" (continuous ramp, default for quantitative fields)."
         },
         "domain": {
-          "minItems": 1,
-          "description": "Explicit domain, PINNING the scale: the category list for ordinal scales (values outside it render the unknown color); [min, max] numbers for sequential scales.",
           "type": "array",
           "items": {
             "$ref": "#/$defs/DomainValue"
-          }
+          },
+          "minItems": 1,
+          "description": "Explicit domain, PINNING the scale: the category list for ordinal scales (values outside it render the unknown color); [min, max] numbers for sequential scales."
         },
         "domainMode": {
-          "description": "Ordinal domain stability: \"grow\" (default — first-seen order, assignments keyed by value; removing a series never recolors the others) or \"data\" (legacy rebuild-per-render). Ignored when `domain` is set.",
           "anyOf": [
             {
-              "const": "grow",
-              "type": "string"
+              "type": "string",
+              "const": "grow"
             },
             {
-              "const": "data",
-              "type": "string"
+              "type": "string",
+              "const": "data"
             }
-          ]
+          ],
+          "description": "Ordinal domain stability: \"grow\" (default — first-seen order, assignments keyed by value; removing a series never recolors the others) or \"data\" (legacy rebuild-per-render). Ignored when `domain` is set."
         },
         "range": {
-          "minItems": 1,
-          "description": "Explicit output colors (CSS color strings). Ordinal: the palette, in domain order. Sequential: ramp stops, evenly spaced.",
           "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "minItems": 1,
+          "description": "Explicit output colors (CSS color strings). Ordinal: the palette, in domain order. Sequential: ramp stops, evenly spaced."
         },
         "scheme": {
-          "description": "Named color scheme: categorical \"observable10\" (default), \"ipsum\" and \"flexoki\" (hrbrthemes), \"tableau10\" and \"colorblind\" (ggthemes), or sequential \"viridis\" (default).",
           "anyOf": [
             {
-              "const": "observable10",
-              "type": "string"
+              "type": "string",
+              "const": "observable10"
             },
             {
-              "const": "ipsum",
-              "type": "string"
+              "type": "string",
+              "const": "ipsum"
             },
             {
-              "const": "flexoki",
-              "type": "string"
+              "type": "string",
+              "const": "flexoki"
             },
             {
-              "const": "tableau10",
-              "type": "string"
+              "type": "string",
+              "const": "tableau10"
             },
             {
-              "const": "colorblind",
-              "type": "string"
+              "type": "string",
+              "const": "colorblind"
             },
             {
-              "const": "viridis",
-              "type": "string"
+              "type": "string",
+              "const": "viridis"
             }
-          ]
+          ],
+          "description": "Named color scheme: categorical \"observable10\" (default), \"ipsum\" and \"flexoki\" (hrbrthemes), \"tableau10\" and \"colorblind\" (ggthemes), or sequential \"viridis\" (default)."
         },
         "reverse": {
-          "description": "Reverse the color range. Default false.",
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Reverse the color range. Default false."
         },
         "onExhaust": {
-          "description": "What happens when an ordinal scale runs out of palette entries: \"cycle\" (default — reuse colors and warn once) or \"error\" (fail the render; use for correctness-critical charts).",
           "anyOf": [
             {
-              "const": "cycle",
-              "type": "string"
+              "type": "string",
+              "const": "cycle"
             },
             {
-              "const": "error",
-              "type": "string"
+              "type": "string",
+              "const": "error"
             }
-          ]
+          ],
+          "description": "What happens when an ordinal scale runs out of palette entries: \"cycle\" (default — reuse colors and warn once) or \"error\" (fail the render; use for correctness-critical charts)."
         },
         "labels": {
-          "description": "Legend label format string for sequential scales (numeric formats like \".1f\", \",d\", \".0%\"). Omit for automatic formatting.",
-          "type": "string"
+          "type": "string",
+          "description": "Legend label format string for sequential scales (numeric formats like \".1f\", \",d\", \".0%\"). Omit for automatic formatting."
         }
-      }
+      },
+      "additionalProperties": false,
+      "description": "Configuration for a color or fill scale."
     },
     "Scales": {
-      "additionalProperties": false,
-      "description": "Per-scale configuration, keyed by aesthetic. Omitted scales use inference (type from field data, domain from data extent).",
       "type": "object",
       "properties": {
         "x": {
@@ -1438,253 +1436,253 @@
         "fill": {
           "$ref": "#/$defs/ColorScaleSpec"
         }
-      }
+      },
+      "additionalProperties": false,
+      "description": "Per-scale configuration, keyed by aesthetic. Omitted scales use inference (type from field data, domain from data extent)."
     },
     "LegendSpec": {
-      "additionalProperties": false,
-      "description": "Legend options. Legends style only through the theme.",
       "type": "object",
       "properties": {
         "order": {
-          "description": "Order of discrete legend entries: \"stable-domain\" (default — stored assignment order, stable across data changes), \"present-first-seen\" (first occurrence in the current data), \"sorted\" (alphabetical). Ordering NEVER changes color assignments.",
           "anyOf": [
             {
-              "const": "stable-domain",
-              "type": "string"
+              "type": "string",
+              "const": "stable-domain"
             },
             {
-              "const": "present-first-seen",
-              "type": "string"
+              "type": "string",
+              "const": "present-first-seen"
             },
             {
-              "const": "sorted",
-              "type": "string"
+              "type": "string",
+              "const": "sorted"
             }
-          ]
+          ],
+          "description": "Order of discrete legend entries: \"stable-domain\" (default — stored assignment order, stable across data changes), \"present-first-seen\" (first occurrence in the current data), \"sorted\" (alphabetical). Ordering NEVER changes color assignments."
         }
-      }
+      },
+      "additionalProperties": false,
+      "description": "Legend options. Legends style only through the theme."
     },
     "ThemeName": {
-      "description": "A registered theme name: \"default\" (inherits the page color via currentColor), \"light\", \"dark\", or \"minimal\".",
       "anyOf": [
         {
-          "const": "default",
-          "type": "string"
+          "type": "string",
+          "const": "default"
         },
         {
-          "const": "light",
-          "type": "string"
+          "type": "string",
+          "const": "light"
         },
         {
-          "const": "dark",
-          "type": "string"
+          "type": "string",
+          "const": "dark"
         },
         {
-          "const": "minimal",
-          "type": "string"
+          "type": "string",
+          "const": "minimal"
         },
         {
-          "const": "ggplot2",
-          "type": "string"
+          "type": "string",
+          "const": "ggplot2"
         },
         {
-          "const": "classic",
-          "type": "string"
+          "type": "string",
+          "const": "classic"
         },
         {
-          "const": "hrbr",
-          "type": "string"
+          "type": "string",
+          "const": "hrbr"
         },
         {
-          "const": "few",
-          "type": "string"
+          "type": "string",
+          "const": "few"
         },
         {
-          "const": "clean",
-          "type": "string"
+          "type": "string",
+          "const": "clean"
         },
         {
-          "const": "fivethirtyeight",
-          "type": "string"
+          "type": "string",
+          "const": "fivethirtyeight"
         },
         {
-          "const": "economist",
-          "type": "string"
+          "type": "string",
+          "const": "economist"
         },
         {
-          "const": "tufte",
-          "type": "string"
+          "type": "string",
+          "const": "tufte"
         }
-      ]
+      ],
+      "description": "A registered theme name: \"default\" (inherits the page color via currentColor), \"light\", \"dark\", or \"minimal\"."
     },
     "ThemeSpec": {
-      "additionalProperties": false,
-      "description": "A theme object: a named base plus role overrides. Roles feed geom defaults (ink/paper/accent); every color rides a --gg-* CSS custom property so hosts can restyle without a re-render.",
       "type": "object",
       "properties": {
         "name": {
-          "description": "Base theme to override. Default \"default\".",
-          "$ref": "#/$defs/ThemeName"
+          "$ref": "#/$defs/ThemeName",
+          "description": "Base theme to override. Default \"default\"."
         },
         "ink": {
-          "description": "Foreground role (CSS color): axis lines, tick labels, titles, unmapped line/point/text marks.",
-          "type": "string"
+          "type": "string",
+          "description": "Foreground role (CSS color): axis lines, tick labels, titles, unmapped line/point/text marks."
         },
         "paper": {
-          "description": "Background role (CSS color) painted behind the plot. \"none\" for transparent.",
-          "type": "string"
+          "type": "string",
+          "description": "Background role (CSS color) painted behind the plot. \"none\" for transparent."
         },
         "accent": {
-          "description": "Accent role (CSS color): default fill for unmapped bars, columns, and areas.",
-          "type": "string"
+          "type": "string",
+          "description": "Accent role (CSS color): default fill for unmapped bars, columns, and areas."
         },
         "grid": {
-          "description": "Panel grid line color (CSS color).",
-          "type": "string"
+          "type": "string",
+          "description": "Panel grid line color (CSS color)."
         },
         "panel": {
-          "description": "Panel background color (CSS color).",
-          "type": "string"
+          "type": "string",
+          "description": "Panel background color (CSS color)."
         },
         "axisText": {
-          "description": "Axis tick-label color (CSS color).",
-          "type": "string"
+          "type": "string",
+          "description": "Axis tick-label color (CSS color)."
         },
         "axisLine": {
-          "description": "Axis-line color (CSS color).",
-          "type": "string"
+          "type": "string",
+          "description": "Axis-line color (CSS color)."
         },
         "tickColor": {
-          "description": "Axis-tick color (CSS color).",
-          "type": "string"
+          "type": "string",
+          "description": "Axis-tick color (CSS color)."
         },
         "panelBorder": {
-          "description": "Panel-border color (CSS color).",
-          "type": "string"
+          "type": "string",
+          "description": "Panel-border color (CSS color)."
         },
         "interactionInk": {
-          "description": "Primary interaction-control and overlay ink (CSS color).",
-          "type": "string"
+          "type": "string",
+          "description": "Primary interaction-control and overlay ink (CSS color)."
         },
         "interactionMuted": {
+          "type": "number",
           "exclusiveMinimum": 0,
           "exclusiveMaximum": 1,
-          "description": "Opacity for marks de-emphasized by an interaction.",
-          "type": "number"
+          "description": "Opacity for marks de-emphasized by an interaction."
         },
         "focusRing": {
-          "description": "Focus-ring color (CSS color).",
-          "type": "string"
+          "type": "string",
+          "description": "Focus-ring color (CSS color)."
         },
         "crosshair": {
-          "description": "Crosshair-guide color (CSS color).",
-          "type": "string"
+          "type": "string",
+          "description": "Crosshair-guide color (CSS color)."
         },
         "selectionFill": {
-          "description": "Interval-selection fill (CSS color, normally translucent).",
-          "type": "string"
+          "type": "string",
+          "description": "Interval-selection fill (CSS color, normally translucent)."
         },
         "selectionStroke": {
-          "description": "Selection and zoom-target stroke (CSS color).",
-          "type": "string"
+          "type": "string",
+          "description": "Selection and zoom-target stroke (CSS color)."
         },
         "tooltipPaper": {
-          "description": "Opaque tooltip surface (CSS color).",
-          "type": "string"
+          "type": "string",
+          "description": "Opaque tooltip surface (CSS color)."
         },
         "tooltipInk": {
-          "description": "Tooltip foreground (CSS color).",
-          "type": "string"
+          "type": "string",
+          "description": "Tooltip foreground (CSS color)."
         },
         "tooltipBorder": {
-          "description": "Tooltip keyline (CSS color).",
-          "type": "string"
+          "type": "string",
+          "description": "Tooltip keyline (CSS color)."
         },
         "toolActive": {
-          "description": "Active-tool text and underline (CSS color).",
-          "type": "string"
+          "type": "string",
+          "description": "Active-tool text and underline (CSS color)."
         },
         "fontFamily": {
-          "description": "Chart font-family stack.",
-          "type": "string"
+          "type": "string",
+          "description": "Chart font-family stack."
         },
         "fontSize": {
+          "type": "number",
           "minimum": 1,
-          "description": "Base and tick-label font size in px.",
-          "type": "number"
+          "description": "Base and tick-label font size in px."
         },
         "axisTextSize": {
-          "minimum": 1,
-          "type": "number"
+          "type": "number",
+          "minimum": 1
         },
         "fontWeight": {
+          "type": "number",
           "minimum": 1,
-          "maximum": 1000,
-          "type": "number"
+          "maximum": 1000
         },
         "titleSize": {
-          "minimum": 1,
-          "type": "number"
+          "type": "number",
+          "minimum": 1
         },
         "titleWeight": {
+          "type": "number",
           "minimum": 1,
-          "maximum": 1000,
-          "type": "number"
+          "maximum": 1000
         },
         "subtitleSize": {
-          "minimum": 1,
-          "type": "number"
+          "type": "number",
+          "minimum": 1
         },
         "subtitleWeight": {
+          "type": "number",
           "minimum": 1,
-          "maximum": 1000,
-          "type": "number"
+          "maximum": 1000
         },
         "axisTitleSize": {
-          "minimum": 1,
-          "type": "number"
+          "type": "number",
+          "minimum": 1
         },
         "axisTitleWeight": {
+          "type": "number",
           "minimum": 1,
-          "maximum": 1000,
-          "type": "number"
+          "maximum": 1000
         },
         "captionSize": {
-          "minimum": 1,
-          "type": "number"
+          "type": "number",
+          "minimum": 1
         },
         "stripSize": {
-          "minimum": 1,
-          "type": "number"
+          "type": "number",
+          "minimum": 1
         },
         "stripWeight": {
+          "type": "number",
           "minimum": 1,
-          "maximum": 1000,
-          "type": "number"
+          "maximum": 1000
         },
         "axisLineWidth": {
-          "minimum": 0,
-          "type": "number"
+          "type": "number",
+          "minimum": 0
         },
         "tickWidth": {
-          "minimum": 0,
-          "type": "number"
+          "type": "number",
+          "minimum": 0
         },
         "tickLength": {
-          "minimum": 0,
-          "type": "number"
+          "type": "number",
+          "minimum": 0
         },
         "gridWidth": {
-          "minimum": 0,
-          "type": "number"
+          "type": "number",
+          "minimum": 0
         },
         "panelBorderWidth": {
-          "minimum": 0,
-          "type": "number"
+          "type": "number",
+          "minimum": 0
         },
         "gridDasharray": {
-          "description": "SVG stroke-dasharray for major grid lines.",
-          "type": "string"
+          "type": "string",
+          "description": "SVG stroke-dasharray for major grid lines."
         },
         "axisLineX": {
           "type": "boolean"
@@ -1707,153 +1705,153 @@
         "showPanelBorder": {
           "type": "boolean"
         }
-      }
+      },
+      "additionalProperties": false,
+      "description": "A theme object: a named base plus role overrides. Roles feed geom defaults (ink/paper/accent); every color rides a --gg-* CSS custom property so hosts can restyle without a re-render."
     },
     "Labs": {
-      "additionalProperties": false,
-      "description": "Human-readable labels: titles, axis titles, legend titles, caption.",
       "type": "object",
       "properties": {
         "title": {
-          "description": "Plot title.",
-          "type": "string"
+          "type": "string",
+          "description": "Plot title."
         },
         "subtitle": {
-          "description": "Plot subtitle, under the title.",
-          "type": "string"
+          "type": "string",
+          "description": "Plot subtitle, under the title."
         },
         "caption": {
-          "description": "Small caption under the plot.",
-          "type": "string"
+          "type": "string",
+          "description": "Small caption under the plot."
         },
         "x": {
-          "description": "X axis title. Defaults to the mapped field name.",
-          "type": "string"
+          "type": "string",
+          "description": "X axis title. Defaults to the mapped field name."
         },
         "y": {
-          "description": "Y axis title. Defaults to the mapped field name.",
-          "type": "string"
+          "type": "string",
+          "description": "Y axis title. Defaults to the mapped field name."
         },
         "color": {
-          "description": "Color legend title. Defaults to the mapped field name.",
-          "type": "string"
+          "type": "string",
+          "description": "Color legend title. Defaults to the mapped field name."
         },
         "fill": {
-          "description": "Fill legend title. Defaults to the mapped field name.",
-          "type": "string"
+          "type": "string",
+          "description": "Fill legend title. Defaults to the mapped field name."
         }
-      }
+      },
+      "additionalProperties": false,
+      "description": "Human-readable labels: titles, axis titles, legend titles, caption."
     },
     "FacetScales": {
-      "description": "How positional scales behave across facet panels: \"fixed\" (default — all panels share both scales, trained on the union of panel data), \"free\" (both positional scales train per panel), \"free_x\" (only x is per-panel), \"free_y\" (only y is per-panel). Discrete color/fill assignments are ALWAYS global (one legend), regardless of this setting.",
       "anyOf": [
         {
-          "const": "fixed",
-          "type": "string"
+          "type": "string",
+          "const": "fixed"
         },
         {
-          "const": "free",
-          "type": "string"
+          "type": "string",
+          "const": "free"
         },
         {
-          "const": "free_x",
-          "type": "string"
+          "type": "string",
+          "const": "free_x"
         },
         {
-          "const": "free_y",
-          "type": "string"
+          "type": "string",
+          "const": "free_y"
         }
-      ]
+      ],
+      "description": "How positional scales behave across facet panels: \"fixed\" (default — all panels share both scales, trained on the union of panel data), \"free\" (both positional scales train per panel), \"free_x\" (only x is per-panel), \"free_y\" (only y is per-panel). Discrete color/fill assignments are ALWAYS global (one legend), regardless of this setting."
     },
     "FacetSpec": {
-      "additionalProperties": false,
-      "description": "Facet the plot into small-multiple panels. Wrap form: set `wrap` (+ optional ncol). Grid form: set `rows` and/or `cols`. Panels partition the data BEFORE stats and positions run (each panel computes its own counts, bins, stacks). Panel values sort ascending; null values form their own panel.",
       "type": "object",
       "properties": {
         "wrap": {
-          "description": "Facet WRAP form: partition rows by this data field's distinct values, one panel per value, wrapped into a grid ncol wide (ggplot2's facet_wrap). Mutually exclusive with rows/cols.",
-          "$ref": "#/$defs/FieldRef"
+          "$ref": "#/$defs/FieldRef",
+          "description": "Facet WRAP form: partition rows by this data field's distinct values, one panel per value, wrapped into a grid ncol wide (ggplot2's facet_wrap). Mutually exclusive with rows/cols."
         },
         "rows": {
-          "description": "Facet GRID form: the field whose distinct values become grid rows (ggplot2's facet_grid rows). Combine with cols; mutually exclusive with wrap.",
-          "$ref": "#/$defs/FieldRef"
+          "$ref": "#/$defs/FieldRef",
+          "description": "Facet GRID form: the field whose distinct values become grid rows (ggplot2's facet_grid rows). Combine with cols; mutually exclusive with wrap."
         },
         "cols": {
-          "description": "Facet GRID form: the field whose distinct values become grid columns (ggplot2's facet_grid cols). Combine with rows; mutually exclusive with wrap.",
-          "$ref": "#/$defs/FieldRef"
+          "$ref": "#/$defs/FieldRef",
+          "description": "Facet GRID form: the field whose distinct values become grid columns (ggplot2's facet_grid cols). Combine with rows; mutually exclusive with wrap."
         },
         "ncol": {
+          "type": "integer",
           "minimum": 1,
-          "description": "WRAP ONLY: number of panel columns (an integer of at least 1). Omit for an automatic near-square layout (ceil(sqrt(panels))).",
-          "type": "integer"
+          "description": "WRAP ONLY: number of panel columns (an integer of at least 1). Omit for an automatic near-square layout (ceil(sqrt(panels)))."
         },
         "scales": {
           "$ref": "#/$defs/FacetScales"
         }
-      }
+      },
+      "additionalProperties": false,
+      "description": "Facet the plot into small-multiple panels. Wrap form: set `wrap` (+ optional ncol). Grid form: set `rows` and/or `cols`. Panels partition the data BEFORE stats and positions run (each panel computes its own counts, bins, stacks). Panel values sort ascending; null values form their own panel."
     },
     "CoordSpec": {
-      "additionalProperties": false,
-      "description": "The plot's coordinate system. {\"type\": \"flip\"} turns any vertical composition into its horizontal counterpart (ggplot2's coord_flip): map x to the category and y to the value as usual, then flip.",
       "type": "object",
       "required": [
         "type"
       ],
       "properties": {
         "type": {
-          "description": "Coordinate system: \"cartesian\" (default) or \"flip\" (swap the axes: x renders vertically, y horizontally — THE mechanism for horizontal bar charts; positions, stacking, dodging, and hit-testing all follow).",
           "anyOf": [
             {
-              "const": "cartesian",
-              "type": "string"
+              "type": "string",
+              "const": "cartesian"
             },
             {
-              "const": "flip",
-              "type": "string"
+              "type": "string",
+              "const": "flip"
             }
-          ]
+          ],
+          "description": "Coordinate system: \"cartesian\" (default) or \"flip\" (swap the axes: x renders vertically, y horizontally — THE mechanism for horizontal bar charts; positions, stacking, dodging, and hit-testing all follow)."
         }
-      }
+      },
+      "additionalProperties": false,
+      "description": "The plot's coordinate system. {\"type\": \"flip\"} turns any vertical composition into its horizontal counterpart (ggplot2's coord_flip): map x to the category and y to the value as usual, then flip."
     },
     "PlotSpec": {
-      "additionalProperties": false,
-      "description": "A complete ggsvelte plot specification: data + aesthetic mapping + one or more layers, in ggplot2's layered grammar. Strictly JSON (PortableSpec).",
       "type": "object",
       "required": [
         "layers"
       ],
       "properties": {
         "$schema": {
-          "description": "URL of the ggsvelte spec JSON Schema version this spec targets.",
-          "type": "string"
+          "type": "string",
+          "description": "URL of the ggsvelte spec JSON Schema version this spec targets."
         },
         "edition": {
+          "type": "integer",
           "minimum": 1,
-          "description": "Defaults edition this spec was authored against (currently 1). normalize() stamps the current edition when absent, so a spec keeps ITS edition's default look (theme roles, categorical palette) even after ggsvelte's defaults improve in a later edition. Explicit theme/scale settings always win over edition defaults.",
-          "type": "integer"
+          "description": "Defaults edition this spec was authored against (currently 1). normalize() stamps the current edition when absent, so a spec keeps ITS edition's default look (theme roles, categorical palette) even after ggsvelte's defaults improve in a later edition. Explicit theme/scale settings always win over edition defaults."
         },
         "data": {
-          "description": "Default data for all layers.",
-          "$ref": "#/$defs/DataRef"
+          "$ref": "#/$defs/DataRef",
+          "description": "Default data for all layers."
         },
         "datasets": {
-          "description": "Named inline datasets referenced by {\"name\": ...} data refs.",
           "type": "object",
           "additionalProperties": {
             "$ref": "#/$defs/InlineData"
-          }
+          },
+          "description": "Named inline datasets referenced by {\"name\": ...} data refs."
         },
         "aes": {
-          "description": "Plot-level aesthetic mapping, inherited by every layer.",
-          "$ref": "#/$defs/Aes"
+          "$ref": "#/$defs/Aes",
+          "description": "Plot-level aesthetic mapping, inherited by every layer."
         },
         "layers": {
-          "minItems": 1,
-          "description": "The plot's layers, drawn in array order (first = bottom). At least one layer.",
           "type": "array",
           "items": {
             "$ref": "#/$defs/LayerSpec"
-          }
+          },
+          "minItems": 1,
+          "description": "The plot's layers, drawn in array order (first = bottom). At least one layer."
         },
         "facet": {
           "$ref": "#/$defs/FacetSpec"
@@ -1871,7 +1869,6 @@
           "$ref": "#/$defs/Labs"
         },
         "theme": {
-          "description": "A registered theme name, or a theme object (named base + role overrides). Omit for the default theme.",
           "anyOf": [
             {
               "$ref": "#/$defs/ThemeName"
@@ -1879,32 +1876,35 @@
             {
               "$ref": "#/$defs/ThemeSpec"
             }
-          ]
+          ],
+          "description": "A registered theme name, or a theme object (named base + role overrides). Omit for the default theme."
         },
         "width": {
+          "type": "number",
           "exclusiveMinimum": 0,
-          "description": "Preferred plot width in px (greater than 0). The host may override.",
-          "type": "number"
+          "description": "Preferred plot width in px (greater than 0). The host may override."
         },
         "height": {
+          "type": "number",
           "exclusiveMinimum": 0,
-          "description": "Preferred plot height in px (greater than 0). The host may override.",
-          "type": "number"
+          "description": "Preferred plot height in px (greater than 0). The host may override."
         },
         "a11y": {
-          "description": "Accessibility mode: \"auto\" (default — layers may render to canvas per their `render` hint, paired with an off-screen description block) or \"force-svg\" (every layer renders as SVG DOM marks — use for assistive-technology-critical charts; canvas layers do not expose per-mark accessibility).",
           "anyOf": [
             {
-              "const": "auto",
-              "type": "string"
+              "type": "string",
+              "const": "auto"
             },
             {
-              "const": "force-svg",
-              "type": "string"
+              "type": "string",
+              "const": "force-svg"
             }
-          ]
+          ],
+          "description": "Accessibility mode: \"auto\" (default — layers may render to canvas per their `render` hint, paired with an off-screen description block) or \"force-svg\" (every layer renders as SVG DOM marks — use for assistive-technology-critical charts; canvas layers do not expose per-mark accessibility)."
         }
-      }
+      },
+      "additionalProperties": false,
+      "description": "A complete ggsvelte plot specification: data + aesthetic mapping + one or more layers, in ggplot2's layered grammar. Strictly JSON (PortableSpec)."
     }
   },
   "$ref": "#/$defs/PlotSpec"

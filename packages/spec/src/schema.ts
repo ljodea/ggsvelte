@@ -37,13 +37,20 @@
  * ("svg" | "canvas" | "auto"), and the plot-level `a11y` flag ("force-svg"
  * keeps every layer in the accessible SVG backend).
  */
-import { type Static, Type } from "@sinclair/typebox";
+import Type, { type Static, type TSchema } from "typebox";
 
 // ---------------------------------------------------------------------------
-// Module (named $defs)
+// Named $defs (TypeBox 1.x Cyclic)
 // ---------------------------------------------------------------------------
+// TypeBox 1.x (`typebox` package) is the active line. 0.x lived as
+// `@sinclair/typebox` under LTS in the sinclair-typebox support repo.
+//
+// In 0.x, `Type.Module(...).Import("Key")` produced a `$defs` + `$ref` schema.
+// In 1.x, `Type.Module` returns an inlined property bag (no `.Import`);
+// `Type.Cyclic(decls, key)` is the equivalent that preserves named `$defs`
+// for the published JSON Schema artifact (decision 0004).
 
-export const SpecModule = Type.Module({
+const SpecDeclarations = {
   CellValue: Type.Union([Type.String(), Type.Number(), Type.Boolean(), Type.Null()], {
     description:
       'A single data cell: string, number, boolean, or null. Dates travel as ISO 8601 strings (e.g. "2026-07-10"); non-finite numbers travel as null.',
@@ -1496,10 +1503,52 @@ export const SpecModule = Type.Module({
         "A complete ggsvelte plot specification: data + aesthetic mapping + one or more layers, in ggplot2's layered grammar. Strictly JSON (PortableSpec).",
     },
   ),
-});
+};
+
+/**
+ * Named-defs module surface (public).
+ * `.Import(key)` returns a Cyclic schema rooted at `key` (`$defs` + `$ref`),
+ * matching the TypeBox 0.x Module.Import JSON shape used by the artifact
+ * emitter and by Value.Check / Value.Errors.
+ *
+ * Type inference uses `SpecStatic` (Type.Module) instead: Cyclic's Static<>
+ * collapses large graphs to `never` under TypeScript 6, while Module inlines
+ * refs into concrete object types.
+ *
+ * Build the `$defs` graph once (rooted at PlotSpec) and re-root by swapping
+ * `$ref` — Type.Cyclic(decls, key) per import would rebuild the full graph
+ * ~20× at module load.
+ */
+const SpecDefsRoot = Type.Cyclic(SpecDeclarations, "PlotSpec");
+
+/** Cyclic schema: shared `$defs` bag + root `$ref` (TypeBox 0.x Import shape). */
+export type SpecImportSchema = {
+  $defs: (typeof SpecDefsRoot)["$defs"];
+  $ref: string;
+} & TSchema;
+
+function reRootSpec(key: keyof typeof SpecDeclarations): SpecImportSchema {
+  // One shared `$defs` graph; only the root `$ref` changes per import.
+  const schema: SpecImportSchema = {
+    $defs: SpecDefsRoot.$defs,
+    $ref: key,
+  };
+  return schema;
+}
+
+export const SpecModule = {
+  Import(key: keyof typeof SpecDeclarations): SpecImportSchema {
+    return reRootSpec(key);
+  },
+};
+
+/** Inlined declaration bag for Static<> extraction (not for JSON emission). */
+const SpecStatic = Type.Module(SpecDeclarations);
+
+type SpecType<K extends keyof typeof SpecStatic> = Static<(typeof SpecStatic)[K]>;
 
 // ---------------------------------------------------------------------------
-// Imported (validatable) schemas
+// Imported (validatable) schemas — Cyclic `$defs`+`$ref` for runtime/artifact
 // ---------------------------------------------------------------------------
 
 export const PlotSpecSchema = SpecModule.Import("PlotSpec");
@@ -1528,7 +1577,7 @@ export const CoordSpecSchema = SpecModule.Import("CoordSpec");
 // ---------------------------------------------------------------------------
 
 /** A single data cell (JSON scalar). */
-export type CellValue = Static<ReturnType<typeof SpecModule.Import<"CellValue">>>;
+export type CellValue = SpecType<"CellValue">;
 
 // The data-container types are written out by hand: TypeBox's computed module
 // types collapse `Type.Record`/`additionalProperties` value schemas to `{}`
@@ -1554,91 +1603,91 @@ export type DataRef = DataValues | DataColumns | DataName;
 /** Inline data only ({values} or {columns}). */
 export type InlineData = DataValues | DataColumns;
 /** Canonical channel value: {field} | {value, scale?} | {stat} | null. */
-export type ChannelValue = Static<typeof ChannelValueSchema>;
+export type ChannelValue = SpecType<"ChannelValue">;
 /** Aesthetic mapping (canonical channel forms only). */
-export type Aes = Static<typeof AesSchema>;
+export type Aes = SpecType<"Aes">;
 /** Point layer params. */
-export type PointParams = Static<ReturnType<typeof SpecModule.Import<"PointParams">>>;
+export type PointParams = SpecType<"PointParams">;
 /** Line layer params. */
-export type LineParams = Static<ReturnType<typeof SpecModule.Import<"LineParams">>>;
+export type LineParams = SpecType<"LineParams">;
 /** Col layer params. */
-export type ColParams = Static<ReturnType<typeof SpecModule.Import<"ColParams">>>;
+export type ColParams = SpecType<"ColParams">;
 /** Bar/histogram layer params (styling + stat-bin controls). */
-export type BarParams = Static<ReturnType<typeof SpecModule.Import<"BarParams">>>;
+export type BarParams = SpecType<"BarParams">;
 /** Area layer params. */
-export type AreaParams = Static<ReturnType<typeof SpecModule.Import<"AreaParams">>>;
+export type AreaParams = SpecType<"AreaParams">;
 /** Rule layer params (annotation intercepts + styling). */
-export type RuleParams = Static<ReturnType<typeof SpecModule.Import<"RuleParams">>>;
+export type RuleParams = SpecType<"RuleParams">;
 /** Text layer params. */
-export type TextParams = Static<ReturnType<typeof SpecModule.Import<"TextParams">>>;
+export type TextParams = SpecType<"TextParams">;
 /** Smooth layer params (method/se/level/span/degree/n + styling). */
-export type SmoothParams = Static<ReturnType<typeof SpecModule.Import<"SmoothParams">>>;
+export type SmoothParams = SpecType<"SmoothParams">;
 /** Boxplot layer params. */
-export type BoxplotParams = Static<ReturnType<typeof SpecModule.Import<"BoxplotParams">>>;
+export type BoxplotParams = SpecType<"BoxplotParams">;
 /** Density layer params (bw/adjust/n/cut + styling). */
-export type DensityParams = Static<ReturnType<typeof SpecModule.Import<"DensityParams">>>;
+export type DensityParams = SpecType<"DensityParams">;
 /** A summary function name (stat summary). */
-export type SummaryFun = Static<ReturnType<typeof SpecModule.Import<"SummaryFun">>>;
+export type SummaryFun = SpecType<"SummaryFun">;
 /** Errorbar layer params (styling + summary-stat functions). */
-export type ErrorbarParams = Static<ReturnType<typeof SpecModule.Import<"ErrorbarParams">>>;
+export type ErrorbarParams = SpecType<"ErrorbarParams">;
 /** Jitter/nudge position parameters. */
-export type PositionParams = Static<ReturnType<typeof SpecModule.Import<"PositionParams">>>;
+export type PositionParams = SpecType<"PositionParams">;
 /** A point layer. */
-export type PointLayer = Static<typeof PointLayerSchema>;
+export type PointLayer = SpecType<"PointLayer">;
 /** A line layer. */
-export type LineLayer = Static<typeof LineLayerSchema>;
+export type LineLayer = SpecType<"LineLayer">;
 /** A col layer (pre-computed bars). */
-export type ColLayer = Static<typeof ColLayerSchema>;
+export type ColLayer = SpecType<"ColLayer">;
 /** A bar layer (count or bin stat). */
-export type BarLayer = Static<typeof BarLayerSchema>;
+export type BarLayer = SpecType<"BarLayer">;
 /** A histogram layer (alias; normalize() canonicalizes to bar + stat bin). */
-export type HistogramLayer = Static<typeof HistogramLayerSchema>;
+export type HistogramLayer = SpecType<"HistogramLayer">;
 /** An area layer. */
-export type AreaLayer = Static<typeof AreaLayerSchema>;
+export type AreaLayer = SpecType<"AreaLayer">;
 /** A rule (reference line) layer. */
-export type RuleLayer = Static<typeof RuleLayerSchema>;
+export type RuleLayer = SpecType<"RuleLayer">;
 /** A text-label layer. */
-export type TextLayer = Static<typeof TextLayerSchema>;
+export type TextLayer = SpecType<"TextLayer">;
 /** A smooth (fitted trend) layer. */
-export type SmoothLayer = Static<typeof SmoothLayerSchema>;
+export type SmoothLayer = SpecType<"SmoothLayer">;
 /** A boxplot layer. */
-export type BoxplotLayer = Static<typeof BoxplotLayerSchema>;
+export type BoxplotLayer = SpecType<"BoxplotLayer">;
 /** A density (KDE) layer. */
-export type DensityLayer = Static<typeof DensityLayerSchema>;
+export type DensityLayer = SpecType<"DensityLayer">;
 /** An errorbar layer. */
-export type ErrorbarLayer = Static<typeof ErrorbarLayerSchema>;
+export type ErrorbarLayer = SpecType<"ErrorbarLayer">;
 /** One plot layer, discriminated by `geom`. */
-export type LayerSpec = Static<typeof LayerSpecSchema>;
+export type LayerSpec = SpecType<"LayerSpec">;
 /** Stackable position adjustment names. */
-export type StackablePosition = Static<ReturnType<typeof SpecModule.Import<"StackablePosition">>>;
+export type StackablePosition = SpecType<"StackablePosition">;
 /** Position adjustments accepted by point layers. */
 export type PointPosition = "identity" | "jitter" | "nudge";
 /** Positional (x/y) scale configuration. */
-export type PositionScaleSpec = Static<ReturnType<typeof SpecModule.Import<"PositionScaleSpec">>>;
+export type PositionScaleSpec = SpecType<"PositionScaleSpec">;
 /** Color/fill scale configuration. */
-export type ColorScaleSpec = Static<ReturnType<typeof SpecModule.Import<"ColorScaleSpec">>>;
+export type ColorScaleSpec = SpecType<"ColorScaleSpec">;
 /** Per-scale configuration ({ x, y, color, fill }). */
-export type Scales = Static<typeof ScalesSchema>;
+export type Scales = SpecType<"Scales">;
 /** Facet-panel scale behavior. */
-export type FacetScales = Static<ReturnType<typeof SpecModule.Import<"FacetScales">>>;
+export type FacetScales = SpecType<"FacetScales">;
 /** Facet configuration (wrap OR rows/cols grid). */
-export type FacetSpec = Static<typeof FacetSpecSchema>;
+export type FacetSpec = SpecType<"FacetSpec">;
 /** Coordinate system ({ type: "cartesian" | "flip" }). */
-export type CoordSpec = Static<typeof CoordSpecSchema>;
+export type CoordSpec = SpecType<"CoordSpec">;
 /** Per-layer rendering backend hint. */
-export type RenderBackend = Static<ReturnType<typeof SpecModule.Import<"RenderBackend">>>;
+export type RenderBackend = SpecType<"RenderBackend">;
 /** Plot-level accessibility mode. */
 export type A11yMode = "auto" | "force-svg";
 /** Legend options. */
-export type LegendSpec = Static<ReturnType<typeof SpecModule.Import<"LegendSpec">>>;
+export type LegendSpec = SpecType<"LegendSpec">;
 /** Built-in theme names. */
-export type ThemeName = Static<ReturnType<typeof SpecModule.Import<"ThemeName">>>;
+export type ThemeName = SpecType<"ThemeName">;
 /** Theme object: named base + role overrides. */
-export type ThemeSpec = Static<ReturnType<typeof SpecModule.Import<"ThemeSpec">>>;
+export type ThemeSpec = SpecType<"ThemeSpec">;
 /** Plot labels. */
-export type Labs = Static<ReturnType<typeof SpecModule.Import<"Labs">>>;
+export type Labs = SpecType<"Labs">;
 /** The canonical, strictly-JSON plot spec (what agents emit and schemas describe). */
-export type PortableSpec = Omit<Static<typeof PlotSpecSchema>, "data" | "datasets"> & {
+export type PortableSpec = Omit<SpecType<"PlotSpec">, "data" | "datasets"> & {
   data?: DataRef;
   datasets?: Record<string, InlineData>;
 };

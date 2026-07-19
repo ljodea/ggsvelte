@@ -16,7 +16,9 @@
  */
 import { PlotSpecSchema } from "./schema.js";
 
-const RECORD_PATTERN = "^(.*)$";
+// TypeBox 0.x emitted `^(.*)$`; TypeBox 1.x emits `^.*$`. Both are
+// "match any property name" records and rewrite to additionalProperties.
+const RECORD_PATTERNS = new Set(["^(.*)$", "^.*$"]);
 
 function transform(node: unknown, defNames: ReadonlySet<string>): unknown {
   if (Array.isArray(node)) return node.map((n) => transform(n, defNames));
@@ -32,14 +34,16 @@ function transform(node: unknown, defNames: ReadonlySet<string>): unknown {
       key === "patternProperties" &&
       typeof value === "object" &&
       value !== null &&
-      Object.keys(value).length === 1 &&
-      RECORD_PATTERN in value
+      Object.keys(value).length === 1
     ) {
-      out["additionalProperties"] = transform(
-        (value as Record<string, unknown>)[RECORD_PATTERN],
-        defNames,
-      );
-      continue;
+      const pattern = Object.keys(value)[0]!;
+      if (RECORD_PATTERNS.has(pattern)) {
+        out["additionalProperties"] = transform(
+          (value as Record<string, unknown>)[pattern],
+          defNames,
+        );
+        continue;
+      }
     }
     out[key] = transform(value, defNames);
   }
