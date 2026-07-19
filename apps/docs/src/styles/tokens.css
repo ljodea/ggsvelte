@@ -1,0 +1,77 @@
+@font-face {
+  font-family: "Roboto Condensed";
+  src: url("../../../../packages/svelte/src/lib/fonts/RobotoCondensed-Regular.ttf")
+    format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Roboto Condensed";
+  src: url("../../../../packages/svelte/src/lib/fonts/RobotoCondensed-Bold.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Noto Sans Display";
+  src: url("../lib/fonts/noto-sans-display-latin-400.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Noto Sans Display";
+  src: url("../lib/fonts/noto-sans-display-latin-600.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+}
+
+:root {
+  --paper: #ffffff;
+  --wash: #f5f7fa;
+  --ink: #172033;
+  --muted-ink: #5e6878;
+  --line: #d9dee8;
+  --accent: #4269d0;
+  --success: #237a57;
+  --warning: #8a5a00;
+  --error: #b42318;
+  --visited: #665980;
+  --code-paper: #172033;
+  --code-ink: #f4f6fa;
+  --display-font: "Roboto Condensed", "Arial Narrow", Arial, sans-serif;
+  --body-font: "Noto Sans Display", Arial, sans-serif;
+  --code-font: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --content-max: 90rem;
+  --article-max: 48rem;
+  --sidebar-width: 15.5rem;
+  --contents-width: 14rem;
+  --radius: 4px;
+  --bg: var(--paper);
+  --fg: var(--ink);
+  --muted: var(--muted-ink);
+  --surface: var(--wash);
+  --border: var(--line);
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --paper: #11151d;
+  --wash: #181e28;
+  --ink: #e9edf4;
+  --muted-ink: #aab4c4;
+  --line: #394354;
+  --accent: #86a5ff;
+  --success: #62c99a;
+  --warning: #efc46d;
+  --error: #ff8a80;
+  --visited: #c2afe8;
+  --code-paper: #0b0e14;
+  --code-ink: #f0f3f8;
+  color-scheme: dark;
+}

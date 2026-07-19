@@ -24,6 +24,7 @@ import {
 } from "@ggsvelte/core";
 import { ERROR_CATALOG, LINT_CATALOG } from "@ggsvelte/spec";
 import { INTERACTION_DIAGNOSTIC_CATALOG } from "../packages/svelte/src/lib/interaction/interaction";
+import { GUIDE_CATALOG, type GuideSlug } from "../apps/docs/src/lib/catalog/guide";
 import supportMatrix from "../support-matrix.json";
 
 // ---------------------------------------------------------------------------
@@ -51,17 +52,9 @@ function inline(s: string, base: string): string {
   return out;
 }
 
-/** Render the markdown subset used by the guide sections to HTML. */
-export function renderMarkdown(md: string, base = ""): string {
-  const lines = md.split("\n");
-  const html: string[] = [];
-  let paragraph: string[] = [];
-  let list: string[] | null = null;
-  let code: string[] | null = null;
-  let codeLang = "";
+function createHeadingId(): (text: string) => string {
   const headingCounts = new Map<string, number>();
-
-  const headingId = (text: string): string => {
+  return (text: string): string => {
     const stem =
       text
         .replaceAll(/`([^`]+)`/g, "$1")
@@ -74,6 +67,43 @@ export function renderMarkdown(md: string, base = ""): string {
     headingCounts.set(stem, count);
     return count === 1 ? stem : `${stem}-${String(count)}`;
   };
+}
+
+export interface MarkdownHeading {
+  level: number;
+  id: string;
+  title: string;
+}
+
+/** Extract the exact heading ids used by renderMarkdown for page navigation. */
+export function extractMarkdownHeadings(md: string): MarkdownHeading[] {
+  const headingId = createHeadingId();
+  const headings: MarkdownHeading[] = [];
+  for (const line of md.split("\n")) {
+    const heading = /^(#{1,4}) (.*)$/.exec(line);
+    if (heading === null) continue;
+    const rawTitle = heading[2]!;
+    headings.push({
+      level: heading[1]!.length,
+      id: headingId(rawTitle),
+      title: rawTitle
+        .replaceAll(/`([^`]+)`/g, "$1")
+        .replaceAll(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+        .replaceAll("**", ""),
+    });
+  }
+  return headings;
+}
+
+/** Render the markdown subset used by the guide sections to HTML. */
+export function renderMarkdown(md: string, base = ""): string {
+  const lines = md.split("\n");
+  const html: string[] = [];
+  let paragraph: string[] = [];
+  let list: string[] | null = null;
+  let code: string[] | null = null;
+  let codeLang = "";
+  const headingId = createHeadingId();
 
   const flushParagraph = () => {
     if (paragraph.length > 0) {
@@ -1286,62 +1316,24 @@ export interface GuidePage {
 }
 
 export function guidePages(lifecycle: LifecycleDoc): GuidePage[] {
-  return [
-    {
-      slug: "getting-started",
-      title: "Getting started",
-      description: "Install ggsvelte and draw the same chart in all three surfaces.",
-      markdown: GETTING_STARTED_MD,
-    },
-    {
-      slug: "compatibility",
-      title: "Compatibility",
-      description: "Tested Node, Svelte, package-manager, browser, and OS boundaries.",
-      markdown: COMPATIBILITY_MD,
-    },
-    {
-      slug: "errors",
-      title: "Errors reference",
-      description: "Every validation error and render-time diagnostic, from the catalogs.",
-      markdown: buildErrorsMd(),
-    },
-    {
-      slug: "advisories",
-      title: "Advisories",
-      description: "Spec-lint advisories and the pipeline's disclosed heuristics.",
-      markdown: buildAdvisoriesMd(),
-    },
-    {
-      slug: "lifecycle",
-      title: "Lifecycle & editions",
-      description: "API stability tags per export, and the defaults-edition mechanism.",
-      markdown: buildLifecycleMd(lifecycle),
-    },
-    {
-      slug: "interactions",
-      title: "Interactions",
-      description: "Inspection, selection, zoom, keyboard behavior, identity, and event contracts.",
-      markdown: INTERACTIONS_MD,
-    },
-    {
-      slug: "interaction-reference",
-      title: "Interaction reference",
-      description: "Search interaction props, callbacks, event phases, and diagnostic codes.",
-      markdown: INTERACTION_REFERENCE_MD,
-    },
-    {
-      slug: "migrating-pre-0-1",
-      title: "Migrating pre-0.1 interactions",
-      description: "Move from tooltip and brush props to semantic interaction capabilities.",
-      markdown: MIGRATING_PRE_0_1_MD,
-    },
-    {
-      slug: "upgrading",
-      title: "Upgrading ggsvelte",
-      description: "Per-release upgrade notes: what changed, what is optional, what to replace.",
-      markdown: UPGRADING_MD,
-    },
-  ];
+  const markdownBySlug: Record<GuideSlug, string> = {
+    "getting-started": GETTING_STARTED_MD,
+    interactions: INTERACTIONS_MD,
+    compatibility: COMPATIBILITY_MD,
+    "interaction-reference": INTERACTION_REFERENCE_MD,
+    errors: buildErrorsMd(),
+    advisories: buildAdvisoriesMd(),
+    lifecycle: buildLifecycleMd(lifecycle),
+    "migrating-pre-0-1": MIGRATING_PRE_0_1_MD,
+    upgrading: UPGRADING_MD,
+  };
+
+  return GUIDE_CATALOG.map(({ slug, title, description }) => ({
+    slug,
+    title,
+    description,
+    markdown: markdownBySlug[slug],
+  }));
 }
 
 /** llms.txt — the curated index (llmstxt.org shape: H1, blurb, link lists). */

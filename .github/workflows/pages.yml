@@ -92,9 +92,13 @@ jobs:
         run: bun run build
       - name: Build docs for the repository subpath
         env:
+          DOCS_BUILD_MODE: legacy-full
           BASE_PATH: /ggsvelte
         run: bun run build:docs
       - name: Verify packed links and required R0 journeys
+        env:
+          DOCS_BUILD_MODE: legacy-full
+          BASE_PATH: /ggsvelte
         run: bun run check:pages-links
       - name: Include benchmark history
         run: |

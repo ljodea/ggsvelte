@@ -4,10 +4,6 @@
   import Scatter from "$examples/point/scatter-color/Example.svelte";
 </script>
 
-<svelte:head>
-  <title>ggsvelte — layered grammar of graphics for Svelte</title>
-</svelte:head>
-
 <section class="hero">
   <h1>ggsvelte</h1>
   <p class="tagline">

@@ -17,12 +17,22 @@
         var root = document.documentElement;
         if (vr) root.setAttribute("data-vr", "");
         if (theme !== "dark" && theme !== "light") {
+          var stored = null;
+          if (!vr) {
+            try {
+              stored = localStorage.getItem("ggsvelte-theme");
+            } catch (_error) {
+              stored = null;
+            }
+          }
           theme =
-            !vr &&
-            typeof window.matchMedia === "function" &&
-            window.matchMedia("(prefers-color-scheme: dark)").matches
-              ? "dark"
-              : "light";
+            stored === "dark" || stored === "light"
+              ? stored
+              : !vr &&
+                  typeof window.matchMedia === "function" &&
+                  window.matchMedia("(prefers-color-scheme: dark)").matches
+                ? "dark"
+                : "light";
         }
         root.setAttribute("data-theme", theme);
       })();
