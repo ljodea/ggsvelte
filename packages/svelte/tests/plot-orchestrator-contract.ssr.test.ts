@@ -4,6 +4,10 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const orchestratorPath = join(import.meta.dirname, "../src/lib/plot-orchestrator.svelte.ts");
+const interactionAssemblyPath = join(
+  import.meta.dirname,
+  "../src/lib/plot-interaction-assembly.svelte.ts",
+);
 
 function expectOrdered(source: string, tokens: readonly string[]): void {
   let previousIndex = -1;
@@ -18,11 +22,31 @@ function expectOrdered(source: string, tokens: readonly string[]): void {
   }
 }
 
-describe("plot orchestrator lifecycle contract", () => {
-  const source = readFileSync(orchestratorPath, "utf8");
+describe("plot interaction assembly lifecycle contract", () => {
+  const orchestratorSource = readFileSync(orchestratorPath, "utf8");
+  const assemblySource = readFileSync(interactionAssemblyPath, "utf8");
+
+  it("keeps interaction topology behind the assembly seam", () => {
+    expect(orchestratorSource).toContain("createPlotInteractionAssembly(");
+    for (const factory of [
+      "createPlotZoomState(",
+      "createLegendFilterState(",
+      "createPlotRuntime(",
+      "createSemanticKeyService(",
+      "createLegendEntryKeyIndex(",
+      "createInspectionState(",
+      "createSurfaceState(",
+      "createSelectionState(",
+      "createLegendFocusState(",
+      "createIntervalState(",
+      "createPlotChromeState(",
+    ]) {
+      expect(orchestratorSource).not.toContain(factory);
+    }
+  });
 
   it("keeps controller construction in dependency order", () => {
-    expectOrdered(source, [
+    expectOrdered(assemblySource, [
       "const zoomState = createPlotZoomState(",
       "const legendFilterState = createLegendFilterState(",
       "const runtime = createPlotRuntime(",
@@ -38,12 +62,12 @@ describe("plot orchestrator lifecycle contract", () => {
   });
 
   it("uses the model-owned CandidateStore without constructing a second hit index", () => {
-    expect(source).not.toContain("buildHitIndex");
-    expect(source).not.toContain("SceneHitIndex");
+    expect(assemblySource).not.toContain("buildHitIndex");
+    expect(assemblySource).not.toContain("SceneHitIndex");
   });
 
   it("keeps phased effects in registration order", () => {
-    expectOrdered(source, [
+    expectOrdered(assemblySource, [
       "runtime.registerModelEffects();",
       "semanticKeys.registerEffects();",
       "surfaceState.registerSurfaceEffects();",
