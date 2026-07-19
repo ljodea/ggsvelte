@@ -12,6 +12,7 @@
  * Output: `{ ok: true, spec }` or `{ ok: false, errors: SpecError[] }` with
  * the agent error contract from errors.ts. Messages are snapshot-tested.
  */
+import { Settings } from "typebox/system";
 import { Value } from "typebox/value";
 
 import type { SpecError } from "./errors.js";
@@ -117,73 +118,81 @@ export function validate(input: unknown, options?: ValidateOptions): ValidateRes
       };
     }
 
-    // --- layers: discriminator-aware, branch-selected validation ------------
-    const layers = input["layers"];
-    if (!Array.isArray(layers)) {
-      errors.push({
-        code: "missing-layers",
-        path: "/layers",
-        message: `"layers" must be an array of layer objects (got ${layers === undefined ? "nothing" : typeof layers}).`,
-        fix: {
-          description: "Add a layers array with at least one layer.",
-          example: [{ geom: "point" }],
-        },
-      });
-    } else if (layers.length === 0) {
-      errors.push({
-        code: "empty-layers",
-        path: "/layers",
-        message: '"layers" must contain at least one layer.',
-        fix: { description: "Add a layer.", example: [{ geom: "point" }] },
-      });
-    } else {
-      for (let i = 0; i < layers.length; i++) {
-        const layer: unknown = layers[i];
-        const layerPath = `/layers/${i}`;
-        if (!isRecord(layer)) {
-          errors.push({
-            code: "invalid-layer",
-            path: layerPath,
-            message: `Each layer must be an object with a "geom" (got ${typeof layer}).`,
-            fix: { description: "Replace with a layer object.", example: { geom: "point" } },
-          });
-          continue;
+    // TypeBox 1 defaults maxErrors to 8; honor our documented maxDiagnostics
+    // so enum fan-out and multi-field failures aren't truncated before mapping.
+    const previousMaxErrors = Settings.Get().maxErrors;
+    Settings.Set({ maxErrors: Math.max(limits.maxDiagnostics, previousMaxErrors) });
+    try {
+      // --- layers: discriminator-aware, branch-selected validation ------------
+      const layers = input["layers"];
+      if (!Array.isArray(layers)) {
+        errors.push({
+          code: "missing-layers",
+          path: "/layers",
+          message: `"layers" must be an array of layer objects (got ${layers === undefined ? "nothing" : typeof layers}).`,
+          fix: {
+            description: "Add a layers array with at least one layer.",
+            example: [{ geom: "point" }],
+          },
+        });
+      } else if (layers.length === 0) {
+        errors.push({
+          code: "empty-layers",
+          path: "/layers",
+          message: '"layers" must contain at least one layer.',
+          fix: { description: "Add a layer.", example: [{ geom: "point" }] },
+        });
+      } else {
+        for (let i = 0; i < layers.length; i++) {
+          const layer: unknown = layers[i];
+          const layerPath = `/layers/${i}`;
+          if (!isRecord(layer)) {
+            errors.push({
+              code: "invalid-layer",
+              path: layerPath,
+              message: `Each layer must be an object with a "geom" (got ${typeof layer}).`,
+              fix: { description: "Replace with a layer object.", example: { geom: "point" } },
+            });
+            continue;
+          }
+          const geom = layer["geom"];
+          if (typeof geom !== "string" || !(geom in GEOM_BRANCHES)) {
+            errors.push(unknownGeomError(geom, layerPath));
+            continue;
+          }
+          const branch = GEOM_BRANCHES[geom as keyof typeof GEOM_BRANCHES];
+          errors.push(
+            ...mapValueErrors(Value.Errors(branch, layer), {
+              schema: branch,
+              value: layer,
+              pathPrefix: layerPath,
+            }),
+          );
         }
-        const geom = layer["geom"];
-        if (typeof geom !== "string" || !(geom in GEOM_BRANCHES)) {
-          errors.push(unknownGeomError(geom, layerPath));
-          continue;
-        }
-        const branch = GEOM_BRANCHES[geom as keyof typeof GEOM_BRANCHES];
-        errors.push(
-          ...mapValueErrors(Value.Errors(branch, layer), {
-            schema: branch,
-            value: layer,
-            pathPrefix: layerPath,
-          }),
-        );
       }
-    }
 
-    // --- everything else: check with layers replaced by a known-valid layer,
-    // so the plot-level walk never re-reports layer noise. -------------------
-    const shell = { ...input, layers: [{ geom: "point" }] };
-    errors.push(
-      ...mapValueErrors(Value.Errors(PlotSpecSchema, shell), {
-        schema: PlotSpecSchema,
-        value: shell,
-        pathPrefix: "",
-      }),
-    );
+      // --- everything else: check with layers replaced by a known-valid layer,
+      // so the plot-level walk never re-reports layer noise. -------------------
+      const shell = { ...input, layers: [{ geom: "point" }] };
+      errors.push(
+        ...mapValueErrors(Value.Errors(PlotSpecSchema, shell), {
+          schema: PlotSpecSchema,
+          value: shell,
+          pathPrefix: "",
+        }),
+      );
 
-    if (errors.length === 0) {
-      // Value.Check failed but neither walk produced a mapped error: surface a
-      // generic failure rather than lie with ok:true.
-      errors.push({
-        code: "invalid-type",
-        path: "",
-        message: "The spec does not match the schema.",
-      });
+      if (errors.length === 0) {
+        // Value.Check failed but neither walk produced a mapped error: surface a
+        // generic failure rather than lie with ok:true.
+        errors.push({
+          code: "invalid-type",
+          path: "",
+          message: "The spec does not match the schema.",
+        });
+      }
+    } finally {
+      Settings.Set({ maxErrors: previousMaxErrors });
     }
   }
 

@@ -106,6 +106,21 @@ function schemaAtInstancePath(rootSchema: unknown, instancePath: string): unknow
       node = props[seg];
       continue;
     }
+    // Array index: follow `items` (object or tuple entry).
+    if (/^\d+$/.test(seg)) {
+      const items = node["items"];
+      if (isRecord(items)) {
+        node = items;
+        continue;
+      }
+      if (Array.isArray(items)) {
+        const entry = items[Number(seg)];
+        if (isRecord(entry)) {
+          node = entry;
+          continue;
+        }
+      }
+    }
     // additionalProperties / patternProperties value schemas
     if (isRecord(node["additionalProperties"])) {
       node = node["additionalProperties"];
@@ -156,7 +171,18 @@ function schemaAtSchemaPath(
 
   const fromBase = tryWalk(base);
   if (fromBase !== null && fromBase !== undefined) return fromBase;
-  return tryWalk(cyclicRootSchema(rootSchema));
+  const fromRoot = tryWalk(cyclicRootSchema(rootSchema));
+  if (fromRoot !== null && fromRoot !== undefined) return fromRoot;
+  // TypeBox 1 schemaPath is often relative to a $defs member (e.g. DataValues),
+  // not the Cyclic plot root — try each def as a base.
+  if (defs !== null) {
+    for (const def of Object.values(defs)) {
+      if (!isRecord(def)) continue;
+      const hit = tryWalk(def);
+      if (hit !== null && hit !== undefined) return hit;
+    }
+  }
+  return null;
 }
 
 interface UnionMemberInfo {
@@ -192,18 +218,54 @@ function unionMembers(schema: unknown): UnionMemberInfo {
   return info;
 }
 
+/** True only for the channel node itself (`…/aes/<channel>`), not nested paths. */
 function isChannelPath(path: string): boolean {
   const segs = pathSegments(path);
-  // .../aes/<channel>
-  for (let i = 0; i < segs.length - 1; i++) {
-    if (segs[i] === "aes" && AES_CHANNEL_KEYS.has(segs[i + 1]!)) return true;
-  }
+  if (segs.length < 2) return false;
+  const i = segs.length - 2;
+  return segs[i] === "aes" && AES_CHANNEL_KEYS.has(segs[i + 1]!);
+}
+
+/**
+ * DataRef / InlineData union roots only: `/data` or `/datasets/<name>`.
+ * Nested paths under a data container must keep their own diagnostics.
+ */
+function isDataUnionPath(path: string): boolean {
+  const segs = pathSegments(path);
+  if (segs.length === 1 && segs[0] === "data") return true;
+  if (segs.length === 2 && segs[0] === "datasets") return true;
   return false;
 }
 
-function isDataPath(path: string): boolean {
-  const segs = pathSegments(path);
-  return segs[0] === "data" || segs[0] === "datasets";
+/** Canonical channel object form (or null); bare strings are handled separately. */
+function looksLikeChannelForm(v: unknown): boolean {
+  if (v === null) return true;
+  if (!isRecord(v)) return false;
+  return "field" in v || "value" in v || "stat" in v;
+}
+
+/** Already a data container shape — do not suggest re-wrapping as `{ values: [...] }`. */
+function looksLikeDataContainer(v: unknown): boolean {
+  if (!isRecord(v)) return false;
+  return "values" in v || "columns" in v || "name" in v;
+}
+
+function isScalarValue(v: unknown): boolean {
+  return v === null || typeof v === "string" || typeof v === "number" || typeof v === "boolean";
+}
+
+/**
+ * TypeBox Object with `additionalProperties: false` (closed) vs a schema
+ * (record/open keys whose *values* must match). 1.x reports value failures
+ * under schema-valued additionalProperties with the same keyword.
+ */
+function additionalPropertiesIsClosed(objectSchema: unknown): boolean {
+  if (!isRecord(objectSchema)) return true;
+  const ap = objectSchema["additionalProperties"];
+  // Explicit schema (object / boolean true) means keys are allowed; false/absent = closed.
+  if (ap === false || ap === undefined) return true;
+  if (ap === true) return false;
+  return typeof ap !== "object" || ap === null;
 }
 
 function objectPropertyNames(schema: unknown): string[] {
@@ -270,9 +332,17 @@ function mapPathGroup(
   const anyOfErr = group.find((e) => e.keyword === "anyOf");
   const constErrs = group.filter((e) => e.keyword === "const");
 
+  // Object-branch noise in mixed unions (e.g. ThemeName | ThemeSpec): prefer
+  // required / additionalProperties over const-branch enum synthesis.
+  const hasObjectBranchNoise =
+    isRecord(valueAtPath) &&
+    group.some((e) => e.keyword === "additionalProperties" || e.keyword === "required");
+
   // anyOf / const unions FIRST: 1.x fans out branch failures (required +
   // additionalProperties + anyOf) for object unions. Prefer the anyOf signal
-  // so DataRef / ChannelValue surface catalog codes, not branch noise.
+  // so DataRef / ChannelValue surface catalog codes, not branch noise — except
+  // when the instance already matches a near-canonical form (nested paths own
+  // the real diagnostic) or an object branch reported concrete property noise.
   if (anyOfErr !== undefined || constErrs.length > 0) {
     const unionSchema =
       (anyOfErr === undefined
@@ -287,6 +357,11 @@ function mapPathGroup(
       isChannelPath(path);
 
     if (isChannel && !members.allConst) {
+      // Near-canonical channel object: suppress union catalog so nested type
+      // errors (e.g. `/aes/x/value`) keep their own diagnostics.
+      if (looksLikeChannelForm(valueAtPath) && typeof valueAtPath !== "string") {
+        return [];
+      }
       const bareString = typeof valueAtPath === "string";
       return [
         {
@@ -303,11 +378,17 @@ function mapPathGroup(
       ];
     }
 
-    if (
+    const isDataUnion =
       members.refs.includes("DataValues") ||
       members.refs.some((r) => r.includes("DataValues")) ||
-      (isDataPath(path) && anyOfErr !== undefined)
-    ) {
+      (isDataUnionPath(path) && anyOfErr !== undefined);
+
+    if (isDataUnion) {
+      // Already wrapped as values/columns/name — nested cell/column errors
+      // report the real problem; do not suggest re-wrapping.
+      if (looksLikeDataContainer(valueAtPath)) {
+        return [];
+      }
       return [
         {
           code: "invalid-data",
@@ -322,14 +403,27 @@ function mapPathGroup(
       ];
     }
 
-    let allowed = members.allConst && members.consts.length > 0 ? members.consts : [];
-    if (allowed.length === 0 && constErrs.length > 0) {
+    // Prefer allowed values from the actual const errors TypeBox emitted —
+    // schemaPath resolution against Cyclic $defs can land on the wrong
+    // sibling union (e.g. scale type vs coord type both use `properties/type`).
+    let allowed: string[] = [];
+    if (constErrs.length > 0) {
       allowed = constErrs
         .map((e) => (e.params as { allowedValue?: unknown }).allowedValue)
         .filter((v) => v !== undefined)
         .map(String);
     }
-    if (allowed.length > 0) {
+    if (allowed.length === 0 && members.allConst && members.consts.length > 0) {
+      allowed = members.consts;
+    }
+    // Only promote const branch noise when the value could be an enum member.
+    // Mixed enum|object unions (theme) must not turn ThemeSpec property errors
+    // into "pick a theme name".
+    if (
+      allowed.length > 0 &&
+      (members.allConst || isScalarValue(valueAtPath)) &&
+      !hasObjectBranchNoise
+    ) {
       if (allowed.length === 1 && constErrs.length <= 1 && anyOfErr === undefined) {
         return [
           {
@@ -357,7 +451,7 @@ function mapPathGroup(
       ];
     }
 
-    if (anyOfErr !== undefined) {
+    if (anyOfErr !== undefined && !hasObjectBranchNoise) {
       return [
         {
           code: "invalid-type",
@@ -366,17 +460,34 @@ function mapPathGroup(
         },
       ];
     }
+    // Mixed union with object-branch property noise: fall through to
+    // additionalProperties / required handlers below.
   }
 
-  // additionalProperties: one error may list several unexpected keys.
+  // additionalProperties: closed objects → unexpected keys; schema-valued
+  // additionalProperties (records / free-form rows) → value type failures.
   const addl = group.find((e) => e.keyword === "additionalProperties");
   if (addl !== undefined) {
-    const unexpected = Array.isArray(addl.params.additionalProperties)
+    const listed = Array.isArray(addl.params.additionalProperties)
       ? addl.params.additionalProperties
       : [];
-    const objectSchema = schemaAtInstancePath(ctx.schema, instancePath);
+    const objectSchema =
+      (typeof addl.schemaPath === "string"
+        ? schemaAtSchemaPath(ctx.schema, instancePath, addl.schemaPath)
+        : null) ?? schemaAtInstancePath(ctx.schema, instancePath);
+    if (!additionalPropertiesIsClosed(objectSchema)) {
+      return listed.map((prop) => {
+        const propPath = `${path}/${prop}`;
+        const propValue = pointerGet(ctx.value, `${instancePath}/${prop}`);
+        return {
+          code: "invalid-type" as const,
+          path: propPath,
+          message: `Invalid value for "${prop}" (got ${JSON.stringify(propValue)}).`,
+        };
+      });
+    }
     const properties = objectPropertyNames(objectSchema);
-    return unexpected.map((prop) => {
+    return listed.map((prop) => {
       const propPath = `${path}/${prop}`;
       const suggestion = didYouMean(prop, properties);
       return {
