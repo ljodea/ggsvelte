@@ -1,5 +1,26 @@
 # @ggsvelte/spec
 
+## 0.3.0
+
+### Patch Changes
+
+- f63e498: # Compile plot schema validation
+
+  Compile and reuse the plot schema validator so large inline datasets no longer block rendering during validation.
+
+- 378f73c: # Preserve precise TypeBox union diagnostics
+
+  Report extra channel and data keys against the active union form, reject named
+  references inside inline-only dataset entries, and preserve the generic
+  `SpecModule.Import` signature used by downstream TypeScript consumers.
+
+- 0a7b872: # Migrate schema runtime from @sinclair/typebox 0.x LTS to typebox 1.x
+
+  Replace the LTS `@sinclair/typebox` package with the active `typebox` 1.x line
+  (same author; official Latest). Regenerates `schema/v0.json` and rewires
+  runtime validation/error mapping for the 1.x Value API. PortableSpec shapes
+  and the public validate()/builder surface are unchanged.
+
 ## 0.2.0
 
 ### Patch Changes
