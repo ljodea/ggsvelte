@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784496553308,
+  "lastUpdate": 1784497137420,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -33046,6 +33046,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 145.9978,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "8b7d672736d7ec6bee3063fc23ea085b9f9dfe46",
+          "message": "feat(docs): add packed Quickstart and diagnostics (#331)\n\n* fix(svelte): harden the responsive first-chart path\n\n* feat(docs): add packed quickstart and diagnostic guide\n\n* fix(docs): attach copy controls accessibly",
+          "timestamp": "2026-07-19T16:38:12-05:00",
+          "tree_id": "8529bf7fc7ba1e1e34f720f490cce91c9b5dcf16",
+          "url": "https://github.com/ljodea/ggsvelte/commit/8b7d672736d7ec6bee3063fc23ea085b9f9dfe46"
+        },
+        "date": 1784497136430,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 1.8009,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.6397,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 5.5672,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 8.4204,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 33.488,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 68.4939,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 0.9745,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2058,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 35.8666,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 56.1884,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 12.5052,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 11.7897,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 962.3139,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7945,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 248.0603,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 8.4003,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 11.9145,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 589.7544,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 143.0291,
             "unit": "ms"
           }
         ]
