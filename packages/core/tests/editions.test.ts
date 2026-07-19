@@ -14,6 +14,7 @@ import type { EditionDefaults } from "../src/editions.ts";
 import { EDITION_DEFAULTS, resolveEditionDefaults } from "../src/editions.ts";
 import { runPipeline } from "../src/pipeline.ts";
 import type { PointsBatch, RectsBatch } from "../src/scene.ts";
+import { VIRIDIS_RAMP_10 } from "../src/scales/color.ts";
 import { CATEGORICAL_PALETTE_10 } from "../src/scales/train.ts";
 import { BUILTIN_THEMES, LEGACY_BUILTIN_THEMES } from "../src/theme.ts";
 
@@ -101,6 +102,26 @@ describe("pipeline defaults keyed by edition", () => {
     for (const c of colors.slice(0, 3)) {
       expect(FAKE_EDITION_2.categoricalPalette).toContain(c);
     }
+  });
+
+  it("an explicit viridis scheme wins over an edition's sequential default", () => {
+    const model = runPipeline(
+      {
+        edition: 2,
+        data: {
+          values: [
+            { x: 1, y: 1, value: 0 },
+            { x: 2, y: 2, value: 1 },
+          ],
+        },
+        aes: { x: "x", y: "y", color: "value" },
+        layers: [{ geom: "point" }],
+        scales: { color: { scheme: "viridis" } },
+      },
+      { ...RUN, editions: EDITIONS_WITH_FAKE_2 },
+    );
+
+    expect(pointColors(model)).toEqual([VIRIDIS_RAMP_10[0], VIRIDIS_RAMP_10.at(-1)]);
   });
 
   it("theme role defaults follow the edition (unmapped bar accent)", () => {
