@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784430766843,
+  "lastUpdate": 1784437484392,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -31737,6 +31737,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 159.8113,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "0a7b87200fe0383b88ef38ade66486b45bbca0cf",
+          "message": "deps: migrate @sinclair/typebox 0.34 → typebox 1.x (#316)\n\n* deps: migrate @sinclair/typebox 0.34 → typebox 1.x\n\nTypeBox split into two packages by the same author:\n- `@sinclair/typebox` 0.x is LTS (lives in the low-star sinclair-typebox\n  support repo) — what Dependabot #311 was bumping\n- `typebox` 1.x is Latest (main sinclairzx81/typebox repo, ~7k stars)\n\nMove `@ggsvelte/spec` onto the active 1.x line. Runtime schemas use\nType.Cyclic for named `$defs` (Module.Import was removed); Static types\ncome from Type.Module inlining. Rewrite the agent error mapper for 1.x's\nJSON-Schema-style keywords, and accept TypeBox 1.x's `^.*$` record pattern\nin the schema artifact transform.\n\nSupersedes dependabot/bun #311.\n\n* fix: typebox 1.x load cost, lint, and Check typing\n\nShare one Cyclic `$defs` graph across SpecModule.Import roots, compile\nschemas in the property test, satisfy type-aware lint, and treat\nValue.Check as a plain boolean so Static-collapse does not poison\nvalidate() control flow.\n\n* chore: add changeset for typebox 1.x migration\n\nRecord a patch for @ggsvelte/spec so the dependency swap and schema\nartifact refresh appear in the next Version Packages release.\n\n* fix(spec): address TypeBox 1.x error-mapping P2s\n\nHonor Settings.maxErrors from maxDiagnostics, and tighten union /\nadditionalProperties mapping so nested channel and data value failures\nkeep actionable diagnostics instead of container-level catalog noise.\n\n* fix(spec): satisfy type-aware lint after error-mapping fixes\n\nExtract schema-shape collection helpers to stay under max-depth and\nannotate tuple items walk for no-unsafe-assignment.\n\n* fix(spec): preserve branch noise and exact-optional TypeBox settings\n\nNear-canonical channel/data forms only suppress the union catalog when\nthere is no actionable additionalProperties noise; otherwise fall through\nto unexpected-property. Enable exactOptionalPropertyTypes for validate()\nso explicit undefined matches tsconfig and JSON Schema.\n\n* fix(spec): report mixed channel forms and form-illegal keys\n\nTreat field/value/stat as exclusive discriminators and only ignore\nadditionalProperties noise for keys legal on the present form, so\nfield+value and field+scale no longer collapse to root invalid-type.\n\n* fix(spec): report mixed data forms instead of root invalid-type\n\nMirror channel form handling for DataRef: values/columns/name are\nexclusive discriminators. Mixed containers (values+name) get invalid-data\nwith a mixes-forms message; non-discriminator siblings still fall through.",
+          "timestamp": "2026-07-18T23:20:37-05:00",
+          "tree_id": "7fbbe5739e0ca1e340145032be218fa312583c37",
+          "url": "https://github.com/ljodea/ggsvelte/commit/0a7b87200fe0383b88ef38ade66486b45bbca0cf"
+        },
+        "date": 1784437483627,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 946.6259,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 942.3188,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 9684.1406,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 9260.1116,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 94255.6439,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 92439.7078,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 202.7297,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 201.1046,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 93970.0705,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 92962.9628,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 1287.2069,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 1266.0999,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 91903.1234,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.667,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 268.096,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 9.6568,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 30271.0646,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 3645.3765,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 30238.3281,
             "unit": "ms"
           }
         ]
