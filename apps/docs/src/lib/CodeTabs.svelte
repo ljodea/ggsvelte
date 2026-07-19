@@ -4,6 +4,8 @@
    * spec JSON (what agents emit), fluent-builder TypeScript (spec.ts), and
    * idiomatic Svelte components (Example.svelte) — each with a copy button.
    */
+  import { copyText, MANUAL_COPY_STATUS } from "$lib/clipboard";
+
   interface Tab {
     label: string;
     code: string;
@@ -12,28 +14,28 @@
   const { tabs }: { tabs: Tab[] } = $props();
 
   let active = $state(0);
-  let copied = $state(false);
+  let copyStatus = $state("");
+  let codeNode = $state<HTMLElement>();
   const tabsetId = $props.id();
   const panelId = `${tabsetId}-panel`;
   let copyTimer: ReturnType<typeof setTimeout> | undefined;
 
   async function copy(): Promise<void> {
     const code = tabs[active]?.code ?? "";
-    try {
-      await navigator.clipboard.writeText(code);
-      copied = true;
-      clearTimeout(copyTimer);
+    if (codeNode === undefined) return;
+    const result = await copyText(code, codeNode);
+    clearTimeout(copyTimer);
+    copyStatus = result === "copied" ? "Copied." : MANUAL_COPY_STATUS;
+    if (result === "copied") {
       copyTimer = setTimeout(() => {
-        copied = false;
+        copyStatus = "";
       }, 1500);
-    } catch {
-      // Clipboard unavailable (permissions/insecure context): quietly no-op.
     }
   }
 
   function select(i: number): void {
     active = i;
-    copied = false;
+    copyStatus = "";
   }
 
   function handleTabKey(event: KeyboardEvent, index: number): void {
@@ -88,8 +90,9 @@
       {/each}
     </div>
     <button type="button" class="copy" onclick={copy}>
-      {copied ? "Copied!" : "Copy"}
+      {copyStatus === "Copied." ? "Copied" : "Copy"}
     </button>
+    <span class="visually-hidden" role="status">{copyStatus}</span>
   </div>
   <div
     id={panelId}
@@ -103,7 +106,7 @@
       aria-label="Code example"
       tabindex="0"
     >
-      <pre><code>{tabs[active]?.code ?? ""}</code></pre>
+      <pre><code bind:this={codeNode}>{tabs[active]?.code ?? ""}</code></pre>
     </div>
   </div>
 </div>
