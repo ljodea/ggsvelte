@@ -12,6 +12,25 @@ function errorsOf(input: unknown) {
   return result.errors;
 }
 
+describe("validate — performance", () => {
+  it("validates a 10,000-row inline dataset without blocking interactive rendering", () => {
+    const values = Array.from({ length: 10_000 }, (_, index) => ({
+      x: index,
+      y: index % 100,
+    }));
+    const startedAt = performance.now();
+
+    const result = validate({
+      data: { values },
+      aes: { x: { field: "x" }, y: { field: "y" } },
+      layers: [{ geom: "point" }],
+    });
+
+    expect(result.ok).toBe(true);
+    expect(performance.now() - startedAt).toBeLessThan(2_000);
+  });
+});
+
 describe("validate — accepts", () => {
   it("a minimal valid spec", () => {
     const result = validate({ layers: [{ geom: "point" }] });
