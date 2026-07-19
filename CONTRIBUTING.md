@@ -86,7 +86,7 @@ upstream, `.md`/`.yaml`/`.svelte` can fold back into oxfmt (`.oxfmtrc.json`
 | oxfmt                                        | 0.58.0                 | formatter for ts/js/json/jsonc/css/toml                                               |
 | prettier + prettier-plugin-svelte            | 3.9.5 / 4.1.1          | formatter for .svelte/.md/.yaml (see quirk above)                                     |
 | markdownlint-cli2                            | 0.23.0                 | markdown lint (pre-commit stage; config `.markdownlint-cli2.jsonc`)                   |
-| svelte-check                                 | 4.7.2                  | Svelte template + type checking (packages/svelte)                                     |
+| svelte-check                                 | 4.7.3                  | Svelte template + type checking (packages/svelte)                                     |
 | knip                                         | 6.26.0                 | unused files/exports/deps (spikes ignored)                                            |
 | publint / @arethetypeswrong/cli              | 0.3.21 / 0.18.5        | package publish shape (skips unbuilt stubs)                                           |
 | actionlint (npm, wasm)                       | 2.0.6                  | workflow lint via `scripts/actionlint.ts` (no shellcheck integration — wasm build)    |
