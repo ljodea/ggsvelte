@@ -257,8 +257,8 @@ export function closestOrthInRange(
  * Nearest candidate in one axis direction within a panel-sorted order.
  *
  * `order[panelStart, panelEnd)` must be sorted by ascending primary coordinate,
- * then id. Prefer min primary > 0 (strictly in-direction), then min orthogonal
- * distance, then lower id — matching a linear 0..n-1 scan.
+ * then paint order. Prefer min primary > 0 (strictly in-direction), then min
+ * orthogonal distance, then higher id so topmost/later-painted marks win.
  *
  * Non-finite seed primary → return seedId (linear never updates from NaN primary).
  * Complexity: O(log n + k) probes into `order` for a finite seed (k = equal-primary run).
@@ -315,7 +315,7 @@ export function directionalNearestInOrder(
       if (id === startId) continue;
       const o = Math.abs(orth[id]! - seedOrth);
       if (!Number.isFinite(o)) continue;
-      if (best < 0 || o < bestOrth || (o === bestOrth && id < best)) {
+      if (best < 0 || o < bestOrth || (o === bestOrth && id > best)) {
         best = id;
         bestOrth = o;
       }
@@ -328,7 +328,7 @@ export function directionalNearestInOrder(
       if (id === startId) continue;
       const o = Math.abs(orth[id]! - seedOrth);
       if (!Number.isFinite(o)) continue;
-      if (best < 0 || o < bestOrth || (o === bestOrth && id < best)) {
+      if (best < 0 || o < bestOrth || (o === bestOrth && id > best)) {
         best = id;
         bestOrth = o;
       }

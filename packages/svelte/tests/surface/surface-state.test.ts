@@ -296,7 +296,6 @@ function mountSurfaceComposite(
       model: () => model,
       reducer: () => surface.reducer,
       inspectConfig: () => config.inspect,
-      surfaceInteractive: () => options.surfaceInteractive ?? true,
       inspectEnabled: () => config.inspect !== null,
       dataIdentityEpoch: () => "epoch-1",
       keyAt,

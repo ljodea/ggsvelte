@@ -539,7 +539,7 @@ describe("CandidateStore", () => {
     expect(store.cycle(3, Number.NaN)).toBe(3);
     expect(store.cycle(3, Number.POSITIVE_INFINITY)).toBe(3);
     expect(store.cycle(3, 1.5)).toBe(3);
-    expect(store.traverse(0, "down")).toBe(3);
+    expect(store.traverse(0, "down")).toBe(4);
     expect(store.queryRect(5, 15, 15, 45)).toEqual(new Uint32Array([0, 3, 4, 1]));
   });
 
@@ -547,6 +547,7 @@ describe("CandidateStore", () => {
   // [0, 3, 4, 2, 1]
   it("walks next/previous with wrap-around and falls back for unknown start ids", () => {
     expect(store.traverse(null, "next")).toBe(0);
+    expect(store.traverse(null, "previous")).toBe(0);
     expect(store.traverse(0, "first")).toBe(0);
     expect(store.traverse(0, "last")).toBe(1);
     expect(store.traverse(0, "next")).toBe(3);
@@ -557,16 +558,21 @@ describe("CandidateStore", () => {
     expect(store.traverse(0, "previous")).toBe(1);
     expect(store.traverse(1, "previous")).toBe(2);
     expect(store.traverse(2, "previous")).toBe(4);
+    // CandidateStore owns modular keyboard jumps; callers do not materialize
+    // traversal order to calculate an index themselves.
+    expect(store.traverse(null, "next", 2)).toBe(3);
+    expect(store.traverse(0, "next", 3)).toBe(2);
+    expect(store.traverse(0, "previous", 2)).toBe(2);
     expect(store.traverse(999, "next")).toBe(0);
     expect(store.traverse(-1, "previous")).toBe(0);
   });
 
   it("keeps spatial directions independent of sequential rank", () => {
     // Spatial uses geometry, not traversal order.
-    expect(store.traverse(0, "down")).toBe(3);
+    expect(store.traverse(0, "down")).toBe(4);
     expect(store.traverse(0, "right")).toBe(2);
-    // From (50,30), nearest left is the coincident pair at x=10 (ids 3 then 4); lower id wins ties.
-    expect(store.traverse(2, "left")).toBe(3);
+    // From (50,30), nearest left is the coincident pair at x=10; topmost id 4 wins.
+    expect(store.traverse(2, "left")).toBe(4);
     expect(store.traverse(1, "up")).toBe(2);
   });
 });
@@ -672,9 +678,9 @@ describe("candidate traversal hot path", () => {
     expect(hot.traverse(n - 1, "right")).toBe(n - 1);
   });
 
-  it("directional traverse prefers lower id when primary and orth both tie", () => {
+  it("directional traverse prefers topmost paint order when primary and orth both tie", () => {
     // Three points at x=20 with y=0,10,0; seed at (0,0). Right nearest primary
-    // is x=20; among y=0 ties (orth 0), lower id wins.
+    // is x=20; among y=0 ties (orth 0), the later-painted higher id wins.
     const hot = buildCandidateStore(
       sceneWithPoints([
         [0, 0],
@@ -690,7 +696,7 @@ describe("candidate traversal hot path", () => {
       },
     );
     void hot.x;
-    expect(hot.traverse(0, "right")).toBe(1);
+    expect(hot.traverse(0, "right")).toBe(3);
   });
 });
 

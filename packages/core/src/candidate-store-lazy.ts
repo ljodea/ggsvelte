@@ -78,8 +78,8 @@ class LazyCandidateStore implements CandidateStore {
     return this.#ready()?.group(seedId, axis) ?? null;
   }
 
-  traverse(startId: number | null, direction?: TraversalDirection): number | null {
-    return this.#ready()?.traverse(startId, direction) ?? null;
+  traverse(startId: number | null, direction?: TraversalDirection, step?: number): number | null {
+    return this.#ready()?.traverse(startId, direction, step) ?? null;
   }
 
   cycle(seedId: number, step?: number): number | null {

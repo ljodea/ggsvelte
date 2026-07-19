@@ -976,19 +976,26 @@ export function buildCandidateStoreEager(
         range: { axis, panelIndex: panel, start, end, permutation },
       };
     },
-    traverse(startId, direction = "next") {
+    traverse(startId, direction = "next", step) {
       if (n === 0) return null;
-      if (direction === "first" || startId === null) return traversal[0]!;
+      if (direction === "first") return traversal[0]!;
       if (direction === "last") return traversal[n - 1]!;
       if (direction === "next" || direction === "previous") {
-        if (!Number.isInteger(startId) || startId < 0 || startId >= n) return traversal[0]!;
-        const at = traversalRank[startId]!;
-        if (direction === "next") return traversal[(at + 1) % n]!;
-        return traversal[(at - 1 + n) % n]!;
+        if (startId !== null && (!Number.isInteger(startId) || startId < 0 || startId >= n))
+          return traversal[0]!;
+        // Preserve the original null-start contract when callers omit step.
+        if (startId === null && step === undefined) return traversal[0]!;
+        const resolvedStep = step ?? 1;
+        if (!Number.isInteger(resolvedStep) || !Number.isFinite(resolvedStep)) return startId;
+        const at = startId === null ? -1 : traversalRank[startId]!;
+        const delta = direction === "next" ? resolvedStep : -resolvedStep;
+        const next = (((at + delta) % n) + n) % n;
+        return traversal[next]!;
       }
+      if (startId === null) return traversal[0]!;
       if (!Number.isInteger(startId) || startId < 0 || startId >= n) return traversal[0]!;
       // left/right/up/down: O(log n + k) via panel-sorted primary axis indexes
-      // (not a full O(n) scan). Same panel; min primary > 0; min orth; lower id.
+      // (not a full O(n) scan). Same panel; min primary > 0; min orth; topmost id.
       const panel = panelIds[startId]!;
       if (direction === "left" || direction === "right") {
         const [panelStart, panelEnd] = panelRangeInOrder(orderByX, panelIds, panel);

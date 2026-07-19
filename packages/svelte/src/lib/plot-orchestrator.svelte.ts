@@ -447,8 +447,8 @@ export function createPlotOrchestrator<
   const surfaceInteractive = $derived(interactionConfig.availableTools.length > 0);
 
   // ------------------------------------------------- inspection
-  // Construction-time deriveds may read model / surfaceInteractive (both
-  // earlier). Phased effects register later via registerInspectionEffects().
+  // Construction-time deriveds may read the earlier model. Phased effects
+  // register later via registerInspectionEffects().
   // Reversed deps: reducer / clearBrush / chooseTool close over the later-
   // declared surfaceState (handler/effect-only; construction guard).
   const inspectionState = createInspectionState({
@@ -456,7 +456,6 @@ export function createPlotOrchestrator<
     // Deferred: surface owns the reducer (handler/effect only).
     reducer: () => surfaceState.reducer,
     inspectConfig: () => interactionConfig.inspect,
-    surfaceInteractive: () => surfaceInteractive,
     inspectEnabled: () => inspectEnabled,
     dataIdentityEpoch: () => dataIdentityEpoch,
     // Deferred: semantic-key service is declared later (handler only).

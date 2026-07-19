@@ -156,7 +156,6 @@ function mountInspectionController(
     model?: () => RenderModel | null;
     reducer?: () => InteractionReducer;
     inspectConfig?: () => InspectConfig;
-    surfaceInteractive?: () => boolean;
     inspectEnabled?: () => boolean;
     dataIdentityEpoch?: () => string;
     keyAt?: (index: number) => PropertyKey | null;
@@ -192,7 +191,6 @@ function mountInspectionController(
       model: options.model ?? (() => defaultModel),
       reducer: getReducer,
       inspectConfig: options.inspectConfig ?? defaultInspect,
-      surfaceInteractive: options.surfaceInteractive ?? (() => true),
       inspectEnabled: options.inspectEnabled ?? (() => true),
       dataIdentityEpoch: options.dataIdentityEpoch ?? (() => "epoch-1"),
       keyAt:
@@ -245,7 +243,6 @@ describe("createInspectionState construction", () => {
           return reducer;
         },
         inspectConfig: defaultInspect,
-        surfaceInteractive: () => true,
         inspectEnabled: () => {
           inspectEnabledCalls++;
           return true;
@@ -854,22 +851,15 @@ describe("createInspectionState traversal", () => {
     destroy();
   });
 
-  it("keyboard navigate O(1)-fetches by retained id (no full-store rematch)", () => {
-    // applyTraversalIndex must use candidates.candidate(id) for the selected
-    // index only — not matchCandidateFromHit over iterateCandidates (O(C)).
-    // Count candidate() calls after the first navigate has built the traversal
-    // list: a second navigate should call candidate once (the selected id),
-    // not once per store entry.
+  it("keyboard navigate delegates to CandidateStore without materializing traversal hits", () => {
     const model = modelFor(continuousSpec());
     const realCandidate = model.candidates.candidate.bind(model.candidates);
     let candidateCalls = 0;
-    let countCalls = false;
     model.candidates.candidate = (id: number) => {
-      if (countCalls) candidateCalls += 1;
+      candidateCalls += 1;
       return realCandidate(id);
     };
-    const storeSize = model.candidates.size;
-    expect(storeSize).toBeGreaterThan(1);
+    expect(model.candidates.size).toBeGreaterThan(1);
 
     const { state, destroy } = mountInspectionController({
       model: () => model,
@@ -880,16 +870,46 @@ describe("createInspectionState traversal", () => {
     flushSync();
     expect(state.inspection).not.toBeNull();
     const firstKey = state.inspection!.focus.key;
+    // The store chooses one id and inspection fetches only that candidate.
+    expect(candidateCalls).toBe(1);
 
     candidateCalls = 0;
-    countCalls = true;
     state.navigate(1);
     flushSync();
     expect(state.inspection).not.toBeNull();
     expect(state.inspection!.focus.key).not.toEqual(firstKey);
-    // O(1) id fetch — not a full-store walk (would be ≥ storeSize).
-    expect(candidateCalls).toBeLessThan(storeSize);
-    expect(candidateCalls).toBeGreaterThan(0);
+    expect(candidateCalls).toBe(1);
+
+    destroy();
+  });
+
+  it("delegates directional navigation and coincident cycling to CandidateStore", () => {
+    const model = modelFor(continuousSpec());
+    const realTraverse = model.candidates.traverse.bind(model.candidates);
+    const realCycle = model.candidates.cycle.bind(model.candidates);
+    const traversals: string[] = [];
+    let cycleCalls = 0;
+    model.candidates.traverse = (id, direction, step) => {
+      traversals.push(direction ?? "next");
+      return realTraverse(id, direction, step);
+    };
+    model.candidates.cycle = (id, step) => {
+      cycleCalls += 1;
+      return realCycle(id, step);
+    };
+
+    const { state, destroy } = mountInspectionController({
+      model: () => model,
+      registerEffects: false,
+    });
+
+    state.navigate(1);
+    state.navigateDirection(1, 0);
+    state.cycleCoincident(1);
+    flushSync();
+
+    expect(traversals).toContain("right");
+    expect(cycleCalls).toBe(1);
 
     destroy();
   });
@@ -914,7 +934,6 @@ describe("createInspectionState setInspection(null) clear ordering", () => {
         model: () => model,
         reducer: () => wrapped,
         inspectConfig: defaultInspect,
-        surfaceInteractive: () => true,
         inspectEnabled: () => true,
         dataIdentityEpoch: () => "epoch-1",
         keyAt: keyAtForModel(model),

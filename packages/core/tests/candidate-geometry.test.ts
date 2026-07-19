@@ -178,7 +178,7 @@ describe("closestOrthInRange", () => {
 });
 
 describe("directionalNearestInOrder / panelRangeInOrder", () => {
-  it("finds nearest in-direction with lower id on full orth ties", () => {
+  it("finds nearest in-direction with topmost paint order on full orth ties", () => {
     // order by primary (x): ids at x=0,10,10,20
     const order = [0, 1, 2, 3];
     const primary = [0, 10, 10, 20];
@@ -187,8 +187,8 @@ describe("directionalNearestInOrder / panelRangeInOrder", () => {
     expect(directionalNearestInOrder(order, primary, orth, 0, 4, 0, 0, 0, true)).toBe(2);
     // left from id3: nearest is x=10 run; min orth id2
     expect(directionalNearestInOrder(order, primary, orth, 0, 4, 3, 20, 0, false)).toBe(2);
-    // full orth tie at x=10: both orth 5 → lower id
-    expect(directionalNearestInOrder(order, primary, [0, 5, 5, 0], 0, 4, 0, 0, 0, true)).toBe(1);
+    // full orth tie at x=10: both orth 5 → later-painted higher id
+    expect(directionalNearestInOrder(order, primary, [0, 5, 5, 0], 0, 4, 0, 0, 0, true)).toBe(2);
   });
 
   it("returns seed when nothing lies in-direction or seed primary is non-finite", () => {

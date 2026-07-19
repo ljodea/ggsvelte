@@ -94,7 +94,8 @@ export interface CandidateStore {
     options: { mode: CandidateInspectMode; maxDistance: number; panelId?: string },
   ): CandidateMatch | null;
   group(seedId: number, axis: "x" | "y"): CandidateGroup | null;
-  traverse(startId: number | null, direction?: TraversalDirection): number | null;
+  /** Navigate traversal order; sequential directions apply step in O(1). */
+  traverse(startId: number | null, direction?: TraversalDirection, step?: number): number | null;
   cycle(seedId: number, step?: number): number | null;
   queryRect(x0: number, y0: number, x1: number, y1: number, panelId?: string): Uint32Array;
   /** Release epoch-local resolvers, scene references, and compact arrays. */
