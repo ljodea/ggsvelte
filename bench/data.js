@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784485006750,
+  "lastUpdate": 1784496553308,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -32927,6 +32927,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 143.977,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "16541e61bfcd9d08a8a6ca5a71fbab8d1f866c71",
+          "message": "vr: approve Quickstart baselines for PR #331 (#332)\n\n* vr: update baselines for PR #331 @ be863235102573c18bbf5774adc17715aeb3189e\n\n* vr: keep unrelated interaction baseline stable\n\n---------\n\nCo-authored-by: ggsvelte-vr-bot <vr-bot@users.noreply.github.com>",
+          "timestamp": "2026-07-19T16:28:29-05:00",
+          "tree_id": "b12b1f0c3d1a3281d9a8472755330dec6322a163",
+          "url": "https://github.com/ljodea/ggsvelte/commit/16541e61bfcd9d08a8a6ca5a71fbab8d1f866c71"
+        },
+        "date": 1784496552503,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 1.6461,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.3989,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 5.2567,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 8.2058,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 35.0727,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 69.0181,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 0.9612,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.1999,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 35.7123,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 57.3146,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 11.955,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 11.591,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 955.2187,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.8222,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 248.8708,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 9.5094,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 11.6046,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 614.293,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 145.9978,
             "unit": "ms"
           }
         ]
