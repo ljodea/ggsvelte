@@ -11,7 +11,7 @@ import { Value } from "typebox/value";
 import { Ajv2020 } from "ajv/dist/2020.js";
 
 import { schemaArtifactJSON } from "../src/artifact.ts";
-import { PlotSpecSchema } from "../src/schema.ts";
+import { PlotSpecSchema, THEME_NAMES } from "../src/schema.ts";
 
 const artifactPath = join(import.meta.dir, "..", "schema", "v0.json");
 const committed = readFileSync(artifactPath, "utf8");
@@ -19,6 +19,33 @@ const committed = readFileSync(artifactPath, "utf8");
 describe("schema/v0.json artifact", () => {
   it("is current (regenerate with `bun run schema:emit` when this fails)", () => {
     expect(committed).toBe(schemaArtifactJSON());
+  });
+
+  it("describes every registered theme name in the published schema", () => {
+    const artifact = JSON.parse(committed) as {
+      $defs: { ThemeName: { description?: string } };
+    };
+    const description = artifact.$defs.ThemeName.description ?? "";
+
+    for (const theme of THEME_NAMES) expect(description).toContain(`"${theme}"`);
+  });
+
+  it("documents that a named scheme selects its scale family", () => {
+    const artifact = JSON.parse(committed) as {
+      $defs: { ColorScaleSpec: { properties: { scheme: { description?: string } } } };
+    };
+
+    expect(artifact.$defs.ColorScaleSpec.properties.scheme.description).toContain(
+      "When type is omitted",
+    );
+  });
+
+  it("documents the supported custom color syntax", () => {
+    const artifact = JSON.parse(committed) as {
+      $defs: { ColorScaleSpec: { properties: { range: { description?: string } } } };
+    };
+
+    expect(artifact.$defs.ColorScaleSpec.properties.range.description).toContain("#rgb or #rrggbb");
   });
 
   it("contains no TypeBox-style refs or patternProperties records", () => {

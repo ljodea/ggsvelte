@@ -1,5 +1,7 @@
 import { describe, expect, it } from "bun:test";
 
+import { CATEGORICAL_SCHEME_NAMES } from "@ggsvelte/spec";
+
 import {
   CATEGORICAL_SCHEMES,
   CATEGORICAL_PALETTE_10,
@@ -122,6 +124,10 @@ describe("trainColor (value-stable, decision 0002)", () => {
       "#D55E00",
       "#CC79A7",
     ]);
+  });
+
+  it("implements every categorical scheme advertised by the spec registry", () => {
+    expect(Object.keys(CATEGORICAL_SCHEMES)).toEqual(CATEGORICAL_SCHEME_NAMES);
   });
 
   it("resolves every named categorical scheme in source order", () => {

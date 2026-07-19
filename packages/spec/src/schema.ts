@@ -37,7 +37,51 @@
  * ("svg" | "canvas" | "auto"), and the plot-level `a11y` flag ("force-svg"
  * keeps every layer in the accessible SVG backend).
  */
-import Type, { type Static, type TSchema } from "typebox";
+import Type, { type Static, type TLiteral, type TSchema } from "typebox";
+
+/** Named categorical color schemes known to this schema version. */
+export const CATEGORICAL_SCHEME_NAMES = [
+  "observable10",
+  "ipsum",
+  "flexoki",
+  "tableau10",
+  "colorblind",
+] as const;
+
+/** Named sequential color schemes known to this schema version. */
+export const SEQUENTIAL_SCHEME_NAMES = ["viridis"] as const;
+
+export const COLOR_SCHEME_NAMES = [
+  ...CATEGORICAL_SCHEME_NAMES,
+  ...SEQUENTIAL_SCHEME_NAMES,
+] as const;
+
+type ColorSchemeNameValue = (typeof COLOR_SCHEME_NAMES)[number];
+const COLOR_SCHEME_NAME_SCHEMAS = COLOR_SCHEME_NAMES.map((name) =>
+  Type.Literal(name),
+) as unknown as [TLiteral<ColorSchemeNameValue>, ...TLiteral<ColorSchemeNameValue>[]];
+
+/** Built-in theme names known to this schema version. */
+export const THEME_NAMES = [
+  "default",
+  "light",
+  "dark",
+  "minimal",
+  "ggplot2",
+  "classic",
+  "hrbr",
+  "few",
+  "clean",
+  "fivethirtyeight",
+  "economist",
+  "tufte",
+] as const;
+
+type ThemeNameValue = (typeof THEME_NAMES)[number];
+const THEME_NAME_SCHEMAS = THEME_NAMES.map((name) => Type.Literal(name)) as unknown as [
+  TLiteral<ThemeNameValue>,
+  ...TLiteral<ThemeNameValue>[],
+];
 
 // ---------------------------------------------------------------------------
 // Named $defs (TypeBox 1.x Cyclic)
@@ -1154,24 +1198,14 @@ const SpecDeclarations = {
         Type.Array(Type.String(), {
           minItems: 1,
           description:
-            "Explicit output colors (CSS color strings). Ordinal: the palette, in domain order. Sequential: ramp stops, evenly spaced.",
+            "Explicit output colors using #rgb or #rrggbb hex syntax. Ordinal: the palette, in domain order. Sequential: ramp stops, evenly spaced.",
         }),
       ),
       scheme: Type.Optional(
-        Type.Union(
-          [
-            Type.Literal("observable10"),
-            Type.Literal("ipsum"),
-            Type.Literal("flexoki"),
-            Type.Literal("tableau10"),
-            Type.Literal("colorblind"),
-            Type.Literal("viridis"),
-          ],
-          {
-            description:
-              'Named color scheme: categorical "observable10" (default), "ipsum" and "flexoki" (hrbrthemes), "tableau10" and "colorblind" (ggthemes), or sequential "viridis" (default).',
-          },
-        ),
+        Type.Union(COLOR_SCHEME_NAME_SCHEMAS, {
+          description:
+            'Named color scheme: categorical "observable10" (default), "ipsum", "flexoki", "tableau10", and "colorblind"; or sequential "viridis" (default). When type is omitted, the named scheme selects its ordinal or sequential scale family.',
+        }),
       ),
       reverse: Type.Optional(
         Type.Boolean({ description: "Reverse the color range. Default false." }),
@@ -1233,26 +1267,9 @@ const SpecDeclarations = {
     },
   ),
 
-  ThemeName: Type.Union(
-    [
-      Type.Literal("default"),
-      Type.Literal("light"),
-      Type.Literal("dark"),
-      Type.Literal("minimal"),
-      Type.Literal("ggplot2"),
-      Type.Literal("classic"),
-      Type.Literal("hrbr"),
-      Type.Literal("few"),
-      Type.Literal("clean"),
-      Type.Literal("fivethirtyeight"),
-      Type.Literal("economist"),
-      Type.Literal("tufte"),
-    ],
-    {
-      description:
-        'A registered theme name: "default" (inherits the page color via currentColor), "light", "dark", or "minimal".',
-    },
-  ),
+  ThemeName: Type.Union(THEME_NAME_SCHEMAS, {
+    description: `A registered theme name: ${THEME_NAMES.map((name) => `"${name}"`).join(", ")}.`,
+  }),
 
   ThemeSpec: Type.Object(
     {
@@ -1709,22 +1726,6 @@ export const KNOWN_GEOMS = [
   "errorbar",
 ] as const;
 export type GeomName = (typeof KNOWN_GEOMS)[number];
-
-/** Built-in theme names known to this schema version. */
-export const THEME_NAMES = [
-  "default",
-  "light",
-  "dark",
-  "minimal",
-  "ggplot2",
-  "classic",
-  "hrbr",
-  "few",
-  "clean",
-  "fivethirtyeight",
-  "economist",
-  "tufte",
-] as const;
 
 /**
  * The current DEFAULTS EDITION (Hadley lesson 13: fix accumulated bad

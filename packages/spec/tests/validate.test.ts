@@ -145,6 +145,65 @@ describe("validate — agent errors (snapshot-tested messages)", () => {
     expect(errorsOf({ layer: [], layers: [{ geom: "point" }] })).toMatchSnapshot();
   });
 
+  it("rejects a categorical scheme on a sequential scale with a named fix", () => {
+    const errors = errorsOf({
+      layers: [{ geom: "point" }],
+      scales: { color: { type: "sequential", scheme: "ipsum" } },
+    });
+
+    expect(errors).toEqual([
+      {
+        code: "scale-scheme-type",
+        path: "/scales/color/scheme",
+        message: 'The categorical scheme "ipsum" cannot be used with a sequential color scale.',
+        fix: {
+          description: 'Use "viridis" or provide a sequential range of #rgb/#rrggbb stops.',
+          example: "viridis",
+        },
+      },
+    ]);
+  });
+
+  it("rejects the sequential scheme on an ordinal scale with a named fix", () => {
+    const errors = errorsOf({
+      layers: [{ geom: "point" }],
+      scales: { fill: { type: "ordinal", scheme: "viridis" } },
+    });
+
+    expect(errors).toEqual([
+      {
+        code: "scale-scheme-type",
+        path: "/scales/fill/scheme",
+        message: 'The sequential scheme "viridis" cannot be used with an ordinal color scale.',
+        fix: {
+          description: "Use a categorical scheme or provide an ordinal range of CSS colors.",
+          example: "observable10",
+        },
+      },
+    ]);
+  });
+
+  it("rejects non-hex custom color stops before rendering", () => {
+    for (const unsupported of ["red", "rgb(255 0 0)"]) {
+      const errors = errorsOf({
+        layers: [{ geom: "point" }],
+        scales: { color: { type: "sequential", range: ["#000", unsupported] } },
+      });
+
+      expect(errors).toEqual([
+        {
+          code: "scale-range-color",
+          path: "/scales/color/range/1",
+          message: `The color stop "${unsupported}" is not a supported hex color.`,
+          fix: {
+            description: "Use #rgb or #rrggbb syntax for custom color ranges.",
+            example: "#ff0000",
+          },
+        },
+      ]);
+    }
+  });
+
   it("multiple errors are all reported", () => {
     const errors = errorsOf({
       aes: { x: "displ" },

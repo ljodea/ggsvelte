@@ -3,6 +3,7 @@
  * pinning, nice, zero, reverse), time/log tick generation, label format
  * strings, sequential color ramps, and the theme registry.
  */
+import { THEME_NAMES } from "@ggsvelte/spec";
 import { fromAny } from "@total-typescript/shoehorn";
 import { describe, expect, it } from "bun:test";
 
@@ -11,7 +12,13 @@ import { defaultLogTickFormat, logTicks } from "../src/layout/ticks.ts";
 import { defaultTimeTickFormat, timeTicks } from "../src/layout/time.ts";
 import { rampColor, trainSequential, VIRIDIS_RAMP_10 } from "../src/scales/color.ts";
 import { ScaleConfigError, trainBand, trainContinuous } from "../src/scales/train.ts";
-import { BUILTIN_THEMES, resolveTheme, themeVar, UnknownThemeError } from "../src/theme.ts";
+import {
+  BUILTIN_THEMES,
+  LEGACY_BUILTIN_THEMES,
+  resolveTheme,
+  themeVar,
+  UnknownThemeError,
+} from "../src/theme.ts";
 
 const DAY = 86_400_000;
 
@@ -208,6 +215,21 @@ describe("sequential color", () => {
     expect(scale.colorOf(Number.NaN)).toBeUndefined();
   });
 
+  it("normalizes three-digit hex stops before interpolation", () => {
+    const scale = trainSequential([0, 1], { range: ["#f00", "#00F"] });
+
+    expect(scale.stops).toEqual(["#ff0000", "#0000ff"]);
+    expect(scale.colorOf(0)).toBe("#ff0000");
+    expect(scale.colorOf(0.5)).toBe("#800080");
+    expect(scale.colorOf(1)).toBe("#0000ff");
+  });
+
+  it("refuses unsupported custom stops instead of emitting malformed colors", () => {
+    expect(() => trainSequential([0, 1], { range: ["red", "blue"] })).toThrow(
+      'Sequential color stops must use #rgb or #rrggbb syntax (got "red").',
+    );
+  });
+
   it("supports explicit domain, custom range, and reverse", () => {
     const scale = trainSequential([0, 1], {
       domain: [0, 100],
@@ -232,6 +254,11 @@ describe("theme registry", () => {
     "tooltipBorder",
     "toolActive",
   ] as const;
+
+  it("keeps every edition theme table complete against the spec registry", () => {
+    expect(Object.keys(BUILTIN_THEMES).toSorted()).toEqual([...THEME_NAMES].toSorted());
+    expect(Object.keys(LEGACY_BUILTIN_THEMES).toSorted()).toEqual([...THEME_NAMES].toSorted());
+  });
 
   it("resolves the edition-2 typography and structural theme tokens", () => {
     expect(resolveTheme()).toBe(BUILTIN_THEMES.default);

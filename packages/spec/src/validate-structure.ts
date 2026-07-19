@@ -8,7 +8,7 @@
  */
 import type { SpecError } from "./errors.js";
 import type { Aes, ChannelName } from "./schema.js";
-import { GEOM_DEFAULTS } from "./schema.js";
+import { CATEGORICAL_SCHEME_NAMES, GEOM_DEFAULTS, SEQUENTIAL_SCHEME_NAMES } from "./schema.js";
 import { effectiveChannel } from "./validate-data.js";
 
 const CHANNEL_FIX_EXAMPLE = { field: "column_name" };
@@ -180,6 +180,58 @@ export function layerStructuralErrors(
         fix: {
           description: `Map "${channel}" to a data field.`,
           example: { [channel]: CHANNEL_FIX_EXAMPLE },
+        },
+      });
+    }
+  }
+  return errors;
+}
+
+const CATEGORICAL_SCHEMES = new Set<string>(CATEGORICAL_SCHEME_NAMES);
+const SEQUENTIAL_SCHEMES = new Set<string>(SEQUENTIAL_SCHEME_NAMES);
+
+/** Named color schemes must match the configured color scale family. */
+export function colorScaleStructuralErrors(scales: Record<string, unknown>): SpecError[] {
+  const errors: SpecError[] = [];
+  for (const channel of ["color", "fill"] as const) {
+    const scale = scales[channel];
+    if (!isRecord(scale)) continue;
+    const type = scale["type"];
+    const scheme = scale["scheme"];
+    if (type === "sequential" && typeof scheme === "string" && CATEGORICAL_SCHEMES.has(scheme)) {
+      errors.push({
+        code: "scale-scheme-type",
+        path: `/scales/${channel}/scheme`,
+        message: `The categorical scheme "${scheme}" cannot be used with a sequential color scale.`,
+        fix: {
+          description: 'Use "viridis" or provide a sequential range of #rgb/#rrggbb stops.',
+          example: "viridis",
+        },
+      });
+    } else if (type === "ordinal" && typeof scheme === "string" && SEQUENTIAL_SCHEMES.has(scheme)) {
+      errors.push({
+        code: "scale-scheme-type",
+        path: `/scales/${channel}/scheme`,
+        message: 'The sequential scheme "viridis" cannot be used with an ordinal color scale.',
+        fix: {
+          description: "Use a categorical scheme or provide an ordinal range of CSS colors.",
+          example: "observable10",
+        },
+      });
+    }
+
+    const range = scale["range"];
+    if (!Array.isArray(range)) continue;
+    for (let index = 0; index < range.length; index++) {
+      const color: unknown = range[index];
+      if (typeof color !== "string" || /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(color)) continue;
+      errors.push({
+        code: "scale-range-color",
+        path: `/scales/${channel}/range/${index}`,
+        message: `The color stop "${color}" is not a supported hex color.`,
+        fix: {
+          description: "Use #rgb or #rrggbb syntax for custom color ranges.",
+          example: "#ff0000",
         },
       });
     }

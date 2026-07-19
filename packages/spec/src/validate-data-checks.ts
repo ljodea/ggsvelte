@@ -6,7 +6,7 @@
 import type { SpecError } from "./errors.js";
 import { didYouMean } from "./errors.js";
 import type { Aes, ChannelName, ColorScaleSpec, PositionScaleSpec } from "./schema.js";
-import { CHANNELS, GEOM_DEFAULTS } from "./schema.js";
+import { CHANNELS, GEOM_DEFAULTS, SEQUENTIAL_SCHEME_NAMES } from "./schema.js";
 import type { ProfileFieldType, ValidateLimits, ValidateOptions } from "./validate-data.js";
 import {
   effectiveChannel,
@@ -32,6 +32,7 @@ function isRecord(v: unknown): v is Record<string, unknown> {
 
 const AXIS_CHANNELS = ["x", "y"] as const;
 const COLOR_CHANNELS = ["color", "fill"] as const;
+const SEQUENTIAL_SCHEMES = new Set<string>(SEQUENTIAL_SCHEME_NAMES);
 
 export function dataChecks(
   spec: Record<string, unknown>,
@@ -224,7 +225,12 @@ export function dataChecks(
 
   for (const channel of COLOR_CHANNELS) {
     const config = scales?.[channel] as ColorScaleSpec | undefined;
-    if (config?.type !== "sequential") continue;
+    const effectiveType =
+      config?.type ??
+      (config?.scheme !== undefined && SEQUENTIAL_SCHEMES.has(config.scheme)
+        ? "sequential"
+        : undefined);
+    if (effectiveType !== "sequential") continue;
     for (const use of colorFields[channel]) {
       const type = typeOf(use.field);
       if (type === "nominal" || type === "ordinal") {

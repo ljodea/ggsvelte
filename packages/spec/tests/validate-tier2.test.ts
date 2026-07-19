@@ -187,6 +187,16 @@ describe("tier 2 — data-aware checks (inline data)", () => {
       }),
     ).toEqual(["scale-type-mismatch"]);
   });
+  it("treats viridis as sequential when checking an omitted scale type", () => {
+    expect(
+      codesOf({
+        ...base,
+        aes: { ...base.aes, color: { field: "city" } },
+        scales: { color: { scheme: "viridis" } },
+        layers: [{ geom: "point" }],
+      }),
+    ).toEqual(["scale-type-mismatch"]);
+  });
 });
 
 describe("tier 2 — DataProfile", () => {

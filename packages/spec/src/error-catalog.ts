@@ -89,6 +89,16 @@ export const ERROR_CATALOG = {
     summary: "Fallback: a value has the wrong JSON type.",
     fix: "Give the property the JSON type the message names.",
   },
+  "scale-scheme-type": {
+    tier: 1,
+    summary: "A named color scheme is incompatible with the configured color scale type.",
+    fix: 'Use a categorical scheme with "ordinal", or "viridis"/hex stops with "sequential".',
+  },
+  "scale-range-color": {
+    tier: 1,
+    summary: "A custom color range contains a color outside the supported hex syntax.",
+    fix: "Replace each custom color with #rgb or #rrggbb syntax.",
+  },
   // --- tier 1 structural (grammar rules the schema alone cannot express) ---
   "missing-required-channel": {
     tier: 2,
