@@ -2,8 +2,9 @@
  * Spec validation orchestrator — tier 1 (schema shape) plus opt-in tier 2
  * (structural grammar, data-aware checks, optional lint).
  *
- * Tier-1 mechanism (decision 0004): TypeBox 1.x `Value.Check`/`Value.Errors`
- * over the same schemas that emit `schema/v0.json` — one artifact, no drift.
+ * Tier-1 mechanism (decision 0004): TypeBox 1.x compiled checks plus
+ * `Value.Errors` over the same schemas that emit `schema/v0.json` — one
+ * artifact, no drift.
  * Raw TypeBox union noise is mapped to the agent error contract in
  * validate-map-errors.ts. Data-free grammar rules live in
  * validate-structure.ts. Data-aware checks live in validate-data*.ts
@@ -12,6 +13,7 @@
  * Output: `{ ok: true, spec }` or `{ ok: false, errors: SpecError[] }` with
  * the agent error contract from errors.ts. Messages are snapshot-tested.
  */
+import Compile from "typebox/compile";
 import { Settings } from "typebox/system";
 import { Value } from "typebox/value";
 
@@ -47,6 +49,16 @@ import { facetStructuralErrors, layerStructuralErrors } from "./validate-structu
 export type ValidateResult =
   | { ok: true; spec: PortableSpec; advisories?: SpecAdvisory[] }
   | { ok: false; errors: SpecError[]; advisories?: SpecAdvisory[] };
+
+const PLOT_SPEC_VALIDATOR = (() => {
+  const previousExactOptional = Settings.Get().exactOptionalPropertyTypes;
+  Settings.Set({ exactOptionalPropertyTypes: true });
+  try {
+    return Compile(PlotSpecSchema);
+  } finally {
+    Settings.Set({ exactOptionalPropertyTypes: previousExactOptional });
+  }
+})();
 
 const GEOM_BRANCHES = {
   point: PointLayerSchema,
@@ -176,9 +188,10 @@ export function validate(input: unknown, options?: ValidateOptions): ValidateRes
     exactOptionalPropertyTypes: true,
   });
   try {
-    // SpecImportSchema is a structural Cyclic root; Static<> on it is not useful
-    // for control-flow (collapses), so treat Check as a plain boolean.
-    const schemaValid: boolean = Value.Check(PlotSpecSchema, input);
+    // TypeBox's interpreted Value.Check walks the cyclic schema graph repeatedly
+    // for every inline row. Reuse its compiled validator so large plots remain
+    // interactive while preserving Value.Errors for detailed invalid diagnostics.
+    const schemaValid: boolean = PLOT_SPEC_VALIDATOR.Check(input);
 
     if (!schemaValid) {
       if (!isRecord(input)) {
