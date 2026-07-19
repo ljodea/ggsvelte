@@ -69,7 +69,7 @@ function cyclicRootSchema(schema: unknown): Record<string, unknown> | null {
   const defs = schema["$defs"];
   const ref = schema["$ref"];
   if (isRecord(defs) && typeof ref === "string" && isRecord(defs[ref])) {
-    return defs[ref] as Record<string, unknown>;
+    return defs[ref];
   }
   return isRecord(schema) ? schema : null;
 }
@@ -86,7 +86,7 @@ function resolveRef(
     : ref.startsWith("#/")
       ? null
       : ref;
-  if (name !== null && isRecord(defs[name])) return defs[name] as Record<string, unknown>;
+  if (name !== null && isRecord(defs[name])) return defs[name];
   return node;
 }
 
@@ -97,21 +97,18 @@ function resolveRef(
 function schemaAtInstancePath(rootSchema: unknown, instancePath: string): unknown {
   const root = cyclicRootSchema(rootSchema);
   if (root === null) return null;
-  const defs =
-    isRecord(rootSchema) && isRecord(rootSchema["$defs"])
-      ? (rootSchema["$defs"] as Record<string, unknown>)
-      : null;
+  const defs = isRecord(rootSchema) && isRecord(rootSchema["$defs"]) ? rootSchema["$defs"] : null;
   let node: Record<string, unknown> = root;
   for (const seg of pathSegments(instancePath)) {
     node = resolveRef(node, defs);
     const props = node["properties"];
     if (isRecord(props) && isRecord(props[seg])) {
-      node = props[seg] as Record<string, unknown>;
+      node = props[seg];
       continue;
     }
     // additionalProperties / patternProperties value schemas
     if (isRecord(node["additionalProperties"])) {
-      node = node["additionalProperties"] as Record<string, unknown>;
+      node = node["additionalProperties"];
       continue;
     }
     return null;
@@ -135,10 +132,7 @@ function schemaAtSchemaPath(
   const base = schemaAtInstancePath(rootSchema, instancePath);
   if (schemaPath === "#" || schemaPath === "") return base;
 
-  const defs =
-    isRecord(rootSchema) && isRecord(rootSchema["$defs"])
-      ? (rootSchema["$defs"] as Record<string, unknown>)
-      : null;
+  const defs = isRecord(rootSchema) && isRecord(rootSchema["$defs"]) ? rootSchema["$defs"] : null;
 
   const parts = schemaPath
     .replace(/^#\/?/, "")
@@ -303,7 +297,7 @@ function mapPathGroup(
             : `Channel "${key}" must be {"field": ...}, {"value": ...}, {"stat": ...}, or null.`,
           fix: {
             description: `Use a canonical channel form, e.g. {"field": "column_name"} to map "${key}" to a data column.`,
-            example: bareString ? { field: valueAtPath as string } : CHANNEL_FIX_EXAMPLE,
+            example: bareString ? { field: valueAtPath } : CHANNEL_FIX_EXAMPLE,
           },
         },
       ];
@@ -378,7 +372,7 @@ function mapPathGroup(
   const addl = group.find((e) => e.keyword === "additionalProperties");
   if (addl !== undefined) {
     const unexpected = Array.isArray(addl.params.additionalProperties)
-      ? (addl.params.additionalProperties as string[])
+      ? addl.params.additionalProperties
       : [];
     const objectSchema = schemaAtInstancePath(ctx.schema, instancePath);
     const properties = objectPropertyNames(objectSchema);
@@ -403,7 +397,7 @@ function mapPathGroup(
   const req = group.find((e) => e.keyword === "required");
   if (req !== undefined) {
     const missing = Array.isArray(req.params.requiredProperties)
-      ? (req.params.requiredProperties as string[])
+      ? req.params.requiredProperties
       : [];
     return missing.map((prop) => ({
       code: "missing-property" as const,
@@ -458,26 +452,6 @@ function mapPathGroup(
       message: `${message}${path === "" ? "" : ` at "${key}"`} (got ${JSON.stringify(valueAtPath)}).`,
     },
   ];
-}
-
-/** @deprecated Prefer mapValueErrors for 1.x multi-error groups. */
-export function mapValueError(
-  error: TLocalizedValidationError,
-  pathPrefix: string,
-  ctx?: Omit<MapErrorsContext, "pathPrefix">,
-): SpecError {
-  const mapped = mapValueErrors([error], {
-    pathPrefix,
-    schema: ctx?.schema ?? {},
-    value: ctx?.value ?? null,
-  });
-  return (
-    mapped[0] ?? {
-      code: "invalid-type",
-      path: pathPrefix + error.instancePath,
-      message: error.message,
-    }
-  );
 }
 
 export function unknownGeomError(geom: unknown, layerPath: string): SpecError {

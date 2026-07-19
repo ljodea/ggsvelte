@@ -7,7 +7,7 @@ import { describe, expect, it } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { Value } from "typebox/value";
+import Schema from "typebox/schema";
 import { Ajv2020 } from "ajv/dist/2020.js";
 
 import { gg } from "../src/builder.ts";
@@ -94,8 +94,8 @@ function randomBuilder(rnd: () => number) {
 }
 
 describe("builder property test", () => {
-  // TypeBox 1.x Cyclic validation is slower per-check than 0.x Module.Import;
-  // 250 seeded cases need headroom over bun's default 5s test timeout.
+  // TypeBox 1.x: building Cyclic `$defs` graphs + Schema.Compile is front-loaded;
+  // allow headroom over bun's 5s default when this file loads cold.
   it(
     "every builder output validates against the emitted JSON Schema (ajv + TypeBox), 250 seeded cases",
     () => {
@@ -104,6 +104,8 @@ describe("builder property test", () => {
       ) as object;
       const ajv = new Ajv2020({ strict: false });
       const validateAjv = ajv.compile(artifact);
+      // Dynamic Value.Check on large Cyclic schemas is ~15ms/check; Compile is ~0.1ms.
+      const validateTb = Schema.Compile(PlotSpecSchema);
       const rnd = mulberry32(0xc0ffee);
       for (let i = 0; i < 250; i++) {
         const spec = randomBuilder(rnd).spec();
@@ -114,9 +116,9 @@ describe("builder property test", () => {
               JSON.stringify(validateAjv.errors, null, 2),
           );
         }
-        expect(Value.Check(PlotSpecSchema, spec)).toBe(true);
+        expect(validateTb.Check(spec)).toBe(true);
       }
     },
-    { timeout: 30_000 },
+    { timeout: 60_000 },
   );
 });

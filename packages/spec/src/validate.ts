@@ -93,7 +93,9 @@ export function validate(input: unknown, options?: ValidateOptions): ValidateRes
   }
 
   const errors: SpecError[] = [];
-  const schemaValid = Value.Check(PlotSpecSchema, input);
+  // SpecImportSchema is a structural Cyclic root; Static<> on it is not useful
+  // for control-flow (collapses), so treat Check as a plain boolean.
+  const schemaValid: boolean = Value.Check(PlotSpecSchema, input);
 
   if (!schemaValid) {
     if (!isRecord(input)) {

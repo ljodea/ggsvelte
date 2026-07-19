@@ -37,7 +37,7 @@
  * ("svg" | "canvas" | "auto"), and the plot-level `a11y` flag ("force-svg"
  * keeps every layer in the accessible SVG backend).
  */
-import Type, { type Static } from "typebox";
+import Type, { type Static, type TSchema } from "typebox";
 
 // ---------------------------------------------------------------------------
 // Named $defs (TypeBox 1.x Cyclic)
@@ -1514,10 +1514,31 @@ const SpecDeclarations = {
  * Type inference uses `SpecStatic` (Type.Module) instead: Cyclic's Static<>
  * collapses large graphs to `never` under TypeScript 6, while Module inlines
  * refs into concrete object types.
+ *
+ * Build the `$defs` graph once (rooted at PlotSpec) and re-root by swapping
+ * `$ref` — Type.Cyclic(decls, key) per import would rebuild the full graph
+ * ~20× at module load.
  */
+const SpecDefsRoot = Type.Cyclic(SpecDeclarations, "PlotSpec");
+
+/** Cyclic schema: shared `$defs` bag + root `$ref` (TypeBox 0.x Import shape). */
+export type SpecImportSchema = {
+  $defs: (typeof SpecDefsRoot)["$defs"];
+  $ref: string;
+} & TSchema;
+
+function reRootSpec(key: keyof typeof SpecDeclarations): SpecImportSchema {
+  // One shared `$defs` graph; only the root `$ref` changes per import.
+  const schema: SpecImportSchema = {
+    $defs: SpecDefsRoot.$defs,
+    $ref: key,
+  };
+  return schema;
+}
+
 export const SpecModule = {
-  Import<K extends keyof typeof SpecDeclarations>(key: K) {
-    return Type.Cyclic(SpecDeclarations, key as string);
+  Import(key: keyof typeof SpecDeclarations): SpecImportSchema {
+    return reRootSpec(key);
   },
 };
 
