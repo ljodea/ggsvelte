@@ -256,8 +256,8 @@ function isScalarValue(v: unknown): boolean {
 
 /** Exclusive channel form discriminators (exactly one allowed per channel). */
 const CHANNEL_DISCRIMINATORS = ["field", "value", "stat"] as const;
-/** Discriminator keys of DataRef / InlineData forms. */
-const DATA_FORM_KEYS = new Set(["values", "columns", "name"]);
+/** Exclusive data form discriminators (exactly one allowed per DataRef). */
+const DATA_DISCRIMINATORS = ["values", "columns", "name"] as const;
 
 /**
  * True when an additionalProperties failure lists a key that is *not* in
@@ -282,6 +282,10 @@ function channelDiscriminatorKeys(v: Record<string, unknown>): string[] {
   return CHANNEL_DISCRIMINATORS.filter((k) => k in v);
 }
 
+function dataDiscriminatorKeys(v: Record<string, unknown>): string[] {
+  return DATA_DISCRIMINATORS.filter((k) => k in v);
+}
+
 /**
  * Keys legal on the single present channel form, or null when forms are mixed
  * / absent. FieldRef = {field}; ValueRef = {value, scale?}; StatRef = {stat}.
@@ -299,6 +303,13 @@ function allowedKeysForPresentChannelForm(v: Record<string, unknown>): Set<strin
     default:
       return null;
   }
+}
+
+/** Keys legal on the single present data form, or null when forms are mixed. */
+function allowedKeysForPresentDataForm(v: Record<string, unknown>): Set<string> | null {
+  const discs = dataDiscriminatorKeys(v);
+  if (discs.length !== 1) return null;
+  return new Set([discs[0]!]);
 }
 
 /**
@@ -458,10 +469,27 @@ function mapPathGroup(
 
     if (isDataUnion) {
       // Already wrapped as values/columns/name:
+      // - mixed forms (values+name) → invalid-data
       // - extra sibling keys (rows) → fall through for unexpected-property
       // - nested cell failures only → suppress invalid-data re-wrap
-      if (looksLikeDataContainer(valueAtPath)) {
-        if (hasActionableAddlNoise(group, DATA_FORM_KEYS)) {
+      if (isRecord(valueAtPath) && looksLikeDataContainer(valueAtPath)) {
+        const discs = dataDiscriminatorKeys(valueAtPath);
+        if (discs.length > 1) {
+          return [
+            {
+              code: "invalid-data",
+              path,
+              message: `Data mixes forms (${discs.map((d) => `"${d}"`).join(" and ")}); use exactly one of {"values": [...rows]}, {"columns": {...arrays}}, or {"name": "dataset"}.`,
+              allowed: ["values", "columns", "name"],
+              fix: {
+                description: "Pick a single data form.",
+                example: { values: [{ x: 1, y: 2 }] },
+              },
+            },
+          ];
+        }
+        const formKeys = allowedKeysForPresentDataForm(valueAtPath);
+        if (formKeys !== null && hasActionableAddlNoise(group, formKeys)) {
           // fall through
         } else {
           return [];

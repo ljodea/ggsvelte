@@ -246,6 +246,30 @@ describe("validate — TypeBox 1.x error mapping (Codex P2 regressions)", () => 
     );
   });
 
+  it("mixed data forms (values+name) report invalid-data, not root invalid-type", () => {
+    const errors = errorsOf({
+      data: { values: [], name: "cars" },
+      layers: [{ geom: "point" }],
+    });
+    expect(errors.some((e) => e.code === "invalid-type" && e.path === "")).toBe(false);
+    expect(
+      errors.some(
+        (e) => e.code === "invalid-data" && e.path === "/data" && e.message.includes("mixes forms"),
+      ),
+    ).toBe(true);
+  });
+
+  it("mixed data forms (columns+values) report invalid-data mixes forms", () => {
+    const errors = errorsOf({
+      data: { columns: { x: [1] }, values: [] },
+      layers: [{ geom: "point" }],
+    });
+    expect(errors.some((e) => e.code === "invalid-type" && e.path === "")).toBe(false);
+    expect(errors.some((e) => e.code === "invalid-data" && e.message.includes("mixes forms"))).toBe(
+      true,
+    );
+  });
+
   it("explicit undefined on optional props is rejected (exactOptionalPropertyTypes)", () => {
     const errors = errorsOf({
       layers: [{ geom: "point" }],
