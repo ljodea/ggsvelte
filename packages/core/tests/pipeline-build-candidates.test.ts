@@ -2,18 +2,17 @@
  * Characterization tests for pipeline candidate construction paths:
  * source-backed (identity layers) vs identity-indexed (stats/annotations).
  *
- * Seams under test (issue #220):
- * - filterAggregateXRows / filterBinRepresentedRows / filterAggregateYRows
- *   public row-filter contracts
- * - complexity: each filter reads table.column(field) once, not per base row
+ * The outer seam is `runPipeline`; focused internal-seam checks retain the
+ * proven complexity contracts for identity indexing, lineage, and datum
+ * resolution.
  */
 import { fromAny } from "@total-typescript/shoehorn";
 import { describe, expect, it, spyOn } from "bun:test";
 
 import { aes, gg } from "@ggsvelte/spec";
 
-import { ordinalSeriesRank } from "../src/pipeline/build-candidates-datum-context.ts";
-import { resolveCandidateLogicalValues } from "../src/pipeline/build-candidates-datum-values.ts";
+import { ordinalSeriesRank } from "../src/pipeline/candidate-construction/datum.ts";
+import { resolveCandidateLogicalValues } from "../src/pipeline/candidate-construction/datum.ts";
 import { runPipeline } from "../src/pipeline.ts";
 import { trainColor } from "../src/scales/train.ts";
 import { ColumnTable } from "../src/table.ts";
@@ -378,7 +377,7 @@ describe("buildPipelineCandidates via runPipeline", () => {
 describe("resolveCandidateSeries / resolveRepresentedSourceRows", () => {
   it("uses derived group when sourceRow is null", async () => {
     const { resolveCandidateSeries } =
-      await import("../src/pipeline/build-candidates-datum-series.ts");
+      await import("../src/pipeline/candidate-construction/datum.ts");
     const result = resolveCandidateSeries({
       sourceRow: null,
       derivedGroup: 7,
@@ -397,7 +396,7 @@ describe("resolveCandidateSeries / resolveRepresentedSourceRows", () => {
 
   it("maps seriesByRow for identity source rows", async () => {
     const { resolveCandidateSeries } =
-      await import("../src/pipeline/build-candidates-datum-series.ts");
+      await import("../src/pipeline/candidate-construction/datum.ts");
     const seriesByRow = new Map([["0:0:2", 4]]);
     const result = resolveCandidateSeries({
       sourceRow: 2,
@@ -412,24 +411,6 @@ describe("resolveCandidateSeries / resolveRepresentedSourceRows", () => {
       sourceValue: () => null,
     });
     expect(result.group).toBe(4);
-  });
-});
-
-describe("isAllSourceBacked", () => {
-  it("is true only when every layer is identity and non-annotation", async () => {
-    const { isAllSourceBacked } = await import("../src/pipeline/build-candidates-source-backed.ts");
-    expect(
-      isAllSourceBacked(
-        fromAny([
-          { layer: { stat: "identity" }, ruleForm: null },
-          { layer: {}, ruleForm: null },
-        ]),
-      ),
-    ).toBe(true);
-    expect(isAllSourceBacked(fromAny([{ layer: { stat: "count" }, ruleForm: null }]))).toBe(false);
-    expect(
-      isAllSourceBacked(fromAny([{ layer: { stat: "identity" }, ruleForm: "annotation" }])),
-    ).toBe(false);
   });
 });
 
@@ -458,7 +439,7 @@ describe("collectColorChannelValues", () => {
 describe("createLazyIdentityIndex", () => {
   it("builds the index once and reuses it", async () => {
     const { createLazyIdentityIndex } =
-      await import("../src/pipeline/build-candidates-identity-lazy.ts");
+      await import("../src/pipeline/candidate-construction/identity-index.ts");
     let calls = 0;
     // empty panels produce a stable empty-ish index; count construction via
     // successive get() returning the same reference.
@@ -474,7 +455,7 @@ describe("createLazyIdentityIndex", () => {
 describe("buildPathGroupSortedRows", () => {
   it("groups frame rows and sorts each group by xNumeric (fallback row index)", async () => {
     const { buildPathGroupSortedRows } =
-      await import("../src/pipeline/build-candidates-frame-row.ts");
+      await import("../src/pipeline/candidate-construction/frame-row.ts");
     // rows: group 1 at x=3, group 0 at x=2, group 1 at x=1, group 0 at x=0
     // → group 0 sorted [3, 1]; group 1 sorted [2, 0]
     const frame = fromAny({
@@ -488,7 +469,7 @@ describe("buildPathGroupSortedRows", () => {
 
   it("falls back to row index order when xNumeric is null", async () => {
     const { buildPathGroupSortedRows } =
-      await import("../src/pipeline/build-candidates-frame-row.ts");
+      await import("../src/pipeline/candidate-construction/frame-row.ts");
     const frame = fromAny({ groups: [0, 0, 0], xNumeric: null });
     expect([...buildPathGroupSortedRows(frame).get(0)!]).toEqual([0, 1, 2]);
   });
@@ -497,7 +478,7 @@ describe("buildPathGroupSortedRows", () => {
 describe("getPathGroupSortedRows", () => {
   it("returns the same Map for the same frame (precomputed once)", async () => {
     const { getPathGroupSortedRows } =
-      await import("../src/pipeline/build-candidates-frame-row.ts");
+      await import("../src/pipeline/candidate-construction/frame-row.ts");
     const frame = fromAny({
       groups: [0, 0, 1],
       xNumeric: new Float64Array([0, 1, 2]),
@@ -513,7 +494,7 @@ describe("getPathGroupSortedRows", () => {
 describe("resolveCandidateFrameRow paths", () => {
   it("maps path vertices to x-sorted frame rows and reflects closed-path reverse legs", async () => {
     const { resolveCandidateFrameRow } =
-      await import("../src/pipeline/build-candidates-frame-row.ts");
+      await import("../src/pipeline/candidate-construction/frame-row.ts");
     // Two groups interleaved: g0 rows {0,2} with x 2,0 → sorted [2,0];
     // g1 rows {1,3} with x 3,1 → sorted [3,1]
     const frame = fromAny({
@@ -585,7 +566,7 @@ describe("resolveCandidateFrameRow paths", () => {
 
   it("resolves many subpaths without linear pathOffsets scans (O(log P))", async () => {
     const { resolveCandidateFrameRow } =
-      await import("../src/pipeline/build-candidates-frame-row.ts");
+      await import("../src/pipeline/candidate-construction/frame-row.ts");
     const { pathSubpathIndex } = await import("../src/candidate-geometry.ts");
     // P subpaths × 2 vertices each; offsets [0,2,4,...,2P]
     const P = 2_000;
@@ -639,7 +620,7 @@ describe("allocatePipelineRunId", () => {
 describe("resolveOutlierContext", () => {
   it("returns nulls for non-boxplot point batches", async () => {
     const { resolveOutlierContext } =
-      await import("../src/pipeline/build-candidates-datum-outlier.ts");
+      await import("../src/pipeline/candidate-construction/datum.ts");
     expect(
       resolveOutlierContext({
         frame: undefined,
@@ -654,7 +635,7 @@ describe("resolveOutlierContext", () => {
 describe("lineage represented-row filters", () => {
   it("keeps rows whose band key matches the aggregate x output", async () => {
     const { filterAggregateXRows } =
-      await import("../src/pipeline/build-candidates-lineage-filters.ts");
+      await import("../src/pipeline/candidate-construction/identity-index.ts");
     const table = ColumnTable.fromRows([
       { g: "a", y: 1 },
       { g: "b", y: 2 },
@@ -672,7 +653,7 @@ describe("lineage represented-row filters", () => {
 
   it("filters bin membership with closed=right half-open intervals", async () => {
     const { filterBinRepresentedRows } =
-      await import("../src/pipeline/build-candidates-lineage-filters.ts");
+      await import("../src/pipeline/candidate-construction/identity-index.ts");
     const table = ColumnTable.fromRows([{ x: 0.5 }, { x: 1.5 }, { x: 2.5 }, { x: 3.5 }]);
     const frame = fromAny({
       xmin: new Float64Array([0, 2]),
@@ -694,7 +675,7 @@ describe("lineage represented-row filters", () => {
 
   it("keeps rows with finite y values for aggregate y lineage", async () => {
     const { filterAggregateYRows } =
-      await import("../src/pipeline/build-candidates-lineage-filters.ts");
+      await import("../src/pipeline/candidate-construction/identity-index.ts");
     const table = ColumnTable.fromRows([
       { y: 1 },
       { y: Number.NaN },
@@ -715,7 +696,7 @@ describe("lineage represented-row filters", () => {
 describe("lineage filter column hoist (issue #220)", () => {
   it("filterAggregateXRows reads the field column once for many base rows", async () => {
     const { filterAggregateXRows } =
-      await import("../src/pipeline/build-candidates-lineage-filters.ts");
+      await import("../src/pipeline/candidate-construction/identity-index.ts");
     const table = ColumnTable.fromRows(
       Array.from({ length: 40 }, (_, i) => ({ g: i % 2 === 0 ? "a" : "b", y: i })),
     );
@@ -728,7 +709,7 @@ describe("lineage filter column hoist (issue #220)", () => {
 
   it("filterBinRepresentedRows reads the field column once for many base rows", async () => {
     const { filterBinRepresentedRows } =
-      await import("../src/pipeline/build-candidates-lineage-filters.ts");
+      await import("../src/pipeline/candidate-construction/identity-index.ts");
     const table = ColumnTable.fromRows(Array.from({ length: 40 }, (_, i) => ({ x: i * 0.1 })));
     const frame = fromAny({
       xmin: new Float64Array([0]),
@@ -752,7 +733,7 @@ describe("lineage filter column hoist (issue #220)", () => {
 
   it("filterAggregateYRows reads the field column once for many base rows", async () => {
     const { filterAggregateYRows } =
-      await import("../src/pipeline/build-candidates-lineage-filters.ts");
+      await import("../src/pipeline/candidate-construction/identity-index.ts");
     const table = ColumnTable.fromRows(
       Array.from({ length: 40 }, (_, i) => ({ y: i % 5 === 0 ? Number.NaN : i })),
     );
@@ -768,7 +749,7 @@ describe("aggregate lineage index (issue #184)", () => {
   it("pre-buckets group source rows by x band key for O(1) mark resolve", async () => {
     const { preparePanels } = await import("../src/pipeline/prepare-panels.ts");
     const { buildCandidateIdentityIndex } =
-      await import("../src/pipeline/build-candidates-identity.ts");
+      await import("../src/pipeline/candidate-construction/identity-index.ts");
     const { bandKey } = await import("../src/scales/train.ts");
     const { normalize } = await import("@ggsvelte/spec");
 
@@ -796,9 +777,9 @@ describe("aggregate lineage index (issue #184)", () => {
   it("pre-buckets bin memberships per frame row so resolve does not re-scan", async () => {
     const { preparePanels } = await import("../src/pipeline/prepare-panels.ts");
     const { buildCandidateIdentityIndex } =
-      await import("../src/pipeline/build-candidates-identity.ts");
+      await import("../src/pipeline/candidate-construction/identity-index.ts");
     const { filterBinRepresentedRows } =
-      await import("../src/pipeline/build-candidates-lineage-filters.ts");
+      await import("../src/pipeline/candidate-construction/identity-index.ts");
     const { normalize } = await import("@ggsvelte/spec");
 
     for (const closed of ["right", "left"] as const) {
@@ -840,7 +821,7 @@ describe("aggregate lineage index (issue #184)", () => {
   it("does not build group×x buckets for identity layers that never consume them", async () => {
     const { preparePanels } = await import("../src/pipeline/prepare-panels.ts");
     const { buildCandidateIdentityIndex } =
-      await import("../src/pipeline/build-candidates-identity.ts");
+      await import("../src/pipeline/candidate-construction/identity-index.ts");
     const { normalize } = await import("@ggsvelte/spec");
 
     // Mixed layers force identity-indexed path; only count should fill group×x.
@@ -902,11 +883,11 @@ describe("aggregate lineage index (issue #184)", () => {
   it("resolveRepresentedSourceRows uses index lookups and matches filter parity", async () => {
     const { preparePanels } = await import("../src/pipeline/prepare-panels.ts");
     const { buildCandidateIdentityIndex } =
-      await import("../src/pipeline/build-candidates-identity.ts");
+      await import("../src/pipeline/candidate-construction/identity-index.ts");
     const { resolveRepresentedSourceRows } =
-      await import("../src/pipeline/build-candidates-datum-represented.ts");
+      await import("../src/pipeline/candidate-construction/datum.ts");
     const { filterRepresentedSourceRows } =
-      await import("../src/pipeline/build-candidates-lineage.ts");
+      await import("../src/pipeline/candidate-construction/identity-index.ts");
     const { LineageStore } = await import("../src/identity.ts");
     const { normalize } = await import("@ggsvelte/spec");
 
@@ -963,7 +944,7 @@ describe("aggregate lineage index (issue #184)", () => {
 describe("buildBinLineageBuckets missing-edges fallback (issue #218)", () => {
   async function loadBuildBinLineageBuckets() {
     const { buildBinLineageBuckets } =
-      await import("../src/pipeline/build-candidates-identity-aggregate.ts");
+      await import("../src/pipeline/candidate-construction/identity-index.ts");
     return buildBinLineageBuckets;
   }
 
@@ -1106,9 +1087,9 @@ describe("finite-y lineage cache (issue #216)", () => {
   it("precomputes finite-y source rows once per group for smooth layers", async () => {
     const { preparePanels } = await import("../src/pipeline/prepare-panels.ts");
     const { buildCandidateIdentityIndex } =
-      await import("../src/pipeline/build-candidates-identity.ts");
+      await import("../src/pipeline/candidate-construction/identity-index.ts");
     const { filterAggregateYRows } =
-      await import("../src/pipeline/build-candidates-lineage-filters.ts");
+      await import("../src/pipeline/candidate-construction/identity-index.ts");
     const { normalize } = await import("@ggsvelte/spec");
 
     const prepared = preparePanels(
@@ -1152,9 +1133,9 @@ describe("finite-y lineage cache (issue #216)", () => {
   it("filterRepresentedSourceRows reuses finite-y cache for every smooth mark", async () => {
     const { preparePanels } = await import("../src/pipeline/prepare-panels.ts");
     const { buildCandidateIdentityIndex } =
-      await import("../src/pipeline/build-candidates-identity.ts");
+      await import("../src/pipeline/candidate-construction/identity-index.ts");
     const { filterRepresentedSourceRows } =
-      await import("../src/pipeline/build-candidates-lineage.ts");
+      await import("../src/pipeline/candidate-construction/identity-index.ts");
     const { normalize } = await import("@ggsvelte/spec");
 
     const prepared = preparePanels(
@@ -1215,7 +1196,7 @@ describe("finite-y lineage cache (issue #216)", () => {
   it("does not build finite-y buckets for identity or count layers", async () => {
     const { preparePanels } = await import("../src/pipeline/prepare-panels.ts");
     const { buildCandidateIdentityIndex } =
-      await import("../src/pipeline/build-candidates-identity.ts");
+      await import("../src/pipeline/candidate-construction/identity-index.ts");
     const { normalize } = await import("@ggsvelte/spec");
 
     const prepared = preparePanels(
@@ -1242,11 +1223,11 @@ describe("finite-y lineage cache (issue #216)", () => {
   it("resolveRepresentedSourceRows matches pure filter and reuses lineage for smooth marks", async () => {
     const { preparePanels } = await import("../src/pipeline/prepare-panels.ts");
     const { buildCandidateIdentityIndex } =
-      await import("../src/pipeline/build-candidates-identity.ts");
+      await import("../src/pipeline/candidate-construction/identity-index.ts");
     const { resolveRepresentedSourceRows } =
-      await import("../src/pipeline/build-candidates-datum-represented.ts");
+      await import("../src/pipeline/candidate-construction/datum.ts");
     const { filterRepresentedSourceRows } =
-      await import("../src/pipeline/build-candidates-lineage.ts");
+      await import("../src/pipeline/candidate-construction/identity-index.ts");
     const { LineageStore } = await import("../src/identity.ts");
     const { normalize } = await import("@ggsvelte/spec");
 
@@ -1344,9 +1325,9 @@ describe("finite-y lineage cache (issue #216)", () => {
   it("finite-y cache uses panel-local y values under facet wrap", async () => {
     const { preparePanels } = await import("../src/pipeline/prepare-panels.ts");
     const { buildCandidateIdentityIndex } =
-      await import("../src/pipeline/build-candidates-identity.ts");
+      await import("../src/pipeline/candidate-construction/identity-index.ts");
     const { filterRepresentedSourceRows } =
-      await import("../src/pipeline/build-candidates-lineage.ts");
+      await import("../src/pipeline/candidate-construction/identity-index.ts");
     const { normalize } = await import("@ggsvelte/spec");
 
     const prepared = preparePanels(
@@ -1405,11 +1386,11 @@ describe("finite-y lineage cache (issue #216)", () => {
   it("summary finite-y cache matches pure filter after group×x resolve", async () => {
     const { preparePanels } = await import("../src/pipeline/prepare-panels.ts");
     const { buildCandidateIdentityIndex } =
-      await import("../src/pipeline/build-candidates-identity.ts");
+      await import("../src/pipeline/candidate-construction/identity-index.ts");
     const { resolveRepresentedSourceRows } =
-      await import("../src/pipeline/build-candidates-datum-represented.ts");
+      await import("../src/pipeline/candidate-construction/datum.ts");
     const { filterRepresentedSourceRows } =
-      await import("../src/pipeline/build-candidates-lineage.ts");
+      await import("../src/pipeline/candidate-construction/identity-index.ts");
     const { LineageStore } = await import("../src/identity.ts");
     const { normalize } = await import("@ggsvelte/spec");
 
@@ -1475,7 +1456,7 @@ describe("pre-stat inputGroups cache (issue #217)", () => {
   it("identity index buckets source rows from frame.inputGroups (not re-derived)", async () => {
     const { preparePanels } = await import("../src/pipeline/prepare-panels.ts");
     const { buildCandidateIdentityIndex } =
-      await import("../src/pipeline/build-candidates-identity.ts");
+      await import("../src/pipeline/candidate-construction/identity-index.ts");
     const { normalize } = await import("@ggsvelte/spec");
 
     const prepared = preparePanels(
@@ -1511,7 +1492,7 @@ describe("pre-stat inputGroups cache (issue #217)", () => {
   it("bin lineage assign uses frame.inputGroups for source-row membership", async () => {
     const { preparePanels } = await import("../src/pipeline/prepare-panels.ts");
     const { buildCandidateIdentityIndex } =
-      await import("../src/pipeline/build-candidates-identity.ts");
+      await import("../src/pipeline/candidate-construction/identity-index.ts");
     const { normalize } = await import("@ggsvelte/spec");
 
     const prepared = preparePanels(

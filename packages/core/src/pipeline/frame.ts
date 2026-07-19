@@ -12,7 +12,6 @@ import { buildIdentityFrame } from "./frame-identity.js";
 import { buildNonIdentityFrame } from "./frame-stats.js";
 
 export { deriveLayerGroups } from "./frame-helpers.js";
-export { createRawCandidateDatumResolver, candidateAutoMode } from "./frame-candidates.js";
 
 export function buildFrame(
   binding: LayerBinding,
