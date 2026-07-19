@@ -28,10 +28,15 @@
         "Clipboard unavailable. Code selected for manual copy.";
     }
   }
+
+  function enhanceCodeCopy(node: HTMLElement): { destroy: () => void } {
+    node.addEventListener("click", copyGuideCode);
+    return { destroy: () => node.removeEventListener("click", copyGuideCode) };
+  }
 </script>
 
 <!-- Guide markdown is repository-authored catalog content, never user input. -->
-<article class="guide prose" onclick={copyGuideCode}>
+<article class="guide prose" use:enhanceCodeCopy>
   <!-- eslint-disable-next-line svelte/no-at-html-tags -->
   {@html data.html}
 </article>
