@@ -1195,7 +1195,7 @@ const SpecDeclarations = {
         }),
       ),
       range: Type.Optional(
-        Type.Array(Type.String(), {
+        Type.Array(Type.String({ pattern: "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$" }), {
           minItems: 1,
           description:
             "Explicit output colors using #rgb or #rrggbb hex syntax. Ordinal: the palette, in domain order. Sequential: ramp stops, evenly spaced.",

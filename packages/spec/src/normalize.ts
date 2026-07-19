@@ -190,7 +190,7 @@ function normalizeHexColor(color: string): string {
 function normalizeColorScale(scale: ColorScaleSpec): ColorScaleSpec {
   return {
     ...scale,
-    ...(scale.range !== undefined && { range: scale.range.map(normalizeHexColor) }),
+    ...(Array.isArray(scale.range) && { range: scale.range.map(normalizeHexColor) }),
   };
 }
 

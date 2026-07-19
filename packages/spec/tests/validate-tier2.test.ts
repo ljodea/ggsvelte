@@ -197,6 +197,20 @@ describe("tier 2 — data-aware checks (inline data)", () => {
       }),
     ).toEqual(["scale-type-mismatch"]);
   });
+
+  it("lets an explicit range defer omitted-type inference to the mapped data", () => {
+    expect(
+      validate(
+        {
+          ...base,
+          aes: { ...base.aes, color: { field: "city" } },
+          scales: { color: { scheme: "viridis", range: ["#123456"] } },
+          layers: [{ geom: "point" }],
+        },
+        {},
+      ).ok,
+    ).toBe(true);
+  });
 });
 
 describe("tier 2 — DataProfile", () => {

@@ -38,7 +38,7 @@ export function resolveColorScale(
   if (!anyField) return { resolved: null, legendInput: null, state: null };
 
   const schemeType =
-    config?.scheme === undefined
+    config?.scheme === undefined || config.range !== undefined
       ? undefined
       : SEQUENTIAL_SCHEMES.has(config.scheme)
         ? "sequential"

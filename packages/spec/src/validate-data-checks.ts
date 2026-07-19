@@ -227,7 +227,9 @@ export function dataChecks(
     const config = scales?.[channel] as ColorScaleSpec | undefined;
     const effectiveType =
       config?.type ??
-      (config?.scheme !== undefined && SEQUENTIAL_SCHEMES.has(config.scheme)
+      (config?.range === undefined &&
+      config?.scheme !== undefined &&
+      SEQUENTIAL_SCHEMES.has(config.scheme)
         ? "sequential"
         : undefined);
     if (effectiveType !== "sequential") continue;

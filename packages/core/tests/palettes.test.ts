@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 
-import { aes, gg, SpecValidationError } from "@ggsvelte/spec";
+import { aes, gg, SpecValidationError, type PortableSpec } from "@ggsvelte/spec";
 
 import { runPipeline } from "../src/pipeline.ts";
 import { renderToSVGString } from "../src/render-svg.ts";
@@ -82,6 +82,25 @@ describe("named categorical palettes through the pipeline", () => {
     }
   });
 
+  it("reports malformed non-array ranges through spec validation", () => {
+    const malformed = {
+      data: { values: [{ x: 1, y: 1, category: "a" }] },
+      aes: { x: { field: "x" }, y: { field: "y" }, color: { field: "category" } },
+      layers: [{ geom: "point" }],
+      scales: { color: { range: "#f00" } },
+    } as unknown as PortableSpec;
+
+    try {
+      runPipeline(malformed, { width: 640, height: 400 });
+      expect.unreachable("expected an invalid range to fail");
+    } catch (error) {
+      expect(error).toBeInstanceOf(SpecValidationError);
+      expect((error as SpecValidationError).errors.map((item) => item.code)).toContain(
+        "invalid-type",
+      );
+    }
+  });
+
   it("renders canonical colors for three-digit sequential stops", () => {
     const svg = renderToSVGString(
       gg(
@@ -115,6 +134,18 @@ describe("named categorical palettes through the pipeline", () => {
       .spec();
     const model = runPipeline(spec, { width: 640, height: 400 });
     const scale = model.scales.color;
+    if (scale?.kind !== "ordinal") throw new Error("expected an ordinal color scale");
+    expect(scale.scale.colorOf("a")).toBe("#123456");
+  });
+
+  it("lets an explicit range take precedence for omitted-type inference", () => {
+    const spec = gg([{ x: 1, y: 1, category: "a" }], aes({ x: "x", y: "y", color: "category" }))
+      .geomPoint()
+      .scales({ color: { scheme: "viridis", range: ["#123456"] } })
+      .spec();
+    const model = runPipeline(spec, { width: 640, height: 400 });
+    const scale = model.scales.color;
+
     if (scale?.kind !== "ordinal") throw new Error("expected an ordinal color scale");
     expect(scale.scale.colorOf("a")).toBe("#123456");
   });

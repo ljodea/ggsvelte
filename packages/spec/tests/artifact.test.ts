@@ -40,12 +40,18 @@ describe("schema/v0.json artifact", () => {
     );
   });
 
-  it("documents the supported custom color syntax", () => {
+  it("documents and enforces the supported custom color syntax", () => {
     const artifact = JSON.parse(committed) as {
-      $defs: { ColorScaleSpec: { properties: { range: { description?: string } } } };
+      $defs: {
+        ColorScaleSpec: {
+          properties: { range: { description?: string; items?: { pattern?: string } } };
+        };
+      };
     };
+    const range = artifact.$defs.ColorScaleSpec.properties.range;
 
-    expect(artifact.$defs.ColorScaleSpec.properties.range.description).toContain("#rgb or #rrggbb");
+    expect(range.description).toContain("#rgb or #rrggbb");
+    expect(range.items?.pattern).toBe("^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$");
   });
 
   it("contains no TypeBox-style refs or patternProperties records", () => {
@@ -112,6 +118,8 @@ describe("schema/v0.json artifact", () => {
       [{ layers: [{ geom: "text", params: { anchor: "left" } }] }, false],
       [{ scales: { y: { type: "log", zero: false } }, layers: [{ geom: "point" }] }, true],
       [{ scales: { y: { type: "exp" } }, layers: [{ geom: "point" }] }, false],
+      [{ scales: { color: { range: ["#abc", "#123456"] } }, layers: [{ geom: "point" }] }, true],
+      [{ scales: { color: { range: ["tomato"] } }, layers: [{ geom: "point" }] }, false],
       [{ theme: "dark", layers: [{ geom: "point" }] }, true],
       [{ theme: "darkk", layers: [{ geom: "point" }] }, false],
       [{ theme: { name: "dark", accent: "#f00" }, layers: [{ geom: "point" }] }, true],
