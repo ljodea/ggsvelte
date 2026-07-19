@@ -244,7 +244,11 @@ await build({
   writeFileSync(
     join(directory, "src", "ssr.ts"),
     `import { render } from "svelte/server";
+import { SpecModule } from "@ggsvelte/spec";
 import { GGPlot, type PortableSpec } from "@ggsvelte/svelte";
+type PointParamsImport = ReturnType<typeof SpecModule.Import<"PointParams">>;
+const pointParamsSchema: PointParamsImport = SpecModule.Import("PointParams");
+void pointParamsSchema;
 const spec: PortableSpec = ${JSON.stringify(plotSpec)};
 export const html = render(GGPlot, { props: { spec, width: 480, height: 320 } }).body;
 `,
