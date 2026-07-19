@@ -39,17 +39,19 @@ concurrency:
   # Cancel superseded runs on PRs/branches; never cancel main.
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
-# Heavy-job pool policy (issue #247):
+# Heavy-job pool policy (issues #247 and #319):
 # Light jobs (detect-changes, checks, unit, actions-security, vr-baseline-guard,
-# compatibility-matrix, ci-gate) run freely. Heavy container / matrix work uses
-# job-level concurrency groups so Playwright containers do not oversubscribe
-# the shared 8-vCPU self-hosted host.
+# compatibility-matrix, ci-gate) run freely. Required CPU-heavy work shares the
+# repo-wide `heavy-self-hosted-cpu` group with VR, Pages, and hard benchmarks so
+# the four runner services cannot oversubscribe their shared 8-vCPU host.
 # - Shared groups use `queue: max` so pending jobs wait (up to 100) instead of
 #   the default single-pending slot replacing earlier required runs.
-# - Required component shards share `heavy-component`; informational
-#   interaction-perf uses its own group so it cannot hold the gate.
-# - Consumer throttle applies only to Ubuntu self-hosted rows; hosted
+# - Informational interaction-perf keeps its own group so it cannot FIFO-block
+#   required gates; runner-level CPU isolation is tracked separately.
+# - Consumer throttling applies only to Ubuntu self-hosted rows; hosted
 #   Windows/macOS rows get a per-run unique group (no cross-PR serialization).
+# - Every Bun install uses a job-private runner.temp cache. The runner services
+#   share HOME, so ~/.bun/install/cache can race during concurrent restores.
 
 env:
   # Keep in sync with: spikes/browser devDependency "playwright" and the
@@ -158,7 +160,7 @@ jobs:
     runs-on: [self-hosted, ggsvelte]
     # Cap concurrent heavy work on the shared self-hosted host (#247).
     concurrency:
-      group: heavy-packages-dist
+      group: heavy-self-hosted-cpu
       cancel-in-progress: false
       queue: max
     permissions:
@@ -220,11 +222,13 @@ jobs:
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: steps.restore_dist.outputs.hit != 'true'
         with:
-          path: ~/.bun/install/cache
+          path: ${{ runner.temp }}/bun-install-cache
           key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
           restore-keys: bun-${{ runner.os }}-
       - if: steps.restore_dist.outputs.hit != 'true'
         run: bun install --frozen-lockfile
+        env:
+          BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
       - name: build packages (tsc -b + svelte-package)
         if: steps.restore_dist.outputs.hit != 'true'
         run: bun run build
@@ -293,10 +297,12 @@ jobs:
           bun-version: 1.3.14
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          path: ~/.bun/install/cache
+          path: ${{ runner.temp }}/bun-install-cache
           key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
           restore-keys: bun-${{ runner.os }}-
       - run: bun install --frozen-lockfile
+        env:
+          BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
       - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
       - run: uv tool install pre-commit
       # Pre-commit stage only. Pre-push parity (build, unit, svelte-check, knip,
@@ -331,11 +337,13 @@ jobs:
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: steps.content_hash.outputs.hit != 'true'
         with:
-          path: ~/.bun/install/cache
+          path: ${{ runner.temp }}/bun-install-cache
           key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
           restore-keys: bun-${{ runner.os }}-
       - if: steps.content_hash.outputs.hit != 'true'
         run: bun install --frozen-lockfile
+        env:
+          BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
       - name: build spec/core dist (package exports point at dist/)
         if: steps.content_hash.outputs.hit != 'true'
         run: bun run check
@@ -420,7 +428,7 @@ jobs:
     # Cap concurrent Ubuntu/self-hosted consumer rows only (#247). Hosted
     # Windows/macOS rows get a unique group so they are not serialized.
     concurrency:
-      group: ${{ startsWith(matrix.os, 'ubuntu') && 'heavy-consumer-ubuntu' || format('heavy-consumer-hosted-{0}', github.run_id) }}
+      group: ${{ startsWith(matrix.os, 'ubuntu') && 'heavy-self-hosted-cpu' || format('heavy-consumer-hosted-{0}', github.run_id) }}
       cancel-in-progress: false
       queue: max
     timeout-minutes: 20
@@ -479,6 +487,8 @@ jobs:
           runtime_pm_version: ${{ steps.consumer_runtime.outputs.runtime_pm_ver }}
       - if: steps.content_hash.outputs.hit != 'true'
         run: bun install --frozen-lockfile
+        env:
+          BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
       - name: download shared packages/*/dist
         if: steps.content_hash.outputs.hit != 'true'
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -528,9 +538,9 @@ jobs:
       needs.detect-changes.outputs.component == 'true' &&
       needs.packages-dist.result == 'success'
     runs-on: [self-hosted, ggsvelte]
-    # Shared with other required component shards (#247); not interaction-perf.
+    # Shared with all required CPU-heavy jobs on this host (#247, #319).
     concurrency:
-      group: heavy-component
+      group: heavy-self-hosted-cpu
       cancel-in-progress: false
       queue: max
     env:
@@ -565,11 +575,13 @@ jobs:
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: steps.content_hash.outputs.hit != 'true'
         with:
-          path: ~/.bun/install/cache
+          path: ${{ runner.temp }}/bun-install-cache
           key: bun-container-${{ runner.os }}-${{ hashFiles('bun.lock') }}
           restore-keys: bun-container-${{ runner.os }}-
       - if: steps.content_hash.outputs.hit != 'true'
         run: bun install --frozen-lockfile
+        env:
+          BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
       - name: download shared packages/*/dist
         if: steps.content_hash.outputs.hit != 'true'
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -680,9 +692,9 @@ jobs:
       needs.detect-changes.outputs.component == 'true' &&
       needs.packages-dist.result == 'success'
     runs-on: [self-hosted, ggsvelte]
-    # Shared with other required component shards (#247); not interaction-perf.
+    # Shared with all required CPU-heavy jobs on this host (#247, #319).
     concurrency:
-      group: heavy-component
+      group: heavy-self-hosted-cpu
       cancel-in-progress: false
       queue: max
     env:
@@ -717,11 +729,13 @@ jobs:
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: steps.content_hash.outputs.hit != 'true'
         with:
-          path: ~/.bun/install/cache
+          path: ${{ runner.temp }}/bun-install-cache
           key: bun-container-${{ runner.os }}-${{ hashFiles('bun.lock') }}
           restore-keys: bun-container-${{ runner.os }}-
       - if: steps.content_hash.outputs.hit != 'true'
         run: bun install --frozen-lockfile
+        env:
+          BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
       - name: download shared packages/*/dist
         if: steps.content_hash.outputs.hit != 'true'
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -781,9 +795,9 @@ jobs:
       needs.detect-changes.outputs.component == 'true' &&
       needs.packages-dist.result == 'success'
     runs-on: [self-hosted, ggsvelte]
-    # Shared with other required component shards (#247); not interaction-perf.
+    # Shared with all required CPU-heavy jobs on this host (#247, #319).
     concurrency:
-      group: heavy-component
+      group: heavy-self-hosted-cpu
       cancel-in-progress: false
       queue: max
     env:
@@ -818,11 +832,13 @@ jobs:
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: steps.content_hash.outputs.hit != 'true'
         with:
-          path: ~/.bun/install/cache
+          path: ${{ runner.temp }}/bun-install-cache
           key: bun-container-${{ runner.os }}-${{ hashFiles('bun.lock') }}
           restore-keys: bun-container-${{ runner.os }}-
       - if: steps.content_hash.outputs.hit != 'true'
         run: bun install --frozen-lockfile
+        env:
+          BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
       - name: download shared packages/*/dist
         if: steps.content_hash.outputs.hit != 'true'
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -889,7 +905,7 @@ jobs:
       needs.detect-changes.outputs.interaction_perf == 'true' &&
       needs.packages-dist.result == 'success'
     runs-on: [self-hosted, ggsvelte]
-    # Separate from heavy-component so informational perf cannot hold the gate.
+    # Separate from heavy-self-hosted-cpu so informational perf cannot hold the gate.
     concurrency:
       group: heavy-interaction-perf
       cancel-in-progress: false
@@ -914,10 +930,12 @@ jobs:
           bun-version: 1.3.14
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          path: ~/.bun/install/cache
+          path: ${{ runner.temp }}/bun-install-cache
           key: bun-container-${{ runner.os }}-${{ hashFiles('bun.lock') }}
           restore-keys: bun-container-${{ runner.os }}-
       - run: bun install --frozen-lockfile
+        env:
+          BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
       - name: download shared packages/*/dist
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
@@ -968,6 +986,10 @@ jobs:
     needs: detect-changes
     if: needs.detect-changes.outputs.build == 'true'
     runs-on: [self-hosted, ggsvelte]
+    concurrency:
+      group: heavy-self-hosted-cpu
+      cancel-in-progress: false
+      queue: max
     permissions:
       contents: read
     steps:
@@ -986,11 +1008,13 @@ jobs:
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: steps.content_hash.outputs.hit != 'true'
         with:
-          path: ~/.bun/install/cache
+          path: ${{ runner.temp }}/bun-install-cache
           key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
           restore-keys: bun-${{ runner.os }}-
       - if: steps.content_hash.outputs.hit != 'true'
         run: bun install --frozen-lockfile
+        env:
+          BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
       - name: build packages (tsc -b + svelte-package)
         if: steps.content_hash.outputs.hit != 'true'
         run: bun run build
@@ -1051,11 +1075,13 @@ jobs:
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: steps.content_hash.outputs.hit != 'true'
         with:
-          path: ~/.bun/install/cache
+          path: ${{ runner.temp }}/bun-install-cache
           key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
           restore-keys: bun-${{ runner.os }}-
       - if: steps.content_hash.outputs.hit != 'true'
         run: bun install --frozen-lockfile
+        env:
+          BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
       - name: actionlint (lockfile-installed wasm build)
         if: steps.content_hash.outputs.hit != 'true'
         run: bun run lint:actions
@@ -1075,6 +1101,10 @@ jobs:
     needs: detect-changes
     if: needs.detect-changes.outputs.bench_smoke == 'true'
     runs-on: [self-hosted, ggsvelte]
+    concurrency:
+      group: heavy-self-hosted-cpu
+      cancel-in-progress: false
+      queue: max
     permissions:
       contents: read
     steps:
@@ -1093,11 +1123,13 @@ jobs:
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: steps.content_hash.outputs.hit != 'true'
         with:
-          path: ~/.bun/install/cache
+          path: ${{ runner.temp }}/bun-install-cache
           key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
           restore-keys: bun-${{ runner.os }}-
       - if: steps.content_hash.outputs.hit != 'true'
         run: bun install --frozen-lockfile
+        env:
+          BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
       - name: build spec/core dist (benchmarks import the packages)
         if: steps.content_hash.outputs.hit != 'true'
         run: bun run check

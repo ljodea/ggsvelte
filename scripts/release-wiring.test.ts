@@ -4,6 +4,12 @@ import { join } from "node:path";
 
 const root = join(import.meta.dir, "..");
 const read = (path: string) => readFileSync(join(root, path), "utf8");
+const heavyGroupCount = (workflow: string) =>
+  workflow
+    .split("\n")
+    .filter(
+      (line) => line.trimStart().startsWith("group:") && line.includes("heavy-self-hosted-cpu"),
+    ).length;
 
 describe("R0 release wiring", () => {
   it("runs benchmark unit tests in CI and pre-push parity", () => {
@@ -348,14 +354,53 @@ it("tiers the PR consumer matrix (issue #246)", () => {
   expect(ci).not.toMatch(/full required[\s\S]{0,40}push\/main/i);
 });
 
-it("caps heavy self-hosted jobs with concurrency groups (issue #247)", () => {
+it("caps aggregate heavy self-hosted work across workflows (issues #247 and #319)", () => {
   const ci = read(".github/workflows/ci.yml");
-  // Required component shards share one group; informational perf is separate.
-  expect(ci).toContain("group: heavy-component");
+  const vr = read(".github/workflows/vr-compare.yml");
+  const pages = read(".github/workflows/pages.yml");
+  const bench = read(".github/workflows/bench.yml");
+  const nightly = read(".github/workflows/compatibility-nightly.yml");
+
+  // One repo-wide group is the aggregate mutex. Category-specific groups let
+  // browser, build, and benchmark jobs starve each other on the same host.
+  expect(heavyGroupCount(ci)).toBe(7);
+  expect(heavyGroupCount(vr)).toBe(2);
+  expect(heavyGroupCount(pages)).toBe(1);
+  expect(heavyGroupCount(bench)).toBe(1);
+  expect(heavyGroupCount(nightly)).toBe(1);
+  expect(ci).not.toContain("heavy-component");
+  expect(ci).not.toContain("heavy-packages-dist");
+  expect(ci).not.toContain("heavy-consumer-ubuntu");
+  // Informational perf stays separate so it cannot FIFO-block required gates.
   expect(ci).toContain("group: heavy-interaction-perf");
-  expect(ci).toContain("group: heavy-packages-dist");
-  expect(ci).toContain("heavy-consumer-ubuntu");
   // Pending jobs queue instead of replacing each other (GitHub queue: max).
-  expect(ci).toContain("queue: max");
+  for (const workflow of [ci, vr, pages, bench, nightly]) expect(workflow).toContain("queue: max");
   expect(ci).toContain("Heavy-job pool policy");
+});
+
+it("uses job-private Bun caches in self-hosted workflows (issue #319)", () => {
+  const workflows = [
+    ".github/workflows/ci.yml",
+    ".github/workflows/vr-compare.yml",
+    ".github/workflows/pages.yml",
+    ".github/workflows/bench.yml",
+    ".github/workflows/compatibility-nightly.yml",
+    ".github/workflows/evals.yml",
+  ];
+  for (const path of workflows) {
+    const workflow = read(path);
+    const installs = workflow.match(/bun install --frozen-lockfile/g) ?? [];
+    const privateCacheEnv =
+      workflow.match(/BUN_INSTALL_CACHE_DIR: \$\{\{ runner\.temp \}\}\/bun-install-cache/g) ?? [];
+    const privateCachePaths =
+      workflow.match(/path: \$\{\{ runner\.temp \}\}\/bun-install-cache/g) ?? [];
+    const bunCacheKeys = workflow.match(/key: bun-(?:container-)?\$\{\{ runner\.os \}\}/g) ?? [];
+    expect(workflow, path).not.toContain("path: ~/.bun/install/cache");
+    expect(privateCacheEnv.length, `${path}: every install gets a private cache`).toBe(
+      installs.length,
+    );
+    expect(privateCachePaths.length, `${path}: every Bun cache restore is private`).toBe(
+      bunCacheKeys.length,
+    );
+  }
 });

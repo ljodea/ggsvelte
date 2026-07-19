@@ -42,6 +42,10 @@ jobs:
       matrix: ${{ fromJSON(needs.matrix.outputs.matrix) }}
     # Linux rows use the private self-hosted pool; Windows/macOS stay on GitHub-hosted.
     runs-on: ${{ startsWith(matrix.os, 'ubuntu') && fromJSON('["self-hosted","ggsvelte"]') || matrix.os }}
+    concurrency:
+      group: ${{ startsWith(matrix.os, 'ubuntu') && 'heavy-self-hosted-cpu' || format('heavy-nightly-hosted-{0}', github.run_id) }}
+      cancel-in-progress: false
+      queue: max
     timeout-minutes: 20
     permissions:
       contents: read
@@ -56,6 +60,8 @@ jobs:
         with:
           bun-version: 1.3.14
       - run: bun install --frozen-lockfile
+        env:
+          BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
       - run: bun run build
       - run: bun run check:svelte
       - env:
