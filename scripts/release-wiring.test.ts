@@ -391,6 +391,7 @@ it("uses job-private Bun caches in self-hosted workflows (issue #319)", () => {
   for (const path of workflows) {
     const workflow = read(path);
     const installs = workflow.match(/bun install --frozen-lockfile/g) ?? [];
+    const fixtureInstalls = workflow.match(/run: bun scripts\/consumer-compat\.ts/g) ?? [];
     const privateCacheEnv =
       workflow.match(/BUN_INSTALL_CACHE_DIR: \$\{\{ runner\.temp \}\}\/bun-install-cache/g) ?? [];
     const privateCachePaths =
@@ -398,10 +399,28 @@ it("uses job-private Bun caches in self-hosted workflows (issue #319)", () => {
     const bunCacheKeys = workflow.match(/key: bun-(?:container-)?\$\{\{ runner\.os \}\}/g) ?? [];
     expect(workflow, path).not.toContain("path: ~/.bun/install/cache");
     expect(privateCacheEnv.length, `${path}: every install gets a private cache`).toBe(
-      installs.length,
+      installs.length + fixtureInstalls.length,
     );
     expect(privateCachePaths.length, `${path}: every Bun cache restore is private`).toBe(
       bunCacheKeys.length,
+    );
+  }
+
+  // Consumer fixtures run their own package-manager install from a later step,
+  // so that step must receive the cache env independently of the root install.
+  for (const [path, start, end] of [
+    [".github/workflows/ci.yml", "  consumer-compat:", "  component-svelte:"],
+    [".github/workflows/compatibility-nightly.yml", "  packed-consumer:", ""],
+  ]) {
+    const workflow = read(path);
+    const jobStart = workflow.indexOf(start);
+    const jobEnd = end.length > 0 ? workflow.indexOf(end, jobStart) : workflow.length;
+    const job = workflow.slice(jobStart, jobEnd);
+    const consumerRun = job.indexOf("run: bun scripts/consumer-compat.ts");
+    const consumerStepStart = job.lastIndexOf("\n      - ", consumerRun);
+    const consumerStep = job.slice(consumerStepStart, consumerRun);
+    expect(consumerStep, `${path}: fixture install gets a private cache`).toContain(
+      "BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache",
     );
   }
 });

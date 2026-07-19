@@ -517,6 +517,7 @@ jobs:
       - name: install tarballs in a clean consumer and exercise types, build, SSR, Node, and CLI
         if: steps.content_hash.outputs.hit != 'true'
         env:
+          BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
           PACKAGE_MANAGER: ${{ matrix.packageManager }}
           PACKAGE_MANAGER_VERSION: ${{ matrix.packageManagerVersion }}
           SVELTE_VERSION: ${{ matrix.svelte }}
