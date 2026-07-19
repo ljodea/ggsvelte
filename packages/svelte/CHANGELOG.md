@@ -1,5 +1,45 @@
 # @ggsvelte/svelte
 
+## 0.3.0
+
+### Patch Changes
+
+- b8dcf24: # Use CandidateStore for all hit resolution
+
+  Add paint-ordered `CandidateStore.hitTest()` and route Svelte pointer inspection
+  through the render model's existing lazy candidate index. Remove the experimental
+  `buildHitIndex` and related `@ggsvelte/core/dom` types so interactive plots no
+  longer build and retain a second geometry index.
+
+  Migration: <https://ljodea.github.io/ggsvelte/guide/upgrading#0-2-to-0-3>
+
+- e4b02b5: # Delegate keyboard navigation to CandidateStore
+
+  Let `CandidateStore.traverse()` apply modular sequential steps and preserve
+  paint order for directional ties. Svelte inspection now delegates sequential,
+  directional, and coincident keyboard navigation to the model-owned store
+  without materializing a second candidate traversal list.
+
+  Migration: <https://ljodea.github.io/ggsvelte/guide/upgrading#0-2-to-0-3>
+
+- 57e4c85: # Internalize plot interaction assembly
+
+  Internalize controller construction, deferred sibling wiring, shared Candidate
+  projection, and lifecycle registration in a deep plot-interaction assembly module.
+
+- 5d95948: # Own semantic Candidate projection once
+
+  Move semantic Candidate traversal, liveness gating, anchor projection, interaction masks, and interval-consumption shaping behind one runtime module seam.
+
+- Updated dependencies [f63e498]
+- Updated dependencies [b8dcf24]
+- Updated dependencies [30db776]
+- Updated dependencies [e4b02b5]
+- Updated dependencies [378f73c]
+- Updated dependencies [0a7b872]
+  - @ggsvelte/spec@0.3.0
+  - @ggsvelte/core@0.3.0
+
 ## 0.2.1
 
 ### Patch Changes
