@@ -1,5 +1,19 @@
 # @ggsvelte/svelte
 
+## 0.3.1
+
+### Patch Changes
+
+- 8b7d672: # Harden the responsive Quickstart path
+
+  Make declaration-only layers server-render on the supported Svelte floor, apply `ariaLabel` to static chart output, commit responsive width and readiness together after collapsed containers recover, and expose the installed package version through `ggsvelte-render --version`.
+
+- Updated dependencies [8b7d672]
+- Updated dependencies [2b2f55c]
+- Updated dependencies [437ff12]
+  - @ggsvelte/core@0.3.1
+  - @ggsvelte/spec@0.3.1
+
 ## 0.3.0
 
 ### Patch Changes
