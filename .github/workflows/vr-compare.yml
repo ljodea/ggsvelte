@@ -92,6 +92,10 @@ jobs:
     needs: detect-changes
     if: github.event_name == 'pull_request' && needs.detect-changes.outputs.vr == 'true'
     runs-on: [self-hosted, ggsvelte]
+    concurrency:
+      group: heavy-self-hosted-cpu
+      cancel-in-progress: false
+      queue: max
     permissions:
       contents: read
     container:
@@ -113,10 +117,12 @@ jobs:
           bun-version: 1.3.14
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          path: ~/.bun/install/cache
+          path: ${{ runner.temp }}/bun-install-cache
           key: bun-container-${{ runner.os }}-${{ hashFiles('bun.lock') }}
           restore-keys: bun-container-${{ runner.os }}-
       - run: bun install --frozen-lockfile
+        env:
+          BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
 
       - name: manifest is current (the VR matrix is generated from it)
         run: bun run manifest:check
@@ -240,6 +246,10 @@ jobs:
     needs: approve-gate
     if: needs.approve-gate.outputs.match == 'true'
     runs-on: [self-hosted, ggsvelte]
+    concurrency:
+      group: heavy-self-hosted-cpu
+      cancel-in-progress: false
+      queue: max
     permissions:
       contents: read # checkout only; this job can write nothing
     container:
@@ -268,10 +278,12 @@ jobs:
           bun-version: 1.3.14
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          path: ~/.bun/install/cache
+          path: ${{ runner.temp }}/bun-install-cache
           key: bun-container-${{ runner.os }}-${{ hashFiles('bun.lock') }}
           restore-keys: bun-container-${{ runner.os }}-
       - run: bun install --frozen-lockfile
+        env:
+          BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
 
       - name: manifest is current (the VR matrix is generated from it)
         run: bun run manifest:check

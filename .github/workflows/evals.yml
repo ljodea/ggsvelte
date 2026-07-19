@@ -57,10 +57,12 @@ jobs:
           bun-version: 1.3.14
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          path: ~/.bun/install/cache
+          path: ${{ runner.temp }}/bun-install-cache
           key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
           restore-keys: bun-${{ runner.os }}-
       - run: bun install --frozen-lockfile
+        env:
+          BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
       - name: build spec/core dist (the runner imports the packages)
         run: bun run check
       - name: run evals (auto dry-run with a mock model when the key is empty)
