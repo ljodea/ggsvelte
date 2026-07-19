@@ -44,7 +44,11 @@ import {
   resolveFieldEvidence,
 } from "./validate-data.js";
 import { mapValueErrors, unknownGeomError } from "./validate-map-errors.js";
-import { facetStructuralErrors, layerStructuralErrors } from "./validate-structure.js";
+import {
+  colorScaleStructuralErrors,
+  facetStructuralErrors,
+  layerStructuralErrors,
+} from "./validate-structure.js";
 
 export type ValidateResult =
   | { ok: true; spec: PortableSpec; advisories?: SpecAdvisory[] }
@@ -214,6 +218,10 @@ export function validate(input: unknown, options?: ValidateOptions): ValidateRes
       }
 
       errors.push(...collectSchemaShapeErrors(input));
+    }
+
+    if (schemaValid && isRecord(input) && isRecord(input["scales"])) {
+      errors.push(...colorScaleStructuralErrors(input["scales"]));
     }
 
     // --- tier 2 (opt-in via options): structural grammar checks ----------------

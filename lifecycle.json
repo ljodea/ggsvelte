@@ -76,7 +76,15 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "CATEGORICAL_SCHEME_NAMES": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "CHANNELS": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "COLOR_SCHEME_NAMES": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -509,6 +517,10 @@
           "lifecycle": "experimental"
         },
         "SCHEMA_VERSION": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "SEQUENTIAL_SCHEME_NAMES": {
           "kind": "value",
           "lifecycle": "experimental"
         },

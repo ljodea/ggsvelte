@@ -28,6 +28,7 @@
 import type {
   Aes,
   ChannelValue,
+  ColorScaleSpec,
   FacetSpec,
   LayerSpec,
   PortableSpec,
@@ -177,12 +178,28 @@ function normalizeTheme(theme: ThemeName | ThemeSpec): ThemeName | ThemeSpec {
   return typeof theme === "string" ? theme : { ...theme };
 }
 
+function normalizeHexColor(color: string): string {
+  const match = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(color);
+  if (match === null) return color;
+  const digits = match[1]!.toLowerCase();
+  return digits.length === 3
+    ? `#${digits[0]}${digits[0]}${digits[1]}${digits[1]}${digits[2]}${digits[2]}`
+    : `#${digits}`;
+}
+
+function normalizeColorScale(scale: ColorScaleSpec): ColorScaleSpec {
+  return {
+    ...scale,
+    ...(Array.isArray(scale.range) && { range: scale.range.map(normalizeHexColor) }),
+  };
+}
+
 function normalizeScales(scales: Scales): Scales {
   return {
     ...(scales.x !== undefined && { x: { ...scales.x } }),
     ...(scales.y !== undefined && { y: { ...scales.y } }),
-    ...(scales.color !== undefined && { color: { ...scales.color } }),
-    ...(scales.fill !== undefined && { fill: { ...scales.fill } }),
+    ...(scales.color !== undefined && { color: normalizeColorScale(scales.color) }),
+    ...(scales.fill !== undefined && { fill: normalizeColorScale(scales.fill) }),
   };
 }
 

@@ -419,6 +419,24 @@ function mapPathGroup(
   const constErrs = group.filter((e) => e.keyword === "const");
   let activeFormKeys: ReadonlySet<string> | null = null;
 
+  if (
+    group.some((error) => error.keyword === "pattern") &&
+    /^\/scales\/(?:color|fill)\/range\/\d+$/.test(path) &&
+    typeof valueAtPath === "string"
+  ) {
+    return [
+      {
+        code: "scale-range-color",
+        path,
+        message: `The color stop "${valueAtPath}" is not a supported hex color.`,
+        fix: {
+          description: "Use #rgb or #rrggbb syntax for custom color ranges.",
+          example: "#ff0000",
+        },
+      },
+    ];
+  }
+
   // Object-branch noise in mixed unions (e.g. ThemeName | ThemeSpec): prefer
   // required / additionalProperties over const-branch enum synthesis.
   const hasObjectBranchNoise =

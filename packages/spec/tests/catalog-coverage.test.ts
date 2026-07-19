@@ -35,6 +35,12 @@ const TRIGGERS: Record<SpecErrorCode, Trigger> = {
   "value-out-of-range": { spec: { layers: [point], width: -5 } },
   "invalid-data": { spec: { layers: [point], data: { rows: [] } } },
   "invalid-type": { spec: { layers: [point], width: "wide" } },
+  "scale-scheme-type": {
+    spec: { layers: [point], scales: { color: { type: "sequential", scheme: "ipsum" } } },
+  },
+  "scale-range-color": {
+    spec: { layers: [point], scales: { color: { range: ["tomato"] } } },
+  },
   "missing-required-channel": { spec: { layers: [{ geom: "point" }] }, options: {} },
   "rule-form-ambiguous": {
     spec: {

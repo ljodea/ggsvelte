@@ -7,13 +7,14 @@ import { pathToFileURL } from "node:url";
 import { chromium } from "@playwright/test";
 
 import { renderToSVGString } from "../packages/core/src/index.js";
-import type { SpecInput, ThemeName } from "../packages/spec/src/index.js";
+import { THEME_NAMES, type SpecInput, type ThemeName } from "../packages/spec/src/index.js";
 
 const ROOT = dirname(import.meta.dirname);
 const OUT = join(ROOT, "artifacts/theme-equivalence");
 const SVG_OUT = join(OUT, "svg");
 const FONT_DIR = "../../../packages/svelte/src/lib/fonts";
-const themes = ["ggplot2", "hrbr", "few"] as const satisfies readonly ThemeName[];
+const themes = THEME_NAMES;
+const matchedReferenceThemes = new Set<ThemeName>(["ggplot2", "hrbr", "few"]);
 
 const values = [
   { x: 1, y: 2.2, series: "Alpha" },
@@ -120,12 +121,14 @@ await Bun.write(
   join(OUT, "index.html"),
   `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ggsvelte theme equivalence</title>
 <style>:root{font-family:"Roboto Condensed","Arial Narrow",sans-serif;color:#262626;background:#f4f3ef}body{margin:32px}h1{font-size:34px;margin:0 0 6px}p{font-size:17px;color:#5d5952;margin:0 0 30px}.pair{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:0 0 34px}.pair h2{grid-column:1/-1;margin:0;font-size:24px}.card{background:#fff;padding:10px}.card h3{margin:0 0 8px;font-size:16px}.card img{display:block;width:100%;height:auto}@media(max-width:900px){.pair{grid-template-columns:1fr}}</style></head><body>
-<h1>Theme equivalence evidence</h1><p>Matched data, domains, breaks, colors, 720×480 logical viewport, and 2× raster output. R references use Cairo; ggsvelte uses Chromium with its bundled Roboto Condensed.</p>
+<h1>Registered theme evidence</h1><p>Every registered theme uses matched data, domains, breaks, colors, a 720×480 logical viewport, and 2× raster output. The three reference-matched specimens use Cairo alongside ggsvelte’s Chromium render with bundled Roboto Condensed.</p>
 ${themes
-  .map(
-    (theme) =>
-      `<section class="pair"><h2>${theme}</h2><div class="card"><h3>R reference</h3><img src="r-${theme}.png" width="1440" height="960"></div><div class="card"><h3>ggsvelte</h3><img src="ggsvelte-${theme}.png" width="1440" height="960"></div></section>`,
-  )
+  .map((theme) => {
+    const ggsvelte = `<div class="card"><h3>ggsvelte</h3><img src="ggsvelte-${theme}.png" width="1440" height="960"></div>`;
+    return matchedReferenceThemes.has(theme)
+      ? `<section class="pair"><h2>${theme}</h2><div class="card"><h3>Reference</h3><img src="r-${theme}.png" width="1440" height="960"></div>${ggsvelte}</section>`
+      : `<section class="pair"><h2>${theme}</h2>${ggsvelte}</section>`;
+  })
   .join("\n")}</body></html>`,
 );
-console.log(`Rendered ${themes.length} matched ggsvelte theme references.`);
+console.log(`Rendered ${themes.length} registered ggsvelte themes.`);

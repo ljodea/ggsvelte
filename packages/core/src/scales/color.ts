@@ -21,6 +21,17 @@ export const VIRIDIS_RAMP_10: readonly string[] = [
   "#fde725",
 ];
 
+function normalizeHexStop(stop: string): string {
+  const match = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(stop);
+  if (match === null) {
+    throw new RangeError(`Sequential color stops must use #rgb or #rrggbb syntax (got "${stop}").`);
+  }
+  const digits = match[1]!.toLowerCase();
+  return digits.length === 3
+    ? `#${digits[0]}${digits[0]}${digits[1]}${digits[1]}${digits[2]}${digits[2]}`
+    : `#${digits}`;
+}
+
 function hexChannel(hex: string, i: number): number {
   return Number.parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16);
 }
@@ -62,7 +73,7 @@ export interface SequentialColorScale {
 export interface SequentialConfig {
   /** Explicit [min, max]; wins over the data extent. */
   domain?: [number, number];
-  /** Explicit ramp stops (CSS colors — must be #rrggbb for interpolation). */
+  /** Explicit ramp stops (#rgb or #rrggbb; normalized before interpolation). */
   range?: readonly string[];
   reverse?: boolean;
 }
@@ -80,7 +91,7 @@ export function trainSequential(
     min -= 0.5;
     max += 0.5;
   }
-  const base = config.range ?? VIRIDIS_RAMP_10;
+  const base = (config.range ?? VIRIDIS_RAMP_10).map((stop) => normalizeHexStop(stop));
   const stops = config.reverse === true ? base.toReversed() : [...base];
   const span = max - min;
   const at = (t: number) => rampColor(stops, t);

@@ -1,8 +1,9 @@
 import { describe, expect, it } from "bun:test";
 
-import { aes, gg } from "@ggsvelte/spec";
+import { aes, gg, SpecValidationError, type PortableSpec } from "@ggsvelte/spec";
 
 import { runPipeline } from "../src/pipeline.ts";
+import { renderToSVGString } from "../src/render-svg.ts";
 import {
   COLORBLIND_PALETTE,
   FLEXOKI_PALETTE,
@@ -32,6 +33,93 @@ describe("named categorical palettes through the pipeline", () => {
     });
   }
 
+  it("uses a named scheme to select its scale family when type is omitted", () => {
+    const categorical = runPipeline(
+      gg(
+        [
+          { x: 1, y: 1, category: 1 },
+          { x: 2, y: 2, category: 2 },
+        ],
+        aes({ x: "x", y: "y", color: "category" }),
+      )
+        .geomPoint()
+        .scales({ color: { scheme: "ipsum" } })
+        .spec(),
+      { width: 640, height: 400 },
+    );
+    const sequential = runPipeline(
+      gg([{ x: 1, y: 1, category: "a" }], aes({ x: "x", y: "y", color: "category" }))
+        .geomPoint()
+        .scales({ color: { scheme: "viridis" } })
+        .spec(),
+      { width: 640, height: 400 },
+    );
+
+    expect(categorical.scales.color?.kind).toBe("ordinal");
+    expect(sequential.scales.color?.kind).toBe("sequential");
+  });
+
+  it("rejects incompatible schemes at the render boundary", () => {
+    for (const color of [
+      { type: "sequential" as const, scheme: "ipsum" as const },
+      { type: "ordinal" as const, scheme: "viridis" as const },
+    ]) {
+      try {
+        runPipeline(
+          gg([{ x: 1, y: 1, category: "a" }], aes({ x: "x", y: "y", color: "category" }))
+            .geomPoint()
+            .scales({ color })
+            .spec(),
+          { width: 640, height: 400 },
+        );
+        expect.unreachable("expected an incompatible scheme to fail");
+      } catch (error) {
+        expect(error).toBeInstanceOf(SpecValidationError);
+        expect((error as SpecValidationError).errors.map((item) => item.code)).toContain(
+          "scale-scheme-type",
+        );
+      }
+    }
+  });
+
+  it("reports malformed non-array ranges through spec validation", () => {
+    const malformed = {
+      data: { values: [{ x: 1, y: 1, category: "a" }] },
+      aes: { x: { field: "x" }, y: { field: "y" }, color: { field: "category" } },
+      layers: [{ geom: "point" }],
+      scales: { color: { range: "#f00" } },
+    } as unknown as PortableSpec;
+
+    try {
+      runPipeline(malformed, { width: 640, height: 400 });
+      expect.unreachable("expected an invalid range to fail");
+    } catch (error) {
+      expect(error).toBeInstanceOf(SpecValidationError);
+      expect((error as SpecValidationError).errors.map((item) => item.code)).toContain(
+        "invalid-type",
+      );
+    }
+  });
+
+  it("renders canonical colors for three-digit sequential stops", () => {
+    const svg = renderToSVGString(
+      gg(
+        [
+          { x: 1, y: 1, value: 0 },
+          { x: 2, y: 2, value: 1 },
+        ],
+        aes({ x: "x", y: "y", color: "value" }),
+      )
+        .geomPoint()
+        .scales({ color: { type: "sequential", range: ["#f00", "#00f"] } }),
+      { width: 640, height: 400 },
+    );
+
+    expect(svg).toContain('fill="#ff0000"');
+    expect(svg).toContain('fill="#0000ff"');
+    expect(svg).not.toContain("NaN");
+  });
+
   it("lets an explicit range take precedence over a named scheme", () => {
     const spec = gg(
       [{ x: 1, y: 1, category: "a" }],
@@ -46,6 +134,18 @@ describe("named categorical palettes through the pipeline", () => {
       .spec();
     const model = runPipeline(spec, { width: 640, height: 400 });
     const scale = model.scales.color;
+    if (scale?.kind !== "ordinal") throw new Error("expected an ordinal color scale");
+    expect(scale.scale.colorOf("a")).toBe("#123456");
+  });
+
+  it("lets an explicit range take precedence for omitted-type inference", () => {
+    const spec = gg([{ x: 1, y: 1, category: "a" }], aes({ x: "x", y: "y", color: "category" }))
+      .geomPoint()
+      .scales({ color: { scheme: "viridis", range: ["#123456"] } })
+      .spec();
+    const model = runPipeline(spec, { width: 640, height: 400 });
+    const scale = model.scales.color;
+
     if (scale?.kind !== "ordinal") throw new Error("expected an ordinal color scale");
     expect(scale.scale.colorOf("a")).toBe("#123456");
   });

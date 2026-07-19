@@ -1362,10 +1362,11 @@
         "range": {
           "type": "array",
           "items": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
           },
           "minItems": 1,
-          "description": "Explicit output colors (CSS color strings). Ordinal: the palette, in domain order. Sequential: ramp stops, evenly spaced."
+          "description": "Explicit output colors using #rgb or #rrggbb hex syntax. Ordinal: the palette, in domain order. Sequential: ramp stops, evenly spaced."
         },
         "scheme": {
           "anyOf": [
@@ -1394,7 +1395,7 @@
               "const": "viridis"
             }
           ],
-          "description": "Named color scheme: categorical \"observable10\" (default), \"ipsum\" and \"flexoki\" (hrbrthemes), \"tableau10\" and \"colorblind\" (ggthemes), or sequential \"viridis\" (default)."
+          "description": "Named color scheme: categorical \"observable10\" (default), \"ipsum\", \"flexoki\", \"tableau10\", and \"colorblind\"; or sequential \"viridis\" (default). When type is omitted, the named scheme selects its ordinal or sequential scale family."
         },
         "reverse": {
           "type": "boolean",
@@ -1515,7 +1516,7 @@
           "const": "tufte"
         }
       ],
-      "description": "A registered theme name: \"default\" (inherits the page color via currentColor), \"light\", \"dark\", or \"minimal\"."
+      "description": "A registered theme name: \"default\", \"light\", \"dark\", \"minimal\", \"ggplot2\", \"classic\", \"hrbr\", \"few\", \"clean\", \"fivethirtyeight\", \"economist\", \"tufte\"."
     },
     "ThemeSpec": {
       "type": "object",

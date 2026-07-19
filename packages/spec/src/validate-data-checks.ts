@@ -6,7 +6,7 @@
 import type { SpecError } from "./errors.js";
 import { didYouMean } from "./errors.js";
 import type { Aes, ChannelName, ColorScaleSpec, PositionScaleSpec } from "./schema.js";
-import { CHANNELS, GEOM_DEFAULTS } from "./schema.js";
+import { CHANNELS, GEOM_DEFAULTS, SEQUENTIAL_SCHEME_NAMES } from "./schema.js";
 import type { ProfileFieldType, ValidateLimits, ValidateOptions } from "./validate-data.js";
 import {
   effectiveChannel,
@@ -32,6 +32,7 @@ function isRecord(v: unknown): v is Record<string, unknown> {
 
 const AXIS_CHANNELS = ["x", "y"] as const;
 const COLOR_CHANNELS = ["color", "fill"] as const;
+const SEQUENTIAL_SCHEMES = new Set<string>(SEQUENTIAL_SCHEME_NAMES);
 
 export function dataChecks(
   spec: Record<string, unknown>,
@@ -224,15 +225,28 @@ export function dataChecks(
 
   for (const channel of COLOR_CHANNELS) {
     const config = scales?.[channel] as ColorScaleSpec | undefined;
-    if (config?.type !== "sequential") continue;
+    const inferredFromSequentialScheme =
+      config?.type === undefined &&
+      config?.range === undefined &&
+      config?.scheme !== undefined &&
+      SEQUENTIAL_SCHEMES.has(config.scheme);
+    const effectiveType = config?.type ?? (inferredFromSequentialScheme ? "sequential" : undefined);
+    if (effectiveType !== "sequential") continue;
     for (const use of colorFields[channel]) {
       const type = typeOf(use.field);
       if (type === "nominal" || type === "ordinal") {
         errors.push({
           code: "scale-type-mismatch",
           path: use.path,
-          message: `scales.${channel}.type is "sequential" but field "${use.field}" is ${type}; sequential color ramps need quantitative values.`,
-          fix: { description: `Set scales.${channel}.type to "ordinal".` },
+          message: inferredFromSequentialScheme
+            ? `scales.${channel}.scheme is "${config.scheme}" and selects a sequential scale, but field "${use.field}" is ${type}; sequential color ramps need quantitative values.`
+            : `scales.${channel}.type is "sequential" but field "${use.field}" is ${type}; sequential color ramps need quantitative values.`,
+          fix: inferredFromSequentialScheme
+            ? {
+                description: `Set scales.${channel}.scheme to a categorical scheme, remove it to infer an ordinal scale from "${use.field}", or map a quantitative field.`,
+                example: { scheme: "observable10" },
+              }
+            : { description: `Set scales.${channel}.type to "ordinal".` },
         });
       }
     }

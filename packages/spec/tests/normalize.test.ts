@@ -119,6 +119,32 @@ describe("normalize", () => {
     expect(normalize(spec as SpecInput)).toEqual(spec);
   });
 
+  it("normalizes three-digit custom color stops to canonical lowercase hex", () => {
+    const spec = normalize({
+      layers: [{ geom: "point" }],
+      scales: {
+        color: { type: "sequential", range: ["#ABC", "#123456"] },
+        fill: { type: "ordinal", range: ["#F0A"] },
+      },
+    });
+
+    expect(spec.scales).toEqual({
+      color: { type: "sequential", range: ["#aabbcc", "#123456"] },
+      fill: { type: "ordinal", range: ["#ff00aa"] },
+    });
+    expect(normalize(spec as SpecInput)).toEqual(spec);
+  });
+
+  it("leaves a malformed non-array range for validation instead of throwing", () => {
+    const malformed = {
+      layers: [{ geom: "point" }],
+      scales: { color: { range: "#f00" } },
+    } as unknown as SpecInput;
+
+    expect(() => normalize(malformed)).not.toThrow();
+    expect(normalize(malformed).scales?.color?.range).toBe("#f00");
+  });
+
   it("preserves data, datasets, labs, theme, size", () => {
     const spec = normalize({
       $schema: "x",

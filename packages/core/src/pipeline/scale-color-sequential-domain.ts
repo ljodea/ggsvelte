@@ -25,5 +25,6 @@ export function resolveSequentialRange(
 ): readonly string[] | undefined {
   const editionRamp =
     editionDefaults.sequentialRamp === VIRIDIS_RAMP_10 ? undefined : editionDefaults.sequentialRamp;
-  return config?.range ?? editionRamp;
+  const namedSchemeRamp = config?.scheme === "viridis" ? VIRIDIS_RAMP_10 : undefined;
+  return config?.range ?? namedSchemeRamp ?? editionRamp;
 }

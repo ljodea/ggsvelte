@@ -324,6 +324,44 @@ exports[`ERROR_CATALOG coverage [invalid-type] is reproducible; message + fix sn
 }
 `;
 
+exports[`ERROR_CATALOG coverage [scale-scheme-type] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Use a categorical scheme with "ordinal", or "viridis"/hex stops with "sequential".",
+    "summary": "A named color scheme is incompatible with the configured color scale type.",
+    "tier": 1,
+  },
+  "instance": {
+    "code": "scale-scheme-type",
+    "fix": {
+      "description": "Use "viridis" or provide a sequential range of #rgb/#rrggbb stops.",
+      "example": "viridis",
+    },
+    "message": "The categorical scheme "ipsum" cannot be used with a sequential color scale.",
+    "path": "/scales/color/scheme",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [scale-range-color] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Replace each custom color with #rgb or #rrggbb syntax.",
+    "summary": "A custom color range contains a color outside the supported hex syntax.",
+    "tier": 1,
+  },
+  "instance": {
+    "code": "scale-range-color",
+    "fix": {
+      "description": "Use #rgb or #rrggbb syntax for custom color ranges.",
+      "example": "#ff0000",
+    },
+    "message": "The color stop "tomato" is not a supported hex color.",
+    "path": "/scales/color/range/0",
+  },
+}
+`;
+
 exports[`ERROR_CATALOG coverage [missing-required-channel] is reproducible; message + fix snapshot 1`] = `
 {
   "catalog": {
