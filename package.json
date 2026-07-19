@@ -39,6 +39,7 @@
     "lint:actions:security": "zizmor .github/workflows",
     "support:check": "bun scripts/support-matrix.ts",
     "compat:consumer": "bun scripts/consumer-compat.ts",
+    "quickstart:measure": "bun scripts/quickstart-timing.ts",
     "changeset": "changeset",
     "build": "bun run check && cd packages/svelte && bun run --bun build",
     "build:docs": "cd apps/docs && bun run --bun build",

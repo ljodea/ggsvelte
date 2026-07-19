@@ -4,7 +4,7 @@
  * (packages/svelte/bin/ggsvelte-render.js) directly — never network bunx.
  */
 import { describe, expect, it } from "bun:test";
-import { mkdtempSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -112,6 +112,22 @@ describe("runCLI", () => {
     expect(await runCLI(["--width", "abc"], makeIO().io)).toBe(2);
   });
 
+  it("--version prints the installed package version without reading stdin", async () => {
+    let stdinReads = 0;
+    const { io, err, out } = makeIO();
+    io.readStdin = () => {
+      stdinReads++;
+      return Promise.resolve("");
+    };
+
+    expect(await runCLI(["--version"], io, { version: "0.3.0" })).toBe(0);
+    expect(out).toEqual(["0.3.0\n"]);
+    expect(err).toEqual([]);
+    expect(stdinReads).toBe(0);
+    expect(await runCLI(["--version", "plot.json"], makeIO().io, { version: "0.3.0" })).toBe(2);
+    expect(await runCLI(["--version", "--help"], makeIO().io, { version: "0.3.0" })).toBe(2);
+  });
+
   it("--help prints usage to stderr, exit 0", async () => {
     const { io, err, out } = makeIO();
     expect(await runCLI(["--help"], io)).toBe(0);
@@ -121,6 +137,25 @@ describe("runCLI", () => {
 });
 
 describe("workspace bin smoke test", () => {
+  it("reports the version of the Svelte package that owns the bin", async () => {
+    const packageDirectory = join(import.meta.dir, "..", "..", "svelte");
+    const manifest = JSON.parse(readFileSync(join(packageDirectory, "package.json"), "utf8")) as {
+      version: string;
+    };
+    const proc = Bun.spawn(
+      ["bun", join(packageDirectory, "bin", "ggsvelte-render.js"), "--version"],
+      { stdout: "pipe", stderr: "pipe" },
+    );
+    const [stdout, stderr, exitCode] = await Promise.all([
+      new Response(proc.stdout).text(),
+      new Response(proc.stderr).text(),
+      proc.exited,
+    ]);
+    expect(exitCode).toBe(0);
+    expect(stdout).toBe(`${manifest.version}\n`);
+    expect(stderr).toBe("");
+  });
+
   it("bun packages/svelte/bin/ggsvelte-render.js spec.json > out.svg", async () => {
     const binPath = join(import.meta.dir, "..", "..", "svelte", "bin", "ggsvelte-render.js");
     const dir = mkdtempSync(join(tmpdir(), "ggsvelte-cli-"));

@@ -16,16 +16,19 @@
  * scripts/gen-llms.test.ts; apps/docs imports it via the `$scripts` alias
  * for its prerendered endpoints and guide pages.
  */
-import {
-  ADVISORY_CATALOG,
-  CLI_DIAGNOSTIC_CATALOG,
-  PIPELINE_ERROR_CATALOG,
-  PIPELINE_WARNING_CATALOG,
-} from "@ggsvelte/core";
-import { ERROR_CATALOG, LINT_CATALOG } from "@ggsvelte/spec";
+import { ADVISORY_CATALOG } from "@ggsvelte/core";
+import { LINT_CATALOG } from "@ggsvelte/spec";
 import { INTERACTION_DIAGNOSTIC_CATALOG } from "../packages/svelte/src/lib/interaction/interaction";
 import { GUIDE_CATALOG, type GuideSlug } from "../apps/docs/src/lib/catalog/guide";
 import supportMatrix from "../support-matrix.json";
+import {
+  buildDiagnosticDocs,
+  type DiagnosticDocEntry,
+  type DiagnosticDocSource,
+} from "./diagnostic-docs";
+import { QUICKSTART_PAGE_FILENAME, QUICKSTART_PAGE_SVELTE } from "./quickstart";
+
+export { buildDiagnosticDocs } from "./diagnostic-docs";
 
 // ---------------------------------------------------------------------------
 // Minimal markdown renderer (headings, paragraphs, fenced code, inline code,
@@ -103,6 +106,8 @@ export function renderMarkdown(md: string, base = ""): string {
   let list: string[] | null = null;
   let code: string[] | null = null;
   let codeLang = "";
+  let codeCopy = false;
+  let copyCodeCount = 0;
   const headingId = createHeadingId();
 
   const flushParagraph = () => {
@@ -117,13 +122,18 @@ export function renderMarkdown(md: string, base = ""): string {
       list = null;
     }
   };
+  const renderCode = (source: string): string => {
+    const languageClass = codeLang === "" ? "" : ` class="language-${codeLang}"`;
+    const rendered = `<pre><code${languageClass}>${escapeHtml(source)}</code></pre>`;
+    if (!codeCopy) return rendered;
+    const id = `guide-code-${String(++copyCodeCount)}`;
+    return `<div class="guide-code-copy"><button type="button" data-copy-code="${id}" aria-describedby="${id}-status">Copy code</button><pre id="${id}"><code${languageClass}>${escapeHtml(source)}</code></pre><span id="${id}-status" role="status" aria-live="polite"></span></div>`;
+  };
 
   for (const line of lines) {
     if (code !== null) {
       if (line.startsWith("```")) {
-        html.push(
-          `<pre><code${codeLang === "" ? "" : ` class="language-${codeLang}"`}>${escapeHtml(code.join("\n"))}</code></pre>`,
-        );
+        html.push(renderCode(code.join("\n")));
         code = null;
       } else {
         code.push(line);
@@ -133,7 +143,9 @@ export function renderMarkdown(md: string, base = ""): string {
     if (line.startsWith("```")) {
       flushParagraph();
       flushList();
-      codeLang = line.slice(3).trim();
+      const [language = "", ...flags] = line.slice(3).trim().split(/\s+/);
+      codeLang = /^[a-z0-9-]*$/i.test(language) ? language : "";
+      codeCopy = flags.includes("copy");
       code = [];
       continue;
     }
@@ -166,7 +178,7 @@ export function renderMarkdown(md: string, base = ""): string {
   }
   flushParagraph();
   flushList();
-  if (code !== null) html.push(`<pre><code>${escapeHtml(code.join("\n"))}</code></pre>`);
+  if (code !== null) html.push(renderCode(code.join("\n")));
   return html.join("\n");
 }
 
@@ -176,73 +188,101 @@ export function renderMarkdown(md: string, base = ""): string {
 
 export const GETTING_STARTED_MD = `# Getting started
 
-ggsvelte is a layered grammar of graphics for JavaScript: ggplot2 semantics
-(aes, geom, stat, scale, coord, facet, theme, position), a strictly-JSON
-\`PortableSpec\` at the center, and three surfaces that compile to the same
-canonical spec — JSON for agents, a fluent builder, and Svelte 5 components.
+Build a responsive, accessible chart in one Svelte file. Start with the
+framework-native path below; the builder and PortableSpec are useful later,
+when you need to generate or transmit charts.
 
-## Install
+## Create a SvelteKit app
+
+Start with Node.js 22 or newer in an empty directory:
 
 \`\`\`sh
-bun add @ggsvelte/svelte        # or: npm install @ggsvelte/svelte
+npx sv create my-chart --template minimal --types ts --no-add-ons --install npm
+cd my-chart
 \`\`\`
 
-The \`ggsvelte\` package re-exports the whole surface (\`@ggsvelte/spec\` and
-\`@ggsvelte/core\` are its dependencies — install them directly only for
-spec-only / core-only usage without Svelte) and owns the \`ggsvelte-render\`
-CLI.
+Already have a supported SvelteKit app? Continue with the install step.
 
-## First chart, three ways
+## Install ggsvelte
 
-The same scatter plot in each surface. All three produce (or consume) the
-same canonical PortableSpec.
+Choose the package manager already used by the app:
 
-**1. Spec JSON** — what agents emit; validated by the published JSON Schema:
+\`\`\`sh
+npm install @ggsvelte/svelte
+# or: pnpm add @ggsvelte/svelte
+# or: bun add @ggsvelte/svelte
+\`\`\`
+
+\`@ggsvelte/spec\` and \`@ggsvelte/core\` are dependencies of the Svelte
+package. Install them directly only for spec-only or headless use.
+
+## Draw your first chart
+
+\`${QUICKSTART_PAGE_FILENAME}\` (complete file)
 
 \`\`\`svelte
-<script>
-  import { GGPlot } from "@ggsvelte/svelte";
-
-  const spec = {
-    data: { values: [{ displ: 1.8, hwy: 29 }, { displ: 5.7, hwy: 16 }] },
-    layers: [
-      {
-        geom: "point",
-        aes: { x: { field: "displ" }, y: { field: "hwy" } }
-      }
-    ]
-  };
-</script>
-
-<GGPlot {spec} width={640} height={400} />
+${QUICKSTART_PAGE_SVELTE}
 \`\`\`
 
-**2. Fluent builder** — immutable chaining, \`.spec()\` validates and returns
-the canonical PortableSpec:
+Run the app with your package manager's standard dev command and open the
+local URL it prints. The chart fills a normal positive-width block container
+and uses the default 400px height. No chart CSS or fixed width is required.
+
+## You have a chart
+
+The first useful model is small: \`GGPlot\` owns the chart, \`data\` supplies
+rows, \`aes\` maps fields, and \`GeomPoint\` adds the point layer. Change the
+four rows or the \`x\` and \`y\` field names to adapt it.
+
+If the chart is inside \`display: none\`, a zero-width grid track, or another
+collapsed container, it stays not-ready until the container receives a
+positive width. During server rendering it uses a deterministic 640 × 400
+fallback, then measures the real container after hydration. A blank chart,
+hydration warning, or TypeScript package mismatch is covered in the
+[Errors reference](/guide/errors#quickstart-troubleshooting).
+
+## Choose another surface only when you need it
+
+### Fluent builder
+
+Use the builder to construct specs programmatically in TypeScript. Fragment,
+assuming the \`cars\` data from the complete file above:
 
 \`\`\`ts
 import { aes, gg } from "@ggsvelte/svelte";
 
-const spec = gg(rows, aes({ x: "displ", y: "hwy" })).geomPoint().spec();
+const spec = gg(cars, aes({ x: "weight", y: "economy" }))
+  .geomPoint()
+  .spec();
 \`\`\`
 
-**3. Svelte components** — declaration-only children as sugar:
+### PortableSpec JSON
 
-\`\`\`svelte
-<script>
-  import { GGPlot, GeomPoint } from "@ggsvelte/svelte";
-  import { rows } from "./data.js";
-</script>
+Use PortableSpec when a chart must be saved, transmitted, validated, or
+generated without executable accessors. Fragment equivalent to the first
+chart:
 
-<GGPlot data={rows} aes={{ x: "displ", y: "hwy" }} width={640} height={400}>
-  <GeomPoint />
-</GGPlot>
+\`\`\`json
+{
+  "data": { "values": [{ "weight": 1.8, "economy": 37 }] },
+  "layers": [
+    {
+      "geom": "point",
+      "aes": {
+        "x": { "field": "weight" },
+        "y": { "field": "economy" }
+      }
+    }
+  ]
+}
 \`\`\`
 
-## Headless / server rendering
+## Headless and server rendering
 
-\`renderToSVGString\` is the pure export path (no DOM, all-SVG; safe in
-Node/edge/workers), and \`ggsvelte-render\` is the same thing as a CLI:
+\`renderToSVGString\` is the pure no-DOM export path. The installed
+\`ggsvelte-render\` CLI writes SVG to stdout and JSON Lines diagnostics to
+stderr. These are fragments; use the complete PortableSpec above as \`spec\`
+or save it as \`spec.json\`.
 
 \`\`\`ts
 import { renderToSVGString } from "@ggsvelte/core";
@@ -251,38 +291,29 @@ const svg = renderToSVGString(spec, { width: 640, height: 400 });
 \`\`\`
 
 \`\`\`sh
-ggsvelte-render spec.json > chart.svg   # diagnostics: JSON lines on stderr
+ggsvelte-render spec.json > chart.svg
 \`\`\`
 
-## Validating specs (agents: read this)
+## Validating specs
 
-\`validate(spec)\` checks schema shape (tier 1, no data needed);
-\`validate(spec, { profile })\` adds data-aware checks against a
-\`DataProfile\` — \`{ fields: [{ name, type }], rowCount? }\` — without
-shipping the data. Every error is \`{ code, path, message, allowed?, fix }\`
-and **the fix carries a machine-applicable example — apply it**. Pass
-\`{ lint: true }\` to also get advisories for valid-but-questionable specs.
+\`validate(spec)\` checks schema shape. \`validate(spec, { profile })\` adds
+data-aware checks without shipping the data. Every validation error has a
+stable code, path, message, and fix. Pass \`{ lint: true }\` to also receive
+advisories for valid-but-questionable specs.
 
 ## Where next
 
-- [Examples gallery](/examples) — every example shows the Svelte component,
-  the builder chain, and the canonical spec JSON side by side.
+- [Examples gallery](/examples) — runnable charts across marks, statistics,
+  scales, themes, and interaction.
 - [Interactions](/guide/interactions) — inspection, selection, zoom, typed
   events, keyboard behavior, and stable identity.
 - [Local data playground](/playground) — paste bounded JSON rows without
   uploads, remote fetches, or code execution.
-- [Interaction reference](/guide/interaction-reference) — props, callbacks,
-  event phases, diagnostics, and accessibility defaults.
 - [Compatibility](/guide/compatibility) — tested Node, Svelte, installer,
   browser, and operating-system boundaries.
-- [Pre-0.1 interaction migration](/guide/migrating-pre-0-1) — replace the old
-  tooltip and brush props and callback payloads.
-- [Errors reference](/guide/errors) — every validation and render diagnostic.
-- [Spec-lint advisories](/guide/advisories) — meaningless-but-valid specs.
-- [Lifecycle & editions](/guide/lifecycle) — API stability tags and the
-  defaults-edition mechanism.
-- [JSON Schema](/schema/v0.json) — for constrained decoding.
-- [llms-full.txt](/llms-full.txt) — the whole docs corpus in one file.
+- [Errors reference](/guide/errors) — validation, render, interaction, and CLI
+  diagnostics with consequences and safe recovery steps.
+- [JSON Schema](/schema/v0.json) — PortableSpec for constrained decoding.
 `;
 
 export const COMPATIBILITY_MD = `# Compatibility
@@ -1160,44 +1191,93 @@ function catalogSection(
   return lines.join("\n");
 }
 
+const diagnosticSectionTitles: Record<DiagnosticDocSource, string> = {
+  validation: "Validation errors (@ggsvelte/spec)",
+  pipeline: "Render-time errors (@ggsvelte/core)",
+  warning: "Render warnings",
+  interaction: "Interaction diagnostics (@ggsvelte/svelte)",
+  cli: "CLI diagnostics (ggsvelte-render)",
+};
+
+function diagnosticHeading(entry: DiagnosticDocEntry): string {
+  const primaryAnchor = entry.code
+    .toLowerCase()
+    .replaceAll(/[^a-z0-9]+/g, "-")
+    .replaceAll(/^-|-$/g, "");
+  return entry.anchor === primaryAnchor
+    ? `### \`${entry.code}\``
+    : `### \`${entry.code}\` — ${entry.source}`;
+}
+
+function renderDiagnosticEntry(entry: DiagnosticDocEntry): string {
+  const lines = [
+    diagnosticHeading(entry),
+    "",
+    `**Code + severity:** \`${entry.code}\` · ${entry.severity}`,
+    "",
+    `**What failed:** ${entry.whatFailed}`,
+    "",
+    `**Why:** ${entry.why}`,
+    "",
+    `**Fix:** ${entry.fix}`,
+    "",
+    `**Consequence (${entry.consequence}):** ${entry.consequenceText}`,
+    "",
+    `**Stable link:** [/guide/errors#${entry.anchor}](/guide/errors#${entry.anchor})`,
+    "",
+  ];
+  if (entry.recipe !== undefined) {
+    lines.push(
+      "**Minimal illustration — copy only the relevant fragment:**",
+      "",
+      `\`\`\`${entry.recipe.language} copy`,
+      entry.recipe.code,
+      "```",
+      "",
+    );
+  }
+  return lines.join("\n");
+}
+
 export function buildErrorsMd(): string {
-  const validation = catalogSection(
-    "Validation errors (@ggsvelte/spec)",
-    "Returned by `validate()` as `{ code, path, message, allowed?, fix }`. Tier 1 = schema shape, no data needed; tier 2 runs when an options argument is passed (structural grammar rules + data-aware checks against inline data or a DataProfile). Instances carry a concrete `fix.example` — apply it.",
-    ERROR_CATALOG,
-    {
-      tierOf: (code) => `tier ${String(ERROR_CATALOG[code as keyof typeof ERROR_CATALOG].tier)}`,
-    },
-  );
-  const pipeline = catalogSection(
-    "Render-time errors (@ggsvelte/core)",
-    "Thrown by `runPipeline` / `renderToSVGString` as `PipelineError { code, path, message }` — structured errors, never blank output (failure policy).",
-    PIPELINE_ERROR_CATALOG,
-  );
-  const warnings = catalogSection(
-    "Warnings",
-    'Collected on `RenderModel.warnings` (deduplicated): degraded-but-rendered conditions. The CLI emits them as stderr JSON lines with kind "warning".',
-    PIPELINE_WARNING_CATALOG,
-  );
-  const cli = catalogSection(
-    "CLI diagnostics (ggsvelte-render)",
-    "stderr JSON lines. Exit codes: 0 rendered, 1 render failed, 2 usage error, 3 invalid spec.",
-    CLI_DIAGNOSTIC_CATALOG,
-  );
+  const entries = buildDiagnosticDocs();
+  const sections = (Object.keys(diagnosticSectionTitles) as DiagnosticDocSource[]).map((source) => {
+    const intro =
+      source === "cli"
+        ? "SVG is written only to stdout; JSON Lines diagnostics are written only to stderr. Exit 1 means rendering failed, exit 2 means usage/input failed, and exit 3 means spec validation failed."
+        : "Each entry answers what failed, why, how to recover safely, and whether output was blocked or degraded.";
+    return [
+      `## ${diagnosticSectionTitles[source]}`,
+      "",
+      intro,
+      "",
+      ...entries
+        .filter((entry) => entry.source === source)
+        .map((entry) => renderDiagnosticEntry(entry)),
+    ].join("\n");
+  });
+
   return `# Errors reference
 
-Every diagnostic ggsvelte can produce, generated from the catalogs the code
-itself uses (\`ERROR_CATALOG\` in @ggsvelte/spec; \`PIPELINE_ERROR_CATALOG\`,
-\`PIPELINE_WARNING_CATALOG\`, \`CLI_DIAGNOSTIC_CATALOG\` in @ggsvelte/core) —
-one source, no drift.
+Diagnostics are generated from the catalogs used by validation, rendering,
+interaction, and the CLI. Identity is the pair \`(source, code)\`: a bare code
+can intentionally exist in more than one source with a different consequence.
 
-${validation}
+## Quickstart troubleshooting
 
-${pipeline}
+- **Collapsed or zero-width container:** the responsive plot remains
+  \`data-gg-ready="false"\` until ResizeObserver reports a positive width.
+  Give the parent a real grid/flex track width; no fixed chart width is needed.
+- **SSR and hydration:** omitted width server-renders at 640 × 400, stays
+  not-ready on the server, then measures its real container after hydration.
+- **Unexpected height:** omitted height is 400px unless the spec supplies one.
+- **TypeScript or linked-package mismatch:** install one compatible
+  \`@ggsvelte/svelte\` version and let it resolve matching core/spec packages;
+  remove stale lockfile overrides that mix versions.
+- **CLI input failure:** run \`ggsvelte-render --help\`; keep SVG stdout
+  separate from JSON Lines stderr while correcting the reported input.
 
-${warnings}
-
-${cli}
+${sections.join("\n\n")}
 `;
 }
 

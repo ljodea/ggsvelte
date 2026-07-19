@@ -4,6 +4,7 @@ import GGPlot from "../src/lib/GGPlot.svelte";
 import { createPlotInteraction } from "../src/lib/interaction/controller.svelte.js";
 import GGPlotHydrationFixture from "./fixtures/GGPlotHydrationFixture.svelte";
 import HydrationFixture from "./fixtures/HydrationFixture.svelte";
+import QuickstartSsrFixture from "./fixtures/QuickstartSsrFixture.svelte";
 import { renderSsrFixture } from "./helpers/ssr.js";
 
 const rows = [
@@ -25,6 +26,16 @@ describe("SSR release fixture", () => {
     expect(fixture.body).toContain("gg-plot");
     expect(fixture.body).toContain("<!--[-->");
     expect(fixture.html).toMatch(/^<!doctype html>/);
+  });
+
+  it("server-renders the declaration-only Quickstart with responsive defaults and its accessible name", () => {
+    const fixture = renderSsrFixture(QuickstartSsrFixture, {});
+
+    expect(fixture.body).toContain('data-gg-ready="false"');
+    expect(fixture.body).toContain('width="640" height="400"');
+    expect(fixture.body).toContain(
+      'aria-label="Fuel economy decreases as vehicle weight increases"',
+    );
   });
 
   it('keeps data-gg-ready="false" during SSR for fixed-width SVG plots (decision 0009)', () => {

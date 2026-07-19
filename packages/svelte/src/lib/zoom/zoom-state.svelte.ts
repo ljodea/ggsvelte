@@ -109,11 +109,12 @@ export function createPlotZoomState(deps: PlotZoomStateDeps): PlotZoomState {
     return next;
   });
 
-  const effectiveSpec: PortableSpec | null = $derived.by(() => {
+  function resolveEffectiveSpec(): PortableSpec | null {
     const assembled = deps.assembled();
     if (assembled === null || effectiveZoomDomains === null) return assembled;
     return applyZoomToSpec(assembled, effectiveZoomDomains);
-  });
+  }
+  const effectiveSpec: PortableSpec | null = $derived.by(resolveEffectiveSpec);
 
   function commitZoom(domains: ContinuousZoomDomains | null, source: InteractionSource): void {
     let committed: ContinuousZoomDomains | null = domains;
@@ -209,7 +210,9 @@ export function createPlotZoomState(deps: PlotZoomStateDeps): PlotZoomState {
       return effectiveZoomDomains;
     },
     get effectiveSpec() {
-      return effectiveSpec;
+      // Svelte 5.33 SSR does not invalidate construction-time deriveds after
+      // declaration-only children register in the same server pass.
+      return typeof window === "undefined" ? resolveEffectiveSpec() : effectiveSpec;
     },
     commitZoom,
     resetZoom,
