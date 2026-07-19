@@ -1,14 +1,11 @@
 /*
- * Docs styles. Two jobs beyond looking decent:
+ * Docs styles. Site appearance tokens are deliberately separate from chart
+ * theme tokens: an explicit chart theme must not change when the docs shell
+ * switches between light and dark.
  *
- * 1. THEME → CHART BRIDGE: every chart color rides a --gg-* custom property
- *    with the resolved theme role as fallback, so defining --gg-* per
- *    [data-theme] here restyles every rendered chart without a re-render.
- *    Values mirror @ggsvelte/core BUILTIN_THEMES.light/.dark.
- *
- * 2. VR MODE (html[data-vr], stamped pre-paint by app.html): strip chrome,
- *    freeze all transitions/animations, and pin the fixed-size
- *    .gg-example-frame to the top-left corner for screenshotting.
+ * VR MODE (html[data-vr], stamped pre-paint by app.html) strips chrome,
+ * freezes transitions/animations, and pins the fixed-size .gg-example-frame
+ * to the top-left corner for screenshotting.
  *
  * FONT: the chart component self-hosts Roboto Condensed and waits on
  * document.fonts.ready in VR. The page chrome keeps a native UI stack.
@@ -32,31 +29,6 @@
   --border: #343a44;
   --accent: #7ea1f0;
   color-scheme: dark;
-}
-
-/* Chart theme roles (mirror BUILTIN_THEMES in @ggsvelte/core). */
-:root[data-theme="light"] {
-  --gg-ink: #262626;
-  --gg-paper: #ffffff;
-  --gg-panel: #ffffff;
-  --gg-grid: #cccccc;
-  --gg-accent: #4385be;
-  --gg-axisText: #4d4d4d;
-  --gg-axisLine: #cccccc;
-  --gg-tickColor: #cccccc;
-  --gg-panelBorder: #cccccc;
-}
-
-:root[data-theme="dark"] {
-  --gg-ink: #e6e8eb;
-  --gg-paper: #16181d;
-  --gg-panel: #16181d;
-  --gg-grid: #3b3f46;
-  --gg-accent: #7ea1f0;
-  --gg-axisText: #c6c9ce;
-  --gg-axisLine: #6b717b;
-  --gg-tickColor: #6b717b;
-  --gg-panelBorder: #6b717b;
 }
 
 * {

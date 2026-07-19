@@ -2,7 +2,7 @@
 
 This board compares R and ggsvelte renders using the same data, explicit domains, explicit breaks, explicit colors, 720×480 logical viewport, and 1440×960 output. R uses Cairo at 192 dpi. ggsvelte uses Chromium at device scale factor 2 with its bundled Roboto Condensed faces loaded and verified through `document.fonts.check()`.
 
-Open [index.html](./index.html) for the side-by-side board. Raw structural measurements are in [r-metrics.json](./r-metrics.json) and [ggsvelte-metrics.json](./ggsvelte-metrics.json).
+Open [index.html](./index.html) for all 12 registered ggsvelte themes and the three side-by-side structural references. Raw structural measurements are in [r-metrics.json](./r-metrics.json) and [ggsvelte-metrics.json](./ggsvelte-metrics.json).
 
 ## Structural parity
 

@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import type { RenderModel } from "@ggsvelte/core";
+
 import GGPlot from "../src/lib/GGPlot.svelte";
 import LargePinnedTooltip from "./fixtures/LargePinnedTooltip.svelte";
 import { render } from "./helpers/render.js";
@@ -42,6 +44,36 @@ describe("DESIGN.md interaction presentation", () => {
     expect(getComputedStyle(active).borderTopWidth).toBe("0px");
     expect(getComputedStyle(active).borderBottomWidth).toBe("2px");
     expect(active.getBoundingClientRect().height).toBeGreaterThanOrEqual(44);
+  });
+
+  it("refreshes mixed SVG and canvas strata when the explicit chart theme changes", async () => {
+    const models: Array<{ theme: string; backends: string[] }> = [];
+    const view = render(GGPlot, {
+      data: rows,
+      aes: { x: "x", y: "y" },
+      layers: [
+        { geom: "point", render: "canvas" },
+        { geom: "line", render: "svg" },
+      ],
+      theme: "dark",
+      width: 480,
+      height: 320,
+      onrender: (model: RenderModel) => {
+        models.push({ theme: model.scene.theme.paper, backends: [...model.layerBackends] });
+      },
+    });
+
+    await expect.poll(() => models.at(-1)?.theme).toBe("#16181d");
+    expect(models.at(-1)?.backends).toEqual(["canvas", "svg"]);
+    expect(view.container.querySelector(".gg-paper")?.getAttribute("fill")).toContain("#16181d");
+    expect(view.container.querySelectorAll("canvas")).toHaveLength(1);
+
+    await view.rerender({ theme: "light" });
+
+    await expect.poll(() => models.at(-1)?.theme).toBe("#ffffff");
+    expect(models.at(-1)?.backends).toEqual(["canvas", "svg"]);
+    expect(view.container.querySelector(".gg-paper")?.getAttribute("fill")).toContain("#ffffff");
+    expect(view.container.querySelectorAll("canvas")).toHaveLength(1);
   });
 
   it("renders a solid translucent select draft and outline-only labelled zoom draft", async () => {
