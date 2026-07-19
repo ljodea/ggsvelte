@@ -2,8 +2,8 @@
  * Spec validation orchestrator — tier 1 (schema shape) plus opt-in tier 2
  * (structural grammar, data-aware checks, optional lint).
  *
- * Tier-1 mechanism (decision 0004): TypeBox `Value.Check`/`Value.Errors` over
- * the same schemas that emit `schema/v0.json` — one artifact, no drift.
+ * Tier-1 mechanism (decision 0004): TypeBox 1.x `Value.Check`/`Value.Errors`
+ * over the same schemas that emit `schema/v0.json` — one artifact, no drift.
  * Raw TypeBox union noise is mapped to the agent error contract in
  * validate-map-errors.ts. Data-free grammar rules live in
  * validate-structure.ts. Data-aware checks live in validate-data*.ts
@@ -12,7 +12,7 @@
  * Output: `{ ok: true, spec }` or `{ ok: false, errors: SpecError[] }` with
  * the agent error contract from errors.ts. Messages are snapshot-tested.
  */
-import { Value } from "@sinclair/typebox/value";
+import { Value } from "typebox/value";
 
 import type { SpecError } from "./errors.js";
 import type { SpecAdvisory } from "./lint.js";
@@ -40,7 +40,7 @@ import {
   jsonDepth,
   resolveFieldEvidence,
 } from "./validate-data.js";
-import { mapValueError, unknownGeomError } from "./validate-map-errors.js";
+import { mapValueErrors, unknownGeomError } from "./validate-map-errors.js";
 import { facetStructuralErrors, layerStructuralErrors } from "./validate-structure.js";
 
 export type ValidateResult =
@@ -153,18 +153,26 @@ export function validate(input: unknown, options?: ValidateOptions): ValidateRes
           continue;
         }
         const branch = GEOM_BRANCHES[geom as keyof typeof GEOM_BRANCHES];
-        for (const valueError of Value.Errors(branch, layer)) {
-          errors.push(mapValueError(valueError, layerPath));
-        }
+        errors.push(
+          ...mapValueErrors(Value.Errors(branch, layer), {
+            schema: branch,
+            value: layer,
+            pathPrefix: layerPath,
+          }),
+        );
       }
     }
 
     // --- everything else: check with layers replaced by a known-valid layer,
     // so the plot-level walk never re-reports layer noise. -------------------
     const shell = { ...input, layers: [{ geom: "point" }] };
-    for (const valueError of Value.Errors(PlotSpecSchema, shell)) {
-      errors.push(mapValueError(valueError, ""));
-    }
+    errors.push(
+      ...mapValueErrors(Value.Errors(PlotSpecSchema, shell), {
+        schema: PlotSpecSchema,
+        value: shell,
+        pathPrefix: "",
+      }),
+    );
 
     if (errors.length === 0) {
       // Value.Check failed but neither walk produced a mapped error: surface a

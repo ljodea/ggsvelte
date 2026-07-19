@@ -7,7 +7,7 @@ import { describe, expect, it } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { Value } from "@sinclair/typebox/value";
+import { Value } from "typebox/value";
 import { Ajv2020 } from "ajv/dist/2020.js";
 
 import { gg } from "../src/builder.ts";
@@ -94,23 +94,29 @@ function randomBuilder(rnd: () => number) {
 }
 
 describe("builder property test", () => {
-  it("every builder output validates against the emitted JSON Schema (ajv + TypeBox), 250 seeded cases", () => {
-    const artifact = JSON.parse(
-      readFileSync(join(import.meta.dir, "..", "schema", "v0.json"), "utf8"),
-    ) as object;
-    const ajv = new Ajv2020({ strict: false });
-    const validateAjv = ajv.compile(artifact);
-    const rnd = mulberry32(0xc0ffee);
-    for (let i = 0; i < 250; i++) {
-      const spec = randomBuilder(rnd).spec();
-      const ajvOk = validateAjv(spec);
-      if (!ajvOk) {
-        throw new Error(
-          `case ${i}: ajv rejected builder output:\n${JSON.stringify(spec, null, 2)}\n` +
-            JSON.stringify(validateAjv.errors, null, 2),
-        );
+  // TypeBox 1.x Cyclic validation is slower per-check than 0.x Module.Import;
+  // 250 seeded cases need headroom over bun's default 5s test timeout.
+  it(
+    "every builder output validates against the emitted JSON Schema (ajv + TypeBox), 250 seeded cases",
+    () => {
+      const artifact = JSON.parse(
+        readFileSync(join(import.meta.dir, "..", "schema", "v0.json"), "utf8"),
+      ) as object;
+      const ajv = new Ajv2020({ strict: false });
+      const validateAjv = ajv.compile(artifact);
+      const rnd = mulberry32(0xc0ffee);
+      for (let i = 0; i < 250; i++) {
+        const spec = randomBuilder(rnd).spec();
+        const ajvOk = validateAjv(spec);
+        if (!ajvOk) {
+          throw new Error(
+            `case ${i}: ajv rejected builder output:\n${JSON.stringify(spec, null, 2)}\n` +
+              JSON.stringify(validateAjv.errors, null, 2),
+          );
+        }
+        expect(Value.Check(PlotSpecSchema, spec)).toBe(true);
       }
-      expect(Value.Check(PlotSpecSchema, spec)).toBe(true);
-    }
-  });
+    },
+    { timeout: 30_000 },
+  );
 });

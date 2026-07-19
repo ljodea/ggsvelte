@@ -7,7 +7,7 @@ import { describe, expect, it } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { Value } from "@sinclair/typebox/value";
+import { Value } from "typebox/value";
 import { Ajv2020 } from "ajv/dist/2020.js";
 
 import { schemaArtifactJSON } from "../src/artifact.ts";
