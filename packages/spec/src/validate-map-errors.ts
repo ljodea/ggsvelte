@@ -114,7 +114,7 @@ function schemaAtInstancePath(rootSchema: unknown, instancePath: string): unknow
         continue;
       }
       if (Array.isArray(items)) {
-        const entry = items[Number(seg)];
+        const entry: unknown = items[Number(seg)];
         if (isRecord(entry)) {
           node = entry;
           continue;
