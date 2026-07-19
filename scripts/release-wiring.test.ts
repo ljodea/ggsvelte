@@ -363,7 +363,7 @@ it("caps aggregate heavy self-hosted work across workflows (issues #247 and #319
 
   // One repo-wide group is the aggregate mutex. Category-specific groups let
   // browser, build, and benchmark jobs starve each other on the same host.
-  expect(heavyGroupCount(ci)).toBe(7);
+  expect(heavyGroupCount(ci)).toBe(8);
   expect(heavyGroupCount(vr)).toBe(2);
   expect(heavyGroupCount(pages)).toBe(1);
   expect(heavyGroupCount(bench)).toBe(1);
@@ -371,8 +371,9 @@ it("caps aggregate heavy self-hosted work across workflows (issues #247 and #319
   expect(ci).not.toContain("heavy-component");
   expect(ci).not.toContain("heavy-packages-dist");
   expect(ci).not.toContain("heavy-consumer-ubuntu");
-  // Informational perf stays separate so it cannot FIFO-block required gates.
-  expect(ci).toContain("group: heavy-interaction-perf");
+  // Informational performance work is still CPU-heavy: leaving it outside the
+  // mutex can starve the required browser and memory gates it runs beside.
+  expect(ci).not.toContain("group: heavy-interaction-perf");
   // Pending jobs queue instead of replacing each other (GitHub queue: max).
   for (const workflow of [ci, vr, pages, bench, nightly]) expect(workflow).toContain("queue: max");
   expect(ci).toContain("Heavy-job pool policy");

@@ -41,13 +41,13 @@ concurrency:
 
 # Heavy-job pool policy (issues #247 and #319):
 # Light jobs (detect-changes, checks, unit, actions-security, vr-baseline-guard,
-# compatibility-matrix, ci-gate) run freely. Required CPU-heavy work shares the
-# repo-wide `heavy-self-hosted-cpu` group with VR, Pages, and hard benchmarks so
-# the four runner services cannot oversubscribe their shared 8-vCPU host.
+# compatibility-matrix, ci-gate) run freely. CPU-heavy work shares the repo-wide
+# `heavy-self-hosted-cpu` group with VR, Pages, and hard benchmarks so the four
+# runner services cannot oversubscribe their shared 8-vCPU host.
 # - Shared groups use `queue: max` so pending jobs wait (up to 100) instead of
 #   the default single-pending slot replacing earlier required runs.
-# - Informational interaction-perf keeps its own group so it cannot FIFO-block
-#   required gates; runner-level CPU isolation is tracked separately.
+# - Informational interaction-perf shares the mutex despite being excluded from
+#   ci-gate; otherwise it can starve required work on the same physical host.
 # - Consumer throttling applies only to Ubuntu self-hosted rows; hosted
 #   Windows/macOS rows get a per-run unique group (no cross-PR serialization).
 # - Every Bun install uses a job-private runner.temp cache. The runner services
@@ -894,9 +894,8 @@ jobs:
           retention-days: 7
 
   # Informational only — not a required status check (excluded from ci-gate).
-  # Absolute wall-clock p50/p95 budgets are noisy on the shared self-hosted
-  # host (4 concurrent runners on 8 vCPU). Path-gated and independent of the
-  # component job so it does not serialize the critical path. Hard gate remains
+  # It still shares the aggregate heavy lane: running this browser workload
+  # beside required jobs would reintroduce host starvation. Hard gate remains
   # on `run-bench` PRs via bench.yml.
   interaction-perf:
     name: interaction-perf (p50/p95, informational)
@@ -905,9 +904,9 @@ jobs:
       needs.detect-changes.outputs.interaction_perf == 'true' &&
       needs.packages-dist.result == 'success'
     runs-on: [self-hosted, ggsvelte]
-    # Separate from heavy-self-hosted-cpu so informational perf cannot hold the gate.
+    # Informational does not mean CPU-light; share the host-wide mutex (#319).
     concurrency:
-      group: heavy-interaction-perf
+      group: heavy-self-hosted-cpu
       cancel-in-progress: false
       queue: max
     env:
