@@ -229,6 +229,16 @@ describe("validate — TypeBox 1.x error mapping (Codex P2 regressions)", () => 
     ).toBe(true);
   });
 
+  it("value channel with an extra key reports only the extra key", () => {
+    const errors = errorsOf({
+      layers: [{ geom: "point", aes: { x: { value: 1, foo: 2 } } }],
+    });
+    expect(
+      errors.some((e) => e.code === "unexpected-property" && e.path === "/layers/0/aes/x/foo"),
+    ).toBe(true);
+    expect(errors.some((e) => e.path === "/layers/0/aes/x/value")).toBe(false);
+  });
+
   it("mixed channel forms (field+value) report invalid-channel-value, not root invalid-type", () => {
     const errors = errorsOf({
       layers: [{ geom: "point", aes: { x: { field: "x", value: 1 } } }],
@@ -265,6 +275,17 @@ describe("validate — TypeBox 1.x error mapping (Codex P2 regressions)", () => 
     );
   });
 
+  it("named data with an extra key reports only the extra key", () => {
+    const errors = errorsOf({
+      data: { name: "cars", rows: [] },
+      layers: [{ geom: "point" }],
+    });
+    expect(errors.some((e) => e.code === "unexpected-property" && e.path === "/data/rows")).toBe(
+      true,
+    );
+    expect(errors.some((e) => e.path === "/data/name")).toBe(false);
+  });
+
   it("mixed data forms (values+name) report invalid-data, not root invalid-type", () => {
     const errors = errorsOf({
       data: { values: [], name: "cars" },
@@ -275,6 +296,17 @@ describe("validate — TypeBox 1.x error mapping (Codex P2 regressions)", () => 
       errors.some(
         (e) => e.code === "invalid-data" && e.path === "/data" && e.message.includes("mixes forms"),
       ),
+    ).toBe(true);
+  });
+
+  it("dataset entries reject named references with a property diagnostic", () => {
+    const errors = errorsOf({
+      datasets: { cars: { name: "cars" } },
+      layers: [{ geom: "point" }],
+    });
+    expect(errors.some((e) => e.code === "invalid-type" && e.path === "")).toBe(false);
+    expect(
+      errors.some((e) => e.code === "unexpected-property" && e.path === "/datasets/cars/name"),
     ).toBe(true);
   });
 

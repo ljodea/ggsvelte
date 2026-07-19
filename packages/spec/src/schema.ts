@@ -1537,7 +1537,8 @@ function reRootSpec(key: keyof typeof SpecDeclarations): SpecImportSchema {
 }
 
 export const SpecModule = {
-  Import(key: keyof typeof SpecDeclarations): SpecImportSchema {
+  // oxlint-disable-next-line typescript/no-unnecessary-type-parameters -- preserves TypeBox 0.x instantiation-expression compatibility
+  Import<Key extends keyof typeof SpecDeclarations>(key: Key): SpecImportSchema {
     return reRootSpec(key);
   },
 };

@@ -264,26 +264,51 @@ const DATA_DISCRIMINATORS = ["values", "columns", "name"] as const;
  * `ignoreKeys`. Used to ignore competing-branch noise (e.g. Columns rejecting
  * `values`) while still surfacing typos and form-illegal keys.
  */
+function additionalPropertyNames(
+  group: readonly TLocalizedValidationError[],
+  ignoreKeys: ReadonlySet<string> = new Set(),
+): string[] {
+  const names = new Set<string>();
+  for (const error of group) {
+    if (error.keyword !== "additionalProperties") continue;
+    const listed = Array.isArray(error.params.additionalProperties)
+      ? error.params.additionalProperties
+      : [];
+    for (const key of listed) {
+      if (!ignoreKeys.has(key)) names.add(key);
+    }
+  }
+  return [...names];
+}
+
 function hasActionableAddlNoise(
   group: readonly TLocalizedValidationError[],
   ignoreKeys: ReadonlySet<string>,
 ): boolean {
-  for (const e of group) {
-    if (e.keyword !== "additionalProperties") continue;
-    const listed = Array.isArray(e.params.additionalProperties)
-      ? e.params.additionalProperties
-      : [];
-    if (listed.some((k) => !ignoreKeys.has(k))) return true;
-  }
-  return false;
+  return additionalPropertyNames(group, ignoreKeys).length > 0;
 }
 
 function channelDiscriminatorKeys(v: Record<string, unknown>): string[] {
   return CHANNEL_DISCRIMINATORS.filter((k) => k in v);
 }
 
-function dataDiscriminatorKeys(v: Record<string, unknown>): string[] {
-  return DATA_DISCRIMINATORS.filter((k) => k in v);
+function dataDiscriminatorKeys(
+  v: Record<string, unknown>,
+  allowed: readonly (typeof DATA_DISCRIMINATORS)[number][] = DATA_DISCRIMINATORS,
+): string[] {
+  return allowed.filter((k) => k in v);
+}
+
+function dataDiscriminatorsForUnion(
+  members: UnionMemberInfo,
+  path: string,
+): readonly (typeof DATA_DISCRIMINATORS)[number][] {
+  const allowed: (typeof DATA_DISCRIMINATORS)[number][] = [];
+  if (members.refs.some((ref) => ref.endsWith("DataValues"))) allowed.push("values");
+  if (members.refs.some((ref) => ref.endsWith("DataColumns"))) allowed.push("columns");
+  if (members.refs.some((ref) => ref.endsWith("DataName"))) allowed.push("name");
+  if (allowed.length > 0) return allowed;
+  return pathSegments(path)[0] === "datasets" ? ["values", "columns"] : DATA_DISCRIMINATORS;
 }
 
 /**
@@ -306,8 +331,11 @@ function allowedKeysForPresentChannelForm(v: Record<string, unknown>): Set<strin
 }
 
 /** Keys legal on the single present data form, or null when forms are mixed. */
-function allowedKeysForPresentDataForm(v: Record<string, unknown>): Set<string> | null {
-  const discs = dataDiscriminatorKeys(v);
+function allowedKeysForPresentDataForm(
+  v: Record<string, unknown>,
+  allowedDiscriminators: readonly (typeof DATA_DISCRIMINATORS)[number][],
+): Set<string> | null {
+  const discs = dataDiscriminatorKeys(v, allowedDiscriminators);
   if (discs.length !== 1) return null;
   return new Set([discs[0]!]);
 }
@@ -389,6 +417,7 @@ function mapPathGroup(
 
   const anyOfErr = group.find((e) => e.keyword === "anyOf");
   const constErrs = group.filter((e) => e.keyword === "const");
+  let activeFormKeys: ReadonlySet<string> | null = null;
 
   // Object-branch noise in mixed unions (e.g. ThemeName | ThemeSpec): prefer
   // required / additionalProperties over const-branch enum synthesis.
@@ -440,6 +469,7 @@ function mapPathGroup(
         }
         const formKeys = allowedKeysForPresentChannelForm(valueAtPath);
         if (formKeys !== null && hasActionableAddlNoise(group, formKeys)) {
+          activeFormKeys = formKeys;
           // fall through to additionalProperties / required handlers
         } else {
           return [];
@@ -468,19 +498,31 @@ function mapPathGroup(
       (isDataUnionPath(path) && anyOfErr !== undefined);
 
     if (isDataUnion) {
-      // Already wrapped as values/columns/name:
-      // - mixed forms (values+name) → invalid-data
-      // - extra sibling keys (rows) → fall through for unexpected-property
+      const allowedDataDiscriminators = dataDiscriminatorsForUnion(members, path);
+      const allowedDataForms = allowedDataDiscriminators.map((discriminator) =>
+        discriminator === "values"
+          ? '{"values": [...rows]}'
+          : discriminator === "columns"
+            ? '{"columns": {...arrays}}'
+            : '{"name": "dataset"}',
+      );
+      const allowedDataFormsMessage =
+        allowedDataForms.length === 2
+          ? `${allowedDataForms[0]} or ${allowedDataForms[1]}`
+          : `${allowedDataForms.slice(0, -1).join(", ")}, or ${allowedDataForms.at(-1)}`;
+      // Already wrapped as an allowed data form:
+      // - mixed allowed forms (values+name on DataRef) → invalid-data
+      // - illegal discriminators / extra siblings → fall through for unexpected-property
       // - nested cell failures only → suppress invalid-data re-wrap
       if (isRecord(valueAtPath) && looksLikeDataContainer(valueAtPath)) {
-        const discs = dataDiscriminatorKeys(valueAtPath);
+        const discs = dataDiscriminatorKeys(valueAtPath, allowedDataDiscriminators);
         if (discs.length > 1) {
           return [
             {
               code: "invalid-data",
               path,
-              message: `Data mixes forms (${discs.map((d) => `"${d}"`).join(" and ")}); use exactly one of {"values": [...rows]}, {"columns": {...arrays}}, or {"name": "dataset"}.`,
-              allowed: ["values", "columns", "name"],
+              message: `Data mixes forms (${discs.map((d) => `"${d}"`).join(" and ")}); use exactly one of ${allowedDataFormsMessage}.`,
+              allowed: [...allowedDataDiscriminators],
               fix: {
                 description: "Pick a single data form.",
                 example: { values: [{ x: 1, y: 2 }] },
@@ -488,8 +530,13 @@ function mapPathGroup(
             },
           ];
         }
-        const formKeys = allowedKeysForPresentDataForm(valueAtPath);
-        if (formKeys !== null && hasActionableAddlNoise(group, formKeys)) {
+        const presentFormKeys = allowedKeysForPresentDataForm(
+          valueAtPath,
+          allowedDataDiscriminators,
+        );
+        const formKeys = presentFormKeys ?? new Set(allowedDataDiscriminators);
+        if (hasActionableAddlNoise(group, formKeys)) {
+          activeFormKeys = formKeys;
           // fall through
         } else {
           return [];
@@ -499,8 +546,8 @@ function mapPathGroup(
           {
             code: "invalid-data",
             path,
-            message: `Data must be one of {"values": [...rows]}, {"columns": {...arrays}}, or {"name": "dataset"}.`,
-            allowed: ["values", "columns", "name"],
+            message: `Data must be one of ${allowedDataFormsMessage}.`,
+            allowed: [...allowedDataDiscriminators],
             fix: {
               description: 'Wrap inline rows as {"values": [...]}.',
               example: { values: [{ x: 1, y: 2 }] },
@@ -575,9 +622,7 @@ function mapPathGroup(
   // additionalProperties (records / free-form rows) → value type failures.
   const addl = group.find((e) => e.keyword === "additionalProperties");
   if (addl !== undefined) {
-    const listed = Array.isArray(addl.params.additionalProperties)
-      ? addl.params.additionalProperties
-      : [];
+    const listed = additionalPropertyNames(group, activeFormKeys ?? new Set());
     const objectSchema =
       (typeof addl.schemaPath === "string"
         ? schemaAtSchemaPath(ctx.schema, instancePath, addl.schemaPath)
@@ -593,7 +638,8 @@ function mapPathGroup(
         };
       });
     }
-    const properties = objectPropertyNames(objectSchema);
+    const properties =
+      activeFormKeys === null ? objectPropertyNames(objectSchema) : [...activeFormKeys];
     return listed.map((prop) => {
       const propPath = `${path}/${prop}`;
       const suggestion = didYouMean(prop, properties);
