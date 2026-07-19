@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  buildInspectionCandidateRef,
   buildQueuedInspectFrame,
   buildQueuedPointerInspection,
   resolveQueuedInspectFrameAction,
@@ -414,39 +413,6 @@ describe("buildQueuedInspectFrame", () => {
       x: 12,
       y: 24,
     });
-  });
-});
-
-describe("buildInspectionCandidateRef", () => {
-  it("prefers candidateId and does not call fallbackId when present", () => {
-    let fallbackCalls = 0;
-    expect(
-      buildInspectionCandidateRef({
-        epoch: 3,
-        candidateId: 7,
-        fallbackId: () => {
-          fallbackCalls += 1;
-          return -1;
-        },
-        panelId: "p0",
-        x: 1,
-        y: 2,
-      }),
-    ).toEqual({ epoch: 3, id: 7, panelId: "p0", x: 1, y: 2 });
-    expect(fallbackCalls).toBe(0);
-  });
-
-  it("uses lazy fallbackId when candidateId is missing (incl. -1)", () => {
-    expect(
-      buildInspectionCandidateRef({
-        epoch: 1,
-        candidateId: undefined,
-        fallbackId: () => -1,
-        panelId: null,
-        x: 10,
-        y: 20,
-      }),
-    ).toEqual({ epoch: 1, id: -1, panelId: null, x: 10, y: 20 });
   });
 });
 

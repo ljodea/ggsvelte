@@ -155,32 +155,10 @@ export function resolveQueuedInspectFrameAction(
 }
 
 /** Reducer inspect payload candidate (matches InteractionCandidateRef shape). */
-export type InspectionCandidateRef = {
+type InspectionCandidateRef = {
   readonly epoch: number;
   readonly id: number;
   readonly panelId: string | null;
   readonly x: number;
   readonly y: number;
 };
-
-/**
- * Build the inspect-dispatch candidate ref for setInspection apply.
- * `fallbackId` is a thunk so hosts can defer `traversalHits.indexOf(hit)`
- * until `candidateId` is actually missing (hot pointer path).
- */
-export function buildInspectionCandidateRef(input: {
-  readonly epoch: number;
-  readonly candidateId: number | undefined;
-  readonly fallbackId: () => number;
-  readonly panelId: string | null;
-  readonly x: number;
-  readonly y: number;
-}): InspectionCandidateRef {
-  return {
-    epoch: input.epoch,
-    id: input.candidateId ?? input.fallbackId(),
-    panelId: input.panelId,
-    x: input.x,
-    y: input.y,
-  };
-}
