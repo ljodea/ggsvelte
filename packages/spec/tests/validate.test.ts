@@ -210,6 +210,31 @@ describe("validate — TypeBox 1.x error mapping (Codex P2 regressions)", () => 
     ).toBe(true);
   });
 
+  it("mixed channel forms (field+value) report invalid-channel-value, not root invalid-type", () => {
+    const errors = errorsOf({
+      layers: [{ geom: "point", aes: { x: { field: "x", value: 1 } } }],
+    });
+    expect(errors.some((e) => e.code === "invalid-type" && e.path === "")).toBe(false);
+    expect(
+      errors.some(
+        (e) =>
+          e.code === "invalid-channel-value" &&
+          e.path === "/layers/0/aes/x" &&
+          e.message.includes("mixes"),
+      ),
+    ).toBe(true);
+  });
+
+  it("field form with scale (ValueRef-only key) reports unexpected-property", () => {
+    const errors = errorsOf({
+      layers: [{ geom: "point", aes: { x: { field: "x", scale: true } } }],
+    });
+    expect(errors.some((e) => e.code === "invalid-type" && e.path === "")).toBe(false);
+    expect(
+      errors.some((e) => e.code === "unexpected-property" && e.path === "/layers/0/aes/x/scale"),
+    ).toBe(true);
+  });
+
   it("wrapped data with an extra sibling key reports unexpected-property", () => {
     const errors = errorsOf({
       data: { values: [], rows: [] },

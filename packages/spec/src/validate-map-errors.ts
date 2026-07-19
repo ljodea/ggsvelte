@@ -254,16 +254,15 @@ function isScalarValue(v: unknown): boolean {
   return v === null || typeof v === "string" || typeof v === "number" || typeof v === "boolean";
 }
 
-/** Discriminator keys of channel form objects (FieldRef | ValueRef | StatRef). */
-const CHANNEL_FORM_KEYS = new Set(["field", "value", "stat", "scale"]);
+/** Exclusive channel form discriminators (exactly one allowed per channel). */
+const CHANNEL_DISCRIMINATORS = ["field", "value", "stat"] as const;
 /** Discriminator keys of DataRef / InlineData forms. */
 const DATA_FORM_KEYS = new Set(["values", "columns", "name"]);
 
 /**
- * True when an additionalProperties failure lists a key that is *not* a
- * competing-branch discriminator. Cross-branch noise (e.g. Columns rejecting
- * `values`) is ignored so nested/cell errors remain authoritative; genuine
- * typos like `fielld` / `rows` fall through to unexpected-property mapping.
+ * True when an additionalProperties failure lists a key that is *not* in
+ * `ignoreKeys`. Used to ignore competing-branch noise (e.g. Columns rejecting
+ * `values`) while still surfacing typos and form-illegal keys.
  */
 function hasActionableAddlNoise(
   group: readonly TLocalizedValidationError[],
@@ -277,6 +276,29 @@ function hasActionableAddlNoise(
     if (listed.some((k) => !ignoreKeys.has(k))) return true;
   }
   return false;
+}
+
+function channelDiscriminatorKeys(v: Record<string, unknown>): string[] {
+  return CHANNEL_DISCRIMINATORS.filter((k) => k in v);
+}
+
+/**
+ * Keys legal on the single present channel form, or null when forms are mixed
+ * / absent. FieldRef = {field}; ValueRef = {value, scale?}; StatRef = {stat}.
+ */
+function allowedKeysForPresentChannelForm(v: Record<string, unknown>): Set<string> | null {
+  const discs = channelDiscriminatorKeys(v);
+  if (discs.length !== 1) return null;
+  switch (discs[0]) {
+    case "field":
+      return new Set(["field"]);
+    case "value":
+      return new Set(["value", "scale"]);
+    case "stat":
+      return new Set(["stat"]);
+    default:
+      return null;
+  }
 }
 
 /**
@@ -383,10 +405,30 @@ function mapPathGroup(
 
     if (isChannel && !members.allConst) {
       // Near-canonical channel object:
-      // - extra keys (fielld) → fall through so additionalProperties maps
+      // - mixed forms (field+value) → invalid-channel-value
+      // - form-illegal keys (field+scale) / typos → fall through to addl
       // - nested type failures only (value: {}) → suppress union catalog
-      if (looksLikeChannelForm(valueAtPath) && typeof valueAtPath !== "string") {
-        if (hasActionableAddlNoise(group, CHANNEL_FORM_KEYS)) {
+      if (
+        isRecord(valueAtPath) &&
+        looksLikeChannelForm(valueAtPath) &&
+        typeof valueAtPath !== "string"
+      ) {
+        const discs = channelDiscriminatorKeys(valueAtPath);
+        if (discs.length > 1) {
+          return [
+            {
+              code: "invalid-channel-value",
+              path,
+              message: `Channel "${key}" mixes forms (${discs.map((d) => `"${d}"`).join(" and ")}); use exactly one of {"field": ...}, {"value": ...}, or {"stat": ...}.`,
+              fix: {
+                description: `Pick a single channel form for "${key}".`,
+                example: CHANNEL_FIX_EXAMPLE,
+              },
+            },
+          ];
+        }
+        const formKeys = allowedKeysForPresentChannelForm(valueAtPath);
+        if (formKeys !== null && hasActionableAddlNoise(group, formKeys)) {
           // fall through to additionalProperties / required handlers
         } else {
           return [];
