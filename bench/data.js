@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784419474717,
+  "lastUpdate": 1784420472299,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -31380,6 +31380,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 105.7281,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "e4b02b5eb8649410482b611336dd680541a8235a",
+          "message": "refactor(interaction): delegate keyboard navigation to CandidateStore (#315)",
+          "timestamp": "2026-07-18T19:20:29-05:00",
+          "tree_id": "ada8640030bc657f90407ba0369939cdbbece3a1",
+          "url": "https://github.com/ljodea/ggsvelte/commit/e4b02b5eb8649410482b611336dd680541a8235a"
+        },
+        "date": 1784420471498,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.7319,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.1822,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 9.9883,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 13.6623,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 90.2504,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 119.015,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.0496,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2751,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 85.465,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 108.2373,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 11.7739,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 11.2512,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 1105.6176,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.6652,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 274.112,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 10.5614,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 28.5445,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 631.8045,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 167.6327,
             "unit": "ms"
           }
         ]
