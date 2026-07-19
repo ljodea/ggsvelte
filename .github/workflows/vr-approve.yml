@@ -236,6 +236,19 @@ jobs:
           persist-credentials: false
           path: base
 
+      - name: setup Bun for trusted default-branch generator
+        if: steps.gate.outputs.approved == 'true' && steps.idem.outputs.skip != 'true'
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.3.14
+
+      - name: install trusted default-branch dependencies
+        if: steps.gate.outputs.approved == 'true' && steps.idem.outputs.skip != 'true'
+        working-directory: base
+        run: bun install --frozen-lockfile
+        env:
+          BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
+
       - name: commit verified baselines to vr-update/pr-<n>
         if: steps.gate.outputs.approved == 'true' && steps.idem.outputs.skip != 'true'
         env:
@@ -261,7 +274,13 @@ jobs:
 
           mkdir -p tests/visual/__screenshots__
           find ../vr-artifact -name '*.png' -exec cp {} tests/visual/__screenshots__/ \;
-          git add tests/visual/__screenshots__
+
+          # Re-materialize docs-owned preview assets from the newly approved
+          # canonical light baselines. This executes only the trusted generator
+          # checked out from the default branch, never PR-authored code.
+          bun scripts/gen-gallery-previews.ts
+          git add tests/visual/__screenshots__ apps/docs/static/previews \
+            apps/docs/src/lib/generated/gallery-previews.ts
 
           if git diff --cached --quiet; then
             echo "no baseline changes — nothing to commit (idempotent per head SHA)"
