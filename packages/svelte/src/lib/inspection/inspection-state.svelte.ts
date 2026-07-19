@@ -2,15 +2,15 @@
  * Inspection controller extracted from GGPlot for S6.
  *
  * Owns inspection $state, inspectionSeed, lastInspectionFingerprint,
- * activeTraversalIndex, pointer-queue fields (queuedPointerToken,
+ * activeCandidateId, pointer-queue fields (queuedPointerToken,
  * queuedPointerInspection, pendingPinnedPointer), construction-time deriveds
  * (inspectionPanel, traversalHits), the coordinator, private resolve/emit
  * helpers, public set/toggle/dismiss/close/traversal/queue methods, and
  * phased effects (coordinator disposal + scene-reconcile).
  *
  * Factory sits at the original queue-vars position (before the component-held
- * reducer). Construction-time deriveds read inspection (own), model, and
- * surfaceInteractive only. Armed later-declared / handler-only deps for the
+ * reducer). Construction-time deriveds read inspection (own) and model only.
+ * Armed later-declared / handler-only deps for the
  * construction guard: reducer, captureSurface, tooltipHovered,
  * clearTooltipHovered, keyAt, inspectEnabled, chooseTool, clearBrush,
  * oninspect, oninteraction.
@@ -36,21 +36,8 @@ import type {
 import { inspectionLiveText as inspectionLiveTextFor } from "../assembly/labels.js";
 import { plotTooltipDomId } from "../assembly/layout.js";
 import { panelContainingAnchor } from "../scene/geometry.js";
-import {
-  bestDirectionalIndex,
-  buildTraversalEntries,
-  cycleCoincidentIndex,
-  hitFromCandidate,
-  nextTraversalIndex,
-  type SceneHit,
-  planCycleCoincident,
-  planDirectionalNavigate,
-} from "../surface/plot-px.js";
-import {
-  buildInspectionCandidateRef,
-  resolveQueuedInspectFrameAction,
-  type QueuedPointerInspection,
-} from "./frame.js";
+import { hitFromCandidate, type SceneHit } from "../surface/plot-px.js";
+import { resolveQueuedInspectFrameAction, type QueuedPointerInspection } from "./frame.js";
 import {
   resolveInspectionCompleteness,
   resolveInspectionMode,
@@ -85,7 +72,6 @@ export type InspectionStateDeps = {
    */
   reducer: () => InteractionReducer;
   inspectConfig: () => ResolvedInteractionConfig["inspect"];
-  surfaceInteractive: () => boolean;
   inspectEnabled: () => boolean;
   dataIdentityEpoch: () => string;
   /**
@@ -165,7 +151,7 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
   );
   let inspectionSeed: CandidateFacts | null = null;
   let lastInspectionFingerprint = "";
-  let activeTraversalIndex = $state(-1);
+  let activeCandidateId: number | null = null;
 
   let queuedPointerToken: {
     readonly epoch: number;
@@ -174,22 +160,11 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
   let queuedPointerInspection: QueuedPointerInspection | null = null;
   let pendingPinnedPointer: QueuedPointerInspection | null = null;
 
-  // Construction-safe: own state + earlier host model / surfaceInteractive.
+  // Construction-safe: own state + earlier host model.
   const inspectionPanel = $derived.by(() => {
     if (inspection === null || deps.model() === null) return null;
     return panelContainingAnchor(deps.model()!.scene.panels, inspection.focus.anchor);
   });
-
-  // Parallel hits + candidate ids: keyboard apply O(1)-fetches
-  // candidates.candidate(id) so resolveInspection does not re-scan the full
-  // store (O(C) matchCandidateFromHit). Ids only — not full CandidateFacts —
-  // so large charts do not retain every facts object for the model lifetime.
-  const traversal = $derived.by(() => {
-    if (!deps.surfaceInteractive() || deps.model() === null)
-      return { hits: [] as SceneHit[], candidateIds: [] as number[] };
-    return buildTraversalEntries(deps.model()!.candidates);
-  });
-  const traversalHits: SceneHit[] = $derived(traversal.hits);
 
   // Coordinator closes over keyAt — handler-only invocation (deferred).
   const inspectionCoordinator = createInspectionCoordinator<Record<string, CellValue>, PropertyKey>(
@@ -300,14 +275,13 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
           return;
         }
         const next = resolved.snapshot;
-        const candidateRef = buildInspectionCandidateRef({
+        const candidateRef = {
           epoch: deps.model()?.runId ?? 0,
-          candidateId: candidate?.id,
-          fallbackId: () => traversalHits.indexOf(hit!),
+          id: resolved.seed.id,
           panelId: next.panelId,
           x: hit!.x,
           y: hit!.y,
-        });
+        };
         deps.reducer().dispatch({ type: "inspect", candidate: candidateRef, source });
         if (state === "pinned") deps.reducer().dispatch({ type: "toggle-pin", source });
         if (
@@ -319,6 +293,7 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
           return;
         inspection = next;
         inspectionSeed = resolved.seed;
+        activeCandidateId = resolved.seed.id;
         if (resolved.semanticChanged) emitInspection(next, resolved.semanticFingerprint);
       }
     }
@@ -433,47 +408,44 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
     dismissInspection("close", source, { restoreFocus });
   }
 
-  /** Private — no remaining external consumer (codex r2 P2-3). */
-  function applyTraversalIndex(index: number): void {
-    activeTraversalIndex = index;
-    // O(1) id → facts for the selected index only (not full-store rematch).
-    const model = deps.model();
-    const id = traversal.candidateIds[index];
-    const candidate =
-      model === null || id === undefined
-        ? undefined
-        : (model.candidates.candidate(id) ?? undefined);
-    setInspection(traversal.hits[index]!, "keyboard", "transient", undefined, candidate);
+  function applyCandidateId(id: number | null): void {
+    if (id === null) return;
+    const candidate = deps.model()?.candidates.candidate(id);
+    if (candidate === null || candidate === undefined) return;
+    activeCandidateId = id;
+    setInspection(hitFromCandidate(candidate), "keyboard", "transient", undefined, candidate);
   }
 
   function navigate(delta: number): void {
-    if (traversalHits.length === 0) return;
-    applyTraversalIndex(nextTraversalIndex(activeTraversalIndex, delta, traversalHits.length));
+    const store = deps.model()?.candidates;
+    if (store === undefined || store.size === 0) return;
+    const direction = delta < 0 ? "previous" : "next";
+    applyCandidateId(store.traverse(activeCandidateId, direction, Math.abs(delta)));
   }
 
   function navigateDirection(dx: number, dy: number): void {
-    const plan = planDirectionalNavigate({
-      hitCount: traversalHits.length,
-      hasInspection: inspection !== null,
-      currentIndex: activeTraversalIndex,
-      bestIndex: () => bestDirectionalIndex(inspection!.focus.anchor, traversalHits, dx, dy),
-    });
-    if (plan.type === "set-index") applyTraversalIndex(plan.index);
+    const store = deps.model()?.candidates;
+    if (store === undefined || store.size === 0) return;
+    if (inspection === null || activeCandidateId === null) {
+      applyCandidateId(store.traverse(activeCandidateId, "next"));
+      return;
+    }
+    const direction = dx < 0 ? "left" : dx > 0 ? "right" : dy < 0 ? "up" : dy > 0 ? "down" : "next";
+    applyCandidateId(store.traverse(activeCandidateId, direction));
   }
 
   function cycleCoincident(delta: number): void {
-    const plan = planCycleCoincident({
-      hasInspection: inspection !== null,
-      hitCount: traversalHits.length,
-      currentIndex: activeTraversalIndex,
-      nextIndex: () =>
-        cycleCoincidentIndex(inspection!.focus.anchor, traversalHits, activeTraversalIndex, delta),
-    });
-    if (plan.type === "set-index") applyTraversalIndex(plan.index);
+    const store = deps.model()?.candidates;
+    if (store === undefined || store.size === 0) return;
+    if (inspection === null || activeCandidateId === null) {
+      applyCandidateId(store.traverse(activeCandidateId, "next"));
+      return;
+    }
+    applyCandidateId(store.cycle(activeCandidateId, delta));
   }
 
   function resetTraversalIndex(): void {
-    activeTraversalIndex = -1;
+    activeCandidateId = null;
   }
 
   function applyQueuedInspectFrame(action: InspectPointerFrameAction): void {
@@ -600,6 +572,7 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
           } else {
             inspection = reconciled.snapshot;
             inspectionSeed = reconciled.seed;
+            activeCandidateId = reconciled.seed.id;
             if (reconciled.semanticChanged)
               emitInspection(reconciled.snapshot, reconciled.semanticFingerprint);
           }
