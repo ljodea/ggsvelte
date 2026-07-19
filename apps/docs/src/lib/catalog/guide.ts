@@ -13,7 +13,7 @@ export const GUIDE_CATALOG = [
   {
     slug: "getting-started",
     title: "Getting started",
-    description: "Install ggsvelte and draw the same chart in all three surfaces.",
+    description: "Install ggsvelte and build one complete responsive, accessible Svelte chart.",
     section: "Start",
   },
   {
@@ -37,7 +37,8 @@ export const GUIDE_CATALOG = [
   {
     slug: "errors",
     title: "Errors reference",
-    description: "Every validation error and render-time diagnostic, from the catalogs.",
+    description:
+      "Understand validation, render, interaction, and CLI diagnostics and recover safely.",
     section: "Reference",
   },
   {

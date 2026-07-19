@@ -8,14 +8,21 @@ import { describe, expect, it } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { ADVISORY_CATALOG, PIPELINE_ERROR_CATALOG, PIPELINE_WARNING_CATALOG } from "@ggsvelte/core";
+import {
+  ADVISORY_CATALOG,
+  CLI_DIAGNOSTIC_CATALOG,
+  PIPELINE_ERROR_CATALOG,
+  PIPELINE_WARNING_CATALOG,
+} from "@ggsvelte/core";
 import { ERROR_CATALOG, LINT_CATALOG } from "@ggsvelte/spec";
 import { INTERACTION_DIAGNOSTIC_CATALOG } from "../packages/svelte/src/lib/interaction/interaction.ts";
 
 import { EXAMPLES } from "../examples/manifest.ts";
 import type { LifecycleDoc } from "./gen-llms.ts";
+import { QUICKSTART_PAGE_SVELTE } from "./quickstart.ts";
 import {
   buildAdvisoriesMd,
+  buildDiagnosticDocs,
   buildErrorsMd,
   buildLifecycleMd,
   buildLlmsFull,
@@ -60,6 +67,14 @@ describe("renderMarkdown", () => {
     expect(html).toContain('href="https://example.com"');
   });
 
+  it("renders allowlisted copy fences with accessible controls and status", () => {
+    const html = renderMarkdown('```json copy\n{"x": 1}\n```');
+    expect(html).toContain('<button type="button" data-copy-code="guide-code-1"');
+    expect(html).toContain('aria-describedby="guide-code-1-status"');
+    expect(html).toContain('<pre id="guide-code-1"><code class="language-json">');
+    expect(html).toContain('<span id="guide-code-1-status" role="status" aria-live="polite">');
+  });
+
   it("adds stable unique heading fragments", () => {
     const html = renderMarkdown("# Events\n\n## `onselect` event\n\n## `onselect` event");
     expect(html).toContain('<h1 id="events">Events</h1>');
@@ -69,11 +84,44 @@ describe("renderMarkdown", () => {
 });
 
 describe("guide sections cover their catalogs", () => {
-  it("errors page names every validation + pipeline + warning code", () => {
-    const md = buildErrorsMd();
-    for (const code of Object.keys(ERROR_CATALOG)) expect(md).toContain(`\`${code}\``);
-    for (const code of Object.keys(PIPELINE_ERROR_CATALOG)) expect(md).toContain(`\`${code}\``);
-    for (const code of Object.keys(PIPELINE_WARNING_CATALOG)) expect(md).toContain(`\`${code}\``);
+  it("errors page presents every source-qualified diagnostic with stable anchors", () => {
+    const entries = buildDiagnosticDocs();
+    const expectedCount =
+      Object.keys(ERROR_CATALOG).length +
+      Object.keys(PIPELINE_ERROR_CATALOG).length +
+      Object.keys(PIPELINE_WARNING_CATALOG).length +
+      Object.keys(INTERACTION_DIAGNOSTIC_CATALOG).length +
+      Object.keys(CLI_DIAGNOSTIC_CATALOG).length;
+    expect(entries).toHaveLength(expectedCount);
+    expect(new Set(entries.map((entry) => `${entry.source}:${entry.code}`)).size).toBe(
+      expectedCount,
+    );
+    expect(
+      entries.find((entry) => entry.source === "validation" && entry.code === "unknown-field"),
+    ).toMatchObject({ anchor: "unknown-field", severity: "error", consequence: "blocked" });
+    expect(
+      entries.find((entry) => entry.source === "pipeline" && entry.code === "unknown-field"),
+    ).toMatchObject({
+      anchor: "unknown-field-pipeline",
+      severity: "error",
+      consequence: "blocked",
+    });
+    expect(
+      entries.find((entry) => entry.source === "warning" && entry.code === "palette-exhausted"),
+    ).toMatchObject({ anchor: "palette-exhausted-warning", consequence: "degraded" });
+    expect(
+      entries.find((entry) => entry.source === "cli" && entry.code === "max-marks-exceeded"),
+    ).toMatchObject({ anchor: "max-marks-exceeded-cli", consequence: "blocked" });
+
+    const html = renderMarkdown(buildErrorsMd());
+    for (const entry of entries) {
+      expect(html).toContain(`id="${entry.anchor}"`);
+      expect(entry.whatFailed).not.toBe("");
+      expect(entry.why).not.toBe("");
+      expect(entry.fix).not.toBe("");
+    }
+    expect(buildErrorsMd()).toContain("## Quickstart troubleshooting");
+    expect(buildErrorsMd()).toContain("Minimal illustration — copy only the relevant fragment");
   });
 
   it("advisories page names every lint + heuristic code", () => {
@@ -90,11 +138,20 @@ describe("guide sections cover their catalogs", () => {
     expect(md).toContain("edition: 1");
   });
 
-  it("getting-started shows all three surfaces and the fix contract", () => {
-    expect(GETTING_STARTED_MD).toContain('geom: "point"');
-    expect(GETTING_STARTED_MD).toContain("geomPoint()");
-    expect(GETTING_STARTED_MD).toContain("<GeomPoint />");
-    expect(GETTING_STARTED_MD).toContain("fix");
+  it("getting-started leads with the exact complete responsive SvelteKit page", () => {
+    expect(GETTING_STARTED_MD).toContain("`src/routes/+page.svelte` (complete file)");
+    expect(GETTING_STARTED_MD).toContain(QUICKSTART_PAGE_SVELTE);
+    expect(GETTING_STARTED_MD.match(/<GeomPoint \/>/g)).toHaveLength(1);
+    expect(QUICKSTART_PAGE_SVELTE).toContain("import { GeomPoint, GGPlot }");
+    expect(QUICKSTART_PAGE_SVELTE).toContain("const cars = [");
+    expect(QUICKSTART_PAGE_SVELTE).toContain('ariaLabel="Fuel economy decreases');
+    expect(QUICKSTART_PAGE_SVELTE).not.toMatch(/\bwidth=/);
+    expect(QUICKSTART_PAGE_SVELTE).not.toMatch(/\bheight=/);
+
+    const chartCheckpoint = GETTING_STARTED_MD.indexOf("## You have a chart");
+    expect(chartCheckpoint).toBeGreaterThan(-1);
+    expect(GETTING_STARTED_MD.indexOf("Fluent builder")).toBeGreaterThan(chartCheckpoint);
+    expect(GETTING_STARTED_MD.indexOf("PortableSpec JSON")).toBeGreaterThan(chartCheckpoint);
   });
 
   it("documents the machine-checked packed-consumer support contract", () => {

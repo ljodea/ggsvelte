@@ -18,13 +18,84 @@ for (const width of [375, 768, 1280]) {
   });
 }
 
-for (const route of ["/examples/point/scatter-color", "/reference/interactions", "/playground"]) {
+for (const route of [
+  "/examples/point/scatter-color",
+  "/reference/interactions",
+  "/playground",
+  "/guide/errors#unknown-field",
+]) {
   test(`${route} keeps wide content locally contained on mobile`, async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 800 });
     await page.goto(route);
     await expectNoHorizontalOverflow(page);
   });
 }
+
+test("getting started presents one complete Svelte file before secondary surfaces", async ({
+  page,
+}) => {
+  await page.goto(GUIDE_ROUTE);
+  const article = page.locator("article.guide");
+  await expect(article).toContainText("src/routes/+page.svelte (complete file)");
+  const text = await article.textContent();
+  expect(text?.indexOf("Draw your first chart")).toBeLessThan(
+    text?.indexOf("You have a chart") ?? 0,
+  );
+  expect(text?.indexOf("You have a chart")).toBeLessThan(text?.indexOf("Fluent builder") ?? 0);
+  const firstFile = article.locator("pre").nth(2);
+  await expect(firstFile).toContainText("import { GeomPoint, GGPlot }");
+  await expect(firstFile).toContainText("ariaLabel=");
+  await expect(firstFile).not.toContainText("width=");
+  await expect(firstFile).not.toContainText("height=");
+});
+
+test("errors deep links expose source-qualified recovery and copy safe recipes", async ({
+  context,
+  page,
+}) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  await page.goto("/guide/errors#unknown-field");
+  await expect(page.locator("#unknown-field")).toBeVisible();
+  await expect(page.locator("#unknown-field-pipeline")).toHaveCount(1);
+  const recipe = page.locator("#unknown-field ~ .guide-code-copy").first();
+  await recipe.getByRole("button", { name: "Copy code" }).click();
+  await expect(recipe.getByRole("status")).toHaveText("Copied.");
+  await expect
+    .poll(() => page.evaluate(() => navigator.clipboard.readText()))
+    .toContain('"field": "weight"');
+
+  await page.goto("/guide/errors#interaction-tool-unavailable");
+  await expect(page.locator("#interaction-tool-unavailable")).toBeVisible();
+  await expect(page.locator("#interaction-tool-unavailable + p")).toContainText(
+    "INTERACTION_TOOL_UNAVAILABLE",
+  );
+
+  await page.goto("/guide/errors#invalid-json");
+  await expect(page.locator("#invalid-json")).toBeVisible();
+  await expect(page.locator("#invalid-json ~ .guide-code-copy").first()).toContainText(
+    "ggsvelte-render",
+  );
+});
+
+test("guide code copy falls back to selecting text when clipboard access is denied", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText: () => Promise.reject(new DOMException("Denied", "NotAllowedError")) },
+    });
+  });
+  await page.goto("/guide/errors#unknown-field");
+  const recipe = page.locator("#unknown-field ~ .guide-code-copy").first();
+  await recipe.getByRole("button", { name: "Copy code" }).click();
+  await expect(recipe.getByRole("status")).toHaveText(
+    "Clipboard unavailable. Code selected for manual copy.",
+  );
+  expect(await page.evaluate(() => window.getSelection()?.toString())).toContain(
+    '"field": "weight"',
+  );
+});
 
 test("desktop docs shell exposes chapter, breadcrumb, contents, and sequence navigation", async ({
   page,

@@ -175,6 +175,39 @@ pre {
   line-height: 1.55;
 }
 
+.guide-code-copy {
+  position: relative;
+  margin: 1.5rem 0;
+}
+
+.guide-code-copy pre {
+  margin: 0;
+  padding-top: 3.25rem;
+}
+
+.guide-code-copy button {
+  position: absolute;
+  z-index: 1;
+  top: 0.65rem;
+  right: 0.65rem;
+  min-height: 2.75rem;
+  padding: 0.35rem 0.65rem;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  background: var(--code-paper);
+  color: var(--code-ink);
+  font: 600 0.78rem/1 var(--body-font);
+  cursor: pointer;
+}
+
+.guide-code-copy [role="status"] {
+  display: block;
+  min-height: 1.4em;
+  margin-top: 0.4rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
 .prose :is(p, li, h3) code {
   padding: 0.08em 0.28em;
   border-radius: 2px;
