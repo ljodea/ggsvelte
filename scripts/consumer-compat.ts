@@ -18,7 +18,7 @@ const fixtureDependencies = [
   // Plugin 7 requires Svelte 5.46+, which would make the minimum row a test
   // of fixture peer resolution rather than a test of ggsvelte.
   "@sveltejs/vite-plugin-svelte@5.1.1",
-  "svelte-check@4.7.2",
+  "svelte-check@4.7.3",
   "typescript@6.0.3",
   "vite@6.4.3",
 ];
