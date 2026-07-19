@@ -254,6 +254,31 @@ function isScalarValue(v: unknown): boolean {
   return v === null || typeof v === "string" || typeof v === "number" || typeof v === "boolean";
 }
 
+/** Discriminator keys of channel form objects (FieldRef | ValueRef | StatRef). */
+const CHANNEL_FORM_KEYS = new Set(["field", "value", "stat", "scale"]);
+/** Discriminator keys of DataRef / InlineData forms. */
+const DATA_FORM_KEYS = new Set(["values", "columns", "name"]);
+
+/**
+ * True when an additionalProperties failure lists a key that is *not* a
+ * competing-branch discriminator. Cross-branch noise (e.g. Columns rejecting
+ * `values`) is ignored so nested/cell errors remain authoritative; genuine
+ * typos like `fielld` / `rows` fall through to unexpected-property mapping.
+ */
+function hasActionableAddlNoise(
+  group: readonly TLocalizedValidationError[],
+  ignoreKeys: ReadonlySet<string>,
+): boolean {
+  for (const e of group) {
+    if (e.keyword !== "additionalProperties") continue;
+    const listed = Array.isArray(e.params.additionalProperties)
+      ? e.params.additionalProperties
+      : [];
+    if (listed.some((k) => !ignoreKeys.has(k))) return true;
+  }
+  return false;
+}
+
 /**
  * TypeBox Object with `additionalProperties: false` (closed) vs a schema
  * (record/open keys whose *values* must match). 1.x reports value failures
@@ -357,25 +382,31 @@ function mapPathGroup(
       isChannelPath(path);
 
     if (isChannel && !members.allConst) {
-      // Near-canonical channel object: suppress union catalog so nested type
-      // errors (e.g. `/aes/x/value`) keep their own diagnostics.
+      // Near-canonical channel object:
+      // - extra keys (fielld) → fall through so additionalProperties maps
+      // - nested type failures only (value: {}) → suppress union catalog
       if (looksLikeChannelForm(valueAtPath) && typeof valueAtPath !== "string") {
-        return [];
-      }
-      const bareString = typeof valueAtPath === "string";
-      return [
-        {
-          code: "invalid-channel-value",
-          path,
-          message: bareString
-            ? `Channel "${key}" is the bare string ${JSON.stringify(valueAtPath)}; portable specs require the canonical form {"field": ${JSON.stringify(valueAtPath)}}.`
-            : `Channel "${key}" must be {"field": ...}, {"value": ...}, {"stat": ...}, or null.`,
-          fix: {
-            description: `Use a canonical channel form, e.g. {"field": "column_name"} to map "${key}" to a data column.`,
-            example: bareString ? { field: valueAtPath } : CHANNEL_FIX_EXAMPLE,
+        if (hasActionableAddlNoise(group, CHANNEL_FORM_KEYS)) {
+          // fall through to additionalProperties / required handlers
+        } else {
+          return [];
+        }
+      } else {
+        const bareString = typeof valueAtPath === "string";
+        return [
+          {
+            code: "invalid-channel-value",
+            path,
+            message: bareString
+              ? `Channel "${key}" is the bare string ${JSON.stringify(valueAtPath)}; portable specs require the canonical form {"field": ${JSON.stringify(valueAtPath)}}.`
+              : `Channel "${key}" must be {"field": ...}, {"value": ...}, {"stat": ...}, or null.`,
+            fix: {
+              description: `Use a canonical channel form, e.g. {"field": "column_name"} to map "${key}" to a data column.`,
+              example: bareString ? { field: valueAtPath } : CHANNEL_FIX_EXAMPLE,
+            },
           },
-        },
-      ];
+        ];
+      }
     }
 
     const isDataUnion =
@@ -384,23 +415,29 @@ function mapPathGroup(
       (isDataUnionPath(path) && anyOfErr !== undefined);
 
     if (isDataUnion) {
-      // Already wrapped as values/columns/name — nested cell/column errors
-      // report the real problem; do not suggest re-wrapping.
+      // Already wrapped as values/columns/name:
+      // - extra sibling keys (rows) → fall through for unexpected-property
+      // - nested cell failures only → suppress invalid-data re-wrap
       if (looksLikeDataContainer(valueAtPath)) {
-        return [];
-      }
-      return [
-        {
-          code: "invalid-data",
-          path,
-          message: `Data must be one of {"values": [...rows]}, {"columns": {...arrays}}, or {"name": "dataset"}.`,
-          allowed: ["values", "columns", "name"],
-          fix: {
-            description: 'Wrap inline rows as {"values": [...]}.',
-            example: { values: [{ x: 1, y: 2 }] },
+        if (hasActionableAddlNoise(group, DATA_FORM_KEYS)) {
+          // fall through
+        } else {
+          return [];
+        }
+      } else {
+        return [
+          {
+            code: "invalid-data",
+            path,
+            message: `Data must be one of {"values": [...rows]}, {"columns": {...arrays}}, or {"name": "dataset"}.`,
+            allowed: ["values", "columns", "name"],
+            fix: {
+              description: 'Wrap inline rows as {"values": [...]}.',
+              example: { values: [{ x: 1, y: 2 }] },
+            },
           },
-        },
-      ];
+        ];
+      }
     }
 
     // Prefer allowed values from the actual const errors TypeBox emitted —

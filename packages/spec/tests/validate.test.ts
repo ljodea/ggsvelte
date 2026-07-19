@@ -199,4 +199,34 @@ describe("validate — TypeBox 1.x error mapping (Codex P2 regressions)", () => 
     expect(errors.length).toBeGreaterThan(8);
     expect(errors.some((e) => e.path === "/labs/caption")).toBe(true);
   });
+
+  it("near-canonical channel with a typo key reports unexpected-property", () => {
+    const errors = errorsOf({
+      layers: [{ geom: "point", aes: { x: { field: "x", fielld: true } } }],
+    });
+    expect(errors.some((e) => e.code === "invalid-type" && e.path === "")).toBe(false);
+    expect(
+      errors.some((e) => e.code === "unexpected-property" && e.path === "/layers/0/aes/x/fielld"),
+    ).toBe(true);
+  });
+
+  it("wrapped data with an extra sibling key reports unexpected-property", () => {
+    const errors = errorsOf({
+      data: { values: [], rows: [] },
+      layers: [{ geom: "point" }],
+    });
+    expect(errors.some((e) => e.code === "invalid-type" && e.path === "")).toBe(false);
+    expect(errors.some((e) => e.code === "unexpected-property" && e.path === "/data/rows")).toBe(
+      true,
+    );
+  });
+
+  it("explicit undefined on optional props is rejected (exactOptionalPropertyTypes)", () => {
+    const errors = errorsOf({
+      layers: [{ geom: "point" }],
+      width: undefined,
+    });
+    expect(errors.length).toBeGreaterThan(0);
+    expect(errors.some((e) => e.path === "/width" || e.code === "invalid-type")).toBe(true);
+  });
 });

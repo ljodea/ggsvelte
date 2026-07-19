@@ -91,65 +91,53 @@ function mapLayerShapeErrors(layer: unknown, layerPath: string): SpecError[] {
   });
 }
 
-/**
- * Tier-1 schema walk with TypeBox maxErrors raised to our documented
- * maxDiagnostics, then restored (Settings is process-global).
- */
-function collectSchemaShapeErrors(
-  input: Record<string, unknown>,
-  maxDiagnostics: number,
-): SpecError[] {
-  const previousMaxErrors = Settings.Get().maxErrors;
-  Settings.Set({ maxErrors: Math.max(maxDiagnostics, previousMaxErrors) });
-  try {
-    const errors: SpecError[] = [];
-    const layers = input["layers"];
-    if (!Array.isArray(layers)) {
-      errors.push({
-        code: "missing-layers",
-        path: "/layers",
-        message: `"layers" must be an array of layer objects (got ${layers === undefined ? "nothing" : typeof layers}).`,
-        fix: {
-          description: "Add a layers array with at least one layer.",
-          example: [{ geom: "point" }],
-        },
-      });
-    } else if (layers.length === 0) {
-      errors.push({
-        code: "empty-layers",
-        path: "/layers",
-        message: '"layers" must contain at least one layer.',
-        fix: { description: "Add a layer.", example: [{ geom: "point" }] },
-      });
-    } else {
-      for (let i = 0; i < layers.length; i++) {
-        errors.push(...mapLayerShapeErrors(layers[i], `/layers/${i}`));
-      }
+/** Tier-1 schema walk (caller must set TypeBox Settings for the process). */
+function collectSchemaShapeErrors(input: Record<string, unknown>): SpecError[] {
+  const errors: SpecError[] = [];
+  const layers = input["layers"];
+  if (!Array.isArray(layers)) {
+    errors.push({
+      code: "missing-layers",
+      path: "/layers",
+      message: `"layers" must be an array of layer objects (got ${layers === undefined ? "nothing" : typeof layers}).`,
+      fix: {
+        description: "Add a layers array with at least one layer.",
+        example: [{ geom: "point" }],
+      },
+    });
+  } else if (layers.length === 0) {
+    errors.push({
+      code: "empty-layers",
+      path: "/layers",
+      message: '"layers" must contain at least one layer.',
+      fix: { description: "Add a layer.", example: [{ geom: "point" }] },
+    });
+  } else {
+    for (let i = 0; i < layers.length; i++) {
+      errors.push(...mapLayerShapeErrors(layers[i], `/layers/${i}`));
     }
-
-    // Plot-level walk with a known-valid layer shell so layer noise is not
-    // re-reported alongside the branch-selected layer walk above.
-    const shell = { ...input, layers: [{ geom: "point" }] };
-    errors.push(
-      ...mapValueErrors(Value.Errors(PlotSpecSchema, shell), {
-        schema: PlotSpecSchema,
-        value: shell,
-        pathPrefix: "",
-      }),
-    );
-
-    if (errors.length === 0) {
-      // Value.Check failed but neither walk produced a mapped error.
-      errors.push({
-        code: "invalid-type",
-        path: "",
-        message: "The spec does not match the schema.",
-      });
-    }
-    return errors;
-  } finally {
-    Settings.Set({ maxErrors: previousMaxErrors });
   }
+
+  // Plot-level walk with a known-valid layer shell so layer noise is not
+  // re-reported alongside the branch-selected layer walk above.
+  const shell = { ...input, layers: [{ geom: "point" }] };
+  errors.push(
+    ...mapValueErrors(Value.Errors(PlotSpecSchema, shell), {
+      schema: PlotSpecSchema,
+      value: shell,
+      pathPrefix: "",
+    }),
+  );
+
+  if (errors.length === 0) {
+    // Value.Check failed but neither walk produced a mapped error.
+    errors.push({
+      code: "invalid-type",
+      path: "",
+      message: "The spec does not match the schema.",
+    });
+  }
+  return errors;
 }
 
 /**
@@ -179,87 +167,102 @@ export function validate(input: unknown, options?: ValidateOptions): ValidateRes
   }
 
   const errors: SpecError[] = [];
-  // SpecImportSchema is a structural Cyclic root; Static<> on it is not useful
-  // for control-flow (collapses), so treat Check as a plain boolean.
-  const schemaValid: boolean = Value.Check(PlotSpecSchema, input);
+  // TypeBox Settings are process-global. Align with tsconfig exactOptionalPropertyTypes
+  // and raise maxErrors so Value.Errors is not truncated at the default of 8.
+  const previousMaxErrors = Settings.Get().maxErrors;
+  const previousExactOptional = Settings.Get().exactOptionalPropertyTypes;
+  Settings.Set({
+    maxErrors: Math.max(limits.maxDiagnostics, previousMaxErrors),
+    exactOptionalPropertyTypes: true,
+  });
+  try {
+    // SpecImportSchema is a structural Cyclic root; Static<> on it is not useful
+    // for control-flow (collapses), so treat Check as a plain boolean.
+    const schemaValid: boolean = Value.Check(PlotSpecSchema, input);
 
-  if (!schemaValid) {
-    if (!isRecord(input)) {
-      return {
-        ok: false,
-        errors: [
-          {
-            code: "invalid-spec-root",
-            path: "",
-            message: `A plot spec must be a JSON object with a "layers" array (got ${Array.isArray(input) ? "an array" : typeof input}).`,
-            fix: {
-              description: "Provide an object with at least one layer.",
-              example: {
-                layers: [{ geom: "point", aes: { x: { field: "x" }, y: { field: "y" } } }],
+    if (!schemaValid) {
+      if (!isRecord(input)) {
+        return {
+          ok: false,
+          errors: [
+            {
+              code: "invalid-spec-root",
+              path: "",
+              message: `A plot spec must be a JSON object with a "layers" array (got ${Array.isArray(input) ? "an array" : typeof input}).`,
+              fix: {
+                description: "Provide an object with at least one layer.",
+                example: {
+                  layers: [{ geom: "point", aes: { x: { field: "x" }, y: { field: "y" } } }],
+                },
               },
             },
-          },
-        ],
-      };
+          ],
+        };
+      }
+
+      errors.push(...collectSchemaShapeErrors(input));
     }
 
-    errors.push(...collectSchemaShapeErrors(input, limits.maxDiagnostics));
-  }
-
-  // --- tier 2 (opt-in via options): structural grammar checks ----------------
-  // Required channels, the bar/count y ban, and the rule form rules are part
-  // of the tier-2 contract (the pipeline enforces them at render time with
-  // equivalent structured errors); tier 1 stays schema-shape-only so partial
-  // specs remain composable.
-  // Eligibility: only record layers with a known geom whose branch passes
-  // Value.Check (shape errors already reported above).
-  if (options !== undefined && isRecord(input) && Array.isArray(input["layers"])) {
-    const plotAes = isRecord(input["aes"]) ? (input["aes"] as Aes) : undefined;
-    const layers = input["layers"] as unknown[];
-    for (let i = 0; i < layers.length; i++) {
-      const layer = layers[i];
-      if (!isRecord(layer)) continue;
-      const geom = layer["geom"];
-      if (typeof geom !== "string" || !(geom in GEOM_BRANCHES)) continue;
-      const branch = GEOM_BRANCHES[geom as keyof typeof GEOM_BRANCHES];
-      if (!Value.Check(branch, layer)) continue; // shape errors already reported
-      errors.push(...layerStructuralErrors(layer, geom, i, plotAes));
+    // --- tier 2 (opt-in via options): structural grammar checks ----------------
+    // Required channels, the bar/count y ban, and the rule form rules are part
+    // of the tier-2 contract (the pipeline enforces them at render time with
+    // equivalent structured errors); tier 1 stays schema-shape-only so partial
+    // specs remain composable.
+    // Eligibility: only record layers with a known geom whose branch passes
+    // Value.Check (shape errors already reported above).
+    if (options !== undefined && isRecord(input) && Array.isArray(input["layers"])) {
+      const plotAes = isRecord(input["aes"]) ? (input["aes"] as Aes) : undefined;
+      const layers = input["layers"] as unknown[];
+      for (let i = 0; i < layers.length; i++) {
+        const layer = layers[i];
+        if (!isRecord(layer)) continue;
+        const geom = layer["geom"];
+        if (typeof geom !== "string" || !(geom in GEOM_BRANCHES)) continue;
+        const branch = GEOM_BRANCHES[geom as keyof typeof GEOM_BRANCHES];
+        if (!Value.Check(branch, layer)) continue; // shape errors already reported
+        errors.push(...layerStructuralErrors(layer, geom, i, plotAes));
+      }
     }
-  }
 
-  // --- tier 2 (opt-in): facet form rules --------------------------------------
-  // Runs for any record-valued facet, even when the facet is schema-invalid.
-  if (options !== undefined && isRecord(input) && isRecord(input["facet"])) {
-    errors.push(...facetStructuralErrors(input["facet"]));
-  }
-
-  // --- tier 2 (opt-in): data-aware checks + optional lint --------------------
-  // Resolve field evidence once so dataChecks and lintSpec share the same
-  // pivot + type-inference pass over large inline data. Still runs on record
-  // roots even when schema/structural errors already accumulated.
-  let advisories: SpecAdvisory[] | undefined;
-  if (options !== undefined && isRecord(input)) {
-    const resolved = resolveFieldEvidence(input, options, limits);
-    errors.push(...dataChecks(input, options, limits, resolved));
-    if (options.lint === true) {
-      // Reuse the map on success; on none/errors pass null so lint does not
-      // re-scan data that data-aware validation already refused or lacked.
-      const shared = resolved.status === "ok" ? resolved.fields : null;
-      advisories = lintSpec(input, options, shared);
+    // --- tier 2 (opt-in): facet form rules --------------------------------------
+    // Runs for any record-valued facet, even when the facet is schema-invalid.
+    if (options !== undefined && isRecord(input) && isRecord(input["facet"])) {
+      errors.push(...facetStructuralErrors(input["facet"]));
     }
-  }
-  const withAdvisories = advisories !== undefined && advisories.length > 0 ? { advisories } : {};
 
-  if (errors.length > limits.maxDiagnostics) {
-    const kept = errors.slice(0, limits.maxDiagnostics);
-    kept.push({
-      code: "validation-limit",
-      path: "",
-      message: `Diagnostics truncated: ${errors.length} problems found, showing the first ${limits.maxDiagnostics} (documented maxDiagnostics limit).`,
+    // --- tier 2 (opt-in): data-aware checks + optional lint --------------------
+    // Resolve field evidence once so dataChecks and lintSpec share the same
+    // pivot + type-inference pass over large inline data. Still runs on record
+    // roots even when schema/structural errors already accumulated.
+    let advisories: SpecAdvisory[] | undefined;
+    if (options !== undefined && isRecord(input)) {
+      const resolved = resolveFieldEvidence(input, options, limits);
+      errors.push(...dataChecks(input, options, limits, resolved));
+      if (options.lint === true) {
+        // Reuse the map on success; on none/errors pass null so lint does not
+        // re-scan data that data-aware validation already refused or lacked.
+        const shared = resolved.status === "ok" ? resolved.fields : null;
+        advisories = lintSpec(input, options, shared);
+      }
+    }
+    const withAdvisories = advisories !== undefined && advisories.length > 0 ? { advisories } : {};
+
+    if (errors.length > limits.maxDiagnostics) {
+      const kept = errors.slice(0, limits.maxDiagnostics);
+      kept.push({
+        code: "validation-limit",
+        path: "",
+        message: `Diagnostics truncated: ${errors.length} problems found, showing the first ${limits.maxDiagnostics} (documented maxDiagnostics limit).`,
+      });
+      return { ok: false, errors: kept, ...withAdvisories };
+    }
+
+    if (errors.length > 0) return { ok: false, errors, ...withAdvisories };
+    return { ok: true, spec: input as PortableSpec, ...withAdvisories };
+  } finally {
+    Settings.Set({
+      maxErrors: previousMaxErrors,
+      exactOptionalPropertyTypes: previousExactOptional,
     });
-    return { ok: false, errors: kept, ...withAdvisories };
   }
-
-  if (errors.length > 0) return { ok: false, errors, ...withAdvisories };
-  return { ok: true, spec: input as PortableSpec, ...withAdvisories };
 }
