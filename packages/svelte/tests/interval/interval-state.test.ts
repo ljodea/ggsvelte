@@ -157,7 +157,7 @@ function mountIntervalController(
     coordFlipped?: () => boolean;
     captureSurface?: () => HTMLDivElement | null;
     candidateSemanticKeys?: (candidate: CandidateFacts) => PropertyKey[];
-    sharedConsumptionCandidates?: IntervalStateDeps["sharedConsumptionCandidates"];
+    consumptionCandidates?: IntervalStateDeps["consumptionCandidates"];
     inspectionPanel?: () => ScenePanel | null;
     emitSelection?: (event: PlotSelection) => void;
     announce?: (message: string) => void;
@@ -176,9 +176,23 @@ function mountIntervalController(
       coordFlipped: options.coordFlipped ?? (() => false),
       captureSurface: options.captureSurface ?? (() => null),
       candidateSemanticKeys: options.candidateSemanticKeys ?? identityCandidateKeys,
-      ...(options.sharedConsumptionCandidates !== undefined && {
-        sharedConsumptionCandidates: options.sharedConsumptionCandidates,
-      }),
+      consumptionCandidates:
+        options.consumptionCandidates ??
+        (() => {
+          const currentModel = options.model?.() ?? defaultModel;
+          const candidates = [];
+          for (let id = 0; id < currentModel.candidates.size; id++) {
+            const candidate = currentModel.candidates.candidate(id);
+            if (candidate === null) continue;
+            candidates.push({
+              panelId: candidate.panelId,
+              xValue: candidate.xValue,
+              yValue: candidate.yValue,
+              keys: identityCandidateKeys(candidate),
+            });
+          }
+          return candidates;
+        }),
       inspectionPanel: options.inspectionPanel ?? (() => null),
       emitSelection: options.emitSelection ?? (() => {}),
       announce: options.announce ?? (() => {}),
@@ -219,6 +233,9 @@ describe("createIntervalState construction", () => {
           candidateSemanticKeysCalls++;
           return identityCandidateKeys(candidate);
         },
+        consumptionCandidates: () => {
+          throw new Error("consumptionCandidates must remain lazy for empty intervals");
+        },
         inspectionPanel: () => {
           inspectionPanelCalls++;
           return null;
@@ -258,8 +275,8 @@ describe("createIntervalState construction", () => {
   });
 });
 
-describe("createIntervalState shared consumption bag", () => {
-  it("uses sharedConsumptionCandidates and skips candidateSemanticKeys walk for non-union keys", () => {
+describe("createIntervalState semantic Candidate consumption", () => {
+  it("consumes the supplied projection without resolving Candidate keys", () => {
     const model = modelFor(continuousSpec());
     const panelId = model.scene.panels[0]?.id;
     if (panelId === undefined) throw new Error("expected panel");
@@ -285,7 +302,7 @@ describe("createIntervalState shared consumption bag", () => {
         keyCalls++;
         return identityCandidateKeys(candidate);
       },
-      sharedConsumptionCandidates: () => sharedBag,
+      consumptionCandidates: () => sharedBag,
     });
 
     state.applyBrushSelectEnd(brushEvent(model, { keys: ["0", "1"] }), "pointer");
@@ -293,30 +310,7 @@ describe("createIntervalState shared consumption bag", () => {
     keyCalls = 0;
     const keys = state.effectiveIntervalKeys;
     expect(keys.length).toBeGreaterThan(0);
-    // Shared bag supplied all candidates — no local full-store key walk.
     expect(keyCalls).toBe(0);
-
-    destroy();
-  });
-
-  it("falls back to local walk when shared bag is null", () => {
-    const model = modelFor(continuousSpec());
-    let keyCalls = 0;
-    const { state, destroy } = mountIntervalController({
-      model: () => model,
-      selectConfig: persistentSelect,
-      candidateSemanticKeys: (candidate) => {
-        keyCalls++;
-        return identityCandidateKeys(candidate);
-      },
-      sharedConsumptionCandidates: () => null,
-    });
-
-    state.applyBrushSelectEnd(brushEvent(model), "pointer");
-    flushSync();
-    keyCalls = 0;
-    expect(state.effectiveIntervalKeys.length).toBeGreaterThan(0);
-    expect(keyCalls).toBeGreaterThan(0);
 
     destroy();
   });
