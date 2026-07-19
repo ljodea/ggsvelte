@@ -187,15 +187,19 @@ describe("tier 2 — data-aware checks (inline data)", () => {
       }),
     ).toEqual(["scale-type-mismatch"]);
   });
-  it("treats viridis as sequential when checking an omitted scale type", () => {
-    expect(
-      codesOf({
-        ...base,
-        aes: { ...base.aes, color: { field: "city" } },
-        scales: { color: { scheme: "viridis" } },
-        layers: [{ geom: "point" }],
-      }),
-    ).toEqual(["scale-type-mismatch"]);
+  it("treats viridis as sequential and suggests a complete repair when type is omitted", () => {
+    const errors = errorsOf({
+      ...base,
+      aes: { ...base.aes, color: { field: "city" } },
+      scales: { color: { scheme: "viridis" } },
+      layers: [{ geom: "point" }],
+    });
+
+    expect(errors.map((error) => error.code)).toEqual(["scale-type-mismatch"]);
+    expect(errors[0]?.message).toContain('scheme is "viridis"');
+    expect(errors[0]?.fix?.description).toContain("categorical scheme");
+    expect(errors[0]?.fix?.description).not.toContain('type to "ordinal"');
+    expect(errors[0]?.fix?.example).toEqual({ scheme: "observable10" });
   });
 
   it("lets an explicit range defer omitted-type inference to the mapped data", () => {
