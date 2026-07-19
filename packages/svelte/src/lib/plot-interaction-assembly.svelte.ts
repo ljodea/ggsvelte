@@ -23,6 +23,7 @@ import {
   type SemanticKeyService,
 } from "./runtime/semantic-keys.svelte.js";
 import { createPlotRuntime } from "./runtime/runtime.svelte.js";
+import { createSemanticCandidateProjection } from "./runtime/semantic-candidate-projection.svelte.js";
 import type { LegendEntryIdentity } from "./legend/focus.js";
 import { createLegendFilterState } from "./legend/filter-state.svelte.js";
 import { createLegendEntryKeyIndex } from "./legend/entry-key-index.svelte.js";
@@ -313,28 +314,11 @@ export function createPlotInteractionAssembly<
   let tooltipHovered = $state(false);
   // ------------------------------------------------- selection
   // Construction-time effectiveSelectedKeys reads earlier interaction/scope
-  // only. Anchors and masks are methods (later-declared inputs).
+  // only. The later runtime projection module owns anchors and masks.
   const selectionState = createSelectionState({
-    model: () => runtime.model,
     interaction: inputs.interaction,
     resolvedInteractionScope: () => resolvedInteractionScope,
     selectConfig: () => interactionConfig.select,
-    // Deferred: interval is declared after this factory (method only).
-    effectiveIntervalKeys: () => intervalState.effectiveIntervalKeys,
-    // Deferred: legend-focus is declared after this factory (method only).
-    effectiveEmphasisKeys: () => legendFocusState.effectiveEmphasisKeys,
-    // Deferred method-only projection of inspection focus for presentation masks.
-    inspectionFocus: () => {
-      const current = inspectionState.inspection;
-      return current === null
-        ? null
-        : {
-            sourceKeys: current.focus.sourceKeys,
-            key: current.focus.key,
-          };
-    },
-    // Deferred: semantic-key service initializes later (#165).
-    candidateSemanticKeys: (candidate) => candidateSemanticKeys(candidate),
     onselect: inputs.onselect,
     oninteraction: inputs.oninteraction,
     announce: announceSink,
@@ -377,14 +361,30 @@ export function createPlotInteractionAssembly<
     coordFlipped: () => coordFlipped,
     captureSurface: inputs.captureSurface,
     candidateSemanticKeys: (candidate) => candidateSemanticKeys(candidate),
-    // Deferred: fused projection is declared after this factory (method only).
-    // When non-null, non-union interval keys reuse the host's single store walk.
-    sharedConsumptionCandidates: () => fusedConsumptionCandidates,
+    // Deferred: the projection module is constructed immediately after interval.
+    consumptionCandidates: () => semanticCandidateProjection.intervalConsumptionCandidates,
     inspectionPanel: () => inspectionState.inspectionPanel,
     emitSelection: (...args: Parameters<SelectionState["emitSelection"]>) => {
       selectionState.emitSelection(...args);
     },
     announce: announceSink,
+  });
+  const semanticCandidateProjection = createSemanticCandidateProjection({
+    model: () => runtime.model,
+    candidateSemanticKeys: (candidate) => candidateSemanticKeys(candidate),
+    selectedKeys: () => selectionState.effectiveSelectedKeys,
+    intervalKeys: () => intervalState.effectiveIntervalKeys,
+    intervals: () => intervalState.effectiveIntervals,
+    emphasisKeys: () => legendFocusState.effectiveEmphasisKeys,
+    inspectionFocus: () => {
+      const current = inspectionState.inspection;
+      return current === null
+        ? null
+        : {
+            sourceKeys: current.focus.sourceKeys,
+            key: current.focus.key,
+          };
+    },
   });
   // ------------------------------------------------- plot chrome
   // All inputs earlier-declared. Pure construction-time deriveds —
@@ -420,57 +420,6 @@ export function createPlotInteractionAssembly<
   // Surface window-teardown + tool-sync (after diagnostics, before catalog/
   // focus/inspection registrations).
   surfaceState.registerSurfaceEffects();
-
-  // Focus keys first (no candidate walk) so shared projection can short-circuit
-  // when idle. One full-store projection feeds selected/emphasized anchors,
-  // interaction masks, AND non-union interval key consumption — was O(2C) when
-  // a non-union interval was live (interval consumption walk + anchors walk).
-  // Liveness uses *counts* (Object.is-stable when keys swap but stay non-empty)
-  // so focus-only key changes rebuild masks/anchors without re-walking C (Codex P2).
-  const presentationFocusKeys = $derived(selectionState.computePresentationFocusKeys());
-  const selectedKeyCount = $derived(selectionState.effectiveSelectedKeys.length);
-  const emphasisKeyCount = $derived(legendFocusState.effectiveEmphasisKeys.length);
-  const presentationFocusKeyCount = $derived(presentationFocusKeys.length);
-  // Gate without reading effectiveIntervalKeys (those depend on the fused bag
-  // for non-union presets — reading keys here would circular-depend).
-  const needIntervalConsumptionWalk = $derived(
-    intervalState.effectiveIntervals.length > 0 &&
-      intervalState.effectiveIntervals[0]?.preset !== "union",
-  );
-  // Union interval keys come from stored records only (no walk). Safe to read
-  // for the selection/anchor gate after the non-union path is handled above.
-  const intervalKeyCount = $derived(intervalState.effectiveIntervalKeys.length);
-  const sharedCandidateProjection = $derived.by(() => {
-    if (needIntervalConsumptionWalk) return selectionState.computeSharedCandidateProjection();
-    if (selectedKeyCount + intervalKeyCount + emphasisKeyCount + presentationFocusKeyCount === 0)
-      return [];
-    return selectionState.computeSharedCandidateProjection();
-  });
-  // Map once for interval consumption; null when the bag was not built for
-  // interval (union / idle). Interval falls back to its local walk only when
-  // this is null AND non-union — which should not happen under the host gate.
-  const fusedConsumptionCandidates = $derived.by(() => {
-    if (!needIntervalConsumptionWalk) return null;
-    return sharedCandidateProjection.map((entry) => ({
-      panelId: entry.panelId,
-      keys: entry.keys,
-      ...(entry.xValue !== undefined && { xValue: entry.xValue }),
-      ...(entry.yValue !== undefined && { yValue: entry.yValue }),
-    }));
-  });
-  const selectedAnchors = $derived(
-    selectionState.computeSelectedAnchors(sharedCandidateProjection),
-  );
-  const emphasizedAnchors = $derived(
-    selectionState.computeEmphasizedAnchors(sharedCandidateProjection),
-  );
-  const interactionMasks = $derived(
-    selectionState.computeInteractionMasks(
-      presentationFocusKeys,
-      // Thunk: with empty focus (idle), shared projection is never forced for masks.
-      () => sharedCandidateProjection,
-    ),
-  );
 
   // Host-side deriveds kept outside the factory (construction-time free of
   // the model read).
@@ -531,13 +480,13 @@ export function createPlotInteractionAssembly<
       return legendFocusEnabled;
     },
     get selectedAnchors() {
-      return selectedAnchors;
+      return semanticCandidateProjection.selectedAnchors;
     },
     get emphasizedAnchors() {
-      return emphasizedAnchors;
+      return semanticCandidateProjection.emphasizedAnchors;
     },
     get interactionMasks() {
-      return interactionMasks;
+      return semanticCandidateProjection.interactionMasks;
     },
     get interactiveLegendEntries() {
       return interactiveLegendEntries;

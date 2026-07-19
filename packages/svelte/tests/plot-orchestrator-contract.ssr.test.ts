@@ -39,6 +39,7 @@ describe("plot interaction assembly lifecycle contract", () => {
       "createSelectionState(",
       "createLegendFocusState(",
       "createIntervalState(",
+      "createSemanticCandidateProjection(",
       "createPlotChromeState(",
     ]) {
       expect(orchestratorSource).not.toContain(factory);
@@ -57,6 +58,7 @@ describe("plot interaction assembly lifecycle contract", () => {
       "const selectionState = createSelectionState(",
       "const legendFocusState = createLegendFocusState(",
       "const intervalState = createIntervalState(",
+      "const semanticCandidateProjection = createSemanticCandidateProjection(",
       "const chromeState = createPlotChromeState(",
     ]);
   });
@@ -64,6 +66,17 @@ describe("plot interaction assembly lifecycle contract", () => {
   it("uses the model-owned CandidateStore without constructing a second hit index", () => {
     expect(assemblySource).not.toContain("buildHitIndex");
     expect(assemblySource).not.toContain("SceneHitIndex");
+  });
+
+  it("keeps semantic Candidate projection knowledge behind one module seam", () => {
+    expect(assemblySource).toContain("createSemanticCandidateProjection(");
+    for (const implementationDetail of [
+      "needIntervalConsumptionWalk",
+      "sharedCandidateProjection",
+      "fusedConsumptionCandidates",
+    ]) {
+      expect(assemblySource).not.toContain(implementationDetail);
+    }
   });
 
   it("keeps phased effects in registration order", () => {

@@ -5,8 +5,7 @@
 import { flushSync } from "svelte";
 import { describe, expect, it } from "vitest";
 
-import type { CellValue, CandidateFacts, RenderModel } from "@ggsvelte/core";
-import { aes, gg, type PortableSpec } from "@ggsvelte/spec";
+import type { CellValue } from "@ggsvelte/core";
 
 import type {
   PlotInteractionEvent,
@@ -16,19 +15,9 @@ import type {
 } from "../../src/lib/interaction/interaction.js";
 import { createPlotInteraction } from "../../src/lib/interaction/controller.svelte.js";
 import { buildPointSelectionEvent } from "../../src/lib/selection/selection.js";
-import {
-  createSelectionState,
-  type SelectionStateDeps,
-} from "../../src/lib/selection/selection-state.svelte.js";
+import { createSelectionState } from "../../src/lib/selection/selection-state.svelte.js";
 import { withEffectRoot, withFlushedEffectRoot } from "../helpers/effect-root.svelte.js";
-import { modelFor } from "../helpers/model.js";
-import { derivedBox, reactiveBox } from "../helpers/reactive-box.svelte.js";
-
-const continuousRows = [
-  { id: "a", x: 1, y: 1 },
-  { id: "b", x: 10, y: 20 },
-  { id: "c", x: 5, y: 8 },
-];
+import { reactiveBox } from "../helpers/reactive-box.svelte.js";
 
 type SelectConfig = ResolvedInteractionConfig["select"];
 type MaybeController = ReturnType<typeof createPlotInteraction> | undefined;
@@ -66,20 +55,6 @@ const pointSelectMultiple = (): SelectConfig =>
     preset: "independent" as const,
   });
 
-function continuousSpec(
-  data: readonly { id: string; x: number; y: number }[] = continuousRows,
-): PortableSpec {
-  return gg([...data], aes({ x: "x", y: "y" }))
-    .geomPoint()
-    .spec();
-}
-
-/** Identity semantic keys from rowIndex — stable for anchor/mask tests. */
-function identityCandidateKeys(candidate: CandidateFacts): PropertyKey[] {
-  if (candidate.rowIndex === null) return [];
-  return [String(candidate.rowIndex)];
-}
-
 type SelectionHarness = {
   state: ReturnType<typeof createSelectionState>;
   destroy: () => void;
@@ -87,30 +62,19 @@ type SelectionHarness = {
 
 function mountSelectionController(
   options: {
-    model?: () => RenderModel | null;
     interaction?: () => MaybeController;
     resolvedInteractionScope?: () => PlotInteractionScope;
     selectConfig?: () => SelectConfig;
-    effectiveIntervalKeys?: () => readonly PropertyKey[];
-    effectiveEmphasisKeys?: () => readonly PropertyKey[];
-    inspectionFocus?: SelectionStateDeps["inspectionFocus"];
-    candidateSemanticKeys?: SelectionStateDeps["candidateSemanticKeys"];
     onselect?: () => SelectCb;
     oninteraction?: () => InteractionCb;
     announce?: (message: string) => void;
   } = {},
 ): SelectionHarness {
-  const defaultModel = modelFor(continuousSpec());
   const { value: state, destroy } = withFlushedEffectRoot(() =>
     createSelectionState({
-      model: options.model ?? (() => defaultModel),
       interaction: options.interaction ?? noController,
       resolvedInteractionScope: options.resolvedInteractionScope ?? (() => defaultScope),
       selectConfig: options.selectConfig ?? pointSelectSingle,
-      effectiveIntervalKeys: options.effectiveIntervalKeys ?? (() => []),
-      effectiveEmphasisKeys: options.effectiveEmphasisKeys ?? (() => []),
-      inspectionFocus: options.inspectionFocus ?? (() => null),
-      candidateSemanticKeys: options.candidateSemanticKeys ?? identityCandidateKeys,
       onselect: options.onselect ?? noSelectCb,
       oninteraction: options.oninteraction ?? noInteractionCb,
       announce: options.announce ?? (() => {}),
@@ -120,38 +84,16 @@ function mountSelectionController(
 }
 
 describe("createSelectionState construction", () => {
-  it("does not invoke armed later-declared getters during construction (before first flush)", () => {
-    const model = modelFor(continuousSpec());
-    let intervalKeysCalls = 0;
-    let emphasisKeysCalls = 0;
-    let inspectionFocusCalls = 0;
-    let candidateSemanticKeysCalls = 0;
+  it("does not invoke callback getters during construction", () => {
     let onselectCalls = 0;
     let oninteractionCalls = 0;
     let announceCalls = 0;
 
     const { value: state, destroy } = withEffectRoot(() =>
       createSelectionState({
-        model: () => model,
         interaction: noController,
         resolvedInteractionScope: () => defaultScope,
         selectConfig: pointSelectSingle,
-        effectiveIntervalKeys: () => {
-          intervalKeysCalls++;
-          return [];
-        },
-        effectiveEmphasisKeys: () => {
-          emphasisKeysCalls++;
-          return [];
-        },
-        inspectionFocus: () => {
-          inspectionFocusCalls++;
-          return null;
-        },
-        candidateSemanticKeys: (candidate) => {
-          candidateSemanticKeysCalls++;
-          return identityCandidateKeys(candidate);
-        },
         onselect: (): SelectCb => {
           onselectCalls++;
           return noSelectCb();
@@ -166,21 +108,8 @@ describe("createSelectionState construction", () => {
       }),
     );
 
-    expect(intervalKeysCalls).toBe(0);
-    expect(emphasisKeysCalls).toBe(0);
-    expect(inspectionFocusCalls).toBe(0);
-    expect(candidateSemanticKeysCalls).toBe(0);
-    expect(onselectCalls).toBe(0);
-    expect(oninteractionCalls).toBe(0);
-    expect(announceCalls).toBe(0);
-    // Accessor + flush must not reach armed deps (construction-time derived
-    // only reads interaction/scope).
     expect(state.effectiveSelectedKeys).toEqual([]);
     flushSync();
-    expect(intervalKeysCalls).toBe(0);
-    expect(emphasisKeysCalls).toBe(0);
-    expect(inspectionFocusCalls).toBe(0);
-    expect(candidateSemanticKeysCalls).toBe(0);
     expect(onselectCalls).toBe(0);
     expect(oninteractionCalls).toBe(0);
     expect(announceCalls).toBe(0);
@@ -339,219 +268,6 @@ describe("createSelectionState controller mode", () => {
     state.togglePointKeys([], "pointer");
     flushSync();
     expect(events).toHaveLength(2);
-
-    destroy();
-  });
-});
-
-describe("createSelectionState anchors", () => {
-  it("computeSelectedAnchors unions selected + interval keys with literal coords", () => {
-    const model = modelFor(continuousSpec());
-    // Find anchors for row indexes "0" and "1"
-    const expected: { x: number; y: number }[] = [];
-    for (let id = 0; id < model.candidates.size; id++) {
-      const c = model.candidates.candidate(id);
-      if (c === null || c.rowIndex === null) continue;
-      if (c.rowIndex === 0 || c.rowIndex === 1) {
-        const identity = `${String(c.x)}:${String(c.y)}`;
-        if (!expected.some((a) => `${a.x}:${a.y}` === identity)) {
-          expected.push({ x: c.x, y: c.y });
-        }
-      }
-    }
-    expect(expected.length).toBeGreaterThan(0);
-
-    const { state, destroy } = mountSelectionController({
-      model: () => model,
-      selectConfig: pointSelectMultiple,
-      effectiveIntervalKeys: () => ["1"],
-    });
-
-    state.togglePointKeys(["0"], "pointer");
-    flushSync();
-    expect(state.computeSelectedAnchors()).toEqual(expected);
-
-    destroy();
-  });
-
-  it("computeEmphasizedAnchors reads emphasis keys; empty keys skip candidate walk", () => {
-    const model = modelFor(continuousSpec());
-    let candidateCalls = 0;
-    const { state, destroy } = mountSelectionController({
-      model: () => model,
-      effectiveEmphasisKeys: () => ["0"],
-      candidateSemanticKeys: (candidate) => {
-        candidateCalls++;
-        return identityCandidateKeys(candidate);
-      },
-    });
-
-    const anchors = state.computeEmphasizedAnchors();
-    expect(anchors.length).toBeGreaterThan(0);
-    expect(candidateCalls).toBeGreaterThan(0);
-
-    candidateCalls = 0;
-    const empty = mountSelectionController({
-      model: () => model,
-      effectiveEmphasisKeys: () => [],
-      candidateSemanticKeys: (candidate) => {
-        candidateCalls++;
-        return identityCandidateKeys(candidate);
-      },
-    });
-    expect(empty.state.computeEmphasizedAnchors()).toEqual([]);
-    expect(candidateCalls).toBe(0);
-    empty.destroy();
-    destroy();
-  });
-
-  it("shared projection serves selected + emphasized anchors with one key walk", () => {
-    const model = modelFor(continuousSpec());
-    let candidateCalls = 0;
-    const { state, destroy } = mountSelectionController({
-      model: () => model,
-      selectConfig: pointSelectMultiple,
-      effectiveEmphasisKeys: () => ["1"],
-      candidateSemanticKeys: (candidate) => {
-        candidateCalls++;
-        return identityCandidateKeys(candidate);
-      },
-    });
-    state.togglePointKeys(["0"], "pointer");
-    flushSync();
-
-    candidateCalls = 0;
-    const shared = state.computeSharedCandidateProjection();
-    const once = candidateCalls;
-    expect(once).toBeGreaterThan(0);
-    // Interval consumption fields travel on the same bag (host fuses walks).
-    expect(shared.every((entry) => typeof entry.panelId === "string")).toBe(true);
-
-    const selected = state.computeSelectedAnchors(shared);
-    const emphasized = state.computeEmphasizedAnchors(shared);
-    // No second store walk: key resolver not invoked again for anchors.
-    expect(candidateCalls).toBe(once);
-    expect(selected.length).toBeGreaterThan(0);
-    expect(emphasized.length).toBeGreaterThan(0);
-
-    // Without sharing, two independent calls would double the key work.
-    candidateCalls = 0;
-    state.computeSelectedAnchors();
-    state.computeEmphasizedAnchors();
-    expect(candidateCalls).toBeGreaterThanOrEqual(once * 2);
-
-    destroy();
-  });
-});
-
-describe("createSelectionState masks", () => {
-  it("computeInteractionMasks non-empty only when focus keys exist; inspection contributes", () => {
-    const model = modelFor(continuousSpec());
-    const emphasisBox = reactiveBox<readonly PropertyKey[]>([]);
-    const focusBox = reactiveBox<{
-      sourceKeys: readonly PropertyKey[];
-      key: PropertyKey | null;
-    } | null>(null);
-
-    const { state, destroy } = mountSelectionController({
-      model: () => model,
-      effectiveEmphasisKeys: () => emphasisBox.value,
-      inspectionFocus: () => focusBox.value,
-    });
-
-    // No focus keys → empty masks
-    expect(state.computePresentationFocusKeys()).toEqual([]);
-    const projections = state.computeSemanticCandidateProjections();
-    expect(projections.length).toBeGreaterThan(0);
-    expect(state.computeInteractionMasks([], () => projections)).toEqual([]);
-
-    // Emphasis alone
-    emphasisBox.set(["0"]);
-    flushSync();
-    const focusKeys = state.computePresentationFocusKeys();
-    expect(focusKeys).toEqual(["0"]);
-    const masks = state.computeInteractionMasks(focusKeys, () => projections);
-    expect(masks.length).toBeGreaterThan(0);
-    expect(masks.some((m) => m !== null)).toBe(true);
-
-    // Inspection focus merges when emphasis non-empty
-    focusBox.set({ sourceKeys: ["1"], key: "2" });
-    flushSync();
-    const merged = state.computePresentationFocusKeys();
-    expect(merged).toEqual(["0", "1", "2"]);
-
-    destroy();
-  });
-
-  it("focus-only change does not recompute candidate projections (host memo boundary)", () => {
-    const model = modelFor(continuousSpec());
-    const emphasisBox = reactiveBox<readonly PropertyKey[]>(["0"]);
-    let candidateCalls = 0;
-
-    const { value, destroy } = withFlushedEffectRoot(() => {
-      const state = createSelectionState({
-        model: () => model,
-        interaction: noController,
-        resolvedInteractionScope: () => defaultScope,
-        selectConfig: pointSelectSingle,
-        effectiveIntervalKeys: () => [],
-        effectiveEmphasisKeys: () => emphasisBox.value,
-        inspectionFocus: () => null,
-        candidateSemanticKeys: (candidate) => {
-          candidateCalls++;
-          return identityCandidateKeys(candidate);
-        },
-        onselect: noSelectCb,
-        oninteraction: noInteractionCb,
-        announce: () => {},
-      });
-      // Host-shaped independent memo boundaries (three separate deriveds,
-      // via the rune-backed helper — runes are unavailable in .test.ts).
-      const focus = derivedBox(() => state.computePresentationFocusKeys());
-      const projections = derivedBox(() => state.computeSemanticCandidateProjections());
-      const masks = derivedBox(() =>
-        state.computeInteractionMasks(focus.value, () => projections.value),
-      );
-      return {
-        state,
-        get focus() {
-          return focus.value;
-        },
-        get masks() {
-          return masks.value;
-        },
-        get projections() {
-          return projections.value;
-        },
-      };
-    });
-
-    // IDLE REGRESSION GUARD: with empty focus, reading masks must NOT
-    // materialize the projections walk (the thunk stays uninvoked).
-    emphasisBox.set([]);
-    flushSync();
-    expect(value.masks).toEqual([]);
-    expect(candidateCalls).toBe(0);
-    emphasisBox.set(["0"]);
-    flushSync();
-
-    // Initial focused read materializes projections
-    void value.focus;
-    void value.projections;
-    void value.masks;
-    flushSync();
-    const callsAfterInit = candidateCalls;
-    expect(callsAfterInit).toBeGreaterThan(0);
-
-    // Focus-only flip: change emphasis keys, re-read focus + masks
-    emphasisBox.set(["0", "1"]);
-    flushSync();
-    void value.focus;
-    void value.masks;
-    // Projections derived should NOT re-run candidateSemanticKeys
-    expect(candidateCalls).toBe(callsAfterInit);
-    expect(value.focus).toEqual(["0", "1"]);
-    expect(value.masks.length).toBeGreaterThan(0);
 
     destroy();
   });
