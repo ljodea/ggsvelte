@@ -372,9 +372,12 @@
 }
 
 .docs-mobile-tools,
-.docs-skip,
-.chapter-dialog {
+.docs-skip {
   display: none;
+}
+
+.chapter-dialog[open] {
+  display: block;
 }
 
 @media (max-width: 74.99rem) {
@@ -424,10 +427,6 @@
     border: 1px solid var(--line);
     background: var(--paper);
     box-shadow: 0 8px 24px color-mix(in srgb, #000 12%, transparent);
-  }
-
-  .chapter-dialog[open] {
-    display: block;
   }
 
   .chapter-dialog__panel {

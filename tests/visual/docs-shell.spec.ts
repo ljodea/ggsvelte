@@ -63,7 +63,11 @@ test("mobile header and docs navigation are explicit, reachable controls", async
     "#guide-chapters-trigger",
   );
   await chapterMenu.click();
-  await expect(page.getByRole("navigation", { name: "Guide chapters" })).toBeVisible();
+  const chapterDialog = page.locator("dialog.chapter-dialog");
+  await expect(chapterDialog.getByRole("navigation", { name: "Guide chapters" })).toBeVisible();
+  await page.setViewportSize({ width: 1280, height: 760 });
+  await expect(chapterDialog).toBeVisible();
+  await chapterDialog.getByRole("button", { name: "Close guide chapters" }).click();
   await expectNoHorizontalOverflow(page);
 });
 
