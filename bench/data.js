@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784418890776,
+  "lastUpdate": 1784419474717,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -31261,6 +31261,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 161.4857,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "0a5b21bac99a84da22f21b372860067dc6c61646",
+          "message": "chore: align svelte-check pins with 4.7.3 (#314)\n\n#310 bumped package manifests and the lockfile; update the tool roster\nand consumer-compat fixture so they match the installed version.",
+          "timestamp": "2026-07-18T19:03:57-05:00",
+          "tree_id": "3ba4704b521a002810db70aaecdbb5b6438ad43e",
+          "url": "https://github.com/ljodea/ggsvelte/commit/0a5b21bac99a84da22f21b372860067dc6c61646"
+        },
+        "date": 1784419473834,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.0142,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.2583,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 7.1442,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 10.6753,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 68.3161,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 96.4255,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 0.9281,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.0465,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 69.0664,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 87.8281,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 8.0438,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 7.641,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 791.9377,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.4471,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 195.987,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 6.4624,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 23.2756,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 692.6922,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 105.7281,
             "unit": "ms"
           }
         ]
