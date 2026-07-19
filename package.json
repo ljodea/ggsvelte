@@ -10,7 +10,8 @@
   ],
   "type": "module",
   "scripts": {
-    "check": "tsc -b packages/spec packages/core",
+    "check": "tsc -b packages/spec packages/core && bun run check:type-contracts",
+    "check:type-contracts": "tsc -p packages/spec/type-tests/tsconfig.json",
     "check:svelte": "cd packages/svelte && bun run --bun check",
     "check:examples": "bun node_modules/.bin/tsc -p examples --noEmit",
     "check:docs": "cd apps/docs && bun run --bun check",
