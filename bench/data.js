@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784470976905,
+  "lastUpdate": 1784471885265,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -32451,6 +32451,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 143.4287,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "e23a079b91aaa39224d77a16ed35d3b89fcbbbac",
+          "message": "vr: update baselines for PR #325 @ 002a89d7a8913ba38aa74e8fa4fde20d408b4f6c (#326)\n\nCo-authored-by: ggsvelte-vr-bot <vr-bot@users.noreply.github.com>",
+          "timestamp": "2026-07-19T09:37:22-05:00",
+          "tree_id": "18b98fe68c0156a360bafde4db6e5856d35ba3aa",
+          "url": "https://github.com/ljodea/ggsvelte/commit/e23a079b91aaa39224d77a16ed35d3b89fcbbbac"
+        },
+        "date": 1784471884056,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 1.4619,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 1.959,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 4.5943,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 7.3189,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 27.7642,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 56.1588,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 0.7361,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 0.9603,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 27.597,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 45.8391,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 9.2568,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 9.0986,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 827.8887,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.6429,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 200.7401,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 9.05,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 10.5648,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 490.4182,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 113.951,
             "unit": "ms"
           }
         ]
