@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784477293740,
+  "lastUpdate": 1784485006750,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -32808,6 +32808,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 143.6013,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "76c415952ebd2840ea53a9bfe77f34c368d43c8e",
+          "message": "feat(docs): establish responsive site foundation (#329)\n\n* feat(docs): establish responsive site foundation\n\nAdd strict build modes, generated route metadata, responsive navigation, accessible code tabs, and mode-aware sitemap and robots checks.\n\n* fix(docs): keep open chapter dialog visible\n\nPreserve the modal across responsive breakpoint changes and cover the resize path in Playwright.",
+          "timestamp": "2026-07-19T13:15:55-05:00",
+          "tree_id": "7d98b6e573fc1bd54ace0e04a97b6ace00daa96a",
+          "url": "https://github.com/ljodea/ggsvelte/commit/76c415952ebd2840ea53a9bfe77f34c368d43c8e"
+        },
+        "date": 1784485005400,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 1.8792,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.8843,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 6.0364,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 9.3733,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 36.8238,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 71.9795,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.0286,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2398,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 36.9917,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 58.1536,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.4379,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 13.8182,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 1013.9681,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.8217,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 279.7633,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 9.9273,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 15.4017,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 594.5915,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 143.977,
             "unit": "ms"
           }
         ]
