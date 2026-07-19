@@ -46,6 +46,7 @@ Options:
   --height N       Plot height in px (default: spec.height, then 400)
   --data FILE      JSON file with named datasets ({"name": rows|columns|{values}|{columns}})
   --max-marks N    Refuse to render more marks than N (default 100000)
+  --version        Print the installed @ggsvelte/svelte version
   --help           Show this help
 
 Diagnostics are JSON lines on stderr. Exit codes: 0 rendered, 1 render
@@ -58,6 +59,7 @@ interface ParsedArgs {
   dataPath: string | null;
   maxMarks: number | null;
   help: boolean;
+  version: boolean;
 }
 
 class UsageError extends Error {}
@@ -70,6 +72,7 @@ function parseArgs(argv: readonly string[]): ParsedArgs {
     dataPath: null,
     maxMarks: null,
     help: false,
+    version: false,
   };
   const numberFlag = (flag: string, raw: string | undefined): number => {
     const n = Number(raw);
@@ -84,6 +87,9 @@ function parseArgs(argv: readonly string[]): ParsedArgs {
       case "--help":
       case "-h":
         out.help = true;
+        break;
+      case "--version":
+        out.version = true;
         break;
       case "--width":
         out.width = numberFlag("--width", argv[++i]);
@@ -129,8 +135,17 @@ function parseJSON(io: CLIIO, text: string, what: string): { value: unknown } | 
   }
 }
 
+export interface CLIRunOptions {
+  /** Version of the package that owns the installed ggsvelte-render bin. */
+  version?: string;
+}
+
 /** Run the CLI. Returns the process exit code (documented in module docs). */
-export async function runCLI(argv: readonly string[], io: CLIIO): Promise<number> {
+export async function runCLI(
+  argv: readonly string[],
+  io: CLIIO,
+  options: CLIRunOptions = {},
+): Promise<number> {
   let args: ParsedArgs;
   try {
     args = parseArgs(argv);
@@ -138,6 +153,28 @@ export async function runCLI(argv: readonly string[], io: CLIIO): Promise<number
     errLine(io, { kind: "error", code: "usage", message: (error as Error).message });
     io.writeErr(USAGE);
     return 2;
+  }
+  if (args.version) {
+    const hasOtherArguments =
+      args.help ||
+      args.specPath !== null ||
+      args.width !== null ||
+      args.height !== null ||
+      args.dataPath !== null ||
+      args.maxMarks !== null;
+    if (hasOtherArguments || options.version === undefined) {
+      errLine(io, {
+        kind: "error",
+        code: "usage",
+        message: hasOtherArguments
+          ? "--version must be used without a spec or other options"
+          : "--version is unavailable from this programmatic runner",
+      });
+      io.writeErr(USAGE);
+      return 2;
+    }
+    io.writeOut(`${options.version}\n`);
+    return 0;
   }
   if (args.help) {
     io.writeErr(USAGE);

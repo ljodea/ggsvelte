@@ -25,14 +25,31 @@ function readStdin() {
   });
 }
 
-const code = await runCLI(process.argv.slice(2), {
-  readStdin,
-  readFile: (path) => readFileSync(path, "utf8"),
-  writeOut: (text) => {
-    process.stdout.write(text);
+const packageJson = /** @type {unknown} */ (
+  JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"))
+);
+if (
+  typeof packageJson !== "object" ||
+  packageJson === null ||
+  !("version" in packageJson) ||
+  typeof packageJson.version !== "string"
+) {
+  throw new Error("@ggsvelte/svelte package.json has no string version");
+}
+const packageVersion = packageJson.version;
+
+const code = await runCLI(
+  process.argv.slice(2),
+  {
+    readStdin,
+    readFile: (path) => readFileSync(path, "utf8"),
+    writeOut: (text) => {
+      process.stdout.write(text);
+    },
+    writeErr: (line) => {
+      process.stderr.write(line + "\n");
+    },
   },
-  writeErr: (line) => {
-    process.stderr.write(line + "\n");
-  },
-});
+  { version: packageVersion },
+);
 process.exit(code);

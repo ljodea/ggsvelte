@@ -50,7 +50,9 @@ export function createPlotInteractionAssembly<
   Identity extends keyof Row | ((row: Row, index: number) => PropertyKey) = keyof Row,
 >(deps: PlotInteractionAssemblyDeps<Row, Identity>) {
   const inputs = deps.inputs;
-  const assembled = $derived(deps.assembled());
+  const assembledDerived = $derived(deps.assembled());
+  const assembled = (): PortableSpec | null =>
+    typeof window === "undefined" ? deps.assembled() : assembledDerived;
   const interactionConfig = $derived(deps.interactionConfig());
   const resolvedInteractionScope = $derived(deps.resolvedInteractionScope());
   function deliverDiagnostic(diagnostic: InteractionDiagnostic): void {
@@ -126,7 +128,7 @@ export function createPlotInteractionAssembly<
     interaction: inputs.interaction,
     resolvedInteractionScope: () => resolvedInteractionScope,
     zoomConfig: () => interactionConfig.zoom,
-    assembled: () => assembled,
+    assembled,
     // model / coordFlipped declared after the runtime; handlers only.
     model: () => runtime.model,
     coordFlipped: () => coordFlipped,
@@ -192,7 +194,7 @@ export function createPlotInteractionAssembly<
   const runtime = createPlotRuntime({
     widthProp: () => inputs.width(),
     heightProp: () => inputs.height(),
-    assembled: () => assembled,
+    assembled,
     effectiveSpec: () => zoomState.effectiveSpec,
     effectiveZoomDomains: () => zoomState.effectiveZoomDomains,
     effectiveLegendFilters: () => legendFilterState.filters,
@@ -212,7 +214,7 @@ export function createPlotInteractionAssembly<
   // intervals (#165).
   const semanticKeys = createSemanticKeyService({
     model: () => runtime.model,
-    assembled: () => assembled,
+    assembled,
     datumKey: () => inputs.datumKey(),
     data: () => inputs.data(),
     spec: () => inputs.spec(),
@@ -310,7 +312,7 @@ export function createPlotInteractionAssembly<
     tooltipHovered: () => tooltipHovered,
     announce: announceSink,
   });
-  const coordFlipped = $derived(assembled?.coord?.type === "flip");
+  const coordFlipped = $derived(assembled()?.coord?.type === "flip");
   let tooltipHovered = $state(false);
   // ------------------------------------------------- selection
   // Construction-time effectiveSelectedKeys reads earlier interaction/scope
@@ -462,7 +464,7 @@ export function createPlotInteractionAssembly<
     announcer,
 
     get assembled() {
-      return assembled;
+      return assembled();
     },
     get interactionConfig() {
       return interactionConfig;

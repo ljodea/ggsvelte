@@ -177,7 +177,7 @@ export function createPlotOrchestrator<
   // geom prop changes flow into this $derived without re-registration.
   // Explicit `spec` short-circuits before registry/children so ignored props
   // do not become reactive dependencies of the assembled plot.
-  const assembled: PortableSpec | null = $derived.by(() => {
+  function assembleCurrentSpec(): PortableSpec | null {
     const spec = inputs.spec();
     if (spec !== undefined) return assemblePortableSpec({ spec, layers: [] });
     const data = inputs.data();
@@ -202,11 +202,19 @@ export function createPlotOrchestrator<
       ...(labs !== undefined && { labs }),
       ...(a11y !== undefined && { a11y }),
     });
-  });
+  }
+  const assembled: PortableSpec | null = $derived.by(assembleCurrentSpec);
+  // Svelte 5.33's one-pass SSR can cache a construction-time empty registry
+  // before declaration children initialize. Recompute from the plain registry
+  // on the server; client reads retain normal rune dependency tracking.
+  const currentAssembled = (): PortableSpec | null =>
+    typeof window === "undefined" ? assembleCurrentSpec() : assembled;
 
   // Facet intent: raw prop (declaration-only children before layers register)
   // OR assembled.facet (portable-spec plots that embed facet without a prop).
-  const facetedPlot = $derived(isFacetedPlotIntent({ facet: inputs.facet(), assembled }));
+  const facetedPlot = $derived(
+    isFacetedPlotIntent({ facet: inputs.facet(), assembled: currentAssembled() }),
+  );
 
   const resolvedInteractionScope: PlotInteractionScope = $derived(
     (() => {
@@ -220,7 +228,7 @@ export function createPlotOrchestrator<
         zoom,
         faceted: facetedPlot,
         ...(datumKey !== undefined && { datumKey }),
-        assembled,
+        assembled: currentAssembled(),
       });
     })(),
   );
@@ -246,7 +254,7 @@ export function createPlotOrchestrator<
 
   return createPlotInteractionAssembly({
     inputs,
-    assembled: () => assembled,
+    assembled: currentAssembled,
     interactionConfig: () => interactionConfig,
     resolvedInteractionScope: () => resolvedInteractionScope,
   });

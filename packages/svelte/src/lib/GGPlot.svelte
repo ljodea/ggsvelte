@@ -197,9 +197,12 @@
   }
 </script>
 
-<!-- Children MUST render before any registry-consuming markup: SSR evaluates
-     in one pass, so declaration-only geoms have to register first
-     (decision 0001 — authoring rule, do not reorder). -->
+<!-- Declaration-only children emit no markup. Render them outside and before
+     the root so SSR registers every layer before root attributes read derived
+     plot state; placing them inside the root is too late in Svelte's one-pass
+     server evaluation even when they appear first in source order. -->
+{@render children?.()}
+
 <!-- The root div is the plot's stable mount point and carries the
      data-gg-ready readiness signal. Compositing (decision 0006): ordered
      full-size sibling strata, document order = paint order, no z-index;
@@ -219,7 +222,6 @@
   data-gg-ready={runtime.ready ? "true" : "false"}
   style={chromeState.rootStyle}
 >
-  {@render children?.()}
   {#if chromeState.showToolRail}
     <ToolRail
       availableTools={chromeState.availableTools}
@@ -261,6 +263,7 @@
     <MarkStrata
       model={currentModel}
       strata={runtime.strata}
+      {ariaLabel}
       markLabel={chromeState.markLabel}
       interactionMasks={engine.interactionMasks}
       {a11yTableOpen}
