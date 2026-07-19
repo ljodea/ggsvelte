@@ -1,106 +1,37 @@
 /*
- * Docs styles. Site appearance tokens are deliberately separate from chart
- * theme tokens: an explicit chart theme must not change when the docs shell
- * switches between light and dark.
- *
- * VR MODE (html[data-vr], stamped pre-paint by app.html) strips chrome,
- * freezes transitions/animations, and pins the fixed-size .gg-example-frame
- * to the top-left corner for screenshotting.
- *
- * FONT: the chart component self-hosts Roboto Condensed and waits on
- * document.fonts.ready in VR. The page chrome keeps a native UI stack.
+ * Docs shell styles. Site appearance is deliberately separate from chart
+ * theme tokens: explicit chart themes do not follow the surrounding page.
  */
+@import "./styles/tokens.css";
+@import "./styles/base.css";
+@import "./styles/shell.css";
 
-:root {
+.gg-example-frame {
   --bg: #ffffff;
   --fg: #1f2328;
   --muted: #57606a;
   --surface: #f6f8fa;
   --border: #d0d7de;
   --accent: #4269d0;
-  color-scheme: light;
-}
 
-:root[data-theme="dark"] {
-  --bg: #16181d;
-  --fg: #e6e8eb;
-  --muted: #9aa2ab;
-  --surface: #1f232b;
-  --border: #343a44;
-  --accent: #7ea1f0;
-  color-scheme: dark;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
+  min-width: 0;
+  overflow: hidden;
   background: var(--bg);
   color: var(--fg);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   line-height: 1.55;
 }
 
-a {
-  color: var(--accent);
+:root[data-theme="dark"] .gg-example-frame {
+  --bg: #16181d;
+  --fg: #e6e8eb;
+  --muted: #9aa2ab;
+  --surface: #1f232b;
+  --border: #343a44;
+  --accent: #7ea1f0;
 }
 
-code,
-pre {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.9em;
-}
-
-.site-main {
-  max-width: 60rem;
-  margin: 0 auto;
-  padding: 1.5rem;
-}
-
-.site-chrome {
-  border-bottom: 1px solid var(--border);
-}
-
-.site-chrome nav {
-  max-width: 60rem;
-  margin: 0 auto;
-  padding: 0.75rem 1.5rem;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 1.25rem;
-}
-
-@media (max-width: 32rem) {
-  .site-chrome nav {
-    gap: 0.55rem 1rem;
-  }
-
-  .site-chrome .brand {
-    flex-basis: 100%;
-  }
-}
-
-.site-chrome .brand {
-  font-weight: 700;
-  font-size: 1.05rem;
-  color: var(--fg);
-  text-decoration: none;
-}
-
-.site-chrome a {
-  text-decoration: none;
-}
-
-.gg-example-frame {
-  overflow: hidden;
-  background: var(--bg);
-}
-
-/* ---- VR mode (html[data-vr] is set pre-paint) ------------------------- */
-
+/* VR mode isolates fixed chart baselines from the public documentation shell. */
 html[data-vr] *,
 html[data-vr] *::before,
 html[data-vr] *::after {
@@ -110,12 +41,17 @@ html[data-vr] *::after {
 }
 
 html[data-vr] .site-chrome,
-html[data-vr] .example-prose {
+html[data-vr] .example-prose,
+html[data-vr] .skip-link,
+html[data-vr] .site-menu,
+html[data-vr] .chapter-dialog {
   display: none !important;
 }
 
 html[data-vr] .site-main {
+  width: auto;
   max-width: none;
+  min-height: 0;
   margin: 0;
   padding: 0;
 }

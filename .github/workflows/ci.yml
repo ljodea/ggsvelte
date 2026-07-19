@@ -874,10 +874,10 @@ jobs:
           fi
       - name: build packaged interaction test target
         if: steps.content_hash.outputs.hit != 'true'
-        run: BASE_PATH=/ggsvelte bun run build:docs
-      - name: interaction and safe-playground accessibility journeys
+        run: DOCS_BUILD_MODE=legacy-full BASE_PATH=/ggsvelte bun run build:docs
+      - name: docs shell, interaction, and safe-playground journeys
         if: steps.content_hash.outputs.hit != 'true'
-        run: bun run test:visual -- interaction-accessibility.spec.ts playground.spec.ts
+        run: bun run test:visual -- docs-shell.spec.ts interaction-accessibility.spec.ts playground.spec.ts --grep-invert 'visual contract'
       - uses: ./.github/actions/ci-content-hash-write
         if: steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
         with:
@@ -957,7 +957,7 @@ jobs:
             fi
           done
       - name: build docs for interaction performance fixtures
-        run: BASE_PATH=/ggsvelte bun run build:docs
+        run: DOCS_BUILD_MODE=legacy-full BASE_PATH=/ggsvelte bun run build:docs
       - name: interaction performance p50/p95 (informational — never fail the check)
         id: perf
         # Wall-clock budgets flake on the shared self-hosted host. Hard gate is

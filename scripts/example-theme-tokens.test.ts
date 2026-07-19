@@ -1,6 +1,6 @@
 /**
  * Docs theme tokens live on :root as --fg / --bg / --surface / --muted
- * (apps/docs/src/app.css). Example chrome that hard-codes var(--text, #17202a)
+ * (apps/docs/src/styles/tokens.css). Example chrome that hard-codes var(--text, #17202a)
  * never resolves --text, so buttons and tables stay near-black in dark theme.
  *
  * Regression for the post-merge finding on #44 (linked-views dark baseline).
@@ -10,7 +10,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 const ROOT = join(import.meta.dir, "..");
-const DOCS_CSS = join(ROOT, "apps/docs/src/app.css");
+const DOCS_CSS = join(ROOT, "apps/docs/src/styles/tokens.css");
 const INTERACTION_EXAMPLES = join(ROOT, "examples/interaction");
 
 function exampleSvelteSources(): Array<{ id: string; source: string }> {
@@ -23,10 +23,10 @@ function exampleSvelteSources(): Array<{ id: string; source: string }> {
 }
 
 describe("docs theme tokens", () => {
-  it("defines --fg for light and dark themes (not --text)", () => {
+  it("defines --fg through the site ink token in light and dark themes (not --text)", () => {
     const css = readFileSync(DOCS_CSS, "utf8");
-    expect(css).toMatch(/:root\s*\{[^}]*--fg\s*:/s);
-    expect(css).toMatch(/:root\[data-theme="dark"\]\s*\{[^}]*--fg\s*:/s);
+    expect(css).toMatch(/:root\s*\{[^}]*--ink\s*:[^}]*--fg\s*:\s*var\(--ink\)/s);
+    expect(css).toMatch(/:root\[data-theme="dark"\]\s*\{[^}]*--ink\s*:/s);
     expect(css).not.toMatch(/--text\s*:/);
   });
 });

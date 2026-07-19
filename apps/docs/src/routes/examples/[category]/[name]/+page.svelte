@@ -25,11 +25,6 @@
   );
 </script>
 
-<svelte:head>
-  <title>{data.entry.title} — ggsvelte examples</title>
-  <meta name="description" content={data.entry.description} />
-</svelte:head>
-
 <article class="example-page">
   <!-- .example-prose is hidden in VR mode; the frame is what gets shot. -->
   <div class="example-prose">

@@ -100,7 +100,7 @@ jobs:
       - name: enforce retained-memory baseline
         run: bun run bench:memory:check
       - name: build packaged interaction performance target
-        run: bun run build && BASE_PATH=/ggsvelte bun run build:docs
+        run: bun run build && DOCS_BUILD_MODE=legacy-full BASE_PATH=/ggsvelte bun run build:docs
       - name: enforce Playwright interaction p50/p95 budgets
         run: bun run test:interaction-perf
       - name: upload results

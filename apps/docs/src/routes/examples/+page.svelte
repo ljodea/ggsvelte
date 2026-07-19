@@ -17,10 +17,6 @@
   }
 </script>
 
-<svelte:head>
-  <title>Examples — ggsvelte</title>
-</svelte:head>
-
 <h1>Examples</h1>
 <p>
   Every example is one source with three uses: this gallery, the visual

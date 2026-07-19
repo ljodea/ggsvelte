@@ -1,26 +1,52 @@
 <script lang="ts">
-  import { base } from "$app/paths";
-
   import "../app.css";
 
-  const { children } = $props();
+  import DocsShell from "$lib/components/DocsShell.svelte";
+  import SiteFooter from "$lib/components/SiteFooter.svelte";
+  import SiteHeader from "$lib/components/SiteHeader.svelte";
+
+  import type { LayoutProps } from "./$types";
+
+  const { data, children }: LayoutProps = $props();
+  const noindex = $derived(
+    !data.site.indexable || data.route === undefined || !data.route.index,
+  );
 </script>
 
 <svelte:head>
-  <title>ggsvelte</title>
+  <title>{data.route?.title ?? "ggsvelte"}</title>
+  {#if data.route !== undefined}
+    <meta name="description" content={data.route.description} />
+  {/if}
+  {#if data.canonical !== undefined}
+    <link rel="canonical" href={data.canonical} />
+  {/if}
+  {#if noindex}
+    <meta name="robots" content="noindex,follow" />
+  {/if}
 </svelte:head>
 
-<!-- .site-chrome is hidden in VR mode (html[data-vr], see app.css) -->
-<header class="site-chrome">
-  <nav>
-    <a class="brand" href={`${base}/`}>ggsvelte</a>
-    <a href={`${base}/guide/getting-started`}>Guide</a>
-    <a href={`${base}/examples`}>Examples</a>
-    <a href={`${base}/playground`}>Playground</a>
-    <a href="https://github.com/ljodea/ggsvelte" rel="external">GitHub</a>
-  </nav>
-</header>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<SiteHeader path={data.path} />
 
-<main class="site-main">
-  {@render children()}
+<main
+  id="main-content"
+  class:docs-main={data.route?.shell === "docs"}
+  class="site-main"
+  data-build-mode={data.site.mode}
+>
+  {#if data.route?.shell === "docs"}
+    <DocsShell
+      route={data.route}
+      path={data.path}
+      previous={data.sequence.previous}
+      next={data.sequence.next}
+    >
+      {@render children()}
+    </DocsShell>
+  {:else}
+    {@render children()}
+  {/if}
 </main>
+
+<SiteFooter />

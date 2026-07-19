@@ -26,6 +26,24 @@ code differ, fix both in the same change and treat the code as the rendered cont
 The plot is always the strongest visual anchor. Titles, controls, tooltips, legends,
 and diagnostics support it rather than turning the chart into an application card.
 
+## Public documentation surfaces
+
+The documentation shell uses its own `--site-*` appearance tokens. Those tokens must
+never become chart-theme defaults or alter an explicitly selected chart theme. Example
+frames retain a compatibility boundary for chart-adjacent controls while chart visuals
+continue to resolve only from `ThemeTokens` and `--gg-*` properties.
+
+The site uses self-hosted Noto Sans Display for reading text and Roboto Condensed for
+headlines and compact labels. Documentation pages use an editorial three-rail layout:
+chapter navigation, a readable article column, and an on-this-page rail. The right rail
+collapses first; on narrow screens both navigation rails become explicit native-dialog
+controls. Wide code and data stay in local scroll regions rather than widening the page.
+
+Prefer rules, whitespace, and typographic hierarchy to cards, shadows, or pill-shaped
+chrome. Light and dark appearances are user-selectable and stored locally. Forced-colors
+mode preserves native controls, focus outlines, boundaries, and current navigation
+without relying on color alone.
+
 ## Typography
 
 Roboto Condensed is the default chart family because its narrow proportions preserve
