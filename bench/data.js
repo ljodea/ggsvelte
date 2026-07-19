@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784471885265,
+  "lastUpdate": 1784474682456,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -32570,6 +32570,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 113.951,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "437ff1238288b54d6916f16648e48fb3af037a84",
+          "message": "fix(color): enforce theme and palette contracts (#325)\n\n* fix(color): enforce palette compatibility\n\n* fix(docs): isolate chart themes from site appearance\n\n* fix(color): preserve invalid ranges for validation\n\n* fix(color): honor named sequential schemes\n\n* fix(spec): make inferred-scale repairs actionable",
+          "timestamp": "2026-07-19T10:23:59-05:00",
+          "tree_id": "6443401bcb064de49e4ad372bf03d12109a9e892",
+          "url": "https://github.com/ljodea/ggsvelte/commit/437ff1238288b54d6916f16648e48fb3af037a84"
+        },
+        "date": 1784474681069,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.3192,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.0427,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 5.501,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 7.9416,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 28.9037,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 61.2951,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 0.9744,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2191,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 28.1887,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 51.5806,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 9.357,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 9.4889,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 844.4701,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.827,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 229.4632,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 9.6255,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 11.2505,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 595.2438,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 119.7035,
             "unit": "ms"
           }
         ]
