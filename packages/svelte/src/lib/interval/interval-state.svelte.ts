@@ -72,15 +72,13 @@ export type IntervalStateDeps = {
   commitZoom: (domains: ContinuousZoomDomains | null, source: InteractionSource) => void;
   coordFlipped: () => boolean;
   captureSurface: () => HTMLDivElement | null;
-  /** Semantic candidate projection, initialized before factory construction. */
+  /** Used by the precise-bounds lineage projection. */
   candidateSemanticKeys: (candidate: CandidateFacts) => PropertyKey[];
   /**
-   * Deferred host bag for non-union interval key consumption. When the host
-   * already walked the store for anchors/masks (shared projection), return that
-   * bag here so `effectiveIntervalKeys` does not re-walk O(C). `null`/omitted
-   * falls back to the local full-store projection (tests / non-orchestrator).
+   * Deferred semantic Candidate view for non-union interval consumption.
+   * Projection ownership stays outside interval behavior.
    */
-  sharedConsumptionCandidates?: () => readonly IntervalConsumptionCandidate<PropertyKey>[] | null;
+  consumptionCandidates: () => readonly IntervalConsumptionCandidate<PropertyKey>[];
   /**
    * Handler-only: `openBoundsEditor` select branch reads the host's inspection
    * panel as its fallback target. Host derived is earlier than the factory and
@@ -168,23 +166,6 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
     );
   });
 
-  function intervalConsumptionCandidates(): IntervalConsumptionCandidate<PropertyKey>[] {
-    const model = deps.model();
-    if (model === null) return [];
-    const candidates: IntervalConsumptionCandidate<PropertyKey>[] = [];
-    for (let id = 0; id < model.candidates.size; id++) {
-      const candidate = model.candidates.candidate(id);
-      if (candidate === null) continue;
-      candidates.push({
-        panelId: candidate.panelId,
-        xValue: candidate.xValue,
-        yValue: candidate.yValue,
-        keys: deps.candidateSemanticKeys(candidate),
-      });
-    }
-    return candidates;
-  }
-
   const effectiveIntervalKeys: readonly PropertyKey[] = $derived.by(() => {
     const model = deps.model();
     if (model === null || effectiveIntervals.length === 0) return [];
@@ -198,13 +179,10 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
         panels: model.scene.panels,
         candidates: [],
       });
-    // Prefer host shared bag (one store walk with anchors/masks) over a second
-    // local full-store projection when non-union intervals are live.
-    const shared = deps.sharedConsumptionCandidates?.() ?? null;
     return consumeIntervalKeys({
       records: effectiveIntervals,
       panels: model.scene.panels,
-      candidates: shared ?? intervalConsumptionCandidates(),
+      candidates: deps.consumptionCandidates(),
     });
   });
 

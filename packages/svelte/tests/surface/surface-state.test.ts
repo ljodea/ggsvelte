@@ -365,6 +365,20 @@ function mountSurfaceComposite(
       coordFlipped: () => false,
       captureSurface: () => capture,
       candidateSemanticKeys: identityCandidateKeys,
+      consumptionCandidates: () => {
+        const candidates = [];
+        for (let id = 0; id < model.candidates.size; id++) {
+          const candidate = model.candidates.candidate(id);
+          if (candidate === null) continue;
+          candidates.push({
+            panelId: candidate.panelId,
+            xValue: candidate.xValue,
+            yValue: candidate.yValue,
+            keys: identityCandidateKeys(candidate),
+          });
+        }
+        return candidates;
+      },
       inspectionPanel: () => inspection.inspectionPanel,
       emitSelection: (event) => {
         selectionEvents.push(event);

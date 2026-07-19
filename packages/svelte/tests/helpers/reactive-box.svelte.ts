@@ -19,17 +19,3 @@ export function reactiveBox<T>(initial: T): ReactiveBox<T> {
     },
   };
 }
-
-/**
- * Rune-backed memo for `.test.ts` files (runes are unavailable there).
- * Mirrors a host `$derived` boundary: `fn` re-runs only when its reactive
- * inputs change, regardless of how often `.value` is read.
- */
-export function derivedBox<T>(fn: () => T): { readonly value: T } {
-  const value = $derived.by(fn);
-  return {
-    get value() {
-      return value;
-    },
-  };
-}
