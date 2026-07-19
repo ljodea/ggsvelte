@@ -1,11 +1,10 @@
-/**
- * Map a scene primitive back to a post-stat frame row and series group.
- */
-import { pathSubpathIndex } from "../candidate-geometry.js";
-import type { GeometryBatch } from "../scene.js";
+import { pathSubpathIndex } from "../../candidate-geometry.js";
+import type { GeometryBatch } from "../../scene.js";
+import type { LayerFrame } from "../types.js";
 
-import type { LayerFrame } from "./types.js";
-
+// ---------------------------------------------------------------------------
+// Candidate frame row
+// ---------------------------------------------------------------------------
 /**
  * Build per-group frame-row indices sorted by xNumeric (fallback: row index).
  * Path candidate resolution looks up local vertex → frame row from this index.
