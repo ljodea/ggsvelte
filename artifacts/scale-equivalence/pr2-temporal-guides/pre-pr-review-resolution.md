@@ -94,3 +94,23 @@ Final Grok and Claude implementation reviews both returned `VERDICT: PASS`. Thei
 - **Initial-candidate isolation duplication: rebutted.** The initial-navigation test proves the pending state was observable before promotion; the adjacent apply-candidate test proves isolation and retained active DOM using the same observer.
 - **Band parity: rebutted as outside these findings.** Public discrete helpers exclude temporal guide options and band normalization strips them defensively; the reviewed runtime defect was the linear/log path that parsed epochs while silently dropping guides.
 - **Datetime fallback broadening: accepted intent.** It applies only to a trained time scale with an explicit temporal request and no authored, mapped, or scalar kind evidence.
+
+## Final Codex round-three follow-up
+
+All five findings on `34d9241` were valid. The reported Jan 2 multi-day example was already on the UTC epoch phase, but the underlying defect reproduced from a Jan 3 local minimum and was fixed with the same requested invariant.
+
+- **Date-only auto guides selected sub-day intervals: fixed.** Automatic date-kind candidate pools are day-or-coarser; datetime auto selection and authored sub-day date intervals remain supported.
+- **Irregular explicit breaks produced duplicate visible labels: fixed.** Formatting context now uses the smallest non-zero gap across a sorted, deduplicated copy of every surviving break. Authored order/values and public `interval: null` are unchanged.
+- **Zoned multi-day phases depended on the domain minimum: fixed.** Day and week cursors align an absolute Gregorian civil-day index to the same epoch/weekday phase as UTC before timezone projection. Regressions cover `2 days`, `2 weeks`, explicit week starts, and the existing DST matrix.
+- **Domain-only rowless date scales fell back to datetime: fixed.** Strict configured domain/break evidence participates in date/datetime kind resolution before fallback, without field-name guessing, epoch-magnitude inference, or fabricated `ScaleDecision`s.
+- **The emitted schema accepted unsupported `dateLabels` tokens: fixed.** TypeBox and JSON Schema share the closed token pattern; AJV parity covers `%Q` and trailing `%`. Render-time `%Q` still produces the stable `invalid-temporal-labels` `PipelineError`.
+
+TDD evidence: all six focused tests failed on `34d9241`, then 92 focused tests passed after implementation. Full verification passed 1,262 of 1,263 tests before regeneration; the sole failure was the expected stale `lifecycle.json`, and its six freshness/coverage tests pass after `lifecycle:gen`. Type contracts, type-aware lint, docs/Svelte checks, and 48/48 deterministic evals pass.
+
+Both final Grok and Claude reviews returned `VERDICT: PASS` with no P0/P1/P2 findings. Their P3 observations were resolved as follows:
+
+- **Invalid configured-value decisions: rebutted by stage ordering.** Explicit domains and breaks are strictly converted during scale training before layout; malformed values throw `invalid-scale-domain`/`invalid-scale-breaks` and cannot reach the kind-evidence branch. Numeric auto domains still return no kind and use the documented datetime fallback.
+- **Sub-day date domains can have sparse automatic ticks: accepted unreachable semantic edge.** Valid date parser outputs are midnight calendar values, so distinct sub-day date domains are not produced by the semantic pipeline. Authored sub-day intervals remain intentionally supported.
+- **Length-invalid `dateLabels` error precedence: accepted intent.** Empty, oversized, and unsupported-token strings are all semantic label-grammar failures and now share the stable `invalid-temporal-labels` pipeline diagnostic; non-string shapes still fail TypeBox.
+- **Near-duplicate explicit breaks: rebutted.** Deduplication is exact by source value. A real one-millisecond gap must select millisecond formatting rather than be fuzzed away and mislabeled.
+- **Generated projections: refreshed.** The new reviewed plan is an approved docs source, so route/search projections were regenerated; freshness tests and the complete docs build pass.

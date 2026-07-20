@@ -148,6 +148,52 @@ describe("measured temporal axis GuidePlan", () => {
     }
   });
 
+  it("keeps automatic date guides day-or-coarser without restricting authored intervals", () => {
+    const planShortSpan = (kind: "date" | "datetime", config = {}) =>
+      planTemporalAxis({
+        aesthetic: "x",
+        panelIndex: 0,
+        domain: [Date.UTC(2024, 0, 1), Date.UTC(2024, 0, 2)],
+        kind,
+        orient: "horizontal",
+        extentPx: 640,
+        reverse: false,
+        measurer,
+        fontSize: 11,
+        marginCapPx: 224,
+        config,
+      });
+    const date = planShortSpan("date");
+    expect(date.interval).toBe("1 day");
+    expect(
+      date.ticks
+        .filter((tick) => tick.kind === "major")
+        .every((tick) => (tick.value as number) % (24 * 60 * 60 * 1_000) === 0),
+    ).toBe(true);
+    expect(planShortSpan("datetime").interval).toBe("6 hours");
+    expect(planShortSpan("date", { dateBreaks: "6 hours" }).interval).toBe("6 hours");
+  });
+
+  it("derives explicit-break labels from the smallest surviving gap", () => {
+    const plan = planTemporalAxis({
+      aesthetic: "x",
+      panelIndex: 0,
+      domain: [Date.UTC(2024, 0, 1), Date.UTC(2025, 1, 1)],
+      breaks: [Date.UTC(2024, 0, 1), Date.UTC(2025, 0, 1), Date.UTC(2025, 1, 1)],
+      kind: "date",
+      orient: "horizontal",
+      extentPx: 640,
+      reverse: false,
+      measurer,
+      fontSize: 11,
+      marginCapPx: 224,
+      config: {},
+    });
+    expect(plan.source).toBe("explicit");
+    expect(plan.interval).toBeNull();
+    expect(plan.ticks.map((tick) => tick.label)).toEqual(["Jan 2024", "Jan 2025", "Feb"]);
+  });
+
   it("keeps interval tie-breaks stable at neighboring integer widths", () => {
     expect([319, 320, 321].map((width) => planYears(width).interval)).toEqual([
       "50 years",

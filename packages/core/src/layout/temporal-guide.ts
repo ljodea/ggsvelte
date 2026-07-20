@@ -318,6 +318,12 @@ function compareScore(left: CandidateEvaluation, right: CandidateEvaluation): nu
 }
 
 function automaticCandidate(input: TemporalAxisPlanInput): CandidateEvaluation {
+  const intervalPool =
+    input.kind === "date"
+      ? AUTOMATIC_INTERVALS.filter((candidate) =>
+          ["day", "week", "month", "quarter", "year"].includes(candidate.unit),
+        )
+      : AUTOMATIC_INTERVALS;
   const span = Math.max(1, input.domain[1] - input.domain[0]);
   const previousApprox =
     input.previousInterval === undefined || input.previousInterval === null
@@ -339,15 +345,13 @@ function automaticCandidate(input: TemporalAxisPlanInput): CandidateEvaluation {
               : 0),
       );
   const primary = evaluatePool(
-    AUTOMATIC_INTERVALS.filter((candidate) => {
+    intervalPool.filter((candidate) => {
       const approx = intervalApproxMs(candidate);
       return approx >= lowerApprox && approx <= upperApprox;
     }),
   );
   const coarser = () =>
-    evaluatePool(
-      AUTOMATIC_INTERVALS.filter((candidate) => intervalApproxMs(candidate) > upperApprox),
-    );
+    evaluatePool(intervalPool.filter((candidate) => intervalApproxMs(candidate) > upperApprox));
   const candidates = primary.length > 0 ? primary : coarser();
   if (candidates.length === 0) {
     const fallback = interval("year", 1);
@@ -406,8 +410,12 @@ function explicitCandidate(input: TemporalAxisPlanInput): CandidateEvaluation {
 }
 
 function inferExplicitInterval(values: readonly number[]): TemporalInterval {
-  if (values.length < 2) return interval("year", 1);
-  const gap = Math.abs(values[1]! - values[0]!);
+  const ordered = [...new Set(values)].toSorted((left, right) => left - right);
+  if (ordered.length < 2) return interval("year", 1);
+  let gap = Number.POSITIVE_INFINITY;
+  for (let index = 1; index < ordered.length; index++) {
+    gap = Math.min(gap, ordered[index]! - ordered[index - 1]!);
+  }
   if (gap >= YEAR) return interval("year", Math.max(1, Math.round(gap / YEAR)));
   if (gap >= MONTH) return interval("month", Math.max(1, Math.round(gap / MONTH)));
   if (gap >= DAY) return interval("day", Math.max(1, Math.round(gap / DAY)));

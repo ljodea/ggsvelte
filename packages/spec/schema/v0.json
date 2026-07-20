@@ -1491,6 +1491,7 @@
           "type": "string",
           "minLength": 1,
           "maxLength": 128,
+          "pattern": "^(?:[^%]|%(?:Y|y|m|b|B|d|e|a|A|H|I|M|S|L|p|q|z|Z|%))+$",
           "description": "Strict temporal label format. Supported tokens: %Y %y %m %b %B %d %e %a %A %H %I %M %S %L %p %q %z %Z %%."
         },
         "locale": {

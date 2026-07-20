@@ -163,6 +163,7 @@ export {
   TEMPORAL_WEEKDAYS,
   TemporalIntervalError,
   TemporalIntervalSpecSchema,
+  TemporalLabelSpecSchema,
   temporalIntervalTicks,
   temporalLabelConfigurationError,
   temporalLocaleConfigurationError,

@@ -2616,14 +2616,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/spec"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-244",
+    id: "heading:guide-lifecycle:experimental-245",
     kind: "heading",
-    title: "experimental (244)",
+    title: "experimental (245)",
     summary:
-      "experimental (244) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-244",
+      "experimental (245) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-245",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (244)"],
+    exact: ["experimental (245)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-8",
@@ -4798,6 +4798,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-spec",
     keywords: ["@ggsvelte/spec", ".", "type", "experimental"],
     exact: ["TemporalKind"],
+  },
+  {
+    id: "api:ggsvelte-spec:TemporalLabelSpecSchema",
+    kind: "api",
+    title: "TemporalLabelSpecSchema",
+    summary: "@ggsvelte/spec · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "value", "experimental"],
+    exact: ["TemporalLabelSpecSchema"],
   },
   {
     id: "api:ggsvelte-spec:TemporalParseError",

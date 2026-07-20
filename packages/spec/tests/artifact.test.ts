@@ -117,6 +117,27 @@ describe("schema/v0.json artifact", () => {
       [{ layers: [{ geom: "rule", params: { yintercept: 3 } }] }, true],
       [{ layers: [{ geom: "text", params: { anchor: "left" } }] }, false],
       [{ scales: { y: { type: "log", zero: false } }, layers: [{ geom: "point" }] }, true],
+      [
+        {
+          scales: { x: { type: "time", dateLabels: "literal %Y %% %m" } },
+          layers: [{ geom: "point" }],
+        },
+        true,
+      ],
+      [
+        {
+          scales: { x: { type: "time", dateLabels: "%Q" } },
+          layers: [{ geom: "point" }],
+        },
+        false,
+      ],
+      [
+        {
+          scales: { x: { type: "time", dateLabels: "trailing %" } },
+          layers: [{ geom: "point" }],
+        },
+        false,
+      ],
       [{ scales: { y: { type: "exp" } }, layers: [{ geom: "point" }] }, false],
       [{ scales: { color: { range: ["#abc", "#123456"] } }, layers: [{ geom: "point" }] }, true],
       [{ scales: { color: { range: ["tomato"] } }, layers: [{ geom: "point" }] }, false],

@@ -696,6 +696,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "TemporalLabelSpecSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "TemporalParseError": {
           "kind": "value",
           "lifecycle": "experimental"

@@ -12,8 +12,30 @@ import {
 
 import { PipelineError } from "./types.js";
 
+function preflightTemporalLabels(spec: PortableSpec): void {
+  for (const axis of ["x", "y"] as const) {
+    const dateLabels = spec.scales?.[axis]?.dateLabels;
+    if (typeof dateLabels !== "string") continue;
+    const error = temporalLabelConfigurationError(dateLabels);
+    if (error === null) continue;
+    const path = `/scales/${axis}/dateLabels`;
+    throw new PipelineError("invalid-temporal-labels", path, error, {
+      code: "invalid-temporal-labels",
+      severity: "error",
+      path,
+      problem: "The temporal label format is not in the closed portable grammar.",
+      cause: error,
+      fixes: [{ description: "Use only the documented dateLabels tokens." }],
+      documentationUrl: "/guide/temporal-scales#formatting",
+    });
+  }
+}
+
 export function normalizeAndValidateSpec(spec: SpecInput | PortableSpec): PortableSpec {
   const normalized = normalize(spec);
+  // Preserve the stable pipeline diagnostic before the portable schema rejects
+  // the same closed-token violation as a generic shape error.
+  preflightTemporalLabels(normalized);
   const result = validate(normalized);
   if (!result.ok) throw new SpecValidationError(result.errors);
 
@@ -43,21 +65,6 @@ export function normalizeAndValidateSpec(spec: SpecInput | PortableSpec): Portab
 
   for (const axis of ["x", "y"] as const) {
     const config = normalized.scales?.[axis];
-    if (config?.dateLabels !== undefined) {
-      const error = temporalLabelConfigurationError(config.dateLabels);
-      if (error !== null) {
-        const path = `/scales/${axis}/dateLabels`;
-        throw new PipelineError("invalid-temporal-labels", path, error, {
-          code: "invalid-temporal-labels",
-          severity: "error",
-          path,
-          problem: "The temporal label format is not in the closed portable grammar.",
-          cause: error,
-          fixes: [{ description: "Use only the documented dateLabels tokens." }],
-          documentationUrl: "/guide/temporal-scales#formatting",
-        });
-      }
-    }
     if (config?.locale !== undefined) {
       const error = temporalLocaleConfigurationError(config.locale);
       if (error !== null) {

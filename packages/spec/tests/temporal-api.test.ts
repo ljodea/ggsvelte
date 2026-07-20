@@ -85,6 +85,17 @@ describe("temporal scale schema", () => {
     }
   });
 
+  it("enforces the closed dateLabels token grammar in tier-1 validation", () => {
+    const accepts = (dateLabels: string) =>
+      validate({
+        layers: [{ geom: "point" }],
+        scales: { x: { type: "time", dateLabels } },
+      }).ok;
+    expect(accepts("literal %Y %% %y %m %b %B %d %e %a %A %H %I %M %S %L %p %q %z %Z")).toBe(true);
+    expect(accepts("%Q")).toBe(false);
+    expect(accepts("trailing %")).toBe(false);
+  });
+
   it("rejects invalid temporal configuration without inline data evidence", () => {
     for (const x of [
       { type: "time" as const, timezone: "Not/A_Zone" },

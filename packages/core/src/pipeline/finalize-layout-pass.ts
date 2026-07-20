@@ -60,6 +60,19 @@ export function finalizePanelLayoutPass(input: {
       if (decision.kind !== null) return decision.kind;
     }
 
+    const config = normalized.scales?.[axis];
+    if (conversion.requestedTime) {
+      for (const values of [config?.domain, config?.breaks]) {
+        if (values === undefined || values.length === 0) continue;
+        const decision = parseTemporalColumn(
+          values,
+          conversion.parser,
+          conversion.options,
+        ).decision;
+        if (decision.kind !== null) return decision.kind;
+      }
+    }
+
     const scale = axis === "x" ? xTraining.scale : yTraining.scale;
     return scale.type === "time" && conversion.requestedTime ? "datetime" : null;
   };

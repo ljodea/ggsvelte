@@ -99,6 +99,40 @@ describe("temporal interval stepping", () => {
     }
   });
 
+  it("keeps zoned multi-day and multi-week phases aligned with UTC civil dates", () => {
+    const civilDates = (
+      timezone: string,
+      interval: "2 days" | "2 weeks",
+      weekStart: "monday" | "sunday" = "monday",
+    ) =>
+      temporalIntervalTicks(
+        Date.parse("2024-01-03T12:00:00-05:00"),
+        Date.parse("2024-02-20T12:00:00-05:00"),
+        interval,
+        { kind: "datetime", timezone, weekStart },
+      ).map((value) => {
+        const parts = new Intl.DateTimeFormat("en-CA", {
+          timeZone: timezone,
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        }).formatToParts(value);
+        return ["year", "month", "day"]
+          .map((type) => parts.find((part) => part.type === type)?.value)
+          .join("-");
+      });
+
+    expect(civilDates("America/New_York", "2 days").slice(0, 3)).toEqual([
+      "2024-01-04",
+      "2024-01-06",
+      "2024-01-08",
+    ]);
+    expect(civilDates("America/New_York", "2 days")).toEqual(civilDates("UTC", "2 days"));
+    expect(civilDates("America/New_York", "2 weeks", "sunday")).toEqual(
+      civilDates("UTC", "2 weeks", "sunday"),
+    );
+  });
+
   it("honors named week starts", () => {
     const min = Date.UTC(2026, 0, 1);
     const max = Date.UTC(2026, 0, 20);

@@ -221,6 +221,38 @@ describe("temporal pipeline semantics", () => {
     expect(model.scaleDecisions.filter((decision) => decision.aesthetic === "x")).toHaveLength(0);
   });
 
+  it("derives rowless date kind from a configured parser domain", () => {
+    const model = runPipeline(
+      {
+        edition: 2,
+        data: { values: [{ pad: 1 }] },
+        layers: [
+          {
+            geom: "rule",
+            stat: "identity",
+            position: "identity",
+            params: { yintercept: 0 },
+          },
+        ],
+        scales: {
+          x: {
+            type: "time",
+            parse: "ymd",
+            domain: ["2024-01-01", "2024-01-03"],
+            dateBreaks: "1 day",
+            nice: false,
+          },
+        },
+      },
+      size,
+    );
+    const guide = model.guidePlans.find((plan) => plan.aesthetic === "x")!;
+    expect(guide.source).toBe("interval");
+    expect(guide.temporalKind).toBe("date");
+    expect(guide.ticks.every((tick) => !tick.fullLabel.includes(":"))).toBe(true);
+    expect(model.scaleDecisions.filter((decision) => decision.aesthetic === "x")).toHaveLength(0);
+  });
+
   it("preserves authored overlapping labels and emits a structured diagnostic", () => {
     const model = runPipeline(
       gg(

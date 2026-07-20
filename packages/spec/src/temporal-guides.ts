@@ -117,6 +117,15 @@ export const TEMPORAL_LABEL_TOKENS = [
   "%",
 ] as const;
 const LABEL_TOKEN_SET = new Set<string>(TEMPORAL_LABEL_TOKENS);
+const TEMPORAL_LABEL_PATTERN = `^(?:[^%]|%(?:${TEMPORAL_LABEL_TOKENS.join("|")}))+$`;
+
+export const TemporalLabelSpecSchema = Type.String({
+  minLength: 1,
+  maxLength: 128,
+  pattern: TEMPORAL_LABEL_PATTERN,
+  description:
+    "Strict temporal label format. Supported tokens: %Y %y %m %b %B %d %e %a %A %H %I %M %S %L %p %q %z %Z %%.",
+});
 
 export function temporalLabelConfigurationError(pattern: string): string | null {
   if (pattern.length === 0 || pattern.length > 128) {
@@ -305,6 +314,20 @@ export function temporalIntervalTicks(
     millisecond: current.millisecond,
   };
 
+  const absoluteCivilDay = Math.floor(utcEpoch(parts.year, parts.month - 1, parts.day) / DAY_MS);
+  const plainAtCivilDay = (day: number) => {
+    const date = new Date(day * DAY_MS);
+    return Temporal.PlainDateTime.from({
+      year: date.getUTCFullYear(),
+      month: date.getUTCMonth() + 1,
+      day: date.getUTCDate(),
+      hour: 0,
+      minute: 0,
+      second: 0,
+      millisecond: 0,
+    });
+  };
+
   let plain;
   switch (interval.unit) {
     case "hour": {
@@ -312,24 +335,19 @@ export function temporalIntervalTicks(
       plain = Temporal.PlainDateTime.from({ ...parts, hour, minute: 0, second: 0, millisecond: 0 });
       break;
     }
-    case "day":
-      plain = Temporal.PlainDateTime.from({
-        ...parts,
-        hour: 0,
-        minute: 0,
-        second: 0,
-        millisecond: 0,
-      });
+    case "day": {
+      const alignedDay = Math.floor(absoluteCivilDay / interval.step) * interval.step;
+      plain = plainAtCivilDay(alignedDay);
       break;
+    }
     case "week": {
-      const daysBack = (current.dayOfWeek - weekStart + 7) % 7;
-      plain = Temporal.PlainDateTime.from({
-        ...parts,
-        hour: 0,
-        minute: 0,
-        second: 0,
-        millisecond: 0,
-      }).subtract({ days: daysBack });
+      // Epoch day zero was Thursday (Temporal day 4). Match the UTC path's
+      // weekday offset and multi-week phase in local civil-date space.
+      const offsetDays = (weekStart - 4 + 7) % 7;
+      const stepDays = interval.step * 7;
+      const alignedDay =
+        Math.floor((absoluteCivilDay - offsetDays) / stepDays) * stepDays + offsetDays;
+      plain = plainAtCivilDay(alignedDay);
       break;
     }
     case "month":
