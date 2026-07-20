@@ -774,8 +774,8 @@ describe("ci-routing module tree (split-safe)", () => {
       stdout: "pipe",
       stderr: "pipe",
     });
-    emit.stdin.write("packages/spec/src/index.ts\n");
-    emit.stdin.end();
+    await emit.stdin.write("packages/spec/src/index.ts\n");
+    await emit.stdin.end();
     const emitOut = await new Response(emit.stdout).text();
     const emitCode = await emit.exited;
     expect(emitCode).toBe(0);
