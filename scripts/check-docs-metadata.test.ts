@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "bun:test";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -86,7 +86,7 @@ function socialHead(structured = true): string {
     '<meta property="og:url" content="https://ggsvelte.sh/"/>',
     '<meta property="og:image" content="https://ggsvelte.sh/previews/interaction-tooltip-light.png"/>',
     '<meta property="og:image:width" content="640"/>',
-    '<meta property="og:image:height" content="400"/>',
+    '<meta property="og:image:height" content="740"/>',
     '<meta property="og:image:alt" content="An interactive ggsvelte scatter plot with a pinned data inspection."/>',
     '<meta name="twitter:card" content="summary_large_image"/>',
     '<meta name="twitter:title" content="Home — ggsvelte"/>',
@@ -98,6 +98,19 @@ function socialHead(structured = true): string {
 }
 
 describe("built docs metadata", () => {
+  it("preserves fenced source that names the legacy host without treating it as metadata", () => {
+    const root = fixture(`<html><head>${socialHead()}</head><body></body></html>`);
+    const llmsFull = readFileSync(join(root, "llms-full.txt"), "utf8");
+    writeFileSync(
+      join(root, "llms-full.txt"),
+      `${llmsFull}\n\n\`\`\`ts\nconst docs = "https://ljodea.github.io/ggsvelte/guide/errors";\n\`\`\`\n`,
+    );
+
+    expect(() => {
+      validateDocsBuildMetadata(root, config, [route]);
+    }).not.toThrow();
+  });
+
   it("rejects relative or wrong-origin links in generated LLM discovery files", () => {
     const root = fixture(`<html><head>${socialHead()}</head><body></body></html>`);
     writeFileSync(join(root, "llms.txt"), "[Docs](/docs)");

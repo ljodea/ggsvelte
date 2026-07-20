@@ -106,7 +106,7 @@ export function buildSeoDocument(route: SeoRoute, canonicalBase: string): SeoDoc
     image: {
       url: absoluteUrl(canonicalBase, SOCIAL_IMAGE_PATH),
       width: 640,
-      height: 400,
+      height: 740,
       alt: "An interactive ggsvelte scatter plot with a pinned data inspection.",
     },
     twitterCard: "summary_large_image",

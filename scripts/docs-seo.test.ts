@@ -1,4 +1,6 @@
 import { describe, expect, it } from "bun:test";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
 import sveltePackage from "../packages/svelte/package.json";
 import { createDocsRouteInventory } from "./docs-route-inventory.ts";
@@ -21,11 +23,26 @@ describe("generated docs SEO", () => {
       image: {
         url: "https://ggsvelte.sh/previews/interaction-tooltip-light.png",
         width: 640,
-        height: 400,
+        height: 740,
         alt: "An interactive ggsvelte scatter plot with a pinned data inspection.",
       },
       twitterCard: "summary_large_image",
     });
+    const socialImage = readFileSync(
+      join(
+        import.meta.dir,
+        "..",
+        "apps",
+        "docs",
+        "static",
+        "previews",
+        "interaction-tooltip-light.png",
+      ),
+    );
+    expect([socialImage.readUInt32BE(16), socialImage.readUInt32BE(20)]).toEqual([
+      seo.image.width,
+      seo.image.height,
+    ]);
     expect(seo.structuredData).toEqual([
       {
         "@context": "https://schema.org",

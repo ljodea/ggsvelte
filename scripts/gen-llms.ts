@@ -1820,7 +1820,7 @@ Every public export carries a lifecycle tag (generated into
 
 ## Defaults editions
 
-\`normalize()\` stamps \`edition: 1\` onto every spec that doesn't carry one,
+\`normalize()\` stamps \`edition: ${String(CURRENT_EDITION)}\` onto every spec that doesn't carry one,
 freezing which generation of DEFAULT aesthetics (theme role tokens,
 categorical palette, sequential ramp) the spec was authored against. When a
 future edition ships better defaults, stamped specs keep their original look
@@ -1908,6 +1908,20 @@ export function docsDiscoveryFacts(canonicalBase: string): DocsDiscoveryFacts {
     currentEdition: CURRENT_EDITION,
     themeNames: THEME_NAMES,
   };
+}
+
+export function markdownOutsideFences(markdown: string): string {
+  let fenced = false;
+  return markdown
+    .split("\n")
+    .filter((line) => {
+      if (line.trimStart().startsWith("```")) {
+        fenced = !fenced;
+        return false;
+      }
+      return !fenced;
+    })
+    .join("\n");
 }
 
 function absoluteMarkdownLinks(markdown: string, canonicalBase: string): string {

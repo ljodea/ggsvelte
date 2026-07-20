@@ -8,7 +8,7 @@ import {
   type DocsRouteRecord,
 } from "./docs-route-inventory.ts";
 import { buildSeoDocument } from "./docs-seo.ts";
-import { docsDiscoveryFacts } from "./gen-llms.ts";
+import { docsDiscoveryFacts, markdownOutsideFences } from "./gen-llms.ts";
 
 function fail(message: string): never {
   throw new Error(`Docs metadata check failed: ${message}`);
@@ -147,8 +147,9 @@ export function validateDocsBuildMetadata(
   const facts = docsDiscoveryFacts(config.canonicalBase);
   for (const filename of ["llms.txt", "llms-full.txt"] as const) {
     const text = readFileSync(join(buildDir, filename), "utf8");
-    if (text.includes("](/")) fail(`${filename} contains a root-relative discovery link`);
-    if (config.base === "" && text.includes("https://ljodea.github.io/ggsvelte")) {
+    const discoveryText = markdownOutsideFences(text);
+    if (discoveryText.includes("](/")) fail(`${filename} contains a root-relative discovery link`);
+    if (config.base === "" && discoveryText.includes("https://ljodea.github.io/ggsvelte")) {
       fail(`${filename} leaks the legacy production prefix into a root build`);
     }
     for (const expected of [

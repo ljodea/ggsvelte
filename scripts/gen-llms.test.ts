@@ -137,7 +137,8 @@ describe("guide sections cover their catalogs", () => {
     for (const s of lifecycle.surfaces) expect(md).toContain(s.package);
     expect(md).toContain("`normalize`");
     expect(md).toContain("stable-intent");
-    expect(md).toContain("edition: 1");
+    expect(md).toContain("edition: 2");
+    expect(md).not.toContain("stamps `edition: 1`");
   });
 
   it("getting-started leads with the exact complete responsive SvelteKit page", () => {

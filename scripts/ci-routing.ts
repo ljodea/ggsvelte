@@ -81,6 +81,7 @@ export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
     // Docs app imports `$scripts/gen-llms` and ships lifecycle-driven guide content.
     "scripts/gen-llms.ts",
     "scripts/gen-llms.test.ts",
+    "scripts/docs-seo.ts",
     "scripts/diagnostic-docs.ts",
     "scripts/quickstart.ts",
     "scripts/cli-docs.ts",
