@@ -60,7 +60,7 @@
     </div>
     <p>
       No account, service, or chart CSS required. <a href={`${base}/playground`}
-        >Use my data</a
+        >Adapt a chart</a
       > locally.
     </p>
   </div>

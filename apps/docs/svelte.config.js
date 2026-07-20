@@ -14,6 +14,14 @@ export default {
   kit: {
     adapter: adapter(),
     paths: { base: build.base },
+    prerender: {
+      handleMissingId: ({ id, message }) => {
+        // Versioned playground fragments are application state, not document
+        // anchors. Every ordinary missing heading id remains a build failure.
+        if (id.startsWith("play=v1.")) return;
+        throw new Error(message);
+      },
+    },
     alias: {
       // The shared example corpus (plan: "one source, three uses"). The docs
       // site is one consumer; tests/visual and llms-full.txt are the others.

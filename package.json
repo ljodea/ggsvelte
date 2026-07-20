@@ -22,6 +22,8 @@
     "docs:search:check": "bun scripts/gen-docs-search.ts --check",
     "gallery:previews:gen": "bun scripts/gen-gallery-previews.ts",
     "gallery:previews:check": "bun scripts/gen-gallery-previews.ts --check",
+    "playground:seeds:gen": "bun scripts/gen-playground-seeds.ts",
+    "playground:seeds:check": "bun scripts/gen-playground-seeds.ts --check",
     "check:docs-metadata": "bun scripts/check-docs-metadata.ts",
     "lint": "bun node_modules/.bin/oxlint .",
     "lint:md": "bun node_modules/.bin/markdownlint-cli2",

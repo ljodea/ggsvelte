@@ -1,682 +1,363 @@
 <script lang="ts">
-  import { tick } from "svelte";
+  import { pushState as pushSvelteKitState } from "$app/navigation";
+  import { onMount, tick } from "svelte";
 
-  import { GGPlot } from "@ggsvelte/svelte";
-  import type {
-    AesInput,
-    InteractionDiagnostic,
-    LayerInput,
-    PlotInteractionEvent,
-    RenderModel,
-  } from "@ggsvelte/svelte";
-
+  import { copyText, MANUAL_LINK_COPY_STATUS } from "$lib/clipboard";
+  import PlaygroundEditor from "$lib/components/PlaygroundEditor.svelte";
+  import PlaygroundOutput from "$lib/components/PlaygroundOutput.svelte";
+  import PlaygroundPreview from "$lib/components/PlaygroundPreview.svelte";
+  import PlaygroundShell from "$lib/components/PlaygroundShell.svelte";
   import {
-    inferPlaygroundFields,
-    parsePlaygroundData,
-    PlaygroundDataError,
-    recommendPlaygroundFields,
-    PLAYGROUND_MAX_BYTES,
-    PLAYGROUND_MAX_FIELDS,
-    PLAYGROUND_MAX_ROWS,
-    type PlaygroundField,
-    type PlaygroundRow,
-  } from "./playground-data";
+    PLAYGROUND_EXAMPLES,
+    PLAYGROUND_SAMPLES,
+  } from "$lib/generated/playground-seeds";
+  import {
+    decodePlaygroundHash,
+    encodePlaygroundSeed,
+    type PlaygroundSeedV1,
+  } from "$lib/playground-codec";
+  import { playgroundSvelteOutput } from "$lib/playground-output";
+  import {
+    confirmPlaygroundRendered,
+    createPlaygroundState,
+    editPlaygroundDraft,
+    failPlaygroundCandidate,
+    promotePlaygroundCandidate,
+    reportPlaygroundDiagnostic,
+    resetPlaygroundSource,
+    setPlaygroundHistoryHash,
+    stagePlaygroundDraft,
+    stagePlaygroundSeed,
+    type PlaygroundDiagnostic,
+  } from "$lib/playground-state";
 
-  type Mark = "point" | "line" | "col";
+  const initialSample = PLAYGROUND_SAMPLES[0]!;
+  const initialSeed: PlaygroundSeedV1 = initialSample.seed;
 
-  const sampleRows: PlaygroundRow[] = [
-    { id: "a1", species: "Adelie", flipper: 181, mass: 3750 },
-    { id: "a2", species: "Adelie", flipper: 186, mass: 3800 },
-    { id: "c1", species: "Chinstrap", flipper: 196, mass: 4050 },
-    { id: "c2", species: "Chinstrap", flipper: 201, mass: 4300 },
-    { id: "g1", species: "Gentoo", flipper: 211, mass: 5000 },
-    { id: "g2", species: "Gentoo", flipper: 221, mass: 5550 },
-  ];
-  const temporalSamples = {
-    "Raw years": {
-      rows: [
-        { year: "1835", value: 12 },
-        { year: "1900", value: 19 },
-        { year: "2026", value: 31 },
-      ],
-      x: "year",
-      y: "value",
-    },
-    "ISO dates": {
-      rows: [
-        { date: "2024-01-01", value: 4 },
-        { date: "2024-02-01", value: 7 },
-        { date: "2024-03-01", value: 5 },
-      ],
-      x: "date",
-      y: "value",
-    },
-    "Ambiguous dates": {
-      rows: [
-        { date: "03/04/2024", value: 4 },
-        { date: "05/06/2024", value: 7 },
-        { date: "07/08/2024", value: 5 },
-      ],
-      x: "date",
-      y: "value",
-    },
-  } as const;
-  const sampleSource = JSON.stringify(sampleRows, null, 2);
+  let workbench = $state(createPlaygroundState(initialSeed));
+  let shareUrl = $state("");
+  let shareStatus = $state("");
+  let shareSource = $state<HTMLElement>();
 
-  let draft = $state(sampleSource);
-  let rows = $state<PlaygroundRow[]>(sampleRows);
-  let fields = $state<PlaygroundField[]>(inferPlaygroundFields(sampleRows));
-  let xField = $state("flipper");
-  let yField = $state("mass");
-  let colorField = $state("species");
-  let keyField = $state("id");
-  let mark = $state<Mark>("point");
-  let inspectEnabled = $state(false);
-  let selectEnabled = $state(false);
-  let zoomEnabled = $state(false);
-  let revision = $state(0);
-  let errorMessage = $state("");
-  let errorFix = $state("");
-  let lastGoodPreviewShown = $state(true);
-  let status = $state(
-    "Sample data ready. Choose interaction options or paste your own rows.",
-  );
-  let eventLog = $state<string[]>([]);
-  let alertElement = $state<HTMLDivElement>();
-  let scaleDecisions = $state<RenderModel["scaleDecisions"]>([]);
-
-  const numericFields = $derived(
-    fields.filter((field) => field.kind === "number"),
-  );
-  const yFields = $derived(numericFields.length > 0 ? numericFields : fields);
-  const renderKey = $derived(
-    [
-      revision,
-      mark,
-      xField,
-      yField,
-      colorField,
-      keyField,
-      inspectEnabled,
-      selectEnabled,
-      zoomEnabled,
-    ].join("|"),
-  );
-  const aes = $derived.by(() => {
-    const mapping: Record<string, string> = { x: xField, y: yField };
-    if (colorField !== "") mapping.color = colorField;
-    return mapping as AesInput;
-  });
-  const layers = $derived.by(
-    () =>
-      [
-        mark === "point"
-          ? { geom: "point", params: { size: 4, alpha: 0.82 } }
-          : mark === "line"
-            ? { geom: "line", params: { linewidth: 1.6 } }
-            : { geom: "col" },
-      ] as LayerInput[],
+  const svelteOutput = $derived(playgroundSvelteOutput(workbench.committed));
+  const selectedSample = $derived(
+    workbench.seed.source.kind === "sample" ? workbench.seed.source.id : "",
   );
 
-  function logEvent(
-    event: PlotInteractionEvent<PlaygroundRow, PropertyKey>,
-  ): void {
-    const detail =
-      event.type === "inspect" && event.phase !== "clear"
-        ? `${event.state}, ${String(event.members.length)} member${event.members.length === 1 ? "" : "s"}`
-        : event.type === "select" && event.phase !== "start"
-          ? `${String(event.keys.length)} key${event.keys.length === 1 ? "" : "s"}`
-          : event.type === "zoom" && event.phase === "end"
-            ? "domains updated"
-            : "";
-    const entry = `${event.type} · ${event.phase} · ${event.source}${detail === "" ? "" : ` · ${detail}`}`;
-    if (
-      event.type === "inspect" &&
-      event.phase === "change" &&
-      eventLog[0]?.startsWith("inspect · change")
-    ) {
-      eventLog = [entry, ...eventLog.slice(1)];
-    } else {
-      eventLog = [entry, ...eventLog].slice(0, 12);
-    }
+  function replaceLocationHash(hash: string | null): void {
+    const url = new URL(window.location.href);
+    url.hash = hash ?? "";
+    history.replaceState(history.state, "", url);
   }
 
-  function reportDiagnostic(diagnostic: InteractionDiagnostic): void {
-    status = `${diagnostic.code}: ${diagnostic.message} ${diagnostic.suggestions.join("; ")}`;
+  function verifiedSharedSeed(
+    hash: string,
+    seed: PlaygroundSeedV1,
+  ): PlaygroundSeedV1 {
+    const source = seed.source;
+    if (source.kind === "custom") return seed;
+    const trusted =
+      source.kind === "example"
+        ? PLAYGROUND_EXAMPLES.some(
+            (entry) =>
+              entry.id === source.id &&
+              entry.compatibility.supported &&
+              entry.compatibility.fragment === hash,
+          )
+        : PLAYGROUND_SAMPLES.some(
+            (entry) => entry.id === source.id && entry.fragment === hash,
+          );
+    return trusted ? seed : { ...seed, source: { kind: "custom" } };
   }
 
-  async function showError(error: unknown, preserved = true): Promise<void> {
-    errorMessage =
-      error instanceof Error ? error.message : "The data could not be applied.";
-    errorFix =
-      error instanceof PlaygroundDataError
-        ? error.fix
-        : "Keep the last working preview, adjust the data, and try again.";
-    lastGoodPreviewShown = preserved;
-    await tick();
-    alertElement?.focus();
-  }
-
-  async function applyData(): Promise<void> {
-    try {
-      const parsed = parsePlaygroundData(draft);
-      const nextFields = inferPlaygroundFields(parsed.rows);
-      if (nextFields.length < 2) {
-        throw new PlaygroundDataError(
-          "INVALID_ROW",
-          "The playground needs at least two named fields to draw a chart.",
-          "Add another field to each row, then apply the data again.",
-        );
+  function restoreLocation(origin: "initial-navigation" | "popstate"): void {
+    const decoded = decodePlaygroundHash(window.location.hash);
+    if (decoded.status === "absent") {
+      if (origin === "popstate") {
+        workbench = stagePlaygroundSeed(workbench, initialSeed, origin, null);
       }
-      const recommended = recommendPlaygroundFields(nextFields);
-      rows = parsed.rows;
-      fields = nextFields;
-      xField = recommended.x;
-      yField = recommended.y;
-      colorField = recommended.color;
-      keyField = recommended.key;
-      revision += 1;
-      eventLog = [];
-      errorMessage = "";
-      errorFix = "";
-      lastGoodPreviewShown = true;
-      status = `Applied ${String(rows.length)} local row${rows.length === 1 ? "" : "s"}. Nothing was uploaded.`;
-    } catch (error) {
-      await showError(error);
+      return;
+    }
+    if (decoded.status === "error") {
+      replaceLocationHash(workbench.historyHash);
+      workbench = reportPlaygroundDiagnostic(
+        workbench,
+        {
+          code: decoded.error.code.toLowerCase().replaceAll("_", "-"),
+          path: "#play",
+          message: decoded.error.message,
+          fix: "Open a generated example link or reset to a built-in sample.",
+        },
+        "The shared link was rejected. The current local chart and a truthful URL were retained.",
+      );
+      return;
+    }
+    workbench = stagePlaygroundSeed(
+      workbench,
+      verifiedSharedSeed(window.location.hash, decoded.seed),
+      origin,
+      window.location.hash,
+    );
+  }
+
+  onMount(() => {
+    restoreLocation("initial-navigation");
+    const onPopState = () => restoreLocation("popstate");
+    addEventListener("popstate", onPopState);
+    return () => removeEventListener("popstate", onPopState);
+  });
+
+  function editDraft(draft: string): void {
+    const edited = editPlaygroundDraft(workbench, draft);
+    workbench = edited;
+    if (!edited.synchronized) {
+      shareUrl = "";
+      shareStatus = "";
     }
   }
 
-  function resetSample(): void {
-    draft = sampleSource;
-    void applyData();
+  function applyDraft(): void {
+    workbench = stagePlaygroundDraft(workbench);
   }
 
-  function loadTemporalSample(name: keyof typeof temporalSamples): void {
-    const sample = temporalSamples[name];
-    draft = JSON.stringify(sample.rows, null, 2);
-    rows = [...sample.rows] as PlaygroundRow[];
-    fields = inferPlaygroundFields(rows);
-    xField = sample.x;
-    yField = sample.y;
-    colorField = "";
-    keyField = "";
-    mark = "line";
-    revision += 1;
-    eventLog = [];
-    scaleDecisions = [];
-    errorMessage = "";
-    status = `${name} sample loaded. Nothing was uploaded.`;
+  function resetSource(): void {
+    workbench = resetPlaygroundSource(workbench);
   }
 
-  function rendererFailed(error: unknown): void {
-    void showError(error, false);
+  function loadSample(id: string): boolean {
+    if (id === "") return false;
+    if (
+      !workbench.synchronized ||
+      workbench.candidate !== null ||
+      workbench.seed.source.kind === "custom"
+    ) {
+      const discard = window.confirm(
+        "Discard the current draft and load this sample? Copy it first if you need to keep it.",
+      );
+      if (!discard) return false;
+    }
+    const sample = PLAYGROUND_SAMPLES.find((entry) => entry.id === id);
+    if (sample === undefined) return false;
+    workbench = stagePlaygroundSeed(workbench, sample.seed, "source");
+    return true;
+  }
+
+  function candidateRendered(generation: number): void {
+    // Keep the inert candidate mounted briefly so assistive-technology and
+    // browser tests can observe the pending state before atomic promotion.
+    window.setTimeout(() => {
+      const current = workbench;
+      const origin = current.candidate?.origin;
+      const promoted = promotePlaygroundCandidate(current, generation);
+      if (promoted === current) return;
+      workbench = promoted;
+      if (
+        (origin === "apply" || origin === "source") &&
+        window.location.hash.startsWith("#play=")
+      ) {
+        replaceLocationHash(null);
+      }
+      shareUrl = "";
+      shareStatus = "";
+    }, 300);
+  }
+
+  function reconcileCandidateFailure(
+    generation: number,
+    diagnostic: PlaygroundDiagnostic,
+  ): void {
+    workbench = failPlaygroundCandidate(workbench, generation, diagnostic);
+    if (workbench.navigationRecovery !== null) {
+      replaceLocationHash(workbench.navigationRecovery.replaceHash);
+    }
+  }
+
+  function activeFailed(diagnostic: PlaygroundDiagnostic): void {
+    workbench = reportPlaygroundDiagnostic(
+      workbench,
+      diagnostic,
+      "The current chart stopped safely. Reset the source to recover.",
+      false,
+    );
+  }
+
+  async function share(): Promise<void> {
+    if (!workbench.canCopyOrShare) return;
+    const hash = encodePlaygroundSeed(workbench.seed);
+    const url = new URL(window.location.href);
+    url.hash = hash;
+    pushSvelteKitState(url, {});
+    workbench = setPlaygroundHistoryHash(workbench, hash);
+    shareUrl = url.href;
+    await tick();
+    if (shareSource === undefined) return;
+    const result = await copyText(shareUrl, shareSource);
+    shareStatus =
+      result === "copied"
+        ? "Share link copied. The PortableSpec is now in this URL and browser history."
+        : MANUAL_LINK_COPY_STATUS;
   }
 </script>
 
 <section class="playground" aria-labelledby="playground-heading">
-  <div class="intro">
-    <p class="eyebrow">Local, bounded, no code execution</p>
-    <h1 id="playground-heading">Use my data</h1>
-    <p>
-      Paste a JSON array of ordinary row objects. The data stays in this browser
-      tab: ggsvelte does not upload it, store it, fetch remote URLs, or evaluate
-      JavaScript.
-    </p>
-  </div>
-
-  <div class="workspace">
-    <form
-      class="controls"
-      onsubmit={(event) => {
-        event.preventDefault();
-        void applyData();
-      }}
-    >
-      <label for="playground-data">JSON rows</label>
-      <textarea
-        id="playground-data"
-        aria-describedby="playground-limits"
-        bind:value={draft}
-        spellcheck="false"
-        rows="16"></textarea>
-      <p class="limits" id="playground-limits">
-        Up to {PLAYGROUND_MAX_ROWS.toLocaleString()} rows, {PLAYGROUND_MAX_FIELDS}
-        fields per row, and {PLAYGROUND_MAX_BYTES / 1024} KiB.
+  <header class="playground-intro">
+    <div>
+      <p class="eyebrow">Local PortableSpec workbench</p>
+      <h1 id="playground-heading">Adapt a chart, then take the Svelte</h1>
+      <p class="lede">
+        Start from a real example or a small sample. Edit bounded JSON, render
+        it locally, and copy one complete Svelte component. No account, upload,
+        remote fetch, or code execution.
       </p>
-      <div class="actions">
-        <button class="primary" type="submit">Apply data</button>
-        <button type="button" onclick={resetSample}>Reset sample</button>
-      </div>
-      <fieldset class="sample-controls">
-        <legend>Temporal samples</legend>
-        {#each Object.keys(temporalSamples) as name}
-          <button
-            type="button"
-            onclick={() =>
-              loadTemporalSample(name as keyof typeof temporalSamples)}
-            >{name}</button
-          >
-        {/each}
-      </fieldset>
-
-      {#if errorMessage !== ""}
-        <div class="error" role="alert" tabindex="-1" bind:this={alertElement}>
-          <strong>{errorMessage}</strong>
-          <span>{errorFix}</span>
-          <span>
-            {lastGoodPreviewShown
-              ? "The last working preview is still shown."
-              : "The renderer stopped safely. Reset the sample to restore the preview."}
-          </span>
-        </div>
-      {/if}
-    </form>
-
-    <section class="preview" aria-labelledby="preview-heading">
-      <div class="preview-heading">
-        <div>
-          <p class="eyebrow">Preview</p>
-          <h2 id="preview-heading">Build a chart</h2>
-        </div>
-        <p class="privacy-status" aria-live="polite">{status}</p>
-      </div>
-
-      <div class="field-controls">
-        <label>
-          Mark
-          <select bind:value={mark}>
-            <option value="point">Point</option>
-            <option value="line">Line</option>
-            <option value="col">Column</option>
-          </select>
-        </label>
-        <label>
-          X
-          <select bind:value={xField}>
-            {#each fields as field (field.name)}<option value={field.name}
-                >{field.name}</option
-              >{/each}
-          </select>
-        </label>
-        <label>
-          Y
-          <select bind:value={yField}>
-            {#each yFields as field (field.name)}<option value={field.name}
-                >{field.name}</option
-              >{/each}
-          </select>
-        </label>
-        <label>
-          Color
-          <select bind:value={colorField}>
-            <option value="">None</option>
-            {#each fields as field (field.name)}<option value={field.name}
-                >{field.name}</option
-              >{/each}
-          </select>
-        </label>
-        <label>
-          Stable key
-          <select bind:value={keyField}>
-            <option value="">None</option>
-            {#each fields as field (field.name)}<option value={field.name}
-                >{field.name}</option
-              >{/each}
-          </select>
-        </label>
-      </div>
-
-      <fieldset class="interaction-controls">
-        <legend>Interaction (opt in)</legend>
-        <label
-          ><input type="checkbox" bind:checked={inspectEnabled} /> Inspect + pin</label
-        >
-        <label
-          ><input type="checkbox" bind:checked={selectEnabled} /> Select area</label
-        >
-        <label
-          ><input type="checkbox" bind:checked={zoomEnabled} /> Zoom area</label
-        >
-      </fieldset>
-
-      <div class="chart-boundary">
-        {#key renderKey}
-          <svelte:boundary onerror={rendererFailed}>
-            <GGPlot
-              data={rows}
-              {aes}
-              {layers}
-              key={keyField === "" ? undefined : keyField}
-              inspect={inspectEnabled}
-              select={selectEnabled
-                ? { type: "interval", mode: "xy", persistent: true }
-                : false}
-              zoom={zoomEnabled ? { mode: "xy" } : false}
-              oninteraction={logEvent}
-              ondiagnostic={reportDiagnostic}
-              onrender={(model) => (scaleDecisions = model.scaleDecisions)}
-              labs={{
-                title: "My local data",
-                x: xField,
-                y: yField,
-                color: colorField || undefined,
-              }}
-              width="container"
-              height={400}
-            />
-            {#snippet failed()}
-              <div class="render-error" role="status">
-                The new chart could not render. Adjust the field choices or
-                reset the sample.
-              </div>
-            {/snippet}
-          </svelte:boundary>
-        {/key}
-      </div>
-
-      <section
-        class="scale-decisions"
-        aria-labelledby="scale-decisions-heading"
+    </div>
+    <div class="share-actions">
+      <button type="button" onclick={share} disabled={!workbench.canCopyOrShare}
+        >Share this chart</button
       >
-        <h3 id="scale-decisions-heading">Inferred choices</h3>
-        {#if scaleDecisions.length === 0}
-          <p>No temporal scale decision is active for the selected fields.</p>
-        {:else}
-          {#each scaleDecisions as decision (`${decision.aesthetic}-${decision.field}`)}
-            <dl>
-              <div>
-                <dt>Field</dt>
-                <dd>{decision.aesthetic}: {decision.field}</dd>
-              </div>
-              <div>
-                <dt>Choice</dt>
-                <dd>{decision.status} · {decision.parser ?? "none"}</dd>
-              </div>
-              <div>
-                <dt>Precision</dt>
-                <dd>{decision.precision ?? "none"}</dd>
-              </div>
-              <div>
-                <dt>Validated</dt>
-                <dd>{decision.validatedCount.toLocaleString()} values</dd>
-              </div>
-              <div>
-                <dt>Domain</dt>
-                <dd>{JSON.stringify(decision.domain ?? [])}</dd>
-              </div>
-              <div>
-                <dt>Portable override</dt>
-                <dd>
-                  <code>{JSON.stringify(decision.portableOverride)}</code>
-                </dd>
-              </div>
-            </dl>
-          {/each}
-        {/if}
-      </section>
+      <p>
+        Sharing explicitly puts the bounded PortableSpec in the URL and browser
+        history. URL fragments are not sent with HTTP requests, but anyone with
+        the link can read it.
+      </p>
+    </div>
+  </header>
 
-      <section class="event-log" aria-labelledby="event-log-heading">
-        <h3 id="event-log-heading">Semantic events</h3>
-        {#if eventLog.length === 0}
-          <p>
-            Opt into an interaction and use the plot. No raw rows are copied
-            into this log.
-          </p>
-        {:else}
-          <ol>
-            {#each eventLog as entry, index (`${entry}-${String(index)}`)}<li>
-                {entry}
-              </li>{/each}
-          </ol>
-        {/if}
-      </section>
-    </section>
-  </div>
+  {#if shareUrl !== ""}
+    <div class="share-result">
+      <code bind:this={shareSource}>{shareUrl}</code>
+      <p role="status" aria-live="polite">{shareStatus}</p>
+    </div>
+  {/if}
+
+  <PlaygroundShell>
+    {#snippet preview()}
+      <PlaygroundPreview
+        rendered={workbench.rendered}
+        candidate={workbench.candidate}
+        lastValid={workbench.lastValid}
+        status={workbench.status}
+        onCandidateRendered={candidateRendered}
+        onCandidateFailed={reconcileCandidateFailure}
+        onActiveRendered={() =>
+          (workbench = confirmPlaygroundRendered(workbench))}
+        onActiveFailed={activeFailed}
+      />
+    {/snippet}
+    {#snippet editor()}
+      <PlaygroundEditor
+        draft={workbench.draft}
+        samples={PLAYGROUND_SAMPLES}
+        {selectedSample}
+        diagnostics={workbench.diagnostics}
+        pending={workbench.candidate !== null}
+        onEdit={editDraft}
+        onApply={applyDraft}
+        onReset={resetSource}
+        onLoadSample={loadSample}
+      />
+    {/snippet}
+    {#snippet output()}
+      <PlaygroundOutput
+        code={svelteOutput}
+        enabled={workbench.canCopyOrShare}
+      />
+    {/snippet}
+  </PlaygroundShell>
 </section>
 
 <style>
   .playground {
-    margin: 1rem 0 3rem;
+    width: min(100% - 2rem, 96rem);
+    margin: 0 auto;
+    padding-block: clamp(2rem, 5vw, 4.5rem);
   }
 
-  .intro {
-    max-width: 48rem;
-  }
-
-  .intro h1,
-  .preview-heading h2 {
-    margin: 0.1rem 0 0.45rem;
-    line-height: 1.12;
+  .playground-intro {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(16rem, 24rem);
+    gap: clamp(2rem, 7vw, 7rem);
+    align-items: end;
   }
 
   .eyebrow {
     margin: 0;
-    color: var(--muted);
-    font-size: 0.76rem;
+    color: var(--accent);
+    font-size: 0.75rem;
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
   }
 
-  .workspace {
-    display: grid;
-    grid-template-columns: minmax(16rem, 21rem) minmax(0, 1fr);
-    gap: 1.5rem;
-    margin-top: 1.5rem;
-    align-items: start;
+  h1 {
+    max-width: 14ch;
+    margin: 0.3rem 0 1rem;
+    font-size: clamp(2.7rem, 6vw, 6rem);
+    line-height: 0.92;
+    letter-spacing: -0.045em;
   }
 
-  .controls,
-  .preview {
-    min-width: 0;
-    border: 1px solid var(--border);
-    border-radius: 0.7rem;
-    background: var(--surface);
-    padding: 1rem;
-  }
-
-  .controls > label,
-  .field-controls label {
-    display: grid;
-    gap: 0.3rem;
-    font-weight: 650;
-  }
-
-  textarea,
-  select,
-  button {
-    min-height: 2.75rem;
-    border: 1px solid var(--border);
-    border-radius: 0.4rem;
-    background: var(--bg);
-    color: var(--fg);
-    font: inherit;
-  }
-
-  textarea {
-    width: 100%;
-    padding: 0.65rem;
-    resize: vertical;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    font-size: 0.8rem;
-    line-height: 1.45;
-  }
-
-  select,
-  button {
-    padding: 0.45rem 0.65rem;
-  }
-
-  button {
-    cursor: pointer;
-    font-weight: 650;
-  }
-
-  button.primary {
-    border-color: var(--accent);
-    background: var(--accent);
-    color: white;
-  }
-
-  .limits,
-  .privacy-status,
-  .event-log p {
-    color: var(--muted);
-    font-size: 0.82rem;
-  }
-
-  .actions,
-  .sample-controls {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.55rem;
-  }
-
-  .sample-controls {
-    margin: 0.85rem 0 0;
-    border: 0;
-    padding: 0;
-  }
-
-  .sample-controls legend {
-    width: 100%;
-    font-weight: 700;
-  }
-
-  .error,
-  .render-error {
-    display: grid;
-    gap: 0.25rem;
-    margin-top: 0.85rem;
-    padding: 0.75rem;
-    border: 1px solid #b42318;
-    border-radius: 0.4rem;
-    background: color-mix(in srgb, #b42318 8%, var(--bg));
-  }
-
-  .preview-heading {
-    display: flex;
-    justify-content: space-between;
-    gap: 1rem;
-    align-items: start;
-  }
-
-  .privacy-status {
-    max-width: 22rem;
+  .lede {
+    max-width: 48rem;
     margin: 0;
-    text-align: right;
+    color: var(--muted);
+    font-size: 1.05rem;
   }
 
-  .field-controls {
+  .share-actions {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 0.65rem;
-    margin: 1rem 0;
+    border-top: 1px solid var(--line);
+    padding-top: 1rem;
   }
 
-  .field-controls select {
-    width: 100%;
+  .share-actions button {
+    min-height: 44px;
+    border: 1px solid var(--ink);
+    border-radius: 2px;
+    background: var(--ink);
+    color: var(--paper);
+    font: 650 0.88rem/1 var(--body-font);
+    cursor: pointer;
   }
 
-  .interaction-controls {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.65rem 1rem;
-    margin: 0 0 1rem;
-    border: 0;
-    padding: 0;
+  .share-actions button:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
   }
 
-  .interaction-controls legend {
-    width: 100%;
-    margin-bottom: 0.3rem;
-    font-weight: 700;
-  }
-
-  .interaction-controls label {
-    display: flex;
-    min-height: 2.75rem;
-    align-items: center;
-    gap: 0.45rem;
-  }
-
-  .interaction-controls input {
-    width: 1.15rem;
-    height: 1.15rem;
-  }
-
-  .chart-boundary {
-    min-height: 25rem;
-    overflow: hidden;
-    border-radius: 0.45rem;
-    background: var(--bg);
-  }
-
-  .scale-decisions,
-  .event-log {
-    margin-top: 1rem;
-    border-top: 1px solid var(--border);
-    padding-top: 0.8rem;
-  }
-
-  .scale-decisions h3,
-  .event-log h3 {
+  .share-actions p,
+  .share-result p {
     margin: 0;
-    font-size: 1rem;
-  }
-
-  .scale-decisions dl {
-    display: grid;
-    gap: 0.3rem;
-    margin: 0.65rem 0 0;
-    font-size: 0.82rem;
-  }
-
-  .scale-decisions dl div {
-    display: grid;
-    grid-template-columns: 7rem minmax(0, 1fr);
-    gap: 0.5rem;
-  }
-
-  .scale-decisions dt {
     color: var(--muted);
-    font-weight: 700;
-  }
-
-  .scale-decisions dd {
-    min-width: 0;
-    margin: 0;
-    overflow-wrap: anywhere;
-  }
-
-  .event-log ol {
-    margin: 0.5rem 0 0;
-    padding-left: 1.4rem;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: 0.78rem;
   }
 
-  @media (max-width: 58rem) {
-    .workspace {
-      grid-template-columns: 1fr;
-    }
-
-    .field-controls {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+  .share-result {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    border-block: 1px solid var(--line);
+    padding-block: 0.75rem;
   }
 
-  @media (max-width: 32rem) {
-    .preview-heading {
-      display: block;
+  .share-result code {
+    min-width: 0;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 47.99rem) {
+    .playground {
+      width: min(100% - 1.25rem, 96rem);
     }
 
-    .privacy-status {
-      margin-top: 0.5rem;
-      text-align: left;
+    .playground-intro {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
     }
 
-    .field-controls {
+    .share-result {
       grid-template-columns: 1fr;
     }
   }

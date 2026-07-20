@@ -1,0 +1,180 @@
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { pathToFileURL } from "node:url";
+
+import { normalize, validate, type PortableSpec } from "@ggsvelte/spec";
+import { format } from "oxfmt";
+
+import {
+  encodePlaygroundSeed,
+  PlaygroundCodecError,
+  validatePlaygroundSeed,
+  type PlaygroundCompatibility,
+  type PlaygroundSeedV1,
+} from "../apps/docs/src/lib/playground-codec.js";
+import {
+  PLAYGROUND_SAMPLES as SOURCE_SAMPLES,
+  type PlaygroundSample,
+} from "../apps/docs/src/lib/playground-samples.js";
+import { EXAMPLES } from "../examples/manifest.js";
+
+const ROOT = resolve(import.meta.dir, "..");
+const DEFAULT_OUTPUT = resolve(ROOT, "apps/docs/src/lib/generated/playground-seeds.ts");
+
+export interface PlaygroundExampleSource {
+  readonly id: string;
+  readonly title: string;
+}
+
+export type GeneratedPlaygroundCompatibility =
+  | { readonly supported: true; readonly fragment: string }
+  | { readonly supported: false; readonly reason: string };
+
+export interface GeneratedPlaygroundExample extends PlaygroundExampleSource {
+  readonly compatibility: GeneratedPlaygroundCompatibility;
+}
+
+export interface GeneratedPlaygroundSample {
+  readonly id: string;
+  readonly title: string;
+  readonly description: string;
+  readonly seed: PlaygroundSeedV1;
+  readonly fragment: string;
+}
+
+export interface GeneratePlaygroundSeedOptions {
+  readonly output?: string;
+  readonly entries?: readonly PlaygroundExampleSource[];
+  readonly samples?: readonly PlaygroundSample[];
+  readonly loadSpec?: (id: string) => Promise<PortableSpec>;
+  readonly check?: boolean;
+}
+
+function compatibilityReason(error: PlaygroundCodecError): string {
+  switch (error.code) {
+    case "TOO_MANY_ROWS":
+      return "This example has more than 500 inline rows. Use a smaller sample in the playground.";
+    case "DECODED_TOO_LARGE":
+    case "ENCODED_TOO_LARGE":
+      return "This example is larger than the 12 KiB share limit. Open a smaller example or sample.";
+    case "NESTING_TOO_DEEP":
+      return "This example nests more deeply than shared playground state allows.";
+    case "TOO_MANY_FIELDS":
+      return "This example has more than 64 fields in one inline dataset.";
+    case "STRING_TOO_LONG":
+      return "This example contains text that is too long for a shared playground URL.";
+    default:
+      return `This example cannot be opened as a portable playground seed: ${error.message}`;
+  }
+}
+
+export function evaluatePlaygroundCompatibility(
+  source: PlaygroundSeedV1["source"],
+  input: PortableSpec,
+): PlaygroundCompatibility {
+  const shape = validate(input);
+  if (!shape.ok) {
+    return {
+      supported: false,
+      reason: `This example is not a valid PortableSpec: ${shape.errors[0]?.message ?? "validation failed"}`,
+    };
+  }
+  const spec = normalize(shape.spec);
+  const result = validate(spec, {});
+  if (!result.ok) {
+    return {
+      supported: false,
+      reason: `This example is not a valid PortableSpec: ${result.errors[0]?.message ?? "validation failed"}`,
+    };
+  }
+  const seed: PlaygroundSeedV1 = { version: 1, source, spec: result.spec };
+  try {
+    validatePlaygroundSeed(seed);
+    return { supported: true, seed, fragment: encodePlaygroundSeed(seed) };
+  } catch (error) {
+    return {
+      supported: false,
+      reason:
+        error instanceof PlaygroundCodecError
+          ? compatibilityReason(error)
+          : "This example cannot be represented as a playground seed.",
+    };
+  }
+}
+
+async function defaultLoadSpec(id: string): Promise<PortableSpec> {
+  const modulePath = pathToFileURL(resolve(ROOT, "examples", id, "spec.ts")).href;
+  const module = (await import(modulePath)) as { default: PortableSpec };
+  return module.default;
+}
+
+async function generatedSource(
+  entries: readonly PlaygroundExampleSource[],
+  samples: readonly PlaygroundSample[],
+  loadSpec: (id: string) => Promise<PortableSpec>,
+): Promise<string> {
+  const examples: GeneratedPlaygroundExample[] = [];
+  for (const entry of entries) {
+    const compatibility = evaluatePlaygroundCompatibility(
+      { kind: "example", id: entry.id },
+      await loadSpec(entry.id),
+    );
+    examples.push({
+      id: entry.id,
+      title: entry.title,
+      compatibility: compatibility.supported
+        ? { supported: true, fragment: compatibility.fragment }
+        : compatibility,
+    });
+  }
+  const generatedSamples: GeneratedPlaygroundSample[] = samples.map((sample) => {
+    const compatibility = evaluatePlaygroundCompatibility(
+      { kind: "sample", id: sample.id },
+      sample.spec,
+    );
+    if (!compatibility.supported) {
+      throw new Error(`Playground sample ${sample.id} is incompatible: ${compatibility.reason}`);
+    }
+    return {
+      id: sample.id,
+      title: sample.title,
+      description: sample.description,
+      seed: compatibility.seed,
+      fragment: compatibility.fragment,
+    };
+  });
+
+  const raw = `// Generated by bun scripts/gen-playground-seeds.ts — do not edit.\n\nimport type { PlaygroundSeedV1 } from "../playground-codec.js";\n\nexport type GeneratedPlaygroundCompatibility =\n  | { readonly supported: true; readonly fragment: string }\n  | { readonly supported: false; readonly reason: string };\n\nexport interface GeneratedPlaygroundExample {\n  readonly id: string;\n  readonly title: string;\n  readonly compatibility: GeneratedPlaygroundCompatibility;\n}\n\nexport interface GeneratedPlaygroundSample {\n  readonly id: string;\n  readonly title: string;\n  readonly description: string;\n  readonly seed: PlaygroundSeedV1;\n  readonly fragment: string;\n}\n\nexport const PLAYGROUND_EXAMPLES: readonly GeneratedPlaygroundExample[] = ${JSON.stringify(examples, null, 2)};\n\nexport const PLAYGROUND_SAMPLES: readonly GeneratedPlaygroundSample[] = ${JSON.stringify(generatedSamples, null, 2)};\n`;
+  const formatted = await format(DEFAULT_OUTPUT, raw);
+  if (formatted.errors.length > 0) {
+    throw new Error(
+      `Could not format playground seeds: ${formatted.errors[0]?.message ?? "unknown error"}`,
+    );
+  }
+  return formatted.code;
+}
+
+export async function generatePlaygroundSeeds(
+  options: GeneratePlaygroundSeedOptions = {},
+): Promise<void> {
+  const output = options.output ?? DEFAULT_OUTPUT;
+  const generated = await generatedSource(
+    options.entries ?? EXAMPLES,
+    options.samples ?? SOURCE_SAMPLES,
+    options.loadSpec ?? defaultLoadSpec,
+  );
+  if (options.check === true) {
+    if (!existsSync(output) || readFileSync(output, "utf8") !== generated) {
+      throw new Error("Generated playground seeds are stale. Run bun run playground:seeds:gen.");
+    }
+    return;
+  }
+  mkdirSync(dirname(output), { recursive: true });
+  writeFileSync(output, generated);
+}
+
+if (import.meta.main) {
+  const check = process.argv.includes("--check");
+  await generatePlaygroundSeeds({ check });
+  console.log(check ? "playground seeds are current" : "playground seeds generated");
+}
