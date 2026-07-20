@@ -1,7 +1,12 @@
 /**
  * Train a sequential color scale from values + config/edition range.
  */
-import { parseTemporalColumn, type ColorScaleSpec } from "@ggsvelte/spec";
+import {
+  parseTemporalColumn,
+  TEMPORAL_PARSER_NAMES,
+  type ColorScaleSpec,
+  type TemporalParserName,
+} from "@ggsvelte/spec";
 
 import type { EditionDefaults } from "../editions.js";
 import { trainSequential, type SequentialColorScale } from "../scales/color.js";
@@ -46,7 +51,13 @@ export function trainSequentialColorScale(input: {
       : null;
   const numeric = temporalValues === null ? cellsToNumeric(values) : temporal.semantic;
   const extent = finiteExtent([numeric]);
-  const sequentialDomain = resolveSequentialDomain(config);
+  const inferredParser = TEMPORAL_PARSER_NAMES.find(
+    (candidate): candidate is TemporalParserName => candidate === temporal.decision.parser,
+  );
+  const sequentialDomain = resolveSequentialDomain(
+    config,
+    temporalValues === null ? undefined : inferredParser,
+  );
   const range = resolveSequentialRange(config, editionDefaults);
   const scale = trainSequential(extent, {
     ...(sequentialDomain !== undefined && { domain: sequentialDomain }),

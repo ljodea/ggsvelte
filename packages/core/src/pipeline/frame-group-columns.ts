@@ -11,7 +11,7 @@ import type { LayerBinding } from "./types.js";
 export function deriveLayerGroups(binding: LayerBinding, table: ColumnTable): number[] {
   const aes = binding.layer.aes ?? {};
   const declared: Record<string, Discreteness> = {};
-  for (const mapping of Object.values(aes)) {
+  for (const [channel, mapping] of Object.entries(aes)) {
     if (
       mapping !== null &&
       mapping !== undefined &&
@@ -26,8 +26,12 @@ export function deriveLayerGroups(binding: LayerBinding, table: ColumnTable): nu
               mapping.field === binding.ymaxField
             ? binding.yConversion
             : undefined;
-      declared[mapping.field] =
-        conversion === undefined
+      const forcedDiscrete =
+        (channel === "color" && binding.color.forcedDiscrete === true) ||
+        (channel === "fill" && binding.fill.forcedDiscrete === true);
+      declared[mapping.field] = forcedDiscrete
+        ? "discrete"
+        : conversion === undefined
           ? table.discreteness(mapping.field)
           : positionDiscreteness(table, mapping.field, conversion);
     }

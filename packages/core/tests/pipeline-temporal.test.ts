@@ -135,6 +135,41 @@ describe("temporal pipeline semantics", () => {
     );
     if (legend?.type !== "ramp") throw new Error("expected temporal ramp legend");
     expect(legend.ticks.map(({ label }) => label)).toEqual(["1850", "1900", "1950", "2000"]);
+
+    const pinned = runPipeline(
+      gg(yearRows, aes({ x: "value", y: "value", color: "year" }))
+        .geomPoint()
+        .scales({ color: { type: "sequential", domain: ["1835", "2026"] } })
+        .spec(),
+      size,
+    ).scales.color;
+    expect(pinned?.kind).toBe("sequential");
+    if (pinned?.kind !== "sequential") throw new Error("expected pinned temporal color scale");
+    expect(pinned.scale.domain).toEqual([Date.UTC(1835, 0, 1), Date.UTC(2026, 0, 1)]);
+  });
+
+  it("groups inferred temporal strings when color is explicitly ordinal", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { x: 1, y: 1, year: "2024" },
+          { x: 2, y: 2, year: "2024" },
+          { x: 1, y: 3, year: "2025" },
+          { x: 2, y: 4, year: "2025" },
+        ],
+        aes({ x: "x", y: "y", color: "year" }),
+      )
+        .geomLine()
+        .scales({ color: { type: "ordinal" } })
+        .spec(),
+      size,
+    );
+
+    expect(model.scales.color?.kind).toBe("ordinal");
+    const paths = model.scene.batches.find((batch) => batch.kind === "paths");
+    expect(paths?.kind).toBe("paths");
+    if (paths?.kind !== "paths") throw new Error("expected grouped paths");
+    expect([...paths.pathOffsets]).toEqual([0, 2, 4]);
   });
 
   for (const type of ["linear", "log"] as const) {
@@ -417,6 +452,15 @@ describe("temporal pipeline semantics", () => {
         new Date("2026-01-01T00:00:00.000Z").getTime(),
       ]);
     }
+
+    const equivalentSpellings = runPipeline(
+      gg([{ when: "1/2/2025" }, { when: "01/02/2025" }], aes({ x: "when" }))
+        .geomBar()
+        .scaleXDate({ parse: "dmy", nice: false })
+        .spec(),
+      size,
+    );
+    expect(equivalentSpellings.scales.y.domain).toEqual([0, 2]);
   });
 
   it("rejects invalid annotations after mapped data infers a temporal parser", () => {
@@ -577,6 +621,27 @@ describe("temporal pipeline semantics", () => {
     );
     expect(model.scales.y.type).toBe("time");
     expect(model.scaleDecisions.map(({ parser }) => parser)).toEqual(["iso", "dmy"]);
+
+    expect(() =>
+      runPipeline(
+        {
+          data: {
+            values: [
+              { x: "a", lo: "2024-01-01", hi: "31/01/2024" },
+              { x: "b", lo: "2024-02-01", hi: "29/02/2024" },
+            ],
+          },
+          layers: [
+            {
+              geom: "errorbar",
+              aes: { x: { field: "x" }, ymin: { field: "lo" }, ymax: { field: "hi" } },
+            },
+            { geom: "rule", params: { yintercept: "not-a-date" } },
+          ],
+        },
+        size,
+      ),
+    ).toThrow(PipelineError);
   });
 
   it("preflights requested temporal annotation intercepts", () => {

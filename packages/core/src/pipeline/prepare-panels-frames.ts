@@ -56,7 +56,10 @@ export function buildPanelFrames(input: {
   const panelFrames: LayerFrame[][] = facetPanels.map(() => []);
 
   for (let index = 0; index < normalized.layers.length; index++) {
-    bindings.push(bindLayer(normalized.layers[index]!, index, table, warnings, conversions));
+    const binding = bindLayer(normalized.layers[index]!, index, table, warnings, conversions);
+    binding.color.forcedDiscrete = normalized.scales?.color?.type === "ordinal";
+    binding.fill.forcedDiscrete = normalized.scales?.fill?.type === "ordinal";
+    bindings.push(binding);
   }
   const temporal = preflightTemporalBindings({
     table: sourceTable,

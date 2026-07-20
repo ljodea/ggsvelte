@@ -337,6 +337,11 @@ export function preflightTemporalBindings(input: {
   };
   const xConversion = commonConversion("x", conversions.x);
   const yConversion = commonConversion("y", conversions.y);
+  const inferredTemporalAxes = new Set(
+    decisions
+      .filter((decision) => decision.status === "temporal")
+      .map((decision) => decision.aesthetic),
+  );
   // Rowless annotations and other author-facing scalar values must use the
   // same parser decision as mapped data when that decision is unambiguous.
   for (const binding of bindings) {
@@ -350,7 +355,12 @@ export function preflightTemporalBindings(input: {
       if (raw === undefined) continue;
       const values = Array.isArray(raw) ? raw : [raw];
       const conversion = axis === "x" ? binding.xConversion : binding.yConversion;
-      if (conversion.forcedDiscrete || (!conversion.requestedTime && conversion.parser === "auto"))
+      if (
+        conversion.forcedDiscrete ||
+        (!conversion.requestedTime &&
+          conversion.parser === "auto" &&
+          !inferredTemporalAxes.has(axis))
+      )
         continue;
       // Annotation numbers are already-semantic epoch milliseconds. Source
       // epoch-unit parsing happens earlier for mapped columns/domains/breaks.
@@ -363,6 +373,17 @@ export function preflightTemporalBindings(input: {
         conversion.parser,
         conversion.options,
       ).decision;
+      if (
+        conversion.parser === "auto" &&
+        inferredTemporalAxes.has(axis) &&
+        decision.status !== "temporal"
+      ) {
+        throw new PipelineError(
+          "temporal-parse-failed",
+          `/layers/${binding.index}/params/${axis}intercept`,
+          `The ${axis} axis is temporal, but the annotation intercept could not be parsed unambiguously. Set a concrete intercept format or force a band scale.`,
+        );
+      }
       if (
         decision.kind !== null &&
         conversion.requestedKind !== undefined &&

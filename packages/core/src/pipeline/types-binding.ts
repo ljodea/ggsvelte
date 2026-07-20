@@ -13,6 +13,8 @@ export interface ColorBinding {
   constant: string | null;
   /** Scaled constant ({value, scale: true}), if any. */
   scaledConstant: CellValue | null;
+  /** Explicit ordinal scale override for grouping semantics. */
+  forcedDiscrete?: boolean;
 }
 
 export type RuleForm = "annotation" | "vertical" | "horizontal";

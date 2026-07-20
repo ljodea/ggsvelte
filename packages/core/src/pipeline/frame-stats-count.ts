@@ -2,7 +2,7 @@
  * Count stat → LayerFrame.
  */
 import { statCount } from "../stats/count.js";
-import { ColumnTable } from "../table.js";
+import { ColumnTable, type CellValue } from "../table.js";
 
 import { carriedColumns, emptyFrameExtras, removedStatWarning } from "./frame-helpers.js";
 import { positionValuesToNumeric } from "./temporal-position.js";
@@ -20,8 +20,18 @@ export function buildCountFrame(
   const carried = carriedColumns(binding, table);
   const columnOf = makeColumnOf(binding);
   const xField = binding.xField!;
+  const parsedX = table.parsed(
+    xField,
+    binding.xConversion.sourceParser,
+    binding.xConversion.options,
+  );
+  const temporalX =
+    binding.xConversion.sourceParser !== "auto" || parsedX.decision.status === "temporal";
+  const countX: readonly (CellValue | null)[] = temporalX
+    ? Array.from(parsedX.semantic, (value, row) => (parsedX.valid[row] === 1 ? value : null))
+    : table.column(xField);
   const result = statCount({
-    x: table.column(xField),
+    x: countX,
     groups,
     weights: binding.weightField === null ? null : table.numeric(binding.weightField),
     carried,
@@ -38,7 +48,9 @@ export function buildCountFrame(
     table,
     n: result.x.length,
     xValues: result.x,
-    xNumeric: positionValuesToNumeric(result.x, binding.xConversion).values,
+    xNumeric: temporalX
+      ? Float64Array.from(result.x, (value) => (typeof value === "number" ? value : Number.NaN))
+      : positionValuesToNumeric(result.x, binding.xConversion).values,
     yValues: null,
     yNumeric: binding.yStatColumn === "count" ? result.count : null,
     groups: result.groups,

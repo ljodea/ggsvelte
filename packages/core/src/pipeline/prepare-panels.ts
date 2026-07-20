@@ -76,7 +76,10 @@ export function preparePanels(
     // Runtime filters can empty the table; bindings still resolve against the
     // filtered table so color/fill scales keep the full source-value catalog.
     for (let index = 0; index < normalized.layers.length; index++) {
-      bindings.push(bindLayer(normalized.layers[index]!, index, table, warnings, conversions));
+      const binding = bindLayer(normalized.layers[index]!, index, table, warnings, conversions);
+      binding.color.forcedDiscrete = normalized.scales?.color?.type === "ordinal";
+      binding.fill.forcedDiscrete = normalized.scales?.fill?.type === "ordinal";
+      bindings.push(binding);
     }
     // Parsing is a source contract, not a rendered-row optimization. Validate
     // the complete source even when runtime filters remove every row.
