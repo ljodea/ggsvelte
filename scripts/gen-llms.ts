@@ -687,7 +687,49 @@ three equally spaced categories. Numeric \`1835\` stays quantitative.
 Read \`model.scaleDecisions\` in \`onrender\` for field, parser, precision,
 bounded evidence, validated count, trained domain, ambiguity, and a portable
 override. Exceptional or advisory choices also appear in
-\`model.scaleDiagnostics\` as stable problem/cause/fix records.
+\`model.scaleDiagnostics\` as stable problem/cause/fix records. The responsive
+axis decisions live in \`model.guidePlans\`: each drawn panel axis reports its
+calendar interval, visible and complete labels, major/minor tier, locale,
+timezone, overlap state, and stable ID. \`ScaleDecision.guidePlanIds\` links
+inference to those panel plans without copying facet-specific arrays.
+
+## Responsive calendar labels
+
+Automatic temporal axes score calendar-aligned candidates from milliseconds to
+centuries against the actual panel extent and measured label widths. They prefer
+3–7 major labels, but no-overlap wins. Month, quarter, year, week, and day
+stepping follows civil boundaries rather than average milliseconds. The planner
+runs inside the existing two layout passes and may move only to a coarser
+interval during pass B.
+
+Default date labels keep UTC calendar meaning. Datetime labels use the configured
+IANA timezone. The deterministic defaults are \`en-US\`, UTC, and Monday week
+starts. Visible labels may suppress repeated context; every SVG major tick keeps
+a complete standalone label in its \`<title>\`.
+
+Use exact portable controls when the default is not the editorial choice:
+
+\`\`\`ts fragment
+const spec = gg(rows, aes({ x: "when", y: "value" }))
+  .geomLine()
+  .scaleXDatetime({
+    dateBreaks: "2 weeks",
+    dateMinorBreaks: "1 day",
+    dateLabels: "%e %b",
+    locale: "en-GB",
+    timezone: "Europe/London",
+    weekStart: "monday",
+  })
+  .spec();
+\`\`\`
+
+Canonical JSON uses the same fields. Interval strings are a positive integer plus
+\`millisecond\`, \`second\`, \`minute\`, \`hour\`, \`day\`, \`week\`, \`month\`,
+\`quarter\`, or \`year\` (singular or plural). Explicit \`breaks\` outrank
+\`dateBreaks\`; \`dateLabels\` outranks the older soft-fallback \`labels\` field.
+Authored breaks and labels are never silently thinned, rotated, or truncated.
+If they cannot fit, the render keeps them and emits a structured scale
+diagnostic with a coarser-interval or wider-layout fix.
 
 ## Override one choice
 

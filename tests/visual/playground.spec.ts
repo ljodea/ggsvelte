@@ -15,6 +15,60 @@ async function readSpec(page: Page): Promise<Record<string, unknown>> {
   >;
 }
 
+interface CandidateObservation {
+  status: string | null;
+  focusables: number;
+  semanticDescendants: number;
+  inert: boolean;
+  inertAttribute: boolean;
+  hidden: string | null;
+  activeRetained: boolean;
+}
+
+async function observeCandidateTransitions(page: Page): Promise<void> {
+  await page.addInitScript(() => {
+    const observedWindow = window as typeof window & {
+      playgroundCandidateObservations?: CandidateObservation[];
+    };
+    const observations: CandidateObservation[] = [];
+    observedWindow.playgroundCandidateObservations = observations;
+    const capture = () => {
+      const node = document.querySelector<HTMLElement>(".candidate-chart");
+      if (node === null) return;
+      observations.push({
+        status: document.querySelector(".preview-surface .status")?.textContent ?? null,
+        focusables: node.querySelectorAll("button, a, input, select, textarea, [tabindex]").length,
+        semanticDescendants: node.querySelectorAll('[role="img"], [role="status"], [aria-live]')
+          .length,
+        inert: node.inert,
+        inertAttribute: node.hasAttribute("inert"),
+        hidden: node.getAttribute("aria-hidden"),
+        activeRetained:
+          document.querySelector('.active-chart > [data-retained-during-candidate="true"]') !==
+          null,
+      });
+    };
+    new MutationObserver(capture).observe(document, {
+      attributes: true,
+      characterData: true,
+      childList: true,
+      subtree: true,
+    });
+    capture();
+  });
+}
+
+function candidateObservations(page: Page): Promise<CandidateObservation[]> {
+  return page.evaluate(
+    () =>
+      (
+        window as typeof window & {
+          playgroundCandidateObservations?: CandidateObservation[];
+        }
+      ).playgroundCandidateObservations ?? [],
+  );
+}
+
 const PIPELINE_FAILURE_SPEC = {
   edition: 2,
   data: {
@@ -102,17 +156,23 @@ test("compatible gallery details open the exact fragment while oversized example
 });
 
 test("initial candidate keeps the pending status until promotion", async ({ page }) => {
+  await observeCandidateTransitions(page);
   await page.goto(`/playground${VALID_INITIAL_FRAGMENT}`);
-  await page.locator(".candidate-chart").waitFor({ state: "attached" });
-  await expect(page.locator(".preview-surface .status")).toHaveText(
-    "Checking the next chart before replacing the last valid result.",
-  );
+  await expect
+    .poll(async () =>
+      (await candidateObservations(page)).some(
+        (observation) =>
+          observation.status === "Checking the next chart before replacing the last valid result.",
+      ),
+    )
+    .toBe(true);
   await expect(page.locator(".active-chart .gg-title")).toHaveText("Initial candidate");
 });
 
 test("valid edits render before Svelte copy becomes available and candidates stay inert", async ({
   page,
 }) => {
+  await observeCandidateTransitions(page);
   await page.goto("/playground");
   await settleVisualState(page);
   await expect(page.getByRole("button", { name: "Copy Svelte" })).toBeEnabled();
@@ -127,27 +187,28 @@ test("valid edits render before Svelte copy becomes available and candidates sta
   await expect(page.getByRole("button", { name: "Copy Svelte" })).toBeDisabled();
   await page.getByRole("button", { name: "Apply draft" }).click();
 
-  const candidateState = await page
-    .waitForFunction(() => {
-      const node = document.querySelector<HTMLElement>(".candidate-chart");
-      if (node === null) return null;
-      return {
-        focusables: node.querySelectorAll("button, a, input, select, textarea, [tabindex]").length,
-        exposed: node.querySelectorAll('[role="img"], [role="status"], [aria-live]').length,
-        inert: node.inert,
-        inertAttribute: node.hasAttribute("inert"),
-        hidden: node.getAttribute("aria-hidden"),
-      };
-    })
-    .then((handle) => handle.jsonValue());
-  await expect(page.locator('.active-chart > [data-retained-during-candidate="true"]')).toHaveCount(
-    1,
+  const isIsolatedCandidate = (observation: CandidateObservation) =>
+    observation.activeRetained &&
+    observation.inert &&
+    observation.inertAttribute &&
+    observation.hidden === "true" &&
+    observation.focusables === 0 &&
+    observation.semanticDescendants === 1;
+  await expect
+    .poll(async () =>
+      (await candidateObservations(page)).some((observation) => isIsolatedCandidate(observation)),
+    )
+    .toBe(true);
+  const candidateState = (await candidateObservations(page)).find((observation) =>
+    isIsolatedCandidate(observation),
   );
   expect(candidateState).toMatchObject({
     focusables: 0,
+    semanticDescendants: 1,
     inert: true,
     inertAttribute: true,
     hidden: "true",
+    activeRetained: true,
   });
 
   await expect(page.getByText("Rendered custom draft.")).toBeVisible();
@@ -156,6 +217,109 @@ test("valid edits render before Svelte copy becomes available and candidates sta
   await expect(page.getByLabel("Generated Svelte component")).toContainText(
     "const spec: PortableSpec",
   );
+});
+
+test("temporal samples expose privacy-safe guide plans and keep ambiguous dates discrete", async ({
+  page,
+  context,
+}) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  await page.goto("/playground");
+  await settleVisualState(page);
+
+  await page.getByLabel("Start from a sample").selectOption("raw-years");
+  await expect(page.getByText("Rendered raw-years.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Axis plans" })).toBeVisible();
+  await expect(page.getByText(/temporal · year/u)).toBeVisible();
+
+  await page.getByRole("button", { name: "Copy privacy-safe scale report" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Copied a privacy-safe" })).toBeVisible();
+  const report = await page.evaluate(() => navigator.clipboard.readText());
+  const serialized = report.toLowerCase();
+  expect(JSON.parse(report)).toMatchObject({
+    decisions: [{ aesthetic: "x", status: "temporal", parser: "year", precision: "year" }],
+    guides: expect.any(Array),
+  });
+  expect(serialized).not.toContain('"data"');
+  expect(serialized).not.toContain('"field"');
+  expect(serialized).not.toContain('"domain"');
+  expect(serialized).not.toContain('"label"');
+  expect(serialized).not.toContain("1835");
+
+  await page.getByLabel("Start from a sample").selectOption("iso-dates");
+  await expect(page.getByText("Rendered iso-dates.")).toBeVisible();
+  await expect(page.getByText(/temporal · iso/u)).toBeVisible();
+
+  await page.getByLabel("Start from a sample").selectOption("ambiguous-dates");
+  await expect(page.getByText("Rendered ambiguous-dates.")).toBeVisible();
+  await expect(page.getByText(/nominal · none/u)).toBeVisible();
+});
+
+test("axis-plan inspection supports multiple temporal decisions on one aesthetic", async ({
+  page,
+}) => {
+  await page.goto("/playground");
+  await settleVisualState(page);
+  await page.getByLabel("PortableSpec JSON").fill(
+    JSON.stringify({
+      edition: 1,
+      data: {
+        values: [
+          { group: "a", low: "2024-01-01", high: "2024-01-03" },
+          { group: "b", low: "2024-02-01", high: "2024-02-04" },
+        ],
+      },
+      layers: [
+        {
+          geom: "errorbar",
+          stat: "identity",
+          position: "identity",
+          aes: {
+            x: { field: "group" },
+            ymin: { field: "low" },
+            ymax: { field: "high" },
+          },
+        },
+      ],
+      scales: { y: { type: "time", parse: "ymd" } },
+      labs: { title: "Temporal bounds", x: "Group", y: "Date" },
+    }),
+  );
+  await page.getByRole("button", { name: "Apply draft" }).click();
+  await expect(page.getByText("Rendered custom draft.")).toBeVisible();
+  await expect(page.getByText(/temporal · ymd/u)).toHaveCount(2);
+});
+
+test("191-year temporal guide stays collision-free with complete labels", async ({ page }) => {
+  for (const width of [320, 640, 1200]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("/examples/line/time-axis");
+    await settleVisualState(page);
+
+    const ticks = page.locator(".gg-axis-x .gg-tick:not(.gg-tick-minor)");
+    await expect(ticks.first()).toBeVisible();
+    const evidence = await ticks.evaluateAll((elements) =>
+      elements.map((element) => {
+        const text = element.querySelector("text");
+        const title = element.querySelector("title");
+        const box = text?.getBoundingClientRect();
+        return {
+          left: box?.left ?? 0,
+          right: box?.right ?? 0,
+          full: title?.textContent ?? "",
+          titleIsFirst: element.firstElementChild === title,
+        };
+      }),
+    );
+    expect(evidence.length, String(width)).toBeGreaterThanOrEqual(3);
+    expect(evidence.every((tick) => tick.full.length > 0 && tick.titleIsFirst)).toBe(true);
+    for (let index = 1; index < evidence.length; index++) {
+      expect(
+        evidence[index - 1]!.right + 6,
+        `${String(width)}px tick ${String(index)}`,
+      ).toBeLessThanOrEqual(evidence[index]!.left);
+    }
+  }
 });
 
 test("advanced outputs stay ordered and undo restores one render-confirmed snapshot", async ({
@@ -469,6 +633,12 @@ test("denied clipboard selects the share URL with truthful fallback text", async
     "Clipboard unavailable. Share link selected for manual copy.",
   );
   expect(await page.evaluate(() => getSelection()?.toString())).toContain("#play=v1.");
+
+  await page.getByRole("button", { name: "Copy privacy-safe scale report" }).click();
+  await expect(
+    page.getByRole("status").filter({ hasText: "scale report is selected" }),
+  ).toBeVisible();
+  expect(await page.evaluate(() => getSelection()?.toString())).toContain('"guides"');
 });
 
 test("playground is preview-first, operable, and axe-clean at a touch-size viewport", async ({

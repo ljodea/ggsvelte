@@ -75,6 +75,84 @@ export const PLAYGROUND_SAMPLES = [
     },
   },
   {
+    id: "raw-years",
+    title: "Raw years",
+    description: "Infer a calendar axis from unprocessed four-digit year strings.",
+    spec: {
+      edition: 1,
+      data: {
+        values: [
+          { year: "1835", value: 12 },
+          { year: "1900", value: 19 },
+          { year: "2026", value: 31 },
+        ],
+      },
+      layers: [
+        {
+          geom: "line",
+          stat: "identity",
+          position: "identity",
+          aes: { x: { field: "year" }, y: { field: "value" } },
+          params: { linewidth: 1.8 },
+        },
+      ],
+      labs: { title: "Raw year inference", x: "Year", y: "Value" },
+      height: 400,
+    },
+  },
+  {
+    id: "iso-dates",
+    title: "ISO dates",
+    description: "Infer a calendar axis from unprocessed ISO date strings.",
+    spec: {
+      edition: 1,
+      data: {
+        values: [
+          { date: "2024-01-01", value: 4 },
+          { date: "2024-02-01", value: 7 },
+          { date: "2024-03-01", value: 5 },
+        ],
+      },
+      layers: [
+        {
+          geom: "line",
+          stat: "identity",
+          position: "identity",
+          aes: { x: { field: "date" }, y: { field: "value" } },
+          params: { linewidth: 1.8 },
+        },
+      ],
+      labs: { title: "ISO date inference", x: "Date", y: "Value" },
+      height: 400,
+    },
+  },
+  {
+    id: "ambiguous-dates",
+    title: "Ambiguous dates",
+    description: "Keep ambiguous day/month strings discrete until a parser is explicit.",
+    spec: {
+      edition: 1,
+      data: {
+        values: [
+          { date: "03/04/2024", value: 4 },
+          { date: "05/06/2024", value: 7 },
+          { date: "07/08/2024", value: 5 },
+        ],
+      },
+      layers: [
+        {
+          geom: "line",
+          stat: "identity",
+          position: "identity",
+          aes: { x: { field: "date" }, y: { field: "value" } },
+          params: { linewidth: 1.8 },
+        },
+      ],
+      labs: { title: "Ambiguous dates stay discrete", x: "Date", y: "Value" },
+      height: 400,
+    },
+  },
+  {
     id: "category-columns",
     title: "Category columns",
     description: "Compare a few named categories with direct values.",

@@ -146,7 +146,7 @@ describe("pipeline semantic identity", () => {
       { width: 400, height: 240 },
     );
     expect(defaults.axisFormatters.x(1000)).toBe("1,000");
-    expect(defaults.axisFormatters.y(instant)).toBe("Jul 14");
+    expect(defaults.axisFormatters.y(instant)).toBe("2025-07-14");
   });
 
   it("keeps stable facet ids, raw legend values, and domain snapshots", () => {

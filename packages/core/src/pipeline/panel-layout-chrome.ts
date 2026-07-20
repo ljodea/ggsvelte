@@ -25,6 +25,8 @@ export function resolvePanelLayoutChrome(input: PanelLayoutChromeInput): PanelLa
     scalesConfig: input.scalesConfig,
     xScale: input.xScale,
     yScale: input.yScale,
+    xTemporalKind: input.xTemporalKind,
+    yTemporalKind: input.yTemporalKind,
     xTitle: labsChrome.xTitle,
     yTitle: labsChrome.yTitle,
     warnings: input.warnings,
@@ -38,6 +40,8 @@ export function resolvePanelLayoutChrome(input: PanelLayoutChromeInput): PanelLa
   });
 
   return {
+    flip: input.flip,
+    scalesConfig: input.scalesConfig,
     ...labsChrome,
     ...display,
     ...legends,

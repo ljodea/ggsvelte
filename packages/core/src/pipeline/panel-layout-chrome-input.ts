@@ -1,7 +1,7 @@
 /**
  * resolvePanelLayoutChrome input contract.
  */
-import type { PortableSpec } from "@ggsvelte/spec";
+import type { PortableSpec, TemporalKind } from "@ggsvelte/spec";
 
 import type { LegendInput, LegendOrder } from "../legend.js";
 import type { PositionScale } from "../scales/train.js";
@@ -19,6 +19,8 @@ export interface PanelLayoutChromeInput {
   scalesConfig: NonNullable<PortableSpec["scales"]>;
   xScale: PositionScale;
   yScale: PositionScale;
+  xTemporalKind: TemporalKind | null;
+  yTemporalKind: TemporalKind | null;
   colorLegend: LegendInput | null;
   fillLegend: LegendInput | null;
   legendOrder: LegendOrder;

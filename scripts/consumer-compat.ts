@@ -227,6 +227,7 @@ export function writeConsumerFixture(
           checkJs: true,
           esModuleInterop: true,
           forceConsistentCasingInFileNames: true,
+          lib: ["ES2024", "DOM", "DOM.Iterable"],
           moduleResolution: "Bundler",
           resolveJsonModule: true,
           skipLibCheck: false,
@@ -259,7 +260,7 @@ export function writeConsumerFixture(
   writeFileSync(
     join(directory, "src", "routes", "contract", "+page.svelte"),
     `<script lang="ts">
-  import { dmy, GGPlot, GeomLine, scaleXDate, scale_x_date, type PortableSpec } from "@ggsvelte/svelte";
+  import { dmy, GGPlot, GeomLine, scaleXDate, scale_x_date, type GuidePlan, type PortableSpec } from "@ggsvelte/svelte";
   const spec: PortableSpec = ${JSON.stringify(plotSpec)};
   const temporalRows = [
     { year: "1835", value: 12 },
@@ -267,11 +268,20 @@ export function writeConsumerFixture(
     { year: "2026", value: 31 },
   ];
   const explicitDateScale = scale_x_date({ parse: "dmy" });
-  const camelDateScale = scaleXDate({ parse: "iso" });
+  const camelDateScale = scaleXDate({
+    parse: "iso",
+    dateBreaks: "2 weeks",
+    dateMinorBreaks: "1 day",
+    dateLabels: "%e %b",
+    locale: "en-GB",
+    weekStart: "monday",
+  });
   const authorDate = dmy("31/12/2024");
   void explicitDateScale;
   void camelDateScale;
+  const guidePlan: GuidePlan | undefined = undefined;
   void authorDate;
+  void guidePlan;
 </script>
 
 <GGPlot {spec} width={480} height={320} inspect={true} ariaLabel="Packed contract chart" />
@@ -318,6 +328,7 @@ const spec = ${JSON.stringify(plotSpec)};
 const temporalSpec = {
   data: { values: [{ year: "1835", value: 12 }, { year: "2026", value: 31 }] },
   layers: [{ geom: "line", aes: { x: { field: "year" }, y: { field: "value" } } }],
+  scales: { x: { type: "time", dateBreaks: "50 years", dateLabels: "%Y", locale: "en-GB" } },
 };
 assert.equal(validate(spec).ok, true);
 assert.equal(validate(temporalSpec).ok, true);

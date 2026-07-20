@@ -460,6 +460,11 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
+        id: "responsive-calendar-labels",
+        title: "Responsive calendar labels",
+        level: 2,
+      },
+      {
         id: "override-one-choice",
         title: "Override one choice",
         level: 2,
@@ -1254,8 +1259,28 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "invalid-temporal-labels",
+        title: "invalid-temporal-labels",
+        level: 3,
+      },
+      {
+        id: "invalid-temporal-locale",
+        title: "invalid-temporal-locale",
+        level: 3,
+      },
+      {
         id: "temporal-parse-failed",
         title: "temporal-parse-failed",
+        level: 3,
+      },
+      {
+        id: "temporal-break-limit",
+        title: "temporal-break-limit",
+        level: 3,
+      },
+      {
+        id: "temporal-break-progression",
+        title: "temporal-break-progression",
         level: 3,
       },
       {
@@ -1376,6 +1401,26 @@ export const DOCS_ROUTES = [
       {
         id: "temporal-values-censored",
         title: "temporal-values-censored",
+        level: 3,
+      },
+      {
+        id: "unused-scale-option",
+        title: "unused-scale-option",
+        level: 3,
+      },
+      {
+        id: "temporal-label-overlap",
+        title: "temporal-label-overlap",
+        level: 3,
+      },
+      {
+        id: "temporal-label-margin-overflow",
+        title: "temporal-label-margin-overflow",
+        level: 3,
+      },
+      {
+        id: "temporal-break-outside-domain",
+        title: "temporal-break-outside-domain",
         level: 3,
       },
       {
@@ -1628,8 +1673,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-226",
-        title: "experimental (226)",
+        id: "experimental-245",
+        title: "experimental (245)",
         level: 3,
       },
       {
@@ -1643,8 +1688,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-204",
-        title: "experimental (204)",
+        id: "experimental-213",
+        title: "experimental (213)",
         level: 3,
       },
       {
@@ -1668,8 +1713,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-182",
-        title: "experimental (182)",
+        id: "experimental-198",
+        title: "experimental (198)",
         level: 3,
       },
       {

@@ -1,0 +1,41 @@
+[
+  {
+    "extentPx": 320,
+    "interval": "50 years",
+    "source": "automatic",
+    "overlap": false,
+    "marginOverflow": false,
+    "ticks": [
+      { "value": -3786825600000, "label": "1850", "fullLabel": "1850-01-01", "kind": "major" },
+      { "value": -2208988800000, "label": "1900", "fullLabel": "1900-01-01", "kind": "major" },
+      { "value": -631152000000, "label": "1950", "fullLabel": "1950-01-01", "kind": "major" },
+      { "value": 946684800000, "label": "2000", "fullLabel": "2000-01-01", "kind": "major" }
+    ]
+  },
+  {
+    "extentPx": 640,
+    "interval": "50 years",
+    "source": "automatic",
+    "overlap": false,
+    "marginOverflow": false,
+    "ticks": [
+      { "value": -3786825600000, "label": "1850", "fullLabel": "1850-01-01", "kind": "major" },
+      { "value": -2208988800000, "label": "1900", "fullLabel": "1900-01-01", "kind": "major" },
+      { "value": -631152000000, "label": "1950", "fullLabel": "1950-01-01", "kind": "major" },
+      { "value": 946684800000, "label": "2000", "fullLabel": "2000-01-01", "kind": "major" }
+    ]
+  },
+  {
+    "extentPx": 1200,
+    "interval": "50 years",
+    "source": "automatic",
+    "overlap": false,
+    "marginOverflow": false,
+    "ticks": [
+      { "value": -3786825600000, "label": "1850", "fullLabel": "1850-01-01", "kind": "major" },
+      { "value": -2208988800000, "label": "1900", "fullLabel": "1900-01-01", "kind": "major" },
+      { "value": -631152000000, "label": "1950", "fullLabel": "1950-01-01", "kind": "major" },
+      { "value": 946684800000, "label": "2000", "fullLabel": "2000-01-01", "kind": "major" }
+    ]
+  }
+]

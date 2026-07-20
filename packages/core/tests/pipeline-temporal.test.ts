@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 
-import { aes, gg } from "@ggsvelte/spec";
+import { aes, gg, SpecValidationError } from "@ggsvelte/spec";
 
 import { PipelineError, runPipeline } from "../src/pipeline.ts";
 
@@ -13,6 +13,413 @@ const yearRows = [
 ];
 
 describe("temporal pipeline semantics", () => {
+  it("exposes measured temporal GuidePlans at responsive extents", () => {
+    for (const width of [320, 640, 1200]) {
+      const model = runPipeline(
+        gg(yearRows, aes({ x: "year", y: "value" }))
+          .geomLine()
+          .spec(),
+        { width, height: 400 },
+      );
+      const guide = model.guidePlans.find((plan) => plan.aesthetic === "x");
+      expect(model.guidePlans.map((plan) => plan.aesthetic).toSorted()).toEqual(["x", "y"]);
+      expect(guide?.scaleType).toBe("time");
+      expect(guide?.overlap, String(width)).toBe(false);
+      expect(guide?.ticks.every((tick) => tick.fullLabel.length > 0)).toBe(true);
+      expect(model.scaleDecisions[0]?.guidePlanIds).toContain(guide?.id);
+      expect(model.scene.panels[0]?.axisX?.every((tick) => tick.kind === "major")).toBe(true);
+    }
+  });
+
+  it("projects explicit major and minor temporal intervals separately", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { date: "2024-01-01", value: 1 },
+          { date: "2024-04-01", value: 2 },
+        ],
+        aes({ x: "date", y: "value" }),
+      )
+        .geomLine()
+        .scaleXDate({
+          dateBreaks: "1 month",
+          dateMinorBreaks: "1 week",
+          dateLabels: "%Y-%m-%d",
+        })
+        .spec(),
+      size,
+    );
+    const guide = model.guidePlans.find((plan) => plan.aesthetic === "x")!;
+    expect(guide.source).toBe("interval");
+    expect(guide.ticks.some((tick) => tick.kind === "minor")).toBe(true);
+    expect(model.scene.panels[0]?.grid.minorX.length).toBeGreaterThan(0);
+    expect(Object.hasOwn(model.scene.grid, "minorX")).toBe(false);
+    expect(Object.hasOwn(model.scene.grid, "minorY")).toBe(false);
+    const majorGrid = new Set(model.scene.panels[0]?.grid.x ?? []);
+    expect((model.scene.panels[0]?.grid.minorX ?? []).every((value) => !majorGrid.has(value))).toBe(
+      true,
+    );
+  });
+
+  it("reports bounded explicit temporal intervals as structured pipeline errors", () => {
+    expect(() =>
+      runPipeline(
+        gg(yearRows, aes({ x: "year", y: "value" }))
+          .geomLine()
+          .scaleXDate({ dateBreaks: "1 day" })
+          .spec(),
+        size,
+      ),
+    ).toThrow(
+      expect.objectContaining({
+        name: "PipelineError",
+        code: "temporal-break-limit",
+        path: "/scales/x/dateBreaks",
+      }),
+    );
+  });
+
+  it("keeps explicit temporal interval errors on their owning axis and option", () => {
+    expect(() =>
+      runPipeline(
+        gg(
+          [
+            { x: "2024-01-01", y: "1900-01-01" },
+            { x: "2024-01-03", y: "2025-01-01" },
+          ],
+          aes({ x: "x", y: "y" }),
+        )
+          .geomPoint()
+          .scaleXDate({ dateBreaks: "1 day" })
+          .scaleYDate({ dateBreaks: "1 day" })
+          .spec(),
+        size,
+      ),
+    ).toThrow(
+      expect.objectContaining({
+        code: "temporal-break-limit",
+        path: "/scales/y/dateBreaks",
+      }),
+    );
+
+    expect(() =>
+      runPipeline(
+        gg(yearRows, aes({ x: "year", y: "value" }))
+          .geomLine()
+          .scaleXDate({ dateBreaks: "1 day", dateMinorBreaks: "1 day" })
+          .spec(),
+        size,
+      ),
+    ).toThrow(
+      expect.objectContaining({
+        code: "temporal-break-limit",
+        path: "/scales/x/dateBreaks",
+      }),
+    );
+
+    expect(() =>
+      runPipeline(
+        gg(
+          [
+            { date: "2024-01-01", value: 1 },
+            { date: "2024-12-31", value: 2 },
+          ],
+          aes({ x: "date", y: "value" }),
+        )
+          .geomLine()
+          .scaleXDate({ dateBreaks: "1 year", dateMinorBreaks: "1 day" })
+          .spec(),
+        size,
+      ),
+    ).toThrow(
+      expect.objectContaining({
+        code: "temporal-break-limit",
+        path: "/scales/x/dateMinorBreaks",
+      }),
+    );
+  });
+
+  it("rejects temporal guides on explicitly non-time runtime scales", () => {
+    for (const type of ["linear", "log"] as const) {
+      let thrown: unknown;
+      try {
+        runPipeline(
+          {
+            edition: 2,
+            data: {
+              values: [
+                { when: "2024-01-01", value: 1 },
+                { when: "2024-01-03", value: 2 },
+              ],
+            },
+            layers: [
+              {
+                geom: "point",
+                stat: "identity",
+                position: "identity",
+                aes: { x: { field: "when" }, y: { field: "value" } },
+              },
+            ],
+            scales: {
+              x: { type, parse: "ymd", dateBreaks: "1 day", dateLabels: "%Y-%m-%d" },
+            },
+          },
+          size,
+        );
+      } catch (error) {
+        thrown = error;
+      }
+      expect(thrown, type).toBeInstanceOf(SpecValidationError);
+      expect((thrown as SpecValidationError).errors, type).toEqual([
+        {
+          code: "scale-type-mismatch",
+          path: "/scales/x",
+          message: `scales.x uses temporal break or label options with explicit type "${type}".`,
+          fix: {
+            description:
+              'Use type "time", a date/datetime scale helper, or remove the temporal option.',
+          },
+        },
+      ]);
+    }
+  });
+
+  it("plans intervals for parser-backed rowless time axes without fabricating decisions", () => {
+    const model = runPipeline(
+      {
+        edition: 2,
+        data: { values: [{ pad: 1 }] },
+        layers: [
+          {
+            geom: "rule",
+            stat: "identity",
+            position: "identity",
+            params: { xintercept: ["2024-01-01", "2024-01-10"] },
+          },
+        ],
+        scales: {
+          x: {
+            type: "time",
+            parse: "ymd",
+            domain: ["2024-01-01", "2024-01-10"],
+            dateBreaks: "3 days",
+            nice: false,
+          },
+        },
+      },
+      size,
+    );
+    const guide = model.guidePlans.find((plan) => plan.aesthetic === "x")!;
+    expect(guide.source).toBe("interval");
+    expect(guide.temporalKind).toBe("date");
+    expect(guide.interval).toBe("3 days");
+    expect(guide.ticks.filter((tick) => tick.kind === "major").map((tick) => tick.value)).toEqual([
+      Date.UTC(2024, 0, 3),
+      Date.UTC(2024, 0, 6),
+      Date.UTC(2024, 0, 9),
+    ]);
+    expect(model.scaleDecisions.filter((decision) => decision.aesthetic === "x")).toHaveLength(0);
+  });
+
+  it("derives rowless date kind from a configured parser domain", () => {
+    const model = runPipeline(
+      {
+        edition: 2,
+        data: { values: [{ pad: 1 }] },
+        layers: [
+          {
+            geom: "rule",
+            stat: "identity",
+            position: "identity",
+            params: { yintercept: 0 },
+          },
+        ],
+        scales: {
+          x: {
+            type: "time",
+            parse: "ymd",
+            domain: ["2024-01-01", "2024-01-03"],
+            dateBreaks: "1 day",
+            nice: false,
+          },
+        },
+      },
+      size,
+    );
+    const guide = model.guidePlans.find((plan) => plan.aesthetic === "x")!;
+    expect(guide.source).toBe("interval");
+    expect(guide.temporalKind).toBe("date");
+    expect(guide.ticks.every((tick) => !tick.fullLabel.includes(":"))).toBe(true);
+    expect(model.scaleDecisions.filter((decision) => decision.aesthetic === "x")).toHaveLength(0);
+  });
+
+  it("preserves authored overlapping labels and emits a structured diagnostic", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { date: "2024-01-01", value: 1 },
+          { date: "2024-12-31", value: 2 },
+        ],
+        aes({ x: "date", y: "value" }),
+      )
+        .geomLine()
+        .scaleXDate({ dateBreaks: "1 month", dateLabels: "%Y-%m-%d" })
+        .spec(),
+      { width: 120, height: 240 },
+    );
+    const labels = model.scene.panels[0]?.axisX?.map((tick) => tick.label) ?? [];
+    expect(labels).toContain("2024-01-01");
+    expect(labels.some((label) => label.includes("…"))).toBe(false);
+    expect(
+      model.scaleDiagnostics.some((diagnostic) => diagnostic.code === "temporal-label-overlap"),
+    ).toBe(true);
+  });
+
+  it("preserves labels and reports margin overflow separately from overlap", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { date: "2024-01-01", value: 1 },
+          { date: "2024-02-01", value: 2 },
+        ],
+        aes({ x: "date", y: "value" }),
+      )
+        .geomLine()
+        .scaleXDate({ dateBreaks: "1 month", dateLabels: "%A %B %Y-%m-%d" })
+        .spec(),
+      { width: 120, height: 240 },
+    );
+    const labels = model.scene.panels[0]?.axisX?.map((tick) => tick.label) ?? [];
+    expect(labels).toEqual(["Monday January 2024-01-01", "Thursday February 2024-02-01"]);
+    expect(labels.every((label) => !label.includes("…"))).toBe(true);
+    expect(
+      model.scaleDiagnostics.some(
+        (diagnostic) => diagnostic.code === "temporal-label-margin-overflow",
+      ),
+    ).toBe(true);
+  });
+
+  it("applies explicit temporal precedence and reports ignored shorthand", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { date: "2024-01-01", value: 1 },
+          { date: "2024-04-01", value: 2 },
+        ],
+        aes({ x: "date", y: "value" }),
+      )
+        .geomLine()
+        .scaleXDate({
+          breaks: ["2024-01-01", "2024-04-01"],
+          dateBreaks: "1 month",
+          labels: "%Y",
+          dateLabels: "%b",
+        })
+        .spec(),
+      size,
+    );
+    const guide = model.guidePlans.find((plan) => plan.aesthetic === "x")!;
+    expect(guide.source).toBe("explicit");
+    expect(guide.interval).toBeNull();
+    expect(guide.ticks.map((tick) => tick.label)).toEqual(["Jan", "Apr"]);
+    expect(model.warnings.filter((warning) => warning.code === "unused-scale-option")).toHaveLength(
+      2,
+    );
+  });
+
+  it("retains explicit source breaks and diagnoses out-of-domain values", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { date: "2024-01-01", value: 1 },
+          { date: "2024-04-01", value: 2 },
+        ],
+        aes({ x: "date", y: "value" }),
+      )
+        .geomLine()
+        .scaleXDate({
+          domain: ["2024-01-01", "2024-04-01"],
+          breaks: ["2023-12-01", "2024-01-01", "2024-05-01"],
+        })
+        .spec(),
+      size,
+    );
+    const guide = model.guidePlans.find((plan) => plan.aesthetic === "x")!;
+    expect(guide.sourceBreaks).toEqual(["2023-12-01", "2024-01-01", "2024-05-01"]);
+    expect(guide.ticks.filter((tick) => tick.kind === "major")).toHaveLength(1);
+    expect(
+      model.scaleDiagnostics.some(
+        (diagnostic) => diagnostic.code === "temporal-break-outside-domain",
+      ),
+    ).toBe(true);
+  });
+
+  it("does not misreport duplicate in-domain breaks as outside the domain", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { date: "2024-01-01", value: 1 },
+          { date: "2024-04-01", value: 2 },
+        ],
+        aes({ x: "date", y: "value" }),
+      )
+        .geomLine()
+        .scaleXDate({ breaks: ["2024-01-01", "2024-01-01", "2024-04-01"] })
+        .spec(),
+      size,
+    );
+    const guide = model.guidePlans.find((plan) => plan.aesthetic === "x")!;
+    expect(guide.ticks.filter((tick) => tick.kind === "major")).toHaveLength(3);
+    expect(
+      model.scaleDiagnostics.some(
+        (diagnostic) => diagnostic.code === "temporal-break-outside-domain",
+      ),
+    ).toBe(false);
+  });
+
+  it("rejects unparseable explicit breaks instead of misreporting them as out of domain", () => {
+    expect(() =>
+      runPipeline(
+        gg(
+          [
+            { date: "2024-01-01", value: 1 },
+            { date: "2024-04-01", value: 2 },
+          ],
+          aes({ x: "date", y: "value" }),
+        )
+          .geomLine()
+          .scaleXDate({ breaks: ["2024-01-01", "not-a-date"] })
+          .spec(),
+        size,
+      ),
+    ).toThrow(
+      expect.objectContaining({
+        code: "invalid-scale-breaks",
+        path: "/scales/x/breaks",
+      }),
+    );
+  });
+
+  it("keeps semantic temporal plans ascending under reverse and coord flip", () => {
+    const model = runPipeline(
+      gg(yearRows, aes({ x: "year", y: "value" }))
+        .geomLine()
+        .scaleXDate({ reverse: true })
+        .coordFlip()
+        .spec(),
+      size,
+    );
+    const guide = model.guidePlans.find((plan) => plan.aesthetic === "x")!;
+    const values = guide.ticks
+      .filter((tick) => tick.kind === "major")
+      .map((tick) => tick.value as number);
+    expect(values).toEqual([...values].toSorted((left, right) => left - right));
+    expect(guide.direction).toBe("descending");
+    expect(model.scene.panels[0]?.axisY?.map((tick) => tick.label)).toEqual(
+      guide.ticks.filter((tick) => tick.kind === "major").map((tick) => tick.label),
+    );
+  });
+
   it("infers raw string years as a time scale with epoch domain", () => {
     const model = runPipeline(
       gg(yearRows, aes({ x: "year", y: "value" }))
@@ -426,6 +833,9 @@ describe("temporal pipeline semantics", () => {
     );
     expect(model.scales.panels).toHaveLength(2);
     expect(model.scales.panels.map((panel) => panel.x.type)).toEqual(["time", "time"]);
+    const facetGuides = model.guidePlans.filter((plan) => plan.aesthetic === "x");
+    expect(facetGuides).toHaveLength(2);
+    expect(facetGuides.every((plan) => plan.interval !== null && !plan.overlap)).toBe(true);
     expect(
       model.scene.batches
         .filter((batch) => batch.kind === "paths")
@@ -723,6 +1133,34 @@ describe("temporal pipeline semantics", () => {
     ).toThrow(PipelineError);
   });
 
+  it("preflights locale and dateLabels into stable structured pipeline errors", () => {
+    for (const [config, code, path] of [
+      [{ locale: "not_a_locale" }, "invalid-temporal-locale", "/scales/x/locale"],
+      [{ dateLabels: "%Q" }, "invalid-temporal-labels", "/scales/x/dateLabels"],
+    ] as const) {
+      try {
+        runPipeline(
+          {
+            data: { values: [] },
+            layers: [{ geom: "point" }],
+            scales: { x: { type: "time", ...config } },
+          },
+          size,
+        );
+        throw new Error("expected temporal configuration to fail");
+      } catch (error) {
+        expect(error).toBeInstanceOf(PipelineError);
+        if (!(error instanceof PipelineError)) throw error;
+        expect(error.code).toBe(code);
+        expect(error.path).toBe(path);
+        expect(error.diagnostic).toMatchObject({ code, path, severity: "error" });
+        expect(error.diagnostic?.problem.length).toBeGreaterThan(0);
+        expect(error.diagnostic?.cause.length).toBeGreaterThan(0);
+        expect(error.diagnostic?.fixes.length).toBeGreaterThan(0);
+      }
+    }
+  });
+
   it("keeps ambiguous y-intercept annotations discrete", () => {
     const model = runPipeline(
       {
@@ -855,6 +1293,7 @@ describe("temporal pipeline semantics", () => {
       portableOverride: { type: "time", temporalKind: "date", parse: "year" },
     });
     expect(model.row(0)).toEqual(yearRows[0]);
-    expect(model.axisFormatters.x("1835")).toContain("1835");
+    expect(model.axisFormatters.x("1835")).toBe("1835-01-01");
+    expect(Object.isFrozen(model.guidePlans)).toBe(true);
   });
 });

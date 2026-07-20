@@ -13,7 +13,15 @@
  *
  * Data is generated from a seeded PRNG so runs are comparable.
  */
-import { buildCandidateStore, planStrata, renderToSVGString, runPipeline } from "@ggsvelte/core";
+import {
+  buildCandidateStore,
+  FONT_METRICS,
+  MetricsTableMeasurer,
+  planStrata,
+  planTemporalAxis,
+  renderToSVGString,
+  runPipeline,
+} from "@ggsvelte/core";
 import { drawStratum } from "@ggsvelte/core/dom";
 import { aes, gg } from "@ggsvelte/spec";
 import type { PortableSpec } from "@ggsvelte/spec";
@@ -50,6 +58,25 @@ function temporalLineSpec(n: number): PortableSpec {
   }
   return gg({ date, value }, aes({ x: "date", y: "value" }))
     .geomLine()
+    .spec();
+}
+
+function temporalFreeFacetSpec(panelCount: number): PortableSpec {
+  const panel = Array.from<string>({ length: panelCount * 2 });
+  const date = Array.from<string>({ length: panelCount * 2 });
+  const value = Array.from<number>({ length: panelCount * 2 });
+  for (let index = 0; index < panelCount; index++) {
+    const first = index * 2;
+    panel[first] = `panel-${String(index).padStart(3, "0")}`;
+    panel[first + 1] = panel[first]!;
+    date[first] = `${String(1800 + (index % 100))}-01-01`;
+    date[first + 1] = `${String(1925 + (index % 100))}-01-01`;
+    value[first] = index;
+    value[first + 1] = index + 1;
+  }
+  return gg({ panel, date, value }, aes({ x: "date", y: "value" }))
+    .geomLine()
+    .facet({ wrap: "panel", ncol: 10, scales: "free_x" })
     .spec();
 }
 
@@ -244,6 +271,75 @@ export function buildWorkloads(smoke: boolean): Workload[] {
       group: `temporal line ${fmtK(n)}`,
       bench: `runPipeline temporal line ${fmtK(n)}`,
       fn: () => runPipeline(spec, opts),
+    });
+  }
+
+  {
+    const measurer = new MetricsTableMeasurer(FONT_METRICS);
+    const input = {
+      aesthetic: "x" as const,
+      panelIndex: 0,
+      domain: [Date.UTC(1800, 0, 1), Date.UTC(2100, 0, 1)] as const,
+      kind: "date" as const,
+      orient: "horizontal" as const,
+      extentPx: 800,
+      reverse: false,
+      measurer,
+      fontSize: 11.5,
+      marginCapPx: 92,
+      config: {},
+    };
+    const resizeInput = {
+      ...input,
+      domain: [Date.UTC(1835, 0, 1), Date.UTC(2025, 0, 1)] as const,
+    };
+    workloads.push(
+      {
+        id: "temporal guide candidate-selection 300y",
+        group: "temporal guide candidate selection",
+        bench: "planTemporalAxis 300-year domain",
+        fn: () => planTemporalAxis(input),
+      },
+      {
+        id: "temporal guide resize-churn 191y",
+        group: "temporal guide responsive planning",
+        bench: "planTemporalAxis 191-year resize sequence",
+        fn: () => {
+          let previousInterval: string | null | undefined;
+          let result;
+          for (const extentPx of [320, 640, 1_200, 640, 320]) {
+            result = planTemporalAxis({
+              ...resizeInput,
+              extentPx,
+              ...(previousInterval !== undefined && { previousInterval }),
+            });
+            previousInterval = result.interval;
+          }
+          return result;
+        },
+      },
+      {
+        id: "temporal guide DST-heavy 3y",
+        group: "temporal guide zoned calendar planning",
+        bench: "planTemporalAxis DST-heavy datetime domain",
+        fn: () =>
+          planTemporalAxis({
+            ...input,
+            domain: [Date.UTC(2022, 0, 1), Date.UTC(2025, 0, 1)],
+            kind: "datetime",
+            config: { timezone: "America/New_York", dateBreaks: "1 month" },
+          }),
+      },
+    );
+  }
+
+  {
+    const spec = temporalFreeFacetSpec(smoke ? 10 : 100);
+    workloads.push({
+      id: `pipeline temporal free-facets ${smoke ? "10" : "100"}`,
+      group: `temporal free facets ${smoke ? "10" : "100"}`,
+      bench: `runPipeline temporal free facets ${smoke ? "10" : "100"}`,
+      fn: () => runPipeline(spec, { ...opts, width: 1_200, height: 900 }),
     });
   }
 

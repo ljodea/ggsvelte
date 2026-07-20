@@ -3,7 +3,17 @@ import type { PositionScaleSpec, Scales } from "./schema.js";
 export type TemporalScaleOptions = Omit<PositionScaleSpec, "type" | "temporalKind">;
 export type DiscretePositionScaleOptions = Omit<
   PositionScaleSpec,
-  "type" | "temporalKind" | "parse" | "parseFailure" | "timezone" | "disambiguation"
+  | "type"
+  | "temporalKind"
+  | "parse"
+  | "parseFailure"
+  | "timezone"
+  | "disambiguation"
+  | "dateBreaks"
+  | "dateMinorBreaks"
+  | "dateLabels"
+  | "locale"
+  | "weekStart"
 >;
 
 function temporalScale(
@@ -15,7 +25,21 @@ function temporalScale(
 }
 
 function discreteScale(axis: "x" | "y", options: DiscretePositionScaleOptions = {}): Scales {
-  return { [axis]: { type: "band", ...options } };
+  const {
+    type: _,
+    temporalKind: __,
+    parse: ___,
+    parseFailure: ____,
+    timezone: _____,
+    disambiguation: ______,
+    dateBreaks: _______,
+    dateMinorBreaks: ________,
+    dateLabels: _________,
+    locale: __________,
+    weekStart: ___________,
+    ...discrete
+  } = options as PositionScaleSpec;
+  return { [axis]: { type: "band", ...discrete } };
 }
 
 export function scaleXDate(options: TemporalScaleOptions = {}): Scales {

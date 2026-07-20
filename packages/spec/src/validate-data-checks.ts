@@ -10,6 +10,11 @@ import { CHANNELS, GEOM_DEFAULTS, SEQUENTIAL_SCHEME_NAMES } from "./schema.js";
 import type { ProfileFieldType, ValidateLimits, ValidateOptions } from "./validate-data.js";
 import { parseTemporalColumn, temporalParserConfigurationError } from "./temporal.js";
 import {
+  parseTemporalInterval,
+  temporalLabelConfigurationError,
+  temporalLocaleConfigurationError,
+} from "./temporal-guides.js";
+import {
   effectiveChannel,
   resolveFieldEvidence,
   type ResolveFieldEvidenceResult,
@@ -75,24 +80,70 @@ export function dataChecks(
         config?.temporalKind !== undefined ||
         config?.timezone !== undefined ||
         config?.disambiguation !== undefined ||
-        config?.parseFailure !== undefined)
+        config?.parseFailure !== undefined ||
+        config?.dateBreaks !== undefined ||
+        config?.dateMinorBreaks !== undefined ||
+        config?.dateLabels !== undefined ||
+        config?.locale !== undefined ||
+        config?.weekStart !== undefined)
     );
   };
   const invalidTemporalAxes = new Set<"x" | "y">();
   for (const axis of AXIS_CHANNELS) {
     const config = scales?.[axis] as PositionScaleSpec | undefined;
+    const hasGuideTemporalOption =
+      config?.dateBreaks !== undefined ||
+      config?.dateMinorBreaks !== undefined ||
+      config?.dateLabels !== undefined ||
+      config?.locale !== undefined ||
+      config?.weekStart !== undefined;
+    if (
+      hasGuideTemporalOption &&
+      (config?.type === "band" || config?.type === "linear" || config?.type === "log")
+    ) {
+      invalidTemporalAxes.add(axis);
+      errors.push({
+        code: "scale-type-mismatch",
+        path: `/scales/${axis}`,
+        message: `scales.${axis} uses temporal break or label options with explicit type "${config.type}".`,
+        fix: {
+          description:
+            'Use type "time", a date/datetime scale helper, or remove the temporal option.',
+        },
+      });
+      continue;
+    }
     if (config?.type === "band" || !scaleRequestsTime(axis)) continue;
-    const configurationError = temporalParserConfigurationError(config?.parse ?? "auto", {
+    let configurationError = temporalParserConfigurationError(config?.parse ?? "auto", {
       ...(config?.timezone !== undefined && { timezone: config.timezone }),
       ...(config?.disambiguation !== undefined && { disambiguation: config.disambiguation }),
     });
+    if (configurationError === null) {
+      for (const interval of [config?.dateBreaks, config?.dateMinorBreaks]) {
+        if (interval === undefined) continue;
+        try {
+          parseTemporalInterval(interval);
+        } catch (error) {
+          configurationError = error instanceof Error ? error.message : "invalid temporal interval";
+          break;
+        }
+      }
+    }
+    if (configurationError === null && config?.dateLabels !== undefined) {
+      configurationError = temporalLabelConfigurationError(config.dateLabels);
+    }
+    if (configurationError === null && config?.locale !== undefined) {
+      configurationError = temporalLocaleConfigurationError(config.locale);
+    }
     if (configurationError === null) continue;
     invalidTemporalAxes.add(axis);
     errors.push({
       code: "scale-type-mismatch",
       path: `/scales/${axis}`,
-      message: `scales.${axis} has invalid temporal parser configuration: ${configurationError}.`,
-      fix: { description: "Correct the parser format or timezone configuration." },
+      message: `scales.${axis} has invalid temporal configuration: ${configurationError}.`,
+      fix: {
+        description: "Correct the parser, interval, label, locale, or timezone configuration.",
+      },
     });
   }
 
@@ -268,13 +319,8 @@ export function dataChecks(
 
   for (const axis of AXIS_CHANNELS) {
     const config = scales?.[axis] as PositionScaleSpec | undefined;
-    const requestsTime =
-      config?.parse !== undefined ||
-      config?.temporalKind !== undefined ||
-      config?.timezone !== undefined ||
-      config?.disambiguation !== undefined ||
-      config?.parseFailure !== undefined;
-    const declared = config?.type === "band" ? "band" : requestsTime ? "time" : config?.type;
+    const declared =
+      config?.type === "band" ? "band" : scaleRequestsTime(axis) ? "time" : config?.type;
     if (declared === undefined || declared === "band" || invalidTemporalAxes.has(axis)) continue;
     for (const use of axisFields[axis]) {
       const type = typeOf(use.field);

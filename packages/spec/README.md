@@ -55,8 +55,20 @@ whole-column validation. Ambiguous ordered dates require an explicit parser:
 import { dmy, scale_x_date } from "@ggsvelte/spec";
 
 const dates = dmy(["31/12/2024", "01/01/2025"]); // Date authoring values
-const scale = scale_x_date({ parse: "dmy" }); // { x: { type: "time", ... } }
+const scale = scale_x_date({
+  parse: "dmy",
+  dateBreaks: "2 weeks",
+  dateMinorBreaks: "1 day",
+  dateLabels: "%e %b",
+  locale: "en-GB",
+  weekStart: "monday",
+});
 ```
+
+Temporal break intervals are closed portable strings: a positive integer plus
+millisecond, second, minute, hour, day, week, month, quarter, or year. Explicit
+`breaks` outrank `dateBreaks`; `dateLabels` outranks the legacy soft-fallback
+`labels` formatter.
 
 All six orders (`ymd`, `ydm`, `mdy`, `myd`, `dmy`, `dym`), timestamp variants,
 exact closed formats, and epoch units are typed. PortableSpec never contains `Date`,

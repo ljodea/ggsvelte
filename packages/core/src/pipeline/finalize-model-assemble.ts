@@ -50,6 +50,7 @@ export function assembleFinalizeRenderModel(input: {
     advisories: input.advisories,
     scaleDecisions: prepared.scaleDecisions,
     scaleDiagnostics: prepared.scaleDiagnostics,
+    guidePlans: panelLayout.guidePlans,
     xConversion: prepared.xConversion,
     yConversion: prepared.yConversion,
     runId: input.runId,

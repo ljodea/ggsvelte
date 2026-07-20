@@ -6,7 +6,11 @@ import type { TextMeasurer } from "../layout/measure.js";
 import type { buildLegends } from "../legend.js";
 import type { PositionScale } from "../scales/train.js";
 
+import type { DisplayTemporalFn } from "./panel-layout-types.js";
+
 export interface PanelLayoutChrome {
+  flip: boolean;
+  scalesConfig: import("@ggsvelte/spec").Scales;
   title: string;
   subtitle: string;
   caption: string;
@@ -27,6 +31,7 @@ export interface PanelLayoutChrome {
   freeH: boolean;
   freeV: boolean;
   displayScales: (p: number) => { h: PositionScale; v: PositionScale };
+  displayTemporal: DisplayTemporalFn;
   measurer: TextMeasurer;
   layoutTheme: LayoutTheme;
   legendBlock: ReturnType<typeof buildLegends>;

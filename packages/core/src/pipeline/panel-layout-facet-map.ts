@@ -13,7 +13,9 @@ export function mapFacetPanelPlacements(input: MapFacetPanelPlacementsInput): Pa
     freeH,
     freeV,
     displayScales,
+    displayTemporal,
     mMax,
+    previousGuidePlans,
     panelW,
     panelH,
     colX,
@@ -29,11 +31,17 @@ export function mapFacetPanelPlacements(input: MapFacetPanelPlacementsInput): Pa
 
   return facetPanels.map((def, p) => {
     const { h, v } = displayScales(p);
+    const temporal = displayTemporal(p);
     return placeOneFacetPanel({
       def,
       h,
       v,
+      ...(temporal.h !== undefined && { hTemporal: temporal.h }),
+      ...(temporal.v !== undefined && { vTemporal: temporal.v }),
       mMax,
+      ...(previousGuidePlans[p] !== undefined && {
+        previousGuidePlans: previousGuidePlans[p],
+      }),
       panelW,
       panelH,
       colX: colX[def.col]!,

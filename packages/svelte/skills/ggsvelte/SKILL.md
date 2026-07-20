@@ -43,15 +43,18 @@ ndensity`; density→`density, scaled`; smooth→`y, ymin, ymax, se`;
 - **scales**: per channel: `{"type": "linear"|"log"|"time"|"band"}` for x/y;
   time scales additionally accept `"parse"` (closed names such as `"dmy"`,
   exact `{ "format": ... }`, or `{ "epoch": "seconds"|"milliseconds" }`),
-  `"temporalKind"`, `"timezone"`, `"disambiguation"`, and
-  `"parseFailure":"error"|"censor"`.
+  `"temporalKind"`, `"timezone"`, `"disambiguation"`,
+  `"parseFailure":"error"|"censor"`, `"dateBreaks"`,
+  `"dateMinorBreaks"`, `"dateLabels"`, `"locale"`, and `"weekStart"`.
   `{"type": "ordinal"|"sequential", "scheme"?, "range"?, "domain"?}` for
   color/fill. Defaults are inferred and disclosed as advisories.
 - **temporal defaults**: ISO dates/date-times, four-digit year strings,
   year-months, month-years, and year-quarters infer time after bounded sampling
   plus whole-column validation. Ambiguous ordered dates stay discrete: set
   `"parse":"dmy"` or `"parse":"mdy"`. For year-like identifiers, force
-  `{"type":"band"}`. Never preprocess dates into indexes.
+  `{"type":"band"}`. Never preprocess dates into indexes. Automatic temporal
+  labels use measured panel extent and calendar boundaries; inspect
+  `model.guidePlans` for the selected interval and visible/full labels.
 - **temporal override rules**: `.scaleXDate()`/`.scaleYDate()` serialize mapped
   authoring `Date` cells as calendar dates; `.scaleXDatetime()`/
   `.scaleYDatetime()` preserve instants.
@@ -60,6 +63,11 @@ ndensity`; density→`density, scaled`; smooth→`y, ymin, ymax, se`;
   separate groups; sequential temporal color/fill uses parsed domains and
   calendar legend labels. Censoring is available only with an explicit parser;
   invalid configuration and ambiguous automatic inference remain errors.
+  Use e.g. `.scaleXDatetime({ dateBreaks: "2 weeks", dateMinorBreaks: "1 day",
+dateLabels: "%e %b", locale: "en-GB", timezone: "Europe/London" })`.
+  Explicit `breaks` outrank `dateBreaks`; `dateLabels` outranks `labels`.
+  Authored labels are preserved with a diagnostic rather than silently
+  rotated, thinned, or truncated.
 - Rendering surfaces: `<GGPlot spec={...}/>` (Svelte),
   `renderToSVGString(spec, {width, height})` (headless, Node-safe),
   `ggsvelte-render spec.json > out.svg` (CLI; JSON-line diagnostics on stderr).

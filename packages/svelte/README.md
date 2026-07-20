@@ -56,7 +56,9 @@ ISO dates, year-months, year-quarters, and runtime `Date` values also infer temp
 For ambiguous values, choose a closed parser with
 `.scaleXDate({ parse: "dmy" })` or `scales={{ x: { type: "time", parse: "dmy" } }}`.
 Use `.scaleXDiscrete()` / `type: "band"` when four-digit values are identifiers.
-`onrender` exposes `model.scaleDecisions` and `model.scaleDiagnostics`.
+`onrender` exposes `model.scaleDecisions`, `model.scaleDiagnostics`, and measured
+`model.guidePlans`. Configure calendar labels directly with
+`.scaleXDatetime({ dateBreaks: "2 weeks", dateMinorBreaks: "1 day", dateLabels: "%e %b", locale: "en-GB", timezone: "Europe/London" })`.
 
 `<GGPlot>` supports `facet`, `coord`, `theme`, opt-in `inspect`, point or
 faceted interval `select`, brush `zoom`, visual `legendFocus`, data-changing

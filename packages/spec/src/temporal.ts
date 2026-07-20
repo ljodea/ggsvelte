@@ -230,7 +230,8 @@ function parseOffset(offset: string): number | null {
   return match[1] === "+" ? total : -total;
 }
 
-function temporalImplementation(): typeof PolyfillTemporal {
+/** @internal Shared native-first Temporal implementation for spec-owned calendar semantics. */
+export function temporalImplementation(): typeof PolyfillTemporal {
   const nativeTemporal = (globalThis as typeof globalThis & { Temporal?: typeof PolyfillTemporal })
     .Temporal;
   return nativeTemporal ?? PolyfillTemporal;

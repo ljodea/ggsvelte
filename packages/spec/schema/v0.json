@@ -1473,6 +1473,66 @@
           ],
           "description": "DST gap/fold policy for IANA local times. Default \"reject\"; choose \"earlier\", \"later\", or Temporal-compatible behavior explicitly."
         },
+        "dateBreaks": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[ ]*(?:[1-9][0-9]{0,5}|1000000)[ ]+(?:millisecond|second|minute|hour|day|week|month|quarter|year)s?[ ]*$",
+          "description": "A positive integer calendar interval such as \"2 weeks\", \"3 months\", or \"10 years\". Canonical units are millisecond, second, minute, hour, day, week, month, quarter, and year."
+        },
+        "dateMinorBreaks": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[ ]*(?:[1-9][0-9]{0,5}|1000000)[ ]+(?:millisecond|second|minute|hour|day|week|month|quarter|year)s?[ ]*$",
+          "description": "A positive integer calendar interval such as \"2 weeks\", \"3 months\", or \"10 years\". Canonical units are millisecond, second, minute, hour, day, week, month, quarter, and year."
+        },
+        "dateLabels": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^(?:[^%]|%(?:Y|y|m|b|B|d|e|a|A|H|I|M|S|L|p|q|z|Z|%))+$",
+          "description": "Strict temporal label format. Supported tokens: %Y %y %m %b %B %d %e %a %A %H %I %M %S %L %p %q %z %Z %%."
+        },
+        "locale": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "description": "BCP 47 locale for temporal labels. Default \"en-US\". JSON Schema bounds the portable string shape; runtime validation canonicalizes the tag and verifies Intl support before rendering."
+        },
+        "weekStart": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "monday"
+            },
+            {
+              "type": "string",
+              "const": "tuesday"
+            },
+            {
+              "type": "string",
+              "const": "wednesday"
+            },
+            {
+              "type": "string",
+              "const": "thursday"
+            },
+            {
+              "type": "string",
+              "const": "friday"
+            },
+            {
+              "type": "string",
+              "const": "saturday"
+            },
+            {
+              "type": "string",
+              "const": "sunday"
+            }
+          ],
+          "description": "Week boundary used by temporal interval breaks. Default \"monday\"."
+        },
         "domain": {
           "type": "array",
           "items": {

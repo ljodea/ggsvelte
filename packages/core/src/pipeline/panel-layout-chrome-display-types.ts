@@ -4,6 +4,8 @@
 import type { TickFormatter } from "../layout/layout.js";
 import type { PositionScale } from "../scales/train.js";
 
+import type { DisplayTemporalFn } from "./panel-layout-types.js";
+
 export interface PanelLayoutDisplay {
   hTitle: string;
   vTitle: string;
@@ -16,4 +18,5 @@ export interface PanelLayoutDisplay {
   freeH: boolean;
   freeV: boolean;
   displayScales: (p: number) => { h: PositionScale; v: PositionScale };
+  displayTemporal: DisplayTemporalFn;
 }

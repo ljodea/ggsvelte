@@ -19,6 +19,8 @@ export function singlePanelPlacementFromLayout(
     height: Math.max(1, layoutHeight - margins.top - margins.bottom),
     ticksH: layoutResult.x.ticks,
     ticksV: layoutResult.y.ticks,
+    ...(layoutResult.x.guidePlan !== undefined && { hGuidePlan: layoutResult.x.guidePlan }),
+    ...(layoutResult.y.guidePlan !== undefined && { vGuidePlan: layoutResult.y.guidePlan }),
     showAxisX: true,
     showAxisY: true,
   };

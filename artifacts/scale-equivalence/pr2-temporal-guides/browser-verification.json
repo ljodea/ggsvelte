@@ -1,0 +1,63 @@
+{
+  "acceptanceUrl": "http://127.0.0.1:4173/examples/line/time-axis",
+  "playgroundUrl": "http://127.0.0.1:4173/playground",
+  "verifiedAt": "2026-07-20",
+  "acceptanceFixture": "fixture.json",
+  "viewports": [
+    {
+      "width": 320,
+      "height": 900,
+      "lightScreenshot": "time-axis-320-light.png",
+      "darkScreenshot": "time-axis-320-dark.png",
+      "visibleLabels": ["1850", "1900", "1950", "2000"],
+      "fullLabels": ["1850-01-01", "1900-01-01", "1950-01-01", "2000-01-01"],
+      "minimumNeighborGapPx": 37.623779296875,
+      "overlap": false,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "width": 640,
+      "height": 900,
+      "lightScreenshot": "time-axis-640-light.png",
+      "darkScreenshot": "time-axis-640-dark.png",
+      "visibleLabels": ["1850", "1900", "1950", "2000"],
+      "fullLabels": ["1850-01-01", "1900-01-01", "1950-01-01", "2000-01-01"],
+      "minimumNeighborGapPx": 121.83258056640625,
+      "overlap": false,
+      "horizontalOverflowPx": 0
+    },
+    {
+      "width": 1200,
+      "height": 900,
+      "lightScreenshot": "time-axis-1200-light.png",
+      "darkScreenshot": "time-axis-1200-dark.png",
+      "visibleLabels": ["1850", "1900", "1950", "2000"],
+      "fullLabels": ["1850-01-01", "1900-01-01", "1950-01-01", "2000-01-01"],
+      "minimumNeighborGapPx": 130.25347900390625,
+      "overlap": false,
+      "horizontalOverflowPx": 0
+    }
+  ],
+  "semanticAssertions": {
+    "rawInputStarts": "1835",
+    "rawInputEnds": "2025",
+    "preprocessing": false,
+    "explicitScale": false,
+    "scaleDecision": "temporal · year",
+    "selectedInterval": "50 years",
+    "titleIsFirstTickChild": true,
+    "consoleErrorsAfterCleanLoad": 0
+  },
+  "playgroundReport": {
+    "copiedStatusObserved": true,
+    "decisionCount": 1,
+    "guideCount": 2,
+    "containsRows": false,
+    "containsDomains": false,
+    "containsLabels": false,
+    "containsVisibleLabel": false,
+    "containsSourceEpoch": false,
+    "screenshots": ["playground-1280.png", "playground-375.png"]
+  },
+  "negativeControl": "The Ambiguous dates sample remains nominal unless the author supplies an explicit parser; temporal inference does not silently choose DMY or MDY."
+}

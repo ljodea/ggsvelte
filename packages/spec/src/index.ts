@@ -152,6 +152,29 @@ export type {
   TemporalParserName,
   TemporalPrecision,
 } from "./temporal.js";
+export {
+  MAX_TEMPORAL_CANDIDATES,
+  MAX_TEMPORAL_MAJOR_TICKS,
+  MAX_TEMPORAL_MINOR_TICKS,
+  MIN_TEMPORAL_LABEL_GAP_PX,
+  parseTemporalInterval,
+  TEMPORAL_INTERVAL_UNITS,
+  TEMPORAL_LABEL_TOKENS,
+  TEMPORAL_WEEKDAYS,
+  TemporalIntervalError,
+  TemporalIntervalSpecSchema,
+  TemporalLabelSpecSchema,
+  temporalIntervalTicks,
+  temporalLabelConfigurationError,
+  temporalLocaleConfigurationError,
+  TemporalWeekStartSchema,
+} from "./temporal-guides.js";
+export type {
+  TemporalInterval,
+  TemporalIntervalSpec,
+  TemporalIntervalUnit,
+  TemporalWeekStart,
+} from "./temporal-guides.js";
 
 // Scale helpers
 export {

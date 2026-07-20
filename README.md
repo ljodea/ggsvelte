@@ -104,7 +104,25 @@ Portable JSON uses `scales: { x: { type: "time", parse: "dmy" } }`. If four-digi
 values are identifiers rather than years, use `.scaleXDiscrete()` or
 `scales: { x: { type: "band" } }`. Inspect `model.scaleDecisions` and
 `model.scaleDiagnostics` through `onrender` to see the bounded evidence and copyable
-correction.
+correction. `model.guidePlans` explains the interval and complete labels selected for each
+rendered panel axis.
+
+Temporal labels are measured against the real panel width and calendar-aligned from
+milliseconds through centuries. Override one choice without preprocessing:
+
+```ts
+.scaleXDatetime({
+  dateBreaks: "2 weeks",
+  dateMinorBreaks: "1 day",
+  dateLabels: "%e %b",
+  locale: "en-GB",
+  timezone: "Europe/London",
+  weekStart: "monday",
+})
+```
+
+Explicit breaks and labels are preserved. When they cannot fit, ggsvelte reports a
+structured overlap diagnostic instead of silently rotating, thinning, or truncating them.
 
 ## One spec, three surfaces
 

@@ -25,10 +25,14 @@ function renderPanelAxes(panel: ScenePanel, theme: ThemeTokens): string {
       );
     }
     for (const tick of panel.axisX) {
-      parts.push(`<g class="gg-tick" transform="translate(${px(tick.pos)},0)">`);
+      const minor = tick.kind === "minor";
+      parts.push(
+        `<g class="gg-tick${minor ? " gg-tick-minor" : ""}" transform="translate(${px(tick.pos)},0)">`,
+      );
+      if (!minor) parts.push(`<title>${escapeXML(tick.fullLabel ?? tick.label)}</title>`);
       if (theme.ticksX) {
         parts.push(
-          `<line y2="${px(theme.tickLength)}" stroke="${tickColor}" stroke-width="${px(theme.tickWidth)}" vector-effect="non-scaling-stroke"/>`,
+          `<line y2="${px(minor ? theme.tickLength / 2 : theme.tickLength)}" stroke="${tickColor}" stroke-width="${px(theme.tickWidth)}"${minor ? ' opacity="0.5"' : ""} vector-effect="non-scaling-stroke"/>`,
         );
       }
       if (tick.label !== "") {
@@ -50,10 +54,14 @@ function renderPanelAxes(panel: ScenePanel, theme: ThemeTokens): string {
       );
     }
     for (const tick of panel.axisY) {
-      parts.push(`<g class="gg-tick" transform="translate(0,${px(tick.pos)})">`);
+      const minor = tick.kind === "minor";
+      parts.push(
+        `<g class="gg-tick${minor ? " gg-tick-minor" : ""}" transform="translate(0,${px(tick.pos)})">`,
+      );
+      if (!minor) parts.push(`<title>${escapeXML(tick.fullLabel ?? tick.label)}</title>`);
       if (theme.ticksY) {
         parts.push(
-          `<line x2="-${px(theme.tickLength)}" stroke="${tickColor}" stroke-width="${px(theme.tickWidth)}" vector-effect="non-scaling-stroke"/>`,
+          `<line x2="-${px(minor ? theme.tickLength / 2 : theme.tickLength)}" stroke="${tickColor}" stroke-width="${px(theme.tickWidth)}"${minor ? ' opacity="0.5"' : ""} vector-effect="non-scaling-stroke"/>`,
         );
       }
       if (tick.label !== "") {
@@ -107,9 +115,26 @@ function renderAxisTitles(scene: Scene): string {
 
 function renderGrid(panel: ScenePanel, theme: ThemeTokens): string {
   const dash = theme.gridDasharray === "" ? "" : ` stroke-dasharray="${theme.gridDasharray}"`;
-  const parts: string[] = [
+  const parts: string[] = [];
+  const hasMinorX = theme.gridX && (panel.grid.minorX?.length ?? 0) > 0;
+  const hasMinorY = theme.gridY && (panel.grid.minorY?.length ?? 0) > 0;
+  if (hasMinorX || hasMinorY) {
+    parts.push(
+      `<g class="gg-grid gg-grid-minor" stroke="${themeVar("grid", theme)}" stroke-width="${px(theme.gridWidth)}"${dash} opacity="0.5" vector-effect="non-scaling-stroke">`,
+    );
+    if (hasMinorX)
+      for (const gx of panel.grid.minorX ?? []) {
+        parts.push(`<line x1="${px(gx)}" y1="0" x2="${px(gx)}" y2="${px(panel.height)}"/>`);
+      }
+    if (hasMinorY)
+      for (const gy of panel.grid.minorY ?? []) {
+        parts.push(`<line x1="0" y1="${px(gy)}" x2="${px(panel.width)}" y2="${px(gy)}"/>`);
+      }
+    parts.push("</g>");
+  }
+  parts.push(
     `<g class="gg-grid" stroke="${themeVar("grid", theme)}" stroke-width="${px(theme.gridWidth)}"${dash} vector-effect="non-scaling-stroke">`,
-  ];
+  );
   if (theme.gridX)
     for (const gx of panel.grid.x) {
       parts.push(`<line x1="${px(gx)}" y1="0" x2="${px(gx)}" y2="${px(panel.height)}"/>`);

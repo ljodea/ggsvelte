@@ -11,9 +11,12 @@ export function placeSinglePanelFromChrome(
   options: Pick<RunOptions, "width">,
 ): PanelPlacement {
   const { h, v } = chrome.displayScales(0);
+  const temporal = chrome.displayTemporal(0);
   return placeSinglePanel({
     h,
     v,
+    ...(temporal.h !== undefined && { hTemporal: temporal.h }),
+    ...(temporal.v !== undefined && { vTemporal: temporal.v }),
     hTitle: chrome.hTitle,
     vTitle: chrome.vTitle,
     axisTitleBand: chrome.axisTitleBand,

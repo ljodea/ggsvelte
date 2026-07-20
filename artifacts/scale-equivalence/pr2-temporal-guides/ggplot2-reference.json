@@ -1,0 +1,7 @@
+{
+  "command": "Rscript -e 'library(ggplot2); years <- seq(1835, 2025, 5); d <- data.frame(date=as.Date(paste0(years, \"-01-01\")), value=seq_along(years)); x <- ggplot_build(ggplot(d, aes(date, value)) + geom_line())$layout$panel_params[[1]]$x; x$get_breaks(); x$get_labels()'",
+  "breaks": [null, "1850-01-01", "1900-01-01", "1950-01-01", "2000-01-01", null],
+  "labels": ["1800", "1850", "1900", "1950", "2000", "2050"],
+  "projectedInDomainLabels": ["1850", "1900", "1950", "2000"],
+  "parity": "ggsvelte draws the same four in-domain 50-year labels. ggplot2 also returns padded out-of-domain break slots as NA; ggsvelte plans only drawable in-domain ticks."
+}

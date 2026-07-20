@@ -35,7 +35,12 @@ export function assembleScenePanels(input: {
       strip: facetPanels[p]!.label,
       axisX: placement.showAxisX ? bottom : null,
       axisY: placement.showAxisY ? left : null,
-      grid: { x: bottom.map((t) => t.pos), y: left.map((t) => t.pos) },
+      grid: {
+        x: bottom.filter((tick) => tick.kind === "major").map((tick) => tick.pos),
+        y: left.filter((tick) => tick.kind === "major").map((tick) => tick.pos),
+        minorX: bottom.filter((tick) => tick.kind === "minor").map((tick) => tick.pos),
+        minorY: left.filter((tick) => tick.kind === "minor").map((tick) => tick.pos),
+      },
     };
   });
 

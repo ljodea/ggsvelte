@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { PipelineError } from "@ggsvelte/core";
+  import { PipelineError, type RenderModel } from "@ggsvelte/core";
   import { GGPlot } from "@ggsvelte/svelte";
 
   import type { PlaygroundInteractionEvent } from "$lib/playground-events";
@@ -29,7 +29,7 @@
       generation: number,
       diagnostic: PlaygroundDiagnostic,
     ) => void;
-    onActiveRendered: () => void;
+    onActiveRendered: (model: RenderModel) => void;
     onActiveFailed: (diagnostic: PlaygroundDiagnostic) => void;
     onInteraction: (event: PlaygroundInteractionEvent) => void;
   } = $props();

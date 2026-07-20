@@ -1,10 +1,10 @@
 /**
  * Spec-driven axis tick formatters and semantic value formatters.
  */
-import type { PositionScaleSpec } from "@ggsvelte/spec";
+import type { PositionScaleSpec, TemporalKind } from "@ggsvelte/spec";
 
 import type { TickFormatter } from "../layout/layout.js";
-import { formatTime, numberFormatter } from "../layout/format.js";
+import { compileTemporalLabelFormat, formatTime, numberFormatter } from "../layout/format.js";
 import { defaultTickFormat, tickStep } from "../layout/ticks.js";
 import { defaultLogTickFormat } from "../layout/ticks.js";
 import { defaultTimeTickFormat } from "../layout/time.js";
@@ -18,9 +18,34 @@ export function makeAxisFormatter(
   scale: PositionScale,
   config: PositionScaleSpec | undefined,
   warnings: PipelineWarning[],
+  resolvedTemporalKind?: TemporalKind | null,
 ): TickFormatter | undefined {
-  const labels = config?.labels;
-  if (labels === undefined) return undefined;
+  if (config?.breaks !== undefined && config.dateBreaks !== undefined) {
+    warnings.push({
+      code: "unused-scale-option",
+      message: `scales.${axis}.breaks takes precedence; dateBreaks is ignored.`,
+    });
+  }
+  if (config?.labels !== undefined && config.dateLabels !== undefined) {
+    warnings.push({
+      code: "unused-scale-option",
+      message: `scales.${axis}.dateLabels takes precedence; labels is ignored.`,
+    });
+  }
+  const labels = config?.dateLabels ?? config?.labels;
+  if (labels === undefined) {
+    if (scale.type !== "time") return undefined;
+    const kind = resolvedTemporalKind ?? config?.temporalKind ?? "datetime";
+    const format = compileTemporalLabelFormat(
+      kind === "date" ? "%Y-%m-%d" : "%Y-%m-%d %H:%M:%S %Z",
+      {
+        kind,
+        locale: config?.locale ?? "en-US",
+        timezone: config?.timezone ?? "UTC",
+      },
+    );
+    return (value) => format(value as number);
+  }
   if (scale.type === "band") {
     warnings.push({
       code: "invalid-label-format",
@@ -29,6 +54,14 @@ export function makeAxisFormatter(
     return undefined;
   }
   if (scale.type === "time") {
+    if (config?.dateLabels !== undefined) {
+      const format = compileTemporalLabelFormat(config.dateLabels, {
+        kind: resolvedTemporalKind ?? config.temporalKind ?? "datetime",
+        locale: config.locale ?? "en-US",
+        timezone: config.timezone ?? "UTC",
+      });
+      return (value) => format(value as number);
+    }
     return (value) => formatTime(value as number, labels);
   }
   const f = numberFormatter(labels);

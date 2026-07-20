@@ -139,7 +139,12 @@ export function positionConversionContext(
     config.temporalKind !== undefined ||
     config.timezone !== undefined ||
     config.disambiguation !== undefined ||
-    config.parseFailure !== undefined;
+    config.parseFailure !== undefined ||
+    config.dateBreaks !== undefined ||
+    config.dateMinorBreaks !== undefined ||
+    config.dateLabels !== undefined ||
+    config.locale !== undefined ||
+    config.weekStart !== undefined;
   const forcedNonTemporal = (config.type === "linear" || config.type === "log") && !requestedTime;
   return {
     parser: config.parse ?? "auto",

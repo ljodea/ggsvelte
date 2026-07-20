@@ -96,6 +96,10 @@ describe("packed consumer compatibility harness", () => {
       expect(readFileSync(join(directory, "src", "routes", "+page.svelte"), "utf8")).toBe(
         `${QUICKSTART_PAGE_SVELTE}\n`,
       );
+      const tsconfig = JSON.parse(readFileSync(join(directory, "tsconfig.json"), "utf8")) as {
+        compilerOptions: { lib: string[] };
+      };
+      expect(tsconfig.compilerOptions.lib).toEqual(["ES2024", "DOM", "DOM.Iterable"]);
     } finally {
       rmSync(directory, { recursive: true, force: true });
     }
