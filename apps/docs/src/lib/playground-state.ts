@@ -1,10 +1,12 @@
 import { normalize, validate, type PortableSpec, type SpecError } from "@ggsvelte/spec";
 
 import {
+  assertPlaygroundDraftSize,
   encodePlaygroundSeed,
   PLAYGROUND_MAX_DECODED_BYTES,
   PLAYGROUND_MAX_DEPTH,
   PLAYGROUND_MAX_ROWS,
+  PlaygroundCodecError,
   validatePlaygroundSeed,
   type PlaygroundSeedV1,
 } from "./playground-codec";
@@ -163,8 +165,19 @@ function invalidDraft(
 export function stagePlaygroundDraft(state: PlaygroundState): PlaygroundState {
   let input: unknown;
   try {
+    assertPlaygroundDraftSize(state.draft);
     input = JSON.parse(state.draft) as unknown;
   } catch (error) {
+    if (error instanceof PlaygroundCodecError) {
+      return invalidDraft(state, [
+        {
+          code: "share-limit",
+          path: "",
+          message: error.message,
+          fix: "Use a smaller portable spec.",
+        },
+      ]);
+    }
     return invalidDraft(state, [
       {
         code: "invalid-json",
@@ -206,7 +219,7 @@ export function stagePlaygroundDraft(state: PlaygroundState): PlaygroundState {
     committed: checked.spec,
     rendered: checked.spec,
     renderConfirmed: true,
-    historyHash: state.historyHash,
+    historyHash: null,
   };
   return stage(state, "apply", next, canonical);
 }
@@ -230,7 +243,7 @@ export function stagePlaygroundSeed(
         ? targetHash === undefined
           ? encodePlaygroundSeed(bounded)
           : targetHash
-        : state.historyHash,
+        : null,
   };
   return stage(state, origin, next);
 }

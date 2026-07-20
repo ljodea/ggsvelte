@@ -3,6 +3,7 @@ import { describe, expect, test } from "bun:test";
 import type { PortableSpec } from "@ggsvelte/spec";
 
 import {
+  assertPlaygroundDraftSize,
   decodePlaygroundHash,
   encodePlaygroundSeed,
   PLAYGROUND_MAX_DECODED_BYTES,
@@ -59,7 +60,18 @@ describe("playground fragment codec", () => {
     expectCode("#play=v1._w", "INVALID_UTF8");
   });
 
-  test("checks encoded and decoded limits before parsing", () => {
+  test("checks editor, encoded, and decoded limits before parsing", () => {
+    expect(() => {
+      assertPlaygroundDraftSize("x".repeat(PLAYGROUND_MAX_DECODED_BYTES + 1));
+    }).toThrow(
+      new PlaygroundCodecError(
+        "DECODED_TOO_LARGE",
+        `Playground JSON must be at most ${String(PLAYGROUND_MAX_DECODED_BYTES / 1024)} KiB.`,
+      ),
+    );
+    expect(() => {
+      assertPlaygroundDraftSize("🧭".repeat(PLAYGROUND_MAX_DECODED_BYTES / 2));
+    }).toThrow(PlaygroundCodecError);
     expectCode(`#play=v1.${"a".repeat(PLAYGROUND_MAX_ENCODED_LENGTH + 1)}`, "ENCODED_TOO_LARGE");
     const decodedLarge = seed({
       ...spec,
@@ -138,7 +150,7 @@ describe("playground fragment codec", () => {
     );
   });
 
-  test("rejects unsafe row and column field names", () => {
+  test("rejects unsafe row, column, and dataset names", () => {
     const unsafeRow: Record<string, string | number | boolean | null> = { value: 2 };
     Object.defineProperty(unsafeRow, "__proto__", { value: 1, enumerable: true });
     expectCode(rawHash(seed({ ...spec, data: { values: [unsafeRow] } })), "UNSAFE_FIELD");
@@ -148,6 +160,10 @@ describe("playground fragment codec", () => {
     };
     Object.defineProperty(unsafeColumns, "constructor", { value: [1], enumerable: true });
     expectCode(rawHash(seed({ ...spec, data: { columns: unsafeColumns } })), "UNSAFE_FIELD");
+
+    const datasets = Object.create(null) as Record<string, PortableSpec["data"]>;
+    datasets["__proto__"] = { values: [{ value: 2 }] };
+    expectCode(rawHash(seed({ ...spec, data: { name: "__proto__" }, datasets })), "UNSAFE_FIELD");
   });
 
   test("surfaces tier-2 PortableSpec diagnostics", () => {

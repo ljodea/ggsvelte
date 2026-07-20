@@ -121,13 +121,35 @@ function assertSafeField(field: string): void {
   }
 }
 
+function assertJsonByteLength(source: string, label: string): Uint8Array {
+  // ASCII is the cheapest possible UTF-8 representation, so this avoids an
+  // allocation for obviously oversized editor input before JSON.parse.
+  if (source.length > PLAYGROUND_MAX_DECODED_BYTES) {
+    fail(
+      "DECODED_TOO_LARGE",
+      `${label} must be at most ${String(PLAYGROUND_MAX_DECODED_BYTES / 1024)} KiB.`,
+    );
+  }
+  const bytes = new TextEncoder().encode(source);
+  if (bytes.byteLength > PLAYGROUND_MAX_DECODED_BYTES) {
+    fail(
+      "DECODED_TOO_LARGE",
+      `${label} must be at most ${String(PLAYGROUND_MAX_DECODED_BYTES / 1024)} KiB.`,
+    );
+  }
+  return bytes;
+}
+
 function inlineDataRecords(spec: Record<string, unknown>): Record<string, unknown>[] {
   const records: Record<string, unknown>[] = [];
   const data = spec["data"];
   if (isRecord(data)) records.push(data);
   const datasets = spec["datasets"];
   if (isRecord(datasets)) {
-    for (const value of Object.values(datasets)) if (isRecord(value)) records.push(value);
+    for (const [name, value] of Object.entries(datasets)) {
+      assertSafeField(name);
+      if (isRecord(value)) records.push(value);
+    }
   }
   return records;
 }
@@ -255,28 +277,33 @@ function base64UrlToBytes(payload: string): Uint8Array {
   return bytes;
 }
 
-export function validatePlaygroundSeed(seed: PlaygroundSeedV1): PlaygroundSeedV1 {
-  return assertSeed(seed);
+export function assertPlaygroundDraftSize(source: string): void {
+  assertJsonByteLength(source, "Playground JSON");
 }
 
-export function encodePlaygroundSeed(seed: PlaygroundSeedV1): string {
-  const sourceBytes = new TextEncoder().encode(JSON.stringify(seed));
-  if (sourceBytes.byteLength > PLAYGROUND_MAX_DECODED_BYTES) {
-    fail(
-      "DECODED_TOO_LARGE",
-      `Shared playground JSON must be at most ${String(PLAYGROUND_MAX_DECODED_BYTES / 1024)} KiB.`,
-    );
-  }
+export function validatePlaygroundSeed(seed: PlaygroundSeedV1): PlaygroundSeedV1 {
+  // Preserve the most actionable structural reason (rows, fields, unsafe
+  // names) before applying the whole-envelope share-size ceiling.
+  assertBoundedTree(seed);
+  assertInlineDataBounds(seed.spec);
+  assertJsonByteLength(JSON.stringify(seed), "Shared playground JSON");
   const bounded = assertSeed(seed);
-  const bytes = new TextEncoder().encode(JSON.stringify(bounded));
-  const payload = bytesToBase64Url(bytes);
+  const payload = bytesToBase64Url(
+    assertJsonByteLength(JSON.stringify(bounded), "Shared playground JSON"),
+  );
   if (payload.length > PLAYGROUND_MAX_ENCODED_LENGTH) {
     fail(
       "ENCODED_TOO_LARGE",
       `Shared playground payloads must be at most ${String(PLAYGROUND_MAX_ENCODED_LENGTH / 1024)} KiB.`,
     );
   }
-  return `${HASH_PREFIX}${PAYLOAD_PREFIX}${payload}`;
+  return bounded;
+}
+
+export function encodePlaygroundSeed(seed: PlaygroundSeedV1): string {
+  const bounded = validatePlaygroundSeed(seed);
+  const bytes = new TextEncoder().encode(JSON.stringify(bounded));
+  return `${HASH_PREFIX}${PAYLOAD_PREFIX}${bytesToBase64Url(bytes)}`;
 }
 
 export function decodePlaygroundHash(hash: string): DecodePlaygroundHashResult {

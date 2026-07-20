@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { pushState as pushSvelteKitState } from "$app/navigation";
   import { onMount, tick } from "svelte";
 
   import { copyText, MANUAL_LINK_COPY_STATUS } from "$lib/clipboard";
@@ -118,7 +119,11 @@
 
   function loadSample(id: string): boolean {
     if (id === "") return false;
-    if (!workbench.synchronized || workbench.candidate !== null) {
+    if (
+      !workbench.synchronized ||
+      workbench.candidate !== null ||
+      workbench.seed.source.kind === "custom"
+    ) {
       const discard = window.confirm(
         "Discard the current draft and load this sample? Copy it first if you need to keep it.",
       );
@@ -134,7 +139,17 @@
     // Keep the inert candidate mounted briefly so assistive-technology and
     // browser tests can observe the pending state before atomic promotion.
     window.setTimeout(() => {
-      workbench = promotePlaygroundCandidate(workbench, generation);
+      const current = workbench;
+      const origin = current.candidate?.origin;
+      const promoted = promotePlaygroundCandidate(current, generation);
+      if (promoted === current) return;
+      workbench = promoted;
+      if (origin === "apply" || origin === "source") {
+        if (window.location.hash.startsWith("#play="))
+          replaceLocationHash(null);
+        shareUrl = "";
+        shareStatus = "";
+      }
     }, 300);
   }
 
@@ -162,7 +177,7 @@
     const hash = encodePlaygroundSeed(workbench.seed);
     const url = new URL(window.location.href);
     url.hash = hash;
-    history.pushState({}, "", url);
+    pushSvelteKitState(url, {});
     workbench = setPlaygroundHistoryHash(workbench, hash);
     shareUrl = url.href;
     await tick();
@@ -209,6 +224,7 @@
     {#snippet preview()}
       <PlaygroundPreview
         rendered={workbench.rendered}
+        activeKey={workbench.candidate?.generation ?? 0}
         candidate={workbench.candidate}
         lastValid={workbench.lastValid}
         status={workbench.status}

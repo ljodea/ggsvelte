@@ -172,6 +172,10 @@ test("share owns only the fragment, preserves query state, and Back/Forward rest
   await expect(page).toHaveURL(/#play=v1\./u);
   await expect(page.locator(".active-chart .gg-title")).toHaveText("Shared edit");
   await expect(page.getByLabel("PortableSpec JSON")).toHaveValue(/Shared edit/u);
+
+  await applyTitle(page, "Unshared follow-up");
+  await expect(page).toHaveURL(/\/playground\?theme=dark$/u);
+  await expect(page.locator(".share-result")).toHaveCount(0);
 });
 
 test("render-failing initial and dirty history entries restore truthful URL and state", async ({
@@ -223,6 +227,12 @@ test("dirty sample changes require explicit discard", async ({ page }) => {
   await page.getByLabel("Start from a sample").selectOption("monthly-line");
   await expect(page.getByText("Rendered monthly-line.")).toBeVisible();
   await expect(page.locator(".active-chart .gg-title")).toHaveText("Monthly series");
+
+  await applyTitle(page, "Custom work to preserve");
+  page.once("dialog", (dialog) => dialog.dismiss());
+  await page.getByLabel("Start from a sample").selectOption("starter-scatter");
+  await expect(page.locator(".active-chart .gg-title")).toHaveText("Custom work to preserve");
+  await expect(page.getByLabel("PortableSpec JSON")).toHaveValue(/Custom work to preserve/u);
 });
 
 test("denied clipboard selects the share URL with truthful fallback text", async ({ page }) => {

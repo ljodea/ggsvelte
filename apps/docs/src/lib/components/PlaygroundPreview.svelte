@@ -10,6 +10,7 @@
 
   const {
     rendered,
+    activeKey,
     candidate,
     lastValid,
     status,
@@ -19,6 +20,7 @@
     onActiveFailed,
   }: {
     rendered: PortableSpec;
+    activeKey: number;
     candidate: PlaygroundCandidate | null;
     lastValid: boolean;
     status: string;
@@ -64,15 +66,17 @@
 
 <div class="chart-stack" aria-busy={candidate !== null}>
   <div class="active-chart">
-    <svelte:boundary onerror={(error) => onActiveFailed(diagnostic(error))}>
-      <GGPlot spec={rendered} width="container" onrender={onActiveRendered} />
-      {#snippet failed()}
-        <div class="render-error" role="status">
-          The last valid chart could not be painted. Reset the source to
-          recover.
-        </div>
-      {/snippet}
-    </svelte:boundary>
+    {#key activeKey}
+      <svelte:boundary onerror={(error) => onActiveFailed(diagnostic(error))}>
+        <GGPlot spec={rendered} width="container" onrender={onActiveRendered} />
+        {#snippet failed()}
+          <div class="render-error" role="status">
+            The last valid chart could not be painted. Reset the source to
+            recover.
+          </div>
+        {/snippet}
+      </svelte:boundary>
+    {/key}
   </div>
 
   {#if candidate !== null}

@@ -2,7 +2,10 @@ import { describe, expect, test } from "bun:test";
 
 import type { PortableSpec } from "@ggsvelte/spec";
 
-import type { PlaygroundSeedV1 } from "../apps/docs/src/lib/playground-codec";
+import {
+  PLAYGROUND_MAX_DECODED_BYTES,
+  type PlaygroundSeedV1,
+} from "../apps/docs/src/lib/playground-codec";
 import {
   createPlaygroundState,
   editPlaygroundDraft,
@@ -58,6 +61,26 @@ describe("playground state", () => {
     expect(invalid.lastValid).toBe(true);
     expect(invalid.diagnostics[0]?.code).toBe("empty-layers");
     expect(invalid.canCopyOrShare).toBe(false);
+  });
+
+  test("rejects oversized source before parsing and bounds valid-but-unshareable specs", () => {
+    const oversizedSource = "{".repeat(PLAYGROUND_MAX_DECODED_BYTES + 1);
+    const sourceRejected = stagePlaygroundDraft(
+      editPlaygroundDraft(createPlaygroundState(sampleSeed), oversizedSource),
+    );
+    expect(sourceRejected.diagnostics[0]?.code).toBe("share-limit");
+    expect(sourceRejected.diagnostics[0]?.message).toContain("12 KiB");
+
+    const manyLayers = Array.from({ length: 130 }, () => baseSpec.layers[0]!);
+    const oversizedSpec = JSON.stringify({ ...baseSpec, layers: manyLayers });
+    expect(new TextEncoder().encode(oversizedSpec).byteLength).toBeGreaterThan(
+      PLAYGROUND_MAX_DECODED_BYTES,
+    );
+    const specRejected = stagePlaygroundDraft(
+      editPlaygroundDraft(createPlaygroundState(sampleSeed), oversizedSpec),
+    );
+    expect(specRejected.diagnostics[0]?.code).toBe("share-limit");
+    expect(specRejected.candidate).toBeNull();
   });
 
   test("canonicalizes, stages, and promotes only a matching render generation", () => {
