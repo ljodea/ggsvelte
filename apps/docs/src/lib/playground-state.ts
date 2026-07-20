@@ -288,11 +288,8 @@ function snapshotOf(state: PlaygroundSnapshot): PlaygroundSnapshot {
   };
 }
 
-function changedSnapshot(current: PlaygroundSnapshot, next: PlaygroundSnapshot): boolean {
-  return (
-    JSON.stringify(current.seed) !== JSON.stringify(next.seed) ||
-    JSON.stringify(current.sourceBaseline) !== JSON.stringify(next.sourceBaseline)
-  );
+function changedRenderedChart(current: PlaygroundSnapshot, next: PlaygroundSnapshot): boolean {
+  return JSON.stringify(current.rendered) !== JSON.stringify(next.rendered);
 }
 
 export function promotePlaygroundCandidate(
@@ -308,7 +305,7 @@ export function promotePlaygroundCandidate(
     candidate.origin === "popstate" ||
     candidate.origin === "reset"
       ? []
-      : state.renderConfirmed && changedSnapshot(state, next)
+      : state.renderConfirmed && changedRenderedChart(state, next)
         ? [...state.undoSnapshots, snapshotOf(state)].slice(-PLAYGROUND_MAX_UNDO_SNAPSHOTS)
         : state.undoSnapshots);
   return finalize({

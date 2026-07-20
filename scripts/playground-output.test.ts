@@ -42,7 +42,7 @@ describe("playground outputs", () => {
       code: JSON.stringify(current, null, 2),
     });
     expect(rebuildPlaygroundSpecWithBuilder(current)).toEqual(current);
-    expect(outputs[1]?.code).toContain('import { gg, type PortableSpec } from "@ggsvelte/spec";');
+    expect(outputs[1]?.code).toContain('import { gg, type PortableSpec } from "@ggsvelte/svelte";');
     expect(outputs[1]?.code).toContain(".layer(");
     expect(playgroundOutputs(current)).toBe(outputs);
   });
@@ -107,8 +107,8 @@ describe("playground outputs", () => {
 
   test("is one complete component containing the exact committed PortableSpec", () => {
     const output = playgroundSvelteOutput(spec);
-    expect(output).toContain('import { GGPlot } from "@ggsvelte/svelte";');
-    expect(output).toContain('import type { PortableSpec } from "@ggsvelte/spec";');
+    expect(output).toContain('import { GGPlot, type PortableSpec } from "@ggsvelte/svelte";');
+    expect(output).not.toContain('from "@ggsvelte/spec";');
     expect(output).toContain("const spec: PortableSpec =");
     expect(output).toContain("<GGPlot {spec} />");
     expect(parseSpecFromSvelteOutput(output)).toEqual(spec);

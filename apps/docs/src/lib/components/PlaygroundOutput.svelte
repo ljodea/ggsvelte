@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { tick } from "svelte";
+  import { tick, untrack } from "svelte";
 
   import { copyText, MANUAL_COPY_STATUS } from "$lib/clipboard";
   import { playgroundSVGExport } from "$lib/playground-export";
@@ -24,9 +24,25 @@
   let copying = $state(false);
   let copyStatus = $state("");
   let exportStatus = $state("");
+  let outputRevision = 0;
   const tabsetId = $props.id();
   const panelId = `${tabsetId}-panel`;
   const activeOutput = $derived(outputs[active] ?? outputs[0]!);
+
+  $effect(() => {
+    const nextOutputs = outputs;
+    untrack(() => {
+      outputRevision += 1;
+      if (active >= nextOutputs.length) active = 0;
+      const hadFallback = fallbackCode !== "";
+      fallbackCode = "";
+      fallbackLabel = "output";
+      manualFallback = false;
+      copyStatus = "";
+      copying = false;
+      if (hadFallback) getSelection()?.removeAllRanges();
+    });
+  });
 
   function select(index: number): void {
     if (copying) return;
@@ -59,6 +75,7 @@
   async function copy(): Promise<void> {
     if (!enabled || !activeOutput.supported || copying) return;
     const selected = activeOutput;
+    const revision = outputRevision;
     fallbackCode = selected.code;
     fallbackLabel = selected.label;
     manualFallback = false;
@@ -69,6 +86,7 @@
       return;
     }
     const result = await copyText(selected.code, fallbackSource);
+    if (revision !== outputRevision) return;
     copying = false;
     manualFallback = result !== "copied";
     copyStatus =
@@ -177,10 +195,16 @@
 </div>
 <p class="action-status" role="status" aria-live="polite">{copyStatus}</p>
 <p class="action-status" role="status" aria-live="polite">{exportStatus}</p>
-<div class:visible={manualFallback} class="manual-copy-source">
+<div
+  class:visible={manualFallback}
+  class="manual-copy-source"
+  aria-hidden={!manualFallback}
+>
   <p>Copy the selected {fallbackLabel} output manually:</p>
-  <!-- svelte-ignore a11y_no_noninteractive_tabindex (manual-copy source is scrollable) -->
-  <pre tabindex="0"><code bind:this={fallbackSource}>{fallbackCode}</code></pre>
+  <!-- svelte-ignore a11y_no_noninteractive_tabindex (visible manual-copy source is scrollable) -->
+  <pre tabindex={manualFallback ? 0 : -1}><code bind:this={fallbackSource}
+      >{fallbackCode}</code
+    ></pre>
 </div>
 
 <style>

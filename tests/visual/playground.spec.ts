@@ -171,7 +171,7 @@ test("advanced outputs stay ordered and undo restores one render-confirmed snaps
   await expect(page.getByRole("tab")).toHaveText(["Svelte", "Builder", "PortableSpec"]);
   await page.getByRole("tab", { name: "Builder" }).click();
   await expect(page.getByLabel("Generated Builder output")).toContainText(
-    'import { gg, type PortableSpec } from "@ggsvelte/spec";',
+    'import { gg, type PortableSpec } from "@ggsvelte/svelte";',
   );
   await page.getByRole("button", { name: "Copy Builder" }).click();
   expect(await page.evaluate(() => navigator.clipboard.readText())).toContain("const built = gg(");
@@ -215,6 +215,9 @@ test("output copy fallback stays bound to the selected representation", async ({
   });
   await page.goto("/playground");
   await settleVisualState(page);
+  const manualCopySource = page.locator(".manual-copy-source");
+  await expect(manualCopySource).toHaveAttribute("aria-hidden", "true");
+  await expect(manualCopySource.locator("pre")).toHaveAttribute("tabindex", "-1");
   const builderTab = page.getByRole("tab", { name: "Builder" });
   const portableTab = page.getByRole("tab", { name: "PortableSpec" });
   await builderTab.click();
@@ -227,7 +230,7 @@ test("output copy fallback stays bound to the selected representation", async ({
   await expect(builderTab).toHaveAttribute("aria-selected", "true");
 
   await expect(page.locator(".manual-copy-source.visible")).toContainText(
-    'import { gg, type PortableSpec } from "@ggsvelte/spec";',
+    'import { gg, type PortableSpec } from "@ggsvelte/svelte";',
   );
   await expect(page.locator(".manual-copy-source.visible")).toContainText(
     "Copy the selected Builder output manually",
@@ -235,6 +238,12 @@ test("output copy fallback stays bound to the selected representation", async ({
   expect(await page.evaluate(() => getSelection()?.toString())).toContain("const built = gg(");
   await portableTab.click();
   await expect(portableTab).toHaveAttribute("aria-selected", "true");
+
+  await applyTitle(page, "Fallback invalidated by promotion");
+  await expect(manualCopySource).toHaveAttribute("aria-hidden", "true");
+  await expect(manualCopySource).not.toHaveClass(/visible/u);
+  await expect(manualCopySource.locator("code")).toBeEmpty();
+  expect(await page.evaluate(() => getSelection()?.toString() ?? "")).toBe("");
 });
 
 test("Builder output explains rather than lowers unsupported named datasets", async ({ page }) => {

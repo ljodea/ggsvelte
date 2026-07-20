@@ -156,6 +156,16 @@ describe("playground state", () => {
     expect(promoted.undoSnapshots).toEqual([]);
   });
 
+  test("does not record metadata-only promotion as a chart undo snapshot", () => {
+    const initial = confirmPlaygroundRendered(createPlaygroundState(sampleSeed));
+    const staged = stagePlaygroundDraft(initial);
+    expect(staged.candidate?.next.seed.source).toEqual({ kind: "custom" });
+
+    const promoted = promotePlaygroundCandidate(staged, staged.candidate!.generation);
+    expect(promoted.rendered).toEqual(initial.rendered);
+    expect(promoted.undoSnapshots).toEqual([]);
+  });
+
   test("undo records only render-confirmed chart changes and promotes atomically", () => {
     const first = promotePlaygroundCandidate(
       stagePlaygroundDraft(

@@ -19,8 +19,7 @@ function scriptSafeJSON(spec: PortableSpec): string {
 
 export function playgroundSvelteOutput(spec: PortableSpec): string {
   return `<script lang="ts">
-  import type { PortableSpec } from "@ggsvelte/spec";
-  import { GGPlot } from "@ggsvelte/svelte";
+  import { GGPlot, type PortableSpec } from "@ggsvelte/svelte";
 
   const spec: PortableSpec = ${scriptSafeJSON(spec)};
 </script>
@@ -137,7 +136,7 @@ export function playgroundBuilderOutput(spec: PortableSpec): PlaygroundOutput {
     kind: "builder",
     label: "Builder",
     supported: true,
-    code: `import { gg, type PortableSpec } from "@ggsvelte/spec";\n\nconst built = gg(${startArguments})\n${calls.join("\n")}\n  .spec();\n\nconst spec: PortableSpec = {\n  ...built,\n${metadataLines}\n};\n\nexport { spec };\n`,
+    code: `import { gg, type PortableSpec } from "@ggsvelte/svelte";\n\nconst built = gg(${startArguments})\n${calls.join("\n")}\n  .spec();\n\nconst spec: PortableSpec = {\n  ...built,\n${metadataLines}\n};\n\nexport { spec };\n`,
   };
 }
 
