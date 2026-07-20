@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784578782556,
+  "lastUpdate": 1784588929077,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -35377,6 +35377,150 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 145.8878,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "78c194230616e24b79b9e1c0322168ee36509e48",
+          "message": "feat(scales): plan semantic temporal guides (#348)\n\n* feat(scales): plan semantic temporal guides\n\n* docs: normalize temporal guide decision formatting\n\n* fix(scales): harden temporal guide planning\n\n* fix(scales): resolve temporal guide review findings\n\n* test(scales): close temporal guide review gaps\n\n* docs: refresh temporal diagnostic indexes\n\n* fix(docs): keep temporal reports tied to active chart\n\n* fix(scales): address temporal guide review findings\n\n* fix(scales): close final temporal guide review gaps\n\n* fix(scales): close temporal guide review findings",
+          "timestamp": "2026-07-20T18:08:01-05:00",
+          "tree_id": "e437495e3c7bce36f6e6981e78462075070396b4",
+          "url": "https://github.com/ljodea/ggsvelte/commit/78c194230616e24b79b9e1c0322168ee36509e48"
+        },
+        "date": 1784588928205,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.1026,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.7343,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 6.9358,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 9.565,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 48.6926,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 83.9131,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal-line 100k",
+            "value": 71.475,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide candidate-selection 300y",
+            "value": 0.0705,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide resize-churn 191y",
+            "value": 0.3651,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide DST-heavy 3y",
+            "value": 3.6351,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal free-facets 100",
+            "value": 26.8605,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.2294,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.3693,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 52.5845,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 71.962,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.4976,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.1082,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 958.475,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.6668,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 249.9304,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 9.437,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 19.9658,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 609.9058,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 156.4625,
             "unit": "ms"
           }
         ]
