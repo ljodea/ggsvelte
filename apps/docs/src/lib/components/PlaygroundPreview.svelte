@@ -2,6 +2,7 @@
   import { PipelineError } from "@ggsvelte/core";
   import { GGPlot } from "@ggsvelte/svelte";
 
+  import type { PlaygroundInteractionEvent } from "$lib/playground-events";
   import type {
     PlaygroundCandidate,
     PlaygroundDiagnostic,
@@ -17,6 +18,7 @@
     onCandidateFailed,
     onActiveRendered,
     onActiveFailed,
+    onInteraction,
   }: {
     rendered: PortableSpec;
     candidate: PlaygroundCandidate | null;
@@ -29,11 +31,13 @@
     ) => void;
     onActiveRendered: () => void;
     onActiveFailed: (diagnostic: PlaygroundDiagnostic) => void;
+    onInteraction: (event: PlaygroundInteractionEvent) => void;
   } = $props();
 
   function diagnostic(error: unknown): PlaygroundDiagnostic {
     if (error instanceof PipelineError) {
       return {
+        source: "pipeline",
         code: error.code,
         path: error.path,
         message: error.message,
@@ -43,6 +47,7 @@
       };
     }
     return {
+      source: "pipeline",
       code: "render-failed",
       path: "",
       message:
@@ -66,7 +71,13 @@
   <div class="active-chart">
     {#key rendered}
       <svelte:boundary onerror={(error) => onActiveFailed(diagnostic(error))}>
-        <GGPlot spec={rendered} width="container" onrender={onActiveRendered} />
+        <GGPlot
+          spec={rendered}
+          width="container"
+          inspect={true}
+          oninteraction={onInteraction}
+          onrender={onActiveRendered}
+        />
         {#snippet failed()}
           <div class="render-error" role="status">
             The last valid chart could not be painted. Reset the source to

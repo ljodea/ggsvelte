@@ -9,8 +9,10 @@
     selectedSample,
     diagnostics,
     pending,
+    canUndo,
     onEdit,
     onApply,
+    onUndo,
     onReset,
     onLoadSample,
   }: {
@@ -19,8 +21,10 @@
     selectedSample: string;
     diagnostics: readonly PlaygroundDiagnostic[];
     pending: boolean;
+    canUndo: boolean;
     onEdit: (draft: string) => void;
     onApply: () => void;
+    onUndo: () => void;
     onReset: () => void;
     onLoadSample: (id: string) => boolean;
   } = $props();
@@ -30,7 +34,7 @@
 
   $effect(() => {
     const signature = diagnostics
-      .map((item) => `${item.code}:${item.path}`)
+      .map((item) => `${item.source}:${item.code}:${item.path}`)
       .join("|");
     if (signature === "") {
       focusedSignature = "";
@@ -98,9 +102,12 @@
     >
       <strong>Draft not applied</strong>
       <ol>
-        {#each diagnostics as diagnostic (`${diagnostic.code}:${diagnostic.path}`)}
+        {#each diagnostics as diagnostic (`${diagnostic.source}:${diagnostic.code}:${diagnostic.path}`)}
           <li>
-            <code>{diagnostic.code}</code>
+            <p class="diagnostic-identity">
+              <span>{diagnostic.source}</span>
+              <code>{diagnostic.code}</code>
+            </p>
             {#if diagnostic.path !== ""}<span>{diagnostic.path}</span>{/if}
             <p>{diagnostic.message}</p>
             {#if diagnostic.fix !== undefined}<p class="fix">
@@ -115,6 +122,9 @@
   <div class="editor-actions">
     <button class="primary" type="submit" disabled={pending}
       >{pending ? "Checking…" : "Apply draft"}</button
+    >
+    <button type="button" onclick={onUndo} disabled={pending || !canUndo}
+      >Undo chart</button
     >
     <button type="button" onclick={onReset} disabled={pending}
       >Reset source</button
@@ -214,14 +224,28 @@
     padding-left: 1.2rem;
   }
 
+  .diagnostic-identity {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: baseline;
+  }
+
+  .diagnostic-identity span {
+    color: var(--accent);
+    font: 700 0.68rem/1 var(--body-font);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
   .diagnostics li p,
-  .diagnostics li span {
+  .diagnostics li > span {
     margin: 0.2rem 0 0;
     overflow-wrap: anywhere;
     font-size: 0.82rem;
   }
 
-  .diagnostics li span {
+  .diagnostics li > span {
     display: block;
     color: var(--muted);
     font-family: var(--mono-font);
