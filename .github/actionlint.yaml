@@ -5,3 +5,4 @@
 self-hosted-runner:
   labels:
     - ggsvelte
+    - ggsvelte-heavy
