@@ -40,11 +40,13 @@
   let shareUrl = $state("");
   let shareStatus = $state("");
   let shareSource = $state<HTMLElement>();
+  let reportSource = $state<HTMLElement>();
   let reportStatus = $state("");
   let scaleDecisions = $state<RenderModel["scaleDecisions"]>([]);
   let guidePlans = $state<RenderModel["guidePlans"]>([]);
 
   const svelteOutput = $derived(playgroundSvelteOutput(workbench.committed));
+  const scaleReport = $derived(privacySafeScaleReport());
   const selectedSample = $derived(
     workbench.seed.source.kind === "sample" ? workbench.seed.source.id : "",
   );
@@ -156,6 +158,9 @@
       const promoted = promotePlaygroundCandidate(current, generation);
       if (promoted === current) return;
       workbench = promoted;
+      scaleDecisions = [];
+      guidePlans = [];
+      reportStatus = "";
       if (
         (origin === "apply" || origin === "source") &&
         window.location.hash.startsWith("#play=")
@@ -185,6 +190,9 @@
   }
 
   function activeFailed(diagnostic: PlaygroundDiagnostic): void {
+    scaleDecisions = [];
+    guidePlans = [];
+    reportStatus = "";
     workbench = reportPlaygroundDiagnostic(
       workbench,
       diagnostic,
@@ -204,6 +212,7 @@
           precision: decision.precision,
           validatedCount: decision.validatedCount,
           ambiguityCount: decision.ambiguity.length,
+          portableOverride: decision.portableOverride,
           guidePlanIds: decision.guidePlanIds ?? [],
         })),
         guides: guidePlans.map((guide) => ({
@@ -231,14 +240,12 @@
   }
 
   async function copyScaleReport(): Promise<void> {
-    try {
-      await navigator.clipboard.writeText(privacySafeScaleReport());
-      reportStatus =
-        "Copied a privacy-safe scale report without rows, field names, domains, or labels.";
-    } catch {
-      reportStatus =
-        "The browser could not copy the report. Clipboard permission may be blocked.";
-    }
+    if (reportSource === undefined) return;
+    const result = await copyText(scaleReport, reportSource);
+    reportStatus =
+      result === "copied"
+        ? "Copied a privacy-safe scale report without rows, field names, domains, or labels."
+        : "Clipboard unavailable. The privacy-safe scale report is selected for manual copy.";
   }
 
   async function share(): Promise<void> {
@@ -337,7 +344,7 @@
       {#if scaleDecisions.length === 0}
         <p>No temporal scale decision is active for this chart.</p>
       {:else}
-        {#each scaleDecisions as decision (`${decision.aesthetic}-${decision.status}-${decision.parser}`)}
+        {#each scaleDecisions as decision (decision.aesthetic)}
           <dl>
             <div>
               <dt>Axis</dt>
@@ -398,6 +405,10 @@
         target="_blank"
         rel="noreferrer">Report a scale issue</a
       >
+      <pre
+        class="report-source"
+        aria-hidden="true"
+        bind:this={reportSource}>{scaleReport}</pre>
       <p role="status" aria-live="polite">{reportStatus}</p>
     </div>
   </section>
@@ -565,6 +576,16 @@
 
   .report-actions p {
     flex-basis: 100%;
+  }
+
+  .report-source {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: pre;
   }
 
   @media (max-width: 47.99rem) {

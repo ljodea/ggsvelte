@@ -175,6 +175,10 @@ test("temporal samples expose privacy-safe guide plans and keep ambiguous dates 
   expect(serialized).not.toContain('"label"');
   expect(serialized).not.toContain("1835");
 
+  await page.getByLabel("Start from a sample").selectOption("iso-dates");
+  await expect(page.getByText("Rendered iso-dates.")).toBeVisible();
+  await expect(page.getByText(/temporal · iso/u)).toBeVisible();
+
   await page.getByLabel("Start from a sample").selectOption("ambiguous-dates");
   await expect(page.getByText("Rendered ambiguous-dates.")).toBeVisible();
   await expect(page.getByText(/nominal · none/u)).toBeVisible();
@@ -359,6 +363,12 @@ test("denied clipboard selects the share URL with truthful fallback text", async
     "Clipboard unavailable. Share link selected for manual copy.",
   );
   expect(await page.evaluate(() => getSelection()?.toString())).toContain("#play=v1.");
+
+  await page.getByRole("button", { name: "Copy privacy-safe scale report" }).click();
+  await expect(
+    page.getByRole("status").filter({ hasText: "scale report is selected" }),
+  ).toBeVisible();
+  expect(await page.evaluate(() => getSelection()?.toString())).toContain('"guides"');
 });
 
 test("playground is preview-first, operable, and axe-clean at a touch-size viewport", async ({
