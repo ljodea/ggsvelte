@@ -127,6 +127,13 @@
       </dd>
     </div>
     <div>
+      <dt>Can I control the chart’s visual system?</dt>
+      <dd>
+        <a href={`${base}/themes`}>Compare chart themes</a>, palettes, and
+        interaction roles.
+      </dd>
+    </div>
+    <div>
       <dt>What happens when a spec is wrong?</dt>
       <dd>
         <a href={`${base}/guide/errors`}
