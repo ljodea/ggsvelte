@@ -403,3 +403,45 @@ describe("llms surfaces", () => {
     }
   });
 });
+
+describe("public export surface (split-safe)", () => {
+  it("exposes exactly the documented runtime export set from gen-llms", async () => {
+    const mod = await import("./gen-llms.ts");
+    const expected = [
+      "ACCESSIBILITY_MD",
+      "COMPATIBILITY_MD",
+      "DATA_MAPPINGS_MD",
+      "FACETS_COORDINATES_MD",
+      "GETTING_STARTED_MD",
+      "INSPECT_PIN_MD",
+      "INTERACTIONS_MD",
+      "INTERACTION_REFERENCE_INDEX",
+      "INTERACTION_REFERENCE_MD",
+      "LAYERS_MARKS_MD",
+      "LINKED_VIEWS_MD",
+      "MIGRATING_PRE_0_1_MD",
+      "RENDERING_PERFORMANCE_MD",
+      "RESPONSIVE_CHARTS_MD",
+      "SCALES_GUIDES_MD",
+      "SELECTION_ZOOM_MD",
+      "SERVER_RENDERING_EXPORT_MD",
+      "STATISTICS_POSITIONS_MD",
+      "TEMPORAL_SCALES_MD",
+      "THEMES_COLOR_MD",
+      "UPGRADING_MD",
+      "buildAdvisoriesMd",
+      "buildDiagnosticDocs",
+      "buildErrorsMd",
+      "buildLifecycleMd",
+      "buildLlmsFull",
+      "buildLlmsIndex",
+      "docsDiscoveryFacts",
+      "extractMarkdownHeadings",
+      "guidePages",
+      "markdownOutsideFences",
+      "pruneSpecData",
+      "renderMarkdown",
+    ].toSorted();
+    expect(Object.keys(mod).toSorted()).toEqual(expected);
+  });
+});

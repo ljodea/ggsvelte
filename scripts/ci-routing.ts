@@ -81,6 +81,8 @@ export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
     // Docs app imports `$scripts/gen-llms` and ships lifecycle-driven guide content.
     "scripts/gen-llms.ts",
     "scripts/gen-llms.test.ts",
+    "scripts/llms-markdown.ts",
+    "scripts/llms-guide-content.ts",
     "scripts/docs-seo.ts",
     "scripts/diagnostic-docs.ts",
     "scripts/quickstart.ts",
@@ -560,6 +562,8 @@ export const JOB_CONTENT_INPUTS: Record<CacheableExecution, readonly string[]> =
     "skills/ggsvelte/**",
     "lifecycle.json",
     "scripts/gen-llms.ts",
+    "scripts/llms-markdown.ts",
+    "scripts/llms-guide-content.ts",
     "scripts/diagnostic-docs.ts",
     "scripts/quickstart.ts",
     "scripts/gen-manifest.ts",
