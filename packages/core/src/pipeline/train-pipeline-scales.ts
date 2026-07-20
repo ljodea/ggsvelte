@@ -20,12 +20,38 @@ export function trainPipelineScales(input: TrainPipelineScalesInput): TrainedPip
     panelFrames,
     freeX,
     freeY,
+    xConversion,
+    yConversion,
     editionDefaults,
     warnings,
     advisories,
   } = input;
 
-  const scalesConfig = normalized.scales ?? {};
+  const sourceScalesConfig = normalized.scales ?? {};
+  const withResolvedParser = (
+    axis: "x" | "y",
+    conversion: typeof xConversion,
+  ): (typeof sourceScalesConfig)["x"] => {
+    const config = sourceScalesConfig[axis];
+    if (
+      config === undefined ||
+      config.parse !== undefined ||
+      conversion.parser === "auto" ||
+      config.type === "band" ||
+      config.type === "linear" ||
+      config.type === "log"
+    ) {
+      return config;
+    }
+    // This is an internal effective config only: the canonical PortableSpec
+    // remains untouched while domains/breaks reuse the source-column decision.
+    return { ...config, parse: conversion.parser };
+  };
+  const scalesConfig: NonNullable<typeof normalized.scales> = { ...sourceScalesConfig };
+  const resolvedX = withResolvedParser("x", xConversion);
+  const resolvedY = withResolvedParser("y", yConversion);
+  if (resolvedX !== undefined) scalesConfig.x = resolvedX;
+  if (resolvedY !== undefined) scalesConfig.y = resolvedY;
   const position = trainPipelinePositionScales({
     scalesConfig,
     facetPanels,

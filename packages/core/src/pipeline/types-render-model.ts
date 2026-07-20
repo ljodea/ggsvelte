@@ -7,6 +7,7 @@ import type { CandidateStore } from "../candidate-store.js";
 import type { LineageStore } from "../identity.js";
 
 import type { Advisory, PipelineWarning } from "./types-advisory.js";
+import type { ScaleDecision, ScaleDiagnostic } from "./types-scale-diagnostics.js";
 import type {
   AxisValueFormatter,
   LayerBackend,
@@ -20,6 +21,10 @@ export interface RenderModel {
   scales: TrainedScales;
   warnings: PipelineWarning[];
   advisories: Advisory[];
+  /** Structured scale inference/parser diagnostics for tools and hosts. */
+  scaleDiagnostics: ScaleDiagnostic[];
+  /** Inspectable position-scale semantic decisions. */
+  scaleDecisions: ScaleDecision[];
   /** Monotonic run identity (module-global, increases every runPipeline call). */
   runId: number;
   /**

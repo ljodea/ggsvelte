@@ -11,25 +11,60 @@ import { buildFrame, remapSourceRows } from "./frame.js";
 import { applyPosition } from "./position.js";
 import { computePanelBinRanges } from "./prepare-panels-bin-ranges.js";
 import { warnEmptyLayers } from "./prepare-panels-empty-layers.js";
-import type { Advisory, LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
+import type { PositionConversionContext } from "./temporal-position.js";
+import { preflightTemporalBindings } from "./temporal-preflight.js";
+import type {
+  Advisory,
+  LayerBinding,
+  LayerFrame,
+  PipelineWarning,
+  ScaleDecision,
+  ScaleDiagnostic,
+} from "./types.js";
 
 export function buildPanelFrames(input: {
   normalized: PortableSpec;
   table: ColumnTable;
+  sourceTable: ColumnTable;
   facetPanels: readonly FacetPanelDef[];
   faceted: boolean;
   freeX: boolean;
   warnings: PipelineWarning[];
   advisories: Advisory[];
-}): { bindings: LayerBinding[]; panelFrames: LayerFrame[][] } {
-  const { normalized, table, facetPanels, faceted, freeX, warnings, advisories } = input;
+  conversions: Readonly<{ x: PositionConversionContext; y: PositionConversionContext }>;
+}): {
+  bindings: LayerBinding[];
+  panelFrames: LayerFrame[][];
+  scaleDecisions: ScaleDecision[];
+  scaleDiagnostics: ScaleDiagnostic[];
+  xConversion: PositionConversionContext;
+  yConversion: PositionConversionContext;
+} {
+  const {
+    normalized,
+    table,
+    sourceTable,
+    facetPanels,
+    faceted,
+    freeX,
+    warnings,
+    advisories,
+    conversions,
+  } = input;
 
   const bindings: LayerBinding[] = [];
   const panelFrames: LayerFrame[][] = facetPanels.map(() => []);
 
   for (let index = 0; index < normalized.layers.length; index++) {
-    bindings.push(bindLayer(normalized.layers[index]!, index, table, warnings));
+    bindings.push(bindLayer(normalized.layers[index]!, index, table, warnings, conversions));
   }
+  const temporal = preflightTemporalBindings({
+    table: sourceTable,
+    bindings,
+    warnings,
+    advisories,
+    conversions,
+  });
   const binRanges = computePanelBinRanges(bindings, table, faceted, freeX);
   for (let p = 0; p < facetPanels.length; p++) {
     const panelTable = facetPanels[p]!.table;
@@ -48,5 +83,12 @@ export function buildPanelFrames(input: {
   }
   warnEmptyLayers(bindings, panelFrames, warnings);
 
-  return { bindings, panelFrames };
+  return {
+    bindings,
+    panelFrames,
+    scaleDecisions: temporal.decisions,
+    scaleDiagnostics: temporal.diagnostics,
+    xConversion: temporal.xConversion,
+    yConversion: temporal.yConversion,
+  };
 }

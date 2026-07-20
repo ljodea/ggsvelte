@@ -2,9 +2,10 @@
  * Count stat → LayerFrame.
  */
 import { statCount } from "../stats/count.js";
-import { cellsToNumeric, ColumnTable } from "../table.js";
+import { ColumnTable } from "../table.js";
 
 import { carriedColumns, emptyFrameExtras, removedStatWarning } from "./frame-helpers.js";
+import { positionValuesToNumeric } from "./temporal-position.js";
 import { makeColumnOf } from "./frame-stats-shared.js";
 import type { LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
 import { NO_ROW } from "./types.js";
@@ -37,7 +38,7 @@ export function buildCountFrame(
     table,
     n: result.x.length,
     xValues: result.x,
-    xNumeric: cellsToNumeric(result.x),
+    xNumeric: positionValuesToNumeric(result.x, binding.xConversion).values,
     yNumeric: binding.yStatColumn === "count" ? result.count : null,
     groups: result.groups,
     inputGroups: groups,

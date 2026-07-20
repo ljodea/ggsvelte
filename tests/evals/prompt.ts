@@ -41,7 +41,8 @@ GRAMMAR CHEAT-SHEET
 - rule annotation form: params.xintercept / params.yintercept (numbers or ISO dates), NO aes.x/aes.y on that layer. text needs aes x, y, label.
 - Facet: {"wrap": {"field": f}, "ncol"?, "scales"?: "fixed"|"free"|"free_x"|"free_y"} OR grid {"rows": {"field": f}, "cols": {"field": g}} — never both forms.
 - Coord: {"type": "flip"} makes horizontal charts (still map x=category, y=value).
-- Scales: {"x"|"y": {"type": "linear"|"log"|"time"|"band", "domain"?, "nice"?, "zero"?}, "color"|"fill": {"type": "ordinal"|"sequential", "range"?}}. Use "time" for temporal fields, "log" only for positive quantitative fields, "sequential" only for quantitative color/fill.
+- Position scales: {"x"|"y": {"type": "linear"|"log"|"time"|"band", "parse"?, "temporalKind"?: "date"|"datetime", "timezone"?, "domain"?, "nice"?, "zero"?}}. Ordinary ISO dates, four-digit year strings, year-months, and year-quarters infer time without an explicit scale. Ambiguous ordered dates require a closed parse name such as "dmy" or "mdy". Use "band" when year-like strings are identifiers. Never preprocess dates into indexes.
+- Color/fill scales: {"color"|"fill": {"type": "ordinal"|"sequential", "range"?}}. Use "log" only for positive quantitative fields and "sequential" only for quantitative color/fill.
 - Labs: {"title", "subtitle", "caption", "x", "y", "color", "fill"} — plain strings.
 - Only map fields that exist in the DataProfile, with their exact names.
 

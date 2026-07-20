@@ -1,6 +1,7 @@
 /**
  * Pipeline diagnostics: advisories, warnings, structured errors, and canvas threshold.
  */
+import type { ScaleDiagnostic } from "./types-scale-diagnostics.js";
 
 export interface Advisory {
   code: string;
@@ -22,12 +23,14 @@ export interface PipelineWarning {
 export class PipelineError extends Error {
   readonly code: string;
   readonly path: string;
+  readonly diagnostic: ScaleDiagnostic | undefined;
 
-  constructor(code: string, path: string, message: string) {
+  constructor(code: string, path: string, message: string, diagnostic?: ScaleDiagnostic) {
     super(message);
     this.name = "PipelineError";
     this.code = code;
     this.path = path;
+    this.diagnostic = diagnostic;
   }
 }
 

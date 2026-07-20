@@ -8,6 +8,7 @@ import { didYouMean } from "./errors.js";
 import type { Aes, ChannelName, ColorScaleSpec, PositionScaleSpec } from "./schema.js";
 import { CHANNELS, GEOM_DEFAULTS, SEQUENTIAL_SCHEME_NAMES } from "./schema.js";
 import type { ProfileFieldType, ValidateLimits, ValidateOptions } from "./validate-data.js";
+import { parseTemporal } from "./temporal.js";
 import {
   effectiveChannel,
   resolveFieldEvidence,
@@ -198,16 +199,59 @@ export function dataChecks(
 
   for (const axis of AXIS_CHANNELS) {
     const config = scales?.[axis] as PositionScaleSpec | undefined;
-    const declared = config?.type;
+    const declared =
+      config?.type ??
+      (config?.parse !== undefined || config?.temporalKind !== undefined ? "time" : undefined);
     if (declared === undefined || declared === "band") continue;
     for (const use of axisFields[axis]) {
       const type = typeOf(use.field);
       if (type === null) continue;
       if (declared === "time" && type !== "temporal") {
+        const info = fields.get(use.field);
+        const failures =
+          config?.parse === undefined || info?.values === null || info?.values === undefined
+            ? []
+            : info.values
+                .map((value, index) => ({
+                  value,
+                  index,
+                  parsed:
+                    value === null
+                      ? null
+                      : parseTemporal(value, config.parse!, {
+                          ...(config.timezone !== undefined && { timezone: config.timezone }),
+                          ...(config.disambiguation !== undefined && {
+                            disambiguation: config.disambiguation,
+                          }),
+                        }),
+                }))
+                .filter((entry) => entry.parsed !== null && !entry.parsed.ok);
+        if (
+          config?.parse !== undefined &&
+          info?.values !== null &&
+          (failures.length === 0 || config.parseFailure === "censor")
+        ) {
+          continue;
+        }
+        const temporal = info?.temporal;
+        const detail =
+          failures.length > 0
+            ? ` Parser ${JSON.stringify(config?.parse)} rejected ${failures.length} value(s), including row ${failures[0]!.index}: ${JSON.stringify(failures[0]!.value)}.`
+            : temporal?.status === "ambiguous"
+              ? ` Automatic temporal inference was ambiguous between: ${temporal.candidates.join(", ")}.`
+              : temporal?.status === "invalid"
+                ? ` Automatic temporal inference failed whole-column validation for ${temporal.failedCount} value(s).`
+                : "";
         errors.push({
           code: "scale-type-mismatch",
           path: use.path,
-          message: `scales.${axis}.type is "time" but field "${use.field}" is ${type}; time scales need temporal values (Dates or ISO 8601 strings).`,
+          message: `scales.${axis} requests time but field "${use.field}" is ${type}.${detail}`,
+          fix: {
+            description:
+              config?.parse === undefined
+                ? `Set scales.${axis}.parse to an explicit temporal order, or set scales.${axis}.type to "band" to keep categories.`
+                : `Correct the rejected values, choose the matching scales.${axis}.parse value, or use parseFailure: "censor" explicitly.`,
+          },
         });
       } else if (
         (declared === "log" || declared === "linear") &&

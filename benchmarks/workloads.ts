@@ -40,6 +40,19 @@ function mulberry32(seed: number): () => number {
   };
 }
 
+function temporalLineSpec(n: number): PortableSpec {
+  const start = Date.UTC(1800, 0, 1);
+  const date = Array.from<string>({ length: n });
+  const value = Array.from<number>({ length: n });
+  for (let index = 0; index < n; index++) {
+    date[index] = new Date(start + index * 86_400_000).toISOString().slice(0, 10);
+    value[index] = 50 + Math.sin(index / 30) * 10;
+  }
+  return gg({ date, value }, aes({ x: "date", y: "value" }))
+    .geomLine()
+    .spec();
+}
+
 function scatterSpec(n: number, render?: "svg" | "canvas"): PortableSpec {
   const rnd = mulberry32(0xbadc0de ^ n);
   const x = Array.from<number>({ length: n });
@@ -221,6 +234,17 @@ export function buildWorkloads(smoke: boolean): Workload[] {
         fn: () => renderToSVGString(spec, opts),
       },
     );
+  }
+
+  {
+    const n = smoke ? 1_000 : 100_000;
+    const spec = temporalLineSpec(n);
+    workloads.push({
+      id: `pipeline temporal-line ${fmtK(n)}`,
+      group: `temporal line ${fmtK(n)}`,
+      bench: `runPipeline temporal line ${fmtK(n)}`,
+      fn: () => runPipeline(spec, opts),
+    });
   }
 
   {

@@ -24,8 +24,20 @@ export function applyPointTextPosition(
   const params: PositionParams = "positionParams" in layer ? (layer.positionParams ?? {}) : {};
   // Offsets are band-step fractions on discrete axes (resolution 1),
   // data units on continuous axes.
-  const xDiscrete = binding.xField !== null && table.discreteness(binding.xField) === "discrete";
-  const yDiscrete = binding.yField !== null && table.discreteness(binding.yField) === "discrete";
+  const xDiscrete =
+    binding.xField !== null &&
+    table.discreteness(
+      binding.xField,
+      binding.xConversion.sourceParser,
+      binding.xConversion.options,
+    ) === "discrete";
+  const yDiscrete =
+    binding.yField !== null &&
+    table.discreteness(
+      binding.yField,
+      binding.yConversion.sourceParser,
+      binding.yConversion.options,
+    ) === "discrete";
   if (position === "nudge") {
     const { dx, dy } = nudgeOffsets(frame.n, params.x ?? 0, params.y ?? 0);
     frame.offsetX = dx;

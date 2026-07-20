@@ -9,7 +9,7 @@ import { defaultTickFormat, tickStep } from "../layout/ticks.js";
 import { defaultLogTickFormat } from "../layout/ticks.js";
 import { defaultTimeTickFormat } from "../layout/time.js";
 import type { PositionScale } from "../scales/train.js";
-import { cellToNumber } from "../table.js";
+import { cellToNumber, type CellValue } from "../table.js";
 
 import type { AxisValueFormatter, PipelineWarning } from "./types.js";
 
@@ -45,6 +45,7 @@ export function makeAxisFormatter(
 export function makeAxisValueFormatter(
   scale: PositionScale,
   custom: TickFormatter | undefined,
+  valueToNumber?: (value: CellValue) => number,
 ): AxisValueFormatter {
   if (scale.type === "band") return (value) => (value === null ? "–" : String(value));
   const fallback =
@@ -55,7 +56,7 @@ export function makeAxisValueFormatter(
         : defaultTickFormat(tickStep(scale.domain[0], scale.domain[1], 5));
   return (value) => {
     if (value === null) return "–";
-    const numeric = cellToNumber(value);
+    const numeric = valueToNumber?.(value) ?? cellToNumber(value);
     return custom === undefined ? fallback(numeric) : custom(numeric, NaN);
   };
 }

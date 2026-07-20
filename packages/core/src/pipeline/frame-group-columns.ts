@@ -17,7 +17,18 @@ export function deriveLayerGroups(binding: LayerBinding, table: ColumnTable): nu
       "field" in mapping &&
       table.has(mapping.field)
     ) {
-      declared[mapping.field] = table.discreteness(mapping.field);
+      const conversion =
+        mapping.field === binding.xField
+          ? binding.xConversion
+          : mapping.field === binding.yField ||
+              mapping.field === binding.yminField ||
+              mapping.field === binding.ymaxField
+            ? binding.yConversion
+            : undefined;
+      declared[mapping.field] =
+        conversion === undefined
+          ? table.discreteness(mapping.field)
+          : table.discreteness(mapping.field, conversion.sourceParser, conversion.options);
     }
   }
   return [...deriveGroups(table.columns(), aes, declared).groups];

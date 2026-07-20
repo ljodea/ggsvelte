@@ -1,0 +1,37 @@
+{
+  "id": "47-ambiguous-dates-explicit-dmy",
+  "kind": "chart",
+  "prompt": "Create a line chart of value over observed_on. Values such as 03/04/2024 are day-month-year; use the explicit dmy temporal parser rather than guessing.",
+  "dataProfile": {
+    "fields": [
+      { "name": "observed_on", "type": "temporal" },
+      { "name": "value", "type": "quantitative" }
+    ],
+    "rowCount": 3
+  },
+  "data": {
+    "main": [
+      { "observed_on": "03/04/2024", "value": 4 },
+      { "observed_on": "05/06/2024", "value": 7 },
+      { "observed_on": "07/08/2024", "value": 5 }
+    ]
+  },
+  "gold": {
+    "edition": 2,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "line",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "observed_on" },
+          "y": { "field": "value" }
+        }
+      }
+    ],
+    "scales": { "x": { "type": "time", "parse": "dmy" } }
+  },
+  "expectRefusal": false,
+  "notes": "Ambiguous ordered dates require a closed explicit parser and must never be guessed."
+}

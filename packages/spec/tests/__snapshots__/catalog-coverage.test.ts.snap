@@ -620,7 +620,10 @@ exports[`ERROR_CATALOG coverage [scale-type-mismatch] is reproducible; message +
   },
   "instance": {
     "code": "scale-type-mismatch",
-    "message": "scales.x.type is "time" but field "x" is quantitative; time scales need temporal values (Dates or ISO 8601 strings).",
+    "fix": {
+      "description": "Set scales.x.parse to an explicit temporal order, or set scales.x.type to "band" to keep categories.",
+    },
+    "message": "scales.x requests time but field "x" is quantitative.",
     "path": "/layers/0/aes/x",
   },
 }

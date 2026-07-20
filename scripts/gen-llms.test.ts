@@ -87,13 +87,16 @@ describe("guide sections cover their catalogs", () => {
     for (const s of lifecycle.surfaces) expect(md).toContain(s.package);
     expect(md).toContain("`normalize`");
     expect(md).toContain("stable-intent");
-    expect(md).toContain("edition: 1");
+    expect(md).toContain("currently 2");
+    expect(md).toContain("do not preserve incorrect");
   });
 
   it("getting-started shows all three surfaces and the fix contract", () => {
-    expect(GETTING_STARTED_MD).toContain('geom: "point"');
-    expect(GETTING_STARTED_MD).toContain("geomPoint()");
-    expect(GETTING_STARTED_MD).toContain("<GeomPoint />");
+    expect(GETTING_STARTED_MD).toContain('geom: "line"');
+    expect(GETTING_STARTED_MD).toContain('year: "1835"');
+    expect(GETTING_STARTED_MD).toContain("without preprocessing");
+    expect(GETTING_STARTED_MD).toContain("geomLine()");
+    expect(GETTING_STARTED_MD).toContain("<GeomLine />");
     expect(GETTING_STARTED_MD).toContain("fix");
   });
 

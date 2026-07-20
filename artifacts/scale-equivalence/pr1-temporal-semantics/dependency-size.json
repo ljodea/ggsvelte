@@ -1,0 +1,37 @@
+{
+  "measuredAt": "2026-07-19",
+  "environment": {
+    "runtime": "bun 1.3.14 x64-darwin",
+    "cpu": "Apple M1 Pro under x64 Bun",
+    "nodeRequirement": ">=22"
+  },
+  "specPackage": {
+    "publishedBaselineVersion": "0.3.0",
+    "publishedBaselinePackedBytes": 151182,
+    "publishedBaselineUnpackedBytes": 919814,
+    "workingTreePackedBytes": 192618,
+    "workingTreeUnpackedBytes": 1071983,
+    "packedDeltaBytes": 41436,
+    "unpackedDeltaBytes": 152169
+  },
+  "temporalPolyfill": {
+    "package": "@js-temporal/polyfill",
+    "version": "0.5.1",
+    "installedKiB": 3008,
+    "esmBytes": 128868,
+    "esmGzipBytes": 36230,
+    "dependency": "jsbi ^4.3.0",
+    "strategy": "globalThis.Temporal when present; official static fallback for the synchronous IANA parser API; UTC/integer parsing never calls Temporal"
+  },
+  "packedConsumerBuild": {
+    "clientJavaScriptKiB": 739.16,
+    "clientJavaScriptGzipKiB": 221.88,
+    "ssrJavaScriptKiB": 258.52
+  },
+  "verification": [
+    "packages/spec temporal parser and DST corpus",
+    "packages/core pure Node import and render tests",
+    "packages/svelte SSR and strict svelte-check",
+    "apps/docs browser build/check"
+  ]
+}

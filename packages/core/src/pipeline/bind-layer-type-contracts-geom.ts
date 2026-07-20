@@ -5,6 +5,7 @@ import type { LayerSpec } from "@ggsvelte/spec";
 
 import type { ColumnTable } from "../table.js";
 
+import type { PositionConversionContext } from "./temporal-position.js";
 import { PipelineError } from "./types.js";
 
 export function validateGeomChannelTypeContracts(input: {
@@ -13,11 +14,17 @@ export function validateGeomChannelTypeContracts(input: {
   table: ColumnTable;
   xField: string | null;
   yField: string | null;
+  xConversion: PositionConversionContext;
+  yConversion: PositionConversionContext;
 }): void {
-  const { layer, index, table, xField, yField } = input;
+  const { layer, index, table, xField, yField, xConversion, yConversion } = input;
   const geom = layer.geom;
 
-  if (geom === "density" && xField !== null && table.fieldType(xField) === "nominal") {
+  if (
+    geom === "density" &&
+    xField !== null &&
+    table.fieldType(xField, xConversion.sourceParser, xConversion.options) === "nominal"
+  ) {
     throw new PipelineError(
       "channel-type-mismatch",
       `/layers/${index}/aes/x`,
@@ -29,7 +36,11 @@ export function validateGeomChannelTypeContracts(input: {
       ["x", xField],
       ["y", yField],
     ] as const) {
-      if (field !== null && table.fieldType(field) === "nominal") {
+      const conversion = channel === "x" ? xConversion : yConversion;
+      if (
+        field !== null &&
+        table.fieldType(field, conversion.sourceParser, conversion.options) === "nominal"
+      ) {
         throw new PipelineError(
           "channel-type-mismatch",
           `/layers/${index}/aes/${channel}`,
@@ -39,14 +50,20 @@ export function validateGeomChannelTypeContracts(input: {
     }
   }
   if (geom === "boxplot") {
-    if (xField !== null && table.fieldType(xField) !== "nominal") {
+    if (
+      xField !== null &&
+      table.fieldType(xField, xConversion.sourceParser, xConversion.options) !== "nominal"
+    ) {
       throw new PipelineError(
         "channel-type-mismatch",
         `/layers/${index}/aes/x`,
-        `The boxplot geom needs a DISCRETE x this milestone, but field "${xField}" is ${table.fieldType(xField)}. Map x to a categorical field.`,
+        `The boxplot geom needs a DISCRETE x this milestone, but field "${xField}" is ${table.fieldType(xField, xConversion.sourceParser, xConversion.options)}. Map x to a categorical field.`,
       );
     }
-    if (yField !== null && table.fieldType(yField) === "nominal") {
+    if (
+      yField !== null &&
+      table.fieldType(yField, yConversion.sourceParser, yConversion.options) === "nominal"
+    ) {
       throw new PipelineError(
         "channel-type-mismatch",
         `/layers/${index}/aes/y`,

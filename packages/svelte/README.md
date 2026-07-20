@@ -4,8 +4,9 @@
 
 Svelte 5 adapter for the ggsvelte layered grammar of graphics — plus the
 whole `@ggsvelte/spec` + `@ggsvelte/core` surface re-exported, and the
-`ggsvelte-render` CLI. The v0.1 API is intentionally early (lifecycle tags in the
-repo's `lifecycle.json`).
+`ggsvelte-render` CLI. The current v0.3.0 packages remain pre-1.0; correctness
+fixes improve defaults in place and are documented with direct overrides (lifecycle
+tags live in the repo's `lifecycle.json`).
 
 ```sh
 bun add @ggsvelte/svelte        # or: npm install @ggsvelte/svelte
@@ -14,35 +15,48 @@ bun add @ggsvelte/svelte        # or: npm install @ggsvelte/svelte
 ## Quick example — three surfaces, one spec
 
 ```svelte
-<script>
-  import { GGPlot, GeomPoint, gg, aes } from "@ggsvelte/svelte";
+<script lang="ts">
+  import { GGPlot, GeomLine, gg, aes } from "@ggsvelte/svelte";
 
+  // Untouched year strings infer a proportional calendar axis.
   const rows = [
-    { displ: 1.8, hwy: 29 },
-    { displ: 5.7, hwy: 16 },
+    { year: "1835", value: 12 },
+    { year: "1900", value: 19 },
+    { year: "2026", value: 31 },
   ];
 
   // 1. Spec JSON (what agents emit)
   const spec = {
     data: { values: rows },
     layers: [
-      { geom: "point", aes: { x: { field: "displ" }, y: { field: "hwy" } } },
+      { geom: "line", aes: { x: { field: "year" }, y: { field: "value" } } },
     ],
   };
 
   // 2. Fluent builder — same canonical spec
-  const built = gg(rows, aes({ x: "displ", y: "hwy" }))
-    .geomPoint()
+  const built = gg(rows, aes({ x: "year", y: "value" }))
+    .geomLine()
     .spec();
 </script>
 
 <!-- 3. Components as sugar -->
-<GGPlot data={rows} aes={{ x: "displ", y: "hwy" }} width={640} height={400}>
-  <GeomPoint />
+<GGPlot
+  data={rows}
+  aes={{ x: "year", y: "value" }}
+  width="container"
+  height={400}
+>
+  <GeomLine />
 </GGPlot>
 
 <GGPlot {spec} width={640} height={400} />
 ```
+
+ISO dates, year-months, year-quarters, and runtime `Date` values also infer temporal.
+For ambiguous values, choose a closed parser with
+`.scaleXDate({ parse: "dmy" })` or `scales={{ x: { type: "time", parse: "dmy" } }}`.
+Use `.scaleXDiscrete()` / `type: "band"` when four-digit values are identifiers.
+`onrender` exposes `model.scaleDecisions` and `model.scaleDiagnostics`.
 
 `<GGPlot>` supports `facet`, `coord`, `theme`, opt-in `inspect`, point or
 faceted interval `select`, brush `zoom`, visual `legendFocus`, data-changing

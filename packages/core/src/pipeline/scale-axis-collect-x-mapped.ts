@@ -4,6 +4,7 @@
 import type { PositionScaleSpec } from "@ggsvelte/spec";
 
 import type { AxisCollectAcc } from "./scale-axis-collect-acc.js";
+import { xConversionOf } from "./temporal-position.js";
 import type { Advisory, LayerFrame } from "./types.js";
 
 export function collectMappedXEvidence(
@@ -18,7 +19,10 @@ export function collectMappedXEvidence(
   const { binding } = frame;
   const geom = binding.layer.geom;
   const field = binding.xField!;
-  const fieldType = frame.table.has(field) ? frame.table.fieldType(field) : "quantitative";
+  const conversion = xConversionOf(binding);
+  const fieldType = frame.table.has(field)
+    ? frame.table.fieldType(field, conversion.sourceParser, conversion.options)
+    : "quantitative";
   acc.typeParts.add(fieldType);
   const barX = (geom === "bar" || geom === "col") && binding.layer.stat !== "bin";
   if (barX && fieldType !== "nominal" && configType === undefined) {

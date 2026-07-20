@@ -23,8 +23,16 @@ export function buildSmoothFrame(
   const columnOf = makeColumnOf(binding);
   const params = (layer.params ?? {}) as SmoothParams;
   const result = statSmooth({
-    x: table.numeric(binding.xField!),
-    y: table.numeric(binding.yField!),
+    x: table.numeric(
+      binding.xField!,
+      binding.xConversion.sourceParser,
+      binding.xConversion.options,
+    ),
+    y: table.numeric(
+      binding.yField!,
+      binding.yConversion.sourceParser,
+      binding.yConversion.options,
+    ),
     groups,
     carried,
     params,

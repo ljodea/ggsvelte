@@ -17,8 +17,22 @@ export function buildIdentityFrame(
     table,
     n,
     xValues: binding.xField === null ? null : table.column(binding.xField),
-    xNumeric: binding.xField === null ? null : table.numeric(binding.xField),
-    yNumeric: binding.yField === null ? null : table.numeric(binding.yField),
+    xNumeric:
+      binding.xField === null
+        ? null
+        : table.numeric(
+            binding.xField,
+            binding.xConversion.sourceParser,
+            binding.xConversion.options,
+          ),
+    yNumeric:
+      binding.yField === null
+        ? null
+        : table.numeric(
+            binding.yField,
+            binding.yConversion.sourceParser,
+            binding.yConversion.options,
+          ),
     groups,
     inputGroups: groups,
     rowIndex: Uint32Array.from({ length: n }, (_, i) => i),
@@ -26,7 +40,21 @@ export function buildIdentityFrame(
     fillValues: binding.fill.field === null ? null : table.column(binding.fill.field),
     labelValues: binding.labelField === null ? null : table.column(binding.labelField),
     ...emptyFrameExtras(),
-    ymin: binding.yminField === null ? null : table.numeric(binding.yminField),
-    ymax: binding.ymaxField === null ? null : table.numeric(binding.ymaxField),
+    ymin:
+      binding.yminField === null
+        ? null
+        : table.numeric(
+            binding.yminField,
+            binding.yConversion.sourceParser,
+            binding.yConversion.options,
+          ),
+    ymax:
+      binding.ymaxField === null
+        ? null
+        : table.numeric(
+            binding.ymaxField,
+            binding.yConversion.sourceParser,
+            binding.yConversion.options,
+          ),
   };
 }

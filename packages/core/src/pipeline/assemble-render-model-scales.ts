@@ -6,6 +6,7 @@ import type { ScaleState } from "../scales/state.js";
 import type { PositionScale } from "../scales/train.js";
 
 import { makeAxisValueFormatter } from "./layout-helpers.js";
+import { positionValueToNumber, type PositionConversionContext } from "./temporal-position.js";
 import type { RenderModel, ResolvedColorScale } from "./types.js";
 
 export function buildRenderModelScaleState(
@@ -42,9 +43,19 @@ export function buildRenderModelAxisFormatters(
   yScale: PositionScale,
   formatX: TickFormatter | undefined,
   formatY: TickFormatter | undefined,
+  xConversion: PositionConversionContext,
+  yConversion: PositionConversionContext,
 ): RenderModel["axisFormatters"] {
   return Object.freeze({
-    x: makeAxisValueFormatter(xScale, formatX),
-    y: makeAxisValueFormatter(yScale, formatY),
+    x: makeAxisValueFormatter(
+      xScale,
+      formatX,
+      xScale.type === "time" ? (value) => positionValueToNumber(value, xConversion) : undefined,
+    ),
+    y: makeAxisValueFormatter(
+      yScale,
+      formatY,
+      yScale.type === "time" ? (value) => positionValueToNumber(value, yConversion) : undefined,
+    ),
   });
 }

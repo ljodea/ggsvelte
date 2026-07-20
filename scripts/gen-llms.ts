@@ -22,7 +22,12 @@ import {
   PIPELINE_ERROR_CATALOG,
   PIPELINE_WARNING_CATALOG,
 } from "@ggsvelte/core";
-import { ERROR_CATALOG, LINT_CATALOG } from "@ggsvelte/spec";
+import {
+  ERROR_CATALOG,
+  LINT_CATALOG,
+  SCALE_CAPABILITIES,
+  TEMPORAL_PARSER_NAMES,
+} from "@ggsvelte/spec";
 import { INTERACTION_DIAGNOSTIC_CATALOG } from "../packages/svelte/src/lib/interaction/interaction";
 import supportMatrix from "../support-matrix.json";
 
@@ -164,8 +169,9 @@ CLI.
 
 ## First chart, three ways
 
-The same scatter plot in each surface. All three produce (or consume) the
-same canonical PortableSpec.
+The same raw-year line chart in each surface. Four-digit strings infer a
+proportional calendar axis without preprocessing or an explicit scale. All
+three surfaces produce (or consume) the same canonical PortableSpec.
 
 **1. Spec JSON** — what agents emit; validated by the published JSON Schema:
 
@@ -174,11 +180,11 @@ same canonical PortableSpec.
   import { GGPlot } from "@ggsvelte/svelte";
 
   const spec = {
-    data: { values: [{ displ: 1.8, hwy: 29 }, { displ: 5.7, hwy: 16 }] },
+    data: { values: [{ year: "1835", value: 12 }, { year: "2026", value: 31 }] },
     layers: [
       {
-        geom: "point",
-        aes: { x: { field: "displ" }, y: { field: "hwy" } }
+        geom: "line",
+        aes: { x: { field: "year" }, y: { field: "value" } }
       }
     ]
   };
@@ -193,19 +199,19 @@ the canonical PortableSpec:
 \`\`\`ts
 import { aes, gg } from "@ggsvelte/svelte";
 
-const spec = gg(rows, aes({ x: "displ", y: "hwy" })).geomPoint().spec();
+const spec = gg(rows, aes({ x: "year", y: "value" })).geomLine().spec();
 \`\`\`
 
 **3. Svelte components** — declaration-only children as sugar:
 
 \`\`\`svelte
 <script>
-  import { GGPlot, GeomPoint } from "@ggsvelte/svelte";
+  import { GGPlot, GeomLine } from "@ggsvelte/svelte";
   import { rows } from "./data.js";
 </script>
 
-<GGPlot data={rows} aes={{ x: "displ", y: "hwy" }} width={640} height={400}>
-  <GeomPoint />
+<GGPlot data={rows} aes={{ x: "year", y: "value" }} width={640} height={400}>
+  <GeomLine />
 </GGPlot>
 \`\`\`
 
@@ -237,6 +243,8 @@ and **the fix carries a machine-applicable example — apply it**. Pass
 
 - [Examples gallery](/examples) — every example shows the Svelte component,
   the builder chain, and the canonical spec JSON side by side.
+- [Dates without preprocessing](/guide/temporal-scales) — inference, explicit parsers,
+  discrete overrides, diagnostics, and all three authoring surfaces.
 - [Interactions](/guide/interactions) — inspection, selection, zoom, typed
   events, keyboard behavior, and stable identity.
 - [Local data playground](/playground) — paste bounded JSON rows without
@@ -253,6 +261,72 @@ and **the fix carries a machine-applicable example — apply it**. Pass
   defaults-edition mechanism.
 - [JSON Schema](/schema/v0.json) — for constrained decoding.
 - [llms-full.txt](/llms-full.txt) — the whole docs corpus in one file.
+`;
+
+export const TEMPORAL_SCALES_MD = `# Dates without preprocessing
+
+ggsvelte infers strict ISO dates/date-times, four-digit year strings,
+year-months, month-years, year-quarters, and runtime \`Date\` values from data.
+Classification inspects at most the first and last 32 non-null values; after it
+selects one parser family, every non-null value must validate. A partially valid
+column never becomes partially temporal.
+
+## Let the default work
+
+\`"1835"\`, \`"1900"\`, and \`"2026"\` are spaced as calendar years, not as
+three equally spaced categories. Numeric \`1835\` stays quantitative.
+
+\`\`\`svelte
+<script lang="ts">
+  import { GGPlot, GeomLine } from "@ggsvelte/svelte";
+  const rows = [
+    { year: "1835", value: 12 },
+    { year: "1900", value: 19 },
+    { year: "2026", value: 31 },
+  ];
+</script>
+
+<GGPlot data={rows} aes={{ x: "year", y: "value" }} width="container" height={360}>
+  <GeomLine />
+</GGPlot>
+\`\`\`
+
+## Inspect the choice
+
+Read \`model.scaleDecisions\` in \`onrender\` for field, parser, precision,
+bounded evidence, validated count, trained domain, ambiguity, and a portable
+override. Exceptional or advisory choices also appear in
+\`model.scaleDiagnostics\` as stable problem/cause/fix records.
+
+## Override one choice
+
+Ambiguous values such as \`03/04/2024\` stay discrete. Pick the intended order:
+
+\`\`\`ts
+const spec = gg(rows, aes({ x: "when", y: "value" }))
+  .geomLine()
+  .scaleXDate({ parse: "dmy" })
+  .spec();
+\`\`\`
+
+Canonical JSON uses \`scales: { x: { type: "time", parse: "dmy" } }\`.
+The closed parser names are generated from the runtime registry:
+\`${TEMPORAL_PARSER_NAMES.join("`, `")}\`. Exact bounded formats and epoch
+seconds/milliseconds are object parser forms. Timezone-less values mean UTC; IANA zones use Temporal
+with explicit DST disambiguation.
+
+If four-digit strings are identifiers, force categories with
+\`.scaleXDiscrete()\`, \`scale_x_discrete()\`, or
+\`scales: { x: { type: "band" } }\`.
+
+## PortableSpec boundary
+
+PortableSpec remains strict JSON: no \`Date\`, callback, or regular expression.
+The checked capability ledger records the temporal family as
+\`${SCALE_CAPABILITIES.find((capability) => capability.family === "position-temporal")?.runtime ?? "missing"}\`; docs, helper tests, and agent checks consume that ledger.
+Builder and Svelte authoring may contain runtime Dates; they canonicalize to ISO
+before validation. The standalone \`ymd\`, \`mdy\`, \`dmy\`, related order and
+timestamp helpers, exact-format parser, and epoch helpers return authoring Dates.
 `;
 
 export const COMPATIBILITY_MD = `# Compatibility
@@ -1239,20 +1313,18 @@ Every public export carries a lifecycle tag (generated into
   renderToSVGString, GGPlot and their direct result contracts). Not frozen
   pre-1.0, but changes here are treated as breaking: they get a changeset, a
   migration note, and a deprecation window where feasible.
-- **stable** — committed API under semver (none in v0.1).
+- **stable** — committed API under semver (none while the project remains pre-1.0).
 - **superseded** — keeps working but stops being recommended; docs point to
   the replacement. Protects agent-generated code from silent breakage.
 
 ## Defaults editions
 
-\`normalize()\` stamps \`edition: 1\` onto every spec that doesn't carry one,
-freezing which generation of DEFAULT aesthetics (theme role tokens,
-categorical palette, sequential ramp) the spec was authored against. When a
-future edition ships better defaults, stamped specs keep their original look
-— old charts never reshuffle. Explicit settings (\`theme\`,
-\`scales.*.range\`, \`scales.*.scheme\`) always win over edition defaults, and
-unknown editions degrade to the latest known with an \`unknown-edition\`
-warning.
+\`normalize()\` stamps the current appearance edition (currently 2) onto every
+spec, freezing theme and palette defaults. Editions do not preserve incorrect
+pre-1.0 parser, scale-stage, guide, or coordinate execution. Those correctness
+fixes land in place with migration notes and direct overrides. Explicit
+settings always win; unknown appearance editions degrade to the latest known
+with an \`unknown-edition\` warning.
 
 ${sections.join("\n")}
 `;
@@ -1292,6 +1364,12 @@ export function guidePages(lifecycle: LifecycleDoc): GuidePage[] {
       title: "Getting started",
       description: "Install ggsvelte and draw the same chart in all three surfaces.",
       markdown: GETTING_STARTED_MD,
+    },
+    {
+      slug: "temporal-scales",
+      title: "Dates without preprocessing",
+      description: "Value-driven date inference, strict parsers, overrides, and diagnostics.",
+      markdown: TEMPORAL_SCALES_MD,
     },
     {
       slug: "compatibility",
@@ -1363,7 +1441,7 @@ export function buildLlmsIndex(
   lines.push(
     "- [Local data playground](/playground): safely try bounded JSON rows with static and interactive chart controls",
     "- [Search interaction reference](/reference/interactions): filter interaction capabilities, events, diagnostics, and accessibility guidance",
-    "- [JSON Schema v0](/schema/v0.json): the PortableSpec schema (unstable in v0.1)",
+    "- [JSON Schema v0](/schema/v0.json): the pre-1.0 PortableSpec schema",
     "- [llms-full.txt](/llms-full.txt): all docs prose plus every example (spec JSON + Svelte source)",
     "",
     "## Examples",

@@ -1,26 +1,21 @@
 /**
- * ColumnTable — the pipeline's columnar data container (plan: "Columnar,
- * copy-conscious pipeline", Hadley lesson 10).
+ * ColumnTable — the pipeline's columnar data container.
  *
- * - Accepts rows OR column arrays; stores columns.
- * - `numeric()` returns a cached Float64Array (data-space math is f64).
- * - Field type inference (documented, deterministic):
- *     string  -> nominal (discrete), UNLESS every non-null value is an ISO
- *                8601 date string -> temporal (continuous)
- *     boolean -> nominal (discrete)
- *     number  -> quantitative (continuous)
- *     Date    -> temporal (continuous — matches R's Date, decision 0005)
- *     null    -> carries no type information; ignored by inference
- *     mixed   -> nominal if ANY non-null value is a string/boolean (grouping
- *                spike rule), else quantitative
- *     empty / all-null -> quantitative (no evidence of discreteness)
- * - Discreteness follows the type: nominal -> discrete; quantitative and
- *   temporal -> continuous (decision 0005's `is.discrete` mirror).
- *
- * M0c note: temporal fields ride the LINEAR scale over epoch milliseconds
- * (the time scale lands in M1); `numeric()` converts Dates and ISO strings
- * to epoch ms.
+ * Temporal meaning is owned by @ggsvelte/spec's strict parser registry. A
+ * ColumnTable caches immutable parsed views by field + parser semantics;
+ * subsets gather parent views so filters/facets never reclassify or reparse.
  */
+import {
+  canonicalTemporalParserKey,
+  inferTemporalColumn,
+  parseTemporal,
+  parseTemporalColumn,
+  type TemporalDecision,
+  type TemporalDisambiguation,
+  type TemporalKind,
+  type TemporalParserSpec,
+  type TemporalPrecision,
+} from "@ggsvelte/spec";
 
 export type CellValue = string | number | boolean | Date | null;
 export type Columns = Readonly<Record<string, readonly CellValue[]>>;
@@ -28,26 +23,38 @@ export type Rows = readonly Readonly<Record<string, CellValue>>[];
 
 export type FieldType = "quantitative" | "temporal" | "nominal";
 export type Discreteness = "discrete" | "continuous";
+type TemporalFailurePolicy = "error" | "censor";
 
-/** Full ISO 8601 date / date-time strings (what "dates travel as"). */
-const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}([T ]\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:?\d{2})?)?$/;
-
-export function isISODateString(value: string): boolean {
-  return ISO_DATE_RE.test(value) && !Number.isNaN(Date.parse(value));
+export interface ParsedColumnOptions {
+  timezone?: string;
+  disambiguation?: TemporalDisambiguation;
+  failurePolicy?: TemporalFailurePolicy;
 }
 
-/** Deterministic field type inference (rules in the module docs). */
-export function inferFieldType(column: readonly CellValue[]): FieldType {
+export interface ParsedColumnView {
+  raw: readonly CellValue[];
+  semantic: Float64Array;
+  valid: Uint8Array;
+  parserKey: string;
+  temporalKind?: TemporalKind;
+  temporalPrecision?: TemporalPrecision;
+  decision: TemporalDecision;
+}
+
+/** Strict ISO predicate retained for public import compatibility. */
+export function isISODateString(value: string): boolean {
+  return parseTemporal(value, "iso").ok;
+}
+
+function nonTemporalFieldType(column: readonly CellValue[]): FieldType {
   let sawNumber = false;
   let sawDate = false;
   let sawString = false;
-  let allStringsISO = true;
-  for (const v of column) {
-    if (v === null) continue;
-    switch (typeof v) {
+  for (const value of column) {
+    if (value === null) continue;
+    switch (typeof value) {
       case "string":
         sawString = true;
-        if (allStringsISO && !isISODateString(v)) allStringsISO = false;
         break;
       case "boolean":
         return "nominal";
@@ -55,52 +62,92 @@ export function inferFieldType(column: readonly CellValue[]): FieldType {
         sawNumber = true;
         break;
       default:
-        if (v instanceof Date) sawDate = true;
-        break;
+        if (value instanceof Date && Number.isFinite(value.getTime())) sawDate = true;
+        else return "nominal";
     }
   }
-  if (sawString) {
-    // strings win (mixed columns are nominal) unless ALL are ISO dates and
-    // nothing contradicts a temporal reading
-    return allStringsISO && !sawNumber ? "temporal" : "nominal";
-  }
+  if (sawString || (sawDate && sawNumber)) return "nominal";
   if (sawDate) return "temporal";
   return "quantitative";
+}
+
+/** Deterministic field type inference using the shared temporal registry. */
+export function inferFieldType(column: readonly CellValue[]): FieldType {
+  const temporal = inferTemporalColumn(column);
+  return temporal.status === "temporal" ? "temporal" : nonTemporalFieldType(column);
 }
 
 export function discretenessOf(type: FieldType): Discreteness {
   return type === "nominal" ? "discrete" : "continuous";
 }
 
-/** One cell's numeric reading (numbers pass; Dates/ISO strings -> epoch ms). */
-export function cellToNumber(v: CellValue): number {
-  if (typeof v === "number") return v;
-  if (v instanceof Date) return v.getTime();
-  if (typeof v === "boolean") return v ? 1 : 0;
-  if (typeof v === "string") {
-    if (isISODateString(v)) return Date.parse(v);
-    const n = Number(v);
-    return v.trim() === "" ? NaN : n;
+/** One context-free numeric reading. Column temporal conversion uses parsed(). */
+export function cellToNumber(value: CellValue): number {
+  if (typeof value === "number") return value;
+  if (value instanceof Date) return value.getTime();
+  if (typeof value === "boolean") return value ? 1 : 0;
+  if (typeof value === "string") {
+    const iso = parseTemporal(value, "iso");
+    if (iso.ok) return iso.epochMs;
+    const numeric = Number(value);
+    return value.trim() === "" ? Number.NaN : numeric;
   }
-  return NaN; // null and anything else
+  return Number.NaN;
 }
 
 /** Numeric view of a plain column (post-stat data outside a ColumnTable). */
 export function cellsToNumeric(column: readonly CellValue[]): Float64Array {
   const out = new Float64Array(column.length);
-  for (let i = 0; i < column.length; i++) out[i] = cellToNumber(column[i]!);
+  for (let index = 0; index < column.length; index++) out[index] = cellToNumber(column[index]!);
   return out;
+}
+
+function optionsKey(options: ParsedColumnOptions): string {
+  return [
+    options.timezone ?? "UTC",
+    options.disambiguation ?? "reject",
+    options.failurePolicy ?? "error",
+  ].join("|");
+}
+
+function parseOptions(options: ParsedColumnOptions) {
+  return {
+    ...(options.timezone !== undefined && { timezone: options.timezone }),
+    ...(options.disambiguation !== undefined && { disambiguation: options.disambiguation }),
+  };
+}
+
+function requestKey(parser: TemporalParserSpec | "auto", options: ParsedColumnOptions): string {
+  return `${parser === "auto" ? "auto" : canonicalTemporalParserKey(parser)}|${optionsKey(options)}`;
+}
+
+function fallbackNumeric(raw: readonly CellValue[]): { semantic: Float64Array; valid: Uint8Array } {
+  const semantic = cellsToNumeric(raw);
+  const valid = new Uint8Array(raw.length);
+  for (let index = 0; index < semantic.length; index++) {
+    if (Number.isFinite(semantic[index]!)) valid[index] = 1;
+  }
+  return { semantic, valid };
 }
 
 export class ColumnTable {
   readonly #columns: Record<string, readonly CellValue[]>;
   readonly #rowCount: number;
-  readonly #numericCache = new Map<string, Float64Array>();
+  readonly #parsedCache = new Map<string, ParsedColumnView>();
   readonly #typeCache = new Map<string, FieldType>();
+  readonly #parent: ColumnTable | null;
+  readonly #parentRows: readonly number[] | Uint32Array | null;
 
-  private constructor(columns: Record<string, readonly CellValue[]>, rowCount: number) {
+  private constructor(
+    columns: Record<string, readonly CellValue[]>,
+    rowCount: number,
+    parent: ColumnTable | null = null,
+    parentRows: readonly number[] | Uint32Array | null = null,
+  ) {
     this.#columns = columns;
     this.#rowCount = rowCount;
+    this.#parent = parent;
+    this.#parentRows = parentRows;
   }
 
   /** Build from row objects (missing keys become null). */
@@ -110,9 +157,9 @@ export class ColumnTable {
     const columns: Record<string, CellValue[]> = {};
     for (const name of names) {
       const column = Array.from<CellValue>({ length: rows.length });
-      for (let i = 0; i < rows.length; i++) {
-        const v = rows[i]![name];
-        column[i] = v === undefined ? null : v;
+      for (let index = 0; index < rows.length; index++) {
+        const value = rows[index]![name];
+        column[index] = value === undefined ? null : value;
       }
       columns[name] = column;
     }
@@ -145,7 +192,6 @@ export class ColumnTable {
     return name in this.#columns;
   }
 
-  /** All columns (read-only view; used by group derivation). */
   columns(): Columns {
     return this.#columns;
   }
@@ -160,48 +206,112 @@ export class ColumnTable {
     return column;
   }
 
-  /**
-   * Cached Float64Array view of a column: numbers pass through, Dates and
-   * ISO date strings become epoch ms, booleans 0/1, everything else NaN.
-   */
-  numeric(name: string): Float64Array {
-    const cached = this.#numericCache.get(name);
+  /** Immutable semantic view, cached by parser and conversion options. */
+  parsed(
+    name: string,
+    parser: TemporalParserSpec | "auto" = "auto",
+    options: ParsedColumnOptions = {},
+  ): ParsedColumnView {
+    const cacheKey = `${name}|${requestKey(parser, options)}`;
+    const cached = this.#parsedCache.get(cacheKey);
     if (cached !== undefined) return cached;
-    const column = this.column(name);
-    const out = new Float64Array(column.length);
-    for (let i = 0; i < column.length; i++) out[i] = cellToNumber(column[i]!);
-    this.#numericCache.set(name, out);
-    return out;
+
+    if (this.#parent !== null && this.#parentRows !== null) {
+      const parent = this.#parent.parsed(name, parser, options);
+      const semantic = new Float64Array(this.#parentRows.length);
+      const valid = new Uint8Array(this.#parentRows.length);
+      for (let index = 0; index < this.#parentRows.length; index++) {
+        const sourceIndex = this.#parentRows[index]!;
+        semantic[index] = parent.semantic[sourceIndex]!;
+        valid[index] = parent.valid[sourceIndex]!;
+      }
+      const view: ParsedColumnView = {
+        raw: this.column(name),
+        semantic,
+        valid,
+        parserKey: parent.parserKey,
+        ...(parent.temporalKind !== undefined && { temporalKind: parent.temporalKind }),
+        ...(parent.temporalPrecision !== undefined && {
+          temporalPrecision: parent.temporalPrecision,
+        }),
+        decision: parent.decision,
+      };
+      this.#parsedCache.set(cacheKey, view);
+      return view;
+    }
+
+    const raw = this.column(name);
+    const parsed = parseTemporalColumn(raw, parser, parseOptions(options));
+    const temporal = parser !== "auto" || parsed.decision.status === "temporal";
+    const values = temporal
+      ? { semantic: parsed.semantic, valid: parsed.valid }
+      : fallbackNumeric(raw);
+    const view: ParsedColumnView = {
+      raw,
+      semantic: values.semantic,
+      valid: values.valid,
+      parserKey: `${parsed.decision.parserKey}|${optionsKey(options)}`,
+      ...(parsed.decision.kind !== null && { temporalKind: parsed.decision.kind }),
+      ...(parsed.decision.precision !== null && {
+        temporalPrecision: parsed.decision.precision,
+      }),
+      decision: parsed.decision,
+    };
+    this.#parsedCache.set(cacheKey, view);
+    return view;
+  }
+
+  /** Cached numeric view; explicit parser semantics are optional. */
+  numeric(
+    name: string,
+    parser: TemporalParserSpec | "auto" = "auto",
+    options: ParsedColumnOptions = {},
+  ): Float64Array {
+    return this.parsed(name, parser, options).semantic;
   }
 
   /**
-   * Row subset (facet partition). Field TYPES are inherited from this table,
-   * not re-inferred: a panel whose slice is all-null (or accidentally
-   * numeric-looking) must scale exactly like its siblings.
+   * Row subset (facet/filter partition). Parsed views gather from this table,
+   * preserving source decisions and avoiding per-panel parsing.
    */
   subset(rows: readonly number[] | Uint32Array): ColumnTable {
     const columns: Record<string, CellValue[]> = {};
     for (const name of this.fields) {
       const source = this.#columns[name]!;
       const column = Array.from<CellValue>({ length: rows.length });
-      for (let i = 0; i < rows.length; i++) column[i] = source[rows[i]!]!;
+      for (let index = 0; index < rows.length; index++) column[index] = source[rows[index]!]!;
       columns[name] = column;
     }
-    const out = new ColumnTable(columns, rows.length);
-    for (const name of this.fields) out.#typeCache.set(name, this.fieldType(name));
-    return out;
+    return new ColumnTable(columns, rows.length, this, rows);
   }
 
-  /** Inferred field type (cached; rules in module docs). */
-  fieldType(name: string): FieldType {
-    const cached = this.#typeCache.get(name);
+  /** Inferred or explicitly parsed field type. */
+  fieldType(
+    name: string,
+    parser: TemporalParserSpec | "auto" = "auto",
+    options: ParsedColumnOptions = {},
+  ): FieldType {
+    if (parser !== "auto") return "temporal";
+    const cacheKey = `${name}|${requestKey(parser, options)}`;
+    const cached = this.#typeCache.get(cacheKey);
     if (cached !== undefined) return cached;
-    const type = inferFieldType(this.column(name));
-    this.#typeCache.set(name, type);
+    if (this.#parent !== null) {
+      const inherited = this.#parent.fieldType(name, parser, options);
+      this.#typeCache.set(cacheKey, inherited);
+      return inherited;
+    }
+    const decision = this.parsed(name, parser, options).decision;
+    const type =
+      decision.status === "temporal" ? "temporal" : nonTemporalFieldType(this.column(name));
+    this.#typeCache.set(cacheKey, type);
     return type;
   }
 
-  discreteness(name: string): Discreteness {
-    return discretenessOf(this.fieldType(name));
+  discreteness(
+    name: string,
+    parser: TemporalParserSpec | "auto" = "auto",
+    options: ParsedColumnOptions = {},
+  ): Discreteness {
+    return discretenessOf(this.fieldType(name, parser, options));
   }
 }
