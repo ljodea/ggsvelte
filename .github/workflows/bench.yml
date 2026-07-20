@@ -62,11 +62,7 @@ jobs:
   bench-label:
     name: bench-label (budget gate on 'run-bench' PRs)
     if: github.event_name == 'pull_request' && github.event.label.name == 'run-bench'
-    runs-on: [self-hosted, ggsvelte]
-    concurrency:
-      group: heavy-self-hosted-cpu
-      cancel-in-progress: false
-      queue: max
+    runs-on: [self-hosted, ggsvelte, ggsvelte-heavy]
     container:
       image: mcr.microsoft.com/playwright:v1.61.1-noble
     defaults:
