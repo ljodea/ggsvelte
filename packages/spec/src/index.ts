@@ -129,6 +129,7 @@ export {
   parseTemporalColumn,
   parseTemporalFormat,
   TEMPORAL_PARSER_NAMES,
+  temporalParserConfigurationError,
   TemporalParseError,
   TemporalParserSpecSchema,
   ydm,

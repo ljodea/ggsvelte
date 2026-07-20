@@ -35,10 +35,12 @@ export function resolvePanelLayoutDisplay(input: PanelLayoutDisplayInput): Panel
   const formatY = makeAxisFormatter("y", yScale, scalesConfig.y, warnings);
   const { hTitle, vTitle } = flipDisplayTitles(flip, xTitle, yTitle);
   const { formatH, formatV } = flipDisplayFormatters(flip, formatX, formatY);
-  const convertedBreaks = (axis: "x" | "y"): number[] | undefined => {
+  const convertedBreaks = (axis: "x" | "y"): (number | string)[] | undefined => {
     const config = scalesConfig[axis];
-    let breaks: number[] | undefined;
+    let breaks: (number | string)[] | undefined;
     if (config?.breaks !== undefined) {
+      const scale = axis === "x" ? xScale : yScale;
+      if (scale.type === "band") return [...config.breaks];
       const converted = positionValuesToNumeric(
         config.breaks,
         positionConversionContext(config),

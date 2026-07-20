@@ -20,7 +20,7 @@ export function collectPointPositions(frame: LayerFrame, fx: Frame): CollectedPo
   let kept = 0;
   for (let row = 0; row < n; row++) {
     const tx = positionOf(fx.xScale, frame.xNumeric, frame.xValues, row, frame.offsetX);
-    const ty = positionOf(fx.yScale, frame.yNumeric, null, row, frame.offsetY);
+    const ty = positionOf(fx.yScale, frame.yNumeric, frame.yValues, row, frame.offsetY);
     if (Number.isNaN(tx) || Number.isNaN(ty)) continue;
     xs[kept] = tx;
     ys[kept] = ty;

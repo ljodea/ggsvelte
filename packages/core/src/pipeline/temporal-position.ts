@@ -5,7 +5,14 @@ import {
   type TemporalParserSpec,
 } from "@ggsvelte/spec";
 
-import { cellsToNumeric, type CellValue, type ParsedColumnOptions } from "../table.js";
+import {
+  cellsToNumeric,
+  type CellValue,
+  type ColumnTable,
+  type Discreteness,
+  type FieldType,
+  type ParsedColumnOptions,
+} from "../table.js";
 
 export interface PositionConversionContext {
   /** Effective parser for detached/post-stat values and author scalars. */
@@ -14,6 +21,8 @@ export interface PositionConversionContext {
   sourceParser: TemporalParserSpec | "auto";
   options: ParsedColumnOptions;
   requestedTime: boolean;
+  requestedKind?: "date" | "datetime";
+  forcedDiscrete: boolean;
 }
 
 export const AUTO_POSITION_CONVERSION: PositionConversionContext = Object.freeze({
@@ -21,6 +30,15 @@ export const AUTO_POSITION_CONVERSION: PositionConversionContext = Object.freeze
   sourceParser: "auto",
   options: Object.freeze({}),
   requestedTime: false,
+  forcedDiscrete: false,
+});
+
+const DISCRETE_POSITION_CONVERSION: PositionConversionContext = Object.freeze({
+  parser: "auto",
+  sourceParser: "auto",
+  options: Object.freeze({}),
+  requestedTime: false,
+  forcedDiscrete: true,
 });
 
 export function xConversionOf(binding: {
@@ -33,6 +51,26 @@ export function yConversionOf(binding: {
   yConversion?: PositionConversionContext | undefined;
 }): PositionConversionContext {
   return binding.yConversion ?? AUTO_POSITION_CONVERSION;
+}
+
+export function positionFieldType(
+  table: ColumnTable,
+  field: string,
+  conversion: PositionConversionContext,
+): FieldType {
+  return conversion.forcedDiscrete
+    ? "nominal"
+    : table.fieldType(field, conversion.sourceParser, conversion.options);
+}
+
+export function positionDiscreteness(
+  table: ColumnTable,
+  field: string,
+  conversion: PositionConversionContext,
+): Discreteness {
+  return conversion.forcedDiscrete
+    ? "discrete"
+    : table.discreteness(field, conversion.sourceParser, conversion.options);
 }
 
 export interface ConvertedPositionValues {
@@ -82,7 +120,8 @@ export function positionValueToNumber(
 export function positionConversionContext(
   config: PositionScaleSpec | undefined,
 ): PositionConversionContext {
-  if (config === undefined || config.type === "band") return AUTO_POSITION_CONVERSION;
+  if (config === undefined) return AUTO_POSITION_CONVERSION;
+  if (config.type === "band") return DISCRETE_POSITION_CONVERSION;
   return {
     parser: config.parse ?? "auto",
     sourceParser: config.parse ?? "auto",
@@ -94,6 +133,13 @@ export function positionConversionContext(
       ...(config.parseFailure !== undefined && { failurePolicy: config.parseFailure }),
     },
     requestedTime:
-      config.type === "time" || config.parse !== undefined || config.temporalKind !== undefined,
+      config.type === "time" ||
+      config.parse !== undefined ||
+      config.temporalKind !== undefined ||
+      config.timezone !== undefined ||
+      config.disambiguation !== undefined ||
+      config.parseFailure !== undefined,
+    ...(config.temporalKind !== undefined && { requestedKind: config.temporalKind }),
+    forcedDiscrete: false,
   };
 }

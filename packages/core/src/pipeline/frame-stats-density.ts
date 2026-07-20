@@ -51,6 +51,7 @@ export function buildDensityFrame(
     n: outN,
     xValues: null,
     xNumeric: result.x,
+    yValues: null,
     yNumeric,
     groups: result.groups,
     inputGroups: groups,

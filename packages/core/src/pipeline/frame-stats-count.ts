@@ -39,6 +39,7 @@ export function buildCountFrame(
     n: result.x.length,
     xValues: result.x,
     xNumeric: positionValuesToNumeric(result.x, binding.xConversion).values,
+    yValues: null,
     yNumeric: binding.yStatColumn === "count" ? result.count : null,
     groups: result.groups,
     inputGroups: groups,

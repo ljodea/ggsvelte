@@ -57,17 +57,90 @@ describe("temporal pipeline semantics", () => {
     expect(model.row(0)?.["when"]).toBe(first);
   });
 
+  it("renders every identity geometry on an explicit discrete y scale", () => {
+    const model = runPipeline(
+      {
+        data: {
+          values: [
+            { x: 1, category: "low", label: "L" },
+            { x: 2, category: "high", label: "H" },
+          ],
+        },
+        layers: [
+          {
+            geom: "point",
+            aes: { x: { field: "x" }, y: { field: "category" } },
+          },
+          {
+            geom: "line",
+            aes: { x: { field: "x" }, y: { field: "category" } },
+          },
+          {
+            geom: "text",
+            aes: {
+              x: { field: "x" },
+              y: { field: "category" },
+              label: { field: "label" },
+            },
+          },
+          { geom: "rule", aes: { y: { field: "category" } } },
+        ],
+        scales: { y: { type: "band" } },
+      },
+      size,
+    );
+    expect(model.scales.y.type).toBe("band");
+    expect(model.scene.batches.map(({ kind }) => kind)).toEqual([
+      "points",
+      "paths",
+      "glyphs",
+      "segments",
+    ]);
+  });
+
   it("lets an explicit discrete scale override string-year inference", () => {
     const model = runPipeline(
       gg(yearRows, aes({ x: "year", y: "value" }))
         .geomLine()
-        .scaleXDiscrete()
+        .scaleXDiscrete({ breaks: ["1835", "2026"] })
         .spec(),
       size,
     );
     expect(model.scales.x.type).toBe("band");
     if (model.scales.x.type === "band")
       expect(model.scales.x.domain).toEqual(["1835", "1900", "2026"]);
+    expect(model.scene.axes.x.ticks.map(({ label }) => label)).toEqual(["1835", "2026"]);
+    expect(model.scene.axes.x.ticks[1]!.pos).toBeGreaterThan(model.scene.panels[0]!.width * 0.7);
+    const line = model.scene.batches.find((batch) => batch.kind === "paths");
+    if (line?.kind === "paths") expect([...line.pathOffsets]).toEqual([0, 1, 2, 3]);
+    expect(model.scaleDecisions).toHaveLength(0);
+  });
+
+  it("positions reordered typed band breaks by domain identity", () => {
+    const model = runPipeline(
+      {
+        data: {
+          values: [
+            { category: 1, value: 1 },
+            { category: "1", value: 2 },
+            { category: 2, value: 3 },
+          ],
+        },
+        layers: [
+          {
+            geom: "point",
+            aes: { x: { field: "category" }, y: { field: "value" } },
+          },
+        ],
+        scales: { x: { type: "band", breaks: [2, 1] } },
+      },
+      size,
+    );
+    expect(model.scene.axes.x.ticks.map(({ label }) => label)).toEqual(["2", "1"]);
+    expect(model.scene.axes.x.ticks[0]!.pos).toBeGreaterThan(model.scene.axes.x.ticks[1]!.pos);
+    if (model.scales.x.type === "band") {
+      expect(model.scales.x.rawDomain).toEqual([1, "1", 2]);
+    }
   });
 
   it("uses an explicit ordered parser throughout grouping, frames, and scale training", () => {
@@ -200,6 +273,27 @@ describe("temporal pipeline semantics", () => {
     }
   });
 
+  it("keeps calendar-date parsers on UTC dates even when a timezone is configured", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { year: "2024", value: 1 },
+          { year: "2025", value: 2 },
+        ],
+        aes({ x: "year", y: "value" }),
+      )
+        .geomLine()
+        .scaleXDate({ timezone: "Asia/Tokyo", nice: false })
+        .spec(),
+      size,
+    );
+    expect(model.scales.x.type).toBe("time");
+    if (model.scales.x.type !== "band") {
+      expect(model.scales.x.domain).toEqual([Date.UTC(2024, 0, 1), Date.UTC(2025, 0, 1)]);
+    }
+    expect(model.axisFormatters.x("2024")).toContain("2024");
+  });
+
   it("applies timezone and disambiguation to automatically selected parsers", () => {
     const rows = [
       { when: "2024-03-10T01:30:00", value: 1 },
@@ -325,6 +419,7 @@ describe("temporal pipeline semantics", () => {
       expect(point.scales.x.domain).toEqual([900_000_000_000, 1_200_000_000_000]);
     }
     expect(point.scene.axes.x.ticks).toHaveLength(2);
+    expect(point.axisFormatters.x(1_000_000_000)).toBe(point.axisFormatters.x(1_000_000_000_000));
     const rules = point.scene.batches.filter((batch) => batch.kind === "segments");
     expect(rules).toHaveLength(2);
     if (rules[0]?.kind === "segments" && rules[1]?.kind === "segments") {
@@ -345,6 +440,194 @@ describe("temporal pipeline semantics", () => {
       if (model.scales.x.type !== "band") {
         expect(model.scales.x.domain).toEqual([900_000_000_000, 1_100_000_000_000]);
       }
+    }
+  });
+
+  it("rejects date/datetime kind mismatches", () => {
+    const rows = [
+      { when: "2025-01-01T10:30:00", value: 1 },
+      { when: "2025-01-02T10:30:00", value: 2 },
+    ];
+    expect(() =>
+      runPipeline(
+        gg(rows, aes({ x: "when", y: "value" }))
+          .geomLine()
+          .scaleXDate({ parse: "ymd_hms" })
+          .spec(),
+        size,
+      ),
+    ).toThrow(PipelineError);
+    expect(() =>
+      runPipeline(
+        gg([rows[0]!, { when: "not-a-date", value: 2 }], aes({ x: "when", y: "value" }))
+          .geomLine()
+          .scaleXDate({ parse: "ymd_hms", parseFailure: "censor" })
+          .spec(),
+        size,
+      ),
+    ).toThrow(PipelineError);
+  });
+
+  it("infers temporal y scales from identity bounds", () => {
+    const model = runPipeline(
+      {
+        data: {
+          values: [
+            { x: "a", lo: "2024-01-01", hi: "2024-01-03" },
+            { x: "b", lo: "2024-02-01", hi: "2024-02-03" },
+          ],
+        },
+        layers: [
+          {
+            geom: "errorbar",
+            aes: { x: { field: "x" }, ymin: { field: "lo" }, ymax: { field: "hi" } },
+          },
+        ],
+      },
+      size,
+    );
+    expect(model.scales.y.type).toBe("time");
+    expect(model.scaleDecisions.map(({ field }) => field)).toEqual(["lo", "hi"]);
+  });
+
+  it("keeps independent auto-parser decisions for mixed temporal bound formats", () => {
+    const model = runPipeline(
+      {
+        data: {
+          values: [
+            { x: "a", lo: "2024-01-01", hi: "31/01/2024" },
+            { x: "b", lo: "2024-02-01", hi: "29/02/2024" },
+          ],
+        },
+        layers: [
+          {
+            geom: "errorbar",
+            aes: { x: { field: "x" }, ymin: { field: "lo" }, ymax: { field: "hi" } },
+          },
+        ],
+      },
+      size,
+    );
+    expect(model.scales.y.type).toBe("time");
+    expect(model.scaleDecisions.map(({ parser }) => parser)).toEqual(["iso", "dmy"]);
+  });
+
+  it("preflights requested temporal annotation intercepts", () => {
+    const semantic = runPipeline(
+      {
+        data: { values: [{}] },
+        layers: [{ geom: "rule", params: { yintercept: Date.UTC(2025, 0, 1) } }],
+        scales: { y: { type: "time" } },
+      },
+      size,
+    );
+    expect(semantic.scene.batches.some(({ kind }) => kind === "segments")).toBe(true);
+
+    const spec = {
+      data: { values: [{}] },
+      layers: [{ geom: "rule" as const, params: { yintercept: "not-a-date" } }],
+      scales: { y: { type: "time" as const, parse: "dmy" as const } },
+    };
+    expect(() => runPipeline(spec, size)).toThrow(PipelineError);
+    const censored = runPipeline(
+      { ...spec, scales: { y: { ...spec.scales.y, parseFailure: "censor" } } },
+      size,
+    );
+    expect(censored.scene.batches).toHaveLength(0);
+    expect(censored.warnings.some(({ code }) => code === "temporal-values-censored")).toBe(true);
+
+    expect(() =>
+      runPipeline(
+        {
+          data: { values: [{}] },
+          layers: [
+            {
+              geom: "rule",
+              params: { yintercept: ["2025-01-01 10:30:00", "bad"] },
+            },
+          ],
+          scales: {
+            y: {
+              type: "time",
+              parse: "ymd_hms",
+              temporalKind: "date",
+              parseFailure: "censor",
+            },
+          },
+        },
+        size,
+      ),
+    ).toThrow(PipelineError);
+
+    const mixed = runPipeline(
+      {
+        data: { values: [{}] },
+        layers: [{ geom: "rule", params: { yintercept: [Date.UTC(2025, 0, 1), "bad"] } }],
+        scales: { y: { type: "time", parse: "dmy", parseFailure: "censor" } },
+      },
+      size,
+    );
+    expect(
+      mixed.warnings.find(({ code }) => code === "temporal-values-censored")?.message,
+    ).toContain("censored 1 annotation");
+  });
+
+  it("rejects invalid temporal configuration without source rows", () => {
+    expect(() =>
+      runPipeline(
+        {
+          data: { values: [] },
+          layers: [{ geom: "point" }],
+          scales: {
+            x: {
+              type: "time",
+              parse: { format: "%Y-%m-Q%q" },
+              parseFailure: "censor",
+            },
+          },
+        },
+        size,
+      ),
+    ).toThrow(PipelineError);
+  });
+
+  it("keeps ambiguous y-intercept annotations discrete", () => {
+    const model = runPipeline(
+      {
+        data: { values: [{}] },
+        layers: [{ geom: "rule", params: { yintercept: "03/04/2024" } }],
+      },
+      size,
+    );
+    expect(model.scales.y.type).toBe("band");
+  });
+
+  it("preflights explicit parsers against temporal bound fields", () => {
+    const spec = {
+      data: {
+        values: [
+          { x: 1, ymin: "31/12/2024", ymax: "bad" },
+          { x: 2, ymin: "01/01/2025", ymax: "02/01/2025" },
+        ],
+      },
+      layers: [
+        {
+          geom: "errorbar" as const,
+          aes: {
+            x: { field: "x" },
+            ymin: { field: "ymin" },
+            ymax: { field: "ymax" },
+          },
+        },
+      ],
+      scales: { y: { type: "time" as const, parse: "dmy" as const } },
+    };
+    expect(() => runPipeline(spec, size)).toThrow(PipelineError);
+    try {
+      runPipeline(spec, size);
+    } catch (error) {
+      expect((error as PipelineError).code).toBe("temporal-parse-failed");
+      expect((error as Error).message).toContain('field "ymax"');
     }
   });
 
@@ -380,6 +663,27 @@ describe("temporal pipeline semantics", () => {
     expect(censored.warnings.some((warning) => warning.code === "temporal-values-censored")).toBe(
       true,
     );
+  });
+
+  it("preflights the source column even when runtime filters remove every row", () => {
+    expect(() =>
+      runPipeline(
+        {
+          data: { values: [{ when: "not-a-date", value: 1, group: "drop" }] },
+          layers: [
+            {
+              geom: "point",
+              aes: { x: { field: "when" }, y: { field: "value" } },
+            },
+          ],
+          scales: { x: { type: "time", parse: "dmy" } },
+        },
+        {
+          ...size,
+          rowFilters: [{ scale: "color", field: "group", mode: "exclude", values: ["drop"] }],
+        },
+      ),
+    ).toThrow(PipelineError);
   });
 
   it("validates the whole source column before runtime filters and facets", () => {

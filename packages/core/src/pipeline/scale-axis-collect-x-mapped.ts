@@ -4,7 +4,7 @@
 import type { PositionScaleSpec } from "@ggsvelte/spec";
 
 import type { AxisCollectAcc } from "./scale-axis-collect-acc.js";
-import { xConversionOf } from "./temporal-position.js";
+import { positionFieldType, xConversionOf } from "./temporal-position.js";
 import type { Advisory, LayerFrame } from "./types.js";
 
 export function collectMappedXEvidence(
@@ -21,7 +21,7 @@ export function collectMappedXEvidence(
   const field = binding.xField!;
   const conversion = xConversionOf(binding);
   const fieldType = frame.table.has(field)
-    ? frame.table.fieldType(field, conversion.sourceParser, conversion.options)
+    ? positionFieldType(frame.table, field, conversion)
     : "quantitative";
   acc.typeParts.add(fieldType);
   const barX = (geom === "bar" || geom === "col") && binding.layer.stat !== "bin";

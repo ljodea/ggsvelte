@@ -32,7 +32,7 @@ export function writeLineSubpaths(input: {
     const rows = subpaths[s]!;
     for (const row of rows) {
       const tx = positionOf(fx.xScale, frame.xNumeric, frame.xValues, row);
-      const ty = positionOf(fx.yScale, frame.yNumeric, null, row);
+      const ty = positionOf(fx.yScale, frame.yNumeric, frame.yValues, row);
       positions[cursor * 2] = tx * fx.innerWidth;
       positions[cursor * 2 + 1] = fx.innerHeight - ty * fx.innerHeight;
       rowIndex[cursor] = frame.rowIndex[row]!;

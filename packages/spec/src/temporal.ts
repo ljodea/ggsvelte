@@ -126,6 +126,25 @@ export class TemporalParseError extends Error {
   }
 }
 
+const PRECISION_RANK: Readonly<Record<TemporalPrecision, number>> = {
+  year: 0,
+  quarter: 1,
+  month: 2,
+  date: 3,
+  minute: 4,
+  second: 5,
+  millisecond: 6,
+};
+
+function finestPrecision(
+  current: TemporalPrecision | null,
+  candidate: TemporalPrecision,
+): TemporalPrecision {
+  return current === null || PRECISION_RANK[candidate] > PRECISION_RANK[current]
+    ? candidate
+    : current;
+}
+
 interface DateParts {
   year: number;
   month: number;
@@ -217,10 +236,40 @@ function temporalImplementation(): typeof PolyfillTemporal {
   return nativeTemporal ?? PolyfillTemporal;
 }
 
+const TIMEZONE_VALIDITY_CACHE = new Map<string, boolean>();
+
+function timezoneValidationFailure(timezone: string | undefined): TemporalParseResult | null {
+  if (timezone === undefined || ["UTC", "Etc/UTC", "Z"].includes(timezone)) return null;
+  const cached = TIMEZONE_VALIDITY_CACHE.get(timezone);
+  if (cached !== undefined) {
+    return cached ? null : failure(`invalid or unsupported timezone ${JSON.stringify(timezone)}`);
+  }
+  let valid = true;
+  try {
+    const Temporal = temporalImplementation();
+    Temporal.ZonedDateTime.from({
+      timeZone: timezone,
+      year: 2000,
+      month: 1,
+      day: 1,
+      hour: 12,
+    });
+  } catch {
+    valid = false;
+  }
+  if (TIMEZONE_VALIDITY_CACHE.size >= 64) {
+    const oldest = TIMEZONE_VALIDITY_CACHE.keys().next().value;
+    if (oldest !== undefined) TIMEZONE_VALIDITY_CACHE.delete(oldest);
+  }
+  TIMEZONE_VALIDITY_CACHE.set(timezone, valid);
+  return valid ? null : failure(`invalid or unsupported timezone ${JSON.stringify(timezone)}`);
+}
+
 function partsToEpoch(
   parts: DateParts,
   options: TemporalParseOptions,
-  offset?: string,
+  offset: string | undefined,
+  kind: TemporalKind,
 ): TemporalParseResult {
   const invalid = validateParts(parts);
   if (invalid !== null) return failure(invalid);
@@ -234,7 +283,9 @@ function partsToEpoch(
       : failure("instant is outside the supported range");
   }
 
-  const timezone = options.timezone ?? "UTC";
+  // Calendar dates are timezone-free values. Keep them on UTC calendar
+  // boundaries so ticks preserve their represented date.
+  const timezone = kind === "date" ? "UTC" : (options.timezone ?? "UTC");
   if (timezone === "UTC" || timezone === "Etc/UTC" || timezone === "Z") {
     const epochMs = utcEpoch(parts);
     return Number.isFinite(epochMs)
@@ -287,7 +338,7 @@ function parseISO(value: string, options: TemporalParseOptions): TemporalParseRe
     if (fraction !== undefined) precision = "millisecond";
   }
   return withMetadata(
-    partsToEpoch(parts, options, match[8]),
+    partsToEpoch(parts, options, match[8], hasTime ? "datetime" : "date"),
     hasTime ? "datetime" : "date",
     precision,
   );
@@ -301,7 +352,7 @@ function parsePeriod(
   if (parser === "year") {
     if (!YEAR_RE.test(value)) return failure("expected exactly four year digits");
     return withMetadata(
-      partsToEpoch({ year: Number(value), ...DEFAULT_PARTS }, options),
+      partsToEpoch({ year: Number(value), ...DEFAULT_PARTS }, options, undefined, "date"),
       "date",
       "year",
     );
@@ -315,7 +366,12 @@ function parsePeriod(
       ? (Number(match[2]) - 1) * 3 + 1
       : Number(parser === "my" ? match[1] : match[2]);
   return withMetadata(
-    partsToEpoch({ year, month, day: 1, hour: 0, minute: 0, second: 0, millisecond: 0 }, options),
+    partsToEpoch(
+      { year, month, day: 1, hour: 0, minute: 0, second: 0, millisecond: 0 },
+      options,
+      undefined,
+      "date",
+    ),
     "date",
     parser === "yq" ? "quarter" : "month",
   );
@@ -354,7 +410,7 @@ function parseOrdered(
   const precision: TemporalPrecision =
     timePrecision === "hm" ? "minute" : timePrecision === "hms" ? "second" : "date";
   return withMetadata(
-    partsToEpoch(parts, options),
+    partsToEpoch(parts, options, undefined, timePrecision === undefined ? "date" : "datetime"),
     timePrecision === undefined ? "date" : "datetime",
     precision,
   );
@@ -412,12 +468,12 @@ function parseExactFormat(
   if (values["Y"] === undefined) return failure("exact formats require %Y");
   if (values["m"] !== undefined && values["q"] !== undefined)
     return failure("exact formats cannot contain both %m and %q");
-  const hasTime =
+  const hasClockTime =
     values["H"] !== undefined ||
     values["M"] !== undefined ||
     values["S"] !== undefined ||
     values["L"] !== undefined;
-  if (hasTime && (values["H"] === undefined || values["M"] === undefined))
+  if (hasClockTime && (values["H"] === undefined || values["M"] === undefined))
     return failure("time formats require both %H and %M");
   const parts: DateParts = {
     year: Number(values["Y"]),
@@ -432,14 +488,51 @@ function parseExactFormat(
   if (values["m"] !== undefined) precision = "month";
   if (values["q"] !== undefined) precision = "quarter";
   if (values["d"] !== undefined) precision = "date";
-  if (hasTime) precision = "minute";
+  if (hasClockTime) precision = "minute";
   if (values["S"] !== undefined) precision = "second";
   if (values["L"] !== undefined) precision = "millisecond";
-  return withMetadata(
-    partsToEpoch(parts, options, values["z"]),
-    hasTime ? "datetime" : "date",
-    precision,
-  );
+  const kind: TemporalKind = hasClockTime || values["z"] !== undefined ? "datetime" : "date";
+  return withMetadata(partsToEpoch(parts, options, values["z"], kind), kind, precision);
+}
+
+const FORMAT_SAMPLE_VALUES: Readonly<Record<string, string>> = {
+  Y: "2000",
+  m: "01",
+  d: "01",
+  H: "12",
+  M: "00",
+  S: "00",
+  L: "000",
+  z: "Z",
+  q: "1",
+  "%": "%",
+};
+
+function exactFormatSample(format: string): string {
+  let sample = "";
+  for (let index = 0; index < format.length; index++) {
+    const char = format[index]!;
+    if (char !== "%") {
+      sample += char;
+      continue;
+    }
+    const token = format[++index];
+    if (token === undefined) return sample;
+    sample += FORMAT_SAMPLE_VALUES[token] ?? "0";
+  }
+  return sample;
+}
+
+/** Returns a stable reason when parser options are invalid independent of data. */
+export function temporalParserConfigurationError(
+  parser: TemporalParserSpec | "auto",
+  options: TemporalParseOptions = {},
+): string | null {
+  const timezoneFailure = timezoneValidationFailure(options.timezone);
+  if (timezoneFailure !== null && !timezoneFailure.ok) return timezoneFailure.reason;
+  if (parser === "auto" || typeof parser === "string" || "epoch" in parser) return null;
+  const result = parseExactFormat(exactFormatSample(parser.format), parser.format, options);
+  return result.ok ? null : result.reason;
 }
 
 export function parseTemporal(
@@ -447,6 +540,8 @@ export function parseTemporal(
   parser: TemporalParserSpec,
   options: TemporalParseOptions = {},
 ): TemporalParseResult {
+  const timezoneFailure = timezoneValidationFailure(options.timezone);
+  if (timezoneFailure !== null) return timezoneFailure;
   if (value instanceof Date) {
     const epochMs = value.getTime();
     return Number.isFinite(epochMs)
@@ -606,9 +701,7 @@ function inferTemporalColumnInternal(
     validatedCount++;
     onSuccess?.(index, parsed.epochMs);
     kind = kind === "datetime" || parsed.kind === "datetime" ? "datetime" : "date";
-    precision = precision ?? parsed.precision;
-    if (precision !== parsed.precision && parsed.precision === "millisecond")
-      precision = "millisecond";
+    precision = finestPrecision(precision, parsed.precision);
   }
   const failedCount = nonNull.length - validatedCount;
   if (failedCount > 0) {
@@ -681,7 +774,7 @@ export function parseTemporalColumn(
     valid[index] = 1;
     validatedCount++;
     kind = kind === "datetime" || result.kind === "datetime" ? "datetime" : "date";
-    precision = precision ?? result.precision;
+    precision = finestPrecision(precision, result.precision);
   }
   const failedCount = nonNullCount - validatedCount;
   const parserKey = canonicalTemporalParserKey(parser);

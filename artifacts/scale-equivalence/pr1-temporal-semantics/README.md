@@ -27,6 +27,6 @@ A clean reload had zero console errors and zero failed network requests.
 
 ## Supporting evidence
 
-- `performance.json`: 100k-row temporal workload is 1.2619× the numeric scatter workload and below the 1.5× initial limit.
+- `performance.json`: 100k-row temporal workload is 1.3256× the numeric scatter workload and below the 1.5× initial limit.
 - `dependency-size.json`: packed package and polyfill size measurements plus SSR/browser verification scope.
 - `tthw.md`: strict clean-consumer journey under five minutes.

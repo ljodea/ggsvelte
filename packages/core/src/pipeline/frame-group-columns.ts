@@ -5,6 +5,7 @@ import { deriveGroups } from "../grouping.js";
 import type { CellValue, Discreteness } from "../table.js";
 import type { ColumnTable } from "../table.js";
 
+import { positionDiscreteness } from "./temporal-position.js";
 import type { LayerBinding } from "./types.js";
 
 export function deriveLayerGroups(binding: LayerBinding, table: ColumnTable): number[] {
@@ -28,7 +29,7 @@ export function deriveLayerGroups(binding: LayerBinding, table: ColumnTable): nu
       declared[mapping.field] =
         conversion === undefined
           ? table.discreteness(mapping.field)
-          : table.discreteness(mapping.field, conversion.sourceParser, conversion.options);
+          : positionDiscreteness(table, mapping.field, conversion);
     }
   }
   return [...deriveGroups(table.columns(), aes, declared).groups];

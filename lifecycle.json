@@ -900,6 +900,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "temporalParserConfigurationError": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "toPortable": {
           "kind": "value",
           "lifecycle": "experimental"

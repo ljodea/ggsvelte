@@ -9,10 +9,10 @@
     "publishedBaselineVersion": "0.3.1",
     "publishedBaselinePackedBytes": 154559,
     "publishedBaselineUnpackedBytes": 930013,
-    "workingTreePackedBytes": 192370,
-    "workingTreeUnpackedBytes": 1067412,
-    "packedDeltaBytes": 37811,
-    "unpackedDeltaBytes": 137399
+    "workingTreePackedBytes": 195809,
+    "workingTreeUnpackedBytes": 1083051,
+    "packedDeltaBytes": 41250,
+    "unpackedDeltaBytes": 153038
   },
   "temporalPolyfill": {
     "package": "@js-temporal/polyfill",
@@ -24,8 +24,8 @@
     "strategy": "globalThis.Temporal when present; official static fallback for the synchronous IANA parser API; UTC/integer parsing never calls Temporal"
   },
   "packedConsumerBuild": {
-    "largestClientJavaScriptKiB": 719.99,
-    "largestClientJavaScriptGzipKiB": 214.52,
+    "largestClientJavaScriptKiB": 725.94,
+    "largestClientJavaScriptGzipKiB": 216.08,
     "largestServerJavaScriptKiB": 241.79
   },
   "verification": [

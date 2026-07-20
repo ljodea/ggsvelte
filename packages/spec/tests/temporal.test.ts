@@ -53,6 +53,12 @@ describe("strict temporal parsing", () => {
       precision: "second",
     });
     expect(parseTemporal("31|12|2024", { format: "%d|%m|%Y" })).toMatchObject({ ok: true });
+    expect(parseTemporal("2024-01-01+02:00", { format: "%Y-%m-%d%z" })).toMatchObject({
+      ok: true,
+      kind: "datetime",
+      precision: "date",
+      epochMs: Date.UTC(2023, 11, 31, 22),
+    });
     expect(parseTemporal(1_700_000_000, { epoch: "seconds" })).toMatchObject({
       ok: true,
       epochMs: 1_700_000_000_000,
@@ -100,6 +106,22 @@ describe("strict temporal parsing", () => {
     ).toMatchObject({ ok: true, epochMs: Date.parse("2024-11-03T06:30:00.000Z") });
     expect(parseTemporal("2024-01-01", "iso", { timezone: "Not/A_Zone" })).toMatchObject({
       ok: false,
+    });
+    expect(parseTemporal("2024-01-01T00:00:00Z", "iso", { timezone: "Not/A_Zone" })).toMatchObject({
+      ok: false,
+    });
+  });
+
+  it("keeps date precision in UTC while applying zones to datetimes", () => {
+    const year = parseTemporal("2024", "year", { timezone: "Asia/Tokyo" });
+    expect(year).toMatchObject({ ok: true, kind: "date", epochMs: Date.UTC(2024, 0, 1) });
+    const datetime = parseTemporal("2024-01-01T00:00:00", "iso", {
+      timezone: "Asia/Tokyo",
+    });
+    expect(datetime).toMatchObject({
+      ok: true,
+      kind: "datetime",
+      epochMs: Date.UTC(2023, 11, 31, 15),
     });
   });
 
@@ -162,6 +184,16 @@ describe("value-driven temporal inference", () => {
     const decision = inferTemporalColumn(values);
     expect(decision).toMatchObject({ status: "invalid", failedCount: 1, validatedCount: 99 });
     expect(decision.failures?.[0]?.value).toBe("not-a-year");
+  });
+
+  it("reports the finest precision independent of row order", () => {
+    const coarseFirst = inferTemporalColumn(["2024-01-01", "2024-01-02T12:30:45"]);
+    const fineFirst = inferTemporalColumn(["2024-01-02T12:30:45", "2024-01-01"]);
+    expect(coarseFirst.precision).toBe("second");
+    expect(fineFirst.precision).toBe("second");
+    expect(
+      parseTemporalColumn(["2024-01-01", "2024-01-02T12:30:45"], "iso").decision.precision,
+    ).toBe("second");
   });
 
   it("accepts Date plus compatible ISO values and rejects incoherent mixtures", () => {

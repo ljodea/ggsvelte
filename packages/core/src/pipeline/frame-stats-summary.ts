@@ -43,6 +43,7 @@ export function buildSummaryFrame(
     n: result.x.length,
     xValues: result.x,
     xNumeric: positionValuesToNumeric(result.x, binding.xConversion).values,
+    yValues: null,
     yNumeric: result.y,
     groups: result.groups,
     inputGroups: groups,

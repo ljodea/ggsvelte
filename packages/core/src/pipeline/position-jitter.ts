@@ -6,6 +6,7 @@ import type { PositionParams } from "@ggsvelte/spec";
 import { DEFAULT_JITTER_SEED, jitterOffsets, nudgeOffsets } from "../positions/jitter.js";
 import type { ColumnTable } from "../table.js";
 
+import { positionDiscreteness } from "./temporal-position.js";
 import type { Advisory, LayerFrame } from "./types.js";
 
 /** Apply jitter/nudge for point and text layers. Returns true when handled. */
@@ -26,18 +27,10 @@ export function applyPointTextPosition(
   // data units on continuous axes.
   const xDiscrete =
     binding.xField !== null &&
-    table.discreteness(
-      binding.xField,
-      binding.xConversion.sourceParser,
-      binding.xConversion.options,
-    ) === "discrete";
+    positionDiscreteness(table, binding.xField, binding.xConversion) === "discrete";
   const yDiscrete =
     binding.yField !== null &&
-    table.discreteness(
-      binding.yField,
-      binding.yConversion.sourceParser,
-      binding.yConversion.options,
-    ) === "discrete";
+    positionDiscreteness(table, binding.yField, binding.yConversion) === "discrete";
   if (position === "nudge") {
     const { dx, dy } = nudgeOffsets(frame.n, params.x ?? 0, params.y ?? 0);
     frame.offsetX = dx;

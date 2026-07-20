@@ -10,6 +10,7 @@ import { warnEmptyData } from "./prepare-panels-empty.js";
 import { buildPanelFrames } from "./prepare-panels-frames.js";
 import { applyRuntimeRowFilters } from "./prepare-panels-row-filters.js";
 import { positionConversionContext } from "./temporal-position.js";
+import { assertTemporalConfiguration, preflightTemporalBindings } from "./temporal-preflight.js";
 import type { PreparedPanels } from "./prepare-panels-types.js";
 import type {
   Advisory,
@@ -38,6 +39,8 @@ export function preparePanels(
     x: positionConversionContext(normalized.scales?.x),
     y: positionConversionContext(normalized.scales?.y),
   };
+  assertTemporalConfiguration("x", conversions.x);
+  assertTemporalConfiguration("y", conversions.y);
 
   const facetLayout: FacetLayout = emptyData
     ? SINGLE_PANEL(table, filtered.sourceRows)
@@ -75,6 +78,18 @@ export function preparePanels(
     for (let index = 0; index < normalized.layers.length; index++) {
       bindings.push(bindLayer(normalized.layers[index]!, index, table, warnings, conversions));
     }
+    // Parsing is a source contract, not a rendered-row optimization. Validate
+    // the complete source even when runtime filters remove every row.
+    const temporal = preflightTemporalBindings({
+      table: sourceTable,
+      bindings,
+      warnings,
+      advisories,
+      conversions,
+    });
+    scaleDecisions = temporal.decisions;
+    scaleDiagnostics = temporal.diagnostics;
+    resolvedConversions = { x: temporal.xConversion, y: temporal.yConversion };
   }
 
   return {

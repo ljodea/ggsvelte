@@ -40,6 +40,7 @@ export function buildBoxplotFrame(
     n: result.x.length,
     xValues: result.x,
     xNumeric: null,
+    yValues: null,
     yNumeric: null,
     groups: result.groups,
     inputGroups: groups,

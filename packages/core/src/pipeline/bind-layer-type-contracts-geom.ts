@@ -5,7 +5,7 @@ import type { LayerSpec } from "@ggsvelte/spec";
 
 import type { ColumnTable } from "../table.js";
 
-import type { PositionConversionContext } from "./temporal-position.js";
+import { positionFieldType, type PositionConversionContext } from "./temporal-position.js";
 import { PipelineError } from "./types.js";
 
 export function validateGeomChannelTypeContracts(input: {
@@ -23,7 +23,7 @@ export function validateGeomChannelTypeContracts(input: {
   if (
     geom === "density" &&
     xField !== null &&
-    table.fieldType(xField, xConversion.sourceParser, xConversion.options) === "nominal"
+    positionFieldType(table, xField, xConversion) === "nominal"
   ) {
     throw new PipelineError(
       "channel-type-mismatch",
@@ -37,10 +37,7 @@ export function validateGeomChannelTypeContracts(input: {
       ["y", yField],
     ] as const) {
       const conversion = channel === "x" ? xConversion : yConversion;
-      if (
-        field !== null &&
-        table.fieldType(field, conversion.sourceParser, conversion.options) === "nominal"
-      ) {
+      if (field !== null && positionFieldType(table, field, conversion) === "nominal") {
         throw new PipelineError(
           "channel-type-mismatch",
           `/layers/${index}/aes/${channel}`,
@@ -50,20 +47,14 @@ export function validateGeomChannelTypeContracts(input: {
     }
   }
   if (geom === "boxplot") {
-    if (
-      xField !== null &&
-      table.fieldType(xField, xConversion.sourceParser, xConversion.options) !== "nominal"
-    ) {
+    if (xField !== null && positionFieldType(table, xField, xConversion) !== "nominal") {
       throw new PipelineError(
         "channel-type-mismatch",
         `/layers/${index}/aes/x`,
-        `The boxplot geom needs a DISCRETE x this milestone, but field "${xField}" is ${table.fieldType(xField, xConversion.sourceParser, xConversion.options)}. Map x to a categorical field.`,
+        `The boxplot geom needs a DISCRETE x this milestone, but field "${xField}" is ${positionFieldType(table, xField, xConversion)}. Map x to a categorical field.`,
       );
     }
-    if (
-      yField !== null &&
-      table.fieldType(yField, yConversion.sourceParser, yConversion.options) === "nominal"
-    ) {
+    if (yField !== null && positionFieldType(table, yField, yConversion) === "nominal") {
       throw new PipelineError(
         "channel-type-mismatch",
         `/layers/${index}/aes/y`,

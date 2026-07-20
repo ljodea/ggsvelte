@@ -25,6 +25,7 @@ export function buildIdentityFrame(
             binding.xConversion.sourceParser,
             binding.xConversion.options,
           ),
+    yValues: binding.yField === null ? null : table.column(binding.yField),
     yNumeric:
       binding.yField === null
         ? null
