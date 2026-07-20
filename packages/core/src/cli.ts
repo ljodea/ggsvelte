@@ -284,6 +284,9 @@ export async function runCLI(
     });
     for (const warning of model.warnings) errLine(io, { kind: "warning", ...warning });
     for (const advisory of model.advisories) errLine(io, { kind: "advisory", ...advisory });
+    for (const diagnostic of model.scaleDiagnostics) {
+      errLine(io, { kind: "scale-diagnostic", ...diagnostic });
+    }
     // Spec-lint advisories (Hadley lesson 16): valid-but-questionable specs.
     // Distinguished from pipeline heuristics by source: "spec-lint".
     for (const advisory of lintSpec(spec)) {
@@ -309,7 +312,13 @@ export async function runCLI(
       return 3;
     }
     if (error instanceof PipelineError) {
-      errLine(io, { kind: "error", code: error.code, path: error.path, message: error.message });
+      errLine(io, {
+        kind: "error",
+        code: error.code,
+        path: error.path,
+        message: error.message,
+        ...(error.diagnostic !== undefined && { diagnostic: error.diagnostic }),
+      });
       return 1;
     }
     errLine(io, {

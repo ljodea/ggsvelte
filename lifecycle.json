@@ -44,6 +44,22 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "AuthoringCellValue": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "AuthoringColumns": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "AuthoringDataRef": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "AuthoringRows": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "BarLayer": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -193,6 +209,10 @@
           "lifecycle": "experimental"
         },
         "DensityParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "DiscretePositionScaleOptions": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -384,6 +404,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "ParsedTemporalColumn": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "PlotSpecSchema": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -516,6 +540,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "SCALE_CAPABILITIES": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "SCHEMA_VERSION": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -526,6 +554,10 @@
         },
         "STAT_COLUMNS": {
           "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "ScaleCapability": {
+          "kind": "type",
           "lifecycle": "experimental"
         },
         "Scales": {
@@ -592,8 +624,64 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "TEMPORAL_PARSER_NAMES": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "THEME_NAMES": {
           "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TemporalDecision": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "TemporalDisambiguation": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "TemporalFailure": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "TemporalKind": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "TemporalParseError": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TemporalParseOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "TemporalParseResult": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "TemporalParserName": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "TemporalParserSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "TemporalParserSpecSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TemporalParserSpecSchemaRef": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TemporalPrecision": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "TemporalScaleOptions": {
+          "kind": "type",
           "lifecycle": "experimental"
         },
         "TextLayer": {
@@ -644,7 +732,35 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "canonicalTemporalParserKey": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "didYouMean": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "dmy": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "dmy_hm": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "dmy_hms": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "dym": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "dym_hm": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "dym_hms": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -652,7 +768,19 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "fromEpochMilliseconds": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "fromEpochSeconds": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "gg": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "inferTemporalColumn": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -668,6 +796,34 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "mdy": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "mdy_hm": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "mdy_hms": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "my": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "myd": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "myd_hm": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "myd_hms": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "normalize": {
           "kind": "value",
           "lifecycle": "stable-intent"
@@ -676,11 +832,75 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "parseTemporal": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "parseTemporalColumn": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "parseTemporalFormat": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "portabilityIssues": {
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scaleXDate": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleXDatetime": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleXDiscrete": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleYDate": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleYDatetime": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleYDiscrete": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_x_date": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_x_datetime": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_x_discrete": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_y_date": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_y_datetime": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_y_discrete": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "schemaArtifactJSON": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "temporalParserConfigurationError": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -695,6 +915,38 @@
         "validate": {
           "kind": "value",
           "lifecycle": "stable-intent"
+        },
+        "ydm": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "ydm_hm": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "ydm_hms": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "ym": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "ymd": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "ymd_hm": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "ymd_hms": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "yq": {
+          "kind": "value",
+          "lifecycle": "experimental"
         }
       }
     },
@@ -1125,6 +1377,18 @@
         },
         "ScaleConfigError": {
           "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "ScaleDecision": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ScaleDiagnostic": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ScaleDiagnosticFix": {
+          "kind": "type",
           "lifecycle": "experimental"
         },
         "ScaleDomainSnapshot": {
@@ -1585,6 +1849,22 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "AuthoringCellValue": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "AuthoringColumns": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "AuthoringDataRef": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "AuthoringRows": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "BoxplotParams": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1622,6 +1902,10 @@
           "lifecycle": "experimental"
         },
         "DensityParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "DiscretePositionScaleOptions": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -1937,6 +2221,26 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "SCALE_CAPABILITIES": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "ScaleCapability": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ScaleDecision": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ScaleDiagnostic": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ScaleDiagnosticFix": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "ScaleState": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -2001,6 +2305,34 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "TemporalDecision": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "TemporalDisambiguation": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "TemporalKind": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "TemporalParserName": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "TemporalParserSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "TemporalPrecision": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "TemporalScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "ThemeName": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -2057,6 +2389,38 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "dmy": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "dmy_hm": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "dmy_hms": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "dym": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "dym_hm": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "dym_hms": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "fromEpochMilliseconds": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "fromEpochSeconds": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "gg": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -2069,11 +2433,43 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "mdy": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "mdy_hm": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "mdy_hms": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "my": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "myd": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "myd_hm": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "myd_hms": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "normalize": {
           "kind": "value",
           "lifecycle": "stable-intent"
         },
         "normalizeInteractionConfig": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "parseTemporalFormat": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -2093,6 +2489,54 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scaleXDate": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleXDatetime": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleXDiscrete": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleYDate": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleYDatetime": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleYDiscrete": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_x_date": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_x_datetime": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_x_discrete": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_y_date": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_y_datetime": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_y_discrete": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "toPortable": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -2104,6 +2548,38 @@
         "validate": {
           "kind": "value",
           "lifecycle": "stable-intent"
+        },
+        "ydm": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "ydm_hm": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "ydm_hms": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "ym": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "ymd": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "ymd_hm": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "ymd_hms": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "yq": {
+          "kind": "value",
+          "lifecycle": "experimental"
         }
       }
     }

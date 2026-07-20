@@ -108,7 +108,8 @@ test("Docs landing and sidebar expose the full task-first path without duplicate
     "Reference",
     "Release",
   ]);
-  await expect(sidebar.getByRole("link")).toHaveCount(25);
+  await expect(sidebar.getByRole("link")).toHaveCount(26);
+  await expect(sidebar.getByRole("link", { name: "Dates without preprocessing" })).toBeVisible();
   await expectNoDocumentOverflow(page);
 
   await page.goto("/guide/errors?theme=light");

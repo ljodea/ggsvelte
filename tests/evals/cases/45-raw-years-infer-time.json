@@ -1,0 +1,37 @@
+{
+  "id": "45-raw-years-infer-time",
+  "kind": "chart",
+  "prompt": "Create a line chart of value by year. The year values are raw four-digit strings; rely on automatic temporal inference and do not preprocess them or add an unnecessary explicit scale.",
+  "dataProfile": {
+    "fields": [
+      { "name": "year", "type": "temporal" },
+      { "name": "value", "type": "quantitative" }
+    ],
+    "rowCount": 4
+  },
+  "data": {
+    "main": [
+      { "year": "1835", "value": 12 },
+      { "year": "1900", "value": 19 },
+      { "year": "1965", "value": 24 },
+      { "year": "2026", "value": 31 }
+    ]
+  },
+  "gold": {
+    "edition": 2,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "line",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "year" },
+          "y": { "field": "value" }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "The zero-config raw-year journey: preserve source strings and rely on value-driven temporal inference."
+}

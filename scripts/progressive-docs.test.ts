@@ -69,7 +69,7 @@ describe("progressive Docs journey", () => {
       ],
       [
         "/guide/facets-coordinates",
-        { section: "Core grammar", label: "Facets and coordinates", order: 14 },
+        { section: "Core grammar", label: "Facets and coordinates", order: 15 },
         {
           id: "facet-the-comparison",
           title: "Facet the comparison",
@@ -78,7 +78,7 @@ describe("progressive Docs journey", () => {
       ],
       [
         "/guide/themes-color",
-        { section: "Core grammar", label: "Themes and color", order: 15 },
+        { section: "Core grammar", label: "Themes and color", order: 16 },
         {
           id: "choose-a-chart-theme",
           title: "Choose a chart theme",

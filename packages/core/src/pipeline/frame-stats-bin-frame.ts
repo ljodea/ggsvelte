@@ -40,6 +40,7 @@ export function packBinLayerFrame(
     n: result.x.length,
     xValues: null,
     xNumeric: result.x,
+    yValues: null,
     yNumeric: columns[binding.yStatColumn ?? "count"] ?? result.count,
     groups: result.groups,
     inputGroups,

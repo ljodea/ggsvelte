@@ -15,6 +15,14 @@ export function computePanelBinRanges(
   return bindings.map((binding) => {
     const stat = binding.layer.stat ?? "identity";
     if (stat !== "bin" || !faceted || freeX || binding.xField === null) return void 0;
-    return finiteExtent([table.numeric(binding.xField)]) ?? void 0;
+    return (
+      finiteExtent([
+        table.numeric(
+          binding.xField,
+          binding.xConversion.sourceParser,
+          binding.xConversion.options,
+        ),
+      ]) ?? void 0
+    );
   });
 }

@@ -1,0 +1,18 @@
+{
+  "measuredAt": "2026-07-19",
+  "environment": "Apple M1 Pro, bun 1.3.14 x64-darwin",
+  "workloads": {
+    "pipeline scatter 100k": {
+      "medianMs": 56.9969,
+      "budgetMs": 88
+    },
+    "pipeline temporal-line 100k": {
+      "medianMs": 75.5545,
+      "budgetMs": 132,
+      "ratioToScatter": 1.3256,
+      "initialLimit": "<= 1.5x pipeline scatter 100k"
+    }
+  },
+  "result": "pass",
+  "note": "The temporal workload passes its new budget and 1.5x ratio limit. The full legacy budget command reported unrelated pre-existing runner/baseline overruns under x64 Bun emulation; those values were not re-baselined in this PR."
+}

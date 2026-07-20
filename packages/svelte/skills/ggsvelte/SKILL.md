@@ -22,7 +22,9 @@ spec = data + aes (mappings) + layers[]        one layer = { geom, stat, positio
   `{"value": "red"}` is a constant; `{"stat": "count"}` reads a stat output;
   `null` unsets an inherited channel. **Bare strings are invalid in JSON
   specs** — always `{"field": ...}`. Channels: x, y, color (strokes/points),
-  fill (bars/areas), size, linewidth, alpha, group, label, weight, ymin, ymax.
+  fill (bars/areas), group, label, weight, ymin, ymax. The schema also reserves
+  mapped size, linewidth, and alpha, but this release does not yet render those
+  field mappings; use geom params for constant styling until that capability lands.
 - **layers**: drawn in order. Geoms: `point, line, col, bar, histogram, area,
 rule, text, smooth, boxplot, density, errorbar`. Each geom has a default
   stat/position (bar → count+stack, histogram → bin+stack, col/area →
@@ -39,8 +41,15 @@ ndensity`; density→`density, scaled`; smooth→`y, ymin, ymax, se`;
 - **facet**: wrap form `{"wrap": {"field": "g"}, "ncol": 3}` XOR grid form
   `{"rows": {...}, "cols": {...}}`; `"scales": "fixed"|"free"|"free_x"|"free_y"`.
 - **scales**: per channel: `{"type": "linear"|"log"|"time"|"band"}` for x/y;
+  time scales additionally accept `"parse"` (closed names such as `"dmy"`),
+  `"temporalKind"`, `"timezone"`, and `"disambiguation"`.
   `{"type": "ordinal"|"sequential", "scheme"?, "range"?, "domain"?}` for
   color/fill. Defaults are inferred and disclosed as advisories.
+- **temporal defaults**: ISO dates/date-times, four-digit year strings,
+  year-months, month-years, and year-quarters infer time after bounded sampling
+  plus whole-column validation. Ambiguous ordered dates stay discrete: set
+  `"parse":"dmy"` or `"parse":"mdy"`. For year-like identifiers, force
+  `{"type":"band"}`. Never preprocess dates into indexes.
 - Rendering surfaces: `<GGPlot spec={...}/>` (Svelte),
   `renderToSVGString(spec, {width, height})` (headless, Node-safe),
   `ggsvelte-render spec.json > out.svg` (CLI; JSON-line diagnostics on stderr).
@@ -142,7 +151,7 @@ All specs assume inline `"data": {"values": [...]}` or a named dataset.
 1. **Scatter** — `{"layers":[{"geom":"point","aes":{"x":{"field":"displ"},"y":{"field":"hwy"}}}]}`
 2. **Scatter colored by category** — add `"color":{"field":"class"}` to the aes.
 3. **Scatter + trend** — `{"aes":{"x":{"field":"x"},"y":{"field":"y"}},"layers":[{"geom":"point"},{"geom":"smooth","params":{"method":"loess"}}]}` (plot-level aes inherits into both layers)
-4. **Line (time series)** — `{"layers":[{"geom":"line","aes":{"x":{"field":"date"},"y":{"field":"value"}}}],"scales":{"x":{"type":"time"}}}` (ISO date strings infer time automatically)
+4. **Line (time series)** — `{"layers":[{"geom":"line","aes":{"x":{"field":"date"},"y":{"field":"value"}}}]}` (ISO dates, raw four-digit years, year-months, and year-quarters infer time automatically; add `"scales":{"x":{"type":"time","parse":"dmy"}}` only for an explicit ordered parser)
 5. **Multi-series line** — map `"color":{"field":"series"}` (grouping follows).
 6. **Column chart (pre-computed heights)** — `{"layers":[{"geom":"col","aes":{"x":{"field":"category"},"y":{"field":"amount"}}}]}`
 7. **Bar chart (count rows per category)** — `{"layers":[{"geom":"bar","aes":{"x":{"field":"category"}}}]}` — never map y on bar.
@@ -171,5 +180,6 @@ labels, `"width"`/`"height"` in px, `"theme": "default"|"light"|"dark"|"minimal"
 - Full corpus for models: `/llms-full.txt` on the docs site (all guide prose
   - every example with spec JSON and Svelte source); index at `/llms.txt`.
 - Error catalog: `/guide/errors`; advisories: `/guide/advisories`;
-  lifecycle/editions: `/guide/lifecycle` (specs are stamped `"edition": 1` —
-  leave it alone; it freezes default aesthetics).
+  lifecycle/editions: `/guide/lifecycle` (specs are stamped with the current
+  appearance edition, currently 2; editions do not preserve incorrect pre-1.0
+  parser or scale execution).

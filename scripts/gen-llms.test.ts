@@ -33,6 +33,7 @@ import {
   INTERACTION_REFERENCE_MD,
   INTERACTION_REFERENCE_INDEX,
   MIGRATING_PRE_0_1_MD,
+  TEMPORAL_SCALES_MD,
   UPGRADING_MD,
   guidePages,
   pruneSpecData,
@@ -154,6 +155,14 @@ describe("guide sections cover their catalogs", () => {
     expect(chartCheckpoint).toBeGreaterThan(-1);
     expect(GETTING_STARTED_MD.indexOf("Fluent builder")).toBeGreaterThan(chartCheckpoint);
     expect(GETTING_STARTED_MD.indexOf("PortableSpec JSON")).toBeGreaterThan(chartCheckpoint);
+  });
+
+  it("documents zero-config years, strict temporal overrides, and inspection", () => {
+    expect(TEMPORAL_SCALES_MD).toContain('year: "1835"');
+    expect(TEMPORAL_SCALES_MD).toContain("without preprocessing");
+    expect(TEMPORAL_SCALES_MD).toContain("scaleDecisions");
+    expect(TEMPORAL_SCALES_MD).toContain('.scaleXDate({ parse: "dmy" })');
+    expect(TEMPORAL_SCALES_MD).toContain("scale_x_discrete()");
   });
 
   it("documents the machine-checked packed-consumer support contract", () => {

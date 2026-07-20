@@ -65,7 +65,7 @@ export const GUIDE_CATALOG = [
     title: "Facets and coordinates",
     description: "Repeat one grammar across panels and choose how axes compose the view.",
     section: "Core grammar",
-    navigationOrder: 14,
+    navigationOrder: 15,
   },
   {
     slug: "themes-color",
@@ -73,7 +73,14 @@ export const GUIDE_CATALOG = [
     description:
       "Keep chart furniture separate from data color and from the documentation appearance.",
     section: "Core grammar",
-    navigationOrder: 15,
+    navigationOrder: 16,
+  },
+  {
+    slug: "temporal-scales",
+    title: "Dates without preprocessing",
+    description: "Value-driven date inference, strict parsers, overrides, and diagnostics.",
+    section: "Core grammar",
+    navigationOrder: 14,
   },
   {
     slug: "interactions",

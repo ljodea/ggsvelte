@@ -1,0 +1,37 @@
+{
+  "id": "46-year-identifiers-stay-discrete",
+  "kind": "chart",
+  "prompt": "Create a line chart of score by model code. The model_code values look like four-digit years but are identifiers/categories, so explicitly keep the x scale discrete.",
+  "dataProfile": {
+    "fields": [
+      { "name": "model_code", "type": "nominal" },
+      { "name": "score", "type": "quantitative" }
+    ],
+    "rowCount": 3
+  },
+  "data": {
+    "main": [
+      { "model_code": "1835", "score": 12 },
+      { "model_code": "1900", "score": 19 },
+      { "model_code": "2026", "score": 31 }
+    ]
+  },
+  "gold": {
+    "edition": 2,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "line",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "model_code" },
+          "y": { "field": "score" }
+        }
+      }
+    ],
+    "scales": { "x": { "type": "band" } }
+  },
+  "expectRefusal": false,
+  "notes": "Tests the direct categorical escape hatch for year-like identifiers."
+}

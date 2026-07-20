@@ -22,6 +22,8 @@ describe("runtime docs route projection helpers", () => {
   it("projects guide sequence and sitemap policy from generated route facts", () => {
     expect(guideSequence("/guide/getting-started").previous?.path).toBe("/docs");
     expect(guideSequence("/guide/getting-started").next?.path).toBe("/guide/data-mappings");
+    expect(guideSequence("/guide/temporal-scales").previous?.path).toBe("/guide/scales-guides");
+    expect(guideSequence("/guide/temporal-scales").next?.path).toBe("/guide/facets-coordinates");
     expect(sitemapRoutes().some((route) => route.kind === "alias")).toBe(false);
     expect(findDocsRoute("/examples/interactions/inspection")?.index).toBe(false);
   });

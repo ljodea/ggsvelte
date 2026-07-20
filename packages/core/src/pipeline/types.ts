@@ -12,6 +12,9 @@ export type {
   RenderModel,
   ResolvedColorScale,
   RunOptions,
+  ScaleDecision,
+  ScaleDiagnostic,
+  ScaleDiagnosticFix,
   ScaleDomainSnapshot,
   TrainedScales,
 } from "./types-public.js";

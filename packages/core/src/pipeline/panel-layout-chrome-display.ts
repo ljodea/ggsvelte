@@ -2,6 +2,8 @@
  * Coord-flip-aware display titles, formatters, free scales, and panel scale view.
  */
 import { makeAxisFormatter } from "./layout-helpers.js";
+import { positionConversionContext, positionValuesToNumeric } from "./temporal-position.js";
+import { PipelineError } from "./types.js";
 import {
   flipDisplayBreaks,
   flipDisplayFormatters,
@@ -33,11 +35,28 @@ export function resolvePanelLayoutDisplay(input: PanelLayoutDisplayInput): Panel
   const formatY = makeAxisFormatter("y", yScale, scalesConfig.y, warnings);
   const { hTitle, vTitle } = flipDisplayTitles(flip, xTitle, yTitle);
   const { formatH, formatV } = flipDisplayFormatters(flip, formatX, formatY);
-  const { hBreaks, vBreaks } = flipDisplayBreaks(
-    flip,
-    scalesConfig.x?.breaks,
-    scalesConfig.y?.breaks,
-  );
+  const convertedBreaks = (axis: "x" | "y"): (number | string)[] | undefined => {
+    const config = scalesConfig[axis];
+    let breaks: (number | string)[] | undefined;
+    if (config?.breaks !== undefined) {
+      const scale = axis === "x" ? xScale : yScale;
+      if (scale.type === "band") return [...config.breaks];
+      const converted = positionValuesToNumeric(
+        config.breaks,
+        positionConversionContext(config),
+      ).values;
+      if ([...converted].some((value) => !Number.isFinite(value))) {
+        throw new PipelineError(
+          "invalid-scale-breaks",
+          `/scales/${axis}/breaks`,
+          `One or more ${axis} breaks do not match the scale's numeric or temporal parser.`,
+        );
+      }
+      breaks = [...converted];
+    }
+    return breaks;
+  };
+  const { hBreaks, vBreaks } = flipDisplayBreaks(flip, convertedBreaks("x"), convertedBreaks("y"));
   const { freeH, freeV } = flipDisplayFreeFlags(flip, freeX, freeY);
 
   return {

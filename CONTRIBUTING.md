@@ -134,6 +134,8 @@ ignored — land those as deliberate migrations.
 | `bun run lint:type-aware`                             | oxlint `--type-aware --deny-warnings` (tsgolint; permanent CI gate)                                                                               |
 | `bun run fmt` / `bun run fmt:check`                   | oxfmt (ts/js/json/css/toml) + prettier (.svelte/.md/.yaml)                                                                                        |
 | `bun run test`                                        | bun unit tests (spec + core + scripts + evals harness; needs `bun run check` first)                                                               |
+| `bun run test:temporal-parser`                        | focused strict-parser, schema/helper, Date.parse gate, and parsed-column cache loop                                                               |
+| `bun run test:temporal-pipeline`                      | focused temporal pipeline and calendar-tick loop                                                                                                  |
 | `bun run test:components`                             | packages/svelte component tests (Chromium, Firefox, WebKit) followed by the Node SSR suite                                                        |
 | `cd packages/svelte && bun run test:coverage`         | browser (chromium) + SSR coverage reports; browser config enforces thresholds; CI runs the same chromium+ssr coverage and uploads lcov to Codecov |
 | `bun run check:examples`                              | tsc over the examples corpus's .ts files (needs `bun run check` first: dist types)                                                                |

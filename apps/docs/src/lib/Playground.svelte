@@ -7,6 +7,7 @@
     InteractionDiagnostic,
     LayerInput,
     PlotInteractionEvent,
+    RenderModel,
   } from "@ggsvelte/svelte";
 
   import {
@@ -31,6 +32,35 @@
     { id: "g1", species: "Gentoo", flipper: 211, mass: 5000 },
     { id: "g2", species: "Gentoo", flipper: 221, mass: 5550 },
   ];
+  const temporalSamples = {
+    "Raw years": {
+      rows: [
+        { year: "1835", value: 12 },
+        { year: "1900", value: 19 },
+        { year: "2026", value: 31 },
+      ],
+      x: "year",
+      y: "value",
+    },
+    "ISO dates": {
+      rows: [
+        { date: "2024-01-01", value: 4 },
+        { date: "2024-02-01", value: 7 },
+        { date: "2024-03-01", value: 5 },
+      ],
+      x: "date",
+      y: "value",
+    },
+    "Ambiguous dates": {
+      rows: [
+        { date: "03/04/2024", value: 4 },
+        { date: "05/06/2024", value: 7 },
+        { date: "07/08/2024", value: 5 },
+      ],
+      x: "date",
+      y: "value",
+    },
+  } as const;
   const sampleSource = JSON.stringify(sampleRows, null, 2);
 
   let draft = $state(sampleSource);
@@ -53,6 +83,7 @@
   );
   let eventLog = $state<string[]>([]);
   let alertElement = $state<HTMLDivElement>();
+  let scaleDecisions = $state<RenderModel["scaleDecisions"]>([]);
 
   const numericFields = $derived(
     fields.filter((field) => field.kind === "number"),
@@ -160,6 +191,23 @@
     void applyData();
   }
 
+  function loadTemporalSample(name: keyof typeof temporalSamples): void {
+    const sample = temporalSamples[name];
+    draft = JSON.stringify(sample.rows, null, 2);
+    rows = [...sample.rows] as PlaygroundRow[];
+    fields = inferPlaygroundFields(rows);
+    xField = sample.x;
+    yField = sample.y;
+    colorField = "";
+    keyField = "";
+    mark = "line";
+    revision += 1;
+    eventLog = [];
+    scaleDecisions = [];
+    errorMessage = "";
+    status = `${name} sample loaded. Nothing was uploaded.`;
+  }
+
   function rendererFailed(error: unknown): void {
     void showError(error, false);
   }
@@ -199,6 +247,17 @@
         <button class="primary" type="submit">Apply data</button>
         <button type="button" onclick={resetSample}>Reset sample</button>
       </div>
+      <fieldset class="sample-controls">
+        <legend>Temporal samples</legend>
+        {#each Object.keys(temporalSamples) as name}
+          <button
+            type="button"
+            onclick={() =>
+              loadTemporalSample(name as keyof typeof temporalSamples)}
+            >{name}</button
+          >
+        {/each}
+      </fieldset>
 
       {#if errorMessage !== ""}
         <div class="error" role="alert" tabindex="-1" bind:this={alertElement}>
@@ -295,6 +354,7 @@
               zoom={zoomEnabled ? { mode: "xy" } : false}
               oninteraction={logEvent}
               ondiagnostic={reportDiagnostic}
+              onrender={(model) => (scaleDecisions = model.scaleDecisions)}
               labs={{
                 title: "My local data",
                 x: xField,
@@ -313,6 +373,47 @@
           </svelte:boundary>
         {/key}
       </div>
+
+      <section
+        class="scale-decisions"
+        aria-labelledby="scale-decisions-heading"
+      >
+        <h3 id="scale-decisions-heading">Inferred choices</h3>
+        {#if scaleDecisions.length === 0}
+          <p>No temporal scale decision is active for the selected fields.</p>
+        {:else}
+          {#each scaleDecisions as decision (`${decision.aesthetic}-${decision.field}`)}
+            <dl>
+              <div>
+                <dt>Field</dt>
+                <dd>{decision.aesthetic}: {decision.field}</dd>
+              </div>
+              <div>
+                <dt>Choice</dt>
+                <dd>{decision.status} · {decision.parser ?? "none"}</dd>
+              </div>
+              <div>
+                <dt>Precision</dt>
+                <dd>{decision.precision ?? "none"}</dd>
+              </div>
+              <div>
+                <dt>Validated</dt>
+                <dd>{decision.validatedCount.toLocaleString()} values</dd>
+              </div>
+              <div>
+                <dt>Domain</dt>
+                <dd>{JSON.stringify(decision.domain ?? [])}</dd>
+              </div>
+              <div>
+                <dt>Portable override</dt>
+                <dd>
+                  <code>{JSON.stringify(decision.portableOverride)}</code>
+                </dd>
+              </div>
+            </dl>
+          {/each}
+        {/if}
+      </section>
 
       <section class="event-log" aria-labelledby="event-log-heading">
         <h3 id="event-log-heading">Semantic events</h3>
@@ -424,10 +525,22 @@
     font-size: 0.82rem;
   }
 
-  .actions {
+  .actions,
+  .sample-controls {
     display: flex;
     flex-wrap: wrap;
     gap: 0.55rem;
+  }
+
+  .sample-controls {
+    margin: 0.85rem 0 0;
+    border: 0;
+    padding: 0;
+  }
+
+  .sample-controls legend {
+    width: 100%;
+    font-weight: 700;
   }
 
   .error,
@@ -499,15 +612,41 @@
     background: var(--bg);
   }
 
+  .scale-decisions,
   .event-log {
     margin-top: 1rem;
     border-top: 1px solid var(--border);
     padding-top: 0.8rem;
   }
 
+  .scale-decisions h3,
   .event-log h3 {
     margin: 0;
     font-size: 1rem;
+  }
+
+  .scale-decisions dl {
+    display: grid;
+    gap: 0.3rem;
+    margin: 0.65rem 0 0;
+    font-size: 0.82rem;
+  }
+
+  .scale-decisions dl div {
+    display: grid;
+    grid-template-columns: 7rem minmax(0, 1fr);
+    gap: 0.5rem;
+  }
+
+  .scale-decisions dt {
+    color: var(--muted);
+    font-weight: 700;
+  }
+
+  .scale-decisions dd {
+    min-width: 0;
+    margin: 0;
+    overflow-wrap: anywhere;
   }
 
   .event-log ol {

@@ -68,6 +68,8 @@ export interface SequentialColorScale {
   colorOf(value: unknown): string | undefined;
   /** Color at a normalized ramp position t in [0, 1] (legend gradients). */
   at(t: number): string;
+  /** True when the numeric domain contains semantic epoch milliseconds. */
+  temporal?: boolean;
 }
 
 export interface SequentialConfig {

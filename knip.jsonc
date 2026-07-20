@@ -11,6 +11,9 @@
   // is true for markdownlint-cli2's explicit node_modules/.bin invocation
   // and pnpm, which the clean-consumer harness resolves from PATH.
   "ignoreDependencies": ["publint", "@arethetypeswrong/cli", "oxfmt", "markdownlint-cli2", "pnpm"],
+  // Root-exported ggplot2 spellings are intentional binding-identical aliases
+  // of the camelCase scale helpers, and declaration tests enforce that contract.
+  "ignoreIssues": { "packages/spec/src/scale-helpers.ts": ["duplicates"] },
   "workspaces": {
     ".": {
       "entry": ["scripts/*.ts", "tests/visual/**/*.ts", "tests/evals/**/*.ts"],

@@ -4,7 +4,8 @@
 import type { ColumnTable } from "../table.js";
 
 import type { FacetPanelDef } from "./facets.js";
-import type { LayerBinding, LayerFrame } from "./types.js";
+import type { PositionConversionContext } from "./temporal-position.js";
+import type { LayerBinding, LayerFrame, ScaleDecision, ScaleDiagnostic } from "./types.js";
 
 export interface PreparedPanels {
   table: ColumnTable;
@@ -20,4 +21,8 @@ export interface PreparedPanels {
   facetPanels: FacetPanelDef[];
   bindings: LayerBinding[];
   panelFrames: LayerFrame[][];
+  scaleDecisions: ScaleDecision[];
+  scaleDiagnostics: ScaleDiagnostic[];
+  xConversion: PositionConversionContext;
+  yConversion: PositionConversionContext;
 }
