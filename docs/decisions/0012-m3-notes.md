@@ -135,21 +135,29 @@ bench-smoke unchanged.
 
 ## VR approval flow (completed) + release
 
-- `vr-compare.yml` gains the `/approve-visuals` path: issue_comment trigger,
-  OWNER/MEMBER/COLLABORATOR author association, PR head resolved via API,
-  checkout of that exact SHA, pinned-container `--update-snapshots` run,
-  `vr-baselines-approved` artifact (PNGs + pr/head_sha/comment metadata).
-  Still unprivileged (read-only token) — PR code executes only here.
-- `vr-approve.yml`: the gate is real — approval flavor only, artifact
-  verified as inert data (PNG magic bytes, ≤500 files, ≤50 MiB), the
-  approval INDEPENDENTLY re-verified via the API (comment body/author
-  permission/PR match; created_at not older than the head commit;
-  head_sha must equal the PR's CURRENT head — deliberately stronger than
-  the workflow_run.head_sha field, which is useless for comment-triggered
-  runs), idempotent per head SHA, commits only to `vr-update/pr-<n>`.
+- `vr-compare.yml` provides the `/approve-visuals` path after source merge:
+  issue_comment trigger, OWNER/MEMBER/COLLABORATOR association, exact command,
+  default-branch target, and a comment timestamp strictly newer than the merge.
+  It resolves the post-merge `merge_commit_sha`, confirms that commit remains
+  reachable from the default branch, checks it out from the base repository,
+  and regenerates `vr-baselines-approved` in the pinned container. This half
+  remains unprivileged (read-only token).
+- `vr-approve.yml` independently re-verifies the comment body/linkage, live
+  collaborator permission, merged/default target, strict post-merge timestamp,
+  immutable `render_sha == merge_commit_sha`, and default-branch reachability.
+  It accepts only PNGs (magic bytes, ≤500 files, ≤50 MiB), runs the already-
+  merged commit's preview generator without `GH_TOKEN` in the environment, and
+  exposes write credentials only to the final script-free commit/push step.
+  Publication is idempotent per render SHA and limited to `vr-update/pr-<n>`.
 - CI guard: new `vr-baseline-guard` job rejects PR diffs touching
   `tests/visual/__screenshots__/` unless the head is a same-repo
   `vr-update/pr-N` branch.
+- Source-first publication invariant (added after PR #337): maintainers inspect
+  candidate evidence, merge source, comment `/approve-visuals` on the merged PR,
+  then review and merge the generated baseline PR. Intentional source diffs may
+  leave VR Compare red, so it is not a required branch-protection check; making
+  it required would deadlock this order. This prevents docs-owned previews from
+  publishing ahead of their source.
 - `release.yml`: changesets/action, `id-token: write`, npm trusted
   publishing (OIDC + provenance via publishConfig; NO tokens), publish =
   `changeset publish` after `bun run build`; setup-node 24 for npm OIDC.
@@ -202,9 +210,10 @@ LICENSE (MIT, Liam O'Dea) at root + copied into each package; READMEs (root
    `@ggsvelte/core` pointing at `.github/workflows/release.yml`.
 3. **Secrets**: `ANTHROPIC_API_KEY` (evals.yml). No NPM_TOKEN — trusted
    publishing only.
-4. **First CI run**: bootstraps VR container baselines via the
-   vr-compare → `/approve-visuals` → vr-approve path; then enable branch
-   protection with the required checks.
+4. **First CI run**: inspect VR candidates, merge source to the default branch,
+   comment `/approve-visuals` on that merged PR, then merge the generated
+   `vr-update/pr-<n>` PR. Enable required checks afterward, but keep VR Compare
+   non-required because source-first approval would otherwise deadlock.
 5. **Domain** (`ggsvelte.dev` or equivalent): optional pre-0.1.0; schema
    stays served from the repo/docs build until then.
 6. **Publish**: merge the changesets "Version Packages" PR → release.yml

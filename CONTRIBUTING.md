@@ -353,15 +353,30 @@ docs/decisions/0009.
 
 ## Visual-regression trust model
 
-`vr-compare.yml` (unprivileged, `pull_request`, no secrets) is the ONLY place
-PR-authored code executes; it builds packages + docs, runs the VR suite in
-the pinned container, and uploads candidate baselines as a `vr-baselines`
-artifact (PNGs + pr/head-SHA metadata). `vr-approve.yml` (privileged,
-`workflow_run`, job-scoped `contents: write`) never executes PR code: it
-verifies the artifact as inert data (PNG magic bytes, count/size limits, SHA
-match) and pushes to a `vr-update/pr-<n>` branch. The maintainer
-`/approve-visuals` gate is TODO (M3) and the gate defaults to _not approved_,
-so the privileged path is dormant until then. Do not weaken these invariants.
+`vr-compare.yml` is the only workflow that executes **unmerged** PR code. It
+has no secrets or write permissions, renders in the pinned container, and
+uploads inert PNG candidates. After source lands, `vr-approve.yml` independently
+verifies the comment, permission, default-branch merge, timestamp, and immutable
+`merge_commit_sha`. It checks out only that already-merged base-repository
+commit, verifies the PNG artifact, and runs the matching preview generator
+without `GH_TOKEN` in its environment. Only the final script-free commit/push
+step receives the write credential.
+
+The source-first landing order is deliberate:
+
+1. Inspect the source PR's candidate report. For an intentional pixel change,
+   the red VR comparison is expected; keep VR Compare non-required so it cannot
+   deadlock this flow. `ci-gate`, code review, and the baseline evidence still
+   gate the source merge.
+2. Merge the source PR into the default branch.
+3. Comment `/approve-visuals` on the **merged** PR. A pre-merge command is
+   rejected, including one recorded in the same second as the merge.
+4. Review and merge the generated `vr-update/pr-<n>` PR.
+
+This creates a short, explicit window where source has landed but its approved
+baselines have not. Finish step 4 promptly. Never merge an unexplained visual
+diff, and do not make VR Compare a required branch-protection check without
+redesigning this source-first protocol.
 
 ## Lifecycle policy (Hadley lesson 13)
 

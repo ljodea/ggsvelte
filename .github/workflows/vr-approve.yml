@@ -2,10 +2,10 @@
 # separation (plan, round-2 security fix).
 #
 # Security invariants (enforced in order):
-#   1. NEVER executes PR-authored code: no PR checkout, no bun install of PR
-#      manifests, no scripts from the artifact. It only downloads the
-#      `vr-baselines-approved` artifact produced by the unprivileged
-#      vr-compare run and verifies it as inert data.
+#   1. NEVER executes unmerged PR-authored code or anything from the artifact.
+#      After independent API verification, it checks out only the immutable
+#      commit already merged into the default branch. Baseline PNGs remain
+#      inert data; the trusted merged generator runs without GH_TOKEN in env.
 #   2. Flavor gate: only `/approve-visuals`-triggered (issue_comment) VR
 #      Compare runs proceed. Plain pull_request runs upload bootstrap
 #      candidates only and are never committed from here.
@@ -15,13 +15,15 @@
 #   4. INDEPENDENT approval re-verification via the API: artifact metadata is
 #      a hint, never a credential. The referenced comment must literally be
 #      `/approve-visuals`, must belong to the referenced PR, its author must
-#      hold write/maintain/admin, the metadata head SHA must be the PR's
-#      CURRENT head, and the comment must postdate the head commit — approval
-#      must postdate the code it approves. (Committer dates are self-reported
+#      hold write/maintain/admin, the artifact render SHA must be the PR's
+#      immutable merged commit on the repository default branch, and the
+#      comment must postdate both the merge and rendered commit. Requiring
+#      source-first landing keeps docs-owned previews consistent with main.
+#      (Committer dates are self-reported
 #      by pushers; the residual risk is bounded because the vr-update branch
 #      still lands through a human-reviewed PR.)
 #   5. Writes ONLY to a `vr-update/pr-<n>` branch in the base repo (never to
-#      the PR branch, never to a fork), idempotent per head SHA.
+#      the PR branch, never to a fork), idempotent per rendered merge SHA.
 #   6. `contents: write` is job-scoped; the workflow default is no permissions.
 #
 # Companion guard: ci.yml's `vr-baseline-guard` job rejects any PR diff that
@@ -54,7 +56,7 @@ jobs:
     permissions:
       contents: write # push the verified vr-update/pr-<n> branch
       actions: read # download the triggering run's artifact
-      pull-requests: read # re-verify the approval comment / PR head via API
+      pull-requests: read # re-verify the approval comment / merged PR via API
     steps:
       - name: flavor gate — only /approve-visuals (issue_comment) runs proceed
         id: gate
@@ -66,13 +68,13 @@ jobs:
             echo "approval-flavored VR Compare run — verifying"
             echo "approved=true" >> "$GITHUB_OUTPUT"
           else
-            echo "::notice::pull_request-flavored VR Compare run — candidate baselines only, NOT approved. Comment /approve-visuals on the PR (maintainers only) to land baselines."
+            echo "::notice::pull_request-flavored VR Compare run — candidate baselines only, NOT approved. After the source PR merges, comment /approve-visuals on it (maintainers only) to land baselines."
             {
               echo "## VR approve: not an approval run"
               echo ""
               echo "This VR Compare run was triggered by \`${RUN_EVENT}\`, so its artifact"
-              echo "holds bootstrap CANDIDATES only. A maintainer comments \`/approve-visuals\`"
-              echo "on the PR to regenerate + land baselines via the verified path."
+              echo "holds bootstrap CANDIDATES only. After the source PR merges, a maintainer"
+              echo "comments \`/approve-visuals\` on it to regenerate + land baselines via the verified path."
             } >> "$GITHUB_STEP_SUMMARY"
             echo "approved=false" >> "$GITHUB_OUTPUT"
           fi
@@ -98,17 +100,17 @@ jobs:
 
           # Metadata must exist and parse into well-formed fields. NOTE: for
           # issue_comment-flavored runs, github.event.workflow_run.head_sha
-          # points at the DEFAULT branch (the comment's run context), not the
-          # PR head — so the head-SHA binding is asserted against the PR's
-          # current head via the API in the next step instead.
+          # points at the default branch run context, not necessarily the
+          # exact merged commit rendered by the unprivileged workflow. The
+          # render binding is independently asserted through the API next.
           [ -f metadata.txt ] || { echo "::error::metadata.txt missing"; exit 1; }
           pr="$(sed -n 's/^pr=//p' metadata.txt)"
-          head_sha="$(sed -n 's/^head_sha=//p' metadata.txt)"
+          render_sha="$(sed -n 's/^render_sha=//p' metadata.txt)"
           comment_id="$(sed -n 's/^comment_id=//p' metadata.txt)"
           case "${pr}" in (*[!0-9]*|'') echo "::error::invalid pr number in metadata"; exit 1 ;; esac
           case "${comment_id}" in (*[!0-9]*|'') echo "::error::invalid comment id in metadata"; exit 1 ;; esac
-          if ! printf '%s' "${head_sha}" | grep -Eq '^[0-9a-f]{40}$'; then
-            echo "::error::invalid head_sha in metadata"
+          if ! printf '%s' "${render_sha}" | grep -Eq '^[0-9a-f]{40}$'; then
+            echo "::error::invalid render_sha in metadata"
             exit 1
           fi
 
@@ -143,7 +145,7 @@ jobs:
           # Validated-above values only (numeric / 40-hex) — safe as outputs.
           {
             echo "pr=${pr}"
-            echo "head_sha=${head_sha}"
+            echo "render_sha=${render_sha}"
             echo "comment_id=${comment_id}"
           } >> "$GITHUB_OUTPUT"
 
@@ -153,13 +155,13 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
           PR_NUMBER: ${{ steps.verify.outputs.pr }}
-          HEAD_SHA: ${{ steps.verify.outputs.head_sha }}
+          RENDER_SHA: ${{ steps.verify.outputs.render_sha }}
           COMMENT_ID: ${{ steps.verify.outputs.comment_id }}
         run: |
           set -euo pipefail
-          # The artifact was produced by a run that executed PR-authored code,
-          # so its metadata could be forged. Re-derive every trust decision
-          # from the API; the metadata only tells us WHERE to look.
+          # The artifact was produced by an unprivileged run of the merged
+          # render commit, so its metadata is still untrusted. Re-derive every
+          # trust decision from the API; metadata only tells us WHERE to look.
 
           # (a) The referenced comment must literally be `/approve-visuals`.
           comment_json="$(gh api "repos/${REPO}/issues/comments/${COMMENT_ID}")"
@@ -186,108 +188,144 @@ jobs:
             *) echo "::error::comment author ${author} has insufficient permission: ${permission}"; exit 1 ;;
           esac
 
-          # (d) The metadata head SHA must be the PR's CURRENT head — binds
-          # the PNGs to the code being approved and refuses stale artifacts
-          # (workflow_run.head_sha is unusable here; see previous step).
-          current_head="$(gh api "repos/${REPO}/pulls/${PR_NUMBER}" --jq .head.sha)"
-          if [ "${current_head}" != "${HEAD_SHA}" ]; then
-            echo "::error::PR #${PR_NUMBER} head moved: artifact is for ${HEAD_SHA}, PR is at ${current_head} — re-approve"
+          # (d) The source must be merged into this repository's default branch,
+          # and the artifact must render the immutable merged commit. This works
+          # for merge, squash, and rebase strategies and survives deleted heads.
+          pr_json="$(gh api "repos/${REPO}/pulls/${PR_NUMBER}")"
+          merged_at="$(printf '%s' "${pr_json}" | jq -r '.merged_at // empty')"
+          if [ -z "${merged_at}" ]; then
+            echo "::error::source PR #${PR_NUMBER} is not merged"
             exit 1
           fi
+          base_repo="$(printf '%s' "${pr_json}" | jq -r '.base.repo.full_name // empty')"
+          base_ref="$(printf '%s' "${pr_json}" | jq -r '.base.ref // empty')"
+          default_branch="$(gh api "repos/${REPO}" --jq .default_branch)"
+          if [ "${base_repo}" != "${REPO}" ] || [ "${base_ref}" != "${default_branch}" ]; then
+            echo "::error::source PR #${PR_NUMBER} targeted ${base_repo}:${base_ref}, not ${REPO}:${default_branch}"
+            exit 1
+          fi
+          merged_sha="$(printf '%s' "${pr_json}" | jq -r '.merge_commit_sha // empty')"
+          if [ "${merged_sha}" != "${RENDER_SHA}" ]; then
+            echo "::error::artifact render is for ${RENDER_SHA}, but PR #${PR_NUMBER} merged as ${merged_sha}"
+            exit 1
+          fi
+          default_sha="$(gh api --method GET "repos/${REPO}/commits" -f sha="${default_branch}" -f per_page=1 --jq '.[0].sha')"
+          compare_status="$(gh api "repos/${REPO}/compare/${RENDER_SHA}...${default_sha}" --jq .status)"
+          case "${compare_status}" in
+            identical|ahead) ;;
+            *) echo "::error::merged render ${RENDER_SHA} is not reachable from ${default_branch} (${compare_status})"; exit 1 ;;
+          esac
 
-          # (e) Approval must postdate the code it approves: the comment may
-          # not be older than the head commit's committer date.
+          # (e) Approval must postdate the merge, not merely the source head.
           comment_created="$(printf '%s' "${comment_json}" | jq -r .created_at)"
-          commit_date="$(gh api "repos/${REPO}/commits/${HEAD_SHA}" --jq .commit.committer.date)"
           comment_epoch="$(date -u -d "${comment_created}" +%s)"
-          commit_epoch="$(date -u -d "${commit_date}" +%s)"
-          if [ "${comment_epoch}" -lt "${commit_epoch}" ]; then
-            echo "::error::approval comment (${comment_created}) predates head commit (${commit_date}) — approve the current code, not older code"
+          merged_epoch="$(date -u -d "${merged_at}" +%s)"
+          if [ "${comment_epoch}" -le "${merged_epoch}" ]; then
+            echo "::error::approval comment predates merge — comment /approve-visuals again"
             exit 1
           fi
-          echo "approval verified: ${author} approved PR #${PR_NUMBER} @ ${HEAD_SHA}"
 
-      - name: idempotency — skip if this head SHA is already on the branch
+          # (f) Approval must also postdate the exact rendered commit.
+          commit_date="$(gh api "repos/${REPO}/commits/${RENDER_SHA}" --jq .commit.committer.date)"
+          commit_epoch="$(date -u -d "${commit_date}" +%s)"
+          if [ "${comment_epoch}" -le "${commit_epoch}" ]; then
+            echo "::error::approval comment (${comment_created}) predates rendered commit (${commit_date})"
+            exit 1
+          fi
+          echo "approval verified: ${author} approved merged PR #${PR_NUMBER} @ ${RENDER_SHA}"
+
+      - name: idempotency — skip if this render SHA is already on the branch
         id: idem
         if: steps.gate.outputs.approved == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
           PR_NUMBER: ${{ steps.verify.outputs.pr }}
-          HEAD_SHA: ${{ steps.verify.outputs.head_sha }}
+          RENDER_SHA: ${{ steps.verify.outputs.render_sha }}
         run: |
           set -euo pipefail
           branch="vr-update/pr-${PR_NUMBER}"
           tip="$(git ls-remote "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" "refs/heads/${branch}" | cut -f1)"
           if [ -n "${tip}" ]; then
             message="$(gh api "repos/${REPO}/commits/${tip}" --jq .commit.message)"
-            if printf '%s' "${message}" | grep -qF "${HEAD_SHA}"; then
-              echo "::notice::${branch} tip already carries baselines for ${HEAD_SHA} — nothing to do"
+            if printf '%s' "${message}" | grep -qF "${RENDER_SHA}"; then
+              echo "::notice::${branch} tip already carries baselines for ${RENDER_SHA} — nothing to do"
               echo "skip=true" >> "$GITHUB_OUTPUT"
               exit 0
             fi
           fi
           echo "skip=false" >> "$GITHUB_OUTPUT"
 
-      - name: checkout base repo (default branch — never PR code)
+      - name: checkout exact verified merged commit from base repo
         if: steps.gate.outputs.approved == 'true' && steps.idem.outputs.skip != 'true'
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
+          # Pin trusted generation to the exact commit used for screenshots;
+          # a moving default branch must not desynchronize source and previews.
+          ref: ${{ steps.verify.outputs.render_sha }}
           persist-credentials: false
           path: base
 
-      - name: setup Bun for trusted default-branch generator
+      - name: setup Bun for verified merged-commit generator
         if: steps.gate.outputs.approved == 'true' && steps.idem.outputs.skip != 'true'
         uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version: 1.3.14
 
-      - name: install trusted default-branch dependencies
+      - name: install dependencies at verified merged commit
         if: steps.gate.outputs.approved == 'true' && steps.idem.outputs.skip != 'true'
         working-directory: base
         run: bun install --frozen-lockfile
         env:
           BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
 
-      - name: commit verified baselines to vr-update/pr-<n>
+      - name: materialize verified baseline branch without write credentials
+        if: steps.gate.outputs.approved == 'true' && steps.idem.outputs.skip != 'true'
+        env:
+          PR_NUMBER: ${{ steps.verify.outputs.pr }}
+        run: |
+          set -euo pipefail
+          pr="${PR_NUMBER}"
+          case "${pr}" in (*[!0-9]*|'') echo "::error::invalid pr number"; exit 1 ;; esac
+          cd base
+          git config user.name "ggsvelte-vr-bot"
+          git config user.email "vr-bot@users.noreply.github.com"
+          git checkout -B "vr-update/pr-${pr}"
+
+          mkdir -p tests/visual/__screenshots__
+          find ../vr-artifact -name '*.png' -exec cp {} tests/visual/__screenshots__/ \;
+
+          # Re-materialize docs-owned previews with the generator from the same
+          # verified merged commit that produced the screenshots. GH_TOKEN is
+          # intentionally absent while dependencies and repository code run.
+          bun scripts/gen-gallery-previews.ts
+          git add tests/visual/__screenshots__ apps/docs/static/previews \
+            apps/docs/src/lib/generated/gallery-previews.ts
+
+      - name: commit and push verified baselines to vr-update/pr-<n>
         if: steps.gate.outputs.approved == 'true' && steps.idem.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
           PR_NUMBER: ${{ steps.verify.outputs.pr }}
-          APPROVED_HEAD_SHA: ${{ steps.verify.outputs.head_sha }}
+          APPROVED_RENDER_SHA: ${{ steps.verify.outputs.render_sha }}
         run: |
           set -euo pipefail
           pr="${PR_NUMBER}"
           case "${pr}" in (*[!0-9]*|'') echo "::error::invalid pr number"; exit 1 ;; esac
           branch="vr-update/pr-${pr}"
           push_url="https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git"
-
           cd base
-          git config user.name "ggsvelte-vr-bot"
-          git config user.email "vr-bot@users.noreply.github.com"
+
           # Record the current remote tip (empty if the branch is new) so the
-          # lease below only replaces exactly what we observed — a concurrent
-          # push between here and ours is rejected instead of clobbered.
+          # lease only replaces exactly what we observed. This credentialed
+          # step executes no repository scripts.
           old_tip="$(git ls-remote "${push_url}" "refs/heads/${branch}" | cut -f1)"
-          git checkout -B "${branch}"
-
-          mkdir -p tests/visual/__screenshots__
-          find ../vr-artifact -name '*.png' -exec cp {} tests/visual/__screenshots__/ \;
-
-          # Re-materialize docs-owned preview assets from the newly approved
-          # canonical light baselines. This executes only the trusted generator
-          # checked out from the default branch, never PR-authored code.
-          bun scripts/gen-gallery-previews.ts
-          git add tests/visual/__screenshots__ apps/docs/static/previews \
-            apps/docs/src/lib/generated/gallery-previews.ts
-
           if git diff --cached --quiet; then
-            echo "no baseline changes — nothing to commit (idempotent per head SHA)"
+            echo "no baseline changes — nothing to commit (idempotent per render SHA)"
             exit 0
           fi
-          # The head SHA in the message is the idempotency key checked above.
-          git commit -m "vr: update baselines for PR #${pr} @ ${APPROVED_HEAD_SHA}"
+          git commit -m "vr: update baselines for PR #${pr} @ ${APPROVED_RENDER_SHA}"
           git push --force-with-lease="refs/heads/${branch}:${old_tip}" \
             "${push_url}" "HEAD:refs/heads/${branch}"
           echo "pushed verified baselines to ${branch}"
