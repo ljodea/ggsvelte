@@ -32,7 +32,11 @@
     const signature = diagnostics
       .map((item) => `${item.code}:${item.path}`)
       .join("|");
-    if (signature === "" || signature === focusedSignature) return;
+    if (signature === "") {
+      focusedSignature = "";
+      return;
+    }
+    if (signature === focusedSignature) return;
     focusedSignature = signature;
     void tick().then(() => alertElement?.focus());
   });

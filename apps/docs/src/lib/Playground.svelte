@@ -41,9 +41,7 @@
 
   const svelteOutput = $derived(playgroundSvelteOutput(workbench.committed));
   const selectedSample = $derived(
-    workbench.sourceBaseline.source.kind === "sample"
-      ? workbench.sourceBaseline.source.id
-      : "",
+    workbench.seed.source.kind === "sample" ? workbench.seed.source.id : "",
   );
 
   function replaceLocationHash(hash: string | null): void {
@@ -108,6 +106,15 @@
     addEventListener("popstate", onPopState);
     return () => removeEventListener("popstate", onPopState);
   });
+
+  function editDraft(draft: string): void {
+    const edited = editPlaygroundDraft(workbench, draft);
+    workbench = edited;
+    if (!edited.synchronized) {
+      shareUrl = "";
+      shareStatus = "";
+    }
+  }
 
   function applyDraft(): void {
     workbench = stagePlaygroundDraft(workbench);
@@ -226,7 +233,6 @@
     {#snippet preview()}
       <PlaygroundPreview
         rendered={workbench.rendered}
-        activeKey={workbench.candidate?.generation ?? 0}
         candidate={workbench.candidate}
         lastValid={workbench.lastValid}
         status={workbench.status}
@@ -244,7 +250,7 @@
         {selectedSample}
         diagnostics={workbench.diagnostics}
         pending={workbench.candidate !== null}
-        onEdit={(draft) => (workbench = editPlaygroundDraft(workbench, draft))}
+        onEdit={editDraft}
         onApply={applyDraft}
         onReset={resetSource}
         onLoadSample={loadSample}
