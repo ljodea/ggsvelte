@@ -1,6 +1,7 @@
 # Decision 0014: measured temporal GuidePlans inside two-pass layout
 
-**Status:** Accepted  
+**Status:** Accepted
+
 **Date:** 2026-07-20
 
 ## Context
