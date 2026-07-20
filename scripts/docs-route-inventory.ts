@@ -71,7 +71,7 @@ const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     path: "/playground",
     title: "PortableSpec playground — ggsvelte",
     description:
-      "Open a real ggsvelte example, edit a bounded PortableSpec locally, and copy a complete Svelte component or share URL.",
+      "Edit a bounded PortableSpec locally, inspect semantic events, and take complete Svelte, equivalent Builder or JSON, SVG, or a share URL.",
     canonicalPath: "/playground",
     kind: "page",
     index: true,

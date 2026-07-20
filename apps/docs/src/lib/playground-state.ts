@@ -11,14 +11,23 @@ import {
   type PlaygroundSeedV1,
 } from "./playground-codec";
 
+export type PlaygroundDiagnosticSource = "playground" | "validation" | "pipeline" | "export";
+
 export interface PlaygroundDiagnostic {
+  readonly source: PlaygroundDiagnosticSource;
   readonly code: string;
   readonly path: string;
   readonly message: string;
   readonly fix?: string;
 }
 
-export type PlaygroundCandidateOrigin = "apply" | "source" | "initial-navigation" | "popstate";
+export type PlaygroundCandidateOrigin =
+  | "apply"
+  | "source"
+  | "reset"
+  | "undo"
+  | "initial-navigation"
+  | "popstate";
 
 export interface PlaygroundSnapshot {
   readonly sourceBaseline: PlaygroundSeedV1;
@@ -34,6 +43,7 @@ export interface PlaygroundCandidate {
   readonly generation: number;
   readonly origin: PlaygroundCandidateOrigin;
   readonly next: PlaygroundSnapshot;
+  readonly undoSnapshotsAfterPromotion?: readonly PlaygroundSnapshot[];
 }
 
 export interface PlaygroundNavigationRecovery {
@@ -47,11 +57,14 @@ export interface PlaygroundState extends PlaygroundSnapshot {
   readonly lastValid: boolean;
   readonly status: string;
   readonly nextGeneration: number;
+  readonly undoSnapshots: readonly PlaygroundSnapshot[];
   readonly synchronized: boolean;
   readonly canCopyOrShare: boolean;
   readonly navigationRecovery: PlaygroundNavigationRecovery | null;
   readonly historyIntent: "none";
 }
+
+export const PLAYGROUND_MAX_UNDO_SNAPSHOTS = 20;
 
 const VALIDATE_LIMITS = {
   maxRows: PLAYGROUND_MAX_ROWS,
@@ -70,6 +83,7 @@ export function serializePlaygroundSpec(spec: PortableSpec): string {
 
 function diagnosticFromSpec(error: SpecError): PlaygroundDiagnostic {
   return {
+    source: "validation",
     code: error.code,
     path: error.path,
     message: error.message,
@@ -97,11 +111,17 @@ function stage(
   origin: PlaygroundCandidateOrigin,
   next: PlaygroundSnapshot,
   draft = state.draft,
+  undoSnapshotsAfterPromotion?: readonly PlaygroundSnapshot[],
 ): PlaygroundState {
   return finalize({
     ...state,
     draft,
-    candidate: { generation: state.nextGeneration, origin, next },
+    candidate: {
+      generation: state.nextGeneration,
+      origin,
+      next,
+      ...(undoSnapshotsAfterPromotion === undefined ? {} : { undoSnapshotsAfterPromotion }),
+    },
     diagnostics: [],
     lastValid: false,
     status: "Checking the next chart before replacing the last valid result.",
@@ -130,6 +150,7 @@ export function createPlaygroundState(
     lastValid: false,
     status: "Sample ready. Everything stays in this browser tab.",
     nextGeneration: 1,
+    undoSnapshots: [],
     navigationRecovery: null,
     historyIntent: "none",
   });
@@ -175,6 +196,7 @@ export function stagePlaygroundDraft(state: PlaygroundState): PlaygroundState {
     if (error instanceof PlaygroundCodecError) {
       return invalidDraft(state, [
         {
+          source: "playground",
           code: "share-limit",
           path: "",
           message: error.message,
@@ -184,6 +206,7 @@ export function stagePlaygroundDraft(state: PlaygroundState): PlaygroundState {
     }
     return invalidDraft(state, [
       {
+        source: "playground",
         code: "invalid-json",
         path: "",
         message: error instanceof Error ? error.message : "The draft is not valid JSON.",
@@ -209,6 +232,7 @@ export function stagePlaygroundDraft(state: PlaygroundState): PlaygroundState {
   } catch (error) {
     return invalidDraft(state, [
       {
+        source: "playground",
         code: "share-limit",
         path: "",
         message: error instanceof Error ? error.message : "The draft exceeds playground limits.",
@@ -231,7 +255,7 @@ export function stagePlaygroundDraft(state: PlaygroundState): PlaygroundState {
 export function stagePlaygroundSeed(
   state: PlaygroundState,
   seed: PlaygroundSeedV1,
-  origin: Exclude<PlaygroundCandidateOrigin, "apply">,
+  origin: Exclude<PlaygroundCandidateOrigin, "apply" | "undo">,
   targetHash?: string | null,
 ): PlaygroundState {
   const bounded = validatePlaygroundSeed(seed);
@@ -252,16 +276,46 @@ export function stagePlaygroundSeed(
   return stage(state, origin, next);
 }
 
+function snapshotOf(state: PlaygroundSnapshot): PlaygroundSnapshot {
+  return {
+    sourceBaseline: state.sourceBaseline,
+    seed: state.seed,
+    draft: serializePlaygroundSpec(state.committed),
+    committed: state.committed,
+    rendered: state.rendered,
+    renderConfirmed: state.renderConfirmed,
+    historyHash: state.historyHash,
+  };
+}
+
+function changedSnapshot(current: PlaygroundSnapshot, next: PlaygroundSnapshot): boolean {
+  return (
+    JSON.stringify(current.seed) !== JSON.stringify(next.seed) ||
+    JSON.stringify(current.sourceBaseline) !== JSON.stringify(next.sourceBaseline)
+  );
+}
+
 export function promotePlaygroundCandidate(
   state: PlaygroundState,
   generation: number,
 ): PlaygroundState {
-  if (state.candidate?.generation !== generation) return state;
-  const next = state.candidate.next;
+  const candidate = state.candidate;
+  if (candidate?.generation !== generation) return state;
+  const next = candidate.next;
+  const nextUndoSnapshots =
+    candidate.undoSnapshotsAfterPromotion ??
+    (candidate.origin === "initial-navigation" ||
+    candidate.origin === "popstate" ||
+    candidate.origin === "reset"
+      ? []
+      : state.renderConfirmed && changedSnapshot(state, next)
+        ? [...state.undoSnapshots, snapshotOf(state)].slice(-PLAYGROUND_MAX_UNDO_SNAPSHOTS)
+        : state.undoSnapshots);
   return finalize({
     ...state,
     ...next,
     candidate: null,
+    undoSnapshots: nextUndoSnapshots,
     diagnostics: [],
     lastValid: false,
     status: `Rendered ${next.seed.source.kind === "custom" ? "custom draft" : next.seed.source.id}.`,
@@ -294,7 +348,19 @@ export function failPlaygroundCandidate(
 }
 
 export function resetPlaygroundSource(state: PlaygroundState): PlaygroundState {
-  return stagePlaygroundSeed(state, state.sourceBaseline, "source");
+  return stagePlaygroundSeed(state, state.sourceBaseline, "reset");
+}
+
+export function stagePlaygroundUndo(state: PlaygroundState): PlaygroundState {
+  if (state.candidate !== null || state.undoSnapshots.length === 0) return state;
+  const target = state.undoSnapshots.at(-1)!;
+  return stage(
+    state,
+    "undo",
+    { ...target, historyHash: null },
+    state.draft,
+    state.undoSnapshots.slice(0, -1),
+  );
 }
 
 export function setPlaygroundHistoryHash(

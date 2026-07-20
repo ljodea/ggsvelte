@@ -7,13 +7,16 @@ import {
   type PlaygroundSeedV1,
 } from "../apps/docs/src/lib/playground-codec";
 import {
+  confirmPlaygroundRendered,
   createPlaygroundState,
   editPlaygroundDraft,
+  PLAYGROUND_MAX_UNDO_SNAPSHOTS,
   failPlaygroundCandidate,
   promotePlaygroundCandidate,
   resetPlaygroundSource,
   stagePlaygroundDraft,
   stagePlaygroundSeed,
+  stagePlaygroundUndo,
 } from "../apps/docs/src/lib/playground-state";
 
 const baseSpec: PortableSpec = {
@@ -59,7 +62,11 @@ describe("playground state", () => {
     expect(invalid.committed).toEqual(baseSpec);
     expect(invalid.rendered).toEqual(baseSpec);
     expect(invalid.lastValid).toBe(true);
-    expect(invalid.diagnostics[0]?.code).toBe("empty-layers");
+    expect(invalid.diagnostics[0]).toMatchObject({
+      source: "validation",
+      code: "empty-layers",
+      path: "/layers",
+    });
     expect(invalid.canCopyOrShare).toBe(false);
   });
 
@@ -141,11 +148,84 @@ describe("playground state", () => {
     expect(promoted.canCopyOrShare).toBe(true);
   });
 
+  test("never records an unpainted initial chart as an undo snapshot", () => {
+    const staged = stagePlaygroundDraft(
+      editPlaygroundDraft(createPlaygroundState(sampleSeed), JSON.stringify(nextSpec)),
+    );
+    const promoted = promotePlaygroundCandidate(staged, staged.candidate!.generation);
+    expect(promoted.undoSnapshots).toEqual([]);
+  });
+
+  test("undo records only render-confirmed chart changes and promotes atomically", () => {
+    const first = promotePlaygroundCandidate(
+      stagePlaygroundDraft(
+        editPlaygroundDraft(
+          confirmPlaygroundRendered(createPlaygroundState(sampleSeed)),
+          JSON.stringify(nextSpec),
+        ),
+      ),
+      1,
+    );
+    expect(first.undoSnapshots).toHaveLength(1);
+
+    const secondSpec: PortableSpec = { ...nextSpec, labs: { title: "Second" } };
+    const secondStaged = stagePlaygroundDraft(
+      editPlaygroundDraft(first, JSON.stringify(secondSpec)),
+    );
+    const second = promotePlaygroundCandidate(secondStaged, secondStaged.candidate!.generation);
+    expect(second.undoSnapshots).toHaveLength(2);
+
+    const undoStaged = stagePlaygroundUndo(second);
+    expect(undoStaged.candidate?.origin).toBe("undo");
+    expect(undoStaged.committed.labs?.title).toBe("Second");
+    expect(undoStaged.undoSnapshots).toHaveLength(2);
+
+    const undone = promotePlaygroundCandidate(undoStaged, undoStaged.candidate!.generation);
+    expect(undone.committed.labs?.title).toBe("Edited");
+    expect(undone.draft).toContain("Edited");
+    expect(undone.undoSnapshots).toHaveLength(1);
+  });
+
+  test("bounds meaningful undo history", () => {
+    let state = confirmPlaygroundRendered(createPlaygroundState(sampleSeed));
+    for (let index = 1; index <= PLAYGROUND_MAX_UNDO_SNAPSHOTS + 3; index += 1) {
+      const staged = stagePlaygroundDraft(
+        editPlaygroundDraft(
+          state,
+          JSON.stringify({ ...nextSpec, labs: { title: `Version ${String(index)}` } }),
+        ),
+      );
+      state = promotePlaygroundCandidate(staged, staged.candidate!.generation);
+    }
+    expect(state.undoSnapshots).toHaveLength(PLAYGROUND_MAX_UNDO_SNAPSHOTS);
+    expect(state.undoSnapshots[0]?.committed.labs?.title).toBe("Version 3");
+  });
+
+  test("failed candidates and navigation never create stale undo history", () => {
+    const initial = confirmPlaygroundRendered(createPlaygroundState(sampleSeed));
+    const staged = stagePlaygroundDraft(editPlaygroundDraft(initial, JSON.stringify(nextSpec)));
+    const failed = failPlaygroundCandidate(staged, staged.candidate!.generation, {
+      code: "render-failed",
+      path: "",
+      message: "No chart was promoted.",
+      source: "pipeline",
+    });
+    expect(failed.undoSnapshots).toEqual([]);
+    expect(stagePlaygroundUndo(failed)).toBe(failed);
+
+    const changed = promotePlaygroundCandidate(staged, staged.candidate!.generation);
+    expect(changed.undoSnapshots).toHaveLength(1);
+    const navigated = stagePlaygroundSeed(changed, sampleSeed, "popstate", null);
+    const promoted = promotePlaygroundCandidate(navigated, navigated.candidate!.generation);
+    expect(promoted.undoSnapshots).toEqual([]);
+  });
+
   test("pipeline failure keeps committed output and records last-valid state", () => {
     const staged = stagePlaygroundDraft(
       editPlaygroundDraft(createPlaygroundState(sampleSeed), JSON.stringify(nextSpec)),
     );
     const failed = failPlaygroundCandidate(staged, staged.candidate!.generation, {
+      source: "pipeline",
       code: "palette-exhausted",
       path: "/scales/color",
       message: "The palette cannot represent this domain.",
@@ -156,7 +236,11 @@ describe("playground state", () => {
     expect(failed.draft).toContain("Edited");
     expect(failed.lastValid).toBe(true);
     expect(failed.canCopyOrShare).toBe(false);
-    expect(failed.diagnostics[0]?.code).toBe("palette-exhausted");
+    expect(failed.diagnostics[0]).toMatchObject({
+      source: "pipeline",
+      code: "palette-exhausted",
+      path: "/scales/color",
+    });
   });
 
   test("source and navigation candidates leave the complete retained snapshot untouched until promotion", () => {
@@ -175,6 +259,7 @@ describe("playground state", () => {
       code: "render-failed",
       path: "",
       message: "The shared chart could not render.",
+      source: "pipeline",
     });
     expect(failed.draft).toBe("draft in progress");
     expect(failed.seed).toEqual(sampleSeed);
@@ -199,10 +284,11 @@ describe("playground state", () => {
       1,
     );
     const reset = resetPlaygroundSource(promotedEdit);
-    expect(reset.candidate?.origin).toBe("source");
+    expect(reset.candidate?.origin).toBe("reset");
     expect(reset.historyIntent).toBe("none");
     const restored = promotePlaygroundCandidate(reset, reset.candidate!.generation);
     expect(restored.committed).toEqual(baseSpec);
     expect(restored.sourceBaseline).toEqual(sampleSeed);
+    expect(restored.undoSnapshots).toEqual([]);
   });
 });
