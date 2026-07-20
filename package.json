@@ -73,7 +73,7 @@
     "actionlint": "2.0.6",
     "axe-core": "^4.11.1",
     "knip": "6.27.0",
-    "markdownlint-cli2": "0.23.0",
+    "markdownlint-cli2": "0.23.1",
     "oxfmt": "0.59.0",
     "oxlint": "1.74.0",
     "oxlint-tsgolint": "0.24.0",
