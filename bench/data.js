@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784567020466,
+  "lastUpdate": 1784575523728,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -34881,6 +34881,130 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 146.3251,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "8f7dfb9b32d1dccfe330fccd0e94dfbefad8419d",
+          "message": "feat(docs): add bounded PortableSpec playground (#345)\n\nAdds the bounded local PortableSpec playground, trusted handoffs, render-confirmed promotion, sharing/history recovery, complete Svelte output, and focused regressions.",
+          "timestamp": "2026-07-20T14:24:32-05:00",
+          "tree_id": "711f18190dfea32104d567d7f2c3d594475af098",
+          "url": "https://github.com/ljodea/ggsvelte/commit/8f7dfb9b32d1dccfe330fccd0e94dfbefad8419d"
+        },
+        "date": 1784575522330,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 1.9087,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.2211,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 6.1493,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 8.0509,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 37.8681,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 66.8847,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal-line 100k",
+            "value": 50.1629,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 0.8961,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.0466,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 42.0976,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 61.1265,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 9.528,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 9.3241,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 816.0598,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 1.2021,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 197.259,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 7.315,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 12.0226,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 484.4919,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 119.6417,
             "unit": "ms"
           }
         ]
