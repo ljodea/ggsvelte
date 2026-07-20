@@ -65,6 +65,17 @@ const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     shell: "site",
   },
   {
+    path: "/themes",
+    title: "Chart themes and color scales — ggsvelte",
+    description:
+      "Compare every built-in ggsvelte chart theme and color scheme with live, copyable Svelte examples.",
+    canonicalPath: "/themes",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
     path: "/reference/interactions",
     title: "Interaction reference — ggsvelte",
     description:

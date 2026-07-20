@@ -24,6 +24,11 @@
       active: path === "/playground",
     },
     {
+      label: "Themes",
+      href: "/themes",
+      active: path === "/themes",
+    },
+    {
       label: "Reference",
       href: "/reference/interactions",
       active: path.startsWith("/reference"),
