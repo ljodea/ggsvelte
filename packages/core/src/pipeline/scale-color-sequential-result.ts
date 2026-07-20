@@ -1,6 +1,7 @@
 /**
  * Pack sequential scale resolution into ColorResolution legend input.
  */
+import { timeTicks } from "../layout/time.js";
 import type { SequentialColorScale } from "../scales/color.js";
 
 import type { ColorResolution } from "./scale-color-types.js";
@@ -20,6 +21,9 @@ export function sequentialColorResolution(
       domain: scale.domain,
       at: (t: number) => scale.at(t),
       format,
+      ...(scale.temporal === true && {
+        ticks: timeTicks(scale.domain[0], scale.domain[1], 5).values,
+      }),
     },
     state: null,
   };

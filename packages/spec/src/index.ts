@@ -39,6 +39,7 @@ export {
   RuleLayerSchema,
   ScalesSchema,
   SEQUENTIAL_SCHEME_NAMES,
+  TemporalParserSpecSchemaRef,
   SmoothLayerSchema,
   SpecModule,
   TextLayerSchema,
@@ -95,10 +96,79 @@ export type {
   StatName,
   SummaryFun,
   TextLayer,
+  TemporalParserSpec,
   TextParams,
   ThemeName,
   ThemeSpec,
 } from "./schema.js";
+
+// Checked public capability ledger
+export { SCALE_CAPABILITIES } from "./capabilities.js";
+export type { ScaleCapability } from "./capabilities.js";
+
+// Temporal parsing, inference, and authoring conversions
+export {
+  canonicalTemporalParserKey,
+  dmy,
+  dmy_hm,
+  dmy_hms,
+  dym,
+  dym_hm,
+  dym_hms,
+  fromEpochMilliseconds,
+  fromEpochSeconds,
+  inferTemporalColumn,
+  mdy,
+  mdy_hm,
+  mdy_hms,
+  my,
+  myd,
+  myd_hm,
+  myd_hms,
+  parseTemporal,
+  parseTemporalColumn,
+  parseTemporalFormat,
+  TEMPORAL_PARSER_NAMES,
+  temporalParserConfigurationError,
+  TemporalParseError,
+  TemporalParserSpecSchema,
+  ydm,
+  ydm_hm,
+  ydm_hms,
+  ym,
+  ymd,
+  ymd_hm,
+  ymd_hms,
+  yq,
+} from "./temporal.js";
+export type {
+  TemporalDecision,
+  TemporalDisambiguation,
+  TemporalFailure,
+  TemporalKind,
+  ParsedTemporalColumn,
+  TemporalParseOptions,
+  TemporalParseResult,
+  TemporalParserName,
+  TemporalPrecision,
+} from "./temporal.js";
+
+// Scale helpers
+export {
+  scaleXDate,
+  scaleXDatetime,
+  scaleXDiscrete,
+  scaleYDate,
+  scaleYDatetime,
+  scaleYDiscrete,
+  scale_x_date,
+  scale_x_datetime,
+  scale_x_discrete,
+  scale_y_date,
+  scale_y_datetime,
+  scale_y_discrete,
+} from "./scale-helpers.js";
+export type { DiscretePositionScaleOptions, TemporalScaleOptions } from "./scale-helpers.js";
 
 // Portability (PortableSpec vs RuntimeSpec)
 export {
@@ -182,6 +252,10 @@ export type { SpecError, SpecErrorCode, SpecErrorFix } from "./errors.js";
 // Fluent builder
 export { aes, gg, GGBuilder } from "./builder.js";
 export type {
+  AuthoringCellValue,
+  AuthoringColumns,
+  AuthoringDataRef,
+  AuthoringRows,
   DataInput,
   GeomAreaOptions,
   GeomBarOptions,

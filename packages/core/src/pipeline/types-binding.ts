@@ -5,12 +5,16 @@ import type { LayerSpec } from "@ggsvelte/spec";
 
 import type { CellValue } from "../table.js";
 
+import type { PositionConversionContext } from "./temporal-position.js";
+
 export interface ColorBinding {
   field: string | null;
   /** Literal (non-scaled) constant, if any. */
   constant: string | null;
   /** Scaled constant ({value, scale: true}), if any. */
   scaledConstant: CellValue | null;
+  /** Explicit ordinal scale override for grouping semantics. */
+  forcedDiscrete?: boolean;
 }
 
 export type RuleForm = "annotation" | "vertical" | "horizontal";
@@ -22,6 +26,10 @@ export interface LayerBinding {
   yField: string | null;
   /** The stat-generated column the y channel maps ({ stat: ... }), if any. */
   yStatColumn: string | null;
+  /** Parser/timezone semantics for every x position read. */
+  xConversion: PositionConversionContext;
+  /** Parser/timezone semantics for y, ymin, and ymax position reads. */
+  yConversion: PositionConversionContext;
   yminField: string | null;
   ymaxField: string | null;
   color: ColorBinding;

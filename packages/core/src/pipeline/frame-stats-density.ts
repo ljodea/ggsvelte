@@ -19,7 +19,11 @@ export function buildDensityFrame(
   const carried = carriedColumns(binding, table);
   const columnOf = makeColumnOf(binding);
   const result = statDensity({
-    x: table.numeric(binding.xField!),
+    x: table.numeric(
+      binding.xField!,
+      binding.xConversion.sourceParser,
+      binding.xConversion.options,
+    ),
     groups,
     weights: binding.weightField === null ? null : table.numeric(binding.weightField),
     carried,
@@ -47,6 +51,7 @@ export function buildDensityFrame(
     n: outN,
     xValues: null,
     xNumeric: result.x,
+    yValues: null,
     yNumeric,
     groups: result.groups,
     inputGroups: groups,

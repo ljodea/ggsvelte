@@ -33,7 +33,10 @@ export function emitDataSegments(input: {
     if (binding.ruleForm === "vertical") {
       pushVertical(positionOf(fx.xScale, frame.xNumeric, frame.xValues, row), frame.rowIndex[row]!);
     } else {
-      pushHorizontal(positionOf(fx.yScale, frame.yNumeric, null, row), frame.rowIndex[row]!);
+      pushHorizontal(
+        positionOf(fx.yScale, frame.yNumeric, frame.yValues, row),
+        frame.rowIndex[row]!,
+      );
     }
     if (wantsColors && color !== null && rowIndex.length > before) {
       const value =

@@ -44,6 +44,8 @@ export function runPipeline(spec: SpecInput | PortableSpec, options: RunOptions)
     panelFrames: prepared.panelFrames,
     freeX: prepared.freeX,
     freeY: prepared.freeY,
+    xConversion: prepared.xConversion,
+    yConversion: prepared.yConversion,
     editionDefaults,
     warnings,
     advisories,

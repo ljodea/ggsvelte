@@ -4,6 +4,11 @@
  * for import-path stability.
  */
 export type { Advisory, PipelineWarning } from "./types-advisory.js";
+export type {
+  ScaleDecision,
+  ScaleDiagnostic,
+  ScaleDiagnosticFix,
+} from "./types-scale-diagnostics.js";
 export { CANVAS_AUTO_THRESHOLD, PipelineError } from "./types-advisory.js";
 
 export type {

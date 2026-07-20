@@ -1,16 +1,16 @@
 import { aes, gg } from "@ggsvelte/spec";
 
 import { defineExample } from "../../define.js";
-import { traffic } from "./data.js";
+import { longRunSeries } from "./data.js";
 
 export default defineExample(
-  gg(traffic, aes({ x: "date", y: "users" }))
+  gg(longRunSeries, aes({ x: "year", y: "value" }))
     .geomLine({ linewidth: 1.5 })
-    .scales({ x: { type: "time" }, y: { zero: true } })
     .labs({
-      title: "Daily active users, Q1 2026",
-      x: "Date",
-      y: "Users",
+      title: "Long-run index, 1835–2025",
+      subtitle: "Raw four-digit strings infer a calendar scale",
+      x: "Year",
+      y: "Index",
     })
     .spec(),
 );

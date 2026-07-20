@@ -10,11 +10,10 @@ Build polished charts from Svelte components, a fluent builder, or portable
 JSON. ggsvelte gives you readable scales, stable colors, contained responsive
 rendering, and publication-ready themes before you tune anything.
 
-> **Status: v0.1 is the first public release and intentionally early.** Every export carries a
-> lifecycle tag (see `lifecycle.json` and the docs lifecycle page); the
-> agent core path (`PortableSpec` / `normalize` / `validate` /
-> `renderToSVGString` / `GGPlot`) is `stable-intent`, everything else
-> `experimental`.
+> **Status: the package manifests are the version source of truth; current releases remain pre-1.0.** Correctness fixes may
+> improve default semantics in place; behavioral changes and direct overrides are
+> documented rather than preserved behind legacy runtime branches. Every export carries a
+> lifecycle tag (see `lifecycle.json` and the docs lifecycle page).
 
 ## What you can make
 
@@ -64,6 +63,48 @@ or [coordinate intervals across facets](https://ljodea.github.io/ggsvelte/exampl
 bring [your own local JSON rows to the playground](https://ljodea.github.io/ggsvelte/playground),
 then read the [interaction guide](https://ljodea.github.io/ggsvelte/guide/interactions)
 or [searchable event reference](https://ljodea.github.io/ggsvelte/reference/interactions).
+
+## Dates without preprocessing
+
+A raw four-digit string column is enough to get a proportional calendar axis. No index
+mapping, ISO conversion, or explicit time scale is required:
+
+```svelte
+<script lang="ts">
+  import { GGPlot, GeomLine } from "@ggsvelte/svelte";
+
+  const rows = [
+    { year: "1835", value: 12 },
+    { year: "1900", value: 19 },
+    { year: "2026", value: 31 },
+  ];
+</script>
+
+<GGPlot
+  data={rows}
+  aes={{ x: "year", y: "value" }}
+  width="container"
+  height={360}
+>
+  <GeomLine />
+</GGPlot>
+```
+
+Strict ISO dates, year-months, year-quarters, and runtime `Date` values work the same way.
+Ambiguous ordered dates stay discrete until you choose an order:
+
+```ts
+const spec = gg(rows, aes({ x: "when", y: "value" }))
+  .geomLine()
+  .scaleXDate({ parse: "dmy" })
+  .spec();
+```
+
+Portable JSON uses `scales: { x: { type: "time", parse: "dmy" } }`. If four-digit
+values are identifiers rather than years, use `.scaleXDiscrete()` or
+`scales: { x: { type: "band" } }`. Inspect `model.scaleDecisions` and
+`model.scaleDiagnostics` through `onrender` to see the bounded evidence and copyable
+correction.
 
 ## One spec, three surfaces
 

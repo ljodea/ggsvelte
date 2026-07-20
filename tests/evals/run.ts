@@ -361,4 +361,5 @@ if (import.meta.main) {
   console.log(
     `Done: ${board.cases.length - failed}/${board.cases.length} passed. Outputs in tests/evals/out/.`,
   );
+  if (failed > 0) process.exitCode = 1;
 }

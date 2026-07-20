@@ -157,6 +157,13 @@ describe("axisTicks", () => {
     ]);
   });
 
+  it("keeps signed-zero band breaks distinct", async () => {
+    const { trainBand } = await import("../src/scales/train.ts");
+    const domain = layoutDomain(trainBand([[0, -0]]), [0, -0]);
+    expect(domain.type).toBe("band");
+    if (domain.type === "band") expect(domain.breaks).toHaveLength(2);
+  });
+
   it("positions typed band categories through rawDomain, not labels", async () => {
     const { trainBand } = await import("../src/scales/train.ts");
     // Numeric 1 and string "1" share the presentation label "1"; boolean and

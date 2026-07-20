@@ -1,7 +1,8 @@
 import { bandKey } from "../../scales/train.js";
-import { cellToNumber, ColumnTable } from "../../table.js";
+import { ColumnTable } from "../../table.js";
 import type { FacetPanelDef } from "../facets.js";
 import { NO_ROW } from "../types.js";
+import { xConversionOf, yConversionOf } from "../temporal-position.js";
 import type { LayerFrame } from "../types.js";
 import type { BarParams } from "@ggsvelte/spec";
 
@@ -116,12 +117,13 @@ export function buildBinLineageBuckets(input: {
     bins.sort((a, b) => a.lo - b.lo || a.hi - b.hi);
   }
 
-  const xColumn = frame.table.column(field);
+  const xConversion = xConversionOf(frame.binding);
+  const xNumeric = frame.table.numeric(field, xConversion.sourceParser, xConversion.options);
   for (let localRow = 0; localRow < inputGroups.length; localRow++) {
     const group = inputGroups[localRow]!;
     const bins = binsByGroup.get(group);
     if (bins === undefined || bins.length === 0) continue;
-    const value = cellToNumber(xColumn[localRow]!);
+    const value = xNumeric[localRow]!;
     if (!Number.isFinite(value)) continue;
     const idx = findBinIndex(value, bins, closed);
     if (idx < 0) continue;
@@ -205,7 +207,11 @@ export function buildCandidateIdentityIndex(
       const yField = frame.binding.yField;
       const finiteY =
         (stat === "smooth" || stat === "summary" || stat === "boxplot") && yField !== null;
-      const yColumn = finiteY ? frame.table.column(yField) : null;
+      const yConversion = yConversionOf(frame.binding);
+      const yNumeric =
+        finiteY && yField !== null
+          ? frame.table.numeric(yField, yConversion.sourceParser, yConversion.options)
+          : null;
       for (let localRow = 0; localRow < inputGroups.length; localRow++) {
         const group = inputGroups[localRow]!;
         const sourceRow = facetPanels[panelIndex]!.sourceRows?.[localRow] ?? localRow;
@@ -221,7 +227,7 @@ export function buildCandidateIdentityIndex(
             sourceRow,
           });
         }
-        if (yColumn !== null && Number.isFinite(cellToNumber(yColumn[localRow]!))) {
+        if (yNumeric !== null && Number.isFinite(yNumeric[localRow]!)) {
           appendSourceRowByGroupKey(sourceRowsByGroupY, key, sourceRow);
         }
       }
@@ -302,9 +308,10 @@ export function filterBinRepresentedRows(input: {
   const frameGroup = frame.groups[frameRow];
   const firstInGroup = frameRow === 0 || frame.groups[frameRow - 1] !== frameGroup;
   const lastInGroup = frameRow === frame.n - 1 || frame.groups[frameRow + 1] !== frameGroup;
-  const col = table.column(field);
+  const xConversion = xConversionOf(frame.binding);
+  const numeric = table.numeric(field, xConversion.sourceParser, xConversion.options);
   return baseRows.filter((row) => {
-    const value = cellToNumber(col[row]!);
+    const value = numeric[row]!;
     if (!Number.isFinite(value)) return false;
     return closed === "right"
       ? value <= hi && (value > lo || (firstInGroup && value >= lo))
@@ -313,12 +320,14 @@ export function filterBinRepresentedRows(input: {
 }
 
 export function filterAggregateYRows(input: {
+  frame?: LayerFrame;
   table: ColumnTable;
   field: string;
   baseRows: readonly number[];
 }): number[] {
-  const col = input.table.column(input.field);
-  return input.baseRows.filter((row) => Number.isFinite(cellToNumber(col[row]!)));
+  const conversion = yConversionOf(input.frame?.binding ?? {});
+  const numeric = input.table.numeric(input.field, conversion.sourceParser, conversion.options);
+  return input.baseRows.filter((row) => Number.isFinite(numeric[row]!));
 }
 
 // ---------------------------------------------------------------------------
@@ -394,6 +403,7 @@ export function filterRepresentedSourceRows(input: {
 
   if (needsY) {
     representedRows = filterAggregateYRows({
+      frame,
       table,
       field: aggregateYField,
       baseRows: representedRows,

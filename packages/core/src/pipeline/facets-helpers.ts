@@ -6,7 +6,7 @@ import { didYouMean } from "@ggsvelte/spec";
 import { encodeKey } from "../scales/state.js";
 import { bandKey } from "../scales/train.js";
 import type { CellValue } from "../table.js";
-import { cellToNumber, ColumnTable } from "../table.js";
+import { ColumnTable } from "../table.js";
 
 import { PipelineError } from "./types.js";
 
@@ -41,10 +41,19 @@ export function facetValues(table: ColumnTable, field: string): CellValue[] {
   }
   const values = [...seen.values()];
   const numeric = table.fieldType(field) !== "nominal";
+  const numericByKey = new Map<string, number>();
+  if (numeric) {
+    const semantic = table.numeric(field);
+    const column = table.column(field);
+    for (let index = 0; index < column.length; index++) {
+      const key = encodeKey(column[index]!);
+      if (!numericByKey.has(key)) numericByKey.set(key, semantic[index]!);
+    }
+  }
   values.sort((a, b) => {
     if (a === null) return b === null ? 0 : 1;
     if (b === null) return -1;
-    if (numeric) return cellToNumber(a) - cellToNumber(b);
+    if (numeric) return numericByKey.get(encodeKey(a))! - numericByKey.get(encodeKey(b))!;
     const ka = bandKey(a);
     const kb = bandKey(b);
     if (ka === kb) return encodeKey(a).localeCompare(encodeKey(b), "en");

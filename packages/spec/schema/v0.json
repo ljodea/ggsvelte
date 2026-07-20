@@ -1255,6 +1255,143 @@
       ],
       "description": "One domain entry: a number (linear/log), an ISO 8601 date string (time), or a category value (band/ordinal)."
     },
+    "TemporalParserSpec": {
+      "anyOf": [
+        {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "iso"
+            },
+            {
+              "type": "string",
+              "const": "year"
+            },
+            {
+              "type": "string",
+              "const": "ym"
+            },
+            {
+              "type": "string",
+              "const": "my"
+            },
+            {
+              "type": "string",
+              "const": "yq"
+            },
+            {
+              "type": "string",
+              "const": "ymd"
+            },
+            {
+              "type": "string",
+              "const": "ydm"
+            },
+            {
+              "type": "string",
+              "const": "mdy"
+            },
+            {
+              "type": "string",
+              "const": "myd"
+            },
+            {
+              "type": "string",
+              "const": "dmy"
+            },
+            {
+              "type": "string",
+              "const": "dym"
+            },
+            {
+              "type": "string",
+              "const": "ymd_hm"
+            },
+            {
+              "type": "string",
+              "const": "ymd_hms"
+            },
+            {
+              "type": "string",
+              "const": "ydm_hm"
+            },
+            {
+              "type": "string",
+              "const": "ydm_hms"
+            },
+            {
+              "type": "string",
+              "const": "mdy_hm"
+            },
+            {
+              "type": "string",
+              "const": "mdy_hms"
+            },
+            {
+              "type": "string",
+              "const": "myd_hm"
+            },
+            {
+              "type": "string",
+              "const": "myd_hms"
+            },
+            {
+              "type": "string",
+              "const": "dmy_hm"
+            },
+            {
+              "type": "string",
+              "const": "dmy_hms"
+            },
+            {
+              "type": "string",
+              "const": "dym_hm"
+            },
+            {
+              "type": "string",
+              "const": "dym_hms"
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "required": [
+            "format"
+          ],
+          "properties": {
+            "format": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "description": "Closed strftime-style input grammar (maximum 128 characters and 32 tokens). Supported tokens: %Y, %m, %d, %H, %M, %S, %L, %z, %q, and %%."
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "epoch"
+          ],
+          "properties": {
+            "epoch": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "seconds"
+                },
+                {
+                  "type": "string",
+                  "const": "milliseconds"
+                }
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
+      ],
+      "description": "A deterministic temporal parser name, exact closed format, or epoch unit. JavaScript callbacks and regular expressions are not portable parsers."
+    },
     "PositionScaleSpec": {
       "type": "object",
       "properties": {
@@ -1279,13 +1416,70 @@
           ],
           "description": "Scale type: \"linear\" (default for numbers), \"log\" (base 10; the whole domain must be positive), \"time\" (temporal fields; ISO strings or Date values), \"band\" (discrete categories). Omit to infer from the field type."
         },
+        "temporalKind": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "date"
+            },
+            {
+              "type": "string",
+              "const": "datetime"
+            }
+          ],
+          "description": "Temporal precision intent. \"date\" uses calendar dates; \"datetime\" uses instants. Supplying this option requests a time scale."
+        },
+        "parse": {
+          "$ref": "#/$defs/TemporalParserSpec",
+          "description": "Explicit deterministic parser for temporal source values. Omit for value-driven inference."
+        },
+        "parseFailure": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "error"
+            },
+            {
+              "type": "string",
+              "const": "censor"
+            }
+          ],
+          "description": "Explicit parser failure policy: \"error\" (default) stops with bounded evidence; \"censor\" converts invalid values to missing and emits a warning."
+        },
+        "timezone": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "description": "IANA timezone used for timezone-less temporal input. Default \"UTC\". Invalid zones fail with an actionable diagnostic."
+        },
+        "disambiguation": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "compatible"
+            },
+            {
+              "type": "string",
+              "const": "earlier"
+            },
+            {
+              "type": "string",
+              "const": "later"
+            },
+            {
+              "type": "string",
+              "const": "reject"
+            }
+          ],
+          "description": "DST gap/fold policy for IANA local times. Default \"reject\"; choose \"earlier\", \"later\", or Temporal-compatible behavior explicitly."
+        },
         "domain": {
           "type": "array",
           "items": {
             "$ref": "#/$defs/DomainValue"
           },
           "minItems": 1,
-          "description": "Explicit domain, PINNING the scale: [min, max] for continuous scales (numbers, or ISO date strings for time); the full category list for band scales. Data outside the domain is dropped with a warning."
+          "description": "Explicit domain, PINNING the scale: [min, max] for continuous scales (numbers, or temporal strings for time); the full category list for band scales. Data outside the domain is dropped with a warning."
         },
         "nice": {
           "type": "boolean",

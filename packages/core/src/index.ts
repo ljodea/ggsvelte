@@ -175,6 +175,9 @@ export type {
   RenderModel,
   ResolvedColorScale,
   RunOptions,
+  ScaleDecision,
+  ScaleDiagnostic,
+  ScaleDiagnosticFix,
   TrainedScales,
   ScaleDomainSnapshot,
 } from "./pipeline.js";

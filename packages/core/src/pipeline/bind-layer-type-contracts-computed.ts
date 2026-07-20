@@ -5,6 +5,7 @@ import type { BarParams, LayerSpec } from "@ggsvelte/spec";
 
 import type { ColumnTable } from "../table.js";
 
+import { positionFieldType, type PositionConversionContext } from "./temporal-position.js";
 import { PipelineError } from "./types.js";
 
 export function validateComputedYAndBinContracts(input: {
@@ -13,8 +14,10 @@ export function validateComputedYAndBinContracts(input: {
   table: ColumnTable;
   xField: string | null;
   yField: string | null;
+  xConversion: PositionConversionContext;
+  yConversion: PositionConversionContext;
 }): void {
-  const { layer, index, table, xField, yField } = input;
+  const { layer, index, table, xField, yField, xConversion } = input;
   const geom = layer.geom;
   const stat = layer.stat ?? "identity";
   const params = layer.params ?? {};
@@ -42,7 +45,7 @@ export function validateComputedYAndBinContracts(input: {
         "The bin stat accepts params.center OR params.boundary (both align the bin grid), never both.",
       );
     }
-    if (xField !== null && table.fieldType(xField) === "nominal") {
+    if (xField !== null && positionFieldType(table, xField, xConversion) === "nominal") {
       throw new PipelineError(
         "channel-type-mismatch",
         `/layers/${index}/aes/x`,

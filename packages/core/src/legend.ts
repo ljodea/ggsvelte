@@ -36,6 +36,8 @@ export interface RampLegendInput {
   at(t: number): string;
   /** Tick label formatter. */
   format(value: number): string;
+  /** Optional semantic tick positions; numeric ramps use linear ticks. */
+  ticks?: readonly number[];
 }
 
 export type LegendInput = DiscreteLegendInput | RampLegendInput;
@@ -177,7 +179,7 @@ export function buildLegends(
     {
       const titleHeight = input.title === "" ? 0 : TITLE_HEIGHT;
       const [min, max] = input.domain;
-      const tickValues = linearTicks(min, max, 5);
+      const tickValues = input.ticks ?? linearTicks(min, max, 5);
       const step = min === max ? 0 : tickStep(min, max, 5);
       void step;
       const span = max - min;

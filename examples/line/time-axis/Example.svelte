@@ -1,15 +1,19 @@
 <script lang="ts">
   import { GeomLine, GGPlot } from "@ggsvelte/svelte";
 
-  import { traffic } from "./data.js";
+  import { longRunSeries } from "./data.js";
 </script>
 
 <GGPlot
-  data={traffic}
-  aes={{ x: "date", y: "users" }}
-  scales={{ x: { type: "time" }, y: { zero: true } }}
-  labs={{ title: "Daily active users, Q1 2026", x: "Date", y: "Users" }}
-  width={640}
+  data={longRunSeries}
+  aes={{ x: "year", y: "value" }}
+  labs={{
+    title: "Long-run index, 1835–2025",
+    subtitle: "Raw four-digit strings infer a calendar scale",
+    x: "Year",
+    y: "Index",
+  }}
+  width="container"
   height={400}
 >
   <GeomLine linewidth={1.5} />

@@ -37,7 +37,12 @@ export type Domain =
   | { type: "linear"; min: number; max: number; breaks?: readonly number[] }
   | { type: "log"; min: number; max: number; breaks?: readonly number[] }
   | { type: "time"; min: number; max: number; breaks?: readonly number[] }
-  | { type: "band"; categories: string[] };
+  | {
+      type: "band";
+      categories: string[];
+      rawCategories?: readonly unknown[];
+      breaks?: readonly (number | string)[];
+    };
 
 export interface Margins {
   top: number;
@@ -49,6 +54,8 @@ export interface Margins {
 export interface Tick {
   value: number | string;
   label: string;
+  /** Typed band-domain position; avoids indexing filtered/reordered breaks. */
+  domainIndex?: number;
   /** false when band-label thinning hides this tick's label. */
   labeled: boolean;
 }
@@ -158,13 +165,23 @@ function deriveTicks(
   labelEvery: number,
 ): AxisTicks {
   if (domain.type === "band") {
-    const cats = domain.categories;
-    const ticks = cats.map((c, i) => ({
-      value: c,
-      label: format ? format(c, NaN) : c,
-      labeled: i % labelEvery === 0,
+    const rawCategories = domain.rawCategories ?? domain.categories;
+    const entries =
+      domain.breaks === undefined
+        ? domain.categories.map((value, domainIndex) => ({ value, domainIndex }))
+        : domain.breaks
+            .map((value) => ({
+              value,
+              domainIndex: rawCategories.findIndex((category) => Object.is(category, value)),
+            }))
+            .filter(({ domainIndex }) => domainIndex >= 0);
+    const ticks = entries.map(({ value, domainIndex }, index) => ({
+      value,
+      label: format ? format(value, NaN) : String(value),
+      domainIndex,
+      labeled: index % labelEvery === 0,
     }));
-    return { ticks, step: NaN, empty: cats.length === 0 };
+    return { ticks, step: NaN, empty: entries.length === 0 };
   }
   const { min, max } = domain;
   if (!Number.isFinite(min) || !Number.isFinite(max)) {

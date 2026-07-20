@@ -12,6 +12,7 @@ import {
   validateGeomStatContracts,
 } from "./bind-layer-validate.js";
 import { resolveYChannel } from "./bind-layer-y.js";
+import type { PositionConversionContext } from "./temporal-position.js";
 import type { LayerBinding, PipelineWarning } from "./types.js";
 
 export function resolveLayerPositionChannels(input: {
@@ -20,6 +21,8 @@ export function resolveLayerPositionChannels(input: {
   index: number;
   table: ColumnTable;
   warnings: PipelineWarning[];
+  xConversion: PositionConversionContext;
+  yConversion: PositionConversionContext;
 }): {
   ruleForm: LayerBinding["ruleForm"];
   xField: string | null;
@@ -28,14 +31,22 @@ export function resolveLayerPositionChannels(input: {
   yminField: string | null;
   ymaxField: string | null;
 } {
-  const { layer, aes, index, table, warnings } = input;
+  const { layer, aes, index, table, warnings, xConversion, yConversion } = input;
   const geom = layer.geom;
   const ruleForm = resolveRuleForm(layer, index);
   const stat = layer.stat ?? "identity";
   const xField = checkField(aes.x, "x", index, table, warnings);
   const { yField, yStatColumn } = resolveYChannel({ aes, stat, index, table, warnings });
 
-  validateGeomStatContracts({ layer, index, table, xField, yField });
+  validateGeomStatContracts({
+    layer,
+    index,
+    table,
+    xField,
+    yField,
+    xConversion,
+    yConversion,
+  });
 
   const yminField = checkField(aes.ymin, "ymin", index, table, warnings);
   const ymaxField = checkField(aes.ymax, "ymax", index, table, warnings);

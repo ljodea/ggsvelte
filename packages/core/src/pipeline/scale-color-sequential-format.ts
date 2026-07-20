@@ -4,6 +4,7 @@
 import type { ColorScaleSpec } from "@ggsvelte/spec";
 
 import { numberFormatter } from "../layout/format.js";
+import { defaultTimeTickFormat } from "../layout/time.js";
 import { defaultTickFormat, tickStep } from "../layout/ticks.js";
 import type { SequentialColorScale } from "../scales/color.js";
 
@@ -16,7 +17,10 @@ export function resolveSequentialLegendFormat(
   warnings: PipelineWarning[],
 ): (v: number) => string {
   const labelFormat = config?.labels;
-  let format = defaultTickFormat(tickStep(scale.domain[0], scale.domain[1], 5));
+  let format =
+    scale.temporal === true
+      ? defaultTimeTickFormat
+      : defaultTickFormat(tickStep(scale.domain[0], scale.domain[1], 5));
   if (labelFormat !== undefined) {
     const f = numberFormatter(labelFormat);
     if (f.ok) {

@@ -17,6 +17,12 @@ export const GUIDE_CATALOG = [
     section: "Start",
   },
   {
+    slug: "temporal-scales",
+    title: "Dates without preprocessing",
+    description: "Value-driven date inference, strict parsers, overrides, and diagnostics.",
+    section: "Build",
+  },
+  {
     slug: "interactions",
     title: "Interactions",
     description: "Inspection, selection, zoom, keyboard behavior, identity, and event contracts.",

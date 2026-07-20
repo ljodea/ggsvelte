@@ -17,7 +17,7 @@
  * for its prerendered endpoints and guide pages.
  */
 import { ADVISORY_CATALOG } from "@ggsvelte/core";
-import { LINT_CATALOG } from "@ggsvelte/spec";
+import { LINT_CATALOG, SCALE_CAPABILITIES, TEMPORAL_PARSER_NAMES } from "@ggsvelte/spec";
 import { INTERACTION_DIAGNOSTIC_CATALOG } from "../packages/svelte/src/lib/interaction/interaction";
 import { GUIDE_CATALOG, type GuideSlug } from "../apps/docs/src/lib/catalog/guide";
 import supportMatrix from "../support-matrix.json";
@@ -305,6 +305,8 @@ advisories for valid-but-questionable specs.
 
 - [Examples gallery](/examples) — runnable charts across marks, statistics,
   scales, themes, and interaction.
+- [Dates without preprocessing](/guide/temporal-scales) — inference, explicit parsers,
+  discrete overrides, diagnostics, and all three authoring surfaces.
 - [Interactions](/guide/interactions) — inspection, selection, zoom, typed
   events, keyboard behavior, and stable identity.
 - [Local data playground](/playground) — paste bounded JSON rows without
@@ -314,6 +316,72 @@ advisories for valid-but-questionable specs.
 - [Errors reference](/guide/errors) — validation, render, interaction, and CLI
   diagnostics with consequences and safe recovery steps.
 - [JSON Schema](/schema/v0.json) — PortableSpec for constrained decoding.
+`;
+
+export const TEMPORAL_SCALES_MD = `# Dates without preprocessing
+
+ggsvelte infers strict ISO dates/date-times, four-digit year strings,
+year-months, month-years, year-quarters, and runtime \`Date\` values from data.
+Classification inspects at most the first and last 32 non-null values; after it
+selects one parser family, every non-null value must validate. A partially valid
+column never becomes partially temporal.
+
+## Let the default work
+
+\`"1835"\`, \`"1900"\`, and \`"2026"\` are spaced as calendar years, not as
+three equally spaced categories. Numeric \`1835\` stays quantitative.
+
+\`\`\`svelte
+<script lang="ts">
+  import { GGPlot, GeomLine } from "@ggsvelte/svelte";
+  const rows = [
+    { year: "1835", value: 12 },
+    { year: "1900", value: 19 },
+    { year: "2026", value: 31 },
+  ];
+</script>
+
+<GGPlot data={rows} aes={{ x: "year", y: "value" }} width="container" height={360}>
+  <GeomLine />
+</GGPlot>
+\`\`\`
+
+## Inspect the choice
+
+Read \`model.scaleDecisions\` in \`onrender\` for field, parser, precision,
+bounded evidence, validated count, trained domain, ambiguity, and a portable
+override. Exceptional or advisory choices also appear in
+\`model.scaleDiagnostics\` as stable problem/cause/fix records.
+
+## Override one choice
+
+Ambiguous values such as \`03/04/2024\` stay discrete. Pick the intended order:
+
+\`\`\`ts
+const spec = gg(rows, aes({ x: "when", y: "value" }))
+  .geomLine()
+  .scaleXDate({ parse: "dmy" })
+  .spec();
+\`\`\`
+
+Canonical JSON uses \`scales: { x: { type: "time", parse: "dmy" } }\`.
+The closed parser names are generated from the runtime registry:
+\`${TEMPORAL_PARSER_NAMES.join("`, `")}\`. Exact bounded formats and epoch
+seconds/milliseconds are object parser forms. Timezone-less values mean UTC;
+IANA zones use Temporal with explicit DST disambiguation.
+
+If four-digit strings are identifiers, force categories with
+\`.scaleXDiscrete()\`, \`scale_x_discrete()\`, or
+\`scales: { x: { type: "band" } }\`.
+
+## PortableSpec boundary
+
+PortableSpec remains strict JSON: no \`Date\`, callback, or regular expression.
+The checked capability ledger records the temporal family as
+\`${SCALE_CAPABILITIES.find((capability) => capability.family === "position-temporal")?.runtime ?? "missing"}\`; docs, helper tests, and agent checks consume that ledger.
+Builder and Svelte authoring may contain runtime Dates; they canonicalize to ISO
+before validation. The standalone \`ymd\`, \`mdy\`, \`dmy\`, related order and
+timestamp helpers, exact-format parser, and epoch helpers return authoring Dates.
 `;
 
 export const COMPATIBILITY_MD = `# Compatibility
@@ -1398,6 +1466,7 @@ export interface GuidePage {
 export function guidePages(lifecycle: LifecycleDoc): GuidePage[] {
   const markdownBySlug: Record<GuideSlug, string> = {
     "getting-started": GETTING_STARTED_MD,
+    "temporal-scales": TEMPORAL_SCALES_MD,
     interactions: INTERACTIONS_MD,
     compatibility: COMPATIBILITY_MD,
     "interaction-reference": INTERACTION_REFERENCE_MD,

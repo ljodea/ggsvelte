@@ -4,9 +4,10 @@
 import type { ErrorbarParams } from "@ggsvelte/spec";
 
 import { statSummary } from "../stats/summary.js";
-import { cellsToNumeric, ColumnTable } from "../table.js";
+import { ColumnTable } from "../table.js";
 
 import { carriedColumns, emptyFrameExtras, removedStatWarning } from "./frame-helpers.js";
+import { positionValuesToNumeric } from "./temporal-position.js";
 import { makeColumnOf } from "./frame-stats-shared.js";
 import type { LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
 import { NO_ROW } from "./types.js";
@@ -23,7 +24,11 @@ export function buildSummaryFrame(
   const params = (layer.params ?? {}) as ErrorbarParams;
   const result = statSummary({
     x: table.column(binding.xField!),
-    y: table.numeric(binding.yField!),
+    y: table.numeric(
+      binding.yField!,
+      binding.yConversion.sourceParser,
+      binding.yConversion.options,
+    ),
     groups,
     fun: params.fun,
     funMin: params.funMin,
@@ -37,7 +42,8 @@ export function buildSummaryFrame(
     table,
     n: result.x.length,
     xValues: result.x,
-    xNumeric: cellsToNumeric(result.x),
+    xNumeric: positionValuesToNumeric(result.x, binding.xConversion).values,
+    yValues: null,
     yNumeric: result.y,
     groups: result.groups,
     inputGroups: groups,

@@ -125,6 +125,29 @@ describe("assemblePortableSpec", () => {
     expect(assembled!.legend?.order).toBe("stable-domain");
   });
 
+  it("canonicalizes Date authoring values and preserves temporal scale parser options", () => {
+    const assembled = assemblePortableSpec({
+      data: [
+        { when: new Date("2024-01-01T00:00:00.000Z"), value: 1 },
+        { when: new Date("2024-01-02T00:00:00.000Z"), value: 2 },
+      ],
+      aes: { x: "when", y: "value" },
+      layers: [{ geom: "line" }],
+      scales: { x: { type: "time", temporalKind: "date", parse: "iso" } },
+    });
+    expect(assembled?.data).toEqual({
+      values: [
+        { when: "2024-01-01", value: 1 },
+        { when: "2024-01-02", value: 2 },
+      ],
+    });
+    expect(assembled?.scales?.x).toMatchObject({
+      type: "time",
+      temporalKind: "date",
+      parse: "iso",
+    });
+  });
+
   it("lets empty layers array win over hypothetical registry content", () => {
     // Caller converts registry → LayerInput[] before assemble; empty wins.
     expect(

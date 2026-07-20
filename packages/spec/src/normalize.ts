@@ -32,6 +32,7 @@ import type {
   FacetSpec,
   LayerSpec,
   PortableSpec,
+  PositionScaleSpec,
   Scales,
   ThemeName,
   ThemeSpec,
@@ -194,10 +195,32 @@ function normalizeColorScale(scale: ColorScaleSpec): ColorScaleSpec {
   };
 }
 
+function normalizePositionScale(scale: PositionScaleSpec): PositionScaleSpec {
+  if (scale.type === "band") {
+    const {
+      temporalKind: _,
+      parse: __,
+      parseFailure: ___,
+      timezone: ____,
+      disambiguation: _____,
+      ...band
+    } = scale;
+    return band;
+  }
+  const requestsTime =
+    scale.type === "time" ||
+    scale.temporalKind !== undefined ||
+    scale.parse !== undefined ||
+    scale.parseFailure !== undefined ||
+    scale.timezone !== undefined ||
+    scale.disambiguation !== undefined;
+  return requestsTime ? { ...scale, type: "time" } : { ...scale };
+}
+
 function normalizeScales(scales: Scales): Scales {
   return {
-    ...(scales.x !== undefined && { x: { ...scales.x } }),
-    ...(scales.y !== undefined && { y: { ...scales.y } }),
+    ...(scales.x !== undefined && { x: normalizePositionScale(scales.x) }),
+    ...(scales.y !== undefined && { y: normalizePositionScale(scales.y) }),
     ...(scales.color !== undefined && { color: normalizeColorScale(scales.color) }),
     ...(scales.fill !== undefined && { fill: normalizeColorScale(scales.fill) }),
   };

@@ -5,19 +5,35 @@ import { deriveGroups } from "../grouping.js";
 import type { CellValue, Discreteness } from "../table.js";
 import type { ColumnTable } from "../table.js";
 
+import { positionDiscreteness } from "./temporal-position.js";
 import type { LayerBinding } from "./types.js";
 
 export function deriveLayerGroups(binding: LayerBinding, table: ColumnTable): number[] {
   const aes = binding.layer.aes ?? {};
   const declared: Record<string, Discreteness> = {};
-  for (const mapping of Object.values(aes)) {
+  for (const [channel, mapping] of Object.entries(aes)) {
     if (
       mapping !== null &&
       mapping !== undefined &&
       "field" in mapping &&
       table.has(mapping.field)
     ) {
-      declared[mapping.field] = table.discreteness(mapping.field);
+      const conversion =
+        mapping.field === binding.xField
+          ? binding.xConversion
+          : mapping.field === binding.yField ||
+              mapping.field === binding.yminField ||
+              mapping.field === binding.ymaxField
+            ? binding.yConversion
+            : undefined;
+      const forcedDiscrete =
+        (channel === "color" && binding.color.forcedDiscrete === true) ||
+        (channel === "fill" && binding.fill.forcedDiscrete === true);
+      declared[mapping.field] = forcedDiscrete
+        ? "discrete"
+        : conversion === undefined
+          ? table.discreteness(mapping.field)
+          : positionDiscreteness(table, mapping.field, conversion);
     }
   }
   return [...deriveGroups(table.columns(), aes, declared).groups];

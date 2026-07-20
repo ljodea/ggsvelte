@@ -503,7 +503,10 @@ export function resolveCandidateLogicalValues(input: {
     ? annotationY
     : outlierSourceRow === null
       ? sourceRow === null
-        ? (frame?.yNumeric?.[frameRow] ?? frame?.box?.middle[frameRow] ?? null)
+        ? (frame?.yValues?.[frameRow] ??
+          frame?.yNumeric?.[frameRow] ??
+          frame?.box?.middle[frameRow] ??
+          null)
         : sourceValue(yField)
       : (frame?.box?.outlierY[primitiveIndex] ?? null);
 
