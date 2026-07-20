@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784576764425,
+  "lastUpdate": 1784577663411,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -35129,6 +35129,130 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 149.78,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c8879c54d1ec8648fcf4c06bd5cc252dbae89160",
+          "message": "feat(docs): add advanced playground tools (#347)\n\nAdds semantically checked Builder output, bounded undo, deterministic SVG export, source-aware diagnostics, and bounded chart-local interaction inspection. Current-head CI and Codex review are clean; the expected playground VR deltas will land through the trusted post-merge companion.",
+          "timestamp": "2026-07-20T15:00:05-05:00",
+          "tree_id": "7c1707b32ce0cc8522314ec20b4720c95e72ab51",
+          "url": "https://github.com/ljodea/ggsvelte/commit/c8879c54d1ec8648fcf4c06bd5cc252dbae89160"
+        },
+        "date": 1784577661828,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.5433,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.2219,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 8.3178,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 10.2852,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 51.3753,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 85.4326,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal-line 100k",
+            "value": 69.7291,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.1651,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.281,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 51.9051,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 72.5516,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 14.0125,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 13.3031,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 977.0337,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.8084,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 254.8857,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 9.5459,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 14.5572,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 590.5494,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 147.3622,
             "unit": "ms"
           }
         ]
