@@ -11,6 +11,7 @@
     "check": "bun ../../scripts/gen-docs-routes.ts --check && bun ../../scripts/gen-gallery-previews.ts --check && svelte-kit sync && svelte-check --fail-on-warnings"
   },
   "dependencies": {
+    "@ggsvelte/core": "workspace:*",
     "@ggsvelte/examples": "workspace:*",
     "@ggsvelte/spec": "workspace:*",
     "@ggsvelte/svelte": "workspace:*"
