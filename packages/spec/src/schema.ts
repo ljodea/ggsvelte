@@ -39,6 +39,8 @@
  */
 import Type, { type Static, type TLiteral, type TSchema } from "typebox";
 
+import { TemporalParserSpecSchema } from "./temporal.js";
+
 /** Named categorical color schemes known to this schema version. */
 export const CATEGORICAL_SCHEME_NAMES = [
   "observable10",
@@ -1120,6 +1122,8 @@ const SpecDeclarations = {
       "One domain entry: a number (linear/log), an ISO 8601 date string (time), or a category value (band/ordinal).",
   }),
 
+  TemporalParserSpec: TemporalParserSpecSchema,
+
   PositionScaleSpec: Type.Object(
     {
       type: Type.Optional(
@@ -1131,11 +1135,51 @@ const SpecDeclarations = {
           },
         ),
       ),
+      temporalKind: Type.Optional(
+        Type.Union([Type.Literal("date"), Type.Literal("datetime")], {
+          description:
+            'Temporal precision intent. "date" uses calendar dates; "datetime" uses instants. Supplying this option requests a time scale.',
+        }),
+      ),
+      parse: Type.Optional(
+        Type.Ref("TemporalParserSpec", {
+          description:
+            "Explicit deterministic parser for temporal source values. Omit for value-driven inference.",
+        }),
+      ),
+      parseFailure: Type.Optional(
+        Type.Union([Type.Literal("error"), Type.Literal("censor")], {
+          description:
+            'Explicit parser failure policy: "error" (default) stops with bounded evidence; "censor" converts invalid values to missing and emits a warning.',
+        }),
+      ),
+      timezone: Type.Optional(
+        Type.String({
+          minLength: 1,
+          maxLength: 128,
+          description:
+            'IANA timezone used for timezone-less temporal input. Default "UTC". Invalid zones fail with an actionable diagnostic.',
+        }),
+      ),
+      disambiguation: Type.Optional(
+        Type.Union(
+          [
+            Type.Literal("compatible"),
+            Type.Literal("earlier"),
+            Type.Literal("later"),
+            Type.Literal("reject"),
+          ],
+          {
+            description:
+              'DST gap/fold policy for IANA local times. Default "reject"; choose "earlier", "later", or Temporal-compatible behavior explicitly.',
+          },
+        ),
+      ),
       domain: Type.Optional(
         Type.Array(Type.Ref("DomainValue"), {
           minItems: 1,
           description:
-            "Explicit domain, PINNING the scale: [min, max] for continuous scales (numbers, or ISO date strings for time); the full category list for band scales. Data outside the domain is dropped with a warning.",
+            "Explicit domain, PINNING the scale: [min, max] for continuous scales (numbers, or temporal strings for time); the full category list for band scales. Data outside the domain is dropped with a warning.",
         }),
       ),
       nice: Type.Optional(
@@ -1587,6 +1631,7 @@ export const AesSchema = SpecModule.Import("Aes");
 export const ChannelValueSchema = SpecModule.Import("ChannelValue");
 export const DataRefSchema = SpecModule.Import("DataRef");
 export const ScalesSchema = SpecModule.Import("Scales");
+export const TemporalParserSpecSchemaRef = SpecModule.Import("TemporalParserSpec");
 export const FacetSpecSchema = SpecModule.Import("FacetSpec");
 export const CoordSpecSchema = SpecModule.Import("CoordSpec");
 
@@ -1681,6 +1726,7 @@ export type StackablePosition = SpecType<"StackablePosition">;
 /** Position adjustments accepted by point layers. */
 export type PointPosition = "identity" | "jitter" | "nudge";
 /** Positional (x/y) scale configuration. */
+export type TemporalParserSpec = SpecType<"TemporalParserSpec">;
 export type PositionScaleSpec = SpecType<"PositionScaleSpec">;
 /** Color/fill scale configuration. */
 export type ColorScaleSpec = SpecType<"ColorScaleSpec">;

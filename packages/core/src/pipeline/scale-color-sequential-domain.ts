@@ -1,16 +1,25 @@
 /**
  * Sequential color domain and range resolution (config vs edition defaults).
  */
-import type { ColorScaleSpec } from "@ggsvelte/spec";
+import { parseTemporalColumn, type ColorScaleSpec, type TemporalParserSpec } from "@ggsvelte/spec";
 
 import type { EditionDefaults } from "../editions.js";
 import { VIRIDIS_RAMP_10 } from "../scales/color.js";
 import type { CellValue } from "../table.js";
 import { cellToNumber } from "../table.js";
 
-export function resolveSequentialDomain(config?: ColorScaleSpec): [number, number] | undefined {
+export function resolveSequentialDomain(
+  config?: ColorScaleSpec,
+  temporalParser?: TemporalParserSpec,
+): [number, number] | undefined {
   const domain = config?.domain;
   if (domain === undefined || domain.length !== 2) return undefined;
+  if (temporalParser !== undefined) {
+    const parsed = parseTemporalColumn(domain, temporalParser);
+    if (parsed.valid[0] === 1 && parsed.valid[1] === 1) {
+      return [parsed.semantic[0]!, parsed.semantic[1]!];
+    }
+  }
   return [cellToNumber(domain[0] as CellValue), cellToNumber(domain[1] as CellValue)];
 }
 

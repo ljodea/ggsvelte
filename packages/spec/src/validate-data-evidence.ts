@@ -8,6 +8,7 @@
  */
 import type { SpecError } from "./errors.js";
 import type { Aes, CellValue, ChannelName } from "./schema.js";
+import { inferTemporalColumn, type TemporalDecision } from "./temporal.js";
 import type { ProfileFieldType, ValidateLimits, ValidateOptions } from "./validate-data.js";
 
 // ---------------------------------------------------------------------------
@@ -25,6 +26,8 @@ export interface FieldEvidenceEntry {
   allNull: boolean;
   /** Raw column values (inline data only; null for profile-backed fields). */
   values: readonly CellValue[] | null;
+  /** Shared value-driven temporal decision (inline data only). */
+  temporal: TemporalDecision | null;
 }
 
 export type FieldEvidenceMap = Map<string, FieldEvidenceEntry>;
@@ -66,37 +69,23 @@ const PROFILE_TYPES: ReadonlySet<string> = new Set([
   "nominal",
 ]);
 
-/** ISO 8601 date / date-time strings (mirrors @ggsvelte/core's inference). */
-const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}([T ]\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:?\d{2})?)?$/;
-
-function inferProfileType(column: readonly CellValue[]): ProfileFieldType | null {
+function inferProfileType(column: readonly CellValue[]): {
+  type: ProfileFieldType | null;
+  temporal: TemporalDecision;
+} {
+  const temporal = inferTemporalColumn(column);
+  if (temporal.status === "temporal") return { type: "temporal", temporal };
   let sawNumber = false;
-  let sawDate = false;
-  let sawString = false;
-  let allStringsISO = true;
-  for (const v of column) {
-    if (v === null) continue;
-    switch (typeof v) {
-      case "string":
-        sawString = true;
-        if (allStringsISO && !(ISO_DATE_RE.test(v) && !Number.isNaN(Date.parse(v)))) {
-          allStringsISO = false;
-        }
-        break;
-      case "boolean":
-        return "nominal";
-      case "number":
-        sawNumber = true;
-        break;
-      default:
-        sawDate = true;
-        break;
+  let sawValue = false;
+  for (const value of column) {
+    if (value === null) continue;
+    sawValue = true;
+    if (typeof value === "boolean" || typeof value === "string") {
+      return { type: "nominal", temporal };
     }
+    if (typeof value === "number") sawNumber = true;
   }
-  if (sawString) return allStringsISO && !sawNumber ? "temporal" : "nominal";
-  if (sawDate) return "temporal";
-  if (sawNumber) return "quantitative";
-  return null; // empty / all-null: no type evidence
+  return { type: sawNumber ? "quantitative" : sawValue ? "nominal" : null, temporal };
 }
 
 function badProfile(message: string): SpecError[] {
@@ -185,7 +174,7 @@ export function resolveFieldEvidence(
     if (bad.length > 0) return { status: "errors", errors: bad };
     const fields: FieldEvidenceMap = new Map();
     for (const f of options.profile.fields) {
-      fields.set(f.name, { type: f.type, allNull: false, values: null });
+      fields.set(f.name, { type: f.type, allNull: false, values: null, temporal: null });
     }
     return { status: "ok", fields };
   }
@@ -223,11 +212,12 @@ export function resolveFieldEvidence(
   const fields: FieldEvidenceMap = new Map();
   for (const name of names) {
     const column = columns[name]!;
-    const type = inferProfileType(column);
+    const inferred = inferProfileType(column);
     fields.set(name, {
-      type,
-      allNull: column.length > 0 && type === null,
+      type: inferred.type,
+      allNull: column.length > 0 && inferred.type === null,
       values: column,
+      temporal: inferred.temporal,
     });
   }
   return { status: "ok", fields };

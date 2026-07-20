@@ -125,6 +125,43 @@ export const DOCS_ROUTES = [
     ],
   },
   {
+    path: "/guide/temporal-scales",
+    title: "Dates without preprocessing — ggsvelte",
+    description: "Value-driven date inference, strict parsers, overrides, and diagnostics.",
+    canonicalPath: "/guide/temporal-scales",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    navigation: {
+      section: "Build",
+      label: "Dates without preprocessing",
+      order: 1,
+    },
+    headings: [
+      {
+        id: "let-the-default-work",
+        title: "Let the default work",
+        level: 2,
+      },
+      {
+        id: "inspect-the-choice",
+        title: "Inspect the choice",
+        level: 2,
+      },
+      {
+        id: "override-one-choice",
+        title: "Override one choice",
+        level: 2,
+      },
+      {
+        id: "portablespec-boundary",
+        title: "PortableSpec boundary",
+        level: 2,
+      },
+    ],
+  },
+  {
     path: "/guide/interactions",
     title: "Interactions — ggsvelte",
     description: "Inspection, selection, zoom, keyboard behavior, identity, and event contracts.",
@@ -136,7 +173,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Build",
       label: "Interactions",
-      order: 1,
+      order: 2,
     },
     headings: [
       {
@@ -228,7 +265,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Build",
       label: "Compatibility",
-      order: 2,
+      order: 3,
     },
     headings: [
       {
@@ -250,7 +287,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Interaction reference",
-      order: 3,
+      order: 4,
     },
     headings: [
       {
@@ -443,7 +480,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Errors reference",
-      order: 4,
+      order: 5,
     },
     headings: [
       {
@@ -697,6 +734,16 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "invalid-scale-breaks",
+        title: "invalid-scale-breaks",
+        level: 3,
+      },
+      {
+        id: "temporal-parse-failed",
+        title: "temporal-parse-failed",
+        level: 3,
+      },
+      {
         id: "log-domain-not-positive",
         title: "log-domain-not-positive",
         level: 3,
@@ -809,6 +856,11 @@ export const DOCS_ROUTES = [
       {
         id: "out-of-domain",
         title: "out-of-domain",
+        level: 3,
+      },
+      {
+        id: "temporal-values-censored",
+        title: "temporal-values-censored",
         level: 3,
       },
       {
@@ -935,7 +987,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Advisories",
-      order: 5,
+      order: 6,
     },
     headings: [
       {
@@ -1013,6 +1065,21 @@ export const DOCS_ROUTES = [
         title: "canvas-auto",
         level: 3,
       },
+      {
+        id: "temporal-year-inferred",
+        title: "temporal-year-inferred",
+        level: 3,
+      },
+      {
+        id: "temporal-inference-ambiguous",
+        title: "temporal-inference-ambiguous",
+        level: 3,
+      },
+      {
+        id: "temporal-inference-invalid",
+        title: "temporal-inference-invalid",
+        level: 3,
+      },
     ],
   },
   {
@@ -1027,7 +1094,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Lifecycle & editions",
-      order: 6,
+      order: 7,
     },
     headings: [
       {
@@ -1046,8 +1113,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-163",
-        title: "experimental (163)",
+        id: "experimental-226",
+        title: "experimental (226)",
         level: 3,
       },
       {
@@ -1061,8 +1128,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-201",
-        title: "experimental (201)",
+        id: "experimental-204",
+        title: "experimental (204)",
         level: 3,
       },
       {
@@ -1086,8 +1153,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-129",
-        title: "experimental (129)",
+        id: "experimental-182",
+        title: "experimental (182)",
         level: 3,
       },
       {
@@ -1109,7 +1176,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Release",
       label: "Migrating pre-0.1 interactions",
-      order: 7,
+      order: 8,
     },
     headings: [
       {
@@ -1141,7 +1208,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Release",
       label: "Upgrading ggsvelte",
-      order: 8,
+      order: 9,
     },
     headings: [
       {
@@ -1415,9 +1482,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/line/time-axis",
-    title: "Time-axis line chart — ggsvelte gallery",
+    title: "Raw-year time-axis line chart — ggsvelte gallery",
     description:
-      "A time series over ISO 8601 date strings: the time scale picks UTC calendar ticks (weeks here) with d3-style multi-scale labels, and the y scale is forced to include zero.",
+      "A long-run series over untouched four-digit year strings. Value-driven inference selects a UTC calendar scale automatically; no preprocessing or explicit time scale is required.",
     canonicalPath: "/examples/line/time-axis",
     kind: "page",
     index: true,
@@ -1629,6 +1696,10 @@ export const GUIDE_NAVIGATION = [
   {
     section: "Build",
     entries: [
+      {
+        path: "/guide/temporal-scales",
+        label: "Dates without preprocessing",
+      },
       {
         path: "/guide/interactions",
         label: "Interactions",

@@ -3,9 +3,7 @@
  */
 import type { PositionScaleSpec } from "@ggsvelte/spec";
 
-import type { CellValue } from "../table.js";
-import { cellToNumber } from "../table.js";
-
+import { positionConversionContext, positionValuesToNumeric } from "./temporal-position.js";
 import { PipelineError } from "./types.js";
 
 export function continuousDomainOf(
@@ -20,13 +18,14 @@ export function continuousDomainOf(
       `A continuous ${axis} domain needs exactly [min, max] (got ${config.domain.length} entries).`,
     );
   }
-  const lo = cellToNumber(config.domain[0] as CellValue);
-  const hi = cellToNumber(config.domain[1] as CellValue);
+  const converted = positionValuesToNumeric(config.domain, positionConversionContext(config));
+  const lo = converted.values[0]!;
+  const hi = converted.values[1]!;
   if (!Number.isFinite(lo) || !Number.isFinite(hi)) {
     throw new PipelineError(
       "invalid-scale-domain",
       `/scales/${axis}/domain`,
-      `The ${axis} domain [${String(config.domain[0])}, ${String(config.domain[1])}] does not parse to finite numbers (use numbers, or ISO 8601 strings for time scales).`,
+      `The ${axis} domain [${String(config.domain[0])}, ${String(config.domain[1])}] does not parse to finite values for this scale. Use numbers for numeric scales or values matching scales.${axis}.parse for time scales.`,
     );
   }
   return lo <= hi ? [lo, hi] : [hi, lo];

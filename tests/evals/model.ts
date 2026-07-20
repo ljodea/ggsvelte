@@ -125,7 +125,7 @@ interface MockSpec {
   layers: MockLayer[];
   facet?: Record<string, unknown>;
   coord?: { type: string };
-  scales?: Record<string, { type: string }>;
+  scales?: Record<string, { type: string; parse?: string }>;
 }
 
 interface Mention {
@@ -153,6 +153,9 @@ function findMentions(prompt: string, profile: DataProfile): Mention[] {
     const tokens = field.name.toLowerCase().split(/[_\s]+/);
     const forms = new Set([field.name.toLowerCase(), tokens.join(" ")]);
     if (tokens.length >= 2) forms.add(tokens.slice(0, -1).join(" "));
+    // Keep the deterministic fallback useful for common prompt/profile vocabulary
+    // mismatches without inventing a field that is absent from the profile.
+    if (tokens.includes("cost")) forms.add("price");
     let best = -1;
     for (const form of forms) {
       const i = prompt.indexOf(form);
@@ -259,7 +262,7 @@ export class MockResponder implements Responder {
   #synthesize(prompt: string, profile: DataProfile, repair: boolean): MockSpec {
     const pick = new FieldPicker(prompt, profile);
     const spec: MockSpec = { data: { name: "main" }, layers: [] };
-    const scales: Record<string, { type: string }> = {};
+    const scales: Record<string, { type: string; parse?: string }> = {};
     const wantsColor = COLOR_TRIGGER.test(prompt);
     let xField: string | undefined;
 
@@ -297,7 +300,7 @@ export class MockResponder implements Responder {
       colorFor("color", aes);
       spec.layers.push({ geom: "density", aes });
       xField = x;
-    } else if (/box ?plot/.test(prompt)) {
+    } else if (/box ?plot|compare (?:the )?teams?/.test(prompt)) {
       const x = pick.cat() ?? "x";
       const y = pick.quant() ?? "y";
       spec.layers.push({ geom: "boxplot", aes: { x: f(x), y: f(y) } });
@@ -305,10 +308,22 @@ export class MockResponder implements Responder {
     } else if (/error ?bars?|standard error/.test(prompt)) {
       const x = pick.cat() ?? "x";
       const y = pick.quant() ?? "y";
+      const explicitBounds = /\bfrom\b.+\bto\b/.test(prompt);
       if (/jitter|individual/.test(prompt)) {
         spec.layers.push({ geom: "point", position: "jitter", aes: { x: f(x), y: f(y) } });
+      } else if (explicitBounds) {
+        spec.layers.push({ geom: "point", aes: { x: f(x), y: f(y) } });
       }
-      spec.layers.push({ geom: "errorbar", stat: "summary", aes: { x: f(x), y: f(y) } });
+      if (explicitBounds) {
+        const ymin = pick.mentionedQuant() ?? "ymin";
+        const ymax = pick.mentionedQuant() ?? "ymax";
+        spec.layers.push({
+          geom: "errorbar",
+          aes: { x: f(x), y: f(y), ymin: f(ymin), ymax: f(ymax) },
+        });
+      } else {
+        spec.layers.push({ geom: "errorbar", stat: "summary", aes: { x: f(x), y: f(y) } });
+      }
       xField = x;
     } else if (/smooth|trend line|regression|best[- ]fit|loess/.test(prompt)) {
       const first = pick.quant() ?? "x";
@@ -358,7 +373,9 @@ export class MockResponder implements Responder {
       }
       xField = x;
     } else if (/line chart|over time|time series|per (?:day|week|month|hour)|trend/.test(prompt)) {
-      const x = pick.temporal() ?? pick.quant() ?? "x";
+      const x = /identifier|model code|category/.test(prompt)
+        ? (pick.mentionedCat() ?? pick.cat() ?? "x")
+        : (pick.temporal() ?? pick.quant() ?? "x");
       const y = pick.quant() ?? "y";
       const aes: MockAes = { x: f(x), y: f(y) };
       colorFor("color", aes);
@@ -453,6 +470,12 @@ export class MockResponder implements Responder {
       const onX = /log(?:arithmic)?[^.]*\bx[- ]axis|\bx[- ]axis[^.]*log/.test(prompt);
       scales[onX ? "x" : "y"] = { type: "log" };
     }
+    if (/automatic temporal inference|rely on (?:automatic )?inference/.test(prompt)) {
+      delete scales["x"];
+    }
+    if (/identifier|model code/.test(prompt)) scales["x"] = { type: "band" };
+    const ordered = /\b(dmy|mdy|ymd|ydm|myd|dym)\b/.exec(prompt)?.[1];
+    if (ordered !== undefined) scales["x"] = { type: "time", parse: ordered };
     void xField;
     if (Object.keys(scales).length > 0) spec.scales = scales;
     return spec;

@@ -255,11 +255,31 @@ export function writeConsumerFixture(
   writeFileSync(
     join(directory, "src", "routes", "contract", "+page.svelte"),
     `<script lang="ts">
-  import { GGPlot, type PortableSpec } from "@ggsvelte/svelte";
+  import { dmy, GGPlot, GeomLine, scaleXDate, scale_x_date, type PortableSpec } from "@ggsvelte/svelte";
   const spec: PortableSpec = ${JSON.stringify(plotSpec)};
+  const temporalRows = [
+    { year: "1835", value: 12 },
+    { year: "1900", value: 19 },
+    { year: "2026", value: 31 },
+  ];
+  const explicitDateScale = scale_x_date({ parse: "dmy" });
+  const camelDateScale = scaleXDate({ parse: "iso" });
+  const authorDate = dmy("31/12/2024");
+  void explicitDateScale;
+  void camelDateScale;
+  void authorDate;
 </script>
 
 <GGPlot {spec} width={480} height={320} inspect={true} ariaLabel="Packed contract chart" />
+<GGPlot
+  data={temporalRows}
+  aes={{ x: "year", y: "value" }}
+  width={480}
+  height={320}
+  ariaLabel="Raw year temporal contract chart"
+>
+  <GeomLine />
+</GGPlot>
 `,
   );
   writeFileSync(join(directory, "plot.json"), `${JSON.stringify(plotSpec)}\n`);
@@ -291,8 +311,14 @@ import { renderToSVGString } from "@ggsvelte/core";
 const pointParamsSchema = SpecModule.Import("PointParams");
 void pointParamsSchema;
 const spec = ${JSON.stringify(plotSpec)};
+const temporalSpec = {
+  data: { values: [{ year: "1835", value: 12 }, { year: "2026", value: 31 }] },
+  layers: [{ geom: "line", aes: { x: { field: "year" }, y: { field: "value" } } }],
+};
 assert.equal(validate(spec).ok, true);
+assert.equal(validate(temporalSpec).ok, true);
 assert.match(renderToSVGString(spec, { width: 480, height: 320 }), /<svg/);
+assert.match(renderToSVGString(temporalSpec, { width: 480, height: 320 }), /1835|1850/);
 console.log("consumer smoke passed");
 `,
   );

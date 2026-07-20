@@ -87,6 +87,14 @@ export const PIPELINE_ERROR_CATALOG = {
     summary: "An explicit scale domain is malformed for its scale type.",
     fix: "Provide a two-element [min, max] for continuous scales (values of the field's type).",
   },
+  "invalid-scale-breaks": {
+    summary: "One or more explicit scale breaks do not match the scale's parser.",
+    fix: "Use numeric breaks for numeric scales or values matching the temporal parse option.",
+  },
+  "temporal-parse-failed": {
+    summary: "An explicit temporal parser rejected one or more source values.",
+    fix: "Correct the rejected values, choose the matching parser, or explicitly opt into censoring.",
+  },
   "log-domain-not-positive": {
     summary: "A log scale received an explicit domain that is not strictly positive.",
     fix: "Restrict the domain to positive values, or use a linear scale.",
@@ -169,6 +177,9 @@ export const PIPELINE_WARNING_CATALOG = {
   "out-of-domain": {
     summary: "Values outside an explicit scale domain render the unknown color (deduplicated).",
   },
+  "temporal-values-censored": {
+    summary: "An explicit temporal parser censored invalid source values by author request.",
+  },
 } as const satisfies Record<string, { summary: string }>;
 
 export type PipelineWarningCode = keyof typeof PIPELINE_WARNING_CATALOG;
@@ -205,6 +216,16 @@ export const ADVISORY_CATALOG = {
   "canvas-auto": {
     summary:
       "A high-count layer auto-switched to the canvas backend (a11y/copy-SVG tradeoff disclosed).",
+  },
+  "temporal-year-inferred": {
+    summary:
+      "A four-digit string field was inferred as calendar years; a discrete override is available.",
+  },
+  "temporal-inference-ambiguous": {
+    summary: "A date-like field remained discrete because multiple date orders matched.",
+  },
+  "temporal-inference-invalid": {
+    summary: "A date-like field remained discrete because whole-column validation failed.",
   },
 } as const satisfies Record<string, { summary: string }>;
 

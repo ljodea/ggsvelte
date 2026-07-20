@@ -33,6 +33,7 @@ export function packSmoothLayerFrame(
     n: result.x.length,
     xValues: null,
     xNumeric: result.x,
+    yValues: null,
     yNumeric: result.y,
     groups: result.groups,
     inputGroups,

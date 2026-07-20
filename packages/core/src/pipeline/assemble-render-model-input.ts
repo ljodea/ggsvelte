@@ -9,12 +9,15 @@ import type { CellValue, ColumnTable } from "../table.js";
 import type { CandidateStore } from "../candidate-store.js";
 import type { LineageStore } from "../identity.js";
 
+import type { PositionConversionContext } from "./temporal-position.js";
 import type {
   Advisory,
   LayerBackend,
   MappedField,
   PipelineWarning,
   ResolvedColorScale,
+  ScaleDecision,
+  ScaleDiagnostic,
   ScaleDomainSnapshot,
 } from "./types.js";
 
@@ -29,6 +32,10 @@ export interface AssembleRenderModelInput {
   fillState: ScaleState | null;
   warnings: PipelineWarning[];
   advisories: Advisory[];
+  scaleDecisions: ScaleDecision[];
+  scaleDiagnostics: ScaleDiagnostic[];
+  xConversion: PositionConversionContext;
+  yConversion: PositionConversionContext;
   runId: number;
   layerBackends: LayerBackend[];
   layerFields: MappedField[][];

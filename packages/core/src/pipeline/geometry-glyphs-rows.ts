@@ -25,7 +25,7 @@ export function emitGlyphRows(input: {
   let removed = 0;
   for (let row = 0; row < n; row++) {
     const tx = positionOf(fx.xScale, frame.xNumeric, frame.xValues, row, frame.offsetX);
-    const ty = positionOf(fx.yScale, frame.yNumeric, null, row, frame.offsetY);
+    const ty = positionOf(fx.yScale, frame.yNumeric, frame.yValues, row, frame.offsetY);
     const label =
       binding.labelConstant ?? (frame.labelValues === null ? null : frame.labelValues[row]);
     if (Number.isNaN(tx) || Number.isNaN(ty) || label === null) {

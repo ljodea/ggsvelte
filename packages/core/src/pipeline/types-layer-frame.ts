@@ -25,6 +25,7 @@ export interface LayerFrame {
   n: number;
   xValues: readonly CellValue[] | null;
   xNumeric: Float64Array | null;
+  yValues: readonly CellValue[] | null;
   yNumeric: Float64Array | null;
   groups: readonly number[];
   /**

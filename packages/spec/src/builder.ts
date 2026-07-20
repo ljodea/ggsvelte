@@ -15,6 +15,16 @@
 import { SpecValidationError } from "./errors.js";
 import type { AesInput, FacetInput, LayerInput, SpecInput } from "./normalize.js";
 import { normalize } from "./normalize.js";
+import {
+  scaleXDate,
+  scaleXDatetime,
+  scaleXDiscrete,
+  scaleYDate,
+  scaleYDatetime,
+  scaleYDiscrete,
+  type DiscretePositionScaleOptions,
+  type TemporalScaleOptions,
+} from "./scale-helpers.js";
 import type {
   A11yMode,
   AreaParams,
@@ -52,13 +62,19 @@ export function aes(mapping: AesInput): AesInput {
   return mapping;
 }
 
-/** Data accepted by gg(): inline rows, inline columns, or a DataRef. */
-export type DataInput =
-  | readonly Record<string, CellValue>[]
-  | Readonly<Record<string, readonly CellValue[]>>
-  | DataRef;
+/** A builder/Svelte data cell. Dates canonicalize to ISO before validation. */
+export type AuthoringCellValue = CellValue | Date;
+export type AuthoringRows = readonly Readonly<Record<string, AuthoringCellValue>>[];
+export type AuthoringColumns = Readonly<Record<string, readonly AuthoringCellValue[]>>;
+export type AuthoringDataRef =
+  | { values: AuthoringRows }
+  | { columns: AuthoringColumns }
+  | { name: string };
 
-function isDataRef(data: DataInput): data is DataRef {
+/** Data accepted by gg(): authoring rows, columns, or a data reference. */
+export type DataInput = AuthoringRows | AuthoringColumns | AuthoringDataRef;
+
+function isDataRef(data: DataInput): data is AuthoringDataRef {
   if (Array.isArray(data)) return false;
   const keys = Object.keys(data);
   if (keys.length !== 1) return false;
@@ -72,12 +88,93 @@ function isDataRef(data: DataInput): data is DataRef {
   return false;
 }
 
-function toDataRef(data: DataInput): DataRef {
-  if (Array.isArray(data)) {
-    return { values: data as Record<string, CellValue>[] };
+function snapshotCell(value: AuthoringCellValue): AuthoringCellValue {
+  return value instanceof Date ? new Date(value.getTime()) : value;
+}
+
+function snapshotRows(rows: AuthoringRows): Record<string, AuthoringCellValue>[] {
+  return rows.map((row) =>
+    Object.fromEntries(Object.entries(row).map(([key, value]) => [key, snapshotCell(value)])),
+  );
+}
+
+function snapshotColumns(columns: AuthoringColumns): Record<string, AuthoringCellValue[]> {
+  return Object.fromEntries(
+    Object.entries(columns).map(([key, values]) => [
+      key,
+      values.map((value) => snapshotCell(value)),
+    ]),
+  );
+}
+
+function toAuthoringDataRef(data: DataInput): AuthoringDataRef {
+  if (Array.isArray(data)) return { values: snapshotRows(data as AuthoringRows) };
+  if (isDataRef(data)) {
+    if ("name" in data) return data;
+    if ("values" in data) return { values: snapshotRows(data.values) };
+    return { columns: snapshotColumns(data.columns) };
   }
-  if (isDataRef(data)) return data;
-  return { columns: data as Record<string, CellValue[]> };
+  return { columns: snapshotColumns(data as AuthoringColumns) };
+}
+
+function portableCell(value: AuthoringCellValue, calendarDate: boolean): CellValue {
+  if (!(value instanceof Date)) return value;
+  const iso = value.toISOString();
+  return calendarDate ? iso.slice(0, 10) : iso;
+}
+
+function portableRows(
+  rows: AuthoringRows,
+  calendarFields: ReadonlySet<string>,
+): Record<string, CellValue>[] {
+  return rows.map((row) =>
+    Object.fromEntries(
+      Object.entries(row).map(([key, value]) => [
+        key,
+        portableCell(value, calendarFields.has(key)),
+      ]),
+    ),
+  );
+}
+
+function portableColumns(
+  columns: AuthoringColumns,
+  calendarFields: ReadonlySet<string>,
+): Record<string, CellValue[]> {
+  return Object.fromEntries(
+    Object.entries(columns).map(([key, values]) => [
+      key,
+      values.map((value) => portableCell(value, calendarFields.has(key))),
+    ]),
+  );
+}
+
+function toDataRef(data: AuthoringDataRef, calendarFields: ReadonlySet<string>): DataRef {
+  if ("name" in data) return data;
+  if ("values" in data) return { values: portableRows(data.values, calendarFields) };
+  return { columns: portableColumns(data.columns, calendarFields) };
+}
+
+function mappedField(value: AesInput[keyof AesInput]): string | null {
+  if (typeof value === "string") return value;
+  return value !== undefined && value !== null && "field" in value ? value.field : null;
+}
+
+function calendarDateFields(state: BuilderState): ReadonlySet<string> {
+  const fields = new Set<string>();
+  for (const axis of ["x", "y"] as const) {
+    if (state.scales?.[axis]?.temporalKind !== "date") continue;
+    const channels = axis === "x" ? (["x"] as const) : (["y", "ymin", "ymax"] as const);
+    for (const channel of channels) {
+      const plotField = mappedField(state.aes?.[channel]);
+      if (plotField !== null) fields.add(plotField);
+      for (const layer of state.layers) {
+        const layerField = mappedField(layer.aes?.[channel]);
+        if (layerField !== null) fields.add(layerField);
+      }
+    }
+  }
+  return fields;
 }
 
 /** Point-layer sugar options: params plus aes and position (jitter/nudge). */
@@ -161,7 +258,7 @@ export interface GeomTextOptions extends TextParams {
 }
 
 interface BuilderState {
-  readonly data?: DataRef;
+  readonly data?: AuthoringDataRef;
   readonly aes?: AesInput;
   readonly layers: readonly LayerInput[];
   readonly facet?: FacetInput;
@@ -310,6 +407,36 @@ export class GGBuilder {
     return this.#with({ scales: { ...this.#state.scales, ...scales } });
   }
 
+  /** Configure the x scale as calendar dates. */
+  scaleXDate(options: TemporalScaleOptions = {}): GGBuilder {
+    return this.scales(scaleXDate(options));
+  }
+
+  /** Configure the x scale as date-time instants. */
+  scaleXDatetime(options: TemporalScaleOptions = {}): GGBuilder {
+    return this.scales(scaleXDatetime(options));
+  }
+
+  /** Configure the y scale as calendar dates. */
+  scaleYDate(options: TemporalScaleOptions = {}): GGBuilder {
+    return this.scales(scaleYDate(options));
+  }
+
+  /** Configure the y scale as date-time instants. */
+  scaleYDatetime(options: TemporalScaleOptions = {}): GGBuilder {
+    return this.scales(scaleYDatetime(options));
+  }
+
+  /** Force x values to remain discrete categories. */
+  scaleXDiscrete(options: DiscretePositionScaleOptions = {}): GGBuilder {
+    return this.scales(scaleXDiscrete(options));
+  }
+
+  /** Force y values to remain discrete categories. */
+  scaleYDiscrete(options: DiscretePositionScaleOptions = {}): GGBuilder {
+    return this.scales(scaleYDiscrete(options));
+  }
+
   /** Configure the legend (merged over previous calls). */
   legend(legend: LegendSpec): GGBuilder {
     return this.#with({ legend: { ...this.#state.legend, ...legend } });
@@ -346,7 +473,7 @@ export class GGBuilder {
       height,
     } = this.#state;
     const input: SpecInput = {
-      ...(data !== undefined && { data }),
+      ...(data !== undefined && { data: toDataRef(data, calendarDateFields(this.#state)) }),
       ...(plotAes !== undefined && { aes: plotAes }),
       layers: [...layers],
       ...(facet !== undefined && { facet }),
@@ -369,7 +496,7 @@ export class GGBuilder {
 /** Start a plot: gg(data, aes({ x: 'displ', y: 'hwy' })).geomPoint().spec(). */
 export function gg(data?: DataInput, mapping?: AesInput): GGBuilder {
   return new GGBuilder({
-    ...(data !== undefined && { data: toDataRef(data) }),
+    ...(data !== undefined && { data: toAuthoringDataRef(data) }),
     ...(mapping !== undefined && { aes: mapping }),
     layers: [],
   });

@@ -7,6 +7,7 @@ import type { EditionDefaults } from "../editions.js";
 import type { ColumnTable } from "../table.js";
 
 import type { FacetPanelDef } from "./facets.js";
+import type { PositionConversionContext } from "./temporal-position.js";
 import type { Advisory, LayerBinding, LayerFrame, PipelineWarning, RunOptions } from "./types.js";
 
 export interface TrainPipelineScalesInput {
@@ -20,6 +21,8 @@ export interface TrainPipelineScalesInput {
   panelFrames: readonly (readonly LayerFrame[])[];
   freeX: boolean;
   freeY: boolean;
+  xConversion: PositionConversionContext;
+  yConversion: PositionConversionContext;
   editionDefaults: EditionDefaults;
   warnings: PipelineWarning[];
   advisories: Advisory[];

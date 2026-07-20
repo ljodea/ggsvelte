@@ -15,7 +15,12 @@ export function bucketByGroup(
   let removed = 0;
   for (let row = 0; row < frame.n; row++) {
     const tx = positionOf(fx.xScale, frame.xNumeric, frame.xValues, row);
-    const ty = positionOf(fx.yScale, yNumericOverride ?? frame.yNumeric, null, row);
+    const ty = positionOf(
+      fx.yScale,
+      yNumericOverride ?? frame.yNumeric,
+      yNumericOverride instanceof Float64Array ? null : frame.yValues,
+      row,
+    );
     if (Number.isNaN(tx) || Number.isNaN(ty)) {
       removed++;
       continue;

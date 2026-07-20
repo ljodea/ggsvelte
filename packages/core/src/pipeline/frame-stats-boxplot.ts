@@ -23,7 +23,11 @@ export function buildBoxplotFrame(
   const params = (layer.params ?? {}) as BoxplotParams;
   const result = statBoxplot({
     x: table.column(binding.xField!),
-    y: table.numeric(binding.yField!),
+    y: table.numeric(
+      binding.yField!,
+      binding.yConversion.sourceParser,
+      binding.yConversion.options,
+    ),
     groups,
     ...(params.coef !== undefined && { coef: params.coef }),
     carried,
@@ -36,6 +40,7 @@ export function buildBoxplotFrame(
     n: result.x.length,
     xValues: result.x,
     xNumeric: null,
+    yValues: null,
     yNumeric: null,
     groups: result.groups,
     inputGroups: groups,
