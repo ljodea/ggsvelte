@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784577663411,
+  "lastUpdate": 1784578782556,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -35253,6 +35253,130 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 147.3622,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "08e4a4d303509c6c86cab8c7d02c61176a14669d",
+          "message": "vr: update advanced playground baselines for #347 (#350)\n\nTrusted pinned-container baselines generated from merged PR #347 at c8879c54d1ec8648fcf4c06bd5cc252dbae89160. Zero-diff VR passed before merge.",
+          "timestamp": "2026-07-20T15:18:55-05:00",
+          "tree_id": "025bb374b206ebe2536630f0e11ed90474147ca8",
+          "url": "https://github.com/ljodea/ggsvelte/commit/08e4a4d303509c6c86cab8c7d02c61176a14669d"
+        },
+        "date": 1784578781528,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.4166,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.7448,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 7.7337,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 10.0522,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 48.0901,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 83.4782,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal-line 100k",
+            "value": 66.6176,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.2146,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2712,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 53.2725,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 74.2979,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.7367,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 13.2237,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 907.3293,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.6633,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 253.1524,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 8.2971,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 14.1373,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 583.0546,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 145.8878,
             "unit": "ms"
           }
         ]
