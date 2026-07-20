@@ -315,7 +315,8 @@ advisories for valid-but-questionable specs.
 - [Interactions](/guide/interactions) — inspection, selection, zoom, typed
   events, keyboard behavior, and stable identity.
 - [PortableSpec playground](/playground) — open a compatible example, edit a
-  bounded local PortableSpec, and copy complete Svelte or an explicit share URL
+  bounded local PortableSpec, inspect semantic events, and take complete Svelte,
+  equivalent Builder or JSON, deterministic SVG, or an explicit share URL
   without uploads, remote fetches, or code execution.
 - [Compatibility](/guide/compatibility) — tested Node, Svelte, installer,
   browser, and operating-system boundaries.
@@ -1903,7 +1904,7 @@ export function buildLlmsIndex(
     lines.push(`- [${page.title}](/guide/${page.slug}): ${page.description}`);
   }
   lines.push(
-    "- [PortableSpec playground](/playground): open a compatible example, edit bounded local JSON, and copy complete Svelte or an explicit share URL",
+    "- [PortableSpec playground](/playground): edit bounded local JSON, inspect semantic events, and take complete Svelte, equivalent Builder or JSON, SVG, or an explicit share URL",
     "- [Search interaction reference](/reference/interactions): filter interaction capabilities, events, diagnostics, and accessibility guidance",
     "- [JSON Schema v0](/schema/v0.json): the PortableSpec schema (unstable in v0.1)",
     "- [llms-full.txt](/llms-full.txt): all docs prose plus every example (spec JSON + Svelte source)",

@@ -36,7 +36,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "PortableSpec playground",
     summary:
-      "Open a real ggsvelte example, edit a bounded PortableSpec locally, and copy a complete Svelte component or share URL.",
+      "Edit a bounded PortableSpec locally, inspect semantic events, and take complete Svelte, equivalent Builder or JSON, SVG, or a share URL.",
     href: "/playground",
     keywords: [],
     exact: ["PortableSpec playground"],

@@ -1,3 +1,5 @@
+import { readFile } from "node:fs/promises";
+
 import { expect, test, type Page } from "@playwright/test";
 import axe from "axe-core";
 
@@ -125,20 +127,28 @@ test("valid edits render before Svelte copy becomes available and candidates sta
   await expect(page.getByRole("button", { name: "Copy Svelte" })).toBeDisabled();
   await page.getByRole("button", { name: "Apply draft" }).click();
 
-  const candidate = page.locator(".candidate-chart");
-  await candidate.waitFor({ state: "attached" });
+  const candidateState = await page
+    .waitForFunction(() => {
+      const node = document.querySelector<HTMLElement>(".candidate-chart");
+      if (node === null) return null;
+      return {
+        focusables: node.querySelectorAll("button, a, input, select, textarea, [tabindex]").length,
+        exposed: node.querySelectorAll('[role="img"], [role="status"], [aria-live]').length,
+        inert: node.inert,
+        inertAttribute: node.hasAttribute("inert"),
+        hidden: node.getAttribute("aria-hidden"),
+      };
+    })
+    .then((handle) => handle.jsonValue());
   await expect(page.locator('.active-chart > [data-retained-during-candidate="true"]')).toHaveCount(
     1,
   );
-  expect(
-    await candidate.evaluate((node) => ({
-      focusables: node.querySelectorAll("button, a, input, select, textarea, [tabindex]").length,
-      exposed: node.querySelectorAll('[role="img"], [role="status"], [aria-live]').length,
-      inert: (node as HTMLElement).inert,
-      inertAttribute: node.hasAttribute("inert"),
-      hidden: node.getAttribute("aria-hidden"),
-    })),
-  ).toMatchObject({ inert: true, inertAttribute: true, hidden: "true" });
+  expect(candidateState).toMatchObject({
+    focusables: 0,
+    inert: true,
+    inertAttribute: true,
+    hidden: "true",
+  });
 
   await expect(page.getByText("Rendered custom draft.")).toBeVisible();
   await expect(page.locator(".active-chart .gg-title")).toHaveText("Edited locally");
@@ -216,6 +226,168 @@ test("191-year temporal guide stays collision-free with complete labels", async 
   }
 });
 
+test("advanced outputs stay ordered and undo restores one render-confirmed snapshot", async ({
+  page,
+  context,
+}) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  await page.goto("/playground");
+  await settleVisualState(page);
+  await applyTitle(page, "First committed chart");
+  await applyTitle(page, "Second committed chart");
+
+  await expect(page.getByRole("tab")).toHaveText(["Svelte", "Builder", "PortableSpec"]);
+  await page.getByRole("tab", { name: "Builder" }).click();
+  await expect(page.getByLabel("Generated Builder output")).toContainText(
+    'import { gg, type PortableSpec } from "@ggsvelte/svelte";',
+  );
+  await page.getByRole("button", { name: "Copy Builder" }).click();
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toContain("const built = gg(");
+  await page.getByRole("tab", { name: "PortableSpec" }).click();
+  await expect(page.getByLabel("Generated PortableSpec output")).toContainText(
+    "Second committed chart",
+  );
+  await page.getByRole("button", { name: "Copy PortableSpec" }).click();
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toContain(
+    '"title": "Second committed chart"',
+  );
+
+  await page.getByLabel("PortableSpec JSON").fill("draft to preserve before undo");
+  page.once("dialog", (dialog) => dialog.dismiss());
+  await page.getByRole("button", { name: "Undo chart" }).click();
+  await expect(page.locator(".active-chart .gg-title")).toHaveText("Second committed chart");
+  await expect(page.getByLabel("PortableSpec JSON")).toHaveValue("draft to preserve before undo");
+
+  page.once("dialog", (dialog) => dialog.accept());
+  await page.getByRole("button", { name: "Undo chart" }).click();
+  await expect(page.locator(".active-chart .gg-title")).toHaveText("First committed chart");
+  await expect(page.getByLabel("PortableSpec JSON")).toHaveValue(/First committed chart/u);
+  await expect(page.getByLabel("Generated PortableSpec output")).toContainText(
+    "First committed chart",
+  );
+});
+
+test("output copy fallback stays bound to the selected representation", async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: {
+        writeText: () =>
+          new Promise((_resolve, reject) => {
+            setTimeout(() => {
+              reject(new DOMException("Denied", "NotAllowedError"));
+            }, 1000);
+          }),
+      },
+    });
+  });
+  await page.goto("/playground");
+  await settleVisualState(page);
+  const manualCopySource = page.locator(".manual-copy-source");
+  await expect(manualCopySource).toHaveAttribute("aria-hidden", "true");
+  await expect(manualCopySource.locator("pre")).toHaveAttribute("tabindex", "-1");
+  const builderTab = page.getByRole("tab", { name: "Builder" });
+  const portableTab = page.getByRole("tab", { name: "PortableSpec" });
+  await builderTab.click();
+  await page.getByRole("button", { name: "Copy Builder" }).evaluate((button: HTMLButtonElement) => {
+    button.click();
+  });
+  await portableTab.evaluate((button: HTMLButtonElement) => {
+    button.click();
+  });
+  await expect(builderTab).toHaveAttribute("aria-selected", "true");
+
+  await expect(page.locator(".manual-copy-source.visible")).toContainText(
+    'import { gg, type PortableSpec } from "@ggsvelte/svelte";',
+  );
+  await expect(page.locator(".manual-copy-source.visible")).toContainText(
+    "Copy the selected Builder output manually",
+  );
+  expect(await page.evaluate(() => getSelection()?.toString())).toContain("const built = gg(");
+  await portableTab.click();
+  await expect(portableTab).toHaveAttribute("aria-selected", "true");
+
+  await applyTitle(page, "Fallback invalidated by promotion");
+  await expect(manualCopySource).toHaveAttribute("aria-hidden", "true");
+  await expect(manualCopySource).not.toHaveClass(/visible/u);
+  await expect(manualCopySource.locator("code")).toBeEmpty();
+  expect(await page.evaluate(() => getSelection()?.toString() ?? "")).toBe("");
+});
+
+test("Builder output explains rather than lowers unsupported named datasets", async ({ page }) => {
+  await page.goto("/playground");
+  await settleVisualState(page);
+  const spec = await readSpec(page);
+  const data = spec["data"] as { values: unknown[] };
+  spec["datasets"] = { rows: { values: data.values } };
+  spec["data"] = { name: "rows" };
+  await page.getByLabel("PortableSpec JSON").fill(JSON.stringify(spec, null, 2));
+  await page.getByRole("button", { name: "Apply draft" }).click();
+  await expect(page.getByText("Rendered custom draft.")).toBeVisible();
+
+  await page.getByRole("tab", { name: "Builder" }).click();
+  await expect(page.getByText("Builder output unavailable for this chart")).toBeVisible();
+  await expect(page.getByText(/cannot preserve named inline datasets/u)).toBeVisible();
+  await expect(page.getByRole("button", { name: "Copy Builder" })).toBeDisabled();
+});
+
+test("SVG export downloads complete output and reports browser download failures", async ({
+  page,
+}) => {
+  await page.goto("/playground");
+  await settleVisualState(page);
+
+  const downloadPromise = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Download SVG" }).click();
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toBe("ggsvelte-chart.svg");
+  const path = await download.path();
+  if (path === null) throw new Error("expected a downloaded SVG path");
+  expect(await readFile(path, "utf8")).toMatch(/^<svg[\s>]/u);
+  await expect(page.getByRole("status").filter({ hasText: "SVG downloaded" })).toBeVisible();
+
+  await page.evaluate(() => {
+    URL.createObjectURL = () => {
+      throw new Error("Downloads disabled for test");
+    };
+  });
+  await page.getByRole("button", { name: "Download SVG" }).click();
+  await expect(
+    page.getByRole("status").filter({ hasText: "export/download-failed" }),
+  ).toContainText("The chart and outputs were retained.");
+});
+
+test("semantic event inspection is local, bounded, clearable, and reset by promotion", async ({
+  page,
+}) => {
+  await page.goto("/playground");
+  await settleVisualState(page);
+  const inspector = page.locator("details.event-inspector");
+  await expect(inspector).not.toHaveAttribute("open", "");
+  await inspector.locator("summary").click();
+
+  const chart = page.getByRole("group", {
+    name: "Penguin flippers and body mass",
+  });
+  await chart.focus();
+  await chart.press("ArrowRight");
+  await expect(page.getByRole("list", { name: "Semantic event log" })).toContainText(
+    "inspect/change",
+  );
+  await expect(
+    page.getByRole("list", { name: "Semantic event log" }).locator("pre").first(),
+  ).toContainText('"source": "keyboard"');
+
+  await page.getByRole("button", { name: "Clear events" }).click();
+  await expect(page.getByText("No semantic events yet.", { exact: false })).toBeVisible();
+
+  await chart.press("ArrowRight");
+  await expect(page.getByRole("list", { name: "Semantic event log" })).toBeVisible();
+  await applyTitle(page, "Events reset on promotion");
+  await expect(page.getByRole("list", { name: "Semantic event log" })).toHaveCount(0);
+  await expect(page.getByText("No semantic events yet.", { exact: false })).toBeVisible();
+});
+
 test("schema and pipeline failures preserve and label the last render-confirmed chart", async ({
   page,
 }) => {
@@ -228,6 +400,7 @@ test("schema and pipeline failures preserve and label the last render-confirmed 
   await page.getByLabel("PortableSpec JSON").fill('{"layers":[]}');
   await page.getByRole("button", { name: "Apply draft" }).click();
   await expect(page.getByRole("alert")).toBeFocused();
+  await expect(page.getByRole("alert")).toContainText("validation");
   await expect(page.getByRole("alert")).toContainText("empty-layers");
   await expect(page.getByText("Last valid result", { exact: true })).toBeVisible();
   await expect(page.locator(".active-chart .gg-title")).toHaveText(baselineTitle);
@@ -241,6 +414,7 @@ test("schema and pipeline failures preserve and label the last render-confirmed 
 
   await page.getByLabel("PortableSpec JSON").fill(JSON.stringify(PIPELINE_FAILURE_SPEC, null, 2));
   await page.getByRole("button", { name: "Apply draft" }).click();
+  await expect(page.getByRole("alert")).toContainText("pipeline");
   await expect(page.getByRole("alert")).toContainText("palette-exhausted");
   await expect(page.locator(".active-chart .gg-title")).toHaveText(baselineTitle);
   await expect(page.locator(".active-chart .gg-title")).not.toHaveText(
@@ -393,6 +567,7 @@ test("playground is preview-first, operable, and axe-clean at a touch-size viewp
   await expect(page.getByRole("button", { name: "Apply draft" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Share this chart" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Copy Svelte" })).toBeVisible();
+  await expect(page.locator("details.event-inspector")).not.toHaveAttribute("open", "");
 
   await page.addScriptTag({ content: axe.source });
   const violations = await page.evaluate(async () => {

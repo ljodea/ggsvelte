@@ -6,6 +6,7 @@
 
   import { copyText, MANUAL_LINK_COPY_STATUS } from "$lib/clipboard";
   import PlaygroundEditor from "$lib/components/PlaygroundEditor.svelte";
+  import PlaygroundEvents from "$lib/components/PlaygroundEvents.svelte";
   import PlaygroundOutput from "$lib/components/PlaygroundOutput.svelte";
   import PlaygroundPreview from "$lib/components/PlaygroundPreview.svelte";
   import PlaygroundShell from "$lib/components/PlaygroundShell.svelte";
@@ -14,11 +15,16 @@
     PLAYGROUND_SAMPLES,
   } from "$lib/generated/playground-seeds";
   import {
+    appendPlaygroundEvent,
+    type PlaygroundEventEntry,
+    type PlaygroundInteractionEvent,
+  } from "$lib/playground-events";
+  import {
     decodePlaygroundHash,
     encodePlaygroundSeed,
     type PlaygroundSeedV1,
   } from "$lib/playground-codec";
-  import { playgroundSvelteOutput } from "$lib/playground-output";
+  import { playgroundOutputs } from "$lib/playground-output";
   import {
     confirmPlaygroundRendered,
     createPlaygroundState,
@@ -30,9 +36,9 @@
     setPlaygroundHistoryHash,
     stagePlaygroundDraft,
     stagePlaygroundSeed,
+    stagePlaygroundUndo,
     type PlaygroundDiagnostic,
   } from "$lib/playground-state";
-
   const initialSample = PLAYGROUND_SAMPLES[0]!;
   const initialSeed: PlaygroundSeedV1 = initialSample.seed;
 
@@ -44,8 +50,9 @@
   let reportStatus = $state("");
   let scaleDecisions = $state<RenderModel["scaleDecisions"]>([]);
   let guidePlans = $state<RenderModel["guidePlans"]>([]);
+  let events = $state<readonly PlaygroundEventEntry[]>([]);
 
-  const svelteOutput = $derived(playgroundSvelteOutput(workbench.committed));
+  const outputs = $derived(playgroundOutputs(workbench.committed));
   const scaleReport = $derived(privacySafeScaleReport());
   const selectedSample = $derived(
     workbench.seed.source.kind === "sample" ? workbench.seed.source.id : "",
@@ -90,6 +97,7 @@
       workbench = reportPlaygroundDiagnostic(
         workbench,
         {
+          source: "playground",
           code: decoded.error.code.toLowerCase().replaceAll("_", "-"),
           path: "#play",
           message: decoded.error.message,
@@ -131,6 +139,18 @@
     workbench = resetPlaygroundSource(workbench);
   }
 
+  function undoChart(): void {
+    if (workbench.undoSnapshots.length === 0 || workbench.candidate !== null)
+      return;
+    if (!workbench.synchronized) {
+      const discard = window.confirm(
+        "Discard the current draft and undo to the previous rendered chart? Copy it first if you need to keep it.",
+      );
+      if (!discard) return;
+    }
+    workbench = stagePlaygroundUndo(workbench);
+  }
+
   function loadSample(id: string): boolean {
     if (id === "") return false;
     if (
@@ -161,8 +181,12 @@
       scaleDecisions = [];
       guidePlans = [];
       reportStatus = "";
+      events = [];
       if (
-        (origin === "apply" || origin === "source") &&
+        (origin === "apply" ||
+          origin === "source" ||
+          origin === "reset" ||
+          origin === "undo") &&
         window.location.hash.startsWith("#play=")
       ) {
         replaceLocationHash(null);
@@ -187,6 +211,10 @@
     scaleDecisions = model.scaleDecisions;
     guidePlans = model.guidePlans;
     reportStatus = "";
+  }
+
+  function recordInteraction(event: PlaygroundInteractionEvent): void {
+    events = appendPlaygroundEvent(events, event);
   }
 
   function activeFailed(diagnostic: PlaygroundDiagnostic): void {
@@ -272,9 +300,10 @@
       <p class="eyebrow">Local PortableSpec workbench</p>
       <h1 id="playground-heading">Adapt a chart, then take the Svelte</h1>
       <p class="lede">
-        Start from a real example or a small sample. Edit bounded JSON, render
-        it locally, and copy one complete Svelte component. No account, upload,
-        remote fetch, or code execution.
+        Start from a real example or a small sample. Edit bounded JSON, inspect
+        semantic events, and take complete Svelte, equivalent Builder or
+        PortableSpec, and deterministic SVG. No account, upload, remote fetch,
+        or code execution.
       </p>
     </div>
     <div class="share-actions">
@@ -307,6 +336,7 @@
         onCandidateFailed={reconcileCandidateFailure}
         onActiveRendered={activeRendered}
         onActiveFailed={activeFailed}
+        onInteraction={recordInteraction}
       />
     {/snippet}
     {#snippet editor()}
@@ -316,17 +346,21 @@
         {selectedSample}
         diagnostics={workbench.diagnostics}
         pending={workbench.candidate !== null}
+        canUndo={workbench.undoSnapshots.length > 0}
         onEdit={editDraft}
         onApply={applyDraft}
+        onUndo={undoChart}
         onReset={resetSource}
         onLoadSample={loadSample}
       />
     {/snippet}
     {#snippet output()}
       <PlaygroundOutput
-        code={svelteOutput}
+        {outputs}
+        rendered={workbench.rendered}
         enabled={workbench.canCopyOrShare}
       />
+      <PlaygroundEvents entries={events} onClear={() => (events = [])} />
     {/snippet}
   </PlaygroundShell>
 
