@@ -30,6 +30,7 @@ describe("docs route inventory", () => {
     expect(paths.has("/examples/point/scatter-color")).toBe(true);
     expect(paths.has("/examples/interactions/inspection")).toBe(true);
     expect(paths.has("/playground")).toBe(true);
+    expect(paths.has("/themes")).toBe(true);
     expect(paths.has("/reference/interactions")).toBe(true);
     expect(paths.has("/__perf/r3-interaction")).toBe(true);
     expect(paths.has("/sitemap.xml")).toBe(true);
@@ -37,6 +38,20 @@ describe("docs route inventory", () => {
 
     expect(validateRouteInventory(inventory)).toBe(inventory);
     expect(JSON.parse(JSON.stringify(inventory))).toEqual(inventory);
+  });
+
+  it("publishes the themes destination with canonical acquisition metadata", () => {
+    expect(createDocsRouteInventory().find((entry) => entry.path === "/themes")).toEqual({
+      path: "/themes",
+      title: "Chart themes and color scales — ggsvelte",
+      description:
+        "Compare every built-in ggsvelte chart theme and color scheme with live, copyable Svelte examples.",
+      canonicalPath: "/themes",
+      kind: "page",
+      index: true,
+      sitemap: true,
+      shell: "site",
+    });
   });
 
   it("keeps aliases canonicalized, noindex, and out of the sitemap", () => {

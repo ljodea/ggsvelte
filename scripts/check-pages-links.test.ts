@@ -18,6 +18,7 @@ describe("packed Pages link checks", () => {
     "guide/migrating-pre-0-1.html",
     "guide/upgrading.html",
     "playground.html",
+    "themes.html",
     "reference/interactions.html",
     "examples/interaction/tooltip.html",
     "examples/interaction/brush-zoom.html",
@@ -85,6 +86,7 @@ describe("packed Pages link checks", () => {
     expect(requiredPages).toContain("examples/interactions/inspection.html");
     expect(requiredPages).toContain("examples/interactions/interval-selection.html");
     expect(requiredPages).toContain("playground.html");
+    expect(requiredPages).toContain("themes.html");
     expect(requiredPages).toContain("reference/interactions.html");
     expect(requiredPages).toContain("guide/interaction-reference.html");
     expect(requiredPages).toContain("robots.txt");
