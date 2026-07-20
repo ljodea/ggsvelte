@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784505968251,
+  "lastUpdate": 1784517427437,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -33403,6 +33403,125 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 150.2244,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "922991a5e1fdba1988f2dde744af38062e522c0a",
+          "message": "Merge pull request #334 from ljodea/feat/docs-themes-color\n\nfeat(docs): showcase themes and color scales",
+          "timestamp": "2026-07-19T22:16:18-05:00",
+          "tree_id": "23e7cf9f946318e4d1bb6741ff3a7f3cdbbe2928",
+          "url": "https://github.com/ljodea/ggsvelte/commit/922991a5e1fdba1988f2dde744af38062e522c0a"
+        },
+        "date": 1784517426387,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.1135,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.5376,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 5.4992,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 8.7828,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 33.3371,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 69.9755,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 0.9967,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2027,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 36.1556,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 57.2175,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 12.4411,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.6633,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 893.4123,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.8024,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 255.5716,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 8.4152,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 11.2568,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 582.3243,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 143.1704,
             "unit": "ms"
           }
         ]
