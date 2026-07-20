@@ -1,10 +1,11 @@
 /**
  * Train a sequential color scale from values + config/edition range.
  */
-import type { ColorScaleSpec } from "@ggsvelte/spec";
+import { parseTemporalColumn, type ColorScaleSpec } from "@ggsvelte/spec";
 
 import type { EditionDefaults } from "../editions.js";
 import { trainSequential, type SequentialColorScale } from "../scales/color.js";
+import { encodeKey } from "../scales/state.js";
 import { finiteExtent } from "../scales/train.js";
 import type { CellValue } from "../table.js";
 import { cellsToNumeric } from "../table.js";
@@ -32,7 +33,18 @@ export function trainSequentialColorScale(input: {
       message: `The ${name} scale is sequential but a mapped field is discrete; values that do not parse as numbers render the unknown color.`,
     });
   }
-  const numeric = cellsToNumeric(values);
+  const temporal = parseTemporalColumn(values, "auto");
+  const temporalValues =
+    temporal.decision.status === "temporal"
+      ? new Map(
+          values.flatMap((value, index) =>
+            temporal.valid[index] === 1
+              ? ([[encodeKey(value), temporal.semantic[index]!]] as const)
+              : [],
+          ),
+        )
+      : null;
+  const numeric = temporalValues === null ? cellsToNumeric(values) : temporal.semantic;
   const extent = finiteExtent([numeric]);
   const sequentialDomain = resolveSequentialDomain(config);
   const range = resolveSequentialRange(config, editionDefaults);
@@ -49,5 +61,18 @@ export function trainSequentialColorScale(input: {
       howToOverride: `Set scales.${name}.range (ramp stops) or scales.${name}.domain.`,
     });
   }
-  return scale;
+  if (temporalValues === null) return scale;
+  return {
+    ...scale,
+    colorOf(value: unknown): string | undefined {
+      let key: string;
+      try {
+        key = encodeKey(value);
+      } catch {
+        return undefined;
+      }
+      const semantic = temporalValues.get(key);
+      return semantic === undefined ? undefined : scale.colorOf(semantic);
+    },
+  };
 }

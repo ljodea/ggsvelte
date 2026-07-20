@@ -13,6 +13,13 @@ import {
 } from "../src/temporal.ts";
 
 describe("strict temporal parsing", () => {
+  it("rejects blank strings for explicit epoch parsers", () => {
+    for (const value of ["", " ", "\t", "\n"] as const) {
+      expect(parseTemporal(value, { epoch: "seconds" })).toMatchObject({ ok: false });
+      expect(parseTemporal(value, { epoch: "milliseconds" })).toMatchObject({ ok: false });
+    }
+  });
+
   it("accepts Gregorian leap dates and rejects calendar overflow", () => {
     expect(parseTemporal("2000-02-29", "iso")).toMatchObject({
       ok: true,

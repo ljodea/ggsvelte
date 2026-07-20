@@ -549,7 +549,10 @@ export function parseTemporal(
       : failure("invalid Date value");
   }
   if (typeof parser === "object" && "epoch" in parser) {
-    if ((typeof value !== "number" && typeof value !== "string") || value === "") {
+    if (
+      (typeof value !== "number" && typeof value !== "string") ||
+      (typeof value === "string" && value.trim() === "")
+    ) {
       return failure(`expected epoch ${parser.epoch}`);
     }
     const numeric = typeof value === "number" ? value : Number(value);

@@ -67,6 +67,24 @@ describe("temporal scale schema", () => {
     }
   });
 
+  it("rejects invalid temporal configuration without inline data evidence", () => {
+    for (const x of [
+      { type: "time" as const, timezone: "Not/A_Zone" },
+      { type: "time" as const, parse: { format: "%m-%d" } },
+    ]) {
+      const result = validate(
+        {
+          data: { name: "runtime" },
+          layers: [{ geom: "rule", params: { xintercept: "2025-01-01" } }],
+          scales: { x },
+        },
+        {},
+      );
+      expect(result.ok).toBe(false);
+      if (!result.ok) expect(result.errors[0]?.path).toBe("/scales/x");
+    }
+  });
+
   it("shares value-driven inference and explicit parsing with tier-2 validation", () => {
     const years = {
       data: { columns: { when: ["1835", "1900", "2026"], value: [1, 2, 3] } },
@@ -165,6 +183,17 @@ describe("temporal scale schema", () => {
       scales: { x: { parse: "dmy" } },
     } as const;
     expect(validate(dmy, {}).ok).toBe(true);
+
+    for (const geom of ["smooth", "histogram", "density"] as const) {
+      const layer = {
+        geom,
+        aes: {
+          x: { field: "when" },
+          ...(geom === "smooth" && { y: { field: "value" } }),
+        },
+      };
+      expect(validate({ ...dmy, layers: [layer] }, {}).ok).toBe(true);
+    }
 
     const bad = validate(
       {

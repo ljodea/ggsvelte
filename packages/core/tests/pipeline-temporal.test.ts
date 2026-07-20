@@ -98,6 +98,21 @@ describe("temporal pipeline semantics", () => {
     ]);
   });
 
+  it("maps temporal strings through a sequential color scale", () => {
+    const model = runPipeline(
+      gg(yearRows, aes({ x: "value", y: "value", color: "year" }))
+        .geomPoint()
+        .spec(),
+      size,
+    );
+    const resolved = model.scales.color;
+    expect(resolved?.kind).toBe("sequential");
+    if (resolved?.kind !== "sequential") throw new Error("unreachable");
+    expect(resolved.scale.domain).toEqual([Date.UTC(1835, 0, 1), Date.UTC(2026, 0, 1)]);
+    expect(resolved.scale.colorOf("1835")).toMatch(/^#[0-9a-f]{6}$/);
+    expect(resolved.scale.colorOf("1835")).not.toBe(resolved.scale.colorOf("2026"));
+  });
+
   it("lets an explicit discrete scale override string-year inference", () => {
     const model = runPipeline(
       gg(yearRows, aes({ x: "year", y: "value" }))
@@ -362,6 +377,18 @@ describe("temporal pipeline semantics", () => {
         new Date("2026-01-01T00:00:00.000Z").getTime(),
       ]);
     }
+  });
+
+  it("rejects invalid annotations after mapped data infers a temporal parser", () => {
+    expect(() =>
+      runPipeline(
+        gg(yearRows, aes({ x: "year", y: "value" }))
+          .geomPoint()
+          .geomRule({ xintercept: "bad" })
+          .spec(),
+        size,
+      ),
+    ).toThrow(PipelineError);
   });
 
   it("passes semantic epoch numbers through resolved parsers for rules and formatters", () => {

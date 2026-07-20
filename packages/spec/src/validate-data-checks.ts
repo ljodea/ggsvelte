@@ -65,26 +65,53 @@ export function dataChecks(
   preResolved?: ResolveFieldEvidenceResult,
 ): SpecError[] {
   const errors: SpecError[] = [];
+  const scales = isRecord(spec["scales"]) ? spec["scales"] : undefined;
+  const scaleRequestsTime = (axis: "x" | "y"): boolean => {
+    const config = scales?.[axis] as PositionScaleSpec | undefined;
+    return (
+      config?.type !== "band" &&
+      (config?.type === "time" ||
+        config?.parse !== undefined ||
+        config?.temporalKind !== undefined ||
+        config?.timezone !== undefined ||
+        config?.disambiguation !== undefined ||
+        config?.parseFailure !== undefined)
+    );
+  };
+  const invalidTemporalAxes = new Set<"x" | "y">();
+  for (const axis of AXIS_CHANNELS) {
+    const config = scales?.[axis] as PositionScaleSpec | undefined;
+    if (config?.type === "band" || !scaleRequestsTime(axis)) continue;
+    const configurationError = temporalParserConfigurationError(config?.parse ?? "auto", {
+      ...(config?.timezone !== undefined && { timezone: config.timezone }),
+      ...(config?.disambiguation !== undefined && { disambiguation: config.disambiguation }),
+    });
+    if (configurationError === null) continue;
+    invalidTemporalAxes.add(axis);
+    errors.push({
+      code: "scale-type-mismatch",
+      path: `/scales/${axis}`,
+      message: `scales.${axis} has invalid temporal parser configuration: ${configurationError}.`,
+      fix: { description: "Correct the parser format or timezone configuration." },
+    });
+  }
 
   const resolved = preResolved ?? resolveFieldEvidence(spec, options, limits);
-  if (resolved.status === "errors") return resolved.errors;
-  if (resolved.status === "none") return errors; // no data, no profile: nothing to check
+  if (resolved.status === "errors") return [...errors, ...resolved.errors];
+  if (resolved.status === "none") return errors; // value-dependent checks need data or a profile
   const fields = resolved.fields;
 
   const available = [...fields.keys()];
   const plotAes = isRecord(spec["aes"]) ? (spec["aes"] as Aes) : undefined;
   const layers = Array.isArray(spec["layers"]) ? (spec["layers"] as unknown[]) : [];
-  const scales = isRecord(spec["scales"]) ? spec["scales"] : undefined;
-  const scaleRequestsTime = (axis: "x" | "y"): boolean => {
-    const config = scales?.[axis] as PositionScaleSpec | undefined;
-    return (
-      config?.type === "time" ||
-      config?.parse !== undefined ||
-      config?.temporalKind !== undefined ||
-      config?.timezone !== undefined ||
-      config?.disambiguation !== undefined ||
-      config?.parseFailure !== undefined
-    );
+  const scaleRequestsTimeForChannel = (channel: ChannelName): boolean => {
+    const axis =
+      channel === "x"
+        ? "x"
+        : channel === "y" || channel === "ymin" || channel === "ymax"
+          ? "y"
+          : null;
+    return axis !== null && scaleRequestsTime(axis);
   };
 
   interface AxisUse {
@@ -107,7 +134,10 @@ export function dataChecks(
       const m = effectiveChannel(plotAes, layerAes, channel);
       if (m === undefined || !("field" in m)) return null;
       const t = fields.get(m.field)?.type;
-      return t === undefined || t === null ? null : [m.field, t];
+      if (t === undefined || t === null) return null;
+      // Geom/stat contracts see position values after configured temporal parsing.
+      // Parse failures and configuration errors are owned by scale validation below.
+      return [m.field, scaleRequestsTimeForChannel(channel) ? "temporal" : t];
     };
     const typeError = (channel: ChannelName, message: string, fixDesc: string) => {
       errors.push({
@@ -245,24 +275,7 @@ export function dataChecks(
       config?.disambiguation !== undefined ||
       config?.parseFailure !== undefined;
     const declared = config?.type === "band" ? "band" : requestsTime ? "time" : config?.type;
-    if (declared === undefined || declared === "band") continue;
-    if (declared === "time") {
-      const configurationError = temporalParserConfigurationError(config?.parse ?? "auto", {
-        ...(config?.timezone !== undefined && { timezone: config.timezone }),
-        ...(config?.disambiguation !== undefined && {
-          disambiguation: config.disambiguation,
-        }),
-      });
-      if (configurationError !== null) {
-        errors.push({
-          code: "scale-type-mismatch",
-          path: `/scales/${axis}`,
-          message: `scales.${axis} has invalid temporal parser configuration: ${configurationError}.`,
-          fix: { description: "Correct the parser format or timezone configuration." },
-        });
-        continue;
-      }
-    }
+    if (declared === undefined || declared === "band" || invalidTemporalAxes.has(axis)) continue;
     for (const use of axisFields[axis]) {
       const type = typeOf(use.field);
       if (type === null) continue;

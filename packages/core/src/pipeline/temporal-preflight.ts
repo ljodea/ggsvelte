@@ -350,7 +350,8 @@ export function preflightTemporalBindings(input: {
       if (raw === undefined) continue;
       const values = Array.isArray(raw) ? raw : [raw];
       const conversion = axis === "x" ? binding.xConversion : binding.yConversion;
-      if (conversion.forcedDiscrete || !conversion.requestedTime) continue;
+      if (conversion.forcedDiscrete || (!conversion.requestedTime && conversion.parser === "auto"))
+        continue;
       // Annotation numbers are already-semantic epoch milliseconds. Source
       // epoch-unit parsing happens earlier for mapped columns/domains/breaks.
       const sourceValues = values.filter(
