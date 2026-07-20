@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784526141016,
+  "lastUpdate": 1784529048464,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -33889,6 +33889,130 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 147.831,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "8c0b261f06a191d3635ddba9da8ac386ee886452",
+          "message": "Merge pull request #339 from ljodea/feat/docs-progressive-search\n\nfeat(docs): add progressive guides and global search",
+          "timestamp": "2026-07-20T01:30:01-05:00",
+          "tree_id": "0b36632669a1635c740dede5c328c415e2261678",
+          "url": "https://github.com/ljodea/ggsvelte/commit/8c0b261f06a191d3635ddba9da8ac386ee886452"
+        },
+        "date": 1784529047648,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.7062,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.1552,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 8.2913,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 10.4489,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 45.6726,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 79.9487,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal-line 100k",
+            "value": 68.5873,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.1389,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.333,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 49.8829,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 72.514,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.0163,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 14.457,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 897.3192,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.6695,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 244.6799,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 9.6163,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 12.7696,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 581.651,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 146.054,
             "unit": "ms"
           }
         ]
