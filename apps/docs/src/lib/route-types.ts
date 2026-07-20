@@ -23,6 +23,7 @@ export interface DocsRouteMetadata {
   sitemap: boolean;
   shell: DocsShell;
   navigation?: RouteNavigation;
+  primaryNavigationOwner?: "reference";
   headings?: RouteHeading[];
 }
 

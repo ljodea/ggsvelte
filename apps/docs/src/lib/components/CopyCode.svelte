@@ -4,8 +4,14 @@
   const {
     code,
     label = "Copy",
+    accessibleLabel = label,
     class: className = "",
-  }: { code: string; label?: string; class?: string } = $props();
+  }: {
+    code: string;
+    label?: string;
+    accessibleLabel?: string;
+    class?: string;
+  } = $props();
   let source = $state<HTMLElement>();
   let status = $state("");
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -20,7 +26,7 @@
 </script>
 
 <div class={`copy-code ${className}`}>
-  <button type="button" onclick={copy}
+  <button type="button" aria-label={accessibleLabel} onclick={copy}
     >{status === "Copied." ? "Copied" : label}</button
   >
   <code bind:this={source}>{code}</code>

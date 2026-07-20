@@ -8,9 +8,7 @@
 <nav class="breadcrumbs" aria-label="Breadcrumb">
   <ol>
     <li>
-      <a
-        href={`${base}${reference ? "/reference/interactions" : "/guide/getting-started"}`}
-      >
+      <a href={`${base}${reference ? "/reference" : "/docs"}`}>
         {reference ? "Reference" : "Docs"}
       </a>
     </li>

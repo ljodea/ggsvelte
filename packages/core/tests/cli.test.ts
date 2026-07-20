@@ -9,7 +9,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import type { CLIIO } from "../src/cli.ts";
-import { runCLI } from "../src/cli.ts";
+import { CLI_OPTIONS, runCLI } from "../src/cli.ts";
 
 const SPEC = {
   data: {
@@ -52,6 +52,21 @@ function makeIO(stdin = "", files: Record<string, string> = {}): Captured {
 }
 
 describe("runCLI", () => {
+  it("owns parser, help, and docs option identity in one package-private registry", async () => {
+    expect(CLI_OPTIONS.map((option) => option.flag)).toEqual([
+      "--width",
+      "--height",
+      "--data",
+      "--max-marks",
+      "--version",
+      "--help",
+    ]);
+    expect(CLI_OPTIONS.find((option) => option.flag === "--max-marks")?.anchor).toBe("max-marks");
+    const { io, err } = makeIO();
+    expect(await runCLI(["--help"], io)).toBe(0);
+    for (const option of CLI_OPTIONS) expect(err.join("\n")).toContain(option.flag);
+  });
+
   it("renders a spec from stdin: SVG on stdout, advisories as stderr JSON lines", async () => {
     const { io, out, err } = makeIO(JSON.stringify(SPEC));
     const code = await runCLI([], io);

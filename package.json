@@ -18,6 +18,8 @@
     "check:pages-links": "bun scripts/check-pages-links.ts",
     "docs:routes:gen": "bun scripts/gen-docs-routes.ts",
     "docs:routes:check": "bun scripts/gen-docs-routes.ts --check",
+    "docs:search:gen": "bun scripts/gen-docs-search.ts",
+    "docs:search:check": "bun scripts/gen-docs-search.ts --check",
     "gallery:previews:gen": "bun scripts/gen-gallery-previews.ts",
     "gallery:previews:check": "bun scripts/gen-gallery-previews.ts --check",
     "check:docs-metadata": "bun scripts/check-docs-metadata.ts",

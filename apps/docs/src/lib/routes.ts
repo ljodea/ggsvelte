@@ -27,6 +27,22 @@ export function sitemapRoutes(): DocsRouteMetadata[] {
   return ROUTES.filter((route) => route.sitemap);
 }
 
+export type PrimaryNavigationOwner = "docs" | "reference";
+
+export function primaryNavigationOwner(
+  route: DocsRouteMetadata | undefined,
+): PrimaryNavigationOwner | undefined {
+  if (route === undefined) return undefined;
+  if (
+    route.primaryNavigationOwner === "reference" ||
+    route.path.startsWith("/reference") ||
+    route.navigation?.section === "Reference"
+  ) {
+    return "reference";
+  }
+  return route.shell === "docs" ? "docs" : undefined;
+}
+
 export function guideSequence(path: string): {
   previous?: DocsRouteMetadata;
   next?: DocsRouteMetadata;

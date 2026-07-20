@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
 
-  import { GUIDE_NAVIGATION } from "$lib/routes";
+  import { GUIDE_NAVIGATION, primaryNavigationOwner } from "$lib/routes";
   import type { DocsRouteMetadata } from "$lib/route-types";
 
   import Breadcrumbs from "./Breadcrumbs.svelte";
@@ -28,6 +28,7 @@
   const displayTitle = $derived(
     route.navigation?.label ?? route.title.replace(" — ggsvelte", ""),
   );
+  const reference = $derived(primaryNavigationOwner(route) === "reference");
 
   function openChapters(): void {
     chapterDialog?.showModal();
@@ -67,10 +68,7 @@
   </aside>
 
   <div class="docs-article">
-    <Breadcrumbs
-      title={displayTitle}
-      reference={path.startsWith("/reference/")}
-    />
+    <Breadcrumbs title={displayTitle} {reference} />
     {@render children()}
     <PrevNext {previous} {next} />
   </div>
