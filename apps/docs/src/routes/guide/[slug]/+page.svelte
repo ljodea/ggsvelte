@@ -1,5 +1,6 @@
 <script lang="ts">
   import { copyText, MANUAL_COPY_STATUS } from "$lib/clipboard";
+  import GettingStartedGuide from "$lib/components/GettingStartedGuide.svelte";
   import type { PageProps } from "./$types";
 
   const { data }: PageProps = $props();
@@ -26,8 +27,12 @@
   }
 </script>
 
-<!-- Guide markdown is repository-authored catalog content, never user input. -->
-<article class="guide prose" use:enhanceCodeCopy>
-  <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-  {@html data.html}
-</article>
+{#if data.page.slug === "getting-started"}
+  <GettingStartedGuide />
+{:else}
+  <!-- Guide markdown is repository-authored catalog content, never user input. -->
+  <article class="guide prose" use:enhanceCodeCopy>
+    <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+    {@html data.html}
+  </article>
+{/if}

@@ -10,7 +10,7 @@ async function expectNoHorizontalOverflow(page: import("@playwright/test").Page)
   expect(dimensions.document).toBeLessThanOrEqual(dimensions.viewport);
 }
 
-for (const width of [375, 768, 1280]) {
+for (const width of [375, 768, 1024, 1280, 1600]) {
   test(`docs shell has no horizontal overflow at ${String(width)}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 800 });
     await page.goto(GUIDE_ROUTE);
@@ -42,11 +42,17 @@ test("getting started presents one complete Svelte file before secondary surface
     text?.indexOf("You have a chart") ?? 0,
   );
   expect(text?.indexOf("You have a chart")).toBeLessThan(text?.indexOf("Fluent builder") ?? 0);
-  const firstFile = article.locator("pre").nth(2);
+  const firstFile = article.locator(".lesson-source--file code");
   await expect(firstFile).toContainText("import { GeomPoint, GGPlot }");
   await expect(firstFile).toContainText("ariaLabel=");
   await expect(firstFile).not.toContainText("width=");
   await expect(firstFile).not.toContainText("height=");
+  await expect(
+    article.locator(".copy-code code").filter({ hasText: "import { aes, gg }" }),
+  ).toBeVisible();
+  await expect(
+    article.locator(".copy-code code").filter({ hasText: '"geom": "point"' }),
+  ).toBeVisible();
 });
 
 test("errors deep links expose source-qualified recovery and copy safe recipes", async ({
@@ -105,7 +111,7 @@ test("desktop docs shell exposes chapter, breadcrumb, contents, and sequence nav
 
   const chapters = page.getByRole("navigation", { name: "Guide chapters" });
   await expect(chapters).toBeVisible();
-  await expect(chapters.getByRole("link")).toHaveCount(9);
+  await expect(chapters.getByRole("link")).toHaveCount(25);
   await expect(page.getByRole("navigation", { name: "Breadcrumb" })).toContainText(
     "Getting started",
   );
@@ -160,6 +166,7 @@ test("code tabs implement automatic arrow, Home, and End activation with roving 
 });
 
 test("appearance choice applies immediately and survives navigation", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/guide/getting-started?theme=light");
   await page.getByRole("button", { name: "Dark appearance", exact: true }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
@@ -177,6 +184,7 @@ test("appearance control remains usable when browser storage is unavailable", as
       throw new DOMException("Storage denied", "SecurityError");
     };
   });
+  await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/guide/getting-started?theme=light");
   await page.getByRole("button", { name: "Dark appearance", exact: true }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");

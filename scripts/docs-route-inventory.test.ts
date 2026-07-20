@@ -1,5 +1,6 @@
 import { describe, expect, it } from "bun:test";
 
+import { CLI_REFERENCE_OPTIONS } from "./cli-docs.ts";
 import {
   createDocsRouteInventory,
   routeCanonicalUrl,
@@ -25,19 +26,75 @@ describe("docs route inventory", () => {
     const paths = new Set(inventory.map((entry) => entry.path));
 
     expect(paths.has("/")).toBe(true);
+    expect(paths.has("/docs")).toBe(true);
     expect(paths.has("/guide/getting-started")).toBe(true);
+    expect(paths.has("/reference")).toBe(true);
     expect(paths.has("/examples")).toBe(true);
     expect(paths.has("/examples/point/scatter-color")).toBe(true);
     expect(paths.has("/examples/interactions/inspection")).toBe(true);
     expect(paths.has("/playground")).toBe(true);
     expect(paths.has("/themes")).toBe(true);
     expect(paths.has("/reference/interactions")).toBe(true);
+    expect(paths.has("/reference/cli")).toBe(true);
     expect(paths.has("/__perf/r3-interaction")).toBe(true);
     expect(paths.has("/sitemap.xml")).toBe(true);
     expect(paths.has("/robots.txt")).toBe(true);
 
     expect(validateRouteInventory(inventory)).toBe(inventory);
     expect(JSON.parse(JSON.stringify(inventory))).toEqual(inventory);
+  });
+
+  it("publishes task-first Docs and one Reference landing with canonical metadata", () => {
+    const inventory = createDocsRouteInventory();
+    expect(inventory.find((entry) => entry.path === "/docs")).toMatchObject({
+      title: "Documentation — ggsvelte",
+      canonicalPath: "/docs",
+      kind: "page",
+      index: true,
+      sitemap: true,
+      shell: "docs",
+      navigation: { section: "Start", label: "Overview", order: 0 },
+    });
+    expect(inventory.find((entry) => entry.path === "/reference")).toMatchObject({
+      title: "Reference — ggsvelte",
+      canonicalPath: "/reference",
+      kind: "page",
+      index: true,
+      sitemap: true,
+      shell: "docs",
+      navigation: { section: "Reference", label: "Reference overview", order: 50 },
+    });
+  });
+
+  it("keeps every navigation target concrete and gives global Reference active ownership", () => {
+    const inventory = createDocsRouteInventory();
+    const byPath = new Map(inventory.map((entry) => [entry.path, entry]));
+    const navigation = inventory.filter((entry) => entry.navigation !== undefined);
+
+    for (const entry of navigation) expect(byPath.has(entry.path), entry.path).toBe(true);
+    expect(byPath.get("/guide/errors")?.navigation?.section).toBe("Reference");
+    expect(byPath.get("/guide/interaction-reference")?.navigation).toBeUndefined();
+    expect(byPath.has("/guide")).toBe(false);
+  });
+
+  it("publishes the CLI reference inside the one Reference hierarchy", () => {
+    const cliRoute = createDocsRouteInventory().find((entry) => entry.path === "/reference/cli");
+    expect(cliRoute).toMatchObject({
+      title: "Command-line reference — ggsvelte",
+      canonicalPath: "/reference/cli",
+      kind: "page",
+      index: true,
+      sitemap: true,
+      shell: "docs",
+      navigation: { section: "Reference", label: "CLI reference", order: 52 },
+    });
+    expect(cliRoute?.headings?.filter((heading) => heading.level === 3)).toEqual(
+      CLI_REFERENCE_OPTIONS.map((option) => ({
+        id: option.anchor,
+        title: option.flag,
+        level: 3,
+      })),
+    );
   });
 
   it("publishes the themes destination with canonical acquisition metadata", () => {

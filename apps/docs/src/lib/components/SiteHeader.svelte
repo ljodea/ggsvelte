@@ -2,16 +2,23 @@
   import { base } from "$app/paths";
   import { onMount } from "svelte";
 
-  const { path }: { path: string } = $props();
+  import { primaryNavigationOwner } from "$lib/routes";
+  import type { DocsRouteMetadata } from "$lib/route-types";
+
+  import SiteSearch from "./SiteSearch.svelte";
+
+  const { path, route }: { path: string; route?: DocsRouteMetadata } = $props();
+  const owner = $derived(primaryNavigationOwner(route));
 
   let menu = $state<HTMLDialogElement>();
+  let search = $state<{ open: (trigger: HTMLElement) => void }>();
   let appearance = $state<"light" | "dark">("light");
 
   const links = $derived([
     {
       label: "Docs",
-      href: "/guide/getting-started",
-      active: path.startsWith("/guide/"),
+      href: "/docs",
+      active: owner === "docs",
     },
     {
       label: "Gallery",
@@ -30,8 +37,8 @@
     },
     {
       label: "Reference",
-      href: "/reference/interactions",
-      active: path.startsWith("/reference"),
+      href: "/reference",
+      active: owner === "reference",
     },
   ]);
 
@@ -53,6 +60,11 @@
 
   function openMenu(): void {
     menu?.showModal();
+  }
+
+  function openSearch(event: MouseEvent): void {
+    if (event.currentTarget instanceof HTMLElement)
+      search?.open(event.currentTarget);
   }
 
   function closeMenu(): void {
@@ -82,6 +94,9 @@
     </nav>
 
     <div class="site-actions desktop-actions">
+      <button type="button" class="search-trigger" onclick={openSearch}>
+        Search <span class="visually-hidden">documentation</span>
+      </button>
       <button type="button" class="appearance" onclick={toggleAppearance}>
         {appearance === "dark" ? "Light" : "Dark"}
         <span class="visually-hidden">appearance</span>
@@ -92,6 +107,13 @@
         rel="external">GitHub <span aria-hidden="true">↗</span></a
       >
     </div>
+
+    <button
+      type="button"
+      class="mobile-search-trigger"
+      aria-label="Search documentation"
+      onclick={openSearch}>Search</button
+    >
 
     <button
       type="button"
@@ -137,3 +159,5 @@
     </button>
   </div>
 </dialog>
+
+<SiteSearch bind:this={search} />

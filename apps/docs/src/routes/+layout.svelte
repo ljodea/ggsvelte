@@ -27,7 +27,7 @@
 </svelte:head>
 
 <a class="skip-link" href="#main-content">Skip to content</a>
-<SiteHeader path={data.path} />
+<SiteHeader path={data.path} route={data.route} />
 
 <main
   id="main-content"

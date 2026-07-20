@@ -26,7 +26,16 @@ import {
   type DiagnosticDocEntry,
   type DiagnosticDocSource,
 } from "./diagnostic-docs";
-import { QUICKSTART_PAGE_FILENAME, QUICKSTART_PAGE_SVELTE } from "./quickstart";
+import { assertGuideCodeContract, type CodeClassification } from "./guide-code-contract";
+import {
+  QUICKSTART_BUILDER_FRAGMENT,
+  QUICKSTART_CLI_FRAGMENT,
+  QUICKSTART_HEADLESS_FRAGMENT,
+  QUICKSTART_PAGE_FILENAME,
+  QUICKSTART_PAGE_SVELTE,
+  QUICKSTART_PORTABLE_SPEC_FRAGMENT,
+  quickstartLessonMarkdown,
+} from "./quickstart";
 
 export { buildDiagnosticDocs } from "./diagnostic-docs";
 
@@ -107,6 +116,7 @@ export function renderMarkdown(md: string, base = ""): string {
   let code: string[] | null = null;
   let codeLang = "";
   let codeCopy = false;
+  let codeClassification: CodeClassification = "fragment";
   let copyCodeCount = 0;
   const headingId = createHeadingId();
 
@@ -124,10 +134,19 @@ export function renderMarkdown(md: string, base = ""): string {
   };
   const renderCode = (source: string): string => {
     const languageClass = codeLang === "" ? "" : ` class="language-${codeLang}"`;
-    const rendered = `<pre><code${languageClass}>${escapeHtml(source)}</code></pre>`;
+    const classificationLabel =
+      codeClassification === "fragment"
+        ? "Fragment"
+        : codeLang === "svelte"
+          ? "Complete file"
+          : codeLang === "sh"
+            ? "Complete command"
+            : "Complete example";
+    const label = `<p class="guide-code-classification">${classificationLabel}</p>`;
+    const rendered = `${label}<pre><code${languageClass}>${escapeHtml(source)}</code></pre>`;
     if (!codeCopy) return rendered;
     const id = `guide-code-${String(++copyCodeCount)}`;
-    return `<div class="guide-code-copy"><button type="button" data-copy-code="${id}" aria-describedby="${id}-status">Copy code</button><pre id="${id}"><code${languageClass}>${escapeHtml(source)}</code></pre><span id="${id}-status" role="status" aria-live="polite"></span></div>`;
+    return `${label}<div class="guide-code-copy"><button type="button" data-copy-code="${id}" aria-describedby="${id}-status">Copy code</button><pre id="${id}"><code${languageClass}>${escapeHtml(source)}</code></pre><span id="${id}-status" role="status"></span></div>`;
   };
 
   for (const line of lines) {
@@ -146,6 +165,7 @@ export function renderMarkdown(md: string, base = ""): string {
       const [language = "", ...flags] = line.slice(3).trim().split(/\s+/);
       codeLang = /^[a-z0-9-]*$/i.test(language) ? language : "";
       codeCopy = flags.includes("copy");
+      codeClassification = flags.includes("complete") ? "complete" : "fragment";
       code = [];
       continue;
     }
@@ -196,7 +216,7 @@ when you need to generate or transmit charts.
 
 Start with Node.js 22 or newer in an empty directory:
 
-\`\`\`sh
+\`\`\`sh complete
 npx sv create my-chart --template minimal --types ts --no-add-ons --install npm
 cd my-chart
 \`\`\`
@@ -207,7 +227,7 @@ Already have a supported SvelteKit app? Continue with the install step.
 
 Choose the package manager already used by the app:
 
-\`\`\`sh
+\`\`\`sh complete
 npm install @ggsvelte/svelte
 # or: pnpm add @ggsvelte/svelte
 # or: bun add @ggsvelte/svelte
@@ -220,7 +240,7 @@ package. Install them directly only for spec-only or headless use.
 
 \`${QUICKSTART_PAGE_FILENAME}\` (complete file)
 
-\`\`\`svelte
+\`\`\`svelte complete
 ${QUICKSTART_PAGE_SVELTE}
 \`\`\`
 
@@ -233,6 +253,10 @@ and uses the default 400px height. No chart CSS or fixed width is required.
 The first useful model is small: \`GGPlot\` owns the chart, \`data\` supplies
 rows, \`aes\` maps fields, and \`GeomPoint\` adds the point layer. Change the
 four rows or the \`x\` and \`y\` field names to adapt it.
+
+## Build the grammar one change at a time
+
+${quickstartLessonMarkdown()}
 
 If the chart is inside \`display: none\`, a zero-width grid track, or another
 collapsed container, it stays not-ready until the container receives a
@@ -248,12 +272,8 @@ hydration warning, or TypeScript package mismatch is covered in the
 Use the builder to construct specs programmatically in TypeScript. Fragment,
 assuming the \`cars\` data from the complete file above:
 
-\`\`\`ts
-import { aes, gg } from "@ggsvelte/svelte";
-
-const spec = gg(cars, aes({ x: "weight", y: "economy" }))
-  .geomPoint()
-  .spec();
+\`\`\`ts fragment
+${QUICKSTART_BUILDER_FRAGMENT}
 \`\`\`
 
 ### PortableSpec JSON
@@ -262,19 +282,8 @@ Use PortableSpec when a chart must be saved, transmitted, validated, or
 generated without executable accessors. Fragment equivalent to the first
 chart:
 
-\`\`\`json
-{
-  "data": { "values": [{ "weight": 1.8, "economy": 37 }] },
-  "layers": [
-    {
-      "geom": "point",
-      "aes": {
-        "x": { "field": "weight" },
-        "y": { "field": "economy" }
-      }
-    }
-  ]
-}
+\`\`\`json fragment
+${QUICKSTART_PORTABLE_SPEC_FRAGMENT}
 \`\`\`
 
 ## Headless and server rendering
@@ -284,14 +293,12 @@ chart:
 stderr. These are fragments; use the complete PortableSpec above as \`spec\`
 or save it as \`spec.json\`.
 
-\`\`\`ts
-import { renderToSVGString } from "@ggsvelte/core";
-
-const svg = renderToSVGString(spec, { width: 640, height: 400 });
+\`\`\`ts fragment
+${QUICKSTART_HEADLESS_FRAGMENT}
 \`\`\`
 
-\`\`\`sh
-ggsvelte-render spec.json > chart.svg
+\`\`\`sh fragment
+${QUICKSTART_CLI_FRAGMENT}
 \`\`\`
 
 ## Validating specs
@@ -314,6 +321,334 @@ advisories for valid-but-questionable specs.
 - [Errors reference](/guide/errors) — validation, render, interaction, and CLI
   diagnostics with consequences and safe recovery steps.
 - [JSON Schema](/schema/v0.json) — PortableSpec for constrained decoding.
+`;
+
+export const DATA_MAPPINGS_MD = `# Data and mappings
+
+Start with ordinary rows. A mapping names which field supplies each visual
+channel; it does not rewrite the source objects.
+
+## Map fields to position
+
+This fragment maps numeric fields to the horizontal and vertical position
+channels:
+
+\`\`\`svelte fragment
+aes={{ x: "weight", y: "economy" }}
+\`\`\`
+
+A field mapping is explicit data meaning. Change the mapping without reshaping
+the rows, or change the rows while keeping the same chart grammar. The
+[scatter with color example](/examples/point/scatter-color) adds one discrete
+channel while preserving the positional fields.
+
+## Keep data local
+
+Inline rows, named datasets, and PortableSpec data all pass through validation
+and normalization before rendering. The documentation playground remains
+local-only; it does not upload chart data.
+`;
+
+export const LAYERS_MARKS_MD = `# Layers and marks
+
+A plot is an ordered composition. Add a mark without replacing the data or the
+mappings already owned by the plot.
+
+## Compose layers
+
+This fragment draws a line first and points over it:
+
+\`\`\`svelte fragment
+<GeomLine />
+<GeomPoint />
+\`\`\`
+
+Layers paint in source order. They inherit plot mappings unless a layer supplies
+its own mapping or data. See the [multi-series line example](/examples/line/multi-series)
+for the same composition with a stable discrete color scale.
+
+## Choose a mark for the question
+
+Use points for records, lines for ordered change, columns for precomputed
+heights, bars for counts, and rules/text for annotation. The
+[Gallery](/examples) keeps each mark attached to a real rendered example.
+`;
+
+export const STATISTICS_POSITIONS_MD = `# Statistics and positions
+
+Statistics derive marks from mapped rows; positions decide how marks share the
+same coordinate space. Keep raw evidence visible when a summary could hide it.
+
+## Statistical summaries
+
+Add a fitted trend without replacing the observations:
+
+\`\`\`svelte fragment
+<GeomPoint />
+<GeomSmooth method="lm" />
+\`\`\`
+
+The [loess example](/examples/smooth/loess-scatter) shows a smoother and
+confidence ribbon over the source points. Histograms, density, boxplots, and
+error bars use the same derive-then-render boundary.
+
+## Positions
+
+Stack combines values, dodge places groups side by side, fill normalizes each
+stack to one, and jitter separates overlapping points with a deterministic
+seed. Compare the [bar examples](/examples?category=bar) before overriding a
+position.
+`;
+
+export const SCALES_GUIDES_MD = `# Scales and guides
+
+A scale translates a data domain into position, color, size, or labels. Axes
+and legends explain that translation; they do not own the data meaning.
+
+## Categorical color
+
+Use a named categorical scheme when color identifies groups:
+
+\`\`\`svelte fragment
+aes={{ x: "weight", y: "economy", color: "vehicleClass" }}
+scales={{ color: { type: "ordinal", scheme: "observable10" } }}
+\`\`\`
+
+Stable assignments preserve category identity as rows filter or reorder. See
+all registered schemes, capacities, and exhaustion behavior on
+[Themes and color](/themes).
+
+## Date and time axes
+
+Declare a time scale for ISO 8601 values and let the scale choose UTC calendar
+ticks. Pin breaks or labels only when the audience needs a fixed convention.
+The [time-axis example](/examples/line/time-axis) is the runnable contract.
+`;
+
+export const FACETS_COORDINATES_MD = `# Facets and coordinates
+
+Facets partition rows into panels before panel statistics run. Coordinates
+control how trained scales are presented.
+
+## Facet a comparison
+
+Repeat one grammar for each group:
+
+\`\`\`svelte fragment
+facet={{ wrap: "vehicleClass", ncol: 2 }}
+\`\`\`
+
+Fixed scales support direct panel comparison. Free scales make within-panel
+shape easier to see but weaken cross-panel magnitude comparison. Use the
+[facet wrap](/examples/facet/wrap) and [free-y](/examples/facet/wrap-free-y)
+examples to choose deliberately.
+
+## Coordinates
+
+Use coordinate flip for horizontal composition rather than swapping semantic
+mappings. The [horizontal bar example](/examples/bar/horizontal) preserves the
+ordinary category/value grammar and flips the presentation.
+`;
+
+export const THEMES_COLOR_MD = `# Themes and color
+
+Chart theme controls furniture: paper, ink, grid, type, and interaction roles.
+Scales control data color. The surrounding documentation appearance controls
+neither unless follow mode is explicit.
+
+## Choose a chart theme
+
+Pass a registered theme without changing mappings:
+
+\`\`\`svelte fragment
+theme="economist"
+\`\`\`
+
+Compare all twelve live themes, categorical schemes, sequential ramps, custom
+ranges, and safe failure behavior on the [Themes and color destination](/themes).
+
+## Preserve color meaning
+
+Explicit scale range wins over named scheme, which wins over the edition
+default. Switching chart furniture must not reassign categories or reverse a
+quantitative ramp.
+`;
+
+export const INSPECT_PIN_MD = `# Inspect and pin
+
+Inspection is chart-local presentation state: a semantic crosshair, HTML
+tooltip, keyboard traversal, and an optional pinned result.
+
+## Inspect and pin
+
+Supply a stable row key and opt into the behavior:
+
+\`\`\`svelte fragment
+<GGPlot
+  key="id"
+  inspect={{ mode: "exact", pin: true }}
+/>
+\`\`\`
+
+Pointer, touch, and keyboard paths report the same semantic datum. Enter or
+Space pins; Escape dismisses. Try the [inspection example](/examples/interaction/tooltip).
+
+## Keep ownership honest
+
+Tooltip, crosshair, active tool, and pin state remain private to one chart.
+Use a shared controller only for semantic selection, emphasis, intervals, or
+zoom domains that ordinary application UI also consumes.
+`;
+
+export const SELECTION_ZOOM_MD = `# Selection and zoom
+
+Selection identifies data; zoom changes visible domains. Explicit tools keep
+those gestures from competing with inspection or page scrolling.
+
+## Select points
+
+Point selection requires stable keys and emits semantic identities instead of
+renderer indices.
+
+\`\`\`svelte fragment
+<GGPlot key="id" select={{ type: "point", multiple: true }} />
+\`\`\`
+
+## Select an area and zoom
+
+Interval selection and brush zoom expose separate tools, domain bounds, clear
+paths, and precise keyboard-editable bounds. Try the
+[selection and zoom example](/examples/interaction/brush-zoom) before combining
+the capabilities in application code.
+`;
+
+export const LINKED_VIEWS_MD = `# Linked views
+
+Share semantic state only when plots, controls, or tables need the same
+selection, emphasis, interval, or domain.
+
+## Create a shared controller
+
+\`\`\`svelte fragment
+const interaction = createPlotInteraction<string>();
+const scope = { keys: "record-id", x: "weight", y: "economy" } as const;
+\`\`\`
+
+Every linked consumer receives the same explicit scope. Passive plots render a
+transition without publishing it again. The
+[linked views example](/examples/interaction/linked-views) coordinates two
+plots, buttons, and a table without callback loops.
+
+## Keep local state local
+
+Inspection, tooltip, crosshair, active tool, and interval drafts stay local.
+Share the committed semantic result, not renderer pixels or private UI mode.
+`;
+
+export const ACCESSIBILITY_MD = `# Accessibility
+
+A chart needs a useful accessible name, keyboard and touch interaction paths,
+visible focus, concise announcements, and a data-detail alternative when marks
+are dense.
+
+## Name the chart
+
+\`\`\`svelte fragment
+<GGPlot ariaLabel="Fuel economy decreases as vehicle weight increases" />
+\`\`\`
+
+The name states the chart's subject or takeaway. It is not generic image alt
+text and does not replace a visible caption.
+
+## Keyboard and touch
+
+Focus the chart and use arrows or brackets to traverse data. Enter or Space
+pins or commits the active tool; Escape dismisses. Touch inspection pins rather
+than depending on hover. The [inspection example](/examples/interaction/tooltip)
+keeps complete pinned content in ordinary labelled DOM.
+
+## Dense charts
+
+Canvas marks retain SVG axes and legends plus the existing accessible
+description/table path. Forced colors preserves controls and focus even when
+system colors replace chart paint.
+`;
+
+export const RESPONSIVE_CHARTS_MD = `# Responsive charts
+
+Omit width to let GGPlot observe its container. A normal positive-width block
+needs no chart CSS; omitted height uses the specification and then 400px.
+
+## Container width
+
+A collapsed parent, hidden tab, or zero-width grid track keeps the plot
+not-ready until ResizeObserver reports positive width. Do not patch that state
+with an arbitrary fixed chart width. Follow the
+[container troubleshooting path](/guide/errors#quickstart-troubleshooting).
+
+## Server fallback and hydration
+
+Responsive charts server-render at a deterministic 640 × 400 fallback, remain
+not-ready in server HTML, then measure the real container after hydration.
+Reserve layout space around the chart to avoid page shift.
+`;
+
+export const RENDERING_PERFORMANCE_MD = `# Rendering and performance
+
+Renderer choice belongs to mark density and interaction needs, not to a site
+appearance. Axes, legends, labels, and accessibility remain semantic chrome.
+
+## SVG, canvas, and auto
+
+SVG keeps marks as DOM geometry. Canvas batches dense marks. Auto rendering
+moves eligible dense strata above the published threshold and emits the
+\`canvas-auto\` advisory. The [10k-point example](/examples/point/canvas-scatter)
+shows canvas marks under SVG axes and legend.
+
+## Canvas and interaction
+
+Inspection and semantic selection use the model-owned candidate store rather
+than DOM nodes. Stable keys preserve identity across SVG and canvas; renderer
+indices never enter public callbacks.
+
+## Measure before overriding
+
+Use the performance fixtures and advisories already shipped with the repository.
+Do not infer a faster renderer from screenshot timing or add a global canvas
+rule that removes useful SVG detail.
+`;
+
+export const SERVER_RENDERING_EXPORT_MD = `# Server rendering and export
+
+Choose the Svelte component for application SSR, the pure core renderer for a
+no-DOM process, or the installed CLI for shell composition. All paths consume
+the same portable specification contract.
+
+## Server rendering
+
+[Server rendering](/guide/server-rendering-export#server-rendering) uses the
+same deterministic layout fallback as the responsive component. Browser-only
+measurement and interaction attach after hydration.
+
+## Pure SVG export
+
+\`\`\`ts fragment
+import { renderToSVGString } from "@ggsvelte/core";
+
+const svg = renderToSVGString(spec, { width: 640, height: 400 });
+\`\`\`
+
+The pure renderer needs no DOM and returns a complete SVG string.
+
+## Command-line export
+
+\`\`\`sh fragment
+ggsvelte-render spec.json > chart.svg
+\`\`\`
+
+SVG is stdout. Diagnostics are JSON Lines on stderr, so shell redirection stays
+safe. The [CLI reference](/reference/cli) lists flags and exit classes from its
+implementation.
 `;
 
 export const COMPATIBILITY_MD = `# Compatibility
@@ -369,7 +704,7 @@ props, callbacks, phases, and diagnostics, use the
 keyboard traversal, and click-or-Enter pinning. Configure it when the chart
 has a natural comparison axis:
 
-\`\`\`svelte
+\`\`\`svelte fragment
 <GGPlot
   {data}
   aes={{ x: "date", y: "value", color: "series" }}
@@ -393,7 +728,7 @@ For custom HTML, pass a Svelte 5 snippet. Informational content is the default;
 choose \`contentMode: "interactive"\` only when the pinned tooltip contains
 controls that need focus.
 
-\`\`\`svelte
+\`\`\`svelte fragment
 {#snippet details(inspection)}
   <strong>{inspection.focus.row?.name}</strong>
   <span>{inspection.members.length} series at this value</span>
@@ -407,7 +742,7 @@ controls that need focus.
 Point selection is durable identity, not a renderer index. Supply a unique,
 stable string, number, or symbol for every source row:
 
-\`\`\`svelte
+\`\`\`svelte fragment
 <GGPlot
   key="id"
   select={{ type: "point", multiple: true }}
@@ -421,7 +756,7 @@ Use interval selection for brushing. The callback receives both the selected
 domain and normalized plot-pixel rectangle, plus semantic keys and a lineage
 count for aggregate marks.
 
-\`\`\`svelte
+\`\`\`svelte fragment
 <GGPlot
   key="id"
   select={{ type: "interval", mode: "xy", persistent: true }}
@@ -454,7 +789,7 @@ published once by its origin; passive charts render the new snapshot without
 emitting the callback again. Controlled plots never infer channel names: add an
 \`x\` and/or \`y\` scope whenever controlled zoom uses that channel.
 
-\`\`\`svelte
+\`\`\`svelte fragment
 <script lang="ts">
   import { createPlotInteraction } from "@ggsvelte/svelte";
 
@@ -536,7 +871,7 @@ Faceted interval selection is supported, but faceted brush zoom remains
 disabled with \`INTERACTION_INTERVAL_FACET_UNSUPPORTED\`; use a linked detail
 view when each facet needs a zoomed inspection surface.
 
-\`\`\`svelte
+\`\`\`svelte fragment
 <GGPlot
   zoom={{ mode: "xy" }}
   onzoom={(event) => console.log(event.domains)}
@@ -708,7 +1043,7 @@ presentation-only \`legendFocus\`.
 area mode. Keep the value in Svelte state when application controls and the
 plot tool rail must stay synchronized:
 
-\`\`\`svelte
+\`\`\`svelte fragment
 <script lang="ts">
   import type { InteractionTool } from "@ggsvelte/svelte";
 
@@ -799,7 +1134,7 @@ focused callbacks. Narrow on \`type\` and \`phase\`.
 Receives structured \`InteractionDiagnostic\` objects with \`severity\`,
 \`code\`, \`message\`, \`prop\`, \`suggestions\`, and \`docUrl\`.
 
-\`\`\`svelte
+\`\`\`svelte fragment
 <GGPlot
   ondiagnostic={(diagnostic) =>
     console.warn(diagnostic.code, diagnostic.message, diagnostic.suggestions)}
@@ -956,7 +1291,7 @@ tooltip snippets together.
 
 Before:
 
-\`\`\`svelte
+\`\`\`svelte fragment
 <GGPlot
   tooltip={true}
   brush={true}
@@ -969,7 +1304,7 @@ Before:
 
 After:
 
-\`\`\`svelte
+\`\`\`svelte fragment
 <GGPlot
   key="id"
   inspect={true}
@@ -1015,13 +1350,25 @@ See [Interactions](/guide/interactions) for current options, event shapes,
 keyboard behavior, and identity requirements.
 `;
 
-export const UPGRADING_MD = `# Upgrading ggsvelte
+export const UPGRADING_MD = `# Upgrade in five minutes
 
 One section per released 0.x transition, newest first. Each heading is a
 stable anchor that changesets and release notes link to. Pre-1.0, breaking
 changes ride minor releases; every deprecation or removal ships with a
 migration note here. The pre-release API has its own page:
 [Migrating pre-0.1 interactions](/guide/migrating-pre-0-1).
+
+## Five-minute path
+
+- Check that linked \`@ggsvelte/svelte\`, core, and spec packages resolve to one compatible release.
+- Read only the adjacent transition sections needed for the installed version.
+- Apply the before/after source change backed by the migration fixtures.
+- Run strict type, build, render, and visual checks before deploying.
+- Follow a stable diagnostic anchor if blocked; roll package versions back together if needed.
+
+The accepted lifecycle and deprecation policy remains in
+[Lifecycle and editions](/guide/lifecycle#lifecycle-tags); this page applies it
+rather than creating a second policy.
 
 ## 0.2 to 0.3
 
@@ -1034,7 +1381,7 @@ spatial index.
 
 Before 0.3:
 
-\`\`\`ts
+\`\`\`ts fragment
 import { buildHitIndex } from "@ggsvelte/core/dom";
 
 const hitIndex = buildHitIndex(model.scene);
@@ -1045,7 +1392,7 @@ In 0.3, use the model-owned candidate identity directly. \`hitTest()\` follows
 paint order, honors panel clipping, and returns \`CandidateFacts\`. Rectangle
 queries remain available as \`model.candidates.queryRect(...)\` candidate ids.
 
-\`\`\`svelte
+\`\`\`svelte fragment
 <script lang="ts">
   import { GeomPoint, GGPlot, type RenderModel } from "@ggsvelte/svelte";
 
@@ -1097,7 +1444,7 @@ one surface consumes the same interaction state.
 
 Chart-local (unchanged from 0.1):
 
-\`\`\`svelte
+\`\`\`svelte fragment
 <script lang="ts">
   import {
     GeomPoint,
@@ -1128,7 +1475,7 @@ Chart-local (unchanged from 0.1):
 
 Shared controller (new in 0.2, optional):
 
-\`\`\`svelte
+\`\`\`svelte fragment
 <script lang="ts">
   import {
     createPlotInteraction,
@@ -1230,7 +1577,7 @@ function renderDiagnosticEntry(entry: DiagnosticDocEntry): string {
     lines.push(
       "**Minimal illustration — copy only the relevant fragment:**",
       "",
-      `\`\`\`${entry.recipe.language} copy`,
+      `\`\`\`${entry.recipe.language} fragment copy`,
       entry.recipe.code,
       "```",
       "",
@@ -1398,7 +1745,20 @@ export interface GuidePage {
 export function guidePages(lifecycle: LifecycleDoc): GuidePage[] {
   const markdownBySlug: Record<GuideSlug, string> = {
     "getting-started": GETTING_STARTED_MD,
+    "data-mappings": DATA_MAPPINGS_MD,
+    "layers-marks": LAYERS_MARKS_MD,
+    "statistics-positions": STATISTICS_POSITIONS_MD,
+    "scales-guides": SCALES_GUIDES_MD,
+    "facets-coordinates": FACETS_COORDINATES_MD,
+    "themes-color": THEMES_COLOR_MD,
     interactions: INTERACTIONS_MD,
+    "inspect-pin": INSPECT_PIN_MD,
+    "selection-zoom": SELECTION_ZOOM_MD,
+    "linked-views": LINKED_VIEWS_MD,
+    accessibility: ACCESSIBILITY_MD,
+    "responsive-charts": RESPONSIVE_CHARTS_MD,
+    "rendering-performance": RENDERING_PERFORMANCE_MD,
+    "server-rendering-export": SERVER_RENDERING_EXPORT_MD,
     compatibility: COMPATIBILITY_MD,
     "interaction-reference": INTERACTION_REFERENCE_MD,
     errors: buildErrorsMd(),
@@ -1408,12 +1768,11 @@ export function guidePages(lifecycle: LifecycleDoc): GuidePage[] {
     upgrading: UPGRADING_MD,
   };
 
-  return GUIDE_CATALOG.map(({ slug, title, description }) => ({
-    slug,
-    title,
-    description,
-    markdown: markdownBySlug[slug],
-  }));
+  return GUIDE_CATALOG.map(({ slug, title, description }) => {
+    const markdown = markdownBySlug[slug];
+    assertGuideCodeContract(markdown, slug);
+    return { slug, title, description, markdown };
+  });
 }
 
 /** llms.txt — the curated index (llmstxt.org shape: H1, blurb, link lists). */

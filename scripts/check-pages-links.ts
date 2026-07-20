@@ -5,6 +5,8 @@ import { posix, resolve } from "node:path";
 import { resolveDocsBuildConfig } from "../apps/docs/build-mode.ts";
 
 export const requiredPages = [
+  "docs.html",
+  "reference.html",
   "guide/interactions.html",
   "guide/interaction-reference.html",
   "guide/migrating-pre-0-1.html",
@@ -12,6 +14,7 @@ export const requiredPages = [
   "playground.html",
   "themes.html",
   "reference/interactions.html",
+  "reference/cli.html",
   "examples/interaction/tooltip.html",
   "examples/interaction/brush-zoom.html",
   "examples/interaction/linked-views.html",

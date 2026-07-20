@@ -1,6 +1,7 @@
 import { EXAMPLES } from "../examples/manifest.ts";
 import { EXAMPLE_ALIASES } from "../apps/docs/src/lib/example-aliases.ts";
-import { GUIDE_CATALOG } from "../apps/docs/src/lib/catalog/guide.ts";
+import { CLI_REFERENCE_OPTIONS } from "./cli-docs.ts";
+import { GUIDE_CATALOG, type GuideCatalogEntry } from "../apps/docs/src/lib/catalog/guide.ts";
 
 export type DocsRouteKind = "page" | "alias" | "endpoint" | "performance";
 export type DocsShell = "site" | "docs";
@@ -27,6 +28,7 @@ export interface DocsRouteRecord {
   sitemap: boolean;
   shell: DocsShell;
   navigation?: RouteNavigation;
+  primaryNavigationOwner?: "reference";
   headings?: RouteHeading[];
 }
 
@@ -41,6 +43,18 @@ const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     index: true,
     sitemap: true,
     shell: "site",
+  },
+  {
+    path: "/docs",
+    title: "Documentation — ggsvelte",
+    description:
+      "Build, customize, interact with, deploy, and troubleshoot ggsvelte charts through a task-first learning path.",
+    canonicalPath: "/docs",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    navigation: { section: "Start", label: "Overview", order: 0 },
   },
   {
     path: "/examples",
@@ -76,6 +90,18 @@ const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     shell: "site",
   },
   {
+    path: "/reference",
+    title: "Reference — ggsvelte",
+    description:
+      "Find ggsvelte component, specification, interaction, diagnostic, lifecycle, and command-line contracts.",
+    canonicalPath: "/reference",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    navigation: { section: "Reference", label: "Reference overview", order: 50 },
+  },
+  {
     path: "/reference/interactions",
     title: "Interaction reference — ggsvelte",
     description:
@@ -85,6 +111,30 @@ const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     index: true,
     sitemap: true,
     shell: "docs",
+    navigation: { section: "Reference", label: "Interaction reference", order: 51 },
+  },
+  {
+    path: "/reference/cli",
+    title: "Command-line reference — ggsvelte",
+    description:
+      "Render PortableSpec JSON to SVG with implementation-derived flags, streams, diagnostics, and exit classes.",
+    canonicalPath: "/reference/cli",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    navigation: { section: "Reference", label: "CLI reference", order: 52 },
+    headings: [
+      { id: "input-and-output", title: "Input and output", level: 2 },
+      { id: "options", title: "Options", level: 2 },
+      ...CLI_REFERENCE_OPTIONS.map((option) => ({
+        id: option.anchor,
+        title: option.flag,
+        level: 3,
+      })),
+      { id: "exit-codes", title: "Exit codes", level: 2 },
+      { id: "troubleshooting", title: "Troubleshooting", level: 2 },
+    ],
   },
 ];
 
@@ -125,7 +175,8 @@ const PERFORMANCE_ROUTES: readonly DocsRouteRecord[] = [
 }));
 
 export function createDocsRouteInventory(): DocsRouteRecord[] {
-  const guides: DocsRouteRecord[] = GUIDE_CATALOG.map((entry, order) => ({
+  const guideCatalog: readonly GuideCatalogEntry[] = GUIDE_CATALOG;
+  const guides: DocsRouteRecord[] = guideCatalog.map((entry) => ({
     path: `/guide/${entry.slug}`,
     title: `${entry.title} — ggsvelte`,
     description: entry.description,
@@ -134,7 +185,18 @@ export function createDocsRouteInventory(): DocsRouteRecord[] {
     index: true,
     sitemap: true,
     shell: "docs",
-    navigation: { section: entry.section, label: entry.title, order },
+    ...(entry.primaryNavigationOwner === undefined
+      ? {}
+      : { primaryNavigationOwner: entry.primaryNavigationOwner }),
+    ...(entry.section === undefined
+      ? {}
+      : {
+          navigation: {
+            section: entry.section,
+            label: entry.title,
+            order: entry.navigationOrder,
+          },
+        }),
   }));
   const examples: DocsRouteRecord[] = EXAMPLES.map((entry) => ({
     path: `/examples/${entry.id}`,

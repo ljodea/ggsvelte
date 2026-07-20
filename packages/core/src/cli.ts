@@ -36,18 +36,71 @@ export interface CLIIO {
   writeErr(line: string): void;
 }
 
+export const CLI_OPTIONS = [
+  {
+    anchor: "width",
+    flag: "--width",
+    value: "N",
+    description: "Plot width in px (default: spec.width, then 640)",
+    kind: "number",
+    target: "width",
+  },
+  {
+    anchor: "height",
+    flag: "--height",
+    value: "N",
+    description: "Plot height in px (default: spec.height, then 400)",
+    kind: "number",
+    target: "height",
+  },
+  {
+    anchor: "data",
+    flag: "--data",
+    value: "FILE",
+    description: "JSON file with named datasets",
+    detail: '{"name": rows|columns|{values}|{columns}}',
+    kind: "file",
+    target: "dataPath",
+  },
+  {
+    anchor: "max-marks",
+    flag: "--max-marks",
+    value: "N",
+    description: "Refuse to render more marks than N (default 100000)",
+    kind: "number",
+    target: "maxMarks",
+  },
+  {
+    anchor: "version",
+    flag: "--version",
+    value: "",
+    description: "Print the installed @ggsvelte/svelte version",
+    kind: "boolean",
+    target: "version",
+  },
+  {
+    anchor: "help",
+    flag: "--help",
+    aliases: ["-h"],
+    value: "",
+    description: "Show this help",
+    kind: "boolean",
+    target: "help",
+  },
+] as const;
+
+const cliOptionLines = CLI_OPTIONS.map((option) => {
+  const signature = `${option.flag}${option.value === "" ? "" : ` ${option.value}`}`;
+  return `  ${signature.padEnd(17)} ${option.description}`;
+}).join("\n");
+
 const USAGE = `Usage: ggsvelte-render [spec.json] [options]
 
 Renders a ggsvelte plot spec (JSON) to SVG on stdout. Reads the spec from
 the file argument, or from stdin when omitted.
 
 Options:
-  --width N        Plot width in px (default: spec.width, then 640)
-  --height N       Plot height in px (default: spec.height, then 400)
-  --data FILE      JSON file with named datasets ({"name": rows|columns|{values}|{columns}})
-  --max-marks N    Refuse to render more marks than N (default 100000)
-  --version        Print the installed @ggsvelte/svelte version
-  --help           Show this help
+${cliOptionLines}
 
 Diagnostics are JSON lines on stderr. Exit codes: 0 rendered, 1 render
 failed, 2 usage error, 3 invalid spec.`;
@@ -74,6 +127,13 @@ function parseArgs(argv: readonly string[]): ParsedArgs {
     help: false,
     version: false,
   };
+  const optionByFlag = new Map<string, (typeof CLI_OPTIONS)[number]>();
+  for (const option of CLI_OPTIONS) {
+    optionByFlag.set(option.flag, option);
+    if ("aliases" in option) {
+      for (const alias of option.aliases) optionByFlag.set(alias, option);
+    }
+  }
   const numberFlag = (flag: string, raw: string | undefined): number => {
     const n = Number(raw);
     if (raw === undefined || !Number.isFinite(n) || n <= 0) {
@@ -83,37 +143,24 @@ function parseArgs(argv: readonly string[]): ParsedArgs {
   };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i]!;
-    switch (arg) {
-      case "--help":
-      case "-h":
-        out.help = true;
-        break;
-      case "--version":
-        out.version = true;
-        break;
-      case "--width":
-        out.width = numberFlag("--width", argv[++i]);
-        break;
-      case "--height":
-        out.height = numberFlag("--height", argv[++i]);
-        break;
-      case "--max-marks":
-        out.maxMarks = numberFlag("--max-marks", argv[++i]);
-        break;
-      case "--data": {
+    const option = optionByFlag.get(arg);
+    if (option !== undefined) {
+      if (option.kind === "boolean") {
+        out[option.target] = true;
+      } else if (option.kind === "number") {
+        out[option.target] = numberFlag(option.flag, argv[++i]);
+      } else {
         const path = argv[++i];
-        if (path === undefined) throw new UsageError("--data needs a file path");
-        out.dataPath = path;
-        break;
+        if (path === undefined) throw new UsageError(`${option.flag} needs a file path`);
+        out[option.target] = path;
       }
-      default:
-        if (arg.startsWith("-")) throw new UsageError(`Unknown option "${arg}"`);
-        if (out.specPath !== null) {
-          throw new UsageError(`Unexpected extra argument "${arg}" (one spec file only)`);
-        }
-        out.specPath = arg;
-        break;
+      continue;
     }
+    if (arg.startsWith("-")) throw new UsageError(`Unknown option "${arg}"`);
+    if (out.specPath !== null) {
+      throw new UsageError(`Unexpected extra argument "${arg}" (one spec file only)`);
+    }
+    out.specPath = arg;
   }
   return out;
 }

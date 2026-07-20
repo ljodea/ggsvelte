@@ -175,6 +175,19 @@ pre {
   line-height: 1.55;
 }
 
+.guide-code-classification {
+  margin: 1.5rem 0 0.35rem;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.guide-code-classification + :is(pre, .guide-code-copy) {
+  margin-top: 0;
+}
+
 .guide-code-copy {
   position: relative;
   margin: 1.5rem 0;

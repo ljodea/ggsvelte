@@ -16,7 +16,9 @@ import { UPGRADING_MD } from "./gen-llms.ts";
 const MIGRATIONS_DIR = join(import.meta.dir, "..", "packages", "svelte", "tests", "migrations");
 
 function guideSvelteBlocks(md: string): string[] {
-  return [...md.matchAll(/```svelte\n([\s\S]*?)```/g)].map((match) => match[1]!.trim());
+  return [...md.matchAll(/```svelte(?:\s+(?:complete|fragment|copy))*\n([\s\S]*?)```/g)].map(
+    (match) => match[1]!.trim(),
+  );
 }
 
 function fixtureFiles(extension: string): Map<string, string> {

@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 test("themes is a first-class route from site navigation and the homepage", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/themes?theme=light");
   await expect(
     page.getByRole("navigation", { name: "Primary" }).getByRole("link", { name: "Themes" }),
@@ -64,6 +65,7 @@ test("themes compares all built-in chart themes on the same live chart", async (
 });
 
 test("chart theme stays separate until follow-docs appearance is explicit", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/themes?theme=light");
 
   const lab = page.getByRole("region", { name: "Chart theme lab" });
@@ -197,6 +199,7 @@ test("sequential color compares direction, custom stops, and a pinned domain", a
 test("custom interaction theme preserves linked emphasis across SVG and canvas", async ({
   page,
 }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/themes?theme=light");
 
   const region = page.getByRole("region", { name: "Custom interaction theme" });

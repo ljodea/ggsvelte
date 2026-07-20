@@ -126,7 +126,13 @@ describe("planJobs", () => {
   });
 
   test("docs generators schedule pages/vr (not scripts-only)", () => {
-    for (const path of ["scripts/gen-llms.ts", "scripts/gen-gallery-previews.ts"]) {
+    for (const path of [
+      "scripts/gen-llms.ts",
+      "scripts/gen-docs-search.ts",
+      "scripts/gen-gallery-previews.ts",
+      "scripts/cli-docs.ts",
+      "scripts/guide-code-contract.ts",
+    ]) {
       const plan = planJobs(classifyChangedPaths([path]));
       expect(plan.unit).toBe(true);
       expect(plan.pages).toBe(true);

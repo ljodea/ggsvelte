@@ -13,6 +13,8 @@ import {
 describe("packed Pages link checks", () => {
   const files = new Set([
     "index.html",
+    "docs.html",
+    "reference.html",
     "guide/interactions.html",
     "guide/interaction-reference.html",
     "guide/migrating-pre-0-1.html",
@@ -20,6 +22,7 @@ describe("packed Pages link checks", () => {
     "playground.html",
     "themes.html",
     "reference/interactions.html",
+    "reference/cli.html",
     "examples/interaction/tooltip.html",
     "examples/interaction/brush-zoom.html",
     "examples/interaction/linked-views.html",
@@ -85,9 +88,12 @@ describe("packed Pages link checks", () => {
     for (const page of requiredPages) expect(files.has(page)).toBe(true);
     expect(requiredPages).toContain("examples/interactions/inspection.html");
     expect(requiredPages).toContain("examples/interactions/interval-selection.html");
+    expect(requiredPages).toContain("docs.html");
+    expect(requiredPages).toContain("reference.html");
     expect(requiredPages).toContain("playground.html");
     expect(requiredPages).toContain("themes.html");
     expect(requiredPages).toContain("reference/interactions.html");
+    expect(requiredPages).toContain("reference/cli.html");
     expect(requiredPages).toContain("guide/interaction-reference.html");
     expect(requiredPages).toContain("robots.txt");
     expect(requiredPages).toContain("sitemap.xml");
