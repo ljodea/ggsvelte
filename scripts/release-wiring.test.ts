@@ -4,12 +4,11 @@ import { join } from "node:path";
 
 const root = join(import.meta.dir, "..");
 const read = (path: string) => readFileSync(join(root, path), "utf8");
-const heavyGroupCount = (workflow: string) =>
+const heavyLaneCount = (workflow: string) =>
   workflow
     .split("\n")
-    .filter(
-      (line) => line.trimStart().startsWith("group:") && line.includes("heavy-self-hosted-cpu"),
-    ).length;
+    .filter((line) => line.trimStart().startsWith("runs-on:") && line.includes("ggsvelte-heavy"))
+    .length;
 
 describe("R0 release wiring", () => {
   it("runs benchmark unit tests in CI and pre-push parity", () => {
@@ -354,28 +353,33 @@ it("tiers the PR consumer matrix (issue #246)", () => {
   expect(ci).not.toMatch(/full required[\s\S]{0,40}push\/main/i);
 });
 
-it("caps aggregate heavy self-hosted work across workflows (issues #247 and #319)", () => {
+it("routes CPU-heavy work through the runner heavy lane (issues #247, #319, #321)", () => {
   const ci = read(".github/workflows/ci.yml");
   const vr = read(".github/workflows/vr-compare.yml");
   const pages = read(".github/workflows/pages.yml");
   const bench = read(".github/workflows/bench.yml");
   const nightly = read(".github/workflows/compatibility-nightly.yml");
 
-  // One repo-wide group is the aggregate mutex. Category-specific groups let
-  // browser, build, and benchmark jobs starve each other on the same host.
-  expect(heavyGroupCount(ci)).toBe(8);
-  expect(heavyGroupCount(vr)).toBe(2);
-  expect(heavyGroupCount(pages)).toBe(1);
-  expect(heavyGroupCount(bench)).toBe(1);
-  expect(heavyGroupCount(nightly)).toBe(1);
+  // The pool runs cpuset-pinned lanes: two runner services carry the
+  // ggsvelte-heavy label (4 dedicated vCPUs each), so at most two heavy jobs
+  // run concurrently while light jobs flow freely. Category-specific labels
+  // would let browser, build, and benchmark jobs starve each other again.
+  expect(heavyLaneCount(ci)).toBe(8);
+  expect(heavyLaneCount(vr)).toBe(2);
+  expect(heavyLaneCount(pages)).toBe(1);
+  expect(heavyLaneCount(bench)).toBe(1);
+  expect(heavyLaneCount(nightly)).toBe(1);
+  // The post-#319 repo-wide concurrency mutex must not come back: labels, not
+  // groups, gate host capacity now (#321).
+  for (const workflow of [ci, vr, pages, bench, nightly]) {
+    expect(workflow).not.toContain("heavy-self-hosted-cpu");
+  }
   expect(ci).not.toContain("heavy-component");
   expect(ci).not.toContain("heavy-packages-dist");
   expect(ci).not.toContain("heavy-consumer-ubuntu");
-  // Informational performance work is still CPU-heavy: leaving it outside the
-  // mutex can starve the required browser and memory gates it runs beside.
+  // Informational performance work is still CPU-heavy: it opts into the heavy
+  // lane with the required browser and memory gates it runs beside.
   expect(ci).not.toContain("group: heavy-interaction-perf");
-  // Pending jobs queue instead of replacing each other (GitHub queue: max).
-  for (const workflow of [ci, vr, pages, bench, nightly]) expect(workflow).toContain("queue: max");
   expect(ci).toContain("Heavy-job pool policy");
 });
 

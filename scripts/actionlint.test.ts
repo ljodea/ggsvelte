@@ -77,8 +77,9 @@ jobs: {}
     expect(prepared).not.toContain("queue: max");
     expect(prepared).toContain("group: heavy-component");
     expect(prepared).toContain("cancel-in-progress: false");
-    // Real workflow file still has queue: max; only lint input is rewritten.
-    expect(read(".github/workflows/ci.yml")).toContain("queue: max");
+    // Workflows dropped queue: max with the heavy-lane switch (#321); the
+    // strip stays so a future reintroduction cannot break the wasm linter.
+    expect(read(".github/workflows/ci.yml")).not.toContain("queue: max");
   });
 
   it("keeps .github/actionlint.yaml labels wired into the wasm runner", () => {

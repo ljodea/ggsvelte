@@ -68,11 +68,7 @@ jobs:
     name: build static docs
     needs: detect-changes
     if: needs.detect-changes.outputs.pages == 'true'
-    runs-on: [self-hosted, ggsvelte]
-    concurrency:
-      group: heavy-self-hosted-cpu
-      cancel-in-progress: false
-      queue: max
+    runs-on: [self-hosted, ggsvelte, ggsvelte-heavy]
     permissions:
       contents: read
     steps:
