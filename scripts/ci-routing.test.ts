@@ -79,6 +79,21 @@ describe("classifyChangedPaths", () => {
     expect(flags.markdown).toBe(true);
     expect(flags.lockfile).toBe(false);
   });
+
+  test("llms module siblings stay on the docs lane (pages/vr)", () => {
+    for (const file of [
+      "scripts/gen-llms.ts",
+      "scripts/llms-markdown.ts",
+      "scripts/llms-guide-content.ts",
+    ]) {
+      const flags = classifyChangedPaths([file]);
+      expect(flags.docs, file).toBe(true);
+      const plan = planJobs(flags);
+      expect(plan.pages, file).toBe(true);
+      expect(plan.vr, file).toBe(true);
+      expect(plan.unit, file).toBe(true);
+    }
+  });
 });
 
 describe("parseNameStatusList", () => {
@@ -618,6 +633,21 @@ describe("unit content inputs cover actionlint config", () => {
     ]);
     expect(paths).toContain(".github/actionlint.yaml");
     expect(JOB_CONTENT_INPUTS.unit).toContain(".github/actionlint.yaml");
+  });
+});
+
+describe("component_journeys content inputs cover llms modules", () => {
+  test("journey shard hashes gen-llms and extracted llms siblings", () => {
+    const inputs = JOB_CONTENT_INPUTS.component_journeys;
+    for (const file of [
+      "scripts/gen-llms.ts",
+      "scripts/llms-markdown.ts",
+      "scripts/llms-guide-content.ts",
+    ]) {
+      expect(inputs, file).toContain(file);
+      const matched = listJobContentPaths("component_journeys", [file]);
+      expect(matched, file).toContain(file);
+    }
   });
 });
 

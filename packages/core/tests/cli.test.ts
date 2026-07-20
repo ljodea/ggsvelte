@@ -168,7 +168,17 @@ describe("workspace bin smoke test", () => {
     ]);
     expect(exitCode).toBe(0);
     expect(stdout).toBe(`${manifest.version}\n`);
-    expect(stderr).toBe("");
+    // Bun may emit a host CPU capability warning on stderr before the script runs.
+    const cliStderr = stderr
+      .split(/\r?\n/)
+      .filter(
+        (line) =>
+          !line.startsWith("warn: CPU lacks AVX support") &&
+          !line.includes("bun-darwin-x64-baseline.zip") &&
+          line.trim() !== "",
+      )
+      .join("\n");
+    expect(cliStderr).toBe("");
   });
 
   it("bun packages/svelte/bin/ggsvelte-render.js spec.json > out.svg", async () => {
