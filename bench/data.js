@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784554030348,
+  "lastUpdate": 1784567020466,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -34757,6 +34757,130 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 145.9584,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "df1a8c607f881864b128810f0b83bfe65105dad2",
+          "message": "ci: replace heavy-job mutex with cpuset-isolated runner heavy lane (#346)\n\n* ci: replace heavy-job mutex with cpuset-isolated runner heavy lane\n\nCloses #321. Follow-up to #247 and #319.\n\nThe self-hosted pool now runs cpuset-pinned lanes: two runner services\ncarry the ggsvelte-heavy label (4 dedicated vCPUs each) and light runners\nare pinned to 2 vCPUs each. CPU-heavy jobs opt into the heavy lane via\nruns-on labels, so at most two run concurrently and browser/Vitest worker\nauto-detection sees the allocated CPU count instead of the whole host —\na docker shim applies the slot cpuset to job containers.\n\nThis removes the repo-wide heavy-self-hosted-cpu concurrency mutex that\nfully serialized CI, VR Compare, Pages, and Bench heavy jobs after #319,\nrecovering safe parallelism. Runner job hooks now log host telemetry\n(load, PSI, memory, disk) to distinguish infra contention from product\nregressions.\n\n* ci: register ggsvelte-heavy runner label with actionlint\n\n* test: assert heavy-lane routing instead of the retired CPU mutex\n\nThe structural wiring test now counts ggsvelte-heavy runs-on lanes (same\nper-workflow heavy job counts) and pins the ban on reintroducing the\nheavy-self-hosted-cpu mutex. actionlint queue: max strip stays as a guard;\nits real-file assertion flips to match the post-#321 workflows.",
+          "timestamp": "2026-07-20T12:02:53-05:00",
+          "tree_id": "bddcaec6687d83c5a9eb3649385fb8407a398b8e",
+          "url": "https://github.com/ljodea/ggsvelte/commit/df1a8c607f881864b128810f0b83bfe65105dad2"
+        },
+        "date": 1784567019610,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.5955,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 3.0365,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 9.0895,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 10.6921,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 47.7834,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 84.8417,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal-line 100k",
+            "value": 68.6114,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.2278,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.347,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 51.3685,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 69.7787,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 14.3151,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 13.4539,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 1029.9165,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.6699,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 288.163,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 10.0072,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 13.3255,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 597.434,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 146.3251,
             "unit": "ms"
           }
         ]
