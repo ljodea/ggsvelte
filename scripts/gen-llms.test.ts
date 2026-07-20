@@ -312,14 +312,30 @@ describe("pruneSpecData", () => {
 describe("llms surfaces", () => {
   const pages = guidePages(lifecycle);
 
+  it("publishes absolute canonical links and implementation-derived release facts", () => {
+    const txt = buildLlmsIndex(pages.slice(0, 1), EXAMPLES.slice(0, 1), {
+      canonicalBase: "https://ggsvelte.sh",
+      packageVersion: "0.4.0",
+      currentEdition: 2,
+      themeNames: ["light", "dark"],
+    });
+
+    expect(txt).toContain("Package version: 0.4.0");
+    expect(txt).toContain("Defaults edition: 2");
+    expect(txt).toContain("Registered chart themes (2): light, dark");
+    expect(txt).toContain("(https://ggsvelte.sh/guide/getting-started)");
+    expect(txt).toContain("(https://ggsvelte.sh/examples/");
+    expect(txt).not.toMatch(/\]\(\//);
+  });
+
   it("llms.txt lists every guide page and every manifest example", () => {
     const txt = buildLlmsIndex(pages, EXAMPLES);
     expect(txt.startsWith("# ggsvelte\n")).toBe(true);
-    for (const page of pages) expect(txt).toContain(`(/guide/${page.slug})`);
-    expect(txt).toContain("(/schema/v0.json)");
-    expect(txt).toContain("(/playground)");
-    expect(txt).toContain("(/reference/interactions)");
-    for (const ex of EXAMPLES) expect(txt).toContain(`(/examples/${ex.id})`);
+    for (const page of pages) expect(txt).toContain(`(https://ggsvelte.sh/guide/${page.slug})`);
+    expect(txt).toContain("(https://ggsvelte.sh/schema/v0.json)");
+    expect(txt).toContain("(https://ggsvelte.sh/playground)");
+    expect(txt).toContain("(https://ggsvelte.sh/reference/interactions)");
+    for (const ex of EXAMPLES) expect(txt).toContain(`(https://ggsvelte.sh/examples/${ex.id})`);
     expect(pages.map((page) => page.slug)).toContain("interactions");
     expect(pages.map((page) => page.slug)).toContain("interaction-reference");
     expect(pages.map((page) => page.slug)).toContain("migrating-pre-0-1");
@@ -339,6 +355,36 @@ describe("llms surfaces", () => {
     expect(linked?.title).toBe("Link plots, controls, and a table");
     expect(linked?.tags).toContain("controller");
     expect(linked?.tags).toContain("linked-views");
+  });
+
+  it("llms-full.txt carries the same canonical origin and release facts", () => {
+    const txt = buildLlmsFull(
+      [
+        {
+          slug: "start",
+          title: "Start",
+          description: "Start here.",
+          markdown:
+            '# Start\n\n[Errors](/guide/errors)\n\n[Legacy](https://ljodea.github.io/ggsvelte/guide/errors)\n\n```ts fragment\nconst preserved = "https://ljodea.github.io/ggsvelte/guide/errors";\n```',
+        },
+      ],
+      [],
+      {
+        canonicalBase: "https://preview.example",
+        packageVersion: "0.4.0",
+        currentEdition: 2,
+        themeNames: ["light", "dark"],
+      },
+    );
+
+    expect(txt).toContain("Package version: 0.4.0");
+    expect(txt).toContain("Defaults edition: 2");
+    expect(txt).toContain("Registered chart themes (2): light, dark");
+    expect(txt).toContain("[Errors](https://preview.example/guide/errors)");
+    expect(txt).toContain("[Legacy](https://preview.example/guide/errors)");
+    expect(txt).not.toContain("[Legacy](https://ljodea.github.io/ggsvelte");
+    expect(txt).toContain('const preserved = "https://ljodea.github.io/ggsvelte/guide/errors";');
+    expect(txt).not.toMatch(/\]\(\//);
   });
 
   it("llms-full.txt embeds guide prose + spec JSON + svelte source per example", () => {

@@ -80,9 +80,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/reference/interactions",
-    title: "Interaction reference — ggsvelte",
+    title: "Search interactions — ggsvelte",
     description:
-      "Search ggsvelte interaction capabilities, events, diagnostics, and accessibility defaults.",
+      "Filter ggsvelte interaction capabilities, events, diagnostics, and accessibility defaults.",
     canonicalPath: "/reference/interactions",
     kind: "page",
     index: true,

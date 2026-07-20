@@ -17,7 +17,14 @@
  * for its prerendered endpoints and guide pages.
  */
 import { ADVISORY_CATALOG } from "@ggsvelte/core";
-import { LINT_CATALOG, SCALE_CAPABILITIES, TEMPORAL_PARSER_NAMES } from "@ggsvelte/spec";
+import {
+  CURRENT_EDITION,
+  LINT_CATALOG,
+  SCALE_CAPABILITIES,
+  TEMPORAL_PARSER_NAMES,
+  THEME_NAMES,
+} from "@ggsvelte/spec";
+import sveltePackage from "../packages/svelte/package.json";
 import { INTERACTION_DIAGNOSTIC_CATALOG } from "../packages/svelte/src/lib/interaction/interaction";
 import { GUIDE_CATALOG, type GuideSlug } from "../apps/docs/src/lib/catalog/guide";
 import supportMatrix from "../support-matrix.json";
@@ -1887,15 +1894,56 @@ export function guidePages(lifecycle: LifecycleDoc): GuidePage[] {
   });
 }
 
+export interface DocsDiscoveryFacts {
+  canonicalBase: string;
+  packageVersion: string;
+  currentEdition: number;
+  themeNames: readonly string[];
+}
+
+export function docsDiscoveryFacts(canonicalBase: string): DocsDiscoveryFacts {
+  return {
+    canonicalBase,
+    packageVersion: sveltePackage.version,
+    currentEdition: CURRENT_EDITION,
+    themeNames: THEME_NAMES,
+  };
+}
+
+function absoluteMarkdownLinks(markdown: string, canonicalBase: string): string {
+  const origin = canonicalBase.replace(/\/$/, "");
+  let fenced = false;
+  return markdown
+    .split("\n")
+    .map((line) => {
+      if (line.trimStart().startsWith("```")) {
+        fenced = !fenced;
+        return line;
+      }
+      if (fenced) return line;
+      return line
+        .replaceAll("https://ljodea.github.io/ggsvelte", origin)
+        .replaceAll(/\]\((\/[^)\s]*)\)/g, (_match, path: string) => `](${origin}${path})`);
+    })
+    .join("\n");
+}
+
 /** llms.txt — the curated index (llmstxt.org shape: H1, blurb, link lists). */
 export function buildLlmsIndex(
   pages: readonly GuidePage[],
   examples: readonly LlmsExampleEntry[],
+  facts: DocsDiscoveryFacts = docsDiscoveryFacts("https://ggsvelte.sh"),
 ): string {
   const lines = [
     "# ggsvelte",
     "",
     "> A layered grammar of graphics for JavaScript: ggplot2 semantics (aes/geom/stat/scale/coord/facet/theme/position), a strictly-JSON PortableSpec that agents emit (published JSON Schema for constrained decoding), a fluent builder, Svelte 5 components, hybrid SVG/canvas rendering, and value-stable color scales. validate() returns { code, path, message, fix } errors whose fix.example is machine-applicable.",
+    "",
+    "## Current release facts",
+    "",
+    `- Package version: ${facts.packageVersion}`,
+    `- Defaults edition: ${String(facts.currentEdition)}`,
+    `- Registered chart themes (${String(facts.themeNames.length)}): ${facts.themeNames.join(", ")}`,
     "",
     "## Docs",
     "",
@@ -1921,7 +1969,7 @@ export function buildLlmsIndex(
     lines.push(`- [${ex.title}](/examples/${ex.id}): ${ex.description}`);
   }
   lines.push("");
-  return lines.join("\n");
+  return absoluteMarkdownLinks(lines.join("\n"), facts.canonicalBase);
 }
 
 /**
@@ -1974,11 +2022,18 @@ export function pruneSpecData(spec: unknown, maxRows = 20): { spec: unknown; pru
 export function buildLlmsFull(
   pages: readonly GuidePage[],
   examples: readonly LlmsFullExample[],
+  facts: DocsDiscoveryFacts = docsDiscoveryFacts("https://ggsvelte.sh"),
 ): string {
   const parts = [
     "# ggsvelte — full docs corpus for language models",
     "",
     "Generated from the docs guide sources and the examples manifest (one source, three uses). Each example shows its canonical PortableSpec JSON (what an agent should emit) and the equivalent Svelte component usage.",
+    "",
+    "## Current release facts",
+    "",
+    `- Package version: ${facts.packageVersion}`,
+    `- Defaults edition: ${String(facts.currentEdition)}`,
+    `- Registered chart themes (${String(facts.themeNames.length)}): ${facts.themeNames.join(", ")}`,
     "",
     "---",
     "",
@@ -2009,5 +2064,5 @@ export function buildLlmsFull(
       "",
     );
   }
-  return parts.join("\n");
+  return absoluteMarkdownLinks(parts.join("\n"), facts.canonicalBase);
 }

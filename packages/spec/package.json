@@ -14,13 +14,14 @@
     "validation",
     "visualization"
   ],
-  "homepage": "https://github.com/ljodea/ggsvelte",
+  "homepage": "https://ljodea.github.io/ggsvelte/",
   "bugs": "https://github.com/ljodea/ggsvelte/issues",
   "license": "MIT",
   "author": "Liam O'Dea",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ljodea/ggsvelte.git"
+    "url": "git+https://github.com/ljodea/ggsvelte.git",
+    "directory": "packages/spec"
   },
   "files": [
     "dist",
