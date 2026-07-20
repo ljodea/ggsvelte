@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784551514826,
+  "lastUpdate": 1784551539232,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -34385,6 +34385,130 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 146.9364,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "e975ea7f897f5fcb5facb4cc568fe04d929ed875",
+          "message": "deps-dev(deps-dev): bump vite in / (#344)\n\nBumps [vite](https://github.com/vitejs/vite/tree/HEAD/packages/vite) in `/` from 8.1.4 to 8.1.5.\n\n\nUpdates `vite` from 8.1.4 to 8.1.5\n- [Release notes](https://github.com/vitejs/vite/releases)\n- [Changelog](https://github.com/vitejs/vite/blob/main/packages/vite/CHANGELOG.md)\n- [Commits](https://github.com/vitejs/vite/commits/v8.1.5/packages/vite)\n\nUpdates `vite` from 8.1.4 to 8.1.5\n- [Release notes](https://github.com/vitejs/vite/releases)\n- [Changelog](https://github.com/vitejs/vite/blob/main/packages/vite/CHANGELOG.md)\n- [Commits](https://github.com/vitejs/vite/commits/v8.1.5/packages/vite)\n\nUpdates `vite` from 8.1.4 to 8.1.5\n- [Release notes](https://github.com/vitejs/vite/releases)\n- [Changelog](https://github.com/vitejs/vite/blob/main/packages/vite/CHANGELOG.md)\n- [Commits](https://github.com/vitejs/vite/commits/v8.1.5/packages/vite)\n\n---\nupdated-dependencies:\n- dependency-name: vite\n  dependency-version: 8.1.5\n  dependency-type: direct:development\n  update-type: version-update:semver-patch\n  dependency-group: bun\n- dependency-name: vite\n  dependency-version: 8.1.5\n  dependency-type: direct:development\n  update-type: version-update:semver-patch\n  dependency-group: bun\n- dependency-name: vite\n  dependency-version: 8.1.5\n  dependency-type: direct:development\n  update-type: version-update:semver-patch\n  dependency-group: bun\n...\n\nSigned-off-by: dependabot[bot] <support@github.com>\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2026-07-20T07:44:50-05:00",
+          "tree_id": "0daa0cb85608a2b9477579c71ed645ee69e0df61",
+          "url": "https://github.com/ljodea/ggsvelte/commit/e975ea7f897f5fcb5facb4cc568fe04d929ed875"
+        },
+        "date": 1784551538345,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.4549,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.9357,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 8.6138,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 10.9505,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 57.8995,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 90.0105,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal-line 100k",
+            "value": 65.6404,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.2098,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.3088,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 56.4905,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 79.5642,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 12.7784,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.6818,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 1124.4396,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.8297,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 271.3193,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 11.9991,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 14.6307,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 629.0001,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 155.9453,
             "unit": "ms"
           }
         ]
