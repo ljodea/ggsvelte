@@ -60,7 +60,7 @@ Try [inspection and pinning](https://ljodea.github.io/ggsvelte/examples/interact
 or [interval selection and zoom](https://ljodea.github.io/ggsvelte/examples/interaction/brush-zoom),
 then [filter groups without losing their colors](https://ljodea.github.io/ggsvelte/examples/interaction/legend-filter)
 or [coordinate intervals across facets](https://ljodea.github.io/ggsvelte/examples/interaction/facet-intervals),
-bring [your own local JSON rows to the playground](https://ljodea.github.io/ggsvelte/playground),
+adapt a [bounded PortableSpec in the local playground](https://ljodea.github.io/ggsvelte/playground),
 then read the [interaction guide](https://ljodea.github.io/ggsvelte/guide/interactions)
 or [searchable event reference](https://ljodea.github.io/ggsvelte/reference/interactions).
 
@@ -194,7 +194,7 @@ CLI: `ggsvelte-render spec.json > chart.svg` (JSON-line diagnostics on stderr).
 
 - [Guide and examples](https://ljodea.github.io/ggsvelte/)
 - [Interactions and event reference](https://ljodea.github.io/ggsvelte/guide/interactions)
-- [Local data playground](https://ljodea.github.io/ggsvelte/playground)
+- [Local PortableSpec playground](https://ljodea.github.io/ggsvelte/playground)
 - [Upgrading between releases](https://ljodea.github.io/ggsvelte/guide/upgrading)
 - [Pre-0.1 interaction migration](https://ljodea.github.io/ggsvelte/guide/migrating-pre-0-1)
 - [Lifecycle and editions](https://ljodea.github.io/ggsvelte/guide/lifecycle)

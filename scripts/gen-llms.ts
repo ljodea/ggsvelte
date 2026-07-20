@@ -314,8 +314,9 @@ advisories for valid-but-questionable specs.
   scales, themes, and interaction.
 - [Interactions](/guide/interactions) — inspection, selection, zoom, typed
   events, keyboard behavior, and stable identity.
-- [Local data playground](/playground) — paste bounded JSON rows without
-  uploads, remote fetches, or code execution.
+- [PortableSpec playground](/playground) — open a compatible example, edit a
+  bounded local PortableSpec, and copy complete Svelte or an explicit share URL
+  without uploads, remote fetches, or code execution.
 - [Compatibility](/guide/compatibility) — tested Node, Svelte, installer,
   browser, and operating-system boundaries.
 - [Errors reference](/guide/errors) — validation, render, interaction, and CLI
@@ -345,8 +346,9 @@ channel while preserving the positional fields.
 ## Keep data local
 
 Inline rows, named datasets, and PortableSpec data all pass through validation
-and normalization before rendering. The documentation playground remains
-local-only; it does not upload chart data.
+and normalization before rendering. The documentation playground opens only
+bounded portable seeds, keeps the last render-confirmed chart on failure, and
+remains local-only; it does not upload chart data.
 `;
 
 export const LAYERS_MARKS_MD = `# Layers and marks
@@ -802,7 +804,7 @@ the [linked plots, controls, and table example](/examples/interaction/linked-vie
 the [linked legend focus example](/examples/interaction/legend-focus),
 the [stable-color legend filter example](/examples/interaction/legend-filter),
 the [faceted interval example](/examples/interaction/facet-intervals),
-or [use your own local JSON rows in the playground](/playground). For exact
+or [adapt a bounded PortableSpec in the local playground](/playground). For exact
 props, callbacks, phases, and diagnostics, use the
 [interaction reference](/guide/interaction-reference).
 
@@ -1901,7 +1903,7 @@ export function buildLlmsIndex(
     lines.push(`- [${page.title}](/guide/${page.slug}): ${page.description}`);
   }
   lines.push(
-    "- [Local data playground](/playground): safely try bounded JSON rows with static and interactive chart controls",
+    "- [PortableSpec playground](/playground): open a compatible example, edit bounded local JSON, and copy complete Svelte or an explicit share URL",
     "- [Search interaction reference](/reference/interactions): filter interaction capabilities, events, diagnostics, and accessibility guidance",
     "- [JSON Schema v0](/schema/v0.json): the PortableSpec schema (unstable in v0.1)",
     "- [llms-full.txt](/llms-full.txt): all docs prose plus every example (spec JSON + Svelte source)",

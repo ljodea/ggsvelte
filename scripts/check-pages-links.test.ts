@@ -3,6 +3,9 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 
+import { encodePlaygroundSeed } from "../apps/docs/src/lib/playground-codec.ts";
+import type { PlaygroundSeedV1 } from "../apps/docs/src/lib/playground-codec.ts";
+
 import {
   checkPackedPages,
   findBrokenFragments,
@@ -82,6 +85,30 @@ describe("packed Pages link checks", () => {
         anchors,
       ),
     ).toEqual(["#missing"]);
+  });
+
+  it("validates playground state fragments instead of treating them as heading ids", () => {
+    const seed: PlaygroundSeedV1 = {
+      version: 1,
+      source: { kind: "sample", id: "link-check" },
+      spec: {
+        edition: 2,
+        data: { values: [{ x: 1, y: 2 }] },
+        layers: [
+          {
+            geom: "point",
+            stat: "identity",
+            position: "identity",
+            aes: { x: { field: "x" }, y: { field: "y" } },
+          },
+        ],
+      },
+    };
+    const valid = `../../playground${encodePlaygroundSeed(seed)}`;
+    const invalid = "../../playground#play=v1.bad";
+    expect(
+      findBrokenFragments("examples/point/scatter.html", [valid, invalid], files, new Map()),
+    ).toEqual([invalid]);
   });
 
   it("requires the playground, R0 examples, guides, and agent endpoints in the packed site", () => {

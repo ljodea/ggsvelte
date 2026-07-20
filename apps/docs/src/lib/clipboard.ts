@@ -1,4 +1,6 @@
 export const MANUAL_COPY_STATUS = "Clipboard unavailable. Code selected for manual copy.";
+export const MANUAL_LINK_COPY_STATUS =
+  "Clipboard unavailable. Share link selected for manual copy.";
 
 export function selectText(node: Node): void {
   const selection = window.getSelection();

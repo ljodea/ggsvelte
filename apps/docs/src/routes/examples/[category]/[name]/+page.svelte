@@ -5,6 +5,7 @@
   import { galleryEntryFor } from "$lib/catalog/gallery";
   import { EXAMPLES } from "$lib/examples";
   import { rankRelatedExamples } from "$lib/gallery-filter";
+  import { PLAYGROUND_EXAMPLES } from "$lib/generated/playground-seeds";
 
   import type { PageProps } from "./$types";
 
@@ -16,6 +17,10 @@
   const galleryEntry = $derived(galleryEntryFor(data.entry));
   const related = $derived(
     rankRelatedExamples(data.entry.id, galleryEntries, 3),
+  );
+  const playgroundCompatibility = $derived(
+    PLAYGROUND_EXAMPLES.find((entry) => entry.id === data.entry.id)
+      ?.compatibility,
   );
   const tabs = $derived([
     { label: "Svelte", code: data.svelteSource },
@@ -73,14 +78,24 @@
         <p class="eyebrow">Complete source</p>
         <h2 id="example-code-heading">Start with the Svelte component</h2>
       </div>
-      <a class="playground-link" href={`${base}/playground`}
-        >Try your data in the playground</a
-      >
+      {#if playgroundCompatibility?.supported}
+        <a
+          class="playground-link"
+          href={`${base}/playground${playgroundCompatibility.fragment}`}
+          >Open this example in Playground</a
+        >
+      {/if}
     </div>
-    <p class="handoff-note">
-      The current playground opens a fresh local workspace. Source-preserving
-      handoff arrives with the workbench update.
-    </p>
+    {#if playgroundCompatibility?.supported}
+      <p class="handoff-note">
+        Opens the exact bounded PortableSpec locally. Nothing is uploaded or
+        executed as code.
+      </p>
+    {:else if playgroundCompatibility !== undefined}
+      <p class="handoff-note unsupported">
+        Playground handoff unavailable: {playgroundCompatibility.reason}
+      </p>
+    {/if}
     <CodeTabs {tabs} />
   </section>
 
@@ -266,6 +281,11 @@
   .handoff-note {
     color: var(--muted);
     font-size: 0.85rem;
+  }
+
+  .handoff-note.unsupported {
+    border-left: 3px solid var(--line);
+    padding-left: 0.75rem;
   }
 
   .implementation {

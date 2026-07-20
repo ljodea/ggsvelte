@@ -131,9 +131,9 @@ test("detail is specimen-first and always orders Svelte, builder, then JSON", as
   await expect(page.locator(".gg-example-frame")).toBeVisible();
   const tabs = page.getByRole("tablist", { name: "Code representations" }).getByRole("tab");
   await expect(tabs).toHaveText(["Svelte", "Builder (TS)", "Spec (JSON)"]);
-  await expect(page.getByRole("link", { name: "Try your data in the playground" })).toHaveAttribute(
+  await expect(page.getByRole("link", { name: "Open this example in Playground" })).toHaveAttribute(
     "href",
-    /\/playground$/,
+    /\/playground#play=v1\./,
   );
   await expect(page.locator(".related li")).toHaveCount(3);
 });
