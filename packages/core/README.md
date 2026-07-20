@@ -6,7 +6,7 @@ The framework-agnostic ggsvelte engine: the grammar-of-graphics pipeline
 (stats, positions, panel-aware facets, value-stable scales, two-pass layout)
 and the pure SVG-string renderer. The main entry has no DOM dependency —
 safe in Node, edge runtimes, and workers; canvas rendering and the hit index
-live behind `@ggsvelte/core/dom`. The current v0.3.0 API remains pre-1.0;
+live behind `@ggsvelte/core/dom`. The current API remains pre-1.0;
 correctness fixes improve defaults in place with documented direct overrides.
 
 ```sh

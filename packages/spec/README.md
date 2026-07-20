@@ -7,7 +7,7 @@ Schema (`schema/v0.json`), the `normalize()` canonicalizer, two-tier
 `validate()` with the agent error contract (`{ code, path, message,
 allowed?, fix }` — every fix carries a machine-applicable example),
 `lintSpec()` advisories, portability helpers, and the fluent `gg()/aes()`
-builder. Zero DOM, zero d3. The current v0.3.0 API remains pre-1.0; correctness
+builder. Zero DOM, zero d3. The current API remains pre-1.0; correctness
 fixes improve defaults in place with documented direct overrides.
 
 ```sh

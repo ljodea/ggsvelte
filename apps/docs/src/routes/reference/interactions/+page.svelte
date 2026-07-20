@@ -17,14 +17,6 @@
   );
 </script>
 
-<svelte:head>
-  <title>Search interaction reference — ggsvelte</title>
-  <meta
-    name="description"
-    content="Search ggsvelte interaction capabilities, events, diagnostics, and accessibility defaults."
-  />
-</svelte:head>
-
 <main class="reference-search" aria-labelledby="reference-heading">
   <p class="eyebrow">v0.1 chart-local API</p>
   <h1 id="reference-heading">Search interaction reference</h1>

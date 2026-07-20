@@ -6,9 +6,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "svelte-kit sync && vite build",
+    "build": "bun ../../scripts/gen-docs-routes.ts --check && bun ../../scripts/gen-gallery-previews.ts --check && svelte-kit sync && vite build && bun ../../scripts/check-docs-metadata.ts",
     "preview": "vite preview",
-    "check": "svelte-kit sync && svelte-check --fail-on-warnings"
+    "check": "bun ../../scripts/gen-docs-routes.ts --check && bun ../../scripts/gen-gallery-previews.ts --check && svelte-kit sync && svelte-check --fail-on-warnings"
   },
   "dependencies": {
     "@ggsvelte/examples": "workspace:*",

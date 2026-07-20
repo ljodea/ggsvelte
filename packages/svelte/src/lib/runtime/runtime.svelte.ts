@@ -75,9 +75,12 @@ export function createPlotRuntime(deps: PlotRuntimeDeps): PlotRuntime {
       // Debounce resize storms through rAF; the pipeline's run-id gate
       // guarantees only the newest result commits regardless.
       const nextWidth = Math.round(entries[0]?.contentRect.width ?? 0);
-      containerHasPositiveWidth = nextWidth > 0;
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
+        // Commit readiness and the measured model width in one reactive turn.
+        // Otherwise data-gg-ready can become true for the stale 640px SSR
+        // fallback one frame before the responsive model is available.
+        containerHasPositiveWidth = nextWidth > 0;
         if (nextWidth > 0) containerWidth = nextWidth;
       });
     });
@@ -110,7 +113,7 @@ export function createPlotRuntime(deps: PlotRuntimeDeps): PlotRuntime {
   } = { runId: -1, scales: undefined };
   let scaleEpoch = $state(0);
 
-  const model: RenderModel | null = $derived.by(() => {
+  function resolveModel(): RenderModel | null {
     void scaleEpoch;
     const effectiveSpec = deps.effectiveSpec();
     if (effectiveSpec === null) return null;
@@ -130,11 +133,19 @@ export function createPlotRuntime(deps: PlotRuntimeDeps): PlotRuntime {
       scaleBox.scales = m.scales.state;
     }
     return m;
-  });
+  }
+  const model: RenderModel | null = $derived.by(resolveModel);
+  const currentModel = (): RenderModel | null =>
+    typeof window === "undefined" ? resolveModel() : model;
 
   // ---------------------------------------------------------- strata plan
-  const strata = $derived(model === null ? [] : planStrata(model.scene, model.layerBackends));
-  const canvasCount = $derived(strata.filter((s) => s.backend === "canvas").length);
+  const resolveStrata = () => {
+    const current = currentModel();
+    return current === null ? [] : planStrata(current.scene, current.layerBackends);
+  };
+  const strata = $derived(resolveStrata());
+  const currentStrata = () => (typeof window === "undefined" ? resolveStrata() : strata);
+  const canvasCount = $derived(currentStrata().filter((s) => s.backend === "canvas").length);
   const hasCanvas = $derived(canvasCount > 0);
 
   // Canvas first-paint tracking: data-gg-ready waits for every distinct
@@ -199,7 +210,7 @@ export function createPlotRuntime(deps: PlotRuntimeDeps): PlotRuntime {
 
   return {
     get model() {
-      return model;
+      return currentModel();
     },
     get resolvedWidth() {
       return resolvedWidth;
@@ -208,10 +219,12 @@ export function createPlotRuntime(deps: PlotRuntimeDeps): PlotRuntime {
       return resolvedHeight;
     },
     get strata() {
-      return strata;
+      return currentStrata();
     },
     get hasCanvas() {
-      return hasCanvas;
+      return typeof window === "undefined"
+        ? currentStrata().some((s) => s.backend === "canvas")
+        : hasCanvas;
     },
     get ready() {
       return ready;

@@ -1,0 +1,257 @@
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-padding-top: 6rem;
+  background: var(--paper);
+}
+
+body {
+  min-width: 20rem;
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--body-font);
+  font-size: 1rem;
+  line-height: 1.65;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+a {
+  color: var(--accent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.16em;
+}
+
+a:visited:not(.site-brand) {
+  color: var(--visited);
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--accent) 72%, transparent);
+  outline-offset: 3px;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  color: var(--ink);
+  font-family: var(--display-font);
+  font-weight: 700;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: clamp(2.35rem, 6vw, 3.75rem);
+  letter-spacing: -0.025em;
+}
+
+h2 {
+  font-size: clamp(1.65rem, 3vw, 2.1rem);
+}
+
+h3 {
+  font-size: 1.25rem;
+}
+
+p,
+li,
+dd {
+  text-wrap: pretty;
+}
+
+img,
+canvas {
+  max-width: 100%;
+}
+
+code,
+pre {
+  font-family: var(--code-font);
+  font-size: 0.9em;
+}
+
+pre {
+  max-width: 100%;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.skip-link {
+  position: fixed;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 1000;
+  padding: 0.65rem 0.85rem;
+  transform: translateY(-150%);
+  border: 1px solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+.site-main {
+  width: min(100%, var(--content-max));
+  min-height: 62vh;
+  margin: 0 auto;
+  padding: 3rem clamp(1rem, 4vw, 4rem) 5rem;
+}
+
+.site-main.docs-main {
+  width: 100%;
+  max-width: none;
+  padding-inline: clamp(1rem, 3vw, 3rem);
+}
+
+.prose {
+  min-width: 0;
+  max-width: var(--article-max);
+}
+
+.prose > :first-child {
+  margin-top: 0;
+}
+
+.prose h1 {
+  margin: 0 0 1.25rem;
+}
+
+.prose h2 {
+  margin: 3rem 0 1rem;
+  padding-top: 0.25rem;
+  border-top: 1px solid var(--line);
+}
+
+.prose h3 {
+  margin: 2rem 0 0.75rem;
+}
+
+.prose p,
+.prose li {
+  max-width: 44rem;
+}
+
+.prose pre {
+  overflow-x: auto;
+  margin: 1.5rem 0;
+  padding: 1rem;
+  border-radius: 3px;
+  background: var(--code-paper);
+  color: var(--code-ink);
+  line-height: 1.55;
+}
+
+.guide-code-copy {
+  position: relative;
+  margin: 1.5rem 0;
+}
+
+.guide-code-copy pre {
+  margin: 0;
+  padding-top: 3.25rem;
+}
+
+.guide-code-copy button {
+  position: absolute;
+  z-index: 1;
+  top: 0.65rem;
+  right: 0.65rem;
+  min-height: 2.75rem;
+  padding: 0.35rem 0.65rem;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  background: var(--code-paper);
+  color: var(--code-ink);
+  font: 600 0.78rem/1 var(--body-font);
+  cursor: pointer;
+}
+
+.guide-code-copy [role="status"] {
+  display: block;
+  min-height: 1.4em;
+  margin-top: 0.4rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.prose :is(p, li, h3) code {
+  padding: 0.08em 0.28em;
+  border-radius: 2px;
+  background: var(--wash);
+  box-decoration-break: clone;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 47.99rem) {
+  html {
+    scroll-padding-top: 5rem;
+  }
+
+  body {
+    font-size: 0.98rem;
+  }
+
+  .site-main,
+  .site-main.docs-main {
+    padding: 2rem 1rem 4rem;
+  }
+
+  .prose h1 {
+    font-size: clamp(2.2rem, 12vw, 3rem);
+  }
+}
+
+@media (forced-colors: active) {
+  :focus-visible {
+    outline-color: Highlight;
+  }
+
+  .prose h2 {
+    border-color: CanvasText;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

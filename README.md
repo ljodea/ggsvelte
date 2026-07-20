@@ -10,7 +10,7 @@ Build polished charts from Svelte components, a fluent builder, or portable
 JSON. ggsvelte gives you readable scales, stable colors, contained responsive
 rendering, and publication-ready themes before you tune anything.
 
-> **Status: the current packages are v0.3.0 and remain pre-1.0.** Correctness fixes may
+> **Status: the package manifests are the version source of truth; current releases remain pre-1.0.** Correctness fixes may
 > improve default semantics in place; behavioral changes and direct overrides are
 > documented rather than preserved behind legacy runtime branches. Every export carries a
 > lifecycle tag (see `lifecycle.json` and the docs lifecycle page).

@@ -3,13 +3,13 @@
   "environment": "Apple M1 Pro, bun 1.3.14 x64-darwin",
   "workloads": {
     "pipeline scatter 100k": {
-      "medianMs": 52.1492,
+      "medianMs": 54.1548,
       "budgetMs": 88
     },
     "pipeline temporal-line 100k": {
-      "medianMs": 69.4276,
+      "medianMs": 68.3395,
       "budgetMs": 132,
-      "ratioToScatter": 1.3313,
+      "ratioToScatter": 1.2619,
       "initialLimit": "<= 1.5x pipeline scatter 100k"
     }
   },

@@ -6,13 +6,13 @@
     "nodeRequirement": ">=22"
   },
   "specPackage": {
-    "publishedBaselineVersion": "0.3.0",
-    "publishedBaselinePackedBytes": 151182,
-    "publishedBaselineUnpackedBytes": 919814,
-    "workingTreePackedBytes": 192618,
-    "workingTreeUnpackedBytes": 1071983,
-    "packedDeltaBytes": 41436,
-    "unpackedDeltaBytes": 152169
+    "publishedBaselineVersion": "0.3.1",
+    "publishedBaselinePackedBytes": 154559,
+    "publishedBaselineUnpackedBytes": 930013,
+    "workingTreePackedBytes": 192370,
+    "workingTreeUnpackedBytes": 1067412,
+    "packedDeltaBytes": 37811,
+    "unpackedDeltaBytes": 137399
   },
   "temporalPolyfill": {
     "package": "@js-temporal/polyfill",
@@ -24,9 +24,9 @@
     "strategy": "globalThis.Temporal when present; official static fallback for the synchronous IANA parser API; UTC/integer parsing never calls Temporal"
   },
   "packedConsumerBuild": {
-    "clientJavaScriptKiB": 739.16,
-    "clientJavaScriptGzipKiB": 221.88,
-    "ssrJavaScriptKiB": 258.52
+    "largestClientJavaScriptKiB": 719.99,
+    "largestClientJavaScriptGzipKiB": 214.52,
+    "largestServerJavaScriptKiB": 241.79
   },
   "verification": [
     "packages/spec temporal parser and DST corpus",

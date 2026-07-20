@@ -4,7 +4,7 @@
 
 Svelte 5 adapter for the ggsvelte layered grammar of graphics — plus the
 whole `@ggsvelte/spec` + `@ggsvelte/core` surface re-exported, and the
-`ggsvelte-render` CLI. The current v0.3.0 packages remain pre-1.0; correctness
+`ggsvelte-render` CLI. Current releases remain pre-1.0; correctness
 fixes improve defaults in place and are documented with direct overrides (lifecycle
 tags live in the repo's `lifecycle.json`).
 

@@ -2,6 +2,8 @@
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { posix, resolve } from "node:path";
 
+import { resolveDocsBuildConfig } from "../apps/docs/build-mode.ts";
+
 export const requiredPages = [
   "guide/interactions.html",
   "guide/interaction-reference.html",
@@ -16,9 +18,11 @@ export const requiredPages = [
   "examples/interactions/interval-selection.html",
   "llms.txt",
   "llms-full.txt",
+  "robots.txt",
+  "sitemap.xml",
 ] as const;
 
-const PROJECT_BASE = "/ggsvelte";
+const LEGACY_PROJECT_BASE = "/ggsvelte";
 const EXTERNAL_PROTOCOL = /^[a-z][a-z\d+.-]*:/i;
 
 function candidates(path: string): string[] {
@@ -28,13 +32,18 @@ function candidates(path: string): string[] {
   return [path, `${path}.html`, `${path}/index.html`];
 }
 
-function targetPath(sourcePath: string, href: string): string | null {
+function targetPath(sourcePath: string, href: string, projectBase: string): string | null {
   const clean = href.split("#", 1)[0]?.split("?", 1)[0] ?? "";
   if (clean === "" || clean.startsWith("#") || clean.startsWith("//")) return null;
   if (EXTERNAL_PROTOCOL.test(clean)) return null;
 
   if (clean.startsWith("/")) {
-    const withoutBase = clean === PROJECT_BASE ? "/" : clean.replace(`${PROJECT_BASE}/`, "/");
+    const withoutBase =
+      projectBase !== "" && clean === projectBase
+        ? "/"
+        : projectBase !== "" && clean.startsWith(`${projectBase}/`)
+          ? clean.slice(projectBase.length)
+          : clean;
     return posix.normalize(withoutBase.replace(/^\/+/, ""));
   }
   return posix.normalize(posix.join(posix.dirname(sourcePath), clean));
@@ -45,9 +54,10 @@ export function findBrokenLinks(
   sourcePath: string,
   hrefs: readonly string[],
   files: ReadonlySet<string>,
+  projectBase = LEGACY_PROJECT_BASE,
 ): string[] {
   return hrefs.filter((href) => {
-    const target = targetPath(sourcePath, href);
+    const target = targetPath(sourcePath, href, projectBase);
     return target !== null && !candidates(target).some((candidate) => files.has(candidate));
   });
 }
@@ -58,6 +68,7 @@ export function findBrokenFragments(
   hrefs: readonly string[],
   files: ReadonlySet<string>,
   anchors: ReadonlyMap<string, ReadonlySet<string>>,
+  projectBase = LEGACY_PROJECT_BASE,
 ): string[] {
   return hrefs.filter((href) => {
     const hashIndex = href.indexOf("#");
@@ -71,7 +82,7 @@ export function findBrokenFragments(
     } catch {
       return true;
     }
-    const target = beforeHash === "" ? sourcePath : targetPath(sourcePath, beforeHash);
+    const target = beforeHash === "" ? sourcePath : targetPath(sourcePath, beforeHash, projectBase);
     if (target === null) return false;
     const page = candidates(target).find((candidate) => files.has(candidate));
     if (page === undefined || !page.endsWith(".html")) return false;
@@ -88,7 +99,10 @@ function listFiles(root: string, directory = root): string[] {
   });
 }
 
-export function checkPackedPages(buildDirectory: string): string[] {
+export function checkPackedPages(
+  buildDirectory: string,
+  projectBase = LEGACY_PROJECT_BASE,
+): string[] {
   if (!existsSync(buildDirectory)) return [`packed Pages directory is missing: ${buildDirectory}`];
   const files = new Set(listFiles(buildDirectory));
   const htmlByPath = new Map<string, string>();
@@ -116,10 +130,10 @@ export function checkPackedPages(buildDirectory: string): string[] {
     const hrefs = [...html.matchAll(/\bhref=(?:"([^"]*)"|'([^']*)')/gi)].map(
       (match) => match[1] ?? match[2] ?? "",
     );
-    for (const href of findBrokenLinks(sourcePath, hrefs, files)) {
+    for (const href of findBrokenLinks(sourcePath, hrefs, files, projectBase)) {
       problems.push(`${sourcePath}: broken href ${JSON.stringify(href)}`);
     }
-    for (const href of findBrokenFragments(sourcePath, hrefs, files, anchors)) {
+    for (const href of findBrokenFragments(sourcePath, hrefs, files, anchors, projectBase)) {
       problems.push(`${sourcePath}: broken fragment ${JSON.stringify(href)}`);
     }
   }
@@ -128,7 +142,13 @@ export function checkPackedPages(buildDirectory: string): string[] {
 
 function main(): void {
   const buildDirectory = resolve(import.meta.dir, "../apps/docs/build");
-  const problems = checkPackedPages(buildDirectory);
+  const mode = process.env["DOCS_BUILD_MODE"];
+  const basePath = process.env["BASE_PATH"];
+  const config = resolveDocsBuildConfig({
+    ...(mode !== undefined && { mode }),
+    ...(basePath !== undefined && { basePath }),
+  });
+  const problems = checkPackedPages(buildDirectory, config.base);
   if (problems.length > 0) {
     console.error(`Packed Pages link check failed (${String(problems.length)}):`);
     for (const problem of problems) console.error(`  - ${problem}`);

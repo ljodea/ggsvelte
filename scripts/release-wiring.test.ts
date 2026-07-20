@@ -379,6 +379,18 @@ it("caps aggregate heavy self-hosted work across workflows (issues #247 and #319
   expect(ci).toContain("Heavy-job pool policy");
 });
 
+it("regenerates docs-owned gallery previews when approved baselines land", () => {
+  const approve = read(".github/workflows/vr-approve.yml");
+  const copy = approve.indexOf("find ../vr-artifact -name '*.png'");
+  const generate = approve.indexOf("bun scripts/gen-gallery-previews.ts");
+  const stage = approve.indexOf("git add tests/visual/__screenshots__ apps/docs/static/previews");
+
+  expect(copy).toBeGreaterThan(-1);
+  expect(generate).toBeGreaterThan(copy);
+  expect(stage).toBeGreaterThan(generate);
+  expect(approve).toContain("apps/docs/src/lib/generated/gallery-previews.ts");
+});
+
 it("uses job-private Bun caches in self-hosted workflows (issue #319)", () => {
   const workflows = [
     ".github/workflows/ci.yml",

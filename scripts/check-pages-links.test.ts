@@ -26,6 +26,8 @@ describe("packed Pages link checks", () => {
     "examples/interactions/interval-selection.html",
     "llms.txt",
     "llms-full.txt",
+    "robots.txt",
+    "sitemap.xml",
     "_app/app.js",
   ]);
 
@@ -45,6 +47,12 @@ describe("packed Pages link checks", () => {
         files,
       ),
     ).toEqual([]);
+  });
+
+  it("rejects legacy-prefix leakage in root builds without false-passing legacy builds", () => {
+    const href = "/ggsvelte/guide/interactions";
+    expect(findBrokenLinks("index.html", [href], files, "")).toEqual([href]);
+    expect(findBrokenLinks("index.html", [href], files, "/ggsvelte")).toEqual([]);
   });
 
   it("reports missing internal targets but ignores external protocols", () => {
@@ -79,6 +87,8 @@ describe("packed Pages link checks", () => {
     expect(requiredPages).toContain("playground.html");
     expect(requiredPages).toContain("reference/interactions.html");
     expect(requiredPages).toContain("guide/interaction-reference.html");
+    expect(requiredPages).toContain("robots.txt");
+    expect(requiredPages).toContain("sitemap.xml");
   });
 
   it("reports a missing packed directory and every absent required page", () => {

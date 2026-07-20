@@ -16,20 +16,19 @@
  * scripts/gen-llms.test.ts; apps/docs imports it via the `$scripts` alias
  * for its prerendered endpoints and guide pages.
  */
-import {
-  ADVISORY_CATALOG,
-  CLI_DIAGNOSTIC_CATALOG,
-  PIPELINE_ERROR_CATALOG,
-  PIPELINE_WARNING_CATALOG,
-} from "@ggsvelte/core";
-import {
-  ERROR_CATALOG,
-  LINT_CATALOG,
-  SCALE_CAPABILITIES,
-  TEMPORAL_PARSER_NAMES,
-} from "@ggsvelte/spec";
+import { ADVISORY_CATALOG } from "@ggsvelte/core";
+import { LINT_CATALOG, SCALE_CAPABILITIES, TEMPORAL_PARSER_NAMES } from "@ggsvelte/spec";
 import { INTERACTION_DIAGNOSTIC_CATALOG } from "../packages/svelte/src/lib/interaction/interaction";
+import { GUIDE_CATALOG, type GuideSlug } from "../apps/docs/src/lib/catalog/guide";
 import supportMatrix from "../support-matrix.json";
+import {
+  buildDiagnosticDocs,
+  type DiagnosticDocEntry,
+  type DiagnosticDocSource,
+} from "./diagnostic-docs";
+import { QUICKSTART_PAGE_FILENAME, QUICKSTART_PAGE_SVELTE } from "./quickstart";
+
+export { buildDiagnosticDocs } from "./diagnostic-docs";
 
 // ---------------------------------------------------------------------------
 // Minimal markdown renderer (headings, paragraphs, fenced code, inline code,
@@ -56,17 +55,9 @@ function inline(s: string, base: string): string {
   return out;
 }
 
-/** Render the markdown subset used by the guide sections to HTML. */
-export function renderMarkdown(md: string, base = ""): string {
-  const lines = md.split("\n");
-  const html: string[] = [];
-  let paragraph: string[] = [];
-  let list: string[] | null = null;
-  let code: string[] | null = null;
-  let codeLang = "";
+function createHeadingId(): (text: string) => string {
   const headingCounts = new Map<string, number>();
-
-  const headingId = (text: string): string => {
+  return (text: string): string => {
     const stem =
       text
         .replaceAll(/`([^`]+)`/g, "$1")
@@ -79,6 +70,45 @@ export function renderMarkdown(md: string, base = ""): string {
     headingCounts.set(stem, count);
     return count === 1 ? stem : `${stem}-${String(count)}`;
   };
+}
+
+export interface MarkdownHeading {
+  level: number;
+  id: string;
+  title: string;
+}
+
+/** Extract the exact heading ids used by renderMarkdown for page navigation. */
+export function extractMarkdownHeadings(md: string): MarkdownHeading[] {
+  const headingId = createHeadingId();
+  const headings: MarkdownHeading[] = [];
+  for (const line of md.split("\n")) {
+    const heading = /^(#{1,4}) (.*)$/.exec(line);
+    if (heading === null) continue;
+    const rawTitle = heading[2]!;
+    headings.push({
+      level: heading[1]!.length,
+      id: headingId(rawTitle),
+      title: rawTitle
+        .replaceAll(/`([^`]+)`/g, "$1")
+        .replaceAll(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+        .replaceAll("**", ""),
+    });
+  }
+  return headings;
+}
+
+/** Render the markdown subset used by the guide sections to HTML. */
+export function renderMarkdown(md: string, base = ""): string {
+  const lines = md.split("\n");
+  const html: string[] = [];
+  let paragraph: string[] = [];
+  let list: string[] | null = null;
+  let code: string[] | null = null;
+  let codeLang = "";
+  let codeCopy = false;
+  let copyCodeCount = 0;
+  const headingId = createHeadingId();
 
   const flushParagraph = () => {
     if (paragraph.length > 0) {
@@ -92,13 +122,18 @@ export function renderMarkdown(md: string, base = ""): string {
       list = null;
     }
   };
+  const renderCode = (source: string): string => {
+    const languageClass = codeLang === "" ? "" : ` class="language-${codeLang}"`;
+    const rendered = `<pre><code${languageClass}>${escapeHtml(source)}</code></pre>`;
+    if (!codeCopy) return rendered;
+    const id = `guide-code-${String(++copyCodeCount)}`;
+    return `<div class="guide-code-copy"><button type="button" data-copy-code="${id}" aria-describedby="${id}-status">Copy code</button><pre id="${id}"><code${languageClass}>${escapeHtml(source)}</code></pre><span id="${id}-status" role="status" aria-live="polite"></span></div>`;
+  };
 
   for (const line of lines) {
     if (code !== null) {
       if (line.startsWith("```")) {
-        html.push(
-          `<pre><code${codeLang === "" ? "" : ` class="language-${codeLang}"`}>${escapeHtml(code.join("\n"))}</code></pre>`,
-        );
+        html.push(renderCode(code.join("\n")));
         code = null;
       } else {
         code.push(line);
@@ -108,7 +143,9 @@ export function renderMarkdown(md: string, base = ""): string {
     if (line.startsWith("```")) {
       flushParagraph();
       flushList();
-      codeLang = line.slice(3).trim();
+      const [language = "", ...flags] = line.slice(3).trim().split(/\s+/);
+      codeLang = /^[a-z0-9-]*$/i.test(language) ? language : "";
+      codeCopy = flags.includes("copy");
       code = [];
       continue;
     }
@@ -141,7 +178,7 @@ export function renderMarkdown(md: string, base = ""): string {
   }
   flushParagraph();
   flushList();
-  if (code !== null) html.push(`<pre><code>${escapeHtml(code.join("\n"))}</code></pre>`);
+  if (code !== null) html.push(renderCode(code.join("\n")));
   return html.join("\n");
 }
 
@@ -151,74 +188,101 @@ export function renderMarkdown(md: string, base = ""): string {
 
 export const GETTING_STARTED_MD = `# Getting started
 
-ggsvelte is a layered grammar of graphics for JavaScript: ggplot2 semantics
-(aes, geom, stat, scale, coord, facet, theme, position), a strictly-JSON
-\`PortableSpec\` at the center, and three surfaces that compile to the same
-canonical spec — JSON for agents, a fluent builder, and Svelte 5 components.
+Build a responsive, accessible chart in one Svelte file. Start with the
+framework-native path below; the builder and PortableSpec are useful later,
+when you need to generate or transmit charts.
 
-## Install
+## Create a SvelteKit app
+
+Start with Node.js 22 or newer in an empty directory:
 
 \`\`\`sh
-bun add @ggsvelte/svelte        # or: npm install @ggsvelte/svelte
+npx sv create my-chart --template minimal --types ts --no-add-ons --install npm
+cd my-chart
 \`\`\`
 
-The \`ggsvelte\` package re-exports the whole surface (\`@ggsvelte/spec\` and
-\`@ggsvelte/core\` are its dependencies — install them directly only for
-spec-only / core-only usage without Svelte) and owns the \`ggsvelte-render\`
-CLI.
+Already have a supported SvelteKit app? Continue with the install step.
 
-## First chart, three ways
+## Install ggsvelte
 
-The same raw-year line chart in each surface. Four-digit strings infer a
-proportional calendar axis without preprocessing or an explicit scale. All
-three surfaces produce (or consume) the same canonical PortableSpec.
+Choose the package manager already used by the app:
 
-**1. Spec JSON** — what agents emit; validated by the published JSON Schema:
+\`\`\`sh
+npm install @ggsvelte/svelte
+# or: pnpm add @ggsvelte/svelte
+# or: bun add @ggsvelte/svelte
+\`\`\`
+
+\`@ggsvelte/spec\` and \`@ggsvelte/core\` are dependencies of the Svelte
+package. Install them directly only for spec-only or headless use.
+
+## Draw your first chart
+
+\`${QUICKSTART_PAGE_FILENAME}\` (complete file)
 
 \`\`\`svelte
-<script>
-  import { GGPlot } from "@ggsvelte/svelte";
-
-  const spec = {
-    data: { values: [{ year: "1835", value: 12 }, { year: "2026", value: 31 }] },
-    layers: [
-      {
-        geom: "line",
-        aes: { x: { field: "year" }, y: { field: "value" } }
-      }
-    ]
-  };
-</script>
-
-<GGPlot {spec} width={640} height={400} />
+${QUICKSTART_PAGE_SVELTE}
 \`\`\`
 
-**2. Fluent builder** — immutable chaining, \`.spec()\` validates and returns
-the canonical PortableSpec:
+Run the app with your package manager's standard dev command and open the
+local URL it prints. The chart fills a normal positive-width block container
+and uses the default 400px height. No chart CSS or fixed width is required.
+
+## You have a chart
+
+The first useful model is small: \`GGPlot\` owns the chart, \`data\` supplies
+rows, \`aes\` maps fields, and \`GeomPoint\` adds the point layer. Change the
+four rows or the \`x\` and \`y\` field names to adapt it.
+
+If the chart is inside \`display: none\`, a zero-width grid track, or another
+collapsed container, it stays not-ready until the container receives a
+positive width. During server rendering it uses a deterministic 640 × 400
+fallback, then measures the real container after hydration. A blank chart,
+hydration warning, or TypeScript package mismatch is covered in the
+[Errors reference](/guide/errors#quickstart-troubleshooting).
+
+## Choose another surface only when you need it
+
+### Fluent builder
+
+Use the builder to construct specs programmatically in TypeScript. Fragment,
+assuming the \`cars\` data from the complete file above:
 
 \`\`\`ts
 import { aes, gg } from "@ggsvelte/svelte";
 
-const spec = gg(rows, aes({ x: "year", y: "value" })).geomLine().spec();
+const spec = gg(cars, aes({ x: "weight", y: "economy" }))
+  .geomPoint()
+  .spec();
 \`\`\`
 
-**3. Svelte components** — declaration-only children as sugar:
+### PortableSpec JSON
 
-\`\`\`svelte
-<script>
-  import { GGPlot, GeomLine } from "@ggsvelte/svelte";
-  import { rows } from "./data.js";
-</script>
+Use PortableSpec when a chart must be saved, transmitted, validated, or
+generated without executable accessors. Fragment equivalent to the first
+chart:
 
-<GGPlot data={rows} aes={{ x: "year", y: "value" }} width={640} height={400}>
-  <GeomLine />
-</GGPlot>
+\`\`\`json
+{
+  "data": { "values": [{ "weight": 1.8, "economy": 37 }] },
+  "layers": [
+    {
+      "geom": "point",
+      "aes": {
+        "x": { "field": "weight" },
+        "y": { "field": "economy" }
+      }
+    }
+  ]
+}
 \`\`\`
 
-## Headless / server rendering
+## Headless and server rendering
 
-\`renderToSVGString\` is the pure export path (no DOM, all-SVG; safe in
-Node/edge/workers), and \`ggsvelte-render\` is the same thing as a CLI:
+\`renderToSVGString\` is the pure no-DOM export path. The installed
+\`ggsvelte-render\` CLI writes SVG to stdout and JSON Lines diagnostics to
+stderr. These are fragments; use the complete PortableSpec above as \`spec\`
+or save it as \`spec.json\`.
 
 \`\`\`ts
 import { renderToSVGString } from "@ggsvelte/core";
@@ -227,40 +291,31 @@ const svg = renderToSVGString(spec, { width: 640, height: 400 });
 \`\`\`
 
 \`\`\`sh
-ggsvelte-render spec.json > chart.svg   # diagnostics: JSON lines on stderr
+ggsvelte-render spec.json > chart.svg
 \`\`\`
 
-## Validating specs (agents: read this)
+## Validating specs
 
-\`validate(spec)\` checks schema shape (tier 1, no data needed);
-\`validate(spec, { profile })\` adds data-aware checks against a
-\`DataProfile\` — \`{ fields: [{ name, type }], rowCount? }\` — without
-shipping the data. Every error is \`{ code, path, message, allowed?, fix }\`
-and **the fix carries a machine-applicable example — apply it**. Pass
-\`{ lint: true }\` to also get advisories for valid-but-questionable specs.
+\`validate(spec)\` checks schema shape. \`validate(spec, { profile })\` adds
+data-aware checks without shipping the data. Every validation error has a
+stable code, path, message, and fix. Pass \`{ lint: true }\` to also receive
+advisories for valid-but-questionable specs.
 
 ## Where next
 
-- [Examples gallery](/examples) — every example shows the Svelte component,
-  the builder chain, and the canonical spec JSON side by side.
+- [Examples gallery](/examples) — runnable charts across marks, statistics,
+  scales, themes, and interaction.
 - [Dates without preprocessing](/guide/temporal-scales) — inference, explicit parsers,
   discrete overrides, diagnostics, and all three authoring surfaces.
 - [Interactions](/guide/interactions) — inspection, selection, zoom, typed
   events, keyboard behavior, and stable identity.
 - [Local data playground](/playground) — paste bounded JSON rows without
   uploads, remote fetches, or code execution.
-- [Interaction reference](/guide/interaction-reference) — props, callbacks,
-  event phases, diagnostics, and accessibility defaults.
 - [Compatibility](/guide/compatibility) — tested Node, Svelte, installer,
   browser, and operating-system boundaries.
-- [Pre-0.1 interaction migration](/guide/migrating-pre-0-1) — replace the old
-  tooltip and brush props and callback payloads.
-- [Errors reference](/guide/errors) — every validation and render diagnostic.
-- [Spec-lint advisories](/guide/advisories) — meaningless-but-valid specs.
-- [Lifecycle & editions](/guide/lifecycle) — API stability tags and the
-  defaults-edition mechanism.
-- [JSON Schema](/schema/v0.json) — for constrained decoding.
-- [llms-full.txt](/llms-full.txt) — the whole docs corpus in one file.
+- [Errors reference](/guide/errors) — validation, render, interaction, and CLI
+  diagnostics with consequences and safe recovery steps.
+- [JSON Schema](/schema/v0.json) — PortableSpec for constrained decoding.
 `;
 
 export const TEMPORAL_SCALES_MD = `# Dates without preprocessing
@@ -312,8 +367,8 @@ const spec = gg(rows, aes({ x: "when", y: "value" }))
 Canonical JSON uses \`scales: { x: { type: "time", parse: "dmy" } }\`.
 The closed parser names are generated from the runtime registry:
 \`${TEMPORAL_PARSER_NAMES.join("`, `")}\`. Exact bounded formats and epoch
-seconds/milliseconds are object parser forms. Timezone-less values mean UTC; IANA zones use Temporal
-with explicit DST disambiguation.
+seconds/milliseconds are object parser forms. Timezone-less values mean UTC;
+IANA zones use Temporal with explicit DST disambiguation.
 
 If four-digit strings are identifiers, force categories with
 \`.scaleXDiscrete()\`, \`scale_x_discrete()\`, or
@@ -1204,44 +1259,93 @@ function catalogSection(
   return lines.join("\n");
 }
 
+const diagnosticSectionTitles: Record<DiagnosticDocSource, string> = {
+  validation: "Validation errors (@ggsvelte/spec)",
+  pipeline: "Render-time errors (@ggsvelte/core)",
+  warning: "Render warnings",
+  interaction: "Interaction diagnostics (@ggsvelte/svelte)",
+  cli: "CLI diagnostics (ggsvelte-render)",
+};
+
+function diagnosticHeading(entry: DiagnosticDocEntry): string {
+  const primaryAnchor = entry.code
+    .toLowerCase()
+    .replaceAll(/[^a-z0-9]+/g, "-")
+    .replaceAll(/^-|-$/g, "");
+  return entry.anchor === primaryAnchor
+    ? `### \`${entry.code}\``
+    : `### \`${entry.code}\` — ${entry.source}`;
+}
+
+function renderDiagnosticEntry(entry: DiagnosticDocEntry): string {
+  const lines = [
+    diagnosticHeading(entry),
+    "",
+    `**Code + severity:** \`${entry.code}\` · ${entry.severity}`,
+    "",
+    `**What failed:** ${entry.whatFailed}`,
+    "",
+    `**Why:** ${entry.why}`,
+    "",
+    `**Fix:** ${entry.fix}`,
+    "",
+    `**Consequence (${entry.consequence}):** ${entry.consequenceText}`,
+    "",
+    `**Stable link:** [/guide/errors#${entry.anchor}](/guide/errors#${entry.anchor})`,
+    "",
+  ];
+  if (entry.recipe !== undefined) {
+    lines.push(
+      "**Minimal illustration — copy only the relevant fragment:**",
+      "",
+      `\`\`\`${entry.recipe.language} copy`,
+      entry.recipe.code,
+      "```",
+      "",
+    );
+  }
+  return lines.join("\n");
+}
+
 export function buildErrorsMd(): string {
-  const validation = catalogSection(
-    "Validation errors (@ggsvelte/spec)",
-    "Returned by `validate()` as `{ code, path, message, allowed?, fix }`. Tier 1 = schema shape, no data needed; tier 2 runs when an options argument is passed (structural grammar rules + data-aware checks against inline data or a DataProfile). Instances carry a concrete `fix.example` — apply it.",
-    ERROR_CATALOG,
-    {
-      tierOf: (code) => `tier ${String(ERROR_CATALOG[code as keyof typeof ERROR_CATALOG].tier)}`,
-    },
-  );
-  const pipeline = catalogSection(
-    "Render-time errors (@ggsvelte/core)",
-    "Thrown by `runPipeline` / `renderToSVGString` as `PipelineError { code, path, message }` — structured errors, never blank output (failure policy).",
-    PIPELINE_ERROR_CATALOG,
-  );
-  const warnings = catalogSection(
-    "Warnings",
-    'Collected on `RenderModel.warnings` (deduplicated): degraded-but-rendered conditions. The CLI emits them as stderr JSON lines with kind "warning".',
-    PIPELINE_WARNING_CATALOG,
-  );
-  const cli = catalogSection(
-    "CLI diagnostics (ggsvelte-render)",
-    "stderr JSON lines. Exit codes: 0 rendered, 1 render failed, 2 usage error, 3 invalid spec.",
-    CLI_DIAGNOSTIC_CATALOG,
-  );
+  const entries = buildDiagnosticDocs();
+  const sections = (Object.keys(diagnosticSectionTitles) as DiagnosticDocSource[]).map((source) => {
+    const intro =
+      source === "cli"
+        ? "SVG is written only to stdout; JSON Lines diagnostics are written only to stderr. Exit 1 means rendering failed, exit 2 means usage/input failed, and exit 3 means spec validation failed."
+        : "Each entry answers what failed, why, how to recover safely, and whether output was blocked or degraded.";
+    return [
+      `## ${diagnosticSectionTitles[source]}`,
+      "",
+      intro,
+      "",
+      ...entries
+        .filter((entry) => entry.source === source)
+        .map((entry) => renderDiagnosticEntry(entry)),
+    ].join("\n");
+  });
+
   return `# Errors reference
 
-Every diagnostic ggsvelte can produce, generated from the catalogs the code
-itself uses (\`ERROR_CATALOG\` in @ggsvelte/spec; \`PIPELINE_ERROR_CATALOG\`,
-\`PIPELINE_WARNING_CATALOG\`, \`CLI_DIAGNOSTIC_CATALOG\` in @ggsvelte/core) —
-one source, no drift.
+Diagnostics are generated from the catalogs used by validation, rendering,
+interaction, and the CLI. Identity is the pair \`(source, code)\`: a bare code
+can intentionally exist in more than one source with a different consequence.
 
-${validation}
+## Quickstart troubleshooting
 
-${pipeline}
+- **Collapsed or zero-width container:** the responsive plot remains
+  \`data-gg-ready="false"\` until ResizeObserver reports a positive width.
+  Give the parent a real grid/flex track width; no fixed chart width is needed.
+- **SSR and hydration:** omitted width server-renders at 640 × 400, stays
+  not-ready on the server, then measures its real container after hydration.
+- **Unexpected height:** omitted height is 400px unless the spec supplies one.
+- **TypeScript or linked-package mismatch:** install one compatible
+  \`@ggsvelte/svelte\` version and let it resolve matching core/spec packages;
+  remove stale lockfile overrides that mix versions.
+- **CLI input failure:** run \`ggsvelte-render --help\`; keep SVG stdout
+  separate from JSON Lines stderr while correcting the reported input.
 
-${warnings}
-
-${cli}
+${sections.join("\n\n")}
 `;
 }
 
@@ -1313,18 +1417,20 @@ Every public export carries a lifecycle tag (generated into
   renderToSVGString, GGPlot and their direct result contracts). Not frozen
   pre-1.0, but changes here are treated as breaking: they get a changeset, a
   migration note, and a deprecation window where feasible.
-- **stable** — committed API under semver (none while the project remains pre-1.0).
+- **stable** — committed API under semver (none in v0.1).
 - **superseded** — keeps working but stops being recommended; docs point to
   the replacement. Protects agent-generated code from silent breakage.
 
 ## Defaults editions
 
-\`normalize()\` stamps the current appearance edition (currently 2) onto every
-spec, freezing theme and palette defaults. Editions do not preserve incorrect
-pre-1.0 parser, scale-stage, guide, or coordinate execution. Those correctness
-fixes land in place with migration notes and direct overrides. Explicit
-settings always win; unknown appearance editions degrade to the latest known
-with an \`unknown-edition\` warning.
+\`normalize()\` stamps \`edition: 1\` onto every spec that doesn't carry one,
+freezing which generation of DEFAULT aesthetics (theme role tokens,
+categorical palette, sequential ramp) the spec was authored against. When a
+future edition ships better defaults, stamped specs keep their original look
+— old charts never reshuffle. Explicit settings (\`theme\`,
+\`scales.*.range\`, \`scales.*.scheme\`) always win over edition defaults, and
+unknown editions degrade to the latest known with an \`unknown-edition\`
+warning.
 
 ${sections.join("\n")}
 `;
@@ -1358,68 +1464,25 @@ export interface GuidePage {
 }
 
 export function guidePages(lifecycle: LifecycleDoc): GuidePage[] {
-  return [
-    {
-      slug: "getting-started",
-      title: "Getting started",
-      description: "Install ggsvelte and draw the same chart in all three surfaces.",
-      markdown: GETTING_STARTED_MD,
-    },
-    {
-      slug: "temporal-scales",
-      title: "Dates without preprocessing",
-      description: "Value-driven date inference, strict parsers, overrides, and diagnostics.",
-      markdown: TEMPORAL_SCALES_MD,
-    },
-    {
-      slug: "compatibility",
-      title: "Compatibility",
-      description: "Tested Node, Svelte, package-manager, browser, and OS boundaries.",
-      markdown: COMPATIBILITY_MD,
-    },
-    {
-      slug: "errors",
-      title: "Errors reference",
-      description: "Every validation error and render-time diagnostic, from the catalogs.",
-      markdown: buildErrorsMd(),
-    },
-    {
-      slug: "advisories",
-      title: "Advisories",
-      description: "Spec-lint advisories and the pipeline's disclosed heuristics.",
-      markdown: buildAdvisoriesMd(),
-    },
-    {
-      slug: "lifecycle",
-      title: "Lifecycle & editions",
-      description: "API stability tags per export, and the defaults-edition mechanism.",
-      markdown: buildLifecycleMd(lifecycle),
-    },
-    {
-      slug: "interactions",
-      title: "Interactions",
-      description: "Inspection, selection, zoom, keyboard behavior, identity, and event contracts.",
-      markdown: INTERACTIONS_MD,
-    },
-    {
-      slug: "interaction-reference",
-      title: "Interaction reference",
-      description: "Search interaction props, callbacks, event phases, and diagnostic codes.",
-      markdown: INTERACTION_REFERENCE_MD,
-    },
-    {
-      slug: "migrating-pre-0-1",
-      title: "Migrating pre-0.1 interactions",
-      description: "Move from tooltip and brush props to semantic interaction capabilities.",
-      markdown: MIGRATING_PRE_0_1_MD,
-    },
-    {
-      slug: "upgrading",
-      title: "Upgrading ggsvelte",
-      description: "Per-release upgrade notes: what changed, what is optional, what to replace.",
-      markdown: UPGRADING_MD,
-    },
-  ];
+  const markdownBySlug: Record<GuideSlug, string> = {
+    "getting-started": GETTING_STARTED_MD,
+    "temporal-scales": TEMPORAL_SCALES_MD,
+    interactions: INTERACTIONS_MD,
+    compatibility: COMPATIBILITY_MD,
+    "interaction-reference": INTERACTION_REFERENCE_MD,
+    errors: buildErrorsMd(),
+    advisories: buildAdvisoriesMd(),
+    lifecycle: buildLifecycleMd(lifecycle),
+    "migrating-pre-0-1": MIGRATING_PRE_0_1_MD,
+    upgrading: UPGRADING_MD,
+  };
+
+  return GUIDE_CATALOG.map(({ slug, title, description }) => ({
+    slug,
+    title,
+    description,
+    markdown: markdownBySlug[slug],
+  }));
 }
 
 /** llms.txt — the curated index (llmstxt.org shape: H1, blurb, link lists). */
@@ -1441,7 +1504,7 @@ export function buildLlmsIndex(
   lines.push(
     "- [Local data playground](/playground): safely try bounded JSON rows with static and interactive chart controls",
     "- [Search interaction reference](/reference/interactions): filter interaction capabilities, events, diagnostics, and accessibility guidance",
-    "- [JSON Schema v0](/schema/v0.json): the pre-1.0 PortableSpec schema",
+    "- [JSON Schema v0](/schema/v0.json): the PortableSpec schema (unstable in v0.1)",
     "- [llms-full.txt](/llms-full.txt): all docs prose plus every example (spec JSON + Svelte source)",
     "",
     "## Examples",

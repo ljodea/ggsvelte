@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { basename, join, relative, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 
+import { QUICKSTART_PAGE_SVELTE } from "./quickstart.js";
 import { loadSupportMatrix, type PackageManager } from "./support-matrix.js";
 
 interface CommandStep {
@@ -17,7 +18,10 @@ const fixtureDependencies = [
   // The compatibility fixture must itself support the Svelte 5.33.1 floor.
   // Plugin 7 requires Svelte 5.46+, which would make the minimum row a test
   // of fixture peer resolution rather than a test of ggsvelte.
+  "@sveltejs/adapter-static@3.0.10",
+  "@sveltejs/kit@2.20.8",
   "@sveltejs/vite-plugin-svelte@5.1.1",
+  "@types/node@22.15.3",
   "svelte-check@4.7.3",
   "typescript@6.0.3",
   "vite@6.4.3",
@@ -89,7 +93,14 @@ function runner(packageManager: PackageManager, binary: string, args: string[]):
   return { label: "", command: "bun", args: ["run", binary, ...args] };
 }
 
-export function commandPlan(packageManager: PackageManager): CommandStep[] {
+function scriptRunner(packageManager: PackageManager, script: string): CommandStep {
+  return { label: "", command: packageManager, args: ["run", script] };
+}
+
+export function commandPlan(
+  packageManager: PackageManager,
+  expectedSveltePackageVersion: string,
+): CommandStep[] {
   const install: CommandStep =
     packageManager === "npm"
       ? {
@@ -109,12 +120,13 @@ export function commandPlan(packageManager: PackageManager): CommandStep[] {
             args: ["install", "--ignore-scripts"],
           };
 
-  const typecheck = runner(packageManager, "svelte-check", [
-    "--tsconfig",
-    "./tsconfig.json",
-    "--fail-on-warnings",
-  ]);
-  typecheck.label = "type-check consumer";
+  const typecheck = scriptRunner(packageManager, "check");
+  typecheck.label = "sync and type-check SvelteKit consumer";
+  const build = scriptRunner(packageManager, "build");
+  build.label = "build and prerender SvelteKit consumer";
+  const cliVersion = runner(packageManager, "ggsvelte-render", ["--version"]);
+  cliVersion.label = "CLI version";
+  cliVersion.expect = expectedSveltePackageVersion;
   const cliFile = runner(packageManager, "ggsvelte-render", ["plot.json"]);
   cliFile.label = "CLI file input";
   cliFile.expect = "<svg";
@@ -126,13 +138,20 @@ export function commandPlan(packageManager: PackageManager): CommandStep[] {
   return [
     install,
     typecheck,
-    { label: "build consumer", command: "node", args: ["build.mjs"] },
+    build,
+    {
+      label: "verify prerendered Quickstart",
+      command: "node",
+      args: ["verify-prerender.mjs"],
+      expect: "prerendered Quickstart verified",
+    },
     {
       label: "runtime and SSR smoke",
       command: "node",
       args: ["smoke.mjs"],
       expect: "consumer smoke passed",
     },
+    cliVersion,
     cliFile,
     cliStdin,
   ];
@@ -174,19 +193,24 @@ export function fixtureManifest(
         return [entry.slice(0, separator), entry.slice(separator + 1)];
       }),
     ),
+    scripts: {
+      check: "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --fail-on-warnings",
+      build: "vite build",
+    },
     ...(packageManager === "bun" ? { overrides: localPackages } : {}),
   };
 }
 
-function writeFixture(
+export function writeConsumerFixture(
   directory: string,
   svelteVersion: string,
   tarballs: string[],
   packageManager: PackageManager,
 ): void {
-  mkdirSync(join(directory, "src"), { recursive: true });
+  mkdirSync(join(directory, "src", "lib"), { recursive: true });
+  mkdirSync(join(directory, "src", "routes", "contract"), { recursive: true });
   const manifest = fixtureManifest(svelteVersion, tarballs, directory, packageManager);
-  writeFileSync(join(directory, "package.json"), JSON.stringify(manifest, null, 2));
+  writeFileSync(join(directory, "package.json"), `${JSON.stringify(manifest, null, 2)}\n`);
   if (packageManager === "pnpm") {
     writeFileSync(
       join(directory, "pnpm-workspace.yaml"),
@@ -195,30 +219,43 @@ function writeFixture(
   }
   writeFileSync(
     join(directory, "tsconfig.json"),
-    JSON.stringify(
+    `${JSON.stringify(
       {
+        extends: "./.svelte-kit/tsconfig.json",
         compilerOptions: {
-          module: "ESNext",
+          allowJs: true,
+          checkJs: true,
+          esModuleInterop: true,
+          forceConsistentCasingInFileNames: true,
           moduleResolution: "Bundler",
-          target: "ES2023",
-          strict: true,
+          resolveJsonModule: true,
           skipLibCheck: false,
-          types: ["svelte"],
+          sourceMap: true,
+          strict: true,
         },
-        include: ["src/**/*.ts", "src/**/*.svelte"],
       },
       null,
       2,
-    ),
+    )}\n`,
   );
   writeFileSync(
-    join(directory, "index.html"),
-    '<div id="app"></div><script type="module" src="/src/main.ts"></script>',
+    join(directory, "svelte.config.js"),
+    `import adapter from "@sveltejs/adapter-static";\n\nexport default { kit: { adapter: adapter() } };\n`,
   );
   writeFileSync(
-    join(directory, "src", "App.svelte"),
+    join(directory, "vite.config.ts"),
+    `import { sveltekit } from "@sveltejs/kit/vite";\nimport { defineConfig } from "vite";\n\nexport default defineConfig({ plugins: [sveltekit()] });\n`,
+  );
+  writeFileSync(
+    join(directory, "src", "app.html"),
+    `<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8" />\n    <meta name="viewport" content="width=device-width" />\n    %sveltekit.head%\n  </head>\n  <body data-sveltekit-preload-data="hover">\n    <div style="display: contents">%sveltekit.body%</div>\n  </body>\n</html>\n`,
+  );
+  writeFileSync(join(directory, "src", "routes", "+layout.ts"), `export const prerender = true;\n`);
+  writeFileSync(join(directory, "src", "routes", "+page.svelte"), `${QUICKSTART_PAGE_SVELTE}\n`);
+  writeFileSync(
+    join(directory, "src", "routes", "contract", "+page.svelte"),
     `<script lang="ts">
-  import { GGPlot, GeomLine, scale_x_date, type PortableSpec } from "@ggsvelte/svelte";
+  import { dmy, GGPlot, GeomLine, scaleXDate, scale_x_date, type PortableSpec } from "@ggsvelte/svelte";
   const spec: PortableSpec = ${JSON.stringify(plotSpec)};
   const temporalRows = [
     { year: "1835", value: 12 },
@@ -226,66 +263,53 @@ function writeFixture(
     { year: "2026", value: 31 },
   ];
   const explicitDateScale = scale_x_date({ parse: "dmy" });
+  const camelDateScale = scaleXDate({ parse: "iso" });
+  const authorDate = dmy("31/12/2024");
   void explicitDateScale;
+  void camelDateScale;
+  void authorDate;
 </script>
-<GGPlot {spec} width={480} height={320} inspect={true} />
-<GGPlot data={temporalRows} aes={{ x: "year", y: "value" }} width={480} height={320}>
+
+<GGPlot {spec} width={480} height={320} inspect={true} ariaLabel="Packed contract chart" />
+<GGPlot
+  data={temporalRows}
+  aes={{ x: "year", y: "value" }}
+  width={480}
+  height={320}
+  ariaLabel="Raw year temporal contract chart"
+>
   <GeomLine />
 </GGPlot>
 `,
   );
-  writeFileSync(
-    join(directory, "src", "main.ts"),
-    'import { mount } from "svelte";\nimport App from "./App.svelte";\nmount(App, { target: document.querySelector("#app")! });\n',
-  );
-  writeFileSync(
-    join(directory, "build.mjs"),
-    `import { build } from "vite";
-import { svelte } from "@sveltejs/vite-plugin-svelte";
-await build({ configFile: false, plugins: [svelte()], build: { outDir: "dist-client" } });
-await build({
-  configFile: false,
-  plugins: [svelte()],
-  build: { ssr: "src/ssr.ts", outDir: "dist-ssr" },
-  ssr: { noExternal: ["@ggsvelte/svelte"] },
-});
-`,
-  );
-  writeFileSync(
-    join(directory, "src", "ssr.ts"),
-    `import { render } from "svelte/server";
-import { SpecModule } from "@ggsvelte/spec";
-import { dmy, GGPlot, scaleXDate, type PortableSpec } from "@ggsvelte/svelte";
-type PointParamsImport = ReturnType<typeof SpecModule.Import<"PointParams">>;
-const pointParamsSchema: PointParamsImport = SpecModule.Import("PointParams");
-void pointParamsSchema;
-const spec: PortableSpec = ${JSON.stringify(plotSpec)};
-const temporalRows = [
-  { when: dmy("31/12/2024"), value: 1 },
-  { when: dmy("01/01/2025"), value: 2 },
-];
-const temporalScale = scaleXDate({ parse: "iso" });
-export const html =
-  render(GGPlot, { props: { spec, width: 480, height: 320 } }).body +
-  render(GGPlot, {
-    props: {
-      data: temporalRows,
-      aes: { x: "when", y: "value" },
-      layers: [{ geom: "line" }],
-      scales: temporalScale,
-      width: 480,
-      height: 320,
-    },
-  }).body;
-`,
-  );
   writeFileSync(join(directory, "plot.json"), `${JSON.stringify(plotSpec)}\n`);
+  writeFileSync(
+    join(directory, "verify-prerender.mjs"),
+    `import { strict as assert } from "node:assert";
+import { existsSync, readFileSync } from "node:fs";
+
+const html = readFileSync("build/index.html", "utf8");
+assert.match(html, /<title>My first ggsvelte chart<\\/title>/);
+assert.match(html, /aria-label="Fuel economy decreases as vehicle weight increases"/);
+assert.match(html, /class="gg-plot-root[^"]*gg-container-width"/);
+assert.match(html, /data-gg-ready="false"/);
+assert.match(html, /width="640" height="400"/);
+assert.match(html, /_app\\/immutable/);
+assert.equal(
+  existsSync("build/contract.html") || existsSync("build/contract/index.html"),
+  true,
+);
+console.log("prerendered Quickstart verified");
+`,
+  );
   writeFileSync(
     join(directory, "smoke.mjs"),
     `import { strict as assert } from "node:assert";
-import { validate } from "@ggsvelte/spec";
+import { SpecModule, validate } from "@ggsvelte/spec";
 import { renderToSVGString } from "@ggsvelte/core";
-import { html } from "./dist-ssr/ssr.js";
+
+const pointParamsSchema = SpecModule.Import("PointParams");
+void pointParamsSchema;
 const spec = ${JSON.stringify(plotSpec)};
 const temporalSpec = {
   data: { values: [{ year: "1835", value: 12 }, { year: "2026", value: 31 }] },
@@ -295,7 +319,6 @@ assert.equal(validate(spec).ok, true);
 assert.equal(validate(temporalSpec).ok, true);
 assert.match(renderToSVGString(spec, { width: 480, height: 320 }), /<svg/);
 assert.match(renderToSVGString(temporalSpec, { width: 480, height: 320 }), /1835|1850/);
-assert.match(html, /gg-plot/);
 console.log("consumer smoke passed");
 `,
   );
@@ -394,9 +417,12 @@ function main(): void {
   mkdirSync(fixture, { recursive: true });
   try {
     const tarballs = pack(root, artifacts);
-    writeFixture(fixture, svelteVersion, tarballs, packageManager);
+    writeConsumerFixture(fixture, svelteVersion, tarballs, packageManager);
     verifyPackageManagerVersion(packageManager, packageManagerVersion, fixture, root);
-    for (const step of commandPlan(packageManager)) run(step, fixture, root);
+    const expectedSveltePackageVersion = packageVersion(root, "svelte");
+    for (const step of commandPlan(packageManager, expectedSveltePackageVersion)) {
+      run(step, fixture, root);
+    }
     console.log(`consumer-compat: PASS (${packageManager}, Svelte ${svelteVersion})`);
   } finally {
     rmSync(temporaryRoot, { recursive: true, force: true });

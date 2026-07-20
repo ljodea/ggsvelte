@@ -23,6 +23,7 @@
   const {
     model,
     strata,
+    ariaLabel,
     markLabel,
     interactionMasks,
     a11yTableOpen,
@@ -31,6 +32,7 @@
   }: {
     model: RenderModel;
     strata: readonly Stratum[];
+    ariaLabel?: string | undefined;
     markLabel: (row: number) => string;
     interactionMasks: readonly (BatchInteractionMask | null)[];
     a11yTableOpen: boolean;
@@ -84,7 +86,7 @@
 </script>
 
 {#if hasCanvas}
-  <SceneView scene={model.scene} mode="chrome-bottom" />
+  <SceneView scene={model.scene} mode="chrome-bottom" {ariaLabel} />
   {#each strata as stratum, si (si)}
     {#if stratum.backend === "canvas"}
       <canvas
@@ -94,7 +96,7 @@
       <CanvasA11y
         {model}
         batches={stratum.batches}
-        sceneLabelText={sceneLabel(model.scene)}
+        sceneLabelText={ariaLabel ?? sceneLabel(model.scene)}
         open={a11yTableOpen}
         onToggle={onA11yToggle}
       />
@@ -113,6 +115,7 @@
 {:else}
   <SceneView
     scene={model.scene}
+    {ariaLabel}
     focusable={false}
     {markLabel}
     focusMasks={interactionMasks}

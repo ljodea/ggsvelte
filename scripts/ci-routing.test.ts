@@ -126,11 +126,21 @@ describe("planJobs", () => {
   });
 
   test("docs generators schedule pages/vr (not scripts-only)", () => {
-    const plan = planJobs(classifyChangedPaths(["scripts/gen-llms.ts"]));
-    expect(plan.unit).toBe(true);
+    for (const path of ["scripts/gen-llms.ts", "scripts/gen-gallery-previews.ts"]) {
+      const plan = planJobs(classifyChangedPaths([path]));
+      expect(plan.unit).toBe(true);
+      expect(plan.pages).toBe(true);
+      expect(plan.vr).toBe(true);
+      expect(plan.component).toBe(false);
+    }
+  });
+
+  test("canonical visual sources schedule pages because generated gallery previews depend on them", () => {
+    const plan = planJobs(
+      classifyChangedPaths(["tests/visual/__screenshots__/point-scatter-color-light.png"]),
+    );
     expect(plan.pages).toBe(true);
     expect(plan.vr).toBe(true);
-    expect(plan.component).toBe(false);
   });
 
   test("lifecycle.json schedules pages/vr via docs surface", () => {
@@ -227,10 +237,16 @@ describe("planJobs", () => {
     expect(planJobs(classifyChangedPaths(["scripts/consumer-compat.ts"])).packages_dist).toBe(true);
   });
 
-  test("consumer harness scripts schedule the packed-consumer matrix", () => {
-    const plan = planJobs(classifyChangedPaths(["scripts/consumer-compat.ts"]));
-    expect(plan.consumer).toBe(true);
-    expect(plan.unit).toBe(true);
+  test("consumer harness and canonical Quickstart sources schedule the packed-consumer matrix", () => {
+    for (const path of [
+      "scripts/consumer-compat.ts",
+      "scripts/quickstart.ts",
+      "scripts/quickstart-timing.ts",
+    ]) {
+      const plan = planJobs(classifyChangedPaths([path]));
+      expect(plan.consumer).toBe(true);
+      expect(plan.unit).toBe(true);
+    }
   });
 
   test("manual-AT evidence and community forms schedule unit", () => {

@@ -30,6 +30,7 @@
   const {
     scene,
     mode = "full",
+    ariaLabel,
     batches = null,
     focusable = false,
     markLabel,
@@ -37,6 +38,8 @@
   }: {
     scene: Scene;
     mode?: Mode;
+    /** Plot-level accessible name; falls back to the label derived from scene labs. */
+    ariaLabel?: string | undefined;
     /** Batch subset for mode "marks" (defaults to every scene batch). */
     batches?: GeometryBatch[] | null;
     /** Give SVG point marks keyboard focus (tooltip targets; a11y pass). */
@@ -48,7 +51,7 @@
 
   const uid = $props.id();
 
-  const label = $derived(sceneLabel(scene));
+  const label = $derived(ariaLabel ?? sceneLabel(scene));
   const ink = $derived(themeVar("ink", scene.theme));
   const drawChrome = $derived(mode === "full" || mode === "chrome-bottom");
   const drawTop = $derived(mode === "full" || mode === "chrome-top");
