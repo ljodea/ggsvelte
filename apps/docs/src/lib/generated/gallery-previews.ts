@@ -144,7 +144,7 @@ export const GALLERY_PREVIEWS = [
     id: "line/time-axis",
     filename: "line-time-axis-light.png",
     path: "/previews/line-time-axis-light.png",
-    sha256: "a0713915bdff68c00786f922e8f9419fcf2ff9c1bdbb39d6fad9e027352ba167",
+    sha256: "040e357307297c31656299254f83835e1d68f2e4469b0c04c6c6701f07b0cb65",
   },
   {
     id: "point/canvas-scatter",
