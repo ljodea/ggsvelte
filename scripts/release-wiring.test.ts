@@ -379,6 +379,44 @@ it("caps aggregate heavy self-hosted work across workflows (issues #247 and #319
   expect(ci).toContain("Heavy-job pool policy");
 });
 
+it("binds approved baselines to a post-merge default-branch commit", () => {
+  const compare = read(".github/workflows/vr-compare.yml");
+  const approve = read(".github/workflows/vr-approve.yml");
+  const checkout = approve.indexOf("checkout exact verified merged commit from base repo");
+
+  for (const workflow of [compare, approve]) {
+    expect(workflow).toContain(".merge_commit_sha");
+    expect(workflow).toContain(".base.repo.full_name");
+    expect(workflow).toContain(".base.ref");
+    expect(workflow).toContain("default_branch");
+    expect(workflow).toContain('comment_epoch="$(date -u -d');
+    expect(workflow).toContain('merged_epoch="$(date -u -d');
+    expect(workflow).toContain('if [ "${comment_epoch}" -le "${merged_epoch}" ]; then');
+    expect(workflow).toContain("identical|ahead");
+    expect(workflow).toContain('-f sha="${default_branch}"');
+  }
+  expect(compare).toContain("compare/${render_sha}...${default_sha}");
+  expect(compare).toContain('render_repo="${REPO}"');
+  expect(compare).not.toContain(".head.repo.full_name");
+  expect(compare).toContain("source PR #${PR_NUMBER} is not merged");
+  expect(compare).toContain("approval comment predates merge");
+  expect(compare).toContain("ref: ${{ needs.approve-gate.outputs.render_sha }}");
+  expect(approve).toContain("compare/${RENDER_SHA}...${default_sha}");
+  expect(approve).toContain("artifact render is for ${RENDER_SHA}");
+  expect(approve).toContain('if [ "${comment_epoch}" -le "${commit_epoch}" ]; then');
+  expect(approve).toContain("ref: ${{ steps.verify.outputs.render_sha }}");
+  expect(approve.indexOf('merged_at="$(printf')).toBeLessThan(checkout);
+
+  const installAndGenerator = approve.slice(
+    approve.indexOf("install dependencies at verified merged commit"),
+    approve.indexOf("commit and push verified baselines to vr-update/pr-<n>"),
+  );
+  expect(installAndGenerator).toContain("bun install --frozen-lockfile");
+  expect(installAndGenerator).toContain("bun scripts/gen-gallery-previews.ts");
+  expect(installAndGenerator).not.toContain("GH_TOKEN:");
+  expect(installAndGenerator).not.toContain("GITHUB_TOKEN:");
+});
+
 it("regenerates docs-owned gallery previews when approved baselines land", () => {
   const approve = read(".github/workflows/vr-approve.yml");
   const copy = approve.indexOf("find ../vr-artifact -name '*.png'");

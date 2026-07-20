@@ -13,11 +13,13 @@
 #     INDEPENDENTLY re-verifies the approval via the API — metadata written
 #     here is a hint for the privileged half, never a credential.
 #
-# Approval flavor (M3): a maintainer comments `/approve-visuals` on a PR. The
-# approve-gate job checks the command + author association and resolves the
-# exact PR head SHA; approve-regenerate checks out THAT SHA, rebuilds, and
-# REGENERATES baselines inside the pinned container. Still unprivileged: PR
-# code runs only in read-only contexts, to produce inert PNGs.
+# Approval flavor (M3): after the source PR merges to the default branch, a
+# maintainer comments `/approve-visuals` on it. The approve-gate checks the
+# command, author association, merge target, and post-merge timestamp, then
+# resolves the immutable merged commit. approve-regenerate checks out THAT
+# commit from the base repo and REGENERATES baselines inside the pinned container.
+# Still unprivileged: merged code runs only in read-only contexts, producing
+# inert PNGs.
 #
 # Baseline policy (decision 0009): committed baselines in
 # tests/visual/__screenshots__/ come ONLY from this pinned container. While
@@ -185,7 +187,7 @@ jobs:
           retention-days: 7
 
   approve-gate:
-    name: /approve-visuals — parse command, resolve PR head (read-only)
+    name: /approve-visuals — verify merge, resolve rendered commit (read-only)
     # Only comments ON a PR, only from commenters whose association implies
     # repo trust (OWNER/MEMBER/COLLABORATOR). This job runs NO checked-out
     # code — just the command parse and a read-only API lookup.
@@ -199,11 +201,11 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: read # resolve the PR head via `gh api` (read-only)
+      pull-requests: read # resolve the merged PR via `gh api` (read-only)
     outputs:
       match: ${{ steps.cmd.outputs.match }}
-      head_sha: ${{ steps.pr.outputs.head_sha }}
-      head_repo: ${{ steps.pr.outputs.head_repo }}
+      render_sha: ${{ steps.pr.outputs.render_sha }}
+      render_repo: ${{ steps.pr.outputs.render_repo }}
     steps:
       - name: trimmed comment body must be exactly `/approve-visuals`
         id: cmd
@@ -222,27 +224,56 @@ jobs:
             echo "match=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: resolve PR head SHA + head repo (read-only API)
+      - name: verify default-branch merge and resolve rendered commit (read-only API)
         id: pr
         if: steps.cmd.outputs.match == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.issue.number }}
+          COMMENT_CREATED_AT: ${{ github.event.comment.created_at }}
         run: |
           set -euo pipefail
-          head_sha="$(gh api "repos/${REPO}/pulls/${PR_NUMBER}" --jq .head.sha)"
-          head_repo="$(gh api "repos/${REPO}/pulls/${PR_NUMBER}" --jq .head.repo.full_name)"
-          if ! printf '%s' "${head_sha}" | grep -Eq '^[0-9a-f]{40}$'; then
-            echo "::error::resolved head SHA is not a 40-hex commit id: ${head_sha}"
+          pr_json="$(gh api "repos/${REPO}/pulls/${PR_NUMBER}")"
+          merged_at="$(printf '%s' "${pr_json}" | jq -r '.merged_at // empty')"
+          if [ -z "${merged_at}" ]; then
+            echo "::error::source PR #${PR_NUMBER} is not merged — merge it to the default branch, then comment /approve-visuals"
             exit 1
           fi
-          echo "resolved PR #${PR_NUMBER} head: ${head_repo}@${head_sha}"
-          echo "head_sha=${head_sha}" >> "$GITHUB_OUTPUT"
-          echo "head_repo=${head_repo}" >> "$GITHUB_OUTPUT"
+
+          base_repo="$(printf '%s' "${pr_json}" | jq -r '.base.repo.full_name // empty')"
+          base_ref="$(printf '%s' "${pr_json}" | jq -r '.base.ref // empty')"
+          default_branch="$(gh api "repos/${REPO}" --jq .default_branch)"
+          if [ "${base_repo}" != "${REPO}" ] || [ "${base_ref}" != "${default_branch}" ]; then
+            echo "::error::source PR #${PR_NUMBER} targeted ${base_repo}:${base_ref}, not ${REPO}:${default_branch}"
+            exit 1
+          fi
+
+          comment_epoch="$(date -u -d "${COMMENT_CREATED_AT}" +%s)"
+          merged_epoch="$(date -u -d "${merged_at}" +%s)"
+          if [ "${comment_epoch}" -le "${merged_epoch}" ]; then
+            echo "::error::approval comment predates merge — comment /approve-visuals again after PR #${PR_NUMBER} merges"
+            exit 1
+          fi
+
+          render_sha="$(printf '%s' "${pr_json}" | jq -r '.merge_commit_sha // empty')"
+          render_repo="${REPO}"
+          if ! printf '%s' "${render_sha}" | grep -Eq '^[0-9a-f]{40}$'; then
+            echo "::error::resolved merged commit is not a 40-hex commit id: ${render_sha}"
+            exit 1
+          fi
+          default_sha="$(gh api --method GET "repos/${REPO}/commits" -f sha="${default_branch}" -f per_page=1 --jq '.[0].sha')"
+          compare_status="$(gh api "repos/${REPO}/compare/${render_sha}...${default_sha}" --jq .status)"
+          case "${compare_status}" in
+            identical|ahead) ;;
+            *) echo "::error::merged render ${render_sha} is not reachable from ${default_branch} (${compare_status})"; exit 1 ;;
+          esac
+          echo "resolved PR #${PR_NUMBER} merged render: ${render_repo}@${render_sha}"
+          echo "render_sha=${render_sha}" >> "$GITHUB_OUTPUT"
+          echo "render_repo=${render_repo}" >> "$GITHUB_OUTPUT"
 
   approve-regenerate:
-    name: /approve-visuals — regenerate baselines at PR head (pinned container)
+    name: /approve-visuals — regenerate baselines at merged commit (pinned container)
     needs: approve-gate
     if: needs.approve-gate.outputs.match == 'true'
     runs-on: [self-hosted, ggsvelte]
@@ -261,17 +292,17 @@ jobs:
         # The container's /bin/sh is dash, which rejects `set -o pipefail`.
         shell: bash
     steps:
-      # PR-authored code (build configs, plugins, the examples themselves)
-      # executes from here on. That is acceptable ONLY because this job is
+      # The merged render commit (build configs, plugins, examples) executes
+      # from here on. That is acceptable ONLY because this job is
       # read-only: no write permissions, no secrets beyond the read-only
       # default GITHUB_TOKEN, and its sole output is the inert artifact
       # below, which vr-approve.yml re-verifies against the API.
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
-          repository: ${{ needs.approve-gate.outputs.head_repo }}
-          # Exact resolved SHA, never a movable branch ref — what gets
+          repository: ${{ needs.approve-gate.outputs.render_repo }}
+          # Exact merged SHA, never a movable branch ref — what gets
           # screenshotted is exactly what vr-approve re-verifies against.
-          ref: ${{ needs.approve-gate.outputs.head_sha }}
+          ref: ${{ needs.approve-gate.outputs.render_sha }}
           persist-credentials: false
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
@@ -294,13 +325,13 @@ jobs:
       - name: build static docs site (the VR screenshot target)
         run: bun run build:docs
 
-      - name: REGENERATE baselines at the approved head
+      - name: REGENERATE baselines at the approved merged commit
         run: bun run test:visual -- --update-snapshots
 
       - name: assemble approved-baseline artifact (PNGs + metadata)
         env:
           PR_NUMBER: ${{ github.event.issue.number }}
-          HEAD_SHA: ${{ needs.approve-gate.outputs.head_sha }}
+          RENDER_SHA: ${{ needs.approve-gate.outputs.render_sha }}
           COMMENT_ID: ${{ github.event.comment.id }}
           COMMENT_CREATED_AT: ${{ github.event.comment.created_at }}
           COMMENT_AUTHOR: ${{ github.event.comment.user.login }}
@@ -314,7 +345,7 @@ jobs:
           # written — this file merely tells the privileged half where to look.
           printf '%s\n' \
             "pr=${PR_NUMBER}" \
-            "head_sha=${HEAD_SHA}" \
+            "render_sha=${RENDER_SHA}" \
             "comment_id=${COMMENT_ID}" \
             "comment_created_at=${COMMENT_CREATED_AT}" \
             "comment_author=${COMMENT_AUTHOR}" > vr-artifact/metadata.txt

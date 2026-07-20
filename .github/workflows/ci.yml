@@ -1182,7 +1182,7 @@ jobs:
             echo "baseline changes from a same-repo vr-update branch (vr-approve flow) — ok"
             exit 0
           fi
-          echo "::error::this PR changes tests/visual/__screenshots__/ but is not a same-repo vr-update/pr-<n> branch. Baselines are container-generated only: have a maintainer comment /approve-visuals on the PR, then merge the resulting vr-update branch (see vr-approve.yml and docs/decisions/0009)."
+          echo "::error::this PR changes tests/visual/__screenshots__/ but is not a same-repo vr-update/pr-<n> branch. Baselines are container-generated only: merge the source PR, then have a maintainer comment /approve-visuals on it and merge the resulting vr-update branch (see vr-approve.yml and docs/decisions/0009)."
           exit 1
 
   # Single required aggregator. Skipped jobs are OK when routing disabled them;
