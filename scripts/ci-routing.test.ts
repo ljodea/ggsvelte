@@ -126,11 +126,21 @@ describe("planJobs", () => {
   });
 
   test("docs generators schedule pages/vr (not scripts-only)", () => {
-    const plan = planJobs(classifyChangedPaths(["scripts/gen-llms.ts"]));
-    expect(plan.unit).toBe(true);
+    for (const path of ["scripts/gen-llms.ts", "scripts/gen-gallery-previews.ts"]) {
+      const plan = planJobs(classifyChangedPaths([path]));
+      expect(plan.unit).toBe(true);
+      expect(plan.pages).toBe(true);
+      expect(plan.vr).toBe(true);
+      expect(plan.component).toBe(false);
+    }
+  });
+
+  test("canonical visual sources schedule pages because generated gallery previews depend on them", () => {
+    const plan = planJobs(
+      classifyChangedPaths(["tests/visual/__screenshots__/point-scatter-color-light.png"]),
+    );
     expect(plan.pages).toBe(true);
     expect(plan.vr).toBe(true);
-    expect(plan.component).toBe(false);
   });
 
   test("lifecycle.json schedules pages/vr via docs surface", () => {

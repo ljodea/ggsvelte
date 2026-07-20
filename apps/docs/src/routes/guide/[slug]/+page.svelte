@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { copyText, MANUAL_COPY_STATUS } from "$lib/clipboard";
   import type { PageProps } from "./$types";
 
   const { data }: PageProps = $props();
@@ -15,18 +16,8 @@
     const status = document.querySelector(`#${CSS.escape(`${codeId}-status`)}`);
     if (code === null || code === undefined || status === null) return;
 
-    try {
-      await navigator.clipboard.writeText(code.textContent ?? "");
-      status.textContent = "Copied.";
-    } catch {
-      const selection = window.getSelection();
-      const range = document.createRange();
-      range.selectNodeContents(code);
-      selection?.removeAllRanges();
-      selection?.addRange(range);
-      status.textContent =
-        "Clipboard unavailable. Code selected for manual copy.";
-    }
+    const result = await copyText(code.textContent ?? "", code);
+    status.textContent = result === "copied" ? "Copied." : MANUAL_COPY_STATUS;
   }
 
   function enhanceCodeCopy(node: HTMLElement): { destroy: () => void } {
