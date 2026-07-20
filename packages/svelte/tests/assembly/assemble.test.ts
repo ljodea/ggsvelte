@@ -137,8 +137,8 @@ describe("assemblePortableSpec", () => {
     });
     expect(assembled?.data).toEqual({
       values: [
-        { when: "2024-01-01T00:00:00.000Z", value: 1 },
-        { when: "2024-01-02T00:00:00.000Z", value: 2 },
+        { when: "2024-01-01", value: 1 },
+        { when: "2024-01-02", value: 2 },
       ],
     });
     expect(assembled?.scales?.x).toMatchObject({

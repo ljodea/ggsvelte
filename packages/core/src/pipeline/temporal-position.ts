@@ -7,6 +7,7 @@ import {
 
 import {
   cellsToNumeric,
+  cellsToQuantitative,
   type CellValue,
   type ColumnTable,
   type Discreteness,
@@ -23,6 +24,8 @@ export interface PositionConversionContext {
   requestedTime: boolean;
   requestedKind?: "date" | "datetime";
   forcedDiscrete: boolean;
+  /** Explicit linear/log scale with no temporal options: numeric coercion only. */
+  forcedNonTemporal: boolean;
 }
 
 export const AUTO_POSITION_CONVERSION: PositionConversionContext = Object.freeze({
@@ -31,6 +34,7 @@ export const AUTO_POSITION_CONVERSION: PositionConversionContext = Object.freeze
   options: Object.freeze({}),
   requestedTime: false,
   forcedDiscrete: false,
+  forcedNonTemporal: false,
 });
 
 const DISCRETE_POSITION_CONVERSION: PositionConversionContext = Object.freeze({
@@ -39,6 +43,7 @@ const DISCRETE_POSITION_CONVERSION: PositionConversionContext = Object.freeze({
   options: Object.freeze({}),
   requestedTime: false,
   forcedDiscrete: true,
+  forcedNonTemporal: false,
 });
 
 export function xConversionOf(binding: {
@@ -90,8 +95,14 @@ export function positionValuesToNumeric(
       disambiguation: conversion.options.disambiguation,
     }),
   });
-  const temporal = conversion.parser !== "auto" || parsed.decision.status === "temporal";
-  const numeric = temporal ? parsed.semantic.slice() : cellsToNumeric(values);
+  const temporal =
+    !conversion.forcedNonTemporal &&
+    (conversion.parser !== "auto" || parsed.decision.status === "temporal");
+  const numeric = conversion.forcedNonTemporal
+    ? cellsToQuantitative(values)
+    : temporal
+      ? parsed.semantic.slice()
+      : cellsToNumeric(values);
   if (temporal) {
     // Stats, trained domains, annotations, and public axis formatters may
     // already hold semantic epoch milliseconds. A concrete source parser is
@@ -122,6 +133,14 @@ export function positionConversionContext(
 ): PositionConversionContext {
   if (config === undefined) return AUTO_POSITION_CONVERSION;
   if (config.type === "band") return DISCRETE_POSITION_CONVERSION;
+  const requestedTime =
+    config.type === "time" ||
+    config.parse !== undefined ||
+    config.temporalKind !== undefined ||
+    config.timezone !== undefined ||
+    config.disambiguation !== undefined ||
+    config.parseFailure !== undefined;
+  const forcedNonTemporal = (config.type === "linear" || config.type === "log") && !requestedTime;
   return {
     parser: config.parse ?? "auto",
     sourceParser: config.parse ?? "auto",
@@ -131,15 +150,11 @@ export function positionConversionContext(
         disambiguation: config.disambiguation,
       }),
       ...(config.parseFailure !== undefined && { failurePolicy: config.parseFailure }),
+      ...(forcedNonTemporal && { inferTemporal: false }),
     },
-    requestedTime:
-      config.type === "time" ||
-      config.parse !== undefined ||
-      config.temporalKind !== undefined ||
-      config.timezone !== undefined ||
-      config.disambiguation !== undefined ||
-      config.parseFailure !== undefined,
+    requestedTime,
     ...(config.temporalKind !== undefined && { requestedKind: config.temporalKind }),
     forcedDiscrete: false,
+    forcedNonTemporal,
   };
 }

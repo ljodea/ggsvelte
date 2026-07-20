@@ -88,33 +88,93 @@ function isDataRef(data: DataInput): data is AuthoringDataRef {
   return false;
 }
 
-function portableCell(value: AuthoringCellValue): CellValue {
-  return value instanceof Date ? value.toISOString() : value;
+function snapshotCell(value: AuthoringCellValue): AuthoringCellValue {
+  return value instanceof Date ? new Date(value.getTime()) : value;
 }
 
-function portableRows(rows: AuthoringRows): Record<string, CellValue>[] {
+function snapshotRows(rows: AuthoringRows): Record<string, AuthoringCellValue>[] {
   return rows.map((row) =>
-    Object.fromEntries(Object.entries(row).map(([key, value]) => [key, portableCell(value)])),
+    Object.fromEntries(Object.entries(row).map(([key, value]) => [key, snapshotCell(value)])),
   );
 }
 
-function portableColumns(columns: AuthoringColumns): Record<string, CellValue[]> {
+function snapshotColumns(columns: AuthoringColumns): Record<string, AuthoringCellValue[]> {
   return Object.fromEntries(
     Object.entries(columns).map(([key, values]) => [
       key,
-      values.map((value) => portableCell(value)),
+      values.map((value) => snapshotCell(value)),
     ]),
   );
 }
 
-function toDataRef(data: DataInput): DataRef {
-  if (Array.isArray(data)) return { values: portableRows(data as AuthoringRows) };
+function toAuthoringDataRef(data: DataInput): AuthoringDataRef {
+  if (Array.isArray(data)) return { values: snapshotRows(data as AuthoringRows) };
   if (isDataRef(data)) {
     if ("name" in data) return data;
-    if ("values" in data) return { values: portableRows(data.values) };
-    return { columns: portableColumns(data.columns) };
+    if ("values" in data) return { values: snapshotRows(data.values) };
+    return { columns: snapshotColumns(data.columns) };
   }
-  return { columns: portableColumns(data as AuthoringColumns) };
+  return { columns: snapshotColumns(data as AuthoringColumns) };
+}
+
+function portableCell(value: AuthoringCellValue, calendarDate: boolean): CellValue {
+  if (!(value instanceof Date)) return value;
+  const iso = value.toISOString();
+  return calendarDate ? iso.slice(0, 10) : iso;
+}
+
+function portableRows(
+  rows: AuthoringRows,
+  calendarFields: ReadonlySet<string>,
+): Record<string, CellValue>[] {
+  return rows.map((row) =>
+    Object.fromEntries(
+      Object.entries(row).map(([key, value]) => [
+        key,
+        portableCell(value, calendarFields.has(key)),
+      ]),
+    ),
+  );
+}
+
+function portableColumns(
+  columns: AuthoringColumns,
+  calendarFields: ReadonlySet<string>,
+): Record<string, CellValue[]> {
+  return Object.fromEntries(
+    Object.entries(columns).map(([key, values]) => [
+      key,
+      values.map((value) => portableCell(value, calendarFields.has(key))),
+    ]),
+  );
+}
+
+function toDataRef(data: AuthoringDataRef, calendarFields: ReadonlySet<string>): DataRef {
+  if ("name" in data) return data;
+  if ("values" in data) return { values: portableRows(data.values, calendarFields) };
+  return { columns: portableColumns(data.columns, calendarFields) };
+}
+
+function mappedField(value: AesInput[keyof AesInput]): string | null {
+  if (typeof value === "string") return value;
+  return value !== undefined && value !== null && "field" in value ? value.field : null;
+}
+
+function calendarDateFields(state: BuilderState): ReadonlySet<string> {
+  const fields = new Set<string>();
+  for (const axis of ["x", "y"] as const) {
+    if (state.scales?.[axis]?.temporalKind !== "date") continue;
+    const channels = axis === "x" ? (["x"] as const) : (["y", "ymin", "ymax"] as const);
+    for (const channel of channels) {
+      const plotField = mappedField(state.aes?.[channel]);
+      if (plotField !== null) fields.add(plotField);
+      for (const layer of state.layers) {
+        const layerField = mappedField(layer.aes?.[channel]);
+        if (layerField !== null) fields.add(layerField);
+      }
+    }
+  }
+  return fields;
 }
 
 /** Point-layer sugar options: params plus aes and position (jitter/nudge). */
@@ -198,7 +258,7 @@ export interface GeomTextOptions extends TextParams {
 }
 
 interface BuilderState {
-  readonly data?: DataRef;
+  readonly data?: AuthoringDataRef;
   readonly aes?: AesInput;
   readonly layers: readonly LayerInput[];
   readonly facet?: FacetInput;
@@ -413,7 +473,7 @@ export class GGBuilder {
       height,
     } = this.#state;
     const input: SpecInput = {
-      ...(data !== undefined && { data }),
+      ...(data !== undefined && { data: toDataRef(data, calendarDateFields(this.#state)) }),
       ...(plotAes !== undefined && { aes: plotAes }),
       layers: [...layers],
       ...(facet !== undefined && { facet }),
@@ -436,7 +496,7 @@ export class GGBuilder {
 /** Start a plot: gg(data, aes({ x: 'displ', y: 'hwy' })).geomPoint().spec(). */
 export function gg(data?: DataInput, mapping?: AesInput): GGBuilder {
   return new GGBuilder({
-    ...(data !== undefined && { data: toDataRef(data) }),
+    ...(data !== undefined && { data: toAuthoringDataRef(data) }),
     ...(mapping !== undefined && { aes: mapping }),
     layers: [],
   });

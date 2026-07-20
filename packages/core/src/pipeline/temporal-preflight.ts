@@ -66,7 +66,7 @@ export function preflightTemporalBindings(input: {
   for (const binding of bindings) {
     const processAxis = (axis: "x" | "y"): void => {
       const axisConversion = axis === "x" ? binding.xConversion : binding.yConversion;
-      if (axisConversion.forcedDiscrete) return;
+      if (axisConversion.forcedDiscrete || axisConversion.forcedNonTemporal) return;
       assertTemporalConfiguration(axis, axisConversion);
       const fields =
         axis === "x" ? [binding.xField] : [binding.yField, binding.yminField, binding.ymaxField];

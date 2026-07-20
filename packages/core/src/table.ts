@@ -29,6 +29,8 @@ export interface ParsedColumnOptions {
   timezone?: string;
   disambiguation?: TemporalDisambiguation;
   failurePolicy?: TemporalFailurePolicy;
+  /** Internal position-scale override: coerce numeric strings without temporal inference. */
+  inferTemporal?: boolean;
 }
 
 export interface ParsedColumnView {
@@ -102,11 +104,29 @@ export function cellsToNumeric(column: readonly CellValue[]): Float64Array {
   return out;
 }
 
+/** Strict quantitative coercion for explicit linear/log scales. */
+export function cellsToQuantitative(column: readonly CellValue[]): Float64Array {
+  const out = new Float64Array(column.length);
+  for (let index = 0; index < column.length; index++) {
+    const value = column[index]!;
+    out[index] =
+      typeof value === "number"
+        ? value
+        : value instanceof Date
+          ? value.getTime()
+          : typeof value === "string" && value.trim() !== ""
+            ? Number(value)
+            : Number.NaN;
+  }
+  return out;
+}
+
 function optionsKey(options: ParsedColumnOptions): string {
   return [
     options.timezone ?? "UTC",
     options.disambiguation ?? "reject",
     options.failurePolicy ?? "error",
+    options.inferTemporal === false ? "numeric-only" : "infer-temporal",
   ].join("|");
 }
 
@@ -121,8 +141,11 @@ function requestKey(parser: TemporalParserSpec | "auto", options: ParsedColumnOp
   return `${parser === "auto" ? "auto" : canonicalTemporalParserKey(parser)}|${optionsKey(options)}`;
 }
 
-function fallbackNumeric(raw: readonly CellValue[]): { semantic: Float64Array; valid: Uint8Array } {
-  const semantic = cellsToNumeric(raw);
+function fallbackNumeric(
+  raw: readonly CellValue[],
+  inferTemporal: boolean,
+): { semantic: Float64Array; valid: Uint8Array } {
+  const semantic = inferTemporal ? cellsToNumeric(raw) : cellsToQuantitative(raw);
   const valid = new Uint8Array(raw.length);
   for (let index = 0; index < semantic.length; index++) {
     if (Number.isFinite(semantic[index]!)) valid[index] = 1;
@@ -242,10 +265,11 @@ export class ColumnTable {
 
     const raw = this.column(name);
     const parsed = parseTemporalColumn(raw, parser, parseOptions(options));
-    const temporal = parser !== "auto" || parsed.decision.status === "temporal";
+    const inferTemporal = options.inferTemporal !== false;
+    const temporal = parser !== "auto" || (inferTemporal && parsed.decision.status === "temporal");
     const values = temporal
       ? { semantic: parsed.semantic, valid: parsed.valid }
-      : fallbackNumeric(raw);
+      : fallbackNumeric(raw, inferTemporal);
     const view: ParsedColumnView = {
       raw,
       semantic: values.semantic,
@@ -300,9 +324,17 @@ export class ColumnTable {
       this.#typeCache.set(cacheKey, inherited);
       return inherited;
     }
-    const decision = this.parsed(name, parser, options).decision;
+    const view = this.parsed(name, parser, options);
     const type =
-      decision.status === "temporal" ? "temporal" : nonTemporalFieldType(this.column(name));
+      options.inferTemporal === false
+        ? this.column(name).every(
+            (value, index) => value === null || Number.isFinite(view.semantic[index]!),
+          )
+          ? "quantitative"
+          : "nominal"
+        : view.decision.status === "temporal"
+          ? "temporal"
+          : nonTemporalFieldType(this.column(name));
     this.#typeCache.set(cacheKey, type);
     return type;
   }

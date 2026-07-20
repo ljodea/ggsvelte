@@ -57,6 +57,25 @@ describe("temporal pipeline semantics", () => {
     expect(model.row(0)?.["when"]).toBe(first);
   });
 
+  it("renders builder Date cells through an explicit calendar scale", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { when: new Date("2024-01-01T00:00:00.000Z"), value: 1 },
+          { when: new Date("2024-01-02T00:00:00.000Z"), value: 2 },
+        ],
+        aes({ x: "when", y: "value" }),
+      )
+        .geomLine()
+        .scaleXDate({ parse: "iso", nice: false })
+        .spec(),
+      size,
+    );
+
+    expect(model.scales.x.type).toBe("time");
+    expect(model.scales.x.domain).toEqual([Date.UTC(2024, 0, 1), Date.UTC(2024, 0, 2)]);
+  });
+
   it("renders every identity geometry on an explicit discrete y scale", () => {
     const model = runPipeline(
       {
@@ -111,7 +130,28 @@ describe("temporal pipeline semantics", () => {
     expect(resolved.scale.domain).toEqual([Date.UTC(1835, 0, 1), Date.UTC(2026, 0, 1)]);
     expect(resolved.scale.colorOf("1835")).toMatch(/^#[0-9a-f]{6}$/);
     expect(resolved.scale.colorOf("1835")).not.toBe(resolved.scale.colorOf("2026"));
+    const legend = model.scene.legends.find(
+      (candidate) => candidate.type === "ramp" && candidate.scale === "color",
+    );
+    if (legend?.type !== "ramp") throw new Error("expected temporal ramp legend");
+    expect(legend.ticks.map(({ label }) => label)).toEqual(["1850", "1900", "1950", "2000"]);
   });
+
+  for (const type of ["linear", "log"] as const) {
+    it(`keeps numeric string years quantitative under an explicit ${type} scale`, () => {
+      const model = runPipeline(
+        gg(yearRows, aes({ x: "year", y: "value" }))
+          .geomLine()
+          .scales({ x: { type, nice: false } })
+          .spec(),
+        size,
+      );
+
+      expect(model.scales.x.type).toBe(type);
+      expect(model.scales.x.domain).toEqual([1835, 2026]);
+      expect(model.scaleDecisions).toHaveLength(0);
+    });
+  }
 
   it("lets an explicit discrete scale override string-year inference", () => {
     const model = runPipeline(

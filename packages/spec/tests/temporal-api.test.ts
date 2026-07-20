@@ -403,4 +403,24 @@ describe("temporal scale authoring surfaces", () => {
       }).ok,
     ).toBe(false);
   });
+
+  it("canonicalizes Date cells mapped to calendar scales as ISO dates", () => {
+    const spec = gg(
+      [
+        { when: new Date("2024-01-01T00:00:00.000Z"), value: 1 },
+        { when: new Date("2024-01-02T00:00:00.000Z"), value: 2 },
+      ],
+      aes({ x: "when", y: "value" }),
+    )
+      .geomLine()
+      .scaleXDate({ parse: "iso" })
+      .spec();
+
+    expect(spec.data).toEqual({
+      values: [
+        { when: "2024-01-01", value: 1 },
+        { when: "2024-01-02", value: 2 },
+      ],
+    });
+  });
 });

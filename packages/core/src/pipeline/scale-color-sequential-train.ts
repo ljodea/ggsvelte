@@ -64,6 +64,7 @@ export function trainSequentialColorScale(input: {
   if (temporalValues === null) return scale;
   return {
     ...scale,
+    temporal: true,
     colorOf(value: unknown): string | undefined {
       let key: string;
       try {
