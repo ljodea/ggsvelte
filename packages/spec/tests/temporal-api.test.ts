@@ -24,8 +24,17 @@ const compileOnlyTemporalTypeAssertions = (): void => {
   scaleXDate({ parse: (value: string) => new Date(value) });
   // @ts-expect-error parser names are a closed autocomplete union
   scaleXDate({ parse: "month-day-ish" });
-  // @ts-expect-error dateBreaks belongs to PR 2 after interval support exists
-  scaleXDate({ dateBreaks: "2 weeks" });
+  scaleXDate({
+    dateBreaks: "2 weeks",
+    dateMinorBreaks: "1 day",
+    dateLabels: "%e %b",
+    locale: "en-GB",
+    weekStart: "monday",
+  });
+  // @ts-expect-error weekStart is a closed weekday union
+  scaleXDate({ weekStart: "workweek" });
+  // @ts-expect-error temporal intervals remain portable strings, not callbacks
+  scaleXDate({ dateBreaks: () => [new Date()] });
 };
 void compileOnlyTemporalTypeAssertions;
 
@@ -71,6 +80,12 @@ describe("temporal scale schema", () => {
     for (const x of [
       { type: "time" as const, timezone: "Not/A_Zone" },
       { type: "time" as const, parse: { format: "%m-%d" } },
+      { type: "time" as const, dateBreaks: "0 days" },
+      { type: "time" as const, dateMinorBreaks: "1 fortnight" },
+      { type: "time" as const, dateLabels: "%Q" },
+      { type: "time" as const, locale: "not_a_locale" },
+      { type: "linear" as const, dateBreaks: "1 year" },
+      { type: "band" as const, dateLabels: "%Y" },
     ]) {
       const result = validate(
         {
@@ -81,7 +96,7 @@ describe("temporal scale schema", () => {
         {},
       );
       expect(result.ok).toBe(false);
-      if (!result.ok) expect(result.errors[0]?.path).toBe("/scales/x");
+      if (!result.ok) expect(result.errors[0]?.path.startsWith("/scales/x")).toBe(true);
     }
   });
 
@@ -358,7 +373,16 @@ describe("temporal scale authoring surfaces", () => {
   });
 
   it("normalizes helper, builder, and canonical scale configuration equally", () => {
-    const options = { parse: "dmy" as const, timezone: "UTC", disambiguation: "reject" as const };
+    const options = {
+      parse: "dmy" as const,
+      timezone: "UTC",
+      disambiguation: "reject" as const,
+      dateBreaks: "2 weeks",
+      dateMinorBreaks: "1 week",
+      dateLabels: "%e %b",
+      locale: "en-GB",
+      weekStart: "monday" as const,
+    };
     const helper = scaleXDate(options);
     expect(helper).toEqual({
       x: {
@@ -367,6 +391,11 @@ describe("temporal scale authoring surfaces", () => {
         parse: "dmy",
         timezone: "UTC",
         disambiguation: "reject",
+        dateBreaks: "2 weeks",
+        dateMinorBreaks: "1 week",
+        dateLabels: "%e %b",
+        locale: "en-GB",
+        weekStart: "monday",
       },
     });
 

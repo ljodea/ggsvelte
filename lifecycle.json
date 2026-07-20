@@ -404,6 +404,22 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "MAX_TEMPORAL_CANDIDATES": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "MAX_TEMPORAL_MAJOR_TICKS": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "MAX_TEMPORAL_MINOR_TICKS": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "MIN_TEMPORAL_LABEL_GAP_PX": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "ParsedTemporalColumn": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -624,7 +640,19 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "TEMPORAL_INTERVAL_UNITS": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TEMPORAL_LABEL_TOKENS": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "TEMPORAL_PARSER_NAMES": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TEMPORAL_WEEKDAYS": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -641,6 +669,26 @@
           "lifecycle": "experimental"
         },
         "TemporalFailure": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "TemporalInterval": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "TemporalIntervalError": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TemporalIntervalSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "TemporalIntervalSpecSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TemporalIntervalUnit": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -682,6 +730,14 @@
         },
         "TemporalScaleOptions": {
           "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "TemporalWeekStart": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "TemporalWeekStartSchema": {
+          "kind": "value",
           "lifecycle": "experimental"
         },
         "TextLayer": {
@@ -844,6 +900,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "parseTemporalInterval": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "portabilityIssues": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -897,6 +957,18 @@
           "lifecycle": "experimental"
         },
         "schemaArtifactJSON": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "temporalIntervalTicks": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "temporalLabelConfigurationError": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "temporalLocaleConfigurationError": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -968,6 +1040,14 @@
           "lifecycle": "experimental"
         },
         "AesMapping": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "AxisGuidePlan": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "AxisGuideTick": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -1180,6 +1260,10 @@
           "lifecycle": "experimental"
         },
         "GroupDerivation": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GuidePlan": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -1471,6 +1555,18 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "TemporalAxisPlanInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "TemporalLabelFormatOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "TemporalTickLabel": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "TextMeasurer": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1567,6 +1663,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "compileTemporalLabelFormat": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "countMarks": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -1612,6 +1712,10 @@
           "lifecycle": "experimental"
         },
         "fnv1a": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "formatTemporalTickSequence": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -1684,6 +1788,10 @@
           "lifecycle": "experimental"
         },
         "planStrata": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "planTemporalAxis": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -1865,6 +1973,14 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "AxisGuidePlan": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "AxisGuideTick": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "BoxplotParams": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1989,6 +2105,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "GuidePlan": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "INTERACTION_DIAGNOSTIC_CATALOG": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -2087,6 +2207,22 @@
         },
         "LegendSpec": {
           "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "MAX_TEMPORAL_CANDIDATES": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "MAX_TEMPORAL_MAJOR_TICKS": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "MAX_TEMPORAL_MINOR_TICKS": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "MIN_TEMPORAL_LABEL_GAP_PX": {
+          "kind": "value",
           "lifecycle": "experimental"
         },
         "MappedField": {
@@ -2305,11 +2441,35 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "TEMPORAL_INTERVAL_UNITS": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TEMPORAL_LABEL_TOKENS": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TEMPORAL_WEEKDAYS": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "TemporalDecision": {
           "kind": "type",
           "lifecycle": "experimental"
         },
         "TemporalDisambiguation": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "TemporalInterval": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "TemporalIntervalSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "TemporalIntervalUnit": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -2330,6 +2490,10 @@
           "lifecycle": "experimental"
         },
         "TemporalScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "TemporalWeekStart": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -2473,6 +2637,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "parseTemporalInterval": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "planStrata": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -2534,6 +2702,10 @@
           "lifecycle": "experimental"
         },
         "scale_y_discrete": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "temporalIntervalTicks": {
           "kind": "value",
           "lifecycle": "experimental"
         },

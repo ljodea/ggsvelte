@@ -69,6 +69,7 @@ describe("Axis", () => {
         expect(tick).toBeDefined();
         if (tick === undefined) throw new Error("expected tick");
         expect(tickGroups[i]?.getAttribute("transform")).toBe(tickTransform(tick.pos));
+        expect(tickGroups[i]?.querySelector("title")?.textContent).toBe(tick.fullLabel);
         const label = tickGroups[i]?.querySelector("text");
         if (tick.label !== "") {
           expect(label?.getAttribute("text-anchor")).toBe(anchor);
@@ -89,8 +90,8 @@ describe("Axis", () => {
     expect(panel).toBeDefined();
     if (panel === undefined) throw new Error("expected panel");
     const ticks = [
-      { pos: 10, label: "" },
-      { pos: 40, label: "mid" },
+      { pos: 10, value: 1, label: "", fullLabel: "", kind: "minor" as const },
+      { pos: 40, value: 2, label: "mid", fullLabel: "middle value", kind: "major" as const },
     ];
     const { container } = render(Axis, {
       ticks,
@@ -101,6 +102,8 @@ describe("Axis", () => {
     const tickGroups = [...container.querySelectorAll("g.gg-tick")];
     expect(tickGroups).toHaveLength(2);
     expect(tickGroups[0]?.querySelector("text")).toBeNull();
+    expect(tickGroups[0]?.querySelector("title")).toBeNull();
+    expect(tickGroups[1]?.querySelector("title")?.textContent).toBe("middle value");
     expect(tickGroups[1]?.querySelector("text")?.textContent).toBe("mid");
     model.dispose();
   });

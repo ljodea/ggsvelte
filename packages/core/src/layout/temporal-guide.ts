@@ -1,0 +1,457 @@
+import {
+  MAX_TEMPORAL_MAJOR_TICKS,
+  MAX_TEMPORAL_MINOR_TICKS,
+  parseTemporalInterval,
+  temporalIntervalTicks,
+  type PositionScaleSpec,
+  type TemporalInterval,
+  type TemporalKind,
+} from "@ggsvelte/spec";
+
+import type { PositionScale } from "../scales/train.js";
+import type { CellValue } from "../table.js";
+import { formatTemporalTickSequence, formatTime } from "./format.js";
+import type { Tick } from "./layout.js";
+import type { TextMeasurer } from "./measure.js";
+
+export interface AxisGuideTick {
+  value: number | CellValue;
+  label: string;
+  fullLabel: string;
+  kind: "major" | "minor";
+}
+
+export interface AxisGuidePlan {
+  type: "axis";
+  id: string;
+  aesthetic: "x" | "y";
+  panelIndex: number;
+  scaleType: "linear" | "log" | "time" | "band";
+  temporalKind: TemporalKind | null;
+  domain: readonly [number, number] | readonly CellValue[];
+  direction: "ascending" | "descending";
+  source: "automatic" | "interval" | "explicit";
+  interval: string | null;
+  locale: string | null;
+  timezone: string | null;
+  ticks: readonly AxisGuideTick[];
+  sourceBreaks?: readonly CellValue[];
+  overlap: boolean;
+  marginOverflow: boolean;
+  degraded: readonly string[];
+}
+
+export type GuidePlan = AxisGuidePlan;
+
+export function planBasicAxis(input: {
+  aesthetic: "x" | "y";
+  panelIndex: number;
+  scale: PositionScale;
+  ticks: readonly Tick[];
+  config: PositionScaleSpec | undefined;
+}): AxisGuidePlan {
+  const values = input.ticks.map((tick, index) =>
+    input.scale.type === "band"
+      ? tick.domainIndex === undefined
+        ? (input.scale.rawDomain[index] as CellValue)
+        : (input.scale.rawDomain[tick.domainIndex] as CellValue)
+      : (tick.value as number),
+  );
+  const ticks = input.ticks.map((tick, index) => ({
+    value: values[index]!,
+    label: tick.labeled ? tick.label : "",
+    fullLabel: tick.fullLabel ?? tick.label,
+    kind: tick.kind ?? ("major" as const),
+  }));
+  const source = input.config?.breaks === undefined ? "automatic" : "explicit";
+  return Object.freeze({
+    type: "axis" as const,
+    id: `axis:${input.aesthetic}:panel:${String(input.panelIndex)}`,
+    aesthetic: input.aesthetic,
+    panelIndex: input.panelIndex,
+    scaleType: input.scale.type,
+    temporalKind: null,
+    domain:
+      input.scale.type === "band"
+        ? Object.freeze(input.scale.rawDomain.map((value) => value as CellValue))
+        : Object.freeze([input.scale.domain[0], input.scale.domain[1]] as const),
+    direction: input.config?.reverse === true ? ("descending" as const) : ("ascending" as const),
+    source,
+    interval: null,
+    locale: null,
+    timezone: null,
+    ticks: Object.freeze(ticks.map((tick) => Object.freeze(tick))),
+    ...(input.config?.breaks !== undefined && {
+      sourceBreaks: Object.freeze([...input.config.breaks] as CellValue[]),
+    }),
+    overlap: false,
+    marginOverflow: false,
+    degraded: Object.freeze([]),
+  });
+}
+
+export interface TemporalAxisPlanInput {
+  aesthetic: "x" | "y";
+  panelIndex: number;
+  domain: readonly [number, number];
+  kind: TemporalKind;
+  orient: "horizontal" | "vertical";
+  extentPx: number;
+  reverse: boolean;
+  measurer: TextMeasurer;
+  fontSize: number;
+  marginCapPx: number;
+  config: Pick<
+    PositionScaleSpec,
+    | "dateBreaks"
+    | "dateMinorBreaks"
+    | "dateLabels"
+    | "labels"
+    | "locale"
+    | "timezone"
+    | "weekStart"
+    | "disambiguation"
+  >;
+  /** Numeric semantic epoch-ms breaks converted through the resolved source parser. */
+  breaks?: readonly number[];
+  sourceBreaks?: readonly CellValue[];
+  /** Pass-A automatic interval hint. Author intervals never use this. */
+  previousInterval?: string | null;
+}
+
+interface CandidateEvaluation {
+  interval: TemporalInterval;
+  ticks: AxisGuideTick[];
+  overlap: boolean;
+  marginOverflow: boolean;
+  count: number;
+  approxMs: number;
+}
+
+const SECOND = 1_000;
+const MINUTE = 60 * SECOND;
+const HOUR = 60 * MINUTE;
+const DAY = 24 * HOUR;
+const WEEK = 7 * DAY;
+const MONTH = 30.44 * DAY;
+const YEAR = 365.25 * DAY;
+
+const AUTOMATIC_INTERVALS: readonly TemporalInterval[] = [
+  ...[1, 2, 5, 10, 20, 50, 100, 200, 500].map((step) => interval("millisecond", step)),
+  ...[1, 2, 5, 10, 15, 30].map((step) => interval("second", step)),
+  ...[1, 2, 5, 10, 15, 30].map((step) => interval("minute", step)),
+  ...[1, 2, 3, 6, 12].map((step) => interval("hour", step)),
+  ...[1, 2].map((step) => interval("day", step)),
+  ...[1, 2].map((step) => interval("week", step)),
+  ...[1, 2, 3, 6].map((step) => interval("month", step)),
+  ...[1, 2].map((step) => interval("quarter", step)),
+  ...[1, 2, 5, 10, 20, 50, 100, 200, 500, 1_000, 2_000, 5_000].map((step) =>
+    interval("year", step),
+  ),
+];
+
+function interval(unit: TemporalInterval["unit"], step: number): TemporalInterval {
+  return { unit, step, key: `${String(step)} ${unit}${step === 1 ? "" : "s"}` };
+}
+
+function intervalApproxMs(value: TemporalInterval): number {
+  const unit = {
+    millisecond: 1,
+    second: SECOND,
+    minute: MINUTE,
+    hour: HOUR,
+    day: DAY,
+    week: WEEK,
+    month: MONTH,
+    quarter: 3 * MONTH,
+    year: YEAR,
+  }[value.unit];
+  return unit * value.step;
+}
+
+function temporalOptions(input: TemporalAxisPlanInput) {
+  return {
+    kind: input.kind,
+    timezone: input.kind === "date" ? "UTC" : (input.config.timezone ?? "UTC"),
+    weekStart: input.config.weekStart ?? "monday",
+    ...(input.config.disambiguation !== undefined && {
+      disambiguation: input.config.disambiguation,
+    }),
+  };
+}
+
+function buildTicks(
+  values: readonly number[],
+  intervalValue: TemporalInterval,
+  input: TemporalAxisPlanInput,
+): AxisGuideTick[] {
+  const labels = formatTemporalTickSequence(values, {
+    ...temporalOptions(input),
+    interval: intervalValue,
+    ...(input.config.dateLabels !== undefined && { pattern: input.config.dateLabels }),
+  });
+  if (input.config.dateLabels === undefined && input.config.labels !== undefined) {
+    for (let index = 0; index < labels.length; index++) {
+      labels[index] = {
+        ...labels[index]!,
+        label: formatTime(values[index]!, input.config.labels),
+      };
+    }
+  }
+  return values.map((value, index) => ({
+    value,
+    label: labels[index]!.label,
+    fullLabel: labels[index]!.fullLabel,
+    kind: "major" as const,
+  }));
+}
+
+function evaluateTicks(
+  ticks: readonly AxisGuideTick[],
+  input: TemporalAxisPlanInput,
+): { overlap: boolean; marginOverflow: boolean } {
+  if (ticks.length === 0) return { overlap: false, marginOverflow: false };
+  const [min, max] = input.domain;
+  const span = max - min;
+  const projected = ticks
+    .map((tick) => {
+      const value = tick.value as number;
+      const fraction = span === 0 ? 0.5 : (value - min) / span;
+      const pos = (input.reverse ? 1 - fraction : fraction) * input.extentPx;
+      return {
+        pos,
+        width: input.measurer.measureWidth(tick.label, input.fontSize),
+        height: input.measurer.measureHeight(input.fontSize),
+      };
+    })
+    .toSorted((left, right) => left.pos - right.pos);
+
+  let overlap = false;
+  for (let index = 1; index < projected.length; index++) {
+    const previous = projected[index - 1]!;
+    const current = projected[index]!;
+    const previousHalf = input.orient === "horizontal" ? previous.width / 2 : previous.height / 2;
+    const currentHalf = input.orient === "horizontal" ? current.width / 2 : current.height / 2;
+    if (previous.pos + previousHalf + 6 > current.pos - currentHalf) {
+      overlap = true;
+      break;
+    }
+  }
+  const marginOverflow = projected.some((tick) =>
+    input.orient === "horizontal"
+      ? tick.width / 2 > input.marginCapPx
+      : tick.width > input.marginCapPx,
+  );
+  return { overlap, marginOverflow };
+}
+
+function evaluateCandidate(
+  intervalValue: TemporalInterval,
+  input: TemporalAxisPlanInput,
+): CandidateEvaluation | null {
+  try {
+    const values = temporalIntervalTicks(input.domain[0], input.domain[1], intervalValue, {
+      ...temporalOptions(input),
+      maxTicks: MAX_TEMPORAL_MAJOR_TICKS,
+    });
+    if (values.length === 0) return null;
+    const ticks = buildTicks(values, intervalValue, input);
+    const measured = evaluateTicks(ticks, input);
+    return {
+      interval: intervalValue,
+      ticks,
+      ...measured,
+      count: ticks.length,
+      approxMs: intervalApproxMs(intervalValue),
+    };
+  } catch {
+    return null;
+  }
+}
+
+function candidateScore(
+  candidate: CandidateEvaluation,
+): readonly [number, number, number, number, string] {
+  const countPenalty =
+    candidate.count >= 3 && candidate.count <= 7
+      ? Math.abs(candidate.count - 5)
+      : 10 + Math.min(Math.abs(candidate.count - 3), Math.abs(candidate.count - 7));
+  return [
+    candidate.overlap ? 1 : 0,
+    candidate.marginOverflow ? 1 : 0,
+    countPenalty,
+    -candidate.approxMs,
+    candidate.interval.key,
+  ];
+}
+
+function compareScore(left: CandidateEvaluation, right: CandidateEvaluation): number {
+  const a = candidateScore(left);
+  const b = candidateScore(right);
+  for (let index = 0; index < a.length; index++) {
+    const av = a[index]!;
+    const bv = b[index]!;
+    if (av === bv) continue;
+    return av < bv ? -1 : 1;
+  }
+  return 0;
+}
+
+function automaticCandidate(input: TemporalAxisPlanInput): CandidateEvaluation {
+  const span = Math.max(1, input.domain[1] - input.domain[0]);
+  const previousApprox =
+    input.previousInterval === undefined || input.previousInterval === null
+      ? null
+      : intervalApproxMs(parseTemporalInterval(input.previousInterval));
+  const minimumApprox = previousApprox ?? span / 12;
+  const maximumApprox = Math.max(minimumApprox, span * 1.1);
+  let pool = AUTOMATIC_INTERVALS.filter((candidate) => {
+    const approx = intervalApproxMs(candidate);
+    return approx >= minimumApprox && approx <= maximumApprox;
+  });
+  if (pool.length === 0) {
+    pool = [
+      AUTOMATIC_INTERVALS.reduce((closest, candidate) =>
+        Math.abs(intervalApproxMs(candidate) - span / 5) <
+        Math.abs(intervalApproxMs(closest) - span / 5)
+          ? candidate
+          : closest,
+      ),
+    ];
+  }
+  const candidates = pool
+    .map((candidate) => evaluateCandidate(candidate, input))
+    .filter((candidate): candidate is CandidateEvaluation => candidate !== null)
+    .toSorted(
+      (left, right) =>
+        left.approxMs - right.approxMs || left.interval.key.localeCompare(right.interval.key),
+    );
+  if (candidates.length === 0) {
+    const fallback = interval("year", 1);
+    return {
+      interval: fallback,
+      ticks: [],
+      overlap: false,
+      marginOverflow: false,
+      count: 0,
+      approxMs: YEAR,
+    };
+  }
+
+  if (input.previousInterval !== undefined && input.previousInterval !== null) {
+    const previous = parseTemporalInterval(input.previousInterval);
+    const ladder = candidates.filter((candidate) => candidate.approxMs >= (previousApprox ?? 0));
+    const retained = ladder.find((candidate) => candidate.interval.key === previous.key);
+    if (retained !== undefined && !retained.overlap) return retained;
+    return ladder.find((candidate) => !candidate.overlap) ?? ladder.at(-1) ?? candidates.at(-1)!;
+  }
+  return candidates.toSorted(compareScore)[0]!;
+}
+
+function exactCandidate(input: TemporalAxisPlanInput): CandidateEvaluation {
+  const intervalValue = parseTemporalInterval(input.config.dateBreaks!);
+  const values = temporalIntervalTicks(input.domain[0], input.domain[1], intervalValue, {
+    ...temporalOptions(input),
+    maxTicks: MAX_TEMPORAL_MAJOR_TICKS,
+  });
+  const ticks = buildTicks(values, intervalValue, input);
+  return {
+    interval: intervalValue,
+    ticks,
+    ...evaluateTicks(ticks, input),
+    count: ticks.length,
+    approxMs: intervalApproxMs(intervalValue),
+  };
+}
+
+function explicitCandidate(input: TemporalAxisPlanInput): CandidateEvaluation {
+  const values = (input.breaks ?? []).filter(
+    (value) => Number.isFinite(value) && value >= input.domain[0] && value <= input.domain[1],
+  );
+  const intervalValue = inferExplicitInterval(values);
+  const ticks = buildTicks(values, intervalValue, input);
+  return {
+    interval: intervalValue,
+    ticks,
+    ...evaluateTicks(ticks, input),
+    count: ticks.length,
+    approxMs: intervalApproxMs(intervalValue),
+  };
+}
+
+function inferExplicitInterval(values: readonly number[]): TemporalInterval {
+  if (values.length < 2) return interval("year", 1);
+  const gap = Math.abs(values[1]! - values[0]!);
+  if (gap >= YEAR) return interval("year", Math.max(1, Math.round(gap / YEAR)));
+  if (gap >= MONTH) return interval("month", Math.max(1, Math.round(gap / MONTH)));
+  if (gap >= DAY) return interval("day", Math.max(1, Math.round(gap / DAY)));
+  if (gap >= HOUR) return interval("hour", Math.max(1, Math.round(gap / HOUR)));
+  if (gap >= MINUTE) return interval("minute", Math.max(1, Math.round(gap / MINUTE)));
+  if (gap >= SECOND) return interval("second", Math.max(1, Math.round(gap / SECOND)));
+  return interval("millisecond", Math.max(1, Math.round(gap)));
+}
+
+export function planTemporalAxis(input: TemporalAxisPlanInput): AxisGuidePlan {
+  const source =
+    input.breaks === undefined
+      ? input.config.dateBreaks === undefined
+        ? "automatic"
+        : "interval"
+      : "explicit";
+  let selected: CandidateEvaluation;
+  switch (source) {
+    case "automatic":
+      selected = automaticCandidate(input);
+      break;
+    case "interval":
+      selected = exactCandidate(input);
+      break;
+    case "explicit":
+      selected = explicitCandidate(input);
+      break;
+  }
+
+  const majorValues = new Set(selected.ticks.map((tick) => tick.value as number));
+  let minorTicks: AxisGuideTick[] = [];
+  if (input.config.dateMinorBreaks !== undefined) {
+    const minorInterval = parseTemporalInterval(input.config.dateMinorBreaks);
+    const values = temporalIntervalTicks(input.domain[0], input.domain[1], minorInterval, {
+      ...temporalOptions(input),
+      maxTicks: MAX_TEMPORAL_MINOR_TICKS,
+    });
+    minorTicks = values
+      .filter((value) => !majorValues.has(value))
+      .map((value) => ({ value, label: "", fullLabel: "", kind: "minor" as const }));
+  }
+
+  const degraded = [
+    ...(selected.overlap ? ["temporal-label-overlap"] : []),
+    ...(selected.marginOverflow ? ["temporal-label-margin-overflow"] : []),
+    ...(source === "explicit" &&
+    input.sourceBreaks !== undefined &&
+    input.sourceBreaks.length > selected.ticks.length
+      ? ["temporal-break-outside-domain"]
+      : []),
+  ];
+  return Object.freeze({
+    type: "axis" as const,
+    id: `axis:${input.aesthetic}:panel:${String(input.panelIndex)}`,
+    aesthetic: input.aesthetic,
+    panelIndex: input.panelIndex,
+    scaleType: "time" as const,
+    temporalKind: input.kind,
+    domain: Object.freeze([input.domain[0], input.domain[1]] as const),
+    direction: input.reverse ? ("descending" as const) : ("ascending" as const),
+    source,
+    interval: selected.interval.key,
+    locale: input.config.locale ?? "en-US",
+    timezone: input.kind === "date" ? "UTC" : (input.config.timezone ?? "UTC"),
+    ticks: Object.freeze([...selected.ticks, ...minorTicks].map((tick) => Object.freeze(tick))),
+    ...(input.sourceBreaks !== undefined && {
+      sourceBreaks: Object.freeze([...input.sourceBreaks]),
+    }),
+    overlap: selected.overlap,
+    marginOverflow: selected.marginOverflow,
+    degraded: Object.freeze(degraded),
+  });
+}

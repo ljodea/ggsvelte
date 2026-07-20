@@ -152,8 +152,8 @@ describe("axisTicks", () => {
       false,
     );
     expect(ticks).toEqual([
-      { pos: 0, label: "0" },
-      { pos: 100, label: "50" },
+      { pos: 0, value: 0, label: "0", fullLabel: "0", kind: "major" },
+      { pos: 100, value: 50, label: "50", fullLabel: "50", kind: "major" },
     ]);
   });
 
@@ -176,9 +176,9 @@ describe("axisTicks", () => {
       false,
     );
     expect(ticks).toEqual([
-      { pos: 50, label: "1" },
-      { pos: 150, label: "1" },
-      { pos: 250, label: "true" },
+      { pos: 50, value: 1, label: "1", fullLabel: "1", kind: "major" },
+      { pos: 150, value: "1", label: "1", fullLabel: "1", kind: "major" },
+      { pos: 250, value: true, label: "true", fullLabel: "true", kind: "major" },
     ]);
   });
 });

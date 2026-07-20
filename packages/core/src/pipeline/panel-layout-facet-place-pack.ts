@@ -25,6 +25,8 @@ export function packFacetPanelPlacement(input: {
     height: panelH,
     ticksH: ticksRun.x.ticks,
     ticksV: ticksRun.y.ticks,
+    ...(ticksRun.x.guidePlan !== undefined && { hGuidePlan: ticksRun.x.guidePlan }),
+    ...(ticksRun.y.guidePlan !== undefined && { vGuidePlan: ticksRun.y.guidePlan }),
     showAxisX: freeH || def.row === bottomMostRow,
     showAxisY: freeV || def.col === 0,
   };

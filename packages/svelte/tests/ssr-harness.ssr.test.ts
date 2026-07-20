@@ -1,3 +1,4 @@
+import { runPipeline } from "@ggsvelte/core";
 import { describe, expect, it } from "vitest";
 
 import GGPlot from "../src/lib/GGPlot.svelte";
@@ -51,6 +52,38 @@ describe("SSR release fixture", () => {
 
     expect(fixture.body).toContain('data-gg-ready="false"');
     expect(fixture.body).not.toContain('data-gg-ready="true"');
+  });
+
+  it("server-renders the same measured temporal guide labels as the core plan", () => {
+    const spec = {
+      data: {
+        values: [
+          { when: "2024-01-01T00:00:00Z", value: 1 },
+          { when: "2024-01-15T00:00:00Z", value: 2 },
+          { when: "2024-02-01T00:00:00Z", value: 3 },
+        ],
+      },
+      layers: [{ geom: "line" as const, aes: { x: "when", y: "value" } }],
+      scales: {
+        x: {
+          type: "time" as const,
+          temporalKind: "datetime" as const,
+          dateBreaks: "2 weeks",
+          dateLabels: "%e %b",
+          locale: "en-GB",
+          timezone: "Europe/London",
+        },
+      },
+    };
+    const model = runPipeline(spec, { width: 480, height: 320 });
+    const fixture = renderSsrFixture(GGPlot, { spec, width: 480, height: 320 });
+    const guide = model.guidePlans.find((plan) => plan.aesthetic === "x");
+
+    expect(guide).toBeDefined();
+    for (const tick of guide!.ticks.filter((entry) => entry.kind === "major")) {
+      expect(fixture.body).toContain(tick.label);
+      expect(fixture.body).toContain(`<title>${tick.fullLabel}</title>`);
+    }
   });
 
   it("renders the canonical browser hydration fixture", () => {

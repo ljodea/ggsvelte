@@ -95,6 +95,14 @@ export const PIPELINE_ERROR_CATALOG = {
     summary: "An explicit temporal parser rejected one or more source values.",
     fix: "Correct the rejected values, choose the matching parser, or explicitly opt into censoring.",
   },
+  "temporal-break-limit": {
+    summary: "An explicit temporal interval would generate more bounded ticks than allowed.",
+    fix: "Choose a coarser calendar interval.",
+  },
+  "temporal-break-progression": {
+    summary: "Calendar interval progression failed to advance monotonically.",
+    fix: "Choose another timezone, disambiguation policy, or interval and report the failing case.",
+  },
   "log-domain-not-positive": {
     summary: "A log scale received an explicit domain that is not strictly positive.",
     fix: "Restrict the domain to positive values, or use a linear scale.",
@@ -179,6 +187,18 @@ export const PIPELINE_WARNING_CATALOG = {
   },
   "temporal-values-censored": {
     summary: "An explicit temporal parser censored invalid source values by author request.",
+  },
+  "unused-scale-option": {
+    summary: "A lower-precedence scale option was ignored in favor of an explicit winner.",
+  },
+  "temporal-label-overlap": {
+    summary: "Authored or exhausted automatic temporal labels overlap at the available extent.",
+  },
+  "temporal-label-margin-overflow": {
+    summary: "A complete temporal label exceeds the bounded axis margin.",
+  },
+  "temporal-break-outside-domain": {
+    summary: "One or more explicit temporal breaks were outside the trained domain and omitted.",
   },
 } as const satisfies Record<string, { summary: string }>;
 

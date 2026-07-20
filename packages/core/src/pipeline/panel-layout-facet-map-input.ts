@@ -5,13 +5,14 @@ import type { LayoutTheme, Margins, TickFormatter } from "../layout/layout.js";
 import type { TextMeasurer } from "../layout/measure.js";
 
 import type { FacetPanelDef } from "./facets.js";
-import type { DisplayScalesFn } from "./panel-layout-types.js";
+import type { DisplayScalesFn, DisplayTemporalFn } from "./panel-layout-types.js";
 
 export interface MapFacetPanelPlacementsInput {
   facetPanels: readonly FacetPanelDef[];
   freeH: boolean;
   freeV: boolean;
   displayScales: DisplayScalesFn;
+  displayTemporal: DisplayTemporalFn;
   mMax: Margins;
   panelW: number;
   panelH: number;

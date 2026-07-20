@@ -1,0 +1,47 @@
+{
+  "id": "48-temporal-interval-labels",
+  "kind": "chart",
+  "prompt": "Create a line chart of value over observed_on. Use two-week calendar breaks, daily minor breaks, day-first labels such as 3 Apr, the en-GB locale, and Monday week starts. Keep the original ISO date values; do not preprocess them into indexes.",
+  "dataProfile": {
+    "fields": [
+      { "name": "observed_on", "type": "temporal" },
+      { "name": "value", "type": "quantitative" }
+    ],
+    "rowCount": 4
+  },
+  "data": {
+    "main": [
+      { "observed_on": "2024-04-03", "value": 4 },
+      { "observed_on": "2024-04-17", "value": 7 },
+      { "observed_on": "2024-05-01", "value": 5 },
+      { "observed_on": "2024-05-15", "value": 9 }
+    ]
+  },
+  "gold": {
+    "edition": 2,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "line",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "observed_on" },
+          "y": { "field": "value" }
+        }
+      }
+    ],
+    "scales": {
+      "x": {
+        "type": "time",
+        "dateBreaks": "2 weeks",
+        "dateMinorBreaks": "1 day",
+        "dateLabels": "%e %b",
+        "locale": "en-GB",
+        "weekStart": "monday"
+      }
+    }
+  },
+  "expectRefusal": false,
+  "notes": "Temporal interval and label controls remain closed portable JSON and preserve source dates."
+}

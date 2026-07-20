@@ -138,8 +138,24 @@ export {
 } from "./layout/ticks.js";
 export { defaultTimeTickFormat, timeTicks } from "./layout/time.js";
 export type { TimeTicksResult } from "./layout/time.js";
-export { formatTime, numberFormatter } from "./layout/format.js";
-export type { NumberFormatter } from "./layout/format.js";
+export {
+  compileTemporalLabelFormat,
+  formatTemporalTickSequence,
+  formatTime,
+  numberFormatter,
+} from "./layout/format.js";
+export type {
+  NumberFormatter,
+  TemporalLabelFormatOptions,
+  TemporalTickLabel,
+} from "./layout/format.js";
+export { planTemporalAxis } from "./layout/temporal-guide.js";
+export type {
+  AxisGuidePlan,
+  AxisGuideTick,
+  GuidePlan,
+  TemporalAxisPlanInput,
+} from "./layout/temporal-guide.js";
 export { DEFAULT_LAYOUT_THEME, layout, layoutPass, marginDelta } from "./layout/layout.js";
 export type {
   AxisResult,

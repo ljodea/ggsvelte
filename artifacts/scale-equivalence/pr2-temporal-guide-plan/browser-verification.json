@@ -1,0 +1,32 @@
+{
+  "url": "http://127.0.0.1:4173/playground",
+  "verifiedAt": "2026-07-20",
+  "viewports": [
+    { "width": 1280, "height": 720, "screenshot": "playground-1280.png" },
+    { "width": 375, "height": 812, "screenshot": "playground-375.png" }
+  ],
+  "sample": "ISO dates",
+  "semanticAssertions": {
+    "scaleDecision": "temporal · iso",
+    "precision": "date",
+    "validatedCount": 3,
+    "selectedInterval": "2 weeks",
+    "visibleLabels": ["Jan 8, 2024", "22", "Feb 5, 2024", "19"],
+    "standaloneFullLabels": ["2024-01-08", "2024-01-22", "2024-02-05", "2024-02-19"],
+    "titleIsFirstTickChild": true,
+    "layout": "fits",
+    "mobileHorizontalOverflowPx": 0,
+    "consoleErrorsAfterCleanLoad": 0
+  },
+  "privacySafeReport": {
+    "copiedStatusObserved": true,
+    "decisionCount": 1,
+    "guideCount": 2,
+    "containsRows": false,
+    "containsDomains": false,
+    "containsLabels": false,
+    "containsVisibleLabel": false,
+    "containsSourceEpoch": false
+  },
+  "negativeControl": "The Ambiguous dates sample remains non-temporal unless the author supplies an explicit parser; temporal inference does not silently choose DMY or MDY."
+}

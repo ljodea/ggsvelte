@@ -32,5 +32,6 @@ export interface ScaleDecision {
   validatedCount: number;
   ambiguity: readonly string[];
   domain?: readonly (string | number | boolean | null)[];
+  guidePlanIds?: readonly string[];
   portableOverride: Readonly<PositionScaleSpec>;
 }

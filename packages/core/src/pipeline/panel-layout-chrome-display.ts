@@ -31,8 +31,8 @@ export function resolvePanelLayoutDisplay(input: PanelLayoutDisplayInput): Panel
     warnings,
   } = input;
 
-  const formatX = makeAxisFormatter("x", xScale, scalesConfig.x, warnings);
-  const formatY = makeAxisFormatter("y", yScale, scalesConfig.y, warnings);
+  const formatX = makeAxisFormatter("x", xScale, scalesConfig.x, warnings, input.xTemporalKind);
+  const formatY = makeAxisFormatter("y", yScale, scalesConfig.y, warnings, input.yTemporalKind);
   const { hTitle, vTitle } = flipDisplayTitles(flip, xTitle, yTitle);
   const { formatH, formatV } = flipDisplayFormatters(flip, formatX, formatY);
   const convertedBreaks = (axis: "x" | "y"): (number | string)[] | undefined => {
@@ -58,6 +58,38 @@ export function resolvePanelLayoutDisplay(input: PanelLayoutDisplayInput): Panel
   };
   const { hBreaks, vBreaks } = flipDisplayBreaks(flip, convertedBreaks("x"), convertedBreaks("y"));
   const { freeH, freeV } = flipDisplayFreeFlags(flip, freeX, freeY);
+  const displayScales = makeDisplayScalesFn(flip, panelScales);
+  const displayTemporal = (panelIndex: number) => {
+    const xKind = input.xTemporalKind ?? scalesConfig.x?.temporalKind ?? null;
+    const yKind = input.yTemporalKind ?? scalesConfig.y?.temporalKind ?? null;
+    const x =
+      xScale.type === "time" && xKind !== null
+        ? {
+            aesthetic: "x" as const,
+            panelIndex,
+            kind: xKind,
+            config: scalesConfig.x ?? {},
+            ...(scalesConfig.x?.breaks !== undefined && {
+              sourceBreaks: scalesConfig.x.breaks,
+            }),
+          }
+        : undefined;
+    const y =
+      yScale.type === "time" && yKind !== null
+        ? {
+            aesthetic: "y" as const,
+            panelIndex,
+            kind: yKind,
+            config: scalesConfig.y ?? {},
+            ...(scalesConfig.y?.breaks !== undefined && {
+              sourceBreaks: scalesConfig.y.breaks,
+            }),
+          }
+        : undefined;
+    return flip
+      ? { ...(y !== undefined && { h: y }), ...(x !== undefined && { v: x }) }
+      : { ...(x !== undefined && { h: x }), ...(y !== undefined && { v: y }) };
+  };
 
   return {
     hTitle,
@@ -70,6 +102,7 @@ export function resolvePanelLayoutDisplay(input: PanelLayoutDisplayInput): Panel
     vBreaks,
     freeH,
     freeV,
-    displayScales: makeDisplayScalesFn(flip, panelScales),
+    displayScales,
+    displayTemporal,
   };
 }

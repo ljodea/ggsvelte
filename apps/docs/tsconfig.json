@@ -4,6 +4,9 @@
   "compilerOptions": {
     "strict": true,
     "moduleResolution": "bundler",
+    // Use the shipped Temporal polyfill declarations until the proposal lands;
+    // TypeScript 6's esnext draft and @js-temporal/polyfill 0.5 have incompatible nominal types.
+    "lib": ["ES2024", "DOM", "DOM.Iterable"],
     // No ambient @types (the hoisted @types/bun's import.meta declarations
     // clash with vite/client's): the app code uses no bun/node globals.
     "types": []

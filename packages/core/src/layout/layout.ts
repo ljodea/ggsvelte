@@ -23,6 +23,11 @@
  * Label rotation is intentionally NOT implemented (skipped per spike scope).
  */
 
+import type { PositionScaleSpec, TemporalKind } from "@ggsvelte/spec";
+
+import type { CellValue } from "../table.js";
+import type { AxisGuidePlan } from "./temporal-guide.js";
+import { planTemporalAxis } from "./temporal-guide.js";
 import type { TextMeasurer } from "./measure.js";
 import {
   defaultLogTickFormat,
@@ -36,13 +41,27 @@ import { defaultTimeTickFormat, timeTicks } from "./time.js";
 export type Domain =
   | { type: "linear"; min: number; max: number; breaks?: readonly number[] }
   | { type: "log"; min: number; max: number; breaks?: readonly number[] }
-  | { type: "time"; min: number; max: number; breaks?: readonly number[] }
+  | {
+      type: "time";
+      min: number;
+      max: number;
+      breaks?: readonly number[];
+      temporal?: TemporalLayoutDomainContext;
+    }
   | {
       type: "band";
       categories: string[];
       rawCategories?: readonly unknown[];
       breaks?: readonly (number | string)[];
     };
+
+export interface TemporalLayoutDomainContext {
+  aesthetic: "x" | "y";
+  panelIndex: number;
+  kind: TemporalKind;
+  config: PositionScaleSpec;
+  sourceBreaks?: readonly CellValue[];
+}
 
 export interface Margins {
   top: number;
@@ -54,6 +73,8 @@ export interface Margins {
 export interface Tick {
   value: number | string;
   label: string;
+  fullLabel?: string;
+  kind?: "major" | "minor";
   /** Typed band-domain position; avoids indexing filtered/reordered breaks. */
   domainIndex?: number;
   /** false when band-label thinning hides this tick's label. */
@@ -62,6 +83,7 @@ export interface Tick {
 
 export interface AxisResult {
   ticks: Tick[];
+  guidePlan?: AxisGuidePlan;
   /** band thinning: only every n-th tick keeps its label. 1 = all. */
   labelEvery: number;
   truncated: boolean;
@@ -119,6 +141,8 @@ export interface LayoutInput {
    * (fixes the M0c follow-up in decision 0007).
    */
   reserve?: Partial<Margins>;
+  /** @internal Pass-A temporal plans used as monotonic Pass-B hints. */
+  previousGuidePlans?: Readonly<{ x?: AxisGuidePlan; y?: AxisGuidePlan }>;
 }
 
 export interface PassResult {
@@ -147,6 +171,16 @@ interface AxisTicks {
   ticks: Tick[];
   step: number;
   empty: boolean;
+  guidePlan?: AxisGuidePlan;
+}
+
+interface DeriveTicksContext {
+  orient: "horizontal" | "vertical";
+  extentPx: number;
+  measurer: TextMeasurer;
+  fontSize: number;
+  marginCapPx: number;
+  previousGuidePlan?: AxisGuidePlan;
 }
 
 function smallestGap(values: readonly number[]): number {
@@ -163,6 +197,7 @@ function deriveTicks(
   requestedCount: number,
   format: TickFormatter | undefined,
   labelEvery: number,
+  context: DeriveTicksContext,
 ): AxisTicks {
   if (domain.type === "band") {
     const rawCategories = domain.rawCategories ?? domain.categories;
@@ -189,7 +224,7 @@ function deriveTicks(
   }
 
   // Explicit breaks override derivation (out-of-domain breaks are dropped).
-  if (domain.breaks !== undefined) {
+  if (domain.breaks !== undefined && !(domain.type === "time" && domain.temporal !== undefined)) {
     const values = domain.breaks.filter((v) => Number.isFinite(v) && v >= min && v <= max);
     const step = smallestGap(values);
     const fmt: (v: number) => string = format
@@ -207,6 +242,40 @@ function deriveTicks(
   }
 
   if (domain.type === "time") {
+    if (domain.temporal !== undefined) {
+      const plan = planTemporalAxis({
+        aesthetic: domain.temporal.aesthetic,
+        panelIndex: domain.temporal.panelIndex,
+        domain: [min, max],
+        kind: domain.temporal.kind,
+        orient: context.orient,
+        extentPx: context.extentPx,
+        reverse: domain.temporal.config.reverse === true,
+        measurer: context.measurer,
+        fontSize: context.fontSize,
+        marginCapPx: context.marginCapPx,
+        config: domain.temporal.config,
+        ...(domain.breaks !== undefined && { breaks: domain.breaks }),
+        ...(domain.temporal.sourceBreaks !== undefined && {
+          sourceBreaks: domain.temporal.sourceBreaks,
+        }),
+        ...(context.previousGuidePlan?.interval !== undefined && {
+          previousInterval: context.previousGuidePlan.interval,
+        }),
+      });
+      return {
+        ticks: plan.ticks.map((tick) => ({
+          value: tick.value as number,
+          label: tick.label,
+          fullLabel: tick.fullLabel,
+          kind: tick.kind,
+          labeled: tick.kind === "major" && tick.label !== "",
+        })),
+        step: NaN,
+        empty: plan.ticks.length === 0,
+        guidePlan: plan,
+      };
+    }
     const values = timeTicks(min, max, requestedCount).values;
     const fmt: (v: number) => string = format ? (v) => format(v, NaN) : defaultTimeTickFormat;
     return {
@@ -286,18 +355,6 @@ export function layoutPass(margins: Margins, input: LayoutInput, theme: LayoutTh
 
   const degradations: string[] = [];
 
-  // --- derive ticks (tick count depends on the provisional range) ---
-  let xCount = clamp(Math.round(innerW / targetPxPerTickX), 2, maxTicks);
-  let yCount = clamp(Math.round(innerH / targetPxPerTickY), 2, maxTicks);
-  let xEvery = 1;
-  let yEvery = 1;
-  let x = deriveTicks(input.x, xCount, input.formatX, xEvery);
-  let y = deriveTicks(input.y, yCount, input.formatY, yEvery);
-  if (x.empty) degradations.push("x:empty-domain");
-  if (y.empty) degradations.push("y:empty-domain");
-
-  const labelH = measurer.measureHeight(fontSize);
-
   // --- caps (per side, fraction of the plot dimension) ---
   // Caps are floored to the quantization grid so a quantized-up margin can
   // never exceed the cap (the cap wins over the min-margin floor too).
@@ -307,12 +364,46 @@ export function layoutPass(margins: Margins, input: LayoutInput, theme: LayoutTh
   const capTop = capify(maxMarginFraction * height);
   const capBottom = capify(maxMarginFraction * height);
 
+  // --- derive ticks (tick count depends on the provisional range) ---
+  let xCount = clamp(Math.round(innerW / targetPxPerTickX), 2, maxTicks);
+  let yCount = clamp(Math.round(innerH / targetPxPerTickY), 2, maxTicks);
+  let xEvery = 1;
+  let yEvery = 1;
+  const xContext: DeriveTicksContext = {
+    orient: "horizontal",
+    extentPx: innerW,
+    measurer,
+    fontSize,
+    marginCapPx: capRight,
+    ...(input.previousGuidePlans?.x !== undefined && {
+      previousGuidePlan: input.previousGuidePlans.x,
+    }),
+  };
+  const yContext: DeriveTicksContext = {
+    orient: "vertical",
+    extentPx: innerH,
+    measurer,
+    fontSize,
+    marginCapPx: capLeft,
+    ...(input.previousGuidePlans?.y !== undefined && {
+      previousGuidePlan: input.previousGuidePlans.y,
+    }),
+  };
+  let x = deriveTicks(input.x, xCount, input.formatX, xEvery, xContext);
+  let y = deriveTicks(input.y, yCount, input.formatY, yEvery, yContext);
+  if (x.empty) degradations.push("x:empty-domain");
+  if (y.empty) degradations.push("y:empty-domain");
+  if (x.guidePlan !== undefined) degradations.push(...x.guidePlan.degraded);
+  if (y.guidePlan !== undefined) degradations.push(...y.guidePlan.degraded);
+
+  const labelH = measurer.measureHeight(fontSize);
+
   // --- y axis → left margin (label width + tick + gap) ---
   let xTruncated = false;
   let yTruncated = false;
   const leftFixed = tickLength + tickLabelGap;
   let yLabelW = maxLabeledWidth(y, measurer, fontSize);
-  if (!y.empty && yLabelW + leftFixed > capLeft) {
+  if (!y.empty && y.guidePlan === undefined && yLabelW + leftFixed > capLeft) {
     // Degrade 1: tick thinning.
     while (yLabelW + leftFixed > capLeft) {
       if (input.y.type === "band") {
@@ -322,7 +413,7 @@ export function layoutPass(margins: Margins, input: LayoutInput, theme: LayoutTh
         if (yCount <= 2) break;
         yCount = Math.max(2, Math.floor(yCount / 2));
       }
-      y = deriveTicks(input.y, yCount, input.formatY, yEvery);
+      y = deriveTicks(input.y, yCount, input.formatY, yEvery, yContext);
       degradations.push("y:thin");
       yLabelW = maxLabeledWidth(y, measurer, fontSize);
     }
@@ -351,7 +442,7 @@ export function layoutPass(margins: Margins, input: LayoutInput, theme: LayoutTh
     return lx.length === 0 ? 0 : measurer.measureWidth(lx.at(-1)!.label, fontSize) / 2;
   };
   lastXLabelW = computeLastXW();
-  if (!x.empty && lastXLabelW > capRight) {
+  if (!x.empty && x.guidePlan === undefined && lastXLabelW > capRight) {
     while (lastXLabelW > capRight) {
       if (input.x.type === "band") {
         if (xEvery * 2 >= x.ticks.length) break;
@@ -360,7 +451,7 @@ export function layoutPass(margins: Margins, input: LayoutInput, theme: LayoutTh
         if (xCount <= 2) break;
         xCount = Math.max(2, Math.floor(xCount / 2));
       }
-      x = deriveTicks(input.x, xCount, input.formatX, xEvery);
+      x = deriveTicks(input.x, xCount, input.formatX, xEvery, xContext);
       degradations.push("x:thin");
       lastXLabelW = computeLastXW();
     }
@@ -400,8 +491,18 @@ export function layoutPass(margins: Margins, input: LayoutInput, theme: LayoutTh
 
   return {
     margins: out,
-    x: { ticks: x.ticks, labelEvery: xEvery, truncated: xTruncated },
-    y: { ticks: y.ticks, labelEvery: yEvery, truncated: yTruncated },
+    x: {
+      ticks: x.ticks,
+      labelEvery: xEvery,
+      truncated: xTruncated,
+      ...(x.guidePlan !== undefined && { guidePlan: x.guidePlan }),
+    },
+    y: {
+      ticks: y.ticks,
+      labelEvery: yEvery,
+      truncated: yTruncated,
+      ...(y.guidePlan !== undefined && { guidePlan: y.guidePlan }),
+    },
     degradations: [...new Set(degradations)],
   };
 }
@@ -420,7 +521,17 @@ export function marginDelta(a: Margins, b: Margins): number {
 export function layout(input: LayoutInput): LayoutResult {
   const theme: LayoutTheme = { ...DEFAULT_LAYOUT_THEME, ...input.theme };
   const passA = layoutPass(theme.marginPriors, input, theme);
-  const passB = layoutPass(passA.margins, input, theme);
+  const passB = layoutPass(
+    passA.margins,
+    {
+      ...input,
+      previousGuidePlans: {
+        ...(passA.x.guidePlan !== undefined && { x: passA.x.guidePlan }),
+        ...(passA.y.guidePlan !== undefined && { y: passA.y.guidePlan }),
+      },
+    },
+    theme,
+  );
   const converged = marginDelta(passA.margins, passB.margins) <= 0.5;
   return {
     ...passB,

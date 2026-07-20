@@ -39,6 +39,8 @@
  */
 import Type, { type Static, type TLiteral, type TSchema } from "typebox";
 
+import { TemporalIntervalSpecSchema, TemporalWeekStartSchema } from "./temporal-guides.js";
+
 import { TemporalParserSpecSchema } from "./temporal.js";
 
 /** Named categorical color schemes known to this schema version. */
@@ -1175,6 +1177,24 @@ const SpecDeclarations = {
           },
         ),
       ),
+      dateBreaks: Type.Optional(TemporalIntervalSpecSchema),
+      dateMinorBreaks: Type.Optional(TemporalIntervalSpecSchema),
+      dateLabels: Type.Optional(
+        Type.String({
+          minLength: 1,
+          maxLength: 128,
+          description:
+            "Strict temporal label format. Supported tokens: %Y %y %m %b %B %d %e %a %A %H %I %M %S %L %p %q %z %Z %%.",
+        }),
+      ),
+      locale: Type.Optional(
+        Type.String({
+          minLength: 1,
+          maxLength: 128,
+          description: 'BCP 47 locale for temporal labels. Default "en-US".',
+        }),
+      ),
+      weekStart: Type.Optional(TemporalWeekStartSchema),
       domain: Type.Optional(
         Type.Array(Type.Ref("DomainValue"), {
           minItems: 1,

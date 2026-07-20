@@ -41,6 +41,7 @@ const svg = renderToSVGString(spec, { width: 640, height: 400 });
 const model = runPipeline(spec, { width: 640, height: 400 });
 console.log(model.scaleDecisions); // inferred parser, precision, evidence, domain
 console.log(model.scaleDiagnostics); // bounded problem/cause/fix advisories
+console.log(model.guidePlans); // per-panel intervals, visible/full labels, fit state
 model.scene; // panels, axes, legends, geometry batches (typed arrays)
 model.advisories; // every heuristic decision, with how-to-override
 model.warnings; // degraded-but-rendered conditions

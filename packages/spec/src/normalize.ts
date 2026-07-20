@@ -207,13 +207,23 @@ function normalizePositionScale(scale: PositionScaleSpec): PositionScaleSpec {
     } = scale;
     return band;
   }
+  const hasTemporalGuideOption =
+    scale.dateBreaks !== undefined ||
+    scale.dateMinorBreaks !== undefined ||
+    scale.dateLabels !== undefined ||
+    scale.locale !== undefined ||
+    scale.weekStart !== undefined;
+  if ((scale.type === "linear" || scale.type === "log") && hasTemporalGuideOption) {
+    return { ...scale };
+  }
   const requestsTime =
     scale.type === "time" ||
     scale.temporalKind !== undefined ||
     scale.parse !== undefined ||
     scale.parseFailure !== undefined ||
     scale.timezone !== undefined ||
-    scale.disambiguation !== undefined;
+    scale.disambiguation !== undefined ||
+    hasTemporalGuideOption;
   return requestsTime ? { ...scale, type: "time" } : { ...scale };
 }
 

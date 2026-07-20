@@ -30,6 +30,10 @@ describe("panel layout via runPipeline", () => {
     expect(p.height).toBeGreaterThan(150);
     expect(p.axisX).not.toBeNull();
     expect(p.axisY).not.toBeNull();
+    expect(model.guidePlans.map((plan) => [plan.aesthetic, plan.scaleType])).toEqual([
+      ["x", "linear"],
+      ["y", "linear"],
+    ]);
   });
 
   it("facet wrap places panels on a grid with strips", () => {

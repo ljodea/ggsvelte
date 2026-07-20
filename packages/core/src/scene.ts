@@ -16,6 +16,7 @@
  *
  * @internal
  */
+import type { CellValue } from "./table.js";
 import type { ThemeTokens } from "./theme.js";
 
 // Interaction identity boundary (keep in sync with the implementation plan):
@@ -132,7 +133,12 @@ export type GeometryBatch = PointsBatch | PathsBatch | RectsBatch | SegmentsBatc
 export interface SceneTick {
   /** Position along the axis, panel-local px. */
   pos: number;
+  /** Semantic scale value (epoch milliseconds for temporal axes). */
+  value: CellValue;
   label: string;
+  /** Standalone accessible text; contextual visible labels may be shorter. */
+  fullLabel: string;
+  kind: "major" | "minor";
 }
 
 export interface SceneAxis {
@@ -158,8 +164,8 @@ export interface ScenePanel {
   axisX: SceneTick[] | null;
   /** Left-axis ticks for this panel (null = no y axis on this panel). */
   axisY: SceneTick[] | null;
-  /** Grid line positions (panel-local px; drawn on EVERY panel). */
-  grid: { x: number[]; y: number[] };
+  /** Major/minor grid line positions (panel-local px; drawn on EVERY panel). */
+  grid: { x: number[]; y: number[]; minorX: number[]; minorY: number[] };
 }
 
 /** Facet strip band height in px (drawn above each faceted panel). */

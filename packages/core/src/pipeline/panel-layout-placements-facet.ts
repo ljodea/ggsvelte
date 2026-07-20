@@ -29,6 +29,7 @@ export function placeFacetPanelsFromChrome(input: {
     layoutHeight: chrome.layoutHeight,
     topBand: chrome.topBand,
     displayScales: chrome.displayScales,
+    displayTemporal: chrome.displayTemporal,
     hBreaks: chrome.hBreaks,
     vBreaks: chrome.vBreaks,
     formatH: chrome.formatH,

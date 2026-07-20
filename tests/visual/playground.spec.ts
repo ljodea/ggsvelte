@@ -50,6 +50,18 @@ test("valid local JSON replaces the preview without network or code execution", 
   expect(pageErrors).toEqual([]);
 });
 
+test("temporal samples render after clearing the optional color field", async ({ page }) => {
+  await page.goto("/playground");
+  await settleVisualState(page);
+
+  await page.getByRole("button", { name: "ISO dates" }).click();
+
+  await expect(page.getByText("ISO dates sample loaded. Nothing was uploaded.")).toBeVisible();
+  await expect(page.getByRole("alert")).toHaveCount(0);
+  await expect(page.locator('.gg-plot-root[data-gg-ready="true"]')).toHaveCount(1);
+  await expect(page.getByRole("heading", { name: "Axis plans" })).toBeVisible();
+});
+
 test("invalid data is actionable, takes focus, and preserves the last good chart", async ({
   page,
 }) => {

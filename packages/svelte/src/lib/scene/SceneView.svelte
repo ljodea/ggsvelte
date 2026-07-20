@@ -147,6 +147,27 @@
             fill={themeVar("panel", scene.theme)}
           />
         {/if}
+        {#if (scene.theme.gridX && (panel.grid.minorX?.length ?? 0) > 0) || (scene.theme.gridY && (panel.grid.minorY?.length ?? 0) > 0)}
+          <g
+            class="gg-grid gg-grid-minor"
+            stroke={themeVar("grid", scene.theme)}
+            stroke-width={scene.theme.gridWidth}
+            stroke-dasharray={scene.theme.gridDasharray || undefined}
+            opacity="0.5"
+            vector-effect="non-scaling-stroke"
+          >
+            {#if scene.theme.gridX}
+              {#each panel.grid.minorX ?? [] as gx, gi (gi)}
+                <line x1={gx} y1="0" x2={gx} y2={panel.height} />
+              {/each}
+            {/if}
+            {#if scene.theme.gridY}
+              {#each panel.grid.minorY ?? [] as gy, gi (gi)}
+                <line x1="0" y1={gy} x2={panel.width} y2={gy} />
+              {/each}
+            {/if}
+          </g>
+        {/if}
         <g
           class="gg-grid"
           stroke={themeVar("grid", scene.theme)}

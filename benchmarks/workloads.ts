@@ -13,7 +13,14 @@
  *
  * Data is generated from a seeded PRNG so runs are comparable.
  */
-import { buildCandidateStore, planStrata, renderToSVGString, runPipeline } from "@ggsvelte/core";
+import {
+  buildCandidateStore,
+  MetricsTableMeasurer,
+  planStrata,
+  planTemporalAxis,
+  renderToSVGString,
+  runPipeline,
+} from "@ggsvelte/core";
 import { drawStratum } from "@ggsvelte/core/dom";
 import { aes, gg } from "@ggsvelte/spec";
 import type { PortableSpec } from "@ggsvelte/spec";
@@ -244,6 +251,29 @@ export function buildWorkloads(smoke: boolean): Workload[] {
       group: `temporal line ${fmtK(n)}`,
       bench: `runPipeline temporal line ${fmtK(n)}`,
       fn: () => runPipeline(spec, opts),
+    });
+  }
+
+  {
+    const measurer = new MetricsTableMeasurer();
+    const input = {
+      aesthetic: "x" as const,
+      panelIndex: 0,
+      domain: [Date.UTC(1800, 0, 1), Date.UTC(2100, 0, 1)] as const,
+      kind: "date" as const,
+      orient: "horizontal" as const,
+      extentPx: 800,
+      reverse: false,
+      measurer,
+      fontSize: 11.5,
+      marginCapPx: 92,
+      config: {},
+    };
+    workloads.push({
+      id: "temporal guide candidate-selection 300y",
+      group: "temporal guide candidate selection",
+      bench: "planTemporalAxis 300-year domain",
+      fn: () => planTemporalAxis(input),
     });
   }
 

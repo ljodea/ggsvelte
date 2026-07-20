@@ -84,6 +84,7 @@
   let eventLog = $state<string[]>([]);
   let alertElement = $state<HTMLDivElement>();
   let scaleDecisions = $state<RenderModel["scaleDecisions"]>([]);
+  let guidePlans = $state<RenderModel["guidePlans"]>([]);
 
   const numericFields = $derived(
     fields.filter((field) => field.kind === "number"),
@@ -106,6 +107,12 @@
     const mapping: Record<string, string> = { x: xField, y: yField };
     if (colorField !== "") mapping.color = colorField;
     return mapping as AesInput;
+  });
+  const labs = $derived({
+    title: "My local data",
+    x: xField,
+    y: yField,
+    ...(colorField === "" ? {} : { color: colorField }),
   });
   const layers = $derived.by(
     () =>
@@ -204,8 +211,58 @@
     revision += 1;
     eventLog = [];
     scaleDecisions = [];
+    guidePlans = [];
     errorMessage = "";
     status = `${name} sample loaded. Nothing was uploaded.`;
+  }
+
+  function privacySafeScaleReport(): string {
+    return JSON.stringify(
+      {
+        decisions: scaleDecisions.map((decision) => ({
+          aesthetic: decision.aesthetic,
+          status: decision.status,
+          parser: decision.parser,
+          kind: decision.kind,
+          precision: decision.precision,
+          validatedCount: decision.validatedCount,
+          ambiguityCount: decision.ambiguity.length,
+          portableOverride: decision.portableOverride,
+          guidePlanIds: decision.guidePlanIds ?? [],
+        })),
+        guides: guidePlans.map((guide) => ({
+          id: guide.id,
+          aesthetic: guide.aesthetic,
+          panelIndex: guide.panelIndex,
+          scaleType: guide.scaleType,
+          temporalKind: guide.temporalKind,
+          source: guide.source,
+          interval: guide.interval,
+          locale: guide.locale,
+          timezone: guide.timezone,
+          majorCount: guide.ticks.filter((entry) => entry.kind === "major")
+            .length,
+          minorCount: guide.ticks.filter((entry) => entry.kind === "minor")
+            .length,
+          overlap: guide.overlap,
+          marginOverflow: guide.marginOverflow,
+          degraded: guide.degraded,
+        })),
+      },
+      null,
+      2,
+    );
+  }
+
+  async function copyScaleReport(): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(privacySafeScaleReport());
+      status =
+        "Copied a privacy-safe scale report without rows, field names, domains, or labels.";
+    } catch {
+      status =
+        "The browser could not copy the report. Clipboard permission may be blocked.";
+    }
   }
 
   function rendererFailed(error: unknown): void {
@@ -354,13 +411,11 @@
               zoom={zoomEnabled ? { mode: "xy" } : false}
               oninteraction={logEvent}
               ondiagnostic={reportDiagnostic}
-              onrender={(model) => (scaleDecisions = model.scaleDecisions)}
-              labs={{
-                title: "My local data",
-                x: xField,
-                y: yField,
-                color: colorField || undefined,
+              onrender={(model) => {
+                scaleDecisions = model.scaleDecisions;
+                guidePlans = model.guidePlans;
               }}
+              {labs}
               width="container"
               height={400}
             />
@@ -413,6 +468,50 @@
             </dl>
           {/each}
         {/if}
+
+        {#if guidePlans.length > 0}
+          <h4>Axis plans</h4>
+          {#each guidePlans as guide (guide.id)}
+            <dl>
+              <div>
+                <dt>Axis</dt>
+                <dd>{guide.aesthetic} · panel {guide.panelIndex + 1}</dd>
+              </div>
+              <div>
+                <dt>Break choice</dt>
+                <dd>{guide.source} · {guide.interval ?? "scale default"}</dd>
+              </div>
+              <div>
+                <dt>Major labels</dt>
+                <dd>
+                  {guide.ticks
+                    .filter((entry) => entry.kind === "major")
+                    .map((entry) => entry.label)
+                    .join(", ")}
+                </dd>
+              </div>
+              <div>
+                <dt>Layout</dt>
+                <dd>
+                  {guide.overlap ? "overlap" : "fits"}{guide.marginOverflow
+                    ? " · margin overflow"
+                    : ""}
+                </dd>
+              </div>
+            </dl>
+          {/each}
+        {/if}
+
+        <div class="report-actions">
+          <button type="button" onclick={() => void copyScaleReport()}
+            >Copy privacy-safe scale report</button
+          >
+          <a
+            href="https://github.com/ljodea/ggsvelte/issues/new?title=Scale%20report"
+            target="_blank"
+            rel="noreferrer">Report a scale issue</a
+          >
+        </div>
       </section>
 
       <section class="event-log" aria-labelledby="event-log-heading">
@@ -526,7 +625,8 @@
   }
 
   .actions,
-  .sample-controls {
+  .sample-controls,
+  .report-actions {
     display: flex;
     flex-wrap: wrap;
     gap: 0.55rem;
@@ -647,6 +747,17 @@
     min-width: 0;
     margin: 0;
     overflow-wrap: anywhere;
+  }
+
+  .report-actions {
+    margin-top: 0.8rem;
+    align-items: center;
+  }
+
+  .report-actions a {
+    color: var(--accent);
+    font-size: 0.82rem;
+    font-weight: 650;
   }
 
   .event-log ol {

@@ -1,6 +1,7 @@
 /**
  * Public RenderModel surface returned by runPipeline.
  */
+import type { GuidePlan } from "../layout/temporal-guide.js";
 import type { Scene } from "../scene.js";
 import type { CellValue } from "../table.js";
 import type { CandidateStore } from "../candidate-store.js";
@@ -25,6 +26,8 @@ export interface RenderModel {
   scaleDiagnostics: ScaleDiagnostic[];
   /** Inspectable position-scale semantic decisions. */
   scaleDecisions: ScaleDecision[];
+  /** Semantic axis plans for every actually drawn panel axis. */
+  guidePlans: readonly GuidePlan[];
   /** Monotonic run identity (module-global, increases every runPipeline call). */
   runId: number;
   /**

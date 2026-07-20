@@ -1,7 +1,7 @@
 /**
  * Finalize phase: two-pass panel layout only.
  */
-import type { PortableSpec } from "@ggsvelte/spec";
+import { TemporalIntervalError, type PortableSpec } from "@ggsvelte/spec";
 
 import { perfMark, perfMeasure } from "../perf.js";
 import type { ThemeTokens } from "../theme.js";
@@ -10,7 +10,7 @@ import { computePanelLayout } from "./panel-layout.js";
 import type { PanelLayoutResult } from "./panel-layout.js";
 import type { PreparedPanels } from "./prepare-panels.js";
 import type { TrainedPipelineScales } from "./train-pipeline-scales.js";
-import type { PipelineWarning, RunOptions } from "./types.js";
+import { PipelineError, type PipelineWarning, type RunOptions } from "./types.js";
 
 export function finalizePanelLayoutPass(input: {
   normalized: PortableSpec;
@@ -33,28 +33,71 @@ export function finalizePanelLayoutPass(input: {
     allFrames,
   } = trained;
 
+  const temporalKind = (axis: "x" | "y") => {
+    const requested =
+      axis === "x" ? prepared.xConversion.requestedKind : prepared.yConversion.requestedKind;
+    if (requested !== undefined) return requested;
+    const kinds = prepared.scaleDecisions
+      .filter((decision) => decision.aesthetic === axis && decision.status === "temporal")
+      .map((decision) => decision.kind)
+      .filter((kind): kind is "date" | "datetime" => kind !== null);
+    return kinds.includes("datetime") ? "datetime" : (kinds[0] ?? null);
+  };
+
   perfMark("ggsvelte:layout:start");
-  const panelLayout = computePanelLayout({
-    flip,
-    faceted,
-    freeX,
-    freeY,
-    nrow,
-    ncol,
-    facetPanels,
-    panelScales,
-    allFrames,
-    labs: normalized.labs ?? {},
-    scalesConfig,
-    xScale: xTraining.scale,
-    yScale: yTraining.scale,
-    colorLegend: colorResolution.legendInput,
-    fillLegend: fillResolution.legendInput,
-    legendOrder: normalized.legend?.order ?? "stable-domain",
-    theme,
-    options,
-    warnings,
-  });
+  let panelLayout: PanelLayoutResult;
+  try {
+    panelLayout = computePanelLayout({
+      flip,
+      faceted,
+      freeX,
+      freeY,
+      nrow,
+      ncol,
+      facetPanels,
+      panelScales,
+      allFrames,
+      labs: normalized.labs ?? {},
+      scalesConfig,
+      xScale: xTraining.scale,
+      yScale: yTraining.scale,
+      xTemporalKind: temporalKind("x"),
+      yTemporalKind: temporalKind("y"),
+      colorLegend: colorResolution.legendInput,
+      fillLegend: fillResolution.legendInput,
+      legendOrder: normalized.legend?.order ?? "stable-domain",
+      theme,
+      options,
+      warnings,
+    });
+  } catch (error) {
+    if (!(error instanceof TemporalIntervalError)) throw error;
+    const axis = (["x", "y"] as const).find(
+      (candidate) =>
+        scalesConfig[candidate]?.dateBreaks === error.value ||
+        scalesConfig[candidate]?.dateMinorBreaks === error.value,
+    );
+    const option =
+      axis !== undefined && scalesConfig[axis]?.dateMinorBreaks === error.value
+        ? "dateMinorBreaks"
+        : "dateBreaks";
+    const path = axis === undefined ? "/scales" : `/scales/${axis}/${option}`;
+    const code = error.message.includes("progression")
+      ? "temporal-break-progression"
+      : "temporal-break-limit";
+    throw new PipelineError(code, path, error.message, {
+      code,
+      severity: "error",
+      path,
+      problem:
+        code === "temporal-break-limit"
+          ? "The requested temporal interval produces too many ticks."
+          : "The requested temporal interval did not advance monotonically.",
+      cause: error.message,
+      fixes: [{ description: "Choose a coarser calendar interval." }],
+      documentationUrl: "/guide/temporal-scales#explicit-intervals",
+    });
+  }
   perfMark("ggsvelte:layout:end");
   perfMeasure("ggsvelte:layout", "ggsvelte:layout:start", "ggsvelte:layout:end");
   return panelLayout;

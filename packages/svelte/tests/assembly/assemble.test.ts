@@ -133,7 +133,18 @@ describe("assemblePortableSpec", () => {
       ],
       aes: { x: "when", y: "value" },
       layers: [{ geom: "line" }],
-      scales: { x: { type: "time", temporalKind: "date", parse: "iso" } },
+      scales: {
+        x: {
+          type: "time",
+          temporalKind: "date",
+          parse: "iso",
+          dateBreaks: "2 weeks",
+          dateMinorBreaks: "1 day",
+          dateLabels: "%e %b",
+          locale: "en-GB",
+          weekStart: "monday",
+        },
+      },
     });
     expect(assembled?.data).toEqual({
       values: [
@@ -145,6 +156,11 @@ describe("assemblePortableSpec", () => {
       type: "time",
       temporalKind: "date",
       parse: "iso",
+      dateBreaks: "2 weeks",
+      dateMinorBreaks: "1 day",
+      dateLabels: "%e %b",
+      locale: "en-GB",
+      weekStart: "monday",
     });
   });
 

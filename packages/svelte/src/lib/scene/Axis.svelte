@@ -39,12 +39,19 @@
       />
     {/if}
     {#each ticks as tick, i (i)}
-      <g class="gg-tick" transform={`translate(${tick.pos},0)`}>
+      <g
+        class="gg-tick"
+        class:gg-tick-minor={tick.kind === "minor"}
+        transform={`translate(${tick.pos},0)`}
+      >
+        {#if tick.kind !== "minor"}<title>{tick.fullLabel ?? tick.label}</title
+          >{/if}
         {#if theme.ticksX}
           <line
-            y2={theme.tickLength}
+            y2={tick.kind === "minor" ? theme.tickLength / 2 : theme.tickLength}
             stroke={tickColor}
             stroke-width={theme.tickWidth}
+            opacity={tick.kind === "minor" ? 0.5 : undefined}
             vector-effect="non-scaling-stroke"
           />
         {/if}
@@ -76,12 +83,21 @@
       />
     {/if}
     {#each ticks as tick, i (i)}
-      <g class="gg-tick" transform={`translate(0,${tick.pos})`}>
+      <g
+        class="gg-tick"
+        class:gg-tick-minor={tick.kind === "minor"}
+        transform={`translate(0,${tick.pos})`}
+      >
+        {#if tick.kind !== "minor"}<title>{tick.fullLabel ?? tick.label}</title
+          >{/if}
         {#if theme.ticksY}
           <line
-            x2={-theme.tickLength}
+            x2={tick.kind === "minor"
+              ? -theme.tickLength / 2
+              : -theme.tickLength}
             stroke={tickColor}
             stroke-width={theme.tickWidth}
+            opacity={tick.kind === "minor" ? 0.5 : undefined}
             vector-effect="non-scaling-stroke"
           />
         {/if}

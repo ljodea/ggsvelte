@@ -2,6 +2,7 @@
  * assembleRenderModel input contract.
  */
 import type { TickFormatter } from "../layout/layout.js";
+import type { GuidePlan } from "../layout/temporal-guide.js";
 import type { ScaleState } from "../scales/state.js";
 import type { PositionScale } from "../scales/train.js";
 import type { Scene } from "../scene.js";
@@ -34,6 +35,7 @@ export interface AssembleRenderModelInput {
   advisories: Advisory[];
   scaleDecisions: ScaleDecision[];
   scaleDiagnostics: ScaleDiagnostic[];
+  guidePlans: readonly GuidePlan[];
   xConversion: PositionConversionContext;
   yConversion: PositionConversionContext;
   runId: number;

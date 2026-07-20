@@ -1,7 +1,12 @@
 /**
  * Input for facet panel tick layout + placement packing.
  */
-import type { LayoutTheme, Margins, TickFormatter } from "../layout/layout.js";
+import type {
+  LayoutTheme,
+  Margins,
+  TemporalLayoutDomainContext,
+  TickFormatter,
+} from "../layout/layout.js";
 import type { TextMeasurer } from "../layout/measure.js";
 import type { PositionScale } from "../scales/train.js";
 
@@ -11,6 +16,8 @@ export interface FacetPanelTicksInput {
   def: FacetPanelDef;
   h: PositionScale;
   v: PositionScale;
+  hTemporal?: TemporalLayoutDomainContext;
+  vTemporal?: TemporalLayoutDomainContext;
   mMax: Margins;
   panelW: number;
   panelH: number;
