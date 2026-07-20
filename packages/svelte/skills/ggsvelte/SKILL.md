@@ -41,8 +41,10 @@ ndensity`; density→`density, scaled`; smooth→`y, ymin, ymax, se`;
 - **facet**: wrap form `{"wrap": {"field": "g"}, "ncol": 3}` XOR grid form
   `{"rows": {...}, "cols": {...}}`; `"scales": "fixed"|"free"|"free_x"|"free_y"`.
 - **scales**: per channel: `{"type": "linear"|"log"|"time"|"band"}` for x/y;
-  time scales additionally accept `"parse"` (closed names such as `"dmy"`),
-  `"temporalKind"`, `"timezone"`, and `"disambiguation"`.
+  time scales additionally accept `"parse"` (closed names such as `"dmy"`,
+  exact `{ "format": ... }`, or `{ "epoch": "seconds"|"milliseconds" }`),
+  `"temporalKind"`, `"timezone"`, `"disambiguation"`, and
+  `"parseFailure":"error"|"censor"`.
   `{"type": "ordinal"|"sequential", "scheme"?, "range"?, "domain"?}` for
   color/fill. Defaults are inferred and disclosed as advisories.
 - **temporal defaults**: ISO dates/date-times, four-digit year strings,
@@ -50,6 +52,14 @@ ndensity`; density→`density, scaled`; smooth→`y, ymin, ymax, se`;
   plus whole-column validation. Ambiguous ordered dates stay discrete: set
   `"parse":"dmy"` or `"parse":"mdy"`. For year-like identifiers, force
   `{"type":"band"}`. Never preprocess dates into indexes.
+- **temporal override rules**: `.scaleXDate()`/`.scaleYDate()` serialize mapped
+  authoring `Date` cells as calendar dates; `.scaleXDatetime()`/
+  `.scaleYDatetime()` preserve instants.
+  Explicit `linear`/`log` disables temporal inference, so numeric strings stay
+  quantitative. Explicit ordinal color/fill keeps temporal-looking labels as
+  separate groups; sequential temporal color/fill uses parsed domains and
+  calendar legend labels. Censoring is available only with an explicit parser;
+  invalid configuration and ambiguous automatic inference remain errors.
 - Rendering surfaces: `<GGPlot spec={...}/>` (Svelte),
   `renderToSVGString(spec, {width, height})` (headless, Node-safe),
   `ggsvelte-render spec.json > out.svg` (CLI; JSON-line diagnostics on stderr).
