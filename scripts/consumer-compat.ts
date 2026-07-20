@@ -1,9 +1,9 @@
 import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { basename, join, relative, resolve } from "node:path";
+import { basename, dirname, join, relative, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 
-import { QUICKSTART_PAGE_SVELTE } from "./quickstart.js";
+import { COMPLETE_SVELTE_SNIPPETS } from "./guide-code-contract.js";
 import { loadSupportMatrix, type PackageManager } from "./support-matrix.js";
 
 interface CommandStep {
@@ -251,7 +251,11 @@ export function writeConsumerFixture(
     `<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8" />\n    <meta name="viewport" content="width=device-width" />\n    %sveltekit.head%\n  </head>\n  <body data-sveltekit-preload-data="hover">\n    <div style="display: contents">%sveltekit.body%</div>\n  </body>\n</html>\n`,
   );
   writeFileSync(join(directory, "src", "routes", "+layout.ts"), `export const prerender = true;\n`);
-  writeFileSync(join(directory, "src", "routes", "+page.svelte"), `${QUICKSTART_PAGE_SVELTE}\n`);
+  for (const snippet of COMPLETE_SVELTE_SNIPPETS) {
+    const target = join(directory, snippet.filename);
+    mkdirSync(dirname(target), { recursive: true });
+    writeFileSync(target, `${snippet.source}\n`);
+  }
   writeFileSync(
     join(directory, "src", "routes", "contract", "+page.svelte"),
     `<script lang="ts">

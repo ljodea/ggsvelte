@@ -14,6 +14,22 @@ export const DOCS_ROUTES = [
     shell: "site",
   },
   {
+    path: "/docs",
+    title: "Documentation — ggsvelte",
+    description:
+      "Build, customize, interact with, deploy, and troubleshoot ggsvelte charts through a task-first learning path.",
+    canonicalPath: "/docs",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    navigation: {
+      section: "Start",
+      label: "Overview",
+      order: 0,
+    },
+  },
+  {
     path: "/examples",
     title: "Gallery — ggsvelte",
     description:
@@ -47,6 +63,22 @@ export const DOCS_ROUTES = [
     shell: "site",
   },
   {
+    path: "/reference",
+    title: "Reference — ggsvelte",
+    description:
+      "Find ggsvelte component, specification, interaction, diagnostic, lifecycle, and command-line contracts.",
+    canonicalPath: "/reference",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    navigation: {
+      section: "Reference",
+      label: "Reference overview",
+      order: 50,
+    },
+  },
+  {
     path: "/reference/interactions",
     title: "Interaction reference — ggsvelte",
     description:
@@ -56,6 +88,79 @@ export const DOCS_ROUTES = [
     index: true,
     sitemap: true,
     shell: "docs",
+    navigation: {
+      section: "Reference",
+      label: "Interaction reference",
+      order: 51,
+    },
+  },
+  {
+    path: "/reference/cli",
+    title: "Command-line reference — ggsvelte",
+    description:
+      "Render PortableSpec JSON to SVG with implementation-derived flags, streams, diagnostics, and exit classes.",
+    canonicalPath: "/reference/cli",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    navigation: {
+      section: "Reference",
+      label: "CLI reference",
+      order: 52,
+    },
+    headings: [
+      {
+        id: "input-and-output",
+        title: "Input and output",
+        level: 2,
+      },
+      {
+        id: "options",
+        title: "Options",
+        level: 2,
+      },
+      {
+        id: "width",
+        title: "--width",
+        level: 3,
+      },
+      {
+        id: "height",
+        title: "--height",
+        level: 3,
+      },
+      {
+        id: "data",
+        title: "--data",
+        level: 3,
+      },
+      {
+        id: "max-marks",
+        title: "--max-marks",
+        level: 3,
+      },
+      {
+        id: "version",
+        title: "--version",
+        level: 3,
+      },
+      {
+        id: "help",
+        title: "--help",
+        level: 3,
+      },
+      {
+        id: "exit-codes",
+        title: "Exit codes",
+        level: 2,
+      },
+      {
+        id: "troubleshooting",
+        title: "Troubleshooting",
+        level: 2,
+      },
+    ],
   },
   {
     path: "/guide/getting-started",
@@ -69,7 +174,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Start",
       label: "Getting started",
-      order: 0,
+      order: 1,
     },
     headings: [
       {
@@ -91,6 +196,46 @@ export const DOCS_ROUTES = [
         id: "you-have-a-chart",
         title: "You have a chart",
         level: 2,
+      },
+      {
+        id: "build-the-grammar-one-change-at-a-time",
+        title: "Build the grammar one change at a time",
+        level: 2,
+      },
+      {
+        id: "map-fields-to-position",
+        title: "Map fields to position",
+        level: 3,
+      },
+      {
+        id: "add-a-second-layer",
+        title: "Add a second layer",
+        level: 3,
+      },
+      {
+        id: "make-color-meaning-explicit",
+        title: "Make color meaning explicit",
+        level: 3,
+      },
+      {
+        id: "add-a-statistical-smoother",
+        title: "Add a statistical smoother",
+        level: 3,
+      },
+      {
+        id: "facet-the-comparison",
+        title: "Facet the comparison",
+        level: 3,
+      },
+      {
+        id: "choose-a-chart-theme",
+        title: "Choose a chart theme",
+        level: 3,
+      },
+      {
+        id: "enable-inspect-and-pin",
+        title: "Enable inspect and pin",
+        level: 3,
       },
       {
         id: "choose-another-surface-only-when-you-need-it",
@@ -125,6 +270,171 @@ export const DOCS_ROUTES = [
     ],
   },
   {
+    path: "/guide/data-mappings",
+    title: "Data and mappings — ggsvelte",
+    description:
+      "Choose rows and map their fields to visual channels without mutating source data.",
+    canonicalPath: "/guide/data-mappings",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    navigation: {
+      section: "Core grammar",
+      label: "Data and mappings",
+      order: 10,
+    },
+    headings: [
+      {
+        id: "map-fields-to-position",
+        title: "Map fields to position",
+        level: 2,
+      },
+      {
+        id: "keep-data-local",
+        title: "Keep data local",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/guide/layers-marks",
+    title: "Layers and marks — ggsvelte",
+    description: "Compose marks in paint order while sharing or overriding plot mappings.",
+    canonicalPath: "/guide/layers-marks",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    navigation: {
+      section: "Core grammar",
+      label: "Layers and marks",
+      order: 11,
+    },
+    headings: [
+      {
+        id: "compose-layers",
+        title: "Compose layers",
+        level: 2,
+      },
+      {
+        id: "choose-a-mark-for-the-question",
+        title: "Choose a mark for the question",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/guide/statistics-positions",
+    title: "Statistics and positions — ggsvelte",
+    description:
+      "Compute summaries and control how derived marks occupy the same coordinate space.",
+    canonicalPath: "/guide/statistics-positions",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    navigation: {
+      section: "Core grammar",
+      label: "Statistics and positions",
+      order: 12,
+    },
+    headings: [
+      {
+        id: "statistical-summaries",
+        title: "Statistical summaries",
+        level: 2,
+      },
+      {
+        id: "positions",
+        title: "Positions",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/guide/scales-guides",
+    title: "Scales and guides — ggsvelte",
+    description: "Translate data domains into position, color, labels, axes, and legends.",
+    canonicalPath: "/guide/scales-guides",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    navigation: {
+      section: "Core grammar",
+      label: "Scales and guides",
+      order: 13,
+    },
+    headings: [
+      {
+        id: "categorical-color",
+        title: "Categorical color",
+        level: 2,
+      },
+      {
+        id: "date-and-time-axes",
+        title: "Date and time axes",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/guide/facets-coordinates",
+    title: "Facets and coordinates — ggsvelte",
+    description: "Repeat one grammar across panels and choose how axes compose the view.",
+    canonicalPath: "/guide/facets-coordinates",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    navigation: {
+      section: "Core grammar",
+      label: "Facets and coordinates",
+      order: 15,
+    },
+    headings: [
+      {
+        id: "facet-a-comparison",
+        title: "Facet a comparison",
+        level: 2,
+      },
+      {
+        id: "coordinates",
+        title: "Coordinates",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/guide/themes-color",
+    title: "Themes and color — ggsvelte",
+    description:
+      "Keep chart furniture separate from data color and from the documentation appearance.",
+    canonicalPath: "/guide/themes-color",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    navigation: {
+      section: "Core grammar",
+      label: "Themes and color",
+      order: 16,
+    },
+    headings: [
+      {
+        id: "choose-a-chart-theme",
+        title: "Choose a chart theme",
+        level: 2,
+      },
+      {
+        id: "preserve-color-meaning",
+        title: "Preserve color meaning",
+        level: 2,
+      },
+    ],
+  },
+  {
     path: "/guide/temporal-scales",
     title: "Dates without preprocessing — ggsvelte",
     description: "Value-driven date inference, strict parsers, overrides, and diagnostics.",
@@ -134,9 +444,9 @@ export const DOCS_ROUTES = [
     sitemap: true,
     shell: "docs",
     navigation: {
-      section: "Build",
+      section: "Core grammar",
       label: "Dates without preprocessing",
-      order: 1,
+      order: 14,
     },
     headings: [
       {
@@ -163,7 +473,7 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/guide/interactions",
-    title: "Interactions — ggsvelte",
+    title: "Interaction overview — ggsvelte",
     description: "Inspection, selection, zoom, keyboard behavior, identity, and event contracts.",
     canonicalPath: "/guide/interactions",
     kind: "page",
@@ -171,9 +481,9 @@ export const DOCS_ROUTES = [
     sitemap: true,
     shell: "docs",
     navigation: {
-      section: "Build",
-      label: "Interactions",
-      order: 2,
+      section: "Interaction",
+      label: "Interaction overview",
+      order: 20,
     },
     headings: [
       {
@@ -254,6 +564,215 @@ export const DOCS_ROUTES = [
     ],
   },
   {
+    path: "/guide/inspect-pin",
+    title: "Inspect and pin — ggsvelte",
+    description: "Add chart-local tooltip, crosshair, keyboard traversal, and durable pinning.",
+    canonicalPath: "/guide/inspect-pin",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    navigation: {
+      section: "Interaction",
+      label: "Inspect and pin",
+      order: 21,
+    },
+    headings: [
+      {
+        id: "inspect-and-pin-2",
+        title: "Inspect and pin",
+        level: 2,
+      },
+      {
+        id: "keep-ownership-honest",
+        title: "Keep ownership honest",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/guide/selection-zoom",
+    title: "Selection and zoom — ggsvelte",
+    description: "Choose explicit point, interval, and brush-zoom tools with semantic results.",
+    canonicalPath: "/guide/selection-zoom",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    navigation: {
+      section: "Interaction",
+      label: "Selection and zoom",
+      order: 22,
+    },
+    headings: [
+      {
+        id: "select-points",
+        title: "Select points",
+        level: 2,
+      },
+      {
+        id: "select-an-area-and-zoom",
+        title: "Select an area and zoom",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/guide/linked-views",
+    title: "Linked views — ggsvelte",
+    description:
+      "Share semantic selection, emphasis, intervals, and domains across application surfaces.",
+    canonicalPath: "/guide/linked-views",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    navigation: {
+      section: "Interaction",
+      label: "Linked views",
+      order: 23,
+    },
+    headings: [
+      {
+        id: "create-a-shared-controller",
+        title: "Create a shared controller",
+        level: 2,
+      },
+      {
+        id: "keep-local-state-local",
+        title: "Keep local state local",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/guide/accessibility",
+    title: "Accessibility — ggsvelte",
+    description:
+      "Name charts and preserve keyboard, touch, focus, announcement, and data-detail paths.",
+    canonicalPath: "/guide/accessibility",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    navigation: {
+      section: "Interaction",
+      label: "Accessibility",
+      order: 24,
+    },
+    headings: [
+      {
+        id: "name-the-chart",
+        title: "Name the chart",
+        level: 2,
+      },
+      {
+        id: "keyboard-and-touch",
+        title: "Keyboard and touch",
+        level: 2,
+      },
+      {
+        id: "dense-charts",
+        title: "Dense charts",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/guide/responsive-charts",
+    title: "Responsive charts — ggsvelte",
+    description:
+      "Size charts from their container with deterministic server and collapsed-width behavior.",
+    canonicalPath: "/guide/responsive-charts",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    navigation: {
+      section: "Production",
+      label: "Responsive charts",
+      order: 30,
+    },
+    headings: [
+      {
+        id: "container-width",
+        title: "Container width",
+        level: 2,
+      },
+      {
+        id: "server-fallback-and-hydration",
+        title: "Server fallback and hydration",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/guide/rendering-performance",
+    title: "Rendering and performance — ggsvelte",
+    description:
+      "Choose SVG, canvas, and automatic strata while retaining semantic selection and chart chrome.",
+    canonicalPath: "/guide/rendering-performance",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    navigation: {
+      section: "Production",
+      label: "Rendering and performance",
+      order: 31,
+    },
+    headings: [
+      {
+        id: "svg-canvas-and-auto",
+        title: "SVG, canvas, and auto",
+        level: 2,
+      },
+      {
+        id: "canvas-and-interaction",
+        title: "Canvas and interaction",
+        level: 2,
+      },
+      {
+        id: "measure-before-overriding",
+        title: "Measure before overriding",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/guide/server-rendering-export",
+    title: "Server rendering and export — ggsvelte",
+    description:
+      "Render deterministic SVG through Svelte SSR, the pure core API, or the installed CLI.",
+    canonicalPath: "/guide/server-rendering-export",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    navigation: {
+      section: "Production",
+      label: "Server rendering and export",
+      order: 32,
+    },
+    headings: [
+      {
+        id: "server-rendering",
+        title: "Server rendering",
+        level: 2,
+      },
+      {
+        id: "pure-svg-export",
+        title: "Pure SVG export",
+        level: 2,
+      },
+      {
+        id: "command-line-export",
+        title: "Command-line export",
+        level: 2,
+      },
+    ],
+  },
+  {
     path: "/guide/compatibility",
     title: "Compatibility — ggsvelte",
     description: "Tested Node, Svelte, package-manager, browser, and OS boundaries.",
@@ -263,9 +782,9 @@ export const DOCS_ROUTES = [
     sitemap: true,
     shell: "docs",
     navigation: {
-      section: "Build",
+      section: "Production",
       label: "Compatibility",
-      order: 3,
+      order: 40,
     },
     headings: [
       {
@@ -284,11 +803,7 @@ export const DOCS_ROUTES = [
     index: true,
     sitemap: true,
     shell: "docs",
-    navigation: {
-      section: "Reference",
-      label: "Interaction reference",
-      order: 4,
-    },
+    primaryNavigationOwner: "reference",
     headings: [
       {
         id: "static-default",
@@ -480,7 +995,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Errors reference",
-      order: 5,
+      order: 53,
     },
     headings: [
       {
@@ -987,7 +1502,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Advisories",
-      order: 6,
+      order: 54,
     },
     headings: [
       {
@@ -1094,7 +1609,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Lifecycle & editions",
-      order: 7,
+      order: 55,
     },
     headings: [
       {
@@ -1165,41 +1680,9 @@ export const DOCS_ROUTES = [
     ],
   },
   {
-    path: "/guide/migrating-pre-0-1",
-    title: "Migrating pre-0.1 interactions — ggsvelte",
-    description: "Move from tooltip and brush props to semantic interaction capabilities.",
-    canonicalPath: "/guide/migrating-pre-0-1",
-    kind: "page",
-    index: true,
-    sitemap: true,
-    shell: "docs",
-    navigation: {
-      section: "Release",
-      label: "Migrating pre-0.1 interactions",
-      order: 8,
-    },
-    headings: [
-      {
-        id: "rename-the-props-and-callbacks",
-        title: "Rename the props and callbacks",
-        level: 2,
-      },
-      {
-        id: "migrate-payload-handling",
-        title: "Migrate payload handling",
-        level: 2,
-      },
-      {
-        id: "migrate-custom-tooltip-snippets",
-        title: "Migrate custom tooltip snippets",
-        level: 2,
-      },
-    ],
-  },
-  {
     path: "/guide/upgrading",
-    title: "Upgrading ggsvelte — ggsvelte",
-    description: "Per-release upgrade notes: what changed, what is optional, what to replace.",
+    title: "Upgrade in five minutes — ggsvelte",
+    description: "Check versions, apply fixture-backed changes, and verify each 0.x transition.",
     canonicalPath: "/guide/upgrading",
     kind: "page",
     index: true,
@@ -1207,10 +1690,15 @@ export const DOCS_ROUTES = [
     shell: "docs",
     navigation: {
       section: "Release",
-      label: "Upgrading ggsvelte",
-      order: 9,
+      label: "Upgrade in five minutes",
+      order: 60,
     },
     headings: [
+      {
+        id: "five-minute-path",
+        title: "Five-minute path",
+        level: 2,
+      },
       {
         id: "0-2-to-0-3",
         title: "0.2 to 0.3",
@@ -1235,6 +1723,38 @@ export const DOCS_ROUTES = [
         id: "deprecated-type-aliases",
         title: "Deprecated type aliases",
         level: 3,
+      },
+    ],
+  },
+  {
+    path: "/guide/migrating-pre-0-1",
+    title: "Migrating pre-0.1 interactions — ggsvelte",
+    description: "Move from tooltip and brush props to semantic interaction capabilities.",
+    canonicalPath: "/guide/migrating-pre-0-1",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    navigation: {
+      section: "Release",
+      label: "Migrating pre-0.1 interactions",
+      order: 61,
+    },
+    headings: [
+      {
+        id: "rename-the-props-and-callbacks",
+        title: "Rename the props and callbacks",
+        level: 2,
+      },
+      {
+        id: "migrate-payload-handling",
+        title: "Migrate payload handling",
+        level: 2,
+      },
+      {
+        id: "migrate-custom-tooltip-snippets",
+        title: "Migrate custom tooltip snippets",
+        level: 2,
       },
     ],
   },
@@ -1688,21 +2208,87 @@ export const GUIDE_NAVIGATION = [
     section: "Start",
     entries: [
       {
+        path: "/docs",
+        label: "Overview",
+      },
+      {
         path: "/guide/getting-started",
         label: "Getting started",
       },
     ],
   },
   {
-    section: "Build",
+    section: "Core grammar",
     entries: [
+      {
+        path: "/guide/data-mappings",
+        label: "Data and mappings",
+      },
+      {
+        path: "/guide/layers-marks",
+        label: "Layers and marks",
+      },
+      {
+        path: "/guide/statistics-positions",
+        label: "Statistics and positions",
+      },
+      {
+        path: "/guide/scales-guides",
+        label: "Scales and guides",
+      },
       {
         path: "/guide/temporal-scales",
         label: "Dates without preprocessing",
       },
       {
+        path: "/guide/facets-coordinates",
+        label: "Facets and coordinates",
+      },
+      {
+        path: "/guide/themes-color",
+        label: "Themes and color",
+      },
+    ],
+  },
+  {
+    section: "Interaction",
+    entries: [
+      {
         path: "/guide/interactions",
-        label: "Interactions",
+        label: "Interaction overview",
+      },
+      {
+        path: "/guide/inspect-pin",
+        label: "Inspect and pin",
+      },
+      {
+        path: "/guide/selection-zoom",
+        label: "Selection and zoom",
+      },
+      {
+        path: "/guide/linked-views",
+        label: "Linked views",
+      },
+      {
+        path: "/guide/accessibility",
+        label: "Accessibility",
+      },
+    ],
+  },
+  {
+    section: "Production",
+    entries: [
+      {
+        path: "/guide/responsive-charts",
+        label: "Responsive charts",
+      },
+      {
+        path: "/guide/rendering-performance",
+        label: "Rendering and performance",
+      },
+      {
+        path: "/guide/server-rendering-export",
+        label: "Server rendering and export",
       },
       {
         path: "/guide/compatibility",
@@ -1714,8 +2300,16 @@ export const GUIDE_NAVIGATION = [
     section: "Reference",
     entries: [
       {
-        path: "/guide/interaction-reference",
+        path: "/reference",
+        label: "Reference overview",
+      },
+      {
+        path: "/reference/interactions",
         label: "Interaction reference",
+      },
+      {
+        path: "/reference/cli",
+        label: "CLI reference",
       },
       {
         path: "/guide/errors",
@@ -1735,12 +2329,12 @@ export const GUIDE_NAVIGATION = [
     section: "Release",
     entries: [
       {
-        path: "/guide/migrating-pre-0-1",
-        label: "Migrating pre-0.1 interactions",
+        path: "/guide/upgrading",
+        label: "Upgrade in five minutes",
       },
       {
-        path: "/guide/upgrading",
-        label: "Upgrading ggsvelte",
+        path: "/guide/migrating-pre-0-1",
+        label: "Migrating pre-0.1 interactions",
       },
     ],
   },

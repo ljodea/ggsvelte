@@ -83,6 +83,9 @@ export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
     "scripts/gen-llms.test.ts",
     "scripts/diagnostic-docs.ts",
     "scripts/quickstart.ts",
+    "scripts/cli-docs.ts",
+    "scripts/guide-code-contract.ts",
+    "scripts/gen-docs-search.ts",
     "scripts/gen-gallery-previews.ts",
     "scripts/gen-gallery-previews.test.ts",
     // Public gallery previews are materialized from canonical light baselines.

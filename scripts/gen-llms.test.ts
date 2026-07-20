@@ -69,11 +69,12 @@ describe("renderMarkdown", () => {
   });
 
   it("renders allowlisted copy fences with accessible controls and status", () => {
-    const html = renderMarkdown('```json copy\n{"x": 1}\n```');
+    const html = renderMarkdown('```json fragment copy\n{"x": 1}\n```');
     expect(html).toContain('<button type="button" data-copy-code="guide-code-1"');
     expect(html).toContain('aria-describedby="guide-code-1-status"');
     expect(html).toContain('<pre id="guide-code-1"><code class="language-json">');
-    expect(html).toContain('<span id="guide-code-1-status" role="status" aria-live="polite">');
+    expect(html).toContain('<span id="guide-code-1-status" role="status">');
+    expect(html).toContain('<p class="guide-code-classification">Fragment</p>');
   });
 
   it("adds stable unique heading fragments", () => {
@@ -142,7 +143,8 @@ describe("guide sections cover their catalogs", () => {
   it("getting-started leads with the exact complete responsive SvelteKit page", () => {
     expect(GETTING_STARTED_MD).toContain("`src/routes/+page.svelte` (complete file)");
     expect(GETTING_STARTED_MD).toContain(QUICKSTART_PAGE_SVELTE);
-    expect(GETTING_STARTED_MD.match(/<GeomPoint \/>/g)).toHaveLength(1);
+    expect(GETTING_STARTED_MD.match(/```svelte complete/g)).toHaveLength(1);
+    expect(GETTING_STARTED_MD.match(/```svelte fragment/g)?.length).toBeGreaterThanOrEqual(7);
     expect(QUICKSTART_PAGE_SVELTE).toContain("import { GeomPoint, GGPlot }");
     expect(QUICKSTART_PAGE_SVELTE).toContain("const cars = [");
     expect(QUICKSTART_PAGE_SVELTE).toContain('ariaLabel="Fuel economy decreases');

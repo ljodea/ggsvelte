@@ -4,6 +4,7 @@ import { pathToFileURL } from "node:url";
 
 import { format } from "oxfmt";
 
+import { GUIDE_SECTIONS } from "../apps/docs/src/lib/catalog/guide.ts";
 import lifecycle from "../lifecycle.json";
 import { extractMarkdownHeadings, guidePages, type LifecycleDoc } from "./gen-llms.ts";
 import {
@@ -50,9 +51,10 @@ function guideNavigation(routes: readonly DocsRouteRecord[]) {
     });
     groups.set(route.navigation.section, entries);
   }
-  return [...groups].map(([section, entries]) => ({
+  return GUIDE_SECTIONS.filter((section) => groups.has(section)).map((section) => ({
     section,
-    entries: entries
+    entries: groups
+      .get(section)!
       .toSorted((a, b) => a.order - b.order)
       .map(({ path, label }) => ({ path, label })),
   }));
