@@ -216,6 +216,45 @@ test("route metadata is canonical, singular, and aliases are noindex", async ({ 
   await expect(page.locator('link[rel="canonical"]')).toHaveCount(0);
 });
 
+test("public metadata exposes social cards and truthful route-local structured data", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const mode = await page.locator("#main-content").getAttribute("data-build-mode");
+  const canonicalBase =
+    mode === "legacy-full" ? "https://ljodea.github.io/ggsvelte" : "https://ggsvelte.sh";
+  await expect(page.locator('meta[property="og:url"]')).toHaveAttribute(
+    "content",
+    `${canonicalBase}/`,
+  );
+  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
+    "content",
+    `${canonicalBase}/previews/interaction-tooltip-light.png`,
+  );
+  await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute(
+    "content",
+    "summary_large_image",
+  );
+  const homeData = JSON.parse(
+    (await page.locator('script[type="application/ld+json"]').textContent()) ?? "[]",
+  ) as Array<{ "@type": string }>;
+  expect(homeData.map((entry) => entry["@type"])).toEqual(["WebSite", "SoftwareSourceCode"]);
+
+  await page.goto(GUIDE_ROUTE);
+  const guideData = JSON.parse(
+    (await page.locator('script[type="application/ld+json"]').textContent()) ?? "[]",
+  ) as Array<{ "@type": string; itemListElement?: Array<{ name: string }> }>;
+  expect(guideData).toMatchObject([
+    {
+      "@type": "BreadcrumbList",
+      itemListElement: [{ name: "Docs" }, { name: "Getting started" }],
+    },
+  ]);
+
+  await page.goto("/examples");
+  await expect(page.locator('script[type="application/ld+json"]')).toHaveCount(0);
+});
+
 test("guide shell visual contract: desktop light, dark, and forced colors", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto(`${GUIDE_ROUTE}?theme=light`);

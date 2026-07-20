@@ -144,6 +144,21 @@ describe("docs route inventory", () => {
     );
   });
 
+  it("requires unique acquisition metadata across indexable canonical routes", () => {
+    expect(() =>
+      validateRouteInventory([
+        route({ path: "/a", canonicalPath: "/a", title: "Same", description: "Same." }),
+        route({ path: "/b", canonicalPath: "/b", title: "Same", description: "Different." }),
+      ]),
+    ).toThrow("duplicate indexable title");
+    expect(() =>
+      validateRouteInventory([
+        route({ path: "/a", canonicalPath: "/a", title: "First", description: "Same." }),
+        route({ path: "/b", canonicalPath: "/b", title: "Second", description: "Same." }),
+      ]),
+    ).toThrow("duplicate indexable description");
+  });
+
   it("rejects duplicates, alias cycles, missing targets, and incomplete metadata", () => {
     const cases: DocsRouteRecord[][] = [
       [route(), route()],

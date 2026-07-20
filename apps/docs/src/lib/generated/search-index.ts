@@ -64,12 +64,12 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "page:reference-interactions",
     kind: "page",
-    title: "Interaction reference",
+    title: "Search interactions",
     summary:
-      "Search ggsvelte interaction capabilities, events, diagnostics, and accessibility defaults.",
+      "Filter ggsvelte interaction capabilities, events, diagnostics, and accessibility defaults.",
     href: "/reference/interactions",
     keywords: ["Reference"],
-    exact: ["Interaction reference"],
+    exact: ["Search interactions"],
   },
   {
     id: "page:reference-cli",

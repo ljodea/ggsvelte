@@ -128,6 +128,7 @@ describe("planJobs", () => {
   test("docs generators schedule pages/vr (not scripts-only)", () => {
     for (const path of [
       "scripts/gen-llms.ts",
+      "scripts/docs-seo.ts",
       "scripts/gen-docs-search.ts",
       "scripts/gen-gallery-previews.ts",
       "scripts/cli-docs.ts",

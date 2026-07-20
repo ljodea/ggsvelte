@@ -103,9 +103,9 @@ const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
   },
   {
     path: "/reference/interactions",
-    title: "Interaction reference — ggsvelte",
+    title: "Search interactions — ggsvelte",
     description:
-      "Search ggsvelte interaction capabilities, events, diagnostics, and accessibility defaults.",
+      "Filter ggsvelte interaction capabilities, events, diagnostics, and accessibility defaults.",
     canonicalPath: "/reference/interactions",
     kind: "page",
     index: true,
@@ -239,6 +239,8 @@ function fail(message: string): never {
 
 export function validateRouteInventory<Route extends DocsRouteRecord>(routes: Route[]): Route[] {
   const byPath = new Map<string, Route>();
+  const indexableTitles = new Map<string, string>();
+  const indexableDescriptions = new Map<string, string>();
   for (const route of routes) {
     if (route.path !== "/" && (!route.path.startsWith("/") || route.path.endsWith("/"))) {
       fail(`route path must be an absolute path without a trailing slash: ${route.path}`);
@@ -257,6 +259,20 @@ export function validateRouteInventory<Route extends DocsRouteRecord>(routes: Ro
       fail(`performance route ${route.path} must be noindex and excluded from the sitemap`);
     }
     if (route.sitemap && !route.index) fail(`${route.path} cannot enter the sitemap while noindex`);
+    if (route.index) {
+      const titleOwner = indexableTitles.get(route.title);
+      if (titleOwner !== undefined) {
+        fail(`duplicate indexable title for ${titleOwner} and ${route.path}: ${route.title}`);
+      }
+      const descriptionOwner = indexableDescriptions.get(route.description);
+      if (descriptionOwner !== undefined) {
+        fail(
+          `duplicate indexable description for ${descriptionOwner} and ${route.path}: ${route.description}`,
+        );
+      }
+      indexableTitles.set(route.title, route.path);
+      indexableDescriptions.set(route.description, route.path);
+    }
     byPath.set(route.path, route);
   }
 

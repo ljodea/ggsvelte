@@ -21,6 +21,25 @@
   {#if data.canonical !== undefined}
     <link rel="canonical" href={data.canonical} />
   {/if}
+  {#if data.seo !== undefined}
+    <meta property="og:site_name" content="ggsvelte" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={data.seo.title} />
+    <meta property="og:description" content={data.seo.description} />
+    <meta property="og:url" content={data.seo.canonical} />
+    <meta property="og:image" content={data.seo.image.url} />
+    <meta property="og:image:width" content={String(data.seo.image.width)} />
+    <meta property="og:image:height" content={String(data.seo.image.height)} />
+    <meta property="og:image:alt" content={data.seo.image.alt} />
+    <meta name="twitter:card" content={data.seo.twitterCard} />
+    <meta name="twitter:title" content={data.seo.title} />
+    <meta name="twitter:description" content={data.seo.description} />
+    <meta name="twitter:image" content={data.seo.image.url} />
+    <meta name="twitter:image:alt" content={data.seo.image.alt} />
+    {#if data.seo.structuredDataScript !== ""}
+      {@html data.seo.structuredDataScript}
+    {/if}
+  {/if}
   {#if noindex}
     <meta name="robots" content="noindex,follow" />
   {/if}

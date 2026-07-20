@@ -7,6 +7,8 @@ import {
   routeCanonicalUrl,
   type DocsRouteRecord,
 } from "./docs-route-inventory.ts";
+import { buildSeoDocument } from "./docs-seo.ts";
+import { docsDiscoveryFacts, markdownOutsideFences } from "./gen-llms.ts";
 
 function fail(message: string): never {
   throw new Error(`Docs metadata check failed: ${message}`);
@@ -20,6 +22,14 @@ function htmlPath(buildDir: string, routePath: string): string {
 
 function matches(html: string, pattern: RegExp): string[] {
   return html.match(pattern) ?? [];
+}
+
+function escapeHtmlAttribute(value: string): string {
+  return value.replaceAll("&", "&amp;").replaceAll('"', "&quot;");
+}
+
+function requireHeadValue(head: string, markup: string, routePath: string, kind: string): void {
+  if (!head.includes(markup)) fail(`${routePath} social metadata is missing or disagrees: ${kind}`);
 }
 
 function listHtmlFiles(root: string, directory = root): string[] {
@@ -60,6 +70,58 @@ export function validateDocsBuildMetadata(
     if (!canonicals[0]!.includes(`href="${canonical}"`)) {
       fail(`${route.path} canonical does not match ${canonical}`);
     }
+    const title = escapeHtmlAttribute(route.title);
+    const description = escapeHtmlAttribute(route.description);
+    const expectedSeo = buildSeoDocument(route, config.canonicalBase);
+    const socialImage = expectedSeo.image.url;
+    for (const [kind, markup] of [
+      ["Open Graph site name", '<meta property="og:site_name" content="ggsvelte"/>'],
+      ["Open Graph type", '<meta property="og:type" content="website"/>'],
+      ["Open Graph title", `<meta property="og:title" content="${title}"/>`],
+      ["Open Graph description", `<meta property="og:description" content="${description}"/>`],
+      ["Open Graph URL", `<meta property="og:url" content="${canonical}"/>`],
+      ["Open Graph image", `<meta property="og:image" content="${socialImage}"/>`],
+      [
+        "Open Graph image width",
+        `<meta property="og:image:width" content="${String(expectedSeo.image.width)}"/>`,
+      ],
+      [
+        "Open Graph image height",
+        `<meta property="og:image:height" content="${String(expectedSeo.image.height)}"/>`,
+      ],
+      [
+        "Open Graph image alternative",
+        `<meta property="og:image:alt" content="${escapeHtmlAttribute(expectedSeo.image.alt)}"/>`,
+      ],
+      ["Twitter card", '<meta name="twitter:card" content="summary_large_image"/>'],
+      ["Twitter title", `<meta name="twitter:title" content="${title}"/>`],
+      ["Twitter description", `<meta name="twitter:description" content="${description}"/>`],
+      ["Twitter image", `<meta name="twitter:image" content="${socialImage}"/>`],
+      [
+        "Twitter image alternative",
+        `<meta name="twitter:image:alt" content="${escapeHtmlAttribute(expectedSeo.image.alt)}"/>`,
+      ],
+    ] as const) {
+      requireHeadValue(head, markup, route.path, kind);
+    }
+    const structuredScripts = [
+      ...head.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g),
+    ];
+    const expectedStructuredData = expectedSeo.structuredData;
+    if (structuredScripts.length !== (expectedStructuredData.length === 0 ? 0 : 1)) {
+      fail(`${route.path} structured data script count does not match the visible page`);
+    }
+    if (structuredScripts.length === 1) {
+      let actualStructuredData: unknown;
+      try {
+        actualStructuredData = JSON.parse(structuredScripts[0]![1]!);
+      } catch {
+        fail(`${route.path} structured data is not valid JSON`);
+      }
+      if (JSON.stringify(actualStructuredData) !== JSON.stringify(expectedStructuredData)) {
+        fail(`${route.path} structured data disagrees with generated route and package facts`);
+      }
+    }
     const shouldNoindex = !config.indexable || !route.index;
     if (robots.length !== (shouldNoindex ? 1 : 0)) {
       fail(`${route.path} robots policy does not match mode ${config.mode}`);
@@ -80,6 +142,24 @@ export function validateDocsBuildMetadata(
   if (!robots.includes(expectedPolicy)) fail(`robots.txt is missing ${expectedPolicy}`);
   if (!robots.includes(`Sitemap: ${config.canonicalBase}/sitemap.xml`)) {
     fail("robots.txt is missing the absolute mode-specific sitemap URL");
+  }
+
+  const facts = docsDiscoveryFacts(config.canonicalBase);
+  for (const filename of ["llms.txt", "llms-full.txt"] as const) {
+    const text = readFileSync(join(buildDir, filename), "utf8");
+    const discoveryText = markdownOutsideFences(text);
+    if (discoveryText.includes("](/")) fail(`${filename} contains a root-relative discovery link`);
+    if (config.base === "" && discoveryText.includes("https://ljodea.github.io/ggsvelte")) {
+      fail(`${filename} leaks the legacy production prefix into a root build`);
+    }
+    for (const expected of [
+      `Package version: ${facts.packageVersion}`,
+      `Defaults edition: ${String(facts.currentEdition)}`,
+      `Registered chart themes (${String(facts.themeNames.length)}): ${facts.themeNames.join(", ")}`,
+    ]) {
+      if (!text.includes(expected))
+        fail(`${filename} is missing current release fact: ${expected}`);
+    }
   }
 }
 

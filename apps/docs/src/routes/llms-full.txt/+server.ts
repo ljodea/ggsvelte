@@ -8,9 +8,10 @@
 import type { PortableSpec } from "@ggsvelte/spec";
 
 import type { LlmsFullExample } from "$scripts/gen-llms";
-import { buildLlmsFull, pruneSpecData } from "$scripts/gen-llms";
+import { buildLlmsFull, docsDiscoveryFacts, pruneSpecData } from "$scripts/gen-llms";
 
 import { EXAMPLES } from "$lib/examples";
+import { docsBuildConfig } from "$lib/server/build-config";
 import { GUIDE_PAGES } from "$lib/guide";
 
 export const prerender = true;
@@ -33,6 +34,7 @@ function pick<T>(table: Record<string, T>, suffix: string): T {
 }
 
 export function GET(): Response {
+  const config = docsBuildConfig();
   const examples: LlmsFullExample[] = EXAMPLES.map((entry) => {
     const full = pick(specs, `/${entry.id}/spec.ts`).default;
     // Cap inline data so one 10k-row example cannot dominate the corpus.
@@ -45,7 +47,10 @@ export function GET(): Response {
       svelteSource: pick(svelteSources, `/${entry.id}/Example.svelte`),
     };
   });
-  return new Response(buildLlmsFull(GUIDE_PAGES, examples), {
-    headers: { "content-type": "text/plain; charset=utf-8" },
-  });
+  return new Response(
+    buildLlmsFull(GUIDE_PAGES, examples, docsDiscoveryFacts(config.canonicalBase)),
+    {
+      headers: { "content-type": "text/plain; charset=utf-8" },
+    },
+  );
 }
