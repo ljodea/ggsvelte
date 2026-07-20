@@ -47,3 +47,18 @@ Initial independent reviews: Claude `VERDICT: BLOCK`; Grok `VERDICT: BLOCK`. All
 - Deterministic evals: 48/48 passed.
 - Packed npm consumer: passed with Svelte 5.33.1.
 - All four new temporal benchmark workloads are within budget. The whole local absolute-budget command is invalidated by unrelated continuously CPU-saturating processes and exceeds only three unchanged legacy workloads; the isolated self-hosted `run-bench` PR lane is authoritative.
+
+## Final PASS re-review follow-ups
+
+Both final re-reviews returned `VERDICT: PASS` with no P0/P1 findings.
+
+- **Unvalidated locale/dateLabels path: fixed.** `runPipeline` now preflights both options into stable `PipelineError` diagnostics before layout; tests assert code, path, severity, problem/cause/fix payloads.
+- **Locale JSON Schema semantics: rebutted/documented.** JSON Schema bounds the portable string; BCP 47 canonicalization and host Intl support are semantic runtime checks that JSON Schema cannot express. The emitted description now states this split explicitly.
+- **Fixed-facet memoization: rebutted.** The reviewed plan permits, but does not require, within-render reuse. Correct two-pass hints are retained and the 100-free-facet median remains under 25 ms.
+- **English `%Z`: rebutted.** Stable short zone identifiers are intentionally resolved in `en-US`; localized month/weekday/day-period text still honors locale. This avoids host-dependent translated zone names.
+- **Evidence base SHA: rebutted.** Size delta uses final `origin/main@df1a8c6` after the required #346 merge, not the branch's earlier `a7a28bb` starting point.
+- **Retention assertion: fixed.** The test now proves fresh planning chooses `50 years` while a still-fitting `100 years` Pass-A hint is retained.
+- **Maximum interval acceptance: fixed.** Exact `1000000 years` acceptance complements the `1000001 years` rejection.
+- **Spring DST straddle: fixed.** The matrix now includes an hourly range spanning the spring gap plus the synthetic-gap-anchor case.
+- **Duplicate break warning: rebutted with regression.** Continuous temporal breaks are not deduplicated; duplicate in-domain breaks preserve count and do not emit `temporal-break-outside-domain`.
+- **Host ICU localization: accepted documented constraint.** Non-default locale byte output follows the pinned support matrix; renderer equality is preserved because formatting happens once in the pipeline.

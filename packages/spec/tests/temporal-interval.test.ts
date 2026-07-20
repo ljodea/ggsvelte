@@ -24,6 +24,11 @@ describe("temporal interval grammar", () => {
       step: 500,
       key: "500 milliseconds",
     });
+    expect(parseTemporalInterval("1000000 years")).toEqual({
+      unit: "year",
+      step: 1_000_000,
+      key: "1000000 years",
+    });
   });
 
   it("rejects ambiguous, fractional, unbounded, and non-canonical intervals", () => {
@@ -78,6 +83,11 @@ describe("temporal interval stepping", () => {
 
   it("steps zoned datetimes monotonically across DST gaps and folds", () => {
     const ranges = [
+      {
+        min: Date.parse("2024-03-10T00:00:00-05:00"),
+        max: Date.parse("2024-03-10T06:00:00-04:00"),
+        interval: "1 hour",
+      },
       {
         min: Date.parse("2024-03-10T03:30:00-04:00"),
         max: Date.parse("2024-03-10T08:00:00-04:00"),

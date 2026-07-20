@@ -91,6 +91,14 @@ export const PIPELINE_ERROR_CATALOG = {
     summary: "One or more explicit scale breaks do not match the scale's parser.",
     fix: "Use numeric breaks for numeric scales or values matching the temporal parse option.",
   },
+  "invalid-temporal-labels": {
+    summary: "A temporal dateLabels string uses an unsupported or incomplete token.",
+    fix: "Use only the documented closed dateLabels token grammar.",
+  },
+  "invalid-temporal-locale": {
+    summary: "A temporal scale locale is not a valid supported BCP 47 locale.",
+    fix: "Use a canonical BCP 47 locale such as en-US, en-GB, fr-FR, or ja-JP.",
+  },
   "temporal-parse-failed": {
     summary: "An explicit temporal parser rejected one or more source values.",
     fix: "Correct the rejected values, choose the matching parser, or explicitly opt into censoring.",

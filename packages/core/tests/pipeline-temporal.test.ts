@@ -180,6 +180,29 @@ describe("temporal pipeline semantics", () => {
     ).toBe(true);
   });
 
+  it("does not misreport duplicate in-domain breaks as outside the domain", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { date: "2024-01-01", value: 1 },
+          { date: "2024-04-01", value: 2 },
+        ],
+        aes({ x: "date", y: "value" }),
+      )
+        .geomLine()
+        .scaleXDate({ breaks: ["2024-01-01", "2024-01-01", "2024-04-01"] })
+        .spec(),
+      size,
+    );
+    const guide = model.guidePlans.find((plan) => plan.aesthetic === "x")!;
+    expect(guide.ticks.filter((tick) => tick.kind === "major")).toHaveLength(3);
+    expect(
+      model.scaleDiagnostics.some(
+        (diagnostic) => diagnostic.code === "temporal-break-outside-domain",
+      ),
+    ).toBe(false);
+  });
+
   it("rejects unparseable explicit breaks instead of misreporting them as out of domain", () => {
     expect(() =>
       runPipeline(
@@ -934,6 +957,34 @@ describe("temporal pipeline semantics", () => {
         size,
       ),
     ).toThrow(PipelineError);
+  });
+
+  it("preflights locale and dateLabels into stable structured pipeline errors", () => {
+    for (const [config, code, path] of [
+      [{ locale: "not_a_locale" }, "invalid-temporal-locale", "/scales/x/locale"],
+      [{ dateLabels: "%Q" }, "invalid-temporal-labels", "/scales/x/dateLabels"],
+    ] as const) {
+      try {
+        runPipeline(
+          {
+            data: { values: [] },
+            layers: [{ geom: "point" }],
+            scales: { x: { type: "time", ...config } },
+          },
+          size,
+        );
+        throw new Error("expected temporal configuration to fail");
+      } catch (error) {
+        expect(error).toBeInstanceOf(PipelineError);
+        if (!(error instanceof PipelineError)) throw error;
+        expect(error.code).toBe(code);
+        expect(error.path).toBe(path);
+        expect(error.diagnostic).toMatchObject({ code, path, severity: "error" });
+        expect(error.diagnostic?.problem.length).toBeGreaterThan(0);
+        expect(error.diagnostic?.cause.length).toBeGreaterThan(0);
+        expect(error.diagnostic?.fixes.length).toBeGreaterThan(0);
+      }
+    }
   });
 
   it("keeps ambiguous y-intercept annotations discrete", () => {

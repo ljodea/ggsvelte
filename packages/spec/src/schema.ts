@@ -1191,7 +1191,8 @@ const SpecDeclarations = {
         Type.String({
           minLength: 1,
           maxLength: 128,
-          description: 'BCP 47 locale for temporal labels. Default "en-US".',
+          description:
+            'BCP 47 locale for temporal labels. Default "en-US". JSON Schema bounds the portable string shape; runtime validation canonicalizes the tag and verifies Intl support before rendering.',
         }),
       ),
       weekStart: Type.Optional(TemporalWeekStartSchema),

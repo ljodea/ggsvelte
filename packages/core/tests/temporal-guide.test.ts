@@ -120,9 +120,10 @@ describe("measured temporal axis GuidePlan", () => {
       fontSize: 11,
       marginCapPx: 112,
       config: {},
-      previousInterval: "50 years",
+      previousInterval: "100 years",
     });
-    expect(retained.interval).toBe("50 years");
+    expect(planYears(320).interval).toBe("50 years");
+    expect(retained.interval).toBe("100 years");
 
     const coarsened = planTemporalAxis({
       aesthetic: "x",
