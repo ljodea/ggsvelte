@@ -1,7 +1,7 @@
 /**
  * Finalize phase: two-pass panel layout only.
  */
-import { TemporalIntervalError, type PortableSpec } from "@ggsvelte/spec";
+import { parseTemporalInterval, TemporalIntervalError, type PortableSpec } from "@ggsvelte/spec";
 
 import { perfMark, perfMeasure } from "../perf.js";
 import type { ThemeTokens } from "../theme.js";
@@ -72,13 +72,21 @@ export function finalizePanelLayoutPass(input: {
     });
   } catch (error) {
     if (!(error instanceof TemporalIntervalError)) throw error;
+    const matchesInterval = (value: string | undefined) => {
+      if (value === undefined) return false;
+      try {
+        return parseTemporalInterval(value).key === error.value;
+      } catch {
+        return value === error.value;
+      }
+    };
     const axis = (["x", "y"] as const).find(
       (candidate) =>
-        scalesConfig[candidate]?.dateBreaks === error.value ||
-        scalesConfig[candidate]?.dateMinorBreaks === error.value,
+        matchesInterval(scalesConfig[candidate]?.dateBreaks) ||
+        matchesInterval(scalesConfig[candidate]?.dateMinorBreaks),
     );
     const option =
-      axis !== undefined && scalesConfig[axis]?.dateMinorBreaks === error.value
+      axis !== undefined && matchesInterval(scalesConfig[axis]?.dateMinorBreaks)
         ? "dateMinorBreaks"
         : "dateBreaks";
     const path = axis === undefined ? "/scales" : `/scales/${axis}/${option}`;

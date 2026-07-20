@@ -22,7 +22,7 @@ export function computeFacetGridGeometry(input: FacetGridGeometryInput): FacetGr
     layoutHeight: input.layoutHeight,
   });
 
-  const mMax = computeFacetSharedMargins({
+  const shared = computeFacetSharedMargins({
     facetPanels: input.facetPanels,
     approxW: outer.approxW,
     approxH: outer.approxH,
@@ -42,7 +42,7 @@ export function computeFacetGridGeometry(input: FacetGridGeometryInput): FacetGr
     ncol: input.ncol,
     freeH: input.freeH,
     freeV: input.freeV,
-    mMax,
+    mMax: shared.margins,
     outerLeft: outer.outerLeft,
     topBand: input.topBand,
     spacing: outer.spacing,
@@ -51,5 +51,9 @@ export function computeFacetGridGeometry(input: FacetGridGeometryInput): FacetGr
     gridH: outer.gridH,
   });
 
-  return { mMax, ...cells };
+  return {
+    mMax: shared.margins,
+    previousGuidePlans: shared.previousGuidePlans,
+    ...cells,
+  };
 }

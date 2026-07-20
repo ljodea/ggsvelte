@@ -147,6 +147,7 @@ const WEEKDAYS_LONG = [
   "Friday",
   "Saturday",
 ] as const;
+const MAX_TEMPORAL_INTL_CACHE_ENTRIES = 64;
 const TEMPORAL_INTL_CACHE = new Map<string, Intl.DateTimeFormat>();
 
 function cachedDateTimeFormat(
@@ -155,11 +156,22 @@ function cachedDateTimeFormat(
   options: Intl.DateTimeFormatOptions,
 ): Intl.DateTimeFormat {
   const key = JSON.stringify([locale, timezone, options]);
-  let formatter = TEMPORAL_INTL_CACHE.get(key);
-  if (formatter === undefined) {
-    formatter = new Intl.DateTimeFormat(locale, { ...options, timeZone: timezone });
-    TEMPORAL_INTL_CACHE.set(key, formatter);
+  const cached = TEMPORAL_INTL_CACHE.get(key);
+  if (cached !== undefined) {
+    TEMPORAL_INTL_CACHE.delete(key);
+    TEMPORAL_INTL_CACHE.set(key, cached);
+    return cached;
   }
+  const formatter = new Intl.DateTimeFormat(locale, {
+    ...options,
+    calendar: "gregory",
+    timeZone: timezone,
+  });
+  if (TEMPORAL_INTL_CACHE.size >= MAX_TEMPORAL_INTL_CACHE_ENTRIES) {
+    const oldest = TEMPORAL_INTL_CACHE.keys().next().value;
+    if (oldest !== undefined) TEMPORAL_INTL_CACHE.delete(oldest);
+  }
+  TEMPORAL_INTL_CACHE.set(key, formatter);
   return formatter;
 }
 
@@ -199,6 +211,7 @@ function displayParts(ms: number, options: TemporalLabelFormatOptions): Temporal
     minute: "numeric",
     second: "numeric",
     hourCycle: "h23",
+    numberingSystem: "latn",
   }).formatToParts(ms);
   const monthShort = partValue(
     cachedDateTimeFormat(locale, timezone, { month: "short" }).formatToParts(ms),

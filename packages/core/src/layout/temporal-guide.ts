@@ -1,6 +1,7 @@
 import {
   MAX_TEMPORAL_MAJOR_TICKS,
   MAX_TEMPORAL_MINOR_TICKS,
+  MIN_TEMPORAL_LABEL_GAP_PX,
   parseTemporalInterval,
   temporalIntervalTicks,
   type PositionScaleSpec,
@@ -101,6 +102,8 @@ export interface TemporalAxisPlanInput {
   measurer: TextMeasurer;
   fontSize: number;
   marginCapPx: number;
+  /** Cap for the orthogonal label band (bottom for x, top/bottom overhang for y). */
+  orthogonalMarginCapPx?: number;
   config: Pick<
     PositionScaleSpec,
     | "dateBreaks"
@@ -172,6 +175,7 @@ function intervalApproxMs(value: TemporalInterval): number {
 function temporalOptions(input: TemporalAxisPlanInput) {
   return {
     kind: input.kind,
+    locale: input.config.locale ?? "en-US",
     timezone: input.kind === "date" ? "UTC" : (input.config.timezone ?? "UTC"),
     weekStart: input.config.weekStart ?? "monday",
     ...(input.config.disambiguation !== undefined && {
@@ -232,15 +236,16 @@ function evaluateTicks(
     const current = projected[index]!;
     const previousHalf = input.orient === "horizontal" ? previous.width / 2 : previous.height / 2;
     const currentHalf = input.orient === "horizontal" ? current.width / 2 : current.height / 2;
-    if (previous.pos + previousHalf + 6 > current.pos - currentHalf) {
+    if (previous.pos + previousHalf + MIN_TEMPORAL_LABEL_GAP_PX > current.pos - currentHalf) {
       overlap = true;
       break;
     }
   }
+  const orthogonalCap = input.orthogonalMarginCapPx ?? input.marginCapPx;
   const marginOverflow = projected.some((tick) =>
     input.orient === "horizontal"
-      ? tick.width / 2 > input.marginCapPx
-      : tick.width > input.marginCapPx,
+      ? tick.width / 2 > input.marginCapPx || tick.height > orthogonalCap
+      : tick.width > input.marginCapPx || tick.height / 2 > orthogonalCap,
   );
   return { overlap, marginOverflow };
 }
@@ -303,29 +308,32 @@ function automaticCandidate(input: TemporalAxisPlanInput): CandidateEvaluation {
     input.previousInterval === undefined || input.previousInterval === null
       ? null
       : intervalApproxMs(parseTemporalInterval(input.previousInterval));
-  const minimumApprox = previousApprox ?? span / 12;
-  const maximumApprox = Math.max(minimumApprox, span * 1.1);
-  let pool = AUTOMATIC_INTERVALS.filter((candidate) => {
-    const approx = intervalApproxMs(candidate);
-    return approx >= minimumApprox && approx <= maximumApprox;
-  });
-  if (pool.length === 0) {
-    pool = [
-      AUTOMATIC_INTERVALS.reduce((closest, candidate) =>
-        Math.abs(intervalApproxMs(candidate) - span / 5) <
-        Math.abs(intervalApproxMs(closest) - span / 5)
-          ? candidate
-          : closest,
-      ),
-    ];
-  }
-  const candidates = pool
-    .map((candidate) => evaluateCandidate(candidate, input))
-    .filter((candidate): candidate is CandidateEvaluation => candidate !== null)
-    .toSorted(
-      (left, right) =>
-        left.approxMs - right.approxMs || left.interval.key.localeCompare(right.interval.key),
+  const lowerApprox = previousApprox ?? span / 12;
+  const upperApprox = Math.max(lowerApprox, span * 1.1);
+  const evaluatePool = (pool: readonly TemporalInterval[]) =>
+    pool
+      .map((candidate) => evaluateCandidate(candidate, input))
+      .filter((candidate): candidate is CandidateEvaluation => candidate !== null)
+      .toSorted(
+        (left, right) =>
+          left.approxMs - right.approxMs ||
+          (left.interval.key < right.interval.key
+            ? -1
+            : left.interval.key > right.interval.key
+              ? 1
+              : 0),
+      );
+  const primary = evaluatePool(
+    AUTOMATIC_INTERVALS.filter((candidate) => {
+      const approx = intervalApproxMs(candidate);
+      return approx >= lowerApprox && approx <= upperApprox;
+    }),
+  );
+  const coarser = () =>
+    evaluatePool(
+      AUTOMATIC_INTERVALS.filter((candidate) => intervalApproxMs(candidate) > upperApprox),
     );
+  const candidates = primary.length > 0 ? primary : coarser();
   if (candidates.length === 0) {
     const fallback = interval("year", 1);
     return {
@@ -340,12 +348,15 @@ function automaticCandidate(input: TemporalAxisPlanInput): CandidateEvaluation {
 
   if (input.previousInterval !== undefined && input.previousInterval !== null) {
     const previous = parseTemporalInterval(input.previousInterval);
-    const ladder = candidates.filter((candidate) => candidate.approxMs >= (previousApprox ?? 0));
-    const retained = ladder.find((candidate) => candidate.interval.key === previous.key);
+    const retained = candidates.find((candidate) => candidate.interval.key === previous.key);
     if (retained !== undefined && !retained.overlap) return retained;
-    return ladder.find((candidate) => !candidate.overlap) ?? ladder.at(-1) ?? candidates.at(-1)!;
+    const fallbackLadder = [...candidates, ...coarser()];
+    return fallbackLadder.find((candidate) => !candidate.overlap) ?? fallbackLadder.at(-1)!;
   }
-  return candidates.toSorted(compareScore)[0]!;
+  const fitting = candidates.filter((candidate) => !candidate.overlap);
+  if (fitting.length > 0) return fitting.toSorted(compareScore)[0]!;
+  const fallbackLadder = [...candidates, ...coarser()];
+  return fallbackLadder.find((candidate) => !candidate.overlap) ?? fallbackLadder.at(-1)!;
 }
 
 function exactCandidate(input: TemporalAxisPlanInput): CandidateEvaluation {
@@ -443,7 +454,7 @@ export function planTemporalAxis(input: TemporalAxisPlanInput): AxisGuidePlan {
     domain: Object.freeze([input.domain[0], input.domain[1]] as const),
     direction: input.reverse ? ("descending" as const) : ("ascending" as const),
     source,
-    interval: selected.interval.key,
+    interval: source === "explicit" ? null : selected.interval.key,
     locale: input.config.locale ?? "en-US",
     timezone: input.kind === "date" ? "UTC" : (input.config.timezone ?? "UTC"),
     ticks: Object.freeze([...selected.ticks, ...minorTicks].map((tick) => Object.freeze(tick))),

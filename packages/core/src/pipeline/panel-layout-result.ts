@@ -55,6 +55,6 @@ export function panelLayoutResultFromChrome(
     formatY: chrome.formatY,
     displayScales: chrome.displayScales,
     legendBlock: chrome.legendBlock,
-    guidePlans,
+    guidePlans: Object.freeze(guidePlans),
   };
 }

@@ -39,6 +39,7 @@ export function placeFacetPanels(input: {
     displayScales: input.displayScales,
     displayTemporal: input.displayTemporal,
     mMax: geometry.mMax,
+    previousGuidePlans: geometry.previousGuidePlans,
     panelW: geometry.panelW,
     panelH: geometry.panelH,
     colX: geometry.colX,

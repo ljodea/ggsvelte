@@ -81,6 +81,7 @@ describe("temporal scale schema", () => {
       { type: "time" as const, timezone: "Not/A_Zone" },
       { type: "time" as const, parse: { format: "%m-%d" } },
       { type: "time" as const, dateBreaks: "0 days" },
+      { type: "time" as const, dateBreaks: "1000001 years" },
       { type: "time" as const, dateMinorBreaks: "1 fortnight" },
       { type: "time" as const, dateLabels: "%Q" },
       { type: "time" as const, locale: "not_a_locale" },

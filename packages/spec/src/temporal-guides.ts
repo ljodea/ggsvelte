@@ -35,11 +35,12 @@ const WEEKDAY_SCHEMAS = TEMPORAL_WEEKDAYS.map((weekday) => Type.Literal(weekday)
   ...TLiteral<TemporalWeekStart>[],
 ];
 
+const TEMPORAL_INTERVAL_STEP_PATTERN = "(?:[1-9][0-9]{0,5}|1000000)";
+
 export const TemporalIntervalSpecSchema = Type.String({
   minLength: 1,
   maxLength: 128,
-  pattern:
-    "^[ ]*[1-9][0-9]{0,6}[ ]+(?:millisecond|second|minute|hour|day|week|month|quarter|year)s?[ ]*$",
+  pattern: `^[ ]*${TEMPORAL_INTERVAL_STEP_PATTERN}[ ]+(?:millisecond|second|minute|hour|day|week|month|quarter|year)s?[ ]*$`,
   description:
     'A positive integer calendar interval such as "2 weeks", "3 months", or "10 years". Canonical units are millisecond, second, minute, hour, day, week, month, quarter, and year.',
 });
@@ -70,15 +71,16 @@ export class TemporalIntervalError extends Error {
   }
 }
 
-const INTERVAL_RE =
-  /^([1-9]\d{0,6}) +(millisecond|second|minute|hour|day|week|month|quarter|year)(s?)$/;
+const INTERVAL_RE = new RegExp(
+  `^(${TEMPORAL_INTERVAL_STEP_PATTERN}) +(millisecond|second|minute|hour|day|week|month|quarter|year)(s?)$`,
+);
 
 export function parseTemporalInterval(value: string): TemporalInterval;
 export function parseTemporalInterval(value: unknown): TemporalInterval {
   if (typeof value !== "string" || value.length > 128) {
     throw new TemporalIntervalError(String(value), "expected a string of at most 128 characters");
   }
-  const match = INTERVAL_RE.exec(value.trim());
+  const match = INTERVAL_RE.exec(value.replaceAll(/^ +| +$/g, ""));
   if (match === null) {
     throw new TemporalIntervalError(
       value,
@@ -286,7 +288,6 @@ export function temporalIntervalTicks(
   }
 
   const Temporal = temporalImplementation();
-  const disambiguation = options.disambiguation ?? "reject";
   const current = Temporal.Instant.fromEpochMilliseconds(min).toZonedDateTimeISO(timezone);
   const parts = {
     year: current.year,
@@ -370,7 +371,10 @@ export function temporalIntervalTicks(
       return [];
   }
 
-  let tick = plain.toZonedDateTime(timezone, { disambiguation });
+  // Generated civil boundaries are synthetic, not parsed source values. Temporal's
+  // compatible policy keeps them monotonic through gaps/folds; source parsing has
+  // already applied the author's configured disambiguation contract.
+  let tick = plain.toZonedDateTime(timezone, { disambiguation: "compatible" });
   if (tick.epochMilliseconds < min) {
     tick = addTemporalInterval(tick, interval);
   }

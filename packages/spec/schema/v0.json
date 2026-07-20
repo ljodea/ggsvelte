@@ -1477,14 +1477,14 @@
           "type": "string",
           "minLength": 1,
           "maxLength": 128,
-          "pattern": "^[ ]*[1-9][0-9]{0,6}[ ]+(?:millisecond|second|minute|hour|day|week|month|quarter|year)s?[ ]*$",
+          "pattern": "^[ ]*(?:[1-9][0-9]{0,5}|1000000)[ ]+(?:millisecond|second|minute|hour|day|week|month|quarter|year)s?[ ]*$",
           "description": "A positive integer calendar interval such as \"2 weeks\", \"3 months\", or \"10 years\". Canonical units are millisecond, second, minute, hour, day, week, month, quarter, and year."
         },
         "dateMinorBreaks": {
           "type": "string",
           "minLength": 1,
           "maxLength": 128,
-          "pattern": "^[ ]*[1-9][0-9]{0,6}[ ]+(?:millisecond|second|minute|hour|day|week|month|quarter|year)s?[ ]*$",
+          "pattern": "^[ ]*(?:[1-9][0-9]{0,5}|1000000)[ ]+(?:millisecond|second|minute|hour|day|week|month|quarter|year)s?[ ]*$",
           "description": "A positive integer calendar interval such as \"2 weeks\", \"3 months\", or \"10 years\". Canonical units are millisecond, second, minute, hour, day, week, month, quarter, and year."
         },
         "dateLabels": {

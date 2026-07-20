@@ -48,6 +48,16 @@ describe("temporal label formatting", () => {
     ]);
   });
 
+  it("extracts Gregorian numeric fields with Latin digits in non-Latin locales", () => {
+    const format = compileTemporalLabelFormat("%Y-%m-%d %H:%M:%S", {
+      kind: "datetime",
+      locale: "fa-IR",
+      timezone: "UTC",
+    });
+    expect(format(Date.UTC(2024, 2, 10, 7, 30, 9))).toBe("2024-03-10 07:30:09");
+    expect(format(Date.UTC(2024, 2, 10, 7, 30, 9))).not.toContain("NaN");
+  });
+
   it("rejects unsupported strict dateLabels tokens", () => {
     expect(() =>
       compileTemporalLabelFormat("%Y %Q", {
@@ -89,24 +99,111 @@ describe("measured temporal axis GuidePlan", () => {
     }
   });
 
-  it("retains or moves only coarser from a prior-pass interval", () => {
-    const passA = planYears(1200);
-    const passB = planTemporalAxis({
+  it("keeps interval tie-breaks stable at neighboring integer widths", () => {
+    expect([319, 320, 321].map((width) => planYears(width).interval)).toEqual([
+      "50 years",
+      "50 years",
+      "50 years",
+    ]);
+  });
+
+  it("retains a fitting Pass-A interval and walks multiple coarser steps when needed", () => {
+    const retained = planTemporalAxis({
       aesthetic: "x",
       panelIndex: 0,
       domain: [Date.UTC(1835, 0, 1), Date.UTC(2025, 0, 1)],
       kind: "date",
       orient: "horizontal",
-      extentPx: 180,
+      extentPx: 320,
       reverse: false,
       measurer,
       fontSize: 11,
-      marginCapPx: 63,
+      marginCapPx: 112,
       config: {},
-      previousInterval: passA.interval,
+      previousInterval: "50 years",
     });
-    expect(passB.interval).not.toBeNull();
-    expect(passB.ticks.length).toBeLessThanOrEqual(passA.ticks.length);
+    expect(retained.interval).toBe("50 years");
+
+    const coarsened = planTemporalAxis({
+      aesthetic: "x",
+      panelIndex: 0,
+      domain: [Date.UTC(1835, 0, 1), Date.UTC(2025, 0, 1)],
+      kind: "date",
+      orient: "horizontal",
+      extentPx: 80,
+      reverse: false,
+      measurer,
+      fontSize: 11,
+      marginCapPx: 28,
+      config: {},
+      previousInterval: "10 years",
+    });
+    expect(coarsened.interval).toBe("100 years");
+    expect(coarsened.overlap).toBe(false);
+  });
+
+  it("keeps the coarsest bounded plan and reports overlap when the ladder is exhausted", () => {
+    const epochYear = (year: number) => {
+      const date = new Date(0);
+      date.setUTCFullYear(year, 0, 1);
+      date.setUTCHours(0, 0, 0, 0);
+      return date.getTime();
+    };
+    const plan = planTemporalAxis({
+      aesthetic: "x",
+      panelIndex: 0,
+      domain: [epochYear(0), epochYear(10_000)],
+      kind: "date",
+      orient: "horizontal",
+      extentPx: 1,
+      reverse: false,
+      measurer,
+      fontSize: 11,
+      marginCapPx: 100,
+      config: {},
+      previousInterval: "100 years",
+    });
+    expect(plan.interval).toBe("5000 years");
+    expect(plan.overlap).toBe(true);
+    expect(plan.degraded).toContain("temporal-label-overlap");
+  });
+
+  it("uses the requested locale for planner-produced labels", () => {
+    const plan = planTemporalAxis({
+      aesthetic: "x",
+      panelIndex: 0,
+      domain: [Date.UTC(2024, 0, 1), Date.UTC(2024, 1, 1)],
+      kind: "date",
+      orient: "horizontal",
+      extentPx: 640,
+      reverse: false,
+      measurer,
+      fontSize: 11,
+      marginCapPx: 224,
+      config: { dateBreaks: "1 month", dateLabels: "%B", locale: "fr-FR" },
+    });
+    expect(plan.ticks[0]?.label.toLocaleLowerCase("fr-FR")).toBe("janvier");
+    expect(plan.locale).toBe("fr-FR");
+  });
+
+  it("reports orthogonal margin overflow without changing authored labels", () => {
+    const plan = planTemporalAxis({
+      aesthetic: "x",
+      panelIndex: 0,
+      domain: [Date.UTC(2024, 0, 1), Date.UTC(2024, 1, 1)],
+      kind: "date",
+      orient: "horizontal",
+      extentPx: 640,
+      reverse: false,
+      measurer,
+      fontSize: 11,
+      marginCapPx: 1_000,
+      orthogonalMarginCapPx: 5,
+      config: { dateBreaks: "1 month", dateLabels: "%Y-%m-%d" },
+    });
+    expect(plan.ticks.map((tick) => tick.label)).toEqual(["2024-01-01", "2024-02-01"]);
+    expect(plan.marginOverflow).toBe(true);
+    expect(plan.degraded).toContain("temporal-label-margin-overflow");
   });
 
   it("preserves explicit intervals and labels while reporting overlap", () => {
@@ -124,6 +221,7 @@ describe("measured temporal axis GuidePlan", () => {
       config: { dateBreaks: "1 month", dateLabels: "%Y-%m-%d" },
     });
     expect(plan.source).toBe("interval");
+    expect(plan.interval).toBe("1 month");
     expect(plan.ticks.filter((tick) => tick.kind === "major")).toHaveLength(12);
     expect(plan.ticks[0]?.label).toBe("2024-01-01");
     expect(plan.overlap).toBe(true);
@@ -146,8 +244,8 @@ describe("measured temporal axis GuidePlan", () => {
     const major = new Set(
       plan.ticks.filter((tick) => tick.kind === "major").map((tick) => tick.value),
     );
-    expect(
-      plan.ticks.filter((tick) => tick.kind === "minor").every((tick) => !major.has(tick.value)),
-    ).toBe(true);
+    const minor = plan.ticks.filter((tick) => tick.kind === "minor");
+    expect(minor.length).toBeGreaterThan(0);
+    expect(minor.every((tick) => !major.has(tick.value))).toBe(true);
   });
 });

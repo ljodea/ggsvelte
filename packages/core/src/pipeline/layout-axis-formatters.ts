@@ -34,14 +34,14 @@ export function makeAxisFormatter(
   }
   const labels = config?.dateLabels ?? config?.labels;
   if (labels === undefined) {
-    if (scale.type !== "time" || config === undefined) return undefined;
-    const kind = resolvedTemporalKind ?? config.temporalKind ?? "datetime";
+    if (scale.type !== "time") return undefined;
+    const kind = resolvedTemporalKind ?? config?.temporalKind ?? "datetime";
     const format = compileTemporalLabelFormat(
       kind === "date" ? "%Y-%m-%d" : "%Y-%m-%d %H:%M:%S %Z",
       {
         kind,
-        locale: config.locale ?? "en-US",
-        timezone: config.timezone ?? "UTC",
+        locale: config?.locale ?? "en-US",
+        timezone: config?.timezone ?? "UTC",
       },
     );
     return (value) => format(value as number);
@@ -56,7 +56,7 @@ export function makeAxisFormatter(
   if (scale.type === "time") {
     if (config?.dateLabels !== undefined) {
       const format = compileTemporalLabelFormat(config.dateLabels, {
-        kind: config.temporalKind ?? "datetime",
+        kind: resolvedTemporalKind ?? config.temporalKind ?? "datetime",
         locale: config.locale ?? "en-US",
         timezone: config.timezone ?? "UTC",
       });

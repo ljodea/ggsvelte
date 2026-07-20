@@ -26,7 +26,9 @@ Pass B final extent
 
 Pass B never selects a finer interval. If every bounded candidate overlaps, the coarsest plan renders with a diagnostic. Temporal labels bypass generic post-plan thinning and ellipsis. Margins stay capped; authored text remains intact and reports neighbor overlap or margin overflow separately.
 
-Automatic interval candidates use civil boundaries. Date-kind axes remain UTC calendar values. Datetime axes step and format in their explicit IANA timezone. The existing native-first Temporal/polyfill adapter and deterministic formatter foundation are reused; adding d3-time would duplicate parser/timezone policy and dependency cost.
+Automatic interval candidates use civil boundaries. Pass A scores the deterministic primary ladder whose approximate count is at most twelve, then walks every coarser candidate if that ladder still overlaps; candidates denser than twelve cannot win the documented 3–7-label preference and are excluded to keep 100-facet planning bounded. Pass B starts at the prior interval and walks only coarser. Date-kind axes remain UTC calendar values. Datetime axes step and format in their explicit IANA timezone. Synthetic tick boundaries use Temporal's `compatible` gap/fold resolution so generation remains monotonic; the author's `disambiguation` policy has already been enforced while parsing source and authored values. The existing native-first Temporal/polyfill adapter and deterministic formatter foundation are reused; adding d3-time would duplicate parser/timezone policy and dependency cost.
+
+Faceted layout retains each panel's Pass-B interval from the shared-margin pass and supplies it as the same-or-coarser hint to final placement. Fixed and free panels therefore cannot re-score to a finer interval after shared margins are known.
 
 Explicit minor breaks project into separate `minorX`/`minorY` grid arrays and minor `SceneTick`s. Fixed subordinate opacity and half-length are defaults, not a public guide-appearance API; PR 7 owns that API.
 

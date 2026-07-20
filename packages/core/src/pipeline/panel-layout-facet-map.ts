@@ -15,6 +15,7 @@ export function mapFacetPanelPlacements(input: MapFacetPanelPlacementsInput): Pa
     displayScales,
     displayTemporal,
     mMax,
+    previousGuidePlans,
     panelW,
     panelH,
     colX,
@@ -38,6 +39,9 @@ export function mapFacetPanelPlacements(input: MapFacetPanelPlacementsInput): Pa
       ...(temporal.h !== undefined && { hTemporal: temporal.h }),
       ...(temporal.v !== undefined && { vTemporal: temporal.v }),
       mMax,
+      ...(previousGuidePlans[p] !== undefined && {
+        previousGuidePlans: previousGuidePlans[p],
+      }),
       panelW,
       panelH,
       colX: colX[def.col]!,

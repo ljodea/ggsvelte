@@ -4,10 +4,16 @@
 import type { LayoutTheme, Margins, TickFormatter } from "../layout/layout.js";
 import { layout } from "../layout/layout.js";
 import type { TextMeasurer } from "../layout/measure.js";
+import type { AxisGuidePlan } from "../layout/temporal-guide.js";
 
 import type { FacetPanelDef } from "./facets.js";
 import { elementwiseMaxMargins, layoutDomain } from "./layout-helpers.js";
 import type { DisplayScalesFn, DisplayTemporalFn } from "./panel-layout-types.js";
+
+export interface FacetSharedMarginsResult {
+  margins: Margins;
+  previousGuidePlans: readonly Readonly<{ x?: AxisGuidePlan; y?: AxisGuidePlan }>[];
+}
 
 export function computeFacetSharedMargins(input: {
   facetPanels: readonly FacetPanelDef[];
@@ -21,7 +27,7 @@ export function computeFacetSharedMargins(input: {
   formatV: TickFormatter | undefined;
   measurer: TextMeasurer;
   layoutTheme: LayoutTheme;
-}): Margins {
+}): FacetSharedMarginsResult {
   const {
     facetPanels,
     approxW,
@@ -37,6 +43,7 @@ export function computeFacetSharedMargins(input: {
   } = input;
 
   let mMax: Margins = { top: 0, right: 0, bottom: 0, left: 0 };
+  const previousGuidePlans: Readonly<{ x?: AxisGuidePlan; y?: AxisGuidePlan }>[] = [];
   for (let p = 0; p < facetPanels.length; p++) {
     const { h, v } = displayScales(p);
     const temporal = displayTemporal(p);
@@ -51,6 +58,15 @@ export function computeFacetSharedMargins(input: {
       theme: layoutTheme,
     });
     mMax = elementwiseMaxMargins(mMax, run.margins);
+    previousGuidePlans.push(
+      Object.freeze({
+        ...(run.x.guidePlan !== undefined && { x: run.x.guidePlan }),
+        ...(run.y.guidePlan !== undefined && { y: run.y.guidePlan }),
+      }),
+    );
   }
-  return mMax;
+  return {
+    margins: mMax,
+    previousGuidePlans: Object.freeze(previousGuidePlans),
+  };
 }

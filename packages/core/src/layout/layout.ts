@@ -180,6 +180,7 @@ interface DeriveTicksContext {
   measurer: TextMeasurer;
   fontSize: number;
   marginCapPx: number;
+  orthogonalMarginCapPx?: number;
   previousGuidePlan?: AxisGuidePlan;
 }
 
@@ -254,6 +255,9 @@ function deriveTicks(
         measurer: context.measurer,
         fontSize: context.fontSize,
         marginCapPx: context.marginCapPx,
+        ...(context.orthogonalMarginCapPx !== undefined && {
+          orthogonalMarginCapPx: context.orthogonalMarginCapPx,
+        }),
         config: domain.temporal.config,
         ...(domain.breaks !== undefined && { breaks: domain.breaks }),
         ...(domain.temporal.sourceBreaks !== undefined && {
@@ -375,6 +379,7 @@ export function layoutPass(margins: Margins, input: LayoutInput, theme: LayoutTh
     measurer,
     fontSize,
     marginCapPx: capRight,
+    orthogonalMarginCapPx: capBottom,
     ...(input.previousGuidePlans?.x !== undefined && {
       previousGuidePlan: input.previousGuidePlans.x,
     }),
@@ -385,6 +390,7 @@ export function layoutPass(margins: Margins, input: LayoutInput, theme: LayoutTh
     measurer,
     fontSize,
     marginCapPx: capLeft,
+    orthogonalMarginCapPx: capTop,
     ...(input.previousGuidePlans?.y !== undefined && {
       previousGuidePlan: input.previousGuidePlans.y,
     }),

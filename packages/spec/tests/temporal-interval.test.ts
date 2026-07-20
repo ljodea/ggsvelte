@@ -38,6 +38,8 @@ describe("temporal interval grammar", () => {
       "day",
       "",
       "1\u00A0day",
+      "\u00A01 day",
+      "1 day\u00A0",
     ]) {
       expect(() => parseTemporalInterval(value), value).toThrow();
     }
@@ -75,22 +77,31 @@ describe("temporal interval stepping", () => {
   });
 
   it("steps zoned datetimes monotonically across DST gaps and folds", () => {
-    for (const [min, max] of [
-      [Date.parse("2024-03-09T00:00:00-05:00"), Date.parse("2024-03-12T00:00:00-04:00")],
-      [Date.parse("2024-11-02T00:00:00-04:00"), Date.parse("2024-11-05T00:00:00-05:00")],
-    ] as const) {
-      const ticks = temporalIntervalTicks(min, max, "1 day", {
-        kind: "datetime",
-        timezone: "America/New_York",
-        disambiguation: "reject",
-      });
-      expect(ticks.length).toBeGreaterThanOrEqual(2);
-      for (let index = 1; index < ticks.length; index++) {
-        expect(ticks[index]!).toBeGreaterThan(ticks[index - 1]!);
+    const ranges = [
+      {
+        min: Date.parse("2024-03-10T03:30:00-04:00"),
+        max: Date.parse("2024-03-10T08:00:00-04:00"),
+        interval: "2 hours",
+      },
+      {
+        min: Date.parse("2024-11-03T01:30:00-04:00"),
+        max: Date.parse("2024-11-03T07:00:00-05:00"),
+        interval: "1 hour",
+      },
+    ] as const;
+    for (const disambiguation of ["compatible", "earlier", "later", "reject"] as const) {
+      for (const { min, max, interval } of ranges) {
+        const ticks = temporalIntervalTicks(min, max, interval, {
+          kind: "datetime",
+          timezone: "America/New_York",
+          disambiguation,
+        });
+        expect(ticks.length).toBeGreaterThanOrEqual(2);
+        for (let index = 1; index < ticks.length; index++) {
+          expect(ticks[index]!).toBeGreaterThan(ticks[index - 1]!);
+        }
+        expect(new Set(ticks).size).toBe(ticks.length);
       }
-      expect(ticks.map((value) => new Date(value).toISOString())).toEqual(
-        [...new Set(ticks)].map((value) => new Date(value).toISOString()),
-      );
     }
   });
 

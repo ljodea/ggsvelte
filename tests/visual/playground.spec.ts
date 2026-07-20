@@ -62,6 +62,39 @@ test("temporal samples render after clearing the optional color field", async ({
   await expect(page.getByRole("heading", { name: "Axis plans" })).toBeVisible();
 });
 
+test("191-year temporal guide stays collision-free with complete labels", async ({ page }) => {
+  for (const width of [320, 640, 1200]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("/examples/line/time-axis");
+    await settleVisualState(page);
+
+    const ticks = page.locator(".gg-axis-x .gg-tick:not(.gg-tick-minor)");
+    await expect(ticks.first()).toBeVisible();
+    const evidence = await ticks.evaluateAll((elements) =>
+      elements.map((element) => {
+        const text = element.querySelector("text");
+        const title = element.querySelector("title");
+        const box = text?.getBoundingClientRect();
+        return {
+          left: box?.left ?? 0,
+          right: box?.right ?? 0,
+          visible: text?.textContent ?? "",
+          full: title?.textContent ?? "",
+          titleIsFirst: element.firstElementChild === title,
+        };
+      }),
+    );
+    expect(evidence.length, String(width)).toBeGreaterThanOrEqual(3);
+    expect(evidence.every((tick) => tick.full.length > 0 && tick.titleIsFirst)).toBe(true);
+    for (let index = 1; index < evidence.length; index++) {
+      expect(
+        evidence[index - 1]!.right + 6,
+        `${String(width)}px tick ${String(index)}`,
+      ).toBeLessThanOrEqual(evidence[index]!.left);
+    }
+  }
+});
+
 test("invalid data is actionable, takes focus, and preserves the last good chart", async ({
   page,
 }) => {

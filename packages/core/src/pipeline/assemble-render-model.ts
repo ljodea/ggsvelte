@@ -19,7 +19,7 @@ function guidePlanDiagnostics(input: AssembleRenderModelInput): RenderModel["sca
   const seen = new Set<string>();
   return input.guidePlans.flatMap((plan) =>
     plan.degraded.flatMap((code) => {
-      const key = `${code}:${plan.aesthetic}:${String(plan.panelIndex)}`;
+      const key = `${code}:${plan.aesthetic}`;
       if (seen.has(key)) return [];
       seen.add(key);
       const margin = code === "temporal-label-margin-overflow";

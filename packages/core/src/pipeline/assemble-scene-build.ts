@@ -48,7 +48,10 @@ export function assembleScene(input: AssembleSceneInput): Scene {
     panels: scenePanels,
     batches,
     axes: { x: xAxis, y: yAxis },
-    grid: scenePanels[0]?.grid ?? { x: [], y: [] },
+    grid: {
+      x: scenePanels[0]?.grid.x ?? [],
+      y: scenePanels[0]?.grid.y ?? [],
+    },
     legends,
     theme,
     title,
