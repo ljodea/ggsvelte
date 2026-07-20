@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784590911755,
+  "lastUpdate": 1784591516716,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -35665,6 +35665,150 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 148.6455,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "2a89f61dacd4bf68bdbedb7e2f0670494709fb02",
+          "message": "refactor: split gen-llms into markdown and guide content modules (#354)\n\nExtract the minimal markdown renderer and guide prose constants from the\nmonolithic gen-llms module so prose edits no longer collide with catalog\nbuilders and llms surface assembly. Keep $scripts/gen-llms as the public\nre-export entrypoint.\n\nRoute the new sibling modules through the docs lane and component_journeys\ncontent-hash inputs, and assert the runtime export surface plus docs-lane\nscheduling so path routing cannot false-green after a prose-only edit.",
+          "timestamp": "2026-07-20T18:51:10-05:00",
+          "tree_id": "ecebe299a9d068414a60e4853f6b74a7dcfb47a3",
+          "url": "https://github.com/ljodea/ggsvelte/commit/2a89f61dacd4bf68bdbedb7e2f0670494709fb02"
+        },
+        "date": 1784591515708,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.2375,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.9841,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 9.9296,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 10.8498,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 49.5793,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 84.2235,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal-line 100k",
+            "value": 66.3837,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide candidate-selection 300y",
+            "value": 0.0899,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide resize-churn 191y",
+            "value": 0.2714,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide DST-heavy 3y",
+            "value": 2.9779,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal free-facets 100",
+            "value": 26.3032,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.4689,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.4295,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 50.2275,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 75.5368,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 12.6071,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 11.3261,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 1004.9643,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.6638,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 252.3267,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 8.5213,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 15.1992,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 642.1538,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 131.8816,
             "unit": "ms"
           }
         ]
