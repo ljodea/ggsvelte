@@ -42,9 +42,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/playground",
-    title: "Use my data — ggsvelte playground",
+    title: "PortableSpec playground — ggsvelte",
     description:
-      "Build a local ggsvelte chart from bounded JSON rows, then opt into inspection, interval selection, and zoom.",
+      "Open a real ggsvelte example, edit a bounded PortableSpec locally, and copy a complete Svelte component or share URL.",
     canonicalPath: "/playground",
     kind: "page",
     index: true,

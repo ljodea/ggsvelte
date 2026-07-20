@@ -34,12 +34,12 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "page:playground",
     kind: "page",
-    title: "Use my data — ggsvelte playground",
+    title: "PortableSpec playground",
     summary:
-      "Build a local ggsvelte chart from bounded JSON rows, then opt into inspection, interval selection, and zoom.",
+      "Open a real ggsvelte example, edit a bounded PortableSpec locally, and copy a complete Svelte component or share URL.",
     href: "/playground",
     keywords: [],
-    exact: ["Use my data — ggsvelte playground"],
+    exact: ["PortableSpec playground"],
   },
   {
     id: "page:themes",

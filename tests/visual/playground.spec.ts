@@ -1,20 +1,70 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import axe from "axe-core";
 
+import type { PortableSpec } from "@ggsvelte/spec";
+
+import { encodePlaygroundSeed } from "../../apps/docs/src/lib/playground-codec";
 import { settleVisualState } from "./helpers/deterministic";
 
-test("landing page makes the interactive and local-data paths obvious", async ({ page }) => {
+async function readSpec(page: Page): Promise<Record<string, unknown>> {
+  return JSON.parse(await page.getByLabel("PortableSpec JSON").inputValue()) as Record<
+    string,
+    unknown
+  >;
+}
+
+const PIPELINE_FAILURE_SPEC = {
+  edition: 2,
+  data: {
+    values: [
+      { x: 1, y: 2, group: "A" },
+      { x: 2, y: 3, group: "B" },
+    ],
+  },
+  layers: [
+    {
+      geom: "point",
+      stat: "identity",
+      position: "identity",
+      aes: {
+        x: { field: "x" },
+        y: { field: "y" },
+        color: { field: "group" },
+      },
+    },
+  ],
+  scales: { color: { type: "ordinal", range: ["#d94841"], onExhaust: "error" } },
+  labs: { title: "Must not replace the chart" },
+} as const satisfies PortableSpec;
+
+const PIPELINE_FAILURE_FRAGMENT = encodePlaygroundSeed({
+  version: 1,
+  source: { kind: "custom" },
+  spec: PIPELINE_FAILURE_SPEC,
+});
+
+async function applyTitle(page: Page, title: string): Promise<void> {
+  const spec = await readSpec(page);
+  spec["labs"] = { ...(spec["labs"] as Record<string, unknown> | undefined), title };
+  await page.getByLabel("PortableSpec JSON").fill(JSON.stringify(spec, null, 2));
+  await page.getByRole("button", { name: "Apply draft" }).click();
+  await expect(page.getByText("Rendered custom draft.")).toBeVisible();
+}
+
+test("landing page makes the gallery and local adaptation paths obvious", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("link", { name: "Inspect a live plot" })).toHaveAttribute(
     "href",
     /examples\/interactions\/inspection$/,
   );
-  await page.getByRole("link", { name: "Use my data" }).click();
+  await page.getByRole("link", { name: "Adapt a chart" }).click();
   await expect(page).toHaveURL(/\/playground$/);
-  await expect(page.getByRole("heading", { name: "Use my data" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Adapt a chart, then take the Svelte" }),
+  ).toBeVisible();
 });
 
-test("interaction reference filters the exact v0.1 contract", async ({ page }) => {
+test("interaction reference filters the exact public contract", async ({ page }) => {
   await page.goto("/reference/interactions");
   await page.getByLabel("Search capabilities and events").fill("diagnostic");
 
@@ -23,72 +73,184 @@ test("interaction reference filters the exact v0.1 contract", async ({ page }) =
   await expect(page.getByRole("link", { name: /Inspect and pin/ })).toHaveCount(0);
 });
 
-test("valid local JSON replaces the preview without network or code execution", async ({
+test("compatible gallery details open the exact fragment while oversized examples explain why", async ({
   page,
 }) => {
-  const unexpectedRequests: string[] = [];
-  const pageErrors: string[] = [];
+  await page.goto("/examples/point/scatter-color");
+  const handoff = page.getByRole("link", { name: "Open this example in Playground" });
+  await expect(handoff).toHaveAttribute("href", /\/playground#play=v1\.[A-Za-z0-9_-]+$/u);
+  await handoff.click();
+  await expect(page).toHaveURL(/\/playground#play=v1\./u);
+  await expect(page.getByText("Rendered point/scatter-color.")).toBeVisible();
+  await expect(page.getByLabel("PortableSpec JSON")).toHaveValue(/Penguin flippers vs body mass/u);
+
+  await page.goto("/examples/point/canvas-scatter");
+  await expect(page.getByRole("link", { name: "Open this example in Playground" })).toHaveCount(0);
+  await expect(page.getByText(/more than 500 inline rows/u)).toBeVisible();
+});
+
+test("valid edits render before Svelte copy becomes available and candidates stay inert", async ({
+  page,
+}) => {
   await page.goto("/playground");
   await settleVisualState(page);
-  page.on("pageerror", (error) => pageErrors.push(error.message));
-  page.on("request", (request) => {
-    if (!request.url().startsWith("http://127.0.0.1:4173")) unexpectedRequests.push(request.url());
-  });
+  await expect(page.getByRole("button", { name: "Copy Svelte" })).toBeEnabled();
 
-  await page.getByLabel("JSON rows").fill(
-    JSON.stringify([
-      { label: "<img src=x onerror=alert(1)>", x: 1, y: 4 },
-      { label: "safe", x: 2, y: 9 },
-    ]),
+  const spec = await readSpec(page);
+  spec["labs"] = { ...(spec["labs"] as Record<string, unknown>), title: "Edited locally" };
+  await page.getByLabel("PortableSpec JSON").fill(JSON.stringify(spec, null, 2));
+  await expect(page.getByRole("button", { name: "Copy Svelte" })).toBeDisabled();
+  await page.getByRole("button", { name: "Apply draft" }).click();
+
+  const candidate = page.locator(".candidate-chart");
+  await candidate.waitFor({ state: "attached" });
+  expect(
+    await candidate.evaluate((node) => ({
+      focusables: node.querySelectorAll("button, a, input, select, textarea, [tabindex]").length,
+      exposed: node.querySelectorAll('[role="img"], [role="status"], [aria-live]').length,
+      inert: (node as HTMLElement).inert,
+      inertAttribute: node.hasAttribute("inert"),
+      hidden: node.getAttribute("aria-hidden"),
+    })),
+  ).toMatchObject({ inert: true, inertAttribute: true, hidden: "true" });
+
+  await expect(page.getByText("Rendered custom draft.")).toBeVisible();
+  await expect(page.locator(".active-chart .gg-title")).toHaveText("Edited locally");
+  await expect(page.getByRole("button", { name: "Copy Svelte" })).toBeEnabled();
+  await expect(page.getByLabel("Generated Svelte component")).toContainText(
+    "const spec: PortableSpec",
   );
-  await page.getByRole("button", { name: "Apply data" }).click();
-
-  await expect(page.getByText("Applied 2 local rows. Nothing was uploaded.")).toBeVisible();
-  await expect(page.locator('.gg-plot-root[data-gg-ready="true"]')).toHaveCount(1);
-  await expect(page.locator("img")).toHaveCount(0);
-  expect(unexpectedRequests).toEqual([]);
-  expect(pageErrors).toEqual([]);
 });
 
-test("invalid data is actionable, takes focus, and preserves the last good chart", async ({
+test("schema and pipeline failures preserve and label the last render-confirmed chart", async ({
   page,
 }) => {
   await page.goto("/playground");
   await settleVisualState(page);
-  const originalCircles = await page.locator(".gg-points circle").count();
+  const baselineTitle = "Penguin flippers and body mass";
+  await expect(page.locator(".active-chart .gg-title")).toHaveText(baselineTitle);
 
-  await page.getByLabel("JSON rows").fill('[{"x":{"nested":true},"y":2}]');
-  await page.getByRole("button", { name: "Apply data" }).click();
+  await page.getByLabel("PortableSpec JSON").fill('{"layers":[]}');
+  await page.getByRole("button", { name: "Apply draft" }).click();
+  await expect(page.getByRole("alert")).toBeFocused();
+  await expect(page.getByRole("alert")).toContainText("empty-layers");
+  await expect(page.getByText("Last valid result", { exact: true })).toBeVisible();
+  await expect(page.locator(".active-chart .gg-title")).toHaveText(baselineTitle);
+  await expect(page.getByRole("button", { name: "Copy Svelte" })).toBeDisabled();
 
-  const alert = page.getByRole("alert");
-  await expect(alert).toBeFocused();
-  await expect(alert).toContainText('field "x" must be a string, number, boolean, or null');
-  await expect(alert).toContainText("Flatten nested values");
-  await expect(alert).toContainText("last working preview is still shown");
-  await expect(page.locator(".gg-points circle")).toHaveCount(originalCircles);
+  await page.getByLabel("PortableSpec JSON").fill(JSON.stringify(PIPELINE_FAILURE_SPEC, null, 2));
+  await page.getByRole("button", { name: "Apply draft" }).click();
+  await expect(page.getByRole("alert")).toContainText("palette-exhausted");
+  await expect(page.locator(".active-chart .gg-title")).toHaveText(baselineTitle);
+  await expect(page.locator(".active-chart .gg-title")).not.toHaveText(
+    "Must not replace the chart",
+  );
 });
 
-test("interaction is static by default and emits bounded semantic events after opt-in", async ({
+test("share owns only the fragment, preserves query state, and Back/Forward restores complete charts", async ({
   page,
+  context,
 }) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  await page.goto("/playground?theme=dark");
+  await settleVisualState(page);
+  await applyTitle(page, "Shared edit");
+  await page.getByRole("button", { name: "Share this chart" }).click();
+
+  await expect(page).toHaveURL(/\/playground\?theme=dark#play=v1\./u);
+  await expect(page.getByRole("status").filter({ hasText: "Share link copied" })).toBeVisible();
+  expect(await page.evaluate(() => localStorage.length)).toBe(0);
+
+  await page.goBack();
+  await expect(page).toHaveURL(/\/playground\?theme=dark$/u);
+  await expect(page.locator(".active-chart .gg-title")).toHaveText(
+    "Penguin flippers and body mass",
+  );
+  await expect(page.getByLabel("PortableSpec JSON")).not.toHaveValue(/Shared edit/u);
+
+  await page.goForward();
+  await expect(page).toHaveURL(/#play=v1\./u);
+  await expect(page.locator(".active-chart .gg-title")).toHaveText("Shared edit");
+  await expect(page.getByLabel("PortableSpec JSON")).toHaveValue(/Shared edit/u);
+});
+
+test("render-failing initial and dirty history entries restore truthful URL and state", async ({
+  page,
+  context,
+}) => {
+  await page.goto(`/playground${PIPELINE_FAILURE_FRAGMENT}`);
+  await expect(page.getByRole("alert")).toContainText("palette-exhausted");
+  await expect(page).toHaveURL(/\/playground$/u);
+  await expect(page.locator(".active-chart .gg-title")).toHaveText(
+    "Penguin flippers and body mass",
+  );
+
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  await applyTitle(page, "Retained history chart");
+  await page.getByRole("button", { name: "Share this chart" }).click();
+  const retainedHash = new URL(page.url()).hash;
+  await page.getByLabel("PortableSpec JSON").fill("dirty draft that must survive failure");
+
+  await page.evaluate(
+    ({ failing, retained }) => {
+      history.pushState({}, "", failing);
+      history.pushState({}, "", retained);
+      history.back();
+    },
+    { failing: PIPELINE_FAILURE_FRAGMENT, retained: retainedHash },
+  );
+  await expect(page.getByRole("alert")).toContainText("palette-exhausted");
+  await expect(page).toHaveURL(new RegExp(`${retainedHash.replaceAll(".", "\\.")}$`, "u"));
+  await expect(page.locator(".active-chart .gg-title")).toHaveText("Retained history chart");
+  await expect(page.getByLabel("PortableSpec JSON")).toHaveValue(
+    "dirty draft that must survive failure",
+  );
+
+  await page.goForward();
+  await expect(page.locator(".active-chart .gg-title")).toHaveText("Retained history chart");
+  await expect(page.getByLabel("PortableSpec JSON")).toHaveValue(/Retained history chart/u);
+});
+
+test("dirty sample changes require explicit discard", async ({ page }) => {
+  await page.goto("/playground");
+  await page.getByLabel("PortableSpec JSON").fill("draft to keep");
+  page.once("dialog", (dialog) => dialog.dismiss());
+  await page.getByLabel("Start from a sample").selectOption("monthly-line");
+  await expect(page.getByLabel("Start from a sample")).toHaveValue("starter-scatter");
+  await expect(page.getByLabel("PortableSpec JSON")).toHaveValue("draft to keep");
+
+  page.once("dialog", (dialog) => dialog.accept());
+  await page.getByLabel("Start from a sample").selectOption("monthly-line");
+  await expect(page.getByText("Rendered monthly-line.")).toBeVisible();
+  await expect(page.locator(".active-chart .gg-title")).toHaveText("Monthly series");
+});
+
+test("denied clipboard selects the share URL with truthful fallback text", async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText: () => Promise.reject(new DOMException("Denied", "NotAllowedError")) },
+    });
+  });
   await page.goto("/playground");
   await settleVisualState(page);
-  await expect(page.locator(".gg-capture")).toHaveCount(0);
-
-  await page.getByLabel("Inspect + pin").check();
-  const capture = page.locator(".gg-capture");
-  await expect(capture).toBeVisible();
-  await capture.focus();
-  await capture.press("ArrowRight");
-  await expect(page.locator(".event-log li").first()).toContainText("inspect · change · keyboard");
-  await expect(page.locator(".event-log li")).toHaveCount(1);
+  await page.getByRole("button", { name: "Share this chart" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Share link selected" })).toContainText(
+    "Clipboard unavailable. Share link selected for manual copy.",
+  );
+  expect(await page.evaluate(() => getSelection()?.toString())).toContain("#play=v1.");
 });
 
-test("playground stays operable and axe-clean at a touch-size viewport", async ({ page }) => {
+test("playground is preview-first, operable, and axe-clean at a touch-size viewport", async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/playground");
   await settleVisualState(page);
 
+  const preview = await page.locator(".preview-surface").boundingBox();
+  const editor = await page.locator(".editor-surface").boundingBox();
+  expect(preview?.y).toBeLessThan(editor?.y ?? 0);
   const horizontalOverflow = await page.evaluate(
     () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
   );
@@ -97,6 +259,10 @@ test("playground stays operable and axe-clean at a touch-size viewport", async (
     const box = await button.boundingBox();
     if (box !== null) expect(box.height).toBeGreaterThanOrEqual(44);
   }
+  await expect(page.getByLabel("Start from a sample")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Apply draft" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Share this chart" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Copy Svelte" })).toBeVisible();
 
   await page.addScriptTag({ content: axe.source });
   const violations = await page.evaluate(async () => {
@@ -111,3 +277,18 @@ test("playground stays operable and axe-clean at a touch-size viewport", async (
   });
   expect(violations, JSON.stringify(violations, null, 2)).toEqual([]);
 });
+
+for (const viewport of [
+  { name: "desktop", width: 1280, height: 900 },
+  { name: "tablet", width: 768, height: 1024 },
+  { name: "mobile", width: 390, height: 844 },
+] as const) {
+  test(`Playground ${viewport.name} visual contract`, async ({ page }) => {
+    await page.setViewportSize({ width: viewport.width, height: viewport.height });
+    await page.goto("/playground");
+    await settleVisualState(page);
+    await expect(page).toHaveScreenshot(`docs-playground-${viewport.name}.png`, {
+      fullPage: true,
+    });
+  });
+}
