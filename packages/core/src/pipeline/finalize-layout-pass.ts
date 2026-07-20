@@ -1,11 +1,12 @@
 /**
  * Finalize phase: two-pass panel layout only.
  */
-import { parseTemporalInterval, TemporalIntervalError, type PortableSpec } from "@ggsvelte/spec";
+import { parseTemporalColumn, type CellValue, type PortableSpec } from "@ggsvelte/spec";
 
 import { perfMark, perfMeasure } from "../perf.js";
 import type { ThemeTokens } from "../theme.js";
 
+import { TemporalGuideIntervalError } from "../layout/temporal-guide.js";
 import { computePanelLayout } from "./panel-layout.js";
 import type { PanelLayoutResult } from "./panel-layout.js";
 import type { PreparedPanels } from "./prepare-panels.js";
@@ -34,14 +35,33 @@ export function finalizePanelLayoutPass(input: {
   } = trained;
 
   const temporalKind = (axis: "x" | "y") => {
-    const requested =
-      axis === "x" ? prepared.xConversion.requestedKind : prepared.yConversion.requestedKind;
-    if (requested !== undefined) return requested;
+    const conversion = axis === "x" ? prepared.xConversion : prepared.yConversion;
+    if (conversion.requestedKind !== undefined) return conversion.requestedKind;
     const kinds = prepared.scaleDecisions
       .filter((decision) => decision.aesthetic === axis && decision.status === "temporal")
       .map((decision) => decision.kind)
       .filter((kind): kind is "date" | "datetime" => kind !== null);
-    return kinds.includes("datetime") ? "datetime" : (kinds[0] ?? null);
+    if (kinds.length > 0) return kinds.includes("datetime") ? "datetime" : kinds[0]!;
+
+    const scalarValues: CellValue[] = [];
+    for (const layer of normalized.layers) {
+      const params = layer.params as
+        | { xintercept?: CellValue | CellValue[]; yintercept?: CellValue | CellValue[] }
+        | undefined;
+      const value = axis === "x" ? params?.xintercept : params?.yintercept;
+      if (value !== undefined) scalarValues.push(...(Array.isArray(value) ? value : [value]));
+    }
+    if (scalarValues.length > 0 && conversion.requestedTime) {
+      const decision = parseTemporalColumn(
+        scalarValues,
+        conversion.parser,
+        conversion.options,
+      ).decision;
+      if (decision.kind !== null) return decision.kind;
+    }
+
+    const scale = axis === "x" ? xTraining.scale : yTraining.scale;
+    return scale.type === "time" && conversion.requestedTime ? "datetime" : null;
   };
 
   perfMark("ggsvelte:layout:start");
@@ -71,29 +91,13 @@ export function finalizePanelLayoutPass(input: {
       warnings,
     });
   } catch (error) {
-    if (!(error instanceof TemporalIntervalError)) throw error;
-    const matchesInterval = (value: string | undefined) => {
-      if (value === undefined) return false;
-      try {
-        return parseTemporalInterval(value).key === error.value;
-      } catch {
-        return value === error.value;
-      }
-    };
-    const axis = (["x", "y"] as const).find(
-      (candidate) =>
-        matchesInterval(scalesConfig[candidate]?.dateBreaks) ||
-        matchesInterval(scalesConfig[candidate]?.dateMinorBreaks),
-    );
-    const option =
-      axis !== undefined && matchesInterval(scalesConfig[axis]?.dateMinorBreaks)
-        ? "dateMinorBreaks"
-        : "dateBreaks";
-    const path = axis === undefined ? "/scales" : `/scales/${axis}/${option}`;
-    const code = error.message.includes("progression")
+    if (!(error instanceof TemporalGuideIntervalError)) throw error;
+    const intervalError = error.cause;
+    const path = `/scales/${error.aesthetic}/${error.option}`;
+    const code = intervalError.message.includes("progression")
       ? "temporal-break-progression"
       : "temporal-break-limit";
-    throw new PipelineError(code, path, error.message, {
+    throw new PipelineError(code, path, intervalError.message, {
       code,
       severity: "error",
       path,
@@ -101,7 +105,7 @@ export function finalizePanelLayoutPass(input: {
         code === "temporal-break-limit"
           ? "The requested temporal interval produces too many ticks."
           : "The requested temporal interval did not advance monotonically.",
-      cause: error.message,
+      cause: intervalError.message,
       fixes: [{ description: "Choose a coarser calendar interval." }],
       documentationUrl: "/guide/temporal-scales#explicit-intervals",
     });

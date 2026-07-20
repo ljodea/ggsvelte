@@ -141,6 +141,24 @@ describe("temporal interval stepping", () => {
         expect(new Set(ticks).size).toBe(ticks.length);
       }
     }
+
+    const civilTime = new Intl.DateTimeFormat("en-US", {
+      timeZone: "America/New_York",
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+    });
+    const evenHourTicks = temporalIntervalTicks(
+      Date.parse("2024-03-10T03:30:00-04:00"),
+      Date.parse("2024-03-10T08:00:00-04:00"),
+      "2 hours",
+      { kind: "datetime", timezone: "America/New_York" },
+    );
+    expect(evenHourTicks.map((value) => civilTime.format(value))).toEqual([
+      "04:00",
+      "06:00",
+      "08:00",
+    ]);
   });
 
   it("rejects structurally valid locales that the host Intl cannot format", () => {

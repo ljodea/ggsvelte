@@ -74,3 +74,23 @@ All five GitHub P2 findings were valid and fixed with focused regressions:
 - **Unsupported locales silently fell back: fixed.** Runtime validation requires `Intl.DateTimeFormat.supportedLocalesOf` support before accepting a canonical locale.
 
 The independent merge review also found and fixed a P1 duplicate-key crash when multiple temporal decisions share one aesthetic. Axis decisions now render unkeyed, and a browser regression exercises two temporal y-bound decisions. The privacy-safe report explicitly whitelists only `type`, `temporalKind`, and `parse` from `portableOverride`.
+
+## Final Codex and CI follow-up
+
+Codex's review of `65ab6ac` found four additional P2s and one P3. All were valid and fixed:
+
+- **Multi-hour intervals lost their civil phase after DST gaps: fixed.** Zoned calendar stepping now advances an aligned `PlainDateTime` cursor before projecting each boundary. The New York spring-forward regression requires 04:00, 06:00, and 08:00 for `2 hours`.
+- **Equal interval strings obscured diagnostic ownership: fixed.** The planner carries the exact semantic aesthetic and `dateBreaks`/`dateMinorBreaks` option with the original interval error. Tests cover cross-axis collisions, major-first collisions, and minor-only failures.
+- **Runtime accepted temporal guides on explicit linear/log scales: fixed.** A targeted preflight now emits the same single `scale-type-mismatch` code, path, message, and fix as tier-2 validation without opting the renderer into unrelated tier-2 checks.
+- **Millisecond ticks shared standalone labels: fixed.** Complete labels include `%L` whenever the interval or values require sub-second precision; whole-second labels remain unchanged.
+- **Parser-backed rowless time axes skipped interval planning: fixed.** Layout derives date/datetime kind from strict scalar annotation evidence before the deterministic datetime fallback, without fabricating mapped-field `ScaleDecision`s.
+
+CI attempts 1 and 2 also reproduced three test-harness timing failures. The generated registry integrity test now has a 15-second workload-specific timeout; Playground tests observe the transient candidate from a pre-navigation `MutationObserver` instead of racing a Playwright round trip; and the unchanged 1,000-member Firefox axe contract has a 180-second cap after two 90-second expirations. Product promotion remains 300 ms.
+
+Final Grok and Claude implementation reviews both returned `VERDICT: PASS`. Their P3 follow-ups were resolved as follows:
+
+- **Minor-only error ownership and exact runtime diagnostic parity: fixed with regressions.**
+- **Candidate semantic descendants: fixed with evidence.** The inert candidate contains one chart role, while the candidate root is `aria-hidden="true"`, inert, and has zero focusable descendants; the test asserts the complete containment snapshot.
+- **Initial-candidate isolation duplication: rebutted.** The initial-navigation test proves the pending state was observable before promotion; the adjacent apply-candidate test proves isolation and retained active DOM using the same observer.
+- **Band parity: rebutted as outside these findings.** Public discrete helpers exclude temporal guide options and band normalization strips them defensively; the reviewed runtime defect was the linear/log path that parsed epochs while silently dropping guides.
+- **Datetime fallback broadening: accepted intent.** It applies only to a trained time scale with an explicit temporal request and no authored, mapped, or scalar kind evidence.

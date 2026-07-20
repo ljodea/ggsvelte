@@ -59,6 +59,44 @@ describe("temporal label formatting", () => {
     ]);
   });
 
+  it("keeps standalone datetime labels distinct at sub-second precision", () => {
+    const values = [Date.UTC(2024, 0, 1, 0, 0, 0, 1), Date.UTC(2024, 0, 1, 0, 0, 0, 2)];
+    const milliseconds = formatTemporalTickSequence(values, {
+      kind: "datetime",
+      interval: { unit: "millisecond", step: 1, key: "1 millisecond" },
+      locale: "en-US",
+      timezone: "UTC",
+    });
+    expect(milliseconds.map((label) => label.fullLabel)).toEqual([
+      "2024-01-01 00:00:00.001 UTC",
+      "2024-01-01 00:00:00.002 UTC",
+    ]);
+
+    const retainedPrecision = formatTemporalTickSequence(values, {
+      kind: "datetime",
+      interval: { unit: "second", step: 1, key: "1 second" },
+      locale: "en-US",
+      timezone: "UTC",
+    });
+    expect(retainedPrecision.map((label) => label.fullLabel)).toEqual(
+      milliseconds.map((label) => label.fullLabel),
+    );
+
+    const wholeSeconds = formatTemporalTickSequence(
+      [Date.UTC(2024, 0, 1), Date.UTC(2024, 0, 1, 0, 0, 1)],
+      {
+        kind: "datetime",
+        interval: { unit: "second", step: 1, key: "1 second" },
+        locale: "en-US",
+        timezone: "UTC",
+      },
+    );
+    expect(wholeSeconds.map((label) => label.fullLabel)).toEqual([
+      "2024-01-01 00:00:00 UTC",
+      "2024-01-01 00:00:01 UTC",
+    ]);
+  });
+
   it("extracts Gregorian numeric fields with Latin digits in non-Latin locales", () => {
     const format = compileTemporalLabelFormat("%Y-%m-%d %H:%M:%S", {
       kind: "datetime",

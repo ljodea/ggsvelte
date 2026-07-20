@@ -1,7 +1,7 @@
 /**
  * Normalize + validate a pipeline spec entry.
  */
-import type { PortableSpec, SpecInput } from "@ggsvelte/spec";
+import type { PortableSpec, SpecError, SpecInput } from "@ggsvelte/spec";
 import {
   normalize,
   SpecValidationError,
@@ -16,6 +16,31 @@ export function normalizeAndValidateSpec(spec: SpecInput | PortableSpec): Portab
   const normalized = normalize(spec);
   const result = validate(normalized);
   if (!result.ok) throw new SpecValidationError(result.errors);
+
+  const scaleTypeMismatchCode: SpecError["code"] = "scale-type-mismatch";
+  const temporalScaleErrors: SpecError[] = [];
+  for (const axis of ["x", "y"] as const) {
+    const config = normalized.scales?.[axis];
+    const hasTemporalGuideOption =
+      config?.dateBreaks !== undefined ||
+      config?.dateMinorBreaks !== undefined ||
+      config?.dateLabels !== undefined ||
+      config?.locale !== undefined ||
+      config?.weekStart !== undefined;
+    if (hasTemporalGuideOption && (config?.type === "linear" || config?.type === "log")) {
+      temporalScaleErrors.push({
+        code: scaleTypeMismatchCode,
+        path: `/scales/${axis}`,
+        message: `scales.${axis} uses temporal break or label options with explicit type "${config.type}".`,
+        fix: {
+          description:
+            'Use type "time", a date/datetime scale helper, or remove the temporal option.',
+        },
+      });
+    }
+  }
+  if (temporalScaleErrors.length > 0) throw new SpecValidationError(temporalScaleErrors);
+
   for (const axis of ["x", "y"] as const) {
     const config = normalized.scales?.[axis];
     if (config?.dateLabels !== undefined) {

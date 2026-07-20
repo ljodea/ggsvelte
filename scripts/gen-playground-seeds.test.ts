@@ -108,5 +108,5 @@ describe("generated playground seeds", () => {
       reason:
         "This example is larger than the 12 KiB share limit. Open a smaller example or sample.",
     });
-  });
+  }, 15_000); // Full Linux coverage consistently takes ~5.35s; keep the integrity check intact.
 });

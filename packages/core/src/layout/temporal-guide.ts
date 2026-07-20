@@ -3,6 +3,7 @@ import {
   MAX_TEMPORAL_MINOR_TICKS,
   MIN_TEMPORAL_LABEL_GAP_PX,
   parseTemporalInterval,
+  TemporalIntervalError,
   temporalIntervalTicks,
   type PositionScaleSpec,
   type TemporalInterval,
@@ -43,6 +44,20 @@ export interface AxisGuidePlan {
 }
 
 export type GuidePlan = AxisGuidePlan;
+
+export class TemporalGuideIntervalError extends Error {
+  override readonly cause: TemporalIntervalError;
+
+  constructor(
+    readonly aesthetic: "x" | "y",
+    readonly option: "dateBreaks" | "dateMinorBreaks",
+    cause: TemporalIntervalError,
+  ) {
+    super(cause.message);
+    this.name = "TemporalGuideIntervalError";
+    this.cause = cause;
+  }
+}
 
 export function planBasicAxis(input: {
   aesthetic: "x" | "y";
@@ -415,7 +430,12 @@ export function planTemporalAxis(input: TemporalAxisPlanInput): AxisGuidePlan {
       selected = automaticCandidate(input);
       break;
     case "interval":
-      selected = exactCandidate(input);
+      try {
+        selected = exactCandidate(input);
+      } catch (error) {
+        if (!(error instanceof TemporalIntervalError)) throw error;
+        throw new TemporalGuideIntervalError(input.aesthetic, "dateBreaks", error);
+      }
       break;
     case "explicit":
       selected = explicitCandidate(input);
@@ -426,13 +446,18 @@ export function planTemporalAxis(input: TemporalAxisPlanInput): AxisGuidePlan {
   let minorTicks: AxisGuideTick[] = [];
   if (input.config.dateMinorBreaks !== undefined) {
     const minorInterval = parseTemporalInterval(input.config.dateMinorBreaks);
-    const values = temporalIntervalTicks(input.domain[0], input.domain[1], minorInterval, {
-      ...temporalOptions(input),
-      maxTicks: MAX_TEMPORAL_MINOR_TICKS,
-    });
-    minorTicks = values
-      .filter((value) => !majorValues.has(value))
-      .map((value) => ({ value, label: "", fullLabel: "", kind: "minor" as const }));
+    try {
+      const values = temporalIntervalTicks(input.domain[0], input.domain[1], minorInterval, {
+        ...temporalOptions(input),
+        maxTicks: MAX_TEMPORAL_MINOR_TICKS,
+      });
+      minorTicks = values
+        .filter((value) => !majorValues.has(value))
+        .map((value) => ({ value, label: "", fullLabel: "", kind: "minor" as const }));
+    } catch (error) {
+      if (!(error instanceof TemporalIntervalError)) throw error;
+      throw new TemporalGuideIntervalError(input.aesthetic, "dateMinorBreaks", error);
+    }
   }
 
   const degraded = [

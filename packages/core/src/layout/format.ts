@@ -354,8 +354,14 @@ export function formatTemporalTickSequence(
   values: readonly number[],
   options: TemporalLabelFormatOptions & { interval: TemporalInterval; pattern?: string },
 ): TemporalTickLabel[] {
+  const needsMilliseconds =
+    options.interval.unit === "millisecond" || values.some((value) => Math.abs(value % 1_000) > 0);
   const full = compileTemporalLabelFormat(
-    options.kind === "date" ? "%Y-%m-%d" : "%Y-%m-%d %H:%M:%S %Z",
+    options.kind === "date"
+      ? "%Y-%m-%d"
+      : needsMilliseconds
+        ? "%Y-%m-%d %H:%M:%S.%L %Z"
+        : "%Y-%m-%d %H:%M:%S %Z",
     options,
   );
   if (options.pattern !== undefined) {

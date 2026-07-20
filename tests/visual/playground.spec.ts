@@ -15,6 +15,60 @@ async function readSpec(page: Page): Promise<Record<string, unknown>> {
   >;
 }
 
+interface CandidateObservation {
+  status: string | null;
+  focusables: number;
+  semanticDescendants: number;
+  inert: boolean;
+  inertAttribute: boolean;
+  hidden: string | null;
+  activeRetained: boolean;
+}
+
+async function observeCandidateTransitions(page: Page): Promise<void> {
+  await page.addInitScript(() => {
+    const observedWindow = window as typeof window & {
+      playgroundCandidateObservations?: CandidateObservation[];
+    };
+    const observations: CandidateObservation[] = [];
+    observedWindow.playgroundCandidateObservations = observations;
+    const capture = () => {
+      const node = document.querySelector<HTMLElement>(".candidate-chart");
+      if (node === null) return;
+      observations.push({
+        status: document.querySelector(".preview-surface .status")?.textContent ?? null,
+        focusables: node.querySelectorAll("button, a, input, select, textarea, [tabindex]").length,
+        semanticDescendants: node.querySelectorAll('[role="img"], [role="status"], [aria-live]')
+          .length,
+        inert: node.inert,
+        inertAttribute: node.hasAttribute("inert"),
+        hidden: node.getAttribute("aria-hidden"),
+        activeRetained:
+          document.querySelector('.active-chart > [data-retained-during-candidate="true"]') !==
+          null,
+      });
+    };
+    new MutationObserver(capture).observe(document, {
+      attributes: true,
+      characterData: true,
+      childList: true,
+      subtree: true,
+    });
+    capture();
+  });
+}
+
+function candidateObservations(page: Page): Promise<CandidateObservation[]> {
+  return page.evaluate(
+    () =>
+      (
+        window as typeof window & {
+          playgroundCandidateObservations?: CandidateObservation[];
+        }
+      ).playgroundCandidateObservations ?? [],
+  );
+}
+
 const PIPELINE_FAILURE_SPEC = {
   edition: 2,
   data: {
@@ -102,17 +156,23 @@ test("compatible gallery details open the exact fragment while oversized example
 });
 
 test("initial candidate keeps the pending status until promotion", async ({ page }) => {
+  await observeCandidateTransitions(page);
   await page.goto(`/playground${VALID_INITIAL_FRAGMENT}`);
-  await page.locator(".candidate-chart").waitFor({ state: "attached" });
-  await expect(page.locator(".preview-surface .status")).toHaveText(
-    "Checking the next chart before replacing the last valid result.",
-  );
+  await expect
+    .poll(async () =>
+      (await candidateObservations(page)).some(
+        (observation) =>
+          observation.status === "Checking the next chart before replacing the last valid result.",
+      ),
+    )
+    .toBe(true);
   await expect(page.locator(".active-chart .gg-title")).toHaveText("Initial candidate");
 });
 
 test("valid edits render before Svelte copy becomes available and candidates stay inert", async ({
   page,
 }) => {
+  await observeCandidateTransitions(page);
   await page.goto("/playground");
   await settleVisualState(page);
   await expect(page.getByRole("button", { name: "Copy Svelte" })).toBeEnabled();
@@ -127,27 +187,28 @@ test("valid edits render before Svelte copy becomes available and candidates sta
   await expect(page.getByRole("button", { name: "Copy Svelte" })).toBeDisabled();
   await page.getByRole("button", { name: "Apply draft" }).click();
 
-  const candidateState = await page
-    .waitForFunction(() => {
-      const node = document.querySelector<HTMLElement>(".candidate-chart");
-      if (node === null) return null;
-      return {
-        focusables: node.querySelectorAll("button, a, input, select, textarea, [tabindex]").length,
-        exposed: node.querySelectorAll('[role="img"], [role="status"], [aria-live]').length,
-        inert: node.inert,
-        inertAttribute: node.hasAttribute("inert"),
-        hidden: node.getAttribute("aria-hidden"),
-      };
-    })
-    .then((handle) => handle.jsonValue());
-  await expect(page.locator('.active-chart > [data-retained-during-candidate="true"]')).toHaveCount(
-    1,
+  const isIsolatedCandidate = (observation: CandidateObservation) =>
+    observation.activeRetained &&
+    observation.inert &&
+    observation.inertAttribute &&
+    observation.hidden === "true" &&
+    observation.focusables === 0 &&
+    observation.semanticDescendants === 1;
+  await expect
+    .poll(async () =>
+      (await candidateObservations(page)).some((observation) => isIsolatedCandidate(observation)),
+    )
+    .toBe(true);
+  const candidateState = (await candidateObservations(page)).find((observation) =>
+    isIsolatedCandidate(observation),
   );
   expect(candidateState).toMatchObject({
     focusables: 0,
+    semanticDescendants: 1,
     inert: true,
     inertAttribute: true,
     hidden: "true",
+    activeRetained: true,
   });
 
   await expect(page.getByText("Rendered custom draft.")).toBeVisible();

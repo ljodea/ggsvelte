@@ -368,12 +368,36 @@ export function temporalIntervalTicks(
       return [];
   }
 
-  // Generated civil boundaries are synthetic, not parsed source values. Temporal's
-  // compatible policy keeps them monotonic through gaps/folds; source parsing has
-  // already applied the author's configured disambiguation contract.
-  let tick = plain.toZonedDateTime(timezone, { disambiguation: "compatible" });
+  const advancePlain = (value: typeof plain): typeof plain => {
+    switch (interval.unit) {
+      case "hour":
+        return value.add({ hours: interval.step });
+      case "day":
+        return value.add({ days: interval.step });
+      case "week":
+        return value.add({ weeks: interval.step });
+      case "month":
+        return value.add({ months: interval.step });
+      case "quarter":
+        return value.add({ months: interval.step * 3 });
+      case "year":
+        return value.add({ years: interval.step });
+      default:
+        return value;
+    }
+  };
+  const project = (value: typeof plain) =>
+    value.toZonedDateTime(timezone, { disambiguation: "compatible" });
+
+  // Generated civil boundaries are synthetic, not parsed source values. Advance
+  // the aligned civil cursor before each projection so a gap adjustment (for
+  // example 02:00 -> 03:00) cannot shift every later multi-hour boundary.
+  // Source parsing has already applied the author's disambiguation contract.
+  let cursor = plain;
+  let tick = project(cursor);
   if (tick.epochMilliseconds < min) {
-    tick = addTemporalInterval(tick, interval);
+    cursor = advancePlain(cursor);
+    tick = project(cursor);
   }
 
   const result: number[] = [];
@@ -386,7 +410,8 @@ export function temporalIntervalTicks(
       }
       result.push(epoch);
     }
-    const next = addTemporalInterval(tick, interval);
+    const nextCursor = advancePlain(cursor);
+    const next = project(nextCursor);
     if (next.epochMilliseconds <= epoch) {
       stalled += 1;
       if (stalled >= 2) {
@@ -395,33 +420,8 @@ export function temporalIntervalTicks(
     } else {
       stalled = 0;
     }
+    cursor = nextCursor;
     tick = next;
   }
   return result;
-}
-
-function addTemporalInterval(
-  value: ReturnType<
-    ReturnType<typeof temporalImplementation>["Instant"]["fromEpochMilliseconds"]
-  >["toZonedDateTimeISO"] extends (...args: never[]) => infer Z
-    ? Z
-    : never,
-  interval: TemporalInterval,
-) {
-  switch (interval.unit) {
-    case "hour":
-      return value.add({ hours: interval.step });
-    case "day":
-      return value.add({ days: interval.step });
-    case "week":
-      return value.add({ weeks: interval.step });
-    case "month":
-      return value.add({ months: interval.step });
-    case "quarter":
-      return value.add({ months: interval.step * 3 });
-    case "year":
-      return value.add({ years: interval.step });
-    default:
-      return value;
-  }
 }
