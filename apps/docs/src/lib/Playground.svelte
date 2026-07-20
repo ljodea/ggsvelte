@@ -240,7 +240,17 @@
           precision: decision.precision,
           validatedCount: decision.validatedCount,
           ambiguityCount: decision.ambiguity.length,
-          portableOverride: decision.portableOverride,
+          portableOverride: {
+            ...(decision.portableOverride.type !== undefined && {
+              type: decision.portableOverride.type,
+            }),
+            ...(decision.portableOverride.temporalKind !== undefined && {
+              temporalKind: decision.portableOverride.temporalKind,
+            }),
+            ...(decision.portableOverride.parse !== undefined && {
+              parse: decision.portableOverride.parse,
+            }),
+          },
           guidePlanIds: decision.guidePlanIds ?? [],
         })),
         guides: guidePlans.map((guide) => ({
@@ -378,7 +388,7 @@
       {#if scaleDecisions.length === 0}
         <p>No temporal scale decision is active for this chart.</p>
       {:else}
-        {#each scaleDecisions as decision (decision.aesthetic)}
+        {#each scaleDecisions as decision}
           <dl>
             <div>
               <dt>Axis</dt>

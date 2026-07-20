@@ -181,7 +181,9 @@ function partValue(parts: readonly Intl.DateTimeFormatPart[], type: Intl.DateTim
 
 function displayParts(ms: number, options: TemporalLabelFormatOptions): TemporalDisplayParts {
   const locale = options.locale ?? "en-US";
-  const timezone = options.kind === "date" ? "UTC" : (options.timezone ?? "UTC");
+  const configuredTimezone = options.kind === "date" ? "UTC" : (options.timezone ?? "UTC");
+  const timezone =
+    configuredTimezone === "Z" || configuredTimezone === "Etc/UTC" ? "UTC" : configuredTimezone;
   const d = new Date(ms);
   if (locale === "en-US" && timezone === "UTC") {
     const hour = d.getUTCHours();

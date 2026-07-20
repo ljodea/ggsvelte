@@ -194,6 +194,41 @@ test("temporal samples expose privacy-safe guide plans and keep ambiguous dates 
   await expect(page.getByText(/nominal · none/u)).toBeVisible();
 });
 
+test("axis-plan inspection supports multiple temporal decisions on one aesthetic", async ({
+  page,
+}) => {
+  await page.goto("/playground");
+  await settleVisualState(page);
+  await page.getByLabel("PortableSpec JSON").fill(
+    JSON.stringify({
+      edition: 1,
+      data: {
+        values: [
+          { group: "a", low: "2024-01-01", high: "2024-01-03" },
+          { group: "b", low: "2024-02-01", high: "2024-02-04" },
+        ],
+      },
+      layers: [
+        {
+          geom: "errorbar",
+          stat: "identity",
+          position: "identity",
+          aes: {
+            x: { field: "group" },
+            ymin: { field: "low" },
+            ymax: { field: "high" },
+          },
+        },
+      ],
+      scales: { y: { type: "time", parse: "ymd" } },
+      labs: { title: "Temporal bounds", x: "Group", y: "Date" },
+    }),
+  );
+  await page.getByRole("button", { name: "Apply draft" }).click();
+  await expect(page.getByText("Rendered custom draft.")).toBeVisible();
+  await expect(page.getByText(/temporal · ymd/u)).toHaveCount(2);
+});
+
 test("191-year temporal guide stays collision-free with complete labels", async ({ page }) => {
   for (const width of [320, 640, 1200]) {
     await page.setViewportSize({ width, height: 900 });

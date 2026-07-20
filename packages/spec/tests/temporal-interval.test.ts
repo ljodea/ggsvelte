@@ -5,6 +5,7 @@ import {
   MAX_TEMPORAL_MINOR_TICKS,
   parseTemporalInterval,
   temporalIntervalTicks,
+  temporalLocaleConfigurationError,
 } from "../src/index.ts";
 
 describe("temporal interval grammar", () => {
@@ -71,6 +72,33 @@ describe("temporal interval stepping", () => {
     ).toEqual([Date.UTC(2024, 1, 1), Date.UTC(2024, 2, 1)]);
   });
 
+  it("anchors multi-year month intervals identically across UTC and zoned datetimes", () => {
+    const min = Date.parse("2020-08-15T12:00:00Z");
+    const max = Date.parse("2025-08-15T12:00:00Z");
+    const yearMonth = (value: number, timeZone: string) => {
+      const parts = new Intl.DateTimeFormat("en-US", {
+        timeZone,
+        year: "numeric",
+        month: "numeric",
+      }).formatToParts(value);
+      return `${parts.find((part) => part.type === "year")?.value}-${parts.find((part) => part.type === "month")?.value}`;
+    };
+    for (const interval of ["18 months", "5 quarters"]) {
+      const utc = temporalIntervalTicks(min, max, interval, {
+        kind: "datetime",
+        timezone: "UTC",
+      });
+      const zoned = temporalIntervalTicks(min, max, interval, {
+        kind: "datetime",
+        timezone: "America/New_York",
+      });
+      expect(
+        zoned.map((value) => yearMonth(value, "America/New_York")),
+        interval,
+      ).toEqual(utc.map((value) => yearMonth(value, "UTC")));
+    }
+  });
+
   it("honors named week starts", () => {
     const min = Date.UTC(2026, 0, 1);
     const max = Date.UTC(2026, 0, 20);
@@ -113,6 +141,11 @@ describe("temporal interval stepping", () => {
         expect(new Set(ticks).size).toBe(ticks.length);
       }
     }
+  });
+
+  it("rejects structurally valid locales that the host Intl cannot format", () => {
+    expect(temporalLocaleConfigurationError("zz-ZZ")).toContain("unsupported");
+    expect(temporalLocaleConfigurationError("en-US")).toBeNull();
   });
 
   it("fails before allocating an unbounded explicit interval", () => {

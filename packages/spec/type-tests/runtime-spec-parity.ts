@@ -1,3 +1,4 @@
+import { scaleXDiscrete } from "../src/scale-helpers.js";
 import type { Aes, LayerSpec, PortableSpec } from "../src/schema.js";
 import type { RuntimeAes, RuntimeLayerSpec, RuntimeSpec } from "../src/runtime.js";
 
@@ -45,3 +46,7 @@ const currentPortableSurface = {
 } satisfies PortableSpec;
 
 acceptRuntimeSpec(currentPortableSurface);
+
+// Discrete helpers must not accept options that normalize into a time scale.
+// @ts-expect-error dateBreaks is temporal-only
+scaleXDiscrete({ dateBreaks: "1 day" });

@@ -62,3 +62,15 @@ Both final re-reviews returned `VERDICT: PASS` with no P0/P1 findings.
 - **Spring DST straddle: fixed.** The matrix now includes an hourly range spanning the spring gap plus the synthetic-gap-anchor case.
 - **Duplicate break warning: rebutted with regression.** Continuous temporal breaks are not deduplicated; duplicate in-domain breaks preserve count and do not emit `temporal-break-outside-domain`.
 - **Host ICU localization: accepted documented constraint.** Non-default locale byte output follows the pinned support matrix; renderer equality is preserved because formatting happens once in the pipeline.
+
+## PR #348 review follow-ups
+
+All five GitHub P2 findings were valid and fixed with focused regressions:
+
+- **Guide-only time requests skipped field compatibility: fixed.** Tier-2 compatibility now reuses the complete temporal-request predicate for `dateBreaks`, `dateMinorBreaks`, `dateLabels`, `locale`, and `weekStart`.
+- **Discrete helpers accepted temporal guide options: fixed.** Type-level helper options exclude every temporal-only field; runtime helpers and band normalization strip them defensively.
+- **UTC alias `Z` crashed Intl formatting: fixed.** Accepted `Z` and `Etc/UTC` aliases canonicalize to `UTC` before formatter caching and construction.
+- **Zoned multi-year month/quarter anchors drifted from UTC: fixed.** Month and quarter alignment now floors an absolute month index; regressions cover `18 months` and `5 quarters`.
+- **Unsupported locales silently fell back: fixed.** Runtime validation requires `Intl.DateTimeFormat.supportedLocalesOf` support before accepting a canonical locale.
+
+The independent merge review also found and fixed a P1 duplicate-key crash when multiple temporal decisions share one aesthetic. Axis decisions now render unkeyed, and a browser regression exercises two temporal y-bound decisions. The privacy-safe report explicitly whitelists only `type`, `temporalKind`, and `parse` from `portableOverride`.

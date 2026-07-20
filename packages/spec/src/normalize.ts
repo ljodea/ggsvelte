@@ -203,6 +203,11 @@ function normalizePositionScale(scale: PositionScaleSpec): PositionScaleSpec {
       parseFailure: ___,
       timezone: ____,
       disambiguation: _____,
+      dateBreaks: ______,
+      dateMinorBreaks: _______,
+      dateLabels: ________,
+      locale: _________,
+      weekStart: __________,
       ...band
     } = scale;
     return band;

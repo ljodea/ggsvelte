@@ -139,6 +139,12 @@ export function temporalLocaleConfigurationError(locale: string): string | null 
   try {
     const canonical = Intl.getCanonicalLocales(locale);
     if (canonical.length !== 1) return `invalid or unsupported locale ${JSON.stringify(locale)}`;
+    const supported = Intl.DateTimeFormat.supportedLocalesOf(canonical, {
+      localeMatcher: "lookup",
+    });
+    if (supported.length !== 1) {
+      return `invalid or unsupported locale ${JSON.stringify(locale)}`;
+    }
     new Intl.DateTimeFormat(canonical[0], { timeZone: "UTC", year: "numeric" }).format(0);
     return null;
   } catch {
@@ -326,25 +332,16 @@ export function temporalIntervalTicks(
       }).subtract({ days: daysBack });
       break;
     }
-    case "month": {
-      const month = Math.floor((parts.month - 1) / interval.step) * interval.step + 1;
-      plain = Temporal.PlainDateTime.from({
-        ...parts,
-        month,
-        day: 1,
-        hour: 0,
-        minute: 0,
-        second: 0,
-        millisecond: 0,
-      });
-      break;
-    }
+    case "month":
     case "quarter": {
-      const quarterStep = interval.step * 3;
-      const month = Math.floor((parts.month - 1) / quarterStep) * quarterStep + 1;
+      const stepMonths = interval.step * (interval.unit === "quarter" ? 3 : 1);
+      const absoluteMonth = parts.year * 12 + parts.month - 1;
+      const alignedMonth = Math.floor(absoluteMonth / stepMonths) * stepMonths;
+      const monthIndex = ((alignedMonth % 12) + 12) % 12;
       plain = Temporal.PlainDateTime.from({
         ...parts,
-        month,
+        year: Math.floor(alignedMonth / 12),
+        month: monthIndex + 1,
         day: 1,
         hour: 0,
         minute: 0,

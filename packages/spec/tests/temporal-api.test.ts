@@ -3,6 +3,7 @@ import { describe, expect, it } from "bun:test";
 import {
   aes,
   gg,
+  normalize,
   scaleXDate,
   scaleXDatetime,
   scaleXDiscrete,
@@ -35,6 +36,14 @@ const compileOnlyTemporalTypeAssertions = (): void => {
   scaleXDate({ weekStart: "workweek" });
   // @ts-expect-error temporal intervals remain portable strings, not callbacks
   scaleXDate({ dateBreaks: () => [new Date()] });
+  // @ts-expect-error discrete helpers reject every temporal guide option
+  scaleXDiscrete({
+    dateBreaks: "1 day",
+    dateMinorBreaks: "12 hours",
+    dateLabels: "%Y-%m-%d",
+    locale: "en-GB",
+    weekStart: "monday",
+  });
 };
 void compileOnlyTemporalTypeAssertions;
 
@@ -85,6 +94,7 @@ describe("temporal scale schema", () => {
       { type: "time" as const, dateMinorBreaks: "1 fortnight" },
       { type: "time" as const, dateLabels: "%Q" },
       { type: "time" as const, locale: "not_a_locale" },
+      { type: "time" as const, locale: "zz-ZZ" },
       { type: "linear" as const, dateBreaks: "1 year" },
       { type: "band" as const, dateLabels: "%Y" },
     ]) {
@@ -305,6 +315,15 @@ describe("temporal scale schema", () => {
       scales: { x: { timezone: "America/New_York" } },
     } as const;
     expect(validate(nominal, {}).ok).toBe(false);
+    for (const x of [
+      { dateBreaks: "1 day" },
+      { dateMinorBreaks: "12 hours" },
+      { dateLabels: "%Y-%m-%d" },
+      { locale: "en-GB" },
+      { weekStart: "monday" as const },
+    ]) {
+      expect(validate({ ...nominal, scales: { x } }, {}).ok, JSON.stringify(x)).toBe(false);
+    }
     expect(
       validate(
         {
@@ -417,6 +436,32 @@ describe("temporal scale authoring surfaces", () => {
     expect(scaleYDatetime()).toEqual({ y: { type: "time", temporalKind: "datetime" } });
     expect(scaleXDiscrete()).toEqual({ x: { type: "band" } });
     expect(scaleYDiscrete()).toEqual({ y: { type: "band" } });
+    expect(
+      scaleXDiscrete({
+        reverse: true,
+        dateBreaks: "1 day",
+        dateMinorBreaks: "12 hours",
+        dateLabels: "%Y-%m-%d",
+        locale: "en-GB",
+        weekStart: "monday",
+      } as never),
+    ).toEqual({ x: { type: "band", reverse: true } });
+    expect(
+      normalize({
+        layers: [{ geom: "point" }],
+        scales: {
+          x: {
+            type: "band",
+            reverse: true,
+            dateBreaks: "1 day",
+            dateMinorBreaks: "12 hours",
+            dateLabels: "%Y-%m-%d",
+            locale: "en-GB",
+            weekStart: "monday",
+          },
+        },
+      }).scales,
+    ).toEqual({ x: { type: "band", reverse: true } });
   });
 
   it("canonicalizes authoring Date cells before PortableSpec validation", () => {

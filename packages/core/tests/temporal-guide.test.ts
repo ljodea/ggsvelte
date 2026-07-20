@@ -17,6 +17,17 @@ describe("temporal label formatting", () => {
     expect(format(Date.UTC(2024, 2, 10, 7, 30))).toBe("Sun 10 Mar 2024 03:30 AM EDT");
   });
 
+  it("normalizes accepted UTC aliases before Intl formatting", () => {
+    for (const timezone of ["Z", "Etc/UTC"]) {
+      const format = compileTemporalLabelFormat("%Y-%m-%d %H:%M %Z", {
+        kind: "datetime",
+        locale: "en-GB",
+        timezone,
+      });
+      expect(format(Date.UTC(2024, 0, 2, 3, 4)), timezone).toBe("2024-01-02 03:04 UTC");
+    }
+  });
+
   it("keeps date-kind labels on UTC calendar fields", () => {
     const format = compileTemporalLabelFormat("%Y-%m-%d", {
       kind: "date",

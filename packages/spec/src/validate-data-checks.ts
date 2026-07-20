@@ -319,13 +319,8 @@ export function dataChecks(
 
   for (const axis of AXIS_CHANNELS) {
     const config = scales?.[axis] as PositionScaleSpec | undefined;
-    const requestsTime =
-      config?.parse !== undefined ||
-      config?.temporalKind !== undefined ||
-      config?.timezone !== undefined ||
-      config?.disambiguation !== undefined ||
-      config?.parseFailure !== undefined;
-    const declared = config?.type === "band" ? "band" : requestsTime ? "time" : config?.type;
+    const declared =
+      config?.type === "band" ? "band" : scaleRequestsTime(axis) ? "time" : config?.type;
     if (declared === undefined || declared === "band" || invalidTemporalAxes.has(axis)) continue;
     for (const use of axisFields[axis]) {
       const type = typeOf(use.field);
