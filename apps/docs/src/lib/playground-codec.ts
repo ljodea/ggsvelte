@@ -142,13 +142,24 @@ function assertJsonByteLength(source: string, label: string): Uint8Array {
 
 function inlineDataRecords(spec: Record<string, unknown>): Record<string, unknown>[] {
   const records: Record<string, unknown>[] = [];
-  const data = spec["data"];
-  if (isRecord(data)) records.push(data);
+  const addData = (value: unknown): void => {
+    if (!isRecord(value)) return;
+    if (typeof value["name"] === "string") assertSafeField(value["name"]);
+    records.push(value);
+  };
+
+  addData(spec["data"]);
+  const layers = spec["layers"];
+  if (Array.isArray(layers)) {
+    for (const layer of layers) {
+      if (isRecord(layer)) addData(layer["data"]);
+    }
+  }
   const datasets = spec["datasets"];
   if (isRecord(datasets)) {
     for (const [name, value] of Object.entries(datasets)) {
       assertSafeField(name);
-      if (isRecord(value)) records.push(value);
+      addData(value);
     }
   }
   return records;

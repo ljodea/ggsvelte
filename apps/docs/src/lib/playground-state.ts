@@ -61,7 +61,11 @@ const VALIDATE_LIMITS = {
 } as const;
 
 export function serializePlaygroundSpec(spec: PortableSpec): string {
-  return JSON.stringify(spec, null, 2);
+  const pretty = JSON.stringify(spec, null, 2);
+  if (new TextEncoder().encode(pretty).byteLength <= PLAYGROUND_MAX_DECODED_BYTES) {
+    return pretty;
+  }
+  return JSON.stringify(spec);
 }
 
 function diagnosticFromSpec(error: SpecError): PlaygroundDiagnostic {

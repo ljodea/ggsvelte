@@ -166,6 +166,19 @@ describe("playground fragment codec", () => {
     expectCode(rawHash(seed({ ...spec, data: { name: "__proto__" }, datasets })), "UNSAFE_FIELD");
   });
 
+  test("rejects unsafe named references even without an inline dataset key", () => {
+    expectCode(rawHash(seed({ ...spec, data: { name: "constructor" } })), "UNSAFE_FIELD");
+    expectCode(
+      rawHash(
+        seed({
+          ...spec,
+          layers: [{ ...spec.layers[0]!, data: { name: "prototype" } }],
+        }),
+      ),
+      "UNSAFE_FIELD",
+    );
+  });
+
   test("surfaces tier-2 PortableSpec diagnostics", () => {
     const invalid = {
       ...spec,

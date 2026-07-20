@@ -167,6 +167,7 @@ test("share owns only the fragment, preserves query state, and Back/Forward rest
     "Penguin flippers and body mass",
   );
   await expect(page.getByLabel("PortableSpec JSON")).not.toHaveValue(/Shared edit/u);
+  await expect(page.locator(".share-result")).toHaveCount(0);
 
   await page.goForward();
   await expect(page).toHaveURL(/#play=v1\./u);

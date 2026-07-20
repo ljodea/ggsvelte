@@ -63,6 +63,36 @@ describe("playground state", () => {
     expect(invalid.canCopyOrShare).toBe(false);
   });
 
+  test("keeps near-limit compact seeds editable without exceeding the pre-parse bound", () => {
+    const nearLimitSpec: PortableSpec = {
+      ...baseSpec,
+      edition: 2,
+      data: {
+        values: Array.from({ length: 200 }, (_, index) => ({
+          x: index,
+          y: index + 1,
+          label: `row-${String(index)}`,
+        })),
+      },
+    };
+    expect(
+      new TextEncoder().encode(JSON.stringify(nearLimitSpec, null, 2)).byteLength,
+    ).toBeGreaterThan(PLAYGROUND_MAX_DECODED_BYTES);
+    expect(new TextEncoder().encode(JSON.stringify(nearLimitSpec)).byteLength).toBeLessThan(
+      PLAYGROUND_MAX_DECODED_BYTES,
+    );
+
+    const state = createPlaygroundState({
+      version: 1,
+      source: { kind: "custom" },
+      spec: nearLimitSpec,
+    });
+    expect(new TextEncoder().encode(state.draft).byteLength).toBeLessThanOrEqual(
+      PLAYGROUND_MAX_DECODED_BYTES,
+    );
+    expect(stagePlaygroundDraft(state).candidate).not.toBeNull();
+  });
+
   test("rejects oversized source before parsing and bounds valid-but-unshareable specs", () => {
     const oversizedSource = "{".repeat(PLAYGROUND_MAX_DECODED_BYTES + 1);
     const sourceRejected = stagePlaygroundDraft(

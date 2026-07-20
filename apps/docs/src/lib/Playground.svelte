@@ -144,12 +144,14 @@
       const promoted = promotePlaygroundCandidate(current, generation);
       if (promoted === current) return;
       workbench = promoted;
-      if (origin === "apply" || origin === "source") {
-        if (window.location.hash.startsWith("#play="))
-          replaceLocationHash(null);
-        shareUrl = "";
-        shareStatus = "";
+      if (
+        (origin === "apply" || origin === "source") &&
+        window.location.hash.startsWith("#play=")
+      ) {
+        replaceLocationHash(null);
       }
+      shareUrl = "";
+      shareStatus = "";
     }, 300);
   }
 
