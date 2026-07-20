@@ -1259,6 +1259,16 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "invalid-temporal-labels",
+        title: "invalid-temporal-labels",
+        level: 3,
+      },
+      {
+        id: "invalid-temporal-locale",
+        title: "invalid-temporal-locale",
+        level: 3,
+      },
+      {
         id: "temporal-parse-failed",
         title: "temporal-parse-failed",
         level: 3,

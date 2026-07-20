@@ -1838,6 +1838,26 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["invalid-scale-breaks"],
   },
   {
+    id: "heading:guide-errors:invalid-temporal-labels",
+    kind: "heading",
+    title: "invalid-temporal-labels",
+    summary:
+      "invalid-temporal-labels in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#invalid-temporal-labels",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["invalid-temporal-labels"],
+  },
+  {
+    id: "heading:guide-errors:invalid-temporal-locale",
+    kind: "heading",
+    title: "invalid-temporal-locale",
+    summary:
+      "invalid-temporal-locale in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#invalid-temporal-locale",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["invalid-temporal-locale"],
+  },
+  {
     id: "heading:guide-errors:temporal-parse-failed",
     kind: "heading",
     title: "temporal-parse-failed",
@@ -9978,6 +9998,28 @@ export const DOCS_SEARCH_INDEX = [
       "Use numeric breaks for numeric scales or values matching the temporal parse option.",
     ],
     exact: ["invalid-scale-breaks", "pipeline:invalid-scale-breaks"],
+  },
+  {
+    id: "diagnostic:pipeline:invalid-temporal-labels",
+    kind: "diagnostic",
+    title: "invalid-temporal-labels · pipeline",
+    summary: "A temporal dateLabels string uses an unsupported or incomplete token.",
+    href: "/guide/errors#invalid-temporal-labels",
+    keywords: ["pipeline", "error", "Use only the documented closed dateLabels token grammar."],
+    exact: ["invalid-temporal-labels", "pipeline:invalid-temporal-labels"],
+  },
+  {
+    id: "diagnostic:pipeline:invalid-temporal-locale",
+    kind: "diagnostic",
+    title: "invalid-temporal-locale · pipeline",
+    summary: "A temporal scale locale is not a valid supported BCP 47 locale.",
+    href: "/guide/errors#invalid-temporal-locale",
+    keywords: [
+      "pipeline",
+      "error",
+      "Use a canonical BCP 47 locale such as en-US, en-GB, fr-FR, or ja-JP.",
+    ],
+    exact: ["invalid-temporal-locale", "pipeline:invalid-temporal-locale"],
   },
   {
     id: "diagnostic:pipeline:temporal-parse-failed",
