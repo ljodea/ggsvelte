@@ -6,6 +6,7 @@ import { join } from "node:path";
 import {
   buildDeploymentIdentity,
   deploymentBuildConfig,
+  ensureNotFoundNoindex,
   ensurePreviewNoindexHeader,
   validateDeploymentArtifact,
 } from "./deployment-artifact.ts";
@@ -25,8 +26,8 @@ const REQUIRED_HEADERS = `/*
 
 const REQUIRED_REDIRECTS = `/bench https://ljodea.github.io/ggsvelte/bench/ 302
 /bench/* https://ljodea.github.io/ggsvelte/bench/:splat 302
-/ggsvelte / 301
-/ggsvelte/* /:splat 301
+/ggsvelte https://ggsvelte.sh/ 301
+/ggsvelte/* https://ggsvelte.sh/:splat 301
 `;
 
 const SOURCE_COMMIT = "0123456789abcdef0123456789abcdef01234567";
@@ -57,7 +58,10 @@ function makeCompleteArtifact(buildMode: "cloudflare-preview" | "cloudflare-prod
   const buildDirectory = mkdtempSync(join(tmpdir(), "ggsvelte-cloudflare-artifact-"));
   for (const [path, contents] of [
     ["index.html", '<link rel="canonical" href="https://ggsvelte.sh/">'],
-    ["404.html", '<meta name="robots" content="noindex,follow">Not found'],
+    [
+      "404.html",
+      '<meta name="robots" content="noindex,follow"><noscript><main><h1>Not found</h1></main></noscript>',
+    ],
     [
       "_headers",
       buildMode === "cloudflare-preview"
@@ -142,6 +146,24 @@ describe("deployment artifact identity", () => {
     }
   });
 
+  it("makes the unknown-route fallback index-safe and useful without JavaScript", () => {
+    const buildDirectory = mkdtempSync(join(tmpdir(), "ggsvelte-cloudflare-not-found-"));
+    try {
+      writeFileSync(
+        join(buildDirectory, "404.html"),
+        '<html><head></head><body><div style="display: contents"><script>start()</script></div></body></html>',
+      );
+      ensureNotFoundNoindex(buildDirectory);
+      const html = readFileSync(join(buildDirectory, "404.html"), "utf8");
+      expect(html).toContain('<meta name="robots" content="noindex,follow" />');
+      expect(html).toContain("<main><h1>Not found</h1>");
+      expect(html).toContain('<a href="/">Go to the ggsvelte documentation</a>');
+      expect(html).not.toContain("<script");
+    } finally {
+      rmSync(buildDirectory, { recursive: true, force: true });
+    }
+  });
+
   it("injects a broad noindex header only into preview artifacts", () => {
     const preview = mkdtempSync(join(tmpdir(), "ggsvelte-cloudflare-preview-"));
     const production = mkdtempSync(join(tmpdir(), "ggsvelte-cloudflare-production-"));
@@ -184,6 +206,36 @@ describe("deployment artifact identity", () => {
     }
   });
 
+  it("rejects an unknown-route fallback with no no-JavaScript message", () => {
+    const buildDirectory = makeCompleteArtifact("cloudflare-production");
+    try {
+      writeFileSync(
+        join(buildDirectory, "404.html"),
+        '<meta name="robots" content="noindex,follow">',
+      );
+      expect(
+        validateDeploymentArtifact(buildDirectory, expectedArtifact("cloudflare-production")),
+      ).toContain("404.html must render Not found without JavaScript");
+    } finally {
+      rmSync(buildDirectory, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects a scripted unknown-route fallback", () => {
+    const buildDirectory = makeCompleteArtifact("cloudflare-production");
+    try {
+      writeFileSync(
+        join(buildDirectory, "404.html"),
+        '<meta name="robots" content="noindex,follow"><main><h1>Not found</h1></main><script>start()</script>',
+      );
+      expect(
+        validateDeploymentArtifact(buildDirectory, expectedArtifact("cloudflare-production")),
+      ).toContain("404.html must remain useful without client scripts");
+    } finally {
+      rmSync(buildDirectory, { recursive: true, force: true });
+    }
+  });
+
   it("rejects missing security, cache, and fixed-destination redirect policies", () => {
     const buildDirectory = makeCompleteArtifact("cloudflare-production");
     try {
@@ -201,7 +253,7 @@ describe("deployment artifact identity", () => {
         "_headers must cache only SvelteKit immutable assets for one year",
       );
       expect(problems).toContain("_redirects is missing the fixed legacy benchmark redirect");
-      expect(problems).toContain("_redirects is missing the /ggsvelte cleanup redirect");
+      expect(problems).toContain("_redirects is missing the absolute /ggsvelte cleanup redirect");
     } finally {
       rmSync(buildDirectory, { recursive: true, force: true });
     }
