@@ -58,7 +58,7 @@ describe("R0 release wiring", () => {
     );
     const interactionPerfJob = ci.slice(
       ci.indexOf("  interaction-perf:"),
-      ci.indexOf("  build:\n    name: build"),
+      ci.indexOf("  build:\n    name: build (packages"),
     );
     expect(ci).toContain("mcr.microsoft.com/playwright:v1.61.1-noble");
     expect(ci).toContain("HOME: /root");
@@ -218,9 +218,12 @@ describe("R0 release wiring", () => {
     expect(consumerJob).toContain("node -v");
     expect(consumerJob).toContain("uses: ./.github/actions/ci-content-hash-write");
 
-    // Marker jobs share the composite (not only unit).
+    // Marker jobs share the composite (not only unit). Split build keeps
+    // independent content-hash executions so docs_site can cache-hit alone.
     for (const jobMarker of [
-      "  build:\n    name: build",
+      "  build:\n    name: build (packages",
+      "  svelte-check:\n    name: svelte-check",
+      "  docs-site:\n    name: docs-site",
       "  actions-security:\n    name: actions-security",
       "  bench-smoke:\n    name: bench-smoke",
     ]) {
@@ -230,6 +233,22 @@ describe("R0 release wiring", () => {
       expect(slice).toContain("uses: ./.github/actions/ci-content-hash-restore");
       expect(slice).toContain("uses: ./.github/actions/ci-content-hash-write");
     }
+    expect(ci).toContain("execution: svelte_check");
+    expect(ci).toContain("execution: docs_site");
+    // Concurrent: neither svelte-check nor docs-site waits on build.
+    const svelteCheckJob = ci.slice(
+      ci.indexOf("  svelte-check:\n    name: svelte-check"),
+      ci.indexOf("  docs-site:\n    name: docs-site"),
+    );
+    const docsSiteJob = ci.slice(
+      ci.indexOf("  docs-site:\n    name: docs-site"),
+      ci.indexOf("  actions-security:\n    name: actions-security"),
+    );
+    expect(svelteCheckJob).toContain("needs: detect-changes");
+    expect(svelteCheckJob).not.toContain("needs: [build");
+    expect(docsSiteJob).toContain("needs: detect-changes");
+    expect(docsSiteJob).toContain("bun run build:docs");
+    expect(docsSiteJob).toContain("bun run check:pages-links");
 
     // actions-security scans composites after extraction (zizmor path scope).
     const actionsSecurity = ci.slice(

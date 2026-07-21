@@ -79,6 +79,8 @@ jobs:
       component: ${{ steps.route.outputs.component }}
       consumer: ${{ steps.route.outputs.consumer }}
       build: ${{ steps.route.outputs.build }}
+      svelte_check: ${{ steps.route.outputs.svelte_check }}
+      docs_site: ${{ steps.route.outputs.docs_site }}
       actions_security: ${{ steps.route.outputs.actions_security }}
       bench_smoke: ${{ steps.route.outputs.bench_smoke }}
       interaction_perf: ${{ steps.route.outputs.interaction_perf }}
@@ -989,8 +991,13 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
+  # Former monolithic "build" is three concurrent jobs (fail-fast / no serial wait):
+  #   build        — packages + knip + type-aware + publint (scripts tests land here)
+  #   svelte-check — packages/svelte + apps/docs svelte-check (product surface only)
+  #   docs-site    — vite adapter-static + pages-links (product surface only)
+  # scripts/**/*.test.ts schedules build + unit only — never docs site.
   build:
-    name: build (tsc -b, packaging lint, static analysis)
+    name: build (packages + knip + type-aware + publint)
     needs: detect-changes
     if: needs.detect-changes.outputs.build == 'true'
     runs-on: [self-hosted, ggsvelte]
@@ -1022,13 +1029,6 @@ jobs:
       - name: build packages (tsc -b + svelte-package)
         if: steps.content_hash.outputs.hit != 'true'
         run: bun run build
-      # Former pre-push hooks that are not duplicated by unit/component jobs.
-      - name: svelte-check (packages/svelte)
-        if: steps.content_hash.outputs.hit != 'true'
-        run: bun run check:svelte
-      - name: svelte-check (apps/docs)
-        if: steps.content_hash.outputs.hit != 'true'
-        run: bun run check:docs
       - name: tsc examples corpus
         if: steps.content_hash.outputs.hit != 'true'
         run: bun run check:examples
@@ -1041,6 +1041,93 @@ jobs:
       - name: publint + attw (real gate — exports point at dist/)
         if: steps.content_hash.outputs.hit != 'true'
         run: bun run lint:package
+      - uses: ./.github/actions/ci-content-hash-write
+        if: steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
+        with:
+          execution: build
+          hash: ${{ steps.content_hash.outputs.hash }}
+      # packages/*/dist for consumers is produced by packages-dist (issue #241).
+      # This job keeps an independent build so publint/attw always re-validate
+      # a fresh tree alongside knip/type-aware analysis.
+
+  svelte-check:
+    name: svelte-check (packages/svelte + apps/docs)
+    needs: detect-changes
+    if: needs.detect-changes.outputs.svelte_check == 'true'
+    runs-on: [self-hosted, ggsvelte]
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.3.14
+      - uses: ./.github/actions/ci-content-hash-restore
+        id: content_hash
+        with:
+          execution: svelte_check
+          bypass: ${{ needs.detect-changes.outputs.bypass_content_cache }}
+          disable: ${{ vars.CI_DISABLE_CONTENT_HASH }}
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: steps.content_hash.outputs.hit != 'true'
+        with:
+          path: ${{ runner.temp }}/bun-install-cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-
+      - if: steps.content_hash.outputs.hit != 'true'
+        run: bun install --frozen-lockfile
+        env:
+          BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
+      - name: build packages (svelte-check imports package types)
+        if: steps.content_hash.outputs.hit != 'true'
+        run: bun run build
+      - name: svelte-check (packages/svelte)
+        if: steps.content_hash.outputs.hit != 'true'
+        run: bun run check:svelte
+      - name: svelte-check (apps/docs)
+        if: steps.content_hash.outputs.hit != 'true'
+        run: bun run check:docs
+      - uses: ./.github/actions/ci-content-hash-write
+        if: steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
+        with:
+          execution: svelte_check
+          hash: ${{ steps.content_hash.outputs.hash }}
+
+  docs-site:
+    name: docs-site (adapter-static build + pages links)
+    needs: detect-changes
+    if: needs.detect-changes.outputs.docs_site == 'true'
+    runs-on: [self-hosted, ggsvelte]
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.3.14
+      - uses: ./.github/actions/ci-content-hash-restore
+        id: content_hash
+        with:
+          execution: docs_site
+          bypass: ${{ needs.detect-changes.outputs.bypass_content_cache }}
+          disable: ${{ vars.CI_DISABLE_CONTENT_HASH }}
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: steps.content_hash.outputs.hit != 'true'
+        with:
+          path: ${{ runner.temp }}/bun-install-cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-
+      - if: steps.content_hash.outputs.hit != 'true'
+        run: bun install --frozen-lockfile
+        env:
+          BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
+      - name: build packages (docs import workspace packages)
+        if: steps.content_hash.outputs.hit != 'true'
+        run: bun run build
       - name: build static docs site (adapter-static; the deployable/VR target)
         if: steps.content_hash.outputs.hit != 'true'
         run: bun run build:docs
@@ -1050,11 +1137,8 @@ jobs:
       - uses: ./.github/actions/ci-content-hash-write
         if: steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
         with:
-          execution: build
+          execution: docs_site
           hash: ${{ steps.content_hash.outputs.hash }}
-      # packages/*/dist for consumers is produced by packages-dist (issue #241).
-      # This job keeps an independent build so publint/attw always re-validate
-      # a fresh tree alongside knip/type-aware analysis.
 
   actions-security:
     name: actions-security (actionlint + zizmor)
@@ -1201,6 +1285,8 @@ jobs:
       - component-spikes
       - component-journeys
       - build
+      - svelte-check
+      - docs-site
       - actions-security
       - bench-smoke
       - vr-baseline-guard
@@ -1222,6 +1308,8 @@ jobs:
           COMPONENT_REQ: ${{ needs.detect-changes.outputs.component }}
           CONSUMER_REQ: ${{ needs.detect-changes.outputs.consumer }}
           BUILD_REQ: ${{ needs.detect-changes.outputs.build }}
+          SVELTE_CHECK_REQ: ${{ needs.detect-changes.outputs.svelte_check }}
+          DOCS_SITE_REQ: ${{ needs.detect-changes.outputs.docs_site }}
           ACTIONS_REQ: ${{ needs.detect-changes.outputs.actions_security }}
           BENCH_REQ: ${{ needs.detect-changes.outputs.bench_smoke }}
           PACKAGES_DIST_REQ: ${{ needs.detect-changes.outputs.packages_dist }}
@@ -1233,6 +1321,8 @@ jobs:
           DOCS_JOURNEYS_RES: ${{ needs.component-journeys.result }}
           CONSUMER_RES: ${{ needs.consumer-compat.result }}
           BUILD_RES: ${{ needs.build.result }}
+          SVELTE_CHECK_RES: ${{ needs.svelte-check.result }}
+          DOCS_SITE_RES: ${{ needs.docs-site.result }}
           ACTIONS_RES: ${{ needs.actions-security.result }}
           BENCH_RES: ${{ needs.bench-smoke.result }}
           PACKAGES_DIST_RES: ${{ needs.packages-dist.result }}
@@ -1258,6 +1348,8 @@ jobs:
               component: req("COMPONENT_REQ"),
               consumer: req("CONSUMER_REQ"),
               build: req("BUILD_REQ"),
+              svelte_check: req("SVELTE_CHECK_REQ"),
+              docs_site: req("DOCS_SITE_REQ"),
               actions_security: req("ACTIONS_REQ"),
               bench_smoke: req("BENCH_REQ"),
               interaction_perf: false,
@@ -1285,6 +1377,8 @@ jobs:
               component: componentResult,
               consumer: env.CONSUMER_RES as JobResult,
               build: env.BUILD_RES as JobResult,
+              svelte_check: env.SVELTE_CHECK_RES as JobResult,
+              docs_site: env.DOCS_SITE_RES as JobResult,
               actions_security: env.ACTIONS_RES as JobResult,
               bench_smoke: env.BENCH_RES as JobResult,
               packages_dist: env.PACKAGES_DIST_RES as JobResult,

@@ -46,6 +46,8 @@ export type JobName =
   | "component"
   | "consumer"
   | "build"
+  | "svelte_check"
+  | "docs_site"
   | "actions_security"
   | "bench_smoke"
   | "interaction_perf"
@@ -214,6 +216,8 @@ const JOB_NAMES: readonly JobName[] = [
   "component",
   "consumer",
   "build",
+  "svelte_check",
+  "docs_site",
   "actions_security",
   "bench_smoke",
   "interaction_perf",
@@ -359,10 +363,15 @@ export function planJobs(changes: ChangeFlags, options: PlanOptions = {}): JobPl
   const docsSurface = changes.docs || changes.examples || forceProduct;
   const browserSurface =
     packageSurface || changes.spikes || changes.visual || changes.performance || forceProduct;
-  // knip / type-aware / docs+examples check live on the build job once pre-push
-  // parity is dropped from the checks job (to avoid double-running unit/build).
+  // Split former monolithic "build" job so expensive steps fail/finish in parallel:
+  // - build: package tsc + knip + type-aware + publint (scripts/evals need this)
+  // - svelte_check: packages/svelte + apps/docs svelte-check (product surface only)
+  // - docs_site: vite adapter-static + pages-links (product surface only)
+  // A scripts/**/*.test.ts change must NOT schedule svelte_check or docs_site.
   const staticAnalysisSurface =
     packageSurface || docsSurface || changes.scripts || changes.evals || forceProduct;
+  const svelteCheckSurface = packageSurface || docsSurface || forceProduct;
+  const docsSiteSurface = packageSurface || docsSurface || forceProduct;
 
   // Pixel VR: render-relevant only (not pure guide/content generators).
   const vr =
@@ -405,6 +414,8 @@ export function planJobs(changes: ChangeFlags, options: PlanOptions = {}): JobPl
     component: browserSurface,
     consumer: packageSurface || changes.consumer_tools || forceProduct,
     build: staticAnalysisSurface,
+    svelte_check: svelteCheckSurface,
+    docs_site: docsSiteSurface,
     // Composite action recipe edits must still lint the actions surface even
     // when no workflow YAML changed (Dependabot directories for composites).
     actions_security: changes.workflows || changes.ci_actions || forceProduct,

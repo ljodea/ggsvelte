@@ -442,6 +442,25 @@ describe("planJobs", () => {
     expect(plan.consumer).toBe(false);
     expect(plan.component).toBe(false);
   });
+
+  test("scripts test-only changes never rebuild docs site or run svelte-check", () => {
+    // release-wiring.test.ts (and other scripts/**/*.test.ts) used to force the
+    // monolithic build job, which always ran vite build:docs.
+    const plan = planJobs(classifyChangedPaths(["scripts/release-wiring.test.ts"]));
+    expect(plan.unit).toBe(true);
+    expect(plan.build).toBe(true); // knip / type-aware still cover scripts/
+    expect(plan.svelte_check).toBe(false);
+    expect(plan.docs_site).toBe(false);
+    expect(plan.pages).toBe(false);
+    expect(plan.packages_dist).toBe(false);
+  });
+
+  test("package changes schedule concurrent build + svelte_check + docs_site", () => {
+    const plan = planJobs(classifyChangedPaths(["packages/core/src/x.ts"]));
+    expect(plan.build).toBe(true);
+    expect(plan.svelte_check).toBe(true);
+    expect(plan.docs_site).toBe(true);
+  });
 });
 
 describe("evaluateGate", () => {
@@ -456,6 +475,8 @@ describe("evaluateGate", () => {
       component: "skipped",
       consumer: "skipped",
       build: "success",
+      svelte_check: "success",
+      docs_site: "success",
       actions_security: "skipped",
       bench_smoke: "skipped",
       interaction_perf: "skipped",
