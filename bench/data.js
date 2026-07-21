@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784619953670,
+  "lastUpdate": 1784620841216,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -37930,6 +37930,185 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 161.0641,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "e2fb069774bddf645c937be23605d532ec878a4c",
+          "message": "docs: rewrite site copy for expert readers (#371)\n\n* docs: rewrite site copy for expert readers\n\nReplace marketing slogans and patronizing FAQ copy with concise,\ntechnical language aimed at ggplot2 users and Svelte developers.\nGallery cards are image-only; featured examples drop job-title prose.\n\n* fix(ci): type-safe stdout/stderr in block-output-paths tests\n\nspawnSync output is string | Buffer; coerce before template interpolation\nso type-aware lint passes on push.",
+          "timestamp": "2026-07-21T02:59:53-05:00",
+          "tree_id": "f9954e45f45827e7118831bfc0a1bf218c14c69d",
+          "url": "https://github.com/ljodea/ggsvelte/commit/e2fb069774bddf645c937be23605d532ec878a4c"
+        },
+        "date": 1784620839831,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 1.5595,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 1.9779,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 5.3783,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 8.681,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 34.1886,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 66.4631,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal-line 100k",
+            "value": 55.4632,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide candidate-selection 300y",
+            "value": 0.0611,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide resize-churn 191y",
+            "value": 0.2652,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide DST-heavy 3y",
+            "value": 2.942,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal free-facets 100",
+            "value": 22.0124,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.1595,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.1855,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 40.1151,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 63.1647,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 8.0076,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 7.6216,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 834.368,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.8416,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 194.611,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 8.0364,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-identity 100k",
+            "value": 13.8259,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 100k",
+            "value": 13.8031,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-sqrt 100k",
+            "value": 13.5147,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 smooth 100k",
+            "value": 14.5158,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 bin 100k",
+            "value": 9.8867,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 facets-100 100k",
+            "value": 57.906,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline binned-64 100k",
+            "value": 18.8468,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 13.8486,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 665.8539,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 95.0606,
             "unit": "ms"
           }
         ]
