@@ -86,6 +86,7 @@ describe("Cloudflare Pages project contract", () => {
     expect(workflow).toContain("bunx wrangler pages deploy apps/docs/build");
     expect(workflow).toContain("CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}");
     expect(workflow).toContain("CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}");
+    expect(workflow).toContain("if: github.ref == 'refs/heads/main'");
     expect(workflow).toContain("ref: ${{ github.sha }}");
     expect(workflow).not.toContain("pull_request:");
   });
