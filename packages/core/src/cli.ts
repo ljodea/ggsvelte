@@ -38,6 +38,13 @@ export interface CLIIO {
   writeErr(line: string): void;
 }
 
+/** Map a scale diagnostic's severity onto the documented CLI JSONL `kind`. */
+export function scaleDiagnosticCliKind(
+  severity: "advisory" | "warning" | "error",
+): "advisory" | "warning" | "error" {
+  return severity;
+}
+
 export const CLI_OPTIONS = [
   {
     anchor: "width",
@@ -292,14 +299,12 @@ export async function runCLI(
     for (const advisory of model.advisories) errLine(io, { kind: "advisory", ...advisory });
     for (const diagnostic of model.scaleDiagnostics) {
       // Documented CLI contract is error|warning|advisory only. Scale diagnostics
-      // already carry severity; never invent a fourth kind on the success path.
-      const kind =
-        diagnostic.severity === "error"
-          ? "warning"
-          : diagnostic.severity === "warning"
-            ? "warning"
-            : "advisory";
-      errLine(io, { kind, source: "scale", ...diagnostic });
+      // already carry severity; map 1:1 and never invent a fourth kind.
+      errLine(io, {
+        kind: scaleDiagnosticCliKind(diagnostic.severity),
+        source: "scale",
+        ...diagnostic,
+      });
     }
     // Spec-lint advisories (Hadley lesson 16): valid-but-questionable specs.
     // Distinguished from pipeline heuristics by source: "spec-lint".
