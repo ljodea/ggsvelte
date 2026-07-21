@@ -9,7 +9,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import type { CLIIO } from "../src/cli.ts";
-import { CLI_OPTIONS, runCLI } from "../src/cli.ts";
+import { CLI_OPTIONS, runCLI, scaleDiagnosticCliKind } from "../src/cli.ts";
 
 const SPEC = {
   data: {
@@ -108,6 +108,14 @@ describe("runCLI", () => {
           (typeof line["code"] === "string" && line["code"].includes("temporal")),
       ) || lines.some((line) => line["kind"] === "advisory"),
     ).toBe(true);
+  });
+
+  it("preserves scale diagnostic severity on the documented CLI kind field", () => {
+    // Success-path scale diagnostics may carry severity "error" (public ScaleDiagnostic
+    // permits it). JSONL consumers gate on kind; kind must match severity, not demote.
+    expect(scaleDiagnosticCliKind("error")).toBe("error");
+    expect(scaleDiagnosticCliKind("warning")).toBe("warning");
+    expect(scaleDiagnosticCliKind("advisory")).toBe("advisory");
   });
 
   it("renders a spec from a file with --width/--height", async () => {
