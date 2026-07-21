@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784664332383,
+  "lastUpdate": 1784664492893,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -39944,6 +39944,200 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 148.9179,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "bfc0638289212daa27f603ce9ca759160b9b76d1",
+          "message": "ci: smoke VR matrix, content routing, docs journeys (#381)\n\n* ci: smoke VR matrix, content routing, docs journeys\n\nCut enforced visual regression from the full dual-theme × examples × docs\nmatrix to a 17-shot smoke inventory (including two dark seats). Guide/content\npaths no longer schedule VR; docs_journeys runs non-pixel structure/a11y\ninstead. Gallery lights stay under apps/docs/static/previews and may lag.\nSame-PR smoke baseline updates are allowed when paired with render-relevant\nnon-baseline paths; baseline-only PRs still fail.\n\n* ci: rebaseline smoke from container; fix Codex P2s\n\n- Replace stale smoke goldens with Playwright actuals from the failed\n  VR Compare run (all 17 seats; container-generated).\n- Expand component_journeys content-hash inputs to every docs generator that\n  schedules docs_journeys so content-only script PRs cannot cache-skip\n  Playwright (Codex P2).\n- Tighten same-PR baseline guard via scripts/vr-baseline-guard.ts and the\n  pre-commit block-output-paths guard: content-only apps/docs paths no longer\n  justify __screenshots__ updates (Codex P2).",
+          "timestamp": "2026-07-21T15:07:18-05:00",
+          "tree_id": "8c27cccb497103ecb2d20366934644595aea776b",
+          "url": "https://github.com/ljodea/ggsvelte/commit/bfc0638289212daa27f603ce9ca759160b9b76d1"
+        },
+        "date": 1784664491891,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.2416,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.723,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 7.1131,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 9.9153,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 57.7164,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 89.1171,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal-line 100k",
+            "value": 71.5999,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide candidate-selection 300y",
+            "value": 0.1255,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide resize-churn 191y",
+            "value": 0.4605,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide DST-heavy 3y",
+            "value": 4.468,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal free-facets 100",
+            "value": 35.8173,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.4456,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.415,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 53.3306,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 72.3737,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 14.1168,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 11.0176,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 937.0491,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7974,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 259.883,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 10.2327,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-identity 100k",
+            "value": 19.6982,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 100k",
+            "value": 17.105,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-sqrt 100k",
+            "value": 16.9894,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 smooth 100k",
+            "value": 18.5175,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 bin 100k",
+            "value": 13.2744,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 facets-100 100k",
+            "value": 82.8742,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline binned-64 100k",
+            "value": 25.6664,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline coord-identity points 100k",
+            "value": 17.5367,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline coord-log10 points 100k",
+            "value": 20.3004,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline coord-tessellation 10k",
+            "value": 48.3164,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 14.8189,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 593.7599,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 149.0591,
             "unit": "ms"
           }
         ]
