@@ -19,6 +19,26 @@
       "DOCS_BUILD_MODE": "cloudflare-preview"
     }
   },
+  "externalRedirects": [
+    {
+      "source": "https://ggsvelte.pages.dev",
+      "target": "https://ggsvelte.sh",
+      "status": 301,
+      "preserveQueryString": true,
+      "subpathMatching": true,
+      "preservePathSuffix": true,
+      "includeSubdomains": false
+    },
+    {
+      "source": "https://www.ggsvelte.sh",
+      "target": "https://ggsvelte.sh",
+      "status": 301,
+      "preserveQueryString": true,
+      "subpathMatching": true,
+      "preservePathSuffix": true,
+      "includeSubdomains": false
+    }
+  ],
   "watchPaths": [
     "apps/docs/**",
     "packages/**",

@@ -23,9 +23,7 @@ const REQUIRED_HEADERS = `/*
   Cache-Control: public, max-age=31536000, immutable
 `;
 
-const REQUIRED_REDIRECTS = `https://ggsvelte.pages.dev/* https://ggsvelte.sh/:splat 301
-https://www.ggsvelte.sh/* https://ggsvelte.sh/:splat 301
-/bench https://ljodea.github.io/ggsvelte/bench/ 302
+const REQUIRED_REDIRECTS = `/bench https://ljodea.github.io/ggsvelte/bench/ 302
 /bench/* https://ljodea.github.io/ggsvelte/bench/:splat 302
 /ggsvelte / 301
 /ggsvelte/* /:splat 301
@@ -202,10 +200,23 @@ describe("deployment artifact identity", () => {
       expect(problems).toContain(
         "_headers must cache only SvelteKit immutable assets for one year",
       );
-      expect(problems).toContain("_redirects is missing the exact production pages.dev redirect");
-      expect(problems).toContain("_redirects is missing the exact www redirect");
       expect(problems).toContain("_redirects is missing the fixed legacy benchmark redirect");
       expect(problems).toContain("_redirects is missing the /ggsvelte cleanup redirect");
+    } finally {
+      rmSync(buildDirectory, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects unsupported domain-level sources in Pages _redirects", () => {
+    const buildDirectory = makeCompleteArtifact("cloudflare-production");
+    try {
+      writeFileSync(
+        join(buildDirectory, "_redirects"),
+        `https://ggsvelte.pages.dev/* https://ggsvelte.sh/:splat 301\n${REQUIRED_REDIRECTS}`,
+      );
+      expect(
+        validateDeploymentArtifact(buildDirectory, expectedArtifact("cloudflare-production")),
+      ).toContain("_redirects must not contain unsupported domain-level source URLs");
     } finally {
       rmSync(buildDirectory, { recursive: true, force: true });
     }

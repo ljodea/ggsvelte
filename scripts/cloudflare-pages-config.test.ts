@@ -13,6 +13,15 @@ interface PagesConfig {
   rootDirectory: string;
   runtimes: Record<string, string>;
   environments: Record<string, Record<string, string>>;
+  externalRedirects: readonly {
+    source: string;
+    target: string;
+    status: number;
+    preserveQueryString: boolean;
+    subpathMatching: boolean;
+    preservePathSuffix: boolean;
+    includeSubdomains: boolean;
+  }[];
   watchPaths: readonly string[];
 }
 
@@ -38,6 +47,26 @@ describe("Cloudflare Pages project contract", () => {
         preview: { DOCS_BUILD_MODE: "cloudflare-preview" },
       },
     });
+    expect(config.externalRedirects).toEqual([
+      {
+        source: "https://ggsvelte.pages.dev",
+        target: "https://ggsvelte.sh",
+        status: 301,
+        preserveQueryString: true,
+        subpathMatching: true,
+        preservePathSuffix: true,
+        includeSubdomains: false,
+      },
+      {
+        source: "https://www.ggsvelte.sh",
+        target: "https://ggsvelte.sh",
+        status: 301,
+        preserveQueryString: true,
+        subpathMatching: true,
+        preservePathSuffix: true,
+        includeSubdomains: false,
+      },
+    ]);
     expect(config.watchPaths).toEqual([
       "apps/docs/**",
       "packages/**",

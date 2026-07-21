@@ -14,6 +14,7 @@ This runbook moves the public documentation from GitHub Pages to `https://ggsvel
 - `cloudflare-production` for the `main` workflow; `cloudflare-preview` for trusted pre-merge uploads
 - a repository secret containing a least-privilege, account-scoped Pages Write token, exposed only to the post-merge deploy step
 - conservative workflow paths covering every package, docs, example, generator, lockfile, and TypeScript input
+- exact-host Bulk Redirect contracts for `www.ggsvelte.sh` and `ggsvelte.pages.dev`, with path/query preservation and subdomain matching disabled
 
 Native Pages Git integration is preferred, but this account's GitHub App installation returned Cloudflare API error `8000011`. Direct Upload is the documented fallback: GitHub Actions checks out the exact head commit, builds and validates `artifact.json`, and uploads those same bytes. Do not broaden the deployment token beyond Pages Write.
 
@@ -88,8 +89,8 @@ The immutable preview must return the intended `artifact.json`, root/deep routes
 4. Attach `ggsvelte.sh` through Pages Custom Domains.
 5. Wait until Cloudflare reports the domain and certificate as `Active`.
 6. Smoke apex from fresh requests before changing `www`, `pages.dev`, or GitHub Pages.
-7. Attach `www.ggsvelte.sh`, then add a permanent path-and-query-preserving redirect to the apex.
-8. Redirect only the exact production host `ggsvelte.pages.dev` to the apex. Do not match hash or branch preview subdomains.
+7. Create the checked account-level Bulk Redirect list and rule for exact `www.ggsvelte.sh` → apex and exact `ggsvelte.pages.dev` → apex redirects. Preserve query strings and path suffixes, enable subpath matching, and keep include-subdomains disabled.
+8. Add the proxied `www` placeholder DNS record required by Bulk Redirects. Do not attach `www` as a second serving domain and do not match hash or branch preview subdomains.
 9. Keep `_redirects` handling `/ggsvelte/*` cleanup and temporary external `/bench/*` redirects.
 
 Run the full matrix:

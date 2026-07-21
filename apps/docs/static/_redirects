@@ -1,5 +1,3 @@
-https://ggsvelte.pages.dev/* https://ggsvelte.sh/:splat 301
-https://www.ggsvelte.sh/* https://ggsvelte.sh/:splat 301
 /bench https://ljodea.github.io/ggsvelte/bench/ 302
 /bench/* https://ljodea.github.io/ggsvelte/bench/:splat 302
 /ggsvelte / 301

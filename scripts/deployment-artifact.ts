@@ -177,11 +177,8 @@ export function validateDeploymentArtifact(
   const redirectsPath = join(buildDirectory, "_redirects");
   if (existsSync(redirectsPath)) {
     const redirects = readFileSync(redirectsPath, "utf8");
-    if (!redirects.includes("https://ggsvelte.pages.dev/* https://ggsvelte.sh/:splat 301")) {
-      problems.push("_redirects is missing the exact production pages.dev redirect");
-    }
-    if (!redirects.includes("https://www.ggsvelte.sh/* https://ggsvelte.sh/:splat 301")) {
-      problems.push("_redirects is missing the exact www redirect");
+    if (/^https:\/\/\S+\s+/m.test(redirects)) {
+      problems.push("_redirects must not contain unsupported domain-level source URLs");
     }
     if (!redirects.includes("/bench/* https://ljodea.github.io/ggsvelte/bench/:splat 302")) {
       problems.push("_redirects is missing the fixed legacy benchmark redirect");
