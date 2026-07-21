@@ -22,6 +22,26 @@ describe("deployment HTTP smoke assertions", () => {
     ).toEqual([]);
   });
 
+  it("accepts a same-origin relative Location with the expected absolute destination", () => {
+    expect(
+      evaluateSmokeResponse(
+        {
+          name: "legacy-base cleanup redirect",
+          url: "https://ggsvelte.sh/ggsvelte/guide/getting-started?from=legacy-base",
+          status: 301,
+          redirectTo: "https://ggsvelte.sh/guide/getting-started?from=legacy-base",
+        },
+        {
+          status: 301,
+          headers: new Headers({
+            Location: "/guide/getting-started?from=legacy-base",
+          }),
+          body: "",
+        },
+      ),
+    ).toEqual([]);
+  });
+
   it("covers immutable preview routes and blocks promotion without noindex", () => {
     const plan = previewSmokePlan(
       "https://feature-cloudflare.ggsvelte.pages.dev",

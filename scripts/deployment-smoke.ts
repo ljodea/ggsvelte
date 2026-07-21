@@ -207,7 +207,15 @@ export function evaluateSmokeResponse(expected: SmokeExpectation, actual: SmokeR
   }
   if (expected.redirectTo !== undefined) {
     const location = actual.headers.get("location");
-    if (location !== expected.redirectTo) {
+    let resolvedLocation: string | null = null;
+    if (location !== null) {
+      try {
+        resolvedLocation = new URL(location, expected.url).href;
+      } catch {
+        resolvedLocation = null;
+      }
+    }
+    if (resolvedLocation !== expected.redirectTo) {
       problems.push(
         `${expected.name}: expected redirect ${expected.redirectTo}, received ${location ?? "no Location header"}`,
       );
