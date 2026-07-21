@@ -11,10 +11,12 @@ on:
 
 permissions: {}
 
-# Concurrency is intentionally NOT workflow-level. A path-routed `pages=false`
-# run that only executes detect-changes must not enter the deploy group and
-# displace a pending real deploy (GitHub keeps only one pending run per group).
-# Serialize production deploys on the deploy job alone (see below).
+# Superseded main pushes cancel older Pages runs (build + deploy). Deploy still
+# has its own group below so two deploys never interleave; cancel-in-progress
+# here is what stops the post-merge Pages backlog from eating heavy runners.
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   detect-changes:

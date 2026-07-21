@@ -1,0 +1,64 @@
+# Cancel leftover self-hosted work the moment a PR is closed or merged.
+# Concurrency cancel-in-progress only fires when a *new* run in the same
+# group starts; merge/close alone does not, so merged branches used to keep
+# burning the heavy lane for 20–40 minutes after the PR was gone.
+name: Cancel on PR close
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions: {}
+
+jobs:
+  cancel:
+    name: cancel in-flight runs for closed PR
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - name: cancel queued and in-progress runs for this head branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          HEAD_BRANCH: ${{ github.head_ref }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${HEAD_BRANCH}" ]; then
+            echo "no head_ref; nothing to cancel"
+            exit 0
+          fi
+          # Paginate active runs on this head branch (queued + in_progress + pending + waiting).
+          cancel_ids=()
+          for status in queued in_progress pending waiting requested; do
+            page=1
+            while true; do
+              resp="$(gh api "repos/${REPO}/actions/runs?branch=${HEAD_BRANCH}&status=${status}&per_page=100&page=${page}")"
+              count="$(printf '%s' "$resp" | jq '.workflow_runs | length')"
+              if [ "$count" -eq 0 ]; then
+                break
+              fi
+              while IFS= read -r id; do
+                [ -n "$id" ] || continue
+                cancel_ids+=("$id")
+              done < <(printf '%s' "$resp" | jq -r '.workflow_runs[].id')
+              if [ "$count" -lt 100 ]; then
+                break
+              fi
+              page=$((page + 1))
+            done
+          done
+          # De-dupe
+          mapfile -t cancel_ids < <(printf '%s\n' "${cancel_ids[@]:-}" | awk 'NF && !seen[$0]++')
+          if [ "${#cancel_ids[@]}" -eq 0 ]; then
+            echo "no active runs on branch ${HEAD_BRANCH} (PR #${PR_NUMBER})"
+            exit 0
+          fi
+          echo "cancelling ${#cancel_ids[@]} run(s) for PR #${PR_NUMBER} branch=${HEAD_BRANCH}"
+          for id in "${cancel_ids[@]}"; do
+            echo "  gh run cancel ${id}"
+            gh run cancel "$id" --repo "$REPO" || true
+          done
