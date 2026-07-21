@@ -1,0 +1,441 @@
+{
+  "schemaVersion": 1,
+  "sourceOrigin": "https://ljodea.github.io/ggsvelte",
+  "destinationOrigin": "https://ggsvelte.sh",
+  "crawledAt": "2026-07-21",
+  "benchmarkPrefix": "/bench",
+  "routes": [
+    {
+      "sourcePath": "/",
+      "destinationPath": "/",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/__perf/interaction-100k",
+      "destinationPath": "/__perf/interaction-100k",
+      "kind": "performance",
+      "sources": ["canonical"]
+    },
+    {
+      "sourcePath": "/__perf/legend-focus-100k",
+      "destinationPath": "/__perf/legend-focus-100k",
+      "kind": "performance",
+      "sources": ["canonical"]
+    },
+    {
+      "sourcePath": "/__perf/r3-interaction",
+      "destinationPath": "/__perf/r3-interaction",
+      "kind": "performance",
+      "sources": ["canonical"]
+    },
+    {
+      "sourcePath": "/docs",
+      "destinationPath": "/docs",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/examples",
+      "destinationPath": "/examples",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/examples/area/basic",
+      "destinationPath": "/examples/area/basic",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/examples/area/stacked",
+      "destinationPath": "/examples/area/stacked",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/examples/bar/dodged",
+      "destinationPath": "/examples/bar/dodged",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/examples/bar/horizontal",
+      "destinationPath": "/examples/bar/horizontal",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/examples/bar/proportions",
+      "destinationPath": "/examples/bar/proportions",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/examples/bar/stacked",
+      "destinationPath": "/examples/bar/stacked",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/examples/boxplot/by-category",
+      "destinationPath": "/examples/boxplot/by-category",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/examples/col/basic",
+      "destinationPath": "/examples/col/basic",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/examples/col/value-labels",
+      "destinationPath": "/examples/col/value-labels",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/examples/color/continuous",
+      "destinationPath": "/examples/color/continuous",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/examples/density/overlay",
+      "destinationPath": "/examples/density/overlay",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/examples/errorbar/mean-se",
+      "destinationPath": "/examples/errorbar/mean-se",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/examples/facet/wrap",
+      "destinationPath": "/examples/facet/wrap",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/examples/facet/wrap-free-y",
+      "destinationPath": "/examples/facet/wrap-free-y",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/examples/histogram/basic",
+      "destinationPath": "/examples/histogram/basic",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/examples/interaction/brush-zoom",
+      "destinationPath": "/examples/interaction/brush-zoom",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/examples/interaction/facet-intervals",
+      "destinationPath": "/examples/interaction/facet-intervals",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/examples/interaction/legend-filter",
+      "destinationPath": "/examples/interaction/legend-filter",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/examples/interaction/legend-focus",
+      "destinationPath": "/examples/interaction/legend-focus",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/examples/interaction/linked-views",
+      "destinationPath": "/examples/interaction/linked-views",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/examples/interaction/tooltip",
+      "destinationPath": "/examples/interaction/tooltip",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/examples/interactions/inspection",
+      "destinationPath": "/examples/interaction/tooltip",
+      "kind": "alias",
+      "sources": ["alias", "live-crawl"]
+    },
+    {
+      "sourcePath": "/examples/interactions/interval-selection",
+      "destinationPath": "/examples/interaction/brush-zoom",
+      "kind": "alias",
+      "sources": ["alias", "live-crawl"]
+    },
+    {
+      "sourcePath": "/examples/line/multi-series",
+      "destinationPath": "/examples/line/multi-series",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/examples/line/time-axis",
+      "destinationPath": "/examples/line/time-axis",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/examples/point/canvas-scatter",
+      "destinationPath": "/examples/point/canvas-scatter",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/examples/point/jitter",
+      "destinationPath": "/examples/point/jitter",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/examples/point/log-scale",
+      "destinationPath": "/examples/point/log-scale",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/examples/point/scatter-color",
+      "destinationPath": "/examples/point/scatter-color",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/examples/rule/annotation",
+      "destinationPath": "/examples/rule/annotation",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/examples/rule/data-driven",
+      "destinationPath": "/examples/rule/data-driven",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/examples/smooth/loess-scatter",
+      "destinationPath": "/examples/smooth/loess-scatter",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/examples/text/labels",
+      "destinationPath": "/examples/text/labels",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/guide/accessibility",
+      "destinationPath": "/guide/accessibility",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/guide/advisories",
+      "destinationPath": "/guide/advisories",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/guide/compatibility",
+      "destinationPath": "/guide/compatibility",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/guide/data-mappings",
+      "destinationPath": "/guide/data-mappings",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/guide/errors",
+      "destinationPath": "/guide/errors",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/guide/facets-coordinates",
+      "destinationPath": "/guide/facets-coordinates",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/guide/getting-started",
+      "destinationPath": "/guide/getting-started",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/guide/inspect-pin",
+      "destinationPath": "/guide/inspect-pin",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/guide/interaction-reference",
+      "destinationPath": "/guide/interaction-reference",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/guide/interactions",
+      "destinationPath": "/guide/interactions",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/guide/layers-marks",
+      "destinationPath": "/guide/layers-marks",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/guide/lifecycle",
+      "destinationPath": "/guide/lifecycle",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/guide/linked-views",
+      "destinationPath": "/guide/linked-views",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/guide/migrating-pre-0-1",
+      "destinationPath": "/guide/migrating-pre-0-1",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/guide/rendering-performance",
+      "destinationPath": "/guide/rendering-performance",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/guide/responsive-charts",
+      "destinationPath": "/guide/responsive-charts",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/guide/scales-guides",
+      "destinationPath": "/guide/scales-guides",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/guide/selection-zoom",
+      "destinationPath": "/guide/selection-zoom",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/guide/server-rendering-export",
+      "destinationPath": "/guide/server-rendering-export",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/guide/statistics-positions",
+      "destinationPath": "/guide/statistics-positions",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/guide/temporal-scales",
+      "destinationPath": "/guide/temporal-scales",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/guide/themes-color",
+      "destinationPath": "/guide/themes-color",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/guide/upgrading",
+      "destinationPath": "/guide/upgrading",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/llms-full.txt",
+      "destinationPath": "/llms-full.txt",
+      "kind": "endpoint",
+      "sources": ["canonical"]
+    },
+    {
+      "sourcePath": "/llms.txt",
+      "destinationPath": "/llms.txt",
+      "kind": "endpoint",
+      "sources": ["canonical"]
+    },
+    {
+      "sourcePath": "/playground",
+      "destinationPath": "/playground",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/reference",
+      "destinationPath": "/reference",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/reference/cli",
+      "destinationPath": "/reference/cli",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/reference/interactions",
+      "destinationPath": "/reference/interactions",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    },
+    {
+      "sourcePath": "/robots.txt",
+      "destinationPath": "/robots.txt",
+      "kind": "endpoint",
+      "sources": ["canonical"]
+    },
+    {
+      "sourcePath": "/schema/v0.json",
+      "destinationPath": "/schema/v0.json",
+      "kind": "endpoint",
+      "sources": ["canonical", "live-crawl"]
+    },
+    {
+      "sourcePath": "/sitemap.xml",
+      "destinationPath": "/sitemap.xml",
+      "kind": "endpoint",
+      "sources": ["canonical"]
+    },
+    {
+      "sourcePath": "/themes",
+      "destinationPath": "/themes",
+      "kind": "page",
+      "sources": ["canonical", "sitemap", "live-crawl"]
+    }
+  ]
+}

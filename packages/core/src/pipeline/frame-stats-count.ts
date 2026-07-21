@@ -7,9 +7,9 @@ import { scaleTransform } from "../scales/transform.js";
 
 import { carriedColumns, emptyFrameExtras, removedStatWarning } from "./frame-helpers.js";
 import { binIdColumn } from "./binned-scale.js";
-import { positionColumn, positionValuesToNumeric } from "./temporal-position.js";
-import { makeColumnOf } from "./frame-stats-shared.js";
+import { makeColumnOf, shouldAggregateOnSemanticTemporalX } from "./frame-stats-shared.js";
 import { forwardMeasureOnce } from "./stat-measure-transform.js";
+import { positionColumn, positionValuesToNumeric } from "./temporal-position.js";
 import type { LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
 import { NO_ROW } from "./types.js";
 
@@ -51,8 +51,7 @@ export function buildCountFrame(
     binding.xConversion.options,
   );
   const temporalX =
-    binned === null &&
-    (binding.xConversion.sourceParser !== "auto" || parsedX.decision.status === "temporal");
+    binned === null && shouldAggregateOnSemanticTemporalX(binding, parsedX.decision.status);
   const countX: readonly (CellValue | null)[] =
     binned === null
       ? temporalX

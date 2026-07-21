@@ -1,6 +1,6 @@
 {
   "name": "@ggsvelte/core",
-  "version": "0.4.0",
+  "version": "0.5.1",
   "description": "ggsvelte core: framework-agnostic grammar-of-graphics pipeline, scale stability, layout, and the pure SVG-string renderer.",
   "keywords": [
     "canvas",
@@ -14,7 +14,7 @@
     "svg",
     "visualization"
   ],
-  "homepage": "https://ljodea.github.io/ggsvelte/",
+  "homepage": "https://ggsvelte.sh/",
   "bugs": "https://github.com/ljodea/ggsvelte/issues",
   "license": "MIT",
   "author": "Liam O'Dea",
@@ -44,7 +44,7 @@
     "provenance": true
   },
   "dependencies": {
-    "@ggsvelte/spec": "^0.4.0"
+    "@ggsvelte/spec": "^0.5.1"
   },
   "devDependencies": {
     "typescript": "^6.0.3"

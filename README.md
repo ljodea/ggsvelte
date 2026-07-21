@@ -34,7 +34,7 @@ bun add @ggsvelte/svelte        # or: npm install @ggsvelte/svelte
 
 Requires Node.js 22+ and Svelte 5.33.1+. Clean packed-artifact installs are
 tested with npm, pnpm, and Bun on Ubuntu and Windows; see the
-[compatibility matrix](https://ljodea.github.io/ggsvelte/guide/compatibility).
+[compatibility matrix](https://ggsvelte.sh/guide/compatibility).
 
 ## Why ggsvelte
 
@@ -56,13 +56,13 @@ tested with npm, pnpm, and Bun on Ubuntu and Windows; see the
   or intervals, brush to zoom, and consume typed Svelte 5 events without
   depending on SVG nodes or renderer indices.
 
-Try [inspection and pinning](https://ljodea.github.io/ggsvelte/examples/interaction/tooltip)
-or [interval selection and zoom](https://ljodea.github.io/ggsvelte/examples/interaction/brush-zoom),
-then [filter groups without losing their colors](https://ljodea.github.io/ggsvelte/examples/interaction/legend-filter)
-or [coordinate intervals across facets](https://ljodea.github.io/ggsvelte/examples/interaction/facet-intervals),
-adapt a [bounded PortableSpec in the local playground](https://ljodea.github.io/ggsvelte/playground),
-then read the [interaction guide](https://ljodea.github.io/ggsvelte/guide/interactions)
-or [searchable event reference](https://ljodea.github.io/ggsvelte/reference/interactions).
+Try [inspection and pinning](https://ggsvelte.sh/examples/interaction/tooltip)
+or [interval selection and zoom](https://ggsvelte.sh/examples/interaction/brush-zoom),
+then [filter groups without losing their colors](https://ggsvelte.sh/examples/interaction/legend-filter)
+or [coordinate intervals across facets](https://ggsvelte.sh/examples/interaction/facet-intervals),
+adapt a [bounded PortableSpec in the local playground](https://ggsvelte.sh/playground),
+then read the [interaction guide](https://ggsvelte.sh/guide/interactions)
+or [searchable event reference](https://ggsvelte.sh/reference/interactions).
 
 ## Dates without preprocessing
 
@@ -130,7 +130,7 @@ family `linear` plus `transform: "log10" | "sqrt"`; helpers include
 `scaleXLog10`, `scaleYSqrt`, `scaleXBinned`, and ggplot2 aliases. Binned scales
 keep bin ids internal while source values remain available to tooltips and
 events. See [Scales and guides](https://ljodea.github.io/ggsvelte/guide/scales-guides)
-and [Upgrading](https://ljodea.github.io/ggsvelte/guide/upgrading#0-4-to-0-5).
+and [Upgrading](https://ggsvelte.sh/guide/upgrading#0-5-to-0-6).
 
 ## One spec, three surfaces
 
@@ -200,12 +200,12 @@ CLI: `ggsvelte-render spec.json > chart.svg` (JSON-line diagnostics on stderr).
 
 ## Documentation
 
-- [Guide and examples](https://ljodea.github.io/ggsvelte/)
-- [Interactions and event reference](https://ljodea.github.io/ggsvelte/guide/interactions)
-- [Local PortableSpec playground](https://ljodea.github.io/ggsvelte/playground)
-- [Upgrading between releases](https://ljodea.github.io/ggsvelte/guide/upgrading)
-- [Pre-0.1 interaction migration](https://ljodea.github.io/ggsvelte/guide/migrating-pre-0-1)
-- [Lifecycle and editions](https://ljodea.github.io/ggsvelte/guide/lifecycle)
+- [Guide and examples](https://ggsvelte.sh/)
+- [Interactions and event reference](https://ggsvelte.sh/guide/interactions)
+- [Local PortableSpec playground](https://ggsvelte.sh/playground)
+- [Upgrading between releases](https://ggsvelte.sh/guide/upgrading)
+- [Pre-0.1 interaction migration](https://ggsvelte.sh/guide/migrating-pre-0-1)
+- [Lifecycle and editions](https://ggsvelte.sh/guide/lifecycle)
 
 ## Contributing
 

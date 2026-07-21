@@ -19,6 +19,7 @@ const config: DocsBuildConfig = {
   canonicalBase: "https://ggsvelte.sh",
   indexable: true,
   analytics: true,
+  analyticsToken: "0123456789abcdef0123456789abcdef",
 };
 const route: DocsRouteRecord = {
   path: "/",
@@ -98,6 +99,18 @@ function socialHead(structured = true): string {
 }
 
 describe("built docs metadata", () => {
+  it("accepts the adapter fallback outside the canonical route inventory", () => {
+    const root = fixture(`<html><head>${socialHead()}</head><body></body></html>`);
+    writeFileSync(
+      join(root, "404.html"),
+      '<html><head><meta name="robots" content="noindex,follow"></head></html>',
+    );
+
+    expect(() => {
+      validateDocsBuildMetadata(root, config, [route]);
+    }).not.toThrow();
+  });
+
   it("preserves fenced source that names the legacy host without treating it as metadata", () => {
     const root = fixture(`<html><head>${socialHead()}</head><body></body></html>`);
     const llmsFull = readFileSync(join(root, "llms-full.txt"), "utf8");

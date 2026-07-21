@@ -14,6 +14,8 @@
  *   - Errors and advisories go to stderr as JSON LINES:
  *       {"kind":"error","code",...} | {"kind":"warning",...} |
  *       {"kind":"advisory",...}
+ *     Scale inference diagnostics reuse those same `kind` values (mapped from
+ *     their internal severity) and set `source: "scale"` so hosts can filter.
  *
  * Exit codes (documented contract):
  *   0  rendered
@@ -34,6 +36,13 @@ export interface CLIIO {
   readFile(path: string): string;
   writeOut(text: string): void;
   writeErr(line: string): void;
+}
+
+/** Map a scale diagnostic's severity onto the documented CLI JSONL `kind`. */
+export function scaleDiagnosticCliKind(
+  severity: "advisory" | "warning" | "error",
+): "advisory" | "warning" | "error" {
+  return severity;
 }
 
 export const CLI_OPTIONS = [
@@ -91,7 +100,11 @@ export const CLI_OPTIONS = [
 
 const cliOptionLines = CLI_OPTIONS.map((option) => {
   const signature = `${option.flag}${option.value === "" ? "" : ` ${option.value}`}`;
-  return `  ${signature.padEnd(17)} ${option.description}`;
+  const detail =
+    "detail" in option && typeof option.detail === "string" && option.detail.length > 0
+      ? ` ${option.detail}`
+      : "";
+  return `  ${signature.padEnd(17)} ${option.description}${detail}`;
 }).join("\n");
 
 const USAGE = `Usage: ggsvelte-render [spec.json] [options]
@@ -285,7 +298,13 @@ export async function runCLI(
     for (const warning of model.warnings) errLine(io, { kind: "warning", ...warning });
     for (const advisory of model.advisories) errLine(io, { kind: "advisory", ...advisory });
     for (const diagnostic of model.scaleDiagnostics) {
-      errLine(io, { kind: "scale-diagnostic", ...diagnostic });
+      // Documented CLI contract is error|warning|advisory only. Scale diagnostics
+      // already carry severity; map 1:1 and never invent a fourth kind.
+      errLine(io, {
+        kind: scaleDiagnosticCliKind(diagnostic.severity),
+        source: "scale",
+        ...diagnostic,
+      });
     }
     // Spec-lint advisories (Hadley lesson 16): valid-but-questionable specs.
     // Distinguished from pipeline heuristics by source: "spec-lint".

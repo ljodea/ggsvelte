@@ -243,7 +243,8 @@ function displayParts(ms: number, options: TemporalLabelFormatOptions): Temporal
     cachedDateTimeFormat("en-US", timezone, { timeZoneName: "longOffset" }).formatToParts(ms),
     "timeZoneName",
   );
-  const offsetMatch = /^GMT([+-])(\d{2}):(\d{2})$/.exec(longOffset);
+  // Intl longOffset may include seconds for historical zones (e.g. GMT+05:21:10).
+  const offsetMatch = /^GMT([+-])(\d{2}):(\d{2})(?::\d{2})?$/.exec(longOffset);
   const offset =
     offsetMatch === null ? "+0000" : `${offsetMatch[1]}${offsetMatch[2]}${offsetMatch[3]}`;
   return {

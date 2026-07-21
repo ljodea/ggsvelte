@@ -2865,14 +2865,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Five-minute path"],
   },
   {
-    id: "heading:guide-upgrading:0-4-to-0-5",
+    id: "heading:guide-upgrading:0-5-to-0-6",
     kind: "heading",
-    title: "0.4 to 0.5",
+    title: "0.5 to 0.6",
     summary:
-      "0.4 to 0.5 in Upgrade in five minutes. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
-    href: "/guide/upgrading#0-4-to-0-5",
+      "0.5 to 0.6 in Upgrade in five minutes. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+    href: "/guide/upgrading#0-5-to-0-6",
     keywords: ["Upgrade in five minutes", "Release"],
-    exact: ["0.4 to 0.5"],
+    exact: ["0.5 to 0.6"],
   },
   {
     id: "heading:guide-upgrading:move-position-transforms-before-statistics",

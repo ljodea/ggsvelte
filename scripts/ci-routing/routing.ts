@@ -72,6 +72,20 @@ export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
     "scripts/gen-docs-search.ts",
     "scripts/gen-gallery-previews.ts",
     "scripts/gen-gallery-previews.test.ts",
+    // Deployment generators and smoke contracts change the published artifact.
+    "scripts/cloudflare-pages-config.test.ts",
+    "scripts/deployment-artifact.ts",
+    "scripts/deployment-artifact.test.ts",
+    "scripts/deployment-smoke.ts",
+    "scripts/deployment-smoke-cli.ts",
+    "scripts/deployment-smoke.test.ts",
+    "scripts/gen-legacy-routes.ts",
+    "scripts/legacy-artifact.ts",
+    "scripts/legacy-artifact.test.ts",
+    "scripts/legacy-migration.ts",
+    "scripts/legacy-migration.test.ts",
+    "scripts/legacy-routes.ts",
+    "scripts/legacy-routes.test.ts",
     // Public gallery previews are materialized from canonical light baselines.
     "tests/visual/__screenshots__/**",
     "lifecycle.json",
@@ -112,6 +126,8 @@ export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
   consumer_tools: [
     "scripts/consumer-compat.ts",
     "scripts/consumer-compat.test.ts",
+    // Packed fixture snippets live here; consumer-compat imports them.
+    "scripts/guide-code-contract.ts",
     "scripts/quickstart.ts",
     "scripts/quickstart-timing.ts",
     "scripts/quickstart-timing.test.ts",

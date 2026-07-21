@@ -914,6 +914,64 @@ describe("temporal pipeline semantics", () => {
     expect(equivalentSpellings.scales.y.domain).toEqual([-0.1, 2.1]);
   });
 
+  it("aggregates summary-stat temporal x by semantic epoch, not raw spelling", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { when: "1/2/2025", value: 1 },
+          { when: "01/02/2025", value: 3 },
+        ],
+        aes({ x: "when", y: "value" }),
+      )
+        .geomErrorbar({ stat: "summary" })
+        .scaleXDate({ parse: "dmy", nice: false })
+        .spec(),
+      size,
+    );
+    expect(model.scales.x.type).toBe("time");
+    // One combined summary (mean_se of [1, 3]) — three segments for a single errorbar
+    // (vertical + two whiskers). Raw-string bucketing would emit two errorbars (6 segments).
+    const segments = model.scene.batches.find((batch) => batch.kind === "segments");
+    expect(segments?.kind).toBe("segments");
+    if (segments?.kind === "segments") {
+      expect(segments.segments.length / 4).toBe(3);
+    }
+    expect(model.scene.axes.x.ticks.filter((tick) => tick.kind === "major")).toHaveLength(1);
+    expect(model.scene.axes.x.ticks[0]!.label).toContain("2025");
+  });
+
+  it("keeps raw category labels for banded temporal count bars", () => {
+    const inferred = runPipeline(
+      gg([{ year: "1835" }, { year: "1835" }, { year: "2026" }], aes({ x: "year" }))
+        .geomBar()
+        .spec(),
+      size,
+    );
+    expect(inferred.scales.x.type).toBe("band");
+    if (inferred.scales.x.type === "band") {
+      expect(inferred.scales.x.domain).toEqual(["1835", "2026"]);
+    }
+    expect(inferred.scene.axes.x.ticks.map(({ label }) => label)).toEqual(["1835", "2026"]);
+    // Count y remains non-temporal and receives the PR 3 default 5% display expansion.
+    expect(inferred.scales.y.domain[0]).toBeCloseTo(-0.1, 12);
+    expect(inferred.scales.y.domain[1]).toBeCloseTo(2.1, 12);
+
+    const discrete = runPipeline(
+      gg([{ year: "1835" }, { year: "1835" }, { year: "2026" }], aes({ x: "year" }))
+        .geomBar()
+        .scaleXDiscrete()
+        .spec(),
+      size,
+    );
+    expect(discrete.scales.x.type).toBe("band");
+    if (discrete.scales.x.type === "band") {
+      expect(discrete.scales.x.domain).toEqual(["1835", "2026"]);
+    }
+    expect(discrete.scene.axes.x.ticks.map(({ label }) => label)).toEqual(["1835", "2026"]);
+    expect(discrete.scales.y.domain[0]).toBeCloseTo(-0.1, 12);
+    expect(discrete.scales.y.domain[1]).toBeCloseTo(2.1, 12);
+  });
+
   it("rejects invalid annotations after mapped data infers a temporal parser", () => {
     expect(() =>
       runPipeline(

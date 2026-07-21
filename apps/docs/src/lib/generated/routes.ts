@@ -1810,8 +1810,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "0-4-to-0-5",
-        title: "0.4 to 0.5",
+        id: "0-5-to-0-6",
+        title: "0.5 to 0.6",
         level: 2,
       },
       {

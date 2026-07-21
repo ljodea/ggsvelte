@@ -78,7 +78,7 @@ DONE:
 
 - ADR 0015 records semantic/transformed/pixel spaces, binned two-phase behavior,
   decision 0013's explicit pre-1.0 correctness exception, and no dual staging.
-- `/guide/scales-guides` and `/guide/upgrading#0-4-to-0-5` document helpers,
+- `/guide/scales-guides` and `/guide/upgrading#0-5-to-0-6` document helpers,
   aliases, OOB, expansion, transformed units, zoom, and family-plus-transform
   migration. Before/after Svelte fixtures pass the verbatim migration guard.
 - `.changeset/brave-position-transforms.md` covers spec/core/Svelte and carries

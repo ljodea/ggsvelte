@@ -1,5 +1,38 @@
 # @ggsvelte/svelte
 
+## 0.5.1
+
+### Patch Changes
+
+- 85f5b5a: <!-- markdownlint-disable MD041 -->
+
+  Map scale-diagnostic severity onto the CLI stderr `kind` field 1:1 so error-severity diagnostics emit `kind: "error"` instead of being demoted to `warning`.
+
+- Updated dependencies [85f5b5a]
+  - @ggsvelte/spec@0.5.1
+  - @ggsvelte/core@0.5.1
+
+## 0.5.0
+
+### Minor Changes
+
+- 78c1942: # Temporal guide plans
+
+  Add measured temporal axis plans with calendar-aligned automatic breaks, contextual and complete labels, explicit interval/minor-break controls, locale/timezone formatting, stable diagnostics, and per-panel `RenderModel.guidePlans` inspection.
+
+  Migration: none — additive
+
+### Patch Changes
+
+- 087a4b1: <!-- markdownlint-disable MD041 -->
+
+  Point published package metadata at the live documentation site and identify each package's monorepo directory.
+
+- Updated dependencies [78c1942]
+- Updated dependencies [087a4b1]
+  - @ggsvelte/spec@0.5.0
+  - @ggsvelte/core@0.5.0
+
 ## 0.4.0
 
 ### Minor Changes

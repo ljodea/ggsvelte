@@ -1399,7 +1399,7 @@ The accepted lifecycle and deprecation policy remains in
 [Lifecycle and editions](/guide/lifecycle#lifecycle-tags); this page applies it
 rather than creating a second policy.
 
-## 0.4 to 0.5
+## 0.5 to 0.6
 
 ### Move position transforms before statistics
 
@@ -1415,7 +1415,7 @@ Authored \`type: "log"\` still validates, but canonical specs now store
 and cannot decide whether changed statistics are intended, so migration remains
 a manual chart review.
 
-Before 0.5, this fit used the old late log projection:
+Before 0.6, this fit used the old late log projection:
 
 \`\`\`svelte fragment
 <script lang="ts">
@@ -1439,7 +1439,7 @@ Before 0.5, this fit used the old late log projection:
 </GGPlot>
 \`\`\`
 
-In 0.5, make the pre-stat transform and limit policy explicit, then compare the
+In 0.6, make the pre-stat transform and limit policy explicit, then compare the
 fit with the intended analysis. The zero expansion below restores flush bounds;
 the new default for non-temporal continuous and binned scales is 5%
 multiplicative display expansion, including pinned domains.

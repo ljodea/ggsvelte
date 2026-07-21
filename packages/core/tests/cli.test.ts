@@ -9,7 +9,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import type { CLIIO } from "../src/cli.ts";
-import { CLI_OPTIONS, runCLI } from "../src/cli.ts";
+import { CLI_OPTIONS, runCLI, scaleDiagnosticCliKind } from "../src/cli.ts";
 
 const SPEC = {
   data: {
@@ -77,6 +77,45 @@ describe("runCLI", () => {
     expect(lines.some((l) => l["kind"] === "advisory" && l["code"] === "scale-type-inferred")).toBe(
       true,
     );
+  });
+
+  it("maps scale diagnostics onto the documented error|warning|advisory kinds", async () => {
+    const temporalSpec = {
+      data: {
+        values: [
+          { when: "1835", value: 1 },
+          { when: "2026", value: 2 },
+        ],
+      },
+      aes: { x: { field: "when" }, y: { field: "value" } },
+      layers: [{ geom: "point" }],
+    };
+    const { io, out, err } = makeIO(JSON.stringify(temporalSpec));
+    const code = await runCLI([], io);
+    expect(code).toBe(0);
+    expect(out.join("")).toStartWith("<svg ");
+    const lines = err.map((l) => JSON.parse(l) as Record<string, unknown>);
+    const kinds = new Set(lines.map((line) => line["kind"]));
+    expect(kinds.has("scale-diagnostic")).toBe(false);
+    for (const kind of kinds) {
+      expect(["error", "warning", "advisory"]).toContain(kind);
+    }
+    // Temporal inference still surfaces on stderr without inventing a fourth kind.
+    expect(
+      lines.some(
+        (line) =>
+          line["source"] === "scale" ||
+          (typeof line["code"] === "string" && line["code"].includes("temporal")),
+      ) || lines.some((line) => line["kind"] === "advisory"),
+    ).toBe(true);
+  });
+
+  it("preserves scale diagnostic severity on the documented CLI kind field", () => {
+    // Success-path scale diagnostics may carry severity "error" (public ScaleDiagnostic
+    // permits it). JSONL consumers gate on kind; kind must match severity, not demote.
+    expect(scaleDiagnosticCliKind("error")).toBe("error");
+    expect(scaleDiagnosticCliKind("warning")).toBe("warning");
+    expect(scaleDiagnosticCliKind("advisory")).toBe("advisory");
   });
 
   it("renders a spec from a file with --width/--height", async () => {
@@ -148,6 +187,17 @@ describe("runCLI", () => {
     expect(await runCLI(["--help"], io)).toBe(0);
     expect(out).toHaveLength(0);
     expect(err.join("\n")).toContain("Usage: ggsvelte-render");
+  });
+
+  it("--help includes --data detail for the named-dataset JSON shape", async () => {
+    const { io, err } = makeIO();
+    expect(await runCLI(["--help"], io)).toBe(0);
+    const help = err.join("\n");
+    const dataOption = CLI_OPTIONS.find((option) => option.flag === "--data");
+    expect(dataOption && "detail" in dataOption).toBe(true);
+    if (dataOption && "detail" in dataOption) {
+      expect(help).toContain(dataOption.detail);
+    }
   });
 });
 

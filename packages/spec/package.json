@@ -1,6 +1,6 @@
 {
   "name": "@ggsvelte/spec",
-  "version": "0.4.0",
+  "version": "0.5.1",
   "description": "ggsvelte plot spec: TypeBox schemas, PortableSpec types, normalize(), validate() with agent errors, fluent builder, JSON Schema artifact.",
   "keywords": [
     "agents",
@@ -14,7 +14,7 @@
     "validation",
     "visualization"
   ],
-  "homepage": "https://ljodea.github.io/ggsvelte/",
+  "homepage": "https://ggsvelte.sh/",
   "bugs": "https://github.com/ljodea/ggsvelte/issues",
   "license": "MIT",
   "author": "Liam O'Dea",

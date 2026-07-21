@@ -95,7 +95,7 @@ categorical colors. Filter changes, clause removals, and clears are delivered to
 `onlegendfilter` and the unified `oninteraction` callback. Changing filter
 mode clears prior clauses; values removed from a changing data catalog are
 pruned and return visible by default. `resetScales()` resets trained scale
-state without clearing active filters. See the [interaction guide and typed event reference](https://ljodea.github.io/ggsvelte/guide/interactions).
+state without clearing active filters. See the [interaction guide and typed event reference](https://ggsvelte.sh/guide/interactions).
 
 ## Headless + CLI
 
@@ -110,10 +110,10 @@ ggsvelte-render spec.json --width 640 --height 400 > chart.svg
 
 ## Links
 
-- Docs + examples: <https://ljodea.github.io/ggsvelte/>
+- Docs + examples: <https://ggsvelte.sh/>
 - Repository: <https://github.com/ljodea/ggsvelte>
-- Upgrading between releases: <https://ljodea.github.io/ggsvelte/guide/upgrading>
-- Pre-0.1 interaction migration: <https://ljodea.github.io/ggsvelte/guide/migrating-pre-0-1>
+- Upgrading between releases: <https://ggsvelte.sh/guide/upgrading>
+- Pre-0.1 interaction migration: <https://ggsvelte.sh/guide/migrating-pre-0-1>
 - Spec package: [`@ggsvelte/spec`](https://www.npmjs.com/package/@ggsvelte/spec)
 - Core package: [`@ggsvelte/core`](https://www.npmjs.com/package/@ggsvelte/core)
 - Agent skill: `skills/ggsvelte/SKILL.md` (shipped in this package)
