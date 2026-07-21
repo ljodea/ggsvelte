@@ -30,16 +30,16 @@ const MODE_RANK: Record<BandLabelMode, number> = {
 };
 
 /** Minimum clear gap between adjacent band labels, px. */
-export const MIN_BAND_LABEL_GAP_PX = 4;
+const MIN_BAND_LABEL_GAP_PX = 4;
 /** Below this category count, thinning would hide a named bar → never thin. */
-export const BAND_THIN_MIN_CATEGORIES = 12;
+const BAND_THIN_MIN_CATEGORIES = 12;
 /** Wrapped labels use at most this many lines before escalating to rotation. */
-export const MAX_WRAP_LINES = 2;
+const MAX_WRAP_LINES = 2;
 
 const RAD = Math.PI / 180;
 
 /** A pre-resolved band tick to lay out (break-matching already applied). */
-export interface BandPlanEntry {
+interface BandPlanEntry {
   value: string | number;
   label: string;
   domainIndex: number;
@@ -69,7 +69,7 @@ export interface BandAxisPlanInput {
   previousMode?: BandLabelMode | null;
 }
 
-export interface BandTick {
+interface BandTick {
   value: string | number;
   label: string;
   fullLabel: string;
