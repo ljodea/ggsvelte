@@ -33,11 +33,6 @@ import {
   maskIsAllFocused,
 } from "./canvas-marks.js";
 
-export type { ColorResolver } from "./canvas-dom.js";
-export { cssColorResolver, drawClippedToPanel, sizeCanvasForDpr } from "./canvas-dom.js";
-export type { CanvasFocusPresentation, PrimitiveFocusMask } from "./canvas-marks.js";
-export { drawBatch } from "./canvas-marks.js";
-
 /**
  * Group geometry batches by panel once (issue #185): O(B) instead of
  * re-filtering the full list per panel (O(P·B)). Within each panel bucket,
