@@ -45,6 +45,10 @@ describe("formatTooltipCell", () => {
     expect(formatTooltipCell(1.23456)).toBe("1.235");
     expect(formatTooltipCell("1985")).toBe("1985");
   });
+
+  it("does not throw on invalid Date (live-text tokens)", () => {
+    expect(formatTooltipCell(new Date(Number.NaN))).toBe("–");
+  });
 });
 
 describe("tooltipDisplayPayloadToken", () => {
@@ -173,6 +177,25 @@ describe("collapseIdenticalDisplayMembers", () => {
     });
     // Same display payload as listed → swap to focus, length 1.
     expect(collapseIdenticalDisplayMembers([listed], outside)).toEqual([outside]);
+  });
+
+  it("keeps length ≤ members when prepending distinct focus outside the window", () => {
+    const members = Array.from({ length: 8 }, (_, i) =>
+      member({
+        layerIndex: 0,
+        key: `s-${i}`,
+        fields: [field("y", "y", i)],
+      }),
+    );
+    const outsideFocus = member({
+      layerIndex: 0,
+      key: "focus-out",
+      fields: [field("y", "y", 99)],
+    });
+    const collapsed = collapseIdenticalDisplayMembers(members, outsideFocus);
+    expect(collapsed).toHaveLength(8);
+    expect(collapsed[0]).toBe(outsideFocus);
+    expect(collapsed.some((m) => m.fields[0]?.value === 7)).toBe(false);
   });
 });
 

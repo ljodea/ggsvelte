@@ -13,7 +13,12 @@ import type { NonEmptyReadonlyArray, PlotDatum, TooltipField } from "../interact
 /** Shared with Tooltip.svelte so equality matches what the user sees. */
 export function formatTooltipCell(value: CellValue): string {
   if (value === null) return "–";
-  if (value instanceof Date) return value.toISOString();
+  if (value instanceof Date) {
+    // Invalid Date throws on toISOString — keyboard live-text tokens must not.
+    const time = value.getTime();
+    if (Number.isNaN(time)) return "–";
+    return value.toISOString();
+  }
   if (typeof value === "number") return String(Math.round(value * 1000) / 1000);
   return String(value);
 }
@@ -71,8 +76,14 @@ export function collapseIdenticalDisplayMembers<Row, Key>(
     chosen.set(focusToken, focus);
   } else if (!focusInMembers) {
     // Focus was outside the member window (e.g. transient cap) and is distinct.
+    // Replace the last capped slot rather than growing past members.length so
+    // live-text counts and the default tooltip stay within the transient bound.
     chosen.set(focusToken, focus);
     order.unshift(focusToken);
+    if (order.length > members.length) {
+      const dropped = order.pop()!;
+      if (dropped !== focusToken) chosen.delete(dropped);
+    }
   }
 
   const first = chosen.get(order[0]!)!;

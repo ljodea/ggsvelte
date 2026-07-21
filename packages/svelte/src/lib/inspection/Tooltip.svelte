@@ -139,9 +139,9 @@
         </dl>
       {/each}
     </div>
-    {#if inspection.state === "transient" && inspection.members.length > 8}
+    {#if inspection.state === "transient" && displayMembers.length > 8}
       <p class="gg-tooltip-more">
-        +{inspection.members.length - 8} more · pin to inspect all
+        +{displayMembers.length - 8} more · pin to inspect all
       </p>
     {:else if inspection.state === "transient"}
       <p class="gg-tooltip-hint">Click to pin</p>
