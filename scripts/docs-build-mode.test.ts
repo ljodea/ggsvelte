@@ -10,6 +10,7 @@ describe("docs build modes", () => {
       canonicalBase: "https://ggsvelte.sh",
       indexable: false,
       analytics: false,
+      analyticsToken: null,
     });
   });
 
@@ -26,11 +27,17 @@ describe("docs build modes", () => {
       indexable: false,
       analytics: false,
     });
-    expect(resolveDocsBuildConfig({ mode: "cloudflare-production" })).toMatchObject({
+    expect(
+      resolveDocsBuildConfig({
+        mode: "cloudflare-production",
+        analyticsToken: "0123456789abcdef0123456789abcdef",
+      }),
+    ).toMatchObject({
       base: "",
       canonicalBase: "https://ggsvelte.sh",
       indexable: true,
       analytics: true,
+      analyticsToken: "0123456789abcdef0123456789abcdef",
     });
     expect(
       resolveDocsBuildConfig({ mode: "legacy-migration", basePath: "/ggsvelte" }),
@@ -40,6 +47,19 @@ describe("docs build modes", () => {
       indexable: false,
       analytics: false,
     });
+  });
+
+  it("keeps analytics absent without an explicit production token", () => {
+    expect(resolveDocsBuildConfig({ mode: "cloudflare-production" })).toMatchObject({
+      analytics: false,
+      analyticsToken: null,
+    });
+    expect(() =>
+      resolveDocsBuildConfig({
+        mode: "cloudflare-preview",
+        analyticsToken: "0123456789abcdef0123456789abcdef",
+      }),
+    ).toThrow("Analytics token is allowed only for cloudflare-production");
   });
 
   it("fails unknown modes and base-path combinations with the complete matrix", () => {

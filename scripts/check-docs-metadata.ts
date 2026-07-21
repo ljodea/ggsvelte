@@ -46,7 +46,9 @@ export function validateDocsBuildMetadata(
   routes: readonly DocsRouteRecord[],
 ): void {
   const pageRoutes = routes.filter((route) => route.kind !== "endpoint");
-  const actualFiles = listHtmlFiles(buildDir).toSorted();
+  const actualFiles = listHtmlFiles(buildDir)
+    .filter((path) => path !== "404.html")
+    .toSorted();
   const expectedFiles = pageRoutes
     .map((route) => htmlPath(buildDir, route.path).slice(buildDir.length + 1))
     .toSorted();

@@ -12,7 +12,7 @@ const build = resolveDocsBuildConfig({
 export default {
   preprocess: vitePreprocess(),
   kit: {
-    adapter: adapter(),
+    adapter: adapter({ fallback: "404.html" }),
     paths: { base: build.base },
     prerender: {
       handleMissingId: ({ id, message }) => {
