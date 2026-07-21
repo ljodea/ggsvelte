@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784675402333,
+  "lastUpdate": 1784676009600,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -41302,6 +41302,200 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 149.1839,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b426c8566dae0ccbf09e23422e64a310824ed1e3",
+          "message": "deps-dev(deps-dev): bump @sveltejs/kit in / (#399)\n\nBumps [@sveltejs/kit](https://github.com/sveltejs/kit/tree/HEAD/packages/kit) in `/` from 2.69.3 to 2.70.0.\n\n\nUpdates `@sveltejs/kit` from 2.69.3 to 2.70.0\n- [Release notes](https://github.com/sveltejs/kit/releases)\n- [Changelog](https://github.com/sveltejs/kit/blob/version-3/packages/kit/CHANGELOG.md)\n- [Commits](https://github.com/sveltejs/kit/commits/@sveltejs/kit@2.70.0/packages/kit)\n\nUpdates `@sveltejs/kit` from 2.69.3 to 2.70.0\n- [Release notes](https://github.com/sveltejs/kit/releases)\n- [Changelog](https://github.com/sveltejs/kit/blob/version-3/packages/kit/CHANGELOG.md)\n- [Commits](https://github.com/sveltejs/kit/commits/@sveltejs/kit@2.70.0/packages/kit)\n\n---\nupdated-dependencies:\n- dependency-name: \"@sveltejs/kit\"\n  dependency-version: 2.70.0\n  dependency-type: direct:development\n  update-type: version-update:semver-minor\n  dependency-group: bun\n- dependency-name: \"@sveltejs/kit\"\n  dependency-version: 2.70.0\n  dependency-type: direct:development\n  update-type: version-update:semver-minor\n  dependency-group: bun\n...\n\nSigned-off-by: dependabot[bot] <support@github.com>\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2026-07-21T18:19:16-05:00",
+          "tree_id": "2bdd263c088f7e1462a64f33b9277d0bcd3861be",
+          "url": "https://github.com/ljodea/ggsvelte/commit/b426c8566dae0ccbf09e23422e64a310824ed1e3"
+        },
+        "date": 1784676008611,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.755,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.9221,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 7.3409,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 10.2635,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 57.8897,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 88.2136,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal-line 100k",
+            "value": 68.9209,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide candidate-selection 300y",
+            "value": 0.1239,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide resize-churn 191y",
+            "value": 0.3908,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide DST-heavy 3y",
+            "value": 4.0175,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal free-facets 100",
+            "value": 35.9852,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.2136,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.3807,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 51.6195,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 71.9872,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 12.8437,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 11.2914,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 918.3887,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7922,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 259.5098,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 10.5106,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-identity 100k",
+            "value": 20.9527,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 100k",
+            "value": 16.2389,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-sqrt 100k",
+            "value": 15.8126,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 smooth 100k",
+            "value": 15.5854,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 bin 100k",
+            "value": 12.5017,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 facets-100 100k",
+            "value": 80.059,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline binned-64 100k",
+            "value": 24.774,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline coord-identity points 100k",
+            "value": 17.0177,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline coord-log10 points 100k",
+            "value": 18.5536,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline coord-tessellation 10k",
+            "value": 48.0812,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 15.8928,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 589.7856,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 149.2436,
             "unit": "ms"
           }
         ]
