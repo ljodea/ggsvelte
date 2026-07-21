@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784591516716,
+  "lastUpdate": 1784592402480,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -35809,6 +35809,150 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 131.8816,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "180c5e40830075f47cb279e63ff89b3df9e29291",
+          "message": "refactor: split ci-routing into routing, content-hash, and CLI (#355)\n\n* refactor: split ci-routing into routing, content-hash, and CLI modules\n\nSeparate path classification / job planning from the content-hash skip\nprotocol and the argv CLI so each concern can change independently.\nKeep scripts/ci-routing.ts as the public re-export entry and\nimport.meta.main owner so workflow and composite-action commands stay\nunchanged.\n\nRoute scripts/ci-routing/** through the ci_routing lane and universal\ncontent-hash inputs, and add characterization tests for subtree\nrouting, export surface, and CLI subcommands.\n\n* fix: await stdin write/end in ci-routing CLI characterization\n\nSatisfy typescript/no-floating-promises on the emit-github-output\nsubprocess test after the module split.",
+          "timestamp": "2026-07-20T19:05:48-05:00",
+          "tree_id": "39cee48c13559444cee84c9c1d4324f3dbb0a052",
+          "url": "https://github.com/ljodea/ggsvelte/commit/180c5e40830075f47cb279e63ff89b3df9e29291"
+        },
+        "date": 1784592401057,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.2901,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.7271,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 6.8671,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 10.1789,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 48.9556,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 83.6276,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal-line 100k",
+            "value": 73.4808,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide candidate-selection 300y",
+            "value": 0.0829,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide resize-churn 191y",
+            "value": 0.478,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide DST-heavy 3y",
+            "value": 4.9066,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal free-facets 100",
+            "value": 36.0909,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.3882,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.4667,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 53.7918,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 75.9852,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 14.8512,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 13.5353,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 970.3644,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.6631,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 257.6873,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 9.311,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 17.2621,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 591.3372,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 148.7789,
             "unit": "ms"
           }
         ]
