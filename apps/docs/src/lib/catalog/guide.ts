@@ -13,8 +13,8 @@ export function guideSectionDomId(section: string): string {
   return `guide-${section
     .trim()
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")}`;
+    .replaceAll(/[^a-z0-9]+/g, "-")
+    .replaceAll(/^-+|-+$/g, "")}`;
 }
 
 interface GuideCatalogEntryBase {

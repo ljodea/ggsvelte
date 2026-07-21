@@ -50,7 +50,9 @@
 
   function scrollActiveIntoView(): void {
     if (activeId === undefined) return;
-    document.getElementById(activeId)?.scrollIntoView({ block: "nearest" });
+    document
+      .querySelector(`#${CSS.escape(activeId)}`)
+      ?.scrollIntoView({ block: "nearest" });
   }
 
   $effect(() => {
