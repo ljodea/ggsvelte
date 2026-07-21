@@ -1,11 +1,23 @@
 import { describe, expect, it } from "bun:test";
-import { mkdtempSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import { validateDocsCsp, validateHtmlCsp } from "./docs-csp";
 
 describe("docs CSP validation", () => {
+  it("keeps visual determinism compatible with enforced style-element CSP", () => {
+    const helper = readFileSync(
+      join(import.meta.dir, "..", "tests", "visual", "helpers", "deterministic.ts"),
+      "utf8",
+    );
+    const css = readFileSync(join(import.meta.dir, "..", "apps", "docs", "src", "app.css"), "utf8");
+
+    expect(helper).not.toContain("addStyleTag");
+    expect(helper).toContain("dataset.visualTest");
+    expect(css).toContain("html[data-visual-test]");
+  });
+
   it("requires each executable inline script to have an exact CSP hash", () => {
     const script = "window.ok = true;";
     const allowed = `<html><head><meta http-equiv="content-security-policy" content="script-src 'self' 'sha256-brEJFbdwhNtD+3GNEqieG8EUDl5O3uwckNR5MnkJ/Pk='; style-src 'self'; style-src-attr 'unsafe-inline'"></head><body><script>${script}</script></body></html>`;

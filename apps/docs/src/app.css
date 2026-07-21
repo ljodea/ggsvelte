@@ -40,10 +40,14 @@
 /* VR mode isolates fixed chart baselines from the public documentation shell. */
 html[data-vr] *,
 html[data-vr] *::before,
-html[data-vr] *::after {
+html[data-vr] *::after,
+html[data-visual-test] *,
+html[data-visual-test] *::before,
+html[data-visual-test] *::after {
   transition: none !important;
   animation: none !important;
   caret-color: transparent !important;
+  scroll-behavior: auto !important;
 }
 
 html[data-vr] .site-chrome,

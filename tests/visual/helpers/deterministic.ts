@@ -7,18 +7,8 @@ import { expect, type Page } from "@playwright/test";
  */
 export async function settleVisualState(page: Page, expectedPlots = 1): Promise<void> {
   await page.emulateMedia({ colorScheme: "light", reducedMotion: "reduce" });
-  await page.addStyleTag({
-    content: `
-      *, *::before, *::after {
-        animation-delay: 0s !important;
-        animation-duration: 0s !important;
-        caret-color: transparent !important;
-        scroll-behavior: auto !important;
-        transition: none !important;
-      }
-    `,
-  });
   await page.evaluate(async () => {
+    document.documentElement.dataset.visualTest = "";
     await document.fonts.ready;
     await new Promise<void>((resolve) => {
       requestAnimationFrame(() => {
