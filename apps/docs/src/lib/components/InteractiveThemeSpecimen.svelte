@@ -176,15 +176,18 @@
 
   .section-heading {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(18rem, 0.55fr);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.55fr);
     gap: clamp(2rem, 7vw, 7rem);
     align-items: end;
+    min-width: 0;
     margin-bottom: 2rem;
   }
 
   h2 {
-    max-width: 11ch;
+    max-width: min(11ch, 100%);
+    min-width: 0;
     margin: 0.25rem 0 0;
+    overflow-wrap: anywhere;
     font-size: clamp(2.5rem, 5vw, 4.75rem);
     line-height: 0.94;
   }
