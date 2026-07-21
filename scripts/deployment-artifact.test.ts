@@ -7,6 +7,7 @@ import {
   buildDeploymentIdentity,
   deploymentBuildConfig,
   ensureNotFoundNoindex,
+  ensurePreviewCleanupRedirects,
   ensurePreviewNoindexHeader,
   validateDeploymentArtifact,
 } from "./deployment-artifact.ts";
@@ -24,10 +25,16 @@ const REQUIRED_HEADERS = `/*
   Cache-Control: public, max-age=31536000, immutable
 `;
 
-const REQUIRED_REDIRECTS = `/bench https://ljodea.github.io/ggsvelte/bench/ 302
+const PRODUCTION_REDIRECTS = `/bench https://ljodea.github.io/ggsvelte/bench/ 302
 /bench/* https://ljodea.github.io/ggsvelte/bench/:splat 302
 /ggsvelte https://ggsvelte.sh/ 301
 /ggsvelte/* https://ggsvelte.sh/:splat 301
+`;
+
+const PREVIEW_REDIRECTS = `/bench https://ljodea.github.io/ggsvelte/bench/ 302
+/bench/* https://ljodea.github.io/ggsvelte/bench/:splat 302
+/ggsvelte / 301
+/ggsvelte/* /:splat 301
 `;
 
 const SOURCE_COMMIT = "0123456789abcdef0123456789abcdef01234567";
@@ -68,7 +75,7 @@ function makeCompleteArtifact(buildMode: "cloudflare-preview" | "cloudflare-prod
         ? REQUIRED_HEADERS.replace("/*\n", "/*\n  X-Robots-Tag: noindex, nofollow\n")
         : REQUIRED_HEADERS,
     ],
-    ["_redirects", REQUIRED_REDIRECTS],
+    ["_redirects", buildMode === "cloudflare-preview" ? PREVIEW_REDIRECTS : PRODUCTION_REDIRECTS],
     ["robots.txt", "Sitemap: https://ggsvelte.sh/sitemap.xml"],
     ["sitemap.xml", "<loc>https://ggsvelte.sh/</loc>"],
     ["artifact.json", `${JSON.stringify(buildDeploymentIdentity(expectedArtifact(buildMode)))}\n`],
@@ -182,6 +189,55 @@ describe("deployment artifact identity", () => {
     }
   });
 
+  it("rewrites absolute /ggsvelte cleanup redirects to same-origin only for preview", () => {
+    const preview = mkdtempSync(join(tmpdir(), "ggsvelte-preview-redirects-"));
+    const production = mkdtempSync(join(tmpdir(), "ggsvelte-production-redirects-"));
+    try {
+      writeFileSync(join(preview, "_redirects"), PRODUCTION_REDIRECTS);
+      writeFileSync(join(production, "_redirects"), PRODUCTION_REDIRECTS);
+      ensurePreviewCleanupRedirects(preview, "cloudflare-preview");
+      ensurePreviewCleanupRedirects(production, "cloudflare-production");
+      expect(readFileSync(join(preview, "_redirects"), "utf8")).toBe(PREVIEW_REDIRECTS);
+      expect(readFileSync(join(production, "_redirects"), "utf8")).toBe(PRODUCTION_REDIRECTS);
+    } finally {
+      rmSync(preview, { recursive: true, force: true });
+      rmSync(production, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects preview artifacts that send /ggsvelte cleanup traffic to production", () => {
+    const buildDirectory = makeCompleteArtifact("cloudflare-preview");
+    try {
+      writeFileSync(join(buildDirectory, "_redirects"), PRODUCTION_REDIRECTS);
+      const problems = validateDeploymentArtifact(
+        buildDirectory,
+        expectedArtifact("cloudflare-preview"),
+      );
+      expect(problems).toContain(
+        "preview _redirects must not send /ggsvelte cleanup traffic to production",
+      );
+    } finally {
+      rmSync(buildDirectory, { recursive: true, force: true });
+    }
+  });
+
+  it("requires same-origin /ggsvelte cleanup redirects on preview artifacts", () => {
+    const buildDirectory = makeCompleteArtifact("cloudflare-preview");
+    try {
+      writeFileSync(
+        join(buildDirectory, "_redirects"),
+        `/bench https://ljodea.github.io/ggsvelte/bench/ 302
+/bench/* https://ljodea.github.io/ggsvelte/bench/:splat 302
+`,
+      );
+      expect(
+        validateDeploymentArtifact(buildDirectory, expectedArtifact("cloudflare-preview")),
+      ).toContain("_redirects is missing the same-origin /ggsvelte cleanup redirect");
+    } finally {
+      rmSync(buildDirectory, { recursive: true, force: true });
+    }
+  });
+
   it("rejects preview artifacts without a broad noindex header", () => {
     const buildDirectory = makeCompleteArtifact("cloudflare-preview");
     try {
@@ -264,7 +320,7 @@ describe("deployment artifact identity", () => {
     try {
       writeFileSync(
         join(buildDirectory, "_redirects"),
-        `https://ggsvelte.pages.dev/* https://ggsvelte.sh/:splat 301\n${REQUIRED_REDIRECTS}`,
+        `https://ggsvelte.pages.dev/* https://ggsvelte.sh/:splat 301\n${PRODUCTION_REDIRECTS}`,
       );
       expect(
         validateDeploymentArtifact(buildDirectory, expectedArtifact("cloudflare-production")),

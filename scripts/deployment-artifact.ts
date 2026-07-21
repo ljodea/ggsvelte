@@ -116,6 +116,25 @@ export function ensurePreviewNoindexHeader(
   writeFileSync(path, headers.replace("/*\n", "/*\n  X-Robots-Tag: noindex, nofollow\n"));
 }
 
+/**
+ * Production keeps absolute `/ggsvelte` cleanup redirects so cutover smoke sees
+ * canonical `Location: https://ggsvelte.sh/...`. Preview must stay on the
+ * preview origin — rewrite those rules to same-host targets so trusted
+ * previews never force traffic onto production.
+ */
+export function ensurePreviewCleanupRedirects(
+  buildDirectory: string,
+  buildMode: DeploymentBuildMode,
+): void {
+  if (buildMode !== "cloudflare-preview") return;
+  const path = join(buildDirectory, "_redirects");
+  if (!existsSync(path)) return;
+  const redirects = readFileSync(path, "utf8")
+    .replaceAll("/ggsvelte https://ggsvelte.sh/ 301", "/ggsvelte / 301")
+    .replaceAll("/ggsvelte/* https://ggsvelte.sh/:splat 301", "/ggsvelte/* /:splat 301");
+  writeFileSync(path, redirects);
+}
+
 export function validateDeploymentArtifact(
   buildDirectory: string,
   expected: DeploymentExpectation,
@@ -206,8 +225,20 @@ export function validateDeploymentArtifact(
     if (!redirects.includes("/bench/* https://ljodea.github.io/ggsvelte/bench/:splat 302")) {
       problems.push("_redirects is missing the fixed legacy benchmark redirect");
     }
-    if (!redirects.includes("/ggsvelte/* https://ggsvelte.sh/:splat 301")) {
-      problems.push("_redirects is missing the absolute /ggsvelte cleanup redirect");
+    if (expected.buildMode === "cloudflare-production") {
+      if (!redirects.includes("/ggsvelte/* https://ggsvelte.sh/:splat 301")) {
+        problems.push("_redirects is missing the absolute /ggsvelte cleanup redirect");
+      }
+    } else if (expected.buildMode === "cloudflare-preview") {
+      if (
+        redirects.includes("/ggsvelte https://ggsvelte.sh/ 301") ||
+        redirects.includes("/ggsvelte/* https://ggsvelte.sh/:splat 301")
+      ) {
+        problems.push("preview _redirects must not send /ggsvelte cleanup traffic to production");
+      }
+      if (!redirects.includes("/ggsvelte/* /:splat 301")) {
+        problems.push("_redirects is missing the same-origin /ggsvelte cleanup redirect");
+      }
     }
   }
 
@@ -284,6 +315,7 @@ function main(): void {
   };
   ensureNotFoundNoindex(buildDirectory);
   ensurePreviewNoindexHeader(buildDirectory, config.mode);
+  ensurePreviewCleanupRedirects(buildDirectory, config.mode);
   writeFileSync(
     join(buildDirectory, "artifact.json"),
     `${JSON.stringify(buildDeploymentIdentity(expected), null, 2)}\n`,
