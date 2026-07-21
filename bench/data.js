@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784608401118,
+  "lastUpdate": 1784611080213,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -36673,6 +36673,150 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 158.0609,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "85f5b5ace1b441c2d36b19999a4b231d09a0c9a2",
+          "message": "fix(core): preserve error severity on CLI scale diagnostics (#357) (#362)\n\n* fix(core): map error-severity scale diagnostics to CLI kind error\n\nPost-merge Codex on #357 correctly noted the success-path mapping demoted\nseverity \"error\" to kind \"warning\", contradicting the documented\nerror|warning|advisory mapping from internal severity. Map 1:1 and pin\nwith a unit contract test.\n\n* chore: add patch changeset for CLI scale-diagnostic kind mapping\n\nDocument the consumer-visible stderr kind fix for error-severity scale\ndiagnostics so the next release changelog records it.",
+          "timestamp": "2026-07-21T00:17:09-05:00",
+          "tree_id": "95ffc3c70d0c501fbfb72457820351df5bbb88db",
+          "url": "https://github.com/ljodea/ggsvelte/commit/85f5b5ace1b441c2d36b19999a4b231d09a0c9a2"
+        },
+        "date": 1784611079263,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.2287,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.6745,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 7.0231,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 9.9997,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 48.6601,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 85.0861,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal-line 100k",
+            "value": 71.304,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide candidate-selection 300y",
+            "value": 0.0945,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide resize-churn 191y",
+            "value": 0.2609,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide DST-heavy 3y",
+            "value": 3.5271,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal free-facets 100",
+            "value": 28.0223,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.3357,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.4093,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 50.4652,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 74.6755,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 14.1099,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.2544,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 996.419,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.6583,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 260.6512,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 9.4689,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 13.9938,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 620.7154,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 155.9981,
             "unit": "ms"
           }
         ]
