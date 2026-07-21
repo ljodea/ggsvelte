@@ -8,6 +8,10 @@
 /* Code blocks are always dark (see --code-paper); atom-one-dark token colors. */
 @import "svelte-highlight/styles/atom-one-dark.css";
 
+.app-contents {
+  display: contents;
+}
+
 .gg-example-frame {
   --bg: #ffffff;
   --fg: #1f2328;

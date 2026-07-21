@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "bun ../../scripts/gen-docs-routes.ts --check && bun ../../scripts/gen-docs-search.ts --check && bun ../../scripts/gen-legacy-routes.ts --check && bun ../../scripts/gen-gallery-previews.ts --check && bun ../../scripts/gen-playground-seeds.ts --check && svelte-kit sync && vite build && bun ../../scripts/check-docs-metadata.ts",
+    "build": "bun ../../scripts/gen-docs-routes.ts --check && bun ../../scripts/gen-docs-search.ts --check && bun ../../scripts/gen-legacy-routes.ts --check && bun ../../scripts/gen-gallery-previews.ts --check && bun ../../scripts/gen-playground-seeds.ts --check && svelte-kit sync && vite build && bun ../../scripts/check-docs-metadata.ts && bun ../../scripts/docs-csp.ts",
     "preview": "vite preview",
     "check": "bun ../../scripts/gen-docs-routes.ts --check && bun ../../scripts/gen-docs-search.ts --check && bun ../../scripts/gen-legacy-routes.ts --check && bun ../../scripts/gen-gallery-previews.ts --check && bun ../../scripts/gen-playground-seeds.ts --check && svelte-kit sync && svelte-check --fail-on-warnings"
   },
