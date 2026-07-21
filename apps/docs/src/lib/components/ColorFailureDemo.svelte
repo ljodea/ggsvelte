@@ -123,15 +123,18 @@
 
   .section-heading {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(18rem, 0.55fr);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.55fr);
     gap: clamp(2rem, 7vw, 7rem);
     align-items: end;
+    min-width: 0;
     margin-bottom: 2rem;
   }
 
   h2 {
-    max-width: 12ch;
+    max-width: min(12ch, 100%);
+    min-width: 0;
     margin: 0.25rem 0 0;
+    overflow-wrap: anywhere;
     font-size: clamp(2.5rem, 5vw, 4.75rem);
     line-height: 0.94;
   }
@@ -143,9 +146,10 @@
 
   .limit-grid {
     display: grid;
-    grid-template-columns: minmax(16rem, 0.65fr) minmax(0, 1.35fr);
+    grid-template-columns: minmax(0, 0.65fr) minmax(0, 1.35fr);
     gap: 1.25rem;
     align-items: start;
+    min-width: 0;
   }
 
   article {

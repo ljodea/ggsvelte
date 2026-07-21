@@ -45,22 +45,30 @@
 
 <style>
   .themes-page {
+    /* Contain wide specimens / display type so document scrollWidth stays viewport-bound. */
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: clip;
     padding-bottom: clamp(4rem, 9vw, 8rem);
   }
 
   .themes-hero {
     display: grid;
-    grid-template-columns: minmax(0, 1.15fr) minmax(18rem, 0.55fr);
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.55fr);
     gap: clamp(2rem, 7vw, 7rem);
     align-items: end;
+    min-width: 0;
     min-height: min(46rem, calc(100svh - 8rem));
     padding-block: clamp(4rem, 9vw, 8rem);
   }
 
   .themes-hero h1 {
     grid-column: 1;
-    max-width: 10ch;
+    /* ch-box + display face can overflow max-width without wrap/clip (scrollWidth expands). */
+    max-width: min(10ch, 100%);
+    min-width: 0;
     margin: 0.35rem 0 0;
+    overflow-wrap: anywhere;
     font-size: clamp(4rem, 8vw, 8rem);
     line-height: 0.84;
     letter-spacing: -0.045em;
@@ -68,6 +76,7 @@
 
   .themes-hero > p:last-child {
     grid-column: 2;
+    min-width: 0;
     margin: 0 0 0.5rem;
     color: var(--muted);
     font-size: 1.05rem;
@@ -89,15 +98,18 @@
 
   .section-heading {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(16rem, 0.45fr);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.45fr);
     gap: 2rem;
     align-items: end;
+    min-width: 0;
     margin-bottom: 2rem;
   }
 
   .section-heading h2 {
-    max-width: 12ch;
+    max-width: min(12ch, 100%);
+    min-width: 0;
     margin: 0.25rem 0 0;
+    overflow-wrap: anywhere;
     font-size: clamp(2.5rem, 5vw, 4.75rem);
     line-height: 0.94;
   }

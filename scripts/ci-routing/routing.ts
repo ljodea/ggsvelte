@@ -46,6 +46,8 @@ export type JobName =
   | "component"
   | "consumer"
   | "build"
+  | "svelte_check"
+  | "docs_site"
   | "actions_security"
   | "bench_smoke"
   | "interaction_perf"
@@ -125,8 +127,23 @@ export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
     "scripts/cli-docs.ts",
     "scripts/guide-code-contract.ts",
     "scripts/gen-docs-search.ts",
+    "scripts/gen-docs-search.test.ts",
     "scripts/gen-gallery-previews.ts",
     "scripts/gen-gallery-previews.test.ts",
+    // apps/docs package.json build/check invoke these — must schedule svelte_check + docs_site
+    // after the monlith split (Codex P2: pure scripts/** no longer runs vite docs).
+    "scripts/gen-docs-routes.ts",
+    "scripts/gen-docs-routes.test.ts",
+    // Shared inventory imported by gen-docs-routes / check-docs-metadata / gen-legacy-routes
+    // / deployment-artifact (Codex P2: inventory-only PRs were scripts-lane only).
+    "scripts/docs-route-inventory.ts",
+    "scripts/docs-route-inventory.test.ts",
+    "scripts/gen-playground-seeds.ts",
+    "scripts/gen-playground-seeds.test.ts",
+    "scripts/check-docs-metadata.ts",
+    "scripts/check-docs-metadata.test.ts",
+    "scripts/check-pages-links.ts",
+    "scripts/check-pages-links.test.ts",
     // Deployment generators and smoke contracts change the published artifact.
     "scripts/cloudflare-pages-config.test.ts",
     "scripts/deployment-artifact.ts",
@@ -214,6 +231,8 @@ const JOB_NAMES: readonly JobName[] = [
   "component",
   "consumer",
   "build",
+  "svelte_check",
+  "docs_site",
   "actions_security",
   "bench_smoke",
   "interaction_perf",
@@ -359,10 +378,15 @@ export function planJobs(changes: ChangeFlags, options: PlanOptions = {}): JobPl
   const docsSurface = changes.docs || changes.examples || forceProduct;
   const browserSurface =
     packageSurface || changes.spikes || changes.visual || changes.performance || forceProduct;
-  // knip / type-aware / docs+examples check live on the build job once pre-push
-  // parity is dropped from the checks job (to avoid double-running unit/build).
+  // Split former monolithic "build" job so expensive steps fail/finish in parallel:
+  // - build: package tsc + knip + type-aware + publint (scripts/evals need this)
+  // - svelte_check: packages/svelte + apps/docs svelte-check (product surface only)
+  // - docs_site: vite adapter-static + pages-links (product surface only)
+  // A scripts/**/*.test.ts change must NOT schedule svelte_check or docs_site.
   const staticAnalysisSurface =
     packageSurface || docsSurface || changes.scripts || changes.evals || forceProduct;
+  const svelteCheckSurface = packageSurface || docsSurface || forceProduct;
+  const docsSiteSurface = packageSurface || docsSurface || forceProduct;
 
   // Pixel VR: render-relevant only (not pure guide/content generators).
   const vr =
@@ -405,6 +429,8 @@ export function planJobs(changes: ChangeFlags, options: PlanOptions = {}): JobPl
     component: browserSurface,
     consumer: packageSurface || changes.consumer_tools || forceProduct,
     build: staticAnalysisSurface,
+    svelte_check: svelteCheckSurface,
+    docs_site: docsSiteSurface,
     // Composite action recipe edits must still lint the actions surface even
     // when no workflow YAML changed (Dependabot directories for composites).
     actions_security: changes.workflows || changes.ci_actions || forceProduct,
