@@ -1,0 +1,27 @@
+# Job-private Bun install cache (issue #319) + frozen-lockfile install.
+# Caller gates the whole step with `if:` when content-hash hit must skip install.
+name: CI bun install (private cache)
+description: >
+  Restore a runner.temp Bun install cache and run bun install --frozen-lockfile.
+  Uses job-private cache paths so self-hosted runners do not share HOME caches.
+
+inputs:
+  cache_key_prefix:
+    description: >
+      Cache key prefix — `bun` for host runners, `bun-container` for Playwright
+      container jobs (separate cache namespace).
+    required: false
+    default: "bun"
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ${{ runner.temp }}/bun-install-cache
+        key: ${{ inputs.cache_key_prefix }}-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+        restore-keys: ${{ inputs.cache_key_prefix }}-${{ runner.os }}-
+    - run: bun install --frozen-lockfile
+      shell: bash
+      env:
+        BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache

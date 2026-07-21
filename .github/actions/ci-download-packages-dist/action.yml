@@ -1,0 +1,30 @@
+# Download the same-run packages-dist artifact and verify package entrypoints
+# (issue #241). Caller gates with `if:` when content-hash hit must skip.
+name: CI download packages-dist
+description: >
+  Download the packages-dist artifact into packages/ and verify that
+  spec/core/svelte dist entrypoints exist.
+
+runs:
+  using: composite
+  steps:
+    - name: download shared packages/*/dist
+      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+      with:
+        name: packages-dist
+        # Producer uploads .packages-dist-upload/packages → extract as packages/.
+        path: packages
+    - name: verify downloaded package dist entrypoints
+      shell: bash
+      run: |
+        set -euo pipefail
+        for path in \
+          packages/spec/dist/index.js \
+          packages/core/dist/index.js \
+          packages/svelte/dist/index.js; do
+          if [ ! -f "${path}" ]; then
+            echo "::error::packages-dist artifact missing ${path} after download"
+            find packages -maxdepth 3 -type d 2>/dev/null | head -40 || true
+            exit 1
+          fi
+        done
