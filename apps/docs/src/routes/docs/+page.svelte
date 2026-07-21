@@ -11,11 +11,10 @@
 
 <article class="docs-landing" aria-labelledby="docs-heading">
   <header>
-    <h1 id="docs-heading">Build a chart, then follow the job.</h1>
+    <h1 id="docs-heading">Documentation</h1>
     <p>
-      Start with one complete Svelte file. Continue through focused chapters
-      when you need to customize, add interaction, deploy, or recover from a
-      diagnostic.
+      Install, compose the grammar, add interaction, ship, and read the public
+      contracts.
     </p>
   </header>
 
@@ -28,7 +27,7 @@
         </a>
         {#if task.hrefs.length > 1}
           <p>
-            Then:
+            Also:
             {#each task.hrefs.slice(1) as href, index (href)}
               {#if index > 0}
                 ·
@@ -41,12 +40,13 @@
   </nav>
 
   <section class="docs-next" aria-labelledby="docs-next-heading">
-    <h2 id="docs-next-heading">Go deeper without losing the path.</h2>
+    <h2 id="docs-next-heading">Also</h2>
     <p>
-      <a href={`${base}/examples`}>Browse real rendered examples</a>, or open
-      the
-      <a href={`${base}/reference`}>single Reference hierarchy</a> for exact public
-      contracts.
+      <a href={`${base}/examples`}>Examples</a>
+      ·
+      <a href={`${base}/reference`}>Reference</a>
+      ·
+      <a href={`${base}/playground`}>Playground</a>
     </p>
   </section>
 </article>

@@ -72,29 +72,29 @@ test("each progressive step changes the real chart through its public contract",
   await expect(steps.nth(6).locator(".gg-capture")).toBeVisible();
 });
 
-test("Docs landing and sidebar expose the full task-first path without duplicate Reference", async ({
+test("Docs landing and sidebar expose the full path without duplicate Reference", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/docs?theme=light");
   const tasks = page.getByRole("navigation", { name: "Documentation tasks" });
-  await expect(tasks.getByRole("link", { name: /Build a chart/ })).toHaveAttribute(
+  await expect(tasks.getByRole("link", { name: /Getting started/ })).toHaveAttribute(
     "href",
     /\/guide\/getting-started$/,
   );
-  await expect(tasks.getByRole("link", { name: /Customize it/ })).toHaveAttribute(
+  await expect(tasks.getByRole("link", { name: /Scales, themes, color/ })).toHaveAttribute(
     "href",
     /\/guide\/scales-guides$/,
   );
-  await expect(tasks.getByRole("link", { name: /Add interaction/ })).toHaveAttribute(
+  await expect(tasks.getByRole("link", { name: /^Interaction/ })).toHaveAttribute(
     "href",
     /\/guide\/inspect-pin$/,
   );
-  await expect(tasks.getByRole("link", { name: /Deploy it/ })).toHaveAttribute(
+  await expect(tasks.getByRole("link", { name: /Layout and export/ })).toHaveAttribute(
     "href",
     /\/guide\/responsive-charts$/,
   );
-  await expect(tasks.getByRole("link", { name: /Troubleshoot it/ })).toHaveAttribute(
+  await expect(tasks.getByRole("link", { name: /Diagnostics/ })).toHaveAttribute(
     "href",
     /\/guide\/errors$/,
   );
@@ -132,7 +132,7 @@ test("prerendered Docs and lesson source remain useful without JavaScript", asyn
   const page = await context.newPage();
   await page.goto("/docs?theme=light");
   await expect(page.getByRole("navigation", { name: "Documentation tasks" })).toContainText(
-    "Build a chart",
+    "Getting started",
   );
   await page.goto("/guide/getting-started?theme=light");
   await expect(page.locator(".lesson-source--file code")).toContainText(
@@ -204,8 +204,8 @@ test("global search implements the combobox/listbox keyboard contract", async ({
   await expect(input).toHaveAttribute("aria-haspopup", "listbox");
   await expect(input).toHaveAttribute("aria-controls", "docs-search-results");
   await expect(dialog.locator("#docs-search-results")).toHaveAttribute("role", "listbox");
-  await expect(dialog.getByRole("link", { name: "Build a chart" })).toBeVisible();
-  await expect(dialog.getByRole("link", { name: "Build a chart" })).not.toHaveAttribute(
+  await expect(dialog.getByRole("link", { name: "Getting started" })).toBeVisible();
+  await expect(dialog.getByRole("link", { name: "Getting started" })).not.toHaveAttribute(
     "role",
     "option",
   );
@@ -225,7 +225,7 @@ test("global search implements the combobox/listbox keyboard contract", async ({
   await input.fill("no-such-ggsvelte-contract");
   await expect(input).toHaveAttribute("aria-expanded", "false");
   await expect(dialog.getByText("No matching documentation.", { exact: true })).toBeVisible();
-  await expect(dialog.getByRole("link", { name: "Troubleshoot it" })).toBeVisible();
+  await expect(dialog.getByRole("link", { name: "Diagnostics" })).toBeVisible();
   await input.evaluate((element) => {
     (element as HTMLInputElement).setSelectionRange(4, 4);
   });

@@ -56,14 +56,13 @@
 <section class="sequential-lab" aria-label="Sequential color scales">
   <header class="section-heading">
     <div>
-      <p class="eyebrow">Quantitative color</p>
-      <h2>Make direction and domain visible.</h2>
+      <p class="eyebrow">Sequential</p>
+      <h2>Ramps and domains</h2>
     </div>
     <div>
       <p>
-        Sequential color encodes order. Reverse the public ramp instead of
-        rebuilding it, or pin a domain when two charts must share the same
-        meaning.
+        Order encoding. Reverse the ramp or pin <code>domain</code> when charts must
+        share the same scale meaning.
       </p>
       <ol class="viridis-ramp" aria-label="Viridis reference colors">
         {#each VIRIDIS_COLORS as color, index (`${color}-${String(index)}`)}

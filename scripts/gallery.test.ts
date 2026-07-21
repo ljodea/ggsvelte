@@ -26,16 +26,14 @@ describe("gallery editorial catalog", () => {
     expect(new Set(FEATURED_EXAMPLES.map((entry) => entry.id)).size).toBe(6);
     const ids = new Set(EXAMPLES.map((entry) => entry.id));
     expect(FEATURED_EXAMPLES.every((entry) => ids.has(entry.id))).toBe(true);
-    expect(FEATURED_EXAMPLES.every((entry) => entry.jobTitle !== "" && entry.proof !== "")).toBe(
-      true,
-    );
+    expect(FEATURED_EXAMPLES.every((entry) => entry.id.includes("/"))).toBe(true);
   });
 
   test("projects every manifest entry without changing canonical identity", () => {
     const projected = EXAMPLES.map((entry) => galleryEntryFor(entry));
     expect(projected).toHaveLength(31);
     expect(projected.map((entry) => entry.id)).toEqual(EXAMPLES.map((entry) => entry.id));
-    expect(projected.filter((entry) => entry.featured !== undefined)).toHaveLength(6);
+    expect(projected.filter((entry) => entry.featured)).toHaveLength(6);
   });
 });
 
@@ -46,10 +44,13 @@ describe("gallery filter URL contract", () => {
     expect(filterGallery(entries, { query: "", categories: [], tags: [] })).toEqual(entries);
   });
 
-  test("searches manifest facts plus curated job titles", () => {
-    const curated = filterGallery(entries, { query: "ordinary ui", categories: [], tags: [] });
-    expect(curated).toHaveLength(1);
-    expect(curated[0]?.id).toBe("interaction/linked-views");
+  test("searches manifest titles, descriptions, and tags", () => {
+    const curated = filterGallery(entries, {
+      query: "linked selection",
+      categories: [],
+      tags: [],
+    });
+    expect(curated.some((entry) => entry.id === "interaction/linked-views")).toBe(true);
   });
 
   test("composes category, tag, and text with AND semantics", () => {
