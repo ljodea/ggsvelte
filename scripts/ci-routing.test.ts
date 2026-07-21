@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { join } from "node:path";
 
 import {
   CACHEABLE_EXECUTIONS,
@@ -669,5 +670,125 @@ describe("success marker protocol", () => {
     expect(validateSuccessMarker(parsed, { execution: "build", hash: "abc" })).toBe(false);
     expect(parseSuccessMarker("not-json")).toBeNull();
     expect(parseSuccessMarker('{"schema":1}')).toBeNull();
+  });
+});
+
+async function spawnCiRoutingCli(args: string[]): Promise<{
+  stdout: string;
+  stderr: string;
+  exitCode: number;
+}> {
+  const proc = Bun.spawn(["bun", "scripts/ci-routing.ts", ...args], {
+    cwd: join(import.meta.dir, ".."),
+    stdout: "pipe",
+    stderr: "pipe",
+  });
+  const [stdout, stderr, exitCode] = await Promise.all([
+    new Response(proc.stdout).text(),
+    new Response(proc.stderr).text(),
+    proc.exited,
+  ]);
+  return { stdout, stderr, exitCode };
+}
+
+describe("ci-routing module tree (split-safe)", () => {
+  test("subtree files set ci_routing, force full surface, and bypass content cache", () => {
+    for (const file of [
+      "scripts/ci-routing.ts",
+      "scripts/ci-routing/routing.ts",
+      "scripts/ci-routing/content-hash.ts",
+      "scripts/ci-routing/cli.ts",
+    ]) {
+      const flags = classifyChangedPaths([file]);
+      expect(flags.ci_routing, file).toBe(true);
+      const plan = planJobs(flags);
+      expect(plan.unit, file).toBe(true);
+      expect(plan.build, file).toBe(true);
+      expect(plan.component, file).toBe(true);
+      expect(plan.consumer, file).toBe(true);
+      expect(plan.pages, file).toBe(true);
+      expect(shouldBypassContentCache(flags), file).toBe(true);
+    }
+  });
+
+  test("every cacheable execution includes the ci-routing subtree via universal inputs", () => {
+    for (const execution of CACHEABLE_EXECUTIONS) {
+      expect(JOB_CONTENT_INPUTS[execution], execution).toContain("scripts/ci-routing/**");
+      const matched = listJobContentPaths(execution, [
+        "scripts/ci-routing/routing.ts",
+        "scripts/ci-routing/content-hash.ts",
+        "scripts/ci-routing/cli.ts",
+      ]);
+      expect(matched, execution).toContain("scripts/ci-routing/routing.ts");
+      expect(matched, execution).toContain("scripts/ci-routing/content-hash.ts");
+      expect(matched, execution).toContain("scripts/ci-routing/cli.ts");
+    }
+  });
+
+  test("public runtime export surface stays stable from the root entry", async () => {
+    const mod = await import("./ci-routing.ts");
+    const expected = [
+      "CACHEABLE_EXECUTIONS",
+      "CONTENT_HASH_SCHEMA",
+      "JOB_CONTENT_INPUTS",
+      "LANE_PATTERNS",
+      "classifyChangedPaths",
+      "collectGitHeadInputDigests",
+      "contentHashCacheKey",
+      "emptyChangeFlags",
+      "evaluateGate",
+      "formatGithubOutputs",
+      "formatTreeEntryDigest",
+      "hashJobInputs",
+      "jobNames",
+      "listJobContentPaths",
+      "matchPathPattern",
+      "parseFileList",
+      "parseGitLsTreeLine",
+      "parseNameStatusList",
+      "parseSuccessMarker",
+      "planJobs",
+      "requireJobInputDigests",
+      "serializeSuccessMarker",
+      "shouldBypassContentCache",
+      "successMarkerPath",
+      "validateSuccessMarker",
+    ].toSorted();
+    expect(Object.keys(mod).toSorted()).toEqual(expected);
+  });
+
+  test("CLI entrypoint help, plan, emit-github-output, and invalid command", async () => {
+    const help = await spawnCiRoutingCli(["help"]);
+    expect(help.exitCode).toBe(0);
+    expect(help.stdout).toContain("emit-github-output");
+
+    const plan = await spawnCiRoutingCli(["plan", "--force-all"]);
+    expect(plan.exitCode).toBe(0);
+    const planJson = JSON.parse(plan.stdout) as Record<string, boolean>;
+    expect(planJson.unit).toBe(true);
+    expect(planJson.pages).toBe(true);
+
+    const emit = Bun.spawn(["bun", "scripts/ci-routing.ts", "emit-github-output", "--stdin"], {
+      cwd: join(import.meta.dir, ".."),
+      stdin: "pipe",
+      stdout: "pipe",
+      stderr: "pipe",
+    });
+    await emit.stdin.write("packages/spec/src/index.ts\n");
+    await emit.stdin.end();
+    const emitOut = await new Response(emit.stdout).text();
+    const emitCode = await emit.exited;
+    expect(emitCode).toBe(0);
+    expect(emitOut).toContain("unit=true");
+    expect(emitOut).toContain("bypass_content_cache=");
+
+    const bad = await spawnCiRoutingCli(["not-a-command"]);
+    expect(bad.exitCode).not.toBe(0);
+  });
+
+  test("importing the root module does not require CLI argv", async () => {
+    // Characterization: side-effect free import (CLI is gated on import.meta.main).
+    const mod = await import("./ci-routing.ts");
+    expect(typeof mod.planJobs).toBe("function");
   });
 });

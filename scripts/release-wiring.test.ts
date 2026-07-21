@@ -220,14 +220,19 @@ describe("R0 release wiring", () => {
     );
     expect(actionsSecurity).toMatch(/zizmor==1\.26\.1 \.github\/workflows \.github\/actions/);
 
-    // Router module documents invalidation + schema + composite recipe inputs.
+    // Router modules document invalidation + schema + composite recipe inputs.
+    // Implementation lives under scripts/ci-routing/; the root file re-exports.
     const routing = read("scripts/ci-routing.ts");
+    const contentHash = read("scripts/ci-routing/content-hash.ts");
+    const pathRouting = read("scripts/ci-routing/routing.ts");
     expect(routing).toContain("CONTENT_HASH_SCHEMA");
     expect(routing).toContain("JOB_CONTENT_INPUTS");
-    expect(routing).toContain("bypass_content_cache");
-    expect(routing).toContain("CI_DISABLE_CONTENT_HASH");
-    expect(routing).toContain(".github/actions/**");
-    expect(routing).toContain("ci_actions");
+    expect(contentHash).toContain("CONTENT_HASH_SCHEMA");
+    expect(contentHash).toContain("JOB_CONTENT_INPUTS");
+    expect(contentHash).toContain("CI_DISABLE_CONTENT_HASH");
+    expect(contentHash).toContain(".github/actions/**");
+    expect(pathRouting).toContain("ci_actions");
+    expect(pathRouting).toContain("bypass_content_cache");
     expect(read("CONTRIBUTING.md")).toContain("content-hash");
   });
 
