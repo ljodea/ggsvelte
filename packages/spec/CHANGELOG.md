@@ -1,5 +1,13 @@
 # @ggsvelte/spec
 
+## 0.5.1
+
+### Patch Changes
+
+- 85f5b5a: <!-- markdownlint-disable MD041 -->
+
+  Map scale-diagnostic severity onto the CLI stderr `kind` field 1:1 so error-severity diagnostics emit `kind: "error"` instead of being demoted to `warning`.
+
 ## 0.5.0
 
 ### Minor Changes
