@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784658808428,
+  "lastUpdate": 1784663393192,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -39362,6 +39362,200 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 149.1507,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "6b8f64b57e2ba03fd88e806d52aec50a5a5c0358",
+          "message": "feat(coords): project geometry after statistics (#380)\n\n* feat(coords): project geometry after statistics\n\n* chore(coords): satisfy type-aware lint\n\n* fix(coords): address post-stat review findings\n\n* fix(coords): project interval mark edges",
+          "timestamp": "2026-07-21T14:48:49-05:00",
+          "tree_id": "6f554a162baedf0829b6bae937aaab4b155d059b",
+          "url": "https://github.com/ljodea/ggsvelte/commit/6b8f64b57e2ba03fd88e806d52aec50a5a5c0358"
+        },
+        "date": 1784663391516,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.4075,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.8651,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 7.6264,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 10.3889,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 57.3604,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 90.5365,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal-line 100k",
+            "value": 70.5285,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide candidate-selection 300y",
+            "value": 0.1269,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide resize-churn 191y",
+            "value": 0.4242,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide DST-heavy 3y",
+            "value": 4.0068,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal free-facets 100",
+            "value": 37.3133,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.264,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 2.1106,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 52.529,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 85.5343,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.7798,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.8821,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 935.5825,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.8053,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 258.9754,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 10.2682,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-identity 100k",
+            "value": 21.9895,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 100k",
+            "value": 17.4421,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-sqrt 100k",
+            "value": 16.7622,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 smooth 100k",
+            "value": 16.4663,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 bin 100k",
+            "value": 12.7823,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 facets-100 100k",
+            "value": 83.7471,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline binned-64 100k",
+            "value": 24.8873,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline coord-identity points 100k",
+            "value": 17.4947,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline coord-log10 points 100k",
+            "value": 19.2296,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline coord-tessellation 10k",
+            "value": 48.1464,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 16.5245,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 591.7808,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 151.9582,
             "unit": "ms"
           }
         ]
