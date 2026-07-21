@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784597499063,
+  "lastUpdate": 1784607660135,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -36385,6 +36385,150 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 152.6957,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "8f368e3af53130e4314ec2c0d0576eb1237c3eae",
+          "message": "vr: update baselines for PR #348 @ 78c194230616e24b79b9e1c0322168ee36509e48 (#361)\n\nCo-authored-by: ggsvelte-vr-bot <vr-bot@users.noreply.github.com>",
+          "timestamp": "2026-07-20T23:20:07-05:00",
+          "tree_id": "fef2625a8d9fdd18e597c90c11a49022061fa5cb",
+          "url": "https://github.com/ljodea/ggsvelte/commit/8f368e3af53130e4314ec2c0d0576eb1237c3eae"
+        },
+        "date": 1784607658671,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.1804,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.6984,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 6.5293,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 9.3324,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 45.3527,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 82.3343,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal-line 100k",
+            "value": 68.1236,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide candidate-selection 300y",
+            "value": 0.0875,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide resize-churn 191y",
+            "value": 0.3139,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide DST-heavy 3y",
+            "value": 3.9348,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal free-facets 100",
+            "value": 26.1494,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.2848,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.5336,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 50.8797,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 73.997,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 12.9383,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 11.7768,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 1001.5381,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.6872,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 258.7262,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 8.657,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 15.4237,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 676.6004,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 137.3641,
             "unit": "ms"
           }
         ]
