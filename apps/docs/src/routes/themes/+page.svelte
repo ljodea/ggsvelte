@@ -45,10 +45,11 @@
 
 <style>
   .themes-page {
-    /* Contain wide specimens / display type so document scrollWidth stays viewport-bound. */
+    /* Prefer min-width + wrapping over overflow-x:clip — clip creates a nested
+       scrollport that leaves absolute copy triggers "outside of the viewport"
+       for Playwright (and can trap focus/scroll for real users). */
     min-width: 0;
     max-width: 100%;
-    overflow-x: clip;
     padding-bottom: clamp(4rem, 9vw, 8rem);
   }
 

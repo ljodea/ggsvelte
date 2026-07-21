@@ -58,8 +58,12 @@
 <style>
   .copy-code {
     position: relative;
+    /* Bound width so long pre lines scroll inside .code-body and the absolute
+       copy trigger stays inside the visible card (not past document edge). */
+    width: 100%;
     max-width: 100%;
     min-width: 0;
+    overflow: hidden;
     border: 1px solid var(--line);
     border-radius: 2px;
     background: var(--code-paper);
