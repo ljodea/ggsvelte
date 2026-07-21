@@ -90,26 +90,24 @@
 
 <header class="gallery-intro">
   <p class="eyebrow">Gallery</p>
-  <h1>Find the chart your work needs</h1>
+  <h1>Examples</h1>
   <p>
-    Start with six common jobs, then filter the complete set of {entries.length} runnable
-    examples. Every preview is generated from the same ggsvelte output used by visual
-    regression tests.
+    {entries.length} runnable charts from the same outputs used in visual regression.
   </p>
 </header>
 
 <section class="featured-gallery" aria-labelledby="featured-heading">
   <div class="section-heading">
     <div>
-      <p class="eyebrow">Six starting points</p>
-      <h2 id="featured-heading">What are you trying to show?</h2>
+      <p class="eyebrow">Featured</p>
+      <h2 id="featured-heading">Featured</h2>
     </div>
-    <a href="#all-examples">View all {entries.length}</a>
+    <a href="#all-examples">All {entries.length}</a>
   </div>
   <ol>
     {#each featured as entry (entry.id)}
       <li>
-        <a href={`${base}/examples/${entry.id}`}>
+        <a href={`${base}/examples/${entry.id}`} aria-label={entry.title}>
           <figure>
             <div class="preview-paper">
               <img
@@ -120,11 +118,6 @@
                 loading="eager"
               />
             </div>
-            <figcaption>
-              <span class="example-kind">{entry.featured!.note}</span>
-              <strong>{entry.featured!.jobTitle}</strong>
-              <span>{entry.featured!.proof}</span>
-            </figcaption>
           </figure>
         </a>
       </li>
@@ -135,7 +128,7 @@
 <section id="all-examples" class="catalog" aria-labelledby="catalog-heading">
   <div class="section-heading">
     <div>
-      <p class="eyebrow">Complete catalog</p>
+      <p class="eyebrow">Catalog</p>
       <h2 id="catalog-heading">All examples</h2>
     </div>
     <p class="result-count" aria-live="polite">
@@ -145,50 +138,50 @@
 
   <form class="filters" onsubmit={(event) => event.preventDefault()}>
     <label>
-      <span>Filter examples</span>
+      <span>Filter</span>
       <input
         type="search"
-        placeholder="Try legend, facet, canvas…"
+        placeholder="legend, facet, canvas…"
         bind:value={filters.query}
         oninput={updateQuery}
       />
     </label>
     <label>
-      <span>Chart family</span>
+      <span>Category</span>
       <select value={filters.categories[0] ?? ""} onchange={updateCategory}>
-        <option value="">All families</option>
+        <option value="">All</option>
         {#each categories as category (category)}<option value={category}
             >{category}</option
           >{/each}
       </select>
     </label>
     <label>
-      <span>Technique</span>
+      <span>Tag</span>
       <select value={filters.tags[0] ?? ""} onchange={updateTag}>
-        <option value="">All techniques</option>
+        <option value="">All</option>
         {#each tags as tag (tag)}<option value={tag}>{tag}</option>{/each}
       </select>
     </label>
-    <button type="button" onclick={clearFilters}>Clear filters</button>
+    <button type="button" onclick={clearFilters}>Clear</button>
   </form>
 
   {#if resetNotice}
     <p class="filter-notice" aria-live="polite">
-      Some unsupported filters were reset.
+      Unsupported filters were reset.
     </p>
   {/if}
 
   {#if results.length === 0}
     <div class="zero-results">
-      <h3>No examples match those filters.</h3>
-      <p>Try a broader phrase or clear the selected family and technique.</p>
-      <button type="button" onclick={clearFilters}>Clear filters</button>
+      <h3>No matches.</h3>
+      <p>Broaden the query or clear filters.</p>
+      <button type="button" onclick={clearFilters}>Clear</button>
     </div>
   {:else}
     <ul class="example-grid">
       {#each results as entry (entry.id)}
         <li>
-          <a href={`${base}/examples/${entry.id}`}>
+          <a href={`${base}/examples/${entry.id}`} aria-label={entry.title}>
             <figure>
               <div class="preview-paper">
                 <img
@@ -199,11 +192,6 @@
                   loading="lazy"
                 />
               </div>
-              <figcaption>
-                <span class="example-kind">{entry.docsSection}</span>
-                <strong>{entry.title}</strong>
-                <span>{entry.description}</span>
-              </figcaption>
             </figure>
           </a>
         </li>
@@ -231,8 +219,7 @@
     font-size: 1.08rem;
   }
 
-  .eyebrow,
-  .example-kind {
+  .eyebrow {
     color: var(--muted);
     font-size: 0.75rem;
     font-weight: 600;
@@ -258,7 +245,7 @@
   .example-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 2rem 1.25rem;
+    gap: 1.25rem;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -288,22 +275,6 @@
     width: 100%;
     height: 100%;
     object-fit: contain;
-  }
-
-  figcaption {
-    display: grid;
-    gap: 0.35rem;
-    padding-top: 0.75rem;
-  }
-
-  figcaption strong {
-    font: 700 1.35rem/1.05 var(--display-font);
-  }
-
-  figcaption > span:last-child {
-    color: var(--muted);
-    font-size: 0.9rem;
-    line-height: 1.45;
   }
 
   .catalog {

@@ -9,14 +9,13 @@
 <section class="palette-gallery" aria-label="Categorical color schemes">
   <header class="section-heading">
     <div>
-      <p class="eyebrow">Categorical color</p>
-      <h2>Keep identity stable and capacity explicit.</h2>
+      <p class="eyebrow">Categorical</p>
+      <h2>Named schemes</h2>
     </div>
     <div>
       <p>
-        Named schemes preserve category identity across chart themes. Capacity
-        tells you when a palette will repeat instead of pretending every
-        category is unique.
+        Stable category colors across themes. Capacity is the point at which
+        colors repeat under cycle, or fail under error.
       </p>
       <div class="controls">
         <div class="select-control">

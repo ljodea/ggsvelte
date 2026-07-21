@@ -60,7 +60,7 @@
 <div class="panel-heading">
   <div>
     <p class="panel-number">01</p>
-    <h2>See the result</h2>
+    <h2>Preview</h2>
   </div>
   {#if lastValid}<strong class="last-valid">Last valid result</strong>{/if}
 </div>

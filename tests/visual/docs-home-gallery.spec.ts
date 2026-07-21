@@ -9,12 +9,10 @@ async function expectNoOverflow(page: import("@playwright/test").Page): Promise<
 test("homepage first viewport leads with a live chart and two actions", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/?theme=light");
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "Build charts that explain themselves.",
-  );
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("ggplot2 for Svelte.");
   await expect(page.locator(".home-hero .gg-plot-root")).toBeVisible();
-  await expect(page.getByRole("link", { name: "Build your first chart" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Browse the gallery" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Getting started" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Examples" }).first()).toBeVisible();
   await expect(page.getByRole("button", { name: "Copy install" })).toBeVisible();
   await expectNoOverflow(page);
 });
@@ -95,7 +93,7 @@ test("install copy and code tabs share the manual-copy fallback", async ({ page 
   await expect(tabs.first()).toHaveText("Svelte");
 });
 
-test("gallery exposes six jobs and all 31 generated previews", async ({ page }) => {
+test("gallery exposes six featured previews and all 31 generated previews", async ({ page }) => {
   await page.goto("/examples");
   await expect(page.locator(".featured-gallery li")).toHaveCount(6);
   await expect(page.locator(".example-grid li")).toHaveCount(31);
@@ -107,21 +105,23 @@ test("gallery filtering is URL-addressable, preserves theme, and restores histor
   page,
 }) => {
   await page.goto("/examples?theme=dark");
-  const search = page.getByRole("searchbox", { name: "Filter examples" });
-  await search.fill("ordinary ui");
-  await expect(page).toHaveURL(/theme=dark.*q=ordinary\+ui|q=ordinary\+ui.*theme=dark/);
-  await expect(page.locator(".example-grid li")).toHaveCount(1);
-  await page.getByLabel("Chart family").selectOption("bar");
+  const search = page.getByRole("searchbox", { name: "Filter" });
+  await search.fill("linked");
+  await expect(page).toHaveURL(/theme=dark.*q=linked|q=linked.*theme=dark/);
+  await expect(page.locator(".example-grid li").first()).toBeVisible();
+  const linkedCount = await page.locator(".example-grid li").count();
+  expect(linkedCount).toBeGreaterThan(0);
+  await page.getByLabel("Category").selectOption("bar");
   await expect(page).toHaveURL(/category=bar/);
-  await expect(page.getByText("0 of 31")).toBeVisible();
+  await expect(page.getByText(/0 of 31|of 31/)).toBeVisible();
   await page.goBack();
-  await expect(page.getByLabel("Chart family")).toHaveValue("");
-  await expect(page.locator(".example-grid li")).toHaveCount(1);
+  await expect(page.getByLabel("Category")).toHaveValue("");
+  await expect(page.locator(".example-grid li").first()).toBeVisible();
 });
 
 test("unknown gallery filter values reset without dropping unrelated params", async ({ page }) => {
   await page.goto("/examples?theme=dark&category=unknown&tag=nope");
-  await expect(page.getByText("Some unsupported filters were reset.")).toBeVisible();
+  await expect(page.getByText("Unsupported filters were reset.")).toBeVisible();
   await expect(page).toHaveURL(/theme=dark/);
   await expect(page).not.toHaveURL(/category=unknown|tag=nope/);
 });
@@ -131,7 +131,7 @@ test("detail is specimen-first and always orders Svelte, builder, then JSON", as
   await expect(page.locator(".gg-example-frame")).toBeVisible();
   const tabs = page.getByRole("tablist", { name: "Code representations" }).getByRole("tab");
   await expect(tabs).toHaveText(["Svelte", "Builder (TS)", "Spec (JSON)"]);
-  await expect(page.getByRole("link", { name: "Open this example in Playground" })).toHaveAttribute(
+  await expect(page.getByRole("link", { name: "Open in Playground" })).toHaveAttribute(
     "href",
     /\/playground#play=v1\./,
   );

@@ -102,7 +102,7 @@ describe("docs route inventory", () => {
       path: "/themes",
       title: "Chart themes and color scales — ggsvelte",
       description:
-        "Compare every built-in ggsvelte chart theme and color scheme with live, copyable Svelte examples.",
+        "Built-in chart themes, categorical schemes, sequential ramps, and interaction role colors.",
       canonicalPath: "/themes",
       kind: "page",
       index: true,

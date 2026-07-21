@@ -6,45 +6,35 @@
   <header>
     <h1 id="reference-heading">Reference</h1>
     <p>
-      Exact public contracts, generated from the same catalogs and lifecycle
-      facts as the packages.
+      Public contracts for interactions, CLI, diagnostics, lifecycle, and
+      schema.
     </p>
   </header>
 
   <nav aria-label="Reference sections">
     <a href={`${base}/reference/interactions`}>
       <strong>Interaction reference</strong>
-      <span>Capabilities, events, diagnostics, and accessibility defaults.</span
-      >
+      <span>Capabilities, events, diagnostics, accessibility defaults.</span>
     </a>
     <a href={`${base}/reference/cli`}>
       <strong>CLI reference</strong>
-      <span
-        >Implementation-derived flags, streams, diagnostics, and exit classes.</span
-      >
+      <span>Flags, streams, diagnostics, exit classes.</span>
     </a>
     <a href={`${base}/guide/errors`}>
       <strong>Errors reference</strong>
-      <span
-        >Source-qualified validation, pipeline, interaction, and CLI
-        diagnostics.</span
-      >
+      <span>Validation, pipeline, interaction, and CLI diagnostics.</span>
     </a>
     <a href={`${base}/guide/advisories`}>
       <strong>Advisories</strong>
-      <span
-        >Valid-but-questionable specs and disclosed rendering heuristics.</span
-      >
+      <span>Valid-but-questionable specs and disclosed heuristics.</span>
     </a>
     <a href={`${base}/guide/lifecycle`}>
       <strong>Lifecycle and editions</strong>
-      <span
-        >Every public export’s stability tag and defaults-edition behavior.</span
-      >
+      <span>Stability tags and defaults-edition behavior.</span>
     </a>
     <a href={`${base}/schema/v0.json`}>
       <strong>PortableSpec JSON Schema</strong>
-      <span>The machine-readable constrained specification contract.</span>
+      <span>Machine-readable constrained specification.</span>
     </a>
   </nav>
 </article>

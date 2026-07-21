@@ -4,7 +4,6 @@ import { pathToFileURL } from "node:url";
 
 import { format } from "oxfmt";
 
-import { FEATURED_EXAMPLES } from "../apps/docs/src/lib/catalog/gallery.ts";
 import { DOCS_ROUTES } from "../apps/docs/src/lib/generated/routes.ts";
 import type { DocsRouteMetadata } from "../apps/docs/src/lib/route-types.ts";
 import type { DocsSearchEntry } from "../apps/docs/src/lib/search-types.ts";
@@ -84,17 +83,15 @@ export function createDocsSearchEntries(): DocsSearchEntry[] {
     }
   }
 
-  const featuredById = new Map(FEATURED_EXAMPLES.map((entry) => [entry.id, entry]));
   for (const example of EXAMPLES) {
-    const featured = featuredById.get(example.id);
     entries.push({
       id: `example:${example.id.replaceAll("/", ":")}`,
       kind: "example",
-      title: featured?.jobTitle ?? example.title,
-      summary: featured?.proof ?? example.description,
+      title: example.title,
+      summary: example.description,
       href: `/examples/${example.id}`,
       keywords: [example.title, example.docsSection, ...example.tags],
-      exact: [example.title, ...(featured === undefined ? [] : [featured.jobTitle])],
+      exact: [example.title],
     });
   }
 

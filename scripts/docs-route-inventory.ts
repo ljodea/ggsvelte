@@ -37,7 +37,7 @@ const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     path: "/",
     title: "ggsvelte — layered grammar of graphics for Svelte",
     description:
-      "Build publication-ready, interactive data graphics in Svelte with a layered grammar and a portable JSON specification.",
+      "Layered grammar of graphics for Svelte: ggplot2-style aes, geoms, stats, and themes, with PortableSpec JSON and hybrid SVG/canvas rendering.",
     canonicalPath: "/",
     kind: "page",
     index: true,
@@ -47,8 +47,7 @@ const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
   {
     path: "/docs",
     title: "Documentation — ggsvelte",
-    description:
-      "Build, customize, interact with, deploy, and troubleshoot ggsvelte charts through a task-first learning path.",
+    description: "Install, compose the grammar, add interaction, ship, and read public contracts.",
     canonicalPath: "/docs",
     kind: "page",
     index: true,
@@ -59,8 +58,7 @@ const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
   {
     path: "/examples",
     title: "Gallery — ggsvelte",
-    description:
-      "Browse runnable ggsvelte charts across marks, statistics, scales, and interaction.",
+    description: "Runnable ggsvelte examples across marks, stats, scales, and interaction.",
     canonicalPath: "/examples",
     kind: "page",
     index: true,
@@ -71,7 +69,7 @@ const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     path: "/playground",
     title: "PortableSpec playground — ggsvelte",
     description:
-      "Edit a bounded PortableSpec locally, inspect semantic events, and take complete Svelte, equivalent Builder or JSON, SVG, or a share URL.",
+      "Edit a bounded PortableSpec locally. Export Svelte, builder TypeScript, JSON, or SVG.",
     canonicalPath: "/playground",
     kind: "page",
     index: true,
@@ -82,7 +80,7 @@ const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     path: "/themes",
     title: "Chart themes and color scales — ggsvelte",
     description:
-      "Compare every built-in ggsvelte chart theme and color scheme with live, copyable Svelte examples.",
+      "Built-in chart themes, categorical schemes, sequential ramps, and interaction role colors.",
     canonicalPath: "/themes",
     kind: "page",
     index: true,
@@ -92,8 +90,7 @@ const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
   {
     path: "/reference",
     title: "Reference — ggsvelte",
-    description:
-      "Find ggsvelte component, specification, interaction, diagnostic, lifecycle, and command-line contracts.",
+    description: "Interaction, CLI, diagnostic, lifecycle, and PortableSpec contracts.",
     canonicalPath: "/reference",
     kind: "page",
     index: true,

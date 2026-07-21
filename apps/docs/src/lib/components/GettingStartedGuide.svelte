@@ -68,8 +68,8 @@
 <article class="guide getting-started-guide">
   <h1>Getting started</h1>
   <p class="lede">
-    Build a responsive, accessible chart in one Svelte file. See the result
-    first, then add one grammar decision at a time.
+    Install, render one chart from a Svelte file, then add aes, layers, scales,
+    facets, theme, and inspect one step at a time.
   </p>
 
   <h2 id="create-a-sveltekit-app">Create a SvelteKit app</h2>
@@ -271,10 +271,10 @@
 
   <h2 id="where-next">Where next</h2>
   <ul>
-    <li><a href={`${base}/examples`}>Browse runnable examples</a>.</li>
-    <li><a href={`${base}/guide/interactions`}>Add interaction</a>.</li>
-    <li><a href={`${base}/guide/compatibility`}>Check compatibility</a>.</li>
-    <li><a href={`${base}/guide/errors`}>Recover from a diagnostic</a>.</li>
+    <li><a href={`${base}/examples`}>Examples</a></li>
+    <li><a href={`${base}/guide/interactions`}>Interaction</a></li>
+    <li><a href={`${base}/guide/compatibility`}>Compatibility</a></li>
+    <li><a href={`${base}/guide/errors`}>Diagnostics</a></li>
   </ul>
 </article>
 

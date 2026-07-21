@@ -14,7 +14,6 @@
   const frameWidth = 640;
   const frameHeight = $derived(data.entry.vrHeight ?? 400);
   const galleryEntries = EXAMPLES.map((entry) => galleryEntryFor(entry));
-  const galleryEntry = $derived(galleryEntryFor(data.entry));
   const related = $derived(
     rankRelatedExamples(data.entry.id, galleryEntries, 3),
   );
@@ -34,16 +33,14 @@
     <p class="crumbs">
       <a href={`${base}/examples`}>Gallery</a> / {data.entry.docsSection}
     </p>
-    <p class="eyebrow">{data.entry.category} example</p>
-    <h1>{galleryEntry.featured?.jobTitle ?? data.entry.title}</h1>
-    <p class="proof">
-      {galleryEntry.featured?.proof ?? data.entry.description}
-    </p>
+    <p class="eyebrow">{data.entry.category}</p>
+    <h1>{data.entry.title}</h1>
+    <p class="proof">{data.entry.description}</p>
   </header>
 
   {#if data.entry.journey}
     <section class="example-prose try-it" aria-labelledby="try-it-heading">
-      <h2 id="try-it-heading">Try the interaction</h2>
+      <h2 id="try-it-heading">Interaction</h2>
       <dl>
         <div>
           <dt>Pointer</dt>
@@ -75,25 +72,24 @@
   >
     <div class="section-heading">
       <div>
-        <p class="eyebrow">Complete source</p>
-        <h2 id="example-code-heading">Start with the Svelte component</h2>
+        <p class="eyebrow">Source</p>
+        <h2 id="example-code-heading">Svelte, builder, JSON</h2>
       </div>
       {#if playgroundCompatibility?.supported}
         <a
           class="playground-link"
           href={`${base}/playground${playgroundCompatibility.fragment}`}
-          >Open this example in Playground</a
+          >Open in Playground</a
         >
       {/if}
     </div>
     {#if playgroundCompatibility?.supported}
       <p class="handoff-note">
-        Opens the exact bounded PortableSpec locally. Nothing is uploaded or
-        executed as code.
+        Local PortableSpec only — no upload or remote execution.
       </p>
     {:else if playgroundCompatibility !== undefined}
       <p class="handoff-note unsupported">
-        Playground handoff unavailable: {playgroundCompatibility.reason}
+        Playground unavailable: {playgroundCompatibility.reason}
       </p>
     {/if}
     <CodeTabs {tabs} />
@@ -104,8 +100,8 @@
     aria-labelledby="implementation-heading"
   >
     <div>
-      <p class="eyebrow">Implementation notes</p>
-      <h2 id="implementation-heading">What this example exercises</h2>
+      <p class="eyebrow">Meta</p>
+      <h2 id="implementation-heading">Details</h2>
     </div>
     <dl>
       <div>
@@ -143,15 +139,15 @@
   <section class="example-prose related" aria-labelledby="related-heading">
     <div class="section-heading">
       <div>
-        <p class="eyebrow">Keep looking</p>
-        <h2 id="related-heading">Related examples</h2>
+        <p class="eyebrow">Related</p>
+        <h2 id="related-heading">More examples</h2>
       </div>
-      <a href={`${base}/examples`}>Back to all {EXAMPLES.length}</a>
+      <a href={`${base}/examples`}>All {EXAMPLES.length}</a>
     </div>
     <ul>
       {#each related as entry (entry.id)}
         <li>
-          <a href={`${base}/examples/${entry.id}`}>
+          <a href={`${base}/examples/${entry.id}`} aria-label={entry.title}>
             <div class="preview-paper">
               <img
                 src={`${base}${entry.previewPath}`}
@@ -161,7 +157,6 @@
                 loading="lazy"
               />
             </div>
-            <strong>{entry.featured?.jobTitle ?? entry.title}</strong>
           </a>
         </li>
       {/each}
