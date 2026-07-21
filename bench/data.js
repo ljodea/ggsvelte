@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784669819005,
+  "lastUpdate": 1784672923762,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -40526,6 +40526,200 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 156.5802,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "7f45a5754d0360114567eabaee6d8d67b735c5c2",
+          "message": "ci: concurrent build / svelte-check / docs-site (no docs for test-only) (#389)\n\n* ci: split build into concurrent build / svelte-check / docs-site\n\nThe monlithic build job serialized package analysis, svelte-check, and a\nfull vite docs build. A scripts/**/*.test.ts change still forced all of it.\n\n- Route svelte_check + docs_site only for package/docs product surface\n- scripts/evals still schedule knip/type-aware build, never docs site\n- Separate content-hash executions (schema 2) so docs_site can cache-hit\n- ci-gate aggregates the three independent job results\n\n#384 follow-up: test-only CI PRs no longer rebuild the docs site.\n\n* ci: svelte-kit sync before type-aware oxlint in split build job\n\napps/docs/tsconfig extends .svelte-kit/tsconfig.json. The monlithic build\njob got that file from check:docs (svelte-kit sync) before oxlint; after\nthe split, build no longer ran check:docs and oxlint failed with Invalid\ntsconfig. Restore a dedicated sync step before lint:type-aware.\n\n* fix(ci): journeys overflow, legend-focus baseline, split-build hash gaps\n\ncomponent-journeys failed on latent #371 drift: homepage link text and\nthemes display-type overflow. VR failed because legend-focus-committed\nbaseline was captured in hover \"previewed\" state while the test waits for\ncommitted \"pinned\" text — replace with container actual.\n\nCodex P2s on #389 (all valid):\n- hash apps/docs in build (knip/type-aware still cover docs)\n- hash docs $scripts imports for svelte_check + docs_site\n- route gen-docs-routes / playground-seeds / metadata / pages-links to\n  docs lane so they schedule the split docs jobs\n\n* fix(ci): route docs-route-inventory through docs jobs\n\nShared inventory is imported by gen-docs-routes, check-docs-metadata,\ngen-legacy-routes, and deployment-artifact. Inventory-only PRs were\nscripts-lane only after the monlith split, so svelte_check/docs_site\nnever ran. Put the module (and its test) on the docs lane and content\nhash. Codex P2 on #389.",
+          "timestamp": "2026-07-21T17:27:40-05:00",
+          "tree_id": "81f32e9baa6f9deaccd4120deeb832a910b07fbd",
+          "url": "https://github.com/ljodea/ggsvelte/commit/7f45a5754d0360114567eabaee6d8d67b735c5c2"
+        },
+        "date": 1784672922121,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.5644,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.9656,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 6.9714,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 10.1018,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 55.9316,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 91.1671,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal-line 100k",
+            "value": 71.103,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide candidate-selection 300y",
+            "value": 0.0812,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide resize-churn 191y",
+            "value": 0.4009,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide DST-heavy 3y",
+            "value": 3.7943,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal free-facets 100",
+            "value": 36.8682,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.2373,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.4123,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 52.8395,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 73.2746,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 12.3075,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 13.0935,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 905.6596,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7598,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 256.8497,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 10.1496,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-identity 100k",
+            "value": 21.8396,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 100k",
+            "value": 19.2662,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-sqrt 100k",
+            "value": 16.0386,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 smooth 100k",
+            "value": 17.9631,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 bin 100k",
+            "value": 14.8312,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 facets-100 100k",
+            "value": 79.0458,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline binned-64 100k",
+            "value": 24.7964,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline coord-identity points 100k",
+            "value": 16.7736,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline coord-log10 points 100k",
+            "value": 19.7353,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline coord-tessellation 10k",
+            "value": 51.4419,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 15.4228,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 584.9162,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 148.5609,
             "unit": "ms"
           }
         ]
