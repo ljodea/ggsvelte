@@ -9,8 +9,17 @@
   // is invoked as `bun node_modules/.bin/oxfmt` (arch-proof invocation, see
   // CONTRIBUTING.md), which knip's script parser does not resolve. The same
   // is true for markdownlint-cli2's explicit node_modules/.bin invocation
-  // and pnpm, which the clean-consumer harness resolves from PATH.
-  "ignoreDependencies": ["publint", "@arethetypeswrong/cli", "oxfmt", "markdownlint-cli2", "pnpm"],
+  // and pnpm, which the clean-consumer harness resolves from PATH. wrangler
+  // is invoked as `bunx wrangler pages deploy` from cloudflare-pages.yml —
+  // no import graph edge for knip to follow.
+  "ignoreDependencies": [
+    "publint",
+    "@arethetypeswrong/cli",
+    "oxfmt",
+    "markdownlint-cli2",
+    "pnpm",
+    "wrangler",
+  ],
   // Root-exported ggplot2 spellings are intentional binding-identical aliases
   // of the camelCase scale helpers, and declaration tests enforce that contract.
   "ignoreIssues": { "packages/spec/src/scale-helpers.ts": ["duplicates"] },
