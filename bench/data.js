@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784664492893,
+  "lastUpdate": 1784668511712,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -40138,6 +40138,200 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 149.0591,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c6af6430809130e7345d6a72bbe8fb4aa4c02ffa",
+          "message": "ci: kill queue backlog (cancel-on-close, main cancel, 4-slot heavy) (#384)\n\n* ci: kill queue backlog — cancel on close/main, 4-slot heavy pool\n\nThroughput was dominated by a 2-slot heavy lane plus zombie runs from\nmerged PRs, not by single-job CPU. This lands the full fix set:\n\n- cancel-on-pr-close.yml: cancel all active runs for a PR head when the\n  PR is closed or merged (concurrency alone never fires on close)\n- CI/Pages/Bench: cancel-in-progress true on every ref, including main\n- Demote interaction-perf, bench-smoke, and packed-consumer Ubuntu off\n  ggsvelte-heavy so Playwright/compile keep the heavy label\n- Document live topology: one cx53 with four 4-vCPU heavy runners\n\nHost-side reconfigure (ops, not this tree): runners 1–4 labeled heavy\nwith 4-CPU affinity; runners 5–6 removed.\n\n* ci: drop ggsvelte-heavy — one pool, one label\n\nAll four runners already carried both ggsvelte and ggsvelte-heavy, so the\nlabel split had zero scheduling effect. Jobs requesting \"light\" or \"heavy\"\nmatched the same machines; the distinction was documentation theater that\nkept confusing the queue.\n\n- Every self-hosted job: runs-on [self-hosted, ggsvelte]\n- Remove ggsvelte-heavy from actionlint allowlist\n- Document that concurrency cap is 4 runner services + cpuset isolation,\n  not GitHub labels\n\nLive runners already relabeled to ggsvelte-only via API.\n\n* ci: fix Codex P1/P2 cancel races and release-wiring for single pool\n\n- cancel-on-pr-close: pull_request_target + filter by head_sha/PR, exclude self\n- pages/bench: job-level concurrency so skip-only runs cannot cancel real work\n- main CI/Pages routing: widen base to last successful run under cancel-in-progress\n- release-wiring: assert single ggsvelte pool (drop ggsvelte-heavy expectations)\n- prettier: trim actionlint trailing blank line\n\nAddresses Codex findings on #384; unblocks unit/checks CI.\n\n* ci: suppress zizmor dangerous-triggers on cancel-on-pr-close\n\nSame pattern as vr-approve: pull_request_target is intentional and safe\nbecause the job never checks out PR code (event metadata + Actions API only).\nRequired for fork PRs to receive actions:write.",
+          "timestamp": "2026-07-21T16:14:18-05:00",
+          "tree_id": "11a7241ac1d434ee880228893cb605ed8d1970b1",
+          "url": "https://github.com/ljodea/ggsvelte/commit/c6af6430809130e7345d6a72bbe8fb4aa4c02ffa"
+        },
+        "date": 1784668510706,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.3988,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.8834,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 7.4618,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 10.7756,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 57.5309,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 92.8082,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal-line 100k",
+            "value": 66.8524,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide candidate-selection 300y",
+            "value": 0.0807,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide resize-churn 191y",
+            "value": 0.3391,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide DST-heavy 3y",
+            "value": 3.744,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal free-facets 100",
+            "value": 30.5344,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.2521,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.3967,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 53.1805,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 76.8602,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 9.7865,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 10.0404,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 1010.2812,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.8111,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 257.9757,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 13.374,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-identity 100k",
+            "value": 15.5083,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 100k",
+            "value": 16.0574,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-sqrt 100k",
+            "value": 15.6495,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 smooth 100k",
+            "value": 17.532,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 bin 100k",
+            "value": 13.2216,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 facets-100 100k",
+            "value": 77.7033,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline binned-64 100k",
+            "value": 25.0024,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline coord-identity points 100k",
+            "value": 16.2244,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline coord-log10 points 100k",
+            "value": 18.4451,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline coord-tessellation 10k",
+            "value": 46.2325,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 12.837,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 626.2333,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 156.4865,
             "unit": "ms"
           }
         ]
