@@ -263,6 +263,7 @@ describe("planJobs", () => {
   test("consumer harness and canonical Quickstart sources schedule the packed-consumer matrix", () => {
     for (const path of [
       "scripts/consumer-compat.ts",
+      "scripts/guide-code-contract.ts",
       "scripts/quickstart.ts",
       "scripts/quickstart-timing.ts",
     ]) {
@@ -270,6 +271,10 @@ describe("planJobs", () => {
       expect(plan.consumer).toBe(true);
       expect(plan.unit).toBe(true);
     }
+  });
+
+  test("guide-code-contract changes invalidate the consumer content-hash surface", () => {
+    expect(JOB_CONTENT_INPUTS.consumer).toContain("scripts/guide-code-contract.ts");
   });
 
   test("manual-AT evidence and community forms schedule unit", () => {
