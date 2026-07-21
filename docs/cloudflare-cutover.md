@@ -111,6 +111,12 @@ Cloudflare Web Analytics is optional and dashboard-created. Put its public 32-ch
 
 The site uses only Cloudflare's standard page-navigation and Core Web Vitals collection. Do not add custom events, chart/spec/search/filter data, query strings, fragments, cookies, fingerprints, or stable user identifiers. Do not describe route traffic as installs or conversions.
 
+## Content Security Policy
+
+CSP is enforced, not report-only. SvelteKit emits a route-specific policy in each prerendered HTML document so its hydration bootstrap can use an exact SHA-256 source. The pre-paint theme bootstrap is the same-origin `/theme.js` file rather than inline executable code. The Pages response header separately enforces `frame-ancestors 'none'`, because browsers ignore that directive in a CSP meta element.
+
+Executable inline scripts, inline event handlers, and broad inline style-element allowances are forbidden. `style-src-attr 'unsafe-inline'` is the sole inline exception: charts and examples emit bounded layout, theme, and palette values as style attributes. Inline style elements remain hash-authorized. `scripts/docs-csp.ts` validates every built HTML file and the final generated 404 before upload.
+
 ## Legacy migration activation
 
 Only after apex and redirect smoke pass:
@@ -134,7 +140,7 @@ If initial apex activation fails before a known-good Pages deployment exists, st
 
 First five minutes: deployment status, root/deep routes, assets, headers, 404, sitemap, schema, `llms`, benchmark redirect, and certificate.
 
-First hour: redirect path/query preservation, CSP report-only signals, cache headers, 404s, and Core Web Vitals.
+First hour: redirect path/query preservation, enforced-CSP violations, cache headers, 404s, and Core Web Vitals.
 
 First 24–48 hours: deployment errors, old-host traffic, sitemap fetches, Search Console/Bing crawl diagnostics, index coverage, and rollback readiness. Sitemap submission is not evidence of indexing or ranking; follow `docs/search-verification.md`.
 

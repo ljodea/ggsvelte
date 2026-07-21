@@ -122,6 +122,9 @@ updates:
       - "/"
       - "/.github/actions/ci-content-hash-restore"
       - "/.github/actions/ci-content-hash-write"
+      - "/.github/actions/ci-setup-bun"
+      - "/.github/actions/ci-bun-install"
+      - "/.github/actions/ci-download-packages-dist"
     schedule:
       interval: "weekly"
       day: "tuesday"

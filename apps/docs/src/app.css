@@ -8,6 +8,10 @@
 /* Code blocks are always dark (see --code-paper); atom-one-dark token colors. */
 @import "svelte-highlight/styles/atom-one-dark.css";
 
+.app-contents {
+  display: contents;
+}
+
 .gg-example-frame {
   --bg: #ffffff;
   --fg: #1f2328;
@@ -36,10 +40,14 @@
 /* VR mode isolates fixed chart baselines from the public documentation shell. */
 html[data-vr] *,
 html[data-vr] *::before,
-html[data-vr] *::after {
+html[data-vr] *::after,
+html[data-visual-test] *,
+html[data-visual-test] *::before,
+html[data-visual-test] *::after {
   transition: none !important;
   animation: none !important;
   caret-color: transparent !important;
+  scroll-behavior: auto !important;
 }
 
 html[data-vr] .site-chrome,

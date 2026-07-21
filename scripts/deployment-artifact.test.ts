@@ -14,7 +14,7 @@ import {
 
 const REQUIRED_HEADERS = `/*
   Cache-Control: public, max-age=0, must-revalidate
-  Content-Security-Policy-Report-Only: default-src 'self'
+  Content-Security-Policy: frame-ancestors 'none'
   Permissions-Policy: camera=(), geolocation=(), microphone=()
   Referrer-Policy: strict-origin-when-cross-origin
   X-Content-Type-Options: nosniff
@@ -30,6 +30,9 @@ const PRODUCTION_REDIRECTS = `/bench https://ljodea.github.io/ggsvelte/bench/ 30
 /ggsvelte https://ggsvelte.sh/ 301
 /ggsvelte/* https://ggsvelte.sh/:splat 301
 `;
+
+const CSP_META = `<meta http-equiv="content-security-policy" content="default-src 'self'; base-uri 'self'; connect-src 'self' https://cloudflareinsights.com; font-src 'self'; form-action 'self'; frame-src 'none'; img-src 'self' data:; manifest-src 'self'; media-src 'self'; object-src 'none'; script-src 'self' https://static.cloudflareinsights.com; script-src-attr 'none'; style-src 'self'; style-src-attr 'unsafe-inline'; upgrade-insecure-requests">`;
+const NOT_FOUND_CSP_META = `<meta http-equiv="content-security-policy" content="default-src 'self'; base-uri 'self'; form-action 'self'; frame-src 'none'; img-src 'self' data:; object-src 'none'; script-src 'none'; script-src-attr 'none'; style-src 'self'; style-src-attr 'none'; upgrade-insecure-requests">`;
 
 const PREVIEW_REDIRECTS = `/bench https://ljodea.github.io/ggsvelte/bench/ 302
 /bench/* https://ljodea.github.io/ggsvelte/bench/:splat 302
@@ -64,10 +67,10 @@ const expectedArtifact = (buildMode: "cloudflare-preview" | "cloudflare-producti
 function makeCompleteArtifact(buildMode: "cloudflare-preview" | "cloudflare-production") {
   const buildDirectory = mkdtempSync(join(tmpdir(), "ggsvelte-cloudflare-artifact-"));
   for (const [path, contents] of [
-    ["index.html", '<link rel="canonical" href="https://ggsvelte.sh/">'],
+    ["index.html", `${CSP_META}<link rel="canonical" href="https://ggsvelte.sh/">`],
     [
       "404.html",
-      '<meta name="robots" content="noindex,follow"><noscript><main><h1>Not found</h1></main></noscript>',
+      `${NOT_FOUND_CSP_META}<meta name="robots" content="noindex,follow"><main><h1>Not found</h1></main>`,
     ],
     [
       "_headers",
