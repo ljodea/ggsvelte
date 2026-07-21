@@ -14,7 +14,9 @@
     "@ggsvelte/core": "workspace:*",
     "@ggsvelte/examples": "workspace:*",
     "@ggsvelte/spec": "workspace:*",
-    "@ggsvelte/svelte": "workspace:*"
+    "@ggsvelte/svelte": "workspace:*",
+    "phosphor-svelte": "^3.1.0",
+    "svelte-highlight": "^7.16.0"
   },
   "devDependencies": {
     "@sveltejs/adapter-static": "^3.0.10",

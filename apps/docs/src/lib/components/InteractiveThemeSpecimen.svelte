@@ -150,7 +150,11 @@
   <p class="fragment-label">
     Svelte component excerpt · provide your own rows and scope
   </p>
-  <CopyCode {code} label="Copy interaction theme code" />
+  <CopyCode
+    {code}
+    language="svelte"
+    accessibleLabel="Copy interaction theme code"
+  />
 </section>
 
 <style>

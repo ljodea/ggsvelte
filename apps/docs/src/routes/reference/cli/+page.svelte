@@ -24,7 +24,8 @@
   <p class="guide-code-classification">Fragment</p>
   <CopyCode
     class="cli-command"
-    label="Copy command"
+    language="bash"
+    accessibleLabel="Copy command"
     code="ggsvelte-render spec.json > chart.svg 2> diagnostics.jsonl"
   />
   <p>Errors, warnings, and advisories are JSON Lines on stderr.</p>

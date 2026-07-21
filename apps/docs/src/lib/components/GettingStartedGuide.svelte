@@ -77,7 +77,8 @@
   <p class="guide-code-classification">Complete command</p>
   <CopyCode
     class="lesson-source"
-    label="Copy create command"
+    language="bash"
+    accessibleLabel="Copy create command"
     code={`npx sv create my-chart --template minimal --types ts --no-add-ons --install npm\ncd my-chart`}
   />
 
@@ -86,7 +87,8 @@
   <p class="guide-code-classification">Complete command</p>
   <CopyCode
     class="lesson-source"
-    label="Copy install"
+    language="bash"
+    accessibleLabel="Copy install"
     code="npm install @ggsvelte/svelte"
   />
 
@@ -163,7 +165,8 @@
       </div>
       <CopyCode
         class="lesson-source lesson-source--file"
-        label="Copy complete file"
+        language="svelte"
+        accessibleLabel="Copy complete file"
         code={QUICKSTART_PAGE_SVELTE}
       />
     </section>
@@ -187,7 +190,7 @@
         <p class="guide-code-classification">Fragment</p>
         <CopyCode
           class="lesson-source"
-          label="Copy fragment"
+          language="svelte"
           accessibleLabel={`Copy ${step.title} fragment`}
           code={step.fragment}
         />
@@ -229,7 +232,8 @@
   <p class="guide-code-classification">Fragment</p>
   <CopyCode
     class="lesson-source"
-    label="Copy builder fragment"
+    language="typescript"
+    accessibleLabel="Copy builder fragment"
     code={QUICKSTART_BUILDER_FRAGMENT}
   />
   <h3 id="portablespec-json">PortableSpec JSON</h3>
@@ -240,7 +244,8 @@
   <p class="guide-code-classification">Fragment</p>
   <CopyCode
     class="lesson-source"
-    label="Copy PortableSpec fragment"
+    language="json"
+    accessibleLabel="Copy PortableSpec fragment"
     code={QUICKSTART_PORTABLE_SPEC_FRAGMENT}
   />
 
@@ -253,13 +258,15 @@
   <p class="guide-code-classification">Fragment</p>
   <CopyCode
     class="lesson-source"
-    label="Copy headless fragment"
+    language="typescript"
+    accessibleLabel="Copy headless fragment"
     code={QUICKSTART_HEADLESS_FRAGMENT}
   />
   <p class="guide-code-classification">Fragment</p>
   <CopyCode
     class="lesson-source"
-    label="Copy CLI fragment"
+    language="bash"
+    accessibleLabel="Copy CLI fragment"
     code={QUICKSTART_CLI_FRAGMENT}
   />
 
@@ -339,25 +346,12 @@
   }
 
   .getting-started-guide :global(.lesson-source.copy-code) {
-    grid-template-columns: minmax(0, 1fr) auto;
     max-height: 28rem;
     overflow: auto;
   }
 
-  .getting-started-guide :global(.lesson-source code) {
-    align-items: start;
+  .getting-started-guide :global(.lesson-source .code-body pre) {
     white-space: pre;
-  }
-
-  .progressive-step :global(.lesson-source.copy-code) {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .progressive-step :global(.lesson-source.copy-code button) {
-    grid-row: 2;
-    grid-column: 1;
-    border-top: 1px solid currentColor;
-    border-left: 0;
   }
 
   .guide-code-classification {

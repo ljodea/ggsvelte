@@ -15,13 +15,15 @@
     entries.find((entry) => entry.id === item.id)!,
   );
   const tabs = [
-    { label: "Svelte", code: QUICKSTART_PAGE_SVELTE },
+    { label: "Svelte", code: QUICKSTART_PAGE_SVELTE, language: "svelte" },
     {
       label: "Builder (TS)",
+      language: "typescript",
       code: `import { aes, gg } from "@ggsvelte/svelte";\n\nconst spec = gg(cars, aes({ x: "weight", y: "economy" }))\n  .geomPoint()\n  .spec();`,
     },
     {
       label: "Spec (JSON)",
+      language: "json",
       code: `{"data":{"values":[{"weight":1.8,"economy":37}]},"layers":[{"geom":"point","aes":{"x":{"field":"weight"},"y":{"field":"economy"}}}]}`,
     },
   ];
@@ -48,7 +50,7 @@
   </div>
 
   <div class="hero-actions">
-    <CopyCode code={install} label="Copy install" />
+    <CopyCode code={install} language="bash" accessibleLabel="Copy install" />
     <div class="cta-row">
       <a class="primary-action" href={`${base}/guide/getting-started`}
         >Getting started</a

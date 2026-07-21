@@ -52,7 +52,10 @@ describe("renderMarkdown", () => {
     expect(html).toContain('<h1 id="t">T</h1>');
     expect(html).toContain('<p>para with <code>code</code> and <a href="/y">x</a></p>');
     expect(html).toContain("<ul><li>a</li><li>b</li></ul>");
-    expect(html).toContain('<pre><code class="language-ts">const a = 1 &lt; 2;</code></pre>');
+    expect(html).toContain('<pre><code class="hljs language-ts">');
+    expect(html).toContain('hljs-keyword">const</span>');
+    expect(html).toContain('hljs-number">1</span>');
+    expect(html).toContain("&lt;");
   });
 
   it("escapes HTML everywhere", () => {
@@ -68,12 +71,16 @@ describe("renderMarkdown", () => {
     expect(html).toContain('href="https://example.com"');
   });
 
-  it("renders allowlisted copy fences with accessible controls and status", () => {
+  it("renders allowlisted copy fences with accessible icon controls and status", () => {
     const html = renderMarkdown('```json fragment copy\n{"x": 1}\n```');
     expect(html).toContain('<button type="button" data-copy-code="guide-code-1"');
+    expect(html).toContain('aria-label="Copy code"');
     expect(html).toContain('aria-describedby="guide-code-1-status"');
-    expect(html).toContain('<pre id="guide-code-1"><code class="language-json">');
-    expect(html).toContain('<span id="guide-code-1-status" role="status">');
+    expect(html).toContain("<svg");
+    expect(html).not.toContain(">Copy code</button>");
+    expect(html).toContain('<pre id="guide-code-1"><code class="hljs language-json">');
+    expect(html).toContain("hljs-");
+    expect(html).toContain('<span id="guide-code-1-status" role="status" class="visually-hidden">');
     expect(html).toContain('<p class="guide-code-classification">Fragment</p>');
   });
 

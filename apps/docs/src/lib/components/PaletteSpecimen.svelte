@@ -67,7 +67,11 @@
   </div>
 
   <p class="fragment-label">Svelte fragment</p>
-  <CopyCode {code} label={`Copy ${label} palette code`} />
+  <CopyCode
+    {code}
+    language="svelte"
+    accessibleLabel={`Copy ${label} palette code`}
+  />
 </article>
 
 <style>

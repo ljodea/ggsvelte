@@ -5,6 +5,8 @@
 @import "./styles/tokens.css";
 @import "./styles/base.css";
 @import "./styles/shell.css";
+/* Code blocks are always dark (see --code-paper); atom-one-dark token colors. */
+@import "svelte-highlight/styles/atom-one-dark.css";
 
 .gg-example-frame {
   --bg: #ffffff;

@@ -95,7 +95,11 @@
       {/if}
 
       <p class="fragment-label">Svelte fragment</p>
-      <CopyCode {code} label="Copy exhaustion example" />
+      <CopyCode
+        {code}
+        language="svelte"
+        accessibleLabel="Copy exhaustion example"
+      />
     </article>
   </div>
 </section>

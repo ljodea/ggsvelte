@@ -47,7 +47,11 @@
     </GGPlot>
   </div>
   <p class="fragment-label">Svelte fragment</p>
-  <CopyCode {code} label={`Copy ${label} theme code`} />
+  <CopyCode
+    {code}
+    language="svelte"
+    accessibleLabel={`Copy ${label} theme code`}
+  />
 </article>
 
 <style>

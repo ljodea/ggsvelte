@@ -175,6 +175,49 @@ pre {
   line-height: 1.55;
 }
 
+/* highlight.js / svelte-highlight: keep our dark code surface, keep theme tokens */
+.prose pre code.hljs,
+.prose pre.hljs,
+.copy-code pre.hljs,
+.guide-code-copy pre code.hljs,
+.scroll-region pre.hljs {
+  background: transparent !important;
+}
+
+/*
+ * atom-one-dark comment/quote greys fail WCAG against --code-paper. Lift them
+ * so axe on example/detail pages (which include CodeTabs) stays clean.
+ */
+.hljs-comment,
+.hljs-quote {
+  color: #a8b0bd !important;
+  font-style: italic;
+}
+
+/* Wide fences scroll locally; never expand the document width. */
+.copy-code,
+.guide-code-copy,
+.code-tabs .scroll-region {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.copy-code .code-body,
+.guide-code-copy pre,
+.code-tabs .scroll-region {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.copy-code pre,
+.guide-code-copy pre,
+.code-tabs pre {
+  max-width: 100%;
+  white-space: pre;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
 .guide-code-classification {
   margin: 1.5rem 0 0.35rem;
   color: var(--muted);
@@ -195,25 +238,39 @@ pre {
 
 .guide-code-copy pre {
   margin: 0;
-  padding-top: 3.25rem;
+  padding: 1rem 3.25rem 1rem 1rem;
 }
 
 .guide-code-copy button {
   position: absolute;
   z-index: 1;
-  top: 0.65rem;
-  right: 0.65rem;
-  min-height: 2.75rem;
-  padding: 0.35rem 0.65rem;
-  border: 1px solid currentColor;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--code-ink) 28%, transparent);
   border-radius: 2px;
-  background: var(--code-paper);
+  background: color-mix(in srgb, var(--code-paper) 88%, transparent);
   color: var(--code-ink);
-  font: 600 0.78rem/1 var(--body-font);
   cursor: pointer;
 }
 
-.guide-code-copy [role="status"] {
+.guide-code-copy button:hover {
+  border-color: color-mix(in srgb, var(--code-ink) 55%, transparent);
+  background: color-mix(in srgb, var(--code-paper) 70%, var(--code-ink) 8%);
+}
+
+.guide-code-copy button svg {
+  display: block;
+  pointer-events: none;
+}
+
+.guide-code-copy [role="status"]:not(.visually-hidden) {
   display: block;
   min-height: 1.4em;
   margin-top: 0.4rem;

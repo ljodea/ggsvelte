@@ -4,11 +4,17 @@
    * spec JSON (what agents emit), fluent-builder TypeScript (spec.ts), and
    * idiomatic Svelte components (Example.svelte) — each with a copy button.
    */
+  import CheckIcon from "phosphor-svelte/lib/CheckIcon";
+  import CopyIcon from "phosphor-svelte/lib/CopyIcon";
+  import Highlight from "svelte-highlight";
+
   import { copyText, MANUAL_COPY_STATUS } from "$lib/clipboard";
+  import { resolveCodeLanguage } from "$lib/code-languages";
 
   interface Tab {
     label: string;
     code: string;
+    language?: string;
   }
 
   const { tabs }: { tabs: Tab[] } = $props();
@@ -19,6 +25,28 @@
   const tabsetId = $props.id();
   const panelId = `${tabsetId}-panel`;
   let copyTimer: ReturnType<typeof setTimeout> | undefined;
+
+  const activeTab = $derived(tabs[active]);
+  const languageModule = $derived(
+    resolveCodeLanguage(
+      activeTab?.language ?? languageFromLabel(activeTab?.label),
+    ),
+  );
+  const copied = $derived(copyStatus === "Copied.");
+
+  function languageFromLabel(label: string | undefined): string {
+    if (label === undefined) return "plaintext";
+    const lower = label.toLowerCase();
+    if (lower.includes("svelte")) return "svelte";
+    if (lower.includes("json") || lower.includes("spec")) return "json";
+    if (
+      lower.includes("ts") ||
+      lower.includes("builder") ||
+      lower.includes("type")
+    )
+      return "typescript";
+    return "plaintext";
+  }
 
   async function copy(): Promise<void> {
     const code = tabs[active]?.code ?? "";
@@ -89,8 +117,17 @@
         </button>
       {/each}
     </div>
-    <button type="button" class="copy" onclick={copy}>
-      {copyStatus === "Copied." ? "Copied" : "Copy"}
+    <button
+      type="button"
+      class="copy"
+      aria-label={copied ? "Copied" : "Copy code"}
+      onclick={copy}
+    >
+      {#if copied}
+        <CheckIcon size={18} weight="bold" aria-hidden="true" />
+      {:else}
+        <CopyIcon size={18} weight="regular" aria-hidden="true" />
+      {/if}
     </button>
     <span class="visually-hidden" role="status">{copyStatus}</span>
   </div>
@@ -105,8 +142,9 @@
       role="region"
       aria-label="Code example"
       tabindex="0"
+      bind:this={codeNode}
     >
-      <pre><code bind:this={codeNode}>{tabs[active]?.code ?? ""}</code></pre>
+      <Highlight code={activeTab?.code ?? ""} language={languageModule} />
     </div>
   </div>
 </div>
@@ -136,7 +174,7 @@
     overflow-x: auto;
   }
 
-  .bar button {
+  .bar button[role="tab"] {
     min-height: 44px;
     flex: 0 0 auto;
     padding: 0.35rem 0.65rem;
@@ -149,14 +187,29 @@
     font: 600 0.82rem/1 var(--body-font);
   }
 
-  .bar button.active {
+  .bar button[role="tab"].active {
     border-bottom-color: var(--accent);
     color: var(--fg);
   }
 
   .bar .copy {
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    min-width: 2.5rem;
+    min-height: 2.5rem;
     margin-left: auto;
+    padding: 0;
+    border: 0;
+    border-radius: 2px;
+    background: none;
     color: var(--accent);
+    cursor: pointer;
+  }
+
+  .bar .copy:hover {
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
   }
 
   .scroll-region {
@@ -166,12 +219,22 @@
     color: var(--code-ink);
   }
 
-  pre {
+  .scroll-region :global(pre.hljs),
+  .scroll-region :global(pre) {
     min-width: max-content;
     margin: 0;
     padding: 1rem;
+    background: transparent !important;
+    color: inherit;
+    font-family: var(--code-font);
     font-size: 0.8rem;
     line-height: 1.5;
+  }
+
+  .scroll-region :global(code.hljs),
+  .scroll-region :global(code) {
+    background: transparent !important;
+    font-family: inherit;
   }
 
   @media (max-width: 35rem) {
