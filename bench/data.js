@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784663393192,
+  "lastUpdate": 1784664297252,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -39556,6 +39556,200 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 151.9582,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "60b791947f0e7800df2fd1d753ffe85e6e5a968a",
+          "message": "docs: icon-only copy controls and syntax highlighting (#382)\n\n* docs: icon-only copy controls and syntax highlighting\n\nReplace the heavy \"Copy …\" text chrome on every docs code block with a\nsingle Phosphor copy/check icon (aria-label only), and highlight fenced\nand component code with highlight.js / svelte-highlight so snippets read\nas code on a package site built for people who write it.\n\n* docs: drop unused docs highlight.js dep for knip\n\nhighlight.js is used only from scripts/ (root). Keep phosphor-svelte as a\nknip ignore for apps/docs because it is deep-imported only from .svelte.\n\n* docs: fix code-block contrast and width containment\n\nLift hljs comment/quote colors for WCAG contrast on --code-paper, and\nconstrain copy/code regions so long fences scroll locally instead of\nwidening the document on narrow viewports.\n\n* docs: visible copy feedback on guide fence controls\n\nSwap the Phosphor icon to a check on success and surface the manual-copy\nstatus when the clipboard API fails, matching CopyCode/CodeTabs behavior.",
+          "timestamp": "2026-07-21T15:03:59-05:00",
+          "tree_id": "b60fe3169665c7e21a1562691eb1d2992fedba6e",
+          "url": "https://github.com/ljodea/ggsvelte/commit/60b791947f0e7800df2fd1d753ffe85e6e5a968a"
+        },
+        "date": 1784664295730,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.1584,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.6022,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 6.8386,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 9.2414,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 50.384,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 86.6501,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal-line 100k",
+            "value": 58.4262,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide candidate-selection 300y",
+            "value": 0.0971,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide resize-churn 191y",
+            "value": 0.3116,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide DST-heavy 3y",
+            "value": 3.5013,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal free-facets 100",
+            "value": 23.192,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.1248,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.381,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 43.5273,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 65.6223,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 9.63,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 9.7623,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 936.1778,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.8047,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 231.3632,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 9.0171,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-identity 100k",
+            "value": 15.274,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 100k",
+            "value": 14.8713,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-sqrt 100k",
+            "value": 13.5886,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 smooth 100k",
+            "value": 14.7805,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 bin 100k",
+            "value": 10.5446,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 facets-100 100k",
+            "value": 67.607,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline binned-64 100k",
+            "value": 22.8823,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline coord-identity points 100k",
+            "value": 14.0027,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline coord-log10 points 100k",
+            "value": 17.1381,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline coord-tessellation 10k",
+            "value": 38.1377,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 15.5785,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 607.7999,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 121.0082,
             "unit": "ms"
           }
         ]
