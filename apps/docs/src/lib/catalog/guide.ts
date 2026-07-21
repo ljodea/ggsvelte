@@ -8,6 +8,15 @@ export const GUIDE_SECTIONS = [
 ] as const;
 export type GuideSection = (typeof GUIDE_SECTIONS)[number];
 
+/** Stable HTML id / ARIA IDREF token for a guide section heading (no spaces). */
+export function guideSectionDomId(section: string): string {
+  return `guide-${section
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")}`;
+}
+
 interface GuideCatalogEntryBase {
   slug: string;
   title: string;

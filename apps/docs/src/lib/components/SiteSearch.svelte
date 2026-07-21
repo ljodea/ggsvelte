@@ -48,6 +48,19 @@
     activeIndex = (next + results.length) % results.length;
   }
 
+  function scrollActiveIntoView(): void {
+    if (activeId === undefined) return;
+    document.getElementById(activeId)?.scrollIntoView({ block: "nearest" });
+  }
+
+  $effect(() => {
+    // Keyboard navigation keeps focus on the combobox; scroll the selected option
+    // into the results scrollport so Enter target stays visible.
+    void activeIndex;
+    void results.length;
+    queueMicrotask(scrollActiveIntoView);
+  });
+
   function followActive(): void {
     const result = results[activeIndex];
     if (result === undefined) return;

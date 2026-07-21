@@ -91,7 +91,11 @@ export const CLI_OPTIONS = [
 
 const cliOptionLines = CLI_OPTIONS.map((option) => {
   const signature = `${option.flag}${option.value === "" ? "" : ` ${option.value}`}`;
-  return `  ${signature.padEnd(17)} ${option.description}`;
+  const detail =
+    "detail" in option && typeof option.detail === "string" && option.detail.length > 0
+      ? ` ${option.detail}`
+      : "";
+  return `  ${signature.padEnd(17)} ${option.description}${detail}`;
 }).join("\n");
 
 const USAGE = `Usage: ggsvelte-render [spec.json] [options]

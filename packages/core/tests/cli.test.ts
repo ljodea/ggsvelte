@@ -149,6 +149,17 @@ describe("runCLI", () => {
     expect(out).toHaveLength(0);
     expect(err.join("\n")).toContain("Usage: ggsvelte-render");
   });
+
+  it("--help includes --data detail for the named-dataset JSON shape", async () => {
+    const { io, err } = makeIO();
+    expect(await runCLI(["--help"], io)).toBe(0);
+    const help = err.join("\n");
+    const dataOption = CLI_OPTIONS.find((option) => option.flag === "--data");
+    expect(dataOption && "detail" in dataOption).toBe(true);
+    if (dataOption && "detail" in dataOption) {
+      expect(help).toContain(dataOption.detail);
+    }
+  });
 });
 
 describe("workspace bin smoke test", () => {
