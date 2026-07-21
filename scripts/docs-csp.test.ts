@@ -113,6 +113,13 @@ describe("docs CSP validation", () => {
 
     writeFileSync(
       join(directory, "index.html"),
+      `<meta http-equiv="content-security-policy" content="${policy.replace("; upgrade-insecure-requests", "")}">`,
+    );
+    expect(validateDocsCsp(directory)).toContain("index.html: missing upgrade-insecure-requests");
+    expect(validateDocsCsp(directory, { requireUpgradeInsecureRequests: false })).toEqual([]);
+
+    writeFileSync(
+      join(directory, "index.html"),
       `<meta http-equiv="content-security-policy" content="${policy.replace("object-src 'none'; ", "")}">`,
     );
     expect(validateDocsCsp(directory)).toContain("index.html: object-src must include 'none'");
