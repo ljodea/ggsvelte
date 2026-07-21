@@ -260,9 +260,10 @@ export type PlanOptions = {
  *
  * Force tiers (do not collapse these):
  * - `forceProduct`: lockfile or ci-routing self-change — full package/browser surface.
- * - CI plumbing (`ci_workflow`, `ci_actions`): actions-security (+ unit via the
- *   workflows lane when YAML changed). Never alone schedule VR / component /
- *   consumer / pages. Content-hash bypass still applies (recipe identity).
+ * - CI plumbing (`ci_workflow`, `ci_actions`): checks + unit + actions-security.
+ *   Never alone schedule VR / component / consumer / pages. Content-hash bypass
+ *   still applies (recipe identity). unit covers release-wiring assertions over
+ *   workflow YAML and composite action.yml (content-hash protocol).
  */
 export function planJobs(changes: ChangeFlags, options: PlanOptions = {}): JobPlan {
   if (options.forceAll === true) {
@@ -307,6 +308,9 @@ export function planJobs(changes: ChangeFlags, options: PlanOptions = {}): JobPl
       changes.docs ||
       changes.examples ||
       changes.workflows ||
+      // release-wiring.test.ts reads composite action.yml and asserts the
+      // content-hash protocol; schedule unit when those recipes change.
+      changes.ci_actions ||
       forceProduct,
     component: browserSurface,
     consumer: packageSurface || changes.consumer_tools || forceProduct,

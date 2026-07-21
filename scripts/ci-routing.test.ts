@@ -213,8 +213,9 @@ describe("planJobs", () => {
     );
     expect(plan.checks).toBe(true);
     expect(plan.actions_security).toBe(true);
+    // release-wiring.test.ts asserts composite content-hash protocol wiring.
+    expect(plan.unit).toBe(true);
     // Not a product surface change — content-hash still bypasses on these paths.
-    expect(plan.unit).toBe(false);
     expect(plan.component).toBe(false);
     expect(plan.consumer).toBe(false);
     expect(plan.build).toBe(false);
