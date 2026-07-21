@@ -311,7 +311,7 @@ describe("pipeline post-stat coord_transform", () => {
       [0, 1].map(
         (subpath) =>
           [...(batch.semanticAnchors ?? [])]
-            .slice(batch.pathOffsets[subpath]!, batch.pathOffsets[subpath + 1]!)
+            .slice(batch.pathOffsets[subpath], batch.pathOffsets[subpath + 1])
             .filter((anchor) => anchor === 1).length,
       ),
     ).toEqual([2, 2]);

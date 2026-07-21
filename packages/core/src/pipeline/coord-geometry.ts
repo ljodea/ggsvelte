@@ -129,6 +129,12 @@ function tessellateSegment(
   budget.remaining--;
 }
 
+function indexRange(start: number, end: number): number[] {
+  const values = Array.from({ length: Math.max(0, end - start) }, () => 0);
+  for (let index = 0; index < values.length; index++) values[index] = start + index;
+  return values;
+}
+
 function expandedStepVertices(
   positions: ArrayLike<number>,
   rows: Uint32Array,
@@ -209,7 +215,7 @@ function projectPathBatch(
               positions: Array.from(unprojected.slice(runStart * 2, runEnd * 2)),
               rows: Array.from(batch.rowIndex.slice(runStart, runEnd)),
               anchors: Array.from({ length: runEnd - runStart }, () => 1),
-              indices: Array.from({ length: runEnd - runStart }, (_, index) => runStart + index),
+              indices: indexRange(runStart, runEnd),
             };
       const count = source.rows.length;
       const mandatoryStepCorners = Math.max(0, count - (runEnd - runStart));
