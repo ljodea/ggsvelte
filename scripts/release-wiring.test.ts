@@ -4,7 +4,16 @@ import { join } from "node:path";
 
 const root = join(import.meta.dir, "..");
 const read = (path: string) => readFileSync(join(root, path), "utf8");
-const heavyLaneCount = (workflow: string) =>
+const selfHostedGgsvelteCount = (workflow: string) =>
+  workflow
+    .split("\n")
+    .filter(
+      (line) =>
+        line.trimStart().startsWith("runs-on:") &&
+        line.includes("ggsvelte") &&
+        !line.includes("ggsvelte-heavy"),
+    ).length;
+const heavyRunsOnCount = (workflow: string) =>
   workflow
     .split("\n")
     .filter((line) => line.trimStart().startsWith("runs-on:") && line.includes("ggsvelte-heavy"))
@@ -367,34 +376,41 @@ it("tiers the PR consumer matrix (issue #246)", () => {
   expect(ci).not.toMatch(/full required[\s\S]{0,40}push\/main/i);
 });
 
-it("routes CPU-heavy work through the runner heavy lane (issues #247, #319, #321)", () => {
+it("uses one self-hosted ggsvelte pool (no heavy/light label split)", () => {
   const ci = read(".github/workflows/ci.yml");
   const vr = read(".github/workflows/vr-compare.yml");
   const pages = read(".github/workflows/pages.yml");
   const bench = read(".github/workflows/bench.yml");
   const nightly = read(".github/workflows/compatibility-nightly.yml");
+  const cancel = read(".github/workflows/cancel-on-pr-close.yml");
 
-  // The pool runs cpuset-pinned lanes: two runner services carry the
-  // ggsvelte-heavy label (4 dedicated vCPUs each), so at most two heavy jobs
-  // run concurrently while light jobs flow freely. Category-specific labels
-  // would let browser, build, and benchmark jobs starve each other again.
-  expect(heavyLaneCount(ci)).toBe(8);
-  expect(heavyLaneCount(vr)).toBe(2);
-  expect(heavyLaneCount(pages)).toBe(1);
-  expect(heavyLaneCount(bench)).toBe(1);
-  expect(heavyLaneCount(nightly)).toBe(1);
-  // The post-#319 repo-wide concurrency mutex must not come back: labels, not
-  // groups, gate host capacity now (#321).
+  // Single-label pool: every self-hosted Linux job uses `ggsvelte` only.
+  // Dual-label scheduling was theater; the old 2-slot heavy-only pool was the
+  // real bottleneck (issues #247, #319, #321). Comments may mention the retired
+  // label when explaining history — assert on runs-on lines only.
   for (const workflow of [ci, vr, pages, bench, nightly]) {
+    expect(heavyRunsOnCount(workflow)).toBe(0);
     expect(workflow).not.toContain("heavy-self-hosted-cpu");
   }
+  expect(selfHostedGgsvelteCount(ci)).toBeGreaterThanOrEqual(10);
+  expect(selfHostedGgsvelteCount(vr)).toBe(3);
+  expect(selfHostedGgsvelteCount(pages)).toBe(2);
+  expect(selfHostedGgsvelteCount(bench)).toBe(1);
+  expect(selfHostedGgsvelteCount(nightly)).toBeGreaterThanOrEqual(1);
   expect(ci).not.toContain("heavy-component");
   expect(ci).not.toContain("heavy-packages-dist");
   expect(ci).not.toContain("heavy-consumer-ubuntu");
-  // Informational performance work is still CPU-heavy: it opts into the heavy
-  // lane with the required browser and memory gates it runs beside.
   expect(ci).not.toContain("group: heavy-interaction-perf");
-  expect(ci).toContain("Heavy-job pool policy");
+  // Documented live topology + cancel-on-close (not label fiction).
+  expect(ci).toContain("four cpuset-isolated runners");
+  expect(ci).toContain("cancel-in-progress: true");
+  expect(cancel).toContain("pull_request_target");
+  expect(cancel).toContain("head_sha");
+  // Pages/Bench: job-level concurrency so skip-only runs cannot cancel real work.
+  expect(pages).toContain("group: pages-build-");
+  expect(pages).not.toMatch(/^concurrency:\s*$/m);
+  expect(bench).toContain("group: bench-label-");
+  expect(bench).toContain("group: bench-trend-");
 });
 
 it("binds approved baselines to a post-merge default-branch commit", () => {

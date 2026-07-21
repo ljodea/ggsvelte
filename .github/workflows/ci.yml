@@ -40,25 +40,25 @@ permissions: {}
 
 concurrency:
   group: ci-${{ github.ref }}
-  # Cancel superseded runs on PRs/branches; never cancel main.
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+  # Cancel superseded runs on every ref — including main. Rapid merges used to
+  # stack full suites behind a 2-slot heavy lane; only the latest commit per
+  # ref is worth finishing. PR close/merge is handled by cancel-on-pr-close.yml
+  # (concurrency alone does not cancel when no replacement run starts).
+  cancel-in-progress: true
 
-# Heavy-job pool policy (issues #247, #319, #321):
-# The self-hosted pool runs cpuset-isolated lanes. Two runner services carry
-# the `ggsvelte-heavy` label, each pinned to 4 dedicated host vCPUs; light
-# runners are pinned to 2 vCPUs each. CPU-heavy jobs opt into the heavy lane
-# via `runs-on: [self-hosted, ggsvelte, ggsvelte-heavy]`, so at most two run
-# concurrently and browser/Vitest worker auto-detection sees the allocated
-# CPU count (a docker shim applies the same cpuset to job containers).
-# - Light jobs (detect-changes, checks, unit, actions-security,
-#   vr-baseline-guard, compatibility-matrix, ci-gate) keep `ggsvelte` only and
-#   run freely; they may spill onto idle heavy runners without harm.
-# - Informational interaction-perf uses the heavy lane despite being excluded
-#   from ci-gate; it is CPU-heavy even though it is not required.
-# - Runner services share HOME; every Bun install uses a job-private
-#   runner.temp cache so concurrent restores cannot race.
-# - Job-started/completed hooks on the runners log host telemetry (load, PSI,
-#   memory, disk) so infra contention can be told apart from regressions.
+# Self-hosted pool (issues #247, #319, #321, throughput fix 2026-07):
+# One cx53 host, four cpuset-isolated runners (4 vCPUs each), all labeled
+# only `ggsvelte`. There is NO separate heavy/light GitHub label: that
+# split was a lie once every runner carried both labels (same match set,
+# zero scheduling effect) and a bottleneck when only two runners had
+# `ggsvelte-heavy` while four "light" runners sat idle.
+# - Every Linux job uses `runs-on: [self-hosted, ggsvelte]`. Concurrency
+#   cap = 4 jobs host-wide (one per runner service). CPU isolation is
+#   systemd CPUAffinity + docker cpuset shim, not GitHub labels.
+# - Path routing + cancel-on-close + cancel-in-progress control *which*
+#   work runs; labels do not invent free capacity.
+# - Runner services share HOME; Bun installs use job-private runner.temp.
+# - Job hooks log host telemetry (load, PSI, memory, disk).
 
 env:
   # Keep in sync with: spikes/browser devDependency "playwright" and the
@@ -70,6 +70,7 @@ jobs:
     name: detect-changes (path routing)
     runs-on: [self-hosted, ggsvelte]
     permissions:
+      actions: read
       contents: read
       # pull-requests:read not required — we use event SHAs, not the API.
     outputs:
@@ -105,6 +106,8 @@ jobs:
           HEAD_SHA: ${{ github.sha }}
           # Issue #246: run-compat must force consumer after path routing.
           PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
         shell: bash
         run: |
           set -euo pipefail
@@ -113,6 +116,24 @@ jobs:
             echo "no usable base SHA — force-all"
             bun scripts/ci-routing.ts emit-github-output --force-all
           else
+            # Main + cancel-in-progress: a later markdown/workflow-only push must
+            # still route product work from earlier unvalidated main commits.
+            # Widen the base to the last successful CI head on main so the
+            # replacement run covers the cumulative unvalidated range.
+            if [ "${EVENT_NAME}" = "push" ] && [ "${GITHUB_REF}" = "refs/heads/main" ] && command -v gh >/dev/null 2>&1; then
+              last_ok="$(
+                gh api "repos/${REPO}/actions/workflows/ci.yml/runs?branch=main&status=completed&per_page=20" \
+                  --jq --arg head "${HEAD_SHA}" '
+                    [.workflow_runs[]
+                      | select(.conclusion == "success" and .head_sha != $head)
+                      | .head_sha][0] // empty
+                  ' 2>/dev/null || true
+              )"
+              if [ -n "${last_ok}" ]; then
+                echo "widening main route base ${BASE_SHA} → last successful CI ${last_ok}"
+                BASE_SHA="${last_ok}"
+              fi
+            fi
             # Ensure the base object exists for the three-dot diff.
             git fetch --no-tags --depth=1 origin "${BASE_SHA}" 2>/dev/null || true
             if ! git cat-file -e "${BASE_SHA}^{commit}" 2>/dev/null; then
@@ -165,7 +186,7 @@ jobs:
     name: packages-dist (build + upload packages/*/dist)
     needs: detect-changes
     if: needs.detect-changes.outputs.packages_dist == 'true'
-    runs-on: [self-hosted, ggsvelte, ggsvelte-heavy]
+    runs-on: [self-hosted, ggsvelte]
     permissions:
       contents: read
     steps:
@@ -426,8 +447,8 @@ jobs:
       fail-fast: false
       max-parallel: 4
       matrix: ${{ fromJSON(needs.compatibility-matrix.outputs.matrix) }}
-    # Linux rows use the private self-hosted heavy lane; Windows/macOS stay on GitHub-hosted.
-    runs-on: ${{ startsWith(matrix.os, 'ubuntu') && fromJSON('["self-hosted","ggsvelte","ggsvelte-heavy"]') || matrix.os }}
+    # Linux rows use the private self-hosted ggsvelte pool; Windows/macOS stay on GitHub-hosted.
+    runs-on: ${{ startsWith(matrix.os, 'ubuntu') && fromJSON('["self-hosted","ggsvelte"]') || matrix.os }}
     timeout-minutes: 20
     permissions:
       contents: read
@@ -535,7 +556,7 @@ jobs:
     if: >-
       needs.detect-changes.outputs.component == 'true' &&
       needs.packages-dist.result == 'success'
-    runs-on: [self-hosted, ggsvelte, ggsvelte-heavy]
+    runs-on: [self-hosted, ggsvelte]
     env:
       # GitHub runs the container as root, while /github/home belongs to
       # pwuser. Firefox refuses that ownership mismatch.
@@ -684,7 +705,7 @@ jobs:
     if: >-
       needs.detect-changes.outputs.component == 'true' &&
       needs.packages-dist.result == 'success'
-    runs-on: [self-hosted, ggsvelte, ggsvelte-heavy]
+    runs-on: [self-hosted, ggsvelte]
     env:
       # GitHub runs the container as root, while /github/home belongs to
       # pwuser. Firefox refuses that ownership mismatch.
@@ -784,7 +805,7 @@ jobs:
     if: >-
       needs.detect-changes.outputs.docs_journeys == 'true' &&
       needs.packages-dist.result == 'success'
-    runs-on: [self-hosted, ggsvelte, ggsvelte-heavy]
+    runs-on: [self-hosted, ggsvelte]
     env:
       # GitHub runs the container as root, while /github/home belongs to
       # pwuser. Firefox refuses that ownership mismatch.
@@ -889,16 +910,14 @@ jobs:
           retention-days: 7
 
   # Informational only — not a required status check (excluded from ci-gate).
-  # It still shares the aggregate heavy lane: running this browser workload
-  # beside required jobs would reintroduce host starvation. Hard gate remains
-  # on `run-bench` PRs via bench.yml.
+  # Hard gate remains on `run-bench` PRs via bench.yml.
   interaction-perf:
     name: interaction-perf (p50/p95, informational)
     needs: [detect-changes, packages-dist]
     if: >-
       needs.detect-changes.outputs.interaction_perf == 'true' &&
       needs.packages-dist.result == 'success'
-    runs-on: [self-hosted, ggsvelte, ggsvelte-heavy]
+    runs-on: [self-hosted, ggsvelte]
     env:
       HOME: /root
     container:
@@ -974,7 +993,7 @@ jobs:
     name: build (tsc -b, packaging lint, static analysis)
     needs: detect-changes
     if: needs.detect-changes.outputs.build == 'true'
-    runs-on: [self-hosted, ggsvelte, ggsvelte-heavy]
+    runs-on: [self-hosted, ggsvelte]
     permissions:
       contents: read
     steps:
@@ -1085,7 +1104,7 @@ jobs:
     name: bench-smoke (mitata, 1k workload)
     needs: detect-changes
     if: needs.detect-changes.outputs.bench_smoke == 'true'
-    runs-on: [self-hosted, ggsvelte, ggsvelte-heavy]
+    runs-on: [self-hosted, ggsvelte]
     permissions:
       contents: read
     steps:

@@ -18,10 +18,15 @@ on:
 
 permissions: {}
 
+# Concurrency is per job, not workflow-level. pull_request:labeled fires for
+# every label; a non-run-bench label must not cancel an in-flight budget gate.
 jobs:
   bench-trend:
     name: bench-trend (record datapoint on gh-pages)
     if: github.event_name == 'push'
+    concurrency:
+      group: bench-trend-${{ github.ref }}
+      cancel-in-progress: true
     # GitHub-hosted: needs contents:write to push gh-pages datapoints.
     runs-on: ubuntu-latest
     permissions:
@@ -62,7 +67,12 @@ jobs:
   bench-label:
     name: bench-label (budget gate on 'run-bench' PRs)
     if: github.event_name == 'pull_request' && github.event.label.name == 'run-bench'
-    runs-on: [self-hosted, ggsvelte, ggsvelte-heavy]
+    # Only the run-bench job joins this group; other labels skip the job and
+    # therefore cannot supersede an active budget-gate run.
+    concurrency:
+      group: bench-label-${{ github.ref }}
+      cancel-in-progress: true
+    runs-on: [self-hosted, ggsvelte]
     container:
       image: mcr.microsoft.com/playwright:v1.61.1-noble
     defaults:
