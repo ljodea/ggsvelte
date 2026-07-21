@@ -134,6 +134,10 @@ export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
     // after the monlith split (Codex P2: pure scripts/** no longer runs vite docs).
     "scripts/gen-docs-routes.ts",
     "scripts/gen-docs-routes.test.ts",
+    // Shared inventory imported by gen-docs-routes / check-docs-metadata / gen-legacy-routes
+    // / deployment-artifact (Codex P2: inventory-only PRs were scripts-lane only).
+    "scripts/docs-route-inventory.ts",
+    "scripts/docs-route-inventory.test.ts",
     "scripts/gen-playground-seeds.ts",
     "scripts/gen-playground-seeds.test.ts",
     "scripts/check-docs-metadata.ts",

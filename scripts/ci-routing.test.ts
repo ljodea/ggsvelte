@@ -467,6 +467,7 @@ describe("planJobs", () => {
     // Helpers invoked by apps/docs package.json must sit on the docs lane.
     for (const path of [
       "scripts/gen-docs-routes.ts",
+      "scripts/docs-route-inventory.ts",
       "scripts/gen-playground-seeds.ts",
       "scripts/check-docs-metadata.ts",
       "scripts/check-pages-links.ts",
@@ -494,6 +495,7 @@ describe("JOB_CONTENT_INPUTS (split build hashes)", () => {
       const inputs = JOB_CONTENT_INPUTS[execution];
       expect(inputs, execution).toContain("apps/docs/**");
       expect(inputs, execution).toContain("scripts/gen-docs-routes.ts");
+      expect(inputs, execution).toContain("scripts/docs-route-inventory.ts");
       expect(inputs, execution).toContain("scripts/gen-playground-seeds.ts");
       expect(inputs, execution).toContain("scripts/check-docs-metadata.ts");
       expect(inputs, execution).toContain("scripts/check-pages-links.ts");
