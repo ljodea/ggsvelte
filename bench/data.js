@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784668511712,
+  "lastUpdate": 1784669819005,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -40332,6 +40332,200 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 156.4865,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "1c7080b5d663004a4cc2ec686e56b8ce151e02fa",
+          "message": "ci: hash highlight-code in component_journeys cache (#388)\n\nllms-markdown imports highlight-code for fenced HTML. Without hashing it,\na highlight-only change can content-cache-hit component_journeys and skip\ndocs build/tests even though rendered guide HTML changed (Codex P2 on #382).",
+          "timestamp": "2026-07-21T16:36:05-05:00",
+          "tree_id": "61f4c2b511b79200a3ef4d5451152371a95d942f",
+          "url": "https://github.com/ljodea/ggsvelte/commit/1c7080b5d663004a4cc2ec686e56b8ce151e02fa"
+        },
+        "date": 1784669817999,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.6064,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.8436,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 7.5855,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 9.9286,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 57.0006,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 90.1358,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal-line 100k",
+            "value": 67.1221,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide candidate-selection 300y",
+            "value": 0.0934,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide resize-churn 191y",
+            "value": 0.3524,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide DST-heavy 3y",
+            "value": 3.8397,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal free-facets 100",
+            "value": 28.5717,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.2392,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.3601,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 53.3668,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 74.0611,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 11.4862,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 10.0473,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 949.9472,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.8247,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 264.4257,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 11.2605,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-identity 100k",
+            "value": 24.9502,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 100k",
+            "value": 16.9834,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-sqrt 100k",
+            "value": 16.1717,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 smooth 100k",
+            "value": 18.166,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 bin 100k",
+            "value": 13.2453,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 facets-100 100k",
+            "value": 79.3442,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline binned-64 100k",
+            "value": 27.1804,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline coord-identity points 100k",
+            "value": 16.9529,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline coord-log10 points 100k",
+            "value": 19.3693,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline coord-tessellation 10k",
+            "value": 46.3138,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 17.8687,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 610.1498,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 156.5802,
             "unit": "ms"
           }
         ]
