@@ -68,8 +68,8 @@
 <article class="guide getting-started-guide">
   <h1>Getting started</h1>
   <p class="lede">
-    Build a responsive, accessible chart in one Svelte file. See the result
-    first, then add one grammar decision at a time.
+    Install, render one chart from a Svelte file, then add aes, layers, scales,
+    facets, theme, and inspect one step at a time.
   </p>
 
   <h2 id="create-a-sveltekit-app">Create a SvelteKit app</h2>
