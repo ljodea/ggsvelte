@@ -5,6 +5,10 @@ import axe from "axe-core";
 
 import type { PortableSpec } from "@ggsvelte/spec";
 
+import {
+  PLAYGROUND_CANDIDATE_EVENT,
+  type PlaygroundCandidatePhaseDetail,
+} from "../../apps/docs/src/lib/playground-candidate-lifecycle";
 import { encodePlaygroundSeed } from "../../apps/docs/src/lib/playground-codec";
 import { settleVisualState } from "./helpers/deterministic";
 
@@ -15,58 +19,50 @@ async function readSpec(page: Page): Promise<Record<string, unknown>> {
   >;
 }
 
-interface CandidateObservation {
-  status: string | null;
-  focusables: number;
-  semanticDescendants: number;
-  inert: boolean;
-  inertAttribute: boolean;
-  hidden: string | null;
-  activeRetained: boolean;
-}
+type CandidatePhaseLog = PlaygroundCandidatePhaseDetail[];
 
-async function observeCandidateTransitions(page: Page): Promise<void> {
-  await page.addInitScript(() => {
+async function installCandidatePhaseLog(page: Page): Promise<void> {
+  await page.addInitScript((eventName) => {
     const observedWindow = window as typeof window & {
-      playgroundCandidateObservations?: CandidateObservation[];
+      playgroundCandidatePhases?: CandidatePhaseLog;
     };
-    const observations: CandidateObservation[] = [];
-    observedWindow.playgroundCandidateObservations = observations;
-    const capture = () => {
-      const node = document.querySelector<HTMLElement>(".candidate-chart");
-      if (node === null) return;
-      observations.push({
-        status: document.querySelector(".preview-surface .status")?.textContent ?? null,
-        focusables: node.querySelectorAll("button, a, input, select, textarea, [tabindex]").length,
-        semanticDescendants: node.querySelectorAll('[role="img"], [role="status"], [aria-live]')
-          .length,
-        inert: node.inert,
-        inertAttribute: node.hasAttribute("inert"),
-        hidden: node.getAttribute("aria-hidden"),
-        activeRetained:
-          document.querySelector('.active-chart > [data-retained-during-candidate="true"]') !==
-          null,
-      });
-    };
-    new MutationObserver(capture).observe(document, {
-      attributes: true,
-      characterData: true,
-      childList: true,
-      subtree: true,
+    const phases: CandidatePhaseLog = [];
+    observedWindow.playgroundCandidatePhases = phases;
+    window.addEventListener(eventName, (event) => {
+      phases.push((event as CustomEvent<PlaygroundCandidatePhaseDetail>).detail);
     });
-    capture();
-  });
+  }, PLAYGROUND_CANDIDATE_EVENT);
 }
 
-function candidateObservations(page: Page): Promise<CandidateObservation[]> {
+function candidatePhaseLog(page: Page): Promise<CandidatePhaseLog> {
   return page.evaluate(
     () =>
       (
         window as typeof window & {
-          playgroundCandidateObservations?: CandidateObservation[];
+          playgroundCandidatePhases?: CandidatePhaseLog;
         }
-      ).playgroundCandidateObservations ?? [],
+      ).playgroundCandidatePhases ?? [],
   );
+}
+
+function phasesForGeneration(log: CandidatePhaseLog, generation: number): CandidatePhaseLog {
+  return log.filter((entry) => entry.generation === generation);
+}
+
+async function waitForGenerationTerminal(
+  page: Page,
+  generation: number,
+): Promise<CandidatePhaseLog> {
+  await expect
+    .poll(async () => {
+      const log = await candidatePhaseLog(page);
+      return phasesForGeneration(log, generation).some(
+        (entry) =>
+          entry.phase === "promoted" || entry.phase === "failed" || entry.phase === "cancelled",
+      );
+    })
+    .toBe(true);
+  return phasesForGeneration(await candidatePhaseLog(page), generation);
 }
 
 const PIPELINE_FAILURE_SPEC = {
@@ -154,60 +150,82 @@ test("compatible gallery details open the exact fragment while oversized example
 });
 
 test("initial candidate keeps the pending status until promotion", async ({ page }) => {
-  await observeCandidateTransitions(page);
+  await installCandidatePhaseLog(page);
   await page.goto(`/playground${VALID_INITIAL_FRAGMENT}`);
+
   await expect
-    .poll(async () =>
-      (await candidateObservations(page)).some(
-        (observation) =>
-          observation.status === "Checking the next chart before replacing the last valid result.",
-      ),
-    )
-    .toBe(true);
+    .poll(async () => {
+      const log = await candidatePhaseLog(page);
+      return log.find((entry) => entry.phase === "pending" && entry.origin === "initial-navigation")
+        ?.generation;
+    })
+    .toEqual(expect.any(Number));
+
+  const generation = (await candidatePhaseLog(page)).find(
+    (entry) => entry.phase === "pending" && entry.origin === "initial-navigation",
+  )!.generation;
+  const phases = await waitForGenerationTerminal(page, generation);
+  expect(phases.map((entry) => entry.phase)).toEqual(["pending", "ready", "promoted"]);
+  expect(phases[0]).toMatchObject({
+    origin: "initial-navigation",
+    status: "Checking the next chart before replacing the last valid result.",
+  });
+  expect(phases[1]?.isolation).toMatchObject({
+    inert: true,
+    inertAttribute: true,
+    ariaHidden: "true",
+  });
   await expect(page.locator(".active-chart .gg-title")).toHaveText("Initial candidate");
 });
 
 test("valid edits render before Svelte copy becomes available and candidates stay inert", async ({
   page,
 }) => {
-  await observeCandidateTransitions(page);
+  await installCandidatePhaseLog(page);
   await page.goto("/playground");
   await settleVisualState(page);
   await expect(page.getByRole("button", { name: "Copy Svelte" })).toBeEnabled();
-  const activeChartNode = page.locator(".active-chart > *").first();
-  await activeChartNode.evaluate((node) => {
+  // Capture the active-chart element identity before apply. Promotion must not
+  // replace this node while the candidate is pending (Svelte may rewrite attrs).
+  await page.locator(".active-chart").evaluate((node) => {
+    (
+      window as typeof window & { playgroundRetainedActive?: Element | null }
+    ).playgroundRetainedActive = node;
     (node as HTMLElement).dataset["retainedDuringCandidate"] = "true";
   });
 
+  const before = await candidatePhaseLog(page);
   const spec = await readSpec(page);
   spec["labs"] = { ...(spec["labs"] as Record<string, unknown>), title: "Edited locally" };
   await page.getByLabel("PortableSpec JSON").fill(JSON.stringify(spec, null, 2));
   await expect(page.getByRole("button", { name: "Copy Svelte" })).toBeDisabled();
   await page.getByRole("button", { name: "Apply draft" }).click();
 
-  const isIsolatedCandidate = (observation: CandidateObservation) =>
-    observation.activeRetained &&
-    observation.inert &&
-    observation.inertAttribute &&
-    observation.hidden === "true" &&
-    observation.focusables === 0 &&
-    observation.semanticDescendants === 1;
   await expect
-    .poll(async () =>
-      (await candidateObservations(page)).some((observation) => isIsolatedCandidate(observation)),
-    )
-    .toBe(true);
-  const candidateState = (await candidateObservations(page)).find((observation) =>
-    isIsolatedCandidate(observation),
-  );
-  expect(candidateState).toMatchObject({
-    focusables: 0,
-    semanticDescendants: 1,
+    .poll(async () => {
+      const log = await candidatePhaseLog(page);
+      return log.find(
+        (entry, index) =>
+          index >= before.length && entry.phase === "pending" && entry.origin === "apply",
+      )?.generation;
+    })
+    .toEqual(expect.any(Number));
+
+  const generation = (await candidatePhaseLog(page)).find(
+    (entry, index) =>
+      index >= before.length && entry.phase === "pending" && entry.origin === "apply",
+  )!.generation;
+  const phases = await waitForGenerationTerminal(page, generation);
+  expect(phases.map((entry) => entry.phase)).toEqual(["pending", "ready", "promoted"]);
+  expect(phases[1]?.isolation).toMatchObject({
     inert: true,
     inertAttribute: true,
-    hidden: "true",
-    activeRetained: true,
+    ariaHidden: "true",
+    // Last-valid active chart content retained while candidate paints.
+    activeTitle: "Penguin flippers and body mass",
   });
+  // Identity probe: the pre-apply .active-chart node must still be mounted at ready.
+  expect(phases[1]?.isolation?.activeRetained).toBe(true);
 
   await expect(page.getByText("Rendered custom draft.")).toBeVisible();
   await expect(page.locator(".active-chart .gg-title")).toHaveText("Edited locally");

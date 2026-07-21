@@ -3,6 +3,10 @@
   import { GGPlot } from "@ggsvelte/svelte";
 
   import type { PlaygroundInteractionEvent } from "$lib/playground-events";
+  import {
+    snapshotCandidateIsolation,
+    type PlaygroundCandidateIsolation,
+  } from "$lib/playground-candidate-lifecycle";
   import type {
     PlaygroundCandidate,
     PlaygroundDiagnostic,
@@ -14,7 +18,7 @@
     candidate,
     lastValid,
     status,
-    onCandidateRendered,
+    onCandidateReady,
     onCandidateFailed,
     onActiveRendered,
     onActiveFailed,
@@ -24,7 +28,10 @@
     candidate: PlaygroundCandidate | null;
     lastValid: boolean;
     status: string;
-    onCandidateRendered: (generation: number) => void;
+    onCandidateReady: (
+      generation: number,
+      isolation: PlaygroundCandidateIsolation,
+    ) => void;
     onCandidateFailed: (
       generation: number,
       diagnostic: PlaygroundDiagnostic,
@@ -33,6 +40,35 @@
     onActiveFailed: (diagnostic: PlaygroundDiagnostic) => void;
     onInteraction: (event: PlaygroundInteractionEvent) => void;
   } = $props();
+
+  let activeChartEl = $state<HTMLDivElement | undefined>();
+  let candidateChartEl = $state<HTMLDivElement | undefined>();
+
+  function candidatePainted(generation: number): void {
+    const candidateRoot =
+      candidateChartEl ??
+      (document.querySelector(".candidate-chart") as HTMLElement | null);
+    if (candidateRoot === null) {
+      onCandidateReady(generation, {
+        inert: true,
+        inertAttribute: true,
+        ariaHidden: "true",
+        activeRetained: false,
+        activeTitle: null,
+      });
+      return;
+    }
+    const probe =
+      (
+        window as typeof window & {
+          playgroundRetainedActive?: Element | null;
+        }
+      ).playgroundRetainedActive ?? null;
+    onCandidateReady(
+      generation,
+      snapshotCandidateIsolation(candidateRoot, activeChartEl ?? null, probe),
+    );
+  }
 
   function diagnostic(error: unknown): PlaygroundDiagnostic {
     if (error instanceof PipelineError) {
@@ -68,7 +104,7 @@
 <p class="status" role="status" aria-live="polite">{status}</p>
 
 <div class="chart-stack" aria-busy={candidate !== null}>
-  <div class="active-chart">
+  <div class="active-chart" bind:this={activeChartEl}>
     {#key rendered}
       <svelte:boundary onerror={(error) => onActiveFailed(diagnostic(error))}>
         <GGPlot
@@ -90,7 +126,12 @@
 
   {#if candidate !== null}
     {#key candidate.generation}
-      <div class="candidate-chart" aria-hidden="true" inert>
+      <div
+        class="candidate-chart"
+        aria-hidden="true"
+        inert
+        bind:this={candidateChartEl}
+      >
         <svelte:boundary
           onerror={(error) =>
             onCandidateFailed(candidate.generation, diagnostic(error))}
@@ -98,7 +139,7 @@
           <GGPlot
             spec={candidate.next.rendered}
             width="container"
-            onrender={() => onCandidateRendered(candidate.generation)}
+            onrender={() => candidatePainted(candidate.generation)}
           />
           {#snippet failed()}{/snippet}
         </svelte:boundary>
