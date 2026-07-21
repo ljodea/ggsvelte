@@ -305,8 +305,14 @@ for (const [name, width, height] of [
   test(`progressive lesson ${name} visual contract`, async ({ page }) => {
     await page.setViewportSize({ width, height });
     await page.goto("/guide/getting-started?theme=light");
-    await page.locator(".site-header").evaluate((element) => {
-      element.style.visibility = "hidden";
+    // Lesson contracts cover the progressive step only. Hide fixed chrome that can
+    // overlay the element after scroll-into-view (site header + skip links, which
+    // become visible when focused and sit at position:fixed top-left).
+    await page.evaluate(() => {
+      (document.activeElement as HTMLElement | null)?.blur?.();
+      for (const el of document.querySelectorAll<HTMLElement>(".site-header, .skip-link")) {
+        el.style.visibility = "hidden";
+      }
     });
     const step = page.locator(".progressive-step").nth(3);
     await expect(step).toHaveScreenshot(`docs-progressive-lesson-${name}.png`);
