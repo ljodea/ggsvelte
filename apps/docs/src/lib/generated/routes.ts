@@ -162,7 +162,7 @@ export const DOCS_ROUTES = [
   {
     path: "/guide/getting-started",
     title: "Getting started — ggsvelte",
-    description: "Install ggsvelte and build one complete responsive, accessible Svelte chart.",
+    description: "Install @ggsvelte/svelte and render one chart from a Svelte file.",
     canonicalPath: "/guide/getting-started",
     kind: "page",
     index: true,
@@ -269,8 +269,7 @@ export const DOCS_ROUTES = [
   {
     path: "/guide/data-mappings",
     title: "Data and mappings — ggsvelte",
-    description:
-      "Choose rows and map their fields to visual channels without mutating source data.",
+    description: "Map row fields to visual channels without mutating source data.",
     canonicalPath: "/guide/data-mappings",
     kind: "page",
     index: true,
@@ -426,8 +425,7 @@ export const DOCS_ROUTES = [
   {
     path: "/guide/themes-color",
     title: "Themes and color — ggsvelte",
-    description:
-      "Keep chart furniture separate from data color and from the documentation appearance.",
+    description: "Chart theme vs data color scales; independent of site appearance.",
     canonicalPath: "/guide/themes-color",
     kind: "page",
     index: true,

@@ -139,7 +139,7 @@ test("prerendered Docs and lesson source remain useful without JavaScript", asyn
     'import { GeomPoint, GGPlot } from "@ggsvelte/svelte"',
   );
   await expect(page.locator(".first-result .lesson-output")).toBeVisible();
-  await expect(page.getByText("Map data fields to x and y", { exact: false })).toBeVisible();
+  await expect(page.getByText("Map fields to x and y", { exact: false })).toBeVisible();
   await context.close();
 });
 

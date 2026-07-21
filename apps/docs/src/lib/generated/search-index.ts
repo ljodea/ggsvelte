@@ -123,7 +123,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "page:guide-getting-started",
     kind: "page",
     title: "Getting started",
-    summary: "Install ggsvelte and build one complete responsive, accessible Svelte chart.",
+    summary: "Install @ggsvelte/svelte and render one chart from a Svelte file.",
     href: "/guide/getting-started",
     keywords: ["Start"],
     exact: ["Getting started"],
@@ -133,7 +133,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Create a SvelteKit app",
     summary:
-      "Create a SvelteKit app in Getting started. Install ggsvelte and build one complete responsive, accessible Svelte chart.",
+      "Create a SvelteKit app in Getting started. Install @ggsvelte/svelte and render one chart from a Svelte file.",
     href: "/guide/getting-started#create-a-sveltekit-app",
     keywords: ["Getting started", "Start"],
     exact: ["Create a SvelteKit app"],
@@ -143,7 +143,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Install ggsvelte",
     summary:
-      "Install ggsvelte in Getting started. Install ggsvelte and build one complete responsive, accessible Svelte chart.",
+      "Install ggsvelte in Getting started. Install @ggsvelte/svelte and render one chart from a Svelte file.",
     href: "/guide/getting-started#install-ggsvelte",
     keywords: ["Getting started", "Start"],
     exact: ["Install ggsvelte"],
@@ -153,7 +153,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Draw your first chart",
     summary:
-      "Draw your first chart in Getting started. Install ggsvelte and build one complete responsive, accessible Svelte chart.",
+      "Draw your first chart in Getting started. Install @ggsvelte/svelte and render one chart from a Svelte file.",
     href: "/guide/getting-started#draw-your-first-chart",
     keywords: ["Getting started", "Start"],
     exact: ["Draw your first chart"],
@@ -163,7 +163,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "You have a chart",
     summary:
-      "You have a chart in Getting started. Install ggsvelte and build one complete responsive, accessible Svelte chart.",
+      "You have a chart in Getting started. Install @ggsvelte/svelte and render one chart from a Svelte file.",
     href: "/guide/getting-started#you-have-a-chart",
     keywords: ["Getting started", "Start"],
     exact: ["You have a chart"],
@@ -173,7 +173,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Build the grammar one change at a time",
     summary:
-      "Build the grammar one change at a time in Getting started. Install ggsvelte and build one complete responsive, accessible Svelte chart.",
+      "Build the grammar one change at a time in Getting started. Install @ggsvelte/svelte and render one chart from a Svelte file.",
     href: "/guide/getting-started#build-the-grammar-one-change-at-a-time",
     keywords: ["Getting started", "Start"],
     exact: ["Build the grammar one change at a time"],
@@ -183,7 +183,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Map fields to position",
     summary:
-      "Map fields to position in Getting started. Install ggsvelte and build one complete responsive, accessible Svelte chart.",
+      "Map fields to position in Getting started. Install @ggsvelte/svelte and render one chart from a Svelte file.",
     href: "/guide/getting-started#map-fields-to-position",
     keywords: ["Getting started", "Start"],
     exact: ["Map fields to position"],
@@ -193,7 +193,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Add a second layer",
     summary:
-      "Add a second layer in Getting started. Install ggsvelte and build one complete responsive, accessible Svelte chart.",
+      "Add a second layer in Getting started. Install @ggsvelte/svelte and render one chart from a Svelte file.",
     href: "/guide/getting-started#add-a-second-layer",
     keywords: ["Getting started", "Start"],
     exact: ["Add a second layer"],
@@ -203,7 +203,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Make color meaning explicit",
     summary:
-      "Make color meaning explicit in Getting started. Install ggsvelte and build one complete responsive, accessible Svelte chart.",
+      "Make color meaning explicit in Getting started. Install @ggsvelte/svelte and render one chart from a Svelte file.",
     href: "/guide/getting-started#make-color-meaning-explicit",
     keywords: ["Getting started", "Start"],
     exact: ["Make color meaning explicit"],
@@ -213,7 +213,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Add a statistical smoother",
     summary:
-      "Add a statistical smoother in Getting started. Install ggsvelte and build one complete responsive, accessible Svelte chart.",
+      "Add a statistical smoother in Getting started. Install @ggsvelte/svelte and render one chart from a Svelte file.",
     href: "/guide/getting-started#add-a-statistical-smoother",
     keywords: ["Getting started", "Start"],
     exact: ["Add a statistical smoother"],
@@ -223,7 +223,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Facet the comparison",
     summary:
-      "Facet the comparison in Getting started. Install ggsvelte and build one complete responsive, accessible Svelte chart.",
+      "Facet the comparison in Getting started. Install @ggsvelte/svelte and render one chart from a Svelte file.",
     href: "/guide/getting-started#facet-the-comparison",
     keywords: ["Getting started", "Start"],
     exact: ["Facet the comparison"],
@@ -233,7 +233,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Choose a chart theme",
     summary:
-      "Choose a chart theme in Getting started. Install ggsvelte and build one complete responsive, accessible Svelte chart.",
+      "Choose a chart theme in Getting started. Install @ggsvelte/svelte and render one chart from a Svelte file.",
     href: "/guide/getting-started#choose-a-chart-theme",
     keywords: ["Getting started", "Start"],
     exact: ["Choose a chart theme"],
@@ -243,7 +243,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Enable inspect and pin",
     summary:
-      "Enable inspect and pin in Getting started. Install ggsvelte and build one complete responsive, accessible Svelte chart.",
+      "Enable inspect and pin in Getting started. Install @ggsvelte/svelte and render one chart from a Svelte file.",
     href: "/guide/getting-started#enable-inspect-and-pin",
     keywords: ["Getting started", "Start"],
     exact: ["Enable inspect and pin"],
@@ -253,7 +253,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Choose another surface only when you need it",
     summary:
-      "Choose another surface only when you need it in Getting started. Install ggsvelte and build one complete responsive, accessible Svelte chart.",
+      "Choose another surface only when you need it in Getting started. Install @ggsvelte/svelte and render one chart from a Svelte file.",
     href: "/guide/getting-started#choose-another-surface-only-when-you-need-it",
     keywords: ["Getting started", "Start"],
     exact: ["Choose another surface only when you need it"],
@@ -263,7 +263,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Fluent builder",
     summary:
-      "Fluent builder in Getting started. Install ggsvelte and build one complete responsive, accessible Svelte chart.",
+      "Fluent builder in Getting started. Install @ggsvelte/svelte and render one chart from a Svelte file.",
     href: "/guide/getting-started#fluent-builder",
     keywords: ["Getting started", "Start"],
     exact: ["Fluent builder"],
@@ -273,7 +273,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "PortableSpec JSON",
     summary:
-      "PortableSpec JSON in Getting started. Install ggsvelte and build one complete responsive, accessible Svelte chart.",
+      "PortableSpec JSON in Getting started. Install @ggsvelte/svelte and render one chart from a Svelte file.",
     href: "/guide/getting-started#portablespec-json",
     keywords: ["Getting started", "Start"],
     exact: ["PortableSpec JSON"],
@@ -283,7 +283,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Headless and server rendering",
     summary:
-      "Headless and server rendering in Getting started. Install ggsvelte and build one complete responsive, accessible Svelte chart.",
+      "Headless and server rendering in Getting started. Install @ggsvelte/svelte and render one chart from a Svelte file.",
     href: "/guide/getting-started#headless-and-server-rendering",
     keywords: ["Getting started", "Start"],
     exact: ["Headless and server rendering"],
@@ -293,7 +293,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Validating specs",
     summary:
-      "Validating specs in Getting started. Install ggsvelte and build one complete responsive, accessible Svelte chart.",
+      "Validating specs in Getting started. Install @ggsvelte/svelte and render one chart from a Svelte file.",
     href: "/guide/getting-started#validating-specs",
     keywords: ["Getting started", "Start"],
     exact: ["Validating specs"],
@@ -303,7 +303,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Where next",
     summary:
-      "Where next in Getting started. Install ggsvelte and build one complete responsive, accessible Svelte chart.",
+      "Where next in Getting started. Install @ggsvelte/svelte and render one chart from a Svelte file.",
     href: "/guide/getting-started#where-next",
     keywords: ["Getting started", "Start"],
     exact: ["Where next"],
@@ -312,7 +312,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "page:guide-data-mappings",
     kind: "page",
     title: "Data and mappings",
-    summary: "Choose rows and map their fields to visual channels without mutating source data.",
+    summary: "Map row fields to visual channels without mutating source data.",
     href: "/guide/data-mappings",
     keywords: ["Core grammar"],
     exact: ["Data and mappings"],
@@ -322,7 +322,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Map fields to position",
     summary:
-      "Map fields to position in Data and mappings. Choose rows and map their fields to visual channels without mutating source data.",
+      "Map fields to position in Data and mappings. Map row fields to visual channels without mutating source data.",
     href: "/guide/data-mappings#map-fields-to-position",
     keywords: ["Data and mappings", "Core grammar"],
     exact: ["Map fields to position"],
@@ -332,7 +332,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Keep data local",
     summary:
-      "Keep data local in Data and mappings. Choose rows and map their fields to visual channels without mutating source data.",
+      "Keep data local in Data and mappings. Map row fields to visual channels without mutating source data.",
     href: "/guide/data-mappings#keep-data-local",
     keywords: ["Data and mappings", "Core grammar"],
     exact: ["Keep data local"],
@@ -497,7 +497,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "page:guide-themes-color",
     kind: "page",
     title: "Themes and color",
-    summary: "Keep chart furniture separate from data color and from the documentation appearance.",
+    summary: "Chart theme vs data color scales; independent of site appearance.",
     href: "/guide/themes-color",
     keywords: ["Core grammar"],
     exact: ["Themes and color"],
@@ -507,7 +507,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Choose a chart theme",
     summary:
-      "Choose a chart theme in Themes and color. Keep chart furniture separate from data color and from the documentation appearance.",
+      "Choose a chart theme in Themes and color. Chart theme vs data color scales; independent of site appearance.",
     href: "/guide/themes-color#choose-a-chart-theme",
     keywords: ["Themes and color", "Core grammar"],
     exact: ["Choose a chart theme"],
@@ -517,7 +517,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Preserve color meaning",
     summary:
-      "Preserve color meaning in Themes and color. Keep chart furniture separate from data color and from the documentation appearance.",
+      "Preserve color meaning in Themes and color. Chart theme vs data color scales; independent of site appearance.",
     href: "/guide/themes-color#preserve-color-meaning",
     keywords: ["Themes and color", "Core grammar"],
     exact: ["Preserve color meaning"],
