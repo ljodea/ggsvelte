@@ -3,9 +3,22 @@ import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
+import { docsCspDirectives } from "../apps/docs/csp";
 import { validateDocsCsp, validateHtmlCsp } from "./docs-csp";
 
 describe("docs CSP validation", () => {
+  it("upgrades insecure requests only for HTTPS publication modes", () => {
+    expect(docsCspDirectives("dev")).not.toHaveProperty("upgrade-insecure-requests");
+    for (const mode of [
+      "legacy-full",
+      "cloudflare-preview",
+      "cloudflare-production",
+      "legacy-migration",
+    ] as const) {
+      expect(docsCspDirectives(mode)).toHaveProperty("upgrade-insecure-requests", true);
+    }
+  });
+
   it("keeps visual determinism compatible with enforced style-element CSP", () => {
     const helper = readFileSync(
       join(import.meta.dir, "..", "tests", "visual", "helpers", "deterministic.ts"),
