@@ -228,8 +228,9 @@ describe("line + point pipeline fixture (#385)", () => {
     // Default tooltip / live-text presentation collapses identical field blocks.
     const display = collapseIdenticalDisplayMembers(inspection.members, inspection.focus);
     expect(display).toHaveLength(1);
-    expect(display[0]!.fields.map((f) => f.field)).toEqual(["period", "value"]);
-    expect(display[0]!.fields.map((f) => f.value)).toEqual(["1985", 511]);
+    const shown = display[0];
+    expect(shown.fields.map((f) => f.field)).toEqual(["period", "value"]);
+    expect(shown.fields.map((f) => f.value)).toEqual(["1985", 511]);
 
     model.dispose();
   });
