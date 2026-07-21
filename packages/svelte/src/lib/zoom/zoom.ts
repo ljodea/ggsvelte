@@ -1,5 +1,5 @@
 import type { RenderModel } from "@ggsvelte/core";
-import type { PortableSpec, Scales } from "@ggsvelte/spec";
+import type { CoordTransformAxisSpec, PortableSpec, Scales } from "@ggsvelte/spec";
 
 import type {
   InteractionSource,
@@ -60,6 +60,27 @@ const zoomScale = (
   // another 5% and identical brushes would creep outward.
   expand: { mult: 0, add: 0 },
 });
+
+function withoutCoordLimits(
+  axis: CoordTransformAxisSpec | undefined,
+): CoordTransformAxisSpec | undefined {
+  if (axis?.limits === undefined) return axis;
+  const { limits: _limits, ...rest } = axis;
+  return rest;
+}
+
+function coordForZoom(spec: PortableSpec, domains: ContinuousZoomDomains): PortableSpec["coord"] {
+  const coord = spec.coord;
+  if (coord?.type !== "transform") return coord;
+  const x = domains.x === undefined ? coord.x : withoutCoordLimits(coord.x);
+  const y = domains.y === undefined ? coord.y : withoutCoordLimits(coord.y);
+  if (x === coord.x && y === coord.y) return coord;
+  return {
+    ...coord,
+    ...(x === undefined ? {} : { x }),
+    ...(y === undefined ? {} : { y }),
+  };
+}
 
 /**
  * Restrict controller/shared zoom domains to channels this plot opted into.
@@ -164,8 +185,10 @@ export function applyZoomToSpec(
   domains: ContinuousZoomDomains | null,
 ): PortableSpec {
   if (domains === null || (domains.x === undefined && domains.y === undefined)) return spec;
+  const coord = coordForZoom(spec, domains);
   return {
     ...spec,
+    ...(coord !== spec.coord && coord !== undefined && { coord }),
     scales: {
       ...spec.scales,
       ...(domains.x !== undefined && {

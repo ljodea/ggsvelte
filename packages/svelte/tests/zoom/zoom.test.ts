@@ -151,6 +151,24 @@ describe("applyZoomToSpec", () => {
     expect(next.scales?.x).toBeUndefined();
   });
 
+  it("clears explicit coordinate limits on zoomed axes", () => {
+    const withCoordLimits = fromAny<PortableSpec>({
+      layers: [{ geom: "point" }],
+      coord: {
+        type: "transform",
+        x: { transform: "log10", limits: [1, 1000], expand: false },
+        y: { transform: "sqrt", limits: [0, 100], reverse: true },
+      },
+    });
+    const next = applyZoomToSpec(withCoordLimits, { x: [10, 100] });
+    expect(next.coord).toEqual({
+      type: "transform",
+      x: { transform: "log10", expand: false },
+      y: { transform: "sqrt", limits: [0, 100], reverse: true },
+    });
+    expect(next.scales?.x?.domain).toEqual([10, 100]);
+  });
+
   it("is idempotent when an emitted semantic domain is reapplied", () => {
     const once = applyZoomToSpec(base, { x: [10, 20] });
     const twice = applyZoomToSpec(once, { x: [10, 20] });

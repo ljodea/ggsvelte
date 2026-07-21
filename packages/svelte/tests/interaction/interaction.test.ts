@@ -1427,6 +1427,49 @@ describe("brush + brush-to-zoom", () => {
     expect(endedPanelId).toBe(first.id);
   });
 
+  it("brush zoom replaces explicit coordinate limits with the brushed viewport", async () => {
+    let model: RenderModel | null = null;
+    const { container } = render(GGPlot, {
+      data: [1, 10, 100, 1000].map((x) => ({ x, y: 1 })),
+      aes: { x: "x", y: "y" },
+      layers: [{ geom: "point" }],
+      scales: { x: { type: "linear", domain: [1, 1000], expand: { mult: 0, add: 0 } } },
+      coord: {
+        type: "transform",
+        x: { transform: "log10", limits: [1, 1000], expand: false },
+      },
+      zoom: { mode: "x" },
+      onrender: (next: RenderModel) => {
+        model = next;
+      },
+      ...size,
+    });
+    await until(() => model !== null);
+    const before = requireModel(model);
+    const panel = before.scene.panels[0];
+    const capture = container.querySelector(".gg-capture")!;
+    const zoomArea = [
+      ...container.querySelectorAll<HTMLButtonElement>(".gg-tool-rail button"),
+    ].find((button) => button.textContent === "Zoom area")!;
+    zoomArea.click();
+    await until(() => zoomArea.getAttribute("aria-pressed") === "true");
+    drag(
+      capture,
+      panel.x + panel.width / 3,
+      panel.y,
+      panel.x + (panel.width * 2) / 3,
+      panel.y + panel.height,
+    );
+    await until(() => model !== before);
+
+    const after = requireModel(model);
+    if (after.scales.x.type === "band") throw new Error("expected continuous x scale");
+    expect(after.scales.x.domain[0]).toBeCloseTo(10, 4);
+    expect(after.scales.x.domain[1]).toBeCloseTo(100, 4);
+    expect(after.coordProjectors[0].x.coordinateDomain[0]).toBeCloseTo(1, 4);
+    expect(after.coordProjectors[0].x.coordinateDomain[1]).toBeCloseTo(2, 4);
+  });
+
   it("brush-to-zoom respecs explicit domains; colors NEVER shift; double-click resets", async () => {
     let model: RenderModel | null = null;
     const { container } = render(GGPlot, {
