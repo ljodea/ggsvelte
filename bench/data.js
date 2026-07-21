@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784613923826,
+  "lastUpdate": 1784617046411,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -37105,6 +37105,150 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 149.513,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "f5b26914a7d0cbb631a4ea0d02c44940c2210087",
+          "message": "fix(docs): make cutover smoke truthful (#367)\n\n* fix(docs): make cutover smoke truthful\n\n* fix(docs): isolate the no-JavaScript fallback\n\n* fix(docs): serve a static not-found document",
+          "timestamp": "2026-07-21T01:56:42-05:00",
+          "tree_id": "7555f76e179b8d119dc41be04b29d51fde07d48d",
+          "url": "https://github.com/ljodea/ggsvelte/commit/f5b26914a7d0cbb631a4ea0d02c44940c2210087"
+        },
+        "date": 1784617045412,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 1.6275,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.0735,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 5.0727,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 7.2364,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 34.054,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 62.5188,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal-line 100k",
+            "value": 46.7361,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide candidate-selection 300y",
+            "value": 0.0748,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide resize-churn 191y",
+            "value": 0.2457,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide DST-heavy 3y",
+            "value": 2.4509,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal free-facets 100",
+            "value": 18.4284,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 0.9875,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.2058,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 34.7495,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 54.0924,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 9.5879,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 8.4331,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 726.2189,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.4601,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 186.8016,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 6.6467,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 13.2398,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 655.7086,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 93.3139,
             "unit": "ms"
           }
         ]
