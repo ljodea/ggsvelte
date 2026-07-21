@@ -4,6 +4,8 @@
  * (apps/docs/static/previews); do not grow this list to cover every example.
  *
  * Declaration order is the fixture order. Do not sort.
+ * Baselines in `__screenshots__/` are container-only; refresh via same-PR
+ * update from CI actuals when the smoke suite or renderer changes.
  */
 
 export type SmokeTheme = "light" | "dark";

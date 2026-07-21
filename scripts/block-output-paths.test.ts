@@ -13,7 +13,11 @@ afterEach(() => {
   for (const sandbox of sandboxes.splice(0)) rmSync(sandbox, { recursive: true, force: true });
 });
 
-function runGuard(branch: string, staged: string, hookArg = baseline): SpawnSyncReturns<string> {
+function runGuard(
+  branch: string,
+  staged: string,
+  hookArg: string | string[] = baseline,
+): SpawnSyncReturns<string> {
   const sandbox = mkdtempSync(resolve(tmpdir(), "ggsvelte-output-guard-"));
   const bin = resolve(sandbox, "bin");
   sandboxes.push(sandbox);
@@ -31,10 +35,11 @@ esac
   );
   chmodSync(fakeGit, 0o755);
 
+  const args = Array.isArray(hookArg) ? hookArg : [hookArg];
   // Minimal env only: spreading process.env on CI leaves GITHUB_* / locale /
   // BASH_ENV values that can change branch resolution or stderr decoding.
   // Empty-string overrides are also unreliable across Node/Bun spawn impls.
-  return spawnSync("bash", [guard, hookArg], {
+  return spawnSync("bash", [guard, ...args], {
     cwd: sandbox,
     encoding: "utf8",
     env: {
@@ -79,5 +84,20 @@ describe("block-output-paths guard", () => {
     expect(result.status).toBe(1);
     // vr-update/* only exempts screenshot baselines; coverage stays blocked.
     expect(combinedOutput(result)).toContain(coverageArtifact);
+  });
+
+  it("allows same-PR smoke baselines when packages/examples/visual tests are staged", () => {
+    const staged = `${baseline}\ntests/visual/smoke-matrix.ts\n`;
+    expect(runGuard("ci/vr-smoke-throughput", staged).status).toBe(0);
+    expect(
+      runGuard("feature/ordinary", `${baseline}\npackages/svelte/src/lib/Plot.svelte\n`).status,
+    ).toBe(0);
+  });
+
+  it("still blocks baselines justified only by docs content-only paths", () => {
+    const staged = `${baseline}\napps/docs/src/lib/catalog/guide.ts\n`;
+    const result = runGuard("feature/ordinary", staged);
+    expect(result.status).toBe(1);
+    expect(combinedOutput(result)).toContain("plot.png");
   });
 });

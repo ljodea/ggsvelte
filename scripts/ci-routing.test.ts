@@ -771,6 +771,21 @@ describe("component_journeys content inputs cover llms modules", () => {
       expect(matched, file).toContain(file);
     }
   });
+
+  test("journey shard also hashes content-only docs generators (Codex P2)", () => {
+    const inputs = JOB_CONTENT_INPUTS.component_journeys;
+    for (const file of [
+      "scripts/gen-docs-search.ts",
+      "scripts/gen-gallery-previews.ts",
+      "scripts/docs-seo.ts",
+      "scripts/deployment-artifact.ts",
+      "scripts/cli-docs.ts",
+    ]) {
+      expect(inputs, file).toContain(file);
+      const matched = listJobContentPaths("component_journeys", [file]);
+      expect(matched, file).toContain(file);
+    }
+  });
 });
 
 describe("success marker protocol", () => {
