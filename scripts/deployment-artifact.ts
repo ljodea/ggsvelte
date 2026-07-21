@@ -149,6 +149,9 @@ export function validateDeploymentArtifact(
     ) {
       problems.push("_headers must cache only SvelteKit immutable assets for one year");
     }
+    if (!headers.includes("/_app/immutable/*\n  ! Cache-Control\n")) {
+      problems.push("_headers must detach the inherited HTML cache policy from immutable assets");
+    }
   }
 
   const redirectsPath = join(buildDirectory, "_redirects");

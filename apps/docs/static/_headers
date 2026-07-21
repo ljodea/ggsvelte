@@ -7,4 +7,5 @@
   X-Frame-Options: DENY
 
 /_app/immutable/*
+  ! Cache-Control
   Cache-Control: public, max-age=31536000, immutable

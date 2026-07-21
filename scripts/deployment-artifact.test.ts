@@ -18,6 +18,7 @@ const REQUIRED_HEADERS = `/*
   X-Frame-Options: DENY
 
 /_app/immutable/*
+  ! Cache-Control
   Cache-Control: public, max-age=31536000, immutable
 `;
 
@@ -165,6 +166,21 @@ describe("deployment artifact identity", () => {
       );
       expect(problems).toContain("_redirects is missing the fixed legacy benchmark redirect");
       expect(problems).toContain("_redirects is missing the /ggsvelte cleanup redirect");
+    } finally {
+      rmSync(buildDirectory, { recursive: true, force: true });
+    }
+  });
+
+  it("requires immutable assets to detach the inherited HTML cache policy", () => {
+    const buildDirectory = makeCompleteArtifact("cloudflare-production");
+    try {
+      writeFileSync(
+        join(buildDirectory, "_headers"),
+        REQUIRED_HEADERS.replace("  ! Cache-Control\n", ""),
+      );
+      expect(
+        validateDeploymentArtifact(buildDirectory, expectedArtifact("cloudflare-production")),
+      ).toContain("_headers must detach the inherited HTML cache policy from immutable assets");
     } finally {
       rmSync(buildDirectory, { recursive: true, force: true });
     }

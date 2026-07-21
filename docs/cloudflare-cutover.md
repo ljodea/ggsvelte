@@ -6,13 +6,16 @@ This runbook moves the public documentation from GitHub Pages to `https://ggsvel
 
 `apps/docs/deployment/cloudflare-pages.json` is the checked deployment contract:
 
-- Git-integrated Pages project `ggsvelte`
+- Direct Upload Pages project `ggsvelte`, deployed by `.github/workflows/cloudflare-pages.yml`
 - production branch `main`
 - repository-root build command `bun run build:cloudflare`
 - output directory `apps/docs/build`
-- Build system v3 with Bun 1.3.14 and Node.js 22
-- `cloudflare-production` on `main`; `cloudflare-preview` on other branches
-- conservative build-watch paths covering every package, docs, example, generator, lockfile, and TypeScript input
+- GitHub-hosted build with Bun 1.3.14 and Node.js 22
+- `cloudflare-production` for the `main` workflow; `cloudflare-preview` for trusted pre-merge uploads
+- a repository secret containing a least-privilege, account-scoped Pages Write token, exposed only to the post-merge deploy step
+- conservative workflow paths covering every package, docs, example, generator, lockfile, and TypeScript input
+
+Native Pages Git integration is preferred, but this account's GitHub App installation returned Cloudflare API error `8000011`. Direct Upload is the documented fallback: GitHub Actions checks out the exact head commit, builds and validates `artifact.json`, and uploads those same bytes. Do not broaden the deployment token beyond Pages Write.
 
 The build emits `artifact.json`, `_headers`, `_redirects`, `404.html`, canonical metadata, sitemap, robots, and text discovery endpoints. `artifact.json` binds the artifact to its source commit, route-inventory digest, and build mode. Cloudflare artifacts never fetch or contain mutable benchmark history; `/bench/*` temporarily redirects to the preserved legacy subtree.
 
@@ -20,7 +23,7 @@ The build emits `artifact.json`, `_headers`, `_redirects`, `404.html`, canonical
 
 Stop without changing DNS or redirects if any gate fails:
 
-1. A Git-integrated preview did not build from the intended commit.
+1. The immutable Direct Upload preview did not build from the intended commit.
 2. Preview smoke failed, including the `X-Robots-Tag: noindex` check.
 3. The production `pages.dev` artifact does not report the merged source commit.
 4. The apex custom domain or certificate is not `Active`.
@@ -52,7 +55,19 @@ bun run legacy:routes:check
 
 ## Preview gate
 
-Create the Pages project through Cloudflare's Git integration, not Direct Upload. Apply the checked project contract and ensure previews are enabled for pull-request branches.
+A trusted operator builds the exact reviewed pull-request head and uploads it as a non-production branch preview. The long-lived repository token is never exposed to pull-request code; use a temporary operator token for this one pre-merge gate. Build and upload with:
+
+```sh
+DOCS_BUILD_MODE=cloudflare-preview CF_PAGES_COMMIT_SHA=<40-character-commit> \
+  bun run build:cloudflare
+bunx wrangler pages deploy apps/docs/build \
+  --project-name ggsvelte \
+  --branch <trusted-branch> \
+  --commit-hash <40-character-commit> \
+  --commit-dirty=false
+```
+
+Confirm the deployment URL is the immutable hash URL, not the mutable branch alias.
 
 Run:
 
@@ -68,7 +83,7 @@ The immutable preview must return the intended `artifact.json`, root/deep routes
 ## Production and apex activation
 
 1. Merge only after the immutable preview and current-head review/CI gates pass.
-2. Wait for the `main` Pages deployment and record its deployment ID as the first known-good production deployment.
+2. Wait for the `main` Cloudflare Pages workflow and record its deployment ID as the first known-good production deployment.
 3. Verify `https://ggsvelte.pages.dev/artifact.json` reports the merged source commit and `cloudflare-production`.
 4. Attach `ggsvelte.sh` through Pages Custom Domains.
 5. Wait until Cloudflare reports the domain and certificate as `Active`.

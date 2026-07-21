@@ -4,6 +4,8 @@ import { join } from "node:path";
 
 interface PagesConfig {
   schemaVersion: number;
+  integration: string;
+  workflow: string;
   projectName: string;
   productionBranch: string;
   buildCommand: string;
@@ -17,12 +19,14 @@ interface PagesConfig {
 const ROOT = join(import.meta.dir, "..");
 
 describe("Cloudflare Pages project contract", () => {
-  it("pins a Git-integrated root build with distinct production and preview modes", () => {
+  it("pins a GitHub Actions direct-upload build with distinct production and preview modes", () => {
     const path = join(ROOT, "apps", "docs", "deployment", "cloudflare-pages.json");
     const config = JSON.parse(readFileSync(path, "utf8")) as PagesConfig;
 
     expect(config).toMatchObject({
       schemaVersion: 1,
+      integration: "github-actions-direct-upload",
+      workflow: ".github/workflows/cloudflare-pages.yml",
       projectName: "ggsvelte",
       productionBranch: "main",
       buildCommand: "bun run build:cloudflare",
@@ -46,6 +50,15 @@ describe("Cloudflare Pages project contract", () => {
       "tsconfig.base.json",
       "mise.toml",
     ]);
+
+    const workflow = readFileSync(join(ROOT, config.workflow), "utf8");
+    expect(workflow).toContain("node-version: 22");
+    expect(workflow).toContain("bun run build:cloudflare");
+    expect(workflow).toContain("bunx wrangler pages deploy apps/docs/build");
+    expect(workflow).toContain("CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}");
+    expect(workflow).toContain("CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}");
+    expect(workflow).toContain("ref: ${{ github.sha }}");
+    expect(workflow).not.toContain("pull_request:");
   });
 
   it("keeps the legacy host full until the explicit migration gate", () => {

@@ -1,5 +1,7 @@
 {
   "schemaVersion": 1,
+  "integration": "github-actions-direct-upload",
+  "workflow": ".github/workflows/cloudflare-pages.yml",
   "projectName": "ggsvelte",
   "productionBranch": "main",
   "buildCommand": "bun run build:cloudflare",
