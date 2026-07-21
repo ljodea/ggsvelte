@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784672923762,
+  "lastUpdate": 1784673395229,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -40720,6 +40720,200 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 148.5609,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "47d9ddd0ee124f8abc6223ce315e977adfa2a65b",
+          "message": "fix(inspect): collapse identical default tooltip field blocks (#385) (#390)\n\n* fix(inspect): collapse identical default tooltip field blocks\n\nLine + point on the same data produced two identical tooltip dl blocks\nbecause axis grouping returns both marks. Collapse identical display\npayloads for default tooltip rendering and a11y live-text counts only;\npublic inspection.members stays full for oninspect and custom content.\n\nCloses #385\n\n* fix(test): drop unnecessary non-null assertions in display-members test\n\n* fix(inspect): address Codex P2 display-collapse edge cases\n\n- Overflow footer uses collapsed displayMembers length\n- Invalid Date formats as en-dash without throwing in live text\n- Prepending out-of-window focus replaces a capped slot (length ≤ members)\n\n* fix(docs): unblock themes journeys after #371 copy/overflow drift\n\ncomponent-journeys fails on main and this PR for the same latent issues:\nhomepage Contracts link text no longer says \"Compare chart themes\", and\nthemes display-type headings expand document scrollWidth on narrow viewports.\n\nPort the journey-only fixes from 03fb866 (#389): update the accessible-name\nassertion and contain themes page/section grids (min-width: 0, overflow-wrap,\noverflow-x clip) so scrollWidth stays viewport-bound.\n\n* fix(docs): keep theme copy triggers in viewport after overflow contain\n\nPage-level overflow-x:clip on .themes-page fixed scrollWidth tests but\ntrapped absolute .copy-trigger buttons past the layout viewport (Playwright:\n\"element is outside of the viewport\" on manual-copy fallback).\n\nDrop the page clip; keep min-width/overflow-wrap containment. Bound\nCopyCode/ThemeSpecimen width so long pre lines scroll inside .code-body\nand the icon button stays on-card.",
+          "timestamp": "2026-07-21T17:35:36-05:00",
+          "tree_id": "64b881f4e48a6afccc15025a4d34b1f6c393b15b",
+          "url": "https://github.com/ljodea/ggsvelte/commit/47d9ddd0ee124f8abc6223ce315e977adfa2a65b"
+        },
+        "date": 1784673393979,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.5284,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.9558,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 7.7423,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 10.5804,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 56.693,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 91.7767,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal-line 100k",
+            "value": 66.1115,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide candidate-selection 300y",
+            "value": 0.0773,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide resize-churn 191y",
+            "value": 0.3558,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide DST-heavy 3y",
+            "value": 3.5423,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal free-facets 100",
+            "value": 30.408,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.4603,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.4588,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 51.8595,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 74.3872,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 11.8982,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 10.8754,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 1104.8758,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.8302,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 275.589,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 13.2907,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-identity 100k",
+            "value": 27.7308,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 100k",
+            "value": 19.5851,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-sqrt 100k",
+            "value": 17.499,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 smooth 100k",
+            "value": 18.3284,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 bin 100k",
+            "value": 13.6091,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 facets-100 100k",
+            "value": 78.7967,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline binned-64 100k",
+            "value": 25.0418,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline coord-identity points 100k",
+            "value": 18.0524,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline coord-log10 points 100k",
+            "value": 19.832,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline coord-tessellation 10k",
+            "value": 48.6904,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 18.421,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 622.4109,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 157.893,
             "unit": "ms"
           }
         ]
