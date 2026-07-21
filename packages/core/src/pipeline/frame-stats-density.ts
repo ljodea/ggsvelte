@@ -3,9 +3,13 @@
  */
 import { statDensity } from "../stats/density.js";
 import type { ColumnTable } from "../table.js";
+import { scaleTransform } from "../scales/transform.js";
 
 import { carriedColumns, emptyFrameExtras, removedStatWarning } from "./frame-helpers.js";
 import { makeColumnOf } from "./frame-stats-shared.js";
+import { transformedZeroBaseline } from "./position-baseline.js";
+import { forwardMeasureOnce } from "./stat-measure-transform.js";
+import { positionColumn } from "./temporal-position.js";
 import type { LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
 import { NO_ROW } from "./types.js";
 
@@ -19,11 +23,7 @@ export function buildDensityFrame(
   const carried = carriedColumns(binding, table);
   const columnOf = makeColumnOf(binding);
   const result = statDensity({
-    x: table.numeric(
-      binding.xField!,
-      binding.xConversion.sourceParser,
-      binding.xConversion.options,
-    ),
+    x: positionColumn(table, binding.xField!, binding.xConversion, binding.xTransform),
     groups,
     weights: binding.weightField === null ? null : table.numeric(binding.weightField),
     carried,
@@ -42,7 +42,10 @@ export function buildDensityFrame(
     scaled: result.scaled,
     ndensity: result.ndensity,
   };
-  const yNumeric = columns[binding.yStatColumn ?? "density"] ?? result.density;
+  const yNumeric = forwardMeasureOnce(
+    columns[binding.yStatColumn ?? "density"] ?? result.density,
+    binding.yTransform,
+  );
   const col = columnOf(result, null);
   const outN = result.x.length;
   return {
@@ -60,8 +63,10 @@ export function buildDensityFrame(
     fillValues: col(binding.fill.field),
     labelValues: col(binding.labelField),
     ...emptyFrameExtras(),
-    // Density renders as an area from the zero baseline.
-    ymin: new Float64Array(outN),
+    // Density renders as an area from the shared transformed-origin baseline.
+    ymin: Float64Array.from({ length: outN }, () =>
+      transformedZeroBaseline(binding.yTransform?.transform ?? scaleTransform("identity")),
+    ),
     ymax: yNumeric,
   };
 }

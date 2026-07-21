@@ -29,11 +29,20 @@ export function layoutDomain(
     breaks === undefined
       ? undefined
       : breaks.map((b) => cellToNumber(b as CellValue)).filter((v) => Number.isFinite(v));
+  if (scale.type === "time") {
+    return {
+      type: "time",
+      min: scale.domain[0],
+      max: scale.domain[1],
+      ...(numericBreaks !== undefined && { breaks: numericBreaks }),
+      ...(temporal !== undefined && { temporal }),
+    };
+  }
   return {
-    type: scale.type,
+    type: "linear",
+    transform: scale.transform,
     min: scale.domain[0],
     max: scale.domain[1],
     ...(numericBreaks !== undefined && { breaks: numericBreaks }),
-    ...(scale.type === "time" && temporal !== undefined && { temporal }),
   };
 }

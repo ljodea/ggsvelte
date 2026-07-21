@@ -32,6 +32,12 @@ export function makeAxisFormatter(
       message: `scales.${axis}.dateLabels takes precedence; labels is ignored.`,
     });
   }
+  if (config?.minorBreaks !== undefined && config.dateMinorBreaks !== undefined) {
+    warnings.push({
+      code: "unused-scale-option",
+      message: `scales.${axis}.dateMinorBreaks takes precedence; minorBreaks is ignored.`,
+    });
+  }
   const labels = config?.dateLabels ?? config?.labels;
   if (labels === undefined) {
     if (scale.type !== "time") return undefined;
@@ -84,7 +90,7 @@ export function makeAxisValueFormatter(
   const fallback =
     scale.type === "time"
       ? defaultTimeTickFormat
-      : scale.type === "log"
+      : scale.transform === "log10"
         ? defaultLogTickFormat
         : defaultTickFormat(tickStep(scale.domain[0], scale.domain[1], 5));
   return (value) => {

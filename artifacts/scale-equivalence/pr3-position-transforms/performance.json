@@ -1,0 +1,28 @@
+{
+  "measuredAt": "2026-07-21T04:35:00Z",
+  "runner": {
+    "bun": "1.3.14 darwin arm64",
+    "hostShellArchitecture": "x86_64 (Rosetta)",
+    "command": "cd benchmarks && bun run bench-json.ts"
+  },
+  "method": "Median wall-clock time over 10 native-Bun runs (4 for the bounded slow-path workloads), deterministic generated data.",
+  "workloads": {
+    "pipeline transform-identity 100k": { "medianMs": 11.1624, "budgetMs": 20, "pass": true },
+    "pipeline transform-log10 100k": { "medianMs": 11.7366, "budgetMs": 20, "pass": true },
+    "pipeline transform-sqrt 100k": { "medianMs": 11.371, "budgetMs": 20, "pass": true },
+    "pipeline transform-log10 smooth 100k": { "medianMs": 11.0588, "budgetMs": 18, "pass": true },
+    "pipeline transform-log10 bin 100k": { "medianMs": 8.5426, "budgetMs": 15, "pass": true },
+    "pipeline transform-log10 facets-100 100k": {
+      "medianMs": 59.97,
+      "budgetMs": 100,
+      "pass": true
+    },
+    "pipeline binned-64 100k": { "medianMs": 15.8528, "budgetMs": 28, "pass": true }
+  },
+  "cacheEvidence": {
+    "transformKernel": "packages/core/tests/scale-transform.test.ts proves one parent transform per cache key across 100 subsets/facets",
+    "stageInventory": "packages/core/tests/pipeline-scale-stage.test.ts prevents geometry double-transform",
+    "resize": "guide/layout replanning consumes trained scale values and does not parse or transform source columns"
+  },
+  "budgetRunNote": "All seven PR 3 workloads passed their measured budgets. The complete local budget command also reported three pre-existing host-sensitive overages (canvas cold, hit-index build, density); their budgets were not changed by this PR."
+}

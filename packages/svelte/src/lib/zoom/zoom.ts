@@ -54,6 +54,10 @@ const zoomScale = (
   ...config,
   domain: [domain[0], domain[1]],
   nice: false,
+  // Zoom writes the already-inverted display domain back as source limits.
+  // Disable the new continuous default expansion or each re-render would add
+  // another 5% and identical brushes would creep outward.
+  expand: { mult: 0, add: 0 },
 });
 
 /**

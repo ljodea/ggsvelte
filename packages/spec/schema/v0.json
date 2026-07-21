@@ -1392,6 +1392,49 @@
       ],
       "description": "A deterministic temporal parser name, exact closed format, or epoch unit. JavaScript callbacks and regular expressions are not portable parsers."
     },
+    "ScaleExpansion": {
+      "type": "object",
+      "properties": {
+        "mult": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 0
+              },
+              "minItems": 2,
+              "maxItems": 2
+            }
+          ],
+          "description": "Multiplicative display padding as a fraction of the (transformed) domain span. A scalar pads both ends; a [lower, upper] tuple pads each end. Non-negative and finite."
+        },
+        "add": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 0
+              },
+              "minItems": 2,
+              "maxItems": 2
+            }
+          ],
+          "description": "Additive display padding in (transformed) scale units. A scalar pads both ends; a [lower, upper] tuple pads each end. Non-negative and finite."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Display-domain expansion. Padding is applied after nice in transformed space and never widens the OOB limits. `{ mult: 0, add: 0 }` disables padding."
+    },
     "PositionScaleSpec": {
       "type": "object",
       "properties": {
@@ -1412,9 +1455,30 @@
             {
               "type": "string",
               "const": "band"
+            },
+            {
+              "type": "string",
+              "const": "binned"
             }
           ],
-          "description": "Scale type: \"linear\" (default for numbers), \"log\" (base 10; the whole domain must be positive), \"time\" (temporal fields; ISO strings or Date values), \"band\" (discrete categories). Omit to infer from the field type."
+          "description": "Scale type: \"linear\" (default for numbers), \"time\" (temporal fields; ISO strings or Date values), \"band\" (discrete categories), \"binned\" (quantitative values assigned to ordered bins). \"log\" is an accepted authored alias that canonicalizes to { type: \"linear\", transform: \"log10\" }. Omit to infer from the field type."
+        },
+        "transform": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "identity"
+            },
+            {
+              "type": "string",
+              "const": "log10"
+            },
+            {
+              "type": "string",
+              "const": "sqrt"
+            }
+          ],
+          "description": "Pre-stat position transform applied after parsing and before grouping-sensitive stats/positions. \"identity\" (default), \"log10\" (base-10; source values must be > 0), \"sqrt\" (source values must be >= 0). Only \"identity\" is permitted on time scales."
         },
         "temporalKind": {
           "anyOf": [
@@ -1566,11 +1630,48 @@
             ]
           },
           "minItems": 1,
-          "description": "Explicit tick positions in data units (numbers, or ISO date strings for time scales). Omit for automatic ticks."
+          "maxItems": 65,
+          "description": "Explicit tick positions in data units (numbers, or ISO date strings for time scales); for binned scales these are the bin boundaries. Omit for automatic ticks. At most 65 values (a binned scale allows at most 64 bins)."
         },
         "labels": {
           "type": "string",
           "description": "Tick label format string. Time scales: strftime-style (\"%Y-%m\", \"%b %d\", \"%H:%M\"). Numeric scales: \",d\" (grouped integer), \".1f\" (fixed decimals), \".0%\" (percent), \"~s\" (SI prefix). Omit for automatic formatting."
+        },
+        "expand": {
+          "$ref": "#/$defs/ScaleExpansion",
+          "description": "Display-domain padding. Non-temporal continuous/binned axes default to { mult: 0.05, add: 0 }; time axes default to zero. Pinned domains still receive display expansion."
+        },
+        "oob": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "censor"
+            },
+            {
+              "type": "string",
+              "const": "squish"
+            }
+          ],
+          "description": "Out-of-bounds policy for values outside explicit source limits, applied before stats. \"censor\" (default) drops them to missing; \"squish\" clamps them to the nearest source limit before transform."
+        },
+        "naValue": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Replacement for missing/censored positional values, resolved after OOB and before transform. A finite number substitutes; null (default) keeps them missing. The replacement is itself checked against the transform/domain rules."
+        },
+        "minorBreaks": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 1,
+          "description": "Explicit minor gridline positions in semantic source units. Coincident major/minor values render only the major tick. Time scales use dateMinorBreaks instead."
         }
       },
       "additionalProperties": false,

@@ -14,6 +14,7 @@ import {
   type FieldType,
   type ParsedColumnOptions,
 } from "../table.js";
+import type { ColumnTransformConfig } from "../scales/transform.js";
 
 export interface PositionConversionContext {
   /** Effective parser for detached/post-stat values and author scalars. */
@@ -56,6 +57,24 @@ export function yConversionOf(binding: {
   yConversion?: PositionConversionContext | undefined;
 }): PositionConversionContext {
   return binding.yConversion ?? AUTO_POSITION_CONVERSION;
+}
+
+/**
+ * Read a position column as scale-space numbers. With a pre-stat transform the
+ * cached transformed view (OOB/NA/forward) is returned; otherwise the semantic
+ * numeric view (identity). The two coincide for identity + unpinned + no-NA.
+ */
+export function positionColumn(
+  table: ColumnTable,
+  field: string,
+  conversion: PositionConversionContext,
+  transform: ColumnTransformConfig | undefined,
+): Float64Array {
+  if (transform === undefined) {
+    return table.numeric(field, conversion.sourceParser, conversion.options);
+  }
+  return table.transformed(field, conversion.sourceParser, conversion.options, transform)
+    .transformed;
 }
 
 export function positionFieldType(

@@ -60,6 +60,14 @@ Use `.scaleXDiscrete()` / `type: "band"` when four-digit values are identifiers.
 `model.guidePlans`. Configure calendar labels directly with
 `.scaleXDatetime({ dateBreaks: "2 weeks", dateMinorBreaks: "1 day", dateLabels: "%e %b", locale: "en-GB", timezone: "Europe/London" })`.
 
+Numeric `log10` and `sqrt` position transforms run before smooth/bin/density
+and other statistics. Use `scaleXLog10()`, `scaleYSqrt()`, `scaleXBinned()`, or
+portable `scales={{ x: { type: "linear", transform: "log10" } }}`. Trained
+models, GuidePlans, interval selection, and precise bounds report family
+`linear` plus `transform`—never trained type `log`. Pinned domains censor
+before stats by default; see the upgrading guide for migration and the zero
+expansion override.
+
 `<GGPlot>` supports `facet`, `coord`, `theme`, opt-in `inspect`, point or
 faceted interval `select`, brush `zoom`, visual `legendFocus`, data-changing
 `legendFilter`, `width="container"`, per-layer `render="canvas"`, and

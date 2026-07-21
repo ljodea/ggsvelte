@@ -464,6 +464,17 @@ export function resolveCandidateSeries(input: {
 // ---------------------------------------------------------------------------
 // Logical values
 // ---------------------------------------------------------------------------
+function semanticFrameNumber(
+  frame: LayerFrame | undefined,
+  axis: "x" | "y",
+  value: number | undefined,
+): CellValue {
+  if (value === undefined || !Number.isFinite(value)) return value ?? null;
+  const transform =
+    axis === "x" ? frame?.binding.xTransform?.transform : frame?.binding.yTransform?.transform;
+  return transform === undefined ? value : transform.inverse(value);
+}
+
 export function resolveCandidateLogicalValues(input: {
   annotationRule: boolean;
   annotationX: CellValue;
@@ -495,7 +506,8 @@ export function resolveCandidateLogicalValues(input: {
     ? annotationX
     : outlierSourceRow === null
       ? sourceRow === null
-        ? (frame?.xValues?.[frameRow] ?? frame?.xNumeric?.[frameRow] ?? null)
+        ? (frame?.xValues?.[frameRow] ??
+          semanticFrameNumber(frame, "x", frame?.xNumeric?.[frameRow]))
         : sourceValue(xField)
       : (frame?.box?.outlierX[primitiveIndex] ?? null);
 
@@ -504,11 +516,13 @@ export function resolveCandidateLogicalValues(input: {
     : outlierSourceRow === null
       ? sourceRow === null
         ? (frame?.yValues?.[frameRow] ??
-          frame?.yNumeric?.[frameRow] ??
-          frame?.box?.middle[frameRow] ??
-          null)
+          semanticFrameNumber(
+            frame,
+            "y",
+            frame?.yNumeric?.[frameRow] ?? frame?.box?.middle[frameRow],
+          ))
         : sourceValue(yField)
-      : (frame?.box?.outlierY[primitiveIndex] ?? null);
+      : semanticFrameNumber(frame, "y", frame?.box?.outlierY[primitiveIndex]);
 
   return { xValue, yValue };
 }

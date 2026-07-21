@@ -42,7 +42,10 @@ export function layoutBoxplotBody(
   const yScale = fx.yScale;
 
   const buffers = createBoxplotBodyBuffers();
-  const yPx = (v: number) => fx.innerHeight - yScale.normalize(v) * fx.innerHeight;
+  // box.lower/middle/upper and frame.ymin/ymax are stat_boxplot's aggregate
+  // output over already-transformed y (scale-space); normalizeTransformed
+  // skips the forward so they are never transformed twice.
+  const yPx = (v: number) => fx.innerHeight - yScale.normalizeTransformed(v) * fx.innerHeight;
 
   for (let row = 0; row < n; row++) {
     const geom = layoutBoxplotBodyRow({ frame, fx, row, widthFrac, yPx });

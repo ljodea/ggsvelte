@@ -12,6 +12,8 @@ export { carriedColumns, deriveLayerGroups } from "./frame-group-columns.js";
 /** Fresh all-null frame extras (each stat branch fills what it uses). */
 export function emptyFrameExtras(): Pick<
   LayerFrame,
+  | "xBinId"
+  | "yBinId"
   | "ymin"
   | "ymax"
   | "xmin"
@@ -26,6 +28,8 @@ export function emptyFrameExtras(): Pick<
   | "yIntercepts"
 > {
   return {
+    xBinId: null,
+    yBinId: null,
     ymin: null,
     ymax: null,
     xmin: null,

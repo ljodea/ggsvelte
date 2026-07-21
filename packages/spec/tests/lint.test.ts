@@ -4,6 +4,8 @@
  * evidence. Also: the validate({ lint: true }) wiring and catalog coverage
  * (every LINT_CATALOG code is exercised here).
  */
+import { readFileSync } from "node:fs";
+
 import { describe, expect, it } from "bun:test";
 
 import { LINT_CATALOG, lintSpec } from "../src/lint.ts";
@@ -130,24 +132,42 @@ describe("many-discrete-colors", () => {
   });
 });
 
-describe("log-nonpositive-data", () => {
-  const spec = (y: number[], type = "log") => ({
+describe("transform-domain-data", () => {
+  const spec = (y: number[], scaleY: Record<string, unknown>) => ({
     data: { columns: { x: y.map((_, i) => i + 1), y } },
     aes: { x: { field: "x" }, y: { field: "y" } },
     layers: [{ geom: "point" }],
-    scales: { y: { type } },
+    scales: { y: scaleY },
   });
 
-  it("fires on mixed-sign data under a log scale", () => {
-    const advisories = lintSpec(spec([5, -1, 0, 10]));
-    expect(codesOf(advisories)).toContain("log-nonpositive-data");
+  it("fires on mixed-sign data under an authored type:log scale (pre-normalization)", () => {
+    const advisories = lintSpec(spec([5, -1, 0, 10], { type: "log" }));
+    expect(codesOf(advisories)).toContain("transform-domain-data");
     expect(advisories[0]!.path).toBe("/scales/y");
-    expect(advisories[0]!.message).toContain("2 non-positive");
+    // log10 rejects <= 0: both -1 and 0 are out of the transform domain.
+    expect(advisories[0]!.message).toContain("2");
   });
 
-  it("silent for all-positive data or a linear scale", () => {
-    expect(lintSpec(spec([1, 2, 3]))).toEqual([]);
-    expect(lintSpec(spec([5, -1, 10], "linear"))).toEqual([]);
+  it("fires on canonical transform:log10 (type:linear) with mixed-sign data", () => {
+    const advisories = lintSpec(spec([5, -1, 0, 10], { type: "linear", transform: "log10" }));
+    expect(codesOf(advisories)).toContain("transform-domain-data");
+  });
+
+  it("fires on transform:sqrt when data mixes negative and non-negative values", () => {
+    // sqrt rejects < 0 only: 0 is a valid sqrt input, -4 is not.
+    const advisories = lintSpec(spec([4, -4, 0, 9], { type: "linear", transform: "sqrt" }));
+    expect(codesOf(advisories)).toContain("transform-domain-data");
+    expect(advisories[0]!.message).toContain("1");
+  });
+
+  it("silent for all-in-domain data or an untransformed scale", () => {
+    expect(lintSpec(spec([1, 2, 3], { type: "log" }))).toEqual([]);
+    // sqrt: zero is valid, so all-non-negative is silent.
+    expect(lintSpec(spec([0, 4, 9], { type: "linear", transform: "sqrt" }))).toEqual([]);
+    expect(lintSpec(spec([5, -1, 10], { type: "linear" }))).toEqual([]);
+    // all-invalid (no positive companion) is the pipeline's error/warning, not
+    // this mixed-data advisory.
+    expect(lintSpec(spec([-1, -2, 0], { type: "log" }))).toEqual([]);
   });
 });
 
@@ -278,5 +298,18 @@ describe("validate({ lint: true }) wiring", () => {
 describe("LINT_CATALOG coverage", () => {
   it("every cataloged advisory code fired in this suite", () => {
     expect([...firedCodes].toSorted()).toEqual(Object.keys(LINT_CATALOG).toSorted());
+  });
+
+  it("source-scan: every code emitted by lint.ts is cataloged and vice-versa (bijective)", () => {
+    // Mirror of core's source↔catalog scanner: scan the lint source for every
+    // `code: "..."` literal actually emitted, and prove it matches LINT_CATALOG
+    // exactly — no retired code lingers, no cataloged code is unemitted.
+    const src = readFileSync(new URL("../src/lint.ts", import.meta.url), "utf8");
+    const emitted = new Set<string>();
+    for (const m of src.matchAll(/\bcode:\s*"([a-z0-9-]+)"/g)) emitted.add(m[1]!);
+    expect([...emitted].toSorted()).toEqual(Object.keys(LINT_CATALOG).toSorted());
+    // The retired late-log codes must not survive anywhere in the source.
+    expect(src).not.toContain("log-nonpositive-data");
+    expect(src).not.toContain("log-domain-not-positive");
   });
 });

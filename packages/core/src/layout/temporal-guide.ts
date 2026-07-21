@@ -28,7 +28,9 @@ export interface AxisGuidePlan {
   id: string;
   aesthetic: "x" | "y";
   panelIndex: number;
-  scaleType: "linear" | "log" | "time" | "band";
+  scaleType: "linear" | "time" | "band";
+  /** Pre-stat numeric transform; time/band plans use identity. */
+  transform: "identity" | "log10" | "sqrt";
   temporalKind: TemporalKind | null;
   domain: readonly [number, number] | readonly CellValue[];
   direction: "ascending" | "descending";
@@ -86,6 +88,7 @@ export function planBasicAxis(input: {
     aesthetic: input.aesthetic,
     panelIndex: input.panelIndex,
     scaleType: input.scale.type,
+    transform: input.scale.type === "band" ? "identity" : input.scale.transform,
     temporalKind: null,
     domain:
       input.scale.type === "band"
@@ -483,6 +486,7 @@ export function planTemporalAxis(input: TemporalAxisPlanInput): AxisGuidePlan {
     aesthetic: input.aesthetic,
     panelIndex: input.panelIndex,
     scaleType: "time" as const,
+    transform: "identity" as const,
     temporalKind: input.kind,
     domain: Object.freeze([input.domain[0], input.domain[1]] as const),
     direction: input.reverse ? ("descending" as const) : ("ascending" as const),

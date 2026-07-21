@@ -40,8 +40,15 @@ ndensity`; density→`density, scaled`; smooth→`y, ymin, ymax, se`;
   the value to y, then flip). The ONLY orientation mechanism.
 - **facet**: wrap form `{"wrap": {"field": "g"}, "ncol": 3}` XOR grid form
   `{"rows": {...}, "cols": {...}}`; `"scales": "fixed"|"free"|"free_x"|"free_y"`.
-- **scales**: per channel: `{"type": "linear"|"log"|"time"|"band"}` for x/y;
-  time scales additionally accept `"parse"` (closed names such as `"dmy"`,
+- **scales**: canonical x/y families are `{"type": "linear"|"binned"|"time"|"band"}`.
+  Numeric continuous/binned scales accept `"transform":"identity"|"log10"|"sqrt"`,
+  semantic `domain`/`limits`, `oob:"censor"|"squish"`, `expand`, `nice`,
+  major/minor breaks, and `reverse`. Authored `type:"log"` is accepted but
+  canonicalizes to `type:"linear", transform:"log10"`; trained models never
+  report type `log`. Scale transforms run before stats and positions. Binned
+  integer ids remain private; guides, candidates, and events use semantic values.
+  Helpers include `scaleXLog10`, `scaleYSqrt`, `scaleXBinned` and binding-identical
+  `scale_x_log10`, `scale_y_sqrt`, `scale_x_binned` aliases. Time scales additionally accept `"parse"` (closed names such as `"dmy"`,
   exact `{ "format": ... }`, or `{ "epoch": "seconds"|"milliseconds" }`),
   `"temporalKind"`, `"timezone"`, `"disambiguation"`,
   `"parseFailure":"error"|"censor"`, `"dateBreaks"`,
@@ -58,7 +65,7 @@ ndensity`; density→`density, scaled`; smooth→`y, ymin, ymax, se`;
 - **temporal override rules**: `.scaleXDate()`/`.scaleYDate()` serialize mapped
   authoring `Date` cells as calendar dates; `.scaleXDatetime()`/
   `.scaleYDatetime()` preserve instants.
-  Explicit `linear`/`log` disables temporal inference, so numeric strings stay
+  Explicit `linear`/`binned` (including authored alias `log`) disables temporal inference, so numeric strings stay
   quantitative. Explicit ordinal color/fill keeps temporal-looking labels as
   separate groups; sequential temporal color/fill uses parsed domains and
   calendar legend labels. Censoring is available only with an explicit parser;
@@ -140,7 +147,7 @@ data-aware checks against a `DataProfile` —
 **Errors include `fix.example` — apply it at `path` and re-validate.**
 `validate(spec, { lint: true })` additionally returns advisories for
 valid-but-questionable specs (line over unordered categories, >10 discrete
-colors, stacked negative areas, discrete×discrete scatter, log over
+colors, stacked negative areas, discrete×discrete scatter, transform-domain
 mixed-sign data). Advisories never block; fix them when they match intent.
 
 ## Which geom for which data (DataProfile → recommendation)
@@ -185,7 +192,7 @@ All specs assume inline `"data": {"values": [...]}` or a named dataset.
 17. **Reference line annotation** — add layer `{"geom":"rule","params":{"yintercept":0}}`.
 18. **Value labels on columns** — recipe 6 + layer `{"geom":"text","aes":{"x":{"field":"category"},"y":{"field":"amount"},"label":{"field":"amount"}},"params":{"dy":-8}}` (`dy`/`dx` are px offsets; `position: "nudge"` + `positionParams.x/y` offsets in DATA units)
 19. **Facets (small multiples)** — any recipe + `"facet":{"wrap":{"field":"panel"},"ncol":3}` (add `"scales":"free_y"` for per-panel y).
-20. **Big scatter (canvas)** — recipe 1 + `"render":"canvas"` on the layer (or let >2000 marks auto-switch; `"a11y":"force-svg"` at plot level overrides for assistive tech). Log axis: `"scales":{"x":{"type":"log"}}` (positive data only). Jittered categorical scatter: `"position":"jitter"` on a point layer.
+20. **Big scatter (canvas)** — recipe 1 + `"render":"canvas"` on the layer (or let >2000 marks auto-switch; `"a11y":"force-svg"` at plot level overrides for assistive tech). Log10 axis: `"scales":{"x":{"type":"linear","transform":"log10"}}` (positive data only; transform runs before stats). Jittered categorical scatter: `"position":"jitter"` on a point layer.
 
 Finish with `"labs": {"title": ..., "x": ..., "y": ...}` for human-readable
 labels, `"width"`/`"height"` in px, `"theme": "default"|"light"|"dark"|"minimal"`.

@@ -20,6 +20,8 @@ export function makeErrorbarHalfWidth(
   return (row: number) => {
     if (res === 0 || frame.xNumeric === null) return 0.01; // lone x: 2% of panel
     const v = frame.xNumeric[row]!;
-    return Math.abs(scale.normalize(v + (widthParam * res) / 2) - scale.normalize(v));
+    return Math.abs(
+      scale.normalizeTransformed(v + (widthParam * res) / 2) - scale.normalizeTransformed(v),
+    );
   };
 }

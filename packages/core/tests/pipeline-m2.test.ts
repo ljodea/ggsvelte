@@ -343,7 +343,8 @@ describe("density geom", () => {
     expect(batch.closed).toBe(true);
     expect(batch.fills).toBeDefined();
     expect(model.scales.y.type).toBe("linear");
-    if (model.scales.y.type !== "band") expect(model.scales.y.domain[0]).toBe(0);
+    // density area from the zero baseline; 5% display expansion pads below it.
+    if (model.scales.y.type !== "band") expect(model.scales.y.domain[0]).toBeLessThanOrEqual(0);
     expect(model.scene.axes.y.title).toBe("density");
   });
 

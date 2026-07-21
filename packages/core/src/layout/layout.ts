@@ -39,8 +39,14 @@ import {
 import { defaultTimeTickFormat, timeTicks } from "./time.js";
 
 export type Domain =
-  | { type: "linear"; min: number; max: number; breaks?: readonly number[] }
-  | { type: "log"; min: number; max: number; breaks?: readonly number[] }
+  | {
+      type: "linear";
+      /** Pre-stat transform: numeric tick/grid/format dispatch keys from this. */
+      transform?: "identity" | "log10" | "sqrt";
+      min: number;
+      max: number;
+      breaks?: readonly number[];
+    }
   | {
       type: "time";
       min: number;
@@ -232,7 +238,7 @@ function deriveTicks(
       ? (v) => format(v, step)
       : domain.type === "time"
         ? defaultTimeTickFormat
-        : domain.type === "log"
+        : domain.type === "linear" && domain.transform === "log10"
           ? defaultLogTickFormat
           : defaultTickFormat(step);
     return {
@@ -288,13 +294,28 @@ function deriveTicks(
       empty: false,
     };
   }
-  if (domain.type === "log") {
+  // log10: decade-aware ticks selected on the semantic (positive) domain.
+  if (domain.transform === "log10") {
     const values = logTicks(min, max, requestedCount);
     const fmt: (v: number) => string = format ? (v) => format(v, NaN) : defaultLogTickFormat;
     return {
       ticks: values.map((v) => ({ value: v, label: fmt(v), labeled: true })),
       step: NaN,
       empty: false,
+    };
+  }
+  // sqrt: select ticks in transformed (sqrt) space, inverse-project to finite
+  // semantic labels so spacing is even in pixels.
+  if (domain.transform === "sqrt") {
+    const lo = min < 0 ? 0 : Math.sqrt(min);
+    const transformedTicks = linearTicks(lo, Math.sqrt(max), requestedCount);
+    const values = transformedTicks.map((t) => t * t);
+    const step = smallestGap(values);
+    const fmt: (v: number) => string = format ? (v) => format(v, step) : defaultTickFormat(step);
+    return {
+      ticks: values.map((v) => ({ value: v, label: fmt(v), labeled: true })),
+      step,
+      empty: values.length === 0,
     };
   }
   const values = linearTicks(min, max, requestedCount);

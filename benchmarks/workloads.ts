@@ -23,7 +23,7 @@ import {
   runPipeline,
 } from "@ggsvelte/core";
 import { drawStratum } from "@ggsvelte/core/dom";
-import { aes, gg } from "@ggsvelte/spec";
+import { aes, gg, MAX_BINNED_BREAKS, scaleXBinned, scaleXContinuous } from "@ggsvelte/spec";
 import type { PortableSpec } from "@ggsvelte/spec";
 
 export interface Workload {
@@ -92,6 +92,65 @@ function scatterSpec(n: number, render?: "svg" | "canvas"): PortableSpec {
   }
   return gg({ x, y, cls }, aes({ x: "x", y: "y", color: "cls" }))
     .geomPoint({ size: 1.5, alpha: 0.7, ...(render !== undefined && { render }) })
+    .spec();
+}
+
+/** PR 3 transform workload: positive data shared by identity/log10/sqrt. */
+function transformedScatterSpec(n: number, transform: "identity" | "log10" | "sqrt"): PortableSpec {
+  const x = Array.from<number>({ length: n });
+  const y = Array.from<number>({ length: n });
+  for (let i = 0; i < n; i++) {
+    x[i] = 1 + (i % 10_000);
+    y[i] = 1 + ((i * 17) % 10_000);
+  }
+  return gg({ x, y }, aes({ x: "x", y: "y" }))
+    .geomPoint({ render: "canvas" })
+    .scales(scaleXContinuous({ transform }))
+    .spec();
+}
+
+function transformedStatsSpec(n: number, stat: "smooth" | "bin"): PortableSpec {
+  const x = Array.from<number>({ length: n });
+  const y = Array.from<number>({ length: n });
+  for (let i = 0; i < n; i++) {
+    x[i] = 1 + (i % 10_000);
+    y[i] = 5 + Math.log10(x[i]!) * 3 + (i % 7) / 10;
+  }
+  if (stat === "smooth") {
+    return gg({ x, y }, aes({ x: "x", y: "y" }))
+      .geomSmooth({ method: "lm", se: false, n: 80 })
+      .scales(scaleXContinuous({ transform: "log10" }))
+      .spec();
+  }
+  return gg({ x }, aes({ x: "x" }))
+    .geomHistogram({ binwidth: 0.25, boundary: 0 })
+    .scales(scaleXContinuous({ transform: "log10" }))
+    .spec();
+}
+
+function transformedFacetSpec(n: number, panels: number): PortableSpec {
+  const x = Array.from<number>({ length: n });
+  const y = Array.from<number>({ length: n });
+  const panel = Array.from<string>({ length: n });
+  for (let i = 0; i < n; i++) {
+    x[i] = 1 + (i % 10_000);
+    y[i] = 1 + ((i * 13) % 1_000);
+    panel[i] = `panel-${i % panels}`;
+  }
+  return gg({ x, y, panel }, aes({ x: "x", y: "y" }))
+    .geomPoint({ render: "canvas" })
+    .facet({ wrap: "panel", ncol: 10 })
+    .scales(scaleXContinuous({ transform: "log10" }))
+    .spec();
+}
+
+function maxBoundaryBinnedSpec(n: number): PortableSpec {
+  const x = Array.from<number>({ length: n }, (_, i) => (i % MAX_BINNED_BREAKS) + 0.5);
+  const y = Array.from<number>({ length: n }, () => 1);
+  const breaks = Array.from<number>({ length: MAX_BINNED_BREAKS + 1 }, (_, i) => i);
+  return gg({ x, y }, aes({ x: "x", y: "y" }))
+    .geomPoint({ render: "canvas" })
+    .scales(scaleXBinned({ breaks }))
     .spec();
 }
 
@@ -451,6 +510,43 @@ export function buildWorkloads(smoke: boolean): Workload[] {
         },
       },
     );
+  }
+
+  // --- PR 3 pre-stat transform and binned-family workloads ------------------
+  {
+    const n = smoke ? 1_000 : 100_000;
+    for (const transform of ["identity", "log10", "sqrt"] as const) {
+      const spec = transformedScatterSpec(n, transform);
+      workloads.push({
+        id: `pipeline transform-${transform} ${fmtK(n)}`,
+        group: `position transform ${transform} ${fmtK(n)}`,
+        bench: `runPipeline transform ${transform} ${fmtK(n)}`,
+        fn: () => runPipeline(spec, opts),
+      });
+    }
+    for (const stat of ["smooth", "bin"] as const) {
+      const spec = transformedStatsSpec(n, stat);
+      workloads.push({
+        id: `pipeline transform-log10 ${stat} ${fmtK(n)}`,
+        group: `pre-stat log10 ${stat} ${fmtK(n)}`,
+        bench: `runPipeline log10 ${stat} ${fmtK(n)}`,
+        fn: () => runPipeline(spec, opts),
+      });
+    }
+    const facets = transformedFacetSpec(n, smoke ? 10 : 100);
+    workloads.push({
+      id: `pipeline transform-log10 facets-${smoke ? "10" : "100"} ${fmtK(n)}`,
+      group: `shared transform cache ${smoke ? "10" : "100"} facets ${fmtK(n)}`,
+      bench: `runPipeline log10 shared facets ${fmtK(n)}`,
+      fn: () => runPipeline(facets, { ...opts, width: 1_200, height: 900 }),
+    });
+    const binned = maxBoundaryBinnedSpec(n);
+    workloads.push({
+      id: `pipeline binned-${MAX_BINNED_BREAKS} ${fmtK(n)}`,
+      group: `binned ${MAX_BINNED_BREAKS} boundaries ${fmtK(n)}`,
+      bench: `runPipeline max-boundary binned ${fmtK(n)}`,
+      fn: () => runPipeline(binned, opts),
+    });
   }
 
   // --- M2 statistical workloads (plan: bin 100k, loess 5k, density 100k) ----

@@ -380,7 +380,10 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
         ),
       });
     }
-    return semanticAxisFromBounds(scale.type, [Number(bounds[0]), Number(bounds[1])]);
+    return semanticAxisFromBounds(scale.type, scale.transform, [
+      Number(bounds[0]),
+      Number(bounds[1]),
+    ]);
   }
 
   function eventAxisBounds(

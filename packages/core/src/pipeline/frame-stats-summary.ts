@@ -7,7 +7,7 @@ import { statSummary } from "../stats/summary.js";
 import { ColumnTable } from "../table.js";
 
 import { carriedColumns, emptyFrameExtras, removedStatWarning } from "./frame-helpers.js";
-import { positionValuesToNumeric } from "./temporal-position.js";
+import { positionColumn, positionValuesToNumeric } from "./temporal-position.js";
 import { makeColumnOf } from "./frame-stats-shared.js";
 import type { LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
 import { NO_ROW } from "./types.js";
@@ -24,11 +24,7 @@ export function buildSummaryFrame(
   const params = (layer.params ?? {}) as ErrorbarParams;
   const result = statSummary({
     x: table.column(binding.xField!),
-    y: table.numeric(
-      binding.yField!,
-      binding.yConversion.sourceParser,
-      binding.yConversion.options,
-    ),
+    y: positionColumn(table, binding.yField!, binding.yConversion, binding.yTransform),
     groups,
     fun: params.fun,
     funMin: params.funMin,

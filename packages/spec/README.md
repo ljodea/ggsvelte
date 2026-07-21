@@ -70,6 +70,14 @@ millisecond, second, minute, hour, day, week, month, quarter, or year. Explicit
 `breaks` outrank `dateBreaks`; `dateLabels` outranks the legacy soft-fallback
 `labels` formatter.
 
+Numeric position transforms are also closed portable names and run before
+statistics. Canonical scales retain family `linear` or `binned` plus
+`transform: "identity" | "log10" | "sqrt"`; authored `type: "log"` normalizes
+to linear + log10. Use `scaleXLog10`, `scaleYSqrt`, `scaleXBinned`, or the
+binding-identical ggplot2 aliases (`scale_x_log10`, `scale_y_sqrt`,
+`scale_x_binned`). Domains/limits are semantic source units; OOB censor/squish
+happens before the transform and stats.
+
 All six orders (`ymd`, `ydm`, `mdy`, `myd`, `dmy`, `dym`), timestamp variants,
 exact closed formats, and epoch units are typed. PortableSpec never contains `Date`,
 callbacks, or regular expressions; builder Dates canonicalize to ISO strings.

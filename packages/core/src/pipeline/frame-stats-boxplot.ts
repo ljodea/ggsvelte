@@ -8,6 +8,7 @@ import type { ColumnTable } from "../table.js";
 
 import { carriedColumns, emptyFrameExtras, removedStatWarning } from "./frame-helpers.js";
 import { makeColumnOf } from "./frame-stats-shared.js";
+import { positionColumn } from "./temporal-position.js";
 import type { LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
 import { NO_ROW } from "./types.js";
 
@@ -23,11 +24,7 @@ export function buildBoxplotFrame(
   const params = (layer.params ?? {}) as BoxplotParams;
   const result = statBoxplot({
     x: table.column(binding.xField!),
-    y: table.numeric(
-      binding.yField!,
-      binding.yConversion.sourceParser,
-      binding.yConversion.options,
-    ),
+    y: positionColumn(table, binding.yField!, binding.yConversion, binding.yTransform),
     groups,
     ...(params.coef !== undefined && { coef: params.coef }),
     carried,

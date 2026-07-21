@@ -29,7 +29,7 @@ export function buildBoxplotOutliers(input: {
   for (let i = 0; i < box.outlierY.length; i++) {
     const boxRow = box.outlierBox[i]!;
     const cx = centerPx[boxRow];
-    const ty = yScale.normalize(box.outlierY[i]!);
+    const ty = yScale.normalizeTransformed(box.outlierY[i]!);
     if (cx === undefined || Number.isNaN(cx) || Number.isNaN(ty)) continue;
     positions.push(cx, fx.innerHeight - ty * fx.innerHeight);
     rowIndex.push(NO_ROW);

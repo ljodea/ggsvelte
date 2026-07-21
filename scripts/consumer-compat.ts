@@ -260,7 +260,7 @@ export function writeConsumerFixture(
   writeFileSync(
     join(directory, "src", "routes", "contract", "+page.svelte"),
     `<script lang="ts">
-  import { dmy, GGPlot, GeomLine, scaleXDate, scale_x_date, type GuidePlan, type PortableSpec } from "@ggsvelte/svelte";
+  import { dmy, GGPlot, GeomLine, GeomPoint, scaleXBinned, scaleXDate, scaleXLog10, scale_x_date, scale_x_log10, type GuidePlan, type PortableSpec } from "@ggsvelte/svelte";
   const spec: PortableSpec = ${JSON.stringify(plotSpec)};
   const temporalRows = [
     { year: "1835", value: 12 },
@@ -277,6 +277,12 @@ export function writeConsumerFixture(
     weekStart: "monday",
   });
   const authorDate = dmy("31/12/2024");
+  const logScale = scaleXLog10({ limits: [1, 1000] });
+  const logAlias = scale_x_log10({ limits: [1, 1000] });
+  const binnedScale = scaleXBinned({ breaks: [1, 10, 100, 1000] });
+  void logScale;
+  void logAlias;
+  void binnedScale;
   void explicitDateScale;
   void camelDateScale;
   const guidePlan: GuidePlan | undefined = undefined;
@@ -293,6 +299,16 @@ export function writeConsumerFixture(
   ariaLabel="Raw year temporal contract chart"
 >
   <GeomLine />
+</GGPlot>
+<GGPlot
+  data={[{ x: 1, y: 1 }, { x: 10, y: 2 }, { x: 100, y: 3 }]}
+  aes={{ x: "x", y: "y" }}
+  scales={scaleXLog10()}
+  width={480}
+  height={320}
+  ariaLabel="Packed log transform contract chart"
+>
+  <GeomPoint />
 </GGPlot>
 `,
   );
@@ -319,12 +335,21 @@ console.log("prerendered Quickstart verified");
   writeFileSync(
     join(directory, "smoke.mjs"),
     `import { strict as assert } from "node:assert";
-import { SpecModule, validate } from "@ggsvelte/spec";
-import { renderToSVGString } from "@ggsvelte/core";
+import { SpecModule, normalize, scaleXBinned, scaleXLog10, scale_x_log10, validate } from "@ggsvelte/spec";
+import { renderToSVGString, runPipeline } from "@ggsvelte/core";
 
 const pointParamsSchema = SpecModule.Import("PointParams");
 void pointParamsSchema;
 const spec = ${JSON.stringify(plotSpec)};
+const logScale = scaleXLog10();
+assert.deepEqual(logScale, scale_x_log10());
+assert.equal(normalize({ data: spec.data, layers: spec.layers, scales: logScale }).scales.x.type, "linear");
+assert.equal(normalize({ data: spec.data, layers: spec.layers, scales: logScale }).scales.x.transform, "log10");
+const binnedSpec = {
+  data: { values: [{ x: 1, y: 1 }, { x: 9, y: 2 }, { x: 11, y: 3 }] },
+  layers: [{ geom: "point", aes: { x: { field: "x" }, y: { field: "y" } } }],
+  scales: scaleXBinned({ breaks: [0, 10, 20] }),
+};
 const temporalSpec = {
   data: { values: [{ year: "1835", value: 12 }, { year: "2026", value: 31 }] },
   layers: [{ geom: "line", aes: { x: { field: "year" }, y: { field: "value" } } }],
@@ -332,6 +357,9 @@ const temporalSpec = {
 };
 assert.equal(validate(spec).ok, true);
 assert.equal(validate(temporalSpec).ok, true);
+assert.equal(validate(binnedSpec).ok, true);
+const binnedModel = runPipeline(binnedSpec, { width: 480, height: 320 });
+assert.equal(binnedModel.scales.x.type, "linear");
 assert.match(renderToSVGString(spec, { width: 480, height: 320 }), /<svg/);
 assert.match(renderToSVGString(temporalSpec, { width: 480, height: 320 }), /1835|1850/);
 console.log("consumer smoke passed");

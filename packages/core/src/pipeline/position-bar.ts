@@ -3,7 +3,9 @@
  */
 import { positionDodge, positionStack } from "../positions/positions.js";
 import { encodeKey } from "../scales/state.js";
+import { scaleTransform } from "../scales/transform.js";
 
+import { transformedZeroBaseline } from "./position-baseline.js";
 import { isBarLike } from "./scale-training.js";
 import type { LayerFrame } from "./types.js";
 
@@ -11,6 +13,12 @@ import type { LayerFrame } from "./types.js";
  * `encodeKey` matches the band scale's typed identity, so categories with
  * colliding labels (`1` vs `"1"`) occupy distinct slots. */
 export function barSlotKeys(frame: LayerFrame): (number | string)[] | null {
+  // A binned position scale groups by the stable integer bin id, NOT the
+  // rendered float center: raw source values inside one bin stack/dodge
+  // together with no float-equality fragility and no id leak into geometry.
+  if (frame.binding?.xBinning !== undefined && frame.xBinId !== null) {
+    return Array.from(frame.xBinId);
+  }
   if (frame.xValues !== null) return frame.xValues.map((v) => encodeKey(v));
   if (frame.xNumeric !== null) return Array.from(frame.xNumeric);
   return null;
@@ -32,13 +40,16 @@ export function applyBarLikePosition(frame: LayerFrame): boolean {
     frame.ymax = ymax;
     return true;
   }
-  // identity / dodge: bars grow from the zero baseline.
+  // identity / dodge: bars grow from the shared transformed-origin baseline.
+  const baseline = transformedZeroBaseline(
+    binding.yTransform?.transform ?? scaleTransform("identity"),
+  );
   const ymin = new Float64Array(frame.n);
   const ymax = new Float64Array(frame.n);
   for (let i = 0; i < frame.n; i++) {
-    const v = Number.isFinite(y[i]!) ? y[i]! : 0;
-    ymin[i] = Math.min(0, v);
-    ymax[i] = Math.max(0, v);
+    const v = Number.isFinite(y[i]!) ? y[i]! : baseline;
+    ymin[i] = Math.min(baseline, v);
+    ymax[i] = Math.max(baseline, v);
   }
   frame.ymin = ymin;
   frame.ymax = ymax;

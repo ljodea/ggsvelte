@@ -368,6 +368,26 @@ export const DOCS_ROUTES = [
     },
     headings: [
       {
+        id: "continuous-position-scales",
+        title: "Continuous position scales",
+        level: 2,
+      },
+      {
+        id: "limits-missing-values-and-oob-policy",
+        title: "Limits, missing values, and OOB policy",
+        level: 2,
+      },
+      {
+        id: "binned-positions",
+        title: "Binned positions",
+        level: 2,
+      },
+      {
+        id: "breaks-and-labels",
+        title: "Breaks and labels",
+        level: 2,
+      },
+      {
         id: "categorical-color",
         title: "Categorical color",
         level: 2,
@@ -1284,8 +1304,33 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
-        id: "log-domain-not-positive",
-        title: "log-domain-not-positive",
+        id: "invalid-scale-transform",
+        title: "invalid-scale-transform",
+        level: 3,
+      },
+      {
+        id: "scale-transform-domain",
+        title: "scale-transform-domain",
+        level: 3,
+      },
+      {
+        id: "scale-type-transform-conflict",
+        title: "scale-type-transform-conflict",
+        level: 3,
+      },
+      {
+        id: "scale-zero-invalid-for-transform",
+        title: "scale-zero-invalid-for-transform",
+        level: 3,
+      },
+      {
+        id: "binned-scale-requires-continuous",
+        title: "binned-scale-requires-continuous",
+        level: 3,
+      },
+      {
+        id: "binned-scale-break-limit",
+        title: "binned-scale-break-limit",
         level: 3,
       },
       {
@@ -1334,8 +1379,23 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
-        id: "log-nonpositive",
-        title: "log-nonpositive",
+        id: "scale-transform-domain-warning",
+        title: "scale-transform-domain — warning",
+        level: 3,
+      },
+      {
+        id: "scale-oob-censored",
+        title: "scale-oob-censored",
+        level: 3,
+      },
+      {
+        id: "scale-oob-squished",
+        title: "scale-oob-squished",
+        level: 3,
+      },
+      {
+        id: "scale-break-outside-domain",
+        title: "scale-break-outside-domain",
         level: 3,
       },
       {
@@ -1576,8 +1636,8 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
-        id: "log-nonpositive-data-needs-data",
-        title: "log-nonpositive-data (needs: data)",
+        id: "transform-domain-data-needs-data",
+        title: "transform-domain-data (needs: data)",
         level: 3,
       },
       {
@@ -1593,6 +1653,11 @@ export const DOCS_ROUTES = [
       {
         id: "zero-forced",
         title: "zero-forced",
+        level: 3,
+      },
+      {
+        id: "scale-baseline-transformed-origin",
+        title: "scale-baseline-transformed-origin",
         level: 3,
       },
       {
@@ -1673,8 +1738,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-245",
-        title: "experimental (245)",
+        id: "experimental-269",
+        title: "experimental (269)",
         level: 3,
       },
       {
@@ -1688,8 +1753,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-213",
-        title: "experimental (213)",
+        id: "experimental-219",
+        title: "experimental (219)",
         level: 3,
       },
       {
@@ -1713,8 +1778,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-198",
-        title: "experimental (198)",
+        id: "experimental-221",
+        title: "experimental (221)",
         level: 3,
       },
       {
@@ -1743,6 +1808,26 @@ export const DOCS_ROUTES = [
         id: "five-minute-path",
         title: "Five-minute path",
         level: 2,
+      },
+      {
+        id: "0-4-to-0-5",
+        title: "0.4 to 0.5",
+        level: 2,
+      },
+      {
+        id: "move-position-transforms-before-statistics",
+        title: "Move position transforms before statistics",
+        level: 3,
+      },
+      {
+        id: "review-limits-zoom-and-transformed-units",
+        title: "Review limits, zoom, and transformed units",
+        level: 3,
+      },
+      {
+        id: "update-scale-and-interaction-inspection",
+        title: "Update scale and interaction inspection",
+        level: 3,
       },
       {
         id: "0-2-to-0-3",
@@ -2080,9 +2165,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/point/log-scale",
-    title: "Log-scale scatter — ggsvelte gallery",
+    title: "Pre-stat log10 scale and fit — ggsvelte gallery",
     description:
-      "A scatter plot with a base-10 logarithmic x scale and SI-prefix tick labels — density-adaptive log ticks handle three decades of GDP per capita.",
+      "A scatter and linear fit computed after a base-10 x transform, with semantic SI-prefix ticks across three decades of GDP per capita.",
     canonicalPath: "/examples/point/log-scale",
     kind: "page",
     index: true,

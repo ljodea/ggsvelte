@@ -152,6 +152,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "ContinuousPositionScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "CoordSpec": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -404,6 +408,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "MAX_BINNED_BREAKS": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "MAX_TEMPORAL_CANDIDATES": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -573,6 +581,10 @@
           "lifecycle": "experimental"
         },
         "ScaleCapability": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ScaleExpansion": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -768,6 +780,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "TransformedPositionScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "UnportableSpecError": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -912,6 +928,14 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scaleXBinned": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleXContinuous": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scaleXDate": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -921,6 +945,26 @@
           "lifecycle": "experimental"
         },
         "scaleXDiscrete": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleXLog10": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleXReverse": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleXSqrt": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleYBinned": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleYContinuous": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -936,6 +980,26 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scaleYLog10": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleYReverse": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleYSqrt": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_x_binned": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_x_continuous": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scale_x_date": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -948,6 +1012,26 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scale_x_log10": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_x_reverse": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_x_sqrt": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_y_binned": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_y_continuous": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scale_y_date": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -957,6 +1041,18 @@
           "lifecycle": "experimental"
         },
         "scale_y_discrete": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_y_log10": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_y_reverse": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_y_sqrt": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -1319,6 +1415,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "MAX_BINNED_BREAKS": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "MappedField": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1359,6 +1459,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "POSITION_TRANSFORM_NAMES": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "PaletteExhaustedError": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -1396,6 +1500,10 @@
           "lifecycle": "experimental"
         },
         "PositionScale": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PositionTransformName": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -1484,6 +1592,10 @@
           "lifecycle": "experimental"
         },
         "ScaleState": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ScaleTransform": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -1731,6 +1843,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "getScaleTransform": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "inferDiscreteness": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -1836,6 +1952,10 @@
           "lifecycle": "experimental"
         },
         "runtimeFilterValueEqual": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleTransform": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -1998,6 +2118,10 @@
           "lifecycle": "experimental"
         },
         "ColorScaleSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ContinuousPositionScaleOptions": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -2381,6 +2505,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "ScaleExpansion": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "ScaleState": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -2525,6 +2653,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "TransformedPositionScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "ValidateResult": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -2661,6 +2793,14 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scaleXBinned": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleXContinuous": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scaleXDate": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -2670,6 +2810,26 @@
           "lifecycle": "experimental"
         },
         "scaleXDiscrete": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleXLog10": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleXReverse": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleXSqrt": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleYBinned": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleYContinuous": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -2685,6 +2845,26 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scaleYLog10": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleYReverse": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleYSqrt": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_x_binned": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_x_continuous": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scale_x_date": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -2697,6 +2877,26 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scale_x_log10": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_x_reverse": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_x_sqrt": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_y_binned": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_y_continuous": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scale_y_date": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -2706,6 +2906,18 @@
           "lifecycle": "experimental"
         },
         "scale_y_discrete": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_y_log10": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_y_reverse": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_y_sqrt": {
           "kind": "value",
           "lifecycle": "experimental"
         },

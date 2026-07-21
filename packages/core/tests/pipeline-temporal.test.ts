@@ -31,6 +31,34 @@ describe("temporal pipeline semantics", () => {
     }
   });
 
+  it("warns unused-scale-option when generic minorBreaks loses to dateMinorBreaks", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { date: "2024-01-01", value: 1 },
+          { date: "2024-04-01", value: 2 },
+        ],
+        aes({ x: "date", y: "value" }),
+      )
+        .geomLine()
+        .scales({
+          x: {
+            type: "time",
+            temporalKind: "date",
+            dateMinorBreaks: "1 week",
+            minorBreaks: [1_704_672_000_000],
+          },
+        })
+        .spec(),
+      size,
+    );
+    const warning = model.warnings.find(
+      (w) => w.code === "unused-scale-option" && w.message.includes("minorBreaks"),
+    );
+    expect(warning).toBeDefined();
+    expect(warning!.message).toContain("dateMinorBreaks takes precedence");
+  });
+
   it("projects explicit major and minor temporal intervals separately", () => {
     const model = runPipeline(
       gg(
@@ -169,12 +197,15 @@ describe("temporal pipeline semantics", () => {
       } catch (error) {
         thrown = error;
       }
+      // type "log" canonicalizes to the linear family (transform log10) before
+      // validation, so the mismatch reports the canonical "linear".
+      const canonicalType = type === "log" ? "linear" : type;
       expect(thrown, type).toBeInstanceOf(SpecValidationError);
       expect((thrown as SpecValidationError).errors, type).toEqual([
         {
           code: "scale-type-mismatch",
           path: "/scales/x",
-          message: `scales.x uses temporal break or label options with explicit type "${type}".`,
+          message: `scales.x uses temporal break or label options with explicit type "${canonicalType}".`,
           fix: {
             description:
               'Use type "time", a date/datetime scale helper, or remove the temporal option.',
@@ -579,7 +610,10 @@ describe("temporal pipeline semantics", () => {
     expect([...paths.pathOffsets]).toEqual([0, 2, 4]);
   });
 
-  for (const type of ["linear", "log"] as const) {
+  for (const [type, transform] of [
+    ["linear", "identity"],
+    ["log", "log10"],
+  ] as const) {
     it(`keeps numeric string years quantitative under an explicit ${type} scale`, () => {
       const model = runPipeline(
         gg(yearRows, aes({ x: "year", y: "value" }))
@@ -589,8 +623,14 @@ describe("temporal pipeline semantics", () => {
         size,
       );
 
-      expect(model.scales.x.type).toBe(type);
-      expect(model.scales.x.domain).toEqual([1835, 2026]);
+      // "log" canonicalizes to the linear family + log10 transform.
+      expect(model.scales.x.type).toBe("linear");
+      if (model.scales.x.type !== "band") {
+        expect(model.scales.x.transform).toBe(transform);
+        // The semantic span 1835..2026 is retained (with 5% display expansion).
+        expect(model.scales.x.domain[0]).toBeLessThanOrEqual(1835);
+        expect(model.scales.x.domain[1]).toBeGreaterThanOrEqual(2026);
+      }
       expect(model.scaleDecisions).toHaveLength(0);
     });
   }
@@ -870,7 +910,8 @@ describe("temporal pipeline semantics", () => {
         .spec(),
       size,
     );
-    expect(equivalentSpellings.scales.y.domain).toEqual([0, 2]);
+    // Count y axis (linear) now carries the default 5% display expansion.
+    expect(equivalentSpellings.scales.y.domain).toEqual([-0.1, 2.1]);
   });
 
   it("rejects invalid annotations after mapped data infers a temporal parser", () => {

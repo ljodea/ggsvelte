@@ -9,6 +9,7 @@ import type { ColumnTable } from "../table.js";
 import { carriedColumns, removedStatWarning } from "./frame-helpers.js";
 import { packBinLayerFrame } from "./frame-stats-bin-frame.js";
 import { makeColumnOf } from "./frame-stats-shared.js";
+import { positionColumn } from "./temporal-position.js";
 import type { Advisory, LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
 
 export function buildBinFrame(
@@ -23,11 +24,7 @@ export function buildBinFrame(
   const carried = carriedColumns(binding, table);
   const columnOf = makeColumnOf(binding);
   const result = statBin({
-    x: table.numeric(
-      binding.xField!,
-      binding.xConversion.sourceParser,
-      binding.xConversion.options,
-    ),
+    x: positionColumn(table, binding.xField!, binding.xConversion, binding.xTransform),
     groups,
     weights: binding.weightField === null ? null : table.numeric(binding.weightField),
     carried,

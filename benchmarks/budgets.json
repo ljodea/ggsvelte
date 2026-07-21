@@ -22,6 +22,13 @@
     "canvas redraw scatter 100k": { "budgetMs": 0.87 },
     "hit-index build 100k": { "budgetMs": 31 },
     "candidate lookup 100k": { "budgetMs": 8 },
+    "pipeline transform-identity 100k": { "budgetMs": 20 },
+    "pipeline transform-log10 100k": { "budgetMs": 20 },
+    "pipeline transform-sqrt 100k": { "budgetMs": 20 },
+    "pipeline transform-log10 smooth 100k": { "budgetMs": 18 },
+    "pipeline transform-log10 bin 100k": { "budgetMs": 15 },
+    "pipeline transform-log10 facets-100 100k": { "budgetMs": 100 },
+    "pipeline binned-64 100k": { "budgetMs": 28 },
     "pipeline histogram 100k": { "budgetMs": 30 },
     "pipeline loess 5k": { "budgetMs": 710 },
     "pipeline density 100k": { "budgetMs": 150 }

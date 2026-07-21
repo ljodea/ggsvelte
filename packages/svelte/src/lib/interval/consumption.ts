@@ -50,7 +50,9 @@ function numericAxisContains(axis: SemanticIntervalAxis, value: CellValue): bool
   if (axis.kind === "band") return false;
   const numeric = cellToNumber(value);
   if (!Number.isFinite(numeric)) return false;
-  if (axis.kind === "log" && numeric <= 0) return false;
+  const transform = axis.transform ?? "identity";
+  if (transform === "log10" && numeric <= 0) return false;
+  if (transform === "sqrt" && numeric < 0) return false;
   return numeric >= axis.domain[0] && numeric <= axis.domain[1];
 }
 
@@ -172,6 +174,7 @@ function sameIntervalAxis(
       left.values.every((value, index) => value === right.values[index])
     );
   }
+  if ((left.transform ?? "identity") !== (right.transform ?? "identity")) return false;
   return Object.is(left.domain[0], right.domain[0]) && Object.is(left.domain[1], right.domain[1]);
 }
 

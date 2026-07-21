@@ -17,6 +17,8 @@ import {
   type TemporalPrecision,
 } from "@ggsvelte/spec";
 
+import { type ColumnTransformConfig, executeColumnTransform } from "./scales/transform.js";
+
 export type CellValue = string | number | boolean | Date | null;
 export type Columns = Readonly<Record<string, readonly CellValue[]>>;
 export type Rows = readonly Readonly<Record<string, CellValue>>[];
@@ -41,6 +43,31 @@ export interface ParsedColumnView {
   temporalKind?: TemporalKind;
   temporalPrecision?: TemporalPrecision;
   decision: TemporalDecision;
+}
+
+/**
+ * Immutable transformed (scale-space) view: the parser result plus the pre-stat
+ * OOB/NA/forward transform. `semantic` is source units; `transformed` is
+ * scale units; `valid` reflects post-transform validity. Counts feed bounded
+ * axis diagnostics without placing full columns in the public model.
+ */
+export interface TransformedColumnView {
+  raw: readonly CellValue[];
+  semantic: Float64Array;
+  transformed: Float64Array;
+  valid: Uint8Array;
+  parserKey: string;
+  transformKey: string;
+  censored: number;
+  squished: number;
+  invalidTransform: number;
+}
+
+function transformConfigKey(config: ColumnTransformConfig): string {
+  const limits =
+    config.sourceLimits === null ? "none" : `${config.sourceLimits[0]},${config.sourceLimits[1]}`;
+  const na = config.naValue === null ? "null" : String(config.naValue);
+  return `${config.transform.key}|${limits}|${config.oob}|${na}`;
 }
 
 /** Strict ISO predicate retained for public import compatibility. */
@@ -157,6 +184,7 @@ export class ColumnTable {
   readonly #columns: Record<string, readonly CellValue[]>;
   readonly #rowCount: number;
   readonly #parsedCache = new Map<string, ParsedColumnView>();
+  readonly #transformedCache = new Map<string, TransformedColumnView>();
   readonly #typeCache = new Map<string, FieldType>();
   readonly #parent: ColumnTable | null;
   readonly #parentRows: readonly number[] | Uint32Array | null;
@@ -292,6 +320,90 @@ export class ColumnTable {
     options: ParsedColumnOptions = {},
   ): Float64Array {
     return this.parsed(name, parser, options).semantic;
+  }
+
+  /**
+   * Immutable transformed (scale-space) view, cached by the parsed request key
+   * plus (transform, source limits, OOB, naValue). Identity with no OOB/NA
+   * aliases the semantic arrays (no O(rows) copy). Subsets gather the parent's
+   * transformed values by source row, so the transform runs once per source key
+   * regardless of facet count.
+   */
+  transformed(
+    name: string,
+    parser: TemporalParserSpec | "auto",
+    options: ParsedColumnOptions,
+    config: ColumnTransformConfig,
+  ): TransformedColumnView {
+    const transformKey = transformConfigKey(config);
+    const cacheKey = `${name}|${requestKey(parser, options)}|${transformKey}`;
+    const cached = this.#transformedCache.get(cacheKey);
+    if (cached !== undefined) return cached;
+
+    const parsedView = this.parsed(name, parser, options);
+
+    // Fast path: identity with no OOB/NA rewrite aliases the semantic arrays.
+    if (
+      config.transform.key === "identity" &&
+      config.sourceLimits === null &&
+      config.naValue === null
+    ) {
+      const view: TransformedColumnView = {
+        raw: parsedView.raw,
+        semantic: parsedView.semantic,
+        transformed: parsedView.semantic,
+        valid: parsedView.valid,
+        parserKey: parsedView.parserKey,
+        transformKey,
+        censored: 0,
+        squished: 0,
+        invalidTransform: 0,
+      };
+      this.#transformedCache.set(cacheKey, view);
+      return view;
+    }
+
+    if (this.#parent !== null && this.#parentRows !== null) {
+      const parent = this.#parent.transformed(name, parser, options, config);
+      const length = this.#parentRows.length;
+      const transformed = new Float64Array(length);
+      const valid = new Uint8Array(length);
+      for (let index = 0; index < length; index++) {
+        const sourceIndex = this.#parentRows[index]!;
+        transformed[index] = parent.transformed[sourceIndex]!;
+        valid[index] = parent.valid[sourceIndex]!;
+      }
+      const view: TransformedColumnView = {
+        raw: parsedView.raw,
+        semantic: parsedView.semantic,
+        transformed,
+        valid,
+        parserKey: parsedView.parserKey,
+        transformKey,
+        // Counts are reported at the axis level from the parent (full-column)
+        // view; subset views carry zeroed counts.
+        censored: 0,
+        squished: 0,
+        invalidTransform: 0,
+      };
+      this.#transformedCache.set(cacheKey, view);
+      return view;
+    }
+
+    const result = executeColumnTransform(parsedView.semantic, parsedView.valid, config);
+    const view: TransformedColumnView = {
+      raw: parsedView.raw,
+      semantic: parsedView.semantic,
+      transformed: result.transformed,
+      valid: result.valid,
+      parserKey: parsedView.parserKey,
+      transformKey,
+      censored: result.censored,
+      squished: result.squished,
+      invalidTransform: result.invalidTransform,
+    };
+    this.#transformedCache.set(cacheKey, view);
+    return view;
   }
 
   /**

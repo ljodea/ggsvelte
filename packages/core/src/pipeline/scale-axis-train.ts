@@ -12,7 +12,7 @@ export type { AxisInputs, AxisTraining } from "./scale-axis-types.js";
 export { isBarLike } from "./scale-axis-types.js";
 
 const POSITION_TYPE_OVERRIDE =
-  'Set scales.AXIS.type ("linear" | "log" | "time" | "band") in the spec.';
+  'Set scales.AXIS.type ("linear" | "time" | "band" | "binned") in the spec.';
 
 export function trainAxis(
   axis: "x" | "y",
@@ -37,6 +37,11 @@ export function trainAxis(
   if (type === "band") {
     return trainBandAxis(axis, inputs, config, advisories, warnings);
   }
-  return trainContinuousAxis(axis, inputs, config, type, advisories, warnings);
-  // type is continuous after band guard (linear | log | time)
+  // Continuous families train affine in transformed space. `binned` values are
+  // already snapped to their bin's transformed center pre-stat (resolve-binned-
+  // axis.ts + binned-scale.ts), so training over them here is correct affine
+  // training over a discrete set of centers; the conflict case type:"log" is
+  // rejected at preflight and mapped to linear here.
+  const continuousType: "linear" | "time" = type === "time" ? "time" : "linear";
+  return trainContinuousAxis(axis, inputs, config, continuousType, advisories, warnings);
 }

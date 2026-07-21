@@ -27,6 +27,14 @@ export interface LayerFrame {
   xNumeric: Float64Array | null;
   yValues: readonly CellValue[] | null;
   yNumeric: Float64Array | null;
+  /**
+   * type: "binned" only — the stable integer bin id per post-stat row (−1 =
+   * unbinned/out-of-range). Separate from the rendered `xNumeric`/`yNumeric`
+   * transformed centers: this is the discrete identity for count aggregation
+   * and stack/fill/dodge grouping. Never serialized into the public model.
+   */
+  xBinId: Int32Array | null;
+  yBinId: Int32Array | null;
   groups: readonly number[];
   /**
    * Pre-stat group id per input table row (canonical first-seen order).

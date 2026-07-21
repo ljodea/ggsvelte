@@ -5,6 +5,7 @@ import type { ColumnTable } from "../table.js";
 
 import { emptyFrameExtras } from "./frame-helpers.js";
 import type { makeColumnOf } from "./frame-stats-shared.js";
+import { forwardMeasureOnce } from "./stat-measure-transform.js";
 import type { LayerBinding, LayerFrame } from "./types.js";
 import { NO_ROW } from "./types.js";
 
@@ -41,7 +42,10 @@ export function packBinLayerFrame(
     xValues: null,
     xNumeric: result.x,
     yValues: null,
-    yNumeric: columns[binding.yStatColumn ?? "count"] ?? result.count,
+    yNumeric: forwardMeasureOnce(
+      columns[binding.yStatColumn ?? "count"] ?? result.count,
+      binding.yTransform,
+    ),
     groups: result.groups,
     inputGroups,
     rowIndex: Uint32Array.from({ length: result.x.length }, () => NO_ROW),

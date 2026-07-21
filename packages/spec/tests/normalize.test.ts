@@ -113,7 +113,12 @@ describe("normalize", () => {
       legend: { order: "sorted" },
       theme: { name: "dark", accent: "#ff0000" },
     });
-    expect(spec.scales).toEqual({ y: { type: "log", zero: false }, color: { scheme: "viridis" } });
+    // `type: "log"` canonicalizes to the linear family + log10 transform (PR 3);
+    // other scale options survive the rewrite unchanged.
+    expect(spec.scales).toEqual({
+      y: { type: "linear", transform: "log10", zero: false },
+      color: { scheme: "viridis" },
+    });
     expect(spec.legend).toEqual({ order: "sorted" });
     expect(spec.theme).toEqual({ name: "dark", accent: "#ff0000" });
     expect(normalize(spec as SpecInput)).toEqual(spec);

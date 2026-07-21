@@ -40,9 +40,11 @@
       ? "Enter an ISO 8601 date, or a date-time with Z or an explicit offset."
       : input.scale === "band"
         ? "Endpoints include both selected categories."
-        : input.scale === "log"
+        : input.transform === "log10"
           ? "Enter positive values in ascending domain order."
-          : "Enter values in ascending domain order.",
+          : input.transform === "sqrt"
+            ? "Enter zero or positive values in ascending domain order."
+            : "Enter values in ascending domain order.",
   );
 
   // A parent may switch axes or replace the committed interval while keeping
@@ -157,9 +159,7 @@
             }}
             type={input.scale === "time" ? "text" : "number"}
             inputmode={input.scale === "time" ? undefined : "decimal"}
-            step={input.scale === "linear" || input.scale === "log"
-              ? (input.step ?? "any")
-              : undefined}
+            step={input.scale === "linear" ? (input.step ?? "any") : undefined}
             autocomplete="off"
             aria-invalid={errors.lower === undefined ? undefined : "true"}
             aria-describedby={describedBy("lower")}
@@ -198,9 +198,7 @@
             }}
             type={input.scale === "time" ? "text" : "number"}
             inputmode={input.scale === "time" ? undefined : "decimal"}
-            step={input.scale === "linear" || input.scale === "log"
-              ? (input.step ?? "any")
-              : undefined}
+            step={input.scale === "linear" ? (input.step ?? "any") : undefined}
             autocomplete="off"
             aria-invalid={errors.upper === undefined ? undefined : "true"}
             aria-describedby={describedBy("upper")}

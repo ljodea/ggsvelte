@@ -10,6 +10,7 @@ import { warnEmptyData } from "./prepare-panels-empty.js";
 import { buildPanelFrames } from "./prepare-panels-frames.js";
 import { applyRuntimeRowFilters } from "./prepare-panels-row-filters.js";
 import { positionConversionContext } from "./temporal-position.js";
+import { assertScaleConfiguration } from "./scale-config-preflight.js";
 import { assertTemporalConfiguration, preflightTemporalBindings } from "./temporal-preflight.js";
 import type { PreparedPanels } from "./prepare-panels-types.js";
 import type {
@@ -41,6 +42,10 @@ export function preparePanels(
   };
   assertTemporalConfiguration("x", conversions.x);
   assertTemporalConfiguration("y", conversions.y);
+  // Structural transform/zero contradictions are rejected before data
+  // execution (normalize left them uncanonicalized on purpose).
+  assertScaleConfiguration("x", normalized.scales?.x);
+  assertScaleConfiguration("y", normalized.scales?.y);
 
   const facetLayout: FacetLayout = emptyData
     ? SINGLE_PANEL(table, filtered.sourceRows)

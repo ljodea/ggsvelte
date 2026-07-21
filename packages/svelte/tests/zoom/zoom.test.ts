@@ -121,13 +121,14 @@ describe("applyZoomToSpec", () => {
     expect(applyZoomToSpec(base, { x: undefined, y: undefined })).toBe(base);
   });
 
-  it("merges continuous domains with nice:false and clones tuples", () => {
+  it("merges continuous domains with nice:false, zero expansion, and cloned tuples", () => {
     const x: [number, number] = [10, 20];
     const next = applyZoomToSpec(base, { x });
     expect(next).not.toBe(base);
     expect(next.scales?.x).toEqual({
       type: "continuous",
       nice: false,
+      expand: { mult: 0, add: 0 },
       domain: [10, 20],
     });
     expect(next.scales?.x?.domain).not.toBe(x);
@@ -142,8 +143,19 @@ describe("applyZoomToSpec", () => {
       layers: [{ geom: "point" }],
     });
     const next = applyZoomToSpec(bare, { y: [0, 1] });
-    expect(next.scales?.y).toEqual({ domain: [0, 1], nice: false });
+    expect(next.scales?.y).toEqual({
+      domain: [0, 1],
+      nice: false,
+      expand: { mult: 0, add: 0 },
+    });
     expect(next.scales?.x).toBeUndefined();
+  });
+
+  it("is idempotent when an emitted semantic domain is reapplied", () => {
+    const once = applyZoomToSpec(base, { x: [10, 20] });
+    const twice = applyZoomToSpec(once, { x: [10, 20] });
+    expect(twice.scales?.x).toEqual(once.scales?.x);
+    expect(twice.scales?.x?.expand).toEqual({ mult: 0, add: 0 });
   });
 });
 

@@ -597,8 +597,19 @@ describe("R0 interaction evidence", () => {
     expect(Object.isFrozen(zoom)).toBe(true);
     expect(Object.isFrozen(zoom.domains)).toBe(true);
 
+    // This arbitrary pixel window can contain no rows now that scale limits
+    // censor before stats. Reset to the natural baseline before touch inspect.
+    tool(container, "Reset zoom").click();
+    await expect.poll(() => model!.candidates.size).toBeGreaterThan(0);
     tool(container, "Inspect").click();
-    const seed = model!.candidates.candidate(0)!;
+    // Pre-stat limit censoring may leave sparse candidate ids after zoom; use
+    // the first surviving semantic candidate rather than assuming id 0.
+    let seed = null;
+    for (let id = 0; id < model!.candidates.size; id++) {
+      seed = model!.candidates.candidate(id);
+      if (seed !== null) break;
+    }
+    if (seed === null) throw new Error("expected a surviving zoom candidate");
     const capture = container.querySelector(".gg-capture")!;
     pointEvent(capture, "pointerdown", seed.x, seed.y, "touch", 31);
     pointEvent(capture, "pointerup", seed.x, seed.y, "touch", 31);

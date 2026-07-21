@@ -17,11 +17,15 @@ export function rectsBatch(
 ): RectsBatch | null {
   const { binding } = frame;
   if (frame.ymin === null || frame.ymax === null) return null;
-  const binned = frame.xmin !== null && frame.xmax !== null;
+  const binned = (frame.xmin !== null && frame.xmax !== null) || binding.xBinning !== undefined;
   if (!binned && fx.xScale.type !== "band") return null;
   const params = (binding.layer.params ?? {}) as { width?: number; alpha?: number };
   const widthFrac =
-    fx.xScale.type === "band" ? (params.width ?? DEFAULT_BAR_WIDTH) * fx.xScale.step : 0;
+    fx.xScale.type === "band"
+      ? (params.width ?? DEFAULT_BAR_WIDTH) * fx.xScale.step
+      : binding.xBinning === undefined
+        ? 0
+        : (params.width ?? DEFAULT_BAR_WIDTH);
 
   const { rects, rowIndexKept, keptRows, removed } = emitRectRows({
     frame,

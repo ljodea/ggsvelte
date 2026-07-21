@@ -4,7 +4,9 @@
 import type { LayerSpec } from "@ggsvelte/spec";
 
 import type { CellValue } from "../table.js";
+import type { ColumnTransformConfig } from "../scales/transform.js";
 
+import type { BinnedBoundaries } from "./binned-scale.js";
 import type { PositionConversionContext } from "./temporal-position.js";
 
 export interface ColorBinding {
@@ -30,6 +32,14 @@ export interface LayerBinding {
   xConversion: PositionConversionContext;
   /** Parser/timezone semantics for y, ymin, and ymax position reads. */
   yConversion: PositionConversionContext;
+  /** Pre-stat x transform (OOB/NA/forward); undefined = read semantic (identity). */
+  xTransform?: ColumnTransformConfig | undefined;
+  /** Pre-stat y transform (OOB/NA/forward); undefined = read semantic (identity). */
+  yTransform?: ColumnTransformConfig | undefined;
+  /** type: "binned" x boundaries (transformed space); undefined = not binned. */
+  xBinning?: BinnedBoundaries | undefined;
+  /** type: "binned" y boundaries (transformed space); undefined = not binned. */
+  yBinning?: BinnedBoundaries | undefined;
   yminField: string | null;
   ymaxField: string | null;
   color: ColorBinding;
