@@ -10,6 +10,20 @@ import {
 } from "../src/layout/layout.ts";
 import { MetricsTableMeasurer } from "../src/layout/measure.ts";
 import { FONT_METRICS } from "../src/layout/font-metrics.ts";
+import type { PositionScaleSpec } from "@ggsvelte/spec";
+
+const SPANISH = ["Resolución", "Corrección (errores o erratas)", "Sentencia", "Orden", "Otro"];
+const bandX = (categories: string[], config: Partial<PositionScaleSpec> = {}): Domain => ({
+  type: "band",
+  categories,
+  rawCategories: categories,
+  band: {
+    aesthetic: "x",
+    panelIndex: 0,
+    config: { type: "band", ...config } as PositionScaleSpec,
+  },
+});
+const MODE_RANK = { "single-line": 0, wrapped: 1, rotated: 2 } as const;
 
 const measurer = new MetricsTableMeasurer(FONT_METRICS);
 const theme: LayoutTheme = DEFAULT_LAYOUT_THEME;
@@ -137,6 +151,57 @@ describe("two-pass layout: fixtures", () => {
     // Nothing in the result exposes rotation; this test documents the scope cut.
     const r = layout(base({}));
     expect("rotation" in r.x).toBe(false);
+  });
+});
+
+describe("measured band x-axis (planner integration)", () => {
+  it("wraps long categorical x labels and grows the bottom margin, dropping none", () => {
+    // 560px wide → inner band ≈ 103px: the labels wrap to two lines and fit.
+    const r = layout(base({ width: 560, height: 300, x: bandX(SPANISH) }));
+    expect(r.x.guidePlan?.bandLabelMode).toBe("wrapped");
+    expect(r.x.ticks.every((t) => t.labeled)).toBe(true);
+    // Two-line labels reserve more bottom than one line, but stay within the cap.
+    const oneLine = theme.marginPriors.bottom;
+    expect(r.margins.bottom).toBeGreaterThan(oneLine);
+    expect(r.margins.bottom).toBeLessThanOrEqual(theme.maxMarginFraction * 300);
+    expect(r.x.ticks.some((t) => (t.lines?.length ?? 1) === 2)).toBe(true);
+  });
+
+  it("rotates and truncates at narrow width, still labelling every bar", () => {
+    const r = layout(base({ width: 240, height: 300, x: bandX(SPANISH) }));
+    expect(r.x.guidePlan?.bandLabelMode).toBe("rotated");
+    expect([-45, -90]).toContain(r.x.guidePlan?.bandLabelAngle);
+    expect(r.x.ticks.every((t) => t.labeled)).toBe(true);
+    expect(r.degradations).toContain("band-label-margin-overflow");
+    expect(r.margins.bottom).toBeLessThanOrEqual(theme.maxMarginFraction * 300);
+  });
+
+  it("mode is monotonic across the two passes (escalate-only, no de-escalation)", () => {
+    const input = base({ width: 240, height: 300, x: bandX(SPANISH) });
+    const passA = layoutPass(theme.marginPriors, input, theme);
+    const passB = layoutPass(
+      passA.margins,
+      { ...input, previousGuidePlans: { x: passA.x.guidePlan } },
+      theme,
+    );
+    const rankOf = (m: string | undefined) =>
+      MODE_RANK[(m ?? "single-line") as keyof typeof MODE_RANK];
+    expect(rankOf(passB.x.guidePlan?.bandLabelMode)).toBeGreaterThanOrEqual(
+      rankOf(passA.x.guidePlan?.bandLabelMode),
+    );
+  });
+
+  it("does NOT plan a vertical band axis — categorical-on-Y keeps legacy truncation", () => {
+    const yBand: Domain = {
+      type: "band",
+      categories: SPANISH,
+      rawCategories: SPANISH,
+      band: { aesthetic: "y", panelIndex: 0, config: { type: "band" } as PositionScaleSpec },
+    };
+    const r = layout(base({ width: 300, height: 300, y: yBand }));
+    // The horizontal planner never runs on Y: no band mode, legacy path owns it.
+    expect(r.y.guidePlan?.bandLabelMode).toBeUndefined();
+    expect(r.margins.left).toBeLessThanOrEqual(theme.maxMarginFraction * 300);
   });
 });
 

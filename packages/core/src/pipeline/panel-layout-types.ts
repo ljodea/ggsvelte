@@ -1,7 +1,12 @@
 /**
  * Shared panel layout result types.
  */
-import type { LayoutResult, TemporalLayoutDomainContext, TickFormatter } from "../layout/layout.js";
+import type {
+  BandLayoutDomainContext,
+  LayoutResult,
+  TemporalLayoutDomainContext,
+  TickFormatter,
+} from "../layout/layout.js";
 import type { AxisGuidePlan } from "../layout/temporal-guide.js";
 import type { PositionScale } from "../scales/train.js";
 import { buildLegends } from "../legend.js";
@@ -40,4 +45,8 @@ export type DisplayScalesFn = (p: number) => { h: PositionScale; v: PositionScal
 export type DisplayTemporalFn = (p: number) => {
   h?: TemporalLayoutDomainContext;
   v?: TemporalLayoutDomainContext;
+};
+export type DisplayBandFn = (p: number) => {
+  h?: BandLayoutDomainContext;
+  v?: BandLayoutDomainContext;
 };
