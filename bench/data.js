@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784620841216,
+  "lastUpdate": 1784624544889,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -38109,6 +38109,185 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 95.0606,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "92b21f14cf0ad3c207a61c382b06eb1c7458669a",
+          "message": "fix(docs): keep preview /ggsvelte cleanup off production (#372)\n\n* fix(docs): keep preview /ggsvelte cleanup off production\n\nPost-merge Codex on #367: absolute cleanup redirects were required for\nevery Cloudflare artifact, so trusted previews redirected /ggsvelte/*\nto ggsvelte.sh and left the preview noindex boundary.\n\nGate the absolute cleanup contract on production only, rewrite preview\nartifacts to same-origin cleanup rules, and reject production-bound\npreview redirects in validation.\n\n* fix(ci): type spawnSync utf8 output in block-output-paths tests\n\nPre-push type-aware lint rejects Buffer|string template interpolation\non the isolated guard harness from #368. Annotate the utf8 spawn\nreturn type so combinedOutput stays string-only.\n\n* fix(docs): require bare /ggsvelte same-origin cleanup on preview\n\nCodex on #372: validating only the wildcard left preview free to drop the\nexact /ggsvelte rule, which is a separate Pages redirect. Require both\nexact and wildcard same-origin cleanup targets.\n\n* chore: re-trigger CI for shepherd merge gate\n\nEmpty commit after Actions jobs sat queued for 30+ minutes.",
+          "timestamp": "2026-07-21T04:01:31-05:00",
+          "tree_id": "4e5ad7c2d26e12a663758b7a67b137ee6e9c7e43",
+          "url": "https://github.com/ljodea/ggsvelte/commit/92b21f14cf0ad3c207a61c382b06eb1c7458669a"
+        },
+        "date": 1784624543895,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.4643,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.7963,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 7.8278,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 11.0756,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 57.6649,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 87.9628,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal-line 100k",
+            "value": 70.7422,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide candidate-selection 300y",
+            "value": 0.1357,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide resize-churn 191y",
+            "value": 0.4536,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide DST-heavy 3y",
+            "value": 4.4887,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal free-facets 100",
+            "value": 36.3639,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.2523,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.4895,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 52.4667,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 72.0125,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 12.9098,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 11.0339,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 929.9371,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7988,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 244.6136,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 10.2413,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-identity 100k",
+            "value": 22.3601,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 100k",
+            "value": 17.3688,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-sqrt 100k",
+            "value": 17.343,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 smooth 100k",
+            "value": 19.5431,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 bin 100k",
+            "value": 13.5663,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 facets-100 100k",
+            "value": 83.385,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline binned-64 100k",
+            "value": 25.9907,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 11.9306,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 591.6153,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 149.9577,
             "unit": "ms"
           }
         ]
