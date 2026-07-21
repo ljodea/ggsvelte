@@ -58,6 +58,7 @@
 <style>
   .copy-code {
     position: relative;
+    max-width: 100%;
     min-width: 0;
     border: 1px solid var(--line);
     border-radius: 2px;

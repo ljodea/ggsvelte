@@ -184,6 +184,40 @@ pre {
   background: transparent !important;
 }
 
+/*
+ * atom-one-dark comment/quote greys fail WCAG against --code-paper. Lift them
+ * so axe on example/detail pages (which include CodeTabs) stays clean.
+ */
+.hljs-comment,
+.hljs-quote {
+  color: #a8b0bd !important;
+  font-style: italic;
+}
+
+/* Wide fences scroll locally; never expand the document width. */
+.copy-code,
+.guide-code-copy,
+.code-tabs .scroll-region {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.copy-code .code-body,
+.guide-code-copy pre,
+.code-tabs .scroll-region {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.copy-code pre,
+.guide-code-copy pre,
+.code-tabs pre {
+  max-width: 100%;
+  white-space: pre;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
 .guide-code-classification {
   margin: 1.5rem 0 0.35rem;
   color: var(--muted);

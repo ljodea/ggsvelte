@@ -67,6 +67,8 @@ export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
     "scripts/gen-llms.ts",
     "scripts/gen-llms.test.ts",
     "scripts/llms-markdown.ts",
+    "scripts/highlight-code.ts",
+    "scripts/highlight-code.test.ts",
     "scripts/llms-guide-content.ts",
     "scripts/docs-seo.ts",
     "scripts/diagnostic-docs.ts",
