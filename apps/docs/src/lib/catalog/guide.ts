@@ -35,15 +35,14 @@ export const GUIDE_CATALOG = [
   {
     slug: "getting-started",
     title: "Getting started",
-    description: "Install ggsvelte and build one complete responsive, accessible Svelte chart.",
+    description: "Install @ggsvelte/svelte and render one chart from a Svelte file.",
     section: "Start",
     navigationOrder: 1,
   },
   {
     slug: "data-mappings",
     title: "Data and mappings",
-    description:
-      "Choose rows and map their fields to visual channels without mutating source data.",
+    description: "Map row fields to visual channels without mutating source data.",
     section: "Core grammar",
     navigationOrder: 10,
   },
@@ -79,8 +78,7 @@ export const GUIDE_CATALOG = [
   {
     slug: "themes-color",
     title: "Themes and color",
-    description:
-      "Keep chart furniture separate from data color and from the documentation appearance.",
+    description: "Chart theme vs data color scales; independent of site appearance.",
     section: "Core grammar",
     navigationOrder: 16,
   },

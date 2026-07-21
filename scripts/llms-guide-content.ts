@@ -21,24 +21,24 @@ import {
 
 export const GETTING_STARTED_MD = `# Getting started
 
-Build a responsive, accessible chart in one Svelte file. Start with the
-framework-native path below; the builder and PortableSpec are useful later,
-when you need to generate or transmit charts.
+Install, render one chart from a Svelte file, then add aes, layers, scales,
+facets, theme, and inspect. The TypeScript builder and portable JSON form are
+secondary surfaces for generation, validation, and headless export.
 
 ## Create a SvelteKit app
 
-Start with Node.js 22 or newer in an empty directory:
+Node.js 22+ in an empty directory:
 
 \`\`\`sh complete
 npx sv create my-chart --template minimal --types ts --no-add-ons --install npm
 cd my-chart
 \`\`\`
 
-Already have a supported SvelteKit app? Continue with the install step.
+Skip this section if the app already exists.
 
 ## Install ggsvelte
 
-Choose the package manager already used by the app:
+Use the app's package manager:
 
 \`\`\`sh complete
 npm install @ggsvelte/svelte
@@ -57,15 +57,13 @@ package. Install them directly only for spec-only or headless use.
 ${QUICKSTART_PAGE_SVELTE}
 \`\`\`
 
-Run the app with your package manager's standard dev command and open the
-local URL it prints. The chart fills a normal positive-width block container
-and uses the default 400px height. No chart CSS or fixed width is required.
+Run the package manager's dev command and open the printed local URL. Omitted
+width follows the container; default height is 400px. No chart CSS required.
 
 ## You have a chart
 
-The first useful model is small: \`GGPlot\` owns the chart, \`data\` supplies
-rows, \`aes\` maps fields, and \`GeomPoint\` adds the point layer. Change the
-four rows or the \`x\` and \`y\` field names to adapt it.
+\`GGPlot\` owns the chart, \`data\` supplies rows, \`aes\` maps fields, and
+\`GeomPoint\` is the first layer. Edit the rows or the \`x\` / \`y\` field names.
 
 ## Build the grammar one change at a time
 
@@ -82,8 +80,7 @@ hydration warning, or TypeScript package mismatch is covered in the
 
 ### Fluent builder
 
-Use the builder to construct specs programmatically in TypeScript. Fragment,
-assuming the \`cars\` data from the complete file above:
+TypeScript builder for programmatic specs (\`cars\` from the complete file):
 
 \`\`\`ts fragment
 ${QUICKSTART_BUILDER_FRAGMENT}
@@ -91,9 +88,8 @@ ${QUICKSTART_BUILDER_FRAGMENT}
 
 ### PortableSpec JSON
 
-Use PortableSpec when a chart must be saved, transmitted, validated, or
-generated without executable accessors. Fragment equivalent to the first
-chart:
+PortableSpec for save, transmit, validate, or generate without executable
+accessors. Equivalent to the first chart:
 
 \`\`\`json fragment
 ${QUICKSTART_PORTABLE_SPEC_FRAGMENT}
@@ -101,10 +97,9 @@ ${QUICKSTART_PORTABLE_SPEC_FRAGMENT}
 
 ## Headless and server rendering
 
-\`renderToSVGString\` is the pure no-DOM export path. The installed
-\`ggsvelte-render\` CLI writes SVG to stdout and JSON Lines diagnostics to
-stderr. These are fragments; use the complete PortableSpec above as \`spec\`
-or save it as \`spec.json\`.
+\`renderToSVGString\` is the pure no-DOM path. \`ggsvelte-render\` writes SVG to
+stdout and JSON Lines diagnostics to stderr. Fragments below; pass the
+PortableSpec above as \`spec\` or \`spec.json\`.
 
 \`\`\`ts fragment
 ${QUICKSTART_HEADLESS_FRAGMENT}
@@ -117,103 +112,90 @@ ${QUICKSTART_CLI_FRAGMENT}
 ## Validating specs
 
 \`validate(spec)\` checks schema shape. \`validate(spec, { profile })\` adds
-data-aware checks without shipping the data. Every validation error has a
-stable code, path, message, and fix. Pass \`{ lint: true }\` to also receive
-advisories for valid-but-questionable specs.
+data-aware checks without shipping data. Errors carry stable code, path,
+message, and fix. \`{ lint: true }\` also returns advisories for
+valid-but-questionable specs.
 
 ## Where next
 
-- [Examples gallery](/examples) — runnable charts across marks, statistics,
-  scales, themes, and interaction.
-- [Interactions](/guide/interactions) — inspection, selection, zoom, typed
-  events, keyboard behavior, and stable identity.
-- [PortableSpec playground](/playground) — open a compatible example, edit a
-  bounded local PortableSpec, inspect semantic events, and take complete Svelte,
-  equivalent Builder or JSON, deterministic SVG, or an explicit share URL
-  without uploads, remote fetches, or code execution.
-- [Compatibility](/guide/compatibility) — tested Node, Svelte, installer,
-  browser, and operating-system boundaries.
-- [Errors reference](/guide/errors) — validation, render, interaction, and CLI
-  diagnostics with consequences and safe recovery steps.
-- [JSON Schema](/schema/v0.json) — PortableSpec for constrained decoding.
+- [Examples](/examples)
+- [Interactions](/guide/interactions)
+- [Playground](/playground) — local PortableSpec only
+- [Compatibility](/guide/compatibility)
+- [Errors reference](/guide/errors)
+- [JSON Schema](/schema/v0.json)
 `;
 
 export const DATA_MAPPINGS_MD = `# Data and mappings
 
-Start with ordinary rows. A mapping names which field supplies each visual
-channel; it does not rewrite the source objects.
+\`aes\` names which field feeds each visual channel. Source rows are not mutated.
 
 ## Map fields to position
 
-This fragment maps numeric fields to the horizontal and vertical position
-channels:
+Numeric fields to position channels:
 
 \`\`\`svelte fragment
 aes={{ x: "weight", y: "economy" }}
 \`\`\`
 
-A field mapping is explicit data meaning. Change the mapping without reshaping
-the rows, or change the rows while keeping the same chart grammar. The
-[scatter with color example](/examples/point/scatter-color) adds one discrete
-channel while preserving the positional fields.
+Change the mapping without reshaping rows, or change rows without changing the
+grammar. The [scatter with color example](/examples/point/scatter-color) adds a
+discrete color channel on the same positions.
 
 ## Keep data local
 
-Inline rows, named datasets, and PortableSpec data all pass through validation
-and normalization before rendering. The documentation playground opens only
-bounded portable seeds, keeps the last render-confirmed chart on failure, and
-remains local-only; it does not upload chart data.
+Inline rows, named datasets, and PortableSpec data all validate and normalize
+before render. The docs playground uses bounded local seeds only — no upload.
+On failure it keeps the last render-confirmed chart.
 `;
 
 export const LAYERS_MARKS_MD = `# Layers and marks
 
-A plot is an ordered composition. Add a mark without replacing the data or the
-mappings already owned by the plot.
+Layers paint in source order. Add a mark without replacing plot data or
+mappings.
 
 ## Compose layers
 
-This fragment draws a line first and points over it:
+Line first, points on top:
 
 \`\`\`svelte fragment
 <GeomLine />
 <GeomPoint />
 \`\`\`
 
-Layers paint in source order. They inherit plot mappings unless a layer supplies
-its own mapping or data. See the [multi-series line example](/examples/line/multi-series)
-for the same composition with a stable discrete color scale.
+Layers inherit plot mappings unless a layer supplies its own mapping or data.
+[Multi-series line](/examples/line/multi-series) uses the same pattern with a
+stable discrete color scale.
 
 ## Choose a mark for the question
 
-Use points for records, lines for ordered change, columns for precomputed
-heights, bars for counts, and rules/text for annotation. The
-[Gallery](/examples) keeps each mark attached to a real rendered example.
+Points for records, lines for ordered series, columns for precomputed heights,
+bars for counts, rules/text for annotation. [Examples](/examples) shows each
+mark on real data.
 `;
 
 export const STATISTICS_POSITIONS_MD = `# Statistics and positions
 
-Statistics derive marks from mapped rows; positions decide how marks share the
-same coordinate space. Keep raw evidence visible when a summary could hide it.
+Stats derive marks from mapped rows. Positions control how derived marks share
+coordinate space.
 
 ## Statistical summaries
 
-Add a fitted trend without replacing the observations:
+Fitted trend over points:
 
 \`\`\`svelte fragment
 <GeomPoint />
 <GeomSmooth method="lm" />
 \`\`\`
 
-The [loess example](/examples/smooth/loess-scatter) shows a smoother and
-confidence ribbon over the source points. Histograms, density, boxplots, and
-error bars use the same derive-then-render boundary.
+[Loess example](/examples/smooth/loess-scatter): smoother and confidence ribbon
+on source points. Histogram, density, boxplot, and errorbar use the same
+derive-then-render path.
 
 ## Positions
 
-Stack combines values, dodge places groups side by side, fill normalizes each
-stack to one, and jitter separates overlapping points with a deterministic
-seed. Compare the [bar examples](/examples?category=bar) before overriding a
-position.
+Stack sums, dodge side-by-side groups, fill normalizes each stack to one, jitter
+separates overlaps with a deterministic seed. [Bar examples](/examples?category=bar).
 `;
 
 export const SCALES_GUIDES_MD = `# Scales and guides
@@ -348,27 +330,26 @@ audience needs a fixed convention. The
 
 export const FACETS_COORDINATES_MD = `# Facets and coordinates
 
-Facets partition rows into panels before panel statistics run. Coordinates
-control how trained scales are presented.
+Facets partition rows into panels before panel stats. Coordinates present
+trained scales (flip, etc.) without rewriting aesthetic mappings.
 
 ## Facet a comparison
 
-Repeat one grammar for each group:
+One grammar, one panel per group:
 
 \`\`\`svelte fragment
 facet={{ wrap: "vehicleClass", ncol: 2 }}
 \`\`\`
 
-Fixed scales support direct panel comparison. Free scales make within-panel
-shape easier to see but weaken cross-panel magnitude comparison. Use the
-[facet wrap](/examples/facet/wrap) and [free-y](/examples/facet/wrap-free-y)
-examples to choose deliberately.
+Fixed scales: compare magnitudes across panels. Free scales: within-panel shape
+at the cost of cross-panel magnitude. [facet wrap](/examples/facet/wrap),
+[free-y](/examples/facet/wrap-free-y).
 
 ## Coordinates
 
-Use coordinate flip for horizontal composition rather than swapping semantic
-mappings. The [horizontal bar example](/examples/bar/horizontal) preserves the
-ordinary category/value grammar and flips the presentation.
+Prefer \`coord flip\` for horizontal bars over swapping x/y semantics.
+[Horizontal bar](/examples/bar/horizontal) keeps category on x, value on y, then
+flips presentation.
 
 ## Scale transforms versus coordinate transforms
 
@@ -429,36 +410,33 @@ in the [Playground](/playground).
 
 export const THEMES_COLOR_MD = `# Themes and color
 
-Chart theme controls furniture: paper, ink, grid, type, and interaction roles.
-Scales control data color. The surrounding documentation appearance controls
-neither unless follow mode is explicit.
+Theme: paper, ink, grid, type, interaction roles. Scales: data color. Site
+appearance is independent unless follow mode is explicit.
 
 ## Choose a chart theme
 
-Pass a registered theme without changing mappings:
+Registered theme name; mappings unchanged:
 
 \`\`\`svelte fragment
 theme="economist"
 \`\`\`
 
-Compare all twelve live themes, categorical schemes, sequential ramps, custom
-ranges, and safe failure behavior on the [Themes and color destination](/themes).
+Twelve themes, categorical schemes, sequential ramps, exhaustion:
+[Themes and color](/themes).
 
 ## Preserve color meaning
 
-Explicit scale range wins over named scheme, which wins over the edition
-default. Switching chart furniture must not reassign categories or reverse a
-quantitative ramp.
+Explicit range beats named scheme beats edition default. Changing theme must
+not reassign categorical colors or reverse a sequential ramp.
 `;
 
 export const INSPECT_PIN_MD = `# Inspect and pin
 
-Inspection is chart-local presentation state: a semantic crosshair, HTML
-tooltip, keyboard traversal, and an optional pinned result.
+Chart-local: semantic crosshair, HTML tooltip, keyboard traversal, optional pin.
 
 ## Inspect and pin
 
-Supply a stable row key and opt into the behavior:
+Stable row key + inspect:
 
 \`\`\`svelte fragment
 <GGPlot
@@ -467,25 +445,24 @@ Supply a stable row key and opt into the behavior:
 />
 \`\`\`
 
-Pointer, touch, and keyboard paths report the same semantic datum. Enter or
-Space pins; Escape dismisses. Try the [inspection example](/examples/interaction/tooltip).
+Pointer, touch, and keyboard report the same semantic datum. Enter/Space pins;
+Escape dismisses. [Inspection example](/examples/interaction/tooltip).
 
 ## Keep ownership honest
 
-Tooltip, crosshair, active tool, and pin state remain private to one chart.
-Use a shared controller only for semantic selection, emphasis, intervals, or
-zoom domains that ordinary application UI also consumes.
+Tooltip, crosshair, active tool, and pin stay private to one chart. Share a
+controller only for selection, emphasis, intervals, or zoom domains that other
+UI also needs.
 `;
 
 export const SELECTION_ZOOM_MD = `# Selection and zoom
 
-Selection identifies data; zoom changes visible domains. Explicit tools keep
-those gestures from competing with inspection or page scrolling.
+Selection: semantic identities. Zoom: visible domains. Separate tools so
+gestures do not fight inspection or page scroll.
 
 ## Select points
 
-Point selection requires stable keys and emits semantic identities instead of
-renderer indices.
+Stable keys; events carry semantic identities, not renderer indices.
 
 \`\`\`svelte fragment
 <GGPlot key="id" select={{ type: "point", multiple: true }} />
@@ -493,16 +470,15 @@ renderer indices.
 
 ## Select an area and zoom
 
-Interval selection and brush zoom expose separate tools, domain bounds, clear
-paths, and precise keyboard-editable bounds. Try the
-[selection and zoom example](/examples/interaction/brush-zoom) before combining
-the capabilities in application code.
+Interval selection and brush zoom are separate tools with domain bounds, clear
+paths, and keyboard-editable bounds.
+[Selection and zoom](/examples/interaction/brush-zoom).
 `;
 
 export const LINKED_VIEWS_MD = `# Linked views
 
-Share semantic state only when plots, controls, or tables need the same
-selection, emphasis, interval, or domain.
+Share selection, emphasis, intervals, or domains across plots, controls, or
+tables via \`createPlotInteraction\`.
 
 ## Create a shared controller
 
@@ -511,22 +487,19 @@ const interaction = createPlotInteraction<string>();
 const scope = { keys: "record-id", x: "weight", y: "economy" } as const;
 \`\`\`
 
-Every linked consumer receives the same explicit scope. Passive plots render a
-transition without publishing it again. The
-[linked views example](/examples/interaction/linked-views) coordinates two
-plots, buttons, and a table without callback loops.
+Same controller + scope on every consumer. Passive plots render without re-emitting.
+[Linked views](/examples/interaction/linked-views): two plots, buttons, table.
 
 ## Keep local state local
 
-Inspection, tooltip, crosshair, active tool, and interval drafts stay local.
-Share the committed semantic result, not renderer pixels or private UI mode.
+Inspection, tooltip, crosshair, active tool, and interval drafts stay chart-local.
+Share committed semantic state, not pixels or UI mode.
 `;
 
 export const ACCESSIBILITY_MD = `# Accessibility
 
-A chart needs a useful accessible name, keyboard and touch interaction paths,
-visible focus, concise announcements, and a data-detail alternative when marks
-are dense.
+Accessible name, keyboard/touch paths, visible focus, live announcements, and
+a data-detail alternative when marks are dense.
 
 ## Name the chart
 
@@ -534,78 +507,68 @@ are dense.
 <GGPlot ariaLabel="Fuel economy decreases as vehicle weight increases" />
 \`\`\`
 
-The name states the chart's subject or takeaway. It is not generic image alt
-text and does not replace a visible caption.
+Subject or takeaway — not generic image alt, not a substitute for a caption.
 
 ## Keyboard and touch
 
-Focus the chart and use arrows or brackets to traverse data. Enter or Space
-pins or commits the active tool; Escape dismisses. Touch inspection pins rather
-than depending on hover. The [inspection example](/examples/interaction/tooltip)
-keeps complete pinned content in ordinary labelled DOM.
+Focus the chart; arrows/brackets traverse. Enter/Space pins or commits the
+active tool; Escape dismisses. Touch pins rather than relying on hover.
+[Inspection example](/examples/interaction/tooltip): pinned content in labelled DOM.
 
 ## Dense charts
 
-Canvas marks retain SVG axes and legends plus the existing accessible
-description/table path. Forced colors preserves controls and focus even when
-system colors replace chart paint.
+Canvas marks keep SVG axes/legends and the accessible description/table path.
+Forced colors keeps controls and focus when system colors replace chart paint.
 `;
 
 export const RESPONSIVE_CHARTS_MD = `# Responsive charts
 
-Omit width to let GGPlot observe its container. A normal positive-width block
-needs no chart CSS; omitted height uses the specification and then 400px.
+Omit width: GGPlot observes its container. Positive-width block, no chart CSS.
+Omitted height: 400px default.
 
 ## Container width
 
-A collapsed parent, hidden tab, or zero-width grid track keeps the plot
-not-ready until ResizeObserver reports positive width. Do not patch that state
-with an arbitrary fixed chart width. Follow the
-[container troubleshooting path](/guide/errors#quickstart-troubleshooting).
+Collapsed parent, hidden tab, or zero-width track → not-ready until
+ResizeObserver reports positive width. Do not paper over that with a fake fixed
+width. [Troubleshooting](/guide/errors#quickstart-troubleshooting).
 
 ## Server fallback and hydration
 
-Responsive charts server-render at a deterministic 640 × 400 fallback, remain
-not-ready in server HTML, then measure the real container after hydration.
-Reserve layout space around the chart to avoid page shift.
+SSR: 640×400 deterministic fallback, not-ready in HTML, measure after hydration.
+Reserve layout space to avoid CLS.
 `;
 
 export const RENDERING_PERFORMANCE_MD = `# Rendering and performance
 
-Renderer choice belongs to mark density and interaction needs, not to a site
-appearance. Axes, legends, labels, and accessibility remain semantic chrome.
+Renderer follows mark density and interaction needs. Axes, legends, labels, and
+a11y chrome stay semantic regardless of SVG vs canvas.
 
 ## SVG, canvas, and auto
 
-SVG keeps marks as DOM geometry. Canvas batches dense marks. Auto rendering
-moves eligible dense strata above the published threshold and emits the
-\`canvas-auto\` advisory. The [10k-point example](/examples/point/canvas-scatter)
-shows canvas marks under SVG axes and legend.
+SVG: DOM marks. Canvas: dense strata. Auto: switches above the published
+threshold and emits \`canvas-auto\`. [10k-point scatter](/examples/point/canvas-scatter):
+canvas marks, SVG axes/legend.
 
 ## Canvas and interaction
 
-Inspection and semantic selection use the model-owned candidate store rather
-than DOM nodes. Stable keys preserve identity across SVG and canvas; renderer
-indices never enter public callbacks.
+Inspection and selection use the model-owned candidate store, not DOM hit tests.
+Stable keys keep identity across SVG/canvas; renderer indices never appear in
+public callbacks.
 
 ## Measure before overriding
 
-Use the performance fixtures and advisories already shipped with the repository.
-Do not infer a faster renderer from screenshot timing or add a global canvas
-rule that removes useful SVG detail.
+Use repo performance fixtures and advisories. Do not pick canvas from screenshot
+timing alone, or force global canvas that drops useful SVG detail.
 `;
 
 export const SERVER_RENDERING_EXPORT_MD = `# Server rendering and export
 
-Choose the Svelte component for application SSR, the pure core renderer for a
-no-DOM process, or the installed CLI for shell composition. All paths consume
-the same portable specification contract.
+Three paths, one PortableSpec: Svelte SSR, pure \`renderToSVGString\`, CLI.
 
 ## Server rendering
 
-[Server rendering](/guide/server-rendering-export#server-rendering) uses the
-same deterministic layout fallback as the responsive component. Browser-only
-measurement and interaction attach after hydration.
+Same deterministic layout fallback as the responsive component. Measurement and
+interaction attach after hydration.
 
 ## Pure SVG export
 
@@ -615,7 +578,7 @@ import { renderToSVGString } from "@ggsvelte/core";
 const svg = renderToSVGString(spec, { width: 640, height: 400 });
 \`\`\`
 
-The pure renderer needs no DOM and returns a complete SVG string.
+No DOM. Complete SVG string.
 
 ## Command-line export
 
@@ -623,9 +586,7 @@ The pure renderer needs no DOM and returns a complete SVG string.
 ggsvelte-render spec.json > chart.svg
 \`\`\`
 
-SVG is stdout. Diagnostics are JSON Lines on stderr, so shell redirection stays
-safe. The [CLI reference](/reference/cli) lists flags and exit classes from its
-implementation.
+SVG on stdout; JSON Lines diagnostics on stderr. [CLI reference](/reference/cli).
 `;
 
 export const TEMPORAL_SCALES_MD = `# Dates without preprocessing
@@ -762,26 +723,22 @@ toolchain. Consumers may use any tested installer above; they do not need Bun.
 
 export const INTERACTIONS_MD = `# Interactions
 
-ggsvelte keeps static charts static. Opt in to only the behaviors the chart
-needs with \`inspect\`, \`select\`, \`zoom\`, \`legendFocus\`, and
-\`legendFilter\`. Once more than one drawing behavior is
-available, the chart renders an accessible tool rail so inspection, selection,
-and zoom never compete for the same drag or click.
+Static by default. Opt in with \`inspect\`, \`select\`, \`zoom\`, \`legendFocus\`,
+\`legendFilter\`. With more than one draw tool, an accessible tool rail keeps
+gestures from competing.
 
-Interaction state has two deliberate ownership models. Without a controller,
-inspection, selection, and zoom are private to one chart and callbacks report
-what changed. Pass a \`createPlotInteraction()\` controller when plots, controls,
-tables, or other Svelte components should share semantic state.
+Without a controller, state is private to one chart and callbacks report
+changes. Pass \`createPlotInteraction()\` when plots, controls, or tables share
+semantic state (required, stable semantic scope via \`interactionScope\`).
 
-Start with the runnable [inspection and pinning example](/examples/interactions/inspection),
-the [interval selection and zoom example](/examples/interactions/interval-selection),
-the [linked plots, controls, and table example](/examples/interaction/linked-views),
-the [linked legend focus example](/examples/interaction/legend-focus),
-the [stable-color legend filter example](/examples/interaction/legend-filter),
-the [faceted interval example](/examples/interaction/facet-intervals),
-or [adapt a bounded PortableSpec in the local playground](/playground). For exact
-props, callbacks, phases, and diagnostics, use the
-[interaction reference](/guide/interaction-reference).
+Examples: [inspect](/examples/interactions/inspection),
+[interval/zoom](/examples/interactions/interval-selection),
+[linked views](/examples/interaction/linked-views),
+[legend focus](/examples/interaction/legend-focus),
+[legend filter](/examples/interaction/legend-filter),
+[facet intervals](/examples/interaction/facet-intervals),
+[playground](/playground).
+Contracts: [interaction reference](/guide/interaction-reference).
 
 ## Inspection
 
@@ -932,12 +889,11 @@ colors. See the [runnable three-view example](/examples/interaction/legend-focus
 
 ## Legend filtering
 
-Legend focus answers “which group should I compare?” without changing data.
-\`legendFilter={true}\` answers “which groups belong in this computation?” by
-adding native Show-group checkboxes to discrete color and fill legends. A
-filter runs before facets, statistics, scales, layout, and rendering. Hidden
-groups remain in the legend catalog and recover the same categorical color when
-shown again.
+\`legendFocus\` is presentation emphasis only — it does not change data.
+\`legendFilter={true}\` adds Show-group checkboxes on discrete color/fill
+legends and filters rows before facets, stats, scales, layout, and render.
+Hidden groups stay in the legend catalog and keep the same categorical color
+when shown again.
 
 Use \`legendFilter={{ mode: "exclude", multiple: true }}\` for the default
 independent checkboxes. \`mode: "include"\` stores the shown values instead;
@@ -1070,15 +1026,13 @@ ${entry.message}
 
 export const INTERACTION_REFERENCE_MD = `# Interaction reference
 
-This page is the searchable interaction contract. Charts own private state by
-default and emit chart-local callbacks. \`createPlotInteraction()\` opts into
-controlled semantic state shared by plots and ordinary Svelte components.
+Searchable interaction contract. Chart-local state and callbacks by default.
+\`createPlotInteraction()\` for shared semantic state across plots and UI.
 
 ## Static default
 
-Charts have no capture layer, tooltip, selection state, or zoom behavior until
-the corresponding capability is enabled. This keeps ordinary charts light and
-prevents interaction gestures from competing with page scrolling.
+No capture layer, tooltip, selection, or zoom until a capability is enabled.
+Page scroll is not hijacked by unused tools.
 
 ## Capability props
 
@@ -1263,98 +1217,91 @@ export const INTERACTION_REFERENCE_INDEX: readonly InteractionReferenceEntry[] =
   {
     id: "static-default",
     name: "Static by default",
-    summary: "Keep capture layers and gestures out of charts until a capability is enabled.",
+    summary: "No capture layer or gesture until a capability is enabled.",
     href: "/guide/interaction-reference#static-default",
     keywords: ["opt in", "capture", "scroll"],
   },
   {
     id: "inspect",
     name: "Inspect and pin",
-    summary: "Show an HTML tooltip and semantic crosshair with pointer and keyboard traversal.",
+    summary: "HTML tooltip, semantic crosshair, pointer and keyboard traversal.",
     href: "/guide/interaction-reference#inspect",
     keywords: ["tooltip", "crosshair", "pin", "keyboard"],
   },
   {
     id: "point-selection",
     name: "Point selection",
-    summary:
-      "Select one or many data records using stable semantic keys instead of renderer indices.",
+    summary: "Select records by stable semantic keys, not renderer indices.",
     href: "/guide/interaction-reference#point-selection",
     keywords: ["select", "multiple", "keys"],
   },
   {
     id: "interval-selection",
     name: "Interval selection",
-    summary:
-      "Brush an explicit rectangular area and receive domain, pixel, and semantic-key bounds.",
+    summary: "Brush a rectangle; receive domain, pixels, and semantic keys.",
     href: "/guide/interaction-reference#interval-selection",
     keywords: ["brush", "rectangle", "domain", "facet", "union", "cross-panel"],
   },
   {
     id: "zoom",
     name: "Brush zoom",
-    summary: "Zoom one or both axes with an explicit area tool and a predictable reset path.",
+    summary: "Zoom x, y, or both with an explicit area tool and reset path.",
     href: "/guide/interaction-reference#zoom",
     keywords: ["domain", "reset", "double click"],
   },
   {
     id: "legend-focus",
     name: "Legend focus",
-    summary: "Preview or commit discrete legend groups across linked SVG and canvas views.",
+    summary: "Preview or commit discrete legend groups across SVG and canvas.",
     href: "/guide/interaction-reference#legendfocus",
     keywords: ["legendFocus", "onlegendfocus", "emphasis", "keyboard", "touch"],
   },
   {
     id: "legend-filter",
     name: "Legend filtering",
-    summary:
-      "Include or exclude discrete groups before statistics and scales without changing color identity.",
+    summary: "Include or exclude groups before stats/scales; color identity stable.",
     href: "/guide/interaction-reference#legendfilter",
     keywords: ["legendFilter", "onlegendfilter", "filter", "checkbox", "stable color"],
   },
   {
     id: "controlled-tool",
     name: "Controlled tool",
-    summary: "Synchronize the active Inspect, Select area, or Zoom area mode with Svelte state.",
+    summary: "Bind active Inspect / Select area / Zoom area to Svelte state.",
     href: "/guide/interaction-reference#controlled-tool",
     keywords: ["tool", "ontoolchange", "state"],
   },
   {
     id: "shared-controller",
     name: "Shared controller",
-    summary:
-      "Link plots, controls, and tables with scoped semantic selection, emphasis, and domains.",
+    summary: "Scoped selection, emphasis, and domains across plots and UI.",
     href: "/guide/interaction-reference#shared-controller",
     keywords: ["createPlotInteraction", "linked views", "scope", "reconcileKeys"],
   },
   {
     id: "identity",
     name: "Stable identity",
-    summary: "Preserve inspection and selection across updates with unique application-level keys.",
+    summary: "Unique application keys for inspection and selection across updates.",
     href: "/guide/interaction-reference#identity",
     keywords: ["key", "lineage", "sourceKeys"],
   },
   {
     id: "events",
     name: "Typed events",
-    summary:
-      "Handle focused callbacks or one discriminated interaction event union with explicit phases.",
+    summary: "Focused callbacks or PlotInteractionEvent with explicit phases.",
     href: "/guide/interaction-reference#events",
     keywords: ["oninspect", "onselect", "onzoom", "oninteraction", "phase"],
   },
   {
     id: "diagnostics",
     name: "Diagnostics",
-    summary:
-      "Respond to structured codes, suggestions, affected props, and exact documentation links.",
+    summary: "Structured codes, props, suggestions, and doc URLs.",
     href: "/guide/interaction-reference#diagnostics",
     keywords: ["ondiagnostic", "warning", "error", "suggestions"],
   },
   {
     id: "accessibility",
     name: "Accessibility",
-    summary:
-      "Use keyboard traversal, precise bounds, concise announcements, labelled DOM, and explicit area tools.",
+    summary: "Keyboard traversal, bounds form, live region, labelled DOM, explicit tools.",
     href: "/guide/interaction-reference#accessibility",
     keywords: ["screen reader", "keyboard", "live region", "focus", "bounds", "ISO 8601"],
   },
@@ -1362,9 +1309,8 @@ export const INTERACTION_REFERENCE_INDEX: readonly InteractionReferenceEntry[] =
 
 export const MIGRATING_PRE_0_1_MD = `# Migrating pre-0.1 interactions
 
-The pre-release interaction API now names user intent instead of presentation.
-This is a source migration: update props, callback payload handling, and custom
-tooltip snippets together.
+Pre-0.1 props named presentation; current props name intent. Update props,
+callback payloads, and custom tooltip snippets together — no runtime shim.
 
 ## Rename the props and callbacks
 

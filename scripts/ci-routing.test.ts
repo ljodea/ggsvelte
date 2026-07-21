@@ -207,28 +207,60 @@ describe("planJobs", () => {
     expect(plan.unit).toBe(true);
   });
 
-  test("composite action changes force the full CI surface (no false-green on recipe-only edits)", () => {
+  test("composite action changes stay on CI-plumbing jobs (no VR/component for Dependabot pin bumps)", () => {
     const plan = planJobs(
       classifyChangedPaths([".github/actions/ci-content-hash-restore/action.yml"]),
     );
-    expect(plan.unit).toBe(true);
-    expect(plan.component).toBe(true);
-    expect(plan.consumer).toBe(true);
-    expect(plan.build).toBe(true);
-    expect(plan.bench_smoke).toBe(true);
+    expect(plan.checks).toBe(true);
     expect(plan.actions_security).toBe(true);
-    expect(plan.packages_dist).toBe(true);
+    // release-wiring.test.ts asserts composite content-hash protocol wiring.
+    expect(plan.unit).toBe(true);
+    // Not a product surface change — content-hash still bypasses on these paths.
+    expect(plan.component).toBe(false);
+    expect(plan.consumer).toBe(false);
+    expect(plan.build).toBe(false);
+    expect(plan.bench_smoke).toBe(false);
+    expect(plan.packages_dist).toBe(false);
+    expect(plan.vr).toBe(false);
+    expect(plan.pages).toBe(false);
+    expect(plan.interaction_perf).toBe(false);
   });
 
-  test("ci.yml self-changes force the full CI surface so routing cannot silently shrink", () => {
+  test("ci.yml self-changes run workflow unit + actions-security without browser surfaces", () => {
+    // Dependabot deps-ci groups often touch ci.yml only to bump action SHAs.
+    // Product force is reserved for lockfile / ci-routing; recipe identity is
+    // enforced via bypass_content_cache + UNIVERSAL_CONTENT_INPUTS instead.
     const plan = planJobs(classifyChangedPaths([".github/workflows/ci.yml"]));
+    expect(plan.checks).toBe(true);
     expect(plan.unit).toBe(true);
-    expect(plan.component).toBe(true);
-    expect(plan.consumer).toBe(true);
-    expect(plan.build).toBe(true);
-    expect(plan.bench_smoke).toBe(true);
     expect(plan.actions_security).toBe(true);
-    expect(plan.vr).toBe(true);
+    expect(plan.component).toBe(false);
+    expect(plan.consumer).toBe(false);
+    expect(plan.build).toBe(false);
+    expect(plan.bench_smoke).toBe(false);
+    expect(plan.packages_dist).toBe(false);
+    expect(plan.vr).toBe(false);
+    expect(plan.pages).toBe(false);
+    expect(plan.interaction_perf).toBe(false);
+  });
+
+  test("dependabot-style multi-workflow pin bump does not schedule VR or component", () => {
+    const plan = planJobs(
+      classifyChangedPaths([
+        ".github/workflows/ci.yml",
+        ".github/workflows/vr-compare.yml",
+        ".github/workflows/pages.yml",
+        ".github/actions/ci-content-hash-write/action.yml",
+      ]),
+    );
+    expect(plan.checks).toBe(true);
+    expect(plan.unit).toBe(true);
+    expect(plan.actions_security).toBe(true);
+    expect(plan.vr).toBe(false);
+    expect(plan.pages).toBe(false);
+    expect(plan.component).toBe(false);
+    expect(plan.consumer).toBe(false);
+    expect(plan.packages_dist).toBe(false);
   });
 
   test("ci-routing module self-changes force the full surface", () => {

@@ -39,9 +39,9 @@ describe("progressive Docs journey", () => {
     expect(QUICKSTART_LESSON_STEPS[1]).toEqual({
       id: "add-a-second-layer",
       title: "Add a second layer",
-      outcome: "Compose a line under the points without replacing the first mark.",
+      outcome: "Line under points; both layers share plot aes.",
       fragment: "<GeomLine />\n<GeomPoint />",
-      explanation: "Layers paint in order and share the plot mapping unless a layer overrides it.",
+      explanation: "Layers paint in source order; a layer may override mapping or data.",
       chapterTitle: "Layers and marks",
       href: "/guide/layers-marks#compose-layers",
     });
@@ -113,12 +113,7 @@ describe("progressive Docs journey", () => {
       ["/guide/accessibility", "Interaction", 24, "/examples/interaction/tooltip"],
       ["/guide/responsive-charts", "Production", 30, "/guide/errors#quickstart-troubleshooting"],
       ["/guide/rendering-performance", "Production", 31, "/examples/point/canvas-scatter"],
-      [
-        "/guide/server-rendering-export",
-        "Production",
-        32,
-        "/guide/server-rendering-export#server-rendering",
-      ],
+      ["/guide/server-rendering-export", "Production", 32, "/reference/cli"],
     ] as const;
     const inventory = createDocsRouteInventory();
     const pages = guidePages(lifecycle as unknown as LifecycleDoc);
@@ -155,9 +150,9 @@ describe("progressive Docs journey", () => {
     expect(QUICKSTART_LESSON_STEPS[0]).toEqual({
       id: "map-fields-to-position",
       title: "Map fields to position",
-      outcome: "Map data fields to x and y without transforming the source rows.",
+      outcome: "Map fields to x and y; source rows stay unchanged.",
       fragment: 'aes={{ x: "weight", y: "economy" }}',
-      explanation: "The rows stay unchanged; the mapping tells the plot what each field means.",
+      explanation: "aes names channels; it does not reshape the data.",
       chapterTitle: "Data and mappings",
       href: "/guide/data-mappings#map-fields-to-position",
     });
