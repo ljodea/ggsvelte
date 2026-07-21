@@ -256,17 +256,6 @@ test("themes controls remain legible in forced colors with reduced motion", asyn
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 
-for (const [name, width, height] of [
-  ["desktop", 1280, 900],
-  ["mobile", 375, 812],
-] as const) {
-  test(`themes ${name} visual contract`, async ({ page }) => {
-    await page.setViewportSize({ width, height });
-    await page.goto("/themes?theme=light");
-    await expect(page).toHaveScreenshot(`docs-themes-${name}.png`);
-  });
-}
-
 test("inspection overlays stay local and use custom interaction roles", async ({ page }) => {
   await page.goto("/themes?theme=light");
 

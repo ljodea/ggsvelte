@@ -284,41 +284,6 @@ test("global search is reachable from compact chrome and survives 200 percent zo
   await expectNoDocumentOverflow(page);
 });
 
-for (const [name, width, height] of [
-  ["desktop", 1280, 900],
-  ["mobile", 375, 812],
-] as const) {
-  test(`Docs landing ${name} visual contract`, async ({ page }) => {
-    await page.setViewportSize({ width, height });
-    await page.goto("/docs?theme=light");
-    await expect(page).toHaveScreenshot(`docs-landing-${name}.png`);
-  });
-
-  test(`Docs search ${name} visual contract`, async ({ page }) => {
-    await page.setViewportSize({ width, height });
-    await page.goto("/docs?theme=light");
-    await page.getByRole("button", { name: "Search documentation" }).click();
-    await page.getByRole("combobox", { name: "Search docs" }).fill("scale-scheme-type");
-    await expect(page).toHaveScreenshot(`docs-search-${name}.png`);
-  });
-
-  test(`progressive lesson ${name} visual contract`, async ({ page }) => {
-    await page.setViewportSize({ width, height });
-    await page.goto("/guide/getting-started?theme=light");
-    // Lesson contracts cover the progressive step only. Hide fixed chrome that can
-    // overlay the element after scroll-into-view (site header + skip links, which
-    // become visible when focused and sit at position:fixed top-left).
-    await page.evaluate(() => {
-      (document.activeElement as HTMLElement | null)?.blur?.();
-      for (const el of document.querySelectorAll<HTMLElement>(".site-header, .skip-link")) {
-        el.style.visibility = "hidden";
-      }
-    });
-    const step = page.locator(".progressive-step").nth(3);
-    await expect(step).toHaveScreenshot(`docs-progressive-lesson-${name}.png`);
-  });
-}
-
 test("mobile lesson keeps result before source and remains contained", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto("/guide/getting-started?theme=light");

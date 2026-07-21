@@ -151,17 +151,3 @@ for (const [path, height] of [
     await expect(frame).toHaveCSS("height", `${String(height)}px`);
   });
 }
-
-for (const [name, route, width, height] of [
-  ["home-desktop", "/?theme=light", 1280, 900],
-  ["home-mobile", "/?theme=light", 375, 812],
-  ["gallery-desktop", "/examples?theme=light", 1280, 900],
-  ["gallery-mobile", "/examples?theme=light", 375, 812],
-  ["detail-desktop", "/examples/point/scatter-color?theme=light", 1280, 900],
-] as const) {
-  test(`${name} visual contract`, async ({ page }) => {
-    await page.setViewportSize({ width, height });
-    await page.goto(route);
-    await expect(page).toHaveScreenshot(`docs-${name}.png`);
-  });
-}

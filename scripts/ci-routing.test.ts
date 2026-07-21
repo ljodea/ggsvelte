@@ -81,7 +81,7 @@ describe("classifyChangedPaths", () => {
     expect(flags.lockfile).toBe(false);
   });
 
-  test("llms module siblings stay on the docs lane (pages/vr)", () => {
+  test("llms module siblings stay on the docs lane (pages) without forcing VR", () => {
     for (const file of [
       "scripts/gen-llms.ts",
       "scripts/llms-markdown.ts",
@@ -89,10 +89,39 @@ describe("classifyChangedPaths", () => {
     ]) {
       const flags = classifyChangedPaths([file]);
       expect(flags.docs, file).toBe(true);
+      expect(flags.docs_render, file).toBe(false);
       const plan = planJobs(flags);
       expect(plan.pages, file).toBe(true);
-      expect(plan.vr, file).toBe(true);
+      expect(plan.vr, file).toBe(false);
+      expect(plan.docs_journeys, file).toBe(true);
       expect(plan.unit, file).toBe(true);
+    }
+  });
+
+  test("guide content under apps/docs is content-only (docs, not docs_render)", () => {
+    for (const file of [
+      "apps/docs/src/lib/catalog/guide.ts",
+      "apps/docs/src/lib/guide.ts",
+      "apps/docs/src/lib/components/GettingStartedGuide.svelte",
+      "apps/docs/src/lib/catalog/docs-tasks.ts",
+    ]) {
+      const flags = classifyChangedPaths([file]);
+      expect(flags.docs, file).toBe(true);
+      expect(flags.docs_render, file).toBe(false);
+    }
+  });
+
+  test("unknown apps/docs shell paths fail closed to docs_render", () => {
+    for (const file of [
+      "apps/docs/src/app.css",
+      "apps/docs/src/styles/tokens.css",
+      "apps/docs/src/lib/components/DocsShell.svelte",
+      "apps/docs/src/routes/examples/[category]/[name]/+page.svelte",
+      "apps/docs/src/routes/+layout.svelte",
+    ]) {
+      const flags = classifyChangedPaths([file]);
+      expect(flags.docs, file).toBe(true);
+      expect(flags.docs_render, file).toBe(true);
     }
   });
 });
@@ -127,8 +156,8 @@ describe("parseNameStatusList", () => {
 });
 
 describe("planJobs", () => {
-  test("docs-site changes run unit+build+vr+pages (script tests cover docs behavior)", () => {
-    const plan = planJobs(classifyChangedPaths(["apps/docs/src/routes/guide/+page.svelte"]));
+  test("docs render shell changes run unit+build+vr+pages+docs_journeys", () => {
+    const plan = planJobs(classifyChangedPaths(["apps/docs/src/routes/guide/[slug]/+page.svelte"]));
     expect(plan.checks).toBe(true);
     expect(plan.unit).toBe(true);
     expect(plan.component).toBe(false);
@@ -138,15 +167,33 @@ describe("planJobs", () => {
     expect(plan.build).toBe(true);
     expect(plan.vr).toBe(true);
     expect(plan.pages).toBe(true);
+    expect(plan.docs_journeys).toBe(true);
+    expect(plan.packages_dist).toBe(true);
     expect(plan.interaction_perf).toBe(false);
   });
 
-  test("docs generators schedule pages/vr (not scripts-only)", () => {
+  test("guide content-only changes schedule pages+docs_journeys without VR", () => {
+    for (const path of [
+      "scripts/llms-guide-content.ts",
+      "apps/docs/src/lib/catalog/guide.ts",
+      "apps/docs/src/lib/components/GettingStartedGuide.svelte",
+    ]) {
+      const plan = planJobs(classifyChangedPaths([path]));
+      expect(plan.unit, path).toBe(true);
+      expect(plan.pages, path).toBe(true);
+      expect(plan.build, path).toBe(true);
+      expect(plan.docs_journeys, path).toBe(true);
+      expect(plan.packages_dist, path).toBe(true);
+      expect(plan.vr, path).toBe(false);
+      expect(plan.component, path).toBe(false);
+    }
+  });
+
+  test("docs generators schedule pages (and journeys) without VR unless render-relevant", () => {
     for (const path of [
       "scripts/gen-llms.ts",
       "scripts/docs-seo.ts",
       "scripts/gen-docs-search.ts",
-      "scripts/gen-gallery-previews.ts",
       "scripts/cli-docs.ts",
       "scripts/guide-code-contract.ts",
       "scripts/deployment-artifact.ts",
@@ -156,11 +203,18 @@ describe("planJobs", () => {
       "scripts/legacy-routes.ts",
     ]) {
       const plan = planJobs(classifyChangedPaths([path]));
-      expect(plan.unit).toBe(true);
-      expect(plan.pages).toBe(true);
-      expect(plan.vr).toBe(true);
-      expect(plan.component).toBe(false);
+      expect(plan.unit, path).toBe(true);
+      expect(plan.pages, path).toBe(true);
+      expect(plan.vr, path).toBe(false);
+      expect(plan.component, path).toBe(false);
     }
+  });
+
+  test("gallery preview generator schedules pages without enforced VR", () => {
+    const plan = planJobs(classifyChangedPaths(["scripts/gen-gallery-previews.ts"]));
+    expect(plan.pages).toBe(true);
+    expect(plan.vr).toBe(false);
+    expect(plan.docs_journeys).toBe(true);
   });
 
   test("canonical visual sources schedule pages because generated gallery previews depend on them", () => {
@@ -171,11 +225,33 @@ describe("planJobs", () => {
     expect(plan.vr).toBe(true);
   });
 
-  test("lifecycle.json schedules pages/vr via docs surface", () => {
+  test("lifecycle.json schedules pages without VR", () => {
     const plan = planJobs(classifyChangedPaths(["lifecycle.json"]));
     expect(plan.pages).toBe(true);
-    expect(plan.vr).toBe(true);
+    expect(plan.vr).toBe(false);
     expect(plan.unit).toBe(true);
+    expect(plan.docs_journeys).toBe(true);
+  });
+
+  test("examples schedule VR and docs_journeys and packages_dist", () => {
+    const plan = planJobs(classifyChangedPaths(["examples/bar/stacked/Example.svelte"]));
+    expect(plan.vr).toBe(true);
+    expect(plan.docs_journeys).toBe(true);
+    expect(plan.packages_dist).toBe(true);
+    expect(plan.pages).toBe(true);
+  });
+
+  test("packages_dist is true whenever vr is true", () => {
+    for (const path of [
+      "packages/core/src/x.ts",
+      "apps/docs/src/app.css",
+      "examples/point/scatter-color/Example.svelte",
+      "tests/visual/vr.spec.ts",
+    ]) {
+      const plan = planJobs(classifyChangedPaths([path]));
+      expect(plan.vr, path).toBe(true);
+      expect(plan.packages_dist, path).toBe(true);
+    }
   });
 
   test("spec changes pull core unit, component, consumer, build, bench, and vr", () => {
@@ -370,8 +446,10 @@ describe("planJobs", () => {
 
 describe("evaluateGate", () => {
   test("passes when required jobs succeed and others are skipped", () => {
-    // Docs-site change: unit+build+vr+pages required; browser/consumer skipped.
+    // Docs-render change: unit+build+vr+pages+docs_journeys+packages_dist required.
     const required = planJobs(classifyChangedPaths(["apps/docs/src/app.css"]));
+    expect(required.packages_dist).toBe(true);
+    expect(required.docs_journeys).toBe(true);
     const results: Record<JobName, string> = {
       checks: "success",
       unit: "success",
@@ -381,9 +459,10 @@ describe("evaluateGate", () => {
       actions_security: "skipped",
       bench_smoke: "skipped",
       interaction_perf: "skipped",
-      packages_dist: "skipped",
+      packages_dist: "success",
       vr: "success",
       pages: "success",
+      docs_journeys: "success",
     };
     const gate = evaluateGate(required, results);
     expect(gate.ok).toBe(true);
@@ -772,6 +851,8 @@ describe("ci-routing module tree (split-safe)", () => {
     const expected = [
       "CACHEABLE_EXECUTIONS",
       "CONTENT_HASH_SCHEMA",
+      "DOCS_CONTENT_ONLY_PATHS",
+      "DOCS_CONTENT_SCRIPT_PATTERNS",
       "JOB_CONTENT_INPUTS",
       "LANE_PATTERNS",
       "classifyChangedPaths",
@@ -782,6 +863,8 @@ describe("ci-routing module tree (split-safe)", () => {
       "formatGithubOutputs",
       "formatTreeEntryDigest",
       "hashJobInputs",
+      "isDocsContentOnlyPath",
+      "isDocsRenderPath",
       "jobNames",
       "listJobContentPaths",
       "matchPathPattern",
