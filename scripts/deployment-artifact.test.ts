@@ -3,7 +3,11 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { buildDeploymentIdentity, validateDeploymentArtifact } from "./deployment-artifact.ts";
+import {
+  buildDeploymentIdentity,
+  deploymentBuildConfig,
+  validateDeploymentArtifact,
+} from "./deployment-artifact.ts";
 
 const REQUIRED_HEADERS = `/*
   Cache-Control: public, max-age=0, must-revalidate
@@ -64,6 +68,19 @@ function makeCompleteArtifact(buildMode: "cloudflare-preview" | "cloudflare-prod
 }
 
 describe("deployment artifact identity", () => {
+  it("passes the configured production analytics token into artifact validation", () => {
+    expect(
+      deploymentBuildConfig({
+        DOCS_BUILD_MODE: "cloudflare-production",
+        DOCS_ANALYTICS_TOKEN: "0123456789abcdef0123456789abcdef",
+      }),
+    ).toMatchObject({
+      mode: "cloudflare-production",
+      analytics: true,
+      analyticsToken: "0123456789abcdef0123456789abcdef",
+    });
+  });
+
   it("binds a Cloudflare artifact to its source commit, route inventory, and build mode", () => {
     expect(buildDeploymentIdentity(expectedArtifact("cloudflare-production"))).toEqual({
       schemaVersion: 1,

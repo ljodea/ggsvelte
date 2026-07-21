@@ -206,13 +206,20 @@ function sourceCommit(): string {
   );
 }
 
-function main(): void {
-  const config = resolveDocsBuildConfig({
-    ...(process.env["DOCS_BUILD_MODE"] === undefined
+export function deploymentBuildConfig(environment: Readonly<Record<string, string | undefined>>) {
+  return resolveDocsBuildConfig({
+    ...(environment["DOCS_BUILD_MODE"] === undefined
       ? {}
-      : { mode: process.env["DOCS_BUILD_MODE"] }),
-    ...(process.env["BASE_PATH"] === undefined ? {} : { basePath: process.env["BASE_PATH"] }),
+      : { mode: environment["DOCS_BUILD_MODE"] }),
+    ...(environment["BASE_PATH"] === undefined ? {} : { basePath: environment["BASE_PATH"] }),
+    ...(environment["DOCS_ANALYTICS_TOKEN"] === undefined
+      ? {}
+      : { analyticsToken: environment["DOCS_ANALYTICS_TOKEN"] }),
   });
+}
+
+function main(): void {
+  const config = deploymentBuildConfig(process.env);
   if (config.mode !== "cloudflare-preview" && config.mode !== "cloudflare-production") {
     throw new Error(
       `Deployment artifact generation requires a Cloudflare build mode, received ${config.mode}`,
