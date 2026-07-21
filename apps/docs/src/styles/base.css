@@ -270,6 +270,14 @@ pre {
   pointer-events: none;
 }
 
+.guide-code-copy [role="status"]:not(.visually-hidden) {
+  display: block;
+  min-height: 1.4em;
+  margin-top: 0.4rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
 .prose :is(p, li, h3) code {
   padding: 0.08em 0.28em;
   border-radius: 2px;
