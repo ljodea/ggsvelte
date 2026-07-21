@@ -236,7 +236,10 @@ export function validateDeploymentArtifact(
       ) {
         problems.push("preview _redirects must not send /ggsvelte cleanup traffic to production");
       }
-      if (!redirects.includes("/ggsvelte/* /:splat 301")) {
+      if (
+        !redirects.includes("/ggsvelte / 301") ||
+        !redirects.includes("/ggsvelte/* /:splat 301")
+      ) {
         problems.push("_redirects is missing the same-origin /ggsvelte cleanup redirect");
       }
     }

@@ -238,6 +238,24 @@ describe("deployment artifact identity", () => {
     }
   });
 
+  it("requires the exact bare /ggsvelte same-origin cleanup on preview, not only the wildcard", () => {
+    const buildDirectory = makeCompleteArtifact("cloudflare-preview");
+    try {
+      writeFileSync(
+        join(buildDirectory, "_redirects"),
+        `/bench https://ljodea.github.io/ggsvelte/bench/ 302
+/bench/* https://ljodea.github.io/ggsvelte/bench/:splat 302
+/ggsvelte/* /:splat 301
+`,
+      );
+      expect(
+        validateDeploymentArtifact(buildDirectory, expectedArtifact("cloudflare-preview")),
+      ).toContain("_redirects is missing the same-origin /ggsvelte cleanup redirect");
+    } finally {
+      rmSync(buildDirectory, { recursive: true, force: true });
+    }
+  });
+
   it("rejects preview artifacts without a broad noindex header", () => {
     const buildDirectory = makeCompleteArtifact("cloudflare-preview");
     try {
