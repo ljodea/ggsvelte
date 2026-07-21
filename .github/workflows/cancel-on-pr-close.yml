@@ -10,7 +10,11 @@
 name: Cancel on PR close
 
 on:
-  pull_request_target:
+  # zizmor flags pull_request_target as a dangerous trigger in general. Safe
+  # here: never checks out PR code, only uses event metadata + Actions API to
+  # cancel runs. Needed so fork PRs get a write-capable GITHUB_TOKEN (plain
+  # pull_request is read-only for forks and cannot cancel anything).
+  pull_request_target: # zizmor: ignore[dangerous-triggers]
     types: [closed]
 
 permissions: {}
