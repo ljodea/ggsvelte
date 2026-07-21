@@ -442,6 +442,70 @@ describe("planJobs", () => {
     expect(plan.consumer).toBe(false);
     expect(plan.component).toBe(false);
   });
+
+  test("scripts test-only changes never rebuild docs site or run svelte-check", () => {
+    // release-wiring.test.ts (and other scripts/**/*.test.ts) used to force the
+    // monolithic build job, which always ran vite build:docs.
+    const plan = planJobs(classifyChangedPaths(["scripts/release-wiring.test.ts"]));
+    expect(plan.unit).toBe(true);
+    expect(plan.build).toBe(true); // knip / type-aware still cover scripts/
+    expect(plan.svelte_check).toBe(false);
+    expect(plan.docs_site).toBe(false);
+    expect(plan.pages).toBe(false);
+    expect(plan.packages_dist).toBe(false);
+  });
+
+  test("package changes schedule concurrent build + svelte_check + docs_site", () => {
+    const plan = planJobs(classifyChangedPaths(["packages/core/src/x.ts"]));
+    expect(plan.build).toBe(true);
+    expect(plan.svelte_check).toBe(true);
+    expect(plan.docs_site).toBe(true);
+  });
+
+  test("docs build helpers schedule svelte_check + docs_site (not scripts-only)", () => {
+    // After the monlith split, pure scripts/** no longer runs check:docs / build:docs.
+    // Helpers invoked by apps/docs package.json must sit on the docs lane.
+    for (const path of [
+      "scripts/gen-docs-routes.ts",
+      "scripts/docs-route-inventory.ts",
+      "scripts/gen-playground-seeds.ts",
+      "scripts/check-docs-metadata.ts",
+      "scripts/check-pages-links.ts",
+    ]) {
+      const flags = classifyChangedPaths([path]);
+      expect(flags.docs, path).toBe(true);
+      const plan = planJobs(flags);
+      expect(plan.svelte_check, path).toBe(true);
+      expect(plan.docs_site, path).toBe(true);
+      expect(plan.pages, path).toBe(true);
+      expect(plan.unit, path).toBe(true);
+      expect(plan.build, path).toBe(true);
+      expect(plan.vr, path).toBe(false);
+    }
+  });
+});
+
+describe("JOB_CONTENT_INPUTS (split build hashes)", () => {
+  test("build hash still includes apps/docs for knip/type-aware coverage", () => {
+    expect(JOB_CONTENT_INPUTS.build).toContain("apps/docs/**");
+  });
+
+  test("svelte_check and docs_site hash docs generators and $scripts imports", () => {
+    for (const execution of ["svelte_check", "docs_site"] as const) {
+      const inputs = JOB_CONTENT_INPUTS[execution];
+      expect(inputs, execution).toContain("apps/docs/**");
+      expect(inputs, execution).toContain("scripts/gen-docs-routes.ts");
+      expect(inputs, execution).toContain("scripts/docs-route-inventory.ts");
+      expect(inputs, execution).toContain("scripts/gen-playground-seeds.ts");
+      expect(inputs, execution).toContain("scripts/check-docs-metadata.ts");
+      expect(inputs, execution).toContain("scripts/check-pages-links.ts");
+      expect(inputs, execution).toContain("scripts/gen-llms.ts");
+      expect(inputs, execution).toContain("scripts/docs-seo.ts");
+      expect(inputs, execution).toContain("scripts/quickstart.ts");
+      expect(inputs, execution).toContain("scripts/guide-code-contract.ts");
+      expect(inputs, execution).toContain("scripts/highlight-code.ts");
+    }
+  });
 });
 
 describe("evaluateGate", () => {
@@ -456,6 +520,8 @@ describe("evaluateGate", () => {
       component: "skipped",
       consumer: "skipped",
       build: "success",
+      svelte_check: "success",
+      docs_site: "success",
       actions_security: "skipped",
       bench_smoke: "skipped",
       interaction_perf: "skipped",

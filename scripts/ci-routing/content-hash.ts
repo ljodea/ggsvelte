@@ -19,7 +19,8 @@ import { createHash } from "node:crypto";
 
 import { matchPathPattern, type ChangeFlags, type PlanOptions } from "./routing";
 
-export const CONTENT_HASH_SCHEMA = 1;
+// Schema 2: split former monolithic `build` into build / svelte_check / docs_site.
+export const CONTENT_HASH_SCHEMA = 2;
 
 /**
  * Physical CI executions that may content-hash short-circuit.
@@ -29,6 +30,8 @@ export type CacheableExecution =
   | "packages_dist"
   | "unit"
   | "build"
+  | "svelte_check"
+  | "docs_site"
   | "actions_security"
   | "bench_smoke"
   | "interaction_perf"
@@ -41,6 +44,8 @@ export const CACHEABLE_EXECUTIONS: readonly CacheableExecution[] = [
   "packages_dist",
   "unit",
   "build",
+  "svelte_check",
+  "docs_site",
   "actions_security",
   "bench_smoke",
   "interaction_perf",
@@ -66,6 +71,47 @@ const UNIVERSAL_CONTENT_INPUTS: readonly string[] = [
   "tsconfig.json",
   "tsconfig.base.json",
   "bunfig.toml",
+];
+
+/**
+ * Docs app + every script that can change svelte-check / vite docs-site
+ * outcomes (generators, $scripts imports, pages-link / metadata gates).
+ * Shared so the three post-split jobs cannot false-green on omitted inputs.
+ */
+const DOCS_SURFACE_CONTENT_INPUTS: readonly string[] = [
+  "apps/docs/**",
+  "examples/**",
+  "lifecycle.json",
+  // apps/docs package.json build/check invoke these generators.
+  "scripts/gen-docs-routes.ts",
+  "scripts/docs-route-inventory.ts",
+  "scripts/docs-route-inventory.test.ts",
+  "scripts/gen-docs-search.ts",
+  "scripts/gen-docs-search.test.ts",
+  "scripts/gen-legacy-routes.ts",
+  "scripts/gen-gallery-previews.ts",
+  "scripts/gen-gallery-previews.test.ts",
+  "scripts/gen-playground-seeds.ts",
+  "scripts/check-docs-metadata.ts",
+  "scripts/check-pages-links.ts",
+  "scripts/legacy-migration.ts",
+  "scripts/legacy-artifact.ts",
+  "scripts/legacy-routes.ts",
+  // $scripts imports used by docs routes / layout (typecheck + published site).
+  "scripts/gen-llms.ts",
+  "scripts/gen-llms.test.ts",
+  "scripts/llms-markdown.ts",
+  "scripts/llms-guide-content.ts",
+  "scripts/docs-seo.ts",
+  "scripts/diagnostic-docs.ts",
+  "scripts/cli-docs.ts",
+  "scripts/guide-code-contract.ts",
+  "scripts/quickstart.ts",
+  "scripts/highlight-code.ts",
+  "scripts/highlight-code.test.ts",
+  "scripts/deployment-artifact.ts",
+  "scripts/deployment-smoke.ts",
+  "scripts/deployment-smoke-cli.ts",
 ];
 
 /**
@@ -106,6 +152,9 @@ export const JOB_CONTENT_INPUTS: Record<CacheableExecution, readonly string[]> =
     "knip.jsonc",
     ".pre-commit-config.yaml",
   ],
+  // Package build + knip + type-aware + publint + examples tsc (no vite docs site).
+  // apps/docs stays hashed: knip + oxlint --type-aware still cover the docs app,
+  // and routing still schedules build for docsSurface changes (Codex P2).
   build: [
     ...UNIVERSAL_CONTENT_INPUTS,
     "packages/spec/**",
@@ -124,6 +173,22 @@ export const JOB_CONTENT_INPUTS: Record<CacheableExecution, readonly string[]> =
     "knip.jsonc",
     ".pre-commit-config.yaml",
     ".github/workflows/**",
+  ],
+  // svelte-check for packages/svelte + apps/docs (generators + check).
+  svelte_check: [
+    ...UNIVERSAL_CONTENT_INPUTS,
+    "packages/spec/**",
+    "packages/core/**",
+    "packages/svelte/**",
+    ...DOCS_SURFACE_CONTENT_INPUTS,
+  ],
+  // Full vite adapter-static docs site + packed pages-link gate.
+  docs_site: [
+    ...UNIVERSAL_CONTENT_INPUTS,
+    "packages/spec/**",
+    "packages/core/**",
+    "packages/svelte/**",
+    ...DOCS_SURFACE_CONTENT_INPUTS,
   ],
   actions_security: [
     ...UNIVERSAL_CONTENT_INPUTS,
