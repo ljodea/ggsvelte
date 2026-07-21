@@ -204,11 +204,16 @@ function buildTicks(
   intervalValue: TemporalInterval,
   input: TemporalAxisPlanInput,
 ): AxisGuideTick[] {
-  const labels = formatTemporalTickSequence(values, {
+  // Contextual abbreviations depend on sequence order. When the axis is reversed,
+  // format in visual order so the leftmost/topmost tick keeps full context, then
+  // map labels back onto ascending semantic values.
+  const formatOrder = input.reverse ? values.toReversed() : values;
+  const formatted = formatTemporalTickSequence(formatOrder, {
     ...temporalOptions(input),
     interval: intervalValue,
     ...(input.config.dateLabels !== undefined && { pattern: input.config.dateLabels }),
   });
+  const labels = input.reverse ? formatted.toReversed() : formatted;
   if (input.config.dateLabels === undefined && input.config.labels !== undefined) {
     for (let index = 0; index < labels.length; index++) {
       labels[index] = {
@@ -256,11 +261,14 @@ function evaluateTicks(
       break;
     }
   }
+  // Layout reserves tickLength + tickLabelGap (defaults 6 + 3) in addition to the
+  // label extent. Match that chrome so near-cap labels still diagnose overflow.
+  const tickChromePx = 6 + 3;
   const orthogonalCap = input.orthogonalMarginCapPx ?? input.marginCapPx;
   const marginOverflow = projected.some((tick) =>
     input.orient === "horizontal"
-      ? tick.width / 2 > input.marginCapPx || tick.height > orthogonalCap
-      : tick.width > input.marginCapPx || tick.height / 2 > orthogonalCap,
+      ? tick.width / 2 > input.marginCapPx || tick.height + tickChromePx > orthogonalCap
+      : tick.width + tickChromePx > input.marginCapPx || tick.height / 2 > orthogonalCap,
   );
   return { overlap, marginOverflow };
 }
