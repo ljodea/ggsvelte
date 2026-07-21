@@ -7,10 +7,14 @@
  *   tested in-repo and SHA-pinned action surface stays small.
  * - `forceAll` is the safe fallback when git cannot compute a base (missing
  *   event.before, shallow history, etc.).
- * - Changing `.github/workflows/ci.yml` itself forces the full CI surface so a
- *   routing edit cannot land without exercising the jobs it controls.
+ * - Product force (lockfile / ci-routing) schedules browser + package surfaces.
+ *   CI plumbing (`ci.yml` pin bumps, composite actions under `.github/actions`)
+ *   does **not** product-force: Dependabot deps-ci PRs must not drag VR /
+ *   Playwright / packed-consumer. Recipe identity still bypasses content-hash
+ *   caches (see content-hash.ts) so the next product PR re-executes under the
+ *   new workflow/action pins.
  * - The `ci_routing` lane includes `scripts/ci-routing.ts` and
- *   `scripts/ci-routing/**` so module splits still force the full surface.
+ *   `scripts/ci-routing/**` so router edits still force the full surface.
  */
 
 export type ChangeLane =
@@ -112,7 +116,8 @@ export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
   ci_workflow: [".github/workflows/ci.yml"],
   ci_routing: ["scripts/ci-routing.ts", "scripts/ci-routing.test.ts", "scripts/ci-routing/**"],
   // Local composite actions used by ci.yml (content-hash restore/write). A change
-  // here is a CI recipe change and must force the full surface + bypass cache.
+  // here is a CI recipe change: bypass content-hash caches, schedule
+  // actions-security — but do not product-force VR/component/consumer.
   ci_actions: [".github/actions/**"],
   visual: ["tests/visual/**"],
   performance: [
@@ -252,6 +257,12 @@ export type PlanOptions = {
  * - consumer follows consumer harness scripts as well as packages
  * - bench_smoke follows svelte (retained-memory imports inspection)
  * - docs generators (gen-llms / lifecycle.json) sit on the docs lane → pages/vr
+ *
+ * Force tiers (do not collapse these):
+ * - `forceProduct`: lockfile or ci-routing self-change — full package/browser surface.
+ * - CI plumbing (`ci_workflow`, `ci_actions`): actions-security (+ unit via the
+ *   workflows lane when YAML changed). Never alone schedule VR / component /
+ *   consumer / pages. Content-hash bypass still applies (recipe identity).
  */
 export function planJobs(changes: ChangeFlags, options: PlanOptions = {}): JobPlan {
   if (options.forceAll === true) {
@@ -260,15 +271,17 @@ export function planJobs(changes: ChangeFlags, options: PlanOptions = {}): JobPl
     return all;
   }
 
-  const force = changes.lockfile || changes.ci_workflow || changes.ci_routing || changes.ci_actions;
-  const packageSurface = changes.spec || changes.core || changes.svelte || force;
-  const docsSurface = changes.docs || changes.examples || force;
+  // Product-wide force. Intentionally excludes ci.yml / .github/actions so
+  // Dependabot action pin bumps stay on the cheap CI-plumbing surface.
+  const forceProduct = changes.lockfile || changes.ci_routing;
+  const packageSurface = changes.spec || changes.core || changes.svelte || forceProduct;
+  const docsSurface = changes.docs || changes.examples || forceProduct;
   const browserSurface =
-    packageSurface || changes.spikes || changes.visual || changes.performance || force;
+    packageSurface || changes.spikes || changes.visual || changes.performance || forceProduct;
   // knip / type-aware / docs+examples check live on the build job once pre-push
   // parity is dropped from the checks job (to avoid double-running unit/build).
   const staticAnalysisSurface =
-    packageSurface || docsSurface || changes.scripts || changes.evals || force;
+    packageSurface || docsSurface || changes.scripts || changes.evals || forceProduct;
 
   // Shared packages/*/dist artifact for jobs that previously each ran
   // `bun run build`. Unit/bench-smoke stay on the cheaper `bun run check`
@@ -279,7 +292,7 @@ export function planJobs(changes: ChangeFlags, options: PlanOptions = {}): JobPl
     changes.visual ||
     changes.performance ||
     changes.consumer_tools ||
-    force;
+    forceProduct;
 
   return {
     // Cheap format/lint parity — always on so markdown-only PRs still get oxfmt/prettier.
@@ -294,18 +307,21 @@ export function planJobs(changes: ChangeFlags, options: PlanOptions = {}): JobPl
       changes.docs ||
       changes.examples ||
       changes.workflows ||
-      force,
+      forceProduct,
     component: browserSurface,
-    consumer: packageSurface || changes.consumer_tools || force,
+    consumer: packageSurface || changes.consumer_tools || forceProduct,
     build: staticAnalysisSurface,
-    actions_security: changes.workflows || force,
+    // Composite action recipe edits must still lint the actions surface even
+    // when no workflow YAML changed (Dependabot directories for composites).
+    actions_security: changes.workflows || changes.ci_actions || forceProduct,
     // retained-memory imports packages/svelte inspection coordinator.
-    bench_smoke: changes.benchmarks || changes.spec || changes.core || changes.svelte || force,
+    bench_smoke:
+      changes.benchmarks || changes.spec || changes.core || changes.svelte || forceProduct,
     // Informational only; path-gated and independent of the component job.
     interaction_perf: browserSurface,
     packages_dist: packagesDist,
-    vr: packageSurface || docsSurface || changes.visual || force,
-    pages: packageSurface || docsSurface || force,
+    vr: packageSurface || docsSurface || changes.visual || forceProduct,
+    pages: packageSurface || docsSurface || forceProduct,
   };
 }
 

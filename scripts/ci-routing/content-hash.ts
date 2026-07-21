@@ -9,7 +9,9 @@
  * - Expanding JOB_CONTENT_INPUTS changes the patterns string inside the digest
  *   and invalidates old caches.
  * - `bypass_content_cache` is true under force-all or lockfile / ci.yml /
- *   ci-routing / composite-action changes.
+ *   ci-routing / composite-action changes (recipe identity). Path routing may
+ *   still skip product jobs for pure CI plumbing; bypass only matters when a
+ *   job is scheduled.
  * - Invalidation: bump CONTENT_HASH_SCHEMA, edit a matched input, change
  *   JOB_CONTENT_INPUTS patterns, or set repo variable CI_DISABLE_CONTENT_HASH=1.
  */

@@ -11,7 +11,9 @@
 # emits per-job flags. Expensive jobs are skipped when their inputs did not
 # change (docs-only, workflow-only, markdown-only, …). The `ci-gate` job is
 # the single required aggregator so skipped jobs do not look like missing
-# checks. Changing this file forces the full surface (see ci_workflow lane).
+# checks. Product force (lockfile / ci-routing) schedules browser+package
+# surfaces; pure CI plumbing (this file's action pins, .github/actions) only
+# runs the cheap security/lint surface — see forceProduct in routing.ts.
 #
 # Content-hash skip (issue #245): when a job is still scheduled, it may
 # early-exit success if a validated success marker / packages-dist cache
@@ -19,7 +21,9 @@
 # JOB_CONTENT_INPUTS + recipe). Success-marker jobs use local composites
 # (.github/actions/ci-content-hash-restore|write); packages-dist keeps its
 # specialized dist-payload path. bypass_content_cache disables short-circuit
-# under force-all / lockfile / ci.yml / ci-routing / .github/actions changes.
+# under force-all / lockfile / ci.yml / ci-routing / .github/actions changes
+# so recipe pin bumps re-execute jobs that *are* scheduled; the next product
+# PR also misses cache because those paths are UNIVERSAL_CONTENT_INPUTS.
 # Invalidate by bumping CONTENT_HASH_SCHEMA, editing a matched input, or
 # setting repo variable CI_DISABLE_CONTENT_HASH=1. GHA cache is ref-scoped
 # (not a cross-PR registry). Exact cache keys only — no restore-keys for
