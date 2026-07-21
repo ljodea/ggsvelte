@@ -63,8 +63,9 @@ describe("R0 release wiring", () => {
     expect(ci).toContain("mcr.microsoft.com/playwright:v1.61.1-noble");
     expect(ci).toContain("HOME: /root");
     // Package browser shards download packages/*/dist (issue #241); no monorepo rebuild.
+    // Download+verify lives in ci-download-packages-dist (pin + entrypoint checks).
     for (const job of [svelteJob, spikesJob]) {
-      expect(job).toContain("download-artifact");
+      expect(job).toContain("uses: ./.github/actions/ci-download-packages-dist");
       expect(job).toContain("packages-dist");
       expect(job).not.toContain("run: bun run build\n");
     }
@@ -72,7 +73,7 @@ describe("R0 release wiring", () => {
     expect(spikesJob).toContain("working-directory: spikes/browser");
     // Journeys: docs_journeys routing + full non-pixel inventory; may build docs site.
     expect(journeysJob).toContain("docs_journeys == 'true'");
-    expect(journeysJob).toContain("download-artifact");
+    expect(journeysJob).toContain("uses: ./.github/actions/ci-download-packages-dist");
     expect(journeysJob).toContain("packages-dist");
     expect(journeysJob).toContain("bun run build:docs");
     expect(journeysJob).not.toContain("bun run test:interaction-perf");
@@ -93,7 +94,7 @@ describe("R0 release wiring", () => {
     expect(interactionPerfJob).not.toContain("needs: [component]");
     expect(interactionPerfJob).toContain("informational");
     expect(interactionPerfJob).toContain("interaction_perf == 'true'");
-    expect(interactionPerfJob).toContain("download-artifact");
+    expect(interactionPerfJob).toContain("uses: ./.github/actions/ci-download-packages-dist");
     expect(interactionPerfJob).toContain("packages-dist");
     expect(bench).toContain("mcr.microsoft.com/playwright:v1.61.1-noble");
     expect(bench).toContain("bun run test:interaction-perf");
@@ -116,12 +117,12 @@ describe("R0 release wiring", () => {
     expect(producerJob).toContain("packages/core/dist");
     expect(producerJob).toContain("packages/svelte/dist");
     expect(producerJob).toContain("run: bun run build");
-    // Consumers download instead of rebuilding packages.
+    // Consumers download instead of rebuilding packages (via composite).
     const consumerJob = ci.slice(
       ci.indexOf("  consumer-compat:\n    name: packed consumer"),
       ci.indexOf("  component-svelte:\n    name: component-svelte"),
     );
-    expect(consumerJob).toContain("download-artifact");
+    expect(consumerJob).toContain("uses: ./.github/actions/ci-download-packages-dist");
     expect(consumerJob).toContain("packages-dist");
     expect(consumerJob).not.toContain("run: bun run build");
     // Unit and bench-smoke keep the cheaper bun run check path (Codex plan review).
@@ -336,6 +337,9 @@ describe("R0 release wiring", () => {
     // github-actions "/" only covers workflows; composites need their own dirs.
     expect(dependabot).toContain('"/.github/actions/ci-content-hash-restore"');
     expect(dependabot).toContain('"/.github/actions/ci-content-hash-write"');
+    expect(dependabot).toContain('"/.github/actions/ci-setup-bun"');
+    expect(dependabot).toContain('"/.github/actions/ci-bun-install"');
+    expect(dependabot).toContain('"/.github/actions/ci-download-packages-dist"');
     // Human-authored locksteps / Changesets-owned internal ranges.
     expect(dependabot).toContain('dependency-name: "playwright"');
     expect(dependabot).toContain('dependency-name: "@playwright/test"');
@@ -518,6 +522,13 @@ it("uses job-private Bun caches in self-hosted workflows (issue #319)", () => {
       bunCacheKeys.length,
     );
   }
+
+  // Shared install composite (ci.yml) must keep the private-cache protocol.
+  const bunInstall = read(".github/actions/ci-bun-install/action.yml");
+  expect(bunInstall).toContain("bun install --frozen-lockfile");
+  expect(bunInstall).toContain("path: ${{ runner.temp }}/bun-install-cache");
+  expect(bunInstall).toContain("BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache");
+  expect(bunInstall).not.toContain("path: ~/.bun/install/cache");
 
   // Consumer fixtures run their own package-manager install from a later step,
   // so that step must receive the cache env independently of the root install.
