@@ -34,41 +34,50 @@ describe("R0 release wiring", () => {
   it("runs the Playwright interaction performance gate with benchmark budgets", () => {
     const ci = read(".github/workflows/ci.yml");
     const bench = read(".github/workflows/bench.yml");
-    // Issue #243: component surface is three parallel jobs (svelte / spikes / journeys).
+    // Browser surface: svelte + spikes (component). Journeys is docs_journeys-routed.
     const svelteJob = ci.slice(
-      ci.indexOf("  component-svelte:\n    name: component-svelte"),
-      ci.indexOf("  component-spikes:\n    name: component-spikes"),
+      ci.indexOf("  component-svelte:"),
+      ci.indexOf("  component-spikes:"),
     );
     const spikesJob = ci.slice(
-      ci.indexOf("  component-spikes:\n    name: component-spikes"),
-      ci.indexOf("  component-journeys:\n    name: component-journeys"),
+      ci.indexOf("  component-spikes:"),
+      ci.indexOf("  component-journeys:"),
     );
     const journeysJob = ci.slice(
-      ci.indexOf("  component-journeys:\n    name: component-journeys"),
-      ci.indexOf("  interaction-perf:\n    name: interaction-perf"),
+      ci.indexOf("  component-journeys:"),
+      ci.indexOf("  interaction-perf:"),
     );
     const interactionPerfJob = ci.slice(
-      ci.indexOf("  interaction-perf:\n    name: interaction-perf"),
+      ci.indexOf("  interaction-perf:"),
       ci.indexOf("  build:\n    name: build"),
     );
     expect(ci).toContain("mcr.microsoft.com/playwright:v1.61.1-noble");
     expect(ci).toContain("HOME: /root");
-    // Each shard downloads shared packages/*/dist (issue #241); does not rebuild packages.
-    for (const job of [svelteJob, spikesJob, journeysJob]) {
+    // Package browser shards download packages/*/dist (issue #241); no monorepo rebuild.
+    for (const job of [svelteJob, spikesJob]) {
       expect(job).toContain("download-artifact");
       expect(job).toContain("packages-dist");
-      expect(job).not.toContain("run: bun run build");
+      expect(job).not.toContain("run: bun run build\n");
     }
     expect(svelteJob).toContain("working-directory: packages/svelte");
     expect(spikesJob).toContain("working-directory: spikes/browser");
-    // Absolute wall-clock gates stay out of the required component surface
-    // so multi-runner host noise cannot block merges (issue #154).
+    // Journeys: docs_journeys routing + full non-pixel inventory; may build docs site.
+    expect(journeysJob).toContain("docs_journeys == 'true'");
+    expect(journeysJob).toContain("download-artifact");
+    expect(journeysJob).toContain("packages-dist");
+    expect(journeysJob).toContain("bun run build:docs");
     expect(journeysJob).not.toContain("bun run test:interaction-perf");
     expect(journeysJob).toContain("interaction-accessibility.spec.ts");
-    // ci-gate aggregates the three shards into the component routing flag.
+    expect(journeysJob).toContain("docs-home-gallery.spec.ts");
+    expect(journeysJob).toContain("docs-progressive-search.spec.ts");
+    expect(journeysJob).toContain("docs-themes.spec.ts");
+    expect(journeysJob).toContain("--grep-invert 'visual contract'");
+    // ci-gate: package component = svelte+spikes; docs_journeys is independent.
     expect(ci).toContain("COMPONENT_SVELTE_RES");
     expect(ci).toContain("COMPONENT_SPIKES_RES");
-    expect(ci).toContain("COMPONENT_JOURNEYS_RES");
+    expect(ci).toContain("DOCS_JOURNEYS_RES");
+    expect(ci).toContain("DOCS_JOURNEYS_REQ");
+    expect(ci).toContain("docs_journeys:");
     expect(interactionPerfJob).toContain("bun run test:interaction-perf");
     // Independent of component shards so it does not serialize the critical path;
     // still path-gated and informational (hard gate remains on run-bench).

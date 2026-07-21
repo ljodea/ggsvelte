@@ -38,6 +38,7 @@
     "test:temporal-pipeline": "bun test packages/core/tests/pipeline-temporal.test.ts packages/core/tests/ticks.test.ts",
     "test:spikes": "cd spikes/browser && bun run --bun test",
     "test:visual": "bun node_modules/.bin/playwright test --config tests/visual/playwright.config.ts",
+    "test:visual:smoke": "bun node_modules/.bin/playwright test --config tests/visual/playwright.config.ts vr.spec.ts",
     "test:interaction-perf": "bun node_modules/.bin/playwright test --config tests/performance/playwright.config.ts",
     "manifest:gen": "bun scripts/gen-manifest.ts",
     "manifest:check": "bun scripts/gen-manifest.ts --check",

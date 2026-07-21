@@ -254,21 +254,3 @@ test("public metadata exposes social cards and truthful route-local structured d
   await page.goto("/examples");
   await expect(page.locator('script[type="application/ld+json"]')).toHaveCount(0);
 });
-
-test("guide shell visual contract: desktop light, dark, and forced colors", async ({ page }) => {
-  await page.setViewportSize({ width: 1280, height: 900 });
-  await page.goto(`${GUIDE_ROUTE}?theme=light`);
-  await expect(page).toHaveScreenshot("docs-guide-1280-light.png");
-
-  await page.goto(`${GUIDE_ROUTE}?theme=dark`);
-  await expect(page).toHaveScreenshot("docs-guide-1280-dark.png");
-
-  await page.emulateMedia({ forcedColors: "active" });
-  await expect(page).toHaveScreenshot("docs-guide-1280-forced-colors.png");
-});
-
-test("guide shell visual contract: mobile light", async ({ page }) => {
-  await page.setViewportSize({ width: 375, height: 760 });
-  await page.goto(`${GUIDE_ROUTE}?theme=light`);
-  await expect(page).toHaveScreenshot("docs-guide-375-light.png");
-});

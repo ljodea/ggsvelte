@@ -327,25 +327,24 @@ Authoring a new example:
 
 ## Visual-regression workflow
 
-The VR suite (`tests/visual/`) screenshots the BUILT docs site: every
-example page supports `?vr&theme=light|dark`, which strips chrome, freezes
-animations, and pins the fixed-size `.gg-example-frame` — the shot target.
-The suite waits on `document.fonts.ready` and `<GGPlot>`'s
-`data-gg-ready="true"` signal. Full determinism rationale + font policy:
+Enforced VR is a **smoke suite** (`tests/visual/smoke-matrix.ts` +
+`vr.spec.ts`, ~15–18 shots including ≥2 dark). It screenshots the BUILT docs
+site: example pages support `?vr&theme=light|dark`, which strips chrome,
+freezes animations, and pins `.gg-example-frame`. Full dual-theme × every
+example is intentionally gone. Gallery lights live under
+`apps/docs/static/previews/` and may lag. Non-pixel docs structure/a11y runs
+in `component-journeys` (docs_journeys routing). Determinism + fonts:
 docs/decisions/0009.
 
-- **Baselines are container-only.** `tests/visual/__screenshots__/` may only
-  be written by the pinned-container CI flow (vr-compare → vr-approve).
-  It is empty until the first CI run bootstraps it: vr-compare tolerates
-  missing baselines by generating candidates and uploading them as the
-  `vr-baselines` artifact with a "bootstrap" summary.
-- **Local runs use a throwaway snapshot dir** (macOS fonts ≠ container
-  fonts, so local pixels never match committed baselines):
+- **Smoke baselines** land in `tests/visual/__screenshots__/` from the pinned
+  container. Prefer **same-PR** updates: change render-relevant code + smoke
+  PNGs together. Baseline-only PRs are rejected by `vr-baseline-guard`.
+- **Local runs use a throwaway snapshot dir** (macOS fonts ≠ container fonts):
 
   ```sh
   bun run build && bun run build:docs
-  VR_SNAPSHOT_DIR=.local-baselines bun run test:visual -- --update-snapshots  # generate
-  VR_SNAPSHOT_DIR=.local-baselines bun run test:visual                        # compare
+  VR_SNAPSHOT_DIR=.local-baselines bun run test:visual:smoke -- --update-snapshots
+  VR_SNAPSHOT_DIR=.local-baselines bun run test:visual:smoke
   ```
 
   `.local-baselines/` is gitignored. `maxDiffPixels` is 0 and `retries` 0 —

@@ -22,6 +22,7 @@ export type ChangeLane =
   | "core"
   | "svelte"
   | "docs"
+  | "docs_render"
   | "examples"
   | "benchmarks"
   | "scripts"
@@ -50,11 +51,59 @@ export type JobName =
   | "interaction_perf"
   | "packages_dist"
   | "vr"
-  | "pages";
+  | "pages"
+  | "docs_journeys";
 
 export type JobPlan = Record<JobName, boolean>;
 
 export type JobResult = "success" | "failure" | "cancelled" | "skipped" | "unknown";
+
+/**
+ * Docs paths that change published text/structure without chart-frame pixels.
+ * Fail-closed: any other `apps/docs/**` path is treated as render-relevant.
+ */
+export const DOCS_CONTENT_ONLY_PATHS: readonly string[] = [
+  "apps/docs/src/lib/catalog/guide.ts",
+  "apps/docs/src/lib/catalog/docs-tasks.ts",
+  "apps/docs/src/lib/catalog/gallery.ts",
+  "apps/docs/src/lib/catalog/themes.ts",
+  "apps/docs/src/lib/guide.ts",
+  "apps/docs/src/lib/components/GettingStartedGuide.svelte",
+  "apps/docs/src/lib/generated/search-index.ts",
+  "apps/docs/src/lib/generated/routes.ts",
+  "apps/docs/src/lib/generated/playground-seeds.ts",
+  "apps/docs/src/lib/generated/gallery-previews.ts",
+];
+
+/** Script generators that ship docs text/SEO/deployment without VR pixel impact. */
+export const DOCS_CONTENT_SCRIPT_PATTERNS: readonly string[] = [
+  "scripts/gen-llms.ts",
+  "scripts/gen-llms.test.ts",
+  "scripts/llms-markdown.ts",
+  "scripts/llms-guide-content.ts",
+  "scripts/docs-seo.ts",
+  "scripts/diagnostic-docs.ts",
+  "scripts/cli-docs.ts",
+  "scripts/guide-code-contract.ts",
+  "scripts/gen-docs-search.ts",
+  "scripts/gen-docs-search.test.ts",
+  "scripts/gen-gallery-previews.ts",
+  "scripts/gen-gallery-previews.test.ts",
+  "scripts/cloudflare-pages-config.test.ts",
+  "scripts/deployment-artifact.ts",
+  "scripts/deployment-artifact.test.ts",
+  "scripts/deployment-smoke.ts",
+  "scripts/deployment-smoke-cli.ts",
+  "scripts/deployment-smoke.test.ts",
+  "scripts/gen-legacy-routes.ts",
+  "scripts/legacy-artifact.ts",
+  "scripts/legacy-artifact.test.ts",
+  "scripts/legacy-migration.ts",
+  "scripts/legacy-migration.test.ts",
+  "scripts/legacy-routes.ts",
+  "scripts/legacy-routes.test.ts",
+  "lifecycle.json",
+];
 
 /** Path patterns per change lane. `**` = this dir or any descendant. */
 export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
@@ -96,6 +145,8 @@ export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
     "tests/visual/__screenshots__/**",
     "lifecycle.json",
   ],
+  // Filled by classifyChangedPaths using content-only allowlists (fail-closed).
+  docs_render: [],
   examples: ["examples/**"],
   benchmarks: ["benchmarks/**"],
   scripts: [
@@ -169,7 +220,30 @@ const JOB_NAMES: readonly JobName[] = [
   "packages_dist",
   "vr",
   "pages",
+  "docs_journeys",
 ] as const;
+
+const DOCS_CONTENT_ONLY = new Set(DOCS_CONTENT_ONLY_PATHS);
+const DOCS_CONTENT_SCRIPTS = new Set(DOCS_CONTENT_SCRIPT_PATTERNS);
+
+/** True when a path is docs content that must not force VR. */
+export function isDocsContentOnlyPath(filePath: string): boolean {
+  const path = filePath.replaceAll("\\", "/").replace(/^\.\//, "");
+  if (DOCS_CONTENT_ONLY.has(path) || DOCS_CONTENT_SCRIPTS.has(path)) return true;
+  // Content-only unit tests next to generators.
+  if (path === "scripts/guide-section-id.test.ts") return true;
+  return false;
+}
+
+/** Fail-closed: apps/docs paths not on the content allowlist are render-relevant. */
+export function isDocsRenderPath(filePath: string): boolean {
+  const path = filePath.replaceAll("\\", "/").replace(/^\.\//, "");
+  if (isDocsContentOnlyPath(path)) return false;
+  if (path === "apps/docs" || path.startsWith("apps/docs/")) return true;
+  // Screenshots feed gallery pages and smoke VR inventory.
+  if (path.startsWith("tests/visual/__screenshots__/")) return true;
+  return false;
+}
 
 const LANE_NAMES = Object.keys(LANE_PATTERNS) as ChangeLane[];
 
@@ -233,6 +307,7 @@ export function classifyChangedPaths(files: readonly string[]): ChangeFlags {
     const file = raw.replaceAll("\\", "/").replace(/^\.\//, "");
     if (!file || file === ".") continue;
     for (const lane of LANE_NAMES) {
+      if (lane === "docs_render") continue; // set below (fail-closed allowlist)
       if (flags[lane]) continue;
       for (const pattern of LANE_PATTERNS[lane]) {
         if (matchPathPattern(pattern, file)) {
@@ -241,6 +316,7 @@ export function classifyChangedPaths(files: readonly string[]): ChangeFlags {
         }
       }
     }
+    if (isDocsRenderPath(file)) flags.docs_render = true;
   }
   return flags;
 }
@@ -258,7 +334,9 @@ export type PlanOptions = {
  * - unit also covers docs/examples/workflows/svelte (script tests live only there)
  * - consumer follows consumer harness scripts as well as packages
  * - bench_smoke follows svelte (retained-memory imports inspection)
- * - docs generators (gen-llms / lifecycle.json) sit on the docs lane → pages/vr
+ * - docs generators (gen-llms / lifecycle.json) sit on the docs lane → pages
+ * - pixel VR follows package surface, examples, visual tests, or docs_render only
+ * - docs_journeys covers non-pixel Playwright structure/a11y for docs content PRs
  *
  * Force tiers (do not collapse these):
  * - `forceProduct`: lockfile or ci-routing self-change — full package/browser surface.
@@ -286,15 +364,25 @@ export function planJobs(changes: ChangeFlags, options: PlanOptions = {}): JobPl
   const staticAnalysisSurface =
     packageSurface || docsSurface || changes.scripts || changes.evals || forceProduct;
 
+  // Pixel VR: render-relevant only (not pure guide/content generators).
+  const vr =
+    packageSurface || changes.examples || changes.visual || changes.docs_render || forceProduct;
+
+  // Non-pixel docs structure/a11y Playwright — content and render both need it.
+  const docsJourneys = docsSurface || packageSurface || changes.visual || forceProduct;
+
   // Shared packages/*/dist artifact for jobs that previously each ran
   // `bun run build`. Unit/bench-smoke stay on the cheaper `bun run check`
   // (spec/core only) and do not wait on the full Svelte package build.
+  // packages_dist must follow vr and docs_journeys so artifact consumers never skip.
   const packagesDist =
     packageSurface ||
     changes.spikes ||
     changes.visual ||
     changes.performance ||
     changes.consumer_tools ||
+    vr ||
+    docsJourneys ||
     forceProduct;
 
   return {
@@ -326,8 +414,9 @@ export function planJobs(changes: ChangeFlags, options: PlanOptions = {}): JobPl
     // Informational only; path-gated and independent of the component job.
     interaction_perf: browserSurface,
     packages_dist: packagesDist,
-    vr: packageSurface || docsSurface || changes.visual || forceProduct,
+    vr,
     pages: packageSurface || docsSurface || forceProduct,
+    docs_journeys: docsJourneys,
   };
 }
 

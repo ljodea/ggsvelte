@@ -23,9 +23,13 @@ export type {
 } from "./ci-routing/routing";
 export {
   LANE_PATTERNS,
+  DOCS_CONTENT_ONLY_PATHS,
+  DOCS_CONTENT_SCRIPT_PATTERNS,
   emptyChangeFlags,
   matchPathPattern,
   classifyChangedPaths,
+  isDocsContentOnlyPath,
+  isDocsRenderPath,
   planJobs,
   evaluateGate,
   formatGithubOutputs,

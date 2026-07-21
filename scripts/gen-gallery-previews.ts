@@ -15,7 +15,9 @@ import { format } from "oxfmt";
 import { EXAMPLES, type ExampleManifestEntry } from "../examples/manifest.js";
 
 const ROOT = resolve(import.meta.dir, "..");
-const DEFAULT_SOURCE = join(ROOT, "tests", "visual", "__screenshots__");
+// Gallery lights are owned by the published previews tree, not the VR smoke
+// baseline dir (tests/visual/__screenshots__). Smoke may lag; previews may lag.
+const DEFAULT_SOURCE = join(ROOT, "apps", "docs", "static", "previews");
 const DEFAULT_OUTPUT = join(ROOT, "apps", "docs", "static", "previews");
 const DEFAULT_PROJECTION = join(
   ROOT,
@@ -116,8 +118,13 @@ export async function generateGalleryPreviews(
   for (const filename of readdirSync(output)) {
     if (filename.endsWith(".png") && !expected.has(filename)) rmSync(join(output, filename));
   }
-  for (const entry of inventory)
-    copyFileSync(join(source, entry.filename), join(output, entry.filename));
+  for (const entry of inventory) {
+    const from = join(source, entry.filename);
+    const to = join(output, entry.filename);
+    // Gallery inventory is self-owned when source === output (smoke baselines
+    // no longer feed previews). Avoid no-op same-path copies.
+    if (from !== to) copyFileSync(from, to);
+  }
   writeFileSync(projection, generated);
 }
 

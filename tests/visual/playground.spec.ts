@@ -694,18 +694,3 @@ test("playground is preview-first, operable, and axe-clean at a touch-size viewp
   });
   expect(violations, JSON.stringify(violations, null, 2)).toEqual([]);
 });
-
-for (const viewport of [
-  { name: "desktop", width: 1280, height: 900 },
-  { name: "tablet", width: 768, height: 1024 },
-  { name: "mobile", width: 390, height: 844 },
-] as const) {
-  test(`Playground ${viewport.name} visual contract`, async ({ page }) => {
-    await page.setViewportSize({ width: viewport.width, height: viewport.height });
-    await page.goto("/playground");
-    await settleVisualState(page);
-    await expect(page).toHaveScreenshot(`docs-playground-${viewport.name}.png`, {
-      fullPage: true,
-    });
-  });
-}

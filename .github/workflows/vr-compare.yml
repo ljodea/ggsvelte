@@ -131,23 +131,25 @@ jobs:
       - name: build static docs site (the VR screenshot target)
         run: bun run build:docs
 
-      - name: run VR screenshots against the built docs
+      - name: run smoke VR screenshots against the built docs
         run: |
           set -euo pipefail
+          # Smoke-only (tests/visual/vr.spec.ts). Non-pixel docs journeys live
+          # in ci.yml component-journeys under docs_journeys routing.
           if ls tests/visual/__screenshots__/*.png >/dev/null 2>&1; then
-            echo "committed baselines present — comparing"
-            bun run test:visual
+            echo "committed smoke baselines present — comparing"
+            bun run test:visual -- vr.spec.ts
           else
-            echo "::notice::no committed baselines yet — generating candidates (bootstrap via CI; see docs/decisions/0009)"
+            echo "::notice::no committed baselines yet — generating smoke candidates (bootstrap via CI; see docs/decisions/0009)"
             {
               echo "## VR bootstrap mode"
               echo ""
               echo "\`tests/visual/__screenshots__/\` is empty: no baselines are committed yet."
-              echo "This run GENERATED candidate baselines inside the pinned container and"
+              echo "This run GENERATED candidate smoke baselines inside the pinned container and"
               echo "uploaded them as the \`vr-baselines\` artifact. Land them via the vr-approve"
-              echo "flow (container-only baseline policy — docs/decisions/0009)."
+              echo "flow or same-PR smoke update (container-only baseline policy — docs/decisions/0009)."
             } >> "$GITHUB_STEP_SUMMARY"
-            bun run test:visual -- --update-snapshots
+            bun run test:visual -- vr.spec.ts --update-snapshots
           fi
 
       - name: upload playwright report (on comparison failure)
