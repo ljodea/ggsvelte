@@ -43,7 +43,7 @@ function httpsBaseUrl(value: string): string {
 }
 
 const securityHeaders = {
-  "content-security-policy-report-only": "default-src 'self'",
+  "content-security-policy": "frame-ancestors 'none'",
   "permissions-policy": "camera=()",
   "referrer-policy": "strict-origin-when-cross-origin",
   "x-content-type-options": "nosniff",

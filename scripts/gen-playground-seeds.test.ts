@@ -81,6 +81,16 @@ describe("generated playground seeds", () => {
     }
   });
 
+  test("keeps the freshness gate in docs builds and checks", () => {
+    const manifest = JSON.parse(
+      readFileSync(join(import.meta.dir, "..", "apps", "docs", "package.json"), "utf8"),
+    ) as { scripts: Record<string, string> };
+
+    for (const script of [manifest.scripts["build"], manifest.scripts["check"]]) {
+      expect(script).toContain("bun ../../scripts/gen-playground-seeds.ts --check");
+    }
+  });
+
   test("repository registry covers the canonical manifest and closed samples", async () => {
     await generatePlaygroundSeeds({ check: true });
     const generated = await import("../apps/docs/src/lib/generated/playground-seeds");
