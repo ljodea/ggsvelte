@@ -70,7 +70,7 @@ jobs:
     name: build static docs
     needs: detect-changes
     if: needs.detect-changes.outputs.pages == 'true'
-    runs-on: [self-hosted, ggsvelte, ggsvelte-heavy]
+    runs-on: [self-hosted, ggsvelte]
     permissions:
       contents: read
     env:

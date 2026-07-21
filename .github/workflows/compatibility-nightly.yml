@@ -40,7 +40,7 @@ jobs:
       fail-fast: false
       max-parallel: 3
       matrix: ${{ fromJSON(needs.matrix.outputs.matrix) }}
-    # Linux rows use self-hosted (non-heavy — leave heavy for Playwright); Windows/macOS hosted.
+    # Linux rows use self-hosted ggsvelte pool; Windows/macOS stay GitHub-hosted.
     runs-on: ${{ startsWith(matrix.os, 'ubuntu') && fromJSON('["self-hosted","ggsvelte"]') || matrix.os }}
     timeout-minutes: 20
     permissions:

@@ -46,21 +46,19 @@ concurrency:
   # (concurrency alone does not cancel when no replacement run starts).
   cancel-in-progress: true
 
-# Heavy-job pool policy (issues #247, #319, #321, throughput fix 2026-07):
-# One cx53 host, four cpuset-isolated runners, each 4 vCPUs, all labeled
-# `ggsvelte` + `ggsvelte-heavy`. Browser / compile-heavy jobs opt into the
-# heavy label so GitHub will not schedule more than four of them at once
-# (and Vitest/Playwright see 4 CPUs via the docker cpuset shim).
-# - Cheap jobs (detect-changes, checks, unit, actions-security,
-#   vr-baseline-guard, compatibility-matrix, ci-gate, bench-smoke,
-#   interaction-perf) use `ggsvelte` only. With the current 4-runner pool
-#   they share the same machines; the label split keeps the door open for
-#   overflow light capacity later without re-labeling browser jobs.
-# - Informational interaction-perf is deliberately off the heavy label so
-#   it never outranks required browser shards when the pool is full.
-# - Runner services share HOME; every Bun install uses a job-private
-#   runner.temp cache so concurrent restores cannot race.
-# - Job-started/completed hooks log host telemetry (load, PSI, memory, disk).
+# Self-hosted pool (issues #247, #319, #321, throughput fix 2026-07):
+# One cx53 host, four cpuset-isolated runners (4 vCPUs each), all labeled
+# only `ggsvelte`. There is NO separate heavy/light GitHub label: that
+# split was a lie once every runner carried both labels (same match set,
+# zero scheduling effect) and a bottleneck when only two runners had
+# `ggsvelte-heavy` while four "light" runners sat idle.
+# - Every Linux job uses `runs-on: [self-hosted, ggsvelte]`. Concurrency
+#   cap = 4 jobs host-wide (one per runner service). CPU isolation is
+#   systemd CPUAffinity + docker cpuset shim, not GitHub labels.
+# - Path routing + cancel-on-close + cancel-in-progress control *which*
+#   work runs; labels do not invent free capacity.
+# - Runner services share HOME; Bun installs use job-private runner.temp.
+# - Job hooks log host telemetry (load, PSI, memory, disk).
 
 env:
   # Keep in sync with: spikes/browser devDependency "playwright" and the
@@ -167,7 +165,7 @@ jobs:
     name: packages-dist (build + upload packages/*/dist)
     needs: detect-changes
     if: needs.detect-changes.outputs.packages_dist == 'true'
-    runs-on: [self-hosted, ggsvelte, ggsvelte-heavy]
+    runs-on: [self-hosted, ggsvelte]
     permissions:
       contents: read
     steps:
@@ -429,7 +427,6 @@ jobs:
       max-parallel: 4
       matrix: ${{ fromJSON(needs.compatibility-matrix.outputs.matrix) }}
     # Linux rows use the private self-hosted heavy lane; Windows/macOS stay on GitHub-hosted.
-    # Ubuntu consumer is typecheck-heavy but not browser; leave heavy for Playwright.
     runs-on: ${{ startsWith(matrix.os, 'ubuntu') && fromJSON('["self-hosted","ggsvelte"]') || matrix.os }}
     timeout-minutes: 20
     permissions:
@@ -538,7 +535,7 @@ jobs:
     if: >-
       needs.detect-changes.outputs.component == 'true' &&
       needs.packages-dist.result == 'success'
-    runs-on: [self-hosted, ggsvelte, ggsvelte-heavy]
+    runs-on: [self-hosted, ggsvelte]
     env:
       # GitHub runs the container as root, while /github/home belongs to
       # pwuser. Firefox refuses that ownership mismatch.
@@ -687,7 +684,7 @@ jobs:
     if: >-
       needs.detect-changes.outputs.component == 'true' &&
       needs.packages-dist.result == 'success'
-    runs-on: [self-hosted, ggsvelte, ggsvelte-heavy]
+    runs-on: [self-hosted, ggsvelte]
     env:
       # GitHub runs the container as root, while /github/home belongs to
       # pwuser. Firefox refuses that ownership mismatch.
@@ -787,7 +784,7 @@ jobs:
     if: >-
       needs.detect-changes.outputs.docs_journeys == 'true' &&
       needs.packages-dist.result == 'success'
-    runs-on: [self-hosted, ggsvelte, ggsvelte-heavy]
+    runs-on: [self-hosted, ggsvelte]
     env:
       # GitHub runs the container as root, while /github/home belongs to
       # pwuser. Firefox refuses that ownership mismatch.
@@ -892,8 +889,7 @@ jobs:
           retention-days: 7
 
   # Informational only — not a required status check (excluded from ci-gate).
-  # Uses the non-heavy label so required browser shards keep priority on the
-  # 4-slot heavy pool. Hard gate remains on `run-bench` PRs via bench.yml.
+  # Hard gate remains on `run-bench` PRs via bench.yml.
   interaction-perf:
     name: interaction-perf (p50/p95, informational)
     needs: [detect-changes, packages-dist]
@@ -976,7 +972,7 @@ jobs:
     name: build (tsc -b, packaging lint, static analysis)
     needs: detect-changes
     if: needs.detect-changes.outputs.build == 'true'
-    runs-on: [self-hosted, ggsvelte, ggsvelte-heavy]
+    runs-on: [self-hosted, ggsvelte]
     permissions:
       contents: read
     steps:
@@ -1087,7 +1083,6 @@ jobs:
     name: bench-smoke (mitata, 1k workload)
     needs: detect-changes
     if: needs.detect-changes.outputs.bench_smoke == 'true'
-    # Mitata 1k is short; keep heavy slots for browser/compile shards.
     runs-on: [self-hosted, ggsvelte]
     permissions:
       contents: read
