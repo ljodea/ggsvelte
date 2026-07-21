@@ -119,15 +119,13 @@ async function applyTitle(page: Page, title: string): Promise<void> {
 
 test("landing page makes the gallery and local adaptation paths obvious", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("link", { name: "Inspect a live plot" })).toHaveAttribute(
+  await expect(page.getByRole("link", { name: "Example source" })).toHaveAttribute(
     "href",
     /examples\/interactions\/inspection$/,
   );
-  await page.getByRole("link", { name: "Adapt a chart" }).click();
+  await page.getByRole("link", { name: "Playground" }).first().click();
   await expect(page).toHaveURL(/\/playground$/);
-  await expect(
-    page.getByRole("heading", { name: "Adapt a chart, then take the Svelte" }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Playground" })).toBeVisible();
 });
 
 test("interaction reference filters the exact public contract", async ({ page }) => {
@@ -143,7 +141,7 @@ test("compatible gallery details open the exact fragment while oversized example
   page,
 }) => {
   await page.goto("/examples/point/scatter-color");
-  const handoff = page.getByRole("link", { name: "Open this example in Playground" });
+  const handoff = page.getByRole("link", { name: "Open in Playground" });
   await expect(handoff).toHaveAttribute("href", /\/playground#play=v1\.[A-Za-z0-9_-]+$/u);
   await handoff.click();
   await expect(page).toHaveURL(/\/playground#play=v1\./u);
@@ -151,7 +149,7 @@ test("compatible gallery details open the exact fragment while oversized example
   await expect(page.getByLabel("PortableSpec JSON")).toHaveValue(/Penguin flippers vs body mass/u);
 
   await page.goto("/examples/point/canvas-scatter");
-  await expect(page.getByRole("link", { name: "Open this example in Playground" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Open in Playground" })).toHaveCount(0);
   await expect(page.getByText(/more than 500 inline rows/u)).toBeVisible();
 });
 

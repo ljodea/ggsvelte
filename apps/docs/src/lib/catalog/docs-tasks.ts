@@ -6,32 +6,28 @@ export interface DocsTask {
 
 export const DOCS_TASKS = [
   {
-    label: "Build a chart",
-    description:
-      "Install one package and render a responsive, accessible chart from one Svelte file.",
+    label: "Getting started",
+    description: "Install @ggsvelte/svelte and render one chart from a Svelte file.",
     hrefs: ["/guide/getting-started"],
   },
   {
-    label: "Customize it",
-    description:
-      "Choose scales, guides, themes, and color without changing the meaning of the data.",
+    label: "Scales, themes, color",
+    description: "Axes, legends, chart themes, and categorical or sequential color.",
     hrefs: ["/guide/scales-guides", "/guide/themes-color"],
   },
   {
-    label: "Add interaction",
-    description: "Add inspect-and-pin behavior with a keyboard and touch path before linked state.",
+    label: "Interaction",
+    description: "Inspect, pin, select, zoom, and linked semantic state.",
     hrefs: ["/guide/inspect-pin"],
   },
   {
-    label: "Deploy it",
-    description:
-      "Make chart sizing predictable, then choose browser, server, or exported SVG output.",
+    label: "Layout and export",
+    description: "Container sizing, SVG/canvas rendering, SSR, and headless SVG.",
     hrefs: ["/guide/responsive-charts", "/guide/server-rendering-export"],
   },
   {
-    label: "Troubleshoot it",
-    description:
-      "Follow stable validation, rendering, interaction, and command-line diagnostic codes.",
+    label: "Diagnostics",
+    description: "Validation, render, interaction, and CLI error codes.",
     hrefs: ["/guide/errors"],
   },
 ] as const satisfies readonly DocsTask[];

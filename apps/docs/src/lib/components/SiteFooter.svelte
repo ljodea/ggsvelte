@@ -6,7 +6,7 @@
   <div class="site-footer__inner">
     <div>
       <a class="site-brand" href={`${base}/`}>ggsvelte</a>
-      <p>A layered grammar for clear, interactive data graphics in Svelte.</p>
+      <p>Layered grammar of graphics for Svelte.</p>
     </div>
     <nav aria-label="Footer">
       <a href={`${base}/docs`}>Docs</a>

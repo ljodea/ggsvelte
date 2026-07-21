@@ -56,7 +56,7 @@ jobs:
     outputs:
       vr: ${{ steps.route.outputs.vr }}
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -105,7 +105,7 @@ jobs:
         # The container's /bin/sh is dash, which rejects `set -o pipefail`.
         shell: bash
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - name: install unzip (playwright image lacks it; setup-bun needs it)
@@ -289,7 +289,7 @@ jobs:
       # read-only: no write permissions, no secrets beyond the read-only
       # default GITHUB_TOKEN, and its sole output is the inert artifact
       # below, which vr-approve.yml re-verifies against the API.
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: ${{ needs.approve-gate.outputs.render_repo }}
           # Exact merged SHA, never a movable branch ref — what gets

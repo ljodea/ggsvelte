@@ -271,10 +271,10 @@
 
   <h2 id="where-next">Where next</h2>
   <ul>
-    <li><a href={`${base}/examples`}>Browse runnable examples</a>.</li>
-    <li><a href={`${base}/guide/interactions`}>Add interaction</a>.</li>
-    <li><a href={`${base}/guide/compatibility`}>Check compatibility</a>.</li>
-    <li><a href={`${base}/guide/errors`}>Recover from a diagnostic</a>.</li>
+    <li><a href={`${base}/examples`}>Examples</a></li>
+    <li><a href={`${base}/guide/interactions`}>Interaction</a></li>
+    <li><a href={`${base}/guide/compatibility`}>Compatibility</a></li>
+    <li><a href={`${base}/guide/errors`}>Diagnostics</a></li>
   </ul>
 </article>
 

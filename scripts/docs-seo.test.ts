@@ -18,7 +18,7 @@ describe("generated docs SEO", () => {
     expect(seo).toMatchObject({
       title: "ggsvelte — layered grammar of graphics for Svelte",
       description:
-        "Build publication-ready, interactive data graphics in Svelte with a layered grammar and a portable JSON specification.",
+        "Layered grammar of graphics for Svelte: ggplot2-style aes, geoms, stats, and themes, with PortableSpec JSON and hybrid SVG/canvas rendering.",
       canonical: "https://ggsvelte.sh/",
       image: {
         url: "https://ggsvelte.sh/previews/interaction-tooltip-light.png",
@@ -50,7 +50,7 @@ describe("generated docs SEO", () => {
         name: "ggsvelte",
         url: "https://ggsvelte.sh/",
         description:
-          "Build publication-ready, interactive data graphics in Svelte with a layered grammar and a portable JSON specification.",
+          "Layered grammar of graphics for Svelte: ggplot2-style aes, geoms, stats, and themes, with PortableSpec JSON and hybrid SVG/canvas rendering.",
       },
       {
         "@context": "https://schema.org",

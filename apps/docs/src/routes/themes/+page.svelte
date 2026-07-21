@@ -11,11 +11,10 @@
 <main class="themes-page">
   <header class="themes-hero">
     <p class="eyebrow">Themes & color</p>
-    <h1>Design the chart, not the plumbing.</h1>
+    <h1>Themes and color</h1>
     <p>
-      Compare every built-in chart theme on the same data, then choose
-      categorical and sequential color behavior with explicit, portable scale
-      settings.
+      Twelve chart themes on identical data, plus categorical schemes,
+      sequential ramps, palette exhaustion, and interaction role colors.
     </p>
   </header>
 
@@ -24,12 +23,11 @@
   <section class="theme-collection" aria-labelledby="built-in-themes-heading">
     <header class="section-heading">
       <div>
-        <p class="eyebrow">Twelve registered themes</p>
-        <h2 id="built-in-themes-heading">One chart. Twelve visual systems.</h2>
+        <p class="eyebrow">Built-in</p>
+        <h2 id="built-in-themes-heading">Chart themes</h2>
       </div>
       <p>
-        Data, mappings, layers, labels, and dimensions stay fixed. Only the
-        chart theme changes.
+        Spec fixed; only <code>theme</code> changes.
       </p>
     </header>
     <ol aria-label="Built-in chart themes">

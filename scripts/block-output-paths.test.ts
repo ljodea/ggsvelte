@@ -1,4 +1,4 @@
-import { spawnSync } from "node:child_process";
+import { spawnSync, type SpawnSyncReturns } from "node:child_process";
 import { chmodSync, mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
@@ -13,7 +13,7 @@ afterEach(() => {
   for (const sandbox of sandboxes.splice(0)) rmSync(sandbox, { recursive: true, force: true });
 });
 
-function runGuard(branch: string, staged: string, hookArg = baseline) {
+function runGuard(branch: string, staged: string, hookArg = baseline): SpawnSyncReturns<string> {
   const sandbox = mkdtempSync(resolve(tmpdir(), "ggsvelte-output-guard-"));
   const bin = resolve(sandbox, "bin");
   sandboxes.push(sandbox);
@@ -49,12 +49,8 @@ esac
   });
 }
 
-function combinedOutput(result: ReturnType<typeof spawnSync>): string {
-  const stdout =
-    typeof result.stdout === "string" ? result.stdout : (result.stdout?.toString("utf8") ?? "");
-  const stderr =
-    typeof result.stderr === "string" ? result.stderr : (result.stderr?.toString("utf8") ?? "");
-  return `${stdout}${stderr}`;
+function combinedOutput(result: SpawnSyncReturns<string>): string {
+  return `${result.stdout ?? ""}${result.stderr ?? ""}`;
 }
 
 describe("block-output-paths guard", () => {

@@ -29,21 +29,20 @@
 
 <section class="home-hero" aria-labelledby="home-heading">
   <div class="hero-claim">
-    <p class="eyebrow">A grammar of graphics for Svelte</p>
-    <h1 id="home-heading">Build charts that explain themselves.</h1>
+    <p class="eyebrow">Open source · Svelte 5</p>
+    <h1 id="home-heading">ggplot2 for Svelte.</h1>
     <p>
-      Compose data, mappings, layers, scales, and interaction in Svelte. Start
-      with a useful chart; keep the portable specification when you need to
-      validate, render, or share it.
+      A layered grammar of graphics — aes, geoms, stats, scales, facets, themes
+      — as Svelte components, with PortableSpec JSON at the center. Built for
+      people who already know visualization, and for agents trained on eighteen
+      years of ggplot2.
     </p>
   </div>
 
   <div class="hero-plot">
     <div class="specimen-label">
-      <span>Live specimen</span>
-      <a href={`${base}/examples/interactions/inspection`}
-        >Inspect a live plot</a
-      >
+      <span>Live chart</span>
+      <a href={`${base}/examples/interactions/inspection`}>Example source</a>
     </div>
     <SignaturePlot />
   </div>
@@ -52,16 +51,13 @@
     <CopyCode code={install} label="Copy install" />
     <div class="cta-row">
       <a class="primary-action" href={`${base}/guide/getting-started`}
-        >Build your first chart</a
+        >Getting started</a
       >
-      <a class="secondary-action" href={`${base}/examples`}
-        >Browse the gallery</a
-      >
+      <a class="secondary-action" href={`${base}/examples`}>Examples</a>
     </div>
     <p>
-      No account, service, or chart CSS required. <a href={`${base}/playground`}
-        >Adapt a chart</a
-      > locally.
+      MIT. No account or hosted service.
+      <a href={`${base}/playground`}>Playground</a>
     </p>
   </div>
 </section>
@@ -69,15 +65,15 @@
 <section class="home-featured" aria-labelledby="home-featured-heading">
   <header>
     <div>
-      <p class="eyebrow">Six production jobs</p>
-      <h2 id="home-featured-heading">Start from the question, not the geom.</h2>
+      <p class="eyebrow">Examples</p>
+      <h2 id="home-featured-heading">Featured</h2>
     </div>
-    <a href={`${base}/examples`}>See all {entries.length} examples</a>
+    <a href={`${base}/examples`}>All {entries.length}</a>
   </header>
   <ol>
     {#each featured as entry (entry.id)}
       <li>
-        <a href={`${base}/examples/${entry.id}`}>
+        <a href={`${base}/examples/${entry.id}`} aria-label={entry.title}>
           <figure>
             <div class="preview-paper">
               <img
@@ -87,10 +83,6 @@
                 height={entry.vrHeight ?? 400}
               />
             </div>
-            <figcaption>
-              <span>{entry.featured!.note}</span>
-              <strong>{entry.featured!.jobTitle}</strong>
-            </figcaption>
           </figure>
         </a>
       </li>
@@ -102,11 +94,11 @@
 
 <section class="code-path" aria-labelledby="code-path-heading">
   <div>
-    <p class="eyebrow">One chart, deliberate surfaces</p>
-    <h2 id="code-path-heading">Write Svelte first.</h2>
+    <p class="eyebrow">Surfaces</p>
+    <h2 id="code-path-heading">Svelte, builder, or JSON.</h2>
     <p>
-      The complete component is the shortest path to a visible result. Switch
-      only when you need generated TypeScript or portable JSON.
+      Same chart as a complete Svelte component, a TypeScript builder, or
+      PortableSpec JSON for validation, agents, and headless render.
     </p>
   </div>
   <CodeTabs {tabs} />
@@ -114,47 +106,40 @@
 
 <section class="evidence" aria-labelledby="evidence-heading">
   <header>
-    <p class="eyebrow">Before you ship</p>
-    <h2 id="evidence-heading">Check the boundary, not a badge.</h2>
+    <p class="eyebrow">Docs</p>
+    <h2 id="evidence-heading">Contracts</h2>
   </header>
   <dl>
     <div>
-      <dt>Will it work in my stack?</dt>
+      <dt>Compatibility</dt>
       <dd>
-        <a href={`${base}/guide/compatibility`}
-          >Read the tested compatibility matrix</a
-        >.
+        <a href={`${base}/guide/compatibility`}>Node, Svelte, browsers, OS</a>
       </dd>
     </div>
     <div>
-      <dt>Can I control the chart’s visual system?</dt>
+      <dt>Themes and color</dt>
       <dd>
-        <a href={`${base}/themes`}>Compare chart themes</a>, palettes, and
-        interaction roles.
+        <a href={`${base}/themes`}>Built-in themes, palettes, scales</a>
       </dd>
     </div>
     <div>
-      <dt>What happens when a spec is wrong?</dt>
+      <dt>Diagnostics</dt>
       <dd>
-        <a href={`${base}/guide/errors`}
-          >Follow stable diagnostics and safe fixes</a
-        >.
+        <a href={`${base}/guide/errors`}>Validation and pipeline codes</a>
       </dd>
     </div>
     <div>
-      <dt>Can I render without a browser?</dt>
+      <dt>Headless SVG</dt>
       <dd>
         <a href={`${base}/guide/getting-started#headless-and-server-rendering`}
-          >Use the no-DOM renderer or CLI</a
-        >.
+          >No-DOM renderer and CLI</a
+        >
       </dd>
     </div>
     <div>
-      <dt>Can another system emit a chart safely?</dt>
+      <dt>PortableSpec</dt>
       <dd>
-        <a href={`${base}/schema/v0.json`}
-          >Validate against the PortableSpec JSON Schema</a
-        >.
+        <a href={`${base}/schema/v0.json`}>JSON Schema</a>
       </dd>
     </div>
   </dl>
@@ -162,8 +147,7 @@
 
 <style>
   .eyebrow,
-  .specimen-label span,
-  figcaption span {
+  .specimen-label span {
     margin: 0;
     color: var(--muted);
     font-size: 0.75rem;
@@ -187,7 +171,7 @@
   }
 
   .hero-claim h1 {
-    max-width: 10ch;
+    max-width: 12ch;
     margin: 0.35rem 0 1.25rem;
     font-size: clamp(4rem, 7.6vw, 8rem);
     line-height: 0.82;
@@ -293,7 +277,7 @@
   .home-featured ol {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 2rem 1.25rem;
+    gap: 1.25rem;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -321,16 +305,6 @@
     width: 100%;
     height: 100%;
     object-fit: contain;
-  }
-
-  figcaption {
-    display: grid;
-    gap: 0.35rem;
-    padding-top: 0.75rem;
-  }
-
-  figcaption strong {
-    font: 700 1.25rem/1.05 var(--display-font);
   }
 
   .code-path {

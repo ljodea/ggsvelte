@@ -3,18 +3,18 @@
   import { penguins } from "$examples/point/scatter-color/data";
 
   const steps = [
-    { label: "Data", note: "Start with ordinary rows." },
+    { label: "Data", note: "Rows as plain objects." },
     {
       label: "Mappings",
-      note: "Map fields, including a stable series identity.",
+      note: "aes for x, y, and color identity.",
     },
     {
       label: "Layers",
-      note: "Compose a statistical layer without replacing the points.",
+      note: "GeomSmooth on top of GeomPoint.",
     },
     {
       label: "Interaction",
-      note: "Opt into inspection after the chart already works.",
+      note: "inspect after the layers work.",
     },
   ] as const;
   let active = $state(0);
@@ -22,12 +22,9 @@
 
 <section class="grammar-demo" aria-labelledby="grammar-heading">
   <div class="grammar-copy">
-    <p class="eyebrow">Svelte-first composition</p>
-    <h2 id="grammar-heading">Build the chart by adding meaning</h2>
-    <p>
-      Each step changes the same real ggsvelte chart. Nothing here is a
-      decorative mockup.
-    </p>
+    <p class="eyebrow">Composition</p>
+    <h2 id="grammar-heading">Data, aes, layers, inspect.</h2>
+    <p>One real chart. Each step adds grammar.</p>
     <ol>
       {#each steps as step, index (step.label)}
         <li class:active={active === index}>
