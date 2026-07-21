@@ -50,7 +50,11 @@ esac
 }
 
 function combinedOutput(result: ReturnType<typeof spawnSync>): string {
-  return `${result.stdout ?? ""}${result.stderr ?? ""}`;
+  const stdout =
+    typeof result.stdout === "string" ? result.stdout : (result.stdout?.toString("utf8") ?? "");
+  const stderr =
+    typeof result.stderr === "string" ? result.stderr : (result.stderr?.toString("utf8") ?? "");
+  return `${stdout}${stderr}`;
 }
 
 describe("block-output-paths guard", () => {
