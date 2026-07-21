@@ -146,6 +146,7 @@ function truncateToFit(
   ellipsis: string,
 ): string {
   if (measurer.measureWidth(label, fontSize) <= maxWidth) return label;
+  // oxlint-disable-next-line typescript/no-misused-spread -- code-point split is intentional (truncation granularity)
   const chars = [...label];
   for (let keep = chars.length - 1; keep >= 1; keep--) {
     const candidate = chars.slice(0, keep).join("") + ellipsis;
@@ -240,7 +241,7 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
     if (wrapped.every((w) => w !== null)) {
       const lineWidth = (lines: string[]) =>
         Math.max(...lines.map((l) => measurer.measureWidth(l, fontSize)));
-      const maxLines = Math.max(...wrapped.map((w) => w!.length));
+      const maxLines = Math.max(...wrapped.map((w) => (w ?? []).length));
       const blockHeight = maxLines * lineHeight;
       const wrapOverlap = neighbourOverlap(
         entries.map((e, i) => ({ pos: e.center, half: lineWidth(wrapped[i]!) / 2 })),

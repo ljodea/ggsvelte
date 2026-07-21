@@ -20,7 +20,7 @@ const bandX = (categories: string[], config: Partial<PositionScaleSpec> = {}): D
   band: {
     aesthetic: "x",
     panelIndex: 0,
-    config: { type: "band", ...config } as PositionScaleSpec,
+    config: { type: "band", ...config },
   },
 });
 const MODE_RANK = { "single-line": 0, wrapped: 1, rotated: 2 } as const;
@@ -198,7 +198,7 @@ describe("measured band x-axis (planner integration)", () => {
       type: "band",
       categories: SPANISH,
       rawCategories: SPANISH,
-      band: { aesthetic: "y", panelIndex: 0, config: { type: "band" } as PositionScaleSpec },
+      band: { aesthetic: "y", panelIndex: 0, config: { type: "band" } },
     };
     const r = layout(base({ width: 300, height: 300, y: yBand }));
     // The horizontal planner never runs on Y: no band mode, legacy path owns it.
