@@ -179,6 +179,10 @@ export const JOB_CONTENT_INPUTS: Record<CacheableExecution, readonly string[]> =
     "scripts/gen-llms.ts",
     "scripts/gen-llms.test.ts",
     "scripts/llms-markdown.ts",
+    // llms-markdown imports highlight-code for fenced-block HTML; hash it or
+    // a highlight-only change can cache-hit and skip docs journeys (Codex P2).
+    "scripts/highlight-code.ts",
+    "scripts/highlight-code.test.ts",
     "scripts/llms-guide-content.ts",
     "scripts/docs-seo.ts",
     "scripts/diagnostic-docs.ts",
