@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784612114926,
+  "lastUpdate": 1784613923826,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -36961,6 +36961,150 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 94.2416,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "ed09958d365194f65fcfa8382ab11c75cb240ce8",
+          "message": "feat(docs): cut over to Cloudflare Pages (#360)\n\n* feat(docs): prepare Cloudflare Pages cutover\n\n* fix(docs): enforce analytics artifact identity\n\n* fix(docs): harden Cloudflare deployment workflow\n\n* fix(docs): noindex every preview response\n\n* fix(docs): preserve exact-host cutover redirects\n\n* fix(docs): model host redirects as Bulk Redirects\n\n* fix(ci): gate manual Pages deploys to main",
+          "timestamp": "2026-07-21T01:04:35-05:00",
+          "tree_id": "ba01e2dfd3103bc846641cd7e265616d30c0de26",
+          "url": "https://github.com/ljodea/ggsvelte/commit/ed09958d365194f65fcfa8382ab11c75cb240ce8"
+        },
+        "date": 1784613922867,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.2196,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.8877,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 7.4636,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 10.4237,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 47.0133,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 86.1533,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal-line 100k",
+            "value": 70.631,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide candidate-selection 300y",
+            "value": 0.1083,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide resize-churn 191y",
+            "value": 0.3281,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide DST-heavy 3y",
+            "value": 3.5493,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal free-facets 100",
+            "value": 28.2588,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.1682,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.373,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 52.0879,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 73.8819,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 14.1943,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.8033,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 1021.0149,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.654,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 244.3915,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 11.0151,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 15.2124,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 618.5944,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 149.513,
             "unit": "ms"
           }
         ]
