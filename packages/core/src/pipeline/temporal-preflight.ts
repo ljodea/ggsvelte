@@ -26,7 +26,7 @@ export interface TemporalPreflightResult {
 }
 
 function docs(code: string): string {
-  return `https://ljodea.github.io/ggsvelte/guide/errors#${code}`;
+  return `https://ggsvelte.sh/guide/errors#${code}`;
 }
 
 export function assertTemporalConfiguration(

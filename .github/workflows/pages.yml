@@ -71,6 +71,11 @@ jobs:
     runs-on: [self-hosted, ggsvelte, ggsvelte-heavy]
     permissions:
       contents: read
+    env:
+      # Keep serving the full site until the apex smoke gate passes. The
+      # cutover runbook then sets this repository variable to legacy-migration.
+      DOCS_BUILD_MODE: ${{ vars.DOCS_LEGACY_MODE || 'legacy-full' }}
+      BASE_PATH: /ggsvelte
     steps:
       - name: Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -87,23 +92,26 @@ jobs:
       - name: Build packages
         run: bun run build
       - name: Build docs for the repository subpath
-        env:
-          DOCS_BUILD_MODE: legacy-full
-          BASE_PATH: /ggsvelte
         run: bun run build:docs
-      - name: Verify packed links and required R0 journeys
-        env:
-          DOCS_BUILD_MODE: legacy-full
-          BASE_PATH: /ggsvelte
-        run: bun run check:pages-links
       - name: Include benchmark history
         run: |
           git fetch --depth=1 origin gh-pages
+          benchmark_commit=$(git rev-parse origin/gh-pages)
+          printf 'BENCHMARK_COMMIT=%s\n' "${benchmark_commit}" >> "${GITHUB_ENV}"
           git archive --format=tar origin/gh-pages bench | tar -xf - -C apps/docs/build
+      - name: Replace known routes with fixed-origin migration pages
+        if: env.DOCS_BUILD_MODE == 'legacy-migration'
+        run: bun scripts/legacy-migration.ts
+      - name: Verify packed links and required R0 journeys
+        run: bun run check:pages-links
+      - name: Bind artifact to source, frozen routes, and benchmark bytes
+        run: bun scripts/legacy-artifact.ts
       - name: Verify deployable artifact
         run: |
           test -f apps/docs/build/index.html
           test -f apps/docs/build/bench/index.html
+          test -f apps/docs/build/404.html
+          test -f apps/docs/build/artifact.json
           if grep -R -E 'href="/(guide|examples|schema|llms)' apps/docs/build; then
             echo "Docs build contains links that escape the /ggsvelte base path" >&2
             exit 1

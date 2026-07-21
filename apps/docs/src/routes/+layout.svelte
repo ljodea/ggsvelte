@@ -43,6 +43,16 @@
   {#if noindex}
     <meta name="robots" content="noindex,follow" />
   {/if}
+  {#if data.site.analytics && data.site.analyticsToken !== null}
+    <script
+      defer
+      src="https://static.cloudflareinsights.com/beacon.min.js"
+      data-cf-beacon={JSON.stringify({
+        token: data.site.analyticsToken,
+        spa: true,
+      })}
+    ></script>
+  {/if}
 </svelte:head>
 
 <a class="skip-link" href="#main-content">Skip to content</a>

@@ -46,7 +46,7 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
       "Zoom a linked detail view",
     ],
     docUrl:
-      "https://ljodea.github.io/ggsvelte/guide/interaction-reference#interaction-interval-facet-unsupported",
+      "https://ggsvelte.sh/guide/interaction-reference#interaction-interval-facet-unsupported",
   },
   INTERACTION_INVALID_MAX_DISTANCE: {
     severity: "error",
@@ -54,8 +54,7 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
     message: "inspect.maxDistance must be a finite non-negative CSS-pixel distance.",
     prop: "inspect.maxDistance",
     suggestions: ["Use a finite number greater than or equal to zero"],
-    docUrl:
-      "https://ljodea.github.io/ggsvelte/guide/interaction-reference#interaction-invalid-max-distance",
+    docUrl: "https://ggsvelte.sh/guide/interaction-reference#interaction-invalid-max-distance",
   },
   INTERACTION_POINT_REQUIRES_KEY: {
     severity: "warning",
@@ -63,8 +62,7 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
     message: "Durable point selection requires a stable key field or accessor.",
     prop: "key",
     suggestions: ['Pass key="id"', "Pass a stable key accessor"],
-    docUrl:
-      "https://ljodea.github.io/ggsvelte/guide/interaction-reference#interaction-point-requires-key",
+    docUrl: "https://ggsvelte.sh/guide/interaction-reference#interaction-point-requires-key",
   },
   INTERACTION_INTERVAL_PRESET_REQUIRES_KEY: {
     severity: "warning",
@@ -74,7 +72,7 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
     prop: "key",
     suggestions: ['Pass key="id"', "Pass a stable key accessor"],
     docUrl:
-      "https://ljodea.github.io/ggsvelte/guide/interaction-reference#interaction-interval-preset-requires-key",
+      "https://ggsvelte.sh/guide/interaction-reference#interaction-interval-preset-requires-key",
   },
   INTERACTION_INVALID_KEY: {
     severity: "error",
@@ -82,7 +80,7 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
     message: "A key accessor returned null, undefined, or a non-PropertyKey value.",
     prop: "key",
     suggestions: ["Return a stable string, number, or symbol for every row"],
-    docUrl: "https://ljodea.github.io/ggsvelte/guide/interaction-reference#interaction-invalid-key",
+    docUrl: "https://ggsvelte.sh/guide/interaction-reference#interaction-invalid-key",
   },
   INTERACTION_DUPLICATE_KEY: {
     severity: "error",
@@ -91,8 +89,7 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
       "The key accessor returned a duplicate value; durable interaction is disabled for that value.",
     prop: "key",
     suggestions: ["Use a field that uniquely identifies each source row"],
-    docUrl:
-      "https://ljodea.github.io/ggsvelte/guide/interaction-reference#interaction-duplicate-key",
+    docUrl: "https://ggsvelte.sh/guide/interaction-reference#interaction-duplicate-key",
   },
   INTERACTION_UNSTABLE_KEY: {
     severity: "error",
@@ -100,8 +97,7 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
     message: "The key accessor returned a different value for the same source row.",
     prop: "key",
     suggestions: ["Return an immutable field that uniquely identifies each row"],
-    docUrl:
-      "https://ljodea.github.io/ggsvelte/guide/interaction-reference#interaction-unstable-key",
+    docUrl: "https://ggsvelte.sh/guide/interaction-reference#interaction-unstable-key",
   },
   INTERACTION_MISSING_LINEAGE: {
     severity: "warning",
@@ -109,8 +105,7 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
     message: "A synthetic or aggregate mark did not expose source-row lineage.",
     prop: "layers",
     suggestions: ["Use a stat that preserves source-row lineage"],
-    docUrl:
-      "https://ljodea.github.io/ggsvelte/guide/interaction-reference#interaction-missing-lineage",
+    docUrl: "https://ggsvelte.sh/guide/interaction-reference#interaction-missing-lineage",
   },
   INTERACTION_LEGEND_REQUIRES_KEY: {
     severity: "warning",
@@ -119,8 +114,7 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
       "Legend focus requires stable row keys so encoded legend values never become identities.",
     prop: "key",
     suggestions: ['Pass key="id"', "Pass a stable key accessor"],
-    docUrl:
-      "https://ljodea.github.io/ggsvelte/guide/interaction-reference#interaction-legend-requires-key",
+    docUrl: "https://ggsvelte.sh/guide/interaction-reference#interaction-legend-requires-key",
   },
   INTERACTION_LEGEND_DISCRETE_ONLY: {
     severity: "advisory",
@@ -129,8 +123,7 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
       "Legend focus currently applies to discrete color and fill legends; continuous ramps remain static.",
     prop: "legendFocus",
     suggestions: ["Use a discrete color or fill mapping", "Keep the continuous ramp static"],
-    docUrl:
-      "https://ljodea.github.io/ggsvelte/guide/interaction-reference#interaction-legend-discrete-only",
+    docUrl: "https://ggsvelte.sh/guide/interaction-reference#interaction-legend-discrete-only",
   },
   INTERACTION_INTERVAL_SCALE_UNSUPPORTED: {
     severity: "warning",
@@ -139,7 +132,7 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
     prop: "scales",
     suggestions: ["Use a continuous positional scale", "Use point inspection for band data"],
     docUrl:
-      "https://ljodea.github.io/ggsvelte/guide/interaction-reference#interaction-interval-scale-unsupported",
+      "https://ggsvelte.sh/guide/interaction-reference#interaction-interval-scale-unsupported",
   },
   INTERACTION_TOOL_UNAVAILABLE: {
     severity: "warning",
@@ -147,8 +140,7 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
     message: "The requested interaction tool is unavailable for the enabled capabilities.",
     prop: "tool",
     suggestions: ["Enable the matching capability", "Choose an available interaction tool"],
-    docUrl:
-      "https://ljodea.github.io/ggsvelte/guide/interaction-reference#interaction-tool-unavailable",
+    docUrl: "https://ggsvelte.sh/guide/interaction-reference#interaction-tool-unavailable",
   },
   INTERACTION_SCOPE_WITHOUT_CONTROLLER: {
     severity: "advisory",
@@ -160,8 +152,7 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
       "Pass interaction={createPlotInteraction()} to control this plot",
       "Remove interactionScope from uncontrolled plots",
     ],
-    docUrl:
-      "https://ljodea.github.io/ggsvelte/guide/interaction-reference#interaction-scope-without-controller",
+    docUrl: "https://ggsvelte.sh/guide/interaction-reference#interaction-scope-without-controller",
   },
   INTERACTION_HANDLER_WITHOUT_CAPABILITY: {
     severity: "advisory",
@@ -176,6 +167,6 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
       "Remove the unused handler",
     ],
     docUrl:
-      "https://ljodea.github.io/ggsvelte/guide/interaction-reference#interaction-handler-without-capability",
+      "https://ggsvelte.sh/guide/interaction-reference#interaction-handler-without-capability",
   },
 });

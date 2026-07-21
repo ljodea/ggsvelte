@@ -14,11 +14,13 @@ export interface DocsBuildConfig {
   canonicalBase: "https://ggsvelte.sh" | "https://ljodea.github.io/ggsvelte";
   indexable: boolean;
   analytics: boolean;
+  analyticsToken: string | null;
 }
 
 export interface DocsBuildInput {
   mode?: string;
   basePath?: string;
+  analyticsToken?: string;
 }
 
 const VALID_COMBINATIONS = [
@@ -40,6 +42,13 @@ function invalid(input: DocsBuildInput): never {
 export function resolveDocsBuildConfig(input: DocsBuildInput): DocsBuildConfig {
   const mode = input.mode ?? "dev";
   const basePath = input.basePath;
+  const analyticsToken = input.analyticsToken;
+  if (analyticsToken !== undefined && mode !== "cloudflare-production") {
+    throw new Error("Analytics token is allowed only for cloudflare-production builds.");
+  }
+  if (analyticsToken !== undefined && !/^[a-f\d]{32}$/i.test(analyticsToken)) {
+    throw new Error("DOCS_ANALYTICS_TOKEN must be a 32-character hexadecimal token.");
+  }
 
   if (mode === "dev" && basePath === undefined) {
     return {
@@ -48,6 +57,7 @@ export function resolveDocsBuildConfig(input: DocsBuildInput): DocsBuildConfig {
       canonicalBase: "https://ggsvelte.sh",
       indexable: false,
       analytics: false,
+      analyticsToken: null,
     };
   }
   if (mode === "legacy-full" && basePath === "/ggsvelte") {
@@ -57,6 +67,7 @@ export function resolveDocsBuildConfig(input: DocsBuildInput): DocsBuildConfig {
       canonicalBase: "https://ljodea.github.io/ggsvelte",
       indexable: true,
       analytics: false,
+      analyticsToken: null,
     };
   }
   if (mode === "cloudflare-preview" && basePath === undefined) {
@@ -66,6 +77,7 @@ export function resolveDocsBuildConfig(input: DocsBuildInput): DocsBuildConfig {
       canonicalBase: "https://ggsvelte.sh",
       indexable: false,
       analytics: false,
+      analyticsToken: null,
     };
   }
   if (mode === "cloudflare-production" && basePath === undefined) {
@@ -74,7 +86,8 @@ export function resolveDocsBuildConfig(input: DocsBuildInput): DocsBuildConfig {
       base: "",
       canonicalBase: "https://ggsvelte.sh",
       indexable: true,
-      analytics: true,
+      analytics: analyticsToken !== undefined,
+      analyticsToken: analyticsToken ?? null,
     };
   }
   if (mode === "legacy-migration" && basePath === "/ggsvelte") {
@@ -84,6 +97,7 @@ export function resolveDocsBuildConfig(input: DocsBuildInput): DocsBuildConfig {
       canonicalBase: "https://ggsvelte.sh",
       indexable: false,
       analytics: false,
+      analyticsToken: null,
     };
   }
 
