@@ -327,11 +327,11 @@ live output and complete source.
 Chart themes are independent of the site's light or dark appearance. The same spec can
 use a built-in theme or explicit theme tokens.
 
-|                                                        Tufte                                                        |                                                          Economist                                                          |
-| :-----------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------------: |
-| [![Scatter plot using the Tufte theme](artifacts/theme-equivalence/ggsvelte-tufte.png)](https://ggsvelte.sh/themes) | [![Scatter plot using the Economist theme](artifacts/theme-equivalence/ggsvelte-economist.png)](https://ggsvelte.sh/themes) |
-|                                                        HRBR                                                         |                                                            Dark                                                             |
-|  [![Scatter plot using the HRBR theme](artifacts/theme-equivalence/ggsvelte-hrbr.png)](https://ggsvelte.sh/themes)  |      [![Scatter plot using the dark theme](artifacts/theme-equivalence/ggsvelte-dark.png)](https://ggsvelte.sh/themes)      |
+|                                                           Tufte                                                           |                                                             Economist                                                             |
+| :-----------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------------------: |
+| [![Multi-series chart using the Tufte theme](artifacts/theme-equivalence/ggsvelte-tufte.png)](https://ggsvelte.sh/themes) | [![Multi-series chart using the Economist theme](artifacts/theme-equivalence/ggsvelte-economist.png)](https://ggsvelte.sh/themes) |
+|                                                           HRBR                                                            |                                                               Dark                                                                |
+|  [![Multi-series chart using the HRBR theme](artifacts/theme-equivalence/ggsvelte-hrbr.png)](https://ggsvelte.sh/themes)  |      [![Multi-series chart using the dark theme](artifacts/theme-equivalence/ggsvelte-dark.png)](https://ggsvelte.sh/themes)      |
 
 [Compare every theme and palette](https://ggsvelte.sh/themes).
 
