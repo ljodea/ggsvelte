@@ -85,6 +85,20 @@ export function ensureNotFoundNoindex(buildDirectory: string): void {
   );
 }
 
+export function ensurePreviewNoindexHeader(
+  buildDirectory: string,
+  buildMode: DeploymentBuildMode,
+): void {
+  if (buildMode !== "cloudflare-preview") return;
+  const path = join(buildDirectory, "_headers");
+  const headers = readFileSync(path, "utf8");
+  if (headers.includes("X-Robots-Tag: noindex")) return;
+  if (!headers.startsWith("/*\n")) {
+    throw new Error("_headers must begin with the broad /* route before preview noindex injection");
+  }
+  writeFileSync(path, headers.replace("/*\n", "/*\n  X-Robots-Tag: noindex, nofollow\n"));
+}
+
 export function validateDeploymentArtifact(
   buildDirectory: string,
   expected: DeploymentExpectation,
@@ -142,6 +156,12 @@ export function validateDeploymentArtifact(
     }
     if (!headers.includes("Cache-Control: public, max-age=0, must-revalidate")) {
       problems.push("_headers must revalidate public HTML and metadata");
+    }
+    if (
+      expected.buildMode === "cloudflare-preview" &&
+      !headers.includes("/*\n  X-Robots-Tag: noindex")
+    ) {
+      problems.push("preview _headers must apply X-Robots-Tag: noindex to every route");
     }
     if (
       !headers.includes("/_app/immutable/*") ||
@@ -237,6 +257,7 @@ function main(): void {
     ...(config.analyticsToken === null ? {} : { analyticsToken: config.analyticsToken }),
   };
   ensureNotFoundNoindex(buildDirectory);
+  ensurePreviewNoindexHeader(buildDirectory, config.mode);
   writeFileSync(
     join(buildDirectory, "artifact.json"),
     `${JSON.stringify(buildDeploymentIdentity(expected), null, 2)}\n`,

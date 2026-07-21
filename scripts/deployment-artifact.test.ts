@@ -1,11 +1,12 @@
 import { describe, expect, it } from "bun:test";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import {
   buildDeploymentIdentity,
   deploymentBuildConfig,
+  ensurePreviewNoindexHeader,
   validateDeploymentArtifact,
 } from "./deployment-artifact.ts";
 
@@ -57,7 +58,12 @@ function makeCompleteArtifact(buildMode: "cloudflare-preview" | "cloudflare-prod
   for (const [path, contents] of [
     ["index.html", '<link rel="canonical" href="https://ggsvelte.sh/">'],
     ["404.html", '<meta name="robots" content="noindex,follow">Not found'],
-    ["_headers", REQUIRED_HEADERS],
+    [
+      "_headers",
+      buildMode === "cloudflare-preview"
+        ? REQUIRED_HEADERS.replace("/*\n", "/*\n  X-Robots-Tag: noindex, nofollow\n")
+        : REQUIRED_HEADERS,
+    ],
     ["_redirects", REQUIRED_REDIRECTS],
     ["robots.txt", "Sitemap: https://ggsvelte.sh/sitemap.xml"],
     ["sitemap.xml", "<loc>https://ggsvelte.sh/</loc>"],
@@ -131,6 +137,36 @@ describe("deployment artifact identity", () => {
         "missing required deployment file: sitemap.xml",
         "missing required deployment file: artifact.json",
       ]);
+    } finally {
+      rmSync(buildDirectory, { recursive: true, force: true });
+    }
+  });
+
+  it("injects a broad noindex header only into preview artifacts", () => {
+    const preview = mkdtempSync(join(tmpdir(), "ggsvelte-cloudflare-preview-"));
+    const production = mkdtempSync(join(tmpdir(), "ggsvelte-cloudflare-production-"));
+    try {
+      writeFileSync(join(preview, "_headers"), REQUIRED_HEADERS);
+      writeFileSync(join(production, "_headers"), REQUIRED_HEADERS);
+      ensurePreviewNoindexHeader(preview, "cloudflare-preview");
+      ensurePreviewNoindexHeader(production, "cloudflare-production");
+      expect(readFileSync(join(preview, "_headers"), "utf8")).toContain(
+        "X-Robots-Tag: noindex, nofollow",
+      );
+      expect(readFileSync(join(production, "_headers"), "utf8")).not.toContain("X-Robots-Tag");
+    } finally {
+      rmSync(preview, { recursive: true, force: true });
+      rmSync(production, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects preview artifacts without a broad noindex header", () => {
+    const buildDirectory = makeCompleteArtifact("cloudflare-preview");
+    try {
+      writeFileSync(join(buildDirectory, "_headers"), REQUIRED_HEADERS);
+      expect(
+        validateDeploymentArtifact(buildDirectory, expectedArtifact("cloudflare-preview")),
+      ).toContain("preview _headers must apply X-Robots-Tag: noindex to every route");
     } finally {
       rmSync(buildDirectory, { recursive: true, force: true });
     }
