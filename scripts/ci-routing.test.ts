@@ -764,6 +764,8 @@ describe("component_journeys content inputs cover llms modules", () => {
     for (const file of [
       "scripts/gen-llms.ts",
       "scripts/llms-markdown.ts",
+      "scripts/highlight-code.ts",
+      "scripts/highlight-code.test.ts",
       "scripts/llms-guide-content.ts",
     ]) {
       expect(inputs, file).toContain(file);
