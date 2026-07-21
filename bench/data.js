@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784624544889,
+  "lastUpdate": 1784652562029,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -38288,6 +38288,185 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 149.9577,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "6f0e16e0721e449e792d7243c606fb1701b44998",
+          "message": "deps-ci: bump gradle/actions/setup-gradle in / (#375)\n\nBumps [gradle/actions/setup-gradle](https://github.com/gradle/actions) in `/` from 5.0.2 to 6.2.0.\n\n\nUpdates `gradle/actions/setup-gradle` from 5.0.2 to 6.2.0\n- [Release notes](https://github.com/gradle/actions/releases)\n- [Commits](https://github.com/gradle/actions/compare/0723195856401067f7a2779048b490ace7a47d7c...3f131e8634966bd73d06cc69884922b02e6faf92)\n\n---\nupdated-dependencies:\n- dependency-name: gradle/actions/setup-gradle\n  dependency-version: 6.2.0\n  dependency-type: direct:production\n  update-type: version-update:semver-major\n  dependency-group: github_actions\n...\n\nSigned-off-by: dependabot[bot] <support@github.com>\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2026-07-21T11:48:23-05:00",
+          "tree_id": "cb1b5f485449cba8b9ff6560ebb5b633a79152ee",
+          "url": "https://github.com/ljodea/ggsvelte/commit/6f0e16e0721e449e792d7243c606fb1701b44998"
+        },
+        "date": 1784652560648,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.2627,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.6601,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 8.1317,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 9.899,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 53.8761,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 91.8973,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal-line 100k",
+            "value": 71.8111,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide candidate-selection 300y",
+            "value": 0.1205,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide resize-churn 191y",
+            "value": 0.4289,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide DST-heavy 3y",
+            "value": 4.3582,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal free-facets 100",
+            "value": 37.6761,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.1889,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.427,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 51.6481,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 72.7196,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.2937,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 11.8464,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 971.1404,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.7949,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 249.8347,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 10.501,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-identity 100k",
+            "value": 18.8257,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 100k",
+            "value": 17.645,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-sqrt 100k",
+            "value": 16.9885,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 smooth 100k",
+            "value": 18.6043,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 bin 100k",
+            "value": 13.4817,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 facets-100 100k",
+            "value": 82.4239,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline binned-64 100k",
+            "value": 24.9985,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 11.7769,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 593.3772,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 149.3562,
             "unit": "ms"
           }
         ]
