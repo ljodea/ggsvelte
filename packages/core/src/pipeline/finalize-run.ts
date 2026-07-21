@@ -26,7 +26,7 @@ export function finalizePipelineRun(input: {
   const { runId, normalized, options, theme, flip, prepared, trained, warnings, advisories } =
     input;
 
-  const { panelLayout, scene } = finalizeLayoutAndGeometry({
+  const { panelLayout, scene, coordProjectors } = finalizeLayoutAndGeometry({
     normalized,
     options,
     theme,
@@ -45,6 +45,7 @@ export function finalizePipelineRun(input: {
     trained,
     panelLayout,
     scene,
+    coordProjectors,
     warnings,
     advisories,
   });

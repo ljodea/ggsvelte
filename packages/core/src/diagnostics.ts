@@ -130,6 +130,20 @@ export const PIPELINE_ERROR_CATALOG = {
       "zero: true was requested under a transform with no valid image for semantic zero (log10).",
     fix: "Remove zero: true; log10 positions use the transformed-space origin (semantic 1), never log10(0).",
   },
+  "coord-transform-domain": {
+    summary:
+      "A post-stat coordinate transform cannot project its trained or explicit viewport domain.",
+    fix: "Choose coordinate limits inside the transform domain, or use the identity coordinate transform.",
+  },
+  "coord-transform-temporal": {
+    summary: "A non-identity coordinate transform was requested for a temporal axis.",
+    fix: "Keep temporal coordinates on identity; use identity coordinate limits/reverse for a viewport.",
+  },
+  "coord-transform-continuous": {
+    summary:
+      "A quantitative coordinate transform or numeric limits were requested for a band axis.",
+    fix: "Use identity coordinates for categories, or configure a continuous quantitative scale.",
+  },
   "binned-scale-requires-continuous": {
     summary: 'A type: "binned" scale is bound to a discrete or temporal field.',
     fix: 'Map a quantitative field, or use type: "band"/"time" instead of "binned".',
@@ -242,6 +256,14 @@ export const PIPELINE_WARNING_CATALOG = {
   },
   "temporal-break-outside-domain": {
     summary: "One or more explicit temporal breaks were outside the trained domain and omitted.",
+  },
+  "coord-tessellation-cap": {
+    summary:
+      "Adaptive coordinate tessellation reached a deterministic depth/vertex cap and retained a bounded approximation.",
+  },
+  "coord-invalid-geometry": {
+    summary:
+      "Path vertices outside a coordinate transform's domain were removed without bridging the remaining finite runs.",
   },
 } as const satisfies Record<string, { summary: string }>;
 

@@ -37,7 +37,13 @@ ndensity`; density→`density, scaled`; smooth→`y, ymin, ymax, se`;
 - **positions**: `stack, fill` (proportions), `dodge` (side-by-side),
   `jitter` (seeded, deterministic), `nudge`, `identity`.
 - **coord**: `{"type": "flip"}` = horizontal bars (map the category to x,
-  the value to y, then flip). The ONLY orientation mechanism.
+  the value to y, then flip). Post-stat projection uses
+  `{"type":"transform","x":{"transform":"log10"},"y":{"transform":"sqrt"}}`
+  with optional semantic `limits`, `reverse`, `expand`, and plot-level `clip`.
+  Use `coordTransform`/`coord_transform`; unlike scale transforms, coordinate
+  transforms preserve stat inputs, tessellate curved render topology, and
+  invert coordinates before scales for interactions. Non-identity coordinate
+  transforms require continuous non-temporal axes.
 - **facet**: wrap form `{"wrap": {"field": "g"}, "ncol": 3}` XOR grid form
   `{"rows": {...}, "cols": {...}}`; `"scales": "fixed"|"free"|"free_x"|"free_y"`.
 - **scales**: canonical x/y families are `{"type": "linear"|"binned"|"time"|"band"}`.

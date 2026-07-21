@@ -6,9 +6,11 @@ import {
   defaultAutoMode,
   directionalNearestInOrder,
   insidePath,
+  isCandidatePrimitive,
   localAnchor,
   panelRangeInOrder,
   pathRange,
+  pathSemanticNeighborRange,
   primitiveCount,
   segmentDistance,
   segmentIntersectsRect,
@@ -66,6 +68,51 @@ function pathSubpathAabb(
   return [minX - pad, minY - pad, maxX + pad, maxY + pad];
 }
 
+function pathSegmentsIntersectRect(
+  batch: Extract<GeometryBatch, { kind: "paths" }>,
+  panelX: number,
+  panelY: number,
+  range: readonly [number, number],
+  loX: number,
+  loY: number,
+  hiX: number,
+  hiY: number,
+): boolean {
+  for (let edge = range[0]; edge < range[1]; edge++) {
+    const x1 = panelX + batch.positions[edge * 2]!;
+    const y1 = panelY + batch.positions[edge * 2 + 1]!;
+    const x2 = panelX + batch.positions[(edge + 1) * 2]!;
+    const y2 = panelY + batch.positions[(edge + 1) * 2 + 1]!;
+    if (segmentIntersectsRect(x1, y1, x2, y2, loX, loY, hiX, hiY)) return true;
+  }
+  return false;
+}
+
+function closestPathEdge(
+  batch: Extract<GeometryBatch, { kind: "paths" }>,
+  range: readonly [number, number] | null,
+  x: number,
+  y: number,
+  slop: number,
+): number {
+  if (range === null) return Infinity;
+  let closest = Infinity;
+  for (let edge = range[0]; edge < range[1]; edge++) {
+    if (
+      segmentDistance(
+        x,
+        y,
+        batch.positions[edge * 2]!,
+        batch.positions[edge * 2 + 1]!,
+        batch.positions[(edge + 1) * 2]!,
+        batch.positions[(edge + 1) * 2 + 1]!,
+      ) <= slop
+    )
+      closest = Math.min(closest, edge);
+  }
+  return closest;
+}
+
 /**
  * Plot-space AABB for the stroke segments incident on vertex `i` within
  * half-open subpath [start, end). Used for stroked (non-fill) path candidates
@@ -86,8 +133,10 @@ function pathVertexStrokeAabb(
   let minY = panelY + batch.positions[i * 2 + 1]!;
   let maxX = minX;
   let maxY = minY;
-  for (const other of [i - 1, i + 1]) {
-    if (other < start || other >= end) continue;
+  const semanticRange = pathSemanticNeighborRange(batch, i);
+  const first = semanticRange?.[0] ?? Math.max(start, i - 1);
+  const last = semanticRange?.[1] ?? Math.min(end - 1, i + 1);
+  for (let other = first; other <= last; other++) {
     const ox = panelX + batch.positions[other * 2]!;
     const oy = panelY + batch.positions[other * 2 + 1]!;
     if (ox < minX) minX = ox;
@@ -141,6 +190,7 @@ export function buildCandidateStoreEager(
     const panel = scene.panels[batch.panelIndex];
     if (panel === undefined) continue;
     for (let primitiveIndex = 0; primitiveIndex < primitiveCount(batch); primitiveIndex++) {
+      if (!isCandidatePrimitive(batch, primitiveIndex)) continue;
       const candidateIndex = batchList.length;
       const raw = batch.rowIndex[primitiveIndex] ?? NO_ROW;
       const rowIndex = raw === NO_ROW ? null : raw;
@@ -148,7 +198,10 @@ export function buildCandidateStoreEager(
       const buildFacts: CandidateBuildFacts = {
         candidateIndex,
         batchIndex,
-        primitiveIndex,
+        primitiveIndex:
+          batch.kind === "paths"
+            ? (batch.semanticIndex?.[primitiveIndex] ?? primitiveIndex)
+            : primitiveIndex,
         layerIndex: batch.layerIndex,
         panelIndex: batch.panelIndex,
         rowIndex,
@@ -440,14 +493,40 @@ export function buildCandidateStoreEager(
       maxY = Math.max(ry, ry + rh);
     } else if (batch.kind === "segments") {
       const pad = batch.linewidth / 2 + hitTolerance;
-      const x1 = panel.x + batch.segments[i * 4]!;
-      const y1 = panel.y + batch.segments[i * 4 + 1]!;
-      const x2 = panel.x + batch.segments[i * 4 + 2]!;
-      const y2 = panel.y + batch.segments[i * 4 + 3]!;
-      minX = Math.min(x1, x2) - pad;
-      minY = Math.min(y1, y2) - pad;
-      maxX = Math.max(x1, x2) + pad;
-      maxY = Math.max(y1, y2) + pad;
+      const renderStart = batch.renderPathOffsets?.[i];
+      const renderEnd = batch.renderPathOffsets?.[i + 1];
+      if (
+        batch.renderPositions !== undefined &&
+        renderStart !== undefined &&
+        renderEnd !== undefined &&
+        renderEnd > renderStart
+      ) {
+        minX = Infinity;
+        minY = Infinity;
+        maxX = -Infinity;
+        maxY = -Infinity;
+        for (let vertex = renderStart; vertex < renderEnd; vertex++) {
+          const x = panel.x + batch.renderPositions[vertex * 2]!;
+          const y = panel.y + batch.renderPositions[vertex * 2 + 1]!;
+          minX = Math.min(minX, x);
+          minY = Math.min(minY, y);
+          maxX = Math.max(maxX, x);
+          maxY = Math.max(maxY, y);
+        }
+        minX -= pad;
+        minY -= pad;
+        maxX += pad;
+        maxY += pad;
+      } else {
+        const x1 = panel.x + batch.segments[i * 4]!;
+        const y1 = panel.y + batch.segments[i * 4 + 1]!;
+        const x2 = panel.x + batch.segments[i * 4 + 2]!;
+        const y2 = panel.y + batch.segments[i * 4 + 3]!;
+        minX = Math.min(x1, x2) - pad;
+        minY = Math.min(y1, y2) - pad;
+        maxX = Math.max(x1, x2) + pad;
+        maxY = Math.max(y1, y2) + pad;
+      }
     } else if (batch.kind === "paths") {
       // Filled paths: full subpath AABB (containment far from any vertex).
       // Stroked paths: AABB of incident edges only — a plot-spanning series
@@ -637,14 +716,37 @@ export function buildCandidateStoreEager(
         : null;
     }
     if (batch.kind === "segments") {
-      const d = segmentDistance(
-        x,
-        y,
-        batch.segments[i * 4]!,
-        batch.segments[i * 4 + 1]!,
-        batch.segments[i * 4 + 2]!,
-        batch.segments[i * 4 + 3]!,
-      );
+      let d = Infinity;
+      const renderStart = batch.renderPathOffsets?.[i];
+      const renderEnd = batch.renderPathOffsets?.[i + 1];
+      if (
+        batch.renderPositions !== undefined &&
+        renderStart !== undefined &&
+        renderEnd !== undefined
+      ) {
+        for (let edge = renderStart; edge + 1 < renderEnd; edge++) {
+          d = Math.min(
+            d,
+            segmentDistance(
+              x,
+              y,
+              batch.renderPositions[edge * 2]!,
+              batch.renderPositions[edge * 2 + 1]!,
+              batch.renderPositions[(edge + 1) * 2]!,
+              batch.renderPositions[(edge + 1) * 2 + 1]!,
+            ),
+          );
+        }
+      } else {
+        d = segmentDistance(
+          x,
+          y,
+          batch.segments[i * 4]!,
+          batch.segments[i * 4 + 1]!,
+          batch.segments[i * 4 + 2]!,
+          batch.segments[i * 4 + 3]!,
+        );
+      }
       return d <= batch.linewidth / 2 + hitTolerance ? d : null;
     }
     if (batch.kind === "paths") {
@@ -661,18 +763,18 @@ export function buildCandidateStoreEager(
         return null;
       }
       let d = Infinity;
-      if (range !== null) {
-        for (const other of [i - 1, i + 1]) {
-          if (other < range[0] || other >= range[1]) continue;
+      const semanticRange = pathSemanticNeighborRange(batch, i);
+      if (range !== null && semanticRange !== null) {
+        for (let edge = semanticRange[0]; edge < semanticRange[1]; edge++) {
           d = Math.min(
             d,
             segmentDistance(
               x,
               y,
-              batch.positions[i * 2]!,
-              batch.positions[i * 2 + 1]!,
-              batch.positions[other * 2]!,
-              batch.positions[other * 2 + 1]!,
+              batch.positions[edge * 2]!,
+              batch.positions[edge * 2 + 1]!,
+              batch.positions[(edge + 1) * 2]!,
+              batch.positions[(edge + 1) * 2 + 1]!,
             ),
           );
         }
@@ -700,6 +802,22 @@ export function buildCandidateStoreEager(
       );
     }
     if (batch.kind === "segments") {
+      const renderStart = batch.renderPathOffsets?.[i];
+      const renderEnd = batch.renderPathOffsets?.[i + 1];
+      if (
+        batch.renderPositions !== undefined &&
+        renderStart !== undefined &&
+        renderEnd !== undefined
+      ) {
+        for (let edge = renderStart; edge + 1 < renderEnd; edge++) {
+          const x1 = panel.x + batch.renderPositions[edge * 2]!;
+          const y1 = panel.y + batch.renderPositions[edge * 2 + 1]!;
+          const x2 = panel.x + batch.renderPositions[(edge + 1) * 2]!;
+          const y2 = panel.y + batch.renderPositions[(edge + 1) * 2 + 1]!;
+          if (segmentIntersectsRect(x1, y1, x2, y2, loX, loY, hiX, hiY)) return true;
+        }
+        return false;
+      }
       const x1 = panel.x + batch.segments[i * 4]!;
       const y1 = panel.y + batch.segments[i * 4 + 1]!;
       const x2 = panel.x + batch.segments[i * 4 + 2]!;
@@ -710,12 +828,12 @@ export function buildCandidateStoreEager(
       if (xs[id]! >= loX && xs[id]! <= hiX && ys[id]! >= loY && ys[id]! <= hiY) return true;
       const range = pathRange(batch, i);
       if (range !== null) {
-        for (const other of [i - 1, i + 1]) {
-          if (other < range[0] || other >= range[1]) continue;
-          const ox = panel.x + batch.positions[other * 2]!;
-          const oy = panel.y + batch.positions[other * 2 + 1]!;
-          if (segmentIntersectsRect(xs[id]!, ys[id]!, ox, oy, loX, loY, hiX, hiY)) return true;
-        }
+        const semanticRange = pathSemanticNeighborRange(batch, i);
+        if (
+          semanticRange !== null &&
+          pathSegmentsIntersectRect(batch, panel.x, panel.y, semanticRange, loX, loY, hiX, hiY)
+        )
+          return true;
         if (batch.fills !== undefined) {
           const centerX = (loX + hiX) / 2 - panel.x;
           const centerY = (loY + hiY) / 2 - panel.y;
@@ -794,10 +912,11 @@ export function buildCandidateStoreEager(
         const panel = scene.panels[batch.panelIndex];
         if (
           panel === undefined ||
-          px < panel.x ||
-          px > panel.x + panel.width ||
-          py < panel.y ||
-          py > panel.y + panel.height
+          (panel.clip !== false &&
+            (px < panel.x ||
+              px > panel.x + panel.width ||
+              py < panel.y ||
+              py > panel.y + panel.height))
         )
           continue;
         const localId = entry.spatial.nearestWithin(px, py, batch.size + hitTolerance);
@@ -818,10 +937,11 @@ export function buildCandidateStoreEager(
         if (batch.kind === "glyphs") continue;
         const panel = scene.panels[panelIds[id]!]!;
         if (
-          px < panel.x ||
-          px > panel.x + panel.width ||
-          py < panel.y ||
-          py > panel.y + panel.height
+          panel.clip !== false &&
+          (px < panel.x ||
+            px > panel.x + panel.width ||
+            py < panel.y ||
+            py > panel.y + panel.height)
         )
           continue;
         const distance = exactDistance(id, px, py, pathContainment);
@@ -837,32 +957,35 @@ export function buildCandidateStoreEager(
           const localX = px - panel.x;
           const localY = py - panel.y;
           const slop = batch.linewidth / 2 + hitTolerance;
-          for (const edge of [primitive - 1, primitive]) {
-            if (edge < range[0] || edge + 1 >= range[1]) continue;
-            if (
-              segmentDistance(
-                localX,
-                localY,
-                batch.positions[edge * 2]!,
-                batch.positions[edge * 2 + 1]!,
-                batch.positions[(edge + 1) * 2]!,
-                batch.positions[(edge + 1) * 2 + 1]!,
-              ) <= slop
-            )
-              pathEdge = Math.min(pathEdge, edge);
-          }
+          pathEdge = closestPathEdge(
+            batch,
+            pathSemanticNeighborRange(batch, primitive),
+            localX,
+            localY,
+            slop,
+          );
           if (!Number.isFinite(pathEdge)) continue;
-          const firstDistance = Math.hypot(
-            batch.positions[pathEdge * 2]! - localX,
-            batch.positions[pathEdge * 2 + 1]! - localY,
-          );
-          const secondDistance = Math.hypot(
-            batch.positions[(pathEdge + 1) * 2]! - localX,
-            batch.positions[(pathEdge + 1) * 2 + 1]! - localY,
-          );
-          const chosenPrimitive = firstDistance <= secondDistance ? pathEdge : pathEdge + 1;
-          candidateId = id - primitive + chosenPrimitive;
-          anchorDistance = Math.min(firstDistance, secondDistance);
+          if (batch.semanticAnchors === undefined) {
+            // Preserve the historical stable edge contract: an equidistant
+            // ordinary path edge resolves to its first render vertex.
+            const firstDistance = Math.hypot(
+              batch.positions[pathEdge * 2]! - localX,
+              batch.positions[pathEdge * 2 + 1]! - localY,
+            );
+            const secondDistance = Math.hypot(
+              batch.positions[(pathEdge + 1) * 2]! - localX,
+              batch.positions[(pathEdge + 1) * 2 + 1]! - localY,
+            );
+            const chosenPrimitive = firstDistance <= secondDistance ? pathEdge : pathEdge + 1;
+            candidateId = id - primitive + chosenPrimitive;
+            anchorDistance = Math.min(firstDistance, secondDistance);
+          } else {
+            // Synthetic render vertices never become candidates. Competing
+            // semantic anchors that own this tessellated edge are compared by
+            // anchor distance in the normal within-batch tie break below.
+            candidateId = id;
+            anchorDistance = Math.hypot(xs[id]! - px, ys[id]! - py);
+          }
         }
         const improvesWithinBatch =
           batch.kind === "paths"

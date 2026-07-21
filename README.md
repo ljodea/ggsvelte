@@ -51,7 +51,8 @@ tested with npm, pnpm, and Bun on Ubuntu and Windows; see the
   layers; canvas automatically above 2,000 marks; deterministic SVG for export.
 - **A real grammar, not a chart-type menu** — 12+ geoms, R-fixture-tested
   statistics, positions, free-scale facets, coordinates, annotations, and
-  interaction compose through the same model.
+  interaction compose through the same model. Scale transforms run before
+  stats; `coordTransform` projects and tessellates final geometry after stats.
 - **Interaction is semantic and opt-in** — inspect and pin data, select points
   or intervals, brush to zoom, and consume typed Svelte 5 events without
   depending on SVG nodes or renderer indices.

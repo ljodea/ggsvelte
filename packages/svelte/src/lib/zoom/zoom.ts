@@ -11,6 +11,7 @@ import {
   panelDataDomains,
   type ContinuousZoomDomains,
   type PanelBounds,
+  type PanelCoordInverse,
   type PlotRect,
 } from "../scene/geometry.js";
 
@@ -233,6 +234,7 @@ export function resolveBrushZoomDomains(
   flipped: boolean,
   mode: ZoomMode,
   current: ContinuousZoomDomains | null,
+  coord?: PanelCoordInverse,
 ): ContinuousZoomDomains | null {
   const th0 = Math.max(0, Math.min(1, (rect.x0 - panel.x) / panel.width));
   const th1 = Math.max(0, Math.min(1, (rect.x1 - panel.x) / panel.width));
@@ -240,7 +242,7 @@ export function resolveBrushZoomDomains(
   const tv1 = Math.max(0, Math.min(1, 1 - (rect.y0 - panel.y) / panel.height));
   // Guard uses raw screen fractions, not flip-remapped domains.
   if (th1 - th0 <= 0 && tv1 - tv0 <= 0) return null;
-  const inverted = panelDataDomains(rect, panel, scales, flipped);
+  const inverted = panelDataDomains(rect, panel, scales, flipped, coord);
   const next: ContinuousZoomDomains = { ...current };
   if (mode !== "y" && inverted.x !== undefined) next.x = inverted.x;
   if (mode !== "x" && inverted.y !== undefined) next.y = inverted.y;
@@ -255,6 +257,7 @@ export function resolveBrushZoomDomains(
 export type BrushZoomModel = {
   readonly scene: { readonly panels: readonly PanelBounds[] };
   readonly scales: Pick<RenderModel["scales"], "x" | "y">;
+  readonly coordProjectors?: readonly PanelCoordInverse[];
 };
 
 /**
@@ -282,6 +285,7 @@ export function resolveBrushZoomFromModel(input: {
     input.flipped,
     input.mode,
     input.current,
+    input.model.coordProjectors?.[0],
   );
   if (next === null) return null;
   return frozenZoomDomains(next);

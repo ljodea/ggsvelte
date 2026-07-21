@@ -12,6 +12,7 @@
  *   throwing SpecValidationError. Builder output therefore always validates
  *   against the published JSON Schema (property-tested).
  */
+import { coordTransform, type CoordTransformOptions } from "./coord-helpers.js";
 import { SpecValidationError } from "./errors.js";
 import type { AesInput, FacetInput, LayerInput, SpecInput } from "./normalize.js";
 import { normalize } from "./normalize.js";
@@ -407,6 +408,11 @@ export class GGBuilder {
   /** Sugar for .coord("flip") — THE horizontal-composition mechanism. */
   coordFlip(): GGBuilder {
     return this.coord("flip");
+  }
+
+  /** Configure a post-stat coordinate transform (distinct from scale transforms). */
+  coordTransform(options: CoordTransformOptions = {}): GGBuilder {
+    return this.coord(coordTransform(options));
   }
 
   /** Set the accessibility mode ("force-svg" keeps every layer in SVG). */

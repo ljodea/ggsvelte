@@ -627,6 +627,116 @@ export const PLAYGROUND_SAMPLES: readonly GeneratedPlaygroundSample[] = [
       "#play=v1.eyJ2ZXJzaW9uIjoxLCJzb3VyY2UiOnsia2luZCI6InNhbXBsZSIsImlkIjoiYW1iaWd1b3VzLWRhdGVzIn0sInNwZWMiOnsiZWRpdGlvbiI6MSwiZGF0YSI6eyJ2YWx1ZXMiOlt7ImRhdGUiOiIwMy8wNC8yMDI0IiwidmFsdWUiOjR9LHsiZGF0ZSI6IjA1LzA2LzIwMjQiLCJ2YWx1ZSI6N30seyJkYXRlIjoiMDcvMDgvMjAyNCIsInZhbHVlIjo1fV19LCJsYXllcnMiOlt7Imdlb20iOiJsaW5lIiwic3RhdCI6ImlkZW50aXR5IiwicG9zaXRpb24iOiJpZGVudGl0eSIsImFlcyI6eyJ4Ijp7ImZpZWxkIjoiZGF0ZSJ9LCJ5Ijp7ImZpZWxkIjoidmFsdWUifX0sInBhcmFtcyI6eyJsaW5ld2lkdGgiOjEuOH19XSwibGFicyI6eyJ0aXRsZSI6IkFtYmlndW91cyBkYXRlcyBzdGF5IGRpc2NyZXRlIiwieCI6IkRhdGUiLCJ5IjoiVmFsdWUifSwiaGVpZ2h0Ijo0MDB9fQ",
   },
   {
+    id: "post-stat-coordinate",
+    title: "Post-stat coordinate transform",
+    description: "Fit in ordinary scale space, then project the final x coordinate through log10.",
+    seed: {
+      version: 1,
+      source: {
+        kind: "sample",
+        id: "post-stat-coordinate",
+      },
+      spec: {
+        edition: 2,
+        data: {
+          values: [
+            {
+              exposure: 1,
+              response: 2.2,
+            },
+            {
+              exposure: 2,
+              response: 2.1,
+            },
+            {
+              exposure: 5,
+              response: 2.4,
+            },
+            {
+              exposure: 10,
+              response: 2.2,
+            },
+            {
+              exposure: 20,
+              response: 2.5,
+            },
+            {
+              exposure: 50,
+              response: 2.8,
+            },
+            {
+              exposure: 100,
+              response: 3.1,
+            },
+            {
+              exposure: 200,
+              response: 4.2,
+            },
+            {
+              exposure: 500,
+              response: 7.1,
+            },
+            {
+              exposure: 1000,
+              response: 12.3,
+            },
+          ],
+        },
+        layers: [
+          {
+            geom: "point",
+            stat: "identity",
+            position: "identity",
+            aes: {
+              x: {
+                field: "exposure",
+              },
+              y: {
+                field: "response",
+              },
+            },
+            params: {
+              size: 3,
+            },
+          },
+          {
+            geom: "smooth",
+            stat: "smooth",
+            position: "identity",
+            aes: {
+              x: {
+                field: "exposure",
+              },
+              y: {
+                field: "response",
+              },
+            },
+            params: {
+              method: "lm",
+              se: false,
+              n: 80,
+            },
+          },
+        ],
+        coord: {
+          type: "transform",
+          x: {
+            transform: "log10",
+          },
+        },
+        labs: {
+          title: "Post-stat coordinate transform",
+          subtitle: "The linear fit is computed before the x coordinate is projected",
+          x: "Exposure (log10 coordinate)",
+          y: "Response",
+        },
+        height: 400,
+      },
+    },
+    fragment:
+      "#play=v1.eyJ2ZXJzaW9uIjoxLCJzb3VyY2UiOnsia2luZCI6InNhbXBsZSIsImlkIjoicG9zdC1zdGF0LWNvb3JkaW5hdGUifSwic3BlYyI6eyJlZGl0aW9uIjoyLCJkYXRhIjp7InZhbHVlcyI6W3siZXhwb3N1cmUiOjEsInJlc3BvbnNlIjoyLjJ9LHsiZXhwb3N1cmUiOjIsInJlc3BvbnNlIjoyLjF9LHsiZXhwb3N1cmUiOjUsInJlc3BvbnNlIjoyLjR9LHsiZXhwb3N1cmUiOjEwLCJyZXNwb25zZSI6Mi4yfSx7ImV4cG9zdXJlIjoyMCwicmVzcG9uc2UiOjIuNX0seyJleHBvc3VyZSI6NTAsInJlc3BvbnNlIjoyLjh9LHsiZXhwb3N1cmUiOjEwMCwicmVzcG9uc2UiOjMuMX0seyJleHBvc3VyZSI6MjAwLCJyZXNwb25zZSI6NC4yfSx7ImV4cG9zdXJlIjo1MDAsInJlc3BvbnNlIjo3LjF9LHsiZXhwb3N1cmUiOjEwMDAsInJlc3BvbnNlIjoxMi4zfV19LCJsYXllcnMiOlt7Imdlb20iOiJwb2ludCIsInN0YXQiOiJpZGVudGl0eSIsInBvc2l0aW9uIjoiaWRlbnRpdHkiLCJhZXMiOnsieCI6eyJmaWVsZCI6ImV4cG9zdXJlIn0sInkiOnsiZmllbGQiOiJyZXNwb25zZSJ9fSwicGFyYW1zIjp7InNpemUiOjN9fSx7Imdlb20iOiJzbW9vdGgiLCJzdGF0Ijoic21vb3RoIiwicG9zaXRpb24iOiJpZGVudGl0eSIsImFlcyI6eyJ4Ijp7ImZpZWxkIjoiZXhwb3N1cmUifSwieSI6eyJmaWVsZCI6InJlc3BvbnNlIn19LCJwYXJhbXMiOnsibWV0aG9kIjoibG0iLCJzZSI6ZmFsc2UsIm4iOjgwfX1dLCJjb29yZCI6eyJ0eXBlIjoidHJhbnNmb3JtIiwieCI6eyJ0cmFuc2Zvcm0iOiJsb2cxMCJ9fSwibGFicyI6eyJ0aXRsZSI6IlBvc3Qtc3RhdCBjb29yZGluYXRlIHRyYW5zZm9ybSIsInN1YnRpdGxlIjoiVGhlIGxpbmVhciBmaXQgaXMgY29tcHV0ZWQgYmVmb3JlIHRoZSB4IGNvb3JkaW5hdGUgaXMgcHJvamVjdGVkIiwieCI6IkV4cG9zdXJlIChsb2cxMCBjb29yZGluYXRlKSIsInkiOiJSZXNwb25zZSJ9LCJoZWlnaHQiOjQwMH19",
+  },
+  {
     id: "category-columns",
     title: "Category columns",
     description: "Compare a few named categories with direct values.",

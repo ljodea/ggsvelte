@@ -7,14 +7,27 @@ export function primitiveCount(batch: GeometryBatch): number {
   return batch.positions.length / 2;
 }
 
+export function isCandidatePrimitive(batch: GeometryBatch, primitiveIndex: number): boolean {
+  return batch.kind !== "paths" || batch.semanticAnchors?.[primitiveIndex] !== 0;
+}
+
+export function candidatePrimitiveCount(batch: GeometryBatch): number {
+  if (batch.kind !== "paths" || batch.semanticAnchors === undefined) return primitiveCount(batch);
+  let count = 0;
+  for (const anchor of batch.semanticAnchors) if (anchor !== 0) count++;
+  return count;
+}
+
 export function localAnchor(batch: GeometryBatch, i: number): readonly [number, number] {
   if (batch.kind === "rects")
     return [batch.rects[i * 4]! + batch.rects[i * 4 + 2]! / 2, batch.rects[i * 4 + 1]!];
   if (batch.kind === "segments")
-    return [
-      (batch.segments[i * 4]! + batch.segments[i * 4 + 2]!) / 2,
-      (batch.segments[i * 4 + 1]! + batch.segments[i * 4 + 3]!) / 2,
-    ];
+    return batch.anchorPositions === undefined
+      ? [
+          (batch.segments[i * 4]! + batch.segments[i * 4 + 2]!) / 2,
+          (batch.segments[i * 4 + 1]! + batch.segments[i * 4 + 3]!) / 2,
+        ]
+      : [batch.anchorPositions[i * 2]!, batch.anchorPositions[i * 2 + 1]!];
   return [batch.positions[i * 2]!, batch.positions[i * 2 + 1]!];
 }
 
@@ -111,6 +124,26 @@ export function pathRange(
   const mid = pathSubpathIndex(offsets, vertex);
   if (mid === null) return null;
   return [offsets[mid]!, offsets[mid + 1]!] as const;
+}
+
+/** Render-vertex span between the nearest semantic anchors around `vertex`.
+ * Returns inclusive endpoints [previousAnchor, nextAnchor]. */
+export function pathSemanticNeighborRange(
+  batch: Extract<GeometryBatch, { kind: "paths" }>,
+  vertex: number,
+): readonly [number, number] | null {
+  const range = pathRange(batch, vertex);
+  if (range === null) return null;
+  if (batch.semanticAnchors === undefined) {
+    return [Math.max(range[0], vertex - 1), Math.min(range[1] - 1, vertex + 1)];
+  }
+  let previous = vertex - 1;
+  while (previous >= range[0] && batch.semanticAnchors[previous] === 0) previous--;
+  if (previous < range[0]) previous = vertex;
+  let next = vertex + 1;
+  while (next < range[1] && batch.semanticAnchors[next] === 0) next++;
+  if (next >= range[1]) next = vertex;
+  return [previous, next];
 }
 
 /** True when a and b lie in the same half-open pathOffsets subpath. */

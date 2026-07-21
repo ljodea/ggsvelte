@@ -161,9 +161,21 @@ function renderSegments(batch: SegmentsBatch, theme: ThemeTokens): string {
   const themeInk = themeVar("ink", theme);
   for (let j = 0; j < n; j++) {
     const stroke = batch.strokes?.[j] ?? batch.stroke ?? themeInk;
-    parts.push(
-      `<line x1="${px(batch.segments[j * 4]!)}" y1="${px(batch.segments[j * 4 + 1]!)}" x2="${px(batch.segments[j * 4 + 2]!)}" y2="${px(batch.segments[j * 4 + 3]!)}" stroke="${stroke}" stroke-width="${px(batch.linewidth)}"/>`,
-    );
+    if (batch.renderPositions !== undefined && batch.renderPathOffsets !== undefined) {
+      const d = pathData(
+        batch.renderPositions,
+        batch.renderPathOffsets[j]!,
+        batch.renderPathOffsets[j + 1]!,
+        "linear",
+      );
+      parts.push(
+        `<path d="${d}" fill="none" stroke="${stroke}" stroke-width="${px(batch.linewidth)}"/>`,
+      );
+    } else {
+      parts.push(
+        `<line x1="${px(batch.segments[j * 4]!)}" y1="${px(batch.segments[j * 4 + 1]!)}" x2="${px(batch.segments[j * 4 + 2]!)}" y2="${px(batch.segments[j * 4 + 3]!)}" stroke="${stroke}" stroke-width="${px(batch.linewidth)}"/>`,
+      );
+    }
   }
   parts.push("</g>");
   return parts.join("");

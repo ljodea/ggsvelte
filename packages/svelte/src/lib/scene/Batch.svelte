@@ -129,6 +129,7 @@
     y1: number;
     x2: number;
     y2: number;
+    d?: string;
     stroke: string;
   }
 
@@ -140,6 +141,15 @@
       y1: batch.segments[j * 4 + 1]!,
       x2: batch.segments[j * 4 + 2]!,
       y2: batch.segments[j * 4 + 3]!,
+      ...(batch.renderPositions !== undefined &&
+        batch.renderPathOffsets !== undefined && {
+          d: pathData(
+            batch.renderPositions,
+            batch.renderPathOffsets[j]!,
+            batch.renderPathOffsets[j + 1]!,
+            "linear",
+          ),
+        }),
       stroke: batch.strokes?.[j] ?? batch.stroke ?? ink,
     }));
   });
@@ -279,16 +289,27 @@
   <g class="gg-batch gg-segments" data-layer={batch.layerIndex} opacity={alpha}>
     {#each presentationOrder(segments) as presented (presented.item.index)}
       {@const s = presented.item}
-      <line
-        x1={s.x1}
-        y1={s.y1}
-        x2={s.x2}
-        y2={s.y2}
-        stroke={s.stroke}
-        stroke-width={batch.linewidth}
-        opacity={focusOpacity(presented.focused)}
-        data-gg-focused={focusMask === null ? undefined : presented.focused}
-      />
+      {#if s.d !== undefined}
+        <path
+          d={s.d}
+          fill="none"
+          stroke={s.stroke}
+          stroke-width={batch.linewidth}
+          opacity={focusOpacity(presented.focused)}
+          data-gg-focused={focusMask === null ? undefined : presented.focused}
+        />
+      {:else}
+        <line
+          x1={s.x1}
+          y1={s.y1}
+          x2={s.x2}
+          y2={s.y2}
+          stroke={s.stroke}
+          stroke-width={batch.linewidth}
+          opacity={focusOpacity(presented.focused)}
+          data-gg-focused={focusMask === null ? undefined : presented.focused}
+        />
+      {/if}
     {/each}
   </g>
 {:else if batch.kind === "glyphs"}

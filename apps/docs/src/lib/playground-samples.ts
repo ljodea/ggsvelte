@@ -153,6 +153,52 @@ export const PLAYGROUND_SAMPLES = [
     },
   },
   {
+    id: "post-stat-coordinate",
+    title: "Post-stat coordinate transform",
+    description: "Fit in ordinary scale space, then project the final x coordinate through log10.",
+    spec: {
+      edition: 2,
+      data: {
+        values: [
+          { exposure: 1, response: 2.2 },
+          { exposure: 2, response: 2.1 },
+          { exposure: 5, response: 2.4 },
+          { exposure: 10, response: 2.2 },
+          { exposure: 20, response: 2.5 },
+          { exposure: 50, response: 2.8 },
+          { exposure: 100, response: 3.1 },
+          { exposure: 200, response: 4.2 },
+          { exposure: 500, response: 7.1 },
+          { exposure: 1000, response: 12.3 },
+        ],
+      },
+      layers: [
+        {
+          geom: "point",
+          stat: "identity",
+          position: "identity",
+          aes: { x: { field: "exposure" }, y: { field: "response" } },
+          params: { size: 3 },
+        },
+        {
+          geom: "smooth",
+          stat: "smooth",
+          position: "identity",
+          aes: { x: { field: "exposure" }, y: { field: "response" } },
+          params: { method: "lm", se: false, n: 80 },
+        },
+      ],
+      coord: { type: "transform", x: { transform: "log10" } },
+      labs: {
+        title: "Post-stat coordinate transform",
+        subtitle: "The linear fit is computed before the x coordinate is projected",
+        x: "Exposure (log10 coordinate)",
+        y: "Response",
+      },
+      height: 400,
+    },
+  },
+  {
     id: "category-columns",
     title: "Category columns",
     description: "Compare a few named categories with direct values.",

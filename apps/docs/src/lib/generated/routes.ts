@@ -424,6 +424,11 @@ export const DOCS_ROUTES = [
         title: "Coordinates",
         level: 2,
       },
+      {
+        id: "scale-transforms-versus-coordinate-transforms",
+        title: "Scale transforms versus coordinate transforms",
+        level: 2,
+      },
     ],
   },
   {
@@ -1324,6 +1329,21 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "coord-transform-domain",
+        title: "coord-transform-domain",
+        level: 3,
+      },
+      {
+        id: "coord-transform-temporal",
+        title: "coord-transform-temporal",
+        level: 3,
+      },
+      {
+        id: "coord-transform-continuous",
+        title: "coord-transform-continuous",
+        level: 3,
+      },
+      {
         id: "binned-scale-requires-continuous",
         title: "binned-scale-requires-continuous",
         level: 3,
@@ -1481,6 +1501,16 @@ export const DOCS_ROUTES = [
       {
         id: "temporal-break-outside-domain",
         title: "temporal-break-outside-domain",
+        level: 3,
+      },
+      {
+        id: "coord-tessellation-cap",
+        title: "coord-tessellation-cap",
+        level: 3,
+      },
+      {
+        id: "coord-invalid-geometry",
+        title: "coord-invalid-geometry",
         level: 3,
       },
       {
@@ -1738,8 +1768,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-269",
-        title: "experimental (269)",
+        id: "experimental-278",
+        title: "experimental (278)",
         level: 3,
       },
       {
@@ -1753,8 +1783,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-219",
-        title: "experimental (219)",
+        id: "experimental-223",
+        title: "experimental (223)",
         level: 3,
       },
       {
@@ -1778,8 +1808,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-221",
-        title: "experimental (221)",
+        id: "experimental-228",
+        title: "experimental (228)",
         level: 3,
       },
       {

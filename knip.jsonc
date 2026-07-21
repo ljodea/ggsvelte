@@ -17,8 +17,11 @@
     "wrangler",
   ],
   // Root-exported ggplot2 spellings are intentional binding-identical aliases
-  // of the camelCase scale helpers, and declaration tests enforce that contract.
-  "ignoreIssues": { "packages/spec/src/scale-helpers.ts": ["duplicates"] },
+  // of camelCase scale/coordinate helpers, and declaration tests enforce that contract.
+  "ignoreIssues": {
+    "packages/spec/src/scale-helpers.ts": ["duplicates"],
+    "packages/spec/src/coord-helpers.ts": ["duplicates"],
+  },
   "workspaces": {
     ".": {
       "entry": ["scripts/*.ts", "tests/visual/**/*.ts", "tests/evals/**/*.ts"],

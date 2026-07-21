@@ -257,6 +257,22 @@ describe("resolveBrushZoomDomains", () => {
     expect(yOnly?.y).toBeDefined();
   });
 
+  it("inverts the coordinate projector before the scale", () => {
+    const domains = resolveBrushZoomDomains(
+      { x0: 50, y0: 0, x1: 100, y1: 100 },
+      panel,
+      fromAny(scales),
+      false,
+      "x",
+      null,
+      {
+        x: { invertFraction: (fraction: number) => fraction * fraction },
+        y: { invertFraction: (fraction: number) => fraction },
+      },
+    );
+    expect(domains?.x).toEqual([25, 100]);
+  });
+
   it("inverts through flipped coordinates", () => {
     // Flipped: screen-x → y scale [0,50], screen-y → x scale [0,100].
     const domains = resolveBrushZoomDomains(

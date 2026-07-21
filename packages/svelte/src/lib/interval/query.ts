@@ -10,6 +10,7 @@ import {
   expandIntervalQuery,
   panelDataDomains,
   type PanelBounds,
+  type PanelCoordInverse,
   type PlotRect,
 } from "../scene/geometry.js";
 import {
@@ -30,11 +31,13 @@ export type IntervalQueryScene = {
   readonly singlePanel: boolean;
   readonly flip: boolean;
   readonly scales: Pick<RenderModel["scales"], "x" | "y">;
+  readonly coord?: PanelCoordInverse;
   /** Faceted panels with their own trained positional scales. When present,
    * the requested stable panel identity enables local semantic inversion. */
   readonly panels?: readonly (PanelBounds & {
     readonly id: string;
     readonly scales: Pick<RenderModel["scales"], "x" | "y">;
+    readonly coord?: PanelCoordInverse;
   })[];
   /** Candidates intersecting an already-expanded plot-px query rect. */
   queryCandidates(
@@ -69,11 +72,16 @@ function bandDomains(
   panel: PanelBounds,
   scales: Pick<RenderModel["scales"], "x" | "y">,
   flipped: boolean,
+  coord?: PanelCoordInverse,
 ): IntervalDomain {
-  const tx0 = (pixels.x0 - panel.x) / panel.width;
-  const tx1 = (pixels.x1 - panel.x) / panel.width;
-  const ty0 = 1 - (pixels.y1 - panel.y) / panel.height;
-  const ty1 = 1 - (pixels.y0 - panel.y) / panel.height;
+  const screenTx0 = (pixels.x0 - panel.x) / panel.width;
+  const screenTx1 = (pixels.x1 - panel.x) / panel.width;
+  const screenTy0 = 1 - (pixels.y1 - panel.y) / panel.height;
+  const screenTy1 = 1 - (pixels.y0 - panel.y) / panel.height;
+  const tx0 = coord?.x.invertFraction(screenTx0) ?? screenTx0;
+  const tx1 = coord?.x.invertFraction(screenTx1) ?? screenTx1;
+  const ty0 = coord?.y.invertFraction(screenTy0) ?? screenTy0;
+  const ty1 = coord?.y.invertFraction(screenTy1) ?? screenTy1;
   const horizontal = bandDomain(flipped ? scales.y : scales.x, tx0, tx1);
   const vertical = bandDomain(flipped ? scales.x : scales.y, ty0, ty1);
   return {
@@ -99,6 +107,7 @@ export type IntervalQueryModelPort = {
   readonly scales: Pick<RenderModel["scales"], "x" | "y"> & {
     readonly panels?: readonly Pick<RenderModel["scales"], "x" | "y">[];
   };
+  readonly coordProjectors?: readonly PanelCoordInverse[];
   readonly candidates: {
     queryRect(x0: number, y0: number, x1: number, y1: number): Iterable<number>;
     candidate(id: number): {
@@ -134,6 +143,7 @@ export function intervalQuerySceneFromModel(
     singlePanel: model.scene.panels.length === 1,
     flip,
     scales: model.scales,
+    ...(model.coordProjectors?.[0] !== undefined && { coord: model.coordProjectors[0] }),
     panels: model.scene.panels.flatMap((scenePanel, index) =>
       scenePanel.id === null
         ? []
@@ -145,6 +155,9 @@ export function intervalQuerySceneFromModel(
               height: scenePanel.height,
               id: scenePanel.id,
               scales: model.scales.panels?.[index] ?? model.scales,
+              ...(model.coordProjectors?.[index] !== undefined && {
+                coord: model.coordProjectors[index],
+              }),
             },
           ],
     ),
@@ -209,12 +222,24 @@ export function resolveIntervalQueryParts(input: ResolveIntervalQueryPartsInput)
   const rowIndexes = lineageRowIndexesFromCandidates(candidates, (id) => scene.lineageKeys(id));
   const continuousDomain =
     scene.singlePanel || requestedPanel !== undefined
-      ? panelDataDomains(input.pixels, panel, requestedPanel?.scales ?? scene.scales, scene.flip)
+      ? panelDataDomains(
+          input.pixels,
+          panel,
+          requestedPanel?.scales ?? scene.scales,
+          scene.flip,
+          requestedPanel?.coord ?? scene.coord,
+        )
       : {};
   const invertedDomain =
     scene.singlePanel || requestedPanel !== undefined
       ? {
-          ...bandDomains(input.pixels, panel, requestedPanel?.scales ?? scene.scales, scene.flip),
+          ...bandDomains(
+            input.pixels,
+            panel,
+            requestedPanel?.scales ?? scene.scales,
+            scene.flip,
+            requestedPanel?.coord ?? scene.coord,
+          ),
           ...continuousDomain,
         }
       : {};

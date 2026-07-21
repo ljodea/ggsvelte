@@ -126,9 +126,11 @@
   {#if drawMarks}
     <defs>
       {#each scene.panels as panel, i (i)}
-        <clipPath id={`${uid}-clip-${i}`}>
-          <rect width={panel.width} height={panel.height} />
-        </clipPath>
+        {#if panel.clip !== false}
+          <clipPath id={`${uid}-clip-${i}`}>
+            <rect width={panel.width} height={panel.height} />
+          </clipPath>
+        {/if}
       {/each}
     </defs>
   {/if}
@@ -188,7 +190,12 @@
         </g>
       {/if}
       {#if drawMarks}
-        <g class="gg-marks" clip-path={`url(#${uid}-clip-${i})`}>
+        <g
+          class="gg-marks"
+          clip-path={panel.clip === false
+            ? undefined
+            : `url(#${uid}-clip-${i})`}
+        >
           {#each markBatches as batch, bi (bi)}
             {#if batch.panelIndex === i}
               <Batch

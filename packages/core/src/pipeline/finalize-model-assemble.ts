@@ -1,6 +1,7 @@
 /**
  * Pack trained scales + contracts into assembleRenderModel input.
  */
+import type { PanelCoordProjector } from "../coord-projector.js";
 import type { Scene } from "../scene.js";
 import type { CandidateStore } from "../candidate-store.js";
 import type { LineageStore } from "../identity.js";
@@ -24,6 +25,7 @@ export function assembleFinalizeRenderModel(input: {
   trained: TrainedPipelineScales;
   prepared: PreparedPanels;
   panelLayout: PanelLayoutResult;
+  coordProjectors: readonly PanelCoordProjector[];
   runId: number;
   warnings: PipelineWarning[];
   advisories: Advisory[];
@@ -51,6 +53,7 @@ export function assembleFinalizeRenderModel(input: {
     scaleDecisions: prepared.scaleDecisions,
     scaleDiagnostics: prepared.scaleDiagnostics,
     guidePlans: panelLayout.guidePlans,
+    coordProjectors: input.coordProjectors,
     xConversion: prepared.xConversion,
     yConversion: prepared.yConversion,
     runId: input.runId,

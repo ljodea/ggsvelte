@@ -1600,7 +1600,44 @@ const SpecDeclarations = {
     },
   ),
 
-  CoordSpec: Type.Object(
+  CoordTransformAxisSpec: Type.Object(
+    {
+      transform: Type.Union(
+        [Type.Literal("identity"), Type.Literal("log10"), Type.Literal("sqrt")],
+        {
+          description:
+            "Post-stat coordinate transform for this axis: identity, base-10 logarithm, or square root.",
+        },
+      ),
+      limits: Type.Optional(
+        Type.Array(Type.Number(), {
+          minItems: 2,
+          maxItems: 2,
+          description:
+            "Optional coordinate viewport [min, max] in semantic/source units. Exactly two numbers. Unlike scale limits, coordinate limits do not remove rows or recompute statistics.",
+        }),
+      ),
+      reverse: Type.Optional(
+        Type.Boolean({
+          description:
+            "Reverse this coordinate axis after its transform without changing stat inputs or the trained semantic scale domain.",
+        }),
+      ),
+      expand: Type.Optional(
+        Type.Boolean({
+          description:
+            "Whether explicit coordinate limits receive the default 5% transformed-space display expansion (default true). Set false for exact viewport limits.",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "One continuous coordinate axis projected after statistics and scale training. Non-identity transforms require a continuous, non-temporal position scale.",
+    },
+  ),
+
+  CoordCartesianSpec: Type.Object(
     {
       type: Type.Union([Type.Literal("cartesian"), Type.Literal("flip")], {
         description:
@@ -1610,9 +1647,35 @@ const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        'The plot\'s coordinate system. {"type": "flip"} turns any vertical composition into its horizontal counterpart (ggplot2\'s coord_flip): map x to the category and y to the value as usual, then flip.',
+        'The plot\'s Cartesian coordinate system. {"type": "flip"} turns any vertical composition into its horizontal counterpart (ggplot2\'s coord_flip).',
     },
   ),
+
+  CoordTransformSpec: Type.Object(
+    {
+      type: Type.Literal("transform", {
+        description: "Project positions after stats/positions and scale training.",
+      }),
+      x: Type.Optional(Type.Ref("CoordTransformAxisSpec")),
+      y: Type.Optional(Type.Ref("CoordTransformAxisSpec")),
+      clip: Type.Optional(
+        Type.Boolean({
+          description:
+            "Clip marks to the panel rectangle (default true). Set false only when intentional overflow should remain visible.",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A post-stat Cartesian coordinate transform with independent x/y projectors. It is intentionally distinct from pre-stat scale transforms.",
+    },
+  ),
+
+  CoordSpec: Type.Union([Type.Ref("CoordCartesianSpec"), Type.Ref("CoordTransformSpec")], {
+    description:
+      "The plot coordinate system: ordinary Cartesian, flipped Cartesian, or a post-stat coordinate transform.",
+  }),
 
   PlotSpec: Type.Object(
     {
@@ -1753,6 +1816,8 @@ export const DataRefSchema = SpecModule.Import("DataRef");
 export const ScalesSchema = SpecModule.Import("Scales");
 export const TemporalParserSpecSchemaRef = SpecModule.Import("TemporalParserSpec");
 export const FacetSpecSchema = SpecModule.Import("FacetSpec");
+export const CoordTransformAxisSpecSchema = SpecModule.Import("CoordTransformAxisSpec");
+export const CoordTransformSpecSchema = SpecModule.Import("CoordTransformSpec");
 export const CoordSpecSchema = SpecModule.Import("CoordSpec");
 
 // ---------------------------------------------------------------------------
@@ -1858,7 +1923,11 @@ export type Scales = SpecType<"Scales">;
 export type FacetScales = SpecType<"FacetScales">;
 /** Facet configuration (wrap OR rows/cols grid). */
 export type FacetSpec = SpecType<"FacetSpec">;
-/** Coordinate system ({ type: "cartesian" | "flip" }). */
+/** One post-stat coordinate axis transform. */
+export type CoordTransformAxisSpec = SpecType<"CoordTransformAxisSpec">;
+/** Post-stat coordinate transform configuration. */
+export type CoordTransformSpec = SpecType<"CoordTransformSpec">;
+/** Cartesian, flipped, or post-stat transformed coordinate system. */
 export type CoordSpec = SpecType<"CoordSpec">;
 /** Per-layer rendering backend hint. */
 export type RenderBackend = SpecType<"RenderBackend">;

@@ -68,6 +68,12 @@ models, GuidePlans, interval selection, and precise bounds report family
 before stats by default; see the upgrading guide for migration and the zero
 expansion override.
 
+Use `coord={coordTransform({ x: "log10" })}` when the statistic should remain
+in ordinary scale space and only final geometry should be projected. Curved
+paths are tessellated without creating inspectable rows, and interval/brush
+inversion applies the coordinate inverse before the scale inverse. See the
+post-stat coordinate Playground sample and Facets and coordinates guide.
+
 `<GGPlot>` supports `facet`, `coord`, `theme`, opt-in `inspect`, point or
 faceted interval `select`, brush `zoom`, visual `legendFocus`, data-changing
 `legendFilter`, `width="container"`, per-layer `render="canvas"`, and

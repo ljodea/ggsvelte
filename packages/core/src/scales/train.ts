@@ -55,6 +55,9 @@ export interface ContinuousScale {
   domain: [number, number];
   /** Post-stat scale-space display domain [min, max] (forward(domain)). */
   transformedDomain: [number, number];
+  /** Raw finite training extent before nice/display expansion. Coordinate
+   * transforms use this when scale expansion crosses their valid domain. */
+  evidenceTransformedDomain: [number, number];
   /** Semantic value -> forward -> affine [0, 1]. NaN outside the transform
    *  domain (e.g. non-positive on log10). Reverse is applied here. */
   normalize(value: number): number;
@@ -222,6 +225,12 @@ export function trainContinuous(
     }
   }
 
+  const evidenceTransformedDomain: [number, number] = pinned
+    ? [transform.forward(config.domain![0]), transform.forward(config.domain![1])]
+    : extent === null
+      ? [t0, t1]
+      : [extent[0], extent[1]];
+
   // Display expansion in transformed space (after nice; pinned domains too).
   const innerSpan = t1 - t0;
   const expandedLower = t0 - expansion.lowerMult * innerSpan - expansion.lowerAdd;
@@ -240,6 +249,7 @@ export function trainContinuous(
       transform: transform.key,
       domain: [transform.inverse(e0), transform.inverse(e1)],
       transformedDomain: [e0, e1],
+      evidenceTransformedDomain,
       normalize: (value: number) =>
         transform.valid(value) ? affine(transform.forward(value)) : Number.NaN,
       normalizeTransformed: (value: number) => affine(value),

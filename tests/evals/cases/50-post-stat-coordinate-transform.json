@@ -1,0 +1,57 @@
+{
+  "id": "50-post-stat-coordinate-transform",
+  "kind": "chart",
+  "prompt": "Plot response against exposure with points and a linear smooth without a confidence band. Apply a base-10 logarithmic x-axis as a post-stat coordinate transform, not a scale transform, so the fit still consumes ordinary exposure values.",
+  "dataProfile": {
+    "fields": [
+      { "name": "exposure", "type": "quantitative" },
+      { "name": "response", "type": "quantitative" }
+    ],
+    "rowCount": 10
+  },
+  "data": {
+    "main": [
+      { "exposure": 1, "response": 2.2 },
+      { "exposure": 2, "response": 2.1 },
+      { "exposure": 5, "response": 2.4 },
+      { "exposure": 10, "response": 2.2 },
+      { "exposure": 20, "response": 2.5 },
+      { "exposure": 50, "response": 2.8 },
+      { "exposure": 100, "response": 3.1 },
+      { "exposure": 200, "response": 4.2 },
+      { "exposure": 500, "response": 7.1 },
+      { "exposure": 1000, "response": 12.3 }
+    ]
+  },
+  "gold": {
+    "edition": 2,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "point",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "exposure" },
+          "y": { "field": "response" }
+        }
+      },
+      {
+        "geom": "smooth",
+        "stat": "smooth",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "exposure" },
+          "y": { "field": "response" }
+        },
+        "params": { "method": "lm", "se": false }
+      }
+    ],
+    "coord": {
+      "type": "transform",
+      "x": { "transform": "log10" }
+    }
+  },
+  "expectRefusal": false,
+  "notes": "The deterministic agent must keep scales.x absent and emit the distinct post-stat coordinate transform contract."
+}

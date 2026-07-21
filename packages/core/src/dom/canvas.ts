@@ -98,9 +98,13 @@ export function sizeCanvasForDpr(
  */
 export function drawClippedToPanel(
   ctx: CanvasRenderingContext2D,
-  panel: { x: number; y: number; width: number; height: number },
+  panel: { x: number; y: number; width: number; height: number; clip?: boolean },
   draw: (ctx: CanvasRenderingContext2D) => void,
 ): void {
+  if (panel.clip === false) {
+    draw(ctx);
+    return;
+  }
   ctx.save();
   ctx.beginPath();
   ctx.rect(panel.x, panel.y, panel.width, panel.height);
@@ -314,6 +318,16 @@ function drawPathsSubset(
  * antialiasing / alpha compositing differs from per-primitive stroke()).
  */
 function traceSegment(ctx: CanvasRenderingContext2D, batch: SegmentsBatch, j: number): void {
+  if (batch.renderPositions !== undefined && batch.renderPathOffsets !== undefined) {
+    const start = batch.renderPathOffsets[j]!;
+    const end = batch.renderPathOffsets[j + 1]!;
+    if (end <= start) return;
+    ctx.moveTo(batch.renderPositions[start * 2]!, batch.renderPositions[start * 2 + 1]!);
+    for (let vertex = start + 1; vertex < end; vertex++) {
+      ctx.lineTo(batch.renderPositions[vertex * 2]!, batch.renderPositions[vertex * 2 + 1]!);
+    }
+    return;
+  }
   const o = j * 4;
   ctx.moveTo(batch.segments[o]!, batch.segments[o + 1]!);
   ctx.lineTo(batch.segments[o + 2]!, batch.segments[o + 3]!);

@@ -236,9 +236,10 @@ export function sceneToSVGString(scene: Scene): string {
   // clipPathUnits is userSpaceOnUse, resolved in the coordinate system of the
   // REFERENCING group, which is panel-translated — so rects sit at 0,0.
   const clips = scene.panels
-    .map(
-      (p, i) =>
-        `<clipPath id="gg-clip-${i}"><rect width="${px(p.width)}" height="${px(p.height)}"/></clipPath>`,
+    .map((p, i) =>
+      p.clip === false
+        ? ""
+        : `<clipPath id="gg-clip-${i}"><rect width="${px(p.width)}" height="${px(p.height)}"/></clipPath>`,
     )
     .join("");
   parts.push(`<defs>${clips}</defs>`);
@@ -250,7 +251,7 @@ export function sceneToSVGString(scene: Scene): string {
         ? ""
         : `<rect class="gg-panel-background" width="${px(p.width)}" height="${px(p.height)}" fill="${themeVar("panel", theme)}"/>`,
       renderGrid(p, theme),
-      `<g class="gg-marks" clip-path="url(#gg-clip-${i})">`,
+      `<g class="gg-marks"${p.clip === false ? "" : ` clip-path="url(#gg-clip-${i})"`}>`,
     );
     for (const batch of scene.batches) {
       if (batch.panelIndex === i) parts.push(renderBatch(batch, theme));

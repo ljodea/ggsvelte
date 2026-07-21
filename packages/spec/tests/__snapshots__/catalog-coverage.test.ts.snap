@@ -252,9 +252,10 @@ exports[`ERROR_CATALOG coverage [invalid-enum-value] is reproducible; message + 
     "allowed": [
       "cartesian",
       "flip",
+      "transform",
     ],
     "code": "invalid-enum-value",
-    "message": "Invalid value "polar" for "type"; allowed: "cartesian", "flip".",
+    "message": "Invalid value "polar" for "type"; allowed: "cartesian", "flip", "transform".",
     "path": "/coord/type",
   },
 }
