@@ -287,6 +287,33 @@ describe("buildPipelineCandidates via runPipeline", () => {
     expect(sizes).toContain(1);
   });
 
+  it("temporal summary lineages use semantic epoch keys matching frame xValues", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { when: "1/2/2025", value: 1 },
+          { when: "01/02/2025", value: 3 },
+          { when: "02/02/2025", value: 5 },
+        ],
+        aes({ x: "when", y: "value" }),
+      )
+        .geomErrorbar({ stat: "summary" })
+        .scaleXDate({ parse: "dmy", nice: false })
+        .spec(),
+      size,
+    );
+    const memberships = Array.from({ length: model.candidates.size }, (_, id) => {
+      const c = model.candidates.candidate(id)!;
+      return [...model.lineage.keys(c.lineage)].toSorted((a, b) => a - b);
+    });
+    // Two summary groups: dmy-equivalent first two rows, then third row alone.
+    expect(memberships.some((rows) => rows.length === 2 && rows[0] === 0 && rows[1] === 1)).toBe(
+      true,
+    );
+    expect(memberships.some((rows) => rows.length === 1 && rows[0] === 2)).toBe(true);
+    expect(memberships.every((rows) => rows.length > 0)).toBe(true);
+  });
+
   it("bin layers intern source rows using closed bin edges", () => {
     const model = runPipeline(
       {
