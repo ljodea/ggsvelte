@@ -461,6 +461,49 @@ describe("planJobs", () => {
     expect(plan.svelte_check).toBe(true);
     expect(plan.docs_site).toBe(true);
   });
+
+  test("docs build helpers schedule svelte_check + docs_site (not scripts-only)", () => {
+    // After the monlith split, pure scripts/** no longer runs check:docs / build:docs.
+    // Helpers invoked by apps/docs package.json must sit on the docs lane.
+    for (const path of [
+      "scripts/gen-docs-routes.ts",
+      "scripts/gen-playground-seeds.ts",
+      "scripts/check-docs-metadata.ts",
+      "scripts/check-pages-links.ts",
+    ]) {
+      const flags = classifyChangedPaths([path]);
+      expect(flags.docs, path).toBe(true);
+      const plan = planJobs(flags);
+      expect(plan.svelte_check, path).toBe(true);
+      expect(plan.docs_site, path).toBe(true);
+      expect(plan.pages, path).toBe(true);
+      expect(plan.unit, path).toBe(true);
+      expect(plan.build, path).toBe(true);
+      expect(plan.vr, path).toBe(false);
+    }
+  });
+});
+
+describe("JOB_CONTENT_INPUTS (split build hashes)", () => {
+  test("build hash still includes apps/docs for knip/type-aware coverage", () => {
+    expect(JOB_CONTENT_INPUTS.build).toContain("apps/docs/**");
+  });
+
+  test("svelte_check and docs_site hash docs generators and $scripts imports", () => {
+    for (const execution of ["svelte_check", "docs_site"] as const) {
+      const inputs = JOB_CONTENT_INPUTS[execution];
+      expect(inputs, execution).toContain("apps/docs/**");
+      expect(inputs, execution).toContain("scripts/gen-docs-routes.ts");
+      expect(inputs, execution).toContain("scripts/gen-playground-seeds.ts");
+      expect(inputs, execution).toContain("scripts/check-docs-metadata.ts");
+      expect(inputs, execution).toContain("scripts/check-pages-links.ts");
+      expect(inputs, execution).toContain("scripts/gen-llms.ts");
+      expect(inputs, execution).toContain("scripts/docs-seo.ts");
+      expect(inputs, execution).toContain("scripts/quickstart.ts");
+      expect(inputs, execution).toContain("scripts/guide-code-contract.ts");
+      expect(inputs, execution).toContain("scripts/highlight-code.ts");
+    }
+  });
 });
 
 describe("evaluateGate", () => {

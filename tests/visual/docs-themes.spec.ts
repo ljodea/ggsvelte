@@ -11,10 +11,10 @@ test("themes is a first-class route from site navigation and the homepage", asyn
   ).toBeVisible();
 
   await page.goto("/?theme=light");
-  await expect(page.getByRole("link", { name: "Compare chart themes" })).toHaveAttribute(
-    "href",
-    /\/themes$/,
-  );
+  // Homepage Contracts section (post-#371 copy) links themes with this accessible name.
+  await expect(
+    page.getByRole("link", { name: "Built-in themes, palettes, scales" }),
+  ).toHaveAttribute("href", /\/themes$/);
 });
 
 test("theme code uses the shared manual-copy fallback", async ({ page }) => {

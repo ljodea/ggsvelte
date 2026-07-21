@@ -107,9 +107,10 @@
 <style>
   .theme-lab {
     display: grid;
-    grid-template-columns: minmax(17rem, 0.75fr) minmax(0, 1.25fr);
+    grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.25fr);
     gap: clamp(2rem, 7vw, 7rem);
     align-items: center;
+    min-width: 0;
     padding-block: clamp(4rem, 9vw, 8rem);
     border-top: 1px solid var(--line);
   }
@@ -125,10 +126,16 @@
   }
 
   h2 {
-    max-width: 11ch;
+    max-width: min(11ch, 100%);
+    min-width: 0;
     margin: 0.25rem 0 1rem;
+    overflow-wrap: anywhere;
     font-size: clamp(2.5rem, 5vw, 4.5rem);
     line-height: 0.95;
+  }
+
+  .lab-copy {
+    min-width: 0;
   }
 
   .lab-copy > p:not(.eyebrow, .resolved) {

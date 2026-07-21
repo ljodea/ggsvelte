@@ -127,8 +127,19 @@ export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
     "scripts/cli-docs.ts",
     "scripts/guide-code-contract.ts",
     "scripts/gen-docs-search.ts",
+    "scripts/gen-docs-search.test.ts",
     "scripts/gen-gallery-previews.ts",
     "scripts/gen-gallery-previews.test.ts",
+    // apps/docs package.json build/check invoke these — must schedule svelte_check + docs_site
+    // after the monlith split (Codex P2: pure scripts/** no longer runs vite docs).
+    "scripts/gen-docs-routes.ts",
+    "scripts/gen-docs-routes.test.ts",
+    "scripts/gen-playground-seeds.ts",
+    "scripts/gen-playground-seeds.test.ts",
+    "scripts/check-docs-metadata.ts",
+    "scripts/check-docs-metadata.test.ts",
+    "scripts/check-pages-links.ts",
+    "scripts/check-pages-links.test.ts",
     // Deployment generators and smoke contracts change the published artifact.
     "scripts/cloudflare-pages-config.test.ts",
     "scripts/deployment-artifact.ts",

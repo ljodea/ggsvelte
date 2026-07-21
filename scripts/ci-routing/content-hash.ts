@@ -74,6 +74,45 @@ const UNIVERSAL_CONTENT_INPUTS: readonly string[] = [
 ];
 
 /**
+ * Docs app + every script that can change svelte-check / vite docs-site
+ * outcomes (generators, $scripts imports, pages-link / metadata gates).
+ * Shared so the three post-split jobs cannot false-green on omitted inputs.
+ */
+const DOCS_SURFACE_CONTENT_INPUTS: readonly string[] = [
+  "apps/docs/**",
+  "examples/**",
+  "lifecycle.json",
+  // apps/docs package.json build/check invoke these generators.
+  "scripts/gen-docs-routes.ts",
+  "scripts/gen-docs-search.ts",
+  "scripts/gen-docs-search.test.ts",
+  "scripts/gen-legacy-routes.ts",
+  "scripts/gen-gallery-previews.ts",
+  "scripts/gen-gallery-previews.test.ts",
+  "scripts/gen-playground-seeds.ts",
+  "scripts/check-docs-metadata.ts",
+  "scripts/check-pages-links.ts",
+  "scripts/legacy-migration.ts",
+  "scripts/legacy-artifact.ts",
+  "scripts/legacy-routes.ts",
+  // $scripts imports used by docs routes / layout (typecheck + published site).
+  "scripts/gen-llms.ts",
+  "scripts/gen-llms.test.ts",
+  "scripts/llms-markdown.ts",
+  "scripts/llms-guide-content.ts",
+  "scripts/docs-seo.ts",
+  "scripts/diagnostic-docs.ts",
+  "scripts/cli-docs.ts",
+  "scripts/guide-code-contract.ts",
+  "scripts/quickstart.ts",
+  "scripts/highlight-code.ts",
+  "scripts/highlight-code.test.ts",
+  "scripts/deployment-artifact.ts",
+  "scripts/deployment-smoke.ts",
+  "scripts/deployment-smoke-cli.ts",
+];
+
+/**
  * Conservative content inputs per physical execution.
  * Patterns use the same matcher as path routing (no negation). Prefer broad
  * trees over incomplete maps that could false-green.
@@ -112,11 +151,14 @@ export const JOB_CONTENT_INPUTS: Record<CacheableExecution, readonly string[]> =
     ".pre-commit-config.yaml",
   ],
   // Package build + knip + type-aware + publint + examples tsc (no vite docs site).
+  // apps/docs stays hashed: knip + oxlint --type-aware still cover the docs app,
+  // and routing still schedules build for docsSurface changes (Codex P2).
   build: [
     ...UNIVERSAL_CONTENT_INPUTS,
     "packages/spec/**",
     "packages/core/**",
     "packages/svelte/**",
+    "apps/docs/**",
     "examples/**",
     "scripts/**",
     "tests/evals/**",
@@ -136,13 +178,7 @@ export const JOB_CONTENT_INPUTS: Record<CacheableExecution, readonly string[]> =
     "packages/spec/**",
     "packages/core/**",
     "packages/svelte/**",
-    "apps/docs/**",
-    "examples/**",
-    "scripts/gen-docs-routes.ts",
-    "scripts/gen-docs-search.ts",
-    "scripts/gen-legacy-routes.ts",
-    "scripts/gen-gallery-previews.ts",
-    "scripts/gen-playground-seeds.ts",
+    ...DOCS_SURFACE_CONTENT_INPUTS,
   ],
   // Full vite adapter-static docs site + packed pages-link gate.
   docs_site: [
@@ -150,17 +186,7 @@ export const JOB_CONTENT_INPUTS: Record<CacheableExecution, readonly string[]> =
     "packages/spec/**",
     "packages/core/**",
     "packages/svelte/**",
-    "apps/docs/**",
-    "examples/**",
-    "scripts/gen-docs-routes.ts",
-    "scripts/gen-docs-search.ts",
-    "scripts/gen-legacy-routes.ts",
-    "scripts/gen-gallery-previews.ts",
-    "scripts/gen-playground-seeds.ts",
-    "scripts/check-docs-metadata.ts",
-    "scripts/check-pages-links.ts",
-    "scripts/legacy-migration.ts",
-    "scripts/legacy-artifact.ts",
+    ...DOCS_SURFACE_CONTENT_INPUTS,
   ],
   actions_security: [
     ...UNIVERSAL_CONTENT_INPUTS,
