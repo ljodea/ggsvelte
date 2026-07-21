@@ -1,10 +1,27 @@
+import type { BarParams } from "@ggsvelte/spec";
+
 import { bandKey } from "../../scales/train.js";
 import { ColumnTable } from "../../table.js";
 import type { FacetPanelDef } from "../facets.js";
-import { NO_ROW } from "../types.js";
+import { shouldAggregateOnSemanticTemporalX } from "../frame-stats-shared.js";
 import { xConversionOf, yConversionOf } from "../temporal-position.js";
-import type { LayerFrame } from "../types.js";
-import type { BarParams } from "@ggsvelte/spec";
+import type { LayerBinding, LayerFrame } from "../types.js";
+import { NO_ROW } from "../types.js";
+
+/** Key used for count/summary/boxplot group×x lineage buckets (matches frame xValues). */
+function aggregateLineageXKey(
+  table: ColumnTable,
+  field: string,
+  localRow: number,
+  binding: LayerBinding,
+): string {
+  const conversion = xConversionOf(binding);
+  const parsed = table.parsed(field, conversion.sourceParser, conversion.options);
+  if (shouldAggregateOnSemanticTemporalX(binding, parsed.decision.status)) {
+    return bandKey(parsed.valid[localRow] === 1 ? parsed.semantic[localRow] : null);
+  }
+  return bandKey(table.column(field)[localRow]);
+}
 
 // ---------------------------------------------------------------------------
 // Aggregate lineage buckets
@@ -201,7 +218,6 @@ export function buildCandidateIdentityIndex(
       // Only count/summary/boxplot resolve via group×x buckets; skip for other layers.
       const bucketByX = stat === "count" || stat === "summary" || stat === "boxplot";
       const xField = frame.binding.xField;
-      const xColumn = bucketByX && xField !== null ? frame.table.column(xField) : null;
       // Finite-y membership uses panel-local table indexes (localRow), then stores
       // source-table rows — same mapping as sourceRowsByGroup itself.
       const yField = frame.binding.yField;
@@ -217,13 +233,13 @@ export function buildCandidateIdentityIndex(
         const sourceRow = facetPanels[panelIndex]!.sourceRows?.[localRow] ?? localRow;
         const key = `${frameKey}:${group}`;
         appendSourceRowByGroupKey(sourceRowsByGroup, key, sourceRow);
-        if (xColumn !== null) {
+        if (bucketByX && xField !== null) {
           appendSourceRowByGroupX({
             sourceRowsByGroupX,
             panelIndex,
             layerIndex,
             group,
-            xKey: bandKey(xColumn[localRow]),
+            xKey: aggregateLineageXKey(frame.table, xField, localRow, frame.binding),
             sourceRow,
           });
         }
@@ -287,8 +303,19 @@ export function filterAggregateXRows(input: {
   field: string;
   outputX: unknown;
   baseRows: readonly number[];
+  /** When present, temporal summary/count keys match semantic epoch frame xValues. */
+  binding?: LayerBinding;
 }): number[] {
   const outputKey = bandKey(input.outputX);
+  if (input.binding !== undefined) {
+    const conversion = xConversionOf(input.binding);
+    const parsed = input.table.parsed(input.field, conversion.sourceParser, conversion.options);
+    if (shouldAggregateOnSemanticTemporalX(input.binding, parsed.decision.status)) {
+      return input.baseRows.filter(
+        (row) => bandKey(parsed.valid[row] === 1 ? parsed.semantic[row] : null) === outputKey,
+      );
+    }
+  }
   const col = input.table.column(input.field);
   return input.baseRows.filter((row) => bandKey(col[row]) === outputKey);
 }
@@ -386,6 +413,7 @@ export function filterRepresentedSourceRows(input: {
         field: aggregateXField,
         outputX,
         baseRows: representedRows,
+        binding: frame.binding,
       });
   } else if (needsBin) {
     representedRows =
