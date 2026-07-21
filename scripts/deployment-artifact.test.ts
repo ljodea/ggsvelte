@@ -58,7 +58,10 @@ function makeCompleteArtifact(buildMode: "cloudflare-preview" | "cloudflare-prod
   const buildDirectory = mkdtempSync(join(tmpdir(), "ggsvelte-cloudflare-artifact-"));
   for (const [path, contents] of [
     ["index.html", '<link rel="canonical" href="https://ggsvelte.sh/">'],
-    ["404.html", '<meta name="robots" content="noindex,follow"><h1>Not found</h1>'],
+    [
+      "404.html",
+      '<meta name="robots" content="noindex,follow"><noscript><main><h1>Not found</h1></main></noscript>',
+    ],
     [
       "_headers",
       buildMode === "cloudflare-preview"
@@ -153,7 +156,7 @@ describe("deployment artifact identity", () => {
       ensureNotFoundNoindex(buildDirectory);
       const html = readFileSync(join(buildDirectory, "404.html"), "utf8");
       expect(html).toContain('<meta name="robots" content="noindex,follow" />');
-      expect(html).toContain("<h1>Not found</h1>");
+      expect(html).toContain("<noscript><main><h1>Not found</h1>");
       expect(html).toContain('<a href="/">Go to the ggsvelte documentation</a>');
     } finally {
       rmSync(buildDirectory, { recursive: true, force: true });

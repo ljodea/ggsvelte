@@ -84,12 +84,12 @@ export function ensureNotFoundNoindex(buildDirectory: string): void {
       '    <meta name="robots" content="noindex,follow" />\n  </head>',
     );
   }
-  if (!html.includes("<h1>Not found</h1>")) {
+  if (!html.includes("<noscript><main><h1>Not found</h1>")) {
     const mount = '<div style="display: contents">';
     if (!html.includes(mount)) throw new Error("404.html is missing its application mount");
     html = html.replace(
       mount,
-      `${mount}\n      <main><h1>Not found</h1><p>This page does not exist.</p><p><a href="/">Go to the ggsvelte documentation</a></p></main>`,
+      `${mount}\n      <noscript><main><h1>Not found</h1><p>This page does not exist.</p><p><a href="/">Go to the ggsvelte documentation</a></p></main></noscript>`,
     );
   }
   writeFileSync(path, html);
@@ -143,7 +143,7 @@ export function validateDeploymentArtifact(
     if (!notFoundHtml.includes('name="robots" content="noindex')) {
       problems.push("404.html must contain a noindex robots policy");
     }
-    if (!notFoundHtml.includes("<h1>Not found</h1>")) {
+    if (!notFoundHtml.includes("<noscript><main><h1>Not found</h1>")) {
       problems.push("404.html must render Not found without JavaScript");
     }
   }
