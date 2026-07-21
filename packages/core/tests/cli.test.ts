@@ -79,6 +79,37 @@ describe("runCLI", () => {
     );
   });
 
+  it("maps scale diagnostics onto the documented error|warning|advisory kinds", async () => {
+    const temporalSpec = {
+      data: {
+        values: [
+          { when: "1835", value: 1 },
+          { when: "2026", value: 2 },
+        ],
+      },
+      aes: { x: { field: "when" }, y: { field: "value" } },
+      layers: [{ geom: "point" }],
+    };
+    const { io, out, err } = makeIO(JSON.stringify(temporalSpec));
+    const code = await runCLI([], io);
+    expect(code).toBe(0);
+    expect(out.join("")).toStartWith("<svg ");
+    const lines = err.map((l) => JSON.parse(l) as Record<string, unknown>);
+    const kinds = new Set(lines.map((line) => line["kind"]));
+    expect(kinds.has("scale-diagnostic")).toBe(false);
+    for (const kind of kinds) {
+      expect(["error", "warning", "advisory"]).toContain(kind);
+    }
+    // Temporal inference still surfaces on stderr without inventing a fourth kind.
+    expect(
+      lines.some(
+        (line) =>
+          line["source"] === "scale" ||
+          (typeof line["code"] === "string" && line["code"].includes("temporal")),
+      ) || lines.some((line) => line["kind"] === "advisory"),
+    ).toBe(true);
+  });
+
   it("renders a spec from a file with --width/--height", async () => {
     const { io, out } = makeIO("", { "spec.json": JSON.stringify(SPEC) });
     const code = await runCLI(["spec.json", "--width", "300", "--height", "200"], io);

@@ -5,8 +5,8 @@ import { statCount } from "../stats/count.js";
 import { ColumnTable, type CellValue } from "../table.js";
 
 import { carriedColumns, emptyFrameExtras, removedStatWarning } from "./frame-helpers.js";
+import { makeColumnOf, shouldAggregateOnSemanticTemporalX } from "./frame-stats-shared.js";
 import { positionValuesToNumeric } from "./temporal-position.js";
-import { makeColumnOf } from "./frame-stats-shared.js";
 import type { LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
 import { NO_ROW } from "./types.js";
 
@@ -25,8 +25,7 @@ export function buildCountFrame(
     binding.xConversion.sourceParser,
     binding.xConversion.options,
   );
-  const temporalX =
-    binding.xConversion.sourceParser !== "auto" || parsedX.decision.status === "temporal";
+  const temporalX = shouldAggregateOnSemanticTemporalX(binding, parsedX.decision.status);
   const countX: readonly (CellValue | null)[] = temporalX
     ? Array.from(parsedX.semantic, (value, row) => (parsedX.valid[row] === 1 ? value : null))
     : table.column(xField);

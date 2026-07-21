@@ -14,6 +14,8 @@
  *   - Errors and advisories go to stderr as JSON LINES:
  *       {"kind":"error","code",...} | {"kind":"warning",...} |
  *       {"kind":"advisory",...}
+ *     Scale inference diagnostics reuse those same `kind` values (mapped from
+ *     their internal severity) and set `source: "scale"` so hosts can filter.
  *
  * Exit codes (documented contract):
  *   0  rendered
@@ -285,7 +287,15 @@ export async function runCLI(
     for (const warning of model.warnings) errLine(io, { kind: "warning", ...warning });
     for (const advisory of model.advisories) errLine(io, { kind: "advisory", ...advisory });
     for (const diagnostic of model.scaleDiagnostics) {
-      errLine(io, { kind: "scale-diagnostic", ...diagnostic });
+      // Documented CLI contract is error|warning|advisory only. Scale diagnostics
+      // already carry severity; never invent a fourth kind on the success path.
+      const kind =
+        diagnostic.severity === "error"
+          ? "warning"
+          : diagnostic.severity === "warning"
+            ? "warning"
+            : "advisory";
+      errLine(io, { kind, source: "scale", ...diagnostic });
     }
     // Spec-lint advisories (Hadley lesson 16): valid-but-questionable specs.
     // Distinguished from pipeline heuristics by source: "spec-lint".
