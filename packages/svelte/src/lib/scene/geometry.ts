@@ -12,6 +12,17 @@ export type PanelCoordInverse = {
   readonly y: { invertFraction(fraction: number): number };
 };
 
+export type PanelCoordProjection = {
+  readonly x: {
+    invertFraction(fraction: number): number;
+    projectFraction(fraction: number): number;
+  };
+  readonly y: {
+    invertFraction(fraction: number): number;
+    projectFraction(fraction: number): number;
+  };
+};
+
 export type PanelBounds = {
   readonly x: number;
   readonly y: number;

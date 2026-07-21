@@ -1074,6 +1074,45 @@ describe("brush + brush-to-zoom", () => {
     expect(x + width).toBeCloseTo((c1.x + c2.x) / 2, 0);
   });
 
+  it("draws precise bounds through the post-stat coordinate projector", async () => {
+    let model: RenderModel | null = null;
+    const data = [1, 10, 100, 1000].map((x) => ({ x, y: 1 }));
+    const { container } = render(GGPlot, {
+      data,
+      aes: { x: "x", y: "y" },
+      layers: [{ geom: "point" }],
+      scales: { x: { type: "linear", domain: [1, 1000], expand: { mult: 0, add: 0 } } },
+      coord: { type: "transform", x: { transform: "log10", expand: false } },
+      key: "x",
+      select: { type: "interval", mode: "x", persistent: true },
+      onrender: (next: RenderModel) => {
+        model = next;
+      },
+      ...size,
+    });
+    await until(() => model !== null);
+    const setBounds = [
+      ...container.querySelectorAll<HTMLButtonElement>(".gg-tool-rail button"),
+    ].find((button) => button.textContent?.trim() === "Set x selection bounds")!;
+    setBounds.click();
+    await until(() => container.querySelector('.gg-bounds-editor input[id$="-lower"]') !== null);
+    const [lower, upper] = [
+      ...container.querySelectorAll<HTMLInputElement>(".gg-bounds-editor input"),
+    ];
+    lower.value = "10";
+    lower.dispatchEvent(new InputEvent("input", { bubbles: true }));
+    upper.value = "100";
+    upper.dispatchEvent(new InputEvent("input", { bubbles: true }));
+    container.querySelector<HTMLButtonElement>('.gg-bounds-editor button[type="submit"]')!.click();
+    await until(() => container.querySelector(".gg-selection") !== null);
+
+    const selection = container.querySelector(".gg-selection")!;
+    const x = Number(selection.getAttribute("x"));
+    const width = Number(selection.getAttribute("width"));
+    expect(x).toBeCloseTo(model!.candidates.candidate(1)!.x, 0);
+    expect(x + width).toBeCloseTo(model!.candidates.candidate(2)!.x, 0);
+  });
+
   it("publishes complete shared xy precise domains and source-row lineage", async () => {
     const interaction = createPlotInteraction<string>();
     const interactionScope = {

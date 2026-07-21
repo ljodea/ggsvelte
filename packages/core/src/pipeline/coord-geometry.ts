@@ -140,22 +140,38 @@ function expandedStepVertices(
   rows: Uint32Array,
   start: number,
   end: number,
+  maxSyntheticVertices: number,
 ): { positions: number[]; rows: number[]; anchors: number[]; indices: number[] } {
   if (end <= start) return { positions: [], rows: [], anchors: [], indices: [] };
   const p = [positions[start * 2]!, positions[start * 2 + 1]!];
   const r = [rows[start] ?? 0xffffffff];
   const a = [1];
   const indices = [start];
+  let syntheticVertices = 0;
   for (let i = start + 1; i < end; i++) {
     const priorX = positions[(i - 1) * 2]!;
     const priorY = positions[(i - 1) * 2 + 1]!;
     const x = positions[i * 2]!;
     const y = positions[i * 2 + 1]!;
     const mid = (priorX + x) / 2;
-    p.push(mid, priorY, mid, y, x, y);
-    r.push(rows[i - 1] ?? 0xffffffff, rows[i] ?? 0xffffffff, rows[i] ?? 0xffffffff);
-    a.push(0, 0, 1);
-    indices.push(i - 1, i, i);
+    if (syntheticVertices < maxSyntheticVertices) {
+      p.push(mid, priorY);
+      r.push(rows[i - 1] ?? 0xffffffff);
+      a.push(0);
+      indices.push(i - 1);
+      syntheticVertices++;
+    }
+    if (syntheticVertices < maxSyntheticVertices) {
+      p.push(mid, y);
+      r.push(rows[i] ?? 0xffffffff);
+      a.push(0);
+      indices.push(i);
+      syntheticVertices++;
+    }
+    p.push(x, y);
+    r.push(rows[i] ?? 0xffffffff);
+    a.push(1);
+    indices.push(i);
   }
   return { positions: p, rows: r, anchors: a, indices };
 }
@@ -182,6 +198,7 @@ function projectPathBatch(
     (sharedBudget?.mandatoryVertices ?? batch.positions.length / 2) >
     MAX_COORD_VERTICES_PER_PANEL_LAYER;
   let invalidVertices = 0;
+  let droppedFilledSubpaths = 0;
   // Path-like geoms are intentionally built in ordinary scale space so this
   // post-stat stage can split coordinate-invalid runs before projection.
   const unprojected = Float64Array.from(batch.positions);
@@ -201,6 +218,20 @@ function projectPathBatch(
   for (let s = 0; s + 1 < batch.pathOffsets.length; s++) {
     const start = batch.pathOffsets[s]!;
     const end = batch.pathOffsets[s + 1]!;
+    let sourceHasInvalidVertex = false;
+    for (let vertex = start; vertex < end; vertex++) {
+      if (projectable[vertex] === 0) {
+        sourceHasInvalidVertex = true;
+        break;
+      }
+    }
+    // A partial closed polygon has no valid boundary: SVG and canvas filling
+    // implicitly join its finite endpoints with a false chord. Drop that
+    // source subpath instead of painting geometry across an invalid gap.
+    if (batch.closed === true && batch.fills !== undefined && sourceHasInvalidVertex) {
+      droppedFilledSubpaths++;
+      continue;
+    }
     let runStart = start;
     while (runStart < end) {
       while (runStart < end && projectable[runStart] === 0) runStart++;
@@ -208,19 +239,25 @@ function projectPathBatch(
       let runEnd = runStart + 1;
       while (runEnd < end && projectable[runEnd] === 1) runEnd++;
 
+      const authoredCount = runEnd - runStart;
+      const desiredStepCorners = batch.curve === "step" ? Math.max(0, 2 * (authoredCount - 1)) : 0;
+      const stepCornerAllowance = Math.min(
+        panelExtraRemaining,
+        Math.max(0, MAX_COORD_VERTICES_PER_SUBPATH - authoredCount),
+      );
       const source =
         batch.curve === "step"
-          ? expandedStepVertices(unprojected, batch.rowIndex, runStart, runEnd)
+          ? expandedStepVertices(unprojected, batch.rowIndex, runStart, runEnd, stepCornerAllowance)
           : {
               positions: Array.from(unprojected.slice(runStart * 2, runEnd * 2)),
               rows: Array.from(batch.rowIndex.slice(runStart, runEnd)),
-              anchors: Array.from({ length: runEnd - runStart }, () => 1),
+              anchors: Array.from({ length: authoredCount }, () => 1),
               indices: indexRange(runStart, runEnd),
             };
       const count = source.rows.length;
-      const mandatoryStepCorners = Math.max(0, count - (runEnd - runStart));
-      if (mandatoryStepCorners > panelExtraRemaining) capped = true;
-      panelExtraRemaining = Math.max(0, panelExtraRemaining - mandatoryStepCorners);
+      const emittedStepCorners = Math.max(0, count - authoredCount);
+      if (emittedStepCorners < desiredStepCorners) capped = true;
+      panelExtraRemaining -= emittedStepCorners;
       const [firstX, firstY] = projectPoint(
         projector,
         width,
@@ -283,7 +320,10 @@ function projectPathBatch(
       code: "coord-invalid-geometry",
       message:
         `Removed ${invalidVertices} path vertex/vertices outside the coordinate transform domain ` +
-        `(layer ${batch.layerIndex}); disconnected finite runs remain separate.`,
+        `(layer ${batch.layerIndex}); ` +
+        (droppedFilledSubpaths > 0
+          ? `dropped ${droppedFilledSubpaths} closed filled subpath/subpaths with incomplete boundaries.`
+          : "disconnected finite runs remain separate."),
     });
   }
   // Step corners were expanded explicitly before projection; renderer-side

@@ -260,27 +260,36 @@ function normalizeCoordAxis(
   axis: CoordTransformAxisSpec | undefined,
 ): CoordTransformAxisSpec | undefined {
   if (axis === undefined) return axis;
-  // Preserve unknown runtime keys so strict schema validation can reject them;
-  // normalization must never launder malformed portable input.
-  const normalized: CoordTransformAxisSpec = {
-    ...axis,
-    ...(axis.limits !== undefined && { limits: [...axis.limits] as [number, number] }),
-  };
-  if (axis.reverse !== true) delete normalized.reverse;
-  if (axis.expand !== false) delete normalized.expand;
+  const runtimeAxis = axis as unknown;
+  if (runtimeAxis === null || typeof runtimeAxis !== "object" || Array.isArray(runtimeAxis))
+    return runtimeAxis as CoordTransformAxisSpec;
+  // Preserve unknown and malformed runtime values so strict schema validation
+  // can reject them; only copy valid tuple-shaped limits defensively.
+  const record = runtimeAxis as Record<string, unknown>;
+  const normalized = {
+    ...record,
+    ...(Array.isArray(record["limits"]) && {
+      limits: [...(record["limits"] as unknown[])],
+    }),
+  } as CoordTransformAxisSpec;
+  if (record["reverse"] !== true) delete normalized.reverse;
+  if (record["expand"] !== false) delete normalized.expand;
   return normalized;
 }
 
 function effectiveCoordAxis(axis: ReturnType<typeof normalizeCoordAxis>): boolean {
+  if (axis === undefined) return false;
+  const runtimeAxis = axis as unknown;
+  if (runtimeAxis === null || typeof runtimeAxis !== "object" || Array.isArray(runtimeAxis))
+    return true;
   return (
-    axis !== undefined &&
-    (axis.transform !== "identity" ||
-      axis.limits !== undefined ||
-      axis.reverse === true ||
-      axis.expand === false ||
-      Object.keys(axis).some(
-        (key) => key !== "transform" && key !== "limits" && key !== "reverse" && key !== "expand",
-      ))
+    axis.transform !== "identity" ||
+    axis.limits !== undefined ||
+    axis.reverse === true ||
+    axis.expand === false ||
+    Object.keys(axis).some(
+      (key) => key !== "transform" && key !== "limits" && key !== "reverse" && key !== "expand",
+    )
   );
 }
 

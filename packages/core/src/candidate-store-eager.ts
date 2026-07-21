@@ -987,12 +987,19 @@ export function buildCandidateStoreEager(
             anchorDistance = Math.hypot(xs[id]! - px, ys[id]! - py);
           }
         }
+        const nearerTessellatedAnchor =
+          batch.kind === "paths" &&
+          batch.semanticAnchors !== undefined &&
+          pathEdge === bestPathEdge &&
+          (anchorDistance < bestDistance ||
+            (anchorDistance === bestDistance &&
+              primitive < (best < 0 ? Infinity : primitiveIds[best]!)));
         const improvesWithinBatch =
           batch.kind === "paths"
             ? pathStart > bestPathStart ||
               (pathStart === bestPathStart &&
                 (batch.fills === undefined
-                  ? pathEdge < bestPathEdge
+                  ? pathEdge < bestPathEdge || nearerTessellatedAnchor
                   : anchorDistance < bestDistance ||
                     (anchorDistance === bestDistance &&
                       primitive < (best < 0 ? Infinity : primitiveIds[best]!))))

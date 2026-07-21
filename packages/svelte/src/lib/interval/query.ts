@@ -11,6 +11,7 @@ import {
   panelDataDomains,
   type PanelBounds,
   type PanelCoordInverse,
+  type PanelCoordProjection,
   type PlotRect,
 } from "../scene/geometry.js";
 import {
@@ -282,8 +283,10 @@ export function bandDomainValuesFromKeys(
 function normalizedAxisSpan(
   scale: RenderModel["scales"]["x"],
   axis: SemanticIntervalAxis | undefined,
+  coord: PanelCoordProjection["x"] | undefined,
 ): readonly [number, number] {
   if (axis === undefined) return [0, 1];
+  let span: readonly [number, number];
   if (axis.kind === "band") {
     if (scale.type !== "band") return [0, 1];
     const centers = bandDomainValuesFromKeys(scale.rawDomain, axis.values).flatMap((value) => {
@@ -292,19 +295,25 @@ function normalizedAxisSpan(
     });
     if (centers.length === 0) return [0, 1];
     const half = scale.step / 2;
-    return [Math.max(0, Math.min(...centers) - half), Math.min(1, Math.max(...centers) + half)];
+    span = [Math.max(0, Math.min(...centers) - half), Math.min(1, Math.max(...centers) + half)];
+  } else {
+    if (scale.type === "band") return [0, 1];
+    const t0 = scale.normalize(axis.domain[0]);
+    const t1 = scale.normalize(axis.domain[1]);
+    if (!Number.isFinite(t0) || !Number.isFinite(t1)) return [0, 1];
+    span = [Math.max(0, Math.min(t0, t1)), Math.min(1, Math.max(t0, t1))];
   }
-  if (scale.type === "band") return [0, 1];
-  const t0 = scale.normalize(axis.domain[0]);
-  const t1 = scale.normalize(axis.domain[1]);
-  if (!Number.isFinite(t0) || !Number.isFinite(t1)) return [0, 1];
-  return [Math.max(0, Math.min(t0, t1)), Math.min(1, Math.max(t0, t1))];
+  const p0 = coord?.projectFraction(span[0]) ?? span[0];
+  const p1 = coord?.projectFraction(span[1]) ?? span[1];
+  if (!Number.isFinite(p0) || !Number.isFinite(p1)) return [0, 1];
+  return [Math.max(0, Math.min(p0, p1)), Math.min(1, Math.max(p0, p1))];
 }
 
 export type IntervalPixelsFromDomainsInput = {
   readonly domains: ReadonlyIntervalDomains;
   readonly panel: PanelBounds;
   readonly scales: Pick<RenderModel["scales"], "x" | "y">;
+  readonly coord?: PanelCoordProjection;
   readonly flipped: boolean;
 };
 
@@ -318,10 +327,12 @@ export function intervalPixelsFromDomains(input: IntervalPixelsFromDomainsInput)
   const horizontal = normalizedAxisSpan(
     input.flipped ? input.scales.y : input.scales.x,
     input.flipped ? input.domains.y : input.domains.x,
+    input.flipped ? input.coord?.y : input.coord?.x,
   );
   const vertical = normalizedAxisSpan(
     input.flipped ? input.scales.x : input.scales.y,
     input.flipped ? input.domains.x : input.domains.y,
+    input.flipped ? input.coord?.x : input.coord?.y,
   );
   return {
     x0: input.panel.x + horizontal[0] * input.panel.width,

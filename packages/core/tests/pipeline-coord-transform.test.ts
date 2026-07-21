@@ -288,6 +288,28 @@ describe("pipeline post-stat coord_transform", () => {
     expect(model.warnings.some((warning) => warning.code === "coord-tessellation-cap")).toBe(true);
   });
 
+  it("drops filled subpaths whose closed boundary crosses an invalid coordinate domain", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { x: 1, y: -1 },
+          { x: 2, y: 10 },
+          { x: 3, y: 100 },
+        ],
+        aes({ x: "x", y: "y" }),
+      )
+        .geomArea()
+        .coordTransform({ y: { transform: "log10", limits: [1, 100], expand: false } })
+        .spec(),
+      size,
+    );
+    const batch = path(model);
+    expect(batch.positions).toHaveLength(0);
+    expect(batch.pathOffsets).toEqual(Uint32Array.from([0]));
+    expect(model.candidates.size).toBe(0);
+    expect(model.warnings.some((warning) => warning.code === "coord-invalid-geometry")).toBe(true);
+  });
+
   it("splits paths at values outside the coordinate transform domain", () => {
     const model = runPipeline(
       gg(
@@ -317,6 +339,12 @@ describe("pipeline post-stat coord_transform", () => {
     ).toEqual([2, 2]);
     expect([...batch.positions].every((value) => Number.isFinite(value))).toBe(true);
     expect(model.candidates.size).toBe(4);
+    const anchorIndexes = [...(batch.semanticAnchors ?? [])].flatMap((anchor, index) =>
+      anchor === 1 ? [index] : [],
+    );
+    // Candidate primitive indexes remain renderer-space indexes even though
+    // semanticIndex points back into the pre-split/stat topology.
+    expect(candidates(model).map((candidate) => candidate.primitiveIndex)).toEqual(anchorIndexes);
     expect(model.warnings.some((warning) => warning.code === "coord-invalid-geometry")).toBe(true);
   });
 

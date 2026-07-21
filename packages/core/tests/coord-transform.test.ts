@@ -3,16 +3,24 @@ import { describe, expect, it } from "bun:test";
 import type { CoordTransformAxisSpec } from "@ggsvelte/spec";
 
 import { buildCoordAxisProjector, buildPanelCoordProjector } from "../src/coord-projector.ts";
-import { projectGeometryBatch } from "../src/pipeline/coord-geometry.ts";
-import type { SegmentsBatch } from "../src/scene.ts";
+import {
+  createCoordTessellationBudget,
+  projectGeometryBatch,
+} from "../src/pipeline/coord-geometry.ts";
+import type { PathsBatch, SegmentsBatch } from "../src/scene.ts";
 import { trainBand, trainContinuous } from "../src/scales/train.ts";
 import { scaleTransform } from "../src/scales/transform.ts";
 
-function linear(values: number[], transform: "identity" | "log10" | "sqrt" = "identity") {
+function linear(
+  values: number[],
+  transform: "identity" | "log10" | "sqrt" = "identity",
+  reverse = false,
+) {
   const definition = scaleTransform(transform);
   return trainContinuous([Float64Array.from(values.map((value) => definition.forward(value)))], {
     transform: definition,
     nice: false,
+    reverse,
   }).scale;
 }
 
@@ -64,6 +72,68 @@ describe("post-stat coordinate axis projector", () => {
     const projected = projector.projectFraction(scale.normalizeTransformed(2));
     expect(projected).toBeCloseTo((Math.sqrt(2) - 1) / (Math.sqrt(3) - 1), 12);
     expect(projector.invertFraction(projected)).toBeCloseTo(scale.normalizeTransformed(2), 12);
+  });
+
+  it("preserves scale reversal and composes coordinate reversal", () => {
+    const scale = linear([1, 100], "identity", true);
+    const projected = axis(scale, { transform: "log10", expand: false });
+    expect(projected.projectFraction(scale.normalizeTransformed(1))).toBeCloseTo(1, 12);
+    expect(projected.projectFraction(scale.normalizeTransformed(100))).toBeCloseTo(0, 12);
+    expect(projected.invertFraction(1)).toBeCloseTo(scale.normalizeTransformed(1), 12);
+
+    const doubleReversed = axis(scale, {
+      transform: "log10",
+      reverse: true,
+      expand: false,
+    });
+    expect(doubleReversed.projectFraction(scale.normalizeTransformed(1))).toBeCloseTo(0, 12);
+    expect(doubleReversed.invertFraction(0)).toBeCloseTo(scale.normalizeTransformed(1), 12);
+  });
+
+  it("pads singleton evidence after falling back from an invalid expanded domain", () => {
+    const scale = linear([0.1]);
+    const projector = axis(scale, { transform: "log10", expand: false });
+    const center = projector.projectFraction(scale.normalizeTransformed(0.1));
+    expect(center).toBeCloseTo(0.5, 12);
+    expect(projector.coordinateDomain[0]).toBeLessThan(projector.coordinateDomain[1]);
+    expect(projector.invertFraction(center)).toBeCloseTo(scale.normalizeTransformed(0.1), 12);
+  });
+
+  it("bounds synthetic step corners while retaining every authored anchor", () => {
+    const count = 40_000;
+    const positions = new Float32Array(count * 2);
+    for (let index = 0; index < count; index++) {
+      positions[index * 2] = (index / (count - 1)) * 400;
+      positions[index * 2 + 1] = index % 2 === 0 ? 20 : 80;
+    }
+    const batch: PathsBatch = {
+      kind: "paths",
+      layerIndex: 0,
+      panelIndex: 0,
+      positions,
+      rowIndex: Uint32Array.from({ length: count }, (_, index) => index),
+      pathOffsets: Uint32Array.from([0, count]),
+      strokes: [null],
+      linewidth: 1,
+      alpha: 1,
+      curve: "step",
+    };
+    const projector = buildPanelCoordProjector(
+      { x: linear([1, 100]), y: linear([0, 100]) },
+      { type: "transform", x: { transform: "log10", expand: false } },
+    );
+    const warnings: { code: string; message: string }[] = [];
+    projectGeometryBatch(
+      batch,
+      projector,
+      400,
+      100,
+      warnings,
+      createCoordTessellationBudget([batch]),
+    );
+    expect(batch.positions.length / 2).toBeLessThanOrEqual(65_536);
+    expect([...(batch.semanticAnchors ?? [])].filter((anchor) => anchor === 1)).toHaveLength(count);
+    expect(warnings.some((warning) => warning.code === "coord-tessellation-cap")).toBe(true);
   });
 
   it("tessellates diagonal segment render topology while retaining one semantic anchor", () => {

@@ -150,6 +150,14 @@ export function buildCoordAxisProjector(
 
   let coordLo = coordTx.forward(scaleLo);
   let coordHi = coordTx.forward(scaleHi);
+  if (!hasLimits && scaleLo === scaleHi && Number.isFinite(coordLo)) {
+    // Raw evidence can be a valid singleton after scale nice/expansion crossed
+    // the coordinate transform boundary. Pad in coordinate space so the
+    // singleton stays centered without inventing invalid scale-space values.
+    coordLo -= 0.5;
+    coordHi += 0.5;
+    if (transformName === "sqrt") coordLo = Math.max(0, coordLo);
+  }
   if (coordLo === coordHi || !Number.isFinite(coordLo) || !Number.isFinite(coordHi)) {
     failure(
       "coord-transform-domain",
@@ -182,14 +190,15 @@ export function buildCoordAxisProjector(
     const affine = scaleSpan === 0 ? 0.5 : (value - scaleDomain[0]) / scaleSpan;
     return scaleReversed ? 1 - affine : affine;
   };
+  const outputReversed = scaleReversed !== reverse;
   const projectFraction = (fraction: number): number => {
     const scaleValue = scaleValueAt(fraction);
     if (!coordTx.valid(scaleValue)) return Number.NaN;
     const projected = (coordTx.forward(scaleValue) - coordLo) / coordSpan;
-    return reverse ? 1 - projected : projected;
+    return outputReversed ? 1 - projected : projected;
   };
   const invertFraction = (fraction: number): number => {
-    const projected = reverse ? 1 - fraction : fraction;
+    const projected = outputReversed ? 1 - fraction : fraction;
     const coordValue = coordLo + projected * coordSpan;
     return scaleFractionAt(coordTx.inverse(coordValue));
   };

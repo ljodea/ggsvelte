@@ -290,6 +290,32 @@ describe("intervalPixelsFromDomains", () => {
     ).toEqual({ x0: 30, y0: 120, x1: 70, y1: 170 });
   });
 
+  it("re-projects semantic domains through the panel coordinate projector", () => {
+    const pixels = intervalPixelsFromDomains({
+      domains: { x: { kind: "linear", domain: [10, 100] } },
+      panel,
+      scales: fromPartial<IntervalQueryScene["scales"]>({
+        ...linearScales,
+        x: { type: "linear", normalize: (value: number) => value / 1000 },
+      }),
+      coord: {
+        x: {
+          invertFraction: (fraction: number) => fraction,
+          projectFraction: (fraction: number) => Math.log10(fraction * 1000) / 3,
+        },
+        y: {
+          invertFraction: (fraction: number) => fraction,
+          projectFraction: (fraction: number) => fraction,
+        },
+      },
+      flipped: false,
+    });
+    expect(pixels.x0).toBeCloseTo(10 + 100 / 3, 10);
+    expect(pixels.x1).toBeCloseTo(10 + 200 / 3, 10);
+    expect(pixels.y0).toBe(20);
+    expect(pixels.y1).toBe(220);
+  });
+
   it("spans the full panel on the unconstrained axis", () => {
     expect(
       intervalPixelsFromDomains({
