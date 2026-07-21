@@ -95,43 +95,51 @@ describe("inspectionLiveText", () => {
     const m = model({
       layerFields: [[{ field: "x" }, { field: "y" }]],
     });
+    const fields = [
+      { channel: "x", field: "x", value: 1 },
+      { channel: "y", field: "y", value: 2 },
+    ];
+    const focus = {
+      key: "a",
+      row: { x: 1, y: 2 },
+      sourceKeys: ["a"] as const,
+      lineageCount: 1,
+      layerIndex: 0,
+      panelId: null,
+      fields,
+      anchor: { x: 0, y: 0 },
+    };
     const one = inspection({
       mode: "exact",
       state: "transient",
-      focus: {
-        key: "a",
-        row: { x: 1, y: 2 },
-        sourceKeys: ["a"],
-        lineageCount: 1,
-        layerIndex: 0,
-        panelId: null,
-        fields: [
-          { channel: "x", field: "x", value: 1 },
-          { channel: "y", field: "y", value: 2 },
-        ],
-        anchor: { x: 0, y: 0 },
-      },
-      members: [
-        {
-          key: "a",
-          row: { x: 1, y: 2 },
-          sourceKeys: ["a"],
-          lineageCount: 1,
-          layerIndex: 0,
-          panelId: null,
-          fields: [],
-          anchor: { x: 0, y: 0 },
-        },
-      ],
+      focus,
+      // Focus is always a member of the public snapshot (resolver contract).
+      members: [focus],
     });
     expect(inspectionLiveText(m, fromAny(one))).toBe("x 1, y 2; 1 datum");
 
-    const pinned = {
+    // Duplicate display payloads (line+point style) collapse for live text (#385).
+    const pinnedDup = {
       ...one,
       state: "pinned" as const,
-      members: [one.members[0], one.members[0]],
+      members: [focus, { ...focus, layerIndex: 1 }],
     };
-    expect(inspectionLiveText(m, fromAny(pinned))).toBe("x 1, y 2; 2 data, pinned");
+    expect(inspectionLiveText(m, fromAny(pinnedDup))).toBe("x 1, y 2; 1 datum, pinned");
+
+    const second = {
+      ...focus,
+      key: "b",
+      fields: [
+        { channel: "x", field: "x", value: 1 },
+        { channel: "y", field: "y", value: 9 },
+      ],
+    };
+    const pinnedDistinct = {
+      ...one,
+      state: "pinned" as const,
+      members: [focus, second],
+    };
+    expect(inspectionLiveText(m, fromAny(pinnedDistinct))).toBe("x 1, y 2; 2 data, pinned");
   });
 
   it("excludes the axis channel from focused fields for x/y modes", () => {
@@ -158,6 +166,7 @@ describe("inspectionLiveText", () => {
         anchor: { x: 0, y: 0 },
       },
       members: [
+        // Same object as focus so display collapse does not invent a second payload.
         {
           key: "a",
           row: { x: 3, y: 9, color: "blue" },
@@ -165,7 +174,11 @@ describe("inspectionLiveText", () => {
           lineageCount: 1,
           layerIndex: 0,
           panelId: null,
-          fields: [],
+          fields: [
+            { channel: "x", field: "x", value: 3 },
+            { channel: "y", field: "y", value: 9 },
+            { channel: "colour", field: "color", value: "blue" },
+          ],
           anchor: { x: 0, y: 0 },
         },
       ],
