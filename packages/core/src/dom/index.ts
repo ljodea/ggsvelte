@@ -7,15 +7,18 @@
 // Lifecycle (Hadley lesson 13; meanings in CONTRIBUTING.md): tags collected
 // into lifecycle.json by scripts/gen-lifecycle.ts.
 // @lifecycle-default experimental
+//
+// Implementation split (same package surface):
+//   canvas-dom.ts   — cssColorResolver / sizeCanvasForDpr / drawClippedToPanel
+//   canvas-marks.ts — mark drawers + drawBatch + focus mask helpers
+//   canvas.ts       — groupBatchesByPanel + drawStratum
 
-export {
-  cssColorResolver,
-  drawBatch,
-  drawClippedToPanel,
-  drawStratum,
-  sizeCanvasForDpr,
-} from "./canvas.js";
-export type { ColorResolver } from "./canvas.js";
-export type { CanvasFocusPresentation, PrimitiveFocusMask } from "./canvas.js";
+export { cssColorResolver, drawClippedToPanel, sizeCanvasForDpr } from "./canvas-dom.js";
+export type { ColorResolver } from "./canvas-dom.js";
+
+export { drawBatch } from "./canvas-marks.js";
+export type { CanvasFocusPresentation, PrimitiveFocusMask } from "./canvas-marks.js";
+
+export { drawStratum } from "./canvas.js";
 
 export { StaticQuadtree } from "./quadtree.js";
