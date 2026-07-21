@@ -1,4 +1,4 @@
-import { primitiveCount } from "./candidate-geometry.js";
+import { candidatePrimitiveCount } from "./candidate-geometry.js";
 import { buildCandidateStoreEager, EMPTY_FLOAT32, EMPTY_UINT32 } from "./candidate-store-eager.js";
 import type {
   CandidateFacts,
@@ -35,7 +35,7 @@ class LazyCandidateStore implements CandidateStore {
     this.epoch = options.epoch ?? 0;
     let size = 0;
     for (const batch of scene.batches) {
-      if (scene.panels[batch.panelIndex] !== undefined) size += primitiveCount(batch);
+      if (scene.panels[batch.panelIndex] !== undefined) size += candidatePrimitiveCount(batch);
     }
     this.#size = size;
   }

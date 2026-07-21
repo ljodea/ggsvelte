@@ -48,6 +48,11 @@ themes, and semantic interaction. Ordinary layers render as SVG; dense point lay
 can render on canvas while axes, legends, text, and accessible descriptions remain in
 the DOM.
 
+Use `coord={coordTransform({ x: "log10" })}` to project final geometry after
+statistics without changing the values consumed by a fit or bin. Nonlinear paths are
+tessellated without creating inspectable rows, and interval or brush inversion returns
+semantic values.
+
 ## Links
 
 - [Documentation](https://ggsvelte.sh/)

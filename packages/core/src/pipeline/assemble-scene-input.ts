@@ -1,6 +1,8 @@
 /**
  * assembleScene input contract.
  */
+import type { PanelCoordProjector } from "../coord-projector.js";
+import type { TextMeasurer } from "../layout/measure.js";
 import type { GeometryBatch, SceneLegend } from "../scene.js";
 import type { ThemeTokens } from "../theme.js";
 import type { PositionScale } from "../scales/train.js";
@@ -16,6 +18,9 @@ export interface AssembleSceneInput {
   displayScales: (p: number) => { h: PositionScale; v: PositionScale };
   hTitle: string;
   vTitle: string;
+  coordProjectors: readonly PanelCoordProjector[];
+  measureText?: TextMeasurer | undefined;
+  axisTextSize: number;
   hMinorBreaks?: readonly number[] | undefined;
   vMinorBreaks?: readonly number[] | undefined;
   batches: GeometryBatch[];

@@ -1,12 +1,46 @@
 /**
  * Build ScenePanel[] and shared axis ticks from placements.
  */
+import type { PanelCoordProjector } from "../coord-projector.js";
+import { FONT_METRICS } from "../layout/font-metrics.js";
+import { MetricsTableMeasurer, type TextMeasurer } from "../layout/measure.js";
 import type { SceneAxis, ScenePanel, SceneTick } from "../scene.js";
 import type { PositionScale } from "../scales/train.js";
 
 import type { FacetPanelDef } from "./facets.js";
 import { axisTicks } from "./layout-helpers.js";
 import type { PanelPlacement } from "./panel-layout.js";
+
+const PROJECTED_LABEL_GAP_PX = 4;
+
+function suppressProjectedLabelOverlap(
+  ticks: readonly SceneTick[],
+  orientation: "horizontal" | "vertical",
+  measurer: TextMeasurer,
+  fontSize: number,
+): SceneTick[] {
+  const output = ticks.map((tick) => ({ ...tick }));
+  const labeled = output
+    .filter((tick) => tick.label !== "")
+    .toSorted((a, b) => (orientation === "horizontal" ? b.pos - a.pos : a.pos - b.pos));
+  let boundary = orientation === "horizontal" ? Number.POSITIVE_INFINITY : Number.NEGATIVE_INFINITY;
+  for (const tick of labeled) {
+    const half =
+      orientation === "horizontal"
+        ? measurer.measureWidth(tick.label, fontSize) / 2
+        : measurer.measureHeight(fontSize) / 2;
+    const fits =
+      orientation === "horizontal"
+        ? tick.pos + half <= boundary - PROJECTED_LABEL_GAP_PX
+        : tick.pos - half >= boundary + PROJECTED_LABEL_GAP_PX;
+    if (!fits) {
+      tick.label = "";
+      continue;
+    }
+    boundary = orientation === "horizontal" ? tick.pos - half : tick.pos + half;
+  }
+  return output;
+}
 
 function numericMinorTicks(
   scale: PositionScale,
@@ -47,6 +81,9 @@ export function assembleScenePanels(input: {
   displayScales: (p: number) => { h: PositionScale; v: PositionScale };
   hTitle: string;
   vTitle: string;
+  coordProjectors: readonly PanelCoordProjector[];
+  measureText?: TextMeasurer | undefined;
+  axisTextSize: number;
   hMinorBreaks?: readonly number[] | undefined;
   vMinorBreaks?: readonly number[] | undefined;
 }): {
@@ -55,19 +92,47 @@ export function assembleScenePanels(input: {
   yAxis: SceneAxis;
 } {
   const { placements, facetPanels, displayScales, hTitle, vTitle } = input;
+  const measurer = input.measureText ?? new MetricsTableMeasurer(FONT_METRICS);
 
   const scenePanels: ScenePanel[] = placements.map((placement, p) => {
     const { h, v } = displayScales(p);
     const majorBottom = axisTicks(h, placement.ticksH, placement.width, false);
     const majorLeft = axisTicks(v, placement.ticksV, placement.height, true);
-    const bottom = [
+    const projector = input.coordProjectors[p];
+    const projectBottom = (tick: SceneTick): SceneTick => ({
+      ...tick,
+      pos:
+        projector === undefined
+          ? tick.pos
+          : projector.x.projectFraction(tick.pos / placement.width) * placement.width,
+    });
+    const projectLeft = (tick: SceneTick): SceneTick => ({
+      ...tick,
+      pos:
+        projector === undefined
+          ? tick.pos
+          : (1 - projector.y.projectFraction(1 - tick.pos / placement.height)) * placement.height,
+    });
+    const projectedBottom = [
       ...majorBottom,
       ...numericMinorTicks(h, input.hMinorBreaks, majorBottom, placement.width, false),
-    ];
-    const left = [
+    ]
+      .map((tick) => projectBottom(tick))
+      .filter((tick) => Number.isFinite(tick.pos) && tick.pos >= 0 && tick.pos <= placement.width);
+    const projectedLeft = [
       ...majorLeft,
       ...numericMinorTicks(v, input.vMinorBreaks, majorLeft, placement.height, true),
-    ];
+    ]
+      .map((tick) => projectLeft(tick))
+      .filter((tick) => Number.isFinite(tick.pos) && tick.pos >= 0 && tick.pos <= placement.height);
+    const bottom =
+      projector?.x.active === true
+        ? suppressProjectedLabelOverlap(projectedBottom, "horizontal", measurer, input.axisTextSize)
+        : projectedBottom;
+    const left =
+      projector?.y.active === true
+        ? suppressProjectedLabelOverlap(projectedLeft, "vertical", measurer, input.axisTextSize)
+        : projectedLeft;
     return {
       identity: facetPanels[p]!.identity,
       id: facetPanels[p]!.id,
@@ -76,6 +141,7 @@ export function assembleScenePanels(input: {
       width: placement.width,
       height: placement.height,
       strip: facetPanels[p]!.label,
+      clip: projector?.clip ?? true,
       axisX: placement.showAxisX ? bottom : null,
       axisY: placement.showAxisY ? left : null,
       grid: {

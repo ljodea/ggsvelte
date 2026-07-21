@@ -55,6 +55,12 @@ separate `transform`. Binned scales retain private integer identities for
 count/stack/dodge while guides, candidates, and interactions use semantic
 centers and edges.
 
+`coordTransform` is a separate post-stat projector. Per-panel projectors map
+trained scale-space values through identity/log10/sqrt coordinates, project
+axis ticks and grids, adaptively tessellate curved paths/segments, and expose
+the inverse used before scale inversion. Synthetic tessellation vertices are
+render topology only; `CandidateStore` retains original/stat semantic anchors.
+
 Browser rendering:
 
 ```ts

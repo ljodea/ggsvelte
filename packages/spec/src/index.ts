@@ -22,6 +22,8 @@ export {
   ChannelValueSchema,
   ColLayerSchema,
   CoordSpecSchema,
+  CoordTransformAxisSpecSchema,
+  CoordTransformSpecSchema,
   CURRENT_EDITION,
   DataRefSchema,
   DensityLayerSchema,
@@ -62,6 +64,8 @@ export type {
   ColorScaleSpec,
   ColParams,
   CoordSpec,
+  CoordTransformAxisSpec,
+  CoordTransformSpec,
   DataColumns,
   DataName,
   DataRef,
@@ -177,6 +181,14 @@ export type {
   TemporalIntervalUnit,
   TemporalWeekStart,
 } from "./temporal-guides.js";
+
+// Coordinate helpers
+export { coord_transform, coordTransform } from "./coord-helpers.js";
+export type {
+  CoordTransformAxisOptions,
+  CoordTransformName,
+  CoordTransformOptions,
+} from "./coord-helpers.js";
 
 // Scale helpers
 export {

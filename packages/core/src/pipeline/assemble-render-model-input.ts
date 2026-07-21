@@ -1,6 +1,7 @@
 /**
  * assembleRenderModel input contract.
  */
+import type { PanelCoordProjector } from "../coord-projector.js";
 import type { TickFormatter } from "../layout/layout.js";
 import type { GuidePlan } from "../layout/temporal-guide.js";
 import type { ScaleState } from "../scales/state.js";
@@ -36,6 +37,7 @@ export interface AssembleRenderModelInput {
   scaleDecisions: ScaleDecision[];
   scaleDiagnostics: ScaleDiagnostic[];
   guidePlans: readonly GuidePlan[];
+  coordProjectors: readonly PanelCoordProjector[];
   xConversion: PositionConversionContext;
   yConversion: PositionConversionContext;
   runId: number;

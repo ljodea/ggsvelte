@@ -350,6 +350,62 @@ at the cost of cross-panel magnitude. [facet wrap](/examples/facet/wrap),
 Prefer \`coord flip\` for horizontal bars over swapping x/y semantics.
 [Horizontal bar](/examples/bar/horizontal) keeps category on x, value on y, then
 flips presentation.
+
+## Scale transforms versus coordinate transforms
+
+A scale transform changes the values consumed by statistics and positions. A
+coordinate transform leaves those computations alone and projects the final
+geometry:
+
+\`\`\`ts fragment
+// The linear fit consumes log10(exposure).
+gg(rows, aes({ x: "exposure", y: "response" }))
+  .geomSmooth({ method: "lm" })
+  .scaleXLog10();
+
+// The fit consumes exposure; only its rendered geometry is curved.
+gg(rows, aes({ x: "exposure", y: "response" }))
+  .geomSmooth({ method: "lm" })
+  .coordTransform({ x: "log10" });
+\`\`\`
+
+The portable JSON form is strict and callback-free:
+
+\`\`\`json complete
+{
+  "type": "transform",
+  "x": {
+    "transform": "log10",
+    "limits": [1, 1000],
+    "reverse": false,
+    "expand": false
+  },
+  "clip": true
+}
+\`\`\`
+
+Use \`coordTransform\` or its identical ggplot2-style alias
+\`coord_transform\`. In Svelte, pass the result to \`coord\`:
+
+\`\`\`svelte fragment
+<GGPlot coord={coordTransform({ x: "log10", y: "sqrt" })}>
+  <GeomPoint />
+  <GeomSmooth method="lm" />
+</GGPlot>
+\`\`\`
+
+Coordinate limits create a post-stat viewport: they do not censor rows or
+recompute a fit. Coordinate inversion runs before scale inversion, so tooltip,
+interval, and brush-zoom values remain semantic. Nonlinear lines, smooths,
+areas, smooth confidence bands, and segments use bounded adaptive tessellation;
+synthetic render vertices never become inspectable data. Set \`clip: false\`
+only for intentional panel overflow.
+
+Non-identity coordinate transforms reject band and temporal axes with
+\`coord-transform-continuous\` or \`coord-transform-temporal\`. Domains that
+cross log10/sqrt boundaries fail with \`coord-transform-domain\` and exact
+recovery guidance. Open the runnable **Post-stat coordinate transform** sample
+in the [Playground](/playground).
 `;
 
 export const THEMES_COLOR_MD = `# Themes and color

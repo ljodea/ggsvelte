@@ -577,6 +577,25 @@ describe("drawStratum segment stroke batching", () => {
     expect(calls.filter((c) => c.name === "lineTo")).toHaveLength(6);
   });
 
+  it("traces coordinate-tessellated segment topology instead of its straight chord", () => {
+    const curved: SegmentsBatch = {
+      ...denseMono,
+      segments: Float32Array.from([0, 0, 1, 1]),
+      rowIndex: Uint32Array.from([0]),
+      renderPositions: Float32Array.from([0, 0, 0.5, 1, 1, 1]),
+      renderPathOffsets: Uint32Array.from([0, 3]),
+    };
+    const { ctx, calls } = recordingContext();
+    drawStratum(ctx, scene([curved]), [curved], resolve);
+    expect(calls.filter((call) => call.name === "moveTo").map((call) => call.args)).toEqual([
+      [0, 0],
+    ]);
+    expect(calls.filter((call) => call.name === "lineTo").map((call) => call.args)).toEqual([
+      [0.5, 1],
+      [1, 1],
+    ]);
+  });
+
   it("null stroke falls back to theme ink once for the mono path", () => {
     const themed: SegmentsBatch = { ...denseMono, stroke: null };
     const { ctx, calls } = recordingContext();

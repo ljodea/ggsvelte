@@ -50,8 +50,16 @@ export interface PathsBatch {
   panelIndex: number;
   /** Interleaved x,y pairs for all subpaths, panel-local px. */
   positions: Float32Array;
-  /** Source row per vertex. */
+  /** Source row per render vertex (synthetic vertices inherit an adjacent row). */
   rowIndex: Uint32Array;
+  /**
+   * Optional render-vertex mask: 1 for original/stat semantic anchors, 0 for
+   * coordinate-tessellation vertices. CandidateStore ignores zero entries.
+   */
+  semanticAnchors?: Uint8Array;
+  /** Original/stat primitive index for each render vertex. Candidate datum
+   * resolution uses this instead of synthetic render topology indexes. */
+  semanticIndex?: Uint32Array;
   /** Start offset (in points) of each subpath; length = subpathCount + 1. */
   pathOffsets: Uint32Array;
   /** Stroke color per subpath (null = theme ink). */
@@ -100,6 +108,13 @@ export interface SegmentsBatch {
   segments: Float32Array;
   /** Source row per segment (0xffffffff for annotation-form rules). */
   rowIndex: Uint32Array;
+  /** Optional tessellated render topology for nonlinear coordinate transforms.
+   * `renderPathOffsets[j..j+1]` owns segment j; semantic candidates remain
+   * one-per-entry in `segments`. */
+  renderPositions?: Float32Array;
+  renderPathOffsets?: Uint32Array;
+  /** Projected semantic midpoint anchor per segment. */
+  anchorPositions?: Float32Array;
   /** Constant stroke, or null when `strokes` carries per-segment values
    *  (null = theme ink). */
   stroke: string | null;
@@ -159,6 +174,8 @@ export interface ScenePanel {
   height: number;
   /** Facet strip label above the panel ("" = no strip). */
   strip: string;
+  /** Whether renderers clip marks to this panel rectangle (default true). */
+  clip?: boolean;
   /** Bottom-axis ticks for THIS panel (null = this panel draws no x axis:
    *  fixed facet scales show the axis on the bottom row only). */
   axisX: SceneTick[] | null;

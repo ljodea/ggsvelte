@@ -2206,7 +2206,51 @@
       "additionalProperties": false,
       "description": "Facet the plot into small-multiple panels. Wrap form: set `wrap` (+ optional ncol). Grid form: set `rows` and/or `cols`. Panels partition the data BEFORE stats and positions run (each panel computes its own counts, bins, stacks). Panel values sort ascending; null values form their own panel."
     },
-    "CoordSpec": {
+    "CoordTransformAxisSpec": {
+      "type": "object",
+      "required": [
+        "transform"
+      ],
+      "properties": {
+        "transform": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "identity"
+            },
+            {
+              "type": "string",
+              "const": "log10"
+            },
+            {
+              "type": "string",
+              "const": "sqrt"
+            }
+          ],
+          "description": "Post-stat coordinate transform for this axis: identity, base-10 logarithm, or square root."
+        },
+        "limits": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "Optional coordinate viewport [min, max] in semantic/source units. Exactly two numbers. Unlike scale limits, coordinate limits do not remove rows or recompute statistics."
+        },
+        "reverse": {
+          "type": "boolean",
+          "description": "Reverse this coordinate axis after its transform without changing stat inputs or the trained semantic scale domain."
+        },
+        "expand": {
+          "type": "boolean",
+          "description": "Whether explicit coordinate limits receive the default 5% transformed-space display expansion (default true). Set false for exact viewport limits."
+        }
+      },
+      "additionalProperties": false,
+      "description": "One continuous coordinate axis projected after statistics and scale training. Non-identity transforms require a continuous, non-temporal position scale."
+    },
+    "CoordCartesianSpec": {
       "type": "object",
       "required": [
         "type"
@@ -2227,7 +2271,43 @@
         }
       },
       "additionalProperties": false,
-      "description": "The plot's coordinate system. {\"type\": \"flip\"} turns any vertical composition into its horizontal counterpart (ggplot2's coord_flip): map x to the category and y to the value as usual, then flip."
+      "description": "The plot's Cartesian coordinate system. {\"type\": \"flip\"} turns any vertical composition into its horizontal counterpart (ggplot2's coord_flip)."
+    },
+    "CoordTransformSpec": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "transform",
+          "description": "Project positions after stats/positions and scale training."
+        },
+        "x": {
+          "$ref": "#/$defs/CoordTransformAxisSpec"
+        },
+        "y": {
+          "$ref": "#/$defs/CoordTransformAxisSpec"
+        },
+        "clip": {
+          "type": "boolean",
+          "description": "Clip marks to the panel rectangle (default true). Set false only when intentional overflow should remain visible."
+        }
+      },
+      "additionalProperties": false,
+      "description": "A post-stat Cartesian coordinate transform with independent x/y projectors. It is intentionally distinct from pre-stat scale transforms."
+    },
+    "CoordSpec": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CoordCartesianSpec"
+        },
+        {
+          "$ref": "#/$defs/CoordTransformSpec"
+        }
+      ],
+      "description": "The plot coordinate system: ordinary Cartesian, flipped Cartesian, or a post-stat coordinate transform."
     },
     "PlotSpec": {
       "type": "object",

@@ -29,6 +29,9 @@
     "pipeline transform-log10 bin 100k": { "budgetMs": 15 },
     "pipeline transform-log10 facets-100 100k": { "budgetMs": 100 },
     "pipeline binned-64 100k": { "budgetMs": 28 },
+    "pipeline coord-identity points 100k": { "budgetMs": 25 },
+    "pipeline coord-log10 points 100k": { "budgetMs": 25 },
+    "pipeline coord-tessellation 10k": { "budgetMs": 50 },
     "pipeline histogram 100k": { "budgetMs": 30 },
     "pipeline loess 5k": { "budgetMs": 710 },
     "pipeline density 100k": { "budgetMs": 150 }

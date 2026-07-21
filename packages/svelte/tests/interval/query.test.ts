@@ -17,6 +17,7 @@ function scene(partial: {
   panel?: IntervalQueryScene["panel"];
   singlePanel?: boolean;
   flip?: boolean;
+  coord?: IntervalQueryScene["coord"];
   candidates?: readonly {
     lineage: number;
     x0: number;
@@ -35,6 +36,7 @@ function scene(partial: {
     panel,
     singlePanel: partial.singlePanel ?? true,
     flip,
+    ...(partial.coord !== undefined && { coord: partial.coord }),
     scales: fromPartial<IntervalQueryScene["scales"]>({
       x: {
         type: "linear",
@@ -157,6 +159,20 @@ describe("resolveIntervalQueryParts", () => {
     expect(parts.invertedDomain.y).toEqual([0, 500]);
   });
 
+  it("inverts the coordinate projector before continuous interval scales", () => {
+    const parts = resolveIntervalQueryParts({
+      pixels: { x0: 50, y0: 0, x1: 100, y1: 100 },
+      mode: "x",
+      scene: scene({
+        coord: {
+          x: { invertFraction: (fraction: number) => fraction * fraction },
+          y: { invertFraction: (fraction: number) => fraction },
+        },
+      }),
+    });
+    expect(parts.invertedDomain.x).toEqual([2.5, 10]);
+  });
+
   it("returns inclusive band endpoints for categorical interval selection", () => {
     const base = scene({});
     const parts = resolveIntervalQueryParts({
@@ -272,6 +288,32 @@ describe("intervalPixelsFromDomains", () => {
         flipped: false,
       }),
     ).toEqual({ x0: 30, y0: 120, x1: 70, y1: 170 });
+  });
+
+  it("re-projects semantic domains through the panel coordinate projector", () => {
+    const pixels = intervalPixelsFromDomains({
+      domains: { x: { kind: "linear", domain: [10, 100] } },
+      panel,
+      scales: fromPartial<IntervalQueryScene["scales"]>({
+        ...linearScales,
+        x: { type: "linear", normalize: (value: number) => value / 1000 },
+      }),
+      coord: {
+        x: {
+          invertFraction: (fraction: number) => fraction,
+          projectFraction: (fraction: number) => Math.log10(fraction * 1000) / 3,
+        },
+        y: {
+          invertFraction: (fraction: number) => fraction,
+          projectFraction: (fraction: number) => fraction,
+        },
+      },
+      flipped: false,
+    });
+    expect(pixels.x0).toBeCloseTo(10 + 100 / 3, 10);
+    expect(pixels.x1).toBeCloseTo(10 + 200 / 3, 10);
+    expect(pixels.y0).toBe(20);
+    expect(pixels.y1).toBe(220);
   });
 
   it("spans the full panel on the unconstrained axis", () => {

@@ -1,0 +1,53 @@
+{
+  "url": "http://127.0.0.1:4173/playground",
+  "browser": "gstack browse Chromium",
+  "verifiedAt": "2026-07-21",
+  "sample": "post-stat-coordinate",
+  "result": "pass",
+  "viewports": [
+    {
+      "width": 320,
+      "height": 900,
+      "lightScreenshot": "coord-log-fit-320-light.png",
+      "darkScreenshot": "coord-log-fit-320-dark.png",
+      "chartWidthPx": 268,
+      "horizontalOverflowPx": 0,
+      "visibleXLabels": ["1,000"],
+      "labelOverlap": false
+    },
+    {
+      "width": 640,
+      "height": 900,
+      "lightScreenshot": "coord-log-fit-640-light.png",
+      "darkScreenshot": "coord-log-fit-640-dark.png",
+      "chartWidthPx": 588,
+      "horizontalOverflowPx": 0,
+      "visibleXLabels": ["200", "400", "600", "1,000"],
+      "labelOverlap": false
+    },
+    {
+      "width": 1200,
+      "height": 900,
+      "lightScreenshot": "coord-log-fit-1200-light.png",
+      "darkScreenshot": "coord-log-fit-1200-dark.png",
+      "chartWidthPx": 449.5,
+      "horizontalOverflowPx": 0,
+      "visibleXLabels": ["200", "400", "600", "1,000"],
+      "labelOverlap": false
+    }
+  ],
+  "semanticAssertions": {
+    "status": "Rendered post-stat-coordinate.",
+    "ready": true,
+    "title": "Post-stat coordinate transform",
+    "sourceRows": 10,
+    "candidateRecords": 20,
+    "projectedPathCommands": 81,
+    "syntheticRenderVerticesBecomeCandidates": false,
+    "coordinateStage": "The linear fit is computed before the x coordinate is projected",
+    "mobileHorizontalOverflowPx": 0,
+    "consoleErrorsAfterCleanLoad": 0,
+    "networkFailuresAfterCleanLoad": 0
+  },
+  "appearance": "The docs shell was verified in light and dark appearance. The chart surface is spec-controlled and remains visually stable across shell appearance changes."
+}

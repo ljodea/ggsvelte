@@ -124,7 +124,12 @@ interface MockSpec {
   data: { name: string };
   layers: MockLayer[];
   facet?: Record<string, unknown>;
-  coord?: { type: string };
+  coord?: {
+    type: string;
+    x?: { transform: string; limits?: number[]; reverse?: boolean; expand?: boolean };
+    y?: { transform: string; limits?: number[]; reverse?: boolean; expand?: boolean };
+    clip?: boolean;
+  };
   scales?: Record<string, { type: string; parse?: string; transform?: string }>;
 }
 
@@ -481,7 +486,19 @@ export class MockResponder implements Responder {
 
     // --- coord / scales ---------------------------------------------------------
     if (prompt.includes("horizontal")) spec.coord = { type: "flip" };
-    if (/\blog\b|logarithmic/.test(prompt)) {
+    const postStatCoordinate =
+      /post-stat coordinate|coordinate transform/.test(prompt) &&
+      /\blog(?:10|arithmic)?\b/.test(prompt);
+    if (postStatCoordinate) {
+      const onX =
+        /(?:coordinate|log(?:10|arithmic)?)[^.]*\bx[- ]axis|\bx[- ]axis[^.]*coordinate/.test(
+          prompt,
+        );
+      spec.coord = {
+        type: "transform",
+        [onX ? "x" : "y"]: { transform: "log10" },
+      };
+    } else if (/\blog\b|logarithmic/.test(prompt)) {
       const onX = /log(?:arithmic)?[^.]*\bx[- ]axis|\bx[- ]axis[^.]*log/.test(prompt);
       scales[onX ? "x" : "y"] = { type: "log" };
     }

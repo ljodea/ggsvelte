@@ -1,5 +1,5 @@
 import type { RenderModel } from "@ggsvelte/core";
-import type { PortableSpec, Scales } from "@ggsvelte/spec";
+import type { CoordTransformAxisSpec, PortableSpec, Scales } from "@ggsvelte/spec";
 
 import type {
   InteractionSource,
@@ -11,6 +11,7 @@ import {
   panelDataDomains,
   type ContinuousZoomDomains,
   type PanelBounds,
+  type PanelCoordInverse,
   type PlotRect,
 } from "../scene/geometry.js";
 
@@ -59,6 +60,27 @@ const zoomScale = (
   // another 5% and identical brushes would creep outward.
   expand: { mult: 0, add: 0 },
 });
+
+function withoutCoordLimits(
+  axis: CoordTransformAxisSpec | undefined,
+): CoordTransformAxisSpec | undefined {
+  if (axis?.limits === undefined) return axis;
+  const { limits: _limits, ...rest } = axis;
+  return rest;
+}
+
+function coordForZoom(spec: PortableSpec, domains: ContinuousZoomDomains): PortableSpec["coord"] {
+  const coord = spec.coord;
+  if (coord?.type !== "transform") return coord;
+  const x = domains.x === undefined ? coord.x : withoutCoordLimits(coord.x);
+  const y = domains.y === undefined ? coord.y : withoutCoordLimits(coord.y);
+  if (x === coord.x && y === coord.y) return coord;
+  return {
+    ...coord,
+    ...(x === undefined ? {} : { x }),
+    ...(y === undefined ? {} : { y }),
+  };
+}
 
 /**
  * Restrict controller/shared zoom domains to channels this plot opted into.
@@ -163,8 +185,10 @@ export function applyZoomToSpec(
   domains: ContinuousZoomDomains | null,
 ): PortableSpec {
   if (domains === null || (domains.x === undefined && domains.y === undefined)) return spec;
+  const coord = coordForZoom(spec, domains);
   return {
     ...spec,
+    ...(coord !== spec.coord && coord !== undefined && { coord }),
     scales: {
       ...spec.scales,
       ...(domains.x !== undefined && {
@@ -233,6 +257,7 @@ export function resolveBrushZoomDomains(
   flipped: boolean,
   mode: ZoomMode,
   current: ContinuousZoomDomains | null,
+  coord?: PanelCoordInverse,
 ): ContinuousZoomDomains | null {
   const th0 = Math.max(0, Math.min(1, (rect.x0 - panel.x) / panel.width));
   const th1 = Math.max(0, Math.min(1, (rect.x1 - panel.x) / panel.width));
@@ -240,7 +265,7 @@ export function resolveBrushZoomDomains(
   const tv1 = Math.max(0, Math.min(1, 1 - (rect.y0 - panel.y) / panel.height));
   // Guard uses raw screen fractions, not flip-remapped domains.
   if (th1 - th0 <= 0 && tv1 - tv0 <= 0) return null;
-  const inverted = panelDataDomains(rect, panel, scales, flipped);
+  const inverted = panelDataDomains(rect, panel, scales, flipped, coord);
   const next: ContinuousZoomDomains = { ...current };
   if (mode !== "y" && inverted.x !== undefined) next.x = inverted.x;
   if (mode !== "x" && inverted.y !== undefined) next.y = inverted.y;
@@ -255,6 +280,7 @@ export function resolveBrushZoomDomains(
 export type BrushZoomModel = {
   readonly scene: { readonly panels: readonly PanelBounds[] };
   readonly scales: Pick<RenderModel["scales"], "x" | "y">;
+  readonly coordProjectors?: readonly PanelCoordInverse[];
 };
 
 /**
@@ -282,6 +308,7 @@ export function resolveBrushZoomFromModel(input: {
     input.flipped,
     input.mode,
     input.current,
+    input.model.coordProjectors?.[0],
   );
   if (next === null) return null;
   return frozenZoomDomains(next);

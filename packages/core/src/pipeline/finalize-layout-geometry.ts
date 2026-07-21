@@ -3,6 +3,7 @@
  */
 import type { PortableSpec } from "@ggsvelte/spec";
 
+import { buildPanelCoordProjector, type PanelCoordProjector } from "../coord-projector.js";
 import type { Scene } from "../scene.js";
 import type { ThemeTokens } from "../theme.js";
 
@@ -21,8 +22,16 @@ export function finalizeLayoutAndGeometry(input: {
   prepared: PreparedPanels;
   trained: TrainedPipelineScales;
   warnings: PipelineWarning[];
-}): { panelLayout: PanelLayoutResult; scene: Scene } {
+}): {
+  panelLayout: PanelLayoutResult;
+  scene: Scene;
+  coordProjectors: readonly PanelCoordProjector[];
+} {
   const panelLayout = finalizePanelLayoutPass(input);
-  const scene = finalizeGeometryAndScene({ ...input, panelLayout });
-  return { panelLayout, scene };
+  const coord = input.normalized.coord?.type === "transform" ? input.normalized.coord : undefined;
+  const coordProjectors = input.trained.panelScales.map((scales) =>
+    buildPanelCoordProjector(scales, coord),
+  );
+  const scene = finalizeGeometryAndScene({ ...input, panelLayout, coordProjectors });
+  return { panelLayout, scene, coordProjectors };
 }

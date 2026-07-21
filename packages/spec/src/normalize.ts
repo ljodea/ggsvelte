@@ -29,6 +29,9 @@ import type {
   Aes,
   ChannelValue,
   ColorScaleSpec,
+  CoordSpec,
+  CoordTransformAxisSpec,
+  CoordTransformSpec,
   FacetSpec,
   LayerSpec,
   PortableSpec,
@@ -253,12 +256,87 @@ function normalizeScales(scales: Scales): Scales {
   };
 }
 
+function normalizeCoordAxis(
+  axis: CoordTransformAxisSpec | undefined,
+): CoordTransformAxisSpec | undefined {
+  if (axis === undefined) return axis;
+  const runtimeAxis = axis as unknown;
+  if (runtimeAxis === null || typeof runtimeAxis !== "object" || Array.isArray(runtimeAxis))
+    return runtimeAxis as CoordTransformAxisSpec;
+  // Preserve unknown and malformed runtime values so strict schema validation
+  // can reject them; only copy valid tuple-shaped limits defensively.
+  const record = runtimeAxis as Record<string, unknown>;
+  const normalized = {
+    ...record,
+    ...(Array.isArray(record["limits"]) && {
+      limits: [...(record["limits"] as unknown[])],
+    }),
+  } as CoordTransformAxisSpec;
+  if (record["reverse"] !== true) delete normalized.reverse;
+  if (record["expand"] !== false) delete normalized.expand;
+  return normalized;
+}
+
+function effectiveCoordAxis(axis: ReturnType<typeof normalizeCoordAxis>): boolean {
+  if (axis === undefined) return false;
+  const runtimeAxis = axis as unknown;
+  if (runtimeAxis === null || typeof runtimeAxis !== "object" || Array.isArray(runtimeAxis))
+    return true;
+  return (
+    axis.transform !== "identity" ||
+    axis.limits !== undefined ||
+    axis.reverse === true ||
+    axis.expand === false ||
+    Object.keys(axis).some(
+      (key) => key !== "transform" && key !== "limits" && key !== "reverse" && key !== "expand",
+    )
+  );
+}
+
+function normalizeCoord(coord: CoordSpec | undefined): CoordSpec | undefined {
+  if (coord === undefined) return undefined;
+  const runtimeCoord = coord as unknown;
+  if (runtimeCoord === null || typeof runtimeCoord !== "object" || Array.isArray(runtimeCoord))
+    return runtimeCoord as CoordSpec;
+  const record = runtimeCoord as Record<string, unknown>;
+  if (record["type"] === "cartesian")
+    return Object.keys(record).some((key) => key !== "type")
+      ? ({ ...record } as CoordSpec)
+      : undefined;
+  if (record["type"] === "flip") return { ...record } as CoordSpec;
+  if (record["type"] !== "transform") return { ...record } as CoordSpec;
+  const transformed = coord as CoordTransformSpec;
+  const x = normalizeCoordAxis(transformed.x);
+  const y = normalizeCoordAxis(transformed.y);
+  const hasUnknownKey = Object.keys(transformed).some(
+    (key) => key !== "type" && key !== "x" && key !== "y" && key !== "clip",
+  );
+  if (
+    !effectiveCoordAxis(x) &&
+    !effectiveCoordAxis(y) &&
+    transformed.clip !== false &&
+    !hasUnknownKey
+  ) {
+    return undefined;
+  }
+  const normalized: CoordSpec = {
+    ...transformed,
+    type: "transform",
+    ...(effectiveCoordAxis(x) && { x: x! }),
+    ...(effectiveCoordAxis(y) && { y: y! }),
+  };
+  if (!effectiveCoordAxis(x)) delete normalized.x;
+  if (!effectiveCoordAxis(y)) delete normalized.y;
+  if (transformed.clip !== false) delete normalized.clip;
+  return normalized;
+}
+
 /** Canonicalize a SpecInput into a normalized PortableSpec (see module docs). */
 export function normalize(input: SpecInput): PortableSpec {
   const plotAes = normalizeAes(input.aes);
-  // Defaults canonicalize away: coord "cartesian" and a11y "auto" ARE the
-  // absent forms (one canonical form per concept).
-  const coord = input.coord?.type === "flip" ? { type: "flip" as const } : undefined;
+  // Defaults canonicalize away: Cartesian/identity coord and a11y "auto" ARE
+  // the absent forms (one canonical form per concept).
+  const coord = normalizeCoord(input.coord);
   const a11y = input.a11y === "force-svg" ? input.a11y : undefined;
   const out: PortableSpec = {
     ...(input.$schema !== undefined && { $schema: input.$schema }),

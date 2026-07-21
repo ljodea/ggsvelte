@@ -3,6 +3,7 @@
  */
 import type { PortableSpec } from "@ggsvelte/spec";
 
+import type { PanelCoordProjector } from "../coord-projector.js";
 import { perfMark, perfMeasure } from "../perf.js";
 import type { Scene } from "../scene.js";
 import type { ThemeTokens } from "../theme.js";
@@ -21,9 +22,20 @@ export function finalizeGeometryAndScene(input: {
   prepared: PreparedPanels;
   trained: TrainedPipelineScales;
   panelLayout: PanelLayoutResult;
+  coordProjectors: readonly PanelCoordProjector[];
   warnings: PipelineWarning[];
 }): Scene {
-  const { normalized, options, theme, flip, prepared, trained, panelLayout, warnings } = input;
+  const {
+    normalized,
+    options,
+    theme,
+    flip,
+    prepared,
+    trained,
+    panelLayout,
+    coordProjectors,
+    warnings,
+  } = input;
   const { facetPanels, panelFrames } = prepared;
   const { panelScales, colorResolution, fillResolution } = trained;
 
@@ -40,6 +52,7 @@ export function finalizeGeometryAndScene(input: {
     color: colorResolution.resolved,
     fill: fillResolution.resolved,
     flip,
+    coordProjectors,
     warnings,
   });
   perfMark("ggsvelte:geometry:end");
@@ -53,6 +66,9 @@ export function finalizeGeometryAndScene(input: {
     displayScales: panelLayout.displayScales,
     hTitle: panelLayout.hTitle,
     vTitle: panelLayout.vTitle,
+    coordProjectors,
+    ...(options.measureText !== undefined && { measureText: options.measureText }),
+    axisTextSize: theme.axisTextSize,
     ...((flip ? normalized.scales?.y?.minorBreaks : normalized.scales?.x?.minorBreaks) !==
       undefined && {
       hMinorBreaks: flip ? normalized.scales?.y?.minorBreaks : normalized.scales?.x?.minorBreaks,

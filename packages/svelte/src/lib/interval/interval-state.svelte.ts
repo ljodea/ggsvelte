@@ -563,6 +563,9 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
         domains,
         panel,
         scales: model.scales.panels[panelIndex] ?? model.scales,
+        ...(model.coordProjectors?.[panelIndex] !== undefined && {
+          coord: model.coordProjectors[panelIndex],
+        }),
         flipped: deps.coordFlipped(),
       }),
       keys,

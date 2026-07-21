@@ -298,6 +298,32 @@ describe("CandidateStore", () => {
     expect(buildCandidateStore(glyphs).hitTest(20, 20)).toBeNull();
   });
 
+  it("chooses the nearest semantic anchor on a shared tessellated edge", () => {
+    const tessellated = scene();
+    tessellated.batches = [
+      {
+        kind: "paths",
+        layerIndex: 0,
+        panelIndex: 0,
+        positions: new Float32Array([0, 10, 10, 10, 20, 10, 30, 10]),
+        rowIndex: new Uint32Array([0, 1, 1, 1]),
+        semanticAnchors: new Uint8Array([1, 0, 0, 1]),
+        semanticIndex: new Uint32Array([0, 1, 1, 1]),
+        pathOffsets: new Uint32Array([0, 4]),
+        strokes: [null],
+        linewidth: 2,
+        alpha: 1,
+        curve: "linear",
+      },
+    ];
+    const tessellatedStore = buildCandidateStore(tessellated, {
+      datum: ({ primitiveIndex }) => ({ xValue: primitiveIndex }),
+    });
+
+    expect(tessellatedStore.hitTest(2, 10)).toMatchObject({ rowIndex: 0, primitiveIndex: 0 });
+    expect(tessellatedStore.hitTest(28, 10)).toMatchObject({ rowIndex: 1, primitiveIndex: 3 });
+  });
+
   it("hitTest preserves exact containment when semantic nearest is too far", () => {
     const largeRect = scene();
     largeRect.batches = [

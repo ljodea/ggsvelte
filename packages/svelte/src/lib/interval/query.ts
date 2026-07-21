@@ -10,6 +10,8 @@ import {
   expandIntervalQuery,
   panelDataDomains,
   type PanelBounds,
+  type PanelCoordInverse,
+  type PanelCoordProjection,
   type PlotRect,
 } from "../scene/geometry.js";
 import {
@@ -30,11 +32,13 @@ export type IntervalQueryScene = {
   readonly singlePanel: boolean;
   readonly flip: boolean;
   readonly scales: Pick<RenderModel["scales"], "x" | "y">;
+  readonly coord?: PanelCoordInverse;
   /** Faceted panels with their own trained positional scales. When present,
    * the requested stable panel identity enables local semantic inversion. */
   readonly panels?: readonly (PanelBounds & {
     readonly id: string;
     readonly scales: Pick<RenderModel["scales"], "x" | "y">;
+    readonly coord?: PanelCoordInverse;
   })[];
   /** Candidates intersecting an already-expanded plot-px query rect. */
   queryCandidates(
@@ -69,11 +73,16 @@ function bandDomains(
   panel: PanelBounds,
   scales: Pick<RenderModel["scales"], "x" | "y">,
   flipped: boolean,
+  coord?: PanelCoordInverse,
 ): IntervalDomain {
-  const tx0 = (pixels.x0 - panel.x) / panel.width;
-  const tx1 = (pixels.x1 - panel.x) / panel.width;
-  const ty0 = 1 - (pixels.y1 - panel.y) / panel.height;
-  const ty1 = 1 - (pixels.y0 - panel.y) / panel.height;
+  const screenTx0 = (pixels.x0 - panel.x) / panel.width;
+  const screenTx1 = (pixels.x1 - panel.x) / panel.width;
+  const screenTy0 = 1 - (pixels.y1 - panel.y) / panel.height;
+  const screenTy1 = 1 - (pixels.y0 - panel.y) / panel.height;
+  const tx0 = coord?.x.invertFraction(screenTx0) ?? screenTx0;
+  const tx1 = coord?.x.invertFraction(screenTx1) ?? screenTx1;
+  const ty0 = coord?.y.invertFraction(screenTy0) ?? screenTy0;
+  const ty1 = coord?.y.invertFraction(screenTy1) ?? screenTy1;
   const horizontal = bandDomain(flipped ? scales.y : scales.x, tx0, tx1);
   const vertical = bandDomain(flipped ? scales.x : scales.y, ty0, ty1);
   return {
@@ -99,6 +108,7 @@ export type IntervalQueryModelPort = {
   readonly scales: Pick<RenderModel["scales"], "x" | "y"> & {
     readonly panels?: readonly Pick<RenderModel["scales"], "x" | "y">[];
   };
+  readonly coordProjectors?: readonly PanelCoordInverse[];
   readonly candidates: {
     queryRect(x0: number, y0: number, x1: number, y1: number): Iterable<number>;
     candidate(id: number): {
@@ -134,6 +144,7 @@ export function intervalQuerySceneFromModel(
     singlePanel: model.scene.panels.length === 1,
     flip,
     scales: model.scales,
+    ...(model.coordProjectors?.[0] !== undefined && { coord: model.coordProjectors[0] }),
     panels: model.scene.panels.flatMap((scenePanel, index) =>
       scenePanel.id === null
         ? []
@@ -145,6 +156,9 @@ export function intervalQuerySceneFromModel(
               height: scenePanel.height,
               id: scenePanel.id,
               scales: model.scales.panels?.[index] ?? model.scales,
+              ...(model.coordProjectors?.[index] !== undefined && {
+                coord: model.coordProjectors[index],
+              }),
             },
           ],
     ),
@@ -209,12 +223,24 @@ export function resolveIntervalQueryParts(input: ResolveIntervalQueryPartsInput)
   const rowIndexes = lineageRowIndexesFromCandidates(candidates, (id) => scene.lineageKeys(id));
   const continuousDomain =
     scene.singlePanel || requestedPanel !== undefined
-      ? panelDataDomains(input.pixels, panel, requestedPanel?.scales ?? scene.scales, scene.flip)
+      ? panelDataDomains(
+          input.pixels,
+          panel,
+          requestedPanel?.scales ?? scene.scales,
+          scene.flip,
+          requestedPanel?.coord ?? scene.coord,
+        )
       : {};
   const invertedDomain =
     scene.singlePanel || requestedPanel !== undefined
       ? {
-          ...bandDomains(input.pixels, panel, requestedPanel?.scales ?? scene.scales, scene.flip),
+          ...bandDomains(
+            input.pixels,
+            panel,
+            requestedPanel?.scales ?? scene.scales,
+            scene.flip,
+            requestedPanel?.coord ?? scene.coord,
+          ),
           ...continuousDomain,
         }
       : {};
@@ -257,8 +283,10 @@ export function bandDomainValuesFromKeys(
 function normalizedAxisSpan(
   scale: RenderModel["scales"]["x"],
   axis: SemanticIntervalAxis | undefined,
+  coord: PanelCoordProjection["x"] | undefined,
 ): readonly [number, number] {
   if (axis === undefined) return [0, 1];
+  let span: readonly [number, number];
   if (axis.kind === "band") {
     if (scale.type !== "band") return [0, 1];
     const centers = bandDomainValuesFromKeys(scale.rawDomain, axis.values).flatMap((value) => {
@@ -267,19 +295,25 @@ function normalizedAxisSpan(
     });
     if (centers.length === 0) return [0, 1];
     const half = scale.step / 2;
-    return [Math.max(0, Math.min(...centers) - half), Math.min(1, Math.max(...centers) + half)];
+    span = [Math.max(0, Math.min(...centers) - half), Math.min(1, Math.max(...centers) + half)];
+  } else {
+    if (scale.type === "band") return [0, 1];
+    const t0 = scale.normalize(axis.domain[0]);
+    const t1 = scale.normalize(axis.domain[1]);
+    if (!Number.isFinite(t0) || !Number.isFinite(t1)) return [0, 1];
+    span = [Math.max(0, Math.min(t0, t1)), Math.min(1, Math.max(t0, t1))];
   }
-  if (scale.type === "band") return [0, 1];
-  const t0 = scale.normalize(axis.domain[0]);
-  const t1 = scale.normalize(axis.domain[1]);
-  if (!Number.isFinite(t0) || !Number.isFinite(t1)) return [0, 1];
-  return [Math.max(0, Math.min(t0, t1)), Math.min(1, Math.max(t0, t1))];
+  const p0 = coord?.projectFraction(span[0]) ?? span[0];
+  const p1 = coord?.projectFraction(span[1]) ?? span[1];
+  if (!Number.isFinite(p0) || !Number.isFinite(p1)) return [0, 1];
+  return [Math.max(0, Math.min(p0, p1)), Math.min(1, Math.max(p0, p1))];
 }
 
 export type IntervalPixelsFromDomainsInput = {
   readonly domains: ReadonlyIntervalDomains;
   readonly panel: PanelBounds;
   readonly scales: Pick<RenderModel["scales"], "x" | "y">;
+  readonly coord?: PanelCoordProjection;
   readonly flipped: boolean;
 };
 
@@ -293,10 +327,12 @@ export function intervalPixelsFromDomains(input: IntervalPixelsFromDomainsInput)
   const horizontal = normalizedAxisSpan(
     input.flipped ? input.scales.y : input.scales.x,
     input.flipped ? input.domains.y : input.domains.x,
+    input.flipped ? input.coord?.y : input.coord?.x,
   );
   const vertical = normalizedAxisSpan(
     input.flipped ? input.scales.x : input.scales.y,
     input.flipped ? input.domains.x : input.domains.y,
+    input.flipped ? input.coord?.x : input.coord?.y,
   );
   return {
     x0: input.panel.x + horizontal[0] * input.panel.width,

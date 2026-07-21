@@ -9,7 +9,7 @@ import type { LayerFrame, PipelineWarning, ResolvedColorScale } from "./types.js
 import type { Frame } from "./geometry-shared.js";
 import { DEFAULT_RULE_LINEWIDTH, removedWarning } from "./geometry-shared.js";
 import { emitErrorbarRows } from "./geometry-errorbar-rows.js";
-import { makeErrorbarHalfWidth } from "./geometry-errorbar-width.js";
+import { makeErrorbarXSpan } from "./geometry-errorbar-width.js";
 
 const DEFAULT_ERRORBAR_WIDTH = 0.9;
 
@@ -26,7 +26,7 @@ export function errorbarBatch(
   const wantsColors =
     color !== null && (frame.colorValues !== null || binding.color.scaledConstant !== null);
 
-  const halfOf = makeErrorbarHalfWidth(frame, fx, widthParam);
+  const xSpanOf = makeErrorbarXSpan(frame, fx, widthParam);
 
   const segments: number[] = [];
   const rowIndex: number[] = [];
@@ -36,7 +36,7 @@ export function errorbarBatch(
     fx,
     color,
     wantsColors,
-    halfOf,
+    xSpanOf,
     segments,
     rowIndex,
     strokes,

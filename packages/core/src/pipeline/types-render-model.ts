@@ -1,6 +1,7 @@
 /**
  * Public RenderModel surface returned by runPipeline.
  */
+import type { PanelCoordProjector } from "../coord-projector.js";
 import type { GuidePlan } from "../layout/temporal-guide.js";
 import type { Scene } from "../scene.js";
 import type { CellValue } from "../table.js";
@@ -28,6 +29,8 @@ export interface RenderModel {
   scaleDecisions: ScaleDecision[];
   /** Semantic axis plans for every actually drawn panel axis. */
   guidePlans: readonly GuidePlan[];
+  /** Per-panel post-stat coordinate forward/inverse projectors. */
+  coordProjectors: readonly PanelCoordProjector[];
   /** Monotonic run identity (module-global, increases every runPipeline call). */
   runId: number;
   /**

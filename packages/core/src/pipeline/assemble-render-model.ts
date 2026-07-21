@@ -83,6 +83,7 @@ export function assembleRenderModel(input: AssembleRenderModelInput): RenderMode
         .map((plan) => plan.id),
     })),
     guidePlans: input.guidePlans,
+    coordProjectors: input.coordProjectors,
     runId: input.runId,
     layerBackends: input.layerBackends,
     layerFields: input.layerFields,

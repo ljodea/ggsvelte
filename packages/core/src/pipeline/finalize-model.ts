@@ -19,6 +19,7 @@ export function finalizeRenderModel(input: FinalizeRenderModelInput): RenderMode
     trained,
     panelLayout,
     scene,
+    coordProjectors,
     warnings,
     advisories,
   } = input;
@@ -47,6 +48,7 @@ export function finalizeRenderModel(input: FinalizeRenderModelInput): RenderMode
     trained,
     prepared,
     panelLayout,
+    coordProjectors,
     runId,
     warnings,
     advisories,

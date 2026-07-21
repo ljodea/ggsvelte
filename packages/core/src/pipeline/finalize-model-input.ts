@@ -2,6 +2,7 @@
  * finalizeRenderModel input contract.
  */
 import type { PortableSpec } from "@ggsvelte/spec";
+import type { PanelCoordProjector } from "../coord-projector.js";
 import type { Scene } from "../scene.js";
 
 import type { PanelLayoutResult } from "./panel-layout.js";
@@ -18,6 +19,7 @@ export interface FinalizeRenderModelInput {
   trained: TrainedPipelineScales;
   panelLayout: PanelLayoutResult;
   scene: Scene;
+  coordProjectors: readonly PanelCoordProjector[];
   warnings: PipelineWarning[];
   advisories: Advisory[];
 }

@@ -23,7 +23,14 @@ import {
   runPipeline,
 } from "@ggsvelte/core";
 import { drawStratum } from "@ggsvelte/core/dom";
-import { aes, gg, MAX_BINNED_BREAKS, scaleXBinned, scaleXContinuous } from "@ggsvelte/spec";
+import {
+  aes,
+  coordTransform,
+  gg,
+  MAX_BINNED_BREAKS,
+  scaleXBinned,
+  scaleXContinuous,
+} from "@ggsvelte/spec";
 import type { PortableSpec } from "@ggsvelte/spec";
 
 export interface Workload {
@@ -141,6 +148,39 @@ function transformedFacetSpec(n: number, panels: number): PortableSpec {
     .geomPoint({ render: "canvas" })
     .facet({ wrap: "panel", ncol: 10 })
     .scales(scaleXContinuous({ transform: "log10" }))
+    .spec();
+}
+
+/** PR 4 post-stat coordinate projection workloads. */
+function coordPointSpec(n: number, transform: "identity" | "log10"): PortableSpec {
+  const x = Array.from<number>({ length: n });
+  const y = Array.from<number>({ length: n });
+  for (let i = 0; i < n; i++) {
+    x[i] = 1 + (i % 10_000);
+    y[i] = 1 + ((i * 17) % 10_000);
+  }
+  return gg({ x, y }, aes({ x: "x", y: "y" }))
+    .geomPoint({ render: "canvas" })
+    .coord(
+      coordTransform({
+        x: transform === "identity" ? { transform, reverse: true } : transform,
+      }),
+    )
+    .spec();
+}
+
+function coordTessellationSpec(n: number): PortableSpec {
+  const x = Array.from<number>({ length: n });
+  const y = Array.from<number>({ length: n });
+  const group = Array.from<string>({ length: n });
+  for (let i = 0; i < n; i++) {
+    x[i] = i % 2 === 0 ? 1 : 1_000_000_000;
+    y[i] = i % 2 === 0 ? 1 : 100_000_000;
+    group[i] = `segment-${i >>> 1}`;
+  }
+  return gg({ x, y, group }, aes({ x: "x", y: "y", group: "group" }))
+    .geomLine()
+    .coord(coordTransform({ x: "log10", y: "sqrt" }))
     .spec();
 }
 
@@ -546,6 +586,28 @@ export function buildWorkloads(smoke: boolean): Workload[] {
       group: `binned ${MAX_BINNED_BREAKS} boundaries ${fmtK(n)}`,
       bench: `runPipeline max-boundary binned ${fmtK(n)}`,
       fn: () => runPipeline(binned, opts),
+    });
+  }
+
+  // --- PR 4 post-stat coordinate projection + bounded tessellation ---------
+  {
+    const n = smoke ? 1_000 : 100_000;
+    for (const transform of ["identity", "log10"] as const) {
+      const spec = coordPointSpec(n, transform);
+      workloads.push({
+        id: `pipeline coord-${transform} points ${fmtK(n)}`,
+        group: `post-stat coordinate ${transform} ${fmtK(n)}`,
+        bench: `runPipeline coord ${transform} points ${fmtK(n)}`,
+        fn: () => runPipeline(spec, opts),
+      });
+    }
+    const vertices = smoke ? 1_000 : 10_000;
+    const tessellated = coordTessellationSpec(vertices);
+    workloads.push({
+      id: `pipeline coord-tessellation ${fmtK(vertices)}`,
+      group: `post-stat coordinate tessellation ${fmtK(vertices)}`,
+      bench: `runPipeline worst-case coord tessellation ${fmtK(vertices)}`,
+      fn: () => runPipeline(tessellated, opts),
     });
   }
 

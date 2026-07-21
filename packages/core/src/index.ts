@@ -107,6 +107,10 @@ export { getScaleTransform, POSITION_TRANSFORM_NAMES, scaleTransform } from "./s
 export type { PositionTransformName, ScaleTransform } from "./scales/transform.js";
 export { MAX_BINNED_BREAKS } from "./pipeline/binned-scale.js";
 
+// Post-stat coordinate projector (PR 4)
+export { buildCoordAxisProjector, buildPanelCoordProjector } from "./coord-projector.js";
+export type { CoordAxisProjector, PanelCoordProjector } from "./coord-projector.js";
+
 // Theme registry
 export { BUILTIN_THEMES, resolveTheme, themeVar, UnknownThemeError } from "./theme.js";
 export type { ThemeColorRole, ThemeRole, ThemeTokens } from "./theme.js";

@@ -1,0 +1,6 @@
+{
+  "runtimeDependenciesAdded": [],
+  "lockfilePackagesAdded": 0,
+  "portableCallbacksAdded": false,
+  "notes": "Coordinate algebra, tessellation, and interaction inversion use existing spec/core primitives; no dependency or executable portable surface was added."
+}

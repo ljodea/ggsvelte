@@ -7,6 +7,22 @@ export type PlotRect = {
   readonly y1: number;
 };
 
+export type PanelCoordInverse = {
+  readonly x: { invertFraction(fraction: number): number };
+  readonly y: { invertFraction(fraction: number): number };
+};
+
+export type PanelCoordProjection = {
+  readonly x: {
+    invertFraction(fraction: number): number;
+    projectFraction(fraction: number): number;
+  };
+  readonly y: {
+    invertFraction(fraction: number): number;
+    projectFraction(fraction: number): number;
+  };
+};
+
 export type PanelBounds = {
   readonly x: number;
   readonly y: number;
@@ -84,11 +100,16 @@ export function panelDataDomains(
   panel: PanelBounds,
   scales: Pick<RenderModel["scales"], "x" | "y">,
   flipped: boolean,
+  coord?: PanelCoordInverse,
 ): { x?: [number, number]; y?: [number, number] } {
-  const tx0 = clamp((rect.x0 - panel.x) / panel.width, 0, 1);
-  const tx1 = clamp((rect.x1 - panel.x) / panel.width, 0, 1);
-  const ty0 = clamp(1 - (rect.y1 - panel.y) / panel.height, 0, 1);
-  const ty1 = clamp(1 - (rect.y0 - panel.y) / panel.height, 0, 1);
+  const screenTx0 = clamp((rect.x0 - panel.x) / panel.width, 0, 1);
+  const screenTx1 = clamp((rect.x1 - panel.x) / panel.width, 0, 1);
+  const screenTy0 = clamp(1 - (rect.y1 - panel.y) / panel.height, 0, 1);
+  const screenTy1 = clamp(1 - (rect.y0 - panel.y) / panel.height, 0, 1);
+  const tx0 = coord?.x.invertFraction(screenTx0) ?? screenTx0;
+  const tx1 = coord?.x.invertFraction(screenTx1) ?? screenTx1;
+  const ty0 = coord?.y.invertFraction(screenTy0) ?? screenTy0;
+  const ty1 = coord?.y.invertFraction(screenTy1) ?? screenTy1;
   const horizontalDomain = invertedDomain(flipped ? scales.y : scales.x, tx0, tx1);
   const verticalDomain = invertedDomain(flipped ? scales.x : scales.y, ty0, ty1);
   const xDomain = flipped ? verticalDomain : horizontalDomain;

@@ -78,6 +78,12 @@ binding-identical ggplot2 aliases (`scale_x_log10`, `scale_y_sqrt`,
 `scale_x_binned`). Domains/limits are semantic source units; OOB censor/squish
 happens before the transform and stats.
 
+Post-stat coordinate transforms use the separate strict `CoordTransformSpec`.
+`coordTransform({ x: "log10", y: "sqrt" })` and its binding-identical
+`coord_transform` alias emit canonical JSON; builder `.coordTransform()` emits
+the same spec. Coordinate limits preserve stat inputs, `reverse` composes in
+coordinate space, and `clip: false` explicitly permits panel overflow.
+
 All six orders (`ymd`, `ydm`, `mdy`, `myd`, `dmy`, `dym`), timestamp variants,
 exact closed formats, and epoch units are typed. PortableSpec never contains `Date`,
 callbacks, or regular expressions; builder Dates canonicalize to ISO strings.

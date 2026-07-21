@@ -1,0 +1,35 @@
+{
+  "environment": {
+    "os": "darwin-arm64",
+    "bun": "1.3.14",
+    "mode": "isolated bench:json run"
+  },
+  "workloads": [
+    {
+      "id": "pipeline coord-identity points 100k",
+      "medianMs": 11.953,
+      "budgetMs": 25,
+      "status": "pass"
+    },
+    {
+      "id": "pipeline coord-log10 points 100k",
+      "medianMs": 13.044,
+      "budgetMs": 25,
+      "status": "pass"
+    },
+    {
+      "id": "pipeline coord-tessellation 10k",
+      "medianMs": 30.994,
+      "budgetMs": 50,
+      "status": "pass"
+    }
+  ],
+  "bounds": {
+    "tolerancePx": 0.5,
+    "maxDepth": 12,
+    "maxAdaptiveOutputPerSubpath": 4096,
+    "maxAdaptiveOutputPerPanelLayer": 65536,
+    "mandatorySemanticAnchorsRetained": true
+  },
+  "notes": "All PR 4 workloads pass. The same three pre-existing host-sensitive absolute budgets remained over: canvas cold scatter 100k, hit-index build 100k, and pipeline density 100k. The isolated CI benchmark workflow remains authoritative for those legacy workloads."
+}

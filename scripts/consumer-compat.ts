@@ -260,7 +260,7 @@ export function writeConsumerFixture(
   writeFileSync(
     join(directory, "src", "routes", "contract", "+page.svelte"),
     `<script lang="ts">
-  import { dmy, GGPlot, GeomLine, GeomPoint, scaleXBinned, scaleXDate, scaleXLog10, scale_x_date, scale_x_log10, type GuidePlan, type PortableSpec } from "@ggsvelte/svelte";
+  import { coord_transform, coordTransform, dmy, GGPlot, GeomLine, GeomPoint, scaleXBinned, scaleXDate, scaleXLog10, scale_x_date, scale_x_log10, type GuidePlan, type PortableSpec } from "@ggsvelte/svelte";
   const spec: PortableSpec = ${JSON.stringify(plotSpec)};
   const temporalRows = [
     { year: "1835", value: 12 },
@@ -280,6 +280,9 @@ export function writeConsumerFixture(
   const logScale = scaleXLog10({ limits: [1, 1000] });
   const logAlias = scale_x_log10({ limits: [1, 1000] });
   const binnedScale = scaleXBinned({ breaks: [1, 10, 100, 1000] });
+  const transformedCoord = coordTransform({ x: "log10" });
+  if (coord_transform !== coordTransform) throw new Error("coord alias identity mismatch");
+  void transformedCoord;
   void logScale;
   void logAlias;
   void binnedScale;
@@ -310,6 +313,16 @@ export function writeConsumerFixture(
 >
   <GeomPoint />
 </GGPlot>
+<GGPlot
+  data={[{ x: 1, y: 1 }, { x: 10, y: 2 }, { x: 100, y: 3 }]}
+  aes={{ x: "x", y: "y" }}
+  coord={coordTransform({ x: "log10" })}
+  width={480}
+  height={320}
+  ariaLabel="Packed post-stat coordinate contract chart"
+>
+  <GeomPoint />
+</GGPlot>
 `,
   );
   writeFileSync(join(directory, "plot.json"), `${JSON.stringify(plotSpec)}\n`);
@@ -335,7 +348,7 @@ console.log("prerendered Quickstart verified");
   writeFileSync(
     join(directory, "smoke.mjs"),
     `import { strict as assert } from "node:assert";
-import { SpecModule, normalize, scaleXBinned, scaleXLog10, scale_x_log10, validate } from "@ggsvelte/spec";
+import { coord_transform, coordTransform, SpecModule, normalize, scaleXBinned, scaleXLog10, scale_x_log10, validate } from "@ggsvelte/spec";
 import { renderToSVGString, runPipeline } from "@ggsvelte/core";
 
 const pointParamsSchema = SpecModule.Import("PointParams");
@@ -343,6 +356,8 @@ void pointParamsSchema;
 const spec = ${JSON.stringify(plotSpec)};
 const logScale = scaleXLog10();
 assert.deepEqual(logScale, scale_x_log10());
+assert.equal(coordTransform, coord_transform);
+assert.deepEqual(coordTransform({ x: "log10" }), { type: "transform", x: { transform: "log10" } });
 assert.equal(normalize({ data: spec.data, layers: spec.layers, scales: logScale }).scales.x.type, "linear");
 assert.equal(normalize({ data: spec.data, layers: spec.layers, scales: logScale }).scales.x.transform, "log10");
 const binnedSpec = {

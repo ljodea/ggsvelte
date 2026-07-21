@@ -164,6 +164,34 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "CoordTransformAxisOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CoordTransformAxisSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CoordTransformAxisSpecSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "CoordTransformName": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CoordTransformOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CoordTransformSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CoordTransformSpecSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "DEFAULT_VALIDATE_LIMITS": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -812,6 +840,14 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "coordTransform": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "coord_transform": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "didYouMean": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -1271,6 +1307,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "CoordAxisProjector": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "CountStatInput": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1465,6 +1505,10 @@
         },
         "PaletteExhaustedError": {
           "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "PanelCoordProjector": {
+          "kind": "type",
           "lifecycle": "experimental"
         },
         "PassResult": {
@@ -1751,11 +1795,19 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "buildCoordAxisProjector": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "buildInteractionMasks": {
           "kind": "value",
           "lifecycle": "experimental"
         },
         "buildLegends": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "buildPanelCoordProjector": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -2126,6 +2178,26 @@
           "lifecycle": "experimental"
         },
         "CoordSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CoordTransformAxisOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CoordTransformAxisSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CoordTransformName": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CoordTransformOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CoordTransformSpec": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -2678,6 +2750,14 @@
           "lifecycle": "experimental"
         },
         "aes": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "coordTransform": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "coord_transform": {
           "kind": "value",
           "lifecycle": "experimental"
         },
