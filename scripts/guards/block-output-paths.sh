@@ -27,9 +27,12 @@ if [[ ${#blocked[@]} -eq 0 ]]; then
   exit 0
 fi
 
-echo "BLOCKED: test/visual output paths are generated artifacts and must not be committed:" >&2
+# printf (not echo) so paths and ASCII-only messages are portable across
+# locales and shells; keep the full blocked list on stderr for tests and
+# operators.
+printf '%s\n' "BLOCKED: generated output paths must not be committed:" >&2
 for f in "${blocked[@]}"; do
-  echo "  $f" >&2
+  printf '  %s\n' "${f}" >&2
 done
-echo "Unstage them (git restore --staged <path>) — VR baselines land only via the vr-approve workflow." >&2
+printf '%s\n' "Unstage them (git restore --staged <path>) - VR baselines land only via the vr-approve workflow." >&2
 exit 1
