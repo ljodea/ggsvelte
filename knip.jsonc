@@ -58,8 +58,8 @@
       "entry": ["src/routes/**/+*.ts", "src/lib/**/*.ts"],
       "project": ["src/**/*.ts", "*.{js,ts}"],
       // Imported only from .svelte files / the $examples alias, which knip
-      // does not trace.
-      "ignoreDependencies": ["@ggsvelte/examples"],
+      // does not trace. phosphor-svelte is deep-imported only from .svelte.
+      "ignoreDependencies": ["@ggsvelte/examples", "phosphor-svelte"],
     },
   },
 }

@@ -15,7 +15,6 @@
     "@ggsvelte/examples": "workspace:*",
     "@ggsvelte/spec": "workspace:*",
     "@ggsvelte/svelte": "workspace:*",
-    "highlight.js": "^11.11.1",
     "phosphor-svelte": "^3.1.0",
     "svelte-highlight": "^7.16.0"
   },
