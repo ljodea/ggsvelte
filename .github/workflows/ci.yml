@@ -109,75 +109,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
         shell: bash
-        run: |
-          set -euo pipefail
-          zero="0000000000000000000000000000000000000000"
-          if [ -z "${BASE_SHA}" ] || [ "${BASE_SHA}" = "${zero}" ]; then
-            echo "no usable base SHA — force-all"
-            bun scripts/ci-routing.ts emit-github-output --force-all
-          else
-            # Main + cancel-in-progress: a later markdown/workflow-only push must
-            # still route product work from earlier unvalidated main commits.
-            # Widen the base to the last successful CI head on main so the
-            # replacement run covers the cumulative unvalidated range.
-            if [ "${EVENT_NAME}" = "push" ] && [ "${GITHUB_REF}" = "refs/heads/main" ] && command -v gh >/dev/null 2>&1; then
-              last_ok="$(
-                gh api "repos/${REPO}/actions/workflows/ci.yml/runs?branch=main&status=completed&per_page=20" \
-                  --jq --arg head "${HEAD_SHA}" '
-                    [.workflow_runs[]
-                      | select(.conclusion == "success" and .head_sha != $head)
-                      | .head_sha][0] // empty
-                  ' 2>/dev/null || true
-              )"
-              if [ -n "${last_ok}" ]; then
-                echo "widening main route base ${BASE_SHA} → last successful CI ${last_ok}"
-                BASE_SHA="${last_ok}"
-              fi
-            fi
-            # Ensure the base object exists for the three-dot diff.
-            git fetch --no-tags --depth=1 origin "${BASE_SHA}" 2>/dev/null || true
-            if ! git cat-file -e "${BASE_SHA}^{commit}" 2>/dev/null; then
-              echo "base SHA ${BASE_SHA} not resolvable — force-all"
-              bun scripts/ci-routing.ts emit-github-output --force-all
-            else
-              # --name-status keeps rename/copy source paths for classification.
-              mapfile -t files < <(git diff --name-status "${BASE_SHA}...${HEAD_SHA}" || true)
-              if [ "${#files[@]}" -eq 0 ]; then
-                # Empty diff (empty commit / metadata-only): still run cheap checks.
-                echo "empty changed-file set — checks-only routing"
-                printf '' | bun scripts/ci-routing.ts emit-github-output --stdin
-              else
-                printf '%s\n' "${files[@]}" | bun scripts/ci-routing.ts emit-github-output --stdin
-                echo "event=${EVENT_NAME} base=${BASE_SHA} head=${HEAD_SHA} files=${#files[@]}"
-                # Issue #244: main push re-running the full suite saturates the pool.
-                # Keep thinner main surface (checks/unit/build/actions-security);
-                # consumer/bench stay PR-primary. force-all paths still full-suite
-                # when base is missing.
-                # Keep packages_dist + component path-routed on main so Codecov
-                # can refresh the packages/svelte flag for branch/main badges
-                # (carryforward cannot bootstrap a first main-branch report).
-                if [ "${EVENT_NAME}" = "push" ] && [ "${GITHUB_REF}" = "refs/heads/main" ]; then
-                  {
-                    echo "consumer=false"
-                    echo "bench_smoke=false"
-                    echo "interaction_perf=false"
-                  } >> "$GITHUB_OUTPUT"
-                  echo "main push: thinned consumer/bench (issue #244); packages_dist+component stay path-routed for coverage"
-                fi
-              fi
-            fi
-          fi
-          # Issue #246: run-compat is an escape hatch for the full required
-          # consumer matrix even when path routing would skip (docs-only PRs).
-          # Applied after routing / #244 thinning so the label always wins on PRs.
-          if [ "${EVENT_NAME}" = "pull_request" ] &&
-            printf '%s' "${PR_LABELS:-}" | tr ',' '\n' | grep -qx 'run-compat'; then
-            {
-              echo "consumer=true"
-              echo "packages_dist=true"
-            } >> "$GITHUB_OUTPUT"
-            echo "run-compat: forced consumer + packages_dist (issue #246)"
-          fi
+        run: bash scripts/ci-detect-changes.sh
 
   # Early package build shared by component / consumer / interaction-perf
   # (issue #241). Unit and bench-smoke keep the cheaper `bun run check`
@@ -193,109 +125,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: ./.github/actions/ci-setup-bun
-      - id: content_hash
-        name: compute content-hash (packages_dist)
-        env:
-          BYPASS: ${{ needs.detect-changes.outputs.bypass_content_cache }}
-          DISABLE: ${{ vars.CI_DISABLE_CONTENT_HASH }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [ "${BYPASS:-}" = "true" ] || [ "${DISABLE:-}" = "1" ]; then
-            {
-              echo "bypass=true"
-              echo "hit=false"
-            } >> "$GITHUB_OUTPUT"
-            echo "content-hash bypassed for packages_dist"
-            exit 0
-          fi
-          echo "bypass=false" >> "$GITHUB_OUTPUT"
-          bun scripts/ci-routing.ts hash-inputs --execution packages_dist --os "${RUNNER_OS}"
-      - id: dist_cache
-        name: restore packages-dist content-hash cache
-        if: steps.content_hash.outputs.bypass != 'true'
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      - uses: ./.github/actions/ci-job-packages-dist
         with:
-          # Exact key only (no restore-keys) — incomplete or wrong-tree hits are unsafe.
-          path: .packages-dist-cache
-          key: ${{ steps.content_hash.outputs.cache_key }}
-      - id: restore_dist
-        name: materialize packages/*/dist from content-hash cache
-        if: steps.content_hash.outputs.bypass != 'true' && steps.dist_cache.outputs.cache-hit == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          for pkg in spec core svelte; do
-            src=".packages-dist-cache/packages/${pkg}/dist"
-            if [ ! -d "${src}" ]; then
-              echo "incomplete content-hash cache (missing ${src}) — will rebuild"
-              echo "hit=false" >> "$GITHUB_OUTPUT"
-              exit 0
-            fi
-          done
-          mkdir -p packages/spec packages/core packages/svelte
-          rm -rf packages/spec/dist packages/core/dist packages/svelte/dist
-          cp -a .packages-dist-cache/packages/spec/dist packages/spec/
-          cp -a .packages-dist-cache/packages/core/dist packages/core/
-          cp -a .packages-dist-cache/packages/svelte/dist packages/svelte/
-          echo "hit=true" >> "$GITHUB_OUTPUT"
-          echo "packages-dist: restored from content-hash cache"
-      - uses: ./.github/actions/ci-bun-install
-        if: steps.restore_dist.outputs.hit != 'true'
-        with:
-          cache_key_prefix: bun
-      - name: build packages (tsc -b + svelte-package)
-        if: steps.restore_dist.outputs.hit != 'true'
-        run: bun run build
-      - name: verify required package dist outputs
-        shell: bash
-        run: |
-          set -euo pipefail
-          for path in \
-            packages/spec/dist/index.js \
-            packages/core/dist/index.js \
-            packages/svelte/dist/index.js; do
-            if [ ! -f "${path}" ]; then
-              echo "::error::missing required dist output: ${path}"
-              exit 1
-            fi
-          done
-          echo "packages-dist: verified spec/core/svelte dist entrypoints"
-      - name: stage packages/*/dist under a single upload root
-        # Multi-path upload strips the common prefix, so consumers would see
-        # spec/dist instead of packages/spec/dist. Stage once and upload that tree.
-        shell: bash
-        run: |
-          set -euo pipefail
-          rm -rf .packages-dist-upload
-          mkdir -p .packages-dist-upload/packages/spec \
-            .packages-dist-upload/packages/core \
-            .packages-dist-upload/packages/svelte
-          cp -a packages/spec/dist .packages-dist-upload/packages/spec/
-          cp -a packages/core/dist .packages-dist-upload/packages/core/
-          cp -a packages/svelte/dist .packages-dist-upload/packages/svelte/
-      - name: stage content-hash cache payload for save
-        if: steps.restore_dist.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          rm -rf .packages-dist-cache
-          mkdir -p .packages-dist-cache/packages/spec \
-            .packages-dist-cache/packages/core \
-            .packages-dist-cache/packages/svelte
-          cp -a packages/spec/dist .packages-dist-cache/packages/spec/
-          cp -a packages/core/dist .packages-dist-cache/packages/core/
-          cp -a packages/svelte/dist .packages-dist-cache/packages/svelte/
-      - name: upload packages/*/dist for same-run consumers
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          # Same-run artifact identity. Cross-run reuse is the content-hash cache above.
-          name: packages-dist
-          # Single directory root → download path: packages restores packages/*/dist.
-          path: .packages-dist-upload/packages
-          if-no-files-found: error
-          retention-days: 1
+          bypass_content_cache: ${{ needs.detect-changes.outputs.bypass_content_cache }}
+          disable_content_hash: ${{ vars.CI_DISABLE_CONTENT_HASH }}
 
   checks:
     name: checks (pre-commit stage)
@@ -308,17 +141,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: ./.github/actions/ci-setup-bun
-      - uses: ./.github/actions/ci-bun-install
-        with:
-          cache_key_prefix: bun
-      - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
-      - run: uv tool install pre-commit
-      # Pre-commit stage only. Pre-push parity (build, unit, svelte-check, knip,
-      # type-aware lint, examples/docs check) is covered by dedicated jobs so we
-      # do not pay for them twice on every PR.
-      - name: pre-commit stage (parity)
-        run: pre-commit run --all-files --show-diff-on-failure
+      - uses: ./.github/actions/ci-job-checks
 
   unit:
     name: unit (bun test spec + core)
@@ -330,50 +153,13 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          # Full history: packages/spec manual-AT alias audit tests git-show
-          # hard-coded historical commits (shallow clone would fail unit).
           fetch-depth: 0
           persist-credentials: false
-      - uses: ./.github/actions/ci-setup-bun
-      - uses: ./.github/actions/ci-content-hash-restore
-        id: content_hash
+      - uses: ./.github/actions/ci-job-unit
         with:
-          execution: unit
-          bypass: ${{ needs.detect-changes.outputs.bypass_content_cache }}
-          disable: ${{ vars.CI_DISABLE_CONTENT_HASH }}
-      - uses: ./.github/actions/ci-bun-install
-        if: steps.content_hash.outputs.hit != 'true'
-        with:
-          cache_key_prefix: bun
-      - name: build spec/core dist (package exports point at dist/)
-        if: steps.content_hash.outputs.hit != 'true'
-        run: bun run check
-      # lcov for Codecov; text reporter still prints a summary in the log.
-      - if: steps.content_hash.outputs.hit != 'true'
-        run: >
-          bun test --coverage --coverage-reporter=lcov
-          --coverage-dir=coverage/unit
-          packages/spec packages/core benchmarks scripts tests/evals
-      - name: Upload unit coverage to Codecov
-        # Custom if overrides default success() — keep the success gate so a
-        # failed suite does not upload a partial report or count as green.
-        if: success() && steps.content_hash.outputs.hit != 'true'
-        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: coverage/unit/lcov.info
-          flags: unit
-          name: unit
-          # Pin the uploader binary; the action's default is "latest".
-          version: v11.3.1
-          disable_search: true
-          fail_ci_if_error: true
-      - uses: ./.github/actions/ci-content-hash-write
-        # Require success so a Codecov upload failure cannot green-cache the job.
-        if: success() && steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
-        with:
-          execution: unit
-          hash: ${{ steps.content_hash.outputs.hash }}
+          bypass_content_cache: ${{ needs.detect-changes.outputs.bypass_content_cache }}
+          disable_content_hash: ${{ vars.CI_DISABLE_CONTENT_HASH }}
+          codecov_token: ${{ secrets.CODECOV_TOKEN }}
 
   compatibility-matrix:
     name: compatibility matrix (machine-checked source)
@@ -383,33 +169,13 @@ jobs:
     permissions:
       contents: read
     outputs:
-      matrix: ${{ steps.matrix.outputs.matrix }}
+      matrix: ${{ steps.job.outputs.matrix }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: ./.github/actions/ci-setup-bun
-      - id: matrix
-        name: emit packed-consumer matrix (PR default vs full required)
-        # Issue #246: PRs run one Linux consumer row by default; full required
-        # matrix when labeled run-compat (detect-changes also forces consumer
-        # + packages_dist so the label works on docs-only PRs). Main push stays
-        # thinned per #244 (consumer PR-primary). Nightly covers expanded rows.
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-          PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          flavor=required
-          if [ "${EVENT_NAME}" = "pull_request" ]; then
-            flavor=pr
-            if printf '%s' "${PR_LABELS}" | tr ',' '\n' | grep -qx 'run-compat'; then
-              flavor=required
-            fi
-          fi
-          echo "support-matrix flavor=${flavor} labels=${PR_LABELS:-}"
-          echo "matrix=$(bun scripts/support-matrix.ts "${flavor}")" >> "$GITHUB_OUTPUT"
+      - id: job
+        uses: ./.github/actions/ci-job-compatibility-matrix
 
   consumer-compat:
     name: packed consumer (${{ matrix.os }}, Node ${{ matrix.node }}, ${{ matrix.packageManager }}, Svelte ${{ matrix.svelte }})
@@ -431,76 +197,14 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: ./.github/actions/ci-job-consumer-compat
         with:
-          node-version: ${{ matrix.node }}
-      - uses: ./.github/actions/ci-setup-bun
-      # Resolved toolchain versions (not matrix majors alone) — Node/npm patch
-      # bumps must miss the consumer success-marker cache (Codex P2 on #245).
-      # Keep resolution in the job so the content-hash composite stays protocol-only.
-      - id: consumer_runtime
-        name: resolve consumer runtime toolchain versions
-        shell: bash
-        env:
-          # env-indirection: matrix values must not expand into the script body (zizmor).
-          MATRIX_PM: ${{ matrix.packageManager }}
-          MATRIX_PM_VERSION: ${{ matrix.packageManagerVersion }}
-        run: |
-          set -euo pipefail
-          RUNTIME_NODE="$(node -v)"
-          case "${MATRIX_PM}" in
-            npm) RUNTIME_PM_VER="$(npm -v)" ;;
-            bun) RUNTIME_PM_VER="$(bun -v)" ;;
-            pnpm)
-              if command -v pnpm >/dev/null 2>&1; then
-                RUNTIME_PM_VER="$(pnpm -v)"
-              else
-                RUNTIME_PM_VER="${MATRIX_PM_VERSION}"
-              fi
-              ;;
-            *) RUNTIME_PM_VER="${MATRIX_PM_VERSION}" ;;
-          esac
-          {
-            echo "runtime_node=${RUNTIME_NODE}"
-            echo "runtime_pm_ver=${RUNTIME_PM_VER}"
-          } >> "$GITHUB_OUTPUT"
-      - uses: ./.github/actions/ci-content-hash-restore
-        id: content_hash
-        with:
-          execution: consumer
-          bypass: ${{ needs.detect-changes.outputs.bypass_content_cache }}
-          disable: ${{ vars.CI_DISABLE_CONTENT_HASH }}
+          bypass_content_cache: ${{ needs.detect-changes.outputs.bypass_content_cache }}
+          disable_content_hash: ${{ vars.CI_DISABLE_CONTENT_HASH }}
           matrix_node: ${{ matrix.node }}
-          matrix_pm: ${{ matrix.packageManager }}
-          matrix_pm_version: ${{ matrix.packageManagerVersion }}
+          matrix_package_manager: ${{ matrix.packageManager }}
+          matrix_package_manager_version: ${{ matrix.packageManagerVersion }}
           matrix_svelte: ${{ matrix.svelte }}
-          runtime_node_version: ${{ steps.consumer_runtime.outputs.runtime_node }}
-          runtime_pm_version: ${{ steps.consumer_runtime.outputs.runtime_pm_ver }}
-      - if: steps.content_hash.outputs.hit != 'true'
-        run: bun install --frozen-lockfile
-        env:
-          BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
-      - uses: ./.github/actions/ci-download-packages-dist
-        if: steps.content_hash.outputs.hit != 'true'
-      - name: type-check Svelte package source
-        if: steps.content_hash.outputs.hit != 'true'
-        run: bun run check:svelte
-      - name: install tarballs in a clean consumer and exercise types, build, SSR, Node, and CLI
-        if: steps.content_hash.outputs.hit != 'true'
-        env:
-          BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
-          PACKAGE_MANAGER: ${{ matrix.packageManager }}
-          PACKAGE_MANAGER_VERSION: ${{ matrix.packageManagerVersion }}
-          SVELTE_VERSION: ${{ matrix.svelte }}
-        run: bun scripts/consumer-compat.ts
-
-      # Component surface is split for wall-clock (issue #243). All three schedule
-      # when routing sets component=true; ci-gate requires every shard to succeed.
-      - uses: ./.github/actions/ci-content-hash-write
-        if: steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
-        with:
-          execution: consumer
-          hash: ${{ steps.content_hash.outputs.hash }}
 
   component-svelte:
     name: component-svelte (packages/svelte vitest browser + ssr)
@@ -527,101 +231,11 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: install unzip (playwright image lacks it; setup-bun needs it)
-        run: apt-get update && apt-get install -y --no-install-recommends unzip
-      - uses: ./.github/actions/ci-setup-bun
-      - uses: ./.github/actions/ci-content-hash-restore
-        id: content_hash
+      - uses: ./.github/actions/ci-job-component-svelte
         with:
-          execution: component_svelte
-          bypass: ${{ needs.detect-changes.outputs.bypass_content_cache }}
-          disable: ${{ vars.CI_DISABLE_CONTENT_HASH }}
-          container_tag: ${{ env.PLAYWRIGHT_CONTAINER_TAG }}
-      - uses: ./.github/actions/ci-bun-install
-        if: steps.content_hash.outputs.hit != 'true'
-        with:
-          cache_key_prefix: bun-container
-      - uses: ./.github/actions/ci-download-packages-dist
-        if: steps.content_hash.outputs.hit != 'true'
-      - name: assert playwright npm/container version sync (packages/svelte)
-        if: steps.content_hash.outputs.hit != 'true'
-        run: |
-          set -euo pipefail
-          npm_version="$(cd packages/svelte && bun -e 'console.log(require("playwright/package.json").version)')"
-          expected="v${npm_version}-noble"
-          echo "packages/svelte playwright: ${npm_version}; container tag: ${PLAYWRIGHT_CONTAINER_TAG}"
-          if [ "${expected}" != "${PLAYWRIGHT_CONTAINER_TAG}" ]; then
-            echo "::error::playwright npm version in packages/svelte (${npm_version}) does not match pinned container tag (${PLAYWRIGHT_CONTAINER_TAG})"
-            exit 1
-          fi
-      # Chromium collects browser v8 coverage (CDP; works under bun) and enforces
-      # thresholds. Firefox/webkit stay coverage-free. SSR runs under bun without
-      # --coverage: @vitest/coverage-v8 needs Node inspector Coverage APIs that
-      # bun does not implement ("Coverage APIs are not supported"). Local
-      # `test:coverage` can still collect SSR lcov under node for offline use.
-      - name: component tests (packages/svelte, chromium + coverage)
-        if: steps.content_hash.outputs.hit != 'true'
-        working-directory: packages/svelte
-        run: bunx --bun vitest run --coverage --project chromium
-      - name: component tests (packages/svelte, firefox + webkit)
-        if: steps.content_hash.outputs.hit != 'true'
-        working-directory: packages/svelte
-        run: bunx --bun vitest run --project firefox --project webkit
-      - name: component tests (packages/svelte, SSR)
-        if: steps.content_hash.outputs.hit != 'true'
-        working-directory: packages/svelte
-        run: bunx --bun vitest run --config vitest.ssr.config.ts
-      - name: rewrite svelte lcov paths to monorepo root
-        # vitest writes SF:src/lib/... relative to packages/svelte; Codecov
-        # components filter packages/svelte/** so paths must be repo-rooted.
-        if: success() && steps.content_hash.outputs.hit != 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          f=packages/svelte/coverage/browser/lcov.info
-          if [ ! -f "${f}" ]; then
-            echo "::error::missing coverage file ${f}"
-            exit 1
-          fi
-          # Idempotent: only prefix bare package-relative src/ paths.
-          sed -i 's|^SF:src/|SF:packages/svelte/src/|' "${f}"
-          sed -i 's|^SF:\./src/|SF:packages/svelte/src/|' "${f}"
-      - name: ensure gpg for Codecov uploader (Playwright image)
-        if: success() && steps.content_hash.outputs.hit != 'true'
-        run: |
-          set -euo pipefail
-          if ! command -v gpg >/dev/null 2>&1; then
-            apt-get update
-            apt-get install -y --no-install-recommends gnupg
-          fi
-      - name: Upload packages/svelte coverage to Codecov
-        # Custom if overrides default success() — keep the success gate so a
-        # failed suite does not upload a partial report or count as green.
-        if: success() && steps.content_hash.outputs.hit != 'true'
-        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: packages/svelte/coverage/browser/lcov.info
-          flags: svelte
-          name: svelte
-          # Pin the uploader binary; the action's default is "latest".
-          version: v11.3.1
-          disable_search: true
-          fail_ci_if_error: true
-      - uses: ./.github/actions/ci-content-hash-write
-        # Require success so a Codecov upload failure cannot green-cache the job.
-        if: success() && steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
-        with:
-          execution: component_svelte
-          hash: ${{ steps.content_hash.outputs.hash }}
-      - name: upload packages/svelte failure artifacts
-        if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: component-svelte-failure-artifacts
-          path: packages/svelte/test-results/
-          if-no-files-found: ignore
-          retention-days: 7
+          bypass_content_cache: ${{ needs.detect-changes.outputs.bypass_content_cache }}
+          disable_content_hash: ${{ vars.CI_DISABLE_CONTENT_HASH }}
+          codecov_token: ${{ secrets.CODECOV_TOKEN }}
 
   component-spikes:
     name: component-spikes (spikes/browser vitest)
@@ -648,50 +262,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: install unzip (playwright image lacks it; setup-bun needs it)
-        run: apt-get update && apt-get install -y --no-install-recommends unzip
-      - uses: ./.github/actions/ci-setup-bun
-      - uses: ./.github/actions/ci-content-hash-restore
-        id: content_hash
+      - uses: ./.github/actions/ci-job-component-spikes
         with:
-          execution: component_spikes
-          bypass: ${{ needs.detect-changes.outputs.bypass_content_cache }}
-          disable: ${{ vars.CI_DISABLE_CONTENT_HASH }}
-          container_tag: ${{ env.PLAYWRIGHT_CONTAINER_TAG }}
-      - uses: ./.github/actions/ci-bun-install
-        if: steps.content_hash.outputs.hit != 'true'
-        with:
-          cache_key_prefix: bun-container
-      - uses: ./.github/actions/ci-download-packages-dist
-        if: steps.content_hash.outputs.hit != 'true'
-      - name: assert playwright npm/container version sync (spikes/browser)
-        if: steps.content_hash.outputs.hit != 'true'
-        run: |
-          set -euo pipefail
-          npm_version="$(cd spikes/browser && bun -e 'console.log(require("playwright/package.json").version)')"
-          expected="v${npm_version}-noble"
-          echo "spikes/browser playwright: ${npm_version}; container tag: ${PLAYWRIGHT_CONTAINER_TAG}"
-          if [ "${expected}" != "${PLAYWRIGHT_CONTAINER_TAG}" ]; then
-            echo "::error::playwright npm version in spikes/browser (${npm_version}) does not match pinned container tag (${PLAYWRIGHT_CONTAINER_TAG})"
-            exit 1
-          fi
-      - name: retired spike suites (browser + ssr projects)
-        if: steps.content_hash.outputs.hit != 'true'
-        working-directory: spikes/browser
-        run: bun run --bun test
-      - uses: ./.github/actions/ci-content-hash-write
-        if: steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
-        with:
-          execution: component_spikes
-          hash: ${{ steps.content_hash.outputs.hash }}
-      - name: upload spikes failure artifacts
-        if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: component-spikes-failure-artifacts
-          path: spikes/browser/test-results/
-          if-no-files-found: ignore
-          retention-days: 7
+          bypass_content_cache: ${{ needs.detect-changes.outputs.bypass_content_cache }}
+          disable_content_hash: ${{ vars.CI_DISABLE_CONTENT_HASH }}
 
   component-journeys:
     # Non-pixel docs/structure/a11y journeys. Routed via docs_journeys so
@@ -720,66 +294,11 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: install unzip (playwright image lacks it; setup-bun needs it)
-        run: apt-get update && apt-get install -y --no-install-recommends unzip
-      - uses: ./.github/actions/ci-setup-bun
-      - uses: ./.github/actions/ci-content-hash-restore
-        id: content_hash
+      - uses: ./.github/actions/ci-job-component-journeys
         with:
-          execution: component_journeys
-          bypass: ${{ needs.detect-changes.outputs.bypass_content_cache }}
-          disable: ${{ vars.CI_DISABLE_CONTENT_HASH }}
-          container_tag: ${{ env.PLAYWRIGHT_CONTAINER_TAG }}
-      - uses: ./.github/actions/ci-bun-install
-        if: steps.content_hash.outputs.hit != 'true'
-        with:
-          cache_key_prefix: bun-container
-      - uses: ./.github/actions/ci-download-packages-dist
-        if: steps.content_hash.outputs.hit != 'true'
-      - name: assert playwright npm/container version sync (root @playwright/test)
-        if: steps.content_hash.outputs.hit != 'true'
-        run: |
-          set -euo pipefail
-          vr_version="$(bun -e 'console.log(require("@playwright/test/package.json").version)')"
-          echo "root @playwright/test (VR suite): ${vr_version}; container tag: ${PLAYWRIGHT_CONTAINER_TAG}"
-          if [ "v${vr_version}-noble" != "${PLAYWRIGHT_CONTAINER_TAG}" ]; then
-            echo "::error::@playwright/test version (${vr_version}) does not match pinned container tag (${PLAYWRIGHT_CONTAINER_TAG})"
-            exit 1
-          fi
-      - name: build packaged interaction test target
-        if: steps.content_hash.outputs.hit != 'true'
-        run: DOCS_BUILD_MODE=legacy-full BASE_PATH=/ggsvelte bun run build:docs
-      - name: docs shell, home/gallery, progressive, themes, interaction, playground journeys
-        if: steps.content_hash.outputs.hit != 'true'
-        # Enumerate every non-pixel docs journey. --grep-invert drops visual-contract
-        # screenshots so content PRs never pay full-page goldens here.
-        run: >-
-          bun run test:visual --
-          docs-shell.spec.ts
-          docs-home-gallery.spec.ts
-          docs-progressive-search.spec.ts
-          docs-themes.spec.ts
-          interaction-accessibility.spec.ts
-          playground.spec.ts
-          --grep-invert 'visual contract'
-      - uses: ./.github/actions/ci-content-hash-write
-        if: steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
-        with:
-          execution: component_journeys
-          hash: ${{ steps.content_hash.outputs.hash }}
-      - name: upload journey failure artifacts
-        if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: component-journeys-failure-artifacts
-          path: |
-            tests/visual/test-results/
-            tests/visual/playwright-report/
-          if-no-files-found: ignore
-          retention-days: 7
+          bypass_content_cache: ${{ needs.detect-changes.outputs.bypass_content_cache }}
+          disable_content_hash: ${{ vars.CI_DISABLE_CONTENT_HASH }}
 
-  # Informational only — not a required status check (excluded from ci-gate).
-  # Hard gate remains on `run-bench` PRs via bench.yml.
   interaction-perf:
     name: interaction-perf (p50/p95, informational)
     needs: [detect-changes, packages-dist]
@@ -800,43 +319,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: install unzip (playwright image lacks it; setup-bun needs it)
-        run: apt-get update && apt-get install -y --no-install-recommends unzip
-      - uses: ./.github/actions/ci-setup-bun
-      - uses: ./.github/actions/ci-bun-install
-        with:
-          cache_key_prefix: bun-container
-      - uses: ./.github/actions/ci-download-packages-dist
-      - name: build docs for interaction performance fixtures
-        run: DOCS_BUILD_MODE=legacy-full BASE_PATH=/ggsvelte bun run build:docs
-      - name: interaction performance p50/p95 (informational — never fail the check)
-        id: perf
-        # Wall-clock budgets flake on the shared self-hosted host. Hard gate is
-        # bench.yml on `run-bench` PRs. Soft-fail here so branch protection that
-        # requires all checks cannot block merges; ci-gate also ignores this job.
-        run: |
-          set +e
-          bun run test:interaction-perf
-          code=$?
-          echo "code=${code}" >> "$GITHUB_OUTPUT"
-          if [ "${code}" -ne 0 ]; then
-            echo "::warning::interaction-perf budgets failed (informational; exit ${code})"
-          fi
-          exit 0
-      - name: upload interaction-perf failure artifacts
-        if: steps.perf.outputs.code != '0'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: interaction-perf-failure-artifacts
-          path: tests/performance/test-results/
-          if-no-files-found: ignore
-          retention-days: 7
+      - uses: ./.github/actions/ci-job-interaction-perf
 
-  # Former monolithic "build" is three concurrent jobs (fail-fast / no serial wait):
-  #   build        — packages + knip + type-aware + publint (scripts tests land here)
-  #   svelte-check — packages/svelte + apps/docs svelte-check (product surface only)
-  #   docs-site    — vite adapter-static + pages-links (product surface only)
-  # scripts/**/*.test.ts schedules build + unit only — never docs site.
   build:
     name: build (packages + knip + type-aware + publint)
     needs: detect-changes
@@ -848,48 +332,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: ./.github/actions/ci-setup-bun
-      - uses: ./.github/actions/ci-content-hash-restore
-        id: content_hash
+      - uses: ./.github/actions/ci-job-build
         with:
-          execution: build
-          bypass: ${{ needs.detect-changes.outputs.bypass_content_cache }}
-          disable: ${{ vars.CI_DISABLE_CONTENT_HASH }}
-      - uses: ./.github/actions/ci-bun-install
-        if: steps.content_hash.outputs.hit != 'true'
-        with:
-          cache_key_prefix: bun
-      - name: build packages (tsc -b + svelte-package)
-        if: steps.content_hash.outputs.hit != 'true'
-        run: bun run build
-      - name: tsc examples corpus
-        if: steps.content_hash.outputs.hit != 'true'
-        run: bun run check:examples
-      # apps/docs/tsconfig.json extends ./.svelte-kit/tsconfig.json. Pre-split,
-      # check:docs (svelte-kit sync) ran in this job before oxlint; keep the
-      # sync here so type-aware lint does not fail with Invalid tsconfig when
-      # svelte-check runs as a concurrent sibling (pre-commit documents the
-      # same order dependency).
-      - name: svelte-kit sync (apps/docs tsconfig for type-aware oxlint)
-        if: steps.content_hash.outputs.hit != 'true'
-        run: cd apps/docs && bun x svelte-kit sync
-      - name: oxlint --type-aware
-        if: steps.content_hash.outputs.hit != 'true'
-        run: bun run lint:type-aware
-      - name: knip
-        if: steps.content_hash.outputs.hit != 'true'
-        run: bun run knip
-      - name: publint + attw (real gate — exports point at dist/)
-        if: steps.content_hash.outputs.hit != 'true'
-        run: bun run lint:package
-      - uses: ./.github/actions/ci-content-hash-write
-        if: steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
-        with:
-          execution: build
-          hash: ${{ steps.content_hash.outputs.hash }}
-      # packages/*/dist for consumers is produced by packages-dist (issue #241).
-      # This job keeps an independent build so publint/attw always re-validate
-      # a fresh tree alongside knip/type-aware analysis.
+          bypass_content_cache: ${{ needs.detect-changes.outputs.bypass_content_cache }}
+          disable_content_hash: ${{ vars.CI_DISABLE_CONTENT_HASH }}
 
   svelte-check:
     name: svelte-check (packages/svelte + apps/docs)
@@ -902,31 +348,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: ./.github/actions/ci-setup-bun
-      - uses: ./.github/actions/ci-content-hash-restore
-        id: content_hash
+      - uses: ./.github/actions/ci-job-svelte-check
         with:
-          execution: svelte_check
-          bypass: ${{ needs.detect-changes.outputs.bypass_content_cache }}
-          disable: ${{ vars.CI_DISABLE_CONTENT_HASH }}
-      - uses: ./.github/actions/ci-bun-install
-        if: steps.content_hash.outputs.hit != 'true'
-        with:
-          cache_key_prefix: bun
-      - name: build packages (svelte-check imports package types)
-        if: steps.content_hash.outputs.hit != 'true'
-        run: bun run build
-      - name: svelte-check (packages/svelte)
-        if: steps.content_hash.outputs.hit != 'true'
-        run: bun run check:svelte
-      - name: svelte-check (apps/docs)
-        if: steps.content_hash.outputs.hit != 'true'
-        run: bun run check:docs
-      - uses: ./.github/actions/ci-content-hash-write
-        if: steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
-        with:
-          execution: svelte_check
-          hash: ${{ steps.content_hash.outputs.hash }}
+          bypass_content_cache: ${{ needs.detect-changes.outputs.bypass_content_cache }}
+          disable_content_hash: ${{ vars.CI_DISABLE_CONTENT_HASH }}
 
   docs-site:
     name: docs-site (adapter-static build + pages links)
@@ -939,31 +364,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: ./.github/actions/ci-setup-bun
-      - uses: ./.github/actions/ci-content-hash-restore
-        id: content_hash
+      - uses: ./.github/actions/ci-job-docs-site
         with:
-          execution: docs_site
-          bypass: ${{ needs.detect-changes.outputs.bypass_content_cache }}
-          disable: ${{ vars.CI_DISABLE_CONTENT_HASH }}
-      - uses: ./.github/actions/ci-bun-install
-        if: steps.content_hash.outputs.hit != 'true'
-        with:
-          cache_key_prefix: bun
-      - name: build packages (docs import workspace packages)
-        if: steps.content_hash.outputs.hit != 'true'
-        run: bun run build
-      - name: build static docs site (adapter-static; the deployable/VR target)
-        if: steps.content_hash.outputs.hit != 'true'
-        run: bun run build:docs
-      - name: verify packed Pages links and required R0 journeys
-        if: steps.content_hash.outputs.hit != 'true'
-        run: bun run check:pages-links
-      - uses: ./.github/actions/ci-content-hash-write
-        if: steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
-        with:
-          execution: docs_site
-          hash: ${{ steps.content_hash.outputs.hash }}
+          bypass_content_cache: ${{ needs.detect-changes.outputs.bypass_content_cache }}
+          disable_content_hash: ${{ vars.CI_DISABLE_CONTENT_HASH }}
 
   actions-security:
     name: actions-security (actionlint + zizmor)
@@ -976,30 +380,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: ./.github/actions/ci-setup-bun
-      - uses: ./.github/actions/ci-content-hash-restore
-        id: content_hash
+      - uses: ./.github/actions/ci-job-actions-security
         with:
-          execution: actions_security
-          bypass: ${{ needs.detect-changes.outputs.bypass_content_cache }}
-          disable: ${{ vars.CI_DISABLE_CONTENT_HASH }}
-      - uses: ./.github/actions/ci-bun-install
-        if: steps.content_hash.outputs.hit != 'true'
-        with:
-          cache_key_prefix: bun
-      - name: actionlint (lockfile-installed wasm build)
-        if: steps.content_hash.outputs.hit != 'true'
-        run: bun run lint:actions
-      - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
-        if: steps.content_hash.outputs.hit != 'true'
-      - name: zizmor
-        if: steps.content_hash.outputs.hit != 'true'
-        run: uvx zizmor==1.26.1 .github/workflows .github/actions
-      - uses: ./.github/actions/ci-content-hash-write
-        if: steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
-        with:
-          execution: actions_security
-          hash: ${{ steps.content_hash.outputs.hash }}
+          bypass_content_cache: ${{ needs.detect-changes.outputs.bypass_content_cache }}
+          disable_content_hash: ${{ vars.CI_DISABLE_CONTENT_HASH }}
 
   bench-smoke:
     name: bench-smoke (mitata, 1k workload)
@@ -1012,31 +396,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: ./.github/actions/ci-setup-bun
-      - uses: ./.github/actions/ci-content-hash-restore
-        id: content_hash
+      - uses: ./.github/actions/ci-job-bench-smoke
         with:
-          execution: bench_smoke
-          bypass: ${{ needs.detect-changes.outputs.bypass_content_cache }}
-          disable: ${{ vars.CI_DISABLE_CONTENT_HASH }}
-      - uses: ./.github/actions/ci-bun-install
-        if: steps.content_hash.outputs.hit != 'true'
-        with:
-          cache_key_prefix: bun
-      - name: build spec/core dist (benchmarks import the packages)
-        if: steps.content_hash.outputs.hit != 'true'
-        run: bun run check
-      - name: bench smoke (1k points; informal numbers, not a gate on values)
-        if: steps.content_hash.outputs.hit != 'true'
-        run: bun run bench:smoke
-      - name: retained-memory absolute and 20% regression gate
-        if: steps.content_hash.outputs.hit != 'true'
-        run: bun run bench:memory:check
-      - uses: ./.github/actions/ci-content-hash-write
-        if: steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
-        with:
-          execution: bench_smoke
-          hash: ${{ steps.content_hash.outputs.hash }}
+          bypass_content_cache: ${{ needs.detect-changes.outputs.bypass_content_cache }}
+          disable_content_hash: ${{ vars.CI_DISABLE_CONTENT_HASH }}
 
   vr-baseline-guard:
     # Same-PR smoke baselines allowed when paired with render-relevant paths
@@ -1050,34 +413,10 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          persist-credentials: false
           fetch-depth: 0
-      - uses: ./.github/actions/ci-setup-bun
-      - name: refuse baseline-only / content-only-justified smoke baseline diffs
-        env:
-          # env-indirection: branch names / repo names are PR-controlled text
-          # and must never be interpolated into the script itself.
-          BASE_REF: ${{ github.event.pull_request.base.ref }}
-          HEAD_REF: ${{ github.event.pull_request.head.ref }}
-          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
-          BASE_REPO: ${{ github.repository }}
-        run: |
-          set -euo pipefail
-          git fetch --no-tags origin "${BASE_REF}"
-          changed="$(git diff --name-only "origin/${BASE_REF}"...HEAD)"
-          vr_update_args=()
-          if [ "${HEAD_REPO}" = "${BASE_REPO}" ] && printf '%s' "${HEAD_REF}" | grep -Eq '^vr-update/pr-[0-9]+$'; then
-            vr_update_args=(--vr-update-branch)
-          fi
-          # Pure helper reuses docs_render vs content-only classification (Codex P2).
-          if ! printf '%s\n' "${changed}" | bun scripts/vr-baseline-guard.ts "${vr_update_args[@]+"${vr_update_args[@]}"}"; then
-            echo "::error::same-PR smoke baselines require packages/, examples/, tests/visual/ (not __screenshots__/ alone), or apps/docs *render* paths — not guide content/catalogs. Or use a vr-update/pr-<n> branch."
-            exit 1
-          fi
+          persist-credentials: false
+      - uses: ./.github/actions/ci-job-vr-baseline-guard
 
-  # Single required aggregator. Skipped jobs are OK when routing disabled them;
-  # a required job that is skipped/failed/cancelled fails the gate.
-  # interaction-perf is intentionally excluded (informational only).
   ci-gate:
     name: ci-gate (required aggregator)
     if: always()
@@ -1104,106 +443,30 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: ./.github/actions/ci-setup-bun
-      - name: evaluate required jobs
-        env:
-          DETECT_RESULT: ${{ needs.detect-changes.result }}
-          CHECKS_REQ: ${{ needs.detect-changes.outputs.checks }}
-          UNIT_REQ: ${{ needs.detect-changes.outputs.unit }}
-          COMPONENT_REQ: ${{ needs.detect-changes.outputs.component }}
-          CONSUMER_REQ: ${{ needs.detect-changes.outputs.consumer }}
-          BUILD_REQ: ${{ needs.detect-changes.outputs.build }}
-          SVELTE_CHECK_REQ: ${{ needs.detect-changes.outputs.svelte_check }}
-          DOCS_SITE_REQ: ${{ needs.detect-changes.outputs.docs_site }}
-          ACTIONS_REQ: ${{ needs.detect-changes.outputs.actions_security }}
-          BENCH_REQ: ${{ needs.detect-changes.outputs.bench_smoke }}
-          PACKAGES_DIST_REQ: ${{ needs.detect-changes.outputs.packages_dist }}
-          DOCS_JOURNEYS_REQ: ${{ needs.detect-changes.outputs.docs_journeys }}
-          CHECKS_RES: ${{ needs.checks.result }}
-          UNIT_RES: ${{ needs.unit.result }}
-          COMPONENT_SVELTE_RES: ${{ needs.component-svelte.result }}
-          COMPONENT_SPIKES_RES: ${{ needs.component-spikes.result }}
-          DOCS_JOURNEYS_RES: ${{ needs.component-journeys.result }}
-          CONSUMER_RES: ${{ needs.consumer-compat.result }}
-          BUILD_RES: ${{ needs.build.result }}
-          SVELTE_CHECK_RES: ${{ needs.svelte-check.result }}
-          DOCS_SITE_RES: ${{ needs.docs-site.result }}
-          ACTIONS_RES: ${{ needs.actions-security.result }}
-          BENCH_RES: ${{ needs.bench-smoke.result }}
-          PACKAGES_DIST_RES: ${{ needs.packages-dist.result }}
-          VR_GUARD_RES: ${{ needs.vr-baseline-guard.result }}
-          EVENT_NAME: ${{ github.event_name }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [ "${DETECT_RESULT}" != "success" ]; then
-            echo "::error::detect-changes failed — cannot trust routing"
-            exit 1
-          fi
-          # vr/pages are enforced by their own workflows; interaction_perf is informational.
-          # vr-baseline-guard is always required on pull_request.
-          # docs_journeys is independent of component (content PRs run journeys without svelte/spikes).
-          bun -e '
-            import { evaluateGate, type JobName, type JobPlan, type JobResult } from "./scripts/ci-routing.ts";
-            const env = process.env;
-            const req = (k: string) => env[k] === "true";
-            const required: JobPlan = {
-              checks: req("CHECKS_REQ"),
-              unit: req("UNIT_REQ"),
-              component: req("COMPONENT_REQ"),
-              consumer: req("CONSUMER_REQ"),
-              build: req("BUILD_REQ"),
-              svelte_check: req("SVELTE_CHECK_REQ"),
-              docs_site: req("DOCS_SITE_REQ"),
-              actions_security: req("ACTIONS_REQ"),
-              bench_smoke: req("BENCH_REQ"),
-              interaction_perf: false,
-              packages_dist: req("PACKAGES_DIST_REQ"),
-              vr: false,
-              pages: false,
-              docs_journeys: req("DOCS_JOURNEYS_REQ"),
-            };
-            const shard = (k: string): JobResult => (env[k] as JobResult) || "skipped";
-            // Issue #243: package browser surface is svelte+spikes only.
-            // Journeys are gated separately via docs_journeys.
-            const componentShards = [
-              shard("COMPONENT_SVELTE_RES"),
-              shard("COMPONENT_SPIKES_RES"),
-            ];
-            let componentResult: JobResult = "skipped";
-            if (componentShards.every((r) => r === "skipped")) componentResult = "skipped";
-            else if (componentShards.every((r) => r === "success")) componentResult = "success";
-            else if (componentShards.some((r) => r === "failure" || r === "cancelled"))
-              componentResult = "failure";
-            else componentResult = "unknown";
-            const results: Partial<Record<JobName, JobResult>> = {
-              checks: env.CHECKS_RES as JobResult,
-              unit: env.UNIT_RES as JobResult,
-              component: componentResult,
-              consumer: env.CONSUMER_RES as JobResult,
-              build: env.BUILD_RES as JobResult,
-              svelte_check: env.SVELTE_CHECK_RES as JobResult,
-              docs_site: env.DOCS_SITE_RES as JobResult,
-              actions_security: env.ACTIONS_RES as JobResult,
-              bench_smoke: env.BENCH_RES as JobResult,
-              packages_dist: env.PACKAGES_DIST_RES as JobResult,
-              docs_journeys: shard("DOCS_JOURNEYS_RES"),
-            };
-            const gate = evaluateGate(required, results);
-            const failures = [...gate.failures];
-            if (env.EVENT_NAME === "pull_request") {
-              const guard = env.VR_GUARD_RES;
-              if (guard !== "success" && guard !== "skipped") {
-                // skipped only if the job if: filtered it out; on PR it always schedules.
-                failures.push(`vr-baseline-guard:${guard}`);
-              }
-              if (guard === "skipped") {
-                failures.push("vr-baseline-guard:skipped");
-              }
-            }
-            if (failures.length) {
-              console.error("ci-gate failed:", failures.join(", "));
-              process.exit(1);
-            }
-            console.log("ci-gate ok");
-          '
+      - uses: ./.github/actions/ci-job-ci-gate
+        with:
+          detect_result: ${{ needs.detect-changes.result }}
+          checks_req: ${{ needs.detect-changes.outputs.checks }}
+          unit_req: ${{ needs.detect-changes.outputs.unit }}
+          component_req: ${{ needs.detect-changes.outputs.component }}
+          consumer_req: ${{ needs.detect-changes.outputs.consumer }}
+          build_req: ${{ needs.detect-changes.outputs.build }}
+          svelte_check_req: ${{ needs.detect-changes.outputs.svelte_check }}
+          docs_site_req: ${{ needs.detect-changes.outputs.docs_site }}
+          actions_req: ${{ needs.detect-changes.outputs.actions_security }}
+          bench_req: ${{ needs.detect-changes.outputs.bench_smoke }}
+          packages_dist_req: ${{ needs.detect-changes.outputs.packages_dist }}
+          docs_journeys_req: ${{ needs.detect-changes.outputs.docs_journeys }}
+          checks_res: ${{ needs.checks.result }}
+          unit_res: ${{ needs.unit.result }}
+          component_svelte_res: ${{ needs.component-svelte.result }}
+          component_spikes_res: ${{ needs.component-spikes.result }}
+          docs_journeys_res: ${{ needs.component-journeys.result }}
+          consumer_res: ${{ needs.consumer-compat.result }}
+          build_res: ${{ needs.build.result }}
+          svelte_check_res: ${{ needs.svelte-check.result }}
+          docs_site_res: ${{ needs.docs-site.result }}
+          actions_res: ${{ needs.actions-security.result }}
+          bench_res: ${{ needs.bench-smoke.result }}
+          packages_dist_res: ${{ needs.packages-dist.result }}
+          vr_guard_res: ${{ needs.vr-baseline-guard.result }}

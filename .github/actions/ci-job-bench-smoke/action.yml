@@ -1,0 +1,45 @@
+# Auto-extracted job body for `bench-smoke` from ci.yml.
+# Job-level needs/if/runs-on/container/strategy stay in the workflow.
+name: CI job — bench-smoke
+description: >
+  Full step body for the bench-smoke CI job (keeps required check name on the caller job).
+inputs:
+  bypass_content_cache:
+    description: Bypass content-hash short-circuit
+    required: false
+    default: "false"
+  disable_content_hash:
+    description: CI_DISABLE_CONTENT_HASH var (1 disables)
+    required: false
+    default: ""
+runs:
+  using: composite
+  steps:
+    - uses: ./.github/actions/ci-setup-bun
+    - uses: ./.github/actions/ci-content-hash-restore
+      id: content_hash
+      with:
+        execution: bench_smoke
+        bypass: ${{ inputs.bypass_content_cache }}
+        disable: ${{ inputs.disable_content_hash }}
+    - uses: ./.github/actions/ci-bun-install
+      if: steps.content_hash.outputs.hit != 'true'
+      with:
+        cache_key_prefix: bun
+    - name: build spec/core dist (benchmarks import the packages)
+      if: steps.content_hash.outputs.hit != 'true'
+      run: bun run check
+      shell: bash
+    - name: bench smoke (1k points; informal numbers, not a gate on values)
+      if: steps.content_hash.outputs.hit != 'true'
+      run: bun run bench:smoke
+      shell: bash
+    - name: retained-memory absolute and 20% regression gate
+      if: steps.content_hash.outputs.hit != 'true'
+      run: bun run bench:memory:check
+      shell: bash
+    - uses: ./.github/actions/ci-content-hash-write
+      if: steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
+      with:
+        execution: bench_smoke
+        hash: ${{ steps.content_hash.outputs.hash }}

@@ -1,0 +1,21 @@
+# Auto-extracted job body for `checks` from ci.yml.
+# Job-level needs/if/runs-on/container/strategy stay in the workflow.
+name: CI job — checks
+description: >
+  Full step body for the checks CI job (keeps required check name on the caller job).
+runs:
+  using: composite
+  steps:
+    - uses: ./.github/actions/ci-setup-bun
+    - uses: ./.github/actions/ci-bun-install
+      with:
+        cache_key_prefix: bun
+    - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
+    - run: uv tool install pre-commit
+      shell: bash
+    # Pre-commit stage only. Pre-push parity (build, unit, svelte-check, knip,
+    # type-aware lint, examples/docs check) is covered by dedicated jobs so we
+    # do not pay for them twice on every PR.
+    - name: pre-commit stage (parity)
+      run: pre-commit run --all-files --show-diff-on-failure
+      shell: bash

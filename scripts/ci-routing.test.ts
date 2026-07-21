@@ -284,9 +284,8 @@ describe("planJobs", () => {
   });
 
   test("composite action changes stay on CI-plumbing jobs (no VR/component for Dependabot pin bumps)", () => {
-    const plan = planJobs(
-      classifyChangedPaths([".github/actions/ci-content-hash-restore/action.yml"]),
-    );
+    const paths = [".github/actions/ci-content-hash-restore/action.yml"];
+    const plan = planJobs(classifyChangedPaths(paths), { paths });
     expect(plan.checks).toBe(true);
     expect(plan.actions_security).toBe(true);
     // release-wiring.test.ts asserts composite content-hash protocol wiring.
@@ -300,6 +299,23 @@ describe("planJobs", () => {
     expect(plan.vr).toBe(false);
     expect(plan.pages).toBe(false);
     expect(plan.interaction_perf).toBe(false);
+  });
+
+  test("job-body composite changes schedule their owning jobs (and packages_dist when needed)", () => {
+    const sveltePaths = [".github/actions/ci-job-component-svelte/action.yml"];
+    const sveltePlan = planJobs(classifyChangedPaths(sveltePaths), { paths: sveltePaths });
+    expect(sveltePlan.component).toBe(true);
+    expect(sveltePlan.packages_dist).toBe(true);
+    expect(sveltePlan.actions_security).toBe(true);
+    expect(sveltePlan.unit).toBe(true);
+    // Still not VR/pages for a single job-body edit.
+    expect(sveltePlan.vr).toBe(false);
+    expect(sveltePlan.pages).toBe(false);
+
+    const consumerPaths = [".github/actions/ci-job-consumer-compat/action.yml"];
+    const consumerPlan = planJobs(classifyChangedPaths(consumerPaths), { paths: consumerPaths });
+    expect(consumerPlan.consumer).toBe(true);
+    expect(consumerPlan.packages_dist).toBe(true);
   });
 
   test("ci.yml self-changes run workflow unit + actions-security without browser surfaces", () => {
@@ -933,6 +949,7 @@ describe("ci-routing module tree (split-safe)", () => {
     const mod = await import("./ci-routing.ts");
     const expected = [
       "CACHEABLE_EXECUTIONS",
+      "CI_JOB_BODY_OWNERS",
       "CONTENT_HASH_SCHEMA",
       "DOCS_CONTENT_ONLY_PATHS",
       "DOCS_CONTENT_SCRIPT_PATTERNS",
@@ -951,6 +968,7 @@ describe("ci-routing module tree (split-safe)", () => {
       "jobNames",
       "listJobContentPaths",
       "matchPathPattern",
+      "owningJobsForActionPath",
       "parseFileList",
       "parseGitLsTreeLine",
       "parseNameStatusList",

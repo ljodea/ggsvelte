@@ -1,0 +1,63 @@
+# Auto-extracted job body for `unit` from ci.yml.
+# Job-level needs/if/runs-on/container/strategy stay in the workflow.
+name: CI job — unit
+description: >
+  Full step body for the unit CI job (keeps required check name on the caller job).
+inputs:
+  bypass_content_cache:
+    description: Bypass content-hash short-circuit
+    required: false
+    default: "false"
+  disable_content_hash:
+    description: CI_DISABLE_CONTENT_HASH var (1 disables)
+    required: false
+    default: ""
+  codecov_token:
+    description: Codecov upload token
+    required: false
+    default: ""
+runs:
+  using: composite
+  steps:
+    - uses: ./.github/actions/ci-setup-bun
+    - uses: ./.github/actions/ci-content-hash-restore
+      id: content_hash
+      with:
+        execution: unit
+        bypass: ${{ inputs.bypass_content_cache }}
+        disable: ${{ inputs.disable_content_hash }}
+    - uses: ./.github/actions/ci-bun-install
+      if: steps.content_hash.outputs.hit != 'true'
+      with:
+        cache_key_prefix: bun
+    - name: build spec/core dist (package exports point at dist/)
+      if: steps.content_hash.outputs.hit != 'true'
+      run: bun run check
+      shell: bash
+    # lcov for Codecov; text reporter still prints a summary in the log.
+    - if: steps.content_hash.outputs.hit != 'true'
+      run: >
+        bun test --coverage --coverage-reporter=lcov
+        --coverage-dir=coverage/unit
+        packages/spec packages/core benchmarks scripts tests/evals
+      shell: bash
+    - name: Upload unit coverage to Codecov
+      # Custom if overrides default success() — keep the success gate so a
+      # failed suite does not upload a partial report or count as green.
+      if: success() && steps.content_hash.outputs.hit != 'true'
+      uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
+      with:
+        token: ${{ inputs.codecov_token }}
+        files: coverage/unit/lcov.info
+        flags: unit
+        name: unit
+        # Pin the uploader binary; the action's default is "latest".
+        version: v11.3.1
+        disable_search: true
+        fail_ci_if_error: true
+    - uses: ./.github/actions/ci-content-hash-write
+      # Require success so a Codecov upload failure cannot green-cache the job.
+      if: success() && steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
+      with:
+        execution: unit
+        hash: ${{ steps.content_hash.outputs.hash }}

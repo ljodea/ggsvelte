@@ -1,0 +1,35 @@
+# Auto-extracted job body for `vr-baseline-guard` from ci.yml.
+# Job-level needs/if/runs-on/container/strategy stay in the workflow.
+name: CI job — vr-baseline-guard
+description: >
+  Full step body for the vr-baseline-guard CI job (keeps required check name on the caller job).
+runs:
+  using: composite
+  steps:
+    - uses: ./.github/actions/ci-setup-bun
+    - name: refuse baseline-only / content-only-justified smoke baseline diffs
+      env:
+        # env-indirection: branch names / repo names are PR-controlled text
+        # and must never be interpolated into the script itself.
+        BASE_REF: ${{ github.event.pull_request.base.ref }}
+        HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+        BASE_REPO: ${{ github.repository }}
+      run: |
+        set -euo pipefail
+        git fetch --no-tags origin "${BASE_REF}"
+        changed="$(git diff --name-only "origin/${BASE_REF}"...HEAD)"
+        vr_update_args=()
+        if [ "${HEAD_REPO}" = "${BASE_REPO}" ] && printf '%s' "${HEAD_REF}" | grep -Eq '^vr-update/pr-[0-9]+$'; then
+          vr_update_args=(--vr-update-branch)
+        fi
+        # Pure helper reuses docs_render vs content-only classification (Codex P2).
+        if ! printf '%s\n' "${changed}" | bun scripts/vr-baseline-guard.ts "${vr_update_args[@]+"${vr_update_args[@]}"}"; then
+          echo "::error::same-PR smoke baselines require packages/, examples/, tests/visual/ (not __screenshots__/ alone), or apps/docs *render* paths — not guide content/catalogs. Or use a vr-update/pr-<n> branch."
+          exit 1
+        fi
+      shell: bash
+
+    # Single required aggregator. Skipped jobs are OK when routing disabled them;
+    # a required job that is skipped/failed/cancelled fails the gate.
+    # interaction-perf is intentionally excluded (informational only).

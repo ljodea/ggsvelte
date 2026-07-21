@@ -1,0 +1,34 @@
+# Auto-extracted job body for `compatibility-matrix` from ci.yml.
+# Job-level needs/if/runs-on/container/strategy stay in the workflow.
+name: CI job — compatibility-matrix
+description: >
+  Full step body for the compatibility-matrix CI job (keeps required check name on the caller job).
+outputs:
+  matrix:
+    description: JSON matrix for consumer-compat
+    value: ${{ steps.matrix.outputs.matrix }}
+runs:
+  using: composite
+  steps:
+    - uses: ./.github/actions/ci-setup-bun
+    - id: matrix
+      name: emit packed-consumer matrix (PR default vs full required)
+      # Issue #246: PRs run one Linux consumer row by default; full required
+      # matrix when labeled run-compat (detect-changes also forces consumer
+      # + packages_dist so the label works on docs-only PRs). Main push stays
+      # thinned per #244 (consumer PR-primary). Nightly covers expanded rows.
+      env:
+        EVENT_NAME: ${{ github.event_name }}
+        PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        flavor=required
+        if [ "${EVENT_NAME}" = "pull_request" ]; then
+          flavor=pr
+          if printf '%s' "${PR_LABELS}" | tr ',' '\n' | grep -qx 'run-compat'; then
+            flavor=required
+          fi
+        fi
+        echo "support-matrix flavor=${flavor} labels=${PR_LABELS:-}"
+        echo "matrix=$(bun scripts/support-matrix.ts "${flavor}")" >> "$GITHUB_OUTPUT"

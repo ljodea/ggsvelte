@@ -1,0 +1,48 @@
+# Auto-extracted job body for `interaction-perf` from ci.yml.
+# Job-level needs/if/runs-on/container/strategy stay in the workflow.
+name: CI job — interaction-perf
+description: >
+  Full step body for the interaction-perf CI job (keeps required check name on the caller job).
+runs:
+  using: composite
+  steps:
+    - name: install unzip (playwright image lacks it; setup-bun needs it)
+      run: apt-get update && apt-get install -y --no-install-recommends unzip
+      shell: bash
+    - uses: ./.github/actions/ci-setup-bun
+    - uses: ./.github/actions/ci-bun-install
+      with:
+        cache_key_prefix: bun-container
+    - uses: ./.github/actions/ci-download-packages-dist
+    - name: build docs for interaction performance fixtures
+      run: DOCS_BUILD_MODE=legacy-full BASE_PATH=/ggsvelte bun run build:docs
+      shell: bash
+    - name: interaction performance p50/p95 (informational — never fail the check)
+      id: perf
+      # Wall-clock budgets flake on the shared self-hosted host. Hard gate is
+      # bench.yml on `run-bench` PRs. Soft-fail here so branch protection that
+      # requires all checks cannot block merges; ci-gate also ignores this job.
+      run: |
+        set +e
+        bun run test:interaction-perf
+        code=$?
+        echo "code=${code}" >> "$GITHUB_OUTPUT"
+        if [ "${code}" -ne 0 ]; then
+          echo "::warning::interaction-perf budgets failed (informational; exit ${code})"
+        fi
+        exit 0
+      shell: bash
+    - name: upload interaction-perf failure artifacts
+      if: steps.perf.outputs.code != '0'
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      with:
+        name: interaction-perf-failure-artifacts
+        path: tests/performance/test-results/
+        if-no-files-found: ignore
+        retention-days: 7
+
+    # Former monolithic "build" is three concurrent jobs (fail-fast / no serial wait):
+    #   build        — packages + knip + type-aware + publint (scripts tests land here)
+    #   svelte-check — packages/svelte + apps/docs svelte-check (product surface only)
+    #   docs-site    — vite adapter-static + pages-links (product surface only)
+    # scripts/**/*.test.ts schedules build + unit only — never docs site.

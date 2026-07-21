@@ -1,0 +1,122 @@
+# Auto-extracted job body for `component-svelte` from ci.yml.
+# Job-level needs/if/runs-on/container/strategy stay in the workflow.
+name: CI job — component-svelte
+description: >
+  Full step body for the component-svelte CI job (keeps required check name on the caller job).
+inputs:
+  bypass_content_cache:
+    description: Bypass content-hash short-circuit
+    required: false
+    default: "false"
+  disable_content_hash:
+    description: CI_DISABLE_CONTENT_HASH var (1 disables)
+    required: false
+    default: ""
+  codecov_token:
+    description: Codecov upload token
+    required: false
+    default: ""
+runs:
+  using: composite
+  steps:
+    - name: install unzip (playwright image lacks it; setup-bun needs it)
+      run: apt-get update && apt-get install -y --no-install-recommends unzip
+      shell: bash
+    - uses: ./.github/actions/ci-setup-bun
+    - uses: ./.github/actions/ci-content-hash-restore
+      id: content_hash
+      with:
+        execution: component_svelte
+        bypass: ${{ inputs.bypass_content_cache }}
+        disable: ${{ inputs.disable_content_hash }}
+        container_tag: ${{ env.PLAYWRIGHT_CONTAINER_TAG }}
+    - uses: ./.github/actions/ci-bun-install
+      if: steps.content_hash.outputs.hit != 'true'
+      with:
+        cache_key_prefix: bun-container
+    - uses: ./.github/actions/ci-download-packages-dist
+      if: steps.content_hash.outputs.hit != 'true'
+    - name: assert playwright npm/container version sync (packages/svelte)
+      if: steps.content_hash.outputs.hit != 'true'
+      run: |
+        set -euo pipefail
+        npm_version="$(cd packages/svelte && bun -e 'console.log(require("playwright/package.json").version)')"
+        expected="v${npm_version}-noble"
+        echo "packages/svelte playwright: ${npm_version}; container tag: ${PLAYWRIGHT_CONTAINER_TAG}"
+        if [ "${expected}" != "${PLAYWRIGHT_CONTAINER_TAG}" ]; then
+          echo "::error::playwright npm version in packages/svelte (${npm_version}) does not match pinned container tag (${PLAYWRIGHT_CONTAINER_TAG})"
+          exit 1
+        fi
+      shell: bash
+    # Chromium collects browser v8 coverage (CDP; works under bun) and enforces
+    # thresholds. Firefox/webkit stay coverage-free. SSR runs under bun without
+    # --coverage: @vitest/coverage-v8 needs Node inspector Coverage APIs that
+    # bun does not implement ("Coverage APIs are not supported"). Local
+    # `test:coverage` can still collect SSR lcov under node for offline use.
+    - name: component tests (packages/svelte, chromium + coverage)
+      if: steps.content_hash.outputs.hit != 'true'
+      working-directory: packages/svelte
+      run: bunx --bun vitest run --coverage --project chromium
+      shell: bash
+    - name: component tests (packages/svelte, firefox + webkit)
+      if: steps.content_hash.outputs.hit != 'true'
+      working-directory: packages/svelte
+      run: bunx --bun vitest run --project firefox --project webkit
+      shell: bash
+    - name: component tests (packages/svelte, SSR)
+      if: steps.content_hash.outputs.hit != 'true'
+      working-directory: packages/svelte
+      run: bunx --bun vitest run --config vitest.ssr.config.ts
+      shell: bash
+    - name: rewrite svelte lcov paths to monorepo root
+      # vitest writes SF:src/lib/... relative to packages/svelte; Codecov
+      # components filter packages/svelte/** so paths must be repo-rooted.
+      if: success() && steps.content_hash.outputs.hit != 'true'
+      shell: bash
+      run: |
+        set -euo pipefail
+        f=packages/svelte/coverage/browser/lcov.info
+        if [ ! -f "${f}" ]; then
+          echo "::error::missing coverage file ${f}"
+          exit 1
+        fi
+        # Idempotent: only prefix bare package-relative src/ paths.
+        sed -i 's|^SF:src/|SF:packages/svelte/src/|' "${f}"
+        sed -i 's|^SF:\./src/|SF:packages/svelte/src/|' "${f}"
+    - name: ensure gpg for Codecov uploader (Playwright image)
+      if: success() && steps.content_hash.outputs.hit != 'true'
+      run: |
+        set -euo pipefail
+        if ! command -v gpg >/dev/null 2>&1; then
+          apt-get update
+          apt-get install -y --no-install-recommends gnupg
+        fi
+      shell: bash
+    - name: Upload packages/svelte coverage to Codecov
+      # Custom if overrides default success() — keep the success gate so a
+      # failed suite does not upload a partial report or count as green.
+      if: success() && steps.content_hash.outputs.hit != 'true'
+      uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
+      with:
+        token: ${{ inputs.codecov_token }}
+        files: packages/svelte/coverage/browser/lcov.info
+        flags: svelte
+        name: svelte
+        # Pin the uploader binary; the action's default is "latest".
+        version: v11.3.1
+        disable_search: true
+        fail_ci_if_error: true
+    - uses: ./.github/actions/ci-content-hash-write
+      # Require success so a Codecov upload failure cannot green-cache the job.
+      if: success() && steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
+      with:
+        execution: component_svelte
+        hash: ${{ steps.content_hash.outputs.hash }}
+    - name: upload packages/svelte failure artifacts
+      if: failure()
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      with:
+        name: component-svelte-failure-artifacts
+        path: packages/svelte/test-results/
+        if-no-files-found: ignore
+        retention-days: 7

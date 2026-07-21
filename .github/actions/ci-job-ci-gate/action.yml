@@ -1,0 +1,140 @@
+# Auto-extracted job body for `ci-gate` from ci.yml.
+# Job-level needs/if/runs-on/container/strategy stay in the workflow.
+name: CI job — ci-gate
+description: >
+  Full step body for the ci-gate CI job (keeps required check name on the caller job).
+inputs:
+  detect_result:
+    description: detect-changes result
+    required: false
+    default: ""
+  checks_req:
+    description: checks required flag
+    required: false
+    default: ""
+  unit_req:
+    description: unit required flag
+    required: false
+    default: ""
+  component_req:
+    description: component required flag
+    required: false
+    default: ""
+  consumer_req:
+    description: consumer required flag
+    required: false
+    default: ""
+  build_req:
+    description: build required flag
+    required: false
+    default: ""
+  svelte_check_req:
+    description: svelte_check required flag
+    required: false
+    default: ""
+  docs_site_req:
+    description: docs_site required flag
+    required: false
+    default: ""
+  actions_req:
+    description: actions_security required flag
+    required: false
+    default: ""
+  bench_req:
+    description: bench_smoke required flag
+    required: false
+    default: ""
+  packages_dist_req:
+    description: packages_dist required flag
+    required: false
+    default: ""
+  docs_journeys_req:
+    description: docs_journeys required flag
+    required: false
+    default: ""
+  checks_res:
+    description: checks result
+    required: false
+    default: ""
+  unit_res:
+    description: unit result
+    required: false
+    default: ""
+  component_svelte_res:
+    description: component-svelte result
+    required: false
+    default: ""
+  component_spikes_res:
+    description: component-spikes result
+    required: false
+    default: ""
+  docs_journeys_res:
+    description: component-journeys result
+    required: false
+    default: ""
+  consumer_res:
+    description: consumer-compat result
+    required: false
+    default: ""
+  build_res:
+    description: build result
+    required: false
+    default: ""
+  svelte_check_res:
+    description: svelte-check result
+    required: false
+    default: ""
+  docs_site_res:
+    description: docs-site result
+    required: false
+    default: ""
+  actions_res:
+    description: actions-security result
+    required: false
+    default: ""
+  bench_res:
+    description: bench-smoke result
+    required: false
+    default: ""
+  packages_dist_res:
+    description: packages-dist result
+    required: false
+    default: ""
+  vr_guard_res:
+    description: vr-baseline-guard result
+    required: false
+    default: ""
+runs:
+  using: composite
+  steps:
+    - uses: ./.github/actions/ci-setup-bun
+    - name: evaluate required jobs
+      env:
+        DETECT_RESULT: ${{ inputs.detect_result }}
+        CHECKS_REQ: ${{ inputs.checks_req }}
+        UNIT_REQ: ${{ inputs.unit_req }}
+        COMPONENT_REQ: ${{ inputs.component_req }}
+        CONSUMER_REQ: ${{ inputs.consumer_req }}
+        BUILD_REQ: ${{ inputs.build_req }}
+        SVELTE_CHECK_REQ: ${{ inputs.svelte_check_req }}
+        DOCS_SITE_REQ: ${{ inputs.docs_site_req }}
+        ACTIONS_REQ: ${{ inputs.actions_req }}
+        BENCH_REQ: ${{ inputs.bench_req }}
+        PACKAGES_DIST_REQ: ${{ inputs.packages_dist_req }}
+        DOCS_JOURNEYS_REQ: ${{ inputs.docs_journeys_req }}
+        CHECKS_RES: ${{ inputs.checks_res }}
+        UNIT_RES: ${{ inputs.unit_res }}
+        COMPONENT_SVELTE_RES: ${{ inputs.component_svelte_res }}
+        COMPONENT_SPIKES_RES: ${{ inputs.component_spikes_res }}
+        DOCS_JOURNEYS_RES: ${{ inputs.docs_journeys_res }}
+        CONSUMER_RES: ${{ inputs.consumer_res }}
+        BUILD_RES: ${{ inputs.build_res }}
+        SVELTE_CHECK_RES: ${{ inputs.svelte_check_res }}
+        DOCS_SITE_RES: ${{ inputs.docs_site_res }}
+        ACTIONS_RES: ${{ inputs.actions_res }}
+        BENCH_RES: ${{ inputs.bench_res }}
+        PACKAGES_DIST_RES: ${{ inputs.packages_dist_res }}
+        VR_GUARD_RES: ${{ inputs.vr_guard_res }}
+        EVENT_NAME: ${{ github.event_name }}
+      shell: bash
+      run: bun scripts/ci-gate.ts

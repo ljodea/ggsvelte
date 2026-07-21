@@ -1,0 +1,106 @@
+# Auto-extracted job body for `consumer-compat` from ci.yml.
+# Job-level needs/if/runs-on/container/strategy stay in the workflow.
+name: CI job — consumer-compat
+description: >
+  Full step body for the consumer-compat CI job (keeps required check name on the caller job).
+inputs:
+  bypass_content_cache:
+    description: Bypass content-hash short-circuit
+    required: false
+    default: "false"
+  disable_content_hash:
+    description: CI_DISABLE_CONTENT_HASH var (1 disables)
+    required: false
+    default: ""
+  matrix_node:
+    description: Matrix Node version
+    required: false
+    default: ""
+  matrix_package_manager:
+    description: Matrix package manager
+    required: false
+    default: ""
+  matrix_package_manager_version:
+    description: Matrix package manager version
+    required: false
+    default: ""
+  matrix_svelte:
+    description: Matrix Svelte version
+    required: false
+    default: ""
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      with:
+        node-version: ${{ inputs.matrix_node }}
+    - uses: ./.github/actions/ci-setup-bun
+    # Resolved toolchain versions (not matrix majors alone) — Node/npm patch
+    # bumps must miss the consumer success-marker cache (Codex P2 on #245).
+    # Keep resolution in the job so the content-hash composite stays protocol-only.
+    - id: consumer_runtime
+      name: resolve consumer runtime toolchain versions
+      shell: bash
+      env:
+        # env-indirection: matrix values must not expand into the script body (zizmor).
+        MATRIX_PM: ${{ inputs.matrix_package_manager }}
+        MATRIX_PM_VERSION: ${{ inputs.matrix_package_manager_version }}
+      run: |
+        set -euo pipefail
+        RUNTIME_NODE="$(node -v)"
+        case "${MATRIX_PM}" in
+          npm) RUNTIME_PM_VER="$(npm -v)" ;;
+          bun) RUNTIME_PM_VER="$(bun -v)" ;;
+          pnpm)
+            if command -v pnpm >/dev/null 2>&1; then
+              RUNTIME_PM_VER="$(pnpm -v)"
+            else
+              RUNTIME_PM_VER="${MATRIX_PM_VERSION}"
+            fi
+            ;;
+          *) RUNTIME_PM_VER="${MATRIX_PM_VERSION}" ;;
+        esac
+        {
+          echo "runtime_node=${RUNTIME_NODE}"
+          echo "runtime_pm_ver=${RUNTIME_PM_VER}"
+        } >> "$GITHUB_OUTPUT"
+    - uses: ./.github/actions/ci-content-hash-restore
+      id: content_hash
+      with:
+        execution: consumer
+        bypass: ${{ inputs.bypass_content_cache }}
+        disable: ${{ inputs.disable_content_hash }}
+        matrix_node: ${{ inputs.matrix_node }}
+        matrix_pm: ${{ inputs.matrix_package_manager }}
+        matrix_pm_version: ${{ inputs.matrix_package_manager_version }}
+        matrix_svelte: ${{ inputs.matrix_svelte }}
+        runtime_node_version: ${{ steps.consumer_runtime.outputs.runtime_node }}
+        runtime_pm_version: ${{ steps.consumer_runtime.outputs.runtime_pm_ver }}
+    - if: steps.content_hash.outputs.hit != 'true'
+      run: bun install --frozen-lockfile
+      shell: bash
+      env:
+        BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
+    - uses: ./.github/actions/ci-download-packages-dist
+      if: steps.content_hash.outputs.hit != 'true'
+    - name: type-check Svelte package source
+      if: steps.content_hash.outputs.hit != 'true'
+      run: bun run check:svelte
+      shell: bash
+    - name: install tarballs in a clean consumer and exercise types, build, SSR, Node, and CLI
+      if: steps.content_hash.outputs.hit != 'true'
+      env:
+        BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
+        PACKAGE_MANAGER: ${{ inputs.matrix_package_manager }}
+        PACKAGE_MANAGER_VERSION: ${{ inputs.matrix_package_manager_version }}
+        SVELTE_VERSION: ${{ inputs.matrix_svelte }}
+      run: bun scripts/consumer-compat.ts
+      shell: bash
+
+    # Component surface is split for wall-clock (issue #243). All three schedule
+    # when routing sets component=true; ci-gate requires every shard to succeed.
+    - uses: ./.github/actions/ci-content-hash-write
+      if: steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
+      with:
+        execution: consumer
+        hash: ${{ steps.content_hash.outputs.hash }}

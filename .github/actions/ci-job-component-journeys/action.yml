@@ -1,0 +1,81 @@
+# Auto-extracted job body for `component-journeys` from ci.yml.
+# Job-level needs/if/runs-on/container/strategy stay in the workflow.
+name: CI job — component-journeys
+description: >
+  Full step body for the component-journeys CI job (keeps required check name on the caller job).
+inputs:
+  bypass_content_cache:
+    description: Bypass content-hash short-circuit
+    required: false
+    default: "false"
+  disable_content_hash:
+    description: CI_DISABLE_CONTENT_HASH var (1 disables)
+    required: false
+    default: ""
+runs:
+  using: composite
+  steps:
+    - name: install unzip (playwright image lacks it; setup-bun needs it)
+      run: apt-get update && apt-get install -y --no-install-recommends unzip
+      shell: bash
+    - uses: ./.github/actions/ci-setup-bun
+    - uses: ./.github/actions/ci-content-hash-restore
+      id: content_hash
+      with:
+        execution: component_journeys
+        bypass: ${{ inputs.bypass_content_cache }}
+        disable: ${{ inputs.disable_content_hash }}
+        container_tag: ${{ env.PLAYWRIGHT_CONTAINER_TAG }}
+    - uses: ./.github/actions/ci-bun-install
+      if: steps.content_hash.outputs.hit != 'true'
+      with:
+        cache_key_prefix: bun-container
+    - uses: ./.github/actions/ci-download-packages-dist
+      if: steps.content_hash.outputs.hit != 'true'
+    - name: assert playwright npm/container version sync (root @playwright/test)
+      if: steps.content_hash.outputs.hit != 'true'
+      run: |
+        set -euo pipefail
+        vr_version="$(bun -e 'console.log(require("@playwright/test/package.json").version)')"
+        echo "root @playwright/test (VR suite): ${vr_version}; container tag: ${PLAYWRIGHT_CONTAINER_TAG}"
+        if [ "v${vr_version}-noble" != "${PLAYWRIGHT_CONTAINER_TAG}" ]; then
+          echo "::error::@playwright/test version (${vr_version}) does not match pinned container tag (${PLAYWRIGHT_CONTAINER_TAG})"
+          exit 1
+        fi
+      shell: bash
+    - name: build packaged interaction test target
+      if: steps.content_hash.outputs.hit != 'true'
+      run: DOCS_BUILD_MODE=legacy-full BASE_PATH=/ggsvelte bun run build:docs
+      shell: bash
+    - name: docs shell, home/gallery, progressive, themes, interaction, playground journeys
+      if: steps.content_hash.outputs.hit != 'true'
+      # Enumerate every non-pixel docs journey. --grep-invert drops visual-contract
+      # screenshots so content PRs never pay full-page goldens here.
+      run: >-
+        bun run test:visual --
+        docs-shell.spec.ts
+        docs-home-gallery.spec.ts
+        docs-progressive-search.spec.ts
+        docs-themes.spec.ts
+        interaction-accessibility.spec.ts
+        playground.spec.ts
+        --grep-invert 'visual contract'
+      shell: bash
+    - uses: ./.github/actions/ci-content-hash-write
+      if: steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
+      with:
+        execution: component_journeys
+        hash: ${{ steps.content_hash.outputs.hash }}
+    - name: upload journey failure artifacts
+      if: failure()
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      with:
+        name: component-journeys-failure-artifacts
+        path: |
+          tests/visual/test-results/
+          tests/visual/playwright-report/
+        if-no-files-found: ignore
+        retention-days: 7
+
+    # Informational only — not a required status check (excluded from ci-gate).
+    # Hard gate remains on `run-bench` PRs via bench.yml.

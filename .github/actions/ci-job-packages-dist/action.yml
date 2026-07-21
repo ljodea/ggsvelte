@@ -1,0 +1,121 @@
+# Auto-extracted job body for `packages-dist` from ci.yml.
+# Job-level needs/if/runs-on/container/strategy stay in the workflow.
+name: CI job — packages-dist
+description: >
+  Full step body for the packages-dist CI job (keeps required check name on the caller job).
+inputs:
+  bypass_content_cache:
+    description: Bypass content-hash short-circuit
+    required: false
+    default: "false"
+  disable_content_hash:
+    description: CI_DISABLE_CONTENT_HASH var (1 disables)
+    required: false
+    default: ""
+runs:
+  using: composite
+  steps:
+    - uses: ./.github/actions/ci-setup-bun
+    - id: content_hash
+      name: compute content-hash (packages_dist)
+      env:
+        BYPASS: ${{ inputs.bypass_content_cache }}
+        DISABLE: ${{ inputs.disable_content_hash }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        if [ "${BYPASS:-}" = "true" ] || [ "${DISABLE:-}" = "1" ]; then
+          {
+            echo "bypass=true"
+            echo "hit=false"
+          } >> "$GITHUB_OUTPUT"
+          echo "content-hash bypassed for packages_dist"
+          exit 0
+        fi
+        echo "bypass=false" >> "$GITHUB_OUTPUT"
+        bun scripts/ci-routing.ts hash-inputs --execution packages_dist --os "${RUNNER_OS}"
+    - id: dist_cache
+      name: restore packages-dist content-hash cache
+      if: steps.content_hash.outputs.bypass != 'true'
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        # Exact key only (no restore-keys) — incomplete or wrong-tree hits are unsafe.
+        path: .packages-dist-cache
+        key: ${{ steps.content_hash.outputs.cache_key }}
+    - id: restore_dist
+      name: materialize packages/*/dist from content-hash cache
+      if: steps.content_hash.outputs.bypass != 'true' && steps.dist_cache.outputs.cache-hit == 'true'
+      shell: bash
+      run: |
+        set -euo pipefail
+        for pkg in spec core svelte; do
+          src=".packages-dist-cache/packages/${pkg}/dist"
+          if [ ! -d "${src}" ]; then
+            echo "incomplete content-hash cache (missing ${src}) — will rebuild"
+            echo "hit=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+        done
+        mkdir -p packages/spec packages/core packages/svelte
+        rm -rf packages/spec/dist packages/core/dist packages/svelte/dist
+        cp -a .packages-dist-cache/packages/spec/dist packages/spec/
+        cp -a .packages-dist-cache/packages/core/dist packages/core/
+        cp -a .packages-dist-cache/packages/svelte/dist packages/svelte/
+        echo "hit=true" >> "$GITHUB_OUTPUT"
+        echo "packages-dist: restored from content-hash cache"
+    - uses: ./.github/actions/ci-bun-install
+      if: steps.restore_dist.outputs.hit != 'true'
+      with:
+        cache_key_prefix: bun
+    - name: build packages (tsc -b + svelte-package)
+      if: steps.restore_dist.outputs.hit != 'true'
+      run: bun run build
+      shell: bash
+    - name: verify required package dist outputs
+      shell: bash
+      run: |
+        set -euo pipefail
+        for path in \
+          packages/spec/dist/index.js \
+          packages/core/dist/index.js \
+          packages/svelte/dist/index.js; do
+          if [ ! -f "${path}" ]; then
+            echo "::error::missing required dist output: ${path}"
+            exit 1
+          fi
+        done
+        echo "packages-dist: verified spec/core/svelte dist entrypoints"
+    - name: stage packages/*/dist under a single upload root
+      # Multi-path upload strips the common prefix, so consumers would see
+      # spec/dist instead of packages/spec/dist. Stage once and upload that tree.
+      shell: bash
+      run: |
+        set -euo pipefail
+        rm -rf .packages-dist-upload
+        mkdir -p .packages-dist-upload/packages/spec \
+          .packages-dist-upload/packages/core \
+          .packages-dist-upload/packages/svelte
+        cp -a packages/spec/dist .packages-dist-upload/packages/spec/
+        cp -a packages/core/dist .packages-dist-upload/packages/core/
+        cp -a packages/svelte/dist .packages-dist-upload/packages/svelte/
+    - name: stage content-hash cache payload for save
+      if: steps.restore_dist.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
+      shell: bash
+      run: |
+        set -euo pipefail
+        rm -rf .packages-dist-cache
+        mkdir -p .packages-dist-cache/packages/spec \
+          .packages-dist-cache/packages/core \
+          .packages-dist-cache/packages/svelte
+        cp -a packages/spec/dist .packages-dist-cache/packages/spec/
+        cp -a packages/core/dist .packages-dist-cache/packages/core/
+        cp -a packages/svelte/dist .packages-dist-cache/packages/svelte/
+    - name: upload packages/*/dist for same-run consumers
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      with:
+        # Same-run artifact identity. Cross-run reuse is the content-hash cache above.
+        name: packages-dist
+        # Single directory root → download path: packages restores packages/*/dist.
+        path: .packages-dist-upload/packages
+        if-no-files-found: error
+        retention-days: 1

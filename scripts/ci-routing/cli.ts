@@ -45,7 +45,7 @@ export async function runCiRoutingCli(argv: string[]): Promise<void> {
 
   if (cmd === "plan") {
     const { files, forceAll } = await resolvePlanArgs(args.slice(1));
-    const plan = planJobs(classifyChangedPaths(files), { forceAll });
+    const plan = planJobs(classifyChangedPaths(files), { forceAll, paths: files });
     process.stdout.write(`${JSON.stringify(plan, null, 2)}\n`);
     return;
   }
@@ -53,7 +53,7 @@ export async function runCiRoutingCli(argv: string[]): Promise<void> {
   if (cmd === "emit-github-output") {
     const { files, forceAll } = await resolvePlanArgs(args.slice(1));
     const changes = classifyChangedPaths(files);
-    const plan = planJobs(changes, { forceAll });
+    const plan = planJobs(changes, { forceAll, paths: files });
     const bypassContentCache = shouldBypassContentCache(changes, { forceAll });
     const body = formatGithubOutputs(plan, { bypassContentCache });
     const outPath = process.env.GITHUB_OUTPUT;

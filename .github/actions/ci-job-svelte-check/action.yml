@@ -1,0 +1,45 @@
+# Auto-extracted job body for `svelte-check` from ci.yml.
+# Job-level needs/if/runs-on/container/strategy stay in the workflow.
+name: CI job — svelte-check
+description: >
+  Full step body for the svelte-check CI job (keeps required check name on the caller job).
+inputs:
+  bypass_content_cache:
+    description: Bypass content-hash short-circuit
+    required: false
+    default: "false"
+  disable_content_hash:
+    description: CI_DISABLE_CONTENT_HASH var (1 disables)
+    required: false
+    default: ""
+runs:
+  using: composite
+  steps:
+    - uses: ./.github/actions/ci-setup-bun
+    - uses: ./.github/actions/ci-content-hash-restore
+      id: content_hash
+      with:
+        execution: svelte_check
+        bypass: ${{ inputs.bypass_content_cache }}
+        disable: ${{ inputs.disable_content_hash }}
+    - uses: ./.github/actions/ci-bun-install
+      if: steps.content_hash.outputs.hit != 'true'
+      with:
+        cache_key_prefix: bun
+    - name: build packages (svelte-check imports package types)
+      if: steps.content_hash.outputs.hit != 'true'
+      run: bun run build
+      shell: bash
+    - name: svelte-check (packages/svelte)
+      if: steps.content_hash.outputs.hit != 'true'
+      run: bun run check:svelte
+      shell: bash
+    - name: svelte-check (apps/docs)
+      if: steps.content_hash.outputs.hit != 'true'
+      run: bun run check:docs
+      shell: bash
+    - uses: ./.github/actions/ci-content-hash-write
+      if: steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
+      with:
+        execution: svelte_check
+        hash: ${{ steps.content_hash.outputs.hash }}

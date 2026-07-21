@@ -1,0 +1,64 @@
+# Auto-extracted job body for `component-spikes` from ci.yml.
+# Job-level needs/if/runs-on/container/strategy stay in the workflow.
+name: CI job — component-spikes
+description: >
+  Full step body for the component-spikes CI job (keeps required check name on the caller job).
+inputs:
+  bypass_content_cache:
+    description: Bypass content-hash short-circuit
+    required: false
+    default: "false"
+  disable_content_hash:
+    description: CI_DISABLE_CONTENT_HASH var (1 disables)
+    required: false
+    default: ""
+runs:
+  using: composite
+  steps:
+    - name: install unzip (playwright image lacks it; setup-bun needs it)
+      run: apt-get update && apt-get install -y --no-install-recommends unzip
+      shell: bash
+    - uses: ./.github/actions/ci-setup-bun
+    - uses: ./.github/actions/ci-content-hash-restore
+      id: content_hash
+      with:
+        execution: component_spikes
+        bypass: ${{ inputs.bypass_content_cache }}
+        disable: ${{ inputs.disable_content_hash }}
+        container_tag: ${{ env.PLAYWRIGHT_CONTAINER_TAG }}
+    - uses: ./.github/actions/ci-bun-install
+      if: steps.content_hash.outputs.hit != 'true'
+      with:
+        cache_key_prefix: bun-container
+    - uses: ./.github/actions/ci-download-packages-dist
+      if: steps.content_hash.outputs.hit != 'true'
+    - name: assert playwright npm/container version sync (spikes/browser)
+      if: steps.content_hash.outputs.hit != 'true'
+      run: |
+        set -euo pipefail
+        npm_version="$(cd spikes/browser && bun -e 'console.log(require("playwright/package.json").version)')"
+        expected="v${npm_version}-noble"
+        echo "spikes/browser playwright: ${npm_version}; container tag: ${PLAYWRIGHT_CONTAINER_TAG}"
+        if [ "${expected}" != "${PLAYWRIGHT_CONTAINER_TAG}" ]; then
+          echo "::error::playwright npm version in spikes/browser (${npm_version}) does not match pinned container tag (${PLAYWRIGHT_CONTAINER_TAG})"
+          exit 1
+        fi
+      shell: bash
+    - name: retired spike suites (browser + ssr projects)
+      if: steps.content_hash.outputs.hit != 'true'
+      working-directory: spikes/browser
+      run: bun run --bun test
+      shell: bash
+    - uses: ./.github/actions/ci-content-hash-write
+      if: steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
+      with:
+        execution: component_spikes
+        hash: ${{ steps.content_hash.outputs.hash }}
+    - name: upload spikes failure artifacts
+      if: failure()
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      with:
+        name: component-spikes-failure-artifacts
+        path: spikes/browser/test-results/
+        if-no-files-found: ignore
+        retention-days: 7

@@ -343,7 +343,42 @@ export function classifyChangedPaths(files: readonly string[]): ChangeFlags {
 export type PlanOptions = {
   /** When true, every job is scheduled (missing base ref / rebuild-all). */
   forceAll?: boolean;
+  /**
+   * Raw changed paths. Used to schedule the owning CI job when a job-body
+   * composite under `.github/actions/ci-job-*` changes (checkout stays in the
+   * workflow; the composite owns the remaining steps). Shared step composites
+   * (`ci-setup-bun`, content-hash, …) still use the cheap CI-plumbing surface.
+   */
+  paths?: readonly string[];
 };
+
+/** Map job-body composite directory → JobPlan flags that must re-run. */
+export const CI_JOB_BODY_OWNERS: Readonly<Record<string, readonly JobName[]>> = {
+  "ci-job-packages-dist": ["packages_dist"],
+  "ci-job-checks": ["checks"],
+  "ci-job-unit": ["unit"],
+  "ci-job-compatibility-matrix": ["consumer", "packages_dist"],
+  "ci-job-consumer-compat": ["consumer", "packages_dist"],
+  "ci-job-component-svelte": ["component", "packages_dist"],
+  "ci-job-component-spikes": ["component", "packages_dist"],
+  "ci-job-component-journeys": ["docs_journeys", "packages_dist"],
+  "ci-job-interaction-perf": ["interaction_perf", "packages_dist"],
+  "ci-job-build": ["build"],
+  "ci-job-svelte-check": ["svelte_check"],
+  "ci-job-docs-site": ["docs_site"],
+  "ci-job-actions-security": ["actions_security"],
+  "ci-job-bench-smoke": ["bench_smoke"],
+  // Always-on PR job + gate: re-run unit (wiring tests) + actions-security.
+  "ci-job-vr-baseline-guard": ["unit", "actions_security"],
+  "ci-job-ci-gate": ["unit", "actions_security"],
+};
+
+/** Owning jobs for a path under `.github/actions/ci-job-*`, else empty. */
+export function owningJobsForActionPath(path: string): readonly JobName[] {
+  const m = path.match(/^\.github\/actions\/(ci-job-[a-z0-9-]+)\//);
+  if (!m) return [];
+  return CI_JOB_BODY_OWNERS[m[1]!] ?? [];
+}
 
 /**
  * Map change lanes → jobs, including monorepo dependency edges:
@@ -409,7 +444,7 @@ export function planJobs(changes: ChangeFlags, options: PlanOptions = {}): JobPl
     docsJourneys ||
     forceProduct;
 
-  return {
+  const plan: JobPlan = {
     // Cheap format/lint parity — always on so markdown-only PRs still get oxfmt/prettier.
     checks: true,
     unit:
@@ -444,6 +479,17 @@ export function planJobs(changes: ChangeFlags, options: PlanOptions = {}): JobPl
     pages: packageSurface || docsSurface || forceProduct,
     docs_journeys: docsJourneys,
   };
+
+  // Job-body composites own domain steps. When one changes, schedule its owner
+  // jobs (and packages_dist when consumers need the artifact). Shared step
+  // composites still use the cheap CI-plumbing surface above.
+  for (const path of options.paths ?? []) {
+    for (const job of owningJobsForActionPath(path)) {
+      plan[job] = true;
+    }
+  }
+
+  return plan;
 }
 
 export type GateEvaluation = {
