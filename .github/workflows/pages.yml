@@ -11,18 +11,15 @@ on:
 
 permissions: {}
 
-# Superseded main pushes cancel older Pages runs (build + deploy). Deploy still
-# has its own group below so two deploys never interleave; cancel-in-progress
-# here is what stops the post-merge Pages backlog from eating heavy runners.
-concurrency:
-  group: pages-${{ github.ref }}
-  cancel-in-progress: true
-
+# Concurrency is on build/deploy only — NOT workflow-level. A skip-only main
+# push (pages=false after path routing) must not cancel an in-flight docs
+# build/deploy that still needs to publish. Deploy keeps its own serial group.
 jobs:
   detect-changes:
     name: detect-changes (path routing)
     runs-on: [self-hosted, ggsvelte]
     permissions:
+      actions: read
       contents: read
     outputs:
       pages: ${{ steps.route.outputs.pages }}
@@ -40,6 +37,8 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           BASE_SHA: ${{ github.event.before }}
           HEAD_SHA: ${{ github.sha }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
         shell: bash
         run: |
           set -euo pipefail
@@ -52,6 +51,24 @@ jobs:
           if [ -z "${BASE_SHA}" ] || [ "${BASE_SHA}" = "${zero}" ]; then
             bun scripts/ci-routing.ts emit-github-output --force-all
             exit 0
+          fi
+          # Widen past cancel-in-progress gaps: include commits since the last
+          # successful Pages build so a later skip-only push cannot leave an
+          # unpublished docs change stranded (build concurrency still cancels
+          # superseded *pages=true* builds).
+          if command -v gh >/dev/null 2>&1; then
+            last_ok="$(
+              gh api "repos/${REPO}/actions/workflows/pages.yml/runs?branch=main&status=completed&per_page=20" \
+                --jq --arg head "${HEAD_SHA}" '
+                  [.workflow_runs[]
+                    | select(.conclusion == "success" and .head_sha != $head)
+                    | .head_sha][0] // empty
+                ' 2>/dev/null || true
+            )"
+            if [ -n "${last_ok}" ]; then
+              echo "widening pages route base ${BASE_SHA} → last successful ${last_ok}"
+              BASE_SHA="${last_ok}"
+            fi
           fi
           git fetch --no-tags --depth=1 origin "${BASE_SHA}" 2>/dev/null || true
           if ! git cat-file -e "${BASE_SHA}^{commit}" 2>/dev/null; then
@@ -70,6 +87,11 @@ jobs:
     name: build static docs
     needs: detect-changes
     if: needs.detect-changes.outputs.pages == 'true'
+    # Only pages=true runs enter this group, so markdown-only pushes cannot
+    # cancel a real docs build that still needs to publish.
+    concurrency:
+      group: pages-build-${{ github.ref }}
+      cancel-in-progress: true
     runs-on: [self-hosted, ggsvelte]
     permissions:
       contents: read

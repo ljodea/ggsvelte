@@ -70,6 +70,7 @@ jobs:
     name: detect-changes (path routing)
     runs-on: [self-hosted, ggsvelte]
     permissions:
+      actions: read
       contents: read
       # pull-requests:read not required — we use event SHAs, not the API.
     outputs:
@@ -105,6 +106,8 @@ jobs:
           HEAD_SHA: ${{ github.sha }}
           # Issue #246: run-compat must force consumer after path routing.
           PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
         shell: bash
         run: |
           set -euo pipefail
@@ -113,6 +116,24 @@ jobs:
             echo "no usable base SHA — force-all"
             bun scripts/ci-routing.ts emit-github-output --force-all
           else
+            # Main + cancel-in-progress: a later markdown/workflow-only push must
+            # still route product work from earlier unvalidated main commits.
+            # Widen the base to the last successful CI head on main so the
+            # replacement run covers the cumulative unvalidated range.
+            if [ "${EVENT_NAME}" = "push" ] && [ "${GITHUB_REF}" = "refs/heads/main" ] && command -v gh >/dev/null 2>&1; then
+              last_ok="$(
+                gh api "repos/${REPO}/actions/workflows/ci.yml/runs?branch=main&status=completed&per_page=20" \
+                  --jq --arg head "${HEAD_SHA}" '
+                    [.workflow_runs[]
+                      | select(.conclusion == "success" and .head_sha != $head)
+                      | .head_sha][0] // empty
+                  ' 2>/dev/null || true
+              )"
+              if [ -n "${last_ok}" ]; then
+                echo "widening main route base ${BASE_SHA} → last successful CI ${last_ok}"
+                BASE_SHA="${last_ok}"
+              fi
+            fi
             # Ensure the base object exists for the three-dot diff.
             git fetch --no-tags --depth=1 origin "${BASE_SHA}" 2>/dev/null || true
             if ! git cat-file -e "${BASE_SHA}^{commit}" 2>/dev/null; then
@@ -426,7 +447,7 @@ jobs:
       fail-fast: false
       max-parallel: 4
       matrix: ${{ fromJSON(needs.compatibility-matrix.outputs.matrix) }}
-    # Linux rows use the private self-hosted heavy lane; Windows/macOS stay on GitHub-hosted.
+    # Linux rows use the private self-hosted ggsvelte pool; Windows/macOS stay on GitHub-hosted.
     runs-on: ${{ startsWith(matrix.os, 'ubuntu') && fromJSON('["self-hosted","ggsvelte"]') || matrix.os }}
     timeout-minutes: 20
     permissions:

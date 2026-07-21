@@ -1,11 +1,16 @@
 # Cancel leftover self-hosted work the moment a PR is closed or merged.
 # Concurrency cancel-in-progress only fires when a *new* run in the same
 # group starts; merge/close alone does not, so merged branches used to keep
-# burning the heavy lane for 20–40 minutes after the PR was gone.
+# burning runners for 20–40 minutes after the PR was gone.
+#
+# pull_request_target (not pull_request): fork PRs get a read-only token under
+# pull_request, so actions:write never actually works for external contributors.
+# This job never checks out PR code — only event metadata + the Actions API —
+# so the write-capable token is safe here.
 name: Cancel on PR close
 
 on:
-  pull_request:
+  pull_request_target:
     types: [closed]
 
 permissions: {}
@@ -18,20 +23,24 @@ jobs:
       actions: write
       contents: read
     steps:
-      - name: cancel queued and in-progress runs for this head branch
+      - name: cancel queued and in-progress runs for this PR head
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
-          HEAD_BRANCH: ${{ github.head_ref }}
+          HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
+          SELF_RUN_ID: ${{ github.run_id }}
         shell: bash
         run: |
           set -euo pipefail
-          if [ -z "${HEAD_BRANCH}" ]; then
-            echo "no head_ref; nothing to cancel"
+          if [ -z "${HEAD_BRANCH}" ] || [ -z "${HEAD_SHA}" ]; then
+            echo "no head ref/sha; nothing to cancel"
             exit 0
           fi
-          # Paginate active runs on this head branch (queued + in_progress + pending + waiting).
+          # Restrict by head SHA (not bare branch name): fork PRs often share
+          # names like main/patch-1 with unrelated runs. Also drop this cleanup
+          # run so we cannot cancel ourselves mid-loop.
           cancel_ids=()
           for status in queued in_progress pending waiting requested; do
             page=1
@@ -43,8 +52,19 @@ jobs:
               fi
               while IFS= read -r id; do
                 [ -n "$id" ] || continue
+                [ "$id" = "${SELF_RUN_ID}" ] && continue
                 cancel_ids+=("$id")
-              done < <(printf '%s' "$resp" | jq -r '.workflow_runs[].id')
+              done < <(
+                printf '%s' "$resp" | jq -r --arg sha "${HEAD_SHA}" --arg pr "${PR_NUMBER}" '
+                  .workflow_runs[]
+                  | select(.head_sha == $sha)
+                  | select(
+                      (.pull_requests | length) == 0
+                      or any(.pull_requests[]; (.number | tostring) == $pr)
+                    )
+                  | .id
+                '
+              )
               if [ "$count" -lt 100 ]; then
                 break
               fi
@@ -54,10 +74,10 @@ jobs:
           # De-dupe
           mapfile -t cancel_ids < <(printf '%s\n' "${cancel_ids[@]:-}" | awk 'NF && !seen[$0]++')
           if [ "${#cancel_ids[@]}" -eq 0 ]; then
-            echo "no active runs on branch ${HEAD_BRANCH} (PR #${PR_NUMBER})"
+            echo "no active runs for PR #${PR_NUMBER} head=${HEAD_SHA} branch=${HEAD_BRANCH}"
             exit 0
           fi
-          echo "cancelling ${#cancel_ids[@]} run(s) for PR #${PR_NUMBER} branch=${HEAD_BRANCH}"
+          echo "cancelling ${#cancel_ids[@]} run(s) for PR #${PR_NUMBER} head=${HEAD_SHA} branch=${HEAD_BRANCH}"
           for id in "${cancel_ids[@]}"; do
             echo "  gh run cancel ${id}"
             gh run cancel "$id" --repo "$REPO" || true
