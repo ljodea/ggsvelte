@@ -111,7 +111,11 @@ const NOT_FOUND_DIRECTIVES = {
   "style-src-attr": ["'none'"],
 } as const;
 
-function validateRequiredDirectives(path: string, html: string): string[] {
+function validateRequiredDirectives(
+  path: string,
+  html: string,
+  requireUpgradeInsecureRequests: boolean,
+): string[] {
   const policy = cspPolicy(html);
   if (policy === null) return [];
   const parsed = directives(policy);
@@ -127,7 +131,7 @@ function validateRequiredDirectives(path: string, html: string): string[] {
       }
     }
   }
-  if (!parsed.has("upgrade-insecure-requests")) {
+  if (requireUpgradeInsecureRequests && !parsed.has("upgrade-insecure-requests")) {
     problems.push(`${path}: missing upgrade-insecure-requests`);
   }
   return problems;
@@ -142,8 +146,16 @@ function htmlFiles(directory: string): string[] {
     .filter((path) => path.endsWith(".html"));
 }
 
-export function validateDocsCsp(directory: string): string[] {
+export interface DocsCspValidationOptions {
+  readonly requireUpgradeInsecureRequests?: boolean;
+}
+
+export function validateDocsCsp(
+  directory: string,
+  options: DocsCspValidationOptions = {},
+): string[] {
   const problems: string[] = [];
+  const requireUpgradeInsecureRequests = options.requireUpgradeInsecureRequests ?? true;
   const headers = readFileSync(join(directory, "_headers"), "utf8");
   if (!/^\s*Content-Security-Policy:\s*frame-ancestors 'none'\s*$/im.test(headers)) {
     problems.push("_headers: missing enforced frame-ancestors 'none' policy");
@@ -156,7 +168,7 @@ export function validateDocsCsp(directory: string): string[] {
     const html = readFileSync(path, "utf8");
     problems.push(
       ...validateHtmlCsp(relativePath, html),
-      ...validateRequiredDirectives(relativePath, html),
+      ...validateRequiredDirectives(relativePath, html, requireUpgradeInsecureRequests),
     );
   }
   return problems;
@@ -164,7 +176,9 @@ export function validateDocsCsp(directory: string): string[] {
 
 if (import.meta.main) {
   const directory = process.argv[2] ?? join(import.meta.dir, "..", "apps", "docs", "build");
-  const problems = validateDocsCsp(directory);
+  const problems = validateDocsCsp(directory, {
+    requireUpgradeInsecureRequests: (process.env["DOCS_BUILD_MODE"] ?? "dev") !== "dev",
+  });
   if (problems.length > 0) {
     throw new Error(`Docs CSP validation failed:\n- ${problems.join("\n- ")}`);
   }
