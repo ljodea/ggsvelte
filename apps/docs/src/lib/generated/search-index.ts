@@ -2326,6 +2326,26 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["temporal-break-outside-domain"],
   },
   {
+    id: "heading:guide-errors:band-label-overlap",
+    kind: "heading",
+    title: "band-label-overlap",
+    summary:
+      "band-label-overlap in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#band-label-overlap",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["band-label-overlap"],
+  },
+  {
+    id: "heading:guide-errors:band-label-margin-overflow",
+    kind: "heading",
+    title: "band-label-margin-overflow",
+    summary:
+      "band-label-margin-overflow in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#band-label-margin-overflow",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["band-label-margin-overflow"],
+  },
+  {
     id: "heading:guide-errors:coord-tessellation-cap",
     kind: "heading",
     title: "coord-tessellation-cap",
@@ -2763,6 +2783,26 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/advisories#temporal-inference-invalid",
     keywords: ["Advisories", "Reference"],
     exact: ["temporal-inference-invalid"],
+  },
+  {
+    id: "heading:guide-advisories:band-labels-wrapped",
+    kind: "heading",
+    title: "band-labels-wrapped",
+    summary:
+      "band-labels-wrapped in Advisories. Spec-lint advisories and the pipeline's disclosed heuristics.",
+    href: "/guide/advisories#band-labels-wrapped",
+    keywords: ["Advisories", "Reference"],
+    exact: ["band-labels-wrapped"],
+  },
+  {
+    id: "heading:guide-advisories:band-labels-rotated",
+    kind: "heading",
+    title: "band-labels-rotated",
+    summary:
+      "band-labels-rotated in Advisories. Spec-lint advisories and the pipeline's disclosed heuristics.",
+    href: "/guide/advisories#band-labels-rotated",
+    keywords: ["Advisories", "Reference"],
+    exact: ["band-labels-rotated"],
   },
   {
     id: "page:guide-lifecycle",
@@ -11468,6 +11508,32 @@ export const DOCS_SEARCH_INDEX = [
       "Inspect the warning message for its path and count, then correct the named data, scale, or option.",
     ],
     exact: ["temporal-break-outside-domain", "warning:temporal-break-outside-domain"],
+  },
+  {
+    id: "diagnostic:warning:band-label-overlap",
+    kind: "diagnostic",
+    title: "band-label-overlap · warning",
+    summary: "Categorical (band) axis labels overlap even after wrapping and rotation.",
+    href: "/guide/errors#band-label-overlap",
+    keywords: [
+      "warning",
+      "warning",
+      "Inspect the warning message for its path and count, then correct the named data, scale, or option.",
+    ],
+    exact: ["band-label-overlap", "warning:band-label-overlap"],
+  },
+  {
+    id: "diagnostic:warning:band-label-margin-overflow",
+    kind: "diagnostic",
+    title: "band-label-margin-overflow · warning",
+    summary: "A rotated band label is truncated (ellipsis) to fit the bounded axis margin.",
+    href: "/guide/errors#band-label-margin-overflow",
+    keywords: [
+      "warning",
+      "warning",
+      "Inspect the warning message for its path and count, then correct the named data, scale, or option.",
+    ],
+    exact: ["band-label-margin-overflow", "warning:band-label-margin-overflow"],
   },
   {
     id: "diagnostic:warning:coord-tessellation-cap",

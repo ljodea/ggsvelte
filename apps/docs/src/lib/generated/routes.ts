@@ -1499,6 +1499,16 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "band-label-overlap",
+        title: "band-label-overlap",
+        level: 3,
+      },
+      {
+        id: "band-label-margin-overflow",
+        title: "band-label-margin-overflow",
+        level: 3,
+      },
+      {
         id: "coord-tessellation-cap",
         title: "coord-tessellation-cap",
         level: 3,
@@ -1728,6 +1738,16 @@ export const DOCS_ROUTES = [
       {
         id: "temporal-inference-invalid",
         title: "temporal-inference-invalid",
+        level: 3,
+      },
+      {
+        id: "band-labels-wrapped",
+        title: "band-labels-wrapped",
+        level: 3,
+      },
+      {
+        id: "band-labels-rotated",
+        title: "band-labels-rotated",
         level: 3,
       },
     ],
