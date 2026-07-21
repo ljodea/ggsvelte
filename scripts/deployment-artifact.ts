@@ -75,24 +75,31 @@ export interface DeploymentExpectation {
 }
 
 export function ensureNotFoundNoindex(buildDirectory: string): void {
-  const path = join(buildDirectory, "404.html");
-  let html = readFileSync(path, "utf8");
-  if (!html.includes('name="robots" content="noindex')) {
-    if (!html.includes("</head>")) throw new Error("404.html is missing its closing head tag");
-    html = html.replace(
-      "</head>",
-      '    <meta name="robots" content="noindex,follow" />\n  </head>',
-    );
-  }
-  if (!html.includes("<noscript><main><h1>Not found</h1>")) {
-    const mount = '<div style="display: contents">';
-    if (!html.includes(mount)) throw new Error("404.html is missing its application mount");
-    html = html.replace(
-      mount,
-      `${mount}\n      <noscript><main><h1>Not found</h1><p>This page does not exist.</p><p><a href="/">Go to the ggsvelte documentation</a></p></main></noscript>`,
-    );
-  }
-  writeFileSync(path, html);
+  writeFileSync(
+    join(buildDirectory, "404.html"),
+    `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex,follow" />
+    <title>Not found — ggsvelte</title>
+    <style>
+      :root { color-scheme: light dark; font-family: ui-sans-serif, system-ui, sans-serif; }
+      body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #f7f5ef; color: #171714; }
+      main { width: min(32rem, calc(100% - 3rem)); }
+      h1 { margin: 0 0 0.75rem; font-family: ui-serif, Georgia, serif; font-size: clamp(2.5rem, 8vw, 5rem); line-height: 0.95; }
+      p { color: #5a574f; font-size: 1.05rem; line-height: 1.6; }
+      a { color: inherit; font-weight: 650; text-underline-offset: 0.2em; }
+      @media (prefers-color-scheme: dark) { body { background: #171714; color: #f7f5ef; } p { color: #bdb8ad; } }
+    </style>
+  </head>
+  <body>
+    <main><h1>Not found</h1><p>This page does not exist.</p><p><a href="/">Go to the ggsvelte documentation</a></p></main>
+  </body>
+</html>
+`,
+  );
 }
 
 export function ensurePreviewNoindexHeader(
@@ -143,8 +150,11 @@ export function validateDeploymentArtifact(
     if (!notFoundHtml.includes('name="robots" content="noindex')) {
       problems.push("404.html must contain a noindex robots policy");
     }
-    if (!notFoundHtml.includes("<noscript><main><h1>Not found</h1>")) {
+    if (!notFoundHtml.includes("<main><h1>Not found</h1>")) {
       problems.push("404.html must render Not found without JavaScript");
+    }
+    if (notFoundHtml.includes("<script")) {
+      problems.push("404.html must remain useful without client scripts");
     }
   }
 

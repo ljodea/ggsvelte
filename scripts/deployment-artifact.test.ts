@@ -156,8 +156,9 @@ describe("deployment artifact identity", () => {
       ensureNotFoundNoindex(buildDirectory);
       const html = readFileSync(join(buildDirectory, "404.html"), "utf8");
       expect(html).toContain('<meta name="robots" content="noindex,follow" />');
-      expect(html).toContain("<noscript><main><h1>Not found</h1>");
+      expect(html).toContain("<main><h1>Not found</h1>");
       expect(html).toContain('<a href="/">Go to the ggsvelte documentation</a>');
+      expect(html).not.toContain("<script");
     } finally {
       rmSync(buildDirectory, { recursive: true, force: true });
     }
@@ -215,6 +216,21 @@ describe("deployment artifact identity", () => {
       expect(
         validateDeploymentArtifact(buildDirectory, expectedArtifact("cloudflare-production")),
       ).toContain("404.html must render Not found without JavaScript");
+    } finally {
+      rmSync(buildDirectory, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects a scripted unknown-route fallback", () => {
+    const buildDirectory = makeCompleteArtifact("cloudflare-production");
+    try {
+      writeFileSync(
+        join(buildDirectory, "404.html"),
+        '<meta name="robots" content="noindex,follow"><main><h1>Not found</h1></main><script>start()</script>',
+      );
+      expect(
+        validateDeploymentArtifact(buildDirectory, expectedArtifact("cloudflare-production")),
+      ).toContain("404.html must remain useful without client scripts");
     } finally {
       rmSync(buildDirectory, { recursive: true, force: true });
     }
