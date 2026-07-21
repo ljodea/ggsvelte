@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784597462344,
+  "lastUpdate": 1784597499063,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -36241,6 +36241,150 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 121.6123,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "0b0ae2b5d5d93d71f318d6c19b23ce9f02755399",
+          "message": "fix(core): address post-merge temporal guide findings from #348 (#359)\n\n- Parse historical IANA longOffset values that include seconds in %z\n- Format reversed axes in visual order so leading ticks keep context\n- Include tick chrome in temporal margin-overflow detection",
+          "timestamp": "2026-07-20T20:30:50-05:00",
+          "tree_id": "d49f80b146f9d265278a2d7e984096906e3be46d",
+          "url": "https://github.com/ljodea/ggsvelte/commit/0b0ae2b5d5d93d71f318d6c19b23ce9f02755399"
+        },
+        "date": 1784597497919,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.0802,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.5646,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 7.0083,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 10.1897,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 48.9682,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 82.9577,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal-line 100k",
+            "value": 71.0912,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide candidate-selection 300y",
+            "value": 0.0698,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide resize-churn 191y",
+            "value": 0.2498,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide DST-heavy 3y",
+            "value": 3.2748,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal free-facets 100",
+            "value": 27.072,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.1351,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.4126,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 51.9198,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 74.6148,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.8741,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 12.9002,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 972.4208,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 1.2613,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 257.5932,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 9.4808,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 17.5257,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 619.4079,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 152.6957,
             "unit": "ms"
           }
         ]
