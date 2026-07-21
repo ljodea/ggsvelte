@@ -67,14 +67,13 @@
 <section class="interactive-theme" aria-label="Custom interaction theme">
   <header class="section-heading">
     <div>
-      <p class="eyebrow">Custom ThemeSpec</p>
-      <h2>Theme the behavior, not only the backdrop.</h2>
+      <p class="eyebrow">ThemeSpec</p>
+      <h2>Interaction roles</h2>
     </div>
     <div>
       <p>
-        Focus, crosshair, selection, tooltip, muted marks, and the active tool
-        use explicit roles. Stable keys carry semantic emphasis between an SVG
-        view and a canvas view.
+        Focus, crosshair, selection, tooltip, muted marks, active tool — each a
+        role on ThemeSpec. Semantic keys share emphasis across SVG and canvas.
       </p>
       <label for="interaction-paper">Interaction chart paper</label>
       <select id="interaction-paper" bind:value={paperTheme}>

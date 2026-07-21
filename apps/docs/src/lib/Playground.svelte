@@ -307,13 +307,12 @@
 <section class="playground" aria-labelledby="playground-heading">
   <header class="playground-intro">
     <div>
-      <p class="eyebrow">Local PortableSpec workbench</p>
-      <h1 id="playground-heading">Adapt a chart, then take the Svelte</h1>
+      <p class="eyebrow">Local only</p>
+      <h1 id="playground-heading">Playground</h1>
       <p class="lede">
-        Start from a real example or a small sample. Edit bounded JSON, inspect
-        semantic events, and take complete Svelte, equivalent Builder or
-        PortableSpec, and deterministic SVG. No account, upload, remote fetch,
-        or code execution.
+        Edit a bounded PortableSpec. Inspect semantic events. Export Svelte,
+        builder TypeScript, JSON, or SVG. No upload, remote fetch, or code
+        execution.
       </p>
     </div>
     <div class="share-actions">

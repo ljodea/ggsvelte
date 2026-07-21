@@ -7,7 +7,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "ggsvelte — layered grammar of graphics for Svelte",
     summary:
-      "Build publication-ready, interactive data graphics in Svelte with a layered grammar and a portable JSON specification.",
+      "Layered grammar of graphics for Svelte: ggplot2-style aes, geoms, stats, and themes, with PortableSpec JSON and hybrid SVG/canvas rendering.",
     href: "/",
     keywords: [],
     exact: ["ggsvelte — layered grammar of graphics for Svelte"],
@@ -16,8 +16,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "page:docs",
     kind: "page",
     title: "Documentation",
-    summary:
-      "Build, customize, interact with, deploy, and troubleshoot ggsvelte charts through a task-first learning path.",
+    summary: "Install, compose the grammar, add interaction, ship, and read public contracts.",
     href: "/docs",
     keywords: ["Start"],
     exact: ["Documentation"],
@@ -26,7 +25,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "page:examples",
     kind: "page",
     title: "Gallery",
-    summary: "Browse runnable ggsvelte charts across marks, statistics, scales, and interaction.",
+    summary: "Runnable ggsvelte examples across marks, stats, scales, and interaction.",
     href: "/examples",
     keywords: [],
     exact: ["Gallery"],
@@ -36,7 +35,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "PortableSpec playground",
     summary:
-      "Edit a bounded PortableSpec locally, inspect semantic events, and take complete Svelte, equivalent Builder or JSON, SVG, or a share URL.",
+      "Edit a bounded PortableSpec locally. Export Svelte, builder TypeScript, JSON, or SVG.",
     href: "/playground",
     keywords: [],
     exact: ["PortableSpec playground"],
@@ -46,7 +45,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "Chart themes and color scales",
     summary:
-      "Compare every built-in ggsvelte chart theme and color scheme with live, copyable Svelte examples.",
+      "Built-in chart themes, categorical schemes, sequential ramps, and interaction role colors.",
     href: "/themes",
     keywords: [],
     exact: ["Chart themes and color scales"],
@@ -55,8 +54,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "page:reference",
     kind: "page",
     title: "Reference",
-    summary:
-      "Find ggsvelte component, specification, interaction, diagnostic, lifecycle, and command-line contracts.",
+    summary: "Interaction, CLI, diagnostic, lifecycle, and PortableSpec contracts.",
     href: "/reference",
     keywords: ["Reference"],
     exact: ["Reference"],
@@ -3169,9 +3167,9 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:color:continuous",
     kind: "example",
-    title: "Map magnitude with ordered color",
+    title: "Continuous color (ramp legend)",
     summary:
-      "A perceptually ordered scale carries quantitative meaning without changing the data model.",
+      "A quantitative color mapping through the viridis sequential ramp, with a gradient ramp legend instead of discrete swatches.",
     href: "/examples/color/continuous",
     keywords: [
       "Continuous color (ramp legend)",
@@ -3182,7 +3180,7 @@ export const DOCS_SEARCH_INDEX = [
       "viridis",
       "legend",
     ],
-    exact: ["Continuous color (ramp legend)", "Map magnitude with ordered color"],
+    exact: ["Continuous color (ramp legend)"],
   },
   {
     id: "example:density:overlay",
@@ -3214,11 +3212,12 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:facet:wrap",
     kind: "example",
-    title: "Compare distributions across groups",
-    summary: "Small multiples turn one specification into a repeated, readable comparison.",
+    title: "Faceted histograms (facet wrap)",
+    summary:
+      "facet.wrap partitions the data BEFORE the bin stat: each panel bins its own service's response times over one shared break grid, and fixed scales share both axes (edge axes only).",
     href: "/examples/facet/wrap",
     keywords: ["Faceted histograms (facet wrap)", "Facets", "facet", "histogram", "bin", "wrap"],
-    exact: ["Faceted histograms (facet wrap)", "Compare distributions across groups"],
+    exact: ["Faceted histograms (facet wrap)"],
   },
   {
     id: "example:facet:wrap-free-y",
@@ -3321,9 +3320,9 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:interaction:linked-views",
     kind: "example",
-    title: "Coordinate a chart with ordinary UI",
+    title: "Link plots, controls, and a table",
     summary:
-      "Semantic keys connect plots, controls, and an accessible table without callback loops.",
+      "A shared Svelte 5 interaction controller coordinates semantic selection, lightweight emphasis, and zoom domains without callback loops. Stable row keys link two plots to ordinary accessible DOM, while explicit reconciliation makes data replacement predictable.",
     href: "/examples/interaction/linked-views",
     keywords: [
       "Link plots, controls, and a table",
@@ -3336,7 +3335,7 @@ export const DOCS_SEARCH_INDEX = [
       "table",
       "svelte",
     ],
-    exact: ["Link plots, controls, and a table", "Coordinate a chart with ordinary UI"],
+    exact: ["Link plots, controls, and a table"],
   },
   {
     id: "example:interaction:tooltip",
@@ -3360,8 +3359,9 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:line:multi-series",
     kind: "example",
-    title: "Track several series over time",
-    summary: "Layered lines, stable color identity, and a clear legend for an application staple.",
+    title: "Multi-series line chart",
+    summary:
+      "One line per group, derived from the discrete color mapping — plus a point layer on top showing how layers compose. Explicit breaks pin one tick per month.",
     href: "/examples/line/multi-series",
     keywords: [
       "Multi-series line chart",
@@ -3372,7 +3372,7 @@ export const DOCS_SEARCH_INDEX = [
       "legend",
       "layers",
     ],
-    exact: ["Multi-series line chart", "Track several series over time"],
+    exact: ["Multi-series line chart"],
   },
   {
     id: "example:line:time-axis",
@@ -3394,8 +3394,9 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:point:canvas-scatter",
     kind: "example",
-    title: "Render dense data responsibly",
-    summary: "Canvas marks keep SVG axes and an accessible chart surface for a 10,000-point view.",
+    title: "Canvas scatter (10k points)",
+    summary:
+      'Above the 2,000-mark threshold, render: "auto" moves the layer onto a canvas stratum (advisory `canvas-auto`): axes, grid, and the legend stay SVG; the marks raster into one canvas sized by the DPR recipe, paired with an off-screen description block and a data-table toggle. Set render: "svg" or a11y: "force-svg" to opt out.',
     href: "/examples/point/canvas-scatter",
     keywords: [
       "Canvas scatter (10k points)",
@@ -3405,7 +3406,7 @@ export const DOCS_SEARCH_INDEX = [
       "performance",
       "strata",
     ],
-    exact: ["Canvas scatter (10k points)", "Render dense data responsibly"],
+    exact: ["Canvas scatter (10k points)"],
   },
   {
     id: "example:point:jitter",
@@ -3475,8 +3476,9 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:smooth:loess-scatter",
     kind: "example",
-    title: "Explain a noisy relationship",
-    summary: "Raw observations, a statistical smoother, and its confidence ribbon share one view.",
+    title: "Loess smooth with confidence ribbon",
+    summary:
+      "A loess trend (R-parity local regression, degree 2) fitted over a scatter, with its 95% confidence ribbon drawn under the line — ggplot2's geom_smooth.",
     href: "/examples/smooth/loess-scatter",
     keywords: [
       "Loess smooth with confidence ribbon",
@@ -3486,7 +3488,7 @@ export const DOCS_SEARCH_INDEX = [
       "ribbon",
       "scatter",
     ],
-    exact: ["Loess smooth with confidence ribbon", "Explain a noisy relationship"],
+    exact: ["Loess smooth with confidence ribbon"],
   },
   {
     id: "example:text:labels",

@@ -176,10 +176,12 @@
     {#if query.trim() === "" || results.length === 0}
       <nav
         class="search-tasks"
-        aria-label={query.trim() === "" ? "Start with a task" : "Try a task"}
+        aria-label={query.trim() === ""
+          ? "Common destinations"
+          : "Other destinations"}
       >
         <p>
-          {query.trim() === "" ? "Start with a task" : "Try a task instead"}
+          {query.trim() === "" ? "Common destinations" : "Other destinations"}
         </p>
         {#each DOCS_TASKS as task (task.label)}
           <a href={`${base}${task.hrefs[0]}`} onclick={close}>{task.label}</a>

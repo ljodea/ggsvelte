@@ -40,8 +40,6 @@ export function filterGallery(
         entry.category,
         entry.docsSection,
         ...entry.tags,
-        entry.featured?.jobTitle ?? "",
-        entry.featured?.proof ?? "",
       ].join(" "),
     );
     return query.split(" ").every((part) => haystack.includes(part));

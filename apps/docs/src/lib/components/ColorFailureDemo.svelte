@@ -19,12 +19,12 @@
 <section class="limits" aria-label="Palette limits">
   <header class="section-heading">
     <div>
-      <p class="eyebrow">Failure is part of the contract</p>
-      <h2>Decide what happens when color runs out.</h2>
+      <p class="eyebrow">Exhaustion</p>
+      <h2>When the palette runs out.</h2>
     </div>
     <p>
-      Cycling keeps a chart renderable and warns once. Strict mode stops before
-      two categories can imply the same identity. Both results below come from
+      <code>onExhaust: "cycle"</code> warns once and reuses colors.
+      <code>"error"</code> fails validation before identity collides. Results from
       the public validation and pipeline APIs.
     </p>
   </header>
@@ -33,7 +33,7 @@
     <article class="incompatible">
       <p class="diagnostic-kind">Validation result</p>
       <code>{evidence.incompatible.code}</code>
-      <h3>A sequential scheme cannot drive ordinal categories.</h3>
+      <h3>Sequential scheme + ordinal categories</h3>
       <p>{evidence.incompatible.message}</p>
       <dl>
         <div>

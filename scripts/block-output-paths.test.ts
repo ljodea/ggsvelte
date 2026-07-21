@@ -1,4 +1,4 @@
-import { spawnSync } from "node:child_process";
+import { spawnSync, type SpawnSyncReturns } from "node:child_process";
 import { chmodSync, mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
@@ -13,7 +13,7 @@ afterEach(() => {
   for (const sandbox of sandboxes.splice(0)) rmSync(sandbox, { recursive: true, force: true });
 });
 
-function runGuard(branch: string, staged: string, hookArg = baseline) {
+function runGuard(branch: string, staged: string, hookArg = baseline): SpawnSyncReturns<string> {
   const sandbox = mkdtempSync(resolve(tmpdir(), "ggsvelte-output-guard-"));
   const bin = resolve(sandbox, "bin");
   sandboxes.push(sandbox);
@@ -31,21 +31,26 @@ esac
   );
   chmodSync(fakeGit, 0o755);
 
-  const env = Object.fromEntries(
-    Object.entries(process.env).filter(([name]) => !name.startsWith("GIT_")),
-  );
+  // Minimal env only: spreading process.env on CI leaves GITHUB_* / locale /
+  // BASH_ENV values that can change branch resolution or stderr decoding.
+  // Empty-string overrides are also unreliable across Node/Bun spawn impls.
   return spawnSync("bash", [guard, hookArg], {
     cwd: sandbox,
     encoding: "utf8",
     env: {
-      ...env,
-      PATH: `${bin}:${env.PATH}`,
+      PATH: `${bin}:/usr/bin:/bin`,
       FAKE_BRANCH: branch,
       FAKE_STAGED: staged,
-      GITHUB_HEAD_REF: "",
-      GITHUB_REF_NAME: "",
+      HOME: sandbox,
+      TMPDIR: tmpdir(),
+      LC_ALL: "C.UTF-8",
+      LANG: "C.UTF-8",
     },
   });
+}
+
+function combinedOutput(result: SpawnSyncReturns<string>): string {
+  return `${result.stdout ?? ""}${result.stderr ?? ""}`;
 }
 
 describe("block-output-paths guard", () => {
@@ -56,7 +61,7 @@ describe("block-output-paths guard", () => {
   it("blocks a newly staged baseline on an ordinary branch", () => {
     const result = runGuard("feature/ordinary", baseline);
     expect(result.status).toBe(1);
-    expect(result.stderr).toContain("plot.png");
+    expect(combinedOutput(result)).toContain("plot.png");
   });
 
   it("allows the audited visual-update branch", () => {
@@ -66,12 +71,13 @@ describe("block-output-paths guard", () => {
   it("blocks a newly staged coverage report on an ordinary branch", () => {
     const result = runGuard("feature/ordinary", coverageArtifact, coverageArtifact);
     expect(result.status).toBe(1);
-    expect(result.stderr).toContain("coverage");
+    expect(combinedOutput(result)).toContain(coverageArtifact);
   });
 
   it("blocks coverage reports on audited visual-update branches", () => {
     const result = runGuard("vr-update/pr-11", coverageArtifact, coverageArtifact);
     expect(result.status).toBe(1);
-    expect(result.stderr).toContain("coverage");
+    // vr-update/* only exempts screenshot baselines; coverage stays blocked.
+    expect(combinedOutput(result)).toContain(coverageArtifact);
   });
 });

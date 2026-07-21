@@ -52,12 +52,11 @@
 
 <section class="theme-lab" aria-label="Chart theme lab">
   <div class="lab-copy">
-    <p class="eyebrow">Separate by default</p>
-    <h2>Site appearance is not chart meaning.</h2>
+    <p class="eyebrow">Independence</p>
+    <h2>Chart theme ≠ site appearance.</h2>
     <p>
-      Choose a chart theme independently so exported graphics keep their
-      intended paper and ink. Follow the docs appearance only when that behavior
-      is deliberate.
+      Theme travels with the chart. Link it to docs appearance only when you
+      want that.
     </p>
     <div class="controls">
       <div class="select-control">

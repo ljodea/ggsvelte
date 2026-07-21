@@ -126,7 +126,7 @@
 <div class="panel-heading">
   <div>
     <p class="panel-number">03</p>
-    <h2>Take the chart with you</h2>
+    <h2>Export</h2>
   </div>
   <div class="output-actions">
     <button
