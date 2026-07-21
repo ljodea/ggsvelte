@@ -4,6 +4,7 @@
  * surfaces via gen-llms.
  */
 import { type CodeClassification } from "./guide-code-contract";
+import { highlightCodeToHtml } from "./highlight-code";
 
 // Minimal markdown renderer (headings, paragraphs, fenced code, inline code,
 // links, unordered lists) — enough for the guide sections below, nothing more.
@@ -16,6 +17,10 @@ function escapeHtml(s: string): string {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;");
 }
+
+/** Phosphor Copy (regular) path — icon-only control for static HTML fences. */
+const COPY_ICON_SVG =
+  '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 256 256" aria-hidden="true"><path d="M216,32H88a8,8,0,0,0-8,8V80H40a8,8,0,0,0-8,8V216a8,8,0,0,0,8,8H168a8,8,0,0,0,8-8V176h40a8,8,0,0,0,8-8V40A8,8,0,0,0,216,32ZM160,208H48V96H160Zm48-48H176V88a8,8,0,0,0-8-8H96V48H208Z"/></svg>';
 
 function inline(s: string, base: string): string {
   let out = escapeHtml(s);
@@ -98,7 +103,8 @@ export function renderMarkdown(md: string, base = ""): string {
     }
   };
   const renderCode = (source: string): string => {
-    const languageClass = codeLang === "" ? "" : ` class="language-${codeLang}"`;
+    const languageClass = codeLang === "" ? ' class="hljs"' : ` class="hljs language-${codeLang}"`;
+    const highlighted = highlightCodeToHtml(source, codeLang);
     const classificationLabel =
       codeClassification === "fragment"
         ? "Fragment"
@@ -108,10 +114,10 @@ export function renderMarkdown(md: string, base = ""): string {
             ? "Complete command"
             : "Complete example";
     const label = `<p class="guide-code-classification">${classificationLabel}</p>`;
-    const rendered = `${label}<pre><code${languageClass}>${escapeHtml(source)}</code></pre>`;
-    if (!codeCopy) return rendered;
+    const pre = `<pre><code${languageClass}>${highlighted}</code></pre>`;
+    if (!codeCopy) return `${label}${pre}`;
     const id = `guide-code-${String(++copyCodeCount)}`;
-    return `${label}<div class="guide-code-copy"><button type="button" data-copy-code="${id}" aria-describedby="${id}-status">Copy code</button><pre id="${id}"><code${languageClass}>${escapeHtml(source)}</code></pre><span id="${id}-status" role="status"></span></div>`;
+    return `${label}<div class="guide-code-copy"><button type="button" data-copy-code="${id}" aria-label="Copy code" aria-describedby="${id}-status">${COPY_ICON_SVG}</button><pre id="${id}"><code${languageClass}>${highlighted}</code></pre><span id="${id}-status" role="status" class="visually-hidden"></span></div>`;
   };
 
   for (const line of lines) {

@@ -99,7 +99,8 @@
           <p class="fragment-label">Svelte fragment</p>
           <CopyCode
             code={snippet(example)}
-            label={`Copy ${example.label} code`}
+            language="svelte"
+            accessibleLabel={`Copy ${example.label} code`}
           />
         </article>
       </li>

@@ -22,9 +22,13 @@
       ?.compatibility,
   );
   const tabs = $derived([
-    { label: "Svelte", code: data.svelteSource },
-    { label: "Builder (TS)", code: data.specSource },
-    { label: "Spec (JSON)", code: JSON.stringify(data.spec, null, 2) },
+    { label: "Svelte", code: data.svelteSource, language: "svelte" },
+    { label: "Builder (TS)", code: data.specSource, language: "typescript" },
+    {
+      label: "Spec (JSON)",
+      code: JSON.stringify(data.spec, null, 2),
+      language: "json",
+    },
   ]);
 </script>
 

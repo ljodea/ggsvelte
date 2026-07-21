@@ -96,7 +96,11 @@
       </GGPlot>
     </div>
     <p class="fragment-label">Svelte fragment</p>
-    <CopyCode {code} label="Copy selected theme code" />
+    <CopyCode
+      {code}
+      language="svelte"
+      accessibleLabel="Copy selected theme code"
+    />
   </div>
 </section>
 
