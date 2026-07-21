@@ -1,0 +1,25 @@
+{
+  "url": "http://127.0.0.1:4176/examples/point/log-scale",
+  "browser": "gstack browse Chromium",
+  "result": "pass",
+  "checks": {
+    "page": "200; responsive GGPlot reached data-gg-ready=true",
+    "console": "no error or warning entries (Vite debug connection messages only)",
+    "responsive": "light and dark chart-theme captures produced at 320, 640, and 1200 pixels",
+    "axisAccessibility": "every x major tick has a non-empty first-child title",
+    "overlap": "0px adjacent x-label overlap at 320, 640, and 1200",
+    "semanticInspection": "clicking the transformed smooth at the right edge reported x=84734 source units, not transformed x=4.928",
+    "semanticZoom": "precise x bounds 1000..10000 produced ticks 1k, 2k, 5k, 10k and censored the point layer to 9 source rows; Reset zoom restored ticks 1k, 10k, 100k and 24 rows",
+    "sourceValues": "identity point candidates retain original country/GDP/life-expectancy rows; synthesized smooth candidates inverse-project the scale transform"
+  },
+  "evidence": [
+    "log10-fit-320-light.png",
+    "log10-fit-640-light.png",
+    "log10-fit-1200-light.png",
+    "log10-fit-320-dark.png",
+    "log10-fit-640-dark.png",
+    "log10-fit-1200-dark.png",
+    "browser-zoom-1200.png",
+    "overlap-metrics.json"
+  ]
+}

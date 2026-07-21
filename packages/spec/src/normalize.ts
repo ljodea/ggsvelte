@@ -212,6 +212,18 @@ function normalizePositionScale(scale: PositionScaleSpec): PositionScaleSpec {
     } = scale;
     return band;
   }
+  // Canonical log10: an authored `type: "log"` (base-10) IS the linear family
+  // with the log10 transform. A conflicting explicit transform (identity/sqrt)
+  // is left uncanonicalized for pipeline preflight to reject as
+  // scale-type-transform-conflict. Pure normalize never throws.
+  if (scale.type === "log" && (scale.transform === undefined || scale.transform === "log10")) {
+    return { ...scale, type: "linear", transform: "log10" };
+  }
+  // Binned is a quantitative position family; it never requests a time scale.
+  // Contradictory temporal options are left for validate() to reject.
+  if (scale.type === "binned") {
+    return { ...scale };
+  }
   const hasTemporalGuideOption =
     scale.dateBreaks !== undefined ||
     scale.dateMinorBreaks !== undefined ||

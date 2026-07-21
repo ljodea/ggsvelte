@@ -222,7 +222,10 @@ describe("coord flip — geometry", () => {
       w: batch.rects[j * 4 + 2]!,
       h: batch.rects[j * 4 + 3]!,
     }));
-    for (const bar of bars) expect(bar.x).toBeCloseTo(0, 3);
+    // All bars share the same baseline left edge (semantic 0, offset by the 5%
+    // measure-axis expansion — no longer pixel 0).
+    const baseX = bars[0]!.x;
+    for (const bar of bars) expect(bar.x).toBeCloseTo(baseX, 3);
     // Bar lengths ordered like the data values 4, 8, 2.
     expect(bars[1]!.w).toBeGreaterThan(bars[0]!.w);
     expect(bars[2]!.w).toBeLessThan(bars[0]!.w);
@@ -241,6 +244,8 @@ describe("coord flip — geometry", () => {
     const model = runPipeline(
       gg(rows, aes({ x: "cat", y: "v", fill: "kind" }))
         .geomCol()
+        // flush measure axis so the stack starts exactly at pixel 0
+        .scales({ y: { expand: { mult: 0, add: 0 } } })
         .coordFlip()
         .spec(),
       size,
@@ -277,6 +282,8 @@ describe("coord flip — geometry", () => {
       gg(rows, aes({ x: "cat", y: "y" }))
         .geomCol()
         .facet({ wrap: "g" })
+        // flush measure axis so bars anchor exactly at pixel 0 across panels
+        .scales({ y: { expand: { mult: 0, add: 0 } } })
         .coordFlip()
         .spec(),
       size,

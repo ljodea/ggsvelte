@@ -17,6 +17,11 @@ export function collectMappedXEvidence(
   if (frame.xValues !== null) acc.columns.push(frame.xValues);
   if (frame.xNumeric !== null) acc.numeric.push(frame.xNumeric);
   const { binding } = frame;
+  // Binned identity geoms render centers but the affine display domain must
+  // include the full outer edges so bars do not project beyond the panel.
+  if (binding.xBinning !== undefined) {
+    acc.numeric.push(Float64Array.from(binding.xBinning.edges));
+  }
   const geom = binding.layer.geom;
   const field = binding.xField!;
   const conversion = xConversionOf(binding);

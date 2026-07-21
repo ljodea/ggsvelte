@@ -1,0 +1,60 @@
+{
+  "pipeline": [
+    "input typing/parsing",
+    "source-limit OOB + pre-stat scale transform",
+    "stats",
+    "positions",
+    "affine scale training + breaks + guides",
+    "post-stat coordinate transform",
+    "rendering + interactions"
+  ],
+  "sourcePreserved": true,
+  "scale": {
+    "type": "linear",
+    "transform": "log10",
+    "domain": [0.014962356560944336, 211348.90398366476],
+    "transformedDomain": [-1.825, 5.325]
+  },
+  "domains": {
+    "baseline": {
+      "x": [0.014962356560944336, 211348.90398366476],
+      "y": [-0.6000000000000001, 12.6],
+      "panels": [
+        {
+          "x": [0.014962356560944336, 211348.90398366476],
+          "y": [-0.6000000000000001, 12.6]
+        }
+      ]
+    },
+    "effective": {
+      "x": [0.014962356560944336, 211348.90398366476],
+      "y": [-0.6000000000000001, 12.6],
+      "panels": [
+        {
+          "x": [0.014962356560944336, 211348.90398366476],
+          "y": [-0.6000000000000001, 12.6]
+        }
+      ]
+    }
+  },
+  "guidePlans": [{}, {}],
+  "batches": [
+    {
+      "kind": "paths",
+      "layerIndex": 0,
+      "marks": 80
+    },
+    {
+      "kind": "rects",
+      "layerIndex": 1,
+      "marks": 7
+    },
+    {
+      "kind": "paths",
+      "layerIndex": 2,
+      "marks": 1024
+    }
+  ],
+  "warnings": [],
+  "scaleDiagnostics": []
+}

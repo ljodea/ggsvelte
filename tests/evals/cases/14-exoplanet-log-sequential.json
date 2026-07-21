@@ -138,7 +138,8 @@
     ],
     "scales": {
       "x": {
-        "type": "log"
+        "type": "linear",
+        "transform": "log10"
       },
       "color": {
         "type": "sequential"
@@ -146,5 +147,5 @@
     }
   },
   "expectRefusal": false,
-  "notes": "Log x + sequential color ramp over a quantitative field, both declared."
+  "notes": "Log x (canonical linear + log10 transform) + sequential color ramp over a quantitative field, both declared."
 }

@@ -15,10 +15,11 @@
  *  - pie-chart equivalents: no polar coord in v1 — unrepresentable.
  *  - text layer without a label aes: that is a validation ERROR
  *    (`missing-required-channel`), not an advisory.
- *  - log scale over entirely non-positive data: the pipeline handles it via
- *    the `log-nonpositive` warning / `log-domain-not-positive` error; the
- *    lint advisory here fires on MIXED-sign data, where the silent row-drop
- *    is most surprising.
+ *  - transform scale over entirely out-of-domain data: the pipeline handles
+ *    it via the `scale-transform-domain` error (explicit limits) / warning
+ *    (data), plus the applicable censor count; the lint advisory here fires on
+ *    MIXED data (some in-domain, some out), where the silent row-drop is most
+ *    surprising.
  *
  * Wired into `validate(spec, { lint: true })` (advisories ride the result)
  * and into the `ggsvelte-render` CLI (stderr JSON lines, kind "advisory",
@@ -85,11 +86,12 @@ export const LINT_CATALOG = {
     rationale:
       "Discrete-by-discrete points overplot into a grid where counts are invisible. Jitter the points, or count the combinations and encode the count.",
   },
-  "log-nonpositive-data": {
-    summary: "A log scale is configured over data that mixes positive and non-positive values.",
+  "transform-domain-data": {
+    summary:
+      "A transform scale (log10/sqrt) is configured over data that mixes in-domain and out-of-domain values.",
     needs: "data",
     rationale:
-      "Log scales silently drop zero/negative rows (the pipeline warns at render). Filter the data deliberately, or use a linear scale.",
+      "log10 rejects values <= 0 and sqrt rejects values < 0; the transform silently drops out-of-domain rows before stats (the pipeline warns at render). Filter the data deliberately, or use an identity/linear scale if those values are meaningful.",
   },
 } as const satisfies Record<string, LintCatalogEntry>;
 
@@ -119,6 +121,33 @@ function buildEvidence(
 }
 
 const DISCRETE: ReadonlySet<ProfileFieldType> = new Set(["nominal", "ordinal"]);
+
+/** Forward-transform domain rule for a position scale, or null if none. */
+interface TransformDomain {
+  valid(value: number): boolean;
+  /** Human label for the message ("log10" | "sqrt"). */
+  label: string;
+  /** Short description of the valid range ("positive" | "non-negative"). */
+  rule: string;
+}
+
+/**
+ * Resolve the effective forward-transform domain for a position scale, reading
+ * the spec BEFORE normalization. Both the authored legacy `type: "log"` and the
+ * canonical `transform: "log10" | "sqrt"` are covered; identity/time/untyped
+ * scales return null.
+ */
+function transformDomainOf(config: PositionScaleSpec | undefined): TransformDomain | null {
+  if (config === undefined) return null;
+  const transform = config.transform ?? (config.type === "log" ? "log10" : undefined);
+  if (transform === "log10") {
+    return { valid: (v) => v > 0, label: "log10", rule: "positive" };
+  }
+  if (transform === "sqrt") {
+    return { valid: (v) => v >= 0, label: "sqrt", rule: "non-negative" };
+  }
+  return null;
+}
 
 // ---------------------------------------------------------------------------
 // lintSpec
@@ -259,10 +288,16 @@ export function lintSpec(
     }
   }
 
-  // --- log-nonpositive-data (scale-level, once per axis) ----------------------
+  // --- transform-domain-data (scale-level, once per axis) ---------------------
+  // Detect the effective forward-transform domain BEFORE normalization: an
+  // authored `type: "log"` (canonicalizes to transform: "log10") and a
+  // canonical `transform: "log10" | "sqrt"` are all handled here. log10 rejects
+  // values <= 0; sqrt rejects values < 0. The advisory fires only on MIXED data
+  // (some in-domain, some out) — all-invalid is the pipeline's error/warning.
   for (const axis of ["x", "y"] as const) {
     const config = scales?.[axis] as PositionScaleSpec | undefined;
-    if (config?.type !== "log") continue;
+    const domain = transformDomainOf(config);
+    if (domain === null) continue;
     for (let i = 0; i < layers.length; i++) {
       const layer = layers[i];
       if (!isRecord(layer)) continue;
@@ -270,21 +305,20 @@ export function lintSpec(
       const use = fieldOf(layerAes, axis);
       const values = use?.info.values;
       if (use === null || values === null || values === undefined) continue;
-      let positive = 0;
-      let nonPositive = 0;
+      let inDomain = 0;
+      let outOfDomain = 0;
       for (const v of values) {
         if (typeof v !== "number") continue;
-        if (v > 0) positive++;
-        else nonPositive++;
+        if (domain.valid(v)) inDomain++;
+        else outOfDomain++;
       }
-      if (positive > 0 && nonPositive > 0) {
+      if (inDomain > 0 && outOfDomain > 0) {
         advisories.push({
-          code: "log-nonpositive-data",
+          code: "transform-domain-data",
           path: `/scales/${axis}`,
-          message: `scales.${axis} is a log scale, but field "${use.field}" has ${nonPositive} non-positive value(s) alongside ${positive} positive — those rows will be silently dropped at render.`,
+          message: `scales.${axis} is a ${domain.label} scale, but field "${use.field}" has ${outOfDomain} value(s) outside its ${domain.rule} domain alongside ${inDomain} valid — those rows will be silently dropped before stats.`,
           suggestion: {
-            description:
-              "Filter the non-positive rows deliberately, or use a linear scale if zero/negative values are meaningful.",
+            description: `Filter the out-of-domain rows deliberately, or use an identity/linear scale if ${domain.rule} values are meaningful.`,
           },
         });
         break; // one advisory per axis is enough

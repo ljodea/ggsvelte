@@ -47,6 +47,14 @@ model.advisories; // every heuristic decision, with how-to-override
 model.warnings; // degraded-but-rendered conditions
 ```
 
+Position scales preserve semantic source values while cached `identity`,
+`log10`, or `sqrt` views feed statistics and positions exactly once. The final
+trained continuous scale exposes both `normalize(semantic)` and
+`normalizeTransformed(scaleSpace)`, semantic inversion, family `linear`, and a
+separate `transform`. Binned scales retain private integer identities for
+count/stack/dodge while guides, candidates, and interactions use semantic
+centers and edges.
+
 Browser rendering:
 
 ```ts

@@ -117,16 +117,30 @@ export function createPlotRuntime(deps: PlotRuntimeDeps): PlotRuntime {
     void scaleEpoch;
     const effectiveSpec = deps.effectiveSpec();
     if (effectiveSpec === null) return null;
+    const rowFilters = deps.effectiveLegendFilters();
+    const assembled = deps.assembled();
+    let baselineDomains: RenderModel["domains"]["effective"] | undefined;
+    let effectivePrevScales = scaleBox.scales;
+    if (deps.effectiveZoomDomains() !== null && assembled !== null) {
+      // Scale limits now censor before stats. Train the unzoomed spec in a
+      // separate pure run so Reset keeps the latest natural data/stat domain;
+      // effective zoom rendering still re-stats only the limited subset.
+      const baseline = runPipeline(assembled, {
+        width: resolvedWidth,
+        height: resolvedHeight,
+        ...(scaleBox.scales !== undefined && { prevScales: scaleBox.scales }),
+        ...(rowFilters.length > 0 && { rowFilters }),
+      });
+      baselineDomains = baseline.domains.effective;
+      effectivePrevScales = baseline.scales.state;
+      baseline.dispose();
+    }
     const m = runPipeline(effectiveSpec, {
       width: resolvedWidth,
       height: resolvedHeight,
-      ...(scaleBox.scales !== undefined && { prevScales: scaleBox.scales }),
-      ...(deps.effectiveZoomDomains() !== null && {
-        baselineScales: deps.assembled()?.scales ?? {},
-      }),
-      ...(deps.effectiveLegendFilters().length > 0 && {
-        rowFilters: deps.effectiveLegendFilters(),
-      }),
+      ...(effectivePrevScales !== undefined && { prevScales: effectivePrevScales }),
+      ...(baselineDomains !== undefined && { baselineDomains }),
+      ...(rowFilters.length > 0 && { rowFilters }),
     });
     if (m.runId > scaleBox.runId) {
       scaleBox.runId = m.runId;

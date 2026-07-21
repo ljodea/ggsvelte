@@ -6,6 +6,7 @@ import type { PositionParams } from "@ggsvelte/spec";
 import { DEFAULT_JITTER_SEED, jitterOffsets, nudgeOffsets } from "../positions/jitter.js";
 import type { ColumnTable } from "../table.js";
 
+import { minBinWidth } from "./binned-scale.js";
 import { positionDiscreteness } from "./temporal-position.js";
 import type { Advisory, LayerFrame } from "./types.js";
 
@@ -39,10 +40,16 @@ export function applyPointTextPosition(
   }
   // jitter (point only, schema-enforced): seeded — deliberate divergence
   // from ggplot2's random jitter (decision 0010), always surfaced.
+  // Binned axes jitter over the transformed BIN WIDTH (never the integer bin
+  // id, never the collapsed resolution of single-bin snapped centers).
+  const xBinDefault =
+    binding.xBinning === undefined ? undefined : 0.4 * minBinWidth(binding.xBinning);
+  const yBinDefault =
+    binding.yBinning === undefined ? undefined : 0.4 * minBinWidth(binding.yBinning);
   const { dx, dy } = jitterOffsets({
     n: frame.n,
-    width: params.width,
-    height: params.height,
+    width: params.width ?? xBinDefault,
+    height: params.height ?? yBinDefault,
     seed: params.seed,
     xNumeric: xDiscrete ? null : frame.xNumeric,
     yNumeric: yDiscrete ? null : frame.yNumeric,

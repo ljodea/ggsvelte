@@ -35,8 +35,10 @@ export function positionOf(
   }
   const v = numeric?.[row];
   if (v === undefined || !Number.isFinite(v)) return NaN;
-  // Offsets on continuous axes are data units.
-  return scale.normalize(offsets === null ? v : v + offsets[row]!);
+  // `numeric` is the already-transformed (scale-space) frame array; offsets
+  // (stack/dodge/jitter/nudge) are also post-stat scale-space units. Use
+  // normalizeTransformed so a transformed value is never forwarded twice.
+  return scale.normalizeTransformed(offsets === null ? v : v + offsets[row]!);
 }
 
 export function removedWarning(removed: number, index: number, warnings: PipelineWarning[]): void {

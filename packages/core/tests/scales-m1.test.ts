@@ -12,6 +12,7 @@ import { defaultLogTickFormat, logTicks } from "../src/layout/ticks.ts";
 import { defaultTimeTickFormat, timeTicks } from "../src/layout/time.ts";
 import { rampColor, trainSequential, VIRIDIS_RAMP_10 } from "../src/scales/color.ts";
 import { ScaleConfigError, trainBand, trainContinuous } from "../src/scales/train.ts";
+import { scaleTransform } from "../src/scales/transform.ts";
 import {
   BUILTIN_THEMES,
   LEGACY_BUILTIN_THEMES,
@@ -53,28 +54,39 @@ describe("trainContinuous — config semantics", () => {
   });
 });
 
-describe("trainContinuous — log scales", () => {
-  it("drops non-positive values with a count and nices to powers of ten", () => {
-    const training = trainContinuous([Float64Array.from([0, -2, 3, 700])], { type: "log" });
-    expect(training.nonPositive).toBe(2);
+describe("trainContinuous — transformed-space (log10) training", () => {
+  const log10 = scaleTransform("log10");
+
+  it("trains affine over transformed evidence and inverse-projects a semantic domain", () => {
+    // Evidence is ALREADY transformed (pre-stat log10 of 1,10,100,1000 = 0,1,2,3);
+    // the trainer never re-forwards it.
+    const training = trainContinuous([Float64Array.from([0, 1, 2, 3])], {
+      transform: log10,
+      nice: false,
+    });
+    expect(training.scale.type).toBe("linear");
+    expect(training.scale.transform).toBe("log10");
     expect(training.scale.domain).toEqual([1, 1000]);
+    // normalize forwards once: normalize(10) = affine(log10(10)=1) = 1/3.
     expect(training.scale.normalize(10)).toBeCloseTo(1 / 3, 12);
+    expect(training.scale.normalizeTransformed(1)).toBeCloseTo(1 / 3, 12);
     expect(Number.isNaN(training.scale.normalize(0))).toBe(true);
     expect(Number.isNaN(training.scale.normalize(-5))).toBe(true);
   });
 
-  it("REFUSES non-positive explicit domains (failure policy)", () => {
+  it("REFUSES an explicit domain outside the transform's valid range", () => {
     expect(() =>
-      trainContinuous([Float64Array.from([1, 10])], { type: "log", domain: [0, 10] }),
+      trainContinuous([Float64Array.from([0, 1])], { transform: log10, domain: [0, 10] }),
     ).toThrow(ScaleConfigError);
     expect(() =>
-      trainContinuous([Float64Array.from([1, 10])], { type: "log", domain: [-1, 10] }),
-    ).toThrow(/strictly positive/);
+      trainContinuous([Float64Array.from([0, 1])], { transform: log10, domain: [-1, 10] }),
+    ).toThrow(/valid range/);
   });
 
-  it("all-non-positive data falls back to a default domain (empty)", () => {
-    const training = trainContinuous([Float64Array.from([-1, 0])], { type: "log" });
+  it("empty transformed evidence falls back to a default domain", () => {
+    const training = trainContinuous([Float64Array.from([])], { transform: log10 });
     expect(training.empty).toBe(true);
+    // fallback transformed window [0, 1] inverse-projects to semantic [1, 10].
     expect(training.scale.domain).toEqual([1, 10]);
   });
 });

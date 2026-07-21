@@ -124,6 +124,14 @@ milliseconds through centuries. Override one choice without preprocessing:
 Explicit breaks and labels are preserved. When they cannot fit, ggsvelte reports a
 structured overlap diagnostic instead of silently rotating, thinning, or truncating them.
 
+Numeric position transforms follow ggplot2 staging: parse, apply source-limit
+OOB, transform once, then compute statistics and positions. Canonical specs use
+family `linear` plus `transform: "log10" | "sqrt"`; helpers include
+`scaleXLog10`, `scaleYSqrt`, `scaleXBinned`, and ggplot2 aliases. Binned scales
+keep bin ids internal while source values remain available to tooltips and
+events. See [Scales and guides](https://ljodea.github.io/ggsvelte/guide/scales-guides)
+and [Upgrading](https://ggsvelte.sh/guide/upgrading#0-5-to-0-6).
+
 ## One spec, three surfaces
 
 **Spec JSON** (what agents emit; JSON Schema at `packages/spec/schema/v0.json`):

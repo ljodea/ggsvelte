@@ -9,6 +9,7 @@ import type { ColumnTable } from "../table.js";
 import { carriedColumns, removedStatWarning } from "./frame-helpers.js";
 import { packSmoothLayerFrame } from "./frame-stats-smooth-frame.js";
 import { makeColumnOf } from "./frame-stats-shared.js";
+import { positionColumn } from "./temporal-position.js";
 import type { Advisory, LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
 
 export function buildSmoothFrame(
@@ -23,16 +24,8 @@ export function buildSmoothFrame(
   const columnOf = makeColumnOf(binding);
   const params = (layer.params ?? {}) as SmoothParams;
   const result = statSmooth({
-    x: table.numeric(
-      binding.xField!,
-      binding.xConversion.sourceParser,
-      binding.xConversion.options,
-    ),
-    y: table.numeric(
-      binding.yField!,
-      binding.yConversion.sourceParser,
-      binding.yConversion.options,
-    ),
+    x: positionColumn(table, binding.xField!, binding.xConversion, binding.xTransform),
+    y: positionColumn(table, binding.yField!, binding.yConversion, binding.yTransform),
     groups,
     carried,
     params,

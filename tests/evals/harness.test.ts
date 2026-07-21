@@ -105,11 +105,18 @@ describe("case corpus", () => {
       if (facet?.["scales"] !== undefined && facet["scales"] !== "fixed") facts.add("facet:free");
       const coord = g["coord"] as Record<string, unknown> | undefined;
       if (coord?.["type"] === "flip") facts.add("coord:flip");
-      const scales = g["scales"] as Record<string, { type?: string }> | undefined;
+      const scales = g["scales"] as
+        | Record<string, { type?: string; transform?: string }>
+        | undefined;
       for (const channel of ["x", "y", "color", "fill"]) {
+        const kind = channel === "color" || channel === "fill" ? "colorish" : "pos";
         const t = scales?.[channel]?.type;
-        if (t !== undefined)
-          facts.add(`scale:${channel === "color" || channel === "fill" ? "colorish" : "pos"}:${t}`);
+        if (t !== undefined) facts.add(`scale:${kind}:${t}`);
+        // Pre-stat position transform (log10/sqrt) is a canonical scale fact.
+        const transform = scales?.[channel]?.transform;
+        if (transform !== undefined && transform !== "identity") {
+          facts.add(`scale:${kind}:${transform}`);
+        }
       }
     }
     for (const stat of ["count", "bin", "smooth", "boxplot", "density", "summary"]) {
@@ -125,7 +132,7 @@ describe("case corpus", () => {
       "facet:grid",
       "facet:free",
       "coord:flip",
-      "scale:pos:log",
+      "scale:pos:log10",
       "scale:pos:time",
       "scale:colorish:sequential",
     ]) {

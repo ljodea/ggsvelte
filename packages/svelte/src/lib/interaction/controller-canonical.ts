@@ -94,10 +94,22 @@ function canonicalIntervalAxis(axis: ReadonlyIntervalDomains["x"]): ReadonlyInte
     }
     return Object.freeze({ kind: "band", values: Object.freeze([...new Set(axis.values)]) });
   }
+  // Runtime guard for untyped JS callers: a stale transient `kind:"log"` (the
+  // pre-PR-3 family) is rejected here like any other unsupported kind — no
+  // compat branch reinterprets it as transform:"log10".
+  const kind: unknown = axis.kind;
+  if (kind !== "linear" && kind !== "time") {
+    throw new TypeError(
+      `Interaction interval axis kind "${String(kind)}" is not supported. Use "linear" or "time" (with an optional transform), or "band".`,
+    );
+  }
   const domain = canonicalDomain(axis.domain);
-  if (axis.kind === "log" && domain[0] <= 0)
-    throw new TypeError("Interaction log interval domains must contain positive values.");
-  return Object.freeze({ kind: axis.kind, domain });
+  const transform = axis.transform ?? "identity";
+  if (transform === "log10" && domain[0] <= 0)
+    throw new TypeError("Interaction log10 interval domains must contain positive values.");
+  if (transform === "sqrt" && domain[0] < 0)
+    throw new TypeError("Interaction sqrt interval domains must contain non-negative values.");
+  return Object.freeze({ kind: axis.kind, transform, domain });
 }
 
 export function canonicalIntervalDomains(
@@ -123,6 +135,7 @@ function equalIntervalAxis(
     );
   }
   if (left.kind === "band" || right.kind === "band") return false;
+  if ((left.transform ?? "identity") !== (right.transform ?? "identity")) return false;
   return equalDomain(left.domain, right.domain);
 }
 

@@ -182,11 +182,11 @@ describe("facet interval consumption", () => {
     );
   });
 
-  it("uses positive numeric membership for logarithmic domains", () => {
+  it("uses positive numeric membership for transform:log10 domains", () => {
     const cross: PlotInteractionInterval<string> = {
       panelId: "north",
       preset: "cross-panel",
-      domains: { x: { kind: "log", domain: [1, 100] } },
+      domains: { x: { kind: "linear", transform: "log10", domain: [1, 100] } },
       keys: [],
     };
     expect(
@@ -200,6 +200,68 @@ describe("facet interval consumption", () => {
         ],
       }),
     ).toEqual(["inside"]);
+  });
+
+  it("rejects negative values on transform:log10 even when they fall inside the numeric domain range", () => {
+    // A domain of [-50, 100] could only be authored directly on this pure
+    // function (canonicalIntervalAxis forbids a non-positive log10 lower
+    // bound at the controller boundary) — but the membership check itself
+    // must reject by transform validity, not merely by domain range.
+    const cross: PlotInteractionInterval<string> = {
+      panelId: "north",
+      preset: "cross-panel",
+      domains: { x: { kind: "linear", transform: "log10", domain: [-50, 100] } },
+      keys: [],
+    };
+    expect(
+      consumeIntervalKeys({
+        records: [cross],
+        panels,
+        candidates: [
+          { panelId: "north", xValue: -2, keys: ["negative-in-range"] },
+          { panelId: "north", xValue: 10, keys: ["inside"] },
+        ],
+      }),
+    ).toEqual(["inside"]);
+  });
+
+  it("rejects negative values on transform:sqrt even when they fall inside the numeric domain range", () => {
+    const cross: PlotInteractionInterval<string> = {
+      panelId: "north",
+      preset: "cross-panel",
+      domains: { x: { kind: "linear", transform: "sqrt", domain: [-50, 100] } },
+      keys: [],
+    };
+    expect(
+      consumeIntervalKeys({
+        records: [cross],
+        panels,
+        candidates: [
+          { panelId: "north", xValue: -2, keys: ["negative-in-range"] },
+          { panelId: "north", xValue: 0, keys: ["zero"] },
+          { panelId: "north", xValue: 10, keys: ["inside"] },
+        ],
+      }),
+    ).toEqual(["zero", "inside"]);
+  });
+
+  it("distinguishes same-domain axes by transform for equality", () => {
+    const log10Record = record("north", "independent", ["n1"]);
+    const withLog10Domain: PlotInteractionInterval<string> = {
+      ...log10Record,
+      domains: { x: { kind: "linear", transform: "log10", domain: [1, 5] } },
+    };
+    const withSqrtDomain: PlotInteractionInterval<string> = {
+      ...log10Record,
+      domains: { x: { kind: "linear", transform: "sqrt", domain: [1, 5] } },
+    };
+    const alsoLog10Domain: PlotInteractionInterval<string> = {
+      ...log10Record,
+      domains: { x: { kind: "linear", transform: "log10", domain: [1, 5] } },
+    };
+    // Same kind, same numeric domain, different transform — must not compare equal.
+    expect(sameIntervalRecord(withLog10Domain, withSqrtDomain)).toBe(false);
+    expect(sameIntervalRecord(withLog10Domain, alsoLog10Domain)).toBe(true);
   });
 
   it("matches band domains by canonical typed identity", () => {
@@ -269,13 +331,19 @@ describe("facet interval consumption", () => {
     expect(
       candidateInInterval(
         { xValue: 3, yValue: 10 },
-        { x: { kind: "linear", domain: [1, 5] }, y: { kind: "log", domain: [1, 100] } },
+        {
+          x: { kind: "linear", domain: [1, 5] },
+          y: { kind: "linear", transform: "log10", domain: [1, 100] },
+        },
       ),
     ).toBe(true);
     expect(
       candidateInInterval(
         { xValue: 3, yValue: -1 },
-        { x: { kind: "linear", domain: [1, 5] }, y: { kind: "log", domain: [1, 100] } },
+        {
+          x: { kind: "linear", domain: [1, 5] },
+          y: { kind: "linear", transform: "log10", domain: [1, 100] },
+        },
       ),
     ).toBe(false);
   });
@@ -295,14 +363,14 @@ describe("facet interval consumption", () => {
           ...committed,
           domains: {
             x: { kind: "band", values: ["@n:1", "1"] },
-            y: { kind: "log", domain: [1, 100] },
+            y: { kind: "linear", transform: "log10", domain: [1, 100] },
           },
         },
         {
           ...canonical,
           domains: {
             x: { kind: "band", values: ["@n:1", "1"] },
-            y: { kind: "log", domain: [1, 100] },
+            y: { kind: "linear", transform: "log10", domain: [1, 100] },
           },
         },
       ),

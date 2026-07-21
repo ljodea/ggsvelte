@@ -1,0 +1,7 @@
+{
+  "newRuntimeDependencies": [],
+  "manifestChanges": 0,
+  "lockfileChanges": 0,
+  "reason": "Position transforms, binned assignment, and guide inversion use the existing pure TypeScript scale pipeline; no dependency was added.",
+  "verification": "git diff --numstat -- bun.lock package.json packages/{spec,core,svelte}/package.json returned no rows"
+}

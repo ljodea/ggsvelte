@@ -121,10 +121,11 @@
     ],
     "scales": {
       "y": {
-        "type": "log"
+        "type": "linear",
+        "transform": "log10"
       }
     }
   },
   "expectRefusal": false,
-  "notes": "Declared log scale on y; all values positive by construction."
+  "notes": "Declared log scale on y (canonical linear + log10 transform); all values positive by construction."
 }

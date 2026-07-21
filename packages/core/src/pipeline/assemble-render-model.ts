@@ -11,6 +11,7 @@ import {
   buildRenderModelScales,
 } from "./assemble-render-model-scales.js";
 import { createRenderModelLifecycle } from "./assemble-render-model-lifecycle.js";
+import { scaleTrainingDiagnostics } from "./assemble-render-model-scale-training-diagnostics.js";
 import type { RenderModel } from "./types.js";
 
 export type { AssembleRenderModelInput } from "./assemble-render-model-input.js";
@@ -69,7 +70,11 @@ export function assembleRenderModel(input: AssembleRenderModelInput): RenderMode
     scales: buildRenderModelScales(input),
     warnings: diagnostics.warnings,
     advisories: diagnostics.advisories,
-    scaleDiagnostics: [...input.scaleDiagnostics, ...guidePlanDiagnostics(input)],
+    scaleDiagnostics: [
+      ...input.scaleDiagnostics,
+      ...scaleTrainingDiagnostics(diagnostics.warnings, diagnostics.advisories),
+      ...guidePlanDiagnostics(input),
+    ],
     scaleDecisions: input.scaleDecisions.map((decision) => ({
       ...decision,
       domain: decision.aesthetic === "x" ? [...input.xScale.domain] : [...input.yScale.domain],

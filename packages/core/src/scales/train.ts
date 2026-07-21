@@ -19,8 +19,14 @@
  */
 import { tickStep } from "../layout/ticks.js";
 import { VIRIDIS_RAMP_10 } from "./color.js";
+import { ScaleConfigError } from "./scale-error.js";
+import type { PositionTransformName, ScaleTransform } from "./transform.js";
+import { scaleTransform } from "./transform.js";
 import type { ScaleState, ScaleWarning, TrainResult } from "./state.js";
 import { encodeKey, trainDiscrete } from "./state.js";
+
+// Re-export for callers that import ScaleConfigError from ./train.js.
+export { ScaleConfigError } from "./scale-error.js";
 
 import { CATEGORICAL_PALETTE_10, CATEGORICAL_SCHEMES } from "./categorical-palettes.js";
 
@@ -41,26 +47,22 @@ function rangeForScheme(scheme: string | undefined): readonly string[] | undefin
   return CATEGORICAL_SCHEMES[scheme as keyof typeof CATEGORICAL_SCHEMES];
 }
 
-/** A misconfigured scale (bad explicit domain, log over zero/negatives). */
-export class ScaleConfigError extends Error {
-  readonly code: string;
-
-  constructor(code: string, message: string) {
-    super(message);
-    this.name = "ScaleConfigError";
-    this.code = code;
-  }
-}
-
 export interface ContinuousScale {
-  type: "linear" | "log" | "time";
-  /** Resolved [min, max] domain (epoch ms for time). */
+  type: "linear" | "time";
+  /** Pre-stat transform applied to source values before affine training. */
+  transform: PositionTransformName;
+  /** Semantic/source-space display domain [min, max] (epoch ms for time). */
   domain: [number, number];
-  /** Normalize a data value to [0, 1] within the domain (NaN when undefined,
-   *  e.g. non-positive values on a log scale). Reverse is applied here. */
+  /** Post-stat scale-space display domain [min, max] (forward(domain)). */
+  transformedDomain: [number, number];
+  /** Semantic value -> forward -> affine [0, 1]. NaN outside the transform
+   *  domain (e.g. non-positive on log10). Reverse is applied here. */
   normalize(value: number): number;
-  /** Inverse of normalize: [0, 1] -> data value (brush-to-zoom inversion).
-   *  Mirrors reverse; log scales invert through the exponent. */
+  /** Post-stat scale-space value -> affine [0, 1]. Geometry uses this so a
+   *  transformed frame value is never forwarded twice. Reverse applied. */
+  normalizeTransformed(value: number): number;
+  /** Inverse of normalize: affine [0, 1] -> inverse -> semantic value
+   *  (brush-to-zoom inversion). Mirrors reverse. */
   invert(t: number): number;
 }
 
@@ -130,128 +132,123 @@ export function finiteExtent(arrays: readonly Float64Array[]): [number, number] 
   return min > max ? null : [min, max];
 }
 
-/** Extent restricted to positive values; also counts non-positive finites. */
-function positiveExtent(arrays: readonly Float64Array[]): {
-  extent: [number, number] | null;
-  nonPositive: number;
-} {
-  let min = Infinity;
-  let max = -Infinity;
-  let nonPositive = 0;
-  for (const array of arrays) {
-    for (let i = 0; i < array.length; i++) {
-      const v = array[i]!;
-      if (!Number.isFinite(v)) continue;
-      if (v <= 0) {
-        nonPositive++;
-        continue;
-      }
-      if (v < min) min = v;
-      if (v > max) max = v;
-    }
-  }
-  return { extent: min > max ? null : [min, max], nonPositive };
+/** Display expansion split per end, applied in transformed space. */
+interface TransformedExpansion {
+  lowerMult: number;
+  upperMult: number;
+  lowerAdd: number;
+  upperAdd: number;
 }
 
+const NO_EXPANSION: TransformedExpansion = { lowerMult: 0, upperMult: 0, lowerAdd: 0, upperAdd: 0 };
+
 export interface ContinuousConfig {
-  type?: "linear" | "log" | "time";
-  /** Explicit [min, max] (epoch ms for time) — PINS the scale. */
+  type?: "linear" | "time";
+  /** Pre-stat transform (default identity). Time forces identity. */
+  transform?: ScaleTransform;
+  /** Explicit [min, max] SEMANTIC domain (epoch ms for time) — PINS the scale. */
   domain?: [number, number];
   nice?: boolean;
   zero?: boolean;
   reverse?: boolean;
+  /** Display expansion in transformed space (default: none). */
+  expansion?: TransformedExpansion;
 }
 
 export interface ContinuousTraining {
   scale: ContinuousScale;
-  /** True when no finite (log: positive) data trained the scale. */
+  /** True when no finite data trained the scale. */
   empty: boolean;
-  /** Count of finite but non-positive values a log scale will drop. */
+  /** Retained for the warning channel; transform-domain drops are counted
+   *  pre-stat by the column transform, so the trainer reports 0. */
   nonPositive: number;
 }
 
-/** Train a continuous positional scale (linear / log / time). */
+/**
+ * Train a continuous positional scale in TRANSFORMED space. `arrays` are the
+ * post-stat transformed (scale-space) evidence: the affine domain is trained
+ * over them, nice/zero apply in transformed space, expansion pads after nice,
+ * and the public semantic `domain` is the inverse-projection of the expanded
+ * transformed endpoints. `normalize` forwards a semantic value before the
+ * affine map; `normalizeTransformed` skips the forward (geometry uses it).
+ */
 export function trainContinuous(
   arrays: readonly Float64Array[],
   config: ContinuousConfig = {},
 ): ContinuousTraining {
   const type = config.type ?? "linear";
+  const transform = config.transform ?? scaleTransform("identity");
   const reverse = config.reverse === true;
-  const nice = config.nice !== false && config.domain === undefined;
-
-  if (type === "log") {
-    const { extent, nonPositive } = positiveExtent(arrays);
-    let domain: [number, number];
-    if (config.domain !== undefined) {
-      const [d0, d1] = config.domain;
-      if (!(d0 > 0) || !(d1 > 0)) {
-        throw new ScaleConfigError(
-          "log-domain-not-positive",
-          `A log scale's domain must be strictly positive (got [${d0}, ${d1}]). ` +
-            "Use a linear scale, or restrict the domain to positive values.",
-        );
-      }
-      domain = [d0, d1];
-    } else if (extent === null) {
-      domain = [1, 10];
-    } else {
-      domain = extent[0] === extent[1] ? [extent[0] / 10, extent[1] * 10] : extent;
-      if (nice) {
-        domain = [10 ** Math.floor(Math.log10(domain[0])), 10 ** Math.ceil(Math.log10(domain[1]))];
-      }
-    }
-    const l0 = Math.log10(domain[0]);
-    const l1 = Math.log10(domain[1]);
-    const span = l1 - l0;
-    return {
-      scale: {
-        type: "log",
-        domain,
-        normalize: (value: number) => {
-          if (!(value > 0)) return NaN;
-          const t = span === 0 ? 0.5 : (Math.log10(value) - l0) / span;
-          return reverse ? 1 - t : t;
-        },
-        invert: (t: number) => 10 ** (l0 + (reverse ? 1 - t : t) * span),
-      },
-      empty: extent === null && config.domain === undefined,
-      nonPositive,
-    };
-  }
+  const expansion = config.expansion ?? NO_EXPANSION;
+  const pinned = config.domain !== undefined;
+  const nice = config.nice !== false && !pinned && type !== "time";
 
   const extent = finiteExtent(arrays);
-  let domain: [number, number];
-  if (config.domain !== undefined) {
-    domain = [config.domain[0], config.domain[1]];
+  let t0: number;
+  let t1: number;
+  if (pinned) {
+    const [lo, hi] = config.domain!;
+    if (!transform.valid(lo) || !transform.valid(hi)) {
+      throw new ScaleConfigError(
+        "scale-transform-domain",
+        `A ${transform.key} scale's explicit domain must lie in the transform's valid range ` +
+          `(got [${lo}, ${hi}]). Use values inside the domain, or a different transform.`,
+      );
+    }
+    t0 = transform.forward(lo);
+    t1 = transform.forward(hi);
   } else if (extent === null) {
-    domain = [0, 1];
+    // Empty: a unit transformed window; inverse gives a sensible semantic span.
+    t0 = 0;
+    t1 = 1;
   } else {
-    let [lo, hi] = extent;
-    if (config.zero === true) {
-      lo = Math.min(lo, 0);
-      hi = Math.max(hi, 0);
+    t0 = extent[0];
+    t1 = extent[1];
+    if (config.zero === true && transform.valid(0)) {
+      const zeroT = transform.forward(0);
+      t0 = Math.min(t0, zeroT);
+      t1 = Math.max(t1, zeroT);
     }
     if (type === "time") {
-      // Time domains are never niced (calendar ticks handle alignment);
-      // zero-variance pads by half a day.
-      domain = lo === hi ? [lo - 43_200_000, hi + 43_200_000] : [lo, hi];
-    } else {
-      domain = nice ? niceLinearDomain(lo, hi) : lo === hi ? [lo - 0.5, hi + 0.5] : [lo, hi];
+      if (t0 === t1) {
+        t0 -= 43_200_000;
+        t1 += 43_200_000;
+      }
+    } else if (nice) {
+      [t0, t1] = niceLinearDomain(t0, t1);
+    } else if (t0 === t1) {
+      t0 -= 0.5;
+      t1 += 0.5;
     }
   }
-  const [d0, d1] = domain;
-  const span = d1 - d0;
+
+  // Display expansion in transformed space (after nice; pinned domains too).
+  const innerSpan = t1 - t0;
+  const expandedLower = t0 - expansion.lowerMult * innerSpan - expansion.lowerAdd;
+  // sqrt's transformed codomain starts at zero. Inverse-projecting negative
+  // display padding would square it back into a positive semantic lower bound.
+  const e0 = transform.key === "sqrt" ? Math.max(0, expandedLower) : expandedLower;
+  const e1 = t1 + expansion.upperMult * innerSpan + expansion.upperAdd;
+  const span = e1 - e0;
+  const affine = (transformed: number): number => {
+    const raw = span === 0 ? 0.5 : (transformed - e0) / span;
+    return reverse ? 1 - raw : raw;
+  };
   return {
     scale: {
       type,
-      domain,
-      normalize: (value: number) => {
-        const t = span === 0 ? 0.5 : (value - d0) / span;
-        return reverse ? 1 - t : t;
+      transform: transform.key,
+      domain: [transform.inverse(e0), transform.inverse(e1)],
+      transformedDomain: [e0, e1],
+      normalize: (value: number) =>
+        transform.valid(value) ? affine(transform.forward(value)) : Number.NaN,
+      normalizeTransformed: (value: number) => affine(value),
+      invert: (t: number) => {
+        const a = reverse ? 1 - t : t;
+        return transform.inverse(e0 + a * span);
       },
-      invert: (t: number) => d0 + (reverse ? 1 - t : t) * span,
     },
-    empty: extent === null && config.domain === undefined,
+    empty: extent === null && !pinned,
     nonPositive: 0,
   };
 }

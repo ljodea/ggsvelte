@@ -374,10 +374,12 @@ describe("appendClosedBandEdges — shared closed ribbon vertices", () => {
       xScale: {
         type: "linear",
         normalize: (v: number) => v,
+        normalizeTransformed: (v: number) => v,
       },
       yScale: {
         type: "linear",
         normalize: (v: number) => v,
+        normalizeTransformed: (v: number) => v,
       },
     });
     const cursor = appendClosedBandEdges({
@@ -468,8 +470,16 @@ describe("collectPointPositions", () => {
     const fx = fromAny({
       innerWidth: 100,
       innerHeight: 200,
-      xScale: { type: "linear", normalize: (v: number) => v },
-      yScale: { type: "linear", normalize: (v: number) => v },
+      xScale: {
+        type: "linear",
+        normalize: (v: number) => v,
+        normalizeTransformed: (v: number) => v,
+      },
+      yScale: {
+        type: "linear",
+        normalize: (v: number) => v,
+        normalizeTransformed: (v: number) => v,
+      },
     });
     const collected = collectPointPositions(frame, fx);
     expect(collected.kept).toBe(2);
@@ -622,8 +632,16 @@ describe("writeSmoothLineGeometry", () => {
       rowIndex: new Uint32Array([10, 11]),
     });
     const fx = fromAny({
-      xScale: { type: "linear", normalize: (v: number) => v },
-      yScale: { type: "linear", normalize: (v: number) => v },
+      xScale: {
+        type: "linear",
+        normalize: (v: number) => v,
+        normalizeTransformed: (v: number) => v,
+      },
+      yScale: {
+        type: "linear",
+        normalize: (v: number) => v,
+        normalizeTransformed: (v: number) => v,
+      },
       innerWidth: 100,
       innerHeight: 50,
     });

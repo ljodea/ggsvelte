@@ -111,9 +111,32 @@ export const PIPELINE_ERROR_CATALOG = {
     summary: "Calendar interval progression failed to advance monotonically.",
     fix: "Choose another timezone, disambiguation policy, or interval and report the failing case.",
   },
-  "log-domain-not-positive": {
-    summary: "A log scale received an explicit domain that is not strictly positive.",
-    fix: "Restrict the domain to positive values, or use a linear scale.",
+  "invalid-scale-transform": {
+    summary: "The scale transform registry was asked for an unknown transform key.",
+    fix: "Use a supported transform (identity, log10, sqrt). This indicates malformed runtime input.",
+  },
+  "scale-transform-domain": {
+    summary:
+      "An explicit scale domain falls outside the transform's valid range (log10 <= 0, sqrt < 0).",
+    fix: "Restrict the domain to the transform's valid range, or use the identity transform.",
+  },
+  "scale-type-transform-conflict": {
+    summary:
+      'A scale declares an incompatible type + transform (e.g. type: "log" with a non-log10 transform, or a temporal scale with a non-identity transform).',
+    fix: 'Use type: "linear" with the intended transform, or drop the transform (a base-10 log scale is type: "linear", transform: "log10").',
+  },
+  "scale-zero-invalid-for-transform": {
+    summary:
+      "zero: true was requested under a transform with no valid image for semantic zero (log10).",
+    fix: "Remove zero: true; log10 positions use the transformed-space origin (semantic 1), never log10(0).",
+  },
+  "binned-scale-requires-continuous": {
+    summary: 'A type: "binned" scale is bound to a discrete or temporal field.',
+    fix: 'Map a quantitative field, or use type: "band"/"time" instead of "binned".',
+  },
+  "binned-scale-break-limit": {
+    summary: "A binned scale's automatic or explicit breaks would exceed MAX_BINNED_BREAKS (64).",
+    fix: "Supply fewer explicit breaks, or widen them so automatic binning stays under the limit.",
   },
   "palette-exhausted": {
     summary:
@@ -151,8 +174,20 @@ export const PIPELINE_WARNING_CATALOG = {
     summary:
       "Rows with missing/non-finite values in required channels were dropped (count in message).",
   },
-  "log-nonpositive": {
-    summary: "A log scale dropped non-positive values (count in message).",
+  "scale-transform-domain": {
+    summary:
+      "A pre-stat transform dropped values outside its domain (log10 <= 0, sqrt < 0); count in message.",
+  },
+  "scale-oob-censored": {
+    summary: "Values outside explicit source limits were censored to missing before stats.",
+  },
+  "scale-oob-squished": {
+    summary:
+      "Values outside explicit source limits were squished to the nearest limit before stats.",
+  },
+  "scale-break-outside-domain": {
+    summary:
+      "One or more explicit continuous breaks were outside the trained display domain and omitted.",
   },
   "sequential-discrete-field": {
     summary: "A sequential color scale is fed a discrete field; unparseable values render unknown.",
@@ -225,6 +260,10 @@ export const ADVISORY_CATALOG = {
   },
   "zero-forced": {
     summary: "Bars/areas forced the measure axis to include zero.",
+  },
+  "scale-baseline-transformed-origin": {
+    summary:
+      "A bar/col/area/histogram/density measure axis under transform: log10 baselines at the transformed-space origin (semantic 1), since log10 has no semantic-zero image.",
   },
   "bar-x-discretized": {
     summary: "A numeric x on a count-stat bar layer was treated as discrete categories.",

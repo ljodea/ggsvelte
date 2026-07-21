@@ -47,6 +47,15 @@ import {
 
 import { TemporalParserSpecSchema } from "./temporal.js";
 
+/**
+ * Hard cap on a binned position scale's bins (automatic or explicit). This is
+ * the single shared source of truth: the TypeBox `breaks` `maxItems` below,
+ * the core runtime boundary resolver, and the `binned-scale-break-limit`
+ * pipeline error all key off it. `n` boundaries produce `n − 1` bins, so the
+ * schema allows at most `MAX_BINNED_BREAKS + 1` break values.
+ */
+export const MAX_BINNED_BREAKS = 64;
+
 /** Named categorical color schemes known to this schema version. */
 export const CATEGORICAL_SCHEME_NAMES = [
   "observable10",
@@ -1130,110 +1139,203 @@ const SpecDeclarations = {
 
   TemporalParserSpec: TemporalParserSpecSchema,
 
-  PositionScaleSpec: Type.Object(
+  ScaleExpansion: Type.Object(
     {
-      type: Type.Optional(
-        Type.Union(
-          [Type.Literal("linear"), Type.Literal("log"), Type.Literal("time"), Type.Literal("band")],
-          {
-            description:
-              'Scale type: "linear" (default for numbers), "log" (base 10; the whole domain must be positive), "time" (temporal fields; ISO strings or Date values), "band" (discrete categories). Omit to infer from the field type.',
-          },
-        ),
-      ),
-      temporalKind: Type.Optional(
-        Type.Union([Type.Literal("date"), Type.Literal("datetime")], {
-          description:
-            'Temporal precision intent. "date" uses calendar dates; "datetime" uses instants. Supplying this option requests a time scale.',
-        }),
-      ),
-      parse: Type.Optional(
-        Type.Ref("TemporalParserSpec", {
-          description:
-            "Explicit deterministic parser for temporal source values. Omit for value-driven inference.",
-        }),
-      ),
-      parseFailure: Type.Optional(
-        Type.Union([Type.Literal("error"), Type.Literal("censor")], {
-          description:
-            'Explicit parser failure policy: "error" (default) stops with bounded evidence; "censor" converts invalid values to missing and emits a warning.',
-        }),
-      ),
-      timezone: Type.Optional(
-        Type.String({
-          minLength: 1,
-          maxLength: 128,
-          description:
-            'IANA timezone used for timezone-less temporal input. Default "UTC". Invalid zones fail with an actionable diagnostic.',
-        }),
-      ),
-      disambiguation: Type.Optional(
+      mult: Type.Optional(
         Type.Union(
           [
-            Type.Literal("compatible"),
-            Type.Literal("earlier"),
-            Type.Literal("later"),
-            Type.Literal("reject"),
+            Type.Number({ minimum: 0 }),
+            Type.Array(Type.Number({ minimum: 0 }), { minItems: 2, maxItems: 2 }),
           ],
           {
             description:
-              'DST gap/fold policy for IANA local times. Default "reject"; choose "earlier", "later", or Temporal-compatible behavior explicitly.',
+              "Multiplicative display padding as a fraction of the (transformed) domain span. A scalar pads both ends; a [lower, upper] tuple pads each end. Non-negative and finite.",
           },
         ),
       ),
-      dateBreaks: Type.Optional(TemporalIntervalSpecSchema),
-      dateMinorBreaks: Type.Optional(TemporalIntervalSpecSchema),
-      dateLabels: Type.Optional(TemporalLabelSpecSchema),
-      locale: Type.Optional(
-        Type.String({
-          minLength: 1,
-          maxLength: 128,
-          description:
-            'BCP 47 locale for temporal labels. Default "en-US". JSON Schema bounds the portable string shape; runtime validation canonicalizes the tag and verifies Intl support before rendering.',
-        }),
-      ),
-      weekStart: Type.Optional(TemporalWeekStartSchema),
-      domain: Type.Optional(
-        Type.Array(Type.Ref("DomainValue"), {
-          minItems: 1,
-          description:
-            "Explicit domain, PINNING the scale: [min, max] for continuous scales (numbers, or temporal strings for time); the full category list for band scales. Data outside the domain is dropped with a warning.",
-        }),
-      ),
-      nice: Type.Optional(
-        Type.Boolean({
-          description:
-            "Round the inferred domain to tick-friendly bounds. Default true. Ignored when `domain` is set.",
-        }),
-      ),
-      zero: Type.Optional(
-        Type.Boolean({
-          description:
-            "Force the domain to include zero. Bars, columns, and areas force this to true on the measure axis; set false explicitly to override. Ignored when `domain` is set.",
-        }),
-      ),
-      reverse: Type.Optional(
-        Type.Boolean({ description: "Reverse the scale's output direction. Default false." }),
-      ),
-      breaks: Type.Optional(
-        Type.Array(Type.Union([Type.Number(), Type.String()]), {
-          minItems: 1,
-          description:
-            "Explicit tick positions in data units (numbers, or ISO date strings for time scales). Omit for automatic ticks.",
-        }),
-      ),
-      labels: Type.Optional(
-        Type.String({
-          description:
-            'Tick label format string. Time scales: strftime-style ("%Y-%m", "%b %d", "%H:%M"). Numeric scales: ",d" (grouped integer), ".1f" (fixed decimals), ".0%" (percent), "~s" (SI prefix). Omit for automatic formatting.',
-        }),
+      add: Type.Optional(
+        Type.Union(
+          [
+            Type.Number({ minimum: 0 }),
+            Type.Array(Type.Number({ minimum: 0 }), { minItems: 2, maxItems: 2 }),
+          ],
+          {
+            description:
+              "Additive display padding in (transformed) scale units. A scalar pads both ends; a [lower, upper] tuple pads each end. Non-negative and finite.",
+          },
+        ),
       ),
     },
     {
       additionalProperties: false,
-      description: "Configuration for a positional (x or y) scale.",
+      description:
+        "Display-domain expansion. Padding is applied after nice in transformed space and never widens the OOB limits. `{ mult: 0, add: 0 }` disables padding.",
     },
   ),
+
+  PositionScaleSpec: Type.Intersect([
+    Type.Object(
+      {
+        type: Type.Optional(
+          Type.Union(
+            [
+              Type.Literal("linear"),
+              Type.Literal("log"),
+              Type.Literal("time"),
+              Type.Literal("band"),
+              Type.Literal("binned"),
+            ],
+            {
+              description:
+                'Scale type: "linear" (default for numbers), "time" (temporal fields; ISO strings or Date values), "band" (discrete categories), "binned" (quantitative values assigned to ordered bins). "log" is an accepted authored alias that canonicalizes to { type: "linear", transform: "log10" }. Omit to infer from the field type.',
+            },
+          ),
+        ),
+        transform: Type.Optional(
+          Type.Union([Type.Literal("identity"), Type.Literal("log10"), Type.Literal("sqrt")], {
+            description:
+              'Pre-stat position transform applied after parsing and before grouping-sensitive stats/positions. "identity" (default), "log10" (base-10; source values must be > 0), "sqrt" (source values must be >= 0). Only "identity" is permitted on time scales.',
+          }),
+        ),
+        temporalKind: Type.Optional(
+          Type.Union([Type.Literal("date"), Type.Literal("datetime")], {
+            description:
+              'Temporal precision intent. "date" uses calendar dates; "datetime" uses instants. Supplying this option requests a time scale.',
+          }),
+        ),
+        parse: Type.Optional(
+          Type.Ref("TemporalParserSpec", {
+            description:
+              "Explicit deterministic parser for temporal source values. Omit for value-driven inference.",
+          }),
+        ),
+        parseFailure: Type.Optional(
+          Type.Union([Type.Literal("error"), Type.Literal("censor")], {
+            description:
+              'Explicit parser failure policy: "error" (default) stops with bounded evidence; "censor" converts invalid values to missing and emits a warning.',
+          }),
+        ),
+        timezone: Type.Optional(
+          Type.String({
+            minLength: 1,
+            maxLength: 128,
+            description:
+              'IANA timezone used for timezone-less temporal input. Default "UTC". Invalid zones fail with an actionable diagnostic.',
+          }),
+        ),
+        disambiguation: Type.Optional(
+          Type.Union(
+            [
+              Type.Literal("compatible"),
+              Type.Literal("earlier"),
+              Type.Literal("later"),
+              Type.Literal("reject"),
+            ],
+            {
+              description:
+                'DST gap/fold policy for IANA local times. Default "reject"; choose "earlier", "later", or Temporal-compatible behavior explicitly.',
+            },
+          ),
+        ),
+        dateBreaks: Type.Optional(TemporalIntervalSpecSchema),
+        dateMinorBreaks: Type.Optional(TemporalIntervalSpecSchema),
+        dateLabels: Type.Optional(TemporalLabelSpecSchema),
+        locale: Type.Optional(
+          Type.String({
+            minLength: 1,
+            maxLength: 128,
+            description:
+              'BCP 47 locale for temporal labels. Default "en-US". JSON Schema bounds the portable string shape; runtime validation canonicalizes the tag and verifies Intl support before rendering.',
+          }),
+        ),
+        weekStart: Type.Optional(TemporalWeekStartSchema),
+        domain: Type.Optional(
+          Type.Array(Type.Ref("DomainValue"), {
+            minItems: 1,
+            description:
+              "Explicit domain, PINNING the scale: [min, max] for continuous scales (numbers, or temporal strings for time); the full category list for band scales. Data outside the domain is dropped with a warning.",
+          }),
+        ),
+        nice: Type.Optional(
+          Type.Boolean({
+            description:
+              "Round the inferred domain to tick-friendly bounds. Default true. Ignored when `domain` is set.",
+          }),
+        ),
+        zero: Type.Optional(
+          Type.Boolean({
+            description:
+              "Force the domain to include zero. Bars, columns, and areas force this to true on the measure axis; set false explicitly to override. Ignored when `domain` is set.",
+          }),
+        ),
+        reverse: Type.Optional(
+          Type.Boolean({ description: "Reverse the scale's output direction. Default false." }),
+        ),
+        breaks: Type.Optional(
+          Type.Array(Type.Union([Type.Number(), Type.String()]), {
+            minItems: 1,
+            description:
+              "Explicit tick positions in data units (numbers, or ISO date strings for time scales); for binned scales these are the bin boundaries. Omit for automatic ticks. Binned scales allow at most 65 boundaries (64 bins); non-binned explicit ticks are not capped.",
+          }),
+        ),
+        labels: Type.Optional(
+          Type.String({
+            description:
+              'Tick label format string. Time scales: strftime-style ("%Y-%m", "%b %d", "%H:%M"). Numeric scales: ",d" (grouped integer), ".1f" (fixed decimals), ".0%" (percent), "~s" (SI prefix). Omit for automatic formatting.',
+          }),
+        ),
+        expand: Type.Optional(
+          Type.Ref("ScaleExpansion", {
+            description:
+              "Display-domain padding. Non-temporal continuous/binned axes default to { mult: 0.05, add: 0 }; time axes default to zero. Pinned domains still receive display expansion.",
+          }),
+        ),
+        oob: Type.Optional(
+          Type.Union([Type.Literal("censor"), Type.Literal("squish")], {
+            description:
+              'Out-of-bounds policy for values outside explicit source limits, applied before stats. "censor" (default) drops them to missing; "squish" clamps them to the nearest source limit before transform.',
+          }),
+        ),
+        naValue: Type.Optional(
+          Type.Union([Type.Number(), Type.Null()], {
+            description:
+              "Replacement for missing/censored positional values, resolved after OOB and before transform. A finite number substitutes; null (default) keeps them missing. The replacement is itself checked against the transform/domain rules.",
+          }),
+        ),
+        minorBreaks: Type.Optional(
+          Type.Array(Type.Number(), {
+            minItems: 1,
+            description:
+              "Explicit minor gridline positions in semantic source units. Coincident major/minor values render only the major tick. Time scales use dateMinorBreaks instead.",
+          }),
+        ),
+      },
+      {
+        additionalProperties: false,
+        description: "Configuration for a positional (x or y) scale.",
+      },
+    ),
+    Type.Union([
+      Type.Object({
+        type: Type.Literal("binned"),
+        breaks: Type.Optional(
+          Type.Array(Type.Union([Type.Number(), Type.String()]), {
+            maxItems: MAX_BINNED_BREAKS + 1,
+          }),
+        ),
+      }),
+      Type.Object({
+        type: Type.Optional(
+          Type.Union([
+            Type.Literal("linear"),
+            Type.Literal("log"),
+            Type.Literal("time"),
+            Type.Literal("band"),
+          ]),
+        ),
+      }),
+    ]),
+  ]),
 
   ColorScaleSpec: Type.Object(
     {
@@ -1746,6 +1848,8 @@ export type PointPosition = "identity" | "jitter" | "nudge";
 /** Positional (x/y) scale configuration. */
 export type TemporalParserSpec = SpecType<"TemporalParserSpec">;
 export type PositionScaleSpec = SpecType<"PositionScaleSpec">;
+/** Display-domain expansion ({ mult?, add? }) for continuous/binned scales. */
+export type ScaleExpansion = SpecType<"ScaleExpansion">;
 /** Color/fill scale configuration. */
 export type ColorScaleSpec = SpecType<"ColorScaleSpec">;
 /** Per-scale configuration ({ x, y, color, fill }). */

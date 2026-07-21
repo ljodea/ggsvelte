@@ -1,6 +1,8 @@
+import type { PositionTransformName } from "@ggsvelte/core";
+
 export type BoundsAxis = "x" | "y";
 export type BoundsAction = "select" | "zoom";
-export type BoundsScale = "linear" | "log" | "time" | "band";
+export type BoundsScale = "linear" | "time" | "band";
 export type BoundsInputSource = "keyboard" | "pointer" | "touch";
 
 export type BoundsCategoryValue = string | number | boolean | bigint | null | undefined | Date;
@@ -18,7 +20,9 @@ interface BoundsEditorInputBase {
 }
 
 interface NumericBoundsEditorInput extends BoundsEditorInputBase {
-  readonly scale: "linear" | "log";
+  readonly scale: "linear";
+  /** Pre-stat position transform (identity/log10/sqrt) driving bound validation. */
+  readonly transform: PositionTransformName;
   readonly bounds: readonly [number, number];
   readonly step?: number | "any";
 }
@@ -52,7 +56,12 @@ interface PreciseBoundsApplyEventBase {
 
 export type PreciseBoundsApplyEvent =
   | (PreciseBoundsApplyEventBase & {
-      readonly scale: "linear" | "log" | "time";
+      readonly scale: "linear";
+      readonly transform: PositionTransformName;
+      readonly bounds: readonly [number, number];
+    })
+  | (PreciseBoundsApplyEventBase & {
+      readonly scale: "time";
       readonly bounds: readonly [number, number];
     })
   | (PreciseBoundsApplyEventBase & {
@@ -186,12 +195,20 @@ export function validateBoundsDraft(
   const errors: { lower?: string; upper?: string } = {};
   if (typeof lower === "string") errors.lower = lower;
   if (typeof upper === "string") errors.upper = upper;
-  if (input.scale === "log") {
+  if (input.scale === "linear" && input.transform === "log10") {
     if (typeof lower === "number" && lower <= 0) {
       errors.lower = "Lower bound must be greater than zero on a log scale.";
     }
     if (typeof upper === "number" && upper <= 0) {
       errors.upper = "Upper bound must be greater than zero on a log scale.";
+    }
+  }
+  if (input.scale === "linear" && input.transform === "sqrt") {
+    if (typeof lower === "number" && lower < 0) {
+      errors.lower = "Lower bound must be zero or greater on a square-root scale.";
+    }
+    if (typeof upper === "number" && upper < 0) {
+      errors.upper = "Upper bound must be zero or greater on a square-root scale.";
     }
   }
   if (typeof lower === "number" && typeof upper === "number" && upper <= lower) {
@@ -201,10 +218,18 @@ export function validateBoundsDraft(
 
   return {
     ok: true,
-    event: {
-      ...baseEvent(input, inputSource),
-      scale: input.scale,
-      bounds: [lower as number, upper as number],
-    },
+    event:
+      input.scale === "linear"
+        ? {
+            ...baseEvent(input, inputSource),
+            scale: "linear",
+            transform: input.transform,
+            bounds: [lower as number, upper as number],
+          }
+        : {
+            ...baseEvent(input, inputSource),
+            scale: "time",
+            bounds: [lower as number, upper as number],
+          },
   };
 }

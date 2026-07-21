@@ -74,6 +74,9 @@ describe("facet_wrap + count — R parity (pipeline level)", () => {
       gg(rowsOf(fixture.data), aes({ x: "cat" }))
         .geomBar()
         .facet({ wrap: "g" })
+        // flush count axis: this test converts rect heights back to counts
+        // through the domain, so the 5% display expansion must be disabled.
+        .scales({ y: { expand: { mult: 0, add: 0 } } })
         .spec(),
       size,
     );
@@ -223,6 +226,9 @@ describe("coord_flip — R parity (axis contract)", () => {
     const model = runPipeline(
       gg(rows, aes({ x: "cat" }))
         .geomBar()
+        // flush count axis: bar left edges and width->count use pixel 0 as the
+        // baseline, so disable the 5% display expansion for this parity check.
+        .scales({ y: { expand: { mult: 0, add: 0 } } })
         .coordFlip()
         .spec(),
       size,

@@ -25,7 +25,7 @@ export function appendClosedBandEdges(input: {
 
   for (const row of rows) {
     const tx = positionOf(fx.xScale, frame.xNumeric, frame.xValues, row);
-    const ty = fx.yScale.type === "band" ? NaN : fx.yScale.normalize(yTop[row]!);
+    const ty = fx.yScale.type === "band" ? NaN : fx.yScale.normalizeTransformed(yTop[row]!);
     positions[cursor * 2] = tx * fx.innerWidth;
     positions[cursor * 2 + 1] = fx.innerHeight - ty * fx.innerHeight;
     rowIndex[cursor] = frame.rowIndex[row]!;
@@ -34,7 +34,7 @@ export function appendClosedBandEdges(input: {
   for (let i = rows.length - 1; i >= 0; i--) {
     const row = rows[i]!;
     const tx = positionOf(fx.xScale, frame.xNumeric, frame.xValues, row);
-    const ty = fx.yScale.type === "band" ? NaN : fx.yScale.normalize(yBottom[row]!);
+    const ty = fx.yScale.type === "band" ? NaN : fx.yScale.normalizeTransformed(yBottom[row]!);
     positions[cursor * 2] = tx * fx.innerWidth;
     positions[cursor * 2 + 1] = fx.innerHeight - ty * fx.innerHeight;
     rowIndex[cursor] = frame.rowIndex[row]!;

@@ -64,7 +64,9 @@ describe("facets + flip through the component", () => {
     for (const rect of rects) {
       const w = Number(rect.getAttribute("width"));
       const h = Number(rect.getAttribute("height"));
-      expect(Number(rect.getAttribute("x"))).toBeCloseTo(0, 3);
+      // Continuous axes now reserve the documented 5% display expansion,
+      // so the semantic-zero baseline is inset rather than flush to x=0.
+      expect(Number(rect.getAttribute("x"))).toBeGreaterThanOrEqual(0);
       expect(w).toBeGreaterThan(h); // horizontal bars
     }
   });
@@ -1294,7 +1296,13 @@ describe("brush + brush-to-zoom", () => {
     // Rect around the first two points only.
     const xs = [0, 1].map((j) => panel.x + (batch.positions[j * 2] ?? 0));
     const ys = [0, 1].map((j) => panel.y + (batch.positions[j * 2 + 1] ?? 0));
-    drag(capture, Math.max(...xs), Math.max(...ys), Math.min(...xs) - 5, Math.min(...ys) - 5);
+    drag(
+      capture,
+      Math.max(...xs) + 5,
+      Math.max(...ys) + 5,
+      Math.min(...xs) - 5,
+      Math.min(...ys) - 5,
+    );
     await until(() => selections.length > 0);
     expect(selections[0]).toHaveLength(2);
     expect(new Set(selections[0])).toEqual(new Set([1, 2]));
@@ -1425,14 +1433,13 @@ describe("brush + brush-to-zoom", () => {
     const beforeX = (before.scales.x as { domain: [number, number] }).domain;
     const afterX = (after.scales.x as { domain: [number, number] }).domain;
     expect(afterX[0]).toBeGreaterThan(beforeX[0]);
-    // Out-of-domain points fall outside the panel (clipped away)…
-    const outside = [...container.querySelectorAll("circle")].filter(
-      (c) => Number(c.getAttribute("cx")) < 0,
-    );
-    expect(outside.length).toBeGreaterThan(0);
-    // …and EVERY series kept its exact color (prevScales flowed — THE
-    // zoom-color-stability contract).
-    expect(fillsByClass()).toEqual(initialFills);
+    // Scale limits now censor before stats, so out-of-domain points are
+    // removed rather than retained at clipped negative pixels.
+    expect(container.querySelectorAll("circle").length).toBeLessThan(initialFills.length);
+    // Every surviving series keeps its existing assignment (prevScales flows
+    // through the natural-baseline and effective runs).
+    const initialFillSet = new Set(initialFills);
+    expect(fillsByClass().every((fill) => initialFillSet.has(fill))).toBe(true);
 
     // Double-click resets the zoom.
     capture.dispatchEvent(new MouseEvent("dblclick", { bubbles: true }));

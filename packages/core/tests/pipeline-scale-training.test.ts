@@ -392,7 +392,11 @@ describe("scale training via runPipeline (regression anchors)", () => {
     );
     expect(model.advisories.some((a) => a.code === "zero-forced")).toBe(true);
     if (model.scales.y.type !== "band") {
-      expect(model.scales.y.domain[0]).toBe(0);
+      // Zero is forced pre-expansion; the 5% display expansion then pads a small
+      // gap below the baseline (ggplot2's default continuous expansion).
+      expect(model.scales.y.domain[0]).toBeLessThanOrEqual(0);
+      expect(model.scales.y.domain[0]).toBeGreaterThan(-1);
+      expect(model.scales.y.domain[1]).toBeGreaterThanOrEqual(5);
     }
   });
 });
@@ -414,13 +418,17 @@ describe("maybeForceZeroForBars / pushContinuousTrainingWarnings", () => {
     expect(forced).toBe(true);
     expect(advisories.map((a) => a.code)).toContain("zero-forced");
     expect(maybeForceZeroForBars("y", inputs, { domain: [0, 10] }, "linear", [])).toBeUndefined();
+    // log10 has no semantic-zero image, so zero is never forced for it.
+    expect(
+      maybeForceZeroForBars("y", inputs, { type: "linear", transform: "log10" }, "linear", []),
+    ).toBeUndefined();
   });
 
-  it("emits empty-domain and log-nonpositive warnings", async () => {
+  it("emits the empty-domain warning (transform-domain drops are counted pre-stat)", async () => {
     const { pushContinuousTrainingWarnings } =
       await import("../src/pipeline/scale-axis-train-continuous-warn.ts");
     const warnings: { code: string; message: string }[] = [];
-    pushContinuousTrainingWarnings("x", "log", { empty: true, nonPositive: 2 }, warnings);
-    expect(warnings.map((w) => w.code)).toEqual(["empty-domain", "log-nonpositive"]);
+    pushContinuousTrainingWarnings("x", "linear", { empty: true, nonPositive: 2 }, warnings);
+    expect(warnings.map((w) => w.code)).toEqual(["empty-domain"]);
   });
 });

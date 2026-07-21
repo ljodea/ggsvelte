@@ -1,0 +1,142 @@
+{
+  "edition": 2,
+  "data": {
+    "values": [
+      {
+        "dose": 1,
+        "response": 4.8
+      },
+      {
+        "dose": 1.47,
+        "response": 5.33
+      },
+      {
+        "dose": 2.15,
+        "response": 5.87
+      },
+      {
+        "dose": 3.16,
+        "response": 5.8
+      },
+      {
+        "dose": 4.64,
+        "response": 6.33
+      },
+      {
+        "dose": 6.81,
+        "response": 6.87
+      },
+      {
+        "dose": 10,
+        "response": 6.8
+      },
+      {
+        "dose": 14.68,
+        "response": 7.33
+      },
+      {
+        "dose": 21.54,
+        "response": 7.87
+      },
+      {
+        "dose": 31.62,
+        "response": 7.8
+      },
+      {
+        "dose": 46.42,
+        "response": 8.33
+      },
+      {
+        "dose": 68.13,
+        "response": 8.87
+      },
+      {
+        "dose": 100,
+        "response": 8.8
+      },
+      {
+        "dose": 146.78,
+        "response": 9.33
+      },
+      {
+        "dose": 215.44,
+        "response": 9.87
+      },
+      {
+        "dose": 316.23,
+        "response": 9.8
+      },
+      {
+        "dose": 464.16,
+        "response": 10.33
+      },
+      {
+        "dose": 681.29,
+        "response": 10.87
+      },
+      {
+        "dose": 1000,
+        "response": 10.8
+      },
+      {
+        "dose": 1467.8,
+        "response": 11.33
+      }
+    ]
+  },
+  "layers": [
+    {
+      "geom": "smooth",
+      "stat": "smooth",
+      "position": "identity",
+      "aes": {
+        "x": {
+          "field": "dose"
+        },
+        "y": {
+          "field": "response"
+        }
+      },
+      "params": {
+        "method": "lm",
+        "se": false
+      }
+    },
+    {
+      "geom": "bar",
+      "stat": "bin",
+      "position": "stack",
+      "aes": {
+        "x": {
+          "field": "dose"
+        },
+        "y": {
+          "stat": "count"
+        }
+      },
+      "params": {
+        "binwidth": 0.5,
+        "boundary": 0
+      }
+    },
+    {
+      "geom": "density",
+      "stat": "density",
+      "position": "identity",
+      "aes": {
+        "x": {
+          "field": "dose"
+        },
+        "y": {
+          "stat": "density"
+        }
+      }
+    }
+  ],
+  "scales": {
+    "x": {
+      "type": "linear",
+      "transform": "log10"
+    }
+  }
+}

@@ -14,6 +14,7 @@ import {
   type FieldType,
   type ParsedColumnOptions,
 } from "../table.js";
+import type { ColumnTransformConfig } from "../scales/transform.js";
 
 export interface PositionConversionContext {
   /** Effective parser for detached/post-stat values and author scalars. */
@@ -58,14 +59,42 @@ export function yConversionOf(binding: {
   return binding.yConversion ?? AUTO_POSITION_CONVERSION;
 }
 
+/**
+ * Read a position column as scale-space numbers. With a pre-stat transform the
+ * cached transformed view (OOB/NA/forward) is returned; otherwise the semantic
+ * numeric view (identity). The two coincide for identity + unpinned + no-NA.
+ */
+export function positionColumn(
+  table: ColumnTable,
+  field: string,
+  conversion: PositionConversionContext,
+  transform: ColumnTransformConfig | undefined,
+): Float64Array {
+  if (transform === undefined) {
+    return table.numeric(field, conversion.sourceParser, conversion.options);
+  }
+  return table.transformed(field, conversion.sourceParser, conversion.options, transform)
+    .transformed;
+}
+
 export function positionFieldType(
   table: ColumnTable,
   field: string,
   conversion: PositionConversionContext,
 ): FieldType {
-  return conversion.forcedDiscrete
-    ? "nominal"
-    : table.fieldType(field, conversion.sourceParser, conversion.options);
+  if (conversion.forcedDiscrete) return "nominal";
+  if (conversion.forcedNonTemporal) {
+    const raw = table.column(field);
+    const numeric = table.numeric(field, conversion.sourceParser, conversion.options);
+    let sawFinite = false;
+    for (let index = 0; index < raw.length; index++) {
+      if (raw[index] === null) continue;
+      if (!Number.isFinite(numeric[index]!)) return "nominal";
+      sawFinite = true;
+    }
+    return sawFinite ? "quantitative" : "nominal";
+  }
+  return table.fieldType(field, conversion.sourceParser, conversion.options);
 }
 
 export function positionDiscreteness(
@@ -128,6 +157,18 @@ export function positionValueToNumber(
   return positionValuesToNumeric([value], conversion).values[0] ?? Number.NaN;
 }
 
+/** Convert one detached semantic value (for example an annotation intercept)
+ * to the same scale space used by transformed frame columns and training. */
+export function positionValueToScaleSpace(
+  value: CellValue,
+  conversion: PositionConversionContext,
+  transform: ColumnTransformConfig | undefined,
+): number {
+  const numeric = positionValueToNumber(value, conversion);
+  if (transform === undefined) return numeric;
+  return transform.transform.valid(numeric) ? transform.transform.forward(numeric) : Number.NaN;
+}
+
 export function positionConversionContext(
   config: PositionScaleSpec | undefined,
 ): PositionConversionContext {
@@ -145,7 +186,9 @@ export function positionConversionContext(
     config.dateLabels !== undefined ||
     config.locale !== undefined ||
     config.weekStart !== undefined;
-  const forcedNonTemporal = (config.type === "linear" || config.type === "log") && !requestedTime;
+  const forcedNonTemporal =
+    (config.type === "linear" || config.type === "log" || config.type === "binned") &&
+    !requestedTime;
   return {
     parser: config.parse ?? "auto",
     sourceParser: config.parse ?? "auto",

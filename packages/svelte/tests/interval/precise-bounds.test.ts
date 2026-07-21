@@ -13,13 +13,18 @@ import {
 } from "../../src/lib/interval/consumption.js";
 
 describe("precise plot bounds adapters", () => {
-  it.each(["linear", "log", "time"] as const)(
-    "builds ascending %s inputs while preserving reversed presentation",
-    (type) => {
+  it.each([
+    { type: "linear", transform: "identity" },
+    { type: "linear", transform: "log10" },
+    { type: "linear", transform: "sqrt" },
+    { type: "time", transform: "identity" },
+  ] as const)(
+    "builds ascending $type/$transform inputs while preserving reversed presentation",
+    ({ type, transform }) => {
       const input = boundsEditorInputForScale({
         axis: "x",
         action: "select",
-        scale: fromPartial<PositionScale>({ type, domain: [1, 100] }),
+        scale: fromPartial<PositionScale>({ type, transform, domain: [1, 100] }),
         bounds: [90, 10],
         reversed: true,
       });
@@ -27,6 +32,7 @@ describe("precise plot bounds adapters", () => {
         axis: "x",
         action: "select",
         scale: type,
+        ...(type === "linear" && { transform }),
         bounds: [10, 90],
         reversed: true,
       });
@@ -117,7 +123,7 @@ describe("precise plot bounds adapters", () => {
     ).toMatchObject({ bounds: [null, date] });
     if (input?.scale !== "band") throw new Error("expected band bounds");
 
-    const numericAxis = semanticAxisFromBounds("band", [
+    const numericAxis = semanticAxisFromBounds("band", "identity", [
       input.categories[0].value,
       input.categories[0].value,
     ]);
@@ -152,15 +158,21 @@ describe("precise plot bounds adapters", () => {
   });
 
   it("converts applied values into controller semantic axis domains", () => {
-    expect(semanticAxisFromBounds("log", [100, 1])).toEqual({
-      kind: "log",
+    expect(semanticAxisFromBounds("linear", "log10", [100, 1])).toEqual({
+      kind: "linear",
+      transform: "log10",
       domain: [1, 100],
     });
-    expect(semanticAxisFromBounds("band", ["south", "north"])).toEqual({
+    expect(semanticAxisFromBounds("linear", "sqrt", [100, 1])).toEqual({
+      kind: "linear",
+      transform: "sqrt",
+      domain: [1, 100],
+    });
+    expect(semanticAxisFromBounds("band", "identity", ["south", "north"])).toEqual({
       kind: "band",
       values: ["south", "north"],
     });
-    expect(semanticAxisFromBounds("band", [1, "1"])).toEqual({
+    expect(semanticAxisFromBounds("band", "identity", [1, "1"])).toEqual({
       kind: "band",
       values: ["@n:1", "1"],
     });

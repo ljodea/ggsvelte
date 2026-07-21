@@ -35,7 +35,7 @@ describe("createPlotInteraction", () => {
         panelId: "facet:v1:species=Adelie",
         preset: "independent",
         domains: {
-          x: { kind: "linear", domain: [180, 210] },
+          x: { kind: "linear", transform: "identity", domain: [180, 210] },
           y: { kind: "band", values: ["s:Female", "s:Male"] },
         },
         keys: ["a", "b"],
@@ -93,7 +93,9 @@ describe("createPlotInteraction", () => {
     const interval = (panelId: string) => ({
       panelId,
       preset: "union" as const,
-      domains: { y: { kind: "log" as const, domain: [100, 10] as const } },
+      domains: {
+        y: { kind: "linear" as const, transform: "log10" as const, domain: [100, 10] as const },
+      },
       keys: [panelId],
     });
     controller.setInterval(interval("a"), options);
@@ -138,12 +140,37 @@ describe("createPlotInteraction", () => {
         {
           panelId: "a",
           preset: "independent",
-          domains: { x: { kind: "log", domain: [0, 1] } },
+          domains: { x: { kind: "linear", transform: "log10", domain: [0, 1] } },
           keys: [],
         },
         options,
       ),
     ).toThrow(/positive/);
+    expect(() =>
+      controller.setInterval(
+        {
+          panelId: "a",
+          preset: "independent",
+          domains: { x: { kind: "linear", transform: "sqrt", domain: [-1, 1] } },
+          keys: [],
+        },
+        options,
+      ),
+    ).toThrow(/non-negative/);
+    // The pre-PR-3 transient kind:"log" is a stale wire shape, not a
+    // recognized family — rejected outright, with no branch reinterpreting
+    // it as transform:"log10".
+    expect(() =>
+      controller.setInterval(
+        {
+          panelId: "a",
+          preset: "independent",
+          domains: { x: fromAny({ kind: "log", domain: [1, 10] }) },
+          keys: [],
+        },
+        options,
+      ),
+    ).toThrow(/not supported/);
     expect(() =>
       controller.setInterval(
         {

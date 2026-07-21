@@ -13,7 +13,13 @@ function write(input: HTMLInputElement, value: string): void {
 describe("<BoundsEditor>", () => {
   it("is an inline labelled fieldset with 44px controls", async () => {
     const { container } = render(BoundsEditor, {
-      input: { axis: "x", action: "select", scale: "linear", bounds: [2, 8] },
+      input: {
+        axis: "x",
+        action: "select",
+        scale: "linear",
+        transform: "identity",
+        bounds: [2, 8],
+      },
       onapply: vi.fn(),
     });
     await tick();
@@ -31,7 +37,7 @@ describe("<BoundsEditor>", () => {
   it("does not commit while typing, then Apply emits exactly once", async () => {
     const events: PreciseBoundsApplyEvent[] = [];
     const { container } = render(BoundsEditor, {
-      input: { axis: "x", action: "zoom", scale: "linear", bounds: [2, 8] },
+      input: { axis: "x", action: "zoom", scale: "linear", transform: "identity", bounds: [2, 8] },
       onapply: (event: PreciseBoundsApplyEvent) => events.push(event),
     });
     const [lower, upper] = [...container.querySelectorAll("input")];
@@ -47,6 +53,7 @@ describe("<BoundsEditor>", () => {
         action: "zoom",
         axis: "x",
         scale: "linear",
+        transform: "identity",
         bounds: [3, 7],
         reversed: false,
       },
@@ -60,6 +67,7 @@ describe("<BoundsEditor>", () => {
         axis: "x",
         action: "select",
         scale: "linear",
+        transform: "identity",
         bounds: [1, 10],
       },
       onapply,
@@ -83,12 +91,18 @@ describe("<BoundsEditor>", () => {
 
   it("resets an uncommitted draft when the parent supplies new bounds", async () => {
     const { container, rerender } = render(BoundsEditor, {
-      input: { axis: "x", action: "zoom", scale: "linear", bounds: [2, 8] },
+      input: { axis: "x", action: "zoom", scale: "linear", transform: "identity", bounds: [2, 8] },
       onapply: vi.fn(),
     });
     write(container.querySelector("input")!, "3");
     await rerender({
-      input: { axis: "x", action: "zoom", scale: "linear", bounds: [10, 20] },
+      input: {
+        axis: "x",
+        action: "zoom",
+        scale: "linear",
+        transform: "identity",
+        bounds: [10, 20],
+      },
     });
     expect(
       [...container.querySelectorAll<HTMLInputElement>("input")].map((field) => field.value),
@@ -98,7 +112,7 @@ describe("<BoundsEditor>", () => {
   it("keeps invalid errors visible, marks the field, and focuses it", async () => {
     const onapply = vi.fn();
     const { container } = render(BoundsEditor, {
-      input: { axis: "x", action: "zoom", scale: "log", bounds: [1, 10] },
+      input: { axis: "x", action: "zoom", scale: "linear", transform: "log10", bounds: [1, 10] },
       onapply,
     });
     const lower = container.querySelector<HTMLInputElement>("input")!;

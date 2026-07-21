@@ -125,7 +125,7 @@ interface MockSpec {
   layers: MockLayer[];
   facet?: Record<string, unknown>;
   coord?: { type: string };
-  scales?: Record<string, { type: string; parse?: string }>;
+  scales?: Record<string, { type: string; parse?: string; transform?: string }>;
 }
 
 interface Mention {
@@ -262,7 +262,7 @@ export class MockResponder implements Responder {
   #synthesize(prompt: string, profile: DataProfile, repair: boolean): MockSpec {
     const pick = new FieldPicker(prompt, profile);
     const spec: MockSpec = { data: { name: "main" }, layers: [] };
-    const scales: Record<string, { type: string; parse?: string }> = {};
+    const scales: Record<string, { type: string; parse?: string; transform?: string }> = {};
     const wantsColor = COLOR_TRIGGER.test(prompt);
     let xField: string | undefined;
 
@@ -276,7 +276,22 @@ export class MockResponder implements Responder {
     };
 
     // --- geom selection (keyword templates, most specific first) -----------
-    if (/stepp?ed/.test(prompt)) {
+    if (
+      prompt.includes("three layers") &&
+      prompt.includes("smooth") &&
+      prompt.includes("histogram") &&
+      prompt.includes("density")
+    ) {
+      const x = pick.quant() ?? "x";
+      const y = pick.quant() ?? "y";
+      spec.layers.push(
+        { geom: "smooth", aes: { x: f(x), y: f(y) }, params: { method: "lm", se: false } },
+        { geom: "histogram", aes: { x: f(x) }, params: { binwidth: 0.5, boundary: 0 } },
+        { geom: "density", aes: { x: f(x) } },
+      );
+      scales["x"] = { type: "linear", transform: "log10" };
+      xField = x;
+    } else if (/stepp?ed/.test(prompt)) {
       // Intentionally-invalid first attempt (unknown geom) to exercise the
       // repair round; the repair call returns the fixed valid spec.
       const x = pick.temporal() ?? pick.quant() ?? "x";

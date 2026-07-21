@@ -1,4 +1,4 @@
-import type { CellValue } from "@ggsvelte/core";
+import type { CellValue, PositionTransformName } from "@ggsvelte/core";
 import type { Snippet } from "svelte";
 
 import type { LegendFilterEvent } from "../legend/filter.js";
@@ -319,7 +319,10 @@ export type FacetIntervalPreset = "independent" | "union" | "cross-panel";
 
 export type SemanticIntervalAxis =
   | Readonly<{
-      kind: "linear" | "log" | "time";
+      kind: "linear" | "time";
+      /** Pre-stat position transform (default identity). Always identity for
+       *  kind:"time". "log"/"sqrt" semantics live in `transform`, not `kind`. */
+      transform?: PositionTransformName;
       /** Ascending data-space values; time values are Unix milliseconds. */
       domain: readonly [number, number];
     }>

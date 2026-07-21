@@ -21,8 +21,8 @@ export function emitErrorbarRows(input: {
   let removed = 0;
   for (let row = 0; row < n; row++) {
     const tx = positionOf(fx.xScale, frame.xNumeric, frame.xValues, row);
-    const t0 = fx.yScale.normalize(frame.ymin![row]!);
-    const t1 = fx.yScale.normalize(frame.ymax![row]!);
+    const t0 = fx.yScale.type === "band" ? NaN : fx.yScale.normalizeTransformed(frame.ymin![row]!);
+    const t1 = fx.yScale.type === "band" ? NaN : fx.yScale.normalizeTransformed(frame.ymax![row]!);
     if (
       Number.isNaN(tx) ||
       t0 === undefined ||

@@ -12,6 +12,7 @@ const input = (overrides: Partial<BoundsEditorInput> = {}): BoundsEditorInput =>
     axis: "x",
     action: "select",
     scale: "linear",
+    transform: "identity",
     bounds: [2, 8],
     ...overrides,
   });
@@ -39,13 +40,14 @@ describe("precise bounds drafts", () => {
         action: "select",
         axis: "x",
         scale: "linear",
+        transform: "identity",
         bounds: [3, 7],
         reversed: true,
       },
     });
   });
 
-  it("rejects non-finite, descending, and non-positive log bounds", () => {
+  it("rejects non-finite, descending, and non-positive log10 bounds", () => {
     const nonFinite = validateBoundsDraft(input(), "nope", "7");
     expect(nonFinite.ok).toBe(false);
     if (nonFinite.ok) throw new Error("expected invalid bounds");
@@ -56,10 +58,44 @@ describe("precise bounds drafts", () => {
     if (descending.ok) throw new Error("expected invalid bounds");
     expect(descending.errors.upper).toContain("greater");
 
-    const nonPositiveLog = validateBoundsDraft(input({ scale: "log", bounds: [1, 10] }), "0", "10");
+    const nonPositiveLog = validateBoundsDraft(
+      input({ scale: "linear", transform: "log10", bounds: [1, 10] }),
+      "0",
+      "10",
+    );
     expect(nonPositiveLog.ok).toBe(false);
     if (nonPositiveLog.ok) throw new Error("expected invalid bounds");
     expect(nonPositiveLog.errors.lower).toContain("greater than zero");
+  });
+
+  it("rejects negative sqrt bounds but accepts zero", () => {
+    const negativeSqrt = validateBoundsDraft(
+      input({ scale: "linear", transform: "sqrt", bounds: [0, 10] }),
+      "-1",
+      "10",
+    );
+    expect(negativeSqrt.ok).toBe(false);
+    if (negativeSqrt.ok) throw new Error("expected invalid bounds");
+    expect(negativeSqrt.errors.lower).toContain("zero or greater");
+
+    const zeroLower = validateBoundsDraft(
+      input({ scale: "linear", transform: "sqrt", bounds: [0, 10] }),
+      "0",
+      "10",
+    );
+    expect(zeroLower).toEqual({
+      ok: true,
+      event: {
+        source: "precise-bounds",
+        inputSource: "keyboard",
+        action: "select",
+        axis: "x",
+        scale: "linear",
+        transform: "sqrt",
+        bounds: [0, 10],
+        reversed: false,
+      },
+    });
   });
 
   it("requires unambiguous ISO-8601 time drafts and emits epoch milliseconds", () => {

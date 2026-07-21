@@ -34,6 +34,7 @@ export {
   KNOWN_STATS,
   LayerSpecSchema,
   LineLayerSchema,
+  MAX_BINNED_BREAKS,
   PlotSpecSchema,
   PointLayerSchema,
   RuleLayerSchema,
@@ -89,6 +90,7 @@ export type {
   RenderBackend,
   RuleLayer,
   RuleParams,
+  ScaleExpansion,
   Scales,
   SmoothLayer,
   SmoothParams,
@@ -178,20 +180,45 @@ export type {
 
 // Scale helpers
 export {
+  scaleXBinned,
+  scaleXContinuous,
   scaleXDate,
   scaleXDatetime,
   scaleXDiscrete,
+  scaleXLog10,
+  scaleXReverse,
+  scaleXSqrt,
+  scaleYBinned,
+  scaleYContinuous,
   scaleYDate,
   scaleYDatetime,
   scaleYDiscrete,
+  scaleYLog10,
+  scaleYReverse,
+  scaleYSqrt,
+  scale_x_binned,
+  scale_x_continuous,
   scale_x_date,
   scale_x_datetime,
   scale_x_discrete,
+  scale_x_log10,
+  scale_x_reverse,
+  scale_x_sqrt,
+  scale_y_binned,
+  scale_y_continuous,
   scale_y_date,
   scale_y_datetime,
   scale_y_discrete,
+  scale_y_log10,
+  scale_y_reverse,
+  scale_y_sqrt,
 } from "./scale-helpers.js";
-export type { DiscretePositionScaleOptions, TemporalScaleOptions } from "./scale-helpers.js";
+export type {
+  ContinuousPositionScaleOptions,
+  DiscretePositionScaleOptions,
+  TemporalScaleOptions,
+  TransformedPositionScaleOptions,
+} from "./scale-helpers.js";
 
 // Portability (PortableSpec vs RuntimeSpec)
 export {

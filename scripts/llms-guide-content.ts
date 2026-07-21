@@ -218,8 +218,111 @@ position.
 
 export const SCALES_GUIDES_MD = `# Scales and guides
 
-A scale translates a data domain into position, color, size, or labels. Axes
-and legends explain that translation; they do not own the data meaning.
+A scale translates semantic data values into a visual position or color. A
+position transform runs before statistics; an axis explains the trained scale
+without changing its meaning.
+
+## Continuous position scales
+
+Numeric x and y fields use a continuous linear scale by default. Non-temporal
+continuous scales reserve 5% multiplicative display expansion at both ends.
+Expansion affects only display training, never filtering or statistics. Restore
+flush bounds with \`expand: { mult: 0, add: 0 }\`.
+
+Use the closed \`identity\`, \`log10\`, and \`sqrt\` transforms. The scale family
+stays \`linear\`: GuidePlan and RenderModel report \`type/scaleType: "linear"\`
+plus the transform. Authored \`type: "log"\` remains an accepted alias and
+canonicalizes to \`{ type: "linear", transform: "log10" }\`.
+
+\`\`\`json fragment
+{
+  "scales": {
+    "x": { "type": "linear", "transform": "log10" },
+    "y": { "type": "linear", "transform": "sqrt", "reverse": true }
+  }
+}
+\`\`\`
+
+Builder helpers and their ggplot2 aliases produce the same canonical spec:
+
+\`\`\`ts fragment
+import {
+  scaleXLog10,
+  scaleYSqrt,
+  scale_x_log10,
+} from "@ggsvelte/spec";
+
+const camel = scaleXLog10({ domain: [1, 10_000] });
+const alias = scale_x_log10({ limits: [1, 10_000] });
+const root = scaleYSqrt({ reverse: true });
+\`\`\`
+
+The Svelte surface accepts the same JSON and re-exports the same helpers:
+
+\`\`\`svelte fragment
+<GGPlot
+  data={rows}
+  aes={{ x: "latency", y: "requests" }}
+  scales={{
+    x: { type: "linear", transform: "log10" },
+    y: { type: "linear", transform: "sqrt" },
+  }}
+>
+  <GeomPoint />
+  <GeomSmooth method="lm" />
+</GGPlot>
+\`\`\`
+
+The smooth receives transformed x and y. This is intentionally different from
+a post-stat coordinate transform: scale transformation can change a fit,
+histogram, density estimate, summary, or boxplot.
+
+## Limits, missing values, and OOB policy
+
+\`domain\` and helper \`limits\` pin an unexpanded interval in semantic source
+units. Supplying both to a helper is an error. The default \`oob: "censor"\`
+replaces out-of-limit values with missing before stats; \`oob: "squish"\`
+clamps them to the nearest limit first. \`naValue\` replaces missing/censored
+positions before transform-domain validation.
+
+Log10 requires positive values and sqrt requires non-negative values. Recovery
+is explicit: filter or repair the data, select identity, widen limits, or choose
+the intended OOB policy. See
+[scale-transform-domain](/guide/errors#scale-transform-domain),
+[scale-oob-censored](/guide/errors#scale-oob-censored), and
+[scale-oob-squished](/guide/errors#scale-oob-squished).
+
+## Binned positions
+
+A binned scale assigns quantitative values to bounded transformed-space bins
+while preserving source values for tooltips and events:
+
+\`\`\`svelte fragment
+scales={{
+  x: {
+    type: "binned",
+    transform: "log10",
+    breaks: [1, 10, 100, 1000],
+  },
+}}
+\`\`\`
+
+The runtime keeps integer bin identities private for count/stack/fill/dodge.
+Geometry, jitter, guides, and synthesized candidates use transformed centers
+and semantic inverse values. Explicit or automatic bins are right-closed with
+an inclusive lowest edge and are capped at 64.
+
+## Breaks and labels
+
+\`breaks\` and \`minorBreaks\` are bounded semantic source values. Major breaks
+win when a major and minor coincide. Explicit breaks outside the trained domain
+are omitted with
+[scale-break-outside-domain](/guide/errors#scale-break-outside-domain).
+Temporal \`dateMinorBreaks\` outranks generic \`minorBreaks\`.
+
+\`reverse\` changes the pixel direction but not semantic tick order. \`nice\`
+controls numeric domain rounding. Guides retain complete semantic values and
+apply the forward transform exactly once.
 
 ## Categorical color
 
@@ -237,8 +340,10 @@ all registered schemes, capacities, and exhaustion behavior on
 ## Date and time axes
 
 Declare a time scale for ISO 8601 values and let the scale choose UTC calendar
-ticks. Pin breaks or labels only when the audience needs a fixed convention.
-The [time-axis example](/examples/line/time-axis) is the runnable contract.
+ticks. Time axes preserve temporal parsing and expansion behavior and always
+use the identity position transform. Pin breaks or labels only when the
+audience needs a fixed convention. The
+[time-axis example](/examples/line/time-axis) is the runnable contract.
 `;
 
 export const FACETS_COORDINATES_MD = `# Facets and coordinates
@@ -1293,6 +1398,113 @@ migration note here. The pre-release API has its own page:
 The accepted lifecycle and deprecation policy remains in
 [Lifecycle and editions](/guide/lifecycle#lifecycle-tags); this page applies it
 rather than creating a second policy.
+
+## 0.5 to 0.6
+
+### Move position transforms before statistics
+
+Position transforms now follow ggplot2 staging: parsing, source-limit OOB, and
+the scale transform happen before statistics and positions. The old late
+projection produced incorrect smooths, bins, densities, summaries, and
+boxplots. This is the pre-1.0 semantic-correctness exception in decision 0015;
+there is no legacy staging switch.
+
+Authored \`type: "log"\` still validates, but canonical specs now store
+\`type: "linear", transform: "log10"\`. Prefer the explicit transform or
+\`scaleXLog10\`/\`scaleYLog10\` helpers. A codemod would only rewrite spelling
+and cannot decide whether changed statistics are intended, so migration remains
+a manual chart review.
+
+Before 0.6, this fit used the old late log projection:
+
+\`\`\`svelte fragment
+<script lang="ts">
+  import { GeomPoint, GeomSmooth, GGPlot } from "@ggsvelte/svelte";
+
+  const rows = [
+    { latency: 1, throughput: 8 },
+    { latency: 10, throughput: 18 },
+    { latency: 100, throughput: 31 },
+    { latency: 1000, throughput: 47 },
+  ];
+</script>
+
+<GGPlot
+  data={rows}
+  aes={{ x: "latency", y: "throughput" }}
+  scales={{ x: { type: "log", domain: [1, 1000] } }}
+>
+  <GeomPoint />
+  <GeomSmooth method="lm" />
+</GGPlot>
+\`\`\`
+
+In 0.6, make the pre-stat transform and limit policy explicit, then compare the
+fit with the intended analysis. The zero expansion below restores flush bounds;
+the new default for non-temporal continuous and binned scales is 5%
+multiplicative display expansion, including pinned domains.
+
+\`\`\`svelte fragment
+<script lang="ts">
+  import {
+    GeomPoint,
+    GeomSmooth,
+    GGPlot,
+    scaleXLog10,
+  } from "@ggsvelte/svelte";
+
+  const rows = [
+    { latency: 1, throughput: 8 },
+    { latency: 10, throughput: 18 },
+    { latency: 100, throughput: 31 },
+    { latency: 1000, throughput: 47 },
+  ];
+</script>
+
+<GGPlot
+  data={rows}
+  aes={{ x: "latency", y: "throughput" }}
+  scales={scaleXLog10({
+    domain: [1, 1000],
+    oob: "censor",
+    expand: { mult: 0, add: 0 },
+    nice: false,
+  })}
+>
+  <GeomPoint />
+  <GeomSmooth method="lm" />
+</GGPlot>
+\`\`\`
+
+### Review limits, zoom, and transformed units
+
+A pinned \`domain\` is now an unexpanded source limit. The default
+\`oob: "censor"\` removes out-of-limit values before stats;
+\`oob: "squish"\` clamps them before transform/stats. Brush zoom writes a
+semantic domain with \`nice: false\` and zero expansion, so it intentionally
+re-runs stats on the zoomed subset rather than acting like a post-stat
+coordinate crop. Use a wider scale domain or squish only when that is the
+intended analysis; a future coordinate-transform API owns visual-only zoom.
+
+Position offsets and stack totals are transformed-space units. Under log10 or
+sqrt, numeric \`stat_bin\` \`binwidth\`, \`boundary\`, and \`center\` are also
+transformed-space units: for example log10 \`boundary: 0\` means semantic 1,
+not \`log10(0)\`.
+
+### Update scale and interaction inspection
+
+Continuous log10/sqrt scales no longer report trained \`type: "log"\`.
+\`RenderModel.scales\`, \`AxisGuidePlan\`, interval selections, and precise
+bounds use family-plus-transform contracts:
+
+\`\`\`text fragment
+scale type / guide scaleType / interval kind: "linear"
+transform: "identity" | "log10" | "sqrt"
+\`\`\`
+
+Reject or migrate transient snapshots containing \`kind: "log"\`; pre-1.0
+interaction snapshots do not have a compatibility branch. Keep semantic
+source-space domains and apply the named transform exactly once.
 
 ## 0.2 to 0.3
 

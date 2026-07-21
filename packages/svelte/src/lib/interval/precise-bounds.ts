@@ -1,4 +1,9 @@
-import { disambiguatedLabels, encodeKey, type PositionScale } from "@ggsvelte/core";
+import {
+  disambiguatedLabels,
+  encodeKey,
+  type PositionScale,
+  type PositionTransformName,
+} from "@ggsvelte/core";
 
 import type {
   BoundsAction,
@@ -63,10 +68,20 @@ export function boundsEditorInputForScale(
     requested[0] <= requested[1]
       ? ([requested[0], requested[1]] as const)
       : ([requested[1], requested[0]] as const);
+  if (scale.type === "time") {
+    return {
+      axis: options.axis,
+      action: options.action,
+      scale: "time",
+      bounds,
+      reversed: options.reversed ?? false,
+    };
+  }
   return {
     axis: options.axis,
     action: options.action,
-    scale: scale.type,
+    scale: "linear",
+    transform: scale.transform,
     bounds,
     reversed: options.reversed ?? false,
   };
@@ -74,6 +89,7 @@ export function boundsEditorInputForScale(
 
 export function semanticAxisFromBounds(
   scale: BoundsScale,
+  transform: PositionTransformName,
   bounds: readonly [number, number] | readonly [BoundsCategoryValue, BoundsCategoryValue],
 ): SemanticIntervalAxis {
   if (scale === "band") {
@@ -89,6 +105,7 @@ export function semanticAxisFromBounds(
   );
   return Object.freeze({
     kind: scale,
+    transform,
     domain,
   });
 }

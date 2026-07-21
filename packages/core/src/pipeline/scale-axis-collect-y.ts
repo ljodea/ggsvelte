@@ -1,13 +1,23 @@
 /**
  * Collect y-axis training evidence from a single layer frame.
  */
+import { snapColumnToBins } from "./binned-scale.js";
 import { isBarLike } from "./scale-axis-train.js";
-import { positionFieldType, positionValuesToNumeric, yConversionOf } from "./temporal-position.js";
+import {
+  positionColumn,
+  positionFieldType,
+  positionValueToScaleSpace,
+  positionValuesToNumeric,
+  yConversionOf,
+} from "./temporal-position.js";
 import type { AxisCollectAcc } from "./scale-axis-collect-x.js";
 import type { LayerFrame } from "./types.js";
 
 export function collectAxisInputsY(frame: LayerFrame, acc: AxisCollectAcc): void {
   const { binding } = frame;
+  if (binding.yBinning !== undefined) {
+    acc.numeric.push(Float64Array.from(binding.yBinning.edges));
+  }
   const geom = binding.layer.geom;
   const yConversion = yConversionOf(binding);
 
@@ -46,11 +56,15 @@ export function collectAxisInputsY(frame: LayerFrame, acc: AxisCollectAcc): void
     acc.allTemporal = false;
     acc.sawContinuousEvidence = true;
   } else if (binding.yField !== null) {
-    // Panel-local data: free-y facets train each panel on ITS rows.
+    // Panel-local data: free-y facets train each panel on ITS rows. Read in
+    // scale-space so evidence matches the transformed frame arrays and trainer.
     const column = frame.table.column(binding.yField);
     acc.columns.push(column);
     acc.numeric.push(
-      frame.table.numeric(binding.yField, yConversion.sourceParser, yConversion.options),
+      snapColumnToBins(
+        positionColumn(frame.table, binding.yField, yConversion, binding.yTransform),
+        binding.yBinning,
+      ),
     );
     const fieldType = positionFieldType(frame.table, binding.yField, yConversion);
     acc.typeParts.add(fieldType);
@@ -62,7 +76,9 @@ export function collectAxisInputsY(frame: LayerFrame, acc: AxisCollectAcc): void
     acc.columns.push([v]);
     const converted = positionValuesToNumeric([v], yConversion);
     const numeric = converted.values[0] ?? Number.NaN;
-    acc.numeric.push(Float64Array.of(numeric));
+    acc.numeric.push(
+      Float64Array.of(positionValueToScaleSpace(v, yConversion, binding.yTransform)),
+    );
     const temporal =
       converted.decision.status === "temporal" ||
       (yConversion.parser !== "auto" && Number.isFinite(numeric));

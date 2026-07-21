@@ -1392,189 +1392,348 @@
       ],
       "description": "A deterministic temporal parser name, exact closed format, or epoch unit. JavaScript callbacks and regular expressions are not portable parsers."
     },
-    "PositionScaleSpec": {
+    "ScaleExpansion": {
       "type": "object",
       "properties": {
-        "type": {
+        "mult": {
           "anyOf": [
             {
-              "type": "string",
-              "const": "linear"
+              "type": "number",
+              "minimum": 0
             },
             {
-              "type": "string",
-              "const": "log"
-            },
-            {
-              "type": "string",
-              "const": "time"
-            },
-            {
-              "type": "string",
-              "const": "band"
-            }
-          ],
-          "description": "Scale type: \"linear\" (default for numbers), \"log\" (base 10; the whole domain must be positive), \"time\" (temporal fields; ISO strings or Date values), \"band\" (discrete categories). Omit to infer from the field type."
-        },
-        "temporalKind": {
-          "anyOf": [
-            {
-              "type": "string",
-              "const": "date"
-            },
-            {
-              "type": "string",
-              "const": "datetime"
-            }
-          ],
-          "description": "Temporal precision intent. \"date\" uses calendar dates; \"datetime\" uses instants. Supplying this option requests a time scale."
-        },
-        "parse": {
-          "$ref": "#/$defs/TemporalParserSpec",
-          "description": "Explicit deterministic parser for temporal source values. Omit for value-driven inference."
-        },
-        "parseFailure": {
-          "anyOf": [
-            {
-              "type": "string",
-              "const": "error"
-            },
-            {
-              "type": "string",
-              "const": "censor"
-            }
-          ],
-          "description": "Explicit parser failure policy: \"error\" (default) stops with bounded evidence; \"censor\" converts invalid values to missing and emits a warning."
-        },
-        "timezone": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 128,
-          "description": "IANA timezone used for timezone-less temporal input. Default \"UTC\". Invalid zones fail with an actionable diagnostic."
-        },
-        "disambiguation": {
-          "anyOf": [
-            {
-              "type": "string",
-              "const": "compatible"
-            },
-            {
-              "type": "string",
-              "const": "earlier"
-            },
-            {
-              "type": "string",
-              "const": "later"
-            },
-            {
-              "type": "string",
-              "const": "reject"
-            }
-          ],
-          "description": "DST gap/fold policy for IANA local times. Default \"reject\"; choose \"earlier\", \"later\", or Temporal-compatible behavior explicitly."
-        },
-        "dateBreaks": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 128,
-          "pattern": "^[ ]*(?:[1-9][0-9]{0,5}|1000000)[ ]+(?:millisecond|second|minute|hour|day|week|month|quarter|year)s?[ ]*$",
-          "description": "A positive integer calendar interval such as \"2 weeks\", \"3 months\", or \"10 years\". Canonical units are millisecond, second, minute, hour, day, week, month, quarter, and year."
-        },
-        "dateMinorBreaks": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 128,
-          "pattern": "^[ ]*(?:[1-9][0-9]{0,5}|1000000)[ ]+(?:millisecond|second|minute|hour|day|week|month|quarter|year)s?[ ]*$",
-          "description": "A positive integer calendar interval such as \"2 weeks\", \"3 months\", or \"10 years\". Canonical units are millisecond, second, minute, hour, day, week, month, quarter, and year."
-        },
-        "dateLabels": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 128,
-          "pattern": "^(?:[^%]|%(?:Y|y|m|b|B|d|e|a|A|H|I|M|S|L|p|q|z|Z|%))+$",
-          "description": "Strict temporal label format. Supported tokens: %Y %y %m %b %B %d %e %a %A %H %I %M %S %L %p %q %z %Z %%."
-        },
-        "locale": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 128,
-          "description": "BCP 47 locale for temporal labels. Default \"en-US\". JSON Schema bounds the portable string shape; runtime validation canonicalizes the tag and verifies Intl support before rendering."
-        },
-        "weekStart": {
-          "anyOf": [
-            {
-              "type": "string",
-              "const": "monday"
-            },
-            {
-              "type": "string",
-              "const": "tuesday"
-            },
-            {
-              "type": "string",
-              "const": "wednesday"
-            },
-            {
-              "type": "string",
-              "const": "thursday"
-            },
-            {
-              "type": "string",
-              "const": "friday"
-            },
-            {
-              "type": "string",
-              "const": "saturday"
-            },
-            {
-              "type": "string",
-              "const": "sunday"
-            }
-          ],
-          "description": "Week boundary used by temporal interval breaks. Default \"monday\"."
-        },
-        "domain": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/DomainValue"
-          },
-          "minItems": 1,
-          "description": "Explicit domain, PINNING the scale: [min, max] for continuous scales (numbers, or temporal strings for time); the full category list for band scales. Data outside the domain is dropped with a warning."
-        },
-        "nice": {
-          "type": "boolean",
-          "description": "Round the inferred domain to tick-friendly bounds. Default true. Ignored when `domain` is set."
-        },
-        "zero": {
-          "type": "boolean",
-          "description": "Force the domain to include zero. Bars, columns, and areas force this to true on the measure axis; set false explicitly to override. Ignored when `domain` is set."
-        },
-        "reverse": {
-          "type": "boolean",
-          "description": "Reverse the scale's output direction. Default false."
-        },
-        "breaks": {
-          "type": "array",
-          "items": {
-            "anyOf": [
-              {
-                "type": "number"
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 0
               },
-              {
-                "type": "string"
-              }
-            ]
-          },
-          "minItems": 1,
-          "description": "Explicit tick positions in data units (numbers, or ISO date strings for time scales). Omit for automatic ticks."
+              "minItems": 2,
+              "maxItems": 2
+            }
+          ],
+          "description": "Multiplicative display padding as a fraction of the (transformed) domain span. A scalar pads both ends; a [lower, upper] tuple pads each end. Non-negative and finite."
         },
-        "labels": {
-          "type": "string",
-          "description": "Tick label format string. Time scales: strftime-style (\"%Y-%m\", \"%b %d\", \"%H:%M\"). Numeric scales: \",d\" (grouped integer), \".1f\" (fixed decimals), \".0%\" (percent), \"~s\" (SI prefix). Omit for automatic formatting."
+        "add": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 0
+              },
+              "minItems": 2,
+              "maxItems": 2
+            }
+          ],
+          "description": "Additive display padding in (transformed) scale units. A scalar pads both ends; a [lower, upper] tuple pads each end. Non-negative and finite."
         }
       },
       "additionalProperties": false,
-      "description": "Configuration for a positional (x or y) scale."
+      "description": "Display-domain expansion. Padding is applied after nice in transformed space and never widens the OOB limits. `{ mult: 0, add: 0 }` disables padding."
+    },
+    "PositionScaleSpec": {
+      "allOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "linear"
+                },
+                {
+                  "type": "string",
+                  "const": "log"
+                },
+                {
+                  "type": "string",
+                  "const": "time"
+                },
+                {
+                  "type": "string",
+                  "const": "band"
+                },
+                {
+                  "type": "string",
+                  "const": "binned"
+                }
+              ],
+              "description": "Scale type: \"linear\" (default for numbers), \"time\" (temporal fields; ISO strings or Date values), \"band\" (discrete categories), \"binned\" (quantitative values assigned to ordered bins). \"log\" is an accepted authored alias that canonicalizes to { type: \"linear\", transform: \"log10\" }. Omit to infer from the field type."
+            },
+            "transform": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "identity"
+                },
+                {
+                  "type": "string",
+                  "const": "log10"
+                },
+                {
+                  "type": "string",
+                  "const": "sqrt"
+                }
+              ],
+              "description": "Pre-stat position transform applied after parsing and before grouping-sensitive stats/positions. \"identity\" (default), \"log10\" (base-10; source values must be > 0), \"sqrt\" (source values must be >= 0). Only \"identity\" is permitted on time scales."
+            },
+            "temporalKind": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "date"
+                },
+                {
+                  "type": "string",
+                  "const": "datetime"
+                }
+              ],
+              "description": "Temporal precision intent. \"date\" uses calendar dates; \"datetime\" uses instants. Supplying this option requests a time scale."
+            },
+            "parse": {
+              "$ref": "#/$defs/TemporalParserSpec",
+              "description": "Explicit deterministic parser for temporal source values. Omit for value-driven inference."
+            },
+            "parseFailure": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "error"
+                },
+                {
+                  "type": "string",
+                  "const": "censor"
+                }
+              ],
+              "description": "Explicit parser failure policy: \"error\" (default) stops with bounded evidence; \"censor\" converts invalid values to missing and emits a warning."
+            },
+            "timezone": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "description": "IANA timezone used for timezone-less temporal input. Default \"UTC\". Invalid zones fail with an actionable diagnostic."
+            },
+            "disambiguation": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "compatible"
+                },
+                {
+                  "type": "string",
+                  "const": "earlier"
+                },
+                {
+                  "type": "string",
+                  "const": "later"
+                },
+                {
+                  "type": "string",
+                  "const": "reject"
+                }
+              ],
+              "description": "DST gap/fold policy for IANA local times. Default \"reject\"; choose \"earlier\", \"later\", or Temporal-compatible behavior explicitly."
+            },
+            "dateBreaks": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "pattern": "^[ ]*(?:[1-9][0-9]{0,5}|1000000)[ ]+(?:millisecond|second|minute|hour|day|week|month|quarter|year)s?[ ]*$",
+              "description": "A positive integer calendar interval such as \"2 weeks\", \"3 months\", or \"10 years\". Canonical units are millisecond, second, minute, hour, day, week, month, quarter, and year."
+            },
+            "dateMinorBreaks": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "pattern": "^[ ]*(?:[1-9][0-9]{0,5}|1000000)[ ]+(?:millisecond|second|minute|hour|day|week|month|quarter|year)s?[ ]*$",
+              "description": "A positive integer calendar interval such as \"2 weeks\", \"3 months\", or \"10 years\". Canonical units are millisecond, second, minute, hour, day, week, month, quarter, and year."
+            },
+            "dateLabels": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "pattern": "^(?:[^%]|%(?:Y|y|m|b|B|d|e|a|A|H|I|M|S|L|p|q|z|Z|%))+$",
+              "description": "Strict temporal label format. Supported tokens: %Y %y %m %b %B %d %e %a %A %H %I %M %S %L %p %q %z %Z %%."
+            },
+            "locale": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "description": "BCP 47 locale for temporal labels. Default \"en-US\". JSON Schema bounds the portable string shape; runtime validation canonicalizes the tag and verifies Intl support before rendering."
+            },
+            "weekStart": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "monday"
+                },
+                {
+                  "type": "string",
+                  "const": "tuesday"
+                },
+                {
+                  "type": "string",
+                  "const": "wednesday"
+                },
+                {
+                  "type": "string",
+                  "const": "thursday"
+                },
+                {
+                  "type": "string",
+                  "const": "friday"
+                },
+                {
+                  "type": "string",
+                  "const": "saturday"
+                },
+                {
+                  "type": "string",
+                  "const": "sunday"
+                }
+              ],
+              "description": "Week boundary used by temporal interval breaks. Default \"monday\"."
+            },
+            "domain": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/DomainValue"
+              },
+              "minItems": 1,
+              "description": "Explicit domain, PINNING the scale: [min, max] for continuous scales (numbers, or temporal strings for time); the full category list for band scales. Data outside the domain is dropped with a warning."
+            },
+            "nice": {
+              "type": "boolean",
+              "description": "Round the inferred domain to tick-friendly bounds. Default true. Ignored when `domain` is set."
+            },
+            "zero": {
+              "type": "boolean",
+              "description": "Force the domain to include zero. Bars, columns, and areas force this to true on the measure axis; set false explicitly to override. Ignored when `domain` is set."
+            },
+            "reverse": {
+              "type": "boolean",
+              "description": "Reverse the scale's output direction. Default false."
+            },
+            "breaks": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
+              },
+              "minItems": 1,
+              "description": "Explicit tick positions in data units (numbers, or ISO date strings for time scales); for binned scales these are the bin boundaries. Omit for automatic ticks. Binned scales allow at most 65 boundaries (64 bins); non-binned explicit ticks are not capped."
+            },
+            "labels": {
+              "type": "string",
+              "description": "Tick label format string. Time scales: strftime-style (\"%Y-%m\", \"%b %d\", \"%H:%M\"). Numeric scales: \",d\" (grouped integer), \".1f\" (fixed decimals), \".0%\" (percent), \"~s\" (SI prefix). Omit for automatic formatting."
+            },
+            "expand": {
+              "$ref": "#/$defs/ScaleExpansion",
+              "description": "Display-domain padding. Non-temporal continuous/binned axes default to { mult: 0.05, add: 0 }; time axes default to zero. Pinned domains still receive display expansion."
+            },
+            "oob": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "censor"
+                },
+                {
+                  "type": "string",
+                  "const": "squish"
+                }
+              ],
+              "description": "Out-of-bounds policy for values outside explicit source limits, applied before stats. \"censor\" (default) drops them to missing; \"squish\" clamps them to the nearest source limit before transform."
+            },
+            "naValue": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Replacement for missing/censored positional values, resolved after OOB and before transform. A finite number substitutes; null (default) keeps them missing. The replacement is itself checked against the transform/domain rules."
+            },
+            "minorBreaks": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 1,
+              "description": "Explicit minor gridline positions in semantic source units. Coincident major/minor values render only the major tick. Time scales use dateMinorBreaks instead."
+            }
+          },
+          "additionalProperties": false,
+          "description": "Configuration for a positional (x or y) scale."
+        },
+        {
+          "anyOf": [
+            {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "binned"
+                },
+                "breaks": {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "maxItems": 65
+                }
+              }
+            },
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "const": "linear"
+                    },
+                    {
+                      "type": "string",
+                      "const": "log"
+                    },
+                    {
+                      "type": "string",
+                      "const": "time"
+                    },
+                    {
+                      "type": "string",
+                      "const": "band"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
     },
     "ColorScaleSpec": {
       "type": "object",

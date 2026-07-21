@@ -55,7 +55,8 @@ describe("col geom (stacked by default)", () => {
   it("forces zero on the y scale with an advisory", () => {
     const model = runPipeline(spec(), size);
     expect(model.scales.y.type).toBe("linear");
-    if (model.scales.y.type !== "band") expect(model.scales.y.domain[0]).toBe(0);
+    // bars anchor at 0; the trained domain reaches 0 then pads 5% below it.
+    if (model.scales.y.type !== "band") expect(model.scales.y.domain[0]).toBeLessThanOrEqual(0);
     expect(model.advisories.some((a) => a.code === "zero-forced")).toBe(true);
   });
 
@@ -67,7 +68,8 @@ describe("col geom (stacked by default)", () => {
     const model = runPipeline(noZero, size);
     expect(model.advisories.some((a) => a.code === "zero-forced")).toBe(false);
     // bar geometry itself grows from 0, so the trained domain still reaches it
-    if (model.scales.y.type !== "band") expect(model.scales.y.domain[0]).toBe(0);
+    // bars anchor at 0; the trained domain reaches 0 then pads 5% below it.
+    if (model.scales.y.type !== "band") expect(model.scales.y.domain[0]).toBeLessThanOrEqual(0);
 
     // zero: true on a plain point layer extends the domain to 0
     const pointZero = runPipeline(
@@ -77,7 +79,8 @@ describe("col geom (stacked by default)", () => {
         .spec(),
       size,
     );
-    if (pointZero.scales.y.type !== "band") expect(pointZero.scales.y.domain[0]).toBe(0);
+    if (pointZero.scales.y.type !== "band")
+      expect(pointZero.scales.y.domain[0]).toBeLessThanOrEqual(0);
   });
 
   it("dodge places side-by-side rects (no vertical stacking)", () => {
@@ -102,7 +105,8 @@ describe("col geom (stacked by default)", () => {
         .spec(),
       size,
     );
-    if (model.scales.y.type !== "band") expect(model.scales.y.domain).toEqual([0, 1]);
+    // fill positions produce proportions in [0, 1]; 5% display expansion pads both ends.
+    if (model.scales.y.type !== "band") expect(model.scales.y.domain).toEqual([-0.05, 1.05]);
   });
 });
 
@@ -195,7 +199,7 @@ describe("area geom", () => {
     expect(batch.pathOffsets[1]! - batch.pathOffsets[0]!).toBe(6);
     // y domain stacks to at least 3+1=4 .. 5+2=7
     if (model.scales.y.type !== "band") {
-      expect(model.scales.y.domain[0]).toBe(0); // zero forced
+      expect(model.scales.y.domain[0]).toBeLessThanOrEqual(0); // zero forced (then 5% padding)
       expect(model.scales.y.domain[1]).toBeGreaterThanOrEqual(7);
     }
   });
@@ -338,7 +342,10 @@ describe("scales config surface", () => {
       size,
     );
     expect(model.scene.axes.x.ticks.every((t) => /^\d{4}-\d{2}$/.test(t.label))).toBe(true);
-    expect(model.scales.y.type).toBe("log");
+    // type "log" canonicalizes to the linear family + log10 transform; decade
+    // ticks/formatting still key from the transform.
+    expect(model.scales.y.type).toBe("linear");
+    if (model.scales.y.type !== "band") expect(model.scales.y.transform).toBe("log10");
     const yLabels = model.scene.axes.y.ticks.map((t) => t.label);
     expect(yLabels).toContain("10");
     expect(yLabels).toContain("100");
@@ -389,7 +396,9 @@ describe("scales config surface", () => {
         .spec(),
       size,
     );
-    expect(model.warnings.some((w) => w.code === "log-nonpositive")).toBe(true);
+    // Non-positive values are dropped pre-stat by the log10 column transform and
+    // surfaced as scale-transform-domain (log-nonpositive is retired).
+    expect(model.warnings.some((w) => w.code === "scale-transform-domain")).toBe(true);
     expect(model.warnings.some((w) => w.code === "removed-missing")).toBe(true);
   });
 

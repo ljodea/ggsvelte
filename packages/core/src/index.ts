@@ -102,6 +102,11 @@ export type {
 export { rampColor, trainSequential, VIRIDIS_RAMP_10 } from "./scales/color.js";
 export type { SequentialColorScale, SequentialConfig } from "./scales/color.js";
 
+// Pre-stat position scale transform registry (PR 3)
+export { getScaleTransform, POSITION_TRANSFORM_NAMES, scaleTransform } from "./scales/transform.js";
+export type { PositionTransformName, ScaleTransform } from "./scales/transform.js";
+export { MAX_BINNED_BREAKS } from "./pipeline/binned-scale.js";
+
 // Theme registry
 export { BUILTIN_THEMES, resolveTheme, themeVar, UnknownThemeError } from "./theme.js";
 export type { ThemeColorRole, ThemeRole, ThemeTokens } from "./theme.js";

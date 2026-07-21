@@ -16,14 +16,26 @@ import { SpecValidationError } from "./errors.js";
 import type { AesInput, FacetInput, LayerInput, SpecInput } from "./normalize.js";
 import { normalize } from "./normalize.js";
 import {
+  scaleXBinned,
+  scaleXContinuous,
   scaleXDate,
   scaleXDatetime,
   scaleXDiscrete,
+  scaleXLog10,
+  scaleXReverse,
+  scaleXSqrt,
+  scaleYBinned,
+  scaleYContinuous,
   scaleYDate,
   scaleYDatetime,
   scaleYDiscrete,
+  scaleYLog10,
+  scaleYReverse,
+  scaleYSqrt,
+  type ContinuousPositionScaleOptions,
   type DiscretePositionScaleOptions,
   type TemporalScaleOptions,
+  type TransformedPositionScaleOptions,
 } from "./scale-helpers.js";
 import type {
   A11yMode,
@@ -435,6 +447,60 @@ export class GGBuilder {
   /** Force y values to remain discrete categories. */
   scaleYDiscrete(options: DiscretePositionScaleOptions = {}): GGBuilder {
     return this.scales(scaleYDiscrete(options));
+  }
+
+  /** Configure the x scale as a continuous linear scale. */
+  scaleXContinuous(options: ContinuousPositionScaleOptions = {}): GGBuilder {
+    return this.scales(scaleXContinuous(options));
+  }
+
+  /** Configure the y scale as a continuous linear scale. */
+  scaleYContinuous(options: ContinuousPositionScaleOptions = {}): GGBuilder {
+    return this.scales(scaleYContinuous(options));
+  }
+
+  /** Configure the x scale as a base-10 log scale (pre-stat log10 transform). */
+  scaleXLog10(options: TransformedPositionScaleOptions = {}): GGBuilder {
+    return this.scales(scaleXLog10(options));
+  }
+
+  /** Configure the y scale as a base-10 log scale (pre-stat log10 transform). */
+  scaleYLog10(options: TransformedPositionScaleOptions = {}): GGBuilder {
+    return this.scales(scaleYLog10(options));
+  }
+
+  /** Configure the x scale as a square-root scale (pre-stat sqrt transform). */
+  scaleXSqrt(options: TransformedPositionScaleOptions = {}): GGBuilder {
+    return this.scales(scaleXSqrt(options));
+  }
+
+  /** Configure the y scale as a square-root scale (pre-stat sqrt transform). */
+  scaleYSqrt(options: TransformedPositionScaleOptions = {}): GGBuilder {
+    return this.scales(scaleYSqrt(options));
+  }
+
+  /** Reverse the x scale's output direction. */
+  scaleXReverse(
+    options: Omit<ContinuousPositionScaleOptions, "transform" | "reverse"> = {},
+  ): GGBuilder {
+    return this.scales(scaleXReverse(options));
+  }
+
+  /** Reverse the y scale's output direction. */
+  scaleYReverse(
+    options: Omit<ContinuousPositionScaleOptions, "transform" | "reverse"> = {},
+  ): GGBuilder {
+    return this.scales(scaleYReverse(options));
+  }
+
+  /** Configure the x scale as a binned (ordered-bin) quantitative scale. */
+  scaleXBinned(options: ContinuousPositionScaleOptions = {}): GGBuilder {
+    return this.scales(scaleXBinned(options));
+  }
+
+  /** Configure the y scale as a binned (ordered-bin) quantitative scale. */
+  scaleYBinned(options: ContinuousPositionScaleOptions = {}): GGBuilder {
+    return this.scales(scaleYBinned(options));
   }
 
   /** Configure the legend (merged over previous calls). */
