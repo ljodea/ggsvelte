@@ -4,6 +4,10 @@
   import type { CellValue } from "@ggsvelte/core";
 
   import type { PlotInspectionChange } from "../interaction/interaction.js";
+  import {
+    collapseIdenticalDisplayMembers,
+    formatTooltipCell,
+  } from "./display-members.js";
 
   const {
     inspection,
@@ -83,18 +87,16 @@
         })(),
   );
 
-  function format(value: CellValue): string {
-    if (value === null) return "–";
-    if (value instanceof Date) return value.toISOString();
-    if (typeof value === "number")
-      return String(Math.round(value * 1000) / 1000);
-    return String(value);
-  }
+  // Collapse identical field blocks for default rendering only (#385). Public
+  // `inspection.members` stays full for custom content / oninspect.
+  const displayMembers = $derived(
+    collapseIdenticalDisplayMembers(inspection.members, inspection.focus),
+  );
 
   const shownMembers = $derived(
     inspection.state === "transient"
-      ? inspection.members.slice(0, 8)
-      : inspection.members,
+      ? displayMembers.slice(0, 8)
+      : displayMembers,
   );
 </script>
 
@@ -132,7 +134,7 @@
         <dl class:gg-tooltip-focus={member === inspection.focus}>
           {#each member.fields as field (field.channel)}
             <dt>{field.field}</dt>
-            <dd>{format(field.value)}</dd>
+            <dd>{formatTooltipCell(field.value)}</dd>
           {/each}
         </dl>
       {/each}
