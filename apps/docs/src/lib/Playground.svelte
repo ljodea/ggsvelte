@@ -15,6 +15,14 @@
     PLAYGROUND_SAMPLES,
   } from "$lib/generated/playground-seeds";
   import {
+    acceptCandidatePhase,
+    candidateTransitionAccepted,
+    createCandidateLifecycleTracker,
+    emitPlaygroundCandidatePhase,
+    type PlaygroundCandidateIsolation,
+    type PlaygroundCandidatePhaseDetail,
+  } from "$lib/playground-candidate-lifecycle";
+  import {
     appendPlaygroundEvent,
     type PlaygroundEventEntry,
     type PlaygroundInteractionEvent,
@@ -37,6 +45,7 @@
     stagePlaygroundDraft,
     stagePlaygroundSeed,
     stagePlaygroundUndo,
+    type PlaygroundCandidateOrigin,
     type PlaygroundDiagnostic,
   } from "$lib/playground-state";
   const initialSample = PLAYGROUND_SAMPLES[0]!;
@@ -51,6 +60,50 @@
   let scaleDecisions = $state<RenderModel["scaleDecisions"]>([]);
   let guidePlans = $state<RenderModel["guidePlans"]>([]);
   let events = $state<readonly PlaygroundEventEntry[]>([]);
+  let lifecycleTracker = $state(createCandidateLifecycleTracker());
+
+  function noteCandidatePhase(detail: PlaygroundCandidatePhaseDetail): void {
+    const accepted = acceptCandidatePhase(lifecycleTracker, detail);
+    if (accepted === null) return;
+    lifecycleTracker = accepted.tracker;
+    emitPlaygroundCandidatePhase(accepted.detail);
+  }
+
+  function noteStagedCandidate(
+    previous: { generation: number; origin: PlaygroundCandidateOrigin } | null,
+    next: typeof workbench,
+  ): void {
+    if (
+      previous !== null &&
+      (next.candidate === null ||
+        next.candidate.generation !== previous.generation)
+    ) {
+      noteCandidatePhase({
+        generation: previous.generation,
+        origin: previous.origin,
+        phase: "cancelled",
+        status: next.status,
+      });
+    }
+    if (next.candidate !== null) {
+      noteCandidatePhase({
+        generation: next.candidate.generation,
+        origin: next.candidate.origin,
+        phase: "pending",
+        status: next.status,
+      });
+    }
+  }
+
+  function activeCandidate(): {
+    generation: number;
+    origin: PlaygroundCandidateOrigin;
+  } | null {
+    const candidate = workbench.candidate;
+    return candidate === null
+      ? null
+      : { generation: candidate.generation, origin: candidate.origin };
+  }
 
   const outputs = $derived(playgroundOutputs(workbench.committed));
   const scaleReport = $derived(privacySafeScaleReport());
@@ -88,12 +141,16 @@
     const decoded = decodePlaygroundHash(window.location.hash);
     if (decoded.status === "absent") {
       if (origin === "popstate") {
-        workbench = stagePlaygroundSeed(workbench, initialSeed, origin, null);
+        const previous = activeCandidate();
+        const next = stagePlaygroundSeed(workbench, initialSeed, origin, null);
+        workbench = next;
+        noteStagedCandidate(previous, next);
       }
       return;
     }
     if (decoded.status === "error") {
       replaceLocationHash(workbench.historyHash);
+      const previous = activeCandidate();
       workbench = reportPlaygroundDiagnostic(
         workbench,
         {
@@ -105,14 +162,25 @@
         },
         "The shared link was rejected. The current local chart and a truthful URL were retained.",
       );
+      if (previous !== null) {
+        noteCandidatePhase({
+          generation: previous.generation,
+          origin: previous.origin,
+          phase: "cancelled",
+          status: workbench.status,
+        });
+      }
       return;
     }
-    workbench = stagePlaygroundSeed(
+    const previous = activeCandidate();
+    const next = stagePlaygroundSeed(
       workbench,
       verifiedSharedSeed(window.location.hash, decoded.seed),
       origin,
       window.location.hash,
     );
+    workbench = next;
+    noteStagedCandidate(previous, next);
   }
 
   onMount(() => {
@@ -123,8 +191,17 @@
   });
 
   function editDraft(draft: string): void {
+    const previous = activeCandidate();
     const edited = editPlaygroundDraft(workbench, draft);
     workbench = edited;
+    if (previous !== null && edited.candidate === null) {
+      noteCandidatePhase({
+        generation: previous.generation,
+        origin: previous.origin,
+        phase: "cancelled",
+        status: edited.status,
+      });
+    }
     if (!edited.synchronized) {
       shareUrl = "";
       shareStatus = "";
@@ -132,11 +209,17 @@
   }
 
   function applyDraft(): void {
-    workbench = stagePlaygroundDraft(workbench);
+    const previous = activeCandidate();
+    const next = stagePlaygroundDraft(workbench);
+    workbench = next;
+    noteStagedCandidate(previous, next);
   }
 
   function resetSource(): void {
-    workbench = resetPlaygroundSource(workbench);
+    const previous = activeCandidate();
+    const next = resetPlaygroundSource(workbench);
+    workbench = next;
+    noteStagedCandidate(previous, next);
   }
 
   function undoChart(): void {
@@ -148,7 +231,10 @@
       );
       if (!discard) return;
     }
-    workbench = stagePlaygroundUndo(workbench);
+    const previous = activeCandidate();
+    const next = stagePlaygroundUndo(workbench);
+    workbench = next;
+    noteStagedCandidate(previous, next);
   }
 
   function loadSample(id: string): boolean {
@@ -165,44 +251,79 @@
     }
     const sample = PLAYGROUND_SAMPLES.find((entry) => entry.id === id);
     if (sample === undefined) return false;
-    workbench = stagePlaygroundSeed(workbench, sample.seed, "source");
+    const previous = activeCandidate();
+    const next = stagePlaygroundSeed(workbench, sample.seed, "source");
+    workbench = next;
+    noteStagedCandidate(previous, next);
     return true;
   }
 
-  function candidateRendered(generation: number): void {
-    // Keep the inert candidate mounted briefly so assistive-technology and
-    // browser tests can observe the pending state before atomic promotion.
-    window.setTimeout(() => {
-      const current = workbench;
-      const origin = current.candidate?.origin;
-      const promoted = promotePlaygroundCandidate(current, generation);
-      if (promoted === current) return;
-      workbench = promoted;
-      scaleDecisions = [];
-      guidePlans = [];
-      reportStatus = "";
-      events = [];
-      if (
-        (origin === "apply" ||
-          origin === "source" ||
-          origin === "reset" ||
-          origin === "undo") &&
-        window.location.hash.startsWith("#play=")
-      ) {
-        replaceLocationHash(null);
-      }
-      shareUrl = "";
-      shareStatus = "";
-    }, 300);
+  function candidateReady(
+    generation: number,
+    isolation: PlaygroundCandidateIsolation,
+  ): void {
+    const current = workbench;
+    const candidate = current.candidate;
+    if (candidate?.generation !== generation) return;
+    noteCandidatePhase({
+      generation,
+      origin: candidate.origin,
+      phase: "ready",
+      status: current.status,
+      isolation,
+    });
+    // Microtask boundary: avoid re-entrant Svelte updates from GGPlot onrender.
+    queueMicrotask(() => {
+      promoteAcceptedCandidate(generation);
+    });
+  }
+
+  function promoteAcceptedCandidate(generation: number): void {
+    const current = workbench;
+    const origin = current.candidate?.origin;
+    const promoted = promotePlaygroundCandidate(current, generation);
+    if (!candidateTransitionAccepted(current, promoted)) return;
+    workbench = promoted;
+    noteCandidatePhase({
+      generation,
+      origin: origin ?? "apply",
+      phase: "promoted",
+      status: promoted.status,
+    });
+    scaleDecisions = [];
+    guidePlans = [];
+    reportStatus = "";
+    events = [];
+    if (
+      (origin === "apply" ||
+        origin === "source" ||
+        origin === "reset" ||
+        origin === "undo") &&
+      window.location.hash.startsWith("#play=")
+    ) {
+      replaceLocationHash(null);
+    }
+    shareUrl = "";
+    shareStatus = "";
   }
 
   function reconcileCandidateFailure(
     generation: number,
     diagnostic: PlaygroundDiagnostic,
   ): void {
-    workbench = failPlaygroundCandidate(workbench, generation, diagnostic);
-    if (workbench.navigationRecovery !== null) {
-      replaceLocationHash(workbench.navigationRecovery.replaceHash);
+    const current = workbench;
+    const origin = current.candidate?.origin;
+    const failed = failPlaygroundCandidate(current, generation, diagnostic);
+    if (!candidateTransitionAccepted(current, failed)) return;
+    workbench = failed;
+    noteCandidatePhase({
+      generation,
+      origin: origin ?? "apply",
+      phase: "failed",
+      status: failed.status,
+    });
+    if (failed.navigationRecovery !== null) {
+      replaceLocationHash(failed.navigationRecovery.replaceHash);
     }
   }
 
@@ -221,12 +342,21 @@
     scaleDecisions = [];
     guidePlans = [];
     reportStatus = "";
+    const previous = activeCandidate();
     workbench = reportPlaygroundDiagnostic(
       workbench,
       diagnostic,
       "The current chart stopped safely. Reset the source to recover.",
       false,
     );
+    if (previous !== null) {
+      noteCandidatePhase({
+        generation: previous.generation,
+        origin: previous.origin,
+        phase: "cancelled",
+        status: workbench.status,
+      });
+    }
   }
 
   function privacySafeScaleReport(): string {
@@ -341,7 +471,7 @@
         candidate={workbench.candidate}
         lastValid={workbench.lastValid}
         status={workbench.status}
-        onCandidateRendered={candidateRendered}
+        onCandidateReady={candidateReady}
         onCandidateFailed={reconcileCandidateFailure}
         onActiveRendered={activeRendered}
         onActiveFailed={activeFailed}
