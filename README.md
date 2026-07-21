@@ -2,218 +2,387 @@
 
 [![codecov](https://codecov.io/gh/ljodea/ggsvelte/branch/main/graph/badge.svg)](https://app.codecov.io/gh/ljodea/ggsvelte)
 
-A layered grammar of graphics for JavaScript — ggplot2 semantics (aes, geom,
-stat, scale, coord, facet, theme, position), a strictly-JSON spec at the
-center, Svelte 5 runes-native components, and hybrid SVG/canvas rendering.
+A layered grammar of graphics for Svelte 5. Map data to aesthetics, add geoms, then
+compose statistics, scales, facets, coordinates, themes, and interaction.
 
-Build polished charts from Svelte components, a fluent builder, or portable
-JSON. ggsvelte gives you readable scales, stable colors, contained responsive
-rendering, and publication-ready themes before you tune anything.
-
-> **Status: the package manifests are the version source of truth; current releases remain pre-1.0.** Correctness fixes may
-> improve default semantics in place; behavioral changes and direct overrides are
-> documented rather than preserved behind legacy runtime branches. Every export carries a
-> lifecycle tag (see `lifecycle.json` and the docs lifecycle page).
-
-## What you can make
-
-|                                               Categorical scatter                                               |                                         Loess trend with uncertainty                                         |
-| :-------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------: |
-| ![Penguin body mass plotted against flipper length and colored by species](artifacts/fresh-renders/scatter.png) | ![Dose response scatter plot with a loess trend and confidence interval](artifacts/fresh-renders/smooth.png) |
-|                                            **Faceted distributions**                                            |                                               **Time series**                                                |
-|                ![Response-time histograms faceted by service](artifacts/fresh-renders/facet.png)                |       ![Daily active users plotted across the first quarter of 2026](artifacts/fresh-renders/time.png)       |
+[Documentation](https://ggsvelte.sh/) · [Examples](https://ggsvelte.sh/examples) ·
+[Getting started](https://ggsvelte.sh/guide/getting-started) ·
+[Playground](https://ggsvelte.sh/playground)
 
 ## Install
 
 ```sh
-bun add @ggsvelte/svelte        # or: npm install @ggsvelte/svelte
+bun add @ggsvelte/svelte
+# or: npm install @ggsvelte/svelte
 ```
 
-`@ggsvelte/svelte` pulls in `@ggsvelte/spec` (spec types, validation, builder) and
-`@ggsvelte/core` (pipeline + renderers) and re-exports the whole surface.
+Requires Node.js 22+ and Svelte 5.33.1+. npm, pnpm, and Bun installs are tested on
+Ubuntu and Windows.
 
-Requires Node.js 22+ and Svelte 5.33.1+. Clean packed-artifact installs are
-tested with npm, pnpm, and Bun on Ubuntu and Windows; see the
-[compatibility matrix](https://ggsvelte.sh/guide/compatibility).
+## Examples
 
-## Why ggsvelte
+Each image is generated from the Svelte file shown above it. Open a chart for the
+live output and complete source.
 
-- **Good defaults without hidden rules** — readable axes, restrained themes,
-  sensible inferred scales, and stable categorical colors. Valid but
-  questionable choices produce actionable advisories instead of visual
-  footguns.
-- **Charts stay inside their container** — omitted width is responsive by
-  default; a numeric width is the explicit fixed-size opt-in. The plot surface
-  clips marks and keeps overlays bounded.
-- **Defaults can improve safely** — every spec is stamped with an edition, so
-  future improvements do not silently restyle existing charts.
-- **Use the right renderer for the data** — SVG for axes, text, and ordinary
-  layers; canvas automatically above 2,000 marks; deterministic SVG for export.
-- **A real grammar, not a chart-type menu** — 12+ geoms, R-fixture-tested
-  statistics, positions, free-scale facets, coordinates, annotations, and
-  interaction compose through the same model.
-- **Interaction is semantic and opt-in** — inspect and pin data, select points
-  or intervals, brush to zoom, and consume typed Svelte 5 events without
-  depending on SVG nodes or renderer indices.
+### [Loess trend with uncertainty](https://ggsvelte.sh/examples/smooth/loess-scatter)
 
-Try [inspection and pinning](https://ggsvelte.sh/examples/interaction/tooltip)
-or [interval selection and zoom](https://ggsvelte.sh/examples/interaction/brush-zoom),
-then [filter groups without losing their colors](https://ggsvelte.sh/examples/interaction/legend-filter)
-or [coordinate intervals across facets](https://ggsvelte.sh/examples/interaction/facet-intervals),
-adapt a [bounded PortableSpec in the local playground](https://ggsvelte.sh/playground),
-then read the [interaction guide](https://ggsvelte.sh/guide/interactions)
-or [searchable event reference](https://ggsvelte.sh/reference/interactions).
-
-## Dates without preprocessing
-
-A raw four-digit string column is enough to get a proportional calendar axis. No index
-mapping, ISO conversion, or explicit time scale is required:
+<!-- example-source: smooth/loess-scatter -->
 
 ```svelte
 <script lang="ts">
-  import { GGPlot, GeomLine } from "@ggsvelte/svelte";
+  import { GeomPoint, GeomSmooth, GGPlot } from "@ggsvelte/svelte";
 
-  const rows = [
-    { year: "1835", value: 12 },
-    { year: "1900", value: 19 },
-    { year: "2026", value: 31 },
-  ];
+  import { trend } from "./data.js";
 </script>
 
 <GGPlot
-  data={rows}
-  aes={{ x: "year", y: "value" }}
-  width="container"
-  height={360}
+  data={trend}
+  aes={{ x: "dose", y: "effect" }}
+  labs={{
+    title: "Dose response with a loess trend",
+    x: "Dose",
+    y: "Effect",
+  }}
+  width={640}
+  height={400}
 >
-  <GeomLine />
+  <GeomPoint alpha={0.55} size={2.5} />
+  <GeomSmooth method="loess" span={0.75} />
 </GGPlot>
 ```
 
-Strict ISO dates, year-months, year-quarters, and runtime `Date` values work the same way.
-Ambiguous ordered dates stay discrete until you choose an order:
+[![Dose response observations with a loess trend and confidence ribbon](apps/docs/static/previews/smooth-loess-scatter-light.png)](https://ggsvelte.sh/examples/smooth/loess-scatter)
 
-```ts
-const spec = gg(rows, aes({ x: "when", y: "value" }))
-  .geomLine()
-  .scaleXDate({ parse: "dmy" })
-  .spec();
-```
+### [Stacked area](https://ggsvelte.sh/examples/area/stacked)
 
-Portable JSON uses `scales: { x: { type: "time", parse: "dmy" } }`. If four-digit
-values are identifiers rather than years, use `.scaleXDiscrete()` or
-`scales: { x: { type: "band" } }`. Inspect `model.scaleDecisions` and
-`model.scaleDiagnostics` through `onrender` to see the bounded evidence and copyable
-correction. `model.guidePlans` explains the interval and complete labels selected for each
-rendered panel axis.
-
-Temporal labels are measured against the real panel width and calendar-aligned from
-milliseconds through centuries. Override one choice without preprocessing:
-
-```ts
-.scaleXDatetime({
-  dateBreaks: "2 weeks",
-  dateMinorBreaks: "1 day",
-  dateLabels: "%e %b",
-  locale: "en-GB",
-  timezone: "Europe/London",
-  weekStart: "monday",
-})
-```
-
-Explicit breaks and labels are preserved. When they cannot fit, ggsvelte reports a
-structured overlap diagnostic instead of silently rotating, thinning, or truncating them.
-
-Numeric position transforms follow ggplot2 staging: parse, apply source-limit
-OOB, transform once, then compute statistics and positions. Canonical specs use
-family `linear` plus `transform: "log10" | "sqrt"`; helpers include
-`scaleXLog10`, `scaleYSqrt`, `scaleXBinned`, and ggplot2 aliases. Binned scales
-keep bin ids internal while source values remain available to tooltips and
-events. See [Scales and guides](https://ljodea.github.io/ggsvelte/guide/scales-guides)
-and [Upgrading](https://ggsvelte.sh/guide/upgrading#0-5-to-0-6).
-
-## One spec, three surfaces
-
-**Spec JSON** (what agents emit; JSON Schema at `packages/spec/schema/v0.json`):
+<!-- example-source: area/stacked -->
 
 ```svelte
-<script>
-  import { GGPlot } from "@ggsvelte/svelte";
+<script lang="ts">
+  import { GeomArea, GGPlot } from "@ggsvelte/svelte";
 
-  const spec = {
-    data: {
-      values: [
-        { displ: 1.8, hwy: 29 },
-        { displ: 5.7, hwy: 16 },
-      ],
-    },
-    layers: [
-      { geom: "point", aes: { x: { field: "displ" }, y: { field: "hwy" } } },
-    ],
-  };
+  import { generation } from "./data.js";
 </script>
 
-<GGPlot {spec} width={640} height={400} />
-```
-
-**Fluent builder**:
-
-```ts
-import { aes, gg } from "@ggsvelte/svelte";
-
-const spec = gg(rows, aes({ x: "displ", y: "hwy" }))
-  .geomPoint()
-  .spec();
-```
-
-**Svelte components**:
-
-```svelte
-<GGPlot data={rows} aes={{ x: "displ", y: "hwy" }} width={640} height={400}>
-  <GeomPoint />
+<GGPlot
+  data={generation}
+  aes={{ x: "year", y: "twh", fill: "source" }}
+  scales={{ x: { labels: "d", nice: false } }}
+  labs={{
+    title: "Electricity generation mix",
+    x: "Year",
+    y: "Generation (TWh)",
+    fill: "Source",
+  }}
+  width={640}
+  height={400}
+>
+  <GeomArea alpha={0.9} />
 </GGPlot>
 ```
 
-Headless (Node/edge/workers, no DOM):
+[![Electricity generation mix as a stacked area chart](apps/docs/static/previews/area-stacked-light.png)](https://ggsvelte.sh/examples/area/stacked)
 
-```ts
-import { renderToSVGString } from "@ggsvelte/core";
-const svg = renderToSVGString(spec, { width: 640, height: 400 });
+### [Density estimates](https://ggsvelte.sh/examples/density/overlay)
+
+<!-- example-source: density/overlay -->
+
+```svelte
+<script lang="ts">
+  import { GeomDensity, GGPlot } from "@ggsvelte/svelte";
+
+  import { sessions } from "./data.js";
+</script>
+
+<GGPlot
+  data={sessions}
+  aes={{ x: "minutes", fill: "cohort" }}
+  labs={{
+    title: "Session length by cohort",
+    x: "Session length (minutes)",
+    y: "Density",
+    fill: "Cohort",
+  }}
+  width={640}
+  height={400}
+>
+  <GeomDensity alpha={0.45} />
+</GGPlot>
 ```
 
-CLI: `ggsvelte-render spec.json > chart.svg` (JSON-line diagnostics on stderr).
+[![Session-length density estimates overlaid by cohort](apps/docs/static/previews/density-overlay-light.png)](https://ggsvelte.sh/examples/density/overlay)
+
+### [Log scale, fit, and inspection](https://ggsvelte.sh/examples/point/log-scale)
+
+<!-- example-source: point/log-scale -->
+
+```svelte
+<script lang="ts">
+  import { GeomPoint, GeomSmooth, GGPlot, scaleXLog10 } from "@ggsvelte/svelte";
+
+  import { countries } from "./data.js";
+</script>
+
+<GGPlot
+  data={countries}
+  aes={{ x: "gdp", y: "lifeExp", color: "region" }}
+  scales={scaleXLog10({ labels: "~s" })}
+  key="country"
+  inspect={{ mode: "xy", pin: true }}
+  zoom={{ mode: "x" }}
+  labs={{
+    title: "Income and life expectancy",
+    x: "GDP per capita (USD, log scale)",
+    y: "Life expectancy (years)",
+    color: "Region",
+  }}
+  width="container"
+  height={400}
+>
+  <GeomPoint size={3.5} />
+  <GeomSmooth method="lm" se={false} />
+</GGPlot>
+```
+
+[![Income and life expectancy on a logarithmic GDP scale](apps/docs/static/previews/point-log-scale-light.png)](https://ggsvelte.sh/examples/point/log-scale)
+
+### [Faceted histograms](https://ggsvelte.sh/examples/facet/wrap)
+
+<!-- example-source: facet/wrap -->
+
+```svelte
+<script lang="ts">
+  import { GeomHistogram, GGPlot } from "@ggsvelte/svelte";
+
+  import { samples } from "./data.js";
+</script>
+
+<GGPlot
+  data={samples}
+  aes={{ x: "ms" }}
+  facet={{ wrap: "service", ncol: 3 }}
+  labs={{
+    title: "Response time by service",
+    x: "Response time (ms)",
+    y: "Requests",
+  }}
+  width={640}
+  height={400}
+>
+  <GeomHistogram bins={18} />
+</GGPlot>
+```
+
+[![Response-time histograms faceted by service](apps/docs/static/previews/facet-wrap-light.png)](https://ggsvelte.sh/examples/facet/wrap)
+
+### [Proportional bars](https://ggsvelte.sh/examples/bar/proportions)
+
+<!-- example-source: bar/proportions -->
+
+```svelte
+<script lang="ts">
+  import { GeomBar, GGPlot } from "@ggsvelte/svelte";
+
+  import { sessions } from "./data.js";
+</script>
+
+<GGPlot
+  data={sessions}
+  aes={{ x: "age", fill: "genre" }}
+  scales={{ y: { labels: ".0%" } }}
+  legend={{ order: "sorted" }}
+  labs={{
+    title: "What each age group streams",
+    x: "Age group",
+    y: "Share of sessions",
+    fill: "Genre",
+  }}
+  width={640}
+  height={400}
+>
+  <GeomBar position="fill" />
+</GGPlot>
+```
+
+[![Streaming genre shares shown as proportional bars](apps/docs/static/previews/bar-proportions-light.png)](https://ggsvelte.sh/examples/bar/proportions)
+
+### [Continuous color](https://ggsvelte.sh/examples/color/continuous)
+
+<!-- example-source: color/continuous -->
+
+```svelte
+<script lang="ts">
+  import { GeomPoint, GGPlot } from "@ggsvelte/svelte";
+
+  import { stations } from "./data.js";
+</script>
+
+<GGPlot
+  data={stations}
+  aes={{ x: "elevation", y: "julyTemp", color: "elevation" }}
+  scales={{ color: { type: "sequential", scheme: "viridis" } }}
+  labs={{
+    title: "It gets colder as you climb",
+    x: "Elevation (m)",
+    y: "July mean temperature (°C)",
+    color: "Elevation (m)",
+  }}
+  width={640}
+  height={400}
+>
+  <GeomPoint size={4} />
+</GGPlot>
+```
+
+[![Temperature and elevation with a continuous viridis color scale](apps/docs/static/previews/color-continuous-light.png)](https://ggsvelte.sh/examples/color/continuous)
+
+### [Boxplots](https://ggsvelte.sh/examples/boxplot/by-category)
+
+<!-- example-source: boxplot/by-category -->
+
+```svelte
+<script lang="ts">
+  import { GeomBoxplot, GGPlot } from "@ggsvelte/svelte";
+
+  import { readings } from "./data.js";
+</script>
+
+<GGPlot
+  data={readings}
+  aes={{ x: "instrument", y: "value" }}
+  labs={{
+    title: "Reading spread by instrument",
+    x: "Instrument",
+    y: "Reading",
+  }}
+  width={640}
+  height={400}
+>
+  <GeomBoxplot />
+</GGPlot>
+```
+
+[![Reading distributions summarized by instrument](apps/docs/static/previews/boxplot-by-category-light.png)](https://ggsvelte.sh/examples/boxplot/by-category)
+
+### [Calendar time from raw years](https://ggsvelte.sh/examples/line/time-axis)
+
+<!-- example-source: line/time-axis -->
+
+```svelte
+<script lang="ts">
+  import { GeomLine, GGPlot } from "@ggsvelte/svelte";
+
+  import { longRunSeries } from "./data.js";
+</script>
+
+<GGPlot
+  data={longRunSeries}
+  aes={{ x: "year", y: "value" }}
+  labs={{
+    title: "Long-run index, 1835–2025",
+    subtitle: "Raw four-digit strings infer a calendar scale",
+    x: "Year",
+    y: "Index",
+  }}
+  width="container"
+  height={400}
+>
+  <GeomLine linewidth={1.5} />
+</GGPlot>
+```
+
+[![Long-run index plotted on an inferred calendar scale](apps/docs/static/previews/line-time-axis-light.png)](https://ggsvelte.sh/examples/line/time-axis)
+
+### [Layered value labels](https://ggsvelte.sh/examples/col/value-labels)
+
+<!-- example-source: col/value-labels -->
+
+```svelte
+<script lang="ts">
+  import { GeomCol, GeomText, GGPlot } from "@ggsvelte/svelte";
+
+  import { revenue } from "./data.js";
+</script>
+
+<GGPlot
+  data={revenue}
+  aes={{ x: "quarter", y: "amount" }}
+  labs={{
+    title: "Quarterly revenue",
+    x: "Quarter",
+    y: "Revenue (€ thousands)",
+  }}
+  width={640}
+  height={400}
+>
+  <GeomCol width={0.7} />
+  <GeomText aes={{ label: "label" }} dy={-8} size={11} />
+</GGPlot>
+```
+
+[![Quarterly revenue columns with a text layer for value labels](apps/docs/static/previews/col-value-labels-light.png)](https://ggsvelte.sh/examples/col/value-labels)
+
+## Themes
+
+Chart themes are independent of the site's light or dark appearance. The same spec can
+use a built-in theme or explicit theme tokens.
+
+|                                                        Tufte                                                        |                                                          Economist                                                          |
+| :-----------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------------: |
+| [![Scatter plot using the Tufte theme](artifacts/theme-equivalence/ggsvelte-tufte.png)](https://ggsvelte.sh/themes) | [![Scatter plot using the Economist theme](artifacts/theme-equivalence/ggsvelte-economist.png)](https://ggsvelte.sh/themes) |
+|                                                        HRBR                                                         |                                                            Dark                                                             |
+|  [![Scatter plot using the HRBR theme](artifacts/theme-equivalence/ggsvelte-hrbr.png)](https://ggsvelte.sh/themes)  |      [![Scatter plot using the dark theme](artifacts/theme-equivalence/ggsvelte-dark.png)](https://ggsvelte.sh/themes)      |
+
+[Compare every theme and palette](https://ggsvelte.sh/themes).
+
+## Composition
+
+- Geoms share one layer model, so points, lines, intervals, summaries, annotations,
+  and text can occupy the same plot.
+- Statistics and positions include binning, density, loess and linear fits, stacking,
+  filling, dodging, and seeded jitter.
+- Scales cover continuous, discrete, temporal, binned, transformed, and color data.
+- Facets train fixed or free panel scales; coordinates can flip the axes.
+- Inspection, selection, zoom, and legend controls emit semantic Svelte events.
+- Ordinary layers render as SVG. Dense point layers move to canvas while axes, text,
+  legends, and accessible descriptions remain in the DOM.
 
 ## Packages
 
-| Package                               | What                                                                                            |
-| ------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| [`@ggsvelte/svelte`](packages/svelte) | Svelte 5 components + everything re-exported + the CLI                                          |
-| [`@ggsvelte/spec`](packages/spec)     | Spec types, JSON Schema, `normalize()`, `validate()`, `lintSpec()`, builder — zero DOM, zero d3 |
-| [`@ggsvelte/core`](packages/core)     | Framework-agnostic pipeline + SVG renderer (pure entry) and canvas/hit-index (`/dom` entry)     |
+| Package                               | Surface                                                                 |
+| ------------------------------------- | ----------------------------------------------------------------------- |
+| [`@ggsvelte/svelte`](packages/svelte) | Svelte 5 components, package re-exports, and the CLI                    |
+| [`@ggsvelte/spec`](packages/spec)     | Portable types, JSON Schema, validation, normalization, and the builder |
+| [`@ggsvelte/core`](packages/core)     | Framework-independent pipeline, SVG renderer, canvas, and hit testing   |
 
-## Agents
+Most applications need only `@ggsvelte/svelte`.
 
-- Skill: [`skills/ggsvelte/SKILL.md`](skills/ggsvelte/SKILL.md) (also shipped
-  inside the `@ggsvelte/svelte` package).
-- Docs site endpoints: `/llms.txt`, `/llms-full.txt`, `/schema/v0.json`.
-- Held-out eval harness: `tests/evals/` (`bun run evals`, dry-run without a key).
+## Reference
 
-## Documentation
+- [Guide](https://ggsvelte.sh/docs)
+- [Example gallery](https://ggsvelte.sh/examples)
+- [Themes and palettes](https://ggsvelte.sh/themes)
+- [Interactions and events](https://ggsvelte.sh/reference/interactions)
+- [Compatibility](https://ggsvelte.sh/guide/compatibility)
+- [Upgrading](https://ggsvelte.sh/guide/upgrading)
 
-- [Guide and examples](https://ggsvelte.sh/)
-- [Interactions and event reference](https://ggsvelte.sh/guide/interactions)
-- [Local PortableSpec playground](https://ggsvelte.sh/playground)
-- [Upgrading between releases](https://ggsvelte.sh/guide/upgrading)
-- [Pre-0.1 interaction migration](https://ggsvelte.sh/guide/migrating-pre-0-1)
-- [Lifecycle and editions](https://ggsvelte.sh/guide/lifecycle)
+Machine-readable documentation is available at
+[`llms.txt`](https://ggsvelte.sh/llms.txt),
+[`llms-full.txt`](https://ggsvelte.sh/llms-full.txt), and
+[`schema/v0.json`](https://ggsvelte.sh/schema/v0.json).
+
+## Release status
+
+ggsvelte remains pre-1.0. Package manifests are the version source of truth. Lifecycle
+and compatibility contracts are documented in
+[`lifecycle.json`](lifecycle.json) and the
+[lifecycle guide](https://ggsvelte.sh/guide/lifecycle).
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) — tool roster (bun, oxlint+tsgolint,
-pre-commit), the visual-regression trust model, decision records
-(`docs/decisions/`), and the no-time-estimates rule.
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
-[MIT](LICENSE) © Liam O'Dea. Loess reference implementation attribution: see
+[MIT](LICENSE) © Liam O'Dea. Loess reference implementation attribution is recorded in
 [NOTICE](NOTICE).
