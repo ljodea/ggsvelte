@@ -76,13 +76,23 @@ export interface DeploymentExpectation {
 
 export function ensureNotFoundNoindex(buildDirectory: string): void {
   const path = join(buildDirectory, "404.html");
-  const html = readFileSync(path, "utf8");
-  if (html.includes('name="robots" content="noindex')) return;
-  if (!html.includes("</head>")) throw new Error("404.html is missing its closing head tag");
-  writeFileSync(
-    path,
-    html.replace("</head>", '    <meta name="robots" content="noindex,follow" />\n  </head>'),
-  );
+  let html = readFileSync(path, "utf8");
+  if (!html.includes('name="robots" content="noindex')) {
+    if (!html.includes("</head>")) throw new Error("404.html is missing its closing head tag");
+    html = html.replace(
+      "</head>",
+      '    <meta name="robots" content="noindex,follow" />\n  </head>',
+    );
+  }
+  if (!html.includes("<h1>Not found</h1>")) {
+    const mount = '<div style="display: contents">';
+    if (!html.includes(mount)) throw new Error("404.html is missing its application mount");
+    html = html.replace(
+      mount,
+      `${mount}\n      <main><h1>Not found</h1><p>This page does not exist.</p><p><a href="/">Go to the ggsvelte documentation</a></p></main>`,
+    );
+  }
+  writeFileSync(path, html);
 }
 
 export function ensurePreviewNoindexHeader(
@@ -128,11 +138,14 @@ export function validateDeploymentArtifact(
     }
   }
   const notFoundPath = join(buildDirectory, "404.html");
-  if (
-    existsSync(notFoundPath) &&
-    !readFileSync(notFoundPath, "utf8").includes('name="robots" content="noindex')
-  ) {
-    problems.push("404.html must contain a noindex robots policy");
+  if (existsSync(notFoundPath)) {
+    const notFoundHtml = readFileSync(notFoundPath, "utf8");
+    if (!notFoundHtml.includes('name="robots" content="noindex')) {
+      problems.push("404.html must contain a noindex robots policy");
+    }
+    if (!notFoundHtml.includes("<h1>Not found</h1>")) {
+      problems.push("404.html must render Not found without JavaScript");
+    }
   }
 
   if (expected.buildMode === "cloudflare-preview" && hasAnalyticsBeacon) {
@@ -183,8 +196,8 @@ export function validateDeploymentArtifact(
     if (!redirects.includes("/bench/* https://ljodea.github.io/ggsvelte/bench/:splat 302")) {
       problems.push("_redirects is missing the fixed legacy benchmark redirect");
     }
-    if (!redirects.includes("/ggsvelte/* /:splat 301")) {
-      problems.push("_redirects is missing the /ggsvelte cleanup redirect");
+    if (!redirects.includes("/ggsvelte/* https://ggsvelte.sh/:splat 301")) {
+      problems.push("_redirects is missing the absolute /ggsvelte cleanup redirect");
     }
   }
 
