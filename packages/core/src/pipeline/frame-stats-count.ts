@@ -52,11 +52,17 @@ export function buildCountFrame(
   );
   const temporalX =
     binned === null && shouldAggregateOnSemanticTemporalX(binding, parsedX.decision.status);
+  const transformedContinuousX =
+    binned === null && !temporalX && binding.xTransform !== undefined
+      ? positionColumn(table, xField, binding.xConversion, binding.xTransform)
+      : null;
   const countX: readonly (CellValue | null)[] =
     binned === null
       ? temporalX
         ? Array.from(parsedX.semantic, (value, row) => (parsedX.valid[row] === 1 ? value : null))
-        : table.column(xField)
+        : transformedContinuousX === null
+          ? table.column(xField)
+          : Array.from(transformedContinuousX, (value) => (Number.isFinite(value) ? value : null))
       : binned.countX;
   const result = statCount({
     x: countX,
@@ -76,7 +82,11 @@ export function buildCountFrame(
   const centers = binding.xBinning?.centers;
   const xInverse = binding.xTransform?.transform ?? scaleTransform("identity");
   const displayX: CellValue[] =
-    binned === null ? result.x : result.x.map((id) => xInverse.inverse(centers![id as number]!));
+    binned === null
+      ? transformedContinuousX === null
+        ? result.x
+        : result.x.map((value) => xInverse.inverse(value as number))
+      : result.x.map((id) => xInverse.inverse(centers![id as number]!));
   const col = columnOf(result, displayX);
   return {
     binding,
@@ -85,7 +95,7 @@ export function buildCountFrame(
     xValues: displayX,
     xNumeric:
       binned === null
-        ? temporalX
+        ? temporalX || transformedContinuousX !== null
           ? Float64Array.from(result.x, (value) => (typeof value === "number" ? value : Number.NaN))
           : positionValuesToNumeric(result.x, binding.xConversion).values
         : Float64Array.from(result.x, (id) => centers![id as number]!),

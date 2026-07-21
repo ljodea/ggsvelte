@@ -6,6 +6,7 @@ import { isBarLike } from "./scale-axis-train.js";
 import {
   positionColumn,
   positionFieldType,
+  positionValueToScaleSpace,
   positionValuesToNumeric,
   yConversionOf,
 } from "./temporal-position.js";
@@ -75,7 +76,9 @@ export function collectAxisInputsY(frame: LayerFrame, acc: AxisCollectAcc): void
     acc.columns.push([v]);
     const converted = positionValuesToNumeric([v], yConversion);
     const numeric = converted.values[0] ?? Number.NaN;
-    acc.numeric.push(Float64Array.of(numeric));
+    acc.numeric.push(
+      Float64Array.of(positionValueToScaleSpace(v, yConversion, binding.yTransform)),
+    );
     const temporal =
       converted.decision.status === "temporal" ||
       (yConversion.parser !== "auto" && Number.isFinite(numeric));

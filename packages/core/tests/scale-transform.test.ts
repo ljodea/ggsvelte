@@ -176,13 +176,31 @@ describe("TransformedColumnView cache", () => {
     expect(parent.transformed("x", "auto", NUMERIC_ONLY, config("log10"))).toBe(full);
   });
 
-  it("subset transformed values match the parent's by source row", () => {
+  it("subset transformed values and diagnostic counts match selected parent rows", () => {
     const full = parent.transformed("x", "auto", NUMERIC_ONLY, config("log10"));
     const subset = parent.subset([2, 9, 99]);
     const view = subset.transformed("x", "auto", NUMERIC_ONLY, config("log10"));
     expect(view.transformed[0]).toBe(full.transformed[2]);
     expect(view.transformed[1]).toBe(full.transformed[9]);
     expect(view.transformed[2]).toBe(full.transformed[99]);
+
+    const censored = subset.transformed(
+      "x",
+      "auto",
+      NUMERIC_ONLY,
+      config("log10", { sourceLimits: [10, 50] }),
+    );
+    expect(censored.censored).toBe(2);
+    expect(censored.squished).toBe(0);
+
+    const squished = subset.transformed(
+      "x",
+      "auto",
+      NUMERIC_ONLY,
+      config("log10", { sourceLimits: [10, 50], oob: "squish" }),
+    );
+    expect(squished.censored).toBe(0);
+    expect(squished.squished).toBe(2);
   });
 
   it("produces distinct views + keys per transform/oob/limits/naValue", () => {

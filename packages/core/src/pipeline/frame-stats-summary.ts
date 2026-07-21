@@ -29,9 +29,15 @@ export function buildSummaryFrame(
     binding.xConversion.options,
   );
   const temporalX = shouldAggregateOnSemanticTemporalX(binding, parsedX.decision.status);
+  const transformedContinuousX =
+    !temporalX && binding.xTransform !== undefined
+      ? positionColumn(table, xField, binding.xConversion, binding.xTransform)
+      : null;
   const summaryX: readonly (CellValue | null)[] = temporalX
     ? Array.from(parsedX.semantic, (value, row) => (parsedX.valid[row] === 1 ? value : null))
-    : table.column(xField);
+    : transformedContinuousX === null
+      ? table.column(xField)
+      : Array.from(transformedContinuousX, (value) => (Number.isFinite(value) ? value : null));
   const result = statSummary({
     x: summaryX,
     y: positionColumn(table, binding.yField!, binding.yConversion, binding.yTransform),
@@ -42,15 +48,20 @@ export function buildSummaryFrame(
     carried,
   });
   removedStatWarning(result.dropped, index, "missing x or non-finite y", warnings);
-  const col = columnOf(result, result.x);
+  const displayX: CellValue[] =
+    transformedContinuousX === null
+      ? result.x
+      : result.x.map((value) => binding.xTransform!.transform.inverse(value as number));
+  const col = columnOf(result, displayX);
   return {
     binding,
     table,
     n: result.x.length,
-    xValues: result.x,
-    xNumeric: temporalX
-      ? Float64Array.from(result.x, (value) => (typeof value === "number" ? value : Number.NaN))
-      : positionValuesToNumeric(result.x, binding.xConversion).values,
+    xValues: displayX,
+    xNumeric:
+      temporalX || transformedContinuousX !== null
+        ? Float64Array.from(result.x, (value) => (typeof value === "number" ? value : Number.NaN))
+        : positionValuesToNumeric(result.x, binding.xConversion).values,
     yValues: null,
     yNumeric: result.y,
     groups: result.groups,

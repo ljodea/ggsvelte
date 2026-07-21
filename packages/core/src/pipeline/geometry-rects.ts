@@ -18,14 +18,27 @@ export function rectsBatch(
   const { binding } = frame;
   if (frame.ymin === null || frame.ymax === null) return null;
   const binned = (frame.xmin !== null && frame.xmax !== null) || binding.xBinning !== undefined;
-  if (!binned && fx.xScale.type !== "band") return null;
   const params = (binding.layer.params ?? {}) as { width?: number; alpha?: number };
-  const widthFrac =
-    fx.xScale.type === "band"
-      ? (params.width ?? DEFAULT_BAR_WIDTH) * fx.xScale.step
-      : binding.xBinning === undefined
-        ? 0
-        : (params.width ?? DEFAULT_BAR_WIDTH);
+  let widthFrac: number;
+  if (fx.xScale.type === "band") {
+    widthFrac = (params.width ?? DEFAULT_BAR_WIDTH) * fx.xScale.step;
+  } else if (binned) {
+    // stat-bin carries exact xmin/xmax edges (0 means span the full bin); a
+    // binned position scale applies the authored/default width fraction.
+    widthFrac = binding.xBinning === undefined ? 0 : (params.width ?? DEFAULT_BAR_WIDTH);
+  } else {
+    const values = [...(frame.xNumeric ?? [])]
+      .filter((value) => Number.isFinite(value))
+      .toSorted((a, b) => a - b);
+    let resolution = Number.POSITIVE_INFINITY;
+    for (let index = 1; index < values.length; index++) {
+      const gap = values[index]! - values[index - 1]!;
+      if (gap > 0 && gap < resolution) resolution = gap;
+    }
+    if (!Number.isFinite(resolution)) resolution = 1;
+    const span = fx.xScale.transformedDomain[1] - fx.xScale.transformedDomain[0];
+    widthFrac = span === 0 ? 0 : ((params.width ?? DEFAULT_BAR_WIDTH) * resolution) / span;
+  }
 
   const { rects, rowIndexKept, keptRows, removed } = emitRectRows({
     frame,

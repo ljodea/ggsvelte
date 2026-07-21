@@ -10,7 +10,7 @@ import { describe, expect, it } from "bun:test";
 
 import { aes, gg, scaleXLog10, scaleXSqrt, scaleYLog10 } from "@ggsvelte/spec";
 
-import { runPipeline } from "../src/pipeline.ts";
+import { PipelineError, runPipeline } from "../src/pipeline.ts";
 
 const size = { width: 640, height: 400 };
 const log10Rows = [1, 10, 100, 1000, 10_000].map((x, i) => ({ x, y: i + 1 }));
@@ -172,6 +172,180 @@ describe("scaleXSqrt — transformed-space training", () => {
     const g1 = scale.normalize(4) - scale.normalize(1);
     const g2 = scale.normalize(9) - scale.normalize(4);
     expect(g1).toBeCloseTo(g2, 9);
+  });
+});
+
+describe("detached positional values honor the transformed-space contract", () => {
+  it("forwards annotation intercept evidence exactly once before scale training", () => {
+    const model = runPipeline(
+      gg([{ x: 1, y: 1 }], aes({ x: "x", y: "y" }))
+        .geomPoint()
+        .geomRule({ xintercept: 1000, yintercept: 100 })
+        .scales({ ...scaleXLog10(), ...scaleYLog10() })
+        .spec(),
+      size,
+    );
+    const scale = xScale(model);
+    expect(scale.domain[1]).toBeFinite();
+    expect(scale.domain[1]).toBeLessThan(10_000);
+    expect(scale.normalize(1000)).toBeGreaterThanOrEqual(0);
+    expect(scale.normalize(1000)).toBeLessThanOrEqual(1);
+    const y = model.scales.y;
+    if (y.type === "band") throw new Error("expected a continuous y scale");
+    expect(y.domain[1]).toBeFinite();
+    expect(y.normalize(100)).toBeGreaterThanOrEqual(0);
+    expect(y.normalize(100)).toBeLessThanOrEqual(1);
+  });
+
+  it("forwards non-binned count positions before training", () => {
+    const rows = [{ x: 10 }, { x: 10 }, { x: 100 }];
+    const model = runPipeline(
+      gg(rows, aes({ x: "x" }))
+        .geomBar()
+        .scales(scaleXLog10())
+        .spec(),
+      size,
+    );
+    const scale = xScale(model);
+    expect(scale.domain[0]).toBeGreaterThan(0);
+    expect(scale.domain[1]).toBeLessThan(1000);
+    expect(model.scene.batches.some((batch) => batch.kind === "rects")).toBe(true);
+    const candidateX = Array.from(
+      { length: model.candidates.size },
+      (_, id) => model.candidates.candidate(id)?.xValue,
+    ).toSorted((a, b) => Number(a) - Number(b));
+    expect(candidateX).toEqual([10, 100]);
+  });
+
+  it("forwards stat-summary group positions before training and geometry", () => {
+    const rows = [
+      { x: 10, y: 2 },
+      { x: 10, y: 4 },
+      { x: 100, y: 6 },
+      { x: 100, y: 8 },
+    ];
+    const model = runPipeline(
+      gg(rows, aes({ x: "x", y: "y" }))
+        .geomErrorbar({ stat: "summary" })
+        .scales(scaleXLog10())
+        .spec(),
+      size,
+    );
+    const scale = xScale(model);
+    expect(scale.domain[1]).toBeLessThan(1000);
+    const batch = model.scene.batches.find((candidate) => candidate.kind === "segments");
+    if (batch === undefined || batch.kind !== "segments") throw new Error("expected segments");
+    for (const position of batch.segments) expect(position).toBeFinite();
+  });
+});
+
+describe("transform family edge contracts", () => {
+  it("clamps sqrt display expansion to the transform codomain", () => {
+    const model = runPipeline(
+      gg(
+        [0, 1, 4, 9, 16, 25].map((x) => ({ x, y: x })),
+        aes({ x: "x", y: "y" }),
+      )
+        .geomPoint()
+        .scales(scaleXSqrt())
+        .spec(),
+      size,
+    );
+    const scale = xScale(model);
+    expect(scale.domain[0]).toBe(0);
+    expect(scale.transformedDomain[0]).toBe(0);
+    expect(scale.invert(0)).toBe(0);
+  });
+
+  it("rejects a non-identity transform when the mapped field infers temporal", () => {
+    try {
+      runPipeline(
+        {
+          data: {
+            values: [
+              { when: "2024-01-01", y: 1 },
+              { when: "2024-01-02", y: 2 },
+            ],
+          },
+          aes: { x: "when", y: "y" },
+          layers: [{ geom: "point" }],
+          scales: { x: { transform: "log10" } },
+        },
+        size,
+      );
+      throw new Error("expected runPipeline to reject the inferred temporal transform");
+    } catch (error) {
+      expect(error).toBeInstanceOf(PipelineError);
+      expect((error as InstanceType<typeof PipelineError>).code).toBe(
+        "scale-type-transform-conflict",
+      );
+    }
+  });
+
+  it("retains transform-domain diagnostics after runtime row filtering", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { x: -1, y: 1, group: "keep" },
+          { x: 10, y: 2, group: "keep" },
+          { x: 100, y: 3, group: "hide" },
+        ],
+        aes({ x: "x", y: "y", color: "group" }),
+      )
+        .geomPoint()
+        .scales(scaleXLog10())
+        .spec(),
+      {
+        ...size,
+        rowFilters: [{ scale: "color", field: "group", mode: "exclude", values: ["hide"] }],
+      },
+    );
+    expect(model.warnings.some((warning) => warning.code === "scale-transform-domain")).toBe(true);
+    expect(
+      model.scaleDiagnostics.some(
+        (diagnostic) =>
+          diagnostic.code === "scale-transform-domain" && diagnostic.evidence?.failedCount === 1,
+      ),
+    ).toBe(true);
+  });
+});
+
+describe("numeric minor breaks", () => {
+  it("renders in-domain minor gridlines and suppresses values coincident with majors", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { x: 0, y: 0 },
+          { x: 10, y: 10 },
+        ],
+        aes({ x: "x", y: "y" }),
+      )
+        .geomPoint()
+        .scales({ x: { breaks: [0, 10], minorBreaks: [2, 5, 10] } })
+        .spec(),
+      size,
+    );
+    expect(model.scene.panels[0]?.grid.minorX).toHaveLength(2);
+    const major = new Set(model.scene.panels[0]?.grid.x ?? []);
+    expect((model.scene.panels[0]?.grid.minorX ?? []).every((value) => !major.has(value))).toBe(
+      true,
+    );
+
+    const flipped = runPipeline(
+      gg(
+        [
+          { x: 0, y: 0 },
+          { x: 10, y: 10 },
+        ],
+        aes({ x: "x", y: "y" }),
+      )
+        .geomPoint()
+        .scales({ x: { breaks: [0, 10], minorBreaks: [2, 5, 10] } })
+        .coordFlip()
+        .spec(),
+      size,
+    );
+    expect(flipped.scene.panels[0]?.grid.minorY).toHaveLength(2);
   });
 });
 

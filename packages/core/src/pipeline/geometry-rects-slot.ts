@@ -46,7 +46,10 @@ export function resolveRectSlot(input: {
     center = (tx0 + tx1) / 2;
     w = Math.abs(tx1 - tx0) * (widthFrac === 0 ? 1 : widthFrac);
   } else {
-    const tc = fx.xScale.type === "band" ? fx.xScale.normalize(frame.xValues?.[row] ?? null) : NaN;
+    const tc =
+      fx.xScale.type === "band"
+        ? fx.xScale.normalize(frame.xValues?.[row] ?? null)
+        : fx.xScale.normalizeTransformed(frame.xNumeric?.[row] ?? Number.NaN);
     if (tc === undefined || Number.isNaN(tc) || Number.isNaN(t0) || Number.isNaN(t1)) {
       return null;
     }

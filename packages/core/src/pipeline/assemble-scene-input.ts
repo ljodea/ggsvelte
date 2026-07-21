@@ -16,6 +16,8 @@ export interface AssembleSceneInput {
   displayScales: (p: number) => { h: PositionScale; v: PositionScale };
   hTitle: string;
   vTitle: string;
+  hMinorBreaks?: readonly number[] | undefined;
+  vMinorBreaks?: readonly number[] | undefined;
   batches: GeometryBatch[];
   legendBlock: { legends: SceneLegend[]; width: number };
   topBand: number;

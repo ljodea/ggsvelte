@@ -224,7 +224,10 @@ export function trainContinuous(
 
   // Display expansion in transformed space (after nice; pinned domains too).
   const innerSpan = t1 - t0;
-  const e0 = t0 - expansion.lowerMult * innerSpan - expansion.lowerAdd;
+  const expandedLower = t0 - expansion.lowerMult * innerSpan - expansion.lowerAdd;
+  // sqrt's transformed codomain starts at zero. Inverse-projecting negative
+  // display padding would square it back into a positive semantic lower bound.
+  const e0 = transform.key === "sqrt" ? Math.max(0, expandedLower) : expandedLower;
   const e1 = t1 + expansion.upperMult * innerSpan + expansion.upperAdd;
   const span = e1 - e0;
   const affine = (transformed: number): number => {

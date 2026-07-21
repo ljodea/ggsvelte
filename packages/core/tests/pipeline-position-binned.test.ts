@@ -120,20 +120,62 @@ describe("scaleXBinned — requires a quantitative field", () => {
       { x: "a", y: 1 },
       { x: "b", y: 2 },
     ];
-    try {
-      runPipeline(
-        gg(rows, aes({ x: "x", y: "y" }))
-          .geomPoint()
-          .scales(scaleXBinned())
-          .spec(),
-        size,
-      );
-      throw new Error("expected runPipeline to throw");
-    } catch (error) {
-      expect(error).toBeInstanceOf(PipelineError);
-      expect((error as InstanceType<typeof PipelineError>).code).toBe(
-        "binned-scale-requires-continuous",
-      );
+    for (const breaks of [undefined, [0, 10]]) {
+      try {
+        runPipeline(
+          gg(rows, aes({ x: "x", y: "y" }))
+            .geomPoint()
+            .scales(scaleXBinned({ ...(breaks !== undefined && { breaks }) }))
+            .spec(),
+          size,
+        );
+        throw new Error("expected runPipeline to throw");
+      } catch (error) {
+        expect(error).toBeInstanceOf(PipelineError);
+        expect((error as InstanceType<typeof PipelineError>).code).toBe(
+          "binned-scale-requires-continuous",
+        );
+      }
+    }
+  });
+
+  it("coerces numeric strings as quantitative instead of inferring time or nominal", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { x: "2024", y: 1 },
+          { x: "2025", y: 2 },
+        ],
+        aes({ x: "x", y: "y" }),
+      )
+        .geomPoint()
+        .scales(scaleXBinned({ breaks: [2023, 2024, 2025] }))
+        .spec(),
+      size,
+    );
+    expect(model.scales.x.type).toBe("linear");
+    expect(model.scene.batches[0]?.rowIndex).toHaveLength(2);
+    expect(model.scaleDecisions.some((decision) => decision.aesthetic === "x")).toBe(false);
+  });
+
+  it("rejects explicit boundaries that cannot produce a valid bin", () => {
+    for (const breaks of [
+      [-10, 0],
+      ["0", "10"],
+    ] as const) {
+      try {
+        runPipeline(
+          gg([{ x: 1, y: 1 }], aes({ x: "x", y: "y" }))
+            .geomPoint()
+            .scales(scaleXBinned({ transform: "log10", breaks: [...breaks] }))
+            .spec(),
+          size,
+        );
+        throw new Error("expected invalid binned boundaries to throw");
+      } catch (error) {
+        expect(error).toBeInstanceOf(PipelineError);
+        expect((error as InstanceType<typeof PipelineError>).code).toBe("invalid-scale-breaks");
+      }
     }
   });
 });

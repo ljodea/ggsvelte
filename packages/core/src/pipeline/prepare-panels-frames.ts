@@ -10,6 +10,7 @@ import type { FacetPanelDef } from "./facets.js";
 import { buildFrame, remapSourceRows } from "./frame.js";
 import { applyPosition } from "./position.js";
 import { resolveColumnTransform } from "./position-program.js";
+import { assertInferredTemporalTransform } from "./scale-config-preflight.js";
 import { computePanelBinRanges } from "./prepare-panels-bin-ranges.js";
 import { resolveBinnedAxis } from "./resolve-binned-axis.js";
 import { warnEmptyLayers } from "./prepare-panels-empty-layers.js";
@@ -176,6 +177,15 @@ export function buildPanelFrames(input: {
     advisories,
     conversions,
   });
+  for (const axis of ["x", "y"] as const) {
+    assertInferredTemporalTransform(
+      axis,
+      normalized.scales?.[axis],
+      temporal.decisions.some(
+        (decision) => decision.aesthetic === axis && decision.status === "temporal",
+      ),
+    );
+  }
   // Resolve the effective pre-stat transform per axis (after preflight fixes the
   // parser) and attach it to every binding, so stat reads and the affine trainer
   // agree on scale-space. Continuous/binned only; time/band stay identity.

@@ -2,7 +2,7 @@
  * Collect x evidence from boxplot outliers and annotation intercepts.
  */
 import type { AxisCollectAcc } from "./scale-axis-collect-acc.js";
-import { positionValuesToNumeric } from "./temporal-position.js";
+import { positionValueToScaleSpace, positionValuesToNumeric } from "./temporal-position.js";
 import type { LayerFrame } from "./types.js";
 
 export function collectXOutliersAndIntercepts(frame: LayerFrame, acc: AxisCollectAcc): void {
@@ -14,7 +14,9 @@ export function collectXOutliersAndIntercepts(frame: LayerFrame, acc: AxisCollec
     const conversion = frame.binding.xConversion;
     const converted = positionValuesToNumeric([v], conversion);
     const numeric = converted.values[0] ?? Number.NaN;
-    acc.numeric.push(Float64Array.of(numeric));
+    acc.numeric.push(
+      Float64Array.of(positionValueToScaleSpace(v, conversion, frame.binding.xTransform)),
+    );
     const temporal =
       converted.decision.status === "temporal" ||
       (conversion.parser !== "auto" && Number.isFinite(numeric));

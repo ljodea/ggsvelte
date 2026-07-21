@@ -102,6 +102,13 @@ describe("PositionScaleSpec new fields — TypeBox/runtime parity", () => {
     expect(accepts({ type: "linear", minorBreaks: ["a"] })).toBe(false);
   });
 
+  it("caps explicit breaks only when they are binned boundaries", () => {
+    const denseBreaks = Array.from({ length: spec.MAX_BINNED_BREAKS + 2 }, (_, index) => index);
+    expect(accepts({ type: "linear", breaks: denseBreaks })).toBe(true);
+    expect(accepts({ type: "time", breaks: denseBreaks })).toBe(true);
+    expect(accepts({ type: "binned", breaks: denseBreaks })).toBe(false);
+  });
+
   it("still rejects genuinely unknown scale keys", () => {
     expect(accepts({ type: "linear", nonsense: 1 })).toBe(false);
   });

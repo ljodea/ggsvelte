@@ -88,3 +88,33 @@ export function assertScaleConfiguration(
     }
   }
 }
+
+/** Reject a transform that became contradictory only after value-driven
+ * inference resolved an otherwise unspecified axis to temporal. */
+export function assertInferredTemporalTransform(
+  axis: "x" | "y",
+  config: PositionScaleSpec | undefined,
+  inferredTemporal: boolean,
+): void {
+  if (!inferredTemporal || config?.transform === undefined || config.transform === "identity")
+    return;
+  const message =
+    `The ${axis} field inferred a temporal scale, which permits only the identity transform, ` +
+    `but transform: "${config.transform}" was requested.`;
+  throw new PipelineError("scale-type-transform-conflict", `/scales/${axis}/transform`, message, {
+    code: "scale-type-transform-conflict",
+    severity: "error",
+    path: `/scales/${axis}/transform`,
+    problem: `Incompatible inferred temporal scale and transform on the ${axis} scale.`,
+    cause: message,
+    fixes: [
+      { description: "Remove the transform to keep temporal inference." },
+      {
+        description:
+          "Force a non-temporal numeric scale only when the source values are quantitative.",
+        portable: { type: "linear", transform: config.transform },
+      },
+    ],
+    documentationUrl: docs("scale-type-transform-conflict"),
+  });
+}

@@ -17,7 +17,11 @@ import {
   type TemporalPrecision,
 } from "@ggsvelte/spec";
 
-import { type ColumnTransformConfig, executeColumnTransform } from "./scales/transform.js";
+import {
+  COLUMN_TRANSFORM_EVENT,
+  type ColumnTransformConfig,
+  executeColumnTransform,
+} from "./scales/transform.js";
 
 export type CellValue = string | number | boolean | Date | null;
 export type Columns = Readonly<Record<string, readonly CellValue[]>>;
@@ -56,6 +60,8 @@ export interface TransformedColumnView {
   semantic: Float64Array;
   transformed: Float64Array;
   valid: Uint8Array;
+  /** Per-row diagnostic event flags, preserved through subsets. */
+  events: Uint8Array;
   parserKey: string;
   transformKey: string;
   censored: number;
@@ -353,6 +359,7 @@ export class ColumnTable {
         semantic: parsedView.semantic,
         transformed: parsedView.semantic,
         valid: parsedView.valid,
+        events: new Uint8Array(parsedView.valid.length),
         parserKey: parsedView.parserKey,
         transformKey,
         censored: 0,
@@ -368,23 +375,31 @@ export class ColumnTable {
       const length = this.#parentRows.length;
       const transformed = new Float64Array(length);
       const valid = new Uint8Array(length);
+      const events = new Uint8Array(length);
+      let censored = 0;
+      let squished = 0;
+      let invalidTransform = 0;
       for (let index = 0; index < length; index++) {
         const sourceIndex = this.#parentRows[index]!;
         transformed[index] = parent.transformed[sourceIndex]!;
         valid[index] = parent.valid[sourceIndex]!;
+        const event = parent.events[sourceIndex]!;
+        events[index] = event;
+        if ((event & COLUMN_TRANSFORM_EVENT.censored) !== 0) censored++;
+        if ((event & COLUMN_TRANSFORM_EVENT.squished) !== 0) squished++;
+        if ((event & COLUMN_TRANSFORM_EVENT.invalidTransform) !== 0) invalidTransform++;
       }
       const view: TransformedColumnView = {
         raw: parsedView.raw,
         semantic: parsedView.semantic,
         transformed,
         valid,
+        events,
         parserKey: parsedView.parserKey,
         transformKey,
-        // Counts are reported at the axis level from the parent (full-column)
-        // view; subset views carry zeroed counts.
-        censored: 0,
-        squished: 0,
-        invalidTransform: 0,
+        censored,
+        squished,
+        invalidTransform,
       };
       this.#transformedCache.set(cacheKey, view);
       return view;
@@ -396,6 +411,7 @@ export class ColumnTable {
       semantic: parsedView.semantic,
       transformed: result.transformed,
       valid: result.valid,
+      events: result.events,
       parserKey: parsedView.parserKey,
       transformKey,
       censored: result.censored,

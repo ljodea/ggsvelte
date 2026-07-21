@@ -18,6 +18,8 @@ export function assembleScene(input: AssembleSceneInput): Scene {
     displayScales,
     hTitle,
     vTitle,
+    hMinorBreaks,
+    vMinorBreaks,
     batches,
     legendBlock,
     topBand,
@@ -33,6 +35,8 @@ export function assembleScene(input: AssembleSceneInput): Scene {
     displayScales,
     hTitle,
     vTitle,
+    ...(hMinorBreaks !== undefined && { hMinorBreaks }),
+    ...(vMinorBreaks !== undefined && { vMinorBreaks }),
   });
 
   const legends = placeSceneLegends({

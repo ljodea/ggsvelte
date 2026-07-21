@@ -53,6 +53,14 @@ export function finalizeGeometryAndScene(input: {
     displayScales: panelLayout.displayScales,
     hTitle: panelLayout.hTitle,
     vTitle: panelLayout.vTitle,
+    ...((flip ? normalized.scales?.y?.minorBreaks : normalized.scales?.x?.minorBreaks) !==
+      undefined && {
+      hMinorBreaks: flip ? normalized.scales?.y?.minorBreaks : normalized.scales?.x?.minorBreaks,
+    }),
+    ...((flip ? normalized.scales?.x?.minorBreaks : normalized.scales?.y?.minorBreaks) !==
+      undefined && {
+      vMinorBreaks: flip ? normalized.scales?.x?.minorBreaks : normalized.scales?.y?.minorBreaks,
+    }),
     batches,
     legendBlock: panelLayout.legendBlock,
     topBand: panelLayout.topBand,

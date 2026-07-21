@@ -73,9 +73,17 @@ export interface ColumnTransformConfig {
   naValue: number | null;
 }
 
+export const COLUMN_TRANSFORM_EVENT = Object.freeze({
+  censored: 1,
+  squished: 2,
+  invalidTransform: 4,
+});
+
 export interface ColumnTransformResult {
   transformed: Float64Array;
   valid: Uint8Array;
+  /** Per-row bit flags used to aggregate diagnostics through filtered subsets. */
+  events: Uint8Array;
   /** Finite values dropped by OOB censor. */
   censored: number;
   /** Finite values clamped by OOB squish. */
@@ -111,6 +119,7 @@ export function executeColumnTransform(
   const n = semantic.length;
   const transformed = new Float64Array(n);
   const outValid = new Uint8Array(n);
+  const events = new Uint8Array(n);
   const lo = sourceLimits === null ? 0 : sourceLimits[0];
   const hi = sourceLimits === null ? 0 : sourceLimits[1];
   let censored = 0;
@@ -125,17 +134,21 @@ export function executeColumnTransform(
         if (oob === "squish") {
           candidate = lo;
           squished++;
+          events[index] = events[index]! | COLUMN_TRANSFORM_EVENT.squished;
         } else {
           present = false;
           censored++;
+          events[index] = events[index]! | COLUMN_TRANSFORM_EVENT.censored;
         }
       } else if (candidate > hi) {
         if (oob === "squish") {
           candidate = hi;
           squished++;
+          events[index] = events[index]! | COLUMN_TRANSFORM_EVENT.squished;
         } else {
           present = false;
           censored++;
+          events[index] = events[index]! | COLUMN_TRANSFORM_EVENT.censored;
         }
       }
     }
@@ -154,12 +167,13 @@ export function executeColumnTransform(
     if (!transform.valid(candidate)) {
       transformed[index] = Number.NaN;
       invalidTransform++;
+      events[index] = events[index]! | COLUMN_TRANSFORM_EVENT.invalidTransform;
       continue;
     }
     transformed[index] = transform.forward(candidate);
     outValid[index] = 1;
   }
-  return { transformed, valid: outValid, censored, squished, invalidTransform };
+  return { transformed, valid: outValid, events, censored, squished, invalidTransform };
 }
 
 /**
