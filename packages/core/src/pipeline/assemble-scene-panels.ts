@@ -155,7 +155,27 @@ export function assembleScenePanels(input: {
 
   const firstX = scenePanels.find((p) => p.axisX !== null);
   const firstY = scenePanels.find((p) => p.axisY !== null);
-  const xAxis: SceneAxis = { ticks: firstX?.axisX ?? [], title: hTitle };
+  // Multi-line / rotated band labels need the x-axis title pushed below the whole
+  // measured label band (max band height across panels for free scales), instead
+  // of the renderer's fixed single-line offset.
+  const TICK_CHROME_PX = 9; // tickLength + tickLabelGap defaults
+  const TITLE_GAP_PX = 10; // sits within the axis-title reserve band
+  const bandTitleOffset = placements.reduce((max, placement) => {
+    const plan = placement.showAxisX ? placement.hGuidePlan : undefined;
+    if (
+      plan?.bandLabelMode === undefined ||
+      plan.bandLabelMode === "single-line" ||
+      plan.bandLabelBandHeight === undefined
+    ) {
+      return max;
+    }
+    return Math.max(max, TICK_CHROME_PX + plan.bandLabelBandHeight + TITLE_GAP_PX);
+  }, 0);
+  const xAxis: SceneAxis = {
+    ticks: firstX?.axisX ?? [],
+    title: hTitle,
+    ...(bandTitleOffset > 0 && { titleOffset: bandTitleOffset }),
+  };
   const yAxis: SceneAxis = { ticks: firstY?.axisY ?? [], title: vTitle };
 
   return { scenePanels, xAxis, yAxis };

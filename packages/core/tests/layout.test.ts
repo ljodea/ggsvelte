@@ -147,10 +147,12 @@ describe("two-pass layout: fixtures", () => {
     expect(r.x.labelEvery).toBeGreaterThan(1);
   });
 
-  it("rotation is not implemented (skipped by design)", () => {
-    // Nothing in the result exposes rotation; this test documents the scope cut.
+  it("linear/temporal axes never rotate labels (rotation is band-only)", () => {
+    // Non-band axes carry no rotation; band rotation lives on the guide plan, and
+    // is exercised by the "measured band x-axis" suite below.
     const r = layout(base({}));
-    expect("rotation" in r.x).toBe(false);
+    expect(r.x.guidePlan?.bandLabelAngle).toBeUndefined();
+    expect(r.x.ticks.every((t) => t.angle === undefined)).toBe(true);
   });
 });
 

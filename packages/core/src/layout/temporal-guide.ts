@@ -49,6 +49,8 @@ export interface AxisGuidePlan {
   bandLabelMode?: BandLabelMode;
   /** Band rotation in degrees (0 | -45 | -90). */
   bandLabelAngle?: number;
+  /** Measured orthogonal (bottom) band height the labels require, px. */
+  bandLabelBandHeight?: number;
 }
 
 export type GuidePlan = AxisGuidePlan;

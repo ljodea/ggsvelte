@@ -20,7 +20,10 @@
  * margins move in whole quanta, so sub-quantum measurement wobble cannot
  * oscillate tick counts.
  *
- * Label rotation is intentionally NOT implemented (skipped per spike scope).
+ * Linear/temporal tick labels are single-line and never rotated. Categorical
+ * (band) x-axes go through the measured `planBandAxis` planner, which may wrap or
+ * rotate labels within the axis band (see band-guide.ts); that layout travels on
+ * the guide plan (bandLabelMode/bandLabelAngle) and enriched ticks, not here.
  */
 
 import type { PositionScaleSpec, TemporalKind } from "@ggsvelte/spec";
@@ -250,6 +253,7 @@ function bandGuidePlan(
     degraded: Object.freeze([...plan.degraded]),
     bandLabelMode: plan.mode,
     bandLabelAngle: plan.angle,
+    bandLabelBandHeight: plan.labelBandHeight,
   });
 }
 

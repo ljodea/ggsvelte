@@ -257,6 +257,12 @@ export const PIPELINE_WARNING_CATALOG = {
   "temporal-break-outside-domain": {
     summary: "One or more explicit temporal breaks were outside the trained domain and omitted.",
   },
+  "band-label-overlap": {
+    summary: "Categorical (band) axis labels overlap even after wrapping and rotation.",
+  },
+  "band-label-margin-overflow": {
+    summary: "A rotated band label is truncated (ellipsis) to fit the bounded axis margin.",
+  },
   "coord-tessellation-cap": {
     summary:
       "Adaptive coordinate tessellation reached a deterministic depth/vertex cap and retained a bounded approximation.",
@@ -315,6 +321,13 @@ export const ADVISORY_CATALOG = {
   },
   "temporal-inference-invalid": {
     summary: "A date-like field remained discrete because whole-column validation failed.",
+  },
+  "band-labels-wrapped": {
+    summary: "Long categorical x labels were wrapped onto multiple lines to avoid collisions.",
+  },
+  "band-labels-rotated": {
+    summary:
+      "Long categorical x labels were rotated to avoid collisions; coord_flip lays them out horizontally.",
   },
 } as const satisfies Record<string, { summary: string }>;
 
