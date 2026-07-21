@@ -1032,6 +1032,14 @@ jobs:
       - name: tsc examples corpus
         if: steps.content_hash.outputs.hit != 'true'
         run: bun run check:examples
+      # apps/docs/tsconfig.json extends ./.svelte-kit/tsconfig.json. Pre-split,
+      # check:docs (svelte-kit sync) ran in this job before oxlint; keep the
+      # sync here so type-aware lint does not fail with Invalid tsconfig when
+      # svelte-check runs as a concurrent sibling (pre-commit documents the
+      # same order dependency).
+      - name: svelte-kit sync (apps/docs tsconfig for type-aware oxlint)
+        if: steps.content_hash.outputs.hit != 'true'
+        run: cd apps/docs && bun x svelte-kit sync
       - name: oxlint --type-aware
         if: steps.content_hash.outputs.hit != 'true'
         run: bun run lint:type-aware

@@ -249,6 +249,16 @@ describe("R0 release wiring", () => {
     expect(docsSiteJob).toContain("needs: detect-changes");
     expect(docsSiteJob).toContain("bun run build:docs");
     expect(docsSiteJob).toContain("bun run check:pages-links");
+    // build job must still generate apps/docs/.svelte-kit before type-aware
+    // (docs tsconfig extends it); sync used to come free via monlithic check:docs.
+    const buildJob = ci.slice(
+      ci.indexOf("  build:\n    name: build (packages"),
+      ci.indexOf("  svelte-check:\n    name: svelte-check"),
+    );
+    const syncAt = buildJob.indexOf("svelte-kit sync");
+    const typeAwareAt = buildJob.indexOf("lint:type-aware");
+    expect(syncAt).toBeGreaterThan(-1);
+    expect(typeAwareAt).toBeGreaterThan(syncAt);
 
     // actions-security scans composites after extraction (zizmor path scope).
     const actionsSecurity = ci.slice(
