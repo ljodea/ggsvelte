@@ -209,6 +209,7 @@ exports[`ERROR_CATALOG coverage [unexpected-property] is reproducible; message +
       "facet",
       "coord",
       "scales",
+      "guides",
       "legend",
       "labs",
       "theme",
@@ -396,6 +397,24 @@ exports[`ERROR_CATALOG coverage [scale-manual-domain-range] is reproducible; mes
     },
     "message": "The manual color scale has 2 domain values but 1 range colors.",
     "path": "/scales/color",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [guide-aesthetic-incompatible] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Use axis for x/y, legend for discrete/style scales, colorbar for sequential color, or colorsteps for binned color.",
+    "summary": "A guide variant is incompatible with its aesthetic or trained scale family.",
+    "tier": 1,
+  },
+  "instance": {
+    "code": "guide-aesthetic-incompatible",
+    "fix": {
+      "description": "Use { type: "axis" } or { type: "none" } for positional aesthetics.",
+    },
+    "message": "The legend guide is incompatible with the x aesthetic.",
+    "path": "/scales/x/guide",
   },
 }
 `;
@@ -609,6 +628,24 @@ exports[`ERROR_CATALOG coverage [facet-ncol-without-wrap] is reproducible; messa
 }
 `;
 
+exports[`ERROR_CATALOG coverage [unsupported-geom-aesthetic] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Remove the mapping or move it to one of the compatible geoms listed in the error.",
+    "summary": "A mapped style aesthetic is not consumed by the selected geom.",
+    "tier": 2,
+  },
+  "instance": {
+    "code": "unsupported-geom-aesthetic",
+    "fix": {
+      "description": "Remove aes.size or move it to a compatible point layer.",
+    },
+    "message": "The line geom does not consume aes.size; supported geoms: point, text.",
+    "path": "/layers/0/aes/size",
+  },
+}
+`;
+
 exports[`ERROR_CATALOG coverage [unknown-field] is reproducible; message + fix snapshot 1`] = `
 {
   "catalog": {
@@ -738,24 +775,6 @@ exports[`ERROR_CATALOG coverage [validation-limit] is reproducible; message + fi
     "code": "validation-limit",
     "message": "Inline data has 2 rows, more than the documented maxRows limit (1); data-aware checks skipped. Validate with a DataProfile instead.",
     "path": "/data",
-  },
-}
-`;
-
-exports[`ERROR_CATALOG coverage [unsupported-geom-aesthetic] is reproducible; message + fix snapshot 1`] = `
-{
-  "catalog": {
-    "fix": "Remove the mapping or move it to one of the compatible geoms listed in the error.",
-    "summary": "A mapped style aesthetic is not consumed by the selected geom.",
-    "tier": 2,
-  },
-  "instance": {
-    "code": "unsupported-geom-aesthetic",
-    "fix": {
-      "description": "Remove aes.size or move it to a compatible point layer.",
-    },
-    "message": "The line geom does not consume aes.size; supported geoms: point, text.",
-    "path": "/layers/0/aes/size",
   },
 }
 `;

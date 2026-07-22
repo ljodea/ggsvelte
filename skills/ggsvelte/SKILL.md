@@ -70,6 +70,15 @@ ndensity`; density→`density, scaled`; smooth→`y, ymin, ymax, se`;
   helpers for color or fill. `color`/`colour` and ggplot2 snake-case exports
   are binding-identical. GuidePlans are `discrete`, `colorbar`, or
   `colorsteps`. Defaults are inferred and disclosed as advisories.
+- **guides**: top-level `guides` overrides scale-local `guide`. Use `axis`,
+  `legend`, `colorbar`, `colorsteps`, or `none` through the camelCase helpers
+  (or binding-identical snake-case aliases). Guide options style titles,
+  ticks/labels, numeric order, `auto|right|bottom` placement,
+  `auto|vertical|horizontal` direction, collision handling, force visibility,
+  and bounded theme roles without changing scale math. Auto non-position guides
+  move below when the viewport is at most 480px or a right guide would leave
+  less than 320px of panel. Exact discrete entries remain interactive; numeric
+  ticks/bins do not. Force identity/single-value manual guides explicitly.
 - **temporal defaults**: ISO dates/date-times, four-digit year strings,
   year-months, month-years, and year-quarters infer time after bounded sampling
   plus whole-column validation. Ambiguous ordered dates stay discrete: set

@@ -29,6 +29,7 @@ export function computeFacetGridGeometry(input: FacetGridGeometryInput): FacetGr
     outerBottomTitle: input.outerBottomTitle,
     axisTitleBand: input.axisTitleBand,
     legendWidth: input.legendWidth,
+    legendBottomHeight: input.legendBottomHeight,
     optionsWidth: input.optionsWidth,
     layoutHeight: input.layoutHeight,
   });

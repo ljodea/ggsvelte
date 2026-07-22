@@ -37,10 +37,10 @@ describe("sequential color scales", () => {
     const legend = model.scene.legends.find((candidate) => candidate.type === "ramp");
     if (legend?.type !== "ramp") throw new Error("expected ramp scene legend");
     expect(legend.ticks).toEqual([
-      { y: 96, label: "1" },
-      { y: 64, label: "10" },
-      { y: 32, label: "100" },
-      { y: 0, label: "1,000" },
+      { y: 96, label: "1", fullLabel: "1" },
+      { y: 64, label: "10", fullLabel: "10" },
+      { y: 32, label: "100", fullLabel: "100" },
+      { y: 0, label: "1,000", fullLabel: "1,000" },
     ]);
     expect(Object.isFrozen(plan)).toBe(true);
   });

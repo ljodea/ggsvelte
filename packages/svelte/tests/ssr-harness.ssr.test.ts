@@ -104,11 +104,15 @@ describe("SSR release fixture", () => {
           range: ["#111", "#eee"],
         },
       },
+      guides: {
+        color: { type: "colorsteps", position: "bottom", direction: "horizontal" },
+      },
       width: 480,
       height: 320,
     });
 
     expect(fixture.body.match(/gg-legend-step/g)).toHaveLength(2);
+    expect(fixture.body).toContain("gg-legend-bottom gg-legend-horizontal");
     expect(fixture.body).toContain("1–10");
     expect(fixture.body).toContain("10–100");
   });

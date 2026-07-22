@@ -1,0 +1,6 @@
+{
+  "runtimeDependenciesAdded": [],
+  "lockfilePackagesAdded": 0,
+  "portableCallbacksAdded": false,
+  "notes": "Responsive guides reuse the existing scale plans, text measurer, scene, SVG/Svelte renderers, and interaction indexes; no dependency or executable portable surface was added."
+}

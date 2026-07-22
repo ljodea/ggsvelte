@@ -36,12 +36,21 @@ export function computePanelLayout(input: {
   legendInputs: readonly LegendInput[];
   legendOrder: LegendOrder;
   theme: ThemeTokens;
+  layoutAxisTitleSize: number;
+  layoutAxisTextSize: number;
   options: Pick<RunOptions, "width" | "height" | "measureText">;
   warnings: PipelineWarning[];
 }): PanelLayoutResult {
   const { faceted, nrow, ncol, facetPanels, options } = input;
 
   const chrome = resolvePanelLayoutChrome(input);
+  if (chrome.legendBlock.autoMovedBottom) {
+    input.warnings.push({
+      code: "guide-auto-bottom",
+      message:
+        "Auto-positioned guides moved below the panel to preserve at least 320 px of readable width.",
+    });
+  }
   const placements = buildPanelPlacements({
     faceted,
     nrow,

@@ -93,6 +93,13 @@ silent interpolation. CamelCase, fluent-builder, and ggplot2 snake-case forms
 all emit the same strict JSON; callbacks and regular expressions remain
 forbidden.
 
+Guide presentation is a separate portable contract. Use top-level `guides`, a
+scale-local `guide`, fluent `.guides()`, or `guideAxis`, `guideLegend`,
+`guideColorbar`, `guideColorsteps`, and `guideNone` (plus snake-case aliases).
+Top-level entries win over scale-local entries. Non-position guides accept bounded
+right/bottom placement, direction, collision, force, and theme overrides; invalid
+aesthetic/variant combinations fail validation instead of being ignored.
+
 Post-stat coordinate transforms use the separate strict `CoordTransformSpec`.
 `coordTransform({ x: "log10", y: "sqrt" })` and its binding-identical
 `coord_transform` alias emit canonical JSON; builder `.coordTransform()` emits

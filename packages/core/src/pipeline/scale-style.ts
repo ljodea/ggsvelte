@@ -508,9 +508,10 @@ function numericIdentityResolution(input: {
   aesthetic: NumericStyleAesthetic;
   values: readonly CellValue[];
   config: NumericStyleConfig | undefined;
+  title: string;
   warnings: PipelineWarning[];
 }): StyleResolution {
-  const { aesthetic, values, config, warnings } = input;
+  const { aesthetic, values, config, title, warnings } = input;
   const unknownCount = values.filter(
     (value) =>
       value !== null &&
@@ -535,11 +536,51 @@ function numericIdentityResolution(input: {
       return numericOutputValid(aesthetic, number) ? number : fallback.unknownValue;
     },
   });
+  const forceGuide = config?.guide?.type === "legend" && config.guide.force === true;
+  const domain = forceGuide
+    ? [
+        ...new Map(
+          values
+            .filter(
+              (value): value is number =>
+                typeof value === "number" && numericOutputValid(aesthetic, value),
+            )
+            .map((value) => [encodeKey(value), value]),
+        ).values(),
+      ]
+    : [];
+  const labels = disambiguatedLabels(domain);
+  const entries = domain.map((value, index) =>
+    styleGuideEntry(aesthetic, value, labels[index]!, scale.valueOf(value)),
+  );
   return {
     aesthetic,
     resolved: { kind: "identity", scale },
-    legendInput: null,
-    guidePlan: null,
+    legendInput:
+      domain.length === 0
+        ? null
+        : {
+            kind: "discrete",
+            scale: aesthetic,
+            title,
+            domain,
+            firstSeen: values,
+            keyOf: (value: unknown) => ({ [aesthetic]: scale.valueOf(value) }),
+          },
+    guidePlan:
+      domain.length === 0
+        ? null
+        : Object.freeze({
+            type: "discrete" as const,
+            id: `guide:${aesthetic}`,
+            aesthetic,
+            scaleType: "identity" as const,
+            title,
+            domain: Object.freeze([...domain]),
+            entries: Object.freeze(entries),
+            naValue: fallback.naValue,
+            unknownValue: fallback.unknownValue,
+          }),
     state: null,
   };
 }
@@ -588,11 +629,48 @@ function finiteResolution(input: {
             : unknownValue;
       },
     });
+    const forceGuide = config?.guide?.type === "legend" && config.guide.force === true;
+    const domain = forceGuide
+      ? [
+          ...new Map(
+            values
+              .filter((value) => typeof value === "string" && valid.has(value))
+              .map((value) => [encodeKey(value), value]),
+          ).values(),
+        ]
+      : [];
+    const labels = disambiguatedLabels(domain);
+    const entries = domain.map((value, index) =>
+      styleGuideEntry(aesthetic, value, labels[index]!, scale.valueOf(value)),
+    );
     return {
       aesthetic,
       resolved: { kind: type, scale },
-      legendInput: null,
-      guidePlan: null,
+      legendInput:
+        domain.length === 0
+          ? null
+          : {
+              kind: "discrete",
+              scale: aesthetic,
+              title,
+              domain,
+              firstSeen: values,
+              keyOf: (value: unknown) => ({ [aesthetic]: scale.valueOf(value) }),
+            },
+      guidePlan:
+        domain.length === 0
+          ? null
+          : Object.freeze({
+              type: "discrete" as const,
+              id: `guide:${aesthetic}`,
+              aesthetic,
+              scaleType: "identity" as const,
+              title,
+              domain: Object.freeze([...domain]),
+              entries: Object.freeze(entries),
+              naValue,
+              unknownValue,
+            }),
       state: null,
     };
   }
@@ -822,6 +900,7 @@ export function resolveStyleScale(input: {
       aesthetic,
       values: collected.values,
       config: numericConfig,
+      title,
       warnings,
     });
   }

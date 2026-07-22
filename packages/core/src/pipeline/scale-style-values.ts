@@ -2,6 +2,7 @@
 import {
   parseTemporal,
   parseTemporalColumn,
+  type GuideSpec,
   type StyleAesthetic,
   type TemporalKind,
   type TemporalParserSpec,
@@ -30,6 +31,7 @@ export interface NumericStyleConfig {
   unknownValue?: number;
   onExhaust?: "cycle" | "error";
   labels?: string;
+  guide?: GuideSpec;
 }
 
 export interface NumericStyleValueView {

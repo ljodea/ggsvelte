@@ -15,6 +15,7 @@ import type {
   DensityParams,
   ErrorbarParams,
   FacetScales,
+  GuidesSpec,
   InlineData,
   Labs,
   LegendSpec,
@@ -181,6 +182,7 @@ export interface SpecInput {
   facet?: FacetInput;
   coord?: CoordSpec;
   scales?: Scales;
+  guides?: GuidesSpec;
   legend?: LegendSpec;
   labs?: Labs;
   theme?: ThemeName | ThemeSpec;

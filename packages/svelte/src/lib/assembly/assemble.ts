@@ -5,6 +5,7 @@ import type {
   DataInput,
   FacetInput,
   GeomName,
+  GuidesSpec,
   Labs,
   LayerInput,
   LegendSpec,
@@ -62,6 +63,7 @@ export type AssemblePortableSpecInput = {
   readonly facet?: FacetInput;
   readonly coord?: CoordSpec | "flip";
   readonly scales?: Scales;
+  readonly guides?: GuidesSpec;
   readonly legend?: LegendSpec;
   readonly theme?: ThemeName | ThemeSpec;
   readonly labs?: Labs;
@@ -98,6 +100,7 @@ export function assemblePortableSpec(input: AssemblePortableSpecInput): Portable
   if (input.coord !== undefined) builder = builder.coord(input.coord);
   if (input.a11y !== undefined) builder = builder.a11y(input.a11y);
   if (input.scales !== undefined) builder = builder.scales(input.scales);
+  if (input.guides !== undefined) builder = builder.guides(input.guides);
   if (input.legend !== undefined) builder = builder.legend(input.legend);
   if (input.theme !== undefined) builder = builder.theme(input.theme);
   if (input.labs !== undefined) builder = builder.labs(input.labs);

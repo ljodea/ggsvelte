@@ -51,6 +51,7 @@ export function panelLayoutResultFromChrome(
     xTitle: chrome.xTitle,
     yTitle: chrome.yTitle,
     topBand: chrome.topBand,
+    bottomBand: chrome.bottomBand,
     formatX: chrome.formatX,
     formatY: chrome.formatY,
     displayScales: chrome.displayScales,

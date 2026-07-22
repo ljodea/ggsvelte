@@ -186,6 +186,10 @@ export interface SceneTick {
   /** Standalone accessible text; contextual visible labels may be shorter. */
   fullLabel: string;
   kind: "major" | "minor";
+  /** Appearance-only visibility flags; semantic value/fullLabel remain intact. */
+  showTick?: boolean;
+  showLabel?: boolean;
+  labelSize?: number;
   /** Wrapped label lines (band axis, mode "wrapped"). */
   lines?: string[];
   /** Rotation in degrees (band axis, mode "rotated"): -45 | -90. */
@@ -196,6 +200,7 @@ export interface SceneAxis {
   ticks: SceneTick[];
   /** Axis title ("" = none). */
   title: string;
+  titleSize?: number;
   /** Title offset below the panel grid, px (derived from a multi-line/rotated
    * band label band; falls back to the fixed default when absent). */
   titleOffset?: number;
@@ -234,13 +239,16 @@ export interface SceneLegendEntry {
   /** Raw domain value, retained separately from its formatted label. */
   value: unknown;
   label: string;
+  /** Complete semantic label when `label` is visually abbreviated. */
+  fullLabel?: string;
   color: string;
   size?: number;
   linewidth?: number;
   alpha?: number;
   shape?: PointShape;
   linetype?: Linetype;
-  /** Top of the entry row, legend-local px. */
+  /** Left/top of the entry row, legend-local px. */
+  x?: number;
   y: number;
 }
 
@@ -249,8 +257,15 @@ type SceneLegendScale = "color" | "fill" | "size" | "linewidth" | "alpha" | "sha
 /** A discrete (swatch list) legend. */
 export interface SceneDiscreteLegend {
   type: "discrete";
-  /** Which mapped aesthetic produced it. */
+  /** Primary aesthetic used for stable interaction identity. */
   scale: SceneLegendScale;
+  /** Every aesthetic represented by a merged key. */
+  aesthetics?: readonly SceneLegendScale[];
+  position?: "right" | "bottom";
+  direction?: "vertical" | "horizontal";
+  titleSize?: number;
+  labelSize?: number;
+  keyGap?: number;
   /** False when entries are representative ticks/bins rather than raw value identities. */
   interactive?: boolean;
   title: string;
@@ -268,6 +283,11 @@ export interface SceneDiscreteLegend {
 export interface SceneRampLegend {
   type: "ramp";
   scale: string;
+  aesthetics?: readonly string[];
+  position?: "right" | "bottom";
+  direction?: "vertical" | "horizontal";
+  titleSize?: number;
+  labelSize?: number;
   title: string;
   x: number;
   y: number;
@@ -275,8 +295,10 @@ export interface SceneRampLegend {
   height: number;
   /** Gradient stops top(=max) to bottom(=min): [offset 0..1, color]. */
   stops: [number, string][];
-  /** Labeled positions along the ramp: y = legend-local px from ramp top. */
-  ticks: { y: number; label: string }[];
+  /** Whether renderer tick marks are visible independently of labels. */
+  showTicks?: boolean;
+  /** Labeled positions along the ramp's primary direction. */
+  ticks: { pos?: number; y?: number; label: string; fullLabel?: string }[];
   /** Ramp bar size in px. */
   rampWidth: number;
   rampHeight: number;
@@ -285,12 +307,17 @@ export interface SceneRampLegend {
 export interface SceneStepsLegend {
   type: "steps";
   scale: string;
+  aesthetics?: readonly string[];
+  position?: "right" | "bottom";
+  direction?: "vertical" | "horizontal";
+  titleSize?: number;
+  labelSize?: number;
   title: string;
   x: number;
   y: number;
   width: number;
   height: number;
-  entries: { label: string; color: string; y: number }[];
+  entries: { label: string; fullLabel?: string; color: string; x?: number; y: number }[];
   stepWidth: number;
   stepHeight: number;
 }

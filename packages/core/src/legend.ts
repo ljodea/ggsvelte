@@ -1,23 +1,31 @@
-/**
- * Legend construction (plan: legends are Scene objects produced by the same
- * pipeline, placed by the two-pass layout, styled ONLY through the theme —
- * Hadley lesson 6: one styling path).
- *
- * The pipeline measures legends BEFORE the two-pass layout and passes their
- * width as a reserved right margin, so tick derivation sees the true panel
- * width. Ordering (`legend.order`) reorders entries only — color assignments
- * NEVER change with order (scale-stability contract).
- */
-import { linearTicks, tickStep } from "./layout/ticks.js";
+/** Deterministic semantic legend construction and responsive right/bottom planning. */
+import type { GuideThemeSpec, StyleAesthetic } from "@ggsvelte/spec";
+
 import type { TextMeasurer } from "./layout/measure.js";
+import { linearTicks } from "./layout/ticks.js";
 import { truncateToFit } from "./layout/truncate.js";
+import type { Linetype, PointShape } from "./scales/style.js";
 import { encodeKey } from "./scales/state.js";
 import { bandKey } from "./scales/train.js";
-import type { Linetype, PointShape } from "./scales/style.js";
 import type { SceneLegend, SceneLegendEntry } from "./scene.js";
-import type { StyleAesthetic } from "@ggsvelte/spec";
 
 export type LegendOrder = "stable-domain" | "present-first-seen" | "sorted";
+type GuidePosition = "auto" | "right" | "bottom";
+type GuideDirection = "auto" | "vertical" | "horizontal";
+
+export interface ResolvedLegendAppearance {
+  type: "legend" | "colorbar" | "colorsteps" | "none";
+  title: string;
+  order: number;
+  position: GuidePosition;
+  direction: GuideDirection;
+  keySize?: number;
+  collision?: "ellipsis" | "wrap" | "error";
+  force?: boolean;
+  showTicks?: boolean;
+  showLabels?: boolean;
+  theme?: GuideThemeSpec;
+}
 
 interface LegendKeyStyle {
   color?: string;
@@ -31,12 +39,11 @@ interface LegendKeyStyle {
 export interface DiscreteLegendInput {
   kind: "discrete";
   scale: "color" | "fill" | StyleAesthetic;
+  aesthetics?: readonly ("color" | "fill" | StyleAesthetic)[];
+  appearance?: ResolvedLegendAppearance;
   title: string;
-  /** Values in stable assignment order (the default legend order). */
   domain: readonly unknown[];
-  /** Values in first-occurrence order of the CURRENT data. */
   firstSeen: readonly unknown[];
-  /** Whether entries have exact raw-value identity for focus/filter interactions. */
   interactive?: boolean;
   colorOf?(value: unknown): string | undefined;
   keyOf?(value: unknown): LegendKeyStyle;
@@ -46,32 +53,29 @@ export interface DiscreteLegendInput {
 export interface RampLegendInput {
   kind: "ramp";
   scale: "color" | "fill";
+  aesthetics?: readonly ("color" | "fill")[];
+  appearance?: ResolvedLegendAppearance;
   title: string;
   domain: [number, number];
-  /** Ramp color at t in [0, 1]. */
   at(t: number): string;
-  /** Tick label formatter. */
   format(value: number): string;
-  /** Optional semantic tick positions; numeric ramps use linear ticks. */
   ticks?: readonly number[];
-  /** Map a semantic tick value to its normalized position on the trained ramp. */
   position?: (value: number) => number;
 }
 
 export interface StepsLegendInput {
   kind: "steps";
   scale: "color" | "fill";
+  aesthetics?: readonly ("color" | "fill")[];
+  appearance?: ResolvedLegendAppearance;
   title: string;
   entries: readonly Readonly<{ label: string; color: string }>[];
 }
 
 export type LegendInput = DiscreteLegendInput | RampLegendInput | StepsLegendInput;
 
-// Layout constants (themable via CSS at render time; measured with the
-// canonical measurer so reserved margins are deterministic).
 const FONT_SIZE = 11;
 const TITLE_HEIGHT = 18;
-/** Discrete legend row height; also the WCAG 2.2 minimum pointer target. */
 export const LEGEND_ROW_HEIGHT = 24;
 const SWATCH_SIZE = 10;
 const SWATCH_GAP = 6;
@@ -79,30 +83,49 @@ const PADDING = 4;
 const BLOCK_GAP = 12;
 const RAMP_WIDTH = 12;
 const RAMP_HEIGHT = 96;
+const HORIZONTAL_RAMP_LENGTH = 180;
 const RAMP_STOP_COUNT = 10;
 const STEP_HEIGHT = 24;
 const UNKNOWN_COLOR = "#999999";
+const MIN_READABLE_PANEL = 320;
+const ESTIMATED_NON_LEGEND_CHROME = 80;
+const AUTO_BOTTOM_MAX_WIDTH = 480;
 
 export interface LegendBlock {
   legends: SceneLegend[];
-  /** Total width of the legend column (0 = no legends). */
+  /** Width reserved on the right. */
   width: number;
+  /** Height occupied by right-positioned blocks. */
   height: number;
+  /** Height reserved below the panel for bottom-positioned blocks. */
+  bottomHeight: number;
+  /** True when at least one auto-positioned guide degraded from right to bottom. */
+  autoMovedBottom: boolean;
+}
+
+export class LegendLayoutError extends Error {
+  constructor(
+    readonly scale: string,
+    readonly label: string,
+    detail?: string,
+    readonly recovery = 'Use collision: "ellipsis", move the guide below, or shorten the label.',
+  ) {
+    super(detail ?? `The ${scale} guide label "${label}" cannot fit without truncation.`);
+    this.name = "LegendLayoutError";
+  }
 }
 
 function orderedValues(input: DiscreteLegendInput, order: LegendOrder): unknown[] {
   switch (order) {
     case "present-first-seen": {
-      // Dedupe by typed identity, not presentation label: the ordinal scale
-      // gives 1 and "1" distinct assignments, so both must appear.
       const domainKeys = new Set(input.domain.map((value) => encodeKey(value)));
       const seen = new Set<string>();
       const out: unknown[] = [];
-      for (const v of input.firstSeen) {
-        const key = encodeKey(v);
+      for (const value of input.firstSeen) {
+        const key = encodeKey(value);
         if (!domainKeys.has(key) || seen.has(key)) continue;
         seen.add(key);
-        out.push(v);
+        out.push(value);
       }
       return out;
     }
@@ -120,13 +143,6 @@ function valueKind(value: unknown): string {
   return typeof value;
 }
 
-/**
- * Presentation labels for discrete values, with a typed qualifier appended
- * to any label shared by more than one typed value (`1` and `"1"` both
- * render as "1"): the qualifier is the only way — visually and for
- * accessible names — to tell the entries apart. Shared by legends and the
- * precise-bounds category selects.
- */
 export function disambiguatedLabels(values: readonly unknown[]): string[] {
   const raw = values.map((value) => bandKey(value));
   const counts = new Map<string, number>();
@@ -136,182 +152,454 @@ export function disambiguatedLabels(values: readonly unknown[]): string[] {
   );
 }
 
-/** Ellipsis for legend entry truncation (same glyph as axis truncateToFit paths). */
+/** Ellipsis for legend entry truncation (same glyph as axis paths). */
 const LEGEND_ELLIPSIS = "…";
 
-/**
- * Truncate a legend entry label to `maxWidth` via shared binary-search
- * {@link truncateToFit}: O(log L) measureWidth calls (and O(L log L) string work)
- * instead of a reverse linear scan O(L) measures / O(L²) joins.
- *
- * The pipeline's MetricsTableMeasurer is monotonic in keep length; under a
- * non-monotonic native measurer this is best-effort (same contract as axes).
- */
-function truncate(label: string, maxWidth: number, measurer: TextMeasurer): string {
-  return truncateToFit(label, maxWidth, measurer, FONT_SIZE, LEGEND_ELLIPSIS);
+/** Binary-search truncation shared with axis layout, honoring guide typography. */
+function truncate(
+  label: string,
+  maxWidth: number,
+  measurer: TextMeasurer,
+  fontSize: number,
+): string {
+  return truncateToFit(label, maxWidth, measurer, fontSize, LEGEND_ELLIPSIS);
 }
 
-/**
- * Build and vertically stack legend boxes at x=0 (the pipeline shifts them to
- * their final plot position after layout). `maxWidth` caps the block; labels
- * truncate with an ellipsis beyond it.
- */
+function settings(input: LegendInput, position: "right" | "bottom") {
+  const appearance = input.appearance;
+  const theme = appearance?.theme;
+  const direction =
+    appearance?.direction === undefined || appearance.direction === "auto"
+      ? position === "bottom"
+        ? "horizontal"
+        : "vertical"
+      : appearance.direction;
+  return {
+    appearance,
+    position,
+    direction,
+    title: appearance?.title ?? input.title,
+    titleSize: theme?.titleSize ?? FONT_SIZE,
+    labelSize: theme?.labelSize ?? FONT_SIZE,
+    keySize: appearance?.keySize ?? SWATCH_SIZE,
+    keyGap: theme?.keyGap ?? SWATCH_GAP,
+    rowGap: theme?.rowGap ?? 0,
+    blockGap: theme?.blockGap ?? BLOCK_GAP,
+    rampThickness: theme?.colorbarThickness ?? RAMP_WIDTH,
+    rampLength: theme?.colorbarLength ?? HORIZONTAL_RAMP_LENGTH,
+  } as const;
+}
+
+function presentedContinuousLabel(input: {
+  fullLabel: string;
+  availableWidth: number;
+  measurer: TextMeasurer;
+  fontSize: number;
+  appearance: ResolvedLegendAppearance | undefined;
+  show: boolean;
+  scale: string;
+}): string {
+  if (!input.show) return "";
+  const label = truncate(input.fullLabel, input.availableWidth, input.measurer, input.fontSize);
+  if (input.appearance?.collision === "error" && label !== input.fullLabel)
+    throw new LegendLayoutError(input.scale, input.fullLabel);
+  return label;
+}
+
+function resolvePosition(input: LegendInput, autoBottom: boolean): "right" | "bottom" {
+  const authored = input.appearance?.position;
+  return authored === "right" || authored === "bottom" ? authored : autoBottom ? "bottom" : "right";
+}
+
+function buildDiscrete(
+  input: DiscreteLegendInput,
+  order: LegendOrder,
+  measurer: TextMeasurer,
+  maxWidth: number,
+  position: "right" | "bottom",
+): SceneLegend {
+  const style = settings(input, position);
+  const values = orderedValues(input, order);
+  const fullLabels =
+    input.labelOf === undefined
+      ? disambiguatedLabels(values)
+      : values.map((value) => input.labelOf?.(value) ?? "");
+  const titleHeight = style.title === "" ? 0 : TITLE_HEIGHT;
+  const keys = values.map((value) => input.keyOf?.(value) ?? {});
+  // Grow the swatch so mapped size keys render at their authored radii instead
+  // of collapsing at the renderer's swatchSize / 2 cap.
+  const maxKeyRadius = keys.reduce((max, key) => Math.max(max, key.size ?? 0), 0);
+  const keySize = Math.max(style.keySize, Math.ceil(maxKeyRadius * 2));
+  const entries: SceneLegendEntry[] = [];
+  let width = 0;
+  let height = titleHeight + PADDING;
+  if (style.direction === "vertical") {
+    const maxLabelWidth = Math.max(1, maxWidth - PADDING * 2 - keySize - style.keyGap);
+    let labelWidth = 0;
+    for (let index = 0; index < values.length; index++) {
+      const fullLabel = fullLabels[index]!;
+      const label = truncate(fullLabel, maxLabelWidth, measurer, style.labelSize);
+      if (style.appearance?.collision === "error" && label !== fullLabel)
+        throw new LegendLayoutError(input.scale, fullLabel);
+      labelWidth = Math.max(labelWidth, measurer.measureWidth(label, style.labelSize));
+      entries.push({
+        value: values[index],
+        label,
+        fullLabel,
+        color: UNKNOWN_COLOR,
+        ...keys[index],
+        ...(input.colorOf?.(values[index]) !== undefined && {
+          color: input.colorOf?.(values[index]) ?? UNKNOWN_COLOR,
+        }),
+        x: 0,
+        y: titleHeight + index * (LEGEND_ROW_HEIGHT + style.rowGap),
+      });
+    }
+    const titleWidth = measurer.measureWidth(style.title, style.titleSize);
+    width = Math.min(
+      maxWidth,
+      PADDING * 2 + Math.max(keySize + style.keyGap + Math.ceil(labelWidth), Math.ceil(titleWidth)),
+    );
+    height =
+      titleHeight +
+      values.length * LEGEND_ROW_HEIGHT +
+      Math.max(0, values.length - 1) * style.rowGap +
+      PADDING;
+  } else {
+    let cursorX = PADDING;
+    let cursorY = titleHeight;
+    let rowWidth = 0;
+    for (let index = 0; index < values.length; index++) {
+      const fullLabel = fullLabels[index]!;
+      const maxLabelWidth = Math.max(1, maxWidth - PADDING * 2 - keySize - style.keyGap);
+      const label = truncate(fullLabel, maxLabelWidth, measurer, style.labelSize);
+      if (style.appearance?.collision === "error" && label !== fullLabel)
+        throw new LegendLayoutError(input.scale, fullLabel);
+      const itemWidth =
+        keySize + style.keyGap + measurer.measureWidth(label, style.labelSize) + PADDING * 2;
+      if (cursorX > PADDING && cursorX + itemWidth > maxWidth) {
+        cursorX = PADDING;
+        cursorY += LEGEND_ROW_HEIGHT + style.rowGap;
+      }
+      entries.push({
+        value: values[index],
+        label,
+        fullLabel,
+        color: UNKNOWN_COLOR,
+        ...keys[index],
+        ...(input.colorOf?.(values[index]) !== undefined && {
+          color: input.colorOf?.(values[index]) ?? UNKNOWN_COLOR,
+        }),
+        x: cursorX - PADDING,
+        y: cursorY,
+      });
+      cursorX += itemWidth;
+      rowWidth = Math.max(rowWidth, cursorX);
+    }
+    width = Math.min(
+      maxWidth,
+      Math.max(rowWidth, measurer.measureWidth(style.title, style.titleSize) + PADDING * 2),
+    );
+    height = cursorY + (values.length === 0 ? 0 : LEGEND_ROW_HEIGHT) + PADDING;
+  }
+  return {
+    type: "discrete",
+    scale: input.scale,
+    aesthetics: input.aesthetics ?? [input.scale],
+    interactive: input.interactive ?? true,
+    title: style.title,
+    position,
+    direction: style.direction,
+    titleSize: style.titleSize,
+    labelSize: style.labelSize,
+    keyGap: style.keyGap,
+    x: 0,
+    y: 0,
+    width,
+    height,
+    entries,
+    swatchSize: keySize,
+  };
+}
+
+function rampStops(input: RampLegendInput): [number, string][] {
+  return Array.from({ length: RAMP_STOP_COUNT }, (_, index) => {
+    const offset = index / (RAMP_STOP_COUNT - 1);
+    return [offset, input.at(1 - offset)];
+  });
+}
+
+function buildRamp(
+  input: RampLegendInput,
+  measurer: TextMeasurer,
+  maxWidth: number,
+  position: "right" | "bottom",
+): SceneLegend {
+  const style = settings(input, position);
+  const titleHeight = style.title === "" ? 0 : TITLE_HEIGHT;
+  const [min, max] = input.domain;
+  const tickValues = input.ticks ?? linearTicks(min, max, 5);
+  const span = max - min;
+  const normalized = (value: number) =>
+    Math.min(1, Math.max(0, input.position?.(value) ?? (span === 0 ? 0.5 : (value - min) / span)));
+  const showLabels = style.appearance?.showLabels !== false;
+  const showTicks = style.appearance?.showTicks !== false;
+  if (style.direction === "horizontal") {
+    const rampWidth = Math.max(48, Math.min(style.rampLength, maxWidth - PADDING * 2));
+    const tickLabelWidth = Math.max(1, rampWidth / Math.max(1, tickValues.length) - PADDING);
+    const ticks = tickValues.map((value) => {
+      const fullLabel = input.format(value);
+      return {
+        pos: normalized(value) * rampWidth,
+        label: presentedContinuousLabel({
+          fullLabel,
+          availableWidth: tickLabelWidth,
+          measurer,
+          fontSize: style.labelSize,
+          appearance: style.appearance,
+          show: showLabels,
+          scale: input.scale,
+        }),
+        fullLabel,
+      };
+    });
+    return {
+      type: "ramp",
+      scale: input.scale,
+      aesthetics: input.aesthetics ?? [input.scale],
+      title: style.title,
+      position,
+      direction: "horizontal",
+      titleSize: style.titleSize,
+      labelSize: style.labelSize,
+      showTicks,
+      x: 0,
+      y: 0,
+      width: rampWidth + PADDING * 2,
+      height:
+        titleHeight + style.rampThickness + (showLabels ? LEGEND_ROW_HEIGHT : 0) + PADDING * 2,
+      stops: rampStops(input),
+      ticks,
+      rampWidth,
+      rampHeight: style.rampThickness,
+    };
+  }
+  const maxLabelWidth = Math.max(1, maxWidth - PADDING * 2 - style.rampThickness - style.keyGap);
+  const ticks = tickValues.map((value) => {
+    const fullLabel = input.format(value);
+    return {
+      y: (1 - normalized(value)) * RAMP_HEIGHT,
+      label: presentedContinuousLabel({
+        fullLabel,
+        availableWidth: maxLabelWidth,
+        measurer,
+        fontSize: style.labelSize,
+        appearance: style.appearance,
+        show: showLabels,
+        scale: input.scale,
+      }),
+      fullLabel,
+    };
+  });
+  let labelWidth = 0;
+  for (const tick of ticks)
+    labelWidth = Math.max(labelWidth, measurer.measureWidth(tick.label, style.labelSize));
+  return {
+    type: "ramp",
+    scale: input.scale,
+    aesthetics: input.aesthetics ?? [input.scale],
+    title: style.title,
+    position,
+    direction: "vertical",
+    titleSize: style.titleSize,
+    labelSize: style.labelSize,
+    showTicks,
+    x: 0,
+    y: 0,
+    width: PADDING * 2 + style.rampThickness + style.keyGap + labelWidth,
+    height: titleHeight + RAMP_HEIGHT + PADDING * 2,
+    stops: rampStops(input),
+    ticks,
+    rampWidth: style.rampThickness,
+    rampHeight: RAMP_HEIGHT,
+  };
+}
+
+function buildSteps(
+  input: StepsLegendInput,
+  measurer: TextMeasurer,
+  maxWidth: number,
+  position: "right" | "bottom",
+): SceneLegend {
+  const style = settings(input, position);
+  const titleHeight = style.title === "" ? 0 : TITLE_HEIGHT;
+  const source = input.entries.toReversed();
+  const showLabels = style.appearance?.showLabels !== false;
+  if (style.direction === "horizontal") {
+    const stepWidth = Math.max(
+      16,
+      Math.min(48, (maxWidth - PADDING * 2) / Math.max(1, source.length)),
+    );
+    return {
+      type: "steps",
+      scale: input.scale,
+      aesthetics: input.aesthetics ?? [input.scale],
+      title: style.title,
+      position,
+      direction: "horizontal",
+      titleSize: style.titleSize,
+      labelSize: style.labelSize,
+      x: 0,
+      y: 0,
+      width: Math.min(maxWidth, stepWidth * source.length + PADDING * 2),
+      height: titleHeight + STEP_HEIGHT + (showLabels ? LEGEND_ROW_HEIGHT : 0) + PADDING * 2,
+      entries: source.map((entry, index) => ({
+        label: presentedContinuousLabel({
+          fullLabel: entry.label,
+          availableWidth: Math.max(1, stepWidth - PADDING),
+          measurer,
+          fontSize: style.labelSize,
+          appearance: style.appearance,
+          show: showLabels,
+          scale: input.scale,
+        }),
+        fullLabel: entry.label,
+        color: entry.color,
+        x: index * stepWidth,
+        y: 0,
+      })),
+      stepWidth,
+      stepHeight: STEP_HEIGHT,
+    };
+  }
+  let labelWidth = 0;
+  const maxLabelWidth = Math.max(1, maxWidth - PADDING * 2 - style.rampThickness - style.keyGap);
+  const entries = source.map((entry, index) => {
+    const label = presentedContinuousLabel({
+      fullLabel: entry.label,
+      availableWidth: maxLabelWidth,
+      measurer,
+      fontSize: style.labelSize,
+      appearance: style.appearance,
+      show: showLabels,
+      scale: input.scale,
+    });
+    labelWidth = Math.max(labelWidth, measurer.measureWidth(label, style.labelSize));
+    return { label, fullLabel: entry.label, color: entry.color, x: 0, y: index * STEP_HEIGHT };
+  });
+  return {
+    type: "steps",
+    scale: input.scale,
+    aesthetics: input.aesthetics ?? [input.scale],
+    title: style.title,
+    position,
+    direction: "vertical",
+    titleSize: style.titleSize,
+    labelSize: style.labelSize,
+    x: 0,
+    y: 0,
+    width: PADDING * 2 + style.rampThickness + style.keyGap + labelWidth,
+    height: titleHeight + entries.length * STEP_HEIGHT + PADDING * 2,
+    entries,
+    stepWidth: style.rampThickness,
+    stepHeight: STEP_HEIGHT,
+  };
+}
+
+function buildForPosition(
+  input: LegendInput,
+  order: LegendOrder,
+  measurer: TextMeasurer,
+  maxWidth: number,
+  position: "right" | "bottom",
+): SceneLegend {
+  if (input.kind === "discrete") return buildDiscrete(input, order, measurer, maxWidth, position);
+  if (input.kind === "steps") return buildSteps(input, measurer, maxWidth, position);
+  return buildRamp(input, measurer, maxWidth, position);
+}
+
 export function buildLegends(
   inputs: readonly LegendInput[],
   order: LegendOrder,
   measurer: TextMeasurer,
   maxWidth: number,
+  viewportWidth?: number,
+  viewportHeight = Number.POSITIVE_INFINITY,
 ): LegendBlock {
-  const legends: SceneLegend[] = [];
-  let y = 0;
-  let width = 0;
-
-  for (const input of inputs) {
-    if (input.kind === "discrete") {
-      const values = orderedValues(input, order);
-      const displayLabels =
-        input.labelOf === undefined
-          ? disambiguatedLabels(values)
-          : values.map((value) => input.labelOf?.(value) ?? "");
-      const titleHeight = input.title === "" ? 0 : TITLE_HEIGHT;
-      const keys = values.map((value) => input.keyOf?.(value) ?? {});
-      // Grow the swatch so the largest size key renders at its true radius.
-      // Both renderers cap a size/shape key at swatchSize/2, so a fixed 10px
-      // swatch collapses every radius above 5px to an identical dot. Size keys
-      // reach 9px under the default range, so distinct large keys would
-      // otherwise look the same while the plotted marks differ. Sizing the
-      // swatch from the largest key makes the caps non-binding in both the pure
-      // SVG and Svelte renderers (they derive layout from swatchSize).
-      const maxKeyRadius = keys.reduce((max, key) => Math.max(max, key.size ?? 0), 0);
-      const swatchSize = Math.max(SWATCH_SIZE, Math.ceil(maxKeyRadius * 2));
-      const maxLabelWidth = Math.max(1, maxWidth - PADDING * 2 - swatchSize - SWATCH_GAP);
-      const entries: SceneLegendEntry[] = [];
-      let labelWidth = 0;
-      for (let i = 0; i < values.length; i++) {
-        const label = truncate(displayLabels[i]!, maxLabelWidth, measurer);
-        labelWidth = Math.max(labelWidth, measurer.measureWidth(label, FONT_SIZE));
-        const key = keys[i]!;
-        entries.push({
-          value: values[i],
-          label,
-          color: key.color ?? input.colorOf?.(values[i]) ?? UNKNOWN_COLOR,
-          ...(key.size !== undefined && { size: key.size }),
-          ...(key.linewidth !== undefined && { linewidth: key.linewidth }),
-          ...(key.alpha !== undefined && { alpha: key.alpha }),
-          ...(key.shape !== undefined && { shape: key.shape }),
-          ...(key.linetype !== undefined && { linetype: key.linetype }),
-          y: titleHeight + i * LEGEND_ROW_HEIGHT,
-        });
-      }
-      const titleWidth =
-        input.title === ""
-          ? 0
-          : Math.min(measurer.measureWidth(input.title, FONT_SIZE), maxWidth - PADDING * 2);
-      const boxWidth =
-        PADDING * 2 +
-        Math.max(swatchSize + SWATCH_GAP + Math.ceil(labelWidth), Math.ceil(titleWidth));
-      const boxHeight = titleHeight + entries.length * LEGEND_ROW_HEIGHT + PADDING;
-      legends.push({
-        type: "discrete",
-        scale: input.scale,
-        interactive: input.interactive ?? true,
-        title: input.title,
-        x: 0,
-        y,
-        width: boxWidth,
-        height: boxHeight,
-        entries,
-        swatchSize,
-      });
-      width = Math.max(width, boxWidth);
-      y += boxHeight + BLOCK_GAP;
-      continue;
-    }
-    if (input.kind === "steps") {
-      const titleHeight = input.title === "" ? 0 : TITLE_HEIGHT;
-      let labelWidth = 0;
-      const maxLabelWidth = Math.max(1, maxWidth - PADDING * 2 - RAMP_WIDTH - SWATCH_GAP);
-      const entries = input.entries.toReversed().map((entry, index) => {
-        const label = truncate(entry.label, maxLabelWidth, measurer);
-        labelWidth = Math.max(labelWidth, measurer.measureWidth(label, FONT_SIZE));
-        return { label, color: entry.color, y: index * STEP_HEIGHT };
-      });
-      const titleWidth =
-        input.title === ""
-          ? 0
-          : Math.min(measurer.measureWidth(input.title, FONT_SIZE), maxWidth - PADDING * 2);
-      const boxWidth =
-        PADDING * 2 +
-        Math.max(RAMP_WIDTH + SWATCH_GAP + Math.ceil(labelWidth), Math.ceil(titleWidth));
-      const boxHeight = titleHeight + entries.length * STEP_HEIGHT + PADDING * 2;
-      legends.push({
-        type: "steps",
-        scale: input.scale,
-        title: input.title,
-        x: 0,
-        y,
-        width: boxWidth,
-        height: boxHeight,
-        entries,
-        stepWidth: RAMP_WIDTH,
-        stepHeight: STEP_HEIGHT,
-      });
-      width = Math.max(width, boxWidth);
-      y += boxHeight + BLOCK_GAP;
-      continue;
-    }
-    {
-      const titleHeight = input.title === "" ? 0 : TITLE_HEIGHT;
-      const [min, max] = input.domain;
-      const tickValues = input.ticks ?? linearTicks(min, max, 5);
-      const step = min === max ? 0 : tickStep(min, max, 5);
-      void step;
-      const span = max - min;
-      const ticks = tickValues.map((v) => {
-        const position = input.position?.(v) ?? (span === 0 ? 0.5 : (v - min) / span);
-        return {
-          y: RAMP_HEIGHT - Math.min(1, Math.max(0, position)) * RAMP_HEIGHT,
-          label: input.format(v),
-        };
-      });
-      let labelWidth = 0;
-      for (const t of ticks) {
-        labelWidth = Math.max(labelWidth, measurer.measureWidth(t.label, FONT_SIZE));
-      }
-      const titleWidth =
-        input.title === ""
-          ? 0
-          : Math.min(measurer.measureWidth(input.title, FONT_SIZE), maxWidth - PADDING * 2);
-      const stops: [number, string][] = [];
-      for (let i = 0; i < RAMP_STOP_COUNT; i++) {
-        const offset = i / (RAMP_STOP_COUNT - 1);
-        stops.push([offset, input.at(1 - offset)]);
-      }
-      const boxWidth =
-        PADDING * 2 +
-        Math.max(RAMP_WIDTH + SWATCH_GAP + Math.ceil(labelWidth), Math.ceil(titleWidth));
-      const boxHeight = titleHeight + RAMP_HEIGHT + PADDING * 2;
-      legends.push({
-        type: "ramp",
-        scale: input.scale,
-        title: input.title,
-        x: 0,
-        y,
-        width: boxWidth,
-        height: boxHeight,
-        stops,
-        ticks,
-        rampWidth: RAMP_WIDTH,
-        rampHeight: RAMP_HEIGHT,
-      });
-      width = Math.max(width, boxWidth);
-      y += boxHeight + BLOCK_GAP;
-    }
+  const resolvedViewportWidth = viewportWidth ?? maxWidth / 0.35;
+  let autoBottom = viewportWidth !== undefined && resolvedViewportWidth <= AUTO_BOTTOM_MAX_WIDTH;
+  const build = () =>
+    inputs.map((input) => {
+      const position = resolvePosition(input, autoBottom);
+      const available =
+        position === "bottom"
+          ? Math.max(48, resolvedViewportWidth - ESTIMATED_NON_LEGEND_CHROME)
+          : maxWidth;
+      return buildForPosition(input, order, measurer, available, position);
+    });
+  let legends = build();
+  const tentativeRightWidth = Math.max(
+    0,
+    ...legends.filter((legend) => legend.position === "right").map((legend) => legend.width),
+  );
+  if (
+    viewportWidth !== undefined &&
+    !autoBottom &&
+    resolvedViewportWidth - tentativeRightWidth - ESTIMATED_NON_LEGEND_CHROME < MIN_READABLE_PANEL
+  ) {
+    autoBottom = true;
+    legends = build();
   }
 
+  let rightY = 0;
+  let bottomY = 0;
+  let rightWidth = 0;
+  let previousRightGap = 0;
+  let previousBottomGap = 0;
+  for (const legend of legends) {
+    const gap =
+      inputs.find((input) => input.scale === legend.scale)?.appearance?.theme?.blockGap ??
+      BLOCK_GAP;
+    if (legend.position === "right") {
+      if (rightY > 0) rightY += previousRightGap;
+      legend.y = rightY;
+      rightY += legend.height;
+      previousRightGap = gap;
+      rightWidth = Math.max(rightWidth, legend.width);
+    } else {
+      if (bottomY > 0) bottomY += previousBottomGap;
+      legend.y = bottomY;
+      bottomY += legend.height;
+      previousBottomGap = gap;
+    }
+  }
+  const overflowingPosition =
+    rightY > viewportHeight ? "right" : bottomY > viewportHeight ? "bottom" : null;
+  if (overflowingPosition !== null) {
+    const overflowing = legends.find(
+      (legend) =>
+        legend.position === overflowingPosition &&
+        inputs.find((input) => input.scale === legend.scale)?.appearance?.collision === "error",
+    );
+    if (overflowing !== undefined) {
+      const extent = overflowingPosition === "right" ? rightY : bottomY;
+      throw new LegendLayoutError(
+        overflowing.scale,
+        overflowing.title,
+        `The ${overflowing.scale} guide needs ${String(Math.ceil(extent))}px but the viewport is ${String(Math.floor(viewportHeight))}px tall.`,
+        "Increase the chart height, reduce the visible categories, or suppress this guide.",
+      );
+    }
+  }
   return {
     legends,
-    width,
-    height: legends.length === 0 ? 0 : y - BLOCK_GAP,
+    width: rightWidth,
+    height: rightY,
+    bottomHeight: bottomY,
+    autoMovedBottom:
+      autoBottom &&
+      inputs.some(
+        (input) => input.appearance?.position === undefined || input.appearance.position === "auto",
+      ),
   };
 }

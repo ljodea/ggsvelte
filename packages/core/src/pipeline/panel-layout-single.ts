@@ -27,6 +27,7 @@ export function placeSinglePanel(input: {
   vTitle: string;
   axisTitleBand: number;
   legendWidth: number;
+  legendBottomHeight: number;
   optionsWidth: number;
   layoutHeight: number;
   topBand: number;
@@ -48,6 +49,7 @@ export function placeSinglePanel(input: {
     vTitle,
     axisTitleBand,
     legendWidth,
+    legendBottomHeight,
     optionsWidth,
     layoutHeight,
     topBand,
@@ -67,7 +69,13 @@ export function placeSinglePanel(input: {
     ...(formatH !== undefined && { formatX: formatH }),
     ...(formatV !== undefined && { formatY: formatV }),
     measurer,
-    reserve: singlePanelMarginReserve(hTitle, vTitle, axisTitleBand, legendWidth),
+    reserve: singlePanelMarginReserve(
+      hTitle,
+      vTitle,
+      axisTitleBand,
+      legendWidth,
+      legendBottomHeight,
+    ),
     theme: layoutTheme,
   });
   return singlePanelPlacementFromLayout(layoutResult, optionsWidth, layoutHeight, topBand);

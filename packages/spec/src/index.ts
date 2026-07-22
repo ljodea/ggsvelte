@@ -80,6 +80,14 @@ export type {
   FacetScales,
   FacetSpec,
   GeomName,
+  GuideSpec,
+  GuidesSpec,
+  GuideThemeSpec,
+  AxisGuideSpec,
+  LegendGuideSpec,
+  ColorbarGuideSpec,
+  ColorstepsGuideSpec,
+  NoneGuideSpec,
   HistogramLayer,
   InlineData,
   Labs,
@@ -115,6 +123,26 @@ export type {
   ThemeName,
   ThemeSpec,
 } from "./schema.js";
+
+export {
+  guideAxis,
+  guideColorbar,
+  guideColorsteps,
+  guideLegend,
+  guideNone,
+  guides,
+  guide_axis,
+  guide_colorbar,
+  guide_colorsteps,
+  guide_legend,
+  guide_none,
+} from "./guide-helpers.js";
+export type {
+  AxisGuideOptions,
+  ColorbarGuideOptions,
+  ColorstepsGuideOptions,
+  LegendGuideOptions,
+} from "./guide-helpers.js";
 
 // Checked public capability ledger
 export { SCALE_CAPABILITIES, STYLE_AESTHETIC_GEOMS } from "./capabilities.js";

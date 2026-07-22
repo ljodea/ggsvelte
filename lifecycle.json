@@ -64,6 +64,14 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "AxisGuideOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "AxisGuideSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "BarLayer": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -165,6 +173,22 @@
           "lifecycle": "experimental"
         },
         "ColorScaleSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ColorbarGuideOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ColorbarGuideSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ColorstepsGuideOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ColorstepsGuideSpec": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -384,6 +408,18 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "GuideSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GuideThemeSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GuidesSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "HistogramLayer": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -450,6 +486,14 @@
         },
         "LayerSpecSchema": {
           "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "LegendGuideOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "LegendGuideSpec": {
+          "kind": "type",
           "lifecycle": "experimental"
         },
         "LegendSpec": {
@@ -521,6 +565,10 @@
           "lifecycle": "experimental"
         },
         "ManualNumericStyleScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "NoneGuideSpec": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -1009,6 +1057,50 @@
           "lifecycle": "experimental"
         },
         "gg": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "guideAxis": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "guideColorbar": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "guideColorsteps": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "guideLegend": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "guideNone": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "guide_axis": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "guide_colorbar": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "guide_colorsteps": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "guide_legend": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "guide_none": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "guides": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -2841,7 +2933,15 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "AxisGuideOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "AxisGuidePlan": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "AxisGuideSpec": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -2877,7 +2977,15 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "ColorbarGuideOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "ColorbarGuidePlan": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ColorbarGuideSpec": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -2885,7 +2993,15 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "ColorstepsGuideOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "ColorstepsGuidePlan": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ColorstepsGuideSpec": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -3053,6 +3169,18 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "GuideSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GuideThemeSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GuidesSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "INTERACTION_DIAGNOSTIC_CATALOG": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -3165,6 +3293,14 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "LegendGuideOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "LegendGuideSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "LegendSpec": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -3214,6 +3350,10 @@
           "lifecycle": "experimental"
         },
         "NonEmptyReadonlyArray": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "NoneGuideSpec": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -3642,6 +3782,50 @@
           "lifecycle": "experimental"
         },
         "gg": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "guideAxis": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "guideColorbar": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "guideColorsteps": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "guideLegend": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "guideNone": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "guide_axis": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "guide_colorbar": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "guide_colorsteps": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "guide_legend": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "guide_none": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "guides": {
           "kind": "value",
           "lifecycle": "experimental"
         },

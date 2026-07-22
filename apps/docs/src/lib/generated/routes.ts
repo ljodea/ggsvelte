@@ -409,6 +409,11 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
+        id: "responsive-guide-presentation",
+        title: "Responsive guide presentation",
+        level: 2,
+      },
+      {
         id: "date-and-time-axes",
         title: "Date and time axes",
         level: 2,
@@ -1139,6 +1144,11 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "guide-aesthetic-incompatible",
+        title: "guide-aesthetic-incompatible",
+        level: 3,
+      },
+      {
         id: "missing-required-channel",
         title: "missing-required-channel",
         level: 3,
@@ -1227,6 +1237,16 @@ export const DOCS_ROUTES = [
         id: "render-time-errors-ggsvelte-core",
         title: "Render-time errors (@ggsvelte/core)",
         level: 2,
+      },
+      {
+        id: "guide-aesthetic-incompatible-pipeline",
+        title: "guide-aesthetic-incompatible — pipeline",
+        level: 3,
+      },
+      {
+        id: "guide-layout-overflow",
+        title: "guide-layout-overflow",
+        level: 3,
       },
       {
         id: "no-data",
@@ -1674,6 +1694,11 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "guide-auto-bottom",
+        title: "guide-auto-bottom",
+        level: 3,
+      },
+      {
         id: "unused-scale-option",
         title: "unused-scale-option",
         level: 3,
@@ -1978,8 +2003,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-427",
-        title: "experimental (427)",
+        id: "experimental-450",
+        title: "experimental (450)",
         level: 3,
       },
       {
@@ -2018,8 +2043,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-385",
-        title: "experimental (385)",
+        id: "experimental-408",
+        title: "experimental (408)",
         level: 3,
       },
       {
@@ -2057,6 +2082,11 @@ export const DOCS_ROUTES = [
       {
         id: "map-style-semantics-instead-of-precomputing-outputs",
         title: "Map style semantics instead of precomputing outputs",
+        level: 3,
+      },
+      {
+        id: "move-guide-layout-into-the-guide-api",
+        title: "Move guide layout into the guide API",
         level: 3,
       },
       {

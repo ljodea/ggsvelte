@@ -131,6 +131,14 @@ interface MockSpec {
     clip?: boolean;
   };
   scales?: Record<string, { type: string; parse?: string; transform?: string; breaks?: number[] }>;
+  guides?: Record<
+    string,
+    {
+      type: "legend" | "colorbar" | "colorsteps";
+      position?: "right" | "bottom";
+      direction?: "vertical" | "horizontal";
+    }
+  >;
 }
 
 interface Mention {
@@ -572,6 +580,18 @@ export class MockResponder implements Responder {
     if (ordered !== undefined) scales["x"] = { type: "time", parse: ordered };
     void xField;
     if (Object.keys(scales).length > 0) spec.scales = scales;
+    if (/legend[^.]*\b(?:below|bottom)\b|\b(?:below|bottom)[^.]*legend/.test(prompt)) {
+      const aesthetic = spec.layers.some((layer) => layer.aes?.["color"] !== undefined)
+        ? "color"
+        : "fill";
+      spec.guides = {
+        [aesthetic]: {
+          type: "legend",
+          position: "bottom",
+          ...(prompt.includes("horizontal") && { direction: "horizontal" }),
+        },
+      };
+    }
     return spec;
   }
 }

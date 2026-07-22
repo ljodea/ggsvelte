@@ -24,6 +24,7 @@ export function placeSinglePanelFromChrome(
     vTitle: chrome.vTitle,
     axisTitleBand: chrome.axisTitleBand,
     legendWidth: chrome.legendBlock.width,
+    legendBottomHeight: chrome.legendBlock.bottomHeight,
     optionsWidth: options.width,
     layoutHeight: chrome.layoutHeight,
     topBand: chrome.topBand,

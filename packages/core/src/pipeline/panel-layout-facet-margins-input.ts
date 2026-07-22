@@ -17,6 +17,7 @@ export interface FacetGridGeometryInput {
   outerBottomTitle: string;
   axisTitleBand: number;
   legendWidth: number;
+  legendBottomHeight: number;
   optionsWidth: number;
   layoutHeight: number;
   topBand: number;

@@ -25,6 +25,7 @@ export function placeFacetPanelsFromChrome(input: {
     outerBottomTitle: chrome.hTitle,
     axisTitleBand: chrome.axisTitleBand,
     legendWidth: chrome.legendBlock.width,
+    legendBottomHeight: chrome.legendBlock.bottomHeight,
     optionsWidth: options.width,
     layoutHeight: chrome.layoutHeight,
     topBand: chrome.topBand,

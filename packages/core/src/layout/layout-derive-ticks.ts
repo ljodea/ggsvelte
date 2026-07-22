@@ -6,7 +6,7 @@ import { encodeKey } from "../scales/state.js";
 import type { CellValue } from "../table.js";
 import type { AxisGuidePlan } from "./temporal-guide.js";
 import { planTemporalAxis } from "./temporal-guide.js";
-import { planBandAxis, type BandAxisPlan } from "./band-guide.js";
+import { planBandAxis, type BandAxisPlan, type BandGuideConfig } from "./band-guide.js";
 import type { TextMeasurer } from "./measure.js";
 import {
   defaultLogTickFormat,
@@ -140,6 +140,12 @@ function smallestGap(values: readonly number[]): number {
   return gap;
 }
 
+function bandGuideConfig(value: unknown): BandGuideConfig | undefined {
+  if (typeof value !== "object" || value === null || Array.isArray(value) || "type" in value)
+    return undefined;
+  return value;
+}
+
 export function deriveTicks(
   domain: Domain,
   requestedCount: number,
@@ -152,7 +158,7 @@ export function deriveTicks(
     // Resolve break-filtered (or full-domain) entries once for both the measured
     // horizontal planner and the legacy vertical path — O(D+K) via encodeKey map.
     const resolved = resolveBandEntries(domain);
-    const guide = domain.band?.config.guide;
+    const guide = bandGuideConfig(domain.band?.config.guide);
     // mode:off must apply before the horizontal-only measured branch so vertical
     // band axes (native Y, or x after coord_flip) also hide labels.
     if (domain.band !== undefined && guide?.mode === "off") {

@@ -425,6 +425,30 @@ position and color scales.
 Open [complete style scales](/examples/point/style-scales) for the runnable
 five-channel contract.
 
+## Responsive guide presentation
+
+Guide appearance is downstream of scale training. Author top-level \`guides\`,
+a scale-local \`guide\`, or fluent \`.guides()\` with \`guideAxis\`,
+\`guideLegend\`, \`guideColorbar\`, \`guideColorsteps\`, and \`guideNone\`.
+Top-level entries win over scale-local entries.
+
+\`\`\`ts fragment
+import { guideAxis, guideColorsteps } from "@ggsvelte/spec";
+
+const guides = {
+  x: guideAxis({ title: "Hour", showTicks: false }),
+  color: guideColorsteps({ position: "bottom", direction: "horizontal" }),
+};
+\`\`\`
+
+Automatic legends stay right only when the viewport is wider than 480px and at
+least 320px of readable panel remains; otherwise they move below. Bottom keys
+wrap without shrinking type and bottom ramps are horizontal. Discrete guides
+merge only across exact semantic and presentation identities. Exact raw-value
+entries stay interactive after merging; numeric ticks and bins do not become
+filter targets. Identity/manual guides with fewer than two entries remain
+hidden unless \`force: true\` is explicit.
+
 ## Date and time axes
 
 Declare a time scale for ISO 8601 values and let the scale choose UTC calendar
@@ -1580,6 +1604,60 @@ A mapped \`alpha\` is now the complete authored opacity aesthetic; it is not
 multiplied by a competing scalar geom \`alpha\` parameter. Remove that scalar
 parameter and set the mapped scale's \`range\` when you need a lower opacity
 ceiling.
+
+### Move guide layout into the guide API
+
+Automatic non-position guides now move below the chart when the viewport is at
+most 480px or a right guide would leave less than 320px of readable panel.
+Bottom colorbars/colorsteps are horizontal and discrete keys wrap without
+shrinking text. If an application positioned or hid the old fixed right legend
+with surrounding CSS, remove that workaround and author portable guide intent:
+
+\`\`\`svelte fragment
+<script lang="ts">
+  import { GGPlot, GeomPoint } from "@ggsvelte/svelte";
+
+  // Before 0.8, automatic legends always occupied the fixed right column.
+  const rows = [
+    { x: 1, y: 2, region: "North" },
+    { x: 2, y: 3, region: "South" },
+  ];
+</script>
+
+<GGPlot data={rows} aes={{ x: "x", y: "y", color: "region" }}>
+  <GeomPoint />
+</GGPlot>
+\`\`\`
+
+In 0.8, declare the alternate presentation directly:
+
+\`\`\`svelte fragment
+<script lang="ts">
+  import { GGPlot, GeomPoint, guideLegend } from "@ggsvelte/svelte";
+
+  // Since 0.8, guide presentation is portable and responsive without changing scale math.
+  const rows = [
+    { x: 1, y: 2, region: "North" },
+    { x: 2, y: 3, region: "South" },
+  ];
+</script>
+
+<GGPlot
+  data={rows}
+  aes={{ x: "x", y: "y", color: "region" }}
+  guides={{
+    color: guideLegend({ position: "bottom", direction: "horizontal" }),
+  }}
+>
+  <GeomPoint />
+</GGPlot>
+\`\`\`
+
+Top-level \`guides\` override scale-local \`guide\` settings. Use
+\`guideNone()\` for suppression and \`force: true\` only when an identity or
+single-value manual guide is intentional. Guide appearance does not alter scale
+domains or assignments. Exact discrete entries remain focus/filter targets;
+numeric guide ticks and bins remain representative and non-interactive.
 
 ## 0.6 to 0.7
 

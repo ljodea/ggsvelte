@@ -236,6 +236,12 @@ live output and complete source.
 
 [![Temperature and elevation with a continuous viridis color scale](apps/docs/static/previews/color-continuous-light.png)](https://ggsvelte.sh/examples/color/continuous)
 
+Guide presentation stays separate from scale math. Use `guides={{ color:
+guideColorbar({ position: "bottom" }) }}` (or fluent `.guides()`) to title,
+orient, place, suppress, or force axes and non-position guides. Automatic legends use
+the right side only while at least 320px of panel remains, then move below with
+complete accessible labels and unchanged scale assignments.
+
 ### [Boxplots](https://ggsvelte.sh/examples/boxplot/by-category)
 
 <!-- example-source: boxplot/by-category -->

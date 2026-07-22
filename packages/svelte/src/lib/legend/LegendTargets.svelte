@@ -62,7 +62,27 @@
 
   function targetAriaLabel(target: InteractiveLegendEntry): string {
     const scale = target.identity.scale;
-    return `${target.legend.title || scale}: ${target.entry.label} (${scale} legend)`;
+    const aesthetics = target.legend.aesthetics ?? [scale];
+    return `${target.legend.title || scale}: ${target.entry.fullLabel ?? target.entry.label} (${aesthetics.join(" + ")} legend)`;
+  }
+
+  function targetLeft(target: InteractiveLegendEntry): number {
+    return (
+      target.legend.x +
+      (target.legend.direction === "horizontal" ? (target.entry.x ?? 0) : 0)
+    );
+  }
+
+  function targetWidth(target: InteractiveLegendEntry, index: number): number {
+    if (target.legend.direction !== "horizontal")
+      return Math.max(24, target.legend.width);
+    const start = target.entry.x ?? 0;
+    const next = entries[index + 1];
+    const end =
+      next?.legend === target.legend
+        ? (next.entry.x ?? target.legend.width)
+        : target.legend.width;
+    return Math.max(24, end - start);
   }
 </script>
 
@@ -81,9 +101,9 @@
         tabindex={index === rovingIndex ? 0 : -1}
         data-gg-legend-target
         data-index={index}
-        style:left={`${target.legend.x}px`}
+        style:left={`${targetLeft(target)}px`}
         style:top={`${target.legend.y + target.entry.y}px`}
-        style:width={`${Math.max(24, target.legend.width)}px`}
+        style:width={`${targetWidth(target, index)}px`}
         onpointerenter={(event) => {
           if (event.pointerType !== "touch") onPreviewIndex(index, "pointer");
         }}
@@ -182,6 +202,21 @@
   .gg-legend-clear:focus-visible {
     outline: 2px solid var(--gg-focusRing, var(--gg-theme-focusRing, Highlight));
     outline-offset: 2px;
+  }
+
+  @media (forced-colors: active) {
+    .gg-legend-target:hover,
+    .gg-legend-target-active,
+    .gg-legend-target[aria-pressed="true"] {
+      border-color: Highlight;
+      background: Canvas;
+    }
+
+    .gg-legend-clear {
+      border-color: ButtonText;
+      background: Canvas;
+      color: CanvasText;
+    }
   }
 
   /* Local sr-only for target labels (GGPlot keeps its own .gg-sr-only for other chrome). */
