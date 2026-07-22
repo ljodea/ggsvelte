@@ -111,22 +111,47 @@ function temporalDecisionForField(
   return decision;
 }
 
-function uniqueNonNullCount(values: readonly unknown[]): number {
-  const seen = new Set<string>();
-  for (const value of values) {
-    if (value === null) continue;
-    seen.add(typeof value === "string" ? value : JSON.stringify(value));
+/** Type-preserving key for discrete domain identity (mirrors core encodeKey). */
+function discreteDomainKey(value: unknown): string {
+  switch (typeof value) {
+    case "string":
+      return value.startsWith("@") ? "@" + value : value;
+    case "number":
+      if (Number.isNaN(value)) return "@n:NaN";
+      if (Object.is(value, -0)) return "@n:-0";
+      return "@n:" + String(value);
+    case "boolean":
+      return "@b:" + String(value);
+    case "bigint":
+      return "@i:" + value.toString();
+    case "undefined":
+      return "@undefined";
+    default:
+      if (value === null) return "@null";
+      if (value instanceof Date) {
+        const t = value.getTime();
+        return "@d:" + (Number.isNaN(t) ? "NaN" : String(t));
+      }
+      return JSON.stringify(value);
   }
-  return seen.size;
 }
 
 function expectedManualDomainLength(
   domain: unknown,
-  fieldValues: readonly unknown[] | null | undefined,
+  fieldValueLists: readonly (readonly unknown[] | null | undefined)[],
 ): number | null {
   if (Array.isArray(domain)) return domain.filter((value) => value !== null).length;
-  if (fieldValues === null || fieldValues === undefined) return null;
-  return uniqueNonNullCount(fieldValues);
+  const seen = new Set<string>();
+  let sawValues = false;
+  for (const values of fieldValueLists) {
+    if (values === null || values === undefined) continue;
+    sawValues = true;
+    for (const value of values) {
+      if (value === null) continue;
+      seen.add(discreteDomainKey(value));
+    }
+  }
+  return sawValues ? seen.size : null;
 }
 
 export function dataChecks(
@@ -462,12 +487,14 @@ export function dataChecks(
     const config = scales?.[channel] as ColorScaleSpec | undefined;
     const effectiveType = configuredColorScaleType(config);
 
-    // Manual range length vs domain / inferred unique values.
+    // Manual range length vs domain / inferred unique values (union across layers).
     if ((effectiveType === "manual" || config?.type === "manual") && Array.isArray(config?.range)) {
       const range = config.range;
-      for (const use of colorFields[channel]) {
-        const expected = expectedManualDomainLength(config.domain, fields.get(use.field)?.values);
-        if (expected === null || range.length === expected) continue;
+      const expected = expectedManualDomainLength(
+        config.domain,
+        colorFields[channel].map((use) => fields.get(use.field)?.values),
+      );
+      if (expected !== null && range.length !== expected) {
         errors.push({
           code: "scale-manual-domain-range",
           path: `/scales/${channel}`,
@@ -524,17 +551,29 @@ export function dataChecks(
             }),
           },
         );
-        const epochParser =
-          typeof config?.parse === "object" &&
-          config.parse !== null &&
-          "epoch" in (config.parse as object);
-        if (decision?.status !== "temporal" && !epochParser) {
+        if (decision?.status !== "temporal") {
           errors.push({
             code: "scale-type-mismatch",
             path: use.path,
-            message: `scales.${channel} requests temporal colors but field "${use.field}" is quantitative (numbers are not treated as temporal without an epoch parser).`,
+            message: `scales.${channel} requests temporal colors but field "${use.field}" is quantitative (numbers are not treated as temporal without a successful epoch parse).`,
             fix: {
-              description: `Map a temporal field, use parse: { epoch: "ms" | "s" }, or remove temporal color options.`,
+              description: `Map a temporal field, use a working parse: { epoch: "ms" | "s" }, or remove temporal color options.`,
+            },
+          });
+          continue;
+        }
+        if (
+          config?.temporalKind !== undefined &&
+          decision.kind !== null &&
+          decision.kind !== undefined &&
+          decision.kind !== config.temporalKind
+        ) {
+          errors.push({
+            code: "scale-type-mismatch",
+            path: use.path,
+            message: `scales.${channel} requests temporal kind "${config.temporalKind}" but field "${use.field}" parses as "${decision.kind}".`,
+            fix: {
+              description: `Use the ${decision.kind ?? "matching"} color helper or correct the source precision.`,
             },
           });
           continue;
