@@ -7,7 +7,6 @@ import { describe, expect, it } from "vitest";
 import type { CandidateFacts, CellValue } from "@ggsvelte/core";
 
 import type { PlotInspection } from "../../src/lib/interaction/interaction.js";
-import type { QueuedPointerInspection } from "../../src/lib/inspection/frame.js";
 import { reactiveBox } from "../helpers/reactive-box.svelte.js";
 import {
   candidateHit,
@@ -93,11 +92,12 @@ describe("createInspectionState pin cycle", () => {
     destroy();
   });
 
-  it("restore-pending path via stashed queued frame while pinned", () => {
+  it("restore-pending path via schedulePointerInspect while pinned", () => {
     const model = modelFor(continuousSpec());
-    const { state, reducer, destroy } = mountInspectionController({
+    const { state, flushFrame, destroy } = mountInspectionController({
       model: () => model,
       registerEffects: false,
+      deferredFrames: true,
     });
 
     const first = candidateHit(model);
@@ -107,7 +107,6 @@ describe("createInspectionState pin cycle", () => {
     flushSync();
     expect(state.inspection?.state).toBe("pinned");
 
-    // Second candidate as pending restore payload.
     let second: CandidateFacts | null = null;
     for (let id = 0; id < model.candidates.size; id++) {
       const candidate = model.candidates.candidate(id);
@@ -117,31 +116,20 @@ describe("createInspectionState pin cycle", () => {
       }
     }
     if (second === null) throw new Error("expected a second candidate");
-    const pending: QueuedPointerInspection = {
-      hit: hitFromCandidate(second),
+
+    state.schedulePointerInspect({
+      point: { x: second.x, y: second.y },
       source: "pointer",
-      concreteMode: "xy",
-      candidate: second,
-    };
-    state.queuePointerFrame(pending, reducer.frameToken());
-    state.applyQueuedInspectFrame({
-      type: "inspect",
-      candidate: {
-        epoch: model.runId,
-        id: second.id,
-        panelId: second.panelId,
-        x: second.x,
-        y: second.y,
-      },
-      source: "pointer",
+      mode: "xy",
+      maxDistance: 1e6,
     });
+    flushFrame();
     flushSync();
     // Still pinned — pending was stashed, not applied.
     expect(state.inspection?.state).toBe("pinned");
 
     state.toggleInspectionPin("pointer");
     flushSync();
-    // restore-pending → transient on the stashed second hit.
     expect(state.inspection?.state).toBe("transient");
     expect(state.inspection?.focus.anchor).toEqual({
       x: second.x,
@@ -152,83 +140,120 @@ describe("createInspectionState pin cycle", () => {
   });
 });
 
-describe("createInspectionState applyQueuedInspectFrame", () => {
-  it("drops stale token, stashes when pinned, applies when fresh, drops on epoch mismatch; always clears queues first", () => {
+describe("createInspectionState schedulePointerInspect / onInspectPointerFrame", () => {
+  it("applies on flush, drops stale tokens without reducer dispatch, stashes when pinned, cancels before flush", () => {
     const model = modelFor(continuousSpec());
     const announcements: string[] = [];
-    const { state, reducer, destroy } = mountInspectionController({
+    const { state, reducer, flushFrame, destroy } = mountInspectionController({
       model: () => model,
       announce: (message) => {
         announcements.push(message);
       },
       registerEffects: false,
+      deferredFrames: true,
     });
-    const { candidate, hit } = candidateHit(model);
-    const queued: QueuedPointerInspection = {
-      hit,
-      source: "pointer",
-      concreteMode: "xy",
-      candidate,
-    };
-    const frameCandidate = {
-      epoch: model.runId,
-      id: candidate.id,
-      panelId: candidate.panelId,
-      x: candidate.x,
-      y: candidate.y,
-    };
+    const { candidate } = candidateHit(model);
 
-    // Empty frame path: no pending → none; queues stay empty; no inspection.
-    state.applyQueuedInspectFrame({
-      type: "inspect",
-      candidate: null,
-      source: "pointer",
-    });
+    // Empty frame path: no pending → none; no inspection change.
+    expect(
+      state.onInspectPointerFrame({
+        type: "inspect",
+        candidate: null,
+        source: "pointer",
+      }),
+    ).toBe(true);
     flushSync();
     expect(state.inspection).toBeNull();
 
-    // Stale token → drop (queue cleared before routing).
-    state.queuePointerFrame(queued, { epoch: 0, revision: 0 });
-    // Advance reducer epoch so token is stale.
-    reducer.dispatch({ type: "invalidate", reason: "scene" });
-    state.applyQueuedInspectFrame({
-      type: "inspect",
-      candidate: frameCandidate,
+    // Fresh schedule + flush → transient on both authorities.
+    state.schedulePointerInspect({
+      point: { x: candidate.x, y: candidate.y },
       source: "pointer",
+      mode: "xy",
+      maxDistance: 1e6,
     });
+    flushFrame();
     flushSync();
-    expect(state.inspection).toBeNull();
-    // Second apply is empty-frame (queues stayed cleared after drop).
-    state.applyQueuedInspectFrame({
-      type: "inspect",
-      candidate: frameCandidate,
-      source: "pointer",
-    });
-    expect(state.inspection).toBeNull();
-
-    // Fresh token + transient → apply.
-    state.queuePointerFrame(queued, reducer.frameToken());
-    state.applyQueuedInspectFrame({
-      type: "inspect",
-      candidate: frameCandidate,
-      source: "pointer",
-    });
-    flushSync();
-    expect(state.inspection).not.toBeNull();
     expect(state.inspection?.state).toBe("transient");
-    // Queues cleared: re-apply is empty.
-    state.applyQueuedInspectFrame({
-      type: "inspect",
-      candidate: frameCandidate,
-      source: "pointer",
-    });
+    expect(reducer.state.inspection.kind).toBe("transient");
+    expect(reducer.state.inspection.candidate?.id).toBe(candidate.id);
+
+    // Re-apply empty (queues cleared) keeps transient.
+    expect(
+      state.onInspectPointerFrame({
+        type: "inspect",
+        candidate: {
+          epoch: model.runId,
+          id: candidate.id,
+          panelId: candidate.panelId,
+          x: candidate.x,
+          y: candidate.y,
+        },
+        source: "pointer",
+      }),
+    ).toBe(true);
     flushSync();
     expect(state.inspection?.state).toBe("transient");
 
-    // Pinned → stash-pending (not apply over pinned).
+    // Stale token → drop; skip reducer dispatch (atomic).
+    state.setInspection(null, "pointer");
+    flushSync();
+    reducer.dispatch({ type: "inspect", candidate: null, source: "programmatic" });
+    // Clear activeCandidate so a later set-active is guaranteed to commit.
+    reducer.dispatch({ type: "set-active", candidate: null });
+    state.schedulePointerInspect({
+      point: { x: candidate.x, y: candidate.y },
+      source: "pointer",
+      mode: "xy",
+      maxDistance: 1e6,
+    });
+    const scheduledToken = reducer.frameToken();
+    // Advance revision without cancelling the schedule (set-active with a
+    // different ref always commits when active was null).
+    reducer.dispatch({
+      type: "set-active",
+      candidate: {
+        epoch: model.runId,
+        id: candidate.id + 10_000,
+        panelId: candidate.panelId,
+        x: candidate.x,
+        y: candidate.y,
+      },
+    });
+    expect(reducer.accepts(scheduledToken)).toBe(false);
+    const revBefore = reducer.state.revision;
+    flushFrame();
+    flushSync();
+    expect(state.inspection).toBeNull();
+    // Drop skipped dispatch — inspection kind stays idle (not transient).
+    expect(reducer.state.inspection.kind).toBe("idle");
+    expect(reducer.state.revision).toBe(revBefore);
+
+    // Cancel before flush → no apply.
+    state.schedulePointerInspect({
+      point: { x: candidate.x, y: candidate.y },
+      source: "pointer",
+      mode: "xy",
+      maxDistance: 1e6,
+    });
+    state.cancelPointerInspect({ pendingPinned: "preserve" });
+    flushFrame();
+    flushSync();
+    expect(state.inspection).toBeNull();
+
+    // Pin + schedule other candidate → stash; single-stash; restore then flip.
+    state.schedulePointerInspect({
+      point: { x: candidate.x, y: candidate.y },
+      source: "pointer",
+      mode: "xy",
+      maxDistance: 1e6,
+    });
+    flushFrame();
+    flushSync();
     state.toggleInspectionPin("pointer");
     flushSync();
     expect(state.inspection?.state).toBe("pinned");
+
     let other: CandidateFacts | null = null;
     for (let id = 0; id < model.candidates.size; id++) {
       const c = model.candidates.candidate(id);
@@ -238,50 +263,34 @@ describe("createInspectionState applyQueuedInspectFrame", () => {
       }
     }
     if (other === null) throw new Error("expected another candidate");
-    const otherQueued: QueuedPointerInspection = {
-      hit: hitFromCandidate(other),
+
+    state.schedulePointerInspect({
+      point: { x: other.x, y: other.y },
       source: "pointer",
-      concreteMode: "xy",
-      candidate: other,
-    };
-    state.queuePointerFrame(otherQueued, reducer.frameToken());
-    const otherFrame = {
-      epoch: model.runId,
-      id: other.id,
-      panelId: other.panelId,
-      x: other.x,
-      y: other.y,
-    };
-    state.applyQueuedInspectFrame({
-      type: "inspect",
-      candidate: otherFrame,
-      source: "pointer",
+      mode: "xy",
+      maxDistance: 1e6,
     });
+    flushFrame();
     flushSync();
     expect(state.inspection?.state).toBe("pinned");
-    // Queues cleared ON the stash path: a second apply must be an empty frame
-    // (no double-stash). Discriminator below: restore-pending consumes the
-    // SINGLE stash silently, so the NEXT unpin after re-pinning must take the
-    // flip branch — which is the only branch that announces "unpinned".
-    state.applyQueuedInspectFrame({
-      type: "inspect",
-      candidate: otherFrame,
+    // Second schedule+flush must not double-stash.
+    state.schedulePointerInspect({
+      point: { x: other.x, y: other.y },
       source: "pointer",
+      mode: "xy",
+      maxDistance: 1e6,
     });
+    flushFrame();
     flushSync();
     expect(state.inspection?.state).toBe("pinned");
-    // Unpin #1 (keyboard — the announcing source class): restore-pending
-    // consumes the stash and never announces; transient lands on the stashed
-    // candidate's anchor.
+
     announcements.length = 0;
     state.toggleInspectionPin("keyboard");
     flushSync();
     expect(state.inspection?.state).toBe("transient");
     expect(state.inspection?.focus.anchor).toEqual({ x: other.x, y: other.y });
     expect(announcements.some((m) => m.includes("unpinned"))).toBe(false);
-    // Re-pin, unpin #2 (keyboard): with the stash gone (single-stash), this
-    // is the FLIP branch, which announces for keyboard. A double-stash
-    // regression would restore again silently instead.
+
     state.toggleInspectionPin("keyboard");
     flushSync();
     announcements.length = 0;
@@ -290,77 +299,64 @@ describe("createInspectionState applyQueuedInspectFrame", () => {
     expect(state.inspection?.state).toBe("transient");
     expect(announcements.some((m) => m.includes("unpinned"))).toBe(true);
 
-    // Epoch mismatch → drop (from a clean transient base).
-    state.setInspection(null, "pointer");
+    // cancelPointerInspect({ discard }) drops stash → flip announces.
+    state.toggleInspectionPin("keyboard");
     flushSync();
-    state.queuePointerFrame(queued, reducer.frameToken());
-    state.applyQueuedInspectFrame({
-      type: "inspect",
-      candidate: { ...frameCandidate, epoch: model.runId + 999 },
+    state.schedulePointerInspect({
+      point: { x: candidate.x, y: candidate.y },
       source: "pointer",
+      mode: "xy",
+      maxDistance: 1e6,
     });
+    flushFrame();
     flushSync();
-    expect(state.inspection).toBeNull();
+    expect(state.inspection?.state).toBe("pinned");
+    state.cancelPointerInspect({ pendingPinned: "discard" });
+    announcements.length = 0;
+    state.toggleInspectionPin("keyboard");
+    flushSync();
+    expect(state.inspection?.state).toBe("transient");
+    expect(announcements.some((m) => m.includes("unpinned"))).toBe(true);
 
     destroy();
   });
 
-  it("host-facing mutators: clearQueuedPointer drops the payload; clearPendingPinned drops the stash", () => {
+  it("typed inspect cancel does not cancel a pending move-area schedule", () => {
+    let frame: (() => void) | null = null;
+    const frames: string[] = [];
+    let controller: ReturnType<typeof createInspectionState> | null = null;
     const model = modelFor(continuousSpec());
-    const announcements: string[] = [];
-    const { state, reducer, destroy } = mountInspectionController({
-      model: () => model,
-      announce: (message) => {
-        announcements.push(message);
+    const reducer = createInteractionReducer({
+      scheduleFrame: (callback) => {
+        frame = callback;
+        return 1;
       },
+      cancelFrame: () => {
+        frame = null;
+      },
+      onPointerFrame: (action) => {
+        frames.push(action.type);
+        if (action.type === "inspect") return controller!.onInspectPointerFrame(action);
+        return true;
+      },
+    });
+    const { state, destroy } = mountInspectionController({
+      model: () => model,
+      reducer: () => reducer,
       registerEffects: false,
     });
-    const { candidate, hit } = candidateHit(model);
-    const queued: QueuedPointerInspection = {
-      hit,
-      source: "pointer",
-      concreteMode: "xy",
-      candidate,
-    };
-    const frame = {
-      epoch: model.runId,
-      id: candidate.id,
-      panelId: candidate.panelId,
-      x: candidate.x,
-      y: candidate.y,
-    };
+    controller = state;
 
-    // clearQueuedPointer clears ONLY the payload (host leave/cancel paths):
-    // a fresh-token frame that would otherwise apply must become empty.
-    state.queuePointerFrame(queued, reducer.frameToken());
-    state.clearQueuedPointer();
-    state.applyQueuedInspectFrame({ type: "inspect", candidate: frame, source: "pointer" });
-    flushSync();
-    expect(state.inspection).toBeNull();
-
-    // clearPendingPinned drops a stashed pending: the next unpin must take
-    // the announcing FLIP branch instead of a silent restore.
-    state.queuePointerFrame(queued, reducer.frameToken());
-    state.applyQueuedInspectFrame({ type: "inspect", candidate: frame, source: "pointer" });
-    flushSync();
-    expect(state.inspection?.state).toBe("transient");
-    state.toggleInspectionPin("pointer");
-    flushSync();
-    state.queuePointerFrame(queued, reducer.frameToken());
-    state.applyQueuedInspectFrame({ type: "inspect", candidate: frame, source: "pointer" });
-    flushSync();
-    expect(state.inspection?.state).toBe("pinned");
-    state.clearPendingPinned();
-    announcements.length = 0;
-    state.toggleInspectionPin("keyboard");
-    flushSync();
-    expect(state.inspection?.state).toBe("transient");
-    expect(announcements.some((m) => m.includes("unpinned"))).toBe(true);
+    reducer.queuePointer({ type: "move-area", point: { x: 1, y: 2 } });
+    expect(frame).not.toBeNull();
+    state.cancelPointerInspect({ pendingPinned: "preserve" });
+    expect(frame).not.toBeNull();
+    frame?.();
+    expect(frames).toEqual(["move-area"]);
 
     destroy();
   });
 });
-
 describe("createInspectionState setInspection(null) clear ordering", () => {
   it("pins ordered sequence: dispatch1(non-null) → emit while still non-null → clear → dispatch2(null)", () => {
     const model = modelFor(continuousSpec());

@@ -56,17 +56,15 @@ describe("createSurfaceState construction", () => {
         inspectionCalls++;
         return null;
       },
-      applyQueuedInspectFrame: () => {
+      schedulePointerInspect: () => {
         inspectionCalls++;
       },
-      queuePointerFrame: () => {
+      cancelPointerInspect: () => {
         inspectionCalls++;
       },
-      clearQueuedPointer: () => {
+      onInspectPointerFrame: () => {
         inspectionCalls++;
-      },
-      clearPendingPinned: () => {
-        inspectionCalls++;
+        return true;
       },
       setInspection: () => {
         inspectionCalls++;
@@ -212,11 +210,10 @@ describe("createSurfaceState construction", () => {
       get inspection() {
         return null;
       },
-      clearQueuedPointer: () => {},
-      clearPendingPinned: () => {},
+      schedulePointerInspect: () => {},
+      cancelPointerInspect: () => {},
+      onInspectPointerFrame: () => true,
       setInspection: () => {},
-      applyQueuedInspectFrame: () => {},
-      queuePointerFrame: () => {},
       closeInspection: () => {},
       dismissInspection: () => {},
       toggleInspectionPin: () => {},

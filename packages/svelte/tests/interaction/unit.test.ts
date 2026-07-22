@@ -256,4 +256,43 @@ describe("chart-local interaction reducer", () => {
     expect(frame).toBeNull();
     expect(reducer.state.inspection.candidate?.id).toBe(2);
   });
+
+  it("typed cancelScheduledPointer only clears matching kind; onPointerFrame false skips dispatch", () => {
+    let frame: (() => void) | null = null;
+    const seen: string[] = [];
+    const reducer = createInteractionReducer({
+      scheduleFrame: (callback) => {
+        frame = callback;
+        return 1;
+      },
+      cancelFrame: () => {
+        frame = null;
+      },
+      onPointerFrame: (action) => {
+        seen.push(action.type);
+        if (action.type === "inspect") return false;
+        return true;
+      },
+    });
+
+    reducer.queuePointer({ type: "move-area", point: { x: 1, y: 2 } });
+    expect(frame).not.toBeNull();
+    reducer.cancelScheduledPointer("inspect");
+    expect(frame).not.toBeNull();
+    (frame as (() => void) | null)?.();
+    expect(seen).toEqual(["move-area"]);
+
+    frame = null;
+    seen.length = 0;
+    reducer.queuePointer({
+      type: "inspect",
+      candidate: candidate(1),
+      source: "pointer",
+    });
+    const rev = reducer.state.revision;
+    (frame as (() => void) | null)?.();
+    expect(seen).toEqual(["inspect"]);
+    expect(reducer.state.revision).toBe(rev);
+    expect(reducer.state.inspection.kind).toBe("idle");
+  });
 });

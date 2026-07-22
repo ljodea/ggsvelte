@@ -7,7 +7,6 @@ import { describe, expect, it } from "vitest";
 import type { CandidateFacts, CellValue, RenderModel } from "@ggsvelte/core";
 
 import type { PlotInspection } from "../../src/lib/interaction/interaction.js";
-import type { QueuedPointerInspection } from "../../src/lib/inspection/frame.js";
 import { withEffectRoot } from "../helpers/effect-root.svelte.js";
 import { reactiveBox } from "../helpers/reactive-box.svelte.js";
 import {
@@ -144,7 +143,7 @@ describe("createInspectionState scene-reconcile effect", () => {
     const enabledBox = reactiveBox(true);
     const events: PlotInspection<Record<string, CellValue>>[] = [];
 
-    const { state, reducer, destroy } = mountInspectionController({
+    const { state, destroy } = mountInspectionController({
       model: () => modelBox.value,
       inspectEnabled: () => enabledBox.value,
       oninspect: () => (event) => {
@@ -190,13 +189,13 @@ describe("createInspectionState scene-reconcile effect", () => {
     // Reconcile-pinned CLEAR path, deterministic: swap to a model with
     // DISJOINT row ids (keyAt cannot find the pinned seed) → one programmatic
     // clear emit + teardown of any queued/pending frames.
-    const pendingQueued: QueuedPointerInspection = {
-      hit: hitFromCandidate(b.candidate),
+    // Queue a pending inspect payload via the intentful schedule API (no flush).
+    state.schedulePointerInspect({
+      point: { x: b.candidate.x, y: b.candidate.y },
       source: "pointer",
-      concreteMode: "xy",
-      candidate: b.candidate,
-    };
-    state.queuePointerFrame(pendingQueued, reducer.frameToken());
+      mode: "xy",
+      maxDistance: 1e6,
+    });
     events.length = 0;
     Object.defineProperty(modelA, "runId", { value: 5, configurable: true });
     modelBox.set(modelA);
@@ -204,7 +203,7 @@ describe("createInspectionState scene-reconcile effect", () => {
     expect(state.inspection).toBeNull();
     expect(events.some((event) => event.phase === "clear")).toBe(true);
     // Invalidate teardown cleared the queued frame: a fresh apply is empty.
-    state.applyQueuedInspectFrame({
+    state.onInspectPointerFrame({
       type: "inspect",
       candidate: {
         epoch: modelA.runId,

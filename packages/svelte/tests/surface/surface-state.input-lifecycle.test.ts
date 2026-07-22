@@ -7,7 +7,6 @@ import { describe, expect, it, vi } from "vitest";
 import type { CandidateFacts } from "@ggsvelte/core";
 
 import { hitFromCandidate } from "../../src/lib/surface/plot-px.js";
-import type { QueuedPointerInspection } from "../../src/lib/inspection/frame.js";
 import { TOUCH_INSPECT_CLICK_SUPPRESS_MS } from "../../src/lib/surface/pointer.js";
 import {
   firstCandidate,
@@ -293,25 +292,14 @@ describe("createSurfaceState pointer cancel vs lost capture", () => {
     flushSync();
     expect(h.inspection.inspection?.state).toBe("pinned");
 
-    // Stash pending via queued frame while pinned.
-    const pending: QueuedPointerInspection = {
-      hit: hitFromCandidate(second),
+    // Stash pending via intentful schedule while pinned.
+    h.inspection.schedulePointerInspect({
+      point: { x: second.x, y: second.y },
       source: "pointer",
-      concreteMode: "xy",
-      candidate: second,
-    };
-    h.inspection.queuePointerFrame(pending, h.surface.reducer.frameToken());
-    h.inspection.applyQueuedInspectFrame({
-      type: "inspect",
-      candidate: {
-        epoch: h.model.runId,
-        id: second.id,
-        panelId: second.panelId,
-        x: second.x,
-        y: second.y,
-      },
-      source: "pointer",
+      mode: "xy",
+      maxDistance: 1e6,
     });
+    h.flushFrames();
     flushSync();
     expect(h.inspection.inspection?.state).toBe("pinned");
 
@@ -350,24 +338,13 @@ describe("createSurfaceState pointer cancel vs lost capture", () => {
     h.inspection.toggleInspectionPin("pointer");
     flushSync();
 
-    const pending: QueuedPointerInspection = {
-      hit: hitFromCandidate(second),
+    h.inspection.schedulePointerInspect({
+      point: { x: second.x, y: second.y },
       source: "pointer",
-      concreteMode: "xy",
-      candidate: second,
-    };
-    h.inspection.queuePointerFrame(pending, h.surface.reducer.frameToken());
-    h.inspection.applyQueuedInspectFrame({
-      type: "inspect",
-      candidate: {
-        epoch: h.model.runId,
-        id: second.id,
-        panelId: second.panelId,
-        x: second.x,
-        y: second.y,
-      },
-      source: "pointer",
+      mode: "xy",
+      maxDistance: 1e6,
     });
+    h.flushFrames();
     flushSync();
 
     h.surface.chooseTool("select-area");

@@ -62,13 +62,19 @@ function sameCandidate(
   return a === b || (a !== null && b !== null && a.epoch === b.epoch && a.id === b.id);
 }
 
+export type PointerScheduleKind = "inspect" | "move-area";
+
 export function createInteractionReducer(
   options: {
     initialTool?: InteractionTool;
     onChange?: (state: InteractionReducerState) => void;
+    /**
+     * Continuous pointer-frame sink. Return `false` to skip the subsequent
+     * `dispatch` (atomic drop for stale inspect frames). Void/`true` dispatches.
+     */
     onPointerFrame?: (
       action: Extract<InteractionAction, { type: "inspect" | "move-area" }>,
-    ) => void;
+    ) => boolean | void;
     scheduleFrame?: (callback: () => void) => unknown;
     cancelFrame?: (handle: unknown) => void;
   } = {},
@@ -85,7 +91,16 @@ export function createInteractionReducer(
     null;
   let frameHandle: unknown = null;
 
-  const cancelScheduledPointer = (): void => {
+  /**
+   * Cancel the coalesced pointer schedule. With `kind`, cancel only when the
+   * queued action matches (inspect cancel must not kill move-area).
+   */
+  const cancelScheduledPointer = (kind?: PointerScheduleKind): void => {
+    if (
+      kind !== undefined &&
+      (scheduledPointerAction === null || scheduledPointerAction.type !== kind)
+    )
+      return;
     if (frameHandle !== null) options.cancelFrame?.(frameHandle);
     frameHandle = null;
     scheduledPointerAction = null;
@@ -215,8 +230,10 @@ export function createInteractionReducer(
         const latest = scheduledPointerAction;
         scheduledPointerAction = null;
         if (latest !== null) {
-          options.onPointerFrame?.(latest);
-          dispatch(latest);
+          // false = atomic drop (e.g. stale inspect token): skip dispatch so
+          // reducer inspection does not diverge from InspectionState.
+          const shouldDispatch = options.onPointerFrame?.(latest);
+          if (shouldDispatch !== false) dispatch(latest);
         }
       });
     },

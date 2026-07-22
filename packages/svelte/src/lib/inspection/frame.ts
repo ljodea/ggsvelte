@@ -1,7 +1,8 @@
 /**
  * Pure decision tables for capture-surface inspection *frame* policy:
  * pointer-move queue payloads and onPointerFrame routing.
- * Callers own queue mutation and setInspection side effects.
+ * InspectionState owns queue mutation and setInspection side effects;
+ * these tables stay pure routing helpers.
  */
 
 import type { CandidateFacts, CandidateMatch } from "@ggsvelte/core";
@@ -128,21 +129,15 @@ export type QueuedInspectFrameAction =
   | { readonly type: "apply-pending" };
 
 /**
- * Pure decision for the inspect branch of `onPointerFrame` after the host
- * has snapshotted and cleared queue fields.
+ * Pure decision for the inspect branch of `onInspectPointerFrame` after
+ * InspectionState has snapshotted and cleared queue fields.
  *
- * Priority (matches current host):
+ * Priority:
  *   1. none — !hasPending
- *   2. drop — !tokenAccepted (stale frame token)
+ *   2. drop — !tokenAccepted (stale frame token) → skip reducer dispatch
  *   3. stash-pending — currentState === "pinned"
- *   4. drop — candidateEpochMismatch
+ *   4. drop — candidateEpochMismatch → skip reducer dispatch
  *   5. apply-pending
- *
- * Host sequencing: snapshot pending + token, clear `queuedPointerInspection`
- * and `queuedPointerToken`, then call this helper, then switch:
- *   none/drop → return
- *   stash-pending → `pendingPinnedPointer = pending`
- *   apply-pending → `setInspection(pending…, "transient", …)`
  */
 export function resolveQueuedInspectFrameAction(
   input: QueuedInspectFrameInput,
