@@ -110,9 +110,9 @@ describe("anchorsFromCandidateKeys", () => {
 
   it("collects anchors in id-ascending order and dedups by coordinate identity", () => {
     expect(anchorsFromCandidateKeys(candidates, ["a", "b"])).toEqual([
-      { x: 1, y: 2 },
-      { x: 3, y: 4 },
-      { x: 5, y: 6 },
+      { x: 1, y: 2, chrome: "ring" },
+      { x: 3, y: 4, chrome: "ring" },
+      { x: 5, y: 6, chrome: "ring" },
     ]);
   });
 
@@ -121,7 +121,22 @@ describe("anchorsFromCandidateKeys", () => {
       { x: 1, y: 2, keys: ["a"] },
       { x: 1, y: 2, keys: ["a"] },
     ];
-    expect(anchorsFromCandidateKeys(dupes, ["a"])).toEqual([{ x: 1, y: 2 }]);
+    expect(anchorsFromCandidateKeys(dupes, ["a"])).toEqual([{ x: 1, y: 2, chrome: "ring" }]);
+  });
+
+  it("marks rect candidates as chrome none", () => {
+    expect(
+      anchorsFromCandidateKeys(
+        [
+          { x: 1, y: 2, keys: ["a"], kind: "rects" },
+          { x: 3, y: 4, keys: ["b"], kind: "points" },
+        ],
+        ["a", "b"],
+      ),
+    ).toEqual([
+      { x: 1, y: 2, chrome: "none" },
+      { x: 3, y: 4, chrome: "ring" },
+    ]);
   });
 });
 
@@ -223,14 +238,33 @@ describe("buildPointSelectionEvent", () => {
 });
 
 describe("mergePresentationFocusKeys", () => {
-  it("returns the same emphasis reference when emphasis is empty", () => {
+  it("returns the same emphasis reference when emphasis is empty and inspection is not rect", () => {
     const empty: PropertyKey[] = [];
     expect(mergePresentationFocusKeys(empty, { sourceKeys: ["a"], key: null })).toBe(empty);
+    expect(
+      mergePresentationFocusKeys(empty, {
+        sourceKeys: ["a"],
+        key: null,
+        kind: "points",
+      }),
+    ).toBe(empty);
   });
 
   it("returns the same emphasis reference when inspection is null", () => {
     const emphasis = ["a", "b"] as const;
     expect(mergePresentationFocusKeys(emphasis, null)).toBe(emphasis);
+  });
+
+  it("uses inspection keys alone for rect focus when emphasis is empty", () => {
+    const empty: PropertyKey[] = [];
+    const result = mergePresentationFocusKeys(empty, {
+      sourceKeys: ["a", "b"],
+      key: "c",
+      kind: "rects",
+    });
+    expect(result).toEqual(["a", "b", "c"]);
+    expect(Object.isFrozen(result)).toBe(true);
+    expect(result).not.toBe(empty);
   });
 
   it("unions emphasis then sourceKeys then optional key, dedupes, and freezes", () => {

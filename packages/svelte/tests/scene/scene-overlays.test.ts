@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import SceneOverlays from "../../src/lib/scene/SceneOverlays.svelte";
 import { render } from "../helpers/render.js";
 
-const anchors = [{ x: 10, y: 20 }];
+const anchors = [{ x: 10, y: 20, chrome: "ring" as const }];
 
 describe("SceneOverlays", () => {
   it("renders the interactive overlay when surfaceInteractive", () => {

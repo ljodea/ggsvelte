@@ -33,6 +33,7 @@ import { createIntervalState } from "./interval/interval-state.svelte.js";
 import { createInspectionState } from "./inspection/inspection-state.svelte.js";
 import { createSurfaceState } from "./surface/surface-state.svelte.js";
 import { createSelectionState, type SelectionState } from "./selection/selection-state.svelte.js";
+import { presentationChromeForKind } from "./selection/selection.js";
 import { createPlotChromeState } from "./chrome/chrome-state.svelte.js";
 
 export type PlotInteractionAssemblyDeps<
@@ -380,12 +381,22 @@ export function createPlotInteractionAssembly<
     emphasisKeys: () => legendFocusState.effectiveEmphasisKeys,
     inspectionFocus: () => {
       const current = inspectionState.inspection;
-      return current === null
-        ? null
-        : {
-            sourceKeys: current.focus.sourceKeys,
-            key: current.focus.key,
-          };
+      const seed = inspectionState.inspectionSeed;
+      if (current === null) return null;
+      return {
+        sourceKeys: current.focus.sourceKeys,
+        key: current.focus.key,
+        kind: seed?.kind ?? null,
+        primitives:
+          seed === null
+            ? []
+            : Object.freeze([
+                {
+                  batchIndex: seed.batchIndex,
+                  primitiveIndex: seed.primitiveIndex,
+                },
+              ]),
+      };
     },
   });
   // ------------------------------------------------- plot chrome
@@ -486,6 +497,11 @@ export function createPlotInteractionAssembly<
     },
     get emphasizedAnchors() {
       return semanticCandidateProjection.emphasizedAnchors;
+    },
+    get hoverChrome() {
+      // Read inspection $state so chrome updates with seed (plain let).
+      if (inspectionState.inspection === null) return "ring";
+      return presentationChromeForKind(inspectionState.inspectionSeed?.kind);
     },
     get interactionMasks() {
       return semanticCandidateProjection.interactionMasks;

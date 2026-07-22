@@ -1,5 +1,6 @@
 import {
   buildInteractionMasks,
+  buildPrimitiveInteractionMasks,
   type BatchInteractionMask,
   type CandidateFacts,
   type RenderModel,
@@ -11,6 +12,7 @@ import {
   anchorsFromCandidateKeys,
   collectCandidates,
   mergePresentationFocusKeys,
+  type PresentationAnchor,
   type PresentationInspectionFocus,
 } from "../selection/selection.js";
 
@@ -19,6 +21,7 @@ type SemanticCandidate = IntervalConsumptionCandidate<PropertyKey> & {
   readonly y: number;
   readonly batchIndex: number;
   readonly primitiveIndex: number;
+  readonly kind: string;
 };
 
 export type SemanticCandidateProjectionDeps = {
@@ -32,8 +35,8 @@ export type SemanticCandidateProjectionDeps = {
 };
 
 export type SemanticCandidateProjection = {
-  readonly selectedAnchors: { x: number; y: number }[];
-  readonly emphasizedAnchors: { x: number; y: number }[];
+  readonly selectedAnchors: PresentationAnchor[];
+  readonly emphasizedAnchors: PresentationAnchor[];
   readonly interactionMasks: readonly (BatchInteractionMask | null)[];
   readonly intervalConsumptionCandidates: readonly IntervalConsumptionCandidate<PropertyKey>[];
 };
@@ -70,6 +73,7 @@ export function createSemanticCandidateProjection(
     return collectCandidates(model.candidates, (candidate) => ({
       x: candidate.x,
       y: candidate.y,
+      kind: candidate.kind,
       batchIndex: candidate.batchIndex,
       primitiveIndex: candidate.primitiveIndex,
       panelId: candidate.panelId,
@@ -93,12 +97,20 @@ export function createSemanticCandidateProjection(
   );
   const interactionMasks = $derived.by((): readonly (BatchInteractionMask | null)[] => {
     const model = deps.model();
-    if (model === null || presentationFocusKeys.length === 0) return [];
-    return buildInteractionMasks(
-      model.scene.batches,
-      presentationFocusKeys,
-      sharedCandidateProjection,
-    );
+    if (model === null) return [];
+    if (presentationFocusKeys.length > 0) {
+      return buildInteractionMasks(
+        model.scene.batches,
+        presentationFocusKeys,
+        sharedCandidateProjection,
+      );
+    }
+    // Keyless rect inspection: de-emphasize siblings via seed primitives (#386).
+    const focus = deps.inspectionFocus();
+    if (focus?.kind === "rects" && focus.primitives !== undefined && focus.primitives.length > 0) {
+      return buildPrimitiveInteractionMasks(model.scene.batches, focus.primitives);
+    }
+    return [];
   });
 
   return {

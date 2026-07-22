@@ -6,9 +6,11 @@
     IntervalSelection,
     PlotInspectionChange,
   } from "../interaction/interaction.js";
+  import type {
+    PresentationAnchor,
+    PresentationChrome,
+  } from "../selection/selection.js";
   import { normalizedRect } from "./geometry.js";
-
-  type Anchor = { readonly x: number; readonly y: number };
   type Panel = {
     readonly x: number;
     readonly y: number;
@@ -29,6 +31,7 @@
     inspection = null,
     inspectionPanel = null,
     coordFlipped = false,
+    hoverChrome = "ring",
     selectedAnchors = [],
     emphasizedAnchors = [],
     brushRect = null,
@@ -45,8 +48,10 @@
     > | null;
     inspectionPanel?: Panel | null;
     coordFlipped?: boolean;
-    selectedAnchors?: readonly Anchor[];
-    emphasizedAnchors?: readonly Anchor[];
+    /** Circle ring for points; `"none"` for rect marks (mask de-emphasis). */
+    hoverChrome?: PresentationChrome;
+    selectedAnchors?: readonly PresentationAnchor[];
+    emphasizedAnchors?: readonly PresentationAnchor[];
     brushRect?: BrushRect | null;
     activeTool?: InteractionTool;
     areaAwaitingSecond?: boolean;
@@ -99,33 +104,40 @@
         {/if}
       {/if}
     {/if}
-    <circle
-      class="gg-hover-ring"
-      cx={inspection.focus.anchor.x}
-      cy={inspection.focus.anchor.y}
-      r="6"
-      fill="none"
-    />
+    {#if hoverChrome === "ring"}
+      <circle
+        class="gg-hover-ring"
+        cx={inspection.focus.anchor.x}
+        cy={inspection.focus.anchor.y}
+        r="6"
+        fill="none"
+      />
+    {/if}
   {/if}
   <!-- Selection rings are presentation of shared controller state; passive
-       consumers (interactive=false) must still show them. -->
+       consumers (interactive=false) must still show them. Rect anchors use
+       relative de-emphasis instead of a point ring (#386). -->
   {#each selectedAnchors as anchor, index (index)}
-    <circle
-      class="gg-selected-ring"
-      cx={anchor.x}
-      cy={anchor.y}
-      r="8"
-      fill="none"
-    />
+    {#if anchor.chrome === "ring"}
+      <circle
+        class="gg-selected-ring"
+        cx={anchor.x}
+        cy={anchor.y}
+        r="8"
+        fill="none"
+      />
+    {/if}
   {/each}
   {#each emphasizedAnchors as anchor, index (index)}
-    <circle
-      class="gg-emphasized-ring"
-      cx={anchor.x}
-      cy={anchor.y}
-      r="11"
-      fill="none"
-    />
+    {#if anchor.chrome === "ring"}
+      <circle
+        class="gg-emphasized-ring"
+        cx={anchor.x}
+        cy={anchor.y}
+        r="11"
+        fill="none"
+      />
+    {/if}
   {/each}
   {#if interactive && brushRect !== null}
     {@const r = normalizedRect(brushRect)}

@@ -308,6 +308,7 @@
       inspection={inspectionState.inspection}
       inspectionPanel={inspectionState.inspectionPanel}
       coordFlipped={engine.coordFlipped}
+      hoverChrome={engine.hoverChrome}
       selectedAnchors={engine.selectedAnchors}
       emphasizedAnchors={engine.emphasizedAnchors}
       brushRect={surfaceState.brushRect}

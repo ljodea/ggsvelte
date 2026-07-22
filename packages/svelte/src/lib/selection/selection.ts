@@ -1,10 +1,26 @@
 import type { InteractionSource, PointSelection } from "../interaction/interaction.js";
 
+/** Overlay chrome for a presentation anchor. Rect marks use relative de-emphasis, not rings. */
+export type PresentationChrome = "ring" | "none";
+
+export type PresentationAnchor = {
+  readonly x: number;
+  readonly y: number;
+  readonly chrome: PresentationChrome;
+};
+
 export type CandidateAnchorKeys = {
   readonly x: number;
   readonly y: number;
   readonly keys: readonly PropertyKey[];
+  /** Geometry batch kind when known (`rects` suppresses point rings — #386). */
+  readonly kind?: string;
 };
+
+/** Point-like chrome by default; rect batches use mask de-emphasis only. */
+export function presentationChromeForKind(kind: string | null | undefined): PresentationChrome {
+  return kind === "rects" ? "none" : "ring";
+}
 
 export type CandidateRowRef = {
   readonly rowIndex: number | null;
@@ -134,14 +150,16 @@ export function collectCandidates<T, R>(
  * Collect unique pixel anchors for selected semantic keys.
  * Candidates must already be in id-ascending order; key resolution stays with
  * the caller. Dedup identity is `${String(x)}:${String(y)}`.
+ * `chrome` is derived from the first-seen candidate's geometry kind at that
+ * anchor so rect marks do not receive point rings (#386).
  */
 export function anchorsFromCandidateKeys(
   candidates: Iterable<CandidateAnchorKeys>,
   selectedKeys: readonly PropertyKey[],
-): { x: number; y: number }[] {
+): PresentationAnchor[] {
   if (selectedKeys.length === 0) return [];
   const keySet = new Set(selectedKeys);
-  const anchors: { x: number; y: number }[] = [];
+  const anchors: PresentationAnchor[] = [];
   const seen = new Set<string>();
   for (const candidate of candidates) {
     let selected = false;
@@ -153,7 +171,11 @@ export function anchorsFromCandidateKeys(
     const identity = `${String(candidate.x)}:${String(candidate.y)}`;
     if (selected && !seen.has(identity)) {
       seen.add(identity);
-      anchors.push({ x: candidate.x, y: candidate.y });
+      anchors.push({
+        x: candidate.x,
+        y: candidate.y,
+        chrome: presentationChromeForKind(candidate.kind),
+      });
     }
   }
   return anchors;
@@ -163,19 +185,37 @@ export function anchorsFromCandidateKeys(
 export type PresentationInspectionFocus = {
   readonly sourceKeys: readonly PropertyKey[];
   readonly key: PropertyKey | null;
+  /** Geometry kind of the inspection seed when known. */
+  readonly kind?: string | null;
+  /**
+   * Renderer primitives for the inspection seed (and later, group members).
+   * Used for keyless rect de-emphasis when sourceKeys are empty (#386).
+   */
+  readonly primitives?: readonly {
+    readonly batchIndex: number;
+    readonly primitiveIndex: number;
+  }[];
 };
 
 /**
- * Keys used for interaction mask presentation when emphasis is active.
- * Short-circuit: if emphasis is empty OR inspection is null, return emphasis
- * (same reference). Otherwise freeze the Set-union of emphasis, sourceKeys,
- * and the optional focus key (insertion order: emphasis → sourceKeys → key).
+ * Keys used for interaction mask presentation.
+ * - Legend emphasis alone: return emphasis (same reference when inspection null).
+ * - Legend emphasis + inspection: freeze Set-union (emphasis → sourceKeys → key).
+ * - Inspection of rect marks with empty emphasis: freeze inspection keys so
+ *   bar/col hover can de-emphasize siblings without a point ring (#386).
+ * - Other inspection-only cases: return empty emphasis (point chrome keeps rings).
  */
 export function mergePresentationFocusKeys(
   emphasisKeys: readonly PropertyKey[],
   inspection: PresentationInspectionFocus | null,
 ): readonly PropertyKey[] {
-  if (emphasisKeys.length === 0 || inspection === null) return emphasisKeys;
+  if (inspection === null) return emphasisKeys;
+  if (emphasisKeys.length === 0) {
+    if (inspection.kind !== "rects") return emphasisKeys;
+    const keys = [...inspection.sourceKeys, ...(inspection.key === null ? [] : [inspection.key])];
+    if (keys.length === 0) return emphasisKeys;
+    return Object.freeze([...new Set(keys)]);
+  }
   return Object.freeze([
     ...new Set([
       ...emphasisKeys,
