@@ -1,3 +1,9 @@
+/**
+ * Temporal axis guide planning and basic (non-temporal) axis plan assembly.
+ *
+ * Guide plan type contracts live in `guide-plan-types.ts` and are re-exported
+ * here so `@ggsvelte/core` and internal imports keep a stable path.
+ */
 import {
   MAX_TEMPORAL_MAJOR_TICKS,
   MAX_TEMPORAL_MINOR_TICKS,
@@ -11,113 +17,24 @@ import {
 } from "@ggsvelte/spec";
 
 import { neighbourOverlap } from "./axis-overlap.js";
-import type { BandLabelMode } from "./band-guide.js";
 import type { PositionScale } from "../scales/train.js";
 import type { CellValue } from "../table.js";
 import { formatTemporalTickSequence, formatTime } from "./format.js";
 import type { Tick } from "./layout-types.js";
 import type { TextMeasurer } from "./measure.js";
+import type { AxisGuidePlan, AxisGuideTick } from "./guide-plan-types.js";
 
-export interface AxisGuideTick {
-  value: number | CellValue;
-  label: string;
-  fullLabel: string;
-  kind: "major" | "minor";
-}
-
-export interface AxisGuidePlan {
-  type: "axis";
-  id: string;
-  aesthetic: "x" | "y";
-  panelIndex: number;
-  scaleType: "linear" | "time" | "band";
-  /** Pre-stat numeric transform; time/band plans use identity. */
-  transform: "identity" | "log10" | "sqrt";
-  temporalKind: TemporalKind | null;
-  domain: readonly [number, number] | readonly CellValue[];
-  direction: "ascending" | "descending";
-  source: "automatic" | "interval" | "explicit";
-  interval: string | null;
-  locale: string | null;
-  timezone: string | null;
-  ticks: readonly AxisGuideTick[];
-  sourceBreaks?: readonly CellValue[];
-  overlap: boolean;
-  marginOverflow: boolean;
-  degraded: readonly string[];
-  /** Band label layout (measured horizontal band axes only). */
-  bandLabelMode?: BandLabelMode;
-  /** Band rotation in degrees (0 | -45 | -90). */
-  bandLabelAngle?: number;
-  /** Measured orthogonal (bottom) band height the labels require, px. */
-  bandLabelBandHeight?: number;
-}
-
-export interface DiscreteGuideEntry {
-  value: CellValue;
-  label: string;
-  color: string;
-}
-
-export interface DiscreteGuidePlan {
-  type: "discrete";
-  id: string;
-  aesthetic: "color" | "fill";
-  scaleType: "ordinal" | "manual";
-  title: string;
-  domain: readonly CellValue[];
-  entries: readonly DiscreteGuideEntry[];
-  naValue: string;
-  unknownValue: string;
-}
-
-export interface ColorbarGuideTick {
-  value: number;
-  label: string;
-  fullLabel: string;
-}
-
-export interface ColorbarGuidePlan {
-  type: "colorbar";
-  id: string;
-  aesthetic: "color" | "fill";
-  title: string;
-  domain: readonly [number, number];
-  transformedDomain: readonly [number, number];
-  transform: "identity" | "log10" | "sqrt";
-  temporalKind: TemporalKind | null;
-  direction: "ascending" | "descending";
-  ticks: readonly ColorbarGuideTick[];
-  stops: readonly (readonly [number, string])[];
-  naValue: string;
-  unknownValue: string;
-}
-
-export interface ColorstepsGuideStep {
-  lower: number;
-  upper: number;
-  lowerInclusive: true;
-  upperInclusive: boolean;
-  label: string;
-  color: string;
-}
-
-export interface ColorstepsGuidePlan {
-  type: "colorsteps";
-  id: string;
-  aesthetic: "color" | "fill";
-  title: string;
-  domain: readonly [number, number];
-  transformedDomain: readonly [number, number];
-  transform: "identity" | "log10" | "sqrt";
-  temporalKind: TemporalKind | null;
-  direction: "ascending" | "descending";
-  steps: readonly ColorstepsGuideStep[];
-  naValue: string;
-  unknownValue: string;
-}
-
-export type GuidePlan = AxisGuidePlan | DiscreteGuidePlan | ColorbarGuidePlan | ColorstepsGuidePlan;
+export type {
+  AxisGuidePlan,
+  AxisGuideTick,
+  ColorbarGuidePlan,
+  ColorbarGuideTick,
+  ColorstepsGuidePlan,
+  ColorstepsGuideStep,
+  DiscreteGuideEntry,
+  DiscreteGuidePlan,
+  GuidePlan,
+} from "./guide-plan-types.js";
 
 export class TemporalGuideIntervalError extends Error {
   override readonly cause: TemporalIntervalError;

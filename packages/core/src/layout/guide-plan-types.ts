@@ -1,0 +1,111 @@
+/**
+ * Public guide-plan contracts for axes and non-position color/fill legends.
+ *
+ * Behavior (planning algorithms) lives in temporal-guide.ts and color/legend
+ * pipeline modules; this file is pure data shapes only.
+ */
+import type { TemporalKind } from "@ggsvelte/spec";
+
+import type { CellValue } from "../table.js";
+import type { BandLabelMode } from "./band-guide.js";
+
+export interface AxisGuideTick {
+  value: number | CellValue;
+  label: string;
+  fullLabel: string;
+  kind: "major" | "minor";
+}
+
+export interface AxisGuidePlan {
+  type: "axis";
+  id: string;
+  aesthetic: "x" | "y";
+  panelIndex: number;
+  scaleType: "linear" | "time" | "band";
+  /** Pre-stat numeric transform; time/band plans use identity. */
+  transform: "identity" | "log10" | "sqrt";
+  temporalKind: TemporalKind | null;
+  domain: readonly [number, number] | readonly CellValue[];
+  direction: "ascending" | "descending";
+  source: "automatic" | "interval" | "explicit";
+  interval: string | null;
+  locale: string | null;
+  timezone: string | null;
+  ticks: readonly AxisGuideTick[];
+  sourceBreaks?: readonly CellValue[];
+  overlap: boolean;
+  marginOverflow: boolean;
+  degraded: readonly string[];
+  /** Band label layout (measured horizontal band axes only). */
+  bandLabelMode?: BandLabelMode;
+  /** Band rotation in degrees (0 | -45 | -90). */
+  bandLabelAngle?: number;
+  /** Measured orthogonal (bottom) band height the labels require, px. */
+  bandLabelBandHeight?: number;
+}
+
+export interface DiscreteGuideEntry {
+  value: CellValue;
+  label: string;
+  color: string;
+}
+
+export interface DiscreteGuidePlan {
+  type: "discrete";
+  id: string;
+  aesthetic: "color" | "fill";
+  scaleType: "ordinal" | "manual";
+  title: string;
+  domain: readonly CellValue[];
+  entries: readonly DiscreteGuideEntry[];
+  naValue: string;
+  unknownValue: string;
+}
+
+export interface ColorbarGuideTick {
+  value: number;
+  label: string;
+  fullLabel: string;
+}
+
+export interface ColorbarGuidePlan {
+  type: "colorbar";
+  id: string;
+  aesthetic: "color" | "fill";
+  title: string;
+  domain: readonly [number, number];
+  transformedDomain: readonly [number, number];
+  transform: "identity" | "log10" | "sqrt";
+  temporalKind: TemporalKind | null;
+  direction: "ascending" | "descending";
+  ticks: readonly ColorbarGuideTick[];
+  stops: readonly (readonly [number, string])[];
+  naValue: string;
+  unknownValue: string;
+}
+
+export interface ColorstepsGuideStep {
+  lower: number;
+  upper: number;
+  lowerInclusive: true;
+  upperInclusive: boolean;
+  label: string;
+  color: string;
+}
+
+export interface ColorstepsGuidePlan {
+  type: "colorsteps";
+  id: string;
+  aesthetic: "color" | "fill";
+  title: string;
+  domain: readonly [number, number];
+  transformedDomain: readonly [number, number];
+  transform: "identity" | "log10" | "sqrt";
+  temporalKind: TemporalKind | null;
+  direction: "ascending" | "descending";
+  steps: readonly ColorstepsGuideStep[];
+  naValue: string;
+  unknownValue: string;
+}
+
+export type GuidePlan = AxisGuidePlan | DiscreteGuidePlan | ColorbarGuidePlan | ColorstepsGuidePlan;
