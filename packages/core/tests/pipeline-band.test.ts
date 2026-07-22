@@ -77,6 +77,21 @@ describe("band axis diagnostics (#387)", () => {
     expect(model.advisories.some((a) => a.code === "band-labels-rotated")).toBe(false);
   });
 
+  it("describes forced-wrap margin overflow without claiming rotation (Codex #527)", () => {
+    const wrapSpec: SpecInput = {
+      data: { values: rows },
+      layers: [{ geom: "col", aes: { x: { field: "category" }, y: { field: "count" } } }],
+      scales: { x: { guide: { mode: "wrap", wrap: 8 } } },
+    };
+    // Short height forces wrap block past the orthogonal margin cap.
+    const model = runPipeline(wrapSpec, { width: 560, height: 80 });
+    const diag = model.scaleDiagnostics.find((d) => d.code === "band-label-margin-overflow");
+    expect(diag).toBeDefined();
+    expect(diag?.problem).toMatch(/wrap/i);
+    expect(diag?.problem).not.toMatch(/rotat/i);
+    expect(diag?.cause).not.toMatch(/rotat/i);
+  });
+
   it("re-plans the narrower final facet panel so the band margin is reserved (Codex P2)", () => {
     // Two columns force each panel far narrower than the whole width. The band is
     // re-measured at the final panel size (not the optimistic approx), so the

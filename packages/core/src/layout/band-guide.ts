@@ -127,8 +127,13 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
     if (marginOverflow) degraded.push("band-label-margin-overflow");
     let overlap = false;
     if (opts?.reportOverlap === true && entries.length > 0) {
+      // Remeasure after end-cap truncation so shortened display labels are what
+      // the overlap check sees (not the pre-truncation entry widths).
       overlap = neighbourOverlap(
-        entries.map((e) => ({ pos: e.center, half: e.width / 2 })),
+        ticks.map((tick, i) => ({
+          pos: entries[i]!.center,
+          half: measurer.measureWidth(tick.label, fontSize) / 2,
+        })),
         gap,
       );
       if (overlap) degraded.push("band-label-overlap");
@@ -176,13 +181,9 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
 
   /** Try a wrap layout. When `force`, keep mode even if tokens can't wrap / overlap. */
   const tryWrapPlan = (force: boolean): BandAxisPlan | null => {
-    const wrapped = entries.map((e) => {
-      const lines = wrapLabel(e.label, bandBudget, measurer, fontSize, maxWrapLines);
-      if (lines !== null) return lines;
-      // Forced wrap: keep unbreakable tokens as a single (possibly over-wide) line
-      // so the author pin is not silently escalated to rotation.
-      return force ? [e.label] : null;
-    });
+    const wrapped = entries.map((e) =>
+      wrapLabel(e.label, bandBudget, measurer, fontSize, maxWrapLines, { force }),
+    );
     if (!force && !wrapped.every((w): w is string[] => w !== null)) return null;
     const linesList = wrapped as string[][];
     const lineWidths = linesList.map((lines) =>

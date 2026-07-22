@@ -314,7 +314,7 @@ export const PIPELINE_WARNING_CATALOG = {
   },
   "band-label-margin-overflow": {
     summary:
-      "A band label is truncated (ellipsis) to fit a bounded axis margin — a rotated label past the bottom cap, or a single-line end label past the side cap.",
+      "A band label exceeds a bounded axis margin — single-line end truncation, forced-wrap height/side overflow, or a rotated label past the bottom/side cap.",
   },
   "coord-tessellation-cap": {
     summary:
