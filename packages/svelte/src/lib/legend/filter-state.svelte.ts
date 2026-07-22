@@ -187,9 +187,20 @@ export function createLegendFilterState(deps: LegendFilterStateDeps): LegendFilt
       if (field === undefined || fields.size !== 1) return [];
       // A scaled constant (aes { value, scale: true }) feeds this legend
       // without a field: toggling its entry would filter an unrelated field
-      // while the constant-colored layer stays rendered. Keep it static.
+      // while the constant-colored layer stays rendered. Keep it static —
+      // but only when that constant is actually a *visible* legend entry.
+      // Rowless annotation constants train the scale and appear on
+      // layerScaledConstants for focus/index, yet are excluded from the
+      // interactive legend domain (#598); those must not disable filters.
+      const scaledConstantKeys = new Set(
+        model.layerScaledConstants
+          .map((constants) => constants[sceneLegend.scale])
+          .filter((value): value is CellValue => value !== undefined)
+          .map((value) => encodeKey(value)),
+      );
       if (
-        model.layerScaledConstants.some((constants) => constants[sceneLegend.scale] !== undefined)
+        scaledConstantKeys.size > 0 &&
+        sceneLegend.entries.some((entry) => scaledConstantKeys.has(encodeKey(entry.value)))
       )
         return [];
       const current = localLegendFilters.find(
