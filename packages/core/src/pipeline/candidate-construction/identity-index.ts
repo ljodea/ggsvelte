@@ -101,10 +101,9 @@ export function buildCandidateIdentityIndex(
             include: includeInX,
           });
         }
-        if (yNumeric !== null && Number.isFinite(yNumeric[localRow]!)) {
-          if (xNumericForSmooth !== null && !Number.isFinite(xNumericForSmooth[localRow]!)) {
-            continue;
-          }
+        const yOk = yNumeric !== null && Number.isFinite(yNumeric[localRow]!);
+        const xOk = xNumericForSmooth === null || Number.isFinite(xNumericForSmooth[localRow]!);
+        if (yOk && xOk) {
           appendSourceRowByGroupKey(sourceRowsByGroupY, key, sourceRow);
         }
       }
