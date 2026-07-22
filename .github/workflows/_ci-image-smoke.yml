@@ -5,7 +5,8 @@
 name: _ci-image-smoke
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [ci/flip-container-image-ghcr]
 
 permissions:
   contents: read
