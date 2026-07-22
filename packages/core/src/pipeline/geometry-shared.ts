@@ -12,4 +12,4 @@ export {
   removedWarning,
   type Frame,
 } from "./geometry-shared-position.js";
-export { bucketByGroup, xSortKey } from "./geometry-shared-bucket.js";
+export { bucketByGroup, sortGroupRowsByX, xSortKey } from "./geometry-shared-bucket.js";
