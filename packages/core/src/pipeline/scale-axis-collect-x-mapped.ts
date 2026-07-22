@@ -43,9 +43,9 @@ export function collectMappedXEvidence(
   acc.sawContinuousEvidence = true;
 
   // Segment end x: same dual evidence as mapped x (numeric + discrete categories).
-  if (frame.xend !== null) {
+  if (frame.xend != null) {
     acc.numeric.push(frame.xend);
-    if (frame.xendValues !== null) acc.columns.push(frame.xendValues);
+    if (frame.xendValues != null) acc.columns.push(frame.xendValues);
     const endField = binding.xendField;
     if (endField !== null && frame.table.has(endField)) {
       const endType = positionFieldType(frame.table, endField, conversion);

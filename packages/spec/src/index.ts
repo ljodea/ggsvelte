@@ -449,6 +449,7 @@ export type {
   RuntimePointLayer,
   RuntimeRasterLayer,
   RuntimeRectLayer,
+  RuntimeSegmentLayer,
   RuntimeRuleLayer,
   RuntimeSmoothLayer,
   RuntimeSpec,
