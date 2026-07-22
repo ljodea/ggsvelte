@@ -29,20 +29,22 @@ runs:
           echo "unzip already present ($(command -v unzip)); skipping apt."
           exit 0
         fi
-        list="$(mktemp)"
         keyring=/usr/share/keyrings/ubuntu-archive-keyring.gpg
+        # Write an azure-mirror, main-only source into sources.list.d so BOTH the
+        # update below and the install (which uses apt's default source config)
+        # resolve unzip from it.
         {
           echo "deb [signed-by=${keyring}] http://azure.archive.ubuntu.com/ubuntu noble main"
           echo "deb [signed-by=${keyring}] http://azure.archive.ubuntu.com/ubuntu noble-updates main"
-        } > "$list"
-        # Refresh indexes from ONLY the list above (sourceparts=- disables the
-        # image's default sources for this update), so we pull ~a few MB of
-        # `main` instead of the full 31 MB across universe/security/backports.
+        } > /etc/apt/sources.list.d/ci-unzip.list
+        # Restrict ONLY the update to our source (sourceparts=- skips the image's
+        # default sources), so we pull ~a few MB of `main` from the co-located
+        # Azure mirror instead of 31 MB across universe/security/backports from
+        # the throttled public mirrors.
         apt-get \
-          -o Dir::Etc::sourcelist="$list" \
           -o Dir::Etc::sourceparts="-" \
+          -o Dir::Etc::sourcelist="sources.list.d/ci-unzip.list" \
           -o APT::Get::List-Cleanup="0" \
           update
         apt-get install -y --no-install-recommends unzip
-        rm -f "$list"
-        unzip -v | head -1
+        echo "unzip installed: $(command -v unzip)"
