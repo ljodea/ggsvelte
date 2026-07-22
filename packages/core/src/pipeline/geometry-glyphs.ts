@@ -25,36 +25,16 @@ export function glyphsBatch(
     dy?: number;
     alpha?: number;
   };
-  const positions: number[] = [];
-  const rowIndex: number[] = [];
-  const styleRows: number[] = [];
-  const texts: string[] = [];
-  const colors: string[] = [];
   const wantsColors =
     color !== null && (frame.colorValues !== null || binding.color.scaledConstant !== null);
-  const removed = emitGlyphRows({
+  const emitted = emitGlyphRows({
     frame,
     fx,
     color,
     wantsColors,
     dx: params.dx ?? 0,
     dy: params.dy ?? 0,
-    positions,
-    rowIndex,
-    styleRows,
-    texts,
-    colors,
   });
-  removedWarning(removed, binding.index, warnings);
-  return packGlyphsBatch({
-    frame,
-    positions,
-    rowIndex,
-    styleRows,
-    texts,
-    colors,
-    wantsColors,
-    styles,
-    params,
-  });
+  removedWarning(emitted.removed, binding.index, warnings);
+  return packGlyphsBatch({ frame, emitted, wantsColors, styles, params });
 }

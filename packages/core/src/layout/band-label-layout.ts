@@ -17,6 +17,8 @@ export const MIN_BAND_LABEL_GAP_PX = 4;
 export const BAND_THIN_MIN_CATEGORIES = 12;
 /** Wrapped labels use at most this many lines before escalating to rotation. */
 export const MAX_WRAP_LINES = 2;
+/** Clamp author `guide.wrap` into a sane line budget. */
+export const MAX_AUTHOR_WRAP_LINES = 8;
 
 export const RAD = Math.PI / 180;
 

@@ -119,6 +119,17 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "col/long-labels",
+    category: "col",
+    name: "long-labels",
+    title: "Columns with long i18n category labels",
+    description: "Narrow (480px) column chart with long Spanish multi-word and German single-token category labels — exercises measured band-axis wrap/rotate/truncate layout.",
+    tags: ["col", "band", "labels", "i18n", "vr"],
+    docsSection: "Bars & columns",
+    vrHeight: 420,
+    hasData: true,
+  },
+  {
     id: "col/value-labels",
     category: "col",
     name: "value-labels",

@@ -1988,8 +1988,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-241",
-        title: "experimental (241)",
+        id: "experimental-246",
+        title: "experimental (246)",
         level: 3,
       },
       {
@@ -2226,6 +2226,17 @@ export const DOCS_ROUTES = [
     description:
       "Pre-computed bar heights with geom col (ggplot2's geom_col): a band x scale, a zero-based linear y scale, and the theme's accent role filling the unmapped bars.",
     canonicalPath: "/examples/col/basic",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/col/long-labels",
+    title: "Columns with long i18n category labels — ggsvelte gallery",
+    description:
+      "Narrow (480px) column chart with long Spanish multi-word and German single-token category labels — exercises measured band-axis wrap/rotate/truncate layout.",
+    canonicalPath: "/examples/col/long-labels",
     kind: "page",
     index: true,
     sitemap: true,

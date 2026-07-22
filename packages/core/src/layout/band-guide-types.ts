@@ -5,6 +5,20 @@ import type { TextMeasurer } from "./measure.js";
 
 export type BandLabelMode = "single-line" | "wrapped" | "rotated";
 
+/**
+ * Author override for band (categorical) axis label layout — from
+ * `scales.x.guide` / `scaleXDiscrete({ guide })`. Mirrors ggplot2's
+ * `guide_axis(angle=)` / discrete label wrap for pixel-stable output.
+ */
+export type BandGuideConfig = {
+  /** Default "auto" escalates single → wrap → rotate → truncate. */
+  mode?: "auto" | "single" | "wrap" | "rotate" | "off";
+  /** Degrees when mode is "rotate", or when auto escalates to rotation. */
+  angle?: number;
+  /** Max wrap lines (default 2) when wrapping. */
+  wrap?: number;
+};
+
 /** A pre-resolved band tick to lay out (break-matching already applied). */
 interface BandPlanEntry {
   value: string | number;
@@ -34,6 +48,11 @@ export interface BandAxisPlanInput {
   ellipsis?: string;
   /** Pass-A mode; the planner escalates only, never de-escalates. */
   previousMode?: BandLabelMode | null;
+  /**
+   * Optional author `scales.*.guide` pin. When set (and mode ≠ "auto"), the
+   * planner does not auto-escalate away from the pinned presentation.
+   */
+  config?: BandGuideConfig;
 }
 
 export interface BandAxisPlanTick {
@@ -50,7 +69,7 @@ export interface BandAxisPlanTick {
 
 export interface BandAxisPlan {
   mode: BandLabelMode;
-  /** 0 | -45 | -90 */
+  /** 0 | -45 | -90 (or a clamped author pin in −90..0). */
   angle: number;
   ticks: BandAxisPlanTick[];
   /** 1 = every category labeled; >1 = high-cardinality thinning. */
@@ -64,4 +83,9 @@ export interface BandAxisPlan {
   overlap: boolean;
   marginOverflow: boolean;
   degraded: string[];
+  /**
+   * True when `scales.*.guide.mode` forced the presentation (not auto).
+   * Suppresses heuristic wrap/rotate advisories that would re-suggest the pin.
+   */
+  authorPinned?: boolean;
 }

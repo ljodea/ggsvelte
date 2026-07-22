@@ -1795,7 +1795,23 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "BandAxisPlan": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "BandAxisPlanInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "BandConfig": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "BandGuideConfig": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "BandLabelMode": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -2620,6 +2636,10 @@
           "lifecycle": "experimental"
         },
         "perfMeasure": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "planBandAxis": {
           "kind": "value",
           "lifecycle": "experimental"
         },

@@ -7,6 +7,9 @@
  *     → thin (labelEvery)
  *     → overlap warning
  *
+ * Author pins via `scales.*.guide` (`mode` / `angle` / `wrap`) skip auto
+ * escalation and report honest overlap/overflow when the pin cannot fit.
+ *
  * Types live in `band-guide-types.ts`; wrap/cap helpers in `band-label-layout.ts`.
  */
 
@@ -14,6 +17,7 @@ import { neighbourOverlap, neighbourOverlapAsym } from "./axis-overlap.js";
 import type { BandAxisPlan, BandAxisPlanInput, BandAxisPlanTick } from "./band-guide-types.js";
 import {
   BAND_THIN_MIN_CATEGORIES,
+  MAX_AUTHOR_WRAP_LINES,
   MAX_WRAP_LINES,
   MIN_BAND_LABEL_GAP_PX,
   MODE_RANK,
@@ -25,7 +29,28 @@ import {
 } from "./band-label-layout.js";
 import { truncateToFit } from "./truncate.js";
 
-export type { BandAxisPlan, BandAxisPlanInput, BandLabelMode } from "./band-guide-types.js";
+export type {
+  BandAxisPlan,
+  BandAxisPlanInput,
+  BandGuideConfig,
+  BandLabelMode,
+} from "./band-guide-types.js";
+
+function resolveMaxWrapLines(wrap: number | undefined): number {
+  if (wrap === undefined || !Number.isFinite(wrap)) return MAX_WRAP_LINES;
+  return Math.max(1, Math.min(MAX_AUTHOR_WRAP_LINES, Math.floor(wrap)));
+}
+
+/**
+ * Planner geometry assumes labels hang down-left with text-anchor="end".
+ * Normalize author angles into the supported −90..0 range (flip positive
+ * angles, then clamp).
+ */
+function resolvePinnedAngle(angle: number | undefined): number | undefined {
+  if (angle === undefined || !Number.isFinite(angle)) return undefined;
+  const signed = angle > 0 ? -angle : angle;
+  return Math.min(0, Math.max(-90, signed));
+}
 
 export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
   const {
@@ -38,12 +63,17 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
     orthogonalMarginCapPx,
     marginCapPx,
     previousMode,
+    config,
   } = input;
   const quantum = input.quantum ?? 0;
   const ellipsis = input.ellipsis ?? "…";
   const gap = MIN_BAND_LABEL_GAP_PX;
   const lineHeight = measurer.measureHeight(fontSize);
   const n = Math.max(1, categoryCount);
+  const guideMode = config?.mode ?? "auto";
+  const authorPinned = guideMode !== "auto";
+  const maxWrapLines = resolveMaxWrapLines(config?.wrap);
+  const pinnedAngle = resolvePinnedAngle(config?.angle);
 
   const bandWidth = extentPx / n;
   const centerOf = (domainIndex: number) => {
@@ -78,7 +108,10 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
       };
     });
 
-  const singlePlan = (): BandAxisPlan => {
+  const withPin = (plan: BandAxisPlan): BandAxisPlan =>
+    authorPinned ? { ...plan, authorPinned: true } : plan;
+
+  const singlePlan = (opts?: { reportOverlap?: boolean }): BandAxisPlan => {
     const ticks = buildTicks(1, (e) => ({ label: e.label }));
     const { alongOverhang, leftOverhang, marginOverflow } = capEndOverhang(
       ticks,
@@ -90,6 +123,16 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
       ellipsis,
       true,
     );
+    const degraded: string[] = [];
+    if (marginOverflow) degraded.push("band-label-margin-overflow");
+    let overlap = false;
+    if (opts?.reportOverlap === true && entries.length > 0) {
+      overlap = neighbourOverlap(
+        entries.map((e) => ({ pos: e.center, half: e.width / 2 })),
+        gap,
+      );
+      if (overlap) degraded.push("band-label-overlap");
+    }
     return {
       mode: "single-line",
       angle: 0,
@@ -98,76 +141,95 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
       labelBandHeight: lineHeight,
       alongOverhang,
       leftOverhang,
-      overlap: false,
+      overlap,
       marginOverflow,
-      degraded: marginOverflow ? ["band-label-margin-overflow"] : [],
+      degraded,
     };
   };
 
+  const offPlan = (): BandAxisPlan => ({
+    mode: "single-line",
+    angle: 0,
+    ticks: buildTicks(1, (e) => ({ label: e.label })).map((tick) => ({
+      ...tick,
+      labeled: false,
+    })),
+    labelEvery: 1,
+    labelBandHeight: 0,
+    alongOverhang: 0,
+    leftOverhang: 0,
+    overlap: false,
+    marginOverflow: false,
+    degraded: [],
+    authorPinned: true,
+  });
+
+  // mode:off applies to every orientation (including vertical / coord_flip).
+  if (guideMode === "off") return offPlan();
+
   // Vertical band axes are not planned here (legacy path owns them).
-  if (input.orient === "vertical" || entries.length === 0) return singlePlan();
+  if (input.orient === "vertical" || entries.length === 0) return withPin(singlePlan());
 
   const budget = (px: number) => (quantum > 0 ? Math.floor(px / quantum) * quantum : px);
   const bandBudget = budget(bandWidth);
   const orthoCap = budget(orthogonalMarginCapPx);
 
-  const floor = MODE_RANK[previousMode ?? "single-line"];
-
-  // --- single-line ---
-  if (floor <= MODE_RANK["single-line"]) {
-    const singleOverlap = neighbourOverlap(
-      entries.map((e) => ({ pos: e.center, half: e.width / 2 })),
+  /** Try a wrap layout. When `force`, keep mode even if tokens can't wrap / overlap. */
+  const tryWrapPlan = (force: boolean): BandAxisPlan | null => {
+    const wrapped = entries.map((e) => {
+      const lines = wrapLabel(e.label, bandBudget, measurer, fontSize, maxWrapLines);
+      if (lines !== null) return lines;
+      // Forced wrap: keep unbreakable tokens as a single (possibly over-wide) line
+      // so the author pin is not silently escalated to rotation.
+      return force ? [e.label] : null;
+    });
+    if (!force && !wrapped.every((w): w is string[] => w !== null)) return null;
+    const linesList = wrapped as string[][];
+    const lineWidths = linesList.map((lines) =>
+      Math.max(...lines.map((l) => measurer.measureWidth(l, fontSize))),
+    );
+    const maxLines = Math.max(...linesList.map((w) => w.length));
+    const blockHeight = maxLines * lineHeight;
+    const wrapOverlap = neighbourOverlap(
+      entries.map((e, i) => ({ pos: e.center, half: lineWidths[i]! / 2 })),
       gap,
     );
-    if (!singleOverlap) return singlePlan();
-  }
-
-  // --- wrapped (≤ MAX_WRAP_LINES) ---
-  if (floor <= MODE_RANK.wrapped) {
-    // Wrap once per entry; reuse lines + measured widths for overlap, side
-    // reserve, and tick emission (avoid re-wrap + re-measure on the emit path).
-    const wrapped = entries.map((e) =>
-      wrapLabel(e.label, bandBudget, measurer, fontSize, MAX_WRAP_LINES),
-    );
-    if (wrapped.every((w): w is string[] => w !== null)) {
-      const lineWidths = wrapped.map((lines) =>
-        Math.max(...lines.map((l) => measurer.measureWidth(l, fontSize))),
-      );
-      const maxLines = Math.max(...wrapped.map((w) => w.length));
-      const blockHeight = maxLines * lineHeight;
-      const wrapOverlap = neighbourOverlap(
-        entries.map((e, i) => ({ pos: e.center, half: lineWidths[i]! / 2 })),
-        gap,
-      );
-      if (!wrapOverlap && blockHeight <= orthoCap) {
-        // Reserve each side from the widest wrapped line at its real end position.
-        let wrapLeft = 0;
-        let wrapRight = 0;
-        for (let i = 0; i < entries.length; i++) {
-          const half = lineWidths[i]! / 2;
-          wrapLeft = Math.max(wrapLeft, half - entries[i]!.center);
-          wrapRight = Math.max(wrapRight, half - (extentPx - entries[i]!.center));
-        }
-        return {
-          mode: "wrapped",
-          angle: 0,
-          ticks: buildTicks(1, (_e, i) => {
-            const lines = wrapped[i]!;
-            return { label: lines.join(" "), lines };
-          }),
-          labelEvery: 1,
-          labelBandHeight: quantizeUp(blockHeight, quantum),
-          alongOverhang: Math.min(marginCapPx, Math.max(0, wrapRight)),
-          leftOverhang: Math.min(marginCapPx, Math.max(0, wrapLeft)),
-          overlap: false,
-          marginOverflow: false,
-          degraded: [],
-        };
-      }
+    if (!force && (wrapOverlap || blockHeight > orthoCap)) return null;
+    let wrapLeft = 0;
+    let wrapRight = 0;
+    for (let i = 0; i < entries.length; i++) {
+      const half = lineWidths[i]! / 2;
+      wrapLeft = Math.max(wrapLeft, half - entries[i]!.center);
+      wrapRight = Math.max(wrapRight, half - (extentPx - entries[i]!.center));
     }
-  }
+    const degraded: string[] = [];
+    let marginOverflow = false;
+    if (force) {
+      if (wrapOverlap) degraded.push("band-label-overlap");
+      if (blockHeight > orthoCap) marginOverflow = true;
+      if (wrapLeft > marginCapPx + 1e-6 || wrapRight > marginCapPx + 1e-6) {
+        marginOverflow = true;
+      }
+      if (marginOverflow) degraded.push("band-label-margin-overflow");
+    }
+    return {
+      mode: "wrapped",
+      angle: 0,
+      ticks: buildTicks(1, (_e, i) => {
+        const lines = linesList[i]!;
+        return { label: lines.join(" "), lines };
+      }),
+      labelEvery: 1,
+      // Always reserve within the orthogonal cap; forced over-tall pins flag overflow.
+      labelBandHeight: quantizeUp(Math.min(blockHeight, orthoCap), quantum),
+      alongOverhang: Math.min(marginCapPx, Math.max(0, wrapRight)),
+      leftOverhang: Math.min(marginCapPx, Math.max(0, wrapLeft)),
+      overlap: force ? wrapOverlap : false,
+      marginOverflow,
+      degraded,
+    };
+  };
 
-  // --- rotated (−45 then −90) ---
   // The SVG renderer hangs rotated labels with text-anchor="end", so the along-
   // axis footprint is ASYMMETRIC about the tick: it extends mostly to the LEFT
   // (the text runs up-left from the tick), with only a half-line-height to the
@@ -193,7 +255,7 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
   // angle by pos, then filter by array index for thinning — O(K log K) once +
   // O(K) per doubling step, not O(K log K) per step.
   type AsymItem = { pos: number; left: number; right: number; index: number };
-  const rotatedOverlapsSorted = (angle: number, every: number, sorted: readonly AsymItem[]) => {
+  const rotatedOverlapsSorted = (every: number, sorted: readonly AsymItem[]) => {
     const items = every === 1 ? sorted : sorted.filter((item) => item.index % every === 0);
     return neighbourOverlapAsym(items, gap, { alreadySorted: true });
   };
@@ -207,112 +269,148 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
       }))
       .toSorted((a, b) => a.pos - b.pos);
 
-  // Prefer −45 (more readable, less bottom footprint); escalate to −90 ONLY when
-  // −45 actually overlaps neighbours. A −45 label that merely exceeds the bottom
-  // cap is truncated within the −45 budget below — switching to −90 for that would
-  // need MORE bottom space (its footprint is the full label width) and truncate
-  // harder without resolving any collision.
-  const sortedAtNeg45 = projectRotatedSorted(-45);
-  const angle = rotatedOverlapsSorted(-45, 1, sortedAtNeg45) ? -90 : -45;
-  const sortedAtAngle = angle === -45 ? sortedAtNeg45 : projectRotatedSorted(angle);
+  const chooseAutoAngle = (): number => {
+    const sortedAtNeg45 = projectRotatedSorted(-45);
+    return rotatedOverlapsSorted(1, sortedAtNeg45) ? -90 : -45;
+  };
 
-  const degraded: string[] = [];
-  let labelEvery = 1;
-  let overlap = false;
-  let marginOverflow = false;
+  const rotatedPlan = (angle: number): BandAxisPlan => {
+    const sortedAtAngle = projectRotatedSorted(angle);
+    const degraded: string[] = [];
+    let labelEvery = 1;
+    let overlap = false;
+    let marginOverflow = false;
 
-  // Along-axis: do adjacent rotated labels still collide at their real positions?
-  // Gate thinning on the number of DISPLAYED ticks (a small authored-break subset
-  // of a huge domain must keep every break), never the full category count.
-  if (rotatedOverlapsSorted(angle, 1, sortedAtAngle)) {
-    if (entries.length >= BAND_THIN_MIN_CATEGORIES) {
-      // High cardinality: thin (never for a handful of named bars).
-      while (
-        rotatedOverlapsSorted(angle, labelEvery, sortedAtAngle) &&
-        labelEvery * 2 < entries.length
-      ) {
-        labelEvery *= 2;
-      }
-      if (rotatedOverlapsSorted(angle, labelEvery, sortedAtAngle)) {
+    // Along-axis: do adjacent rotated labels still collide at their real positions?
+    // Gate thinning on the number of DISPLAYED ticks (a small authored-break subset
+    // of a huge domain must keep every break), never the full category count.
+    if (rotatedOverlapsSorted(1, sortedAtAngle)) {
+      if (entries.length >= BAND_THIN_MIN_CATEGORIES) {
+        // High cardinality: thin (never for a handful of named bars).
+        while (
+          rotatedOverlapsSorted(labelEvery, sortedAtAngle) &&
+          labelEvery * 2 < entries.length
+        ) {
+          labelEvery *= 2;
+        }
+        if (rotatedOverlapsSorted(labelEvery, sortedAtAngle)) {
+          overlap = true;
+          degraded.push("band-label-overlap");
+        }
+      } else {
         overlap = true;
         degraded.push("band-label-overlap");
       }
-    } else {
-      overlap = true;
-      degraded.push("band-label-overlap");
     }
-  }
 
-  // Orthogonal: recompute the footprint from the labels that survive thinning, so
-  // a hidden wide label neither truncates visible text nor emits a false overflow.
-  const shownWidth = labeledMaxWidth(labelEvery);
-  const orthoNeeded = orthoOf(shownWidth, angle);
-  const a = Math.abs(angle) * RAD;
-  const cosA = Math.cos(a);
-  const sinA = Math.sin(a);
-  // Uniform width budget from the bottom cap (∞ when the whole band already fits).
-  const orthoWidthBudget =
-    orthoNeeded > orthoCap
-      ? Math.max(1, (orthoCap - lineHeight * cosA) / sinA)
-      : Number.POSITIVE_INFINITY;
+    // Orthogonal: recompute the footprint from the labels that survive thinning, so
+    // a hidden wide label neither truncates visible text nor emits a false overflow.
+    const shownWidth = labeledMaxWidth(labelEvery);
+    const orthoNeeded = orthoOf(shownWidth, angle);
+    const a = Math.abs(angle) * RAD;
+    const cosA = Math.cos(a);
+    const sinA = Math.sin(a);
+    // Uniform width budget from the bottom cap (∞ when the whole band already fits).
+    // Degenerate angles (≈0) have sin≈0; avoid divide-by-zero and fall back to no
+    // width cap from the orthogonal budget (side-cap truncation still applies).
+    const orthoWidthBudget =
+      orthoNeeded > orthoCap && sinA > 1e-9
+        ? Math.max(1, (orthoCap - lineHeight * cosA) / sinA)
+        : Number.POSITIVE_INFINITY;
 
-  // Truncate each label to the TIGHTER of the bottom-cap budget and its own LEFT
-  // side cap. An end-anchored rotated label extends left by leftExtOf(w), which
-  // must fit `center + marginCapPx` or it draws past the viewport into chrome.
-  // (For −90 the left extent is width-independent, so truncation can't help; that
-  // degenerate case is flagged in the overhang pass below.)
-  const ticks = buildTicks(labelEvery, (e) => {
-    let widthBudget = orthoWidthBudget;
-    if (cosA > 1e-9) {
-      const sideBudget = (e.center + marginCapPx - (lineHeight / 2) * sinA) / cosA;
-      widthBudget = Math.min(widthBudget, sideBudget);
+    // Truncate each label to the TIGHTER of the bottom-cap budget and its own LEFT
+    // side cap. An end-anchored rotated label extends left by leftExtOf(w), which
+    // must fit `center + marginCapPx` or it draws past the viewport into chrome.
+    // (For −90 the left extent is width-independent, so truncation can't help; that
+    // degenerate case is flagged in the overhang pass below.)
+    const ticks = buildTicks(labelEvery, (e) => {
+      let widthBudget = orthoWidthBudget;
+      if (cosA > 1e-9) {
+        const sideBudget = (e.center + marginCapPx - (lineHeight / 2) * sinA) / cosA;
+        widthBudget = Math.min(widthBudget, sideBudget);
+      }
+      const label =
+        widthBudget === Number.POSITIVE_INFINITY
+          ? e.label
+          : truncateToFit(e.label, Math.max(1, widthBudget), measurer, fontSize, ellipsis);
+      if (label !== e.label) marginOverflow = true;
+      return { label, angle };
+    });
+
+    // One measureWidth per labeled tick: drives both band height (max width) and
+    // end-anchored overhang (left/right extent). Avoids a second full scan.
+    let shownMaxWidth = 0;
+    let rotLeft = 0;
+    let rotRight = 0;
+    for (let i = 0; i < ticks.length; i++) {
+      if (!ticks[i]!.labeled) continue;
+      const center = entries[i]!.center;
+      const width = measurer.measureWidth(ticks[i]!.label, fontSize);
+      shownMaxWidth = Math.max(shownMaxWidth, width);
+      const leftExt = leftExtOf(width, angle);
+      const rightExt = rightExtOf(angle);
+      // Width-independent residual (chiefly −90): if the footprint still exceeds the
+      // side cap after truncation we cannot shrink it further — flag honestly.
+      if (
+        leftExt > center + marginCapPx + 1e-6 ||
+        rightExt > extentPx - center + marginCapPx + 1e-6
+      ) {
+        marginOverflow = true;
+      }
+      rotLeft = Math.max(rotLeft, leftExt - center);
+      rotRight = Math.max(rotRight, rightExt - (extentPx - center));
     }
-    const label =
-      widthBudget === Number.POSITIVE_INFINITY
-        ? e.label
-        : truncateToFit(e.label, Math.max(1, widthBudget), measurer, fontSize, ellipsis);
-    if (label !== e.label) marginOverflow = true;
-    return { label, angle };
-  });
+    const labelBandHeight = quantizeUp(Math.min(orthoOf(shownMaxWidth, angle), orthoCap), quantum);
+    if (marginOverflow) degraded.push("band-label-margin-overflow");
+    const alongOverhang = Math.max(0, Math.min(marginCapPx, rotRight));
+    const leftOverhang = Math.max(0, Math.min(marginCapPx, rotLeft));
 
-  // One measureWidth per labeled tick: drives both band height (max width) and
-  // end-anchored overhang (left/right extent). Avoids a second full scan.
-  let shownMaxWidth = 0;
-  let rotLeft = 0;
-  let rotRight = 0;
-  for (let i = 0; i < ticks.length; i++) {
-    if (!ticks[i]!.labeled) continue;
-    const center = entries[i]!.center;
-    const width = measurer.measureWidth(ticks[i]!.label, fontSize);
-    shownMaxWidth = Math.max(shownMaxWidth, width);
-    const leftExt = leftExtOf(width, angle);
-    const rightExt = rightExtOf(angle);
-    // Width-independent residual (chiefly −90): if the footprint still exceeds the
-    // side cap after truncation we cannot shrink it further — flag honestly.
-    if (
-      leftExt > center + marginCapPx + 1e-6 ||
-      rightExt > extentPx - center + marginCapPx + 1e-6
-    ) {
-      marginOverflow = true;
-    }
-    rotLeft = Math.max(rotLeft, leftExt - center);
-    rotRight = Math.max(rotRight, rightExt - (extentPx - center));
-  }
-  const labelBandHeight = quantizeUp(Math.min(orthoOf(shownMaxWidth, angle), orthoCap), quantum);
-  if (marginOverflow) degraded.push("band-label-margin-overflow");
-  const alongOverhang = Math.max(0, Math.min(marginCapPx, rotRight));
-  const leftOverhang = Math.max(0, Math.min(marginCapPx, rotLeft));
-
-  return {
-    mode: "rotated",
-    angle,
-    ticks,
-    labelEvery,
-    labelBandHeight,
-    alongOverhang,
-    leftOverhang,
-    overlap,
-    marginOverflow,
-    degraded,
+    return {
+      mode: "rotated",
+      angle,
+      ticks,
+      labelEvery,
+      labelBandHeight,
+      alongOverhang,
+      leftOverhang,
+      overlap,
+      marginOverflow,
+      degraded,
+    };
   };
+
+  // --- Author pins (no auto-escalation away from the chosen presentation) ---
+  if (guideMode === "single") return withPin(singlePlan({ reportOverlap: true }));
+  if (guideMode === "wrap") {
+    return withPin(tryWrapPlan(true) ?? singlePlan({ reportOverlap: true }));
+  }
+  if (guideMode === "rotate") {
+    // Prefer author angle; else the measured −45/−90 choice used by auto.
+    return withPin(rotatedPlan(pinnedAngle ?? chooseAutoAngle()));
+  }
+
+  // --- auto: measured escalation ladder ---
+  const floor = MODE_RANK[previousMode ?? "single-line"];
+
+  // --- single-line ---
+  if (floor <= MODE_RANK["single-line"]) {
+    const singleOverlap = neighbourOverlap(
+      entries.map((e) => ({ pos: e.center, half: e.width / 2 })),
+      gap,
+    );
+    if (!singleOverlap) return singlePlan();
+  }
+
+  // --- wrapped (≤ maxWrapLines) ---
+  if (floor <= MODE_RANK.wrapped) {
+    const wrapped = tryWrapPlan(false);
+    if (wrapped !== null) return wrapped;
+  }
+
+  // Prefer −45 (more readable, less bottom footprint); escalate to −90 ONLY when
+  // −45 actually overlaps neighbours — unless the author pinned a specific angle.
+  // A −45 label that merely exceeds the bottom cap is truncated within the −45
+  // budget below — switching to −90 for that would need MORE bottom space and
+  // truncate harder without resolving any collision.
+  return rotatedPlan(pinnedAngle ?? chooseAutoAngle());
 }

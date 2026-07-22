@@ -442,11 +442,12 @@ export const ADVISORY_CATALOG = {
     summary: "A date-like field remained discrete because whole-column validation failed.",
   },
   "band-labels-wrapped": {
-    summary: "Long categorical x labels were wrapped onto multiple lines to avoid collisions.",
+    summary:
+      "Long categorical x labels were wrapped onto multiple lines to avoid collisions; pin with scales.x.guide.mode or coordFlip().",
   },
   "band-labels-rotated": {
     summary:
-      "Long categorical x labels were rotated to avoid collisions; coord_flip lays them out horizontally.",
+      "Long categorical x labels were rotated to avoid collisions; pin with scales.x.guide.mode/angle, or coordFlip() for horizontal rows.",
   },
 } as const satisfies Record<string, { summary: string }>;
 

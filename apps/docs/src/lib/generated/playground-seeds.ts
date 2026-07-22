@@ -94,6 +94,15 @@ export const PLAYGROUND_EXAMPLES: readonly GeneratedPlaygroundExample[] = [
     },
   },
   {
+    id: "col/long-labels",
+    title: "Columns with long i18n category labels",
+    compatibility: {
+      supported: true,
+      fragment:
+        "#play=v1.eyJ2ZXJzaW9uIjoxLCJzb3VyY2UiOnsia2luZCI6ImV4YW1wbGUiLCJpZCI6ImNvbC9sb25nLWxhYmVscyJ9LCJzcGVjIjp7ImVkaXRpb24iOjIsImRhdGEiOnsidmFsdWVzIjpbeyJjYXRlZ29yeSI6IlJlc29sdWNpw7NuIiwiY291bnQiOjkwMDB9LHsiY2F0ZWdvcnkiOiJDb3JyZWNjacOzbiAoZXJyb3JlcyBvIGVycmF0YXMpIiwiY291bnQiOjMyMDB9LHsiY2F0ZWdvcnkiOiJTZW50ZW5jaWEiLCJjb3VudCI6MjgwMH0seyJjYXRlZ29yeSI6IkFubGFnZXZlcndhbHR1bmdzZ2VzZWxsc2NoYWZ0IiwiY291bnQiOjI1MDB9LHsiY2F0ZWdvcnkiOiJPcmRlbiIsImNvdW50Ijo5MDB9XX0sImxheWVycyI6W3siZ2VvbSI6ImNvbCIsInN0YXQiOiJpZGVudGl0eSIsInBvc2l0aW9uIjoic3RhY2siLCJhZXMiOnsieCI6eyJmaWVsZCI6ImNhdGVnb3J5In0sInkiOnsiZmllbGQiOiJjb3VudCJ9fX1dLCJsYWJzIjp7InRpdGxlIjoiRmlsaW5nIHR5cGVzIChsb25nIGNhdGVnb3J5IGxhYmVscykiLCJ4IjoiQ2F0ZWdvcnkiLCJ5IjoiQ291bnQifX19",
+    },
+  },
+  {
     id: "col/value-labels",
     title: "Columns with value labels",
     compatibility: {
