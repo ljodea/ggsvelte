@@ -111,6 +111,24 @@ function temporalDecisionForField(
   return decision;
 }
 
+function uniqueNonNullCount(values: readonly unknown[]): number {
+  const seen = new Set<string>();
+  for (const value of values) {
+    if (value === null) continue;
+    seen.add(typeof value === "string" ? value : JSON.stringify(value));
+  }
+  return seen.size;
+}
+
+function expectedManualDomainLength(
+  domain: unknown,
+  fieldValues: readonly unknown[] | null | undefined,
+): number | null {
+  if (Array.isArray(domain)) return domain.filter((value) => value !== null).length;
+  if (fieldValues === null || fieldValues === undefined) return null;
+  return uniqueNonNullCount(fieldValues);
+}
+
 export function dataChecks(
   spec: Record<string, unknown>,
   options: ValidateOptions,
@@ -442,12 +460,30 @@ export function dataChecks(
 
   for (const channel of COLOR_CHANNELS) {
     const config = scales?.[channel] as ColorScaleSpec | undefined;
+    const effectiveType = configuredColorScaleType(config);
+
+    // Manual range length vs domain / inferred unique values.
+    if ((effectiveType === "manual" || config?.type === "manual") && Array.isArray(config?.range)) {
+      const range = config.range;
+      for (const use of colorFields[channel]) {
+        const expected = expectedManualDomainLength(config.domain, fields.get(use.field)?.values);
+        if (expected === null || range.length === expected) continue;
+        errors.push({
+          code: "scale-manual-domain-range",
+          path: `/scales/${channel}`,
+          message: `The manual ${channel} scale needs one range color per domain value (${String(expected)} values, ${String(range.length)} colors).`,
+          fix: {
+            description: `Provide ${String(expected)} range colors, or set scales.${channel}.domain explicitly to match the range length.`,
+          },
+        });
+      }
+    }
+
     const inferredFromSequentialScheme =
       config?.type === undefined &&
       config?.range === undefined &&
       config?.scheme !== undefined &&
       SEQUENTIAL_SCHEMES.has(config.scheme);
-    const effectiveType = configuredColorScaleType(config);
     if (effectiveType !== "sequential" && effectiveType !== "binned") continue;
     for (const use of colorFields[channel]) {
       const type = typeOf(use.field);
@@ -466,13 +502,47 @@ export function dataChecks(
         });
         continue;
       }
-      if (type !== "nominal" && type !== "ordinal") continue;
 
       const requestsTemporal =
         config?.temporalKind !== undefined ||
         config?.parse !== undefined ||
         config?.timezone !== undefined ||
         config?.disambiguation !== undefined;
+
+      // Quantitative fields with temporal-only options fail at resolve time.
+      if (type === "quantitative" && requestsTemporal) {
+        const info = fields.get(use.field);
+        const decision = temporalDecisionForField(
+          temporalDecisionCache,
+          use.field,
+          info,
+          config?.parse ?? "auto",
+          {
+            ...(config?.timezone !== undefined && { timezone: config.timezone }),
+            ...(config?.disambiguation !== undefined && {
+              disambiguation: config.disambiguation,
+            }),
+          },
+        );
+        const epochParser =
+          typeof config?.parse === "object" &&
+          config.parse !== null &&
+          "epoch" in (config.parse as object);
+        if (decision?.status !== "temporal" && !epochParser) {
+          errors.push({
+            code: "scale-type-mismatch",
+            path: use.path,
+            message: `scales.${channel} requests temporal colors but field "${use.field}" is quantitative (numbers are not treated as temporal without an epoch parser).`,
+            fix: {
+              description: `Map a temporal field, use parse: { epoch: "ms" | "s" }, or remove temporal color options.`,
+            },
+          });
+          continue;
+        }
+      }
+
+      if (type !== "nominal" && type !== "ordinal") continue;
+
       if (!requestsTemporal) {
         errors.push({
           code: "scale-type-mismatch",

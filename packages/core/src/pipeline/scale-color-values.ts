@@ -100,9 +100,12 @@ export function resolveColorValueView(input: {
     warnings.push({ code: "color-temporal-censored", message: cause });
   }
 
+  // Check kind whenever parse recovered a precision — including partial
+  // parseFailure: "censor" columns whose overall status is "invalid".
   if (
-    temporal &&
     config?.temporalKind !== undefined &&
+    parsed.decision.kind !== null &&
+    parsed.decision.kind !== undefined &&
     parsed.decision.kind !== config.temporalKind
   ) {
     throw colorScaleError(
