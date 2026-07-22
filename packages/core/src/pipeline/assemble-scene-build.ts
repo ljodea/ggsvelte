@@ -32,6 +32,10 @@ export function assembleScene(input: AssembleSceneInput): Scene {
     caption,
   } = input;
 
+  // Tick chrome between gridBottom and the first x-label line, matching the SVG
+  // renderer's own offset so a custom (longer/hidden) tick theme keeps the
+  // band-label axis title clear of the labels.
+  const tickChromePx = (theme.ticksX ? theme.tickLength : 0) + 3;
   const { scenePanels, xAxis, yAxis } = assembleScenePanels({
     placements,
     facetPanels,
@@ -41,6 +45,7 @@ export function assembleScene(input: AssembleSceneInput): Scene {
     coordProjectors,
     ...(measureText !== undefined && { measureText }),
     axisTextSize,
+    tickChromePx,
     ...(hMinorBreaks !== undefined && { hMinorBreaks }),
     ...(vMinorBreaks !== undefined && { vMinorBreaks }),
   });

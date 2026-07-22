@@ -84,6 +84,8 @@ export function assembleScenePanels(input: {
   coordProjectors: readonly PanelCoordProjector[];
   measureText?: TextMeasurer | undefined;
   axisTextSize: number;
+  /** Tick chrome (theme tickLength + label gap) below gridBottom; renderer-matched. */
+  tickChromePx?: number;
   hMinorBreaks?: readonly number[] | undefined;
   vMinorBreaks?: readonly number[] | undefined;
 }): {
@@ -158,7 +160,9 @@ export function assembleScenePanels(input: {
   // Multi-line / rotated band labels need the x-axis title pushed below the whole
   // measured label band (max band height across panels for free scales), instead
   // of the renderer's fixed single-line offset.
-  const TICK_CHROME_PX = 9; // tickLength + tickLabelGap defaults
+  // Tick chrome from the active theme (renderer-matched), not a fixed default, so
+  // a custom longer-tick theme still pushes the x title below the label band.
+  const tickChromePx = input.tickChromePx ?? 9; // tickLength(6) + gap(3) defaults
   const TITLE_GAP_PX = 10; // sits within the axis-title reserve band
   const bandTitleOffset = placements.reduce((max, placement) => {
     const plan = placement.showAxisX ? placement.hGuidePlan : undefined;
@@ -169,7 +173,7 @@ export function assembleScenePanels(input: {
     ) {
       return max;
     }
-    return Math.max(max, TICK_CHROME_PX + plan.bandLabelBandHeight + TITLE_GAP_PX);
+    return Math.max(max, tickChromePx + plan.bandLabelBandHeight + TITLE_GAP_PX);
   }, 0);
   const xAxis: SceneAxis = {
     ticks: firstX?.axisX ?? [],

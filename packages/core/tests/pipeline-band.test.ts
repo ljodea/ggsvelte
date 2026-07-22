@@ -56,6 +56,43 @@ describe("band axis diagnostics (#387)", () => {
     expect(model.advisories.some((a) => a.code.startsWith("band-labels-"))).toBe(true);
   });
 
+  it("describes a single-line end-cap overflow in terms of width, not rotation (Codex P3)", () => {
+    // One category with a very long label at a narrow width stays single-line
+    // (no neighbour to collide with) but overflows the end cap. The diagnostic
+    // must steer users to width, and must NOT claim the label was rotated.
+    const loneSpec: SpecInput = {
+      data: {
+        values: [{ c: "Una sola categoría con una etiqueta larguísima que se desborda", n: 5 }],
+      },
+      layers: [{ geom: "col", aes: { x: { field: "c" }, y: { field: "n" } } }],
+    };
+    const model = runPipeline(loneSpec, { width: 220, height: 300 });
+    const diag = model.scaleDiagnostics.find((d) => d.code === "band-label-margin-overflow");
+    expect(diag).toBeDefined();
+    expect(diag?.problem).not.toMatch(/rotat/i);
+    expect(`${diag?.cause} ${diag?.fixes.map((f) => f.description).join(" ")}`).toMatch(/width/i);
+    // No band-labels-rotated advisory either, since the axis is still single-line.
+    expect(model.advisories.some((a) => a.code === "band-labels-rotated")).toBe(false);
+  });
+
+  it("re-plans the narrower final facet panel so the band margin is reserved (Codex P2)", () => {
+    // Two columns force each panel far narrower than the whole width. The band is
+    // re-measured at the final panel size (not the optimistic approx), so the
+    // faceted chart still escalates to rotation — proving the second shared pass.
+    const facetSpec: SpecInput = {
+      data: {
+        values: rows.flatMap((r) => [
+          { ...r, panel: "A" },
+          { ...r, panel: "B" },
+        ]),
+      },
+      layers: [{ geom: "col", aes: { x: { field: "category" }, y: { field: "count" } } }],
+      facet: { cols: "panel" },
+    };
+    const model = runPipeline(facetSpec, { width: 420, height: 300 });
+    expect(model.advisories.some((a) => a.code === "band-labels-rotated")).toBe(true);
+  });
+
   it("does not degrade a short-label bar chart", () => {
     const shortSpec: SpecInput = {
       data: {

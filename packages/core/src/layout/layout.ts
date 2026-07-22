@@ -197,8 +197,10 @@ interface AxisTicks {
   guidePlan?: AxisGuidePlan;
   /** Measured band planner: orthogonal (bottom) band height it requires, px. */
   bandLabelBandHeight?: number;
-  /** Measured band planner: along-axis overhang past the end ticks, px. */
+  /** Measured band planner: along-axis overhang past the RIGHT end tick, px. */
   bandAlongOverhang?: number;
+  /** Measured band planner: along-axis overhang past the LEFT end tick, px. */
+  bandLeftOverhang?: number;
   /** Measured band planner: resolved thinning (1 = every category labeled). */
   bandLabelEvery?: number;
 }
@@ -325,6 +327,7 @@ function deriveTicks(
         guidePlan: bandGuidePlan(plan, domain.band, rawCategories),
         bandLabelBandHeight: plan.labelBandHeight,
         bandAlongOverhang: plan.alongOverhang,
+        bandLeftOverhang: plan.leftOverhang,
         bandLabelEvery: plan.labelEvery,
       };
     }
@@ -624,7 +627,12 @@ export function layoutPass(margins: Margins, input: LayoutInput, theme: LayoutTh
   // Measured band axes budget the wrapped/rotated band height and the along-axis
   // overhang of the end labels, instead of the single-line defaults.
   const bandPlanned = x.bandLabelBandHeight !== undefined;
-  const rawLeft = y.empty ? minMargins.left : Math.max(minMargins.left, yLabelW + leftFixed);
+  // A band end label that overhangs past x=0 (single category, reversed axis, or a
+  // wide leftmost break) must be reserved in the LEFT margin too, not just right.
+  const bandLeft = bandPlanned ? (x.bandLeftOverhang ?? 0) : 0;
+  const rawLeft = y.empty
+    ? Math.max(minMargins.left, bandLeft)
+    : Math.max(minMargins.left, yLabelW + leftFixed, bandLeft);
   const rawBottom = x.empty
     ? minMargins.bottom
     : Math.max(minMargins.bottom, (x.bandLabelBandHeight ?? labelH) + bottomFixed);

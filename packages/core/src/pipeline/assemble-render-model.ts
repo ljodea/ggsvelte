@@ -13,6 +13,7 @@ import {
 import { createRenderModelLifecycle } from "./assemble-render-model-lifecycle.js";
 import { scaleTrainingDiagnostics } from "./assemble-render-model-scale-training-diagnostics.js";
 import type { RenderModel } from "./types.js";
+import type { BandLabelMode } from "../layout/band-guide.js";
 
 export type { AssembleRenderModelInput } from "./assemble-render-model-input.js";
 
@@ -23,23 +24,33 @@ const COORD_FLIP_FIX = {
   portable: { coord: { type: "flip" } },
 } as const;
 
-function bandGuideDiagnostic(code: string, aesthetic: "x" | "y") {
+function bandGuideDiagnostic(code: string, aesthetic: "x" | "y", mode: BandLabelMode | undefined) {
   const margin = code === "band-label-margin-overflow";
+  // A margin overflow on a single-line axis is a HORIZONTAL end-cap problem (a
+  // wide end label past the panel edge), not a rotated-label bottom-margin one —
+  // so steer the user to width, not height, and never claim rotation.
+  const horizontalCap = margin && mode === "single-line";
   return {
     code,
     severity: "warning" as const,
     path: `/scales/${aesthetic}`,
-    problem: margin
-      ? "A rotated categorical label is truncated to fit the axis margin cap."
-      : "Categorical labels overlap even after wrapping and rotation.",
-    cause: margin
-      ? "The full label is longer than the bounded bottom margin allows, even rotated."
-      : "There are more (or longer) categories than the axis width can separate.",
+    problem: horizontalCap
+      ? "A categorical end label is truncated to fit the axis width."
+      : margin
+        ? "A rotated categorical label is truncated to fit the axis margin cap."
+        : "Categorical labels overlap even after wrapping and rotation.",
+    cause: horizontalCap
+      ? "The end label extends past the panel edge and the bounded side margin can't fit it."
+      : margin
+        ? "The full label is longer than the bounded bottom margin allows, even rotated."
+        : "There are more (or longer) categories than the axis width can separate.",
     fixes: [
       {
-        description: margin
-          ? "Use shorter category labels or allocate more chart height."
-          : "Reduce the number of categories or allocate more chart width.",
+        description: horizontalCap
+          ? "Use shorter category labels or allocate more chart width."
+          : margin
+            ? "Use shorter category labels or allocate more chart height."
+            : "Reduce the number of categories or allocate more chart width.",
       },
       COORD_FLIP_FIX,
     ],
@@ -86,7 +97,7 @@ function guidePlanDiagnostics(input: AssembleRenderModelInput): RenderModel["sca
       seen.add(key);
       return [
         plan.scaleType === "band"
-          ? bandGuideDiagnostic(code, plan.aesthetic)
+          ? bandGuideDiagnostic(code, plan.aesthetic, plan.bandLabelMode)
           : temporalGuideDiagnostic(code, plan.aesthetic),
       ];
     }),
