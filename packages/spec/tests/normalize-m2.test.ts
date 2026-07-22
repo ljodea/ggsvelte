@@ -5,6 +5,7 @@
 import { describe, expect, it } from "bun:test";
 
 import { normalize } from "../src/normalize.ts";
+import type { SpecInput } from "../src/normalize.ts";
 
 describe("normalize — M2 statistical layer", () => {
   it("canonicalizes the histogram alias to bar + stat bin (+ stack, + y stat count)", () => {
