@@ -16,6 +16,7 @@ import { getContext, onDestroy, setContext } from "svelte";
 
 import type {
   AesInput,
+  DataInput,
   GeomName,
   PositionName,
   PositionParams,
@@ -36,6 +37,8 @@ export interface LayerDescriptor {
   readonly geom: GeomName;
   readonly stat?: StatName | undefined;
   readonly aes?: AesInput | undefined;
+  /** Optional layer-local data (#589). */
+  readonly data?: DataInput | readonly Record<string, unknown>[] | undefined;
   readonly position?: PositionName | undefined;
   readonly positionParams?: PositionParams | undefined;
   readonly render?: RenderBackend | undefined;

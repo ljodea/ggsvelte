@@ -163,6 +163,7 @@ function normalizeLayer(layer: LayerInput, plotAes: Aes | undefined): LayerSpec 
     ...(positionParams !== undefined && { positionParams }),
     ...(render !== undefined && { render }),
     ...(aes !== undefined && { aes }),
+    ...(layer.data !== undefined && { data: layer.data }),
     ...(params !== undefined && { params }),
   };
   return out as LayerSpec;

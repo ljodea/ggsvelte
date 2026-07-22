@@ -19,6 +19,8 @@ import { parseTemporalColumn, type TemporalDecision } from "./temporal-column.js
 import {
   effectiveChannel,
   resolveFieldEvidence,
+  resolveLayerFieldEvidence,
+  type FieldEvidenceMap,
   type ResolveFieldEvidenceResult,
 } from "./validate-data-evidence.js";
 import { checkColorScaleDataCompatibility } from "./validate-data-checks-color.js";
@@ -265,12 +267,21 @@ export function dataChecks(
   errors.push(...temporalConfig.errors);
   const { invalidTemporalAxes } = temporalConfig;
 
+  // Prefer per-layer evidence when available (#589); fall back to plot-level
+  // resolveFieldEvidence for preResolved/lint sharing and profile mode.
+  const layerResolved = resolveLayerFieldEvidence(spec, options, limits);
+  if (layerResolved.status === "errors") return [...errors, ...layerResolved.errors];
+
   const resolved = preResolved ?? resolveFieldEvidence(spec, options, limits);
   if (resolved.status === "errors") return [...errors, ...resolved.errors];
-  if (resolved.status === "none") return errors; // value-dependent checks need data or a profile
-  const fields = resolved.fields;
+  if (resolved.status === "none" && layerResolved.status === "none") return errors;
+  const plotFields: FieldEvidenceMap | null =
+    layerResolved.status === "ok"
+      ? layerResolved.plot
+      : resolved.status === "ok"
+        ? resolved.fields
+        : null;
 
-  const available = [...fields.keys()];
   const plotAes = isRecord(spec["aes"]) ? (spec["aes"] as Aes) : undefined;
   const layers = Array.isArray(spec["layers"]) ? (spec["layers"] as unknown[]) : [];
   const scaleRequestsTimeForChannel = (channel: ChannelName): boolean => {
@@ -308,6 +319,11 @@ export function dataChecks(
     const layerAes = isRecord(layer["aes"]) ? (layer["aes"] as Aes) : undefined;
     const defaultStat = GEOM_DEFAULTS[geom as keyof typeof GEOM_DEFAULTS]?.stat ?? "identity";
     const stat = typeof layer["stat"] === "string" ? layer["stat"] : defaultStat;
+
+    const fields: FieldEvidenceMap | null =
+      layerResolved.status === "ok" ? (layerResolved.layers[i] ?? plotFields) : plotFields;
+    if (fields === null) continue; // runtime-only named data: skip field checks
+    const available = [...fields.keys()];
 
     // --- geom/stat field-type rules (M2 statistical layer) -----------------
     const fieldTypeOf = (channel: ChannelName): [string, ProfileFieldType] | null => {
@@ -527,6 +543,18 @@ export function dataChecks(
   }
 
   // --- scale/type compatibility (order preserved for diagnostics) ------------
+  // Union layer evidence for global scale checks (same field name across layers
+  // is last-wins; per-layer unknown-field already used layer-local maps above).
+  const fields: FieldEvidenceMap = new Map(plotFields ?? undefined);
+  if (layerResolved.status === "ok") {
+    for (const layerMap of layerResolved.layers) {
+      if (layerMap === null) continue;
+      for (const [name, entry] of layerMap) fields.set(name, entry);
+    }
+  }
+  if (fields.size === 0 && resolved.status === "ok") {
+    for (const [name, entry] of resolved.fields) fields.set(name, entry);
+  }
   const typeOf = (field: string) => fields.get(field)?.type ?? null;
   for (const aesthetic of ["shape", "linetype"] as const) {
     const config = scales?.[aesthetic] as { type?: string } | undefined;

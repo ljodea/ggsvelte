@@ -1,19 +1,24 @@
 /**
- * Bind data, facet-partition, and build per-panel LayerFrames (stat + position).
+ * Bind data (plot + per-layer), facet-partition, and build per-panel LayerFrames.
  */
 import type { PortableSpec } from "@ggsvelte/spec";
 
-import { bindData, bindLayer } from "./bind.js";
+import { ColumnTable } from "../table.js";
+
+import { bindLayer } from "./bind.js";
+import { bindLayerTable, bindPlotData } from "./bind-data.js";
 import { configureStyleBindings } from "./bind-layer-style-config.js";
 import type { FacetLayout } from "./facets.js";
 import { resolveFacet, SINGLE_PANEL } from "./facets.js";
+import { facetFieldNames } from "./layer-panel-data.js";
 import { warnEmptyData } from "./prepare-panels-empty.js";
 import { buildPanelFrames } from "./prepare-panels-frames.js";
 import { applyRuntimeRowFilters } from "./prepare-panels-row-filters.js";
 import { positionConversionContext } from "./temporal-position.js";
 import { assertScaleConfiguration } from "./scale-config-preflight.js";
 import { assertTemporalConfiguration, preflightTemporalBindings } from "./temporal-preflight.js";
-import type { PreparedPanels } from "./prepare-panels-types.js";
+import type { LayerDataContext, PreparedPanels } from "./prepare-panels-types.js";
+import { SourceRegistry } from "./source-registry.js";
 import type {
   Advisory,
   LayerBinding,
@@ -24,7 +29,40 @@ import type {
   ScaleDiagnostic,
 } from "./types.js";
 
-export type { PreparedPanels } from "./prepare-panels-types.js";
+export type { LayerDataContext, PreparedPanels } from "./prepare-panels-types.js";
+
+/**
+ * Choose the table used to build facet layout:
+ * 1. Plot table when it contains every facet field.
+ * 2. Else first layer table that contains every facet field.
+ * resolveFacet still throws unknown-field when the chosen table lacks a field.
+ */
+function facetLayoutTable(
+  facet: PortableSpec["facet"],
+  plotTable: ColumnTable | null,
+  layerSources: readonly ColumnTable[],
+): ColumnTable {
+  const fields = facetFieldNames(facet);
+  if (fields.length === 0) {
+    return plotTable ?? layerSources[0] ?? ColumnTable.fromRows([]);
+  }
+  if (plotTable !== null && fields.every((f) => plotTable.has(f))) return plotTable;
+  for (const table of layerSources) {
+    if (fields.every((f) => table.has(f))) return table;
+  }
+  // Fall back to plot or first layer so resolveFacet emits a clear unknown-field.
+  return plotTable ?? layerSources[0] ?? ColumnTable.fromRows([]);
+}
+
+/** Apply rowFilters only for clauses whose field exists on this layer table. */
+function filterLayerTable(
+  table: ColumnTable,
+  clauses: RunOptions["rowFilters"],
+): { table: ColumnTable; sourceRows: number[] | null } {
+  if (clauses === undefined || clauses.length === 0) return { table, sourceRows: null };
+  const applicable = clauses.filter((c) => table.has(c.field));
+  return applyRuntimeRowFilters(table, applicable);
+}
 
 export function preparePanels(
   normalized: PortableSpec,
@@ -32,42 +70,75 @@ export function preparePanels(
   warnings: PipelineWarning[],
   advisories: Advisory[],
 ): PreparedPanels {
-  const sourceTable = bindData(normalized, options);
-  const filtered = applyRuntimeRowFilters(sourceTable, options.rowFilters);
-  const table = filtered.table;
-  const emptyData = table.rowCount === 0;
+  const registry = new SourceRegistry();
+  const plotSource = bindPlotData(normalized, options);
+
+  const layerContexts: LayerDataContext[] = [];
+  for (let index = 0; index < normalized.layers.length; index++) {
+    const layer = normalized.layers[index]!;
+    const sourceTable = bindLayerTable(layer.data, plotSource, index, normalized, options);
+    const sourceId = registry.register(sourceTable);
+    const filtered = filterLayerTable(sourceTable, options.rowFilters);
+    layerContexts.push({
+      sourceTable,
+      filteredTable: filtered.table,
+      filteredToSource: filtered.sourceRows,
+      sourceId,
+    });
+  }
+
+  // Primary table: plot source when present, else first layer source (for
+  // legacy prepared.table / prepared.sourceTable consumers).
+  const sourceTable = plotSource ?? layerContexts[0]?.sourceTable ?? ColumnTable.fromRows([]);
+  const primaryFiltered =
+    plotSource === null
+      ? {
+          table: layerContexts[0]?.filteredTable ?? ColumnTable.fromRows([]),
+          sourceRows: layerContexts[0]?.filteredToSource ?? null,
+        }
+      : filterLayerTable(plotSource, options.rowFilters);
+  const table = primaryFiltered.table;
+
+  const emptyData = layerContexts.every((ctx) => ctx.filteredTable.rowCount === 0);
   if (emptyData) warnEmptyData(warnings);
+
   const conversions = {
     x: positionConversionContext(normalized.scales?.x),
     y: positionConversionContext(normalized.scales?.y),
   };
   assertTemporalConfiguration("x", conversions.x);
   assertTemporalConfiguration("y", conversions.y);
-  // Structural transform/zero contradictions are rejected before data
-  // execution (normalize left them uncanonicalized on purpose).
   assertScaleConfiguration("x", normalized.scales?.x);
   assertScaleConfiguration("y", normalized.scales?.y);
 
+  const layoutTable = facetLayoutTable(
+    normalized.facet,
+    plotSource === null ? null : primaryFiltered.table,
+    layerContexts.map((c) => c.filteredTable),
+  );
   const facetLayout: FacetLayout = emptyData
-    ? SINGLE_PANEL(table, filtered.sourceRows)
-    : resolveFacet(normalized.facet, table, filtered.sourceRows);
+    ? SINGLE_PANEL(table, primaryFiltered.sourceRows)
+    : resolveFacet(normalized.facet, layoutTable, null);
   const { faceted, nrow, ncol } = facetLayout;
   const facetPanels = facetLayout.panels;
   const freeX = faceted && facetLayout.freeX;
   const freeY = faceted && facetLayout.freeY;
+  const facetFields = facetFieldNames(normalized.facet);
 
   let bindings: LayerBinding[] = [];
   let panelFrames: LayerFrame[][] = facetPanels.map(() => []);
   let scaleDecisions: ScaleDecision[] = [];
   let scaleDiagnostics: ScaleDiagnostic[] = [];
   let resolvedConversions = conversions;
+
   if (!emptyData) {
     const built = buildPanelFrames({
       normalized,
-      table,
-      sourceTable,
+      layerContexts,
+      registry,
       facetPanels,
       faceted,
+      facetFields,
       freeX,
       warnings,
       advisories,
@@ -78,28 +149,36 @@ export function preparePanels(
     scaleDecisions = built.scaleDecisions;
     scaleDiagnostics = built.scaleDiagnostics;
     resolvedConversions = { x: built.xConversion, y: built.yConversion };
-  } else if (sourceTable.fields.length > 0) {
-    // Runtime filters can empty the table; bindings still resolve against the
-    // filtered table so color/fill scales keep the full source-value catalog.
+  } else if (
+    sourceTable.fields.length > 0 ||
+    layerContexts.some((c) => c.sourceTable.fields.length > 0)
+  ) {
     for (let index = 0; index < normalized.layers.length; index++) {
-      const binding = bindLayer(normalized.layers[index]!, index, table, warnings, conversions);
+      const ctx = layerContexts[index]!;
+      const binding = bindLayer(
+        normalized.layers[index]!,
+        index,
+        ctx.filteredTable,
+        warnings,
+        conversions,
+        { sourceTable: ctx.sourceTable, sourceId: ctx.sourceId },
+      );
       binding.color.forcedDiscrete = ["ordinal", "manual"].includes(
         normalized.scales?.color?.type ?? "",
       );
       binding.fill.forcedDiscrete = ["ordinal", "manual"].includes(
         normalized.scales?.fill?.type ?? "",
       );
-      configureStyleBindings(binding, normalized.scales, table);
+      configureStyleBindings(binding, normalized.scales, ctx.filteredTable);
       bindings.push(binding);
     }
-    // Parsing is a source contract, not a rendered-row optimization. Validate
-    // the complete source even when runtime filters remove every row.
     const temporal = preflightTemporalBindings({
       table: sourceTable,
       bindings,
       warnings,
       advisories,
       conversions,
+      layerTables: layerContexts.map((c) => c.sourceTable),
     });
     scaleDecisions = temporal.decisions;
     scaleDiagnostics = temporal.diagnostics;
@@ -109,6 +188,8 @@ export function preparePanels(
   return {
     table,
     sourceTable,
+    sourceRegistry: registry,
+    layerContexts,
     emptyData,
     faceted,
     freeX,

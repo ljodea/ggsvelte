@@ -67,6 +67,11 @@ export interface AesInput {
 
 interface LayerInputBase {
   aes?: AesInput;
+  /**
+   * Optional layer-local data. When omitted, the layer inherits plot-level
+   * `data`. Accepts the same DataRef forms as plot-level data.
+   */
+  data?: DataRef;
   /** Rendering backend hint ("auto" is the default and canonicalizes away). */
   render?: RenderBackend;
 }

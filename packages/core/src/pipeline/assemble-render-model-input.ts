@@ -12,6 +12,7 @@ import type { CellValue, ColumnTable } from "../table.js";
 import type { CandidateStore } from "../candidate-store.js";
 import type { LineageStore } from "../identity.js";
 
+import type { SourceRegistry } from "./source-registry.js";
 import type { PositionConversionContext } from "./temporal-position.js";
 import type {
   Advisory,
@@ -54,4 +55,6 @@ export interface AssembleRenderModelInput {
   formatX: TickFormatter | undefined;
   formatY: TickFormatter | undefined;
   table: ColumnTable;
+  /** Multi-table global row registry (#589). When set, model.row uses it. */
+  sourceRegistry?: SourceRegistry | null;
 }

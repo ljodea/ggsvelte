@@ -3,11 +3,15 @@
  */
 import type { LayerSpec } from "@ggsvelte/spec";
 
+import type { ColumnTable } from "../table.js";
+
 import type { LayerBinding } from "./types.js";
 
 export function makeLayerBinding(input: {
   layer: LayerSpec;
   index: number;
+  sourceTable: ColumnTable;
+  sourceId: number;
   xField: string | null;
   yField: string | null;
   yStatColumn: string | null;
@@ -37,6 +41,8 @@ export function makeLayerBinding(input: {
   return {
     layer: input.layer,
     index: input.index,
+    sourceTable: input.sourceTable,
+    sourceId: input.sourceId,
     xField: input.xField,
     yField: input.yField,
     yStatColumn: input.yStatColumn,

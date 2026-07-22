@@ -32,8 +32,11 @@ export function preflightTemporalBindings(input: {
   warnings: PipelineWarning[];
   advisories: Advisory[];
   conversions: Readonly<{ x: PositionConversionContext; y: PositionConversionContext }>;
+  /** Optional multi-table sources; field preflight prefers binding.sourceTable. */
+  layerTables?: readonly ColumnTable[];
 }): TemporalPreflightResult {
   const { table, bindings, warnings, advisories, conversions } = input;
+  void input.layerTables;
   const { decisions, diagnostics } = preflightTemporalFields({
     table,
     bindings,

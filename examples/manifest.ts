@@ -383,6 +383,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "point/layer-data-bands",
+    category: "point",
+    name: "layer-data-bands",
+    title: "Per-layer data (bands + callout)",
+    description: "A large observation table layered with a small background-band table and a one-row annotation table. Each geom supplies its own data; the plot has no shared table.",
+    tags: ["point", "rect", "text", "layer-data", "multi-table"],
+    docsSection: "Scatter plots",
+    hasData: true,
+  },
+  {
     id: "point/log-scale",
     category: "point",
     name: "log-scale",

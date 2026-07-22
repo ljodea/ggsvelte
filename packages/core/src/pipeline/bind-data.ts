@@ -1,7 +1,8 @@
 /**
  * Resolve NamedData / dataset refs into ColumnTables for the pipeline.
+ * Supports plot-level and per-layer DataRef (#589).
  */
-import type { PortableSpec } from "@ggsvelte/spec";
+import type { DataRef, PortableSpec } from "@ggsvelte/spec";
 
 import type { Columns, Rows } from "../table.js";
 import { ColumnTable } from "../table.js";
@@ -20,15 +21,16 @@ function tableFromNamed(data: NamedData): ColumnTable {
   return ColumnTable.fromColumns(data as Columns);
 }
 
-export function bindData(spec: PortableSpec, options: RunOptions): ColumnTable {
-  const ref = spec.data;
-  if (ref === undefined) {
-    throw new PipelineError(
-      "no-data",
-      "/data",
-      "The spec has no data. Provide spec.data ({values}, {columns}, or {name}) or layer data.",
-    );
-  }
+/**
+ * Resolve a DataRef against spec.datasets / RunOptions.data.
+ * `path` is the diagnostic root (`/data` or `/layers/<n>/data`).
+ */
+export function resolveDataRef(
+  ref: DataRef,
+  spec: PortableSpec,
+  options: RunOptions,
+  path: string,
+): ColumnTable {
   if ("values" in ref) return ColumnTable.fromRows(ref.values);
   if ("columns" in ref) return ColumnTable.fromColumns(ref.columns);
   const name = ref.name;
@@ -37,7 +39,7 @@ export function bindData(spec: PortableSpec, options: RunOptions): ColumnTable {
   if (fromSpec !== undefined && fromRun !== undefined && options.allowOverride !== true) {
     throw new PipelineError(
       "dataset-collision",
-      "/data/name",
+      `${path}/name`,
       `Dataset "${name}" is defined in both spec.datasets and RunOptions.data. ` +
         "Pass allowOverride: true to let the runtime data win, or rename one.",
     );
@@ -49,7 +51,51 @@ export function bindData(spec: PortableSpec, options: RunOptions): ColumnTable {
   const available = [...Object.keys(spec.datasets ?? {}), ...Object.keys(options.data ?? {})];
   throw new PipelineError(
     "unknown-dataset",
-    "/data/name",
+    `${path}/name`,
     `Unknown dataset "${name}". Available: ${available.length > 0 ? available.join(", ") : "none"}.`,
+  );
+}
+
+/** Plot-level data only (throws no-data when missing — legacy single-table path). */
+export function bindData(spec: PortableSpec, options: RunOptions): ColumnTable {
+  const ref = spec.data;
+  if (ref === undefined) {
+    throw new PipelineError(
+      "no-data",
+      "/data",
+      "The spec has no data. Provide spec.data ({values}, {columns}, or {name}) or layer data.",
+    );
+  }
+  return resolveDataRef(ref, spec, options, "/data");
+}
+
+/**
+ * Optional plot-level data. Returns null when the plot omits `data` so layers
+ * can supply their own tables.
+ */
+export function bindPlotData(spec: PortableSpec, options: RunOptions): ColumnTable | null {
+  if (spec.data === undefined) return null;
+  return resolveDataRef(spec.data, spec, options, "/data");
+}
+
+/**
+ * Resolve one layer's table: explicit layer.data wins; else inherit plot table.
+ * Throws layer-scoped no-data when both are absent.
+ */
+export function bindLayerTable(
+  layerData: DataRef | undefined,
+  plotTable: ColumnTable | null,
+  layerIndex: number,
+  spec: PortableSpec,
+  options: RunOptions,
+): ColumnTable {
+  if (layerData !== undefined) {
+    return resolveDataRef(layerData, spec, options, `/layers/${layerIndex}/data`);
+  }
+  if (plotTable !== null) return plotTable;
+  throw new PipelineError(
+    "no-data",
+    `/layers/${layerIndex}`,
+    `Layer ${layerIndex} has no data. Provide layer.data ({values}, {columns}, or {name}) or plot-level data.`,
   );
 }

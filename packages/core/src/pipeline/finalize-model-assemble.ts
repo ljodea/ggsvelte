@@ -86,8 +86,9 @@ export function assembleFinalizeRenderModel(input: {
     candidates: input.candidates,
     formatX: panelLayout.formatX,
     formatY: panelLayout.formatY,
-    // Retain the unfiltered source table: model.row() resolves source-row
-    // indices, which runtime filters preserve against the original data.
+    // Retain the unfiltered source table + multi-table registry: model.row()
+    // resolves global source-row indices (#589).
     table: prepared.sourceTable,
+    sourceRegistry: prepared.sourceRegistry,
   });
 }

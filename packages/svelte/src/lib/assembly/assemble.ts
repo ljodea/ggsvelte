@@ -31,11 +31,25 @@ export type LayerDescriptorLike = {
   readonly geom: GeomName;
   readonly stat?: StatName | undefined;
   readonly aes?: AesInput | undefined;
+  readonly data?: DataInput | readonly Record<string, unknown>[] | undefined;
   readonly position?: PositionName | undefined;
   readonly positionParams?: PositionParams | undefined;
   readonly render?: RenderBackend | undefined;
   readonly params?: Record<string, unknown> | undefined;
 };
+
+/** Wrap geom data props into a DataRef shape for LayerInput. */
+function layerDataRef(data: DataInput | readonly Record<string, unknown>[]): LayerInput["data"] {
+  if (Array.isArray(data)) return { values: data as never };
+  if (typeof data === "object" && data !== null) {
+    if ("values" in data || "columns" in data || "name" in data) {
+      return data as LayerInput["data"];
+    }
+    // Column-oriented bare object.
+    return { columns: data as never };
+  }
+  return data as LayerInput["data"];
+}
 
 /** Convert a registry descriptor into a LayerInput (reads live getters). */
 export function toLayerInput(descriptor: LayerDescriptorLike): LayerInput {
@@ -50,6 +64,7 @@ export function toLayerInput(descriptor: LayerDescriptorLike): LayerInput {
     }),
     ...(descriptor.render !== undefined && { render: descriptor.render }),
     ...(descriptor.aes !== undefined && { aes: descriptor.aes }),
+    ...(descriptor.data !== undefined && { data: layerDataRef(descriptor.data) }),
     ...(descriptor.params !== undefined && { params: descriptor.params }),
   } as LayerInput;
 }

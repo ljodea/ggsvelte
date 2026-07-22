@@ -6,7 +6,13 @@ import { coordTransform, type CoordTransformOptions } from "./coord-helpers.js";
 import { SpecValidationError } from "./errors.js";
 import type { AesInput, FacetInput, LayerInput, SpecInput } from "./normalize.js";
 import { normalize } from "./normalize.js";
-import { calendarDateFields, toDataRef, type AuthoringDataRef } from "./builder-data.js";
+import {
+  calendarDateFields,
+  toAuthoringDataRef,
+  toDataRef,
+  type AuthoringDataRef,
+  type DataInput,
+} from "./builder-data.js";
 import type {
   GeomAreaOptions,
   GeomBarOptions,
@@ -66,9 +72,14 @@ function layerFrom(
     position?: string;
     positionParams?: PositionParams;
     stat?: string;
+    data?: DataInput;
   },
 ): LayerInput {
-  const { aes: layerAes, render, position, positionParams, stat, ...params } = options;
+  const { aes: layerAes, render, position, positionParams, stat, data, ...params } = options;
+  // Snapshot authoring data immediately so later mutation of the caller's array
+  // cannot leak into the builder; portable Date→ISO conversion happens in .spec().
+  const withData =
+    data === undefined ? {} : { data: toAuthoringDataRef(data) as LayerInput["data"] };
   return {
     geom,
     ...(stat !== undefined && { stat }),
@@ -76,6 +87,7 @@ function layerFrom(
     ...(positionParams !== undefined && { positionParams }),
     ...(render !== undefined && { render }),
     ...(layerAes !== undefined && { aes: layerAes }),
+    ...withData,
     ...(Object.keys(params).length > 0 && { params }),
   } as LayerInput;
 }
@@ -280,10 +292,19 @@ export class GGBuilderCore {
       width,
       height,
     } = this.#state;
+    const calendarFields = calendarDateFields(this.#state);
+    const portableLayers = layers.map((layer) => {
+      if (layer.data === undefined) return layer;
+      // layer.data may still be authoring form (Dates) from geom sugar.
+      return {
+        ...layer,
+        data: toDataRef(layer.data as AuthoringDataRef, calendarFields),
+      };
+    });
     const input: SpecInput = {
-      ...(data !== undefined && { data: toDataRef(data, calendarDateFields(this.#state)) }),
+      ...(data !== undefined && { data: toDataRef(data, calendarFields) }),
       ...(plotAes !== undefined && { aes: plotAes }),
-      layers: [...layers],
+      layers: portableLayers,
       ...(facet !== undefined && { facet }),
       ...(coord !== undefined && { coord }),
       ...(a11y !== undefined && { a11y }),

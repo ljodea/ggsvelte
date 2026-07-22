@@ -31,6 +31,8 @@ export function preflightTemporalFields(input: {
   const docs = temporalPreflightDocs;
 
   for (const binding of bindings) {
+    // Prefer the layer's own source table when multi-table (#589).
+    const layerTable = binding.sourceTable ?? table;
     const processAxis = (axis: "x" | "y"): void => {
       const axisConversion = axis === "x" ? binding.xConversion : binding.yConversion;
       if (axisConversion.forcedDiscrete || axisConversion.forcedNonTemporal) return;
@@ -52,16 +54,16 @@ export function preflightTemporalFields(input: {
             ];
       const fieldResolutions: PositionConversionContext[] = [];
       for (const field of new Set(fields)) {
-        if (field === null || !table.has(field)) continue;
+        if (field === null || !layerTable.has(field)) continue;
         const conversion = axisConversion;
-        const key = `${axis}|${field}|${conversion.parser === "auto" ? "auto" : JSON.stringify(conversion.parser)}|${JSON.stringify(conversion.options)}`;
+        const key = `${binding.sourceId}|${axis}|${field}|${conversion.parser === "auto" ? "auto" : JSON.stringify(conversion.parser)}|${JSON.stringify(conversion.options)}`;
         const cachedResolution = resolvedByKey.get(key);
         if (cachedResolution !== undefined) {
           fieldResolutions.push(cachedResolution);
           continue;
         }
 
-        const view = table.parsed(field, conversion.sourceParser, conversion.options);
+        const view = layerTable.parsed(field, conversion.sourceParser, conversion.options);
         const decision = view.decision;
         const explicit = conversion.parser !== "auto";
         if (explicit && decision.failedCount > 0) {
