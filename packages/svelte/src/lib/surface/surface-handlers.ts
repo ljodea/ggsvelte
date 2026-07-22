@@ -366,7 +366,7 @@ export function createSurfaceHandlers(live: SurfaceHandlerLive): SurfaceHandlers
     if (blurAction.type === "ignore") return;
     // Shared for keep-pinned and clear-inspection (ordering is load-bearing).
     deps.inspection().resetTraversalIndex();
-    reducer.dispatch({ type: "set-active", candidate: null });
+    deps.inspection().cancelPointerInspect({ pendingPinned: "preserve" });
     if (blurAction.type === "blur-clear-inspection")
       deps.inspection().setInspection(null, "keyboard");
   }

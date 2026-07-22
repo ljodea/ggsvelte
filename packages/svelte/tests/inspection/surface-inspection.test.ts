@@ -13,7 +13,6 @@ import {
   resolveToggleInspectionPinAction,
   shouldAnnounceUnpin,
   shouldClearInspectionAnnouncement,
-  shouldCommitInspection,
   shouldFocusPinnedInteractiveTooltip,
   type SetInspectionInput,
   type ToggleInspectionPinInput,
@@ -413,44 +412,6 @@ describe("buildQueuedInspectFrame", () => {
       x: 12,
       y: 24,
     });
-  });
-});
-
-describe("shouldCommitInspection", () => {
-  it("commits when reducer kind matches requested state", () => {
-    expect(
-      shouldCommitInspection({
-        requestedState: "transient",
-        reducerKind: "transient",
-      }),
-    ).toBe(true);
-    expect(
-      shouldCommitInspection({
-        requestedState: "pinned",
-        reducerKind: "pinned",
-      }),
-    ).toBe(true);
-  });
-
-  it("abandons when reducer kind does not match requested state", () => {
-    expect(
-      shouldCommitInspection({
-        requestedState: "transient",
-        reducerKind: "pinned",
-      }),
-    ).toBe(false);
-    expect(
-      shouldCommitInspection({
-        requestedState: "pinned",
-        reducerKind: "transient",
-      }),
-    ).toBe(false);
-    expect(
-      shouldCommitInspection({
-        requestedState: "transient",
-        reducerKind: "none",
-      }),
-    ).toBe(false);
   });
 });
 

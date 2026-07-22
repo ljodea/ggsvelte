@@ -176,7 +176,6 @@ describe("createSurfaceState onSurfaceBlur", () => {
     h.surface.onSurfaceBlur(new FocusEvent("blur", { bubbles: true, relatedTarget: null }));
     flushSync();
     expect(h.inspection.inspection).toBeNull();
-    expect(h.surface.reducer.state.activeCandidate).toBeNull();
 
     // Pinned survives genuine blur
     h.inspection.setInspection(
@@ -193,7 +192,6 @@ describe("createSurfaceState onSurfaceBlur", () => {
     h.surface.onSurfaceBlur(new FocusEvent("blur", { bubbles: true, relatedTarget: null }));
     flushSync();
     expect(h.inspection.inspection?.state).toBe("pinned");
-    expect(h.surface.reducer.state.activeCandidate).toBeNull();
 
     h.destroy();
   });
