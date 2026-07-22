@@ -56,8 +56,6 @@ export function buildCandidateStoreEager(
     coincidentAt,
     permutations,
     buckets,
-    logicalValue,
-    fact,
   } = indexes;
   const query = buildCandidateSpatialQuery(indexes);
   const { spatial, isPoint, pointBatchIndexes } = query;
@@ -67,7 +65,7 @@ export function buildCandidateStoreEager(
     size: n,
     x: xs,
     y: ys,
-    candidate: fact,
+    candidate: (id) => indexes.fact(id),
     hitTest(px, py) {
       let best = -1;
       let bestBatch = -1;
@@ -183,7 +181,7 @@ export function buildCandidateStoreEager(
           bestPathEdge = pathEdge;
         }
       }
-      return fact(best);
+      return indexes.fact(best);
     },
     nearest(px, py, search) {
       let best = -1,
@@ -228,7 +226,7 @@ export function buildCandidateStoreEager(
           resultMode = candidateMode;
         }
       }
-      const found = fact(best);
+      const found = indexes.fact(best);
       return found === null ? null : { ...found, distance: bestDistance, mode: resultMode };
     },
     group(seedId, axis) {
@@ -270,7 +268,7 @@ export function buildCandidateStoreEager(
       }
       return {
         axis,
-        axisValue: logicalValue(seedId, axis),
+        axisValue: indexes.logicalValue(seedId, axis),
         token: tokens[key]!,
         focusId: seedId,
         memberIds,
