@@ -130,7 +130,7 @@ function printHelp(): void {
  * Production I/O for `detect-changes` — mirrors the former ci.yml bash:
  * swallow gh/git fetch/diff failures; exact-key GITHUB_OUTPUT write.
  */
-export function createDetectChangesIo(): DetectChangesIo {
+function createDetectChangesIo(): DetectChangesIo {
   return {
     commandExists(name: string): boolean {
       const r = spawnSync("bash", ["-c", `command -v ${JSON.stringify(name)}`], {
