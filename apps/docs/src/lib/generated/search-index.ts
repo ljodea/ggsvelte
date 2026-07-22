@@ -13260,7 +13260,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "diagnostic",
     title: "band-label-margin-overflow · warning",
     summary:
-      "A band label is truncated (ellipsis) to fit a bounded axis margin — a rotated label past the bottom cap, or a single-line end label past the side cap.",
+      "A band label exceeds a bounded axis margin — single-line end truncation, forced-wrap height/side overflow, or a rotated label past the bottom/side cap.",
     href: "/guide/errors#band-label-margin-overflow",
     keywords: [
       "warning",
