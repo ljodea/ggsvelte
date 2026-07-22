@@ -73,7 +73,7 @@ function markFocusedPrimitive(
   if (primitiveIndex === null) return;
   let values = focused.get(batchIndex);
   if (values === undefined) {
-    values = new Uint8Array(primitiveCount(batch));
+    values = new Uint8Array(renderPrimitiveCount(batch));
     focused.set(batchIndex, values);
   }
   values[primitiveIndex] = 1;

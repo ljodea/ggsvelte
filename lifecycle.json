@@ -1667,6 +1667,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "FocusedPrimitive": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "GeometryBatch": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -2092,6 +2096,10 @@
           "lifecycle": "experimental"
         },
         "buildPanelCoordProjector": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "buildPrimitiveInteractionMasks": {
           "kind": "value",
           "lifecycle": "experimental"
         },
