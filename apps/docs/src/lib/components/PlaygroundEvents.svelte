@@ -1,4 +1,5 @@
 <script lang="ts">
+  import UiButton from "$lib/components/UiButton.svelte";
   import {
     PLAYGROUND_MAX_EVENTS,
     type PlaygroundEventEntry,
@@ -28,9 +29,9 @@
         Interact with a mark to inspect public <code>oninteraction</code>
         payloads. This chart-local log is never persisted or shared.
       </p>
-      <button type="button" onclick={onClear} disabled={entries.length === 0}
-        >Clear events</button
-      >
+      <UiButton type="button" onclick={onClear} disabled={entries.length === 0}>
+        Clear events
+      </UiButton>
     </div>
     {#if newestFirst.length === 0}
       <p class="empty">
@@ -56,7 +57,7 @@
 <style>
   .event-inspector {
     margin-top: 1rem;
-    border-block: 1px solid var(--line);
+    border-top: 1px solid var(--line);
   }
 
   summary {
@@ -92,23 +93,6 @@
   .event-intro p,
   .empty {
     margin: 0;
-  }
-
-  button {
-    min-height: 44px;
-    flex: 0 0 auto;
-    border: 1px solid var(--line);
-    border-radius: 2px;
-    padding: 0.55rem 0.7rem;
-    background: var(--paper);
-    color: var(--ink);
-    font: 650 0.78rem/1 var(--body-font);
-    cursor: pointer;
-  }
-
-  button:disabled {
-    cursor: not-allowed;
-    opacity: 0.45;
   }
 
   ol {

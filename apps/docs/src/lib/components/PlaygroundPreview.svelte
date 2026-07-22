@@ -101,7 +101,9 @@
   {#if lastValid}<strong class="last-valid">Last valid result</strong>{/if}
 </div>
 
-<p class="status" role="status" aria-live="polite">{status}</p>
+{#if status !== ""}
+  <p class="status" role="status" aria-live="polite">{status}</p>
+{/if}
 
 <div class="chart-stack" aria-busy={candidate !== null}>
   <div class="active-chart" bind:this={activeChartEl}>
@@ -148,30 +150,24 @@
   {/if}
 </div>
 
-<p class="local-note">
-  Rendering happens locally. Nothing in the editor is fetched, uploaded, or
-  executed as code.
-</p>
-
 <style>
   :global(.preview-surface) {
-    padding: 1rem;
+    padding: 1rem 1.1rem 1.15rem;
   }
 
   .panel-heading {
     display: flex;
-    min-height: 2.5rem;
+    min-height: 2rem;
     align-items: start;
     justify-content: space-between;
     gap: 1rem;
     border-bottom: 1px solid var(--line);
-    padding-bottom: 0.75rem;
+    padding-bottom: 0.6rem;
   }
 
   .panel-heading h2,
   .panel-heading p,
-  .status,
-  .local-note {
+  .status {
     margin: 0;
   }
 
@@ -188,6 +184,7 @@
 
   .last-valid {
     border: 1px solid currentColor;
+    border-radius: 0.35rem;
     padding: 0.3rem 0.45rem;
     color: #9b2c20;
     font-size: 0.72rem;
@@ -195,22 +192,18 @@
     text-transform: uppercase;
   }
 
-  .status,
-  .local-note {
+  .status {
+    padding-block: 0.55rem 0.35rem;
     color: var(--muted);
     font-size: 0.8rem;
   }
 
-  .status {
-    min-height: 2.7rem;
-    padding-block: 0.75rem;
-  }
-
   .chart-stack {
     display: grid;
-    min-height: 25rem;
+    min-height: 28rem;
     overflow: hidden;
-    border-block: 1px solid var(--line);
+    border: 1px solid var(--line);
+    border-radius: 0.35rem;
     background: var(--paper);
   }
 
@@ -227,21 +220,16 @@
 
   .render-error {
     display: grid;
-    min-height: 25rem;
+    min-height: 28rem;
     place-items: center;
     padding: 1rem;
     color: #9b2c20;
     text-align: center;
   }
 
-  .local-note {
-    border-top: 1px solid var(--line);
-    padding-top: 0.75rem;
-  }
-
   @media (max-width: 47.99rem) {
     :global(.preview-surface) {
-      padding: 1rem 0;
+      padding: 0.85rem 0.75rem;
     }
 
     .chart-stack {
