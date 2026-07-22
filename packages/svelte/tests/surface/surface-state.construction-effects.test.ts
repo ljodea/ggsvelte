@@ -94,7 +94,7 @@ describe("createSurfaceState construction", () => {
         intervalCalls++;
         return null;
       },
-      applyBrushSelectEnd: () => {
+      finishBrushSelect: () => {
         intervalCalls++;
       },
     });
@@ -225,7 +225,7 @@ describe("createSurfaceState construction", () => {
       },
     });
     const stubInterval = fromAny<SurfaceStateDeps["interval"] extends () => infer R ? R : never>({
-      applyBrushSelectEnd: () => {},
+      finishBrushSelect: () => {},
       get committedInterval() {
         return null;
       },

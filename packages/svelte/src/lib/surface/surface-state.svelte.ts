@@ -81,7 +81,7 @@ export type SurfaceStateDeps = {
     | "cycleCoincident"
     | "resetTraversalIndex"
   >;
-  interval: () => Pick<IntervalState, "applyBrushSelectEnd" | "committedInterval">;
+  interval: () => Pick<IntervalState, "finishBrushSelect" | "committedInterval">;
   zoom: () => Pick<PlotZoomState, "applyBrushZoom">;
   /** S8 host-held sinks. */
   emitSelection: (event: PlotSelection) => void;
