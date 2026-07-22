@@ -374,7 +374,7 @@ console.log("prerendered Quickstart verified");
   writeFileSync(
     join(directory, "smoke.mjs"),
     `import { strict as assert } from "node:assert";
-import { coord_transform, coordTransform, guideColorsteps, guideLegend, guide_legend, SpecModule, normalize, scaleColorBinned, scaleColourBinned, scaleShapeDiscrete, scaleSizeContinuous, scaleXBinned, scaleXLog10, scale_colour_binned, scale_shape_discrete, scale_x_log10, validate } from "@ggsvelte/spec";
+import { coord_equal, coord_fixed, coord_transform, coordEqual, coordFixed, coordTransform, guideColorsteps, guideLegend, guide_legend, SpecModule, normalize, scaleColorBinned, scaleColourBinned, scaleShapeDiscrete, scaleSizeContinuous, scaleXBinned, scaleXLog10, scale_colour_binned, scale_shape_discrete, scale_x_log10, validate } from "@ggsvelte/spec";
 import { renderToSVGString, runPipeline } from "@ggsvelte/core";
 
 const pointParamsSchema = SpecModule.Import("PointParams");
@@ -383,6 +383,10 @@ const spec = ${JSON.stringify(plotSpec)};
 const logScale = scaleXLog10();
 assert.deepEqual(logScale, scale_x_log10());
 assert.equal(coordTransform, coord_transform);
+assert.equal(coordFixed, coord_fixed);
+assert.equal(coordEqual, coord_equal);
+assert.equal(coordEqual, coordFixed);
+assert.deepEqual(coordFixed(), { type: "fixed" });
 assert.equal(scaleColorBinned, scaleColourBinned);
 assert.equal(scaleColorBinned, scale_colour_binned);
 assert.equal(scaleShapeDiscrete, scale_shape_discrete);

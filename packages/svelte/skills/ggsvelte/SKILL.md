@@ -43,7 +43,11 @@ ndensity`; density→`density, scaled`; smooth→`y, ymin, ymax, se`;
   Use `coordTransform`/`coord_transform`; unlike scale transforms, coordinate
   transforms preserve stat inputs, tessellate curved render topology, and
   invert coordinates before scales for interactions. Non-identity coordinate
-  transforms require continuous non-temporal axes.
+  transforms require continuous non-temporal axes. Fixed aspect uses
+  `{"type":"fixed","ratio":1}`, `coordFixed`/`coord_fixed`, or
+  `coordEqual`/`coord_equal`; ratio is physical y-unit/x-unit length. Fixed
+  coordinates fit a centered data rectangle after chart chrome and reject
+  free positional facet scales.
 - **facet**: wrap form `{"wrap": {"field": "g"}, "ncol": 3}` XOR grid form
   `{"rows": {...}, "cols": {...}}`; `"scales": "fixed"|"free"|"free_x"|"free_y"`.
 - **scales**: canonical x/y families are `{"type": "linear"|"binned"|"time"|"band"}`.

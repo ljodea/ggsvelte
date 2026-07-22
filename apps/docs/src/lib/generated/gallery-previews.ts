@@ -165,6 +165,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "eaa1ff4f5a2e9c113b1ce183b30bf8fbdc08dc77457e97966f974d5c50aa7554",
   },
   {
+    id: "point/fixed-aspect",
+    filename: "point-fixed-aspect-light.png",
+    path: "/previews/point-fixed-aspect-light.png",
+    sha256: "a2a92012bbe2a12699bf9bb9a790276b271678061b797f645c0dcf70d77fba8d",
+  },
+  {
     id: "point/jitter",
     filename: "point-jitter-light.png",
     path: "/previews/point-jitter-light.png",

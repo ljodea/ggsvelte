@@ -196,6 +196,18 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "CoordFixedOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CoordFixedSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CoordFixedSpecSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "CoordSpec": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1100,7 +1112,23 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "coordEqual": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "coordFixed": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "coordTransform": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "coord_equal": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "coord_fixed": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -3109,6 +3137,14 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "CoordFixedOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CoordFixedSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "CoordSpec": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -3845,7 +3881,23 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "coordEqual": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "coordFixed": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "coordTransform": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "coord_equal": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "coord_fixed": {
           "kind": "value",
           "lifecycle": "experimental"
         },

@@ -1,0 +1,6 @@
+{
+  "title": "Fixed aspect ratio",
+  "description": "A unit circle remains circular through responsive width changes because coord_fixed fits a centered equal-unit data rectangle.",
+  "tags": ["point", "coordinates", "fixed-aspect", "responsive"],
+  "docsSection": "Scatter plots"
+}

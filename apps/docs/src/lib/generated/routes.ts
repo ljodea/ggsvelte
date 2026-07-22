@@ -450,6 +450,11 @@ export const DOCS_ROUTES = [
         title: "Scale transforms versus coordinate transforms",
         level: 2,
       },
+      {
+        id: "preserve-physical-data-unit-ratios",
+        title: "Preserve physical data-unit ratios",
+        level: 2,
+      },
     ],
   },
   {
@@ -1149,6 +1154,11 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "coord-fixed-free-scales",
+        title: "coord-fixed-free-scales",
+        level: 3,
+      },
+      {
         id: "missing-required-channel",
         title: "missing-required-channel",
         level: 3,
@@ -1406,6 +1416,16 @@ export const DOCS_ROUTES = [
       {
         id: "coord-transform-continuous",
         title: "coord-transform-continuous",
+        level: 3,
+      },
+      {
+        id: "coord-fixed-free-scales-pipeline",
+        title: "coord-fixed-free-scales — pipeline",
+        level: 3,
+      },
+      {
+        id: "coord-fixed-degraded",
+        title: "coord-fixed-degraded",
         level: 3,
       },
       {
@@ -2038,8 +2058,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-473",
-        title: "experimental (473)",
+        id: "experimental-480",
+        title: "experimental (480)",
         level: 3,
       },
       {
@@ -2078,8 +2098,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-412",
-        title: "experimental (412)",
+        id: "experimental-418",
+        title: "experimental (418)",
         level: 3,
       },
       {
@@ -2122,6 +2142,16 @@ export const DOCS_ROUTES = [
       {
         id: "move-guide-layout-into-the-guide-api",
         title: "Move guide layout into the guide API",
+        level: 3,
+      },
+      {
+        id: "0-8-to-0-9",
+        title: "0.8 to 0.9",
+        level: 2,
+      },
+      {
+        id: "constrain-the-data-rectangle-instead-of-the-outer-box",
+        title: "Constrain the data rectangle instead of the outer box",
         level: 3,
       },
       {
@@ -2494,6 +2524,17 @@ export const DOCS_ROUTES = [
     description:
       'Above the 2,000-mark threshold, render: "auto" moves the layer onto a canvas stratum (advisory `canvas-auto`): axes, grid, and the legend stay SVG; the marks raster into one canvas sized by the DPR recipe, paired with an off-screen description block and a data-table toggle. Set render: "svg" or a11y: "force-svg" to opt out.',
     canonicalPath: "/examples/point/canvas-scatter",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/point/fixed-aspect",
+    title: "Fixed aspect ratio — ggsvelte gallery",
+    description:
+      "A unit circle remains circular through responsive width changes because coord_fixed fits a centered equal-unit data rectangle.",
+    canonicalPath: "/examples/point/fixed-aspect",
     kind: "page",
     index: true,
     sitemap: true,

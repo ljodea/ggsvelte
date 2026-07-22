@@ -373,6 +373,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "point/fixed-aspect",
+    category: "point",
+    name: "fixed-aspect",
+    title: "Fixed aspect ratio",
+    description: "A unit circle remains circular through responsive width changes because coord_fixed fits a centered equal-unit data rectangle.",
+    tags: ["point", "coordinates", "fixed-aspect", "responsive"],
+    docsSection: "Scatter plots",
+    hasData: true,
+  },
+  {
     id: "point/jitter",
     category: "point",
     name: "jitter",

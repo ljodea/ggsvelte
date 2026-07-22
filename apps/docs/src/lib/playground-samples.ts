@@ -199,6 +199,44 @@ export const PLAYGROUND_SAMPLES = [
     },
   },
   {
+    id: "fixed-aspect-coordinate",
+    title: "Fixed physical data units",
+    description:
+      "Fit an equal-unit data rectangle after chart chrome so a unit circle stays circular.",
+    spec: {
+      edition: 2,
+      data: {
+        values: [
+          { x: 1, y: 0 },
+          { x: 0.7, y: 0.7 },
+          { x: 0, y: 1 },
+          { x: -0.7, y: 0.7 },
+          { x: -1, y: 0 },
+          { x: -0.7, y: -0.7 },
+          { x: 0, y: -1 },
+          { x: 0.7, y: -0.7 },
+          { x: 1, y: 0 },
+        ],
+      },
+      layers: [
+        {
+          geom: "line",
+          stat: "identity",
+          position: "identity",
+          aes: { x: { field: "x" }, y: { field: "y" } },
+          params: { linewidth: 2 },
+        },
+      ],
+      coord: { type: "fixed" },
+      labs: {
+        title: "Equal units stay circular",
+        x: "x",
+        y: "y",
+      },
+      height: 440,
+    },
+  },
+  {
     id: "binned-colorsteps",
     title: "Binned colorsteps",
     description: "Translate quantitative values into deterministic semantic color intervals.",

@@ -106,6 +106,12 @@ Post-stat coordinate transforms use the separate strict `CoordTransformSpec`.
 the same spec. Coordinate limits preserve stat inputs, `reverse` composes in
 coordinate space, and `clip: false` explicitly permits panel overflow.
 
+Fixed-aspect coordinates use `coordFixed({ ratio: 1 })`, builder
+`.coordFixed()`, or the identical `coord_fixed`, `coordEqual`, and `coord_equal`
+aliases. `ratio` is physical y-unit length divided by physical x-unit length.
+The strict schema rejects non-positive/non-finite ratios and rejects
+`coord_fixed` with free positional facet scales before rendering.
+
 All six orders (`ymd`, `ydm`, `mdy`, `myd`, `dmy`, `dym`), timestamp variants,
 exact closed formats, and epoch units are typed. PortableSpec never contains `Date`,
 callbacks, or regular expressions; builder Dates canonicalize to ISO strings.
