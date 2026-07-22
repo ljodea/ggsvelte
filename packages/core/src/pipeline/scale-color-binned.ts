@@ -1,19 +1,14 @@
-/** Binned, manual, and identity color/fill scale families. */
+/** Binned color/fill scale family (colorsteps over transformed semantic bins). */
 import type { ColorScaleSpec } from "@ggsvelte/spec";
 
 import type { EditionDefaults } from "../editions.js";
-import { disambiguatedLabels } from "../legend.js";
 import { normalizeColor, rampColor, VIRIDIS_RAMP_10 } from "../scales/color.js";
-import type {
-  BinnedColorScale,
-  IdentityColorScale,
-  ManualColorScale,
-} from "../scales/non-position-color.js";
-import { encodeKey } from "../scales/state.js";
+import type { BinnedColorScale } from "../scales/non-position-color.js";
 import { finiteExtent } from "../scales/train.js";
 import { scaleTransform } from "../scales/transform.js";
 import type { CellValue } from "../table.js";
 
+import { fallbackColors, warnUnknownColors } from "./scale-color-family-helpers.js";
 import { resolveSequentialRange } from "./scale-color-sequential-domain.js";
 import { resolveBinnedLegendFormat } from "./scale-color-sequential-format.js";
 import type { ColorResolution } from "./scale-color-types.js";
@@ -21,160 +16,6 @@ import { resolveColorValueView } from "./scale-color-values.js";
 import { PipelineError, type PipelineWarning } from "./types.js";
 
 const DEFAULT_BIN_COUNT = 5;
-
-function uniqueValues(values: readonly CellValue[]): CellValue[] {
-  const seen = new Set<string>();
-  const output: CellValue[] = [];
-  for (const value of values) {
-    if (value === null) continue;
-    const key = encodeKey(value);
-    if (seen.has(key)) continue;
-    seen.add(key);
-    output.push(value);
-  }
-  return output;
-}
-
-function warnUnknownColors(
-  name: "color" | "fill",
-  count: number,
-  warnings: PipelineWarning[],
-): void {
-  if (count === 0) return;
-  warnings.push({
-    code: "color-unknown-values",
-    message: `${String(count)} ${name} value(s) use the unknown color.`,
-  });
-}
-
-function fallbackColors(config: ColorScaleSpec | undefined): {
-  naValue: string;
-  unknownValue: string;
-} {
-  return {
-    naValue: normalizeColor(config?.naValue ?? "#999999"),
-    unknownValue: normalizeColor(config?.unknownValue ?? "#999999"),
-  };
-}
-
-export function resolveManualColorScale(input: {
-  name: "color" | "fill";
-  values: readonly CellValue[];
-  observedValues: readonly CellValue[];
-  config: ColorScaleSpec;
-  legendTitle: string;
-  warnings: PipelineWarning[];
-}): ColorResolution {
-  const { name, values, observedValues, config, legendTitle, warnings } = input;
-  const domain = (config.domain ?? uniqueValues(values)).filter(
-    (value): value is CellValue => value !== null,
-  );
-  const colors = (config.range ?? []).map((color) => normalizeColor(color));
-  if (domain.length !== colors.length) {
-    throw new PipelineError(
-      "color-manual-domain-range",
-      `/scales/${name}`,
-      `The manual ${name} scale needs one range color per domain value (${String(domain.length)} values, ${String(colors.length)} colors).`,
-    );
-  }
-  const indexByKey = new Map(domain.map((value, index) => [encodeKey(value), index] as const));
-  const { naValue, unknownValue } = fallbackColors(config);
-  const scale: ManualColorScale = Object.freeze({
-    type: "manual" as const,
-    domain: Object.freeze([...domain]),
-    colors: Object.freeze([...colors]),
-    naValue,
-    unknownValue,
-    indexOf(value: unknown): number | undefined {
-      try {
-        return indexByKey.get(encodeKey(value));
-      } catch {
-        return undefined;
-      }
-    },
-    colorOf(value: unknown): string | undefined {
-      if (value === null || value === undefined) return naValue;
-      const index = this.indexOf(value);
-      return index === undefined ? unknownValue : colors[index];
-    },
-  });
-  const labels = disambiguatedLabels(domain);
-  const entries = domain.map((value, index) =>
-    Object.freeze({ value, label: labels[index]!, color: colors[index]! }),
-  );
-  warnUnknownColors(
-    name,
-    observedValues.filter((value) => value !== null && scale.indexOf(value) === undefined).length,
-    warnings,
-  );
-  const showGuide = entries.length > 0;
-  return {
-    resolved: { kind: "manual", scale },
-    legendInput: showGuide
-      ? {
-          kind: "discrete",
-          scale: name,
-          title: legendTitle,
-          domain,
-          firstSeen: values,
-          colorOf: (value: unknown) => scale.colorOf(value),
-        }
-      : null,
-    guidePlan: showGuide
-      ? Object.freeze({
-          type: "discrete" as const,
-          id: `guide:${name}`,
-          aesthetic: name,
-          scaleType: "manual" as const,
-          title: legendTitle,
-          domain: Object.freeze([...domain]),
-          entries: Object.freeze(entries),
-          naValue,
-          unknownValue,
-        })
-      : null,
-    state: null,
-  };
-}
-
-export function resolveIdentityColorScale(input: {
-  name: "color" | "fill";
-  values: readonly CellValue[];
-  config: ColorScaleSpec;
-  warnings: PipelineWarning[];
-}): ColorResolution {
-  const { name, values, config, warnings } = input;
-  const { naValue, unknownValue } = fallbackColors(config);
-  const scale: IdentityColorScale = Object.freeze({
-    type: "identity" as const,
-    naValue,
-    unknownValue,
-    colorOf(value: unknown): string | undefined {
-      if (value === null || value === undefined) return naValue;
-      if (typeof value !== "string") return unknownValue;
-      try {
-        return normalizeColor(value);
-      } catch {
-        return unknownValue;
-      }
-    },
-  });
-  warnUnknownColors(
-    name,
-    values.filter(
-      (value) =>
-        value !== null &&
-        (typeof value !== "string" || !/^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(value)),
-    ).length,
-    warnings,
-  );
-  return {
-    resolved: { kind: "identity", scale },
-    legendInput: null,
-    guidePlan: null,
-    state: null,
-  };
-}
 
 export function resolveBinnedColorScale(input: {
   name: "color" | "fill";
