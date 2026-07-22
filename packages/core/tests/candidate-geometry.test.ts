@@ -238,3 +238,46 @@ describe("directionalNearestInOrder / panelRangeInOrder", () => {
     expect(panelRangeInOrder(order, panels, 9)).toEqual([5, 5]);
   });
 });
+
+import {
+  closestPathEdge,
+  pathSegmentsIntersectRect,
+  pathSubpathAabb,
+  pathVertexStrokeAabb,
+} from "../src/candidate-path-geometry.ts";
+
+describe("path AABB / edge helpers (candidate-path-geometry)", () => {
+  it("pathSubpathAabb pads subpath bounds by linewidth/2 + hitTolerance", () => {
+    const batch = pathsBatch([0, 2]);
+    batch.positions = Float32Array.from([0, 0, 10, 10]);
+    batch.linewidth = 2;
+    expect(pathSubpathAabb(batch, 100, 200, 0, 2, 0, 0, 3)).toEqual([
+      100 - 4,
+      200 - 4,
+      100 + 10 + 4,
+      200 + 10 + 4,
+    ]);
+  });
+
+  it("pathVertexStrokeAabb uses incident neighbors for stroke pads", () => {
+    const batch = pathsBatch([0, 3]);
+    batch.positions = Float32Array.from([0, 0, 10, 0, 10, 10]);
+    batch.linewidth = 0;
+    expect(pathVertexStrokeAabb(batch, 0, 0, 1, 0, 3, 1)).toEqual([-1, -1, 11, 11]);
+  });
+
+  it("closestPathEdge returns the first edge within slop", () => {
+    const batch = pathsBatch([0, 3]);
+    batch.positions = Float32Array.from([0, 0, 10, 0, 20, 0]);
+    expect(closestPathEdge(batch, [0, 2], 5, 0, 0.5)).toBe(0);
+    expect(closestPathEdge(batch, [0, 2], 15, 0, 0.5)).toBe(1);
+    expect(closestPathEdge(batch, null, 5, 0, 1)).toBe(Infinity);
+  });
+
+  it("pathSegmentsIntersectRect detects an edge crossing the query box", () => {
+    const batch = pathsBatch([0, 2]);
+    batch.positions = Float32Array.from([0, 0, 10, 10]);
+    expect(pathSegmentsIntersectRect(batch, 0, 0, [0, 1], 4, 4, 6, 6)).toBe(true);
+    expect(pathSegmentsIntersectRect(batch, 0, 0, [0, 1], 20, 20, 30, 30)).toBe(false);
+  });
+});
