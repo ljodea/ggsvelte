@@ -25,7 +25,7 @@ export function resolveFacetWrap(input: {
   warnings: PipelineWarning[];
 }): FacetLayout {
   const { table, wrapField, freeX, freeY, baseSourceRows, strip, warnings } = input;
-  const levels = input.wrapRef?.levels as readonly import("../table.js").CellValue[] | undefined;
+  const levels = input.wrapRef?.levels;
   const labels = input.wrapRef?.labels;
   const values = facetValues(table, wrapField, {
     ...(levels !== undefined && { levels }),

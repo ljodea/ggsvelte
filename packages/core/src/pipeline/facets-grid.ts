@@ -5,7 +5,7 @@ import type { FacetFieldRef } from "@ggsvelte/spec";
 
 import { createFacetPanelIdentity } from "../facet-identity.js";
 import { encodeKey } from "../scales/state.js";
-import type { CellValue, ColumnTable } from "../table.js";
+import type { ColumnTable } from "../table.js";
 
 import { facetDisplayLabel, facetValues } from "./facets-helpers.js";
 import { partitionByField, partitionByFields } from "./facets-tokens.js";
@@ -26,8 +26,8 @@ export function resolveFacetGrid(input: {
   warnings: PipelineWarning[];
 }): FacetLayout {
   const { table, rowsField, colsField, freeX, freeY, baseSourceRows, strip, warnings } = input;
-  const rowLevels = input.rowsRef?.levels as readonly CellValue[] | undefined;
-  const colLevels = input.colsRef?.levels as readonly CellValue[] | undefined;
+  const rowLevels = input.rowsRef?.levels;
+  const colLevels = input.colsRef?.levels;
   const rowLabels = input.rowsRef?.labels;
   const colLabels = input.colsRef?.labels;
 

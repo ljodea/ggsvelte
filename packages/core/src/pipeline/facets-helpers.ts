@@ -53,7 +53,7 @@ export function facetDisplayLabel(
 
 export interface FacetValuesOptions {
   /** Closed explicit order; when set, only these panels exist (empty allowed). */
-  levels?: readonly CellValue[];
+  levels?: readonly (string | number | boolean | null)[];
   /** Spec path for diagnostics (e.g. `/facet/wrap/levels`). */
   path?: string;
   warnings?: PipelineWarning[];
@@ -88,7 +88,7 @@ export function facetValues(
       const key = encodeKey(level);
       if (levelKeys.has(key)) continue;
       levelKeys.add(key);
-      ordered.push(level as CellValue);
+      ordered.push(level);
     }
     if (warnings !== undefined) {
       const missing = ordered

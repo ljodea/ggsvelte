@@ -5,7 +5,6 @@
 import { describe, expect, it } from "bun:test";
 
 import { normalize } from "../src/normalize.ts";
-import type { SpecInput } from "../src/normalize.ts";
 import { validate } from "../src/validate.ts";
 
 const base = {
@@ -24,7 +23,7 @@ describe("facet field config — PortableSpec seam (#590)", () => {
     const spec = normalize({
       ...base,
       facet: { wrap: "g", ncol: 2 },
-    } as SpecInput);
+    });
     expect(spec.facet).toEqual({ wrap: { field: "g" }, ncol: 2 });
     expect(validate(spec).ok).toBe(true);
   });
@@ -39,7 +38,7 @@ describe("facet field config — PortableSpec seam (#590)", () => {
           labels: { c: "Charlie", a: "Alpha", b: "Bravo" },
         },
       },
-    } as SpecInput);
+    });
     expect(spec.facet).toEqual({
       wrap: {
         field: "g",
@@ -57,7 +56,7 @@ describe("facet field config — PortableSpec seam (#590)", () => {
         wrap: { field: "g" },
         strip: { position: "left", show: false },
       },
-    } as SpecInput);
+    });
     expect(spec.facet).toEqual({
       wrap: { field: "g" },
       strip: { position: "left", show: false },
@@ -73,7 +72,7 @@ describe("facet field config — PortableSpec seam (#590)", () => {
         cols: { field: "c", levels: ["east", "west"] },
         strip: { position: "right" },
       },
-    } as SpecInput);
+    });
     expect(spec.facet).toEqual({
       rows: { field: "r", levels: ["south", "north"], labels: { south: "S", north: "N" } },
       cols: { field: "c", levels: ["east", "west"] },
@@ -111,7 +110,7 @@ describe("facet field config — PortableSpec seam (#590)", () => {
         },
         strip: { position: "bottom", show: true },
       },
-    } as SpecInput);
-    expect(normalize(once as SpecInput)).toEqual(once);
+    });
+    expect(normalize(once)).toEqual(once);
   });
 });

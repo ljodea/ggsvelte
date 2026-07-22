@@ -171,16 +171,14 @@ function normalizeLayer(layer: LayerInput, plotAes: Aes | undefined): LayerSpec 
 }
 
 /** Canonicalize one facet field: bare string -> { field }; clone levels/labels. */
-function normalizeFacetField(
-  v: FacetInput["wrap"],
-): FacetSpec["wrap"] | FacetSpec["rows"] | FacetSpec["cols"] | undefined {
+function normalizeFacetField(v: FacetInput["wrap"]): FacetSpec["wrap"] | undefined {
   if (v === undefined) return undefined;
   if (typeof v === "string") return { field: v };
   const levels =
     v.levels === undefined
       ? undefined
-      : (v.levels.map((level) => level) as NonNullable<FacetSpec["wrap"]>["levels"]);
-  const labels = v.labels === undefined ? undefined : Object.fromEntries(Object.entries(v.labels));
+      : ([...v.levels] as NonNullable<FacetSpec["wrap"]>["levels"]);
+  const labels = v.labels === undefined ? undefined : { ...v.labels };
   return {
     field: v.field,
     ...(levels !== undefined && { levels }),
