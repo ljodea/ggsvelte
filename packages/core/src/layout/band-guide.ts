@@ -299,11 +299,11 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
     const wrapped = entries.map((e) =>
       wrapLabel(e.label, bandBudget, measurer, fontSize, MAX_WRAP_LINES),
     );
-    if (wrapped.every((w) => w !== null)) {
+    if (wrapped.every((w): w is string[] => w !== null)) {
       const lineWidths = wrapped.map((lines) =>
-        Math.max(...lines!.map((l) => measurer.measureWidth(l, fontSize))),
+        Math.max(...lines.map((l) => measurer.measureWidth(l, fontSize))),
       );
-      const maxLines = Math.max(...wrapped.map((w) => (w ?? []).length));
+      const maxLines = Math.max(...wrapped.map((w) => w.length));
       const blockHeight = maxLines * lineHeight;
       const wrapOverlap = neighbourOverlap(
         entries.map((e, i) => ({ pos: e.center, half: lineWidths[i]! / 2 })),
