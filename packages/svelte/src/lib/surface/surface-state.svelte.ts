@@ -56,6 +56,7 @@ import {
   shouldClearInspectionOnPointerLeave,
   TOUCH_INSPECT_CLICK_SUPPRESS_MS,
 } from "./pointer.js";
+import { buildSurfaceDescription } from "./surface-description.js";
 import type { PlotZoomState } from "../zoom/zoom-state.svelte.js";
 
 // ---------------------------------------------------------------------------
@@ -179,17 +180,14 @@ export function createSurfaceState(deps: SurfaceStateDeps): SurfaceState {
     void reducerRevision;
     return reducer.state.tool;
   });
-  const surfaceDescription = $derived.by(() => {
-    if (activeTool === "select-area")
-      return "Press Enter or Space to set the first selection corner. Use Arrow keys to move the opposite corner; hold Shift for larger steps. Press Enter or Space to complete the selection. Press Escape to cancel.";
-    if (activeTool === "zoom-area")
-      return "Press Enter or Space to set the first zoom corner. Use Arrow keys to move the opposite corner; hold Shift for larger steps. Press Enter or Space to complete the zoom. Press Escape to cancel.";
-    if (activeTool === "point")
-      return "Use Arrow keys to inspect data. Press Enter or Space to toggle the focused point selection. Press Escape to dismiss.";
-    return deps.inspectConfig()?.pin === true
-      ? "Use Arrow keys to inspect data. Press Enter or Space to pin. Press Escape to dismiss."
-      : "Use Arrow keys to inspect data. Press Escape to dismiss.";
-  });
+  // Lazy pin read: only consult inspectConfig on the inspect tool branch so
+  // non-inspect tools do not subscribe to inspect config (dependency tracking).
+  const surfaceDescription = $derived.by(() =>
+    buildSurfaceDescription(
+      activeTool,
+      activeTool === "inspect" && deps.inspectConfig()?.pin === true,
+    ),
+  );
 
   let touchInspectStart: { x: number; y: number } | null = null;
   let touchInspectMoved = false;
