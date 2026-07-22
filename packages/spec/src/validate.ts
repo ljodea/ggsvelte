@@ -6,7 +6,8 @@
  * `Value.Errors` over the same schemas that emit `schema/v0.json` — one
  * artifact, no drift.
  * Raw TypeBox union noise is mapped to the agent error contract in
- * validate-map-errors.ts (schema/path inspection in validate-schema-walk.ts).
+ * validate-map-errors.ts (schema walk: validate-schema-walk.ts; channel/data
+ * form classification: validate-map-forms.ts).
  * Data-free grammar rules live in validate-structure*.ts (layers / color
  * schemes / facet form). Data-aware checks live in validate-data*.ts
  * (evidence + checks modules, barrel at validate-data.ts).
