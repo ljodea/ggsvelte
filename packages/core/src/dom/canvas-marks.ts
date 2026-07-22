@@ -5,7 +5,7 @@
  * (text always renders as SVG).
  *
  * Primitive drawers live in canvas-marks-{points,paths,segments}.ts; focus-mask
- * helpers in canvas-marks-mask.ts. This module owns dispatch + public API.
+ * helpers in canvas-marks-mask.ts. Thin orchestrator over those drawers for dispatch + public API.
  */
 import type { GeometryBatch } from "../scene.js";
 import type { ThemeTokens } from "../theme.js";
