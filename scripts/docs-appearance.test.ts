@@ -69,6 +69,12 @@ describe("docs appearance", () => {
     writeDocsAppearance("light", el, null);
     expect(el.dataset.theme).toBe("light");
   });
+
+  test("write with two args uses the lazy default storage resolver", () => {
+    const el = root("light");
+    writeDocsAppearance("dark", el);
+    expect(el.dataset.theme).toBe("dark");
+  });
 });
 
 describe("watchDocsAppearance", () => {
