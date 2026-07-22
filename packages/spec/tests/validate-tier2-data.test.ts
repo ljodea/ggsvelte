@@ -478,6 +478,51 @@ describe("tier 2 — data-aware checks (inline data)", () => {
     });
     expect(errors.map((e) => e.code)).toEqual(["scale-type-mismatch"]);
   });
+
+  it("does not throw on a non-primitive temporal scaled constant", () => {
+    // A schema-invalid object constant (with a BigInt) must not reach parseTemporalColumn,
+    // whose evidence formatting throws on BigInt; it is treated as non-temporal instead.
+    const spec = fromAny({
+      ...base,
+      aes: { ...base.aes, size: { value: { n: 1n }, scale: true } },
+      scales: { size: { type: "sequential", parse: "iso" } },
+      layers: [{ geom: "point" }],
+    });
+    expect(() => validate(spec, {})).not.toThrow();
+    expect(validate(spec, {}).ok).toBe(false);
+  });
+
+  it("does not throw on a schema-invalid temporal option", () => {
+    // A Symbol timezone reaches tier-2; it must not be handed to the temporal helpers
+    // (whose cache-key/parse assumptions throw) — defer to the schema diagnostic.
+    const spec = fromAny({
+      ...base,
+      aes: { ...base.aes, size: { field: "temp" } },
+      scales: { size: { type: "sequential", parse: { epoch: "seconds" }, timezone: Symbol("x") } },
+      layers: [{ geom: "point" }],
+    });
+    expect(() => validate(spec, {})).not.toThrow();
+  });
+
+  it("accepts an invalid censored constant when a field trains the temporal scale", () => {
+    // Layer 1 maps size to a temporal field (trains the scale); layer 2 adds a censored
+    // invalid constant, which the runtime censors to the unknown style rather than failing
+    // — the same partial-invalid recovery already accepted for fields.
+    expect(
+      validate(
+        {
+          data: { values: rows },
+          aes: { x: { field: "city" }, y: { field: "temp" } },
+          scales: { size: { type: "sequential", parse: "iso", parseFailure: "censor" } },
+          layers: [
+            { geom: "point", aes: { size: { field: "when" } } },
+            { geom: "point", aes: { size: { value: "large", scale: true } } },
+          ],
+        },
+        {},
+      ).ok,
+    ).toBe(true);
+  });
 });
 
 describe("tier 2 — DataProfile", () => {

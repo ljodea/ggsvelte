@@ -193,13 +193,18 @@ function numericStyleConstantError(input: {
   let constantKind: string | null | undefined;
   if (value instanceof Date) {
     constantKind = "datetime";
-  } else {
+  } else if (typeof value === "string" || typeof value === "number") {
     const decision = parseTemporalColumn(
       [value] as Parameters<typeof parseTemporalColumn>[0],
       parser,
       options,
     ).decision;
     constantKind = decision.status === "temporal" ? (decision.kind ?? null) : undefined;
+  } else {
+    // boolean, bigint, symbol, object, null: not a temporal constant, and must not be
+    // handed to parseTemporalColumn — its evidence formatting (JSON.stringify) throws on
+    // BigInt / unserializable objects. safeFormatConstant handles the message safely.
+    constantKind = undefined;
   }
   if (constantKind === undefined) {
     if (censorRecovers) return null;
@@ -520,7 +525,15 @@ export function dataChecks(
       config.disambiguation !== undefined;
     // Config-level temporal facts, shared by the field checks and the scaled-constant
     // checks below (both mirror the runtime resolveNumericStyleValueView path).
+    // A schema-invalid parser or option (e.g. a Symbol timezone) reaches tier-2 (schema
+    // errors don't short-circuit it); handing it to the temporal helpers throws in their
+    // cache-key/evidence formatting instead of yielding the schema diagnostic, so gate
+    // every temporal call on the inputs being usable and defer otherwise.
     const parseUsable = temporalParserUsable(config.parse);
+    const temporalOptionsUsable =
+      (config.timezone === undefined || typeof config.timezone === "string") &&
+      (config.disambiguation === undefined || typeof config.disambiguation === "string");
+    const temporalInputsUsable = parseUsable && temporalOptionsUsable;
     const parser = (config.parse ?? "auto") as Parameters<typeof parseTemporalColumn>[1];
     const temporalOptions = {
       ...(config.timezone !== undefined && { timezone: config.timezone }),
@@ -535,8 +548,8 @@ export function dataChecks(
     // style-domain-invalid / style-binned-breaks, so require parseability before
     // treating either as a recovery bound (matches numericSequentialResolution).
     const parseableBound = (value: unknown): boolean =>
+      temporalInputsUsable &&
       config.parse !== undefined &&
-      parseUsable &&
       parseTemporal(value, config.parse as Parameters<typeof parseTemporal>[1], temporalOptions).ok;
     const domainValues = Array.isArray(config.domain)
       ? config.domain.filter((value) => value !== null)
@@ -549,16 +562,21 @@ export function dataChecks(
         : [];
     const hasBinnedBreaks =
       binnedBreaks.length >= 2 && binnedBreaks.every((value) => parseableBound(value));
+    // A temporal field with real parseable values trains the scale, so an invalid
+    // censored scaled constant sharing it is censored to the unknown style rather than
+    // rejected (the same partial-invalid path fields already accept). Track it here to
+    // extend censor recovery to the scaled-constant check below.
+    let fieldTrainsScale = false;
     for (const use of numericStyleFields[aesthetic]) {
       const type = typeOf(use.field);
+      // A temporal-typed field always trains the scale (extends censor recovery below).
+      if (type === "temporal") fieldTrainsScale = true;
       // A quantitative field carrying temporal options fails at resolve time
       // unless a working parser (or censor recovery) yields temporal values —
       // mirror the color checker rather than deferring unconditionally.
       if (type === "quantitative" && requestsTemporal) {
-        // A schema-invalid parser reaches tier-2 (schema errors don't short-circuit
-        // it); passing it to temporalDecisionForField would throw instead of
-        // yielding the schema diagnostic. Defer to that diagnostic.
-        if (!parseUsable) continue;
+        // Defer to the schema diagnostic when the parser/options are schema-invalid.
+        if (!temporalInputsUsable) continue;
         const decision = temporalDecisionForField(
           temporalDecisionCache,
           use.field,
@@ -566,6 +584,11 @@ export function dataChecks(
           parser as Parameters<typeof temporalDecisionForField>[3],
           temporalOptions as Parameters<typeof temporalDecisionForField>[4],
         );
+        // A field that parses (fully or partially) trains the scale from data.
+        fieldTrainsScale ||=
+          decision !== null &&
+          decision !== undefined &&
+          (decision.status === "temporal" || (decision.validatedCount ?? 0) > 0);
         const error = quantitativeTemporalFieldError({
           decision,
           aesthetic,
@@ -599,7 +622,8 @@ export function dataChecks(
     // resolve throws at runtime (style-domain-empty / style-temporal-parse). Reject
     // it here too, mirroring the field checks above for both resolution paths.
     const censorRecovers =
-      config.parseFailure === "censor" && (hasExplicitDomain || hasBinnedBreaks);
+      config.parseFailure === "censor" &&
+      (hasExplicitDomain || hasBinnedBreaks || fieldTrainsScale);
     for (const value of numericStyleScaledConstants[aesthetic]) {
       const error = numericStyleConstantError({
         value,
@@ -607,7 +631,7 @@ export function dataChecks(
         configType: config.type,
         requestsTemporal,
         temporalKind: config.temporalKind,
-        parseUsable,
+        parseUsable: temporalInputsUsable,
         parser,
         options: temporalOptions,
         censorRecovers,
