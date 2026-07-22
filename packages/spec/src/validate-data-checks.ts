@@ -9,7 +9,14 @@ import { configuredColorScaleType } from "./scale-helpers.js";
 import type { Aes, ChannelName, ColorScaleSpec, PositionScaleSpec } from "./schema.js";
 import { CHANNELS, GEOM_DEFAULTS, SEQUENTIAL_SCHEME_NAMES } from "./schema.js";
 import type { ProfileFieldType, ValidateLimits, ValidateOptions } from "./validate-data.js";
-import { parseTemporalColumn, temporalParserConfigurationError } from "./temporal.js";
+import {
+  canonicalTemporalParserKey,
+  parseTemporalColumn,
+  temporalParserConfigurationError,
+  type TemporalDecision,
+  type TemporalParseOptions,
+  type TemporalParserSpec,
+} from "./temporal.js";
 import {
   parseTemporalInterval,
   temporalLabelConfigurationError,
@@ -18,6 +25,7 @@ import {
 import {
   effectiveChannel,
   resolveFieldEvidence,
+  type FieldEvidenceEntry,
   type ResolveFieldEvidenceResult,
 } from "./validate-data-evidence.js";
 
@@ -63,6 +71,47 @@ const AXIS_CHANNELS = ["x", "y"] as const;
 const COLOR_CHANNELS = ["color", "fill"] as const;
 const SEQUENTIAL_SCHEMES = new Set<string>(SEQUENTIAL_SCHEME_NAMES);
 
+/**
+ * Resolve one field's temporal decision for scale compatibility checks.
+ *
+ * Memoized per dataChecks() call so multi-layer / multi-channel consumers of
+ * the same field under the same parser+options pay O(n) once, not O(U·n).
+ * When parser is auto and options match the evidence pass (no timezone /
+ * disambiguation), reuse FieldEvidenceEntry.temporal instead of re-scanning.
+ *
+ * Cache key omits parseFailure and temporalKind — those only affect how the
+ * decision is interpreted, not the decision itself.
+ */
+function temporalDecisionForField(
+  cache: Map<string, TemporalDecision | null | undefined>,
+  field: string,
+  info: FieldEvidenceEntry | undefined,
+  parser: TemporalParserSpec | "auto",
+  options: TemporalParseOptions,
+): TemporalDecision | null | undefined {
+  const parserKey = parser === "auto" ? "auto" : canonicalTemporalParserKey(parser);
+  const key = `${field}\0${parserKey}\0${options.timezone ?? ""}\0${options.disambiguation ?? ""}`;
+  if (cache.has(key)) return cache.get(key);
+
+  let decision: TemporalDecision | null | undefined;
+  if (info?.values === null || info?.values === undefined) {
+    // Profile-backed fields: no inline values. temporal is always null today.
+    decision = info?.temporal ?? null;
+  } else if (
+    parser === "auto" &&
+    options.timezone === undefined &&
+    options.disambiguation === undefined &&
+    info.temporal !== null
+  ) {
+    // Evidence was built with inferTemporalColumn(column) — same auto defaults.
+    decision = info.temporal;
+  } else {
+    decision = parseTemporalColumn(info.values, parser, options).decision;
+  }
+  cache.set(key, decision);
+  return decision;
+}
+
 export function dataChecks(
   spec: Record<string, unknown>,
   options: ValidateOptions,
@@ -71,6 +120,7 @@ export function dataChecks(
   preResolved?: ResolveFieldEvidenceResult,
 ): SpecError[] {
   const errors: SpecError[] = [];
+  const temporalDecisionCache = new Map<string, TemporalDecision | null | undefined>();
   const scales = isRecord(spec["scales"]) ? spec["scales"] : undefined;
   const scaleRequestsTime = (axis: "x" | "y"): boolean => {
     const config = scales?.[axis] as PositionScaleSpec | undefined;
@@ -328,15 +378,18 @@ export function dataChecks(
       if (type === null) continue;
       if (declared === "time") {
         const info = fields.get(use.field);
-        const decision =
-          info?.values === null || info?.values === undefined
-            ? info?.temporal
-            : parseTemporalColumn(info.values, config?.parse ?? "auto", {
-                ...(config?.timezone !== undefined && { timezone: config.timezone }),
-                ...(config?.disambiguation !== undefined && {
-                  disambiguation: config.disambiguation,
-                }),
-              }).decision;
+        const decision = temporalDecisionForField(
+          temporalDecisionCache,
+          use.field,
+          info,
+          config?.parse ?? "auto",
+          {
+            ...(config?.timezone !== undefined && { timezone: config.timezone }),
+            ...(config?.disambiguation !== undefined && {
+              disambiguation: config.disambiguation,
+            }),
+          },
+        );
         const censoredInvalid =
           config?.parse !== undefined &&
           config.parseFailure === "censor" &&
@@ -439,15 +492,18 @@ export function dataChecks(
       }
 
       const info = fields.get(use.field);
-      const decision =
-        info?.values === null || info?.values === undefined
-          ? info?.temporal
-          : parseTemporalColumn(info.values, config?.parse ?? "auto", {
-              ...(config?.timezone !== undefined && { timezone: config.timezone }),
-              ...(config?.disambiguation !== undefined && {
-                disambiguation: config.disambiguation,
-              }),
-            }).decision;
+      const decision = temporalDecisionForField(
+        temporalDecisionCache,
+        use.field,
+        info,
+        config?.parse ?? "auto",
+        {
+          ...(config?.timezone !== undefined && { timezone: config.timezone }),
+          ...(config?.disambiguation !== undefined && {
+            disambiguation: config.disambiguation,
+          }),
+        },
+      );
       const censoredInvalid =
         config?.parse !== undefined &&
         config.parseFailure === "censor" &&
