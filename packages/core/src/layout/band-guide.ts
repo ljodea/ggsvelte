@@ -20,6 +20,7 @@
 
 import { neighbourOverlap, neighbourOverlapAsym } from "./axis-overlap.js";
 import type { TextMeasurer } from "./measure.js";
+import { truncateToFit } from "./truncate.js";
 
 export type BandLabelMode = "single-line" | "wrapped" | "rotated";
 
@@ -138,23 +139,6 @@ function wrapLabel(
   }
   if (current !== "") lines.push(current);
   return lines.length <= maxLines ? lines : null;
-}
-
-function truncateToFit(
-  label: string,
-  maxWidth: number,
-  measurer: TextMeasurer,
-  fontSize: number,
-  ellipsis: string,
-): string {
-  if (measurer.measureWidth(label, fontSize) <= maxWidth) return label;
-  // oxlint-disable-next-line typescript/no-misused-spread -- code-point split is intentional (truncation granularity)
-  const chars = [...label];
-  for (let keep = chars.length - 1; keep >= 1; keep--) {
-    const candidate = chars.slice(0, keep).join("") + ellipsis;
-    if (measurer.measureWidth(candidate, fontSize) <= maxWidth) return candidate;
-  }
-  return ellipsis;
 }
 
 /**

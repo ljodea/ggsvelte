@@ -31,6 +31,7 @@
 
 import type { TextMeasurer } from "./measure.js";
 import { deriveTicks, type AxisTicks, type DeriveTicksContext } from "./layout-derive-ticks.js";
+import { truncateToFit } from "./truncate.js";
 import {
   DEFAULT_LAYOUT_THEME,
   type LayoutInput,
@@ -70,23 +71,6 @@ function maxLabeledWidth(axis: AxisTicks, measurer: TextMeasurer, fontSize: numb
     if (w > max) max = w;
   }
   return max;
-}
-
-function truncateToFit(
-  label: string,
-  maxWidth: number,
-  measurer: TextMeasurer,
-  fontSize: number,
-  ellipsis: string,
-): string {
-  if (measurer.measureWidth(label, fontSize) <= maxWidth) return label;
-  // oxlint-disable-next-line typescript/no-misused-spread -- code-point split is intentional (truncation granularity)
-  const chars = [...label];
-  for (let keep = chars.length - 1; keep >= 1; keep--) {
-    const candidate = chars.slice(0, keep).join("") + ellipsis;
-    if (measurer.measureWidth(candidate, fontSize) <= maxWidth) return candidate;
-  }
-  return ellipsis;
 }
 
 /**
