@@ -24,22 +24,22 @@
  * Scale-type inference needs data, so it lives in @ggsvelte/core (pipeline);
  * normalize only fills structural defaults. Normalized output is itself a
  * valid PortableSpec, and normalize(normalize(s)) deep-equals normalize(s).
+ *
+ * Scale and coord canonicalization live in normalize-scales.ts and
+ * normalize-coord.ts; this module owns channels, layers, facet, theme, and
+ * the top-level normalize() walk.
  */
 import type {
   Aes,
   ChannelValue,
-  ColorScaleSpec,
-  CoordSpec,
-  CoordTransformAxisSpec,
-  CoordTransformSpec,
   FacetSpec,
   LayerSpec,
   PortableSpec,
-  PositionScaleSpec,
-  Scales,
   ThemeName,
   ThemeSpec,
 } from "./schema.js";
+import { normalizeCoord } from "./normalize-coord.js";
+import { normalizeScales } from "./normalize-scales.js";
 import { CHANNELS, CURRENT_EDITION, GEOM_DEFAULTS } from "./schema.js";
 import type {
   AesInput,
@@ -180,165 +180,6 @@ function normalizeFacet(facet: FacetInput): FacetSpec {
 
 function normalizeTheme(theme: ThemeName | ThemeSpec): ThemeName | ThemeSpec {
   return typeof theme === "string" ? theme : { ...theme };
-}
-
-function normalizeHexColor(color: string): string {
-  const match = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(color);
-  if (match === null) return color;
-  const digits = match[1]!.toLowerCase();
-  return digits.length === 3
-    ? `#${digits[0]}${digits[0]}${digits[1]}${digits[1]}${digits[2]}${digits[2]}`
-    : `#${digits}`;
-}
-
-function normalizeColorScale(scale: ColorScaleSpec): ColorScaleSpec {
-  const fallbacks = {
-    ...(scale.naValue !== undefined && { naValue: normalizeHexColor(scale.naValue) }),
-    ...(scale.unknownValue !== undefined && {
-      unknownValue: normalizeHexColor(scale.unknownValue),
-    }),
-  };
-  if (scale.type === "identity") return { ...scale, ...fallbacks };
-  return {
-    ...scale,
-    ...(Array.isArray(scale.range) && {
-      range: scale.range.map((color) => normalizeHexColor(color)),
-    }),
-    ...fallbacks,
-  };
-}
-
-function normalizePositionScale(scale: PositionScaleSpec): PositionScaleSpec {
-  if (scale.type === "band") {
-    const {
-      temporalKind: _,
-      parse: __,
-      parseFailure: ___,
-      timezone: ____,
-      disambiguation: _____,
-      dateBreaks: ______,
-      dateMinorBreaks: _______,
-      dateLabels: ________,
-      locale: _________,
-      weekStart: __________,
-      ...band
-    } = scale;
-    return band;
-  }
-  // Canonical log10: an authored `type: "log"` (base-10) IS the linear family
-  // with the log10 transform. A conflicting explicit transform (identity/sqrt)
-  // is left uncanonicalized for pipeline preflight to reject as
-  // scale-type-transform-conflict. Pure normalize never throws.
-  if (scale.type === "log" && (scale.transform === undefined || scale.transform === "log10")) {
-    return { ...scale, type: "linear", transform: "log10" };
-  }
-  // Binned is a quantitative position family; it never requests a time scale.
-  // Contradictory temporal options are left for validate() to reject.
-  if (scale.type === "binned") {
-    return { ...scale };
-  }
-  const hasTemporalGuideOption =
-    scale.dateBreaks !== undefined ||
-    scale.dateMinorBreaks !== undefined ||
-    scale.dateLabels !== undefined ||
-    scale.locale !== undefined ||
-    scale.weekStart !== undefined;
-  if ((scale.type === "linear" || scale.type === "log") && hasTemporalGuideOption) {
-    return { ...scale };
-  }
-  const requestsTime =
-    scale.type === "time" ||
-    scale.temporalKind !== undefined ||
-    scale.parse !== undefined ||
-    scale.parseFailure !== undefined ||
-    scale.timezone !== undefined ||
-    scale.disambiguation !== undefined ||
-    hasTemporalGuideOption;
-  return requestsTime ? { ...scale, type: "time" } : { ...scale };
-}
-
-function normalizeScales(scales: Scales): Scales {
-  return {
-    ...(scales.x !== undefined && { x: normalizePositionScale(scales.x) }),
-    ...(scales.y !== undefined && { y: normalizePositionScale(scales.y) }),
-    ...(scales.color !== undefined && { color: normalizeColorScale(scales.color) }),
-    ...(scales.fill !== undefined && { fill: normalizeColorScale(scales.fill) }),
-  };
-}
-
-function normalizeCoordAxis(
-  axis: CoordTransformAxisSpec | undefined,
-): CoordTransformAxisSpec | undefined {
-  if (axis === undefined) return axis;
-  const runtimeAxis = axis as unknown;
-  if (runtimeAxis === null || typeof runtimeAxis !== "object" || Array.isArray(runtimeAxis))
-    return runtimeAxis as CoordTransformAxisSpec;
-  // Preserve unknown and malformed runtime values so strict schema validation
-  // can reject them; only copy valid tuple-shaped limits defensively.
-  const record = runtimeAxis as Record<string, unknown>;
-  const normalized = {
-    ...record,
-    ...(Array.isArray(record["limits"]) && {
-      limits: [...(record["limits"] as unknown[])],
-    }),
-  } as CoordTransformAxisSpec;
-  if (record["reverse"] !== true) delete normalized.reverse;
-  if (record["expand"] !== false) delete normalized.expand;
-  return normalized;
-}
-
-function effectiveCoordAxis(axis: ReturnType<typeof normalizeCoordAxis>): boolean {
-  if (axis === undefined) return false;
-  const runtimeAxis = axis as unknown;
-  if (runtimeAxis === null || typeof runtimeAxis !== "object" || Array.isArray(runtimeAxis))
-    return true;
-  return (
-    axis.transform !== "identity" ||
-    axis.limits !== undefined ||
-    axis.reverse === true ||
-    axis.expand === false ||
-    Object.keys(axis).some(
-      (key) => key !== "transform" && key !== "limits" && key !== "reverse" && key !== "expand",
-    )
-  );
-}
-
-function normalizeCoord(coord: CoordSpec | undefined): CoordSpec | undefined {
-  if (coord === undefined) return undefined;
-  const runtimeCoord = coord as unknown;
-  if (runtimeCoord === null || typeof runtimeCoord !== "object" || Array.isArray(runtimeCoord))
-    return runtimeCoord as CoordSpec;
-  const record = runtimeCoord as Record<string, unknown>;
-  if (record["type"] === "cartesian")
-    return Object.keys(record).some((key) => key !== "type")
-      ? ({ ...record } as CoordSpec)
-      : undefined;
-  if (record["type"] === "flip") return { ...record } as CoordSpec;
-  if (record["type"] !== "transform") return { ...record } as CoordSpec;
-  const transformed = coord as CoordTransformSpec;
-  const x = normalizeCoordAxis(transformed.x);
-  const y = normalizeCoordAxis(transformed.y);
-  const hasUnknownKey = Object.keys(transformed).some(
-    (key) => key !== "type" && key !== "x" && key !== "y" && key !== "clip",
-  );
-  if (
-    !effectiveCoordAxis(x) &&
-    !effectiveCoordAxis(y) &&
-    transformed.clip !== false &&
-    !hasUnknownKey
-  ) {
-    return undefined;
-  }
-  const normalized: CoordSpec = {
-    ...transformed,
-    type: "transform",
-    ...(effectiveCoordAxis(x) && { x: x! }),
-    ...(effectiveCoordAxis(y) && { y: y! }),
-  };
-  if (!effectiveCoordAxis(x)) delete normalized.x;
-  if (!effectiveCoordAxis(y)) delete normalized.y;
-  if (transformed.clip !== false) delete normalized.clip;
-  return normalized;
 }
 
 /** Canonicalize a SpecInput into a normalized PortableSpec (see module docs). */
