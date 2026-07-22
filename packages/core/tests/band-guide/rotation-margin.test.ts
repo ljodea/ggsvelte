@@ -93,4 +93,25 @@ describe("neighbourOverlapAsym: end-anchored rotated footprint (Codex P2)", () =
     ];
     expect(neighbourOverlapAsym(items, 4)).toBe(false);
   });
+
+  it("alreadySorted matches default sort for ascending pos order", () => {
+    const items = [
+      { pos: 0, left: 2, right: 2 },
+      { pos: 20, left: 30, right: 2 },
+      { pos: 80, left: 5, right: 5 },
+    ];
+    expect(neighbourOverlapAsym(items, 4, { alreadySorted: true })).toBe(
+      neighbourOverlapAsym(items, 4),
+    );
+  });
+
+  it("alreadySorted still catches overlap when items are pre-ordered ascending", () => {
+    // Descending construction then reverse → ascending for alreadySorted.
+    const descending = [
+      { pos: 20, left: 30, right: 2 },
+      { pos: 0, left: 2, right: 2 },
+    ];
+    const ascending = [...descending].toSorted((a, b) => a.pos - b.pos);
+    expect(neighbourOverlapAsym(ascending, 4, { alreadySorted: true })).toBe(true);
+  });
 });

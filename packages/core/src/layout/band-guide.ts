@@ -183,26 +183,38 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
     return width * Math.sin(a) + lineHeight * Math.cos(a);
   };
   /** Widest label among the currently-labeled (every k-th) entries. */
-  const labeledMaxWidth = (every: number) =>
-    Math.max(0, ...entries.filter((_, i) => i % every === 0).map((e) => e.width));
-  // Overlap of the rotated footprint measured at the ACTUAL displayed tick
-  // positions (every k-th when thinned) with each label's own end-anchored
-  // footprint — so a sparse break subset hundreds of px apart is never wrongly
-  // thinned, a hidden wide label never inflates the check, and a long label after
-  // a short one is caught overlapping its left neighbour.
-  const rotatedOverlaps = (angle: number, every: number) =>
-    neighbourOverlapAsym(
-      entries
-        .filter((_, i) => i % every === 0)
-        .map((e) => ({ pos: e.center, left: leftExtOf(e.width, angle), right: rightExtOf(angle) })),
-      gap,
-    );
+  const labeledMaxWidth = (every: number) => {
+    let max = 0;
+    for (let i = 0; i < entries.length; i += every) max = Math.max(max, entries[i]!.width);
+    return max;
+  };
+  // Overlap of the rotated footprint at displayed (every-k) ticks. Entries may
+  // be in authored break order (not domain order), so project+sort once per
+  // angle by pos, then filter by array index for thinning — O(K log K) once +
+  // O(K) per doubling step, not O(K log K) per step.
+  type AsymItem = { pos: number; left: number; right: number; index: number };
+  const rotatedOverlapsSorted = (angle: number, every: number, sorted: readonly AsymItem[]) => {
+    const items = every === 1 ? sorted : sorted.filter((item) => item.index % every === 0);
+    return neighbourOverlapAsym(items, gap, { alreadySorted: true });
+  };
+  const projectRotatedSorted = (angle: number): AsymItem[] =>
+    entries
+      .map((e, index) => ({
+        pos: e.center,
+        left: leftExtOf(e.width, angle),
+        right: rightExtOf(angle),
+        index,
+      }))
+      .toSorted((a, b) => a.pos - b.pos);
+
   // Prefer −45 (more readable, less bottom footprint); escalate to −90 ONLY when
   // −45 actually overlaps neighbours. A −45 label that merely exceeds the bottom
   // cap is truncated within the −45 budget below — switching to −90 for that would
   // need MORE bottom space (its footprint is the full label width) and truncate
   // harder without resolving any collision.
-  const angle = rotatedOverlaps(-45, 1) ? -90 : -45;
+  const sortedAtNeg45 = projectRotatedSorted(-45);
+  const angle = rotatedOverlapsSorted(-45, 1, sortedAtNeg45) ? -90 : -45;
+  const sortedAtAngle = angle === -45 ? sortedAtNeg45 : projectRotatedSorted(angle);
 
   const degraded: string[] = [];
   let labelEvery = 1;
@@ -212,13 +224,16 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
   // Along-axis: do adjacent rotated labels still collide at their real positions?
   // Gate thinning on the number of DISPLAYED ticks (a small authored-break subset
   // of a huge domain must keep every break), never the full category count.
-  if (rotatedOverlaps(angle, 1)) {
+  if (rotatedOverlapsSorted(angle, 1, sortedAtAngle)) {
     if (entries.length >= BAND_THIN_MIN_CATEGORIES) {
       // High cardinality: thin (never for a handful of named bars).
-      while (rotatedOverlaps(angle, labelEvery) && labelEvery * 2 < entries.length) {
+      while (
+        rotatedOverlapsSorted(angle, labelEvery, sortedAtAngle) &&
+        labelEvery * 2 < entries.length
+      ) {
         labelEvery *= 2;
       }
-      if (rotatedOverlaps(angle, labelEvery)) {
+      if (rotatedOverlapsSorted(angle, labelEvery, sortedAtAngle)) {
         overlap = true;
         degraded.push("band-label-overlap");
       }
