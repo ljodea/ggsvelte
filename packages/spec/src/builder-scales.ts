@@ -1,7 +1,8 @@
 /**
  * Fluent builder scale sugar methods (thin wrappers over scale-helpers).
- * Core builder: builder.ts. Geom options: builder-options.ts.
+ * Core builder: builder-core.ts. Public GGBuilder: builder.ts.
  */
+import type { GGBuilder } from "./builder.js";
 import {
   scaleColorBinned,
   scaleColorContinuous,
@@ -51,185 +52,189 @@ import {
 } from "./scale-helpers.js";
 import type { Scales } from "./schema.js";
 
-/** Host must expose scales() so sugar methods can merge scale configs. */
+/** Host must expose scales() returning the public fluent builder type. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- mixin host constructor
 type ScaleHostConstructor = new (...args: any[]) => {
-  scales(scales: Scales): any;
+  scales(scales: Scales): GGBuilder;
 };
 
 /**
  * Mixin that adds scaleX/Y/Color/Fill sugar methods.
- * Returns the same fluent type as the host `scales()` method.
+ * Every method is annotated to return GGBuilder so fluent chains keep full typing.
  */
 export function WithBuilderScales<TBase extends ScaleHostConstructor>(Base: TBase) {
   return class extends Base {
     /** Configure the x scale as calendar dates. */
-    scaleXDate(options: TemporalScaleOptions = {}) {
+    scaleXDate(options: TemporalScaleOptions = {}): GGBuilder {
       return this.scales(scaleXDate(options));
     }
 
     /** Configure the x scale as date-time instants. */
-    scaleXDatetime(options: TemporalScaleOptions = {}) {
+    scaleXDatetime(options: TemporalScaleOptions = {}): GGBuilder {
       return this.scales(scaleXDatetime(options));
     }
 
     /** Configure the y scale as calendar dates. */
-    scaleYDate(options: TemporalScaleOptions = {}) {
+    scaleYDate(options: TemporalScaleOptions = {}): GGBuilder {
       return this.scales(scaleYDate(options));
     }
 
     /** Configure the y scale as date-time instants. */
-    scaleYDatetime(options: TemporalScaleOptions = {}) {
+    scaleYDatetime(options: TemporalScaleOptions = {}): GGBuilder {
       return this.scales(scaleYDatetime(options));
     }
 
     /** Force x values to remain discrete categories. */
-    scaleXDiscrete(options: DiscretePositionScaleOptions = {}) {
+    scaleXDiscrete(options: DiscretePositionScaleOptions = {}): GGBuilder {
       return this.scales(scaleXDiscrete(options));
     }
 
     /** Force y values to remain discrete categories. */
-    scaleYDiscrete(options: DiscretePositionScaleOptions = {}) {
+    scaleYDiscrete(options: DiscretePositionScaleOptions = {}): GGBuilder {
       return this.scales(scaleYDiscrete(options));
     }
 
     /** Configure the x scale as a continuous linear scale. */
-    scaleXContinuous(options: ContinuousPositionScaleOptions = {}) {
+    scaleXContinuous(options: ContinuousPositionScaleOptions = {}): GGBuilder {
       return this.scales(scaleXContinuous(options));
     }
 
     /** Configure the y scale as a continuous linear scale. */
-    scaleYContinuous(options: ContinuousPositionScaleOptions = {}) {
+    scaleYContinuous(options: ContinuousPositionScaleOptions = {}): GGBuilder {
       return this.scales(scaleYContinuous(options));
     }
 
     /** Configure the x scale as a base-10 log scale (pre-stat log10 transform). */
-    scaleXLog10(options: TransformedPositionScaleOptions = {}) {
+    scaleXLog10(options: TransformedPositionScaleOptions = {}): GGBuilder {
       return this.scales(scaleXLog10(options));
     }
 
     /** Configure the y scale as a base-10 log scale (pre-stat log10 transform). */
-    scaleYLog10(options: TransformedPositionScaleOptions = {}) {
+    scaleYLog10(options: TransformedPositionScaleOptions = {}): GGBuilder {
       return this.scales(scaleYLog10(options));
     }
 
     /** Configure the x scale as a square-root scale (pre-stat sqrt transform). */
-    scaleXSqrt(options: TransformedPositionScaleOptions = {}) {
+    scaleXSqrt(options: TransformedPositionScaleOptions = {}): GGBuilder {
       return this.scales(scaleXSqrt(options));
     }
 
     /** Configure the y scale as a square-root scale (pre-stat sqrt transform). */
-    scaleYSqrt(options: TransformedPositionScaleOptions = {}) {
+    scaleYSqrt(options: TransformedPositionScaleOptions = {}): GGBuilder {
       return this.scales(scaleYSqrt(options));
     }
 
     /** Reverse the x scale's output direction. */
-    scaleXReverse(options: Omit<ContinuousPositionScaleOptions, "transform" | "reverse"> = {}) {
+    scaleXReverse(
+      options: Omit<ContinuousPositionScaleOptions, "transform" | "reverse"> = {},
+    ): GGBuilder {
       return this.scales(scaleXReverse(options));
     }
 
     /** Reverse the y scale's output direction. */
-    scaleYReverse(options: Omit<ContinuousPositionScaleOptions, "transform" | "reverse"> = {}) {
+    scaleYReverse(
+      options: Omit<ContinuousPositionScaleOptions, "transform" | "reverse"> = {},
+    ): GGBuilder {
       return this.scales(scaleYReverse(options));
     }
 
     /** Configure the x scale as a binned (ordered-bin) quantitative scale. */
-    scaleXBinned(options: ContinuousPositionScaleOptions = {}) {
+    scaleXBinned(options: ContinuousPositionScaleOptions = {}): GGBuilder {
       return this.scales(scaleXBinned(options));
     }
 
     /** Configure the y scale as a binned (ordered-bin) quantitative scale. */
-    scaleYBinned(options: ContinuousPositionScaleOptions = {}) {
+    scaleYBinned(options: ContinuousPositionScaleOptions = {}): GGBuilder {
       return this.scales(scaleYBinned(options));
     }
 
     /** Configure color as a continuous sequential ramp. */
-    scaleColorContinuous(options: SequentialColorScaleOptions = {}) {
+    scaleColorContinuous(options: SequentialColorScaleOptions = {}): GGBuilder {
       return this.scales(scaleColorContinuous(options));
     }
 
     /** Configure color as discrete categories. */
-    scaleColorDiscrete(options: DiscreteColorScaleOptions = {}) {
+    scaleColorDiscrete(options: DiscreteColorScaleOptions = {}): GGBuilder {
       return this.scales(scaleColorDiscrete(options));
     }
 
     /** Configure color as ordered quantitative bins. */
-    scaleColorBinned(options: BinnedColorScaleOptions = {}) {
+    scaleColorBinned(options: BinnedColorScaleOptions = {}): GGBuilder {
       return this.scales(scaleColorBinned(options));
     }
 
     /** Configure color as a pre-training base-10 transformed ramp. */
-    scaleColorLog10(options: TransformedColorScaleOptions = {}) {
+    scaleColorLog10(options: TransformedColorScaleOptions = {}): GGBuilder {
       return this.scales(scaleColorLog10(options));
     }
 
     /** Configure color as a pre-training square-root transformed ramp. */
-    scaleColorSqrt(options: TransformedColorScaleOptions = {}) {
+    scaleColorSqrt(options: TransformedColorScaleOptions = {}): GGBuilder {
       return this.scales(scaleColorSqrt(options));
     }
 
     /** Configure color as calendar dates. */
-    scaleColorDate(options: TemporalColorScaleOptions = {}) {
+    scaleColorDate(options: TemporalColorScaleOptions = {}): GGBuilder {
       return this.scales(scaleColorDate(options));
     }
 
     /** Configure color as date-time instants. */
-    scaleColorDatetime(options: TemporalColorScaleOptions = {}) {
+    scaleColorDatetime(options: TemporalColorScaleOptions = {}): GGBuilder {
       return this.scales(scaleColorDatetime(options));
     }
 
     /** Configure an explicit color domain-to-value mapping. */
-    scaleColorManual(options: ManualColorScaleOptions) {
+    scaleColorManual(options: ManualColorScaleOptions): GGBuilder {
       return this.scales(scaleColorManual(options));
     }
 
     /** Use validated source values directly as colors. */
-    scaleColorIdentity(options: IdentityColorScaleOptions = {}) {
+    scaleColorIdentity(options: IdentityColorScaleOptions = {}): GGBuilder {
       return this.scales(scaleColorIdentity(options));
     }
 
     /** Configure fill as a continuous sequential ramp. */
-    scaleFillContinuous(options: SequentialColorScaleOptions = {}) {
+    scaleFillContinuous(options: SequentialColorScaleOptions = {}): GGBuilder {
       return this.scales(scaleFillContinuous(options));
     }
 
     /** Configure fill as discrete categories. */
-    scaleFillDiscrete(options: DiscreteColorScaleOptions = {}) {
+    scaleFillDiscrete(options: DiscreteColorScaleOptions = {}): GGBuilder {
       return this.scales(scaleFillDiscrete(options));
     }
 
     /** Configure fill as ordered quantitative bins. */
-    scaleFillBinned(options: BinnedColorScaleOptions = {}) {
+    scaleFillBinned(options: BinnedColorScaleOptions = {}): GGBuilder {
       return this.scales(scaleFillBinned(options));
     }
 
     /** Configure fill as a pre-training base-10 transformed ramp. */
-    scaleFillLog10(options: TransformedColorScaleOptions = {}) {
+    scaleFillLog10(options: TransformedColorScaleOptions = {}): GGBuilder {
       return this.scales(scaleFillLog10(options));
     }
 
     /** Configure fill as a pre-training square-root transformed ramp. */
-    scaleFillSqrt(options: TransformedColorScaleOptions = {}) {
+    scaleFillSqrt(options: TransformedColorScaleOptions = {}): GGBuilder {
       return this.scales(scaleFillSqrt(options));
     }
 
     /** Configure fill as calendar dates. */
-    scaleFillDate(options: TemporalColorScaleOptions = {}) {
+    scaleFillDate(options: TemporalColorScaleOptions = {}): GGBuilder {
       return this.scales(scaleFillDate(options));
     }
 
     /** Configure fill as date-time instants. */
-    scaleFillDatetime(options: TemporalColorScaleOptions = {}) {
+    scaleFillDatetime(options: TemporalColorScaleOptions = {}): GGBuilder {
       return this.scales(scaleFillDatetime(options));
     }
 
     /** Configure an explicit fill domain-to-value mapping. */
-    scaleFillManual(options: ManualColorScaleOptions) {
+    scaleFillManual(options: ManualColorScaleOptions): GGBuilder {
       return this.scales(scaleFillManual(options));
     }
 
     /** Use validated source values directly as fills. */
-    scaleFillIdentity(options: IdentityColorScaleOptions = {}) {
+    scaleFillIdentity(options: IdentityColorScaleOptions = {}): GGBuilder {
       return this.scales(scaleFillIdentity(options));
     }
   };
