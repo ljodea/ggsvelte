@@ -23,6 +23,22 @@ describe("planBandAxis: author guide pins (#407)", () => {
     expect(pinned.degraded).toContain("band-label-overlap");
   });
 
+  it("mode:single measures overlap after end-label truncation", () => {
+    // Full pre-truncation widths collide; side-cap ellipsis shortens the ends so
+    // rendered labels clear each other. Using entry widths would false-positive.
+    const cats = ["VERYLONGLABEL", "A", "VERYLONGLABEL"];
+    const pinned = plan(cats, 120, {
+      config: { mode: "single" },
+      marginCapPx: 8,
+      orthogonalMarginCapPx: 200,
+    });
+    expect(pinned.mode).toBe("single-line");
+    expect(pinned.marginOverflow).toBe(true);
+    expect(pinned.ticks.some((t, i) => t.label !== cats[i])).toBe(true);
+    expect(pinned.overlap).toBe(false);
+    expect(pinned.degraded).not.toContain("band-label-overlap");
+  });
+
   it("mode:wrap pins wrap even when auto would stay single-line", () => {
     const short = ["IT", "HR", "Ops", "Sales"];
     expect(plan(short, 480).mode).toBe("single-line");
@@ -101,6 +117,26 @@ describe("planBandAxis: author guide pins (#407)", () => {
     });
     expect(twoLines.mode).toBe("wrapped");
     expect(twoLines.ticks.every((t) => (t.lines?.length ?? 0) <= 2)).toBe(true);
+  });
+
+  it("mode:wrap keeps capped multi-line layout when labels need more than wrap lines", () => {
+    // Multi-word label that needs >2 lines on a narrow band; forced wrap must
+    // not collapse back to a single full-width line.
+    const label = "one two three four five six seven eight";
+    // extent 150 → band ~50px: words fit individually but need >2 wrap lines.
+    const pinned = plan([label, "A", "B"], 150, {
+      config: { mode: "wrap", wrap: 2 },
+      orthogonalMarginCapPx: 200,
+      marginCapPx: 40,
+    });
+    expect(pinned.mode).toBe("wrapped");
+    const lines = pinned.ticks[0]?.lines;
+    expect(lines).toBeDefined();
+    expect(lines!.length).toBeGreaterThan(1);
+    expect(lines!.length).toBeLessThanOrEqual(2);
+    // Collapsing to the full label as one line would produce a single-line pin.
+    expect(lines![0]).not.toBe(label);
+    expect(lines!.join(" ")).toBe(label);
   });
 
   it("auto + guide.angle uses the pinned angle when escalating to rotate", () => {
