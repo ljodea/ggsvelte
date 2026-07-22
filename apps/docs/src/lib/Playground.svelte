@@ -2,7 +2,7 @@
   import { pushState as pushSvelteKitState } from "$app/navigation";
   import { onMount, tick } from "svelte";
 
-  import type { RenderModel } from "@ggsvelte/core";
+  import type { AxisGuidePlan, RenderModel } from "@ggsvelte/core";
 
   import { copyText, MANUAL_LINK_COPY_STATUS } from "$lib/clipboard";
   import PlaygroundEditor from "$lib/components/PlaygroundEditor.svelte";
@@ -58,7 +58,7 @@
   let reportSource = $state<HTMLElement>();
   let reportStatus = $state("");
   let scaleDecisions = $state<RenderModel["scaleDecisions"]>([]);
-  let guidePlans = $state<RenderModel["guidePlans"]>([]);
+  let guidePlans = $state<readonly AxisGuidePlan[]>([]);
   let events = $state<readonly PlaygroundEventEntry[]>([]);
   let lifecycleTracker = $state(createCandidateLifecycleTracker());
 
@@ -330,7 +330,9 @@
   function activeRendered(model: RenderModel): void {
     workbench = confirmPlaygroundRendered(workbench);
     scaleDecisions = model.scaleDecisions;
-    guidePlans = model.guidePlans;
+    guidePlans = model.guidePlans.filter(
+      (guide): guide is AxisGuidePlan => guide.type === "axis",
+    );
     reportStatus = "";
   }
 
