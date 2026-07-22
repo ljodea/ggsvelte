@@ -59,7 +59,7 @@
           {#if tick.angle !== undefined && tick.angle !== 0}
             <!-- Rotated band label: hang below the axis, anchored at the tick. -->
             <text
-              transform={`translate(0,${(theme.ticksX ? theme.tickLength : 0) + 3}) rotate(${tick.angle})`}
+              transform={`translate(0,${(theme.ticksX && tick.showTick !== false ? theme.tickLength : 0) + 3}) rotate(${tick.angle})`}
               text-anchor="end"
               dominant-baseline="central"
               fill={axisText}
@@ -69,7 +69,9 @@
           {:else if tick.lines !== undefined && tick.lines.length > 1}
             <!-- Wrapped band label: one tspan per line, centered. -->
             <text
-              y={(theme.ticksX ? theme.tickLength : 0) + 3}
+              y={(theme.ticksX && tick.showTick !== false
+                ? theme.tickLength
+                : 0) + 3}
               text-anchor="middle"
               fill={axisText}
               font-size={tick.labelSize ?? theme.axisTextSize}
@@ -84,7 +86,9 @@
             >
           {:else}
             <text
-              y={(theme.ticksX ? theme.tickLength : 0) + 3}
+              y={(theme.ticksX && tick.showTick !== false
+                ? theme.tickLength
+                : 0) + 3}
               dy="0.71em"
               text-anchor="middle"
               fill={axisText}
@@ -131,7 +135,9 @@
         {/if}
         {#if tick.label !== "" && tick.showLabel !== false}
           <text
-            x={-(theme.ticksY ? theme.tickLength : 0) - 3}
+            x={-(theme.ticksY && tick.showTick !== false
+              ? theme.tickLength
+              : 0) - 3}
             dy="0.32em"
             text-anchor="end"
             fill={axisText}

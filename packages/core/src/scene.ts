@@ -270,6 +270,8 @@ export interface SceneDiscreteLegend {
   position?: "right" | "bottom";
   direction?: "vertical" | "horizontal";
   titleSize?: number;
+  /** Measured title band height, including descender gap. */
+  titleHeight?: number;
   labelSize?: number;
   keyGap?: number;
   /** False when entries are representative ticks/bins rather than raw value identities. */
@@ -293,6 +295,8 @@ export interface SceneRampLegend {
   position?: "right" | "bottom";
   direction?: "vertical" | "horizontal";
   titleSize?: number;
+  /** Measured title band height, including descender gap. */
+  titleHeight?: number;
   labelSize?: number;
   title: string;
   x: number;
@@ -305,6 +309,8 @@ export interface SceneRampLegend {
   showTicks?: boolean;
   /** Labeled positions along the ramp's primary direction. */
   ticks: { pos?: number; y?: number; label: string; fullLabel?: string }[];
+  /** Horizontal ramp inset reserved for the leading endpoint label. */
+  rampX?: number;
   /** Ramp bar size in px. */
   rampWidth: number;
   rampHeight: number;
@@ -317,6 +323,8 @@ export interface SceneStepsLegend {
   position?: "right" | "bottom";
   direction?: "vertical" | "horizontal";
   titleSize?: number;
+  /** Measured title band height, including descender gap. */
+  titleHeight?: number;
   labelSize?: number;
   title: string;
   x: number;

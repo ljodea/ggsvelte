@@ -135,4 +135,39 @@ describe("responsive guide authoring API", () => {
         true,
       );
   });
+
+  it("lets a top-level guide override suppress an incompatible scale-local guide", () => {
+    const result = api.validate(
+      portable({ shape: { type: "none" } }, { shape: { guide: { type: "colorbar" } } }),
+    );
+    expect(result.ok).toBe(true);
+  });
+
+  it("rejects legends on explicit sequential and binned color scales", () => {
+    for (const scaleType of ["sequential", "binned"] as const) {
+      const local = api.validate(
+        portable({}, { color: { type: scaleType, guide: { type: "legend" } } }),
+      );
+      expect(local.ok).toBe(false);
+      if (!local.ok)
+        expect(
+          local.errors.some(
+            (error) =>
+              error.code === "guide-aesthetic-incompatible" && error.path === "/scales/color/guide",
+          ),
+        ).toBe(true);
+
+      const top = api.validate(
+        portable({ color: { type: "legend" } }, { color: { type: scaleType } }),
+      );
+      expect(top.ok).toBe(false);
+      if (!top.ok)
+        expect(
+          top.errors.some(
+            (error) =>
+              error.code === "guide-aesthetic-incompatible" && error.path === "/guides/color",
+          ),
+        ).toBe(true);
+    }
+  });
 });

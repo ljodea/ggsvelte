@@ -41,7 +41,7 @@ export function guideStructuralErrors(
     const valid = positional
       ? type === "axis"
       : aesthetic === "color" || aesthetic === "fill"
-        ? type === "legend" ||
+        ? (type === "legend" && scaleType !== "sequential" && scaleType !== "binned") ||
           (type === "colorbar" && (scaleType === undefined || scaleType === "sequential")) ||
           (type === "colorsteps" && scaleType === "binned")
         : type === "legend";
@@ -60,9 +60,11 @@ export function guideStructuralErrors(
     });
   };
   for (const aesthetic of GUIDE_AESTHETICS) {
-    check(aesthetic, guides[aesthetic], `/guides/${aesthetic}`);
+    const top = guides[aesthetic];
+    check(aesthetic, top, `/guides/${aesthetic}`);
     const scale = scales?.[aesthetic];
-    if (isRecord(scale)) check(aesthetic, scale["guide"], `/scales/${aesthetic}/guide`);
+    if (top === undefined && isRecord(scale))
+      check(aesthetic, scale["guide"], `/scales/${aesthetic}/guide`);
   }
   return errors;
 }

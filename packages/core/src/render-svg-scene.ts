@@ -40,7 +40,7 @@ function renderPanelAxes(panel: ScenePanel, theme: ThemeTokens): string {
         );
       }
       if (tick.label !== "" && tick.showLabel !== false) {
-        const yOff = (theme.ticksX ? theme.tickLength : 0) + 3;
+        const yOff = (theme.ticksX && tick.showTick !== false ? theme.tickLength : 0) + 3;
         const labelSize = tick.labelSize ?? theme.axisTextSize;
         const font = `fill="${axisText}" font-size="${px(labelSize)}" font-weight="${theme.fontWeight}"`;
         if (tick.angle !== undefined && tick.angle !== 0) {
@@ -90,7 +90,7 @@ function renderPanelAxes(panel: ScenePanel, theme: ThemeTokens): string {
       }
       if (tick.label !== "" && tick.showLabel !== false) {
         parts.push(
-          `<text x="-${px((theme.ticksY ? theme.tickLength : 0) + 3)}" dy="0.32em" text-anchor="end" fill="${axisText}" font-size="${px(tick.labelSize ?? theme.axisTextSize)}" font-weight="${theme.fontWeight}">${escapeXML(tick.label)}</text>`,
+          `<text x="-${px((theme.ticksY && tick.showTick !== false ? theme.tickLength : 0) + 3)}" dy="0.32em" text-anchor="end" fill="${axisText}" font-size="${px(tick.labelSize ?? theme.axisTextSize)}" font-weight="${theme.fontWeight}">${escapeXML(tick.label)}</text>`,
         );
       }
       parts.push("</g>");
@@ -232,10 +232,10 @@ function renderLegend(legend: SceneLegend, theme: ThemeTokens, gradientId: strin
   const parts: string[] = [
     `<g class="gg-legend gg-legend-${legend.scale} gg-legend-${legend.position ?? "right"} gg-legend-${legend.direction ?? "vertical"}" transform="translate(${px(legend.x)},${px(legend.y)})">`,
   ];
-  const contentTop = legend.title === "" ? 0 : 18;
+  const contentTop = legend.title === "" ? 0 : (legend.titleHeight ?? 18);
   if (legend.title !== "") {
     parts.push(
-      `<text class="gg-legend-title" x="4" y="11" font-size="${px(titleSize)}" font-weight="bold" fill="${ink}">${escapeXML(legend.title)}</text>`,
+      `<text class="gg-legend-title" x="4" y="${px(Math.max(11, contentTop - 7))}" font-size="${px(titleSize)}" font-weight="bold" fill="${ink}">${escapeXML(legend.title)}</text>`,
     );
   }
   if (legend.type === "discrete") {
@@ -266,25 +266,26 @@ function renderLegend(legend: SceneLegend, theme: ThemeTokens, gradientId: strin
       );
     }
   } else {
+    const rampX = horizontal ? (legend.rampX ?? 4) : 4;
     const stops = legend.stops
       .map(([offset, color]) => `<stop offset="${px(offset * 100)}%" stop-color="${color}"/>`)
       .join("");
     parts.push(
       `<defs><linearGradient id="${gradientId}" x1="0" y1="0" x2="${horizontal ? "1" : "0"}" y2="${horizontal ? "0" : "1"}">${stops}</linearGradient></defs>`,
-      `<rect class="gg-legend-ramp" x="4" y="${px(contentTop)}" width="${px(legend.rampWidth)}" height="${px(legend.rampHeight)}" fill="url(#${gradientId})"/>`,
+      `<rect class="gg-legend-ramp" x="${px(rampX)}" y="${px(contentTop)}" width="${px(legend.rampWidth)}" height="${px(legend.rampHeight)}" fill="url(#${gradientId})"/>`,
     );
     for (const tick of legend.ticks) {
       const pos = tick.pos ?? tick.y ?? 0;
       if (legend.showTicks !== false) {
         parts.push(
           horizontal
-            ? `<line class="gg-legend-tick" x1="${px(4 + pos)}" y1="${px(contentTop + legend.rampHeight)}" x2="${px(4 + pos)}" y2="${px(contentTop + legend.rampHeight + 4)}" stroke="${ink}"/>`
-            : `<line class="gg-legend-tick" x1="${px(4 + legend.rampWidth)}" y1="${px(contentTop + pos)}" x2="${px(4 + legend.rampWidth + 4)}" y2="${px(contentTop + pos)}" stroke="${ink}"/>`,
+            ? `<line class="gg-legend-tick" x1="${px(rampX + pos)}" y1="${px(contentTop + legend.rampHeight)}" x2="${px(rampX + pos)}" y2="${px(contentTop + legend.rampHeight + 4)}" stroke="${ink}"/>`
+            : `<line class="gg-legend-tick" x1="${px(rampX + legend.rampWidth)}" y1="${px(contentTop + pos)}" x2="${px(rampX + legend.rampWidth + 4)}" y2="${px(contentTop + pos)}" stroke="${ink}"/>`,
         );
       }
       if (tick.label === "") continue;
       parts.push(
-        `<text class="gg-legend-label" x="${px(horizontal ? 4 + pos : 4 + legend.rampWidth + 6)}" y="${px(horizontal ? contentTop + legend.rampHeight + 12 : contentTop + pos)}" text-anchor="${horizontal ? "middle" : "start"}" dy="0.32em" font-size="${px(labelSize)}" fill="${ink}">${escapeXML(tick.label)}${tick.fullLabel !== undefined && tick.fullLabel !== tick.label ? `<title>${escapeXML(tick.fullLabel)}</title>` : ""}</text>`,
+        `<text class="gg-legend-label" x="${px(horizontal ? rampX + pos : rampX + legend.rampWidth + 6)}" y="${px(horizontal ? contentTop + legend.rampHeight + 12 : contentTop + pos)}" text-anchor="${horizontal ? "middle" : "start"}" dy="0.32em" font-size="${px(labelSize)}" fill="${ink}">${escapeXML(tick.label)}${tick.fullLabel !== undefined && tick.fullLabel !== tick.label ? `<title>${escapeXML(tick.fullLabel)}</title>` : ""}</text>`,
       );
     }
   }

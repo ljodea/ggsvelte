@@ -36,12 +36,14 @@ describe("sequential color scales", () => {
     expect(plan.ticks.map((tick) => tick.value)).toEqual([1, 10, 100, 1000]);
     const legend = model.scene.legends.find((candidate) => candidate.type === "ramp");
     if (legend?.type !== "ramp") throw new Error("expected ramp scene legend");
-    expect(legend.ticks).toEqual([
-      { y: 96, label: "1", fullLabel: "1" },
-      { y: 64, label: "10", fullLabel: "10" },
-      { y: 32, label: "100", fullLabel: "100" },
-      { y: 0, label: "1,000", fullLabel: "1,000" },
+    expect(legend.ticks.map(({ label, fullLabel }) => ({ label, fullLabel }))).toEqual([
+      { label: "1", fullLabel: "1" },
+      { label: "10", fullLabel: "10" },
+      { label: "100", fullLabel: "100" },
+      { label: "1,000", fullLabel: "1,000" },
     ]);
+    for (const [index, expectedY] of [180, 120, 60, 0].entries())
+      expect(legend.ticks[index]?.y).toBeCloseTo(expectedY);
     expect(Object.isFrozen(plan)).toBe(true);
   });
 

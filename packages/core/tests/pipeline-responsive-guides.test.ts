@@ -122,6 +122,42 @@ describe("responsive guide planning", () => {
     expect(hidden.scene.axes.x.title).toBe("");
   });
 
+  it("preserves a scale-local band label mode when a top-level axis guide only adds appearance", () => {
+    const categories = [
+      { category: "A deliberately long northern category", y: 1 },
+      { category: "A deliberately long southern category", y: 2 },
+    ];
+    const result = runPipeline(
+      gg(categories, aes({ x: "category", y: "y" }))
+        .geomPoint()
+        .scales({ x: { type: "band", guide: { mode: "wrap", wrap: 3 } } })
+        .guides({ x: guideAxis({ title: "Category" }) })
+        .spec(),
+      { width: 280, height: 300 },
+    );
+    const plan = result.guidePlans.find(
+      (candidate) => candidate.type === "axis" && candidate.aesthetic === "x",
+    );
+    expect(plan?.type).toBe("axis");
+    if (plan?.type !== "axis") return;
+    expect(plan.bandLabelMode).toBe("wrapped");
+    expect(plan.bandLabelAuthorPinned).toBe(true);
+  });
+
+  it("keeps rendered label offsets aligned when axis tick marks are hidden", () => {
+    const spec = gg(rows, aes({ x: "x", y: "y" }))
+      .geomPoint()
+      .theme({ name: "light", ticksX: true, ticksY: true, tickLength: 8 })
+      .guides({
+        x: guideAxis({ showTicks: false, showLabels: true }),
+        y: guideAxis({ showTicks: false, showLabels: true }),
+      })
+      .spec();
+    const svg = renderToSVGString(spec, { width: 640, height: 360 });
+    expect(svg).toMatch(/gg-axis-x[\s\S]*?<text y="3"/);
+    expect(svg).toMatch(/gg-axis-y[\s\S]*?<text x="-3"/);
+  });
+
   it("restores complete unwrapped axis labels when collision:preserve is explicit", () => {
     const categories = [
       { category: "A deliberately long northern category", y: 1 },
@@ -197,6 +233,29 @@ describe("responsive guide planning", () => {
     expect(svg).toContain(">North</text>");
   });
 
+  it("keeps bottom guides inside the viewport when the y-axis has wide chrome", () => {
+    const wideChromeRows = [
+      { x: 0, y: "A very long category on the vertical axis", value: 0 },
+      { x: 1, y: "Another very long category on the vertical axis", value: 1 },
+    ];
+    const result = runPipeline(
+      gg(wideChromeRows, aes({ x: "x", y: "y", color: "value" }))
+        .geomPoint()
+        .scales({ y: { type: "band" }, ...scaleColorContinuous() })
+        .guides({
+          color: guideColorbar({
+            position: "bottom",
+            direction: "horizontal",
+            theme: { colorbarLength: 512 },
+          }),
+        })
+        .spec(),
+      { width: 640, height: 360 },
+    );
+    const legend = result.scene.legends[0]!;
+    expect(legend.x + legend.width).toBeLessThanOrEqual(result.scene.width - 2);
+  });
+
   it("renders wrapped discrete labels as multiline SVG without ellipsis", () => {
     const wrappedRows = [
       { x: 1, y: 1, group: "A deliberately long northern category label" },
@@ -219,6 +278,28 @@ describe("responsive guide planning", () => {
     expect(svg).toContain(">long northern</tspan>");
     expect(svg).toContain(">category label</tspan>");
     expect(svg).not.toContain("…");
+  });
+
+  it("renders measured colorbar title bands and horizontal ramp insets in pure SVG", () => {
+    const spec = gg(rows, aes({ x: "x", y: "y", color: "x" }))
+      .geomPoint()
+      .scales(scaleColorContinuous())
+      .guides({
+        color: guideColorbar({
+          title: "Value",
+          position: "bottom",
+          theme: { titleSize: 32 },
+        }),
+      })
+      .spec();
+    const result = runPipeline(spec, { width: 640, height: 360 });
+    const legend = result.scene.legends[0];
+    expect(legend?.type).toBe("ramp");
+    if (legend?.type !== "ramp") return;
+    const rampX = Math.round((legend.rampX ?? 0) * 100) / 100;
+    const svg = renderToSVGString(spec, { width: 640, height: 360 });
+    expect(svg).toContain('class="gg-legend-title" x="4" y="32"');
+    expect(svg).toContain(`class="gg-legend-ramp" x="${String(rampX)}"`);
   });
 
   it("controls colorbar tick marks independently from complete semantic labels", () => {

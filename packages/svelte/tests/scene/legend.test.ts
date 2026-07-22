@@ -1,4 +1,4 @@
-import { resolveTheme, type SceneDiscreteLegend } from "@ggsvelte/core";
+import { resolveTheme, type SceneDiscreteLegend, type SceneRampLegend } from "@ggsvelte/core";
 import { describe, expect, it } from "vitest";
 
 import Legend from "../../src/lib/scene/Legend.svelte";
@@ -38,5 +38,55 @@ describe("Legend scene rendering", () => {
     expect(tspans).toHaveLength(2);
     expect(Array.from(tspans, (node) => node.textContent)).toEqual(["A long", "category label"]);
     expect(tspans.item(1)?.getAttribute("dy")).toBe("13");
+  });
+
+  it("uses the measured title band for large guide titles", () => {
+    const legend: SceneDiscreteLegend = {
+      type: "discrete",
+      scale: "color",
+      title: "Large title",
+      titleSize: 32,
+      titleHeight: 39,
+      position: "right",
+      direction: "vertical",
+      x: 0,
+      y: 0,
+      width: 180,
+      height: 70,
+      swatchSize: 10,
+      entries: [{ value: "a", label: "A", color: "#123456", y: 39 }],
+    };
+    const { container } = render(Legend, { legend, theme });
+    expect(container.querySelector(".gg-legend-title")?.getAttribute("y")).toBe("32");
+    expect(container.querySelector(".gg-legend-swatch")?.getAttribute("y")).toBe("46");
+  });
+
+  it("renders horizontal ramp bars and endpoint labels from the measured inset", () => {
+    const legend: SceneRampLegend = {
+      type: "ramp",
+      scale: "color",
+      title: "",
+      position: "bottom",
+      direction: "horizontal",
+      x: 0,
+      y: 0,
+      width: 180,
+      height: 48,
+      stops: [
+        [0, "#000000"],
+        [1, "#ffffff"],
+      ],
+      ticks: [
+        { pos: 0, label: "minimum" },
+        { pos: 120, label: "maximum" },
+      ],
+      rampX: 24,
+      rampWidth: 120,
+      rampHeight: 12,
+    };
+    const { container } = render(Legend, { legend, theme });
+    expect(container.querySelector(".gg-legend-ramp")?.getAttribute("x")).toBe("24");
+    expect(container.querySelector(".gg-legend-tick")?.getAttribute("x1")).toBe("24");
+    expect(container.querySelector(".gg-legend-label")?.getAttribute("x")).toBe("24");
   });
 });

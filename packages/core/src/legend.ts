@@ -76,13 +76,13 @@ export type LegendInput = DiscreteLegendInput | RampLegendInput | StepsLegendInp
 
 const FONT_SIZE = 11;
 const TITLE_HEIGHT = 18;
+const TITLE_DESCENDER_GAP = 7;
 export const LEGEND_ROW_HEIGHT = 24;
 const SWATCH_SIZE = 10;
 const SWATCH_GAP = 6;
 const PADDING = 4;
 const BLOCK_GAP = 12;
 const RAMP_WIDTH = 12;
-const RAMP_HEIGHT = 96;
 const HORIZONTAL_RAMP_LENGTH = 180;
 const RAMP_STOP_COUNT = 10;
 const STEP_HEIGHT = 24;
@@ -233,6 +233,10 @@ function presentedDiscreteLabel(
   };
 }
 
+function legendTitleHeight(title: string, titleSize: number): number {
+  return title === "" ? 0 : Math.max(TITLE_HEIGHT, titleSize + TITLE_DESCENDER_GAP);
+}
+
 function settings(input: LegendInput, position: "right" | "bottom") {
   const appearance = input.appearance;
   const theme = appearance?.theme;
@@ -292,7 +296,7 @@ function buildDiscrete(
     input.labelOf === undefined
       ? disambiguatedLabels(values)
       : values.map((value) => input.labelOf?.(value) ?? "");
-  const titleHeight = style.title === "" ? 0 : TITLE_HEIGHT;
+  const titleHeight = legendTitleHeight(style.title, style.titleSize);
   const keys = values.map((value) => input.keyOf?.(value) ?? {});
   // Grow the swatch so mapped size keys render at their authored radii instead
   // of collapsing at the renderer's swatchSize / 2 cap.
@@ -401,6 +405,7 @@ function buildDiscrete(
     position,
     direction: style.direction,
     titleSize: style.titleSize,
+    titleHeight,
     labelSize: style.labelSize,
     keyGap: style.keyGap,
     x: 0,
@@ -429,7 +434,7 @@ function buildRamp(
   position: "right" | "bottom",
 ): SceneLegend {
   const style = settings(input, position);
-  const titleHeight = style.title === "" ? 0 : TITLE_HEIGHT;
+  const titleHeight = legendTitleHeight(style.title, style.titleSize);
   const [min, max] = input.domain;
   const tickValues = input.ticks ?? linearTicks(min, max, 5);
   const span = max - min;
@@ -438,24 +443,48 @@ function buildRamp(
   const showLabels = style.appearance?.showLabels !== false;
   const showTicks = style.appearance?.showTicks !== false;
   if (style.direction === "horizontal") {
-    const rampWidth = Math.min(style.rampLength, Math.max(1, maxWidth - PADDING * 2));
-    const tickLabelWidth = Math.max(1, rampWidth / Math.max(1, tickValues.length) - PADDING);
-    const ticks = tickValues.map((value) => {
-      const fullLabel = input.format(value);
-      return {
-        pos: normalized(value) * rampWidth,
-        label: presentedContinuousLabel({
+    const buildTicks = (rampWidth: number) => {
+      const tickLabelWidth = Math.max(1, rampWidth / Math.max(1, tickValues.length) - PADDING);
+      return tickValues.map((value) => {
+        const fullLabel = input.format(value);
+        return {
+          pos: normalized(value) * rampWidth,
+          label: presentedContinuousLabel({
+            fullLabel,
+            availableWidth: tickLabelWidth,
+            measurer,
+            fontSize: style.labelSize,
+            appearance: style.appearance,
+            show: showLabels,
+            scale: input.scale,
+          }),
           fullLabel,
-          availableWidth: tickLabelWidth,
-          measurer,
-          fontSize: style.labelSize,
-          appearance: style.appearance,
-          show: showLabels,
-          scale: input.scale,
-        }),
-        fullLabel,
-      };
-    });
+        };
+      });
+    };
+    let rampWidth = Math.min(style.rampLength, Math.max(1, maxWidth - PADDING * 2));
+    let ticks = buildTicks(rampWidth);
+    const labelOverhangs = () => {
+      let left = 0;
+      let right = 0;
+      for (const tick of ticks) {
+        const halfWidth = measurer.measureWidth(tick.label, style.labelSize) / 2;
+        left = Math.max(left, halfWidth - tick.pos);
+        right = Math.max(right, halfWidth - (rampWidth - tick.pos));
+      }
+      return { left, right };
+    };
+    let overhang = labelOverhangs();
+    const containedRampWidth = Math.min(
+      style.rampLength,
+      Math.max(1, maxWidth - PADDING * 2 - overhang.left - overhang.right),
+    );
+    if (containedRampWidth !== rampWidth) {
+      rampWidth = containedRampWidth;
+      ticks = buildTicks(rampWidth);
+      overhang = labelOverhangs();
+    }
+    const rampX = PADDING + overhang.left;
     return {
       type: "ramp",
       scale: input.scale,
@@ -464,6 +493,7 @@ function buildRamp(
       position,
       direction: "horizontal",
       titleSize: style.titleSize,
+      titleHeight,
       labelSize: style.labelSize,
       showTicks,
       x: 0,
@@ -471,7 +501,7 @@ function buildRamp(
       width: Math.min(
         maxWidth,
         Math.max(
-          rampWidth + PADDING * 2,
+          rampX + rampWidth + overhang.right + PADDING,
           measurer.measureWidth(style.title, style.titleSize) + PADDING * 2,
         ),
       ),
@@ -479,6 +509,7 @@ function buildRamp(
         titleHeight + style.rampThickness + (showLabels ? LEGEND_ROW_HEIGHT : 0) + PADDING * 2,
       stops: rampStops(input, "horizontal"),
       ticks,
+      rampX,
       rampWidth,
       rampHeight: style.rampThickness,
     };
@@ -487,7 +518,7 @@ function buildRamp(
   const ticks = tickValues.map((value) => {
     const fullLabel = input.format(value);
     return {
-      y: (1 - normalized(value)) * RAMP_HEIGHT,
+      y: (1 - normalized(value)) * style.rampLength,
       label: presentedContinuousLabel({
         fullLabel,
         availableWidth: maxLabelWidth,
@@ -511,6 +542,7 @@ function buildRamp(
     position,
     direction: "vertical",
     titleSize: style.titleSize,
+    titleHeight,
     labelSize: style.labelSize,
     showTicks,
     x: 0,
@@ -523,11 +555,11 @@ function buildRamp(
           measurer.measureWidth(style.title, style.titleSize),
         ),
     ),
-    height: titleHeight + RAMP_HEIGHT + PADDING * 2,
+    height: titleHeight + style.rampLength + PADDING * 2,
     stops: rampStops(input, "vertical"),
     ticks,
     rampWidth: style.rampThickness,
-    rampHeight: RAMP_HEIGHT,
+    rampHeight: style.rampLength,
   };
 }
 
@@ -538,7 +570,7 @@ function buildSteps(
   position: "right" | "bottom",
 ): SceneLegend {
   const style = settings(input, position);
-  const titleHeight = style.title === "" ? 0 : TITLE_HEIGHT;
+  const titleHeight = legendTitleHeight(style.title, style.titleSize);
   const source = style.direction === "horizontal" ? [...input.entries] : input.entries.toReversed();
   const showLabels = style.appearance?.showLabels !== false;
   if (style.direction === "horizontal") {
@@ -551,6 +583,7 @@ function buildSteps(
       position,
       direction: "horizontal",
       titleSize: style.titleSize,
+      titleHeight,
       labelSize: style.labelSize,
       x: 0,
       y: 0,
@@ -604,6 +637,7 @@ function buildSteps(
     position,
     direction: "vertical",
     titleSize: style.titleSize,
+    titleHeight,
     labelSize: style.labelSize,
     x: 0,
     y: 0,
@@ -643,27 +677,25 @@ export function assertLegendBlockFitsPlacedArea(input: {
 }): void {
   const rightExtent = input.rightTop + input.block.height;
   const bottomExtent = input.bottomInset + input.block.bottomHeight;
-  const overflowingPosition =
-    rightExtent > input.viewportHeight
-      ? "right"
-      : bottomExtent > input.viewportHeight
-        ? "bottom"
-        : null;
-  if (overflowingPosition === null) return;
-  const overflowing = input.block.legends.find(
-    (legend) =>
-      legend.position === overflowingPosition &&
-      input.inputs.find((candidate) => candidate.scale === legend.scale)?.appearance?.collision ===
-        "error",
-  );
-  if (overflowing === undefined) return;
-  const extent = overflowingPosition === "right" ? rightExtent : bottomExtent;
-  throw new LegendLayoutError(
-    overflowing.scale,
-    overflowing.title,
-    `The ${overflowing.scale} guide needs ${String(Math.ceil(extent))}px after placement but the viewport is ${String(Math.floor(input.viewportHeight))}px tall.`,
-    "Increase the chart height, reduce the visible categories, or suppress this guide.",
-  );
+  for (const [position, extent] of [
+    ["right", rightExtent],
+    ["bottom", bottomExtent],
+  ] as const) {
+    if (extent <= input.viewportHeight) continue;
+    const overflowing = input.block.legends.find(
+      (legend) =>
+        legend.position === position &&
+        input.inputs.find((candidate) => candidate.scale === legend.scale)?.appearance
+          ?.collision === "error",
+    );
+    if (overflowing === undefined) continue;
+    throw new LegendLayoutError(
+      overflowing.scale,
+      overflowing.title,
+      `The ${overflowing.scale} guide needs ${String(Math.ceil(extent))}px after placement but the viewport is ${String(Math.floor(input.viewportHeight))}px tall.`,
+      "Increase the chart height, reduce the visible categories, or suppress this guide.",
+    );
+  }
 }
 
 export function buildLegends(
@@ -721,23 +753,23 @@ export function buildLegends(
       previousBottomGap = gap;
     }
   }
-  const overflowingPosition =
-    rightY > viewportHeight ? "right" : bottomY > viewportHeight ? "bottom" : null;
-  if (overflowingPosition !== null) {
+  for (const [position, extent] of [
+    ["right", rightY],
+    ["bottom", bottomY],
+  ] as const) {
+    if (extent <= viewportHeight) continue;
     const overflowing = legends.find(
       (legend) =>
-        legend.position === overflowingPosition &&
+        legend.position === position &&
         inputs.find((input) => input.scale === legend.scale)?.appearance?.collision === "error",
     );
-    if (overflowing !== undefined) {
-      const extent = overflowingPosition === "right" ? rightY : bottomY;
-      throw new LegendLayoutError(
-        overflowing.scale,
-        overflowing.title,
-        `The ${overflowing.scale} guide needs ${String(Math.ceil(extent))}px but the viewport is ${String(Math.floor(viewportHeight))}px tall.`,
-        "Increase the chart height, reduce the visible categories, or suppress this guide.",
-      );
-    }
+    if (overflowing === undefined) continue;
+    throw new LegendLayoutError(
+      overflowing.scale,
+      overflowing.title,
+      `The ${overflowing.scale} guide needs ${String(Math.ceil(extent))}px but the viewport is ${String(Math.floor(viewportHeight))}px tall.`,
+      "Increase the chart height, reduce the visible categories, or suppress this guide.",
+    );
   }
   return {
     legends,

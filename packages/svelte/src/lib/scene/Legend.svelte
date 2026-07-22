@@ -8,8 +8,13 @@
   const uid = $props.id();
   const gradientId = $derived(`gg-ramp-${uid}-${legend.scale}`);
   const ink = $derived(themeVar("ink", theme));
-  const contentTop = $derived(legend.title === "" ? 0 : 18);
+  const contentTop = $derived(
+    legend.title === "" ? 0 : (legend.titleHeight ?? 18),
+  );
   const horizontal = $derived(legend.direction === "horizontal");
+  const rampX = $derived(
+    horizontal ? (legend.type === "ramp" ? (legend.rampX ?? 4) : 4) : 4,
+  );
   const titleSize = $derived(legend.titleSize ?? 11);
   const labelSize = $derived(legend.labelSize ?? 11);
 </script>
@@ -22,7 +27,7 @@
     <text
       class="gg-legend-title"
       x="4"
-      y="11"
+      y={Math.max(11, contentTop - 7)}
       font-size={titleSize}
       font-weight="bold"
       fill={ink}>{legend.title}</text
@@ -213,7 +218,7 @@
     </defs>
     <rect
       class="gg-legend-ramp"
-      x="4"
+      x={rampX}
       y={contentTop}
       width={legend.rampWidth}
       height={legend.rampHeight}
@@ -224,9 +229,9 @@
       {#if legend.showTicks !== false}
         <line
           class="gg-legend-tick"
-          x1={horizontal ? 4 + pos : 4 + legend.rampWidth}
+          x1={horizontal ? rampX + pos : rampX + legend.rampWidth}
           y1={horizontal ? contentTop + legend.rampHeight : contentTop + pos}
-          x2={horizontal ? 4 + pos : 4 + legend.rampWidth + 4}
+          x2={horizontal ? rampX + pos : rampX + legend.rampWidth + 4}
           y2={horizontal
             ? contentTop + legend.rampHeight + 4
             : contentTop + pos}
@@ -236,7 +241,7 @@
       {#if tick.label !== ""}
         <text
           class="gg-legend-label"
-          x={horizontal ? 4 + pos : 4 + legend.rampWidth + 6}
+          x={horizontal ? rampX + pos : rampX + legend.rampWidth + 6}
           y={horizontal
             ? contentTop + legend.rampHeight + 12
             : contentTop + pos}

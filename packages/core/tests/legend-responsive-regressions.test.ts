@@ -160,4 +160,78 @@ describe("responsive legend regressions", () => {
     expect(legend?.type).toBe("ramp");
     expect(legend?.width).toBeGreaterThanOrEqual(measurer.measureWidth(title, 11) + 8);
   });
+
+  it("sizes the title band from the configured guide title font", () => {
+    const input = discrete({
+      appearance: {
+        type: "legend",
+        title: "Large title",
+        order: 0,
+        position: "right",
+        direction: "vertical",
+        theme: { titleSize: 32 },
+      },
+    });
+    const legend = buildLegends([input], "stable-domain", measurer, 240, 720).legends[0];
+    expect(legend?.type).toBe("discrete");
+    if (legend?.type !== "discrete") return;
+    expect(legend.titleHeight).toBeGreaterThanOrEqual(39);
+    expect(legend.entries[0]?.y).toBeGreaterThanOrEqual(legend.titleHeight ?? 0);
+  });
+
+  it("uses the configured ramp length for vertical colorbars", () => {
+    const input = ramp("vertical");
+    input.appearance = {
+      ...input.appearance!,
+      theme: { colorbarLength: 180 },
+    };
+    const legend = buildLegends([input], "stable-domain", measurer, 240, 720).legends[0];
+    expect(legend?.type).toBe("ramp");
+    if (legend?.type !== "ramp") return;
+    expect(legend.rampHeight).toBe(180);
+    expect(legend.ticks.map((tick) => tick.y)).toEqual([180, 0]);
+  });
+
+  it("checks collision:error on every overflowing guide side", () => {
+    const right = discrete({
+      domain: ["a", "b", "c"],
+      firstSeen: ["a", "b", "c"],
+      appearance: {
+        type: "legend",
+        title: "Right",
+        order: 0,
+        position: "right",
+        direction: "vertical",
+      },
+    });
+    const bottom = discrete({
+      scale: "fill",
+      title: "Bottom",
+      domain: ["d", "e", "f", "g"],
+      firstSeen: ["d", "e", "f", "g"],
+      appearance: {
+        type: "legend",
+        title: "Bottom",
+        order: 1,
+        position: "bottom",
+        direction: "horizontal",
+        collision: "error",
+      },
+    });
+    expect(() => buildLegends([right, bottom], "stable-domain", measurer, 48, 128, 60)).toThrow(
+      expect.objectContaining({ scale: "fill" }),
+    );
+  });
+
+  it("insets horizontal ramps for endpoint label overhang", () => {
+    const input = ramp("horizontal");
+    input.format = (value) => (value === 0 ? "minimum" : "maximum");
+    const legend = buildLegends([input], "stable-domain", measurer, 220, 240).legends[0];
+    expect(legend?.type).toBe("ramp");
+    if (legend?.type !== "ramp") return;
+    const leftHalf = measurer.measureWidth(legend.ticks[0]!.label, legend.labelSize ?? 11) / 2;
+    const rightHalf = measurer.measureWidth(legend.ticks.at(-1)!.label, legend.labelSize ?? 11) / 2;
+    expect(legend.rampX).toBeGreaterThanOrEqual(leftHalf);
+    expect((legend.rampX ?? 0) + legend.rampWidth + rightHalf).toBeLessThanOrEqual(legend.width);
+  });
 });

@@ -67,15 +67,31 @@ export function trainPipelineScales(input: TrainPipelineScalesInput): TrainedPip
   ] as const) {
     const top = normalized.guides?.[aesthetic];
     if (top === undefined) continue;
-    const scale = (scalesConfig[aesthetic] ?? {}) as { guide?: GuideSpec };
+    const scale = (scalesConfig[aesthetic] ?? {}) as { guide?: unknown };
     const local = scale.guide;
+    if (aesthetic === "x" || aesthetic === "y") {
+      const localBandGuide =
+        typeof local === "object" && local !== null && !("type" in local)
+          ? (local as { mode?: string })
+          : undefined;
+      const topOverridesBandLayout =
+        top.type === "axis" &&
+        (top.collision !== undefined ||
+          (localBandGuide?.mode === "off" && top.showLabels === true));
+      if (topOverridesBandLayout) {
+        const { guide: _guide, ...withoutBandGuide } = scale;
+        Object.assign(scalesConfig, { [aesthetic]: withoutBandGuide });
+      }
+      continue;
+    }
+    const localGuide = local as GuideSpec | undefined;
     const guide: GuideSpec =
-      local !== undefined && local.type === top.type && top.type !== "none"
+      localGuide !== undefined && localGuide.type === top.type && top.type !== "none"
         ? ({
-            ...local,
+            ...localGuide,
             ...top,
             theme: {
-              ...(local.type === "none" ? undefined : local.theme),
+              ...(localGuide.type === "none" ? undefined : localGuide.theme),
               ...top.theme,
             },
           } as GuideSpec)
