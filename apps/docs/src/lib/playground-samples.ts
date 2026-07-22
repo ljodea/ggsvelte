@@ -199,6 +199,50 @@ export const PLAYGROUND_SAMPLES = [
     },
   },
   {
+    id: "binned-colorsteps",
+    title: "Binned colorsteps",
+    description: "Translate quantitative values into deterministic semantic color intervals.",
+    spec: {
+      edition: 2,
+      data: {
+        values: [
+          { hour: 0, pm25: 4 },
+          { hour: 6, pm25: 18 },
+          { hour: 12, pm25: 42 },
+          { hour: 18, pm25: 76 },
+          { hour: 22, pm25: 11 },
+        ],
+      },
+      layers: [
+        {
+          geom: "point",
+          stat: "identity",
+          position: "identity",
+          aes: {
+            x: { field: "hour" },
+            y: { field: "pm25" },
+            color: { field: "pm25" },
+          },
+          params: { size: 5 },
+        },
+      ],
+      scales: {
+        color: {
+          type: "binned",
+          breaks: [0, 12, 35, 55, 100],
+          range: ["#2a9d8f", "#e9c46a", "#f4a261", "#e76f51"],
+        },
+      },
+      labs: {
+        title: "Particle pollution by hour",
+        x: "Hour",
+        y: "PM2.5 (µg/m³)",
+        color: "PM2.5 band",
+      },
+      height: 400,
+    },
+  },
+  {
     id: "category-columns",
     title: "Category columns",
     description: "Compare a few named categories with direct values.",

@@ -130,7 +130,7 @@ interface MockSpec {
     y?: { transform: string; limits?: number[]; reverse?: boolean; expand?: boolean };
     clip?: boolean;
   };
-  scales?: Record<string, { type: string; parse?: string; transform?: string }>;
+  scales?: Record<string, { type: string; parse?: string; transform?: string; breaks?: number[] }>;
 }
 
 interface Mention {
@@ -239,7 +239,7 @@ class FieldPicker {
 const f = (field: string): Channel => ({ field });
 
 const COLOR_TRIGGER =
-  /colou?red by|colou?r by|split by|stacked by|grouped by|one (?:line|curve|area) per|shaded by|filled by|one per/;
+  /colou?red by|colou?r by|map .* to (?:binned )?colou?r|binned colou?r|colou?rsteps|split by|stacked by|grouped by|one (?:line|curve|area) per|shaded by|filled by|one per/;
 
 export class MockResponder implements Responder {
   readonly name = "mock";
@@ -251,7 +251,13 @@ export class MockResponder implements Responder {
     const repair = user.includes(REPAIR_MARKER);
     const profile = parseProfileLine(user);
 
-    if (/choropleth|\bmap\b|\b3-?d\b|surface plot|network diagram/.test(prompt)) {
+    const aestheticMapping = /\bmap\s+.+\s+to\s+(?:binned\s+)?(?:colou?r|fill|size|alpha)\b/.test(
+      prompt,
+    );
+    if (
+      /choropleth|\b3-?d\b|surface plot|network diagram/.test(prompt) ||
+      (/\bmap\b/.test(prompt) && !aestheticMapping)
+    ) {
       return Promise.resolve(
         JSON.stringify({
           unsupported: "This chart type is outside the supported geoms.",
@@ -267,14 +273,20 @@ export class MockResponder implements Responder {
   #synthesize(prompt: string, profile: DataProfile, repair: boolean): MockSpec {
     const pick = new FieldPicker(prompt, profile);
     const spec: MockSpec = { data: { name: "main" }, layers: [] };
-    const scales: Record<string, { type: string; parse?: string; transform?: string }> = {};
+    const scales: Record<
+      string,
+      { type: string; parse?: string; transform?: string; breaks?: number[] }
+    > = {};
     const wantsColor = COLOR_TRIGGER.test(prompt);
     let xField: string | undefined;
 
     const colorFor = (channel: "color" | "fill", aes: MockAes): void => {
       if (!wantsColor) return;
+      const explicitlyMapped = profile.fields.find((field) =>
+        prompt.includes(`map ${field.name.toLowerCase()} to`),
+      );
       const cat = pick.mentionedCat();
-      const which = cat ?? pick.mentionedQuant();
+      const which = explicitlyMapped?.name ?? cat ?? pick.mentionedQuant();
       if (which === undefined) return;
       aes[channel] = f(which);
       if (pick.typeOf(which) === "quantitative") scales[channel] = { type: "sequential" };
@@ -506,6 +518,15 @@ export class MockResponder implements Responder {
       delete scales["x"];
     }
     if (/identifier|model code/.test(prompt)) scales["x"] = { type: "band" };
+    if (/binned colou?r|colou?rsteps/.test(prompt)) {
+      const boundaryText = /boundaries\s+(.+?)(?:\s+so\b|\.|$)/.exec(prompt)?.[1] ?? "";
+      const breaks = [...boundaryText.matchAll(/\d+(?:\.\d+)?/g)].map((match) => Number(match[0]));
+      const channel = scales["color"] === undefined ? "fill" : "color";
+      scales[channel] = {
+        type: "binned",
+        ...(breaks.length >= 2 && { breaks }),
+      };
+    }
     const ordered = /\b(dmy|mdy|ymd|ydm|myd|dym)\b/.exec(prompt)?.[1];
     if (ordered !== undefined) scales["x"] = { type: "time", parse: ordered };
     void xField;

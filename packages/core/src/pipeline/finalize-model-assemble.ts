@@ -52,7 +52,11 @@ export function assembleFinalizeRenderModel(input: {
     advisories: input.advisories,
     scaleDecisions: prepared.scaleDecisions,
     scaleDiagnostics: prepared.scaleDiagnostics,
-    guidePlans: panelLayout.guidePlans,
+    guidePlans: Object.freeze([
+      ...panelLayout.guidePlans,
+      ...(colorResolution.guidePlan === null ? [] : [colorResolution.guidePlan]),
+      ...(fillResolution.guidePlan === null ? [] : [fillResolution.guidePlan]),
+    ]),
     coordProjectors: input.coordProjectors,
     xConversion: prepared.xConversion,
     yConversion: prepared.yConversion,

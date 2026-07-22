@@ -38,9 +38,18 @@ export interface RampLegendInput {
   format(value: number): string;
   /** Optional semantic tick positions; numeric ramps use linear ticks. */
   ticks?: readonly number[];
+  /** Map a semantic tick value to its normalized position on the trained ramp. */
+  position?: (value: number) => number;
 }
 
-export type LegendInput = DiscreteLegendInput | RampLegendInput;
+export interface StepsLegendInput {
+  kind: "steps";
+  scale: "color" | "fill";
+  title: string;
+  entries: readonly Readonly<{ label: string; color: string }>[];
+}
+
+export type LegendInput = DiscreteLegendInput | RampLegendInput | StepsLegendInput;
 
 // Layout constants (themable via CSS at render time; measured with the
 // canonical measurer so reserved margins are deterministic).
@@ -55,6 +64,7 @@ const BLOCK_GAP = 12;
 const RAMP_WIDTH = 12;
 const RAMP_HEIGHT = 96;
 const RAMP_STOP_COUNT = 10;
+const STEP_HEIGHT = 24;
 const UNKNOWN_COLOR = "#999999";
 
 export interface LegendBlock {
@@ -69,11 +79,12 @@ function orderedValues(input: DiscreteLegendInput, order: LegendOrder): unknown[
     case "present-first-seen": {
       // Dedupe by typed identity, not presentation label: the ordinal scale
       // gives 1 and "1" distinct assignments, so both must appear.
+      const domainKeys = new Set(input.domain.map((value) => encodeKey(value)));
       const seen = new Set<string>();
       const out: unknown[] = [];
       for (const v of input.firstSeen) {
         const key = encodeKey(v);
-        if (seen.has(key)) continue;
+        if (!domainKeys.has(key) || seen.has(key)) continue;
         seen.add(key);
         out.push(v);
       }
@@ -176,6 +187,39 @@ export function buildLegends(
       y += boxHeight + BLOCK_GAP;
       continue;
     }
+    if (input.kind === "steps") {
+      const titleHeight = input.title === "" ? 0 : TITLE_HEIGHT;
+      let labelWidth = 0;
+      const maxLabelWidth = Math.max(1, maxWidth - PADDING * 2 - RAMP_WIDTH - SWATCH_GAP);
+      const entries = input.entries.toReversed().map((entry, index) => {
+        const label = truncate(entry.label, maxLabelWidth, measurer);
+        labelWidth = Math.max(labelWidth, measurer.measureWidth(label, FONT_SIZE));
+        return { label, color: entry.color, y: index * STEP_HEIGHT };
+      });
+      const titleWidth =
+        input.title === ""
+          ? 0
+          : Math.min(measurer.measureWidth(input.title, FONT_SIZE), maxWidth - PADDING * 2);
+      const boxWidth =
+        PADDING * 2 +
+        Math.max(RAMP_WIDTH + SWATCH_GAP + Math.ceil(labelWidth), Math.ceil(titleWidth));
+      const boxHeight = titleHeight + entries.length * STEP_HEIGHT + PADDING * 2;
+      legends.push({
+        type: "steps",
+        scale: input.scale,
+        title: input.title,
+        x: 0,
+        y,
+        width: boxWidth,
+        height: boxHeight,
+        entries,
+        stepWidth: RAMP_WIDTH,
+        stepHeight: STEP_HEIGHT,
+      });
+      width = Math.max(width, boxWidth);
+      y += boxHeight + BLOCK_GAP;
+      continue;
+    }
     {
       const titleHeight = input.title === "" ? 0 : TITLE_HEIGHT;
       const [min, max] = input.domain;
@@ -183,10 +227,13 @@ export function buildLegends(
       const step = min === max ? 0 : tickStep(min, max, 5);
       void step;
       const span = max - min;
-      const ticks = tickValues.map((v) => ({
-        y: span === 0 ? RAMP_HEIGHT / 2 : RAMP_HEIGHT - ((v - min) / span) * RAMP_HEIGHT,
-        label: input.format(v),
-      }));
+      const ticks = tickValues.map((v) => {
+        const position = input.position?.(v) ?? (span === 0 ? 0.5 : (v - min) / span);
+        return {
+          y: RAMP_HEIGHT - Math.min(1, Math.max(0, position)) * RAMP_HEIGHT,
+          label: input.format(v),
+        };
+      });
       let labelWidth = 0;
       for (const t of ticks) {
         labelWidth = Math.max(labelWidth, measurer.measureWidth(t.label, FONT_SIZE));

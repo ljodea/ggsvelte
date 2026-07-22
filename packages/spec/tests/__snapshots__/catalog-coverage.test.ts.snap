@@ -363,6 +363,43 @@ exports[`ERROR_CATALOG coverage [scale-range-color] is reproducible; message + f
 }
 `;
 
+exports[`ERROR_CATALOG coverage [scale-type-transform-conflict] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Use identity for temporal/discrete/manual/identity scales, or choose a quantitative family.",
+    "summary": "A scale family is incompatible with its requested transform.",
+    "tier": 1,
+  },
+  "instance": {
+    "code": "scale-type-transform-conflict",
+    "fix": {
+      "description": "Remove the transform, or use a non-temporal sequential/binned quantitative scale.",
+      "example": "identity",
+    },
+    "message": "The sequential color scale cannot apply the sqrt transform to temporal values.",
+    "path": "/scales/color/transform",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [scale-manual-domain-range] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Provide exactly one range color for each explicit domain value.",
+    "summary": "A manual color scale has different domain and range lengths.",
+    "tier": 1,
+  },
+  "instance": {
+    "code": "scale-manual-domain-range",
+    "fix": {
+      "description": "Provide exactly one range color for each explicit domain value.",
+    },
+    "message": "The manual color scale has 2 domain values but 1 range colors.",
+    "path": "/scales/color",
+  },
+}
+`;
+
 exports[`ERROR_CATALOG coverage [missing-required-channel] is reproducible; message + fix snapshot 1`] = `
 {
   "catalog": {

@@ -36,6 +36,11 @@
       active: path === "/themes",
     },
     {
+      label: "Interactions",
+      href: "/interactions",
+      active: path === "/interactions",
+    },
+    {
       label: "Reference",
       href: "/reference",
       active: owner === "reference",

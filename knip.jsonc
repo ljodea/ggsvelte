@@ -6,16 +6,9 @@
   "ignoreBinaries": ["zizmor", "Rscript"],
   // publint + attw are spawned by scripts/package-lint.ts (guarded to run
   // only on built output), which knip's static analysis cannot trace. The same
-  // is true for markdownlint-cli2's explicit node_modules/.bin invocation,
-  // pnpm (resolved from PATH by the clean-consumer harness), and wrangler
-  // (invoked through bunx by the Cloudflare deployment workflow).
-  "ignoreDependencies": [
-    "publint",
-    "@arethetypeswrong/cli",
-    "markdownlint-cli2",
-    "pnpm",
-    "wrangler",
-  ],
+  // is true for markdownlint-cli2's explicit node_modules/.bin invocation and
+  // pnpm (resolved from PATH by the clean-consumer harness).
+  "ignoreDependencies": ["publint", "@arethetypeswrong/cli", "markdownlint-cli2", "pnpm"],
   // Root-exported ggplot2 spellings are intentional binding-identical aliases
   // of camelCase scale/coordinate helpers, and declaration tests enforce that contract.
   "ignoreIssues": {
@@ -61,8 +54,8 @@
       "entry": ["src/routes/**/+*.ts", "src/lib/**/*.ts"],
       "project": ["src/**/*.ts", "*.{js,ts}"],
       // Imported only from .svelte files / the $examples alias, which knip
-      // does not trace. phosphor-svelte is deep-imported only from .svelte.
-      "ignoreDependencies": ["@ggsvelte/examples", "phosphor-svelte"],
+      // does not trace. phosphor-svelte / bits-ui are deep-imported only from .svelte.
+      "ignoreDependencies": ["@ggsvelte/examples", "phosphor-svelte", "bits-ui"],
     },
   },
 }

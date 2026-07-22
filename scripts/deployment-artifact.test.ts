@@ -14,7 +14,7 @@ import {
 
 const REQUIRED_HEADERS = `/*
   Cache-Control: public, max-age=0, must-revalidate
-  Content-Security-Policy-Report-Only: default-src 'self'
+  Content-Security-Policy: frame-ancestors 'none'
   Permissions-Policy: camera=(), geolocation=(), microphone=()
   Referrer-Policy: strict-origin-when-cross-origin
   X-Content-Type-Options: nosniff
@@ -25,15 +25,14 @@ const REQUIRED_HEADERS = `/*
   Cache-Control: public, max-age=31536000, immutable
 `;
 
-const PRODUCTION_REDIRECTS = `/bench https://ljodea.github.io/ggsvelte/bench/ 302
-/bench/* https://ljodea.github.io/ggsvelte/bench/:splat 302
-/ggsvelte https://ggsvelte.sh/ 301
+const PRODUCTION_REDIRECTS = `/ggsvelte https://ggsvelte.sh/ 301
 /ggsvelte/* https://ggsvelte.sh/:splat 301
 `;
 
-const PREVIEW_REDIRECTS = `/bench https://ljodea.github.io/ggsvelte/bench/ 302
-/bench/* https://ljodea.github.io/ggsvelte/bench/:splat 302
-/ggsvelte / 301
+const CSP_META = `<meta http-equiv="content-security-policy" content="default-src 'self'; base-uri 'self'; connect-src 'self' https://cloudflareinsights.com; font-src 'self'; form-action 'self'; frame-src 'none'; img-src 'self' data:; manifest-src 'self'; media-src 'self'; object-src 'none'; script-src 'self' https://static.cloudflareinsights.com; script-src-attr 'none'; style-src 'self'; style-src-attr 'unsafe-inline'; upgrade-insecure-requests">`;
+const NOT_FOUND_CSP_META = `<meta http-equiv="content-security-policy" content="default-src 'self'; base-uri 'self'; form-action 'self'; frame-src 'none'; img-src 'self' data:; object-src 'none'; script-src 'none'; script-src-attr 'none'; style-src 'self'; style-src-attr 'none'; upgrade-insecure-requests">`;
+
+const PREVIEW_REDIRECTS = `/ggsvelte / 301
 /ggsvelte/* /:splat 301
 `;
 
@@ -64,10 +63,10 @@ const expectedArtifact = (buildMode: "cloudflare-preview" | "cloudflare-producti
 function makeCompleteArtifact(buildMode: "cloudflare-preview" | "cloudflare-production") {
   const buildDirectory = mkdtempSync(join(tmpdir(), "ggsvelte-cloudflare-artifact-"));
   for (const [path, contents] of [
-    ["index.html", '<link rel="canonical" href="https://ggsvelte.sh/">'],
+    ["index.html", `${CSP_META}<link rel="canonical" href="https://ggsvelte.sh/">`],
     [
       "404.html",
-      '<meta name="robots" content="noindex,follow"><noscript><main><h1>Not found</h1></main></noscript>',
+      `${NOT_FOUND_CSP_META}<meta name="robots" content="noindex,follow"><main><h1>Not found</h1></main>`,
     ],
     [
       "_headers",
@@ -224,12 +223,7 @@ describe("deployment artifact identity", () => {
   it("requires same-origin /ggsvelte cleanup redirects on preview artifacts", () => {
     const buildDirectory = makeCompleteArtifact("cloudflare-preview");
     try {
-      writeFileSync(
-        join(buildDirectory, "_redirects"),
-        `/bench https://ljodea.github.io/ggsvelte/bench/ 302
-/bench/* https://ljodea.github.io/ggsvelte/bench/:splat 302
-`,
-      );
+      writeFileSync(join(buildDirectory, "_redirects"), "");
       expect(
         validateDeploymentArtifact(buildDirectory, expectedArtifact("cloudflare-preview")),
       ).toContain("_redirects is missing the same-origin /ggsvelte cleanup redirect");
@@ -241,13 +235,7 @@ describe("deployment artifact identity", () => {
   it("requires the exact bare /ggsvelte same-origin cleanup on preview, not only the wildcard", () => {
     const buildDirectory = makeCompleteArtifact("cloudflare-preview");
     try {
-      writeFileSync(
-        join(buildDirectory, "_redirects"),
-        `/bench https://ljodea.github.io/ggsvelte/bench/ 302
-/bench/* https://ljodea.github.io/ggsvelte/bench/:splat 302
-/ggsvelte/* /:splat 301
-`,
-      );
+      writeFileSync(join(buildDirectory, "_redirects"), `/ggsvelte/* /:splat 301\n`);
       expect(
         validateDeploymentArtifact(buildDirectory, expectedArtifact("cloudflare-preview")),
       ).toContain("_redirects is missing the same-origin /ggsvelte cleanup redirect");
@@ -326,8 +314,33 @@ describe("deployment artifact identity", () => {
       expect(problems).toContain(
         "_headers must cache only SvelteKit immutable assets for one year",
       );
-      expect(problems).toContain("_redirects is missing the fixed legacy benchmark redirect");
+      expect(problems).toContain(
+        "_redirects must not preserve /bench GitHub Pages history redirects",
+      );
       expect(problems).toContain("_redirects is missing the absolute /ggsvelte cleanup redirect");
+    } finally {
+      rmSync(buildDirectory, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects GitHub Pages destinations in _redirects", () => {
+    const buildDirectory = makeCompleteArtifact("cloudflare-production");
+    try {
+      writeFileSync(
+        join(buildDirectory, "_redirects"),
+        `/bench/* https://ljodea.github.io/ggsvelte/bench/:splat 302
+/ggsvelte https://ggsvelte.sh/ 301
+/ggsvelte/* https://ggsvelte.sh/:splat 301
+`,
+      );
+      const problems = validateDeploymentArtifact(
+        buildDirectory,
+        expectedArtifact("cloudflare-production"),
+      );
+      expect(problems).toContain("_redirects must not send traffic to GitHub Pages");
+      expect(problems).toContain(
+        "_redirects must not preserve /bench GitHub Pages history redirects",
+      );
     } finally {
       rmSync(buildDirectory, { recursive: true, force: true });
     }

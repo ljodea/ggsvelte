@@ -59,8 +59,17 @@ ndensity`; density→`density, scaled`; smooth→`y, ymin, ymax, se`;
   `"temporalKind"`, `"timezone"`, `"disambiguation"`,
   `"parseFailure":"error"|"censor"`, `"dateBreaks"`,
   `"dateMinorBreaks"`, `"dateLabels"`, `"locale"`, and `"weekStart"`.
-  `{"type": "ordinal"|"sequential", "scheme"?, "range"?, "domain"?}` for
-  color/fill. Defaults are inferred and disclosed as advisories.
+  Color/fill families are `ordinal`, `sequential`, `binned`, `manual`, and
+  `identity`. Sequential/binned accept identity/log10/sqrt transforms,
+  semantic domains/breaks, OOB policy, temporal parser options, and explicit
+  `naValue`/`unknownValue`; `labels` accepts numeric or temporal formats for
+  colorbars and colorsteps. Manual requires one range color per domain value;
+  identity validates source hex colors and suppresses its guide by default.
+  Bounded warnings count mapped NA and unknown fallback values.
+  Use continuous/discrete/binned/log10/sqrt/date/datetime/manual/identity
+  helpers for color or fill. `color`/`colour` and ggplot2 snake-case exports
+  are binding-identical. GuidePlans are `discrete`, `colorbar`, or
+  `colorsteps`. Defaults are inferred and disclosed as advisories.
 - **temporal defaults**: ISO dates/date-times, four-digit year strings,
   year-months, month-years, and year-quarters infer time after bounded sampling
   plus whole-column validation. Ambiguous ordered dates stay discrete: set

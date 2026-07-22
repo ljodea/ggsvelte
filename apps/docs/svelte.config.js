@@ -2,6 +2,7 @@ import adapter from "@sveltejs/adapter-static";
 import { vitePreprocess } from "@sveltejs/vite-plugin-svelte";
 
 import { resolveDocsBuildConfig } from "./build-mode.ts";
+import { docsCspDirectives } from "./csp.ts";
 
 const build = resolveDocsBuildConfig({
   mode: process.env.DOCS_BUILD_MODE,
@@ -14,6 +15,10 @@ export default {
   kit: {
     adapter: adapter({ fallback: "404.html" }),
     paths: { base: build.base },
+    csp: {
+      mode: "hash",
+      directives: docsCspDirectives(build.mode),
+    },
     prerender: {
       handleMissingId: ({ id, message }) => {
         // Versioned playground fragments are application state, not document

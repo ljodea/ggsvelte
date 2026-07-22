@@ -20,9 +20,10 @@ const heavyRunsOnCount = (workflow: string) =>
     .length;
 
 describe("R0 release wiring", () => {
-  it("runs benchmark unit tests in CI and pre-push parity", () => {
+  it("runs benchmark unit tests in CI (not on git push hooks)", () => {
     const ci = read(".github/workflows/ci.yml");
-    // CI collects lcov for Codecov; pre-push stays plain (no coverage overhead).
+    // CI collects lcov for Codecov. Package tests are CI-only — pre-push was
+    // nuked so agents can push without re-running the full unit suite locally.
     expect(ci).toContain("packages/spec packages/core benchmarks scripts tests/evals");
     expect(ci).toContain("--coverage-reporter=lcov");
     expect(ci).toContain("coverage/unit");
@@ -30,14 +31,14 @@ describe("R0 release wiring", () => {
     expect(ci).toContain("flags: unit");
     expect(ci).toContain("flags: svelte");
     expect(read("codecov.yml")).toContain("component_id: packages-spec");
-    expect(read(".pre-commit-config.yaml")).toContain(
-      "bun test packages/spec packages/core benchmarks scripts tests/evals",
-    );
+    expect(read(".pre-commit-config.yaml")).not.toContain("bun test packages/spec");
+    expect(read(".pre-commit-config.yaml")).not.toContain("pre-push");
   });
 
-  it("checks packed links in CI and the Pages deployment", () => {
+  it("checks packed links in CI and the Cloudflare Pages deployment", () => {
     expect(read(".github/workflows/ci.yml")).toContain("bun run check:pages-links");
-    expect(read(".github/workflows/pages.yml")).toContain("bun run check:pages-links");
+    expect(read(".github/workflows/cloudflare-pages.yml")).toContain("bun run build:cloudflare");
+    expect(read("package.json")).toContain("check:pages-links");
   });
 
   it("runs the Playwright interaction performance gate with benchmark budgets", () => {
@@ -295,15 +296,13 @@ describe("R0 release wiring", () => {
     expect(ci).toContain("scripts/ci-routing.ts emit-github-output");
     expect(ci).toContain("  detect-changes:");
     expect(ci).toContain("  ci-gate:");
-    // Pre-push mega-suite must not double-run on the checks job.
+    // Checks job is pre-commit stage only (format/lint/guards). Heavy analysis
+    // lives on dedicated CI jobs — never reintroduced via hook-stage pre-push.
     expect(ci).not.toContain("hook-stage pre-push");
     expect(ci).toContain("pre-commit run --all-files --show-diff-on-failure");
-    // Static analysis formerly on pre-push now lives on the build job.
     expect(ci).toContain("bun run lint:type-aware");
     expect(ci).toContain("bun run knip");
-    expect(read(".github/workflows/pages.yml")).toContain(
-      "scripts/ci-routing.ts emit-github-output",
-    );
+    expect(read(".pre-commit-config.yaml")).not.toContain("pre-push");
     expect(read(".github/workflows/vr-compare.yml")).toContain(
       "scripts/ci-routing.ts emit-github-output",
     );
@@ -409,41 +408,39 @@ it("tiers the PR consumer matrix (issue #246)", () => {
   expect(ci).not.toMatch(/full required[\s\S]{0,40}push\/main/i);
 });
 
-it("uses one self-hosted ggsvelte pool (no heavy/light label split)", () => {
+it("uses elastic hosted runners for PR correctness and visual checks", () => {
   const ci = read(".github/workflows/ci.yml");
   const vr = read(".github/workflows/vr-compare.yml");
-  const pages = read(".github/workflows/pages.yml");
   const bench = read(".github/workflows/bench.yml");
   const nightly = read(".github/workflows/compatibility-nightly.yml");
   const cancel = read(".github/workflows/cancel-on-pr-close.yml");
 
-  // Single-label pool: every self-hosted Linux job uses `ggsvelte` only.
-  // Dual-label scheduling was theater; the old 2-slot heavy-only pool was the
-  // real bottleneck (issues #247, #319, #321). Comments may mention the retired
-  // label when explaining history — assert on runs-on lines only.
-  for (const workflow of [ci, vr, pages, bench, nightly]) {
+  // PR CI and VR must not regress to the four-slot repo-local pool. Optional,
+  // hardware-sensitive benchmark and nightly workflows may remain self-hosted.
+  for (const workflow of [ci, vr, bench, nightly]) {
     expect(heavyRunsOnCount(workflow)).toBe(0);
     expect(workflow).not.toContain("heavy-self-hosted-cpu");
   }
-  expect(selfHostedGgsvelteCount(ci)).toBeGreaterThanOrEqual(10);
-  expect(selfHostedGgsvelteCount(vr)).toBe(3);
-  expect(selfHostedGgsvelteCount(pages)).toBe(2);
+  expect(selfHostedGgsvelteCount(ci)).toBe(0);
+  expect(selfHostedGgsvelteCount(vr)).toBe(0);
+  expect(ci.match(/runs-on: ubuntu-latest/g)?.length).toBeGreaterThanOrEqual(16);
+  expect(ci).toContain("runs-on: ${{ matrix.os }}");
+  expect(vr.match(/runs-on: ubuntu-latest/g)?.length).toBeGreaterThanOrEqual(4);
   expect(selfHostedGgsvelteCount(bench)).toBe(1);
   expect(selfHostedGgsvelteCount(nightly)).toBeGreaterThanOrEqual(1);
   expect(ci).not.toContain("heavy-component");
   expect(ci).not.toContain("heavy-packages-dist");
   expect(ci).not.toContain("heavy-consumer-ubuntu");
   expect(ci).not.toContain("group: heavy-interaction-perf");
-  // Documented live topology + cancel-on-close (not label fiction).
-  expect(ci).toContain("four cpuset-isolated runners");
+  // Superseded/closed work is still cancelled independently of runner choice.
+  expect(ci).toContain("elastic pool");
   expect(ci).toContain("cancel-in-progress: true");
   expect(cancel).toContain("pull_request_target");
   expect(cancel).toContain("head_sha");
-  // Pages/Bench: job-level concurrency so skip-only runs cannot cancel real work.
-  expect(pages).toContain("group: pages-build-");
-  expect(pages).not.toMatch(/^concurrency:\s*$/m);
+  // Bench: job-level concurrency so skip-only runs cannot cancel real work.
   expect(bench).toContain("group: bench-label-");
-  expect(bench).toContain("group: bench-trend-");
+  expect(bench).not.toContain("gh-pages");
+  expect(bench).not.toContain("github-action-benchmark");
 });
 
 it("binds approved baselines to a post-merge default-branch commit", () => {
@@ -496,11 +493,10 @@ it("regenerates docs-owned gallery previews when approved baselines land", () =>
   expect(approve).toContain("apps/docs/src/lib/generated/gallery-previews.ts");
 });
 
-it("uses job-private Bun caches in self-hosted workflows (issue #319)", () => {
+it("uses job-private Bun caches across CI workflows (issue #319)", () => {
   const workflows = [
     ".github/workflows/ci.yml",
     ".github/workflows/vr-compare.yml",
-    ".github/workflows/pages.yml",
     ".github/workflows/bench.yml",
     ".github/workflows/compatibility-nightly.yml",
     ".github/workflows/evals.yml",

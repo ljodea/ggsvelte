@@ -91,16 +91,18 @@ function temporalGuideDiagnostic(code: string, aesthetic: "x" | "y") {
 function guidePlanDiagnostics(input: AssembleRenderModelInput): RenderModel["scaleDiagnostics"] {
   const seen = new Set<string>();
   return input.guidePlans.flatMap((plan) =>
-    plan.degraded.flatMap((code) => {
-      const key = `${code}:${plan.aesthetic}`;
-      if (seen.has(key)) return [];
-      seen.add(key);
-      return [
-        plan.scaleType === "band"
-          ? bandGuideDiagnostic(code, plan.aesthetic, plan.bandLabelMode)
-          : temporalGuideDiagnostic(code, plan.aesthetic),
-      ];
-    }),
+    plan.type === "axis"
+      ? plan.degraded.flatMap((code) => {
+          const key = `${code}:${plan.aesthetic}`;
+          if (seen.has(key)) return [];
+          seen.add(key);
+          return [
+            plan.scaleType === "band"
+              ? bandGuideDiagnostic(code, plan.aesthetic, plan.bandLabelMode)
+              : temporalGuideDiagnostic(code, plan.aesthetic),
+          ];
+        })
+      : [],
   );
 }
 
@@ -111,7 +113,7 @@ function bandLabelAdvisories(
   const seen = new Set<string>();
   const out: { code: string; path: string; chosen: string; howToOverride: string }[] = [];
   for (const plan of guidePlans) {
-    if (plan.scaleType !== "band") continue;
+    if (plan.type !== "axis" || plan.scaleType !== "band") continue;
     const mode = plan.bandLabelMode;
     if (mode !== "wrapped" && mode !== "rotated") continue;
     const key = `${mode}:${plan.aesthetic}`;

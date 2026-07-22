@@ -103,6 +103,15 @@ export const PLAYGROUND_EXAMPLES: readonly GeneratedPlaygroundExample[] = [
     },
   },
   {
+    id: "color/binned",
+    title: "Binned color (colorsteps)",
+    compatibility: {
+      supported: true,
+      fragment:
+        "#play=v1.eyJ2ZXJzaW9uIjoxLCJzb3VyY2UiOnsia2luZCI6ImV4YW1wbGUiLCJpZCI6ImNvbG9yL2Jpbm5lZCJ9LCJzcGVjIjp7ImVkaXRpb24iOjIsImRhdGEiOnsidmFsdWVzIjpbeyJob3VyIjowLCJwbTI1Ijo0fSx7ImhvdXIiOjIsInBtMjUiOjl9LHsiaG91ciI6NCwicG0yNSI6MTh9LHsiaG91ciI6NiwicG0yNSI6MzF9LHsiaG91ciI6OCwicG0yNSI6NDJ9LHsiaG91ciI6MTAsInBtMjUiOjU4fSx7ImhvdXIiOjEyLCJwbTI1Ijo3Nn0seyJob3VyIjoxNCwicG0yNSI6OTF9LHsiaG91ciI6MTYsInBtMjUiOjYzfSx7ImhvdXIiOjE4LCJwbTI1IjozOX0seyJob3VyIjoyMCwicG0yNSI6MjJ9LHsiaG91ciI6MjIsInBtMjUiOjExfV19LCJsYXllcnMiOlt7Imdlb20iOiJwb2ludCIsInN0YXQiOiJpZGVudGl0eSIsInBvc2l0aW9uIjoiaWRlbnRpdHkiLCJhZXMiOnsieCI6eyJmaWVsZCI6ImhvdXIifSwieSI6eyJmaWVsZCI6InBtMjUifSwiY29sb3IiOnsiZmllbGQiOiJwbTI1In19LCJwYXJhbXMiOnsic2l6ZSI6NX19XSwic2NhbGVzIjp7ImNvbG9yIjp7InR5cGUiOiJiaW5uZWQiLCJicmVha3MiOlswLDEyLDM1LDU1LDEwMF0sInJhbmdlIjpbIiMyYTlkOGYiLCIjZTljNDZhIiwiI2Y0YTI2MSIsIiNlNzZmNTEiXX19LCJsYWJzIjp7InRpdGxlIjoiUGFydGljbGUgcG9sbHV0aW9uIGJ5IGhvdXIiLCJ4IjoiSG91ciIsInkiOiJQTTIuNSAowrVnL23CsykiLCJjb2xvciI6IlBNMi41IGJhbmQifX19",
+    },
+  },
+  {
     id: "color/continuous",
     title: "Continuous color (ramp legend)",
     compatibility: {
@@ -735,6 +744,82 @@ export const PLAYGROUND_SAMPLES: readonly GeneratedPlaygroundSample[] = [
     },
     fragment:
       "#play=v1.eyJ2ZXJzaW9uIjoxLCJzb3VyY2UiOnsia2luZCI6InNhbXBsZSIsImlkIjoicG9zdC1zdGF0LWNvb3JkaW5hdGUifSwic3BlYyI6eyJlZGl0aW9uIjoyLCJkYXRhIjp7InZhbHVlcyI6W3siZXhwb3N1cmUiOjEsInJlc3BvbnNlIjoyLjJ9LHsiZXhwb3N1cmUiOjIsInJlc3BvbnNlIjoyLjF9LHsiZXhwb3N1cmUiOjUsInJlc3BvbnNlIjoyLjR9LHsiZXhwb3N1cmUiOjEwLCJyZXNwb25zZSI6Mi4yfSx7ImV4cG9zdXJlIjoyMCwicmVzcG9uc2UiOjIuNX0seyJleHBvc3VyZSI6NTAsInJlc3BvbnNlIjoyLjh9LHsiZXhwb3N1cmUiOjEwMCwicmVzcG9uc2UiOjMuMX0seyJleHBvc3VyZSI6MjAwLCJyZXNwb25zZSI6NC4yfSx7ImV4cG9zdXJlIjo1MDAsInJlc3BvbnNlIjo3LjF9LHsiZXhwb3N1cmUiOjEwMDAsInJlc3BvbnNlIjoxMi4zfV19LCJsYXllcnMiOlt7Imdlb20iOiJwb2ludCIsInN0YXQiOiJpZGVudGl0eSIsInBvc2l0aW9uIjoiaWRlbnRpdHkiLCJhZXMiOnsieCI6eyJmaWVsZCI6ImV4cG9zdXJlIn0sInkiOnsiZmllbGQiOiJyZXNwb25zZSJ9fSwicGFyYW1zIjp7InNpemUiOjN9fSx7Imdlb20iOiJzbW9vdGgiLCJzdGF0Ijoic21vb3RoIiwicG9zaXRpb24iOiJpZGVudGl0eSIsImFlcyI6eyJ4Ijp7ImZpZWxkIjoiZXhwb3N1cmUifSwieSI6eyJmaWVsZCI6InJlc3BvbnNlIn19LCJwYXJhbXMiOnsibWV0aG9kIjoibG0iLCJzZSI6ZmFsc2UsIm4iOjgwfX1dLCJjb29yZCI6eyJ0eXBlIjoidHJhbnNmb3JtIiwieCI6eyJ0cmFuc2Zvcm0iOiJsb2cxMCJ9fSwibGFicyI6eyJ0aXRsZSI6IlBvc3Qtc3RhdCBjb29yZGluYXRlIHRyYW5zZm9ybSIsInN1YnRpdGxlIjoiVGhlIGxpbmVhciBmaXQgaXMgY29tcHV0ZWQgYmVmb3JlIHRoZSB4IGNvb3JkaW5hdGUgaXMgcHJvamVjdGVkIiwieCI6IkV4cG9zdXJlIChsb2cxMCBjb29yZGluYXRlKSIsInkiOiJSZXNwb25zZSJ9LCJoZWlnaHQiOjQwMH19",
+  },
+  {
+    id: "binned-colorsteps",
+    title: "Binned colorsteps",
+    description: "Translate quantitative values into deterministic semantic color intervals.",
+    seed: {
+      version: 1,
+      source: {
+        kind: "sample",
+        id: "binned-colorsteps",
+      },
+      spec: {
+        edition: 2,
+        data: {
+          values: [
+            {
+              hour: 0,
+              pm25: 4,
+            },
+            {
+              hour: 6,
+              pm25: 18,
+            },
+            {
+              hour: 12,
+              pm25: 42,
+            },
+            {
+              hour: 18,
+              pm25: 76,
+            },
+            {
+              hour: 22,
+              pm25: 11,
+            },
+          ],
+        },
+        layers: [
+          {
+            geom: "point",
+            stat: "identity",
+            position: "identity",
+            aes: {
+              x: {
+                field: "hour",
+              },
+              y: {
+                field: "pm25",
+              },
+              color: {
+                field: "pm25",
+              },
+            },
+            params: {
+              size: 5,
+            },
+          },
+        ],
+        scales: {
+          color: {
+            type: "binned",
+            breaks: [0, 12, 35, 55, 100],
+            range: ["#2a9d8f", "#e9c46a", "#f4a261", "#e76f51"],
+          },
+        },
+        labs: {
+          title: "Particle pollution by hour",
+          x: "Hour",
+          y: "PM2.5 (µg/m³)",
+          color: "PM2.5 band",
+        },
+        height: 400,
+      },
+    },
+    fragment:
+      "#play=v1.eyJ2ZXJzaW9uIjoxLCJzb3VyY2UiOnsia2luZCI6InNhbXBsZSIsImlkIjoiYmlubmVkLWNvbG9yc3RlcHMifSwic3BlYyI6eyJlZGl0aW9uIjoyLCJkYXRhIjp7InZhbHVlcyI6W3siaG91ciI6MCwicG0yNSI6NH0seyJob3VyIjo2LCJwbTI1IjoxOH0seyJob3VyIjoxMiwicG0yNSI6NDJ9LHsiaG91ciI6MTgsInBtMjUiOjc2fSx7ImhvdXIiOjIyLCJwbTI1IjoxMX1dfSwibGF5ZXJzIjpbeyJnZW9tIjoicG9pbnQiLCJzdGF0IjoiaWRlbnRpdHkiLCJwb3NpdGlvbiI6ImlkZW50aXR5IiwiYWVzIjp7IngiOnsiZmllbGQiOiJob3VyIn0sInkiOnsiZmllbGQiOiJwbTI1In0sImNvbG9yIjp7ImZpZWxkIjoicG0yNSJ9fSwicGFyYW1zIjp7InNpemUiOjV9fV0sInNjYWxlcyI6eyJjb2xvciI6eyJ0eXBlIjoiYmlubmVkIiwiYnJlYWtzIjpbMCwxMiwzNSw1NSwxMDBdLCJyYW5nZSI6WyIjMmE5ZDhmIiwiI2U5YzQ2YSIsIiNmNGEyNjEiLCIjZTc2ZjUxIl19fSwibGFicyI6eyJ0aXRsZSI6IlBhcnRpY2xlIHBvbGx1dGlvbiBieSBob3VyIiwieCI6IkhvdXIiLCJ5IjoiUE0yLjUgKMK1Zy9twrMpIiwiY29sb3IiOiJQTTIuNSBiYW5kIn0sImhlaWdodCI6NDAwfX0",
   },
   {
     id: "category-columns",

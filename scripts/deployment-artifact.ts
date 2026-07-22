@@ -4,6 +4,7 @@ import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from "
 import { join } from "node:path";
 
 import { resolveDocsBuildConfig } from "../apps/docs/build-mode.ts";
+import { validateDocsCsp } from "./docs-csp.ts";
 import { createDocsRouteInventory } from "./docs-route-inventory.ts";
 
 export type DeploymentBuildMode = "cloudflare-preview" | "cloudflare-production";
@@ -25,7 +26,7 @@ export interface DeploymentIdentity {
 
 const COMMIT_SHA = /^[0-9a-f]{40}$/;
 const REQUIRED_SECURITY_HEADERS = [
-  "Content-Security-Policy-Report-Only:",
+  "Content-Security-Policy: frame-ancestors 'none'",
   "Permissions-Policy:",
   "Referrer-Policy: strict-origin-when-cross-origin",
   "X-Content-Type-Options: nosniff",
@@ -74,7 +75,18 @@ export interface DeploymentExpectation {
   readonly analyticsToken?: string;
 }
 
+const NOT_FOUND_STYLE = `
+      :root { color-scheme: light dark; font-family: ui-sans-serif, system-ui, sans-serif; }
+      body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #f7f5ef; color: #171714; }
+      main { width: min(32rem, calc(100% - 3rem)); }
+      h1 { margin: 0 0 0.75rem; font-family: ui-serif, Georgia, serif; font-size: clamp(2.5rem, 8vw, 5rem); line-height: 0.95; }
+      p { color: #5a574f; font-size: 1.05rem; line-height: 1.6; }
+      a { color: inherit; font-weight: 650; text-underline-offset: 0.2em; }
+      @media (prefers-color-scheme: dark) { body { background: #171714; color: #f7f5ef; } p { color: #bdb8ad; } }
+    `;
+
 export function ensureNotFoundNoindex(buildDirectory: string): void {
+  const styleHash = createHash("sha256").update(NOT_FOUND_STYLE).digest("base64");
   writeFileSync(
     join(buildDirectory, "404.html"),
     `<!doctype html>
@@ -83,16 +95,9 @@ export function ensureNotFoundNoindex(buildDirectory: string): void {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex,follow" />
+    <meta http-equiv="content-security-policy" content="default-src 'self'; base-uri 'self'; form-action 'self'; frame-src 'none'; img-src 'self' data:; object-src 'none'; script-src 'none'; script-src-attr 'none'; style-src 'self' 'sha256-${styleHash}'; style-src-attr 'none'; upgrade-insecure-requests" />
     <title>Not found — ggsvelte</title>
-    <style>
-      :root { color-scheme: light dark; font-family: ui-sans-serif, system-ui, sans-serif; }
-      body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #f7f5ef; color: #171714; }
-      main { width: min(32rem, calc(100% - 3rem)); }
-      h1 { margin: 0 0 0.75rem; font-family: ui-serif, Georgia, serif; font-size: clamp(2.5rem, 8vw, 5rem); line-height: 0.95; }
-      p { color: #5a574f; font-size: 1.05rem; line-height: 1.6; }
-      a { color: inherit; font-weight: 650; text-underline-offset: 0.2em; }
-      @media (prefers-color-scheme: dark) { body { background: #171714; color: #f7f5ef; } p { color: #bdb8ad; } }
-    </style>
+    <style>${NOT_FOUND_STYLE}</style>
   </head>
   <body>
     <main><h1>Not found</h1><p>This page does not exist.</p><p><a href="/">Go to the ggsvelte documentation</a></p></main>
@@ -222,8 +227,11 @@ export function validateDeploymentArtifact(
     if (/^https:\/\/\S+\s+/m.test(redirects)) {
       problems.push("_redirects must not contain unsupported domain-level source URLs");
     }
-    if (!redirects.includes("/bench/* https://ljodea.github.io/ggsvelte/bench/:splat 302")) {
-      problems.push("_redirects is missing the fixed legacy benchmark redirect");
+    if (redirects.includes("ljodea.github.io") || redirects.includes("github.io/ggsvelte")) {
+      problems.push("_redirects must not send traffic to GitHub Pages");
+    }
+    if (/^\/bench(?:\s|\/\*)/m.test(redirects)) {
+      problems.push("_redirects must not preserve /bench GitHub Pages history redirects");
     }
     if (expected.buildMode === "cloudflare-production") {
       if (!redirects.includes("/ggsvelte/* https://ggsvelte.sh/:splat 301")) {
@@ -243,6 +251,10 @@ export function validateDeploymentArtifact(
         problems.push("_redirects is missing the same-origin /ggsvelte cleanup redirect");
       }
     }
+  }
+
+  if (existsSync(headersPath)) {
+    problems.push(...validateDocsCsp(buildDirectory));
   }
 
   const identityPath = join(buildDirectory, "artifact.json");

@@ -99,6 +99,16 @@ export const ERROR_CATALOG = {
     summary: "A custom color range contains a color outside the supported hex syntax.",
     fix: "Replace each custom color with #rgb or #rrggbb syntax.",
   },
+  "scale-type-transform-conflict": {
+    tier: 1,
+    summary: "A scale family is incompatible with its requested transform.",
+    fix: "Use identity for temporal/discrete/manual/identity scales, or choose a quantitative family.",
+  },
+  "scale-manual-domain-range": {
+    tier: 1,
+    summary: "A manual color scale has different domain and range lengths.",
+    fix: "Provide exactly one range color for each explicit domain value.",
+  },
   // --- tier 1 structural (grammar rules the schema alone cannot express) ---
   "missing-required-channel": {
     tier: 2,

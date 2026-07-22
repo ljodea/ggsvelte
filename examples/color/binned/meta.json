@@ -1,0 +1,6 @@
+{
+  "title": "Binned color (colorsteps)",
+  "description": "A quantitative color mapping split into deterministic intervals with a colorsteps guide.",
+  "tags": ["point", "color", "binned", "colorsteps", "legend"],
+  "docsSection": "Color & legends"
+}

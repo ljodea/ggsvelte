@@ -186,6 +186,20 @@ function renderLegend(legend: SceneLegend, theme: ThemeTokens, gradientId: strin
         `<text class="gg-legend-label" x="${px(4 + legend.swatchSize + 6)}" y="${px(entry.y + contentY + LEGEND_ROW_HEIGHT / 2)}" dy="0.32em" fill="${ink}">${escapeXML(entry.label)}</text>`,
       );
     }
+  } else if (legend.type === "steps") {
+    let stepTop = 0;
+    if (legend.title !== "") {
+      parts.push(
+        `<text class="gg-legend-title" x="4" y="11" font-weight="bold" fill="${ink}">${escapeXML(legend.title)}</text>`,
+      );
+      stepTop = 18;
+    }
+    for (const entry of legend.entries) {
+      parts.push(
+        `<rect class="gg-legend-step" x="4" y="${px(stepTop + entry.y)}" width="${px(legend.stepWidth)}" height="${px(legend.stepHeight)}" fill="${entry.color}"/>`,
+        `<text class="gg-legend-label" x="${px(4 + legend.stepWidth + 6)}" y="${px(stepTop + entry.y + legend.stepHeight / 2)}" dy="0.32em" fill="${ink}">${escapeXML(entry.label)}</text>`,
+      );
+    }
   } else {
     let rampTop = 0;
     if (legend.title !== "") {

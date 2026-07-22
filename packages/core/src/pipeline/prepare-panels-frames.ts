@@ -19,7 +19,7 @@ import type { PositionConversionContext } from "./temporal-position.js";
 import { preflightTemporalBindings } from "./temporal-preflight.js";
 import type { ColumnTransformConfig } from "../scales/transform.js";
 
-const DOCS = "https://ljodea.github.io/ggsvelte/guide/errors";
+const DOCS = "https://ggsvelte.sh/guide/errors";
 
 /** Up to `limit` finite semantic values that failed the transform (invalid). */
 function sampleFailingSemantic(
@@ -166,8 +166,12 @@ export function buildPanelFrames(input: {
 
   for (let index = 0; index < normalized.layers.length; index++) {
     const binding = bindLayer(normalized.layers[index]!, index, table, warnings, conversions);
-    binding.color.forcedDiscrete = normalized.scales?.color?.type === "ordinal";
-    binding.fill.forcedDiscrete = normalized.scales?.fill?.type === "ordinal";
+    binding.color.forcedDiscrete = ["ordinal", "manual"].includes(
+      normalized.scales?.color?.type ?? "",
+    );
+    binding.fill.forcedDiscrete = ["ordinal", "manual"].includes(
+      normalized.scales?.fill?.type ?? "",
+    );
     bindings.push(binding);
   }
   const temporal = preflightTemporalBindings({

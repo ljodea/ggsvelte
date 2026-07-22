@@ -316,8 +316,69 @@ scales={{ color: { type: "ordinal", scheme: "observable10" } }}
 \`\`\`
 
 Stable assignments preserve category identity as rows filter or reorder. See
-all registered schemes, capacities, and exhaustion behavior on
-[Themes and color](/themes).
+registered schemes and capacities on
+[Themes and color](/themes). Palette exhaustion is
+\`onExhaust: "cycle"\` (default, warn once) or \`"error"\` — diagnostics at
+[palette-exhausted](/guide/errors#palette-exhausted) and
+[palette-exhausted — warning](/guide/errors#palette-exhausted-warning).
+
+## Continuous, binned, manual, and identity color
+
+Quantitative color/fill defaults to a continuous viridis colorbar. The
+\`identity\`, \`log10\`, and \`sqrt\` transforms run before color-domain training;
+they do not change position statistics. Explicit reference \`breaks\` stay in
+semantic source units.
+
+\`\`\`ts fragment
+import {
+  scaleColorLog10,
+  scaleFillContinuous,
+} from "@ggsvelte/spec";
+
+const color = scaleColorLog10({ domain: [1, 1000] });
+const fill = scaleFillContinuous({ scheme: "viridis" });
+\`\`\`
+
+Binned color/fill uses deterministic \`[lower, upper)\` intervals with the final
+upper edge included. At most 65 boundaries (64 steps) are portable. A
+colorsteps guide exposes every boundary, label, swatch, and inclusivity rule:
+
+\`\`\`svelte fragment
+<GGPlot
+  data={rows}
+  aes={{ x: "hour", y: "pm25", color: "pm25" }}
+  scales={scaleColorBinned({
+    breaks: [0, 12, 35, 55, 100],
+    range: ["#2a9d8f", "#e9c46a", "#f4a261", "#e76f51"],
+  })}
+>
+  <GeomPoint />
+</GGPlot>
+\`\`\`
+
+Manual scales pair each domain value with exactly one color and never recycle
+unknown values. Identity scales validate source \`#rgb\`/\`#rrggbb\` values and
+show no guide by default. \`naValue\` handles missing values; \`unknownValue\`
+handles invalid, unmapped, or censored values.
+
+\`\`\`ts fragment
+const manual = scaleColorManual({
+  domain: ["control", "treated"],
+  values: ["#4477aa", "#ee6677"],
+  unknownValue: "#999999",
+});
+const identity = scaleFillIdentity({ naValue: "#cccccc" });
+\`\`\`
+
+Color and colour spellings are binding-identical exports, including
+\`scaleColorBinned\`, \`scaleColourBinned\`, \`scale_color_binned\`, and
+\`scale_colour_binned\`. Fill exports use the same families. Date/datetime
+helpers reuse the strict parser registry and semantic epoch representation:
+\`scaleColorDate\`, \`scaleColorDatetime\`, \`scaleFillDate\`, and
+\`scaleFillDatetime\`.
+
+Open [continuous color](/examples/color/continuous) for a colorbar and
+[binned color](/examples/color/binned) for colorsteps.
 
 ## Date and time axes
 
@@ -421,8 +482,9 @@ Registered theme name; mappings unchanged:
 theme="economist"
 \`\`\`
 
-Twelve themes, categorical schemes, sequential ramps, exhaustion:
-[Themes and color](/themes).
+Twelve themes, categorical palettes, sequential ramps:
+[Themes and color](/themes). Exhaustion:
+[palette-exhausted](/guide/errors#palette-exhausted).
 
 ## Preserve color meaning
 
@@ -1400,6 +1462,77 @@ migration note here. The pre-release API has its own page:
 The accepted lifecycle and deprecation policy remains in
 [Lifecycle and editions](/guide/lifecycle#lifecycle-tags); this page applies it
 rather than creating a second policy.
+
+## 0.6 to 0.7
+
+### Choose explicit color/fill families
+
+Color/fill now exposes complete continuous, discrete, binned, transformed,
+temporal, manual, and identity helpers. Existing \`ordinal\` and \`sequential\`
+JSON remains canonical. Review charts that relied on implicit continuous
+clamping: with an explicit domain, the default \`oob: "censor"\` now uses
+\`unknownValue\`; opt into \`oob: "squish"\` to clamp deliberately.
+
+Use \`type: "binned"\` plus semantic \`breaks\` for colorsteps. Manual scales
+require one range color per explicit domain value and never recycle extras.
+Identity scales accept validated hex source values and suppress their guide by
+default. Replace ad-hoc preprocessing with \`scaleColorDate\`/
+\`scaleColorDatetime\` and an explicit parser when date order is ambiguous.
+
+Before 0.7, an explicit continuous color domain clamped implicitly:
+
+\`\`\`svelte fragment
+<script lang="ts">
+  import { GeomPoint, GGPlot } from "@ggsvelte/svelte";
+
+  const rows = [
+    { x: 1, y: 2, score: -10 },
+    { x: 2, y: 3, score: 50 },
+    { x: 3, y: 4, score: 110 },
+  ];
+</script>
+
+<GGPlot
+  data={rows}
+  aes={{ x: "x", y: "y", color: "score" }}
+  scales={{ color: { type: "sequential", domain: [0, 100] } }}
+>
+  <GeomPoint />
+</GGPlot>
+\`\`\`
+
+In 0.7, opt into clamping when it is the intended encoding:
+
+\`\`\`svelte fragment
+<script lang="ts">
+  import {
+    GeomPoint,
+    GGPlot,
+    scaleColorContinuous,
+  } from "@ggsvelte/svelte";
+
+  const rows = [
+    { x: 1, y: 2, score: -10 },
+    { x: 2, y: 3, score: 50 },
+    { x: 3, y: 4, score: 110 },
+  ];
+</script>
+
+<GGPlot
+  data={rows}
+  aes={{ x: "x", y: "y", color: "score" }}
+  scales={scaleColorContinuous({
+    domain: [0, 100],
+    oob: "squish",
+  })}
+>
+  <GeomPoint />
+</GGPlot>
+\`\`\`
+
+\`RenderModel.guidePlans\` now includes serializable \`discrete\`, \`colorbar\`,
+and \`colorsteps\` plans beside axes. Code that assumed every plan was an axis
+must narrow on \`plan.type === "axis"\` before reading axis-only fields.
 
 ## 0.5 to 0.6
 

@@ -7,7 +7,7 @@ body:
     attributes:
       label: Documentation location
       description: Link the page, README section, example, error code, or source file.
-      placeholder: https://ljodea.github.io/ggsvelte/guide/interactions
+      placeholder: https://ggsvelte.sh/guide/interactions
     validations:
       required: true
   - type: dropdown

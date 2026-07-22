@@ -14,6 +14,7 @@ export const requiredPages = [
   "guide/upgrading.html",
   "playground.html",
   "themes.html",
+  "interactions.html",
   "reference/interactions.html",
   "reference/cli.html",
   "examples/interaction/tooltip.html",

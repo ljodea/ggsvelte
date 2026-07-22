@@ -9,7 +9,8 @@ export { NO_ROW } from "./types-no-row.js";
 export type { ColorBinding, LayerBinding, RuleForm } from "./types-binding.js";
 export type { LayerFrame } from "./types-layer-frame.js";
 
-/** Per-mark color lookup over a resolved scale (unknown values render grey). */
+/** Per-mark color lookup over a resolved scale with distinct NA/unknown fallbacks. */
 export function colorOf(resolved: ResolvedColorScale, value: CellValue): string {
-  return resolved.scale.colorOf(value) ?? "#999999";
+  if (value === null) return resolved.scale.naValue ?? "#999999";
+  return resolved.scale.colorOf(value) ?? resolved.scale.unknownValue ?? "#999999";
 }

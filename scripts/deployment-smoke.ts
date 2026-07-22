@@ -11,7 +11,6 @@ export interface CutoverSmokeInput {
   readonly apexOrigin: string;
   readonly wwwOrigin: string;
   readonly productionPagesOrigin: string;
-  readonly legacyOrigin: string;
   readonly sourceCommit: string;
 }
 
@@ -34,16 +33,8 @@ function origin(value: string): string {
   return parsed.origin;
 }
 
-function httpsBaseUrl(value: string): string {
-  const parsed = new URL(value);
-  if (parsed.protocol !== "https:" || parsed.search !== "" || parsed.hash !== "") {
-    throw new Error(`Smoke base URL must use HTTPS without query or fragment: ${value}`);
-  }
-  return `${parsed.origin}${parsed.pathname.replace(/\/$/, "")}`;
-}
-
 const securityHeaders = {
-  "content-security-policy-report-only": "default-src 'self'",
+  "content-security-policy": "frame-ancestors 'none'",
   "permissions-policy": "camera=()",
   "referrer-policy": "strict-origin-when-cross-origin",
   "x-content-type-options": "nosniff",
@@ -104,7 +95,6 @@ export function cutoverSmokePlan(input: CutoverSmokeInput): SmokeExpectation[] {
   const apex = origin(input.apexOrigin);
   const www = origin(input.wwwOrigin);
   const pages = origin(input.productionPagesOrigin);
-  const legacy = httpsBaseUrl(input.legacyOrigin);
   return [
     {
       name: "apex home",
@@ -168,24 +158,6 @@ export function cutoverSmokePlan(input: CutoverSmokeInput): SmokeExpectation[] {
       url: `${apex}/ggsvelte/guide/getting-started?from=legacy-base`,
       status: 301,
       redirectTo: `${apex}/guide/getting-started?from=legacy-base`,
-    },
-    {
-      name: "external benchmark redirect",
-      url: `${apex}/bench/index.html?window=latest`,
-      status: 302,
-      redirectTo: `${legacy}/bench/index.html?window=latest`,
-    },
-    {
-      name: "legacy known-route migration",
-      url: `${legacy}/guide/getting-started?from=old#install`,
-      status: 200,
-      bodyIncludes: [`${apex}/guide/getting-started`, "location.search + location.hash"],
-    },
-    {
-      name: "legacy benchmark history",
-      url: `${legacy}/bench/index.html`,
-      status: 200,
-      bodyIncludes: ["benchmark"],
     },
   ];
 }

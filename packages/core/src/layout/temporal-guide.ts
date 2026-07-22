@@ -53,7 +53,71 @@ export interface AxisGuidePlan {
   bandLabelBandHeight?: number;
 }
 
-export type GuidePlan = AxisGuidePlan;
+export interface DiscreteGuideEntry {
+  value: CellValue;
+  label: string;
+  color: string;
+}
+
+export interface DiscreteGuidePlan {
+  type: "discrete";
+  id: string;
+  aesthetic: "color" | "fill";
+  scaleType: "ordinal" | "manual";
+  title: string;
+  domain: readonly CellValue[];
+  entries: readonly DiscreteGuideEntry[];
+  naValue: string;
+  unknownValue: string;
+}
+
+export interface ColorbarGuideTick {
+  value: number;
+  label: string;
+  fullLabel: string;
+}
+
+export interface ColorbarGuidePlan {
+  type: "colorbar";
+  id: string;
+  aesthetic: "color" | "fill";
+  title: string;
+  domain: readonly [number, number];
+  transformedDomain: readonly [number, number];
+  transform: "identity" | "log10" | "sqrt";
+  temporalKind: TemporalKind | null;
+  direction: "ascending" | "descending";
+  ticks: readonly ColorbarGuideTick[];
+  stops: readonly (readonly [number, string])[];
+  naValue: string;
+  unknownValue: string;
+}
+
+export interface ColorstepsGuideStep {
+  lower: number;
+  upper: number;
+  lowerInclusive: true;
+  upperInclusive: boolean;
+  label: string;
+  color: string;
+}
+
+export interface ColorstepsGuidePlan {
+  type: "colorsteps";
+  id: string;
+  aesthetic: "color" | "fill";
+  title: string;
+  domain: readonly [number, number];
+  transformedDomain: readonly [number, number];
+  transform: "identity" | "log10" | "sqrt";
+  temporalKind: TemporalKind | null;
+  direction: "ascending" | "descending";
+  steps: readonly ColorstepsGuideStep[];
+  naValue: string;
+  unknownValue: string;
+}
+
+export type GuidePlan = AxisGuidePlan | DiscreteGuidePlan | ColorbarGuidePlan | ColorstepsGuidePlan;
 
 export class TemporalGuideIntervalError extends Error {
   override readonly cause: TemporalIntervalError;

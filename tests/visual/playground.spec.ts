@@ -136,6 +136,7 @@ test("interaction reference filters the exact public contract", async ({ page })
 test("compatible gallery details open the exact fragment while oversized examples explain why", async ({
   page,
 }) => {
+  test.setTimeout(60_000);
   await page.goto("/examples/point/scatter-color");
   const handoff = page.getByRole("link", { name: "Open in Playground" });
   await expect(handoff).toHaveAttribute("href", /\/playground#play=v1\.[A-Za-z0-9_-]+$/u);
@@ -235,45 +236,25 @@ test("valid edits render before Svelte copy becomes available and candidates sta
   );
 });
 
-test("temporal samples expose privacy-safe guide plans and keep ambiguous dates discrete", async ({
-  page,
-  context,
-}) => {
-  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+test("temporal samples render and keep ambiguous dates discrete", async ({ page }) => {
   await page.goto("/playground");
   await settleVisualState(page);
 
   await page.getByLabel("Start from a sample").selectOption("raw-years");
   await expect(page.getByText("Rendered raw-years.")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Axis plans" })).toBeVisible();
-  await expect(page.getByText(/temporal · year/u)).toBeVisible();
-
-  await page.getByRole("button", { name: "Copy privacy-safe scale report" }).click();
-  await expect(page.getByRole("status").filter({ hasText: "Copied a privacy-safe" })).toBeVisible();
-  const report = await page.evaluate(() => navigator.clipboard.readText());
-  const serialized = report.toLowerCase();
-  expect(JSON.parse(report)).toMatchObject({
-    decisions: [{ aesthetic: "x", status: "temporal", parser: "year", precision: "year" }],
-    guides: expect.any(Array),
-  });
-  expect(serialized).not.toContain('"data"');
-  expect(serialized).not.toContain('"field"');
-  expect(serialized).not.toContain('"domain"');
-  expect(serialized).not.toContain('"label"');
-  expect(serialized).not.toContain("1835");
+  await expect(page.locator(".active-chart .gg-title")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Axis plans" })).toHaveCount(0);
 
   await page.getByLabel("Start from a sample").selectOption("iso-dates");
   await expect(page.getByText("Rendered iso-dates.")).toBeVisible();
-  await expect(page.getByText(/temporal · iso/u)).toBeVisible();
+  await expect(page.locator(".active-chart .gg-title")).toBeVisible();
 
   await page.getByLabel("Start from a sample").selectOption("ambiguous-dates");
   await expect(page.getByText("Rendered ambiguous-dates.")).toBeVisible();
-  await expect(page.getByText(/nominal · none/u)).toBeVisible();
+  await expect(page.locator(".active-chart .gg-title")).toBeVisible();
 });
 
-test("axis-plan inspection supports multiple temporal decisions on one aesthetic", async ({
-  page,
-}) => {
+test("multiple temporal decisions on one aesthetic still render", async ({ page }) => {
   await page.goto("/playground");
   await settleVisualState(page);
   await page.getByLabel("PortableSpec JSON").fill(
@@ -303,7 +284,8 @@ test("axis-plan inspection supports multiple temporal decisions on one aesthetic
   );
   await page.getByRole("button", { name: "Apply draft" }).click();
   await expect(page.getByText("Rendered custom draft.")).toBeVisible();
-  await expect(page.getByText(/temporal · ymd/u)).toHaveCount(2);
+  await expect(page.locator(".active-chart .gg-title")).toHaveText("Temporal bounds");
+  await expect(page.getByRole("heading", { name: "Axis plans" })).toHaveCount(0);
 });
 
 test("191-year temporal guide stays collision-free with complete labels", async ({ page }) => {
@@ -649,24 +631,22 @@ test("denied clipboard selects the share URL with truthful fallback text", async
     "Clipboard unavailable. Share link selected for manual copy.",
   );
   expect(await page.evaluate(() => getSelection()?.toString())).toContain("#play=v1.");
-
-  await page.getByRole("button", { name: "Copy privacy-safe scale report" }).click();
-  await expect(
-    page.getByRole("status").filter({ hasText: "scale report is selected" }),
-  ).toBeVisible();
-  expect(await page.evaluate(() => getSelection()?.toString())).toContain('"guides"');
 });
 
 test("playground is preview-first, operable, and axe-clean at a touch-size viewport", async ({
   page,
 }) => {
+  // Init scripts bypass the page CSP; post-load addScriptTag does not.
+  await page.addInitScript({ content: axe.source });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/playground");
   await settleVisualState(page);
 
   const preview = await page.locator(".preview-surface").boundingBox();
   const editor = await page.locator(".editor-surface").boundingBox();
+  const output = await page.locator(".output-surface").boundingBox();
   expect(preview?.y).toBeLessThan(editor?.y ?? 0);
+  expect(editor?.y).toBeLessThan(output?.y ?? 0);
   const horizontalOverflow = await page.evaluate(
     () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
   );
@@ -681,7 +661,6 @@ test("playground is preview-first, operable, and axe-clean at a touch-size viewp
   await expect(page.getByRole("button", { name: "Copy Svelte" })).toBeVisible();
   await expect(page.locator("details.event-inspector")).not.toHaveAttribute("open", "");
 
-  await page.addScriptTag({ content: axe.source });
   const violations = await page.evaluate(async () => {
     const runner = (globalThis as typeof globalThis & { axe: typeof axe }).axe;
     return (await runner.run(document.querySelector(".playground")!)).violations.map(

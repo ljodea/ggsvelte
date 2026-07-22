@@ -157,6 +157,43 @@ export const PIPELINE_ERROR_CATALOG = {
       'A discrete color scale with onExhaust: "error" ran out of palette entries (the default "cycle" only warns).',
     fix: "Provide a larger range, set an explicit domain, or accept cycling by removing onExhaust.",
   },
+  "color-temporal-parse": {
+    summary: "A temporal color/fill scale could not parse the complete mapped column.",
+    fix: "Set the exact parse order, correct the rejected values, or explicitly choose parseFailure: censor.",
+  },
+  "color-temporal-kind": {
+    summary:
+      "A temporal color/fill scale requested date or datetime precision that the data does not have.",
+    fix: "Use the matching date/datetime helper or correct the source precision.",
+  },
+  "color-manual-domain-range": {
+    summary: "A manual color/fill scale has a different number of domain values and range colors.",
+    fix: "Provide exactly one range color for every domain value.",
+  },
+  "color-binned-breaks": {
+    summary: "Binned color/fill boundaries are invalid, unparseable, duplicated, or unordered.",
+    fix: "Provide 2–65 strictly increasing boundaries valid for the parser and transform.",
+  },
+  "color-binned-empty": {
+    summary: "A binned color/fill scale has no values inside its parser/transform domain.",
+    fix: "Correct the mapped values, parser, or transform, or provide a valid explicit domain.",
+  },
+  "color-binned-domain": {
+    summary: "A binned color/fill domain is degenerate or invalid for its transform.",
+    fix: "Provide two distinct domain endpoints valid for identity, log10, or sqrt.",
+  },
+  "color-domain-invalid": {
+    summary: "A sequential color/fill domain does not contain exactly two parseable values.",
+    fix: "Provide a two-value semantic domain matching the mapped field and parser.",
+  },
+  "color-transform-empty": {
+    summary: "Every mapped color/fill value is invalid for the requested transform.",
+    fix: "Correct the mapped data or choose a transform whose domain contains the values.",
+  },
+  "color-domain-transform": {
+    summary: "A sequential color/fill domain is invalid for its requested transform.",
+    fix: "Use positive endpoints for log10, non-negative endpoints for sqrt, or identity.",
+  },
   "unknown-theme": {
     summary: "spec.theme names a theme that is not registered.",
     fix: "Use a registered name (default, light, dark, minimal) or a theme object.",
@@ -205,6 +242,21 @@ export const PIPELINE_WARNING_CATALOG = {
   },
   "sequential-discrete-field": {
     summary: "A sequential color scale is fed a discrete field; unparseable values render unknown.",
+  },
+  "color-temporal-censored": {
+    summary:
+      "A temporal color/fill parser censored invalid source values by explicit author request.",
+  },
+  "color-transform-invalid": {
+    summary:
+      "Some color/fill values are outside the requested transform domain and render unknown.",
+  },
+  "color-na-values": {
+    summary: "Missing color/fill values render with the configured NA color (count in message).",
+  },
+  "color-unknown-values": {
+    summary:
+      "Invalid, unmapped, transformed, or censored color/fill values render with the configured unknown color (count in message).",
   },
   "invalid-label-format": {
     summary: "A labels format string was not recognized; the default format is used.",

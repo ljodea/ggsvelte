@@ -14,13 +14,7 @@ describe("docs build modes", () => {
     });
   });
 
-  it("resolves every declared publication mode", () => {
-    expect(resolveDocsBuildConfig({ mode: "legacy-full", basePath: "/ggsvelte" })).toMatchObject({
-      base: "/ggsvelte",
-      canonicalBase: "https://ljodea.github.io/ggsvelte",
-      indexable: true,
-      analytics: false,
-    });
+  it("resolves Cloudflare publication modes only", () => {
     expect(resolveDocsBuildConfig({ mode: "cloudflare-preview" })).toMatchObject({
       base: "",
       canonicalBase: "https://ggsvelte.sh",
@@ -39,14 +33,6 @@ describe("docs build modes", () => {
       analytics: true,
       analyticsToken: "0123456789abcdef0123456789abcdef",
     });
-    expect(
-      resolveDocsBuildConfig({ mode: "legacy-migration", basePath: "/ggsvelte" }),
-    ).toMatchObject({
-      base: "/ggsvelte",
-      canonicalBase: "https://ggsvelte.sh",
-      indexable: false,
-      analytics: false,
-    });
   });
 
   it("keeps analytics absent without an explicit production token", () => {
@@ -62,11 +48,12 @@ describe("docs build modes", () => {
     ).toThrow("Analytics token is allowed only for cloudflare-production");
   });
 
-  it("fails unknown modes and base-path combinations with the complete matrix", () => {
+  it("fails unknown modes, legacy GitHub Pages modes, and base-path combinations", () => {
     for (const input of [
       { mode: "preview" },
       { mode: "cloudflare-production", basePath: "/ggsvelte" },
-      { mode: "legacy-full", basePath: "/wrong" },
+      { mode: "legacy-full", basePath: "/ggsvelte" },
+      { mode: "legacy-migration", basePath: "/ggsvelte" },
       { basePath: "/ggsvelte" },
     ]) {
       expect(() => resolveDocsBuildConfig(input)).toThrow("Valid combinations");

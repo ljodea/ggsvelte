@@ -260,7 +260,7 @@ export function writeConsumerFixture(
   writeFileSync(
     join(directory, "src", "routes", "contract", "+page.svelte"),
     `<script lang="ts">
-  import { coord_transform, coordTransform, dmy, GGPlot, GeomLine, GeomPoint, scaleXBinned, scaleXDate, scaleXLog10, scale_x_date, scale_x_log10, type GuidePlan, type PortableSpec } from "@ggsvelte/svelte";
+  import { coord_transform, coordTransform, dmy, GGPlot, GeomLine, GeomPoint, scaleColorBinned, scaleColourBinned, scaleXBinned, scaleXDate, scaleXLog10, scale_color_binned, scale_colour_binned, scale_x_date, scale_x_log10, type GuidePlan, type PortableSpec } from "@ggsvelte/svelte";
   const spec: PortableSpec = ${JSON.stringify(plotSpec)};
   const temporalRows = [
     { year: "1835", value: 12 },
@@ -280,12 +280,15 @@ export function writeConsumerFixture(
   const logScale = scaleXLog10({ limits: [1, 1000] });
   const logAlias = scale_x_log10({ limits: [1, 1000] });
   const binnedScale = scaleXBinned({ breaks: [1, 10, 100, 1000] });
+  const binnedColor = scaleColorBinned({ breaks: [1, 10, 100, 1000] });
+  if (scaleColorBinned !== scaleColourBinned || scaleColorBinned !== scale_color_binned || scaleColorBinned !== scale_colour_binned) throw new Error("color alias identity mismatch");
   const transformedCoord = coordTransform({ x: "log10" });
   if (coord_transform !== coordTransform) throw new Error("coord alias identity mismatch");
   void transformedCoord;
   void logScale;
   void logAlias;
   void binnedScale;
+  void binnedColor;
   void explicitDateScale;
   void camelDateScale;
   const guidePlan: GuidePlan | undefined = undefined;
@@ -310,6 +313,16 @@ export function writeConsumerFixture(
   width={480}
   height={320}
   ariaLabel="Packed log transform contract chart"
+>
+  <GeomPoint />
+</GGPlot>
+<GGPlot
+  data={[{ x: 1, y: 1 }, { x: 10, y: 2 }, { x: 100, y: 3 }]}
+  aes={{ x: "x", y: "y", color: "x" }}
+  scales={scaleColorBinned({ breaks: [1, 10, 100] })}
+  width={480}
+  height={320}
+  ariaLabel="Packed binned color contract chart"
 >
   <GeomPoint />
 </GGPlot>
@@ -348,7 +361,7 @@ console.log("prerendered Quickstart verified");
   writeFileSync(
     join(directory, "smoke.mjs"),
     `import { strict as assert } from "node:assert";
-import { coord_transform, coordTransform, SpecModule, normalize, scaleXBinned, scaleXLog10, scale_x_log10, validate } from "@ggsvelte/spec";
+import { coord_transform, coordTransform, SpecModule, normalize, scaleColorBinned, scaleColourBinned, scaleXBinned, scaleXLog10, scale_colour_binned, scale_x_log10, validate } from "@ggsvelte/spec";
 import { renderToSVGString, runPipeline } from "@ggsvelte/core";
 
 const pointParamsSchema = SpecModule.Import("PointParams");
@@ -357,6 +370,8 @@ const spec = ${JSON.stringify(plotSpec)};
 const logScale = scaleXLog10();
 assert.deepEqual(logScale, scale_x_log10());
 assert.equal(coordTransform, coord_transform);
+assert.equal(scaleColorBinned, scaleColourBinned);
+assert.equal(scaleColorBinned, scale_colour_binned);
 assert.deepEqual(coordTransform({ x: "log10" }), { type: "transform", x: { transform: "log10" } });
 assert.equal(normalize({ data: spec.data, layers: spec.layers, scales: logScale }).scales.x.type, "linear");
 assert.equal(normalize({ data: spec.data, layers: spec.layers, scales: logScale }).scales.x.transform, "log10");
@@ -364,6 +379,11 @@ const binnedSpec = {
   data: { values: [{ x: 1, y: 1 }, { x: 9, y: 2 }, { x: 11, y: 3 }] },
   layers: [{ geom: "point", aes: { x: { field: "x" }, y: { field: "y" } } }],
   scales: scaleXBinned({ breaks: [0, 10, 20] }),
+};
+const colorSpec = {
+  data: { values: [{ x: 1, y: 1, score: 1 }, { x: 2, y: 2, score: 10 }, { x: 3, y: 3, score: 100 }] },
+  layers: [{ geom: "point", aes: { x: { field: "x" }, y: { field: "y" }, color: { field: "score" } } }],
+  scales: scaleColorBinned({ breaks: [1, 10, 100] }),
 };
 const temporalSpec = {
   data: { values: [{ year: "1835", value: 12 }, { year: "2026", value: 31 }] },
@@ -373,6 +393,10 @@ const temporalSpec = {
 assert.equal(validate(spec).ok, true);
 assert.equal(validate(temporalSpec).ok, true);
 assert.equal(validate(binnedSpec).ok, true);
+assert.equal(validate(colorSpec).ok, true);
+const colorModel = runPipeline(colorSpec, { width: 480, height: 320 });
+assert.equal(colorModel.scales.color.kind, "binned");
+assert.equal(colorModel.guidePlans.some((plan) => plan.type === "colorsteps"), true);
 const binnedModel = runPipeline(binnedSpec, { width: 480, height: 320 });
 assert.equal(binnedModel.scales.x.type, "linear");
 assert.match(renderToSVGString(spec, { width: 480, height: 320 }), /<svg/);

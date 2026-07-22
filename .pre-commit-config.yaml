@@ -1,21 +1,18 @@
 # ggsvelte hooks (python pre-commit framework — plan M0b).
 #
-# pre-commit stage: sub-second — format staged files, lint staged files,
-# path guards. pre-push stage: the heavier roster (type-aware lint,
-# svelte-check, tsc -b, knip, package tests). CI runs BOTH stages via
-# `pre-commit run --all-files` for parity; CI is the contract, local hooks
-# are the mirror.
+# pre-commit stage only: sub-second — format staged files, lint staged files,
+# path guards. Heavy work (build, type-aware lint, svelte-check, knip, package
+# tests, actionlint/zizmor) lives in CI — never on the git push hook.
 #
 # All hooks are repo-local and invoke lockfile-installed binaries through
 # `bun` / `bun run` (never network bunx). `bun` must be on PATH
 # (see CONTRIBUTING.md, including the arm64/x64 note).
-default_install_hook_types: [pre-commit, pre-push]
+default_install_hook_types: [pre-commit]
 default_stages: [pre-commit]
 
 repos:
   - repo: local
     hooks:
-      # ---- pre-commit stage (fast, staged files only) ----
       - id: oxfmt
         name: oxfmt (staged)
         entry: bun node_modules/.bin/oxfmt
@@ -64,87 +61,3 @@ repos:
         # VR baselines (tests/visual/__screenshots__) land only via the
         # audited vr-update/pr-N branch. The hook checks the staged diff so
         # clean committed baselines do not break `pre-commit run --all-files`.
-
-      # ---- pre-push stage (all files) ----
-      # package-build runs FIRST: since M0c the package exports point at
-      # dist/, so svelte-check, type-aware lint, docs check, and
-      # cross-package bun tests all resolve @ggsvelte/*/ggsvelte through the
-      # emitted dist/ (tsc -b for spec/core + svelte-package for ggsvelte —
-      # the docs app and the examples corpus import the built ggsvelte).
-      - id: package-build
-        name: build packages (tsc -b + svelte-package)
-        entry: bun run build
-        language: system
-        pass_filenames: false
-        always_run: true
-        stages: [pre-push]
-
-      - id: docs-check
-        name: svelte-check (apps/docs) — also syncs .svelte-kit, which the
-          type-aware lint's apps/docs tsconfig extends; keep it BEFORE
-          oxlint-type-aware
-        entry: bun run check:docs
-        language: system
-        pass_filenames: false
-        always_run: true
-        stages: [pre-push]
-
-      - id: oxlint-type-aware
-        name: oxlint --type-aware (all files)
-        entry: bun run lint:type-aware
-        language: system
-        pass_filenames: false
-        always_run: true
-        stages: [pre-push]
-
-      - id: svelte-check
-        name: svelte-check (packages/svelte)
-        entry: bun run check:svelte
-        language: system
-        pass_filenames: false
-        always_run: true
-        stages: [pre-push]
-
-      - id: examples-typecheck
-        name: tsc -p examples (corpus .ts files; needs dist from package-build)
-        entry: bun run check:examples
-        language: system
-        pass_filenames: false
-        always_run: true
-        stages: [pre-push]
-
-      - id: knip
-        name: knip (unused files/exports/deps)
-        entry: bun run knip
-        language: system
-        pass_filenames: false
-        always_run: true
-        stages: [pre-push]
-
-      - id: bun-test-packages
-        name: bun test (spec + core + benchmarks + scripts + evals harness; svelte runs under vitest browser mode)
-        entry: bun test packages/spec packages/core benchmarks scripts tests/evals
-        language: system
-        pass_filenames: false
-        always_run: true
-        stages: [pre-push]
-
-      # Workflow lint: only when .github/** is in the push set (or --all-files).
-      # actionlint uses the lockfile wasm build; skips gracefully if it cannot
-      # load. zizmor is an optional uv tool — skip if missing. CI still runs
-      # both in the dedicated actions-security job (contract, not optional).
-      - id: actionlint
-        name: actionlint (.github/workflows)
-        entry: bun run lint:actions
-        language: system
-        pass_filenames: false
-        files: ^\.github/
-        stages: [pre-push]
-
-      - id: zizmor
-        name: zizmor (.github/workflows security)
-        entry: scripts/guards/zizmor-or-skip.sh
-        language: system
-        pass_filenames: false
-        files: ^\.github/
-        stages: [pre-push]

@@ -1,11 +1,12 @@
 # ggsvelte CI (plan M0b + path routing). Parallel jobs after a cached bun install.
 # All third-party actions pinned by full commit SHA (zizmor-enforced).
 #
-# Linux jobs use repo self-hosted runners labeled `ggsvelte` (ops tooling
-# lives outside this FOSS tree). Privileged write/OIDC workflows (release,
-# pages deploy, vr-approve, bench-trend) stay on GitHub-hosted runners so a
-# compromised CI workspace cannot harvest publish credentials. Windows/macOS
-# matrix rows and manual AT stay hosted as well.
+# PR and main-branch correctness jobs use standard GitHub-hosted runners. This
+# public repository receives hosted execution without consuming the owner's
+# private-repository minute allowance, and the elastic pool avoids serializing
+# the job graph behind a handful of persistent runner services. Explicit,
+# hardware-sensitive benchmark/nightly workflows may still use the repo's
+# self-hosted pool; privileged write/OIDC workflows remain GitHub-hosted.
 #
 # Path routing: scripts/ci-routing.ts classifies the changed file set and
 # emits per-job flags. Expensive jobs are skipped when their inputs did not
@@ -46,19 +47,11 @@ concurrency:
   # (concurrency alone does not cancel when no replacement run starts).
   cancel-in-progress: true
 
-# Self-hosted pool (issues #247, #319, #321, throughput fix 2026-07):
-# One cx53 host, four cpuset-isolated runners (4 vCPUs each), all labeled
-# only `ggsvelte`. There is NO separate heavy/light GitHub label: that
-# split was a lie once every runner carried both labels (same match set,
-# zero scheduling effect) and a bottleneck when only two runners had
-# `ggsvelte-heavy` while four "light" runners sat idle.
-# - Every Linux job uses `runs-on: [self-hosted, ggsvelte]`. Concurrency
-#   cap = 4 jobs host-wide (one per runner service). CPU isolation is
-#   systemd CPUAffinity + docker cpuset shim, not GitHub labels.
-# - Path routing + cancel-on-close + cancel-in-progress control *which*
-#   work runs; labels do not invent free capacity.
-# - Runner services share HOME; Bun installs use job-private runner.temp.
-# - Job hooks log host telemetry (load, PSI, memory, disk).
+# Hosted execution is deliberate: this workflow fans out into more jobs than
+# the four-runner self-hosted pool can admit concurrently. The former pool made
+# queue time dominate execution time and caused independent PRs to block one
+# another even on a 16-vCPU host. Path routing and content hashes still reduce
+# unnecessary work, but no longer sit behind a repo-local four-job ceiling.
 
 env:
   # Keep in sync with: spikes/browser devDependency "playwright" and the
@@ -68,7 +61,7 @@ env:
 jobs:
   detect-changes:
     name: detect-changes (path routing)
-    runs-on: [self-hosted, ggsvelte]
+    runs-on: ubuntu-latest
     permissions:
       actions: read
       contents: read
@@ -186,7 +179,7 @@ jobs:
     name: packages-dist (build + upload packages/*/dist)
     needs: detect-changes
     if: needs.detect-changes.outputs.packages_dist == 'true'
-    runs-on: [self-hosted, ggsvelte]
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
@@ -301,7 +294,7 @@ jobs:
     name: checks (pre-commit stage)
     needs: detect-changes
     if: needs.detect-changes.outputs.checks == 'true'
-    runs-on: [self-hosted, ggsvelte]
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
@@ -324,7 +317,7 @@ jobs:
     name: unit (bun test spec + core)
     needs: detect-changes
     if: needs.detect-changes.outputs.unit == 'true'
-    runs-on: [self-hosted, ggsvelte]
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
@@ -379,7 +372,7 @@ jobs:
     name: compatibility matrix (machine-checked source)
     needs: detect-changes
     if: needs.detect-changes.outputs.consumer == 'true'
-    runs-on: [self-hosted, ggsvelte]
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     outputs:
@@ -422,8 +415,8 @@ jobs:
       fail-fast: false
       max-parallel: 4
       matrix: ${{ fromJSON(needs.compatibility-matrix.outputs.matrix) }}
-    # Linux rows use the private self-hosted ggsvelte pool; Windows/macOS stay on GitHub-hosted.
-    runs-on: ${{ startsWith(matrix.os, 'ubuntu') && fromJSON('["self-hosted","ggsvelte"]') || matrix.os }}
+    # Every matrix row uses its standard GitHub-hosted image.
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     permissions:
       contents: read
@@ -509,7 +502,7 @@ jobs:
     if: >-
       needs.detect-changes.outputs.component == 'true' &&
       needs.packages-dist.result == 'success'
-    runs-on: [self-hosted, ggsvelte]
+    runs-on: ubuntu-latest
     env:
       # GitHub runs the container as root, while /github/home belongs to
       # pwuser. Firefox refuses that ownership mismatch.
@@ -630,7 +623,7 @@ jobs:
     if: >-
       needs.detect-changes.outputs.component == 'true' &&
       needs.packages-dist.result == 'success'
-    runs-on: [self-hosted, ggsvelte]
+    runs-on: ubuntu-latest
     env:
       # GitHub runs the container as root, while /github/home belongs to
       # pwuser. Firefox refuses that ownership mismatch.
@@ -702,7 +695,7 @@ jobs:
     if: >-
       needs.detect-changes.outputs.docs_journeys == 'true' &&
       needs.packages-dist.result == 'success'
-    runs-on: [self-hosted, ggsvelte]
+    runs-on: ubuntu-latest
     env:
       # GitHub runs the container as root, while /github/home belongs to
       # pwuser. Firefox refuses that ownership mismatch.
@@ -748,7 +741,7 @@ jobs:
           fi
       - name: build packaged interaction test target
         if: steps.content_hash.outputs.hit != 'true'
-        run: DOCS_BUILD_MODE=legacy-full BASE_PATH=/ggsvelte bun run build:docs
+        run: DOCS_BUILD_MODE=cloudflare-preview bun run build:docs
       - name: docs shell, home/gallery, progressive, themes, interaction, playground journeys
         if: steps.content_hash.outputs.hit != 'true'
         # Enumerate every non-pixel docs journey. --grep-invert drops visual-contract
@@ -786,7 +779,7 @@ jobs:
     if: >-
       needs.detect-changes.outputs.interaction_perf == 'true' &&
       needs.packages-dist.result == 'success'
-    runs-on: [self-hosted, ggsvelte]
+    runs-on: ubuntu-latest
     env:
       HOME: /root
     container:
@@ -808,7 +801,7 @@ jobs:
           cache_key_prefix: bun-container
       - uses: ./.github/actions/ci-download-packages-dist
       - name: build docs for interaction performance fixtures
-        run: DOCS_BUILD_MODE=legacy-full BASE_PATH=/ggsvelte bun run build:docs
+        run: DOCS_BUILD_MODE=cloudflare-preview bun run build:docs
       - name: interaction performance p50/p95 (informational — never fail the check)
         id: perf
         # Wall-clock budgets flake on the shared self-hosted host. Hard gate is
@@ -841,7 +834,7 @@ jobs:
     name: build (packages + knip + type-aware + publint)
     needs: detect-changes
     if: needs.detect-changes.outputs.build == 'true'
-    runs-on: [self-hosted, ggsvelte]
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
@@ -895,7 +888,7 @@ jobs:
     name: svelte-check (packages/svelte + apps/docs)
     needs: detect-changes
     if: needs.detect-changes.outputs.svelte_check == 'true'
-    runs-on: [self-hosted, ggsvelte]
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
@@ -932,7 +925,7 @@ jobs:
     name: docs-site (adapter-static build + pages links)
     needs: detect-changes
     if: needs.detect-changes.outputs.docs_site == 'true'
-    runs-on: [self-hosted, ggsvelte]
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
@@ -969,7 +962,7 @@ jobs:
     name: actions-security (actionlint + zizmor)
     needs: detect-changes
     if: needs.detect-changes.outputs.actions_security == 'true'
-    runs-on: [self-hosted, ggsvelte]
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
@@ -1005,7 +998,7 @@ jobs:
     name: bench-smoke (mitata, 1k workload)
     needs: detect-changes
     if: needs.detect-changes.outputs.bench_smoke == 'true'
-    runs-on: [self-hosted, ggsvelte]
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
@@ -1044,7 +1037,7 @@ jobs:
     # not qualify. Legacy vr-update/pr-<n> bot path still allowed.
     name: vr-baseline-guard (same-PR smoke baselines)
     if: github.event_name == 'pull_request'
-    runs-on: [self-hosted, ggsvelte]
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
@@ -1097,7 +1090,7 @@ jobs:
       - actions-security
       - bench-smoke
       - vr-baseline-guard
-    runs-on: [self-hosted, ggsvelte]
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:

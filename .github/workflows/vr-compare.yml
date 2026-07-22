@@ -50,7 +50,7 @@ jobs:
   detect-changes:
     name: detect-changes (path routing)
     if: github.event_name == 'pull_request'
-    runs-on: [self-hosted, ggsvelte]
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     outputs:
@@ -93,7 +93,7 @@ jobs:
     name: build docs, screenshot, upload candidate baselines
     needs: detect-changes
     if: github.event_name == 'pull_request' && needs.detect-changes.outputs.vr == 'true'
-    runs-on: [self-hosted, ggsvelte]
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     container:
@@ -274,7 +274,7 @@ jobs:
     name: /approve-visuals — regenerate baselines at merged commit (pinned container)
     needs: approve-gate
     if: needs.approve-gate.outputs.match == 'true'
-    runs-on: [self-hosted, ggsvelte]
+    runs-on: ubuntu-latest
     permissions:
       contents: read # checkout only; this job can write nothing
     container:

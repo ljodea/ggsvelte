@@ -1,5 +1,41 @@
 # @ggsvelte/core
 
+## 0.6.0
+
+### Minor Changes
+
+- 82b3a4d: # Pre-stat position transforms and positional scale families
+
+  Add canonical identity, log10, and square-root position transforms; continuous and binned scale helpers with ggplot2 aliases; source-limit OOB policies; transformed-space stats/positions; semantic guides and interaction inversion; binned count/stack/dodge identities; and default 5% non-temporal expansion.
+
+  Migration: <https://ggsvelte.sh/guide/upgrading#0-5-to-0-6>
+
+  Authored `type: "log"` now canonicalizes to `{ type: "linear", transform: "log10" }` and runs before statistics. Pinned domains censor before stats by default, position and numeric-bin parameters use transformed-space units, and trained/guide/interaction contracts report family `linear` plus `transform`. Use `expand: { mult: 0, add: 0 }` for flush bounds.
+
+- 6b8f64b: # Post-stat coordinate transforms and curved topology
+
+  Add canonical `coordTransform`/`coord_transform` APIs for independent identity, log10, and square-root coordinate projection after statistics; semantic coordinate limits and reversal; optional panel clipping; projected axes/grids; adaptive path and segment tessellation; and coordinate-before-scale interaction inversion.
+
+  Migration: none — additive
+
+  Coordinate transforms are intentionally distinct from scale transforms: use `scaleXLog10()` when statistics should consume log-space values, and `coordTransform({ x: "log10" })` when statistics should remain in scale space and only final geometry should be projected.
+
+### Patch Changes
+
+- b08c930: <!-- markdownlint-disable MD041 -->
+
+  Split the canvas DOM paint path into concern-scoped modules (DPR/color helpers, mark drawers, stratum routing) with the published `@ggsvelte/core/dom` barrel and paint behavior unchanged.
+
+- ed09958: <!-- markdownlint-disable MD041 -->
+
+  Point package homepages and runtime diagnostic guidance at the canonical `https://ggsvelte.sh` documentation origin after the hosting cutover.
+
+- Updated dependencies [82b3a4d]
+- Updated dependencies [6b8f64b]
+- Updated dependencies [cd7457c]
+- Updated dependencies [ed09958]
+  - @ggsvelte/spec@0.6.0
+
 ## 0.5.1
 
 ### Patch Changes
@@ -41,7 +77,7 @@
 
   Add deterministic named, exact-format, epoch, timezone, and DST-disambiguation parsers; parser-keyed immutable table views; structured scale decisions and diagnostics; ggplot2-style scale aliases; and lubridate-style authoring helpers. Preserve original source values for interactions while using semantic epoch values before stats, positions, scale training, and rendering.
 
-  Migration: <https://ljodea.github.io/ggsvelte/guide/temporal-scales>
+  Migration: <https://ggsvelte.sh/guide/temporal-scales>
 
   If a four-digit string field is an identifier rather than a calendar year, set the position scale to `type: "band"`, call `scaleXDiscrete()` / `scaleYDiscrete()`, or use the equivalent snake_case alias. Ambiguous DMY/MDY input now requires an explicit parser such as `parse: "dmy"` or `parse: "mdy"`.
 
@@ -83,7 +119,7 @@
   `buildHitIndex` and related `@ggsvelte/core/dom` types so interactive plots no
   longer build and retain a second geometry index.
 
-  Migration: <https://ljodea.github.io/ggsvelte/guide/upgrading#0-2-to-0-3>
+  Migration: <https://ggsvelte.sh/guide/upgrading#0-2-to-0-3>
 
 - e4b02b5: # Delegate keyboard navigation to CandidateStore
 
@@ -92,7 +128,7 @@
   directional, and coincident keyboard navigation to the model-owned store
   without materializing a second candidate traversal list.
 
-  Migration: <https://ljodea.github.io/ggsvelte/guide/upgrading#0-2-to-0-3>
+  Migration: <https://ggsvelte.sh/guide/upgrading#0-2-to-0-3>
 
 ### Patch Changes
 

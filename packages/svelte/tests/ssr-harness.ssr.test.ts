@@ -1,4 +1,4 @@
-import { runPipeline } from "@ggsvelte/core";
+import { runPipeline, type AxisGuidePlan } from "@ggsvelte/core";
 import { describe, expect, it } from "vitest";
 
 import GGPlot from "../src/lib/GGPlot.svelte";
@@ -77,13 +77,40 @@ describe("SSR release fixture", () => {
     };
     const model = runPipeline(spec, { width: 480, height: 320 });
     const fixture = renderSsrFixture(GGPlot, { spec, width: 480, height: 320 });
-    const guide = model.guidePlans.find((plan) => plan.aesthetic === "x");
+    const guide = model.guidePlans.find(
+      (plan): plan is AxisGuidePlan => plan.type === "axis" && plan.aesthetic === "x",
+    );
 
     expect(guide).toBeDefined();
     for (const tick of guide!.ticks.filter((entry) => entry.kind === "major")) {
       expect(fixture.body).toContain(tick.label);
       expect(fixture.body).toContain(`<title>${tick.fullLabel}</title>`);
     }
+  });
+
+  it("server-renders binned colorsteps from the same semantic guide payload", () => {
+    const fixture = renderSsrFixture(GGPlot, {
+      data: [
+        { x: 1, y: 1, score: 1 },
+        { x: 2, y: 2, score: 10 },
+        { x: 3, y: 3, score: 100 },
+      ],
+      aes: { x: "x", y: "y", color: "score" },
+      layers: [{ geom: "point" }],
+      scales: {
+        color: {
+          type: "binned",
+          breaks: [1, 10, 100],
+          range: ["#111", "#eee"],
+        },
+      },
+      width: 480,
+      height: 320,
+    });
+
+    expect(fixture.body.match(/gg-legend-step/g)).toHaveLength(2);
+    expect(fixture.body).toContain("1–10");
+    expect(fixture.body).toContain("10–100");
   });
 
   it("renders the canonical browser hydration fixture", () => {

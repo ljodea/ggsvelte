@@ -241,7 +241,20 @@ export interface SceneRampLegend {
   rampHeight: number;
 }
 
-export type SceneLegend = SceneDiscreteLegend | SceneRampLegend;
+export interface SceneStepsLegend {
+  type: "steps";
+  scale: string;
+  title: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  entries: { label: string; color: string; y: number }[];
+  stepWidth: number;
+  stepHeight: number;
+}
+
+export type SceneLegend = SceneDiscreteLegend | SceneRampLegend | SceneStepsLegend;
 
 export interface Scene {
   width: number;

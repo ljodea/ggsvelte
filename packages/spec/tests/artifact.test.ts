@@ -32,10 +32,14 @@ describe("schema/v0.json artifact", () => {
 
   it("documents that a named scheme selects its scale family", () => {
     const artifact = JSON.parse(committed) as {
-      $defs: { ColorScaleSpec: { properties: { scheme: { description?: string } } } };
+      $defs: {
+        ColorScaleSpec: {
+          allOf: [{ properties: { scheme: { description?: string } } }, unknown];
+        };
+      };
     };
 
-    expect(artifact.$defs.ColorScaleSpec.properties.scheme.description).toContain(
+    expect(artifact.$defs.ColorScaleSpec.allOf[0].properties.scheme.description).toContain(
       "When type is omitted",
     );
   });
@@ -44,13 +48,20 @@ describe("schema/v0.json artifact", () => {
     const artifact = JSON.parse(committed) as {
       $defs: {
         ColorScaleSpec: {
-          properties: { range: { description?: string; items?: { pattern?: string } } };
+          allOf: [
+            {
+              properties: {
+                range: { description?: string; items?: { pattern?: string } };
+              };
+            },
+            unknown,
+          ];
         };
       };
     };
-    const range = artifact.$defs.ColorScaleSpec.properties.range;
+    const range = artifact.$defs.ColorScaleSpec.allOf[0].properties.range;
 
-    expect(range.description).toContain("#rgb or #rrggbb");
+    expect(range.description).toContain("#rgb/#rrggbb");
     expect(range.items?.pattern).toBe("^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$");
   });
 

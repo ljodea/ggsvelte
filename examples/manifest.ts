@@ -129,6 +129,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "color/binned",
+    category: "color",
+    name: "binned",
+    title: "Binned color (colorsteps)",
+    description: "A quantitative color mapping split into deterministic intervals with a colorsteps guide.",
+    tags: ["point", "color", "binned", "colorsteps", "legend"],
+    docsSection: "Color & legends",
+    hasData: true,
+  },
+  {
     id: "color/continuous",
     category: "color",
     name: "continuous",
