@@ -3342,14 +3342,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/spec"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-478",
+    id: "heading:guide-lifecycle:experimental-479",
     kind: "heading",
-    title: "experimental (478)",
+    title: "experimental (479)",
     summary:
-      "experimental (478) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-478",
+      "experimental (479) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-479",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (478)"],
+    exact: ["experimental (479)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-8",
@@ -6096,6 +6096,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-spec",
     keywords: ["@ggsvelte/spec", ".", "type", "experimental"],
     exact: ["SegmentLayerInput"],
+  },
+  {
+    id: "api:ggsvelte-spec:SegmentLayerSchema",
+    kind: "api",
+    title: "SegmentLayerSchema",
+    summary: "@ggsvelte/spec · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "value", "experimental"],
+    exact: ["SegmentLayerSchema"],
   },
   {
     id: "api:ggsvelte-spec:SegmentParams",
