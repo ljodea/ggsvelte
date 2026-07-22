@@ -21,7 +21,11 @@
   } as const;
   const interaction = createPlotInteraction<string>();
   const emphasized = $derived(interaction.emphasized(scope));
-  const selected = $derived(interaction.selected(scope));
+  // Interval brush stores keys on intervals(), not selected().
+  const selectedCount = $derived(
+    new Set(interaction.intervals(scope).flatMap((interval) => interval.keys))
+      .size,
+  );
   let status = $state(
     "Inspect a point, select a region, or focus a legend series.",
   );
@@ -94,9 +98,7 @@ ${closeScript}
 
   <div class="status">
     <div>
-      <strong
-        >{emphasized.length} emphasized · {selected.length} selected</strong
-      >
+      <strong>{emphasized.length} emphasized · {selectedCount} selected</strong>
       <span role="status">{status}</span>
     </div>
     <button type="button" onclick={clearShared}>Clear</button>

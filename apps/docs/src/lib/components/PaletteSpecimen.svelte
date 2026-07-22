@@ -46,7 +46,7 @@
       <h3>{label}</h3>
       <code>scheme="{name}"</code>
     </div>
-    <span class="capacity">{capacity}</span>
+    <span class="capacity">{capacity} colors</span>
   </header>
 
   <ul class="swatches" aria-label={`${label} ordered colors`}>
