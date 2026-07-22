@@ -10,10 +10,8 @@ import type { CandidateBuildFacts, CandidateDatum, CandidateStore } from "../can
 import type { LineageStore } from "../identity.js";
 import type { Scene } from "../scene.js";
 import type { CellValue, ColumnTable } from "../table.js";
-import {
-  createIdentityCandidateDatumResolver,
-  ordinalColorRank,
-} from "./candidate-construction/datum.js";
+import { createIdentityCandidateDatumResolver } from "./candidate-construction/datum.js";
+import { ordinalColorRank } from "./candidate-construction/datum-values.js";
 import { createLazyIdentityIndex } from "./candidate-construction/identity-index.js";
 import type { FacetPanelDef } from "./facets.js";
 import { candidateAutoMode } from "./frame-candidates-auto-mode.js";
