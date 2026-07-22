@@ -22,10 +22,11 @@ const SEQUENTIAL_SCHEMES = new Set<string>(SEQUENTIAL_SCHEME_NAMES);
 /**
  * Recovery sources for `parseFailure: "censor"` on temporal color/fill scales.
  * Mirrors runtime `collectColorChannelValues` + sequential/binned train:
- * - domain endpoints must parse (else color-domain-invalid / color-binned-domain)
- * - binned breaks of length ≥ 2 must parse (else color-binned-breaks)
- * - sibling fields / scaled constants that yield at least one temporal value train
- *   the channel even when the current field is entirely censored
+ * - domain endpoints must parse (else color-domain-invalid / color-binned-domain);
+ *   a present-but-unusable domain blocks all recovery (runtime throws first)
+ * - binned breaks of length ≥ 2 must parse and be strictly increasing
+ * - sibling fields / scaled constants train only when they parse under the
+ *   configured parser (and match temporalKind when authored)
  */
 function colorTemporalCensorRecovery(input: {
   config: ColorScaleSpec | undefined;
@@ -37,6 +38,8 @@ function colorTemporalCensorRecovery(input: {
 }): {
   hasExplicitDomain: boolean;
   hasBinnedBreaks: boolean;
+  /** Authored domain exists but is not a usable two-endpoint train bound. */
+  domainBlocksRecovery: boolean;
   trainingFields: ReadonlySet<string>;
   constantTrains: boolean;
 } {
@@ -55,22 +58,34 @@ function colorTemporalCensorRecovery(input: {
         disambiguation: config.disambiguation,
       }),
   };
-  const parseableBound = (value: unknown): boolean => {
-    if (!temporalInputsUsable || config?.parse === undefined) return false;
-    return parseTemporal(value, config.parse, temporalOptions).ok;
+  const parseBound = (value: unknown) => {
+    if (!temporalInputsUsable || config?.parse === undefined) return null;
+    const result = parseTemporal(value, config.parse, temporalOptions);
+    return result.ok ? result : null;
   };
 
   const domainValues = Array.isArray(config?.domain)
     ? config.domain.filter((value) => value !== null)
     : [];
   const hasExplicitDomain =
-    domainValues.length === 2 && domainValues.every((value) => parseableBound(value));
+    domainValues.length === 2 && domainValues.every((value) => parseBound(value) !== null);
+  // Runtime throws color-domain-invalid / color-binned-domain whenever domain is
+  // authored but not exactly two parseable endpoints — before siblings/breaks train.
+  const domainBlocksRecovery = Array.isArray(config?.domain) && !hasExplicitDomain;
+
   const binnedBreaks =
     config?.type === "binned" && Array.isArray(config.breaks)
       ? config.breaks.filter((value) => value !== null)
       : [];
+  const parsedBreaks = binnedBreaks.map((value) => parseBound(value));
   const hasBinnedBreaks =
-    binnedBreaks.length >= 2 && binnedBreaks.every((value) => parseableBound(value));
+    parsedBreaks.length >= 2 &&
+    parsedBreaks.every((result) => result !== null) &&
+    parsedBreaks.every((result, index) => {
+      if (index === 0 || result === null) return true;
+      const prev = parsedBreaks[index - 1];
+      return prev !== null && result.epochMs > prev.epochMs;
+    });
 
   const trainingFields = new Set<string>();
   const requestsTemporal =
@@ -82,11 +97,16 @@ function colorTemporalCensorRecovery(input: {
     const parser = config?.parse ?? "auto";
     for (const use of colorFields) {
       const type = typeOf(use.field);
-      if (type === "temporal") {
-        trainingFields.add(use.field);
+      // Always reparse under the configured parser — type:"temporal" from default
+      // evidence does not mean the value trains when parse is an explicit override.
+      if (
+        type !== "temporal" &&
+        type !== "quantitative" &&
+        type !== "nominal" &&
+        type !== "ordinal"
+      ) {
         continue;
       }
-      if (type !== "quantitative" && type !== "nominal" && type !== "ordinal") continue;
       const decision = temporalDecisionForField(
         temporalDecisionCache,
         use.field,
@@ -97,19 +117,30 @@ function colorTemporalCensorRecovery(input: {
       if (
         decision !== null &&
         decision !== undefined &&
-        (decision.status === "temporal" || (decision.validatedCount ?? 0) > 0)
+        (decision.status === "temporal" || (decision.validatedCount ?? 0) > 0) &&
+        (config?.temporalKind === undefined ||
+          decision.kind === null ||
+          decision.kind === undefined ||
+          decision.kind === config.temporalKind)
       ) {
         trainingFields.add(use.field);
       }
     }
-  } else {
-    for (const use of colorFields) {
-      if (typeOf(use.field) === "temporal") trainingFields.add(use.field);
-    }
   }
 
-  const constantTrains = colorScaledConstants.some((value) => parseableBound(value));
-  return { hasExplicitDomain, hasBinnedBreaks, trainingFields, constantTrains };
+  const kindOk = (kind: string | undefined): boolean =>
+    config?.temporalKind === undefined || kind === undefined || kind === config.temporalKind;
+  const constantTrains = colorScaledConstants.some((value) => {
+    const parsed = parseBound(value);
+    return parsed !== null && kindOk(parsed.kind);
+  });
+  return {
+    hasExplicitDomain,
+    hasBinnedBreaks,
+    domainBlocksRecovery,
+    trainingFields,
+    constantTrains,
+  };
 }
 
 function censoredTemporalColorRecovers(input: {
@@ -119,12 +150,15 @@ function censoredTemporalColorRecovers(input: {
   recovery: {
     hasExplicitDomain: boolean;
     hasBinnedBreaks: boolean;
+    domainBlocksRecovery: boolean;
     trainingFields: ReadonlySet<string>;
     constantTrains: boolean;
   };
 }): boolean {
   if (input.config?.parse === undefined || input.config.parseFailure !== "censor") return false;
   if (input.decision?.status !== "invalid") return false;
+  // A present-but-unusable domain always throws at runtime before recovery sources apply.
+  if (input.recovery.domainBlocksRecovery) return false;
   if ((input.decision.validatedCount ?? 0) > 0) return true;
   if (input.recovery.hasExplicitDomain || input.recovery.hasBinnedBreaks) return true;
   if (input.recovery.constantTrains) return true;
