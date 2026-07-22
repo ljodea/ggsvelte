@@ -16,11 +16,13 @@ export interface ColorLegendFormatter {
 function resolveColorLegendFormat(input: {
   domain: readonly [number, number];
   temporalKind: TemporalKind | null;
+  transform?: "identity" | "log10" | "sqrt";
   config: ColorScaleSpec | undefined;
   name: "color" | "fill";
   warnings: PipelineWarning[];
 }): ColorLegendFormatter {
   const { domain, temporalKind, config, name, warnings } = input;
+  const transform = input.transform ?? config?.transform ?? "identity";
   const labelFormat = config?.labels;
   if (temporalKind !== null) {
     const options = {
@@ -56,7 +58,6 @@ function resolveColorLegendFormat(input: {
 
   // Log colorbars use decade ticks; linear span precision labels sub-unit
   // powers (0.001, 0.01, 0.1) as "0". Derive decimals from the domain floor.
-  const transform = config?.transform ?? "identity";
   let label: (value: number) => string;
   if (transform === "log10" && labelFormat === undefined) {
     const positives = domain.filter((value) => Number.isFinite(value) && value > 0);
@@ -96,11 +97,8 @@ export function resolveSequentialLegendFormat(
   return resolveColorLegendFormat({
     domain: scale.domain,
     temporalKind: scale.temporalKind ?? null,
-    config: {
-      ...config,
-      ...(scale.transform !== undefined &&
-        config?.transform === undefined && { transform: scale.transform }),
-    },
+    transform: scale.transform,
+    config,
     name,
     warnings,
   });
