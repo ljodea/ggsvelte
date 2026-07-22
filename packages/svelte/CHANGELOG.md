@@ -1,5 +1,66 @@
 # @ggsvelte/svelte
 
+## 0.7.1
+
+### Patch Changes
+
+- 616bcc6: <!-- markdownlint-disable MD041 -->
+
+  fix: geom_col/bar hover uses relative de-emphasis instead of a point ring
+
+  Rect mark inspection no longer draws a circle hover/selection ring at the bar
+  anchor. Sibling bars de-emphasize via interaction masks (including keyless
+  charts via seed primitive focus). Point-like geoms keep circle chrome.
+
+- Updated dependencies [42b031a]
+- Updated dependencies [c4d6b6c]
+- Updated dependencies [bbe65c7]
+- Updated dependencies [dc6c3fe]
+- Updated dependencies [7181580]
+- Updated dependencies [7f38860]
+- Updated dependencies [b349179]
+- Updated dependencies [f66f44b]
+- Updated dependencies [1fa684e]
+- Updated dependencies [c422da0]
+- Updated dependencies [a2c8da0]
+- Updated dependencies [94fdbec]
+- Updated dependencies [6261ee1]
+- Updated dependencies [f1b4a3d]
+- Updated dependencies [8b9e95d]
+- Updated dependencies [d591a18]
+- Updated dependencies [774f6de]
+- Updated dependencies [ddc3cd8]
+- Updated dependencies [dbdec68]
+- Updated dependencies [80905dd]
+- Updated dependencies [616bcc6]
+- Updated dependencies [328ac7d]
+- Updated dependencies [5cebbab]
+- Updated dependencies [eeffbb6]
+- Updated dependencies [4e5b875]
+- Updated dependencies [3f16ec8]
+- Updated dependencies [e6d5f6f]
+- Updated dependencies [72b01ee]
+- Updated dependencies [6afccdc]
+- Updated dependencies [c4f91d0]
+- Updated dependencies [29f0565]
+- Updated dependencies [1fed2f3]
+- Updated dependencies [9a366cf]
+- Updated dependencies [ec7f21b]
+- Updated dependencies [a54932c]
+- Updated dependencies [d1f69cb]
+- Updated dependencies [9affbb6]
+- Updated dependencies [571721f]
+- Updated dependencies [f5a8919]
+- Updated dependencies [09e6954]
+- Updated dependencies [3231dc7]
+- Updated dependencies [b278811]
+- Updated dependencies [1428eb2]
+- Updated dependencies [eeb5ce0]
+- Updated dependencies [4e4ec5b]
+- Updated dependencies [1f94c1c]
+  - @ggsvelte/core@0.7.1
+  - @ggsvelte/spec@0.7.1
+
 ## 0.7.0
 
 ### Minor Changes
