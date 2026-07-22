@@ -80,6 +80,11 @@ function tessellateSegment(
     error > COORD_TESSELLATION_TOLERANCE_PX &&
     budget.remaining > 1
   ) {
+    // Split remaining so the left half cannot starve the true endpoint, then
+    // reallocate any unused left capacity to the right for uneven curvature.
+    const leftRemaining = Math.floor(budget.remaining / 2);
+    const rightRemaining = budget.remaining - leftRemaining;
+    const left = { remaining: leftRemaining, capped: false };
     tessellateSegment(
       projector,
       width,
@@ -94,9 +99,10 @@ function tessellateSegment(
       rows,
       anchors,
       indices,
-      budget,
+      left,
       depth + 1,
     );
+    const right = { remaining: rightRemaining + left.remaining, capped: false };
     tessellateSegment(
       projector,
       width,
@@ -111,9 +117,11 @@ function tessellateSegment(
       rows,
       anchors,
       indices,
-      budget,
+      right,
       depth + 1,
     );
+    budget.remaining = right.remaining;
+    budget.capped ||= left.capped || right.capped;
     return;
   }
   if (
@@ -213,6 +221,22 @@ function projectPathBatch(
     );
     if (Number.isFinite(x) && Number.isFinite(y)) projectable[vertex] = 1;
     else invalidVertices++;
+  }
+  // Invalid vertices never become mandatory rendered anchors; free their
+  // reserved slots without exceeding max(0, cap − validMandatory).
+  if (invalidVertices > 0) {
+    const totalMandatory = sharedBudget?.mandatoryVertices ?? batch.positions.length / 2;
+    const validMandatory = Math.max(0, totalMandatory - invalidVertices);
+    const allowedExtra = Math.max(0, MAX_COORD_VERTICES_PER_PANEL_LAYER - validMandatory);
+    panelExtraRemaining = Math.min(panelExtraRemaining + invalidVertices, allowedExtra);
+    if (sharedBudget !== undefined) {
+      sharedBudget.mandatoryVertices = validMandatory;
+      sharedBudget.extraRemaining = Math.min(
+        sharedBudget.extraRemaining + invalidVertices,
+        allowedExtra,
+      );
+    }
+    capped = validMandatory > MAX_COORD_VERTICES_PER_PANEL_LAYER;
   }
 
   for (let s = 0; s + 1 < batch.pathOffsets.length; s++) {
