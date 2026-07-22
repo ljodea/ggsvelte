@@ -1,17 +1,11 @@
-const DOCS_BUILD_MODES = [
-  "dev",
-  "legacy-full",
-  "cloudflare-preview",
-  "cloudflare-production",
-  "legacy-migration",
-] as const;
+const DOCS_BUILD_MODES = ["dev", "cloudflare-preview", "cloudflare-production"] as const;
 
 type DocsBuildMode = (typeof DOCS_BUILD_MODES)[number];
 
 export interface DocsBuildConfig {
   mode: DocsBuildMode;
-  base: "" | "/ggsvelte";
-  canonicalBase: "https://ggsvelte.sh" | "https://ljodea.github.io/ggsvelte";
+  base: "";
+  canonicalBase: "https://ggsvelte.sh";
   indexable: boolean;
   analytics: boolean;
   analyticsToken: string | null;
@@ -25,10 +19,8 @@ export interface DocsBuildInput {
 
 const VALID_COMBINATIONS = [
   "dev + no BASE_PATH",
-  "legacy-full + BASE_PATH=/ggsvelte",
   "cloudflare-preview + no BASE_PATH",
   "cloudflare-production + no BASE_PATH",
-  "legacy-migration + BASE_PATH=/ggsvelte",
 ].join("; ");
 
 function invalid(input: DocsBuildInput): never {
@@ -60,16 +52,6 @@ export function resolveDocsBuildConfig(input: DocsBuildInput): DocsBuildConfig {
       analyticsToken: null,
     };
   }
-  if (mode === "legacy-full" && basePath === "/ggsvelte") {
-    return {
-      mode,
-      base: "/ggsvelte",
-      canonicalBase: "https://ljodea.github.io/ggsvelte",
-      indexable: true,
-      analytics: false,
-      analyticsToken: null,
-    };
-  }
   if (mode === "cloudflare-preview" && basePath === undefined) {
     return {
       mode,
@@ -88,16 +70,6 @@ export function resolveDocsBuildConfig(input: DocsBuildInput): DocsBuildConfig {
       indexable: true,
       analytics: analyticsToken !== undefined,
       analyticsToken: analyticsToken ?? null,
-    };
-  }
-  if (mode === "legacy-migration" && basePath === "/ggsvelte") {
-    return {
-      mode,
-      base: "/ggsvelte",
-      canonicalBase: "https://ggsvelte.sh",
-      indexable: false,
-      analytics: false,
-      analyticsToken: null,
     };
   }
 

@@ -1,4 +1,2 @@
-/bench https://ljodea.github.io/ggsvelte/bench/ 302
-/bench/* https://ljodea.github.io/ggsvelte/bench/:splat 302
 /ggsvelte https://ggsvelte.sh/ 301
 /ggsvelte/* https://ggsvelte.sh/:splat 301

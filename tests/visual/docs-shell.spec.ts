@@ -195,9 +195,7 @@ test("route metadata is canonical, singular, and aliases are noindex", async ({ 
   await page.goto(GUIDE_ROUTE);
   await expect(page).toHaveTitle("Getting started — ggsvelte");
   await expect(page.locator('link[rel="canonical"]')).toHaveCount(1);
-  const mode = await page.locator("#main-content").getAttribute("data-build-mode");
-  const canonicalBase =
-    mode === "legacy-full" ? "https://ljodea.github.io/ggsvelte" : "https://ggsvelte.sh";
+  const canonicalBase = "https://ggsvelte.sh";
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
     "href",
     `${canonicalBase}/guide/getting-started`,
@@ -220,9 +218,7 @@ test("public metadata exposes social cards and truthful route-local structured d
   page,
 }) => {
   await page.goto("/");
-  const mode = await page.locator("#main-content").getAttribute("data-build-mode");
-  const canonicalBase =
-    mode === "legacy-full" ? "https://ljodea.github.io/ggsvelte" : "https://ggsvelte.sh";
+  const canonicalBase = "https://ggsvelte.sh";
   await expect(page.locator('meta[property="og:url"]')).toHaveAttribute(
     "content",
     `${canonicalBase}/`,
