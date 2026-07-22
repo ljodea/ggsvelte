@@ -8,7 +8,7 @@
  */
 import type { SpecError } from "./errors.js";
 import type { Aes, CellValue, ChannelName } from "./schema.js";
-import { inferTemporalColumn, type TemporalDecision } from "./temporal.js";
+import { inferTemporalColumn, type TemporalDecision } from "./temporal-column.js";
 import type { ProfileFieldType, ValidateLimits, ValidateOptions } from "./validate-data.js";
 
 // ---------------------------------------------------------------------------

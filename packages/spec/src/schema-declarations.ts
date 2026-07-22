@@ -16,7 +16,7 @@ import {
   TemporalWeekStartSchema,
 } from "./temporal-guides.js";
 
-import { TemporalParserSpecSchema } from "./temporal.js";
+import { TemporalParserSpecSchema } from "./temporal-parse.js";
 
 import {
   COLOR_SCHEME_NAME_SCHEMAS,

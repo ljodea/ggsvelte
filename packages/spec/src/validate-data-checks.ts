@@ -9,14 +9,13 @@ import { configuredColorScaleType } from "./scale-helpers.js";
 import type { Aes, ChannelName, ColorScaleSpec, PositionScaleSpec } from "./schema.js";
 import { CHANNELS, GEOM_DEFAULTS, SEQUENTIAL_SCHEME_NAMES } from "./schema.js";
 import type { ProfileFieldType, ValidateLimits, ValidateOptions } from "./validate-data.js";
+import { parseTemporalColumn, type TemporalDecision } from "./temporal-column.js";
 import {
   canonicalTemporalParserKey,
-  parseTemporalColumn,
   temporalParserConfigurationError,
-  type TemporalDecision,
   type TemporalParseOptions,
   type TemporalParserSpec,
-} from "./temporal.js";
+} from "./temporal-parse.js";
 import {
   parseTemporalInterval,
   temporalLabelConfigurationError,
