@@ -1459,6 +1459,77 @@ The accepted lifecycle and deprecation policy remains in
 [Lifecycle and editions](/guide/lifecycle#lifecycle-tags); this page applies it
 rather than creating a second policy.
 
+## 0.6 to 0.7
+
+### Choose explicit color/fill families
+
+Color/fill now exposes complete continuous, discrete, binned, transformed,
+temporal, manual, and identity helpers. Existing \`ordinal\` and \`sequential\`
+JSON remains canonical. Review charts that relied on implicit continuous
+clamping: with an explicit domain, the default \`oob: "censor"\` now uses
+\`unknownValue\`; opt into \`oob: "squish"\` to clamp deliberately.
+
+Use \`type: "binned"\` plus semantic \`breaks\` for colorsteps. Manual scales
+require one range color per explicit domain value and never recycle extras.
+Identity scales accept validated hex source values and suppress their guide by
+default. Replace ad-hoc preprocessing with \`scaleColorDate\`/
+\`scaleColorDatetime\` and an explicit parser when date order is ambiguous.
+
+Before 0.7, an explicit continuous color domain clamped implicitly:
+
+\`\`\`svelte fragment
+<script lang="ts">
+  import { GeomPoint, GGPlot } from "@ggsvelte/svelte";
+
+  const rows = [
+    { x: 1, y: 2, score: -10 },
+    { x: 2, y: 3, score: 50 },
+    { x: 3, y: 4, score: 110 },
+  ];
+</script>
+
+<GGPlot
+  data={rows}
+  aes={{ x: "x", y: "y", color: "score" }}
+  scales={{ color: { type: "sequential", domain: [0, 100] } }}
+>
+  <GeomPoint />
+</GGPlot>
+\`\`\`
+
+In 0.7, opt into clamping when it is the intended encoding:
+
+\`\`\`svelte fragment
+<script lang="ts">
+  import {
+    GeomPoint,
+    GGPlot,
+    scaleColorContinuous,
+  } from "@ggsvelte/svelte";
+
+  const rows = [
+    { x: 1, y: 2, score: -10 },
+    { x: 2, y: 3, score: 50 },
+    { x: 3, y: 4, score: 110 },
+  ];
+</script>
+
+<GGPlot
+  data={rows}
+  aes={{ x: "x", y: "y", color: "score" }}
+  scales={scaleColorContinuous({
+    domain: [0, 100],
+    oob: "squish",
+  })}
+>
+  <GeomPoint />
+</GGPlot>
+\`\`\`
+
+\`RenderModel.guidePlans\` now includes serializable \`discrete\`, \`colorbar\`,
+and \`colorsteps\` plans beside axes. Code that assumed every plan was an axis
+must narrow on \`plan.type === "axis"\` before reading axis-only fields.
+
 ## 0.5 to 0.6
 
 ### Move position transforms before statistics
@@ -1565,75 +1636,6 @@ transform: "identity" | "log10" | "sqrt"
 Reject or migrate transient snapshots containing \`kind: "log"\`; pre-1.0
 interaction snapshots do not have a compatibility branch. Keep semantic
 source-space domains and apply the named transform exactly once.
-
-### Choose explicit color/fill families
-
-Color/fill now exposes complete continuous, discrete, binned, transformed,
-temporal, manual, and identity helpers. Existing \`ordinal\` and \`sequential\`
-JSON remains canonical. Review charts that relied on implicit continuous
-clamping: with an explicit domain, the default \`oob: "censor"\` now uses
-\`unknownValue\`; opt into \`oob: "squish"\` to clamp deliberately.
-
-Use \`type: "binned"\` plus semantic \`breaks\` for colorsteps. Manual scales
-require one range color per explicit domain value and never recycle extras.
-Identity scales accept validated hex source values and suppress their guide by
-default. Replace ad-hoc preprocessing with \`scaleColorDate\`/
-\`scaleColorDatetime\` and an explicit parser when date order is ambiguous.
-
-Before 0.6, an explicit continuous color domain clamped implicitly:
-
-\`\`\`svelte fragment
-<script lang="ts">
-  import { GeomPoint, GGPlot } from "@ggsvelte/svelte";
-
-  const rows = [
-    { x: 1, y: 2, score: -10 },
-    { x: 2, y: 3, score: 50 },
-    { x: 3, y: 4, score: 110 },
-  ];
-</script>
-
-<GGPlot
-  data={rows}
-  aes={{ x: "x", y: "y", color: "score" }}
-  scales={{ color: { type: "sequential", domain: [0, 100] } }}
->
-  <GeomPoint />
-</GGPlot>
-\`\`\`
-
-In 0.6, opt into clamping when it is the intended encoding:
-
-\`\`\`svelte fragment
-<script lang="ts">
-  import {
-    GeomPoint,
-    GGPlot,
-    scaleColorContinuous,
-  } from "@ggsvelte/svelte";
-
-  const rows = [
-    { x: 1, y: 2, score: -10 },
-    { x: 2, y: 3, score: 50 },
-    { x: 3, y: 4, score: 110 },
-  ];
-</script>
-
-<GGPlot
-  data={rows}
-  aes={{ x: "x", y: "y", color: "score" }}
-  scales={scaleColorContinuous({
-    domain: [0, 100],
-    oob: "squish",
-  })}
->
-  <GeomPoint />
-</GGPlot>
-\`\`\`
-
-\`RenderModel.guidePlans\` now includes serializable \`discrete\`, \`colorbar\`,
-and \`colorsteps\` plans beside axes. Code that assumed every plan was an axis
-must narrow on \`plan.type === "axis"\` before reading axis-only fields.
 
 ## 0.2 to 0.3
 

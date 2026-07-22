@@ -76,6 +76,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "BinnedColorScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "BoxplotLayer": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -245,6 +249,10 @@
           "lifecycle": "experimental"
         },
         "DensityParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "DiscreteColorScaleOptions": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -634,6 +642,10 @@
         },
         "ScalesSchema": {
           "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "SequentialColorScaleOptions": {
+          "kind": "type",
           "lifecycle": "experimental"
         },
         "SmoothLayer": {
@@ -2425,6 +2437,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "BinnedColorScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "BoxplotParams": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -2506,6 +2522,10 @@
           "lifecycle": "experimental"
         },
         "DensityParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "DiscreteColorScaleOptions": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -2918,6 +2938,10 @@
           "lifecycle": "experimental"
         },
         "SemanticIntervalAxis": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SequentialColorScaleOptions": {
           "kind": "type",
           "lifecycle": "experimental"
         },

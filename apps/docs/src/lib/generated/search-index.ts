@@ -3083,6 +3083,26 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Five-minute path"],
   },
   {
+    id: "heading:guide-upgrading:0-6-to-0-7",
+    kind: "heading",
+    title: "0.6 to 0.7",
+    summary:
+      "0.6 to 0.7 in Upgrade in five minutes. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+    href: "/guide/upgrading#0-6-to-0-7",
+    keywords: ["Upgrade in five minutes", "Release"],
+    exact: ["0.6 to 0.7"],
+  },
+  {
+    id: "heading:guide-upgrading:choose-explicit-color-fill-families",
+    kind: "heading",
+    title: "Choose explicit color/fill families",
+    summary:
+      "Choose explicit color/fill families in Upgrade in five minutes. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+    href: "/guide/upgrading#choose-explicit-color-fill-families",
+    keywords: ["Upgrade in five minutes", "Release"],
+    exact: ["Choose explicit color/fill families"],
+  },
+  {
     id: "heading:guide-upgrading:0-5-to-0-6",
     kind: "heading",
     title: "0.5 to 0.6",
@@ -3121,16 +3141,6 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/upgrading#update-scale-and-interaction-inspection",
     keywords: ["Upgrade in five minutes", "Release"],
     exact: ["Update scale and interaction inspection"],
-  },
-  {
-    id: "heading:guide-upgrading:choose-explicit-color-fill-families",
-    kind: "heading",
-    title: "Choose explicit color/fill families",
-    summary:
-      "Choose explicit color/fill families in Upgrade in five minutes. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
-    href: "/guide/upgrading#choose-explicit-color-fill-families",
-    keywords: ["Upgrade in five minutes", "Release"],
-    exact: ["Choose explicit color/fill families"],
   },
   {
     id: "heading:guide-upgrading:0-2-to-0-3",

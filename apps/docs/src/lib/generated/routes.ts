@@ -1915,6 +1915,16 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
+        id: "0-6-to-0-7",
+        title: "0.6 to 0.7",
+        level: 2,
+      },
+      {
+        id: "choose-explicit-color-fill-families",
+        title: "Choose explicit color/fill families",
+        level: 3,
+      },
+      {
         id: "0-5-to-0-6",
         title: "0.5 to 0.6",
         level: 2,
@@ -1932,11 +1942,6 @@ export const DOCS_ROUTES = [
       {
         id: "update-scale-and-interaction-inspection",
         title: "Update scale and interaction inspection",
-        level: 3,
-      },
-      {
-        id: "choose-explicit-color-fill-families",
-        title: "Choose explicit color/fill families",
         level: 3,
       },
       {
