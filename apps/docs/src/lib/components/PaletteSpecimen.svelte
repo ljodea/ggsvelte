@@ -29,17 +29,24 @@
   ];
   const displayColors = $derived(reverse ? colors.toReversed() : colors);
   const code = $derived(
-    `<GGPlot\n  data={rows}\n  aes={{ x: "signal", y: "value", color: "category" }}\n  scales={{ color: { scheme: "${name}", reverse: ${String(reverse)} } }}\n  theme="${paperTheme}"\n>\n  <GeomPoint size={4} />\n</GGPlot>`,
+    `<GGPlot
+  data={rows}
+  aes={{ x: "signal", y: "value", color: "category" }}
+  scales={{ color: { scheme: "${name}", reverse: ${String(reverse)} } }}
+  theme="${paperTheme}"
+>
+  <GeomPoint size={4} />
+</GGPlot>`,
   );
 </script>
 
 <article>
   <header>
     <div>
-      <p>Named categorical scheme</p>
       <h3>{label}</h3>
+      <code>scheme="{name}"</code>
     </div>
-    <strong>{capacity} colors</strong>
+    <span class="capacity">{capacity}</span>
   </header>
 
   <ul class="swatches" aria-label={`${label} ordered colors`}>
@@ -53,20 +60,19 @@
     {/each}
   </ul>
 
-  <div class="plot-paper">
+  <div class="plot">
     <GGPlot
       data={rows}
       aes={{ x: "signal", y: "value", color: "category" }}
       scales={{ color: { type: "ordinal", scheme: name, reverse } }}
       theme={paperTheme}
-      height={245}
-      ariaLabel={`${label} categorical color scheme on ${paperTheme} chart paper`}
+      height={260}
+      ariaLabel={`${label} palette on ${paperTheme} paper`}
     >
       <GeomPoint size={4} />
     </GGPlot>
   </div>
 
-  <p class="fragment-label">Svelte fragment</p>
   <CopyCode
     {code}
     language="svelte"
@@ -76,10 +82,9 @@
 
 <style>
   article {
+    display: grid;
+    gap: 0.75rem;
     min-width: 0;
-    height: 100%;
-    border: 1px solid var(--line);
-    background: var(--paper);
   }
 
   header {
@@ -87,27 +92,25 @@
     align-items: start;
     justify-content: space-between;
     gap: 1rem;
-    padding: 1rem;
-  }
-
-  header p,
-  .fragment-label {
-    margin: 0;
-    color: var(--muted);
-    font-size: 0.68rem;
-    font-weight: 650;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
   }
 
   h3 {
-    margin: 0.2rem 0 0;
-    font-size: 1.4rem;
+    margin: 0;
+    font-size: 1.25rem;
+    letter-spacing: -0.01em;
   }
 
-  header strong {
+  header code {
+    display: block;
+    margin-top: 0.2rem;
     color: var(--muted);
     font-size: 0.78rem;
+  }
+
+  .capacity {
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-variant-numeric: tabular-nums;
     white-space: nowrap;
   }
 
@@ -115,7 +118,7 @@
     display: flex;
     min-width: 0;
     margin: 0;
-    padding: 0 1rem 1rem;
+    padding: 0;
     overflow-x: auto;
     list-style: none;
   }
@@ -129,7 +132,6 @@
   .swatches span {
     display: block;
     height: 1.5rem;
-    border: 1px solid color-mix(in srgb, var(--swatch), #000 18%);
     background: var(--swatch);
   }
 
@@ -138,17 +140,7 @@
     font-size: 0.6rem;
   }
 
-  .plot-paper {
+  .plot {
     min-width: 0;
-    overflow: hidden;
-    border-block: 1px solid var(--line);
-  }
-
-  .fragment-label {
-    padding: 0.75rem 1rem 0;
-  }
-
-  :global(.copy-code) {
-    margin: 0.5rem 1rem 1rem;
   }
 </style>

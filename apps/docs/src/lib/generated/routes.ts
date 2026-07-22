@@ -52,9 +52,19 @@ export const DOCS_ROUTES = [
   {
     path: "/themes",
     title: "Chart themes and color scales — ggsvelte",
-    description:
-      "Built-in chart themes, categorical schemes, sequential ramps, and interaction role colors.",
+    description: "Built-in chart themes, categorical palettes, and sequential scales.",
     canonicalPath: "/themes",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/interactions",
+    title: "Chart-local interaction — ggsvelte",
+    description:
+      "Inspect, select, zoom, and legend focus on a live chart. Semantic state is opt-in.",
+    canonicalPath: "/interactions",
     kind: "page",
     index: true,
     sitemap: true,

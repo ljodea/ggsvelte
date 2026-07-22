@@ -23,8 +23,19 @@
   const resolvedTheme = $derived<ThemeName>(
     followDocs ? siteAppearance : explicitTheme,
   );
+  const scheme = $derived(
+    THEME_OPTIONS.find((theme) => theme.name === resolvedTheme)?.scheme ??
+      "observable10",
+  );
   const code = $derived(
-    `<GGPlot data={rows} aes={{ x: "quarter", y: "value", color: "group" }} theme="${resolvedTheme}">\n  <GeomPoint size={4} />\n</GGPlot>`,
+    `<GGPlot
+  data={rows}
+  aes={{ x: "quarter", y: "value", color: "group" }}
+  theme="${resolvedTheme}"
+  scales={{ color: { scheme: "${scheme}" } }}
+>
+  <GeomPoint size={4} />
+</GGPlot>`,
   );
 
   function syncSiteAppearance(): void {
@@ -51,12 +62,30 @@
 </script>
 
 <section class="theme-lab" aria-label="Chart theme lab">
+  <div class="lab-output">
+    <GGPlot
+      data={rows}
+      aes={{ x: "quarter", y: "value", color: "group" }}
+      theme={resolvedTheme}
+      scales={{ color: { type: "ordinal", scheme } }}
+      height={360}
+      ariaLabel={`${resolvedTheme} chart theme`}
+    >
+      <GeomPoint size={4} />
+    </GGPlot>
+    <CopyCode
+      {code}
+      language="svelte"
+      accessibleLabel="Copy selected theme code"
+    />
+  </div>
+
   <div class="lab-copy">
-    <p class="eyebrow">Independence</p>
-    <h2>Chart theme ≠ site appearance.</h2>
+    <p class="eyebrow">Live</p>
+    <h2>Pick a theme</h2>
     <p>
-      Theme travels with the chart. Link it to docs appearance only when you
-      want that.
+      <code>theme</code> is set on the plot. Site appearance is separate unless you
+      wire them yourself.
     </p>
     <div class="controls">
       <div class="select-control">
@@ -77,46 +106,22 @@
       </label>
     </div>
     <p class="resolved" role="status">
-      Chart theme: <strong>{resolvedTheme}</strong>{followDocs
-        ? " · following docs"
-        : " · explicit"}
+      theme="{resolvedTheme}"{followDocs ? " · following docs" : ""}
     </p>
-  </div>
-
-  <div class="lab-output">
-    <div class="plot-paper">
-      <GGPlot
-        data={rows}
-        aes={{ x: "quarter", y: "value", color: "group" }}
-        theme={resolvedTheme}
-        height={340}
-        ariaLabel={`${resolvedTheme} chart theme comparison`}
-      >
-        <GeomPoint size={4} />
-      </GGPlot>
-    </div>
-    <p class="fragment-label">Svelte fragment</p>
-    <CopyCode
-      {code}
-      language="svelte"
-      accessibleLabel="Copy selected theme code"
-    />
   </div>
 </section>
 
 <style>
   .theme-lab {
     display: grid;
-    grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.25fr);
-    gap: clamp(2rem, 7vw, 7rem);
-    align-items: center;
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.65fr);
+    gap: clamp(1.5rem, 4vw, 3rem);
+    align-items: start;
     min-width: 0;
-    padding-block: clamp(4rem, 9vw, 8rem);
-    border-top: 1px solid var(--line);
+    padding-block: clamp(1.5rem, 4vw, 2.5rem) clamp(2.5rem, 6vw, 4rem);
   }
 
-  .eyebrow,
-  .fragment-label {
+  .eyebrow {
     margin: 0;
     color: var(--muted);
     font-size: 0.72rem;
@@ -126,12 +131,10 @@
   }
 
   h2 {
-    max-width: min(11ch, 100%);
-    min-width: 0;
-    margin: 0.25rem 0 1rem;
-    overflow-wrap: anywhere;
-    font-size: clamp(2.5rem, 5vw, 4.5rem);
-    line-height: 0.95;
+    margin: 0.25rem 0 0.65rem;
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
   }
 
   .lab-copy {
@@ -139,14 +142,15 @@
   }
 
   .lab-copy > p:not(.eyebrow, .resolved) {
-    max-width: 34rem;
+    margin: 0;
+    max-width: 28rem;
     color: var(--muted);
   }
 
   .controls {
     display: grid;
     gap: 0.85rem;
-    margin-top: 2rem;
+    margin-top: 1.5rem;
   }
 
   .select-control {
@@ -160,7 +164,7 @@
     width: 100%;
     min-height: 44px;
     padding: 0.6rem 2.5rem 0.6rem 0.75rem;
-    border: 1px solid var(--line-strong);
+    border: 1px solid var(--line-strong, var(--line));
     border-radius: 2px;
     background: var(--paper);
     color: var(--ink);
@@ -183,34 +187,22 @@
 
   .resolved {
     min-height: 1.5rem;
+    margin: 0.75rem 0 0;
     color: var(--muted);
     font-size: 0.82rem;
+    font-family: var(--code-font);
   }
 
   .lab-output {
+    display: grid;
+    gap: 0.75rem;
     min-width: 0;
-    border: 1px solid var(--line);
-    background: var(--paper);
-  }
-
-  .plot-paper {
-    min-width: 0;
-    overflow: hidden;
-    border-bottom: 1px solid var(--line);
-  }
-
-  .fragment-label {
-    padding: 0.8rem 1rem 0;
-  }
-
-  :global(.copy-code) {
-    margin: 0.5rem 1rem 1rem;
   }
 
   @media (max-width: 50rem) {
     .theme-lab {
       grid-template-columns: 1fr;
-      gap: 2rem;
+      gap: 1.5rem;
     }
 
     .lab-output {

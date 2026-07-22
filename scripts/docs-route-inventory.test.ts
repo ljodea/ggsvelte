@@ -101,9 +101,22 @@ describe("docs route inventory", () => {
     expect(createDocsRouteInventory().find((entry) => entry.path === "/themes")).toEqual({
       path: "/themes",
       title: "Chart themes and color scales — ggsvelte",
-      description:
-        "Built-in chart themes, categorical schemes, sequential ramps, and interaction role colors.",
+      description: "Built-in chart themes, categorical palettes, and sequential scales.",
       canonicalPath: "/themes",
+      kind: "page",
+      index: true,
+      sitemap: true,
+      shell: "site",
+    });
+  });
+
+  it("publishes the interactions demo with canonical acquisition metadata", () => {
+    expect(createDocsRouteInventory().find((entry) => entry.path === "/interactions")).toEqual({
+      path: "/interactions",
+      title: "Chart-local interaction — ggsvelte",
+      description:
+        "Inspect, select, zoom, and legend focus on a live chart. Semantic state is opt-in.",
+      canonicalPath: "/interactions",
       kind: "page",
       index: true,
       sitemap: true,

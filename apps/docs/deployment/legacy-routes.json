@@ -378,6 +378,12 @@
       "sources": ["canonical", "sitemap", "live-crawl"]
     },
     {
+      "sourcePath": "/interactions",
+      "destinationPath": "/interactions",
+      "kind": "page",
+      "sources": ["canonical"]
+    },
+    {
       "sourcePath": "/llms-full.txt",
       "destinationPath": "/llms-full.txt",
       "kind": "endpoint",

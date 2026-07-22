@@ -1,15 +1,20 @@
 <script lang="ts">
   import { GeomPoint, GGPlot } from "@ggsvelte/svelte";
   import type { ThemeName } from "@ggsvelte/spec";
+  import { CATEGORICAL_SCHEME_NAMES } from "@ggsvelte/spec";
 
   import CopyCode from "$lib/components/CopyCode.svelte";
+
+  type SchemeName = (typeof CATEGORICAL_SCHEME_NAMES)[number];
 
   const {
     name,
     label,
+    scheme,
   }: {
     name: ThemeName;
     label: string;
+    scheme: SchemeName;
   } = $props();
 
   const rows = [
@@ -23,30 +28,34 @@
     { release: 4, response: 68, group: "South" },
   ];
   const code = $derived(
-    `<GGPlot data={rows} aes={{ x: "release", y: "response", color: "group" }} theme="${name}">\n  <GeomPoint size={3.5} />\n</GGPlot>`,
+    `<GGPlot
+  data={rows}
+  aes={{ x: "release", y: "response", color: "group" }}
+  theme="${name}"
+  scales={{ color: { scheme: "${scheme}" } }}
+>
+  <GeomPoint size={3.5} />
+</GGPlot>`,
   );
 </script>
 
 <article>
   <header>
-    <div>
-      <p>Built-in chart theme</p>
-      <h3>{label}</h3>
-    </div>
-    <code>{name}</code>
+    <h3>{label}</h3>
+    <code>theme="{name}"</code>
   </header>
-  <div class="plot-paper">
+  <div class="plot">
     <GGPlot
       data={rows}
       aes={{ x: "release", y: "response", color: "group" }}
       theme={name}
-      height={230}
-      ariaLabel={`${label} theme applied to the controlled release and response chart`}
+      scales={{ color: { type: "ordinal", scheme } }}
+      height={280}
+      ariaLabel={`${label} theme with ${scheme} palette`}
     >
       <GeomPoint size={3.5} />
     </GGPlot>
   </div>
-  <p class="fragment-label">Svelte fragment</p>
   <CopyCode
     {code}
     language="svelte"
@@ -56,52 +65,32 @@
 
 <style>
   article {
+    display: grid;
+    gap: 0.75rem;
     min-width: 0;
-    max-width: 100%;
-    height: 100%;
-    border: 1px solid var(--line);
-    background: var(--paper);
   }
 
   header {
     display: flex;
-    align-items: start;
+    align-items: baseline;
     justify-content: space-between;
     gap: 1rem;
-    padding: 1rem;
-  }
-
-  header p,
-  .fragment-label {
-    margin: 0;
-    color: var(--muted);
-    font-size: 0.68rem;
-    font-weight: 650;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    min-width: 0;
   }
 
   h3 {
-    margin: 0.2rem 0 0;
-    font-size: 1.4rem;
+    margin: 0;
+    font-size: 1.25rem;
+    letter-spacing: -0.01em;
   }
 
   header > code {
     color: var(--muted);
-    font-size: 0.72rem;
+    font-size: 0.78rem;
+    white-space: nowrap;
   }
 
-  .plot-paper {
+  .plot {
     min-width: 0;
-    overflow: hidden;
-    border-block: 1px solid var(--line);
-  }
-
-  .fragment-label {
-    padding: 0.75rem 1rem 0;
-  }
-
-  :global(.copy-code) {
-    margin: 0.5rem 1rem 1rem;
   }
 </style>
