@@ -117,6 +117,10 @@ export interface RectsBatch {
   /** Outline width in px (only with `stroke`). */
   strokeWidth?: number;
   strokeWidths?: Float32Array;
+  /** Constant outline linetype (boxplot boxes; omitted = solid). */
+  linetype?: Linetype;
+  /** Per-rect outline linetype indexes when aes.linetype is mapped. */
+  linetypeIndexes?: Uint8Array;
   alpha: number;
   alphas?: Float32Array;
 }

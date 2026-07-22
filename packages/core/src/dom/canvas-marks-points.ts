@@ -61,9 +61,15 @@ export function drawPoints(
 ): void {
   const themeInk = resolve(themeVar("ink", theme));
   const n = batch.rowIndex.length;
-  const mappedGeometry =
-    batch.sizes !== undefined || batch.alphas !== undefined || batch.shapeIndexes !== undefined;
-  if (mappedGeometry) {
+  // plus/cross are open stroke paths — even a literal shape constant cannot use
+  // the fill-only fast path (it would paint nothing).
+  const needsPerPointPaint =
+    batch.sizes !== undefined ||
+    batch.alphas !== undefined ||
+    batch.shapeIndexes !== undefined ||
+    batch.shape === "plus" ||
+    batch.shape === "cross";
+  if (needsPerPointPaint) {
     const baseAlpha = ctx.globalAlpha;
     for (let j = 0; j < n; j++) {
       const color = batch.colors?.[j] ?? batch.fill ?? themeInk;
@@ -118,9 +124,13 @@ export function drawPointsSubset(
   const includes = (index: number) => maskIncludes(mask, index) === focused;
   const themeInk = resolve(themeVar("ink", theme));
   const n = batch.rowIndex.length;
-  const mappedGeometry =
-    batch.sizes !== undefined || batch.alphas !== undefined || batch.shapeIndexes !== undefined;
-  if (mappedGeometry) {
+  const needsPerPointPaint =
+    batch.sizes !== undefined ||
+    batch.alphas !== undefined ||
+    batch.shapeIndexes !== undefined ||
+    batch.shape === "plus" ||
+    batch.shape === "cross";
+  if (needsPerPointPaint) {
     const baseAlpha = ctx.globalAlpha;
     for (let j = 0; j < n; j++) {
       if (!includes(j)) continue;

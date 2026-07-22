@@ -152,10 +152,14 @@ function renderRects(batch: RectsBatch, theme: ThemeTokens): string {
   const themeFill = themeVar(batch.fillRole ?? "accent", theme);
   for (let j = 0; j < n; j++) {
     const fill = batch.fills?.[j] ?? batch.fill ?? themeFill;
+    const linetype =
+      batch.linetypeIndexes === undefined
+        ? (batch.linetype ?? "solid")
+        : LINETYPE_NAMES[batch.linetypeIndexes[j]!]!;
     const strokeAttr =
       batch.stroke === undefined
         ? ""
-        : ` stroke="${batch.stroke ?? themeVar("ink", theme)}" stroke-width="${px(batch.strokeWidths?.[j] ?? batch.strokeWidth ?? 1)}"`;
+        : ` stroke="${batch.stroke ?? themeVar("ink", theme)}" stroke-width="${px(batch.strokeWidths?.[j] ?? batch.strokeWidth ?? 1)}"${dashAttr(linetype)}`;
     const alpha = batch.alphas?.[j];
     parts.push(
       `<rect x="${px(batch.rects[j * 4]!)}" y="${px(batch.rects[j * 4 + 1]!)}" width="${px(batch.rects[j * 4 + 2]!)}" height="${px(batch.rects[j * 4 + 3]!)}" fill="${fill}"${strokeAttr}${alpha === undefined ? "" : alphaAttr(alpha)}/>`,

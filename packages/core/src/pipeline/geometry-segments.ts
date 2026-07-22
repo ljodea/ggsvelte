@@ -39,6 +39,9 @@ export function segmentsBatch(
 
   if (binding.ruleForm === "annotation") {
     emitAnnotationSegments({ frame, fx, pushVertical, pushHorizontal });
+    // Annotation intercepts use NO_ROW identity; scaled style constants still
+    // need one style sample per emitted segment so packers expand vectors.
+    for (let i = 0; i < rowIndex.length; i++) styleRows.push(0);
   } else {
     emitDataSegments({
       frame,

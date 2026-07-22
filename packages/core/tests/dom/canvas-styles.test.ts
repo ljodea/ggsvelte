@@ -121,4 +121,23 @@ describe("canvas mapped style vectors", () => {
     expect(state.lineWidth).toBe(7);
     expect(currentDash()).toEqual([]);
   });
+
+  it("strokes literal plus/cross shapes instead of filling open paths", () => {
+    const batch: PointsBatch = {
+      kind: "points",
+      layerIndex: 0,
+      panelIndex: 0,
+      positions: Float32Array.from([10, 10]),
+      rowIndex: Uint32Array.from([0]),
+      size: 4,
+      alpha: 1,
+      shape: "plus",
+      fill: "red",
+    };
+    const { ctx, calls, state } = styleContext();
+    drawBatch(ctx, batch, theme, resolve);
+    expect(calls.some(({ name }) => name === "stroke")).toBe(true);
+    expect(calls.some(({ name }) => name === "fill")).toBe(false);
+    expect(state.lineWidth).toBe(7);
+  });
 });

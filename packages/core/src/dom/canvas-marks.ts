@@ -12,7 +12,7 @@ import type { ThemeTokens } from "../theme.js";
 import { themeVar } from "../theme.js";
 import type { ColorResolver } from "./canvas-dom.js";
 import { maskIncludes, type PrimitiveFocusMask } from "./canvas-marks-mask.js";
-import { applyDash, drawPaths, drawPathsSubset } from "./canvas-marks-paths.js";
+import { applyDash, drawPaths, drawPathsSubset, linetypeAt } from "./canvas-marks-paths.js";
 import { drawPoints, drawPointsSubset } from "./canvas-marks-points.js";
 import { drawSegments } from "./canvas-marks-segments.js";
 
@@ -49,6 +49,7 @@ function drawBatchInner(
         if (batch.stroke !== undefined) {
           ctx.strokeStyle = resolve(batch.stroke ?? themeVar("ink", theme));
           ctx.lineWidth = batch.strokeWidths?.[j] ?? batch.strokeWidth ?? 1;
+          applyDash(ctx, linetypeAt(batch, j));
           ctx.strokeRect(
             batch.rects[j * 4]!,
             batch.rects[j * 4 + 1]!,
@@ -58,6 +59,7 @@ function drawBatchInner(
         }
       }
       ctx.globalAlpha = baseAlpha;
+      applyDash(ctx, "solid");
       break;
     }
     case "segments":
@@ -103,6 +105,7 @@ function drawBatchSubsetInner(
         if (batch.stroke !== undefined) {
           ctx.strokeStyle = resolve(batch.stroke ?? themeVar("ink", theme));
           ctx.lineWidth = batch.strokeWidths?.[j] ?? batch.strokeWidth ?? 1;
+          applyDash(ctx, linetypeAt(batch, j));
           ctx.strokeRect(
             batch.rects[j * 4]!,
             batch.rects[j * 4 + 1]!,
@@ -112,6 +115,7 @@ function drawBatchSubsetInner(
         }
       }
       ctx.globalAlpha = baseAlpha;
+      applyDash(ctx, "solid");
       break;
     }
     case "segments":

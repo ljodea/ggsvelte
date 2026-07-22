@@ -51,8 +51,18 @@ export function boxplotBatches(
     whiskers.alpha = 1;
     whiskers.alphas = whiskerAlphas;
   }
-  if (linetypes !== undefined) medians.linetypeIndexes = linetypes;
+  if (linetypes !== undefined) {
+    medians.linetypeIndexes = linetypes;
+    rects.linetypeIndexes = linetypes;
+  }
   if (whiskerLinetypes !== undefined) whiskers.linetypeIndexes = whiskerLinetypes;
+  // Literal (non-scaled) linetype constants apply to every box stroke surface.
+  if (typeof frame.binding.linetype.constant === "string") {
+    const literal = frame.binding.linetype.constant as Linetype;
+    whiskers.linetype = literal;
+    medians.linetype = literal;
+    rects.linetype = literal;
+  }
 
   const out: GeometryBatch[] = [whiskers, rects, medians];
   const outliers = buildBoxplotOutliers({

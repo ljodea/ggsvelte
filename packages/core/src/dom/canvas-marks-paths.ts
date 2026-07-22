@@ -4,7 +4,7 @@
  */
 import { LINETYPE_NAMES } from "@ggsvelte/spec";
 
-import type { PathsBatch, SegmentsBatch } from "../scene.js";
+import type { PathsBatch, RectsBatch, SegmentsBatch } from "../scene.js";
 import { LINETYPE_DASHES, type Linetype } from "../scales/style.js";
 import type { ThemeTokens } from "../theme.js";
 import { themeVar } from "../theme.js";
@@ -33,7 +33,7 @@ function traceSubpath(
   if (batch.closed === true) ctx.closePath();
 }
 
-function linetypeAt(batch: PathsBatch | SegmentsBatch, index: number): Linetype {
+function linetypeAt(batch: PathsBatch | SegmentsBatch | RectsBatch, index: number): Linetype {
   return batch.linetypeIndexes === undefined
     ? (batch.linetype ?? "solid")
     : LINETYPE_NAMES[batch.linetypeIndexes[index]!]!;

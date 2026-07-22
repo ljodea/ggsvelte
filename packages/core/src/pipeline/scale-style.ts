@@ -571,13 +571,6 @@ function finiteResolution(input: {
   if (type === "binned") {
     const numeric = values.map((value) => (typeof value === "number" ? value : Number.NaN));
     const extent = finiteExtent([Float64Array.from(numeric)]);
-    if (extent === null) {
-      throw new PipelineError(
-        "style-domain-empty",
-        `/scales/${aesthetic}`,
-        `No finite ${aesthetic} values can be binned.`,
-      );
-    }
     const configuredDomain = config?.domain;
     if (
       configuredDomain !== undefined &&
@@ -590,8 +583,19 @@ function finiteResolution(input: {
         `The ${aesthetic} binned domain must contain exactly two finite numbers.`,
       );
     }
-    const low = (configuredDomain?.[0] as number | undefined) ?? Math.min(...extent);
-    const high = (configuredDomain?.[1] as number | undefined) ?? Math.max(...extent);
+    // Prefer an explicit domain when data has no finite samples (filtered-out
+    // frames, all-null mappings that should still emit naValue bins).
+    if (extent === null && configuredDomain === undefined) {
+      throw new PipelineError(
+        "style-domain-empty",
+        `/scales/${aesthetic}`,
+        `No finite ${aesthetic} values can be binned.`,
+      );
+    }
+    const low =
+      configuredDomain !== undefined ? (configuredDomain[0] as number) : Math.min(...extent!);
+    const high =
+      configuredDomain !== undefined ? (configuredDomain[1] as number) : Math.max(...extent!);
     const boundaryCount = Math.min(range.length, 5) + 1;
     const boundaries =
       config?.breaks ??

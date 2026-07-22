@@ -4,7 +4,10 @@ import { fromAny } from "@total-typescript/shoehorn";
 import type { PortableSpec } from "@ggsvelte/spec";
 
 import { runPipeline } from "../src/pipeline.js";
+import { resolveStyleScale } from "../src/pipeline/scale-style.js";
+import type { LayerBinding, LayerFrame } from "../src/pipeline/types.js";
 import { sceneToSVGString } from "../src/render-svg-scene.js";
+import { ColumnTable } from "../src/table.js";
 
 const viewport = { width: 640, height: 400 };
 
@@ -406,6 +409,117 @@ describe("complete mapped style plumbing", () => {
     expect(boxSegments.linetypeIndexes).toBeDefined();
     expect(boxRects.alphas).toBeDefined();
     expect(boxRects.strokeWidths).toBeDefined();
+    expect(boxRects.linetypeIndexes).toBeDefined();
+  });
+
+  it("applies literal and scaled styles to annotation rules and boxplot outlines", () => {
+    const annotation = runPipeline(
+      fromAny({
+        data: { values: [{ x: 1, y: 1 }] },
+        layers: [
+          {
+            geom: "rule",
+            aes: {
+              linewidth: { value: 5, scale: true },
+              alpha: { value: 0.4, scale: true },
+              linetype: { value: "dashed", scale: true },
+            },
+            params: { yintercept: 0.5 },
+          },
+        ],
+        scales: {
+          linewidth: { type: "identity" },
+          alpha: { type: "identity" },
+          linetype: { type: "identity" },
+        },
+      }),
+      viewport,
+    );
+    const rule = annotation.scene.batches.find((batch) => batch.kind === "segments");
+    if (rule?.kind !== "segments") throw new Error("expected annotation rule");
+    expect([...rule.linewidths!]).toEqual([5]);
+    expect([...rule.alphas!]).toEqual([Math.fround(0.4)]);
+    expect([...rule.linetypeIndexes!]).toEqual([1]);
+
+    const boxplot = runPipeline(
+      fromAny({
+        data: {
+          values: [
+            { x: "a", y: 1 },
+            { x: "a", y: 2 },
+            { x: "a", y: 3 },
+          ],
+        },
+        aes: {
+          x: { field: "x" },
+          y: { field: "y" },
+          linetype: { value: "dashed" },
+        },
+        layers: [{ geom: "boxplot" }],
+      }),
+      viewport,
+    );
+    const segments = boxplot.scene.batches.filter((batch) => batch.kind === "segments");
+    const rects = boxplot.scene.batches.find((batch) => batch.kind === "rects");
+    if (segments.length === 0 || rects?.kind !== "rects") {
+      throw new Error("expected boxplot segments and rects");
+    }
+    for (const batch of segments) {
+      if (batch.kind !== "segments") continue;
+      expect(batch.linetype).toBe("dashed");
+    }
+    expect(rects.linetype).toBe("dashed");
+  });
+
+  it("trains binned finite styles from an explicit domain when data is empty", () => {
+    // Empty mapped samples (runtime-filtered frame) must still train from an
+    // explicit domain — same contract as numeric/color binned scales.
+    const table = ColumnTable.fromRows([{ x: 1, y: 1 }]);
+    const binding = fromAny<LayerBinding>({
+      layer: { geom: "point", aes: { shape: { field: "value" } } },
+      index: 0,
+      xField: "x",
+      yField: "y",
+      color: { field: null, constant: null, scaledConstant: null },
+      fill: { field: null, constant: null, scaledConstant: null },
+      size: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      linewidth: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      alpha: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      shape: { field: "value", statColumn: null, constant: null, scaledConstant: null },
+      linetype: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      ruleForm: null,
+    });
+    const frame = fromAny<LayerFrame>({
+      binding,
+      table,
+      n: 0,
+      xNumeric: new Float64Array(0),
+      yNumeric: new Float64Array(0),
+      groups: [],
+      inputGroups: [],
+      rowIndex: new Uint32Array(0),
+      shapeValues: [],
+    });
+    const warnings: { code: string; message: string }[] = [];
+    const resolution = resolveStyleScale({
+      aesthetic: "shape",
+      frames: [frame],
+      bindings: [binding],
+      table,
+      sourceTable: table,
+      config: {
+        type: "binned",
+        domain: [0, 10],
+        breaks: [0, 5, 10],
+        range: ["circle", "square"],
+      },
+      prevState: null,
+      title: "shape",
+      warnings,
+    });
+    expect(resolution.guidePlan?.type).toBe("discrete");
+    if (resolution.guidePlan?.type !== "discrete") throw new Error("expected discrete guide");
+    expect(resolution.guidePlan.domain).toEqual([0, 5]);
   });
 
   it("keeps continuous mapped styles out of grouping and discrete stroke styles in grouping", () => {
