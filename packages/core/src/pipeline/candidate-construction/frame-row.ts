@@ -42,6 +42,70 @@ export function getPathGroupSortedRows(
   return cached;
 }
 
+/** Closed-band layout: cumulative vertex starts per ordered group (2× rows each). */
+interface ClosedBandLayout {
+  readonly starts: readonly number[];
+  readonly groups: readonly number[];
+  readonly rowsByGroup: ReadonlyMap<number, readonly number[]>;
+  readonly total: number;
+}
+
+const closedBandLayoutCache = new WeakMap<object, ClosedBandLayout>();
+
+function getClosedBandLayout(
+  frame: Pick<LayerFrame, "groups" | "xNumeric">,
+  orderedGroups: readonly number[],
+): ClosedBandLayout {
+  let cached = closedBandLayoutCache.get(frame);
+  if (
+    cached !== undefined &&
+    cached.groups.length === orderedGroups.length &&
+    cached.groups.every((group, index) => group === orderedGroups[index])
+  ) {
+    return cached;
+  }
+  const rowsByGroup = getPathGroupSortedRows(frame);
+  const starts: number[] = [];
+  let cursor = 0;
+  for (const group of orderedGroups) {
+    starts.push(cursor);
+    cursor += (rowsByGroup.get(group)?.length ?? 0) * 2;
+  }
+  cached = {
+    starts,
+    groups: orderedGroups,
+    rowsByGroup,
+    total: cursor,
+  };
+  closedBandLayoutCache.set(frame, cached);
+  return cached;
+}
+
+function resolveClosedBandFrameRow(
+  layout: ClosedBandLayout,
+  primitiveIndex: number,
+): { frameRow: number; derivedGroup: number } | null {
+  if (primitiveIndex < 0 || primitiveIndex >= layout.total || layout.starts.length === 0)
+    return null;
+  // Binary search last start ≤ primitiveIndex (O(log G)).
+  let lo = 0;
+  let hi = layout.starts.length - 1;
+  while (lo < hi) {
+    const mid = (lo + hi + 1) >> 1;
+    if (layout.starts[mid]! <= primitiveIndex) lo = mid;
+    else hi = mid - 1;
+  }
+  const group = layout.groups[lo]!;
+  const rowsInGroup = layout.rowsByGroup.get(group) ?? [];
+  const local = primitiveIndex - layout.starts[lo]!;
+  const reflected =
+    local < rowsInGroup.length ? local : Math.max(0, rowsInGroup.length * 2 - 1 - local);
+  return {
+    frameRow: rowsInGroup[Math.min(reflected, rowsInGroup.length - 1)] ?? 0,
+    derivedGroup: group,
+  };
+}
+
 export function resolveCandidateFrameRow(input: {
   frame: LayerFrame | undefined;
   batch: GeometryBatch;
@@ -70,27 +134,16 @@ export function resolveCandidateFrameRow(input: {
         frameRow = rowsInGroup[Math.min(reflected, rowsInGroup.length - 1)] ?? frameRow;
       }
     } else if (batch.closed === true) {
-      // Closed ribbons: upper ascending + lower descending per group (2× rows).
-      const sorted = getPathGroupSortedRows(frame);
-      let cursor = 0;
-      let matched = false;
-      for (const group of orderedGroups) {
-        const rowsInGroup = sorted.get(group) ?? [];
-        const band = rowsInGroup.length * 2;
-        if (primitiveIndex >= cursor && primitiveIndex < cursor + band) {
-          const local = primitiveIndex - cursor;
-          const reflected =
-            local < rowsInGroup.length ? local : Math.max(0, rowsInGroup.length * 2 - 1 - local);
-          frameRow = rowsInGroup[Math.min(reflected, rowsInGroup.length - 1)] ?? frameRow;
-          derivedGroup = group;
-          matched = true;
-          break;
-        }
-        cursor += band;
-      }
-      if (!matched) {
+      const resolved = resolveClosedBandFrameRow(
+        getClosedBandLayout(frame, orderedGroups),
+        primitiveIndex,
+      );
+      if (resolved === null) {
         frameRow = Math.min(Math.max(0, primitiveIndex), Math.max(0, frame.n - 1));
         derivedGroup = frame.groups[frameRow] ?? derivedGroup;
+      } else {
+        frameRow = resolved.frameRow;
+        derivedGroup = resolved.derivedGroup;
       }
     } else {
       // Open paths: semantic index is the pre-split vertex / frame row.

@@ -33,11 +33,18 @@ function effectiveCoordAxis(axis: ReturnType<typeof normalizeCoordAxis>): boolea
   const runtimeAxis = axis as unknown;
   if (runtimeAxis === null || typeof runtimeAxis !== "object" || Array.isArray(runtimeAxis))
     return true;
+  const reverse = (axis as { reverse?: unknown }).reverse;
+  const expand = (axis as { expand?: unknown }).expand;
+  // Non-boolean reverse/expand must stay effective so schema can reject them.
+  const malformedReverse = reverse !== undefined && reverse !== true && reverse !== false;
+  const malformedExpand = expand !== undefined && expand !== true && expand !== false;
   return (
     axis.transform !== "identity" ||
     axis.limits !== undefined ||
     axis.reverse === true ||
     axis.expand === false ||
+    malformedReverse ||
+    malformedExpand ||
     Object.keys(axis).some(
       (key) => key !== "transform" && key !== "limits" && key !== "reverse" && key !== "expand",
     )

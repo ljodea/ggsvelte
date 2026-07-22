@@ -111,6 +111,18 @@ describe("coord_transform public contract", () => {
     expect(validate(spec).ok).toBe(true);
   });
 
+  it("preserves malformed identity axes so schema still rejects them", () => {
+    const badIdentity = normalize({
+      layers: [{ geom: "point" }],
+      coord: { type: "transform", x: { transform: "identity", reverse: "yes" } },
+    } as never);
+    expect(badIdentity.coord).toBeDefined();
+    expect((badIdentity.coord as { x?: { reverse?: unknown } } | undefined)?.x?.reverse).toBe(
+      "yes",
+    );
+    expect(validate(badIdentity).ok).toBe(false);
+  });
+
   it("preserves malformed coord axis booleans and clip for schema validation", () => {
     const badReverse = normalize({
       layers: [{ geom: "point" }],
