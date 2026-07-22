@@ -10,6 +10,7 @@
 
   import { copyText, MANUAL_COPY_STATUS } from "$lib/clipboard";
   import { resolveCodeLanguage } from "$lib/code-languages";
+  import { nextRovingTabIndex } from "$lib/tab-roving";
 
   interface Tab {
     label: string;
@@ -67,19 +68,8 @@
   }
 
   function handleTabKey(event: KeyboardEvent, index: number): void {
-    let next = index;
-    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
-      next = (index + 1) % tabs.length;
-    } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
-      next = (index - 1 + tabs.length) % tabs.length;
-    } else if (event.key === "Home") {
-      next = 0;
-    } else if (event.key === "End") {
-      next = tabs.length - 1;
-    } else {
-      return;
-    }
-
+    const next = nextRovingTabIndex(event.key, index, tabs.length);
+    if (next === null) return;
     event.preventDefault();
     select(next);
     const target = event.currentTarget;

@@ -31,16 +31,18 @@
     type PlaygroundInteractionEvent,
   } from "$lib/playground-events";
   import {
-    decodePlaygroundHash,
     encodePlaygroundSeed,
     type PlaygroundSeedV1,
   } from "$lib/playground-codec";
   import {
-    sharedLinkRejectDiagnostic,
+    applyPlaygroundHashRestoreState,
+    rejectRestoreCancelPhase,
+    resolvePlaygroundHashRestore,
+  } from "$lib/playground-hash-restore";
+  import {
     shouldClearPlayHashAfterPromotion,
     shouldConfirmDiscardForSampleLoad,
     shouldConfirmDiscardForUndo,
-    verifiedSharedSeed,
   } from "$lib/playground-link-policy";
   import { playgroundOutputs } from "$lib/playground-output";
   import {
@@ -109,42 +111,29 @@
   }
 
   function restoreLocation(origin: "initial-navigation" | "popstate"): void {
-    const decoded = decodePlaygroundHash(window.location.hash);
-    if (decoded.status === "absent") {
-      if (origin === "popstate") {
-        const previous = activeCandidate();
-        const next = stagePlaygroundSeed(workbench, initialSeed, origin, null);
-        workbench = next;
-        noteStagedCandidate(previous, next);
-      }
-      return;
-    }
-    if (decoded.status === "error") {
-      replaceLocationHash(workbench.historyHash);
-      const previous = activeCandidate();
-      workbench = reportPlaygroundDiagnostic(
-        workbench,
-        sharedLinkRejectDiagnostic(decoded.error),
-        "The shared link was rejected. The current local chart and a truthful URL were retained.",
-      );
-      if (previous !== null) {
-        noteCandidatePhase({
-          generation: previous.generation,
-          origin: previous.origin,
-          phase: "cancelled",
-          status: workbench.status,
-        });
-      }
-      return;
-    }
-    const previous = activeCandidate();
-    const next = stagePlaygroundSeed(
-      workbench,
-      verifiedSharedSeed(window.location.hash, decoded.seed, shareCatalogs),
+    const decision = resolvePlaygroundHashRestore(
       origin,
       window.location.hash,
+      shareCatalogs,
+    );
+    if (decision.kind === "noop") return;
+    if (decision.kind === "reject") {
+      // Truthful URL first: drop the malformed fragment before reporting.
+      replaceLocationHash(workbench.historyHash);
+    }
+    const previous = activeCandidate();
+    const next = applyPlaygroundHashRestoreState(
+      workbench,
+      decision,
+      origin,
+      initialSeed,
     );
     workbench = next;
+    if (decision.kind === "reject") {
+      const cancel = rejectRestoreCancelPhase(previous, workbench.status);
+      if (cancel !== null) noteCandidatePhase(cancel);
+      return;
+    }
     noteStagedCandidate(previous, next);
   }
 

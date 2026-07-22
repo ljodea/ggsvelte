@@ -5,6 +5,7 @@
   import UiButton from "$lib/components/UiButton.svelte";
   import { playgroundSVGExport } from "$lib/playground-export";
   import type { PlaygroundOutput } from "$lib/playground-output";
+  import { nextRovingTabIndex } from "$lib/tab-roving";
   import type { PortableSpec } from "@ggsvelte/spec";
 
   const {
@@ -52,18 +53,8 @@
   }
 
   function handleTabKey(event: KeyboardEvent, index: number): void {
-    let next = index;
-    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
-      next = (index + 1) % outputs.length;
-    } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
-      next = (index - 1 + outputs.length) % outputs.length;
-    } else if (event.key === "Home") {
-      next = 0;
-    } else if (event.key === "End") {
-      next = outputs.length - 1;
-    } else {
-      return;
-    }
+    const next = nextRovingTabIndex(event.key, index, outputs.length);
+    if (next === null) return;
     event.preventDefault();
     select(next);
     const target = event.currentTarget;
