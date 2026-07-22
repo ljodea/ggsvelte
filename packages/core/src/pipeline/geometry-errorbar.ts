@@ -1,5 +1,8 @@
 /**
  * Errorbar geometry: vertical range plus caps.
+ *
+ * Emit preallocates typed segment buffers (3 segments per kept row); pack
+ * reuses dense buffers and never Float32Array.from a number[] scratch list.
  */
 import type { ErrorbarParams } from "@ggsvelte/spec";
 
@@ -35,45 +38,41 @@ export function errorbarBatch(
 
   const xSpanOf = makeErrorbarXSpan(frame, fx, widthParam);
 
-  const segments: number[] = [];
-  const rowIndex: number[] = [];
-  const styleRows: number[] = [];
-  const strokes: string[] = [];
-  const removed = emitErrorbarRows({
+  const emitted = emitErrorbarRows({
     frame,
     fx,
     color,
     wantsColors,
     xSpanOf,
-    segments,
-    rowIndex,
-    styleRows,
-    strokes,
   });
-  removedWarning(removed, binding.index, warnings);
-  if (rowIndex.length === 0) return null;
+  removedWarning(emitted.removed, binding.index, warnings);
+  if (emitted.keptSegments === 0) return null;
 
   const batch: SegmentsBatch = {
     kind: "segments",
     layerIndex: binding.index,
     panelIndex: 0,
-    segments: Float32Array.from(segments),
-    rowIndex: Uint32Array.from(rowIndex),
+    segments: emitted.segments,
+    rowIndex: emitted.rowIndex,
     stroke: binding.color.constant,
     linewidth:
-      typeof binding.linewidth.constant === "number"
+      typeof binding.linewidth?.constant === "number"
         ? binding.linewidth.constant
         : (params.linewidth ?? DEFAULT_RULE_LINEWIDTH),
     alpha:
-      typeof binding.alpha.constant === "number" ? binding.alpha.constant : (params.alpha ?? 1),
-    ...(typeof binding.linetype.constant === "string" && {
+      typeof binding.alpha?.constant === "number" ? binding.alpha.constant : (params.alpha ?? 1),
+    ...(typeof binding.linetype?.constant === "string" && {
       linetype: binding.linetype.constant as Linetype,
     }),
   };
-  const linewidths = numericStyleVector(frame, "linewidth", styleRows, styles);
-  const alphas = numericStyleVector(frame, "alpha", styleRows, styles);
-  const linetypeIndexes = indexedStyleVector(frame, "linetype", styleRows, styles, (value) =>
-    linetypeIndex(value as Linetype),
+  const linewidths = numericStyleVector(frame, "linewidth", emitted.styleRows, styles);
+  const alphas = numericStyleVector(frame, "alpha", emitted.styleRows, styles);
+  const linetypeIndexes = indexedStyleVector(
+    frame,
+    "linetype",
+    emitted.styleRows,
+    styles,
+    (value) => linetypeIndex(value as Linetype),
   );
   if (linewidths !== undefined) batch.linewidths = linewidths;
   if (alphas !== undefined) {
@@ -81,6 +80,6 @@ export function errorbarBatch(
     batch.alphas = alphas;
   }
   if (linetypeIndexes !== undefined) batch.linetypeIndexes = linetypeIndexes;
-  if (wantsColors) batch.strokes = strokes;
+  if (wantsColors && emitted.strokes !== null) batch.strokes = emitted.strokes;
   return batch;
 }
