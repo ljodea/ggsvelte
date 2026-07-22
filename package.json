@@ -32,7 +32,7 @@
     "fmt": "bun node_modules/.bin/oxfmt && bun node_modules/.bin/prettier --write --log-level warn \"**/*.{svelte,md,yml,yaml}\"",
     "fmt:check": "bun node_modules/.bin/oxfmt --check && bun node_modules/.bin/prettier --check --log-level warn \"**/*.{svelte,md,yml,yaml}\"",
     "test": "bun test packages/spec packages/core benchmarks scripts tests/evals",
-    "test:temporal-parser": "bun test packages/spec/tests/temporal.test.ts packages/spec/tests/temporal-api.test.ts packages/spec/tests/temporal-source-gate.test.ts packages/core/tests/table-temporal.test.ts",
+    "test:temporal-parser": "bun test packages/spec/tests/temporal.test.ts packages/spec/tests/temporal-scale-schema.test.ts packages/spec/tests/temporal-scale-authoring.test.ts packages/spec/tests/temporal-source-gate.test.ts packages/core/tests/table-temporal.test.ts",
     "test:temporal-pipeline": "bun test packages/core/tests/pipeline-temporal.test.ts packages/core/tests/ticks.test.ts",
     "test:spikes": "cd spikes/browser && bun run --bun test",
     "test:visual": "bun node_modules/.bin/playwright test --config tests/visual/playwright.config.ts",

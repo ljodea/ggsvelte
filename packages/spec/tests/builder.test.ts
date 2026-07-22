@@ -47,17 +47,8 @@ describe("gg builder", () => {
     expect(viaBuilder).toEqual(handWritten);
   });
 
-  it("accepts rows, columns, and DataRef data forms", () => {
-    expect(gg(rows).geomPoint().spec().data).toEqual({ values: rows });
-    expect(
-      gg({ x: [1, 2], y: [2, 3] })
-        .geomPoint()
-        .spec().data,
-    ).toEqual({
-      columns: { x: [1, 2], y: [2, 3] },
-    });
-    expect(gg({ name: "cars" }).geomPoint().spec().data).toEqual({ name: "cars" });
-  });
+  // Data-form acceptance + Date snapshot/portable materialization:
+  // packages/spec/tests/builder-data.test.ts
 
   it("labs() merges over previous labs", () => {
     const spec = gg(rows).geomPoint().labs({ title: "T" }).labs({ x: "X" }).spec();
