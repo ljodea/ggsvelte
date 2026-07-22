@@ -77,15 +77,26 @@ function colorTemporalCensorRecovery(input: {
     config?.type === "binned" && Array.isArray(config.breaks)
       ? config.breaks.filter((value) => value !== null)
       : [];
-  const parsedBreaks = binnedBreaks.map((value) => parseBound(value));
-  const hasBinnedBreaks =
-    parsedBreaks.length >= 2 &&
-    parsedBreaks.every((result) => result !== null) &&
-    parsedBreaks.every((result, index) => {
-      if (index === 0 || result === null) return true;
-      const prev = parsedBreaks[index - 1];
-      return prev !== null && result.epochMs > prev.epochMs;
-    });
+  const parsedBreakEpochs: number[] = [];
+  for (const value of binnedBreaks) {
+    const parsed = parseBound(value);
+    if (parsed === null) {
+      parsedBreakEpochs.length = 0;
+      break;
+    }
+    parsedBreakEpochs.push(parsed.epochMs);
+  }
+  let hasBinnedBreaks = parsedBreakEpochs.length >= 2;
+  if (hasBinnedBreaks) {
+    for (let index = 1; index < parsedBreakEpochs.length; index++) {
+      const prev = parsedBreakEpochs[index - 1];
+      const current = parsedBreakEpochs[index];
+      if (prev === undefined || current === undefined || current <= prev) {
+        hasBinnedBreaks = false;
+        break;
+      }
+    }
+  }
 
   const trainingFields = new Set<string>();
   const requestsTemporal =
