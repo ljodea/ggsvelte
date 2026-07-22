@@ -74,9 +74,12 @@ export function collectAxisInputsY(frame: LayerFrame, acc: AxisCollectAcc): void
     acc.sawContinuousEvidence = true;
   }
   // Segment end y: dual evidence (numeric + discrete) even when yField is set.
-  if (frame.yend != null) {
+  // Guard undefined partial fixtures (not only null).
+  if (frame.yend !== null && frame.yend !== undefined) {
     acc.numeric.push(frame.yend);
-    if (frame.yendValues != null) acc.columns.push(frame.yendValues);
+    if (frame.yendValues !== null && frame.yendValues !== undefined) {
+      acc.columns.push(frame.yendValues);
+    }
     const endField = binding.yendField;
     if (endField !== null && frame.table.has(endField)) {
       const endType = positionFieldType(frame.table, endField, yConversion);

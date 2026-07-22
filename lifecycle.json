@@ -788,6 +788,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "RuntimeSegmentLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "RuntimeSmoothLayer": {
           "kind": "type",
           "lifecycle": "experimental"
