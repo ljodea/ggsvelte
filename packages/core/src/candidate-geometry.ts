@@ -1,10 +1,39 @@
 import type { ResolvedCandidateInspectMode } from "./candidate-store-types.js";
 import type { GeometryBatch } from "./scene.js";
 
+/**
+ * Geometry-array topology for candidate indexes / hit refine:
+ * - rects / segments: packed float arrays
+ * - points / glyphs / paths: vertices (`positions.length / 2`)
+ *
+ * Distinct from {@link renderPrimitiveCount} (paint/focus marks) and
+ * {@link candidatePrimitiveCount} (inspectable anchors).
+ */
 export function primitiveCount(batch: GeometryBatch): number {
   if (batch.kind === "rects") return batch.rects.length / 4;
   if (batch.kind === "segments") return batch.segments.length / 4;
   return batch.positions.length / 2;
+}
+
+/**
+ * Paint / focus / mark-threshold address space (one count for canvas focus,
+ * interaction masks, SVG mark totals, and backend auto threshold).
+ * Paths count **subpaths**, not tessellated vertices.
+ */
+export function renderPrimitiveCount(batch: GeometryBatch): number {
+  switch (batch.kind) {
+    case "points":
+    case "glyphs":
+      return batch.rowIndex.length;
+    case "paths":
+      return Math.max(0, batch.pathOffsets.length - 1);
+    case "rects":
+      return batch.rects.length / 4;
+    case "segments":
+      return batch.segments.length / 4;
+    default:
+      return 0;
+  }
 }
 
 export function isCandidatePrimitive(batch: GeometryBatch, primitiveIndex: number): boolean {
