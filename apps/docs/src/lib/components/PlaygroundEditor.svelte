@@ -1,6 +1,7 @@
 <script lang="ts">
   import { tick } from "svelte";
 
+  import UiButton from "$lib/components/UiButton.svelte";
   import type { PlaygroundDiagnostic } from "$lib/playground-state";
 
   const {
@@ -51,7 +52,6 @@
     <p class="panel-number">02</p>
     <h2>Edit the PortableSpec</h2>
   </div>
-  <p>JSON only. No code runs.</p>
 </div>
 
 <div class="source-picker">
@@ -70,9 +70,6 @@
       <option value={sample.id}>{sample.title}</option>
     {/each}
   </select>
-  {#if selectedSample !== ""}
-    <p>{samples.find((sample) => sample.id === selectedSample)?.description}</p>
-  {/if}
 </div>
 
 <form
@@ -120,15 +117,15 @@
   {/if}
 
   <div class="editor-actions">
-    <button class="primary" type="submit" disabled={pending}
-      >{pending ? "Checking…" : "Apply draft"}</button
-    >
-    <button type="button" onclick={onUndo} disabled={pending || !canUndo}
-      >Undo chart</button
-    >
-    <button type="button" onclick={onReset} disabled={pending}
-      >Reset source</button
-    >
+    <UiButton variant="primary" type="submit" disabled={pending}>
+      {pending ? "Checking…" : "Apply draft"}
+    </UiButton>
+    <UiButton type="button" onclick={onUndo} disabled={pending || !canUndo}>
+      Undo chart
+    </UiButton>
+    <UiButton type="button" onclick={onReset} disabled={pending}>
+      Reset source
+    </UiButton>
   </div>
 </form>
 
@@ -142,12 +139,11 @@
     justify-content: space-between;
     gap: 1rem;
     border-bottom: 1px solid var(--line);
-    padding-bottom: 0.75rem;
+    padding-bottom: 0.6rem;
   }
 
   .panel-heading h2,
-  .panel-heading p,
-  .source-picker p {
+  .panel-heading p {
     margin: 0;
   }
 
@@ -156,9 +152,8 @@
     font-size: 1.05rem;
   }
 
-  .panel-heading > p,
-  .source-picker p,
   .limits {
+    margin: 0;
     color: var(--muted);
     font-size: 0.78rem;
   }
@@ -181,18 +176,16 @@
   }
 
   select,
-  textarea,
-  button {
-    min-height: 44px;
+  textarea {
+    min-height: 2.5rem;
     border: 1px solid var(--line);
-    border-radius: 2px;
+    border-radius: 0.5rem;
     background: var(--paper);
     color: var(--ink);
     font: inherit;
   }
 
-  select,
-  button {
+  select {
     padding: 0.55rem 0.7rem;
   }
 
@@ -205,14 +198,11 @@
     tab-size: 2;
   }
 
-  .limits {
-    margin: 0;
-  }
-
   .diagnostics {
     display: grid;
     gap: 0.5rem;
     border-left: 3px solid var(--danger, #b42318);
+    border-radius: 0 0.35rem 0.35rem 0;
     padding: 0.75rem;
     background: color-mix(in srgb, #b42318 7%, var(--paper));
   }
@@ -257,29 +247,14 @@
 
   .editor-actions {
     display: flex;
+    flex-wrap: wrap;
     gap: 0.55rem;
     padding-top: 0.35rem;
   }
 
-  button {
-    cursor: pointer;
-    font-weight: 650;
-  }
-
-  button.primary {
-    border-color: var(--accent);
-    background: var(--accent);
-    color: white;
-  }
-
-  button:disabled {
-    cursor: not-allowed;
-    opacity: 0.55;
-  }
-
   @media (max-width: 47.99rem) {
     :global(.editor-surface) {
-      padding: 1rem 0;
+      padding: 0.85rem 0.75rem;
     }
 
     textarea {

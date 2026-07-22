@@ -4,6 +4,8 @@
   "compilerOptions": {
     "strict": true,
     "moduleResolution": "bundler",
+    // bits-ui ships CSS.Properties expansions that currently explode under TS 6.
+    "skipLibCheck": true,
     // Use the shipped Temporal polyfill declarations until the proposal lands;
     // TypeScript 6's esnext draft and @js-temporal/polyfill 0.5 have incompatible nominal types.
     "lib": ["ES2024", "DOM", "DOM.Iterable"],

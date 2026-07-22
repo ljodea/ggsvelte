@@ -15,6 +15,7 @@
     "@ggsvelte/examples": "workspace:*",
     "@ggsvelte/spec": "workspace:*",
     "@ggsvelte/svelte": "workspace:*",
+    "bits-ui": "^2.18.1",
     "phosphor-svelte": "^3.1.0",
     "svelte-highlight": "^7.16.0"
   },
