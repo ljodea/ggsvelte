@@ -71,14 +71,25 @@ describe("classifyChangedPaths", () => {
   test("docs-only prose does not flip package lanes", () => {
     const flags = classifyChangedPaths([
       "docs/decisions/0001-declaration-only-children.md",
-      "README.md",
+      "CONTRIBUTING.md",
     ]);
     expect(flags.spec).toBe(false);
     expect(flags.core).toBe(false);
     expect(flags.svelte).toBe(false);
     expect(flags.docs).toBe(false);
+    expect(flags.scripts).toBe(false);
     expect(flags.markdown).toBe(true);
     expect(flags.lockfile).toBe(false);
+  });
+
+  test("root README is a unit contract input (readme-showcase), not markdown-only", () => {
+    const flags = classifyChangedPaths(["README.md"]);
+    expect(flags.scripts).toBe(true);
+    expect(flags.markdown).toBe(true);
+    const plan = planJobs(flags);
+    expect(plan.unit).toBe(true);
+    expect(plan.component).toBe(false);
+    expect(plan.vr).toBe(false);
   });
 
   test("llms module siblings stay on the docs lane (pages) without forcing VR", () => {
@@ -818,6 +829,12 @@ describe("unit content inputs cover actionlint config", () => {
     ]);
     expect(paths).toContain(".github/actionlint.yaml");
     expect(JOB_CONTENT_INPUTS.unit).toContain(".github/actionlint.yaml");
+  });
+
+  test("unit includes root README.md (scripts/readme-showcase.test.ts reads it)", () => {
+    const paths = listJobContentPaths("unit", ["README.md", "scripts/readme-showcase.test.ts"]);
+    expect(paths).toContain("README.md");
+    expect(JOB_CONTENT_INPUTS.unit).toContain("README.md");
   });
 });
 
