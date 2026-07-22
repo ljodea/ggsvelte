@@ -171,6 +171,13 @@ export type {
   GuidePlan,
   TemporalAxisPlanInput,
 } from "./layout/temporal-guide.js";
+export { planBandAxis } from "./layout/band-guide.js";
+export type {
+  BandAxisPlan,
+  BandAxisPlanInput,
+  BandGuideConfig,
+  BandLabelMode,
+} from "./layout/band-guide.js";
 export { DEFAULT_LAYOUT_THEME, layout, layoutPass, marginDelta } from "./layout/layout.js";
 export type {
   AxisResult,

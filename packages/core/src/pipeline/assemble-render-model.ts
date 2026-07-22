@@ -114,6 +114,8 @@ function bandLabelAdvisories(
   const out: { code: string; path: string; chosen: string; howToOverride: string }[] = [];
   for (const plan of guidePlans) {
     if (plan.type !== "axis" || plan.scaleType !== "band") continue;
+    // Author-pinned modes are intentional — do not emit heuristic wrap/rotate advisories.
+    if (plan.bandLabelAuthorPinned === true) continue;
     const mode = plan.bandLabelMode;
     if (mode !== "wrapped" && mode !== "rotated") continue;
     const key = `${mode}:${plan.aesthetic}`;
@@ -125,13 +127,13 @@ function bandLabelAdvisories(
             code: "band-labels-wrapped",
             path: `/scales/${plan.aesthetic}`,
             chosen: "wrapped long labels onto multiple lines",
-            howToOverride: "Use shorter labels, or coordFlip() for horizontal bars.",
+            howToOverride: `Set scales.${plan.aesthetic}.guide.mode ("single"|"wrap"|"rotate"|"off") or .guide.wrap, use shorter labels, or coordFlip() for horizontal bars.`,
           }
         : {
             code: "band-labels-rotated",
             path: `/scales/${plan.aesthetic}`,
             chosen: `rotated long labels ${String(plan.bandLabelAngle ?? -90)}°`,
-            howToOverride: "coordFlip() lays categories out horizontally (one row each).",
+            howToOverride: `Set scales.${plan.aesthetic}.guide.mode ("single"|"wrap"|"rotate"|"off") or .guide.angle, or coordFlip() for horizontal category rows.`,
           },
     );
   }

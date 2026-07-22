@@ -1225,6 +1225,46 @@ export const SpecDeclarations = {
               "Explicit minor gridline positions in semantic source units. Coincident major/minor values render only the major tick. Time scales use dateMinorBreaks instead.",
           }),
         ),
+        guide: Type.Optional(
+          Type.Object(
+            {
+              mode: Type.Optional(
+                Type.Union(
+                  [
+                    Type.Literal("auto"),
+                    Type.Literal("single"),
+                    Type.Literal("wrap"),
+                    Type.Literal("rotate"),
+                    Type.Literal("off"),
+                  ],
+                  {
+                    description:
+                      'Band (categorical) axis label layout: "auto" (default — escalate single→wrap→rotate→truncate), "single", "wrap", "rotate", or "off" (hide labels). Continuous axes ignore this field.',
+                  },
+                ),
+              ),
+              angle: Type.Optional(
+                Type.Number({
+                  description:
+                    'Rotation in degrees for band labels when mode is "rotate" (or when auto escalates to rotation). Typical values: -45 or -90. Continuous axes ignore this field.',
+                }),
+              ),
+              wrap: Type.Optional(
+                Type.Number({
+                  minimum: 1,
+                  maximum: 8,
+                  description:
+                    'Maximum wrapped lines per band label when mode is "wrap" (or when auto wraps). Default 2. Continuous axes ignore this field.',
+                }),
+              ),
+            },
+            {
+              additionalProperties: false,
+              description:
+                "Optional band-axis label layout override (mirrors ggplot2 guide_axis(angle=) / discrete label wrap). Only horizontal band axes honor these fields; omit for measured auto layout.",
+            },
+          ),
+        ),
       },
       {
         additionalProperties: false,
