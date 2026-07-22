@@ -19,7 +19,7 @@ import type { PositionConversionContext } from "./temporal-position.js";
 import { preflightTemporalBindings } from "./temporal-preflight.js";
 import type { ColumnTransformConfig } from "../scales/transform.js";
 
-const DOCS = "https://ljodea.github.io/ggsvelte/guide/errors";
+const DOCS = "https://ggsvelte.sh/guide/errors";
 
 /** Up to `limit` finite semantic values that failed the transform (invalid). */
 function sampleFailingSemantic(

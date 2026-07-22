@@ -63,12 +63,11 @@ describe("deployment HTTP smoke assertions", () => {
     }
   });
 
-  it("covers the apex, exact redirects, cleanup paths, and preserved legacy benchmark", () => {
+  it("covers the apex, exact redirects, and /ggsvelte cleanup without GitHub Pages", () => {
     const plan = cutoverSmokePlan({
       apexOrigin: "https://ggsvelte.sh",
       wwwOrigin: "https://www.ggsvelte.sh",
       productionPagesOrigin: "https://ggsvelte.pages.dev",
-      legacyOrigin: "https://ljodea.github.io/ggsvelte",
       sourceCommit: "0123456789abcdef0123456789abcdef01234567",
     });
 
@@ -84,9 +83,6 @@ describe("deployment HTTP smoke assertions", () => {
       "www path and query redirect",
       "production pages.dev path and query redirect",
       "legacy-base cleanup redirect",
-      "external benchmark redirect",
-      "legacy known-route migration",
-      "legacy benchmark history",
     ]);
     expect(plan.find(({ name }) => name === "www path and query redirect")?.redirectTo).toBe(
       "https://ggsvelte.sh/guide/getting-started?from=www",
@@ -94,5 +90,9 @@ describe("deployment HTTP smoke assertions", () => {
     expect(
       plan.find(({ name }) => name === "production pages.dev path and query redirect")?.redirectTo,
     ).toBe("https://ggsvelte.sh/guide/getting-started?from=pages");
+    expect(plan.some(({ name }) => name.includes("legacy") && name.includes("benchmark"))).toBe(
+      false,
+    );
+    expect(plan.some(({ url }) => url.includes("github.io"))).toBe(false);
   });
 });

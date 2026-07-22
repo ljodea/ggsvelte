@@ -22,7 +22,7 @@ import { getScaleTransform } from "../scales/transform.js";
 import { PipelineError } from "./types.js";
 
 function docs(code: string): string {
-  return `https://ljodea.github.io/ggsvelte/guide/errors#${code}`;
+  return `https://ggsvelte.sh/guide/errors#${code}`;
 }
 
 export function assertScaleConfiguration(

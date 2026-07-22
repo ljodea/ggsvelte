@@ -227,8 +227,11 @@ export function validateDeploymentArtifact(
     if (/^https:\/\/\S+\s+/m.test(redirects)) {
       problems.push("_redirects must not contain unsupported domain-level source URLs");
     }
-    if (!redirects.includes("/bench/* https://ljodea.github.io/ggsvelte/bench/:splat 302")) {
-      problems.push("_redirects is missing the fixed legacy benchmark redirect");
+    if (redirects.includes("ljodea.github.io") || redirects.includes("github.io/ggsvelte")) {
+      problems.push("_redirects must not send traffic to GitHub Pages");
+    }
+    if (/^\/bench(?:\s|\/\*)/m.test(redirects)) {
+      problems.push("_redirects must not preserve /bench GitHub Pages history redirects");
     }
     if (expected.buildMode === "cloudflare-production") {
       if (!redirects.includes("/ggsvelte/* https://ggsvelte.sh/:splat 301")) {

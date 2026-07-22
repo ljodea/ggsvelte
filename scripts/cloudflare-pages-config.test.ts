@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 interface PagesConfig {
@@ -91,18 +91,16 @@ describe("Cloudflare Pages project contract", () => {
     expect(workflow).not.toContain("pull_request:");
   });
 
-  it("keeps the legacy host full until the explicit migration gate", () => {
-    const workflow = readFileSync(join(ROOT, ".github", "workflows", "pages.yml"), "utf8");
-    expect(workflow).toContain("DOCS_BUILD_MODE: ${{ vars.DOCS_LEGACY_MODE || 'legacy-full' }}");
-    expect(workflow).toContain("if: env.DOCS_BUILD_MODE == 'legacy-migration'");
-    expect(workflow).toContain("bun scripts/legacy-migration.ts");
-    expect(workflow).toContain("bun scripts/legacy-artifact.ts");
-    expect(workflow.indexOf("git archive --format=tar origin/gh-pages bench")).toBeLessThan(
-      workflow.indexOf("bun scripts/legacy-artifact.ts"),
-    );
+  it("does not keep a GitHub Pages deployment workflow or legacy migration scripts", () => {
+    expect(existsSync(join(ROOT, ".github", "workflows", "pages.yml"))).toBe(false);
+    expect(existsSync(join(ROOT, "scripts", "legacy-migration.ts"))).toBe(false);
+    expect(existsSync(join(ROOT, "scripts", "legacy-artifact.ts"))).toBe(false);
+    expect(existsSync(join(ROOT, "scripts", "legacy-routes.ts"))).toBe(false);
+    expect(existsSync(join(ROOT, "scripts", "gen-legacy-routes.ts"))).toBe(false);
+    expect(existsSync(join(ROOT, "apps", "docs", "deployment", "legacy-routes.json"))).toBe(false);
   });
 
-  it("keeps mutable benchmark fetching out of the Cloudflare build command", () => {
+  it("keeps GitHub Pages and mutable benchmark history out of the Cloudflare build command", () => {
     const rootPackage = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8")) as {
       scripts: Record<string, string>;
     };
@@ -110,5 +108,6 @@ describe("Cloudflare Pages project contract", () => {
     expect(command).toContain("bun scripts/deployment-artifact.ts");
     expect(command).not.toContain("gh-pages");
     expect(command).not.toContain("git fetch");
+    expect(command).not.toContain("legacy");
   });
 });
