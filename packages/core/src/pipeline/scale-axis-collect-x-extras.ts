@@ -19,8 +19,9 @@ export function collectXOutliersAndIntercepts(frame: LayerFrame, acc: AxisCollec
       converted.decision.status === "temporal" ||
       (conversion.parser !== "auto" && Number.isFinite(numeric));
     // Annotation-only axes never enter mapped-field temporal.decisions, so
-    // reject temporal intercepts under a non-identity transform here.
-    if (temporal) {
+    // reject temporal intercepts under a non-identity transform here — but
+    // respect forced-linear axes (year-like strings stay quantitative).
+    if (temporal && !conversion.forcedNonTemporal) {
       assertInferredTemporalTransform(
         "x",
         frame.binding.xTransform === undefined

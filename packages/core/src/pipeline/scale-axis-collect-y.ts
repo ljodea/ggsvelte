@@ -80,7 +80,7 @@ export function collectAxisInputsY(frame: LayerFrame, acc: AxisCollectAcc): void
     const temporal =
       converted.decision.status === "temporal" ||
       (yConversion.parser !== "auto" && Number.isFinite(numeric));
-    if (temporal) {
+    if (temporal && !yConversion.forcedNonTemporal) {
       assertInferredTemporalTransform(
         "y",
         binding.yTransform === undefined
