@@ -487,10 +487,19 @@ jobs:
       # --coverage: @vitest/coverage-v8 needs Node inspector Coverage APIs that
       # bun does not implement ("Coverage APIs are not supported"). Local
       # `test:coverage` can still collect SSR lcov under node for offline use.
+      #
+      # One shell retry: vitest `retry` only re-runs failed *tests*, not suite
+      # import / iframe / coverage-v8 dynamic-import harness failures (PR #440).
       - name: component tests (packages/svelte, chromium + coverage)
         if: steps.content_hash.outputs.hit != 'true'
         working-directory: packages/svelte
-        run: bunx --bun vitest run --coverage --project chromium
+        run: |
+          set -euo pipefail
+          if bunx --bun vitest run --coverage --project chromium; then
+            exit 0
+          fi
+          echo "::warning::chromium+coverage failed once; retrying once for browser harness flake"
+          bunx --bun vitest run --coverage --project chromium
       - name: component tests (packages/svelte, firefox + webkit)
         if: steps.content_hash.outputs.hit != 'true'
         working-directory: packages/svelte

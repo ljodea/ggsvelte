@@ -19,6 +19,13 @@ export default defineConfig({
     include: ["tests/**/*.test.ts"],
     exclude: ["tests/**/*.ssr.test.ts"],
     retry: process.env.CI === "true" ? 1 : 0,
+    // Keep per-file isolate (selection-state and friends rely on clean module
+    // state). Cap concurrent browser workers in CI so GH-hosted runners do not
+    // open dozens of isolated iframes under coverage-v8, which flakes as:
+    //   - Failed to fetch dynamically imported module (...test.ts / coverage-v8/browser)
+    //   - Cannot connect to the iframe
+    // (Storybook vitest-addon CI FAQ; seen on Version Packages #440).
+    maxWorkers: process.env.CI === "true" ? 2 : undefined,
     // Opt-in via --coverage. Browser collection runs on Chromium only
     // (v8-over-CDP); invoke with --project chromium so firefox/webkit
     // are not asked to report coverage.
