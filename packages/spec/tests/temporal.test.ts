@@ -321,6 +321,48 @@ describe("value-driven temporal inference", () => {
       status: "nominal",
     });
   });
+
+  /**
+   * Regression for O(1)-memory sampling (#analyzeNonNull): number/boolean or
+   * mixed non-Date values outside the 64-value head/tail sample must still
+   * force nominal / full-column invalidation (full-column facts, not sample).
+   */
+  it("rejects number/boolean and mixed Date noise outside the head/tail sample window", () => {
+    const years = Array.from({ length: 200 }, (_, index) => `${1800 + index}`);
+    years[100] = 42 as unknown as string;
+    expect(inferTemporalColumn(years)).toMatchObject({
+      status: "nominal",
+      nonNullCount: 200,
+    });
+
+    const iso = Array.from(
+      { length: 200 },
+      (_, index) => `2024-01-${String((index % 28) + 1).padStart(2, "0")}`,
+    );
+    iso[100] = true as unknown as string;
+    expect(inferTemporalColumn(iso)).toMatchObject({ status: "nominal" });
+
+    const dates = Array.from(
+      { length: 200 },
+      (_, index) => new Date(Date.UTC(2024, 0, (index % 28) + 1)),
+    );
+    dates[100] = "not-a-date" as unknown as Date;
+    // Native Date column with an off-sample non-Date fails whole-column validation.
+    expect(inferTemporalColumn(dates).status).toBe("invalid");
+  });
+
+  it("keeps head/tail sample evidence for large temporal columns", () => {
+    const values = Array.from({ length: 200 }, (_, index) => `${1900 + index}`);
+    const decision = inferTemporalColumn(values);
+    expect(decision).toMatchObject({
+      status: "temporal",
+      parser: "year",
+      nonNullCount: 200,
+      validatedCount: 200,
+    });
+    expect(decision.evidence[0]).toBe("1900");
+    expect(decision.evidence).toHaveLength(8);
+  });
 });
 
 describe("temporal authoring helpers and parser identity", () => {

@@ -78,10 +78,43 @@ function evidenceValue(value: unknown): string | number | boolean | null {
   return JSON.stringify(value) ?? "unsupported value";
 }
 
-function representativeNonNull(values: readonly unknown[]): unknown[] {
-  const nonNull = values.filter((value) => value !== null && value !== undefined);
-  if (nonNull.length <= 64) return nonNull;
-  return [...nonNull.slice(0, 32), ...nonNull.slice(-32)];
+/**
+ * One full-column pass: non-null count, full-column number/boolean detection
+ * (not sample-relative), and a representative sample of at most 64 non-null
+ * values (all when ≤64; otherwise first 32 + last 32). Avoids allocating an
+ * O(n) non-null array just to take a bounded sample.
+ */
+function analyzeNonNull(values: readonly unknown[]): {
+  sample: unknown[];
+  nonNullCount: number;
+  sawNumberOrBoolean: boolean;
+} {
+  let nonNullCount = 0;
+  let sawNumberOrBoolean = false;
+  const head: unknown[] = [];
+  const ring: unknown[] = Array.from({ length: 32 });
+  let ringWrite = 0;
+  let ringLen = 0;
+
+  for (const value of values) {
+    if (value === null || value === undefined) continue;
+    nonNullCount++;
+    if (typeof value === "number" || typeof value === "boolean") sawNumberOrBoolean = true;
+    if (head.length < 64) head.push(value);
+    ring[ringWrite] = value;
+    ringWrite = (ringWrite + 1) % 32;
+    if (ringLen < 32) ringLen++;
+  }
+
+  if (nonNullCount <= 64) {
+    return { sample: head, nonNullCount, sawNumberOrBoolean };
+  }
+
+  const first = head.slice(0, 32);
+  const last: unknown[] = [];
+  // When full, ringWrite points at the oldest slot.
+  for (let i = 0; i < 32; i++) last.push(ring[(ringWrite + i) % 32]);
+  return { sample: [...first, ...last], nonNullCount, sawNumberOrBoolean };
 }
 
 const AUTO_ORDERED_PARSERS = TEMPORAL_PARSER_NAMES.filter((parser): parser is TemporalParserName =>
@@ -119,18 +152,17 @@ function nominalDecision(
   status: TemporalDecision["status"],
   values: readonly unknown[],
   candidates: readonly string[] = [],
+  analyzed?: ReturnType<typeof analyzeNonNull>,
 ): TemporalDecision {
-  const nonNull = values.filter((value) => value !== null && value !== undefined);
+  const { sample, nonNullCount } = analyzed ?? analyzeNonNull(values);
   return {
     status,
     parser: null,
     parserKey: `auto:${status}`,
     kind: null,
     precision: null,
-    evidence: representativeNonNull(values)
-      .slice(0, 8)
-      .map((value) => evidenceValue(value)),
-    nonNullCount: nonNull.length,
+    evidence: sample.slice(0, 8).map((value) => evidenceValue(value)),
+    nonNullCount,
     validatedCount: 0,
     failedCount: 0,
     candidates,
@@ -142,19 +174,18 @@ function inferTemporalColumnInternal(
   options: TemporalParseOptions = {},
   onSuccess?: (index: number, epochMs: number) => void,
 ): TemporalDecision {
-  const nonNull = values.filter((value) => value !== null && value !== undefined);
-  if (nonNull.length === 0) return nominalDecision("nominal", values);
-  if (nonNull.some((value) => typeof value === "number" || typeof value === "boolean")) {
-    return nominalDecision("nominal", values);
-  }
-  const sample = representativeNonNull(values);
+  const analyzed = analyzeNonNull(values);
+  if (analyzed.nonNullCount === 0) return nominalDecision("nominal", values, [], analyzed);
+  // Full-column fact (not sample-relative): any number/boolean forces nominal.
+  if (analyzed.sawNumberOrBoolean) return nominalDecision("nominal", values, [], analyzed);
+  const { sample, nonNullCount } = analyzed;
   if (sample.some((value) => !(value instanceof Date) && typeof value !== "string")) {
-    return nominalDecision("nominal", values);
+    return nominalDecision("nominal", values, [], analyzed);
   }
   const candidates = candidateParsers(sample, options);
   const allDates = sample.every((value) => value instanceof Date);
-  if (!allDates && candidates.length === 0) return nominalDecision("nominal", values);
-  if (candidates.length > 1) return nominalDecision("ambiguous", values, candidates);
+  if (!allDates && candidates.length === 0) return nominalDecision("nominal", values, [], analyzed);
+  if (candidates.length > 1) return nominalDecision("ambiguous", values, candidates, analyzed);
 
   const parser = allDates ? null : candidates[0]!;
   let validatedCount = 0;
@@ -180,10 +211,10 @@ function inferTemporalColumnInternal(
     kind = kind === "datetime" || parsed.kind === "datetime" ? "datetime" : "date";
     precision = finestPrecision(precision, parsed.precision);
   }
-  const failedCount = nonNull.length - validatedCount;
+  const failedCount = nonNullCount - validatedCount;
   if (failedCount > 0) {
     return {
-      ...nominalDecision("invalid", values, parser === null ? ["native-date"] : [parser]),
+      ...nominalDecision("invalid", values, parser === null ? ["native-date"] : [parser], analyzed),
       parser,
       parserKey: `auto:${parser ?? "native-date"}:invalid`,
       validatedCount,
@@ -198,7 +229,7 @@ function inferTemporalColumnInternal(
     kind: kind ?? "datetime",
     precision: precision ?? "millisecond",
     evidence: sample.slice(0, 8).map((value) => evidenceValue(value)),
-    nonNullCount: nonNull.length,
+    nonNullCount,
     validatedCount,
     failedCount: 0,
     candidates: parser === null ? ["native-date"] : [parser],
@@ -237,10 +268,12 @@ export function parseTemporalColumn(
   let kind: TemporalKind | null = null;
   let precision: TemporalPrecision | null = null;
   const failures: TemporalFailure[] = [];
+  const evidence: (string | number | boolean | null)[] = [];
   for (let index = 0; index < values.length; index++) {
     const value = values[index];
     if (value === null || value === undefined) continue;
     nonNullCount++;
+    if (evidence.length < 8) evidence.push(evidenceValue(value));
     const result = parseTemporal(value, parser, options);
     if (!result.ok) {
       if (failures.length < 5)
@@ -264,9 +297,7 @@ export function parseTemporalColumn(
       parserKey,
       kind: kind ?? null,
       precision: precision ?? null,
-      evidence: representativeNonNull(values)
-        .slice(0, 8)
-        .map((value) => evidenceValue(value)),
+      evidence,
       nonNullCount,
       validatedCount,
       failedCount,
