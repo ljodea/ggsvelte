@@ -2,6 +2,7 @@
  * Scene-level SVG assembly: panel chrome + sceneLabel + sceneToSVGString.
  * Chrome helpers stay file-private (only used by sceneToSVGString).
  */
+import { groupBatchesByPanel } from "./group-batches-by-panel.js";
 import type { Scene, SceneLegend, ScenePanel } from "./scene.js";
 import { STRIP_BAND } from "./scene.js";
 import { LEGEND_ROW_HEIGHT } from "./legend.js";
@@ -276,6 +277,10 @@ export function sceneToSVGString(scene: Scene): string {
     )
     .join("");
   parts.push(`<defs>${clips}</defs>`);
+  // One O(P+B) panel→batch index (issue #185) instead of re-scanning all
+  // batches per panel (O(P·B)). Bucket order preserves original batch list
+  // order within each panel.
+  const { byPanel } = groupBatchesByPanel(scene.panels.length, scene.batches, false);
   for (let i = 0; i < scene.panels.length; i++) {
     const p = scene.panels[i]!;
     parts.push(
@@ -286,9 +291,7 @@ export function sceneToSVGString(scene: Scene): string {
       renderGrid(p, theme),
       `<g class="gg-marks"${p.clip === false ? "" : ` clip-path="url(#gg-clip-${i})"`}>`,
     );
-    for (const batch of scene.batches) {
-      if (batch.panelIndex === i) parts.push(renderBatch(batch, theme));
-    }
+    for (const batch of byPanel[i]!) parts.push(renderBatch(batch, theme));
     parts.push("</g>");
     if (theme.showPanelBorder) {
       parts.push(
