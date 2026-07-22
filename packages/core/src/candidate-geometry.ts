@@ -44,6 +44,7 @@ export function isCandidatePrimitive(batch: GeometryBatch, primitiveIndex: numbe
 }
 
 export function candidatePrimitiveCount(batch: GeometryBatch): number {
+  if (batch.kind === "paths" && batch.candidates === false) return 0;
   if (batch.kind !== "paths" || batch.semanticAnchors === undefined) return primitiveCount(batch);
   let count = 0;
   for (const anchor of batch.semanticAnchors) if (anchor !== 0) count++;

@@ -1,0 +1,40 @@
+{
+  "id": "54-interval-ribbon",
+  "kind": "chart",
+  "prompt": "Draw a filled ribbon showing the lower and upper bounds of a confidence interval for mean response over time (x = week, ymin = lo, ymax = hi).",
+  "dataProfile": {
+    "fields": [
+      { "name": "week", "type": "quantitative" },
+      { "name": "lo", "type": "quantitative" },
+      { "name": "hi", "type": "quantitative" }
+    ],
+    "rowCount": 6
+  },
+  "data": {
+    "main": [
+      { "week": 1, "lo": 1.2, "hi": 2.1 },
+      { "week": 2, "lo": 1.5, "hi": 2.4 },
+      { "week": 3, "lo": 1.8, "hi": 2.8 },
+      { "week": 4, "lo": 1.6, "hi": 2.6 },
+      { "week": 5, "lo": 1.9, "hi": 2.9 },
+      { "week": 6, "lo": 2.0, "hi": 3.1 }
+    ]
+  },
+  "gold": {
+    "edition": 2,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "ribbon",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "week" },
+          "ymin": { "field": "lo" },
+          "ymax": { "field": "hi" }
+        }
+      }
+    ]
+  },
+  "notes": "Canonical geom_ribbon: precomputed lower/upper bounds along x; not a zero-baseline area."
+}

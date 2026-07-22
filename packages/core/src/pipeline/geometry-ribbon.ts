@@ -78,10 +78,6 @@ function orientationOf(frame: LayerFrame): "x" | "y" {
   return frame.binding.ribbonOrientation ?? ribbonParams(frame).orientation ?? "x";
 }
 
-function runningNumeric(frame: LayerFrame, orientation: "x" | "y"): Float64Array | null {
-  return orientation === "x" ? frame.xNumeric : frame.yNumeric;
-}
-
 function lowerBound(frame: LayerFrame, orientation: "x" | "y"): Float64Array | null {
   return orientation === "x" ? frame.ymin : frame.xmin;
 }
@@ -127,10 +123,12 @@ function finiteRibbonRuns(
   orientation: "x" | "y",
   warnings: PipelineWarning[],
 ): RibbonRun[] {
-  const run = runningNumeric(frame, orientation);
   const lo = lowerBound(frame, orientation);
   const hi = upperBound(frame, orientation);
-  if (run === null || lo === null || hi === null) return [];
+  // Band running axes leave xNumeric/yNumeric null; projection uses values.
+  if (lo === null || hi === null) return [];
+  if (orientation === "x" && frame.xNumeric === null && frame.xValues === null) return [];
+  if (orientation === "y" && frame.yNumeric === null && frame.yValues === null) return [];
 
   // Bucket by group without requiring the orthogonal axis.
   const byGroup = new Map<number, number[]>();
@@ -154,17 +152,11 @@ function finiteRibbonRuns(
     const group = frame.groups[rows[0]!]!;
     let current: number[] = [];
     for (const row of rows) {
-      const r = run[row]!;
       const a = lo[row]!;
       const b = hi[row]!;
-      // Also require the running coord to project (band rank / continuous).
+      // Require bounds finite and the running coord to project (band or continuous).
       const runningPx = projectRunning(frame, fx, orientation, row);
-      if (
-        !Number.isFinite(r) ||
-        !Number.isFinite(a) ||
-        !Number.isFinite(b) ||
-        !Number.isFinite(runningPx)
-      ) {
+      if (!Number.isFinite(a) || !Number.isFinite(b) || !Number.isFinite(runningPx)) {
         removed++;
         if (current.length >= 2) runs.push({ rows: current, group });
         current = [];
@@ -430,6 +422,31 @@ export function ribbonBatches(
       edge: outline,
       strokeOf,
     });
+    // "both" emits two subpaths per run — repeat style vectors to match.
+    const edgeCount = outline === "both" ? 2 : 1;
+    const expand = <T>(values: T[] | Float32Array | Uint8Array | undefined) => {
+      if (values === undefined || edgeCount === 1) return values;
+      if (values instanceof Float32Array) {
+        const expanded = new Float32Array(values.length * edgeCount);
+        for (let i = 0; i < values.length; i++) {
+          for (let e = 0; e < edgeCount; e++) expanded[i * edgeCount + e] = values[i]!;
+        }
+        return expanded;
+      }
+      if (values instanceof Uint8Array) {
+        const expanded = new Uint8Array(values.length * edgeCount);
+        for (let i = 0; i < values.length; i++) {
+          for (let e = 0; e < edgeCount; e++) expanded[i * edgeCount + e] = values[i]!;
+        }
+        return expanded;
+      }
+      const expanded: T[] = [];
+      for (const value of values) for (let e = 0; e < edgeCount; e++) expanded.push(value);
+      return expanded;
+    };
+    const outlineLinewidths = expand(linewidths);
+    const outlineAlphas = expand(alphas);
+    const outlineLinetypes = expand(linetypeIndexes);
     // Open outline batches are presentation-only (no candidate duplication).
     out.push({
       kind: "paths",
@@ -441,16 +458,16 @@ export function ribbonBatches(
       pathOffsets: open.pathOffsets,
       strokes: open.strokes,
       linewidth: outlineWidth,
-      ...(linewidths !== undefined && { linewidths }),
+      ...(outlineLinewidths !== undefined && { linewidths: outlineLinewidths as Float32Array }),
       alpha:
-        alphas === undefined
+        outlineAlphas === undefined
           ? typeof literalAlpha === "number"
             ? literalAlpha
             : (params.alpha ?? 1)
           : 1,
-      ...(alphas !== undefined && { alphas }),
+      ...(outlineAlphas !== undefined && { alphas: outlineAlphas as Float32Array }),
       ...(typeof literalLinetype === "string" && { linetype: literalLinetype as Linetype }),
-      ...(linetypeIndexes !== undefined && { linetypeIndexes }),
+      ...(outlineLinetypes !== undefined && { linetypeIndexes: outlineLinetypes as Uint8Array }),
       linecap,
       linejoin,
       curve: "linear",

@@ -86,15 +86,29 @@ export function resolveLayerPositionChannels(input: {
     ...(ribbonOrientation !== undefined && { ribbonOrientation }),
   });
 
+  // When orientation is pinned, drop the inactive bound pair so scale training
+  // does not train the measure axis from unused interval channels.
+  let outYmin = yminField;
+  let outYmax = ymaxField;
+  let outXmin = xminField;
+  let outXmax = xmaxField;
+  if (ribbonOrientation === "x") {
+    outXmin = null;
+    outXmax = null;
+  } else if (ribbonOrientation === "y") {
+    outYmin = null;
+    outYmax = null;
+  }
+
   return {
     ruleForm,
     xField,
     yField,
     yStatColumn,
-    yminField,
-    ymaxField,
-    xminField,
-    xmaxField,
+    yminField: outYmin,
+    ymaxField: outYmax,
+    xminField: outXmin,
+    xmaxField: outXmax,
     ...(ribbonOrientation !== undefined && { ribbonOrientation }),
   };
 }
