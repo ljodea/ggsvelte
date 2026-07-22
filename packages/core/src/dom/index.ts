@@ -10,7 +10,7 @@
 //
 // Implementation split (same package surface):
 //   canvas-dom.ts   — cssColorResolver / sizeCanvasForDpr / drawClippedToPanel
-//   canvas-marks.ts — mark drawers + drawBatch + focus mask helpers
+//   canvas-marks*.ts — mark drawers by kind + drawBatch + focus mask helpers
 //   canvas.ts       — groupBatchesByPanel + drawStratum
 
 export { cssColorResolver, drawClippedToPanel, sizeCanvasForDpr } from "./canvas-dom.js";
