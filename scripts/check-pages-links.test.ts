@@ -24,6 +24,7 @@ describe("packed Pages link checks", () => {
     "guide/upgrading.html",
     "playground.html",
     "themes.html",
+    "interactions.html",
     "reference/interactions.html",
     "reference/cli.html",
     "examples/interaction/tooltip.html",
@@ -119,6 +120,7 @@ describe("packed Pages link checks", () => {
     expect(requiredPages).toContain("reference.html");
     expect(requiredPages).toContain("playground.html");
     expect(requiredPages).toContain("themes.html");
+    expect(requiredPages).toContain("interactions.html");
     expect(requiredPages).toContain("reference/interactions.html");
     expect(requiredPages).toContain("reference/cli.html");
     expect(requiredPages).toContain("guide/interaction-reference.html");

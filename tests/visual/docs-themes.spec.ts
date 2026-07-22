@@ -92,10 +92,10 @@ test("chart theme stays separate until follow-docs appearance is explicit", asyn
   await expect.poll(chartPaper).toBe("var(--gg-paper, #d5e4eb)");
 });
 
-test("categorical schemes show exact ordered colors and explicit behavior", async ({ page }) => {
+test("categorical palettes show exact ordered colors and reverse", async ({ page }) => {
   await page.goto("/themes?theme=light");
 
-  const region = page.getByRole("region", { name: "Categorical color schemes" });
+  const region = page.getByRole("region", { name: "Categorical palettes" });
   const cards = region.getByRole("list", { name: "Categorical palettes" }).locator(":scope > li");
   await expect(cards).toHaveCount(5);
   await expect(cards.getByRole("heading", { level: 3 })).toHaveText([
@@ -105,7 +105,7 @@ test("categorical schemes show exact ordered colors and explicit behavior", asyn
     "Tableau 10",
     "Colorblind",
   ]);
-  await expect(cards.getByText(/colors$/)).toHaveText([
+  await expect(cards.locator(".capacity")).toHaveText([
     "10 colors",
     "9 colors",
     "8 colors",
@@ -131,7 +131,7 @@ test("categorical schemes show exact ordered colors and explicit behavior", asyn
   const firstMark = observable.locator(".gg-points circle").first();
   await expect(firstMark).toHaveAttribute("fill", "#4269d0");
 
-  await region.getByRole("checkbox", { name: "Reverse palettes" }).check();
+  await region.getByRole("checkbox", { name: "Reverse" }).check();
   const reversedSwatches = observable
     .getByRole("list", { name: "Observable 10 ordered colors" })
     .getByRole("listitem");
@@ -145,24 +145,6 @@ test("categorical schemes show exact ordered colors and explicit behavior", asyn
   await expect(firstMark).toHaveAttribute("fill", "#9498a0");
 });
 
-test("palette limits expose real warnings and caught failures", async ({ page }) => {
-  await page.goto("/themes?theme=light");
-
-  const demo = page.getByRole("region", { name: "Palette limits" });
-  await expect(demo.getByText("scale-scheme-type", { exact: true })).toBeVisible();
-  await expect(demo.getByText("palette-exhausted", { exact: true })).toBeVisible();
-  await expect(demo.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true");
-  const marks = demo.locator(".gg-points circle");
-  await expect(marks).toHaveCount(3);
-  await expect(marks.nth(0)).toHaveAttribute("fill", "#123456");
-  await expect(marks.nth(2)).toHaveAttribute("fill", "#123456");
-
-  await demo.getByLabel("Exhaustion behavior").selectOption("error");
-  await expect(demo.getByRole("alert")).toContainText("Palette exhausted");
-  await expect(demo.getByText("/scales/color", { exact: true })).toBeVisible();
-  await expect(demo.locator(".gg-plot-root")).toHaveCount(0);
-});
-
 test("sequential color compares direction, custom stops, and a pinned domain", async ({ page }) => {
   await page.goto("/themes?theme=light");
 
@@ -173,7 +155,7 @@ test("sequential color compares direction, custom stops, and a pinned domain", a
   await expect(cards).toHaveCount(4);
   await expect(cards.getByRole("heading", { level: 3 })).toHaveText([
     "Viridis",
-    "Reversed viridis",
+    "Reversed",
     "Custom range",
     "Pinned domain",
   ]);
@@ -194,44 +176,6 @@ test("sequential color compares direction, custom stops, and a pinned domain", a
   await expect(cards.nth(1).locator(".copy-code code")).toContainText("reverse: true");
   await expect(cards.nth(2).locator(".copy-code code")).toContainText('range: ["#2d1e2f"');
   await expect(cards.nth(3).locator(".copy-code code")).toContainText("domain: [0, 100]");
-});
-
-test("custom interaction theme preserves linked emphasis across SVG and canvas", async ({
-  page,
-}) => {
-  await page.setViewportSize({ width: 1280, height: 900 });
-  await page.goto("/themes?theme=light");
-
-  const region = page.getByRole("region", { name: "Custom interaction theme" });
-  const plots = region.locator(".gg-plot-root");
-  await expect(region.locator(".copy-code code")).toContainText(
-    'import { createPlotInteraction, GGPlot, type ThemeSpec } from "@ggsvelte/svelte"',
-  );
-  await expect(region.locator(".copy-code code")).toContainText("satisfies ThemeSpec");
-  await expect(region.locator(".copy-code code")).toContainText(
-    'layers={[{ geom: "point", params: { size: 4 } }]}',
-  );
-  await expect(plots).toHaveCount(2);
-  await expect(plots.nth(0).locator("svg.gg-plot")).toBeVisible();
-  await expect(plots.nth(1).locator("canvas")).toBeVisible();
-  const alphaMarks = plots.nth(0).locator('.gg-points circle[fill="#4269d0"]');
-  await expect(alphaMarks).toHaveCount(3);
-
-  await plots.nth(0).getByRole("button", { name: "Series: Alpha (color legend)" }).click();
-  await expect(region.getByText("3 rows emphasized", { exact: true })).toBeVisible();
-  await expect(plots.nth(0).locator('circle[data-gg-focused="false"]').first()).toHaveAttribute(
-    "opacity",
-    "0.18",
-  );
-
-  await region.getByLabel("Interaction chart paper").selectOption("dark");
-  await expect(region.getByText("3 rows emphasized", { exact: true })).toBeVisible();
-  await expect(alphaMarks).toHaveCount(3);
-  await page.getByRole("button", { name: "Dark appearance" }).click();
-  await expect(region.getByText("3 rows emphasized", { exact: true })).toBeVisible();
-
-  await region.getByRole("button", { name: "Clear shared state" }).click();
-  await expect(region.getByText("0 rows emphasized", { exact: true })).toBeVisible();
 });
 
 for (const width of [375, 768, 1024, 1280, 1600]) {
@@ -256,26 +200,31 @@ test("themes controls remain legible in forced colors with reduced motion", asyn
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 
-test("inspection overlays stay local and use custom interaction roles", async ({ page }) => {
-  await page.goto("/themes?theme=light");
+test("interactions is a first-class route with a single live chart", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto("/interactions?theme=light");
+  await expect(
+    page.getByRole("navigation", { name: "Primary" }).getByRole("link", { name: "Interactions" }),
+  ).toHaveAttribute("aria-current", "page");
 
-  const region = page.getByRole("region", { name: "Custom interaction theme" });
-  const plots = region.locator(".gg-plot-root");
-  const svgPlot = plots.nth(0);
-  const canvasPlot = plots.nth(1);
-  const toolbar = svgPlot.getByRole("toolbar", { name: "Chart interaction tools" });
-  await expect(toolbar.locator(".gg-tool-modes").getByRole("button")).toHaveText([
-    "Inspect",
-    "Select area",
-    "Zoom area",
-  ]);
+  const demo = page.getByRole("region", { name: "Interaction demo" });
+  await expect(demo.locator(".gg-plot-root")).toHaveCount(1);
+  await expect(demo.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true");
+  await expect(demo.locator(".copy-code code")).toContainText("createPlotInteraction");
+  await expect(demo.locator(".copy-code code")).toContainText(
+    'select={{ type: "interval", mode: "xy" }}',
+  );
 
-  const capture = svgPlot.locator(".gg-capture");
-  await capture.focus();
-  await expect(capture).toHaveCSS("outline-color", "rgb(230, 57, 70)");
-  await capture.press("ArrowRight");
-  await expect(svgPlot.locator(".gg-tooltip")).toBeVisible();
-  await expect(svgPlot.locator(".gg-crosshair")).not.toHaveCount(0);
-  await expect(canvasPlot.locator(".gg-tooltip")).toHaveCount(0);
-  await expect(canvasPlot.locator(".gg-crosshair")).toHaveCount(0);
+  await demo.getByRole("button", { name: "Series: Alpha (color legend)" }).click();
+  await expect(demo.getByText(/3 emphasized/)).toBeVisible();
+  await demo.getByRole("button", { name: "Clear" }).click();
+  await expect(demo.getByText(/0 emphasized/)).toBeVisible();
+});
+
+test("interactions has no horizontal overflow at 1280px", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto("/interactions?theme=light");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
+    true,
+  );
 });

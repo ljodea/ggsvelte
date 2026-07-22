@@ -316,8 +316,11 @@ scales={{ color: { type: "ordinal", scheme: "observable10" } }}
 \`\`\`
 
 Stable assignments preserve category identity as rows filter or reorder. See
-all registered schemes, capacities, and exhaustion behavior on
-[Themes and color](/themes).
+registered schemes and capacities on
+[Themes and color](/themes). Palette exhaustion is
+\`onExhaust: "cycle"\` (default, warn once) or \`"error"\` — diagnostics at
+[palette-exhausted](/guide/errors#palette-exhausted) and
+[palette-exhausted — warning](/guide/errors#palette-exhausted-warning).
 
 ## Continuous, binned, manual, and identity color
 
@@ -479,8 +482,9 @@ Registered theme name; mappings unchanged:
 theme="economist"
 \`\`\`
 
-Twelve themes, categorical schemes, sequential ramps, exhaustion:
-[Themes and color](/themes).
+Twelve themes, categorical palettes, sequential ramps:
+[Themes and color](/themes). Exhaustion:
+[palette-exhausted](/guide/errors#palette-exhausted).
 
 ## Preserve color meaning
 

@@ -54,8 +54,8 @@
       "entry": ["src/routes/**/+*.ts", "src/lib/**/*.ts"],
       "project": ["src/**/*.ts", "*.{js,ts}"],
       // Imported only from .svelte files / the $examples alias, which knip
-      // does not trace. phosphor-svelte is deep-imported only from .svelte.
-      "ignoreDependencies": ["@ggsvelte/examples", "phosphor-svelte"],
+      // does not trace. phosphor-svelte / bits-ui are deep-imported only from .svelte.
+      "ignoreDependencies": ["@ggsvelte/examples", "phosphor-svelte", "bits-ui"],
     },
   },
 }

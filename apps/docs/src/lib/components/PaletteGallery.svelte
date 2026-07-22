@@ -6,30 +6,24 @@
   let paperTheme = $state<"light" | "dark">("light");
 </script>
 
-<section class="palette-gallery" aria-label="Categorical color schemes">
+<section class="palette-gallery" aria-label="Categorical palettes">
   <header class="section-heading">
     <div>
       <p class="eyebrow">Categorical</p>
-      <h2>Named schemes</h2>
+      <h2>Palettes</h2>
     </div>
-    <div>
-      <p>
-        Stable category colors across themes. Capacity is the point at which
-        colors repeat under cycle, or fail under error.
-      </p>
-      <div class="controls">
-        <div class="select-control">
-          <label for="palette-paper">Chart paper</label>
-          <select id="palette-paper" bind:value={paperTheme}>
-            <option value="light">Light</option>
-            <option value="dark">Dark</option>
-          </select>
-        </div>
-        <label class="check-control">
-          <input type="checkbox" bind:checked={reverse} />
-          <span>Reverse palettes</span>
-        </label>
+    <div class="controls">
+      <div class="select-control">
+        <label for="palette-paper">Chart paper</label>
+        <select id="palette-paper" bind:value={paperTheme}>
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
       </div>
+      <label class="check-control">
+        <input type="checkbox" bind:checked={reverse} />
+        <span>Reverse</span>
+      </label>
     </div>
   </header>
 
@@ -51,7 +45,7 @@
 
 <style>
   .palette-gallery {
-    padding-block: clamp(4rem, 9vw, 8rem);
+    padding-block: clamp(2.5rem, 6vw, 4.5rem);
     border-top: 1px solid var(--line);
   }
 
@@ -65,32 +59,27 @@
   }
 
   .section-heading {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 0.55fr);
-    gap: clamp(2rem, 7vw, 7rem);
+    display: flex;
+    flex-wrap: wrap;
     align-items: end;
+    justify-content: space-between;
+    gap: 1rem 2rem;
     min-width: 0;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
   }
 
   h2 {
-    max-width: min(12ch, 100%);
-    min-width: 0;
-    margin: 0.25rem 0 0;
-    overflow-wrap: anywhere;
-    font-size: clamp(2.5rem, 5vw, 4.75rem);
-    line-height: 0.94;
-  }
-
-  .section-heading > div:last-child > p {
-    color: var(--muted);
+    margin: 0.2rem 0 0;
+    font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+    line-height: 1;
+    letter-spacing: -0.02em;
   }
 
   .controls {
-    display: grid;
-    grid-template-columns: minmax(9rem, 1fr) minmax(10rem, 1fr);
-    gap: 0.75rem;
-    margin-top: 1.25rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 1.25rem;
+    align-items: end;
   }
 
   .select-control {
@@ -101,9 +90,10 @@
   }
 
   select {
+    min-width: 9rem;
     min-height: 44px;
     padding: 0.6rem;
-    border: 1px solid var(--line-strong);
+    border: 1px solid var(--line-strong, var(--line));
     border-radius: 2px;
     background: var(--paper);
     color: var(--ink);
@@ -115,7 +105,6 @@
     gap: 0.6rem;
     align-items: center;
     min-height: 44px;
-    padding-top: 1rem;
     font-size: 0.86rem;
     font-weight: 600;
   }
@@ -128,7 +117,7 @@
   ol {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.25rem;
+    gap: clamp(2rem, 4vw, 3rem) clamp(1.5rem, 3vw, 2.5rem);
     margin: 0;
     padding: 0;
     list-style: none;
@@ -139,17 +128,8 @@
   }
 
   @media (max-width: 50rem) {
-    .section-heading,
     ol {
       grid-template-columns: 1fr;
-    }
-
-    .controls {
-      grid-template-columns: 1fr;
-    }
-
-    .check-control {
-      padding-top: 0;
     }
   }
 </style>

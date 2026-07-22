@@ -148,7 +148,7 @@ export function createPlaygroundState(
     candidate: null,
     diagnostics: [],
     lastValid: false,
-    status: "Sample ready. Everything stays in this browser tab.",
+    status: "Ready.",
     nextGeneration: 1,
     undoSnapshots: [],
     navigationRecovery: null,
@@ -377,7 +377,6 @@ export function confirmPlaygroundRendered(state: PlaygroundState): PlaygroundSta
   return finalize({
     ...state,
     renderConfirmed: true,
-    status: "Sample rendered. Everything stays in this browser tab.",
     historyIntent: "none",
   });
 }

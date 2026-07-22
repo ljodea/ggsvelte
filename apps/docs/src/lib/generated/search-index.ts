@@ -44,11 +44,19 @@ export const DOCS_SEARCH_INDEX = [
     id: "page:themes",
     kind: "page",
     title: "Chart themes and color scales",
-    summary:
-      "Built-in chart themes, categorical schemes, sequential ramps, and interaction role colors.",
+    summary: "Built-in chart themes, categorical palettes, and sequential scales.",
     href: "/themes",
     keywords: [],
     exact: ["Chart themes and color scales"],
+  },
+  {
+    id: "page:interactions",
+    kind: "page",
+    title: "Chart-local interaction",
+    summary: "Inspect, select, zoom, and legend focus on a live chart. Semantic state is opt-in.",
+    href: "/interactions",
+    keywords: [],
+    exact: ["Chart-local interaction"],
   },
   {
     id: "page:reference",

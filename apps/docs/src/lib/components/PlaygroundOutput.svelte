@@ -2,6 +2,7 @@
   import { tick, untrack } from "svelte";
 
   import { copyText, MANUAL_COPY_STATUS } from "$lib/clipboard";
+  import UiButton from "$lib/components/UiButton.svelte";
   import { playgroundSVGExport } from "$lib/playground-export";
   import type { PlaygroundOutput } from "$lib/playground-output";
   import type { PortableSpec } from "@ggsvelte/spec";
@@ -114,7 +115,7 @@
       anchor.href = objectUrl;
       anchor.download = result.filename;
       anchor.click();
-      exportStatus = "SVG downloaded from the render-confirmed chart.";
+      exportStatus = "SVG downloaded.";
     } catch (error) {
       exportStatus = `SVG export failed · export/download-failed: ${error instanceof Error ? error.message : "The browser refused the download."} The chart and outputs were retained.`;
     } finally {
@@ -129,26 +130,26 @@
     <h2>Export</h2>
   </div>
   <div class="output-actions">
-    <button
+    <UiButton
       type="button"
-      class="secondary"
+      variant="secondary"
       onclick={exportSVG}
-      disabled={!enabled}>Download SVG</button
+      disabled={!enabled}
     >
-    <button
+      Download SVG
+    </UiButton>
+    <UiButton
       type="button"
+      variant="primary"
       onclick={copy}
       disabled={!enabled || !activeOutput.supported || copying}
-      >{copying ? "Copying…" : `Copy ${activeOutput.label}`}</button
     >
+      {copying ? "Copying…" : `Copy ${activeOutput.label}`}
+    </UiButton>
   </div>
 </div>
 
-{#if enabled}
-  <p class="output-note">
-    Every enabled output contains the same render-confirmed PortableSpec.
-  </p>
-{:else}
+{#if !enabled}
   <p class="output-note blocked">
     Apply and render the draft successfully before copying, sharing, or
     exporting.
@@ -209,7 +210,7 @@
 
 <style>
   :global(.output-surface) {
-    padding: 1rem;
+    padding: 1rem 1.1rem;
   }
 
   .panel-heading,
@@ -223,7 +224,7 @@
     justify-content: space-between;
     gap: 1rem;
     border-bottom: 1px solid var(--line);
-    padding-bottom: 0.75rem;
+    padding-bottom: 0.6rem;
   }
 
   .panel-heading h2,
@@ -251,31 +252,9 @@
     justify-content: end;
   }
 
-  button {
-    min-height: 44px;
-    border: 1px solid var(--ink);
-    border-radius: 2px;
-    padding: 0.55rem 0.7rem;
-    background: var(--ink);
-    color: var(--paper);
-    font: 650 0.78rem/1 var(--body-font);
-    cursor: pointer;
-  }
-
-  button.secondary {
-    background: var(--paper);
-    color: var(--ink);
-  }
-
-  button:disabled {
-    cursor: not-allowed;
-    opacity: 0.45;
-  }
-
   .output-note,
   .action-status {
-    min-height: 2.5rem;
-    padding-block: 0.7rem;
+    padding-block: 0.55rem;
     color: var(--muted);
     font-size: 0.78rem;
   }
@@ -286,21 +265,29 @@
   }
 
   .output-tabs {
-    border-block: 1px solid var(--line);
+    margin-top: 0.35rem;
+    border: 1px solid var(--line);
+    border-radius: 0.45rem;
+    overflow: hidden;
   }
 
   .tab-list {
     max-width: 100%;
     overflow-x: auto;
     border-bottom: 1px solid var(--line);
+    background: var(--wash);
   }
 
   .tab-list button {
     flex: 0 0 auto;
+    min-height: 44px;
     border: 0;
     border-bottom: 2px solid transparent;
+    padding: 0.55rem 0.85rem;
     background: transparent;
     color: var(--muted);
+    font: 650 0.82rem/1 var(--body-font);
+    cursor: pointer;
   }
 
   .tab-list button.active {
@@ -309,13 +296,13 @@
   }
 
   pre {
-    max-height: 32rem;
+    max-height: 28rem;
     margin: 0;
     overflow: auto;
-    padding: 0.85rem;
+    padding: 1rem 1.1rem;
     background: var(--code-paper);
     color: var(--code-ink);
-    font: 0.72rem/1.55 var(--mono-font);
+    font: 0.78rem/1.55 var(--mono-font);
     white-space: pre;
   }
 
@@ -354,7 +341,7 @@
 
   @media (max-width: 47.99rem) {
     :global(.output-surface) {
-      padding: 1rem 0;
+      padding: 0.85rem 0.75rem;
     }
 
     .panel-heading {
@@ -366,7 +353,7 @@
     }
 
     pre {
-      max-height: 24rem;
+      max-height: 22rem;
     }
   }
 </style>
