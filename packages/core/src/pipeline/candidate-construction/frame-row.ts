@@ -54,16 +54,48 @@ export function resolveCandidateFrameRow(input: {
   let derivedGroup = frame?.groups[frameRow] ?? 0;
 
   if (frame !== undefined && batch.kind === "paths") {
-    // O(log P) subpath lookup (was linear O(P) per vertex → O(V·P) at build).
-    // Null = OOB / empty offsets: keep default frameRow/derivedGroup (codex P1).
-    const subpath = pathSubpathIndex(batch.pathOffsets, primitiveIndex);
-    if (subpath !== null) {
-      derivedGroup = orderedGroups[Math.min(subpath, orderedGroups.length - 1)] ?? 0;
-      const rowsInGroup = getPathGroupSortedRows(frame).get(derivedGroup) ?? [];
-      const local = primitiveIndex - (batch.pathOffsets[subpath] ?? 0);
-      const reflected =
-        local < rowsInGroup.length ? local : Math.max(0, rowsInGroup.length * 2 - 1 - local);
-      frameRow = rowsInGroup[Math.min(reflected, rowsInGroup.length - 1)] ?? frameRow;
+    // After coord projection, candidate facts pass semanticIndex (pre-render
+    // topology) as primitiveIndex. Render pathOffsets are post-tessellation and
+    // cannot index that space; reconstruct group/local from frame groups instead.
+    if (batch.semanticIndex === undefined) {
+      // O(log P) subpath lookup (was linear O(P) per vertex → O(V·P) at build).
+      // Null = OOB / empty offsets: keep default frameRow/derivedGroup (codex P1).
+      const subpath = pathSubpathIndex(batch.pathOffsets, primitiveIndex);
+      if (subpath !== null) {
+        derivedGroup = orderedGroups[Math.min(subpath, orderedGroups.length - 1)] ?? 0;
+        const rowsInGroup = getPathGroupSortedRows(frame).get(derivedGroup) ?? [];
+        const local = primitiveIndex - (batch.pathOffsets[subpath] ?? 0);
+        const reflected =
+          local < rowsInGroup.length ? local : Math.max(0, rowsInGroup.length * 2 - 1 - local);
+        frameRow = rowsInGroup[Math.min(reflected, rowsInGroup.length - 1)] ?? frameRow;
+      }
+    } else if (batch.closed === true) {
+      // Closed ribbons: upper ascending + lower descending per group (2× rows).
+      const sorted = getPathGroupSortedRows(frame);
+      let cursor = 0;
+      let matched = false;
+      for (const group of orderedGroups) {
+        const rowsInGroup = sorted.get(group) ?? [];
+        const band = rowsInGroup.length * 2;
+        if (primitiveIndex >= cursor && primitiveIndex < cursor + band) {
+          const local = primitiveIndex - cursor;
+          const reflected =
+            local < rowsInGroup.length ? local : Math.max(0, rowsInGroup.length * 2 - 1 - local);
+          frameRow = rowsInGroup[Math.min(reflected, rowsInGroup.length - 1)] ?? frameRow;
+          derivedGroup = group;
+          matched = true;
+          break;
+        }
+        cursor += band;
+      }
+      if (!matched) {
+        frameRow = Math.min(Math.max(0, primitiveIndex), Math.max(0, frame.n - 1));
+        derivedGroup = frame.groups[frameRow] ?? derivedGroup;
+      }
+    } else {
+      // Open paths: semantic index is the pre-split vertex / frame row.
+      frameRow = Math.min(Math.max(0, primitiveIndex), Math.max(0, frame.n - 1));
+      derivedGroup = frame.groups[frameRow] ?? derivedGroup;
     }
   } else if (frame !== undefined && batch.kind === "segments") {
     if (frame.binding.layer.geom === "errorbar") frameRow = Math.floor(primitiveIndex / 3);

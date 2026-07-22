@@ -116,6 +116,52 @@ describe("resolveCandidateFrameRow paths", () => {
     ).toEqual({ frameRow: 3, derivedGroup: 1 });
   });
 
+  it("reflects closed-path reverse legs when semanticIndex is present (coord)", async () => {
+    const { resolveCandidateFrameRow } =
+      await import("../../src/pipeline/candidate-construction/frame-row.ts");
+    const frame = fromAny({
+      n: 2,
+      groups: [0, 0],
+      xNumeric: new Float64Array([0, 1]),
+      binding: { layer: { geom: "area" } },
+    });
+    // After coord, facts.primitiveIndex is semantic (pre-tessellation) path vertex.
+    // Closed band: verts 0..1 upper, 2..3 lower reverse.
+    const batch = fromAny({
+      kind: "paths",
+      closed: true,
+      pathOffsets: new Uint32Array([0, 10]), // render offsets deliberately different
+      semanticIndex: new Uint32Array(10),
+    });
+    expect(
+      resolveCandidateFrameRow({
+        frame,
+        batch,
+        primitiveIndex: 0,
+        orderedGroups: [0],
+        outlierLocalRow: null,
+      }),
+    ).toEqual({ frameRow: 0, derivedGroup: 0 });
+    expect(
+      resolveCandidateFrameRow({
+        frame,
+        batch,
+        primitiveIndex: 3,
+        orderedGroups: [0],
+        outlierLocalRow: null,
+      }),
+    ).toEqual({ frameRow: 0, derivedGroup: 0 });
+    expect(
+      resolveCandidateFrameRow({
+        frame,
+        batch,
+        primitiveIndex: 2,
+        orderedGroups: [0],
+        outlierLocalRow: null,
+      }),
+    ).toEqual({ frameRow: 1, derivedGroup: 0 });
+  });
+
   it("resolves many subpaths without linear pathOffsets scans (O(log P))", async () => {
     const { resolveCandidateFrameRow } =
       await import("../../src/pipeline/candidate-construction/frame-row.ts");

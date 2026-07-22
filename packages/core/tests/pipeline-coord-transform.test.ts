@@ -407,6 +407,35 @@ describe("pipeline post-stat coord_transform", () => {
     expect(model.warnings.some((warning) => warning.code === "coord-invalid-geometry")).toBe(true);
   });
 
+  it("keeps post-split path candidate values aligned with pre-split semantic vertices", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { x: 1, y: 1 },
+          { x: 2, y: 2 },
+          { x: 3, y: -1 },
+          { x: 4, y: 10 },
+          { x: 5, y: 100 },
+        ],
+        aes({ x: "x", y: "y" }),
+      )
+        .geomLine()
+        .coordTransform({ y: { transform: "log10", limits: [1, 100], expand: false } })
+        .spec(),
+      size,
+    );
+    // Two finite runs: (1,1)-(2,2) and (4,10)-(5,100). Values must stay on the
+    // authored vertices, not shift to neighbors after pathOffsets re-index.
+    const xs = candidates(model)
+      .map((candidate) => Number(candidate.xValue))
+      .toSorted((a, b) => a - b);
+    const ys = candidates(model)
+      .map((candidate) => Number(candidate.yValue))
+      .toSorted((a, b) => a - b);
+    expect(xs).toEqual([1, 2, 4, 5]);
+    expect(ys).toEqual([1, 2, 10, 100]);
+  });
+
   it("tessellates nonlinear paths without creating semantic candidates", () => {
     const model = runPipeline(
       gg(
