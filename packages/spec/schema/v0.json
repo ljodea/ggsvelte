@@ -1030,6 +1030,10 @@
         "aes": {
           "$ref": "#/$defs/Aes"
         },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
         "params": {
           "$ref": "#/$defs/PointParams"
         }
@@ -1064,6 +1068,10 @@
         "aes": {
           "$ref": "#/$defs/Aes"
         },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
         "params": {
           "$ref": "#/$defs/LineParams"
         }
@@ -1095,6 +1103,10 @@
         },
         "aes": {
           "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
         },
         "params": {
           "$ref": "#/$defs/ColParams"
@@ -1136,6 +1148,10 @@
         "aes": {
           "$ref": "#/$defs/Aes"
         },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
         "params": {
           "$ref": "#/$defs/BarParams"
         }
@@ -1167,6 +1183,10 @@
         },
         "aes": {
           "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
         },
         "params": {
           "$ref": "#/$defs/BarParams"
@@ -1201,6 +1221,10 @@
         },
         "aes": {
           "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
         },
         "params": {
           "$ref": "#/$defs/SmoothParams"
@@ -1244,6 +1268,10 @@
         "aes": {
           "$ref": "#/$defs/Aes"
         },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
         "params": {
           "$ref": "#/$defs/BoxplotParams"
         }
@@ -1277,6 +1305,10 @@
         },
         "aes": {
           "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
         },
         "params": {
           "$ref": "#/$defs/DensityParams"
@@ -1320,6 +1352,10 @@
         "aes": {
           "$ref": "#/$defs/Aes"
         },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
         "params": {
           "$ref": "#/$defs/ErrorbarParams"
         }
@@ -1353,6 +1389,10 @@
         },
         "aes": {
           "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
         },
         "params": {
           "$ref": "#/$defs/RectParams"
@@ -1388,6 +1428,10 @@
         "aes": {
           "$ref": "#/$defs/Aes"
         },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
         "params": {
           "$ref": "#/$defs/TileParams"
         }
@@ -1422,6 +1466,10 @@
         "aes": {
           "$ref": "#/$defs/Aes"
         },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
         "params": {
           "$ref": "#/$defs/RasterParams"
         }
@@ -1453,6 +1501,10 @@
         },
         "aes": {
           "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
         },
         "params": {
           "$ref": "#/$defs/AreaParams"
@@ -1488,6 +1540,10 @@
         "aes": {
           "$ref": "#/$defs/Aes"
         },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
         "params": {
           "$ref": "#/$defs/RibbonParams"
         }
@@ -1521,6 +1577,10 @@
         },
         "aes": {
           "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
         },
         "params": {
           "$ref": "#/$defs/RuleParams"
@@ -1567,6 +1627,10 @@
         "aes": {
           "$ref": "#/$defs/Aes"
         },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
         "params": {
           "$ref": "#/$defs/TextParams"
         }
@@ -1600,6 +1664,10 @@
         },
         "aes": {
           "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
         },
         "params": {
           "$ref": "#/$defs/SegmentParams"

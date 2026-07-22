@@ -198,42 +198,62 @@ export type RasterParams = SpecType<"RasterParams">;
 export type RibbonParams = SpecType<"RibbonParams">;
 /** Jitter/nudge position parameters. */
 export type PositionParams = SpecType<"PositionParams">;
+// Layer types: TypeBox Static collapses DataRef to object[]; restore the
+// hand-written DataRef on optional per-layer `data` (#589).
+type LayerWithDataRef<T> = Omit<T, "data"> & { data?: DataRef };
 /** A point layer. */
-export type PointLayer = SpecType<"PointLayer">;
+export type PointLayer = LayerWithDataRef<SpecType<"PointLayer">>;
 /** A line layer. */
-export type LineLayer = SpecType<"LineLayer">;
+export type LineLayer = LayerWithDataRef<SpecType<"LineLayer">>;
 /** A col layer (pre-computed bars). */
-export type ColLayer = SpecType<"ColLayer">;
+export type ColLayer = LayerWithDataRef<SpecType<"ColLayer">>;
 /** A bar layer (count or bin stat). */
-export type BarLayer = SpecType<"BarLayer">;
+export type BarLayer = LayerWithDataRef<SpecType<"BarLayer">>;
 /** A histogram layer (alias; normalize() canonicalizes to bar + stat bin). */
-export type HistogramLayer = SpecType<"HistogramLayer">;
+export type HistogramLayer = LayerWithDataRef<SpecType<"HistogramLayer">>;
 /** An area layer. */
-export type AreaLayer = SpecType<"AreaLayer">;
+export type AreaLayer = LayerWithDataRef<SpecType<"AreaLayer">>;
 /** A rule (reference line) layer. */
-export type RuleLayer = SpecType<"RuleLayer">;
+export type RuleLayer = LayerWithDataRef<SpecType<"RuleLayer">>;
 /** A text-label layer. */
-export type TextLayer = SpecType<"TextLayer">;
+export type TextLayer = LayerWithDataRef<SpecType<"TextLayer">>;
 /** A smooth (fitted trend) layer. */
-export type SmoothLayer = SpecType<"SmoothLayer">;
+export type SmoothLayer = LayerWithDataRef<SpecType<"SmoothLayer">>;
 /** A boxplot layer. */
-export type BoxplotLayer = SpecType<"BoxplotLayer">;
+export type BoxplotLayer = LayerWithDataRef<SpecType<"BoxplotLayer">>;
 /** A density (KDE) layer. */
-export type DensityLayer = SpecType<"DensityLayer">;
+export type DensityLayer = LayerWithDataRef<SpecType<"DensityLayer">>;
 /** An errorbar layer. */
-export type ErrorbarLayer = SpecType<"ErrorbarLayer">;
+export type ErrorbarLayer = LayerWithDataRef<SpecType<"ErrorbarLayer">>;
 /** A rect layer (arbitrary xmin/xmax/ymin/ymax regions). */
-export type RectLayer = SpecType<"RectLayer">;
+export type RectLayer = LayerWithDataRef<SpecType<"RectLayer">>;
 /** A tile layer (center-sized cells). */
-export type TileLayer = SpecType<"TileLayer">;
+export type TileLayer = LayerWithDataRef<SpecType<"TileLayer">>;
 /** A raster layer (equal-cell dense grid). */
-export type RasterLayer = SpecType<"RasterLayer">;
+export type RasterLayer = LayerWithDataRef<SpecType<"RasterLayer">>;
 /** A ribbon (interval band) layer. */
-export type RibbonLayer = SpecType<"RibbonLayer">;
+export type RibbonLayer = LayerWithDataRef<SpecType<"RibbonLayer">>;
 /** A finite segment layer ((x,y)→(xend,yend)). */
-export type SegmentLayer = SpecType<"SegmentLayer">;
+export type SegmentLayer = LayerWithDataRef<SpecType<"SegmentLayer">>;
 /** One plot layer, discriminated by `geom`. */
-export type LayerSpec = SpecType<"LayerSpec">;
+export type LayerSpec =
+  | PointLayer
+  | LineLayer
+  | ColLayer
+  | BarLayer
+  | HistogramLayer
+  | AreaLayer
+  | RibbonLayer
+  | SegmentLayer
+  | RuleLayer
+  | TextLayer
+  | SmoothLayer
+  | BoxplotLayer
+  | DensityLayer
+  | ErrorbarLayer
+  | RectLayer
+  | TileLayer
+  | RasterLayer;
 /** Stackable position adjustment names. */
 export type StackablePosition = SpecType<"StackablePosition">;
 /** Position adjustments accepted by point layers. */
@@ -292,7 +312,8 @@ export type ThemeSpec = SpecType<"ThemeSpec">;
 /** Plot labels. */
 export type Labs = SpecType<"Labs">;
 /** The canonical, strictly-JSON plot spec (what agents emit and schemas describe). */
-export type PortableSpec = Omit<SpecType<"PlotSpec">, "data" | "datasets"> & {
+export type PortableSpec = Omit<SpecType<"PlotSpec">, "data" | "datasets" | "layers"> & {
   data?: DataRef;
   datasets?: Record<string, InlineData>;
+  layers: LayerSpec[];
 };

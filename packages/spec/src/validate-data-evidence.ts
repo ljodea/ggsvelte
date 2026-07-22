@@ -122,16 +122,21 @@ function profileErrors(profile: unknown): SpecError[] {
   return [];
 }
 
-/** Resolve the spec's inline columns ({values}, {columns}, or a named inline dataset). */
-function inlineColumns(spec: Record<string, unknown>): Record<string, readonly CellValue[]> | null {
-  let data = spec["data"];
-  if (isRecord(data) && typeof data["name"] === "string") {
-    const datasets = spec["datasets"];
-    data = isRecord(datasets) ? datasets[data["name"]] : undefined;
+/**
+ * Resolve inline columns from a data ref against optional named datasets.
+ * Named refs that are not present in datasets return null (runtime-only data).
+ */
+function columnsFromDataRef(
+  data: unknown,
+  datasets: unknown,
+): Record<string, readonly CellValue[]> | null {
+  let ref = data;
+  if (isRecord(ref) && typeof ref["name"] === "string") {
+    ref = isRecord(datasets) ? datasets[ref["name"]] : undefined;
   }
-  if (!isRecord(data)) return null;
-  if (Array.isArray(data["values"])) {
-    const rows = data["values"] as Record<string, CellValue>[];
+  if (!isRecord(ref)) return null;
+  if (Array.isArray(ref["values"])) {
+    const rows = ref["values"] as Record<string, CellValue>[];
     const columns: Record<string, CellValue[]> = {};
     for (const row of rows) {
       if (!isRecord(row)) continue;
@@ -143,10 +148,130 @@ function inlineColumns(spec: Record<string, unknown>): Record<string, readonly C
     }
     return columns;
   }
-  if (isRecord(data["columns"])) {
-    return data["columns"] as Record<string, readonly CellValue[]>;
+  if (isRecord(ref["columns"])) {
+    return ref["columns"] as Record<string, readonly CellValue[]>;
   }
   return null;
+}
+
+/** Resolve the spec's plot-level inline columns ({values}, {columns}, or named). */
+function inlineColumns(spec: Record<string, unknown>): Record<string, readonly CellValue[]> | null {
+  return columnsFromDataRef(spec["data"], spec["datasets"]);
+}
+
+function evidenceFromColumns(columns: Record<string, readonly CellValue[]>): FieldEvidenceMap {
+  const fields: FieldEvidenceMap = new Map();
+  for (const name of Object.keys(columns)) {
+    const column = columns[name]!;
+    const inferred = inferProfileType(column);
+    fields.set(name, {
+      type: inferred.type,
+      allNull: column.length > 0 && inferred.type === null,
+      values: column,
+      temporal: inferred.temporal,
+    });
+  }
+  return fields;
+}
+
+/**
+ * Per-layer field evidence (#589). Each layer inherits plot-level evidence
+ * unless it supplies its own inline/named-inline data.
+ * Layers with only unresolved named (runtime) data get `null` (skip type checks).
+ */
+export function resolveLayerFieldEvidence(
+  spec: Record<string, unknown>,
+  options: ValidateOptions,
+  limits: ValidateLimits,
+):
+  | { status: "ok"; plot: FieldEvidenceMap | null; layers: Array<FieldEvidenceMap | null> }
+  | { status: "none" }
+  | { status: "errors"; errors: SpecError[] } {
+  if (options.profile !== undefined) {
+    const bad = profileErrors(options.profile);
+    if (bad.length > 0) return { status: "errors", errors: bad };
+    const fields: FieldEvidenceMap = new Map();
+    for (const f of options.profile.fields) {
+      fields.set(f.name, { type: f.type, allNull: false, values: null, temporal: null });
+    }
+    const layers = Array.isArray(spec["layers"]) ? (spec["layers"] as unknown[]) : [];
+    return { status: "ok", plot: fields, layers: layers.map(() => fields) };
+  }
+
+  const datasets = spec["datasets"];
+  const plotColumns = inlineColumns(spec);
+  let totalRows = 0;
+  let totalBytes = 0;
+  const countedTables = new Set<string>();
+  const countTable = (key: string, columns: Record<string, readonly CellValue[]>) => {
+    if (countedTables.has(key)) return;
+    countedTables.add(key);
+    const names = Object.keys(columns);
+    const rowCount = names.length === 0 ? 0 : (columns[names[0]!]?.length ?? 0);
+    totalRows += rowCount;
+    totalBytes += estimateBytes(columns, rowCount);
+  };
+  if (plotColumns !== null) countTable("__plot__", plotColumns);
+
+  const layers = Array.isArray(spec["layers"]) ? (spec["layers"] as unknown[]) : [];
+  const layerColumns: Array<Record<string, readonly CellValue[]> | null | "runtime"> = [];
+  for (const layer of layers) {
+    if (!isRecord(layer) || layer["data"] === undefined) {
+      layerColumns.push(null); // inherit plot
+      continue;
+    }
+    const data = layer["data"];
+    const cols = columnsFromDataRef(data, datasets);
+    if (cols === null) {
+      // Named ref not in datasets (or malformed) — runtime-only / skip.
+      layerColumns.push("runtime");
+      continue;
+    }
+    // Deduplicate limit accounting for shared named datasets.
+    const key =
+      isRecord(data) && typeof data["name"] === "string"
+        ? `name:${data["name"]}`
+        : `inline:${layerColumns.length}`;
+    countTable(key, cols);
+    layerColumns.push(cols);
+  }
+
+  if (plotColumns === null && layerColumns.every((c) => c === null || c === "runtime")) {
+    return { status: "none" };
+  }
+
+  if (totalRows > limits.maxRows) {
+    return {
+      status: "errors",
+      errors: [
+        {
+          code: "validation-limit",
+          path: "/data",
+          message: `Inline data has ${totalRows} rows across plot/layers, more than the documented maxRows limit (${limits.maxRows}); data-aware checks skipped. Validate with a DataProfile instead.`,
+        },
+      ],
+    };
+  }
+  if (totalBytes > limits.maxBytes) {
+    return {
+      status: "errors",
+      errors: [
+        {
+          code: "validation-limit",
+          path: "/data",
+          message: `Inline data exceeds the documented maxBytes limit (${limits.maxBytes} bytes, estimated across plot/layers); data-aware checks skipped. Validate with a DataProfile instead.`,
+        },
+      ],
+    };
+  }
+
+  const plot = plotColumns === null ? null : evidenceFromColumns(plotColumns);
+  const layerMaps: Array<FieldEvidenceMap | null> = layerColumns.map((cols) => {
+    if (cols === "runtime") return null;
+    if (cols === null) return plot;
+    return evidenceFromColumns(cols);
+  });
+  return { status: "ok", plot, layers: layerMaps };
 }
 
 function estimateBytes(columns: Record<string, readonly CellValue[]>, rowCount: number): number {

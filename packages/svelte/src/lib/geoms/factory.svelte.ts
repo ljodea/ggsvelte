@@ -11,6 +11,7 @@
  */
 import type {
   AesInput,
+  DataInput,
   GeomName,
   PositionName,
   PositionParams,
@@ -23,6 +24,8 @@ import { registerLayer } from "./registry.svelte.js";
 export interface GeomProps {
   /** Layer-level aes (bare-string shorthand allowed); merges over plot aes. */
   aes?: AesInput;
+  /** Optional layer-local data (#589); inherits plot data when omitted. */
+  data?: DataInput | readonly Record<string, unknown>[];
   /** Stat override (geoms with more than one stat, e.g. errorbar summary). */
   stat?: StatName;
   /** Position override (per-geom subset; normalize/validate enforce it). */
@@ -51,6 +54,9 @@ export function createGeomLayer<P extends GeomProps>(
     },
     get aes() {
       return getProps().aes;
+    },
+    get data() {
+      return getProps().data;
     },
     get position() {
       return getProps().position;

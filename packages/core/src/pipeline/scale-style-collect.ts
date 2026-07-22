@@ -43,10 +43,11 @@ export function collectStyleValues(input: {
     const mapped = styleFrameValues(frame, aesthetic);
     if ((binding.field !== null || binding.statColumn !== null) && mapped !== null) {
       anyField = true;
+      const fieldTable = frame.binding.sourceTable ?? table;
       if (
         binding.field !== null &&
-        table.has(binding.field) &&
-        table.discreteness(binding.field) === "discrete"
+        fieldTable.has(binding.field) &&
+        fieldTable.discreteness(binding.field) === "discrete"
       ) {
         anyDiscrete = true;
       }
@@ -75,11 +76,13 @@ export function collectStyleValues(input: {
   };
   for (const binding of bindings) {
     const mapped = bindingOf(binding, aesthetic);
-    if (mapped.field !== null && sourceTable.has(mapped.field)) {
+    // Prefer the layer's own source table so multi-table catalogs union correctly (#589).
+    const catalogTable = binding.sourceTable ?? sourceTable;
+    if (mapped.field !== null && catalogTable.has(mapped.field)) {
       anyField = true;
       anyIndexable = true;
-      if (sourceTable.discreteness(mapped.field) === "discrete") anyDiscrete = true;
-      for (const value of sourceTable.column(mapped.field)) {
+      if (catalogTable.discreteness(mapped.field) === "discrete") anyDiscrete = true;
+      for (const value of catalogTable.column(mapped.field)) {
         indexableKeys.add(encodeKey(value));
         add(value);
       }

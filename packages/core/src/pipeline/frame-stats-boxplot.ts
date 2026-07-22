@@ -41,6 +41,7 @@ export function buildBoxplotFrame(
     yNumeric: null,
     groups: result.groups,
     inputGroups: groups,
+    inputSourceRows: null,
     rowIndex: Uint32Array.from({ length: result.x.length }, () => NO_ROW),
     colorValues: col(binding.color.field),
     fillValues: col(binding.fill.field),

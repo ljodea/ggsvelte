@@ -32,8 +32,8 @@ export const PIPELINE_ERROR_CATALOG = {
     fix: 'Use collision: "ellipsis" for long labels; increase the chart size, reduce categories, or suppress an oversized guide.',
   },
   "no-data": {
-    summary: "The spec has no data source and no layer provides one.",
-    fix: "Set spec.data ({values}, {columns}, or {name}) or pass named data via RunOptions.data.",
+    summary: "A layer has neither plot-level data nor its own layer.data.",
+    fix: "Set spec.data and/or layer.data ({values}, {columns}, or {name}), or pass named data via RunOptions.data.",
   },
   "dataset-collision": {
     summary: "A dataset name is defined in both spec.datasets and RunOptions.data.",

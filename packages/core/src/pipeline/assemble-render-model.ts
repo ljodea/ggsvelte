@@ -155,6 +155,7 @@ export function assembleRenderModel(input: AssembleRenderModelInput): RenderMode
     scene,
     candidates,
     table: input.table,
+    ...(input.sourceRegistry !== undefined && { sourceRegistry: input.sourceRegistry }),
   });
   const advisories = [...input.advisories, ...bandLabelAdvisories(input.guidePlans)];
   const diagnostics = dedupeRenderModelDiagnostics(input.warnings, advisories);

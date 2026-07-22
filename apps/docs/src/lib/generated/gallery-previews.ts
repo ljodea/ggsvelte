@@ -177,6 +177,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "9aa9e6b97d5d59852a0c815329cd88e17be3bad5546fb68bf1766146872f4e9f",
   },
   {
+    id: "point/layer-data-bands",
+    filename: "point-layer-data-bands-light.png",
+    path: "/previews/point-layer-data-bands-light.png",
+    sha256: "33ef20ba4e6e52721af7e43796ce28ef81a28e8221a8758fb2b7b3825cd61dee",
+  },
+  {
     id: "point/log-scale",
     filename: "point-log-scale-light.png",
     path: "/previews/point-log-scale-light.png",

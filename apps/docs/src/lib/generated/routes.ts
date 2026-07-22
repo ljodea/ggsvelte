@@ -2552,6 +2552,17 @@ export const DOCS_ROUTES = [
     shell: "site",
   },
   {
+    path: "/examples/point/layer-data-bands",
+    title: "Per-layer data (bands + callout) — ggsvelte gallery",
+    description:
+      "A large observation table layered with a small background-band table and a one-row annotation table. Each geom supplies its own data; the plot has no shared table.",
+    canonicalPath: "/examples/point/layer-data-bands",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
     path: "/examples/point/log-scale",
     title: "Pre-stat log10 scale and fit — ggsvelte gallery",
     description:
