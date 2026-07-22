@@ -1,5 +1,5 @@
 import type { FacetPanelDef } from "../facets.js";
-import { yConversionOf } from "../temporal-position.js";
+import { positionColumn, xConversionOf, yConversionOf } from "../temporal-position.js";
 import type { LayerFrame } from "../types.js";
 import { NO_ROW } from "../types.js";
 import {
@@ -61,10 +61,25 @@ export function buildCandidateIdentityIndex(
       const yField = frame.binding.yField;
       const finiteY =
         (stat === "smooth" || stat === "summary" || stat === "boxplot") && yField !== null;
-      const yConversion = yConversionOf(frame.binding);
+      // Match stat reads: finite membership is after the pre-stat transform so
+      // log/sqrt OOD rows do not appear in candidate lineage for the fit.
       const yNumeric =
         finiteY && yField !== null
-          ? frame.table.numeric(yField, yConversion.sourceParser, yConversion.options)
+          ? positionColumn(
+              frame.table,
+              yField,
+              yConversionOf(frame.binding),
+              frame.binding.yTransform,
+            )
+          : null;
+      const xNumericForSmooth =
+        stat === "smooth" && xField !== null
+          ? positionColumn(
+              frame.table,
+              xField,
+              xConversionOf(frame.binding),
+              frame.binding.xTransform,
+            )
           : null;
       for (let localRow = 0; localRow < inputGroups.length; localRow++) {
         const group = inputGroups[localRow]!;
@@ -87,6 +102,9 @@ export function buildCandidateIdentityIndex(
           });
         }
         if (yNumeric !== null && Number.isFinite(yNumeric[localRow]!)) {
+          if (xNumericForSmooth !== null && !Number.isFinite(xNumericForSmooth[localRow]!)) {
+            continue;
+          }
           appendSourceRowByGroupKey(sourceRowsByGroupY, key, sourceRow);
         }
       }

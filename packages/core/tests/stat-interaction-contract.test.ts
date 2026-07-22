@@ -1,6 +1,8 @@
 import { describe, expect, it } from "bun:test";
 
-import { runPipeline } from "../src/pipeline.ts";
+import { aes, gg, scaleXBinned, scaleXLog10, scaleYLog10 } from "@ggsvelte/spec";
+
+import { PipelineError, runPipeline } from "../src/pipeline.ts";
 
 const size = { width: 400, height: 240 };
 
@@ -138,6 +140,92 @@ describe("stat interaction contract", () => {
     expect(lineage(model, 0)).toEqual([0, 1]);
     expect(model.candidates.candidate(1)).toMatchObject({ xValue: 1.5, yValue: 1 });
     expect(lineage(model, 1)).toEqual([2]);
+  });
+
+  it("assigns log10 histogram lineage in transformed space (not raw semantics)", () => {
+    // binwidth 1 at boundary 0 under log10 → decade bins; rows 1,10,100,1000
+    // land in three bins with counts 2,1,1 — lineage must match those counts.
+    const model = runPipeline(
+      gg(
+        [1, 10, 100, 1000].map((x) => ({ x })),
+        aes({ x: "x" }),
+      )
+        .geomHistogram({ binwidth: 1, boundary: 0 })
+        .scales(scaleXLog10())
+        .spec(),
+      size,
+    );
+    const lineages = Array.from({ length: model.candidates.size }, (_, id) => lineage(model, id));
+    const counts = Array.from({ length: model.candidates.size }, (_, id) => {
+      const candidate = model.candidates.candidate(id)!;
+      return { y: candidate.yValue, n: lineages[id]!.length, rows: lineages[id] };
+    });
+    expect(counts.map((c) => c.y)).toEqual([2, 1, 1]);
+    expect(counts.map((c) => c.n)).toEqual([2, 1, 1]);
+    expect(lineages.flat().toSorted((a, b) => a - b)).toEqual([0, 1, 2, 3]);
+  });
+
+  it("resolves binned count lineage by bin id, not inverse bin center", () => {
+    const model = runPipeline(
+      gg([{ x: 1 }, { x: 2 }, { x: 11 }, { x: 12 }, { x: 13 }], aes({ x: "x" }))
+        .geomBar()
+        .scales(scaleXBinned({ breaks: [0, 10, 20] }))
+        .spec(),
+      size,
+    );
+    expect(model.candidates.size).toBe(2);
+    expect(model.candidates.candidate(0)).toMatchObject({ yValue: 2 });
+    expect(lineage(model, 0)).toEqual([0, 1]);
+    expect(model.candidates.candidate(1)).toMatchObject({ yValue: 3 });
+    expect(lineage(model, 1)).toEqual([2, 3, 4]);
+  });
+
+  it("excludes transform-invalid rows from smooth candidate lineage", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { x: 1, y: 1 },
+          { x: 2, y: 4 },
+          { x: 3, y: 9 },
+          { x: 4, y: -1 },
+        ],
+        aes({ x: "x", y: "y" }),
+      )
+        .geomSmooth({ method: "lm", se: false })
+        .scales(scaleYLog10())
+        .spec(),
+      size,
+    );
+    expect(model.candidates.size).toBeGreaterThan(0);
+    for (let id = 0; id < model.candidates.size; id++) {
+      expect(lineage(model, id)).toEqual([0, 1, 2]);
+    }
+  });
+
+  it("rejects temporal annotation intercepts under a non-identity transform", () => {
+    expect(() =>
+      runPipeline(
+        {
+          data: { values: [{ dummy: 1 }] },
+          layers: [{ geom: "rule", params: { xintercept: "2024-01-01" } }],
+          scales: { x: { transform: "log10", nice: false } },
+        },
+        size,
+      ),
+    ).toThrow(PipelineError);
+    try {
+      runPipeline(
+        {
+          data: { values: [{ dummy: 1 }] },
+          layers: [{ geom: "rule", params: { xintercept: "2024-01-01" } }],
+          scales: { x: { transform: "log10", nice: false } },
+        },
+        size,
+      );
+    } catch (error) {
+      expect(error).toBeInstanceOf(PipelineError);
+      expect((error as PipelineError).code).toBe("scale-type-transform-conflict");
+    }
   });
 
   it("uses the box middle for aggregate primitives and the observation for outliers", () => {

@@ -2,8 +2,8 @@ import type { BarParams } from "@ggsvelte/spec";
 
 import { bandKey } from "../../scales/train.js";
 import type { ColumnTable } from "../../table.js";
-import { xConversionOf, yConversionOf } from "../temporal-position.js";
 import { shouldAggregateOnSemanticTemporalX } from "../frame-stats-shared.js";
+import { positionColumn, xConversionOf, yConversionOf } from "../temporal-position.js";
 import type { LayerBinding, LayerFrame } from "../types.js";
 
 export function filterAggregateXRows(input: {
@@ -43,8 +43,13 @@ export function filterBinRepresentedRows(input: {
   const frameGroup = frame.groups[frameRow];
   const firstInGroup = frameRow === 0 || frame.groups[frameRow - 1] !== frameGroup;
   const lastInGroup = frameRow === frame.n - 1 || frame.groups[frameRow + 1] !== frameGroup;
-  const xConversion = xConversionOf(frame.binding);
-  const numeric = table.numeric(field, xConversion.sourceParser, xConversion.options);
+  // Edges are scale-space; filter source rows after the same transform.
+  const numeric = positionColumn(
+    table,
+    field,
+    xConversionOf(frame.binding),
+    frame.binding.xTransform,
+  );
   return baseRows.filter((row) => {
     const value = numeric[row]!;
     if (!Number.isFinite(value)) return false;
@@ -60,8 +65,9 @@ export function filterAggregateYRows(input: {
   field: string;
   baseRows: readonly number[];
 }): number[] {
-  const conversion = yConversionOf(input.frame?.binding ?? {});
-  const numeric = input.table.numeric(input.field, conversion.sourceParser, conversion.options);
+  const binding = input.frame?.binding;
+  const conversion = yConversionOf(binding ?? {});
+  const numeric = positionColumn(input.table, input.field, conversion, binding?.yTransform);
   return input.baseRows.filter((row) => Number.isFinite(numeric[row]!));
 }
 
@@ -110,8 +116,13 @@ export function filterRepresentedSourceRows(input: {
   // Indexed group×x: buckets are the final represented membership (count: all
   // rows; summary/boxplot: finite-y only). Return the frozen array as-is so
   // LineageStore can WeakMap-intern once — no clone, no per-mark y re-filter.
+  // Binned counts key by integer bin id (frame.xBinId), not inverse centers.
   if (needsX && indexKeyPrefix !== null && input.sourceRowsByGroupX !== undefined) {
-    const indexed = input.sourceRowsByGroupX.get(`${indexKeyPrefix}:${bandKey(outputX)}`);
+    const xKey =
+      frame.binding.xBinning !== undefined && frame.xBinId !== null
+        ? bandKey(frame.xBinId[frameRow]!)
+        : bandKey(outputX);
+    const indexed = input.sourceRowsByGroupX.get(`${indexKeyPrefix}:${xKey}`);
     if (indexed !== undefined) return indexed;
   }
 
