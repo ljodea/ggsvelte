@@ -5,12 +5,9 @@ import { createFacetPanelIdentity } from "../facet-identity.js";
 import type { FacetPanelIdentity } from "../facet-identity.js";
 import type { ColumnTable } from "../table.js";
 
-/** Where facet strip chrome is reserved and drawn. */
-export type FacetStripPosition = "top" | "bottom" | "left" | "right";
-
 /** Resolved strip chrome for a facet layout (defaults applied). */
 export interface FacetStripConfig {
-  position: FacetStripPosition;
+  position: "top" | "bottom" | "left" | "right";
   show: boolean;
 }
 

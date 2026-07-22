@@ -14,12 +14,7 @@ import { assertFacetForm, facetFreeFlags } from "./facets-form.js";
 import { resolveFacetWrap } from "./facets-wrap.js";
 import type { PipelineWarning } from "./types.js";
 
-export type {
-  FacetPanelDef,
-  FacetLayout,
-  FacetStripConfig,
-  FacetStripPosition,
-} from "./facets-types.js";
+export type { FacetPanelDef, FacetLayout, FacetStripConfig } from "./facets-types.js";
 export { SINGLE_PANEL, DEFAULT_FACET_STRIP } from "./facets-types.js";
 
 function resolveStripConfig(facet: FacetSpec): FacetStripConfig {

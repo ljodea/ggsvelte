@@ -34,7 +34,7 @@ export function facetField(
  * Authoring key for facet label maps: string form of DomainValue
  * (`"null"` for null; `String(value)` otherwise).
  */
-export function facetLabelKey(value: CellValue): string {
+function facetLabelKey(value: CellValue): string {
   if (value === null) return "null";
   return String(value);
 }
