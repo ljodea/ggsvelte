@@ -263,7 +263,7 @@ function renderLegend(legend: SceneLegend, theme: ThemeTokens, gradientId: strin
         `<rect class="gg-legend-step" x="${px(entryX)}" y="${px(entryY)}" width="${px(legend.stepWidth)}" height="${px(legend.stepHeight)}" fill="${entry.color}"/>`,
         entry.label === ""
           ? ""
-          : `<text class="gg-legend-label" x="${px(horizontal ? entryX + legend.stepWidth / 2 : entryX + legend.stepWidth + 6)}" y="${px(horizontal ? entryY + legend.stepHeight + 12 : entryY + legend.stepHeight / 2)}" text-anchor="${horizontal ? "middle" : "start"}" dy="0.32em" font-size="${px(labelSize)}" fill="${ink}">${escapeXML(entry.label)}</text>`,
+          : `<text class="gg-legend-label" x="${px(horizontal ? entryX + legend.stepWidth / 2 : entryX + legend.stepWidth + 6)}" y="${px(horizontal ? entryY + legend.stepHeight + 12 : entryY + legend.stepHeight / 2)}" text-anchor="${horizontal ? "middle" : "start"}" dy="0.32em" font-size="${px(labelSize)}" fill="${ink}">${escapeXML(entry.label)}${entry.fullLabel !== undefined && entry.fullLabel !== entry.label ? `<title>${escapeXML(entry.fullLabel)}</title>` : ""}</text>`,
       );
     }
   } else {

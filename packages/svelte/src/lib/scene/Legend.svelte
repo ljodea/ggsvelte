@@ -199,7 +199,10 @@
           text-anchor={horizontal ? "middle" : "start"}
           dy="0.32em"
           font-size={labelSize}
-          fill={ink}>{entry.label}</text
+          fill={ink}
+          >{entry.label}{#if entry.fullLabel !== undefined && entry.fullLabel !== entry.label}<title
+              >{entry.fullLabel}</title
+            >{/if}</text
         >
       {/if}
     {/each}

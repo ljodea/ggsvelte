@@ -33,6 +33,9 @@ describe("binned color scales", () => {
     if (legend?.type !== "steps") throw new Error("expected steps scene legend");
     expect(legend.entries.map(({ color }) => color)).toEqual(["#eeeeee", "#777777", "#111111"]);
     expect(sceneToSVGString(model.scene)).toContain('class="gg-legend-step"');
+    legend.entries[0]!.label = "abbreviated…";
+    legend.entries[0]!.fullLabel = "complete <interval>";
+    expect(sceneToSVGString(model.scene)).toContain("<title>complete &lt;interval&gt;</title>");
 
     const plan = model.guidePlans.find((candidate) => candidate.type === "colorsteps");
     if (plan?.type !== "colorsteps") throw new Error("expected colorsteps plan");

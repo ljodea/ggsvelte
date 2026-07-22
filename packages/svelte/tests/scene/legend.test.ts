@@ -1,4 +1,9 @@
-import { resolveTheme, type SceneDiscreteLegend, type SceneRampLegend } from "@ggsvelte/core";
+import {
+  resolveTheme,
+  type SceneDiscreteLegend,
+  type SceneRampLegend,
+  type SceneStepsLegend,
+} from "@ggsvelte/core";
 import { describe, expect, it } from "vitest";
 
 import Legend from "../../src/lib/scene/Legend.svelte";
@@ -85,6 +90,34 @@ describe("Legend scene rendering", () => {
     const { container } = render(Legend, { legend, theme });
     expect(container.querySelector(".gg-legend-title")?.getAttribute("y")).toBe("32");
     expect(container.querySelector(".gg-legend-swatch")?.getAttribute("y")).toBe("46");
+  });
+
+  it("exposes a truncated colorstep entry's complete semantic label", () => {
+    const legend: SceneStepsLegend = {
+      type: "steps",
+      scale: "color",
+      title: "",
+      position: "bottom",
+      direction: "horizontal",
+      x: 0,
+      y: 0,
+      width: 120,
+      height: 40,
+      entries: [
+        {
+          label: "abbreviated…",
+          fullLabel: "complete interval label",
+          color: "#123456",
+          y: 0,
+        },
+      ],
+      stepWidth: 80,
+      stepHeight: 12,
+    };
+    const { container } = render(Legend, { legend, theme });
+    expect(container.querySelector(".gg-legend-label title")?.textContent).toBe(
+      "complete interval label",
+    );
   });
 
   it("renders horizontal ramp bars and endpoint labels from the measured inset", () => {

@@ -48,6 +48,7 @@ export type DiscreteColorScaleOptions = Pick<
   | "naValue"
   | "unknownValue"
   | "onExhaust"
+  | "guide"
 >;
 export type TransformedColorScaleOptions = Omit<
   SequentialColorScaleOptions,
@@ -59,12 +60,12 @@ export type TemporalColorScaleOptions = Omit<
 >;
 export type ManualColorScaleOptions = Pick<
   ColorScaleSpec,
-  "domain" | "naValue" | "unknownValue"
+  "domain" | "naValue" | "unknownValue" | "guide"
 > & {
   /** Colors paired positionally with the explicit or trained domain. */
   values: NonNullable<ColorScaleSpec["range"]>;
 };
-export type IdentityColorScaleOptions = Pick<ColorScaleSpec, "naValue" | "unknownValue">;
+export type IdentityColorScaleOptions = Pick<ColorScaleSpec, "naValue" | "unknownValue" | "guide">;
 
 type ColorAesthetic = "color" | "fill";
 

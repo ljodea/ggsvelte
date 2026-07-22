@@ -66,6 +66,8 @@ export function assembleScene(input: AssembleSceneInput): Scene {
     coordProjectors,
     ...(measureText !== undefined && { measureText }),
     axisTextSize,
+    hAxisTextSize: hGuide.theme?.labelSize ?? axisTextSize,
+    vAxisTextSize: vGuide.theme?.labelSize ?? axisTextSize,
     tickChromePx,
     ...(hMinorBreaks !== undefined && { hMinorBreaks }),
     ...(vMinorBreaks !== undefined && { vMinorBreaks }),

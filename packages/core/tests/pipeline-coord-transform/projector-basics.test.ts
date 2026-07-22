@@ -1,7 +1,9 @@
 import { describe, expect, it } from "bun:test";
 
-import { aes, coord_transform, gg } from "@ggsvelte/spec";
+import { aes, coord_transform, gg, guideAxis } from "@ggsvelte/spec";
 
+import { FONT_METRICS } from "../../src/layout/font-metrics.ts";
+import { MetricsTableMeasurer } from "../../src/layout/measure.ts";
 import { runPipeline } from "../../src/pipeline.ts";
 import { size } from "./fixtures.ts";
 
@@ -70,6 +72,43 @@ describe("pipeline post-stat coord_transform — projector basics", () => {
     expect(model.scene.panels[0]!.grid.x).toHaveLength(5);
     expect(axis.filter((tick) => tick.label !== "")).toHaveLength(3);
     expect(axis.find((tick) => tick.value === 1000)?.label).toBe("1,000");
+  });
+  it("measures projected-label overlap with the resolved guide font size", () => {
+    const renderAt = (labelSize: number) =>
+      runPipeline(
+        gg(
+          [
+            { x: 1, y: 1 },
+            { x: 1000, y: 2 },
+          ],
+          aes({ x: "x", y: "y" }),
+        )
+          .geomPoint()
+          .scales({
+            x: {
+              type: "linear",
+              domain: [1, 1000],
+              expand: { mult: 0, add: 0 },
+              breaks: [200, 400, 600, 800, 1000],
+            },
+          })
+          .guides({ x: guideAxis({ theme: { labelSize } }) })
+          .coordTransform({ x: { transform: "log10", expand: false } })
+          .spec(),
+        { width: 320, height: 360 },
+      );
+
+    const large = renderAt(24).scene.panels[0]!.axisX!;
+    expect(large.every((tick) => tick.labelSize === 24)).toBe(true);
+    const visible = large.filter((tick) => tick.label !== "").toSorted((a, b) => a.pos - b.pos);
+    const measurer = new MetricsTableMeasurer(FONT_METRICS);
+    for (let index = 1; index < visible.length; index++) {
+      const previous = visible[index - 1]!;
+      const current = visible[index]!;
+      const previousRight = previous.pos + measurer.measureWidth(previous.label, 24) / 2;
+      const currentLeft = current.pos - measurer.measureWidth(current.label, 24) / 2;
+      expect(previousRight + 4).toBeLessThanOrEqual(currentLeft);
+    }
   });
   it("omits ticks outside exact coordinate limits without changing scale breaks", () => {
     const model = runPipeline(

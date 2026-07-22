@@ -103,6 +103,9 @@ export function assembleScenePanels(input: {
   coordProjectors: readonly PanelCoordProjector[];
   measureText?: TextMeasurer | undefined;
   axisTextSize: number;
+  /** Resolved per-axis guide font sizes used for projected-label collision checks. */
+  hAxisTextSize?: number;
+  vAxisTextSize?: number;
   /** Tick chrome (theme tickLength + label gap) below gridBottom; renderer-matched. */
   tickChromePx?: number;
   hMinorBreaks?: readonly number[] | undefined;
@@ -148,11 +151,21 @@ export function assembleScenePanels(input: {
       .filter((tick) => Number.isFinite(tick.pos) && tick.pos >= 0 && tick.pos <= placement.height);
     const bottom =
       projector?.x.active === true
-        ? suppressProjectedLabelOverlap(projectedBottom, "horizontal", measurer, input.axisTextSize)
+        ? suppressProjectedLabelOverlap(
+            projectedBottom,
+            "horizontal",
+            measurer,
+            input.hAxisTextSize ?? input.axisTextSize,
+          )
         : projectedBottom;
     const left =
       projector?.y.active === true
-        ? suppressProjectedLabelOverlap(projectedLeft, "vertical", measurer, input.axisTextSize)
+        ? suppressProjectedLabelOverlap(
+            projectedLeft,
+            "vertical",
+            measurer,
+            input.vAxisTextSize ?? input.axisTextSize,
+          )
         : projectedLeft;
     const xGrid = gridPositionsByKind(bottom);
     const yGrid = gridPositionsByKind(left);
