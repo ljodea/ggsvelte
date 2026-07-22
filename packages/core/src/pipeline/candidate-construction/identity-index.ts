@@ -33,11 +33,16 @@ function appendSourceRowByGroupX(input: {
   group: number;
   xKey: string;
   sourceRow: number;
+  /** When false, ensure the bucket exists but do not push (all-non-finite y path). */
+  include: boolean;
 }): void {
   const key = `${input.panelIndex}:${input.layerIndex}:${input.group}:${input.xKey}`;
   const members = input.sourceRowsByGroupX.get(key);
-  if (members === undefined) input.sourceRowsByGroupX.set(key, [input.sourceRow]);
-  else members.push(input.sourceRow);
+  if (members === undefined) {
+    input.sourceRowsByGroupX.set(key, input.include ? [input.sourceRow] : []);
+    return;
+  }
+  if (input.include) members.push(input.sourceRow);
 }
 
 function appendSourceRowByGroupKey(
@@ -184,7 +189,17 @@ function findBinIndex(value: number, bins: readonly BinEdge[], closed: "right" |
 export interface CandidateIdentityIndex {
   readonly seriesByRow: Map<string, number>;
   readonly sourceRowsByGroup: Map<string, number[]>;
-  /** `${panel}:${layer}:${group}:${bandKey(x)}` → source rows (count/summary/boxplot). */
+  /**
+   * `${panel}:${layer}:${group}:${bandKey(x)}` → source rows for aggregate
+   * group×x lineage (count/summary/boxplot).
+   *
+   * Count: every source row in the group×x bucket.
+   * Summary/boxplot (y mapped): only rows with finite y — the final represented
+   * membership so resolve returns this frozen array without a per-mark y scan
+   * (mirrors `sourceRowsByGroupY` / issue #216). Empty buckets are still present
+   * when every row at that x is non-finite, so lookups never fall through to a
+   * full-group re-scan.
+   */
   readonly sourceRowsByGroupX: Map<string, number[]>;
   /** `${panel}:${layer}:${group}:${frameRow}` → source rows (bin/histogram). */
   readonly sourceRowsByGroupBin: Map<string, number[]>;
@@ -234,6 +249,10 @@ export function buildCandidateIdentityIndex(
         const key = `${frameKey}:${group}`;
         appendSourceRowByGroupKey(sourceRowsByGroup, key, sourceRow);
         if (bucketByX && xField !== null) {
+          // Summary/boxplot: only finite y belongs in the final represented
+          // membership. Always create the group×x key (include=false) so an
+          // all-non-finite bucket is an empty frozen array, not a map miss.
+          const includeInX = yNumeric === null || Number.isFinite(yNumeric[localRow]!);
           appendSourceRowByGroupX({
             sourceRowsByGroupX,
             panelIndex,
@@ -241,6 +260,7 @@ export function buildCandidateIdentityIndex(
             group,
             xKey: aggregateLineageXKey(frame.table, xField, localRow, frame.binding),
             sourceRow,
+            include: includeInX,
           });
         }
         if (yNumeric !== null && Number.isFinite(yNumeric[localRow]!)) {
@@ -402,31 +422,38 @@ export function filterRepresentedSourceRows(input: {
     if (cachedY !== undefined) return cachedY;
   }
 
+  // Indexed group×x: buckets are the final represented membership (count: all
+  // rows; summary/boxplot: finite-y only). Return the frozen array as-is so
+  // LineageStore can WeakMap-intern once — no clone, no per-mark y re-filter.
+  if (needsX && indexKeyPrefix !== null && input.sourceRowsByGroupX !== undefined) {
+    const indexed = input.sourceRowsByGroupX.get(`${indexKeyPrefix}:${bandKey(outputX)}`);
+    if (indexed !== undefined) return indexed;
+  }
+
+  // Indexed bin membership (already final; bin never applies needsY).
+  if (needsBin && indexKeyPrefix !== null && input.sourceRowsByGroupBin !== undefined) {
+    const indexed = input.sourceRowsByGroupBin.get(`${indexKeyPrefix}:${frameRow}`);
+    if (indexed !== undefined) return indexed;
+  }
+
+  // Fallback without index maps: clone then filter (parity with pure filters).
   let representedRows = [...input.baseRows];
   if (needsX) {
-    representedRows =
-      (indexKeyPrefix !== null && input.sourceRowsByGroupX !== undefined
-        ? input.sourceRowsByGroupX.get(`${indexKeyPrefix}:${bandKey(outputX)}`)
-        : undefined) ??
-      filterAggregateXRows({
-        table,
-        field: aggregateXField,
-        outputX,
-        baseRows: representedRows,
-        binding: frame.binding,
-      });
+    representedRows = filterAggregateXRows({
+      table,
+      field: aggregateXField,
+      outputX,
+      baseRows: representedRows,
+      binding: frame.binding,
+    });
   } else if (needsBin) {
-    representedRows =
-      (indexKeyPrefix !== null && input.sourceRowsByGroupBin !== undefined
-        ? input.sourceRowsByGroupBin.get(`${indexKeyPrefix}:${frameRow}`)
-        : undefined) ??
-      filterBinRepresentedRows({
-        frame,
-        table,
-        frameRow,
-        field: aggregateXField,
-        baseRows: representedRows,
-      });
+    representedRows = filterBinRepresentedRows({
+      frame,
+      table,
+      frameRow,
+      field: aggregateXField,
+      baseRows: representedRows,
+    });
   }
 
   if (needsY) {
