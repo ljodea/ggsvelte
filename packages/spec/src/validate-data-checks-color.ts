@@ -45,6 +45,7 @@ function discreteDomainKey(value: unknown): string {
 function expectedManualDomainLength(
   domain: unknown,
   fieldValueLists: readonly (readonly unknown[] | null | undefined)[],
+  scaledConstants: readonly unknown[] = [],
 ): number | null {
   if (Array.isArray(domain)) return domain.filter((value) => value !== null).length;
   const seen = new Set<string>();
@@ -57,6 +58,11 @@ function expectedManualDomainLength(
       seen.add(discreteDomainKey(value));
     }
   }
+  for (const value of scaledConstants) {
+    if (value === null) continue;
+    sawValues = true;
+    seen.add(discreteDomainKey(value));
+  }
   return sawValues ? seen.size : null;
 }
 
@@ -65,9 +71,12 @@ export function checkColorScaleDataCompatibility(input: {
   scales: Record<string, unknown> | undefined;
   fields: FieldEvidenceMap;
   colorFields: Record<"color" | "fill", ChannelFieldUse[]>;
+  /** Scaled constants (`{ value, scale: true }`) included in runtime domain training. */
+  colorScaledConstants?: Record<"color" | "fill", readonly unknown[]>;
   temporalDecisionCache: TemporalDecisionCache;
 }): SpecError[] {
   const { scales, fields, colorFields, temporalDecisionCache } = input;
+  const colorScaledConstants = input.colorScaledConstants ?? { color: [], fill: [] };
   const errors: SpecError[] = [];
   const typeOf = (field: string) => fields.get(field)?.type ?? null;
 
@@ -81,6 +90,7 @@ export function checkColorScaleDataCompatibility(input: {
       const expected = expectedManualDomainLength(
         config.domain,
         colorFields[channel].map((use) => fields.get(use.field)?.values),
+        colorScaledConstants[channel],
       );
       if (expected !== null && range.length !== expected) {
         errors.push({
@@ -124,7 +134,8 @@ export function checkColorScaleDataCompatibility(input: {
         config?.timezone !== undefined ||
         config?.disambiguation !== undefined;
 
-      // Quantitative fields with temporal-only options fail at resolve time.
+      // Quantitative fields with temporal-only options fail at resolve time unless
+      // parseFailure: "censor" recovers at least one temporal value (status invalid).
       if (type === "quantitative" && requestsTemporal) {
         const info = fields.get(use.field);
         const decision = temporalDecisionForField(
@@ -139,7 +150,11 @@ export function checkColorScaleDataCompatibility(input: {
             }),
           },
         );
-        if (decision?.status !== "temporal") {
+        const censoredInvalid =
+          config?.parse !== undefined &&
+          config.parseFailure === "censor" &&
+          decision?.status === "invalid";
+        if (decision?.status !== "temporal" && !censoredInvalid) {
           errors.push({
             code: "scale-type-mismatch",
             path: use.path,
@@ -152,8 +167,8 @@ export function checkColorScaleDataCompatibility(input: {
         }
         if (
           config?.temporalKind !== undefined &&
-          decision.kind !== null &&
-          decision.kind !== undefined &&
+          decision?.kind !== null &&
+          decision?.kind !== undefined &&
           decision.kind !== config.temporalKind
         ) {
           errors.push({
@@ -205,9 +220,11 @@ export function checkColorScaleDataCompatibility(input: {
         config.parseFailure === "censor" &&
         decision?.status === "invalid";
       if (decision?.status === "temporal" || censoredInvalid) {
+        // Mirror runtime: compare recovered kind even when status is invalid+censored.
         if (
-          decision?.status === "temporal" &&
           config?.temporalKind !== undefined &&
+          decision?.kind !== null &&
+          decision?.kind !== undefined &&
           decision.kind !== config.temporalKind
         ) {
           errors.push({

@@ -168,6 +168,20 @@ describe("sequential color scales", () => {
     expect(legend.ticks.map((tick) => tick.label)).not.toContain("0");
   });
 
+  it("formats extreme log10 color domains without RangeError", () => {
+    const model = runPipeline(
+      pointSpec([1e-300, 1], { type: "sequential", transform: "log10" }),
+      size,
+    );
+    const legend = model.scene.legends.find((candidate) => candidate.type === "ramp");
+    if (legend?.type !== "ramp") throw new Error("expected ramp legend");
+    expect(legend.ticks.length).toBeGreaterThan(0);
+    for (const tick of legend.ticks) {
+      expect(typeof tick.label).toBe("string");
+      expect(tick.label.length).toBeGreaterThan(0);
+    }
+  });
+
   it("still checks temporalKind when parseFailure censors invalid rows", () => {
     expect(() =>
       runPipeline(
