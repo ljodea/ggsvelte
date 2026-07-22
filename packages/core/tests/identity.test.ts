@@ -227,6 +227,35 @@ describe("pipeline semantic identity", () => {
       [9.5, 20.5],
     ]);
 
+    // Codex P2: uncensored pass must honor baselineScales (nice/expand/type),
+    // not the stripped effective scale config. Data extent [1,19] nices to
+    // [0,20] then expands 5% → [-1,21]; with nice:false expand alone → [0.1,19.9].
+    const nicedBaseline = runPipeline(
+      {
+        data: {
+          values: [
+            { x: 1, y: 1 },
+            { x: 19, y: 19 },
+          ],
+        },
+        layers: [{ geom: "point", aes: { x: { field: "x" }, y: { field: "y" } } }],
+        scales: {
+          x: { type: "linear", domain: [2, 4], nice: false },
+          y: { type: "linear", domain: [2, 4], nice: false },
+        },
+      },
+      {
+        width: 400,
+        height: 240,
+        baselineScales: {
+          x: { type: "linear" },
+          y: { type: "linear" },
+        },
+      },
+    );
+    expect(nicedBaseline.domains.baseline.x).toEqual([-1, 21]);
+    expect(nicedBaseline.domains.baseline.y).toEqual([-1, 21]);
+
     const override = {
       x: [100, 200],
       y: [300, 400],
