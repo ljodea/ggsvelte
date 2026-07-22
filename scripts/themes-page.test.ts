@@ -9,19 +9,19 @@ import { colorBehaviorEvidence } from "../apps/docs/src/lib/color-evidence.ts";
 
 describe("themes catalog", () => {
   it("projects every public theme and categorical palette without docs-owned colors", () => {
-    expect(THEME_OPTIONS.map(({ name }) => name)).toEqual([
-      "default",
-      "light",
-      "dark",
-      "minimal",
-      "ggplot2",
-      "classic",
-      "hrbr",
-      "few",
-      "clean",
-      "fivethirtyeight",
-      "economist",
-      "tufte",
+    expect(THEME_OPTIONS.map(({ name, scheme }) => ({ name, scheme }))).toEqual([
+      { name: "default", scheme: "observable10" },
+      { name: "light", scheme: "tableau10" },
+      { name: "dark", scheme: "flexoki" },
+      { name: "minimal", scheme: "colorblind" },
+      { name: "ggplot2", scheme: "observable10" },
+      { name: "classic", scheme: "tableau10" },
+      { name: "hrbr", scheme: "ipsum" },
+      { name: "few", scheme: "tableau10" },
+      { name: "clean", scheme: "flexoki" },
+      { name: "fivethirtyeight", scheme: "tableau10" },
+      { name: "economist", scheme: "flexoki" },
+      { name: "tufte", scheme: "colorblind" },
     ]);
 
     expect(CATEGORICAL_PALETTES).toEqual([

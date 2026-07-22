@@ -24,9 +24,26 @@ const PALETTE_LABELS = {
   colorblind: "Colorblind",
 } as const satisfies Record<(typeof CATEGORICAL_SCHEME_NAMES)[number], string>;
 
+/** Categorical scheme paired with each theme demo so paper + marks read as a set. */
+const THEME_DEMO_SCHEMES = {
+  default: "observable10",
+  light: "tableau10",
+  dark: "flexoki",
+  minimal: "colorblind",
+  ggplot2: "observable10",
+  classic: "tableau10",
+  hrbr: "ipsum",
+  few: "tableau10",
+  clean: "flexoki",
+  fivethirtyeight: "tableau10",
+  economist: "flexoki",
+  tufte: "colorblind",
+} as const satisfies Record<ThemeName, (typeof CATEGORICAL_SCHEME_NAMES)[number]>;
+
 export const THEME_OPTIONS = THEME_NAMES.map((name) => ({
   name,
   label: THEME_LABELS[name],
+  scheme: THEME_DEMO_SCHEMES[name],
 }));
 
 export const CATEGORICAL_PALETTES = CATEGORICAL_SCHEME_NAMES.map((name) => {

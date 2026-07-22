@@ -125,6 +125,12 @@
       </dd>
     </div>
     <div>
+      <dt>Interactions</dt>
+      <dd>
+        <a href={`${base}/interactions`}>Inspect, select, zoom, legend focus</a>
+      </dd>
+    </div>
+    <div>
       <dt>Diagnostics</dt>
       <dd>
         <a href={`${base}/guide/errors`}>Validation and pipeline codes</a>
