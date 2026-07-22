@@ -36,8 +36,11 @@
   let copying = $state(false);
   let copyStatusRaw = $state("");
   let exportStatus = $state("");
-  /** Outputs identity for the in-flight / completed copy session. */
-  let copySessionOutputs = $state<readonly PlaygroundOutput[] | null>(null);
+  /**
+   * Outputs identity for the in-flight / completed copy session.
+   * `$state.raw` keeps the reference unproxied so identity compares work.
+   */
+  let copySessionOutputs = $state.raw<readonly PlaygroundOutput[] | null>(null);
   const tabsetId = $props.id();
   const panelId = `${tabsetId}-panel`;
   const active = $derived(clampOutputTabIndex(selected, outputs.length));
@@ -47,6 +50,15 @@
   );
   const manualFallback = $derived(manualFallbackIntent && copySessionLive);
   const copyStatus = $derived(copySessionLive ? copyStatusRaw : "");
+  const visibleFallbackCode = $derived(copySessionLive ? fallbackCode : "");
+  const visibleFallbackLabel = $derived(
+    copySessionLive ? fallbackLabel : "output",
+  );
+
+  // Drop any manual-copy selection when the session is invalidated (e.g. promote).
+  $effect(() => {
+    if (!copySessionLive) getSelection()?.removeAllRanges();
+  });
 
   function select(index: number): void {
     if (copying) return;
@@ -196,10 +208,10 @@
   class="manual-copy-source"
   aria-hidden={!manualFallback}
 >
-  <p>Copy the selected {fallbackLabel} output manually:</p>
+  <p>Copy the selected {visibleFallbackLabel} output manually:</p>
   <!-- svelte-ignore a11y_no_noninteractive_tabindex (visible manual-copy source is scrollable) -->
   <pre tabindex={manualFallback ? 0 : -1}><code bind:this={fallbackSource}
-      >{fallbackCode}</code
+      >{visibleFallbackCode}</code
     ></pre>
 </div>
 
