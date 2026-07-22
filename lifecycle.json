@@ -396,6 +396,14 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "GeomRasterOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GeomRectOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "GeomRuleOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -405,6 +413,10 @@
           "lifecycle": "experimental"
         },
         "GeomTextOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GeomTileOptions": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -640,6 +652,38 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "RasterLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RasterLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RasterLayerSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "RasterParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RectLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RectLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RectLayerSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "RectParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "RenderBackend": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -724,6 +768,14 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "RuntimeRasterLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RuntimeRectLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "RuntimeRibbonLayer": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -741,6 +793,10 @@
           "lifecycle": "experimental"
         },
         "RuntimeTextLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RuntimeTileLayer": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -985,6 +1041,22 @@
           "lifecycle": "experimental"
         },
         "ThemeSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "TileLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "TileLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "TileLayerSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TileParams": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -3177,6 +3249,14 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "GeomRaster": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GeomRect": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "GeomRibbon": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -3190,6 +3270,10 @@
           "lifecycle": "experimental"
         },
         "GeomText": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GeomTile": {
           "kind": "value",
           "lifecycle": "experimental"
         },

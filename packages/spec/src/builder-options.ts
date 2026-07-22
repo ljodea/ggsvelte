@@ -15,11 +15,14 @@ import type {
   PointParams,
   PointPosition,
   PositionParams,
+  RasterParams,
+  RectParams,
   RenderBackend,
   RuleParams,
   SmoothParams,
   StackablePosition,
   TextParams,
+  TileParams,
 } from "./schema.js";
 
 /** Point-layer sugar options: params plus aes and position (jitter/nudge). */
@@ -81,6 +84,24 @@ export interface GeomErrorbarOptions extends ErrorbarParams {
   aes?: AesInput;
   render?: RenderBackend;
   stat?: "identity" | "summary";
+}
+
+/** Rect-layer sugar options: params plus optional layer-level aes. */
+export interface GeomRectOptions extends RectParams {
+  aes?: AesInput;
+  render?: RenderBackend;
+}
+
+/** Tile-layer sugar options: params plus optional layer-level aes. */
+export interface GeomTileOptions extends TileParams {
+  aes?: AesInput;
+  render?: RenderBackend;
+}
+
+/** Raster-layer sugar options: params plus optional layer-level aes. */
+export interface GeomRasterOptions extends RasterParams {
+  aes?: AesInput;
+  render?: RenderBackend;
 }
 
 /** Ribbon-layer sugar options: params plus an optional layer-level aes. */

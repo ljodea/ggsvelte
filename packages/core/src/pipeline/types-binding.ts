@@ -71,8 +71,14 @@ export interface LayerBinding {
   yBinning?: BinnedBoundaries | undefined;
   yminField: string | null;
   ymaxField: string | null;
+  /** Left edge field (geom rect); null when unused. */
   xminField: string | null;
+  /** Right edge field (geom rect); null when unused. */
   xmaxField: string | null;
+  /** Tile width field (optional); null when unused or constant via params. */
+  widthField: string | null;
+  /** Tile height field (optional); null when unused or constant via params. */
+  heightField: string | null;
   /** Ribbon only: resolved running-coordinate orientation. */
   ribbonOrientation?: "x" | "y";
   color: ColorBinding;

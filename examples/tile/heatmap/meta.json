@@ -1,0 +1,6 @@
+{
+  "title": "Categorical heatmap (geom tile)",
+  "description": "Center-sized tiles on discrete x/y with fill — the ordinary heatmap contract without raster grid constraints.",
+  "tags": ["tile", "heatmap", "categorical"],
+  "docsSection": "Rectangles & grids"
+}

@@ -287,7 +287,10 @@ export class MockResponder implements Responder {
     const repair = user.includes(REPAIR_MARKER);
     const profile = parseProfileLine(user);
 
+    // Aesthetic mapping phrases like "map y to station" / "map period to fill"
+    // must not trigger the geographic-map refusal.
     const aestheticMapping =
+      /\bmap\s+\S+\s+to\s+\S+/.test(prompt) ||
       /\bmap\s+.+\s+to\s+(?:binned\s+)?(?:colou?r|fill)\b/.test(prompt) ||
       STYLE_CHANNELS.some((channel) => mappedStyleField(prompt, profile, channel) !== undefined);
     if (
@@ -340,6 +343,9 @@ export class MockResponder implements Responder {
       }
     };
 
+    const fieldNamed = (name: string): string | undefined =>
+      profile.fields.some((field) => field.name === name) ? name : undefined;
+
     // --- geom selection (keyword templates, most specific first) -----------
     if (
       prompt.includes("three layers") &&
@@ -356,6 +362,76 @@ export class MockResponder implements Responder {
       );
       scales["x"] = { type: "linear", transform: "log10" };
       xField = x;
+    } else if (/\braster\b/.test(prompt)) {
+      const x = fieldNamed("x") ?? pick.quant() ?? "x";
+      const y = fieldNamed("y") ?? pick.quant() ?? "y";
+      const fill =
+        fieldNamed("z") ?? fieldNamed("elev") ?? pick.mentionedQuant() ?? pick.quant() ?? "z";
+      const aes: MockAes = { x: f(x), y: f(y), fill: f(fill) };
+      spec.layers.push({ geom: "raster", aes });
+      xField = x;
+    } else if (/\b(?:geom )?tile\b|heatmap/.test(prompt)) {
+      const cats = profile.fields.filter(
+        (field) => field.type === "nominal" || field.type === "ordinal",
+      );
+      const quants = profile.fields.filter((field) => field.type === "quantitative");
+      let x: string;
+      let y: string;
+      let fill: string;
+      if (cats.length >= 2) {
+        x = cats[0]!.name;
+        y = cats[1]!.name;
+        fill = quants[0]?.name ?? pick.quant() ?? "n";
+      } else {
+        x = fieldNamed("x") ?? pick.quant() ?? "x";
+        y = fieldNamed("y") ?? pick.quant() ?? "y";
+        fill =
+          fieldNamed("reading") ?? fieldNamed("n") ?? pick.mentionedQuant() ?? pick.quant() ?? "n";
+      }
+      const aes: MockAes = { x: f(x), y: f(y), fill: f(fill) };
+      spec.layers.push({ geom: "tile", aes });
+      xField = x;
+    } else if (/\brectangles?\b|\bgeom rect\b|\brect\b.*xmin|\bxmin\/xmax\b/.test(prompt)) {
+      const xmin = fieldNamed("xmin") ?? fieldNamed("start") ?? pick.quant() ?? "xmin";
+      const xmax = fieldNamed("xmax") ?? fieldNamed("end") ?? pick.quant() ?? "xmax";
+      const ymin = fieldNamed("ymin") ?? fieldNamed("lo") ?? pick.quant() ?? "ymin";
+      const ymax = fieldNamed("ymax") ?? fieldNamed("hi") ?? pick.quant() ?? "ymax";
+      const aes: MockAes = {
+        xmin: f(xmin),
+        xmax: f(xmax),
+        ymin: f(ymin),
+        ymax: f(ymax),
+      };
+      const fill = pick.cat() ?? pick.mentionedCat();
+      if (fill !== undefined) aes.fill = f(fill);
+      const layer: MockLayer = { geom: "rect", aes };
+      if (/semi-transparent|alpha/.test(prompt)) layer.params = { alpha: 0.4 };
+      spec.layers.push(layer);
+      xField = xmin;
+    } else if (/\bribbon\b/.test(prompt) && !/without .*(?:band|ribbon)/.test(prompt)) {
+      // Horizontal (y + xmin/xmax) vs vertical (x + ymin/ymax) ribbons.
+      if (
+        /\bhorizontal\b|map y to|xmin to|xmax to/.test(prompt) &&
+        !/ymin to|ymax to/.test(prompt)
+      ) {
+        const y = fieldNamed("station") ?? pick.quant() ?? "y";
+        const xmin = fieldNamed("min_depth") ?? fieldNamed("xmin") ?? pick.quant() ?? "xmin";
+        const xmax = fieldNamed("max_depth") ?? fieldNamed("xmax") ?? pick.quant() ?? "xmax";
+        spec.layers.push({
+          geom: "ribbon",
+          aes: { y: f(y), xmin: f(xmin), xmax: f(xmax) },
+        });
+        xField = xmin;
+      } else {
+        const x = fieldNamed("week") ?? pick.temporal() ?? pick.quant() ?? "x";
+        const ymin = fieldNamed("lo") ?? fieldNamed("ymin") ?? pick.quant() ?? "ymin";
+        const ymax = fieldNamed("hi") ?? fieldNamed("ymax") ?? pick.quant() ?? "ymax";
+        spec.layers.push({
+          geom: "ribbon",
+          aes: { x: f(x), ymin: f(ymin), ymax: f(ymax) },
+        });
+        xField = x;
+      }
     } else if (/stepp?ed/.test(prompt)) {
       // Intentionally-invalid first attempt (unknown geom) to exercise the
       // repair round; the repair call returns the fixed valid spec.
@@ -374,7 +450,7 @@ export class MockResponder implements Responder {
       colorFor("fill", aes);
       spec.layers.push({ geom: "histogram", aes });
       xField = x;
-    } else if (prompt.includes("density")) {
+    } else if (/\bdensity\b/.test(prompt) && !/\braster\b|\btile\b|\bheatmap\b/.test(prompt)) {
       const x = pick.quant() ?? "x";
       const aes: MockAes = { x: f(x) };
       colorFor("color", aes);

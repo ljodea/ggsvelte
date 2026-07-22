@@ -114,7 +114,8 @@ export function buildIdentityFrame(
     // fields — do not populate them for unrelated geoms that happen to map
     // xmin/xmax, or scale collection treats the layer as edge/bin evidence.
     xmin:
-      binding.layer.geom === "ribbon" && binding.xminField !== null
+      (binding.layer.geom === "rect" || binding.layer.geom === "ribbon") &&
+      binding.xminField !== null
         ? positionNumeric(
             table,
             binding.xminField,
@@ -124,7 +125,8 @@ export function buildIdentityFrame(
           )
         : null,
     xmax:
-      binding.layer.geom === "ribbon" && binding.xmaxField !== null
+      (binding.layer.geom === "rect" || binding.layer.geom === "ribbon") &&
+      binding.xmaxField !== null
         ? positionNumeric(
             table,
             binding.xmaxField,

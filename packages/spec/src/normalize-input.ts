@@ -24,6 +24,8 @@ import type {
   PointParams,
   PointPosition,
   PositionParams,
+  RasterParams,
+  RectParams,
   RenderBackend,
   RuleParams,
   Scales,
@@ -32,6 +34,7 @@ import type {
   TextParams,
   ThemeName,
   ThemeSpec,
+  TileParams,
 } from "./schema.js";
 
 /** Channel form accepted at the TS/builder level: bare string = { field }. */
@@ -55,6 +58,8 @@ export interface AesInput {
   ymax?: ChannelInput;
   xmin?: ChannelInput;
   xmax?: ChannelInput;
+  width?: ChannelInput;
+  height?: ChannelInput;
 }
 
 interface LayerInputBase {
@@ -158,6 +163,27 @@ export interface ErrorbarLayerInput extends LayerInputBase {
   params?: ErrorbarParams;
 }
 
+export interface RectLayerInput extends LayerInputBase {
+  geom: "rect";
+  stat?: "identity";
+  position?: "identity";
+  params?: RectParams;
+}
+
+export interface TileLayerInput extends LayerInputBase {
+  geom: "tile";
+  stat?: "identity";
+  position?: "identity";
+  params?: TileParams;
+}
+
+export interface RasterLayerInput extends LayerInputBase {
+  geom: "raster";
+  stat?: "identity";
+  position?: "identity";
+  params?: RasterParams;
+}
+
 export interface RibbonLayerInput extends LayerInputBase {
   geom: "ribbon";
   stat?: "identity";
@@ -179,7 +205,10 @@ export type LayerInput =
   | SmoothLayerInput
   | BoxplotLayerInput
   | DensityLayerInput
-  | ErrorbarLayerInput;
+  | ErrorbarLayerInput
+  | RectLayerInput
+  | TileLayerInput
+  | RasterLayerInput;
 
 /** Spec accepted at the TS/builder level (superset of PortableSpec forms). */
 export interface SpecInput {

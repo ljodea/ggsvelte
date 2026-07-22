@@ -16,6 +16,9 @@ export function candidateAutoMode(
       return "xy";
     case "col":
     case "bar":
+    case "rect":
+    case "tile":
+    case "raster":
       return "exact";
     case "line":
     case "area":

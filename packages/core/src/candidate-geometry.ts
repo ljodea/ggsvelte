@@ -52,8 +52,12 @@ export function candidatePrimitiveCount(batch: GeometryBatch): number {
 }
 
 export function localAnchor(batch: GeometryBatch, i: number): readonly [number, number] {
-  if (batch.kind === "rects")
-    return [batch.rects[i * 4]! + batch.rects[i * 4 + 2]! / 2, batch.rects[i * 4 + 1]!];
+  if (batch.kind === "rects") {
+    const x = batch.rects[i * 4]! + batch.rects[i * 4 + 2]! / 2;
+    const yTop = batch.rects[i * 4 + 1]!;
+    const h = batch.rects[i * 4 + 3]!;
+    return batch.anchor === "center" ? [x, yTop + h / 2] : [x, yTop];
+  }
   if (batch.kind === "segments")
     return batch.anchorPositions === undefined
       ? [

@@ -1,0 +1,6 @@
+{
+  "title": "Regular density grid (geom raster)",
+  "description": "Equal-cell raster from a regular (x, y) grid with fill — dense heatmaps without per-cell strokes.",
+  "tags": ["raster", "grid", "heatmap"],
+  "docsSection": "Rectangles & grids"
+}

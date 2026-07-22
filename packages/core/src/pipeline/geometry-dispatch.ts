@@ -15,6 +15,7 @@ import {
   segmentsBatch,
 } from "./geometry-marks.js";
 import { boxplotBatches, errorbarBatch, smoothBatches } from "./geometry-composites.js";
+import { edgeRectsBatch, rasterRectsBatch, tileRectsBatch } from "./geometry-edge-rects.js";
 import { ribbonBatches } from "./geometry-ribbon.js";
 
 function single(batch: GeometryBatch | null): GeometryBatch[] {
@@ -37,6 +38,12 @@ export function dispatchGeometryBatch(
     case "col":
     case "bar":
       return single(rectsBatch(frame, fx, fill, styles, warnings));
+    case "rect":
+      return single(edgeRectsBatch(frame, fx, fill, color, styles, warnings));
+    case "tile":
+      return single(tileRectsBatch(frame, fx, fill, color, styles, warnings));
+    case "raster":
+      return single(rasterRectsBatch(frame, fx, fill, styles, warnings));
     case "area":
     case "density":
       return single(areaBatch(frame, fx, fill, styles, warnings));

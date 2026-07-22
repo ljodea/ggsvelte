@@ -1,0 +1,39 @@
+{
+  "id": "57-sensor-grid-tile",
+  "kind": "chart",
+  "prompt": "Plot continuous sensor readings on a regular x/y grid as tiles filled by reading.",
+  "dataProfile": {
+    "fields": [
+      { "name": "x", "type": "quantitative" },
+      { "name": "y", "type": "quantitative" },
+      { "name": "reading", "type": "quantitative" }
+    ],
+    "rowCount": 4
+  },
+  "data": {
+    "main": [
+      { "x": 0, "y": 0, "reading": 1.1 },
+      { "x": 1, "y": 0, "reading": 2.2 },
+      { "x": 0, "y": 1, "reading": 3.3 },
+      { "x": 1, "y": 1, "reading": 4.4 }
+    ]
+  },
+  "gold": {
+    "edition": 2,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "tile",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "x" },
+          "y": { "field": "y" },
+          "fill": { "field": "reading" }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "Second tile coverage: continuous centers."
+}

@@ -1,0 +1,39 @@
+{
+  "id": "58-density-surface-raster",
+  "kind": "chart",
+  "prompt": "Render this regular density grid with geom raster filled by z.",
+  "dataProfile": {
+    "fields": [
+      { "name": "x", "type": "quantitative" },
+      { "name": "y", "type": "quantitative" },
+      { "name": "z", "type": "quantitative" }
+    ],
+    "rowCount": 4
+  },
+  "data": {
+    "main": [
+      { "x": 0, "y": 0, "z": 0.1 },
+      { "x": 1, "y": 0, "z": 0.4 },
+      { "x": 0, "y": 1, "z": 0.7 },
+      { "x": 1, "y": 1, "z": 0.9 }
+    ]
+  },
+  "gold": {
+    "edition": 2,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "raster",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "x" },
+          "y": { "field": "y" },
+          "fill": { "field": "z" }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "geom raster equal-cell grid."
+}

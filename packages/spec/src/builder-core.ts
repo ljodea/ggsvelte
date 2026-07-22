@@ -18,9 +18,12 @@ import type {
   GeomHistogramOptions,
   GeomLineOptions,
   GeomPointOptions,
+  GeomRasterOptions,
+  GeomRectOptions,
   GeomRuleOptions,
   GeomSmoothOptions,
   GeomTextOptions,
+  GeomTileOptions,
 } from "./builder-options.js";
 import type {
   A11yMode,
@@ -168,6 +171,21 @@ export class GGBuilderCore {
    */
   geomErrorbar(options: GeomErrorbarOptions = {}): GGBuilder {
     return this.layer(layerFrom("errorbar", options));
+  }
+
+  /** Sugar for .layer({ geom: 'rect', ... }) — arbitrary xmin/xmax/ymin/ymax regions. */
+  geomRect(options: GeomRectOptions = {}): GGBuilder {
+    return this.layer(layerFrom("rect", options));
+  }
+
+  /** Sugar for .layer({ geom: 'tile', ... }) — center-sized cells at x/y. */
+  geomTile(options: GeomTileOptions = {}): GGBuilder {
+    return this.layer(layerFrom("tile", options));
+  }
+
+  /** Sugar for .layer({ geom: 'raster', ... }) — equal-cell dense grid. */
+  geomRaster(options: GeomRasterOptions = {}): GGBuilder {
+    return this.layer(layerFrom("raster", options));
   }
 
   /**

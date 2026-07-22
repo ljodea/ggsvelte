@@ -28,6 +28,9 @@ export {
   DataRefSchema,
   DensityLayerSchema,
   ErrorbarLayerSchema,
+  RectLayerSchema,
+  TileLayerSchema,
+  RasterLayerSchema,
   RibbonLayerSchema,
   FacetSpecSchema,
   GEOM_DEFAULTS,
@@ -78,6 +81,12 @@ export type {
   DensityParams,
   ErrorbarLayer,
   ErrorbarParams,
+  RectLayer,
+  RectParams,
+  TileLayer,
+  TileParams,
+  RasterLayer,
+  RasterParams,
   RibbonLayer,
   RibbonParams,
   FacetScales,
@@ -436,10 +445,13 @@ export type {
   RuntimeLayerSpec,
   RuntimeLineLayer,
   RuntimePointLayer,
+  RuntimeRasterLayer,
+  RuntimeRectLayer,
   RuntimeRuleLayer,
   RuntimeSmoothLayer,
   RuntimeSpec,
   RuntimeTextLayer,
+  RuntimeTileLayer,
 } from "./runtime.js";
 
 // Canonicalizer
@@ -461,8 +473,11 @@ export type {
   LayerInput,
   LineLayerInput,
   PointLayerInput,
+  RasterLayerInput,
+  RectLayerInput,
   RuleLayerInput,
   SmoothLayerInput,
+  TileLayerInput,
   SpecInput,
   TextLayerInput,
 } from "./normalize.js";
@@ -510,9 +525,12 @@ export type {
   GeomHistogramOptions,
   GeomLineOptions,
   GeomPointOptions,
+  GeomRasterOptions,
+  GeomRectOptions,
   GeomRuleOptions,
   GeomSmoothOptions,
   GeomTextOptions,
+  GeomTileOptions,
 } from "./builder.js";
 
 // Schema artifact (schema/v0.json)

@@ -40,7 +40,9 @@ export function assertRequiredChannels(input: {
     geom === "area" ||
     geom === "text" ||
     geom === "smooth" ||
-    geom === "boxplot"
+    geom === "boxplot" ||
+    geom === "tile" ||
+    geom === "raster"
   ) {
     requireField(xField, "x", index, geom);
     if (yStatColumn === null) requireField(yField, "y", index, geom);
@@ -54,6 +56,12 @@ export function assertRequiredChannels(input: {
       requireField(yminField, "ymin", index, geom);
       requireField(ymaxField, "ymax", index, geom);
     }
+  }
+  if (geom === "rect") {
+    requireField(xminField, "xmin", index, geom);
+    requireField(xmaxField, "xmax", index, geom);
+    requireField(yminField, "ymin", index, geom);
+    requireField(ymaxField, "ymax", index, geom);
   }
   if (geom === "ribbon") {
     const orientation = ribbonOrientation ?? "x";

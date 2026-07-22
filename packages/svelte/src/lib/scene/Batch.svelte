@@ -138,6 +138,8 @@
     width: number;
     height: number;
     fill: string;
+    /** Outline color when stroke is set; undefined = no outline. */
+    stroke: string | undefined;
     alpha: number;
     dasharray: string | undefined;
   }
@@ -152,6 +154,11 @@
           ? (batch.linetype ?? "solid")
           : LINETYPE_NAMES[batch.linetypeIndexes[j]!]!;
       const dash = LINETYPE_DASHES[LINETYPE_NAMES.indexOf(linetype)] ?? [];
+      const stroke =
+        batch.strokes?.[j] ??
+        (batch.stroke === undefined && batch.strokes === undefined
+          ? undefined
+          : (batch.stroke ?? ink));
       return {
         index: j,
         x: batch.rects[j * 4]!,
@@ -159,17 +166,11 @@
         width: batch.rects[j * 4 + 2]!,
         height: batch.rects[j * 4 + 3]!,
         fill: batch.fills?.[j] ?? batch.fill ?? roleFill,
+        stroke,
         alpha: styleNumber(batch.alphas?.[j] ?? 1),
         dasharray: dash.length === 0 ? undefined : dash.join(" "),
       };
     });
-  });
-
-  /** Rect outline (boxplot boxes): undefined = no outline. */
-  const rectStroke: string | undefined = $derived.by(() => {
-    if (batch.kind !== "rects") return void 0;
-    if (batch.stroke === undefined) return void 0;
-    return batch.stroke ?? ink;
   });
 
   interface Segment {
@@ -370,11 +371,11 @@
         width={r.width}
         height={r.height}
         fill={r.fill}
-        stroke={rectStroke}
-        stroke-width={rectStroke === undefined
+        stroke={r.stroke}
+        stroke-width={r.stroke === undefined
           ? undefined
           : (batch.strokeWidths?.[r.index] ?? batch.strokeWidth ?? 1)}
-        stroke-dasharray={rectStroke === undefined ? undefined : r.dasharray}
+        stroke-dasharray={r.stroke === undefined ? undefined : r.dasharray}
         opacity={itemOpacity(r.alpha, presented.focused)}
         data-gg-focused={focusMask === null ? undefined : presented.focused}
       />

@@ -227,19 +227,27 @@
         },
         "ymin": {
           "$ref": "#/$defs/ChannelValue",
-          "description": "Lower bound on the y measure (errorbar identity; ribbon x-orientation). Quantitative values only."
+          "description": "Lower y bound (errorbar identity, rect edges, ribbon x-orientation). Quantitative values only."
         },
         "ymax": {
           "$ref": "#/$defs/ChannelValue",
-          "description": "Upper bound on the y measure (errorbar identity; ribbon x-orientation). Quantitative values only."
+          "description": "Upper y bound (errorbar identity, rect edges, ribbon x-orientation). Quantitative values only."
         },
         "xmin": {
           "$ref": "#/$defs/ChannelValue",
-          "description": "Lower bound on the x measure (ribbon y-orientation). Quantitative values only."
+          "description": "Left edge / lower x bound (geom rect; ribbon y-orientation). Quantitative values only."
         },
         "xmax": {
           "$ref": "#/$defs/ChannelValue",
-          "description": "Upper bound on the x measure (ribbon y-orientation). Quantitative values only."
+          "description": "Right edge / upper x bound (geom rect; ribbon y-orientation). Quantitative values only."
+        },
+        "width": {
+          "$ref": "#/$defs/ChannelValue",
+          "description": "Cell width for geom tile (data units after position transform; not a trained position scale). Prefer params.width for a constant."
+        },
+        "height": {
+          "$ref": "#/$defs/ChannelValue",
+          "description": "Cell height for geom tile (data units after position transform; not a trained position scale). Prefer params.height for a constant."
         }
       },
       "additionalProperties": false,
@@ -599,6 +607,82 @@
       },
       "additionalProperties": false,
       "description": "Parameters for the errorbar geom: styling plus the summary-stat functions (fun, funMin, funMax) used when stat is \"summary\"."
+    },
+    "RectParams": {
+      "type": "object",
+      "properties": {
+        "linewidth": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Outline stroke width in px when color is set. Must be greater than 0."
+        },
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Rectangle opacity. Must be between 0 and 1 (inclusive). Default 1."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Styling parameters for the rect geom (arbitrary xmin/xmax/ymin/ymax regions)."
+    },
+    "TileParams": {
+      "type": "object",
+      "properties": {
+        "width": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Constant tile width in data units after position transform (band axes: fraction of the band step). Default: resolution of unique x centers (continuous) or 1 (band)."
+        },
+        "height": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Constant tile height in data units after position transform (band axes: fraction of the band step). Default: resolution of unique y centers (continuous) or 1 (band)."
+        },
+        "linewidth": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Outline stroke width in px when color is set. Must be greater than 0."
+        },
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Tile opacity. Must be between 0 and 1 (inclusive). Default 1."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Parameters for the tile geom: center-sized cells (x/y + optional width/height)."
+    },
+    "RasterParams": {
+      "type": "object",
+      "properties": {
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Raster opacity. Must be between 0 and 1 (inclusive). Default 1."
+        },
+        "hjust": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Horizontal justification of each cell over its x center (0–1). Default 0.5."
+        },
+        "vjust": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Vertical justification of each cell over its y center (0–1). Default 0.5."
+        },
+        "interpolate": {
+          "type": "boolean",
+          "const": false,
+          "description": "Interpolation between cells. Only false (nearest / no interpolation) is supported."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Parameters for the raster geom: equal-cell dense grid (no per-cell stroke)."
     },
     "PositionParams": {
       "type": "object",
@@ -1200,6 +1284,108 @@
       "additionalProperties": false,
       "description": "An errorbar layer. Identity stat: requires x, ymin, and ymax channels. Summary stat: requires x and y channels (bounds computed by params.fun/funMin/funMax, default mean_se)."
     },
+    "RectLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "rect",
+          "description": "Rectangle geometry: one rectangle per data row from mapped xmin/xmax/ymin/ymax edges. Use for arbitrary shaded regions and time bands."
+        },
+        "stat": {
+          "type": "string",
+          "const": "identity",
+          "description": "Rect layers draw the data as-is."
+        },
+        "position": {
+          "type": "string",
+          "const": "identity",
+          "description": "Rect layers use identity positioning."
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "params": {
+          "$ref": "#/$defs/RectParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A rectangle layer. Requires xmin, xmax, ymin, and ymax channels (quantitative edges)."
+    },
+    "TileLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "tile",
+          "description": "Tile geometry: center-sized cells at (x, y) with optional width/height. Use for heatmaps and gridded categorical cells; supports stroke outlines."
+        },
+        "stat": {
+          "type": "string",
+          "const": "identity",
+          "description": "Tile layers draw the data as-is."
+        },
+        "position": {
+          "type": "string",
+          "const": "identity",
+          "description": "Tile layers use identity positioning."
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "params": {
+          "$ref": "#/$defs/TileParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A tile layer. Requires x and y channels; optional width/height (params or aes) size each cell after position transform."
+    },
+    "RasterLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "raster",
+          "description": "Raster geometry: equal-cell grid at (x, y) with fill; optimized dense heatmaps without per-cell strokes. Irregular spacing warns and suggests geom tile."
+        },
+        "stat": {
+          "type": "string",
+          "const": "identity",
+          "description": "Raster layers draw the data as-is."
+        },
+        "position": {
+          "type": "string",
+          "const": "identity",
+          "description": "Raster layers use identity positioning."
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "params": {
+          "$ref": "#/$defs/RasterParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A raster layer. Requires x and y (regular spacing); fill maps cell color. No stroke. interpolate must be false when set."
+    },
     "AreaLayer": {
       "type": "object",
       "required": [
@@ -1385,6 +1571,15 @@
         },
         {
           "$ref": "#/$defs/ErrorbarLayer"
+        },
+        {
+          "$ref": "#/$defs/RectLayer"
+        },
+        {
+          "$ref": "#/$defs/TileLayer"
+        },
+        {
+          "$ref": "#/$defs/RasterLayer"
         }
       ],
       "description": "One plot layer. The `geom` field selects the geometry and determines which stat, position, and params are allowed."
