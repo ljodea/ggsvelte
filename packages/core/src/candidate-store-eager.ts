@@ -1,10 +1,9 @@
+import { pathRange, pathSemanticNeighborRange } from "./candidate-geometry.js";
 import {
   closestOrthInRange,
   directionalNearestInOrder,
   panelRangeInOrder,
-  pathRange,
-  pathSemanticNeighborRange,
-} from "./candidate-geometry.js";
+} from "./candidate-geometry-nearest.js";
 import { closestPathEdge } from "./candidate-path-geometry.js";
 import { AUTO_MODES, buildCandidateStoreIndexes } from "./candidate-store-indexes.js";
 import type { BucketBoundary, SeriesBoundary } from "./candidate-store-indexes.js";
