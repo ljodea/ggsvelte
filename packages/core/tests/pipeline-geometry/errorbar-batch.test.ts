@@ -107,17 +107,17 @@ describe("packSegmentsBatch", () => {
     expect(
       packSegmentsBatch({
         frame,
-        segments: [],
-        rowIndex: [],
-        perSegmentColors: [],
+        segments: new Float32Array(0),
+        rowIndex: new Uint32Array(0),
+        strokes: null,
         wantsColors: false,
       }),
     ).toBeNull();
     const batch = packSegmentsBatch({
       frame,
-      segments: [0, 0, 10, 10],
-      rowIndex: [3],
-      perSegmentColors: [],
+      segments: Float32Array.of(0, 0, 10, 10),
+      rowIndex: Uint32Array.of(3),
+      strokes: null,
       wantsColors: false,
     });
     expect(batch?.kind).toBe("segments");
