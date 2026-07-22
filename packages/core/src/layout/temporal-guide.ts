@@ -10,6 +10,8 @@ import {
   type TemporalKind,
 } from "@ggsvelte/spec";
 
+import { neighbourOverlap } from "./axis-overlap.js";
+import type { BandLabelMode } from "./band-guide.js";
 import type { PositionScale } from "../scales/train.js";
 import type { CellValue } from "../table.js";
 import { formatTemporalTickSequence, formatTime } from "./format.js";
@@ -43,6 +45,12 @@ export interface AxisGuidePlan {
   overlap: boolean;
   marginOverflow: boolean;
   degraded: readonly string[];
+  /** Band label layout (measured horizontal band axes only). */
+  bandLabelMode?: BandLabelMode;
+  /** Band rotation in degrees (0 | -45 | -90). */
+  bandLabelAngle?: number;
+  /** Measured orthogonal (bottom) band height the labels require, px. */
+  bandLabelBandHeight?: number;
 }
 
 export interface DiscreteGuideEntry {
@@ -317,17 +325,13 @@ function evaluateTicks(
     })
     .toSorted((left, right) => left.pos - right.pos);
 
-  let overlap = false;
-  for (let index = 1; index < projected.length; index++) {
-    const previous = projected[index - 1]!;
-    const current = projected[index]!;
-    const previousHalf = input.orient === "horizontal" ? previous.width / 2 : previous.height / 2;
-    const currentHalf = input.orient === "horizontal" ? current.width / 2 : current.height / 2;
-    if (previous.pos + previousHalf + MIN_TEMPORAL_LABEL_GAP_PX > current.pos - currentHalf) {
-      overlap = true;
-      break;
-    }
-  }
+  const overlap = neighbourOverlap(
+    projected.map((tick) => ({
+      pos: tick.pos,
+      half: input.orient === "horizontal" ? tick.width / 2 : tick.height / 2,
+    })),
+    MIN_TEMPORAL_LABEL_GAP_PX,
+  );
   // Layout reserves tickLength + tickLabelGap (defaults 6 + 3) in addition to the
   // label extent. Match that chrome so near-cap labels still diagnose overflow.
   const tickChromePx = 6 + 3;

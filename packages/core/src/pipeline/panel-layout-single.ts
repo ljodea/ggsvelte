@@ -1,7 +1,12 @@
 /**
  * Single-panel layout placement with axis-title and legend reserves.
  */
-import type { LayoutTheme, TemporalLayoutDomainContext, TickFormatter } from "../layout/layout.js";
+import type {
+  BandLayoutDomainContext,
+  LayoutTheme,
+  TemporalLayoutDomainContext,
+  TickFormatter,
+} from "../layout/layout.js";
 import { layout } from "../layout/layout.js";
 import type { TextMeasurer } from "../layout/measure.js";
 import type { PositionScale } from "../scales/train.js";
@@ -16,6 +21,8 @@ export function placeSinglePanel(input: {
   v: PositionScale;
   hTemporal?: TemporalLayoutDomainContext;
   vTemporal?: TemporalLayoutDomainContext;
+  hBand?: BandLayoutDomainContext;
+  vBand?: BandLayoutDomainContext;
   hTitle: string;
   vTitle: string;
   axisTitleBand: number;
@@ -35,6 +42,8 @@ export function placeSinglePanel(input: {
     v,
     hTemporal,
     vTemporal,
+    hBand,
+    vBand,
     hTitle,
     vTitle,
     axisTitleBand,
@@ -53,8 +62,8 @@ export function placeSinglePanel(input: {
   const layoutResult = layout({
     width: optionsWidth,
     height: layoutHeight,
-    x: layoutDomain(h, hBreaks, hTemporal),
-    y: layoutDomain(v, vBreaks, vTemporal),
+    x: layoutDomain(h, hBreaks, hTemporal, hBand),
+    y: layoutDomain(v, vBreaks, vTemporal, vBand),
     ...(formatH !== undefined && { formatX: formatH }),
     ...(formatV !== undefined && { formatY: formatV }),
     measurer,

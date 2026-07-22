@@ -2,6 +2,7 @@
  * Input for facet panel tick layout + placement packing.
  */
 import type {
+  BandLayoutDomainContext,
   LayoutTheme,
   Margins,
   TemporalLayoutDomainContext,
@@ -19,6 +20,8 @@ export interface FacetPanelTicksInput {
   v: PositionScale;
   hTemporal?: TemporalLayoutDomainContext;
   vTemporal?: TemporalLayoutDomainContext;
+  hBand?: BandLayoutDomainContext;
+  vBand?: BandLayoutDomainContext;
   mMax: Margins;
   previousGuidePlans?: Readonly<{ x?: AxisGuidePlan; y?: AxisGuidePlan }>;
   panelW: number;

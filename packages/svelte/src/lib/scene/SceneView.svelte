@@ -253,7 +253,7 @@
     <text
       class="gg-axis-title"
       x={(gridBounds.left + gridBounds.right) / 2}
-      y={gridBounds.bottom + 32}
+      y={gridBounds.bottom + (scene.axes.x.titleOffset ?? 32)}
       text-anchor="middle"
       fill={ink}
       font-size={scene.theme.axisTitleSize}

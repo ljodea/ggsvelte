@@ -37,6 +37,8 @@ export function axisTicks(
       label: tick.labeled ? tick.label : "",
       fullLabel: tick.fullLabel ?? tick.label,
       kind: tick.kind ?? "major",
+      ...(tick.lines !== undefined && { lines: tick.lines }),
+      ...(tick.angle !== undefined && { angle: tick.angle }),
     });
   }
   return out;

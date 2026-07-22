@@ -1,7 +1,11 @@
 /**
  * Project trained position scales into layout Domain inputs.
  */
-import type { Domain, TemporalLayoutDomainContext } from "../layout/layout.js";
+import type {
+  BandLayoutDomainContext,
+  Domain,
+  TemporalLayoutDomainContext,
+} from "../layout/layout.js";
 import { encodeKey } from "../scales/state.js";
 import type { PositionScale } from "../scales/train.js";
 import type { CellValue } from "../table.js";
@@ -11,6 +15,7 @@ export function layoutDomain(
   scale: PositionScale,
   breaks: readonly (number | string)[] | undefined,
   temporal?: TemporalLayoutDomainContext,
+  band?: BandLayoutDomainContext,
 ): Domain {
   if (scale.type === "band") {
     return {
@@ -23,6 +28,7 @@ export function layoutDomain(
             breaks.findIndex((candidate) => encodeKey(candidate) === encodeKey(value)) === index,
         ),
       }),
+      ...(band !== undefined && { band }),
     };
   }
   const numericBreaks =

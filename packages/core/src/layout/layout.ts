@@ -20,7 +20,10 @@
  * margins move in whole quanta, so sub-quantum measurement wobble cannot
  * oscillate tick counts.
  *
- * Label rotation is intentionally NOT implemented (skipped per spike scope).
+ * Linear/temporal tick labels are single-line and never rotated. Categorical
+ * (band) x-axes go through the measured `planBandAxis` planner, which may wrap or
+ * rotate labels within the axis band (see band-guide.ts); that layout travels on
+ * the guide plan (bandLabelMode/bandLabelAngle) and enriched ticks, not here.
  */
 
 import type { PositionScaleSpec, TemporalKind } from "@ggsvelte/spec";
@@ -28,6 +31,7 @@ import type { PositionScaleSpec, TemporalKind } from "@ggsvelte/spec";
 import type { CellValue } from "../table.js";
 import type { AxisGuidePlan } from "./temporal-guide.js";
 import { planTemporalAxis } from "./temporal-guide.js";
+import { planBandAxis, type BandAxisPlan } from "./band-guide.js";
 import type { TextMeasurer } from "./measure.js";
 import {
   defaultLogTickFormat,
@@ -59,6 +63,8 @@ export type Domain =
       categories: string[];
       rawCategories?: readonly unknown[];
       breaks?: readonly (number | string)[];
+      /** Present ⇒ this band axis gets the measured label planner (horizontal only). */
+      band?: BandLayoutDomainContext;
     };
 
 export interface TemporalLayoutDomainContext {
@@ -67,6 +73,13 @@ export interface TemporalLayoutDomainContext {
   kind: TemporalKind;
   config: PositionScaleSpec;
   sourceBreaks?: readonly CellValue[];
+}
+
+export interface BandLayoutDomainContext {
+  /** Data aesthetic (flip-corrected) — used for the guide-plan id and diagnostic path. */
+  aesthetic: "x" | "y";
+  panelIndex: number;
+  config: PositionScaleSpec;
 }
 
 export interface Margins {
@@ -85,6 +98,10 @@ export interface Tick {
   domainIndex?: number;
   /** false when band-label thinning hides this tick's label. */
   labeled: boolean;
+  /** Wrapped label lines (band axis, mode "wrapped"). */
+  lines?: string[];
+  /** Rotation in degrees (band axis, mode "rotated"): 0 | -45 | -90. */
+  angle?: number;
 }
 
 export interface AxisResult {
@@ -178,6 +195,14 @@ interface AxisTicks {
   step: number;
   empty: boolean;
   guidePlan?: AxisGuidePlan;
+  /** Measured band planner: orthogonal (bottom) band height it requires, px. */
+  bandLabelBandHeight?: number;
+  /** Measured band planner: along-axis overhang past the RIGHT end tick, px. */
+  bandAlongOverhang?: number;
+  /** Measured band planner: along-axis overhang past the LEFT end tick, px. */
+  bandLeftOverhang?: number;
+  /** Measured band planner: resolved thinning (1 = every category labeled). */
+  bandLabelEvery?: number;
 }
 
 interface DeriveTicksContext {
@@ -187,7 +212,54 @@ interface DeriveTicksContext {
   fontSize: number;
   marginCapPx: number;
   orthogonalMarginCapPx?: number;
+  /** Tick chrome (tickLength + gap) that layoutPass adds AFTER the label band; the
+   *  band planner subtracts it so the band + chrome together honor the margin cap. */
+  orthogonalChromePx?: number;
+  quantum?: number;
   previousGuidePlan?: AxisGuidePlan;
+}
+
+/** Assemble an AxisGuidePlan from a measured band plan (mirrors planBasicAxis). */
+function bandGuidePlan(
+  plan: BandAxisPlan,
+  context: BandLayoutDomainContext,
+  rawCategories: readonly unknown[],
+): AxisGuidePlan {
+  const reverse = context.config.reverse === true;
+  return Object.freeze({
+    type: "axis" as const,
+    id: `axis:${context.aesthetic}:panel:${String(context.panelIndex)}`,
+    aesthetic: context.aesthetic,
+    panelIndex: context.panelIndex,
+    scaleType: "band" as const,
+    transform: "identity" as const,
+    temporalKind: null,
+    domain: Object.freeze(rawCategories.map((value) => value as CellValue)),
+    direction: reverse ? ("descending" as const) : ("ascending" as const),
+    source: context.config.breaks === undefined ? ("automatic" as const) : ("explicit" as const),
+    interval: null,
+    locale: null,
+    timezone: null,
+    ticks: Object.freeze(
+      plan.ticks.map((tick) =>
+        Object.freeze({
+          value: rawCategories[tick.domainIndex] as CellValue,
+          label: tick.labeled ? tick.label : "",
+          fullLabel: tick.fullLabel,
+          kind: "major" as const,
+        }),
+      ),
+    ),
+    ...(context.config.breaks !== undefined && {
+      sourceBreaks: Object.freeze([...context.config.breaks] as CellValue[]),
+    }),
+    overlap: plan.overlap,
+    marginOverflow: plan.marginOverflow,
+    degraded: Object.freeze([...plan.degraded]),
+    bandLabelMode: plan.mode,
+    bandLabelAngle: plan.angle,
+    bandLabelBandHeight: plan.labelBandHeight,
+  });
 }
 
 function smallestGap(values: readonly number[]): number {
@@ -208,6 +280,67 @@ function deriveTicks(
 ): AxisTicks {
   if (domain.type === "band") {
     const rawCategories = domain.rawCategories ?? domain.categories;
+    // Measured planner: horizontal band axes with a planning context only (G1).
+    // Vertical band (native Y, or categorical-on-Y after coord_flip) falls through
+    // to the legacy thin/truncate path.
+    if (domain.band !== undefined && context.orient === "horizontal") {
+      // Resolve break-filtered entries with the same identity match as the
+      // legacy path (breaks are typed raw values → match rawCategories).
+      const resolved =
+        domain.breaks === undefined
+          ? domain.categories.map((value, domainIndex) => ({ value, domainIndex }))
+          : domain.breaks
+              .map((value) => ({
+                value,
+                domainIndex: rawCategories.findIndex((category) => Object.is(category, value)),
+              }))
+              .filter(({ domainIndex }) => domainIndex >= 0);
+      const plan = planBandAxis({
+        aesthetic: domain.band.aesthetic,
+        panelIndex: domain.band.panelIndex,
+        categoryCount: domain.categories.length,
+        entries: resolved.map(({ value, domainIndex }) => ({
+          value,
+          label: format ? format(value, NaN) : String(value),
+          domainIndex,
+        })),
+        orient: context.orient,
+        extentPx: context.extentPx,
+        reverse: domain.band.config.reverse === true,
+        measurer: context.measurer,
+        fontSize: context.fontSize,
+        marginCapPx: context.marginCapPx,
+        // Reserve tick chrome: layoutPass adds tickLength+tickLabelGap to the band
+        // height and the renderer offsets labels by it, so the label band itself
+        // must fit the cap MINUS that chrome or it clips without truncating.
+        orthogonalMarginCapPx: Math.max(
+          1,
+          (context.orthogonalMarginCapPx ?? context.marginCapPx) -
+            (context.orthogonalChromePx ?? 0),
+        ),
+        ...(context.quantum !== undefined && { quantum: context.quantum }),
+        previousMode: context.previousGuidePlan?.bandLabelMode ?? null,
+      });
+      const ticks: Tick[] = plan.ticks.map((tick) => ({
+        value: tick.value,
+        label: tick.label,
+        fullLabel: tick.fullLabel,
+        domainIndex: tick.domainIndex,
+        labeled: tick.labeled,
+        ...(tick.lines !== undefined && { lines: tick.lines }),
+        ...(tick.angle !== undefined && { angle: tick.angle }),
+      }));
+      return {
+        ticks,
+        step: NaN,
+        empty: plan.ticks.length === 0,
+        guidePlan: bandGuidePlan(plan, domain.band, rawCategories),
+        bandLabelBandHeight: plan.labelBandHeight,
+        bandAlongOverhang: plan.alongOverhang,
+        bandLeftOverhang: plan.leftOverhang,
+        bandLabelEvery: plan.labelEvery,
+      };
+    }
     const entries =
       domain.breaks === undefined
         ? domain.categories.map((value, domainIndex) => ({ value, domainIndex }))
@@ -401,6 +534,8 @@ export function layoutPass(margins: Margins, input: LayoutInput, theme: LayoutTh
     fontSize,
     marginCapPx: capRight,
     orthogonalMarginCapPx: capBottom,
+    orthogonalChromePx: tickLength + tickLabelGap,
+    quantum,
     ...(input.previousGuidePlans?.x !== undefined && {
       previousGuidePlan: input.previousGuidePlans.x,
     }),
@@ -418,6 +553,8 @@ export function layoutPass(margins: Margins, input: LayoutInput, theme: LayoutTh
   };
   let x = deriveTicks(input.x, xCount, input.formatX, xEvery, xContext);
   let y = deriveTicks(input.y, yCount, input.formatY, yEvery, yContext);
+  // The measured band planner owns its own thinning; adopt its labelEvery.
+  if (x.bandLabelEvery !== undefined) xEvery = x.bandLabelEvery;
   if (x.empty) degradations.push("x:empty-domain");
   if (y.empty) degradations.push("y:empty-domain");
   if (x.guidePlan !== undefined) degradations.push(...x.guidePlan.degraded);
@@ -498,9 +635,23 @@ export function layoutPass(margins: Margins, input: LayoutInput, theme: LayoutTh
 
   // --- assemble margins: floors ⊔ measured, capped, plus reserved bands
   // (axis titles / legends — absolute, never capped away), quantized up ---
-  const rawLeft = y.empty ? minMargins.left : Math.max(minMargins.left, yLabelW + leftFixed);
-  const rawBottom = x.empty ? minMargins.bottom : Math.max(minMargins.bottom, labelH + bottomFixed);
-  const rawRight = x.empty ? minMargins.right : Math.max(minMargins.right, lastXLabelW);
+  // Measured band axes budget the wrapped/rotated band height and the along-axis
+  // overhang of the end labels, instead of the single-line defaults.
+  const bandPlanned = x.bandLabelBandHeight !== undefined;
+  // A band end label that overhangs past x=0 (single category, reversed axis, or a
+  // wide leftmost break) must be reserved in the LEFT margin too, not just right.
+  const bandLeft = bandPlanned ? (x.bandLeftOverhang ?? 0) : 0;
+  const rawLeft = y.empty
+    ? Math.max(minMargins.left, bandLeft)
+    : Math.max(minMargins.left, yLabelW + leftFixed, bandLeft);
+  const rawBottom = x.empty
+    ? minMargins.bottom
+    : Math.max(minMargins.bottom, (x.bandLabelBandHeight ?? labelH) + bottomFixed);
+  const rawRight = x.empty
+    ? minMargins.right
+    : bandPlanned
+      ? Math.max(minMargins.right, x.bandAlongOverhang ?? 0)
+      : Math.max(minMargins.right, lastXLabelW);
   const rawTop = y.empty ? minMargins.top : Math.max(minMargins.top, labelH / 2);
   const reserve = {
     top: input.reserve?.top ?? 0,

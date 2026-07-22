@@ -36,9 +36,28 @@ function renderPanelAxes(panel: ScenePanel, theme: ThemeTokens): string {
         );
       }
       if (tick.label !== "") {
-        parts.push(
-          `<text y="${px((theme.ticksX ? theme.tickLength : 0) + 3)}" dy="0.71em" text-anchor="middle" fill="${axisText}" font-size="${px(theme.axisTextSize)}" font-weight="${theme.fontWeight}">${escapeXML(tick.label)}</text>`,
-        );
+        const yOff = (theme.ticksX ? theme.tickLength : 0) + 3;
+        const font = `fill="${axisText}" font-size="${px(theme.axisTextSize)}" font-weight="${theme.fontWeight}"`;
+        if (tick.angle !== undefined && tick.angle !== 0) {
+          // Rotated band label: hang below the axis, anchored at the tick.
+          parts.push(
+            `<text transform="translate(0,${px(yOff)}) rotate(${tick.angle})" text-anchor="end" dominant-baseline="central" ${font}>${escapeXML(tick.label)}</text>`,
+          );
+        } else if (tick.lines !== undefined && tick.lines.length > 1) {
+          // Wrapped band label: one tspan per line, centered.
+          const lineH = theme.axisTextSize * 1.15;
+          const tspans = tick.lines
+            .map(
+              (line, i) =>
+                `<tspan x="0" dy="${i === 0 ? "0.71em" : px(lineH)}">${escapeXML(line)}</tspan>`,
+            )
+            .join("");
+          parts.push(`<text y="${px(yOff)}" text-anchor="middle" ${font}>${tspans}</text>`);
+        } else {
+          parts.push(
+            `<text y="${px(yOff)}" dy="0.71em" text-anchor="middle" ${font}>${escapeXML(tick.label)}</text>`,
+          );
+        }
       }
       parts.push("</g>");
     }
@@ -102,7 +121,7 @@ function renderAxisTitles(scene: Scene): string {
   const parts: string[] = [];
   if (scene.axes.x.title !== "") {
     parts.push(
-      `<text class="gg-axis-title" x="${px((gridLeft + gridRight) / 2)}" y="${px(gridBottom + 32)}" text-anchor="middle" fill="${ink}" font-size="${px(scene.theme.axisTitleSize)}" font-weight="${scene.theme.axisTitleWeight}">${escapeXML(scene.axes.x.title)}</text>`,
+      `<text class="gg-axis-title" x="${px((gridLeft + gridRight) / 2)}" y="${px(gridBottom + (scene.axes.x.titleOffset ?? 32))}" text-anchor="middle" fill="${ink}" font-size="${px(scene.theme.axisTitleSize)}" font-weight="${scene.theme.axisTitleWeight}">${escapeXML(scene.axes.x.title)}</text>`,
     );
   }
   if (scene.axes.y.title !== "") {

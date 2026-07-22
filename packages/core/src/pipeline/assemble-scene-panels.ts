@@ -25,6 +25,12 @@ function suppressProjectedLabelOverlap(
     .toSorted((a, b) => (orientation === "horizontal" ? b.pos - a.pos : a.pos - b.pos));
   let boundary = orientation === "horizontal" ? Number.POSITIVE_INFINITY : Number.NEGATIVE_INFINITY;
   for (const tick of labeled) {
+    // Planner-managed band ticks (rotated / wrapped) were already fitted by the
+    // band planner; measuring them here as centered single-line strings would
+    // wrongly blank named bars under an active coord projector. Keep them intact.
+    if (tick.angle !== undefined || (tick.lines !== undefined && tick.lines.length > 1)) {
+      continue;
+    }
     const half =
       orientation === "horizontal"
         ? measurer.measureWidth(tick.label, fontSize) / 2
@@ -84,6 +90,8 @@ export function assembleScenePanels(input: {
   coordProjectors: readonly PanelCoordProjector[];
   measureText?: TextMeasurer | undefined;
   axisTextSize: number;
+  /** Tick chrome (theme tickLength + label gap) below gridBottom; renderer-matched. */
+  tickChromePx?: number;
   hMinorBreaks?: readonly number[] | undefined;
   vMinorBreaks?: readonly number[] | undefined;
 }): {
@@ -155,7 +163,29 @@ export function assembleScenePanels(input: {
 
   const firstX = scenePanels.find((p) => p.axisX !== null);
   const firstY = scenePanels.find((p) => p.axisY !== null);
-  const xAxis: SceneAxis = { ticks: firstX?.axisX ?? [], title: hTitle };
+  // Multi-line / rotated band labels need the x-axis title pushed below the whole
+  // measured label band (max band height across panels for free scales), instead
+  // of the renderer's fixed single-line offset.
+  // Tick chrome from the active theme (renderer-matched), not a fixed default, so
+  // a custom longer-tick theme still pushes the x title below the label band.
+  const tickChromePx = input.tickChromePx ?? 9; // tickLength(6) + gap(3) defaults
+  const TITLE_GAP_PX = 10; // sits within the axis-title reserve band
+  const bandTitleOffset = placements.reduce((max, placement) => {
+    const plan = placement.showAxisX ? placement.hGuidePlan : undefined;
+    if (
+      plan?.bandLabelMode === undefined ||
+      plan.bandLabelMode === "single-line" ||
+      plan.bandLabelBandHeight === undefined
+    ) {
+      return max;
+    }
+    return Math.max(max, tickChromePx + plan.bandLabelBandHeight + TITLE_GAP_PX);
+  }, 0);
+  const xAxis: SceneAxis = {
+    ticks: firstX?.axisX ?? [],
+    title: hTitle,
+    ...(bandTitleOffset > 0 && { titleOffset: bandTitleOffset }),
+  };
   const yAxis: SceneAxis = { ticks: firstY?.axisY ?? [], title: vTitle };
 
   return { scenePanels, xAxis, yAxis };

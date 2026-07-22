@@ -154,12 +154,19 @@ export interface SceneTick {
   /** Standalone accessible text; contextual visible labels may be shorter. */
   fullLabel: string;
   kind: "major" | "minor";
+  /** Wrapped label lines (band axis, mode "wrapped"). */
+  lines?: string[];
+  /** Rotation in degrees (band axis, mode "rotated"): -45 | -90. */
+  angle?: number;
 }
 
 export interface SceneAxis {
   ticks: SceneTick[];
   /** Axis title ("" = none). */
   title: string;
+  /** Title offset below the panel grid, px (derived from a multi-line/rotated
+   * band label band; falls back to the fixed default when absent). */
+  titleOffset?: number;
 }
 
 export interface ScenePanel {

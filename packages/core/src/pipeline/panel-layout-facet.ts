@@ -7,7 +7,12 @@ import type { TextMeasurer } from "../layout/measure.js";
 import type { FacetPanelDef } from "./facets.js";
 import { mapFacetPanelPlacements } from "./panel-layout-facet-map.js";
 import { computeFacetGridGeometry } from "./panel-layout-facet-margins.js";
-import type { DisplayScalesFn, DisplayTemporalFn, PanelPlacement } from "./panel-layout-types.js";
+import type {
+  DisplayBandFn,
+  DisplayScalesFn,
+  DisplayTemporalFn,
+  PanelPlacement,
+} from "./panel-layout-types.js";
 
 export function placeFacetPanels(input: {
   facetPanels: readonly FacetPanelDef[];
@@ -24,6 +29,7 @@ export function placeFacetPanels(input: {
   topBand: number;
   displayScales: DisplayScalesFn;
   displayTemporal: DisplayTemporalFn;
+  displayBand: DisplayBandFn;
   hBreaks: readonly (number | string)[] | undefined;
   vBreaks: readonly (number | string)[] | undefined;
   formatH: TickFormatter | undefined;
@@ -38,6 +44,7 @@ export function placeFacetPanels(input: {
     freeV: input.freeV,
     displayScales: input.displayScales,
     displayTemporal: input.displayTemporal,
+    displayBand: input.displayBand,
     mMax: geometry.mMax,
     previousGuidePlans: geometry.previousGuidePlans,
     panelW: geometry.panelW,

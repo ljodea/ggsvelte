@@ -90,6 +90,19 @@ export function resolvePanelLayoutDisplay(input: PanelLayoutDisplayInput): Panel
       ? { ...(y !== undefined && { h: y }), ...(x !== undefined && { v: x }) }
       : { ...(x !== undefined && { h: x }), ...(y !== undefined && { v: y }) };
   };
+  const displayBand = (panelIndex: number) => {
+    const x =
+      xScale.type === "band"
+        ? { aesthetic: "x" as const, panelIndex, config: scalesConfig.x ?? {} }
+        : undefined;
+    const y =
+      yScale.type === "band"
+        ? { aesthetic: "y" as const, panelIndex, config: scalesConfig.y ?? {} }
+        : undefined;
+    return flip
+      ? { ...(y !== undefined && { h: y }), ...(x !== undefined && { v: x }) }
+      : { ...(x !== undefined && { h: x }), ...(y !== undefined && { v: y }) };
+  };
 
   return {
     hTitle,
@@ -104,5 +117,6 @@ export function resolvePanelLayoutDisplay(input: PanelLayoutDisplayInput): Panel
     freeV,
     displayScales,
     displayTemporal,
+    displayBand,
   };
 }

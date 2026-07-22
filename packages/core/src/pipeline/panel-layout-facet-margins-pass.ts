@@ -8,7 +8,7 @@ import type { AxisGuidePlan } from "../layout/temporal-guide.js";
 
 import type { FacetPanelDef } from "./facets.js";
 import { elementwiseMaxMargins, layoutDomain } from "./layout-helpers.js";
-import type { DisplayScalesFn, DisplayTemporalFn } from "./panel-layout-types.js";
+import type { DisplayBandFn, DisplayScalesFn, DisplayTemporalFn } from "./panel-layout-types.js";
 
 export interface FacetSharedMarginsResult {
   margins: Margins;
@@ -21,6 +21,7 @@ export function computeFacetSharedMargins(input: {
   approxH: number;
   displayScales: DisplayScalesFn;
   displayTemporal: DisplayTemporalFn;
+  displayBand: DisplayBandFn;
   hBreaks: readonly (number | string)[] | undefined;
   vBreaks: readonly (number | string)[] | undefined;
   formatH: TickFormatter | undefined;
@@ -34,6 +35,7 @@ export function computeFacetSharedMargins(input: {
     approxH,
     displayScales,
     displayTemporal,
+    displayBand,
     hBreaks,
     vBreaks,
     formatH,
@@ -47,11 +49,12 @@ export function computeFacetSharedMargins(input: {
   for (let p = 0; p < facetPanels.length; p++) {
     const { h, v } = displayScales(p);
     const temporal = displayTemporal(p);
+    const band = displayBand(p);
     const run = layout({
       width: approxW,
       height: approxH,
-      x: layoutDomain(h, hBreaks, temporal.h),
-      y: layoutDomain(v, vBreaks, temporal.v),
+      x: layoutDomain(h, hBreaks, temporal.h, band.h),
+      y: layoutDomain(v, vBreaks, temporal.v, band.v),
       ...(formatH !== undefined && { formatX: formatH }),
       ...(formatV !== undefined && { formatY: formatV }),
       measurer,
