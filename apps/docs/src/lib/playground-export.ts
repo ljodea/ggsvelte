@@ -1,7 +1,7 @@
 import { PipelineError, renderToSVGString } from "@ggsvelte/core";
 import type { PortableSpec } from "@ggsvelte/spec";
 
-import type { PlaygroundDiagnostic } from "./playground-state";
+import type { PlaygroundDiagnostic } from "./playground-state-types";
 
 export type PlaygroundSVGExportResult =
   | {

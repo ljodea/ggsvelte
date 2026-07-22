@@ -3,7 +3,7 @@ import type {
   PlaygroundCandidateOrigin,
   PlaygroundDiagnostic,
   PlaygroundState,
-} from "./playground-state";
+} from "./playground-state-types";
 
 export interface PlaygroundExampleCatalogEntry {
   readonly id: string;

@@ -9,7 +9,7 @@ import {
   validatePlaygroundSeed,
   type PlaygroundSeedV1,
 } from "./playground-codec";
-import type { PlaygroundDiagnostic } from "./playground-state";
+import type { PlaygroundDiagnostic } from "./playground-state-types";
 
 const VALIDATE_LIMITS = {
   maxRows: PLAYGROUND_MAX_ROWS,
