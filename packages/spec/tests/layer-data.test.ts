@@ -86,6 +86,8 @@ describe("layer data schema + normalize", () => {
         },
       ],
     });
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
     expect(result.errors.some((e) => e.path.startsWith("/layers/0/data"))).toBe(true);
   });
 
@@ -112,6 +114,8 @@ describe("layer data schema + normalize", () => {
       },
       {},
     );
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
     const err = result.errors.find((e) => e.path === "/layers/0/aes/y");
     expect(err).toBeDefined();
     expect(err!.message).toContain("displ");

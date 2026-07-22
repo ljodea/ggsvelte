@@ -132,7 +132,7 @@ export function columnsFromDataRef(
 ): Record<string, readonly CellValue[]> | null {
   let ref = data;
   if (isRecord(ref) && typeof ref["name"] === "string") {
-    ref = isRecord(datasets) ? datasets[ref["name"] as string] : undefined;
+    ref = isRecord(datasets) ? datasets[ref["name"]] : undefined;
   }
   if (!isRecord(ref)) return null;
   if (Array.isArray(ref["values"])) {

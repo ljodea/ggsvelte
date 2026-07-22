@@ -39,16 +39,18 @@ export type LayerDescriptorLike = {
 };
 
 /** Wrap geom data props into a DataRef shape for LayerInput. */
-function layerDataRef(data: DataInput | readonly Record<string, unknown>[]): LayerInput["data"] {
+function layerDataRef(
+  data: DataInput | readonly Record<string, unknown>[],
+): NonNullable<LayerInput["data"]> {
   if (Array.isArray(data)) return { values: data as never };
   if (typeof data === "object" && data !== null) {
     if ("values" in data || "columns" in data || "name" in data) {
-      return data as LayerInput["data"];
+      return data as NonNullable<LayerInput["data"]>;
     }
     // Column-oriented bare object.
     return { columns: data as never };
   }
-  return data as LayerInput["data"];
+  return { values: [] };
 }
 
 /** Convert a registry descriptor into a LayerInput (reads live getters). */

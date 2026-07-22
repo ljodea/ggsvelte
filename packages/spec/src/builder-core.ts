@@ -295,10 +295,11 @@ export class GGBuilderCore {
     const calendarFields = calendarDateFields(this.#state);
     const portableLayers = layers.map((layer) => {
       if (layer.data === undefined) return layer;
-      // layer.data may still be authoring form (Dates) from geom sugar.
+      // layerFrom stores AuthoringDataRef snapshots as LayerInput.data; portable
+      // ISO conversion runs here with the final calendar-date field set.
       return {
         ...layer,
-        data: toDataRef(layer.data as AuthoringDataRef, calendarFields),
+        data: toDataRef(layer.data, calendarFields),
       };
     });
     const input: SpecInput = {
