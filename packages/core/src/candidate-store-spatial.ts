@@ -13,15 +13,21 @@ export type CandidateSpatialQuery = SpatialIndex & SpatialRefine;
 /** Build spatial shortlist indexes and geometry refine helpers for an eager store. */
 export function buildCandidateSpatialQuery(indexes: CandidateStoreIndexes): CandidateSpatialQuery {
   const index = buildSpatialIndex(indexes);
-  const { exactDistance, intersects } = createSpatialRefine(indexes);
+  const refine = createSpatialRefine(indexes);
+  // Bind via arrows so type-aware unbound-method is satisfied (methods close over
+  // module state only; they do not use `this`).
   return {
     spatial: index.spatial,
     isPoint: index.isPoint,
     maxPointReach: index.maxPointReach,
     pointBatchIndexes: index.pointBatchIndexes,
-    addExtendedIntersecting: index.addExtendedIntersecting,
-    exactDistance,
-    intersects,
-    shortlistNearest: index.shortlistNearest,
+    addExtendedIntersecting: (loX, loY, hiX, hiY, into) => {
+      index.addExtendedIntersecting(loX, loY, hiX, hiY, into);
+    },
+    exactDistance: (id, px, py, pathContainment) =>
+      refine.exactDistance(id, px, py, pathContainment),
+    intersects: (id, loX, loY, hiX, hiY) => refine.intersects(id, loX, loY, hiX, hiY),
+    shortlistNearest: (px, py, mode, maxDistance) =>
+      index.shortlistNearest(px, py, mode, maxDistance),
   };
 }
