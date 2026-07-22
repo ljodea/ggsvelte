@@ -1026,18 +1026,23 @@ describe("ci-routing module tree (split-safe)", () => {
       CHECKS_RES: "success",
       COMPONENT_REQ: "true",
       COMPONENT_SVELTE_RES: "success",
+      COMPONENT_SVELTE_FX_RES: "success",
       COMPONENT_SPIKES_RES: "success",
       VR_GUARD_RES: "success",
     });
     expect(ok.exitCode).toBe(0);
     expect(ok.stdout).toContain("ci-gate ok");
 
+    // Only the middle shard (component-svelte-fx) fails — the other two
+    // succeed. Confirms the CLI actually reads all three shard env vars
+    // rather than silently dropping the third one added alongside it.
     const failed = await spawnCiGate({
       EVENT_NAME: "pull_request",
       CHECKS_REQ: "true",
       CHECKS_RES: "success",
       COMPONENT_REQ: "true",
-      COMPONENT_SVELTE_RES: "failure",
+      COMPONENT_SVELTE_RES: "success",
+      COMPONENT_SVELTE_FX_RES: "failure",
       COMPONENT_SPIKES_RES: "success",
       VR_GUARD_RES: "skipped",
     });

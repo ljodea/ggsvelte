@@ -6,8 +6,10 @@
  * this driver runs, detect-changes is known to have succeeded.
  *
  * `component` is not read from `needs.<job>.result` directly — it is rolled
- * up from the two component shards (component-svelte, component-spikes;
- * issue #243) so a single required flag covers both.
+ * up from the component test shards (component-svelte, component-svelte-fx,
+ * component-spikes; issues #243, #575) so a single required flag covers all
+ * of them. The shard list is an array (not fixed-arity params) because it
+ * has already grown once and the aggregation rule is shard-count-agnostic.
  */
 import {
   evaluateGate,
@@ -19,16 +21,12 @@ import {
 } from "./routing";
 
 /**
- * Roll up the two component test shards into one `JobResult`. Both skipped
- * → skipped; both success → success; either failure/cancelled → failure;
- * anything else (e.g. one success one skipped, or an unrecognized string) →
- * unknown.
+ * Roll up the component test shards into one `JobResult`. All skipped →
+ * skipped; all success → success; any failure/cancelled → failure; anything
+ * else (e.g. one success one skipped, or an unrecognized string) → unknown.
  */
-export function aggregateComponentShards(
-  svelteResult: string | undefined,
-  spikesResult: string | undefined,
-): JobResult {
-  const shards = [normalizeJobResult(svelteResult), normalizeJobResult(spikesResult)];
+export function aggregateComponentShards(shardResults: readonly (string | undefined)[]): JobResult {
+  const shards = shardResults.map((r) => normalizeJobResult(r));
   if (shards.every((r) => r === "skipped")) return "skipped";
   if (shards.every((r) => r === "success")) return "success";
   if (shards.some((r) => r === "failure" || r === "cancelled")) return "failure";
@@ -40,8 +38,7 @@ export type CiGateInput = {
   required: JobPlan;
   /** Raw `needs.<job>.result` strings, one per non-component required job. */
   results: Partial<Record<JobName, string | undefined>>;
-  componentSvelteResult: string | undefined;
-  componentSpikesResult: string | undefined;
+  componentShardResults: readonly (string | undefined)[];
   /**
    * Raw `needs.vr-baseline-guard.result` — intentionally NOT normalized.
    * The PR-only rule below observes the literal value (including an
@@ -59,7 +56,7 @@ export type CiGateInput = {
 export function evaluateCiGate(input: CiGateInput): GateEvaluation {
   const results: Partial<Record<JobName, string | undefined>> = {
     ...input.results,
-    component: aggregateComponentShards(input.componentSvelteResult, input.componentSpikesResult),
+    component: aggregateComponentShards(input.componentShardResults),
   };
 
   const gate = evaluateGate(input.required, results);

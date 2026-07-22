@@ -274,8 +274,11 @@ function runCiGateCli(): void {
       packages_dist: env.PACKAGES_DIST_RES,
       docs_journeys: env.DOCS_JOURNEYS_RES,
     },
-    componentSvelteResult: env.COMPONENT_SVELTE_RES,
-    componentSpikesResult: env.COMPONENT_SPIKES_RES,
+    componentShardResults: [
+      env.COMPONENT_SVELTE_RES,
+      env.COMPONENT_SVELTE_FX_RES,
+      env.COMPONENT_SPIKES_RES,
+    ],
     vrBaselineGuardResult: env.VR_GUARD_RES,
   });
   if (!gate.ok) {

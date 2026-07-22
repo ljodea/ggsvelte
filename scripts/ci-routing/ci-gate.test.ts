@@ -32,36 +32,42 @@ function baseInput(over: Partial<CiGateInput> = {}): CiGateInput {
     eventName: "pull_request",
     required: ALL_UNREQUIRED,
     results: {},
-    componentSvelteResult: undefined,
-    componentSpikesResult: undefined,
+    componentShardResults: [],
     vrBaselineGuardResult: "success",
     ...over,
   };
 }
 
 describe("aggregateComponentShards", () => {
-  test("both skipped → skipped (missing env var, empty string, or explicit 'skipped')", () => {
-    expect(aggregateComponentShards("skipped", "skipped")).toBe("skipped");
-    expect(aggregateComponentShards("", "")).toBe("skipped");
+  test("all skipped → skipped (missing env var, empty string, or explicit 'skipped')", () => {
+    expect(aggregateComponentShards(["skipped", "skipped"])).toBe("skipped");
+    expect(aggregateComponentShards(["", ""])).toBe("skipped");
+    expect(aggregateComponentShards(["skipped", "skipped", "skipped"])).toBe("skipped");
   });
 
-  test("both success → success", () => {
-    expect(aggregateComponentShards("success", "success")).toBe("success");
+  test("all success → success", () => {
+    expect(aggregateComponentShards(["success", "success"])).toBe("success");
+    expect(aggregateComponentShards(["success", "success", "success"])).toBe("success");
   });
 
   test("one success, one skipped → unknown (not success, not all-skipped)", () => {
-    expect(aggregateComponentShards("success", "skipped")).toBe("unknown");
+    expect(aggregateComponentShards(["success", "skipped"])).toBe("unknown");
   });
 
   test("any failure or cancelled present → failure", () => {
-    expect(aggregateComponentShards("failure", "success")).toBe("failure");
-    expect(aggregateComponentShards("success", "cancelled")).toBe("failure");
-    expect(aggregateComponentShards("failure", "cancelled")).toBe("failure");
-    expect(aggregateComponentShards("failure", "skipped")).toBe("failure");
+    expect(aggregateComponentShards(["failure", "success"])).toBe("failure");
+    expect(aggregateComponentShards(["success", "cancelled"])).toBe("failure");
+    expect(aggregateComponentShards(["failure", "cancelled"])).toBe("failure");
+    expect(aggregateComponentShards(["failure", "skipped"])).toBe("failure");
+    expect(aggregateComponentShards(["success", "success", "failure"])).toBe("failure");
   });
 
   test("unrecognized shard string → unknown", () => {
-    expect(aggregateComponentShards("bogus", "success")).toBe("unknown");
+    expect(aggregateComponentShards(["bogus", "success"])).toBe("unknown");
+  });
+
+  test("three-shard reality (component-svelte, component-svelte-fx, component-spikes): one skip among two successes → unknown, not success", () => {
+    expect(aggregateComponentShards(["success", "success", "skipped"])).toBe("unknown");
   });
 });
 
@@ -121,27 +127,35 @@ describe("evaluateCiGate", () => {
     expect(gate).toEqual({ ok: true, failures: [] });
   });
 
-  test("component result is derived from the two shard inputs, not results.component", () => {
+  test("component result is derived from the shard inputs, not results.component", () => {
     const gate = evaluateCiGate(
       baseInput({
         required: { ...ALL_UNREQUIRED, component: true },
         results: { component: "success" }, // must be ignored — shards win
-        componentSvelteResult: "failure",
-        componentSpikesResult: "success",
+        componentShardResults: ["failure", "success"],
       }),
     );
     expect(gate.failures).toEqual(["component"]);
   });
 
-  test("component required + both shards success → not listed", () => {
+  test("component required + all shards success (svelte, svelte-fx, spikes) → not listed", () => {
     const gate = evaluateCiGate(
       baseInput({
         required: { ...ALL_UNREQUIRED, component: true },
-        componentSvelteResult: "success",
-        componentSpikesResult: "success",
+        componentShardResults: ["success", "success", "success"],
       }),
     );
     expect(gate).toEqual({ ok: true, failures: [] });
+  });
+
+  test("component required + one of three shards fails → listed", () => {
+    const gate = evaluateCiGate(
+      baseInput({
+        required: { ...ALL_UNREQUIRED, component: true },
+        componentShardResults: ["success", "failure", "success"],
+      }),
+    );
+    expect(gate.failures).toEqual(["component"]);
   });
 
   test("docs_journeys is independent of component shards", () => {
@@ -149,8 +163,7 @@ describe("evaluateCiGate", () => {
       baseInput({
         required: { ...ALL_UNREQUIRED, docs_journeys: true },
         results: { docs_journeys: "success" },
-        componentSvelteResult: "failure",
-        componentSpikesResult: "failure",
+        componentShardResults: ["failure", "failure", "failure"],
       }),
     );
     expect(gate).toEqual({ ok: true, failures: [] });
