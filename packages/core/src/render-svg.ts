@@ -73,7 +73,7 @@ export function renderToSVGString(spec: SpecInput | GGBuilder, options: RenderSV
     );
   }
   try {
-    return sceneToSVGString(model.scene, paintMode ?? "full");
+    return sceneToSVGString(model.scene, { paintMode: paintMode ?? "full" });
   } catch (error) {
     // Failure policy: renderer errors are structured, never blank output.
     throw new PipelineError(

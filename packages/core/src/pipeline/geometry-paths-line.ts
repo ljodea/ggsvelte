@@ -48,7 +48,7 @@ export function lineBatch(
   // Apply strokePaint solid fallback when a stroke is still null/theme-default.
   if (strokePaintResolved !== undefined) {
     for (let i = 0; i < strokes.length; i++) {
-      if (strokes[i] === null) strokes[i] = strokePaintResolved.fallback;
+      strokes[i] ??= strokePaintResolved.fallback;
     }
   }
 

@@ -219,6 +219,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "a37d9b1ada234bcaa2fae7978bba5d8fadfb10e84c92f419b90d1cc515ff2f34",
   },
   {
+    id: "ribbon/paint",
+    filename: "ribbon-paint-light.png",
+    path: "/previews/ribbon-paint-light.png",
+    sha256: "fd1e353827fa54bbd4114850cdb7dc32327e6e7c90e0237631eff08536c3d86f",
+  },
+  {
     id: "rule/annotation",
     filename: "rule-annotation-light.png",
     path: "/previews/rule-annotation-light.png",

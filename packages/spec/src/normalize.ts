@@ -154,8 +154,7 @@ function normalizeLayer(layer: LayerInput, plotAes: Aes | undefined): LayerSpec 
       ? { ...layer.positionParams }
       : undefined;
   const rawParams = layer.params === undefined ? undefined : { ...layer.params };
-  const params =
-    rawParams === undefined ? undefined : normalizeLayerParamsPaint(rawParams as never);
+  const params = rawParams === undefined ? undefined : normalizeLayerParamsPaint(rawParams);
   // "auto" is the render default — one canonical form per concept, so it
   // canonicalizes away (same rule as coord "cartesian" / a11y "auto").
   const render = layer.render === "auto" ? undefined : layer.render;

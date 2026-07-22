@@ -76,22 +76,23 @@ function isGlow(value: unknown): value is GlowSpec {
 export function normalizeLayerParamsPaint(
   params: NonNullable<LayerSpec["params"]>,
 ): NonNullable<LayerSpec["params"]> {
-  const bag = params as Record<string, unknown>;
+  const bag: Record<string, unknown> = { ...params };
   let changed = false;
-  const out: Record<string, unknown> = { ...bag };
 
   if (isGradientPaint(bag["fillPaint"])) {
-    out["fillPaint"] = normalizeGradient(bag["fillPaint"]);
+    bag["fillPaint"] = normalizeGradient(bag["fillPaint"]);
     changed = true;
   }
   if (isGradientPaint(bag["strokePaint"])) {
-    out["strokePaint"] = normalizeGradient(bag["strokePaint"]);
+    bag["strokePaint"] = normalizeGradient(bag["strokePaint"]);
     changed = true;
   }
   if (isGlow(bag["glow"])) {
-    out["glow"] = normalizeGlow(bag["glow"]);
+    bag["glow"] = normalizeGlow(bag["glow"]);
     changed = true;
   }
 
-  return (changed ? out : params) as NonNullable<LayerSpec["params"]>;
+  // Layer params is a geom-specific union; paint keys are optional extras on
+  // the supported members. Spread preserves the original structural type.
+  return changed ? { ...params, ...bag } : params;
 }

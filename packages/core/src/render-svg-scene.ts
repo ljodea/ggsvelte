@@ -340,8 +340,18 @@ export function sceneLabel(scene: Scene): string {
   return "ggsvelte plot";
 }
 
+/** Optional paint rendering controls for pure SVG export (#591). */
+export interface SceneSVGOptions {
+  /**
+   * Within-mark paint mode. "full" emits gradients/glow; "fallback" uses solid
+   * paint.fallback colors and omits glow (a11y / reduced-effects).
+   */
+  paintMode?: PaintRenderMode;
+}
+
 /** Serialize a computed Scene to a standalone SVG string. */
-export function sceneToSVGString(scene: Scene, paintMode: PaintRenderMode = "full"): string {
+export function sceneToSVGString(scene: Scene, options: SceneSVGOptions = {}): string {
+  const paintMode = options.paintMode ?? "full";
   const panel = scene.panels[0]!;
   const theme = scene.theme;
   const ink = themeVar("ink", theme);

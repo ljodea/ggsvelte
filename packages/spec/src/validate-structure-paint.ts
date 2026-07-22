@@ -67,7 +67,7 @@ export function paintStructuralErrors(
 
   if (params["fillPaint"] !== undefined) {
     errors.push(...stopOrderErrors(params["fillPaint"], `${layerPath}/params/fillPaint`));
-    if (isDataMapped(fill as ChannelValue | undefined)) {
+    if (isDataMapped(fill)) {
       errors.push({
         code: "paint-scale-conflict",
         path: `${layerPath}/params/fillPaint`,
@@ -83,7 +83,7 @@ export function paintStructuralErrors(
 
   if (params["strokePaint"] !== undefined) {
     errors.push(...stopOrderErrors(params["strokePaint"], `${layerPath}/params/strokePaint`));
-    if (isDataMapped(color as ChannelValue | undefined)) {
+    if (isDataMapped(color)) {
       errors.push({
         code: "paint-scale-conflict",
         path: `${layerPath}/params/strokePaint`,
