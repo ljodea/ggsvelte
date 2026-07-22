@@ -234,7 +234,11 @@ export function validateDeploymentArtifact(
       problems.push("_redirects must not preserve /bench GitHub Pages history redirects");
     }
     if (expected.buildMode === "cloudflare-production") {
-      if (!redirects.includes("/ggsvelte/* https://ggsvelte.sh/:splat 301")) {
+      // Bare `/ggsvelte` does not match `/ggsvelte/*`; require both exact + wildcard.
+      if (
+        !redirects.includes("/ggsvelte https://ggsvelte.sh/ 301") ||
+        !redirects.includes("/ggsvelte/* https://ggsvelte.sh/:splat 301")
+      ) {
         problems.push("_redirects is missing the absolute /ggsvelte cleanup redirect");
       }
     } else if (expected.buildMode === "cloudflare-preview") {
