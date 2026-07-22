@@ -7,6 +7,7 @@ import type { Scene } from "../scene.js";
 import type { CellValue } from "../table.js";
 import type { CandidateStore } from "../candidate-store.js";
 import type { LineageStore } from "../identity.js";
+import type { SemanticViewport } from "../semantic-viewport.js";
 
 import type { Advisory, PipelineWarning } from "./types-advisory.js";
 import type { ScaleDecision, ScaleDiagnostic } from "./types-scale-diagnostics.js";
@@ -31,6 +32,8 @@ export interface RenderModel {
   guidePlans: readonly GuidePlan[];
   /** Per-panel post-stat coordinate forward/inverse projectors. */
   coordProjectors: readonly PanelCoordProjector[];
+  /** Model-owned plot-pixel ↔ semantic projection for interaction adapters. */
+  viewport: SemanticViewport;
   /** Monotonic run identity (module-global, increases every runPipeline call). */
   runId: number;
   /**

@@ -38,6 +38,7 @@ export interface AssembleRenderModelInput {
   scaleDiagnostics: ScaleDiagnostic[];
   guidePlans: readonly GuidePlan[];
   coordProjectors: readonly PanelCoordProjector[];
+  flipped: boolean;
   xConversion: PositionConversionContext;
   yConversion: PositionConversionContext;
   runId: number;

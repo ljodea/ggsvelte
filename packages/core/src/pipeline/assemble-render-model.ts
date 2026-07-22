@@ -14,6 +14,7 @@ import { createRenderModelLifecycle } from "./assemble-render-model-lifecycle.js
 import { scaleTrainingDiagnostics } from "./assemble-render-model-scale-training-diagnostics.js";
 import type { RenderModel } from "./types.js";
 import type { BandLabelMode } from "../layout/band-guide.js";
+import { createSemanticViewport } from "../semantic-viewport.js";
 
 export type { AssembleRenderModelInput } from "./assemble-render-model-input.js";
 
@@ -140,6 +141,7 @@ function bandLabelAdvisories(
 
 export function assembleRenderModel(input: AssembleRenderModelInput): RenderModel {
   const { scene, candidates } = input;
+  const scales = buildRenderModelScales(input);
   const lifecycle = createRenderModelLifecycle({
     scene,
     candidates,
@@ -150,7 +152,7 @@ export function assembleRenderModel(input: AssembleRenderModelInput): RenderMode
 
   return {
     scene,
-    scales: buildRenderModelScales(input),
+    scales,
     warnings: diagnostics.warnings,
     advisories: diagnostics.advisories,
     scaleDiagnostics: [
@@ -167,6 +169,13 @@ export function assembleRenderModel(input: AssembleRenderModelInput): RenderMode
     })),
     guidePlans: input.guidePlans,
     coordProjectors: input.coordProjectors,
+    viewport: createSemanticViewport(
+      scene.panels,
+      scales,
+      input.coordProjectors,
+      input.flipped,
+      candidates,
+    ),
     runId: input.runId,
     layerBackends: input.layerBackends,
     layerFields: input.layerFields,

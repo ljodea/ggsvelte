@@ -1,4 +1,4 @@
-import type { RenderModel } from "@ggsvelte/core";
+import type { RenderModel, SemanticViewportPanel } from "@ggsvelte/core";
 import type { CoordTransformAxisSpec, PortableSpec, Scales } from "@ggsvelte/spec";
 
 import type {
@@ -6,14 +6,7 @@ import type {
   PlotInteractionScope,
   ZoomEvent,
 } from "../interaction/interaction.js";
-import {
-  frozenZoomDomains,
-  panelDataDomains,
-  type ContinuousZoomDomains,
-  type PanelBounds,
-  type PanelCoordInverse,
-  type PlotRect,
-} from "../scene/geometry.js";
+import { frozenZoomDomains, type ContinuousZoomDomains, type PlotRect } from "../scene/geometry.js";
 
 export type ZoomMode = "x" | "y" | "xy";
 
@@ -252,23 +245,32 @@ export function buildZoomEvent(
  */
 export function resolveBrushZoomDomains(
   rect: PlotRect,
-  panel: PanelBounds,
-  scales: Pick<RenderModel["scales"], "x" | "y">,
-  flipped: boolean,
+  panel: SemanticViewportPanel,
   mode: ZoomMode,
   current: ContinuousZoomDomains | null,
-  coord?: PanelCoordInverse,
 ): ContinuousZoomDomains | null {
-  const th0 = Math.max(0, Math.min(1, (rect.x0 - panel.x) / panel.width));
-  const th1 = Math.max(0, Math.min(1, (rect.x1 - panel.x) / panel.width));
-  const tv0 = Math.max(0, Math.min(1, 1 - (rect.y1 - panel.y) / panel.height));
-  const tv1 = Math.max(0, Math.min(1, 1 - (rect.y0 - panel.y) / panel.height));
+  const width = panel.bounds.x1 - panel.bounds.x0;
+  const height = panel.bounds.y1 - panel.bounds.y0;
+  const th0 = Math.max(0, Math.min(1, (rect.x0 - panel.bounds.x0) / width));
+  const th1 = Math.max(0, Math.min(1, (rect.x1 - panel.bounds.x0) / width));
+  const tv0 = Math.max(0, Math.min(1, 1 - (rect.y1 - panel.bounds.y0) / height));
+  const tv1 = Math.max(0, Math.min(1, 1 - (rect.y0 - panel.bounds.y0) / height));
   // Guard uses raw screen fractions, not flip-remapped domains.
   if (th1 - th0 <= 0 && tv1 - tv0 <= 0) return null;
-  const inverted = panelDataDomains(rect, panel, scales, flipped, coord);
+  const inverted = panel.invert(rect);
   const next: ContinuousZoomDomains = { ...current };
-  if (mode !== "y" && inverted.x !== undefined) next.x = inverted.x;
-  if (mode !== "x" && inverted.y !== undefined) next.y = inverted.y;
+  if (
+    mode !== "y" &&
+    inverted.x !== undefined &&
+    inverted.x.every((value) => typeof value === "number" && Number.isFinite(value))
+  )
+    next.x = [inverted.x[0] as number, inverted.x[1] as number];
+  if (
+    mode !== "x" &&
+    inverted.y !== undefined &&
+    inverted.y.every((value) => typeof value === "number" && Number.isFinite(value))
+  )
+    next.y = [inverted.y[0] as number, inverted.y[1] as number];
   if (next.x === undefined && next.y === undefined) return null;
   return next;
 }
@@ -278,9 +280,7 @@ export function resolveBrushZoomDomains(
  * Accepts full `RenderModel` structurally.
  */
 export type BrushZoomModel = {
-  readonly scene: { readonly panels: readonly PanelBounds[] };
-  readonly scales: Pick<RenderModel["scales"], "x" | "y">;
-  readonly coordProjectors?: readonly PanelCoordInverse[];
+  readonly viewport: RenderModel["viewport"];
 };
 
 /**
@@ -294,22 +294,13 @@ export type BrushZoomModel = {
 export function resolveBrushZoomFromModel(input: {
   readonly model: BrushZoomModel | null;
   readonly rect: PlotRect;
-  readonly flipped: boolean;
   readonly mode: ZoomMode;
   readonly current: ContinuousZoomDomains | null;
 }): ContinuousZoomDomains | null {
   if (input.model === null) return null;
-  if (input.model.scene.panels.length !== 1) return null;
-  const panel = input.model.scene.panels[0]!;
-  const next = resolveBrushZoomDomains(
-    input.rect,
-    panel,
-    input.model.scales,
-    input.flipped,
-    input.mode,
-    input.current,
-    input.model.coordProjectors?.[0],
-  );
+  if (input.model.viewport.panels.length !== 1) return null;
+  const panel = input.model.viewport.panels[0]!;
+  const next = resolveBrushZoomDomains(input.rect, panel, input.mode, input.current);
   if (next === null) return null;
   return frozenZoomDomains(next);
 }

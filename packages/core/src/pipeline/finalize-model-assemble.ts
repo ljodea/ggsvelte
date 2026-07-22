@@ -26,6 +26,7 @@ export function assembleFinalizeRenderModel(input: {
   prepared: PreparedPanels;
   panelLayout: PanelLayoutResult;
   coordProjectors: readonly PanelCoordProjector[];
+  flipped: boolean;
   runId: number;
   warnings: PipelineWarning[];
   advisories: Advisory[];
@@ -58,6 +59,7 @@ export function assembleFinalizeRenderModel(input: {
       ...(fillResolution.guidePlan === null ? [] : [fillResolution.guidePlan]),
     ]),
     coordProjectors: input.coordProjectors,
+    flipped: input.flipped,
     xConversion: prepared.xConversion,
     yConversion: prepared.yConversion,
     runId: input.runId,

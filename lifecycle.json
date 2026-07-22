@@ -1815,6 +1815,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "PlotRect": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "PointsBatch": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1968,6 +1972,26 @@
           "lifecycle": "experimental"
         },
         "SemanticCandidateKeys": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SemanticViewport": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SemanticViewportAxisSelection": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SemanticViewportDomains": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SemanticViewportPanel": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SemanticViewportSelection": {
           "kind": "type",
           "lifecycle": "experimental"
         },

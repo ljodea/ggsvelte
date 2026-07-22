@@ -1,7 +1,8 @@
-import { fromAny } from "@total-typescript/shoehorn";
+import { fromAny, fromPartial } from "@total-typescript/shoehorn";
 import { describe, expect, it } from "vitest";
 
 import type { PortableSpec } from "@ggsvelte/spec";
+import type { CellValue, SemanticViewport, SemanticViewportPanel } from "@ggsvelte/core";
 
 import {
   applyZoomToSpec,
@@ -30,7 +31,15 @@ const bandScale = {
   invert: (_t: number) => 0,
 };
 
-const panel = { x: 0, y: 0, width: 100, height: 100 };
+const viewportPanel = (domains: {
+  x?: readonly [CellValue, CellValue];
+  y?: readonly [CellValue, CellValue];
+}) =>
+  fromPartial<SemanticViewportPanel>({
+    id: "panel",
+    bounds: { x0: 0, y0: 0, x1: 100, y1: 100 },
+    invert: () => domains,
+  });
 
 describe("filterZoomDomainsByMode", () => {
   const domains = {
@@ -220,18 +229,11 @@ describe("sanitizePartialZoomDomains", () => {
 });
 
 describe("resolveBrushZoomDomains", () => {
-  const scales = {
-    x: continuousScale([0, 100]),
-    y: continuousScale([0, 50]),
-  };
-
   it("rejects only when both normalized pixel spans are non-positive", () => {
     expect(
       resolveBrushZoomDomains(
         { x0: 10, y0: 10, x1: 10, y1: 10 },
-        panel,
-        fromAny(scales),
-        false,
+        viewportPanel({ x: [10, 10], y: [45, 45] }),
         "xy",
         null,
       ),
@@ -241,9 +243,7 @@ describe("resolveBrushZoomDomains", () => {
   it("allows a single-axis-thin brush (existing behavior)", () => {
     const domains = resolveBrushZoomDomains(
       { x0: 10, y0: 20, x1: 10, y1: 80 },
-      panel,
-      fromAny(scales),
-      false,
+      viewportPanel({ x: [10, 10], y: [10, 40] }),
       "xy",
       null,
     );
@@ -254,9 +254,7 @@ describe("resolveBrushZoomDomains", () => {
   it("filters by mode and merges with current domains", () => {
     const xOnly = resolveBrushZoomDomains(
       { x0: 10, y0: 10, x1: 90, y1: 90 },
-      panel,
-      fromAny(scales),
-      false,
+      viewportPanel({ x: [10, 90], y: [5, 45] }),
       "x",
       { y: [1, 2] },
     );
@@ -265,9 +263,7 @@ describe("resolveBrushZoomDomains", () => {
 
     const yOnly = resolveBrushZoomDomains(
       { x0: 10, y0: 10, x1: 90, y1: 90 },
-      panel,
-      fromAny(scales),
-      false,
+      viewportPanel({ x: [10, 90], y: [5, 45] }),
       "y",
       null,
     );
@@ -275,45 +271,22 @@ describe("resolveBrushZoomDomains", () => {
     expect(yOnly?.y).toBeDefined();
   });
 
-  it("inverts the coordinate projector before the scale", () => {
+  it("accepts only finite numeric viewport domains", () => {
     const domains = resolveBrushZoomDomains(
       { x0: 50, y0: 0, x1: 100, y1: 100 },
-      panel,
-      fromAny(scales),
-      false,
-      "x",
-      null,
-      {
-        x: { invertFraction: (fraction: number) => fraction * fraction },
-        y: { invertFraction: (fraction: number) => fraction },
-      },
-    );
-    expect(domains?.x).toEqual([25, 100]);
-  });
-
-  it("inverts through flipped coordinates", () => {
-    // Flipped: screen-x → y scale [0,50], screen-y → x scale [0,100].
-    const domains = resolveBrushZoomDomains(
-      { x0: 0, y0: 0, x1: 100, y1: 100 },
-      panel,
-      fromAny(scales),
-      true,
+      viewportPanel({ x: [25, 100], y: ["a", "b"] }),
       "xy",
       null,
     );
-    expect(domains?.x).toEqual([0, 100]);
-    expect(domains?.y).toEqual([0, 50]);
+    expect(domains?.x).toEqual([25, 100]);
+    expect(domains?.y).toBeUndefined();
   });
 });
 
 describe("resolveBrushZoomFromModel", () => {
-  const scales = {
-    x: continuousScale([0, 100]),
-    y: continuousScale([0, 50]),
-  };
+  const panel = viewportPanel({ x: [10, 90], y: [5, 45] });
   const single = {
-    scene: { panels: [panel] },
-    scales: fromAny(scales),
+    viewport: fromPartial<SemanticViewport>({ panels: [panel] }),
   };
   const rect = { x0: 10, y0: 10, x1: 90, y1: 90 };
 
@@ -322,7 +295,6 @@ describe("resolveBrushZoomFromModel", () => {
       resolveBrushZoomFromModel({
         model: null,
         rect,
-        flipped: false,
         mode: "xy",
         current: null,
       }),
@@ -333,11 +305,11 @@ describe("resolveBrushZoomFromModel", () => {
     expect(
       resolveBrushZoomFromModel({
         model: {
-          scene: { panels: [panel, { x: 100, y: 0, width: 100, height: 100 }] },
-          scales: fromAny(scales),
+          viewport: fromPartial<SemanticViewport>({
+            panels: [panel, panel],
+          }),
         },
         rect,
-        flipped: false,
         mode: "xy",
         current: null,
       }),
@@ -347,9 +319,10 @@ describe("resolveBrushZoomFromModel", () => {
   it("returns null when there are zero panels", () => {
     expect(
       resolveBrushZoomFromModel({
-        model: { scene: { panels: [] }, scales: fromAny(scales) },
+        model: {
+          viewport: fromPartial<SemanticViewport>({ panels: [] }),
+        },
         rect,
-        flipped: false,
         mode: "xy",
         current: null,
       }),
@@ -360,7 +333,6 @@ describe("resolveBrushZoomFromModel", () => {
     const domains = resolveBrushZoomFromModel({
       model: single,
       rect,
-      flipped: false,
       mode: "xy",
       current: null,
     });
@@ -382,7 +354,6 @@ describe("resolveBrushZoomFromModel", () => {
       resolveBrushZoomFromModel({
         model: single,
         rect: { x0: 10, y0: 10, x1: 10, y1: 10 },
-        flipped: false,
         mode: "xy",
         current: null,
       }),

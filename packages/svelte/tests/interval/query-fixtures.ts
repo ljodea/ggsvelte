@@ -1,55 +1,59 @@
-/**
- * Shared IntervalQueryScene builder for pure interval/query unit suites.
- */
+/** Shared SemanticViewport-backed IntervalQueryScene test builder. */
 import { fromPartial } from "@total-typescript/shoehorn";
+
+import type { CandidateFacts, PlotRect, SemanticViewportPanel } from "@ggsvelte/core";
 
 import type { IntervalQueryScene } from "../../src/lib/interval/query.js";
 
+type Candidate = Readonly<{
+  lineage: number;
+  x0: number;
+  y0: number;
+  x1: number;
+  y1: number;
+}>;
+
 export function scene(partial: {
-  panel?: IntervalQueryScene["panel"];
-  singlePanel?: boolean;
-  flip?: boolean;
-  coord?: IntervalQueryScene["coord"];
-  candidates?: readonly {
-    lineage: number;
-    x0: number;
-    y0: number;
-    x1: number;
-    y1: number;
-  }[];
+  panel?: SemanticViewportPanel | null;
+  panels?: readonly SemanticViewportPanel[];
+  candidates?: readonly Candidate[];
   lineage?: Record<number, number[]>;
 }): IntervalQueryScene {
-  const panel =
-    partial.panel === undefined ? { x: 0, y: 0, width: 100, height: 100, id: "p0" } : partial.panel;
   const candidates = partial.candidates ?? [];
   const lineage = partial.lineage ?? { 1: [10, 11], 2: [11, 12] };
-  const flip = partial.flip ?? false;
-  return {
-    panel,
-    singlePanel: partial.singlePanel ?? true,
-    flip,
-    ...(partial.coord !== undefined && { coord: partial.coord }),
-    scales: fromPartial<IntervalQueryScene["scales"]>({
-      x: {
-        type: "linear",
-        invert: (t: number) => (flip ? 1 - t : t) * 10,
-      },
-      y: {
-        type: "linear",
-        invert: (t: number) => (flip ? t : 1 - t) * 20,
-      },
-    }),
-    queryCandidates(expanded) {
-      // Production uses the hit index; tests approximate with axis-aligned bounds.
+  const defaultPanel = fromPartial<SemanticViewportPanel>({
+    id: "p0",
+    bounds: { x0: 0, y0: 0, x1: 100, y1: 100 },
+    invert: (rect: PlotRect) => ({ x: [rect.x0 / 10, rect.x1 / 10], y: [0, 20] }),
+    query(rect: PlotRect, mode: "x" | "y" | "xy") {
+      const expanded =
+        mode === "x"
+          ? { ...rect, y0: 0, y1: 100 }
+          : mode === "y"
+            ? { ...rect, x0: 0, x1: 100 }
+            : rect;
       return candidates
         .filter(
-          (c) =>
-            c.x1 >= expanded.x0 &&
-            c.x0 <= expanded.x1 &&
-            c.y1 >= expanded.y0 &&
-            c.y0 <= expanded.y1,
+          (candidate) =>
+            candidate.x1 >= expanded.x0 &&
+            candidate.x0 <= expanded.x1 &&
+            candidate.y1 >= expanded.y0 &&
+            candidate.y0 <= expanded.y1,
         )
-        .map((c) => ({ lineage: c.lineage }));
+        .map((candidate) => fromPartial<CandidateFacts>({ lineage: candidate.lineage }));
+    },
+  });
+  const panel = partial.panel === undefined ? defaultPanel : partial.panel;
+  const panels = partial.panels ?? (panel === null ? [] : [panel]);
+  return {
+    viewport: {
+      panels,
+      panel(id) {
+        return panels.find((candidate) => candidate.id === id) ?? null;
+      },
+      panelAt() {
+        return null;
+      },
     },
     lineageKeys(id) {
       return lineage[id] ?? [];

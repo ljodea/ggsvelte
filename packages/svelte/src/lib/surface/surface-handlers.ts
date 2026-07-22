@@ -15,7 +15,7 @@ import { createInteractionReducer } from "../interaction/reducer.js";
 import { brushAtPoint, brushWithEnd } from "./area-brush.js";
 import type { FinishBrushAction } from "./brush-finish.js";
 import { resolveChooseToolAction } from "../interaction/capability.js";
-import { normalizedRect, panelContainingAnchor } from "../scene/geometry.js";
+import { normalizedRect } from "../scene/geometry.js";
 import {
   buildIntervalSelectionFromScene,
   intervalQuerySceneFromModel,
@@ -121,10 +121,13 @@ export function createSurfaceHandlers(live: SurfaceHandlerLive): SurfaceHandlers
   }
 
   function panelAtPoint(point: Readonly<{ x: number; y: number }>) {
-    const panels = deps.model()?.scene.panels ?? [];
-    // Same inclusive-bounds find as inspection-panel resolution (DRY),
-    // plus the surface-only single-panel fallback.
-    return panelContainingAnchor(panels, point) ?? (panels.length === 1 ? panels[0]! : null);
+    const model = deps.model();
+    if (model === null) return null;
+    const viewportPanel = model.viewport.panelAt(point);
+    return (
+      model.scene.panels.find((panel) => panel.id === viewportPanel?.id) ??
+      (model.scene.panels.length === 1 ? model.scene.panels[0]! : null)
+    );
   }
 
   function onPointerMove(event: PointerEvent): void {
@@ -182,7 +185,7 @@ export function createSurfaceHandlers(live: SurfaceHandlerLive): SurfaceHandlers
   function intervalQueryScene(): IntervalQueryScene | null {
     const model = deps.model();
     if (model === null) return null;
-    return intervalQuerySceneFromModel(model, deps.coordFlipped());
+    return intervalQuerySceneFromModel(model);
   }
 
   /**
