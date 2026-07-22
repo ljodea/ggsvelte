@@ -36,7 +36,17 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      # The GitHub Actions cache backend (type=gha) requires the docker-container
+      # Buildx driver; the default `docker` driver does not support it, so the
+      # cache export silently no-ops (or errors). Set up Buildx first.
+      - name: set up Buildx
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
+      # Only publish from main. workflow_dispatch can target any branch, so a
+      # write collaborator dispatching from an unmerged branch must NOT be able
+      # to overwrite the published tag — non-main dispatches are build-only
+      # (push=false below), and there is no reason to authenticate to GHCR.
       - name: log in to GHCR
+        if: github.ref == 'refs/heads/main'
         uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
         with:
           registry: ghcr.io
@@ -47,7 +57,8 @@ jobs:
         with:
           context: .github/docker/ci-runner
           build-args: PLAYWRIGHT_TAG=${{ env.PLAYWRIGHT_TAG }}
-          push: true
+          # Build-only on non-main dispatches; publish only from main.
+          push: ${{ github.ref == 'refs/heads/main' }}
           tags: ghcr.io/${{ github.repository }}/ci-runner:${{ env.PLAYWRIGHT_TAG }}
           # Cache layers across builds to keep republishes fast.
           cache-from: type=gha
