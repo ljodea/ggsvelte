@@ -8,7 +8,7 @@
 import type { Advisory, PipelineWarning } from "./types.js";
 import type { ScaleDiagnostic } from "./types-scale-diagnostics.js";
 
-const DOCS = "https://ljodea.github.io/ggsvelte/guide/errors";
+const DOCS = "https://ggsvelte.sh/guide/errors";
 
 /** `scales.x` / `scales.y` → axis; unknown paths are skipped. */
 function axisOfPath(path: string): "x" | "y" | null {

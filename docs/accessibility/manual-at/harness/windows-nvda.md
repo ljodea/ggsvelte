@@ -27,7 +27,7 @@ or silently approve a release record.
 
 From the GitHub Actions page, choose **Manual assistive-technology evidence**,
 then **Run workflow**. Use `local` to build and serve the selected commit, or
-`live` to verify the deployed GitHub Pages fixture. Set `release` to the release
+`live` to verify the deployed Cloudflare Pages fixture. Set `release` to the release
 whose records the run will support. Choose one display profile per run:
 
 - `baseline` leaves the runner's display settings and browser zoom unchanged.

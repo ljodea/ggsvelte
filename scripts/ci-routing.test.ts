@@ -198,9 +198,6 @@ describe("planJobs", () => {
       "scripts/guide-code-contract.ts",
       "scripts/deployment-artifact.ts",
       "scripts/deployment-smoke.ts",
-      "scripts/gen-legacy-routes.ts",
-      "scripts/legacy-migration.ts",
-      "scripts/legacy-routes.ts",
     ]) {
       const plan = planJobs(classifyChangedPaths([path]));
       expect(plan.unit, path).toBe(true);
@@ -267,7 +264,7 @@ describe("planJobs", () => {
   });
 
   test("workflow-only changes run actions-security + unit (release-wiring) without full suite", () => {
-    const plan = planJobs(classifyChangedPaths([".github/workflows/pages.yml"]));
+    const plan = planJobs(classifyChangedPaths([".github/workflows/cloudflare-pages.yml"]));
     expect(plan.actions_security).toBe(true);
     expect(plan.checks).toBe(true);
     expect(plan.unit).toBe(true);
@@ -325,7 +322,7 @@ describe("planJobs", () => {
       classifyChangedPaths([
         ".github/workflows/ci.yml",
         ".github/workflows/vr-compare.yml",
-        ".github/workflows/pages.yml",
+        ".github/workflows/cloudflare-pages.yml",
         ".github/actions/ci-content-hash-write/action.yml",
       ]),
     );
@@ -569,7 +566,7 @@ describe("evaluateGate", () => {
 
 describe("formatGithubOutputs", () => {
   test("emits true/false lines for every job key", () => {
-    const plan = planJobs(classifyChangedPaths([".github/workflows/pages.yml"]));
+    const plan = planJobs(classifyChangedPaths([".github/workflows/cloudflare-pages.yml"]));
     const text = formatGithubOutputs(plan);
     expect(text).toContain("checks=true\n");
     expect(text).toContain("actions_security=true\n");

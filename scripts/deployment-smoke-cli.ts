@@ -79,7 +79,6 @@ async function main(): Promise<void> {
             apexOrigin: argument("--apex-origin"),
             wwwOrigin: argument("--www-origin"),
             productionPagesOrigin: argument("--production-pages-origin"),
-            legacyOrigin: argument("--legacy-origin"),
             sourceCommit,
           })
         : (() => {
