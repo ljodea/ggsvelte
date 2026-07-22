@@ -2,6 +2,7 @@
  * Collect y-axis training evidence from a single layer frame.
  */
 import { snapColumnToBins } from "./binned-scale.js";
+import { assertInferredTemporalTransform } from "./scale-config-preflight.js";
 import { isBarLike } from "./scale-axis-train.js";
 import {
   positionColumn,
@@ -76,12 +77,21 @@ export function collectAxisInputsY(frame: LayerFrame, acc: AxisCollectAcc): void
     acc.columns.push([v]);
     const converted = positionValuesToNumeric([v], yConversion);
     const numeric = converted.values[0] ?? Number.NaN;
-    acc.numeric.push(
-      Float64Array.of(positionValueToScaleSpace(v, yConversion, binding.yTransform)),
-    );
     const temporal =
       converted.decision.status === "temporal" ||
       (yConversion.parser !== "auto" && Number.isFinite(numeric));
+    if (temporal) {
+      assertInferredTemporalTransform(
+        "y",
+        binding.yTransform === undefined
+          ? undefined
+          : { transform: binding.yTransform.transform.key },
+        true,
+      );
+    }
+    acc.numeric.push(
+      Float64Array.of(positionValueToScaleSpace(v, yConversion, binding.yTransform)),
+    );
     if (!temporal) acc.allTemporal = false;
     if (typeof v === "string" && !Number.isFinite(numeric)) acc.anyDiscrete = true;
     acc.sawContinuousEvidence = true;

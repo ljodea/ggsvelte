@@ -2,9 +2,10 @@ import type { BarParams } from "@ggsvelte/spec";
 
 import { bandKey } from "../../scales/train.js";
 import { ColumnTable } from "../../table.js";
+import { assignBinId } from "../binned-scale.js";
 import type { FacetPanelDef } from "../facets.js";
 import { shouldAggregateOnSemanticTemporalX } from "../frame-stats-shared.js";
-import { xConversionOf } from "../temporal-position.js";
+import { positionColumn, xConversionOf } from "../temporal-position.js";
 import type { LayerBinding, LayerFrame } from "../types.js";
 
 /** Key used for count/summary/boxplot group×x lineage buckets (matches frame xValues). */
@@ -14,6 +15,12 @@ export function aggregateLineageXKey(
   localRow: number,
   binding: LayerBinding,
 ): string {
+  // Binned count stores bin ids on the frame; bucket membership must key by
+  // the same id (not the inverse-projected bin center in xValues).
+  if (binding.xBinning !== undefined) {
+    const transformed = positionColumn(table, field, xConversionOf(binding), binding.xTransform);
+    return bandKey(assignBinId(transformed[localRow]!, binding.xBinning));
+  }
   const conversion = xConversionOf(binding);
   const parsed = table.parsed(field, conversion.sourceParser, conversion.options);
   if (shouldAggregateOnSemanticTemporalX(binding, parsed.decision.status)) {
@@ -135,8 +142,14 @@ export function buildBinLineageBuckets(input: {
     bins.sort((a, b) => a.lo - b.lo || a.hi - b.hi);
   }
 
-  const xConversion = xConversionOf(frame.binding);
-  const xNumeric = frame.table.numeric(field, xConversion.sourceParser, xConversion.options);
+  // Bin edges are in scale space after pre-stat transforms; compare source
+  // rows in the same space so log/sqrt histograms retain lineage.
+  const xNumeric = positionColumn(
+    frame.table,
+    field,
+    xConversionOf(frame.binding),
+    frame.binding.xTransform,
+  );
   for (let localRow = 0; localRow < inputGroups.length; localRow++) {
     const group = inputGroups[localRow]!;
     const bins = binsByGroup.get(group);
