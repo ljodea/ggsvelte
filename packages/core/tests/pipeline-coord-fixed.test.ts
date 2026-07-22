@@ -2,6 +2,7 @@ import { describe, expect, it } from "bun:test";
 
 import { aes, gg } from "@ggsvelte/spec";
 
+import { PIPELINE_ERROR_CATALOG, PIPELINE_WARNING_CATALOG } from "../src/diagnostics.ts";
 import { resolveTheme, sceneToSVGString } from "../src/index.ts";
 import { runPipeline } from "../src/pipeline.ts";
 import { applyFixedAspectLayout } from "../src/pipeline/panel-layout-fixed.ts";
@@ -226,6 +227,57 @@ describe("coord_fixed pipeline", () => {
       ),
     ).toBe(false);
     expect(svg).not.toContain('class="gg-panel-background"');
+  });
+
+  it("catalogs degraded fixed-aspect as a warning, not a pipeline error", () => {
+    expect(PIPELINE_WARNING_CATALOG["coord-fixed-degraded"]).toBeDefined();
+    expect(
+      (PIPELINE_ERROR_CATALOG as Record<string, unknown>)["coord-fixed-degraded"],
+    ).toBeUndefined();
+  });
+
+  it("rejects non-finite fitted fixed-aspect rectangles instead of sizing to zero", () => {
+    const model = fixedModel(640, 400);
+    const panel = model.scene.panels[0]!;
+    const tinySpan = {
+      type: "linear" as const,
+      transform: "identity" as const,
+      domain: [0, 1e-320] as const,
+      transformedDomain: [0, 1e-320] as const,
+      range: [0, 1] as const,
+    };
+    const unitSpan = {
+      type: "linear" as const,
+      transform: "identity" as const,
+      domain: [0, 1] as const,
+      transformedDomain: [0, 1] as const,
+      range: [0, 1] as const,
+    };
+    expect(() =>
+      applyFixedAspectLayout({
+        placements: [
+          {
+            x: panel.x,
+            y: panel.y,
+            width: panel.width,
+            height: panel.height,
+            ticksH: [],
+            ticksV: [],
+            showAxisX: true,
+            showAxisY: true,
+          },
+        ],
+        panelScales: [{ x: tinySpan as never, y: unitSpan as never }],
+        coord: { type: "fixed", ratio: 1 },
+        faceted: false,
+        freeX: false,
+        freeY: false,
+        scalesConfig: {},
+        warnings: [],
+      }),
+    ).toThrow(
+      expect.objectContaining({ code: "coord-fixed-invalid-aspect", path: "/coord/ratio" }),
+    );
   });
 
   it("keeps guidePlans aligned with thinned ticks under degraded fixed aspect", () => {

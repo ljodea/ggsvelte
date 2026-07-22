@@ -165,9 +165,10 @@ export const PIPELINE_ERROR_CATALOG = {
     summary: "Fixed-aspect coordinates were combined with free positional facet scales.",
     fix: 'Use facet.scales = "fixed", or remove coord_fixed.',
   },
-  "coord-fixed-degraded": {
-    summary: "A fixed-aspect data rectangle is below the documented readable minimum.",
-    fix: "Increase the plot allocation or choose a less extreme fixed ratio; the rendered ratio remains exact.",
+  "coord-fixed-invalid-aspect": {
+    summary:
+      "A fixed-aspect target or fitted data rectangle is non-finite or non-positive after chrome is allocated.",
+    fix: "Use a moderate finite ratio and non-degenerate positional domains, or enlarge the plot allocation.",
   },
   "binned-scale-requires-continuous": {
     summary: 'A type: "binned" scale is bound to a discrete or temporal field.',
@@ -438,6 +439,10 @@ export const PIPELINE_WARNING_CATALOG = {
   "coord-invalid-geometry": {
     summary:
       "Path vertices outside a coordinate transform's domain were removed without bridging the remaining finite runs.",
+  },
+  "coord-fixed-degraded": {
+    summary:
+      "A fixed-aspect data rectangle is below the documented readable minimum; the ratio remains exact and minor furniture is removed.",
   },
 } as const satisfies Record<string, { summary: string }>;
 

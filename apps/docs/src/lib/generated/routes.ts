@@ -1424,8 +1424,8 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
-        id: "coord-fixed-degraded",
-        title: "coord-fixed-degraded",
+        id: "coord-fixed-invalid-aspect",
+        title: "coord-fixed-invalid-aspect",
         level: 3,
       },
       {
@@ -1791,6 +1791,11 @@ export const DOCS_ROUTES = [
       {
         id: "coord-invalid-geometry",
         title: "coord-invalid-geometry",
+        level: 3,
+      },
+      {
+        id: "coord-fixed-degraded",
+        title: "coord-fixed-degraded",
         level: 3,
       },
       {

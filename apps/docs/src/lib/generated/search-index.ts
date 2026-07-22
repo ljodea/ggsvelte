@@ -2164,14 +2164,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["coord-fixed-free-scales — pipeline"],
   },
   {
-    id: "heading:guide-errors:coord-fixed-degraded",
+    id: "heading:guide-errors:coord-fixed-invalid-aspect",
     kind: "heading",
-    title: "coord-fixed-degraded",
+    title: "coord-fixed-invalid-aspect",
     summary:
-      "coord-fixed-degraded in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
-    href: "/guide/errors#coord-fixed-degraded",
+      "coord-fixed-invalid-aspect in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#coord-fixed-invalid-aspect",
     keywords: ["Errors reference", "Reference"],
-    exact: ["coord-fixed-degraded"],
+    exact: ["coord-fixed-invalid-aspect"],
   },
   {
     id: "heading:guide-errors:binned-scale-requires-continuous",
@@ -2902,6 +2902,16 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/errors#coord-invalid-geometry",
     keywords: ["Errors reference", "Reference"],
     exact: ["coord-invalid-geometry"],
+  },
+  {
+    id: "heading:guide-errors:coord-fixed-degraded",
+    kind: "heading",
+    title: "coord-fixed-degraded",
+    summary:
+      "coord-fixed-degraded in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#coord-fixed-degraded",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["coord-fixed-degraded"],
   },
   {
     id: "heading:guide-errors:interaction-diagnostics-ggsvelte-svelte",
@@ -15823,17 +15833,18 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["coord-fixed-free-scales", "pipeline:coord-fixed-free-scales"],
   },
   {
-    id: "diagnostic:pipeline:coord-fixed-degraded",
+    id: "diagnostic:pipeline:coord-fixed-invalid-aspect",
     kind: "diagnostic",
-    title: "coord-fixed-degraded · pipeline",
-    summary: "A fixed-aspect data rectangle is below the documented readable minimum.",
-    href: "/guide/errors#coord-fixed-degraded",
+    title: "coord-fixed-invalid-aspect · pipeline",
+    summary:
+      "A fixed-aspect target or fitted data rectangle is non-finite or non-positive after chrome is allocated.",
+    href: "/guide/errors#coord-fixed-invalid-aspect",
     keywords: [
       "pipeline",
       "error",
-      "Increase the plot allocation or choose a less extreme fixed ratio; the rendered ratio remains exact.",
+      "Use a moderate finite ratio and non-degenerate positional domains, or enlarge the plot allocation.",
     ],
-    exact: ["coord-fixed-degraded", "pipeline:coord-fixed-degraded"],
+    exact: ["coord-fixed-invalid-aspect", "pipeline:coord-fixed-invalid-aspect"],
   },
   {
     id: "diagnostic:pipeline:binned-scale-requires-continuous",
@@ -16775,6 +16786,20 @@ export const DOCS_SEARCH_INDEX = [
       "Inspect the warning message for its path and count, then correct the named data, scale, or option.",
     ],
     exact: ["coord-invalid-geometry", "warning:coord-invalid-geometry"],
+  },
+  {
+    id: "diagnostic:warning:coord-fixed-degraded",
+    kind: "diagnostic",
+    title: "coord-fixed-degraded · warning",
+    summary:
+      "A fixed-aspect data rectangle is below the documented readable minimum; the ratio remains exact and minor furniture is removed.",
+    href: "/guide/errors#coord-fixed-degraded",
+    keywords: [
+      "warning",
+      "warning",
+      "Inspect the warning message for its path and count, then correct the named data, scale, or option.",
+    ],
+    exact: ["coord-fixed-degraded", "warning:coord-fixed-degraded"],
   },
   {
     id: "diagnostic:interaction:INTERACTION_INTERVAL_FACET_UNSUPPORTED",
