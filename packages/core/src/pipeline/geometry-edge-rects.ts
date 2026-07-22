@@ -29,7 +29,8 @@ function sizeAt(
   row: number,
 ): number {
   if (field !== null) {
-    const raw = frame.table.column(field)[frame.rowIndex[row]!]!;
+    // Frame tables are panel-local after faceting; use the panel row index.
+    const raw = frame.table.column(field)[row]!;
     const n = typeof raw === "number" ? raw : Number(raw);
     return Number.isFinite(n) ? n : NaN;
   }
@@ -293,10 +294,18 @@ function styleEdgeBatch(
     );
   }
   if (withStroke) {
-    const wantsStroke =
+    const wantsMappedStroke =
       color !== null && (frame.colorValues !== null || binding.color.scaledConstant !== null);
     const constantStroke = binding.color.constant;
-    if (wantsStroke) {
+    const hasStrokeStyle =
+      typeof binding.linewidth?.constant === "number" ||
+      binding.linewidth?.field !== null ||
+      binding.linewidth?.scaledConstant !== null ||
+      typeof binding.linetype?.constant === "string" ||
+      binding.linetype?.field !== null ||
+      binding.linetype?.scaledConstant !== null ||
+      typeof params.linewidth === "number";
+    if (wantsMappedStroke) {
       batch.strokes = Array.from({ length: emitted.kept }, (_, j) =>
         colorOf(
           color,
@@ -308,6 +317,9 @@ function styleEdgeBatch(
       batch.stroke = null;
     } else if (constantStroke !== null) {
       batch.stroke = constantStroke;
+    } else if (hasStrokeStyle) {
+      // Linewidth/linetype without color: outline with theme ink.
+      batch.stroke = null;
     }
     if (batch.stroke !== undefined || batch.strokes !== undefined) {
       batch.strokeWidth =

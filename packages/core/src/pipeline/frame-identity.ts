@@ -110,25 +110,27 @@ export function buildIdentityFrame(
             binding.yTransform,
             binding.yBinning,
           ),
+    // Only geom rect consumes aes xmin/xmax as identity edges. Tile/raster
+    // expand edges later; other geoms must not poison scale training.
     xmin:
-      binding.xminField === null
-        ? null
-        : positionNumeric(
+      binding.layer.geom === "rect" && binding.xminField !== null
+        ? positionNumeric(
             table,
             binding.xminField,
             binding.xConversion,
             binding.xTransform,
             binding.xBinning,
-          ),
+          )
+        : null,
     xmax:
-      binding.xmaxField === null
-        ? null
-        : positionNumeric(
+      binding.layer.geom === "rect" && binding.xmaxField !== null
+        ? positionNumeric(
             table,
             binding.xmaxField,
             binding.xConversion,
             binding.xTransform,
             binding.xBinning,
-          ),
+          )
+        : null,
   };
 }

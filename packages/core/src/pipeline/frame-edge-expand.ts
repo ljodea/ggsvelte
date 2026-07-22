@@ -18,7 +18,8 @@ function sizeAt(
   row: number,
 ): number {
   if (field !== null) {
-    const raw = frame.table.column(field)[frame.rowIndex[row]!]!;
+    // Panel-local table after faceting — index by frame row, not source id.
+    const raw = frame.table.column(field)[row]!;
     const n = typeof raw === "number" ? raw : Number(raw);
     return Number.isFinite(n) ? n : NaN;
   }
@@ -43,11 +44,17 @@ function uniqueSorted(values: Float64Array): number[] {
 
 function spacingOf(unique: readonly number[]): { size: number; irregular: boolean } {
   if (unique.length <= 1) return { size: 1, irregular: false };
-  const diffs: number[] = [];
-  for (let i = 1; i < unique.length; i++) diffs.push(unique[i]! - unique[i - 1]!);
-  const min = Math.min(...diffs);
-  const irregular = diffs.some((d) => Math.abs(d - min) > RASTER_SPACING_EPS);
-  return { size: min > 0 ? min : 1, irregular };
+  let min = Infinity;
+  let irregular = false;
+  let firstGap = NaN;
+  for (let i = 1; i < unique.length; i++) {
+    const d = unique[i]! - unique[i - 1]!;
+    if (!(d > 0)) continue;
+    if (!Number.isFinite(firstGap)) firstGap = d;
+    else if (Math.abs(d - firstGap) > RASTER_SPACING_EPS) irregular = true;
+    if (d < min) min = d;
+  }
+  return { size: Number.isFinite(min) && min > 0 ? min : 1, irregular };
 }
 
 /** Expand continuous tile/raster frames with edge arrays before scale training. */
