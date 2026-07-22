@@ -4,17 +4,14 @@
  * Temporal meaning is owned by @ggsvelte/spec's strict parser registry. A
  * ColumnTable caches immutable parsed views by field + parser semantics;
  * subsets gather parent views so filters/facets never reclassify or reparse.
+ *
+ * Free helpers live in table-coerce.ts; public types in table-types.ts.
+ * This module re-exports both for a stable `./table.js` import path.
  */
 import {
   canonicalTemporalParserKey,
-  inferTemporalColumn,
-  parseTemporal,
   parseTemporalColumn,
-  type TemporalDecision,
-  type TemporalDisambiguation,
-  type TemporalKind,
   type TemporalParserSpec,
-  type TemporalPrecision,
 } from "@ggsvelte/spec";
 
 import {
@@ -22,136 +19,47 @@ import {
   type ColumnTransformConfig,
   executeColumnTransform,
 } from "./scales/transform.js";
+import {
+  cellsToNumeric,
+  cellsToQuantitative,
+  discretenessOf,
+  nonTemporalFieldType,
+} from "./table-coerce.js";
+import type {
+  CellValue,
+  Columns,
+  Discreteness,
+  FieldType,
+  ParsedColumnOptions,
+  ParsedColumnView,
+  Rows,
+  TransformedColumnView,
+} from "./table-types.js";
 
-export type CellValue = string | number | boolean | Date | null;
-export type Columns = Readonly<Record<string, readonly CellValue[]>>;
-export type Rows = readonly Readonly<Record<string, CellValue>>[];
-
-export type FieldType = "quantitative" | "temporal" | "nominal";
-export type Discreteness = "discrete" | "continuous";
-type TemporalFailurePolicy = "error" | "censor";
-
-export interface ParsedColumnOptions {
-  timezone?: string;
-  disambiguation?: TemporalDisambiguation;
-  failurePolicy?: TemporalFailurePolicy;
-  /** Internal position-scale override: coerce numeric strings without temporal inference. */
-  inferTemporal?: boolean;
-}
-
-export interface ParsedColumnView {
-  raw: readonly CellValue[];
-  semantic: Float64Array;
-  valid: Uint8Array;
-  parserKey: string;
-  temporalKind?: TemporalKind;
-  temporalPrecision?: TemporalPrecision;
-  decision: TemporalDecision;
-}
-
-/**
- * Immutable transformed (scale-space) view: the parser result plus the pre-stat
- * OOB/NA/forward transform. `semantic` is source units; `transformed` is
- * scale units; `valid` reflects post-transform validity. Counts feed bounded
- * axis diagnostics without placing full columns in the public model.
- */
-export interface TransformedColumnView {
-  raw: readonly CellValue[];
-  semantic: Float64Array;
-  transformed: Float64Array;
-  valid: Uint8Array;
-  /** Per-row diagnostic event flags, preserved through subsets. */
-  events: Uint8Array;
-  parserKey: string;
-  transformKey: string;
-  censored: number;
-  squished: number;
-  invalidTransform: number;
-}
+export type {
+  CellValue,
+  Columns,
+  Discreteness,
+  FieldType,
+  ParsedColumnOptions,
+  ParsedColumnView,
+  Rows,
+  TransformedColumnView,
+} from "./table-types.js";
+export {
+  cellToNumber,
+  cellsToNumeric,
+  cellsToQuantitative,
+  discretenessOf,
+  inferFieldType,
+  isISODateString,
+} from "./table-coerce.js";
 
 function transformConfigKey(config: ColumnTransformConfig): string {
   const limits =
     config.sourceLimits === null ? "none" : `${config.sourceLimits[0]},${config.sourceLimits[1]}`;
   const na = config.naValue === null ? "null" : String(config.naValue);
   return `${config.transform.key}|${limits}|${config.oob}|${na}`;
-}
-
-/** Strict ISO predicate retained for public import compatibility. */
-export function isISODateString(value: string): boolean {
-  return parseTemporal(value, "iso").ok;
-}
-
-function nonTemporalFieldType(column: readonly CellValue[]): FieldType {
-  let sawNumber = false;
-  let sawDate = false;
-  let sawString = false;
-  for (const value of column) {
-    if (value === null) continue;
-    switch (typeof value) {
-      case "string":
-        sawString = true;
-        break;
-      case "boolean":
-        return "nominal";
-      case "number":
-        sawNumber = true;
-        break;
-      default:
-        if (value instanceof Date && Number.isFinite(value.getTime())) sawDate = true;
-        else return "nominal";
-    }
-  }
-  if (sawString || (sawDate && sawNumber)) return "nominal";
-  if (sawDate) return "temporal";
-  return "quantitative";
-}
-
-/** Deterministic field type inference using the shared temporal registry. */
-export function inferFieldType(column: readonly CellValue[]): FieldType {
-  const temporal = inferTemporalColumn(column);
-  return temporal.status === "temporal" ? "temporal" : nonTemporalFieldType(column);
-}
-
-export function discretenessOf(type: FieldType): Discreteness {
-  return type === "nominal" ? "discrete" : "continuous";
-}
-
-/** One context-free numeric reading. Column temporal conversion uses parsed(). */
-export function cellToNumber(value: CellValue): number {
-  if (typeof value === "number") return value;
-  if (value instanceof Date) return value.getTime();
-  if (typeof value === "boolean") return value ? 1 : 0;
-  if (typeof value === "string") {
-    const iso = parseTemporal(value, "iso");
-    if (iso.ok) return iso.epochMs;
-    const numeric = Number(value);
-    return value.trim() === "" ? Number.NaN : numeric;
-  }
-  return Number.NaN;
-}
-
-/** Numeric view of a plain column (post-stat data outside a ColumnTable). */
-export function cellsToNumeric(column: readonly CellValue[]): Float64Array {
-  const out = new Float64Array(column.length);
-  for (let index = 0; index < column.length; index++) out[index] = cellToNumber(column[index]!);
-  return out;
-}
-
-/** Strict quantitative coercion for explicit linear/log scales. */
-export function cellsToQuantitative(column: readonly CellValue[]): Float64Array {
-  const out = new Float64Array(column.length);
-  for (let index = 0; index < column.length; index++) {
-    const value = column[index]!;
-    out[index] =
-      typeof value === "number"
-        ? value
-        : value instanceof Date
-          ? value.getTime()
-          : typeof value === "string" && value.trim() !== ""
-            ? Number(value)
-            : Number.NaN;
-  }
-  return out;
 }
 
 function optionsKey(options: ParsedColumnOptions): string {
