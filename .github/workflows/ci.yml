@@ -454,8 +454,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: install unzip (playwright image lacks it; setup-bun needs it)
-        run: apt-get update && apt-get install -y --no-install-recommends unzip
+      - uses: ./.github/actions/ci-install-unzip
       - uses: ./.github/actions/ci-setup-bun
       - uses: ./.github/actions/ci-content-hash-restore
         id: content_hash
@@ -584,8 +583,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: install unzip (playwright image lacks it; setup-bun needs it)
-        run: apt-get update && apt-get install -y --no-install-recommends unzip
+      - uses: ./.github/actions/ci-install-unzip
       - uses: ./.github/actions/ci-setup-bun
       - uses: ./.github/actions/ci-content-hash-restore
         id: content_hash
@@ -654,8 +652,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: install unzip (playwright image lacks it; setup-bun needs it)
-        run: apt-get update && apt-get install -y --no-install-recommends unzip
+      - uses: ./.github/actions/ci-install-unzip
       - uses: ./.github/actions/ci-setup-bun
       - uses: ./.github/actions/ci-content-hash-restore
         id: content_hash
@@ -726,8 +723,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: install unzip (playwright image lacks it; setup-bun needs it)
-        run: apt-get update && apt-get install -y --no-install-recommends unzip
+      - uses: ./.github/actions/ci-install-unzip
       - uses: ./.github/actions/ci-setup-bun
       - uses: ./.github/actions/ci-content-hash-restore
         id: content_hash
@@ -806,8 +802,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: install unzip (playwright image lacks it; setup-bun needs it)
-        run: apt-get update && apt-get install -y --no-install-recommends unzip
+      - uses: ./.github/actions/ci-install-unzip
       - uses: ./.github/actions/ci-setup-bun
       - uses: ./.github/actions/ci-bun-install
         with:
