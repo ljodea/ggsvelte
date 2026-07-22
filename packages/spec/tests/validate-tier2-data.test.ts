@@ -445,6 +445,39 @@ describe("tier 2 — data-aware checks (inline data)", () => {
     });
     expect(() => validate(spec, {})).not.toThrow();
   });
+
+  it("rejects a datetime scaled constant on a date temporal numeric style", () => {
+    // The constant parses as datetime; the runtime throws style-temporal-kind against a
+    // date scale, so validation must compare the parsed kind, not just temporal-ness.
+    const errors = errorsOf({
+      ...base,
+      aes: { ...base.aes, size: { value: "2024-01-01T12:00", scale: true } },
+      scales: { size: { type: "sequential", parse: "iso", temporalKind: "date" } },
+      layers: [{ geom: "point" }],
+    });
+    expect(errors.map((e) => e.code)).toEqual(["scale-type-mismatch"]);
+    expect(errors[0]?.message).toContain("datetime");
+  });
+
+  it("rejects a censored temporal constant when no parser can parse the recovery domain", () => {
+    // With no parser the non-empty constant makes the runtime infer a non-temporal auto
+    // parser, so the authored temporal domain cannot parse and scale resolution throws
+    // style-domain-invalid; censor recovery must require a usable, parseable parser.
+    const errors = errorsOf({
+      ...base,
+      aes: { ...base.aes, size: { value: "large", scale: true } },
+      scales: {
+        size: {
+          type: "sequential",
+          temporalKind: "date",
+          parseFailure: "censor",
+          domain: ["2024-01-01", "2024-01-02"],
+        },
+      },
+      layers: [{ geom: "point" }],
+    });
+    expect(errors.map((e) => e.code)).toEqual(["scale-type-mismatch"]);
+  });
 });
 
 describe("tier 2 — DataProfile", () => {
@@ -506,6 +539,22 @@ describe("tier 2 — DataProfile", () => {
       { profile },
     );
     expect(errors.map((e) => e.code)).toEqual(["scale-type-mismatch"]);
+  });
+
+  it("rejects a profile epoch temporal style requesting an incompatible date kind", () => {
+    // Epoch parsing always yields datetime; a profile-backed field with an epoch parser
+    // and temporalKind: "date" throws style-temporal-kind at runtime, so the defer must
+    // not accept it just because there are no samples.
+    const errors = errorsOf(
+      {
+        aes: { x: { field: "city" }, y: { field: "temp" }, size: { field: "temp" } },
+        scales: { size: { type: "sequential", parse: { epoch: "seconds" }, temporalKind: "date" } },
+        layers: [{ geom: "point" }],
+      },
+      { profile },
+    );
+    expect(errors.map((e) => e.code)).toEqual(["scale-type-mismatch"]);
+    expect(errors[0]?.message).toContain("datetime");
   });
 });
 
