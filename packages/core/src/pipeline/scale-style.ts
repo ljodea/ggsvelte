@@ -593,9 +593,9 @@ function finiteResolution(input: {
       );
     }
     const low =
-      configuredDomain !== undefined ? (configuredDomain[0] as number) : Math.min(...extent!);
+      configuredDomain === undefined ? Math.min(...extent!) : (configuredDomain[0] as number);
     const high =
-      configuredDomain !== undefined ? (configuredDomain[1] as number) : Math.max(...extent!);
+      configuredDomain === undefined ? Math.max(...extent!) : (configuredDomain[1] as number);
     const boundaryCount = Math.min(range.length, 5) + 1;
     const boundaries =
       config?.breaks ??
