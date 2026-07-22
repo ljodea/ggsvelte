@@ -275,9 +275,9 @@ export function dataChecks(
   const layers = Array.isArray(spec["layers"]) ? (spec["layers"] as unknown[]) : [];
   const scaleRequestsTimeForChannel = (channel: ChannelName): boolean => {
     const axis =
-      channel === "x" || channel === "xmin" || channel === "xmax"
+      channel === "x" || channel === "xmin" || channel === "xmax" || channel === "xend"
         ? "x"
-        : channel === "y" || channel === "ymin" || channel === "ymax"
+        : channel === "y" || channel === "ymin" || channel === "ymax" || channel === "yend"
           ? "y"
           : null;
     return axis !== null && scaleRequestsTime(scales, axis);
@@ -508,10 +508,10 @@ export function dataChecks(
         });
         continue;
       }
-      if (channel === "x" || channel === "xmin" || channel === "xmax") {
+      if (channel === "x" || channel === "xmin" || channel === "xmax" || channel === "xend") {
         axisFields.x.push({ field: mapped.field, path });
       }
-      if (channel === "y" || channel === "ymin" || channel === "ymax") {
+      if (channel === "y" || channel === "ymin" || channel === "ymax" || channel === "yend") {
         axisFields.y.push({ field: mapped.field, path });
       }
       if (channel === "color" || channel === "fill") {

@@ -32,6 +32,7 @@ export {
   TileLayerSchema,
   RasterLayerSchema,
   RibbonLayerSchema,
+  SegmentLayerSchema,
   FacetSpecSchema,
   GEOM_DEFAULTS,
   HistogramLayerSchema,

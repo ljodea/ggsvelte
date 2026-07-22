@@ -48,10 +48,21 @@ export function preflightTemporalBindings(input: {
     if (fallback.parser !== "auto") return fallback;
     const concrete = new Map<string, PositionConversionContext>();
     for (const binding of bindings) {
+      const isSegment = binding.layer.geom === "segment";
       const fields =
         axis === "x"
-          ? [binding.xField, binding.xminField, binding.xmaxField, binding.xendField]
-          : [binding.yField, binding.yminField, binding.ymaxField, binding.yendField];
+          ? [
+              binding.xField,
+              binding.xminField,
+              binding.xmaxField,
+              ...(isSegment ? [binding.xendField] : []),
+            ]
+          : [
+              binding.yField,
+              binding.yminField,
+              binding.ymaxField,
+              ...(isSegment ? [binding.yendField] : []),
+            ];
       const conversion = axis === "x" ? binding.xConversion : binding.yConversion;
       if (fields.some((field) => field !== null) && conversion.parser !== "auto") {
         concrete.set(JSON.stringify(conversion), conversion);

@@ -35,10 +35,21 @@ export function preflightTemporalFields(input: {
       const axisConversion = axis === "x" ? binding.xConversion : binding.yConversion;
       if (axisConversion.forcedDiscrete || axisConversion.forcedNonTemporal) return;
       assertTemporalConfiguration(axis, axisConversion);
+      const isSegment = binding.layer.geom === "segment";
       const fields =
         axis === "x"
-          ? [binding.xField, binding.xminField, binding.xmaxField, binding.xendField]
-          : [binding.yField, binding.yminField, binding.ymaxField, binding.yendField];
+          ? [
+              binding.xField,
+              binding.xminField,
+              binding.xmaxField,
+              ...(isSegment ? [binding.xendField] : []),
+            ]
+          : [
+              binding.yField,
+              binding.yminField,
+              binding.ymaxField,
+              ...(isSegment ? [binding.yendField] : []),
+            ];
       const fieldResolutions: PositionConversionContext[] = [];
       for (const field of new Set(fields)) {
         if (field === null || !table.has(field)) continue;
