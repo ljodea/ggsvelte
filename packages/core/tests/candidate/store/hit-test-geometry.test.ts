@@ -1,51 +1,9 @@
 import { describe, expect, it } from "bun:test";
 
-import { buildCandidateStore } from "../../src/candidate-store.ts";
-import { data, scene, sceneWithPoints } from "./fixtures.ts";
+import { buildCandidateStore } from "../../../src/candidate-store.ts";
+import { scene } from "../fixtures.ts";
 
-describe("CandidateStore", () => {
-  const store = buildCandidateStore(scene(), {
-    epoch: 7,
-    datum: ({ candidateIndex }) => data[candidateIndex]!,
-  });
-
-  it("defers semantic/index construction until interaction first reads the store", () => {
-    let resolutions = 0;
-    const lazy = buildCandidateStore(scene(), {
-      datum: ({ candidateIndex }) => {
-        resolutions++;
-        return data[candidateIndex]!;
-      },
-    });
-    expect(lazy.size).toBe(5);
-    expect(resolutions).toBe(0);
-    expect(lazy.candidate(0)?.id).toBe(0);
-    expect(resolutions).toBe(5);
-  });
-
-  it("hit-tests points through the lazy store with tolerance and panel clipping", () => {
-    let resolutions = 0;
-    const lazy = buildCandidateStore(sceneWithPoints([[0, 20]]), {
-      datum: () => {
-        resolutions++;
-        return {};
-      },
-    });
-    expect(resolutions).toBe(0);
-    expect(lazy.hitTest(5.5, 20)?.id).toBe(0);
-    expect(resolutions).toBe(1);
-    expect(lazy.hitTest(6.5, 20)).toBeNull();
-    // The rendered mark is clipped at the panel edge even though its radius
-    // extends around the point anchor.
-    expect(lazy.hitTest(-1, 20)).toBeNull();
-
-    const exactRadius = buildCandidateStore(sceneWithPoints([[10, 20]]), {
-      hitTolerance: 0,
-    });
-    expect(exactRadius.hitTest(12.5, 20)?.id).toBe(0);
-    expect(exactRadius.hitTest(13.5, 20)).toBeNull();
-  });
-
+describe("CandidateStore — hit-test-geometry", () => {
   it("hitTest follows reverse paint order for overlapping exact geometry", () => {
     const points = scene();
     points.batches = [
@@ -116,7 +74,6 @@ describe("CandidateStore", () => {
     expect(buildCandidateStore(segments, { hitTolerance: 2 }).hitTest(40, 22)?.id).toBe(1);
     expect(buildCandidateStore(segments, { hitTolerance: 2 }).hitTest(40, 24)).toBeNull();
   });
-
   it("hitTest resolves paths by paint order and stable nearest vertex, never glyphs", () => {
     const paths = scene();
     paths.batches = [
@@ -194,7 +151,6 @@ describe("CandidateStore", () => {
     ];
     expect(buildCandidateStore(glyphs).hitTest(20, 20)).toBeNull();
   });
-
   it("chooses the nearest semantic anchor on a shared tessellated edge", () => {
     const tessellated = scene();
     tessellated.batches = [
@@ -220,7 +176,6 @@ describe("CandidateStore", () => {
     expect(tessellatedStore.hitTest(2, 10)).toMatchObject({ rowIndex: 0, primitiveIndex: 0 });
     expect(tessellatedStore.hitTest(28, 10)).toMatchObject({ rowIndex: 1, primitiveIndex: 3 });
   });
-
   it("hitTest preserves exact containment when semantic nearest is too far", () => {
     const largeRect = scene();
     largeRect.batches = [
@@ -238,7 +193,6 @@ describe("CandidateStore", () => {
     expect(candidates.nearest(20, 90, { mode: "xy", maxDistance: 5 })).toBeNull();
     expect(candidates.hitTest(20, 90)?.id).toBe(0);
   });
-
   it("uses exact geometry for containment and rectangle intersections", () => {
     const rectScene = scene();
     rectScene.batches = [
@@ -258,7 +212,6 @@ describe("CandidateStore", () => {
     expect(rectStore.candidate(0)?.autoMode).toBe("exact");
     expect(rectStore.nearest(22, 55, { mode: "auto", maxDistance: 0 })?.mode).toBe("exact");
   });
-
   it("infers a semantic dominant axis for standalone segments", () => {
     const segmentScene = scene();
     segmentScene.batches = [
@@ -291,7 +244,6 @@ describe("CandidateStore", () => {
       mode: "y",
     });
   });
-
   it("uses polygon containment for exact filled-path lookup", () => {
     const areaScene = scene();
     areaScene.batches = [
@@ -313,7 +265,6 @@ describe("CandidateStore", () => {
     const areaStore = buildCandidateStore(areaScene);
     expect(areaStore.nearest(25, 25, { mode: "exact", maxDistance: 0 })?.id).toBe(0);
   });
-
   it("does not form stroke segments across multi-subpath boundaries", () => {
     // Two disjoint horizontal strokes. The last vertex of path 0 is (20,0);
     // the first of path 1 is (0,50). A false edge between them would pass near (10,25).
@@ -356,7 +307,6 @@ describe("CandidateStore", () => {
     expect([...brushed].every((id) => id < 3)).toBe(true);
     expect(brushed.length).toBeGreaterThan(0);
   });
-
   it("rejects segment bounding boxes that do not geometrically intersect a brush", () => {
     const segmentScene = scene();
     segmentScene.batches = [
@@ -374,128 +324,5 @@ describe("CandidateStore", () => {
     const segmentStore = buildCandidateStore(segmentScene);
     expect(segmentStore.queryRect(0, 9, 1, 10)).toEqual(new Uint32Array());
     expect(segmentStore.queryRect(4, 4, 6, 6)).toEqual(new Uint32Array([0]));
-  });
-
-  it("releases lazy resolvers and initialized candidate arrays on dispose", () => {
-    let resolutions = 0;
-    const lazy = buildCandidateStore(scene(), {
-      datum: () => {
-        resolutions++;
-        return {};
-      },
-    });
-    lazy.dispose();
-    expect(lazy.size).toBe(0);
-    expect(lazy.candidate(0)).toBeNull();
-    expect(lazy.x).toHaveLength(0);
-    expect(resolutions).toBe(0);
-
-    const initialized = buildCandidateStore(scene());
-    expect(initialized.candidate(0)).not.toBeNull();
-    initialized.dispose();
-    expect(initialized.size).toBe(0);
-    expect(initialized.candidate(0)).toBeNull();
-    expect(initialized.x).toHaveLength(0);
-  });
-
-  it("owns typed anchors and exposes stable candidate facts", () => {
-    expect(store.x).toBeInstanceOf(Float32Array);
-    expect(store.y).toBeInstanceOf(Float32Array);
-    expect(store.size).toBe(5);
-    expect(store.candidate(0)).toMatchObject({
-      id: 0,
-      epoch: 7,
-      panelId: "panel:all",
-      rowIndex: 0,
-      seriesId: 0,
-    });
-  });
-
-  it("finds dominant-axis and euclidean nearest candidates", () => {
-    expect(store.nearest(12, 39, { mode: "x", maxDistance: 3 })?.id).toBe(1);
-    expect(store.nearest(48, 31, { mode: "xy", maxDistance: 4 })?.id).toBe(2);
-    expect(store.nearest(80, 80, { mode: "xy", maxDistance: 2 })).toBeNull();
-  });
-
-  it("excludes invalid logical values from dominant-axis inspection", () => {
-    const invalid = [
-      ...data.slice(0, 3),
-      { xValue: Number.NaN, yValue: 2, seriesId: 9 },
-      ...data.slice(3),
-    ];
-    const withInvalid = scene();
-    const points = withInvalid.batches[0]!;
-    if (points.kind !== "points") throw new Error("fixture");
-    points.positions = new Float32Array([...points.positions, 80, 2]);
-    points.rowIndex = new Uint32Array([...points.rowIndex, 5]);
-    const invalidStore = buildCandidateStore(withInvalid, {
-      datum: ({ candidateIndex }) => invalid[candidateIndex]!,
-    });
-    expect(invalidStore.nearest(80, 2, { mode: "x", maxDistance: 1 })).toBeNull();
-  });
-
-  it("returns a compact canonical bucket and one representative per series", () => {
-    const grouped = store.group(1, "x");
-    expect(grouped?.axisValue).toEqual(new Date(0));
-    expect(grouped?.memberIds).toEqual(new Uint32Array([3, 1]));
-    expect(grouped?.focusId).toBe(1);
-    expect(grouped?.range.end).toBeGreaterThan(grouped?.range.start ?? 0);
-  });
-
-  it("cycles coincident marks, traverses deterministically, and returns integer rect ids", () => {
-    // Coincident pair at (10, 25): paint/source order is ids 3 then 4.
-    expect(store.cycle(3, 1)).toBe(4);
-    expect(store.cycle(4, 1)).toBe(3);
-    expect(store.cycle(3, -1)).toBe(4);
-    expect(store.cycle(4, -1)).toBe(3);
-    expect(store.cycle(3, 2)).toBe(3);
-    expect(store.cycle(3, 0)).toBe(3);
-    // Singleton stack: step is a no-op (no retained one-element stack required).
-    expect(store.cycle(0, 1)).toBe(0);
-    expect(store.cycle(0, -3)).toBe(0);
-    // Invalid seed returns null (bounds + non-integer, matching other store entry points).
-    expect(store.cycle(-1, 1)).toBeNull();
-    expect(store.cycle(5, 1)).toBeNull();
-    expect(store.cycle(1.5, 1)).toBeNull();
-    expect(store.cycle(Number.NaN, 1)).toBeNull();
-    // Non-finite / non-integral step falls back to the seed (prior contract).
-    expect(store.cycle(3, Number.NaN)).toBe(3);
-    expect(store.cycle(3, Number.POSITIVE_INFINITY)).toBe(3);
-    expect(store.cycle(3, 1.5)).toBe(3);
-    expect(store.traverse(0, "down")).toBe(4);
-    expect(store.queryRect(5, 15, 15, 45)).toEqual(new Uint32Array([0, 3, 4, 1]));
-  });
-
-  // Traversal order for this fixture (panel → y → x → batch → primitive):
-  // [0, 3, 4, 2, 1]
-  it("walks next/previous with wrap-around and falls back for unknown start ids", () => {
-    expect(store.traverse(null, "next")).toBe(0);
-    expect(store.traverse(null, "previous")).toBe(0);
-    expect(store.traverse(0, "first")).toBe(0);
-    expect(store.traverse(0, "last")).toBe(1);
-    expect(store.traverse(0, "next")).toBe(3);
-    expect(store.traverse(3, "next")).toBe(4);
-    expect(store.traverse(4, "next")).toBe(2);
-    expect(store.traverse(2, "next")).toBe(1);
-    expect(store.traverse(1, "next")).toBe(0);
-    expect(store.traverse(0, "previous")).toBe(1);
-    expect(store.traverse(1, "previous")).toBe(2);
-    expect(store.traverse(2, "previous")).toBe(4);
-    // CandidateStore owns modular keyboard jumps; callers do not materialize
-    // traversal order to calculate an index themselves.
-    expect(store.traverse(null, "next", 2)).toBe(3);
-    expect(store.traverse(0, "next", 3)).toBe(2);
-    expect(store.traverse(0, "previous", 2)).toBe(2);
-    expect(store.traverse(999, "next")).toBe(0);
-    expect(store.traverse(-1, "previous")).toBe(0);
-  });
-
-  it("keeps spatial directions independent of sequential rank", () => {
-    // Spatial uses geometry, not traversal order.
-    expect(store.traverse(0, "down")).toBe(4);
-    expect(store.traverse(0, "right")).toBe(2);
-    // From (50,30), nearest left is the coincident pair at x=10; topmost id 4 wins.
-    expect(store.traverse(2, "left")).toBe(4);
-    expect(store.traverse(1, "up")).toBe(2);
   });
 });
