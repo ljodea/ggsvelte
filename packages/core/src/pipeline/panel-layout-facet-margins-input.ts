@@ -21,6 +21,9 @@ export interface FacetGridGeometryInput {
   optionsWidth: number;
   layoutHeight: number;
   topBand: number;
+  /** Measured strip band size (0 when hidden). */
+  stripBand: number;
+  stripConfig: import("./facets-types.js").FacetStripConfig;
   displayScales: DisplayScalesFn;
   displayTemporal: DisplayTemporalFn;
   displayBand: DisplayBandFn;

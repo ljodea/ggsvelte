@@ -5,6 +5,20 @@ import { createFacetPanelIdentity } from "../facet-identity.js";
 import type { FacetPanelIdentity } from "../facet-identity.js";
 import type { ColumnTable } from "../table.js";
 
+/** Where facet strip chrome is reserved and drawn. */
+export type FacetStripPosition = "top" | "bottom" | "left" | "right";
+
+/** Resolved strip chrome for a facet layout (defaults applied). */
+export interface FacetStripConfig {
+  position: FacetStripPosition;
+  show: boolean;
+}
+
+export const DEFAULT_FACET_STRIP: FacetStripConfig = Object.freeze({
+  position: "top",
+  show: true,
+});
+
 export interface FacetPanelDef {
   /** Stable facet field/value identity; independent of display position. */
   identity: FacetPanelIdentity;
@@ -26,6 +40,8 @@ export interface FacetLayout {
   ncol: number;
   freeX: boolean;
   freeY: boolean;
+  /** Strip position/visibility (defaults: top + show). */
+  strip: FacetStripConfig;
 }
 
 export const SINGLE_PANEL = (
@@ -40,5 +56,6 @@ export const SINGLE_PANEL = (
     ncol: 1,
     freeX: false,
     freeY: false,
+    strip: DEFAULT_FACET_STRIP,
   };
 };

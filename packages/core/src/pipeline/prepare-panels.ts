@@ -144,8 +144,8 @@ export function preparePanels(
   );
   const facetLayout: FacetLayout = emptyData
     ? SINGLE_PANEL(table, primaryFiltered.sourceRows)
-    : resolveFacet(normalized.facet, layoutTable, null);
-  const { faceted, nrow, ncol } = facetLayout;
+    : resolveFacet(normalized.facet, layoutTable, null, warnings);
+  const { faceted, nrow, ncol, strip } = facetLayout;
   const facetPanels = facetLayout.panels;
   const freeX = faceted && facetLayout.freeX;
   const freeY = faceted && facetLayout.freeY;
@@ -222,6 +222,7 @@ export function preparePanels(
     freeY,
     nrow,
     ncol,
+    strip,
     facetPanels,
     bindings,
     panelFrames,

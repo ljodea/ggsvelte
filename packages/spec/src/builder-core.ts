@@ -224,8 +224,10 @@ export class GGBuilderCore {
 
   /**
    * Facet into small multiples: wrap form ({ wrap, ncol? }) or grid form
-   * ({ rows, cols }). Bare strings are field shorthand. scales controls
-   * per-panel positional-scale freedom ("fixed" default).
+   * ({ rows, cols }). Bare strings are field shorthand. Field objects accept
+   * closed `levels` order and a display `labels` map. `strip.position` is
+   * top/bottom/left/right (default top); `strip.show: false` hides strip
+   * chrome. scales controls per-panel positional-scale freedom ("fixed" default).
    */
   facet(facet: FacetInput): GGBuilder {
     return this.#with({ facet });

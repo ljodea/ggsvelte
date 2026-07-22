@@ -3,7 +3,7 @@
  */
 import type { Margins } from "../layout/layout.js";
 
-import type { FacetPanelDef } from "./facets.js";
+import { DEFAULT_FACET_STRIP, type FacetPanelDef, type FacetStripConfig } from "./facets.js";
 
 export function computeFacetColRowPlacements(input: {
   facetPanels: readonly FacetPanelDef[];
@@ -16,6 +16,7 @@ export function computeFacetColRowPlacements(input: {
   topBand: number;
   spacing: number;
   strip: number;
+  stripConfig?: FacetStripConfig;
   panelW: number;
   panelH: number;
 }): { colX: number[]; rowY: number[]; bottomMostRow: number[] } {
@@ -30,6 +31,7 @@ export function computeFacetColRowPlacements(input: {
     topBand,
     spacing,
     strip,
+    stripConfig = DEFAULT_FACET_STRIP,
     panelW,
     panelH,
   } = input;
@@ -38,15 +40,20 @@ export function computeFacetColRowPlacements(input: {
   let xCursor = outerLeft;
   for (let c = 0; c < ncol; c++) {
     if (c === 0 || freeV) xCursor += mMax.left;
+    if (stripConfig.position === "left") xCursor += strip;
     colX.push(xCursor);
-    xCursor += panelW + spacing;
+    xCursor += panelW;
+    if (stripConfig.position === "right") xCursor += strip;
+    xCursor += spacing;
   }
+
   const rowY: number[] = [];
   let yCursor = topBand + mMax.top;
   for (let r = 0; r < nrow; r++) {
-    yCursor += strip;
+    if (stripConfig.position === "top") yCursor += strip;
     rowY.push(yCursor);
     yCursor += panelH;
+    if (stripConfig.position === "bottom") yCursor += strip;
     if (r === nrow - 1 || freeH) yCursor += mMax.bottom;
     yCursor += spacing;
   }

@@ -9,6 +9,8 @@ import type { PanelLayoutResult, PanelPlacement } from "./panel-layout-types.js"
 export function panelLayoutResultFromChrome(
   chrome: PanelLayoutChrome,
   placements: PanelPlacement[],
+  strip: import("./facets-types.js").FacetStripConfig,
+  stripBand: number,
   degraded = false,
 ): PanelLayoutResult {
   const guidePlans = placements.flatMap((placement, panelIndex) => {
@@ -58,6 +60,8 @@ export function panelLayoutResultFromChrome(
     displayScales: chrome.displayScales,
     legendBlock: chrome.legendBlock,
     guidePlans: Object.freeze(guidePlans),
+    strip,
+    stripBand,
     degraded,
   };
 }

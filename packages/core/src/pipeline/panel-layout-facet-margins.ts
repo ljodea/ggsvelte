@@ -32,6 +32,8 @@ export function computeFacetGridGeometry(input: FacetGridGeometryInput): FacetGr
     legendBottomHeight: input.legendBottomHeight,
     optionsWidth: input.optionsWidth,
     layoutHeight: input.layoutHeight,
+    stripBand: input.stripBand,
+    stripConfig: input.stripConfig,
   });
 
   const sharedInput = {
@@ -58,6 +60,7 @@ export function computeFacetGridGeometry(input: FacetGridGeometryInput): FacetGr
     topBand: input.topBand,
     spacing: outer.spacing,
     strip: outer.strip,
+    stripConfig: outer.stripConfig,
     gridW: outer.gridW,
     gridH: outer.gridH,
   };

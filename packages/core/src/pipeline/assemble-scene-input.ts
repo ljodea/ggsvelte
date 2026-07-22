@@ -16,6 +16,8 @@ export interface AssembleSceneInput {
   height: number;
   placements: readonly PanelPlacement[];
   facetPanels: readonly FacetPanelDef[];
+  strip: import("./facets-types.js").FacetStripConfig;
+  stripBand: number;
   displayScales: (p: number) => { h: PositionScale; v: PositionScale };
   hTitle: string;
   vTitle: string;

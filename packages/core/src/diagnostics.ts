@@ -303,6 +303,14 @@ export type PipelineErrorCode = keyof typeof PIPELINE_ERROR_CATALOG;
 
 /** Warnings (`RenderModel.warnings`): degraded-but-rendered conditions. */
 export const PIPELINE_WARNING_CATALOG = {
+  "facet-levels-missing": {
+    summary:
+      "An explicit facet levels list includes values absent from the data; empty panels are kept.",
+  },
+  "facet-levels-unknown": {
+    summary:
+      "Data values for a facet field were omitted from the closed levels list and are excluded from every panel.",
+  },
   "empty-data": {
     summary: "The data has no rows; the frame and axes render as a placeholder.",
   },

@@ -26,6 +26,7 @@ export function computeFacetCellGeometry(input: {
   topBand: number;
   spacing: number;
   strip: number;
+  stripConfig: import("./facets-types.js").FacetStripConfig;
   gridW: number;
   gridH: number;
 }): FacetCellGeometry {
