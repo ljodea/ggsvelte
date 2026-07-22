@@ -13,6 +13,7 @@ import {
   yq,
   fromEpochSeconds,
 } from "../src/temporal.ts";
+import { exactFormatCacheHasForTests } from "../src/temporal-parse.ts";
 
 describe("strict temporal parsing", () => {
   it("rejects blank strings for explicit epoch parsers", () => {
@@ -82,6 +83,28 @@ describe("strict temporal parsing", () => {
     expect(parseTemporal("2024", { format: "%s" })).toMatchObject({ ok: false });
     expect(parseTemporal("2024-12", { format: "%Y-%Y" })).toMatchObject({ ok: false });
     expect(parseTemporal("2024", { format: "x".repeat(129) })).toMatchObject({ ok: false });
+  });
+
+  it("does not retain empty or oversize exact formats as compile-cache keys (#451)", () => {
+    const oversize = "x".repeat(10_000);
+    const empty = "";
+    const oversizeResult = parseTemporal("2024", { format: oversize });
+    const emptyResult = parseTemporal("2024", { format: empty });
+    expect(oversizeResult).toMatchObject({
+      ok: false,
+      reason: "format length must be from 1 through 128 characters",
+    });
+    expect(emptyResult).toMatchObject({
+      ok: false,
+      reason: "format length must be from 1 through 128 characters",
+    });
+    expect(exactFormatCacheHasForTests(oversize)).toBe(false);
+    expect(exactFormatCacheHasForTests(empty)).toBe(false);
+
+    // Bounded invalid formats still cache (LRU path); length failures do not.
+    const unsupported = "%s";
+    expect(parseTemporal("2024", { format: unsupported })).toMatchObject({ ok: false });
+    expect(exactFormatCacheHasForTests(unsupported)).toBe(true);
   });
 
   /**

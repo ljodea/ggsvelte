@@ -424,6 +424,16 @@ const EXACT_FORMAT_CACHE_MAX = 256;
 const EXACT_FORMAT_CACHE = new Map<string, CompiledExactFormat>();
 
 function compileExactFormat(format: string): CompiledExactFormat {
+  // Length failures never enter the cache: rejected strings can be arbitrarily
+  // large, and retaining them as Map keys would bound memory only by the LRU
+  // entry count, not by key size (#451).
+  if (format.length === 0 || format.length > 128) {
+    return {
+      ok: false,
+      reason: "format length must be from 1 through 128 characters",
+    };
+  }
+
   const cached = EXACT_FORMAT_CACHE.get(format);
   if (cached !== undefined) {
     // Refresh LRU order (Map iterates in insertion order).
@@ -432,52 +442,44 @@ function compileExactFormat(format: string): CompiledExactFormat {
     return cached;
   }
 
-  let compiled: CompiledExactFormat;
-  if (format.length === 0 || format.length > 128) {
-    compiled = {
-      ok: false,
-      reason: "format length must be from 1 through 128 characters",
-    };
-  } else {
-    const tokens: string[] = [];
-    let pattern = "^";
-    let reason: string | null = null;
-    for (let index = 0; index < format.length; index++) {
-      const char = format[index]!;
-      if (char !== "%") {
-        pattern += escapeRegex(char);
-        continue;
-      }
-      const token = format[++index];
-      if (token === undefined) {
-        reason = "format cannot end with %";
-        break;
-      }
-      if (token === "%") {
-        pattern += "%";
-        continue;
-      }
-      const tokenPattern = FORMAT_TOKEN_PATTERNS[token];
-      if (tokenPattern === undefined) {
-        reason = `unsupported format token %${token}`;
-        break;
-      }
-      if (tokens.includes(token)) {
-        reason = `duplicate semantic format token %${token}`;
-        break;
-      }
-      tokens.push(token);
-      if (tokens.length > 32) {
-        reason = "format may contain at most 32 semantic tokens";
-        break;
-      }
-      pattern += tokenPattern;
+  const tokens: string[] = [];
+  let pattern = "^";
+  let reason: string | null = null;
+  for (let index = 0; index < format.length; index++) {
+    const char = format[index]!;
+    if (char !== "%") {
+      pattern += escapeRegex(char);
+      continue;
     }
-    compiled =
-      reason === null
-        ? { ok: true, tokens, regex: new RegExp(`${pattern}$`) }
-        : { ok: false, reason };
+    const token = format[++index];
+    if (token === undefined) {
+      reason = "format cannot end with %";
+      break;
+    }
+    if (token === "%") {
+      pattern += "%";
+      continue;
+    }
+    const tokenPattern = FORMAT_TOKEN_PATTERNS[token];
+    if (tokenPattern === undefined) {
+      reason = `unsupported format token %${token}`;
+      break;
+    }
+    if (tokens.includes(token)) {
+      reason = `duplicate semantic format token %${token}`;
+      break;
+    }
+    tokens.push(token);
+    if (tokens.length > 32) {
+      reason = "format may contain at most 32 semantic tokens";
+      break;
+    }
+    pattern += tokenPattern;
   }
+  const compiled: CompiledExactFormat =
+    reason === null
+      ? { ok: true, tokens, regex: new RegExp(`${pattern}$`) }
+      : { ok: false, reason };
 
   if (EXACT_FORMAT_CACHE.size >= EXACT_FORMAT_CACHE_MAX) {
     const oldest = EXACT_FORMAT_CACHE.keys().next().value;
@@ -485,6 +487,11 @@ function compileExactFormat(format: string): CompiledExactFormat {
   }
   EXACT_FORMAT_CACHE.set(format, compiled);
   return compiled;
+}
+
+/** Test-only: whether a format string is retained in the compile cache. */
+export function exactFormatCacheHasForTests(format: string): boolean {
+  return EXACT_FORMAT_CACHE.has(format);
 }
 
 function parseExactFormat(
