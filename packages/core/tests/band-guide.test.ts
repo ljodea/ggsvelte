@@ -80,6 +80,38 @@ describe("planBandAxis: escalation ladder", () => {
   });
 });
 
+describe("planBandAxis: rotated angle + side cap (Codex P2)", () => {
+  // Unwrappable single token (~151px) that overlaps single-line at these bands.
+  const TOKEN = "Anlageverwaltungsgesellschaft";
+
+  it("keeps −45° when labels clear neighbours but only exceed the bottom cap", () => {
+    // 4 bands at 520px (≈130px each): single-line overlaps and the token can't
+    // wrap, so the axis rotates. At −45° the labels clear their neighbours; the
+    // bottom cap is tight, so the FIX truncates within −45° instead of −90°
+    // (−90° would need MORE bottom space and truncate harder).
+    const p = plan([TOKEN, TOKEN, TOKEN, TOKEN], 520, { orthogonalMarginCapPx: 80 });
+    expect(p.mode).toBe("rotated");
+    expect(p.angle).toBe(-45);
+    expect(p.degraded).toContain("band-label-margin-overflow");
+    expect(p.ticks.every((t) => t.labeled)).toBe(true);
+  });
+
+  it("truncates a rotated label that overflows the side cap (not just the bottom)", () => {
+    // Same −45° layout, but a tiny side (left) margin cap: the leftmost label
+    // extends past x=0 and must be truncated to the side cap, not drawn into
+    // chrome. Bottom cap is generous, so only the side path fires.
+    const p = plan([TOKEN, TOKEN, TOKEN, TOKEN], 520, {
+      marginCapPx: 18,
+      orthogonalMarginCapPx: 400,
+    });
+    expect(p.mode).toBe("rotated");
+    expect(p.angle).toBe(-45);
+    expect(p.degraded).toContain("band-label-margin-overflow");
+    expect(p.leftOverhang).toBeLessThanOrEqual(18 + 1e-6); // clamped to the side cap
+    expect(p.ticks.some((t) => t.label.endsWith("…"))).toBe(true);
+  });
+});
+
 describe("planBandAxis: high cardinality", () => {
   it("thins labels (labelEvery > 1) when there are too many bars to ever fit", () => {
     const cats = Array.from({ length: 40 }, (_, i) => `Category number ${i + 1} — extended`);

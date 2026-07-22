@@ -25,6 +25,12 @@ function suppressProjectedLabelOverlap(
     .toSorted((a, b) => (orientation === "horizontal" ? b.pos - a.pos : a.pos - b.pos));
   let boundary = orientation === "horizontal" ? Number.POSITIVE_INFINITY : Number.NEGATIVE_INFINITY;
   for (const tick of labeled) {
+    // Planner-managed band ticks (rotated / wrapped) were already fitted by the
+    // band planner; measuring them here as centered single-line strings would
+    // wrongly blank named bars under an active coord projector. Keep them intact.
+    if (tick.angle !== undefined || (tick.lines !== undefined && tick.lines.length > 1)) {
+      continue;
+    }
     const half =
       orientation === "horizontal"
         ? measurer.measureWidth(tick.label, fontSize) / 2

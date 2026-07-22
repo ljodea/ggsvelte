@@ -364,15 +364,17 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
         .map((e) => ({ pos: e.center, left: leftExtOf(e.width, angle), right: rightExtOf(angle) })),
       gap,
     );
-  // Prefer -45 when it clears neighbours and fits the cap; else -90.
-  const fits45 = !rotatedOverlaps(-45, 1) && orthoOf(labeledMaxWidth(1), -45) <= orthoCap;
-  const angle = fits45 ? -45 : -90;
+  // Prefer −45 (more readable, less bottom footprint); escalate to −90 ONLY when
+  // −45 actually overlaps neighbours. A −45 label that merely exceeds the bottom
+  // cap is truncated within the −45 budget below — switching to −90 for that would
+  // need MORE bottom space (its footprint is the full label width) and truncate
+  // harder without resolving any collision.
+  const angle = rotatedOverlaps(-45, 1) ? -90 : -45;
 
   const degraded: string[] = [];
   let labelEvery = 1;
   let overlap = false;
   let marginOverflow = false;
-  let orthoBudgetForLabel = orthoCap;
 
   // Along-axis: do adjacent rotated labels still collide at their real positions?
   // Gate thinning on the number of DISPLAYED ticks (a small authored-break subset
@@ -397,21 +399,33 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
   // a hidden wide label neither truncates visible text nor emits a false overflow.
   const shownWidth = labeledMaxWidth(labelEvery);
   const orthoNeeded = orthoOf(shownWidth, angle);
-  if (orthoNeeded > orthoCap) {
-    marginOverflow = true;
-    degraded.push("band-label-margin-overflow");
-    // Max label width whose rotated orthogonal footprint fits the cap.
-    const a = Math.abs(angle) * RAD;
-    orthoBudgetForLabel = Math.max(1, (orthoCap - lineHeight * Math.cos(a)) / Math.sin(a));
-  }
+  const a = Math.abs(angle) * RAD;
+  const cosA = Math.cos(a);
+  const sinA = Math.sin(a);
+  // Uniform width budget from the bottom cap (∞ when the whole band already fits).
+  const orthoWidthBudget =
+    orthoNeeded > orthoCap
+      ? Math.max(1, (orthoCap - lineHeight * cosA) / sinA)
+      : Number.POSITIVE_INFINITY;
 
-  const ticks = buildTicks(labelEvery, (e) => ({
-    label:
-      orthoNeeded > orthoCap
-        ? truncateToFit(e.label, orthoBudgetForLabel, measurer, fontSize, ellipsis)
-        : e.label,
-    angle,
-  }));
+  // Truncate each label to the TIGHTER of the bottom-cap budget and its own LEFT
+  // side cap. An end-anchored rotated label extends left by leftExtOf(w), which
+  // must fit `center + marginCapPx` or it draws past the viewport into chrome.
+  // (For −90 the left extent is width-independent, so truncation can't help; that
+  // degenerate case is flagged in the overhang pass below.)
+  const ticks = buildTicks(labelEvery, (e) => {
+    let widthBudget = orthoWidthBudget;
+    if (cosA > 1e-9) {
+      const sideBudget = (e.center + marginCapPx - (lineHeight / 2) * sinA) / cosA;
+      widthBudget = Math.min(widthBudget, sideBudget);
+    }
+    const label =
+      widthBudget === Number.POSITIVE_INFINITY
+        ? e.label
+        : truncateToFit(e.label, Math.max(1, widthBudget), measurer, fontSize, ellipsis);
+    if (label !== e.label) marginOverflow = true;
+    return { label, angle };
+  });
 
   const shownMaxWidth = Math.max(
     0,
@@ -420,15 +434,26 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
   const labelBandHeight = quantizeUp(Math.min(orthoOf(shownMaxWidth, angle), orthoCap), quantum);
   // End overhang of the end-anchored rotated footprint at the real end positions.
   // Left extent dominates (text runs up-left from the tick); right is ~half a line
-  // height. Tracked per side from the labeled ticks, clamped to the cap.
+  // height. Tracked per side from the (truncated) labeled ticks, clamped to the cap.
   let rotLeft = 0;
   let rotRight = 0;
   for (let i = 0; i < ticks.length; i++) {
     if (!ticks[i]!.labeled) continue;
-    const w = measurer.measureWidth(ticks[i]!.label, fontSize);
-    rotLeft = Math.max(rotLeft, leftExtOf(w, angle) - entries[i]!.center);
-    rotRight = Math.max(rotRight, rightExtOf(angle) - (extentPx - entries[i]!.center));
+    const center = entries[i]!.center;
+    const leftExt = leftExtOf(measurer.measureWidth(ticks[i]!.label, fontSize), angle);
+    const rightExt = rightExtOf(angle);
+    // Width-independent residual (chiefly −90): if the footprint still exceeds the
+    // side cap after truncation we cannot shrink it further — flag honestly.
+    if (
+      leftExt > center + marginCapPx + 1e-6 ||
+      rightExt > extentPx - center + marginCapPx + 1e-6
+    ) {
+      marginOverflow = true;
+    }
+    rotLeft = Math.max(rotLeft, leftExt - center);
+    rotRight = Math.max(rotRight, rightExt - (extentPx - center));
   }
+  if (marginOverflow) degraded.push("band-label-margin-overflow");
   const alongOverhang = Math.max(0, Math.min(marginCapPx, rotRight));
   const leftOverhang = Math.max(0, Math.min(marginCapPx, rotLeft));
 

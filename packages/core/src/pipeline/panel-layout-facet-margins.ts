@@ -73,10 +73,15 @@ export function computeFacetGridGeometry(input: FacetGridGeometryInput): FacetGr
   // labels / the x title never draw into adjacent chrome. Gated to band facets so
   // temporal/continuous facets keep their exact single-pass geometry.
   if (hasBandPlan(shared)) {
+    // `computeFacetSharedMargins` treats approxW/H as the per-panel layout BOX
+    // (layout() subtracts margins to get the inner plot size), exactly as final
+    // placement does with `panelW + mMax.left + mMax.right`. Pass the total cell
+    // box — NOT `cells.panelW`, which is already the inner width and would make
+    // layout() subtract margins twice and over-escalate the labels.
     const shared2 = computeFacetSharedMargins({
       ...sharedInput,
-      approxW: cells.panelW,
-      approxH: cells.panelH,
+      approxW: cells.panelW + shared.margins.left + shared.margins.right,
+      approxH: cells.panelH + shared.margins.top + shared.margins.bottom,
     });
     const mMax = elementwiseMaxMargins(shared.margins, shared2.margins);
     const cells2 = computeFacetCellGeometry({ ...cellInput, mMax });

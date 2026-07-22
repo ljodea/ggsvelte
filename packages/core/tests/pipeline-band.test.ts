@@ -93,6 +93,43 @@ describe("band axis diagnostics (#387)", () => {
     expect(model.advisories.some((a) => a.code === "band-labels-rotated")).toBe(true);
   });
 
+  it("keeps every planned band label under an active x coord projection (Codex P2)", () => {
+    // A reversed x coord projector activates suppressProjectedLabelOverlap, which
+    // measures labels as centered single-line. It must NOT blank the labels the
+    // planner already rotated/wrapped to fit — every bar keeps its name.
+    const revSpec: SpecInput = {
+      ...spec,
+      coord: { type: "transform", x: { transform: "identity", reverse: true } },
+    };
+    const model = runPipeline(revSpec, { width: 240, height: 300 });
+    const panel = model.scene.panels[0];
+    expect(panel).toBeDefined();
+    const xTicks = panel?.axisX ?? [];
+    const planned = xTicks.filter((t) => t.angle !== undefined || (t.lines?.length ?? 0) > 1);
+    expect(planned.length).toBeGreaterThan(0); // the axis really is rotated/wrapped
+    // None of the planned band labels were blanked by projection suppression.
+    expect(planned.every((t) => t.label !== "")).toBe(true);
+  });
+
+  it("does not over-escalate a faceted panel that has room to wrap (Codex P2)", () => {
+    // The facet re-plan must pass the TOTAL cell box, not the inner panel width;
+    // otherwise layout() subtracts margins twice and rotates a panel that fits
+    // when wrapped. At a width where each panel comfortably wraps, expect wrapped
+    // (or single-line), never rotated.
+    const facetSpec: SpecInput = {
+      data: {
+        values: rows.flatMap((r) => [
+          { ...r, panel: "A" },
+          { ...r, panel: "B" },
+        ]),
+      },
+      layers: [{ geom: "col", aes: { x: { field: "category" }, y: { field: "count" } } }],
+      facet: { cols: "panel" },
+    };
+    const model = runPipeline(facetSpec, { width: 1120, height: 320 });
+    expect(model.advisories.some((a) => a.code === "band-labels-rotated")).toBe(false);
+  });
+
   it("does not degrade a short-label bar chart", () => {
     const shortSpec: SpecInput = {
       data: {
