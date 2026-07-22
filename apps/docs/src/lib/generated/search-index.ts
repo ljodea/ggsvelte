@@ -3042,14 +3042,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/core"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-236",
+    id: "heading:guide-lifecycle:experimental-238",
     kind: "heading",
-    title: "experimental (236)",
+    title: "experimental (238)",
     summary:
-      "experimental (236) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-236",
+      "experimental (238) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-238",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (236)"],
+    exact: ["experimental (238)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-2",
@@ -7491,6 +7491,15 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["FieldType"],
   },
   {
+    id: "api:ggsvelte-core:FocusedPrimitive",
+    kind: "api",
+    title: "FocusedPrimitive",
+    summary: "@ggsvelte/core · type · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core",
+    keywords: ["@ggsvelte/core", ".", "type", "experimental"],
+    exact: ["FocusedPrimitive"],
+  },
+  {
     id: "api:ggsvelte-core:GeometryBatch",
     kind: "api",
     title: "GeometryBatch",
@@ -8452,6 +8461,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-core",
     keywords: ["@ggsvelte/core", ".", "value", "experimental"],
     exact: ["buildPanelCoordProjector"],
+  },
+  {
+    id: "api:ggsvelte-core:buildPrimitiveInteractionMasks",
+    kind: "api",
+    title: "buildPrimitiveInteractionMasks",
+    summary: "@ggsvelte/core · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core",
+    keywords: ["@ggsvelte/core", ".", "value", "experimental"],
+    exact: ["buildPrimitiveInteractionMasks"],
   },
   {
     id: "api:ggsvelte-core:canonicalAxisToken",

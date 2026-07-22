@@ -97,3 +97,23 @@ test("interval example supports the two-tap touch journey", async ({ page }) => 
   await expect(page.locator(".gg-selection")).toBeVisible();
   await expect(page.locator(".event-status")).toContainText("end:");
 });
+
+// Non-pixel — lives here (docs journeys), not in vr.spec.ts. The approve-visuals
+// regenerate path runs only vr.spec.ts with --update-snapshots; a hard assertion
+// in that file can fail independently of goldens and block baseline landing (#421).
+test("interaction inspect mode preserves real page scrolling", async ({ page }) => {
+  await page.setViewportSize({ width: 800, height: 420 });
+  await page.goto("/examples/interaction/tooltip?vr&theme=light");
+  await settleVisualState(page);
+  await page.evaluate(() => {
+    document.body.style.minHeight = "2000px";
+  });
+  const capture = page.locator(".gg-capture");
+  await expect(capture).toHaveCSS("touch-action", /pan-y/);
+  const box = await capture.boundingBox();
+  if (box === null) throw new Error("expected an inspection capture surface");
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  const before = await page.evaluate(() => window.scrollY);
+  await page.mouse.wheel(0, 500);
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(before);
+});

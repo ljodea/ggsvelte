@@ -4,7 +4,7 @@ import type { RenderModel } from "@ggsvelte/core";
 import GGPlot from "../../src/lib/GGPlot.svelte";
 import { render } from "../helpers/render.js";
 import { until } from "../helpers/until.js";
-import { rows, size } from "./interaction-harness.js";
+import { requireModel, rows, size } from "./interaction-harness.js";
 
 describe("hover + tooltip (overlays, never a pipeline re-run)", () => {
   function pointerMoveAt(capture: Element, x: number, y: number): void {
@@ -70,6 +70,50 @@ describe("hover + tooltip (overlays, never a pipeline re-run)", () => {
     // Miss: move to empty corner -> tooltip clears.
     pointerMoveAt(capture, -100, -100);
     await until(() => container.querySelector(".gg-tooltip") === null);
+  });
+
+  it("geom_col hover de-emphasizes sibling bars without a circle ring (#386)", async () => {
+    let model: RenderModel | null = null;
+    const colRows = [
+      { category: "A", count: 7030 },
+      { category: "B", count: 2100 },
+      { category: "C", count: 1800 },
+    ];
+    const { container } = render(GGPlot, {
+      data: colRows,
+      aes: { x: "category", y: "count" },
+      layers: [{ geom: "col" }],
+      inspect: true,
+      onrender: (m: RenderModel) => {
+        model = m;
+      },
+      ...size,
+    });
+    const m = requireModel(model);
+    let seed = m.candidates.candidate(0);
+    for (let id = 0; id < m.candidates.size; id++) {
+      const candidate = m.candidates.candidate(id);
+      if (candidate?.kind === "rects") {
+        seed = candidate;
+        break;
+      }
+    }
+    if (seed === null || seed.kind !== "rects") throw new Error("expected rect candidate");
+    const capture = container.querySelector(".gg-capture")!;
+    pointerMoveAt(capture, seed.x, seed.y);
+    await until(() => container.querySelector(".gg-tooltip") !== null);
+    expect(container.querySelector(".gg-hover-ring")).toBeNull();
+    await until(
+      () => container.querySelectorAll(".gg-rects rect[data-gg-focused='true']").length === 1,
+    );
+    const focused = container.querySelectorAll(".gg-rects rect[data-gg-focused='true']");
+    const muted = container.querySelectorAll(".gg-rects rect[data-gg-focused='false']");
+    expect(focused).toHaveLength(1);
+    expect(muted).toHaveLength(2);
+    expect(focused[0]?.getAttribute("opacity")).toBeNull();
+    for (const rect of muted) {
+      expect(Number(rect.getAttribute("opacity"))).toBeLessThan(1);
+    }
   });
 
   it("keyboard navigation on the single chart surface shows the tooltip", async () => {

@@ -2,6 +2,7 @@ import { describe, expect, it } from "bun:test";
 
 import {
   buildInteractionMasks,
+  buildPrimitiveInteractionMasks,
   legendValueEqual,
   resolveLegendFocusKeys,
   type SemanticCandidateKeys,
@@ -18,6 +19,18 @@ function pointBatch(count: number): GeometryBatch {
     size: 3,
     alpha: 1,
     shape: "circle",
+    fill: null,
+  };
+}
+
+function rectBatch(count: number): GeometryBatch {
+  return {
+    kind: "rects",
+    layerIndex: 0,
+    panelIndex: 0,
+    rects: new Float32Array(count * 4),
+    rowIndex: Uint32Array.from({ length: count }, (_, index) => index),
+    alpha: 1,
     fill: null,
   };
 }
@@ -89,6 +102,44 @@ describe("buildInteractionMasks", () => {
     ];
 
     expect(buildInteractionMasks([pointBatch(1)], ["focus"], candidates)).toEqual([null]);
+  });
+});
+
+describe("buildPrimitiveInteractionMasks", () => {
+  it("marks explicit rect primitives without semantic keys", () => {
+    const masks = buildPrimitiveInteractionMasks(
+      [rectBatch(3)],
+      [{ batchIndex: 0, primitiveIndex: 1 }],
+    );
+    expect(masks[0]?.focusedCount).toBe(1);
+    expect(masks[0]?.isFocused(0)).toBe(false);
+    expect(masks[0]?.isFocused(1)).toBe(true);
+    expect(masks[0]?.isFocused(2)).toBe(false);
+  });
+
+  it("returns null masks when no primitives are supplied", () => {
+    expect(buildPrimitiveInteractionMasks([rectBatch(2)], [])).toEqual([null]);
+  });
+
+  it("treats path primitive indexes as renderer subpaths, not vertices", () => {
+    // pathOffsets [0, 3, 6] → two subpaths; index 1 is the second path.
+    // Must not remap through pathForVertex (which would map 1 → subpath 0).
+    const paths: GeometryBatch = {
+      kind: "paths",
+      layerIndex: 0,
+      panelIndex: 0,
+      positions: new Float32Array(12),
+      rowIndex: new Uint32Array([0, 1, 2, 3, 4, 5]),
+      pathOffsets: new Uint32Array([0, 3, 6]),
+      strokes: [null, null],
+      linewidth: 1,
+      alpha: 1,
+      curve: "linear",
+    };
+    const masks = buildPrimitiveInteractionMasks([paths], [{ batchIndex: 0, primitiveIndex: 1 }]);
+    expect(masks[0]?.focusedCount).toBe(1);
+    expect(masks[0]?.isFocused(0)).toBe(false);
+    expect(masks[0]?.isFocused(1)).toBe(true);
   });
 });
 
