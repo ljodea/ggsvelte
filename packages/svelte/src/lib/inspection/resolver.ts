@@ -187,9 +187,4 @@ export function materializeInspection<
 // ---------------------------------------------------------------------------
 // Stable import path: re-export coordinator surface from this module.
 // ---------------------------------------------------------------------------
-export {
-  clearInspectionFingerprint,
-  createInspectionCoordinator,
-  type CoordinatedInspection,
-  type CoordinatedInspectionInput,
-} from "./coordinator.js";
+export { clearInspectionFingerprint, createInspectionCoordinator } from "./coordinator.js";
