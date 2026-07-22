@@ -149,6 +149,21 @@ function transformDomainOf(config: PositionScaleSpec | undefined): TransformDoma
   return null;
 }
 
+/** Count numeric values inside/outside a transform domain (non-numbers ignored). */
+function countTransformDomain(
+  values: readonly unknown[],
+  domain: TransformDomain,
+): readonly [inDomain: number, outOfDomain: number] {
+  let inDomain = 0;
+  let outOfDomain = 0;
+  for (const v of values) {
+    if (typeof v !== "number") continue;
+    if (domain.valid(v)) inDomain++;
+    else outOfDomain++;
+  }
+  return [inDomain, outOfDomain];
+}
+
 // ---------------------------------------------------------------------------
 // lintSpec
 // ---------------------------------------------------------------------------
@@ -294,10 +309,15 @@ export function lintSpec(
   // canonical `transform: "log10" | "sqrt"` are all handled here. log10 rejects
   // values <= 0; sqrt rejects values < 0. The advisory fires only on MIXED data
   // (some in-domain, some out) — all-invalid is the pipeline's error/warning.
+  //
+  // Multi-layer charts often share the same mapped field (plot aes or repeated
+  // layer aes). Memoize [inDomain, outOfDomain] per field name for this axis so
+  // a shared column is scanned once (O(n)), not once per layer (O(L·n)).
   for (const axis of ["x", "y"] as const) {
     const config = scales?.[axis] as PositionScaleSpec | undefined;
     const domain = transformDomainOf(config);
     if (domain === null) continue;
+    const fieldDomainCounts = new Map<string, readonly [inDomain: number, outOfDomain: number]>();
     for (let i = 0; i < layers.length; i++) {
       const layer = layers[i];
       if (!isRecord(layer)) continue;
@@ -305,13 +325,12 @@ export function lintSpec(
       const use = fieldOf(layerAes, axis);
       const values = use?.info.values;
       if (use === null || values === null || values === undefined) continue;
-      let inDomain = 0;
-      let outOfDomain = 0;
-      for (const v of values) {
-        if (typeof v !== "number") continue;
-        if (domain.valid(v)) inDomain++;
-        else outOfDomain++;
+      let counts = fieldDomainCounts.get(use.field);
+      if (counts === undefined) {
+        counts = countTransformDomain(values, domain);
+        fieldDomainCounts.set(use.field, counts);
       }
+      const [inDomain, outOfDomain] = counts;
       if (inDomain > 0 && outOfDomain > 0) {
         advisories.push({
           code: "transform-domain-data",

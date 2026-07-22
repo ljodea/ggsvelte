@@ -169,6 +169,60 @@ describe("transform-domain-data", () => {
     // this mixed-data advisory.
     expect(lintSpec(spec([-1, -2, 0], { type: "log" }))).toEqual([]);
   });
+
+  /**
+   * Characterization for field-scan memoization (#425): multi-layer reuse of
+   * the same mapped field under a transform scale must keep one advisory per
+   * axis with stable counts, including plot-aes inheritance.
+   */
+  it("emits one advisory with stable counts when multiple layers share a mixed field", () => {
+    const advisories = lintSpec({
+      data: { columns: { x: [1, 2, 3, 4], y: [5, -1, 0, 10] } },
+      aes: { x: { field: "x" }, y: { field: "y" } },
+      scales: { y: { type: "log" } },
+      layers: [{ geom: "point" }, { geom: "line" }, { geom: "smooth" }],
+    });
+    expect(codesOf(advisories)).toEqual(["transform-domain-data"]);
+    expect(advisories[0]!.path).toBe("/scales/y");
+    // log10: -1 and 0 out of domain; 5 and 10 in domain.
+    expect(advisories[0]!.message).toContain("2 value(s) outside");
+    expect(advisories[0]!.message).toContain("2 valid");
+  });
+
+  it("reuses plot-level aes y across layers when scanning transform domain", () => {
+    const advisories = lintSpec({
+      data: { columns: { x: [1, 2, 3], y: [4, -4, 9] } },
+      aes: { x: { field: "x" }, y: { field: "y" } },
+      scales: { y: { type: "linear", transform: "sqrt" } },
+      // Layer aes omit y so effectiveChannel falls back to plot aes.
+      layers: [{ geom: "point" }, { geom: "line", aes: { x: { field: "x" } } }],
+    });
+    expect(codesOf(advisories)).toEqual(["transform-domain-data"]);
+    expect(advisories[0]!.message).toContain('field "y"');
+    expect(advisories[0]!.message).toContain("1 value(s) outside");
+  });
+
+  it("keeps first-hit field ordering when an earlier mixed field wins", () => {
+    const advisories = lintSpec({
+      data: {
+        columns: {
+          early: [5, -1, 10],
+          late: [1, -2, 3],
+          x: [1, 2, 3],
+        },
+      },
+      scales: { y: { type: "log" } },
+      layers: [
+        { geom: "point", aes: { x: { field: "x" }, y: { field: "early" } } },
+        { geom: "line", aes: { x: { field: "x" }, y: { field: "late" } } },
+      ],
+    });
+    expect(codesOf(advisories)).toEqual(["transform-domain-data"]);
+    // First mixed field encountered is "early" (1 out of domain: -1).
+    expect(advisories[0]!.message).toContain('field "early"');
+    expect(advisories[0]!.message).toContain("1 value(s) outside");
+    expect(advisories[0]!.message).not.toContain('field "late"');
+  });
 });
 
 describe("lintSpec options.limits", () => {
