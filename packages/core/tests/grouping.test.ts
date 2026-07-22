@@ -239,12 +239,12 @@ describe("deriveGroups: edge cases", () => {
     const keys = Array.from({ length: n }, (_, i) => `k${i % 11}`);
     const columns: Columns = { g: keys, c: keys };
     const originalMax = Math.max;
-    Math.max = ((...args: number[]) => {
+    Math.max = (...args: number[]) => {
       if (args.length > 1_000) {
         throw new Error(`Math.max spread over ${String(args.length)} args (groupCount leak)`);
       }
       return originalMax(...args);
-    }) as typeof Math.max;
+    };
     try {
       const explicit = deriveGroups(columns, { group: { field: "g" } });
       expect(explicit.source).toBe("explicit");
