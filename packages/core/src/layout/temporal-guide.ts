@@ -15,7 +15,7 @@ import type { BandLabelMode } from "./band-guide.js";
 import type { PositionScale } from "../scales/train.js";
 import type { CellValue } from "../table.js";
 import { formatTemporalTickSequence, formatTime } from "./format.js";
-import type { Tick } from "./layout.js";
+import type { Tick } from "./layout-types.js";
 import type { TextMeasurer } from "./measure.js";
 
 export interface AxisGuideTick {
