@@ -23,6 +23,7 @@ import type {
 } from "./builder-options.js";
 import type {
   A11yMode,
+  GuidesSpec,
   Labs,
   LegendSpec,
   PortableSpec,
@@ -43,6 +44,7 @@ interface BuilderState {
   readonly coord?: SpecInput["coord"];
   readonly a11y?: A11yMode;
   readonly scales?: Scales;
+  readonly guides?: GuidesSpec;
   readonly legend?: LegendSpec;
   readonly labs?: Labs;
   readonly theme?: ThemeName | ThemeSpec;
@@ -201,7 +203,12 @@ export class GGBuilderCore {
     return this.#with({ scales: { ...this.#state.scales, ...scales } });
   }
 
-  /** Configure the legend (merged over previous calls). */
+  /** Configure appearance-only guides (merged per aesthetic over previous calls). */
+  guides(guides: GuidesSpec): GGBuilder {
+    return this.#with({ guides: { ...this.#state.guides, ...guides } });
+  }
+
+  /** Configure the legacy legend entry order (merged over previous calls). */
   legend(legend: LegendSpec): GGBuilder {
     return this.#with({ legend: { ...this.#state.legend, ...legend } });
   }
@@ -230,6 +237,7 @@ export class GGBuilderCore {
       coord,
       a11y,
       scales,
+      guides,
       legend,
       labs,
       theme,
@@ -244,6 +252,7 @@ export class GGBuilderCore {
       ...(coord !== undefined && { coord }),
       ...(a11y !== undefined && { a11y }),
       ...(scales !== undefined && { scales }),
+      ...(guides !== undefined && { guides }),
       ...(legend !== undefined && { legend }),
       ...(labs !== undefined && { labs }),
       ...(theme !== undefined && { theme }),

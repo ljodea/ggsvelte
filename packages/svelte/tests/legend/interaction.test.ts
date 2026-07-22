@@ -7,6 +7,18 @@ import GGPlot from "../../src/lib/GGPlot.svelte";
 import LegendHarness from "../fixtures/LegendHarness.svelte";
 import { render } from "../helpers/render.js";
 
+function documentCssText(): string {
+  return [...document.styleSheets]
+    .flatMap((sheet) => {
+      try {
+        return [...sheet.cssRules].map((rule) => rule.cssText);
+      } catch {
+        return [] as string[];
+      }
+    })
+    .join("\n");
+}
+
 const theme = fromPartial<ThemeTokens>({});
 const discrete = {
   type: "discrete",
@@ -154,6 +166,26 @@ describe("static Legend", () => {
         mark.getAttribute("fill"),
       ),
     ).toEqual(["#111111", "#eeeeee", "#eeeeee"]);
+  });
+
+  it("uses system colors for committed targets and recovery controls in forced colors", () => {
+    render(GGPlot, {
+      data: [
+        { id: "a", x: 1, y: 1, group: "North" },
+        { id: "b", x: 2, y: 2, group: "South" },
+      ],
+      aes: { x: "x", y: "y", color: "group" },
+      layers: [{ geom: "point" }],
+      key: "id",
+      legendFocus: true,
+      width: 640,
+      height: 400,
+    });
+    const css = documentCssText();
+    expect(css).toMatch(/forced-colors:\s*active/i);
+    expect(css).toMatch(/aria-pressed="true"[^}]*border-color:\s*highlight/i);
+    expect(css).toMatch(/\.gg-legend-clear[^}]*background:\s*canvas/i);
+    expect(css).toMatch(/\.gg-legend-clear[^}]*color:\s*canvastext/i);
   });
 
   it("omits the title node and pins the ramp at y=0 when title is empty", () => {

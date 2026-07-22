@@ -3,6 +3,7 @@
  */
 import { describe, expect, it } from "vitest";
 
+import { resolveTheme } from "@ggsvelte/core";
 import { aes, gg } from "@ggsvelte/spec";
 
 import Axis from "../../src/lib/scene/Axis.svelte";
@@ -139,6 +140,37 @@ describe("Axis", () => {
     expect(label?.getAttribute("transform")).toContain("rotate(-45)");
     expect(label?.getAttribute("text-anchor")).toBe("end");
     expect(label?.textContent).toBe("Corrección");
+    model.dispose();
+  });
+
+  it("places labels next to the axis line when their tick marks are hidden", () => {
+    const model = modelFor(
+      gg(rows, aes({ x: "x", y: "y" }))
+        .geomPoint()
+        .spec(),
+    );
+    const panel = model.scene.panels[0];
+    if (panel === undefined) throw new Error("expected panel");
+    const ticks = [
+      {
+        pos: 40,
+        value: 1,
+        label: "visible label",
+        fullLabel: "visible label",
+        kind: "major" as const,
+        showTick: false,
+      },
+    ];
+    const tickTheme = resolveTheme({
+      name: "light",
+      ticksX: true,
+      ticksY: true,
+      tickLength: 8,
+    });
+    const x = render(Axis, { ticks, orient: "x" as const, panel, theme: tickTheme });
+    expect(x.container.querySelector("g.gg-tick text")?.getAttribute("y")).toBe("3");
+    const y = render(Axis, { ticks, orient: "y" as const, panel, theme: tickTheme });
+    expect(y.container.querySelector("g.gg-tick text")?.getAttribute("x")).toBe("-3");
     model.dispose();
   });
 

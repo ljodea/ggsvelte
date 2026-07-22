@@ -1,0 +1,11 @@
+{
+  "workload": "pipeline responsive-guides resize 10k",
+  "rows": 10000,
+  "viewports": [420, 800],
+  "medianMs": 8.2181,
+  "budgetMs": 12,
+  "runs": 10,
+  "runtime": "Bun 1.3.14 darwin arm64",
+  "result": "pass",
+  "note": "Alternates narrow bottom-guide and wide right-guide plans. The isolated benchmark workflow remains authoritative for host-sensitive existing workloads."
+}

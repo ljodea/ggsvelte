@@ -87,6 +87,29 @@ describe("buildLegendEntryKeyIndex", () => {
     expect(index.get("fill:1")).toEqual([]);
   });
 
+  it("indexes every aesthetic represented by a semantically merged guide", () => {
+    const merged = { ...discreteFill, aesthetics: ["fill", "shape"] as const };
+    const index = buildLegendEntryKeyIndex(
+      adapter({
+        legends: [merged],
+        candidates: [{ layerIndex: 0, lineage: 1, rowIndex: null }],
+        fields: {
+          0: [
+            { channel: "fill", field: "fillGroup" },
+            { channel: "shape", field: "shapeGroup" },
+          ],
+        },
+        lineages: { 1: [0, 1] },
+        rows: {
+          0: { fillGroup: "web", shapeGroup: "web" },
+          1: { fillGroup: "other", shapeGroup: "web" },
+        },
+        keys: { 0: "both", 1: "shape-only" },
+      }),
+    );
+    expect(index.get("fill:0")).toEqual(["both", "shape-only"]);
+  });
+
   it("maps encoded values to first-seen unique semantic keys in lineage order", () => {
     const index = buildLegendEntryKeyIndex(
       adapter({

@@ -58,6 +58,13 @@ export interface ThemeTokens {
   subtitleWeight: number;
   axisTitleSize: number;
   axisTitleWeight: number;
+  guideTitleSize: number;
+  legendKeySize: number;
+  legendKeyGap: number;
+  legendRowGap: number;
+  guideBlockGap: number;
+  colorbarThickness: number;
+  colorbarLengthMin: number;
   captionSize: number;
   stripSize: number;
   stripWeight: number;
@@ -112,6 +119,13 @@ const HRBR_BASE: FoundationThemeTokens = {
   subtitleWeight: 300,
   axisTitleSize: 9,
   axisTitleWeight: 400,
+  guideTitleSize: 11,
+  legendKeySize: 10,
+  legendKeyGap: 6,
+  legendRowGap: 0,
+  guideBlockGap: 12,
+  colorbarThickness: 12,
+  colorbarLengthMin: 180,
   captionSize: 9,
   stripSize: 12,
   stripWeight: 400,

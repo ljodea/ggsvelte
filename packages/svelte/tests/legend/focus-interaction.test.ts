@@ -486,42 +486,30 @@ describe("chart-local legend focus", () => {
 });
 
 describe("legend focus precedence", () => {
-  it("does not infer a pressed legend when color and fill entries have identical keys", async () => {
+  it("projects externally coincident keys onto their one exact merged legend entry", async () => {
     const { container } = render(CoincidentLegendFocusPlot);
-    await until(() => container.querySelectorAll(".gg-legend-target").length === 4);
+    await until(() => container.querySelectorAll(".gg-legend-target").length === 2);
     const targets = [...container.querySelectorAll<HTMLButtonElement>(".gg-legend-target")];
     expect(targets.map((target) => target.getAttribute("aria-label"))).toEqual([
-      "group: north (color legend)",
-      "group: south (color legend)",
-      "group: north (fill legend)",
-      "group: south (fill legend)",
+      "group: north (color + fill legend)",
+      "group: south (color + fill legend)",
     ]);
 
     container.querySelector<HTMLButtonElement>("[data-external-focus]")!.click();
     await until(() => container.querySelectorAll("[data-gg-focused='true']").length === 2);
-    expect(targets.map((target) => target.getAttribute("aria-pressed"))).toEqual([
-      "false",
-      "false",
-      "false",
-      "false",
-    ]);
+    expect(targets.map((target) => target.getAttribute("aria-pressed"))).toEqual(["true", "false"]);
 
     container.querySelector<HTMLButtonElement>("[data-external-clear]")?.click();
-    targets[2].click();
-    await until(() => targets[2].getAttribute("aria-pressed") === "true");
-    expect(targets.map((target) => target.getAttribute("aria-pressed"))).toEqual([
-      "false",
-      "false",
-      "true",
-      "false",
-    ]);
+    targets[0].click();
+    await until(() => targets[0].getAttribute("aria-pressed") === "true");
+    expect(targets.map((target) => target.getAttribute("aria-pressed"))).toEqual(["true", "false"]);
   });
 
   it("keeps legend focus committed while an inspected muted mark is presented on top", async () => {
     const { container } = render(CoincidentLegendFocusPlot);
-    await until(() => container.querySelectorAll(".gg-legend-target").length === 4);
+    await until(() => container.querySelectorAll(".gg-legend-target").length === 2);
     const north = container.querySelector<HTMLButtonElement>(
-      ".gg-legend-target[aria-label='group: north (color legend)']",
+      ".gg-legend-target[aria-label='group: north (color + fill legend)']",
     )!;
     north.click();
     await until(() => container.querySelectorAll("[data-gg-focused='true']").length === 2);

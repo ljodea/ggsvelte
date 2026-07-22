@@ -240,6 +240,21 @@ function nonPositionColorSpec(n: number, family: "log10" | "binned" | "manual"):
     .spec();
 }
 
+function responsiveGuideSpec(n: number): PortableSpec {
+  const x = Array.from<number>({ length: n });
+  const y = Array.from<number>({ length: n });
+  const group = Array.from<string>({ length: n });
+  for (let index = 0; index < n; index++) {
+    x[index] = index % 1_000;
+    y[index] = (index * 17) % 1_000;
+    group[index] = `group-${index % 12}`;
+  }
+  return gg({ x, y, group }, aes({ x: "x", y: "y", color: "group" }))
+    .geomPoint({ render: "canvas" })
+    .guides({ color: { type: "legend", position: "auto" } })
+    .spec();
+}
+
 function mappedStyleSpec(n: number): PortableSpec {
   const x = Array.from<number>({ length: n });
   const y = Array.from<number>({ length: n });
@@ -706,6 +721,22 @@ export function buildWorkloads(smoke: boolean): Workload[] {
       group: `mapped style vectors ${fmtK(n)}`,
       bench: `runPipeline mapped style vectors ${fmtK(n)}`,
       fn: () => runPipeline(spec, opts),
+    });
+  }
+
+  // --- PR 7 responsive guide replanning -----------------------------------
+  {
+    const n = smoke ? 1_000 : 10_000;
+    const spec = responsiveGuideSpec(n);
+    let narrow = false;
+    workloads.push({
+      id: `pipeline responsive-guides resize ${fmtK(n)}`,
+      group: `responsive guide resize ${fmtK(n)}`,
+      bench: `runPipeline responsive guide resize ${fmtK(n)}`,
+      fn: () => {
+        narrow = !narrow;
+        return runPipeline(spec, { ...opts, width: narrow ? 420 : 800 });
+      },
     });
   }
 

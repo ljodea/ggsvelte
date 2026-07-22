@@ -36,6 +36,7 @@
     "pipeline color-binned 100k": { "budgetMs": 180 },
     "pipeline color-manual 100k": { "budgetMs": 130 },
     "pipeline mapped-style 100k": { "budgetMs": 132 },
+    "pipeline responsive-guides resize 10k": { "budgetMs": 12 },
     "pipeline histogram 100k": { "budgetMs": 30 },
     "pipeline loess 5k": { "budgetMs": 710 },
     "pipeline density 100k": { "budgetMs": 150 }

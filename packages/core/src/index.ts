@@ -182,6 +182,7 @@ export { DEFAULT_LAYOUT_THEME, layout, layoutPass, marginDelta } from "./layout/
 export type {
   AxisResult,
   Domain,
+  LayoutAxisPresentation,
   LayoutInput,
   LayoutResult,
   LayoutTheme,

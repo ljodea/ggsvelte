@@ -1426,4 +1426,161 @@ describe("complete mapped style plumbing", () => {
     expect(values).toContain("b");
     expect(values).not.toContain("threshold");
   });
+
+  it("returns a null resolution when no style mapping is present", () => {
+    // Collect must report anyField=false so the orchestrator short-circuits
+    // without inventing a constant scale.
+    const table = ColumnTable.fromRows([{ x: 1, y: 1 }]);
+    const binding = fromAny<LayerBinding>({
+      layer: { geom: "point", aes: {} },
+      index: 0,
+      xField: "x",
+      yField: "y",
+      color: { field: null, constant: null, scaledConstant: null },
+      fill: { field: null, constant: null, scaledConstant: null },
+      size: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      linewidth: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      alpha: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      shape: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      linetype: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      ruleForm: null,
+    });
+    const frame = fromAny<LayerFrame>({
+      binding,
+      table,
+      n: 1,
+      xNumeric: new Float64Array([1]),
+      yNumeric: new Float64Array([1]),
+      groups: [],
+      inputGroups: [],
+      rowIndex: new Uint32Array([0]),
+    });
+    const warnings: { code: string; message: string }[] = [];
+    const resolution = resolveStyleScale({
+      aesthetic: "size",
+      frames: [frame],
+      bindings: [binding],
+      table,
+      sourceTable: table,
+      config: undefined,
+      prevState: null,
+      title: "size",
+      warnings,
+    });
+    expect(resolution).toEqual({
+      aesthetic: "size",
+      resolved: null,
+      legendInput: null,
+      guidePlan: null,
+      state: null,
+    });
+    expect(warnings).toEqual([]);
+  });
+
+  it("trains a discrete style from a scaled constant and keeps its legend interactive", () => {
+    // Scaled constants are catalog-backed and indexable — collect must set
+    // anyField/anyDiscrete/anyIndexable so ordinal training and hover keys work.
+    const table = ColumnTable.fromRows([{ x: 1, y: 1 }]);
+    const binding = fromAny<LayerBinding>({
+      layer: { geom: "point", aes: { shape: { value: "focus", scale: true } } },
+      index: 0,
+      xField: "x",
+      yField: "y",
+      color: { field: null, constant: null, scaledConstant: null },
+      fill: { field: null, constant: null, scaledConstant: null },
+      size: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      linewidth: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      alpha: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      shape: { field: null, statColumn: null, constant: null, scaledConstant: "focus" },
+      linetype: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      ruleForm: null,
+    });
+    const frame = fromAny<LayerFrame>({
+      binding,
+      table,
+      n: 1,
+      xNumeric: new Float64Array([1]),
+      yNumeric: new Float64Array([1]),
+      groups: [],
+      inputGroups: [],
+      rowIndex: new Uint32Array([0]),
+      shapeValues: ["focus"],
+    });
+    const warnings: { code: string; message: string }[] = [];
+    const resolution = resolveStyleScale({
+      aesthetic: "shape",
+      frames: [frame],
+      bindings: [binding],
+      table,
+      sourceTable: table,
+      config: { type: "ordinal" },
+      prevState: null,
+      title: "shape",
+      warnings,
+    });
+    expect(resolution.resolved?.scale.domain).toEqual(["focus"]);
+    expect(resolution.resolved?.scale.valueOf("focus")).toBe("circle");
+    expect(resolution.legendInput).not.toBeNull();
+    expect(resolution.legendInput?.interactive).not.toBe(false);
+    expect(resolution.guidePlan?.type).toBe("discrete");
+  });
+
+  it("trains ordinal style domains from the source catalog when the frame is filtered", () => {
+    // Runtime filters drop rows from panel frames, but the unfiltered source
+    // catalog must still train ordinal domains so legend keys and assignments
+    // stay stable across filters (mirrors color ordinal catalog training).
+    const sourceTable = ColumnTable.fromRows([
+      { x: 1, y: 1, group: "a" },
+      { x: 2, y: 2, group: "b" },
+      { x: 3, y: 3, group: "c" },
+    ]);
+    // Filtered frame only sees a + b.
+    const filteredTable = ColumnTable.fromRows([
+      { x: 1, y: 1, group: "a" },
+      { x: 2, y: 2, group: "b" },
+    ]);
+    const binding = fromAny<LayerBinding>({
+      layer: { geom: "point", aes: { shape: { field: "group" } } },
+      index: 0,
+      xField: "x",
+      yField: "y",
+      color: { field: null, constant: null, scaledConstant: null },
+      fill: { field: null, constant: null, scaledConstant: null },
+      size: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      linewidth: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      alpha: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      shape: { field: "group", statColumn: null, constant: null, scaledConstant: null },
+      linetype: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      ruleForm: null,
+    });
+    const frame = fromAny<LayerFrame>({
+      binding,
+      table: filteredTable,
+      n: 2,
+      xNumeric: new Float64Array([1, 2]),
+      yNumeric: new Float64Array([1, 2]),
+      groups: [],
+      inputGroups: [],
+      rowIndex: new Uint32Array([0, 1]),
+      shapeValues: ["a", "b"],
+    });
+    const warnings: { code: string; message: string }[] = [];
+    const resolution = resolveStyleScale({
+      aesthetic: "shape",
+      frames: [frame],
+      bindings: [binding],
+      table: filteredTable,
+      sourceTable,
+      config: { type: "ordinal" },
+      prevState: null,
+      title: "shape",
+      warnings,
+    });
+    expect(resolution.resolved?.scale.domain).toEqual(["a", "b", "c"]);
+    // Filtered-out category still receives a stable palette slot.
+    expect(resolution.resolved?.scale.valueOf("c")).toBe("square");
+    expect(resolution.guidePlan?.type).toBe("discrete");
+    if (resolution.guidePlan?.type !== "discrete") throw new Error("expected discrete guide");
+    expect(resolution.guidePlan.domain).toEqual(["a", "b", "c"]);
+  });
 });

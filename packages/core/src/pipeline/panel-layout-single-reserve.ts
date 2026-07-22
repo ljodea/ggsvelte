@@ -10,9 +10,14 @@ export function singlePanelMarginReserve(
   vTitle: string,
   axisTitleBand: number,
   legendWidth: number,
+  legendBottomHeight: number,
 ): Partial<Margins> {
   return {
-    ...(hTitle !== "" && { bottom: axisTitleBand }),
+    ...((hTitle !== "" || legendBottomHeight > 0) && {
+      bottom:
+        (hTitle === "" ? 0 : axisTitleBand) +
+        (legendBottomHeight > 0 ? legendBottomHeight + LEGEND_GAP + LEGEND_EDGE_PAD : 0),
+    }),
     ...(vTitle !== "" && { left: axisTitleBand }),
     ...(legendWidth > 0 && { right: legendWidth + LEGEND_GAP + LEGEND_EDGE_PAD }),
   };

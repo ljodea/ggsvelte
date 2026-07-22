@@ -9,6 +9,7 @@ import type { Scene } from "../scene.js";
 import type { ThemeTokens } from "../theme.js";
 
 import { assembleScene, buildGeometryBatches } from "./assemble-scene.js";
+import { resolveAxisGuide } from "./guide-config.js";
 import type { PanelLayoutResult } from "./panel-layout.js";
 import type { PreparedPanels } from "./prepare-panels.js";
 import type { TrainedPipelineScales } from "./train-pipeline-scales.js";
@@ -64,6 +65,8 @@ export function finalizeGeometryAndScene(input: {
   perfMark("ggsvelte:geometry:end");
   perfMeasure("ggsvelte:geometry", "ggsvelte:geometry:start", "ggsvelte:geometry:end");
 
+  const xGuide = resolveAxisGuide("x", trained.scalesConfig, normalized.guides);
+  const yGuide = resolveAxisGuide("y", trained.scalesConfig, normalized.guides);
   return assembleScene({
     width: options.width,
     height: options.height,
@@ -72,6 +75,8 @@ export function finalizeGeometryAndScene(input: {
     displayScales: panelLayout.displayScales,
     hTitle: panelLayout.hTitle,
     vTitle: panelLayout.vTitle,
+    hGuide: flip ? yGuide : xGuide,
+    vGuide: flip ? xGuide : yGuide,
     coordProjectors,
     ...(options.measureText !== undefined && { measureText: options.measureText }),
     axisTextSize: theme.axisTextSize,
@@ -86,6 +91,7 @@ export function finalizeGeometryAndScene(input: {
     batches,
     legendBlock: panelLayout.legendBlock,
     topBand: panelLayout.topBand,
+    bottomBand: panelLayout.bottomBand,
     theme,
     title: panelLayout.title,
     subtitle: panelLayout.subtitle,

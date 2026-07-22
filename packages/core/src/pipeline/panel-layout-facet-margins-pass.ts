@@ -1,7 +1,12 @@
 /**
  * Shared max-margins pass across facet panels (union of per-panel layout).
  */
-import type { LayoutTheme, Margins, TickFormatter } from "../layout/layout.js";
+import type {
+  LayoutAxisPresentation,
+  LayoutTheme,
+  Margins,
+  TickFormatter,
+} from "../layout/layout.js";
 import { layout } from "../layout/layout.js";
 import type { TextMeasurer } from "../layout/measure.js";
 import type { AxisGuidePlan } from "../layout/temporal-guide.js";
@@ -28,6 +33,7 @@ export function computeFacetSharedMargins(input: {
   formatV: TickFormatter | undefined;
   measurer: TextMeasurer;
   layoutTheme: LayoutTheme;
+  axis: Readonly<{ x: LayoutAxisPresentation; y: LayoutAxisPresentation }>;
 }): FacetSharedMarginsResult {
   const {
     facetPanels,
@@ -42,6 +48,7 @@ export function computeFacetSharedMargins(input: {
     formatV,
     measurer,
     layoutTheme,
+    axis,
   } = input;
 
   let mMax: Margins = { top: 0, right: 0, bottom: 0, left: 0 };
@@ -58,6 +65,7 @@ export function computeFacetSharedMargins(input: {
       ...(formatH !== undefined && { formatX: formatH }),
       ...(formatV !== undefined && { formatY: formatV }),
       measurer,
+      axis,
       theme: layoutTheme,
     });
     mMax = elementwiseMaxMargins(mMax, run.margins);

@@ -67,6 +67,25 @@ Use tabular numerals for crosshair labels, tooltip values, and aligned numeric d
 Never substitute browser `system-ui` as the default chart face. Custom themes may
 replace the full family stack, but every role must inherit that selected chart family.
 
+## Guides and responsive presentation
+
+Guides explain scales; they do not redefine them. Axis, legend, colorbar, and colorsteps
+configuration may change titles, visibility, order, orientation, placement, spacing, and
+collision treatment only. Full semantic labels remain in the scene and accessibility
+surface even when visible text is abbreviated.
+
+Automatic non-position guides stay right of the panel only above 480px when at least
+320px of readable panel remains. Otherwise they move below: ramps become horizontal and
+discrete keys wrap without shrinking reader typography. Explicit right and bottom guides
+may occupy both zones. Merge discrete keys only when value identity, source field, labels,
+title, scale family, missing-value policy, and interaction semantics all agree.
+
+Guide dimensions come from `ThemeTokens`: guide title size, legend key size and gaps,
+block gap, and colorbar thickness/minimum length. Bounded per-guide overrides may refine
+one chart but must preserve the same typography hierarchy and semantic interaction target.
+Static numeric ticks/bins are not tab stops; exact finite entries retain native button
+semantics and complete accessible names.
+
 ## Color and palettes
 
 Color is semantic, not decorative. Theme roles style chart furniture and unmapped

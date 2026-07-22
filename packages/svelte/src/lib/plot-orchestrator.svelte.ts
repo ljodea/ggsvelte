@@ -27,6 +27,7 @@ import type {
   CoordSpec,
   DataInput,
   FacetInput,
+  GuidesSpec,
   Labs,
   LayerInput,
   LegendSpec,
@@ -99,6 +100,7 @@ export type OrchestratorInputs<
   facet: () => FacetInput | undefined;
   coord: () => CoordSpec | "flip" | undefined;
   scales: () => Scales | undefined;
+  guides: () => GuidesSpec | undefined;
   legend: () => LegendSpec | undefined;
   theme: () => ThemeName | ThemeSpec | undefined;
   labs: () => Labs | undefined;
@@ -188,6 +190,7 @@ export function createPlotOrchestrator<
     const facet = inputs.facet();
     const coord = inputs.coord();
     const scales = inputs.scales();
+    const guides = inputs.guides();
     const legend = inputs.legend();
     const theme = inputs.theme();
     const labs = inputs.labs();
@@ -199,6 +202,7 @@ export function createPlotOrchestrator<
       ...(facet !== undefined && { facet }),
       ...(coord !== undefined && { coord }),
       ...(scales !== undefined && { scales }),
+      ...(guides !== undefined && { guides }),
       ...(legend !== undefined && { legend }),
       ...(theme !== undefined && { theme }),
       ...(labs !== undefined && { labs }),

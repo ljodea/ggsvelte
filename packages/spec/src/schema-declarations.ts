@@ -67,6 +67,7 @@ function numericStyleScaleSpec(rangeValue: ReturnType<typeof Type.Number>, descr
         unknownValue: Type.Optional(rangeValue),
         onExhaust: Type.Optional(Type.Union([Type.Literal("cycle"), Type.Literal("error")])),
         labels: Type.Optional(Type.String()),
+        guide: Type.Optional(Type.Ref("GuideSpec")),
       },
       { additionalProperties: false, description },
     ),
@@ -159,6 +160,7 @@ function finiteStyleScaleSpec(rangeValue: ReturnType<typeof Type.Union>, descrip
         unknownValue: Type.Optional(rangeValue),
         onExhaust: Type.Optional(Type.Union([Type.Literal("cycle"), Type.Literal("error")])),
         labels: Type.Optional(Type.String()),
+        guide: Type.Optional(Type.Ref("GuideSpec")),
       },
       { additionalProperties: false, description },
     ),
@@ -1410,46 +1412,7 @@ export const SpecDeclarations = {
               "Explicit minor gridline positions in semantic source units. Coincident major/minor values render only the major tick. Time scales use dateMinorBreaks instead.",
           }),
         ),
-        guide: Type.Optional(
-          Type.Object(
-            {
-              mode: Type.Optional(
-                Type.Union(
-                  [
-                    Type.Literal("auto"),
-                    Type.Literal("single"),
-                    Type.Literal("wrap"),
-                    Type.Literal("rotate"),
-                    Type.Literal("off"),
-                  ],
-                  {
-                    description:
-                      'Band (categorical) axis label layout: "auto" (default — escalate single→wrap→rotate→truncate), "single", "wrap", "rotate", or "off" (hide labels). Continuous axes ignore this field.',
-                  },
-                ),
-              ),
-              angle: Type.Optional(
-                Type.Number({
-                  description:
-                    'Rotation in degrees for band labels when mode is "rotate" (or when auto escalates to rotation). Typical values: -45 or -90. Continuous axes ignore this field.',
-                }),
-              ),
-              wrap: Type.Optional(
-                Type.Number({
-                  minimum: 1,
-                  maximum: 8,
-                  description:
-                    'Maximum wrapped lines per band label when mode is "wrap" (or when auto wraps). Default 2. Continuous axes ignore this field.',
-                }),
-              ),
-            },
-            {
-              additionalProperties: false,
-              description:
-                "Optional band-axis label layout override (mirrors ggplot2 guide_axis(angle=) / discrete label wrap). Only horizontal band axes honor these fields; omit for measured auto layout.",
-            },
-          ),
-        ),
+        guide: Type.Optional(Type.Union([Type.Ref("GuideSpec"), Type.Ref("BandAxisGuideSpec")])),
       },
       {
         additionalProperties: false,
@@ -1601,6 +1564,7 @@ export const SpecDeclarations = {
               'Guide label format: numeric (".1f", ",d", ".0%") or temporal strftime-style text.',
           }),
         ),
+        guide: Type.Optional(Type.Ref("GuideSpec")),
       },
       {
         additionalProperties: false,
@@ -1716,7 +1680,159 @@ export const SpecDeclarations = {
     },
   ),
 
-  // --- legend / theme ----------------------------------------------------------
+  // --- guide / legend / theme --------------------------------------------------
+
+  GuideThemeSpec: Type.Object(
+    {
+      titleSize: Type.Optional(Type.Number({ minimum: 8, maximum: 32 })),
+      labelSize: Type.Optional(Type.Number({ minimum: 8, maximum: 24 })),
+      keyGap: Type.Optional(Type.Number({ minimum: 0, maximum: 32 })),
+      rowGap: Type.Optional(Type.Number({ minimum: 0, maximum: 32 })),
+      blockGap: Type.Optional(Type.Number({ minimum: 0, maximum: 64 })),
+      colorbarThickness: Type.Optional(Type.Number({ minimum: 4, maximum: 48 })),
+      colorbarLength: Type.Optional(Type.Number({ minimum: 48, maximum: 512 })),
+    },
+    {
+      additionalProperties: false,
+      description: "Bounded presentation overrides for one guide block.",
+    },
+  ),
+
+  BandAxisGuideSpec: Type.Object(
+    {
+      mode: Type.Optional(
+        Type.Union(
+          [
+            Type.Literal("auto"),
+            Type.Literal("single"),
+            Type.Literal("wrap"),
+            Type.Literal("rotate"),
+            Type.Literal("off"),
+          ],
+          {
+            description: 'Band axis label layout: "auto", "single", "wrap", "rotate", or "off".',
+          },
+        ),
+      ),
+      angle: Type.Optional(
+        Type.Number({ description: 'Rotation in degrees when mode is "rotate".' }),
+      ),
+      wrap: Type.Optional(
+        Type.Number({
+          minimum: 1,
+          maximum: 8,
+          description: 'Maximum wrapped lines when mode is "wrap".',
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Scale-local band-axis label layout override retained independently from guide appearance.",
+    },
+  ),
+
+  AxisGuideSpec: Type.Object(
+    {
+      type: Type.Literal("axis"),
+      title: Type.Optional(Type.String({ maxLength: 256 })),
+      showTicks: Type.Optional(Type.Boolean()),
+      showLabels: Type.Optional(Type.Boolean()),
+      collision: Type.Optional(
+        Type.Union([Type.Literal("auto"), Type.Literal("preserve"), Type.Literal("ellipsis")]),
+      ),
+      theme: Type.Optional(Type.Ref("GuideThemeSpec")),
+    },
+    { additionalProperties: false },
+  ),
+
+  LegendGuideSpec: Type.Object(
+    {
+      type: Type.Literal("legend"),
+      title: Type.Optional(Type.String({ maxLength: 256 })),
+      order: Type.Optional(Type.Integer({ minimum: -1024, maximum: 1024 })),
+      position: Type.Optional(
+        Type.Union([Type.Literal("auto"), Type.Literal("right"), Type.Literal("bottom")]),
+      ),
+      direction: Type.Optional(
+        Type.Union([Type.Literal("auto"), Type.Literal("vertical"), Type.Literal("horizontal")]),
+      ),
+      keySize: Type.Optional(Type.Number({ minimum: 4, maximum: 48 })),
+      collision: Type.Optional(
+        Type.Union([Type.Literal("ellipsis"), Type.Literal("wrap"), Type.Literal("error")]),
+      ),
+      force: Type.Optional(Type.Boolean()),
+      theme: Type.Optional(Type.Ref("GuideThemeSpec")),
+    },
+    { additionalProperties: false },
+  ),
+
+  ColorbarGuideSpec: Type.Object(
+    {
+      type: Type.Literal("colorbar"),
+      title: Type.Optional(Type.String({ maxLength: 256 })),
+      order: Type.Optional(Type.Integer({ minimum: -1024, maximum: 1024 })),
+      position: Type.Optional(
+        Type.Union([Type.Literal("auto"), Type.Literal("right"), Type.Literal("bottom")]),
+      ),
+      direction: Type.Optional(
+        Type.Union([Type.Literal("auto"), Type.Literal("vertical"), Type.Literal("horizontal")]),
+      ),
+      showTicks: Type.Optional(Type.Boolean()),
+      showLabels: Type.Optional(Type.Boolean()),
+      collision: Type.Optional(Type.Union([Type.Literal("ellipsis"), Type.Literal("error")])),
+      force: Type.Optional(Type.Boolean()),
+      theme: Type.Optional(Type.Ref("GuideThemeSpec")),
+    },
+    { additionalProperties: false },
+  ),
+
+  ColorstepsGuideSpec: Type.Object(
+    {
+      type: Type.Literal("colorsteps"),
+      title: Type.Optional(Type.String({ maxLength: 256 })),
+      order: Type.Optional(Type.Integer({ minimum: -1024, maximum: 1024 })),
+      position: Type.Optional(
+        Type.Union([Type.Literal("auto"), Type.Literal("right"), Type.Literal("bottom")]),
+      ),
+      direction: Type.Optional(
+        Type.Union([Type.Literal("auto"), Type.Literal("vertical"), Type.Literal("horizontal")]),
+      ),
+      showLabels: Type.Optional(Type.Boolean()),
+      collision: Type.Optional(Type.Union([Type.Literal("ellipsis"), Type.Literal("error")])),
+      force: Type.Optional(Type.Boolean()),
+      theme: Type.Optional(Type.Ref("GuideThemeSpec")),
+    },
+    { additionalProperties: false },
+  ),
+
+  NoneGuideSpec: Type.Object({ type: Type.Literal("none") }, { additionalProperties: false }),
+
+  GuideSpec: Type.Union([
+    Type.Ref("AxisGuideSpec"),
+    Type.Ref("LegendGuideSpec"),
+    Type.Ref("ColorbarGuideSpec"),
+    Type.Ref("ColorstepsGuideSpec"),
+    Type.Ref("NoneGuideSpec"),
+  ]),
+
+  GuidesSpec: Type.Object(
+    {
+      x: Type.Optional(Type.Ref("GuideSpec")),
+      y: Type.Optional(Type.Ref("GuideSpec")),
+      color: Type.Optional(Type.Ref("GuideSpec")),
+      fill: Type.Optional(Type.Ref("GuideSpec")),
+      size: Type.Optional(Type.Ref("GuideSpec")),
+      linewidth: Type.Optional(Type.Ref("GuideSpec")),
+      alpha: Type.Optional(Type.Ref("GuideSpec")),
+      shape: Type.Optional(Type.Ref("GuideSpec")),
+      linetype: Type.Optional(Type.Ref("GuideSpec")),
+    },
+    {
+      additionalProperties: false,
+      description: "Appearance-only guide configuration keyed by aesthetic.",
+    },
+  ),
 
   LegendSpec: Type.Object(
     {
@@ -1813,6 +1929,13 @@ export const SpecDeclarations = {
       subtitleWeight: Type.Optional(Type.Number({ minimum: 1, maximum: 1000 })),
       axisTitleSize: Type.Optional(Type.Number({ minimum: 1 })),
       axisTitleWeight: Type.Optional(Type.Number({ minimum: 1, maximum: 1000 })),
+      guideTitleSize: Type.Optional(Type.Number({ minimum: 8, maximum: 32 })),
+      legendKeySize: Type.Optional(Type.Number({ minimum: 4, maximum: 48 })),
+      legendKeyGap: Type.Optional(Type.Number({ minimum: 0, maximum: 32 })),
+      legendRowGap: Type.Optional(Type.Number({ minimum: 0, maximum: 32 })),
+      guideBlockGap: Type.Optional(Type.Number({ minimum: 0, maximum: 64 })),
+      colorbarThickness: Type.Optional(Type.Number({ minimum: 4, maximum: 48 })),
+      colorbarLengthMin: Type.Optional(Type.Number({ minimum: 48, maximum: 512 })),
       captionSize: Type.Optional(Type.Number({ minimum: 1 })),
       stripSize: Type.Optional(Type.Number({ minimum: 1 })),
       stripWeight: Type.Optional(Type.Number({ minimum: 1, maximum: 1000 })),
@@ -2038,6 +2161,7 @@ export const SpecDeclarations = {
       facet: Type.Optional(Type.Ref("FacetSpec")),
       coord: Type.Optional(Type.Ref("CoordSpec")),
       scales: Type.Optional(Type.Ref("Scales")),
+      guides: Type.Optional(Type.Ref("GuidesSpec")),
       legend: Type.Optional(Type.Ref("LegendSpec")),
       labs: Type.Optional(Type.Ref("Labs")),
       theme: Type.Optional(

@@ -242,6 +242,7 @@ exports[`validate — agent errors (snapshot-tested messages) unexpected top-lev
       "facet",
       "coord",
       "scales",
+      "guides",
       "legend",
       "labs",
       "theme",

@@ -92,6 +92,31 @@ describe("mapped style capability contract", () => {
     expect(call("scaleLinetypeDiscrete")).toEqual({ linetype: { type: "ordinal" } });
   });
 
+  it("exposes scale-local guides through every constrained style helper type", () => {
+    const guide = spec.guideLegend({ force: true });
+    expect(spec.scaleSizeDiscrete({ guide })).toEqual({
+      size: { type: "ordinal", guide },
+    });
+    expect(spec.scaleSizeManual({ values: [4], guide })).toEqual({
+      size: { type: "manual", range: [4], guide },
+    });
+    expect(spec.scaleSizeIdentity({ guide })).toEqual({
+      size: { type: "identity", guide },
+    });
+    expect(spec.scaleShapeDiscrete({ guide })).toEqual({
+      shape: { type: "ordinal", guide },
+    });
+    expect(spec.scaleShapeBinned({ guide })).toEqual({
+      shape: { type: "binned", guide },
+    });
+    expect(spec.scaleShapeManual({ values: ["circle"], guide })).toEqual({
+      shape: { type: "manual", range: ["circle"], guide },
+    });
+    expect(spec.scaleShapeIdentity({ guide })).toEqual({
+      shape: { type: "identity", guide },
+    });
+  });
+
   it("keeps runtime, TypeBox, and family restrictions aligned", () => {
     expect(validateStyle("size", { type: "sequential", range: [2, 10] }).ok).toBe(true);
     expect(validateStyle("linewidth", { type: "binned", breaks: [0, 2, 4] }).ok).toBe(true);

@@ -24,6 +24,7 @@ export function computeFacetOuterChrome(input: {
   outerBottomTitle: string;
   axisTitleBand: number;
   legendWidth: number;
+  legendBottomHeight: number;
   optionsWidth: number;
   layoutHeight: number;
 }): FacetOuterChrome {
@@ -34,6 +35,7 @@ export function computeFacetOuterChrome(input: {
     outerBottomTitle,
     axisTitleBand,
     legendWidth,
+    legendBottomHeight,
     optionsWidth,
     layoutHeight,
   } = input;
@@ -41,7 +43,9 @@ export function computeFacetOuterChrome(input: {
   const spacing = PANEL_SPACING;
   const strip = STRIP_BAND;
   const outerLeft = outerLeftTitle === "" ? 0 : axisTitleBand;
-  const outerBottom = outerBottomTitle === "" ? 0 : axisTitleBand;
+  const outerBottom =
+    (outerBottomTitle === "" ? 0 : axisTitleBand) +
+    (legendBottomHeight > 0 ? legendBottomHeight + LEGEND_GAP + LEGEND_EDGE_PAD : 0);
   const outerRight = legendWidth > 0 ? legendWidth + LEGEND_GAP + LEGEND_EDGE_PAD : 0;
   const gridW = Math.max(40, optionsWidth - outerLeft - outerRight);
   const gridH = Math.max(40, layoutHeight - outerBottom);

@@ -16,7 +16,7 @@ Requires Node.js 22+ and Svelte 5.33.1+.
 
 ```svelte
 <script lang="ts">
-  import { GeomPoint, GGPlot } from "@ggsvelte/svelte";
+  import { GeomPoint, GGPlot, guideLegend } from "@ggsvelte/svelte";
 
   const rows = [
     { engine: 1.8, highway: 29, class: "compact" },
@@ -30,6 +30,7 @@ Requires Node.js 22+ and Svelte 5.33.1+.
 <GGPlot
   data={rows}
   aes={{ x: "engine", y: "highway", color: "class" }}
+  guides={{ color: guideLegend({ position: "auto" }) }}
   labs={{
     title: "Highway efficiency by engine size",
     x: "Engine displacement",
@@ -64,6 +65,12 @@ Size, linewidth, alpha, shape, and linetype helpers are also re-exported from
 the package root. Their per-mark/per-path vectors render consistently in SVG,
 canvas, and SSR; style legends retain keyboard focus and filtering behavior,
 and inspection reports resolved semantic style values.
+
+Pass `guides` directly to `<GGPlot>` to suppress or restyle axes and to place,
+orient, title, order, or force legends/colorbars/colorsteps. Automatic guides move
+from right to bottom at narrow widths without retraining scales; merged exact-value
+entries keep keyboard focus and filtering across every represented aesthetic. The
+same planned scene renders in browser SVG, headless SVG, and SSR.
 
 ## Links
 

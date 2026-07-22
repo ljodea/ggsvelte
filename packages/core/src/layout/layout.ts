@@ -29,6 +29,7 @@
  * This module owns measurement / margin assembly and re-exports the public surface.
  */
 
+import type { AxisGuidePlan } from "./guide-plan-types.js";
 import type { TextMeasurer } from "./measure.js";
 import { deriveTicks, type AxisTicks, type DeriveTicksContext } from "./layout-derive-ticks.js";
 import { truncateToFit } from "./truncate.js";
@@ -46,6 +47,7 @@ export {
   type AxisResult,
   type BandLayoutDomainContext,
   type Domain,
+  type LayoutAxisPresentation,
   type LayoutInput,
   type LayoutResult,
   type LayoutTheme,
@@ -73,6 +75,34 @@ function maxLabeledWidth(axis: AxisTicks, measurer: TextMeasurer, fontSize: numb
   return max;
 }
 
+/** Measure preserved labels without mutating the semantic guide plan. */
+function presentForLayout(axis: AxisTicks, preserve: boolean): AxisTicks {
+  if (!preserve) return axis;
+  return {
+    ...axis,
+    ticks: axis.ticks.map((tick) => {
+      const { angle: _angle, lines: _lines, ...rest } = tick;
+      return { ...rest, label: tick.fullLabel ?? tick.label, labeled: true };
+    }),
+  };
+}
+
+function hideLabelPresentation(plan: AxisGuidePlan): AxisGuidePlan {
+  const {
+    bandLabelMode: _mode,
+    bandLabelAngle: _angle,
+    bandLabelBandHeight: _height,
+    bandLabelAuthorPinned: _pinned,
+    ...semantic
+  } = plan;
+  return Object.freeze({
+    ...semantic,
+    overlap: false,
+    marginOverflow: false,
+    degraded: Object.freeze([]),
+  });
+}
+
 /**
  * One measurement pass: given current margins, derive ranges → tick counts →
  * ticks/labels → measure → required margins (capped, degraded, quantized).
@@ -95,6 +125,16 @@ export function layoutPass(margins: Margins, input: LayoutInput, theme: LayoutTh
 
   const innerW = Math.max(1, width - margins.left - margins.right);
   const innerH = Math.max(1, height - margins.top - margins.bottom);
+  const xPresentation = input.axis?.x;
+  const yPresentation = input.axis?.y;
+  const xVisible = xPresentation?.visible !== false;
+  const yVisible = yPresentation?.visible !== false;
+  const xLabelsVisible = xVisible && xPresentation?.showLabels !== false;
+  const yLabelsVisible = yVisible && yPresentation?.showLabels !== false;
+  const xTicksVisible = xVisible && xPresentation?.showTicks !== false;
+  const yTicksVisible = yVisible && yPresentation?.showTicks !== false;
+  const xPreserve = xLabelsVisible && xPresentation?.collision === "preserve";
+  const yPreserve = yLabelsVisible && yPresentation?.collision === "preserve";
 
   const degradations: string[] = [];
 
@@ -121,6 +161,8 @@ export function layoutPass(margins: Margins, input: LayoutInput, theme: LayoutTh
     orthogonalMarginCapPx: capBottom,
     orthogonalChromePx: tickLength + tickLabelGap,
     quantum,
+    ellipsis,
+    ...(xPresentation?.collision === "ellipsis" && { bandCollision: "ellipsis" as const }),
     ...(input.previousGuidePlans?.x !== undefined && {
       previousGuidePlan: input.previousGuidePlans.x,
     }),
@@ -136,23 +178,38 @@ export function layoutPass(margins: Margins, input: LayoutInput, theme: LayoutTh
       previousGuidePlan: input.previousGuidePlans.y,
     }),
   };
-  let x = deriveTicks(input.x, xCount, input.formatX, xEvery, xContext);
-  let y = deriveTicks(input.y, yCount, input.formatY, yEvery, yContext);
+  let x = presentForLayout(
+    deriveTicks(input.x, xCount, input.formatX, xEvery, xContext),
+    xPreserve,
+  );
+  let y = presentForLayout(
+    deriveTicks(input.y, yCount, input.formatY, yEvery, yContext),
+    yPreserve,
+  );
   // The measured band planner owns its own thinning; adopt its labelEvery.
   if (x.bandLabelEvery !== undefined) xEvery = x.bandLabelEvery;
   if (x.empty) degradations.push("x:empty-domain");
   if (y.empty) degradations.push("y:empty-domain");
-  if (x.guidePlan !== undefined) degradations.push(...x.guidePlan.degraded);
-  if (y.guidePlan !== undefined) degradations.push(...y.guidePlan.degraded);
+  if (xLabelsVisible && !xPreserve && x.guidePlan !== undefined)
+    degradations.push(...x.guidePlan.degraded);
+  if (yLabelsVisible && !yPreserve && y.guidePlan !== undefined)
+    degradations.push(...y.guidePlan.degraded);
 
   const labelH = measurer.measureHeight(fontSize);
 
   // --- y axis → left margin (label width + tick + gap) ---
   let xTruncated = false;
   let yTruncated = false;
-  const leftFixed = tickLength + tickLabelGap;
-  let yLabelW = maxLabeledWidth(y, measurer, fontSize);
-  if (!y.empty && y.guidePlan === undefined && yLabelW + leftFixed > capLeft) {
+  const leftFixed =
+    (yTicksVisible ? tickLength : 0) + (yTicksVisible && yLabelsVisible ? tickLabelGap : 0);
+  let yLabelW = yLabelsVisible ? maxLabeledWidth(y, measurer, fontSize) : 0;
+  if (
+    yLabelsVisible &&
+    !yPreserve &&
+    !y.empty &&
+    y.guidePlan === undefined &&
+    yLabelW + leftFixed > capLeft
+  ) {
     // Degrade 1: tick thinning.
     while (yLabelW + leftFixed > capLeft) {
       if (input.y.type === "band") {
@@ -162,7 +219,10 @@ export function layoutPass(margins: Margins, input: LayoutInput, theme: LayoutTh
         if (yCount <= 2) break;
         yCount = Math.max(2, Math.floor(yCount / 2));
       }
-      y = deriveTicks(input.y, yCount, input.formatY, yEvery, yContext);
+      y = presentForLayout(
+        deriveTicks(input.y, yCount, input.formatY, yEvery, yContext),
+        yPreserve,
+      );
       degradations.push("y:thin");
       yLabelW = maxLabeledWidth(y, measurer, fontSize);
     }
@@ -183,16 +243,28 @@ export function layoutPass(margins: Margins, input: LayoutInput, theme: LayoutTh
 
   // --- x axis → bottom margin (one label line) + right margin (overhang of
   //     the last centered label) ---
-  const bottomFixed = tickLength + tickLabelGap;
+  const bottomFixed =
+    (xTicksVisible ? tickLength : 0) + (xTicksVisible && xLabelsVisible ? tickLabelGap : 0);
   let lastXLabelW = 0;
-  const labeledX = () => x.ticks.filter((t) => t.labeled);
-  const computeLastXW = () => {
-    const lx = labeledX();
-    return lx.length === 0 ? 0 : measurer.measureWidth(lx.at(-1)!.label, fontSize) / 2;
+  let firstXLabelW = 0;
+  const labeledX = () => (xLabelsVisible ? x.ticks.filter((tick) => tick.labeled) : []);
+  const computeXEndWidths = () => {
+    const labeled = labeledX();
+    firstXLabelW =
+      labeled.length === 0 ? 0 : measurer.measureWidth(labeled[0]!.label, fontSize) / 2;
+    lastXLabelW =
+      labeled.length === 0 ? 0 : measurer.measureWidth(labeled.at(-1)!.label, fontSize) / 2;
   };
-  lastXLabelW = computeLastXW();
-  if (!x.empty && x.guidePlan === undefined && lastXLabelW > capRight) {
-    while (lastXLabelW > capRight) {
+  computeXEndWidths();
+  if (
+    xLabelsVisible &&
+    !xPreserve &&
+    !x.empty &&
+    x.guidePlan === undefined &&
+    lastXLabelW > capRight
+  ) {
+    for (;;) {
+      if (lastXLabelW <= capRight) break;
       if (input.x.type === "band") {
         if (xEvery * 2 >= x.ticks.length) break;
         xEvery *= 2;
@@ -200,9 +272,12 @@ export function layoutPass(margins: Margins, input: LayoutInput, theme: LayoutTh
         if (xCount <= 2) break;
         xCount = Math.max(2, Math.floor(xCount / 2));
       }
-      x = deriveTicks(input.x, xCount, input.formatX, xEvery, xContext);
+      x = presentForLayout(
+        deriveTicks(input.x, xCount, input.formatX, xEvery, xContext),
+        xPreserve,
+      );
       degradations.push("x:thin");
-      lastXLabelW = computeLastXW();
+      computeXEndWidths();
     }
     if (lastXLabelW > capRight) {
       const avail = Math.max(1, capRight * 2); // full label width budget
@@ -214,7 +289,7 @@ export function layoutPass(margins: Margins, input: LayoutInput, theme: LayoutTh
         }
       }
       degradations.push("x:truncate");
-      lastXLabelW = computeLastXW();
+      computeXEndWidths();
     }
   }
 
@@ -222,22 +297,28 @@ export function layoutPass(margins: Margins, input: LayoutInput, theme: LayoutTh
   // (axis titles / legends — absolute, never capped away), quantized up ---
   // Measured band axes budget the wrapped/rotated band height and the along-axis
   // overhang of the end labels, instead of the single-line defaults.
-  const bandPlanned = x.bandLabelBandHeight !== undefined;
+  const bandPlanned = xLabelsVisible && !xPreserve && x.bandLabelBandHeight !== undefined;
   // A band end label that overhangs past x=0 (single category, reversed axis, or a
   // wide leftmost break) must be reserved in the LEFT margin too, not just right.
-  const bandLeft = bandPlanned ? (x.bandLeftOverhang ?? 0) : 0;
-  const rawLeft = y.empty
-    ? Math.max(minMargins.left, bandLeft)
-    : Math.max(minMargins.left, yLabelW + leftFixed, bandLeft);
-  const rawBottom = x.empty
-    ? minMargins.bottom
-    : Math.max(minMargins.bottom, (x.bandLabelBandHeight ?? labelH) + bottomFixed);
-  const rawRight = x.empty
-    ? minMargins.right
-    : bandPlanned
-      ? Math.max(minMargins.right, x.bandAlongOverhang ?? 0)
-      : Math.max(minMargins.right, lastXLabelW);
-  const rawTop = y.empty ? minMargins.top : Math.max(minMargins.top, labelH / 2);
+  const bandLeft = bandPlanned ? (x.bandLeftOverhang ?? 0) : xPreserve ? firstXLabelW : 0;
+  const rawLeft =
+    y.empty || !yVisible
+      ? Math.max(minMargins.left, bandLeft)
+      : Math.max(minMargins.left, yLabelW + leftFixed, bandLeft);
+  const rawBottom =
+    x.empty || !xVisible
+      ? minMargins.bottom
+      : Math.max(
+          minMargins.bottom,
+          (xLabelsVisible ? (x.bandLabelBandHeight ?? labelH) : 0) + bottomFixed,
+        );
+  const rawRight =
+    x.empty || !xLabelsVisible
+      ? minMargins.right
+      : bandPlanned
+        ? Math.max(minMargins.right, x.bandAlongOverhang ?? 0)
+        : Math.max(minMargins.right, lastXLabelW);
+  const rawTop = y.empty || !yLabelsVisible ? minMargins.top : Math.max(minMargins.top, labelH / 2);
   const reserve = {
     top: input.reserve?.top ?? 0,
     right: input.reserve?.right ?? 0,
@@ -246,25 +327,43 @@ export function layoutPass(margins: Margins, input: LayoutInput, theme: LayoutTh
   };
 
   const out: Margins = {
-    left: quantizeUp(Math.min(rawLeft, capLeft) + reserve.left, quantum),
-    right: quantizeUp(Math.min(rawRight, capRight) + reserve.right, quantum),
+    left: quantizeUp(
+      (xPreserve || yPreserve ? rawLeft : Math.min(rawLeft, capLeft)) + reserve.left,
+      quantum,
+    ),
+    right: quantizeUp(
+      (xPreserve ? rawRight : Math.min(rawRight, capRight)) + reserve.right,
+      quantum,
+    ),
     bottom: quantizeUp(Math.min(rawBottom, capBottom) + reserve.bottom, quantum),
     top: quantizeUp(Math.min(rawTop, capTop) + reserve.top, quantum),
   };
 
+  const xGuidePlan =
+    x.guidePlan === undefined
+      ? undefined
+      : xLabelsVisible
+        ? x.guidePlan
+        : hideLabelPresentation(x.guidePlan);
+  const yGuidePlan =
+    y.guidePlan === undefined
+      ? undefined
+      : yLabelsVisible
+        ? y.guidePlan
+        : hideLabelPresentation(y.guidePlan);
   return {
     margins: out,
     x: {
       ticks: x.ticks,
       labelEvery: xEvery,
       truncated: xTruncated,
-      ...(x.guidePlan !== undefined && { guidePlan: x.guidePlan }),
+      ...(xGuidePlan !== undefined && { guidePlan: xGuidePlan }),
     },
     y: {
       ticks: y.ticks,
       labelEvery: yEvery,
       truncated: yTruncated,
-      ...(y.guidePlan !== undefined && { guidePlan: y.guidePlan }),
+      ...(yGuidePlan !== undefined && { guidePlan: yGuidePlan }),
     },
     degradations: [...new Set(degradations)],
   };

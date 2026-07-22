@@ -85,6 +85,7 @@ export function resolveColorScale(
       name,
       values,
       config: config ?? { type: "identity" },
+      legendTitle,
       warnings,
     });
   }

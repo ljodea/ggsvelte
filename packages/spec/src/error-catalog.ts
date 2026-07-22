@@ -109,6 +109,11 @@ export const ERROR_CATALOG = {
     summary: "A manual color scale has different domain and range lengths.",
     fix: "Provide exactly one range color for each explicit domain value.",
   },
+  "guide-aesthetic-incompatible": {
+    tier: 1,
+    summary: "A guide variant is incompatible with its aesthetic or trained scale family.",
+    fix: "Use axis for x/y, legend for discrete/style scales, colorbar for sequential color, or colorsteps for binned color.",
+  },
   // --- tier 1 structural (grammar rules the schema alone cannot express) ---
   "missing-required-channel": {
     tier: 2,

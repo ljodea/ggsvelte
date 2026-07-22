@@ -256,7 +256,7 @@
       y={gridBounds.bottom + (scene.axes.x.titleOffset ?? 32)}
       text-anchor="middle"
       fill={ink}
-      font-size={scene.theme.axisTitleSize}
+      font-size={scene.axes.x.titleSize ?? scene.theme.axisTitleSize}
       font-weight={scene.theme.axisTitleWeight}>{scene.axes.x.title}</text
     >
   {/if}
@@ -266,7 +266,7 @@
       transform={`translate(12,${(gridBounds.top + gridBounds.bottom) / 2}) rotate(-90)`}
       text-anchor="middle"
       fill={ink}
-      font-size={scene.theme.axisTitleSize}
+      font-size={scene.axes.y.titleSize ?? scene.theme.axisTitleSize}
       font-weight={scene.theme.axisTitleWeight}>{scene.axes.y.title}</text
     >
   {/if}

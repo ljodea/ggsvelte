@@ -1,4 +1,4 @@
-import { aes, gg, scaleColorBinned } from "@ggsvelte/spec";
+import { aes, gg, guideColorsteps, scaleColorBinned } from "@ggsvelte/spec";
 
 import { defineExample } from "../../define.js";
 import { readings } from "./data.js";
@@ -12,6 +12,9 @@ export default defineExample(
         range: ["#2a9d8f", "#e9c46a", "#f4a261", "#e76f51"],
       }),
     )
+    .guides({
+      color: guideColorsteps({ position: "bottom", direction: "horizontal" }),
+    })
     .labs({
       title: "Particle pollution by hour",
       x: "Hour",

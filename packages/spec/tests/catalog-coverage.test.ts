@@ -53,6 +53,9 @@ const TRIGGERS: Record<SpecErrorCode, Trigger> = {
       scales: { color: { type: "manual", domain: ["a", "b"], range: ["#f00"] } },
     },
   },
+  "guide-aesthetic-incompatible": {
+    spec: { layers: [point], scales: { x: { guide: { type: "legend" } } } },
+  },
   "missing-required-channel": { spec: { layers: [{ geom: "point" }] }, options: {} },
   "rule-form-ambiguous": {
     spec: {

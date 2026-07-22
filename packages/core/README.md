@@ -70,6 +70,13 @@ quantitative data. Discrete and binned styles contribute to grouping while
 continuous numeric styles do not. Candidate hit geometry follows mapped point
 radius and stroke width, and candidate semantics retain the resolved styles.
 
+Guide appearance resolves after scale training. Automatic guides use the right zone
+only when the viewport remains readable, otherwise they move below with horizontal
+ramps and deterministic key wrapping. Explicit right and bottom zones can coexist.
+Discrete guides merge only across exact semantic identities and preserve every
+represented aesthetic for focus/filter indexing. Identity guides remain suppressed
+unless forced; representative numeric ticks and bins remain non-interactive.
+
 `coordTransform` is a separate post-stat projector. Per-panel projectors map
 trained scale-space values through identity/log10/sqrt coordinates, project
 axis ticks and grids, adaptively tessellate curved paths/segments, and expose

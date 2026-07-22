@@ -66,10 +66,21 @@ describe("manual color scales", () => {
       }),
       size,
     );
-    const singletonLegend = singleton.scene.legends[0];
-    if (singletonLegend?.type !== "discrete") throw new Error("expected singleton legend");
-    expect(singletonLegend.entries).toHaveLength(1);
+    expect(singleton.scene.legends).toHaveLength(0);
     expect(singleton.guidePlans.find((plan) => plan.type === "discrete")).toBeDefined();
+
+    const forced = runPipeline(
+      pointSpec(["control"], {
+        type: "manual",
+        domain: ["control"],
+        range: ["#f00"],
+        guide: { type: "legend", force: true },
+      }),
+      size,
+    );
+    const singletonLegend = forced.scene.legends[0];
+    if (singletonLegend?.type !== "discrete") throw new Error("expected forced singleton legend");
+    expect(singletonLegend.entries).toHaveLength(1);
 
     const pinned = runPipeline(
       pointSpec(

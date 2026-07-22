@@ -34,6 +34,7 @@ export interface PanelLayoutResult {
   xTitle: string;
   yTitle: string;
   topBand: number;
+  bottomBand: number;
   formatX: TickFormatter | undefined;
   formatY: TickFormatter | undefined;
   displayScales: (p: number) => { h: PositionScale; v: PositionScale };

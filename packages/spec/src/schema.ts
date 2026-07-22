@@ -243,7 +243,19 @@ export type CoordSpec = SpecType<"CoordSpec">;
 export type RenderBackend = SpecType<"RenderBackend">;
 /** Plot-level accessibility mode. */
 export type A11yMode = "auto" | "force-svg";
-/** Legend options. */
+/** Bounded per-guide presentation theme overrides. */
+export type GuideThemeSpec = SpecType<"GuideThemeSpec">;
+export type BandAxisGuideSpec = SpecType<"BandAxisGuideSpec">;
+export type AxisGuideSpec = SpecType<"AxisGuideSpec">;
+export type LegendGuideSpec = SpecType<"LegendGuideSpec">;
+export type ColorbarGuideSpec = SpecType<"ColorbarGuideSpec">;
+export type ColorstepsGuideSpec = SpecType<"ColorstepsGuideSpec">;
+export type NoneGuideSpec = SpecType<"NoneGuideSpec">;
+/** One portable appearance-only guide configuration. */
+export type GuideSpec = SpecType<"GuideSpec">;
+/** Guide configuration keyed by aesthetic. */
+export type GuidesSpec = SpecType<"GuidesSpec">;
+/** Legacy legend ordering options. */
 export type LegendSpec = SpecType<"LegendSpec">;
 /** Built-in theme names. */
 export type ThemeName = SpecType<"ThemeName">;
