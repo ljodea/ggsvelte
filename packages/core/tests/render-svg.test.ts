@@ -158,7 +158,7 @@ describe("sceneToSVGString panel batch routing", () => {
     rawBatches: GeometryBatch[];
     sceneBase: Omit<Scene, "theme" | "panels" | "batches">;
   } {
-    const theme = resolveTheme(undefined);
+    const theme = resolveTheme();
     const panels: ScenePanel[] = Array.from({ length: panelCount }, (_, i) => ({
       id: `p${i}`,
       x: i * 10,
