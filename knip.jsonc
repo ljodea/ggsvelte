@@ -13,6 +13,8 @@
   // of camelCase scale/coordinate helpers, and declaration tests enforce that contract.
   "ignoreIssues": {
     "packages/spec/src/scale-helpers.ts": ["duplicates"],
+    "packages/spec/src/scale-position-helpers.ts": ["duplicates"],
+    "packages/spec/src/scale-color-helpers.ts": ["duplicates"],
     "packages/spec/src/coord-helpers.ts": ["duplicates"],
   },
   "workspaces": {
