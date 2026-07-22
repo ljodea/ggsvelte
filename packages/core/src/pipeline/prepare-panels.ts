@@ -89,11 +89,11 @@ export function preparePanels(
     ) {
       const cacheKey = layerData.name;
       const cached = namedTableCache.get(cacheKey);
-      if (cached !== undefined) {
-        sourceTable = cached;
-      } else {
+      if (cached === undefined) {
         sourceTable = bindLayerTable(layerData, plotSource, index, normalized, options);
         namedTableCache.set(cacheKey, sourceTable);
+      } else {
+        sourceTable = cached;
       }
     } else if (layerData === undefined && plotSource !== null) {
       sourceTable = plotSource;
