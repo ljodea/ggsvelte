@@ -370,6 +370,81 @@ describe("tier 2 — data-aware checks (inline data)", () => {
     const result = validate(spec, {});
     expect(result.ok).toBe(false);
   });
+
+  it("rejects a non-temporal scaled constant on a temporal numeric style", () => {
+    // The runtime feeds scaled constants through the temporal parser too, so
+    // size: { value: "large" } on a temporal scale throws style-temporal-parse;
+    // the constant check must run for temporal scales, not just numeric ones.
+    const errors = errorsOf({
+      ...base,
+      aes: { ...base.aes, size: { value: "large", scale: true } },
+      scales: { size: { type: "sequential", temporalKind: "date" } },
+      layers: [{ geom: "point" }],
+    });
+    expect(errors.map((e) => e.code)).toEqual(["scale-type-mismatch"]);
+    expect(errors[0]?.message).toContain("large");
+  });
+
+  it("accepts a parseable scaled constant on a temporal numeric style", () => {
+    expect(
+      validate(
+        {
+          ...base,
+          aes: { ...base.aes, size: { value: "2024-01-01", scale: true } },
+          scales: { size: { type: "sequential", parse: "iso" } },
+          layers: [{ geom: "point" }],
+        },
+        {},
+      ).ok,
+    ).toBe(true);
+  });
+
+  it("rejects a censored binned temporal style whose breaks do not parse", () => {
+    // Authored binned breaks only rescue a censored all-invalid column if they parse
+    // under the configured parser; unparseable breaks still throw style-binned-breaks
+    // at runtime, so validation must not accept them as a recovery bound.
+    const errors = errorsOf({
+      ...base,
+      aes: { ...base.aes, size: { field: "temp" } },
+      scales: {
+        size: {
+          type: "binned",
+          parse: "iso",
+          parseFailure: "censor",
+          breaks: ["not-a-date", "also-bad"],
+        },
+      },
+      layers: [{ geom: "point" }],
+    });
+    expect(errors.map((e) => e.code)).toEqual(["scale-type-mismatch"]);
+  });
+
+  it("does not throw formatting a BigInt scaled constant in a diagnostic", () => {
+    // Tier-2 runs after schema errors, so a schema-invalid BigInt constant reaches
+    // the diagnostic path; JSON.stringify(1n) throws, so a safe formatter is required.
+    const spec = fromAny({
+      ...base,
+      aes: { ...base.aes, size: { value: 1n, scale: true } },
+      scales: { size: { type: "sequential" } },
+      layers: [{ geom: "point" }],
+    });
+    expect(() => validate(spec, {})).not.toThrow();
+    expect(validate(spec, {}).ok).toBe(false);
+  });
+
+  it("does not throw formatting a Symbol temporalKind in a diagnostic", () => {
+    // A schema-invalid non-string temporalKind can reach the mismatch message when the
+    // field parses temporal; stringifying a Symbol throws, so it must be guarded.
+    const spec = fromAny({
+      ...base,
+      aes: { ...base.aes, size: { field: "temp" } },
+      scales: {
+        size: { type: "sequential", parse: { epoch: "seconds" }, temporalKind: Symbol("date") },
+      },
+      layers: [{ geom: "point" }],
+    });
+    expect(() => validate(spec, {})).not.toThrow();
+  });
 });
 
 describe("tier 2 — DataProfile", () => {
@@ -403,9 +478,9 @@ describe("tier 2 — DataProfile", () => {
   });
 
   it("defers a profile-backed temporal numeric style with a working parser", () => {
-    // Profile fields carry no sample values, so the temporal decision is null; the
-    // numeric-style check must defer (the runtime parses epochs once data arrives)
-    // rather than false-reject a spec that renders.
+    // Profile fields carry no sample values, so the temporal decision is null; with an
+    // epoch parser the runtime turns the numeric column temporal once data arrives, so
+    // the numeric-style check must defer rather than false-reject a spec that renders.
     expect(
       validate(
         {
@@ -416,6 +491,21 @@ describe("tier 2 — DataProfile", () => {
         { profile },
       ).ok,
     ).toBe(true);
+  });
+
+  it("rejects a profile-backed temporal numeric style without an epoch parser", () => {
+    // Without an epoch parser (or censor recovery), a quantitative profile field with
+    // temporalKind stays non-temporal at runtime and throws style-temporal-parse, so
+    // validation must reject it rather than defer just because there are no samples.
+    const errors = errorsOf(
+      {
+        aes: { x: { field: "city" }, y: { field: "temp" }, size: { field: "temp" } },
+        scales: { size: { type: "sequential", temporalKind: "date" } },
+        layers: [{ geom: "point" }],
+      },
+      { profile },
+    );
+    expect(errors.map((e) => e.code)).toEqual(["scale-type-mismatch"]);
   });
 });
 

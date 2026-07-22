@@ -15,7 +15,7 @@ import { didYouMean } from "./errors.js";
 import type { Aes, ChannelName } from "./schema.js";
 import { CHANNELS, GEOM_DEFAULTS } from "./schema.js";
 import type { ProfileFieldType, ValidateLimits, ValidateOptions } from "./validate-data.js";
-import type { TemporalDecision } from "./temporal-column.js";
+import { parseTemporalColumn, type TemporalDecision } from "./temporal-column.js";
 import {
   effectiveChannel,
   resolveFieldEvidence,
@@ -49,6 +49,146 @@ function scaledConstantCoercesToFinite(value: unknown): boolean {
     return value.trim() !== "" && Number.isFinite(Number(value));
   }
   return false;
+}
+
+/** Format an arbitrary value for a diagnostic message without ever throwing.
+ *  Tier-2 runs after schema errors, so a schema-invalid JS constant (BigInt,
+ *  Symbol, circular object) can reach a message; JSON.stringify throws on BigInt
+ *  and String() throws on Symbol, so fall back through both to the type name. */
+function safeFormatConstant(value: unknown): string {
+  try {
+    const json = JSON.stringify(value);
+    if (json !== undefined) return json;
+  } catch {
+    /* BigInt / circular — fall through */
+  }
+  try {
+    return String(value);
+  } catch {
+    return typeof value;
+  }
+}
+
+/** A quantitative field carrying temporal options resolves at runtime only when a
+ *  working parser (or censor recovery) yields temporal values. Returns a mismatch
+ *  error or null. Extracted to keep the field loop within the max-depth limit. */
+function quantitativeTemporalFieldError(input: {
+  decision: TemporalDecision | null | undefined;
+  aesthetic: "size" | "linewidth" | "alpha";
+  field: string;
+  temporalKind: unknown;
+  parse: unknown;
+  parseFailure: unknown;
+  hasEpochParser: boolean;
+  hasExplicitDomain: boolean;
+  hasBinnedBreaks: boolean;
+}): SpecError | null {
+  const {
+    decision,
+    aesthetic,
+    field,
+    temporalKind,
+    parse,
+    parseFailure,
+    hasEpochParser,
+    hasExplicitDomain,
+    hasBinnedBreaks,
+  } = input;
+  const mismatch: SpecError = {
+    code: "scale-type-mismatch",
+    path: `/scales/${aesthetic}`,
+    message: `scales.${aesthetic} requests temporal values but field "${field}" is quantitative (numbers are not treated as temporal without a successful epoch parse).`,
+    fix: {
+      description: `Map a temporal field, use a working parse: { epoch: "ms" | "s" }, or remove temporal ${aesthetic} options.`,
+    },
+  };
+  const censorRecovers = parseFailure === "censor" && (hasExplicitDomain || hasBinnedBreaks);
+  if (decision === null || decision === undefined) {
+    // Profile-backed: no samples. Defer only when the scale renders regardless of the
+    // eventual data — an epoch parser makes numbers temporal, or censor recovery trains
+    // from a domain / parseable breaks. Otherwise the runtime throws, so reject now.
+    return hasEpochParser || censorRecovers ? null : mismatch;
+  }
+  const censoredInvalid =
+    parse !== undefined &&
+    parseFailure === "censor" &&
+    decision.status === "invalid" &&
+    ((decision.validatedCount ?? 0) > 0 || hasExplicitDomain || hasBinnedBreaks);
+  if (decision.status !== "temporal" && !censoredInvalid) return mismatch;
+  // temporalKind may be a schema-invalid non-string (e.g. a Symbol) reaching tier-2;
+  // only compare/stringify when it is a valid string, else defer to the schema diagnostic.
+  if (
+    typeof temporalKind === "string" &&
+    decision.kind !== null &&
+    decision.kind !== undefined &&
+    decision.kind !== temporalKind
+  ) {
+    return {
+      code: "scale-type-mismatch",
+      path: `/scales/${aesthetic}`,
+      message: `scales.${aesthetic} requests temporal kind "${temporalKind}" but field "${field}" parses as "${decision.kind}".`,
+      fix: {
+        description: `Use the ${decision.kind ?? "matching"} ${aesthetic} helper or correct the source precision.`,
+      },
+    };
+  }
+  return null;
+}
+
+/** A scaled numeric-style constant is checked against the same resolution path the
+ *  runtime uses (resolveNumericStyleValueView). Returns a mismatch error, or null when
+ *  the constant resolves. Extracted so the per-constant branching does not nest under
+ *  the aesthetic/constant loops (max-depth). */
+function numericStyleConstantError(input: {
+  value: unknown;
+  aesthetic: "size" | "linewidth" | "alpha";
+  configType: string;
+  requestsTemporal: boolean;
+  parseUsable: boolean;
+  parser: Parameters<typeof parseTemporalColumn>[1];
+  options: Parameters<typeof parseTemporalColumn>[2];
+  censorRecovers: boolean;
+}): SpecError | null {
+  const {
+    value,
+    aesthetic,
+    configType,
+    requestsTemporal,
+    parseUsable,
+    parser,
+    options,
+    censorRecovers,
+  } = input;
+  if (!requestsTemporal) {
+    // Non-temporal: accept exactly what cellToNumber() coerces to a finite number
+    // (numbers, Dates, booleans, numeric strings, ISO strings); reject "large", "", null.
+    if (scaledConstantCoercesToFinite(value)) return null;
+    return {
+      code: "scale-type-mismatch",
+      path: `/scales/${aesthetic}`,
+      message: `scales.${aesthetic}.type is "${configType}" but the scaled constant ${safeFormatConstant(value)} is not numeric; ${configType} ${aesthetic} scales need quantitative or temporal values.`,
+      fix: {
+        description: `Use a numeric scaled constant, or set scales.${aesthetic}.type to "ordinal".`,
+        example: { type: "ordinal" },
+      },
+    };
+  }
+  // Temporal: a schema-invalid parser defers to the schema error; otherwise the constant
+  // must be a Date or parse temporal, or be covered by censor recovery.
+  if (!parseUsable) return null;
+  const resolvesTemporal =
+    value instanceof Date ||
+    parseTemporalColumn([value] as Parameters<typeof parseTemporalColumn>[0], parser, options)
+      .decision.status === "temporal";
+  if (resolvesTemporal || censorRecovers) return null;
+  return {
+    code: "scale-type-mismatch",
+    path: `/scales/${aesthetic}`,
+    message: `scales.${aesthetic} requests temporal values but the scaled constant ${safeFormatConstant(value)} is not temporal; use a temporal constant or a working parse.`,
+    fix: {
+      description: `Use a temporal scaled constant, add a working parse: { epoch: "ms" | "s" }, or remove temporal ${aesthetic} options.`,
+    },
+  };
 }
 
 /** Columns generated by each stat ({ stat } channel resolution contract).
@@ -327,7 +467,7 @@ export function dataChecks(
     const config = scales?.[aesthetic] as
       | {
           type?: string;
-          temporalKind?: string;
+          temporalKind?: unknown;
           parse?: unknown;
           timezone?: unknown;
           disambiguation?: unknown;
@@ -342,6 +482,36 @@ export function dataChecks(
       config.parse !== undefined ||
       config.timezone !== undefined ||
       config.disambiguation !== undefined;
+    // Config-level temporal facts, shared by the field checks and the scaled-constant
+    // checks below (both mirror the runtime resolveNumericStyleValueView path).
+    const parseUsable = temporalParserUsable(config.parse);
+    const parser = (config.parse ?? "auto") as Parameters<typeof parseTemporalColumn>[1];
+    const temporalOptions = {
+      ...(config.timezone !== undefined && { timezone: config.timezone }),
+      ...(config.disambiguation !== undefined && { disambiguation: config.disambiguation }),
+    } as Parameters<typeof parseTemporalColumn>[2];
+    // Only an epoch parser turns quantitative (numeric) values temporal at runtime.
+    const hasEpochParser =
+      typeof config.parse === "object" && config.parse !== null && "epoch" in config.parse;
+    const hasExplicitDomain =
+      Array.isArray(config.domain) && config.domain.filter((value) => value !== null).length === 2;
+    // Authored binned breaks train the runtime domain, but numericSequentialResolution
+    // maps them through view.semanticOf and throws style-binned-breaks if any fails to
+    // parse. Require every break to parse under the configured parser before treating
+    // them as a censor-recovery bound, so validation doesn't accept a non-renderable spec.
+    const binnedBreaks =
+      config.type === "binned" && Array.isArray(config.breaks)
+        ? config.breaks.filter((value) => value !== null)
+        : [];
+    const hasBinnedBreaks =
+      parseUsable &&
+      config.parse !== undefined &&
+      binnedBreaks.length >= 2 &&
+      binnedBreaks.every(
+        (value) =>
+          parseTemporal(value, config.parse as Parameters<typeof parseTemporal>[1], temporalOptions)
+            .ok,
+      );
     for (const use of numericStyleFields[aesthetic]) {
       const type = typeOf(use.field);
       // A quantitative field carrying temporal options fails at resolve time
@@ -351,66 +521,26 @@ export function dataChecks(
         // A schema-invalid parser reaches tier-2 (schema errors don't short-circuit
         // it); passing it to temporalDecisionForField would throw instead of
         // yielding the schema diagnostic. Defer to that diagnostic.
-        if (!temporalParserUsable(config.parse)) continue;
+        if (!parseUsable) continue;
         const decision = temporalDecisionForField(
           temporalDecisionCache,
           use.field,
           fields.get(use.field),
-          (config.parse ?? "auto") as Parameters<typeof temporalDecisionForField>[3],
-          {
-            ...(config.timezone !== undefined && { timezone: config.timezone }),
-            ...(config.disambiguation !== undefined && {
-              disambiguation: config.disambiguation,
-            }),
-          } as Parameters<typeof temporalDecisionForField>[4],
+          parser as Parameters<typeof temporalDecisionForField>[3],
+          temporalOptions as Parameters<typeof temporalDecisionForField>[4],
         );
-        // Profile-backed fields carry no sample values, so temporalDecisionForField
-        // returns null/undefined; without data there is nothing to disprove, and the
-        // runtime parses the epochs once data arrives. Defer rather than false-reject.
-        if (decision === null || decision === undefined) continue;
-        const hasExplicitDomain =
-          Array.isArray(config.domain) &&
-          config.domain.filter((value) => value !== null).length === 2;
-        // Authored binned breaks parse into the runtime domain (scale-style.ts:
-        // configuredBoundaries → boundaryDomain → domain), so a censored all-invalid
-        // column still trains and renders. Treat them as a recovery bound, mirroring
-        // hasExplicitDomain (both defer unparseable bounds to the runtime throw).
-        const hasBinnedBreaks =
-          config.type === "binned" &&
-          Array.isArray(config.breaks) &&
-          config.breaks.filter((value) => value !== null).length >= 2;
-        const censoredInvalid =
-          config.parse !== undefined &&
-          config.parseFailure === "censor" &&
-          decision.status === "invalid" &&
-          ((decision.validatedCount ?? 0) > 0 || hasExplicitDomain || hasBinnedBreaks);
-        if (decision.status !== "temporal" && !censoredInvalid) {
-          errors.push({
-            code: "scale-type-mismatch",
-            path: `/scales/${aesthetic}`,
-            message: `scales.${aesthetic} requests temporal values but field "${use.field}" is quantitative (numbers are not treated as temporal without a successful epoch parse).`,
-            fix: {
-              description: `Map a temporal field, use a working parse: { epoch: "ms" | "s" }, or remove temporal ${aesthetic} options.`,
-            },
-          });
-          continue;
-        }
-        if (
-          config.temporalKind !== undefined &&
-          decision?.kind !== null &&
-          decision?.kind !== undefined &&
-          decision.kind !== config.temporalKind
-        ) {
-          errors.push({
-            code: "scale-type-mismatch",
-            path: `/scales/${aesthetic}`,
-            message: `scales.${aesthetic} requests temporal kind "${config.temporalKind}" but field "${use.field}" parses as "${decision.kind}".`,
-            fix: {
-              description: `Use the ${decision.kind ?? "matching"} ${aesthetic} helper or correct the source precision.`,
-            },
-          });
-          continue;
-        }
+        const error = quantitativeTemporalFieldError({
+          decision,
+          aesthetic,
+          field: use.field,
+          temporalKind: config.temporalKind,
+          parse: config.parse,
+          parseFailure: config.parseFailure,
+          hasEpochParser,
+          hasExplicitDomain,
+          hasBinnedBreaks,
+        });
+        if (error !== null) errors.push(error);
       }
       // A nominal/ordinal field trains no finite domain and the runtime throws
       // `style-domain-empty`; reject it with the same "use ordinal" guidance color
@@ -428,27 +558,23 @@ export function dataChecks(
         },
       });
     }
-    // Scaled constants train the same numeric scale, so a non-numeric one (e.g.
-    // { value: "large", scale: true }) throws `style-domain-empty` at runtime.
-    // Reject it here too. Temporal-requesting configs defer to scale resolution.
-    if (!requestsTemporal) {
-      for (const value of numericStyleScaledConstants[aesthetic]) {
-        // Accept exactly what cellToNumber() coerces to a finite number (numbers,
-        // Dates, booleans, numeric strings, ISO date strings) — all train and
-        // render at runtime — while still rejecting "large", "", null, etc.
-        if (scaledConstantCoercesToFinite(value)) {
-          continue;
-        }
-        errors.push({
-          code: "scale-type-mismatch",
-          path: `/scales/${aesthetic}`,
-          message: `scales.${aesthetic}.type is "${config.type}" but the scaled constant ${JSON.stringify(value)} is not numeric; ${config.type} ${aesthetic} scales need quantitative or temporal values.`,
-          fix: {
-            description: `Use a numeric scaled constant, or set scales.${aesthetic}.type to "ordinal".`,
-            example: { type: "ordinal" },
-          },
-        });
-      }
+    // Scaled constants train the same numeric scale, so a constant the scale can't
+    // resolve throws at runtime (style-domain-empty / style-temporal-parse). Reject
+    // it here too, mirroring the field checks above for both resolution paths.
+    const censorRecovers =
+      config.parseFailure === "censor" && (hasExplicitDomain || hasBinnedBreaks);
+    for (const value of numericStyleScaledConstants[aesthetic]) {
+      const error = numericStyleConstantError({
+        value,
+        aesthetic,
+        configType: config.type,
+        requestsTemporal,
+        parseUsable,
+        parser,
+        options: temporalOptions,
+        censorRecovers,
+      });
+      if (error !== null) errors.push(error);
     }
   }
 
