@@ -24,7 +24,7 @@ import {
   type TemporalDecisionCache,
 } from "./validate-data-checks-temporal.js";
 
-export const AXIS_CHANNELS = ["x", "y"] as const;
+const AXIS_CHANNELS = ["x", "y"] as const;
 
 /** True when the axis scale config requests temporal semantics (not band). */
 export function scaleRequestsTime(
