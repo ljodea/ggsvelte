@@ -36,6 +36,16 @@ describe("numeric helpers", () => {
     expect(resolution([0, 0.5, NaN, 2])).toBe(0.5);
   });
 
+  it("resolution ignores multiset cardinality (unique-first)", () => {
+    // 10k rows over three distinct x values — gap is min(1,2)=1, not affected by dups.
+    const many = Float64Array.from({ length: 10_000 }, (_, i) => [0, 1, 3][i % 3]!);
+    expect(resolution(many)).toBe(1);
+    expect(resolution(Float64Array.from({ length: 5000 }, () => 7))).toBe(0);
+    expect(resolution(new Float64Array(0))).toBe(0);
+    // SameValueZero: +0 and -0 collapse; positive gaps only.
+    expect(resolution([0, -0, 1])).toBe(1);
+  });
+
   it("mulberry32 is deterministic and uniform in [0, 1)", () => {
     const a = mulberry32(42);
     const b = mulberry32(42);
