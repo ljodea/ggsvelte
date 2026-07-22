@@ -262,7 +262,8 @@ That runs:
    paths only) — do not chase SSR-report gaps or put thresholds there.
 
 CI (`.github/workflows/ci.yml`) runs chromium browser coverage on the
-`component-svelte` job and unit-suite coverage (`bun test --coverage`) on the
+`component-svelte` job (parallel with coverage-free `component-svelte-fx` for
+firefox + webkit) and unit-suite coverage (`bun test --coverage`) on the
 `unit` job, then uploads lcov to Codecov via `codecov/codecov-action` (flags
 `unit` / `svelte`, path components for package badges). SSR coverage is **not**
 collected in CI: `@vitest/coverage-v8` needs Node inspector Coverage APIs that
