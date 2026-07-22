@@ -1,6 +1,7 @@
 /**
  * Spec lint-advisory catalog — pure data for docs and code identity.
- * Runtime SpecAdvisory instances and lintSpec() live in lint.ts.
+ * Runtime SpecAdvisory instances and lintSpec() live in lint.ts;
+ * rule emission sites: lint-layer-rules.ts and lint-scale-rules.ts.
  */
 
 /** One entry of the lint catalog (docs render straight from it). */

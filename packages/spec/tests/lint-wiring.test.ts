@@ -10,6 +10,49 @@ import { validate } from "../src/validate.ts";
 
 const codesOf = (advisories: ReturnType<typeof lintSpec>) => advisories.map((a) => a.code);
 
+describe("lintSpec never throws on schema-invalid scale entries", () => {
+  it("skips non-record scale values without fabricating advisories", () => {
+    const advisories = lintSpec({
+      data: { columns: { x: [1, 2, -1], y: [1, 2, 3] } },
+      aes: { x: { field: "x" }, y: { field: "y" } },
+      layers: [{ geom: "point" }],
+      scales: { y: null, x: "log" },
+    });
+    expect(advisories).toEqual([]);
+  });
+
+  it("lets validate report schema errors when lint is enabled alongside bad scales", () => {
+    const result = validate(
+      {
+        data: { values: [{ x: 1, y: 2 }] },
+        layers: [{ geom: "point", aes: { x: { field: "x" }, y: { field: "y" } } }],
+        scales: { y: null },
+      },
+      { lint: true },
+    );
+    expect(result.ok).toBe(false);
+    if (result.ok) throw new Error("expected validation failure");
+    expect(result.errors.length).toBeGreaterThan(0);
+  });
+});
+
+describe("lintSpec advisory ordering across rule modules", () => {
+  it("emits layer advisories before scale advisories for the same spec", () => {
+    const advisories = lintSpec({
+      data: {
+        columns: {
+          cat: ["a", "b", "c"],
+          y: [1, 2, -1],
+        },
+      },
+      aes: { x: { field: "cat" }, y: { field: "y" } },
+      layers: [{ geom: "line" }],
+      scales: { y: { type: "log" } },
+    });
+    expect(codesOf(advisories)).toEqual(["line-over-nominal-x", "transform-domain-data"]);
+  });
+});
+
 describe("lintSpec options.limits", () => {
   /** Line-over-nominal-x fixture with `rows` nominal categories cycling a/b/c. */
   const nominalLineSpec = (rows: number) => {
