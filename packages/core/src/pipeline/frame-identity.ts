@@ -135,5 +135,34 @@ export function buildIdentityFrame(
             binding.xBinning,
           )
         : null,
+    // Segment only — keep xend/yend off other geoms so scale training stays clean.
+    xend:
+      binding.layer.geom === "segment" && binding.xendField !== null
+        ? positionNumeric(
+            table,
+            binding.xendField,
+            binding.xConversion,
+            binding.xTransform,
+            binding.xBinning,
+          )
+        : null,
+    yend:
+      binding.layer.geom === "segment" && binding.yendField !== null
+        ? positionNumeric(
+            table,
+            binding.yendField,
+            binding.yConversion,
+            binding.yTransform,
+            binding.yBinning,
+          )
+        : null,
+    xendValues:
+      binding.layer.geom === "segment" && binding.xendField !== null
+        ? table.column(binding.xendField)
+        : null,
+    yendValues:
+      binding.layer.geom === "segment" && binding.yendField !== null
+        ? table.column(binding.yendField)
+        : null,
   };
 }

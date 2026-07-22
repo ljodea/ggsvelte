@@ -219,6 +219,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "ee9a5b3b1cafca8caa681aec83a66e09868606bf2f5b47af1abac065011263c1",
   },
   {
+    id: "segment/annotations",
+    filename: "segment-annotations-light.png",
+    path: "/previews/segment-annotations-light.png",
+    sha256: "82902e5513804fd6d87a1028aa6b8b0c1ce3b7b790ecde0cc52bd0f22e72c345",
+  },
+  {
     id: "smooth/loess-scatter",
     filename: "smooth-loess-scatter-light.png",
     path: "/previews/smooth-loess-scatter-light.png",

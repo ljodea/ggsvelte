@@ -60,6 +60,14 @@ export interface LayerFrame {
   /** Bin edges (bin-stat layers; rects span them on a continuous x). */
   xmin: Float64Array | null;
   xmax: Float64Array | null;
+  /** Segment end x (transformed scale-space); null when unused. */
+  xend: Float64Array | null;
+  /** Segment end y (transformed scale-space); null when unused. */
+  yend: Float64Array | null;
+  /** Raw segment end x values (discrete evidence); null when unused. */
+  xendValues: readonly CellValue[] | null;
+  /** Raw segment end y values (discrete evidence); null when unused. */
+  yendValues: readonly CellValue[] | null;
   dodgeSlot: Uint32Array | null;
   /** Per-row dodge slot count (per-x, ggplot2 preserve="total"). */
   dodgeSlotCounts: Uint32Array | null;

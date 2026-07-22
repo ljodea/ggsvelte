@@ -20,6 +20,7 @@ export const KNOWN_GEOMS = [
   "tile",
   "raster",
   "ribbon",
+  "segment",
 ] as const;
 export type GeomName = (typeof KNOWN_GEOMS)[number];
 
@@ -52,6 +53,8 @@ export const CHANNELS = [
   "ymax",
   "xmin",
   "xmax",
+  "xend",
+  "yend",
   "width",
   "height",
 ] as const;
@@ -97,4 +100,5 @@ export const GEOM_DEFAULTS: Record<GeomName, { stat: StatName; position: Positio
   tile: { stat: "identity", position: "identity" },
   raster: { stat: "identity", position: "identity" },
   ribbon: { stat: "identity", position: "identity" },
+  segment: { stat: "identity", position: "identity" },
 };

@@ -54,28 +54,32 @@ export function resolveBinnedAxis(
   let hi = Number.NEGATIVE_INFINITY;
   const seen = new Set<string>();
   for (const binding of bindings) {
-    const field = axis === "x" ? binding.xField : binding.yField;
-    if (field === null || seen.has(field)) continue;
-    seen.add(field);
-    const fieldType = positionFieldType(table, field, conversion);
-    if (fieldType !== "quantitative") {
-      throw new PipelineError(
-        "binned-scale-requires-continuous",
-        `/scales/${axis}`,
-        `A type: "binned" scale on ${axis} is bound to field "${field}" (${fieldType}), which is not quantitative.`,
-      );
-    }
-    if (explicitEdges !== null) continue;
-    const values =
-      transform === undefined
-        ? table.numeric(field, conversion.sourceParser, conversion.options)
-        : table.transformed(field, conversion.sourceParser, conversion.options, transform)
-            .transformed;
-    for (let i = 0; i < values.length; i++) {
-      const value = values[i]!;
-      if (!Number.isFinite(value)) continue;
-      if (value < lo) lo = value;
-      if (value > hi) hi = value;
+    // Segment endpoints train the same axis — include them in auto binned extent.
+    const fields =
+      axis === "x" ? [binding.xField, binding.xendField] : [binding.yField, binding.yendField];
+    for (const field of fields) {
+      if (field === null || seen.has(field)) continue;
+      seen.add(field);
+      const fieldType = positionFieldType(table, field, conversion);
+      if (fieldType !== "quantitative") {
+        throw new PipelineError(
+          "binned-scale-requires-continuous",
+          `/scales/${axis}`,
+          `A type: "binned" scale on ${axis} is bound to field "${field}" (${fieldType}), which is not quantitative.`,
+        );
+      }
+      if (explicitEdges !== null) continue;
+      const values =
+        transform === undefined
+          ? table.numeric(field, conversion.sourceParser, conversion.options)
+          : table.transformed(field, conversion.sourceParser, conversion.options, transform)
+              .transformed;
+      for (let i = 0; i < values.length; i++) {
+        const value = values[i]!;
+        if (!Number.isFinite(value)) continue;
+        if (value < lo) lo = value;
+        if (value > hi) hi = value;
+      }
     }
   }
   const extent: [number, number] | null = explicitEdges === null && lo <= hi ? [lo, hi] : null;

@@ -17,6 +17,7 @@ import {
 import { boxplotBatches, errorbarBatch, smoothBatches } from "./geometry-composites.js";
 import { edgeRectsBatch, rasterRectsBatch, tileRectsBatch } from "./geometry-edge-rects.js";
 import { ribbonBatches } from "./geometry-ribbon.js";
+import { finiteSegmentBatch } from "./geometry-segment-finite.js";
 
 function single(batch: GeometryBatch | null): GeometryBatch[] {
   return batch === null ? [] : [batch];
@@ -51,6 +52,8 @@ export function dispatchGeometryBatch(
       return ribbonBatches(frame, fx, color, fill, styles, warnings);
     case "rule":
       return single(segmentsBatch(frame, fx, color, styles, warnings));
+    case "segment":
+      return single(finiteSegmentBatch(frame, fx, color, styles, warnings));
     case "text":
       return single(glyphsBatch(frame, fx, color, styles, warnings));
     case "smooth":

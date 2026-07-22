@@ -28,6 +28,7 @@ import type {
   RectParams,
   RenderBackend,
   RuleParams,
+  SegmentParams,
   Scales,
   SmoothParams,
   StackablePosition,
@@ -58,6 +59,8 @@ export interface AesInput {
   ymax?: ChannelInput;
   xmin?: ChannelInput;
   xmax?: ChannelInput;
+  xend?: ChannelInput;
+  yend?: ChannelInput;
   width?: ChannelInput;
   height?: ChannelInput;
 }
@@ -191,6 +194,13 @@ export interface RibbonLayerInput extends LayerInputBase {
   params?: RibbonParams;
 }
 
+export interface SegmentLayerInput extends LayerInputBase {
+  geom: "segment";
+  stat?: "identity";
+  position?: "identity";
+  params?: SegmentParams;
+}
+
 /** Layer accepted at the TS/builder level. */
 export type LayerInput =
   | PointLayerInput
@@ -208,7 +218,8 @@ export type LayerInput =
   | ErrorbarLayerInput
   | RectLayerInput
   | TileLayerInput
-  | RasterLayerInput;
+  | RasterLayerInput
+  | SegmentLayerInput;
 
 /** Spec accepted at the TS/builder level (superset of PortableSpec forms). */
 export interface SpecInput {

@@ -48,9 +48,16 @@ export function drawSegments(
 ): void {
   const themeInk = resolve(themeVar("ink", theme));
   ctx.lineWidth = batch.linewidth;
+  // Save/restore lineCap so a segment batch with lineend does not leak into
+  // later rule/errorbar segment batches that leave linecap undefined.
+  const previousLineCap = ctx.lineCap;
+  if (batch.linecap !== undefined) ctx.lineCap = batch.linecap;
   applyDash(ctx, batch.linetype ?? "solid");
   const n = batch.segments.length / 4;
-  if (n === 0) return;
+  if (n === 0) {
+    ctx.lineCap = previousLineCap;
+    return;
+  }
 
   const mappedStyle =
     batch.linewidths !== undefined ||
@@ -70,6 +77,7 @@ export function drawSegments(
     }
     ctx.globalAlpha = baseAlpha;
     applyDash(ctx, "solid");
+    ctx.lineCap = previousLineCap;
     return;
   }
 
@@ -84,6 +92,7 @@ export function drawSegments(
     }
     if (traced) ctx.stroke();
     applyDash(ctx, "solid");
+    ctx.lineCap = previousLineCap;
     return;
   }
 
@@ -108,4 +117,5 @@ export function drawSegments(
     runStart = runEnd;
   }
   applyDash(ctx, "solid");
+  ctx.lineCap = previousLineCap;
 }

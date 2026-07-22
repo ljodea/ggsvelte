@@ -184,6 +184,8 @@
     linewidth: number;
     alpha: number;
     dasharray: string | undefined;
+    /** Present only when the batch opts in (segment geom); omitted for rule. */
+    linecap?: "butt" | "round" | "square";
   }
 
   const segments: Segment[] = $derived.by(() => {
@@ -206,6 +208,8 @@
       stroke: batch.strokes?.[j] ?? batch.stroke ?? ink,
       linewidth: styleNumber(batch.linewidths?.[j] ?? batch.linewidth),
       alpha: styleNumber(batch.alphas?.[j] ?? 1),
+      // Conditional: only set when the batch opts in (rule batches leave undefined).
+      ...(batch.linecap !== undefined && { linecap: batch.linecap }),
       dasharray: (() => {
         const linetype =
           batch.linetypeIndexes === undefined
@@ -392,6 +396,7 @@
           stroke={s.stroke}
           stroke-width={s.linewidth}
           stroke-dasharray={s.dasharray}
+          stroke-linecap={s.linecap}
           opacity={itemOpacity(s.alpha, presented.focused)}
           data-gg-focused={focusMask === null ? undefined : presented.focused}
         />
@@ -404,6 +409,7 @@
           stroke={s.stroke}
           stroke-width={s.linewidth}
           stroke-dasharray={s.dasharray}
+          stroke-linecap={s.linecap}
           opacity={itemOpacity(s.alpha, presented.focused)}
           data-gg-focused={focusMask === null ? undefined : presented.focused}
         />

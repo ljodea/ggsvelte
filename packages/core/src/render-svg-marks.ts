@@ -205,7 +205,8 @@ function renderSegments(batch: SegmentsBatch, theme: ThemeTokens): string {
       batch.linetypeIndexes === undefined
         ? (batch.linetype ?? "solid")
         : LINETYPE_NAMES[batch.linetypeIndexes[j]!]!;
-    const style = `${dashAttr(linetype)}${alpha === undefined ? "" : alphaAttr(alpha)}`;
+    const linecap = batch.linecap === undefined ? "" : ` stroke-linecap="${batch.linecap}"`;
+    const style = `${dashAttr(linetype)}${alpha === undefined ? "" : alphaAttr(alpha)}${linecap}`;
     if (batch.renderPositions !== undefined && batch.renderPathOffsets !== undefined) {
       const d = pathData(
         batch.renderPositions,
