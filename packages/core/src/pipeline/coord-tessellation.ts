@@ -2,8 +2,8 @@ import type { PanelCoordProjector } from "../coord-projector.js";
 import { segmentDistance } from "../candidate-geometry.js";
 import type { GeometryBatch } from "../scene.js";
 
-export const COORD_TESSELLATION_TOLERANCE_PX = 0.5;
-export const MAX_COORD_TESSELLATION_DEPTH = 12;
+const COORD_TESSELLATION_TOLERANCE_PX = 0.5;
+const MAX_COORD_TESSELLATION_DEPTH = 12;
 export const MAX_COORD_VERTICES_PER_SUBPATH = 4096;
 export const MAX_COORD_VERTICES_PER_PANEL_LAYER = 65_536;
 
