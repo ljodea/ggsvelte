@@ -552,6 +552,7 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
         }
         return true;
     }
+    return true;
   }
 
   function registerInspectionEffects(): void {
