@@ -227,19 +227,19 @@
         },
         "ymin": {
           "$ref": "#/$defs/ChannelValue",
-          "description": "Lower bound channel (errorbar with the identity stat; also y edge for geom rect). Quantitative values only."
+          "description": "Lower y bound (errorbar identity, rect edges, ribbon x-orientation). Quantitative values only."
         },
         "ymax": {
           "$ref": "#/$defs/ChannelValue",
-          "description": "Upper bound channel (errorbar with the identity stat; also y edge for geom rect). Quantitative values only."
+          "description": "Upper y bound (errorbar identity, rect edges, ribbon x-orientation). Quantitative values only."
         },
         "xmin": {
           "$ref": "#/$defs/ChannelValue",
-          "description": "Left edge channel (geom rect). Quantitative values only."
+          "description": "Left edge / lower x bound (geom rect; ribbon y-orientation). Quantitative values only."
         },
         "xmax": {
           "$ref": "#/$defs/ChannelValue",
-          "description": "Right edge channel (geom rect). Quantitative values only."
+          "description": "Right edge / upper x bound (geom rect; ribbon y-orientation). Quantitative values only."
         },
         "width": {
           "$ref": "#/$defs/ChannelValue",
@@ -726,6 +726,92 @@
       },
       "additionalProperties": false,
       "description": "Styling parameters for the area geom."
+    },
+    "RibbonParams": {
+      "type": "object",
+      "properties": {
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Ribbon fill opacity. Must be between 0 and 1 (inclusive). Default 1."
+        },
+        "linewidth": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Outline stroke width in px when an outline is drawn. Must be greater than 0. Default 1."
+        },
+        "outline": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "both"
+            },
+            {
+              "type": "string",
+              "const": "upper"
+            },
+            {
+              "type": "string",
+              "const": "lower"
+            },
+            {
+              "type": "string",
+              "const": "full"
+            }
+          ],
+          "description": "Which edges receive an outline stroke: \"both\" (default — upper and lower), \"upper\", \"lower\", or \"full\" (closed outline of the band). Strokes appear only when aes.color / a color constant is set."
+        },
+        "orientation": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "x"
+            },
+            {
+              "type": "string",
+              "const": "y"
+            }
+          ],
+          "description": "Running-coordinate orientation: \"x\" (map x + ymin + ymax) or \"y\" (map y + xmin + xmax). When omitted, inferred from the complete channel contract; set explicitly if both contracts are mapped."
+        },
+        "lineend": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "butt"
+            },
+            {
+              "type": "string",
+              "const": "round"
+            },
+            {
+              "type": "string",
+              "const": "square"
+            }
+          ],
+          "description": "SVG stroke-linecap for outlines. Default \"butt\"."
+        },
+        "linejoin": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "miter"
+            },
+            {
+              "type": "string",
+              "const": "round"
+            },
+            {
+              "type": "string",
+              "const": "bevel"
+            }
+          ],
+          "description": "SVG stroke-linejoin for outlines. Default \"round\"."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Styling and orientation parameters for the ribbon geom."
     },
     "RuleIntercept": {
       "anyOf": [
@@ -1332,6 +1418,40 @@
       "additionalProperties": false,
       "description": "An area layer. Requires x and y channels; rows are sorted by x within each group. Default position \"stack\"."
     },
+    "RibbonLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "ribbon",
+          "description": "Ribbon geometry: a filled interval between two varying boundaries along a running coordinate (ggplot2's geom_ribbon). Map x+ymin+ymax (x orientation) or y+xmin+xmax (y orientation). Not a zero-baseline area."
+        },
+        "stat": {
+          "type": "string",
+          "const": "identity",
+          "description": "Ribbon layers draw precomputed bounds as-is."
+        },
+        "position": {
+          "type": "string",
+          "const": "identity",
+          "description": "Ribbon layers use identity positioning."
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "params": {
+          "$ref": "#/$defs/RibbonParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A ribbon layer. Requires a running coordinate and both interval bounds (x+ymin+ymax or y+xmin+xmax). Rows are sorted along the running coordinate within each group."
+    },
     "RuleLayer": {
       "type": "object",
       "required": [
@@ -1430,6 +1550,9 @@
         },
         {
           "$ref": "#/$defs/AreaLayer"
+        },
+        {
+          "$ref": "#/$defs/RibbonLayer"
         },
         {
           "$ref": "#/$defs/RuleLayer"

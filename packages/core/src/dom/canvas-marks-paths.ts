@@ -44,6 +44,21 @@ function applyDash(ctx: CanvasRenderingContext2D, linetype: Linetype): void {
   ctx.setLineDash(LINETYPE_DASHES[LINETYPE_NAMES.indexOf(linetype)] ?? []);
 }
 
+function strokePath(
+  ctx: CanvasRenderingContext2D,
+  batch: PathsBatch,
+  s: number,
+  stroke: string,
+  resolve: ColorResolver,
+): void {
+  ctx.strokeStyle = resolve(stroke);
+  ctx.lineWidth = batch.linewidths?.[s] ?? batch.linewidth;
+  applyDash(ctx, linetypeAt(batch, s));
+  ctx.lineJoin = batch.linejoin ?? "round";
+  ctx.lineCap = batch.linecap ?? "round";
+  ctx.stroke();
+}
+
 export function drawPaths(
   ctx: CanvasRenderingContext2D,
   batch: PathsBatch,
@@ -63,13 +78,13 @@ export function drawPaths(
     if (isArea) {
       ctx.fillStyle = resolve(batch.fills![s] ?? themeVar("accent", theme));
       ctx.fill();
+      const strokeColor = batch.strokes[s];
+      const linewidth = batch.linewidths?.[s] ?? batch.linewidth;
+      if (strokeColor !== null && strokeColor !== undefined && linewidth > 0) {
+        strokePath(ctx, batch, s, strokeColor, resolve);
+      }
     } else {
-      ctx.strokeStyle = resolve(batch.strokes[s] ?? themeVar("ink", theme));
-      ctx.lineWidth = batch.linewidths?.[s] ?? batch.linewidth;
-      applyDash(ctx, linetypeAt(batch, s));
-      ctx.lineJoin = "round";
-      ctx.lineCap = "round";
-      ctx.stroke();
+      strokePath(ctx, batch, s, batch.strokes[s] ?? themeVar("ink", theme), resolve);
     }
   }
   ctx.globalAlpha = baseAlpha;
@@ -98,13 +113,13 @@ export function drawPathsSubset(
     if (isArea) {
       ctx.fillStyle = resolve(batch.fills![s] ?? themeVar("accent", theme));
       ctx.fill();
+      const strokeColor = batch.strokes[s];
+      const linewidth = batch.linewidths?.[s] ?? batch.linewidth;
+      if (strokeColor !== null && strokeColor !== undefined && linewidth > 0) {
+        strokePath(ctx, batch, s, strokeColor, resolve);
+      }
     } else {
-      ctx.strokeStyle = resolve(batch.strokes[s] ?? themeVar("ink", theme));
-      ctx.lineWidth = batch.linewidths?.[s] ?? batch.linewidth;
-      applyDash(ctx, linetypeAt(batch, s));
-      ctx.lineJoin = "round";
-      ctx.lineCap = "round";
-      ctx.stroke();
+      strokePath(ctx, batch, s, batch.strokes[s] ?? themeVar("ink", theme), resolve);
     }
   }
   ctx.globalAlpha = baseAlpha;

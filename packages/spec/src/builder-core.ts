@@ -14,6 +14,7 @@ import type {
   GeomColOptions,
   GeomDensityOptions,
   GeomErrorbarOptions,
+  GeomRibbonOptions,
   GeomHistogramOptions,
   GeomLineOptions,
   GeomPointOptions,
@@ -185,6 +186,14 @@ export class GGBuilderCore {
   /** Sugar for .layer({ geom: 'raster', ... }) — equal-cell dense grid. */
   geomRaster(options: GeomRasterOptions = {}): GGBuilder {
     return this.layer(layerFrom("raster", options));
+  }
+
+  /**
+   * Sugar for .layer({ geom: 'ribbon', ... }). Map x+ymin+ymax (or y+xmin+xmax
+   * for y orientation) to precomputed interval bounds.
+   */
+  geomRibbon(options: GeomRibbonOptions = {}): GGBuilder {
+    return this.layer(layerFrom("ribbon", options));
   }
 
   /**

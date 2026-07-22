@@ -85,6 +85,8 @@
     linewidth: number;
     alpha: number;
     dasharray: string | undefined;
+    linecap: "butt" | "round" | "square";
+    linejoin: "miter" | "round" | "bevel";
   }
 
   const subpaths: Subpath[] = $derived.by(() => {
@@ -105,14 +107,25 @@
           ? (batch.linetype ?? "solid")
           : LINETYPE_NAMES[batch.linetypeIndexes[s]!]!;
       const dash = LINETYPE_DASHES[LINETYPE_NAMES.indexOf(linetype)] ?? [];
+      const linewidth = styleNumber(batch.linewidths?.[s] ?? batch.linewidth);
+      const strokeColor = batch.strokes[s];
+      const areaStroke =
+        isArea &&
+        strokeColor !== null &&
+        strokeColor !== undefined &&
+        linewidth > 0
+          ? strokeColor
+          : "none";
       out.push({
         index: s,
         d,
-        stroke: isArea ? "none" : (batch.strokes[s] ?? ink),
+        stroke: isArea ? areaStroke : (strokeColor ?? ink),
         fill: isArea ? (batch.fills![s] ?? accent) : "none",
-        linewidth: styleNumber(batch.linewidths?.[s] ?? batch.linewidth),
+        linewidth,
         alpha: styleNumber(batch.alphas?.[s] ?? 1),
         dasharray: dash.length === 0 ? undefined : dash.join(" "),
+        linecap: batch.linecap ?? "round",
+        linejoin: batch.linejoin ?? "round",
       });
     }
     return out;
@@ -341,8 +354,8 @@
         stroke={p.stroke}
         stroke-width={p.stroke === "none" ? undefined : p.linewidth}
         stroke-dasharray={p.stroke === "none" ? undefined : p.dasharray}
-        stroke-linejoin={p.stroke === "none" ? undefined : "round"}
-        stroke-linecap={p.stroke === "none" ? undefined : "round"}
+        stroke-linejoin={p.stroke === "none" ? undefined : p.linejoin}
+        stroke-linecap={p.stroke === "none" ? undefined : p.linecap}
         opacity={itemOpacity(p.alpha, presented.focused)}
         data-gg-focused={focusMask === null ? undefined : presented.focused}
       />

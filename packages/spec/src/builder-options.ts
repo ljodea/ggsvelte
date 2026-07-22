@@ -10,6 +10,7 @@ import type {
   ColParams,
   DensityParams,
   ErrorbarParams,
+  RibbonParams,
   LineParams,
   PointParams,
   PointPosition,
@@ -99,6 +100,12 @@ export interface GeomTileOptions extends TileParams {
 
 /** Raster-layer sugar options: params plus optional layer-level aes. */
 export interface GeomRasterOptions extends RasterParams {
+  aes?: AesInput;
+  render?: RenderBackend;
+}
+
+/** Ribbon-layer sugar options: params plus an optional layer-level aes. */
+export interface GeomRibbonOptions extends RibbonParams {
   aes?: AesInput;
   render?: RenderBackend;
 }

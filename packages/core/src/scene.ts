@@ -91,6 +91,15 @@ export interface PathsBatch {
   alphas?: Float32Array;
   linetype?: Linetype;
   linetypeIndexes?: Uint8Array;
+  /** Stroke line cap (ribbon outlines; default renderer round when omitted). */
+  linecap?: "butt" | "round" | "square";
+  /** Stroke line join (ribbon outlines; default renderer round when omitted). */
+  linejoin?: "miter" | "round" | "bevel";
+  /**
+   * When false, candidate construction skips this batch (presentation-only
+   * outline edges of a composite mark). Default true / omitted = candidates.
+   */
+  candidates?: boolean;
   curve: "linear" | "step";
 }
 

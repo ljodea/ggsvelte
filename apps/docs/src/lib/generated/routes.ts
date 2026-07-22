@@ -1199,6 +1199,11 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "ribbon-orientation-ambiguous",
+        title: "ribbon-orientation-ambiguous",
+        level: 3,
+      },
+      {
         id: "unknown-field",
         title: "unknown-field",
         level: 3,
@@ -1311,6 +1316,16 @@ export const DOCS_ROUTES = [
       {
         id: "rule-both-axes-pipeline",
         title: "rule-both-axes — pipeline",
+        level: 3,
+      },
+      {
+        id: "ribbon-orientation-ambiguous-pipeline",
+        title: "ribbon-orientation-ambiguous — pipeline",
+        level: 3,
+      },
+      {
+        id: "ribbon-inverted-bounds",
+        title: "ribbon-inverted-bounds",
         level: 3,
       },
       {
@@ -2023,8 +2038,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-465",
-        title: "experimental (465)",
+        id: "experimental-473",
+        title: "experimental (473)",
         level: 3,
       },
       {
@@ -2063,8 +2078,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-411",
-        title: "experimental (411)",
+        id: "experimental-412",
+        title: "experimental (412)",
         level: 3,
       },
       {
@@ -2545,6 +2560,17 @@ export const DOCS_ROUTES = [
     description:
       "Arbitrary rectangles from xmin/xmax/ymin/ymax — background time bands or regions without image injection.",
     canonicalPath: "/examples/rect/regions",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/ribbon/bounds",
+    title: "Ribbon interval — ggsvelte gallery",
+    description:
+      "A filled band between precomputed lower and upper bounds along x — the canonical geom_ribbon contract (not a zero-baseline area).",
+    canonicalPath: "/examples/ribbon/bounds",
     kind: "page",
     index: true,
     sitemap: true,

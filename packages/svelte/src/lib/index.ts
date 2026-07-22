@@ -92,6 +92,7 @@ export { default as GeomErrorbar } from "./geoms/GeomErrorbar.svelte";
 export { default as GeomRect } from "./geoms/GeomRect.svelte";
 export { default as GeomTile } from "./geoms/GeomTile.svelte";
 export { default as GeomRaster } from "./geoms/GeomRaster.svelte";
+export { default as GeomRibbon } from "./geoms/GeomRibbon.svelte";
 export { registerLayer } from "./geoms/registry.svelte.js";
 export type { LayerDescriptor, LayerRegistry } from "./geoms/registry.svelte.js";
 export { createGeomLayer } from "./geoms/factory.svelte.js";

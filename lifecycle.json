@@ -396,6 +396,14 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "GeomRasterOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GeomRectOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "GeomRuleOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -405,6 +413,10 @@
           "lifecycle": "experimental"
         },
         "GeomTextOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GeomTileOptions": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -676,6 +688,22 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "RibbonLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RibbonLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RibbonLayerSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "RibbonParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "RuleLayer": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -745,6 +773,10 @@
           "lifecycle": "experimental"
         },
         "RuntimeRectLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RuntimeRibbonLayer": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -3222,6 +3254,10 @@
           "lifecycle": "experimental"
         },
         "GeomRect": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GeomRibbon": {
           "kind": "value",
           "lifecycle": "experimental"
         },

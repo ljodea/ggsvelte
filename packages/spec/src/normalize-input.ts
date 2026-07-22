@@ -14,6 +14,7 @@ import type {
   DataRef,
   DensityParams,
   ErrorbarParams,
+  RibbonParams,
   FacetScales,
   GuidesSpec,
   InlineData,
@@ -183,6 +184,13 @@ export interface RasterLayerInput extends LayerInputBase {
   params?: RasterParams;
 }
 
+export interface RibbonLayerInput extends LayerInputBase {
+  geom: "ribbon";
+  stat?: "identity";
+  position?: "identity";
+  params?: RibbonParams;
+}
+
 /** Layer accepted at the TS/builder level. */
 export type LayerInput =
   | PointLayerInput
@@ -191,6 +199,7 @@ export type LayerInput =
   | BarLayerInput
   | HistogramLayerInput
   | AreaLayerInput
+  | RibbonLayerInput
   | RuleLayerInput
   | TextLayerInput
   | SmoothLayerInput

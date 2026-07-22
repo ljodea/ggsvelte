@@ -110,10 +110,12 @@ export function buildIdentityFrame(
             binding.yTransform,
             binding.yBinning,
           ),
-    // Only geom rect consumes aes xmin/xmax as identity edges. Tile/raster
-    // expand edges later; other geoms must not poison scale training.
+    // Only ribbon (and stats that write xmin/xmax themselves) consume these
+    // fields — do not populate them for unrelated geoms that happen to map
+    // xmin/xmax, or scale collection treats the layer as edge/bin evidence.
     xmin:
-      binding.layer.geom === "rect" && binding.xminField !== null
+      (binding.layer.geom === "rect" || binding.layer.geom === "ribbon") &&
+      binding.xminField !== null
         ? positionNumeric(
             table,
             binding.xminField,
@@ -123,7 +125,8 @@ export function buildIdentityFrame(
           )
         : null,
     xmax:
-      binding.layer.geom === "rect" && binding.xmaxField !== null
+      (binding.layer.geom === "rect" || binding.layer.geom === "ribbon") &&
+      binding.xmaxField !== null
         ? positionNumeric(
             table,
             binding.xmaxField,

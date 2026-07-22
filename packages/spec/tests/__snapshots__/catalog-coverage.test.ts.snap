@@ -124,6 +124,7 @@ exports[`ERROR_CATALOG coverage [missing-geom] is reproducible; message + fix sn
       "rect",
       "tile",
       "raster",
+      "ribbon",
     ],
     "code": "missing-geom",
     "fix": {
@@ -132,7 +133,7 @@ exports[`ERROR_CATALOG coverage [missing-geom] is reproducible; message + fix sn
         "geom": "point",
       },
     },
-    "message": "Every layer needs a "geom" discriminator. Allowed geoms: "point", "line", "col", "bar", "histogram", "area", "rule", "text", "smooth", "boxplot", "density", "errorbar", "rect", "tile", "raster".",
+    "message": "Every layer needs a "geom" discriminator. Allowed geoms: "point", "line", "col", "bar", "histogram", "area", "rule", "text", "smooth", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon".",
     "path": "/layers/0/geom",
   },
 }
@@ -162,6 +163,7 @@ exports[`ERROR_CATALOG coverage [unknown-geom] is reproducible; message + fix sn
       "rect",
       "tile",
       "raster",
+      "ribbon",
     ],
     "code": "unknown-geom",
     "fix": {
@@ -170,7 +172,7 @@ exports[`ERROR_CATALOG coverage [unknown-geom] is reproducible; message + fix sn
         "geom": "point",
       },
     },
-    "message": "Unknown geom "pont". Allowed geoms: "point", "line", "col", "bar", "histogram", "area", "rule", "text", "smooth", "boxplot", "density", "errorbar", "rect", "tile", "raster". Did you mean "point"?",
+    "message": "Unknown geom "pont". Allowed geoms: "point", "line", "col", "bar", "histogram", "area", "rule", "text", "smooth", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon". Did you mean "point"?",
     "path": "/layers/0/geom",
   },
 }
@@ -648,6 +650,29 @@ exports[`ERROR_CATALOG coverage [unsupported-geom-aesthetic] is reproducible; me
     },
     "message": "The line geom does not consume aes.size; supported geoms: point, text.",
     "path": "/layers/0/aes/size",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [ribbon-orientation-ambiguous] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Set params.orientation to "x" or "y", or map only one complete interval contract.",
+    "summary": "A ribbon layer maps both x-orientation (x+ymin+ymax) and y-orientation (y+xmin+xmax) contracts without params.orientation.",
+    "tier": 2,
+  },
+  "instance": {
+    "code": "ribbon-orientation-ambiguous",
+    "fix": {
+      "description": "Pin orientation explicitly.",
+      "example": {
+        "params": {
+          "orientation": "x",
+        },
+      },
+    },
+    "message": "This ribbon layer maps both x-orientation (x+ymin+ymax) and y-orientation (y+xmin+xmax) contracts. Set params.orientation to "x" or "y".",
+    "path": "/layers/0/params/orientation",
   },
 }
 `;

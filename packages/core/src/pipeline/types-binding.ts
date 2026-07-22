@@ -79,6 +79,8 @@ export interface LayerBinding {
   widthField: string | null;
   /** Tile height field (optional); null when unused or constant via params. */
   heightField: string | null;
+  /** Ribbon only: resolved running-coordinate orientation. */
+  ribbonOrientation?: "x" | "y";
   color: ColorBinding;
   fill: ColorBinding;
   size: StyleBinding;

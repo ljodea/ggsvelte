@@ -106,6 +106,7 @@ export const ColLayerSchema = SpecModule.Import("ColLayer");
 export const BarLayerSchema = SpecModule.Import("BarLayer");
 export const HistogramLayerSchema = SpecModule.Import("HistogramLayer");
 export const AreaLayerSchema = SpecModule.Import("AreaLayer");
+export const RibbonLayerSchema = SpecModule.Import("RibbonLayer");
 export const RuleLayerSchema = SpecModule.Import("RuleLayer");
 export const TextLayerSchema = SpecModule.Import("TextLayer");
 export const SmoothLayerSchema = SpecModule.Import("SmoothLayer");
@@ -189,6 +190,8 @@ export type RectParams = SpecType<"RectParams">;
 export type TileParams = SpecType<"TileParams">;
 /** Raster layer params. */
 export type RasterParams = SpecType<"RasterParams">;
+/** Ribbon layer params (outline, orientation, stroke ends). */
+export type RibbonParams = SpecType<"RibbonParams">;
 /** Jitter/nudge position parameters. */
 export type PositionParams = SpecType<"PositionParams">;
 /** A point layer. */
@@ -221,6 +224,8 @@ export type RectLayer = SpecType<"RectLayer">;
 export type TileLayer = SpecType<"TileLayer">;
 /** A raster layer (equal-cell dense grid). */
 export type RasterLayer = SpecType<"RasterLayer">;
+/** A ribbon (interval band) layer. */
+export type RibbonLayer = SpecType<"RibbonLayer">;
 /** One plot layer, discriminated by `geom`. */
 export type LayerSpec = SpecType<"LayerSpec">;
 /** Stackable position adjustment names. */

@@ -112,7 +112,9 @@ export function deriveLayerGroups(binding: LayerBinding, table: ColumnTable): nu
       table.has(mapping.field)
     ) {
       const conversion =
-        mapping.field === binding.xField
+        mapping.field === binding.xField ||
+        mapping.field === binding.xminField ||
+        mapping.field === binding.xmaxField
           ? binding.xConversion
           : mapping.field === binding.yField ||
               mapping.field === binding.yminField ||

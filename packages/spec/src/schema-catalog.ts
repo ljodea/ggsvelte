@@ -19,6 +19,7 @@ export const KNOWN_GEOMS = [
   "rect",
   "tile",
   "raster",
+  "ribbon",
 ] as const;
 export type GeomName = (typeof KNOWN_GEOMS)[number];
 
@@ -95,4 +96,5 @@ export const GEOM_DEFAULTS: Record<GeomName, { stat: StatName; position: Positio
   rect: { stat: "identity", position: "identity" },
   tile: { stat: "identity", position: "identity" },
   raster: { stat: "identity", position: "identity" },
+  ribbon: { stat: "identity", position: "identity" },
 };

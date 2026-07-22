@@ -83,6 +83,15 @@ export const PIPELINE_ERROR_CATALOG = {
     summary: "A data-driven rule layer maps BOTH aes.x and aes.y.",
     fix: "Keep one direction and unset the other channel with null.",
   },
+  "ribbon-orientation-ambiguous": {
+    summary:
+      "A ribbon layer maps both x-orientation and y-orientation contracts without params.orientation.",
+    fix: 'Set params.orientation to "x" or "y", or map only one complete interval contract.',
+  },
+  "ribbon-inverted-bounds": {
+    summary: "A ribbon layer has one or more rows where the lower bound exceeds the upper bound.",
+    fix: "Swap or correct ymin/ymax (or xmin/xmax) so lower ≤ upper on every finite row.",
+  },
   "facet-form-ambiguous": {
     summary: "A facet sets BOTH the wrap form and the rows/cols grid form.",
     fix: "Keep facet.wrap OR facet.rows/facet.cols, never both.",
