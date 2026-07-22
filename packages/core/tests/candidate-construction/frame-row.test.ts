@@ -162,6 +162,50 @@ describe("resolveCandidateFrameRow paths", () => {
     ).toEqual({ frameRow: 1, derivedGroup: 0 });
   });
 
+  /**
+   * Filtered closed ribbon (#502): non-finite ymin/ymax rows are dropped before
+   * emission. Layout over full frame groups would mis-map reverse legs under
+   * coord semanticIndex; closedFrameRows records the emitted sequence.
+   */
+  it("uses closedFrameRows for filtered ribbon semantic vertices under coord", async () => {
+    const { resolveCandidateFrameRow } =
+      await import("../../src/pipeline/candidate-construction/frame-row.ts");
+    // Frame has 4 rows; only rows 0 and 2 are finite on the band (emitted).
+    // Closed path: upper [0,2] then reverse lower [2,0] → closedFrameRows [0,2,2,0].
+    const frame = fromAny({
+      n: 4,
+      groups: [0, 0, 0, 0],
+      xNumeric: new Float64Array([0, 1, 2, 3]),
+      binding: { layer: { geom: "smooth" } },
+    });
+    const batch = fromAny({
+      kind: "paths",
+      closed: true,
+      pathOffsets: new Uint32Array([0, 20]),
+      semanticIndex: new Uint32Array(20),
+      closedFrameRows: new Uint32Array([0, 2, 2, 0]),
+    });
+    // Full-group reflection would map primitive 1 → frame row 1 (filtered out).
+    expect(
+      resolveCandidateFrameRow({
+        frame,
+        batch,
+        primitiveIndex: 1,
+        orderedGroups: [0],
+        outlierLocalRow: null,
+      }),
+    ).toEqual({ frameRow: 2, derivedGroup: 0 });
+    expect(
+      resolveCandidateFrameRow({
+        frame,
+        batch,
+        primitiveIndex: 3,
+        orderedGroups: [0],
+        outlierLocalRow: null,
+      }),
+    ).toEqual({ frameRow: 0, derivedGroup: 0 });
+  });
+
   it("resolves many subpaths without linear pathOffsets scans (O(log P))", async () => {
     const { resolveCandidateFrameRow } =
       await import("../../src/pipeline/candidate-construction/frame-row.ts");

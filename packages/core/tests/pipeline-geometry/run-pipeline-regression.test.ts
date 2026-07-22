@@ -117,6 +117,40 @@ describe("buildBatch dispatch via runPipeline", () => {
     expect(col.scene.batches.some((b) => b.kind === "rects")).toBe(true);
   });
 
+  it("smooth se ribbon attaches closedFrameRows for emitted band vertices (#502)", () => {
+    // Dense enough for loess SE; x starts at 1 so log10 coord is defined.
+    const rows = Array.from({ length: 30 }, (_, i) => ({
+      x: i + 1,
+      y: Math.sin(i / 4) * 10 + 20,
+    }));
+    const model = runPipeline(
+      gg(rows, aes({ x: "x", y: "y" }))
+        .geomSmooth({ method: "loess", se: true, n: 20 })
+        .coordTransform({ x: "log10" })
+        .spec(),
+      size,
+    );
+    const ribbon = model.scene.batches.find(
+      (b) => b.kind === "paths" && b.closed === true && b.fills !== undefined,
+    );
+    expect(ribbon?.kind).toBe("paths");
+    if (ribbon?.kind !== "paths") return;
+    expect(ribbon.closedFrameRows).toBeDefined();
+    // Pre-projection semantic verts: closedFrameRows length matches original topology
+    // (semanticIndex maps render → that space after coord).
+    expect(ribbon.closedFrameRows!.length).toBeGreaterThan(0);
+    if (ribbon.semanticIndex !== undefined) {
+      for (const semantic of ribbon.semanticIndex) {
+        expect(semantic).toBeLessThan(ribbon.closedFrameRows!.length);
+      }
+    }
+    // All closedFrameRows index into the smooth evaluation frame (0..n-1).
+    for (const row of ribbon.closedFrameRows!) {
+      expect(row).toBeGreaterThanOrEqual(0);
+      expect(row).toBeLessThan(50);
+    }
+  });
+
   it("smooth with se ribbon emits closed ribbon path under the line", () => {
     const model = runPipeline(
       gg(

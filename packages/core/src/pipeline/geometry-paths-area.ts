@@ -23,14 +23,15 @@ export function areaBatch(
   for (const rows of groupRows) rows.sort((a, b) => sortKey(a) - sortKey(b));
 
   // Draw later-stacked groups first so the first-seen group paints on top.
-  const { positions, rowIndex, pathOffsets, fills, strokes } = writeClosedPathGroups({
-    frame,
-    fx,
-    groupRows,
-    yTop: frame.ymax,
-    yBottom: frame.ymin,
-    fillOf: (rows) => areaGroupFillOf(frame, fill, rows),
-  });
+  const { positions, rowIndex, closedFrameRows, pathOffsets, fills, strokes } =
+    writeClosedPathGroups({
+      frame,
+      fx,
+      groupRows,
+      yTop: frame.ymax,
+      yBottom: frame.ymin,
+      fillOf: (rows) => areaGroupFillOf(frame, fill, rows),
+    });
 
   const params: { alpha?: number } =
     binding.layer.geom === "area" || binding.layer.geom === "density"
@@ -42,6 +43,7 @@ export function areaBatch(
     panelIndex: 0,
     positions,
     rowIndex,
+    closedFrameRows,
     pathOffsets,
     strokes,
     fills,

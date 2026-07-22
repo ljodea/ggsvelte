@@ -134,16 +134,24 @@ export function resolveCandidateFrameRow(input: {
         frameRow = rowsInGroup[Math.min(reflected, rowsInGroup.length - 1)] ?? frameRow;
       }
     } else if (batch.closed === true) {
-      const resolved = resolveClosedBandFrameRow(
-        getClosedBandLayout(frame, orderedGroups),
-        primitiveIndex,
-      );
-      if (resolved === null) {
-        frameRow = Math.min(Math.max(0, primitiveIndex), Math.max(0, frame.n - 1));
+      // Prefer emitted closed-band frame rows (filtered ribbons) when present —
+      // layout from full frame groups mis-reflects after non-finite edge drops (#502).
+      const emitted = batch.closedFrameRows;
+      if (emitted !== undefined && primitiveIndex >= 0 && primitiveIndex < emitted.length) {
+        frameRow = emitted[primitiveIndex]!;
         derivedGroup = frame.groups[frameRow] ?? derivedGroup;
       } else {
-        frameRow = resolved.frameRow;
-        derivedGroup = resolved.derivedGroup;
+        const resolved = resolveClosedBandFrameRow(
+          getClosedBandLayout(frame, orderedGroups),
+          primitiveIndex,
+        );
+        if (resolved === null) {
+          frameRow = Math.min(Math.max(0, primitiveIndex), Math.max(0, frame.n - 1));
+          derivedGroup = frame.groups[frameRow] ?? derivedGroup;
+        } else {
+          frameRow = resolved.frameRow;
+          derivedGroup = resolved.derivedGroup;
+        }
       }
     } else {
       // Open paths: semantic index is the pre-split vertex / frame row.
