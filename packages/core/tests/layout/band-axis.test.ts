@@ -3,7 +3,7 @@
  */
 import { describe, expect, it } from "bun:test";
 
-import { layout, layoutPass } from "../../src/layout/layout.ts";
+import { layout, layoutPass, type Domain } from "../../src/layout/layout.ts";
 import { MODE_RANK, SPANISH, bandX, base, theme } from "./fixtures.ts";
 
 describe("measured band x-axis (planner integration)", () => {
