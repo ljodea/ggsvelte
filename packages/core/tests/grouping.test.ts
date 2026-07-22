@@ -215,6 +215,51 @@ describe("deriveGroups: edge cases", () => {
     expect([...r.groups]).toEqual([]);
   });
 
+  test("zero-row explicit group field yields empty groups and groupCount 0", () => {
+    const r = deriveGroups({ g: [] }, { group: { field: "g" } });
+    expect(r.source).toBe("explicit");
+    expect(r.groupCount).toBe(0);
+    expect([...r.groups]).toEqual([]);
+  });
+
+  test("zero-row derived discrete field yields empty groups and groupCount 0", () => {
+    const r = deriveGroups({ c: [] }, { color: { field: "c" } }, { c: "discrete" });
+    expect(r.source).toBe("derived");
+    expect(r.groupCount).toBe(0);
+    expect([...r.groups]).toEqual([]);
+  });
+
+  /**
+   * groupCount must not be derived via Math.max(...groups): spreading R ids
+   * re-scans every row and can blow the arg-limit (Bun RangeError ~1e6).
+   * Guard Math.max arity so both explicit and derived paths stay safe at 1e5.
+   */
+  test("large-R groupCount avoids Math.max(...groups) on explicit and derived paths", () => {
+    const n = 100_000;
+    const keys = Array.from({ length: n }, (_, i) => `k${i % 11}`);
+    const columns: Columns = { g: keys, c: keys };
+    const originalMax = Math.max;
+    Math.max = ((...args: number[]) => {
+      if (args.length > 1_000) {
+        throw new Error(`Math.max spread over ${String(args.length)} args (groupCount leak)`);
+      }
+      return originalMax(...args);
+    }) as typeof Math.max;
+    try {
+      const explicit = deriveGroups(columns, { group: { field: "g" } });
+      expect(explicit.source).toBe("explicit");
+      expect(explicit.groupCount).toBe(11);
+      expect(explicit.groups.length).toBe(n);
+
+      const derived = deriveGroups(columns, { color: { field: "c" } }, { c: "discrete" });
+      expect(derived.source).toBe("derived");
+      expect(derived.groupCount).toBe(11);
+      expect(derived.groups.length).toBe(n);
+    } finally {
+      Math.max = originalMax;
+    }
+  });
+
   test("unknown field throws", () => {
     expect(() => deriveGroups(table, { x: { field: "nope" } })).toThrow(/unknown field/);
   });
