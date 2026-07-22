@@ -1,10 +1,15 @@
-import { MANUAL_COPY_STATUS } from "./clipboard";
+import { MANUAL_COPY_STATUS, MANUAL_LINK_COPY_STATUS } from "./clipboard";
 import type { PlaygroundDiagnostic } from "./playground-state-types";
 
 export const PLAYGROUND_SVG_DOWNLOADED_STATUS = "SVG downloaded.";
+export const PLAYGROUND_SHARE_COPIED_STATUS = "Share link copied.";
 
 export function playgroundCopyStatus(label: string, result: "copied" | "manual"): string {
   return result === "copied" ? `${label} output copied.` : MANUAL_COPY_STATUS;
+}
+
+export function playgroundShareCopyStatus(result: "copied" | "manual"): string {
+  return result === "copied" ? PLAYGROUND_SHARE_COPIED_STATUS : MANUAL_LINK_COPY_STATUS;
 }
 
 export function playgroundSvgExportFailureStatus(diagnostic: PlaygroundDiagnostic): string {

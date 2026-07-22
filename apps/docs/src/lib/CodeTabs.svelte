@@ -8,8 +8,11 @@
   import CopyIcon from "phosphor-svelte/lib/CopyIcon";
   import Highlight from "svelte-highlight";
 
-  import { copyText, MANUAL_COPY_STATUS } from "$lib/clipboard";
-  import { resolveCodeLanguage } from "$lib/code-languages";
+  import { briefCopyStatus, COPIED_STATUS, copyText } from "$lib/clipboard";
+  import {
+    languageFromCodeTabLabel,
+    resolveCodeLanguage,
+  } from "$lib/code-languages";
   import { nextRovingTabIndex } from "$lib/tab-roving";
 
   interface Tab {
@@ -30,31 +33,17 @@
   const activeTab = $derived(tabs[active]);
   const languageModule = $derived(
     resolveCodeLanguage(
-      activeTab?.language ?? languageFromLabel(activeTab?.label),
+      activeTab?.language ?? languageFromCodeTabLabel(activeTab?.label),
     ),
   );
-  const copied = $derived(copyStatus === "Copied.");
-
-  function languageFromLabel(label: string | undefined): string {
-    if (label === undefined) return "plaintext";
-    const lower = label.toLowerCase();
-    if (lower.includes("svelte")) return "svelte";
-    if (lower.includes("json") || lower.includes("spec")) return "json";
-    if (
-      lower.includes("ts") ||
-      lower.includes("builder") ||
-      lower.includes("type")
-    )
-      return "typescript";
-    return "plaintext";
-  }
+  const copied = $derived(copyStatus === COPIED_STATUS);
 
   async function copy(): Promise<void> {
     const code = tabs[active]?.code ?? "";
     if (codeNode === undefined) return;
     const result = await copyText(code, codeNode);
     clearTimeout(copyTimer);
-    copyStatus = result === "copied" ? "Copied." : MANUAL_COPY_STATUS;
+    copyStatus = briefCopyStatus(result);
     if (result === "copied") {
       copyTimer = setTimeout(() => {
         copyStatus = "";
