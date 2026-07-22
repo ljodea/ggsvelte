@@ -32,13 +32,6 @@ export function bucketByGroup(
   return groupRows.filter((rows) => rows !== undefined && rows.length > 0);
 }
 
-export function xSortKey(frame: LayerFrame, fx: Frame): (row: number) => number {
-  return (row: number) =>
-    fx.xScale.type === "band"
-      ? (fx.xScale.indexOf(frame.xValues?.[row] ?? null) ?? Number.MAX_SAFE_INTEGER)
-      : frame.xNumeric![row]!;
-}
-
 /**
  * Sort each group's row indices by ascending x (path/line/area/smooth).
  *
