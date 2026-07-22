@@ -351,8 +351,11 @@ describe("R0 release wiring", () => {
     expect(job).toContain("bun run test:visual -- vr.spec.ts --workers=1 --update-snapshots");
     // Must not reintroduce the full-suite regenerate command.
     expect(job).not.toMatch(/bun run test:visual -- --workers=1 --update-snapshots/);
-    // Smoke file must stay screenshot-only: non-pixel assertions in vr.spec.ts
-    // still fail regenerate even when scoped to that file (Codex P2 on #531).
+    // approve-regenerate checks out the *approved PR's merge SHA*, which may
+    // still contain the pre-move non-pixel scroll test in vr.spec.ts. Invert
+    // that title so legacy render trees cannot block baseline upload.
+    expect(job).toContain("--grep-invert 'preserves real page scrolling'");
+    // Smoke file on main must stay screenshot-only (Codex P2 on #531).
     const smokeSpec = read("tests/visual/vr.spec.ts");
     expect(smokeSpec).not.toContain("without a golden");
     expect(smokeSpec).not.toContain("preserves real page scrolling");

@@ -323,11 +323,14 @@ jobs:
 
       - name: REGENERATE baselines at the approved merged commit
         # Smoke-only screenshots (tests/visual/vr.spec.ts) — same scope as compare.
-        # Non-snapshot journeys (a11y, docs, playground) and non-pixel assertions
-        # (e.g. scroll/touch-action) live outside this file so a red hard assert
-        # cannot block --update-snapshots / vr-baselines-approved (#421).
+        # Checkout is the *merged render SHA* of the approved PR (security: pin
+        # what gets screenshotted). That tree may predate moving the non-pixel
+        # scroll assert out of vr.spec.ts, so --grep-invert drops that title on
+        # legacy SHAs. Current main already keeps vr.spec screenshot-only (#421).
         # workers=1 matches the compare job — canvas-scatter hydrate is main-thread heavy.
-        run: bun run test:visual -- vr.spec.ts --workers=1 --update-snapshots
+        run: >-
+          bun run test:visual -- vr.spec.ts --workers=1 --update-snapshots
+          --grep-invert 'preserves real page scrolling'
 
       - name: assemble approved-baseline artifact (PNGs + metadata)
         env:
