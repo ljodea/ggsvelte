@@ -2,6 +2,7 @@
 /**
  * Focus-mask types and helpers for canvas mark drawers.
  */
+import { renderPrimitiveCount } from "../candidate-geometry.js";
 import type { GeometryBatch } from "../scene.js";
 import type { BatchInteractionMask } from "../interaction-mask.js";
 
@@ -27,17 +28,7 @@ export function maskIncludes(mask: PrimitiveFocusMask, index: number): boolean {
 
 /** Primitive count for focus-mask address space (paths = subpaths, not vertices). */
 export function batchPrimitiveCount(batch: GeometryBatch): number {
-  switch (batch.kind) {
-    case "points":
-    case "rects":
-    case "segments":
-    case "glyphs":
-      return batch.rowIndex.length;
-    case "paths":
-      return Math.max(0, batch.pathOffsets.length - 1);
-    default:
-      return 0;
-  }
+  return renderPrimitiveCount(batch);
 }
 
 /** True when every addressable primitive is focused (fast path → full drawBatch). */

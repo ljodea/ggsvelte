@@ -2,6 +2,7 @@
  * Mark/batch SVG emitters for the pure renderer.
  * Public: countMarks, pathData. Internal: renderBatch.
  */
+import { renderPrimitiveCount } from "./candidate-geometry.js";
 import type {
   GlyphsBatch,
   PathsBatch,
@@ -16,23 +17,7 @@ import { escapeXML, px } from "./render-svg-format.js";
 
 export function countMarks(scene: Scene): number {
   let marks = 0;
-  for (const batch of scene.batches) {
-    switch (batch.kind) {
-      case "points":
-      case "glyphs":
-        marks += batch.rowIndex.length;
-        break;
-      case "paths":
-        marks += Math.max(0, batch.pathOffsets.length - 1);
-        break;
-      case "rects":
-        marks += batch.rects.length / 4;
-        break;
-      case "segments":
-        marks += batch.segments.length / 4;
-        break;
-    }
-  }
+  for (const batch of scene.batches) marks += renderPrimitiveCount(batch);
   return marks;
 }
 
