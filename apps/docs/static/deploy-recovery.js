@@ -4,18 +4,24 @@
 // then fails dynamic imports and SvelteKit surfaces "500 Internal Error".
 // Vite emits `vite:preloadError` for those misses; one guarded reload pulls
 // the current HTML + matching chunks. Guarded so a real missing asset cannot
-// loop.
+// loop. When sessionStorage is blocked, a query flag still limits to one reload.
 (function () {
   var STORAGE_KEY = "ggsvelte-deploy-recovery-at";
+  var QUERY_FLAG = "ggsvelte_deploy_recovery";
   var COOLDOWN_MS = 15000;
 
   function recentlyReloaded() {
     try {
       var raw = sessionStorage.getItem(STORAGE_KEY);
-      if (raw === null) return false;
-      var previous = Number(raw);
-      if (!Number.isFinite(previous)) return false;
-      return Date.now() - previous < COOLDOWN_MS;
+      if (raw !== null) {
+        var previous = Number(raw);
+        if (Number.isFinite(previous) && Date.now() - previous < COOLDOWN_MS) return true;
+      }
+    } catch {
+      // Storage blocked — fall through to query-flag guard.
+    }
+    try {
+      return new URLSearchParams(location.search).get(QUERY_FLAG) === "1";
     } catch {
       return false;
     }
@@ -24,8 +30,9 @@
   function markReload() {
     try {
       sessionStorage.setItem(STORAGE_KEY, String(Date.now()));
+      return "storage";
     } catch {
-      // Private mode / blocked storage: still attempt a single reload.
+      return "query";
     }
   }
 
@@ -40,13 +47,31 @@
     );
   }
 
+  /**
+   * @returns {boolean} true when a reload was initiated
+   */
   function recover() {
-    if (recentlyReloaded()) return;
-    markReload();
-    location.reload();
+    if (recentlyReloaded()) return false;
+    var mark = markReload();
+    if (mark === "storage") {
+      location.reload();
+      return true;
+    }
+    // Storage blocked: one reload via query flag (survives without sessionStorage).
+    try {
+      var url = new URL(location.href);
+      url.searchParams.set(QUERY_FLAG, "1");
+      location.replace(url.toString());
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   window.addEventListener("vite:preloadError", function (event) {
+    // Only swallow the error when we actually recover; otherwise let Vite/
+    // SvelteKit surface a real missing chunk during the cooldown window.
+    if (recentlyReloaded()) return;
     try {
       event.preventDefault();
     } catch {

@@ -47,25 +47,35 @@ export function evaluateAssetProbe(probe: AssetProbe): string | null {
 
 export type FetchLike = (
   input: string,
-  init?: { redirect?: "manual" | "follow" | "error"; headers?: Record<string, string> },
+  init?: {
+    redirect?: "manual" | "follow" | "error";
+    headers?: Record<string, string>;
+    signal?: AbortSignal;
+  },
 ) => Promise<{
   status: number;
   headers: { get(name: string): string | null };
   text(): Promise<string>;
 }>;
 
+/** Match deployment-smoke-cli: fail fast on stalled edge connections. */
+export const ASSET_SMOKE_FETCH_TIMEOUT_MS = 15_000;
+
 export async function smokeImmutableAssets(input: {
   readonly baseUrl: string;
   readonly paths: readonly string[];
   readonly fetchImpl?: FetchLike;
+  readonly timeoutMs?: number;
 }): Promise<AssetSmokeProblem[]> {
   const origin = new URL(input.baseUrl).origin;
+  const timeoutMs = input.timeoutMs ?? ASSET_SMOKE_FETCH_TIMEOUT_MS;
   const fetchImpl: FetchLike =
     input.fetchImpl ??
     ((url, init) =>
       fetch(url, {
         redirect: init?.redirect,
         headers: init?.headers,
+        signal: init?.signal,
       }));
   const problems: AssetSmokeProblem[] = [];
 
@@ -79,6 +89,7 @@ export async function smokeImmutableAssets(input: {
           "cache-control": "no-cache",
           "user-agent": "ggsvelte-deployment-asset-smoke/1",
         },
+        signal: AbortSignal.timeout(timeoutMs),
       });
       if (response.status !== 200) {
         problems.push({
@@ -111,6 +122,7 @@ export async function smokeImmutableAssets(input: {
             "cache-control": "no-cache",
             "user-agent": "ggsvelte-deployment-asset-smoke/1",
           },
+          signal: AbortSignal.timeout(timeoutMs),
         });
         const probe: AssetProbe = {
           asset,

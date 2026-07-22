@@ -1,6 +1,7 @@
 import { describe, expect, it } from "bun:test";
 
 import {
+  ASSET_SMOKE_FETCH_TIMEOUT_MS,
   evaluateAssetProbe,
   extractImmutableAssets,
   smokeImmutableAssets,
@@ -111,5 +112,36 @@ describe("deployment immutable asset smoke", () => {
       fetchImpl,
     });
     expect(problems).toEqual([]);
+  });
+
+  it("passes an abort signal so stalled edge fetches fail within the smoke timeout", async () => {
+    expect(ASSET_SMOKE_FETCH_TIMEOUT_MS).toBe(15_000);
+    const signals: AbortSignal[] = [];
+    const html = `<link href="./_app/immutable/entry/start.OK.js" rel="modulepreload">`;
+    const fetchImpl: FetchLike = (_input, init) => {
+      if (init?.signal !== undefined) signals.push(init.signal);
+      if (_input.endsWith("/") || _input === "https://example.pages.dev/") {
+        return Promise.resolve({
+          status: 200,
+          headers: { get: () => "text/html" },
+          text: () => Promise.resolve(html),
+        });
+      }
+      return Promise.resolve({
+        status: 200,
+        headers: { get: () => "text/javascript" },
+        text: () => Promise.resolve("export {}"),
+      });
+    };
+
+    await smokeImmutableAssets({
+      baseUrl: "https://example.pages.dev",
+      paths: ["/"],
+      fetchImpl,
+    });
+    expect(signals.length).toBeGreaterThanOrEqual(2);
+    for (const signal of signals) {
+      expect(signal).toBeInstanceOf(AbortSignal);
+    }
   });
 });

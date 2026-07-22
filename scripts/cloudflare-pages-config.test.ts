@@ -89,8 +89,11 @@ describe("Cloudflare Pages project contract", () => {
     expect(workflow).toContain("if: github.ref == 'refs/heads/main'");
     expect(workflow).toContain("ref: ${{ github.sha }}");
     expect(workflow).not.toContain("pull_request:");
-    // Superseded main pushes must not each flip production hashes in sequence.
+    // Superseded builds cancel; deploy/smoke does not cancel mid-flight.
+    expect(workflow).toContain("group: cloudflare-pages-build");
     expect(workflow).toMatch(/cancel-in-progress:\s*true/);
+    expect(workflow).toContain("group: cloudflare-pages-deploy");
+    expect(workflow).toMatch(/cancel-in-progress:\s*false/);
     expect(workflow).toContain("bun scripts/deployment-asset-smoke-cli.ts");
   });
 
@@ -104,6 +107,9 @@ describe("Cloudflare Pages project contract", () => {
     expect(recovery).toContain("vite:preloadError");
     expect(recovery).toContain("Failed to fetch dynamically imported module");
     expect(recovery).toContain("ggsvelte-deploy-recovery-at");
+    // Storage-blocked clients use a query flag; only preventDefault when recovering.
+    expect(recovery).toContain("ggsvelte_deploy_recovery");
+    expect(recovery).toContain("if (recentlyReloaded()) return;");
   });
 
   it("does not keep a GitHub Pages deployment workflow or legacy migration scripts", () => {
