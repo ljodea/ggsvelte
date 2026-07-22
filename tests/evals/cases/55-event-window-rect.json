@@ -1,0 +1,74 @@
+{
+  "id": "55-event-window-rect",
+  "kind": "chart",
+  "prompt": "Draw each maintenance window as a semi-transparent rectangle using start/end time on x and 0..1 on y.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "start",
+        "type": "quantitative"
+      },
+      {
+        "name": "end",
+        "type": "quantitative"
+      },
+      {
+        "name": "lo",
+        "type": "quantitative"
+      },
+      {
+        "name": "hi",
+        "type": "quantitative"
+      }
+    ],
+    "rowCount": 2
+  },
+  "data": {
+    "main": [
+      {
+        "start": 2,
+        "end": 4,
+        "lo": 0,
+        "hi": 1
+      },
+      {
+        "start": 6,
+        "end": 8,
+        "lo": 0,
+        "hi": 1
+      }
+    ]
+  },
+  "gold": {
+    "edition": 2,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "rect",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "ymin": {
+            "field": "lo"
+          },
+          "ymax": {
+            "field": "hi"
+          },
+          "xmin": {
+            "field": "start"
+          },
+          "xmax": {
+            "field": "end"
+          }
+        },
+        "params": {
+          "alpha": 0.4
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "Second rect coverage: edge channels with alpha param."
+}

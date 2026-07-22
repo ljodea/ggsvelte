@@ -1,0 +1,39 @@
+{
+  "id": "59-elevation-raster",
+  "kind": "chart",
+  "prompt": "Show elevation on a regular lon/lat grid using geom raster with fill = elev.",
+  "dataProfile": {
+    "fields": [
+      { "name": "lon", "type": "quantitative" },
+      { "name": "lat", "type": "quantitative" },
+      { "name": "elev", "type": "quantitative" }
+    ],
+    "rowCount": 4
+  },
+  "data": {
+    "main": [
+      { "lon": 10, "lat": 50, "elev": 120 },
+      { "lon": 11, "lat": 50, "elev": 140 },
+      { "lon": 10, "lat": 51, "elev": 90 },
+      { "lon": 11, "lat": 51, "elev": 110 }
+    ]
+  },
+  "gold": {
+    "edition": 2,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "raster",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "lon" },
+          "y": { "field": "lat" },
+          "fill": { "field": "elev" }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "Second raster coverage."
+}

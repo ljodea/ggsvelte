@@ -1469,6 +1469,21 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "tile-nonpositive-size",
+        title: "tile-nonpositive-size",
+        level: 3,
+      },
+      {
+        id: "raster-duplicate-cells",
+        title: "raster-duplicate-cells",
+        level: 3,
+      },
+      {
+        id: "unsupported-param",
+        title: "unsupported-param",
+        level: 3,
+      },
+      {
         id: "invalid-aesthetic-constant",
         title: "invalid-aesthetic-constant",
         level: 3,
@@ -1556,6 +1571,11 @@ export const DOCS_ROUTES = [
       {
         id: "removed-missing",
         title: "removed-missing",
+        level: 3,
+      },
+      {
+        id: "raster-irregular-spacing",
+        title: "raster-irregular-spacing",
         level: 3,
       },
       {
@@ -2003,8 +2023,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-450",
-        title: "experimental (450)",
+        id: "experimental-465",
+        title: "experimental (465)",
         level: 3,
       },
       {
@@ -2043,8 +2063,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-408",
-        title: "experimental (408)",
+        id: "experimental-411",
+        title: "experimental (411)",
         level: 3,
       },
       {
@@ -2509,6 +2529,28 @@ export const DOCS_ROUTES = [
     shell: "site",
   },
   {
+    path: "/examples/raster/grid",
+    title: "Regular density grid (geom raster) — ggsvelte gallery",
+    description:
+      "Equal-cell raster from a regular (x, y) grid with fill — dense heatmaps without per-cell strokes.",
+    canonicalPath: "/examples/raster/grid",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/rect/regions",
+    title: "Shaded time bands (geom rect) — ggsvelte gallery",
+    description:
+      "Arbitrary rectangles from xmin/xmax/ymin/ymax — background time bands or regions without image injection.",
+    canonicalPath: "/examples/rect/regions",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
     path: "/examples/rule/annotation",
     title: "Reference-line annotations — ggsvelte gallery",
     description:
@@ -2547,6 +2589,17 @@ export const DOCS_ROUTES = [
     description:
       "A text layer labels each point from a data field, offset with dy. Labels draw exactly where placed — no collision detection in M1.",
     canonicalPath: "/examples/text/labels",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/tile/heatmap",
+    title: "Categorical heatmap (geom tile) — ggsvelte gallery",
+    description:
+      "Center-sized tiles on discrete x/y with fill — the ordinary heatmap contract without raster grid constraints.",
+    canonicalPath: "/examples/tile/heatmap",
     kind: "page",
     index: true,
     sitemap: true,

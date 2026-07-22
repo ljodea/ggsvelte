@@ -189,6 +189,18 @@ export const GALLERY_PREVIEWS = [
     sha256: "c1de8d1f7a78e15456ee73fd575c57da222648ce8f346bd49e196a5514979058",
   },
   {
+    id: "raster/grid",
+    filename: "raster-grid-light.png",
+    path: "/previews/raster-grid-light.png",
+    sha256: "9bd2fb68d59e75b3a5edecbd5ecb2e3a283bf41659d4962dd0ba4147048f84ba",
+  },
+  {
+    id: "rect/regions",
+    filename: "rect-regions-light.png",
+    path: "/previews/rect-regions-light.png",
+    sha256: "9bd2fb68d59e75b3a5edecbd5ecb2e3a283bf41659d4962dd0ba4147048f84ba",
+  },
+  {
     id: "rule/annotation",
     filename: "rule-annotation-light.png",
     path: "/previews/rule-annotation-light.png",
@@ -211,5 +223,11 @@ export const GALLERY_PREVIEWS = [
     filename: "text-labels-light.png",
     path: "/previews/text-labels-light.png",
     sha256: "517d945fa3196f32dcc93e299761cabb12b168632dce0f82b1e9bce7aa6f15db",
+  },
+  {
+    id: "tile/heatmap",
+    filename: "tile-heatmap-light.png",
+    path: "/previews/tile-heatmap-light.png",
+    sha256: "9bd2fb68d59e75b3a5edecbd5ecb2e3a283bf41659d4962dd0ba4147048f84ba",
   },
 ] as const satisfies readonly GalleryPreview[];

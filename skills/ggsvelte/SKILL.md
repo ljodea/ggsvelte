@@ -22,11 +22,11 @@ spec = data + aes (mappings) + layers[]        one layer = { geom, stat, positio
   `{"value": "red"}` is a constant; `{"stat": "count"}` reads a stat output;
   `null` unsets an inherited channel. **Bare strings are invalid in JSON
   specs** — always `{"field": ...}`. Channels: x, y, color (strokes/points),
-  fill (bars/areas), group, label, weight, ymin, ymax. The schema also reserves
-  mapped size, linewidth, and alpha, but this release does not yet render those
-  field mappings; use geom params for constant styling until that capability lands.
+  fill (bars/areas), group, label, weight, ymin, ymax, xmin, xmax, width, height.
+  Mapped size, linewidth, alpha, shape, and linetype are supported on the geoms
+  that consume them (see STYLE_AESTHETIC_GEOMS).
 - **layers**: drawn in order. Geoms: `point, line, col, bar, histogram, area,
-rule, text, smooth, boxplot, density, errorbar`. Each geom has a default
+rule, text, smooth, boxplot, density, errorbar, rect, tile, raster`. Each geom has a default
   stat/position (bar → count+stack, histogram → bin+stack, col/area →
   identity+stack, boxplot → boxplot+dodge, everything else identity).
 - **stats compute columns**: count→`count`; bin→`count, density, ncount,
