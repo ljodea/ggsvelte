@@ -56,6 +56,10 @@ concurrency:
 env:
   # Keep in sync with: spikes/browser devDependency "playwright" and the
   # `component` job's container image below. The sync is asserted in a step.
+  # Container jobs now pull the prebaked ghcr.io/<repo>/ci-runner:<tag> image
+  # (Playwright + unzip). Bumping this tag requires FIRST rebuilding and
+  # publishing that tag via .github/workflows/build-ci-image.yml — otherwise
+  # every container job fails to pull the (nonexistent) new tag.
   PLAYWRIGHT_CONTAINER_TAG: v1.61.1-noble
 
 jobs:
@@ -443,7 +447,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       # Keep in sync with env.PLAYWRIGHT_CONTAINER_TAG above.
-      image: mcr.microsoft.com/playwright:v1.61.1-noble
+      image: ghcr.io/${{ github.repository }}/ci-runner:v1.61.1-noble
     defaults:
       run:
         # The container's /bin/sh is dash, which rejects `set -o pipefail`.
@@ -454,7 +458,6 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: ./.github/actions/ci-install-unzip
       - uses: ./.github/actions/ci-setup-bun
       - uses: ./.github/actions/ci-content-hash-restore
         id: content_hash
@@ -572,7 +575,7 @@ jobs:
       HOME: /root
     container:
       # Keep in sync with env.PLAYWRIGHT_CONTAINER_TAG above.
-      image: mcr.microsoft.com/playwright:v1.61.1-noble
+      image: ghcr.io/${{ github.repository }}/ci-runner:v1.61.1-noble
     defaults:
       run:
         # The container's /bin/sh is dash, which rejects `set -o pipefail`.
@@ -583,7 +586,6 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: ./.github/actions/ci-install-unzip
       - uses: ./.github/actions/ci-setup-bun
       - uses: ./.github/actions/ci-content-hash-restore
         id: content_hash
@@ -641,7 +643,7 @@ jobs:
       HOME: /root
     container:
       # Keep in sync with env.PLAYWRIGHT_CONTAINER_TAG above.
-      image: mcr.microsoft.com/playwright:v1.61.1-noble
+      image: ghcr.io/${{ github.repository }}/ci-runner:v1.61.1-noble
     defaults:
       run:
         # The container's /bin/sh is dash, which rejects `set -o pipefail`.
@@ -652,7 +654,6 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: ./.github/actions/ci-install-unzip
       - uses: ./.github/actions/ci-setup-bun
       - uses: ./.github/actions/ci-content-hash-restore
         id: content_hash
@@ -712,7 +713,7 @@ jobs:
       HOME: /root
     container:
       # Keep in sync with env.PLAYWRIGHT_CONTAINER_TAG above.
-      image: mcr.microsoft.com/playwright:v1.61.1-noble
+      image: ghcr.io/${{ github.repository }}/ci-runner:v1.61.1-noble
     defaults:
       run:
         # The container's /bin/sh is dash, which rejects `set -o pipefail`.
@@ -723,7 +724,6 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: ./.github/actions/ci-install-unzip
       - uses: ./.github/actions/ci-setup-bun
       - uses: ./.github/actions/ci-content-hash-restore
         id: content_hash
@@ -792,7 +792,7 @@ jobs:
     env:
       HOME: /root
     container:
-      image: mcr.microsoft.com/playwright:v1.61.1-noble
+      image: ghcr.io/${{ github.repository }}/ci-runner:v1.61.1-noble
     defaults:
       run:
         shell: bash
@@ -802,7 +802,6 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: ./.github/actions/ci-install-unzip
       - uses: ./.github/actions/ci-setup-bun
       - uses: ./.github/actions/ci-bun-install
         with:
