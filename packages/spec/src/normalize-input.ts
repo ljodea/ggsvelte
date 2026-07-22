@@ -76,13 +76,29 @@ interface LayerInputBase {
   render?: RenderBackend;
 }
 
+/** Facet field accepted at the TS/builder level (bare-string field shorthand). */
+export type FacetFieldInput =
+  | string
+  | {
+      field: string;
+      /** Closed explicit panel order (DomainValue[]). */
+      levels?: readonly (string | number | boolean | null)[];
+      /** Display-label map keyed by string form of semantic values. */
+      labels?: Readonly<Record<string, string>>;
+    };
+
 /** Facet accepted at the TS/builder level (bare-string field shorthand). */
 export interface FacetInput {
-  wrap?: string | { field: string };
-  rows?: string | { field: string };
-  cols?: string | { field: string };
+  wrap?: FacetFieldInput;
+  rows?: FacetFieldInput;
+  cols?: FacetFieldInput;
   ncol?: number;
   scales?: FacetScales;
+  /** Strip chrome: position (top/bottom/left/right) and visibility. */
+  strip?: {
+    position?: "top" | "bottom" | "left" | "right";
+    show?: boolean;
+  };
 }
 
 export interface PointLayerInput extends LayerInputBase {

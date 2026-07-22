@@ -137,16 +137,55 @@ function renderPanelAxes(panel: ScenePanel, theme: ThemeTokens): string {
   return parts.join("");
 }
 
-/** Facet strip: a subtle band + centered label above the panel. */
+/** Facet strip: band + centered label on the authored side of the panel. */
 function renderStrip(panel: ScenePanel, scene: Scene): string {
-  if (panel.strip === "") return "";
+  if (panel.strip === "" || panel.showStrip === false) return "";
+  const band = panel.stripBand ?? STRIP_BAND;
+  if (band <= 0) return "";
+  const position = panel.stripPosition ?? "top";
   const ink = themeVar("ink", scene.theme);
   const stripFill = themeVar("grid", scene.theme);
-  const top = panel.y - STRIP_BAND;
+  const bandDraw = Math.max(1, band - 2);
+  let originX = panel.x;
+  let originY = panel.y;
+  let rectW = panel.width;
+  let rectH = bandDraw;
+  let textX = panel.width / 2;
+  let textY = bandDraw / 2;
+  let textTransform = "";
+
+  // Layout reserves strip outside the axis margin band (see
+  // panel-layout-facet-cells-place). Renderers place chrome in that reserved
+  // region so strip text does not collide with tick labels.
+  if (position === "top") {
+    originY = panel.y - band;
+  } else if (position === "bottom") {
+    // Below the panel content box; axis ticks/labels sit in the bottom margin
+    // immediately under the panel, then the strip band follows.
+    const axisBand = panel.axisX === null ? 0 : 28;
+    originY = panel.y + panel.height + axisBand;
+  } else if (position === "left") {
+    // Left of the y-axis margin so strip sits outside tick labels.
+    const axisBand = panel.axisY === null ? 0 : 36;
+    originX = panel.x - axisBand - band;
+    rectW = bandDraw;
+    rectH = panel.height;
+    textX = bandDraw / 2;
+    textY = panel.height / 2;
+    textTransform = ` transform="rotate(-90 ${px(textX)} ${px(textY)})"`;
+  } else {
+    originX = panel.x + panel.width;
+    rectW = bandDraw;
+    rectH = panel.height;
+    textX = bandDraw / 2;
+    textY = panel.height / 2;
+    textTransform = ` transform="rotate(90 ${px(textX)} ${px(textY)})"`;
+  }
+
   return (
-    `<g class="gg-strip" transform="translate(${px(panel.x)},${px(top)})">` +
-    `<rect width="${px(panel.width)}" height="${px(STRIP_BAND - 2)}" fill="${stripFill}"/>` +
-    `<text x="${px(panel.width / 2)}" y="${px((STRIP_BAND - 2) / 2)}" dy="0.32em" text-anchor="middle" fill="${ink}" font-size="${px(scene.theme.stripSize)}" font-weight="${scene.theme.stripWeight}">${escapeXML(panel.strip)}</text>` +
+    `<g class="gg-strip" transform="translate(${px(originX)},${px(originY)})">` +
+    `<rect width="${px(rectW)}" height="${px(rectH)}" fill="${stripFill}"/>` +
+    `<text x="${px(textX)}" y="${px(textY)}" dy="0.32em" text-anchor="middle" fill="${ink}" font-size="${px(scene.theme.stripSize)}" font-weight="${scene.theme.stripWeight}"${textTransform}>${escapeXML(panel.strip)}</text>` +
     "</g>"
   );
 }

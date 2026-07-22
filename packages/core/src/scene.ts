@@ -251,8 +251,17 @@ export interface ScenePanel {
   y: number;
   width: number;
   height: number;
-  /** Facet strip label above the panel ("" = no strip). */
+  /** Facet strip display label ("" = unfaceted / no label). */
   strip: string;
+  /**
+   * Where the strip band is reserved and drawn (default "top" when faceted).
+   * Left/right bands use `stripBand` as width; top/bottom as height.
+   */
+  stripPosition?: "top" | "bottom" | "left" | "right";
+  /** Whether strip chrome is drawn (false when `strip.show: false`). */
+  showStrip?: boolean;
+  /** Reserved strip band size in px (0 when hidden). */
+  stripBand?: number;
   /** Original panel allocation before a fixed-aspect data rectangle was fitted. */
   allocation?: { x: number; y: number; width: number; height: number };
   /** Whether renderers clip marks to this panel rectangle (default true). */

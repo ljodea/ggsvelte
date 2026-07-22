@@ -2708,24 +2708,80 @@ export const SpecDeclarations = {
     },
   ),
 
+  FacetFieldRef: Type.Object(
+    {
+      field: Type.String({
+        description: "Name of the data column that partitions facet panels.",
+      }),
+      levels: Type.Optional(
+        Type.Array(Type.Ref("DomainValue"), {
+          minItems: 1,
+          description:
+            "Closed explicit panel order for this facet field. When set, panels appear in this order (including empty panels for levels absent from data). Values observed in data but omitted from levels are dropped from all panels and diagnosed. Omit for the default ascending sort of observed values.",
+        }),
+      ),
+      labels: Type.Optional(
+        Type.Record(Type.String(), Type.String(), {
+          description:
+            'Display-label map for authored facet values (JSON object). Keys are string forms of the semantic values ("west", "1", "true", "null"); values are human-readable strip/accessibility text. Labels never change panel IDs or semantic facet identity. Omit to use bandKey(value) as the strip text.',
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        'Facet field reference with optional closed order and display labels. Example: {"field": "region", "levels": ["west", "east"], "labels": {"west": "West Coast"}}. Bare strings are NOT valid here — normalize() expands "region" to {"field": "region"}.',
+    },
+  ),
+
+  FacetStripSpec: Type.Object(
+    {
+      position: Type.Optional(
+        Type.Union(
+          [
+            Type.Literal("top"),
+            Type.Literal("bottom"),
+            Type.Literal("left"),
+            Type.Literal("right"),
+          ],
+          {
+            description:
+              'Where facet strip bands are reserved and drawn: "top" (default), "bottom", "left", or "right". Left/right strips participate in layout measurement rather than overlaying the panel.',
+          },
+        ),
+      ),
+      show: Type.Optional(
+        Type.Boolean({
+          description:
+            "Whether to reserve and draw strip bands (default true). Set false when direct labels are authored elsewhere; panel identity and authored display labels remain available to accessibility and interaction consumers.",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        'Facet strip chrome: position and visibility. Defaults: position "top", show true. Example: {"position": "left"} or {"show": false}.',
+    },
+  ),
+
   FacetSpec: Type.Object(
     {
       wrap: Type.Optional(
-        Type.Ref("FieldRef", {
+        Type.Ref("FacetFieldRef", {
           description:
-            "Facet WRAP form: partition rows by this data field's distinct values, one panel per value, wrapped into a grid ncol wide (ggplot2's facet_wrap). Mutually exclusive with rows/cols.",
+            "Facet WRAP form: partition rows by this data field's distinct values, one panel per value, wrapped into a grid ncol wide (ggplot2's facet_wrap). Mutually exclusive with rows/cols. Optional levels/labels control order and strip text.",
         }),
       ),
       rows: Type.Optional(
-        Type.Ref("FieldRef", {
+        Type.Ref("FacetFieldRef", {
           description:
-            "Facet GRID form: the field whose distinct values become grid rows (ggplot2's facet_grid rows). Combine with cols; mutually exclusive with wrap.",
+            "Facet GRID form: the field whose distinct values become grid rows (ggplot2's facet_grid rows). Combine with cols; mutually exclusive with wrap. Optional levels/labels control order and strip text.",
         }),
       ),
       cols: Type.Optional(
-        Type.Ref("FieldRef", {
+        Type.Ref("FacetFieldRef", {
           description:
-            "Facet GRID form: the field whose distinct values become grid columns (ggplot2's facet_grid cols). Combine with rows; mutually exclusive with wrap.",
+            "Facet GRID form: the field whose distinct values become grid columns (ggplot2's facet_grid cols). Combine with rows; mutually exclusive with wrap. Optional levels/labels control order and strip text.",
         }),
       ),
       ncol: Type.Optional(
@@ -2736,11 +2792,12 @@ export const SpecDeclarations = {
         }),
       ),
       scales: Type.Optional(Type.Ref("FacetScales")),
+      strip: Type.Optional(Type.Ref("FacetStripSpec")),
     },
     {
       additionalProperties: false,
       description:
-        "Facet the plot into small-multiple panels. Wrap form: set `wrap` (+ optional ncol). Grid form: set `rows` and/or `cols`. Panels partition the data BEFORE stats and positions run (each panel computes its own counts, bins, stacks). Panel values sort ascending; null values form their own panel.",
+        "Facet the plot into small-multiple panels. Wrap form: set `wrap` (+ optional ncol). Grid form: set `rows` and/or `cols`. Panels partition the data BEFORE stats and positions run (each panel computes its own counts, bins, stacks). By default panel values sort ascending and strips sit on top; set field `levels`/`labels` and `strip.position`/`strip.show` for authored order, display text, and strip placement. Null values form their own panel when observed (or when listed in levels).",
     },
   ),
 

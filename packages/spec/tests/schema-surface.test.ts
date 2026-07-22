@@ -29,6 +29,8 @@ const VALUE_EXPORTS = [
   "RasterLayerSchema",
   "RibbonLayerSchema",
   "SegmentLayerSchema",
+  "FacetFieldRefSchema",
+  "FacetStripSpecSchema",
   "FacetSpecSchema",
   "GEOM_DEFAULTS",
   "HistogramLayerSchema",

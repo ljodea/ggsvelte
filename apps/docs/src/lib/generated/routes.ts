@@ -2073,8 +2073,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-503",
-        title: "experimental (503)",
+        id: "experimental-508",
+        title: "experimental (508)",
         level: 3,
       },
       {
@@ -2407,6 +2407,17 @@ export const DOCS_ROUTES = [
     description:
       "The summary stat computes mean ± standard error per group (ggplot2's mean_se default), drawn as errorbars over the seeded-jitter raw observations.",
     canonicalPath: "/examples/errorbar/mean-se",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/facet/ordered-side-strips",
+    title: "Ordered small multiples with side strips — ggsvelte gallery",
+    description:
+      'facet.wrap.levels locks a closed west→midwest→south→northeast panel order independent of row order; labels supply human strip text; strip.position: "left" reserves a measured band beside each panel instead of above it.',
+    canonicalPath: "/examples/facet/ordered-side-strips",
     kind: "page",
     index: true,
     sitemap: true,

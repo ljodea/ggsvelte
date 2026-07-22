@@ -348,6 +348,18 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "FacetFieldInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "FacetFieldRef": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "FacetFieldRefSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "FacetInput": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -361,6 +373,14 @@
           "lifecycle": "experimental"
         },
         "FacetSpecSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "FacetStripSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "FacetStripSpecSchema": {
           "kind": "value",
           "lifecycle": "experimental"
         },

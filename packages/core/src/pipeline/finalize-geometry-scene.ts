@@ -72,6 +72,8 @@ export function finalizeGeometryAndScene(input: {
     height: options.height,
     placements: panelLayout.placements,
     facetPanels,
+    strip: panelLayout.strip,
+    stripBand: panelLayout.stripBand,
     displayScales: panelLayout.displayScales,
     hTitle: panelLayout.hTitle,
     vTitle: panelLayout.vTitle,

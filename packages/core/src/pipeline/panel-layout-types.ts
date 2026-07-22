@@ -43,6 +43,10 @@ export interface PanelLayoutResult {
   legendBlock: ReturnType<typeof buildLegends>;
   guidePlans: readonly AxisGuidePlan[];
   degraded: boolean;
+  /** Facet strip chrome resolved for this layout (defaults when unfaceted). */
+  strip: import("./facets-types.js").FacetStripConfig;
+  /** Measured strip band size in px (0 when hidden / unfaceted). */
+  stripBand: number;
 }
 
 export type DisplayScalesFn = (p: number) => { h: PositionScale; v: PositionScale };

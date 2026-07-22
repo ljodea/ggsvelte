@@ -63,6 +63,7 @@ export type {
   ColLayerInput,
   DensityLayerInput,
   ErrorbarLayerInput,
+  FacetFieldInput,
   FacetInput,
   HistogramLayerInput,
   RibbonLayerInput,
@@ -171,20 +172,44 @@ function normalizeLayer(layer: LayerInput, plotAes: Aes | undefined): LayerSpec 
   return out as LayerSpec;
 }
 
-const fieldRef = (v: string | { field: string } | undefined) =>
-  v === undefined ? undefined : typeof v === "string" ? { field: v } : { field: v.field };
+/** Canonicalize one facet field: bare string -> { field }; clone levels/labels. */
+function normalizeFacetField(v: FacetInput["wrap"]): FacetSpec["wrap"] | undefined {
+  if (v === undefined) return undefined;
+  if (typeof v === "string") return { field: v };
+  const levels =
+    v.levels === undefined
+      ? undefined
+      : ([...v.levels] as NonNullable<FacetSpec["wrap"]>["levels"]);
+  const labels = v.labels === undefined ? undefined : { ...v.labels };
+  return {
+    field: v.field,
+    ...(levels !== undefined && { levels }),
+    ...(labels !== undefined && { labels }),
+  };
+}
+
+/** Canonicalize facet strip chrome (position + show). */
+function normalizeFacetStrip(strip: NonNullable<FacetInput["strip"]>): FacetSpec["strip"] {
+  const out: NonNullable<FacetSpec["strip"]> = {
+    ...(strip.position !== undefined && { position: strip.position }),
+    ...(strip.show !== undefined && { show: strip.show }),
+  };
+  return out;
+}
 
 /** Canonicalize a facet input: bare-string fields -> { field }. */
 function normalizeFacet(facet: FacetInput): FacetSpec {
-  const wrap = fieldRef(facet.wrap);
-  const rows = fieldRef(facet.rows);
-  const cols = fieldRef(facet.cols);
+  const wrap = normalizeFacetField(facet.wrap);
+  const rows = normalizeFacetField(facet.rows);
+  const cols = normalizeFacetField(facet.cols);
+  const strip = facet.strip === undefined ? undefined : normalizeFacetStrip(facet.strip);
   return {
     ...(wrap !== undefined && { wrap }),
     ...(rows !== undefined && { rows }),
     ...(cols !== undefined && { cols }),
     ...(facet.ncol !== undefined && { ncol: facet.ncol }),
     ...(facet.scales !== undefined && { scales: facet.scales }),
+    ...(strip !== undefined && Object.keys(strip).length > 0 && { strip }),
   };
 }
 
