@@ -53,7 +53,58 @@ describe("drawStratum focus presentation", () => {
       focusMasks: [Uint8Array.from({ length: count }, (_, index) => (index % 10 === 0 ? 1 : 0))],
     });
 
-    expect(calls.filter((call) => call.name === "fill").length).toBeLessThanOrEqual(4);
+    // Focused indices are 0,10,20,… (all even → red only). Muted has both
+    // colors. Global first-seen order is red→blue within each multi-color pass.
+    expect(calls.filter((call) => call.name === "fill").map((c) => c.fillStyle)).toEqual([
+      "red",
+      "blue",
+      "red",
+    ]);
+    expect(calls.filter((call) => call.name === "arc")).toHaveLength(count);
+  });
+
+  it("keeps global first-seen color order when the first color is muted-only", () => {
+    // colors: red (index 0, muted), blue (1, focused), red (2, focused).
+    // Global first-seen is still red→blue even though the focused pass only
+    // draws blue then red indices — paint order must not flip to blue→red.
+    const colored: PointsBatch = {
+      ...points,
+      positions: Float32Array.from([0, 0, 1, 1, 2, 2]),
+      rowIndex: Uint32Array.from([0, 1, 2]),
+      colors: ["red", "blue", "red"],
+    };
+    const { ctx, calls } = recordingContext();
+    drawStratum(ctx, scene([colored]), [colored], resolve, {
+      focusMasks: [Uint8Array.from([0, 1, 1])],
+      mutedAlpha: 0.25,
+    });
+    const focusedFills = calls.filter((call) => call.name === "fill" && call.alpha === 0.8);
+    expect(focusedFills.map((c) => c.fillStyle)).toEqual(["red", "blue"]);
+    const focusedArcs = calls.filter((call) => call.name === "arc" && call.alpha === 0.8);
+    // red index 2 (x=2) then blue index 1 (x=1) — order follows color groups, not index.
+    expect(focusedArcs.map((c) => c.args[0])).toEqual([2, 1]);
+  });
+
+  it("falls back to run-length when more than 64 global colors are present", () => {
+    // Mixed mask so drawPointsSubset (not the all-focused fast path) runs.
+    const count = 70;
+    const colored: PointsBatch = {
+      ...points,
+      positions: Float32Array.from(
+        Array.from({ length: count }, (_, index) => [index, index]).flat(),
+      ),
+      rowIndex: Uint32Array.from({ length: count }, (_, index) => index),
+      colors: Array.from({ length: count }, (_, index) => `c${index}`),
+    };
+    const mask = Uint8Array.from({ length: count }, (_, index) => (index % 2 === 0 ? 1 : 0));
+    const { ctx, calls } = recordingContext();
+    drawStratum(ctx, scene([colored]), [colored], resolve, {
+      focusMasks: [mask],
+      mutedAlpha: 0.25,
+    });
+    // Unique color per point → each included point is its own run → one fill
+    // per included primitive across muted + focused passes (= count).
+    expect(calls.filter((call) => call.name === "fill").length).toBe(count);
     expect(calls.filter((call) => call.name === "arc")).toHaveLength(count);
   });
 

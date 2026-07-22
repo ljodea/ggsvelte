@@ -13,6 +13,7 @@ export interface RecordedCall {
   name: string;
   args: number[];
   alpha: number;
+  fillStyle: string;
   strokeStyle: string;
   lineWidth: number;
 }
@@ -52,6 +53,7 @@ export function recordingContext(): { ctx: CanvasRenderingContext2D; calls: Reco
             name: property,
             args,
             alpha: object.globalAlpha,
+            fillStyle: String(object.fillStyle),
             strokeStyle: object.strokeStyle,
             lineWidth: object.lineWidth,
           });
