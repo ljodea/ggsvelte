@@ -2,6 +2,7 @@
  * Tick derivation for one layout measurement pass: band (measured + legacy),
  * temporal guides, linear / log10 / sqrt continuous ticks, and explicit breaks.
  */
+import { encodeKey } from "../scales/state.js";
 import type { CellValue } from "../table.js";
 import type { AxisGuidePlan } from "./temporal-guide.js";
 import { planTemporalAxis } from "./temporal-guide.js";
@@ -16,6 +17,46 @@ import {
 } from "./ticks.js";
 import { defaultTimeTickFormat, timeTicks } from "./time.js";
 import type { BandLayoutDomainContext, Domain, Tick, TickFormatter } from "./layout-types.js";
+
+/**
+ * First-occurrence domain index by discrete identity (`encodeKey`, same as
+ * trainBand.indexOf). O(D) build, O(1) lookup — replaces O(K·D) findIndex over
+ * rawCategories for each explicit break.
+ */
+export function firstDomainIndexByEncodeKey(
+  rawCategories: readonly unknown[],
+): (value: unknown) => number {
+  const indexByKey = new Map<string, number>();
+  for (let index = 0; index < rawCategories.length; index++) {
+    const key = encodeKey(rawCategories[index]);
+    if (!indexByKey.has(key)) indexByKey.set(key, index);
+  }
+  return (value: unknown): number => {
+    try {
+      return indexByKey.get(encodeKey(value)) ?? -1;
+    } catch {
+      return -1;
+    }
+  };
+}
+
+/** Resolve band tick entries: full domain or break-filtered domainIndex list. */
+function resolveBandEntries(
+  domain: Extract<Domain, { type: "band" }>,
+): { value: string | number; domainIndex: number }[] {
+  const rawCategories = domain.rawCategories ?? domain.categories;
+  if (domain.breaks === undefined) {
+    return domain.categories.map((value, domainIndex) => ({ value, domainIndex }));
+  }
+  const domainIndexOf = firstDomainIndexByEncodeKey(rawCategories);
+  const entries: { value: string | number; domainIndex: number }[] = [];
+  for (const value of domain.breaks) {
+    const domainIndex = domainIndexOf(value);
+    if (domainIndex < 0) continue;
+    entries.push({ value, domainIndex });
+  }
+  return entries;
+}
 
 export interface AxisTicks {
   ticks: Tick[];
@@ -107,21 +148,13 @@ export function deriveTicks(
 ): AxisTicks {
   if (domain.type === "band") {
     const rawCategories = domain.rawCategories ?? domain.categories;
+    // Resolve break-filtered (or full-domain) entries once for both the measured
+    // horizontal planner and the legacy vertical path — O(D+K) via encodeKey map.
+    const resolved = resolveBandEntries(domain);
     // Measured planner: horizontal band axes with a planning context only (G1).
     // Vertical band (native Y, or categorical-on-Y after coord_flip) falls through
     // to the legacy thin/truncate path.
     if (domain.band !== undefined && context.orient === "horizontal") {
-      // Resolve break-filtered entries with the same identity match as the
-      // legacy path (breaks are typed raw values → match rawCategories).
-      const resolved =
-        domain.breaks === undefined
-          ? domain.categories.map((value, domainIndex) => ({ value, domainIndex }))
-          : domain.breaks
-              .map((value) => ({
-                value,
-                domainIndex: rawCategories.findIndex((category) => Object.is(category, value)),
-              }))
-              .filter(({ domainIndex }) => domainIndex >= 0);
       const plan = planBandAxis({
         aesthetic: domain.band.aesthetic,
         panelIndex: domain.band.panelIndex,
@@ -168,22 +201,13 @@ export function deriveTicks(
         bandLabelEvery: plan.labelEvery,
       };
     }
-    const entries =
-      domain.breaks === undefined
-        ? domain.categories.map((value, domainIndex) => ({ value, domainIndex }))
-        : domain.breaks
-            .map((value) => ({
-              value,
-              domainIndex: rawCategories.findIndex((category) => Object.is(category, value)),
-            }))
-            .filter(({ domainIndex }) => domainIndex >= 0);
-    const ticks = entries.map(({ value, domainIndex }, index) => ({
+    const ticks = resolved.map(({ value, domainIndex }, index) => ({
       value,
       label: format ? format(value, NaN) : String(value),
       domainIndex,
       labeled: index % labelEvery === 0,
     }));
-    return { ticks, step: NaN, empty: entries.length === 0 };
+    return { ticks, step: NaN, empty: resolved.length === 0 };
   }
   const { min, max } = domain;
   if (!Number.isFinite(min) || !Number.isFinite(max)) {
