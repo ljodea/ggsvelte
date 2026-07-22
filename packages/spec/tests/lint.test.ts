@@ -130,6 +130,38 @@ describe("many-discrete-colors", () => {
   it("silent at exactly 10", () => {
     expect(lintSpec(spec(10))).toEqual([]);
   });
+
+  /**
+   * Characterization for distinct-count memoization: shared fields must still
+   * emit one advisory per layer/channel path with the same count, while the
+   * column is scanned once underneath.
+   */
+  it("emits per-layer advisories for a shared high-cardinality color field", () => {
+    const g = categories(12);
+    const advisories = lintSpec({
+      data: { columns: { x: g.map((_, i) => i), g } },
+      aes: { x: { field: "x" }, y: { field: "x" }, color: { field: "g" } },
+      layers: [{ geom: "point" }, { geom: "line" }],
+    }).filter((a) => a.code === "many-discrete-colors");
+    expect(advisories).toHaveLength(2);
+    expect(advisories.map((a) => a.path)).toEqual(["/layers/0/aes/color", "/layers/1/aes/color"]);
+    expect(advisories.every((a) => a.message.includes("12 distinct"))).toBe(true);
+  });
+
+  it("reuses plot-aes color and still fires for color and fill on the same field", () => {
+    const g = categories(15);
+    const advisories = lintSpec({
+      data: { columns: { x: g.map((_, i) => i), g } },
+      aes: { x: { field: "x" }, y: { field: "x" }, color: { field: "g" }, fill: { field: "g" } },
+      layers: [{ geom: "point" }, { geom: "col", aes: { x: { field: "x" }, y: { field: "x" } } }],
+    }).filter((a) => a.code === "many-discrete-colors");
+    // Two layers × color (inherited) + fill (plot aes) on first layer only when
+    // fill is mapped: point and col both inherit color; both inherit fill.
+    expect(advisories.length).toBeGreaterThanOrEqual(2);
+    expect(advisories.every((a) => a.message.includes("15 distinct"))).toBe(true);
+    expect(advisories.some((a) => a.path.endsWith("/color"))).toBe(true);
+    expect(advisories.some((a) => a.path.endsWith("/fill"))).toBe(true);
+  });
 });
 
 describe("transform-domain-data", () => {
