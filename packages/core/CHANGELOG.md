@@ -1,5 +1,230 @@
 # @ggsvelte/core
 
+## 0.7.1
+
+### Patch Changes
+
+- 42b031a: <!-- markdownlint-disable MD041 -->
+
+  perf: O(K) band thinning overlap after one pos-sort
+
+  Rotated band label thinning sorts projections once per angle then reuses the
+  sorted list (filter by every-k). neighbourOverlap accepts alreadySorted for
+  temporal re-checks.
+
+- c4d6b6c: <!-- markdownlint-disable MD041 -->
+
+  perf: O(K·D)→O(K+D) band break domainIndex via encodeKey map
+
+  Explicit band scale breaks resolve domain indices with a first-occurrence
+  `encodeKey` map (trainBand identity), including signed zero and typed 1/"1".
+  Band break lists are also deduped in O(K) in layoutDomain.
+
+- bbe65c7: <!-- markdownlint-disable MD041 -->
+
+  feat: author `scales.*.guide` pins for band axis label layout
+
+  Optional `{ mode, angle, wrap }` on position scales locks categorical label
+  presentation (single / wrap / rotate / off) instead of auto-escalation.
+  Advisories now point at `scales.x.guide` as the howToOverride surface.
+
+- dc6c3fe: <!-- markdownlint-disable MD041 -->
+
+  perf: one measureWidth per rotated band tick for height and overhang
+
+  Rotated categorical axes measure each labeled tick once and reuse the width
+  for both label-band height and end-anchored overhang.
+
+- 7181580: <!-- markdownlint-disable MD041 -->
+
+  perf: reuse band-axis wrap lines and widths on emit
+
+  Wrapped categorical axes wrap and measure each label once, then reuse the
+  cached lines/widths for overlap, side reserve, and tick emission.
+
+- 7f38860: <!-- markdownlint-disable MD041 -->
+
+  perf: Θ(R·B)→Θ(R) binned rect edges via xBinId
+
+  Identity/count bar-col geometry on `type: "binned"` recovers bin edges from the
+  stable integer `xBinId` (frame construction) instead of per-row
+  `centers.findIndex` scans (B ≤ MAX_BINNED_BREAKS).
+
+- b349179: <!-- markdownlint-disable MD041 -->
+
+  refactor: extract candidate nearest-nav helpers
+
+  Move closestOrthInRange / directionalNearestInOrder / panelRangeInOrder into
+  candidate-geometry-nearest.ts. Re-exports keep existing import paths working.
+
+- f66f44b: <!-- markdownlint-disable MD041 -->
+
+  perf: O(C·n)→O(n) canvas point subset color batching
+
+  Masked multi-color point draws bucket included indices by global first-seen
+  color in one pass instead of re-scanning the batch for each of up to 64 colors.
+
+- 1fa684e: <!-- markdownlint-disable MD041 -->
+
+  fix: closed ribbons map coord semantic indices via emitted frame rows
+
+  Area/density/smooth closed bands attach `closedFrameRows` for each
+  pre-projection vertex so candidate frame-row resolve survives non-finite edge
+  filtering under `coordTransform`.
+
+- c422da0: <!-- markdownlint-disable MD041 -->
+
+  refactor: split candidate spatial shortlist indexes from geometry refine
+
+- a2c8da0: <!-- markdownlint-disable MD041 -->
+
+  refactor: split non-position color families into manual, identity, and binned modules
+
+- 94fdbec: <!-- markdownlint-disable MD041 -->
+
+  refactor: split scale training into continuous, band, and color modules
+
+- 6261ee1: <!-- markdownlint-disable MD041 -->
+
+  refactor: extract bin break grids and co-locate stats R-parity suites
+
+- f1b4a3d: <!-- markdownlint-disable MD041 -->
+
+  refactor: split temporal preflight into field, annotation, and shared modules
+
+- 8b9e95d: <!-- markdownlint-disable MD041 -->
+
+  perf: prealloc typed buffers for errorbar segment emit
+
+  Errorbars fill Float32Array/Uint32Array sized to 3 segments per row;
+  dense reuses capacity-n buffers, sparse slices — no number[] +
+  Float32Array.from double-copy.
+
+- d591a18: <!-- markdownlint-disable MD041 -->
+
+  perf: prealloc typed buffers for geom_text glyphs emit
+
+  emitGlyphRows sizes Float32/Uint32 buffers to frame.n (like points/rects)
+  and compacts only when marks are dropped — no number[] + Float32Array.from.
+
+- 774f6de: <!-- markdownlint-disable MD041 -->
+
+  perf: deriveGroups groupCount from Map size (no Math.max spread)
+
+  Explicit and derived grouping return groupCount as the canonical Map size
+  after the O(R) pass, avoiding a second full-array Math.max(...groups) that
+  can RangeError on large row counts.
+
+- ddc3cd8: <!-- markdownlint-disable MD041 -->
+
+  refactor: modularize identity candidate datum resolver
+
+  Split locate, series, and shared types out of datum.ts; keep a thin factory
+  plus lineage/attribute assembly. Public re-exports preserve test import paths.
+
+- dbdec68: <!-- markdownlint-disable MD041 -->
+
+  perf: O(L)→O(log L) legend label measures via shared truncateToFit
+
+  Discrete and steps legend entries truncate with binary-search keep length
+  (same helper as axes/band guides), not a reverse linear measure scan.
+
+- 80905dd: <!-- markdownlint-disable MD041 -->
+
+  perf: O(R) band path x-sort keys (not per-comparator indexOf)
+
+  line/area/smooth group sorts materialize band domain ranks once, then
+  compare O(1); continuous x still sorts on `xNumeric` directly.
+
+- 616bcc6: <!-- markdownlint-disable MD041 -->
+
+  fix: geom_col/bar hover uses relative de-emphasis instead of a point ring
+
+  Rect mark inspection no longer draws a circle hover/selection ring at the bar
+  anchor. Sibling bars de-emphasize via interaction masks (including keyless
+  charts via seed primitive focus). Point-like geoms keep circle chrome.
+
+- 328ac7d: <!-- markdownlint-disable MD041 -->
+
+  perf: prealloc rect emit buffers; single-pass grid major/minor split
+
+  `emitRectRows` writes into preallocated Float32Array/Uint32Array (dense no-copy;
+  sparse compact). Scene panel grid positions collect major/minor in one tick pass.
+
+- 5cebbab: <!-- markdownlint-disable MD041 -->
+
+  perf: unique-first resolution() O(R+U log U) for jitter/errorbar/bar width
+
+  `resolution()` dedupes finite values before sorting so multiset columns cost
+  O(R + U log U). Continuous geom_col bar width reuses the helper (gap 0 → 1).
+
+- eeffbb6: <!-- markdownlint-disable MD041 -->
+
+  perf: prealloc typed buffers for rule segment emit
+
+  Data and annotation rule segments fill Float32Array/Uint32Array sized to
+  max mark count; dense reuses buffers, sparse compact slices — no number[]
+
+  - Float32Array.from double-copy.
+
+- b278811: <!-- markdownlint-disable MD041 -->
+
+  perf: O(1) summary/boxplot group×x lineage resolve via finite-y prefilter
+
+  Build-time group×x buckets for summary/boxplot now store only finite-y source
+  rows (with empty buckets when every y is non-finite), so candidate resolve
+  returns the shared frozen array without per-mark y re-filtering or full-group
+  clones. Count buckets are unchanged.
+
+- 1428eb2: <!-- markdownlint-disable MD041 -->
+
+  perf: skip per-group sort in stat_summary mean_se path
+
+  `statSummary` only sorts (group,x) buckets when median is requested. Default
+  mean_se and min/max/sum stay O(n) per combination.
+
+- eeb5ce0: <!-- markdownlint-disable MD041 -->
+
+  perf: O(P·B)→O(P+B) SVG panel batch routing via shared groupBatchesByPanel
+
+  Faceted pure-SVG renders no longer re-scan every geometry batch for each panel.
+  `groupBatchesByPanel` (issue #185) is pure and shared with the canvas stratum path.
+
+- 4e4ec5b: <!-- markdownlint-disable MD041 -->
+
+  perf: O(log L) ellipsis truncation via shared binary search
+
+  `truncateToFit` binary-searches keep length (O(log L) measureWidth) and is
+  shared by continuous layout and band-axis planners.
+
+- 1f94c1c: <!-- markdownlint-disable MD041 -->
+
+  fix: train uncensored natural baseline when scale domain pins censor
+
+  `runPipeline` with `baselineScales` and explicit x/y domains now trains
+  baseline domains from a second prepare/train pass without domain pins, so
+  zoom-out references match full data extent (Svelte double-pass parity).
+
+- Updated dependencies [bbe65c7]
+- Updated dependencies [4e5b875]
+- Updated dependencies [3f16ec8]
+- Updated dependencies [e6d5f6f]
+- Updated dependencies [72b01ee]
+- Updated dependencies [6afccdc]
+- Updated dependencies [c4f91d0]
+- Updated dependencies [29f0565]
+- Updated dependencies [1fed2f3]
+- Updated dependencies [9a366cf]
+- Updated dependencies [ec7f21b]
+- Updated dependencies [a54932c]
+- Updated dependencies [d1f69cb]
+- Updated dependencies [9affbb6]
+- Updated dependencies [571721f]
+- Updated dependencies [f5a8919]
+- Updated dependencies [09e6954]
+- Updated dependencies [3231dc7]
+  - @ggsvelte/spec@0.7.1
+
 ## 0.7.0
 
 ### Minor Changes

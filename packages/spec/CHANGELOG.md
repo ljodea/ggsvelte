@@ -1,5 +1,85 @@
 # @ggsvelte/spec
 
+## 0.7.1
+
+### Patch Changes
+
+- bbe65c7: <!-- markdownlint-disable MD041 -->
+
+  feat: author `scales.*.guide` pins for band axis label layout
+
+  Optional `{ mode, angle, wrap }` on position scales locks categorical label
+  presentation (single / wrap / rotate / off) instead of auto-escalation.
+  Advisories now point at `scales.x.guide` as the howToOverride surface.
+
+- 4e5b875: <!-- markdownlint-disable MD041 -->
+
+  Extract builder authoring data conversion into builder-data.ts and split the long temporal scale API tests into schema vs authoring files. Public builder exports are unchanged.
+
+- 3f16ec8: <!-- markdownlint-disable MD041 -->
+
+  Extract fluent builder geom option types and scale sugar into focused modules, and split position-scale schema vs helper tests. Public gg()/GGBuilder API is unchanged.
+
+- e6d5f6f: <!-- markdownlint-disable MD041 -->
+
+  Extract the pure LINT_CATALOG into lint-catalog.ts (error-catalog pattern) and split the long lint test suite into rules vs wiring files. Public lint imports are unchanged.
+
+- 72b01ee: <!-- markdownlint-disable MD041 -->
+
+  Split lintSpec into layer and scale rule modules, guard schema-invalid scale entries so lint never throws, and keep catalog source-scan coverage multi-file. Public lintSpec behavior is otherwise unchanged.
+
+- 6afccdc: <!-- markdownlint-disable MD041 -->
+
+  Split normalize scale and coordinate canonicalization into dedicated modules behind the existing normalize() entry. Public normalize/normalizeChannel exports and behavior are unchanged.
+
+- c4f91d0: <!-- markdownlint-disable MD041 -->
+
+  Split strict portability checks from lossy tooling conversion, with co-located tests. Public isPortable/toPortable/toPortableLossy surface is unchanged.
+
+- 29f0565: <!-- markdownlint-disable MD041 -->
+
+  Split scale authoring helpers into position and color modules with a thin facade, and split the long tier-2 validate suite by concern. Public scale-helper import paths and validation behavior are unchanged.
+
+- 1fed2f3: <!-- markdownlint-disable MD041 -->
+
+  Split temporal guides into interval grammar/labels and tick generation behind a stable temporal-guides facade. Public package exports and interval tick behavior are unchanged.
+
+- 9a366cf: <!-- markdownlint-disable MD041 -->
+
+  Split value-level temporal parsing into core, exact-format, and named-engine modules, and co-locate format plus tier-2 temporal scale tests. Public parseTemporal surface is unchanged.
+
+- ec7f21b: <!-- markdownlint-disable MD041 -->
+
+  Split temporal parsing into parse engines, column inference, and a thin authoring facade so domain edits do not require reading the full module. Public package exports and `./temporal.js` re-exports are unchanged.
+
+- a54932c: <!-- markdownlint-disable MD041 -->
+
+  Split the long temporal characterization suite into parse, column, and helpers test files co-located with the temporal production modules. No runtime behavior change.
+
+- d1f69cb: <!-- markdownlint-disable MD041 -->
+
+  Split tier-2 dataChecks into position, color, and shared temporal modules, and co-locate color data-aware validation tests. Public validate() behavior is unchanged.
+
+- 9affbb6: <!-- markdownlint-disable MD041 -->
+
+  Split tier-1 TypeBox error mapping into schema/path walk helpers and the agent SpecError mapper. Public validate() surface and error messages are unchanged.
+
+- 571721f: <!-- markdownlint-disable MD041 -->
+
+  Extract channel/DataRef form classification from the TypeBox error mapper and split temporal decision-reuse tier-2 tests into their own file. Public validate() behavior is unchanged.
+
+- f5a8919: <!-- markdownlint-disable MD041 -->
+
+  Split TypeBox path-group error mapping into union classification and keyword handlers. Public validate() agent diagnostics are unchanged.
+
+- 09e6954: <!-- markdownlint-disable MD041 -->
+
+  Extract tier-1 schema shape walks into a focused module with shared GEOM_BRANCHES, and co-locate temporal tier-2 tests with decision-reuse vs position-scale production modules. Public validate() behavior is unchanged.
+
+- 3231dc7: <!-- markdownlint-disable MD041 -->
+
+  Split data-free structural validation into layer, color-scheme, and facet modules behind a stable validate-structure barrel. Public validate() behavior is unchanged.
+
 ## 0.7.0
 
 ### Minor Changes
