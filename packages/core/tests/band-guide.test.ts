@@ -49,6 +49,28 @@ describe("planBandAxis: escalation ladder", () => {
     expect(p.labelBandHeight).toBeGreaterThan(measurer.measureHeight(11));
   });
 
+  it("reuses wrap lines and widths (no second wrap/measure pass on emit)", () => {
+    // Pre-fix re-wrapped every label for tick emission and re-measured line
+    // widths for overlap + side reserve (~41 measureWidth calls). Cached path
+    // stays well under that for the same fixture.
+    let measureWidthCalls = 0;
+    const counting = {
+      measureWidth: (text: string, fontSizePx: number) => {
+        measureWidthCalls++;
+        return measurer.measureWidth(text, fontSizePx);
+      },
+      measureHeight: (fontSizePx: number) => measurer.measureHeight(fontSizePx),
+    };
+    const p = plan(
+      ["Resolución", "Corrección (errores o erratas)", "Sentencia", "Orden", "Otro"],
+      480,
+      { measurer: counting },
+    );
+    expect(p.mode).toBe("wrapped");
+    expect(measureWidthCalls).toBeLessThanOrEqual(30);
+    expect(measureWidthCalls).toBeGreaterThan(0);
+  });
+
   it("rotates long labels rather than dropping any category", () => {
     // Same labels at 240px (band ≈ 48px): "Corrección" alone exceeds the band, so
     // wrapping is impossible — escalate to rotation, still labelling every bar.

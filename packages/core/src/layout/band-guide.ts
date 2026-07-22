@@ -233,10 +233,10 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
 
   const buildTicks = (
     every: number,
-    build: (entry: Entry) => Pick<BandTick, "label" | "lines" | "angle">,
+    build: (entry: Entry, index: number) => Pick<BandTick, "label" | "lines" | "angle">,
   ): BandTick[] =>
     entries.map((entry, i) => {
-      const enriched = build(entry);
+      const enriched = build(entry, i);
       return {
         value: entry.value,
         label: enriched.label,
@@ -294,16 +294,19 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
 
   // --- wrapped (≤ MAX_WRAP_LINES) ---
   if (floor <= MODE_RANK.wrapped) {
+    // Wrap once per entry; reuse lines + measured widths for overlap, side
+    // reserve, and tick emission (avoid re-wrap + re-measure on the emit path).
     const wrapped = entries.map((e) =>
       wrapLabel(e.label, bandBudget, measurer, fontSize, MAX_WRAP_LINES),
     );
-    if (wrapped.every((w) => w !== null)) {
-      const lineWidth = (lines: string[]) =>
-        Math.max(...lines.map((l) => measurer.measureWidth(l, fontSize)));
-      const maxLines = Math.max(...wrapped.map((w) => (w ?? []).length));
+    if (wrapped.every((w): w is string[] => w !== null)) {
+      const lineWidths = wrapped.map((lines) =>
+        Math.max(...lines.map((l) => measurer.measureWidth(l, fontSize))),
+      );
+      const maxLines = Math.max(...wrapped.map((w) => w.length));
       const blockHeight = maxLines * lineHeight;
       const wrapOverlap = neighbourOverlap(
-        entries.map((e, i) => ({ pos: e.center, half: lineWidth(wrapped[i]!) / 2 })),
+        entries.map((e, i) => ({ pos: e.center, half: lineWidths[i]! / 2 })),
         gap,
       );
       if (!wrapOverlap && blockHeight <= orthoCap) {
@@ -311,15 +314,15 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
         let wrapLeft = 0;
         let wrapRight = 0;
         for (let i = 0; i < entries.length; i++) {
-          const half = lineWidth(wrapped[i]!) / 2;
+          const half = lineWidths[i]! / 2;
           wrapLeft = Math.max(wrapLeft, half - entries[i]!.center);
           wrapRight = Math.max(wrapRight, half - (extentPx - entries[i]!.center));
         }
         return {
           mode: "wrapped",
           angle: 0,
-          ticks: buildTicks(1, (e) => {
-            const lines = wrapLabel(e.label, bandBudget, measurer, fontSize, MAX_WRAP_LINES)!;
+          ticks: buildTicks(1, (_e, i) => {
+            const lines = wrapped[i]!;
             return { label: lines.join(" "), lines };
           }),
           labelEvery: 1,
