@@ -770,4 +770,114 @@ describe("complete mapped style plumbing", () => {
       ),
     ).toThrow(expect.objectContaining({ code: "unsupported-geom-aesthetic" }));
   });
+
+  it("routes null to naValue and out-of-domain to unknownValue with warnings", () => {
+    const model = runPipeline(
+      fromAny({
+        data: {
+          values: [
+            { x: 1, y: 1, amount: 10 },
+            { x: 2, y: 2, amount: null },
+            { x: 3, y: 3, amount: 200 },
+          ],
+        },
+        aes: { x: { field: "x" }, y: { field: "y" }, size: { field: "amount" } },
+        layers: [{ geom: "point" }],
+        scales: {
+          size: {
+            type: "sequential",
+            domain: [0, 100],
+            range: [2, 10],
+            naValue: 1,
+            unknownValue: 99,
+          },
+        },
+      }),
+      viewport,
+    );
+    const points = model.scene.batches.find((batch) => batch.kind === "points");
+    if (points?.kind !== "points") throw new Error("expected points");
+    // size interpolates by area: sqrt(2^2 + 0.1*(10^2-2^2)) = sqrt(13.6) in-range;
+    // null -> naValue (1); 200 is OOB -> unknownValue (99).
+    expect([...points.sizes!]).toEqual([Math.fround(Math.sqrt(13.6)), 1, 99]);
+    expect(model.warnings.some((warning) => warning.code === "style-na-values")).toBe(true);
+    expect(model.warnings.some((warning) => warning.code === "style-unknown-values")).toBe(true);
+  });
+
+  it("clamps out-of-domain values under oob squish without an unknown warning", () => {
+    const model = runPipeline(
+      fromAny({
+        data: {
+          values: [
+            { x: 1, y: 1, amount: 10 },
+            { x: 2, y: 2, amount: 200 },
+          ],
+        },
+        aes: { x: { field: "x" }, y: { field: "y" }, size: { field: "amount" } },
+        layers: [{ geom: "point" }],
+        scales: { size: { type: "sequential", domain: [0, 100], range: [2, 10], oob: "squish" } },
+      }),
+      viewport,
+    );
+    const points = model.scene.batches.find((batch) => batch.kind === "points");
+    if (points?.kind !== "points") throw new Error("expected points");
+    // 200 clamps to the domain max (100) -> range max (10) rather than the unknown style.
+    expect([...points.sizes!]).toEqual([Math.fround(Math.sqrt(13.6)), 10]);
+    expect(model.warnings.some((warning) => warning.code === "style-unknown-values")).toBe(false);
+  });
+
+  it("cycles finite shapes past the palette when onExhaust is cycle", () => {
+    const model = runPipeline(
+      fromAny({
+        data: {
+          values: Array.from({ length: 7 }, (_, index) => ({
+            x: index,
+            y: index,
+            group: `g${index}`,
+          })),
+        },
+        aes: { x: { field: "x" }, y: { field: "y" }, shape: { field: "group" } },
+        layers: [{ geom: "point" }],
+        scales: { shape: { type: "ordinal", onExhaust: "cycle" } },
+      }),
+      viewport,
+    );
+    const points = model.scene.batches.find((batch) => batch.kind === "points");
+    if (points?.kind !== "points") throw new Error("expected points");
+    // Six named symbols; the seventh group wraps to the first instead of throwing.
+    expect([...points.shapeIndexes!]).toEqual([0, 1, 2, 3, 4, 5, 0]);
+  });
+
+  it("rejects a binned domain that disagrees with its boundaries", () => {
+    expect(() =>
+      runPipeline(
+        fromAny({
+          data: { values: [{ x: 1, y: 1, amount: 3 }] },
+          aes: { x: { field: "x" }, y: { field: "y" }, size: { field: "amount" } },
+          layers: [{ geom: "point" }],
+          scales: { size: { type: "binned", domain: [0, 50], breaks: [0, 5, 10], range: [2, 6] } },
+        }),
+        viewport,
+      ),
+    ).toThrow(expect.objectContaining({ code: "style-domain-invalid" }));
+  });
+
+  it("fails deterministically when temporal style values cannot be parsed", () => {
+    expect(() =>
+      runPipeline(
+        fromAny({
+          data: {
+            values: [
+              { x: 1, y: 1, when: "2024-01-01" },
+              { x: 2, y: 2, when: "not-a-date" },
+            ],
+          },
+          aes: { x: { field: "x" }, y: { field: "y" }, size: { field: "when" } },
+          layers: [{ geom: "point" }],
+          scales: { size: { type: "sequential", temporalKind: "date", parse: "ymd" } },
+        }),
+        viewport,
+      ),
+    ).toThrow(expect.objectContaining({ code: "style-temporal-parse" }));
+  });
 });

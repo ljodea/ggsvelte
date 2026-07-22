@@ -44,6 +44,8 @@
         entry.color === "#999999"
           ? ink
           : entry.color}
+      <!-- Shape key geometry must match core's pointShape() so SSR/pure-SVG
+           and hydrated Svelte legend keys render identical proportions. -->
       {#if entry.shape === "square"}
         <rect
           class="gg-legend-key gg-shape-square"
@@ -75,7 +77,7 @@
         )}
         <path
           class="gg-legend-key gg-shape-triangle"
-          d={`M${keyX} ${keyCenterY - r}L${keyX + r} ${keyCenterY + r * 0.8}L${keyX - r} ${keyCenterY + r * 0.8}Z`}
+          d={`M${keyX} ${keyCenterY - r * 1.2}L${keyX + r * 1.1} ${keyCenterY + r * 0.9}L${keyX - r * 1.1} ${keyCenterY + r * 0.9}Z`}
           fill={keyColor}
           opacity={entry.alpha}
         />
@@ -86,7 +88,7 @@
         )}
         <path
           class="gg-legend-key gg-shape-diamond"
-          d={`M${keyX} ${keyCenterY - r}L${keyX + r} ${keyCenterY}L${keyX} ${keyCenterY + r}L${keyX - r} ${keyCenterY}Z`}
+          d={`M${keyX} ${keyCenterY - r * 1.25}L${keyX + r} ${keyCenterY}L${keyX} ${keyCenterY + r * 1.25}L${keyX - r} ${keyCenterY}Z`}
           fill={keyColor}
           opacity={entry.alpha}
         />
@@ -99,7 +101,7 @@
           class={`gg-legend-key gg-shape-${entry.shape}`}
           d={entry.shape === "plus"
             ? `M${keyX - r} ${keyCenterY}H${keyX + r}M${keyX} ${keyCenterY - r}V${keyCenterY + r}`
-            : `M${keyX - r} ${keyCenterY - r}L${keyX + r} ${keyCenterY + r}M${keyX + r} ${keyCenterY - r}L${keyX - r} ${keyCenterY + r}`}
+            : `M${keyX - r * 0.75} ${keyCenterY - r * 0.75}L${keyX + r * 0.75} ${keyCenterY + r * 0.75}M${keyX + r * 0.75} ${keyCenterY - r * 0.75}L${keyX - r * 0.75} ${keyCenterY + r * 0.75}`}
           fill="none"
           stroke={keyColor}
           stroke-width={Math.max(1, r / 2)}

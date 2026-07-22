@@ -24,6 +24,7 @@ import {
 import { finiteExtent } from "../scales/train.js";
 import type { CellValue, ColumnTable } from "../table.js";
 
+import { styleFrameValues } from "./geometry-style.js";
 import { resolveStyleLegendFormat } from "./scale-color-sequential-format.js";
 import type { StyleResolution } from "./scale-style-types.js";
 import { resolveNumericStyleValueView, type NumericStyleConfig } from "./scale-style-values.js";
@@ -50,23 +51,6 @@ const NUMERIC_DEFAULT_CONSTANT: Record<NumericStyleAesthetic, number> = {
   alpha: 1,
 };
 
-function frameValues(frame: LayerFrame, aesthetic: StyleAesthetic): LayerFrame["sizeValues"] {
-  switch (aesthetic) {
-    case "size":
-      return frame.sizeValues;
-    case "linewidth":
-      return frame.linewidthValues;
-    case "alpha":
-      return frame.alphaValues;
-    case "shape":
-      return frame.shapeValues;
-    case "linetype":
-      return frame.linetypeValues;
-    default:
-      return null;
-  }
-}
-
 function bindingOf(binding: LayerBinding, aesthetic: StyleAesthetic) {
   return binding[aesthetic];
 }
@@ -84,7 +68,7 @@ function collectValues(input: {
   let anyDiscrete = false;
   for (const frame of frames) {
     const binding = bindingOf(frame.binding, aesthetic);
-    const mapped = frameValues(frame, aesthetic);
+    const mapped = styleFrameValues(frame, aesthetic);
     if ((binding.field !== null || binding.statColumn !== null) && mapped !== null) {
       anyField = true;
       if (

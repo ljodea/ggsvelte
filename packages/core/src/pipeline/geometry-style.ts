@@ -6,7 +6,12 @@ import type { LayerFrame } from "./types.js";
 
 export type ResolvedStyleScales = Readonly<Record<StyleAesthetic, ResolvedStyleScale | null>>;
 
-function valuesOf(frame: LayerFrame, aesthetic: StyleAesthetic): LayerFrame["sizeValues"] {
+/** Resolve a frame's per-row value column for a style aesthetic. Shared by the
+ *  scale trainer (scale-style.ts) and geometry so both read the same columns. */
+export function styleFrameValues(
+  frame: LayerFrame,
+  aesthetic: StyleAesthetic,
+): LayerFrame["sizeValues"] {
   switch (aesthetic) {
     case "size":
       return frame.sizeValues;
@@ -33,7 +38,7 @@ export function mappedStyleOutput(
   if (binding.constant !== null) return binding.constant as StyleOutput;
   const resolved = scales[aesthetic];
   if (resolved === null) return undefined;
-  const values = valuesOf(frame, aesthetic);
+  const values = styleFrameValues(frame, aesthetic);
   const value = values === null ? binding.scaledConstant : values[row];
   return value === null || value === undefined
     ? binding.scaledConstant === null && values === null
