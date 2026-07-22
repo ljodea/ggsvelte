@@ -47,7 +47,7 @@ describe("SMOKE_SCENARIOS inventory", () => {
       "line-multi-series-light.png",
       "bar-stacked-light.png",
       "area-basic-light.png",
-      "histogram-basic-light.png",
+      "col-long-labels-light.png",
       "facet-wrap-light.png",
       "point-canvas-scatter-light.png",
       "smooth-loess-scatter-light.png",

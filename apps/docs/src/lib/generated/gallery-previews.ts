@@ -57,6 +57,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "b93353b71db8277b10af4928daf33dff918ed39a0facde19c0b40b08a1ee4e9a",
   },
   {
+    id: "col/long-labels",
+    filename: "col-long-labels-light.png",
+    path: "/previews/col-long-labels-light.png",
+    sha256: "4d63c11fe0772ec0397c07320444f6ab589cfe5a5522f5658003be4246fb64e4",
+  },
+  {
     id: "col/value-labels",
     filename: "col-value-labels-light.png",
     path: "/previews/col-value-labels-light.png",

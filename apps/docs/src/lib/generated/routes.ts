@@ -2122,6 +2122,17 @@ export const DOCS_ROUTES = [
     shell: "site",
   },
   {
+    path: "/examples/col/long-labels",
+    title: "Columns with long i18n category labels — ggsvelte gallery",
+    description:
+      "Narrow (480px) column chart with long Spanish multi-word and German single-token category labels — exercises measured band-axis wrap/rotate/truncate layout.",
+    canonicalPath: "/examples/col/long-labels",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
     path: "/examples/col/value-labels",
     title: "Columns with value labels — ggsvelte gallery",
     description:

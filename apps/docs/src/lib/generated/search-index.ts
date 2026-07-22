@@ -3383,6 +3383,24 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Column chart"],
   },
   {
+    id: "example:col:long-labels",
+    kind: "example",
+    title: "Columns with long i18n category labels",
+    summary:
+      "Narrow (480px) column chart with long Spanish multi-word and German single-token category labels — exercises measured band-axis wrap/rotate/truncate layout.",
+    href: "/examples/col/long-labels",
+    keywords: [
+      "Columns with long i18n category labels",
+      "Bars & columns",
+      "col",
+      "band",
+      "labels",
+      "i18n",
+      "vr",
+    ],
+    exact: ["Columns with long i18n category labels"],
+  },
+  {
     id: "example:col:value-labels",
     kind: "example",
     title: "Columns with value labels",

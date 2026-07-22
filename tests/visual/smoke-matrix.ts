@@ -74,7 +74,8 @@ export const SMOKE_SCENARIOS: readonly SmokeScenario[] = [
   example("line/multi-series", "light"),
   example("bar/stacked", "light"),
   example("area/basic", "light"),
-  example("histogram/basic", "light"),
+  // Replaces histogram/basic — locks measured band wrap/rotate pixels (#406).
+  example("col/long-labels", "light"),
   example("facet/wrap", "light"),
   example("point/canvas-scatter", "light"),
   example("smooth/loess-scatter", "light"),
