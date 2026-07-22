@@ -45,7 +45,8 @@ function mockIo(over: Partial<DetectChangesIo> = {}): DetectChangesIo & {
     logs,
     outputs,
     commandExists: () => false,
-    findLastSuccessfulMainHead: () => undefined,
+    // Empty string = no last-ok (same branch as undefined in the driver).
+    findLastSuccessfulMainHead: () => "",
     gitFetchDepth1: () => {},
     gitCommitExists: () => true,
     gitDiffNameStatus: () => [],
