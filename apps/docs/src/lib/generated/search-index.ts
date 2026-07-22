@@ -3412,14 +3412,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/core"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-247",
+    id: "heading:guide-lifecycle:experimental-249",
     kind: "heading",
-    title: "experimental (247)",
+    title: "experimental (249)",
     summary:
-      "experimental (247) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-247",
+      "experimental (249) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-249",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (247)"],
+    exact: ["experimental (249)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-2",
@@ -9423,6 +9423,15 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["LegendValueMembership"],
   },
   {
+    id: "api:ggsvelte-core:LetterboxRect",
+    kind: "api",
+    title: "LetterboxRect",
+    summary: "@ggsvelte/core · type · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core",
+    keywords: ["@ggsvelte/core", ".", "type", "experimental"],
+    exact: ["LetterboxRect"],
+  },
+  {
     id: "api:ggsvelte-core:LineageRef",
     kind: "api",
     title: "LineageRef",
@@ -10564,6 +10573,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-core",
     keywords: ["@ggsvelte/core", ".", "value", "experimental"],
     exact: ["legendValueEqual"],
+  },
+  {
+    id: "api:ggsvelte-core:letterboxGutterRects",
+    kind: "api",
+    title: "letterboxGutterRects",
+    summary: "@ggsvelte/core · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core",
+    keywords: ["@ggsvelte/core", ".", "value", "experimental"],
+    exact: ["letterboxGutterRects"],
   },
   {
     id: "api:ggsvelte-core:linearTicks",
