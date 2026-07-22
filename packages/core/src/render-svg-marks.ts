@@ -124,9 +124,24 @@ function renderPaths(batch: PathsBatch, theme: ThemeTokens): string {
     if (isArea) {
       const fill = batch.fills![s] ?? themeVar("accent", theme);
       const alpha = batch.alphas?.[s];
-      parts.push(
-        `<path d="${d}" fill="${fill}" stroke="none"${alpha === undefined ? "" : alphaAttr(alpha)}/>`,
-      );
+      const strokeColor = batch.strokes[s];
+      const linewidth = batch.linewidths?.[s] ?? batch.linewidth;
+      const strokeActive = strokeColor !== null && strokeColor !== undefined && linewidth > 0;
+      if (strokeActive) {
+        const linetype =
+          batch.linetypeIndexes === undefined
+            ? (batch.linetype ?? "solid")
+            : LINETYPE_NAMES[batch.linetypeIndexes[s]!]!;
+        const linejoin = batch.linejoin ?? "round";
+        const linecap = batch.linecap ?? "round";
+        parts.push(
+          `<path d="${d}" fill="${fill}" stroke="${strokeColor}" stroke-width="${px(linewidth)}"${dashAttr(linetype)}${alpha === undefined ? "" : alphaAttr(alpha)} stroke-linejoin="${linejoin}" stroke-linecap="${linecap}"/>`,
+        );
+      } else {
+        parts.push(
+          `<path d="${d}" fill="${fill}" stroke="none"${alpha === undefined ? "" : alphaAttr(alpha)}/>`,
+        );
+      }
     } else {
       const stroke = batch.strokes[s] ?? themeVar("ink", theme);
       const linewidth = batch.linewidths?.[s] ?? batch.linewidth;
@@ -135,8 +150,10 @@ function renderPaths(batch: PathsBatch, theme: ThemeTokens): string {
         batch.linetypeIndexes === undefined
           ? (batch.linetype ?? "solid")
           : LINETYPE_NAMES[batch.linetypeIndexes[s]!]!;
+      const linejoin = batch.linejoin ?? "round";
+      const linecap = batch.linecap ?? "round";
       parts.push(
-        `<path d="${d}" fill="none" stroke="${stroke}" stroke-width="${px(linewidth)}"${dashAttr(linetype)}${alpha === undefined ? "" : alphaAttr(alpha)} stroke-linejoin="round" stroke-linecap="round"/>`,
+        `<path d="${d}" fill="none" stroke="${stroke}" stroke-width="${px(linewidth)}"${dashAttr(linetype)}${alpha === undefined ? "" : alphaAttr(alpha)} stroke-linejoin="${linejoin}" stroke-linecap="${linecap}"/>`,
       );
     }
   }

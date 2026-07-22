@@ -10,6 +10,7 @@ import type {
   ColParams,
   DensityParams,
   ErrorbarParams,
+  RibbonParams,
   LineParams,
   PointParams,
   PointPosition,
@@ -80,6 +81,12 @@ export interface GeomErrorbarOptions extends ErrorbarParams {
   aes?: AesInput;
   render?: RenderBackend;
   stat?: "identity" | "summary";
+}
+
+/** Ribbon-layer sugar options: params plus an optional layer-level aes. */
+export interface GeomRibbonOptions extends RibbonParams {
+  aes?: AesInput;
+  render?: RenderBackend;
 }
 
 /** Area-layer sugar options: params plus aes and a position override. */

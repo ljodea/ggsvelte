@@ -15,6 +15,7 @@ import {
   segmentsBatch,
 } from "./geometry-marks.js";
 import { boxplotBatches, errorbarBatch, smoothBatches } from "./geometry-composites.js";
+import { ribbonBatches } from "./geometry-ribbon.js";
 
 function single(batch: GeometryBatch | null): GeometryBatch[] {
   return batch === null ? [] : [batch];
@@ -39,6 +40,8 @@ export function dispatchGeometryBatch(
     case "area":
     case "density":
       return single(areaBatch(frame, fx, fill, styles, warnings));
+    case "ribbon":
+      return ribbonBatches(frame, fx, color, fill, styles, warnings);
     case "rule":
       return single(segmentsBatch(frame, fx, color, styles, warnings));
     case "text":

@@ -14,6 +14,7 @@ import type {
   GeomColOptions,
   GeomDensityOptions,
   GeomErrorbarOptions,
+  GeomRibbonOptions,
   GeomHistogramOptions,
   GeomLineOptions,
   GeomPointOptions,
@@ -167,6 +168,14 @@ export class GGBuilderCore {
    */
   geomErrorbar(options: GeomErrorbarOptions = {}): GGBuilder {
     return this.layer(layerFrom("errorbar", options));
+  }
+
+  /**
+   * Sugar for .layer({ geom: 'ribbon', ... }). Map x+ymin+ymax (or y+xmin+xmax
+   * for y orientation) to precomputed interval bounds.
+   */
+  geomRibbon(options: GeomRibbonOptions = {}): GGBuilder {
+    return this.layer(layerFrom("ribbon", options));
   }
 
   /**

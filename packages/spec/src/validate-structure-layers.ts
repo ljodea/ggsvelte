@@ -30,6 +30,7 @@ const REQUIRED_CHANNELS: Record<string, ChannelName[]> = {
   boxplot: ["x", "y"],
   density: ["x"],
   errorbar: ["x"], // ymin/ymax vs y are stat-dependent, checked separately
+  ribbon: [], // orientation-dependent; checked separately
 };
 
 function hasIntercepts(layer: Record<string, unknown>): boolean {
@@ -183,6 +184,70 @@ export function layerStructuralErrors(
             example: { [channel]: CHANNEL_FIX_EXAMPLE },
           },
         });
+      }
+    }
+  }
+
+  if (geom === "ribbon") {
+    const params = isRecord(layer["params"]) ? layer["params"] : {};
+    const pinned =
+      params["orientation"] === "x" || params["orientation"] === "y"
+        ? (params["orientation"] as "x" | "y")
+        : null;
+    const xContract =
+      mapped("x") !== undefined && mapped("ymin") !== undefined && mapped("ymax") !== undefined;
+    const yContract =
+      mapped("y") !== undefined && mapped("xmin") !== undefined && mapped("xmax") !== undefined;
+    let orientation: "x" | "y" | null = pinned;
+    if (orientation === null) {
+      if (xContract && !yContract) orientation = "x";
+      else if (yContract && !xContract) orientation = "y";
+      else if (xContract && yContract) {
+        errors.push({
+          code: "ribbon-orientation-ambiguous",
+          path: `${layerPath}/params/orientation`,
+          message:
+            'This ribbon layer maps both x-orientation (x+ymin+ymax) and y-orientation (y+xmin+xmax) contracts. Set params.orientation to "x" or "y".',
+          fix: {
+            description: "Pin orientation explicitly.",
+            example: { params: { orientation: "x" } },
+          },
+        });
+      } else {
+        // Prefer documenting the x-orientation contract when nothing is mapped.
+        const needed: ChannelName[] =
+          mapped("y") !== undefined || mapped("xmin") !== undefined || mapped("xmax") !== undefined
+            ? (["y", "xmin", "xmax"] as ChannelName[])
+            : (["x", "ymin", "ymax"] as ChannelName[]);
+        for (const channel of needed) {
+          if (mapped(channel) === undefined) {
+            errors.push({
+              code: "missing-required-channel",
+              path: `${layerPath}/aes/${channel}`,
+              message: `The ribbon geom requires a "${channel}" channel for its interval contract; map it in the layer's aes or the plot-level aes.`,
+              fix: {
+                description: `Map "${channel}" to a data field.`,
+                example: { [channel]: CHANNEL_FIX_EXAMPLE },
+              },
+            });
+          }
+        }
+      }
+    } else {
+      const needed: ChannelName[] =
+        orientation === "x" ? ["x", "ymin", "ymax"] : ["y", "xmin", "xmax"];
+      for (const channel of needed) {
+        if (mapped(channel) === undefined) {
+          errors.push({
+            code: "missing-required-channel",
+            path: `${layerPath}/aes/${channel}`,
+            message: `The ribbon geom with orientation "${orientation}" requires a "${channel}" channel; map it in the layer's aes or the plot-level aes.`,
+            fix: {
+              description: `Map "${channel}" to a data field.`,
+              example: { [channel]: CHANNEL_FIX_EXAMPLE },
+            },
+          });
+        }
       }
     }
   }

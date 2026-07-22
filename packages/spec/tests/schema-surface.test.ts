@@ -24,6 +24,7 @@ const VALUE_EXPORTS = [
   "DataRefSchema",
   "DensityLayerSchema",
   "ErrorbarLayerSchema",
+  "RibbonLayerSchema",
   "FacetSpecSchema",
   "GEOM_DEFAULTS",
   "HistogramLayerSchema",

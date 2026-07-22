@@ -39,6 +39,7 @@ export function renderPrimitiveCount(batch: GeometryBatch): number {
 }
 
 export function isCandidatePrimitive(batch: GeometryBatch, primitiveIndex: number): boolean {
+  if (batch.kind === "paths" && batch.candidates === false) return false;
   return batch.kind !== "paths" || batch.semanticAnchors?.[primitiveIndex] !== 0;
 }
 

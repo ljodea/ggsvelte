@@ -103,6 +103,24 @@ const TRIGGERS: Record<SpecErrorCode, Trigger> = {
     },
     options: {},
   },
+  "ribbon-orientation-ambiguous": {
+    spec: {
+      layers: [
+        {
+          geom: "ribbon",
+          aes: {
+            x: { field: "x" },
+            y: { field: "y" },
+            ymin: { field: "ymin" },
+            ymax: { field: "ymax" },
+            xmin: { field: "xmin" },
+            xmax: { field: "xmax" },
+          },
+        },
+      ],
+    },
+    options: {},
+  },
   "unknown-field": {
     spec: { data: xy, layers: [{ geom: "point", aes: { x: { field: "xx" }, y: { field: "y" } } }] },
     options: {},

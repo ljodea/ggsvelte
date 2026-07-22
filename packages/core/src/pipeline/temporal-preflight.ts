@@ -49,7 +49,9 @@ export function preflightTemporalBindings(input: {
     const concrete = new Map<string, PositionConversionContext>();
     for (const binding of bindings) {
       const fields =
-        axis === "x" ? [binding.xField] : [binding.yField, binding.yminField, binding.ymaxField];
+        axis === "x"
+          ? [binding.xField, binding.xminField, binding.xmaxField]
+          : [binding.yField, binding.yminField, binding.ymaxField];
       const conversion = axis === "x" ? binding.xConversion : binding.yConversion;
       if (fields.some((field) => field !== null) && conversion.parser !== "auto") {
         concrete.set(JSON.stringify(conversion), conversion);

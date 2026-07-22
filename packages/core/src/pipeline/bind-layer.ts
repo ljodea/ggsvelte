@@ -81,6 +81,11 @@ export function bindLayer(
     yConversion: conversions.y,
     yminField: position.yminField,
     ymaxField: position.ymaxField,
+    xminField: position.xminField,
+    xmaxField: position.xmaxField,
+    ...(position.ribbonOrientation !== undefined && {
+      ribbonOrientation: position.ribbonOrientation,
+    }),
     color: extras.color,
     fill: extras.fill,
     size: extras.size,

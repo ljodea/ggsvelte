@@ -14,8 +14,24 @@ export function assertRequiredChannels(input: {
   yStatColumn: string | null;
   yminField: string | null;
   ymaxField: string | null;
+  xminField?: string | null;
+  xmaxField?: string | null;
+  ribbonOrientation?: "x" | "y";
 }): void {
-  const { geom, stat, index, ruleForm, xField, yField, yStatColumn, yminField, ymaxField } = input;
+  const {
+    geom,
+    stat,
+    index,
+    ruleForm,
+    xField,
+    yField,
+    yStatColumn,
+    yminField,
+    ymaxField,
+    xminField = null,
+    xmaxField = null,
+    ribbonOrientation,
+  } = input;
 
   if (
     geom === "point" ||
@@ -37,6 +53,18 @@ export function assertRequiredChannels(input: {
     } else {
       requireField(yminField, "ymin", index, geom);
       requireField(ymaxField, "ymax", index, geom);
+    }
+  }
+  if (geom === "ribbon") {
+    const orientation = ribbonOrientation ?? "x";
+    if (orientation === "x") {
+      requireField(xField, "x", index, geom);
+      requireField(yminField, "ymin", index, geom);
+      requireField(ymaxField, "ymax", index, geom);
+    } else {
+      requireField(yField, "y", index, geom);
+      requireField(xminField, "xmin", index, geom);
+      requireField(xmaxField, "xmax", index, geom);
     }
   }
   if (geom === "rule" && ruleForm === "vertical") requireField(xField, "x", index, geom);
