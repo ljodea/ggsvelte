@@ -1695,46 +1695,14 @@
               "description": "Explicit minor gridline positions in semantic source units. Coincident major/minor values render only the major tick. Time scales use dateMinorBreaks instead."
             },
             "guide": {
-              "type": "object",
-              "properties": {
-                "mode": {
-                  "anyOf": [
-                    {
-                      "type": "string",
-                      "const": "auto"
-                    },
-                    {
-                      "type": "string",
-                      "const": "single"
-                    },
-                    {
-                      "type": "string",
-                      "const": "wrap"
-                    },
-                    {
-                      "type": "string",
-                      "const": "rotate"
-                    },
-                    {
-                      "type": "string",
-                      "const": "off"
-                    }
-                  ],
-                  "description": "Band (categorical) axis label layout: \"auto\" (default — escalate single→wrap→rotate→truncate), \"single\", \"wrap\", \"rotate\", or \"off\" (hide labels). Continuous axes ignore this field."
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/GuideSpec"
                 },
-                "angle": {
-                  "type": "number",
-                  "description": "Rotation in degrees for band labels when mode is \"rotate\" (or when auto escalates to rotation). Typical values: -45 or -90. Continuous axes ignore this field."
-                },
-                "wrap": {
-                  "type": "number",
-                  "minimum": 1,
-                  "maximum": 8,
-                  "description": "Maximum wrapped lines per band label when mode is \"wrap\" (or when auto wraps). Default 2. Continuous axes ignore this field."
+                {
+                  "$ref": "#/$defs/BandAxisGuideSpec"
                 }
-              },
-              "additionalProperties": false,
-              "description": "Optional band-axis label layout override (mirrors ggplot2 guide_axis(angle=) / discrete label wrap). Only horizontal band axes honor these fields; omit for measured auto layout."
+              ]
             }
           },
           "additionalProperties": false,
@@ -2017,6 +1985,9 @@
             "labels": {
               "type": "string",
               "description": "Guide label format: numeric (\".1f\", \",d\", \".0%\") or temporal strftime-style text."
+            },
+            "guide": {
+              "$ref": "#/$defs/GuideSpec"
             }
           },
           "additionalProperties": false,
@@ -2402,6 +2373,9 @@
             },
             "labels": {
               "type": "string"
+            },
+            "guide": {
+              "$ref": "#/$defs/GuideSpec"
             }
           },
           "additionalProperties": false,
@@ -2807,6 +2781,9 @@
             },
             "labels": {
               "type": "string"
+            },
+            "guide": {
+              "$ref": "#/$defs/GuideSpec"
             }
           },
           "additionalProperties": false,
@@ -3209,6 +3186,9 @@
             },
             "labels": {
               "type": "string"
+            },
+            "guide": {
+              "$ref": "#/$defs/GuideSpec"
             }
           },
           "additionalProperties": false,
@@ -3529,6 +3509,9 @@
             },
             "labels": {
               "type": "string"
+            },
+            "guide": {
+              "$ref": "#/$defs/GuideSpec"
             }
           },
           "additionalProperties": false,
@@ -3726,6 +3709,432 @@
       },
       "additionalProperties": false,
       "description": "Per-scale configuration, keyed by aesthetic. Omitted scales use inference (type from field data, domain from data extent)."
+    },
+    "GuideThemeSpec": {
+      "type": "object",
+      "properties": {
+        "titleSize": {
+          "type": "number",
+          "minimum": 8,
+          "maximum": 32
+        },
+        "labelSize": {
+          "type": "number",
+          "minimum": 8,
+          "maximum": 24
+        },
+        "keyGap": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 32
+        },
+        "rowGap": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 32
+        },
+        "blockGap": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 64
+        },
+        "colorbarThickness": {
+          "type": "number",
+          "minimum": 4,
+          "maximum": 48
+        },
+        "colorbarLength": {
+          "type": "number",
+          "minimum": 48,
+          "maximum": 512
+        }
+      },
+      "additionalProperties": false,
+      "description": "Bounded presentation overrides for one guide block."
+    },
+    "BandAxisGuideSpec": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "auto"
+            },
+            {
+              "type": "string",
+              "const": "single"
+            },
+            {
+              "type": "string",
+              "const": "wrap"
+            },
+            {
+              "type": "string",
+              "const": "rotate"
+            },
+            {
+              "type": "string",
+              "const": "off"
+            }
+          ],
+          "description": "Band axis label layout: \"auto\", \"single\", \"wrap\", \"rotate\", or \"off\"."
+        },
+        "angle": {
+          "type": "number",
+          "description": "Rotation in degrees when mode is \"rotate\"."
+        },
+        "wrap": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 8,
+          "description": "Maximum wrapped lines when mode is \"wrap\"."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Scale-local band-axis label layout override retained independently from guide appearance."
+    },
+    "AxisGuideSpec": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "axis"
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "showTicks": {
+          "type": "boolean"
+        },
+        "showLabels": {
+          "type": "boolean"
+        },
+        "collision": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "auto"
+            },
+            {
+              "type": "string",
+              "const": "preserve"
+            },
+            {
+              "type": "string",
+              "const": "ellipsis"
+            }
+          ]
+        },
+        "theme": {
+          "$ref": "#/$defs/GuideThemeSpec"
+        }
+      },
+      "additionalProperties": false
+    },
+    "LegendGuideSpec": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "legend"
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "order": {
+          "type": "integer",
+          "minimum": -1024,
+          "maximum": 1024
+        },
+        "position": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "auto"
+            },
+            {
+              "type": "string",
+              "const": "right"
+            },
+            {
+              "type": "string",
+              "const": "bottom"
+            }
+          ]
+        },
+        "direction": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "auto"
+            },
+            {
+              "type": "string",
+              "const": "vertical"
+            },
+            {
+              "type": "string",
+              "const": "horizontal"
+            }
+          ]
+        },
+        "keySize": {
+          "type": "number",
+          "minimum": 4,
+          "maximum": 48
+        },
+        "collision": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "ellipsis"
+            },
+            {
+              "type": "string",
+              "const": "wrap"
+            },
+            {
+              "type": "string",
+              "const": "error"
+            }
+          ]
+        },
+        "force": {
+          "type": "boolean"
+        },
+        "theme": {
+          "$ref": "#/$defs/GuideThemeSpec"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ColorbarGuideSpec": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "colorbar"
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "order": {
+          "type": "integer",
+          "minimum": -1024,
+          "maximum": 1024
+        },
+        "position": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "auto"
+            },
+            {
+              "type": "string",
+              "const": "right"
+            },
+            {
+              "type": "string",
+              "const": "bottom"
+            }
+          ]
+        },
+        "direction": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "auto"
+            },
+            {
+              "type": "string",
+              "const": "vertical"
+            },
+            {
+              "type": "string",
+              "const": "horizontal"
+            }
+          ]
+        },
+        "showTicks": {
+          "type": "boolean"
+        },
+        "showLabels": {
+          "type": "boolean"
+        },
+        "collision": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "ellipsis"
+            },
+            {
+              "type": "string",
+              "const": "error"
+            }
+          ]
+        },
+        "force": {
+          "type": "boolean"
+        },
+        "theme": {
+          "$ref": "#/$defs/GuideThemeSpec"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ColorstepsGuideSpec": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "colorsteps"
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "order": {
+          "type": "integer",
+          "minimum": -1024,
+          "maximum": 1024
+        },
+        "position": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "auto"
+            },
+            {
+              "type": "string",
+              "const": "right"
+            },
+            {
+              "type": "string",
+              "const": "bottom"
+            }
+          ]
+        },
+        "direction": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "auto"
+            },
+            {
+              "type": "string",
+              "const": "vertical"
+            },
+            {
+              "type": "string",
+              "const": "horizontal"
+            }
+          ]
+        },
+        "showLabels": {
+          "type": "boolean"
+        },
+        "collision": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "ellipsis"
+            },
+            {
+              "type": "string",
+              "const": "error"
+            }
+          ]
+        },
+        "force": {
+          "type": "boolean"
+        },
+        "theme": {
+          "$ref": "#/$defs/GuideThemeSpec"
+        }
+      },
+      "additionalProperties": false
+    },
+    "NoneGuideSpec": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "none"
+        }
+      },
+      "additionalProperties": false
+    },
+    "GuideSpec": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/AxisGuideSpec"
+        },
+        {
+          "$ref": "#/$defs/LegendGuideSpec"
+        },
+        {
+          "$ref": "#/$defs/ColorbarGuideSpec"
+        },
+        {
+          "$ref": "#/$defs/ColorstepsGuideSpec"
+        },
+        {
+          "$ref": "#/$defs/NoneGuideSpec"
+        }
+      ]
+    },
+    "GuidesSpec": {
+      "type": "object",
+      "properties": {
+        "x": {
+          "$ref": "#/$defs/GuideSpec"
+        },
+        "y": {
+          "$ref": "#/$defs/GuideSpec"
+        },
+        "color": {
+          "$ref": "#/$defs/GuideSpec"
+        },
+        "fill": {
+          "$ref": "#/$defs/GuideSpec"
+        },
+        "size": {
+          "$ref": "#/$defs/GuideSpec"
+        },
+        "linewidth": {
+          "$ref": "#/$defs/GuideSpec"
+        },
+        "alpha": {
+          "$ref": "#/$defs/GuideSpec"
+        },
+        "shape": {
+          "$ref": "#/$defs/GuideSpec"
+        },
+        "linetype": {
+          "$ref": "#/$defs/GuideSpec"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Appearance-only guide configuration keyed by aesthetic."
     },
     "LegendSpec": {
       "type": "object",
@@ -3933,6 +4342,41 @@
           "type": "number",
           "minimum": 1,
           "maximum": 1000
+        },
+        "guideTitleSize": {
+          "type": "number",
+          "minimum": 8,
+          "maximum": 32
+        },
+        "legendKeySize": {
+          "type": "number",
+          "minimum": 4,
+          "maximum": 48
+        },
+        "legendKeyGap": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 32
+        },
+        "legendRowGap": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 32
+        },
+        "guideBlockGap": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 64
+        },
+        "colorbarThickness": {
+          "type": "number",
+          "minimum": 4,
+          "maximum": 48
+        },
+        "colorbarLengthMin": {
+          "type": "number",
+          "minimum": 48,
+          "maximum": 512
         },
         "captionSize": {
           "type": "number",
@@ -4248,6 +4692,9 @@
         },
         "scales": {
           "$ref": "#/$defs/Scales"
+        },
+        "guides": {
+          "$ref": "#/$defs/GuidesSpec"
         },
         "legend": {
           "$ref": "#/$defs/LegendSpec"

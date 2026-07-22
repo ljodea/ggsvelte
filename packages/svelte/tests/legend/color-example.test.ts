@@ -11,6 +11,7 @@ describe("binned color example", () => {
       () => container.querySelector<HTMLElement>(".gg-plot-root")?.dataset.ggReady === "true",
     );
     expect(container.querySelectorAll(".gg-legend-step")).toHaveLength(4);
+    expect(container.querySelector(".gg-legend-bottom.gg-legend-horizontal")).not.toBeNull();
     expect(container.querySelector(".gg-title")?.textContent).toBe("Particle pollution by hour");
   });
 });

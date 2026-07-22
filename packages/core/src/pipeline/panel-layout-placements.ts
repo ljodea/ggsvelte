@@ -1,6 +1,8 @@
 /**
  * Build panel placements for facet grids or a single panel.
  */
+import type { LayoutAxisPresentation } from "../layout/layout.js";
+
 import type { PanelLayoutChrome } from "./panel-layout-chrome.js";
 import { placeFacetPanelsFromChrome } from "./panel-layout-placements-facet.js";
 import { placeSinglePanelFromChrome } from "./panel-layout-placements-single.js";
@@ -14,11 +16,12 @@ export function buildPanelPlacements(input: {
   ncol: number;
   facetPanels: readonly FacetPanelDef[];
   chrome: PanelLayoutChrome;
+  axis: Readonly<{ x: LayoutAxisPresentation; y: LayoutAxisPresentation }>;
   options: Pick<RunOptions, "width">;
 }): PanelPlacement[] {
-  const { faceted, nrow, ncol, facetPanels, chrome, options } = input;
+  const { faceted, nrow, ncol, facetPanels, chrome, axis, options } = input;
   if (faceted) {
-    return placeFacetPanelsFromChrome({ nrow, ncol, facetPanels, chrome, options });
+    return placeFacetPanelsFromChrome({ nrow, ncol, facetPanels, chrome, axis, options });
   }
-  return [placeSinglePanelFromChrome(chrome, options)];
+  return [placeSinglePanelFromChrome(chrome, axis, options)];
 }

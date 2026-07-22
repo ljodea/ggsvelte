@@ -15,6 +15,7 @@ export function resolvePanelLayoutChrome(input: PanelLayoutChromeInput): PanelLa
     allFrames: input.allFrames,
     labs: input.labs,
     theme: input.theme,
+    axisTitleSize: input.layoutAxisTitleSize,
     height: input.options.height,
   });
   const display = resolvePanelLayoutDisplay({
@@ -35,6 +36,7 @@ export function resolvePanelLayoutChrome(input: PanelLayoutChromeInput): PanelLa
     legendInputs: input.legendInputs,
     legendOrder: input.legendOrder,
     theme: input.theme,
+    layoutAxisTextSize: input.layoutAxisTextSize,
     options: input.options,
   });
 

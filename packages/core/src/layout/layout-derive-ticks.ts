@@ -6,8 +6,9 @@ import { encodeKey } from "../scales/state.js";
 import type { CellValue } from "../table.js";
 import type { AxisGuidePlan } from "./temporal-guide.js";
 import { planTemporalAxis } from "./temporal-guide.js";
-import { planBandAxis, type BandAxisPlan } from "./band-guide.js";
+import { planBandAxis, type BandAxisPlan, type BandGuideConfig } from "./band-guide.js";
 import type { TextMeasurer } from "./measure.js";
+import { truncateToFit } from "./truncate.js";
 import {
   defaultLogTickFormat,
   defaultTickFormat,
@@ -84,6 +85,9 @@ export interface DeriveTicksContext {
    *  band planner subtracts it so the band + chrome together honor the margin cap. */
   orthogonalChromePx?: number;
   quantum?: number;
+  ellipsis?: string;
+  /** Top-level band-axis collision override, resolved after scale-local guide settings. */
+  bandCollision?: "ellipsis";
   previousGuidePlan?: AxisGuidePlan;
 }
 
@@ -140,6 +144,48 @@ function smallestGap(values: readonly number[]): number {
   return gap;
 }
 
+function bandGuideConfig(value: unknown): BandGuideConfig | undefined {
+  if (typeof value !== "object" || value === null || Array.isArray(value) || "type" in value)
+    return undefined;
+  return value;
+}
+
+function ellipsizeBandPlan(
+  plan: BandAxisPlan,
+  categoryCount: number,
+  context: DeriveTicksContext,
+): BandAxisPlan {
+  const maxLabelWidth = Math.max(1, context.extentPx / Math.max(1, categoryCount));
+  return {
+    ...plan,
+    mode: "single-line",
+    angle: 0,
+    ticks: plan.ticks.map((plannedTick) => {
+      const { angle: _angle, lines: _lines, ...tick } = plannedTick;
+      return {
+        ...tick,
+        label: tick.labeled
+          ? truncateToFit(
+              tick.fullLabel,
+              maxLabelWidth,
+              context.measurer,
+              context.fontSize,
+              context.ellipsis ?? "…",
+            )
+          : "",
+      };
+    }),
+    labelEvery: 1,
+    labelBandHeight: context.measurer.measureHeight(context.fontSize),
+    alongOverhang: 0,
+    leftOverhang: 0,
+    overlap: false,
+    marginOverflow: false,
+    degraded: [],
+    authorPinned: true,
+  };
+}
+
 export function deriveTicks(
   domain: Domain,
   requestedCount: number,
@@ -152,7 +198,7 @@ export function deriveTicks(
     // Resolve break-filtered (or full-domain) entries once for both the measured
     // horizontal planner and the legacy vertical path — O(D+K) via encodeKey map.
     const resolved = resolveBandEntries(domain);
-    const guide = domain.band?.config.guide;
+    const guide = bandGuideConfig(domain.band?.config.guide);
     // mode:off must apply before the horizontal-only measured branch so vertical
     // band axes (native Y, or x after coord_flip) also hide labels.
     if (domain.band !== undefined && guide?.mode === "off") {
@@ -177,6 +223,7 @@ export function deriveTicks(
             (context.orthogonalChromePx ?? 0),
         ),
         ...(context.quantum !== undefined && { quantum: context.quantum }),
+        ...(context.ellipsis !== undefined && { ellipsis: context.ellipsis }),
         previousMode: context.previousGuidePlan?.bandLabelMode ?? null,
         config: guide,
       });
@@ -202,7 +249,9 @@ export function deriveTicks(
     // Vertical band (native Y, or categorical-on-Y after coord_flip) falls through
     // to the legacy thin/truncate path.
     if (domain.band !== undefined && context.orient === "horizontal") {
-      const plan = planBandAxis({
+      const resolvedGuide =
+        context.bandCollision === "ellipsis" ? { ...guide, mode: "single" as const } : guide;
+      const planned = planBandAxis({
         aesthetic: domain.band.aesthetic,
         panelIndex: domain.band.panelIndex,
         categoryCount: domain.categories.length,
@@ -226,10 +275,15 @@ export function deriveTicks(
             (context.orthogonalChromePx ?? 0),
         ),
         ...(context.quantum !== undefined && { quantum: context.quantum }),
+        ...(context.ellipsis !== undefined && { ellipsis: context.ellipsis }),
         previousMode: context.previousGuidePlan?.bandLabelMode ?? null,
-        // Author pin from scales.x.guide / scaleXDiscrete({ guide }) (#407).
-        ...(guide !== undefined && { config: guide }),
+        // Top-level collision presentation overrides the scale-local layout pin.
+        ...(resolvedGuide === undefined ? {} : { config: resolvedGuide }),
       });
+      const plan =
+        context.bandCollision === "ellipsis"
+          ? ellipsizeBandPlan(planned, domain.categories.length, context)
+          : planned;
       const ticks: Tick[] = plan.ticks.map((tick) => ({
         value: tick.value,
         label: tick.label,

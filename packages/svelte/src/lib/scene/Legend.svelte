@@ -1,47 +1,56 @@
 <script lang="ts">
-  /**
-   * One SceneLegend (discrete swatches or continuous ramp), already placed by
-   * the layout in plot px. Mirrors renderToSVGString's legend structure (same
-   * class names); the gradient id uses $props.id() so several plots on one
-   * page never collide.
-   *
-   * Legend interaction pure helpers live under legend/ (focus.ts identity,
-   * entry-key-index, focus-emphasis, focus-plans). This component only paints
-   * static SVG chrome.
-   */
   import type { SceneLegend, ThemeTokens } from "@ggsvelte/core";
   import { LEGEND_ROW_HEIGHT, LINETYPE_DASHES, themeVar } from "@ggsvelte/core";
   import { LINETYPE_NAMES } from "@ggsvelte/spec";
 
   const { legend, theme }: { legend: SceneLegend; theme: ThemeTokens } =
     $props();
-
   const uid = $props.id();
   const gradientId = $derived(`gg-ramp-${uid}-${legend.scale}`);
   const ink = $derived(themeVar("ink", theme));
-  const rampTop = $derived(legend.title === "" ? 0 : 18);
+  const contentTop = $derived(
+    legend.title === "" ? 0 : (legend.titleHeight ?? 18),
+  );
+  const horizontal = $derived(legend.direction === "horizontal");
+  const rampX = $derived(
+    horizontal ? (legend.type === "ramp" ? (legend.rampX ?? 4) : 4) : 4,
+  );
+  const titleSize = $derived(legend.titleSize ?? 11);
+  const labelSize = $derived(legend.labelSize ?? 11);
 </script>
 
 <g
-  class={`gg-legend gg-legend-${legend.scale}`}
+  class={`gg-legend gg-legend-${legend.scale} gg-legend-${legend.position ?? "right"} gg-legend-${legend.direction ?? "vertical"}`}
   transform={`translate(${legend.x},${legend.y})`}
 >
   {#if legend.title !== ""}
-    <text class="gg-legend-title" x="4" y="11" font-weight="bold" fill={ink}
-      >{legend.title}</text
+    <text
+      class="gg-legend-title"
+      x="4"
+      y={Math.max(11, contentTop - 7)}
+      font-size={titleSize}
+      font-weight="bold"
+      fill={ink}>{legend.title}</text
     >
   {/if}
   {#if legend.type === "discrete"}
-    {#each legend.entries as entry (entry.label)}
-      {@const keyY = entry.y + (LEGEND_ROW_HEIGHT - legend.swatchSize) / 2}
-      {@const keyX = 4 + legend.swatchSize / 2}
+    {#each legend.entries as entry}
+      {@const baseX = (entry.x ?? 0) + 4}
+      {@const rowHeight = entry.height ?? LEGEND_ROW_HEIGHT}
+      {@const lines = entry.lines ?? [entry.label]}
+      {@const lineHeight = entry.lineHeight ?? labelSize * 1.2}
+      {@const labelY =
+        entry.y + (rowHeight - lines.length * lineHeight) / 2 + lineHeight / 2}
+      {@const keyY = entry.y + (rowHeight - legend.swatchSize) / 2}
+      {@const keyX = baseX + legend.swatchSize / 2}
       {@const keyCenterY = keyY + legend.swatchSize / 2}
       {@const keyColor =
         (entry.shape !== undefined ||
           entry.size !== undefined ||
           entry.linetype !== undefined ||
           entry.linewidth !== undefined) &&
-        entry.color === "#999999"
+        entry.color === "#999999" &&
+        entry.hasPaint !== true
           ? ink
           : entry.color}
       <!-- Shape key geometry must match core's pointShape() so SSR/pure-SVG
@@ -124,9 +133,9 @@
         {@const dash = LINETYPE_DASHES[LINETYPE_NAMES.indexOf(linetype)] ?? []}
         <line
           class="gg-legend-key"
-          x1="4"
+          x1={baseX}
           y1={keyCenterY}
-          x2={4 + legend.swatchSize}
+          x2={baseX + legend.swatchSize}
           y2={keyCenterY}
           stroke={keyColor}
           stroke-width={entry.linewidth ?? 1.5}
@@ -136,7 +145,7 @@
       {:else}
         <rect
           class="gg-legend-swatch"
-          x="4"
+          x={baseX}
           y={keyY}
           width={legend.swatchSize}
           height={legend.swatchSize}
@@ -146,54 +155,109 @@
       {/if}
       <text
         class="gg-legend-label"
-        x={4 + legend.swatchSize + 6}
-        y={entry.y + LEGEND_ROW_HEIGHT / 2}
+        x={baseX + legend.swatchSize + (legend.keyGap ?? 6)}
+        y={entry.lines === undefined ? entry.y + rowHeight / 2 : labelY}
         dy="0.32em"
-        fill={ink}>{entry.label}</text
+        font-size={labelSize}
+        fill={ink}
       >
+        {#if entry.lines !== undefined}
+          {#each lines as line, index}
+            <tspan
+              x={baseX + legend.swatchSize + (legend.keyGap ?? 6)}
+              dy={index === 0 ? undefined : lineHeight}>{line}</tspan
+            >
+          {/each}
+        {:else}
+          {entry.label}{#if entry.fullLabel !== undefined && entry.fullLabel !== entry.label}<title
+              >{entry.fullLabel}</title
+            >{/if}
+        {/if}
+      </text>
     {/each}
   {:else if legend.type === "steps"}
-    {#each legend.entries as entry (entry.y)}
+    {#each legend.entries as entry}
+      {@const entryX = 4 + (entry.x ?? 0)}
+      {@const entryY = contentTop + entry.y}
       <rect
         class="gg-legend-step"
-        x="4"
-        y={rampTop + entry.y}
+        x={entryX}
+        y={entryY}
         width={legend.stepWidth}
         height={legend.stepHeight}
         fill={entry.color}
       />
-      <text
-        class="gg-legend-label"
-        x={4 + legend.stepWidth + 6}
-        y={rampTop + entry.y + legend.stepHeight / 2}
-        dy="0.32em"
-        fill={ink}>{entry.label}</text
-      >
+      {#if entry.label !== ""}
+        <text
+          class="gg-legend-label"
+          x={horizontal
+            ? entryX + legend.stepWidth / 2
+            : entryX + legend.stepWidth + 6}
+          y={horizontal
+            ? entryY + legend.stepHeight + 12
+            : entryY + legend.stepHeight / 2}
+          text-anchor={horizontal ? "middle" : "start"}
+          dy="0.32em"
+          font-size={labelSize}
+          fill={ink}
+          >{entry.label}{#if entry.fullLabel !== undefined && entry.fullLabel !== entry.label}<title
+              >{entry.fullLabel}</title
+            >{/if}</text
+        >
+      {/if}
     {/each}
   {:else}
     <defs>
-      <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-        {#each legend.stops as [offset, color] (offset)}
+      <linearGradient
+        id={gradientId}
+        x1="0"
+        y1="0"
+        x2={horizontal ? "1" : "0"}
+        y2={horizontal ? "0" : "1"}
+      >
+        {#each legend.stops as [offset, color]}
           <stop offset={`${offset * 100}%`} stop-color={color} />
         {/each}
       </linearGradient>
     </defs>
     <rect
       class="gg-legend-ramp"
-      x="4"
-      y={rampTop}
+      x={rampX}
+      y={contentTop}
       width={legend.rampWidth}
       height={legend.rampHeight}
       fill={`url(#${gradientId})`}
     />
     {#each legend.ticks as tick}
-      <text
-        class="gg-legend-label"
-        x={4 + legend.rampWidth + 6}
-        y={rampTop + tick.y}
-        dy="0.32em"
-        fill={ink}>{tick.label}</text
-      >
+      {@const pos = tick.pos ?? tick.y ?? 0}
+      {#if legend.showTicks !== false}
+        <line
+          class="gg-legend-tick"
+          x1={horizontal ? rampX + pos : rampX + legend.rampWidth}
+          y1={horizontal ? contentTop + legend.rampHeight : contentTop + pos}
+          x2={horizontal ? rampX + pos : rampX + legend.rampWidth + 4}
+          y2={horizontal
+            ? contentTop + legend.rampHeight + 4
+            : contentTop + pos}
+          stroke={ink}
+        />
+      {/if}
+      {#if tick.label !== ""}
+        <text
+          class="gg-legend-label"
+          x={horizontal ? rampX + pos : rampX + legend.rampWidth + 6}
+          y={horizontal
+            ? contentTop + legend.rampHeight + 12
+            : contentTop + pos}
+          text-anchor={horizontal ? "middle" : "start"}
+          dy="0.32em"
+          font-size={labelSize}
+          fill={ink}
+          >{tick.label}{#if tick.fullLabel !== undefined && tick.fullLabel !== tick.label}<title
+              >{tick.fullLabel}</title
+            >{/if}</text
+        >
+      {/if}
     {/each}
   {/if}
 </g>

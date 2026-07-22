@@ -17,6 +17,7 @@
     "packages/spec/src/scale-color-helpers.ts": ["duplicates"],
     "packages/spec/src/scale-style-helpers.ts": ["duplicates"],
     "packages/spec/src/coord-helpers.ts": ["duplicates"],
+    "packages/spec/src/guide-helpers.ts": ["duplicates"],
   },
   "workspaces": {
     ".": {

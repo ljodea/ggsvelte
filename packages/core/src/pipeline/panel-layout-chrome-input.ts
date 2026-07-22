@@ -24,6 +24,8 @@ export interface PanelLayoutChromeInput {
   legendInputs: readonly LegendInput[];
   legendOrder: LegendOrder;
   theme: ThemeTokens;
+  layoutAxisTitleSize: number;
+  layoutAxisTextSize: number;
   options: Pick<RunOptions, "width" | "height" | "measureText">;
   warnings: PipelineWarning[];
 }

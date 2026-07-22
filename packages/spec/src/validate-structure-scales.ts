@@ -13,6 +13,63 @@ const CATEGORICAL_SCHEMES = new Set<string>(CATEGORICAL_SCHEME_NAMES);
 const SEQUENTIAL_SCHEMES = new Set<string>(SEQUENTIAL_SCHEME_NAMES);
 
 /** Named color schemes must match the configured color scale family. */
+const GUIDE_AESTHETICS = [
+  "x",
+  "y",
+  "color",
+  "fill",
+  "size",
+  "linewidth",
+  "alpha",
+  "shape",
+  "linetype",
+] as const;
+
+/** Guide variants are constrained by aesthetic and explicit scale family. */
+export function guideStructuralErrors(
+  guides: Record<string, unknown>,
+  scales: Record<string, unknown> | undefined,
+): SpecError[] {
+  const errors: SpecError[] = [];
+  const check = (aesthetic: (typeof GUIDE_AESTHETICS)[number], guide: unknown, path: string) => {
+    if (!isRecord(guide) || typeof guide["type"] !== "string") return;
+    const type = guide["type"];
+    if (type === "none") return;
+    const positional = aesthetic === "x" || aesthetic === "y";
+    const scale = isRecord(scales?.[aesthetic]) ? scales?.[aesthetic] : undefined;
+    const scaleType = scale?.["type"];
+    const valid = positional
+      ? type === "axis"
+      : aesthetic === "color" || aesthetic === "fill"
+        ? (type === "legend" && scaleType !== "sequential" && scaleType !== "binned") ||
+          (type === "colorbar" && (scaleType === undefined || scaleType === "sequential")) ||
+          (type === "colorsteps" && scaleType === "binned")
+        : type === "legend";
+    if (valid) return;
+    errors.push({
+      code: "guide-aesthetic-incompatible",
+      path,
+      message: `The ${type} guide is incompatible with the ${aesthetic} aesthetic${typeof scaleType === "string" ? ` using a ${scaleType} scale` : ""}.`,
+      fix: {
+        description: positional
+          ? 'Use { type: "axis" } or { type: "none" } for positional aesthetics.'
+          : aesthetic === "color" || aesthetic === "fill"
+            ? "Use legend for discrete colors, colorbar for sequential colors, colorsteps for binned colors, or none."
+            : 'Use { type: "legend" } or { type: "none" } for mapped style aesthetics.',
+      },
+    });
+  };
+  for (const aesthetic of GUIDE_AESTHETICS) {
+    const top = guides[aesthetic];
+    check(aesthetic, top, `/guides/${aesthetic}`);
+    const scale = scales?.[aesthetic];
+    if (top === undefined && isRecord(scale))
+      check(aesthetic, scale["guide"], `/scales/${aesthetic}/guide`);
+  }
+  return errors;
+}
+
+/** Named color schemes must match the configured color scale family. */
 export function colorScaleStructuralErrors(scales: Record<string, unknown>): SpecError[] {
   const errors: SpecError[] = [];
   for (const channel of ["color", "fill"] as const) {

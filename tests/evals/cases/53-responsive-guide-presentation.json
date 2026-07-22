@@ -1,0 +1,42 @@
+{
+  "id": "53-responsive-guide-presentation",
+  "kind": "chart",
+  "prompt": "Plot response against dose as points and map region to color. Put the color legend below the plot in a horizontal direction instead of changing the color scale.",
+  "dataProfile": {
+    "fields": [
+      { "name": "dose", "type": "quantitative" },
+      { "name": "response", "type": "quantitative" },
+      { "name": "region", "type": "nominal" }
+    ],
+    "rowCount": 4
+  },
+  "data": {
+    "main": [
+      { "dose": 1, "response": 2.1, "region": "North" },
+      { "dose": 2, "response": 3.2, "region": "South" },
+      { "dose": 3, "response": 3.8, "region": "North" },
+      { "dose": 4, "response": 4.4, "region": "South" }
+    ]
+  },
+  "gold": {
+    "edition": 2,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "point",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "dose" },
+          "y": { "field": "response" },
+          "color": { "field": "region" }
+        }
+      }
+    ],
+    "guides": {
+      "color": { "type": "legend", "position": "bottom", "direction": "horizontal" }
+    }
+  },
+  "expectRefusal": false,
+  "notes": "Guide presentation is explicit and remains separate from scale semantics."
+}

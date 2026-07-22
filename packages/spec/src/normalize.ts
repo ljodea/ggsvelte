@@ -33,6 +33,8 @@ import type {
   Aes,
   ChannelValue,
   FacetSpec,
+  GuidesSpec,
+  GuideSpec,
   LayerSpec,
   PortableSpec,
   ThemeName,
@@ -182,6 +184,34 @@ function normalizeTheme(theme: ThemeName | ThemeSpec): ThemeName | ThemeSpec {
   return typeof theme === "string" ? theme : { ...theme };
 }
 
+function normalizeGuide(guide: GuideSpec): GuideSpec {
+  return {
+    ...guide,
+    ...(guide.type !== "none" && guide.theme !== undefined && { theme: { ...guide.theme } }),
+  };
+}
+
+const GUIDE_ORDER = [
+  "x",
+  "y",
+  "color",
+  "fill",
+  "size",
+  "linewidth",
+  "alpha",
+  "shape",
+  "linetype",
+] as const;
+
+function normalizeGuides(guides: GuidesSpec): GuidesSpec {
+  return Object.fromEntries(
+    GUIDE_ORDER.flatMap((aesthetic) => {
+      const guide = guides[aesthetic];
+      return guide === undefined ? [] : [[aesthetic, normalizeGuide(guide)]];
+    }),
+  );
+}
+
 /** Canonicalize a SpecInput into a normalized PortableSpec (see module docs). */
 export function normalize(input: SpecInput): PortableSpec {
   const plotAes = normalizeAes(input.aes);
@@ -200,6 +230,7 @@ export function normalize(input: SpecInput): PortableSpec {
     ...(input.facet !== undefined && { facet: normalizeFacet(input.facet) }),
     ...(coord !== undefined && { coord }),
     ...(input.scales !== undefined && { scales: normalizeScales(input.scales) }),
+    ...(input.guides !== undefined && { guides: normalizeGuides(input.guides) }),
     ...(input.legend !== undefined && { legend: { ...input.legend } }),
     ...(input.labs !== undefined && { labs: { ...input.labs } }),
     ...(input.theme !== undefined && { theme: normalizeTheme(input.theme) }),

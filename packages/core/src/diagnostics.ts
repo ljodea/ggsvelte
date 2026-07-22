@@ -23,6 +23,14 @@ export interface PipelineErrorCatalogEntry {
 
 /** Structured errors thrown as `PipelineError { code, path, message }`. */
 export const PIPELINE_ERROR_CATALOG = {
+  "guide-aesthetic-incompatible": {
+    summary: "A requested guide variant does not match the trained aesthetic scale family.",
+    fix: "Use axis for positions, legend for discrete scales, colorbar for sequential colors, colorsteps for binned colors, or none.",
+  },
+  "guide-layout-overflow": {
+    summary: "A guide configured with collision: error cannot fit its authored label.",
+    fix: 'Use collision: "ellipsis" for long labels; increase the chart size, reduce categories, or suppress an oversized guide.',
+  },
   "no-data": {
     summary: "The spec has no data source and no layer provides one.",
     fix: "Set spec.data ({values}, {columns}, or {name}) or pass named data via RunOptions.data.",
@@ -367,6 +375,9 @@ export const PIPELINE_WARNING_CATALOG = {
   },
   "temporal-values-censored": {
     summary: "An explicit temporal parser censored invalid source values by author request.",
+  },
+  "guide-auto-bottom": {
+    summary: "An auto-positioned guide moved below the panel to preserve readable width.",
   },
   "unused-scale-option": {
     summary: "A lower-precedence scale option was ignored in favor of an explicit winner.",

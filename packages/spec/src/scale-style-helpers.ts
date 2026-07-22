@@ -4,7 +4,7 @@
  * public facade re-exports this module from scale-helpers.ts.
  */
 
-import type { CellValue, PositiveStyleScaleSpec, Scales } from "./schema.js";
+import type { CellValue, GuideSpec, PositiveStyleScaleSpec, Scales } from "./schema.js";
 import type { LinetypeName, PointShapeName } from "./schema-names.js";
 
 // --- mapped numeric and finite-symbol styles --------------------------------
@@ -20,16 +20,16 @@ export type SequentialStyleScaleOptions = Omit<
 >;
 export type DiscreteNumericStyleScaleOptions = Pick<
   NumericStyleScaleSpec,
-  "domain" | "domainMode" | "range" | "reverse" | "naValue" | "unknownValue" | "onExhaust"
+  "domain" | "domainMode" | "range" | "reverse" | "naValue" | "unknownValue" | "onExhaust" | "guide"
 >;
 export type TemporalNumericStyleScaleOptions = Omit<SequentialStyleScaleOptions, "temporalKind">;
 export type ManualNumericStyleScaleOptions = Pick<
   NumericStyleScaleSpec,
-  "domain" | "naValue" | "unknownValue"
+  "domain" | "naValue" | "unknownValue" | "guide"
 > & { values: NonNullable<NumericStyleScaleSpec["range"]> };
 export type IdentityNumericStyleScaleOptions = Pick<
   NumericStyleScaleSpec,
-  "naValue" | "unknownValue"
+  "naValue" | "unknownValue" | "guide"
 >;
 export interface FiniteStyleScaleOptions<Output extends string = PointShapeName | LinetypeName> {
   domain?: readonly CellValue[];
@@ -41,6 +41,7 @@ export interface FiniteStyleScaleOptions<Output extends string = PointShapeName 
   unknownValue?: Output;
   onExhaust?: "cycle" | "error";
   labels?: string;
+  guide?: GuideSpec;
 }
 export type DiscreteFiniteStyleScaleOptions<Output extends string = PointShapeName | LinetypeName> =
   Omit<FiniteStyleScaleOptions<Output>, "breaks" | "labels">;
@@ -59,12 +60,14 @@ export interface ManualFiniteStyleScaleOptions<
   values: readonly Output[];
   naValue?: Output;
   unknownValue?: Output;
+  guide?: GuideSpec;
 }
 export interface IdentityFiniteStyleScaleOptions<
   Output extends string = PointShapeName | LinetypeName,
 > {
   naValue?: Output;
   unknownValue?: Output;
+  guide?: GuideSpec;
 }
 
 function numericStyleScale(

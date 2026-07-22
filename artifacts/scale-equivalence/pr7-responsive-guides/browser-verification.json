@@ -1,0 +1,38 @@
+{
+  "routes": [
+    "/examples/color/binned",
+    "/examples/color/continuous",
+    "/examples/point/style-scales"
+  ],
+  "viewports": [
+    { "width": 1200, "height": 900, "screenshot": "browser-1200.png" },
+    { "width": 375, "height": 812, "screenshot": "browser-375.png" },
+    { "width": 1200, "height": 900, "appearance": "dark", "screenshot": "browser-dark-1200.png" }
+  ],
+  "assertions": {
+    "httpStatus": 200,
+    "consoleErrors": 0,
+    "explicitBottomColorsteps": {
+      "class": "gg-legend gg-legend-color gg-legend-bottom gg-legend-horizontal",
+      "stepCount": 4,
+      "fullLabels": ["55–100", "35–55", "12–35", "0–12"],
+      "desktopPanelBottomPx": 769.546875,
+      "desktopLegendTopPx": 822.546875,
+      "axisToLegendGapPx": 53,
+      "mobileDocumentOverflowPx": 0
+    },
+    "autoPlacement": {
+      "wide": "gg-legend-right gg-legend-vertical",
+      "widePanelWidthPx": 520,
+      "narrow": "gg-legend-bottom gg-legend-horizontal",
+      "narrowDocumentOverflowPx": 0
+    },
+    "mergedInteraction": {
+      "targetCount": 2,
+      "label": "Region: North (shape + linetype legend)",
+      "ariaPressedAfterClick": true,
+      "focusedMarks": 4,
+      "mutedMarks": 4
+    }
+  }
+}

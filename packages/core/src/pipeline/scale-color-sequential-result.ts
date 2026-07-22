@@ -47,6 +47,7 @@ export function sequentialColorResolution(
       domain: scale.domain,
       at: (t: number) => scale.at(t),
       format: (value: number) => format.label(value),
+      formatFull: (value: number) => format.fullLabel(value),
       ticks: tickValues,
       position: (value: number) =>
         transformedSpan === 0
