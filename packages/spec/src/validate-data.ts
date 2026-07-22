@@ -6,7 +6,10 @@
  *
  * Implementation is split:
  *  - validate-data-evidence.ts — FieldEvidenceMap construction + effectiveChannel
- *  - validate-data-checks.ts — dataChecks walk + STAT_COLUMNS
+ *  - validate-data-checks.ts — dataChecks orchestrator + STAT_COLUMNS + layer walk
+ *  - validate-data-checks-temporal.ts — shared temporalDecisionForField memoization
+ *  - validate-data-checks-position.ts — pre-evidence temporal config + x/y scale types
+ *  - validate-data-checks-color.ts — color/fill scale types + manual domain/range
  *
  * Checks:
  *  - field existence: every { field } channel must name an available field
