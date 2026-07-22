@@ -87,6 +87,11 @@ export function dataChecks(
     shape: [],
     linetype: [],
   };
+  const numericStyleFields: Record<"size" | "linewidth" | "alpha", ChannelFieldUse[]> = {
+    size: [],
+    linewidth: [],
+    alpha: [],
+  };
 
   for (let i = 0; i < layers.length; i++) {
     const layer = layers[i];
@@ -241,6 +246,9 @@ export function dataChecks(
       if (channel === "shape" || channel === "linetype") {
         finiteStyleFields[channel].push({ field: mapped.field, path });
       }
+      if (channel === "size" || channel === "linewidth" || channel === "alpha") {
+        numericStyleFields[channel].push({ field: mapped.field, path });
+      }
     }
   }
 
@@ -252,13 +260,62 @@ export function dataChecks(
     for (const use of finiteStyleFields[aesthetic]) {
       const type = typeOf(use.field);
       if (type !== "quantitative" && type !== "temporal") continue;
+      // A binned finite style requires numeric values: the runtime rejects
+      // temporal (date/datetime) values with `unsupported-aesthetic-scale`
+      // ("cannot be mapped to named symbols", scale-style.ts). So only
+      // quantitative fields may be directed to "binned"; temporal fields must
+      // use "ordinal", which keys arbitrary values (Dates included) to symbols.
+      const isTemporal = type === "temporal";
       errors.push({
         code: "scale-type-mismatch",
         path: `/scales/${aesthetic}`,
         message: `Field "${use.field}" is ${type}, but ${aesthetic} has finite symbols and cannot infer continuous interpolation.`,
         fix: {
-          description: `Set scales.${aesthetic}.type to "binned", or explicitly choose "ordinal" for identifier-like values.`,
-          example: { type: "binned" },
+          description: isTemporal
+            ? `Set scales.${aesthetic}.type to "ordinal"; temporal (date/datetime) values cannot be binned onto named symbols.`
+            : `Set scales.${aesthetic}.type to "binned", or explicitly choose "ordinal" for identifier-like values.`,
+          example: { type: isTemporal ? "ordinal" : "binned" },
+        },
+      });
+    }
+  }
+
+  // Numeric style scales (size/linewidth/alpha) mirror the sequential/binned
+  // color check: a continuous ramp needs quantitative or temporal values, so a
+  // nominal/ordinal field trains no finite domain and the runtime throws
+  // `style-domain-empty` (scale-style.ts). Reject it at validation time with the
+  // same "use ordinal" guidance color scales give. Fields without an explicit
+  // sequential/binned type default to an ordinal numeric style and are fine.
+  for (const aesthetic of ["size", "linewidth", "alpha"] as const) {
+    const config = scales?.[aesthetic] as
+      | {
+          type?: string;
+          temporalKind?: unknown;
+          parse?: unknown;
+          timezone?: unknown;
+          disambiguation?: unknown;
+        }
+      | undefined;
+    if (config?.type !== "sequential" && config?.type !== "binned") continue;
+    // A nominal-looking column with explicit temporal-parse options may resolve
+    // to temporal at runtime; that path is owned by scale resolution (mirror the
+    // color checker), so don't false-positive here.
+    const requestsTemporal =
+      config.temporalKind !== undefined ||
+      config.parse !== undefined ||
+      config.timezone !== undefined ||
+      config.disambiguation !== undefined;
+    if (requestsTemporal) continue;
+    for (const use of numericStyleFields[aesthetic]) {
+      const type = typeOf(use.field);
+      if (type !== "nominal" && type !== "ordinal") continue;
+      errors.push({
+        code: "scale-type-mismatch",
+        path: `/scales/${aesthetic}`,
+        message: `scales.${aesthetic}.type is "${config.type}" but field "${use.field}" is ${type}; ${config.type} ${aesthetic} scales need quantitative or temporal values.`,
+        fix: {
+          description: `Set scales.${aesthetic}.type to "ordinal", or map a quantitative field.`,
+          example: { type: "ordinal" },
         },
       });
     }
