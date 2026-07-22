@@ -2,6 +2,11 @@
  * Trained scale and domain snapshot types on the public RenderModel.
  */
 import type { SequentialColorScale } from "../scales/color.js";
+import type {
+  BinnedColorScale,
+  IdentityColorScale,
+  ManualColorScale,
+} from "../scales/non-position-color.js";
 import type { ScaleState } from "../scales/state.js";
 import type { ColorScale, PositionScale } from "../scales/train.js";
 import type { CellValue } from "../table.js";
@@ -9,7 +14,10 @@ import type { CellValue } from "../table.js";
 /** A resolved color-ish scale: value-stable ordinal or sequential ramp. */
 export type ResolvedColorScale =
   | { kind: "ordinal"; scale: ColorScale }
-  | { kind: "sequential"; scale: SequentialColorScale };
+  | { kind: "sequential"; scale: SequentialColorScale }
+  | { kind: "binned"; scale: BinnedColorScale }
+  | { kind: "manual"; scale: ManualColorScale }
+  | { kind: "identity"; scale: IdentityColorScale };
 
 export interface TrainedScales {
   /** The shared x scale (union-trained). Free-x facets ALSO train per panel

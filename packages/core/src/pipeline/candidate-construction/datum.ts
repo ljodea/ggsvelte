@@ -272,7 +272,12 @@ export function ordinalColorRank(
   field: string | null | undefined,
   readValue: () => CellValue,
 ): number {
-  if (resolved?.kind !== "ordinal" || field === null || field === undefined) return -1;
+  if (
+    (resolved?.kind !== "ordinal" && resolved?.kind !== "manual") ||
+    field === null ||
+    field === undefined
+  )
+    return -1;
   return resolved.scale.indexOf(readValue()) ?? -1;
 }
 

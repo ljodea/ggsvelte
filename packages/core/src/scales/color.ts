@@ -21,7 +21,7 @@ export const VIRIDIS_RAMP_10: readonly string[] = [
   "#fde725",
 ];
 
-function normalizeHexStop(stop: string): string {
+export function normalizeColor(stop: string): string {
   const match = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(stop);
   if (match === null) {
     throw new RangeError(`Sequential color stops must use #rgb or #rrggbb syntax (got "${stop}").`);
@@ -60,16 +60,25 @@ export function rampColor(stops: readonly string[], t: number): string {
 
 export interface SequentialColorScale {
   type: "sequential";
-  /** Data-space domain [min, max]. */
+  /** Semantic/source-space domain [min, max] (epoch ms for temporal values). */
   domain: [number, number];
+  /** Transform-space affine domain used to interpolate the ramp. */
+  transformedDomain: [number, number];
+  transform: "identity" | "log10" | "sqrt";
+  reverse: boolean;
   /** Resolved ramp stops (post-reverse). */
   stops: readonly string[];
-  /** Color for a data value (undefined for non-finite values). */
+  naValue: string;
+  unknownValue: string;
+  /** Color for a semantic value, including explicit NA/OOB fallbacks. */
   colorOf(value: unknown): string | undefined;
   /** Color at a normalized ramp position t in [0, 1] (legend gradients). */
   at(t: number): string;
   /** True when the numeric domain contains semantic epoch milliseconds. */
   temporal?: boolean;
+  temporalKind?: "date" | "datetime";
+  /** Explicit semantic guide breaks, when authored. */
+  guideBreaks?: readonly number[];
 }
 
 export interface SequentialConfig {
@@ -78,6 +87,10 @@ export interface SequentialConfig {
   /** Explicit ramp stops (#rgb or #rrggbb; normalized before interpolation). */
   range?: readonly string[];
   reverse?: boolean;
+  transform?: "identity" | "log10" | "sqrt";
+  oob?: "censor" | "squish";
+  naValue?: string;
+  unknownValue?: string;
 }
 
 /**
@@ -93,19 +106,57 @@ export function trainSequential(
     min -= 0.5;
     max += 0.5;
   }
-  const base = (config.range ?? VIRIDIS_RAMP_10).map((stop) => normalizeHexStop(stop));
+  const transform = config.transform ?? "identity";
+  const forward = (value: number): number => {
+    if (transform === "log10") return value > 0 ? Math.log10(value) : Number.NaN;
+    if (transform === "sqrt") return value >= 0 ? Math.sqrt(value) : Number.NaN;
+    return value;
+  };
+  const transformedMin = forward(min);
+  const transformedMax = forward(max);
+  if (!Number.isFinite(transformedMin) || !Number.isFinite(transformedMax)) {
+    throw new RangeError(
+      `Sequential color domain [${String(min)}, ${String(max)}] is invalid for ${transform}.`,
+    );
+  }
+  const base = (config.range ?? VIRIDIS_RAMP_10).map((stop) => normalizeColor(stop));
   const stops = config.reverse === true ? base.toReversed() : [...base];
-  const span = max - min;
+  const span = transformedMax - transformedMin;
   const at = (t: number) => rampColor(stops, t);
+  const naValue = normalizeColor(config.naValue ?? "#999999");
+  const unknownValue = normalizeColor(config.unknownValue ?? "#999999");
   return {
     type: "sequential",
     domain: [min, max],
+    transformedDomain: [transformedMin, transformedMax],
+    transform,
+    reverse: config.reverse === true,
     stops,
+    naValue,
+    unknownValue,
     at,
     colorOf(value: unknown): string | undefined {
-      const v = typeof value === "number" ? value : value instanceof Date ? value.getTime() : NaN;
-      if (!Number.isFinite(v)) return undefined;
-      return at((v - min) / span);
+      if (value === null || value === undefined) {
+        return config.naValue === undefined ? undefined : naValue;
+      }
+      let semantic =
+        typeof value === "number" ? value : value instanceof Date ? value.getTime() : Number.NaN;
+      if (!Number.isFinite(semantic)) {
+        return config.unknownValue === undefined ? undefined : unknownValue;
+      }
+      const lower = Math.min(min, max);
+      const upper = Math.max(min, max);
+      if (semantic < lower || semantic > upper) {
+        if (config.oob !== "squish") {
+          return config.unknownValue === undefined ? undefined : unknownValue;
+        }
+        semantic = Math.min(upper, Math.max(lower, semantic));
+      }
+      const transformed = forward(semantic);
+      if (!Number.isFinite(transformed)) {
+        return config.unknownValue === undefined ? undefined : unknownValue;
+      }
+      return at(span === 0 ? 0.5 : (transformed - transformedMin) / span);
     },
   };
 }

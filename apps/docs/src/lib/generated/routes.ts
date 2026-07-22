@@ -399,6 +399,11 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
+        id: "continuous-binned-manual-and-identity-color",
+        title: "Continuous, binned, manual, and identity color",
+        level: 2,
+      },
+      {
         id: "date-and-time-axes",
         title: "Date and time axes",
         level: 2,
@@ -1119,6 +1124,16 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "scale-type-transform-conflict",
+        title: "scale-type-transform-conflict",
+        level: 3,
+      },
+      {
+        id: "scale-manual-domain-range",
+        title: "scale-manual-domain-range",
+        level: 3,
+      },
+      {
         id: "missing-required-channel",
         title: "missing-required-channel",
         level: 3,
@@ -1324,8 +1339,8 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
-        id: "scale-type-transform-conflict",
-        title: "scale-type-transform-conflict",
+        id: "scale-type-transform-conflict-pipeline",
+        title: "scale-type-transform-conflict — pipeline",
         level: 3,
       },
       {
@@ -1361,6 +1376,51 @@ export const DOCS_ROUTES = [
       {
         id: "palette-exhausted",
         title: "palette-exhausted",
+        level: 3,
+      },
+      {
+        id: "color-temporal-parse",
+        title: "color-temporal-parse",
+        level: 3,
+      },
+      {
+        id: "color-temporal-kind",
+        title: "color-temporal-kind",
+        level: 3,
+      },
+      {
+        id: "color-manual-domain-range",
+        title: "color-manual-domain-range",
+        level: 3,
+      },
+      {
+        id: "color-binned-breaks",
+        title: "color-binned-breaks",
+        level: 3,
+      },
+      {
+        id: "color-binned-empty",
+        title: "color-binned-empty",
+        level: 3,
+      },
+      {
+        id: "color-binned-domain",
+        title: "color-binned-domain",
+        level: 3,
+      },
+      {
+        id: "color-domain-invalid",
+        title: "color-domain-invalid",
+        level: 3,
+      },
+      {
+        id: "color-transform-empty",
+        title: "color-transform-empty",
+        level: 3,
+      },
+      {
+        id: "color-domain-transform",
+        title: "color-domain-transform",
         level: 3,
       },
       {
@@ -1426,6 +1486,26 @@ export const DOCS_ROUTES = [
       {
         id: "sequential-discrete-field",
         title: "sequential-discrete-field",
+        level: 3,
+      },
+      {
+        id: "color-temporal-censored",
+        title: "color-temporal-censored",
+        level: 3,
+      },
+      {
+        id: "color-transform-invalid",
+        title: "color-transform-invalid",
+        level: 3,
+      },
+      {
+        id: "color-na-values",
+        title: "color-na-values",
+        level: 3,
+      },
+      {
+        id: "color-unknown-values",
+        title: "color-unknown-values",
         level: 3,
       },
       {
@@ -1773,8 +1853,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-278",
-        title: "experimental (278)",
+        id: "experimental-341",
+        title: "experimental (341)",
         level: 3,
       },
       {
@@ -1788,8 +1868,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-223",
-        title: "experimental (223)",
+        id: "experimental-231",
+        title: "experimental (231)",
         level: 3,
       },
       {
@@ -1813,8 +1893,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-228",
-        title: "experimental (228)",
+        id: "experimental-296",
+        title: "experimental (296)",
         level: 3,
       },
       {
@@ -1843,6 +1923,16 @@ export const DOCS_ROUTES = [
         id: "five-minute-path",
         title: "Five-minute path",
         level: 2,
+      },
+      {
+        id: "0-6-to-0-7",
+        title: "0.6 to 0.7",
+        level: 2,
+      },
+      {
+        id: "choose-explicit-color-fill-families",
+        title: "Choose explicit color/fill families",
+        level: 3,
       },
       {
         id: "0-5-to-0-6",
@@ -2017,6 +2107,17 @@ export const DOCS_ROUTES = [
     description:
       "A text layer composed over a column layer: the label channel reads a preformatted field, and a dy offset lifts each label just above its bar.",
     canonicalPath: "/examples/col/value-labels",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/color/binned",
+    title: "Binned color (colorsteps) — ggsvelte gallery",
+    description:
+      "A quantitative color mapping split into deterministic intervals with a colorsteps guide.",
+    canonicalPath: "/examples/color/binned",
     kind: "page",
     index: true,
     sitemap: true,

@@ -96,6 +96,9 @@ export interface ColorScale {
   indexOf(value: unknown): number | undefined;
   /** Resolved color for a value (undefined = unknown). */
   colorOf(value: unknown): string | undefined;
+  /** Rendering fallbacks retained separately from unknown lookup semantics. */
+  naValue?: string;
+  unknownValue?: string;
   /** Serializable value-stable state — commit only for the latest run. */
   state: ScaleState;
   warnings: ScaleWarning[];

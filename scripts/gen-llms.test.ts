@@ -273,6 +273,15 @@ describe("guide sections cover their catalogs", () => {
     expect(renderMarkdown(UPGRADING_MD)).toContain('id="0-1-to-0-2"');
   });
 
+  it("keeps generic color/fill migration guidance on the release that owns it", () => {
+    const colorMigration = UPGRADING_MD.indexOf("### Choose explicit color/fill families");
+    expect(UPGRADING_MD).toContain("## 0.6 to 0.7");
+    expect(renderMarkdown(UPGRADING_MD)).toContain('id="0-6-to-0-7"');
+    expect(colorMigration).toBeGreaterThan(UPGRADING_MD.indexOf("## 0.6 to 0.7"));
+    expect(colorMigration).toBeLessThan(UPGRADING_MD.indexOf("## 0.5 to 0.6"));
+    expect(UPGRADING_MD).toContain("Before 0.7, an explicit continuous color domain");
+  });
+
   it("states the 0.1→0.2 upgrade contract: additive, controller optional", () => {
     expect(UPGRADING_MD).toContain("No source changes are required");
     // Controller adoption is optional — both APIs remain supported.

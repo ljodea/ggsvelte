@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import type { SceneLegend, ThemeTokens } from "@ggsvelte/core";
 
+import GGPlot from "../../src/lib/GGPlot.svelte";
 import LegendHarness from "../fixtures/LegendHarness.svelte";
 import { render } from "../helpers/render.js";
 
@@ -43,6 +44,23 @@ const ramp = {
   ],
 } satisfies SceneLegend;
 
+const steps = {
+  type: "steps",
+  scale: "fill",
+  title: "Count",
+  x: 10,
+  y: 12,
+  width: 96,
+  height: 96,
+  stepWidth: 12,
+  stepHeight: 24,
+  entries: [
+    { label: "0–10", color: "#111111", y: 0 },
+    { label: "10–20", color: "#777777", y: 24 },
+    { label: "20–30", color: "#eeeeee", y: 48 },
+  ],
+} satisfies SceneLegend;
+
 describe("static Legend", () => {
   it("renders discrete SVG swatches and labels without an embedded HTML interaction tree", () => {
     const { container } = render(LegendHarness, { legend: discrete, theme });
@@ -67,6 +85,75 @@ describe("static Legend", () => {
       [...container.querySelectorAll(".gg-legend-label")].map((label) => label.textContent),
     ).toEqual(["10", "0"]);
     expect(container.querySelector("foreignObject, button")).toBeNull();
+  });
+
+  it("renders repeated colorbar break positions without duplicate-key failures", () => {
+    const repeatedTicks = {
+      ...ramp,
+      ticks: [
+        { y: 40, label: "same" },
+        { y: 40, label: "same" },
+      ],
+    } satisfies SceneLegend;
+    const { container } = render(LegendHarness, { legend: repeatedTicks, theme });
+    expect(container.querySelectorAll(".gg-legend-label")).toHaveLength(2);
+  });
+
+  it("renders binned colorsteps as discrete adjacent swatches with labels", () => {
+    const { container } = render(LegendHarness, { legend: steps, theme });
+    const legend = container.querySelector(".gg-legend-fill");
+    expect(legend?.querySelectorAll(".gg-legend-step")).toHaveLength(3);
+    expect(
+      [...(legend?.querySelectorAll(".gg-legend-label") ?? [])].map((label) => label.textContent),
+    ).toEqual(["0–10", "10–20", "20–30"]);
+    expect(
+      [...(legend?.querySelectorAll(".gg-legend-step") ?? [])].map((step) =>
+        step.getAttribute("fill"),
+      ),
+    ).toEqual(["#111111", "#777777", "#eeeeee"]);
+    expect(legend?.querySelector("linearGradient, foreignObject, button")).toBeNull();
+  });
+
+  it("renders colorsteps whose formatted labels collide", () => {
+    const repeatedLabels = {
+      ...steps,
+      entries: [
+        { label: "0–0", color: "#111111", y: 0 },
+        { label: "0–0", color: "#777777", y: 24 },
+      ],
+    } satisfies SceneLegend;
+    const { container } = render(LegendHarness, { legend: repeatedLabels, theme });
+    expect(container.querySelectorAll(".gg-legend-step")).toHaveLength(2);
+  });
+
+  it("renders binned colors and colorsteps through the public GGPlot composition", () => {
+    const { container } = render(GGPlot, {
+      data: [
+        { x: 1, y: 1, score: 1 },
+        { x: 2, y: 2, score: 10 },
+        { x: 3, y: 3, score: 100 },
+      ],
+      aes: { x: "x", y: "y", color: "score" },
+      layers: [{ geom: "point" }],
+      scales: {
+        color: {
+          type: "binned",
+          breaks: [1, 10, 100],
+          range: ["#111", "#eee"],
+        },
+      },
+      width: 640,
+      height: 400,
+    });
+    expect(container.querySelectorAll(".gg-legend-step")).toHaveLength(2);
+    expect(
+      [...container.querySelectorAll(".gg-legend-label")].map((label) => label.textContent),
+    ).toEqual(["10–100", "1–10"]);
+    expect(
+      [...container.querySelectorAll(".gg-points circle, .gg-points rect")].map((mark) =>
+        mark.getAttribute("fill"),
+      ),
+    ).toEqual(["#111111", "#eeeeee", "#eeeeee"]);
   });
 
   it("omits the title node and pins the ramp at y=0 when title is empty", () => {

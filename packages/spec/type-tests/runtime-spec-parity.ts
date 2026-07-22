@@ -1,4 +1,10 @@
-import { scaleXDiscrete } from "../src/scale-helpers.js";
+import {
+  scaleColorContinuous,
+  scaleColorDiscrete,
+  scaleColorIdentity,
+  scaleColorManual,
+  scaleXDiscrete,
+} from "../src/scale-helpers.js";
 import type { Aes, LayerSpec, PortableSpec } from "../src/schema.js";
 import type { RuntimeAes, RuntimeLayerSpec, RuntimeSpec } from "../src/runtime.js";
 
@@ -13,6 +19,22 @@ export type PortableRuntimeLayerKeyParity = Assert<
 >;
 export type PortableRuntimeAesKeyParity = Assert<
   Exclude<keyof Aes, keyof RuntimeAes> extends never ? true : false
+>;
+
+type OptionsOf<Helper> = Helper extends (options: infer Options) => unknown
+  ? NonNullable<Options>
+  : never;
+export type DiscreteColorRejectsOob = Assert<
+  "oob" extends keyof OptionsOf<typeof scaleColorDiscrete> ? false : true
+>;
+export type ContinuousColorRejectsOnExhaust = Assert<
+  "onExhaust" extends keyof OptionsOf<typeof scaleColorContinuous> ? false : true
+>;
+export type ManualColorRejectsReverse = Assert<
+  "reverse" extends keyof OptionsOf<typeof scaleColorManual> ? false : true
+>;
+export type IdentityColorRejectsDomain = Assert<
+  "domain" extends keyof OptionsOf<typeof scaleColorIdentity> ? false : true
 >;
 
 function acceptRuntimeSpec(_spec: RuntimeSpec): void {}

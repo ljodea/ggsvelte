@@ -192,9 +192,19 @@ function normalizeHexColor(color: string): string {
 }
 
 function normalizeColorScale(scale: ColorScaleSpec): ColorScaleSpec {
+  const fallbacks = {
+    ...(scale.naValue !== undefined && { naValue: normalizeHexColor(scale.naValue) }),
+    ...(scale.unknownValue !== undefined && {
+      unknownValue: normalizeHexColor(scale.unknownValue),
+    }),
+  };
+  if (scale.type === "identity") return { ...scale, ...fallbacks };
   return {
     ...scale,
-    ...(Array.isArray(scale.range) && { range: scale.range.map(normalizeHexColor) }),
+    ...(Array.isArray(scale.range) && {
+      range: scale.range.map((color) => normalizeHexColor(color)),
+    }),
+    ...fallbacks,
   };
 }
 

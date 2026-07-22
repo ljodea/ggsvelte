@@ -78,6 +78,14 @@ binding-identical ggplot2 aliases (`scale_x_log10`, `scale_y_sqrt`,
 `scale_x_binned`). Domains/limits are semantic source units; OOB censor/squish
 happens before the transform and stats.
 
+Color/fill scales use the same strict contract across JSON, builder, and Svelte:
+`ordinal`, `sequential`, `binned`, `manual`, and `identity`. CamelCase helpers
+cover continuous/discrete/binned/log10/sqrt/date/datetime/manual/identity;
+`color`/`colour` and ggplot2 snake-case names are binding-identical aliases.
+Binned color is capped at 64 deterministic intervals, manual mappings require
+one range color per domain value, and temporal families reuse the parser
+registry rather than field-name inference.
+
 Post-stat coordinate transforms use the separate strict `CoordTransformSpec`.
 `coordTransform({ x: "log10", y: "sqrt" })` and its binding-identical
 `coord_transform` alias emit canonical JSON; builder `.coordTransform()` emits

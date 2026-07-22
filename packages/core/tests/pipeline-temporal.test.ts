@@ -2,9 +2,24 @@ import { describe, expect, it } from "bun:test";
 
 import { aes, gg, SpecValidationError } from "@ggsvelte/spec";
 
+import type { AxisGuidePlan, GuidePlan } from "../src/layout/temporal-guide.ts";
 import { PipelineError, runPipeline } from "../src/pipeline.ts";
 
 const size = { width: 640, height: 400 };
+
+function axisGuideFor(plans: readonly GuidePlan[], aesthetic: "x" | "y"): AxisGuidePlan {
+  const guide = plans.find(
+    (plan): plan is AxisGuidePlan => plan.type === "axis" && plan.aesthetic === aesthetic,
+  );
+  if (guide === undefined) throw new Error(`Expected an axis guide for ${aesthetic}`);
+  return guide;
+}
+
+function axisGuidesFor(plans: readonly GuidePlan[], aesthetic: "x" | "y"): AxisGuidePlan[] {
+  return plans.filter(
+    (plan): plan is AxisGuidePlan => plan.type === "axis" && plan.aesthetic === aesthetic,
+  );
+}
 
 const yearRows = [
   { year: "1835", value: 1 },
@@ -21,7 +36,7 @@ describe("temporal pipeline semantics", () => {
           .spec(),
         { width, height: 400 },
       );
-      const guide = model.guidePlans.find((plan) => plan.aesthetic === "x");
+      const guide = axisGuideFor(model.guidePlans, "x");
       expect(model.guidePlans.map((plan) => plan.aesthetic).toSorted()).toEqual(["x", "y"]);
       expect(guide?.scaleType).toBe("time");
       expect(guide?.overlap, String(width)).toBe(false);
@@ -77,7 +92,7 @@ describe("temporal pipeline semantics", () => {
         .spec(),
       size,
     );
-    const guide = model.guidePlans.find((plan) => plan.aesthetic === "x")!;
+    const guide = axisGuideFor(model.guidePlans, "x");
     expect(guide.source).toBe("interval");
     expect(guide.ticks.some((tick) => tick.kind === "minor")).toBe(true);
     expect(model.scene.panels[0]?.grid.minorX.length).toBeGreaterThan(0);
@@ -240,7 +255,7 @@ describe("temporal pipeline semantics", () => {
       },
       size,
     );
-    const guide = model.guidePlans.find((plan) => plan.aesthetic === "x")!;
+    const guide = axisGuideFor(model.guidePlans, "x");
     expect(guide.source).toBe("interval");
     expect(guide.temporalKind).toBe("date");
     expect(guide.interval).toBe("3 days");
@@ -277,7 +292,7 @@ describe("temporal pipeline semantics", () => {
       },
       size,
     );
-    const guide = model.guidePlans.find((plan) => plan.aesthetic === "x")!;
+    const guide = axisGuideFor(model.guidePlans, "x");
     expect(guide.source).toBe("interval");
     expect(guide.temporalKind).toBe("date");
     expect(guide.ticks.every((tick) => !tick.fullLabel.includes(":"))).toBe(true);
@@ -349,7 +364,7 @@ describe("temporal pipeline semantics", () => {
         .spec(),
       size,
     );
-    const guide = model.guidePlans.find((plan) => plan.aesthetic === "x")!;
+    const guide = axisGuideFor(model.guidePlans, "x");
     expect(guide.source).toBe("explicit");
     expect(guide.interval).toBeNull();
     expect(guide.ticks.map((tick) => tick.label)).toEqual(["Jan", "Apr"]);
@@ -375,7 +390,7 @@ describe("temporal pipeline semantics", () => {
         .spec(),
       size,
     );
-    const guide = model.guidePlans.find((plan) => plan.aesthetic === "x")!;
+    const guide = axisGuideFor(model.guidePlans, "x");
     expect(guide.sourceBreaks).toEqual(["2023-12-01", "2024-01-01", "2024-05-01"]);
     expect(guide.ticks.filter((tick) => tick.kind === "major")).toHaveLength(1);
     expect(
@@ -399,7 +414,7 @@ describe("temporal pipeline semantics", () => {
         .spec(),
       size,
     );
-    const guide = model.guidePlans.find((plan) => plan.aesthetic === "x")!;
+    const guide = axisGuideFor(model.guidePlans, "x");
     expect(guide.ticks.filter((tick) => tick.kind === "major")).toHaveLength(3);
     expect(
       model.scaleDiagnostics.some(
@@ -440,7 +455,7 @@ describe("temporal pipeline semantics", () => {
         .spec(),
       size,
     );
-    const guide = model.guidePlans.find((plan) => plan.aesthetic === "x")!;
+    const guide = axisGuideFor(model.guidePlans, "x");
     const values = guide.ticks
       .filter((tick) => tick.kind === "major")
       .map((tick) => tick.value as number);
@@ -873,7 +888,7 @@ describe("temporal pipeline semantics", () => {
     );
     expect(model.scales.panels).toHaveLength(2);
     expect(model.scales.panels.map((panel) => panel.x.type)).toEqual(["time", "time"]);
-    const facetGuides = model.guidePlans.filter((plan) => plan.aesthetic === "x");
+    const facetGuides = axisGuidesFor(model.guidePlans, "x");
     expect(facetGuides).toHaveLength(2);
     expect(facetGuides.every((plan) => plan.interval !== null && !plan.overlap)).toBe(true);
     expect(

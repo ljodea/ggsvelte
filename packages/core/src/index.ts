@@ -162,6 +162,12 @@ export { planTemporalAxis } from "./layout/temporal-guide.js";
 export type {
   AxisGuidePlan,
   AxisGuideTick,
+  ColorbarGuidePlan,
+  ColorbarGuideTick,
+  ColorstepsGuidePlan,
+  ColorstepsGuideStep,
+  DiscreteGuideEntry,
+  DiscreteGuidePlan,
   GuidePlan,
   TemporalAxisPlanInput,
 } from "./layout/temporal-guide.js";
@@ -186,6 +192,7 @@ export type {
   LegendInput,
   LegendOrder,
   RampLegendInput,
+  StepsLegendInput,
 } from "./legend.js";
 
 // Pipeline
@@ -247,6 +254,7 @@ export type {
   SceneLegendEntry,
   ScenePanel,
   SceneRampLegend,
+  SceneStepsLegend,
   SceneTick,
   SegmentsBatch,
 } from "./scene.js";
