@@ -55,10 +55,10 @@ function colorTemporalCensorRecovery(input: {
         disambiguation: config.disambiguation,
       }),
   };
-  const parseableBound = (value: unknown): boolean =>
-    temporalInputsUsable &&
-    config?.parse !== undefined &&
-    parseTemporal(value, config.parse as Parameters<typeof parseTemporal>[1], temporalOptions).ok;
+  const parseableBound = (value: unknown): boolean => {
+    if (!temporalInputsUsable || config?.parse === undefined) return false;
+    return parseTemporal(value, config.parse, temporalOptions).ok;
+  };
 
   const domainValues = Array.isArray(config?.domain)
     ? config.domain.filter((value) => value !== null)
@@ -79,7 +79,7 @@ function colorTemporalCensorRecovery(input: {
     config?.timezone !== undefined ||
     config?.disambiguation !== undefined;
   if (temporalInputsUsable && requestsTemporal) {
-    const parser = (config?.parse ?? "auto") as Parameters<typeof temporalDecisionForField>[3];
+    const parser = config?.parse ?? "auto";
     for (const use of colorFields) {
       const type = typeOf(use.field);
       if (type === "temporal") {
