@@ -16,6 +16,7 @@ export const KNOWN_GEOMS = [
   "boxplot",
   "density",
   "errorbar",
+  "ribbon",
 ] as const;
 export type GeomName = (typeof KNOWN_GEOMS)[number];
 
@@ -46,6 +47,8 @@ export const CHANNELS = [
   "weight",
   "ymin",
   "ymax",
+  "xmin",
+  "xmax",
 ] as const;
 export type ChannelName = (typeof CHANNELS)[number];
 
@@ -85,4 +88,5 @@ export const GEOM_DEFAULTS: Record<GeomName, { stat: StatName; position: Positio
   boxplot: { stat: "boxplot", position: "dodge" },
   density: { stat: "density", position: "identity" },
   errorbar: { stat: "identity", position: "identity" },
+  ribbon: { stat: "identity", position: "identity" },
 };

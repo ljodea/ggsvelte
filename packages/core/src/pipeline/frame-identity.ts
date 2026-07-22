@@ -110,5 +110,28 @@ export function buildIdentityFrame(
             binding.yTransform,
             binding.yBinning,
           ),
+    // Only ribbon (and stats that write xmin/xmax themselves) consume these
+    // fields — do not populate them for unrelated geoms that happen to map
+    // xmin/xmax, or scale collection treats the layer as edge/bin evidence.
+    xmin:
+      binding.layer.geom === "ribbon" && binding.xminField !== null
+        ? positionNumeric(
+            table,
+            binding.xminField,
+            binding.xConversion,
+            binding.xTransform,
+            binding.xBinning,
+          )
+        : null,
+    xmax:
+      binding.layer.geom === "ribbon" && binding.xmaxField !== null
+        ? positionNumeric(
+            table,
+            binding.xmaxField,
+            binding.xConversion,
+            binding.xTransform,
+            binding.xBinning,
+          )
+        : null,
   };
 }

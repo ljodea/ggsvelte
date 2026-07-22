@@ -89,6 +89,7 @@ export { default as GeomSmooth } from "./geoms/GeomSmooth.svelte";
 export { default as GeomBoxplot } from "./geoms/GeomBoxplot.svelte";
 export { default as GeomDensity } from "./geoms/GeomDensity.svelte";
 export { default as GeomErrorbar } from "./geoms/GeomErrorbar.svelte";
+export { default as GeomRibbon } from "./geoms/GeomRibbon.svelte";
 export { registerLayer } from "./geoms/registry.svelte.js";
 export type { LayerDescriptor, LayerRegistry } from "./geoms/registry.svelte.js";
 export { createGeomLayer } from "./geoms/factory.svelte.js";

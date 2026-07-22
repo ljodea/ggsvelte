@@ -71,6 +71,10 @@ export interface LayerBinding {
   yBinning?: BinnedBoundaries | undefined;
   yminField: string | null;
   ymaxField: string | null;
+  xminField: string | null;
+  xmaxField: string | null;
+  /** Ribbon only: resolved running-coordinate orientation. */
+  ribbonOrientation?: "x" | "y";
   color: ColorBinding;
   fill: ColorBinding;
   size: StyleBinding;

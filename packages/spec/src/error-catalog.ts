@@ -166,6 +166,12 @@ export const ERROR_CATALOG = {
     summary: "A mapped style aesthetic is not consumed by the selected geom.",
     fix: "Remove the mapping or move it to one of the compatible geoms listed in the error.",
   },
+  "ribbon-orientation-ambiguous": {
+    tier: 2,
+    summary:
+      "A ribbon layer maps both x-orientation (x+ymin+ymax) and y-orientation (y+xmin+xmax) contracts without params.orientation.",
+    fix: 'Set params.orientation to "x" or "y", or map only one complete interval contract.',
+  },
   // --- tier 2 (data-aware; needs inline data or a DataProfile) -------------
   "unknown-field": {
     tier: 2,

@@ -14,6 +14,7 @@ import type {
   DataRef,
   DensityParams,
   ErrorbarParams,
+  RibbonParams,
   FacetScales,
   GuidesSpec,
   InlineData,
@@ -52,6 +53,8 @@ export interface AesInput {
   weight?: ChannelInput;
   ymin?: ChannelInput;
   ymax?: ChannelInput;
+  xmin?: ChannelInput;
+  xmax?: ChannelInput;
 }
 
 interface LayerInputBase {
@@ -155,6 +158,13 @@ export interface ErrorbarLayerInput extends LayerInputBase {
   params?: ErrorbarParams;
 }
 
+export interface RibbonLayerInput extends LayerInputBase {
+  geom: "ribbon";
+  stat?: "identity";
+  position?: "identity";
+  params?: RibbonParams;
+}
+
 /** Layer accepted at the TS/builder level. */
 export type LayerInput =
   | PointLayerInput
@@ -163,6 +173,7 @@ export type LayerInput =
   | BarLayerInput
   | HistogramLayerInput
   | AreaLayerInput
+  | RibbonLayerInput
   | RuleLayerInput
   | TextLayerInput
   | SmoothLayerInput

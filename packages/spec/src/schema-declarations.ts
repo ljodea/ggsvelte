@@ -383,13 +383,25 @@ export const SpecDeclarations = {
       ymin: Type.Optional(
         Type.Ref("ChannelValue", {
           description:
-            "Lower bound channel (errorbar with the identity stat). Quantitative values only.",
+            "Lower bound on the y measure (errorbar identity; ribbon x-orientation). Quantitative values only.",
         }),
       ),
       ymax: Type.Optional(
         Type.Ref("ChannelValue", {
           description:
-            "Upper bound channel (errorbar with the identity stat). Quantitative values only.",
+            "Upper bound on the y measure (errorbar identity; ribbon x-orientation). Quantitative values only.",
+        }),
+      ),
+      xmin: Type.Optional(
+        Type.Ref("ChannelValue", {
+          description:
+            "Lower bound on the x measure (ribbon y-orientation). Quantitative values only.",
+        }),
+      ),
+      xmax: Type.Optional(
+        Type.Ref("ChannelValue", {
+          description:
+            "Upper bound on the x measure (ribbon y-orientation). Quantitative values only.",
         }),
       ),
     },
@@ -811,6 +823,59 @@ export const SpecDeclarations = {
     },
   ),
 
+  RibbonParams: Type.Object(
+    {
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Ribbon fill opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description:
+            "Outline stroke width in px when an outline is drawn. Must be greater than 0. Default 1.",
+        }),
+      ),
+      outline: Type.Optional(
+        Type.Union(
+          [
+            Type.Literal("both"),
+            Type.Literal("upper"),
+            Type.Literal("lower"),
+            Type.Literal("full"),
+          ],
+          {
+            description:
+              'Which edges receive an outline stroke: "both" (default — upper and lower), "upper", "lower", or "full" (closed outline of the band). Strokes appear only when aes.color / a color constant is set.',
+          },
+        ),
+      ),
+      orientation: Type.Optional(
+        Type.Union([Type.Literal("x"), Type.Literal("y")], {
+          description:
+            'Running-coordinate orientation: "x" (map x + ymin + ymax) or "y" (map y + xmin + xmax). When omitted, inferred from the complete channel contract; set explicitly if both contracts are mapped.',
+        }),
+      ),
+      lineend: Type.Optional(
+        Type.Union([Type.Literal("butt"), Type.Literal("round"), Type.Literal("square")], {
+          description: 'SVG stroke-linecap for outlines. Default "butt".',
+        }),
+      ),
+      linejoin: Type.Optional(
+        Type.Union([Type.Literal("miter"), Type.Literal("round"), Type.Literal("bevel")], {
+          description: 'SVG stroke-linejoin for outlines. Default "round".',
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description: "Styling and orientation parameters for the ribbon geom.",
+    },
+  ),
+
   RuleIntercept: Type.Union(
     [
       Type.Number(),
@@ -1163,6 +1228,29 @@ export const SpecDeclarations = {
     },
   ),
 
+  RibbonLayer: Type.Object(
+    {
+      geom: Type.Literal("ribbon", {
+        description:
+          "Ribbon geometry: a filled interval between two varying boundaries along a running coordinate (ggplot2's geom_ribbon). Map x+ymin+ymax (x orientation) or y+xmin+xmax (y orientation). Not a zero-baseline area.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("identity", { description: "Ribbon layers draw precomputed bounds as-is." }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Ribbon layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      params: Type.Optional(Type.Ref("RibbonParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A ribbon layer. Requires a running coordinate and both interval bounds (x+ymin+ymax or y+xmin+xmax). Rows are sorted along the running coordinate within each group.",
+    },
+  ),
+
   RuleLayer: Type.Object(
     {
       geom: Type.Literal("rule", {
@@ -1220,6 +1308,7 @@ export const SpecDeclarations = {
       Type.Ref("BarLayer"),
       Type.Ref("HistogramLayer"),
       Type.Ref("AreaLayer"),
+      Type.Ref("RibbonLayer"),
       Type.Ref("RuleLayer"),
       Type.Ref("TextLayer"),
       Type.Ref("SmoothLayer"),

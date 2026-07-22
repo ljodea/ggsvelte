@@ -28,6 +28,7 @@ import type {
   LineLayer,
   PointLayer,
   PortableSpec,
+  RibbonLayer,
   RuleLayer,
   SmoothLayer,
   TextLayer,
@@ -57,6 +58,7 @@ export interface RuntimeColLayer extends WithRuntimeAes<ColLayer> {}
 export interface RuntimeBarLayer extends WithRuntimeAes<BarLayer> {}
 export interface RuntimeHistogramLayer extends WithRuntimeAes<HistogramLayer> {}
 export interface RuntimeAreaLayer extends WithRuntimeAes<AreaLayer> {}
+export interface RuntimeRibbonLayer extends WithRuntimeAes<RibbonLayer> {}
 export interface RuntimeRuleLayer extends WithRuntimeAes<RuleLayer> {}
 export interface RuntimeTextLayer extends WithRuntimeAes<TextLayer> {}
 export interface RuntimeSmoothLayer extends WithRuntimeAes<SmoothLayer> {}
@@ -71,6 +73,7 @@ export type RuntimeLayerSpec =
   | RuntimeBarLayer
   | RuntimeHistogramLayer
   | RuntimeAreaLayer
+  | RuntimeRibbonLayer
   | RuntimeRuleLayer
   | RuntimeTextLayer
   | RuntimeSmoothLayer

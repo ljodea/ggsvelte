@@ -46,6 +46,8 @@ export function pointFrame(table: ColumnTable): LayerFrame {
     yStatColumn: null,
     yminField: null,
     ymaxField: null,
+    xminField: null,
+    xmaxField: null,
     color: { field: null, constant: null, scaledConstant: null },
     fill: { field: null, constant: null, scaledConstant: null },
     labelField: null,

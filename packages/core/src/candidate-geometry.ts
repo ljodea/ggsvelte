@@ -39,10 +39,12 @@ export function renderPrimitiveCount(batch: GeometryBatch): number {
 }
 
 export function isCandidatePrimitive(batch: GeometryBatch, primitiveIndex: number): boolean {
+  if (batch.kind === "paths" && batch.candidates === false) return false;
   return batch.kind !== "paths" || batch.semanticAnchors?.[primitiveIndex] !== 0;
 }
 
 export function candidatePrimitiveCount(batch: GeometryBatch): number {
+  if (batch.kind === "paths" && batch.candidates === false) return 0;
   if (batch.kind !== "paths" || batch.semanticAnchors === undefined) return primitiveCount(batch);
   let count = 0;
   for (const anchor of batch.semanticAnchors) if (anchor !== 0) count++;

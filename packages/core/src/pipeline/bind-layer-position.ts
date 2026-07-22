@@ -1,5 +1,5 @@
 /**
- * Resolve positional channels (x/y/ymin/ymax) and validate geom/stat contracts.
+ * Resolve positional channels (x/y/ymin/ymax/xmin/xmax) and validate geom/stat contracts.
  */
 import type { Aes, LayerSpec } from "@ggsvelte/spec";
 
@@ -13,6 +13,7 @@ import {
 } from "./bind-layer-validate.js";
 import { resolveYChannel } from "./bind-layer-y.js";
 import type { PositionConversionContext } from "./temporal-position.js";
+import { PipelineError } from "./types.js";
 import type { LayerBinding, PipelineWarning } from "./types.js";
 
 export function resolveLayerPositionChannels(input: {
@@ -30,6 +31,9 @@ export function resolveLayerPositionChannels(input: {
   yStatColumn: string | null;
   yminField: string | null;
   ymaxField: string | null;
+  xminField: string | null;
+  xmaxField: string | null;
+  ribbonOrientation?: "x" | "y";
 } {
   const { layer, aes, index, table, warnings, xConversion, yConversion } = input;
   const geom = layer.geom;
@@ -50,6 +54,22 @@ export function resolveLayerPositionChannels(input: {
 
   const yminField = checkField(aes.ymin, "ymin", index, table, warnings);
   const ymaxField = checkField(aes.ymax, "ymax", index, table, warnings);
+  const xminField = checkField(aes.xmin, "xmin", index, table, warnings);
+  const xmaxField = checkField(aes.xmax, "xmax", index, table, warnings);
+
+  const ribbonOrientation =
+    geom === "ribbon"
+      ? resolveRibbonOrientation({
+          index,
+          xField,
+          yField,
+          yminField,
+          ymaxField,
+          xminField,
+          xmaxField,
+          pinned: ribbonOrientationParam(layer.params),
+        })
+      : undefined;
 
   assertRequiredChannels({
     geom,
@@ -61,7 +81,67 @@ export function resolveLayerPositionChannels(input: {
     yStatColumn,
     yminField,
     ymaxField,
+    xminField,
+    xmaxField,
+    ...(ribbonOrientation !== undefined && { ribbonOrientation }),
   });
 
-  return { ruleForm, xField, yField, yStatColumn, yminField, ymaxField };
+  // When orientation is pinned, drop the inactive bound pair so scale training
+  // does not train the measure axis from unused interval channels.
+  let outYmin = yminField;
+  let outYmax = ymaxField;
+  let outXmin = xminField;
+  let outXmax = xmaxField;
+  if (ribbonOrientation === "x") {
+    outXmin = null;
+    outXmax = null;
+  } else if (ribbonOrientation === "y") {
+    outYmin = null;
+    outYmax = null;
+  }
+
+  return {
+    ruleForm,
+    xField,
+    yField,
+    yStatColumn,
+    yminField: outYmin,
+    ymaxField: outYmax,
+    xminField: outXmin,
+    xmaxField: outXmax,
+    ...(ribbonOrientation !== undefined && { ribbonOrientation }),
+  };
+}
+
+function ribbonOrientationParam(params: LayerSpec["params"]): "x" | "y" | undefined {
+  if (params === undefined || params === null || typeof params !== "object") return undefined;
+  const orientation = (params as Record<string, unknown>)["orientation"];
+  return orientation === "x" || orientation === "y" ? orientation : undefined;
+}
+
+function resolveRibbonOrientation(input: {
+  index: number;
+  xField: string | null;
+  yField: string | null;
+  yminField: string | null;
+  ymaxField: string | null;
+  xminField: string | null;
+  xmaxField: string | null;
+  pinned: "x" | "y" | undefined;
+}): "x" | "y" {
+  const { index, xField, yField, yminField, ymaxField, xminField, xmaxField, pinned } = input;
+  if (pinned === "x" || pinned === "y") return pinned;
+  const xContract = xField !== null && yminField !== null && ymaxField !== null;
+  const yContract = yField !== null && xminField !== null && xmaxField !== null;
+  if (xContract && !yContract) return "x";
+  if (yContract && !xContract) return "y";
+  if (xContract && yContract) {
+    throw new PipelineError(
+      "ribbon-orientation-ambiguous",
+      `/layers/${index}/params/orientation`,
+      'This ribbon layer maps both x-orientation (x+ymin+ymax) and y-orientation (y+xmin+xmax) contracts. Set params.orientation to "x" or "y".',
+    );
+  }
+  // Incomplete contracts: required-channel checks report missing fields.
+  return xField !== null || yminField !== null || ymaxField !== null ? "x" : "y";
 }

@@ -15,6 +15,7 @@ import { assertInferredTemporalTransform } from "./scale-config-preflight.js";
 import { computePanelBinRanges } from "./prepare-panels-bin-ranges.js";
 import { resolveBinnedAxis } from "./resolve-binned-axis.js";
 import { warnEmptyLayers } from "./prepare-panels-empty-layers.js";
+import { assertRibbonBounds } from "./ribbon-bounds.js";
 import { xConversionOf, yConversionOf } from "./temporal-position.js";
 import type { PositionConversionContext } from "./temporal-position.js";
 import { preflightTemporalBindings } from "./temporal-preflight.js";
@@ -244,6 +245,7 @@ export function buildPanelFrames(input: {
       );
       applyPosition(frame, advisories, panelTable);
       remapSourceRows(frame, facetPanels[p]!.sourceRows);
+      assertRibbonBounds(frame);
       panelFrames[p]!.push(frame);
     }
   }

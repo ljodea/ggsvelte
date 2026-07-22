@@ -413,6 +413,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "ribbon/bounds",
+    category: "ribbon",
+    name: "bounds",
+    title: "Ribbon interval",
+    description: "A filled band between precomputed lower and upper bounds along x — the canonical geom_ribbon contract (not a zero-baseline area).",
+    tags: ["ribbon", "interval", "bounds"],
+    docsSection: "Areas",
+    hasData: true,
+  },
+  {
     id: "rule/annotation",
     category: "rule",
     name: "annotation",

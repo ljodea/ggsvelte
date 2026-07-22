@@ -15,8 +15,10 @@ describe("generated gallery previews", () => {
     expect(canonicalPreviewFilename("interaction/linked-views")).toBe(
       "interaction-linked-views-light.png",
     );
-    expect(previewSourceInventory(EXAMPLES)).toHaveLength(34);
-    expect(new Set(previewSourceInventory(EXAMPLES).map((entry) => entry.filename)).size).toBe(34);
+    expect(previewSourceInventory(EXAMPLES)).toHaveLength(EXAMPLES.length);
+    expect(new Set(previewSourceInventory(EXAMPLES).map((entry) => entry.filename)).size).toBe(
+      EXAMPLES.length,
+    );
     expect(
       previewSourceInventory(EXAMPLES).some((entry) => entry.filename.startsWith("docs-guide")),
     ).toBe(false);

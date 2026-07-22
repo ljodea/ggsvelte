@@ -48,7 +48,11 @@ export function buildGeometryBatches(input: {
       const projector = coordProjectors[p];
       const geom = frame.binding.layer.geom;
       const pathLike =
-        geom === "line" || geom === "area" || geom === "density" || geom === "smooth";
+        geom === "line" ||
+        geom === "area" ||
+        geom === "density" ||
+        geom === "smooth" ||
+        geom === "ribbon";
       const built = buildBatch(
         frame,
         // Path topology must retain coordinate-invalid authored/stat vertices

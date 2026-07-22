@@ -1714,6 +1714,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["unsupported-geom-aesthetic"],
   },
   {
+    id: "heading:guide-errors:ribbon-orientation-ambiguous",
+    kind: "heading",
+    title: "ribbon-orientation-ambiguous",
+    summary:
+      "ribbon-orientation-ambiguous in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#ribbon-orientation-ambiguous",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["ribbon-orientation-ambiguous"],
+  },
+  {
     id: "heading:guide-errors:unknown-field",
     kind: "heading",
     title: "unknown-field",
@@ -1942,6 +1952,26 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/errors#rule-both-axes-pipeline",
     keywords: ["Errors reference", "Reference"],
     exact: ["rule-both-axes — pipeline"],
+  },
+  {
+    id: "heading:guide-errors:ribbon-orientation-ambiguous-pipeline",
+    kind: "heading",
+    title: "ribbon-orientation-ambiguous — pipeline",
+    summary:
+      "ribbon-orientation-ambiguous — pipeline in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#ribbon-orientation-ambiguous-pipeline",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["ribbon-orientation-ambiguous — pipeline"],
+  },
+  {
+    id: "heading:guide-errors:ribbon-inverted-bounds",
+    kind: "heading",
+    title: "ribbon-inverted-bounds",
+    summary:
+      "ribbon-inverted-bounds in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#ribbon-inverted-bounds",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["ribbon-inverted-bounds"],
   },
   {
     id: "heading:guide-errors:facet-form-ambiguous-pipeline",
@@ -3272,14 +3302,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/spec"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-450",
+    id: "heading:guide-lifecycle:experimental-455",
     kind: "heading",
-    title: "experimental (450)",
+    title: "experimental (455)",
     summary:
-      "experimental (450) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-450",
+      "experimental (455) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-455",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (450)"],
+    exact: ["experimental (455)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-8",
@@ -3352,14 +3382,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/svelte"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-408",
+    id: "heading:guide-lifecycle:experimental-409",
     kind: "heading",
-    title: "experimental (408)",
+    title: "experimental (409)",
     summary:
-      "experimental (408) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-408",
+      "experimental (409) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-409",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (408)"],
+    exact: ["experimental (409)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-6",
@@ -4020,6 +4050,16 @@ export const DOCS_SEARCH_INDEX = [
       "scales",
     ],
     exact: ["Complete style scales"],
+  },
+  {
+    id: "example:ribbon:bounds",
+    kind: "example",
+    title: "Ribbon interval",
+    summary:
+      "A filled band between precomputed lower and upper bounds along x — the canonical geom_ribbon contract (not a zero-baseline area).",
+    href: "/examples/ribbon/bounds",
+    keywords: ["Ribbon interval", "Areas", "ribbon", "interval", "bounds"],
+    exact: ["Ribbon interval"],
   },
   {
     id: "example:rule:annotation",
@@ -5498,6 +5538,42 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["RenderBackend"],
   },
   {
+    id: "api:ggsvelte-spec:RibbonLayer",
+    kind: "api",
+    title: "RibbonLayer",
+    summary: "@ggsvelte/spec · type · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "type", "experimental"],
+    exact: ["RibbonLayer"],
+  },
+  {
+    id: "api:ggsvelte-spec:RibbonLayerInput",
+    kind: "api",
+    title: "RibbonLayerInput",
+    summary: "@ggsvelte/spec · type · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "type", "experimental"],
+    exact: ["RibbonLayerInput"],
+  },
+  {
+    id: "api:ggsvelte-spec:RibbonLayerSchema",
+    kind: "api",
+    title: "RibbonLayerSchema",
+    summary: "@ggsvelte/spec · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "value", "experimental"],
+    exact: ["RibbonLayerSchema"],
+  },
+  {
+    id: "api:ggsvelte-spec:RibbonParams",
+    kind: "api",
+    title: "RibbonParams",
+    summary: "@ggsvelte/spec · type · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "type", "experimental"],
+    exact: ["RibbonParams"],
+  },
+  {
     id: "api:ggsvelte-spec:RuleLayer",
     kind: "api",
     title: "RuleLayer",
@@ -5640,6 +5716,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-spec",
     keywords: ["@ggsvelte/spec", ".", "type", "experimental"],
     exact: ["RuntimePointLayer"],
+  },
+  {
+    id: "api:ggsvelte-spec:RuntimeRibbonLayer",
+    kind: "api",
+    title: "RuntimeRibbonLayer",
+    summary: "@ggsvelte/spec · type · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "type", "experimental"],
+    exact: ["RuntimeRibbonLayer"],
   },
   {
     id: "api:ggsvelte-spec:RuntimeRuleLayer",
@@ -11105,6 +11190,15 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["GeomProps"],
   },
   {
+    id: "api:ggsvelte-svelte:GeomRibbon",
+    kind: "api",
+    title: "GeomRibbon",
+    summary: "@ggsvelte/svelte · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-svelte",
+    keywords: ["@ggsvelte/svelte", ".", "value", "experimental"],
+    exact: ["GeomRibbon"],
+  },
+  {
     id: "api:ggsvelte-svelte:GeomRule",
     kind: "api",
     title: "GeomRule",
@@ -14616,6 +14710,20 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["unsupported-geom-aesthetic", "validation:unsupported-geom-aesthetic"],
   },
   {
+    id: "diagnostic:validation:ribbon-orientation-ambiguous",
+    kind: "diagnostic",
+    title: "ribbon-orientation-ambiguous · validation",
+    summary:
+      "A ribbon layer maps both x-orientation (x+ymin+ymax) and y-orientation (y+xmin+xmax) contracts without params.orientation.",
+    href: "/guide/errors#ribbon-orientation-ambiguous",
+    keywords: [
+      "validation",
+      "error",
+      'Set params.orientation to "x" or "y", or map only one complete interval contract.',
+    ],
+    exact: ["ribbon-orientation-ambiguous", "validation:ribbon-orientation-ambiguous"],
+  },
+  {
     id: "diagnostic:validation:unknown-field",
     kind: "diagnostic",
     title: "unknown-field · validation",
@@ -14893,6 +15001,33 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/errors#rule-both-axes-pipeline",
     keywords: ["pipeline", "error", "Keep one direction and unset the other channel with null."],
     exact: ["rule-both-axes", "pipeline:rule-both-axes"],
+  },
+  {
+    id: "diagnostic:pipeline:ribbon-orientation-ambiguous",
+    kind: "diagnostic",
+    title: "ribbon-orientation-ambiguous · pipeline",
+    summary:
+      "A ribbon layer maps both x-orientation and y-orientation contracts without params.orientation.",
+    href: "/guide/errors#ribbon-orientation-ambiguous-pipeline",
+    keywords: [
+      "pipeline",
+      "error",
+      'Set params.orientation to "x" or "y", or map only one complete interval contract.',
+    ],
+    exact: ["ribbon-orientation-ambiguous", "pipeline:ribbon-orientation-ambiguous"],
+  },
+  {
+    id: "diagnostic:pipeline:ribbon-inverted-bounds",
+    kind: "diagnostic",
+    title: "ribbon-inverted-bounds · pipeline",
+    summary: "A ribbon layer has one or more rows where the lower bound exceeds the upper bound.",
+    href: "/guide/errors#ribbon-inverted-bounds",
+    keywords: [
+      "pipeline",
+      "error",
+      "Swap or correct ymin/ymax (or xmin/xmax) so lower ≤ upper on every finite row.",
+    ],
+    exact: ["ribbon-inverted-bounds", "pipeline:ribbon-inverted-bounds"],
   },
   {
     id: "diagnostic:pipeline:facet-form-ambiguous",
