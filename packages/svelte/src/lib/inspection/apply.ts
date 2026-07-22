@@ -53,8 +53,7 @@ export type SetInspectionAction =
  *
  * Host note: `apply` is not terminal. After resolve, a null coordinator
  * result re-enters via `setInspection(null, source)` (default transient),
- * re-running these gates. Host still owns resolve, reducer, emit, and
- * the post-dispatch `shouldCommitInspection` gate.
+ * re-running these gates. InspectionState owns resolve/commit/emit.
  */
 export function resolveSetInspectionAction(input: SetInspectionInput): SetInspectionAction {
   if (input.currentState === "pinned" && input.requestedState === "transient")
@@ -64,21 +63,6 @@ export function resolveSetInspectionAction(input: SetInspectionInput): SetInspec
     return { type: "clear", emitClear: input.currentState !== "none" };
   }
   return { type: "apply" };
-}
-
-/**
- * After reducer inspect (+ optional toggle-pin) dispatch for an apply path,
- * whether the host should commit the resolved snapshot into inspection state.
- * Host: when false, return without mutating inspection / seed / emit.
- */
-export function shouldCommitInspection(input: {
-  readonly requestedState: "transient" | "pinned";
-  /** Host: `reducer.state.inspection.kind` after dispatch. */
-  readonly reducerKind: string;
-}): boolean {
-  if (input.requestedState === "transient" && input.reducerKind !== "transient") return false;
-  if (input.requestedState === "pinned" && input.reducerKind !== "pinned") return false;
-  return true;
 }
 
 export type ToggleInspectionPinInput = {

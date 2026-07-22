@@ -155,7 +155,7 @@ describe("interaction capability normalization", () => {
 });
 
 describe("chart-local interaction reducer", () => {
-  it("pins, unpins, dismisses transient content, and suppresses equal changes", () => {
+  it("inspect dispatches are no-ops (inspection authority is InspectionState)", () => {
     const onChange = vi.fn();
     const reducer = createInteractionReducer({
       onChange: () => {
@@ -167,24 +167,22 @@ describe("chart-local interaction reducer", () => {
       candidate: candidate(1),
       source: "pointer",
     });
-    reducer.dispatch({
-      type: "inspect",
-      candidate: candidate(1),
-      source: "pointer",
-    });
-    expect(onChange).toHaveBeenCalledTimes(1);
-    expect(reducer.state.inspection.kind).toBe("transient");
+    expect(onChange).toHaveBeenCalledTimes(0);
+    expect(reducer.state.revision).toBe(0);
+  });
 
-    reducer.dispatch({ type: "toggle-pin", source: "pointer" });
-    expect(reducer.state.inspection.kind).toBe("pinned");
+  it("escape cancels area and bumps epoch without inspection state", () => {
+    const reducer = createInteractionReducer();
+    reducer.dispatch({ type: "set-tool", tool: "select-area" });
     reducer.dispatch({
-      type: "inspect",
-      candidate: candidate(2),
-      source: "pointer",
+      type: "begin-area",
+      point: { x: 10, y: 10 },
+      panelId: "panel:all",
     });
-    expect(reducer.state.inspection.candidate?.id).toBe(1);
+    const epoch = reducer.state.epoch;
     reducer.dispatch({ type: "escape", source: "keyboard" });
-    expect(reducer.state.inspection.kind).toBe("idle");
+    expect(reducer.state.area.kind).toBe("idle");
+    expect(reducer.state.epoch).toBe(epoch + 1);
   });
 
   it("keeps Select area and Zoom area mutually exclusive", () => {
@@ -217,9 +215,9 @@ describe("chart-local interaction reducer", () => {
     expect(reducer.accepts(next)).toBe(false);
   });
 
-  it("coalesces continuous pointer coordinates once per frame and lets boundaries cancel them", () => {
+  it("coalesces inspect frames without reducer mutation; set-tool cancels the schedule", () => {
     let frame: (() => void) | null = null;
-    const changes: number[] = [];
+    const seen: number[] = [];
     const reducer = createInteractionReducer({
       scheduleFrame: (callback) => {
         frame = callback;
@@ -228,8 +226,8 @@ describe("chart-local interaction reducer", () => {
       cancelFrame: () => {
         frame = null;
       },
-      onChange: (state) => {
-        changes.push(state.revision);
+      onPointerFrame: (action) => {
+        if (action.type === "inspect" && action.candidate !== null) seen.push(action.candidate.id);
       },
     });
     reducer.queuePointer({
@@ -242,10 +240,10 @@ describe("chart-local interaction reducer", () => {
       candidate: candidate(2),
       source: "pointer",
     });
-    expect(changes).toHaveLength(0);
+    expect(seen).toHaveLength(0);
     (frame as (() => void) | null)?.();
-    expect(reducer.state.inspection.candidate?.id).toBe(2);
-    expect(changes).toHaveLength(1);
+    expect(seen).toEqual([2]);
+    expect(reducer.state.revision).toBe(0);
 
     reducer.queuePointer({
       type: "inspect",
@@ -254,10 +252,10 @@ describe("chart-local interaction reducer", () => {
     });
     reducer.dispatch({ type: "set-tool", tool: "zoom-area" });
     expect(frame).toBeNull();
-    expect(reducer.state.inspection.candidate?.id).toBe(2);
+    expect(seen).toEqual([2]);
   });
 
-  it("typed cancelScheduledPointer only clears matching kind; onPointerFrame false skips dispatch", () => {
+  it("typed cancelScheduledPointer only clears matching kind; inspect frames never dispatch", () => {
     let frame: (() => void) | null = null;
     const seen: string[] = [];
     const reducer = createInteractionReducer({
@@ -270,7 +268,6 @@ describe("chart-local interaction reducer", () => {
       },
       onPointerFrame: (action) => {
         seen.push(action.type);
-        if (action.type === "inspect") return false;
         return true;
       },
     });
@@ -292,7 +289,7 @@ describe("chart-local interaction reducer", () => {
     const rev = reducer.state.revision;
     (frame as (() => void) | null)?.();
     expect(seen).toEqual(["inspect"]);
+    // Inspect frames never bump reducer revision.
     expect(reducer.state.revision).toBe(rev);
-    expect(reducer.state.inspection.kind).toBe("idle");
   });
 });

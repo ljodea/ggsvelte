@@ -23,7 +23,6 @@ import {
   mountInspectionController,
   noInspect,
   noInteraction,
-  wrapReducerWithLog,
   withFlushedEffectRoot,
   type InspectCb,
 } from "./inspection-state.harness.js";
@@ -165,7 +164,7 @@ describe("createInspectionState schedulePointerInspect / onInspectPointerFrame",
     flushSync();
     expect(state.inspection).toBeNull();
 
-    // Fresh schedule + flush → transient on both authorities.
+    // Fresh schedule + flush → InspectionState owns transient lifecycle.
     state.schedulePointerInspect({
       point: { x: candidate.x, y: candidate.y },
       source: "pointer",
@@ -175,8 +174,8 @@ describe("createInspectionState schedulePointerInspect / onInspectPointerFrame",
     flushFrame();
     flushSync();
     expect(state.inspection?.state).toBe("transient");
-    expect(reducer.state.inspection.kind).toBe("transient");
-    expect(reducer.state.inspection.candidate?.id).toBe(candidate.id);
+    // Reducer is not the inspection authority (no inspection field).
+    expect(reducer.state.revision).toBe(0);
 
     // Re-apply empty (queues cleared) keeps transient.
     expect(
@@ -195,12 +194,10 @@ describe("createInspectionState schedulePointerInspect / onInspectPointerFrame",
     flushSync();
     expect(state.inspection?.state).toBe("transient");
 
-    // Stale token → drop; skip reducer dispatch (atomic).
+    // Stale token → drop (no InspectionState apply).
     state.setInspection(null, "pointer");
     flushSync();
-    reducer.dispatch({ type: "inspect", candidate: null, source: "programmatic" });
-    // Clear activeCandidate so a later set-active is guaranteed to commit.
-    reducer.dispatch({ type: "set-active", candidate: null });
+    reducer.dispatch({ type: "set-tool", tool: "select-area" });
     state.schedulePointerInspect({
       point: { x: candidate.x, y: candidate.y },
       source: "pointer",
@@ -208,26 +205,16 @@ describe("createInspectionState schedulePointerInspect / onInspectPointerFrame",
       maxDistance: 1e6,
     });
     const scheduledToken = reducer.frameToken();
-    // Advance revision without cancelling the schedule (set-active with a
-    // different ref always commits when active was null).
+    // begin-area bumps revision without cancelling the inspect schedule.
     reducer.dispatch({
-      type: "set-active",
-      candidate: {
-        epoch: model.runId,
-        id: candidate.id + 10_000,
-        panelId: candidate.panelId,
-        x: candidate.x,
-        y: candidate.y,
-      },
+      type: "begin-area",
+      point: { x: 0, y: 0 },
+      panelId: "panel:all",
     });
     expect(reducer.accepts(scheduledToken)).toBe(false);
-    const revBefore = reducer.state.revision;
     flushFrame();
     flushSync();
     expect(state.inspection).toBeNull();
-    // Drop skipped dispatch — inspection kind stays idle (not transient).
-    expect(reducer.state.inspection.kind).toBe("idle");
-    expect(reducer.state.revision).toBe(revBefore);
 
     // Cancel before flush → no apply.
     state.schedulePointerInspect({
@@ -358,23 +345,16 @@ describe("createInspectionState schedulePointerInspect / onInspectPointerFrame",
   });
 });
 describe("createInspectionState setInspection(null) clear ordering", () => {
-  it("pins ordered sequence: dispatch1(non-null) → emit while still non-null → clear → dispatch2(null)", () => {
+  it("emits clear while inspection is still non-null, then clears state", () => {
     const model = modelFor(continuousSpec());
     const log: string[] = [];
-    // controllerRef lets both spies record inspection-nullness AT CALL TIME —
-    // that positional evidence is what discriminates the ordering (a refactor
-    // moving the state clear after the second dispatch flips dispatch-2's tag).
     let controllerRef: ReturnType<typeof createInspectionState> | null = null;
     const stateTag = (): string => (controllerRef?.inspection === null ? "null" : "non-null");
-    const base = createInteractionReducer();
-    const wrapped = wrapReducerWithLog(base, (count) => {
-      log.push(`dispatch-${count}-inspection-${stateTag()}`);
-    });
 
     const handle = withFlushedEffectRoot(() => {
       const controller = createInspectionState({
         model: () => model,
-        reducer: () => wrapped,
+        reducer: () => createInteractionReducer(),
         inspectConfig: defaultInspect,
         inspectEnabled: () => true,
         dataIdentityEpoch: () => "epoch-1",
@@ -404,17 +384,8 @@ describe("createInspectionState setInspection(null) clear ordering", () => {
 
     handle.value.setInspection(null, "pointer");
 
-    // Exact host order (base 1173-1180): first inspect-null dispatch and the
-    // clear emit both observe a STILL NON-NULL inspection; the state clear +
-    // coordinator release happen between the emit and the SECOND dispatch, so
-    // dispatch-2 observes null. (The transient coordinator release itself is
-    // module-private and not observable without API widening; its position is
-    // pinned transitively by the state-clear tag on dispatch-2.)
-    expect(log).toEqual([
-      "dispatch-1-inspection-non-null",
-      "emit-clear-inspection-non-null",
-      "dispatch-2-inspection-null",
-    ]);
+    // Single-authority clear: emit observes non-null, then state is null.
+    expect(log).toEqual(["emit-clear-inspection-non-null"]);
     expect(handle.value.inspection).toBeNull();
 
     handle.destroy();

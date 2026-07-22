@@ -115,27 +115,6 @@ export function applyInspect(
   );
 }
 
-/** Wrap a reducer so inspect-null dispatches are logged (shared spy). */
-export function wrapReducerWithLog(
-  base: InteractionReducer,
-  onInspectNull: (count: number) => void,
-): InteractionReducer {
-  let nullDispatches = 0;
-  return {
-    ...base,
-    dispatch: (action) => {
-      if (action.type === "inspect" && action.candidate === null) {
-        nullDispatches++;
-        onInspectNull(nullDispatches);
-      }
-      base.dispatch(action);
-    },
-    get state() {
-      return base.state;
-    },
-  };
-}
-
 export type InspectionHarness = {
   state: ReturnType<typeof createInspectionState>;
   reducer: InteractionReducer;
