@@ -72,11 +72,37 @@ export function preparePanels(
 ): PreparedPanels {
   const registry = new SourceRegistry();
   const plotSource = bindPlotData(normalized, options);
+  // Reuse ColumnTable instances for identical named refs so shared datasets
+  // share SourceRegistry namespaces (and therefore source-row identity).
+  const namedTableCache = new Map<string, ColumnTable>();
 
   const layerContexts: LayerDataContext[] = [];
   for (let index = 0; index < normalized.layers.length; index++) {
     const layer = normalized.layers[index]!;
-    const sourceTable = bindLayerTable(layer.data, plotSource, index, normalized, options);
+    let sourceTable: ColumnTable;
+    const layerData = layer.data;
+    if (
+      layerData !== undefined &&
+      "name" in layerData &&
+      !("values" in layerData) &&
+      !("columns" in layerData)
+    ) {
+      const cacheKey = layerData.name;
+      const cached = namedTableCache.get(cacheKey);
+      if (cached !== undefined) {
+        sourceTable = cached;
+      } else {
+        sourceTable = bindLayerTable(layerData, plotSource, index, normalized, options);
+        namedTableCache.set(cacheKey, sourceTable);
+      }
+    } else if (layerData === undefined && plotSource !== null) {
+      sourceTable = plotSource;
+    } else {
+      sourceTable = bindLayerTable(layerData, plotSource, index, normalized, options);
+      if (layerData !== undefined && "name" in layerData) {
+        namedTableCache.set(layerData.name, sourceTable);
+      }
+    }
     const sourceId = registry.register(sourceTable);
     const filtered = filterLayerTable(sourceTable, options.rowFilters);
     layerContexts.push({

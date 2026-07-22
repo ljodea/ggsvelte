@@ -202,12 +202,16 @@ export function resolveLayerFieldEvidence(
   const plotColumns = inlineColumns(spec);
   let totalRows = 0;
   let totalBytes = 0;
-  if (plotColumns !== null) {
-    const names = Object.keys(plotColumns);
-    const rowCount = names.length === 0 ? 0 : (plotColumns[names[0]!]?.length ?? 0);
+  const countedTables = new Set<string>();
+  const countTable = (key: string, columns: Record<string, readonly CellValue[]>) => {
+    if (countedTables.has(key)) return;
+    countedTables.add(key);
+    const names = Object.keys(columns);
+    const rowCount = names.length === 0 ? 0 : (columns[names[0]!]?.length ?? 0);
     totalRows += rowCount;
-    totalBytes += estimateBytes(plotColumns, rowCount);
-  }
+    totalBytes += estimateBytes(columns, rowCount);
+  };
+  if (plotColumns !== null) countTable("__plot__", plotColumns);
 
   const layers = Array.isArray(spec["layers"]) ? (spec["layers"] as unknown[]) : [];
   const layerColumns: Array<Record<string, readonly CellValue[]> | null | "runtime"> = [];
@@ -216,16 +220,19 @@ export function resolveLayerFieldEvidence(
       layerColumns.push(null); // inherit plot
       continue;
     }
-    const cols = columnsFromDataRef(layer["data"], datasets);
+    const data = layer["data"];
+    const cols = columnsFromDataRef(data, datasets);
     if (cols === null) {
       // Named ref not in datasets (or malformed) — runtime-only / skip.
       layerColumns.push("runtime");
       continue;
     }
-    const names = Object.keys(cols);
-    const rowCount = names.length === 0 ? 0 : (cols[names[0]!]?.length ?? 0);
-    totalRows += rowCount;
-    totalBytes += estimateBytes(cols, rowCount);
+    // Deduplicate limit accounting for shared named datasets.
+    const key =
+      isRecord(data) && typeof data["name"] === "string"
+        ? `name:${data["name"]}`
+        : `inline:${layerColumns.length}`;
+    countTable(key, cols);
     layerColumns.push(cols);
   }
 

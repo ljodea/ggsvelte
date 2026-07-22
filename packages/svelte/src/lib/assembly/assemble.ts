@@ -38,15 +38,27 @@ export type LayerDescriptorLike = {
   readonly params?: Record<string, unknown> | undefined;
 };
 
+/** True when an object is already a single-key DataRef container. */
+function isWrappedDataRef(data: object): data is NonNullable<LayerInput["data"]> {
+  const keys = Object.keys(data);
+  if (keys.length !== 1) return false;
+  const key = keys[0]!;
+  if (key === "name") return typeof (data as { name: unknown }).name === "string";
+  if (key === "values") return Array.isArray((data as { values: unknown }).values);
+  if (key === "columns") {
+    const columns = (data as { columns: unknown }).columns;
+    return typeof columns === "object" && columns !== null && !Array.isArray(columns);
+  }
+  return false;
+}
+
 /** Wrap geom data props into a DataRef shape for LayerInput. */
 function layerDataRef(
   data: DataInput | readonly Record<string, unknown>[],
 ): NonNullable<LayerInput["data"]> {
   if (Array.isArray(data)) return { values: data as never };
   if (typeof data === "object" && data !== null) {
-    if ("values" in data || "columns" in data || "name" in data) {
-      return data as NonNullable<LayerInput["data"]>;
-    }
+    if (isWrappedDataRef(data)) return data;
     // Column-oriented bare object.
     return { columns: data as never };
   }

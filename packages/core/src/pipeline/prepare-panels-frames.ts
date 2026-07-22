@@ -61,6 +61,8 @@ function emitTransformDomainWarnings(
   for (const binding of bindings) {
     const field = axis === "x" ? binding.xField : binding.yField;
     if (field === null) continue;
+    // Prefer the filtered frame-binding table when available; fall back to source.
+    // Diagnostics count pre-facet filtered rows (same as the prior single-table path).
     const table = binding.sourceTable;
     if (!table.has(field)) continue;
     const seenKey = `${binding.sourceId}|${field}`;

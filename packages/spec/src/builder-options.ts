@@ -132,7 +132,7 @@ export interface GeomRuleOptions extends RuleParams, GeomDataOption {
 }
 
 /** Segment-layer sugar options: params plus optional layer-level aes. */
-export interface GeomSegmentOptions extends SegmentParams {
+export interface GeomSegmentOptions extends SegmentParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
 }
