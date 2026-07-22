@@ -1,8 +1,8 @@
 /**
- * Spec-lint advisories (Hadley lesson 16) — each rule fires on its
- * questionable spec, stays silent on the sound variant, and skips without
- * evidence. Also: the validate({ lint: true }) wiring and catalog coverage
- * (every LINT_CATALOG code is exercised here).
+ * Spec-lint rule characterization — each rule fires on its questionable spec,
+ * stays silent on the sound variant, and skips without evidence. Catalog
+ * coverage stays here so firedCodes accumulates across rule describes.
+ * Wiring/limits: lint-wiring.test.ts. Catalog data: lint-catalog.ts.
  */
 import { readFileSync } from "node:fs";
 
@@ -10,8 +10,6 @@ import { describe, expect, it } from "bun:test";
 
 import { LINT_CATALOG, lintSpec } from "../src/lint.ts";
 import type { LintAdvisoryCode } from "../src/lint.ts";
-import { DEFAULT_VALIDATE_LIMITS } from "../src/validate-data.ts";
-import { validate } from "../src/validate.ts";
 
 const firedCodes = new Set<LintAdvisoryCode>();
 const codesOf = (advisories: ReturnType<typeof lintSpec>) => {
@@ -257,145 +255,25 @@ describe("transform-domain-data", () => {
   });
 });
 
-describe("lintSpec options.limits", () => {
-  /** Line-over-nominal-x fixture with `rows` nominal categories cycling a/b/c. */
-  const nominalLineSpec = (rows: number) => {
-    const cats = ["a", "b", "c"] as const;
-    return {
-      data: {
-        columns: {
-          x: Array.from({ length: rows }, (_, i) => cats[i % 3]!),
-          y: Array.from({ length: rows }, (_, i) => i),
-        },
-      },
-      aes: { x: { field: "x" }, y: { field: "y" } },
-      layers: [{ geom: "line" }],
-    };
-  };
-
-  it("raises maxRows so data above the default still yields data-backed advisories", () => {
-    // Default maxRows is 100_000; one past that is skipped under defaults.
-    const rows = DEFAULT_VALIDATE_LIMITS.maxRows + 1;
-    const spec = nominalLineSpec(rows);
-
-    expect(codesOf(lintSpec(spec))).not.toContain("line-over-nominal-x");
-
-    const raised = lintSpec(spec, { limits: { maxRows: rows } });
-    expect(codesOf(raised)).toContain("line-over-nominal-x");
-  });
-
-  it("lowers maxRows so over-limit inline data skips data-backed rules", () => {
-    const spec = nominalLineSpec(15);
-
-    // Under defaults (100k), the advisory fires.
-    expect(codesOf(lintSpec(spec))).toContain("line-over-nominal-x");
-
-    // Lowered limit: evidence is null, lint skips (never fabricates a complaint).
-    expect(lintSpec(spec, { limits: { maxRows: 10 } })).toEqual([]);
-  });
-
-  it("lowers maxBytes so oversized inline data skips data-backed rules", () => {
-    // Wide strings so a tiny maxBytes trips while row count stays small.
-    const big = "x".repeat(200);
-    const spec = {
-      data: {
-        columns: {
-          x: [big, big, big],
-          y: [1, 2, 3],
-        },
-      },
-      aes: { x: { field: "x" }, y: { field: "y" } },
-      layers: [{ geom: "line" }],
-    };
-
-    expect(codesOf(lintSpec(spec))).toContain("line-over-nominal-x");
-    expect(lintSpec(spec, { limits: { maxBytes: 50 } })).toEqual([]);
-  });
-});
-
-describe("validate({ lint: true }) wiring", () => {
-  const questionable = {
-    data: { columns: { x: ["a", "b", "c"], y: [1, 2, 3] } },
-    aes: { x: { field: "x" }, y: { field: "y" } },
-    layers: [{ geom: "line", stat: "identity", position: "identity" }],
-  };
-
-  it("attaches advisories to an ok result", () => {
-    const result = validate(questionable, { lint: true });
-    expect(result.ok).toBe(true);
-    expect(result.advisories?.map((a) => a.code)).toEqual(["line-over-nominal-x"]);
-  });
-
-  it("attaches advisories alongside errors too", () => {
-    const broken = { ...questionable, layers: [...questionable.layers, { geom: "pont" }] };
-    const result = validate(broken, { lint: true });
-    expect(result.ok).toBe(false);
-    expect(result.advisories?.map((a) => a.code)).toEqual(["line-over-nominal-x"]);
-  });
-
-  it("omits the key without lint: true and when nothing fires", () => {
-    expect(validate(questionable, {}).advisories).toBeUndefined();
-    const sound = {
-      ...questionable,
-      data: { columns: { x: [1, 2, 3], y: [1, 2, 3] } },
-    };
-    expect(validate(sound, { lint: true }).advisories).toBeUndefined();
-  });
-
-  it("does not double-scan row-shaped inline data when lint is also on", () => {
-    // Instrumented getters: each cell read increments. validate() with lint
-    // must pivot/type-scan the rows once (same order of magnitude as without
-    // lint), not rebuild columns a second time for lintSpec.
-    let accesses = 0;
-    const rows = Array.from({ length: 40 }, (_, i) => ({
-      get x() {
-        accesses++;
-        return i % 3 === 0 ? "a" : i % 3 === 1 ? "b" : "c";
-      },
-      get y() {
-        accesses++;
-        return i;
-      },
-    }));
-    const spec = {
-      data: { values: rows },
-      aes: { x: { field: "x" }, y: { field: "y" } },
-      layers: [{ geom: "line", stat: "identity", position: "identity" }],
-    };
-
-    accesses = 0;
-    const withoutLint = validate(spec, {});
-    const accessesWithout = accesses;
-    expect(withoutLint.ok).toBe(true);
-
-    accesses = 0;
-    const withLint = validate(spec, { lint: true });
-    const accessesWith = accesses;
-    expect(withLint.ok).toBe(true);
-    expect(withLint.advisories?.map((a) => a.code)).toEqual(["line-over-nominal-x"]);
-
-    // Without sharing, lint rebuilds columns via a second full row walk (~2×).
-    // With one shared pivot, access counts stay comparable.
-    expect(accessesWith).toBeLessThanOrEqual(accessesWithout * 1.15);
-    expect(accessesWith).toBeGreaterThan(0);
-  });
-});
-
 describe("LINT_CATALOG coverage", () => {
   it("every cataloged advisory code fired in this suite", () => {
     expect([...firedCodes].toSorted()).toEqual(Object.keys(LINT_CATALOG).toSorted());
   });
 
   it("source-scan: every code emitted by lint.ts is cataloged and vice-versa (bijective)", () => {
-    // Mirror of core's source↔catalog scanner: scan the lint source for every
-    // `code: "..."` literal actually emitted, and prove it matches LINT_CATALOG
-    // exactly — no retired code lingers, no cataloged code is unemitted.
+    // Mirror of core's source↔catalog scanner: scan lintSpec emissions for every
+    // `code: "..."` literal, and prove it matches LINT_CATALOG exactly — no
+    // retired code lingers, no cataloged code is unemitted. Catalog data is
+    // pure (lint-catalog.ts); emission sites remain in lint.ts.
     const src = readFileSync(new URL("../src/lint.ts", import.meta.url), "utf8");
+    const catalogSrc = readFileSync(new URL("../src/lint-catalog.ts", import.meta.url), "utf8");
     const emitted = new Set<string>();
     for (const m of src.matchAll(/\bcode:\s*"([a-z0-9-]+)"/g)) emitted.add(m[1]!);
     expect([...emitted].toSorted()).toEqual(Object.keys(LINT_CATALOG).toSorted());
     // The retired late-log codes must not survive anywhere in the source.
-    expect(src).not.toContain("log-nonpositive-data");
-    expect(src).not.toContain("log-domain-not-positive");
+    for (const blob of [src, catalogSrc]) {
+      expect(blob).not.toContain("log-nonpositive-data");
+      expect(blob).not.toContain("log-domain-not-positive");
+    }
   });
 });
