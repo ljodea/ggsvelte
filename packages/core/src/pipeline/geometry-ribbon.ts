@@ -40,7 +40,38 @@ interface RibbonRun {
 }
 
 function ribbonParams(frame: LayerFrame): RibbonParams {
-  return (frame.binding.layer.params ?? {}) as RibbonParams;
+  const params = frame.binding.layer.params;
+  if (params === undefined || params === null || typeof params !== "object") return {};
+  const record = params as Record<string, unknown>;
+  const out: RibbonParams = {};
+  if (typeof record["alpha"] === "number") out.alpha = record["alpha"];
+  if (typeof record["linewidth"] === "number") out.linewidth = record["linewidth"];
+  if (
+    record["outline"] === "both" ||
+    record["outline"] === "upper" ||
+    record["outline"] === "lower" ||
+    record["outline"] === "full"
+  ) {
+    out.outline = record["outline"];
+  }
+  if (record["orientation"] === "x" || record["orientation"] === "y") {
+    out.orientation = record["orientation"];
+  }
+  if (
+    record["lineend"] === "butt" ||
+    record["lineend"] === "round" ||
+    record["lineend"] === "square"
+  ) {
+    out.lineend = record["lineend"];
+  }
+  if (
+    record["linejoin"] === "miter" ||
+    record["linejoin"] === "round" ||
+    record["linejoin"] === "bevel"
+  ) {
+    out.linejoin = record["linejoin"];
+  }
+  return out;
 }
 
 function orientationOf(frame: LayerFrame): "x" | "y" {

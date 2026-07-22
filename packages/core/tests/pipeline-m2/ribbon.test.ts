@@ -98,10 +98,10 @@ describe("ribbon geom", () => {
     );
     expect(outlined.scene.batches.length).toBe(2);
     const outline = outlined.scene.batches.find(
-      (b) => b.kind === "paths" && (b as PathsBatch).fills === undefined,
-    ) as PathsBatch | undefined;
+      (b): b is PathsBatch => b.kind === "paths" && b.fills === undefined,
+    );
     expect(outline).toBeDefined();
-    expect(outline!.candidates).toBe(false);
+    expect(outline?.candidates).toBe(false);
   });
 
   it("splits groups on non-finite bounds (gaps)", () => {

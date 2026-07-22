@@ -644,6 +644,22 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "RibbonLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RibbonLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RibbonLayerSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "RibbonParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "RuleLayer": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -705,6 +721,10 @@
           "lifecycle": "experimental"
         },
         "RuntimePointLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RuntimeRibbonLayer": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -3155,6 +3175,10 @@
         },
         "GeomProps": {
           "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GeomRibbon": {
+          "kind": "value",
           "lifecycle": "experimental"
         },
         "GeomRule": {

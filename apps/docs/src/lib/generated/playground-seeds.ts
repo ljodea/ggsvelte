@@ -291,6 +291,15 @@ export const PLAYGROUND_EXAMPLES: readonly GeneratedPlaygroundExample[] = [
     },
   },
   {
+    id: "ribbon/bounds",
+    title: "Ribbon interval",
+    compatibility: {
+      supported: true,
+      fragment:
+        "#play=v1.eyJ2ZXJzaW9uIjoxLCJzb3VyY2UiOnsia2luZCI6ImV4YW1wbGUiLCJpZCI6InJpYmJvbi9ib3VuZHMifSwic3BlYyI6eyJlZGl0aW9uIjoyLCJkYXRhIjp7ImNvbHVtbnMiOnsieCI6WzEsMiwzLDQsNSw2LDcsOF0sIm1pZCI6WzIuMSwyLjQsMi44LDMsMi43LDIuNSwyLjksMy4yXSwibG8iOlsxLjYsMS45LDIuMiwyLjQsMi4xLDEuOSwyLjMsMi42XSwiaGkiOlsyLjYsMi45LDMuNCwzLjYsMy4zLDMuMSwzLjUsMy44XX19LCJsYXllcnMiOlt7Imdlb20iOiJyaWJib24iLCJzdGF0IjoiaWRlbnRpdHkiLCJwb3NpdGlvbiI6ImlkZW50aXR5IiwiYWVzIjp7IngiOnsiZmllbGQiOiJ4In0sInltaW4iOnsiZmllbGQiOiJsbyJ9LCJ5bWF4Ijp7ImZpZWxkIjoiaGkifX0sInBhcmFtcyI6eyJhbHBoYSI6MC4zNX19LHsiZ2VvbSI6ImxpbmUiLCJzdGF0IjoiaWRlbnRpdHkiLCJwb3NpdGlvbiI6ImlkZW50aXR5IiwiYWVzIjp7IngiOnsiZmllbGQiOiJ4In0sInkiOnsiZmllbGQiOiJtaWQifSwieW1pbiI6eyJmaWVsZCI6ImxvIn0sInltYXgiOnsiZmllbGQiOiJoaSJ9fX1dLCJsYWJzIjp7InRpdGxlIjoiUHJlY29tcHV0ZWQgaW50ZXJ2YWwgcmliYm9uIiwieCI6IngiLCJ5IjoidmFsdWUifX19",
+    },
+  },
+  {
     id: "rule/annotation",
     title: "Reference-line annotations",
     compatibility: {

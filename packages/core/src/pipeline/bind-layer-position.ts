@@ -67,7 +67,7 @@ export function resolveLayerPositionChannels(input: {
           ymaxField,
           xminField,
           xmaxField,
-          pinned: (layer.params as { orientation?: "x" | "y" } | undefined)?.orientation,
+          pinned: ribbonOrientationParam(layer.params),
         })
       : undefined;
 
@@ -97,6 +97,12 @@ export function resolveLayerPositionChannels(input: {
     xmaxField,
     ...(ribbonOrientation !== undefined && { ribbonOrientation }),
   };
+}
+
+function ribbonOrientationParam(params: LayerSpec["params"]): "x" | "y" | undefined {
+  if (params === undefined || params === null || typeof params !== "object") return undefined;
+  const orientation = (params as Record<string, unknown>)["orientation"];
+  return orientation === "x" || orientation === "y" ? orientation : undefined;
 }
 
 function resolveRibbonOrientation(input: {
