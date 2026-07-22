@@ -408,31 +408,32 @@ it("tiers the PR consumer matrix (issue #246)", () => {
   expect(ci).not.toMatch(/full required[\s\S]{0,40}push\/main/i);
 });
 
-it("uses one self-hosted ggsvelte pool (no heavy/light label split)", () => {
+it("uses elastic hosted runners for PR correctness and visual checks", () => {
   const ci = read(".github/workflows/ci.yml");
   const vr = read(".github/workflows/vr-compare.yml");
   const bench = read(".github/workflows/bench.yml");
   const nightly = read(".github/workflows/compatibility-nightly.yml");
   const cancel = read(".github/workflows/cancel-on-pr-close.yml");
 
-  // Single-label pool: every self-hosted Linux job uses `ggsvelte` only.
-  // Dual-label scheduling was theater; the old 2-slot heavy-only pool was the
-  // real bottleneck (issues #247, #319, #321). Comments may mention the retired
-  // label when explaining history — assert on runs-on lines only.
+  // PR CI and VR must not regress to the four-slot repo-local pool. Optional,
+  // hardware-sensitive benchmark and nightly workflows may remain self-hosted.
   for (const workflow of [ci, vr, bench, nightly]) {
     expect(heavyRunsOnCount(workflow)).toBe(0);
     expect(workflow).not.toContain("heavy-self-hosted-cpu");
   }
-  expect(selfHostedGgsvelteCount(ci)).toBeGreaterThanOrEqual(10);
-  expect(selfHostedGgsvelteCount(vr)).toBe(3);
+  expect(selfHostedGgsvelteCount(ci)).toBe(0);
+  expect(selfHostedGgsvelteCount(vr)).toBe(0);
+  expect(ci.match(/runs-on: ubuntu-latest/g)?.length).toBeGreaterThanOrEqual(16);
+  expect(ci).toContain("runs-on: ${{ matrix.os }}");
+  expect(vr.match(/runs-on: ubuntu-latest/g)?.length).toBeGreaterThanOrEqual(4);
   expect(selfHostedGgsvelteCount(bench)).toBe(1);
   expect(selfHostedGgsvelteCount(nightly)).toBeGreaterThanOrEqual(1);
   expect(ci).not.toContain("heavy-component");
   expect(ci).not.toContain("heavy-packages-dist");
   expect(ci).not.toContain("heavy-consumer-ubuntu");
   expect(ci).not.toContain("group: heavy-interaction-perf");
-  // Documented live topology + cancel-on-close (not label fiction).
-  expect(ci).toContain("four cpuset-isolated runners");
+  // Superseded/closed work is still cancelled independently of runner choice.
+  expect(ci).toContain("elastic pool");
   expect(ci).toContain("cancel-in-progress: true");
   expect(cancel).toContain("pull_request_target");
   expect(cancel).toContain("head_sha");
@@ -492,7 +493,7 @@ it("regenerates docs-owned gallery previews when approved baselines land", () =>
   expect(approve).toContain("apps/docs/src/lib/generated/gallery-previews.ts");
 });
 
-it("uses job-private Bun caches in self-hosted workflows (issue #319)", () => {
+it("uses job-private Bun caches across CI workflows (issue #319)", () => {
   const workflows = [
     ".github/workflows/ci.yml",
     ".github/workflows/vr-compare.yml",
