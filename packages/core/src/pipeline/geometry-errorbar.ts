@@ -1,5 +1,8 @@
 /**
  * Errorbar geometry: vertical range plus caps.
+ *
+ * Emit preallocates typed segment buffers (3 segments per kept row); pack
+ * reuses dense buffers and never Float32Array.from a number[] scratch list.
  */
 import type { ErrorbarParams } from "@ggsvelte/spec";
 
@@ -28,32 +31,26 @@ export function errorbarBatch(
 
   const xSpanOf = makeErrorbarXSpan(frame, fx, widthParam);
 
-  const segments: number[] = [];
-  const rowIndex: number[] = [];
-  const strokes: string[] = [];
-  const removed = emitErrorbarRows({
+  const emitted = emitErrorbarRows({
     frame,
     fx,
     color,
     wantsColors,
     xSpanOf,
-    segments,
-    rowIndex,
-    strokes,
   });
-  removedWarning(removed, binding.index, warnings);
-  if (rowIndex.length === 0) return null;
+  removedWarning(emitted.removed, binding.index, warnings);
+  if (emitted.keptSegments === 0) return null;
 
   const batch: SegmentsBatch = {
     kind: "segments",
     layerIndex: binding.index,
     panelIndex: 0,
-    segments: Float32Array.from(segments),
-    rowIndex: Uint32Array.from(rowIndex),
+    segments: emitted.segments,
+    rowIndex: emitted.rowIndex,
     stroke: binding.color.constant,
     linewidth: params.linewidth ?? DEFAULT_RULE_LINEWIDTH,
     alpha: params.alpha ?? 1,
   };
-  if (wantsColors) batch.strokes = strokes;
+  if (wantsColors && emitted.strokes !== null) batch.strokes = emitted.strokes;
   return batch;
 }
