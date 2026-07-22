@@ -311,6 +311,65 @@ describe("tier 2 — data-aware checks (inline data)", () => {
       ).ok,
     ).toBe(true);
   });
+
+  it("accepts scaled constants the runtime coerces to a finite number", () => {
+    // cellToNumber() coerces numeric strings and ISO date strings to a finite
+    // number and the scale trains/renders, so validation must accept them —
+    // only genuinely non-coercible constants (e.g. "large") are rejected.
+    for (const value of ["5", "2024-01-01"]) {
+      expect(
+        validate(
+          {
+            ...base,
+            aes: { ...base.aes, size: { value, scale: true } },
+            scales: { size: { type: "sequential" } },
+            layers: [{ geom: "point" }],
+          },
+          {},
+        ).ok,
+      ).toBe(true);
+    }
+  });
+
+  it("accepts a censored binned temporal numeric style trained from authored breaks", () => {
+    // A binned scale whose ISO breaks parse into the runtime domain renders even
+    // when every field value fails the parser (parseFailure: "censor") — authored
+    // binned breaks are a recovery bound like an explicit domain, so validation
+    // must not reject a spec the runtime honors.
+    expect(
+      validate(
+        {
+          ...base,
+          aes: { ...base.aes, size: { field: "temp" } },
+          scales: {
+            size: {
+              type: "binned",
+              parse: "iso",
+              parseFailure: "censor",
+              breaks: ["2024-01-01", "2024-01-15", "2024-01-31"],
+            },
+          },
+          layers: [{ geom: "point" }],
+        },
+        {},
+      ).ok,
+    ).toBe(true);
+  });
+
+  it("returns a diagnostic (not a thrown error) for a schema-invalid numeric-style parser", () => {
+    // parse: 123 is a schema error, but tier-2 still runs; the temporal check must
+    // defer to the schema diagnostic instead of crashing when the malformed parser
+    // reaches canonicalTemporalParserKey.
+    const spec = {
+      ...base,
+      aes: { ...base.aes, size: { field: "temp" } },
+      scales: { size: { type: "sequential", parse: 123 } },
+      layers: [{ geom: "point" }],
+    };
+    expect(() => validate(spec, {})).not.toThrow();
+    const result = validate(spec, {});
+    expect(result.ok).toBe(false);
+  });
 });
 
 describe("tier 2 — DataProfile", () => {
@@ -341,6 +400,22 @@ describe("tier 2 — DataProfile", () => {
         { profile: fromAny({ fields: [{ name: "a", type: "numeric" }] }) },
       ),
     ).toEqual(["invalid-data-profile"]);
+  });
+
+  it("defers a profile-backed temporal numeric style with a working parser", () => {
+    // Profile fields carry no sample values, so the temporal decision is null; the
+    // numeric-style check must defer (the runtime parses epochs once data arrives)
+    // rather than false-reject a spec that renders.
+    expect(
+      validate(
+        {
+          aes: { x: { field: "city" }, y: { field: "temp" }, size: { field: "temp" } },
+          scales: { size: { type: "sequential", parse: { epoch: "seconds" } } },
+          layers: [{ geom: "point" }],
+        },
+        { profile },
+      ).ok,
+    ).toBe(true);
   });
 });
 

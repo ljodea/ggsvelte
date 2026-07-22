@@ -72,11 +72,16 @@ export function resolveNumericStyleValueView(input: {
   // samples, auto detection reports non-temporal and explicit parsers report
   // kind: null, so the checks below would throw before numericSequentialResolution()
   // ever parses the authored boundaries. Seed the temporal decision from the
-  // authored domain — or, failing that, the authored breaks — when no samples
-  // remain, mirroring the color path returning a usable view for a fully
-  // filtered temporal frame.
+  // authored domain — or, failing that, authored *binned* breaks — when no
+  // samples remain, mirroring the color path returning a usable view for a fully
+  // filtered temporal frame. Only binned breaks are bin boundaries that train the
+  // domain; sequential breaks are guide-tick positions, so seeding from them would
+  // let arbitrary tick choices invent a domain (numericSequentialResolution treats
+  // `view.semantic` as the extent). Restrict the breaks fallback to `type: "binned"`.
   const temporalColumn =
-    values.length === 0 ? (config?.domain ?? config?.breaks ?? values) : values;
+    values.length === 0
+      ? (config?.domain ?? (config?.type === "binned" ? config?.breaks : undefined) ?? values)
+      : values;
   const parsed = parseTemporalColumn(temporalColumn, config?.parse ?? "auto", options);
   if (parsed.decision.status !== "temporal") {
     const cause =

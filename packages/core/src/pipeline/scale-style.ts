@@ -67,6 +67,7 @@ function collectValues(input: {
   anyField: boolean;
   anyDiscrete: boolean;
   anyIndexable: boolean;
+  nonInteractiveValues: CellValue[];
 } {
   const { aesthetic, frames, bindings, table, sourceTable } = input;
   const values: CellValue[] = [];
@@ -76,6 +77,11 @@ function collectValues(input: {
   // column or a scaled constant. Stat-only mappings (no field, no constant)
   // leave the key index empty, so their discrete legend must be non-interactive.
   let anyIndexable = false;
+  // Keys of values that index a rendered mark (field columns, rowful constants),
+  // and the rowless annotation constants — used below to keep an annotation-only
+  // value out of an interactive legend's entries (it indexes no mark).
+  const indexableKeys = new Set<string>();
+  const annotationConstants: CellValue[] = [];
   for (const frame of frames) {
     const binding = bindingOf(frame.binding, aesthetic);
     const mapped = styleFrameValues(frame, aesthetic);
@@ -117,16 +123,34 @@ function collectValues(input: {
       anyField = true;
       anyIndexable = true;
       if (sourceTable.discreteness(mapped.field) === "discrete") anyDiscrete = true;
-      for (const value of sourceTable.column(mapped.field)) add(value);
+      for (const value of sourceTable.column(mapped.field)) {
+        indexableKeys.add(encodeKey(value));
+        add(value);
+      }
     }
     if (mapped.scaledConstant !== null) {
       // Rowless annotation constants index no rendered mark (see the frames loop
       // above), so they render but stay non-interactive.
-      if (binding.ruleForm !== "annotation") anyIndexable = true;
+      if (binding.ruleForm === "annotation") {
+        annotationConstants.push(mapped.scaledConstant);
+      } else {
+        anyIndexable = true;
+        indexableKeys.add(encodeKey(mapped.scaledConstant));
+      }
       add(mapped.scaledConstant);
     }
   }
-  return { values, catalog, anyField, anyDiscrete, anyIndexable };
+  // In a mixed legend (a data-backed mapping makes the whole scale interactive
+  // while a rowless annotation constant shares it), the annotation-only value —
+  // one that indexes no rendered mark — would still become a hover/clickable
+  // legend entry resolving an empty key bucket. Exclude such values from the
+  // legend domain; the scale still trains on them (catalog) so the annotation
+  // mark renders. In the all-annotation case (anyIndexable false) the legend is
+  // already non-interactive, so nothing is excluded and the entry is preserved.
+  const nonInteractiveValues = anyIndexable
+    ? annotationConstants.filter((value) => !indexableKeys.has(encodeKey(value)))
+    : [];
+  return { values, catalog, anyField, anyDiscrete, anyIndexable, nonInteractiveValues };
 }
 
 function numericOutputValid(aesthetic: NumericStyleAesthetic, value: number): boolean {
@@ -165,6 +189,7 @@ function discreteResolution(input: {
   naValue: StyleOutput;
   unknownValue: StyleOutput;
   indexable?: boolean;
+  nonInteractiveValues?: readonly CellValue[];
   prevState: ScaleState | null;
   title: string;
   warnings: PipelineWarning[];
@@ -181,6 +206,7 @@ function discreteResolution(input: {
     naValue,
     unknownValue,
     indexable,
+    nonInteractiveValues,
     prevState,
     title,
     warnings,
@@ -231,8 +257,17 @@ function discreteResolution(input: {
       return (trained.rangeValueOf(value) as StyleOutput | undefined) ?? unknownValue;
     },
   });
-  const labels = disambiguatedLabels(resolvedDomain);
-  const entries = resolvedDomain.map((value, index) =>
+  // The scale trains on the full domain (so an annotation constant still renders),
+  // but the legend must drop values that index no rendered mark — otherwise a
+  // mixed interactive legend shows a hover/clickable entry with an empty key
+  // bucket. In the non-mixed cases `nonInteractiveValues` is empty (a no-op).
+  const excludedFromLegend = new Set((nonInteractiveValues ?? []).map((value) => encodeKey(value)));
+  const legendDomain =
+    excludedFromLegend.size === 0
+      ? resolvedDomain
+      : resolvedDomain.filter((value) => !excludedFromLegend.has(encodeKey(value)));
+  const labels = disambiguatedLabels(legendDomain);
+  const entries = legendDomain.map((value, index) =>
     styleGuideEntry(aesthetic, value, labels[index]!, scale.valueOf(value)),
   );
   const unknownCount = observedValues.filter(
@@ -257,7 +292,7 @@ function discreteResolution(input: {
             // Stat-only mappings have no field/constant to index, so the key
             // index resolves no rows — render swatches but disable hover/click.
             ...(indexable === false && { interactive: false }),
-            domain: resolvedDomain,
+            domain: legendDomain,
             firstSeen: observedValues,
             keyOf: (value: unknown) => ({ [aesthetic]: scale.valueOf(value) }),
           },
@@ -270,7 +305,7 @@ function discreteResolution(input: {
             aesthetic,
             scaleType: kind,
             title,
-            domain: Object.freeze([...resolvedDomain]),
+            domain: Object.freeze([...legendDomain]),
             entries: Object.freeze(entries),
             naValue,
             unknownValue,
@@ -556,11 +591,22 @@ function finiteResolution(input: {
   catalog: readonly CellValue[];
   config: FiniteStyleConfig | undefined;
   indexable?: boolean;
+  nonInteractiveValues?: readonly CellValue[];
   prevState: ScaleState | null;
   title: string;
   warnings: PipelineWarning[];
 }): StyleResolution {
-  const { aesthetic, values, catalog, config, indexable, prevState, title, warnings } = input;
+  const {
+    aesthetic,
+    values,
+    catalog,
+    config,
+    indexable,
+    nonInteractiveValues,
+    prevState,
+    title,
+    warnings,
+  } = input;
   const range: (PointShape | Linetype)[] = [
     ...(config?.range ?? (aesthetic === "shape" ? POINT_SHAPE_NAMES : LINETYPE_NAMES)),
   ];
@@ -774,6 +820,7 @@ function finiteResolution(input: {
     naValue,
     unknownValue,
     ...(indexable !== undefined && { indexable }),
+    ...(nonInteractiveValues !== undefined && { nonInteractiveValues }),
     prevState,
     title,
     warnings,
@@ -829,6 +876,7 @@ export function resolveStyleScale(input: {
       catalog: collected.catalog,
       config: config as FiniteStyleConfig | undefined,
       indexable: collected.anyIndexable,
+      nonInteractiveValues: collected.nonInteractiveValues,
       prevState,
       title,
       warnings,
@@ -883,6 +931,7 @@ export function resolveStyleScale(input: {
     naValue: fallback.naValue,
     unknownValue: fallback.unknownValue,
     indexable: collected.anyIndexable,
+    nonInteractiveValues: collected.nonInteractiveValues,
     prevState,
     title,
     warnings,

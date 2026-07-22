@@ -680,6 +680,57 @@ describe("complete mapped style plumbing", () => {
     ]);
   });
 
+  it("refuses to invent a sequential temporal domain from guide-tick breaks", () => {
+    // Sequential breaks are guide-tick positions, not bin boundaries. When all
+    // rows are filtered they must NOT seed the temporal parser (only binned
+    // breaks do) — otherwise arbitrary tick choices would silently train the
+    // scale extent. With no samples the sequential scale must refuse instead.
+    const table = ColumnTable.fromRows([{ x: 1, y: 1 }]);
+    const binding = fromAny<LayerBinding>({
+      layer: { geom: "point", aes: { size: { field: "when" } } },
+      index: 0,
+      xField: "x",
+      yField: "y",
+      color: { field: null, constant: null, scaledConstant: null },
+      fill: { field: null, constant: null, scaledConstant: null },
+      size: { field: "when", statColumn: null, constant: null, scaledConstant: null },
+      linewidth: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      alpha: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      shape: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      linetype: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      ruleForm: null,
+    });
+    const frame = fromAny<LayerFrame>({
+      binding,
+      table,
+      n: 0,
+      xNumeric: new Float64Array(0),
+      yNumeric: new Float64Array(0),
+      groups: [],
+      inputGroups: [],
+      rowIndex: new Uint32Array(0),
+      sizeValues: [],
+    });
+    const warnings: { code: string; message: string }[] = [];
+    expect(() =>
+      resolveStyleScale({
+        aesthetic: "size",
+        frames: [frame],
+        bindings: [binding],
+        table,
+        sourceTable: table,
+        config: {
+          type: "sequential",
+          temporalKind: "date",
+          breaks: ["2024-01-01", "2024-01-15", "2024-01-31"],
+        },
+        prevState: null,
+        title: "size",
+        warnings,
+      }),
+    ).toThrow();
+  });
+
   it("keeps continuous mapped styles out of grouping and discrete stroke styles in grouping", () => {
     const rows = [
       { x: 1, y: 1, alpha: 0.2, kind: "a" },
@@ -1335,5 +1386,44 @@ describe("complete mapped style plumbing", () => {
     );
     if (legend?.type !== "discrete") throw new Error("expected linetype discrete legend");
     expect(legend.interactive).toBe(false);
+  });
+
+  it("excludes a rowless annotation value from a mixed interactive style legend", () => {
+    // A data-backed linetype field makes the whole scale interactive; a rule
+    // annotation constant sharing that scale indexes no rendered mark, so it must
+    // not become a hover/clickable legend entry (an empty key bucket). It still
+    // trains the scale (so the annotation renders) but is dropped from the legend.
+    const model = runPipeline(
+      fromAny({
+        data: {
+          values: [
+            { x: 1, y: 1, group: "a" },
+            { x: 2, y: 2, group: "a" },
+            { x: 1, y: 3, group: "b" },
+            { x: 2, y: 4, group: "b" },
+          ],
+        },
+        aes: { x: { field: "x" }, y: { field: "y" } },
+        layers: [
+          { geom: "line", aes: { linetype: { field: "group" } } },
+          {
+            geom: "rule",
+            aes: { linetype: { value: "threshold", scale: true } },
+            params: { yintercept: 2 },
+          },
+        ],
+        scales: { linetype: { type: "ordinal" } },
+      }),
+      viewport,
+    );
+    const legend = model.scene.legends.find(
+      (entry) => entry.type === "discrete" && entry.scale === "linetype",
+    );
+    if (legend?.type !== "discrete") throw new Error("expected linetype discrete legend");
+    expect(legend.interactive).toBe(true);
+    const values = legend.entries.map((entry) => entry.value);
+    expect(values).toContain("a");
+    expect(values).toContain("b");
+    expect(values).not.toContain("threshold");
   });
 });
