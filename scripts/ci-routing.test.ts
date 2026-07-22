@@ -895,13 +895,17 @@ describe("success marker protocol", () => {
   });
 });
 
-async function spawnCiRoutingCli(args: string[]): Promise<{
+async function spawnCiRoutingCli(
+  args: string[],
+  env?: Record<string, string>,
+): Promise<{
   stdout: string;
   stderr: string;
   exitCode: number;
 }> {
   const proc = Bun.spawn(["bun", "scripts/ci-routing.ts", ...args], {
     cwd: join(import.meta.dir, ".."),
+    env: env === undefined ? undefined : { ...process.env, ...env },
     stdout: "pipe",
     stderr: "pipe",
   });
@@ -969,6 +973,7 @@ describe("ci-routing module tree (split-safe)", () => {
       "jobNames",
       "listJobContentPaths",
       "matchPathPattern",
+      "normalizeJobResult",
       "parseFileList",
       "parseGitLsTreeLine",
       "parseNameStatusList",
@@ -1010,6 +1015,43 @@ describe("ci-routing module tree (split-safe)", () => {
 
     const bad = await spawnCiRoutingCli(["not-a-command"]);
     expect(bad.exitCode).not.toBe(0);
+  });
+
+  test("ci-gate CLI reads env vars, aggregates component shards, and evaluates the PR guard rule", async () => {
+    const spawnCiGate = (env: Record<string, string>) => spawnCiRoutingCli(["ci-gate"], env);
+
+    const ok = await spawnCiGate({
+      EVENT_NAME: "pull_request",
+      CHECKS_REQ: "true",
+      CHECKS_RES: "success",
+      COMPONENT_REQ: "true",
+      COMPONENT_SVELTE_RES: "success",
+      COMPONENT_SPIKES_RES: "success",
+      VR_GUARD_RES: "success",
+    });
+    expect(ok.exitCode).toBe(0);
+    expect(ok.stdout).toContain("ci-gate ok");
+
+    const failed = await spawnCiGate({
+      EVENT_NAME: "pull_request",
+      CHECKS_REQ: "true",
+      CHECKS_RES: "success",
+      COMPONENT_REQ: "true",
+      COMPONENT_SVELTE_RES: "failure",
+      COMPONENT_SPIKES_RES: "success",
+      VR_GUARD_RES: "skipped",
+    });
+    expect(failed.exitCode).not.toBe(0);
+    expect(failed.stderr).toContain("ci-gate failed: component, vr-baseline-guard:skipped");
+
+    const pushEvent = await spawnCiGate({
+      EVENT_NAME: "push",
+      CHECKS_REQ: "true",
+      CHECKS_RES: "success",
+      // VR_GUARD_RES intentionally omitted — must not be checked on push.
+    });
+    expect(pushEvent.exitCode).toBe(0);
+    expect(pushEvent.stdout).toContain("ci-gate ok");
   });
 
   test("importing the root module does not require CLI argv", async () => {
