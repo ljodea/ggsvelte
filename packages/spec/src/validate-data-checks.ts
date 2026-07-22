@@ -305,7 +305,7 @@ export function dataChecks(
     const config = scales?.[aesthetic] as
       | {
           type?: string;
-          temporalKind?: unknown;
+          temporalKind?: string;
           parse?: unknown;
           timezone?: unknown;
           disambiguation?: unknown;
@@ -365,7 +365,7 @@ export function dataChecks(
           errors.push({
             code: "scale-type-mismatch",
             path: `/scales/${aesthetic}`,
-            message: `scales.${aesthetic} requests temporal kind "${String(config.temporalKind)}" but field "${use.field}" parses as "${decision.kind}".`,
+            message: `scales.${aesthetic} requests temporal kind "${config.temporalKind}" but field "${use.field}" parses as "${decision.kind}".`,
             fix: {
               description: `Use the ${decision.kind ?? "matching"} ${aesthetic} helper or correct the source precision.`,
             },
