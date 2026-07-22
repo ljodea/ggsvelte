@@ -51,12 +51,10 @@ function expectedManualDomainLength(
   // DataProfile fields have values: null. If any participating field has
   // unknown values, do not infer length from scaled constants alone — runtime
   // domain also includes the field categories we cannot see here.
-  for (const values of fieldValueLists) {
-    if (values === null || values === undefined) return null;
-  }
   const seen = new Set<string>();
   let sawValues = false;
   for (const values of fieldValueLists) {
+    if (values === null || values === undefined) return null;
     sawValues = true;
     for (const value of values) {
       if (value === null) continue;
