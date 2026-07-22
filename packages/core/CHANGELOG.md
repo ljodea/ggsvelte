@@ -1,5 +1,27 @@
 # @ggsvelte/core
 
+## 0.7.0
+
+### Minor Changes
+
+- ff4ad4c: # Generic color and fill scale families
+
+  Add complete color/fill scale families with binding-identical color/colour helpers, transformed and temporal ramps, deterministic binned colorsteps, manual and identity mappings, explicit NA/unknown policies, and serializable discrete/colorbar/colorsteps GuidePlans.
+
+  `RenderModel.guidePlans` is now a union: narrow on `plan.type === "axis"` before reading axis-only fields. Explicit continuous color domains censor out-of-domain values by default; set `oob: "squish"` to clamp. See the [0.6 to 0.7 migration guide](https://ggsvelte.sh/guide/upgrading#0-6-to-0-7).
+
+  Migration: <https://ggsvelte.sh/guide/upgrading#0-6-to-0-7>
+
+### Patch Changes
+
+- c44f6bc: <!-- markdownlint-disable MD041 -->
+
+  Measured categorical (band) x-axis label layout. Long `geom_col`/`geom_bar` category labels now wrap onto two lines, then rotate (−45°/−90°), instead of overlapping each other and the axis title — every bar keeps its label. When rotation still can't fit, labels truncate with the full text on the tick `<title>`, and a diagnostic suggests `coord_flip` for horizontal bars. The planner never auto-flips the chart and never thins a low-cardinality axis; vertical (coord_flip) categorical axes keep their existing behavior.
+
+- Updated dependencies [c44f6bc]
+- Updated dependencies [ff4ad4c]
+  - @ggsvelte/spec@0.7.0
+
 ## 0.6.0
 
 ### Minor Changes
