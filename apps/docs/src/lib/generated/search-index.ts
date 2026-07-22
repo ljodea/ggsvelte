@@ -3342,14 +3342,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/spec"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-477",
+    id: "heading:guide-lifecycle:experimental-478",
     kind: "heading",
-    title: "experimental (477)",
+    title: "experimental (478)",
     summary:
-      "experimental (477) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-477",
+      "experimental (478) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-478",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (477)"],
+    exact: ["experimental (478)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-8",
@@ -5952,6 +5952,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-spec",
     keywords: ["@ggsvelte/spec", ".", "type", "experimental"],
     exact: ["RuntimeRuleLayer"],
+  },
+  {
+    id: "api:ggsvelte-spec:RuntimeSegmentLayer",
+    kind: "api",
+    title: "RuntimeSegmentLayer",
+    summary: "@ggsvelte/spec · type · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "type", "experimental"],
+    exact: ["RuntimeSegmentLayer"],
   },
   {
     id: "api:ggsvelte-spec:RuntimeSmoothLayer",
