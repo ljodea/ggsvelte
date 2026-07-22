@@ -10,7 +10,7 @@
   import type {
     PlaygroundCandidate,
     PlaygroundDiagnostic,
-  } from "$lib/playground-state";
+  } from "$lib/playground-state-types";
   import type { PortableSpec } from "@ggsvelte/spec";
 
   const {

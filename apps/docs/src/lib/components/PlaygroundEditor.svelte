@@ -2,7 +2,7 @@
   import { tick } from "svelte";
 
   import UiButton from "$lib/components/UiButton.svelte";
-  import type { PlaygroundDiagnostic } from "$lib/playground-state";
+  import type { PlaygroundDiagnostic } from "$lib/playground-state-types";
 
   const {
     draft,

@@ -5,7 +5,7 @@
  * `ggsvelte:playground-candidate` CustomEvent; assistive technology uses
  * aria-busy / status live region, not this event.
  */
-import type { PlaygroundCandidateOrigin } from "./playground-state";
+import type { PlaygroundCandidateOrigin } from "./playground-state-types";
 
 export const PLAYGROUND_CANDIDATE_EVENT = "ggsvelte:playground-candidate";
 
