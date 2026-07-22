@@ -3302,14 +3302,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/core"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-246",
+    id: "heading:guide-lifecycle:experimental-247",
     kind: "heading",
-    title: "experimental (246)",
+    title: "experimental (247)",
     summary:
-      "experimental (246) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-246",
+      "experimental (247) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-247",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (246)"],
+    exact: ["experimental (247)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-2",
@@ -8880,6 +8880,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-core",
     keywords: ["@ggsvelte/core", ".", "type", "experimental"],
     exact: ["LayerBackend"],
+  },
+  {
+    id: "api:ggsvelte-core:LayoutAxisPresentation",
+    kind: "api",
+    title: "LayoutAxisPresentation",
+    summary: "@ggsvelte/core · type · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core",
+    keywords: ["@ggsvelte/core", ".", "type", "experimental"],
+    exact: ["LayoutAxisPresentation"],
   },
   {
     id: "api:ggsvelte-core:LayoutInput",
