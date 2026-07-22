@@ -341,6 +341,18 @@ describe("R0 release wiring", () => {
     expect(approvalJob).toContain("shell: bash");
   });
 
+  it("scopes approve-regenerate to smoke VR screenshots only (#421)", () => {
+    // Full-suite --update-snapshots fails on non-snapshot assertion tests and
+    // permanently blocks baseline landing when any journey is red (see #421).
+    const workflow = read(".github/workflows/vr-compare.yml");
+    const approvalJob = workflow.slice(workflow.indexOf("  approve-regenerate:"));
+    const nextJob = approvalJob.search(/\n  [a-zA-Z0-9_-]+:/);
+    const job = nextJob === -1 ? approvalJob : approvalJob.slice(0, nextJob);
+    expect(job).toContain("bun run test:visual -- vr.spec.ts --workers=1 --update-snapshots");
+    // Must not reintroduce the full-suite regenerate command.
+    expect(job).not.toMatch(/bun run test:visual -- --workers=1 --update-snapshots/);
+  });
+
   it("wires Dependabot for bun workspaces and GitHub Actions", () => {
     const dependabot = read(".github/dependabot.yml");
     expect(dependabot).toContain('package-ecosystem: "bun"');
