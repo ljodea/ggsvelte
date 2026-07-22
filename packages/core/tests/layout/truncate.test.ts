@@ -28,8 +28,10 @@ describe("truncateToFit", () => {
     expect(out.length).toBeLessThan(label.length);
     expect(measurer.measureWidth(out, fontSize)).toBeLessThanOrEqual(budget + 1e-6);
     // One more code point would exceed (maximal keep).
+    // oxlint-disable-next-line typescript/no-misused-spread -- code-point split matches truncateToFit
     const chars = [...label];
     const prefix = out.endsWith(ellipsis) ? out.slice(0, -ellipsis.length) : out;
+    // oxlint-disable-next-line typescript/no-misused-spread -- code-point count of prefix
     const keepCount = [...prefix].length;
     if (keepCount + 1 < chars.length) {
       const longer = chars.slice(0, keepCount + 1).join("") + ellipsis;
