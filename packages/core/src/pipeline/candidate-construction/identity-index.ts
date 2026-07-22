@@ -86,7 +86,10 @@ export function buildCandidateIdentityIndex(
           : null;
       for (let localRow = 0; localRow < inputGroups.length; localRow++) {
         const group = inputGroups[localRow]!;
-        const sourceRow = facetPanels[panelIndex]!.sourceRows?.[localRow] ?? localRow;
+        const sourceRow =
+          frame.inputSourceRows?.[localRow] ??
+          facetPanels[panelIndex]!.sourceRows?.[localRow] ??
+          localRow;
         const key = `${frameKey}:${group}`;
         appendSourceRowByGroupKey(sourceRowsByGroup, key, sourceRow);
         if (bucketByX && xField !== null) {

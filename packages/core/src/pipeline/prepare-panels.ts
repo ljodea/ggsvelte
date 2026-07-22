@@ -29,7 +29,7 @@ import type {
   ScaleDiagnostic,
 } from "./types.js";
 
-export type { LayerDataContext, PreparedPanels } from "./prepare-panels-types.js";
+export type { PreparedPanels } from "./prepare-panels-types.js";
 
 /**
  * Choose the table used to build facet layout:

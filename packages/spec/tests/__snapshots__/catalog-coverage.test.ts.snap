@@ -806,7 +806,7 @@ exports[`ERROR_CATALOG coverage [validation-limit] is reproducible; message + fi
   },
   "instance": {
     "code": "validation-limit",
-    "message": "Inline data has 2 rows, more than the documented maxRows limit (1); data-aware checks skipped. Validate with a DataProfile instead.",
+    "message": "Inline data has 2 rows across plot/layers, more than the documented maxRows limit (1); data-aware checks skipped. Validate with a DataProfile instead.",
     "path": "/data",
   },
 }

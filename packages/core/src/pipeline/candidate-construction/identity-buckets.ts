@@ -124,7 +124,8 @@ export function buildBinLineageBuckets(input: {
     const membersByGroup = new Map<number, number[]>();
     for (let localRow = 0; localRow < inputGroups.length; localRow++) {
       const group = inputGroups[localRow]!;
-      const sourceRow = facetPanel.sourceRows?.[localRow] ?? localRow;
+      const sourceRow =
+        frame.inputSourceRows?.[localRow] ?? facetPanel.sourceRows?.[localRow] ?? localRow;
       const members = membersByGroup.get(group);
       if (members === undefined) membersByGroup.set(group, [sourceRow]);
       else members.push(sourceRow);
@@ -158,7 +159,8 @@ export function buildBinLineageBuckets(input: {
     if (!Number.isFinite(value)) continue;
     const idx = findBinIndex(value, bins, closed);
     if (idx < 0) continue;
-    const sourceRow = facetPanel.sourceRows?.[localRow] ?? localRow;
+    const sourceRow =
+      frame.inputSourceRows?.[localRow] ?? facetPanel.sourceRows?.[localRow] ?? localRow;
     bins[idx]!.bucket.push(sourceRow);
   }
 }

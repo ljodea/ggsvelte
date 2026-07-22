@@ -274,6 +274,9 @@ export function buildPanelFrames(input: {
         binRanges[index],
       );
       applyPosition(frame, advisories, slice.table);
+      // Pre-stat input rows and post-stat mark rows share the layer's global
+      // source-row namespace (filter + multi-table registry).
+      frame.inputSourceRows = slice.globalSourceRows;
       // Map panel-local indices → global multi-table source rows.
       remapToGlobalSourceRows(frame.rowIndex, slice.globalSourceRows);
       // Boxplot outlier rows carry separate source indices.

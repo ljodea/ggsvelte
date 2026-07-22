@@ -126,7 +126,7 @@ function profileErrors(profile: unknown): SpecError[] {
  * Resolve inline columns from a data ref against optional named datasets.
  * Named refs that are not present in datasets return null (runtime-only data).
  */
-export function columnsFromDataRef(
+function columnsFromDataRef(
   data: unknown,
   datasets: unknown,
 ): Record<string, readonly CellValue[]> | null {

@@ -25,7 +25,7 @@ function tableFromNamed(data: NamedData): ColumnTable {
  * Resolve a DataRef against spec.datasets / RunOptions.data.
  * `path` is the diagnostic root (`/data` or `/layers/<n>/data`).
  */
-export function resolveDataRef(
+function resolveDataRef(
   ref: DataRef,
   spec: PortableSpec,
   options: RunOptions,
