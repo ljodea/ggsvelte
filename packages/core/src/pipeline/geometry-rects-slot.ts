@@ -43,12 +43,18 @@ export function resolveRectSlot(input: {
         sourceLeft = frame.xmin[row]!;
         sourceRight = frame.xmax[row]!;
       } else {
-        // A binned position scale snaps identity-stat rows to a transformed
-        // center. Recover that center's reviewed pre-stat boundaries.
+        // A binned position scale snaps identity/count rows to a transformed
+        // center. Recover edges via the stable integer bin id (built once at
+        // frame construction) — Θ(1) per row, not centers.findIndex (Θ(B)).
+        // xBinId is the discrete source of truth for stack/dodge/count too;
+        // float-center Object.is is only a defensive fallback when ids are absent.
         const boundaries = frame.binding.xBinning;
         const transformedCenter = frame.xNumeric?.[row];
         if (boundaries === undefined || transformedCenter === undefined) return null;
-        const index = boundaries.centers.findIndex((value) => Object.is(value, transformedCenter));
+        const index =
+          frame.xBinId === null
+            ? boundaries.centers.findIndex((value) => Object.is(value, transformedCenter))
+            : frame.xBinId[row]!;
         if (index < 0) return null;
         sourceLeft = boundaries.edges[index]!;
         sourceRight = boundaries.edges[index + 1]!;
