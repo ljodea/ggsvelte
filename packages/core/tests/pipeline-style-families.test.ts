@@ -880,4 +880,91 @@ describe("complete mapped style plumbing", () => {
       ),
     ).toThrow(expect.objectContaining({ code: "style-temporal-parse" }));
   });
+
+  it("rejects temporal values mapped to a binned finite style", () => {
+    // shape/linetype do not support date/datetime (capability contract); a
+    // temporal column under type:"binned" must fail loudly, not silently map to
+    // the unknown symbol or throw a misleading style-domain-empty.
+    expect(() =>
+      runPipeline(
+        fromAny({
+          data: {
+            values: [
+              { x: 1, y: 1, when: "2024-01-01" },
+              { x: 2, y: 2, when: "2024-06-01" },
+            ],
+          },
+          aes: { x: { field: "x" }, y: { field: "y" }, shape: { field: "when" } },
+          layers: [{ geom: "point" }],
+          scales: { shape: { type: "binned", breaks: [0, 1, 2] } },
+        }),
+        viewport,
+      ),
+    ).toThrow(expect.objectContaining({ code: "unsupported-aesthetic-scale" }));
+  });
+
+  it("resolves a smooth se after-stat mapping to linewidth instead of rejecting it", () => {
+    // Previously threw stat-channel-unsupported: se is a published smooth output
+    // and must be mappable to a numeric style. It now resolves onto the frame and
+    // candidate (interaction truth) rather than being rejected.
+    const model = runPipeline(
+      fromAny({
+        data: {
+          values: [
+            { x: 1, y: 1 },
+            { x: 2, y: 3 },
+            { x: 3, y: 2 },
+            { x: 4, y: 5 },
+            { x: 5, y: 4 },
+          ],
+        },
+        aes: { x: { field: "x" }, y: { field: "y" }, linewidth: { stat: "se" } },
+        layers: [{ geom: "smooth", params: { method: "lm", se: true } }],
+        scales: { linewidth: { type: "identity" } },
+      }),
+      viewport,
+    );
+    const paths = model.scene.batches.find((batch) => batch.kind === "paths");
+    if (paths?.kind !== "paths") throw new Error("expected smooth path");
+    const width = model.candidates.candidate(0)?.linewidthValue;
+    // Identity carries the pointwise standard error (>= 0) as the linewidth value.
+    expect(typeof width).toBe("number");
+    expect(Number.isFinite(width) && (width as number) >= 0).toBe(true);
+  });
+
+  it("bins faceted styles on the global extent, not panel-local extents", () => {
+    // Two panels whose local value ranges differ wildly; with global bins each
+    // panel's points fall in a single bin (one line), so grouping must not split
+    // them using panel-local rescaled bins.
+    const model = runPipeline(
+      fromAny({
+        data: {
+          values: [
+            { g: "p1", x: 1, y: 1, band: 0 },
+            { g: "p1", x: 2, y: 2, band: 0 },
+            { g: "p1", x: 3, y: 3, band: 1 },
+            { g: "p1", x: 4, y: 4, band: 1 },
+            { g: "p2", x: 1, y: 1, band: 99 },
+            { g: "p2", x: 2, y: 2, band: 99 },
+            { g: "p2", x: 3, y: 3, band: 100 },
+            { g: "p2", x: 4, y: 4, band: 100 },
+          ],
+        },
+        aes: { x: { field: "x" }, y: { field: "y" }, linetype: { field: "band" } },
+        layers: [{ geom: "line" }],
+        facet: { wrap: { field: "g" } },
+        scales: { linetype: { type: "binned" } },
+      }),
+      viewport,
+    );
+    const pathBatches = model.scene.batches.filter((batch) => batch.kind === "paths");
+    const totalSubpaths = pathBatches.reduce(
+      (sum, batch) => sum + (batch.kind === "paths" ? batch.pathOffsets.length - 1 : 0),
+      0,
+    );
+    // Global [0,100] bins put p1 (0,1) in bin 0 and p2 (99,100) in the top bin —
+    // one line per panel. Panel-local binning would rescale each to [low,high]
+    // and split every panel into two one-value groups (4 subpaths).
+    expect(totalSubpaths).toBe(2);
+  });
 });

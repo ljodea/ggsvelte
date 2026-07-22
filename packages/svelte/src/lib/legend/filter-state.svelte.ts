@@ -24,7 +24,15 @@ import {
 // Public types
 // ---------------------------------------------------------------------------
 
-const FILTERABLE_LEGEND_SCALES = ["color", "fill", "shape", "linetype"] as const;
+const FILTERABLE_LEGEND_SCALES = [
+  "color",
+  "fill",
+  "size",
+  "linewidth",
+  "alpha",
+  "shape",
+  "linetype",
+] as const;
 
 type ResolvedLegendFilterOptions = {
   readonly mode: "exclude" | "include";

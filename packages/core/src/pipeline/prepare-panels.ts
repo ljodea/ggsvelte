@@ -89,7 +89,7 @@ export function preparePanels(
       binding.fill.forcedDiscrete = ["ordinal", "manual"].includes(
         normalized.scales?.fill?.type ?? "",
       );
-      configureStyleBindings(binding, normalized.scales);
+      configureStyleBindings(binding, normalized.scales, table);
       bindings.push(binding);
     }
     // Parsing is a source contract, not a rendered-row optimization. Validate

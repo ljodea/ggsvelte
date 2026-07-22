@@ -10,6 +10,35 @@ import type { ColumnTable } from "../table.js";
 import { positionDiscreteness } from "./temporal-position.js";
 import type { LayerBinding } from "./types.js";
 
+/**
+ * Global semantic [low, high] for a binned style field, computed from the
+ * pre-facet table. Stored on the binding so per-panel grouping bins align with
+ * the globally-trained style scale instead of rescaling to panel-local extent.
+ */
+export function styleBinExtent(
+  binding: LayerBinding["size"],
+  table: ColumnTable,
+): readonly [number, number] | undefined {
+  if (binding.binned !== true || binding.field === null || !table.has(binding.field))
+    return undefined;
+  const parser = binding.binParse ?? "auto";
+  const options = {
+    ...(binding.binTimezone !== undefined && { timezone: binding.binTimezone }),
+    ...(binding.binDisambiguation !== undefined && {
+      disambiguation: binding.binDisambiguation,
+    }),
+  };
+  const numeric = table.parsed(binding.field, parser, options).semantic;
+  let low = Number.POSITIVE_INFINITY;
+  let high = Number.NEGATIVE_INFINITY;
+  for (const value of numeric) {
+    if (!Number.isFinite(value)) continue;
+    low = Math.min(low, value);
+    high = Math.max(high, value);
+  }
+  return Number.isFinite(low) ? [low, high] : undefined;
+}
+
 function binnedStyleColumn(
   binding: LayerBinding["size"],
   table: ColumnTable,
@@ -48,8 +77,8 @@ function binnedStyleColumn(
   const domainNumbers = binding.binDomain
     ?.map(semanticOf)
     .filter((value): value is number => value !== undefined);
-  const low = domainNumbers?.[0] ?? inferredLow;
-  const high = domainNumbers?.at(-1) ?? inferredHigh;
+  const low = domainNumbers?.[0] ?? binding.binExtent?.[0] ?? inferredLow;
+  const high = domainNumbers?.at(-1) ?? binding.binExtent?.[1] ?? inferredHigh;
   const binCount = binding.binCount ?? 5;
   const configuredBreaks = binding.binBreaks
     ?.map(semanticOf)

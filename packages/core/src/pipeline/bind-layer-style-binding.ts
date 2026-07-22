@@ -59,7 +59,7 @@ export function styleBinding(
       count: ["count"],
       bin: ["count", "density", "ncount", "ndensity"],
       density: ["density", "count", "scaled", "ndensity"],
-      smooth: ["y", "ymin", "ymax"],
+      smooth: ["y", "ymin", "ymax", "se"],
       summary: ["y", "ymin", "ymax"],
       boxplot: ["ymin", "lower", "middle", "upper", "ymax"],
     };

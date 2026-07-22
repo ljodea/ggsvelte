@@ -14,6 +14,7 @@ type SmoothResult = {
   y: Float64Array;
   ymin: Float64Array | null;
   ymax: Float64Array | null;
+  se: Float64Array;
   groups: number[];
   hasBand: boolean;
   carried: Record<string, CellValue[]>;
@@ -44,6 +45,7 @@ export function packSmoothLayerFrame(
       y: result.y,
       ...(result.ymin !== null && { ymin: result.ymin }),
       ...(result.ymax !== null && { ymax: result.ymax }),
+      se: result.se,
     }),
     labelValues: col(binding.labelField),
     ...emptyFrameExtras(),

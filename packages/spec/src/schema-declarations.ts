@@ -416,8 +416,9 @@ export const SpecDeclarations = {
         }),
       ),
       shape: Type.Optional(
-        Type.Union([Type.Literal("circle"), Type.Literal("square"), Type.Literal("triangle")], {
-          description: 'Point shape. One of "circle", "square", "triangle". Default "circle".',
+        Type.Union(POINT_SHAPE_NAME_SCHEMAS, {
+          description:
+            'Point shape. One of "circle", "triangle", "square", "diamond", "plus", "cross". Default "circle".',
         }),
       ),
     },

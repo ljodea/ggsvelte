@@ -34,6 +34,12 @@ export interface StyleBinding {
   binned?: boolean;
   binBreaks?: readonly CellValue[];
   binDomain?: readonly CellValue[];
+  /**
+   * Global semantic [low, high] captured before faceting, used as the default
+   * bin extent so panel-local grouping matches the globally-trained style scale
+   * when neither binDomain nor binBreaks is authored.
+   */
+  binExtent?: readonly [number, number];
   binCount?: number;
   binTemporal?: boolean;
   binParse?: TemporalParserSpec;

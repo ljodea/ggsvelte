@@ -263,6 +263,33 @@ describe("explicit legend filtering", () => {
     expect(container.querySelector(".gg-shape-triangle")).not.toBeNull();
   });
 
+  it("filters discrete numeric style legends (size/linewidth/alpha) too", async () => {
+    let candidates = 0;
+    const { container } = render(GGPlot, {
+      data: [
+        { x: 1, y: 1, group: "North" },
+        { x: 2, y: 2, group: "South" },
+      ],
+      aes: { x: "x", y: "y", size: "group" },
+      layers: [{ geom: "point" }],
+      scales: { size: { type: "ordinal", range: [4, 8] } },
+      legendFilter: true,
+      width: 360,
+      height: 260,
+      onrender: (model: { candidates: { size: number } }) => {
+        candidates = model.candidates.size;
+      },
+    });
+    // An interactive discrete size legend must expose a filter fieldset, just
+    // like shape/linetype — the whitelist previously excluded numeric styles.
+    await until(() => container.querySelectorAll(".gg-legend-filters input").length === 2);
+    container.querySelector<HTMLInputElement>("input[aria-label='Show North']")!.click();
+    await until(() => candidates === 1);
+    expect(
+      container.querySelector<HTMLInputElement>("input[aria-label='Show North']")?.checked,
+    ).toBe(false);
+  });
+
   it("does not offer a misleading filter for one scale fed by multiple fields", async () => {
     const { container } = render(GGPlot, {
       data: [
@@ -292,7 +319,10 @@ describe("explicit legend filtering", () => {
         { geom: "point", aes: { x: "x", y: "y", color: "group" } },
         // A scaled constant feeds the same legend without a field mapping;
         // toggling its entry would filter `group` while this layer stays.
-        { geom: "line", aes: { x: "x", y: "y", color: { value: "reference", scale: true } } },
+        {
+          geom: "line",
+          aes: { x: "x", y: "y", color: { value: "reference", scale: true } },
+        },
       ],
       legendFilter: true,
       width: 360,

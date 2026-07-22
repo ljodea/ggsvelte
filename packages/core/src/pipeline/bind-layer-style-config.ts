@@ -1,6 +1,9 @@
 /** Attach authored family intent used by pre-stat default grouping. */
 import type { PortableSpec } from "@ggsvelte/spec";
 
+import type { ColumnTable } from "../table.js";
+
+import { styleBinExtent } from "./frame-group-columns.js";
 import type { LayerBinding } from "./types.js";
 
 const STYLE_AESTHETICS = ["size", "linewidth", "alpha", "shape", "linetype"] as const;
@@ -8,6 +11,7 @@ const STYLE_AESTHETICS = ["size", "linewidth", "alpha", "shape", "linetype"] as 
 export function configureStyleBindings(
   binding: LayerBinding,
   scales: PortableSpec["scales"] | undefined,
+  table?: ColumnTable,
 ): void {
   for (const aesthetic of STYLE_AESTHETICS) {
     const config = scales?.[aesthetic];
@@ -51,6 +55,13 @@ export function configureStyleBindings(
     if (type === "binned" && (aesthetic === "shape" || aesthetic === "linetype")) {
       const defaultLength = aesthetic === "shape" ? 6 : 5;
       style.binCount = Math.min(range?.length ?? defaultLength, 5);
+    }
+    // Capture the global bin extent before faceting so per-panel grouping bins
+    // match the globally-trained style scale. Only needed when the user did not
+    // author explicit breaks/domain (those already pin the extent).
+    if (type === "binned" && breaks === undefined && domain === undefined && table !== undefined) {
+      const extent = styleBinExtent(style, table);
+      if (extent !== undefined) style.binExtent = extent;
     }
   }
 }

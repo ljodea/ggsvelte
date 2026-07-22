@@ -175,7 +175,7 @@ export function buildPanelFrames(input: {
     binding.fill.forcedDiscrete = ["ordinal", "manual"].includes(
       configuredColorScaleType(normalized.scales?.fill) ?? normalized.scales?.fill?.type ?? "",
     );
-    configureStyleBindings(binding, normalized.scales);
+    configureStyleBindings(binding, normalized.scales, table);
     bindings.push(binding);
   }
   const temporal = preflightTemporalBindings({

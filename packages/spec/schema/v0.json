@@ -259,14 +259,26 @@
             },
             {
               "type": "string",
+              "const": "triangle"
+            },
+            {
+              "type": "string",
               "const": "square"
             },
             {
               "type": "string",
-              "const": "triangle"
+              "const": "diamond"
+            },
+            {
+              "type": "string",
+              "const": "plus"
+            },
+            {
+              "type": "string",
+              "const": "cross"
             }
           ],
-          "description": "Point shape. One of \"circle\", \"square\", \"triangle\". Default \"circle\"."
+          "description": "Point shape. One of \"circle\", \"triangle\", \"square\", \"diamond\", \"plus\", \"cross\". Default \"circle\"."
         }
       },
       "additionalProperties": false,

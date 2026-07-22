@@ -740,6 +740,18 @@ export function resolveStyleScale(input: {
         `Continuous ${aesthetic} values require an explicit binned scale; named symbols cannot be interpolated.`,
       );
     }
+    if (
+      config?.type === "binned" &&
+      collected.values.some(
+        (value) => value !== null && value !== undefined && typeof value !== "number",
+      )
+    ) {
+      throw new PipelineError(
+        "unsupported-aesthetic-scale",
+        `/scales/${aesthetic}`,
+        `Binned ${aesthetic} scales require numeric values; temporal (date/datetime) and other non-numeric values cannot be mapped to named symbols.`,
+      );
+    }
     return finiteResolution({
       aesthetic,
       values: collected.values,
