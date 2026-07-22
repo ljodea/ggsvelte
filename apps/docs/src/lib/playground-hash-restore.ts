@@ -69,16 +69,14 @@ export function applyPlaygroundHashRestoreState(
   origin: PlaygroundHashRestoreOrigin,
   initialSeed: PlaygroundSeedV1,
 ): PlaygroundState {
-  switch (decision.kind) {
-    case "noop":
-      return state;
-    case "stage-initial":
-      return stagePlaygroundSeed(state, initialSeed, origin, null);
-    case "reject":
-      return reportPlaygroundDiagnostic(state, decision.diagnostic, decision.statusMessage);
-    case "stage":
-      return stagePlaygroundSeed(state, decision.seed, origin, decision.historyHash);
+  if (decision.kind === "noop") return state;
+  if (decision.kind === "stage-initial") {
+    return stagePlaygroundSeed(state, initialSeed, origin, null);
   }
+  if (decision.kind === "reject") {
+    return reportPlaygroundDiagnostic(state, decision.diagnostic, decision.statusMessage);
+  }
+  return stagePlaygroundSeed(state, decision.seed, origin, decision.historyHash);
 }
 
 /**
