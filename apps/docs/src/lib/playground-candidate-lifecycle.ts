@@ -5,7 +5,7 @@
  * `ggsvelte:playground-candidate` CustomEvent; assistive technology uses
  * aria-busy / status live region, not this event.
  */
-import type { PlaygroundCandidateOrigin } from "./playground-state";
+import type { PlaygroundCandidateOrigin } from "./playground-state-types";
 
 export const PLAYGROUND_CANDIDATE_EVENT = "ggsvelte:playground-candidate";
 
@@ -103,6 +103,45 @@ export function acceptCandidatePhase(
  */
 export function candidateTransitionAccepted<T>(previous: T, next: T): boolean {
   return previous !== next;
+}
+
+export type PlaygroundCandidateRef = {
+  readonly generation: number;
+  readonly origin: PlaygroundCandidateOrigin;
+};
+
+/**
+ * Pure phase notes for a workbench transition that may cancel a prior candidate
+ * and/or stage a new one. Order is cancel-then-pending (matches Playground.svelte).
+ */
+export function phaseNotesForCandidateTransition(
+  previous: PlaygroundCandidateRef | null,
+  next: {
+    readonly candidate: PlaygroundCandidateRef | null;
+    readonly status: string;
+  },
+): readonly PlaygroundCandidatePhaseDetail[] {
+  const notes: PlaygroundCandidatePhaseDetail[] = [];
+  if (
+    previous !== null &&
+    (next.candidate === null || next.candidate.generation !== previous.generation)
+  ) {
+    notes.push({
+      generation: previous.generation,
+      origin: previous.origin,
+      phase: "cancelled",
+      status: next.status,
+    });
+  }
+  if (next.candidate !== null) {
+    notes.push({
+      generation: next.candidate.generation,
+      origin: next.candidate.origin,
+      phase: "pending",
+      status: next.status,
+    });
+  }
+  return notes;
 }
 
 export function emitPlaygroundCandidatePhase(

@@ -15,6 +15,7 @@ export function writeClosedPathGroups(input: {
 }): {
   positions: Float32Array;
   rowIndex: Uint32Array;
+  closedFrameRows: Uint32Array;
   pathOffsets: Uint32Array;
   fills: (string | null)[];
   strokes: (string | null)[];
@@ -24,6 +25,7 @@ export function writeClosedPathGroups(input: {
   for (const rows of groupRows) total += rows.length * 2;
   const positions = new Float32Array(total * 2);
   const rowIndex = new Uint32Array(total);
+  const closedFrameRows = new Uint32Array(total);
   const pathOffsets = new Uint32Array(groupRows.length + 1);
   const fills: (string | null)[] = [];
   const strokes: (string | null)[] = [];
@@ -34,6 +36,7 @@ export function writeClosedPathGroups(input: {
     cursor = appendClosedBandEdges({
       positions,
       rowIndex,
+      closedFrameRows,
       cursor,
       rows,
       frame,
@@ -45,5 +48,5 @@ export function writeClosedPathGroups(input: {
     strokes.push(null);
   }
   pathOffsets[groupRows.length] = cursor;
-  return { positions, rowIndex, pathOffsets, fills, strokes };
+  return { positions, rowIndex, closedFrameRows, pathOffsets, fills, strokes };
 }

@@ -1,5 +1,6 @@
 import type { InteractionSource, InteractionTool } from "./interaction.js";
 
+/** Candidate identity carried on inspect pointer-frame payloads (not reducer state). */
 export interface InteractionCandidateRef {
   readonly epoch: number;
   readonly id: number;
@@ -7,12 +8,6 @@ export interface InteractionCandidateRef {
   readonly x: number;
   readonly y: number;
 }
-
-export type InspectionState = Readonly<{
-  kind: "idle" | "transient" | "pinned" | "dismissed";
-  candidate: InteractionCandidateRef | null;
-  source: InteractionSource;
-}>;
 
 type AreaState =
   | Readonly<{ kind: "idle" }>
@@ -24,24 +19,28 @@ type AreaState =
       current: Readonly<{ x: number; y: number }>;
     }>;
 
+/**
+ * Reducer owns tool + area brush + frame epoch/revision.
+ * Inspection lifecycle lives solely in InspectionState (single authority).
+ */
 export interface InteractionReducerState {
   readonly revision: number;
   readonly epoch: number;
   readonly tool: InteractionTool;
-  readonly inspection: InspectionState;
   readonly area: AreaState;
-  readonly activeCandidate: InteractionCandidateRef | null;
 }
 
+/**
+ * Actions. `inspect` is a **pointer-frame payload only** — delivered to
+ * `onPointerFrame` and never stored on reducer state.
+ */
 export type InteractionAction =
   | { type: "inspect"; candidate: InteractionCandidateRef | null; source: InteractionSource }
-  | { type: "toggle-pin"; source: InteractionSource }
   | { type: "escape"; source: InteractionSource }
   | { type: "set-tool"; tool: InteractionTool }
   | { type: "begin-area"; point: Readonly<{ x: number; y: number }>; panelId: string | null }
   | { type: "move-area"; point: Readonly<{ x: number; y: number }> }
   | { type: "cancel-area" }
-  | { type: "set-active"; candidate: InteractionCandidateRef | null }
   | { type: "invalidate"; reason: "resize" | "data" | "scene" | "dispose" };
 
 export interface InteractionFrameToken {
@@ -49,26 +48,20 @@ export interface InteractionFrameToken {
   readonly revision: number;
 }
 
-const idleInspection = (source: InteractionSource = "programmatic"): InspectionState => ({
-  kind: "idle",
-  candidate: null,
-  source,
-});
-
-function sameCandidate(
-  a: InteractionCandidateRef | null,
-  b: InteractionCandidateRef | null,
-): boolean {
-  return a === b || (a !== null && b !== null && a.epoch === b.epoch && a.id === b.id);
-}
+export type PointerScheduleKind = "inspect" | "move-area";
 
 export function createInteractionReducer(
   options: {
     initialTool?: InteractionTool;
     onChange?: (state: InteractionReducerState) => void;
+    /**
+     * Continuous pointer-frame sink.
+     * - inspect: InspectionState only (never reducer-dispatched)
+     * - move-area: may return false to skip dispatch (unused today)
+     */
     onPointerFrame?: (
       action: Extract<InteractionAction, { type: "inspect" | "move-area" }>,
-    ) => void;
+    ) => boolean | void;
     scheduleFrame?: (callback: () => void) => unknown;
     cancelFrame?: (handle: unknown) => void;
   } = {},
@@ -77,15 +70,22 @@ export function createInteractionReducer(
     revision: 0,
     epoch: 0,
     tool: options.initialTool ?? "inspect",
-    inspection: idleInspection(),
     area: { kind: "idle" },
-    activeCandidate: null,
   };
   let scheduledPointerAction: Extract<InteractionAction, { type: "inspect" | "move-area" }> | null =
     null;
   let frameHandle: unknown = null;
 
-  const cancelScheduledPointer = (): void => {
+  /**
+   * Cancel the coalesced pointer schedule. With `kind`, cancel only when the
+   * queued action matches (inspect cancel must not kill move-area).
+   */
+  const cancelScheduledPointer = (kind?: PointerScheduleKind): void => {
+    if (
+      kind !== undefined &&
+      (scheduledPointerAction === null || scheduledPointerAction.type !== kind)
+    )
+      return;
     if (frameHandle !== null) options.cancelFrame?.(frameHandle);
     frameHandle = null;
     scheduledPointerAction = null;
@@ -97,70 +97,26 @@ export function createInteractionReducer(
   };
 
   const dispatch = (action: InteractionAction): void => {
-    // Discrete boundaries always win over queued pointer coordinates. This
-    // keeps cancel/keyboard/tool changes synchronous with the visible state.
+    // Discrete boundaries always win over queued pointer coordinates.
     if (
       action.type === "escape" ||
       action.type === "set-tool" ||
       action.type === "cancel-area" ||
-      action.type === "invalidate" ||
-      ("source" in action && action.source !== "pointer" && action.source !== "touch")
+      action.type === "invalidate"
     )
       cancelScheduledPointer();
     switch (action.type) {
-      case "inspect": {
-        if (state.inspection.kind === "pinned") return;
-        if (action.candidate === null) {
-          if (state.inspection.kind === "idle") return;
-          commit({ inspection: idleInspection(action.source) });
-          return;
-        }
-        if (
-          state.inspection.kind === "dismissed" &&
-          sameCandidate(state.inspection.candidate, action.candidate)
-        )
-          return;
-        if (
-          state.inspection.kind === "transient" &&
-          sameCandidate(state.inspection.candidate, action.candidate)
-        )
-          return;
-        commit({
-          activeCandidate: action.candidate,
-          inspection: { kind: "transient", candidate: action.candidate, source: action.source },
-        });
+      case "inspect":
+        // Inspect payloads are frame-only; never mutate reducer state.
         return;
-      }
-      case "toggle-pin": {
-        const current = state.inspection;
-        if (current.kind === "pinned") {
-          commit({ inspection: idleInspection(action.source) });
-        } else if (current.candidate !== null) {
-          commit({
-            inspection: { kind: "pinned", candidate: current.candidate, source: action.source },
-          });
-        }
-        return;
-      }
-      case "escape": {
-        if (state.area.kind !== "idle") {
-          commit({ area: { kind: "idle" }, epoch: state.epoch + 1 });
-        } else if (state.inspection.kind === "pinned") {
-          commit({ inspection: idleInspection(action.source), epoch: state.epoch + 1 });
-        } else if (state.inspection.candidate === null) {
+      case "escape":
+        // Area cancel + epoch only. Inspection dismiss is InspectionState-owned.
+        if (state.area.kind === "idle") {
           commit({ epoch: state.epoch + 1 });
         } else {
-          commit({
-            inspection: {
-              kind: "dismissed",
-              candidate: state.inspection.candidate,
-              source: action.source,
-            },
-            epoch: state.epoch + 1,
-          });
+          commit({ area: { kind: "idle" }, epoch: state.epoch + 1 });
         }
         return;
-      }
       case "set-tool":
         if (state.tool !== action.tool || state.area.kind !== "idle") {
           commit({ tool: action.tool, area: { kind: "idle" }, epoch: state.epoch + 1 });
@@ -169,7 +125,6 @@ export function createInteractionReducer(
       case "begin-area":
         if (state.tool !== "select-area" && state.tool !== "zoom-area") return;
         commit({
-          inspection: idleInspection(),
           area: {
             kind: "first-corner",
             tool: state.tool,
@@ -185,10 +140,6 @@ export function createInteractionReducer(
         return;
       case "cancel-area":
         if (state.area.kind !== "idle") commit({ area: { kind: "idle" }, epoch: state.epoch + 1 });
-        return;
-      case "set-active":
-        if (!sameCandidate(state.activeCandidate, action.candidate))
-          commit({ activeCandidate: action.candidate });
         return;
       case "invalidate":
         commit({ area: { kind: "idle" }, epoch: state.epoch + 1 });
@@ -214,10 +165,14 @@ export function createInteractionReducer(
         frameHandle = null;
         const latest = scheduledPointerAction;
         scheduledPointerAction = null;
-        if (latest !== null) {
+        if (latest === null) return;
+        // Inspect frames are owned by InspectionState — never reducer-dispatched.
+        if (latest.type === "inspect") {
           options.onPointerFrame?.(latest);
-          dispatch(latest);
+          return;
         }
+        const shouldDispatch = options.onPointerFrame?.(latest);
+        if (shouldDispatch !== false) dispatch(latest);
       });
     },
     cancelScheduledPointer,

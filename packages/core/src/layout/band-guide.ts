@@ -1,204 +1,31 @@
 /**
  * Measured categorical (band) axis label planner — the discrete analogue of
- * `planTemporalAxis`. It resolves how long category labels are presented on the
- * *horizontal* band axis so every named category stays legible without
- * collisions, escalating within the axis band (never changing the aesthetic):
+ * `planTemporalAxis`. Escalation ladder (horizontal only):
  *
  *   single-line → wrapped (≤2 lines) → rotated (−45° then −90°)
- *     → truncate + margin-overflow warning   (few bars, individually too long)
- *     → thin (labelEvery)                     (high cardinality: too many bars)
- *     → overlap warning                       (few bars that still collide)
+ *     → truncate + margin-overflow warning
+ *     → thin (labelEvery)
+ *     → overlap warning
  *
- * It never thins a low-cardinality axis (each bar is a named value the reader
- * must see) and never auto-flips. When rotation still can't fit, truncation is
- * loud (a `band-label-margin-overflow` degradation) and the full text stays on
- * the tick `<title>` / `fullLabel`; the pipeline surfaces a coord_flip fix.
- *
- * Vertical band axes (native Y, or categorical-on-Y after coord_flip) do NOT
- * use this planner — they keep the classic width-cap + thin/truncate path.
+ * Types live in `band-guide-types.ts`; wrap/cap helpers in `band-label-layout.ts`.
  */
 
 import { neighbourOverlap, neighbourOverlapAsym } from "./axis-overlap.js";
-import type { TextMeasurer } from "./measure.js";
+import type { BandAxisPlan, BandAxisPlanInput, BandAxisPlanTick } from "./band-guide-types.js";
+import {
+  BAND_THIN_MIN_CATEGORIES,
+  MAX_WRAP_LINES,
+  MIN_BAND_LABEL_GAP_PX,
+  MODE_RANK,
+  RAD,
+  capEndOverhang,
+  quantizeUp,
+  wrapLabel,
+  type BandLayoutEntry,
+} from "./band-label-layout.js";
+import { truncateToFit } from "./truncate.js";
 
-export type BandLabelMode = "single-line" | "wrapped" | "rotated";
-
-const MODE_RANK: Record<BandLabelMode, number> = {
-  "single-line": 0,
-  wrapped: 1,
-  rotated: 2,
-};
-
-/** Minimum clear gap between adjacent band labels, px. */
-const MIN_BAND_LABEL_GAP_PX = 4;
-/** Below this category count, thinning would hide a named bar → never thin. */
-const BAND_THIN_MIN_CATEGORIES = 12;
-/** Wrapped labels use at most this many lines before escalating to rotation. */
-const MAX_WRAP_LINES = 2;
-
-const RAD = Math.PI / 180;
-
-/** A pre-resolved band tick to lay out (break-matching already applied). */
-interface BandPlanEntry {
-  value: string | number;
-  label: string;
-  domainIndex: number;
-}
-
-export interface BandAxisPlanInput {
-  aesthetic: "x" | "y";
-  panelIndex: number;
-  /** Total number of bands (band width = extentPx / categoryCount). */
-  categoryCount: number;
-  /** Ticks to lay out, in display order, already break-filtered. */
-  entries: readonly BandPlanEntry[];
-  /** Only "horizontal" is planned; "vertical" returns a single-line no-op plan. */
-  orient: "horizontal" | "vertical";
-  extentPx: number;
-  reverse: boolean;
-  measurer: TextMeasurer;
-  fontSize: number;
-  /** Cap for along-axis label overhang past the end ticks (right/left margin). */
-  marginCapPx: number;
-  /** Cap for the orthogonal label band (bottom margin for x). */
-  orthogonalMarginCapPx: number;
-  /** Margin quantum; fitness budgets are floored to it so mode is A→B stable. */
-  quantum?: number;
-  ellipsis?: string;
-  /** Pass-A mode; the planner escalates only, never de-escalates. */
-  previousMode?: BandLabelMode | null;
-}
-
-interface BandTick {
-  value: string | number;
-  label: string;
-  fullLabel: string;
-  labeled: boolean;
-  domainIndex: number;
-  /** Wrapped lines (present when mode === "wrapped"). */
-  lines?: string[];
-  /** Rotation in degrees (present when mode === "rotated"). */
-  angle?: number;
-}
-
-export interface BandAxisPlan {
-  mode: BandLabelMode;
-  /** 0 | -45 | -90 */
-  angle: number;
-  ticks: BandTick[];
-  /** 1 = every category labeled; >1 = high-cardinality thinning. */
-  labelEvery: number;
-  /** Orthogonal (bottom) band height the labels require, px. */
-  labelBandHeight: number;
-  /** Along-axis overhang past the RIGHT end tick (into the right margin), px. */
-  alongOverhang: number;
-  /** Along-axis overhang past the LEFT end tick (into the left margin), px. */
-  leftOverhang: number;
-  overlap: boolean;
-  marginOverflow: boolean;
-  degraded: string[];
-}
-
-interface Entry {
-  value: string | number;
-  label: string;
-  domainIndex: number;
-  center: number;
-  width: number;
-}
-
-function quantizeUp(px: number, quantum: number): number {
-  if (quantum <= 0) return px;
-  return Math.ceil(px / quantum - 1e-9) * quantum;
-}
-
-/** Greedy word wrap; null when a single token exceeds `maxWidth` or lines > cap. */
-function wrapLabel(
-  label: string,
-  maxWidth: number,
-  measurer: TextMeasurer,
-  fontSize: number,
-  maxLines: number,
-): string[] | null {
-  const words = label.split(/\s+/).filter((w) => w.length > 0);
-  if (words.length <= 1) {
-    return measurer.measureWidth(label, fontSize) <= maxWidth ? [label] : null;
-  }
-  const lines: string[] = [];
-  let current = "";
-  for (const word of words) {
-    if (measurer.measureWidth(word, fontSize) > maxWidth) return null; // unbreakable token
-    const trial = current === "" ? word : `${current} ${word}`;
-    if (measurer.measureWidth(trial, fontSize) <= maxWidth) {
-      current = trial;
-    } else {
-      lines.push(current);
-      current = word;
-    }
-  }
-  if (current !== "") lines.push(current);
-  return lines.length <= maxLines ? lines : null;
-}
-
-function truncateToFit(
-  label: string,
-  maxWidth: number,
-  measurer: TextMeasurer,
-  fontSize: number,
-  ellipsis: string,
-): string {
-  if (measurer.measureWidth(label, fontSize) <= maxWidth) return label;
-  // oxlint-disable-next-line typescript/no-misused-spread -- code-point split is intentional (truncation granularity)
-  const chars = [...label];
-  for (let keep = chars.length - 1; keep >= 1; keep--) {
-    const candidate = chars.slice(0, keep).join("") + ellipsis;
-    if (measurer.measureWidth(candidate, fontSize) <= maxWidth) return candidate;
-  }
-  return ellipsis;
-}
-
-/**
- * Cap the along-axis overhang of the end labels using their ACTUAL displayed
- * positions (not the uniform band width). Horizontal labels that overhang past
- * the panel edge + margin cap are truncated (ellipsis) and flagged; the returned
- * per-side overhangs are clamped to the cap so neither margin can be blown.
- * Left and right are tracked separately so a leftmost (or reversed) end label is
- * reserved in the LEFT margin instead of leaking blank space onto the right.
- */
-function capEndOverhang(
-  ticks: BandTick[],
-  entries: readonly Entry[],
-  extentPx: number,
-  marginCapPx: number,
-  measurer: TextMeasurer,
-  fontSize: number,
-  ellipsis: string,
-  truncatable: boolean,
-): { alongOverhang: number; leftOverhang: number; marginOverflow: boolean } {
-  let left = 0;
-  let right = 0;
-  let overflow = false;
-  for (let i = 0; i < ticks.length; i++) {
-    const tick = ticks[i]!;
-    if (!tick.labeled) continue;
-    const center = entries[i]!.center;
-    const edgeDist = Math.min(center, extentPx - center);
-    const allowed = edgeDist + marginCapPx;
-    let half = measurer.measureWidth(tick.label, fontSize) / 2;
-    if (truncatable && half > allowed) {
-      tick.label = truncateToFit(tick.label, allowed * 2, measurer, fontSize, ellipsis);
-      half = measurer.measureWidth(tick.label, fontSize) / 2;
-      overflow = true;
-    }
-    left = Math.max(left, half - center);
-    right = Math.max(right, half - (extentPx - center));
-  }
-  return {
-    alongOverhang: Math.max(0, Math.min(right, marginCapPx)),
-    leftOverhang: Math.max(0, Math.min(left, marginCapPx)),
-    marginOverflow: overflow,
-  };
-}
+export type { BandAxisPlan, BandAxisPlanInput, BandLabelMode } from "./band-guide-types.js";
 
 export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
   const {
@@ -223,7 +50,7 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
     const fraction = (domainIndex + 0.5) / n;
     return (reverse ? 1 - fraction : fraction) * extentPx;
   };
-  const entries: Entry[] = inputEntries.map((entry) => ({
+  const entries: BandLayoutEntry[] = inputEntries.map((entry) => ({
     value: entry.value,
     label: entry.label,
     domainIndex: entry.domainIndex,
@@ -233,10 +60,13 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
 
   const buildTicks = (
     every: number,
-    build: (entry: Entry) => Pick<BandTick, "label" | "lines" | "angle">,
-  ): BandTick[] =>
+    build: (
+      entry: BandLayoutEntry,
+      index: number,
+    ) => Pick<BandAxisPlanTick, "label" | "lines" | "angle">,
+  ): BandAxisPlanTick[] =>
     entries.map((entry, i) => {
-      const enriched = build(entry);
+      const enriched = build(entry, i);
       return {
         value: entry.value,
         label: enriched.label,
@@ -294,16 +124,19 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
 
   // --- wrapped (≤ MAX_WRAP_LINES) ---
   if (floor <= MODE_RANK.wrapped) {
+    // Wrap once per entry; reuse lines + measured widths for overlap, side
+    // reserve, and tick emission (avoid re-wrap + re-measure on the emit path).
     const wrapped = entries.map((e) =>
       wrapLabel(e.label, bandBudget, measurer, fontSize, MAX_WRAP_LINES),
     );
-    if (wrapped.every((w) => w !== null)) {
-      const lineWidth = (lines: string[]) =>
-        Math.max(...lines.map((l) => measurer.measureWidth(l, fontSize)));
-      const maxLines = Math.max(...wrapped.map((w) => (w ?? []).length));
+    if (wrapped.every((w): w is string[] => w !== null)) {
+      const lineWidths = wrapped.map((lines) =>
+        Math.max(...lines.map((l) => measurer.measureWidth(l, fontSize))),
+      );
+      const maxLines = Math.max(...wrapped.map((w) => w.length));
       const blockHeight = maxLines * lineHeight;
       const wrapOverlap = neighbourOverlap(
-        entries.map((e, i) => ({ pos: e.center, half: lineWidth(wrapped[i]!) / 2 })),
+        entries.map((e, i) => ({ pos: e.center, half: lineWidths[i]! / 2 })),
         gap,
       );
       if (!wrapOverlap && blockHeight <= orthoCap) {
@@ -311,15 +144,15 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
         let wrapLeft = 0;
         let wrapRight = 0;
         for (let i = 0; i < entries.length; i++) {
-          const half = lineWidth(wrapped[i]!) / 2;
+          const half = lineWidths[i]! / 2;
           wrapLeft = Math.max(wrapLeft, half - entries[i]!.center);
           wrapRight = Math.max(wrapRight, half - (extentPx - entries[i]!.center));
         }
         return {
           mode: "wrapped",
           angle: 0,
-          ticks: buildTicks(1, (e) => {
-            const lines = wrapLabel(e.label, bandBudget, measurer, fontSize, MAX_WRAP_LINES)!;
+          ticks: buildTicks(1, (_e, i) => {
+            const lines = wrapped[i]!;
             return { label: lines.join(" "), lines };
           }),
           labelEvery: 1,
@@ -350,26 +183,38 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
     return width * Math.sin(a) + lineHeight * Math.cos(a);
   };
   /** Widest label among the currently-labeled (every k-th) entries. */
-  const labeledMaxWidth = (every: number) =>
-    Math.max(0, ...entries.filter((_, i) => i % every === 0).map((e) => e.width));
-  // Overlap of the rotated footprint measured at the ACTUAL displayed tick
-  // positions (every k-th when thinned) with each label's own end-anchored
-  // footprint — so a sparse break subset hundreds of px apart is never wrongly
-  // thinned, a hidden wide label never inflates the check, and a long label after
-  // a short one is caught overlapping its left neighbour.
-  const rotatedOverlaps = (angle: number, every: number) =>
-    neighbourOverlapAsym(
-      entries
-        .filter((_, i) => i % every === 0)
-        .map((e) => ({ pos: e.center, left: leftExtOf(e.width, angle), right: rightExtOf(angle) })),
-      gap,
-    );
+  const labeledMaxWidth = (every: number) => {
+    let max = 0;
+    for (let i = 0; i < entries.length; i += every) max = Math.max(max, entries[i]!.width);
+    return max;
+  };
+  // Overlap of the rotated footprint at displayed (every-k) ticks. Entries may
+  // be in authored break order (not domain order), so project+sort once per
+  // angle by pos, then filter by array index for thinning — O(K log K) once +
+  // O(K) per doubling step, not O(K log K) per step.
+  type AsymItem = { pos: number; left: number; right: number; index: number };
+  const rotatedOverlapsSorted = (angle: number, every: number, sorted: readonly AsymItem[]) => {
+    const items = every === 1 ? sorted : sorted.filter((item) => item.index % every === 0);
+    return neighbourOverlapAsym(items, gap, { alreadySorted: true });
+  };
+  const projectRotatedSorted = (angle: number): AsymItem[] =>
+    entries
+      .map((e, index) => ({
+        pos: e.center,
+        left: leftExtOf(e.width, angle),
+        right: rightExtOf(angle),
+        index,
+      }))
+      .toSorted((a, b) => a.pos - b.pos);
+
   // Prefer −45 (more readable, less bottom footprint); escalate to −90 ONLY when
   // −45 actually overlaps neighbours. A −45 label that merely exceeds the bottom
   // cap is truncated within the −45 budget below — switching to −90 for that would
   // need MORE bottom space (its footprint is the full label width) and truncate
   // harder without resolving any collision.
-  const angle = rotatedOverlaps(-45, 1) ? -90 : -45;
+  const sortedAtNeg45 = projectRotatedSorted(-45);
+  const angle = rotatedOverlapsSorted(-45, 1, sortedAtNeg45) ? -90 : -45;
+  const sortedAtAngle = angle === -45 ? sortedAtNeg45 : projectRotatedSorted(angle);
 
   const degraded: string[] = [];
   let labelEvery = 1;
@@ -379,13 +224,16 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
   // Along-axis: do adjacent rotated labels still collide at their real positions?
   // Gate thinning on the number of DISPLAYED ticks (a small authored-break subset
   // of a huge domain must keep every break), never the full category count.
-  if (rotatedOverlaps(angle, 1)) {
+  if (rotatedOverlapsSorted(angle, 1, sortedAtAngle)) {
     if (entries.length >= BAND_THIN_MIN_CATEGORIES) {
       // High cardinality: thin (never for a handful of named bars).
-      while (rotatedOverlaps(angle, labelEvery) && labelEvery * 2 < entries.length) {
+      while (
+        rotatedOverlapsSorted(angle, labelEvery, sortedAtAngle) &&
+        labelEvery * 2 < entries.length
+      ) {
         labelEvery *= 2;
       }
-      if (rotatedOverlaps(angle, labelEvery)) {
+      if (rotatedOverlapsSorted(angle, labelEvery, sortedAtAngle)) {
         overlap = true;
         degraded.push("band-label-overlap");
       }
@@ -427,20 +275,17 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
     return { label, angle };
   });
 
-  const shownMaxWidth = Math.max(
-    0,
-    ...ticks.filter((t) => t.labeled).map((t) => measurer.measureWidth(t.label, fontSize)),
-  );
-  const labelBandHeight = quantizeUp(Math.min(orthoOf(shownMaxWidth, angle), orthoCap), quantum);
-  // End overhang of the end-anchored rotated footprint at the real end positions.
-  // Left extent dominates (text runs up-left from the tick); right is ~half a line
-  // height. Tracked per side from the (truncated) labeled ticks, clamped to the cap.
+  // One measureWidth per labeled tick: drives both band height (max width) and
+  // end-anchored overhang (left/right extent). Avoids a second full scan.
+  let shownMaxWidth = 0;
   let rotLeft = 0;
   let rotRight = 0;
   for (let i = 0; i < ticks.length; i++) {
     if (!ticks[i]!.labeled) continue;
     const center = entries[i]!.center;
-    const leftExt = leftExtOf(measurer.measureWidth(ticks[i]!.label, fontSize), angle);
+    const width = measurer.measureWidth(ticks[i]!.label, fontSize);
+    shownMaxWidth = Math.max(shownMaxWidth, width);
+    const leftExt = leftExtOf(width, angle);
     const rightExt = rightExtOf(angle);
     // Width-independent residual (chiefly −90): if the footprint still exceeds the
     // side cap after truncation we cannot shrink it further — flag honestly.
@@ -453,6 +298,7 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
     rotLeft = Math.max(rotLeft, leftExt - center);
     rotRight = Math.max(rotRight, rightExt - (extentPx - center));
   }
+  const labelBandHeight = quantizeUp(Math.min(orthoOf(shownMaxWidth, angle), orthoCap), quantum);
   if (marginOverflow) degraded.push("band-label-margin-overflow");
   const alongOverhang = Math.max(0, Math.min(marginCapPx, rotRight));
   const leftOverhang = Math.max(0, Math.min(marginCapPx, rotLeft));

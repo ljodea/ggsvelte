@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 
-import { aes, gg } from "../src/builder.ts";
+import { aes, gg, GGBuilder } from "../src/builder.ts";
 import { normalize } from "../src/normalize.ts";
 import { SpecValidationError } from "../src/errors.ts";
 
@@ -19,6 +19,21 @@ describe("gg builder", () => {
     // base is untouched: still zero layers -> spec() must fail (minItems 1)
     expect(() => base.spec()).toThrow(SpecValidationError);
     expect(withPoint.spec().layers).toHaveLength(1);
+  });
+
+  it("preserves GGBuilder identity across geom and scale sugar chains", () => {
+    const base = gg(rows, aes({ x: "x", y: "y" }));
+    expect(base).toBeInstanceOf(GGBuilder);
+    const withPoint = base.geomPoint();
+    expect(withPoint).toBeInstanceOf(GGBuilder);
+    const withScale = withPoint.scaleXLog10().scaleYSqrt();
+    expect(withScale).toBeInstanceOf(GGBuilder);
+    // Scale sugar remains available after immutable transitions.
+    expect(typeof withScale.scaleColorContinuous).toBe("function");
+    expect(withScale.spec().scales).toEqual({
+      x: { type: "linear", transform: "log10" },
+      y: { type: "linear", transform: "sqrt" },
+    });
   });
 
   it("geomPoint()/geomLine() are exact sugar for .layer()", () => {
@@ -47,17 +62,8 @@ describe("gg builder", () => {
     expect(viaBuilder).toEqual(handWritten);
   });
 
-  it("accepts rows, columns, and DataRef data forms", () => {
-    expect(gg(rows).geomPoint().spec().data).toEqual({ values: rows });
-    expect(
-      gg({ x: [1, 2], y: [2, 3] })
-        .geomPoint()
-        .spec().data,
-    ).toEqual({
-      columns: { x: [1, 2], y: [2, 3] },
-    });
-    expect(gg({ name: "cars" }).geomPoint().spec().data).toEqual({ name: "cars" });
-  });
+  // Data-form acceptance + Date snapshot/portable materialization:
+  // packages/spec/tests/builder-data.test.ts
 
   it("labs() merges over previous labs", () => {
     const spec = gg(rows).geomPoint().labs({ title: "T" }).labs({ x: "X" }).spec();

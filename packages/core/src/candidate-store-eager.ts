@@ -1,10 +1,9 @@
+import { pathRange, pathSemanticNeighborRange } from "./candidate-geometry.js";
 import {
   closestOrthInRange,
   directionalNearestInOrder,
   panelRangeInOrder,
-  pathRange,
-  pathSemanticNeighborRange,
-} from "./candidate-geometry.js";
+} from "./candidate-geometry-nearest.js";
 import { closestPathEdge } from "./candidate-path-geometry.js";
 import { AUTO_MODES, buildCandidateStoreIndexes } from "./candidate-store-indexes.js";
 import type { BucketBoundary, SeriesBoundary } from "./candidate-store-indexes.js";
@@ -24,7 +23,7 @@ export const EMPTY_UINT32 = new Uint32Array(0);
  * Eager candidate store: compact indexes + query methods.
  * Construction is split across:
  * - candidate-store-indexes.ts — typed arrays, traversal, group buckets
- * - candidate-store-spatial.ts — spatial shortlist + geometry refine
+ * - candidate-store-spatial.ts — spatial shortlist + geometry refine (index + refine)
  * - candidate-path-geometry.ts — path AABB / edge helpers
  */
 export function buildCandidateStoreEager(

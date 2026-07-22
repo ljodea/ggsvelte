@@ -147,6 +147,8 @@ export const JOB_CONTENT_INPUTS: Record<CacheableExecution, readonly string[]> =
     ".markdownlint-cli2.jsonc",
     "knip.jsonc",
     ".pre-commit-config.yaml",
+    // scripts/readme-showcase.test.ts contracts the published README snippets.
+    "README.md",
   ],
   // Package build + knip + type-aware + publint + examples tsc (no vite docs site).
   // apps/docs stays hashed: knip + oxlint --type-aware still cover the docs app,

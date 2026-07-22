@@ -1,4 +1,4 @@
-import { pathSubpathIndex } from "./candidate-geometry.js";
+import { pathSubpathIndex, renderPrimitiveCount } from "./candidate-geometry.js";
 import type { GeometryBatch } from "./scene.js";
 
 /** Semantic source-row keys associated with one renderer candidate. */
@@ -22,11 +22,6 @@ export interface LegendValueMembership<Key extends PropertyKey = PropertyKey> {
   readonly keys: readonly Key[];
 }
 
-function primitiveCount(batch: GeometryBatch): number {
-  if (batch.kind === "paths") return Math.max(0, batch.pathOffsets.length - 1);
-  return batch.rowIndex.length;
-}
-
 function pathForVertex(offsets: Uint32Array, vertexIndex: number): number | null {
   if (
     !Number.isInteger(vertexIndex) ||
@@ -40,7 +35,7 @@ function pathForVertex(offsets: Uint32Array, vertexIndex: number): number | null
 
 function rendererPrimitive(batch: GeometryBatch, candidateIndex: number): number | null {
   if (batch.kind === "paths") return pathForVertex(batch.pathOffsets, candidateIndex);
-  const count = primitiveCount(batch);
+  const count = renderPrimitiveCount(batch);
   return Number.isInteger(candidateIndex) && candidateIndex >= 0 && candidateIndex < count
     ? candidateIndex
     : null;
@@ -116,7 +111,7 @@ export function buildInteractionMasks<Key extends PropertyKey>(
     // non-matching emphasis still yields focusedCount 0 (not a null mask).
     let values = focused.get(candidate.batchIndex);
     if (values === undefined) {
-      values = new Uint8Array(primitiveCount(batch));
+      values = new Uint8Array(renderPrimitiveCount(batch));
       focused.set(candidate.batchIndex, values);
     }
     if (candidate.keys.some((key) => emphasis.has(key))) values[primitiveIndex] = 1;

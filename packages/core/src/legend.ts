@@ -10,6 +10,7 @@
  */
 import { linearTicks, tickStep } from "./layout/ticks.js";
 import type { TextMeasurer } from "./layout/measure.js";
+import { truncateToFit } from "./layout/truncate.js";
 import { encodeKey } from "./scales/state.js";
 import { bandKey } from "./scales/train.js";
 import type { SceneLegend, SceneLegendEntry } from "./scene.js";
@@ -120,15 +121,19 @@ export function disambiguatedLabels(values: readonly unknown[]): string[] {
   );
 }
 
+/** Ellipsis for legend entry truncation (same glyph as axis truncateToFit paths). */
+const LEGEND_ELLIPSIS = "…";
+
+/**
+ * Truncate a legend entry label to `maxWidth` via shared binary-search
+ * {@link truncateToFit}: O(log L) measureWidth calls (and O(L log L) string work)
+ * instead of a reverse linear scan O(L) measures / O(L²) joins.
+ *
+ * The pipeline's MetricsTableMeasurer is monotonic in keep length; under a
+ * non-monotonic native measurer this is best-effort (same contract as axes).
+ */
 function truncate(label: string, maxWidth: number, measurer: TextMeasurer): string {
-  if (measurer.measureWidth(label, FONT_SIZE) <= maxWidth) return label;
-  // oxlint-disable-next-line typescript/no-misused-spread -- code-point split is intentional
-  const chars = [...label];
-  for (let keep = chars.length - 1; keep >= 1; keep--) {
-    const candidate = chars.slice(0, keep).join("") + "…";
-    if (measurer.measureWidth(candidate, FONT_SIZE) <= maxWidth) return candidate;
-  }
-  return "…";
+  return truncateToFit(label, maxWidth, measurer, FONT_SIZE, LEGEND_ELLIPSIS);
 }
 
 /**

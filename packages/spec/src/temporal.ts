@@ -2,7 +2,9 @@
  * Temporal authoring helpers and compatibility facade.
  *
  * Implementation is split:
- *  - temporal-parse.ts — parser registry, schemas, value-level engines, parseTemporal
+ *  - temporal-parse-core.ts — types/schema, calendar parts→epoch, timezone
+ *  - temporal-parse-format.ts — exact-format compile cache + parse
+ *  - temporal-parse.ts — named engines, parseTemporal dispatcher, public re-exports
  *  - temporal-column.ts — inferTemporalColumn / parseTemporalColumn
  *  - this file — ymd/dmy/… helpers, epoch helpers, and re-exports so existing
  *    `./temporal.js` imports stay stable.

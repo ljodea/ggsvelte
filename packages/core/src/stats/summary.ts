@@ -49,24 +49,48 @@ export interface SummaryStatResult {
   dropped: number;
 }
 
-function applyFun(fun: SummaryFunName, sorted: readonly number[]): number {
+/**
+ * Apply a summary function to a group of values.
+ * - median requires ascending sort (caller must pass sorted).
+ * - min/max/mean/sum scan unsorted in O(n).
+ */
+function applyFun(fun: SummaryFunName, values: readonly number[], sorted: boolean): number {
   switch (fun) {
     case "mean":
-      return mean(sorted);
+      return mean(values);
     case "median": {
-      const n = sorted.length;
-      return n % 2 === 1 ? sorted[(n - 1) / 2]! : (sorted[n / 2 - 1]! + sorted[n / 2]!) / 2;
+      if (!sorted) {
+        throw new Error("statSummary: median requires sorted values");
+      }
+      const n = values.length;
+      return n % 2 === 1 ? values[(n - 1) / 2]! : (values[n / 2 - 1]! + values[n / 2]!) / 2;
     }
     case "sum": {
       let s = 0;
-      for (const v of sorted) s += v;
+      for (const v of values) s += v;
       return s;
     }
-    case "min":
-      return sorted[0]!;
-    default:
-      return sorted.at(-1)!;
+    case "min": {
+      let m = values[0]!;
+      for (let i = 1; i < values.length; i++) if (values[i]! < m) m = values[i]!;
+      return m;
+    }
+    default: {
+      // max
+      let m = values[0]!;
+      for (let i = 1; i < values.length; i++) if (values[i]! > m) m = values[i]!;
+      return m;
+    }
   }
+}
+
+/** True when any requested fun needs an ascending sort (only median). */
+function needsSortedValues(
+  fun: SummaryFunName,
+  funMin: SummaryFunName | undefined,
+  funMax: SummaryFunName | undefined,
+): boolean {
+  return fun === "median" || funMin === "median" || funMax === "median";
 }
 
 export function statSummary(input: SummaryStatInput): SummaryStatResult {
@@ -108,10 +132,15 @@ export function statSummary(input: SummaryStatInput): SummaryStatResult {
   const outY = new Float64Array(comboRows.length);
   const outYmin = new Float64Array(comboRows.length);
   const outYmax = new Float64Array(comboRows.length);
+  // Default mean_se (and min/max/sum) never need a sort — only median does.
+  // Skipping the O(n log n) sort per (group,x) keeps large repeated-x groups linear.
+  // mean/sum accumulate in input-row order (ggplot2/R data order), not sort order.
+  const sortValues = needsSortedValues(fun, input.funMin, input.funMax);
   for (let slot = 0; slot < comboRows.length; slot++) {
     const rows = comboRows[slot]!;
-    const values = rows.map((row) => y[row]!).toSorted((a, b) => a - b);
-    const center = applyFun(fun, values);
+    const values = rows.map((row) => y[row]!);
+    if (sortValues) values.sort((a, b) => a - b);
+    const center = applyFun(fun, values, sortValues);
     outY[slot] = center;
     if (input.funMin === undefined && input.funMax === undefined && fun === "mean") {
       // mean_se: mean ± sd/sqrt(n); a single observation has no spread.
@@ -119,8 +148,10 @@ export function statSummary(input: SummaryStatInput): SummaryStatResult {
       outYmin[slot] = center - se;
       outYmax[slot] = center + se;
     } else {
-      outYmin[slot] = input.funMin === undefined ? center : applyFun(input.funMin, values);
-      outYmax[slot] = input.funMax === undefined ? center : applyFun(input.funMax, values);
+      outYmin[slot] =
+        input.funMin === undefined ? center : applyFun(input.funMin, values, sortValues);
+      outYmax[slot] =
+        input.funMax === undefined ? center : applyFun(input.funMax, values, sortValues);
     }
   }
 

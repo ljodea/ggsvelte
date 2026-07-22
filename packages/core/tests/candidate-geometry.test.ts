@@ -1,13 +1,18 @@
 import { describe, expect, it, spyOn } from "bun:test";
 
 import {
+  candidatePrimitiveCount,
   closestOrthInRange,
   directionalNearestInOrder,
   panelRangeInOrder,
   pathRange,
   pathSubpathIndex,
+  primitiveCount,
+  renderPrimitiveCount,
   samePath,
 } from "../src/candidate-geometry.ts";
+import { batchMarkCount } from "../src/pipeline.ts";
+import { batchPrimitiveCount } from "../src/dom/canvas-marks-mask.ts";
 import type { PathsBatch } from "../src/scene.ts";
 
 /** Minimal paths batch with the given offsets and enough vertices. */
@@ -68,6 +73,21 @@ describe("pathSubpathIndex / pathRange", () => {
     expect(pathRange(withEmpty, 2)).toEqual([2, 5]);
     expect(pathRange(withEmpty, 1.5)).toEqual([0, 2]);
     expect(pathRange(withEmpty, 2.25)).toEqual([2, 5]);
+  });
+});
+
+describe("render vs candidate primitive algebra (tessellated path)", () => {
+  it("separates render subpaths, geometry vertices, and semantic candidates", () => {
+    // 2 subpaths, 9 vertices, 3 semantic anchors (tessellated path).
+    const batch: PathsBatch = {
+      ...pathsBatch([0, 4, 9]),
+      semanticAnchors: new Uint8Array([1, 0, 0, 1, 0, 0, 0, 0, 1]),
+    };
+    expect(renderPrimitiveCount(batch)).toBe(2); // subpaths
+    expect(primitiveCount(batch)).toBe(9); // vertices
+    expect(candidatePrimitiveCount(batch)).toBe(3); // anchors
+    expect(batchMarkCount(batch)).toBe(2);
+    expect(batchPrimitiveCount(batch)).toBe(2);
   });
 });
 

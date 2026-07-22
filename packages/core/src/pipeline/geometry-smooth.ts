@@ -5,7 +5,7 @@ import type { GeometryBatch } from "../scene.js";
 
 import type { LayerFrame, PipelineWarning, ResolvedColorScale } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
-import { bucketByGroup, xSortKey } from "./geometry-shared.js";
+import { bucketByGroup, sortGroupRowsByX } from "./geometry-shared.js";
 import { buildSmoothLineBatch } from "./geometry-smooth-line.js";
 import { buildSmoothRibbonBatch } from "./geometry-smooth-ribbon.js";
 
@@ -18,8 +18,7 @@ export function smoothBatches(
 ): GeometryBatch[] {
   const groupRows = bucketByGroup(frame, fx, null, warnings);
   if (groupRows.length === 0) return [];
-  const sortKey = xSortKey(frame, fx);
-  for (const rows of groupRows) rows.sort((a, b) => sortKey(a) - sortKey(b));
+  sortGroupRowsByX(groupRows, frame, fx);
 
   const out: GeometryBatch[] = [];
   // Ribbon drawn first, under the line.

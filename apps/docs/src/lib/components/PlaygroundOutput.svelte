@@ -1,10 +1,22 @@
 <script lang="ts">
-  import { tick, untrack } from "svelte";
+  import { tick } from "svelte";
 
-  import { copyText, MANUAL_COPY_STATUS } from "$lib/clipboard";
+  import { copyText } from "$lib/clipboard";
   import UiButton from "$lib/components/UiButton.svelte";
   import { playgroundSVGExport } from "$lib/playground-export";
   import type { PlaygroundOutput } from "$lib/playground-output";
+  import {
+    PLAYGROUND_SVG_DOWNLOADED_STATUS,
+    playgroundCopyStatus,
+    playgroundSvgDownloadFailureStatus,
+    playgroundSvgExportFailureStatus,
+  } from "$lib/playground-output-status";
+  import {
+    clampOutputTabIndex,
+    copySessionMatchesOutputs,
+    nextCopySessionOutputs,
+  } from "$lib/playground-output-ui";
+  import { nextRovingTabIndex } from "$lib/tab-roving";
   import type { PortableSpec } from "@ggsvelte/spec";
 
   const {
@@ -17,53 +29,57 @@
     enabled: boolean;
   } = $props();
 
-  let active = $state(0);
+  let selected = $state(0);
   let fallbackSource = $state<HTMLElement>();
   let fallbackCode = $state("");
   let fallbackLabel = $state("output");
-  let manualFallback = $state(false);
+  let manualFallbackIntent = $state(false);
   let copying = $state(false);
-  let copyStatus = $state("");
+  let copyStatusRaw = $state("");
   let exportStatus = $state("");
-  let outputRevision = 0;
+  /**
+   * Outputs identity for the in-flight / completed copy session.
+   * `$state.raw` keeps the reference unproxied so identity compares work.
+   */
+  let copySessionOutputs = $state.raw<readonly PlaygroundOutput[] | null>(null);
   const tabsetId = $props.id();
   const panelId = `${tabsetId}-panel`;
+  const active = $derived(clampOutputTabIndex(selected, outputs.length));
   const activeOutput = $derived(outputs[active] ?? outputs[0]!);
+  const copySessionLive = $derived(
+    copySessionMatchesOutputs(copySessionOutputs, outputs),
+  );
+  const manualFallback = $derived(manualFallbackIntent && copySessionLive);
+  const copyStatus = $derived(copySessionLive ? copyStatusRaw : "");
+  const visibleFallbackCode = $derived(copySessionLive ? fallbackCode : "");
+  const visibleFallbackLabel = $derived(
+    copySessionLive ? fallbackLabel : "output",
+  );
 
+  // Drop selection and clear the session when outputs leave the session identity.
+  // Clearing is monotonic so undo cannot revive a prior manual-copy session via
+  // playgroundOutputs' WeakMap cache on the restored PortableSpec.
   $effect(() => {
-    const nextOutputs = outputs;
-    untrack(() => {
-      outputRevision += 1;
-      if (active >= nextOutputs.length) active = 0;
-      const hadFallback = fallbackCode !== "";
+    const nextSession = nextCopySessionOutputs(copySessionOutputs, outputs);
+    if (nextSession === copySessionOutputs) return;
+    getSelection()?.removeAllRanges();
+    copySessionOutputs = nextSession;
+    if (nextSession === null) {
+      manualFallbackIntent = false;
+      copyStatusRaw = "";
       fallbackCode = "";
-      fallbackLabel = "output";
-      manualFallback = false;
-      copyStatus = "";
-      copying = false;
-      if (hadFallback) getSelection()?.removeAllRanges();
-    });
+    }
   });
 
   function select(index: number): void {
     if (copying) return;
-    active = index;
-    copyStatus = "";
+    selected = index;
+    copyStatusRaw = "";
   }
 
   function handleTabKey(event: KeyboardEvent, index: number): void {
-    let next = index;
-    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
-      next = (index + 1) % outputs.length;
-    } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
-      next = (index - 1 + outputs.length) % outputs.length;
-    } else if (event.key === "Home") {
-      next = 0;
-    } else if (event.key === "End") {
-      next = outputs.length - 1;
-    } else {
-      return;
-    }
+    const next = nextRovingTabIndex(event.key, index, outputs.length);
+    if (next === null) return;
     event.preventDefault();
     select(next);
     const target = event.currentTarget;
@@ -75,25 +91,29 @@
 
   async function copy(): Promise<void> {
     if (!enabled || !activeOutput.supported || copying) return;
-    const selected = activeOutput;
-    const revision = outputRevision;
-    fallbackCode = selected.code;
-    fallbackLabel = selected.label;
-    manualFallback = false;
+    const selectedOutput = activeOutput;
+    const sessionOutputs = outputs;
+    copySessionOutputs = sessionOutputs;
+    fallbackCode = selectedOutput.code;
+    fallbackLabel = selectedOutput.label;
+    manualFallbackIntent = false;
     copying = true;
     await tick();
     if (fallbackSource === undefined) {
       copying = false;
       return;
     }
-    const result = await copyText(selected.code, fallbackSource);
-    if (revision !== outputRevision) return;
+    const result = await copyText(selectedOutput.code, fallbackSource);
+    if (!copySessionMatchesOutputs(sessionOutputs, outputs)) {
+      // Outputs changed mid-copy; drop the in-flight session without applying UI.
+      // Effect also clears, but null here so we never write status onto a dead session.
+      copySessionOutputs = null;
+      copying = false;
+      return;
+    }
     copying = false;
-    manualFallback = result !== "copied";
-    copyStatus =
-      result === "copied"
-        ? `${selected.label} output copied.`
-        : MANUAL_COPY_STATUS;
+    manualFallbackIntent = result !== "copied";
+    copyStatusRaw = playgroundCopyStatus(selectedOutput.label, result);
   }
 
   function exportSVG(): void {
@@ -101,7 +121,7 @@
     exportStatus = "";
     const result = playgroundSVGExport(rendered);
     if (!result.ok) {
-      exportStatus = `SVG export failed · ${result.diagnostic.source}/${result.diagnostic.code}: ${result.diagnostic.message} ${result.diagnostic.fix ?? ""}`;
+      exportStatus = playgroundSvgExportFailureStatus(result.diagnostic);
       return;
     }
 
@@ -115,9 +135,9 @@
       anchor.href = objectUrl;
       anchor.download = result.filename;
       anchor.click();
-      exportStatus = "SVG downloaded.";
+      exportStatus = PLAYGROUND_SVG_DOWNLOADED_STATUS;
     } catch (error) {
-      exportStatus = `SVG export failed · export/download-failed: ${error instanceof Error ? error.message : "The browser refused the download."} The chart and outputs were retained.`;
+      exportStatus = playgroundSvgDownloadFailureStatus(error);
     } finally {
       if (objectUrl !== null) URL.revokeObjectURL(objectUrl);
     }
@@ -201,10 +221,10 @@
   class="manual-copy-source"
   aria-hidden={!manualFallback}
 >
-  <p>Copy the selected {fallbackLabel} output manually:</p>
+  <p>Copy the selected {visibleFallbackLabel} output manually:</p>
   <!-- svelte-ignore a11y_no_noninteractive_tabindex (visible manual-copy source is scrollable) -->
   <pre tabindex={manualFallback ? 0 : -1}><code bind:this={fallbackSource}
-      >{fallbackCode}</code
+      >{visibleFallbackCode}</code
     ></pre>
 </div>
 

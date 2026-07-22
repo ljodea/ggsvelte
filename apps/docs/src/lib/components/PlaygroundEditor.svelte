@@ -2,7 +2,11 @@
   import { tick } from "svelte";
 
   import UiButton from "$lib/components/UiButton.svelte";
-  import type { PlaygroundDiagnostic } from "$lib/playground-state";
+  import {
+    playgroundDiagnosticSignature,
+    shouldFocusDiagnosticsAlert,
+  } from "$lib/playground-output-ui";
+  import type { PlaygroundDiagnostic } from "$lib/playground-state-types";
 
   const {
     draft,
@@ -34,14 +38,12 @@
   let focusedSignature = "";
 
   $effect(() => {
-    const signature = diagnostics
-      .map((item) => `${item.source}:${item.code}:${item.path}`)
-      .join("|");
+    const signature = playgroundDiagnosticSignature(diagnostics);
     if (signature === "") {
       focusedSignature = "";
       return;
     }
-    if (signature === focusedSignature) return;
+    if (!shouldFocusDiagnosticsAlert(signature, focusedSignature)) return;
     focusedSignature = signature;
     void tick().then(() => alertElement?.focus());
   });

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { PipelineError, type RenderModel } from "@ggsvelte/core";
+  import type { RenderModel } from "@ggsvelte/core";
   import { GGPlot } from "@ggsvelte/svelte";
 
   import type { PlaygroundInteractionEvent } from "$lib/playground-events";
@@ -7,10 +7,11 @@
     snapshotCandidateIsolation,
     type PlaygroundCandidateIsolation,
   } from "$lib/playground-candidate-lifecycle";
+  import { pipelineErrorToPlaygroundDiagnostic } from "$lib/playground-pipeline-diagnostic";
   import type {
     PlaygroundCandidate,
     PlaygroundDiagnostic,
-  } from "$lib/playground-state";
+  } from "$lib/playground-state-types";
   import type { PortableSpec } from "@ggsvelte/spec";
 
   const {
@@ -69,28 +70,6 @@
       snapshotCandidateIsolation(candidateRoot, activeChartEl ?? null, probe),
     );
   }
-
-  function diagnostic(error: unknown): PlaygroundDiagnostic {
-    if (error instanceof PipelineError) {
-      return {
-        source: "pipeline",
-        code: error.code,
-        path: error.path,
-        message: error.message,
-        ...(error.diagnostic?.fixes[0]?.description === undefined
-          ? {}
-          : { fix: error.diagnostic.fixes[0].description }),
-      };
-    }
-    return {
-      source: "pipeline",
-      code: "render-failed",
-      path: "",
-      message:
-        error instanceof Error ? error.message : "The chart could not render.",
-      fix: "Adjust the PortableSpec or reset the source.",
-    };
-  }
 </script>
 
 <div class="panel-heading">
@@ -108,7 +87,10 @@
 <div class="chart-stack" aria-busy={candidate !== null}>
   <div class="active-chart" bind:this={activeChartEl}>
     {#key rendered}
-      <svelte:boundary onerror={(error) => onActiveFailed(diagnostic(error))}>
+      <svelte:boundary
+        onerror={(error) =>
+          onActiveFailed(pipelineErrorToPlaygroundDiagnostic(error))}
+      >
         <GGPlot
           spec={rendered}
           width="container"
@@ -136,7 +118,10 @@
       >
         <svelte:boundary
           onerror={(error) =>
-            onCandidateFailed(candidate.generation, diagnostic(error))}
+            onCandidateFailed(
+              candidate.generation,
+              pipelineErrorToPlaygroundDiagnostic(error),
+            )}
         >
           <GGPlot
             spec={candidate.next.rendered}

@@ -23,10 +23,18 @@ export function layoutDomain(
       categories: [...scale.domain],
       rawCategories: scale.rawDomain,
       ...(breaks !== undefined && {
-        breaks: breaks.filter(
-          (value, index) =>
-            breaks.findIndex((candidate) => encodeKey(candidate) === encodeKey(value)) === index,
-        ),
+        // First-occurrence dedupe by encodeKey (O(K)), not nested findIndex (O(K²)).
+        breaks: (() => {
+          const seen = new Set<string>();
+          const unique: (string | number)[] = [];
+          for (const value of breaks) {
+            const key = encodeKey(value);
+            if (seen.has(key)) continue;
+            seen.add(key);
+            unique.push(value);
+          }
+          return unique;
+        })(),
       }),
       ...(band !== undefined && { band }),
     };

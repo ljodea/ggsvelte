@@ -160,6 +160,9 @@ export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
     ".github/ISSUE_TEMPLATE/**",
     ".github/DISCUSSION_TEMPLATE/**",
     ".changeset/**",
+    // readme-showcase.test.ts reads these files as contract inputs.
+    "README.md",
+    "packages/svelte/README.md",
   ],
   evals: ["tests/evals/**"],
   workflows: [
