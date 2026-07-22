@@ -294,4 +294,97 @@ describe("layer data facets", () => {
     // Both secondary points should render (one per panel) plus observations.
     expect(markCount(model, "points")).toBe(obs.length + 2);
   });
+
+  // #608: first-complete layout omitted panels that only appear on later layers.
+  it("unions facet levels across complete per-layer tables (wrap)", () => {
+    const model = runPipeline(
+      {
+        facet: { wrap: { field: "g" } },
+        layers: [
+          {
+            geom: "point",
+            data: {
+              values: [
+                { x: 1, y: 10, g: "a" },
+                { x: 2, y: 20, g: "a" },
+              ],
+            },
+            aes: { x: { field: "x" }, y: { field: "y" } },
+          },
+          {
+            geom: "point",
+            data: {
+              values: [
+                { x: 3, y: 30, g: "b" },
+                { x: 4, y: 40, g: "b" },
+              ],
+            },
+            aes: { x: { field: "x" }, y: { field: "y" } },
+          },
+        ],
+      },
+      size,
+    );
+    expect(model.scene.panels.map((p) => p.strip)).toEqual(["a", "b"]);
+    expect(markCount(model, "points")).toBe(4);
+  });
+
+  it("unions facet levels when a layer introduces levels absent from plot data", () => {
+    const model = runPipeline(
+      {
+        data: {
+          values: [
+            { x: 1, y: 10, g: "a" },
+            { x: 2, y: 20, g: "b" },
+          ],
+        },
+        aes: { x: { field: "x" }, y: { field: "y" } },
+        facet: { wrap: { field: "g" } },
+        layers: [
+          { geom: "point" },
+          {
+            geom: "point",
+            data: {
+              values: [
+                { x: 5, y: 50, g: "c", tag: "extra" },
+                { x: 6, y: 60, g: "c", tag: "extra" },
+              ],
+            },
+            aes: { x: { field: "x" }, y: { field: "y" } },
+          },
+        ],
+      },
+      size,
+    );
+    expect(model.scene.panels.map((p) => p.strip)).toEqual(["a", "b", "c"]);
+    // Plot points (2) + layer-local "c" points (2).
+    expect(markCount(model, "points")).toBe(4);
+  });
+
+  it("unions facet grid levels across complete per-layer tables", () => {
+    const model = runPipeline(
+      {
+        facet: { rows: { field: "r" }, cols: { field: "c" } },
+        layers: [
+          {
+            geom: "point",
+            data: { values: [{ x: 1, y: 1, r: "R1", c: "C1" }] },
+            aes: { x: { field: "x" }, y: { field: "y" } },
+          },
+          {
+            geom: "point",
+            data: { values: [{ x: 2, y: 2, r: "R2", c: "C2" }] },
+            aes: { x: { field: "x" }, y: { field: "y" } },
+          },
+        ],
+      },
+      size,
+    );
+    // Grid keeps the full rows × cols product (empty combos stay empty).
+    expect(model.scene.panels).toHaveLength(4);
+    expect(model.scene.panels.map((p) => p.strip).toSorted()).toEqual(
+      ["R1 / C1", "R1 / C2", "R2 / C1", "R2 / C2"].toSorted(),
+    );
+    expect(markCount(model, "points")).toBe(2);
+  });
 });

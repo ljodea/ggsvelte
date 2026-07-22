@@ -3,7 +3,7 @@
  */
 import type { PortableSpec } from "@ggsvelte/spec";
 
-import { ColumnTable } from "../table.js";
+import { ColumnTable, type CellValue } from "../table.js";
 
 import { bindLayer } from "./bind.js";
 import { bindLayerTable, bindPlotData } from "./bind-data.js";
@@ -32,10 +32,12 @@ import type {
 export type { PreparedPanels } from "./prepare-panels-types.js";
 
 /**
- * Choose the table used to build facet layout:
- * 1. Plot table when it contains every facet field.
- * 2. Else first layer table that contains every facet field.
- * resolveFacet still throws unknown-field when the chosen table lacks a field.
+ * Choose the table used to build facet layout (#608):
+ * - Collect every complete source (plot + layers that have all facet fields).
+ * - One complete source → use it as-is.
+ * - Several complete sources → concatenate facet columns so resolveFacet
+ *   discovers the union of panel keys (layers still slice by panel identity).
+ * - None complete → fall back so resolveFacet can emit unknown-field.
  */
 function facetLayoutTable(
   facet: PortableSpec["facet"],
@@ -46,12 +48,37 @@ function facetLayoutTable(
   if (fields.length === 0) {
     return plotTable ?? layerSources[0] ?? ColumnTable.fromRows([]);
   }
-  if (plotTable !== null && fields.every((f) => plotTable.has(f))) return plotTable;
-  for (const table of layerSources) {
-    if (fields.every((f) => table.has(f))) return table;
+  const complete: ColumnTable[] = [];
+  if (plotTable !== null && fields.every((f) => plotTable.has(f))) {
+    complete.push(plotTable);
   }
-  // Fall back to plot or first layer so resolveFacet emits a clear unknown-field.
-  return plotTable ?? layerSources[0] ?? ColumnTable.fromRows([]);
+  for (const table of layerSources) {
+    if (fields.every((f) => table.has(f))) complete.push(table);
+  }
+  if (complete.length === 0) {
+    // Fall back to plot or first layer so resolveFacet emits a clear unknown-field.
+    return plotTable ?? layerSources[0] ?? ColumnTable.fromRows([]);
+  }
+  if (complete.length === 1) return complete[0]!;
+  return unionFacetKeyColumns(complete, fields);
+}
+
+/** Concatenate facet-key columns from complete sources for layout discovery. */
+function unionFacetKeyColumns(
+  tables: readonly ColumnTable[],
+  fields: readonly string[],
+): ColumnTable {
+  const columns: Record<string, CellValue[]> = {};
+  for (const field of fields) columns[field] = [];
+  for (const table of tables) {
+    const cols = fields.map((f) => table.column(f));
+    for (let row = 0; row < table.rowCount; row++) {
+      for (let i = 0; i < fields.length; i++) {
+        columns[fields[i]!]!.push(cols[i]![row]!);
+      }
+    }
+  }
+  return ColumnTable.fromColumns(columns);
 }
 
 /** Apply rowFilters only for clauses whose field exists on this layer table. */
