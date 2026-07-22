@@ -522,6 +522,59 @@ describe("complete mapped style plumbing", () => {
     expect(resolution.guidePlan.domain).toEqual([0, 5]);
   });
 
+  it("trains a temporal sequential style from an explicit domain when all rows are filtered", () => {
+    // A runtime filter can empty the frame while an authored temporal domain
+    // still fully determines the scale. It must train from that domain instead
+    // of throwing style-temporal-parse / style-temporal-kind on zero samples.
+    const table = ColumnTable.fromRows([{ x: 1, y: 1 }]);
+    const binding = fromAny<LayerBinding>({
+      layer: { geom: "point", aes: { size: { field: "when" } } },
+      index: 0,
+      xField: "x",
+      yField: "y",
+      color: { field: null, constant: null, scaledConstant: null },
+      fill: { field: null, constant: null, scaledConstant: null },
+      size: { field: "when", statColumn: null, constant: null, scaledConstant: null },
+      linewidth: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      alpha: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      shape: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      linetype: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      ruleForm: null,
+    });
+    const frame = fromAny<LayerFrame>({
+      binding,
+      table,
+      n: 0,
+      xNumeric: new Float64Array(0),
+      yNumeric: new Float64Array(0),
+      groups: [],
+      inputGroups: [],
+      rowIndex: new Uint32Array(0),
+      sizeValues: [],
+    });
+    const warnings: { code: string; message: string }[] = [];
+    const resolution = resolveStyleScale({
+      aesthetic: "size",
+      frames: [frame],
+      bindings: [binding],
+      table,
+      sourceTable: table,
+      config: {
+        type: "sequential",
+        temporalKind: "date",
+        domain: ["2024-01-01", "2024-01-31"],
+      },
+      prevState: null,
+      title: "size",
+      warnings,
+    });
+    expect(resolution.resolved).not.toBeNull();
+    expect(resolution.resolved?.scale.domain).toEqual([
+      Date.UTC(2024, 0, 1),
+      Date.UTC(2024, 0, 31),
+    ]);
+  });
+
   it("keeps continuous mapped styles out of grouping and discrete stroke styles in grouping", () => {
     const rows = [
       { x: 1, y: 1, alpha: 0.2, kind: "a" },

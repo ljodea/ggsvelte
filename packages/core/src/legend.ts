@@ -174,13 +174,23 @@ export function buildLegends(
           ? disambiguatedLabels(values)
           : values.map((value) => input.labelOf?.(value) ?? "");
       const titleHeight = input.title === "" ? 0 : TITLE_HEIGHT;
-      const maxLabelWidth = Math.max(1, maxWidth - PADDING * 2 - SWATCH_SIZE - SWATCH_GAP);
+      const keys = values.map((value) => input.keyOf?.(value) ?? {});
+      // Grow the swatch so the largest size key renders at its true radius.
+      // Both renderers cap a size/shape key at swatchSize/2, so a fixed 10px
+      // swatch collapses every radius above 5px to an identical dot. Size keys
+      // reach 9px under the default range, so distinct large keys would
+      // otherwise look the same while the plotted marks differ. Sizing the
+      // swatch from the largest key makes the caps non-binding in both the pure
+      // SVG and Svelte renderers (they derive layout from swatchSize).
+      const maxKeyRadius = keys.reduce((max, key) => Math.max(max, key.size ?? 0), 0);
+      const swatchSize = Math.max(SWATCH_SIZE, Math.ceil(maxKeyRadius * 2));
+      const maxLabelWidth = Math.max(1, maxWidth - PADDING * 2 - swatchSize - SWATCH_GAP);
       const entries: SceneLegendEntry[] = [];
       let labelWidth = 0;
       for (let i = 0; i < values.length; i++) {
         const label = truncate(displayLabels[i]!, maxLabelWidth, measurer);
         labelWidth = Math.max(labelWidth, measurer.measureWidth(label, FONT_SIZE));
-        const key = input.keyOf?.(values[i]) ?? {};
+        const key = keys[i]!;
         entries.push({
           value: values[i],
           label,
@@ -199,7 +209,7 @@ export function buildLegends(
           : Math.min(measurer.measureWidth(input.title, FONT_SIZE), maxWidth - PADDING * 2);
       const boxWidth =
         PADDING * 2 +
-        Math.max(SWATCH_SIZE + SWATCH_GAP + Math.ceil(labelWidth), Math.ceil(titleWidth));
+        Math.max(swatchSize + SWATCH_GAP + Math.ceil(labelWidth), Math.ceil(titleWidth));
       const boxHeight = titleHeight + entries.length * LEGEND_ROW_HEIGHT + PADDING;
       legends.push({
         type: "discrete",
@@ -211,7 +221,7 @@ export function buildLegends(
         width: boxWidth,
         height: boxHeight,
         entries,
-        swatchSize: SWATCH_SIZE,
+        swatchSize,
       });
       width = Math.max(width, boxWidth);
       y += boxHeight + BLOCK_GAP;

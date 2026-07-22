@@ -66,7 +66,16 @@ export function resolveNumericStyleValueView(input: {
     ...(config?.timezone !== undefined && { timezone: config.timezone }),
     ...(config?.disambiguation !== undefined && { disambiguation: config.disambiguation }),
   };
-  const parsed = parseTemporalColumn(values, config?.parse ?? "auto", options);
+  // A runtime filter can empty `values` while an authored temporal domain still
+  // fully determines the scale (e.g. size: { temporalKind: "date", domain:
+  // [...] }). With no samples, auto detection reports non-temporal and explicit
+  // parsers report kind: null, so the checks below would throw before
+  // numericSequentialResolution() ever parses config.domain. Seed the temporal
+  // decision from the authored domain when no samples remain — mirrors the
+  // color path returning a usable view for a fully filtered temporal frame.
+  const temporalColumn =
+    values.length === 0 && config?.domain !== undefined ? config.domain : values;
+  const parsed = parseTemporalColumn(temporalColumn, config?.parse ?? "auto", options);
   if (parsed.decision.status !== "temporal") {
     const cause =
       parsed.decision.status === "ambiguous"
@@ -84,6 +93,8 @@ export function resolveNumericStyleValueView(input: {
   if (
     parsed.decision.status === "temporal" &&
     config?.temporalKind !== undefined &&
+    parsed.decision.kind !== null &&
+    parsed.decision.kind !== undefined &&
     parsed.decision.kind !== config.temporalKind
   ) {
     throw new PipelineError(
@@ -96,8 +107,9 @@ export function resolveNumericStyleValueView(input: {
     config?.parse ??
     (parsed.decision.parser === null ? null : (parsed.decision.parser as TemporalParserSpec));
   const byKey = new Map<string, number>();
-  for (let index = 0; index < values.length; index++) {
-    if (parsed.valid[index] === 1) byKey.set(encodeKey(values[index]), parsed.semantic[index]!);
+  for (let index = 0; index < temporalColumn.length; index++) {
+    if (parsed.valid[index] === 1)
+      byKey.set(encodeKey(temporalColumn[index]), parsed.semantic[index]!);
   }
   return {
     semantic: parsed.semantic,
