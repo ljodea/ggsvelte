@@ -20,7 +20,7 @@ import {
   parseTemporalInterval,
   temporalLabelConfigurationError,
   temporalLocaleConfigurationError,
-} from "./temporal-guides.js";
+} from "./temporal-interval.js";
 import {
   effectiveChannel,
   resolveFieldEvidence,

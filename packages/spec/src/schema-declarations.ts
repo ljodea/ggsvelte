@@ -14,7 +14,7 @@ import {
   TemporalIntervalSpecSchema,
   TemporalLabelSpecSchema,
   TemporalWeekStartSchema,
-} from "./temporal-guides.js";
+} from "./temporal-interval.js";
 
 import { TemporalParserSpecSchema } from "./temporal-parse.js";
 
