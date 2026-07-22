@@ -26,7 +26,10 @@ export function bindLayer(
     x: PositionConversionContext;
     y: PositionConversionContext;
   }> = DEFAULT_BIND_CONVERSIONS,
+  /** Unfiltered source table + registry id; defaults to `table` / 0 for legacy tests. */
+  source?: { sourceTable: ColumnTable; sourceId: number },
 ): LayerBinding {
+  const resolvedSource = source ?? { sourceTable: table, sourceId: 0 };
   const aes: Aes = layer.aes ?? {};
   const position = resolveLayerPositionChannels({
     layer,
@@ -74,6 +77,8 @@ export function bindLayer(
   return makeLayerBinding({
     layer,
     index,
+    sourceTable: resolvedSource.sourceTable,
+    sourceId: resolvedSource.sourceId,
     xField: position.xField,
     yField: position.yField,
     yStatColumn: position.yStatColumn,

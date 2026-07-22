@@ -1148,6 +1148,12 @@ export const SpecDeclarations = {
       positionParams: Type.Optional(Type.Ref("PositionParams")),
       render: Type.Optional(Type.Ref("RenderBackend")),
       aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
       params: Type.Optional(Type.Ref("PointParams")),
     },
     {
@@ -1171,6 +1177,12 @@ export const SpecDeclarations = {
       ),
       render: Type.Optional(Type.Ref("RenderBackend")),
       aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
       params: Type.Optional(Type.Ref("LineParams")),
     },
     {
@@ -1192,6 +1204,12 @@ export const SpecDeclarations = {
       position: Type.Optional(Type.Ref("StackablePosition")),
       render: Type.Optional(Type.Ref("RenderBackend")),
       aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
       params: Type.Optional(Type.Ref("ColParams")),
     },
     {
@@ -1216,6 +1234,12 @@ export const SpecDeclarations = {
       position: Type.Optional(Type.Ref("StackablePosition")),
       render: Type.Optional(Type.Ref("RenderBackend")),
       aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
       params: Type.Optional(Type.Ref("BarParams")),
     },
     {
@@ -1240,6 +1264,12 @@ export const SpecDeclarations = {
       position: Type.Optional(Type.Ref("StackablePosition")),
       render: Type.Optional(Type.Ref("RenderBackend")),
       aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
       params: Type.Optional(Type.Ref("BarParams")),
     },
     {
@@ -1266,6 +1296,12 @@ export const SpecDeclarations = {
       ),
       render: Type.Optional(Type.Ref("RenderBackend")),
       aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
       params: Type.Optional(Type.Ref("SmoothParams")),
     },
     {
@@ -1295,6 +1331,12 @@ export const SpecDeclarations = {
       ),
       render: Type.Optional(Type.Ref("RenderBackend")),
       aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
       params: Type.Optional(Type.Ref("BoxplotParams")),
     },
     {
@@ -1320,6 +1362,12 @@ export const SpecDeclarations = {
       ),
       render: Type.Optional(Type.Ref("RenderBackend")),
       aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
       params: Type.Optional(Type.Ref("DensityParams")),
     },
     {
@@ -1346,6 +1394,12 @@ export const SpecDeclarations = {
       ),
       render: Type.Optional(Type.Ref("RenderBackend")),
       aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
       params: Type.Optional(Type.Ref("ErrorbarParams")),
     },
     {
@@ -1369,6 +1423,12 @@ export const SpecDeclarations = {
       ),
       render: Type.Optional(Type.Ref("RenderBackend")),
       aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
       params: Type.Optional(Type.Ref("RectParams")),
     },
     {
@@ -1392,6 +1452,12 @@ export const SpecDeclarations = {
       ),
       render: Type.Optional(Type.Ref("RenderBackend")),
       aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
       params: Type.Optional(Type.Ref("TileParams")),
     },
     {
@@ -1415,6 +1481,12 @@ export const SpecDeclarations = {
       ),
       render: Type.Optional(Type.Ref("RenderBackend")),
       aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
       params: Type.Optional(Type.Ref("RasterParams")),
     },
     {
@@ -1436,6 +1508,12 @@ export const SpecDeclarations = {
       position: Type.Optional(Type.Ref("StackablePosition")),
       render: Type.Optional(Type.Ref("RenderBackend")),
       aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
       params: Type.Optional(Type.Ref("AreaParams")),
     },
     {
@@ -1459,6 +1537,12 @@ export const SpecDeclarations = {
       ),
       render: Type.Optional(Type.Ref("RenderBackend")),
       aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
       params: Type.Optional(Type.Ref("RibbonParams")),
     },
     {
@@ -1482,6 +1566,12 @@ export const SpecDeclarations = {
       ),
       render: Type.Optional(Type.Ref("RenderBackend")),
       aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
       params: Type.Optional(Type.Ref("RuleParams")),
     },
     {
@@ -1509,6 +1599,12 @@ export const SpecDeclarations = {
       positionParams: Type.Optional(Type.Ref("PositionParams")),
       render: Type.Optional(Type.Ref("RenderBackend")),
       aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
       params: Type.Optional(Type.Ref("TextParams")),
     },
     {
@@ -1531,6 +1627,12 @@ export const SpecDeclarations = {
       ),
       render: Type.Optional(Type.Ref("RenderBackend")),
       aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
       params: Type.Optional(Type.Ref("SegmentParams")),
     },
     {

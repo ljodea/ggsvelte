@@ -53,6 +53,13 @@ export type RuleForm = "annotation" | "vertical" | "horizontal";
 export interface LayerBinding {
   layer: LayerSpec;
   index: number;
+  /**
+   * Unfiltered source table this layer owns (plot inheritance or layer DataRef).
+   * Used for style/color catalogs and temporal preflight (#589).
+   */
+  sourceTable: import("../table.js").ColumnTable;
+  /** SourceRegistry id for this layer's sourceTable (global row namespace). */
+  sourceId: number;
   xField: string | null;
   yField: string | null;
   /** The stat-generated column the y channel maps ({ stat: ... }), if any. */

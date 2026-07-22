@@ -71,6 +71,7 @@ export function buildIdentityFrame(
           ),
     groups,
     inputGroups: groups,
+    inputSourceRows: null,
     rowIndex: Uint32Array.from({ length: n }, (_, i) => i),
     colorValues: binding.color.field === null ? null : table.column(binding.color.field),
     fillValues: binding.fill.field === null ? null : table.column(binding.fill.field),
