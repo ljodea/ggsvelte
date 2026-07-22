@@ -244,6 +244,38 @@ describe("deployment artifact identity", () => {
     }
   });
 
+  it("requires the exact bare /ggsvelte absolute cleanup on production, not only the wildcard", () => {
+    const buildDirectory = makeCompleteArtifact("cloudflare-production");
+    try {
+      writeFileSync(
+        join(buildDirectory, "_redirects"),
+        `/ggsvelte/* https://ggsvelte.sh/:splat 301\n`,
+      );
+      expect(
+        validateDeploymentArtifact(buildDirectory, expectedArtifact("cloudflare-production")),
+      ).toContain("_redirects is missing the absolute /ggsvelte cleanup redirect");
+    } finally {
+      rmSync(buildDirectory, { recursive: true, force: true });
+    }
+  });
+
+  it("requires a line-anchored bare /ggsvelte production cleanup, not a substring match", () => {
+    const buildDirectory = makeCompleteArtifact("cloudflare-production");
+    try {
+      writeFileSync(
+        join(buildDirectory, "_redirects"),
+        `/old/ggsvelte https://ggsvelte.sh/ 301
+/ggsvelte/* https://ggsvelte.sh/:splat 301
+`,
+      );
+      expect(
+        validateDeploymentArtifact(buildDirectory, expectedArtifact("cloudflare-production")),
+      ).toContain("_redirects is missing the absolute /ggsvelte cleanup redirect");
+    } finally {
+      rmSync(buildDirectory, { recursive: true, force: true });
+    }
+  });
+
   it("rejects preview artifacts without a broad noindex header", () => {
     const buildDirectory = makeCompleteArtifact("cloudflare-preview");
     try {

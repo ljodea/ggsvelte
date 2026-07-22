@@ -43,6 +43,11 @@ const REQUIRED_DEPLOYMENT_FILES = [
   "artifact.json",
 ] as const;
 
+/** True when `rule` appears as a full `_redirects` line (trim-insensitive). */
+function hasRedirectRule(redirects: string, rule: string): boolean {
+  return redirects.split(/\r?\n/).some((line) => line.trim() === rule);
+}
+
 export function routeInventoryDigest(routes: readonly DeploymentRoute[]): string {
   const inventory = routes
     .map((route) =>
@@ -234,19 +239,24 @@ export function validateDeploymentArtifact(
       problems.push("_redirects must not preserve /bench GitHub Pages history redirects");
     }
     if (expected.buildMode === "cloudflare-production") {
-      if (!redirects.includes("/ggsvelte/* https://ggsvelte.sh/:splat 301")) {
+      // Bare `/ggsvelte` does not match `/ggsvelte/*`; require both exact + wildcard.
+      // Line-anchored: `/old/ggsvelte …` must not satisfy the bare-source check.
+      if (
+        !hasRedirectRule(redirects, "/ggsvelte https://ggsvelte.sh/ 301") ||
+        !hasRedirectRule(redirects, "/ggsvelte/* https://ggsvelte.sh/:splat 301")
+      ) {
         problems.push("_redirects is missing the absolute /ggsvelte cleanup redirect");
       }
     } else if (expected.buildMode === "cloudflare-preview") {
       if (
-        redirects.includes("/ggsvelte https://ggsvelte.sh/ 301") ||
-        redirects.includes("/ggsvelte/* https://ggsvelte.sh/:splat 301")
+        hasRedirectRule(redirects, "/ggsvelte https://ggsvelte.sh/ 301") ||
+        hasRedirectRule(redirects, "/ggsvelte/* https://ggsvelte.sh/:splat 301")
       ) {
         problems.push("preview _redirects must not send /ggsvelte cleanup traffic to production");
       }
       if (
-        !redirects.includes("/ggsvelte / 301") ||
-        !redirects.includes("/ggsvelte/* /:splat 301")
+        !hasRedirectRule(redirects, "/ggsvelte / 301") ||
+        !hasRedirectRule(redirects, "/ggsvelte/* /:splat 301")
       ) {
         problems.push("_redirects is missing the same-origin /ggsvelte cleanup redirect");
       }
