@@ -39,6 +39,8 @@ export const CHANNELS = [
   "size",
   "linewidth",
   "alpha",
+  "shape",
+  "linetype",
   "group",
   "label",
   "weight",

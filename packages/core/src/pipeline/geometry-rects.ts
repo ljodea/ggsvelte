@@ -6,6 +6,7 @@ import type { RectsBatch } from "../scene.js";
 import type { LayerFrame, PipelineWarning, ResolvedColorScale } from "./types.js";
 import { colorOf } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
+import { numericStyleVector, type ResolvedStyleScales } from "./geometry-style.js";
 import { DEFAULT_BAR_WIDTH, removedWarning } from "./geometry-shared.js";
 import { emitRectRows } from "./geometry-rects-emit.js";
 
@@ -13,6 +14,7 @@ export function rectsBatch(
   frame: LayerFrame,
   fx: Frame,
   fill: ResolvedColorScale | null,
+  styles: ResolvedStyleScales,
   warnings: PipelineWarning[],
 ): RectsBatch | null {
   const { binding } = frame;
@@ -56,8 +58,14 @@ export function rectsBatch(
     rects: Float32Array.from(rects),
     rowIndex: Uint32Array.from(rowIndexKept),
     fill: binding.fill.constant,
-    alpha: params.alpha ?? 1,
+    alpha:
+      typeof binding.alpha.constant === "number" ? binding.alpha.constant : (params.alpha ?? 1),
   };
+  const alphas = numericStyleVector(frame, "alpha", keptRows, styles);
+  if (alphas !== undefined) {
+    batch.alpha = 1;
+    batch.alphas = alphas;
+  }
   if (fill !== null && (frame.fillValues !== null || binding.fill.scaledConstant !== null)) {
     batch.fills = keptRows.map((row) =>
       colorOf(

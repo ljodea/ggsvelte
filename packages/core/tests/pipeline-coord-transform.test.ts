@@ -1,6 +1,14 @@
 import { describe, expect, it } from "bun:test";
 
-import { aes, coord_transform, gg, scaleXLog10 } from "@ggsvelte/spec";
+import {
+  aes,
+  coord_transform,
+  gg,
+  scaleAlphaIdentity,
+  scaleLinetypeIdentity,
+  scaleLinewidthIdentity,
+  scaleXLog10,
+} from "@ggsvelte/spec";
 
 import { runPipeline } from "../src/pipeline.ts";
 import type { PathsBatch } from "../src/scene.ts";
@@ -373,21 +381,35 @@ describe("pipeline post-stat coord_transform", () => {
     const model = runPipeline(
       gg(
         [
-          { x: 1, y: 1 },
-          { x: 2, y: 2 },
-          { x: 3, y: -1 },
-          { x: 4, y: 10 },
-          { x: 5, y: 100 },
+          { x: 1, y: 1, width: 4, opacity: 0.4, dash: "dashed" },
+          { x: 2, y: 2, width: 4, opacity: 0.4, dash: "dashed" },
+          { x: 3, y: -1, width: 4, opacity: 0.4, dash: "dashed" },
+          { x: 4, y: 10, width: 4, opacity: 0.4, dash: "dashed" },
+          { x: 5, y: 100, width: 4, opacity: 0.4, dash: "dashed" },
         ],
-        aes({ x: "x", y: "y" }),
+        aes({
+          x: "x",
+          y: "y",
+          linewidth: "width",
+          alpha: "opacity",
+          linetype: "dash",
+        }),
       )
         .geomLine()
+        .scales({
+          ...scaleLinewidthIdentity(),
+          ...scaleAlphaIdentity(),
+          ...scaleLinetypeIdentity(),
+        })
         .coordTransform({ y: { transform: "log10", limits: [1, 100], expand: false } })
         .spec(),
       size,
     );
     const batch = path(model);
     expect(batch.pathOffsets).toHaveLength(3);
+    expect(batch.linewidths).toEqual(Float32Array.from([4, 4]));
+    expect(batch.alphas).toEqual(Float32Array.from([0.4, 0.4]));
+    expect(batch.linetypeIndexes).toEqual(Uint8Array.from([1, 1]));
     expect(
       [0, 1].map(
         (subpath) =>

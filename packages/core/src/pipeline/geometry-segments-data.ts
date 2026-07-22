@@ -14,6 +14,7 @@ export function emitDataSegments(input: {
   pushVertical: (t: number | undefined, row: number) => void;
   pushHorizontal: (t: number | undefined, row: number) => void;
   rowIndex: number[];
+  styleRows: number[];
   perSegmentColors: string[];
 }): void {
   const {
@@ -24,6 +25,7 @@ export function emitDataSegments(input: {
     pushVertical,
     pushHorizontal,
     rowIndex,
+    styleRows,
     perSegmentColors,
   } = input;
   const { binding } = frame;
@@ -38,6 +40,7 @@ export function emitDataSegments(input: {
         frame.rowIndex[row]!,
       );
     }
+    if (rowIndex.length > before) styleRows.push(row);
     if (wantsColors && color !== null && rowIndex.length > before) {
       const value =
         frame.colorValues === null ? binding.color.scaledConstant! : frame.colorValues[row]!;

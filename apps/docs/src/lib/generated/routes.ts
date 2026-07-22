@@ -404,6 +404,11 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
+        id: "size-linewidth-alpha-shape-and-linetype",
+        title: "Size, linewidth, alpha, shape, and linetype",
+        level: 2,
+      },
+      {
         id: "date-and-time-axes",
         title: "Date and time axes",
         level: 2,
@@ -1179,6 +1184,11 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "unsupported-geom-aesthetic",
+        title: "unsupported-geom-aesthetic",
+        level: 3,
+      },
+      {
         id: "unknown-field",
         title: "unknown-field",
         level: 3,
@@ -1424,6 +1434,66 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "unsupported-aesthetic-scale",
+        title: "unsupported-aesthetic-scale",
+        level: 3,
+      },
+      {
+        id: "unsupported-geom-aesthetic-pipeline",
+        title: "unsupported-geom-aesthetic — pipeline",
+        level: 3,
+      },
+      {
+        id: "invalid-aesthetic-constant",
+        title: "invalid-aesthetic-constant",
+        level: 3,
+      },
+      {
+        id: "style-temporal-parse",
+        title: "style-temporal-parse",
+        level: 3,
+      },
+      {
+        id: "style-temporal-kind",
+        title: "style-temporal-kind",
+        level: 3,
+      },
+      {
+        id: "style-manual-domain-range",
+        title: "style-manual-domain-range",
+        level: 3,
+      },
+      {
+        id: "style-palette-exhausted",
+        title: "style-palette-exhausted",
+        level: 3,
+      },
+      {
+        id: "style-domain-empty",
+        title: "style-domain-empty",
+        level: 3,
+      },
+      {
+        id: "style-domain-invalid",
+        title: "style-domain-invalid",
+        level: 3,
+      },
+      {
+        id: "style-range-invalid",
+        title: "style-range-invalid",
+        level: 3,
+      },
+      {
+        id: "style-binned-breaks",
+        title: "style-binned-breaks",
+        level: 3,
+      },
+      {
+        id: "stat-channel-unsupported",
+        title: "stat-channel-unsupported",
+        level: 3,
+      },
+      {
         id: "unknown-theme",
         title: "unknown-theme",
         level: 3,
@@ -1509,6 +1579,41 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "style-temporal-censored",
+        title: "style-temporal-censored",
+        level: 3,
+      },
+      {
+        id: "style-na-values",
+        title: "style-na-values",
+        level: 3,
+      },
+      {
+        id: "style-unknown-values",
+        title: "style-unknown-values",
+        level: 3,
+      },
+      {
+        id: "style-palette-exhausted-warning",
+        title: "style-palette-exhausted — warning",
+        level: 3,
+      },
+      {
+        id: "style-fingerprint-mismatch",
+        title: "style-fingerprint-mismatch",
+        level: 3,
+      },
+      {
+        id: "style-version-mismatch",
+        title: "style-version-mismatch",
+        level: 3,
+      },
+      {
+        id: "style-out-of-domain",
+        title: "style-out-of-domain",
+        level: 3,
+      },
+      {
         id: "invalid-label-format",
         title: "invalid-label-format",
         level: 3,
@@ -1516,11 +1621,6 @@ export const DOCS_ROUTES = [
       {
         id: "unknown-edition",
         title: "unknown-edition",
-        level: 3,
-      },
-      {
-        id: "stat-channel-unsupported",
-        title: "stat-channel-unsupported",
         level: 3,
       },
       {
@@ -1873,8 +1973,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-341",
-        title: "experimental (341)",
+        id: "experimental-427",
+        title: "experimental (427)",
         level: 3,
       },
       {
@@ -1888,8 +1988,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-231",
-        title: "experimental (231)",
+        id: "experimental-239",
+        title: "experimental (239)",
         level: 3,
       },
       {
@@ -1913,8 +2013,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-296",
-        title: "experimental (296)",
+        id: "experimental-385",
+        title: "experimental (385)",
         level: 3,
       },
       {
@@ -1943,6 +2043,16 @@ export const DOCS_ROUTES = [
         id: "five-minute-path",
         title: "Five-minute path",
         level: 2,
+      },
+      {
+        id: "0-7-to-0-8",
+        title: "0.7 to 0.8",
+        level: 2,
+      },
+      {
+        id: "map-style-semantics-instead-of-precomputing-outputs",
+        title: "Map style semantics instead of precomputing outputs",
+        level: 3,
       },
       {
         id: "0-6-to-0-7",
@@ -2336,6 +2446,17 @@ export const DOCS_ROUTES = [
     description:
       "A classic scatter plot: two quantitative channels plus a discrete color mapping with a value-stable categorical palette and an automatic legend.",
     canonicalPath: "/examples/point/scatter-color",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/point/style-scales",
+    title: "Complete style scales — ggsvelte gallery",
+    description:
+      "Map size, alpha, linewidth, shape, and linetype with stable legends across SVG and Canvas.",
+    canonicalPath: "/examples/point/style-scales",
     kind: "page",
     index: true,
     sitemap: true,

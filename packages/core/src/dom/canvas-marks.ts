@@ -4,7 +4,10 @@
  * and focus-mask subset passes. Glyph batches are intentionally no-ops here
  * (text always renders as SVG).
  */
+import { LINETYPE_NAMES, POINT_SHAPE_NAMES } from "@ggsvelte/spec";
+
 import type { GeometryBatch, PathsBatch, PointsBatch, SegmentsBatch } from "../scene.js";
+import { LINETYPE_DASHES, type Linetype, type PointShape } from "../scales/style.js";
 import type { BatchInteractionMask } from "../interaction-mask.js";
 import type { ThemeTokens } from "../theme.js";
 import { themeVar } from "../theme.js";
@@ -33,8 +36,10 @@ function maskIncludes(mask: PrimitiveFocusMask, index: number): boolean {
 function tracePoint(ctx: CanvasRenderingContext2D, batch: PointsBatch, j: number): void {
   const x = batch.positions[j * 2]!;
   const y = batch.positions[j * 2 + 1]!;
-  const size = batch.size;
-  switch (batch.shape) {
+  const size = batch.sizes?.[j] ?? batch.size;
+  const shape: PointShape =
+    batch.shapeIndexes === undefined ? batch.shape : POINT_SHAPE_NAMES[batch.shapeIndexes[j]!]!;
+  switch (shape) {
     case "square":
       ctx.rect(x - size, y - size, size * 2, size * 2);
       break;
@@ -44,6 +49,25 @@ function tracePoint(ctx: CanvasRenderingContext2D, batch: PointsBatch, j: number
       ctx.lineTo(x + size * 1.1, y + size * 0.9);
       ctx.lineTo(x - size * 1.1, y + size * 0.9);
       ctx.closePath();
+      break;
+    case "diamond":
+      ctx.moveTo(x, y - size * 1.25);
+      ctx.lineTo(x + size, y);
+      ctx.lineTo(x, y + size * 1.25);
+      ctx.lineTo(x - size, y);
+      ctx.closePath();
+      break;
+    case "plus":
+      ctx.moveTo(x - size, y);
+      ctx.lineTo(x + size, y);
+      ctx.moveTo(x, y - size);
+      ctx.lineTo(x, y + size);
+      break;
+    case "cross":
+      ctx.moveTo(x - size * 0.75, y - size * 0.75);
+      ctx.lineTo(x + size * 0.75, y + size * 0.75);
+      ctx.moveTo(x + size * 0.75, y - size * 0.75);
+      ctx.lineTo(x - size * 0.75, y + size * 0.75);
       break;
     default:
       ctx.moveTo(x + size, y);
@@ -59,6 +83,29 @@ function drawPoints(
 ): void {
   const themeInk = resolve(themeVar("ink", theme));
   const n = batch.rowIndex.length;
+  const mappedGeometry =
+    batch.sizes !== undefined || batch.alphas !== undefined || batch.shapeIndexes !== undefined;
+  if (mappedGeometry) {
+    const baseAlpha = ctx.globalAlpha;
+    for (let j = 0; j < n; j++) {
+      const color = batch.colors?.[j] ?? batch.fill ?? themeInk;
+      const shape =
+        batch.shapeIndexes === undefined ? batch.shape : POINT_SHAPE_NAMES[batch.shapeIndexes[j]!]!;
+      ctx.globalAlpha = baseAlpha * (batch.alphas?.[j] ?? 1);
+      ctx.beginPath();
+      tracePoint(ctx, batch, j);
+      if (shape === "plus" || shape === "cross") {
+        ctx.strokeStyle = resolve(color);
+        ctx.lineWidth = Math.max(1, (batch.sizes?.[j] ?? batch.size) / 2);
+        ctx.stroke();
+      } else {
+        ctx.fillStyle = resolve(color);
+        ctx.fill();
+      }
+    }
+    ctx.globalAlpha = baseAlpha;
+    return;
+  }
   if (batch.colors === undefined) {
     // Single fill: one path for the whole batch (the fast path that makes
     // canvas worth it at high counts).
@@ -93,6 +140,30 @@ function drawPointsSubset(
   const includes = (index: number) => maskIncludes(mask, index) === focused;
   const themeInk = resolve(themeVar("ink", theme));
   const n = batch.rowIndex.length;
+  const mappedGeometry =
+    batch.sizes !== undefined || batch.alphas !== undefined || batch.shapeIndexes !== undefined;
+  if (mappedGeometry) {
+    const baseAlpha = ctx.globalAlpha;
+    for (let j = 0; j < n; j++) {
+      if (!includes(j)) continue;
+      const color = batch.colors?.[j] ?? batch.fill ?? themeInk;
+      const shape =
+        batch.shapeIndexes === undefined ? batch.shape : POINT_SHAPE_NAMES[batch.shapeIndexes[j]!]!;
+      ctx.globalAlpha = baseAlpha * (batch.alphas?.[j] ?? 1);
+      ctx.beginPath();
+      tracePoint(ctx, batch, j);
+      if (shape === "plus" || shape === "cross") {
+        ctx.strokeStyle = resolve(color);
+        ctx.lineWidth = Math.max(1, (batch.sizes?.[j] ?? batch.size) / 2);
+        ctx.stroke();
+      } else {
+        ctx.fillStyle = resolve(color);
+        ctx.fill();
+      }
+    }
+    ctx.globalAlpha = baseAlpha;
+    return;
+  }
   if (batch.colors === undefined) {
     ctx.fillStyle = batch.fill === null ? themeInk : resolve(batch.fill);
     ctx.beginPath();
@@ -171,6 +242,17 @@ function traceSubpath(
   if (batch.closed === true) ctx.closePath();
 }
 
+function linetypeAt(batch: PathsBatch | SegmentsBatch, index: number): Linetype {
+  return batch.linetypeIndexes === undefined
+    ? (batch.linetype ?? "solid")
+    : LINETYPE_NAMES[batch.linetypeIndexes[index]!]!;
+}
+
+function applyDash(ctx: CanvasRenderingContext2D, linetype: Linetype): void {
+  if (typeof ctx.setLineDash !== "function") return;
+  ctx.setLineDash(LINETYPE_DASHES[LINETYPE_NAMES.indexOf(linetype)] ?? []);
+}
+
 function drawPaths(
   ctx: CanvasRenderingContext2D,
   batch: PathsBatch,
@@ -179,23 +261,28 @@ function drawPaths(
 ): void {
   const isArea = batch.fills !== undefined;
   const subpaths = batch.pathOffsets.length - 1;
+  const baseAlpha = ctx.globalAlpha;
   for (let s = 0; s < subpaths; s++) {
     const start = batch.pathOffsets[s]!;
     const end = batch.pathOffsets[s + 1]!;
     if (end <= start) continue;
     ctx.beginPath();
     traceSubpath(ctx, batch, start, end);
+    ctx.globalAlpha = baseAlpha * (batch.alphas?.[s] ?? 1);
     if (isArea) {
       ctx.fillStyle = resolve(batch.fills![s] ?? themeVar("accent", theme));
       ctx.fill();
     } else {
       ctx.strokeStyle = resolve(batch.strokes[s] ?? themeVar("ink", theme));
-      ctx.lineWidth = batch.linewidth;
+      ctx.lineWidth = batch.linewidths?.[s] ?? batch.linewidth;
+      applyDash(ctx, linetypeAt(batch, s));
       ctx.lineJoin = "round";
       ctx.lineCap = "round";
       ctx.stroke();
     }
   }
+  ctx.globalAlpha = baseAlpha;
+  applyDash(ctx, "solid");
 }
 
 function drawPathsSubset(
@@ -208,6 +295,7 @@ function drawPathsSubset(
 ): void {
   const isArea = batch.fills !== undefined;
   const subpaths = batch.pathOffsets.length - 1;
+  const baseAlpha = ctx.globalAlpha;
   for (let s = 0; s < subpaths; s++) {
     if (maskIncludes(mask, s) !== focused) continue;
     const start = batch.pathOffsets[s]!;
@@ -215,17 +303,21 @@ function drawPathsSubset(
     if (end <= start) continue;
     ctx.beginPath();
     traceSubpath(ctx, batch, start, end);
+    ctx.globalAlpha = baseAlpha * (batch.alphas?.[s] ?? 1);
     if (isArea) {
       ctx.fillStyle = resolve(batch.fills![s] ?? themeVar("accent", theme));
       ctx.fill();
     } else {
       ctx.strokeStyle = resolve(batch.strokes[s] ?? themeVar("ink", theme));
-      ctx.lineWidth = batch.linewidth;
+      ctx.lineWidth = batch.linewidths?.[s] ?? batch.linewidth;
+      applyDash(ctx, linetypeAt(batch, s));
       ctx.lineJoin = "round";
       ctx.lineCap = "round";
       ctx.stroke();
     }
   }
+  ctx.globalAlpha = baseAlpha;
+  applyDash(ctx, "solid");
 }
 
 /**
@@ -274,8 +366,30 @@ function drawSegments(
 ): void {
   const themeInk = resolve(themeVar("ink", theme));
   ctx.lineWidth = batch.linewidth;
+  applyDash(ctx, batch.linetype ?? "solid");
   const n = batch.segments.length / 4;
   if (n === 0) return;
+
+  const mappedStyle =
+    batch.linewidths !== undefined ||
+    batch.alphas !== undefined ||
+    batch.linetypeIndexes !== undefined;
+  if (mappedStyle) {
+    const baseAlpha = ctx.globalAlpha;
+    for (let j = 0; j < n; j++) {
+      if (includes !== undefined && !includes(j)) continue;
+      ctx.strokeStyle = segmentStrokeAt(batch, j, themeInk, resolve);
+      ctx.lineWidth = batch.linewidths?.[j] ?? batch.linewidth;
+      ctx.globalAlpha = baseAlpha * (batch.alphas?.[j] ?? 1);
+      applyDash(ctx, linetypeAt(batch, j));
+      ctx.beginPath();
+      traceSegment(ctx, batch, j);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = baseAlpha;
+    applyDash(ctx, "solid");
+    return;
+  }
 
   if (batch.strokes === undefined) {
     ctx.strokeStyle = segmentStrokeAt(batch, 0, themeInk, resolve);
@@ -287,6 +401,7 @@ function drawSegments(
       traced = true;
     }
     if (traced) ctx.stroke();
+    applyDash(ctx, "solid");
     return;
   }
 
@@ -310,6 +425,7 @@ function drawSegments(
     if (traced) ctx.stroke();
     runStart = runEnd;
   }
+  applyDash(ctx, "solid");
 }
 
 function drawBatchInner(
@@ -328,7 +444,9 @@ function drawBatchInner(
     case "rects": {
       const themeFill = resolve(themeVar(batch.fillRole ?? "accent", theme));
       const n = batch.rects.length / 4;
+      const baseAlpha = ctx.globalAlpha;
       for (let j = 0; j < n; j++) {
+        ctx.globalAlpha = baseAlpha * (batch.alphas?.[j] ?? 1);
         const fill = batch.fills?.[j] ?? batch.fill;
         ctx.fillStyle = fill === null || fill === undefined ? themeFill : resolve(fill);
         ctx.fillRect(
@@ -339,7 +457,7 @@ function drawBatchInner(
         );
         if (batch.stroke !== undefined) {
           ctx.strokeStyle = resolve(batch.stroke ?? themeVar("ink", theme));
-          ctx.lineWidth = batch.strokeWidth ?? 1;
+          ctx.lineWidth = batch.strokeWidths?.[j] ?? batch.strokeWidth ?? 1;
           ctx.strokeRect(
             batch.rects[j * 4]!,
             batch.rects[j * 4 + 1]!,
@@ -348,6 +466,7 @@ function drawBatchInner(
           );
         }
       }
+      ctx.globalAlpha = baseAlpha;
       break;
     }
     case "segments":
@@ -378,8 +497,10 @@ function drawBatchSubsetInner(
     case "rects": {
       const themeFill = resolve(themeVar(batch.fillRole ?? "accent", theme));
       const n = batch.rects.length / 4;
+      const baseAlpha = ctx.globalAlpha;
       for (let j = 0; j < n; j++) {
         if (!includes(j)) continue;
+        ctx.globalAlpha = baseAlpha * (batch.alphas?.[j] ?? 1);
         const fill = batch.fills?.[j] ?? batch.fill;
         ctx.fillStyle = fill === null || fill === undefined ? themeFill : resolve(fill);
         ctx.fillRect(
@@ -390,7 +511,7 @@ function drawBatchSubsetInner(
         );
         if (batch.stroke !== undefined) {
           ctx.strokeStyle = resolve(batch.stroke ?? themeVar("ink", theme));
-          ctx.lineWidth = batch.strokeWidth ?? 1;
+          ctx.lineWidth = batch.strokeWidths?.[j] ?? batch.strokeWidth ?? 1;
           ctx.strokeRect(
             batch.rects[j * 4]!,
             batch.rects[j * 4 + 1]!,
@@ -399,6 +520,7 @@ function drawBatchSubsetInner(
           );
         }
       }
+      ctx.globalAlpha = baseAlpha;
       break;
     }
     case "segments":
@@ -451,9 +573,12 @@ export function drawBatchSubset(
   alphaMultiplier: number,
 ): void {
   const alpha = ctx.globalAlpha;
+  const lineWidth = ctx.lineWidth;
   ctx.globalAlpha = alpha * batch.alpha * alphaMultiplier;
   drawBatchSubsetInner(ctx, batch, theme, resolve, mask, focused);
   ctx.globalAlpha = alpha;
+  ctx.lineWidth = lineWidth;
+  applyDash(ctx, "solid");
 }
 
 /** Draw one batch in panel-local coordinates (alpha applied per batch). */
@@ -464,7 +589,10 @@ export function drawBatch(
   resolve: ColorResolver,
 ): void {
   const alpha = ctx.globalAlpha;
+  const lineWidth = ctx.lineWidth;
   ctx.globalAlpha = alpha * batch.alpha;
   drawBatchInner(ctx, batch, theme, resolve);
   ctx.globalAlpha = alpha;
+  ctx.lineWidth = lineWidth;
+  applyDash(ctx, "solid");
 }

@@ -14,9 +14,10 @@ export function emitErrorbarRows(input: {
   xSpanOf: (row: number, center: number) => readonly [number, number];
   segments: number[];
   rowIndex: number[];
+  styleRows: number[];
   strokes: string[];
 }): number {
-  const { frame, fx, color, wantsColors, xSpanOf, segments, rowIndex, strokes } = input;
+  const { frame, fx, color, wantsColors, xSpanOf, segments, rowIndex, styleRows, strokes } = input;
   const { binding, n } = frame;
   let removed = 0;
   for (let row = 0; row < n; row++) {
@@ -46,6 +47,7 @@ export function emitErrorbarRows(input: {
     segments.push(cx, y0, cx, y1, capX0, y0, capX1, y0, capX0, y1, capX1, y1);
     const src = frame.rowIndex[row]!;
     rowIndex.push(src, src, src);
+    styleRows.push(row, row, row);
     if (wantsColors && color !== null) {
       const value =
         frame.colorValues === null ? binding.color.scaledConstant! : frame.colorValues[row]!;

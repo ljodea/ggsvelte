@@ -241,6 +241,14 @@ export type {
   SemanticCandidateKeys,
 } from "./interaction-mask.js";
 export { PANEL_SPACING, STRIP_BAND } from "./scene.js";
+export { LINETYPE_DASHES, linetypeIndex, pointShapeIndex } from "./scales/style.js";
+export type {
+  Linetype,
+  PointShape,
+  ResolvedStyleScale,
+  StyleOutput,
+  StyleScale,
+} from "./scales/style.js";
 export type {
   GeometryBatch,
   GlyphsBatch,

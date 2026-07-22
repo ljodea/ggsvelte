@@ -2,8 +2,10 @@ import {
   closestOrthInRange,
   directionalNearestInOrder,
   panelRangeInOrder,
+  pointHitDistance,
   pathRange,
   pathSemanticNeighborRange,
+  pathSubpathIndex,
 } from "./candidate-geometry.js";
 import { closestPathEdge } from "./candidate-path-geometry.js";
 import { AUTO_MODES, buildCandidateStoreIndexes } from "./candidate-store-indexes.js";
@@ -88,12 +90,36 @@ export function buildCandidateStoreEager(
               py > panel.y + panel.height))
         )
           continue;
-        const localId = entry.spatial.nearestWithin(px, py, batch.size + hitTolerance);
-        if (localId < 0) continue;
-        best = entry.ids[localId]!;
-        bestBatch = entry.batchIndex;
-        bestDistance = Math.hypot(xs[best]! - px, ys[best]! - py);
-        break;
+        let maxRadius = batch.size;
+        if (batch.sizes !== undefined) {
+          for (const radius of batch.sizes) maxRadius = Math.max(maxRadius, radius);
+        }
+        maxRadius *= 1.25;
+        const localIds = entry.spatial
+          .queryRect(
+            px - maxRadius - hitTolerance,
+            py - maxRadius - hitTolerance,
+            px + maxRadius + hitTolerance,
+            py + maxRadius + hitTolerance,
+          )
+          .toSorted((a, b) => b - a);
+        for (const localId of localIds) {
+          const candidateId = entry.ids[localId]!;
+          const primitive = primitiveIds[candidateId]!;
+          const distance = pointHitDistance(
+            batch,
+            primitive,
+            xs[candidateId]! - px,
+            ys[candidateId]! - py,
+            hitTolerance,
+          );
+          if (distance === null) continue;
+          best = candidateId;
+          bestBatch = entry.batchIndex;
+          bestDistance = distance;
+          break;
+        }
+        if (best >= 0) break;
       }
 
       const extended: number[] = [];
@@ -125,7 +151,13 @@ export function buildCandidateStoreEager(
         if (batch.kind === "paths" && batch.fills === undefined && range !== null) {
           const localX = px - panel.x;
           const localY = py - panel.y;
-          const slop = batch.linewidth / 2 + hitTolerance;
+          const subpath = pathSubpathIndex(batch.pathOffsets, primitive);
+          const slop =
+            (subpath === null
+              ? batch.linewidth
+              : (batch.linewidths?.[subpath] ?? batch.linewidth)) /
+              2 +
+            hitTolerance;
           pathEdge = closestPathEdge(
             batch,
             pathSemanticNeighborRange(batch, primitive),

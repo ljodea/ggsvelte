@@ -44,6 +44,8 @@ export interface AesInput {
   size?: ChannelInput;
   linewidth?: ChannelInput;
   alpha?: ChannelInput;
+  shape?: ChannelInput;
+  linetype?: ChannelInput;
   group?: ChannelInput;
   label?: ChannelInput;
   weight?: ChannelInput;

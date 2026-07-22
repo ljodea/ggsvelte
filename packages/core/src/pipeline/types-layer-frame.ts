@@ -5,6 +5,8 @@ import type { CellValue, ColumnTable } from "../table.js";
 
 import type { LayerBinding } from "./types-binding.js";
 
+type StyleValueColumn = readonly CellValue[] | Float64Array;
+
 interface BoxFrame {
   lower: Float64Array;
   middle: Float64Array;
@@ -46,6 +48,11 @@ export interface LayerFrame {
   rowIndex: Uint32Array;
   colorValues: readonly CellValue[] | null;
   fillValues: readonly CellValue[] | null;
+  sizeValues: StyleValueColumn | null;
+  linewidthValues: StyleValueColumn | null;
+  alphaValues: StyleValueColumn | null;
+  shapeValues: StyleValueColumn | null;
+  linetypeValues: StyleValueColumn | null;
   labelValues: readonly CellValue[] | null;
   /** Post-position / stat bounds (bars, areas, bands, boxes, errorbars). */
   ymin: Float64Array | null;

@@ -54,16 +54,22 @@ export function resolveCandidateFrameRow(input: {
   let derivedGroup = frame?.groups[frameRow] ?? 0;
 
   if (frame !== undefined && batch.kind === "paths") {
-    // O(log P) subpath lookup (was linear O(P) per vertex → O(V·P) at build).
-    // Null = OOB / empty offsets: keep default frameRow/derivedGroup (codex P1).
-    const subpath = pathSubpathIndex(batch.pathOffsets, primitiveIndex);
-    if (subpath !== null) {
-      derivedGroup = orderedGroups[Math.min(subpath, orderedGroups.length - 1)] ?? 0;
-      const rowsInGroup = getPathGroupSortedRows(frame).get(derivedGroup) ?? [];
-      const local = primitiveIndex - (batch.pathOffsets[subpath] ?? 0);
-      const reflected =
-        local < rowsInGroup.length ? local : Math.max(0, rowsInGroup.length * 2 - 1 - local);
-      frameRow = rowsInGroup[Math.min(reflected, rowsInGroup.length - 1)] ?? frameRow;
+    const explicitFrameRow = batch.frameRowIndex?.[primitiveIndex];
+    if (explicitFrameRow !== undefined && explicitFrameRow < frame.n) {
+      frameRow = explicitFrameRow;
+      derivedGroup = frame.groups[frameRow] ?? derivedGroup;
+    } else {
+      // O(log P) subpath lookup (was linear O(P) per vertex → O(V·P) at build).
+      // Null = OOB / empty offsets: keep default frameRow/derivedGroup (codex P1).
+      const subpath = pathSubpathIndex(batch.pathOffsets, primitiveIndex);
+      if (subpath !== null) {
+        derivedGroup = orderedGroups[Math.min(subpath, orderedGroups.length - 1)] ?? 0;
+        const rowsInGroup = getPathGroupSortedRows(frame).get(derivedGroup) ?? [];
+        const local = primitiveIndex - (batch.pathOffsets[subpath] ?? 0);
+        const reflected =
+          local < rowsInGroup.length ? local : Math.max(0, rowsInGroup.length * 2 - 1 - local);
+        frameRow = rowsInGroup[Math.min(reflected, rowsInGroup.length - 1)] ?? frameRow;
+      }
     }
   } else if (frame !== undefined && batch.kind === "segments") {
     if (frame.binding.layer.geom === "errorbar") frameRow = Math.floor(primitiveIndex / 3);

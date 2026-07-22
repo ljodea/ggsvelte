@@ -12,19 +12,34 @@ import { linearTicks, tickStep } from "./layout/ticks.js";
 import type { TextMeasurer } from "./layout/measure.js";
 import { encodeKey } from "./scales/state.js";
 import { bandKey } from "./scales/train.js";
+import type { Linetype, PointShape } from "./scales/style.js";
 import type { SceneLegend, SceneLegendEntry } from "./scene.js";
+import type { StyleAesthetic } from "@ggsvelte/spec";
 
 export type LegendOrder = "stable-domain" | "present-first-seen" | "sorted";
 
+interface LegendKeyStyle {
+  color?: string;
+  size?: number;
+  linewidth?: number;
+  alpha?: number;
+  shape?: PointShape;
+  linetype?: Linetype;
+}
+
 export interface DiscreteLegendInput {
   kind: "discrete";
-  scale: "color" | "fill";
+  scale: "color" | "fill" | StyleAesthetic;
   title: string;
   /** Values in stable assignment order (the default legend order). */
   domain: readonly unknown[];
   /** Values in first-occurrence order of the CURRENT data. */
   firstSeen: readonly unknown[];
-  colorOf(value: unknown): string | undefined;
+  /** Whether entries have exact raw-value identity for focus/filter interactions. */
+  interactive?: boolean;
+  colorOf?(value: unknown): string | undefined;
+  keyOf?(value: unknown): LegendKeyStyle;
+  labelOf?(value: unknown): string;
 }
 
 export interface RampLegendInput {
@@ -149,7 +164,10 @@ export function buildLegends(
   for (const input of inputs) {
     if (input.kind === "discrete") {
       const values = orderedValues(input, order);
-      const displayLabels = disambiguatedLabels(values);
+      const displayLabels =
+        input.labelOf === undefined
+          ? disambiguatedLabels(values)
+          : values.map((value) => input.labelOf?.(value) ?? "");
       const titleHeight = input.title === "" ? 0 : TITLE_HEIGHT;
       const maxLabelWidth = Math.max(1, maxWidth - PADDING * 2 - SWATCH_SIZE - SWATCH_GAP);
       const entries: SceneLegendEntry[] = [];
@@ -157,10 +175,16 @@ export function buildLegends(
       for (let i = 0; i < values.length; i++) {
         const label = truncate(displayLabels[i]!, maxLabelWidth, measurer);
         labelWidth = Math.max(labelWidth, measurer.measureWidth(label, FONT_SIZE));
+        const key = input.keyOf?.(values[i]) ?? {};
         entries.push({
           value: values[i],
           label,
-          color: input.colorOf(values[i]) ?? UNKNOWN_COLOR,
+          color: key.color ?? input.colorOf?.(values[i]) ?? UNKNOWN_COLOR,
+          ...(key.size !== undefined && { size: key.size }),
+          ...(key.linewidth !== undefined && { linewidth: key.linewidth }),
+          ...(key.alpha !== undefined && { alpha: key.alpha }),
+          ...(key.shape !== undefined && { shape: key.shape }),
+          ...(key.linetype !== undefined && { linetype: key.linetype }),
           y: titleHeight + i * LEGEND_ROW_HEIGHT,
         });
       }
@@ -175,6 +199,7 @@ export function buildLegends(
       legends.push({
         type: "discrete",
         scale: input.scale,
+        interactive: input.interactive ?? true,
         title: input.title,
         x: 0,
         y,

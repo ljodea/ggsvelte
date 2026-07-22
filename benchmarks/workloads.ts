@@ -31,6 +31,9 @@ import {
   scaleColorBinned,
   scaleColorLog10,
   scaleColorManual,
+  scaleAlphaContinuous,
+  scaleShapeDiscrete,
+  scaleSizeContinuous,
   scaleXBinned,
   scaleXContinuous,
 } from "@ggsvelte/spec";
@@ -234,6 +237,32 @@ function nonPositionColorSpec(n: number, family: "log10" | "binned" | "manual"):
   return gg({ x, y, color }, aes({ x: "x", y: "y", color: "color" }))
     .geomPoint({ render: "canvas" })
     .scales(scale)
+    .spec();
+}
+
+function mappedStyleSpec(n: number): PortableSpec {
+  const x = Array.from<number>({ length: n });
+  const y = Array.from<number>({ length: n });
+  const magnitude = Array.from<number>({ length: n });
+  const confidence = Array.from<number>({ length: n });
+  const group = Array.from<string>({ length: n });
+  for (let index = 0; index < n; index++) {
+    x[index] = index % 1_000;
+    y[index] = (index * 17) % 1_000;
+    magnitude[index] = 1 + (index % 100);
+    confidence[index] = (index % 100) / 100;
+    group[index] = `group-${index % 5}`;
+  }
+  return gg(
+    { x, y, magnitude, confidence, group },
+    aes({ x: "x", y: "y", size: "magnitude", alpha: "confidence", shape: "group" }),
+  )
+    .geomPoint({ render: "canvas" })
+    .scales({
+      ...scaleSizeContinuous(),
+      ...scaleAlphaContinuous(),
+      ...scaleShapeDiscrete(),
+    })
     .spec();
 }
 
@@ -666,6 +695,18 @@ export function buildWorkloads(smoke: boolean): Workload[] {
         fn: () => runPipeline(spec, opts),
       });
     }
+  }
+
+  // --- PR 6 complete mapped style vectors ----------------------------------
+  {
+    const n = smoke ? 1_000 : 100_000;
+    const spec = mappedStyleSpec(n);
+    workloads.push({
+      id: `pipeline mapped-style ${fmtK(n)}`,
+      group: `mapped style vectors ${fmtK(n)}`,
+      bench: `runPipeline mapped style vectors ${fmtK(n)}`,
+      fn: () => runPipeline(spec, opts),
+    });
   }
 
   // --- M2 statistical workloads (plan: bin 100k, loess 5k, density 100k) ----

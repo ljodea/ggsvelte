@@ -24,6 +24,8 @@ import {
 // Public types
 // ---------------------------------------------------------------------------
 
+const FILTERABLE_LEGEND_SCALES = ["color", "fill", "shape", "linetype"] as const;
+
 type ResolvedLegendFilterOptions = {
   readonly mode: "exclude" | "include";
   readonly multiple: boolean;
@@ -95,7 +97,7 @@ export function createLegendFilterState(deps: LegendFilterStateDeps): LegendFilt
     const effectiveSpec = deps.effectiveSpec();
     if (effectiveSpec === null) return bindings;
     for (const layer of effectiveSpec.layers) {
-      for (const scale of ["color", "fill"] as const) {
+      for (const scale of FILTERABLE_LEGEND_SCALES) {
         const own = layer.aes?.[scale];
         // Explicit null is an unset (normalize's null-unset semantics): the
         // layer deliberately removed the plot-level binding — never inherit.
@@ -162,8 +164,8 @@ export function createLegendFilterState(deps: LegendFilterStateDeps): LegendFilt
   function computeEntries(model: RenderModel | null): FilterableLegendEntry[] {
     if (model === null || legendFilterOptions === null) return [];
     return model.scene.legends.flatMap((sceneLegend) => {
-      if (sceneLegend.type !== "discrete") return [];
-      if (sceneLegend.scale !== "color" && sceneLegend.scale !== "fill") return [];
+      if (sceneLegend.type !== "discrete" || sceneLegend.interactive === false) return [];
+      if (!FILTERABLE_LEGEND_SCALES.some((scale) => scale === sceneLegend.scale)) return [];
       const fields = new Set(
         model.layerFields
           .flat()
@@ -229,7 +231,7 @@ export function createLegendFilterState(deps: LegendFilterStateDeps): LegendFilt
       legendFilterOptions.multiple,
     );
     const clause: LegendFilterClause = Object.freeze({
-      scale: target.legend.scale as "color" | "fill",
+      scale: target.legend.scale,
       field: target.field,
       values,
       mode: legendFilterOptions.mode,

@@ -30,6 +30,7 @@ export function finalizePanelLayoutPass(input: {
     panelScales,
     colorResolution,
     fillResolution,
+    styleResolutions,
     scalesConfig,
     allFrames,
   } = trained;
@@ -96,8 +97,11 @@ export function finalizePanelLayoutPass(input: {
       yScale: yTraining.scale,
       xTemporalKind: temporalKind("x"),
       yTemporalKind: temporalKind("y"),
-      colorLegend: colorResolution.legendInput,
-      fillLegend: fillResolution.legendInput,
+      legendInputs: [
+        colorResolution.legendInput,
+        fillResolution.legendInput,
+        ...Object.values(styleResolutions).map((resolution) => resolution.legendInput),
+      ].filter((legend): legend is NonNullable<typeof legend> => legend !== null),
       legendOrder: normalized.legend?.order ?? "stable-domain",
       theme,
       options,

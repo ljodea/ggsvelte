@@ -109,7 +109,7 @@ export interface LegendFocusChange<Key = PropertyKey> {
   readonly phase: "change";
   readonly state: "transient" | "committed";
   readonly source: InteractionSource;
-  readonly scale: "color" | "fill";
+  readonly scale: "color" | "fill" | "size" | "linewidth" | "alpha" | "shape" | "linetype";
   /** Raw encoded domain value. This is deliberately distinct from row keys. */
   readonly value: CellValue;
   readonly label: string;

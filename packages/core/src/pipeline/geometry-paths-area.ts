@@ -5,6 +5,7 @@ import type { PathsBatch } from "../scene.js";
 
 import type { LayerFrame, PipelineWarning, ResolvedColorScale } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
+import { numericStyleVector, type ResolvedStyleScales } from "./geometry-style.js";
 import { bucketByGroup, xSortKey } from "./geometry-shared.js";
 import { writeClosedPathGroups } from "./geometry-paths-closed-batch.js";
 import { areaGroupFillOf } from "./geometry-paths-area-fill.js";
@@ -13,6 +14,7 @@ export function areaBatch(
   frame: LayerFrame,
   fx: Frame,
   fill: ResolvedColorScale | null,
+  styles: ResolvedStyleScales,
   warnings: PipelineWarning[],
 ): PathsBatch | null {
   const { binding } = frame;
@@ -36,6 +38,12 @@ export function areaBatch(
     binding.layer.geom === "area" || binding.layer.geom === "density"
       ? (binding.layer.params ?? {})
       : {};
+  const alphas = numericStyleVector(
+    frame,
+    "alpha",
+    groupRows.map((rows) => rows[0]!),
+    styles,
+  );
   return {
     kind: "paths",
     layerIndex: binding.index,
@@ -47,7 +55,13 @@ export function areaBatch(
     fills,
     closed: true,
     linewidth: 0,
-    alpha: params.alpha ?? 1,
+    alpha:
+      alphas === undefined
+        ? typeof binding.alpha.constant === "number"
+          ? binding.alpha.constant
+          : (params.alpha ?? 1)
+        : 1,
+    ...(alphas !== undefined && { alphas }),
     curve: "linear",
   };
 }

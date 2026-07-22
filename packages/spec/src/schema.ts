@@ -33,10 +33,13 @@ import { SpecDeclarations } from "./schema-declarations.js";
 export {
   CATEGORICAL_SCHEME_NAMES,
   COLOR_SCHEME_NAMES,
+  LINETYPE_NAMES,
   MAX_BINNED_BREAKS,
+  POINT_SHAPE_NAMES,
   SEQUENTIAL_SCHEME_NAMES,
   THEME_NAMES,
 } from "./schema-names.js";
+export type { LinetypeName, PointShapeName } from "./schema-names.js";
 
 export {
   CHANNELS,
@@ -216,7 +219,15 @@ export type PositionScaleSpec = SpecType<"PositionScaleSpec">;
 export type ScaleExpansion = SpecType<"ScaleExpansion">;
 /** Color/fill scale configuration. */
 export type ColorScaleSpec = SpecType<"ColorScaleSpec">;
-/** Per-scale configuration ({ x, y, color, fill }). */
+/** Positive numeric size/linewidth scale configuration. */
+export type PositiveStyleScaleSpec = SpecType<"PositiveStyleScaleSpec">;
+/** Opacity scale configuration. */
+export type AlphaScaleSpec = SpecType<"AlphaScaleSpec">;
+/** Finite point-shape scale configuration. */
+export type ShapeScaleSpec = SpecType<"ShapeScaleSpec">;
+/** Finite stroke-pattern scale configuration. */
+export type LinetypeScaleSpec = SpecType<"LinetypeScaleSpec">;
+/** Per-scale configuration for all position and style aesthetics. */
 export type Scales = SpecType<"Scales">;
 /** Facet-panel scale behavior. */
 export type FacetScales = SpecType<"FacetScales">;

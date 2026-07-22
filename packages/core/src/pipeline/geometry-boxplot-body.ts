@@ -16,6 +16,7 @@ export interface BoxplotBodyResult {
   centerPx: number[];
   linewidth: number;
   alpha: number;
+  keptRows: number[];
   params: BoxplotParams;
 }
 

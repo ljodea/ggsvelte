@@ -28,6 +28,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "AlphaScaleSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "AreaLayer": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -77,6 +81,10 @@
           "lifecycle": "experimental"
         },
         "BinnedColorScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "BinnedFiniteStyleScaleOptions": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -256,6 +264,14 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "DiscreteFiniteStyleScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "DiscreteNumericStyleScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "DiscretePositionScaleOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -302,6 +318,10 @@
         },
         "FacetSpecSchema": {
           "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "FiniteStyleScaleOptions": {
+          "kind": "type",
           "lifecycle": "experimental"
         },
         "GEOM_DEFAULTS": {
@@ -380,6 +400,14 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "IdentityFiniteStyleScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "IdentityNumericStyleScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "InlineData": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -397,6 +425,10 @@
           "lifecycle": "experimental"
         },
         "KNOWN_STATS": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "LINETYPE_NAMES": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -440,6 +472,14 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "LinetypeName": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "LinetypeScaleSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "LintAdvisoryCode": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -476,6 +516,22 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "ManualFiniteStyleScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ManualNumericStyleScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "NumericStyleScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "POINT_SHAPE_NAMES": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "ParsedTemporalColumn": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -504,6 +560,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "PointShapeName": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "PortabilityIssue": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -521,6 +581,10 @@
           "lifecycle": "experimental"
         },
         "PositionScaleSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PositiveStyleScaleSpec": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -628,6 +692,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "STYLE_AESTHETIC_GEOMS": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "ScaleCapability": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -645,6 +713,14 @@
           "lifecycle": "experimental"
         },
         "SequentialColorScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SequentialStyleScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ShapeScaleSpec": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -697,6 +773,10 @@
           "lifecycle": "experimental"
         },
         "StatName": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "StyleAesthetic": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -766,6 +846,10 @@
         },
         "TemporalLabelSpecSchema": {
           "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TemporalNumericStyleScaleOptions": {
+          "kind": "type",
           "lifecycle": "experimental"
         },
         "TemporalParseError": {
@@ -1000,6 +1084,38 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scaleAlpha": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleAlphaBinned": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleAlphaContinuous": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleAlphaDate": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleAlphaDatetime": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleAlphaDiscrete": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleAlphaIdentity": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleAlphaManual": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scaleColorBinned": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -1108,6 +1224,110 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scaleLinetype": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleLinetypeBinned": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleLinetypeDiscrete": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleLinetypeIdentity": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleLinetypeManual": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleLinewidth": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleLinewidthBinned": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleLinewidthContinuous": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleLinewidthDate": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleLinewidthDatetime": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleLinewidthDiscrete": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleLinewidthIdentity": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleLinewidthManual": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleShape": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleShapeBinned": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleShapeDiscrete": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleShapeIdentity": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleShapeManual": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleSize": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleSizeBinned": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleSizeContinuous": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleSizeDate": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleSizeDatetime": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleSizeDiscrete": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleSizeIdentity": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleSizeManual": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scaleXBinned": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -1169,6 +1389,34 @@
           "lifecycle": "experimental"
         },
         "scaleYSqrt": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_alpha_binned": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_alpha_continuous": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_alpha_date": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_alpha_datetime": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_alpha_discrete": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_alpha_identity": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_alpha_manual": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -1277,6 +1525,102 @@
           "lifecycle": "experimental"
         },
         "scale_fill_sqrt": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_linetype": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_linetype_binned": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_linetype_discrete": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_linetype_identity": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_linetype_manual": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_linewidth_binned": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_linewidth_continuous": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_linewidth_date": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_linewidth_datetime": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_linewidth_discrete": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_linewidth_identity": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_linewidth_manual": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_shape": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_shape_binned": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_shape_discrete": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_shape_identity": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_shape_manual": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_size_binned": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_size_continuous": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_size_date": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_size_datetime": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_size_discrete": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_size_identity": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_size_manual": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -1691,6 +2035,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "LINETYPE_DASHES": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "LayerBackend": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1729,6 +2077,10 @@
         },
         "LineageStore": {
           "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "Linetype": {
+          "kind": "type",
           "lifecycle": "experimental"
         },
         "MAX_BINNED_BREAKS": {
@@ -1815,6 +2167,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "PointShape": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "PointsBatch": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1852,6 +2208,10 @@
           "lifecycle": "experimental"
         },
         "ResolvedEdition": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ResolvedStyleScale": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -1992,6 +2352,14 @@
           "lifecycle": "experimental"
         },
         "Stratum": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "StyleOutput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "StyleScale": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -2211,6 +2579,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "linetypeIndex": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "logTicks": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -2248,6 +2620,10 @@
           "lifecycle": "experimental"
         },
         "planTemporalAxis": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "pointShapeIndex": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -2413,6 +2789,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "AlphaScaleSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "AreaMode": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -2442,6 +2822,10 @@
           "lifecycle": "experimental"
         },
         "BinnedColorScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "BinnedFiniteStyleScaleOptions": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -2533,11 +2917,19 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "DiscreteFiniteStyleScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "DiscreteGuideEntry": {
           "kind": "type",
           "lifecycle": "experimental"
         },
         "DiscreteGuidePlan": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "DiscreteNumericStyleScaleOptions": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -2562,6 +2954,10 @@
           "lifecycle": "experimental"
         },
         "FacetSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "FiniteStyleScaleOptions": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -2637,6 +3033,14 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "IdentityFiniteStyleScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "IdentityNumericStyleScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "InspectInput": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -2667,6 +3071,10 @@
         },
         "IntervalSelection": {
           "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "LINETYPE_NAMES": {
+          "kind": "value",
           "lifecycle": "experimental"
         },
         "Labs": {
@@ -2733,6 +3141,18 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "Linetype": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "LinetypeName": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "LinetypeScaleSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "MAX_TEMPORAL_CANDIDATES": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -2753,12 +3173,28 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "ManualFiniteStyleScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ManualNumericStyleScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "MappedField": {
           "kind": "type",
           "lifecycle": "experimental"
         },
         "NonEmptyReadonlyArray": {
           "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "NumericStyleScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "POINT_SHAPE_NAMES": {
+          "kind": "value",
           "lifecycle": "experimental"
         },
         "PipelineError": {
@@ -2833,6 +3269,14 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "PointShape": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PointShapeName": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "PortableSpec": {
           "kind": "type",
           "lifecycle": "stable-intent"
@@ -2842,6 +3286,10 @@
           "lifecycle": "experimental"
         },
         "PositionScaleSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PositiveStyleScaleSpec": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -2877,6 +3325,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "ResolvedStyleScale": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "RunOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -2886,6 +3338,10 @@
           "lifecycle": "experimental"
         },
         "SCALE_CAPABILITIES": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "STYLE_AESTHETIC_GEOMS": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -2949,6 +3405,14 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "SequentialStyleScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ShapeScaleSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "SmoothParams": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -2974,6 +3438,10 @@
           "lifecycle": "experimental"
         },
         "Stratum": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "StyleAesthetic": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -3014,6 +3482,10 @@
           "lifecycle": "experimental"
         },
         "TemporalKind": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "TemporalNumericStyleScaleOptions": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -3213,6 +3685,38 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scaleAlpha": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleAlphaBinned": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleAlphaContinuous": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleAlphaDate": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleAlphaDatetime": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleAlphaDiscrete": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleAlphaIdentity": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleAlphaManual": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scaleColorBinned": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -3321,6 +3825,110 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scaleLinetype": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleLinetypeBinned": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleLinetypeDiscrete": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleLinetypeIdentity": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleLinetypeManual": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleLinewidth": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleLinewidthBinned": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleLinewidthContinuous": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleLinewidthDate": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleLinewidthDatetime": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleLinewidthDiscrete": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleLinewidthIdentity": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleLinewidthManual": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleShape": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleShapeBinned": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleShapeDiscrete": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleShapeIdentity": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleShapeManual": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleSize": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleSizeBinned": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleSizeContinuous": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleSizeDate": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleSizeDatetime": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleSizeDiscrete": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleSizeIdentity": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleSizeManual": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scaleXBinned": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -3382,6 +3990,34 @@
           "lifecycle": "experimental"
         },
         "scaleYSqrt": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_alpha_binned": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_alpha_continuous": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_alpha_date": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_alpha_datetime": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_alpha_discrete": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_alpha_identity": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_alpha_manual": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -3490,6 +4126,102 @@
           "lifecycle": "experimental"
         },
         "scale_fill_sqrt": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_linetype": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_linetype_binned": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_linetype_discrete": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_linetype_identity": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_linetype_manual": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_linewidth_binned": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_linewidth_continuous": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_linewidth_date": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_linewidth_datetime": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_linewidth_discrete": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_linewidth_identity": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_linewidth_manual": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_shape": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_shape_binned": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_shape_discrete": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_shape_identity": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_shape_manual": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_size_binned": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_size_continuous": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_size_date": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_size_datetime": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_size_discrete": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_size_identity": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_size_manual": {
           "kind": "value",
           "lifecycle": "experimental"
         },

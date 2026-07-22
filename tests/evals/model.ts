@@ -241,6 +241,34 @@ const f = (field: string): Channel => ({ field });
 const COLOR_TRIGGER =
   /colou?red by|colou?r by|map .* to (?:binned )?colou?r|binned colou?r|colou?rsteps|split by|stacked by|grouped by|one (?:line|curve|area) per|shaded by|filled by|one per/;
 
+const STYLE_CHANNELS = ["size", "linewidth", "alpha", "shape", "linetype"] as const;
+type StyleChannel = (typeof STYLE_CHANNELS)[number];
+
+function escapeRegExp(value: string): string {
+  return value.replaceAll(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function mappedStyleField(
+  prompt: string,
+  profile: DataProfile,
+  channel: StyleChannel,
+): string | undefined {
+  const channelPattern =
+    channel === "linewidth"
+      ? "(?:linewidth|line[- ]width|stroke[- ]width)"
+      : channel === "linetype"
+        ? "(?:linetype|line[- ]type|dash(?: pattern)?)"
+        : channel;
+  for (const field of profile.fields) {
+    const fieldPattern = escapeRegExp(field.name.toLowerCase());
+    const mapping = new RegExp(
+      `\\b${fieldPattern}\\b\\s+to\\s+(?:(?:continuous|discrete|binned|point|line)\\s+){0,3}${channelPattern}\\b`,
+    );
+    if (mapping.test(prompt)) return field.name;
+  }
+  return undefined;
+}
+
 export class MockResponder implements Responder {
   readonly name = "mock";
 
@@ -251,9 +279,9 @@ export class MockResponder implements Responder {
     const repair = user.includes(REPAIR_MARKER);
     const profile = parseProfileLine(user);
 
-    const aestheticMapping = /\bmap\s+.+\s+to\s+(?:binned\s+)?(?:colou?r|fill|size|alpha)\b/.test(
-      prompt,
-    );
+    const aestheticMapping =
+      /\bmap\s+.+\s+to\s+(?:binned\s+)?(?:colou?r|fill)\b/.test(prompt) ||
+      STYLE_CHANNELS.some((channel) => mappedStyleField(prompt, profile, channel) !== undefined);
     if (
       /choropleth|\b3-?d\b|surface plot|network diagram/.test(prompt) ||
       (/\bmap\b/.test(prompt) && !aestheticMapping)
@@ -290,6 +318,18 @@ export class MockResponder implements Responder {
       if (which === undefined) return;
       aes[channel] = f(which);
       if (pick.typeOf(which) === "quantitative") scales[channel] = { type: "sequential" };
+    };
+
+    const stylesFor = (aes: MockAes): void => {
+      for (const channel of STYLE_CHANNELS) {
+        const field = mappedStyleField(prompt, profile, channel);
+        if (field === undefined) continue;
+        aes[channel] = f(field);
+        const finite = channel === "shape" || channel === "linetype";
+        scales[channel] = {
+          type: finite || pick.typeOf(field) !== "quantitative" ? "ordinal" : "sequential",
+        };
+      }
     };
 
     // --- geom selection (keyword templates, most specific first) -----------
@@ -390,6 +430,7 @@ export class MockResponder implements Responder {
       const y = reversed ? first : second;
       const aes: MockAes = { x: f(x), y: f(y) };
       colorFor("color", aes);
+      stylesFor(aes);
       if (/sized by|size by/.test(prompt)) {
         const size = pick.mentionedQuant();
         if (size !== undefined) aes["size"] = f(size);

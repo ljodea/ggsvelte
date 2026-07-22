@@ -1,9 +1,9 @@
 /**
- * Pre-refactor byte lock for the pure SVG renderer.
+ * Byte lock for the pure SVG renderer.
  *
- * Captured from packages/core/src/render-svg.ts BEFORE the astral split so
- * vertical extracts cannot silently change markup, class names, ids, or
- * concatenation order. Kitchen-sink covers every batch kind + panel chrome.
+ * Originally captured before the renderer split and deliberately refreshed
+ * when public mark classes expand. Kitchen-sink covers every batch kind and
+ * panel chrome so markup changes remain explicit.
  */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -44,7 +44,7 @@ function kitchenSink() {
 }
 
 describe("render-svg golden fixture (byte lock)", () => {
-  it("matches the pre-split kitchen-sink SVG byte-for-byte", () => {
+  it("matches the kitchen-sink SVG byte-for-byte", () => {
     const expected = readFileSync(goldenPath, "utf8");
     const actual = renderToSVGString(kitchenSink(), { width: 640, height: 400 });
     expect(actual).toBe(expected);

@@ -16,6 +16,7 @@
  *
  * @internal
  */
+import type { Linetype, PointShape } from "./scales/style.js";
 import type { CellValue } from "./table.js";
 import type { ThemeTokens } from "./theme.js";
 
@@ -35,8 +36,14 @@ export interface PointsBatch {
   rowIndex: Uint32Array;
   /** Point radius in px. */
   size: number;
+  /** Per-mark radii when aes.size is mapped; omitted keeps the scalar fast path. */
+  sizes?: Float32Array;
   alpha: number;
-  shape: "circle" | "square" | "triangle";
+  /** Per-mark opacity when aes.alpha is mapped. */
+  alphas?: Float32Array;
+  shape: PointShape;
+  /** Canonical POINT_SHAPE_NAMES indexes when aes.shape is mapped. */
+  shapeIndexes?: Uint8Array;
   /** Constant color, or null when `colors` carries per-mark values. */
   fill: string | null;
   /** Per-mark resolved colors (when the color channel is data-mapped). */
@@ -52,6 +59,8 @@ export interface PathsBatch {
   positions: Float32Array;
   /** Source row per render vertex (synthetic vertices inherit an adjacent row). */
   rowIndex: Uint32Array;
+  /** Frame row per semantic vertex when render subpaths split one statistical group. */
+  frameRowIndex?: Uint32Array;
   /**
    * Optional render-vertex mask: 1 for original/stat semantic anchors, 0 for
    * coordinate-tessellation vertices. CandidateStore ignores zero entries.
@@ -70,7 +79,11 @@ export interface PathsBatch {
   /** Close each subpath (area polygons). */
   closed?: boolean;
   linewidth: number;
+  linewidths?: Float32Array;
   alpha: number;
+  alphas?: Float32Array;
+  linetype?: Linetype;
+  linetypeIndexes?: Uint8Array;
   curve: "linear" | "step";
 }
 
@@ -96,7 +109,9 @@ export interface RectsBatch {
   stroke?: string | null;
   /** Outline width in px (only with `stroke`). */
   strokeWidth?: number;
+  strokeWidths?: Float32Array;
   alpha: number;
+  alphas?: Float32Array;
 }
 
 export interface SegmentsBatch {
@@ -120,7 +135,11 @@ export interface SegmentsBatch {
   stroke: string | null;
   strokes?: string[];
   linewidth: number;
+  linewidths?: Float32Array;
   alpha: number;
+  alphas?: Float32Array;
+  linetype?: Linetype;
+  linetypeIndexes?: Uint8Array;
 }
 
 export interface GlyphsBatch {
@@ -139,8 +158,10 @@ export interface GlyphsBatch {
   colors?: string[];
   /** Font size in px. */
   size: number;
+  sizes?: Float32Array;
   anchor: "start" | "middle" | "end";
   alpha: number;
+  alphas?: Float32Array;
 }
 
 export type GeometryBatch = PointsBatch | PathsBatch | RectsBatch | SegmentsBatch | GlyphsBatch;
@@ -203,15 +224,24 @@ export interface SceneLegendEntry {
   value: unknown;
   label: string;
   color: string;
+  size?: number;
+  linewidth?: number;
+  alpha?: number;
+  shape?: PointShape;
+  linetype?: Linetype;
   /** Top of the entry row, legend-local px. */
   y: number;
 }
 
+type SceneLegendScale = "color" | "fill" | "size" | "linewidth" | "alpha" | "shape" | "linetype";
+
 /** A discrete (swatch list) legend. */
 export interface SceneDiscreteLegend {
   type: "discrete";
-  /** Which scale produced it ("color" | "fill"). */
-  scale: string;
+  /** Which mapped aesthetic produced it. */
+  scale: SceneLegendScale;
+  /** False when entries are representative ticks/bins rather than raw value identities. */
+  interactive?: boolean;
   title: string;
   /** Legend box origin in plot px. */
   x: number;

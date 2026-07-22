@@ -86,5 +86,10 @@ export function normalizeScales(scales: Scales): Scales {
     ...(scales.y !== undefined && { y: normalizePositionScale(scales.y) }),
     ...(scales.color !== undefined && { color: normalizeColorScale(scales.color) }),
     ...(scales.fill !== undefined && { fill: normalizeColorScale(scales.fill) }),
+    ...(scales.size !== undefined && { size: { ...scales.size } }),
+    ...(scales.linewidth !== undefined && { linewidth: { ...scales.linewidth } }),
+    ...(scales.alpha !== undefined && { alpha: { ...scales.alpha } }),
+    ...(scales.shape !== undefined && { shape: { ...scales.shape } }),
+    ...(scales.linetype !== undefined && { linetype: { ...scales.linetype } }),
   };
 }

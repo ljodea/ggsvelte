@@ -5,7 +5,7 @@ import type { ColumnTable } from "../table.js";
 import type { CellValue } from "../table.js";
 
 import { emptyFrameExtras } from "./frame-helpers.js";
-import type { CarriedColumnOf } from "./frame-stats-shared.js";
+import { styleColumns, type CarriedColumnOf } from "./frame-stats-shared.js";
 import type { LayerBinding, LayerFrame } from "./types.js";
 import { NO_ROW } from "./types.js";
 
@@ -40,6 +40,11 @@ export function packSmoothLayerFrame(
     rowIndex: Uint32Array.from({ length: result.x.length }, () => NO_ROW),
     colorValues: col(binding.color.field),
     fillValues: col(binding.fill.field),
+    ...styleColumns(binding, col, {
+      y: result.y,
+      ...(result.ymin !== null && { ymin: result.ymin }),
+      ...(result.ymax !== null && { ymax: result.ymax }),
+    }),
     labelValues: col(binding.labelField),
     ...emptyFrameExtras(),
     ymin: result.ymin,

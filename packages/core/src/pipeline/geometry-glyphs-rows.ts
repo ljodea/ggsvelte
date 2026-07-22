@@ -17,10 +17,12 @@ export function emitGlyphRows(input: {
   dy: number;
   positions: number[];
   rowIndex: number[];
+  styleRows: number[];
   texts: string[];
   colors: string[];
 }): number {
-  const { frame, fx, color, wantsColors, dx, dy, positions, rowIndex, texts, colors } = input;
+  const { frame, fx, color, wantsColors, dx, dy, positions, rowIndex, styleRows, texts, colors } =
+    input;
   const { binding, n } = frame;
   let removed = 0;
   for (let row = 0; row < n; row++) {
@@ -34,6 +36,7 @@ export function emitGlyphRows(input: {
     }
     positions.push(tx * fx.innerWidth + dx, fx.innerHeight - ty * fx.innerHeight + dy);
     rowIndex.push(frame.rowIndex[row]!);
+    styleRows.push(row);
     texts.push(bandKey(label));
     if (wantsColors && color !== null) {
       const value =

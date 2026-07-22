@@ -236,6 +236,33 @@ describe("explicit legend filtering", () => {
     expect(view.container.querySelector(".gg-legend-filters")).toBeNull();
   });
 
+  it("filters finite shape legends by their semantic source values", async () => {
+    const { container } = render(GGPlot, {
+      data: [
+        { x: 1, y: 1, group: "North" },
+        { x: 2, y: 2, group: "South" },
+      ],
+      aes: { x: "x", y: "y", shape: "group" },
+      layers: [{ geom: "point" }],
+      scales: { shape: { type: "ordinal", range: ["circle", "triangle"] } },
+      legendFilter: true,
+      width: 360,
+      height: 260,
+    });
+    await until(() => container.querySelectorAll(".gg-legend-filters input").length === 2);
+    container.querySelector<HTMLInputElement>("input[aria-label='Show North']")!.click();
+    await until(
+      () =>
+        container.querySelectorAll(".gg-points circle, .gg-points path, .gg-points rect").length ===
+        1,
+    );
+
+    expect(
+      container.querySelector<HTMLInputElement>("input[aria-label='Show North']")?.checked,
+    ).toBe(false);
+    expect(container.querySelector(".gg-shape-triangle")).not.toBeNull();
+  });
+
   it("does not offer a misleading filter for one scale fed by multiple fields", async () => {
     const { container } = render(GGPlot, {
       data: [

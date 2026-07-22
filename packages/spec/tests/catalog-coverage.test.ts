@@ -89,6 +89,17 @@ const TRIGGERS: Record<SpecErrorCode, Trigger> = {
     spec: { layers: [point], facet: { rows: { field: "g" }, ncol: 2 } },
     options: {},
   },
+  "unsupported-geom-aesthetic": {
+    spec: {
+      layers: [
+        {
+          geom: "line",
+          aes: { x: { field: "x" }, y: { field: "y" }, size: { field: "x" } },
+        },
+      ],
+    },
+    options: {},
+  },
   "unknown-field": {
     spec: { data: xy, layers: [{ geom: "point", aes: { x: { field: "xx" }, y: { field: "y" } } }] },
     options: {},

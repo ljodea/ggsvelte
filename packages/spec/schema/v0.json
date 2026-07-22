@@ -205,6 +205,14 @@
           "$ref": "#/$defs/ChannelValue",
           "description": "Opacity channel, 0 (transparent) to 1 (opaque)."
         },
+        "shape": {
+          "$ref": "#/$defs/ChannelValue",
+          "description": "Finite point-symbol channel. Continuous values require a binned scale."
+        },
+        "linetype": {
+          "$ref": "#/$defs/ChannelValue",
+          "description": "Finite stroke-pattern channel. Continuous values require a binned scale."
+        },
         "group": {
           "$ref": "#/$defs/ChannelValue",
           "description": "Explicit grouping channel. Overrides the default grouping (the interaction of all discrete mapped aesthetics). A constant (e.g. {\"value\": 1}) forces a single group."
@@ -2181,6 +2189,1456 @@
         }
       ]
     },
+    "PositiveStyleScaleSpec": {
+      "allOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "ordinal"
+                },
+                {
+                  "type": "string",
+                  "const": "sequential"
+                },
+                {
+                  "type": "string",
+                  "const": "binned"
+                },
+                {
+                  "type": "string",
+                  "const": "manual"
+                },
+                {
+                  "type": "string",
+                  "const": "identity"
+                }
+              ]
+            },
+            "temporalKind": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "date"
+                },
+                {
+                  "type": "string",
+                  "const": "datetime"
+                }
+              ]
+            },
+            "parse": {
+              "$ref": "#/$defs/TemporalParserSpec"
+            },
+            "parseFailure": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "error"
+                },
+                {
+                  "type": "string",
+                  "const": "censor"
+                }
+              ]
+            },
+            "timezone": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "disambiguation": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "compatible"
+                },
+                {
+                  "type": "string",
+                  "const": "earlier"
+                },
+                {
+                  "type": "string",
+                  "const": "later"
+                },
+                {
+                  "type": "string",
+                  "const": "reject"
+                }
+              ]
+            },
+            "domain": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/DomainValue"
+              },
+              "minItems": 1
+            },
+            "domainMode": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "grow"
+                },
+                {
+                  "type": "string",
+                  "const": "data"
+                }
+              ]
+            },
+            "breaks": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
+              },
+              "minItems": 2
+            },
+            "range": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "minItems": 1
+            },
+            "reverse": {
+              "type": "boolean"
+            },
+            "oob": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "censor"
+                },
+                {
+                  "type": "string",
+                  "const": "squish"
+                }
+              ]
+            },
+            "naValue": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "unknownValue": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "onExhaust": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "cycle"
+                },
+                {
+                  "type": "string",
+                  "const": "error"
+                }
+              ]
+            },
+            "labels": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "description": "Configuration for a positive numeric size or linewidth scale."
+        },
+        {
+          "anyOf": [
+            {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "binned"
+                },
+                "domain": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/DomainValue"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "breaks": {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "minItems": 2,
+                  "maxItems": 65
+                },
+                "range": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "minItems": 2
+                },
+                "domainMode": {
+                  "not": {}
+                },
+                "onExhaust": {
+                  "not": {}
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "type",
+                "range"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "manual"
+                },
+                "range": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "minItems": 1
+                },
+                "temporalKind": {
+                  "not": {}
+                },
+                "parse": {
+                  "not": {}
+                },
+                "parseFailure": {
+                  "not": {}
+                },
+                "timezone": {
+                  "not": {}
+                },
+                "disambiguation": {
+                  "not": {}
+                },
+                "domainMode": {
+                  "not": {}
+                },
+                "breaks": {
+                  "not": {}
+                },
+                "reverse": {
+                  "not": {}
+                },
+                "oob": {
+                  "not": {}
+                },
+                "onExhaust": {
+                  "not": {}
+                },
+                "labels": {
+                  "not": {}
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "identity"
+                },
+                "temporalKind": {
+                  "not": {}
+                },
+                "parse": {
+                  "not": {}
+                },
+                "parseFailure": {
+                  "not": {}
+                },
+                "timezone": {
+                  "not": {}
+                },
+                "disambiguation": {
+                  "not": {}
+                },
+                "domain": {
+                  "not": {}
+                },
+                "domainMode": {
+                  "not": {}
+                },
+                "breaks": {
+                  "not": {}
+                },
+                "range": {
+                  "not": {}
+                },
+                "reverse": {
+                  "not": {}
+                },
+                "oob": {
+                  "not": {}
+                },
+                "onExhaust": {
+                  "not": {}
+                },
+                "labels": {
+                  "not": {}
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "ordinal"
+                },
+                "temporalKind": {
+                  "not": {}
+                },
+                "parse": {
+                  "not": {}
+                },
+                "parseFailure": {
+                  "not": {}
+                },
+                "timezone": {
+                  "not": {}
+                },
+                "disambiguation": {
+                  "not": {}
+                },
+                "breaks": {
+                  "not": {}
+                },
+                "oob": {
+                  "not": {}
+                },
+                "labels": {
+                  "not": {}
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "sequential"
+                },
+                "domain": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/DomainValue"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "range": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "minItems": 2
+                },
+                "domainMode": {
+                  "not": {}
+                },
+                "onExhaust": {
+                  "not": {}
+                }
+              }
+            },
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "not": {}
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "AlphaScaleSpec": {
+      "allOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "ordinal"
+                },
+                {
+                  "type": "string",
+                  "const": "sequential"
+                },
+                {
+                  "type": "string",
+                  "const": "binned"
+                },
+                {
+                  "type": "string",
+                  "const": "manual"
+                },
+                {
+                  "type": "string",
+                  "const": "identity"
+                }
+              ]
+            },
+            "temporalKind": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "date"
+                },
+                {
+                  "type": "string",
+                  "const": "datetime"
+                }
+              ]
+            },
+            "parse": {
+              "$ref": "#/$defs/TemporalParserSpec"
+            },
+            "parseFailure": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "error"
+                },
+                {
+                  "type": "string",
+                  "const": "censor"
+                }
+              ]
+            },
+            "timezone": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "disambiguation": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "compatible"
+                },
+                {
+                  "type": "string",
+                  "const": "earlier"
+                },
+                {
+                  "type": "string",
+                  "const": "later"
+                },
+                {
+                  "type": "string",
+                  "const": "reject"
+                }
+              ]
+            },
+            "domain": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/DomainValue"
+              },
+              "minItems": 1
+            },
+            "domainMode": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "grow"
+                },
+                {
+                  "type": "string",
+                  "const": "data"
+                }
+              ]
+            },
+            "breaks": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
+              },
+              "minItems": 2
+            },
+            "range": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "minItems": 1
+            },
+            "reverse": {
+              "type": "boolean"
+            },
+            "oob": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "censor"
+                },
+                {
+                  "type": "string",
+                  "const": "squish"
+                }
+              ]
+            },
+            "naValue": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "unknownValue": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "onExhaust": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "cycle"
+                },
+                {
+                  "type": "string",
+                  "const": "error"
+                }
+              ]
+            },
+            "labels": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "description": "Configuration for an opacity scale constrained to [0, 1]."
+        },
+        {
+          "anyOf": [
+            {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "binned"
+                },
+                "domain": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/DomainValue"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "breaks": {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "minItems": 2,
+                  "maxItems": 65
+                },
+                "range": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "minItems": 2
+                },
+                "domainMode": {
+                  "not": {}
+                },
+                "onExhaust": {
+                  "not": {}
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "type",
+                "range"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "manual"
+                },
+                "range": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "minItems": 1
+                },
+                "temporalKind": {
+                  "not": {}
+                },
+                "parse": {
+                  "not": {}
+                },
+                "parseFailure": {
+                  "not": {}
+                },
+                "timezone": {
+                  "not": {}
+                },
+                "disambiguation": {
+                  "not": {}
+                },
+                "domainMode": {
+                  "not": {}
+                },
+                "breaks": {
+                  "not": {}
+                },
+                "reverse": {
+                  "not": {}
+                },
+                "oob": {
+                  "not": {}
+                },
+                "onExhaust": {
+                  "not": {}
+                },
+                "labels": {
+                  "not": {}
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "identity"
+                },
+                "temporalKind": {
+                  "not": {}
+                },
+                "parse": {
+                  "not": {}
+                },
+                "parseFailure": {
+                  "not": {}
+                },
+                "timezone": {
+                  "not": {}
+                },
+                "disambiguation": {
+                  "not": {}
+                },
+                "domain": {
+                  "not": {}
+                },
+                "domainMode": {
+                  "not": {}
+                },
+                "breaks": {
+                  "not": {}
+                },
+                "range": {
+                  "not": {}
+                },
+                "reverse": {
+                  "not": {}
+                },
+                "oob": {
+                  "not": {}
+                },
+                "onExhaust": {
+                  "not": {}
+                },
+                "labels": {
+                  "not": {}
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "ordinal"
+                },
+                "temporalKind": {
+                  "not": {}
+                },
+                "parse": {
+                  "not": {}
+                },
+                "parseFailure": {
+                  "not": {}
+                },
+                "timezone": {
+                  "not": {}
+                },
+                "disambiguation": {
+                  "not": {}
+                },
+                "breaks": {
+                  "not": {}
+                },
+                "oob": {
+                  "not": {}
+                },
+                "labels": {
+                  "not": {}
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "sequential"
+                },
+                "domain": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/DomainValue"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "range": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "minItems": 2
+                },
+                "domainMode": {
+                  "not": {}
+                },
+                "onExhaust": {
+                  "not": {}
+                }
+              }
+            },
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "not": {}
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "ShapeScaleSpec": {
+      "allOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "ordinal"
+                },
+                {
+                  "type": "string",
+                  "const": "binned"
+                },
+                {
+                  "type": "string",
+                  "const": "manual"
+                },
+                {
+                  "type": "string",
+                  "const": "identity"
+                }
+              ]
+            },
+            "domain": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/DomainValue"
+              },
+              "minItems": 1
+            },
+            "domainMode": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "grow"
+                },
+                {
+                  "type": "string",
+                  "const": "data"
+                }
+              ]
+            },
+            "breaks": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 2
+            },
+            "range": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "const": "circle"
+                  },
+                  {
+                    "type": "string",
+                    "const": "triangle"
+                  },
+                  {
+                    "type": "string",
+                    "const": "square"
+                  },
+                  {
+                    "type": "string",
+                    "const": "diamond"
+                  },
+                  {
+                    "type": "string",
+                    "const": "plus"
+                  },
+                  {
+                    "type": "string",
+                    "const": "cross"
+                  }
+                ]
+              },
+              "minItems": 1
+            },
+            "reverse": {
+              "type": "boolean"
+            },
+            "naValue": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "circle"
+                },
+                {
+                  "type": "string",
+                  "const": "triangle"
+                },
+                {
+                  "type": "string",
+                  "const": "square"
+                },
+                {
+                  "type": "string",
+                  "const": "diamond"
+                },
+                {
+                  "type": "string",
+                  "const": "plus"
+                },
+                {
+                  "type": "string",
+                  "const": "cross"
+                }
+              ]
+            },
+            "unknownValue": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "circle"
+                },
+                {
+                  "type": "string",
+                  "const": "triangle"
+                },
+                {
+                  "type": "string",
+                  "const": "square"
+                },
+                {
+                  "type": "string",
+                  "const": "diamond"
+                },
+                {
+                  "type": "string",
+                  "const": "plus"
+                },
+                {
+                  "type": "string",
+                  "const": "cross"
+                }
+              ]
+            },
+            "onExhaust": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "cycle"
+                },
+                {
+                  "type": "string",
+                  "const": "error"
+                }
+              ]
+            },
+            "labels": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "description": "Configuration for a finite point-shape scale."
+        },
+        {
+          "anyOf": [
+            {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "binned"
+                },
+                "domain": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "breaks": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 2,
+                  "maxItems": 65
+                },
+                "domainMode": {
+                  "not": {}
+                },
+                "onExhaust": {
+                  "not": {}
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "type",
+                "range"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "manual"
+                },
+                "range": {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "const": "circle"
+                      },
+                      {
+                        "type": "string",
+                        "const": "triangle"
+                      },
+                      {
+                        "type": "string",
+                        "const": "square"
+                      },
+                      {
+                        "type": "string",
+                        "const": "diamond"
+                      },
+                      {
+                        "type": "string",
+                        "const": "plus"
+                      },
+                      {
+                        "type": "string",
+                        "const": "cross"
+                      }
+                    ]
+                  },
+                  "minItems": 1
+                },
+                "domainMode": {
+                  "not": {}
+                },
+                "breaks": {
+                  "not": {}
+                },
+                "reverse": {
+                  "not": {}
+                },
+                "onExhaust": {
+                  "not": {}
+                },
+                "labels": {
+                  "not": {}
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "identity"
+                },
+                "domain": {
+                  "not": {}
+                },
+                "domainMode": {
+                  "not": {}
+                },
+                "breaks": {
+                  "not": {}
+                },
+                "range": {
+                  "not": {}
+                },
+                "reverse": {
+                  "not": {}
+                },
+                "onExhaust": {
+                  "not": {}
+                },
+                "labels": {
+                  "not": {}
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "ordinal"
+                },
+                "breaks": {
+                  "not": {}
+                },
+                "labels": {
+                  "not": {}
+                }
+              }
+            },
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "not": {}
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "LinetypeScaleSpec": {
+      "allOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "ordinal"
+                },
+                {
+                  "type": "string",
+                  "const": "binned"
+                },
+                {
+                  "type": "string",
+                  "const": "manual"
+                },
+                {
+                  "type": "string",
+                  "const": "identity"
+                }
+              ]
+            },
+            "domain": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/DomainValue"
+              },
+              "minItems": 1
+            },
+            "domainMode": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "grow"
+                },
+                {
+                  "type": "string",
+                  "const": "data"
+                }
+              ]
+            },
+            "breaks": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 2
+            },
+            "range": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "const": "solid"
+                  },
+                  {
+                    "type": "string",
+                    "const": "dashed"
+                  },
+                  {
+                    "type": "string",
+                    "const": "dotted"
+                  },
+                  {
+                    "type": "string",
+                    "const": "dotdash"
+                  },
+                  {
+                    "type": "string",
+                    "const": "longdash"
+                  },
+                  {
+                    "type": "string",
+                    "const": "twodash"
+                  }
+                ]
+              },
+              "minItems": 1
+            },
+            "reverse": {
+              "type": "boolean"
+            },
+            "naValue": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "solid"
+                },
+                {
+                  "type": "string",
+                  "const": "dashed"
+                },
+                {
+                  "type": "string",
+                  "const": "dotted"
+                },
+                {
+                  "type": "string",
+                  "const": "dotdash"
+                },
+                {
+                  "type": "string",
+                  "const": "longdash"
+                },
+                {
+                  "type": "string",
+                  "const": "twodash"
+                }
+              ]
+            },
+            "unknownValue": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "solid"
+                },
+                {
+                  "type": "string",
+                  "const": "dashed"
+                },
+                {
+                  "type": "string",
+                  "const": "dotted"
+                },
+                {
+                  "type": "string",
+                  "const": "dotdash"
+                },
+                {
+                  "type": "string",
+                  "const": "longdash"
+                },
+                {
+                  "type": "string",
+                  "const": "twodash"
+                }
+              ]
+            },
+            "onExhaust": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "cycle"
+                },
+                {
+                  "type": "string",
+                  "const": "error"
+                }
+              ]
+            },
+            "labels": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "description": "Configuration for a finite line-pattern scale."
+        },
+        {
+          "anyOf": [
+            {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "binned"
+                },
+                "domain": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "breaks": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 2,
+                  "maxItems": 65
+                },
+                "domainMode": {
+                  "not": {}
+                },
+                "onExhaust": {
+                  "not": {}
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "type",
+                "range"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "manual"
+                },
+                "range": {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "const": "solid"
+                      },
+                      {
+                        "type": "string",
+                        "const": "dashed"
+                      },
+                      {
+                        "type": "string",
+                        "const": "dotted"
+                      },
+                      {
+                        "type": "string",
+                        "const": "dotdash"
+                      },
+                      {
+                        "type": "string",
+                        "const": "longdash"
+                      },
+                      {
+                        "type": "string",
+                        "const": "twodash"
+                      }
+                    ]
+                  },
+                  "minItems": 1
+                },
+                "domainMode": {
+                  "not": {}
+                },
+                "breaks": {
+                  "not": {}
+                },
+                "reverse": {
+                  "not": {}
+                },
+                "onExhaust": {
+                  "not": {}
+                },
+                "labels": {
+                  "not": {}
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "identity"
+                },
+                "domain": {
+                  "not": {}
+                },
+                "domainMode": {
+                  "not": {}
+                },
+                "breaks": {
+                  "not": {}
+                },
+                "range": {
+                  "not": {}
+                },
+                "reverse": {
+                  "not": {}
+                },
+                "onExhaust": {
+                  "not": {}
+                },
+                "labels": {
+                  "not": {}
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "ordinal"
+                },
+                "breaks": {
+                  "not": {}
+                },
+                "labels": {
+                  "not": {}
+                }
+              }
+            },
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "not": {}
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
     "Scales": {
       "type": "object",
       "properties": {
@@ -2195,6 +3653,21 @@
         },
         "fill": {
           "$ref": "#/$defs/ColorScaleSpec"
+        },
+        "size": {
+          "$ref": "#/$defs/PositiveStyleScaleSpec"
+        },
+        "linewidth": {
+          "$ref": "#/$defs/PositiveStyleScaleSpec"
+        },
+        "alpha": {
+          "$ref": "#/$defs/AlphaScaleSpec"
+        },
+        "shape": {
+          "$ref": "#/$defs/ShapeScaleSpec"
+        },
+        "linetype": {
+          "$ref": "#/$defs/LinetypeScaleSpec"
         }
       },
       "additionalProperties": false,
@@ -2499,6 +3972,26 @@
         "fill": {
           "type": "string",
           "description": "Fill legend title. Defaults to the mapped field name."
+        },
+        "size": {
+          "type": "string",
+          "description": "Size legend title. Defaults to the mapped field name."
+        },
+        "linewidth": {
+          "type": "string",
+          "description": "Linewidth legend title. Defaults to the mapped field name."
+        },
+        "alpha": {
+          "type": "string",
+          "description": "Alpha legend title. Defaults to the mapped field name."
+        },
+        "shape": {
+          "type": "string",
+          "description": "Shape legend title. Defaults to the mapped field name."
+        },
+        "linetype": {
+          "type": "string",
+          "description": "Linetype legend title. Defaults to the mapped field name."
         }
       },
       "additionalProperties": false,

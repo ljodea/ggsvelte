@@ -177,6 +177,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "59a0bef505f951ded0ca4169be93dc43e7b19c71659e4d64d25e88cbfbe9a657",
   },
   {
+    id: "point/style-scales",
+    filename: "point-style-scales-light.png",
+    path: "/previews/point-style-scales-light.png",
+    sha256: "c1de8d1f7a78e15456ee73fd575c57da222648ce8f346bd49e196a5514979058",
+  },
+  {
     id: "rule/annotation",
     filename: "rule-annotation-light.png",
     path: "/previews/rule-annotation-light.png",

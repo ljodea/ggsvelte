@@ -741,3 +741,21 @@ exports[`ERROR_CATALOG coverage [validation-limit] is reproducible; message + fi
   },
 }
 `;
+
+exports[`ERROR_CATALOG coverage [unsupported-geom-aesthetic] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Remove the mapping or move it to one of the compatible geoms listed in the error.",
+    "summary": "A mapped style aesthetic is not consumed by the selected geom.",
+    "tier": 2,
+  },
+  "instance": {
+    "code": "unsupported-geom-aesthetic",
+    "fix": {
+      "description": "Remove aes.size or move it to a compatible point layer.",
+    },
+    "message": "The line geom does not consume aes.size; supported geoms: point, text.",
+    "path": "/layers/0/aes/size",
+  },
+}
+`;

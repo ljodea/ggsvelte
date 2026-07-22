@@ -123,6 +123,9 @@ export function calendarDateFields(state: BuilderCalendarSource): ReadonlySet<st
     ["y", ["y", "ymin", "ymax"]],
     ["color", ["color"]],
     ["fill", ["fill"]],
+    ["size", ["size"]],
+    ["linewidth", ["linewidth"]],
+    ["alpha", ["alpha"]],
   ] as const;
   for (const [scale, channels] of mappings) {
     if (state.scales?.[scale]?.temporalKind !== "date") continue;

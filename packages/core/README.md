@@ -63,6 +63,13 @@ numeric or temporal `labels` formats apply to colorbars and colorsteps.
 `guidePlans` includes immutable `discrete`, `colorbar`, and `colorsteps`
 payloads, while SVG, canvas, and Svelte consume the same resolved mark colors.
 
+Mapped size, linewidth, alpha, shape, and linetype share stable training,
+NA/unknown policy, immutable guide plans, and scene vectors. Size interpolates
+in symbol area; shape/linetype use finite named sets and require binning for
+quantitative data. Discrete and binned styles contribute to grouping while
+continuous numeric styles do not. Candidate hit geometry follows mapped point
+radius and stroke width, and candidate semantics retain the resolved styles.
+
 `coordTransform` is a separate post-stat projector. Per-panel projectors map
 trained scale-space values through identity/log10/sqrt coordinates, project
 axis ticks and grids, adaptively tessellate curved paths/segments, and expose

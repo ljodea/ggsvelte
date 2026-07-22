@@ -7,6 +7,7 @@ import type {
   IdentityColorScale,
   ManualColorScale,
 } from "../scales/non-position-color.js";
+import type { ResolvedStyleScale } from "../scales/style.js";
 import type { ScaleState } from "../scales/state.js";
 import type { ColorScale, PositionScale } from "../scales/train.js";
 import type { CellValue } from "../table.js";
@@ -26,6 +27,11 @@ export interface TrainedScales {
   y: PositionScale;
   color: ResolvedColorScale | null;
   fill: ResolvedColorScale | null;
+  size: ResolvedStyleScale | null;
+  linewidth: ResolvedStyleScale | null;
+  alpha: ResolvedStyleScale | null;
+  shape: ResolvedStyleScale | null;
+  linetype: ResolvedStyleScale | null;
   /** Per-panel positional scales (facets; equal to x/y when fixed). */
   panels: { x: PositionScale; y: PositionScale }[];
   /** Serializable per-scale-name state (plain JSON). Commit only when this

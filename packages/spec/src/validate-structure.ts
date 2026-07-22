@@ -9,6 +9,7 @@
 import type { SpecError } from "./errors.js";
 import type { Aes, ChannelName } from "./schema.js";
 import { CATEGORICAL_SCHEME_NAMES, GEOM_DEFAULTS, SEQUENTIAL_SCHEME_NAMES } from "./schema.js";
+import { STYLE_AESTHETIC_GEOMS, type StyleAesthetic } from "./capabilities.js";
 import { effectiveChannel } from "./validate-data.js";
 
 const CHANNEL_FIX_EXAMPLE = { field: "column_name" };
@@ -50,6 +51,20 @@ export function layerStructuralErrors(
   const layerAes = isRecord(layer["aes"]) ? (layer["aes"] as Aes) : undefined;
   const layerPath = `/layers/${index}`;
   const mapped = (channel: ChannelName) => effectiveChannel(plotAes, layerAes, channel);
+
+  for (const aesthetic of Object.keys(STYLE_AESTHETIC_GEOMS) as StyleAesthetic[]) {
+    if (mapped(aesthetic) === undefined) continue;
+    const compatible = STYLE_AESTHETIC_GEOMS[aesthetic] as readonly string[];
+    if (compatible.includes(geom)) continue;
+    errors.push({
+      code: "unsupported-geom-aesthetic",
+      path: `${layerPath}/aes/${aesthetic}`,
+      message: `The ${geom} geom does not consume aes.${aesthetic}; supported geoms: ${compatible.join(", ")}.`,
+      fix: {
+        description: `Remove aes.${aesthetic} or move it to a compatible ${compatible[0]} layer.`,
+      },
+    });
+  }
 
   if (geom === "rule") {
     const intercepts = hasIntercepts(layer);

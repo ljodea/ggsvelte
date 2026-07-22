@@ -10,6 +10,7 @@ import { createCoordTessellationBudget, projectGeometryBatch } from "./coord-geo
 import type { FacetPanelDef } from "./facets.js";
 import { buildBatch, flipBatchInPlace } from "./geometry.js";
 import type { PanelPlacement } from "./panel-layout.js";
+import type { ResolvedStyleScales } from "./geometry-style.js";
 import type { LayerFrame, PipelineWarning, ResolvedColorScale } from "./types.js";
 
 export function buildGeometryBatches(input: {
@@ -20,6 +21,7 @@ export function buildGeometryBatches(input: {
   panelScales: readonly { x: PositionScale; y: PositionScale }[];
   color: ResolvedColorScale | null;
   fill: ResolvedColorScale | null;
+  styles: ResolvedStyleScales;
   flip: boolean;
   coordProjectors: readonly PanelCoordProjector[];
   warnings: PipelineWarning[];
@@ -32,6 +34,7 @@ export function buildGeometryBatches(input: {
     panelScales,
     color,
     fill,
+    styles,
     flip,
     coordProjectors,
     warnings,
@@ -53,6 +56,7 @@ export function buildGeometryBatches(input: {
         geometryPanelFrame(placement, panelScales[p]!, flip, pathLike ? undefined : projector),
         color,
         fill,
+        styles,
         warnings,
       );
       const tessellationBudget = createCoordTessellationBudget(built);

@@ -21,8 +21,7 @@ export interface PanelLayoutChromeInput {
   yScale: PositionScale;
   xTemporalKind: TemporalKind | null;
   yTemporalKind: TemporalKind | null;
-  colorLegend: LegendInput | null;
-  fillLegend: LegendInput | null;
+  legendInputs: readonly LegendInput[];
   legendOrder: LegendOrder;
   theme: ThemeTokens;
   options: Pick<RunOptions, "width" | "height" | "measureText">;

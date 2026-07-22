@@ -221,6 +221,10 @@ export function dataChecks(
   }
   const axisFields: Record<"x" | "y", AxisUse[]> = { x: [], y: [] };
   const colorFields: Record<"color" | "fill", AxisUse[]> = { color: [], fill: [] };
+  const finiteStyleFields: Record<"shape" | "linetype", AxisUse[]> = {
+    shape: [],
+    linetype: [],
+  };
 
   for (let i = 0; i < layers.length; i++) {
     const layer = layers[i];
@@ -361,11 +365,32 @@ export function dataChecks(
       if (channel === "color" || channel === "fill") {
         colorFields[channel].push({ field: mapped.field, path });
       }
+      if (channel === "shape" || channel === "linetype") {
+        finiteStyleFields[channel].push({ field: mapped.field, path });
+      }
     }
   }
 
   // --- scale/type compatibility ----------------------------------------------
   const typeOf = (field: string) => fields.get(field)?.type ?? null;
+
+  for (const aesthetic of ["shape", "linetype"] as const) {
+    const config = scales?.[aesthetic] as { type?: string } | undefined;
+    if (config?.type !== undefined) continue;
+    for (const use of finiteStyleFields[aesthetic]) {
+      const type = typeOf(use.field);
+      if (type !== "quantitative" && type !== "temporal") continue;
+      errors.push({
+        code: "scale-type-mismatch",
+        path: `/scales/${aesthetic}`,
+        message: `Field "${use.field}" is ${type}, but ${aesthetic} has finite symbols and cannot infer continuous interpolation.`,
+        fix: {
+          description: `Set scales.${aesthetic}.type to "binned", or explicitly choose "ordinal" for identifier-like values.`,
+          example: { type: "binned" },
+        },
+      });
+    }
+  }
 
   for (const axis of AXIS_CHANNELS) {
     const config = scales?.[axis] as PositionScaleSpec | undefined;

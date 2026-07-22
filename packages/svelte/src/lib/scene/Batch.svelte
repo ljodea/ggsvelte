@@ -8,9 +8,11 @@
   import type {
     BatchInteractionMask,
     GeometryBatch,
+    PointShape,
     ThemeTokens,
   } from "@ggsvelte/core";
-  import { pathData, themeVar } from "@ggsvelte/core";
+  import { LINETYPE_DASHES, pathData, themeVar } from "@ggsvelte/core";
+  import { LINETYPE_NAMES, POINT_SHAPE_NAMES } from "@ggsvelte/spec";
 
   /** Keyboard-focus cap: point marks become focusable tooltip targets only
    *  up to this many marks per batch (a11y pass; beyond it, the canvas-style
@@ -43,12 +45,17 @@
 
   const ink = $derived(themeVar("ink", theme));
   const accent = $derived(themeVar("accent", theme));
+  const styleNumber = (value: number): number =>
+    Math.round(value * 1_000_000) / 1_000_000;
 
   interface Point {
     index: number;
     x: number;
     y: number;
     fill: string;
+    size: number;
+    alpha: number;
+    shape: PointShape;
     /** Source row (null for synthesized marks). */
     row: number | null;
   }
@@ -60,6 +67,12 @@
       x: batch.positions[j * 2]!,
       y: batch.positions[j * 2 + 1]!,
       fill: batch.colors?.[j] ?? batch.fill ?? ink,
+      size: styleNumber(batch.sizes?.[j] ?? batch.size),
+      alpha: styleNumber(batch.alphas?.[j] ?? 1),
+      shape:
+        batch.shapeIndexes === undefined
+          ? batch.shape
+          : POINT_SHAPE_NAMES[batch.shapeIndexes[j]!]!,
       row: batch.rowIndex[j] === NO_ROW ? null : batch.rowIndex[j]!,
     }));
   });
@@ -69,6 +82,9 @@
     d: string;
     stroke: string;
     fill: string;
+    linewidth: number;
+    alpha: number;
+    dasharray: string | undefined;
   }
 
   const subpaths: Subpath[] = $derived.by(() => {
@@ -84,11 +100,20 @@
         batch.closed === true,
       );
       if (d === "") continue;
-      out.push(
-        isArea
-          ? { index: s, d, stroke: "none", fill: batch.fills![s] ?? accent }
-          : { index: s, d, stroke: batch.strokes[s] ?? ink, fill: "none" },
-      );
+      const linetype =
+        batch.linetypeIndexes === undefined
+          ? (batch.linetype ?? "solid")
+          : LINETYPE_NAMES[batch.linetypeIndexes[s]!]!;
+      const dash = LINETYPE_DASHES[LINETYPE_NAMES.indexOf(linetype)] ?? [];
+      out.push({
+        index: s,
+        d,
+        stroke: isArea ? "none" : (batch.strokes[s] ?? ink),
+        fill: isArea ? (batch.fills![s] ?? accent) : "none",
+        linewidth: styleNumber(batch.linewidths?.[s] ?? batch.linewidth),
+        alpha: styleNumber(batch.alphas?.[s] ?? 1),
+        dasharray: dash.length === 0 ? undefined : dash.join(" "),
+      });
     }
     return out;
   });
@@ -100,6 +125,7 @@
     width: number;
     height: number;
     fill: string;
+    alpha: number;
   }
 
   const rects: Rect[] = $derived.by(() => {
@@ -113,6 +139,7 @@
       width: batch.rects[j * 4 + 2]!,
       height: batch.rects[j * 4 + 3]!,
       fill: batch.fills?.[j] ?? batch.fill ?? roleFill,
+      alpha: styleNumber(batch.alphas?.[j] ?? 1),
     }));
   });
 
@@ -131,6 +158,9 @@
     y2: number;
     d?: string;
     stroke: string;
+    linewidth: number;
+    alpha: number;
+    dasharray: string | undefined;
   }
 
   const segments: Segment[] = $derived.by(() => {
@@ -151,6 +181,16 @@
           ),
         }),
       stroke: batch.strokes?.[j] ?? batch.stroke ?? ink,
+      linewidth: styleNumber(batch.linewidths?.[j] ?? batch.linewidth),
+      alpha: styleNumber(batch.alphas?.[j] ?? 1),
+      dasharray: (() => {
+        const linetype =
+          batch.linetypeIndexes === undefined
+            ? (batch.linetype ?? "solid")
+            : LINETYPE_NAMES[batch.linetypeIndexes[j]!]!;
+        const dash = LINETYPE_DASHES[LINETYPE_NAMES.indexOf(linetype)] ?? [];
+        return dash.length === 0 ? undefined : dash.join(" ");
+      })(),
     }));
   });
 
@@ -160,6 +200,8 @@
     y: number;
     text: string;
     fill: string;
+    size: number;
+    alpha: number;
   }
 
   const glyphs: Glyph[] = $derived.by(() => {
@@ -170,6 +212,8 @@
       y: batch.positions[j * 2 + 1]!,
       text,
       fill: batch.colors?.[j] ?? batch.color ?? ink,
+      size: styleNumber(batch.sizes?.[j] ?? batch.size),
+      alpha: styleNumber(batch.alphas?.[j] ?? 1),
     }));
   });
 
@@ -195,8 +239,10 @@
     ];
   }
 
-  function focusOpacity(focused: boolean): number | undefined {
-    return focusMask === null || focused ? undefined : theme.interactionMuted;
+  function itemOpacity(mapped: number, focused: boolean): number | undefined {
+    const opacity =
+      focusMask === null || focused ? mapped : mapped * theme.interactionMuted;
+    return opacity === 1 ? undefined : opacity;
   }
 </script>
 
@@ -214,32 +260,57 @@
               "data-gg-row": p.row,
             }
           : {}}
-      {#if batch.shape === "square"}
+      {#if p.shape === "square"}
         <rect
-          x={p.x - batch.size}
-          y={p.y - batch.size}
-          width={batch.size * 2}
-          height={batch.size * 2}
+          class={`gg-shape-${p.shape}`}
+          x={p.x - p.size}
+          y={p.y - p.size}
+          width={p.size * 2}
+          height={p.size * 2}
           fill={p.fill}
-          opacity={focusOpacity(presented.focused)}
+          opacity={itemOpacity(p.alpha, presented.focused)}
           data-gg-focused={focusMask === null ? undefined : presented.focused}
           {...focusAttrs}
         />
-      {:else if batch.shape === "triangle"}
+      {:else if p.shape === "triangle"}
         <path
-          d={`M${p.x} ${p.y - batch.size * 1.2}L${p.x + batch.size * 1.1} ${p.y + batch.size * 0.9}L${p.x - batch.size * 1.1} ${p.y + batch.size * 0.9}Z`}
+          class={`gg-shape-${p.shape}`}
+          d={`M${p.x} ${p.y - p.size * 1.2}L${p.x + p.size * 1.1} ${p.y + p.size * 0.9}L${p.x - p.size * 1.1} ${p.y + p.size * 0.9}Z`}
           fill={p.fill}
-          opacity={focusOpacity(presented.focused)}
+          opacity={itemOpacity(p.alpha, presented.focused)}
+          data-gg-focused={focusMask === null ? undefined : presented.focused}
+          {...focusAttrs}
+        />
+      {:else if p.shape === "diamond"}
+        <path
+          class={`gg-shape-${p.shape}`}
+          d={`M${p.x} ${p.y - p.size * 1.25}L${p.x + p.size} ${p.y}L${p.x} ${p.y + p.size * 1.25}L${p.x - p.size} ${p.y}Z`}
+          fill={p.fill}
+          opacity={itemOpacity(p.alpha, presented.focused)}
+          data-gg-focused={focusMask === null ? undefined : presented.focused}
+          {...focusAttrs}
+        />
+      {:else if p.shape === "plus" || p.shape === "cross"}
+        <path
+          class={`gg-shape-${p.shape}`}
+          d={p.shape === "plus"
+            ? `M${p.x - p.size} ${p.y}H${p.x + p.size}M${p.x} ${p.y - p.size}V${p.y + p.size}`
+            : `M${p.x - p.size * 0.75} ${p.y - p.size * 0.75}L${p.x + p.size * 0.75} ${p.y + p.size * 0.75}M${p.x + p.size * 0.75} ${p.y - p.size * 0.75}L${p.x - p.size * 0.75} ${p.y + p.size * 0.75}`}
+          fill="none"
+          stroke={p.fill}
+          stroke-width={Math.max(1, p.size / 2)}
+          opacity={itemOpacity(p.alpha, presented.focused)}
           data-gg-focused={focusMask === null ? undefined : presented.focused}
           {...focusAttrs}
         />
       {:else}
         <circle
+          class={`gg-shape-${p.shape}`}
           cx={p.x}
           cy={p.y}
-          r={batch.size}
+          r={p.size}
           fill={p.fill}
-          opacity={focusOpacity(presented.focused)}
+          opacity={itemOpacity(p.alpha, presented.focused)}
           data-gg-focused={focusMask === null ? undefined : presented.focused}
           {...focusAttrs}
         />
@@ -258,10 +329,11 @@
         d={p.d}
         fill={p.fill}
         stroke={p.stroke}
-        stroke-width={p.stroke === "none" ? undefined : batch.linewidth}
+        stroke-width={p.stroke === "none" ? undefined : p.linewidth}
+        stroke-dasharray={p.stroke === "none" ? undefined : p.dasharray}
         stroke-linejoin={p.stroke === "none" ? undefined : "round"}
         stroke-linecap={p.stroke === "none" ? undefined : "round"}
-        opacity={focusOpacity(presented.focused)}
+        opacity={itemOpacity(p.alpha, presented.focused)}
         data-gg-focused={focusMask === null ? undefined : presented.focused}
       />
     {/each}
@@ -279,8 +351,8 @@
         stroke={rectStroke}
         stroke-width={rectStroke === undefined
           ? undefined
-          : (batch.strokeWidth ?? 1)}
-        opacity={focusOpacity(presented.focused)}
+          : (batch.strokeWidths?.[r.index] ?? batch.strokeWidth ?? 1)}
+        opacity={itemOpacity(r.alpha, presented.focused)}
         data-gg-focused={focusMask === null ? undefined : presented.focused}
       />
     {/each}
@@ -294,8 +366,9 @@
           d={s.d}
           fill="none"
           stroke={s.stroke}
-          stroke-width={batch.linewidth}
-          opacity={focusOpacity(presented.focused)}
+          stroke-width={s.linewidth}
+          stroke-dasharray={s.dasharray}
+          opacity={itemOpacity(s.alpha, presented.focused)}
           data-gg-focused={focusMask === null ? undefined : presented.focused}
         />
       {:else}
@@ -305,8 +378,9 @@
           x2={s.x2}
           y2={s.y2}
           stroke={s.stroke}
-          stroke-width={batch.linewidth}
-          opacity={focusOpacity(presented.focused)}
+          stroke-width={s.linewidth}
+          stroke-dasharray={s.dasharray}
+          opacity={itemOpacity(s.alpha, presented.focused)}
           data-gg-focused={focusMask === null ? undefined : presented.focused}
         />
       {/if}
@@ -327,7 +401,8 @@
         y={glyph.y}
         dy="0.32em"
         fill={glyph.fill}
-        opacity={focusOpacity(presented.focused)}
+        font-size={glyph.size}
+        opacity={itemOpacity(glyph.alpha, presented.focused)}
         data-gg-focused={focusMask === null ? undefined : presented.focused}
         >{glyph.text}</text
       >

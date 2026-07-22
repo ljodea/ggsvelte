@@ -7,6 +7,7 @@ import type { GeometryBatch } from "../scene.js";
 
 import type { LayerFrame, PipelineWarning, ResolvedColorScale } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
+import type { ResolvedStyleScales } from "./geometry-style.js";
 import { dispatchGeometryBatch } from "./geometry-dispatch.js";
 
 export type { Frame } from "./geometry-shared.js";
@@ -18,7 +19,8 @@ export function buildBatch(
   fx: Frame,
   color: ResolvedColorScale | null,
   fill: ResolvedColorScale | null,
+  styles: ResolvedStyleScales,
   warnings: PipelineWarning[],
 ): GeometryBatch[] {
-  return dispatchGeometryBatch(frame, fx, color, fill, warnings);
+  return dispatchGeometryBatch(frame, fx, color, fill, styles, warnings);
 }

@@ -12,10 +12,14 @@ import type { RenderModel, ResolvedColorScale } from "./types.js";
 export function buildRenderModelScaleState(
   colorState: ScaleState | null,
   fillState: ScaleState | null,
+  styleStates: Readonly<Record<string, ScaleState | null>> = {},
 ): Record<string, ScaleState> {
   const state: Record<string, ScaleState> = {};
   if (colorState !== null) state["color"] = colorState;
   if (fillState !== null) state["fill"] = fillState;
+  for (const [aesthetic, styleState] of Object.entries(styleStates)) {
+    if (styleState !== null) state[aesthetic] = styleState;
+  }
   return state;
 }
 
@@ -24,17 +28,24 @@ export function buildRenderModelScales(input: {
   yScale: PositionScale;
   color: ResolvedColorScale | null;
   fill: ResolvedColorScale | null;
+  styles: Record<string, import("../scales/style.js").ResolvedStyleScale | null>;
   panelScales: { x: PositionScale; y: PositionScale }[];
   colorState: ScaleState | null;
   fillState: ScaleState | null;
+  styleStates: Record<string, ScaleState | null>;
 }): RenderModel["scales"] {
   return {
     x: input.xScale,
     y: input.yScale,
     color: input.color,
     fill: input.fill,
+    size: input.styles["size"] ?? null,
+    linewidth: input.styles["linewidth"] ?? null,
+    alpha: input.styles["alpha"] ?? null,
+    shape: input.styles["shape"] ?? null,
+    linetype: input.styles["linetype"] ?? null,
     panels: input.panelScales,
-    state: buildRenderModelScaleState(input.colorState, input.fillState),
+    state: buildRenderModelScaleState(input.colorState, input.fillState, input.styleStates),
   };
 }
 

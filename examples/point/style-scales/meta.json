@@ -1,0 +1,6 @@
+{
+  "title": "Complete style scales",
+  "description": "Map size, alpha, linewidth, shape, and linetype with stable legends across SVG and Canvas.",
+  "tags": ["point", "line", "size", "alpha", "linewidth", "shape", "linetype", "scales"],
+  "docsSection": "Scales & guides"
+}

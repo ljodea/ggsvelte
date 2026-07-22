@@ -38,6 +38,39 @@ function overlaps(left: DOMRect, right: DOMRect): boolean {
   );
 }
 
+describe("style legend focus", () => {
+  it("focuses finite shape entries by semantic source value", async () => {
+    const events: LegendFocusEvent[] = [];
+    const { container } = render(GGPlot, {
+      data: [
+        { id: "north", x: 1, y: 2, group: "North" },
+        { id: "south", x: 2, y: 3, group: "South" },
+      ],
+      aes: { x: "x", y: "y", shape: "group" },
+      layers: [{ geom: "point" }],
+      scales: { shape: { type: "ordinal", range: ["circle", "triangle"] } },
+      key: "id",
+      legendFocus: true,
+      width: 640,
+      height: 400,
+      onlegendfocus: (event: LegendFocusEvent) => events.push(event),
+    });
+    await until(() => container.querySelectorAll(".gg-legend-target").length === 2);
+    container.querySelector<HTMLButtonElement>(".gg-legend-target")!.click();
+    await until(() => events.length === 1);
+
+    expect(events[0]).toMatchObject({
+      type: "legend-focus",
+      phase: "change",
+      state: "committed",
+      scale: "shape",
+      value: "North",
+      keys: ["north"],
+    });
+    expect(container.querySelectorAll("[data-gg-focused='true']")).toHaveLength(1);
+  });
+});
+
 describe("linked legend focus", () => {
   it("maps encoded legend values to stable row keys with one transition and no rerun", async () => {
     const { container } = render(LinkedLegendFocusPlot);

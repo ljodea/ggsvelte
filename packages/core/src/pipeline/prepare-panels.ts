@@ -4,6 +4,7 @@
 import type { PortableSpec } from "@ggsvelte/spec";
 
 import { bindData, bindLayer } from "./bind.js";
+import { configureStyleBindings } from "./bind-layer-style-config.js";
 import type { FacetLayout } from "./facets.js";
 import { resolveFacet, SINGLE_PANEL } from "./facets.js";
 import { warnEmptyData } from "./prepare-panels-empty.js";
@@ -88,6 +89,7 @@ export function preparePanels(
       binding.fill.forcedDiscrete = ["ordinal", "manual"].includes(
         normalized.scales?.fill?.type ?? "",
       );
+      configureStyleBindings(binding, normalized.scales);
       bindings.push(binding);
     }
     // Parsing is a source contract, not a rendered-row optimization. Validate

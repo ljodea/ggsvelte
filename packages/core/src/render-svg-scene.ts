@@ -2,14 +2,17 @@
  * Scene-level SVG assembly: panel chrome + sceneLabel + sceneToSVGString.
  * Chrome helpers stay file-private (only used by sceneToSVGString).
  */
+import { LINETYPE_NAMES } from "@ggsvelte/spec";
+
 import { groupBatchesByPanel } from "./group-batches-by-panel.js";
-import type { Scene, SceneLegend, ScenePanel } from "./scene.js";
+import { LINETYPE_DASHES } from "./scales/style.js";
+import type { Scene, SceneLegend, SceneLegendEntry, ScenePanel } from "./scene.js";
 import { STRIP_BAND } from "./scene.js";
 import { LEGEND_ROW_HEIGHT } from "./legend.js";
 import type { ThemeTokens } from "./theme.js";
 import { themeVar } from "./theme.js";
 import { escapeXML, px } from "./render-svg-format.js";
-import { renderBatch } from "./render-svg-marks.js";
+import { pointShape, renderBatch } from "./render-svg-marks.js";
 
 function renderPanelAxes(panel: ScenePanel, theme: ThemeTokens): string {
   const parts: string[] = [];
@@ -167,6 +170,36 @@ function renderGrid(panel: ScenePanel, theme: ThemeTokens): string {
   return parts.join("");
 }
 
+function renderDiscreteLegendKey(
+  entry: SceneLegendEntry,
+  y: number,
+  size: number,
+  ink: string,
+): string {
+  const centerX = 4 + size / 2;
+  const centerY = y + size / 2;
+  const opacity =
+    entry.alpha === undefined || entry.alpha === 1 ? "" : ` opacity="${px(entry.alpha)}"`;
+  const styleKey =
+    entry.shape !== undefined ||
+    entry.size !== undefined ||
+    entry.linetype !== undefined ||
+    entry.linewidth !== undefined;
+  const keyColor = styleKey && entry.color === "#999999" ? ink : entry.color;
+  if (entry.shape !== undefined || entry.size !== undefined) {
+    const shape = entry.shape ?? "circle";
+    const radius = Math.min(size / 2, entry.size ?? size / 2);
+    return `<g class="gg-legend-key"${opacity}>${pointShape(shape, centerX, centerY, radius, keyColor)}</g>`;
+  }
+  if (entry.linetype !== undefined || entry.linewidth !== undefined) {
+    const linetype = entry.linetype ?? "solid";
+    const dash = LINETYPE_DASHES[LINETYPE_NAMES.indexOf(linetype)] ?? [];
+    const dashAttr = dash.length === 0 ? "" : ` stroke-dasharray="${dash.join(" ")}"`;
+    return `<line class="gg-legend-key" x1="4" y1="${px(centerY)}" x2="${px(4 + size)}" y2="${px(centerY)}" stroke="${keyColor}" stroke-width="${px(entry.linewidth ?? 1.5)}"${dashAttr}${opacity}/>`;
+  }
+  return `<rect class="gg-legend-swatch" x="4" y="${px(y)}" width="${px(size)}" height="${px(size)}" fill="${entry.color}"${opacity}/>`;
+}
+
 function renderLegend(legend: SceneLegend, theme: ThemeTokens, gradientId: string): string {
   const ink = themeVar("ink", theme);
   const parts: string[] = [
@@ -183,7 +216,7 @@ function renderLegend(legend: SceneLegend, theme: ThemeTokens, gradientId: strin
     for (const entry of legend.entries) {
       const swatchY = entry.y + contentY + (LEGEND_ROW_HEIGHT - legend.swatchSize) / 2;
       parts.push(
-        `<rect class="gg-legend-swatch" x="4" y="${px(swatchY)}" width="${px(legend.swatchSize)}" height="${px(legend.swatchSize)}" fill="${entry.color}"/>`,
+        renderDiscreteLegendKey(entry, swatchY, legend.swatchSize, ink),
         `<text class="gg-legend-label" x="${px(4 + legend.swatchSize + 6)}" y="${px(entry.y + contentY + LEGEND_ROW_HEIGHT / 2)}" dy="0.32em" fill="${ink}">${escapeXML(entry.label)}</text>`,
       );
     }

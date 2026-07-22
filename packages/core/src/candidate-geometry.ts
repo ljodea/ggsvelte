@@ -1,5 +1,7 @@
 import type { ResolvedCandidateInspectMode } from "./candidate-store-types.js";
-import type { GeometryBatch } from "./scene.js";
+import { POINT_SHAPE_NAMES } from "@ggsvelte/spec";
+
+import type { GeometryBatch, PointsBatch } from "./scene.js";
 
 export function primitiveCount(batch: GeometryBatch): number {
   if (batch.kind === "rects") return batch.rects.length / 4;
@@ -88,6 +90,36 @@ export function segmentIntersectsRect(
     if (enter > exit) return false;
   }
   return true;
+}
+
+/** Conservative shape-aware point hit distance, or null outside the symbol bounds. */
+export function pointHitDistance(
+  batch: PointsBatch,
+  primitive: number,
+  dx: number,
+  dy: number,
+  hitTolerance: number,
+): number | null {
+  const size = batch.sizes?.[primitive] ?? batch.size;
+  const shape =
+    batch.shapeIndexes === undefined
+      ? batch.shape
+      : POINT_SHAPE_NAMES[batch.shapeIndexes[primitive]!]!;
+  if (shape === "circle") {
+    const distance = Math.hypot(dx, dy);
+    return distance <= size + hitTolerance ? distance : null;
+  }
+  const ax = Math.abs(dx);
+  const ay = Math.abs(dy);
+  const inside =
+    shape === "triangle"
+      ? ax <= size * 1.1 + hitTolerance && ay <= size * 1.2 + hitTolerance
+      : shape === "diamond"
+        ? ax + ay * 0.8 <= size + hitTolerance
+        : shape === "plus"
+          ? ax <= size * 1.25 + hitTolerance && ay <= size * 1.25 + hitTolerance
+          : ax <= size + hitTolerance && ay <= size + hitTolerance;
+  return inside ? Math.hypot(dx, dy) : null;
 }
 
 /**
