@@ -3,6 +3,7 @@
  */
 import { describe, expect, it } from "vitest";
 
+import type { InteractionTool } from "../../src/lib/interaction/interaction.js";
 import {
   resolveLostPointerCaptureAction,
   resolvePointerDownAction,

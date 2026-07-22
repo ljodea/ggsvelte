@@ -8,9 +8,9 @@ import type {
   SurfacePointerUpInput,
 } from "../../src/lib/surface/pointer.js";
 
-export const downPoint = { x: 9, y: 8 } as const;
+const downPoint = { x: 9, y: 8 } as const;
 export const draftCorners = { x0: 10, y0: 20, x1: 10, y1: 20 } as const;
-export const endAt = { x: 40, y: 50 } as const;
+const endAt = { x: 40, y: 50 } as const;
 
 export const down = (
   overrides: Partial<SurfacePointerDownInput> & Pick<SurfacePointerDownInput, "activeTool">,
