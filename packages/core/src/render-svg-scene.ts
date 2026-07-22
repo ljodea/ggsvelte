@@ -187,7 +187,8 @@ function renderDiscreteLegendKey(
     entry.size !== undefined ||
     entry.linetype !== undefined ||
     entry.linewidth !== undefined;
-  const keyColor = styleKey && entry.color === "#999999" ? ink : entry.color;
+  const keyColor =
+    styleKey && entry.color === "#999999" && entry.hasPaint !== true ? ink : entry.color;
   if (entry.shape !== undefined || entry.size !== undefined) {
     const shape = entry.shape ?? "circle";
     const radius = Math.min(size / 2, entry.size ?? size / 2);

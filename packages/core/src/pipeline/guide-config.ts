@@ -86,16 +86,20 @@ function sourceIdentity(
   aesthetic: NonPositionAesthetic,
   bindings: readonly LayerBinding[],
 ): string {
-  const fields = new Set<string>();
-  for (const binding of bindings) {
-    const style = binding[aesthetic];
-    if (style.field !== null) fields.add(`field:${style.field}`);
-    else if ("statColumn" in style && style.statColumn !== null)
-      fields.add(`stat:${style.statColumn}`);
-    else if (style.scaledConstant !== null)
-      fields.add(`constant:${encodeKey(style.scaledConstant)}`);
-  }
-  return [...fields].toSorted().join("|");
+  return JSON.stringify(
+    bindings.map((binding) => {
+      const style = binding[aesthetic];
+      let source: string;
+      if (style.field === null) {
+        source =
+          style.scaledConstant === null ? "none" : `constant:${encodeKey(style.scaledConstant)}`;
+        if ("statColumn" in style && style.statColumn !== null) source = `stat:${style.statColumn}`;
+      } else {
+        source = `field:${style.field}`;
+      }
+      return `${String(binding.index)}:${source}`;
+    }),
+  );
 }
 
 function appearanceOf(guide: NonPositionGuide, title: string): ResolvedLegendAppearance {

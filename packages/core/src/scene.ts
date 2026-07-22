@@ -246,6 +246,8 @@ export interface SceneLegendEntry {
   /** Measured line box used to position wrapped labels. */
   lineHeight?: number;
   color: string;
+  /** True when a paint aesthetic supplied `color`, including literal sentinel-gray values. */
+  hasPaint?: boolean;
   size?: number;
   linewidth?: number;
   alpha?: number;

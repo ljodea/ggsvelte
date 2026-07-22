@@ -40,6 +40,32 @@ describe("Legend scene rendering", () => {
     expect(tspans.item(1)?.getAttribute("dy")).toBe("13");
   });
 
+  it("preserves sentinel-gray paint on merged style keys", () => {
+    const legend: SceneDiscreteLegend = {
+      type: "discrete",
+      scale: "color",
+      aesthetics: ["color", "shape"],
+      title: "Group",
+      x: 0,
+      y: 0,
+      width: 120,
+      height: 48,
+      swatchSize: 10,
+      entries: [
+        {
+          value: "gray",
+          label: "Gray",
+          color: "#999999",
+          hasPaint: true,
+          shape: "circle",
+          y: 18,
+        },
+      ],
+    };
+    const { container } = render(Legend, { legend, theme });
+    expect(container.querySelector(".gg-legend-key")?.getAttribute("fill")).toBe("#999999");
+  });
+
   it("uses the measured title band for large guide titles", () => {
     const legend: SceneDiscreteLegend = {
       type: "discrete",

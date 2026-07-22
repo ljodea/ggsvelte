@@ -45,6 +45,45 @@ describe("responsive guide planning", () => {
     expect(legends[0]?.entries.every((entry) => entry.shape !== undefined)).toBe(true);
   });
 
+  it("keeps swapped per-layer aesthetic sources in separate guides", () => {
+    const swappedRows = [
+      { x: 1, y: 1, a: "North", b: "North" },
+      { x: 2, y: 2, a: "South", b: "South" },
+      { x: 3, y: 3, a: "North", b: "South" },
+      { x: 4, y: 4, a: "South", b: "North" },
+    ];
+    const legends = discrete(
+      720,
+      gg(swappedRows, aes({ x: "x", y: "y" }))
+        .geomPoint({ aes: aes({ color: "a", shape: "b" }) })
+        .geomPoint({ aes: aes({ color: "b", shape: "a" }) })
+        .scales({ ...scaleColorDiscrete(), ...scaleShapeDiscrete() })
+        .labs({ color: "Group", shape: "Group" }),
+    );
+    expect(legends).toHaveLength(2);
+    expect(legends.map((legend) => legend.aesthetics)).toEqual([["color"], ["shape"]]);
+  });
+
+  it("preserves an authored gray paint in a merged style key", () => {
+    const spec = gg(rows, aes({ x: "x", y: "y", color: "region", shape: "region" }))
+      .geomPoint()
+      .scales({
+        ...scaleColorDiscrete({ range: ["#999999", "#ff0000"] }),
+        ...scaleShapeDiscrete(),
+      })
+      .labs({ color: "Region", shape: "Region" })
+      .spec();
+    const result = runPipeline(spec, { width: 720, height: 360 });
+    const legend = result.scene.legends[0];
+    expect(legend?.type).toBe("discrete");
+    if (legend?.type !== "discrete") return;
+    expect(legend.entries[0]?.color).toBe("#999999");
+    expect(legend.entries[0]?.hasPaint).toBe(true);
+    const svg = renderToSVGString(spec, { width: 720, height: 360 });
+    const legendSvg = svg.slice(svg.indexOf('<g class="gg-legend '));
+    expect(legendSvg).toContain('fill="#999999"');
+  });
+
   it("keeps guides separate when strict title identity differs", () => {
     const legends = discrete(
       720,
@@ -156,6 +195,57 @@ describe("responsive guide planning", () => {
     const svg = renderToSVGString(spec, { width: 640, height: 360 });
     expect(svg).toMatch(/gg-axis-x[\s\S]*?<text y="3"/);
     expect(svg).toMatch(/gg-axis-y[\s\S]*?<text x="-3"/);
+  });
+
+  it("suppresses band-label diagnostics and presentation plans when labels are hidden", () => {
+    const categories = [
+      { category: "A deliberately long northern category", y: 1 },
+      { category: "A deliberately long southern category", y: 2 },
+    ];
+    const result = runPipeline(
+      gg(categories, aes({ x: "category", y: "y" }))
+        .geomPoint()
+        .scales({ x: { type: "band" } })
+        .guides({ x: guideAxis({ showLabels: false }) })
+        .spec(),
+      { width: 280, height: 300 },
+    );
+    const plan = result.guidePlans.find(
+      (candidate) => candidate.type === "axis" && candidate.aesthetic === "x",
+    );
+    expect(plan?.type).toBe("axis");
+    if (plan?.type !== "axis") return;
+    expect(plan.degraded).toEqual([]);
+    expect(plan.bandLabelMode).toBeUndefined();
+    expect(result.advisories.filter(({ code }) => code.startsWith("band-label"))).toEqual([]);
+    expect(result.scaleDiagnostics.filter(({ code }) => code.startsWith("band-label"))).toEqual([]);
+  });
+
+  it("renders explicit band-axis ellipsis without wrapping or rotation", () => {
+    const categories = [
+      { category: "A deliberately long northern category", y: 1 },
+      { category: "A deliberately long southern category", y: 2 },
+    ];
+    const result = runPipeline(
+      gg(categories, aes({ x: "category", y: "y" }))
+        .geomPoint()
+        .scales({ x: { type: "band" } })
+        .guides({ x: guideAxis({ collision: "ellipsis" }) })
+        .spec(),
+      { width: 220, height: 300 },
+    );
+    const plan = result.guidePlans.find(
+      (candidate) => candidate.type === "axis" && candidate.aesthetic === "x",
+    );
+    expect(plan?.type).toBe("axis");
+    if (plan?.type !== "axis") return;
+    expect(plan.bandLabelMode).toBe("single-line");
+    expect(result.scene.axes.x.ticks.some((tick) => tick.label.endsWith("…"))).toBe(true);
+    expect(
+      result.scene.axes.x.ticks.every(
+        (tick) => tick.lines === undefined && tick.angle === undefined && tick.fullLabel.length > 0,
+      ),
+    ).toBe(true);
   });
 
   it("restores complete unwrapped axis labels when collision:preserve is explicit", () => {

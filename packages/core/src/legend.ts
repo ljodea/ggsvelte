@@ -59,6 +59,8 @@ export interface RampLegendInput {
   domain: [number, number];
   at(t: number): string;
   format(value: number): string;
+  /** Complete semantic label used for accessibility/details when display text is abbreviated. */
+  formatFull?(value: number): string;
   ticks?: readonly number[];
   position?: (value: number) => number;
 }
@@ -298,8 +300,8 @@ function buildDiscrete(
       : values.map((value) => input.labelOf?.(value) ?? "");
   const titleHeight = legendTitleHeight(style.title, style.titleSize);
   const keys = values.map((value) => input.keyOf?.(value) ?? {});
-  // Grow the swatch so mapped size keys render at their authored radii instead
-  // of collapsing at the renderer's swatchSize / 2 cap.
+  // Renderers cap point radii at half the swatch edge. Grow the key box so
+  // mapped size keys remain visually distinct instead of collapsing at that cap.
   const maxKeyRadius = keys.reduce((max, key) => Math.max(max, key.size ?? 0), 0);
   const keySize = Math.max(style.keySize, Math.ceil(maxKeyRadius * 2));
   const entries: SceneLegendEntry[] = [];
@@ -321,6 +323,8 @@ function buildDiscrete(
       );
       const rowHeight = Math.max(LEGEND_ROW_HEIGHT, keySize, presented.height);
       labelWidth = Math.max(labelWidth, presented.width);
+      const key = keys[index]!;
+      const paint = input.colorOf?.(values[index]);
       entries.push({
         value: values[index],
         label: presented.label,
@@ -329,11 +333,9 @@ function buildDiscrete(
           lines: presented.lines,
           lineHeight: presented.lineHeight,
         }),
-        color: UNKNOWN_COLOR,
-        ...keys[index],
-        ...(input.colorOf?.(values[index]) !== undefined && {
-          color: input.colorOf?.(values[index]) ?? UNKNOWN_COLOR,
-        }),
+        ...key,
+        color: paint ?? key.color ?? UNKNOWN_COLOR,
+        ...((paint !== undefined || key.color !== undefined) && { hasPaint: true }),
         x: 0,
         y: cursorY,
         ...(rowHeight !== LEGEND_ROW_HEIGHT && { height: rowHeight }),
@@ -364,6 +366,8 @@ function buildDiscrete(
       );
       const entryHeight = Math.max(LEGEND_ROW_HEIGHT, keySize, presented.height);
       const itemWidth = keySize + style.keyGap + presented.width + PADDING * 2;
+      const key = keys[index]!;
+      const paint = input.colorOf?.(values[index]);
       if (cursorX > PADDING && cursorX + itemWidth > maxWidth) {
         cursorX = PADDING;
         cursorY += rowHeight + style.rowGap;
@@ -377,11 +381,9 @@ function buildDiscrete(
           lines: presented.lines,
           lineHeight: presented.lineHeight,
         }),
-        color: UNKNOWN_COLOR,
-        ...keys[index],
-        ...(input.colorOf?.(values[index]) !== undefined && {
-          color: input.colorOf?.(values[index]) ?? UNKNOWN_COLOR,
-        }),
+        ...key,
+        color: paint ?? key.color ?? UNKNOWN_COLOR,
+        ...((paint !== undefined || key.color !== undefined) && { hasPaint: true }),
         x: cursorX - PADDING,
         y: cursorY,
         ...(entryHeight !== LEGEND_ROW_HEIGHT && { height: entryHeight }),
@@ -446,11 +448,12 @@ function buildRamp(
     const buildTicks = (rampWidth: number) => {
       const tickLabelWidth = Math.max(1, rampWidth / Math.max(1, tickValues.length) - PADDING);
       return tickValues.map((value) => {
-        const fullLabel = input.format(value);
+        const displayLabel = input.format(value);
+        const fullLabel = input.formatFull?.(value) ?? displayLabel;
         return {
           pos: normalized(value) * rampWidth,
           label: presentedContinuousLabel({
-            fullLabel,
+            fullLabel: displayLabel,
             availableWidth: tickLabelWidth,
             measurer,
             fontSize: style.labelSize,
@@ -516,11 +519,12 @@ function buildRamp(
   }
   const maxLabelWidth = Math.max(1, maxWidth - PADDING * 2 - style.rampThickness - style.keyGap);
   const ticks = tickValues.map((value) => {
-    const fullLabel = input.format(value);
+    const displayLabel = input.format(value);
+    const fullLabel = input.formatFull?.(value) ?? displayLabel;
     return {
       y: (1 - normalized(value)) * style.rampLength,
       label: presentedContinuousLabel({
-        fullLabel,
+        fullLabel: displayLabel,
         availableWidth: maxLabelWidth,
         measurer,
         fontSize: style.labelSize,

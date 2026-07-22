@@ -139,6 +139,15 @@ describe("sequential color scales", () => {
       "2023-01-01",
       "2024-01-01",
     ]);
+    const legend = temporal.scene.legends.find((candidate) => candidate.type === "ramp");
+    expect(legend?.type).toBe("ramp");
+    if (legend?.type !== "ramp") return;
+    expect(legend.ticks.map((tick) => tick.label)).toEqual(["22", "23", "24"]);
+    expect(legend.ticks.map((tick) => tick.fullLabel)).toEqual([
+      "2022-01-01",
+      "2023-01-01",
+      "2024-01-01",
+    ]);
   });
 
   it("rejects transformed colorbar breaks that cannot be projected", () => {

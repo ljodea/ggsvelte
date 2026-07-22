@@ -29,6 +29,7 @@
  * This module owns measurement / margin assembly and re-exports the public surface.
  */
 
+import type { AxisGuidePlan } from "./guide-plan-types.js";
 import type { TextMeasurer } from "./measure.js";
 import { deriveTicks, type AxisTicks, type DeriveTicksContext } from "./layout-derive-ticks.js";
 import { truncateToFit } from "./truncate.js";
@@ -84,6 +85,22 @@ function presentForLayout(axis: AxisTicks, preserve: boolean): AxisTicks {
       return { ...rest, label: tick.fullLabel ?? tick.label, labeled: true };
     }),
   };
+}
+
+function hideLabelPresentation(plan: AxisGuidePlan): AxisGuidePlan {
+  const {
+    bandLabelMode: _mode,
+    bandLabelAngle: _angle,
+    bandLabelBandHeight: _height,
+    bandLabelAuthorPinned: _pinned,
+    ...semantic
+  } = plan;
+  return Object.freeze({
+    ...semantic,
+    overlap: false,
+    marginOverflow: false,
+    degraded: Object.freeze([]),
+  });
 }
 
 /**
@@ -144,6 +161,8 @@ export function layoutPass(margins: Margins, input: LayoutInput, theme: LayoutTh
     orthogonalMarginCapPx: capBottom,
     orthogonalChromePx: tickLength + tickLabelGap,
     quantum,
+    ellipsis,
+    ...(xPresentation?.collision === "ellipsis" && { bandCollision: "ellipsis" as const }),
     ...(input.previousGuidePlans?.x !== undefined && {
       previousGuidePlan: input.previousGuidePlans.x,
     }),
@@ -320,19 +339,31 @@ export function layoutPass(margins: Margins, input: LayoutInput, theme: LayoutTh
     top: quantizeUp(Math.min(rawTop, capTop) + reserve.top, quantum),
   };
 
+  const xGuidePlan =
+    x.guidePlan === undefined
+      ? undefined
+      : xLabelsVisible
+        ? x.guidePlan
+        : hideLabelPresentation(x.guidePlan);
+  const yGuidePlan =
+    y.guidePlan === undefined
+      ? undefined
+      : yLabelsVisible
+        ? y.guidePlan
+        : hideLabelPresentation(y.guidePlan);
   return {
     margins: out,
     x: {
       ticks: x.ticks,
       labelEvery: xEvery,
       truncated: xTruncated,
-      ...(x.guidePlan !== undefined && { guidePlan: x.guidePlan }),
+      ...(xGuidePlan !== undefined && { guidePlan: xGuidePlan }),
     },
     y: {
       ticks: y.ticks,
       labelEvery: yEvery,
       truncated: yTruncated,
-      ...(y.guidePlan !== undefined && { guidePlan: y.guidePlan }),
+      ...(yGuidePlan !== undefined && { guidePlan: yGuidePlan }),
     },
     degradations: [...new Set(degradations)],
   };

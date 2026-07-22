@@ -49,7 +49,8 @@
           entry.size !== undefined ||
           entry.linetype !== undefined ||
           entry.linewidth !== undefined) &&
-        entry.color === "#999999"
+        entry.color === "#999999" &&
+        entry.hasPaint !== true
           ? ink
           : entry.color}
       <!-- Shape key geometry must match core's pointShape() so SSR/pure-SVG
