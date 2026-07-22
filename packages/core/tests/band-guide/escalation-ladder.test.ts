@@ -63,6 +63,27 @@ describe("planBandAxis: escalation ladder", () => {
     expect(p.ticks.every((t) => t.angle === p.angle)).toBe(true);
   });
 
+  it("measures each rotated labeled tick once for height and overhang", () => {
+    // Pre-fix: shownMaxWidth pass + overhang pass each called measureWidth
+    // per labeled tick (~30 total on this fixture). Single-pass is ~25.
+    let measureWidthCalls = 0;
+    const counting = {
+      measureWidth: (text: string, fontSizePx: number) => {
+        measureWidthCalls++;
+        return measurer.measureWidth(text, fontSizePx);
+      },
+      measureHeight: (fontSizePx: number) => measurer.measureHeight(fontSizePx),
+    };
+    const p = plan(
+      ["Resolución", "Corrección (errores o erratas)", "Sentencia", "Orden", "Otro"],
+      240,
+      { measurer: counting },
+    );
+    expect(p.mode).toBe("rotated");
+    expect(measureWidthCalls).toBeLessThanOrEqual(27);
+    expect(measureWidthCalls).toBeGreaterThan(0);
+  });
+
   it("uses a uniform mode across the whole axis (no ragged mix)", () => {
     const p = plan(["A", "Corrección (errores o erratas)", "B", "C"], 480);
     const angles = new Set(p.ticks.map((t) => t.angle ?? 0));
