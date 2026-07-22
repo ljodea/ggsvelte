@@ -9,13 +9,21 @@ export function collectBinnedXEvidence(frame: LayerFrame, acc: AxisCollectAcc): 
   if (frame.xmin === null || frame.xmax === null) return;
   acc.numeric.push(frame.xmin, frame.xmax);
   const xConversion = xConversionOf(frame.binding);
-  const evidenceFields = [
-    ...new Set(
-      [frame.binding.xminField, frame.binding.xmaxField, frame.binding.xField].filter(
-        (field): field is string => field !== null,
-      ),
-    ),
-  ];
+  const geom = frame.binding.layer.geom;
+  // Rect/tile/raster: only endpoint fields (never inherited plot-level x).
+  // Stat-bin bars keep xField for the historical "binned …" type label.
+  const evidenceFields =
+    geom === "rect" || geom === "tile" || geom === "raster"
+      ? [
+          ...new Set(
+            [frame.binding.xminField, frame.binding.xmaxField].filter(
+              (field): field is string => field !== null,
+            ),
+          ),
+        ]
+      : frame.binding.xField === null
+        ? []
+        : [frame.binding.xField];
   if (evidenceFields.length === 0) {
     acc.typeParts.add("quantitative");
     acc.allTemporal = false;
@@ -24,8 +32,6 @@ export function collectBinnedXEvidence(frame: LayerFrame, acc: AxisCollectAcc): 
       const fieldType = frame.table.has(field)
         ? positionFieldType(frame.table, field, xConversion)
         : "quantitative";
-      // Stat-bin paths keep the historical "binned …" type label; edge geoms use the raw type.
-      const geom = frame.binding.layer.geom;
       const label =
         geom === "rect" || geom === "tile" || geom === "raster" ? fieldType : `binned ${fieldType}`;
       acc.typeParts.add(label);

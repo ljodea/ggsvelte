@@ -14,7 +14,8 @@ export function applyColorOnFillGeomWarning(
       geom === "col" ||
       geom === "area" ||
       geom === "boxplot" ||
-      geom === "density") &&
+      geom === "density" ||
+      geom === "raster") &&
     (color.field !== null || color.constant !== null || color.scaledConstant !== null)
   ) {
     warnings.push({

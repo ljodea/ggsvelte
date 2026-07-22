@@ -2,8 +2,6 @@
  * Pre-geometry edge expansion for continuous tile/raster so scale training
  * sees xmin/xmax/ymin/ymax. Band tile leaves edges null (centers train).
  */
-import type { RasterParams, TileParams } from "@ggsvelte/spec";
-
 import { resolution as resolutionOf } from "../stats/numeric.js";
 
 import { positionFieldType } from "./temporal-position.js";
@@ -67,50 +65,52 @@ export function expandEdgeFrame(frame: LayerFrame, warnings: PipelineWarning[]):
       ? "quantitative"
       : positionFieldType(frame.table, frame.binding.yField, frame.binding.yConversion);
 
-  // Band axes train from centers only — do not write continuous edge arrays.
-  if (xType === "nominal" || yType === "nominal") return;
-
+  // Band axes train from centers only. Expand edges only on continuous axes
+  // (mixed band+continuous tiles keep continuous-axis domain expansion).
   if (geom === "tile") {
-    const params = (frame.binding.layer.params ?? {}) as TileParams;
+    if (xType === "nominal" && yType === "nominal") return;
+    const params = frame.binding.layer.params ?? {};
     const defW = defaultResolution(frame.xNumeric);
     const defH = defaultResolution(frame.yNumeric);
-    const left = new Float64Array(frame.n);
-    const right = new Float64Array(frame.n);
-    const bottom = new Float64Array(frame.n);
-    const top = new Float64Array(frame.n);
-    for (let row = 0; row < frame.n; row++) {
-      const cx = frame.xNumeric[row]!;
-      const cy = frame.yNumeric[row]!;
-      const w = sizeAt(frame, frame.binding.widthField, params.width, defW, row);
-      const h = sizeAt(frame, frame.binding.heightField, params.height, defH, row);
-      if (
-        !Number.isFinite(cx) ||
-        !Number.isFinite(cy) ||
-        !(w > 0) ||
-        !(h > 0) ||
-        !Number.isFinite(w) ||
-        !Number.isFinite(h)
-      ) {
-        left[row] = NaN;
-        right[row] = NaN;
-        bottom[row] = NaN;
-        top[row] = NaN;
-        continue;
+    if (xType !== "nominal") {
+      const left = new Float64Array(frame.n);
+      const right = new Float64Array(frame.n);
+      for (let row = 0; row < frame.n; row++) {
+        const cx = frame.xNumeric[row]!;
+        const w = sizeAt(frame, frame.binding.widthField, params.width, defW, row);
+        if (!Number.isFinite(cx) || !(w > 0) || !Number.isFinite(w)) {
+          left[row] = NaN;
+          right[row] = NaN;
+          continue;
+        }
+        left[row] = cx - w / 2;
+        right[row] = cx + w / 2;
       }
-      left[row] = cx - w / 2;
-      right[row] = cx + w / 2;
-      bottom[row] = cy - h / 2;
-      top[row] = cy + h / 2;
+      frame.xmin = left;
+      frame.xmax = right;
     }
-    frame.xmin = left;
-    frame.xmax = right;
-    frame.ymin = bottom;
-    frame.ymax = top;
+    if (yType !== "nominal") {
+      const bottom = new Float64Array(frame.n);
+      const top = new Float64Array(frame.n);
+      for (let row = 0; row < frame.n; row++) {
+        const cy = frame.yNumeric[row]!;
+        const h = sizeAt(frame, frame.binding.heightField, params.height, defH, row);
+        if (!Number.isFinite(cy) || !(h > 0) || !Number.isFinite(h)) {
+          bottom[row] = NaN;
+          top[row] = NaN;
+          continue;
+        }
+        bottom[row] = cy - h / 2;
+        top[row] = cy + h / 2;
+      }
+      frame.ymin = bottom;
+      frame.ymax = top;
+    }
     return;
   }
 
   // raster
-  const params = (frame.binding.layer.params ?? {}) as RasterParams;
+  const params = frame.binding.layer.params ?? {};
   // Schema only admits false; reject any non-false truthy at runtime too.
   if ((params as { interpolate?: unknown }).interpolate === true) {
     throw new PipelineError(

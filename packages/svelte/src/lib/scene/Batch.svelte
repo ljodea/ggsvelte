@@ -125,6 +125,8 @@
     width: number;
     height: number;
     fill: string;
+    /** Outline color when stroke is set; undefined = no outline. */
+    stroke: string | undefined;
     alpha: number;
     dasharray: string | undefined;
   }

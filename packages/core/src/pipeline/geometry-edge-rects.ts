@@ -299,7 +299,7 @@ function styleEdgeBatch(
     if (wantsStroke) {
       batch.strokes = Array.from({ length: emitted.kept }, (_, j) =>
         colorOf(
-          color!,
+          color,
           frame.colorValues === null
             ? binding.color.scaledConstant!
             : frame.colorValues[emitted.keptRows[j]!]!,
@@ -404,15 +404,15 @@ export function rasterRectsBatch(
   styles: ResolvedStyleScales,
   warnings: PipelineWarning[],
 ): RectsBatch | null {
-  if (frame.xmin === null || frame.xmax === null || frame.ymin === null || frame.ymax === null) {
-    return null;
-  }
   if (fx.xScale.type === "band" || fx.yScale.type === "band") {
     throw new PipelineError(
       "channel-type-mismatch",
       `/layers/${frame.binding.index}`,
       'The raster geom needs continuous x and y. Use geom "tile" for discrete axes.',
     );
+  }
+  if (frame.xmin === null || frame.xmax === null || frame.ymin === null || frame.ymax === null) {
+    return null;
   }
   const params = (frame.binding.layer.params ?? {}) as RasterParams;
   const emitted = emitEdges({

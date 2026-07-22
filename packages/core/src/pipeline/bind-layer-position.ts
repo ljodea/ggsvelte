@@ -12,8 +12,9 @@ import {
   validateGeomStatContracts,
 } from "./bind-layer-validate.js";
 import { resolveYChannel } from "./bind-layer-y.js";
-import type { PositionConversionContext } from "./temporal-position.js";
+import { positionFieldType, type PositionConversionContext } from "./temporal-position.js";
 import type { LayerBinding, PipelineWarning } from "./types.js";
+import { PipelineError } from "./types.js";
 
 export function resolveLayerPositionChannels(input: {
   layer: LayerSpec;
@@ -72,6 +73,26 @@ export function resolveLayerPositionChannels(input: {
     xminField,
     xmaxField,
   });
+
+  // Rect edges must be continuous (band endpoints silently drop every row).
+  if (geom === "rect") {
+    for (const [channel, field, conversion] of [
+      ["xmin", xminField, xConversion],
+      ["xmax", xmaxField, xConversion],
+      ["ymin", yminField, yConversion],
+      ["ymax", ymaxField, yConversion],
+    ] as const) {
+      if (field === null) continue;
+      const fieldType = positionFieldType(table, field, conversion);
+      if (fieldType === "nominal") {
+        throw new PipelineError(
+          "channel-type-mismatch",
+          `/layers/${index}/aes/${channel}`,
+          `The rect geom needs quantitative edges, but field "${field}" (${channel}) is nominal.`,
+        );
+      }
+    }
+  }
 
   return {
     ruleForm,
