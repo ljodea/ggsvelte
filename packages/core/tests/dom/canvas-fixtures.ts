@@ -53,7 +53,7 @@ export function recordingContext(): { ctx: CanvasRenderingContext2D; calls: Reco
             name: property,
             args,
             alpha: object.globalAlpha,
-            fillStyle: String(object.fillStyle),
+            fillStyle: object.fillStyle,
             strokeStyle: object.strokeStyle,
             lineWidth: object.lineWidth,
           });
