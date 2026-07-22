@@ -4,6 +4,7 @@
   import { DOCS_TASKS } from "$lib/catalog/docs-tasks";
   import { DOCS_SEARCH_INDEX } from "$lib/generated/search-index";
   import { searchDocs } from "$lib/search";
+  import { siteSearchKeyAction } from "$lib/site-search-keyboard";
 
   let dialog = $state<HTMLDialogElement>();
   let input = $state<HTMLInputElement>();
@@ -43,11 +44,6 @@
     activeIndex = searchDocs(query, DOCS_SEARCH_INDEX).length > 0 ? 0 : -1;
   }
 
-  function moveActive(next: number): void {
-    if (results.length === 0) return;
-    activeIndex = (next + results.length) % results.length;
-  }
-
   function scrollActiveIntoView(): void {
     if (activeId === undefined) return;
     document
@@ -71,37 +67,18 @@
   }
 
   function handleKeydown(event: KeyboardEvent): void {
-    switch (event.key) {
-      case "ArrowDown":
-        if (results.length === 0) return;
-        event.preventDefault();
-        moveActive(activeIndex + 1);
-        break;
-      case "ArrowUp":
-        if (results.length === 0) return;
-        event.preventDefault();
-        moveActive(activeIndex - 1);
-        break;
-      case "Home":
-        if (results.length === 0) return;
-        event.preventDefault();
-        activeIndex = 0;
-        break;
-      case "End":
-        if (results.length === 0) return;
-        event.preventDefault();
-        activeIndex = results.length - 1;
-        break;
-      case "Enter":
-        if (activeIndex < 0) return;
-        event.preventDefault();
-        followActive();
-        break;
-      case "Escape":
-        event.preventDefault();
-        close();
-        break;
+    const action = siteSearchKeyAction(event.key, activeIndex, results.length);
+    if (action.type === "ignore") return;
+    event.preventDefault();
+    if (action.type === "move") {
+      activeIndex = action.index;
+      return;
     }
+    if (action.type === "select") {
+      followActive();
+      return;
+    }
+    close();
   }
 </script>
 

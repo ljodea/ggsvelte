@@ -5,6 +5,11 @@
 
   import { THEME_OPTIONS } from "$lib/catalog/themes";
   import CopyCode from "$lib/components/CopyCode.svelte";
+  import {
+    readDocsAppearance,
+    watchDocsAppearance,
+    type DocsAppearance,
+  } from "$lib/docs-appearance";
 
   const rows = [
     { quarter: 1, value: 24, group: "Observed" },
@@ -19,7 +24,7 @@
 
   let explicitTheme = $state<ThemeName>("default");
   let followDocs = $state(false);
-  let siteAppearance = $state<"light" | "dark">("light");
+  let siteAppearance = $state<DocsAppearance>("light");
   const resolvedTheme = $derived<ThemeName>(
     followDocs ? siteAppearance : explicitTheme,
   );
@@ -39,8 +44,7 @@
   );
 
   function syncSiteAppearance(): void {
-    siteAppearance =
-      document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+    siteAppearance = readDocsAppearance();
   }
 
   function changeFollow(event: Event): void {
@@ -50,14 +54,9 @@
 
   onMount(() => {
     syncSiteAppearance();
-    const observer = new MutationObserver(() => {
-      if (followDocs) syncSiteAppearance();
+    return watchDocsAppearance((appearance) => {
+      if (followDocs) siteAppearance = appearance;
     });
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["data-theme"],
-    });
-    return () => observer.disconnect();
   });
 </script>
 
