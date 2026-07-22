@@ -322,11 +322,10 @@ jobs:
         run: bun run build:docs
 
       - name: REGENERATE baselines at the approved merged commit
-        # Smoke-only (tests/visual/vr.spec.ts) — same scope as the compare job.
-        # The full tests/visual suite includes non-snapshot assertion journeys
-        # (a11y, docs, playground). --update-snapshots cannot make those pass,
-        # so a red assertion test on main would permanently block all baseline
-        # updates (#421). Only vr.spec.ts owns committed __screenshots__/ PNGs.
+        # Smoke-only screenshots (tests/visual/vr.spec.ts) — same scope as compare.
+        # Non-snapshot journeys (a11y, docs, playground) and non-pixel assertions
+        # (e.g. scroll/touch-action) live outside this file so a red hard assert
+        # cannot block --update-snapshots / vr-baselines-approved (#421).
         # workers=1 matches the compare job — canvas-scatter hydrate is main-thread heavy.
         run: bun run test:visual -- vr.spec.ts --workers=1 --update-snapshots
 

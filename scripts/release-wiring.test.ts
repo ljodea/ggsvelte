@@ -351,6 +351,13 @@ describe("R0 release wiring", () => {
     expect(job).toContain("bun run test:visual -- vr.spec.ts --workers=1 --update-snapshots");
     // Must not reintroduce the full-suite regenerate command.
     expect(job).not.toMatch(/bun run test:visual -- --workers=1 --update-snapshots/);
+    // Smoke file must stay screenshot-only: non-pixel assertions in vr.spec.ts
+    // still fail regenerate even when scoped to that file (Codex P2 on #531).
+    const smokeSpec = read("tests/visual/vr.spec.ts");
+    expect(smokeSpec).not.toContain("without a golden");
+    expect(smokeSpec).not.toContain("preserves real page scrolling");
+    const journeysSpec = read("tests/visual/interaction-accessibility.spec.ts");
+    expect(journeysSpec).toContain("preserves real page scrolling");
   });
 
   it("wires Dependabot for bun workspaces and GitHub Actions", () => {
