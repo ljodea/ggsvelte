@@ -198,4 +198,4 @@ export function mountIntervalController(
 
 export { createIntervalState, createPlotInteraction, modelFor, buildIntervalSelection };
 export type { ContinuousZoomDomains };
-export type { IntervalSelection, PlotInteractionScope, PlotSelection };
+export type { InteractionSource, IntervalSelection, PlotInteractionScope, PlotSelection };

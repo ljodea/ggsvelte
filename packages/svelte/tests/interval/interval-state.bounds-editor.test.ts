@@ -21,6 +21,7 @@ import {
   nonPersistentSelect,
   persistentSelect,
   type ContinuousZoomDomains,
+  type InteractionSource,
   type PlotSelection,
   type SelectConfig,
 } from "./interval-state.harness.js";
