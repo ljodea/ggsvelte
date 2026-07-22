@@ -15,9 +15,9 @@ export function aggregateLineageXKey(
   localRow: number,
   binding: LayerBinding,
 ): string {
-  // Binned count stores bin ids on the frame; bucket membership must key by
-  // the same id (not the inverse-projected bin center in xValues).
-  if (binding.xBinning !== undefined) {
+  // Only count aggregates on bin ids (frame.xBinId). Summary/boxplot still
+  // aggregate on actual x values even when a binned scale is attached.
+  if (binding.xBinning !== undefined && (binding.layer.stat ?? "identity") === "count") {
     const transformed = positionColumn(table, field, xConversionOf(binding), binding.xTransform);
     return bandKey(assignBinId(transformed[localRow]!, binding.xBinning));
   }

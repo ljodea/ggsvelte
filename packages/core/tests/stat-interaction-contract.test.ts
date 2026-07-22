@@ -228,6 +228,32 @@ describe("stat interaction contract", () => {
     }
   });
 
+  it("allows forced-linear numeric annotation strings under log10", () => {
+    const model = runPipeline(
+      {
+        data: { values: [{ dummy: 1 }] },
+        layers: [{ geom: "rule", params: { xintercept: "2024" } }],
+        scales: { x: { type: "linear", transform: "log10", nice: false } },
+      },
+      size,
+    );
+    expect(model.domains.effective.x[0]).toBeGreaterThan(0);
+    expect(model.domains.effective.x[1]).toBeGreaterThan(model.domains.effective.x[0]!);
+  });
+
+  it("still rejects non-finite date intercepts on forced-linear log axes", () => {
+    expect(() =>
+      runPipeline(
+        {
+          data: { values: [{ dummy: 1 }] },
+          layers: [{ geom: "rule", params: { xintercept: "2024-01-01" } }],
+          scales: { x: { type: "linear", transform: "log10", nice: false } },
+        },
+        size,
+      ),
+    ).toThrow(PipelineError);
+  });
+
   it("uses the box middle for aggregate primitives and the observation for outliers", () => {
     const model = runPipeline(
       {
