@@ -852,6 +852,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "SegmentLayerSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "SegmentParams": {
           "kind": "type",
           "lifecycle": "experimental"
