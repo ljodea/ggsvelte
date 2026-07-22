@@ -12,9 +12,9 @@
  * "label is unknown" suppressions from it so the two cannot drift.
  *
  * Load/init failures: fatal under CI (`CI` / `GITHUB_ACTIONS`), soft-skip only
- * on local machines (arch mismatch, missing wasm). The pre-push hook and the
- * required `actions-security` job both call this script; CI must never green
- * on a silent skip.
+ * on local machines (arch mismatch, missing wasm). The required
+ * `actions-security` CI job calls this script; CI must never green on a
+ * silent skip.
  *
  * Usage: bun scripts/actionlint.ts [files...]
  */
@@ -25,7 +25,7 @@ const ACTIONLINT_YAML = ".github/actionlint.yaml";
 
 /**
  * Soft-skip wasm load failures only outside CI. GitHub Actions sets both
- * `CI=true` and `GITHUB_ACTIONS=true`; local pre-push has neither.
+ * `CI=true` and `GITHUB_ACTIONS=true`; local manual runs have neither.
  */
 export function allowSoftSkipLoadFailure(env: NodeJS.ProcessEnv = process.env): boolean {
   return env.CI !== "true" && env.GITHUB_ACTIONS !== "true";
