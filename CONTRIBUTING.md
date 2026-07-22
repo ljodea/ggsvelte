@@ -36,7 +36,7 @@ tested support boundaries and what information helps the community respond.
    ```sh
    uv tool install pre-commit   # or pipx install pre-commit / brew install pre-commit
    uv tool install zizmor       # GitHub Actions security auditor (Rust, shipped via PyPI)
-   pre-commit install           # installs BOTH the pre-commit and pre-push git hooks
+   pre-commit install           # installs the fast pre-commit hook only (no pre-push)
    ```
 
 4. **Playwright browsers** (needed for component tests, the VR suite, and
@@ -154,18 +154,18 @@ ignored — land those as deliberate migrations.
 | `Rscript packages/core/tests/fixtures/*/generate.R`   | regenerate the ggplot2-parity fixtures (grouping, stats/positions; needs R + ggplot2)                                                             |
 | `bun run knip`                                        | unused files/exports/dependencies                                                                                                                 |
 | `bun run lint:package`                                | publint + attw (esm-only profile) over built packages — build first                                                                               |
-| `bun run lint:actions`                                | actionlint (wasm) over `.github/workflows` (also pre-push when `.github/**` changes; local soft-skip if wasm cannot load, fatal in CI)            |
-| `bun run lint:actions:security`                       | zizmor over `.github/workflows` (needs `uv tool install zizmor`; pre-push skips if missing)                                                       |
+| `bun run lint:actions`                                | actionlint (wasm) over `.github/workflows` (local soft-skip if wasm cannot load; fatal in CI actions-security job)                                |
+| `bun run lint:actions:security`                       | zizmor over `.github/workflows` (needs `uv tool install zizmor`; CI runs it in actions-security)                                                  |
 | `bun run test:spikes`                                 | retired M0a browser/ssr spike suites (vitest 4 browser mode)                                                                                      |
 | `cd spikes/pure && bun test`                          | retired M0a pure spike suites                                                                                                                     |
-| `pre-commit run --all-files`                          | everything the pre-commit stage runs                                                                                                              |
-| `pre-commit run --all-files --hook-stage pre-push`    | everything the pre-push stage runs (tsc-build runs first — later hooks need dist/)                                                                |
+| `pre-commit run --all-files`                          | fast staged-file parity (oxfmt/prettier/oxlint/markdownlint/manifest/path guards)                                                                 |
 
-CI (`.github/workflows/ci.yml`) runs a `checks` job with exact pre-commit
-parity (both stages) plus unit / component / build / actions-security /
-bench-smoke jobs. **CI is the contract; the git hooks are a convenience
-mirror.** If pre-push ever feels too slow, checks move to CI-required — they
-are never disabled.
+CI (`.github/workflows/ci.yml`) runs a `checks` job for pre-commit parity
+plus unit / component / build / actions-security / bench-smoke jobs.
+**CI is the contract.** Local git hooks are commit-only and sub-second;
+there is no pre-push mega-suite (build, type-aware lint, svelte-check, knip,
+package tests all live in CI). If an old clone still has a pre-push hook,
+remove it with `pre-commit uninstall -t pre-push` then `pre-commit install`.
 
 ### Path routing + content-hash skip
 
@@ -426,7 +426,7 @@ Consequences:
 
 - Run `bun run check` after a fresh clone before `bun run test`,
   `check:svelte`, or `lint:type-aware` — cross-package imports resolve
-  through `dist/`. The pre-push hooks and CI jobs already sequence this.
+  through `dist/`. CI jobs already sequence this.
 - `@ggsvelte/spec`: TypeBox schemas (decision 0004) + `Static<>` types,
   `normalize()`, tier-1 `validate()` with the agent error contract, the
   `gg()/aes()` builder, portability (`isPortable`/`toPortable`/
@@ -449,9 +449,9 @@ plus the VR-and-examples workstream (decision 0009): the `examples/` corpus
 and generated `examples/manifest.ts`, the `apps/docs` SvelteKit +
 adapter-static site, `<GGPlot>`'s `data-gg-ready` readiness signal, the
 `tests/visual` Playwright suite, and a real (un-guarded) `vr-compare.yml`.
-Pre-push consequence: the first hook is now **package-build**
-(`bun run build`, not just `tsc -b`) because docs/examples checks import the
-built `@ggsvelte/svelte` package.
+CI consequence: build jobs run **package-build** (`bun run build`, not just
+`tsc -b`) before docs/examples checks because those imports resolve through
+the built `@ggsvelte/svelte` package.
 
 ## Milestone context (M2 — statistical layer)
 
