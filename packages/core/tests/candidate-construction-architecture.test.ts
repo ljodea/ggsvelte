@@ -16,6 +16,7 @@ const INTENTIONAL_MODULES = [
   "represented-rows.ts",
 ].toSorted();
 
+/** Ownership seams for the intentional module set. */
 describe("Candidate construction architecture", () => {
   it("keeps Candidate construction behind one local module seam", () => {
     const legacySiblingModules = readdirSync(pipelineDir)
