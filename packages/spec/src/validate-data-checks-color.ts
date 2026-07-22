@@ -7,7 +7,7 @@ import type { SpecError } from "./errors.js";
 import { configuredColorScaleType } from "./scale-helpers.js";
 import type { ColorScaleSpec } from "./schema.js";
 import { SEQUENTIAL_SCHEME_NAMES } from "./schema.js";
-import { parseTemporal } from "./temporal-parse.js";
+import { parseTemporalColumn } from "./temporal-column.js";
 import type { FieldEvidenceMap } from "./validate-data-evidence.js";
 import {
   temporalDecisionForField,
@@ -43,12 +43,12 @@ function colorTemporalCensorRecovery(input: {
   trainingFields: ReadonlySet<string>;
   constantTrains: boolean;
   /**
-   * A scaled constant parses under the configured parser but conflicts with
-   * temporalKind — runtime still includes it in collectColorChannelValues and
-   * throws color-temporal-kind, so recovery and otherwise-valid fields must fail.
+   * A channel value (scaled constant or sibling field) parses under the
+   * configured/auto parser but conflicts with temporalKind — runtime still
+   * includes it in collectColorChannelValues and throws color-temporal-kind.
    */
-  constantKindConflicts: boolean;
-  conflictingConstantKind: string | null;
+  kindConflicts: boolean;
+  conflictingKind: string | null;
 } {
   const { config, colorFields, colorScaledConstants, fields, temporalDecisionCache, typeOf } =
     input;
@@ -65,10 +65,25 @@ function colorTemporalCensorRecovery(input: {
         disambiguation: config.disambiguation,
       }),
   };
-  const parseBound = (value: unknown) => {
-    if (!temporalInputsUsable || config?.parse === undefined) return null;
-    const result = parseTemporal(value, config.parse, temporalOptions);
-    return result.ok ? result : null;
+  // Runtime uses config?.parse ?? "auto" in resolveColorValueView — kind-conflict
+  // detection must do the same (not only when parse is explicit). parseTemporal does
+  // not accept "auto", so column parsing is the shared path for both cases.
+  const parser: Parameters<typeof temporalDecisionForField>[3] = config?.parse ?? "auto";
+  const parseBound = (value: unknown): { epochMs: number; kind: string | undefined } | null => {
+    if (!temporalInputsUsable) return null;
+    if (value === null || value === undefined) return null;
+    if (!(value instanceof Date) && typeof value !== "string" && typeof value !== "number") {
+      return null;
+    }
+    const column = parseTemporalColumn(
+      [value] as Parameters<typeof parseTemporalColumn>[0],
+      parser,
+      temporalOptions,
+    );
+    if (column.valid[0] !== 1) return null;
+    const epochMs = column.semantic[0];
+    if (epochMs === undefined || !Number.isFinite(epochMs)) return null;
+    return { epochMs, kind: column.decision.kind ?? undefined };
   };
 
   const domainValues = Array.isArray(config?.domain)
@@ -80,39 +95,48 @@ function colorTemporalCensorRecovery(input: {
   // authored but not exactly two parseable endpoints — before siblings/breaks train.
   const domainBlocksRecovery = Array.isArray(config?.domain) && !hasExplicitDomain;
 
-  const binnedBreaks =
-    config?.type === "binned" && Array.isArray(config.breaks)
-      ? config.breaks.filter((value) => value !== null)
-      : [];
+  // Do not drop null breaks: runtime maps every authored break and throws
+  // color-binned-breaks when any maps to undefined.
+  const authoredBreaks =
+    config?.type === "binned" && Array.isArray(config.breaks) ? config.breaks : [];
   const parsedBreakEpochs: number[] = [];
-  for (const value of binnedBreaks) {
-    const parsed = parseBound(value);
-    if (parsed === null) {
-      parsedBreakEpochs.length = 0;
-      break;
-    }
-    parsedBreakEpochs.push(parsed.epochMs);
-  }
-  let hasBinnedBreaks = parsedBreakEpochs.length >= 2;
-  if (hasBinnedBreaks) {
-    for (let index = 1; index < parsedBreakEpochs.length; index++) {
-      const prev = parsedBreakEpochs[index - 1];
-      const current = parsedBreakEpochs[index];
-      if (prev === undefined || current === undefined || current <= prev) {
-        hasBinnedBreaks = false;
+  let hasBinnedBreaks = false;
+  if (authoredBreaks.length >= 2) {
+    let allParseable = true;
+    for (const value of authoredBreaks) {
+      if (value === null) {
+        allParseable = false;
         break;
+      }
+      const parsed = parseBound(value);
+      if (parsed === null) {
+        allParseable = false;
+        break;
+      }
+      parsedBreakEpochs.push(parsed.epochMs);
+    }
+    if (allParseable && parsedBreakEpochs.length >= 2) {
+      hasBinnedBreaks = true;
+      for (let index = 1; index < parsedBreakEpochs.length; index++) {
+        const prev = parsedBreakEpochs[index - 1];
+        const current = parsedBreakEpochs[index];
+        if (prev === undefined || current === undefined || current <= prev) {
+          hasBinnedBreaks = false;
+          break;
+        }
       }
     }
   }
 
   const trainingFields = new Set<string>();
+  let kindConflicts = false;
+  let conflictingKind: string | null = null;
   const requestsTemporal =
     config?.temporalKind !== undefined ||
     config?.parse !== undefined ||
     config?.timezone !== undefined ||
     config?.disambiguation !== undefined;
   if (temporalInputsUsable && requestsTemporal) {
-    const parser = config?.parse ?? "auto";
     for (const use of colorFields) {
       const type = typeOf(use.field);
       // Always reparse under the configured parser — type:"temporal" from default
@@ -132,33 +156,34 @@ function colorTemporalCensorRecovery(input: {
         parser,
         temporalOptions,
       );
+      if (decision === null || decision === undefined) continue;
+      const trains = decision.status === "temporal" || (decision.validatedCount ?? 0) > 0;
+      if (!trains) continue;
       if (
-        decision !== null &&
-        decision !== undefined &&
-        (decision.status === "temporal" || (decision.validatedCount ?? 0) > 0) &&
-        (config?.temporalKind === undefined ||
-          decision.kind === null ||
-          decision.kind === undefined ||
-          decision.kind === config.temporalKind)
+        typeof config?.temporalKind === "string" &&
+        decision.kind !== null &&
+        decision.kind !== undefined &&
+        decision.kind !== config.temporalKind
       ) {
-        trainingFields.add(use.field);
+        kindConflicts = true;
+        conflictingKind = decision.kind;
+        continue;
       }
+      trainingFields.add(use.field);
     }
   }
 
   const kindOk = (kind: string | undefined): boolean =>
     config?.temporalKind === undefined || kind === undefined || kind === config.temporalKind;
   let constantTrains = false;
-  let constantKindConflicts = false;
-  let conflictingConstantKind: string | null = null;
   for (const value of colorScaledConstants) {
     const parsed = parseBound(value);
     if (parsed === null) continue;
     if (kindOk(parsed.kind)) {
       constantTrains = true;
     } else {
-      constantKindConflicts = true;
-      conflictingConstantKind = parsed.kind;
+      kindConflicts = true;
+      conflictingKind = parsed.kind ?? null;
     }
   }
   return {
@@ -167,8 +192,8 @@ function colorTemporalCensorRecovery(input: {
     domainBlocksRecovery,
     trainingFields,
     constantTrains,
-    constantKindConflicts,
-    conflictingConstantKind,
+    kindConflicts,
+    conflictingKind,
   };
 }
 
@@ -182,16 +207,15 @@ function censoredTemporalColorRecovers(input: {
     domainBlocksRecovery: boolean;
     trainingFields: ReadonlySet<string>;
     constantTrains: boolean;
-    constantKindConflicts: boolean;
+    kindConflicts: boolean;
   };
 }): boolean {
   if (input.config?.parse === undefined || input.config.parseFailure !== "censor") return false;
   if (input.decision?.status !== "invalid") return false;
   // A present-but-unusable domain always throws at runtime before recovery sources apply.
   if (input.recovery.domainBlocksRecovery) return false;
-  // Wrong-kind scaled constants still participate in channel training and throw
-  // color-temporal-kind — they cannot be ignored as non-training.
-  if (input.recovery.constantKindConflicts) return false;
+  // Kind-mismatched channel values still train and throw color-temporal-kind.
+  if (input.recovery.kindConflicts) return false;
   if ((input.decision.validatedCount ?? 0) > 0) return true;
   if (input.recovery.hasExplicitDomain || input.recovery.hasBinnedBreaks) return true;
   if (input.recovery.constantTrains) return true;
@@ -327,19 +351,19 @@ export function checkColorScaleDataCompatibility(input: {
       temporalDecisionCache,
       typeOf,
     });
-    // Runtime collects scaled constants into the same temporal column as fields;
-    // a kind conflict throws color-temporal-kind for the whole channel.
+    // Runtime collects all channel values into one temporal column; a kind
+    // conflict (sibling field or scaled constant) throws color-temporal-kind.
     if (
-      recovery.constantKindConflicts &&
+      recovery.kindConflicts &&
       typeof config?.temporalKind === "string" &&
-      recovery.conflictingConstantKind !== null
+      recovery.conflictingKind !== null
     ) {
       errors.push({
         code: "scale-type-mismatch",
         path: `/scales/${channel}`,
-        message: `scales.${channel} requests temporal kind "${config.temporalKind}" but a scaled constant parses as "${recovery.conflictingConstantKind}".`,
+        message: `scales.${channel} requests temporal kind "${config.temporalKind}" but a channel value parses as "${recovery.conflictingKind}".`,
         fix: {
-          description: `Use a ${config.temporalKind} scaled constant, or set temporalKind to "${recovery.conflictingConstantKind}".`,
+          description: `Use ${config.temporalKind} values for every color mapping and scaled constant, or set temporalKind to "${recovery.conflictingKind}".`,
         },
       });
     }

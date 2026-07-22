@@ -660,8 +660,123 @@ describe("tier 2 — color scale data-aware validation", () => {
     if (result.ok) throw new Error("expected failure");
     expect(
       result.errors.some(
-        (error) =>
-          error.code === "scale-type-mismatch" && error.message.includes("scaled constant"),
+        (error) => error.code === "scale-type-mismatch" && error.message.includes("channel value"),
+      ),
+    ).toBe(true);
+  });
+
+  it("rejects kind-mismatched scaled constants when parse is omitted (auto)", () => {
+    // Runtime uses parse ?? "auto"; conflict detection must not require explicit parse.
+    const result = validate(
+      normalize({
+        data: {
+          values: [
+            { x: 1, y: 1, when: "2024-01-15" },
+            { x: 2, y: 2, when: "2024-02-15" },
+          ],
+        },
+        layers: [
+          {
+            geom: "point",
+            aes: { x: { field: "x" }, y: { field: "y" }, color: { field: "when" } },
+          },
+          {
+            geom: "point",
+            aes: {
+              x: { field: "x" },
+              y: { field: "y" },
+              color: { value: "2024-01-01T12:00", scale: true },
+            },
+          },
+        ],
+        scales: {
+          color: {
+            type: "sequential",
+            temporalKind: "date",
+          },
+        },
+      }),
+      {},
+    );
+    expect(result.ok).toBe(false);
+    if (result.ok) throw new Error("expected failure");
+    expect(result.errors.some((error) => error.code === "scale-type-mismatch")).toBe(true);
+  });
+
+  it("rejects all-failed censored binned temporal colors when a break is null", () => {
+    const result = validate(
+      normalize({
+        data: {
+          values: [
+            { x: 1, y: 1, t: "not-a-date" },
+            { x: 2, y: 2, t: "also-bad" },
+          ],
+        },
+        layers: [
+          {
+            geom: "point",
+            aes: { x: { field: "x" }, y: { field: "y" }, color: { field: "t" } },
+          },
+        ],
+        scales: {
+          color: {
+            type: "binned",
+            parse: "iso",
+            parseFailure: "censor",
+            breaks: ["2024-01-01", null, "2024-02-01"],
+          },
+        },
+      }),
+      {},
+    );
+    expect(result.ok).toBe(false);
+    if (result.ok) throw new Error("expected failure");
+    expect(result.errors.some((error) => error.code === "scale-type-mismatch")).toBe(true);
+  });
+
+  it("rejects a kind-mismatched sibling even when a scaled constant would recover", () => {
+    const result = validate(
+      normalize({
+        data: {
+          values: [
+            { x: 1, y: 1, bad: "xx", when: "2024-01-01T12:00" },
+            { x: 2, y: 2, bad: "yy", when: "2024-02-01T12:00" },
+          ],
+        },
+        layers: [
+          {
+            geom: "point",
+            aes: { x: { field: "x" }, y: { field: "y" }, color: { field: "bad" } },
+          },
+          {
+            geom: "point",
+            aes: { x: { field: "x" }, y: { field: "y" }, color: { field: "when" } },
+          },
+          {
+            geom: "point",
+            aes: {
+              x: { field: "x" },
+              y: { field: "y" },
+              color: { value: "2024-01-15", scale: true },
+            },
+          },
+        ],
+        scales: {
+          color: {
+            type: "sequential",
+            temporalKind: "date",
+            parse: "iso",
+            parseFailure: "censor",
+          },
+        },
+      }),
+      {},
+    );
+    expect(result.ok).toBe(false);
+    if (result.ok) throw new Error("expected failure");
+    expect(
+      result.errors.some(
+        (error) => error.code === "scale-type-mismatch" && error.message.includes("channel value"),
       ),
     ).toBe(true);
   });
