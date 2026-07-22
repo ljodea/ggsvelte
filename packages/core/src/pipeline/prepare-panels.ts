@@ -142,10 +142,17 @@ export function preparePanels(
     plotSource === null ? null : primaryFiltered.table,
     layerContexts.map((c) => c.filteredTable),
   );
-  const facetLayout: FacetLayout = emptyData
-    ? SINGLE_PANEL(table, primaryFiltered.sourceRows)
-    : resolveFacet(normalized.facet, layoutTable, null);
-  const { faceted, nrow, ncol } = facetLayout;
+  // Closed levels still produce empty panels when every row was filtered out;
+  // only implicit (data-driven) facets collapse to a single placeholder.
+  const hasClosedLevels =
+    normalized.facet?.wrap?.levels !== undefined ||
+    normalized.facet?.rows?.levels !== undefined ||
+    normalized.facet?.cols?.levels !== undefined;
+  const facetLayout: FacetLayout =
+    emptyData && !hasClosedLevels
+      ? SINGLE_PANEL(table, primaryFiltered.sourceRows)
+      : resolveFacet(normalized.facet, layoutTable, null, warnings);
+  const { faceted, nrow, ncol, strip } = facetLayout;
   const facetPanels = facetLayout.panels;
   const freeX = faceted && facetLayout.freeX;
   const freeY = faceted && facetLayout.freeY;
@@ -222,6 +229,7 @@ export function preparePanels(
     freeY,
     nrow,
     ncol,
+    strip,
     facetPanels,
     bindings,
     panelFrames,

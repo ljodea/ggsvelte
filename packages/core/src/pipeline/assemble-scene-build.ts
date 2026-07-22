@@ -33,6 +33,8 @@ export function assembleScene(input: AssembleSceneInput): Scene {
     height,
     placements,
     facetPanels,
+    strip,
+    stripBand,
     displayScales,
     hTitle,
     vTitle,
@@ -61,6 +63,8 @@ export function assembleScene(input: AssembleSceneInput): Scene {
   const { scenePanels, xAxis, yAxis } = assembleScenePanels({
     placements,
     facetPanels,
+    strip,
+    stripBand,
     displayScales,
     hTitle,
     vTitle,

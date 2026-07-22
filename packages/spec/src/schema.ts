@@ -122,6 +122,8 @@ export const ChannelValueSchema = SpecModule.Import("ChannelValue");
 export const DataRefSchema = SpecModule.Import("DataRef");
 export const ScalesSchema = SpecModule.Import("Scales");
 export const TemporalParserSpecSchemaRef = SpecModule.Import("TemporalParserSpec");
+export const FacetFieldRefSchema = SpecModule.Import("FacetFieldRef");
+export const FacetStripSpecSchema = SpecModule.Import("FacetStripSpec");
 export const FacetSpecSchema = SpecModule.Import("FacetSpec");
 export const CoordTransformAxisSpecSchema = SpecModule.Import("CoordTransformAxisSpec");
 export const CoordTransformSpecSchema = SpecModule.Import("CoordTransformSpec");
@@ -278,6 +280,8 @@ export type Scales = SpecType<"Scales">;
 /** Facet-panel scale behavior. */
 export type FacetScales = SpecType<"FacetScales">;
 /** Facet configuration (wrap OR rows/cols grid). */
+export type FacetFieldRef = SpecType<"FacetFieldRef">;
+export type FacetStripSpec = SpecType<"FacetStripSpec">;
 export type FacetSpec = SpecType<"FacetSpec">;
 /** One post-stat coordinate axis transform. */
 export type CoordTransformAxisSpec = SpecType<"CoordTransformAxisSpec">;

@@ -24,7 +24,7 @@ export function finalizePanelLayoutPass(input: {
   warnings: PipelineWarning[];
 }): PanelLayoutResult {
   const { normalized, options, theme, flip, prepared, trained, warnings } = input;
-  const { faceted, freeX, freeY, nrow, ncol, facetPanels } = prepared;
+  const { faceted, freeX, freeY, nrow, ncol, facetPanels, strip } = prepared;
   const {
     xTraining,
     yTraining,
@@ -114,6 +114,7 @@ export function finalizePanelLayoutPass(input: {
       nrow,
       ncol,
       facetPanels,
+      strip,
       panelScales,
       allFrames,
       hGuide: flip ? yGuide : xGuide,

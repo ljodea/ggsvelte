@@ -97,6 +97,8 @@ function gridPositionsByKind(ticks: readonly SceneTick[]): {
 export function assembleScenePanels(input: {
   placements: readonly PanelPlacement[];
   facetPanels: readonly FacetPanelDef[];
+  strip: import("./facets-types.js").FacetStripConfig;
+  stripBand: number;
   displayScales: (p: number) => { h: PositionScale; v: PositionScale };
   hTitle: string;
   vTitle: string;
@@ -116,7 +118,7 @@ export function assembleScenePanels(input: {
   xAxis: SceneAxis;
   yAxis: SceneAxis;
 } {
-  const { placements, facetPanels, displayScales, hTitle, vTitle } = input;
+  const { placements, facetPanels, displayScales, hTitle, vTitle, strip, stripBand } = input;
   const measurer = input.measureText ?? new MetricsTableMeasurer(FONT_METRICS);
 
   const scenePanels: ScenePanel[] = placements.map((placement, p) => {
@@ -170,6 +172,8 @@ export function assembleScenePanels(input: {
         : projectedLeft;
     const xGrid = gridPositionsByKind(bottom);
     const yGrid = gridPositionsByKind(left);
+    const label = facetPanels[p]!.label;
+    const hasStrip = label !== "";
     return {
       identity: facetPanels[p]!.identity,
       id: facetPanels[p]!.id,
@@ -177,8 +181,13 @@ export function assembleScenePanels(input: {
       y: placement.y,
       width: placement.width,
       height: placement.height,
+      strip: label,
+      ...(hasStrip && {
+        stripPosition: strip.position,
+        showStrip: strip.show,
+        stripBand: strip.show ? stripBand : 0,
+      }),
       ...(placement.allocation !== undefined && { allocation: { ...placement.allocation } }),
-      strip: facetPanels[p]!.label,
       clip: projector?.clip ?? true,
       axisX: placement.showAxisX ? bottom : null,
       axisY: placement.showAxisY ? left : null,

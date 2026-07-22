@@ -180,6 +180,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "facet/ordered-side-strips",
+    category: "facet",
+    name: "ordered-side-strips",
+    title: "Ordered small multiples with side strips",
+    description: "facet.wrap.levels locks a closed west→midwest→south→northeast panel order independent of row order; labels supply human strip text; strip.position: \"left\" reserves a measured band beside each panel instead of above it.",
+    tags: ["facet", "order", "labels", "strip", "wrap", "col"],
+    docsSection: "Facets",
+    hasData: true,
+  },
+  {
     id: "facet/wrap",
     category: "facet",
     name: "wrap",

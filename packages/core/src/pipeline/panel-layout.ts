@@ -13,7 +13,9 @@ import {
 import type { PositionScale } from "../scales/train.js";
 import type { ThemeTokens } from "../theme.js";
 
-import type { FacetPanelDef } from "./facets.js";
+import type { FacetPanelDef, FacetStripConfig } from "./facets.js";
+import { DEFAULT_FACET_STRIP } from "./facets.js";
+import { measureFacetStripBand } from "./facets-strip.js";
 import { LEGEND_EDGE_PAD } from "./layout-helpers.js";
 import type { AxisGuideAppearance } from "./guide-config.js";
 import { resolvePanelLayoutChrome } from "./panel-layout-chrome.js";
@@ -35,6 +37,7 @@ export function computePanelLayout(input: {
   nrow: number;
   ncol: number;
   facetPanels: readonly FacetPanelDef[];
+  strip?: FacetStripConfig;
   panelScales: readonly { x: PositionScale; y: PositionScale }[];
   allFrames: readonly LayerFrame[];
   hGuide: AxisGuideAppearance;
@@ -54,8 +57,16 @@ export function computePanelLayout(input: {
   warnings: PipelineWarning[];
 }): PanelLayoutResult {
   const { faceted, nrow, ncol, facetPanels, options } = input;
+  const strip = input.strip ?? DEFAULT_FACET_STRIP;
 
   const chrome = resolvePanelLayoutChrome(input);
+  const stripBand = measureFacetStripBand({
+    faceted,
+    strip,
+    panels: facetPanels,
+    measurer: chrome.measurer,
+    stripSize: input.theme.stripSize,
+  });
   if (chrome.legendBlock.autoMovedBottom) {
     input.warnings.push({
       code: "guide-auto-bottom",
@@ -68,6 +79,8 @@ export function computePanelLayout(input: {
     nrow,
     ncol,
     facetPanels,
+    strip,
+    stripBand,
     chrome,
     axis: { x: input.hGuide, y: input.vGuide },
     options,
@@ -115,5 +128,5 @@ export function computePanelLayout(input: {
     );
   }
 
-  return panelLayoutResultFromChrome(chrome, placements, degraded);
+  return panelLayoutResultFromChrome(chrome, placements, strip, stripBand, degraded);
 }

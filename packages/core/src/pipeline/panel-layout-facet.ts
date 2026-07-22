@@ -28,6 +28,8 @@ export function placeFacetPanels(input: {
   optionsWidth: number;
   layoutHeight: number;
   topBand: number;
+  stripBand: number;
+  stripConfig: import("./facets-types.js").FacetStripConfig;
   displayScales: DisplayScalesFn;
   displayTemporal: DisplayTemporalFn;
   displayBand: DisplayBandFn;

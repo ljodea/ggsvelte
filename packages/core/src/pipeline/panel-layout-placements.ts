@@ -15,13 +15,24 @@ export function buildPanelPlacements(input: {
   nrow: number;
   ncol: number;
   facetPanels: readonly FacetPanelDef[];
+  strip: import("./facets-types.js").FacetStripConfig;
+  stripBand: number;
   chrome: PanelLayoutChrome;
   axis: Readonly<{ x: LayoutAxisPresentation; y: LayoutAxisPresentation }>;
   options: Pick<RunOptions, "width">;
 }): PanelPlacement[] {
-  const { faceted, nrow, ncol, facetPanels, chrome, axis, options } = input;
+  const { faceted, nrow, ncol, facetPanels, strip, stripBand, chrome, axis, options } = input;
   if (faceted) {
-    return placeFacetPanelsFromChrome({ nrow, ncol, facetPanels, chrome, axis, options });
+    return placeFacetPanelsFromChrome({
+      nrow,
+      ncol,
+      facetPanels,
+      strip,
+      stripBand,
+      chrome,
+      axis,
+      options,
+    });
   }
   return [placeSinglePanelFromChrome(chrome, axis, options)];
 }

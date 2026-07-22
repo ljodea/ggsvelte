@@ -3,7 +3,7 @@
  */
 import type { ColumnTable } from "../table.js";
 
-import type { FacetPanelDef } from "./facets.js";
+import type { FacetPanelDef, FacetStripConfig } from "./facets.js";
 import type { PositionConversionContext } from "./temporal-position.js";
 import type { SourceRegistry } from "./source-registry.js";
 import type { LayerBinding, LayerFrame, ScaleDecision, ScaleDiagnostic } from "./types.js";
@@ -30,6 +30,8 @@ export interface PreparedPanels {
   freeY: boolean;
   nrow: number;
   ncol: number;
+  /** Resolved strip chrome (position + show); defaults when unfaceted. */
+  strip: FacetStripConfig;
   facetPanels: FacetPanelDef[];
   bindings: LayerBinding[];
   panelFrames: LayerFrame[][];

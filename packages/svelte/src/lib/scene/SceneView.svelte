@@ -17,6 +17,7 @@
     BatchInteractionMask,
     GeometryBatch,
     Scene,
+    ScenePanel,
   } from "@ggsvelte/core";
   import {
     letterboxGutterRects,
@@ -53,6 +54,73 @@
     markLabel?: ((row: number) => string) | undefined;
     focusMasks?: readonly (BatchInteractionMask | null)[];
   } = $props();
+
+  /** Strip band geometry matching core renderToSVGString (issue #590). */
+  function stripGeometry(panel: ScenePanel): {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    textX: number;
+    textY: number;
+    rotate: string | undefined;
+  } | null {
+    if (panel.strip === "" || panel.showStrip === false) return null;
+    const band = panel.stripBand ?? STRIP_BAND;
+    if (band <= 0) return null;
+    const position = panel.stripPosition ?? "top";
+    const bandDraw = Math.max(1, band - 2);
+    if (position === "top") {
+      return {
+        x: panel.x,
+        y: panel.y - band,
+        width: panel.width,
+        height: bandDraw,
+        textX: panel.width / 2,
+        textY: bandDraw / 2,
+        rotate: undefined,
+      };
+    }
+    if (position === "bottom") {
+      // Below the x-axis margin so strip text does not collide with ticks.
+      const axisBand = panel.axisX === null ? 0 : 28;
+      return {
+        x: panel.x,
+        y: panel.y + panel.height + axisBand,
+        width: panel.width,
+        height: bandDraw,
+        textX: panel.width / 2,
+        textY: bandDraw / 2,
+        rotate: undefined,
+      };
+    }
+    if (position === "left") {
+      // Left of the y-axis margin so strip text does not collide with ticks.
+      const axisBand = panel.axisY === null ? 0 : 36;
+      const textX = bandDraw / 2;
+      const textY = panel.height / 2;
+      return {
+        x: panel.x - axisBand - band,
+        y: panel.y,
+        width: bandDraw,
+        height: panel.height,
+        textX,
+        textY,
+        rotate: `rotate(-90 ${textX} ${textY})`,
+      };
+    }
+    const textX = bandDraw / 2;
+    const textY = panel.height / 2;
+    return {
+      x: panel.x + panel.width,
+      y: panel.y,
+      width: bandDraw,
+      height: panel.height,
+      textX,
+      textY,
+      rotate: `rotate(90 ${textX} ${textY})`,
+    };
+  }
 
   const uid = $props.id();
 
@@ -265,24 +333,23 @@
         />
       {/if}
     </g>
-    {#if drawChrome && panel.strip !== ""}
-      <g
-        class="gg-strip"
-        transform={`translate(${panel.x},${panel.y - STRIP_BAND})`}
-      >
+    {#if drawChrome && stripGeometry(panel) !== null}
+      {@const strip = stripGeometry(panel)!}
+      <g class="gg-strip" transform={`translate(${strip.x},${strip.y})`}>
         <rect
-          width={panel.width}
-          height={STRIP_BAND - 2}
+          width={strip.width}
+          height={strip.height}
           fill={themeVar("grid", scene.theme)}
         />
         <text
-          x={panel.width / 2}
-          y={(STRIP_BAND - 2) / 2}
+          x={strip.textX}
+          y={strip.textY}
           dy="0.32em"
           text-anchor="middle"
           fill={ink}
           font-size={scene.theme.stripSize}
-          font-weight={scene.theme.stripWeight}>{panel.strip}</text
+          font-weight={scene.theme.stripWeight}
+          transform={strip.rotate}>{panel.strip}</text
         >
       </g>
     {/if}
