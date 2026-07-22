@@ -260,20 +260,17 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
     return { label, angle };
   });
 
-  const shownMaxWidth = Math.max(
-    0,
-    ...ticks.filter((t) => t.labeled).map((t) => measurer.measureWidth(t.label, fontSize)),
-  );
-  const labelBandHeight = quantizeUp(Math.min(orthoOf(shownMaxWidth, angle), orthoCap), quantum);
-  // End overhang of the end-anchored rotated footprint at the real end positions.
-  // Left extent dominates (text runs up-left from the tick); right is ~half a line
-  // height. Tracked per side from the (truncated) labeled ticks, clamped to the cap.
+  // One measureWidth per labeled tick: drives both band height (max width) and
+  // end-anchored overhang (left/right extent). Avoids a second full scan.
+  let shownMaxWidth = 0;
   let rotLeft = 0;
   let rotRight = 0;
   for (let i = 0; i < ticks.length; i++) {
     if (!ticks[i]!.labeled) continue;
     const center = entries[i]!.center;
-    const leftExt = leftExtOf(measurer.measureWidth(ticks[i]!.label, fontSize), angle);
+    const width = measurer.measureWidth(ticks[i]!.label, fontSize);
+    shownMaxWidth = Math.max(shownMaxWidth, width);
+    const leftExt = leftExtOf(width, angle);
     const rightExt = rightExtOf(angle);
     // Width-independent residual (chiefly −90): if the footprint still exceeds the
     // side cap after truncation we cannot shrink it further — flag honestly.
@@ -286,6 +283,7 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
     rotLeft = Math.max(rotLeft, leftExt - center);
     rotRight = Math.max(rotRight, rightExt - (extentPx - center));
   }
+  const labelBandHeight = quantizeUp(Math.min(orthoOf(shownMaxWidth, angle), orthoCap), quantum);
   if (marginOverflow) degraded.push("band-label-margin-overflow");
   const alongOverhang = Math.max(0, Math.min(marginCapPx, rotRight));
   const leftOverhang = Math.max(0, Math.min(marginCapPx, rotLeft));
