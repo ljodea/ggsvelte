@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784679735574,
+  "lastUpdate": 1784680718143,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -42466,6 +42466,200 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 156.9766,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "e1e3a2cfb75cf11f5c1a707f908b8371a05705d4",
+          "message": "fix: remove multi-minute pre-push hook mega-suite (#411)\n\nLocal git push was re-running full CI (build, svelte-check x2, type-aware\noxlint, knip, package tests, actionlint/zizmor). That made agent commits/PRs\nhang for minutes. Keep only the fast pre-commit staged-file hooks; CI owns\nthe heavy gate.",
+          "timestamp": "2026-07-21T19:37:42-05:00",
+          "tree_id": "77d99dc908c11e2c22477744e01b4092869d6fce",
+          "url": "https://github.com/ljodea/ggsvelte/commit/e1e3a2cfb75cf11f5c1a707f908b8371a05705d4"
+        },
+        "date": 1784680716899,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.561,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.7666,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 7.7065,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 10.631,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 58.7654,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 94.2052,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal-line 100k",
+            "value": 68.765,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide candidate-selection 300y",
+            "value": 0.0673,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide resize-churn 191y",
+            "value": 0.3583,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide DST-heavy 3y",
+            "value": 3.3264,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal free-facets 100",
+            "value": 28.7652,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.175,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.3781,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 52.2989,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 72.9572,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 11.1215,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 10.0548,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 968.4869,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.8229,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 260.319,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 11.5102,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-identity 100k",
+            "value": 22.8937,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 100k",
+            "value": 17.7624,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-sqrt 100k",
+            "value": 17.0122,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 smooth 100k",
+            "value": 18.2616,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 bin 100k",
+            "value": 12.9081,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 facets-100 100k",
+            "value": 78.886,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline binned-64 100k",
+            "value": 26.6536,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline coord-identity points 100k",
+            "value": 17.4974,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline coord-log10 points 100k",
+            "value": 20.7028,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline coord-tessellation 10k",
+            "value": 47.8688,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 13.9027,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 611.2628,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 157.1211,
             "unit": "ms"
           }
         ]
