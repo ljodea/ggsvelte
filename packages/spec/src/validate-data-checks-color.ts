@@ -48,10 +48,15 @@ function expectedManualDomainLength(
   scaledConstants: readonly unknown[] = [],
 ): number | null {
   if (Array.isArray(domain)) return domain.filter((value) => value !== null).length;
+  // DataProfile fields have values: null. If any participating field has
+  // unknown values, do not infer length from scaled constants alone — runtime
+  // domain also includes the field categories we cannot see here.
+  for (const values of fieldValueLists) {
+    if (values === null || values === undefined) return null;
+  }
   const seen = new Set<string>();
   let sawValues = false;
   for (const values of fieldValueLists) {
-    if (values === null || values === undefined) continue;
     sawValues = true;
     for (const value of values) {
       if (value === null) continue;
@@ -150,10 +155,13 @@ export function checkColorScaleDataCompatibility(input: {
             }),
           },
         );
+        // Censor only when at least one value parsed; all-fail invalid leaves
+        // no train extent and still throws at pipeline resolve.
         const censoredInvalid =
           config?.parse !== undefined &&
           config.parseFailure === "censor" &&
-          decision?.status === "invalid";
+          decision?.status === "invalid" &&
+          (decision.validatedCount ?? 0) > 0;
         if (decision?.status !== "temporal" && !censoredInvalid) {
           errors.push({
             code: "scale-type-mismatch",
@@ -218,7 +226,8 @@ export function checkColorScaleDataCompatibility(input: {
       const censoredInvalid =
         config?.parse !== undefined &&
         config.parseFailure === "censor" &&
-        decision?.status === "invalid";
+        decision?.status === "invalid" &&
+        (decision.validatedCount ?? 0) > 0;
       if (decision?.status === "temporal" || censoredInvalid) {
         // Mirror runtime: compare recovered kind even when status is invalid+censored.
         if (
