@@ -1,0 +1,48 @@
+# Install `unzip` into the Playwright container, fast.
+#
+# Why this exists: oven-sh/setup-bun extracts the Bun release zip with
+# @actions/tool-cache `extractZip`, which shells out to the system `unzip`
+# binary on Linux (verified in setup-bun src/action.ts). The
+# mcr.microsoft.com/playwright image ships no `unzip`, so every container job
+# has to install it before ci-setup-bun runs.
+#
+# Why not a plain `apt-get update`: GitHub-hosted runners run on Azure (the
+# runner banner prints `Azure Region: northcentralus`). The public
+# archive.ubuntu.com / security.ubuntu.com mirrors are badly throttled from
+# Azure -- a real run fetched 31.6 MB of apt indexes at 34.4 kB/s and took
+# 15m50s just to install unzip. This action instead refreshes ONLY `main` from
+# the co-located Azure Ubuntu mirror (a few MB, ~15s).
+#
+# No-op when `unzip` is already present (e.g. non-container runners already have
+# it), so calling this action is always safe.
+name: CI install unzip (fast)
+description: Install unzip into the Playwright container via the Azure Ubuntu mirror (main only).
+
+runs:
+  using: composite
+  steps:
+    - name: install unzip via Azure Ubuntu mirror (main only)
+      shell: bash
+      run: |
+        set -euo pipefail
+        if command -v unzip >/dev/null 2>&1; then
+          echo "unzip already present ($(command -v unzip)); skipping apt."
+          exit 0
+        fi
+        list="$(mktemp)"
+        keyring=/usr/share/keyrings/ubuntu-archive-keyring.gpg
+        {
+          echo "deb [signed-by=${keyring}] http://azure.archive.ubuntu.com/ubuntu noble main"
+          echo "deb [signed-by=${keyring}] http://azure.archive.ubuntu.com/ubuntu noble-updates main"
+        } > "$list"
+        # Refresh indexes from ONLY the list above (sourceparts=- disables the
+        # image's default sources for this update), so we pull ~a few MB of
+        # `main` instead of the full 31 MB across universe/security/backports.
+        apt-get \
+          -o Dir::Etc::sourcelist="$list" \
+          -o Dir::Etc::sourceparts="-" \
+          -o APT::Get::List-Cleanup="0" \
+          update
+        apt-get install -y --no-install-recommends unzip
+        rm -f "$list"
+        unzip -v | head -1
