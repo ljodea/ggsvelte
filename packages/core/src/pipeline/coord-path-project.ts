@@ -72,6 +72,10 @@ export function projectPathBatch(
   const offsets: number[] = [0];
   const strokes: (string | null)[] = [];
   const fills: (string | null)[] | undefined = batch.fills === undefined ? undefined : [];
+  const linewidths: number[] | undefined = batch.linewidths === undefined ? undefined : [];
+  const alphas: number[] | undefined = batch.alphas === undefined ? undefined : [];
+  const linetypeIndexes: number[] | undefined =
+    batch.linetypeIndexes === undefined ? undefined : [];
   let panelExtraRemaining =
     sharedBudget?.extraRemaining ??
     Math.max(0, MAX_COORD_VERTICES_PER_PANEL_LAYER - batch.positions.length / 2);
@@ -200,6 +204,9 @@ export function projectPathBatch(
       offsets.push(projected.length / 2);
       strokes.push(batch.strokes[s] ?? null);
       fills?.push(batch.fills?.[s] ?? null);
+      linewidths?.push(batch.linewidths?.[s] ?? batch.linewidth);
+      alphas?.push(batch.alphas?.[s] ?? batch.alpha);
+      linetypeIndexes?.push(batch.linetypeIndexes?.[s] ?? 0);
       runStart = runEnd + 1;
     }
   }
@@ -210,6 +217,9 @@ export function projectPathBatch(
   batch.pathOffsets = Uint32Array.from(offsets);
   batch.strokes = strokes;
   if (fills !== undefined) batch.fills = fills;
+  if (linewidths !== undefined) batch.linewidths = Float32Array.from(linewidths);
+  if (alphas !== undefined) batch.alphas = Float32Array.from(alphas);
+  if (linetypeIndexes !== undefined) batch.linetypeIndexes = Uint8Array.from(linetypeIndexes);
   batch.semanticAnchors = Uint8Array.from(semanticAnchors);
   batch.semanticIndex = Uint32Array.from(semanticIndices);
   if (invalidVertices > 0) {

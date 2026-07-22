@@ -60,6 +60,11 @@ discrete, log10, sqrt, date, datetime, manual, and identity families use the
 same JSON accepted by `<GGPlot>`, with binding-identical `color`/`colour` and
 ggplot2 snake-case aliases.
 
+Size, linewidth, alpha, shape, and linetype helpers are also re-exported from
+the package root. Their per-mark/per-path vectors render consistently in SVG,
+canvas, and SSR; style legends retain keyboard focus and filtering behavior,
+and inspection reports resolved semantic style values.
+
 ## Links
 
 - [Documentation](https://ggsvelte.sh/)

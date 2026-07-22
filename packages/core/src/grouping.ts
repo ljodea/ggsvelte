@@ -33,6 +33,9 @@ export type AesMapping = Readonly<Record<string, ChannelValue | undefined>>;
 
 /** Per-field discreteness declarations (field name -> declared type). */
 export type DeclaredDiscreteness = Readonly<Record<string, Discreteness>>;
+export type ChannelGroupingOverrides = Readonly<
+  Record<string, Readonly<{ discreteness: Discreteness; column?: readonly CellValue[] }>>
+>;
 
 export interface GroupDerivation {
   /** Canonical group id per row, renumbered by first occurrence (0-based). */
@@ -121,6 +124,7 @@ export function deriveGroups(
   columns: Columns,
   aes: AesMapping,
   declaredDiscreteness: DeclaredDiscreteness = {},
+  channelOverrides: ChannelGroupingOverrides = {},
 ): GroupDerivation {
   const n = rowCount(columns);
 
@@ -165,8 +169,14 @@ export function deriveGroups(
       }
       continue;
     }
-    if (fieldDiscreteness(mapping.field, columns, declaredDiscreteness) === "discrete") {
-      discreteColumns.push({ field: mapping.field, column: columns[mapping.field]! });
+    const override = channelOverrides[channel];
+    const discreteness =
+      override?.discreteness ?? fieldDiscreteness(mapping.field, columns, declaredDiscreteness);
+    if (discreteness === "discrete") {
+      discreteColumns.push({
+        field: mapping.field,
+        column: override?.column ?? columns[mapping.field]!,
+      });
     }
   }
 

@@ -118,10 +118,16 @@ export function resolveCandidateFrameRow(input: {
   let derivedGroup = frame?.groups[frameRow] ?? 0;
 
   if (frame !== undefined && batch.kind === "paths") {
-    // After coord projection, candidate facts pass semanticIndex (pre-render
-    // topology) as primitiveIndex. Render pathOffsets are post-tessellation and
-    // cannot index that space; reconstruct group/local from frame groups instead.
-    if (batch.semanticIndex === undefined) {
+    const explicitFrameRow = batch.frameRowIndex?.[primitiveIndex];
+    if (explicitFrameRow !== undefined && explicitFrameRow < frame.n) {
+      // Style-split lines emit exact frame rows so candidate identity survives
+      // subpath reindexing after mapped stroke-style breaks.
+      frameRow = explicitFrameRow;
+      derivedGroup = frame.groups[frameRow] ?? derivedGroup;
+    } else if (batch.semanticIndex === undefined) {
+      // After coord projection, candidate facts pass semanticIndex (pre-render
+      // topology) as primitiveIndex. Render pathOffsets are post-tessellation and
+      // cannot index that space; reconstruct group/local from frame groups instead.
       // O(log P) subpath lookup (was linear O(P) per vertex → O(V·P) at build).
       // Null = OOB / empty offsets: keep default frameRow/derivedGroup (codex P1).
       const subpath = pathSubpathIndex(batch.pathOffsets, primitiveIndex);

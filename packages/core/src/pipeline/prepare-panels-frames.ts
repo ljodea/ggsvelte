@@ -6,6 +6,7 @@ import { configuredColorScaleType, type PortableSpec } from "@ggsvelte/spec";
 import type { ColumnTable } from "../table.js";
 
 import { bindLayer } from "./bind.js";
+import { configureStyleBindings } from "./bind-layer-style-config.js";
 import type { FacetPanelDef } from "./facets.js";
 import { buildFrame, remapSourceRows } from "./frame.js";
 import { applyPosition } from "./position.js";
@@ -174,6 +175,7 @@ export function buildPanelFrames(input: {
     binding.fill.forcedDiscrete = ["ordinal", "manual"].includes(
       configuredColorScaleType(normalized.scales?.fill) ?? normalized.scales?.fill?.type ?? "",
     );
+    configureStyleBindings(binding, normalized.scales, table);
     bindings.push(binding);
   }
   const temporal = preflightTemporalBindings({

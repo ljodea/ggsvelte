@@ -156,6 +156,11 @@ export const ERROR_CATALOG = {
     summary: "facet.ncol only applies to the wrap form.",
     fix: "Remove ncol, or switch to the wrap form.",
   },
+  "unsupported-geom-aesthetic": {
+    tier: 2,
+    summary: "A mapped style aesthetic is not consumed by the selected geom.",
+    fix: "Remove the mapping or move it to one of the compatible geoms listed in the error.",
+  },
   // --- tier 2 (data-aware; needs inline data or a DataProfile) -------------
   "unknown-field": {
     tier: 2,

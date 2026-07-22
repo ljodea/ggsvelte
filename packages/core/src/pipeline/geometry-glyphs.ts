@@ -5,6 +5,7 @@ import type { GlyphsBatch } from "../scene.js";
 
 import type { LayerFrame, PipelineWarning, ResolvedColorScale } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
+import type { ResolvedStyleScales } from "./geometry-style.js";
 import { removedWarning } from "./geometry-shared.js";
 import { packGlyphsBatch } from "./geometry-glyphs-pack.js";
 import { emitGlyphRows } from "./geometry-glyphs-rows.js";
@@ -13,6 +14,7 @@ export function glyphsBatch(
   frame: LayerFrame,
   fx: Frame,
   color: ResolvedColorScale | null,
+  styles: ResolvedStyleScales,
   warnings: PipelineWarning[],
 ): GlyphsBatch | null {
   const { binding } = frame;
@@ -34,5 +36,5 @@ export function glyphsBatch(
     dy: params.dy ?? 0,
   });
   removedWarning(emitted.removed, binding.index, warnings);
-  return packGlyphsBatch({ frame, emitted, wantsColors, params });
+  return packGlyphsBatch({ frame, emitted, wantsColors, styles, params });
 }

@@ -31,7 +31,7 @@ describe("gallery editorial catalog", () => {
 
   test("projects every manifest entry without changing canonical identity", () => {
     const projected = EXAMPLES.map((entry) => galleryEntryFor(entry));
-    expect(projected).toHaveLength(33);
+    expect(projected).toHaveLength(34);
     expect(projected.map((entry) => entry.id)).toEqual(EXAMPLES.map((entry) => entry.id));
     expect(projected.filter((entry) => entry.featured)).toHaveLength(6);
   });

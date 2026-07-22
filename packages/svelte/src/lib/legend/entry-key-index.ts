@@ -175,7 +175,7 @@ export function buildLegendEntryKeyIndex(
     ReadonlyMap<string, number>
   >();
   for (const sceneLegend of adapter.legends) {
-    if (sceneLegend.type !== "discrete") continue;
+    if (sceneLegend.type !== "discrete" || sceneLegend.interactive === false) continue;
     discreteLegends.push(sceneLegend);
     for (let entryIndex = 0; entryIndex < sceneLegend.entries.length; entryIndex++)
       index.set(legendIdentityKey({ scale: sceneLegend.scale, entryIndex }), []);

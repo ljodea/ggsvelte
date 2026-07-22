@@ -403,6 +403,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "point/style-scales",
+    category: "point",
+    name: "style-scales",
+    title: "Complete style scales",
+    description: "Map size, alpha, linewidth, shape, and linetype with stable legends across SVG and Canvas.",
+    tags: ["point", "line", "size", "alpha", "linewidth", "shape", "linetype", "scales"],
+    docsSection: "Scales & guides",
+    hasData: true,
+  },
+  {
     id: "rule/annotation",
     category: "rule",
     name: "annotation",

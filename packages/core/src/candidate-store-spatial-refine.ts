@@ -6,6 +6,8 @@ import {
   insidePath,
   pathRange,
   pathSemanticNeighborRange,
+  pathSubpathIndex,
+  pointHitDistance,
   segmentDistance,
   segmentIntersectsRect,
 } from "./candidate-geometry.js";
@@ -38,8 +40,7 @@ export function createSpatialRefine(indexes: CandidateStoreIndexes): SpatialRefi
     const x = px - panel.x;
     const y = py - panel.y;
     if (batch.kind === "points") {
-      const d = Math.hypot(px - xs[id]!, py - ys[id]!);
-      return d <= batch.size + hitTolerance ? d : null;
+      return pointHitDistance(batch, i, px - xs[id]!, py - ys[id]!, hitTolerance);
     }
     if (batch.kind === "rects") {
       const rx = batch.rects[i * 4]!;
@@ -85,7 +86,7 @@ export function createSpatialRefine(indexes: CandidateStoreIndexes): SpatialRefi
           batch.segments[i * 4 + 3]!,
         );
       }
-      return d <= batch.linewidth / 2 + hitTolerance ? d : null;
+      return d <= (batch.linewidths?.[i] ?? batch.linewidth) / 2 + hitTolerance ? d : null;
     }
     if (batch.kind === "paths") {
       // One O(log P) range lookup; reuse for fill containment and stroke neighbors.
@@ -117,7 +118,10 @@ export function createSpatialRefine(indexes: CandidateStoreIndexes): SpatialRefi
           );
         }
       }
-      return d <= batch.linewidth / 2 + hitTolerance ? d : null;
+      const subpath = pathSubpathIndex(batch.pathOffsets, i);
+      const linewidth =
+        subpath === null ? batch.linewidth : (batch.linewidths?.[subpath] ?? batch.linewidth);
+      return d <= linewidth / 2 + hitTolerance ? d : null;
     }
     return null;
   };

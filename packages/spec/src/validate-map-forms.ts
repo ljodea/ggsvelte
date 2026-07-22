@@ -17,6 +17,8 @@ const AES_CHANNEL_KEYS = new Set([
   "size",
   "linewidth",
   "alpha",
+  "shape",
+  "linetype",
   "group",
   "label",
   "weight",

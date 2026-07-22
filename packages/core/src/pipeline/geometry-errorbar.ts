@@ -7,9 +7,15 @@
 import type { ErrorbarParams } from "@ggsvelte/spec";
 
 import type { SegmentsBatch } from "../scene.js";
+import { linetypeIndex, type Linetype } from "../scales/style.js";
 
 import type { LayerFrame, PipelineWarning, ResolvedColorScale } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
+import {
+  indexedStyleVector,
+  numericStyleVector,
+  type ResolvedStyleScales,
+} from "./geometry-style.js";
 import { DEFAULT_RULE_LINEWIDTH, removedWarning } from "./geometry-shared.js";
 import { emitErrorbarRows } from "./geometry-errorbar-rows.js";
 import { makeErrorbarXSpan } from "./geometry-errorbar-width.js";
@@ -20,6 +26,7 @@ export function errorbarBatch(
   frame: LayerFrame,
   fx: Frame,
   color: ResolvedColorScale | null,
+  styles: ResolvedStyleScales,
   warnings: PipelineWarning[],
 ): SegmentsBatch | null {
   const { binding } = frame;
@@ -48,9 +55,31 @@ export function errorbarBatch(
     segments: emitted.segments,
     rowIndex: emitted.rowIndex,
     stroke: binding.color.constant,
-    linewidth: params.linewidth ?? DEFAULT_RULE_LINEWIDTH,
-    alpha: params.alpha ?? 1,
+    linewidth:
+      typeof binding.linewidth?.constant === "number"
+        ? binding.linewidth.constant
+        : (params.linewidth ?? DEFAULT_RULE_LINEWIDTH),
+    alpha:
+      typeof binding.alpha?.constant === "number" ? binding.alpha.constant : (params.alpha ?? 1),
+    ...(typeof binding.linetype?.constant === "string" && {
+      linetype: binding.linetype.constant as Linetype,
+    }),
   };
+  const linewidths = numericStyleVector(frame, "linewidth", emitted.styleRows, styles);
+  const alphas = numericStyleVector(frame, "alpha", emitted.styleRows, styles);
+  const linetypeIndexes = indexedStyleVector(
+    frame,
+    "linetype",
+    emitted.styleRows,
+    styles,
+    (value) => linetypeIndex(value as Linetype),
+  );
+  if (linewidths !== undefined) batch.linewidths = linewidths;
+  if (alphas !== undefined) {
+    batch.alpha = 1;
+    batch.alphas = alphas;
+  }
+  if (linetypeIndexes !== undefined) batch.linetypeIndexes = linetypeIndexes;
   if (wantsColors && emitted.strokes !== null) batch.strokes = emitted.strokes;
   return batch;
 }

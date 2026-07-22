@@ -194,6 +194,59 @@ export const PIPELINE_ERROR_CATALOG = {
     summary: "A sequential color/fill domain is invalid for its requested transform.",
     fix: "Use positive endpoints for log10, non-negative endpoints for sqrt, or identity.",
   },
+  "unsupported-aesthetic-scale": {
+    summary: "A finite shape/linetype aesthetic was configured as a continuous scale.",
+    fix: "Use a binned scale for quantitative values or an ordinal scale for categories.",
+  },
+  "unsupported-geom-aesthetic": {
+    summary: "A mapped style aesthetic is not consumed by the selected geom.",
+    fix: "Remove the mapping or move it to one of the compatible geoms listed in the error.",
+  },
+  "unsupported-annotation-style": {
+    summary:
+      "A fixed-intercept annotation rule maps a style to a field or after-stat column, but it has no data rows to map.",
+    fix: "Use a constant style value (optionally { value, scale: true }) on the annotation rule.",
+  },
+  "invalid-aesthetic-constant": {
+    summary: "A literal style constant is outside the aesthetic's supported output domain.",
+    fix: "Use a positive size/linewidth, alpha in [0,1], or a documented shape/linetype name.",
+  },
+  "style-temporal-parse": {
+    summary: "A temporal numeric style scale could not parse the complete mapped column.",
+    fix: "Set the exact parser, correct the rejected values, or explicitly choose censoring.",
+  },
+  "style-temporal-kind": {
+    summary: "A temporal numeric style scale requested the wrong date/datetime precision.",
+    fix: "Use the matching date/datetime helper or correct the source precision.",
+  },
+  "style-manual-domain-range": {
+    summary: "A manual style scale has different domain and range lengths.",
+    fix: "Provide exactly one output style for every domain value.",
+  },
+  "style-palette-exhausted": {
+    summary: "A finite style scale needs more distinguishable outputs than its range provides.",
+    fix: "Provide a larger range, reduce categories/bins, or deliberately opt into cycling.",
+  },
+  "style-domain-empty": {
+    summary: "No finite values can train the requested numeric or binned style scale.",
+    fix: "Correct the mapped values or provide a valid explicit domain.",
+  },
+  "style-domain-invalid": {
+    summary: "An explicit style domain is malformed or contradicts its binned boundaries.",
+    fix: "Provide two finite semantic endpoints matching the first and last boundaries.",
+  },
+  "style-range-invalid": {
+    summary: "A numeric sequential/binned style range has fewer than two endpoints.",
+    fix: "Provide at least two valid output values in the aesthetic's supported bounds.",
+  },
+  "style-binned-breaks": {
+    summary: "Binned style boundaries are missing, non-finite, duplicated, or unordered.",
+    fix: "Provide 2–65 strictly increasing numeric boundaries.",
+  },
+  "stat-channel-unsupported": {
+    summary: "A { stat } style mapping names an output the selected stat does not publish.",
+    fix: "Use a generated output listed for that stat or map the original field instead.",
+  },
   "unknown-theme": {
     summary: "spec.theme names a theme that is not registered.",
     fix: "Use a registered name (default, light, dark, minimal) or a theme object.",
@@ -258,15 +311,33 @@ export const PIPELINE_WARNING_CATALOG = {
     summary:
       "Invalid, unmapped, transformed, or censored color/fill values render with the configured unknown color (count in message).",
   },
+  "style-temporal-censored": {
+    summary: "A temporal numeric style parser censored invalid source values by explicit request.",
+  },
+  "style-na-values": {
+    summary: "Missing mapped style values use the configured NA output.",
+  },
+  "style-unknown-values": {
+    summary: "Invalid or out-of-domain mapped style values use the configured unknown output.",
+  },
+  "style-palette-exhausted": {
+    summary: "A finite style range cycled after explicit author opt-in.",
+  },
+  "style-fingerprint-mismatch": {
+    summary: "Restored style state used a different output range; assignments start fresh.",
+  },
+  "style-version-mismatch": {
+    summary: "Restored style state has an unknown schema version; assignments start fresh.",
+  },
+  "style-out-of-domain": {
+    summary: "Values outside an explicit style domain use the unknown output.",
+  },
   "invalid-label-format": {
     summary: "A labels format string was not recognized; the default format is used.",
   },
   "unknown-edition": {
     summary:
       "The spec targets a defaults edition this build does not know; the latest known edition's defaults are used.",
-  },
-  "stat-channel-unsupported": {
-    summary: "A { stat } channel is mapped where this milestone only supports it on y.",
   },
   "color-on-fill-geom": {
     summary:

@@ -34,9 +34,8 @@ describe("temporal scale authoring surfaces", () => {
     expect(temporal?.helpers).toContain("scale_x_date");
     expect(temporal?.helpers).toContain("scaleYDatetime");
     expect(
-      SCALE_CAPABILITIES.find((capability) => capability.family === "mapped-style-reserved")
-        ?.runtime,
-    ).toBe("schema-only");
+      SCALE_CAPABILITIES.find((capability) => capability.family === "numeric-style")?.runtime,
+    ).toBe("implemented");
   });
 
   it("exports binding-identical camel and ggplot2 aliases", () => {

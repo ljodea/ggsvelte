@@ -1,0 +1,48 @@
+{
+  "id": "52-complete-style-scales",
+  "kind": "chart",
+  "prompt": "Plot response against dose as points. Map magnitude to continuous point size, confidence to continuous alpha, and cohort to discrete shape. Keep the semantic fields in the spec instead of precomputing radii, opacity, or symbols.",
+  "dataProfile": {
+    "fields": [
+      { "name": "dose", "type": "quantitative" },
+      { "name": "response", "type": "quantitative" },
+      { "name": "magnitude", "type": "quantitative" },
+      { "name": "confidence", "type": "quantitative" },
+      { "name": "cohort", "type": "nominal" }
+    ],
+    "rowCount": 4
+  },
+  "data": {
+    "main": [
+      { "dose": 1, "response": 2.1, "magnitude": 10, "confidence": 0.4, "cohort": "control" },
+      { "dose": 2, "response": 3.2, "magnitude": 25, "confidence": 0.7, "cohort": "control" },
+      { "dose": 1, "response": 2.8, "magnitude": 18, "confidence": 0.6, "cohort": "treated" },
+      { "dose": 2, "response": 4.4, "magnitude": 40, "confidence": 0.9, "cohort": "treated" }
+    ]
+  },
+  "gold": {
+    "edition": 2,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "point",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "dose" },
+          "y": { "field": "response" },
+          "size": { "field": "magnitude" },
+          "alpha": { "field": "confidence" },
+          "shape": { "field": "cohort" }
+        }
+      }
+    ],
+    "scales": {
+      "size": { "type": "sequential" },
+      "alpha": { "type": "sequential" },
+      "shape": { "type": "ordinal" }
+    }
+  },
+  "expectRefusal": false,
+  "notes": "The deterministic agent must preserve semantic style mappings and select numeric versus finite scale families."
+}

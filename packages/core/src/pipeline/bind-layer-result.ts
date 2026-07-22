@@ -17,6 +17,11 @@ export function makeLayerBinding(input: {
   ymaxField: string | null;
   color: LayerBinding["color"];
   fill: LayerBinding["fill"];
+  size: LayerBinding["size"];
+  linewidth: LayerBinding["linewidth"];
+  alpha: LayerBinding["alpha"];
+  shape: LayerBinding["shape"];
+  linetype: LayerBinding["linetype"];
   labelField: string | null;
   labelConstant: string | null;
   weightField: string | null;
@@ -34,6 +39,11 @@ export function makeLayerBinding(input: {
     ymaxField: input.ymaxField,
     color: input.color,
     fill: input.fill,
+    size: input.size,
+    linewidth: input.linewidth,
+    alpha: input.alpha,
+    shape: input.shape,
+    linetype: input.linetype,
     labelField: input.labelField,
     labelConstant: input.labelConstant,
     weightField: input.weightField,

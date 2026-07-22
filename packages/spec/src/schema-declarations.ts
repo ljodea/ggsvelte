@@ -20,12 +20,186 @@ import { TemporalParserSpecSchema } from "./temporal-parse.js";
 
 import {
   COLOR_SCHEME_NAME_SCHEMAS,
+  LINETYPE_NAME_SCHEMAS,
   MAX_BINNED_BREAKS,
+  POINT_SHAPE_NAME_SCHEMAS,
   THEME_NAMES,
   THEME_NAME_SCHEMAS,
 } from "./schema-names.js";
 
 const forbiddenColorOption = () => Type.Optional(Type.Never());
+const forbiddenStyleOption = () => Type.Optional(Type.Never());
+
+function numericStyleScaleSpec(rangeValue: ReturnType<typeof Type.Number>, description: string) {
+  return Type.Intersect([
+    Type.Object(
+      {
+        type: Type.Optional(
+          Type.Union([
+            Type.Literal("ordinal"),
+            Type.Literal("sequential"),
+            Type.Literal("binned"),
+            Type.Literal("manual"),
+            Type.Literal("identity"),
+          ]),
+        ),
+        temporalKind: Type.Optional(Type.Union([Type.Literal("date"), Type.Literal("datetime")])),
+        parse: Type.Optional(Type.Ref("TemporalParserSpec")),
+        parseFailure: Type.Optional(Type.Union([Type.Literal("error"), Type.Literal("censor")])),
+        timezone: Type.Optional(Type.String({ minLength: 1, maxLength: 128 })),
+        disambiguation: Type.Optional(
+          Type.Union([
+            Type.Literal("compatible"),
+            Type.Literal("earlier"),
+            Type.Literal("later"),
+            Type.Literal("reject"),
+          ]),
+        ),
+        domain: Type.Optional(Type.Array(Type.Ref("DomainValue"), { minItems: 1 })),
+        domainMode: Type.Optional(Type.Union([Type.Literal("grow"), Type.Literal("data")])),
+        breaks: Type.Optional(
+          Type.Array(Type.Union([Type.Number(), Type.String()]), { minItems: 2 }),
+        ),
+        range: Type.Optional(Type.Array(rangeValue, { minItems: 1 })),
+        reverse: Type.Optional(Type.Boolean()),
+        oob: Type.Optional(Type.Union([Type.Literal("censor"), Type.Literal("squish")])),
+        naValue: Type.Optional(rangeValue),
+        unknownValue: Type.Optional(rangeValue),
+        onExhaust: Type.Optional(Type.Union([Type.Literal("cycle"), Type.Literal("error")])),
+        labels: Type.Optional(Type.String()),
+      },
+      { additionalProperties: false, description },
+    ),
+    Type.Union([
+      Type.Object({
+        type: Type.Literal("binned"),
+        domain: Type.Optional(Type.Array(Type.Ref("DomainValue"), { minItems: 2, maxItems: 2 })),
+        breaks: Type.Optional(
+          Type.Array(Type.Union([Type.Number(), Type.String()]), {
+            minItems: 2,
+            maxItems: MAX_BINNED_BREAKS + 1,
+          }),
+        ),
+        range: Type.Optional(Type.Array(rangeValue, { minItems: 2 })),
+        domainMode: forbiddenStyleOption(),
+        onExhaust: forbiddenStyleOption(),
+      }),
+      Type.Object({
+        type: Type.Literal("manual"),
+        range: Type.Array(rangeValue, { minItems: 1 }),
+        temporalKind: forbiddenStyleOption(),
+        parse: forbiddenStyleOption(),
+        parseFailure: forbiddenStyleOption(),
+        timezone: forbiddenStyleOption(),
+        disambiguation: forbiddenStyleOption(),
+        domainMode: forbiddenStyleOption(),
+        breaks: forbiddenStyleOption(),
+        reverse: forbiddenStyleOption(),
+        oob: forbiddenStyleOption(),
+        onExhaust: forbiddenStyleOption(),
+        labels: forbiddenStyleOption(),
+      }),
+      Type.Object({
+        type: Type.Literal("identity"),
+        temporalKind: forbiddenStyleOption(),
+        parse: forbiddenStyleOption(),
+        parseFailure: forbiddenStyleOption(),
+        timezone: forbiddenStyleOption(),
+        disambiguation: forbiddenStyleOption(),
+        domain: forbiddenStyleOption(),
+        domainMode: forbiddenStyleOption(),
+        breaks: forbiddenStyleOption(),
+        range: forbiddenStyleOption(),
+        reverse: forbiddenStyleOption(),
+        oob: forbiddenStyleOption(),
+        onExhaust: forbiddenStyleOption(),
+        labels: forbiddenStyleOption(),
+      }),
+      Type.Object({
+        type: Type.Literal("ordinal"),
+        temporalKind: forbiddenStyleOption(),
+        parse: forbiddenStyleOption(),
+        parseFailure: forbiddenStyleOption(),
+        timezone: forbiddenStyleOption(),
+        disambiguation: forbiddenStyleOption(),
+        breaks: forbiddenStyleOption(),
+        oob: forbiddenStyleOption(),
+        labels: forbiddenStyleOption(),
+      }),
+      Type.Object({
+        type: Type.Literal("sequential"),
+        domain: Type.Optional(Type.Array(Type.Ref("DomainValue"), { minItems: 2, maxItems: 2 })),
+        range: Type.Optional(Type.Array(rangeValue, { minItems: 2 })),
+        domainMode: forbiddenStyleOption(),
+        onExhaust: forbiddenStyleOption(),
+      }),
+      Type.Object({ type: forbiddenStyleOption() }),
+    ]),
+  ]);
+}
+
+function finiteStyleScaleSpec(rangeValue: ReturnType<typeof Type.Union>, description: string) {
+  return Type.Intersect([
+    Type.Object(
+      {
+        type: Type.Optional(
+          Type.Union([
+            Type.Literal("ordinal"),
+            Type.Literal("binned"),
+            Type.Literal("manual"),
+            Type.Literal("identity"),
+          ]),
+        ),
+        domain: Type.Optional(Type.Array(Type.Ref("DomainValue"), { minItems: 1 })),
+        domainMode: Type.Optional(Type.Union([Type.Literal("grow"), Type.Literal("data")])),
+        breaks: Type.Optional(Type.Array(Type.Number(), { minItems: 2 })),
+        range: Type.Optional(Type.Array(rangeValue, { minItems: 1 })),
+        reverse: Type.Optional(Type.Boolean()),
+        naValue: Type.Optional(rangeValue),
+        unknownValue: Type.Optional(rangeValue),
+        onExhaust: Type.Optional(Type.Union([Type.Literal("cycle"), Type.Literal("error")])),
+        labels: Type.Optional(Type.String()),
+      },
+      { additionalProperties: false, description },
+    ),
+    Type.Union([
+      Type.Object({
+        type: Type.Literal("binned"),
+        domain: Type.Optional(Type.Array(Type.Number(), { minItems: 2, maxItems: 2 })),
+        breaks: Type.Optional(
+          Type.Array(Type.Number(), { minItems: 2, maxItems: MAX_BINNED_BREAKS + 1 }),
+        ),
+        domainMode: forbiddenStyleOption(),
+        onExhaust: forbiddenStyleOption(),
+      }),
+      Type.Object({
+        type: Type.Literal("manual"),
+        range: Type.Array(rangeValue, { minItems: 1 }),
+        domainMode: forbiddenStyleOption(),
+        breaks: forbiddenStyleOption(),
+        reverse: forbiddenStyleOption(),
+        onExhaust: forbiddenStyleOption(),
+        labels: forbiddenStyleOption(),
+      }),
+      Type.Object({
+        type: Type.Literal("identity"),
+        domain: forbiddenStyleOption(),
+        domainMode: forbiddenStyleOption(),
+        breaks: forbiddenStyleOption(),
+        range: forbiddenStyleOption(),
+        reverse: forbiddenStyleOption(),
+        onExhaust: forbiddenStyleOption(),
+        labels: forbiddenStyleOption(),
+      }),
+      Type.Object({
+        type: Type.Literal("ordinal"),
+        breaks: forbiddenStyleOption(),
+        labels: forbiddenStyleOption(),
+      }),
+      Type.Object({ type: forbiddenStyleOption() }),
+    ]),
+  ]);
+}
 
 export const SpecDeclarations = {
   CellValue: Type.Union([Type.String(), Type.Number(), Type.Boolean(), Type.Null()], {
@@ -176,6 +350,16 @@ export const SpecDeclarations = {
           description: "Opacity channel, 0 (transparent) to 1 (opaque).",
         }),
       ),
+      shape: Type.Optional(
+        Type.Ref("ChannelValue", {
+          description: "Finite point-symbol channel. Continuous values require a binned scale.",
+        }),
+      ),
+      linetype: Type.Optional(
+        Type.Ref("ChannelValue", {
+          description: "Finite stroke-pattern channel. Continuous values require a binned scale.",
+        }),
+      ),
       group: Type.Optional(
         Type.Ref("ChannelValue", {
           description:
@@ -232,8 +416,9 @@ export const SpecDeclarations = {
         }),
       ),
       shape: Type.Optional(
-        Type.Union([Type.Literal("circle"), Type.Literal("square"), Type.Literal("triangle")], {
-          description: 'Point shape. One of "circle", "square", "triangle". Default "circle".',
+        Type.Union(POINT_SHAPE_NAME_SCHEMAS, {
+          description:
+            'Point shape. One of "circle", "triangle", "square", "diamond", "plus", "cross". Default "circle".',
         }),
       ),
     },
@@ -1492,12 +1677,37 @@ export const SpecDeclarations = {
     ]),
   ]),
 
+  PositiveStyleScaleSpec: numericStyleScaleSpec(
+    Type.Number({ exclusiveMinimum: 0 }),
+    "Configuration for a positive numeric size or linewidth scale.",
+  ),
+
+  AlphaScaleSpec: numericStyleScaleSpec(
+    Type.Number({ minimum: 0, maximum: 1 }),
+    "Configuration for an opacity scale constrained to [0, 1].",
+  ),
+
+  ShapeScaleSpec: finiteStyleScaleSpec(
+    Type.Union(POINT_SHAPE_NAME_SCHEMAS),
+    "Configuration for a finite point-shape scale.",
+  ),
+
+  LinetypeScaleSpec: finiteStyleScaleSpec(
+    Type.Union(LINETYPE_NAME_SCHEMAS),
+    "Configuration for a finite line-pattern scale.",
+  ),
+
   Scales: Type.Object(
     {
       x: Type.Optional(Type.Ref("PositionScaleSpec")),
       y: Type.Optional(Type.Ref("PositionScaleSpec")),
       color: Type.Optional(Type.Ref("ColorScaleSpec")),
       fill: Type.Optional(Type.Ref("ColorScaleSpec")),
+      size: Type.Optional(Type.Ref("PositiveStyleScaleSpec")),
+      linewidth: Type.Optional(Type.Ref("PositiveStyleScaleSpec")),
+      alpha: Type.Optional(Type.Ref("AlphaScaleSpec")),
+      shape: Type.Optional(Type.Ref("ShapeScaleSpec")),
+      linetype: Type.Optional(Type.Ref("LinetypeScaleSpec")),
     },
     {
       additionalProperties: false,
@@ -1645,6 +1855,21 @@ export const SpecDeclarations = {
       ),
       fill: Type.Optional(
         Type.String({ description: "Fill legend title. Defaults to the mapped field name." }),
+      ),
+      size: Type.Optional(
+        Type.String({ description: "Size legend title. Defaults to the mapped field name." }),
+      ),
+      linewidth: Type.Optional(
+        Type.String({ description: "Linewidth legend title. Defaults to the mapped field name." }),
+      ),
+      alpha: Type.Optional(
+        Type.String({ description: "Alpha legend title. Defaults to the mapped field name." }),
+      ),
+      shape: Type.Optional(
+        Type.String({ description: "Shape legend title. Defaults to the mapped field name." }),
+      ),
+      linetype: Type.Optional(
+        Type.String({ description: "Linetype legend title. Defaults to the mapped field name." }),
       ),
     },
     {

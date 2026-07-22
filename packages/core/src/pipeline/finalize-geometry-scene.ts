@@ -37,7 +37,7 @@ export function finalizeGeometryAndScene(input: {
     warnings,
   } = input;
   const { facetPanels, panelFrames } = prepared;
-  const { panelScales, colorResolution, fillResolution } = trained;
+  const { panelScales, colorResolution, fillResolution, styleResolutions } = trained;
 
   // LAYER-major order: layer order is paint order across the whole plot, and
   // it keeps each layer's batches contiguous so strata planning (contiguous
@@ -51,6 +51,12 @@ export function finalizeGeometryAndScene(input: {
     panelScales,
     color: colorResolution.resolved,
     fill: fillResolution.resolved,
+    styles: Object.fromEntries(
+      Object.entries(styleResolutions).map(([aesthetic, resolution]) => [
+        aesthetic,
+        resolution.resolved,
+      ]),
+    ) as import("./geometry-style.js").ResolvedStyleScales,
     flip,
     coordProjectors,
     warnings,

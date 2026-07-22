@@ -4,7 +4,7 @@
 import type { CellValue } from "../table.js";
 
 import type { PositionConversionContext } from "./temporal-position.js";
-import type { LayerBinding } from "./types.js";
+import type { LayerBinding, LayerFrame } from "./types.js";
 
 export type CarriedColumnOf = (
   result: { carried: Record<string, CellValue[]> },
@@ -14,6 +14,26 @@ export type CarriedColumnOf = (
 export function makeColumnOf(binding: LayerBinding): CarriedColumnOf {
   return (result, x) => (field) =>
     field === null ? null : field === binding.xField ? x : (result.carried[field] ?? null);
+}
+
+/** Resolve source/carried and after-stat style columns through one contract. */
+export function styleColumns(
+  binding: LayerBinding,
+  columnOf: (field: string | null) => readonly CellValue[] | null,
+  computed: Readonly<Record<string, Float64Array | readonly CellValue[]>> = {},
+): Pick<
+  LayerFrame,
+  "sizeValues" | "linewidthValues" | "alphaValues" | "shapeValues" | "linetypeValues"
+> {
+  const valueOf = (style: LayerBinding["size"]) =>
+    style.statColumn === null ? columnOf(style.field) : (computed[style.statColumn] ?? null);
+  return {
+    sizeValues: valueOf(binding.size),
+    linewidthValues: valueOf(binding.linewidth),
+    alphaValues: valueOf(binding.alpha),
+    shapeValues: valueOf(binding.shape),
+    linetypeValues: valueOf(binding.linetype),
+  };
 }
 
 /**

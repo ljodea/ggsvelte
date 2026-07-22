@@ -2,7 +2,10 @@
 /**
  * Canvas path (and path-subset) drawers.
  */
-import type { PathsBatch } from "../scene.js";
+import { LINETYPE_NAMES } from "@ggsvelte/spec";
+
+import type { PathsBatch, RectsBatch, SegmentsBatch } from "../scene.js";
+import { LINETYPE_DASHES, type Linetype } from "../scales/style.js";
 import type { ThemeTokens } from "../theme.js";
 import { themeVar } from "../theme.js";
 import type { ColorResolver } from "./canvas-dom.js";
@@ -30,6 +33,17 @@ function traceSubpath(
   if (batch.closed === true) ctx.closePath();
 }
 
+function linetypeAt(batch: PathsBatch | SegmentsBatch | RectsBatch, index: number): Linetype {
+  return batch.linetypeIndexes === undefined
+    ? (batch.linetype ?? "solid")
+    : LINETYPE_NAMES[batch.linetypeIndexes[index]!]!;
+}
+
+function applyDash(ctx: CanvasRenderingContext2D, linetype: Linetype): void {
+  if (typeof ctx.setLineDash !== "function") return;
+  ctx.setLineDash(LINETYPE_DASHES[LINETYPE_NAMES.indexOf(linetype)] ?? []);
+}
+
 export function drawPaths(
   ctx: CanvasRenderingContext2D,
   batch: PathsBatch,
@@ -38,23 +52,28 @@ export function drawPaths(
 ): void {
   const isArea = batch.fills !== undefined;
   const subpaths = batch.pathOffsets.length - 1;
+  const baseAlpha = ctx.globalAlpha;
   for (let s = 0; s < subpaths; s++) {
     const start = batch.pathOffsets[s]!;
     const end = batch.pathOffsets[s + 1]!;
     if (end <= start) continue;
     ctx.beginPath();
     traceSubpath(ctx, batch, start, end);
+    ctx.globalAlpha = baseAlpha * (batch.alphas?.[s] ?? 1);
     if (isArea) {
       ctx.fillStyle = resolve(batch.fills![s] ?? themeVar("accent", theme));
       ctx.fill();
     } else {
       ctx.strokeStyle = resolve(batch.strokes[s] ?? themeVar("ink", theme));
-      ctx.lineWidth = batch.linewidth;
+      ctx.lineWidth = batch.linewidths?.[s] ?? batch.linewidth;
+      applyDash(ctx, linetypeAt(batch, s));
       ctx.lineJoin = "round";
       ctx.lineCap = "round";
       ctx.stroke();
     }
   }
+  ctx.globalAlpha = baseAlpha;
+  applyDash(ctx, "solid");
 }
 
 export function drawPathsSubset(
@@ -67,6 +86,7 @@ export function drawPathsSubset(
 ): void {
   const isArea = batch.fills !== undefined;
   const subpaths = batch.pathOffsets.length - 1;
+  const baseAlpha = ctx.globalAlpha;
   for (let s = 0; s < subpaths; s++) {
     if (maskIncludes(mask, s) !== focused) continue;
     const start = batch.pathOffsets[s]!;
@@ -74,22 +94,21 @@ export function drawPathsSubset(
     if (end <= start) continue;
     ctx.beginPath();
     traceSubpath(ctx, batch, start, end);
+    ctx.globalAlpha = baseAlpha * (batch.alphas?.[s] ?? 1);
     if (isArea) {
       ctx.fillStyle = resolve(batch.fills![s] ?? themeVar("accent", theme));
       ctx.fill();
     } else {
       ctx.strokeStyle = resolve(batch.strokes[s] ?? themeVar("ink", theme));
-      ctx.lineWidth = batch.linewidth;
+      ctx.lineWidth = batch.linewidths?.[s] ?? batch.linewidth;
+      applyDash(ctx, linetypeAt(batch, s));
       ctx.lineJoin = "round";
       ctx.lineCap = "round";
       ctx.stroke();
     }
   }
+  ctx.globalAlpha = baseAlpha;
+  applyDash(ctx, "solid");
 }
 
-/**
- * Trace one segment as a disconnected subpath (moveTo + lineTo).
- * Multiple segments share one path + stroke when strokeStyle matches —
- * same multi-subpath contract points use for mono/run fills (overlapping
- * antialiasing / alpha compositing differs from per-primitive stroke()).
- */
+export { applyDash, linetypeAt };

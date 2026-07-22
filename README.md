@@ -341,7 +341,7 @@ use a built-in theme or explicit theme tokens.
   and text can occupy the same plot.
 - Statistics and positions include binning, density, loess and linear fits, stacking,
   filling, dodging, and seeded jitter.
-- Scales cover continuous, discrete, temporal, binned, transformed, and color data.
+- Scales cover continuous, discrete, temporal, binned, transformed, color/fill, size, linewidth, alpha, shape, and linetype data.
 - Facets train fixed or free panel scales; coordinates can flip axes or project final geometry after statistics.
 - Inspection, selection, zoom, and legend controls emit semantic Svelte events.
 - Ordinary layers render as SVG. Dense point layers move to canvas while axes, text,

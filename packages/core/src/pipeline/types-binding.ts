@@ -1,7 +1,7 @@
 /**
  * Layer binding contract: aes field resolution result for one layer.
  */
-import type { LayerSpec } from "@ggsvelte/spec";
+import type { LayerSpec, TemporalParserSpec } from "@ggsvelte/spec";
 
 import type { CellValue } from "../table.js";
 import type { ColumnTransformConfig } from "../scales/transform.js";
@@ -17,6 +17,35 @@ export interface ColorBinding {
   scaledConstant: CellValue | null;
   /** Explicit ordinal scale override for grouping semantics. */
   forcedDiscrete?: boolean;
+}
+
+export interface StyleBinding {
+  field: string | null;
+  /** Stat-generated column mapped with { stat }. */
+  statColumn: string | null;
+  /** Literal (non-scaled) constant, if any. */
+  constant: CellValue | null;
+  /** Scaled constant ({ value, scale: true }), if any. */
+  scaledConstant: CellValue | null;
+  /** Explicit discrete family override for grouping semantics. */
+  forcedDiscrete?: boolean;
+  forcedContinuous?: boolean;
+  /** Binned family groups on bin ids, not raw numeric values. */
+  binned?: boolean;
+  binBreaks?: readonly CellValue[];
+  binDomain?: readonly CellValue[];
+  /**
+   * Global semantic [low, high] captured before faceting, used as the default
+   * bin extent so panel-local grouping matches the globally-trained style scale
+   * when neither binDomain nor binBreaks is authored.
+   */
+  binExtent?: readonly [number, number];
+  binCount?: number;
+  binTemporal?: boolean;
+  binParse?: TemporalParserSpec;
+  binTimezone?: string;
+  binDisambiguation?: "compatible" | "earlier" | "later" | "reject";
+  binOob?: "censor" | "squish";
 }
 
 export type RuleForm = "annotation" | "vertical" | "horizontal";
@@ -44,6 +73,11 @@ export interface LayerBinding {
   ymaxField: string | null;
   color: ColorBinding;
   fill: ColorBinding;
+  size: StyleBinding;
+  linewidth: StyleBinding;
+  alpha: StyleBinding;
+  shape: StyleBinding;
+  linetype: StyleBinding;
   labelField: string | null;
   labelConstant: string | null;
   weightField: string | null;

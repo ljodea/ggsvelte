@@ -273,6 +273,17 @@ describe("guide sections cover their catalogs", () => {
     expect(renderMarkdown(UPGRADING_MD)).toContain('id="0-1-to-0-2"');
   });
 
+  it("keeps mapped style migration guidance on the release that owns it", () => {
+    const styleMigration = UPGRADING_MD.indexOf(
+      "### Map style semantics instead of precomputing outputs",
+    );
+    expect(UPGRADING_MD).toContain("## 0.7 to 0.8");
+    expect(renderMarkdown(UPGRADING_MD)).toContain('id="0-7-to-0-8"');
+    expect(styleMigration).toBeGreaterThan(UPGRADING_MD.indexOf("## 0.7 to 0.8"));
+    expect(styleMigration).toBeLessThan(UPGRADING_MD.indexOf("## 0.6 to 0.7"));
+    expect(UPGRADING_MD).toContain("Before 0.8, applications commonly precomputed a point radius");
+  });
+
   it("keeps generic color/fill migration guidance on the release that owns it", () => {
     const colorMigration = UPGRADING_MD.indexOf("### Choose explicit color/fill families");
     expect(UPGRADING_MD).toContain("## 0.6 to 0.7");

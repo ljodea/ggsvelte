@@ -32,8 +32,7 @@ export function resolvePanelLayoutChrome(input: PanelLayoutChromeInput): PanelLa
     warnings: input.warnings,
   });
   const legends = resolvePanelLayoutLegends({
-    colorLegend: input.colorLegend,
-    fillLegend: input.fillLegend,
+    legendInputs: input.legendInputs,
     legendOrder: input.legendOrder,
     theme: input.theme,
     options: input.options,

@@ -74,6 +74,12 @@ export function buildIdentityFrame(
     rowIndex: Uint32Array.from({ length: n }, (_, i) => i),
     colorValues: binding.color.field === null ? null : table.column(binding.color.field),
     fillValues: binding.fill.field === null ? null : table.column(binding.fill.field),
+    sizeValues: binding.size.field === null ? null : table.column(binding.size.field),
+    linewidthValues:
+      binding.linewidth.field === null ? null : table.column(binding.linewidth.field),
+    alphaValues: binding.alpha.field === null ? null : table.column(binding.alpha.field),
+    shapeValues: binding.shape.field === null ? null : table.column(binding.shape.field),
+    linetypeValues: binding.linetype.field === null ? null : table.column(binding.linetype.field),
     labelValues: binding.labelField === null ? null : table.column(binding.labelField),
     ...emptyFrameExtras(),
     xBinId:

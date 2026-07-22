@@ -42,6 +42,11 @@ export function resolveLayerFields(
     push("ymax", binding.ymaxField);
     push("color", binding.color.field);
     push("fill", binding.fill.field);
+    for (const channel of ["size", "linewidth", "alpha", "shape", "linetype"] as const) {
+      const style = binding[channel];
+      push(channel, style.field);
+      if (style.statColumn !== null) push(channel, style.statColumn, "stat");
+    }
     push("label", binding.labelField);
     push("weight", binding.weightField);
     return fields;

@@ -17,8 +17,8 @@ function resolveColorLegendFormat(input: {
   domain: readonly [number, number];
   temporalKind: TemporalKind | null;
   transform?: "identity" | "log10" | "sqrt";
-  config: ColorScaleSpec | undefined;
-  name: "color" | "fill";
+  config: Pick<ColorScaleSpec, "labels" | "timezone" | "transform"> | undefined;
+  name: string;
   warnings: PipelineWarning[];
 }): ColorLegendFormatter {
   const { domain, temporalKind, config, name, warnings } = input;
@@ -92,6 +92,16 @@ function resolveColorLegendFormat(input: {
     }
   }
   return { label, fullLabel: label };
+}
+
+export function resolveStyleLegendFormat(input: {
+  domain: readonly [number, number];
+  temporalKind: TemporalKind | null;
+  config: { labels?: string; timezone?: string } | undefined;
+  name: string;
+  warnings: PipelineWarning[];
+}): ColorLegendFormatter {
+  return resolveColorLegendFormat(input);
 }
 
 export function resolveSequentialLegendFormat(

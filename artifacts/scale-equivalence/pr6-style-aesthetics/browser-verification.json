@@ -1,0 +1,21 @@
+{
+  "route": "/examples/point/style-scales",
+  "viewports": [
+    { "width": 1200, "height": 900, "screenshot": "browser-1200.png" },
+    { "width": 375, "height": 812, "screenshot": "browser-375.png" },
+    { "width": 1200, "height": 900, "appearance": "dark", "screenshot": "browser-dark-1200.png" }
+  ],
+  "assertions": {
+    "httpStatus": 200,
+    "consoleErrors": 0,
+    "playgroundSeedAvailable": true,
+    "styleLegendCount": 5,
+    "interactiveLegendTargetCount": 4,
+    "shapeLegendCommit": {
+      "label": "Region: North (shape legend)",
+      "ariaPressed": true,
+      "mutedSouthOpacity": 0.36
+    },
+    "mobileTitleAndSubtitleVisible": true
+  }
+}

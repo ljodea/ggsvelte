@@ -38,16 +38,29 @@ export function assembleFinalizeRenderModel(input: {
   candidates: CandidateStore;
 }): RenderModel {
   const { scene, trained, prepared, panelLayout } = input;
-  const { xTraining, yTraining, panelScales, colorResolution, fillResolution } = trained;
+  const { xTraining, yTraining, panelScales, colorResolution, fillResolution, styleResolutions } =
+    trained;
   return assembleRenderModel({
     scene,
     xScale: xTraining.scale,
     yScale: yTraining.scale,
     color: colorResolution.resolved,
     fill: fillResolution.resolved,
+    styles: Object.fromEntries(
+      Object.entries(styleResolutions).map(([aesthetic, resolution]) => [
+        aesthetic,
+        resolution.resolved,
+      ]),
+    ),
     panelScales,
     colorState: colorResolution.state,
     fillState: fillResolution.state,
+    styleStates: Object.fromEntries(
+      Object.entries(styleResolutions).map(([aesthetic, resolution]) => [
+        aesthetic,
+        resolution.state,
+      ]),
+    ),
     warnings: input.warnings,
     advisories: input.advisories,
     scaleDecisions: prepared.scaleDecisions,
@@ -56,6 +69,9 @@ export function assembleFinalizeRenderModel(input: {
       ...panelLayout.guidePlans,
       ...(colorResolution.guidePlan === null ? [] : [colorResolution.guidePlan]),
       ...(fillResolution.guidePlan === null ? [] : [fillResolution.guidePlan]),
+      ...Object.values(styleResolutions).flatMap((resolution) =>
+        resolution.guidePlan === null ? [] : [resolution.guidePlan],
+      ),
     ]),
     coordProjectors: input.coordProjectors,
     xConversion: prepared.xConversion,

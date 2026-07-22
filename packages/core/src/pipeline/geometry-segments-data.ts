@@ -16,8 +16,20 @@ export function emitDataSegments(input: {
   pushHorizontal: (t: number | undefined, row: number) => void;
   buffers: SegmentEmitBuffers;
   strokes: string[] | null;
+  /** Frame-local rows parallel to buffers (for style vectors). */
+  styleRows: Uint32Array;
 }): void {
-  const { frame, fx, color, wantsColors, pushVertical, pushHorizontal, buffers, strokes } = input;
+  const {
+    frame,
+    fx,
+    color,
+    wantsColors,
+    pushVertical,
+    pushHorizontal,
+    buffers,
+    strokes,
+    styleRows,
+  } = input;
   const { binding } = frame;
 
   for (let row = 0; row < frame.n; row++) {
@@ -30,10 +42,13 @@ export function emitDataSegments(input: {
         frame.rowIndex[row]!,
       );
     }
-    if (wantsColors && color !== null && strokes !== null && buffers.kept > before) {
-      const value =
-        frame.colorValues === null ? binding.color.scaledConstant! : frame.colorValues[row]!;
-      strokes[before] = colorOf(color, value);
+    if (buffers.kept > before) {
+      styleRows[before] = row;
+      if (wantsColors && color !== null && strokes !== null) {
+        const value =
+          frame.colorValues === null ? binding.color.scaledConstant! : frame.colorValues[row]!;
+        strokes[before] = colorOf(color, value);
+      }
     }
   }
 }

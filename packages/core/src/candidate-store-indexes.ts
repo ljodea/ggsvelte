@@ -103,6 +103,11 @@ export function buildCandidateStoreIndexes(
   const yDateList: number[] = [];
   const invalidX = new Map<number, CellValue>();
   const invalidY = new Map<number, CellValue>();
+  const sizeValues: CellValue[] = [];
+  const linewidthValues: CellValue[] = [];
+  const alphaValues: CellValue[] = [];
+  const shapeValues: CellValue[] = [];
+  const linetypeValues: CellValue[] = [];
   const tokens: CanonicalAxisToken[] = [];
   const tokenIndex = new Map<string, number>();
   const remember = (value: CellValue): number => {
@@ -144,6 +149,11 @@ export function buildCandidateStoreIndexes(
       const datum = options.datum?.(buildFacts) ?? {};
       const xValue = datum.xValue ?? null;
       const yValue = datum.yValue ?? null;
+      sizeValues.push(datum.sizeValue ?? null);
+      linewidthValues.push(datum.linewidthValue ?? null);
+      alphaValues.push(datum.alphaValue ?? null);
+      shapeValues.push(datum.shapeValue ?? null);
+      linetypeValues.push(datum.linetypeValue ?? null);
       batchList.push(batchIndex);
       primitiveList.push(primitiveIndex);
       panelList.push(batch.panelIndex);
@@ -215,6 +225,11 @@ export function buildCandidateStoreIndexes(
       y: ys[id]!,
       xValue: logicalValue(id, "x"),
       yValue: logicalValue(id, "y"),
+      sizeValue: sizeValues[id] ?? null,
+      linewidthValue: linewidthValues[id] ?? null,
+      alphaValue: alphaValues[id] ?? null,
+      shapeValue: shapeValues[id] ?? null,
+      linetypeValue: linetypeValues[id] ?? null,
       xToken: xTokenIds[id] === -1 ? null : tokens[xTokenIds[id]!]!,
       yToken: yTokenIds[id] === -1 ? null : tokens[yTokenIds[id]!]!,
       seriesId: series[id]!,

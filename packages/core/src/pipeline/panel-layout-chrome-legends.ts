@@ -19,8 +19,7 @@ export interface PanelLayoutLegends {
 }
 
 export function resolvePanelLayoutLegends(input: {
-  colorLegend: LegendInput | null;
-  fillLegend: LegendInput | null;
+  legendInputs: readonly LegendInput[];
   legendOrder: LegendOrder;
   theme: ThemeTokens;
   options: Pick<RunOptions, "width" | "measureText">;
@@ -33,11 +32,8 @@ export function resolvePanelLayoutLegends(input: {
     tickLength: theme.ticksX || theme.ticksY ? theme.tickLength : 0,
     tickLabelGap: theme.ticksX || theme.ticksY ? 3 : 5,
   };
-  const legendInputs = [input.colorLegend, input.fillLegend].filter(
-    (l): l is LegendInput => l !== null,
-  );
   const legendBlock = buildLegends(
-    legendInputs,
+    input.legendInputs,
     input.legendOrder,
     measurer,
     Math.max(48, options.width * 0.35),

@@ -1,9 +1,10 @@
 /**
- * Scale authoring helpers facade — position (x/y) and color/fill families.
+ * Scale authoring helpers facade — position, color/fill, and style families.
  *
  * Implementation:
  *  - scale-position-helpers.ts — temporal, discrete, continuous, binned, reverse
  *  - scale-color-helpers.ts — color/fill families + configuredColorScaleType
+ *  - scale-style-helpers.ts — numeric and finite-symbol style families
  *
  * Public package imports continue through this module for stable paths.
  */
@@ -112,3 +113,5 @@ export {
   type ManualColorScaleOptions,
   type IdentityColorScaleOptions,
 } from "./scale-color-helpers.js";
+
+export * from "./scale-style-helpers.js";

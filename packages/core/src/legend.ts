@@ -13,19 +13,34 @@ import type { TextMeasurer } from "./layout/measure.js";
 import { truncateToFit } from "./layout/truncate.js";
 import { encodeKey } from "./scales/state.js";
 import { bandKey } from "./scales/train.js";
+import type { Linetype, PointShape } from "./scales/style.js";
 import type { SceneLegend, SceneLegendEntry } from "./scene.js";
+import type { StyleAesthetic } from "@ggsvelte/spec";
 
 export type LegendOrder = "stable-domain" | "present-first-seen" | "sorted";
 
+interface LegendKeyStyle {
+  color?: string;
+  size?: number;
+  linewidth?: number;
+  alpha?: number;
+  shape?: PointShape;
+  linetype?: Linetype;
+}
+
 export interface DiscreteLegendInput {
   kind: "discrete";
-  scale: "color" | "fill";
+  scale: "color" | "fill" | StyleAesthetic;
   title: string;
   /** Values in stable assignment order (the default legend order). */
   domain: readonly unknown[];
   /** Values in first-occurrence order of the CURRENT data. */
   firstSeen: readonly unknown[];
-  colorOf(value: unknown): string | undefined;
+  /** Whether entries have exact raw-value identity for focus/filter interactions. */
+  interactive?: boolean;
+  colorOf?(value: unknown): string | undefined;
+  keyOf?(value: unknown): LegendKeyStyle;
+  labelOf?(value: unknown): string;
 }
 
 export interface RampLegendInput {
@@ -154,18 +169,37 @@ export function buildLegends(
   for (const input of inputs) {
     if (input.kind === "discrete") {
       const values = orderedValues(input, order);
-      const displayLabels = disambiguatedLabels(values);
+      const displayLabels =
+        input.labelOf === undefined
+          ? disambiguatedLabels(values)
+          : values.map((value) => input.labelOf?.(value) ?? "");
       const titleHeight = input.title === "" ? 0 : TITLE_HEIGHT;
-      const maxLabelWidth = Math.max(1, maxWidth - PADDING * 2 - SWATCH_SIZE - SWATCH_GAP);
+      const keys = values.map((value) => input.keyOf?.(value) ?? {});
+      // Grow the swatch so the largest size key renders at its true radius.
+      // Both renderers cap a size/shape key at swatchSize/2, so a fixed 10px
+      // swatch collapses every radius above 5px to an identical dot. Size keys
+      // reach 9px under the default range, so distinct large keys would
+      // otherwise look the same while the plotted marks differ. Sizing the
+      // swatch from the largest key makes the caps non-binding in both the pure
+      // SVG and Svelte renderers (they derive layout from swatchSize).
+      const maxKeyRadius = keys.reduce((max, key) => Math.max(max, key.size ?? 0), 0);
+      const swatchSize = Math.max(SWATCH_SIZE, Math.ceil(maxKeyRadius * 2));
+      const maxLabelWidth = Math.max(1, maxWidth - PADDING * 2 - swatchSize - SWATCH_GAP);
       const entries: SceneLegendEntry[] = [];
       let labelWidth = 0;
       for (let i = 0; i < values.length; i++) {
         const label = truncate(displayLabels[i]!, maxLabelWidth, measurer);
         labelWidth = Math.max(labelWidth, measurer.measureWidth(label, FONT_SIZE));
+        const key = keys[i]!;
         entries.push({
           value: values[i],
           label,
-          color: input.colorOf(values[i]) ?? UNKNOWN_COLOR,
+          color: key.color ?? input.colorOf?.(values[i]) ?? UNKNOWN_COLOR,
+          ...(key.size !== undefined && { size: key.size }),
+          ...(key.linewidth !== undefined && { linewidth: key.linewidth }),
+          ...(key.alpha !== undefined && { alpha: key.alpha }),
+          ...(key.shape !== undefined && { shape: key.shape }),
+          ...(key.linetype !== undefined && { linetype: key.linetype }),
           y: titleHeight + i * LEGEND_ROW_HEIGHT,
         });
       }
@@ -175,18 +209,19 @@ export function buildLegends(
           : Math.min(measurer.measureWidth(input.title, FONT_SIZE), maxWidth - PADDING * 2);
       const boxWidth =
         PADDING * 2 +
-        Math.max(SWATCH_SIZE + SWATCH_GAP + Math.ceil(labelWidth), Math.ceil(titleWidth));
+        Math.max(swatchSize + SWATCH_GAP + Math.ceil(labelWidth), Math.ceil(titleWidth));
       const boxHeight = titleHeight + entries.length * LEGEND_ROW_HEIGHT + PADDING;
       legends.push({
         type: "discrete",
         scale: input.scale,
+        interactive: input.interactive ?? true,
         title: input.title,
         x: 0,
         y,
         width: boxWidth,
         height: boxHeight,
         entries,
-        swatchSize: SWATCH_SIZE,
+        swatchSize,
       });
       width = Math.max(width, boxWidth);
       y += boxHeight + BLOCK_GAP;

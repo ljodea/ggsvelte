@@ -145,6 +145,26 @@ describe("resolveLayerScaledConstants", () => {
     expect(constants[0]?.["color"]).toBe("steelblue");
   });
 
+  it("captures scaled style constants for legend focus/filter keys", () => {
+    const binding = bindLayer(
+      {
+        geom: "point",
+        aes: {
+          x: { field: "x" },
+          y: { field: "y" },
+          shape: { value: "A", scale: true },
+          size: { value: 4, scale: true },
+        },
+      },
+      0,
+      table,
+      [],
+    );
+    const constants = resolveLayerScaledConstants(1, [binding]);
+    expect(constants[0]?.["shape"]).toBe("A");
+    expect(constants[0]?.["size"]).toBe(4);
+  });
+
   it("pads empty bindings to declared layer count (empty-data contract)", () => {
     const constants = resolveLayerScaledConstants(2, []);
     expect(constants).toHaveLength(2);

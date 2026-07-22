@@ -50,6 +50,47 @@ import {
   type TransformedColorScaleOptions,
   type TransformedPositionScaleOptions,
 } from "./scale-helpers.js";
+import {
+  scaleAlphaBinned,
+  scaleAlphaContinuous,
+  scaleAlphaDate,
+  scaleAlphaDatetime,
+  scaleAlphaDiscrete,
+  scaleAlphaIdentity,
+  scaleAlphaManual,
+  scaleLinewidthBinned,
+  scaleLinewidthContinuous,
+  scaleLinewidthDate,
+  scaleLinewidthDatetime,
+  scaleLinewidthDiscrete,
+  scaleLinewidthIdentity,
+  scaleLinewidthManual,
+  scaleLinetypeBinned,
+  scaleLinetypeDiscrete,
+  scaleLinetypeIdentity,
+  scaleLinetypeManual,
+  scaleShapeBinned,
+  scaleShapeDiscrete,
+  scaleShapeIdentity,
+  scaleShapeManual,
+  scaleSizeBinned,
+  scaleSizeContinuous,
+  scaleSizeDate,
+  scaleSizeDatetime,
+  scaleSizeDiscrete,
+  scaleSizeIdentity,
+  scaleSizeManual,
+  type BinnedFiniteStyleScaleOptions,
+  type DiscreteFiniteStyleScaleOptions,
+  type DiscreteNumericStyleScaleOptions,
+  type IdentityFiniteStyleScaleOptions,
+  type IdentityNumericStyleScaleOptions,
+  type ManualFiniteStyleScaleOptions,
+  type ManualNumericStyleScaleOptions,
+  type SequentialStyleScaleOptions,
+  type TemporalNumericStyleScaleOptions,
+} from "./scale-style-helpers.js";
+import type { LinetypeName, PointShapeName } from "./schema-names.js";
 import type { Scales } from "./schema.js";
 
 /** Host must expose scales() returning the public fluent builder type. */
@@ -236,6 +277,98 @@ export function WithBuilderScales<TBase extends ScaleHostConstructor>(Base: TBas
     /** Use validated source values directly as fills. */
     scaleFillIdentity(options: IdentityColorScaleOptions = {}): GGBuilder {
       return this.scales(scaleFillIdentity(options));
+    }
+
+    scaleSizeContinuous(options: SequentialStyleScaleOptions = {}): GGBuilder {
+      return this.scales(scaleSizeContinuous(options));
+    }
+    scaleSizeDiscrete(options: DiscreteNumericStyleScaleOptions = {}): GGBuilder {
+      return this.scales(scaleSizeDiscrete(options));
+    }
+    scaleSizeBinned(options: SequentialStyleScaleOptions = {}): GGBuilder {
+      return this.scales(scaleSizeBinned(options));
+    }
+    scaleSizeDate(options: TemporalNumericStyleScaleOptions = {}): GGBuilder {
+      return this.scales(scaleSizeDate(options));
+    }
+    scaleSizeDatetime(options: TemporalNumericStyleScaleOptions = {}): GGBuilder {
+      return this.scales(scaleSizeDatetime(options));
+    }
+    scaleSizeManual(options: ManualNumericStyleScaleOptions): GGBuilder {
+      return this.scales(scaleSizeManual(options));
+    }
+    scaleSizeIdentity(options: IdentityNumericStyleScaleOptions = {}): GGBuilder {
+      return this.scales(scaleSizeIdentity(options));
+    }
+
+    scaleLinewidthContinuous(options: SequentialStyleScaleOptions = {}): GGBuilder {
+      return this.scales(scaleLinewidthContinuous(options));
+    }
+    scaleLinewidthDiscrete(options: DiscreteNumericStyleScaleOptions = {}): GGBuilder {
+      return this.scales(scaleLinewidthDiscrete(options));
+    }
+    scaleLinewidthBinned(options: SequentialStyleScaleOptions = {}): GGBuilder {
+      return this.scales(scaleLinewidthBinned(options));
+    }
+    scaleLinewidthDate(options: TemporalNumericStyleScaleOptions = {}): GGBuilder {
+      return this.scales(scaleLinewidthDate(options));
+    }
+    scaleLinewidthDatetime(options: TemporalNumericStyleScaleOptions = {}): GGBuilder {
+      return this.scales(scaleLinewidthDatetime(options));
+    }
+    scaleLinewidthManual(options: ManualNumericStyleScaleOptions): GGBuilder {
+      return this.scales(scaleLinewidthManual(options));
+    }
+    scaleLinewidthIdentity(options: IdentityNumericStyleScaleOptions = {}): GGBuilder {
+      return this.scales(scaleLinewidthIdentity(options));
+    }
+
+    scaleAlphaContinuous(options: SequentialStyleScaleOptions = {}): GGBuilder {
+      return this.scales(scaleAlphaContinuous(options));
+    }
+    scaleAlphaDiscrete(options: DiscreteNumericStyleScaleOptions = {}): GGBuilder {
+      return this.scales(scaleAlphaDiscrete(options));
+    }
+    scaleAlphaBinned(options: SequentialStyleScaleOptions = {}): GGBuilder {
+      return this.scales(scaleAlphaBinned(options));
+    }
+    scaleAlphaDate(options: TemporalNumericStyleScaleOptions = {}): GGBuilder {
+      return this.scales(scaleAlphaDate(options));
+    }
+    scaleAlphaDatetime(options: TemporalNumericStyleScaleOptions = {}): GGBuilder {
+      return this.scales(scaleAlphaDatetime(options));
+    }
+    scaleAlphaManual(options: ManualNumericStyleScaleOptions): GGBuilder {
+      return this.scales(scaleAlphaManual(options));
+    }
+    scaleAlphaIdentity(options: IdentityNumericStyleScaleOptions = {}): GGBuilder {
+      return this.scales(scaleAlphaIdentity(options));
+    }
+
+    scaleShapeDiscrete(options: DiscreteFiniteStyleScaleOptions<PointShapeName> = {}): GGBuilder {
+      return this.scales(scaleShapeDiscrete(options));
+    }
+    scaleShapeBinned(options: BinnedFiniteStyleScaleOptions<PointShapeName> = {}): GGBuilder {
+      return this.scales(scaleShapeBinned(options));
+    }
+    scaleShapeManual(options: ManualFiniteStyleScaleOptions<PointShapeName>): GGBuilder {
+      return this.scales(scaleShapeManual(options));
+    }
+    scaleShapeIdentity(options: IdentityFiniteStyleScaleOptions<PointShapeName> = {}): GGBuilder {
+      return this.scales(scaleShapeIdentity(options));
+    }
+
+    scaleLinetypeDiscrete(options: DiscreteFiniteStyleScaleOptions<LinetypeName> = {}): GGBuilder {
+      return this.scales(scaleLinetypeDiscrete(options));
+    }
+    scaleLinetypeBinned(options: BinnedFiniteStyleScaleOptions<LinetypeName> = {}): GGBuilder {
+      return this.scales(scaleLinetypeBinned(options));
+    }
+    scaleLinetypeManual(options: ManualFiniteStyleScaleOptions<LinetypeName>): GGBuilder {
+      return this.scales(scaleLinetypeManual(options));
+    }
+    scaleLinetypeIdentity(options: IdentityFiniteStyleScaleOptions<LinetypeName> = {}): GGBuilder {
+      return this.scales(scaleLinetypeIdentity(options));
     }
   };
 }

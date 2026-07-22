@@ -12,6 +12,8 @@ import { positionOf } from "./geometry-shared.js";
 export interface EmittedErrorbars {
   segments: Float32Array;
   rowIndex: Uint32Array;
+  /** Frame-local rows for mapped style vectors (3 entries per kept errorbar). */
+  styleRows: Uint32Array;
   strokes: string[] | null;
   keptSegments: number;
   removed: number;
@@ -29,6 +31,7 @@ export function emitErrorbarRows(input: {
   // 3 segments × 4 floats per kept row; 3 row ids per kept row.
   const segments = new Float32Array(n * 12);
   const rowIndex = new Uint32Array(n * 3);
+  const styleRows = new Uint32Array(n * 3);
   const strokes = wantsColors && color !== null ? Array.from<string>({ length: n * 3 }) : null;
   let kept = 0; // kept *rows*
   let removed = 0;
@@ -75,6 +78,9 @@ export function emitErrorbarRows(input: {
     rowIndex[ro] = src;
     rowIndex[ro + 1] = src;
     rowIndex[ro + 2] = src;
+    styleRows[ro] = row;
+    styleRows[ro + 1] = row;
+    styleRows[ro + 2] = row;
     if (strokes !== null) {
       const value =
         frame.colorValues === null ? binding.color.scaledConstant! : frame.colorValues[row]!;
@@ -91,17 +97,19 @@ export function emitErrorbarRows(input: {
     return {
       segments: new Float32Array(0),
       rowIndex: new Uint32Array(0),
+      styleRows: new Uint32Array(0),
       strokes: wantsColors ? [] : null,
       keptSegments: 0,
       removed,
     };
   }
   if (kept === n) {
-    return { segments, rowIndex, strokes, keptSegments, removed };
+    return { segments, rowIndex, styleRows, strokes, keptSegments, removed };
   }
   return {
     segments: segments.subarray(0, kept * 12).slice(),
     rowIndex: rowIndex.subarray(0, keptSegments).slice(),
+    styleRows: styleRows.subarray(0, keptSegments).slice(),
     strokes: strokes === null ? null : strokes.slice(0, keptSegments),
     keptSegments,
     removed,

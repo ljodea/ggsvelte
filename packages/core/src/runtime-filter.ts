@@ -8,7 +8,7 @@ export type RuntimeRowFilterMode = "exclude" | "include";
  * Values stay raw and typed; display labels are never used as identity.
  */
 export interface RuntimeRowFilterClause {
-  readonly scale: "color" | "fill";
+  readonly scale: "color" | "fill" | "size" | "linewidth" | "alpha" | "shape" | "linetype";
   readonly field: string;
   readonly values: readonly CellValue[];
   readonly mode: RuntimeRowFilterMode;

@@ -7,7 +7,11 @@ import { scaleTransform } from "../scales/transform.js";
 
 import { carriedColumns, emptyFrameExtras, removedStatWarning } from "./frame-helpers.js";
 import { binIdColumn } from "./binned-scale.js";
-import { makeColumnOf, shouldAggregateOnSemanticTemporalX } from "./frame-stats-shared.js";
+import {
+  makeColumnOf,
+  shouldAggregateOnSemanticTemporalX,
+  styleColumns,
+} from "./frame-stats-shared.js";
 import { forwardMeasureOnce } from "./stat-measure-transform.js";
 import { positionColumn, positionValuesToNumeric } from "./temporal-position.js";
 import type { LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
@@ -107,6 +111,7 @@ export function buildCountFrame(
     rowIndex: Uint32Array.from({ length: result.x.length }, () => NO_ROW),
     colorValues: col(binding.color.field),
     fillValues: col(binding.fill.field),
+    ...styleColumns(binding, col, { count: result.count }),
     labelValues: col(binding.labelField),
     ...emptyFrameExtras(),
     xBinId: binned === null ? null : Int32Array.from(result.x, (id) => id as number),

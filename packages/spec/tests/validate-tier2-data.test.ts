@@ -135,6 +135,112 @@ describe("tier 2 — data-aware checks (inline data)", () => {
       ).ok,
     ).toBe(true);
   });
+
+  // A finite style (shape/linetype) with an inferred continuous field cannot
+  // interpolate; the fix must steer temporal fields to "ordinal" (binned finite
+  // styles reject non-numeric values at runtime) but quantitative to "binned".
+  it("suggests ordinal (not binned) for a temporal finite-style field", () => {
+    const errors = errorsOf({
+      ...base,
+      aes: { ...base.aes, shape: { field: "when" } },
+      layers: [{ geom: "point" }],
+    });
+    expect(errors.map((e) => e.code)).toEqual(["scale-type-mismatch"]);
+    expect(errors[0]?.fix?.example).toEqual({ type: "ordinal" });
+    expect(errors[0]?.fix?.description).toContain("ordinal");
+    expect(errors[0]?.fix?.description).not.toContain('"binned"');
+  });
+
+  it("keeps the binned suggestion for a quantitative finite-style field", () => {
+    const errors = errorsOf({
+      ...base,
+      aes: { ...base.aes, shape: { field: "temp" } },
+      layers: [{ geom: "point" }],
+    });
+    expect(errors.map((e) => e.code)).toEqual(["scale-type-mismatch"]);
+    expect(errors[0]?.fix?.example).toEqual({ type: "binned" });
+  });
+
+  // A sequential/binned numeric style (size/linewidth/alpha) needs quantitative
+  // or temporal values; a nominal field trains no finite domain and the runtime
+  // throws style-domain-empty, so reject it at validation time like color does.
+  it("rejects a nominal field on a sequential numeric style scale", () => {
+    const errors = errorsOf({
+      ...base,
+      aes: { ...base.aes, size: { field: "city" } },
+      scales: { size: { type: "sequential" } },
+      layers: [{ geom: "point" }],
+    });
+    expect(errors.map((e) => e.code)).toEqual(["scale-type-mismatch"]);
+    expect(errors[0]?.message).toContain('field "city" is nominal');
+    expect(errors[0]?.fix?.example).toEqual({ type: "ordinal" });
+  });
+
+  it("rejects a nominal field on a binned alpha scale", () => {
+    expect(
+      codesOf({
+        ...base,
+        aes: { ...base.aes, alpha: { field: "city" } },
+        scales: { alpha: { type: "binned" } },
+        layers: [{ geom: "point" }],
+      }),
+    ).toEqual(["scale-type-mismatch"]);
+  });
+
+  it("accepts quantitative and temporal fields on sequential numeric styles", () => {
+    expect(
+      validate(
+        {
+          ...base,
+          aes: { ...base.aes, size: { field: "temp" } },
+          scales: { size: { type: "sequential" } },
+          layers: [{ geom: "point" }],
+        },
+        {},
+      ).ok,
+    ).toBe(true);
+    expect(
+      validate(
+        {
+          ...base,
+          aes: { ...base.aes, size: { field: "when" } },
+          scales: { size: { type: "sequential", temporalKind: "date" } },
+          layers: [{ geom: "point" }],
+        },
+        {},
+      ).ok,
+    ).toBe(true);
+  });
+
+  it("defers a temporal-parse-requesting nominal field to runtime resolution", () => {
+    // A nominal column with explicit temporal-parse options may resolve to
+    // temporal at scale-resolution time; the numeric-style check must not
+    // false-positive here (mirrors the color checker's requestsTemporal skip).
+    expect(
+      validate(
+        {
+          ...base,
+          aes: { ...base.aes, size: { field: "city" } },
+          scales: { size: { type: "sequential", parse: "dmy" } },
+          layers: [{ geom: "point" }],
+        },
+        {},
+      ).ok,
+    ).toBe(true);
+
+    // The default (no explicit sequential/binned type) infers an ordinal numeric
+    // style for a nominal field — no error.
+    expect(
+      validate(
+        {
+          ...base,
+          aes: { ...base.aes, size: { field: "city" } },
+          layers: [{ geom: "point" }],
+        },
+        {},
+      ).ok,
+    ).toBe(true);
+  });
 });
 
 describe("tier 2 — DataProfile", () => {

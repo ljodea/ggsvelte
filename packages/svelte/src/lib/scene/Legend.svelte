@@ -10,7 +10,8 @@
    * static SVG chrome.
    */
   import type { SceneLegend, ThemeTokens } from "@ggsvelte/core";
-  import { LEGEND_ROW_HEIGHT, themeVar } from "@ggsvelte/core";
+  import { LEGEND_ROW_HEIGHT, LINETYPE_DASHES, themeVar } from "@ggsvelte/core";
+  import { LINETYPE_NAMES } from "@ggsvelte/spec";
 
   const { legend, theme }: { legend: SceneLegend; theme: ThemeTokens } =
     $props();
@@ -32,14 +33,117 @@
   {/if}
   {#if legend.type === "discrete"}
     {#each legend.entries as entry (entry.label)}
-      <rect
-        class="gg-legend-swatch"
-        x="4"
-        y={entry.y + (LEGEND_ROW_HEIGHT - legend.swatchSize) / 2}
-        width={legend.swatchSize}
-        height={legend.swatchSize}
-        fill={entry.color}
-      />
+      {@const keyY = entry.y + (LEGEND_ROW_HEIGHT - legend.swatchSize) / 2}
+      {@const keyX = 4 + legend.swatchSize / 2}
+      {@const keyCenterY = keyY + legend.swatchSize / 2}
+      {@const keyColor =
+        (entry.shape !== undefined ||
+          entry.size !== undefined ||
+          entry.linetype !== undefined ||
+          entry.linewidth !== undefined) &&
+        entry.color === "#999999"
+          ? ink
+          : entry.color}
+      <!-- Shape key geometry must match core's pointShape() so SSR/pure-SVG
+           and hydrated Svelte legend keys render identical proportions. -->
+      {#if entry.shape === "square"}
+        <rect
+          class="gg-legend-key gg-shape-square"
+          x={keyX -
+            Math.min(
+              legend.swatchSize / 2,
+              entry.size ?? legend.swatchSize / 2,
+            )}
+          y={keyCenterY -
+            Math.min(
+              legend.swatchSize / 2,
+              entry.size ?? legend.swatchSize / 2,
+            )}
+          width={Math.min(
+            legend.swatchSize,
+            (entry.size ?? legend.swatchSize / 2) * 2,
+          )}
+          height={Math.min(
+            legend.swatchSize,
+            (entry.size ?? legend.swatchSize / 2) * 2,
+          )}
+          fill={keyColor}
+          opacity={entry.alpha}
+        />
+      {:else if entry.shape === "triangle"}
+        {@const r = Math.min(
+          legend.swatchSize / 2,
+          entry.size ?? legend.swatchSize / 2,
+        )}
+        <path
+          class="gg-legend-key gg-shape-triangle"
+          d={`M${keyX} ${keyCenterY - r * 1.2}L${keyX + r * 1.1} ${keyCenterY + r * 0.9}L${keyX - r * 1.1} ${keyCenterY + r * 0.9}Z`}
+          fill={keyColor}
+          opacity={entry.alpha}
+        />
+      {:else if entry.shape === "diamond"}
+        {@const r = Math.min(
+          legend.swatchSize / 2,
+          entry.size ?? legend.swatchSize / 2,
+        )}
+        <path
+          class="gg-legend-key gg-shape-diamond"
+          d={`M${keyX} ${keyCenterY - r * 1.25}L${keyX + r} ${keyCenterY}L${keyX} ${keyCenterY + r * 1.25}L${keyX - r} ${keyCenterY}Z`}
+          fill={keyColor}
+          opacity={entry.alpha}
+        />
+      {:else if entry.shape === "plus" || entry.shape === "cross"}
+        {@const r = Math.min(
+          legend.swatchSize / 2,
+          entry.size ?? legend.swatchSize / 2,
+        )}
+        <path
+          class={`gg-legend-key gg-shape-${entry.shape}`}
+          d={entry.shape === "plus"
+            ? `M${keyX - r} ${keyCenterY}H${keyX + r}M${keyX} ${keyCenterY - r}V${keyCenterY + r}`
+            : `M${keyX - r * 0.75} ${keyCenterY - r * 0.75}L${keyX + r * 0.75} ${keyCenterY + r * 0.75}M${keyX + r * 0.75} ${keyCenterY - r * 0.75}L${keyX - r * 0.75} ${keyCenterY + r * 0.75}`}
+          fill="none"
+          stroke={keyColor}
+          stroke-width={Math.max(1, r / 2)}
+          opacity={entry.alpha}
+        />
+      {:else if entry.shape !== undefined || entry.size !== undefined}
+        <circle
+          class="gg-legend-key gg-shape-circle"
+          cx={keyX}
+          cy={keyCenterY}
+          r={Math.min(
+            legend.swatchSize / 2,
+            entry.size ?? legend.swatchSize / 2,
+          )}
+          fill={keyColor}
+          opacity={entry.alpha}
+        />
+      {:else if entry.linetype !== undefined || entry.linewidth !== undefined}
+        {@const linetype = entry.linetype ?? "solid"}
+        {@const dash = LINETYPE_DASHES[LINETYPE_NAMES.indexOf(linetype)] ?? []}
+        <line
+          class="gg-legend-key"
+          x1="4"
+          y1={keyCenterY}
+          x2={4 + legend.swatchSize}
+          y2={keyCenterY}
+          stroke={keyColor}
+          stroke-width={entry.linewidth ?? 1.5}
+          stroke-dasharray={dash.length === 0 ? undefined : dash.join(" ")}
+          opacity={entry.alpha}
+        />
+      {:else}
+        <rect
+          class="gg-legend-swatch"
+          x="4"
+          y={keyY}
+          width={legend.swatchSize}
+          height={legend.swatchSize}
+          fill={entry.color}
+          opacity={entry.alpha}
+        />
+      {/if}
       <text
         class="gg-legend-label"
         x={4 + legend.swatchSize + 6}

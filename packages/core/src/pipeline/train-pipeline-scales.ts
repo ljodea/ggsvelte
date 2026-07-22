@@ -4,6 +4,7 @@
 import { trainPipelineColorScales } from "./train-pipeline-scales-color.js";
 import type { TrainPipelineScalesInput } from "./train-pipeline-scales-input.js";
 import { trainPipelinePositionScales } from "./train-pipeline-scales-position.js";
+import { trainPipelineStyleScales } from "./train-pipeline-scales-style.js";
 import type { TrainedPipelineScales } from "./train-pipeline-scales-types.js";
 
 export type { TrainedPipelineScales } from "./train-pipeline-scales-types.js";
@@ -73,10 +74,22 @@ export function trainPipelineScales(input: TrainPipelineScalesInput): TrainedPip
     warnings,
     advisories,
   });
+  const styles = trainPipelineStyleScales({
+    scalesConfig,
+    labs: normalized.labs ?? {},
+    allFrames: position.allFrames,
+    bindings,
+    table,
+    sourceTable,
+    options,
+    warnings,
+    advisories,
+  });
 
   return {
     ...position,
     ...color,
+    ...styles,
     scalesConfig,
   };
 }

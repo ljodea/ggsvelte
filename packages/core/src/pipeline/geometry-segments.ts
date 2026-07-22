@@ -8,6 +8,7 @@ import type { SegmentsBatch } from "../scene.js";
 
 import type { LayerFrame, PipelineWarning, ResolvedColorScale } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
+import type { ResolvedStyleScales } from "./geometry-style.js";
 import { removedWarning } from "./geometry-shared.js";
 import { emitAnnotationSegments } from "./geometry-segments-annotation.js";
 import { emitDataSegments } from "./geometry-segments-data.js";
@@ -22,6 +23,7 @@ export function segmentsBatch(
   frame: LayerFrame,
   fx: Frame,
   color: ResolvedColorScale | null,
+  styles: ResolvedStyleScales,
   warnings: PipelineWarning[],
 ): SegmentsBatch | null {
   const { binding } = frame;
@@ -43,11 +45,16 @@ export function segmentsBatch(
     wantsColors && binding.ruleForm !== "annotation"
       ? Array.from<string>({ length: capacity })
       : null;
+  // Frame-local rows for style vectors (source rowIndex is identity, not style).
+  const styleRows = new Uint32Array(capacity);
 
   const { pushVertical, pushHorizontal } = createSegmentEmitters({ fx, buffers });
 
   if (binding.ruleForm === "annotation") {
     emitAnnotationSegments({ frame, fx, pushVertical, pushHorizontal });
+    // Annotation intercepts use NO_ROW identity; scaled style constants still
+    // need one style sample per emitted segment so packers expand vectors.
+    for (let i = 0; i < buffers.kept; i++) styleRows[i] = 0;
   } else {
     emitDataSegments({
       frame,
@@ -58,6 +65,7 @@ export function segmentsBatch(
       pushHorizontal,
       buffers,
       strokes,
+      styleRows,
     });
   }
 
@@ -71,12 +79,20 @@ export function segmentsBatch(
         : compact.kept === capacity
           ? strokes
           : strokes.slice(0, compact.kept);
+  const outStyleRows =
+    compact.kept === 0
+      ? new Uint32Array(0)
+      : compact.kept === capacity
+        ? styleRows
+        : styleRows.subarray(0, compact.kept).slice();
 
   return packSegmentsBatch({
     frame,
     segments: compact.segments,
     rowIndex: compact.rowIndex,
+    styleRows: outStyleRows,
     strokes: outStrokes,
     wantsColors,
+    styles,
   });
 }

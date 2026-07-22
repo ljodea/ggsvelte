@@ -86,6 +86,13 @@ Binned color is capped at 64 deterministic intervals, manual mappings require
 one range color per domain value, and temporal families reuse the parser
 registry rather than field-name inference.
 
+Mapped `size`, `linewidth`, and `alpha` add sequential, ordinal, binned, manual,
+identity, date, and datetime helpers. `shape` and `linetype` use finite named
+output sets, so quantitative mappings require explicit binning instead of
+silent interpolation. CamelCase, fluent-builder, and ggplot2 snake-case forms
+all emit the same strict JSON; callbacks and regular expressions remain
+forbidden.
+
 Post-stat coordinate transforms use the separate strict `CoordTransformSpec`.
 `coordTransform({ x: "log10", y: "sqrt" })` and its binding-identical
 `coord_transform` alias emit canonical JSON; builder `.coordTransform()` emits
