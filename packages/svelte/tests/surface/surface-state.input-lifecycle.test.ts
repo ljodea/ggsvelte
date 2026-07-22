@@ -4,6 +4,8 @@
 import { flushSync } from "svelte";
 import { describe, expect, it, vi } from "vitest";
 
+import type { CandidateFacts } from "@ggsvelte/core";
+
 import { hitFromCandidate } from "../../src/lib/surface/plot-px.js";
 import type { QueuedPointerInspection } from "../../src/lib/inspection/frame.js";
 import { TOUCH_INSPECT_CLICK_SUPPRESS_MS } from "../../src/lib/surface/pointer.js";

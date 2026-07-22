@@ -242,7 +242,9 @@ describe("createSurfaceState construction", () => {
         model: () => model,
         coordFlipped: () => false,
         root: () => null,
-        toolProp: () => undefined,
+        toolProp: () => {
+          /* uncontrolled */
+        },
         initialTool: () => config.initialTool,
         availableTools: () => config.availableTools,
         inspectConfig: () => {
@@ -251,7 +253,9 @@ describe("createSurfaceState construction", () => {
         },
         selectConfig: () => config.select,
         pointSelectEnabled: () => false,
-        ontoolchange: () => undefined,
+        ontoolchange: () => {
+          /* no controlled callback */
+        },
         surfaceInteractive: () => true,
         candidateSemanticKeys: () => [],
         inspection: () => stubInspection,
