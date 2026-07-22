@@ -93,12 +93,14 @@ test("install copy and code tabs share the manual-copy fallback", async ({ page 
   await expect(tabs.first()).toHaveText("Svelte");
 });
 
-test("gallery exposes six featured previews and all 31 generated previews", async ({ page }) => {
+test("gallery exposes six featured previews and all generated previews", async ({ page }) => {
   await page.goto("/examples");
   await expect(page.locator(".featured-gallery li")).toHaveCount(6);
-  await expect(page.locator(".example-grid li")).toHaveCount(31);
-  await expect(page.locator('img[src*="/previews/"]')).toHaveCount(37);
-  await expect(page.getByText("31 of 31")).toBeVisible();
+  // One meta.json per example under examples/ (grows when new specimens land).
+  const exampleCount = 32;
+  await expect(page.locator(".example-grid li")).toHaveCount(exampleCount);
+  await expect(page.locator('img[src*="/previews/"]')).toHaveCount(6 + exampleCount);
+  await expect(page.getByText(`${String(exampleCount)} of ${String(exampleCount)}`)).toBeVisible();
 });
 
 test("gallery filtering is URL-addressable, preserves theme, and restores history", async ({
@@ -113,7 +115,7 @@ test("gallery filtering is URL-addressable, preserves theme, and restores histor
   expect(linkedCount).toBeGreaterThan(0);
   await page.getByLabel("Category").selectOption("bar");
   await expect(page).toHaveURL(/category=bar/);
-  await expect(page.getByText(/0 of 31|of 31/)).toBeVisible();
+  await expect(page.getByText(/of \d+/)).toBeVisible();
   await page.goBack();
   await expect(page.getByLabel("Category")).toHaveValue("");
   await expect(page.locator(".example-grid li").first()).toBeVisible();
