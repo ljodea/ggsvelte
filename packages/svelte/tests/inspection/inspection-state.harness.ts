@@ -145,7 +145,7 @@ export type InspectionHarness = {
 };
 
 /** Controllable rAF for schedulePointerInspect tests (never sync — handle assign). */
-export function createDeferredFrameScheduler(): {
+function createDeferredFrameScheduler(): {
   scheduleFrame: (callback: () => void) => number;
   cancelFrame: (handle: unknown) => void;
   flush: () => void;

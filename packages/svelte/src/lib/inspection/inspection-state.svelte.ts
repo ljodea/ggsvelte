@@ -98,7 +98,7 @@ export type InspectionStateDeps = {
 };
 
 /** Intent for a coalesced pointer-inspect frame (nearest lookup owned here). */
-export type SchedulePointerInspectInput = {
+type SchedulePointerInspectInput = {
   readonly point: Readonly<{ x: number; y: number }>;
   readonly source: InteractionSource;
   readonly mode: "auto" | "exact" | "x" | "y" | "xy";
@@ -106,7 +106,7 @@ export type SchedulePointerInspectInput = {
 };
 
 /** Cancel policy for pending pointer-inspect work. */
-export type CancelPointerInspectPolicy = {
+type CancelPointerInspectPolicy = {
   /** Leave/clear: discard stash. Cancel/down/blur tool paths: preserve. */
   readonly pendingPinned: "preserve" | "discard";
 };
