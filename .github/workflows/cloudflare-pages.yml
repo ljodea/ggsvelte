@@ -34,6 +34,11 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    # Same environment as deploy so DOCS_ANALYTICS_TOKEN (and other env secrets)
+    # remain available after the job split (GitHub only injects env secrets into
+    # jobs that declare the environment).
+    environment:
+      name: cloudflare-production
     concurrency:
       # Cancel superseded builds. Main lands package refactors in bursts; each
       # push rebuilds the docs artifact. Queuing every intermediate build is
