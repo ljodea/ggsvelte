@@ -31,6 +31,7 @@ import type {
   RasterLayer,
   RectLayer,
   RibbonLayer,
+  SegmentLayer,
   RuleLayer,
   SmoothLayer,
   TextLayer,
@@ -62,6 +63,7 @@ export interface RuntimeBarLayer extends WithRuntimeAes<BarLayer> {}
 export interface RuntimeHistogramLayer extends WithRuntimeAes<HistogramLayer> {}
 export interface RuntimeAreaLayer extends WithRuntimeAes<AreaLayer> {}
 export interface RuntimeRibbonLayer extends WithRuntimeAes<RibbonLayer> {}
+export interface RuntimeSegmentLayer extends WithRuntimeAes<SegmentLayer> {}
 export interface RuntimeRuleLayer extends WithRuntimeAes<RuleLayer> {}
 export interface RuntimeTextLayer extends WithRuntimeAes<TextLayer> {}
 export interface RuntimeSmoothLayer extends WithRuntimeAes<SmoothLayer> {}
@@ -80,6 +82,7 @@ export type RuntimeLayerSpec =
   | RuntimeHistogramLayer
   | RuntimeAreaLayer
   | RuntimeRibbonLayer
+  | RuntimeSegmentLayer
   | RuntimeRuleLayer
   | RuntimeTextLayer
   | RuntimeSmoothLayer

@@ -420,6 +420,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "GeomSegmentOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "GeomSmoothOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -796,6 +800,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "RuntimeSegmentLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "RuntimeSmoothLayer": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -846,6 +854,22 @@
         },
         "ScalesSchema": {
           "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "SegmentLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SegmentLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SegmentLayerSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "SegmentParams": {
+          "kind": "type",
           "lifecycle": "experimental"
         },
         "SequentialColorScaleOptions": {
@@ -3306,6 +3330,10 @@
           "lifecycle": "experimental"
         },
         "GeomRule": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GeomSegment": {
           "kind": "value",
           "lifecycle": "experimental"
         },

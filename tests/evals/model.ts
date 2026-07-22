@@ -409,6 +409,20 @@ export class MockResponder implements Responder {
       if (/semi-transparent|alpha/.test(prompt)) layer.params = { alpha: 0.4 };
       spec.layers.push(layer);
       xField = xmin;
+    } else if (/\bsegment\b|leader line|xend|yend/.test(prompt)) {
+      const x = fieldNamed("x") ?? pick.quant() ?? "x";
+      const y = fieldNamed("y") ?? pick.quant() ?? "y";
+      const xend = fieldNamed("xend") ?? fieldNamed("x2") ?? pick.quant() ?? "xend";
+      const yend = fieldNamed("yend") ?? fieldNamed("y2") ?? pick.quant() ?? "yend";
+      const aes: MockAes = {
+        x: f(x),
+        y: f(y),
+        xend: f(xend),
+        yend: f(yend),
+      };
+      colorFor("color", aes);
+      spec.layers.push({ geom: "segment", aes });
+      xField = x;
     } else if (/\bribbon\b/.test(prompt) && !/without .*(?:band|ribbon)/.test(prompt)) {
       // Horizontal (y + xmin/xmax) vs vertical (x + ymin/ymax) ribbons.
       if (

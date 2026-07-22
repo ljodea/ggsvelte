@@ -473,6 +473,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "segment/annotations",
+    category: "segment",
+    name: "annotations",
+    title: "Segment annotations",
+    description: "Finite data-driven segments from (x,y) to (xend,yend) — leader lines and range ticks that do not span the panel (unlike rule).",
+    tags: ["segment", "annotation", "leader"],
+    docsSection: "Lines & rules",
+    hasData: true,
+  },
+  {
     id: "smooth/loess-scatter",
     category: "smooth",
     name: "loess-scatter",

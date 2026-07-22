@@ -16,6 +16,8 @@ export function assertRequiredChannels(input: {
   ymaxField: string | null;
   xminField?: string | null;
   xmaxField?: string | null;
+  xendField?: string | null;
+  yendField?: string | null;
   ribbonOrientation?: "x" | "y";
 }): void {
   const {
@@ -30,6 +32,8 @@ export function assertRequiredChannels(input: {
     ymaxField,
     xminField = null,
     xmaxField = null,
+    xendField = null,
+    yendField = null,
     ribbonOrientation,
   } = input;
 
@@ -77,4 +81,10 @@ export function assertRequiredChannels(input: {
   }
   if (geom === "rule" && ruleForm === "vertical") requireField(xField, "x", index, geom);
   if (geom === "rule" && ruleForm === "horizontal") requireField(yField, "y", index, geom);
+  if (geom === "segment") {
+    requireField(xField, "x", index, geom);
+    requireField(yField, "y", index, geom);
+    requireField(xendField, "xend", index, geom);
+    requireField(yendField, "yend", index, geom);
+  }
 }

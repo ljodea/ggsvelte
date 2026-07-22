@@ -2058,8 +2058,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-480",
-        title: "experimental (480)",
+        id: "experimental-486",
+        title: "experimental (486)",
         level: 3,
       },
       {
@@ -2098,8 +2098,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-418",
-        title: "experimental (418)",
+        id: "experimental-419",
+        title: "experimental (419)",
         level: 3,
       },
       {
@@ -2634,6 +2634,17 @@ export const DOCS_ROUTES = [
     description:
       "The rule geom's data-driven form: mapping aes.x (and only x) draws one vertical panel-spanning rule per row — a rug plot of the distribution. Semi-transparent strokes reveal density.",
     canonicalPath: "/examples/rule/data-driven",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/segment/annotations",
+    title: "Segment annotations — ggsvelte gallery",
+    description:
+      "Finite data-driven segments from (x,y) to (xend,yend) — leader lines and range ticks that do not span the panel (unlike rule).",
+    canonicalPath: "/examples/segment/annotations",
     kind: "page",
     index: true,
     sitemap: true,

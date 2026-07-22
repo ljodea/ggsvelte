@@ -107,6 +107,7 @@ export const BarLayerSchema = SpecModule.Import("BarLayer");
 export const HistogramLayerSchema = SpecModule.Import("HistogramLayer");
 export const AreaLayerSchema = SpecModule.Import("AreaLayer");
 export const RibbonLayerSchema = SpecModule.Import("RibbonLayer");
+export const SegmentLayerSchema = SpecModule.Import("SegmentLayer");
 export const RuleLayerSchema = SpecModule.Import("RuleLayer");
 export const TextLayerSchema = SpecModule.Import("TextLayer");
 export const SmoothLayerSchema = SpecModule.Import("SmoothLayer");
@@ -173,6 +174,8 @@ export type BarParams = SpecType<"BarParams">;
 export type AreaParams = SpecType<"AreaParams">;
 /** Rule layer params (annotation intercepts + styling). */
 export type RuleParams = SpecType<"RuleParams">;
+/** Segment layer params (styling + lineend). */
+export type SegmentParams = SpecType<"SegmentParams">;
 /** Text layer params. */
 export type TextParams = SpecType<"TextParams">;
 /** Smooth layer params (method/se/level/span/degree/n + styling). */
@@ -227,6 +230,8 @@ export type TileLayer = SpecType<"TileLayer">;
 export type RasterLayer = SpecType<"RasterLayer">;
 /** A ribbon (interval band) layer. */
 export type RibbonLayer = SpecType<"RibbonLayer">;
+/** A finite segment layer ((x,y)→(xend,yend)). */
+export type SegmentLayer = SpecType<"SegmentLayer">;
 /** One plot layer, discriminated by `geom`. */
 export type LayerSpec = SpecType<"LayerSpec">;
 /** Stackable position adjustment names. */

@@ -31,14 +31,15 @@ GRAMMAR CHEAT-SHEET
     {"value": 3}          constant ({"value": "red"} for literal colors)
     {"stat": "count"}     a stat-computed column
     null                  unset an inherited channel
-- Channel names: x, y, color, fill, size, linewidth, alpha, group, label, weight, ymin, ymax, xmin, xmax, width, height.
+- Channel names: x, y, color, fill, size, linewidth, alpha, group, label, weight, ymin, ymax, xmin, xmax, xend, yend, width, height.
 - Layers: { "geom": ..., "stat"?, "position"?, "aes": {...}, "params"?, "positionParams"? }.
-- Geoms: point, line, col, bar, histogram, area, rule, text, smooth, boxplot, density, errorbar, rect, tile, raster, ribbon.
+- Geoms: point, line, col, bar, histogram, area, rule, text, smooth, boxplot, density, errorbar, rect, tile, raster, ribbon, segment.
 - Stat defaults per geom (omit to accept): bar→count, histogram→bin, smooth→smooth, boxplot→boxplot, density→density, everything else→identity.
 - Position defaults: bar/histogram/col/area→stack, boxplot→dodge, else identity. Alternatives: fill (proportions), dodge (side by side), jitter (points; positionParams {width,height,seed}), nudge (text; positionParams {x,y}).
 - bar COUNTS rows (never map aes.y); col draws pre-computed heights (map aes.y). histogram bins a continuous x (params: bins | binwidth).
 - smooth params: {"method": "lm"|"loess", "se": bool, "span"?}. errorbar with "stat":"summary" maps x+y and computes mean±se (params fun/funMin/funMax); with identity stat map x+ymin+ymax.
 - rect: map xmin/xmax/ymin/ymax (quantitative edges). tile: map x/y centers (+ optional width/height or params.width/height); works discrete or continuous. raster: equal-cell continuous grid from x/y (+ fill); no stroke. ribbon: filled band between ymin/ymax along x (or xmin/xmax along y).
+- segment: finite line per row from (x,y) to (xend,yend) — both ends train scales; not panel-spanning (that is rule).
 - rule annotation form: params.xintercept / params.yintercept (numbers or ISO dates), NO aes.x/aes.y on that layer. text needs aes x, y, label.
 - Facet: {"wrap": {"field": f}, "ncol"?, "scales"?: "fixed"|"free"|"free_x"|"free_y"} OR grid {"rows": {"field": f}, "cols": {"field": g}} — never both forms.
 - Coord: {"type": "flip"} makes horizontal charts (still map x=category, y=value). A post-stat coordinate transform is {"type":"transform","x"?: {"transform":"identity"|"log10"|"sqrt","limits"?: [min,max],"reverse"?: bool,"expand"?: bool},"y"?: same,"clip"?: bool}. Fixed physical data-unit lengths use {"type":"fixed","ratio"?: positiveNumber}; omit ratio for equal x/y units and never combine fixed coordinates with free facet scales. Coordinate transforms preserve stat inputs; scale transforms do not.

@@ -119,8 +119,8 @@ export interface BuilderCalendarSource {
 export function calendarDateFields(state: BuilderCalendarSource): ReadonlySet<string> {
   const fields = new Set<string>();
   const mappings = [
-    ["x", ["x", "xmin", "xmax"]],
-    ["y", ["y", "ymin", "ymax"]],
+    ["x", ["x", "xmin", "xmax", "xend"]],
+    ["y", ["y", "ymin", "ymax", "yend"]],
     ["color", ["color"]],
     ["fill", ["fill"]],
     ["size", ["size"]],

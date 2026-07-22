@@ -1,0 +1,43 @@
+{
+  "id": "61-range-tick-segments",
+  "kind": "chart",
+  "prompt": "Show range ticks as finite segments: each row maps x/y start and xend/yend end, colored by group.",
+  "dataProfile": {
+    "fields": [
+      { "name": "x", "type": "quantitative" },
+      { "name": "y", "type": "quantitative" },
+      { "name": "xend", "type": "quantitative" },
+      { "name": "yend", "type": "quantitative" },
+      { "name": "group", "type": "nominal" }
+    ],
+    "rowCount": 5
+  },
+  "data": {
+    "main": [
+      { "x": 0, "y": 1, "xend": 1, "yend": 1, "group": "A" },
+      { "x": 0, "y": 2, "xend": 1.5, "yend": 2, "group": "B" },
+      { "x": 0, "y": 3, "xend": 0.8, "yend": 3, "group": "A" },
+      { "x": 0, "y": 4, "xend": 2, "yend": 4, "group": "C" },
+      { "x": 0, "y": 5, "xend": 1.2, "yend": 5, "group": "B" }
+    ]
+  },
+  "gold": {
+    "edition": 2,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "segment",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "x" },
+          "y": { "field": "y" },
+          "xend": { "field": "xend" },
+          "yend": { "field": "yend" },
+          "color": { "field": "group" }
+        }
+      }
+    ]
+  },
+  "notes": "Data-driven finite segments with mapped color; second corpus cover for geom segment."
+}
