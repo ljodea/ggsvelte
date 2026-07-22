@@ -232,11 +232,13 @@ export type {
 } from "./candidate-store.js";
 export {
   buildInteractionMasks,
+  buildPrimitiveInteractionMasks,
   legendValueEqual,
   resolveLegendFocusKeys,
 } from "./interaction-mask.js";
 export type {
   BatchInteractionMask,
+  FocusedPrimitive,
   LegendValueMembership,
   SemanticCandidateKeys,
 } from "./interaction-mask.js";

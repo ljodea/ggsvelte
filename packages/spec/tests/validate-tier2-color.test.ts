@@ -150,4 +150,94 @@ describe("tier 2 — color scale data-aware validation", () => {
     if (result.ok) throw new Error("expected failure");
     expect(result.errors.some((error) => error.code === "scale-type-mismatch")).toBe(true);
   });
+
+  it("includes scaled color constants in manual domain length checks", () => {
+    const result = validate(
+      normalize({
+        data: {
+          values: [
+            { x: 1, y: 1 },
+            { x: 2, y: 2 },
+          ],
+        },
+        layers: [
+          {
+            geom: "point",
+            aes: { x: { field: "x" }, y: { field: "y" }, color: { value: "a", scale: true } },
+          },
+          {
+            geom: "point",
+            aes: { x: { field: "x" }, y: { field: "y" }, color: { value: "b", scale: true } },
+          },
+        ],
+        scales: { color: { type: "manual", range: ["#f00"] } },
+      }),
+      {},
+    );
+    expect(result.ok).toBe(false);
+    if (result.ok) throw new Error("expected failure");
+    expect(result.errors.some((error) => error.code === "scale-manual-domain-range")).toBe(true);
+  });
+
+  it("rejects censored temporal kind mismatches that runtime also rejects", () => {
+    const result = validate(
+      normalize({
+        data: {
+          values: [
+            { x: 1, y: 1, t: "2024-01-01 12:00" },
+            { x: 2, y: 2, t: "bad" },
+            { x: 3, y: 3, t: "2024-02-01 12:00" },
+          ],
+        },
+        layers: [
+          {
+            geom: "point",
+            aes: { x: { field: "x" }, y: { field: "y" }, color: { field: "t" } },
+          },
+        ],
+        scales: {
+          color: {
+            type: "sequential",
+            temporalKind: "date",
+            parse: "ymd_hm",
+            parseFailure: "censor",
+          },
+        },
+      }),
+      {},
+    );
+    expect(result.ok).toBe(false);
+    if (result.ok) throw new Error("expected failure");
+    expect(result.errors.some((error) => error.code === "scale-type-mismatch")).toBe(true);
+  });
+
+  it("allows censored epoch parses that the pipeline still renders", () => {
+    const result = validate(
+      normalize({
+        data: {
+          values: [
+            { x: 1, y: 1, t: 1_700_000_000_000 },
+            { x: 2, y: 2, t: 1e100 },
+            { x: 3, y: 3, t: 1_706_745_600_000 },
+          ],
+        },
+        layers: [
+          {
+            geom: "point",
+            aes: { x: { field: "x" }, y: { field: "y" }, color: { field: "t" } },
+          },
+        ],
+        scales: {
+          color: {
+            type: "sequential",
+            temporalKind: "datetime",
+            parse: { epoch: "milliseconds" },
+            parseFailure: "censor",
+          },
+        },
+      }),
+      {},
+    );
+    expect(result.ok).toBe(true);
+  });
 });

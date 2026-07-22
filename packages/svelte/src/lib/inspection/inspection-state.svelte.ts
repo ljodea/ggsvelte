@@ -113,6 +113,8 @@ type CancelPointerInspectPolicy = {
 export type InspectionState = {
   readonly inspection: PlotInspectionChange<Record<string, CellValue>, PropertyKey> | null;
   readonly inspectionPanel: ScenePanel | null;
+  /** Seed candidate for presentation chrome (kind); not emitted on public events. */
+  readonly inspectionSeed: CandidateFacts | null;
   setInspection(
     hit: SceneHit | null,
     source: InteractionSource,
@@ -643,6 +645,10 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
     },
     get inspectionPanel() {
       return inspectionPanel;
+    },
+    /** Internal seed for presentation chrome (kind); not part of the public inspection event. */
+    get inspectionSeed() {
+      return inspectionSeed;
     },
     setInspection,
     toggleInspectionPin,
