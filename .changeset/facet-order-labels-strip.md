@@ -13,4 +13,6 @@ Extend facet field configuration with JSON-serializable options for closed panel
 - `facet.strip.position` — `top` (default) | `bottom` | `left` | `right`; left/right bands are measured and reserved in layout
 - `facet.strip.show` — set `false` to hide strip chrome when labels are authored elsewhere
 
-Migration: none — additive; defaults preserve ascending sort and top strips.
+Migration: none — additive
+
+Defaults preserve ascending sort and top strips.

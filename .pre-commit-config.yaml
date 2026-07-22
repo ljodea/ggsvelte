@@ -18,7 +18,10 @@ repos:
         entry: bun node_modules/.bin/oxfmt
         language: system
         files: \.(ts|tsx|mts|cts|js|jsx|mjs|cjs|json|jsonc|css|toml)$
-        exclude: ^(spikes/|bun\.lock$|packages/spec/schema/)
+        # lifecycle.json is generated (gen-lifecycle) and listed in oxfmt
+        # ignorePatterns; pass_filenames would make oxfmt exit 2 when it is the
+        # only staged json match.
+        exclude: ^(spikes/|bun\.lock$|packages/spec/schema/|lifecycle\.json$)
 
       - id: prettier-svelte-md
         name: prettier (staged .svelte/.md/.yaml)
