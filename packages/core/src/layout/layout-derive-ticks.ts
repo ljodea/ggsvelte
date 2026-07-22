@@ -43,15 +43,19 @@ export function firstDomainIndexByEncodeKey(
 /** Resolve band tick entries: full domain or break-filtered domainIndex list. */
 function resolveBandEntries(
   domain: Extract<Domain, { type: "band" }>,
-): { value: unknown; domainIndex: number }[] {
+): { value: string | number; domainIndex: number }[] {
   const rawCategories = domain.rawCategories ?? domain.categories;
   if (domain.breaks === undefined) {
     return domain.categories.map((value, domainIndex) => ({ value, domainIndex }));
   }
   const domainIndexOf = firstDomainIndexByEncodeKey(rawCategories);
-  return domain.breaks
-    .map((value) => ({ value, domainIndex: domainIndexOf(value) }))
-    .filter(({ domainIndex }) => domainIndex >= 0);
+  const entries: { value: string | number; domainIndex: number }[] = [];
+  for (const value of domain.breaks) {
+    const domainIndex = domainIndexOf(value);
+    if (domainIndex < 0) continue;
+    entries.push({ value, domainIndex });
+  }
+  return entries;
 }
 
 export interface AxisTicks {

@@ -26,12 +26,12 @@ export function layoutDomain(
         // First-occurrence dedupe by encodeKey (O(K)), not nested findIndex (O(K²)).
         breaks: (() => {
           const seen = new Set<string>();
-          const unique: typeof breaks = [];
+          const unique: (string | number)[] = [];
           for (const value of breaks) {
             const key = encodeKey(value);
             if (seen.has(key)) continue;
             seen.add(key);
-            unique.push(value);
+            unique.push(value as string | number);
           }
           return unique;
         })(),
