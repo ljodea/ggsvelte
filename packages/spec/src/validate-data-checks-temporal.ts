@@ -18,6 +18,26 @@ export interface ChannelFieldUse {
   path: string;
 }
 
+/**
+ * True when a scale's `parse` value is safe to hand to temporalDecisionForField.
+ *
+ * A schema-invalid parser (e.g. `123`, `true`, `{}`, `[]`) is collected as a
+ * schema error, but tier-2 data checks still run, so a malformed value can reach
+ * this helper's `canonicalTemporalParserKey` — which does `"epoch" in parser`
+ * (throws on a non-object) and reads `parser.format` (throws inside fnv1a on an
+ * empty object). Only `undefined`, a string, or a well-formed `{ epoch }` /
+ * `{ format }` object is usable; anything else must defer to the schema
+ * diagnostic instead of crashing validation.
+ */
+export function temporalParserUsable(parse: unknown): boolean {
+  if (parse === undefined || typeof parse === "string") return true;
+  if (typeof parse !== "object" || parse === null || Array.isArray(parse)) return false;
+  return (
+    typeof (parse as { epoch?: unknown }).epoch === "string" ||
+    typeof (parse as { format?: unknown }).format === "string"
+  );
+}
+
 /** One Map per dataChecks() call — shared by position and color checkers. */
 export type TemporalDecisionCache = Map<string, TemporalDecision | null | undefined>;
 

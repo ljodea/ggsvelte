@@ -10,6 +10,7 @@ import { SEQUENTIAL_SCHEME_NAMES } from "./schema.js";
 import type { FieldEvidenceMap } from "./validate-data-evidence.js";
 import {
   temporalDecisionForField,
+  temporalParserUsable,
   type ChannelFieldUse,
   type TemporalDecisionCache,
 } from "./validate-data-checks-temporal.js";
@@ -156,6 +157,10 @@ export function checkColorScaleDataCompatibility(input: {
       // Quantitative fields with temporal-only options fail at resolve time unless
       // parseFailure: "censor" recovers at least one temporal value (status invalid).
       if (type === "quantitative" && requestsTemporal) {
+        // A schema-invalid parser reaches tier-2 (schema errors don't short-circuit
+        // it); handing it to temporalDecisionForField would throw instead of
+        // yielding the schema diagnostic. Defer to that diagnostic.
+        if (!temporalParserUsable(config?.parse)) continue;
         const info = fields.get(use.field);
         const decision = temporalDecisionForField(
           temporalDecisionCache,
@@ -210,6 +215,10 @@ export function checkColorScaleDataCompatibility(input: {
       }
 
       if (type !== "nominal" && type !== "ordinal") continue;
+
+      // Same schema-invalid-parser guard as the quantitative branch above: a
+      // malformed parser would throw in temporalDecisionForField below.
+      if (requestsTemporal && !temporalParserUsable(config?.parse)) continue;
 
       if (!requestsTemporal) {
         errors.push({

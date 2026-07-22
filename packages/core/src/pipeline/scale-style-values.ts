@@ -68,15 +68,22 @@ export function resolveNumericStyleValueView(input: {
     ...(config?.timezone !== undefined && { timezone: config.timezone }),
     ...(config?.disambiguation !== undefined && { disambiguation: config.disambiguation }),
   };
-  // A runtime filter can empty `values` while an authored temporal domain still
-  // fully determines the scale (e.g. size: { temporalKind: "date", domain:
-  // [...] }). With no samples, auto detection reports non-temporal and explicit
-  // parsers report kind: null, so the checks below would throw before
-  // numericSequentialResolution() ever parses config.domain. Seed the temporal
-  // decision from the authored domain when no samples remain — mirrors the
-  // color path returning a usable view for a fully filtered temporal frame.
+  // A runtime filter can empty `values` while an authored temporal domain or
+  // binned breaks still fully determine the scale (e.g. size: { temporalKind:
+  // "date", domain: [...] } or { type: "binned", breaks: [...] }). With no
+  // samples, auto detection reports non-temporal and explicit parsers report
+  // kind: null, so the checks below would throw before numericSequentialResolution()
+  // ever parses the authored boundaries. Seed the temporal decision from the
+  // authored domain — or, failing that, authored *binned* breaks — when no
+  // samples remain, mirroring the color path returning a usable view for a fully
+  // filtered temporal frame. Only binned breaks are bin boundaries that train the
+  // domain; sequential breaks are guide-tick positions, so seeding from them would
+  // let arbitrary tick choices invent a domain (numericSequentialResolution treats
+  // `view.semantic` as the extent). Restrict the breaks fallback to `type: "binned"`.
   const temporalColumn =
-    values.length === 0 && config?.domain !== undefined ? config.domain : values;
+    values.length === 0
+      ? (config?.domain ?? (config?.type === "binned" ? config?.breaks : undefined) ?? values)
+      : values;
   const parsed = parseTemporalColumn(temporalColumn, config?.parse ?? "auto", options);
   if (parsed.decision.status !== "temporal") {
     const cause =

@@ -356,6 +356,7 @@ export function resolveNumericStyleScale(input: {
   catalog: readonly CellValue[];
   anyDiscrete: boolean;
   anyIndexable: boolean;
+  nonInteractiveValues?: readonly CellValue[];
   config: NumericStyleConfig | undefined;
   prevState: ScaleState | null;
   title: string;
@@ -367,6 +368,7 @@ export function resolveNumericStyleScale(input: {
     catalog,
     anyDiscrete,
     anyIndexable,
+    nonInteractiveValues,
     config,
     prevState,
     title,
@@ -420,6 +422,7 @@ export function resolveNumericStyleScale(input: {
     naValue: fallback.naValue,
     unknownValue: fallback.unknownValue,
     indexable: anyIndexable,
+    ...(nonInteractiveValues !== undefined && { nonInteractiveValues }),
     prevState,
     title,
     warnings,

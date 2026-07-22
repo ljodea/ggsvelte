@@ -3,7 +3,12 @@ import type { StyleAesthetic } from "@ggsvelte/spec";
 
 import { disambiguatedLabels } from "../legend.js";
 import type { StyleOutput, StyleScale } from "../scales/style.js";
-import { PaletteExhaustedError, trainDiscrete, type ScaleState } from "../scales/state.js";
+import {
+  encodeKey,
+  PaletteExhaustedError,
+  trainDiscrete,
+  type ScaleState,
+} from "../scales/state.js";
 import type { CellValue } from "../table.js";
 
 import type { StyleResolution } from "./scale-style-types.js";
@@ -30,6 +35,7 @@ export function discreteStyleResolution(input: {
   naValue: StyleOutput;
   unknownValue: StyleOutput;
   indexable?: boolean;
+  nonInteractiveValues?: readonly CellValue[];
   prevState: ScaleState | null;
   title: string;
   warnings: PipelineWarning[];
@@ -46,6 +52,7 @@ export function discreteStyleResolution(input: {
     naValue,
     unknownValue,
     indexable,
+    nonInteractiveValues,
     prevState,
     title,
     warnings,
@@ -96,8 +103,17 @@ export function discreteStyleResolution(input: {
       return (trained.rangeValueOf(value) as StyleOutput | undefined) ?? unknownValue;
     },
   });
-  const labels = disambiguatedLabels(resolvedDomain);
-  const entries = resolvedDomain.map((value, index) =>
+  // The scale trains on the full domain (so an annotation constant still renders),
+  // but the legend must drop values that index no rendered mark — otherwise a
+  // mixed interactive legend shows a hover/clickable entry with an empty key
+  // bucket. In the non-mixed cases `nonInteractiveValues` is empty (a no-op).
+  const excludedFromLegend = new Set((nonInteractiveValues ?? []).map((value) => encodeKey(value)));
+  const legendDomain =
+    excludedFromLegend.size === 0
+      ? resolvedDomain
+      : resolvedDomain.filter((value) => !excludedFromLegend.has(encodeKey(value)));
+  const labels = disambiguatedLabels(legendDomain);
+  const entries = legendDomain.map((value, index) =>
     styleGuideEntry(aesthetic, value, labels[index]!, scale.valueOf(value)),
   );
   const unknownCount = observedValues.filter(
@@ -122,7 +138,7 @@ export function discreteStyleResolution(input: {
             // Stat-only mappings have no field/constant to index, so the key
             // index resolves no rows — render swatches but disable hover/click.
             ...(indexable === false && { interactive: false }),
-            domain: resolvedDomain,
+            domain: legendDomain,
             firstSeen: observedValues,
             keyOf: (value: unknown) => ({ [aesthetic]: scale.valueOf(value) }),
           },
@@ -135,7 +151,7 @@ export function discreteStyleResolution(input: {
             aesthetic,
             scaleType: kind,
             title,
-            domain: Object.freeze([...resolvedDomain]),
+            domain: Object.freeze([...legendDomain]),
             entries: Object.freeze(entries),
             naValue,
             unknownValue,

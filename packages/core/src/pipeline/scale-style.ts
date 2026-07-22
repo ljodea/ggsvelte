@@ -40,6 +40,7 @@ export function resolveStyleScale(input: {
       catalog: collected.catalog,
       anyDiscrete: collected.anyDiscrete,
       anyIndexable: collected.anyIndexable,
+      nonInteractiveValues: collected.nonInteractiveValues,
       // Narrow PortableSpec's union scale entry to the finite (shape/linetype) config.
       config: config as FiniteStyleConfig | undefined,
       prevState,
@@ -53,6 +54,7 @@ export function resolveStyleScale(input: {
     catalog: collected.catalog,
     anyDiscrete: collected.anyDiscrete,
     anyIndexable: collected.anyIndexable,
+    nonInteractiveValues: collected.nonInteractiveValues,
     config,
     prevState,
     title,
