@@ -114,6 +114,8 @@ function bandLabelAdvisories(
   const out: { code: string; path: string; chosen: string; howToOverride: string }[] = [];
   for (const plan of guidePlans) {
     if (plan.type !== "axis" || plan.scaleType !== "band") continue;
+    // Author-pinned modes are intentional — do not emit heuristic wrap/rotate advisories.
+    if (plan.bandLabelAuthorPinned === true) continue;
     const mode = plan.bandLabelMode;
     if (mode !== "wrapped" && mode !== "rotated") continue;
     const key = `${mode}:${plan.aesthetic}`;

@@ -8,11 +8,9 @@ import type { ColumnTable } from "../table.js";
 import type { EditionDefaults } from "../editions.js";
 
 import { collectColorCatalogValues, collectColorChannelValues } from "./scale-color-collect.js";
-import {
-  resolveBinnedColorScale,
-  resolveIdentityColorScale,
-  resolveManualColorScale,
-} from "./scale-color-families.js";
+import { resolveBinnedColorScale } from "./scale-color-binned.js";
+import { resolveIdentityColorScale } from "./scale-color-identity.js";
+import { resolveManualColorScale } from "./scale-color-manual.js";
 import { resolveOrdinalColorScale } from "./scale-color-ordinal.js";
 import { resolveSequentialColorScale } from "./scale-color-sequential.js";
 import type { ColorResolution } from "./scale-color-types.js";

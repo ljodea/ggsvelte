@@ -183,6 +183,70 @@ describe("band axis guide pins (#407)", () => {
     expect(plan?.type).toBe("axis");
     if (plan?.type !== "axis") return;
     expect(plan.bandLabelMode).toBe("single-line");
+    expect(plan.bandLabelAuthorPinned).toBe(true);
+  });
+
+  it("guide.mode=wrap/rotate suppress heuristic advisories for pinned modes", () => {
+    // Short labels would stay single-line under auto; forced wrap must not claim a heuristic.
+    const shortSpec: SpecInput = {
+      data: {
+        values: [
+          { category: "IT", count: 1 },
+          { category: "HR", count: 2 },
+          { category: "Ops", count: 3 },
+        ],
+      },
+      layers: [{ geom: "col", aes: { x: { field: "category" }, y: { field: "count" } } }],
+      scales: { x: { type: "band", guide: { mode: "wrap" } } },
+    };
+    const wrapModel = runPipeline(shortSpec, { width: 480, height: 300 });
+    expect(wrapModel.advisories.some((a) => a.code.startsWith("band-labels-"))).toBe(false);
+    const wrapPlan = wrapModel.guidePlans.find(
+      (p) => p.type === "axis" && p.scaleType === "band" && p.aesthetic === "x",
+    );
+    expect(wrapPlan?.type).toBe("axis");
+    if (wrapPlan?.type === "axis") {
+      expect(wrapPlan.bandLabelMode).toBe("wrapped");
+      expect(wrapPlan.bandLabelAuthorPinned).toBe(true);
+    }
+
+    const rotatePinned: SpecInput = {
+      ...spec,
+      scales: { x: { type: "band", guide: { mode: "rotate", angle: -45 } } },
+    };
+    const rotateModel = runPipeline(rotatePinned, { width: 560, height: 300 });
+    expect(rotateModel.advisories.some((a) => a.code.startsWith("band-labels-"))).toBe(false);
+    const rotatePlan = rotateModel.guidePlans.find(
+      (p) => p.type === "axis" && p.scaleType === "band" && p.aesthetic === "x",
+    );
+    expect(rotatePlan?.type).toBe("axis");
+    if (rotatePlan?.type === "axis") {
+      expect(rotatePlan.bandLabelMode).toBe("rotated");
+      expect(rotatePlan.bandLabelAuthorPinned).toBe(true);
+    }
+  });
+
+  it("guide.mode=off hides band labels on vertical (y) axes", () => {
+    const pinned: SpecInput = {
+      data: {
+        values: [
+          { category: "North region", count: 1 },
+          { category: "South region", count: 2 },
+          { category: "East region", count: 3 },
+        ],
+      },
+      // Horizontal bars: categorical on y (vertical band axis).
+      layers: [{ geom: "col", aes: { y: { field: "category" }, x: { field: "count" } } }],
+      scales: { y: { type: "band", guide: { mode: "off" } } },
+    };
+    const model = runPipeline(pinned, { width: 400, height: 300 });
+    const plan = model.guidePlans.find(
+      (p) => p.type === "axis" && p.scaleType === "band" && p.aesthetic === "y",
+    );
+    expect(plan?.type).toBe("axis");
+    if (plan?.type !== "axis") return;
+    expect(plan.ticks.every((t) => t.label === "")).toBe(true);
+    expect(plan.bandLabelAuthorPinned).toBe(true);
   });
 
   it("wrapped advisory howToOverride points at scales.x.guide", () => {

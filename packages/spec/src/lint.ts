@@ -21,22 +21,18 @@
  *    MIXED data (some in-domain, some out), where the silent row-drop is most
  *    surprising.
  *
+ * Implementation:
+ *  - lint-catalog.ts — pure advisory catalog (re-exported here)
+ *  - lint-layer-rules.ts — layer-scoped rules
+ *  - lint-scale-rules.ts — scale-level transform-domain-data
+ *
  * Wired into `validate(spec, { lint: true })` (advisories ride the result)
  * and into the `ggsvelte-render` CLI (stderr JSON lines, kind "advisory",
  * source "spec-lint").
- *
- * The pure advisory catalog lives in lint-catalog.ts and is re-exported here
- * so package imports keep the ./lint.js path (same pattern as errors/error-catalog).
  */
 import type { JSONValue } from "./portability.js";
-import type { Aes, ChannelName, PositionScaleSpec } from "./schema.js";
-import { GEOM_DEFAULTS } from "./schema.js";
-import type {
-  FieldEvidenceEntry,
-  FieldEvidenceMap,
-  ProfileFieldType,
-  ValidateOptions,
-} from "./validate-data.js";
+import type { Aes, ChannelName } from "./schema.js";
+import type { FieldEvidenceEntry, FieldEvidenceMap, ValidateOptions } from "./validate-data.js";
 import {
   DEFAULT_VALIDATE_LIMITS,
   effectiveChannel,
@@ -44,6 +40,8 @@ import {
 } from "./validate-data.js";
 
 import type { LintAdvisoryCode } from "./lint-catalog.js";
+import { collectLayerLintAdvisories } from "./lint-layer-rules.js";
+import { collectScaleLintAdvisories } from "./lint-scale-rules.js";
 
 export { LINT_CATALOG, type LintAdvisoryCode, type LintCatalogEntry } from "./lint-catalog.js";
 
@@ -82,59 +80,6 @@ function buildEvidence(
   return resolved.status === "ok" ? resolved.fields : null;
 }
 
-const DISCRETE: ReadonlySet<ProfileFieldType> = new Set(["nominal", "ordinal"]);
-
-/** Forward-transform domain rule for a position scale, or null if none. */
-interface TransformDomain {
-  valid(value: number): boolean;
-  /** Human label for the message ("log10" | "sqrt"). */
-  label: string;
-  /** Short description of the valid range ("positive" | "non-negative"). */
-  rule: string;
-}
-
-/**
- * Resolve the effective forward-transform domain for a position scale, reading
- * the spec BEFORE normalization. Both the authored legacy `type: "log"` and the
- * canonical `transform: "log10" | "sqrt"` are covered; identity/time/untyped
- * scales return null.
- */
-function transformDomainOf(config: PositionScaleSpec | undefined): TransformDomain | null {
-  if (config === undefined) return null;
-  const transform = config.transform ?? (config.type === "log" ? "log10" : undefined);
-  if (transform === "log10") {
-    return { valid: (v) => v > 0, label: "log10", rule: "positive" };
-  }
-  if (transform === "sqrt") {
-    return { valid: (v) => v >= 0, label: "sqrt", rule: "non-negative" };
-  }
-  return null;
-}
-
-/** Count numeric values inside/outside a transform domain (non-numbers ignored). */
-function countTransformDomain(
-  values: readonly unknown[],
-  domain: TransformDomain,
-): readonly [inDomain: number, outOfDomain: number] {
-  let inDomain = 0;
-  let outOfDomain = 0;
-  for (const v of values) {
-    if (typeof v !== "number") continue;
-    if (domain.valid(v)) inDomain++;
-    else outOfDomain++;
-  }
-  return [inDomain, outOfDomain];
-}
-
-/** Distinct non-null values in a column (single pass, no intermediate filter). */
-function countDistinctNonNull(values: readonly unknown[]): number {
-  const distinct = new Set<unknown>();
-  for (const value of values) {
-    if (value !== null) distinct.add(value);
-  }
-  return distinct.size;
-}
-
 // ---------------------------------------------------------------------------
 // lintSpec
 // ---------------------------------------------------------------------------
@@ -156,7 +101,6 @@ export function lintSpec(
   sharedEvidence?: FieldEvidenceMap | null,
 ): SpecAdvisory[] {
   if (!isRecord(spec) || !Array.isArray(spec["layers"])) return [];
-  const advisories: SpecAdvisory[] = [];
   const evidence = sharedEvidence === undefined ? buildEvidence(spec, options) : sharedEvidence;
   const plotAes = isRecord(spec["aes"]) ? (spec["aes"] as Aes) : undefined;
   const layers = spec["layers"] as unknown[];
@@ -173,157 +117,8 @@ export function lintSpec(
     return { field: mapped.field, info };
   };
 
-  // FieldEvidenceMap is built once per lintSpec/validate call; distinct counts
-  // for many-discrete-colors are memoized across layers/channels that share a
-  // field so a high-cardinality column is scanned O(n), not O(L·n).
-  const distinctNonNullByField = new Map<string, number>();
-
-  for (let i = 0; i < layers.length; i++) {
-    const layer = layers[i];
-    if (!isRecord(layer)) continue;
-    const geom = typeof layer["geom"] === "string" ? layer["geom"] : "";
-    const layerAes = isRecord(layer["aes"]) ? (layer["aes"] as Aes) : undefined;
-    const defaults = GEOM_DEFAULTS[geom as keyof typeof GEOM_DEFAULTS];
-    const position =
-      typeof layer["position"] === "string"
-        ? layer["position"]
-        : (defaults?.position ?? "identity");
-
-    // --- line-over-nominal-x ------------------------------------------------
-    if (geom === "line") {
-      const x = fieldOf(layerAes, "x");
-      if (x !== null && x.info.type === "nominal") {
-        advisories.push({
-          code: "line-over-nominal-x",
-          path: `/layers/${i}/aes/x`,
-          message: `This line layer connects points across "${x.field}", a nominal (unordered) field — the line's slopes carry no meaning.`,
-          suggestion: {
-            description:
-              'Use geom "col" (or "bar" with the count stat) for per-category values; keep "line" only for ordered x (numbers, dates, or a genuinely ordinal field).',
-            example: { geom: "col" },
-          },
-        });
-      }
-    }
-
-    // --- discrete-discrete-scatter -------------------------------------------
-    if (geom === "point" && position !== "jitter") {
-      const x = fieldOf(layerAes, "x");
-      const y = fieldOf(layerAes, "y");
-      if (
-        x !== null &&
-        y !== null &&
-        x.info.type !== null &&
-        y.info.type !== null &&
-        DISCRETE.has(x.info.type) &&
-        DISCRETE.has(y.info.type)
-      ) {
-        advisories.push({
-          code: "discrete-discrete-scatter",
-          path: `/layers/${i}`,
-          message: `This point layer maps discrete fields on both axes ("${x.field}" × "${y.field}") — identical combinations overplot invisibly.`,
-          suggestion: {
-            description:
-              'Add position: "jitter" to spread the points, or count the combinations and encode the count (e.g. point size).',
-            example: { geom: "point", position: "jitter" },
-          },
-        });
-      }
-    }
-
-    // --- stacked-area-negative -----------------------------------------------
-    if (geom === "area" && (position === "stack" || position === "fill")) {
-      const y = fieldOf(layerAes, "y");
-      const values = y?.info.values;
-      if (y !== null && values !== null && values !== undefined) {
-        const hasNegative = values.some((v) => typeof v === "number" && v < 0);
-        if (hasNegative) {
-          advisories.push({
-            code: "stacked-area-negative",
-            path: `/layers/${i}/aes/y`,
-            message: `This stacked area layer's y field "${y.field}" contains negative values — stacked bands will cross and misread as parts of a whole.`,
-            suggestion: {
-              description:
-                'Draw one line per series instead, or set position: "identity" to overlap the areas.',
-              example: { geom: "area", position: "identity" },
-            },
-          });
-        }
-      }
-    }
-
-    // --- many-discrete-colors -------------------------------------------------
-    for (const channel of ["color", "fill"] as const) {
-      const c = fieldOf(layerAes, channel);
-      const values = c?.info.values;
-      if (
-        c !== null &&
-        values !== null &&
-        values !== undefined &&
-        c.info.type !== null &&
-        DISCRETE.has(c.info.type)
-      ) {
-        let distinct = distinctNonNullByField.get(c.field);
-        if (distinct === undefined) {
-          distinct = countDistinctNonNull(values);
-          distinctNonNullByField.set(c.field, distinct);
-        }
-        if (distinct > 10) {
-          advisories.push({
-            code: "many-discrete-colors",
-            path: `/layers/${i}/aes/${channel}`,
-            message: `Field "${c.field}" maps ${distinct} distinct values to ${channel} — beyond ~10, hues stop being distinguishable and the default palette cycles.`,
-            suggestion: {
-              description: `Facet by "${c.field}", aggregate it to fewer categories, or pin scales.${channel}.domain (+ a range) to the values that matter.`,
-              example: { facet: { wrap: { field: c.field } } },
-            },
-          });
-        }
-      }
-    }
-  }
-
-  // --- transform-domain-data (scale-level, once per axis) ---------------------
-  // Detect the effective forward-transform domain BEFORE normalization: an
-  // authored `type: "log"` (canonicalizes to transform: "log10") and a
-  // canonical `transform: "log10" | "sqrt"` are all handled here. log10 rejects
-  // values <= 0; sqrt rejects values < 0. The advisory fires only on MIXED data
-  // (some in-domain, some out) — all-invalid is the pipeline's error/warning.
-  //
-  // Multi-layer charts often share the same mapped field (plot aes or repeated
-  // layer aes). Memoize [inDomain, outOfDomain] per field name for this axis so
-  // a shared column is scanned once (O(n)), not once per layer (O(L·n)).
-  for (const axis of ["x", "y"] as const) {
-    const config = scales?.[axis] as PositionScaleSpec | undefined;
-    const domain = transformDomainOf(config);
-    if (domain === null) continue;
-    const fieldDomainCounts = new Map<string, readonly [inDomain: number, outOfDomain: number]>();
-    for (let i = 0; i < layers.length; i++) {
-      const layer = layers[i];
-      if (!isRecord(layer)) continue;
-      const layerAes = isRecord(layer["aes"]) ? (layer["aes"] as Aes) : undefined;
-      const use = fieldOf(layerAes, axis);
-      const values = use?.info.values;
-      if (use === null || values === null || values === undefined) continue;
-      let counts = fieldDomainCounts.get(use.field);
-      if (counts === undefined) {
-        counts = countTransformDomain(values, domain);
-        fieldDomainCounts.set(use.field, counts);
-      }
-      const [inDomain, outOfDomain] = counts;
-      if (inDomain > 0 && outOfDomain > 0) {
-        advisories.push({
-          code: "transform-domain-data",
-          path: `/scales/${axis}`,
-          message: `scales.${axis} is a ${domain.label} scale, but field "${use.field}" has ${outOfDomain} value(s) outside its ${domain.rule} domain alongside ${inDomain} valid — those rows will be silently dropped before stats.`,
-          suggestion: {
-            description: `Filter the out-of-domain rows deliberately, or use an identity/linear scale if ${domain.rule} values are meaningful.`,
-          },
-        });
-        break; // one advisory per axis is enough
-      }
-    }
-  }
-
-  return advisories;
+  return [
+    ...collectLayerLintAdvisories({ layers, fieldOf }),
+    ...collectScaleLintAdvisories({ layers, scales, fieldOf }),
+  ];
 }

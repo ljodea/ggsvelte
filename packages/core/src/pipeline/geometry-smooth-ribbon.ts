@@ -28,24 +28,25 @@ export function buildSmoothRibbonBatch(input: {
     .filter((rows) => rows.length > 1);
   if (bandRows.length === 0) return null;
 
-  const { positions, rowIndex, pathOffsets, fills, strokes } = writeClosedPathGroups({
-    frame,
-    fx,
-    groupRows: bandRows,
-    yTop: frame.ymax,
-    yBottom: frame.ymin,
-    fillOf: (rows) => {
-      const first = rows[0]!;
-      // Ribbon tint: fill channel, else the line's color (band matches
-      // its line in multi-series smooths), else theme accent.
-      return (
-        groupColor(fill, frame.fillValues, binding.fill.scaledConstant, first) ??
-        binding.fill.constant ??
-        groupColor(color, frame.colorValues, binding.color.scaledConstant, first) ??
-        binding.color.constant
-      );
-    },
-  });
+  const { positions, rowIndex, closedFrameRows, pathOffsets, fills, strokes } =
+    writeClosedPathGroups({
+      frame,
+      fx,
+      groupRows: bandRows,
+      yTop: frame.ymax,
+      yBottom: frame.ymin,
+      fillOf: (rows) => {
+        const first = rows[0]!;
+        // Ribbon tint: fill channel, else the line's color (band matches
+        // its line in multi-series smooths), else theme accent.
+        return (
+          groupColor(fill, frame.fillValues, binding.fill.scaledConstant, first) ??
+          binding.fill.constant ??
+          groupColor(color, frame.colorValues, binding.color.scaledConstant, first) ??
+          binding.color.constant
+        );
+      },
+    });
 
   return {
     kind: "paths",
@@ -53,6 +54,7 @@ export function buildSmoothRibbonBatch(input: {
     panelIndex: 0,
     positions,
     rowIndex,
+    closedFrameRows,
     pathOffsets,
     strokes,
     fills,

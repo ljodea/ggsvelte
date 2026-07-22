@@ -5,7 +5,7 @@ import type { PathsBatch } from "../scene.js";
 
 import type { LayerFrame, PipelineWarning, ResolvedColorScale } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
-import { DEFAULT_LINEWIDTH, bucketByGroup, xSortKey } from "./geometry-shared.js";
+import { DEFAULT_LINEWIDTH, bucketByGroup, sortGroupRowsByX } from "./geometry-shared.js";
 import { writeLineSubpaths } from "./geometry-paths-line-write.js";
 
 export function lineBatch(
@@ -17,8 +17,7 @@ export function lineBatch(
   const { binding } = frame;
   const subpaths = bucketByGroup(frame, fx, null, warnings);
   if (subpaths.length === 0) return null;
-  const sortKey = xSortKey(frame, fx);
-  for (const rows of subpaths) rows.sort((a, b) => sortKey(a) - sortKey(b));
+  sortGroupRowsByX(subpaths, frame, fx);
 
   const { positions, rowIndex, pathOffsets, strokes } = writeLineSubpaths({
     frame,

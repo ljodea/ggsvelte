@@ -42,6 +42,11 @@ export interface AxisGuidePlan {
   bandLabelAngle?: number;
   /** Measured orthogonal (bottom) band height the labels require, px. */
   bandLabelBandHeight?: number;
+  /**
+   * True when the author forced `scales.*.guide.mode` (not auto). Heuristic
+   * wrap/rotate advisories should be suppressed for these plans.
+   */
+  bandLabelAuthorPinned?: boolean;
 }
 
 export interface DiscreteGuideEntry {

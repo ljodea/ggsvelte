@@ -5,11 +5,21 @@ import { aes, gg, SpecValidationError, type PortableSpec } from "@ggsvelte/spec"
 import { runPipeline } from "../src/pipeline.ts";
 import { renderToSVGString } from "../src/render-svg.ts";
 import {
+  CATEGORICAL_PALETTE_10,
+  CATEGORICAL_SCHEMES,
   COLORBLIND_PALETTE,
   FLEXOKI_PALETTE,
   IPSUM_PALETTE,
   TABLEAU10_PALETTE,
 } from "../src/scales/train.ts";
+import {
+  CATEGORICAL_PALETTE_10 as PALETTE_DIRECT,
+  CATEGORICAL_SCHEMES as SCHEMES_DIRECT,
+  COLORBLIND_PALETTE as COLORBLIND_DIRECT,
+  FLEXOKI_PALETTE as FLEXOKI_DIRECT,
+  IPSUM_PALETTE as IPSUM_DIRECT,
+  TABLEAU10_PALETTE as TABLEAU10_DIRECT,
+} from "../src/scales/categorical-palettes.ts";
 
 const PALETTES = {
   ipsum: IPSUM_PALETTE,
@@ -17,6 +27,18 @@ const PALETTES = {
   tableau10: TABLEAU10_PALETTE,
   colorblind: COLORBLIND_PALETTE,
 } as const;
+
+describe("train.ts palette re-export identity", () => {
+  it("preserves the same module bindings as categorical-palettes", () => {
+    expect(CATEGORICAL_PALETTE_10).toBe(PALETTE_DIRECT);
+    expect(CATEGORICAL_SCHEMES).toBe(SCHEMES_DIRECT);
+    expect(CATEGORICAL_SCHEMES.observable10).toBe(CATEGORICAL_PALETTE_10);
+    expect(COLORBLIND_PALETTE).toBe(COLORBLIND_DIRECT);
+    expect(FLEXOKI_PALETTE).toBe(FLEXOKI_DIRECT);
+    expect(IPSUM_PALETTE).toBe(IPSUM_DIRECT);
+    expect(TABLEAU10_PALETTE).toBe(TABLEAU10_DIRECT);
+  });
+});
 
 describe("named categorical palettes through the pipeline", () => {
   for (const [scheme, palette] of Object.entries(PALETTES)) {
