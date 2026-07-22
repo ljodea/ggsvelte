@@ -62,18 +62,21 @@ export function quantile7(sorted: readonly number[] | Float64Array, p: number): 
  * ggplot2's resolution(): the smallest positive difference between distinct
  * finite values. Returns 0 when there are fewer than two distinct values
  * (jitter then adds no offset — nothing to jitter within).
+ *
+ * Unique-first (Set) then sort: O(R + U log U) instead of O(R log R) on
+ * multisets — only distinct gaps matter (#493).
  */
 export function resolution(values: readonly number[] | Float64Array): number {
-  const finite: number[] = [];
+  const unique = new Set<number>();
   for (let i = 0; i < values.length; i++) {
     const v = values[i]!;
-    if (Number.isFinite(v)) finite.push(v);
+    if (Number.isFinite(v)) unique.add(v);
   }
-  if (finite.length < 2) return 0;
-  finite.sort((a, b) => a - b);
+  if (unique.size < 2) return 0;
+  const sorted = [...unique].toSorted((a, b) => a - b);
   let min = Infinity;
-  for (let i = 1; i < finite.length; i++) {
-    const d = finite[i]! - finite[i - 1]!;
+  for (let i = 1; i < sorted.length; i++) {
+    const d = sorted[i]! - sorted[i - 1]!;
     if (d > 0 && d < min) min = d;
   }
   return Number.isFinite(min) ? min : 0;

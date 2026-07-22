@@ -36,6 +36,13 @@ describe("numeric helpers", () => {
     expect(resolution([0, 0.5, NaN, 2])).toBe(0.5);
   });
 
+  it("resolution unique-first still finds min gap on large multisets (#493)", () => {
+    // R ≫ U: many duplicates, few distinct. Gap between 0 and 0.25 is the min.
+    const values = Float64Array.from({ length: 50_000 }, (_, i) => (i % 4) * 0.25);
+    expect(resolution(values)).toBe(0.25);
+    expect(resolution([1, 1, 1, 1, 3, 3, 3, 7, 7])).toBe(2);
+  });
+
   it("mulberry32 is deterministic and uniform in [0, 1)", () => {
     const a = mulberry32(42);
     const b = mulberry32(42);
