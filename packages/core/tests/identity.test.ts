@@ -179,11 +179,8 @@ describe("pipeline semantic identity", () => {
     expect(model.domains.effective.panels).toHaveLength(2);
   });
 
-  // SKIP (PR 3 follow-up): the natural baseline is trained from the same frames
-  // the effective pin already censored pre-stat, so an all-excluding pin starves
-  // it. The natural baseline (zoom-out reference) needs an uncensored evidence
-  // pass; the assertions below encode the correct target contract.
-  it.skip("trains latest natural baseline domains beside explicit effective zoom domains", () => {
+  // Uncensored second evidence pass when baselineScales + domain pins (#449).
+  it("trains latest natural baseline domains beside explicit effective zoom domains", () => {
     const model = runPipeline(
       {
         data: {
@@ -218,11 +215,7 @@ describe("pipeline semantic identity", () => {
       [1.9, 4.1],
       [1.9, 4.1],
     ]);
-    // Natural baseline: the un-pinned extent [0,20] widened by expansion. NOTE:
-    // under PR 3's pre-stat pin censoring the natural baseline currently shares
-    // the effective pin's censored frames, so an all-excluding pin starves it.
-    // Restoring an uncensored second evidence pass for the natural baseline (the
-    // zoom-out reference) is tracked as a follow-up.
+    // Natural baseline: uncensored data extent [0,20] with expansion (#449).
     expect(model.domains.baseline.x).toEqual([-1, 21]);
     expect(model.domains.baseline.y).toEqual([-1, 21]);
     expect(model.domains.baseline.panels.map((panel) => panel.x)).toEqual([
@@ -233,6 +226,35 @@ describe("pipeline semantic identity", () => {
       [-0.1, 2.1],
       [9.5, 20.5],
     ]);
+
+    // Codex P2: uncensored pass must honor baselineScales (nice/expand/type),
+    // not the stripped effective scale config. Data extent [1,19] nices to
+    // [0,20] then expands 5% → [-1,21]; with nice:false expand alone → [0.1,19.9].
+    const nicedBaseline = runPipeline(
+      {
+        data: {
+          values: [
+            { x: 1, y: 1 },
+            { x: 19, y: 19 },
+          ],
+        },
+        layers: [{ geom: "point", aes: { x: { field: "x" }, y: { field: "y" } } }],
+        scales: {
+          x: { type: "linear", domain: [2, 4], nice: false },
+          y: { type: "linear", domain: [2, 4], nice: false },
+        },
+      },
+      {
+        width: 400,
+        height: 240,
+        baselineScales: {
+          x: { type: "linear" },
+          y: { type: "linear" },
+        },
+      },
+    );
+    expect(nicedBaseline.domains.baseline.x).toEqual([-1, 21]);
+    expect(nicedBaseline.domains.baseline.y).toEqual([-1, 21]);
 
     const override = {
       x: [100, 200],
