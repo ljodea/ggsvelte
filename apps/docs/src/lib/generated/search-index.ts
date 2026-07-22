@@ -2514,6 +2514,26 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Render warnings"],
   },
   {
+    id: "heading:guide-errors:facet-levels-missing",
+    kind: "heading",
+    title: "facet-levels-missing",
+    summary:
+      "facet-levels-missing in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#facet-levels-missing",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["facet-levels-missing"],
+  },
+  {
+    id: "heading:guide-errors:facet-levels-unknown",
+    kind: "heading",
+    title: "facet-levels-unknown",
+    summary:
+      "facet-levels-unknown in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#facet-levels-unknown",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["facet-levels-unknown"],
+  },
+  {
     id: "heading:guide-errors:empty-data",
     kind: "heading",
     title: "empty-data",
@@ -16540,6 +16560,34 @@ export const DOCS_SEARCH_INDEX = [
       "Raise options.maxMarks deliberately, reduce the data, or render interactively (canvas).",
     ],
     exact: ["max-marks-exceeded", "pipeline:max-marks-exceeded"],
+  },
+  {
+    id: "diagnostic:warning:facet-levels-missing",
+    kind: "diagnostic",
+    title: "facet-levels-missing · warning",
+    summary:
+      "An explicit facet levels list includes values absent from the data; empty panels are kept.",
+    href: "/guide/errors#facet-levels-missing",
+    keywords: [
+      "warning",
+      "warning",
+      "Inspect the warning message for its path and count, then correct the named data, scale, or option.",
+    ],
+    exact: ["facet-levels-missing", "warning:facet-levels-missing"],
+  },
+  {
+    id: "diagnostic:warning:facet-levels-unknown",
+    kind: "diagnostic",
+    title: "facet-levels-unknown · warning",
+    summary:
+      "Data values for a facet field were omitted from the closed levels list and are excluded from every panel.",
+    href: "/guide/errors#facet-levels-unknown",
+    keywords: [
+      "warning",
+      "warning",
+      "Inspect the warning message for its path and count, then correct the named data, scale, or option.",
+    ],
+    exact: ["facet-levels-unknown", "warning:facet-levels-unknown"],
   },
   {
     id: "diagnostic:warning:empty-data",

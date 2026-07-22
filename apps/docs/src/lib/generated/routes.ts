@@ -1599,6 +1599,16 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
+        id: "facet-levels-missing",
+        title: "facet-levels-missing",
+        level: 3,
+      },
+      {
+        id: "facet-levels-unknown",
+        title: "facet-levels-unknown",
+        level: 3,
+      },
+      {
         id: "empty-data",
         title: "empty-data",
         level: 3,
