@@ -31,7 +31,7 @@ export function layoutDomain(
             const key = encodeKey(value);
             if (seen.has(key)) continue;
             seen.add(key);
-            unique.push(value as string | number);
+            unique.push(value);
           }
           return unique;
         })(),
