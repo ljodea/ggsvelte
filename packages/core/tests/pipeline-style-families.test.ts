@@ -575,6 +575,111 @@ describe("complete mapped style plumbing", () => {
     ]);
   });
 
+  it("trains binned finite styles from authored breaks alone when data is empty", () => {
+    // Authored breaks fully define the bins and domain, so a runtime-filtered
+    // frame must train from them without an explicit domain (previously only
+    // `domain` exempted the empty-extent throw).
+    const table = ColumnTable.fromRows([{ x: 1, y: 1 }]);
+    const binding = fromAny<LayerBinding>({
+      layer: { geom: "point", aes: { shape: { field: "value" } } },
+      index: 0,
+      xField: "x",
+      yField: "y",
+      color: { field: null, constant: null, scaledConstant: null },
+      fill: { field: null, constant: null, scaledConstant: null },
+      size: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      linewidth: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      alpha: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      shape: { field: "value", statColumn: null, constant: null, scaledConstant: null },
+      linetype: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      ruleForm: null,
+    });
+    const frame = fromAny<LayerFrame>({
+      binding,
+      table,
+      n: 0,
+      xNumeric: new Float64Array(0),
+      yNumeric: new Float64Array(0),
+      groups: [],
+      inputGroups: [],
+      rowIndex: new Uint32Array(0),
+      shapeValues: [],
+    });
+    const warnings: { code: string; message: string }[] = [];
+    const resolution = resolveStyleScale({
+      aesthetic: "shape",
+      frames: [frame],
+      bindings: [binding],
+      table,
+      sourceTable: table,
+      config: {
+        type: "binned",
+        breaks: [0, 5, 10],
+        range: ["circle", "square"],
+      },
+      prevState: null,
+      title: "shape",
+      warnings,
+    });
+    expect(resolution.guidePlan?.type).toBe("discrete");
+    if (resolution.guidePlan?.type !== "discrete") throw new Error("expected discrete guide");
+    expect(resolution.guidePlan.domain).toEqual([0, 5]);
+  });
+
+  it("trains a temporal binned numeric style from authored breaks when all rows are filtered", () => {
+    // The temporal parser seed must fall back to authored breaks (not just an
+    // authored domain) so a fully filtered temporal binned scale still resolves
+    // instead of throwing style-temporal-parse on zero samples.
+    const table = ColumnTable.fromRows([{ x: 1, y: 1 }]);
+    const binding = fromAny<LayerBinding>({
+      layer: { geom: "point", aes: { size: { field: "when" } } },
+      index: 0,
+      xField: "x",
+      yField: "y",
+      color: { field: null, constant: null, scaledConstant: null },
+      fill: { field: null, constant: null, scaledConstant: null },
+      size: { field: "when", statColumn: null, constant: null, scaledConstant: null },
+      linewidth: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      alpha: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      shape: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      linetype: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      ruleForm: null,
+    });
+    const frame = fromAny<LayerFrame>({
+      binding,
+      table,
+      n: 0,
+      xNumeric: new Float64Array(0),
+      yNumeric: new Float64Array(0),
+      groups: [],
+      inputGroups: [],
+      rowIndex: new Uint32Array(0),
+      sizeValues: [],
+    });
+    const warnings: { code: string; message: string }[] = [];
+    const resolution = resolveStyleScale({
+      aesthetic: "size",
+      frames: [frame],
+      bindings: [binding],
+      table,
+      sourceTable: table,
+      config: {
+        type: "binned",
+        temporalKind: "date",
+        breaks: ["2024-01-01", "2024-01-15", "2024-01-31"],
+        range: [2, 6],
+      },
+      prevState: null,
+      title: "size",
+      warnings,
+    });
+    expect(resolution.resolved).not.toBeNull();
+    expect(resolution.resolved?.scale.domain).toEqual([
+      Date.UTC(2024, 0, 1),
+      Date.UTC(2024, 0, 31),
+    ]);
+  });
+
   it("keeps continuous mapped styles out of grouping and discrete stroke styles in grouping", () => {
     const rows = [
       { x: 1, y: 1, alpha: 0.2, kind: "a" },
@@ -680,6 +785,37 @@ describe("complete mapped style plumbing", () => {
         viewport,
       ),
     ).toThrow(expect.objectContaining({ code: "style-binned-breaks" }));
+  });
+
+  it("normalizes a reversed binned style domain before grouping", () => {
+    // The style trainer normalizes an authored domain with Math.min/max; the
+    // grouping path must too, or a reversed domain like [10, 0] yields descending
+    // breaks that treat every in-domain value as out-of-bounds — collapsing the
+    // grouped lines instead of binning them like the rendered scale.
+    const rows = [
+      { x: 1, y: 1, w: 1 },
+      { x: 2, y: 2, w: 1 },
+      { x: 3, y: 3, w: 9 },
+      { x: 4, y: 4, w: 9 },
+    ];
+    const pathCountForDomain = (domain: number[]): number => {
+      const model = runPipeline(
+        fromAny({
+          data: { values: rows },
+          aes: { x: { field: "x" }, y: { field: "y" }, linewidth: { field: "w" } },
+          layers: [{ geom: "smooth", params: { method: "lm", se: false } }],
+          scales: { linewidth: { type: "binned", domain } },
+        }),
+        viewport,
+      );
+      const paths = model.scene.batches.find((batch) => batch.kind === "paths");
+      if (paths?.kind !== "paths") throw new Error("expected smooth paths");
+      return paths.pathOffsets.length;
+    };
+    // Values 1 and 9 fall in distinct default bins → two grouped lines. The
+    // reversed domain must bin identically to the ascending one.
+    expect(pathCountForDomain([0, 10])).toBe(3);
+    expect(pathCountForDomain([10, 0])).toBe(pathCountForDomain([0, 10]));
   });
 
   it("preserves temporal semantics and formatted date labels on numeric style guides", () => {
@@ -1166,5 +1302,38 @@ describe("complete mapped style plumbing", () => {
       viewport,
     );
     expect(model.scene.batches.some((batch) => batch.kind === "segments")).toBe(true);
+  });
+
+  it("keeps a rowless annotation scaled-constant legend non-interactive", () => {
+    // A fixed-intercept rule's scaled constant lives on an n === 0 annotation
+    // frame with no source row or lineage, so its legend entry would resolve to
+    // an empty key bucket — hover/click emphasizing nothing. It must render but
+    // stay non-interactive (contrast the field-mapped discrete legend above).
+    const model = runPipeline(
+      fromAny({
+        data: {
+          values: [
+            { x: 1, y: 1 },
+            { x: 2, y: 2 },
+          ],
+        },
+        aes: { x: { field: "x" }, y: { field: "y" } },
+        layers: [
+          { geom: "point" },
+          {
+            geom: "rule",
+            aes: { linetype: { value: "threshold", scale: true } },
+            params: { yintercept: 1 },
+          },
+        ],
+        scales: { linetype: { type: "ordinal" } },
+      }),
+      viewport,
+    );
+    const legend = model.scene.legends.find(
+      (entry) => entry.type === "discrete" && entry.scale === "linetype",
+    );
+    if (legend?.type !== "discrete") throw new Error("expected linetype discrete legend");
+    expect(legend.interactive).toBe(false);
   });
 });

@@ -241,6 +241,76 @@ describe("tier 2 — data-aware checks (inline data)", () => {
       ).ok,
     ).toBe(true);
   });
+
+  // A numeric style requesting temporal semantics over a quantitative (number)
+  // column with no working epoch parser auto-detects as non-temporal and throws
+  // style-temporal-parse at runtime; reject at validation time like color does,
+  // instead of the previous unconditional temporal skip.
+  it("rejects a quantitative field on a temporal numeric style without a parser", () => {
+    const errors = errorsOf({
+      ...base,
+      aes: { ...base.aes, size: { field: "temp" } },
+      scales: { size: { type: "sequential", temporalKind: "date" } },
+      layers: [{ geom: "point" }],
+    });
+    expect(errors.map((e) => e.code)).toEqual(["scale-type-mismatch"]);
+    expect(errors[0]?.message).toContain("quantitative");
+  });
+
+  it("accepts a quantitative field on a temporal numeric style with a working epoch parser", () => {
+    // A working parser resolves the numeric column to temporal, so the check
+    // must keep deferring (mirrors the color checker's parser deferral).
+    expect(
+      validate(
+        {
+          ...base,
+          aes: { ...base.aes, size: { field: "temp" } },
+          scales: { size: { type: "sequential", parse: { epoch: "seconds" } } },
+          layers: [{ geom: "point" }],
+        },
+        {},
+      ).ok,
+    ).toBe(true);
+  });
+
+  // The runtime trains numeric style scales on scaled constants too, so a scaled
+  // string constant on a sequential/binned scale throws style-domain-empty; the
+  // check must cover scaled constants, not only mapped fields.
+  it("rejects a scaled string constant on a sequential numeric style scale", () => {
+    const errors = errorsOf({
+      ...base,
+      aes: { ...base.aes, size: { value: "large", scale: true } },
+      scales: { size: { type: "sequential" } },
+      layers: [{ geom: "point" }],
+    });
+    expect(errors.map((e) => e.code)).toEqual(["scale-type-mismatch"]);
+    expect(errors[0]?.message).toContain("large");
+  });
+
+  it("rejects a scaled string constant on a binned alpha scale", () => {
+    expect(
+      codesOf({
+        ...base,
+        aes: { ...base.aes, alpha: { value: "big", scale: true } },
+        scales: { alpha: { type: "binned" } },
+        layers: [{ geom: "point" }],
+      }),
+    ).toEqual(["scale-type-mismatch"]);
+  });
+
+  it("accepts a numeric scaled constant on a sequential numeric style scale", () => {
+    expect(
+      validate(
+        {
+          ...base,
+          aes: { ...base.aes, size: { value: 5, scale: true } },
+          scales: { size: { type: "sequential" } },
+          layers: [{ geom: "point" }],
+        },
+        {},
+      ).ok,
+    ).toBe(true);
+  });
 });
 
 describe("tier 2 — DataProfile", () => {

@@ -77,8 +77,15 @@ function binnedStyleColumn(
   const domainNumbers = binding.binDomain
     ?.map(semanticOf)
     .filter((value): value is number => value !== undefined);
-  const low = domainNumbers?.[0] ?? binding.binExtent?.[0] ?? inferredLow;
-  const high = domainNumbers?.at(-1) ?? binding.binExtent?.[1] ?? inferredHigh;
+  // The style-scale trainer normalizes an authored domain with Math.min/max
+  // before deriving default breaks (scale-style.ts). A reversed authored domain
+  // like [10, 0] would otherwise produce descending breaks here and treat every
+  // in-domain value as out-of-bounds, so grouping bins would diverge from the
+  // rendered scale. Normalize the bounds to match the trainer.
+  const rawLow = domainNumbers?.[0] ?? binding.binExtent?.[0] ?? inferredLow;
+  const rawHigh = domainNumbers?.at(-1) ?? binding.binExtent?.[1] ?? inferredHigh;
+  const low = Math.min(rawLow, rawHigh);
+  const high = Math.max(rawLow, rawHigh);
   const binCount = binding.binCount ?? 5;
   const configuredBreaks = binding.binBreaks
     ?.map(semanticOf)

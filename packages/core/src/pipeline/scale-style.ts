@@ -94,7 +94,11 @@ function collectValues(input: {
     if (binding.scaledConstant !== null) {
       anyField = true;
       anyDiscrete = true;
-      anyIndexable = true;
+      // A rowless annotation frame (fixed-intercept rule, n === 0) contributes
+      // no source row or lineage, so its legend entry would resolve to an empty
+      // key bucket — interactive but emphasizing nothing. Keep it renderable but
+      // non-interactive; a real data layer (n > 0) still marks the scale indexable.
+      if (frame.n > 0) anyIndexable = true;
       values.push(binding.scaledConstant);
     }
     if (binding.statColumn !== null) anyField = true;
@@ -116,7 +120,9 @@ function collectValues(input: {
       for (const value of sourceTable.column(mapped.field)) add(value);
     }
     if (mapped.scaledConstant !== null) {
-      anyIndexable = true;
+      // Rowless annotation constants index no rendered mark (see the frames loop
+      // above), so they render but stay non-interactive.
+      if (binding.ruleForm !== "annotation") anyIndexable = true;
       add(mapped.scaledConstant);
     }
   }
@@ -611,19 +617,32 @@ function finiteResolution(input: {
         `The ${aesthetic} binned domain must contain exactly two finite numbers.`,
       );
     }
-    // Prefer an explicit domain when data has no finite samples (filtered-out
-    // frames, all-null mappings that should still emit naValue bins).
-    if (extent === null && configuredDomain === undefined) {
+    // Prefer an explicit domain — or authored breaks — when data has no finite
+    // samples (filtered-out frames, all-null mappings that should still emit
+    // naValue bins). Authored breaks fully define the bins and domain below, so
+    // they can train the scale without any extent.
+    const authoredBreaks = config?.breaks;
+    if (extent === null && configuredDomain === undefined && (authoredBreaks?.length ?? 0) < 2) {
       throw new PipelineError(
         "style-domain-empty",
         `/scales/${aesthetic}`,
         `No finite ${aesthetic} values can be binned.`,
       );
     }
+    // low/high only feed the default-boundary fallback; when breaks are authored
+    // they are unused, but must stay finite to avoid dereferencing a null extent.
     const low =
-      configuredDomain === undefined ? Math.min(...extent!) : (configuredDomain[0] as number);
+      configuredDomain === undefined
+        ? extent === null
+          ? (authoredBreaks![0] as number)
+          : Math.min(...extent)
+        : (configuredDomain[0] as number);
     const high =
-      configuredDomain === undefined ? Math.max(...extent!) : (configuredDomain[1] as number);
+      configuredDomain === undefined
+        ? extent === null
+          ? (authoredBreaks!.at(-1) as number)
+          : Math.max(...extent)
+        : (configuredDomain[1] as number);
     const boundaryCount = Math.min(range.length, 5) + 1;
     const boundaries =
       config?.breaks ??
