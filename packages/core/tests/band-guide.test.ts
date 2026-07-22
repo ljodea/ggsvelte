@@ -339,7 +339,7 @@ describe("planBandAxis: author guide pins (#407)", () => {
 
   it("mode:off hides every label and reserves no band height", () => {
     const pinned = plan(longCats, 480, { config: { mode: "off" } });
-    expect(pinned.ticks.every((t) => t.labeled === false)).toBe(true);
+    expect(pinned.ticks.every((t) => !t.labeled)).toBe(true);
     expect(pinned.labelBandHeight).toBe(0);
     expect(pinned.degraded).toEqual([]);
   });
