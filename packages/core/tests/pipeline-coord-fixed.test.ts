@@ -200,4 +200,57 @@ describe("coord_fixed pipeline", () => {
     expect(letterboxIndex).toBeGreaterThan(-1);
     expect(letterboxIndex).toBeLessThan(panelIndex);
   });
+
+  it("paints letterbox fill only on gutters when the panel role is none", () => {
+    const model = runPipeline(
+      gg(rows, aes({ x: "x", y: "y" }))
+        .geomPoint()
+        .coordFixed()
+        .theme({ letterboxFill: "#123456", panel: "none" })
+        .spec(),
+      { width: 640, height: 400 },
+    );
+    const panel = model.scene.panels[0]!;
+    const allocation = panel.allocation!;
+    const svg = sceneToSVGString(model.scene);
+    const gutterRects = [...svg.matchAll(/class="gg-letterbox"[^>]*>/g)].map((match) => match[0]);
+    expect(gutterRects.length).toBeGreaterThan(0);
+    // No single letterbox covers the full pre-fit allocation (would leak under panel:none).
+    expect(
+      gutterRects.some(
+        (rect) =>
+          rect.includes(`x="${allocation.x}"`) &&
+          rect.includes(`y="${allocation.y}"`) &&
+          rect.includes(`width="${allocation.width}"`) &&
+          rect.includes(`height="${allocation.height}"`),
+      ),
+    ).toBe(false);
+    expect(svg).not.toContain('class="gg-panel-background"');
+  });
+
+  it("keeps guidePlans aligned with thinned ticks under degraded fixed aspect", () => {
+    const start = Date.UTC(2020, 0, 1);
+    const temporalRows = Array.from({ length: 24 }, (_, index) => ({
+      t: new Date(start + index * 30 * 24 * 3600 * 1000),
+      y: index,
+    }));
+    const model = runPipeline(
+      gg(temporalRows, aes({ x: "t", y: "y" }))
+        .geomPoint()
+        .coordFixed({ ratio: 100 })
+        .spec(),
+      { width: 200, height: 120 },
+    );
+    expect(model.scene.layout).toBe("degraded");
+    const axisLabels =
+      model.scene.panels[0]?.axisX
+        ?.filter((tick) => tick.kind === "major" || tick.kind === undefined)
+        .map((tick) => tick.label) ?? [];
+    const guide = model.guidePlans.find((plan) => plan.type === "axis" && plan.aesthetic === "x");
+    expect(guide).toBeDefined();
+    if (guide?.type !== "axis") throw new Error("expected axis guide");
+    expect(guide.ticks.map((tick) => tick.label)).toEqual(axisLabels);
+    expect(guide.ticks.length).toBeLessThanOrEqual(3);
+    expect(guide.interval).not.toBeNull();
+  });
 });

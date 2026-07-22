@@ -18,7 +18,12 @@
     GeometryBatch,
     Scene,
   } from "@ggsvelte/core";
-  import { sceneLabel, STRIP_BAND, themeVar } from "@ggsvelte/core";
+  import {
+    letterboxGutterRects,
+    sceneLabel,
+    STRIP_BAND,
+    themeVar,
+  } from "@ggsvelte/core";
 
   import Axis from "./Axis.svelte";
   import Batch from "./Batch.svelte";
@@ -127,14 +132,16 @@
   {#if drawChrome}
     {#each scene.panels as panel, i (`letterbox-${i}`)}
       {#if panel.allocation !== undefined}
-        <rect
-          class="gg-letterbox"
-          x={panel.allocation.x}
-          y={panel.allocation.y}
-          width={panel.allocation.width}
-          height={panel.allocation.height}
-          fill={themeVar("letterboxFill", scene.theme)}
-        />
+        {#each letterboxGutterRects(panel.allocation, panel) as gutter, gi (`letterbox-${i}-${gi}`)}
+          <rect
+            class="gg-letterbox"
+            x={gutter.x}
+            y={gutter.y}
+            width={gutter.width}
+            height={gutter.height}
+            fill={themeVar("letterboxFill", scene.theme)}
+          />
+        {/each}
       {/if}
     {/each}
   {/if}

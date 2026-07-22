@@ -1,5 +1,7 @@
 import type { CoordFixedSpec, Scales } from "@ggsvelte/spec";
 
+import type { Tick } from "../layout/layout-types.js";
+import type { AxisGuidePlan } from "../layout/temporal-guide.js";
 import type { PositionScale } from "../scales/train.js";
 
 import type { PanelPlacement } from "./panel-layout-types.js";
@@ -23,6 +25,35 @@ function fitAutomaticTicks<T>(ticks: readonly T[], fraction: number, degraded: b
     const sourceIndex = Math.round((index * (ticks.length - 1)) / Math.max(1, target - 1));
     return ticks[sourceIndex]!;
   });
+}
+
+/** Keep guide-plan disclosure aligned with placement ticks after fixed-aspect thinning. */
+function thinGuidePlan(
+  plan: AxisGuidePlan | undefined,
+  fraction: number,
+  degraded: boolean,
+): AxisGuidePlan | undefined {
+  if (plan === undefined) return undefined;
+  const ticks = fitAutomaticTicks(plan.ticks, fraction, degraded);
+  if (ticks.length === plan.ticks.length) return plan;
+  return Object.freeze({
+    ...plan,
+    ticks: Object.freeze(ticks.map((tick) => Object.freeze({ ...tick }))),
+  });
+}
+
+function thinAutomaticAxis(
+  ticks: readonly Tick[],
+  plan: AxisGuidePlan | undefined,
+  fraction: number,
+  degraded: boolean,
+): { ticks: Tick[]; guidePlan?: AxisGuidePlan } {
+  const thinnedTicks = fitAutomaticTicks(ticks, fraction, degraded);
+  const guidePlan = thinGuidePlan(plan, fraction, degraded);
+  return {
+    ticks: thinnedTicks,
+    ...(guidePlan !== undefined && { guidePlan }),
+  };
 }
 
 export interface FixedAspectLayoutResult {
@@ -90,6 +121,26 @@ export function applyFixedAspectLayout(input: {
       width: placement.width,
       height: placement.height,
     };
+    const thinX =
+      input.scalesConfig.x?.breaks === undefined && input.scalesConfig.x?.dateBreaks === undefined;
+    const thinY =
+      input.scalesConfig.y?.breaks === undefined && input.scalesConfig.y?.dateBreaks === undefined;
+    const horizontal = thinX
+      ? thinAutomaticAxis(
+          placement.ticksH,
+          placement.hGuidePlan,
+          fittedWidth / allocation.width,
+          degraded,
+        )
+      : undefined;
+    const vertical = thinY
+      ? thinAutomaticAxis(
+          placement.ticksV,
+          placement.vGuidePlan,
+          fittedHeight / allocation.height,
+          degraded,
+        )
+      : undefined;
     return {
       ...placement,
       x: allocation.x + (allocation.width - fittedWidth) / 2,
@@ -97,18 +148,14 @@ export function applyFixedAspectLayout(input: {
       width: fittedWidth,
       height: fittedHeight,
       allocation,
-      ...(input.scalesConfig.x?.breaks === undefined &&
-      input.scalesConfig.x?.dateBreaks === undefined
-        ? {
-            ticksH: fitAutomaticTicks(placement.ticksH, fittedWidth / allocation.width, degraded),
-          }
-        : {}),
-      ...(input.scalesConfig.y?.breaks === undefined &&
-      input.scalesConfig.y?.dateBreaks === undefined
-        ? {
-            ticksV: fitAutomaticTicks(placement.ticksV, fittedHeight / allocation.height, degraded),
-          }
-        : {}),
+      ...(horizontal !== undefined && {
+        ticksH: horizontal.ticks,
+        hGuidePlan: horizontal.guidePlan,
+      }),
+      ...(vertical !== undefined && {
+        ticksV: vertical.ticks,
+        vGuidePlan: vertical.guidePlan,
+      }),
     };
   });
 

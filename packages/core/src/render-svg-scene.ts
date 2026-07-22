@@ -5,6 +5,7 @@
 import { LINETYPE_NAMES } from "@ggsvelte/spec";
 
 import { groupBatchesByPanel } from "./group-batches-by-panel.js";
+import { letterboxGutterRects } from "./letterbox-gutters.js";
 import { LINETYPE_DASHES } from "./scales/style.js";
 import type { Scene, SceneLegend, SceneLegendEntry, ScenePanel } from "./scene.js";
 import { STRIP_BAND } from "./scene.js";
@@ -349,9 +350,12 @@ export function sceneToSVGString(scene: Scene): string {
   parts.push(`<defs>${clips}</defs>`);
   for (const p of scene.panels) {
     if (p.allocation === undefined) continue;
-    parts.push(
-      `<rect class="gg-letterbox" x="${px(p.allocation.x)}" y="${px(p.allocation.y)}" width="${px(p.allocation.width)}" height="${px(p.allocation.height)}" fill="${themeVar("letterboxFill", theme)}"/>`,
-    );
+    const fill = themeVar("letterboxFill", theme);
+    for (const gutter of letterboxGutterRects(p.allocation, p)) {
+      parts.push(
+        `<rect class="gg-letterbox" x="${px(gutter.x)}" y="${px(gutter.y)}" width="${px(gutter.width)}" height="${px(gutter.height)}" fill="${fill}"/>`,
+      );
+    }
   }
   // One O(P+B) panel→batch index (issue #185) instead of re-scanning all
   // batches per panel (O(P·B)). Bucket order preserves original batch list

@@ -31,15 +31,29 @@ describe("fixed-aspect scene", () => {
     );
     const panel = model.scene.panels[0];
     if (panel === undefined) throw new Error("expected fixed-aspect panel");
+    const allocation = panel.allocation;
+    if (allocation === undefined) throw new Error("expected fixed-aspect allocation");
     const { container } = render(SceneView, { scene: model.scene });
-    const letterbox = container.querySelector("rect.gg-letterbox");
+    const letterboxes = [...container.querySelectorAll("rect.gg-letterbox")];
     const panelBackground = container.querySelector("rect.gg-panel-background");
-    expect(letterbox).not.toBeNull();
-    expect(letterbox?.getAttribute("x")).toBe(String(panel.allocation?.x));
-    expect(letterbox?.getAttribute("width")).toBe(String(panel.allocation?.width));
-    expect(letterbox?.getAttribute("fill")).toContain("#123456");
+    expect(letterboxes.length).toBeGreaterThan(0);
+    for (const letterbox of letterboxes) {
+      expect(letterbox.getAttribute("fill")).toContain("#123456");
+      const x = Number(letterbox.getAttribute("x"));
+      const y = Number(letterbox.getAttribute("y"));
+      const width = Number(letterbox.getAttribute("width"));
+      const height = Number(letterbox.getAttribute("height"));
+      // Gutters must not cover the fitted data rectangle interior.
+      const fullyCoversPanel =
+        x <= panel.x &&
+        y <= panel.y &&
+        x + width >= panel.x + panel.width &&
+        y + height >= panel.y + panel.height;
+      expect(fullyCoversPanel).toBe(false);
+      expect(x).toBeGreaterThanOrEqual(allocation.x - 1e-9);
+      expect(y).toBeGreaterThanOrEqual(allocation.y - 1e-9);
+    }
     expect(panelBackground?.getAttribute("width")).toBe(String(panel.width));
-    expect(container.querySelectorAll("rect.gg-letterbox")).toHaveLength(1);
     model.dispose();
   });
 
