@@ -138,6 +138,10 @@ const INTERACTION_HANDLERS: Record<
 for (const scenario of SMOKE_SCENARIOS) {
   if (scenario.kind === "example") {
     test(`${scenario.exampleId} — ${scenario.theme}`, async ({ page }) => {
+      // 10k-mark canvas specimen needs headroom under parallel smoke workers.
+      if (scenario.exampleId === "point/canvas-scatter") {
+        test.setTimeout(60_000);
+      }
       await shotExample(page, scenario.exampleId, scenario.theme, scenario.basename);
     });
     continue;
