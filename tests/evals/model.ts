@@ -288,10 +288,14 @@ export class MockResponder implements Responder {
     const profile = parseProfileLine(user);
 
     // Aesthetic mapping phrases like "map y to station" / "map period to fill"
-    // must not trigger the geographic-map refusal.
+    // must not trigger the geographic-map refusal. Only known aesthetic /
+    // position / style channels count — "map revenue to state" is geo-ish and
+    // must still refuse when the prompt also contains "map".
+    const aesChannel =
+      "(?:binned\\s+)?(?:colou?r|fill|x|y|xmin|xmax|ymin|ymax|width|height|size|alpha|shape|linewidth|linetype|label)";
     const aestheticMapping =
-      /\bmap\s+\S+\s+to\s+\S+/.test(prompt) ||
-      /\bmap\s+.+\s+to\s+(?:binned\s+)?(?:colou?r|fill)\b/.test(prompt) ||
+      new RegExp(`\\bmap\\s+\\S+\\s+to\\s+${aesChannel}\\b`).test(prompt) ||
+      new RegExp(`\\bmap\\s+${aesChannel}\\s+to\\s+\\S+\\b`).test(prompt) ||
       STYLE_CHANNELS.some((channel) => mappedStyleField(prompt, profile, channel) !== undefined);
     if (
       /choropleth|\b3-?d\b|surface plot|network diagram/.test(prompt) ||

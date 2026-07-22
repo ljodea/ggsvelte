@@ -214,6 +214,29 @@ describe("dry-run pipeline", () => {
   });
 });
 
+describe("MockResponder map refusal", () => {
+  const profileLine =
+    'DataProfile (JSON):{"fields":[{"name":"revenue","type":"quantitative"},{"name":"state","type":"nominal"},{"name":"region","type":"nominal"},{"name":"y","type":"quantitative"},{"name":"station","type":"nominal"}]}';
+
+  test("refuses geographic map phrasing that is not an aesthetic mapping", async () => {
+    const mock = new MockResponder();
+    const reply = await mock.complete("", `map revenue to state on a US map.\n${profileLine}`);
+    const parsed = JSON.parse(reply) as { unsupported?: string };
+    expect(typeof parsed.unsupported).toBe("string");
+  });
+
+  test("still allows aesthetic map-to-channel phrases", async () => {
+    const mock = new MockResponder();
+    const reply = await mock.complete(
+      "",
+      `Scatter of y by station and map region to color.\n${profileLine}`,
+    );
+    const parsed = JSON.parse(reply) as { layers?: unknown[]; unsupported?: string };
+    expect(parsed.unsupported).toBeUndefined();
+    expect(Array.isArray(parsed.layers)).toBe(true);
+  });
+});
+
 // ---------------------------------------------------------------------------
 // (c) score.ts unit tests
 // ---------------------------------------------------------------------------

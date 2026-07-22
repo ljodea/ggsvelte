@@ -31,9 +31,12 @@ export function collectAxisInputsY(frame: LayerFrame, acc: AxisCollectAcc): void
       acc.numeric.push(frame.yNumeric);
     }
     if (frame.box !== null) acc.numeric.push(frame.box.outlierY);
-    const boundFields = [binding.yminField, binding.ymaxField].filter(
-      (field): field is string => field !== null,
-    );
+    // Tile/raster y edges are synthetic from centers — type evidence from
+    // yField only so inherited ymin/ymax cannot poison inference.
+    const boundFields =
+      geom === "tile" || geom === "raster"
+        ? []
+        : [binding.yminField, binding.ymaxField].filter((field): field is string => field !== null);
     const evidenceFields = [
       ...new Set(
         boundFields.length > 0 ? boundFields : binding.yField === null ? [] : [binding.yField],
