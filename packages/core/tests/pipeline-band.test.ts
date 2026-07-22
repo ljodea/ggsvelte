@@ -16,12 +16,14 @@ const spec: SpecInput = {
 };
 
 describe("band axis diagnostics (#387)", () => {
-  it("emits a rotated advisory that surfaces coord_flip, at a narrow width", () => {
+  it("emits a rotated advisory that surfaces guide pin + coord_flip, at a narrow width", () => {
     const model = runPipeline(spec, { width: 240, height: 300 });
     const advisory = model.advisories.find((a) => a.code === "band-labels-rotated");
     expect(advisory).toBeDefined();
     expect(advisory?.path).toBe("/scales/x");
     expect(advisory?.howToOverride).toContain("coordFlip");
+    expect(advisory?.howToOverride).toContain("guide");
+    expect(advisory?.howToOverride).toContain("scales.x.guide");
   });
 
   it("emits a band-label-margin-overflow diagnostic with a coord_flip fix", () => {
@@ -144,5 +146,48 @@ describe("band axis diagnostics (#387)", () => {
     const model = runPipeline(shortSpec, { width: 480, height: 300 });
     expect(model.advisories.some((a) => a.code.startsWith("band-labels-"))).toBe(false);
     expect(model.scaleDiagnostics.some((d) => d.code.startsWith("band-label-"))).toBe(false);
+  });
+});
+
+describe("band axis guide pins (#407)", () => {
+  it("scaleXDiscrete guide.mode=rotate+angle pins the guide plan", () => {
+    const pinned: SpecInput = {
+      ...spec,
+      scales: {
+        x: { type: "band", guide: { mode: "rotate", angle: -90 } },
+      },
+    };
+    // Width where auto would wrap (560) — author pin still rotates at −90.
+    const model = runPipeline(pinned, { width: 560, height: 300 });
+    const plan = model.guidePlans.find(
+      (p) => p.type === "axis" && p.scaleType === "band" && p.aesthetic === "x",
+    );
+    expect(plan?.type).toBe("axis");
+    if (plan?.type !== "axis") return;
+    expect(plan.bandLabelMode).toBe("rotated");
+    expect(plan.bandLabelAngle).toBe(-90);
+  });
+
+  it("guide.mode=single suppresses wrap/rotate advisories", () => {
+    const pinned: SpecInput = {
+      ...spec,
+      scales: {
+        x: { type: "band", guide: { mode: "single" } },
+      },
+    };
+    const model = runPipeline(pinned, { width: 240, height: 300 });
+    expect(model.advisories.some((a) => a.code.startsWith("band-labels-"))).toBe(false);
+    const plan = model.guidePlans.find(
+      (p) => p.type === "axis" && p.scaleType === "band" && p.aesthetic === "x",
+    );
+    expect(plan?.type).toBe("axis");
+    if (plan?.type !== "axis") return;
+    expect(plan.bandLabelMode).toBe("single-line");
+  });
+
+  it("wrapped advisory howToOverride points at scales.x.guide", () => {
+    const model = runPipeline(spec, { width: 560, height: 300 });
+    const advisory = model.advisories.find((a) => a.code === "band-labels-wrapped");
+    expect(advisory?.howToOverride).toContain("scales.x.guide");
   });
 });

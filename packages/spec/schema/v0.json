@@ -1673,6 +1673,48 @@
               },
               "minItems": 1,
               "description": "Explicit minor gridline positions in semantic source units. Coincident major/minor values render only the major tick. Time scales use dateMinorBreaks instead."
+            },
+            "guide": {
+              "type": "object",
+              "properties": {
+                "mode": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "const": "auto"
+                    },
+                    {
+                      "type": "string",
+                      "const": "single"
+                    },
+                    {
+                      "type": "string",
+                      "const": "wrap"
+                    },
+                    {
+                      "type": "string",
+                      "const": "rotate"
+                    },
+                    {
+                      "type": "string",
+                      "const": "off"
+                    }
+                  ],
+                  "description": "Band (categorical) axis label layout: \"auto\" (default — escalate single→wrap→rotate→truncate), \"single\", \"wrap\", \"rotate\", or \"off\" (hide labels). Continuous axes ignore this field."
+                },
+                "angle": {
+                  "type": "number",
+                  "description": "Rotation in degrees for band labels when mode is \"rotate\" (or when auto escalates to rotation). Typical values: -45 or -90. Continuous axes ignore this field."
+                },
+                "wrap": {
+                  "type": "number",
+                  "minimum": 1,
+                  "maximum": 8,
+                  "description": "Maximum wrapped lines per band label when mode is \"wrap\" (or when auto wraps). Default 2. Continuous axes ignore this field."
+                }
+              },
+              "additionalProperties": false,
+              "description": "Optional band-axis label layout override (mirrors ggplot2 guide_axis(angle=) / discrete label wrap). Only horizontal band axes honor these fields; omit for measured auto layout."
             }
           },
           "additionalProperties": false,

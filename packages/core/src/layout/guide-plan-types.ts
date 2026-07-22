@@ -38,7 +38,7 @@ export interface AxisGuidePlan {
   degraded: readonly string[];
   /** Band label layout (measured horizontal band axes only). */
   bandLabelMode?: BandLabelMode;
-  /** Band rotation in degrees (0 | -45 | -90). */
+  /** Band rotation in degrees (auto chooses −45/−90; authors may pin any finite angle). */
   bandLabelAngle?: number;
   /** Measured orthogonal (bottom) band height the labels require, px. */
   bandLabelBandHeight?: number;

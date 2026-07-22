@@ -155,6 +155,7 @@ export function deriveTicks(
     // Vertical band (native Y, or categorical-on-Y after coord_flip) falls through
     // to the legacy thin/truncate path.
     if (domain.band !== undefined && context.orient === "horizontal") {
+      const guide = domain.band.config.guide;
       const plan = planBandAxis({
         aesthetic: domain.band.aesthetic,
         panelIndex: domain.band.panelIndex,
@@ -180,6 +181,8 @@ export function deriveTicks(
         ),
         ...(context.quantum !== undefined && { quantum: context.quantum }),
         previousMode: context.previousGuidePlan?.bandLabelMode ?? null,
+        // Author pin from scales.x.guide / scaleXDiscrete({ guide }) (#407).
+        ...(guide !== undefined && { config: guide }),
       });
       const ticks: Tick[] = plan.ticks.map((tick) => ({
         value: tick.value,

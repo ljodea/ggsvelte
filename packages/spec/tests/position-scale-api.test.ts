@@ -112,6 +112,22 @@ describe("PositionScaleSpec new fields — TypeBox/runtime parity", () => {
   it("still rejects genuinely unknown scale keys", () => {
     expect(accepts({ type: "linear", nonsense: 1 })).toBe(false);
   });
+
+  it("accepts band guide layout pins (#407)", () => {
+    expect(accepts({ type: "band", guide: { mode: "auto" } })).toBe(true);
+    expect(accepts({ type: "band", guide: { mode: "single" } })).toBe(true);
+    expect(accepts({ type: "band", guide: { mode: "wrap", wrap: 3 } })).toBe(true);
+    expect(accepts({ type: "band", guide: { mode: "rotate", angle: -45 } })).toBe(true);
+    expect(accepts({ type: "band", guide: { mode: "off" } })).toBe(true);
+    expect(accepts({ type: "band", guide: { angle: -90 } })).toBe(true);
+  });
+
+  it("rejects invalid band guide values", () => {
+    expect(accepts({ type: "band", guide: { mode: "diagonal" } })).toBe(false);
+    expect(accepts({ type: "band", guide: { wrap: 0 } })).toBe(false);
+    expect(accepts({ type: "band", guide: { wrap: 99 } })).toBe(false);
+    expect(accepts({ type: "band", guide: { bogus: true } })).toBe(false);
+  });
 });
 
 describe("normalize — canonical type:log matrix", () => {

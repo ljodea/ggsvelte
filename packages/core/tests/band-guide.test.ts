@@ -309,6 +309,66 @@ describe("planBandAxis: determinism and monotonicity", () => {
   });
 });
 
+describe("planBandAxis: author guide pins (#407)", () => {
+  const longCats = ["Resolución", "Corrección (errores o erratas)", "Sentencia", "Orden", "Otro"];
+
+  it("mode:single pins single-line even when auto would wrap", () => {
+    // Same fixture that auto-wraps at 480px.
+    const auto = plan(longCats, 480);
+    expect(auto.mode).toBe("wrapped");
+    const pinned = plan(longCats, 480, { config: { mode: "single" } });
+    expect(pinned.mode).toBe("single-line");
+    expect(pinned.angle).toBe(0);
+    expect(pinned.ticks.every((t) => t.lines === undefined)).toBe(true);
+  });
+
+  it("mode:wrap pins wrap even when auto would stay single-line", () => {
+    const short = ["IT", "HR", "Ops", "Sales"];
+    expect(plan(short, 480).mode).toBe("single-line");
+    const pinned = plan(short, 480, { config: { mode: "wrap" } });
+    expect(pinned.mode).toBe("wrapped");
+    expect(pinned.ticks.every((t) => (t.lines?.length ?? 0) >= 1)).toBe(true);
+  });
+
+  it("mode:rotate + angle pins rotation degrees", () => {
+    const pinned = plan(longCats, 480, { config: { mode: "rotate", angle: -90 } });
+    expect(pinned.mode).toBe("rotated");
+    expect(pinned.angle).toBe(-90);
+    expect(pinned.ticks.every((t) => t.angle === -90)).toBe(true);
+  });
+
+  it("mode:off hides every label and reserves no band height", () => {
+    const pinned = plan(longCats, 480, { config: { mode: "off" } });
+    expect(pinned.ticks.every((t) => t.labeled === false)).toBe(true);
+    expect(pinned.labelBandHeight).toBe(0);
+    expect(pinned.degraded).toEqual([]);
+  });
+
+  it("guide.wrap is honored as the max wrap line budget", () => {
+    // Force wrap with wrap:1 → at most one line per label (same as single-line
+    // text, but mode stays "wrapped" with a one-element lines array).
+    const cats = ["North region", "South region", "East region"];
+    const oneLine = plan(cats, 480, { config: { mode: "wrap", wrap: 1 } });
+    expect(oneLine.mode).toBe("wrapped");
+    expect(oneLine.ticks.every((t) => (t.lines?.length ?? 0) <= 1)).toBe(true);
+
+    // wrap:2 is the default budget — multi-word labels can use up to 2 lines.
+    const twoLines = plan(["Corrección (errores o erratas)", "Resolución", "Sentencia"], 200, {
+      config: { mode: "wrap", wrap: 2 },
+      orthogonalMarginCapPx: 200,
+    });
+    expect(twoLines.mode).toBe("wrapped");
+    expect(twoLines.ticks.every((t) => (t.lines?.length ?? 0) <= 2)).toBe(true);
+  });
+
+  it("auto + guide.angle uses the pinned angle when escalating to rotate", () => {
+    // At 240px auto rotates; with angle:-45 stay at −45 even if −90 would be chosen.
+    const pinned = plan(longCats, 240, { config: { angle: -45 } });
+    expect(pinned.mode).toBe("rotated");
+    expect(pinned.angle).toBe(-45);
+  });
+});
+
 describe("planBandAxis: edge cases", () => {
   it("numbers-as-categories stay single-line (no-op)", () => {
     const p = plan(["2019", "2020", "2021", "2022", "2023"], 480);

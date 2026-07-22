@@ -125,13 +125,13 @@ function bandLabelAdvisories(
             code: "band-labels-wrapped",
             path: `/scales/${plan.aesthetic}`,
             chosen: "wrapped long labels onto multiple lines",
-            howToOverride: "Use shorter labels, or coordFlip() for horizontal bars.",
+            howToOverride: `Set scales.${plan.aesthetic}.guide.mode ("single"|"wrap"|"rotate"|"off") or .guide.wrap, use shorter labels, or coordFlip() for horizontal bars.`,
           }
         : {
             code: "band-labels-rotated",
             path: `/scales/${plan.aesthetic}`,
             chosen: `rotated long labels ${String(plan.bandLabelAngle ?? -90)}°`,
-            howToOverride: "coordFlip() lays categories out horizontally (one row each).",
+            howToOverride: `Set scales.${plan.aesthetic}.guide.mode ("single"|"wrap"|"rotate"|"off") or .guide.angle, or coordFlip() for horizontal category rows.`,
           },
     );
   }
