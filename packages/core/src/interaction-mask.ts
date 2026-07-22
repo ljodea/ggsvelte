@@ -61,19 +61,23 @@ function freezeMasks(
   return Object.freeze(masks);
 }
 
+/**
+ * Mark a **renderer** primitive index as focused (not a candidate vertex index).
+ * Path callers must pass a subpath index; do not run path-vertex remapping here.
+ */
 function markFocusedPrimitive(
   focused: Map<number, Uint8Array>,
   batches: readonly GeometryBatch[],
   batchIndex: number,
-  candidatePrimitiveIndex: number,
+  primitiveIndex: number,
 ): void {
   const batch = batches[batchIndex];
   if (batch === undefined) return;
-  const primitiveIndex = rendererPrimitive(batch, candidatePrimitiveIndex);
-  if (primitiveIndex === null) return;
+  const count = renderPrimitiveCount(batch);
+  if (!Number.isInteger(primitiveIndex) || primitiveIndex < 0 || primitiveIndex >= count) return;
   let values = focused.get(batchIndex);
   if (values === undefined) {
-    values = new Uint8Array(renderPrimitiveCount(batch));
+    values = new Uint8Array(count);
     focused.set(batchIndex, values);
   }
   values[primitiveIndex] = 1;

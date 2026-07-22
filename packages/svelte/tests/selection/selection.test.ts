@@ -138,6 +138,18 @@ describe("anchorsFromCandidateKeys", () => {
       { x: 3, y: 4, chrome: "ring" },
     ]);
   });
+
+  it("prefers ring chrome when a point and rect share an anchor", () => {
+    expect(
+      anchorsFromCandidateKeys(
+        [
+          { x: 1, y: 2, keys: ["a"], kind: "rects" },
+          { x: 1, y: 2, keys: ["a"], kind: "points" },
+        ],
+        ["a"],
+      ),
+    ).toEqual([{ x: 1, y: 2, chrome: "ring" }]);
+  });
 });
 
 describe("rowIndexesForCandidate", () => {

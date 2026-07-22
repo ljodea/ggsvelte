@@ -150,8 +150,9 @@ export function collectCandidates<T, R>(
  * Collect unique pixel anchors for selected semantic keys.
  * Candidates must already be in id-ascending order; key resolution stays with
  * the caller. Dedup identity is `${String(x)}:${String(y)}`.
- * `chrome` is derived from the first-seen candidate's geometry kind at that
- * anchor so rect marks do not receive point rings (#386).
+ * `chrome` prefers `"ring"` when any coincident candidate needs it (e.g. point
+ * overlaid on a rect at the same pixel), so the first-seen rect does not hide
+ * point chrome (#386).
  */
 export function anchorsFromCandidateKeys(
   candidates: Iterable<CandidateAnchorKeys>,
@@ -160,7 +161,7 @@ export function anchorsFromCandidateKeys(
   if (selectedKeys.length === 0) return [];
   const keySet = new Set(selectedKeys);
   const anchors: PresentationAnchor[] = [];
-  const seen = new Set<string>();
+  const indexByIdentity = new Map<string, number>();
   for (const candidate of candidates) {
     let selected = false;
     for (const key of candidate.keys) {
@@ -168,14 +169,18 @@ export function anchorsFromCandidateKeys(
       selected = true;
       break;
     }
+    if (!selected) continue;
     const identity = `${String(candidate.x)}:${String(candidate.y)}`;
-    if (selected && !seen.has(identity)) {
-      seen.add(identity);
-      anchors.push({
-        x: candidate.x,
-        y: candidate.y,
-        chrome: presentationChromeForKind(candidate.kind),
-      });
+    const chrome = presentationChromeForKind(candidate.kind);
+    const existing = indexByIdentity.get(identity);
+    if (existing === undefined) {
+      indexByIdentity.set(identity, anchors.length);
+      anchors.push({ x: candidate.x, y: candidate.y, chrome });
+      continue;
+    }
+    // Upgrade none → ring if a later coincident candidate needs point chrome.
+    if (chrome === "ring" && anchors[existing]?.chrome === "none") {
+      anchors[existing] = { x: candidate.x, y: candidate.y, chrome: "ring" };
     }
   }
   return anchors;

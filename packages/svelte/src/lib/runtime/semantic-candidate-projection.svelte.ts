@@ -24,6 +24,48 @@ type SemanticCandidate = IntervalConsumptionCandidate<PropertyKey> & {
   readonly kind: string;
 };
 
+/** OR two mask projections per batch (focused if either side is focused). */
+function unionInteractionMasks(
+  left: readonly (BatchInteractionMask | null)[],
+  right: readonly (BatchInteractionMask | null)[],
+): readonly (BatchInteractionMask | null)[] {
+  const length = Math.max(left.length, right.length);
+  const out: Array<BatchInteractionMask | null> = [];
+  for (let i = 0; i < length; i++) {
+    const a = left[i] ?? null;
+    const b = right[i] ?? null;
+    if (a === null) {
+      out.push(b);
+      continue;
+    }
+    if (b === null) {
+      out.push(a);
+      continue;
+    }
+    const count = Math.max(a.primitiveCount, b.primitiveCount);
+    const values = new Uint8Array(count);
+    let focusedCount = 0;
+    for (let p = 0; p < count; p++) {
+      const focused =
+        (p < a.primitiveCount && a.isFocused(p)) || (p < b.primitiveCount && b.isFocused(p));
+      if (focused) {
+        values[p] = 1;
+        focusedCount++;
+      }
+    }
+    out.push(
+      Object.freeze({
+        primitiveCount: count,
+        focusedCount,
+        isFocused(primitiveIndex: number): boolean {
+          return values[primitiveIndex] === 1;
+        },
+      }),
+    );
+  }
+  return Object.freeze(out);
+}
+
 export type SemanticCandidateProjectionDeps = {
   model: () => RenderModel | null;
   candidateSemanticKeys: (candidate: CandidateFacts) => readonly PropertyKey[];
@@ -98,19 +140,26 @@ export function createSemanticCandidateProjection(
   const interactionMasks = $derived.by((): readonly (BatchInteractionMask | null)[] => {
     const model = deps.model();
     if (model === null) return [];
+    const focus = deps.inspectionFocus();
+    const rectPrimitives =
+      focus?.kind === "rects" && focus.primitives !== undefined && focus.primitives.length > 0
+        ? focus.primitives
+        : null;
+
+    let keyMasks: readonly (BatchInteractionMask | null)[] | null = null;
     if (presentationFocusKeys.length > 0) {
-      return buildInteractionMasks(
+      keyMasks = buildInteractionMasks(
         model.scene.batches,
         presentationFocusKeys,
         sharedCandidateProjection,
       );
     }
-    // Keyless rect inspection: de-emphasize siblings via seed primitives (#386).
-    const focus = deps.inspectionFocus();
-    if (focus?.kind === "rects" && focus.primitives !== undefined && focus.primitives.length > 0) {
-      return buildPrimitiveInteractionMasks(model.scene.batches, focus.primitives);
-    }
-    return [];
+    // Keyless rect inspection: always layer seed primitives so legend/controller
+    // emphasis keys do not suppress the hovered bar's de-emphasis (#386).
+    if (rectPrimitives === null) return keyMasks ?? [];
+    const primitiveMasks = buildPrimitiveInteractionMasks(model.scene.batches, rectPrimitives);
+    if (keyMasks === null) return primitiveMasks;
+    return unionInteractionMasks(keyMasks, primitiveMasks);
   });
 
   return {

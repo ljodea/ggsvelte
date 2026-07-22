@@ -110,6 +110,56 @@ describe("createSemanticCandidateProjection", () => {
     destroy();
   });
 
+  it("layers keyless rect seed primitives under active legend emphasis", () => {
+    const colModel = modelFor(
+      gg(
+        [
+          { category: "A", count: 10 },
+          { category: "B", count: 20 },
+          { category: "C", count: 15 },
+        ],
+        aes({ x: "category", y: "count" }),
+      )
+        .geomCol()
+        .spec(),
+    );
+    const first = (() => {
+      for (let id = 0; id < colModel.candidates.size; id++) {
+        const candidate = colModel.candidates.candidate(id);
+        if (candidate?.rowIndex === 0) return candidate;
+      }
+      throw new Error("missing col candidate");
+    })();
+    const { value, destroy } = withFlushedEffectRoot(() =>
+      createSemanticCandidateProjection({
+        model: () => colModel,
+        // No candidate has the emphasis key — only the rect seed should focus.
+        candidateSemanticKeys: () => [],
+        selectedKeys: () => [],
+        intervalKeys: () => [],
+        intervals: () => [],
+        emphasisKeys: () => ["legend-only"],
+        inspectionFocus: () => ({
+          sourceKeys: [],
+          key: null,
+          kind: first.kind,
+          primitives: [
+            {
+              batchIndex: first.batchIndex,
+              primitiveIndex: first.primitiveIndex,
+            },
+          ],
+        }),
+      }),
+    );
+
+    const mask = value.interactionMasks.find((entry) => entry !== null);
+    expect(mask).toBeDefined();
+    expect(mask?.isFocused(first.primitiveIndex)).toBe(true);
+    expect(mask?.focusedCount).toBe(1);
+    destroy();
+  });
+
   it("serves anchors and masks from one semantic Candidate walk", () => {
     let keyCalls = 0;
     const first = candidateForRow(0);

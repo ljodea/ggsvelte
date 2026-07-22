@@ -120,6 +120,27 @@ describe("buildPrimitiveInteractionMasks", () => {
   it("returns null masks when no primitives are supplied", () => {
     expect(buildPrimitiveInteractionMasks([rectBatch(2)], [])).toEqual([null]);
   });
+
+  it("treats path primitive indexes as renderer subpaths, not vertices", () => {
+    // pathOffsets [0, 3, 6] → two subpaths; index 1 is the second path.
+    // Must not remap through pathForVertex (which would map 1 → subpath 0).
+    const paths: GeometryBatch = {
+      kind: "paths",
+      layerIndex: 0,
+      panelIndex: 0,
+      positions: new Float32Array(12),
+      rowIndex: new Uint32Array([0, 1, 2, 3, 4, 5]),
+      pathOffsets: new Uint32Array([0, 3, 6]),
+      strokes: [null, null],
+      linewidth: 1,
+      alpha: 1,
+      curve: "linear",
+    };
+    const masks = buildPrimitiveInteractionMasks([paths], [{ batchIndex: 0, primitiveIndex: 1 }]);
+    expect(masks[0]?.focusedCount).toBe(1);
+    expect(masks[0]?.isFocused(0)).toBe(false);
+    expect(masks[0]?.isFocused(1)).toBe(true);
+  });
 });
 
 describe("legend value resolution", () => {
