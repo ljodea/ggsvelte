@@ -294,6 +294,10 @@ export {
 /** @lifecycle stable-intent */
 export type { RenderSVGOptions } from "./render-svg.js";
 
+// Within-mark paint (#591) — resource ids and resolved paint types
+export { paintResourceId } from "./mark-paint.js";
+export type { ResolvedGlow, ResolvedGradientPaint } from "./mark-paint.js";
+
 // CLI implementation (the `ggsvelte-render` bin on the ggsvelte package wraps this)
 export { runCLI } from "./cli.js";
 export type { CLIIO } from "./cli.js";

@@ -38,6 +38,8 @@ const VALUE_EXPORTS = [
   "LayerSpecSchema",
   "LineLayerSchema",
   "MAX_BINNED_BREAKS",
+  "MAX_GLOW_RADIUS",
+  "MAX_PAINT_STOPS",
   "PlotSpecSchema",
   "PointLayerSchema",
   "RuleLayerSchema",

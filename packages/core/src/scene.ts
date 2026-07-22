@@ -16,6 +16,7 @@
  *
  * @internal
  */
+import type { ResolvedGlow, ResolvedGradientPaint } from "./mark-paint.js";
 import type { Linetype, PointShape } from "./scales/style.js";
 import type { CellValue } from "./table.js";
 import type { ThemeTokens } from "./theme.js";
@@ -101,6 +102,12 @@ export interface PathsBatch {
    */
   candidates?: boolean;
   curve: "linear" | "step";
+  /** Within-mark gradient fill (fallback solid remains in `fills`). */
+  fillPaint?: ResolvedGradientPaint;
+  /** Within-mark gradient stroke (fallback solid remains in `strokes`). */
+  strokePaint?: ResolvedGradientPaint;
+  /** Bounded glow treatment for this batch's marks. */
+  glow?: ResolvedGlow;
 }
 
 export interface RectsBatch {
@@ -139,6 +146,12 @@ export interface RectsBatch {
    * center (rect/tile/raster).
    */
   anchor?: "top-center" | "center";
+  /** Within-mark gradient fill (fallback solid remains in `fill`/`fills`). */
+  fillPaint?: ResolvedGradientPaint;
+  /** Within-mark gradient stroke (fallback solid remains in `stroke`/`strokes`). */
+  strokePaint?: ResolvedGradientPaint;
+  /** Bounded glow treatment for this batch's marks. */
+  glow?: ResolvedGlow;
 }
 
 export interface SegmentsBatch {
@@ -169,6 +182,10 @@ export interface SegmentsBatch {
   linetypeIndexes?: Uint8Array;
   /** Optional stroke linecap (segment geom). Undefined leaves renderer default / no attribute. */
   linecap?: "butt" | "round" | "square";
+  /** Within-mark gradient stroke (fallback solid remains in `stroke`/`strokes`). */
+  strokePaint?: ResolvedGradientPaint;
+  /** Bounded glow treatment for this batch's marks. */
+  glow?: ResolvedGlow;
 }
 
 export interface GlyphsBatch {

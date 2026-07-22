@@ -35,6 +35,8 @@ export {
   COLOR_SCHEME_NAMES,
   LINETYPE_NAMES,
   MAX_BINNED_BREAKS,
+  MAX_GLOW_RADIUS,
+  MAX_PAINT_STOPS,
   POINT_SHAPE_NAMES,
   SEQUENTIAL_SCHEME_NAMES,
   THEME_NAMES,
@@ -162,6 +164,18 @@ export type InlineData = DataValues | DataColumns;
 export type ChannelValue = SpecType<"ChannelValue">;
 /** Aesthetic mapping (canonical channel forms only). */
 export type Aes = SpecType<"Aes">;
+/** One ordered gradient color stop. */
+export type ColorStop = SpecType<"ColorStop">;
+/** Gradient coordinate space. */
+export type PaintSpace = SpecType<"PaintSpace">;
+/** Deterministic linear gradient paint. */
+export type LinearGradientPaint = SpecType<"LinearGradientPaint">;
+/** Deterministic radial gradient paint. */
+export type RadialGradientPaint = SpecType<"RadialGradientPaint">;
+/** Closed portable gradient paint (linear | radial). */
+export type GradientPaint = SpecType<"GradientPaint">;
+/** Bounded glow treatment. */
+export type GlowSpec = SpecType<"GlowSpec">;
 /** Point layer params. */
 export type PointParams = SpecType<"PointParams">;
 /** Line layer params. */

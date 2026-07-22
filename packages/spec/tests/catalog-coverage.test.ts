@@ -128,6 +128,65 @@ const TRIGGERS: Record<SpecErrorCode, Trigger> = {
     },
     options: {},
   },
+  "paint-stops-unordered": {
+    spec: {
+      layers: [
+        {
+          geom: "ribbon",
+          aes: {
+            x: { field: "x" },
+            ymin: { field: "lo" },
+            ymax: { field: "hi" },
+          },
+          params: {
+            fillPaint: {
+              type: "linear",
+              x1: 0,
+              y1: 0,
+              x2: 1,
+              y2: 0,
+              stops: [
+                { offset: 0.9, color: "#000000" },
+                { offset: 0.1, color: "#ffffff" },
+              ],
+              fallback: "#000000",
+            },
+          },
+        },
+      ],
+    },
+    options: {},
+  },
+  "paint-scale-conflict": {
+    spec: {
+      layers: [
+        {
+          geom: "ribbon",
+          aes: {
+            x: { field: "x" },
+            ymin: { field: "lo" },
+            ymax: { field: "hi" },
+            fill: { field: "g" },
+          },
+          params: {
+            fillPaint: {
+              type: "linear",
+              x1: 0,
+              y1: 0,
+              x2: 1,
+              y2: 0,
+              stops: [
+                { offset: 0, color: "#000000" },
+                { offset: 1, color: "#ffffff" },
+              ],
+              fallback: "#000000",
+            },
+          },
+        },
+      ],
+    },
+    options: {},
+  },
   "unknown-field": {
     spec: { data: xy, layers: [{ geom: "point", aes: { x: { field: "xx" }, y: { field: "y" } } }] },
     options: {},

@@ -9,6 +9,7 @@ import type { Aes, ChannelName } from "./schema.js";
 import { GEOM_DEFAULTS } from "./schema.js";
 import { STYLE_AESTHETIC_GEOMS, type StyleAesthetic } from "./capabilities.js";
 import { effectiveChannel } from "./validate-data.js";
+import { paintStructuralErrors } from "./validate-structure-paint.js";
 
 const CHANNEL_FIX_EXAMPLE = { field: "column_name" };
 
@@ -266,6 +267,8 @@ export function layerStructuralErrors(
   if (geom === "ribbon") {
     errors.push(...ribbonStructuralErrors(layer, layerPath, mapped));
   }
+
+  errors.push(...paintStructuralErrors(layer, layerPath, plotAes));
 
   for (const channel of REQUIRED_CHANNELS[geom] ?? []) {
     if ((geom === "bar" || geom === "histogram" || geom === "density") && channel !== "x") {

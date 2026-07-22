@@ -1,6 +1,7 @@
 /**
  * Area/density path geometry batch builder (closed ribbons).
  */
+import { layerPaintFromParams, resolveGlow, resolveGradientPaint } from "../mark-paint.js";
 import type { PathsBatch } from "../scene.js";
 
 import type { LayerFrame, PipelineWarning, ResolvedColorScale } from "./types.js";
@@ -23,6 +24,13 @@ export function areaBatch(
   if (groupRows.length === 0) return null;
   sortGroupRowsByX(groupRows, frame, fx);
 
+  const paint = layerPaintFromParams(binding.layer.params);
+  const fillPaintResolved =
+    paint.fillPaint === null
+      ? undefined
+      : resolveGradientPaint(paint.fillPaint, binding.index, "fill");
+  const glowResolved = paint.glow === null ? undefined : resolveGlow(paint.glow, binding.index);
+
   // Draw later-stacked groups first so the first-seen group paints on top.
   const { positions, rowIndex, closedFrameRows, pathOffsets, fills, strokes } =
     writeClosedPathGroups({
@@ -31,7 +39,7 @@ export function areaBatch(
       groupRows,
       yTop: frame.ymax,
       yBottom: frame.ymin,
-      fillOf: (rows) => areaGroupFillOf(frame, fill, rows),
+      fillOf: (rows) => areaGroupFillOf(frame, fill, rows) ?? fillPaintResolved?.fallback ?? null,
     });
 
   const params: { alpha?: number } =
@@ -64,5 +72,7 @@ export function areaBatch(
         : 1,
     ...(alphas !== undefined && { alphas }),
     curve: "linear",
+    ...(fillPaintResolved !== undefined && { fillPaint: fillPaintResolved }),
+    ...(glowResolved !== undefined && { glow: glowResolved }),
   };
 }

@@ -14,6 +14,12 @@ import Type, { type TLiteral } from "typebox";
  */
 export const MAX_BINNED_BREAKS = 64;
 
+/** Maximum gradient color stops in a portable paint (closed, bounded). */
+export const MAX_PAINT_STOPS = 16;
+
+/** Maximum glow blur radius in CSS px (bounded filter work). */
+export const MAX_GLOW_RADIUS = 32;
+
 /** Named categorical color schemes known to this schema version. */
 export const CATEGORICAL_SCHEME_NAMES = [
   "observable10",

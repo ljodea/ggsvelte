@@ -831,3 +831,58 @@ exports[`ERROR_CATALOG coverage [validation-limit] is reproducible; message + fi
   },
 }
 `;
+
+exports[`ERROR_CATALOG coverage [paint-stops-unordered] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Sort stops by offset ascending (each offset between 0 and 1 inclusive).",
+    "summary": "A gradient paint's color stops are not in non-decreasing offset order.",
+    "tier": 2,
+  },
+  "instance": {
+    "code": "paint-stops-unordered",
+    "fix": {
+      "description": "Sort stops by offset ascending (each between 0 and 1).",
+      "example": {
+        "stops": [
+          {
+            "color": "#000000",
+            "offset": 0,
+          },
+          {
+            "color": "#ffffff",
+            "offset": 1,
+          },
+        ],
+      },
+    },
+    "message": "Gradient stop offsets must be non-decreasing; stop 1 has offset 0.1 after 0.9.",
+    "path": "/layers/0/params/fillPaint/stops/1/offset",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [paint-scale-conflict] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Remove the data-mapped fill/color aesthetic, or remove the paint and keep the scale.",
+    "summary": "Within-mark fillPaint/strokePaint cannot combine with a data-mapped fill/color scale channel.",
+    "tier": 2,
+  },
+  "instance": {
+    "code": "paint-scale-conflict",
+    "fix": {
+      "description": "Remove aes.fill field mapping, or remove fillPaint and keep the scale.",
+      "example": {
+        "params": {
+          "fillPaint": {
+            "type": "linear",
+          },
+        },
+      },
+    },
+    "message": "params.fillPaint cannot combine with a data-mapped fill channel (field or scaled constant).",
+    "path": "/layers/0/params/fillPaint",
+  },
+}
+`;

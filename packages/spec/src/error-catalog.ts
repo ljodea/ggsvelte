@@ -177,6 +177,17 @@ export const ERROR_CATALOG = {
       "A ribbon layer maps both x-orientation (x+ymin+ymax) and y-orientation (y+xmin+xmax) contracts without params.orientation.",
     fix: 'Set params.orientation to "x" or "y", or map only one complete interval contract.',
   },
+  "paint-stops-unordered": {
+    tier: 2,
+    summary: "A gradient paint's color stops are not in non-decreasing offset order.",
+    fix: "Sort stops by offset ascending (each offset between 0 and 1 inclusive).",
+  },
+  "paint-scale-conflict": {
+    tier: 2,
+    summary:
+      "Within-mark fillPaint/strokePaint cannot combine with a data-mapped fill/color scale channel.",
+    fix: "Remove the data-mapped fill/color aesthetic, or remove the paint and keep the scale.",
+  },
   // --- tier 2 (data-aware; needs inline data or a DataProfile) -------------
   "unknown-field": {
     tier: 2,
