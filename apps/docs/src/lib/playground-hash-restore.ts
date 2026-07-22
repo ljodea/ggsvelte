@@ -5,13 +5,12 @@ import {
   verifiedSharedSeed,
   type PlaygroundShareCatalogs,
 } from "./playground-link-policy";
-import {
-  reportPlaygroundDiagnostic,
-  stagePlaygroundSeed,
-  type PlaygroundCandidateOrigin,
-  type PlaygroundDiagnostic,
-  type PlaygroundState,
-} from "./playground-state";
+import { reportPlaygroundDiagnostic, stagePlaygroundSeed } from "./playground-state";
+import type {
+  PlaygroundCandidateOrigin,
+  PlaygroundDiagnostic,
+  PlaygroundState,
+} from "./playground-state-types";
 
 export type PlaygroundHashRestoreOrigin = "initial-navigation" | "popstate";
 
