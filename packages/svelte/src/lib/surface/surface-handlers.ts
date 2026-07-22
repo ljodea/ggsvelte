@@ -199,10 +199,8 @@ export function createSurfaceHandlers(live: SurfaceHandlerLive): SurfaceHandlers
       case "select-end": {
         live.setBrushRect(null);
         const eventValue = selectionEvent("end", finish.rect, source);
-        // Writes (committedInterval + conditional record) then host emit —
-        // order unchanged from the pre-extraction select-end branch.
-        deps.interval().applyBrushSelectEnd(eventValue, source);
-        deps.emitSelection(eventValue);
+        // Interval owns commit + emit; surface only routes FinishBrushAction.
+        deps.interval().finishBrushSelect(eventValue, source);
         reducer.dispatch({ type: "cancel-area" });
         break;
       }

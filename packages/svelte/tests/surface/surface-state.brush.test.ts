@@ -50,7 +50,7 @@ describe("createSurfaceState brush lifecycle", () => {
     expect(h.interval.committedInterval).toBeNull();
     expect(h.selectionEvents.some((e) => e.phase === "change")).toBe(true);
 
-    // Phase: pointerup select-end → real interval controller commits + end emit
+    // Phase: pointerup select-end → interval finishBrushSelect commits + emits
     h.surface.onPointerUp(pointerEvent("pointerup", h.capture, { clientX: end.x, clientY: end.y }));
     flushSync();
     expect(h.surface.brushRect).toBeNull();
@@ -58,14 +58,11 @@ describe("createSurfaceState brush lifecycle", () => {
     expect(h.interval.effectiveIntervals.length).toBeGreaterThan(0);
     const phases = h.selectionEvents.map((e) => e.phase);
     expect(phases[0]).toBe("start");
-    expect(phases.at(-1)).toBe("end");
     expect(phases.includes("change")).toBe(true);
-    // Load-bearing order: interval commit before host end emit (onselection
-    // readers may observe committedInterval synchronously in the callback).
-    const commitAt = h.selectionOrderLog.indexOf("commit");
-    const emitEndAt = h.selectionOrderLog.indexOf("emit:end");
-    expect(commitAt).toBeGreaterThanOrEqual(0);
-    expect(emitEndAt).toBeGreaterThan(commitAt);
+    expect(phases.filter((p) => p === "end")).toHaveLength(1);
+    expect(phases.at(-1)).toBe("end");
+    expect(h.selectionOrderLog).toContain("emit:end:after-commit");
+    expect(h.selectionOrderLog).not.toContain("emit:end:before-commit");
 
     h.destroy();
   });

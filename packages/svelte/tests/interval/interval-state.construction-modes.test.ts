@@ -130,7 +130,7 @@ describe("createIntervalState semantic Candidate consumption", () => {
       consumptionCandidates: () => sharedBag,
     });
 
-    state.applyBrushSelectEnd(brushEvent(model, { keys: ["0", "1"] }), "pointer");
+    state.finishBrushSelect(brushEvent(model, { keys: ["0", "1"] }), "pointer");
     flushSync();
     keyCalls = 0;
     const keys = state.effectiveIntervalKeys;
@@ -142,7 +142,7 @@ describe("createIntervalState semantic Candidate consumption", () => {
 });
 
 describe("createIntervalState local mode", () => {
-  it("applyBrushSelectEnd (persistent) commits record; clear empties and emits once; second clear is silent", () => {
+  it("finishBrushSelect (persistent) commits record; clear empties and emits once; second clear is silent", () => {
     const model = modelFor(continuousSpec());
     const events: PlotSelection[] = [];
     const { state, destroy } = mountIntervalController({
@@ -154,7 +154,7 @@ describe("createIntervalState local mode", () => {
     });
 
     const brush = brushEvent(model);
-    state.applyBrushSelectEnd(brush, "pointer");
+    state.finishBrushSelect(brush, "pointer");
     flushSync();
 
     const panelId = model.scene.panels[0]?.id;
@@ -167,13 +167,15 @@ describe("createIntervalState local mode", () => {
     // Public keys surface: literal keys from the event are stored.
     expect(state.effectiveIntervals[0]?.keys).toEqual(["0", "1"]);
     expect(state.effectiveIntervalKeys.length).toBeGreaterThan(0);
-    // applyBrushSelectEnd never emits — host owns emission.
-    expect(events).toEqual([]);
+    // finishBrushSelect emits end after commit (listeners see committed state).
+    expect(events).toHaveLength(1);
+    expect(events[0]?.phase).toBe("end");
+    expect(events[0]?.source).toBe("pointer");
 
     state.clearIntervalSelection("pointer");
     flushSync();
-    expect(events).toHaveLength(1);
-    expect(events[0]).toMatchObject({
+    expect(events).toHaveLength(2);
+    expect(events[1]).toMatchObject({
       type: "select",
       phase: "clear",
       mode: "xy",
@@ -211,7 +213,7 @@ describe("createIntervalState controller mode", () => {
     });
 
     const brush = brushEvent(model, { keys: ["k0"] });
-    state.applyBrushSelectEnd(brush, "pointer");
+    state.finishBrushSelect(brush, "pointer");
     flushSync();
     expect(state.effectiveIntervals).toHaveLength(1);
     expect(state.committedInterval).not.toBeNull();
@@ -225,7 +227,7 @@ describe("createIntervalState controller mode", () => {
 
     // Re-commit, then same-panel replacement with different domains clears
     // the pixel rect via sameIntervalRecord gate.
-    state.applyBrushSelectEnd(brush, "pointer");
+    state.finishBrushSelect(brush, "pointer");
     flushSync();
     expect(state.committedInterval).not.toBeNull();
 
@@ -271,7 +273,7 @@ describe("createIntervalState controller mode", () => {
       },
     });
 
-    state.applyBrushSelectEnd(
+    state.finishBrushSelect(
       brushEvent(model, {
         panelId: north.id,
         domain: { x: [0.5, 1.5], y: [0.5, 1.5] },
@@ -279,7 +281,7 @@ describe("createIntervalState controller mode", () => {
       }),
       "pointer",
     );
-    state.applyBrushSelectEnd(
+    state.finishBrushSelect(
       brushEvent(model, {
         panelId: south.id,
         domain: { x: [1.5, 2.5], y: [1.5, 2.5] },
@@ -336,7 +338,7 @@ describe("createIntervalState clearCurrentPanelInterval", () => {
       },
     });
 
-    state.applyBrushSelectEnd(
+    state.finishBrushSelect(
       brushEvent(model, {
         panelId: north.id,
         domain: { x: [0.5, 1.5], y: [0.5, 1.5] },
@@ -344,7 +346,7 @@ describe("createIntervalState clearCurrentPanelInterval", () => {
       }),
       "pointer",
     );
-    state.applyBrushSelectEnd(
+    state.finishBrushSelect(
       brushEvent(model, {
         panelId: south.id,
         domain: { x: [1.5, 2.5], y: [1.5, 2.5] },
@@ -398,7 +400,7 @@ describe("createIntervalState interval target availability", () => {
       selectConfig: persistentSelect,
     });
 
-    state.applyBrushSelectEnd(
+    state.finishBrushSelect(
       brushEvent(facetModel, {
         panelId: north.id,
         domain: { x: [0.5, 1.5], y: [0.5, 1.5] },
@@ -434,7 +436,7 @@ describe("createIntervalState semanticAxis (public behavior)", () => {
       selectConfig: persistentSelect,
     });
 
-    state.applyBrushSelectEnd(
+    state.finishBrushSelect(
       brushEvent(bandModel, {
         domain: {
           x: ["north", "south"],
@@ -452,7 +454,7 @@ describe("createIntervalState semanticAxis (public behavior)", () => {
     });
 
     // Empty/axis-less: domain with unmappable bounds → private commit early-
-    // returns (no record, no throw). applyBrushSelectEnd still writes
+    // returns (no record, no throw). finishBrushSelect still writes
     // committedInterval first (host 1796 order) — pin that synchronous write
     // before the reconcile effect (which drops the pixel rect when no record
     // backs it) has a chance to run.
@@ -468,7 +470,7 @@ describe("createIntervalState semanticAxis (public behavior)", () => {
       lineageCount: 0,
       source: "pointer",
     });
-    state.applyBrushSelectEnd(axisless, "pointer");
+    state.finishBrushSelect(axisless, "pointer");
     expect(state.committedInterval).not.toBeNull();
     expect(state.committedInterval?.panelId).toBe(panelId);
     expect(state.effectiveIntervals).toEqual([]);

@@ -40,7 +40,7 @@ describe("createIntervalState bounds editor select path", () => {
       },
     });
 
-    state.applyBrushSelectEnd(
+    state.finishBrushSelect(
       brushEvent(bandModel, {
         domain: { x: ["north", "south"], y: [0, 20] },
         keys: ["0", "1"],
@@ -115,7 +115,7 @@ describe("createIntervalState bounds editor select path", () => {
     });
 
     // Wide domain so both continuous points remain in-interval after the edit.
-    state.applyBrushSelectEnd(
+    state.finishBrushSelect(
       brushEvent(spyModel, {
         domain: { x: [0, 20], y: [0, 30] },
         keys: ["0", "1"],
@@ -174,7 +174,7 @@ describe("createIntervalState bounds editor select path", () => {
     });
 
     // Seed a committed interval so the select bounds editor has a record.
-    state.applyBrushSelectEnd(brushEvent(model), "pointer");
+    state.finishBrushSelect(brushEvent(model), "pointer");
     flushSync();
 
     state.openBoundsEditor("select", "x", trigger);
@@ -317,7 +317,7 @@ describe("createIntervalState bounds-cancel effect", () => {
 
     const north = facet.scene.panels[0];
     if (north === undefined) throw new Error("expected north panel");
-    state.applyBrushSelectEnd(
+    state.finishBrushSelect(
       brushEvent(facet, {
         panelId: north.id,
         domain: { x: [0.5, 1.5], y: [0.5, 1.5] },

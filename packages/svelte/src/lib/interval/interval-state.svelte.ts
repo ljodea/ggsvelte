@@ -106,11 +106,11 @@ export type IntervalState = {
   clearIntervalSelection(source: InteractionSource): void;
   clearCurrentPanelInterval(source: InteractionSource): void;
   /**
-   * Owns BOTH writes of the host's select-end branch (committedInterval +
-   * conditional private commit). Snapshots `selectConfig()?.persistent` once.
-   * Never calls emitSelection — host emits after this returns.
+   * Brush select-end: commit writes (committedInterval + conditional record)
+   * then emit. Snapshots `selectConfig()?.persistent` once. Always emits the
+   * end event (including non-persistent) so callers need no post-hook emit.
    */
-  applyBrushSelectEnd(eventValue: IntervalSelection, source: InteractionSource): void;
+  finishBrushSelect(eventValue: IntervalSelection, source: InteractionSource): void;
   openBoundsEditor(action: "select" | "zoom", axis: "x" | "y", trigger: HTMLElement): void;
   applyPreciseBounds(event: PreciseBoundsApplyEvent): void;
   cancelBoundsEditor(): void;
@@ -467,15 +467,17 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
     }
   }
 
-  function applyBrushSelectEnd(eventValue: IntervalSelection, source: InteractionSource): void {
+  function finishBrushSelect(eventValue: IntervalSelection, source: InteractionSource): void {
     // Snapshot once (drift-safe under reactive selectConfig replacement).
     const persistent = deps.selectConfig()?.persistent;
     committedInterval = persistentSelectionOrNull(persistent, eventValue);
-    // TRUTHY guard, exactly as the host's select-end branch — untyped JS
-    // consumers may pass truthy non-boolean `persistent` values, which the
-    // config normalizer forwards unchanged. `?? false` only maps nullish
-    // (already falsy) values, so runtime truthiness is identical.
+    // TRUTHY guard — untyped JS consumers may pass truthy non-boolean
+    // `persistent` values, which the config normalizer forwards unchanged.
+    // `?? false` only maps nullish (already falsy) values, so runtime
+    // truthiness is identical.
     if (persistent ?? false) commitIntervalSelection(eventValue, source);
+    // Emit after writes so listeners observe committed state (load-bearing).
+    deps.emitSelection(eventValue);
   }
 
   function openBoundsEditor(
@@ -605,7 +607,7 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
     },
     clearIntervalSelection,
     clearCurrentPanelInterval,
-    applyBrushSelectEnd,
+    finishBrushSelect,
     openBoundsEditor,
     applyPreciseBounds,
     cancelBoundsEditor,

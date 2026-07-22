@@ -216,8 +216,9 @@ export type SurfaceHarness = {
   flushFrames: () => void;
   selectionEvents: PlotSelection[];
   /**
-   * Ordered side-effect log for select-end characterization:
-   * `commit` from applyBrushSelectEnd, `emit:<phase>` from emitSelection.
+   * Ordered emit log. For phase `end`, suffix records whether
+   * `interval.committedInterval` was already set when the emit ran
+   * (`after-commit` vs `before-commit`).
    */
   selectionOrderLog: string[];
   toolChanges: InteractionTool[];
@@ -343,7 +344,15 @@ export function mountSurfaceComposite(
       interval: () => interval,
       zoom: () => zoom,
       emitSelection: (event) => {
-        selectionOrderLog.push(`emit:${event.phase}`);
+        if (event.phase === "end") {
+          selectionOrderLog.push(
+            interval.committedInterval === null
+              ? "emit:end:before-commit"
+              : "emit:end:after-commit",
+          );
+        } else {
+          selectionOrderLog.push(`emit:${event.phase}`);
+        }
         selectionEvents.push(event);
       },
       semanticKey,
@@ -385,20 +394,21 @@ export function mountSurfaceComposite(
       },
       inspectionPanel: () => inspection.inspectionPanel,
       emitSelection: (event) => {
-        selectionOrderLog.push(`emit:${event.phase}`);
+        if (event.phase === "end") {
+          selectionOrderLog.push(
+            interval.committedInterval === null
+              ? "emit:end:before-commit"
+              : "emit:end:after-commit",
+          );
+        } else {
+          selectionOrderLog.push(`emit:${event.phase}`);
+        }
         selectionEvents.push(event);
       },
       announce: (message) => {
         announcements.push(message);
       },
     });
-
-    // Characterize select-end order: interval commit is recorded before emit.
-    const applyBrushSelectEnd = interval.applyBrushSelectEnd.bind(interval);
-    interval.applyBrushSelectEnd = (event, source) => {
-      selectionOrderLog.push("commit");
-      applyBrushSelectEnd(event, source);
-    };
 
     // 5. surface effects then 6. inspection effects (host 810 vs 954)
     if (options.registerEffects !== false) {
