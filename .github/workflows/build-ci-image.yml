@@ -1,0 +1,54 @@
+# Build and publish the CI runner image (Playwright + unzip) to GHCR.
+#
+# The image lets container jobs skip the per-job `apt-get install unzip` (slow
+# from GitHub's Azure runners against the public Ubuntu mirrors). Publishing is
+# free: ljodea/ggsvelte is public, so GHCR storage/bandwidth are not billed, and
+# image pulls inside Actions never bill data transfer.
+#
+# Runs on Dockerfile changes and on demand. After the first successful run
+# publishes ghcr.io/<owner>/<repo>/ci-runner:<tag>, container jobs can switch
+# their `image:` to it and drop the ci-install-unzip step.
+name: build CI image
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/docker/ci-runner/Dockerfile
+      - .github/workflows/build-ci-image.yml
+
+# PLAYWRIGHT_TAG MUST stay in sync with env.PLAYWRIGHT_CONTAINER_TAG in ci.yml.
+env:
+  PLAYWRIGHT_TAG: v1.61.1-noble
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: build + push ci-runner image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: log in to GHCR
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: build and push
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: .github/docker/ci-runner
+          build-args: PLAYWRIGHT_TAG=${{ env.PLAYWRIGHT_TAG }}
+          push: true
+          tags: ghcr.io/${{ github.repository }}/ci-runner:${{ env.PLAYWRIGHT_TAG }}
+          # Cache layers across builds to keep republishes fast.
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
