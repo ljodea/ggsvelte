@@ -202,6 +202,11 @@ export const PIPELINE_ERROR_CATALOG = {
     summary: "A mapped style aesthetic is not consumed by the selected geom.",
     fix: "Remove the mapping or move it to one of the compatible geoms listed in the error.",
   },
+  "unsupported-annotation-style": {
+    summary:
+      "A fixed-intercept annotation rule maps a style to a field or after-stat column, but it has no data rows to map.",
+    fix: "Use a constant style value (optionally { value, scale: true }) on the annotation rule.",
+  },
   "invalid-aesthetic-constant": {
     summary: "A literal style constant is outside the aesthetic's supported output domain.",
     fix: "Use a positive size/linewidth, alpha in [0,1], or a documented shape/linetype name.",

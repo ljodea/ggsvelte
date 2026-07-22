@@ -49,9 +49,15 @@ export function layerStructuralErrors(
   const layerAes = isRecord(layer["aes"]) ? (layer["aes"] as Aes) : undefined;
   const layerPath = `/layers/${index}`;
   const mapped = (channel: ChannelName) => effectiveChannel(plotAes, layerAes, channel);
+  // Annotation-form rules (fixed intercepts) inherit NO plot aes — normalize
+  // drops it — so a plot-level style meant for other layers must not trip the
+  // geom-capability check here. Match the rule-form x/y handling below by
+  // consulting only the rule's OWN aes for these layers.
+  const annotationRule = geom === "rule" && hasIntercepts(layer);
 
   for (const aesthetic of Object.keys(STYLE_AESTHETIC_GEOMS) as StyleAesthetic[]) {
-    if (mapped(aesthetic) === undefined) continue;
+    const value = annotationRule ? (layerAes?.[aesthetic] ?? undefined) : mapped(aesthetic);
+    if (value === undefined) continue;
     const compatible = STYLE_AESTHETIC_GEOMS[aesthetic] as readonly string[];
     if (compatible.includes(geom)) continue;
     errors.push({

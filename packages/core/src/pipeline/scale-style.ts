@@ -61,11 +61,21 @@ function collectValues(input: {
   bindings: readonly LayerBinding[];
   table: ColumnTable;
   sourceTable: ColumnTable;
-}): { values: CellValue[]; catalog: CellValue[]; anyField: boolean; anyDiscrete: boolean } {
+}): {
+  values: CellValue[];
+  catalog: CellValue[];
+  anyField: boolean;
+  anyDiscrete: boolean;
+  anyIndexable: boolean;
+} {
   const { aesthetic, frames, bindings, table, sourceTable } = input;
   const values: CellValue[] = [];
   let anyField = false;
   let anyDiscrete = false;
+  // A legend key can only resolve hover/click emphasis against a real field
+  // column or a scaled constant. Stat-only mappings (no field, no constant)
+  // leave the key index empty, so their discrete legend must be non-interactive.
+  let anyIndexable = false;
   for (const frame of frames) {
     const binding = bindingOf(frame.binding, aesthetic);
     const mapped = styleFrameValues(frame, aesthetic);
@@ -78,11 +88,13 @@ function collectValues(input: {
       ) {
         anyDiscrete = true;
       }
+      if (binding.field !== null) anyIndexable = true;
       values.push(...mapped);
     }
     if (binding.scaledConstant !== null) {
       anyField = true;
       anyDiscrete = true;
+      anyIndexable = true;
       values.push(binding.scaledConstant);
     }
     if (binding.statColumn !== null) anyField = true;
@@ -99,12 +111,16 @@ function collectValues(input: {
     const mapped = bindingOf(binding, aesthetic);
     if (mapped.field !== null && sourceTable.has(mapped.field)) {
       anyField = true;
+      anyIndexable = true;
       if (sourceTable.discreteness(mapped.field) === "discrete") anyDiscrete = true;
       for (const value of sourceTable.column(mapped.field)) add(value);
     }
-    if (mapped.scaledConstant !== null) add(mapped.scaledConstant);
+    if (mapped.scaledConstant !== null) {
+      anyIndexable = true;
+      add(mapped.scaledConstant);
+    }
   }
-  return { values, catalog, anyField, anyDiscrete };
+  return { values, catalog, anyField, anyDiscrete, anyIndexable };
 }
 
 function numericOutputValid(aesthetic: NumericStyleAesthetic, value: number): boolean {
@@ -142,6 +158,7 @@ function discreteResolution(input: {
   onExhaust?: "cycle" | "error";
   naValue: StyleOutput;
   unknownValue: StyleOutput;
+  indexable?: boolean;
   prevState: ScaleState | null;
   title: string;
   warnings: PipelineWarning[];
@@ -157,6 +174,7 @@ function discreteResolution(input: {
     onExhaust,
     naValue,
     unknownValue,
+    indexable,
     prevState,
     title,
     warnings,
@@ -230,6 +248,9 @@ function discreteResolution(input: {
             kind: "discrete" as const,
             scale: aesthetic,
             title,
+            // Stat-only mappings have no field/constant to index, so the key
+            // index resolves no rows — render swatches but disable hover/click.
+            ...(indexable === false && { interactive: false }),
             domain: resolvedDomain,
             firstSeen: observedValues,
             keyOf: (value: unknown) => ({ [aesthetic]: scale.valueOf(value) }),
@@ -292,6 +313,7 @@ function numericSequentialResolution(input: {
   const mappedBoundaries =
     kind === "binned" ? config?.breaks?.map((value) => view.semanticOf(value)) : undefined;
   if (
+    kind === "binned" &&
     config?.breaks !== undefined &&
     (mappedBoundaries === undefined || mappedBoundaries.some((value) => value === undefined))
   ) {
@@ -333,6 +355,24 @@ function numericSequentialResolution(input: {
   }
   const low = Math.min(domain[0], domain[1]);
   const high = Math.max(domain[0], domain[1]);
+  // Authored breaks on a sequential (non-binned) style scale are guide ticks,
+  // not bin boundaries — mirror color sequential scales: parse them and require
+  // each to lie inside the trained domain instead of running them through the
+  // binned-boundary validation.
+  const sequentialBreaks =
+    kind !== "binned" && config?.breaks !== undefined
+      ? config.breaks.map((value) => view.semanticOf(value))
+      : undefined;
+  if (
+    sequentialBreaks !== undefined &&
+    sequentialBreaks.some((value) => value === undefined || value < low || value > high)
+  ) {
+    throw new PipelineError(
+      "style-domain-invalid",
+      `/scales/${aesthetic}/breaks`,
+      `Every ${aesthetic} break must parse and lie inside the ${aesthetic} domain.`,
+    );
+  }
   const fallback = numericFallback(aesthetic, config);
   const configuredRange = config?.range;
   if (configuredRange !== undefined && configuredRange.length < 2) {
@@ -409,7 +449,10 @@ function numericSequentialResolution(input: {
       return semantic === undefined ? fallback.unknownValue : semanticOutput(semantic);
     },
   });
-  const ticks = kind === "binned" ? boundaries.slice(0, -1) : linearTicks(low, high, 5);
+  const ticks =
+    kind === "binned"
+      ? boundaries.slice(0, -1)
+      : ((sequentialBreaks as number[] | undefined) ?? linearTicks(low, high, 5));
   const formatter = resolveStyleLegendFormat({
     domain,
     temporalKind: view.temporalKind,
@@ -506,11 +549,12 @@ function finiteResolution(input: {
   values: readonly CellValue[];
   catalog: readonly CellValue[];
   config: FiniteStyleConfig | undefined;
+  indexable?: boolean;
   prevState: ScaleState | null;
   title: string;
   warnings: PipelineWarning[];
 }): StyleResolution {
-  const { aesthetic, values, catalog, config, prevState, title, warnings } = input;
+  const { aesthetic, values, catalog, config, indexable, prevState, title, warnings } = input;
   const range: (PointShape | Linetype)[] = [
     ...(config?.range ?? (aesthetic === "shape" ? POINT_SHAPE_NAMES : LINETYPE_NAMES)),
   ];
@@ -695,7 +739,14 @@ function finiteResolution(input: {
   return discreteResolution({
     aesthetic,
     kind: type,
-    values: type === "manual" ? (config?.domain ?? catalog) : catalog,
+    // Fall back to observed values when the source catalog is empty (stat-only
+    // finite mapping), mirroring the numeric-style path.
+    values:
+      type === "manual"
+        ? (config?.domain ?? (catalog.length > 0 ? catalog : values))
+        : catalog.length > 0
+          ? catalog
+          : values,
     observedValues: values,
     range,
     ...(config?.domain !== undefined && { domain: config.domain }),
@@ -703,6 +754,7 @@ function finiteResolution(input: {
     ...(config?.onExhaust !== undefined && { onExhaust: config.onExhaust }),
     naValue,
     unknownValue,
+    ...(indexable !== undefined && { indexable }),
     prevState,
     title,
     warnings,
@@ -757,6 +809,7 @@ export function resolveStyleScale(input: {
       values: collected.values,
       catalog: collected.catalog,
       config: config as FiniteStyleConfig | undefined,
+      indexable: collected.anyIndexable,
       prevState,
       title,
       warnings,
@@ -794,7 +847,15 @@ export function resolveStyleScale(input: {
   return discreteResolution({
     aesthetic,
     kind: type,
-    values: type === "manual" ? (numericConfig?.domain ?? collected.catalog) : collected.catalog,
+    // Stat columns never reach the source catalog, so fall back to the observed
+    // (post-stat) values when no catalog/explicit domain exists — matching color.
+    values:
+      type === "manual"
+        ? (numericConfig?.domain ??
+          (collected.catalog.length > 0 ? collected.catalog : collected.values))
+        : collected.catalog.length > 0
+          ? collected.catalog
+          : collected.values,
     observedValues: collected.values,
     range,
     ...(numericConfig?.domain !== undefined && { domain: numericConfig.domain }),
@@ -802,6 +863,7 @@ export function resolveStyleScale(input: {
     ...(numericConfig?.onExhaust !== undefined && { onExhaust: numericConfig.onExhaust }),
     naValue: fallback.naValue,
     unknownValue: fallback.unknownValue,
+    indexable: collected.anyIndexable,
     prevState,
     title,
     warnings,

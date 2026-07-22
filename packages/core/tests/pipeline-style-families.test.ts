@@ -967,4 +967,151 @@ describe("complete mapped style plumbing", () => {
     // and split every panel into two one-value groups (4 subpaths).
     expect(totalSubpaths).toBe(2);
   });
+
+  it("trains a stat-only discrete numeric style from observed values and disables its legend", () => {
+    // alpha is driven only by an after-stat column (count); stat columns never
+    // reach the source catalog, so the ordinal domain must fall back to the
+    // observed values instead of collapsing to an empty domain (which dropped
+    // the legend entirely). And because a stat-only mapping has no field/constant
+    // to index, the resulting discrete legend must be non-interactive.
+    const model = runPipeline(
+      fromAny({
+        data: {
+          values: [
+            { cat: "a" },
+            { cat: "a" },
+            { cat: "b" },
+            { cat: "b" },
+            { cat: "b" },
+            { cat: "c" },
+          ],
+        },
+        aes: { x: { field: "cat" }, alpha: { stat: "count" } },
+        layers: [{ geom: "bar" }],
+        scales: { alpha: { type: "ordinal" } },
+      }),
+      viewport,
+    );
+    const plan = model.guidePlans.find((p) => p.aesthetic === "alpha");
+    if (plan?.type !== "discrete") throw new Error("expected alpha discrete guide plan");
+    // Observed per-bar counts {2,3,1} → three ordinal entries, not a dropped legend.
+    expect(plan.entries.length).toBeGreaterThan(0);
+    const legend = model.scene.legends.find(
+      (entry) => entry.type === "discrete" && entry.scale === "alpha",
+    );
+    if (legend?.type !== "discrete") throw new Error("expected alpha discrete legend");
+    expect(legend.interactive).toBe(false);
+  });
+
+  it("keeps a field-mapped discrete numeric style legend interactive", () => {
+    // Contrast to the stat-only case: a real field mapping IS indexable, so the
+    // discrete legend stays interactive (hover/click resolves rows).
+    const model = runPipeline(
+      fromAny({
+        data: {
+          values: [
+            { x: 1, y: 1, grp: "a" },
+            { x: 2, y: 2, grp: "b" },
+            { x: 3, y: 3, grp: "c" },
+          ],
+        },
+        aes: { x: { field: "x" }, y: { field: "y" }, size: { field: "grp" } },
+        layers: [{ geom: "point" }],
+        scales: { size: { type: "ordinal" } },
+      }),
+      viewport,
+    );
+    const legend = model.scene.legends.find(
+      (entry) => entry.type === "discrete" && entry.scale === "size",
+    );
+    if (legend?.type !== "discrete") throw new Error("expected size discrete legend");
+    expect(legend.interactive).not.toBe(false);
+  });
+
+  it("honors authored guide breaks on a sequential numeric style scale", () => {
+    // Sequential breaks are guide ticks (like color sequential scales), not bin
+    // boundaries — they must not throw style-binned-breaks and should become the
+    // legend ticks instead of the default linearTicks.
+    const model = runPipeline(
+      fromAny({
+        data: {
+          values: [
+            { x: 1, y: 1, amount: 0 },
+            { x: 2, y: 2, amount: 50 },
+            { x: 3, y: 3, amount: 100 },
+          ],
+        },
+        aes: { x: { field: "x" }, y: { field: "y" }, size: { field: "amount" } },
+        layers: [{ geom: "point" }],
+        scales: { size: { type: "sequential", range: [2, 10], breaks: [0, 25, 50, 75, 100] } },
+      }),
+      viewport,
+    );
+    const plan = model.guidePlans.find((p) => p.aesthetic === "size");
+    if (plan?.type !== "discrete") throw new Error("expected size guide plan");
+    expect(plan.entries.map((entry) => entry.value)).toEqual([0, 25, 50, 75, 100]);
+  });
+
+  it("rejects sequential style breaks that fall outside the domain", () => {
+    expect(() =>
+      runPipeline(
+        fromAny({
+          data: { values: [{ x: 1, y: 1, amount: 50 }] },
+          aes: { x: { field: "x" }, y: { field: "y" }, size: { field: "amount" } },
+          layers: [{ geom: "point" }],
+          scales: { size: { type: "sequential", domain: [0, 100], breaks: [0, 50, 200] } },
+        }),
+        viewport,
+      ),
+    ).toThrow(expect.objectContaining({ code: "style-domain-invalid" }));
+  });
+
+  it("rejects a field-mapped style on a fixed-intercept annotation rule", () => {
+    // An annotation rule emits no data rows, so a field mapping has nothing to
+    // map and would produce NaN/invalid style vectors — reject it loudly.
+    expect(() =>
+      runPipeline(
+        fromAny({
+          data: {
+            values: [
+              { x: 1, y: 1, kind: "a" },
+              { x: 2, y: 2, kind: "b" },
+            ],
+          },
+          aes: { x: { field: "x" }, y: { field: "y" } },
+          layers: [
+            { geom: "point" },
+            { geom: "rule", aes: { linetype: { field: "kind" } }, params: { yintercept: 2 } },
+          ],
+        }),
+        viewport,
+      ),
+    ).toThrow(expect.objectContaining({ code: "unsupported-annotation-style" }));
+  });
+
+  it("allows a scaled-constant style on a fixed-intercept annotation rule", () => {
+    // Constants (including { value, scale: true }) DO expand per emitted segment,
+    // so they remain valid on annotation rules — only field/stat mappings reject.
+    const model = runPipeline(
+      fromAny({
+        data: {
+          values: [
+            { x: 1, y: 1 },
+            { x: 2, y: 2 },
+          ],
+        },
+        aes: { x: { field: "x" }, y: { field: "y" } },
+        layers: [
+          { geom: "point" },
+          {
+            geom: "rule",
+            aes: { linewidth: { value: 5, scale: true } },
+            params: { yintercept: 1 },
+          },
+        ],
+      }),
+      viewport,
+    );
+    expect(model.scene.batches.some((batch) => batch.kind === "segments")).toBe(true);
+  });
 });

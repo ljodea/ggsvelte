@@ -71,6 +71,20 @@ describe("tier 2 — structural grammar checks (opt-in, data-free)", () => {
     expect(result.ok).toBe(true);
   });
 
+  it("rule: annotation form ignores an INHERITED plot style aes for the geom-capability check", () => {
+    // A plot-level size/shape mapping meant for a sibling point layer must not
+    // trip unsupported-geom-aesthetic on a fixed-intercept rule that inherits
+    // nothing (normalize drops plot aes for annotation rules).
+    const result = validate(
+      {
+        aes: { x: { field: "temp" }, y: { field: "temp" }, size: { field: "pop" } },
+        layers: [{ geom: "point" }, { geom: "rule", params: { yintercept: 0 } }],
+      },
+      {},
+    );
+    expect(result.ok).toBe(true);
+  });
+
   it("rule: neither form is an error", () => {
     expect(codesOf({ layers: [{ geom: "rule" }] })).toEqual(["rule-form-missing"]);
   });
