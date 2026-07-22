@@ -138,7 +138,9 @@ jobs:
           # in ci.yml component-journeys under docs_journeys routing.
           if ls tests/visual/__screenshots__/*.png >/dev/null 2>&1; then
             echo "committed smoke baselines present — comparing"
-            bun run test:visual -- vr.spec.ts
+            # workers=1: point/canvas-scatter (10k marks) monopolizes the main thread
+            # during hydrate; parallel workers starve it past the test budget on CI.
+            bun run test:visual -- vr.spec.ts --workers=1
           else
             echo "::notice::no committed baselines yet — generating smoke candidates (bootstrap via CI; see docs/decisions/0009)"
             {
@@ -149,7 +151,7 @@ jobs:
               echo "uploaded them as the \`vr-baselines\` artifact. Land them via the vr-approve"
               echo "flow or same-PR smoke update (container-only baseline policy — docs/decisions/0009)."
             } >> "$GITHUB_STEP_SUMMARY"
-            bun run test:visual -- vr.spec.ts --update-snapshots
+            bun run test:visual -- vr.spec.ts --workers=1 --update-snapshots
           fi
 
       - name: upload playwright report (on comparison failure)
@@ -320,7 +322,8 @@ jobs:
         run: bun run build:docs
 
       - name: REGENERATE baselines at the approved merged commit
-        run: bun run test:visual -- --update-snapshots
+        # workers=1 matches the compare job — canvas-scatter hydrate is main-thread heavy.
+        run: bun run test:visual -- --workers=1 --update-snapshots
 
       - name: assemble approved-baseline artifact (PNGs + metadata)
         env:
