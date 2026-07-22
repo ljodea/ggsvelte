@@ -308,3 +308,53 @@ describe("color/fill scale authoring API", () => {
     ).toBe(false);
   });
 });
+
+describe("color scale data-aware validation", () => {
+  it("rejects manual range that is shorter than the inferred domain", () => {
+    const result = validate(
+      normalize({
+        data: {
+          values: [
+            { x: 1, y: 1, g: "a" },
+            { x: 2, y: 2, g: "b" },
+          ],
+        },
+        layers: [
+          {
+            geom: "point",
+            aes: { x: { field: "x" }, y: { field: "y" }, color: { field: "g" } },
+          },
+        ],
+        scales: { color: { type: "manual", range: ["#f00"] } },
+      }),
+      {},
+    );
+    expect(result.ok).toBe(false);
+    if (result.ok) throw new Error("expected failure");
+    expect(result.errors.some((error) => error.code === "scale-manual-domain-range")).toBe(true);
+  });
+
+  it("rejects temporal color options on quantitative fields without epoch parse", () => {
+    const result = validate(
+      normalize({
+        data: {
+          values: [
+            { x: 1, y: 1, c: 100 },
+            { x: 2, y: 2, c: 200 },
+          ],
+        },
+        layers: [
+          {
+            geom: "point",
+            aes: { x: { field: "x" }, y: { field: "y" }, color: { field: "c" } },
+          },
+        ],
+        scales: { color: { type: "sequential", temporalKind: "date", parse: "dmy" } },
+      }),
+      {},
+    );
+    expect(result.ok).toBe(false);
+    if (result.ok) throw new Error("expected failure");
+    expect(result.errors.some((error) => error.code === "scale-type-mismatch")).toBe(true);
+  });
+});

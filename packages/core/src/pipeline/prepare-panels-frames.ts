@@ -1,7 +1,7 @@
 /**
  * Build per-panel LayerFrames: bind layers, stats, position, remap source rows.
  */
-import type { PortableSpec } from "@ggsvelte/spec";
+import { configuredColorScaleType, type PortableSpec } from "@ggsvelte/spec";
 
 import type { ColumnTable } from "../table.js";
 
@@ -166,11 +166,13 @@ export function buildPanelFrames(input: {
 
   for (let index = 0; index < normalized.layers.length; index++) {
     const binding = bindLayer(normalized.layers[index]!, index, table, warnings, conversions);
+    // Match resolveColorScale family intent (domainMode/onExhaust → ordinal)
+    // so line/stat grouping treats inferred ordinal color as discrete groups.
     binding.color.forcedDiscrete = ["ordinal", "manual"].includes(
-      normalized.scales?.color?.type ?? "",
+      configuredColorScaleType(normalized.scales?.color) ?? normalized.scales?.color?.type ?? "",
     );
     binding.fill.forcedDiscrete = ["ordinal", "manual"].includes(
-      normalized.scales?.fill?.type ?? "",
+      configuredColorScaleType(normalized.scales?.fill) ?? normalized.scales?.fill?.type ?? "",
     );
     bindings.push(binding);
   }

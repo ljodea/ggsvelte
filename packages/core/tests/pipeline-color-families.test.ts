@@ -385,4 +385,73 @@ describe("generic non-position color scales", () => {
       }),
     );
   });
+
+  it("groups lines by inferred ordinal color from domainMode grow", () => {
+    const model = runPipeline(
+      fromAny({
+        data: {
+          values: [
+            { x: 1, y: 1, c: 1 },
+            { x: 2, y: 2, c: 2 },
+            { x: 3, y: 3, c: 1 },
+          ],
+        },
+        layers: [
+          {
+            geom: "line",
+            aes: { x: { field: "x" }, y: { field: "y" }, color: { field: "c" } },
+          },
+        ],
+        scales: { color: { domainMode: "grow" } },
+      }),
+      size,
+    );
+    expect(model.scales.color?.kind).toBe("ordinal");
+    const batch = model.scene.batches.find((candidate) => candidate.kind === "paths");
+    expect(batch?.kind).toBe("paths");
+    if (batch?.kind !== "paths") throw new Error("expected paths");
+    expect(batch.pathOffsets.length).toBe(3); // two series + terminal
+  });
+
+  it("formats log10 colorbar ticks with sub-unit decimals", () => {
+    const model = runPipeline(
+      pointSpec([0.001, 1000], { type: "sequential", transform: "log10" }),
+      size,
+    );
+    const legend = model.scene.legends.find((candidate) => candidate.type === "ramp");
+    if (legend?.type !== "ramp") throw new Error("expected ramp legend");
+    expect(legend.ticks.map((tick) => tick.label)).toContain("0.001");
+    expect(legend.ticks.map((tick) => tick.label)).not.toContain("0");
+  });
+
+  it("still checks temporalKind when parseFailure censors invalid rows", () => {
+    expect(() =>
+      runPipeline(
+        fromAny({
+          data: {
+            values: [
+              { x: 1, y: 1, t: "2024-01-01 12:00" },
+              { x: 2, y: 2, t: "bad" },
+              { x: 3, y: 3, t: "2024-02-01 12:00" },
+            ],
+          },
+          layers: [
+            {
+              geom: "point",
+              aes: { x: { field: "x" }, y: { field: "y" }, color: { field: "t" } },
+            },
+          ],
+          scales: {
+            color: {
+              type: "sequential",
+              temporalKind: "date",
+              parse: "ymd_hm",
+              parseFailure: "censor",
+            },
+          },
+        }),
+        size,
+      ),
+    ).toThrow(expect.objectContaining({ code: "color-temporal-kind" }));
+  });
 });
