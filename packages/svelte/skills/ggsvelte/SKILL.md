@@ -26,7 +26,7 @@ spec = data + aes (mappings) + layers[]        one layer = { geom, stat, positio
   Mapped size, linewidth, alpha, shape, and linetype are supported on the geoms
   that consume them (see STYLE_AESTHETIC_GEOMS).
 - **layers**: drawn in order. Geoms: `point, line, col, bar, histogram, area,
-rule, text, smooth, boxplot, density, errorbar, rect, tile, raster`. Each geom has a default
+rule, text, smooth, boxplot, density, errorbar, rect, tile, raster, ribbon`. Each geom has a default
   stat/position (bar → count+stack, histogram → bin+stack, col/area →
   identity+stack, boxplot → boxplot+dodge, everything else identity).
 - **stats compute columns**: count→`count`; bin→`count, density, ncount,

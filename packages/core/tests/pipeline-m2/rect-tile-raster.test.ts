@@ -194,4 +194,21 @@ describe("geom raster", () => {
     const batch = model.scene.batches[0] as RectsBatch;
     expect(batch.rects.length / 4).toBe(3);
   });
+
+  it("infers a time x scale from temporal tile centers with synthetic edges", () => {
+    const model = runPipeline(
+      gg(
+        {
+          day: ["2024-01-01", "2024-01-02", "2024-01-03"],
+          band: ["a", "b", "c"],
+          z: [1, 2, 3],
+        },
+        aes({ x: "day", y: "band", fill: "z" }),
+      )
+        .geomTile()
+        .spec(),
+      size,
+    );
+    expect(model.scales.x.type).toBe("time");
+  });
 });

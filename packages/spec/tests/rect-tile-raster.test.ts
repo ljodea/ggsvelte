@@ -89,4 +89,44 @@ describe("rect / tile / raster schema + builder", () => {
     });
     expect(result.ok).toBe(false);
   });
+
+  it("rejects non-quantitative tile width/height fields under data-aware validate", () => {
+    const result = validate(
+      {
+        data: {
+          values: [
+            { x: "a", y: "b", label: "wide", n: 1 },
+            { x: "c", y: "d", label: "tall", n: 2 },
+          ],
+        },
+        layers: [
+          {
+            geom: "tile",
+            aes: {
+              x: { field: "x" },
+              y: { field: "y" },
+              width: { field: "label" },
+              fill: { field: "n" },
+            },
+          },
+        ],
+      },
+      {
+        profile: {
+          fields: [
+            { name: "x", type: "nominal" },
+            { name: "y", type: "nominal" },
+            { name: "label", type: "nominal" },
+            { name: "n", type: "quantitative" },
+          ],
+          rowCount: 2,
+        },
+      },
+    );
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.errors.some((e) => e.code === "channel-type-mismatch")).toBe(true);
+      expect(result.errors.some((e) => e.path.includes("width"))).toBe(true);
+    }
+  });
 });

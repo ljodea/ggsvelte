@@ -217,6 +217,18 @@ export function dataChecks(
         }
       }
     }
+    if (geom === "tile") {
+      for (const channel of ["width", "height"] as const) {
+        const info = fieldTypeOf(channel);
+        if (info !== null && info[1] !== "quantitative") {
+          typeError(
+            channel,
+            `The tile geom needs quantitative ${channel}, but field "${info[0]}" is ${info[1]}.`,
+            `Map ${channel} to a positive numeric field, or use params.${channel}.`,
+          );
+        }
+      }
+    }
 
     for (const channel of CHANNELS) {
       const mapped = effectiveChannel(plotAes, layerAes, channel);

@@ -10,10 +10,12 @@ export function collectBinnedXEvidence(frame: LayerFrame, acc: AxisCollectAcc): 
   acc.numeric.push(frame.xmin, frame.xmax);
   const xConversion = xConversionOf(frame.binding);
   const geom = frame.binding.layer.geom;
-  // Rect/tile/raster: only endpoint fields (never inherited plot-level x).
+  // Rect: only endpoint fields (never inherited plot-level x).
+  // Tile/raster: edges are often synthetic from centers — fall back to xField
+  // so temporal inference still sees the mapped center column.
   // Stat-bin bars keep xField for the historical "binned …" type label.
   const evidenceFields =
-    geom === "rect" || geom === "tile" || geom === "raster"
+    geom === "rect"
       ? [
           ...new Set(
             [frame.binding.xminField, frame.binding.xmaxField].filter(
@@ -21,9 +23,21 @@ export function collectBinnedXEvidence(frame: LayerFrame, acc: AxisCollectAcc): 
             ),
           ),
         ]
-      : frame.binding.xField === null
-        ? []
-        : [frame.binding.xField];
+      : geom === "tile" || geom === "raster"
+        ? [
+            ...new Set(
+              [
+                frame.binding.xminField,
+                frame.binding.xmaxField,
+                ...(frame.binding.xminField === null && frame.binding.xmaxField === null
+                  ? [frame.binding.xField]
+                  : []),
+              ].filter((field): field is string => field !== null),
+            ),
+          ]
+        : frame.binding.xField === null
+          ? []
+          : [frame.binding.xField];
   if (evidenceFields.length === 0) {
     acc.typeParts.add("quantitative");
     acc.allTemporal = false;
