@@ -186,6 +186,31 @@ function ellipsizeBandPlan(
   };
 }
 
+/**
+ * Preserve mode renders full, un-truncated single-line labels (presentForLayout
+ * restores fullLabel for every tick and the margin computation uses those widths
+ * uncapped). The pinned-single planner it's routed through still runs its own
+ * end-cap truncation (capEndOverhang) for a normal single-line axis, so its raw
+ * output can carry an ellipsized label plus a false "the end label was truncated"
+ * diagnostic that never matches what's actually rendered. Restore full labels and
+ * drop that diagnostic; genuine neighbour-overlap stays since preserve truly can
+ * render overlapping full labels.
+ */
+function sanitizePreserveBandPlan(plan: BandAxisPlan): BandAxisPlan {
+  return {
+    ...plan,
+    ticks: plan.ticks.map((tick) => ({
+      ...tick,
+      label: tick.labeled ? tick.fullLabel : "",
+    })),
+    alongOverhang: 0,
+    leftOverhang: 0,
+    marginOverflow: false,
+    degraded: plan.degraded.filter((code) => code !== "band-label-margin-overflow"),
+    authorPinned: true,
+  };
+}
+
 export function deriveTicks(
   domain: Domain,
   requestedCount: number,
@@ -289,7 +314,9 @@ export function deriveTicks(
       const plan =
         context.bandCollision === "ellipsis"
           ? ellipsizeBandPlan(planned, domain.categories.length, context)
-          : planned;
+          : context.bandCollision === "preserve"
+            ? sanitizePreserveBandPlan(planned)
+            : planned;
       const ticks: Tick[] = plan.ticks.map((tick) => ({
         value: tick.value,
         label: tick.label,
