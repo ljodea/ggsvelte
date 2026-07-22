@@ -14,6 +14,7 @@
   import {
     clampOutputTabIndex,
     copySessionMatchesOutputs,
+    nextCopySessionOutputs,
   } from "$lib/playground-output-ui";
   import { nextRovingTabIndex } from "$lib/tab-roving";
   import type { PortableSpec } from "@ggsvelte/spec";
@@ -55,9 +56,19 @@
     copySessionLive ? fallbackLabel : "output",
   );
 
-  // Drop any manual-copy selection when the session is invalidated (e.g. promote).
+  // Drop selection and clear the session when outputs leave the session identity.
+  // Clearing is monotonic so undo cannot revive a prior manual-copy session via
+  // playgroundOutputs' WeakMap cache on the restored PortableSpec.
   $effect(() => {
-    if (!copySessionLive) getSelection()?.removeAllRanges();
+    const nextSession = nextCopySessionOutputs(copySessionOutputs, outputs);
+    if (nextSession === copySessionOutputs) return;
+    getSelection()?.removeAllRanges();
+    copySessionOutputs = nextSession;
+    if (nextSession === null) {
+      manualFallbackIntent = false;
+      copyStatusRaw = "";
+      fallbackCode = "";
+    }
   });
 
   function select(index: number): void {
@@ -95,6 +106,8 @@
     const result = await copyText(selectedOutput.code, fallbackSource);
     if (!copySessionMatchesOutputs(sessionOutputs, outputs)) {
       // Outputs changed mid-copy; drop the in-flight session without applying UI.
+      // Effect also clears, but null here so we never write status onto a dead session.
+      copySessionOutputs = null;
       copying = false;
       return;
     }
