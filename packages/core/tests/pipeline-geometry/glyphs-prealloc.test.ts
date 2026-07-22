@@ -114,7 +114,7 @@ describe("emitGlyphRows prealloc (#555)", () => {
     frame.binding = {
       ...frame.binding,
       labelConstant: null,
-    } as LayerFrame["binding"];
+    };
     frame.labelValues = [null, null];
     const emitted = emitGlyphRows({
       frame,
