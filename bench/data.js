@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784678235046,
+  "lastUpdate": 1784678615654,
   "repoUrl": "https://github.com/ljodea/ggsvelte",
   "entries": {
     "Benchmark": [
@@ -41884,6 +41884,200 @@ window.BENCHMARK_DATA = {
           {
             "name": "pipeline density 100k",
             "value": 157.8569,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liam.j.odea@gmail.com",
+            "name": "Liam O'Dea",
+            "username": "ljodea"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b08c9300d7c4d056a27bc5d7ee598417e1575863",
+          "message": "refactor(core): split canvas DOM module by concern (#398)\n\n* refactor(core): split canvas DOM module by concern\n\nSeparate leaf DOM helpers (color/DPR/clip), mark drawers + drawBatch, and\nstratum panel routing so paint paths and viewport recipes can change\nindependently. Preserve the @ggsvelte/core/dom public barrel.\n\nSplit the monolithic canvas test file by routing/focus/segments, share\nfixtures, and add a barrel + DOM-helper smoke suite.\n\n* refactor(core): drop unused canvas re-exports for knip\n\n* chore: add patch changeset for core canvas DOM split",
+          "timestamp": "2026-07-21T19:02:32-05:00",
+          "tree_id": "d2dc5f0e660dd171f221be3af82909d5b798f00d",
+          "url": "https://github.com/ljodea/ggsvelte/commit/b08c9300d7c4d056a27bc5d7ee598417e1575863"
+        },
+        "date": 1784678614089,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "pipeline scatter 1k",
+            "value": 2.304,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 1k",
+            "value": 2.7483,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 10k",
+            "value": 7.845,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 10k",
+            "value": 10.2925,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline scatter 100k",
+            "value": 58.701,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render scatter 100k",
+            "value": 93.1066,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal-line 100k",
+            "value": 69.2368,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide candidate-selection 300y",
+            "value": 0.0853,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide resize-churn 191y",
+            "value": 0.3933,
+            "unit": "ms"
+          },
+          {
+            "name": "temporal guide DST-heavy 3y",
+            "value": 4.7368,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline temporal free-facets 100",
+            "value": 38.3064,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline stacked-bars 50x4",
+            "value": 1.2536,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render stacked-bars 50x4",
+            "value": 1.4225,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline line-series 10x10k",
+            "value": 56.1376,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render line-series 10x10k",
+            "value": 73.9679,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline faceted-bars 50 panels",
+            "value": 13.8802,
+            "unit": "ms"
+          },
+          {
+            "name": "svg render faceted-bars 50 panels",
+            "value": 11.9541,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas cold scatter 100k",
+            "value": 934.9827,
+            "unit": "ms"
+          },
+          {
+            "name": "canvas redraw scatter 100k",
+            "value": 0.8074,
+            "unit": "ms"
+          },
+          {
+            "name": "hit-index build 100k",
+            "value": 273.511,
+            "unit": "ms"
+          },
+          {
+            "name": "candidate lookup 100k",
+            "value": 11.1287,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-identity 100k",
+            "value": 21.1928,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 100k",
+            "value": 17.7405,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-sqrt 100k",
+            "value": 17.4796,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 smooth 100k",
+            "value": 18.2086,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 bin 100k",
+            "value": 13.5977,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline transform-log10 facets-100 100k",
+            "value": 91.99,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline binned-64 100k",
+            "value": 27.6991,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline coord-identity points 100k",
+            "value": 18.4907,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline coord-log10 points 100k",
+            "value": 21.5803,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline coord-tessellation 10k",
+            "value": 47.7949,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline histogram 100k",
+            "value": 13.128,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline loess 5k",
+            "value": 592.8156,
+            "unit": "ms"
+          },
+          {
+            "name": "pipeline density 100k",
+            "value": 149.7103,
             "unit": "ms"
           }
         ]
