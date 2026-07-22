@@ -217,7 +217,9 @@ test("interactions is a first-class route with a single live chart", async ({ pa
 
   await demo.getByRole("button", { name: "Series: Alpha (color legend)" }).click();
   await expect(demo.getByText(/3 emphasized/)).toBeVisible();
-  await demo.getByRole("button", { name: "Clear" }).click();
+  // Legend also exposes a "Clear" control (aria-label "Clear legend focus");
+  // exact match targets the demo status clear only.
+  await demo.getByRole("button", { name: "Clear", exact: true }).click();
   await expect(demo.getByText(/0 emphasized/)).toBeVisible();
 });
 
