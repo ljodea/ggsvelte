@@ -36,11 +36,16 @@ export function computeFacetColRowPlacements(input: {
     panelH,
   } = input;
 
+  // Strip placement relative to axis margins (ggplot-style):
+  // - left:  [strip][y-axis margin][panel]
+  // - right: [panel][strip]  (y-axis stays on left)
+  // - top:   [strip][panel]  (x-axis stays on bottom)
+  // - bottom:[panel][x-axis margin][strip]
   const colX: number[] = [];
   let xCursor = outerLeft;
   for (let c = 0; c < ncol; c++) {
-    if (c === 0 || freeV) xCursor += mMax.left;
     if (stripConfig.position === "left") xCursor += strip;
+    if (c === 0 || freeV) xCursor += mMax.left;
     colX.push(xCursor);
     xCursor += panelW;
     if (stripConfig.position === "right") xCursor += strip;
@@ -53,8 +58,8 @@ export function computeFacetColRowPlacements(input: {
     if (stripConfig.position === "top") yCursor += strip;
     rowY.push(yCursor);
     yCursor += panelH;
-    if (stripConfig.position === "bottom") yCursor += strip;
     if (r === nrow - 1 || freeH) yCursor += mMax.bottom;
+    if (stripConfig.position === "bottom") yCursor += strip;
     yCursor += spacing;
   }
 

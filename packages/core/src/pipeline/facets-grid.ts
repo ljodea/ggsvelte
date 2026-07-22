@@ -69,12 +69,15 @@ export function resolveFacetGrid(input: {
   const panels: FacetPanelDef[] = [];
   for (let r = 0; r < rowValues.length; r++) {
     // Row-dimension lookup is loop-invariant across the col loop — hoist it.
-    const rowInner = grid === null ? null : grid.get(encodeKey(rowValues[r]!));
+    // Closed levels may list row values never observed: missing outer/inner
+    // buckets yield empty panels, not a hard throw.
+    const rowInner = grid === null ? null : (grid.get(encodeKey(rowValues[r]!)) ?? null);
     const rowOnly = rowBuckets === null ? null : (rowBuckets.get(encodeKey(rowValues[r]!)) ?? []);
     for (let c = 0; c < colValues.length; c++) {
       let rows: number[];
-      if (rowInner !== null && rowInner !== undefined) {
-        rows = rowInner.get(encodeKey(colValues[c]!)) ?? [];
+      if (grid !== null) {
+        // Full 2D grid: absent row or col bucket is an empty combination.
+        rows = rowInner?.get(encodeKey(colValues[c]!)) ?? [];
       } else if (rowOnly !== null) {
         rows = rowOnly;
       } else if (colBuckets === null) {

@@ -118,12 +118,20 @@ function renderStrip(panel: ScenePanel, scene: Scene): string {
   let textY = bandDraw / 2;
   let textTransform = "";
 
+  // Layout reserves strip outside the axis margin band (see
+  // panel-layout-facet-cells-place). Renderers place chrome in that reserved
+  // region so strip text does not collide with tick labels.
   if (position === "top") {
     originY = panel.y - band;
   } else if (position === "bottom") {
-    originY = panel.y + panel.height;
+    // Below the panel content box; axis ticks/labels sit in the bottom margin
+    // immediately under the panel, then the strip band follows.
+    const axisBand = panel.axisX !== null ? 28 : 0;
+    originY = panel.y + panel.height + axisBand;
   } else if (position === "left") {
-    originX = panel.x - band;
+    // Left of the y-axis margin so strip sits outside tick labels.
+    const axisBand = panel.axisY !== null ? 36 : 0;
+    originX = panel.x - axisBand - band;
     rectW = bandDraw;
     rectH = panel.height;
     textX = bandDraw / 2;

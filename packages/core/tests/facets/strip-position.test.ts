@@ -35,21 +35,26 @@ describe("facet strip position — layout and render (#590)", () => {
     expect(svg).toContain('class="gg-strip"');
   });
 
-  it("bottom strips place the band below the panel content", () => {
+  it("bottom strips place the band below the panel and axis margin", () => {
     const model = runPipeline(facetSpec({ position: "bottom" }), size);
-    const panel = model.scene.panels[0]!;
-    expect(panel.stripPosition).toBe("bottom");
-    expect(panel.stripBand).toBe(STRIP_BAND);
+    const panels = model.scene.panels;
+    expect(panels.every((p) => p.stripPosition === "bottom")).toBe(true);
+    expect(panels[0]!.stripBand).toBe(STRIP_BAND);
 
     const svg = sceneToSVGString(model.scene);
-    // Strip group is translated to panel.y + panel.height (below content)
-    const match = svg.match(/class="gg-strip" transform="translate\(([^,]+),([^)]+)\)"/);
-    expect(match).not.toBeNull();
-    const stripY = Number(match![2]);
-    expect(stripY).toBeCloseTo(panel.y + panel.height, 1);
+    // Scene panels and strip groups share paint order; axis-bearing panels
+    // clear the tick band before the strip chrome starts.
+    const strips = [...svg.matchAll(/class="gg-strip" transform="translate\(([^,]+),([^)]+)\)"/g)];
+    expect(strips).toHaveLength(panels.length);
+    for (let i = 0; i < panels.length; i++) {
+      const panel = panels[i]!;
+      const stripY = Number(strips[i]![2]);
+      const axisBand = panel.axisX !== null ? 28 : 0;
+      expect(stripY).toBeCloseTo(panel.y + panel.height + axisBand, 1);
+    }
   });
 
-  it("left strips reserve horizontal space and draw beside the panel", () => {
+  it("left strips reserve horizontal space and draw outside the y-axis band", () => {
     const model = runPipeline(
       gg(wrapRows, aes({ x: "x", y: "y" }))
         .geomPoint()
@@ -74,7 +79,9 @@ describe("facet strip position — layout and render (#590)", () => {
     const match = svg.match(/class="gg-strip" transform="translate\(([^,]+),([^)]+)\)"/);
     expect(match).not.toBeNull();
     const stripX = Number(match![1]);
-    expect(stripX).toBeCloseTo(panel.x - panel.stripBand!, 1);
+    // Strip is left of the y-axis margin when the panel draws a left axis.
+    const axisBand = panel.axisY !== null ? 36 : 0;
+    expect(stripX).toBeCloseTo(panel.x - axisBand - panel.stripBand!, 1);
   });
 
   it("right strips draw to the right of the panel content", () => {

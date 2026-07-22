@@ -82,9 +82,11 @@
       };
     }
     if (position === "bottom") {
+      // Below the x-axis margin so strip text does not collide with ticks.
+      const axisBand = panel.axisX !== null ? 28 : 0;
       return {
         x: panel.x,
-        y: panel.y + panel.height,
+        y: panel.y + panel.height + axisBand,
         width: panel.width,
         height: bandDraw,
         textX: panel.width / 2,
@@ -93,10 +95,12 @@
       };
     }
     if (position === "left") {
+      // Left of the y-axis margin so strip text does not collide with ticks.
+      const axisBand = panel.axisY !== null ? 36 : 0;
       const textX = bandDraw / 2;
       const textY = panel.height / 2;
       return {
-        x: panel.x - band,
+        x: panel.x - axisBand - band,
         y: panel.y,
         width: bandDraw,
         height: panel.height,

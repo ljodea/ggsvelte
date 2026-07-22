@@ -100,6 +100,20 @@ describe("facet levels and labels — resolveFacet (#590)", () => {
     expect(layout.panels[0]!.table.rowCount).toBe(0);
     expect(layout.panels[1]!.table.rowCount).toBe(1);
   });
+
+  it("keeps empty panels for grid row levels absent from data", () => {
+    const grid = ColumnTable.fromRows([{ r: "north", c: "east", x: 1 }]);
+    const layout = resolveFacet(
+      {
+        rows: { field: "r", levels: ["south", "north"] },
+        cols: { field: "c", levels: ["east"] },
+      },
+      grid,
+    );
+    expect(layout.panels).toHaveLength(2);
+    expect(layout.panels[0]!.table.rowCount).toBe(0); // south absent
+    expect(layout.panels[1]!.table.rowCount).toBe(1); // north present
+  });
 });
 
 describe("facet levels and labels — runPipeline (#590)", () => {
