@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# pre-push guard: run zizmor over .github/workflows when installed; skip
+# Optional local guard: run zizmor over .github/workflows when installed; skip
 # gracefully when the binary is missing so developers without the uv tool
 # are not blocked. CI's actions-security job always runs a pinned zizmor.
 set -euo pipefail

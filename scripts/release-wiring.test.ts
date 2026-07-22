@@ -20,9 +20,10 @@ const heavyRunsOnCount = (workflow: string) =>
     .length;
 
 describe("R0 release wiring", () => {
-  it("runs benchmark unit tests in CI and pre-push parity", () => {
+  it("runs benchmark unit tests in CI (not on git push hooks)", () => {
     const ci = read(".github/workflows/ci.yml");
-    // CI collects lcov for Codecov; pre-push stays plain (no coverage overhead).
+    // CI collects lcov for Codecov. Package tests are CI-only — pre-push was
+    // nuked so agents can push without re-running the full unit suite locally.
     expect(ci).toContain("packages/spec packages/core benchmarks scripts tests/evals");
     expect(ci).toContain("--coverage-reporter=lcov");
     expect(ci).toContain("coverage/unit");
@@ -30,9 +31,8 @@ describe("R0 release wiring", () => {
     expect(ci).toContain("flags: unit");
     expect(ci).toContain("flags: svelte");
     expect(read("codecov.yml")).toContain("component_id: packages-spec");
-    expect(read(".pre-commit-config.yaml")).toContain(
-      "bun test packages/spec packages/core benchmarks scripts tests/evals",
-    );
+    expect(read(".pre-commit-config.yaml")).not.toContain("bun test packages/spec");
+    expect(read(".pre-commit-config.yaml")).not.toContain("pre-push");
   });
 
   it("checks packed links in CI and the Pages deployment", () => {
@@ -295,12 +295,13 @@ describe("R0 release wiring", () => {
     expect(ci).toContain("scripts/ci-routing.ts emit-github-output");
     expect(ci).toContain("  detect-changes:");
     expect(ci).toContain("  ci-gate:");
-    // Pre-push mega-suite must not double-run on the checks job.
+    // Checks job is pre-commit stage only (format/lint/guards). Heavy analysis
+    // lives on dedicated CI jobs — never reintroduced via hook-stage pre-push.
     expect(ci).not.toContain("hook-stage pre-push");
     expect(ci).toContain("pre-commit run --all-files --show-diff-on-failure");
-    // Static analysis formerly on pre-push now lives on the build job.
     expect(ci).toContain("bun run lint:type-aware");
     expect(ci).toContain("bun run knip");
+    expect(read(".pre-commit-config.yaml")).not.toContain("pre-push");
     expect(read(".github/workflows/pages.yml")).toContain(
       "scripts/ci-routing.ts emit-github-output",
     );

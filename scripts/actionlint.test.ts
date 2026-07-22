@@ -115,29 +115,18 @@ describe("actionlint load-failure policy (Codex P1)", () => {
   });
 });
 
-describe("workflow lint local gates (issue #155)", () => {
-  it("wires actionlint into the pre-push stage, gated on .github/", () => {
+describe("workflow lint gates (issue #155)", () => {
+  it("does not wire actionlint/zizmor into git hooks (CI owns them)", () => {
     const hooks = read(".pre-commit-config.yaml");
-    expect(hooks).toMatch(/id:\s*actionlint/);
-    expect(hooks).toContain("bun run lint:actions");
-    expect(hooks).toMatch(/files:\s*\^\\.github\//);
-    // actionlint hook must be pre-push, not pre-commit (heavier, CI-parity).
-    const actionlintBlock = hooks.slice(hooks.indexOf("id: actionlint"));
-    const nextHook = actionlintBlock.indexOf("\n      - id:");
-    const block = nextHook === -1 ? actionlintBlock : actionlintBlock.slice(0, nextHook);
-    expect(block).toContain("stages: [pre-push]");
+    // Heavy workflow lint lives in the actions-security CI job only.
+    // Local pre-push was nuked: it made every push a multi-minute CI mirror.
+    expect(hooks).not.toMatch(/id:\s*actionlint/);
+    expect(hooks).not.toMatch(/id:\s*zizmor/);
+    expect(hooks).not.toContain("stages: [pre-push]");
+    expect(hooks).not.toContain("pre-push");
   });
 
-  it("wires zizmor into the pre-push stage with a graceful skip wrapper", () => {
-    const hooks = read(".pre-commit-config.yaml");
-    expect(hooks).toMatch(/id:\s*zizmor/);
-    expect(hooks).toContain("scripts/guards/zizmor-or-skip.sh");
-    const zizmorBlock = hooks.slice(hooks.indexOf("id: zizmor"));
-    const nextHook = zizmorBlock.indexOf("\n      - id:");
-    const block = nextHook === -1 ? zizmorBlock : zizmorBlock.slice(0, nextHook);
-    expect(block).toContain("stages: [pre-push]");
-    expect(block).toMatch(/files:\s*\^\\.github\//);
-
+  it("keeps the zizmor optional-skip guard for manual local runs", () => {
     const guard = read("scripts/guards/zizmor-or-skip.sh");
     expect(guard).toContain("command -v zizmor");
     expect(guard).toContain("skipping local gate");
