@@ -1,6 +1,6 @@
 /**
  * Characterization tests for TypeBox 1.x → agent SpecError mapping
- * (packages/spec/src/validate-map-errors.ts + validate-schema-walk.ts).
+ * (validate-map-errors.ts + validate-map-forms.ts + validate-schema-walk.ts).
  *
  * Exercises mapValueErrors classification through the public validate() entry.
  * Snapshot-tested agent messages remain in validate.test.ts (full orchestrator
