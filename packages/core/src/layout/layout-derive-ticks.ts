@@ -87,7 +87,7 @@ export interface DeriveTicksContext {
   quantum?: number;
   ellipsis?: string;
   /** Top-level band-axis collision override, resolved after scale-local guide settings. */
-  bandCollision?: "ellipsis";
+  bandCollision?: "ellipsis" | "preserve";
   previousGuidePlan?: AxisGuidePlan;
 }
 
@@ -186,6 +186,31 @@ function ellipsizeBandPlan(
   };
 }
 
+/**
+ * Preserve mode renders full, un-truncated single-line labels (presentForLayout
+ * restores fullLabel for every tick and the margin computation uses those widths
+ * uncapped). The pinned-single planner it's routed through still runs its own
+ * end-cap truncation (capEndOverhang) for a normal single-line axis, so its raw
+ * output can carry an ellipsized label plus a false "the end label was truncated"
+ * diagnostic that never matches what's actually rendered. Restore full labels and
+ * drop that diagnostic; genuine neighbour-overlap stays since preserve truly can
+ * render overlapping full labels.
+ */
+function sanitizePreserveBandPlan(plan: BandAxisPlan): BandAxisPlan {
+  return {
+    ...plan,
+    ticks: plan.ticks.map((tick) => ({
+      ...tick,
+      label: tick.labeled ? tick.fullLabel : "",
+    })),
+    alongOverhang: 0,
+    leftOverhang: 0,
+    marginOverflow: false,
+    degraded: plan.degraded.filter((code) => code !== "band-label-margin-overflow"),
+    authorPinned: true,
+  };
+}
+
 export function deriveTicks(
   domain: Domain,
   requestedCount: number,
@@ -249,8 +274,14 @@ export function deriveTicks(
     // Vertical band (native Y, or categorical-on-Y after coord_flip) falls through
     // to the legacy thin/truncate path.
     if (domain.band !== undefined && context.orient === "horizontal") {
+      // "preserve" renders full single-line labels downstream (presentForLayout),
+      // so the guide plan must reflect single-line mode too — otherwise the auto
+      // wrap/rotate plan leaks into the axis-title offset and wrap/rotate advisories
+      // for a layout that is never actually rendered.
       const resolvedGuide =
-        context.bandCollision === "ellipsis" ? { ...guide, mode: "single" as const } : guide;
+        context.bandCollision === "ellipsis" || context.bandCollision === "preserve"
+          ? { ...guide, mode: "single" as const }
+          : guide;
       const planned = planBandAxis({
         aesthetic: domain.band.aesthetic,
         panelIndex: domain.band.panelIndex,
@@ -283,7 +314,9 @@ export function deriveTicks(
       const plan =
         context.bandCollision === "ellipsis"
           ? ellipsizeBandPlan(planned, domain.categories.length, context)
-          : planned;
+          : context.bandCollision === "preserve"
+            ? sanitizePreserveBandPlan(planned)
+            : planned;
       const ticks: Tick[] = plan.ticks.map((tick) => ({
         value: tick.value,
         label: tick.label,
