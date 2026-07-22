@@ -155,6 +155,41 @@ function truncateToFit(
   return ellipsis;
 }
 
+/**
+ * Cap the along-axis overhang of the end labels using their ACTUAL displayed
+ * positions (not the uniform band width). Horizontal labels that overhang past
+ * the panel edge + margin cap are truncated (ellipsis) and flagged; the returned
+ * overhang is clamped to the cap so the margin can never be blown.
+ */
+function capEndOverhang(
+  ticks: BandTick[],
+  entries: readonly Entry[],
+  extentPx: number,
+  marginCapPx: number,
+  measurer: TextMeasurer,
+  fontSize: number,
+  ellipsis: string,
+  truncatable: boolean,
+): { alongOverhang: number; marginOverflow: boolean } {
+  let overhang = 0;
+  let overflow = false;
+  for (let i = 0; i < ticks.length; i++) {
+    const tick = ticks[i]!;
+    if (!tick.labeled) continue;
+    const center = entries[i]!.center;
+    const edgeDist = Math.min(center, extentPx - center);
+    const allowed = edgeDist + marginCapPx;
+    let half = measurer.measureWidth(tick.label, fontSize) / 2;
+    if (truncatable && half > allowed) {
+      tick.label = truncateToFit(tick.label, allowed * 2, measurer, fontSize, ellipsis);
+      half = measurer.measureWidth(tick.label, fontSize) / 2;
+      overflow = true;
+    }
+    overhang = Math.max(overhang, half - edgeDist);
+  }
+  return { alongOverhang: Math.max(0, Math.min(overhang, marginCapPx)), marginOverflow: overflow };
+}
+
 export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
   const {
     categoryCount,
@@ -203,17 +238,30 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
       };
     });
 
-  const singlePlan = (): BandAxisPlan => ({
-    mode: "single-line",
-    angle: 0,
-    ticks: buildTicks(1, (e) => ({ label: e.label })),
-    labelEvery: 1,
-    labelBandHeight: lineHeight,
-    alongOverhang: Math.max(0, (entries.at(-1)?.width ?? 0) / 2 - bandWidth / 2),
-    overlap: false,
-    marginOverflow: false,
-    degraded: [],
-  });
+  const singlePlan = (): BandAxisPlan => {
+    const ticks = buildTicks(1, (e) => ({ label: e.label }));
+    const { alongOverhang, marginOverflow } = capEndOverhang(
+      ticks,
+      entries,
+      extentPx,
+      marginCapPx,
+      measurer,
+      fontSize,
+      ellipsis,
+      true,
+    );
+    return {
+      mode: "single-line",
+      angle: 0,
+      ticks,
+      labelEvery: 1,
+      labelBandHeight: lineHeight,
+      alongOverhang,
+      overlap: false,
+      marginOverflow,
+      degraded: marginOverflow ? ["band-label-margin-overflow"] : [],
+    };
+  };
 
   // Vertical band axes are not planned here (legacy path owns them).
   if (input.orient === "vertical" || entries.length === 0) return singlePlan();
@@ -257,7 +305,10 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
           }),
           labelEvery: 1,
           labelBandHeight: quantizeUp(blockHeight, quantum),
-          alongOverhang: Math.max(0, lineWidth(wrapped.at(-1)!) / 2 - bandWidth / 2),
+          alongOverhang: Math.min(
+            marginCapPx,
+            Math.max(0, lineWidth(wrapped.at(-1)!) / 2 - bandWidth / 2),
+          ),
           overlap: false,
           marginOverflow: false,
           degraded: [],
@@ -276,8 +327,18 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
     const a = Math.abs(angle) * RAD;
     return width * Math.sin(a) + lineHeight * Math.cos(a);
   };
+  // Overlap of the rotated footprint measured at the ACTUAL displayed tick
+  // positions (every k-th when thinned), not the uniform band width — so a
+  // sparse break subset that is hundreds of px apart is never wrongly thinned.
+  const rotatedOverlaps = (angle: number, every: number) =>
+    neighbourOverlap(
+      entries
+        .filter((_, i) => i % every === 0)
+        .map((e) => ({ pos: e.center, half: along(angle) / 2 })),
+      gap,
+    );
   // Prefer -45 when it clears neighbours and fits the cap; else -90.
-  const fits45 = along(-45) + gap <= bandBudget && ortho(-45, maxWidth) <= orthoCap;
+  const fits45 = !rotatedOverlaps(-45, 1) && ortho(-45, maxWidth) <= orthoCap;
   const angle = fits45 ? -45 : -90;
   const alongFootprint = along(angle);
 
@@ -287,12 +348,16 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
   let marginOverflow = false;
   let orthoBudgetForLabel = orthoCap;
 
-  // Along-axis: do adjacent rotated labels still collide?
-  if (alongFootprint + gap > bandBudget) {
+  // Along-axis: do adjacent rotated labels still collide at their real positions?
+  if (rotatedOverlaps(angle, 1)) {
     if (n >= BAND_THIN_MIN_CATEGORIES) {
       // High cardinality: thin (never for a handful of named bars).
-      while (bandBudget * labelEvery < alongFootprint + gap && labelEvery * 2 < entries.length) {
+      while (rotatedOverlaps(angle, labelEvery) && labelEvery * 2 < entries.length) {
         labelEvery *= 2;
+      }
+      if (rotatedOverlaps(angle, labelEvery)) {
+        overlap = true;
+        degraded.push("band-label-overlap");
       }
     } else {
       overlap = true;
@@ -323,8 +388,15 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
     ...ticks.filter((t) => t.labeled).map((t) => measurer.measureWidth(t.label, fontSize)),
   );
   const labelBandHeight = quantizeUp(Math.min(ortho(angle, shownMaxWidth), orthoCap), quantum);
-  const alongOverhang = Math.max(0, alongFootprint / 2 - bandWidth / 2);
-  void marginCapPx; // end-overhang is applied by the layout via alongOverhang
+  // End overhang of the rotated footprint at the real end positions (usually small
+  // for −90 since the horizontal footprint is ~one line height), clamped to the cap.
+  const minEdgeDist = Math.min(
+    extentPx,
+    ...entries
+      .filter((_, i) => i % labelEvery === 0)
+      .map((e) => Math.min(e.center, extentPx - e.center)),
+  );
+  const alongOverhang = Math.max(0, Math.min(marginCapPx, alongFootprint / 2 - minEdgeDist));
 
   return {
     mode: "rotated",

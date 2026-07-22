@@ -28,6 +28,7 @@ export function computeFacetGridGeometry(input: FacetGridGeometryInput): FacetGr
     approxH: outer.approxH,
     displayScales: input.displayScales,
     displayTemporal: input.displayTemporal,
+    displayBand: input.displayBand,
     hBreaks: input.hBreaks,
     vBreaks: input.vBreaks,
     formatH: input.formatH,

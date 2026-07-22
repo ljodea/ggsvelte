@@ -40,6 +40,22 @@ describe("band axis diagnostics (#387)", () => {
     expect(model.advisories.some((a) => a.code === "band-labels-rotated")).toBe(false);
   });
 
+  it("plans band labels in faceted charts too (Codex P2)", () => {
+    const facetSpec: SpecInput = {
+      data: {
+        values: rows.flatMap((r) => [
+          { ...r, panel: "A" },
+          { ...r, panel: "B" },
+        ]),
+      },
+      layers: [{ geom: "col", aes: { x: { field: "category" }, y: { field: "count" } } }],
+      facet: { cols: "panel" },
+    };
+    // Two side-by-side panels at 700px → each panel band is narrow → wrap/rotate.
+    const model = runPipeline(facetSpec, { width: 700, height: 300 });
+    expect(model.advisories.some((a) => a.code.startsWith("band-labels-"))).toBe(true);
+  });
+
   it("does not degrade a short-label bar chart", () => {
     const shortSpec: SpecInput = {
       data: {

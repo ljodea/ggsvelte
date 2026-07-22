@@ -30,6 +30,7 @@ export function placeFacetPanelsFromChrome(input: {
     topBand: chrome.topBand,
     displayScales: chrome.displayScales,
     displayTemporal: chrome.displayTemporal,
+    displayBand: chrome.displayBand,
     hBreaks: chrome.hBreaks,
     vBreaks: chrome.vBreaks,
     formatH: chrome.formatH,

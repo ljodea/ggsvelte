@@ -5,7 +5,7 @@ import type { LayoutTheme, TickFormatter } from "../layout/layout.js";
 import type { TextMeasurer } from "../layout/measure.js";
 
 import type { FacetPanelDef } from "./facets.js";
-import type { DisplayScalesFn, DisplayTemporalFn } from "./panel-layout-types.js";
+import type { DisplayBandFn, DisplayScalesFn, DisplayTemporalFn } from "./panel-layout-types.js";
 
 export interface FacetGridGeometryInput {
   facetPanels: readonly FacetPanelDef[];
@@ -22,6 +22,7 @@ export interface FacetGridGeometryInput {
   topBand: number;
   displayScales: DisplayScalesFn;
   displayTemporal: DisplayTemporalFn;
+  displayBand: DisplayBandFn;
   hBreaks: readonly (number | string)[] | undefined;
   vBreaks: readonly (number | string)[] | undefined;
   formatH: TickFormatter | undefined;

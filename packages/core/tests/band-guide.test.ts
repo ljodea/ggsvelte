@@ -89,6 +89,46 @@ describe("planBandAxis: high cardinality", () => {
   });
 });
 
+describe("planBandAxis: sparse explicit breaks (Codex P2)", () => {
+  it("does not thin far-apart break labels even when the full domain is huge", () => {
+    // 100-category domain, 3 explicit breaks at 0/50/99: the displayed ticks are
+    // ~235px apart, so nothing should be thinned even though extentPx/100 is tiny.
+    const longLabel = "Muy larga etiqueta de categoría con detalle";
+    const p = planBandAxis({
+      aesthetic: "x",
+      panelIndex: 0,
+      categoryCount: 100,
+      entries: [0, 50, 99].map((domainIndex) => ({
+        value: `c${domainIndex}`,
+        label: longLabel,
+        domainIndex,
+      })),
+      orient: "horizontal",
+      extentPx: 480,
+      reverse: false,
+      measurer,
+      fontSize: 11,
+      marginCapPx: 168,
+      orthogonalMarginCapPx: 400,
+    });
+    expect(p.labelEvery).toBe(1); // no thinning
+    expect(p.ticks.every((t) => t.labeled)).toBe(true); // every authored break kept
+    expect(p.overlap).toBe(false);
+  });
+});
+
+describe("planBandAxis: end-label margin cap (Codex P2)", () => {
+  it("truncates a lone over-wide label instead of clipping it at the panel edge", () => {
+    const p = plan(["Una sola categoría con una etiqueta extremadamente larga que desborda"], 200, {
+      orthogonalMarginCapPx: 400,
+    });
+    expect(p.mode).toBe("single-line");
+    expect(p.degraded).toContain("band-label-margin-overflow");
+    expect(p.ticks[0]!.label.endsWith("…")).toBe(true);
+    expect(p.alongOverhang).toBeLessThanOrEqual(200 * 0.35); // clamped to the cap
+  });
+});
+
 describe("planBandAxis: overlap detection", () => {
   it("flags overlap when even rotation cannot separate low-cardinality labels", () => {
     // Very narrow band, few long labels, generous height: rotate -90 chosen but bands
