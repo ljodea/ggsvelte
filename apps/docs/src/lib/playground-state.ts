@@ -1,15 +1,13 @@
-import { normalize, validate, type PortableSpec, type SpecError } from "@ggsvelte/spec";
+import type { PortableSpec } from "@ggsvelte/spec";
 
 import {
-  assertPlaygroundDraftSize,
   encodePlaygroundSeed,
-  PLAYGROUND_MAX_DECODED_BYTES,
-  PLAYGROUND_MAX_DEPTH,
-  PLAYGROUND_MAX_ROWS,
-  PlaygroundCodecError,
   validatePlaygroundSeed,
   type PlaygroundSeedV1,
 } from "./playground-codec";
+import { serializePlaygroundSpec, validatePlaygroundDraft } from "./playground-draft-validate";
+
+export { serializePlaygroundSpec } from "./playground-draft-validate";
 
 export type PlaygroundDiagnosticSource = "playground" | "validation" | "pipeline" | "export";
 
@@ -65,31 +63,6 @@ export interface PlaygroundState extends PlaygroundSnapshot {
 }
 
 export const PLAYGROUND_MAX_UNDO_SNAPSHOTS = 20;
-
-const VALIDATE_LIMITS = {
-  maxRows: PLAYGROUND_MAX_ROWS,
-  maxBytes: PLAYGROUND_MAX_DECODED_BYTES,
-  maxDepth: PLAYGROUND_MAX_DEPTH,
-  maxDiagnostics: 100,
-} as const;
-
-export function serializePlaygroundSpec(spec: PortableSpec): string {
-  const pretty = JSON.stringify(spec, null, 2);
-  if (new TextEncoder().encode(pretty).byteLength <= PLAYGROUND_MAX_DECODED_BYTES) {
-    return pretty;
-  }
-  return JSON.stringify(spec);
-}
-
-function diagnosticFromSpec(error: SpecError): PlaygroundDiagnostic {
-  return {
-    source: "validation",
-    code: error.code,
-    path: error.path,
-    message: error.message,
-    ...(error.fix?.description === undefined ? {} : { fix: error.fix.description }),
-  };
-}
 
 function finalize(
   state: Omit<PlaygroundState, "synchronized" | "canCopyOrShare">,
@@ -188,68 +161,19 @@ function invalidDraft(
 }
 
 export function stagePlaygroundDraft(state: PlaygroundState): PlaygroundState {
-  let input: unknown;
-  try {
-    assertPlaygroundDraftSize(state.draft);
-    input = JSON.parse(state.draft) as unknown;
-  } catch (error) {
-    if (error instanceof PlaygroundCodecError) {
-      return invalidDraft(state, [
-        {
-          source: "playground",
-          code: "share-limit",
-          path: "",
-          message: error.message,
-          fix: "Use a smaller portable spec.",
-        },
-      ]);
-    }
-    return invalidDraft(state, [
-      {
-        source: "playground",
-        code: "invalid-json",
-        path: "",
-        message: error instanceof Error ? error.message : "The draft is not valid JSON.",
-        fix: "Check quotes, commas, and brackets, then apply again.",
-      },
-    ]);
-  }
+  const validated = validatePlaygroundDraft(state.draft);
+  if (!validated.ok) return invalidDraft(state, validated.diagnostics);
 
-  const shape = validate(input);
-  if (!shape.ok) return invalidDraft(state, shape.errors.map(diagnosticFromSpec));
-  const normalized = normalize(shape.spec);
-  const checked = validate(normalized, { limits: VALIDATE_LIMITS });
-  if (!checked.ok) return invalidDraft(state, checked.errors.map(diagnosticFromSpec));
-
-  const canonical = serializePlaygroundSpec(checked.spec);
-  const nextSeed: PlaygroundSeedV1 = {
-    version: 1,
-    source: { kind: "custom" },
-    spec: checked.spec,
-  };
-  try {
-    validatePlaygroundSeed(nextSeed);
-  } catch (error) {
-    return invalidDraft(state, [
-      {
-        source: "playground",
-        code: "share-limit",
-        path: "",
-        message: error instanceof Error ? error.message : "The draft exceeds playground limits.",
-        fix: "Use a smaller portable spec.",
-      },
-    ]);
-  }
   const next: PlaygroundSnapshot = {
     sourceBaseline: state.sourceBaseline,
-    seed: nextSeed,
-    draft: canonical,
-    committed: checked.spec,
-    rendered: checked.spec,
+    seed: validated.seed,
+    draft: validated.canonicalDraft,
+    committed: validated.spec,
+    rendered: validated.spec,
     renderConfirmed: true,
     historyHash: null,
   };
-  return stage(state, "apply", next, canonical);
+  return stage(state, "apply", next, validated.canonicalDraft);
 }
 
 export function stagePlaygroundSeed(
