@@ -37,7 +37,7 @@ import {
 } from "../interval/query.js";
 import { BRUSH_SECOND_CORNER_ANNOUNCEMENT } from "../assembly/labels.js";
 import { hitFromCandidate, plotPointFromClient } from "./plot-px.js";
-import { buildQueuedInspectFrame } from "../inspection/frame.js";
+
 import {
   resolveSurfaceBlurAction,
   shouldClosePinnedOnOutsidePointer,
@@ -94,10 +94,9 @@ export type SurfaceStateDeps = {
     InspectionState,
     | "inspection"
     | "inspectionPanel"
-    | "applyQueuedInspectFrame"
-    | "queuePointerFrame"
-    | "clearQueuedPointer"
-    | "clearPendingPinned"
+    | "schedulePointerInspect"
+    | "cancelPointerInspect"
+    | "onInspectPointerFrame"
     | "setInspection"
     | "closeInspection"
     | "dismissInspection"
@@ -169,9 +168,9 @@ export function createSurfaceState(deps: SurfaceStateDeps): SurfaceState {
     onPointerFrame: (action) => {
       if (action.type === "move-area") {
         applyAreaMove(action.point, queuedAreaSource);
-      } else {
-        deps.inspection().applyQueuedInspectFrame(action);
+        return true;
       }
+      return deps.inspection().onInspectPointerFrame(action);
     },
   });
 
@@ -228,8 +227,9 @@ export function createSurfaceState(deps: SurfaceStateDeps): SurfaceState {
       case "apply":
         reducer.dispatch({ type: "set-tool", tool: next });
         brushRect = null;
-        deps.inspection().clearQueuedPointer();
-        reducer.cancelScheduledPointer();
+        // set-tool already full-cancels the schedule; clear inspect payload only
+        // (preserve pinned stash — matches prior clearQueuedPointer-only path).
+        deps.inspection().cancelPointerInspect({ pendingPinned: "preserve" });
         deps.ontoolchange()?.(next);
         break;
     }
@@ -243,13 +243,6 @@ export function createSurfaceState(deps: SurfaceStateDeps): SurfaceState {
     const scene = deps.model()?.scene;
     if (scene === undefined) return { x: 0, y: 0 };
     return plotPointFromClient(event.clientX, event.clientY, rect, scene);
-  }
-
-  /** Private — only consumer is the pointer-frame builder. */
-  function panelId(index: number): string | null {
-    const panel = deps.model()?.scene.panels[index];
-    if (panel === undefined) return null;
-    return panel.id;
   }
 
   function panelAtPoint(point: Readonly<{ x: number; y: number }>) {
@@ -277,37 +270,22 @@ export function createSurfaceState(deps: SurfaceStateDeps): SurfaceState {
     });
     switch (action.type) {
       case "touch-inspect-drag-cancel":
-        deps.inspection().clearQueuedPointer();
-        reducer.cancelScheduledPointer();
+        deps.inspection().cancelPointerInspect({ pendingPinned: "preserve" });
         return;
       case "queue-area-move":
         queuedAreaSource = action.source;
         reducer.queuePointer({ type: "move-area", point: p });
         return;
-      case "queue-inspect": {
+      case "queue-inspect":
         // mode/maxDistance from pure snapshot — no inspect config re-gate.
-        const model = deps.model();
-        const match =
-          model?.candidates.nearest(p.x, p.y, {
-            mode: action.mode,
-            maxDistance: action.maxDistance,
-          }) ?? null;
-        // One null branch for exact-geometry fallback + reducer candidate.
-        const frame = buildQueuedInspectFrame({
-          match,
+        // Inspection owns nearest lookup, token, and reducer.queuePointer.
+        deps.inspection().schedulePointerInspect({
+          point: p,
           source: action.source,
-          epoch: model?.runId ?? 0,
-          fallbackCandidate: () => model?.candidates.hitTest(p.x, p.y) ?? null,
-          panelIdForIndex: (index) => panelId(index),
-        });
-        deps.inspection().queuePointerFrame(frame.queued, reducer.frameToken());
-        reducer.queuePointer({
-          type: "inspect",
-          candidate: frame.candidate,
-          source: action.source,
+          mode: action.mode,
+          maxDistance: action.maxDistance,
         });
         break;
-      }
       case "none":
         break;
     }
@@ -375,8 +353,7 @@ export function createSurfaceState(deps: SurfaceStateDeps): SurfaceState {
         })
       )
         return;
-      deps.inspection().clearQueuedPointer();
-      deps.inspection().clearPendingPinned();
+      deps.inspection().cancelPointerInspect({ pendingPinned: "discard" });
       reducer.cancelScheduledPointer();
       deps.inspection().setInspection(null, "pointer");
     });
@@ -384,7 +361,8 @@ export function createSurfaceState(deps: SurfaceStateDeps): SurfaceState {
 
   function onPointerDown(event: PointerEvent): void {
     // Always cancel queued inspection before pure routing (host cleanup).
-    deps.inspection().clearQueuedPointer();
+    // Preserve pinned stash; full schedule cancel (inspect + move-area).
+    deps.inspection().cancelPointerInspect({ pendingPinned: "preserve" });
     reducer.cancelScheduledPointer();
     // point always computed (pure begin-area needs it; touch/none ignore).
     const p = plotPoint(event);
@@ -622,7 +600,8 @@ export function createSurfaceState(deps: SurfaceStateDeps): SurfaceState {
 
   /** Pointer-cancel always drops draft/queue/touch-inspect and cancels area. */
   function onPointerCancel(): void {
-    deps.inspection().clearQueuedPointer();
+    // Preserve pinned stash (leave discards; cancel preserves).
+    deps.inspection().cancelPointerInspect({ pendingPinned: "preserve" });
     touchInspectStart = null;
     touchInspectMoved = false;
     reducer.cancelScheduledPointer();
@@ -666,7 +645,7 @@ export function createSurfaceState(deps: SurfaceStateDeps): SurfaceState {
       };
       const cancelDraft = () => {
         brushRect = null;
-        deps.inspection().clearQueuedPointer();
+        deps.inspection().cancelPointerInspect({ pendingPinned: "preserve" });
         touchInspectStart = null;
         reducer.cancelScheduledPointer();
         reducer.dispatch({ type: "cancel-area" });
