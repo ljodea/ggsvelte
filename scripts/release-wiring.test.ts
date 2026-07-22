@@ -158,7 +158,9 @@ describe("R0 release wiring", () => {
     // detect-changes exports bypass covering force-all / lockfile / ci.yml / router / actions.
     const detect = ci.slice(ci.indexOf("  detect-changes:"), ci.indexOf("  packages-dist:"));
     expect(detect).toContain("bypass_content_cache:");
-    expect(detect).toContain("emit-github-output");
+    // Job driver lives in scripts/ci-routing/detect-changes.ts (issue #393).
+    expect(detect).toContain("scripts/ci-routing.ts detect-changes");
+    expect(detect).not.toContain("emit-github-output");
 
     // packages-dist keeps its specialized dist-payload protocol (not the marker composite).
     const producerJob = ci.slice(
@@ -293,9 +295,33 @@ describe("R0 release wiring", () => {
 
   it("path-routes CI jobs through scripts/ci-routing.ts and a ci-gate aggregator", () => {
     const ci = read(".github/workflows/ci.yml");
-    expect(ci).toContain("scripts/ci-routing.ts emit-github-output");
+    // ci.yml detect-changes delegates to the detect-changes driver; vr-compare
+    // still uses emit-github-output for its thinner base-resolution path.
+    expect(ci).toContain("scripts/ci-routing.ts detect-changes");
     expect(ci).toContain("  detect-changes:");
     expect(ci).toContain("  ci-gate:");
+    expect(ci).toContain("ci-gate (required aggregator)");
+    expect(ci).toContain("DETECT_RESULT");
+    // Fifteen routing outputs must stay wired for branch protection / needs.
+    for (const out of [
+      "checks:",
+      "unit:",
+      "component:",
+      "consumer:",
+      "build:",
+      "svelte_check:",
+      "docs_site:",
+      "actions_security:",
+      "bench_smoke:",
+      "interaction_perf:",
+      "packages_dist:",
+      "vr:",
+      "pages:",
+      "docs_journeys:",
+      "bypass_content_cache:",
+    ]) {
+      expect(ci, out).toContain(`      ${out}`);
+    }
     // Checks job is pre-commit stage only (format/lint/guards). Heavy analysis
     // lives on dedicated CI jobs — never reintroduced via hook-stage pre-push.
     expect(ci).not.toContain("hook-stage pre-push");
@@ -382,28 +408,30 @@ describe("R0 release wiring", () => {
 });
 
 it("thins expensive jobs on main push (issue #244)", () => {
-  const ci = read(".github/workflows/ci.yml");
-  // Consumer/bench stay PR-primary; packages_dist+component remain path-routed
-  // so Codecov can refresh packages/svelte coverage on main.
-  expect(ci).toContain("main push: thinned consumer/bench (issue #244)");
-  expect(ci).toContain('echo "consumer=false"');
-  expect(ci).toContain('echo "bench_smoke=false"');
-  expect(ci).toContain('echo "interaction_perf=false"');
+  // Policy lives in detect-changes.ts after #393 extraction (not inline bash).
+  const driver = read("scripts/ci-routing/detect-changes.ts");
+  expect(driver).toContain("main push: thinned consumer/bench (issue #244)");
+  expect(driver).toContain("applyMainPushThinning");
+  expect(driver).toMatch(/consumer:\s*false/);
+  expect(driver).toMatch(/bench_smoke:\s*false/);
+  expect(driver).toMatch(/interaction_perf:\s*false/);
   // Must NOT force-off component/packages_dist on main (Codecov main badges).
-  const mainThin = ci.slice(
-    ci.indexOf("main push: thinned consumer/bench"),
-    ci.indexOf("main push: thinned consumer/bench") + 400,
+  const thinFn = driver.slice(
+    driver.indexOf("function applyMainPushThinning"),
+    driver.indexOf("function applyRunCompat"),
   );
-  expect(mainThin).not.toContain("component=false");
-  expect(mainThin).not.toContain("packages_dist=false");
+  expect(thinFn).not.toContain("component:");
+  expect(thinFn).not.toContain("packages_dist:");
 });
 
 it("tiers the PR consumer matrix (issue #246)", () => {
   const ci = read(".github/workflows/ci.yml");
+  const driver = read("scripts/ci-routing/detect-changes.ts");
   expect(ci).toContain("run-compat");
   expect(ci).toContain("flavor=pr");
   // Label must force consumer even when path routing would skip (Codex P2).
-  expect(ci).toContain("run-compat: forced consumer + packages_dist");
+  expect(driver).toContain("run-compat: forced consumer + packages_dist");
+  expect(driver).toContain("applyRunCompat");
   // Main push stays thinned per #244; full required is PR+label or nightly.
   expect(ci).not.toMatch(/full required[\s\S]{0,40}push\/main/i);
 });

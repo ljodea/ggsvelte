@@ -3,6 +3,7 @@
  * Invoked only via `scripts/ci-routing.ts` (`import.meta.main` lives there).
  */
 import { appendFileSync, mkdirSync, writeFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
 
 import {
   classifyChangedPaths,
@@ -26,6 +27,7 @@ import {
   validateSuccessMarker,
   type CacheableExecution,
 } from "./content-hash";
+import { runDetectChanges, type DetectChangesInput, type DetectChangesIo } from "./detect-changes";
 
 export async function runCiRoutingCli(argv: string[]): Promise<void> {
   const args = argv.slice(2);
@@ -61,6 +63,11 @@ export async function runCiRoutingCli(argv: string[]): Promise<void> {
       appendFileSync(outPath, body);
     }
     process.stdout.write(body);
+    return;
+  }
+
+  if (cmd === "detect-changes") {
+    runDetectChangesCli();
     return;
   }
 
@@ -105,15 +112,116 @@ function printHelp(): void {
   bun scripts/ci-routing.ts classify [--files f1 f2 | --from-git --base <ref> | --stdin]
   bun scripts/ci-routing.ts plan [--files ... | --from-git --base <ref> | --stdin] [--force-all]
   bun scripts/ci-routing.ts emit-github-output [--files ... | --from-git --base <ref> | --stdin] [--force-all]
+  bun scripts/ci-routing.ts detect-changes
   bun scripts/ci-routing.ts hash-inputs --execution <name> [--os <runner.os>] [--container-tag <tag>] [--matrix-node N --matrix-pm NAME --matrix-pm-version V --matrix-svelte V] [--runtime-node-version V --runtime-pm-version V]
   bun scripts/ci-routing.ts write-success-marker --execution <name> --hash <hex>
   bun scripts/ci-routing.ts validate-success-marker --execution <name> --hash <hex>
   bun scripts/ci-routing.ts gate --required <file|-> --results <file|->
 
+  detect-changes reads EVENT_NAME, GITHUB_REF, BASE_SHA, HEAD_SHA, PR_LABELS,
+  REPO, GITHUB_OUTPUT (and uses gh/git for main base widening).
   --from-git uses git diff --name-status (rename source + dest).
   --stdin accepts plain paths or name-status lines (tab-separated).
   hash-inputs uses git ls-tree -r HEAD (fail-closed). Emits hash + cache_key (+ GITHUB_OUTPUT).
 `);
+}
+
+/**
+ * Production I/O for `detect-changes` — mirrors the former ci.yml bash:
+ * swallow gh/git fetch/diff failures; exact-key GITHUB_OUTPUT write.
+ */
+export function createDetectChangesIo(): DetectChangesIo {
+  return {
+    commandExists(name: string): boolean {
+      const r = spawnSync("bash", ["-c", `command -v ${JSON.stringify(name)}`], {
+        encoding: "utf8",
+      });
+      return r.status === 0;
+    },
+    findLastSuccessfulMainHead(repo: string, headSha: string): string | undefined {
+      // Issue #244 cumulative main range. See lastSuccessfulMainHeadJq — gh api
+      // has no jq --arg; the former bash form was a silent no-op under `|| true`.
+      const r = spawnSync(
+        "gh",
+        [
+          "api",
+          `repos/${repo}/actions/workflows/ci.yml/runs?branch=main&status=completed&per_page=20`,
+          "--jq",
+          lastSuccessfulMainHeadJq(headSha),
+        ],
+        { encoding: "utf8", maxBuffer: 10 * 1024 * 1024 },
+      );
+      if (r.status !== 0) return undefined;
+      const sha = (r.stdout ?? "").trim();
+      return sha.length > 0 ? sha : undefined;
+    },
+    gitFetchDepth1(sha: string): void {
+      spawnSync("git", ["fetch", "--no-tags", "--depth=1", "origin", sha], {
+        encoding: "utf8",
+        stdio: "ignore",
+      });
+    },
+    gitCommitExists(sha: string): boolean {
+      const r = spawnSync("git", ["cat-file", "-e", `${sha}^{commit}`], {
+        encoding: "utf8",
+        stdio: "ignore",
+      });
+      return r.status === 0;
+    },
+    gitDiffNameStatus(base: string, head: string): string[] | "error" {
+      // Large renames can exceed Node's default 1 MiB maxBuffer; treat overflow
+      // as error → force-all rather than silent checks-only.
+      const r = spawnSync("git", ["diff", "--name-status", `${base}...${head}`], {
+        encoding: "utf8",
+        maxBuffer: 50 * 1024 * 1024,
+      });
+      if (r.error || r.status !== 0) return "error";
+      const text = r.stdout ?? "";
+      return text
+        .split(/\r?\n/)
+        .map((l) => l.trimEnd())
+        .filter((l) => l.length > 0);
+    },
+    writeGithubOutput(body: string): void {
+      writeGithubOutput(body);
+      process.stdout.write(body);
+    },
+    log(msg: string): void {
+      process.stdout.write(`${msg}\n`);
+    },
+  };
+}
+
+/** jq program for last successful main CI head, excluding the current head. */
+export function lastSuccessfulMainHeadJq(headSha: string): string {
+  const headLit = JSON.stringify(headSha);
+  return `[.workflow_runs[] | select(.conclusion == "success" and .head_sha != ${headLit}) | .head_sha][0] // empty`;
+}
+
+function runDetectChangesCli(): void {
+  const env = process.env;
+  const input: DetectChangesInput = {
+    eventName: env.EVENT_NAME ?? "",
+    githubRef: env.GITHUB_REF ?? "",
+    baseSha: env.BASE_SHA ?? "",
+    headSha: env.HEAD_SHA ?? "",
+    prLabels: env.PR_LABELS ?? "",
+    repo: env.REPO ?? "",
+  };
+  if (input.eventName.length === 0) {
+    throw new Error("detect-changes requires EVENT_NAME");
+  }
+  if (input.headSha.length === 0) {
+    throw new Error("detect-changes requires HEAD_SHA");
+  }
+  if (input.repo.length === 0) {
+    throw new Error("detect-changes requires REPO");
+  }
+  const outPath = env.GITHUB_OUTPUT;
+  if (typeof outPath !== "string" || outPath.length === 0) {
+    throw new Error("detect-changes requires GITHUB_OUTPUT (job outputs path)");
+  }
+  runDetectChanges(input, createDetectChangesIo());
 }
 
 function parseCacheableExecution(raw: string | undefined): CacheableExecution {
