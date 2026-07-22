@@ -89,6 +89,21 @@ describe("Cloudflare Pages project contract", () => {
     expect(workflow).toContain("if: github.ref == 'refs/heads/main'");
     expect(workflow).toContain("ref: ${{ github.sha }}");
     expect(workflow).not.toContain("pull_request:");
+    // Superseded main pushes must not each flip production hashes in sequence.
+    expect(workflow).toMatch(/cancel-in-progress:\s*true/);
+    expect(workflow).toContain("bun scripts/deployment-asset-smoke-cli.ts");
+  });
+
+  it("ships a CSP-safe deploy-recovery bootstrap from static assets", () => {
+    const appHtml = readFileSync(join(ROOT, "apps", "docs", "src", "app.html"), "utf8");
+    const recovery = readFileSync(
+      join(ROOT, "apps", "docs", "static", "deploy-recovery.js"),
+      "utf8",
+    );
+    expect(appHtml).toContain('src="%sveltekit.assets%/deploy-recovery.js"');
+    expect(recovery).toContain("vite:preloadError");
+    expect(recovery).toContain("Failed to fetch dynamically imported module");
+    expect(recovery).toContain("ggsvelte-deploy-recovery-at");
   });
 
   it("does not keep a GitHub Pages deployment workflow or legacy migration scripts", () => {

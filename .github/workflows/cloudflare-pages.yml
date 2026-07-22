@@ -23,8 +23,12 @@ on:
 permissions: {}
 
 concurrency:
+  # Cancel superseded builds. Main lands package refactors in bursts; each push
+  # rebuilds the docs artifact and flips production hashes. Queuing every
+  # intermediate deploy multiplies the window where a tab holds HTML that
+  # references retired `/_app/immutable/*` chunks (client "500 Internal Error").
   group: cloudflare-pages-production
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   deploy:
@@ -83,3 +87,10 @@ jobs:
           deployment_url=$(printf '%s\n' "${output}" | grep -Eo 'https://[^[:space:]]+\.pages\.dev' | tail -1)
           test -n "${deployment_url}"
           printf 'deployment-url=%s\n' "${deployment_url}" >> "${GITHUB_OUTPUT}"
+      - name: Verify immutable assets on the new deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          bun scripts/deployment-asset-smoke-cli.ts \
+            --base-url "${{ steps.deploy.outputs.deployment-url }}" \
+            --paths / /guide/getting-started /examples /playground
