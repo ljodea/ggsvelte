@@ -169,6 +169,18 @@ describe("deriveGroups: discreteness rules", () => {
 });
 
 describe("deriveGroups: edge cases", () => {
+  test("multi-field interaction keys keep components separated", () => {
+    // SEP must be non-empty so ("a","bc") and ("as","bc") stay distinct under join.
+    const t: Columns = {
+      a: ["a", "as"],
+      b: ["bc", "bc"],
+      v: [1, 2],
+    };
+    const r = deriveGroups(t, { x: { field: "v" }, color: { field: "a" }, fill: { field: "b" } });
+    expect(r.groupCount).toBe(2);
+    expect([...r.groups]).toEqual([0, 1]);
+  });
+
   test("null forms its own group level", () => {
     const t: Columns = { c: ["a", null, "a", null], v: [1, 2, 3, 4] };
     const r = deriveGroups(t, { x: { field: "v" }, color: { field: "c" } });
