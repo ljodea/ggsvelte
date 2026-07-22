@@ -33,31 +33,26 @@ export type { PreparedPanels } from "./prepare-panels-types.js";
 
 /**
  * Choose the table used to build facet layout (#608):
- * - Collect every complete source (plot + layers that have all facet fields).
- * - One complete source → use it as-is.
+ * - `sources` is one filtered table per distinct SourceRegistry namespace
+ *   (caller dedupes inherited plot tables so we do not double-count).
+ * - Collect every complete source (has all facet fields).
+ * - One complete source → use it as-is (panel sourceRows stay real).
  * - Several complete sources → concatenate facet columns so resolveFacet
  *   discovers the union of panel keys (layers still slice by panel identity).
  * - None complete → fall back so resolveFacet can emit unknown-field.
  */
 function facetLayoutTable(
   facet: PortableSpec["facet"],
-  plotTable: ColumnTable | null,
-  layerSources: readonly ColumnTable[],
+  sources: readonly ColumnTable[],
 ): ColumnTable {
   const fields = facetFieldNames(facet);
   if (fields.length === 0) {
-    return plotTable ?? layerSources[0] ?? ColumnTable.fromRows([]);
+    return sources[0] ?? ColumnTable.fromRows([]);
   }
-  const complete: ColumnTable[] = [];
-  if (plotTable !== null && fields.every((f) => plotTable.has(f))) {
-    complete.push(plotTable);
-  }
-  for (const table of layerSources) {
-    if (fields.every((f) => table.has(f))) complete.push(table);
-  }
+  const complete = sources.filter((table) => fields.every((f) => table.has(f)));
   if (complete.length === 0) {
-    // Fall back to plot or first layer so resolveFacet emits a clear unknown-field.
-    return plotTable ?? layerSources[0] ?? ColumnTable.fromRows([]);
+    // Fall back so resolveFacet emits a clear unknown-field.
+    return sources[0] ?? ColumnTable.fromRows([]);
   }
   if (complete.length === 1) return complete[0]!;
   return unionFacetKeyColumns(complete, fields);
@@ -164,11 +159,21 @@ export function preparePanels(
   assertScaleConfiguration("x", normalized.scales?.x);
   assertScaleConfiguration("y", normalized.scales?.y);
 
-  const layoutTable = facetLayoutTable(
-    normalized.facet,
-    plotSource === null ? null : primaryFiltered.table,
-    layerContexts.map((c) => c.filteredTable),
-  );
+  // One filtered view per unfiltered source object: plot first when present,
+  // then layer-local tables. Inherited layers share plotSource and must not
+  // re-enter the complete set (#608 union without double-counting).
+  const layoutSources: ColumnTable[] = [];
+  const seenSourceTables = new Set<ColumnTable>();
+  if (plotSource !== null) {
+    layoutSources.push(primaryFiltered.table);
+    seenSourceTables.add(plotSource);
+  }
+  for (const ctx of layerContexts) {
+    if (seenSourceTables.has(ctx.sourceTable)) continue;
+    seenSourceTables.add(ctx.sourceTable);
+    layoutSources.push(ctx.filteredTable);
+  }
+  const layoutTable = facetLayoutTable(normalized.facet, layoutSources);
   // Closed levels still produce empty panels when every row was filtered out;
   // only implicit (data-driven) facets collapse to a single placeholder.
   const hasClosedLevels =
