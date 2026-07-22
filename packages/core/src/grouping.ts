@@ -55,7 +55,7 @@ const NON_GROUPING_CHANNELS: ReadonlySet<string> = new Set(["group", "label"]);
 /** Distinct sentinel for null cells so null forms its own interaction level. */
 const NULL_KEY = "\u0000null";
 /** Unit separator between interaction components (never occurs in data keys). */
-const SEP = "\u001f";
+const SEP = "\u001F";
 
 function cellKey(v: CellValue): string {
   if (v === null) return NULL_KEY;
