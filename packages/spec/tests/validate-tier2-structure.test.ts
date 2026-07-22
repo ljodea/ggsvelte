@@ -1,6 +1,7 @@
 /**
  * Tier-2 structural grammar checks (data-free): required channels, rule forms,
- * bar/histogram computed-y bans. Production: validate-structure.ts.
+ * bar/histogram computed-y bans. Production: validate-structure-layers.ts
+ * (barrel validate-structure.ts).
  */
 import { describe, expect, it } from "bun:test";
 

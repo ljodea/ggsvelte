@@ -7,9 +7,9 @@
  * artifact, no drift.
  * Raw TypeBox union noise is mapped to the agent error contract in
  * validate-map-errors.ts (schema/path inspection in validate-schema-walk.ts).
- * Data-free grammar rules live in validate-structure.ts. Data-aware checks
- * live in validate-data*.ts (evidence + checks modules, barrel at
- * validate-data.ts).
+ * Data-free grammar rules live in validate-structure*.ts (layers / color
+ * schemes / facet form). Data-aware checks live in validate-data*.ts
+ * (evidence + checks modules, barrel at validate-data.ts).
  *
  * Output: `{ ok: true, spec }` or `{ ok: false, errors: SpecError[] }` with
  * the agent error contract from errors.ts. Messages are snapshot-tested.
