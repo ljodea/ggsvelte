@@ -66,7 +66,10 @@ describe("R0 release wiring", () => {
       ci.indexOf("  interaction-perf:"),
       ci.indexOf("  build:\n    name: build (packages"),
     );
-    expect(ci).toContain("mcr.microsoft.com/playwright:v1.61.1-noble");
+    // Container jobs pull the prebaked ci-runner image (Playwright + unzip),
+    // not the raw upstream Playwright image. The tag still tracks the matrix
+    // (see scripts/support-matrix.test.ts).
+    expect(ci).toContain("ghcr.io/${{ github.repository }}/ci-runner:v1.61.1-noble");
     expect(ci).toContain("HOME: /root");
     // Package browser shards download packages/*/dist (issue #241); no monorepo rebuild.
     // Download+verify lives in ci-download-packages-dist (pin + entrypoint checks).
@@ -110,7 +113,7 @@ describe("R0 release wiring", () => {
     expect(interactionPerfJob).toContain("interaction_perf == 'true'");
     expect(interactionPerfJob).toContain("uses: ./.github/actions/ci-download-packages-dist");
     expect(interactionPerfJob).toContain("packages-dist");
-    expect(bench).toContain("mcr.microsoft.com/playwright:v1.61.1-noble");
+    expect(bench).toContain("ghcr.io/${{ github.repository }}/ci-runner:v1.61.1-noble");
     expect(bench).toContain("bun run test:interaction-perf");
     expect(read("package.json")).toContain('"test:interaction-perf"');
     expect(read("tests/performance/interaction.spec.ts")).toContain("/__perf/interaction-100k");
