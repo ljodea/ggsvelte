@@ -2,6 +2,7 @@
  * Bar/col (and binned histogram) rect geometry batch builder.
  */
 import type { RectsBatch } from "../scene.js";
+import { resolution as resolutionOf } from "../stats/numeric.js";
 
 import type { LayerFrame, PipelineWarning, ResolvedColorScale } from "./types.js";
 import { colorOf } from "./types.js";
@@ -27,15 +28,11 @@ export function rectsBatch(
     // binned position scale applies the authored/default width fraction.
     widthFrac = binding.xBinning === undefined ? 0 : (params.width ?? DEFAULT_BAR_WIDTH);
   } else {
-    const values = [...(frame.xNumeric ?? [])]
-      .filter((value) => Number.isFinite(value))
-      .toSorted((a, b) => a - b);
-    let resolution = Number.POSITIVE_INFINITY;
-    for (let index = 1; index < values.length; index++) {
-      const gap = values[index]! - values[index - 1]!;
-      if (gap > 0 && gap < resolution) resolution = gap;
-    }
-    if (!Number.isFinite(resolution)) resolution = 1;
+    // Continuous bar width tracks min positive x-gap (ggplot2 resolution).
+    // Fewer than two distinct x values → resolution 0 → fall back to gap 1 so
+    // widthFrac still has a finite data-unit scale (pre-unique-first parity).
+    const gap = resolutionOf(frame.xNumeric ?? []);
+    const resolution = gap > 0 ? gap : 1;
     const span = fx.xScale.transformedDomain[1] - fx.xScale.transformedDomain[0];
     widthFrac = span === 0 ? 0 : ((params.width ?? DEFAULT_BAR_WIDTH) * resolution) / span;
   }
