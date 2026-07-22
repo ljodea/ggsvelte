@@ -1,6 +1,6 @@
 /**
  * Temporal position scale schema validation (portable parsers, guide options).
- * Data-aware tier-2 scale checks: validate-tier2-temporal.test.ts.
+ * Data-aware tier-2 scale checks: validate-tier2-temporal-reuse.test.ts (reuse) + validate-tier2-temporal-position.test.ts (scales).
  * Authoring helpers / builder Date canonicalization: temporal-scale-authoring.test.ts.
  */
 import { describe, expect, it } from "bun:test";
