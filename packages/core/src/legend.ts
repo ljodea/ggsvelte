@@ -165,6 +165,74 @@ function truncate(
   return truncateToFit(label, maxWidth, measurer, fontSize, LEGEND_ELLIPSIS);
 }
 
+/** Greedy, lossless wrapping. Over-wide tokens are split instead of ellipsized. */
+function wrapLegendLabel(
+  label: string,
+  maxWidth: number,
+  measurer: TextMeasurer,
+  fontSize: number,
+): string[] {
+  const words = label.split(/\s+/).filter((word) => word.length > 0);
+  if (words.length === 0) return [""];
+  const lines: string[] = [];
+  let current = "";
+  const flush = () => {
+    if (current !== "") lines.push(current);
+    current = "";
+  };
+  for (const word of words) {
+    const trial = current === "" ? word : `${current} ${word}`;
+    if (measurer.measureWidth(trial, fontSize) <= maxWidth) {
+      current = trial;
+      continue;
+    }
+    flush();
+    let chunk = "";
+    for (const character of word) {
+      const next = `${chunk}${character}`;
+      if (chunk !== "" && measurer.measureWidth(next, fontSize) > maxWidth) {
+        lines.push(chunk);
+        chunk = character;
+      } else {
+        chunk = next;
+      }
+    }
+    current = chunk;
+  }
+  flush();
+  return lines;
+}
+
+function presentedDiscreteLabel(
+  fullLabel: string,
+  maxWidth: number,
+  measurer: TextMeasurer,
+  fontSize: number,
+  appearance: ResolvedLegendAppearance | undefined,
+  scale: string,
+): { label: string; lines?: string[]; width: number; height: number; lineHeight: number } {
+  const lineHeight = measurer.measureHeight(fontSize);
+  if (appearance?.collision === "wrap") {
+    const lines = wrapLegendLabel(fullLabel, maxWidth, measurer, fontSize);
+    return {
+      label: lines.join(" "),
+      lines,
+      width: Math.max(0, ...lines.map((line) => measurer.measureWidth(line, fontSize))),
+      height: lines.length * lineHeight,
+      lineHeight,
+    };
+  }
+  const label = truncate(fullLabel, maxWidth, measurer, fontSize);
+  if (appearance?.collision === "error" && label !== fullLabel)
+    throw new LegendLayoutError(scale, fullLabel);
+  return {
+    label,
+    width: measurer.measureWidth(label, fontSize),
+    height: lineHeight,
+    lineHeight,
+  };
+}
+
 function settings(input: LegendInput, position: "right" | "bottom") {
   const appearance = input.appearance;
   const theme = appearance?.theme;
@@ -236,55 +304,75 @@ function buildDiscrete(
   if (style.direction === "vertical") {
     const maxLabelWidth = Math.max(1, maxWidth - PADDING * 2 - keySize - style.keyGap);
     let labelWidth = 0;
+    let cursorY = titleHeight;
     for (let index = 0; index < values.length; index++) {
       const fullLabel = fullLabels[index]!;
-      const label = truncate(fullLabel, maxLabelWidth, measurer, style.labelSize);
-      if (style.appearance?.collision === "error" && label !== fullLabel)
-        throw new LegendLayoutError(input.scale, fullLabel);
-      labelWidth = Math.max(labelWidth, measurer.measureWidth(label, style.labelSize));
+      const presented = presentedDiscreteLabel(
+        fullLabel,
+        maxLabelWidth,
+        measurer,
+        style.labelSize,
+        style.appearance,
+        input.scale,
+      );
+      const rowHeight = Math.max(LEGEND_ROW_HEIGHT, keySize, presented.height);
+      labelWidth = Math.max(labelWidth, presented.width);
       entries.push({
         value: values[index],
-        label,
+        label: presented.label,
         fullLabel,
+        ...(presented.lines !== undefined && {
+          lines: presented.lines,
+          lineHeight: presented.lineHeight,
+        }),
         color: UNKNOWN_COLOR,
         ...keys[index],
         ...(input.colorOf?.(values[index]) !== undefined && {
           color: input.colorOf?.(values[index]) ?? UNKNOWN_COLOR,
         }),
         x: 0,
-        y: titleHeight + index * (LEGEND_ROW_HEIGHT + style.rowGap),
+        y: cursorY,
+        ...(rowHeight !== LEGEND_ROW_HEIGHT && { height: rowHeight }),
       });
+      cursorY += rowHeight + (index + 1 < values.length ? style.rowGap : 0);
     }
     const titleWidth = measurer.measureWidth(style.title, style.titleSize);
     width = Math.min(
       maxWidth,
       PADDING * 2 + Math.max(keySize + style.keyGap + Math.ceil(labelWidth), Math.ceil(titleWidth)),
     );
-    height =
-      titleHeight +
-      values.length * LEGEND_ROW_HEIGHT +
-      Math.max(0, values.length - 1) * style.rowGap +
-      PADDING;
+    height = cursorY + PADDING;
   } else {
     let cursorX = PADDING;
     let cursorY = titleHeight;
+    let rowHeight = 0;
     let rowWidth = 0;
     for (let index = 0; index < values.length; index++) {
       const fullLabel = fullLabels[index]!;
       const maxLabelWidth = Math.max(1, maxWidth - PADDING * 2 - keySize - style.keyGap);
-      const label = truncate(fullLabel, maxLabelWidth, measurer, style.labelSize);
-      if (style.appearance?.collision === "error" && label !== fullLabel)
-        throw new LegendLayoutError(input.scale, fullLabel);
-      const itemWidth =
-        keySize + style.keyGap + measurer.measureWidth(label, style.labelSize) + PADDING * 2;
+      const presented = presentedDiscreteLabel(
+        fullLabel,
+        maxLabelWidth,
+        measurer,
+        style.labelSize,
+        style.appearance,
+        input.scale,
+      );
+      const entryHeight = Math.max(LEGEND_ROW_HEIGHT, keySize, presented.height);
+      const itemWidth = keySize + style.keyGap + presented.width + PADDING * 2;
       if (cursorX > PADDING && cursorX + itemWidth > maxWidth) {
         cursorX = PADDING;
-        cursorY += LEGEND_ROW_HEIGHT + style.rowGap;
+        cursorY += rowHeight + style.rowGap;
+        rowHeight = 0;
       }
       entries.push({
         value: values[index],
-        label,
+        label: presented.label,
         fullLabel,
+        ...(presented.lines !== undefined && {
+          lines: presented.lines,
+          lineHeight: presented.lineHeight,
+        }),
         color: UNKNOWN_COLOR,
         ...keys[index],
         ...(input.colorOf?.(values[index]) !== undefined && {
@@ -292,15 +380,17 @@ function buildDiscrete(
         }),
         x: cursorX - PADDING,
         y: cursorY,
+        ...(entryHeight !== LEGEND_ROW_HEIGHT && { height: entryHeight }),
       });
       cursorX += itemWidth;
+      rowHeight = Math.max(rowHeight, entryHeight);
       rowWidth = Math.max(rowWidth, cursorX);
     }
     width = Math.min(
       maxWidth,
       Math.max(rowWidth, measurer.measureWidth(style.title, style.titleSize) + PADDING * 2),
     );
-    height = cursorY + (values.length === 0 ? 0 : LEGEND_ROW_HEIGHT) + PADDING;
+    height = cursorY + (values.length === 0 ? 0 : rowHeight) + PADDING;
   }
   return {
     type: "discrete",
@@ -322,10 +412,13 @@ function buildDiscrete(
   };
 }
 
-function rampStops(input: RampLegendInput): [number, string][] {
+function rampStops(
+  input: RampLegendInput,
+  direction: "horizontal" | "vertical",
+): [number, string][] {
   return Array.from({ length: RAMP_STOP_COUNT }, (_, index) => {
     const offset = index / (RAMP_STOP_COUNT - 1);
-    return [offset, input.at(1 - offset)];
+    return [offset, input.at(direction === "horizontal" ? offset : 1 - offset)];
   });
 }
 
@@ -345,7 +438,7 @@ function buildRamp(
   const showLabels = style.appearance?.showLabels !== false;
   const showTicks = style.appearance?.showTicks !== false;
   if (style.direction === "horizontal") {
-    const rampWidth = Math.max(48, Math.min(style.rampLength, maxWidth - PADDING * 2));
+    const rampWidth = Math.min(style.rampLength, Math.max(1, maxWidth - PADDING * 2));
     const tickLabelWidth = Math.max(1, rampWidth / Math.max(1, tickValues.length) - PADDING);
     const ticks = tickValues.map((value) => {
       const fullLabel = input.format(value);
@@ -375,10 +468,16 @@ function buildRamp(
       showTicks,
       x: 0,
       y: 0,
-      width: rampWidth + PADDING * 2,
+      width: Math.min(
+        maxWidth,
+        Math.max(
+          rampWidth + PADDING * 2,
+          measurer.measureWidth(style.title, style.titleSize) + PADDING * 2,
+        ),
+      ),
       height:
         titleHeight + style.rampThickness + (showLabels ? LEGEND_ROW_HEIGHT : 0) + PADDING * 2,
-      stops: rampStops(input),
+      stops: rampStops(input, "horizontal"),
       ticks,
       rampWidth,
       rampHeight: style.rampThickness,
@@ -416,9 +515,16 @@ function buildRamp(
     showTicks,
     x: 0,
     y: 0,
-    width: PADDING * 2 + style.rampThickness + style.keyGap + labelWidth,
+    width: Math.min(
+      maxWidth,
+      PADDING * 2 +
+        Math.max(
+          style.rampThickness + style.keyGap + labelWidth,
+          measurer.measureWidth(style.title, style.titleSize),
+        ),
+    ),
     height: titleHeight + RAMP_HEIGHT + PADDING * 2,
-    stops: rampStops(input),
+    stops: rampStops(input, "vertical"),
     ticks,
     rampWidth: style.rampThickness,
     rampHeight: RAMP_HEIGHT,
@@ -433,13 +539,10 @@ function buildSteps(
 ): SceneLegend {
   const style = settings(input, position);
   const titleHeight = style.title === "" ? 0 : TITLE_HEIGHT;
-  const source = input.entries.toReversed();
+  const source = style.direction === "horizontal" ? [...input.entries] : input.entries.toReversed();
   const showLabels = style.appearance?.showLabels !== false;
   if (style.direction === "horizontal") {
-    const stepWidth = Math.max(
-      16,
-      Math.min(48, (maxWidth - PADDING * 2) / Math.max(1, source.length)),
-    );
+    const stepWidth = Math.min(48, (maxWidth - PADDING * 2) / Math.max(1, source.length));
     return {
       type: "steps",
       scale: input.scale,
@@ -451,7 +554,13 @@ function buildSteps(
       labelSize: style.labelSize,
       x: 0,
       y: 0,
-      width: Math.min(maxWidth, stepWidth * source.length + PADDING * 2),
+      width: Math.min(
+        maxWidth,
+        Math.max(
+          stepWidth * source.length + PADDING * 2,
+          measurer.measureWidth(style.title, style.titleSize) + PADDING * 2,
+        ),
+      ),
       height: titleHeight + STEP_HEIGHT + (showLabels ? LEGEND_ROW_HEIGHT : 0) + PADDING * 2,
       entries: source.map((entry, index) => ({
         label: presentedContinuousLabel({
@@ -498,7 +607,14 @@ function buildSteps(
     labelSize: style.labelSize,
     x: 0,
     y: 0,
-    width: PADDING * 2 + style.rampThickness + style.keyGap + labelWidth,
+    width: Math.min(
+      maxWidth,
+      PADDING * 2 +
+        Math.max(
+          style.rampThickness + style.keyGap + labelWidth,
+          measurer.measureWidth(style.title, style.titleSize),
+        ),
+    ),
     height: titleHeight + entries.length * STEP_HEIGHT + PADDING * 2,
     entries,
     stepWidth: style.rampThickness,
@@ -516,6 +632,38 @@ function buildForPosition(
   if (input.kind === "discrete") return buildDiscrete(input, order, measurer, maxWidth, position);
   if (input.kind === "steps") return buildSteps(input, measurer, maxWidth, position);
   return buildRamp(input, measurer, maxWidth, position);
+}
+
+export function assertLegendBlockFitsPlacedArea(input: {
+  block: LegendBlock;
+  inputs: readonly LegendInput[];
+  viewportHeight: number;
+  rightTop: number;
+  bottomInset: number;
+}): void {
+  const rightExtent = input.rightTop + input.block.height;
+  const bottomExtent = input.bottomInset + input.block.bottomHeight;
+  const overflowingPosition =
+    rightExtent > input.viewportHeight
+      ? "right"
+      : bottomExtent > input.viewportHeight
+        ? "bottom"
+        : null;
+  if (overflowingPosition === null) return;
+  const overflowing = input.block.legends.find(
+    (legend) =>
+      legend.position === overflowingPosition &&
+      input.inputs.find((candidate) => candidate.scale === legend.scale)?.appearance?.collision ===
+        "error",
+  );
+  if (overflowing === undefined) return;
+  const extent = overflowingPosition === "right" ? rightExtent : bottomExtent;
+  throw new LegendLayoutError(
+    overflowing.scale,
+    overflowing.title,
+    `The ${overflowing.scale} guide needs ${String(Math.ceil(extent))}px after placement but the viewport is ${String(Math.floor(input.viewportHeight))}px tall.`,
+    "Increase the chart height, reduce the visible categories, or suppress this guide.",
+  );
 }
 
 export function buildLegends(

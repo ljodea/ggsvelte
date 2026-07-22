@@ -2155,6 +2155,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "LayoutAxisPresentation": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "LayoutInput": {
           "kind": "type",
           "lifecycle": "experimental"

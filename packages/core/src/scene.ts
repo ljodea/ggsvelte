@@ -241,6 +241,10 @@ export interface SceneLegendEntry {
   label: string;
   /** Complete semantic label when `label` is visually abbreviated. */
   fullLabel?: string;
+  /** Visual lines when collision policy wraps without changing the semantic label. */
+  lines?: string[];
+  /** Measured line box used to position wrapped labels. */
+  lineHeight?: number;
   color: string;
   size?: number;
   linewidth?: number;
@@ -250,6 +254,8 @@ export interface SceneLegendEntry {
   /** Left/top of the entry row, legend-local px. */
   x?: number;
   y: number;
+  /** Measured row height, including wrapped labels and oversized keys. */
+  height?: number;
 }
 
 type SceneLegendScale = "color" | "fill" | "size" | "linewidth" | "alpha" | "shape" | "linetype";
@@ -293,7 +299,7 @@ export interface SceneRampLegend {
   y: number;
   width: number;
   height: number;
-  /** Gradient stops top(=max) to bottom(=min): [offset 0..1, color]. */
+  /** Gradient stops in rendered direction: horizontal low→high, vertical high→low. */
   stops: [number, string][];
   /** Whether renderer tick marks are visible independently of labels. */
   showTicks?: boolean;

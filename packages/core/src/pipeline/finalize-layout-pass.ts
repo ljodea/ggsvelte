@@ -115,6 +115,8 @@ export function finalizePanelLayoutPass(input: {
       facetPanels,
       panelScales,
       allFrames,
+      hGuide: flip ? yGuide : xGuide,
+      vGuide: flip ? xGuide : yGuide,
       labs,
       scalesConfig,
       xScale: xTraining.scale,

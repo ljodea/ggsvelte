@@ -116,6 +116,13 @@ export const DEFAULT_LAYOUT_THEME: LayoutTheme = {
   ellipsis: "…",
 };
 
+export interface LayoutAxisPresentation {
+  visible: boolean;
+  showTicks: boolean;
+  showLabels: boolean;
+  collision: "auto" | "preserve" | "ellipsis";
+}
+
 export interface LayoutInput {
   width: number;
   height: number;
@@ -125,6 +132,8 @@ export interface LayoutInput {
   formatY?: TickFormatter;
   measurer: TextMeasurer;
   theme?: Partial<LayoutTheme>;
+  /** Axis presentation that affects measured chrome but never semantic tick plans. */
+  axis?: Readonly<{ x?: LayoutAxisPresentation; y?: LayoutAxisPresentation }>;
   /**
    * Extra per-side space consumed by non-tick content (axis titles, legends),
    * folded INTO the two-pass measurement loop: reserved space shrinks the

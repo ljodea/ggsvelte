@@ -1,6 +1,8 @@
 /**
  * Single-panel placement from layout chrome.
  */
+import type { LayoutAxisPresentation } from "../layout/layout.js";
+
 import type { PanelLayoutChrome } from "./panel-layout-chrome.js";
 import { placeSinglePanel } from "./panel-layout-single.js";
 import type { PanelPlacement } from "./panel-layout-types.js";
@@ -8,6 +10,7 @@ import type { RunOptions } from "./types.js";
 
 export function placeSinglePanelFromChrome(
   chrome: PanelLayoutChrome,
+  axis: Readonly<{ x: LayoutAxisPresentation; y: LayoutAxisPresentation }>,
   options: Pick<RunOptions, "width">,
 ): PanelPlacement {
   const { h, v } = chrome.displayScales(0);
@@ -34,5 +37,6 @@ export function placeSinglePanelFromChrome(
     formatV: chrome.formatV,
     measurer: chrome.measurer,
     layoutTheme: chrome.layoutTheme,
+    axis,
   });
 }

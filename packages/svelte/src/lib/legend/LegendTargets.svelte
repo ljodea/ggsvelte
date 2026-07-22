@@ -79,7 +79,7 @@
     const start = target.entry.x ?? 0;
     const next = entries[index + 1];
     const end =
-      next?.legend === target.legend
+      next?.legend === target.legend && next.entry.y === target.entry.y
         ? (next.entry.x ?? target.legend.width)
         : target.legend.width;
     return Math.max(24, end - start);
@@ -104,6 +104,7 @@
         style:left={`${targetLeft(target)}px`}
         style:top={`${target.legend.y + target.entry.y}px`}
         style:width={`${targetWidth(target, index)}px`}
+        style:height={`${Math.max(24, target.entry.height ?? 24)}px`}
         onpointerenter={(event) => {
           if (event.pointerType !== "touch") onPreviewIndex(index, "pointer");
         }}

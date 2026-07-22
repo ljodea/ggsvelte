@@ -45,6 +45,7 @@ export function computeFacetGridGeometry(input: FacetGridGeometryInput): FacetGr
     formatV: input.formatV,
     measurer: input.measurer,
     layoutTheme: input.layoutTheme,
+    axis: input.axis,
   };
 
   const cellInput = {

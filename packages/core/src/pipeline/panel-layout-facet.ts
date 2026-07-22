@@ -1,7 +1,7 @@
 /**
  * Facet-grid panel placement: shared margin pass, free-scale edge axes, strips.
  */
-import type { LayoutTheme, TickFormatter } from "../layout/layout.js";
+import type { LayoutAxisPresentation, LayoutTheme, TickFormatter } from "../layout/layout.js";
 import type { TextMeasurer } from "../layout/measure.js";
 
 import type { FacetPanelDef } from "./facets.js";
@@ -37,6 +37,7 @@ export function placeFacetPanels(input: {
   formatV: TickFormatter | undefined;
   measurer: TextMeasurer;
   layoutTheme: LayoutTheme;
+  axis: Readonly<{ x: LayoutAxisPresentation; y: LayoutAxisPresentation }>;
 }): PanelPlacement[] {
   const geometry = computeFacetGridGeometry(input);
   return mapFacetPanelPlacements({
@@ -59,5 +60,6 @@ export function placeFacetPanels(input: {
     formatV: input.formatV,
     measurer: input.measurer,
     layoutTheme: input.layoutTheme,
+    axis: input.axis,
   });
 }

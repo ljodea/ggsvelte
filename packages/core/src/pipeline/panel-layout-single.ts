@@ -3,6 +3,7 @@
  */
 import type {
   BandLayoutDomainContext,
+  LayoutAxisPresentation,
   LayoutTheme,
   TemporalLayoutDomainContext,
   TickFormatter,
@@ -37,6 +38,7 @@ export function placeSinglePanel(input: {
   formatV: TickFormatter | undefined;
   measurer: TextMeasurer;
   layoutTheme: LayoutTheme;
+  axis: Readonly<{ x: LayoutAxisPresentation; y: LayoutAxisPresentation }>;
 }): PanelPlacement {
   const {
     h,
@@ -59,6 +61,7 @@ export function placeSinglePanel(input: {
     formatV,
     measurer,
     layoutTheme,
+    axis,
   } = input;
 
   const layoutResult = layout({
@@ -69,6 +72,7 @@ export function placeSinglePanel(input: {
     ...(formatH !== undefined && { formatX: formatH }),
     ...(formatV !== undefined && { formatY: formatV }),
     measurer,
+    axis,
     reserve: singlePanelMarginReserve(
       hTitle,
       vTitle,

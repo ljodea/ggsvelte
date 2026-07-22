@@ -31,7 +31,12 @@
   {#if legend.type === "discrete"}
     {#each legend.entries as entry}
       {@const baseX = (entry.x ?? 0) + 4}
-      {@const keyY = entry.y + (LEGEND_ROW_HEIGHT - legend.swatchSize) / 2}
+      {@const rowHeight = entry.height ?? LEGEND_ROW_HEIGHT}
+      {@const lines = entry.lines ?? [entry.label]}
+      {@const lineHeight = entry.lineHeight ?? labelSize * 1.2}
+      {@const labelY =
+        entry.y + (rowHeight - lines.length * lineHeight) / 2 + lineHeight / 2}
+      {@const keyY = entry.y + (rowHeight - legend.swatchSize) / 2}
       {@const keyX = baseX + legend.swatchSize / 2}
       {@const keyCenterY = keyY + legend.swatchSize / 2}
       {@const keyColor =
@@ -145,14 +150,24 @@
       <text
         class="gg-legend-label"
         x={baseX + legend.swatchSize + (legend.keyGap ?? 6)}
-        y={entry.y + LEGEND_ROW_HEIGHT / 2}
+        y={entry.lines === undefined ? entry.y + rowHeight / 2 : labelY}
         dy="0.32em"
         font-size={labelSize}
         fill={ink}
-        >{entry.label}{#if entry.fullLabel !== undefined && entry.fullLabel !== entry.label}<title
-            >{entry.fullLabel}</title
-          >{/if}</text
       >
+        {#if entry.lines !== undefined}
+          {#each lines as line, index}
+            <tspan
+              x={baseX + legend.swatchSize + (legend.keyGap ?? 6)}
+              dy={index === 0 ? undefined : lineHeight}>{line}</tspan
+            >
+          {/each}
+        {:else}
+          {entry.label}{#if entry.fullLabel !== undefined && entry.fullLabel !== entry.label}<title
+              >{entry.fullLabel}</title
+            >{/if}
+        {/if}
+      </text>
     {/each}
   {:else if legend.type === "steps"}
     {#each legend.entries as entry}

@@ -28,6 +28,7 @@ export function mapFacetPanelPlacements(input: MapFacetPanelPlacementsInput): Pa
     formatV,
     measurer,
     layoutTheme,
+    axis,
   } = input;
 
   return facetPanels.map((def, p) => {
@@ -59,6 +60,7 @@ export function mapFacetPanelPlacements(input: MapFacetPanelPlacementsInput): Pa
       formatV,
       measurer,
       layoutTheme,
+      axis,
     });
   });
 }

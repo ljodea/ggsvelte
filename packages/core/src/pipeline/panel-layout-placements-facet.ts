@@ -1,6 +1,8 @@
 /**
  * Facet-grid panel placements from layout chrome.
  */
+import type { LayoutAxisPresentation } from "../layout/layout.js";
+
 import type { PanelLayoutChrome } from "./panel-layout-chrome.js";
 import { placeFacetPanels } from "./panel-layout-facet.js";
 import type { PanelPlacement } from "./panel-layout-types.js";
@@ -12,9 +14,10 @@ export function placeFacetPanelsFromChrome(input: {
   ncol: number;
   facetPanels: readonly FacetPanelDef[];
   chrome: PanelLayoutChrome;
+  axis: Readonly<{ x: LayoutAxisPresentation; y: LayoutAxisPresentation }>;
   options: Pick<RunOptions, "width">;
 }): PanelPlacement[] {
-  const { nrow, ncol, facetPanels, chrome, options } = input;
+  const { nrow, ncol, facetPanels, chrome, axis, options } = input;
   return placeFacetPanels({
     facetPanels,
     nrow,
@@ -38,5 +41,6 @@ export function placeFacetPanelsFromChrome(input: {
     formatV: chrome.formatV,
     measurer: chrome.measurer,
     layoutTheme: chrome.layoutTheme,
+    axis,
   });
 }

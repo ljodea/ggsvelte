@@ -165,6 +165,20 @@ function mergeIdentity(
   });
 }
 
+function isPaintLegend(input: LegendInput): boolean {
+  return input.scale === "color" || input.scale === "fill";
+}
+
+function paintCompatible(
+  left: Readonly<{ input: LegendInput; plan: Exclude<GuidePlan, { type: "axis" }> }>,
+  right: Readonly<{ input: LegendInput; plan: Exclude<GuidePlan, { type: "axis" }> }>,
+): boolean {
+  if (!isPaintLegend(left.input) || !isPaintLegend(right.input)) return true;
+  if (left.plan.type !== "discrete" || right.plan.type !== "discrete") return false;
+  const rightEntries = right.plan.entries;
+  return left.plan.entries.every((entry, index) => entry.color === rightEntries[index]?.color);
+}
+
 function mergeDiscrete(group: readonly DiscreteLegendInput[]): DiscreteLegendInput {
   const first = group[0]!;
   return {
@@ -256,14 +270,19 @@ export function prepareLegendInputs(input: {
       out.push(current.input);
       continue;
     }
-    const group = [current.input];
+    const group = [current];
     for (let other = index + 1; other < prepared.length; other++) {
       const candidate = prepared[other]!;
-      if (candidate.identity !== current.identity || candidate.input.kind !== "discrete") continue;
+      if (
+        candidate.identity !== current.identity ||
+        candidate.input.kind !== "discrete" ||
+        !group.every((member) => paintCompatible(member, candidate))
+      )
+        continue;
       merged.add(other);
-      group.push(candidate.input);
+      group.push(candidate);
     }
-    out.push(mergeDiscrete(group));
+    out.push(mergeDiscrete(group.map((member) => member.input as DiscreteLegendInput)));
   }
   return out.toSorted(
     (left, right) => (left.appearance?.order ?? 0) - (right.appearance?.order ?? 0),

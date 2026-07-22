@@ -3,6 +3,7 @@
  */
 import type {
   BandLayoutDomainContext,
+  LayoutAxisPresentation,
   LayoutTheme,
   Margins,
   TemporalLayoutDomainContext,
@@ -37,4 +38,5 @@ export interface FacetPanelTicksInput {
   formatV: TickFormatter | undefined;
   measurer: TextMeasurer;
   layoutTheme: LayoutTheme;
+  axis: Readonly<{ x: LayoutAxisPresentation; y: LayoutAxisPresentation }>;
 }

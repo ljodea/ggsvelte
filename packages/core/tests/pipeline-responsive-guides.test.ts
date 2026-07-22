@@ -10,6 +10,7 @@ import {
   scaleColorContinuous,
   scaleColorDiscrete,
   scaleColorIdentity,
+  scaleFillDiscrete,
   scaleShapeDiscrete,
   scaleSizeIdentity,
 } from "@ggsvelte/spec";
@@ -53,6 +54,24 @@ describe("responsive guide planning", () => {
         .labs({ color: "Color region", shape: "Shape region" }),
     );
     expect(legends).toHaveLength(2);
+  });
+
+  it("keeps guides separate when mapped color and fill palettes differ", () => {
+    const legends = discrete(
+      720,
+      gg(rows, aes({ x: "x", y: "y", color: "region", fill: "region" }))
+        .geomPoint()
+        .scales({
+          ...scaleColorDiscrete({ range: ["#ff0000", "#00ff00"] }),
+          ...scaleFillDiscrete({ range: ["#0000ff", "#ffff00"] }),
+        })
+        .labs({ color: "Region", fill: "Region" }),
+    );
+    expect(legends).toHaveLength(2);
+    expect(legends.map((legend) => legend.entries.map((entry) => entry.color))).toEqual([
+      ["#ff0000", "#00ff00"],
+      ["#0000ff", "#ffff00"],
+    ]);
   });
 
   it("moves automatic guides below on narrow viewports and keeps 320px of panel when right", () => {
@@ -108,20 +127,38 @@ describe("responsive guide planning", () => {
       { category: "A deliberately long northern category", y: 1 },
       { category: "A deliberately long southern category", y: 2 },
     ];
-    const result = runPipeline(
-      gg(categories, aes({ x: "category", y: "y" }))
-        .geomPoint()
-        .scales({ x: { type: "band" } })
-        .guides({ x: guideAxis({ collision: "preserve" }) })
-        .spec(),
-      { width: 280, height: 300 },
-    );
+    const build = gg(categories, aes({ x: "category", y: "y" }))
+      .geomPoint()
+      .scales({ x: { type: "band" } });
+    const automatic = runPipeline(build.spec(), { width: 280, height: 300 });
+    const result = runPipeline(build.guides({ x: guideAxis({ collision: "preserve" }) }).spec(), {
+      width: 280,
+      height: 300,
+    });
     expect(
       result.scene.axes.x.ticks.every(
         (tick) =>
           tick.label === tick.fullLabel && tick.lines === undefined && tick.angle === undefined,
       ),
     ).toBe(true);
+    expect(result.scene.panels[0]!.x).toBeGreaterThan(automatic.scene.panels[0]!.x);
+  });
+
+  it("reclaims tick-label margins and diagnostics for hidden axes", () => {
+    const categories = [
+      { category: "A deliberately long northern category", y: 1 },
+      { category: "A deliberately long southern category", y: 2 },
+    ];
+    const build = gg(categories, aes({ x: "category", y: "y" }))
+      .geomPoint()
+      .scales({ x: { type: "band" } });
+    const visible = runPipeline(build.spec(), { width: 280, height: 300 });
+    const hidden = runPipeline(build.guides({ x: guideNone() }).spec(), {
+      width: 280,
+      height: 300,
+    });
+    expect(hidden.scene.panels[0]!.height).toBeGreaterThan(visible.scene.panels[0]!.height);
+    expect(hidden.warnings.filter((warning) => warning.code.startsWith("band-label"))).toEqual([]);
   });
 
   it("reserves independent right and bottom zones for explicitly placed guides", () => {
@@ -158,6 +195,30 @@ describe("responsive guide planning", () => {
     );
     expect(svg).toContain("gg-legend-bottom gg-legend-horizontal");
     expect(svg).toContain(">North</text>");
+  });
+
+  it("renders wrapped discrete labels as multiline SVG without ellipsis", () => {
+    const wrappedRows = [
+      { x: 1, y: 1, group: "A deliberately long northern category label" },
+      { x: 2, y: 2, group: "A deliberately long southern category label" },
+    ];
+    const svg = renderToSVGString(
+      gg(wrappedRows, aes({ x: "x", y: "y", color: "group" }))
+        .geomPoint()
+        .guides({
+          color: guideLegend({
+            position: "bottom",
+            direction: "horizontal",
+            collision: "wrap",
+          }),
+        })
+        .spec(),
+      { width: 190, height: 360 },
+    );
+    expect(svg).toContain("<tspan");
+    expect(svg).toContain(">long northern</tspan>");
+    expect(svg).toContain(">category label</tspan>");
+    expect(svg).not.toContain("…");
   });
 
   it("controls colorbar tick marks independently from complete semantic labels", () => {
@@ -315,6 +376,42 @@ describe("responsive guide planning", () => {
           .guides({ color: guideLegend({ position: "bottom", collision: "error" }) })
           .spec(),
         { width: 320, height: 160 },
+      ),
+    ).toThrow(expect.objectContaining({ code: "guide-layout-overflow", path: "/guides/color" }));
+  });
+
+  it("checks collision:error against the translated right-guide area", () => {
+    const groups = Array.from({ length: 5 }, (_, index) => ({
+      x: index,
+      y: index,
+      group: `g${String(index)}`,
+    }));
+    expect(() =>
+      runPipeline(
+        gg(groups, aes({ x: "x", y: "y", color: "group" }))
+          .geomPoint()
+          .labs({ title: "A chart title", subtitle: "A chart subtitle" })
+          .guides({ color: guideLegend({ position: "right", collision: "error" }) })
+          .spec(),
+        { width: 720, height: 160 },
+      ),
+    ).toThrow(expect.objectContaining({ code: "guide-layout-overflow", path: "/guides/color" }));
+  });
+
+  it("checks collision:error against the translated bottom-guide area", () => {
+    const groups = Array.from({ length: 24 }, (_, index) => ({
+      x: index,
+      y: index,
+      group: `g${String(index)}`,
+    }));
+    expect(() =>
+      runPipeline(
+        gg(groups, aes({ x: "x", y: "y", color: "group" }))
+          .geomPoint()
+          .labs({ caption: "A chart caption" })
+          .guides({ color: guideLegend({ position: "bottom", collision: "error" }) })
+          .spec(),
+        { width: 720, height: 80 },
       ),
     ).toThrow(expect.objectContaining({ code: "guide-layout-overflow", path: "/guides/color" }));
   });

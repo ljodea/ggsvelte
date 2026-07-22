@@ -202,6 +202,28 @@ function renderDiscreteLegendKey(
   return `<rect class="gg-legend-swatch" x="${px(x)}" y="${px(y)}" width="${px(size)}" height="${px(size)}" fill="${entry.color}"${opacity}/>`;
 }
 
+function renderDiscreteLegendLabel(
+  entry: SceneLegendEntry,
+  x: number,
+  rowHeight: number,
+  labelSize: number,
+  ink: string,
+): string {
+  const lines = entry.lines;
+  if (lines === undefined || lines.length <= 1) {
+    return `<text class="gg-legend-label" x="${px(x)}" y="${px(entry.y + rowHeight / 2)}" dy="0.32em" font-size="${px(labelSize)}" fill="${ink}">${escapeXML(entry.label)}${entry.fullLabel !== undefined && entry.fullLabel !== entry.label ? `<title>${escapeXML(entry.fullLabel)}</title>` : ""}</text>`;
+  }
+  const lineHeight = entry.lineHeight ?? labelSize * 1.2;
+  const firstY = entry.y + (rowHeight - lines.length * lineHeight) / 2 + lineHeight / 2;
+  const tspans = lines
+    .map(
+      (line, index) =>
+        `<tspan x="${px(x)}"${index === 0 ? "" : ` dy="${px(lineHeight)}"`}>${escapeXML(line)}</tspan>`,
+    )
+    .join("");
+  return `<text class="gg-legend-label" x="${px(x)}" y="${px(firstY)}" dy="0.32em" font-size="${px(labelSize)}" fill="${ink}">${tspans}</text>`;
+}
+
 function renderLegend(legend: SceneLegend, theme: ThemeTokens, gradientId: string): string {
   const ink = themeVar("ink", theme);
   const horizontal = legend.direction === "horizontal";
@@ -219,10 +241,17 @@ function renderLegend(legend: SceneLegend, theme: ThemeTokens, gradientId: strin
   if (legend.type === "discrete") {
     for (const entry of legend.entries) {
       const baseX = (entry.x ?? 0) + 4;
-      const swatchY = entry.y + (LEGEND_ROW_HEIGHT - legend.swatchSize) / 2;
+      const rowHeight = entry.height ?? LEGEND_ROW_HEIGHT;
+      const swatchY = entry.y + (rowHeight - legend.swatchSize) / 2;
       parts.push(
         renderDiscreteLegendKey(entry, baseX, swatchY, legend.swatchSize, ink),
-        `<text class="gg-legend-label" x="${px(baseX + legend.swatchSize + (legend.keyGap ?? 6))}" y="${px(entry.y + LEGEND_ROW_HEIGHT / 2)}" dy="0.32em" font-size="${px(labelSize)}" fill="${ink}">${escapeXML(entry.label)}${entry.fullLabel !== undefined && entry.fullLabel !== entry.label ? `<title>${escapeXML(entry.fullLabel)}</title>` : ""}</text>`,
+        renderDiscreteLegendLabel(
+          entry,
+          baseX + legend.swatchSize + (legend.keyGap ?? 6),
+          rowHeight,
+          labelSize,
+          ink,
+        ),
       );
     }
   } else if (legend.type === "steps") {
