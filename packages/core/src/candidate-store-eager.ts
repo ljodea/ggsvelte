@@ -59,15 +59,8 @@ export function buildCandidateStoreEager(
     logicalValue,
     fact,
   } = indexes;
-  const {
-    spatial,
-    isPoint,
-    pointBatchIndexes,
-    addExtendedIntersecting,
-    exactDistance,
-    intersects,
-    shortlistNearest,
-  } = buildCandidateSpatialQuery(indexes);
+  const query = buildCandidateSpatialQuery(indexes);
+  const { spatial, isPoint, pointBatchIndexes } = query;
 
   return {
     epoch,
@@ -106,7 +99,7 @@ export function buildCandidateStoreEager(
       }
 
       const extended: number[] = [];
-      addExtendedIntersecting(px, py, px, py, extended);
+      query.addExtendedIntersecting(px, py, px, py, extended);
       extended.sort((a, b) => b - a);
       for (const id of extended) {
         const batchIndex = batchIds[id]!;
@@ -122,7 +115,7 @@ export function buildCandidateStoreEager(
             py > panel.y + panel.height)
         )
           continue;
-        const distance = exactDistance(id, px, py, pathContainment);
+        const distance = query.exactDistance(id, px, py, pathContainment);
         if (distance === null) continue;
         const sameBatch = batchIndex === bestBatch;
         const primitive = primitiveIds[id]!;
@@ -202,7 +195,7 @@ export function buildCandidateStoreEager(
       const ids =
         spatial === null
           ? Array.from({ length: n }, (_, id) => n - 1 - id)
-          : shortlistNearest(px, py, search.mode, search.maxDistance);
+          : query.shortlistNearest(px, py, search.mode, search.maxDistance);
       for (const id of ids) {
         if (search.panelId !== undefined && scene.panels[panelIds[id]!]!.id !== search.panelId)
           continue;
@@ -214,7 +207,7 @@ export function buildCandidateStoreEager(
           continue;
         const distance =
           candidateMode === "exact"
-            ? exactDistance(id, px, py, pathContainment)
+            ? query.exactDistance(id, px, py, pathContainment)
             : candidateMode === "x"
               ? Math.abs((flip ? ys[id] : xs[id])! - (flip ? py : px))
               : candidateMode === "y"
@@ -359,10 +352,10 @@ export function buildCandidateStoreEager(
         hits.push(id);
       }
       const extendedHits: number[] = [];
-      addExtendedIntersecting(loX, loY, hiX, hiY, extendedHits);
+      query.addExtendedIntersecting(loX, loY, hiX, hiY, extendedHits);
       for (const id of extendedHits) {
         if (panelId !== undefined && scene.panels[panelIds[id]!]!.id !== panelId) continue;
-        if (intersects(id, loX, loY, hiX, hiY)) hits.push(id);
+        if (query.intersects(id, loX, loY, hiX, hiY)) hits.push(id);
       }
       hits.sort((a, b) => traversalRank[a]! - traversalRank[b]!);
       return Uint32Array.from(hits);
