@@ -8,6 +8,9 @@ const constructionDir = join(pipelineDir, "candidate-construction");
 
 /** Intentional candidate-construction modules (one primary concern each). */
 const INTENTIONAL_MODULES = [
+  "datum-locate.ts",
+  "datum-series.ts",
+  "datum-types.ts",
   "datum-values.ts",
   "datum.ts",
   "frame-row.ts",
@@ -59,5 +62,24 @@ describe("Candidate construction architecture", () => {
     expect(datum).toMatch(/from "\.\/datum-values\.js"/);
     expect(datum).not.toMatch(/^export function ordinalSeriesRank/m);
     expect(datum).not.toMatch(/^export function resolveCandidateLogicalValues/m);
+  });
+
+  it("splits locate / series from the thin identity factory (#533)", () => {
+    const datum = readFileSync(join(constructionDir, "datum.ts"), "utf8");
+    const locate = readFileSync(join(constructionDir, "datum-locate.ts"), "utf8");
+    const series = readFileSync(join(constructionDir, "datum-series.ts"), "utf8");
+    const types = readFileSync(join(constructionDir, "datum-types.ts"), "utf8");
+    expect(types).toMatch(/export interface IdentityCandidateResolveContext/);
+    expect(types).toMatch(/export interface LocatedIdentityCandidate/);
+    expect(locate).toMatch(/^export function locateIdentityCandidate/m);
+    expect(locate).toMatch(/^export function resolveOutlierContext/m);
+    expect(series).toMatch(/^export function resolveCandidateSeries/m);
+    expect(datum).toMatch(/from "\.\/datum-locate\.js"/);
+    expect(datum).toMatch(/from "\.\/datum-series\.js"/);
+    expect(datum).toMatch(/^export function createIdentityCandidateDatumResolver/m);
+    // Bodies live in dedicated modules, not re-defined in the factory.
+    expect(datum).not.toMatch(/^export function resolveOutlierContext/m);
+    expect(datum).not.toMatch(/^export function resolveCandidateSeries/m);
+    expect(datum).not.toMatch(/^export function locateIdentityCandidate/m);
   });
 });
