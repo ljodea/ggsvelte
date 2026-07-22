@@ -84,28 +84,38 @@ export function drawPointsSubset(
     return;
   }
   // Interactive masks must not turn alternating categorical colors into one
-  // beginPath/fill pair per point. For the normal small categorical case,
-  // batch by first-seen color while retaining the focused-over-muted pass
-  // boundary. Fall back to contiguous runs for high-cardinality colors.
+  // beginPath/fill pair per point. For the normal small categorical case
+  // (≤64 global first-seen colors), bucket included indices by color in one
+  // O(n) pass — not re-scan n for each of C colors (O(C·n)). Preserve global
+  // first-seen paint order (including colors only present on the other mask
+  // half). Fall back to contiguous runs when cardinality exceeds 64.
   const uniqueColors: string[] = [];
-  const seenColors = new Set<string>();
-  for (let j = 0; j < n && uniqueColors.length <= 64; j++) {
+  const indicesByColor = new Map<string, number[]>();
+  let highCardinality = false;
+  for (let j = 0; j < n; j++) {
     const color = batch.colors[j] ?? batch.fill ?? themeInk;
-    if (seenColors.has(color)) continue;
-    seenColors.add(color);
-    uniqueColors.push(color);
+    let list = indicesByColor.get(color);
+    if (list === undefined) {
+      list = [];
+      indicesByColor.set(color, list);
+      uniqueColors.push(color);
+      // Mirror the prior discovery loop: collect at most 65 names, then bail
+      // to run-length (uniqueColors.length > 64). Incomplete buckets are unused.
+      if (uniqueColors.length > 64) {
+        highCardinality = true;
+        break;
+      }
+    }
+    if (includes(j)) list.push(j);
   }
-  if (uniqueColors.length <= 64) {
+  if (!highCardinality) {
     for (const color of uniqueColors) {
+      const list = indicesByColor.get(color)!;
+      if (list.length === 0) continue;
       ctx.fillStyle = resolve(color);
       ctx.beginPath();
-      let traced = false;
-      for (let j = 0; j < n; j++) {
-        if ((batch.colors[j] ?? batch.fill ?? themeInk) !== color || !includes(j)) continue;
-        tracePoint(ctx, batch, j);
-        traced = true;
-      }
-      if (traced) ctx.fill();
+      for (const j of list) tracePoint(ctx, batch, j);
+      ctx.fill();
     }
     return;
   }
