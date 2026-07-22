@@ -4,7 +4,7 @@ import {
   temporalImplementation,
   type TemporalDisambiguation,
   type TemporalKind,
-} from "./temporal.js";
+} from "./temporal-parse.js";
 
 export const TEMPORAL_INTERVAL_UNITS = [
   "millisecond",
