@@ -61,6 +61,39 @@ describe("createInspectionState setInspection", () => {
 
     destroy();
   });
+
+  it("cancels queued inspect before applying a touch tap so rAF cannot override", () => {
+    const model = modelFor(continuousSpec());
+    const { state, flushFrame, destroy } = mountInspectionController({
+      model: () => model,
+      registerEffects: false,
+      deferredFrames: true,
+      inspectConfig: () => ({ mode: "xy", maxDistance: 1e6, pin: false }),
+    });
+    const hover = model.candidates.candidate(0);
+    const tap = model.candidates.candidate(1);
+    if (hover === null || tap === null) throw new Error("expected two candidates");
+    expect(hover.id).not.toBe(tap.id);
+
+    // Small touch move schedules inspect for hover candidate.
+    state.schedulePointerInspect({
+      point: { x: hover.x, y: hover.y },
+      source: "touch",
+      mode: "xy",
+      maxDistance: 1e6,
+    });
+    // Tap applies a different candidate without waiting for the frame.
+    state.setInspection(hitFromCandidate(tap), "touch", "transient", "xy", tap);
+    flushSync();
+    expect(state.inspection?.focus.anchor).toEqual({ x: tap.x, y: tap.y });
+
+    // Stale queued frame must not re-apply hover after the tap.
+    flushFrame();
+    flushSync();
+    expect(state.inspection?.focus.anchor).toEqual({ x: tap.x, y: tap.y });
+
+    destroy();
+  });
 });
 
 describe("createInspectionState pin cycle", () => {
