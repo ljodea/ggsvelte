@@ -56,8 +56,11 @@ export function buildCandidateIdentityIndex(
       // Only count/summary/boxplot resolve via group×x buckets; skip for other layers.
       const bucketByX = stat === "count" || stat === "summary" || stat === "boxplot";
       const xField = frame.binding.xField;
-      // Finite-y membership uses panel-local table indexes (localRow), then stores
-      // source-table rows — same mapping as sourceRowsByGroup itself.
+      // localRow → sourceRow invariant: panel-local table indexes drive
+      // parse/finite-y membership; stored memberships are always source-table
+      // rows via `facetPanel.sourceRows?.[localRow] ?? localRow` (unfaceted =
+      // identity). Faceted temporal summary/count must not intern localRow into
+      // LineageStore keys (#437).
       const yField = frame.binding.yField;
       const finiteY =
         (stat === "smooth" || stat === "summary" || stat === "boxplot") && yField !== null;

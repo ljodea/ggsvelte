@@ -80,6 +80,68 @@ describe("aggregate lineage index (issue #184)", () => {
     }
   });
 
+  /**
+   * Faceted temporal summary (#437): parse/finite-y use panel-local rows;
+   * buckets store source-table rows. Unequal panel membership + spelling
+   * variants must not leak local indexes into sourceRowsByGroupX.
+   */
+  it("faceted temporal summary group×x buckets use source rows and merge epoch spellings", async () => {
+    const { preparePanels } = await import("../../src/pipeline/prepare-panels.ts");
+    const { buildCandidateIdentityIndex } =
+      await import("../../src/pipeline/candidate-construction/identity-index.ts");
+    const { bandKey } = await import("../../src/scales/train.ts");
+    const { normalize } = await import("@ggsvelte/spec");
+
+    const prepared = preparePanels(
+      normalize(
+        gg(
+          [
+            { region: "north", when: "1/2/2025", value: 1 },
+            { region: "north", when: "01/02/2025", value: 3 },
+            { region: "north", when: "02/02/2025", value: 5 },
+            { region: "south", when: "1/2/2025", value: 10 },
+            { region: "south", when: "03/02/2025", value: 7 },
+          ],
+          aes({ x: "when", y: "value" }),
+        )
+          .geomErrorbar({ stat: "summary" })
+          .facet({ wrap: "region" })
+          .scaleXDate({ parse: "dmy", nice: false })
+          .spec(),
+      ),
+      size,
+      [],
+      [],
+    );
+
+    expect(prepared.facetPanels.map((p) => ({ label: p.label, sourceRows: p.sourceRows }))).toEqual(
+      [
+        { label: "north", sourceRows: [0, 1, 2] },
+        { label: "south", sourceRows: [3, 4] },
+      ],
+    );
+
+    const index = buildCandidateIdentityIndex(prepared.panelFrames, prepared.facetPanels);
+    // dmy: 1/2/2025 ≡ 01/02/2025 → 2025-02-01 UTC
+    const day1 = bandKey(Date.UTC(2025, 1, 1));
+    const day2 = bandKey(Date.UTC(2025, 1, 2));
+    const day3 = bandKey(Date.UTC(2025, 1, 3));
+
+    // Panel 0 (north): local rows 0..2 → source 0..2; spellings merge on day1.
+    expect(index.sourceRowsByGroup.get("0:0:0")).toEqual([0, 1, 2]);
+    expect(index.sourceRowsByGroupX.get(`0:0:0:${day1}`)).toEqual([0, 1]);
+    expect(index.sourceRowsByGroupX.get(`0:0:0:${day2}`)).toEqual([2]);
+    // Panel 1 (south): local 0,1 → source 3,4 — not [0,1].
+    expect(index.sourceRowsByGroup.get("1:0:0")).toEqual([3, 4]);
+    expect(index.sourceRowsByGroupX.get(`1:0:0:${day1}`)).toEqual([3]);
+    expect(index.sourceRowsByGroupX.get(`1:0:0:${day3}`)).toEqual([4]);
+    // No local-index pollution: south must never claim source rows 0–2.
+    for (const [key, rows] of index.sourceRowsByGroupX) {
+      if (!key.startsWith("1:")) continue;
+      expect(rows.every((row) => row >= 3)).toBe(true);
+    }
+  });
+
   it("does not build group×x buckets for identity layers that never consume them", async () => {
     const { preparePanels } = await import("../../src/pipeline/prepare-panels.ts");
     const { buildCandidateIdentityIndex } =

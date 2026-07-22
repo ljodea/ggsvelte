@@ -103,6 +103,50 @@ describe("buildPipelineCandidates via runPipeline", () => {
     expect(memberships.every((rows) => rows.length > 0)).toBe(true);
   });
 
+  /**
+   * Combined facet + temporal summary path (#437): unequal panel membership
+   * with local-row parsing must still intern source-table lineage keys.
+   */
+  it("faceted temporal summary marks carry exact source-row lineage memberships", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { region: "north", when: "1/2/2025", value: 1 },
+          { region: "north", when: "01/02/2025", value: 3 },
+          { region: "north", when: "02/02/2025", value: 5 },
+          { region: "south", when: "1/2/2025", value: 10 },
+          { region: "south", when: "03/02/2025", value: 7 },
+        ],
+        aes({ x: "when", y: "value" }),
+      )
+        .geomErrorbar({ stat: "summary" })
+        .facet({ wrap: "region" })
+        .scaleXDate({ parse: "dmy", nice: false })
+        .spec(),
+      size,
+    );
+
+    const byPanel = new Map<string, Set<string>>();
+    for (let id = 0; id < model.candidates.size; id++) {
+      const c = model.candidates.candidate(id)!;
+      const rows = [...model.lineage.keys(c.lineage)].toSorted((a, b) => a - b);
+      const key = rows.join(",");
+      const panel = c.panelId;
+      const set = byPanel.get(panel) ?? new Set<string>();
+      set.add(key);
+      byPanel.set(panel, set);
+    }
+
+    const north = [...byPanel.entries()].find(([id]) => id.includes("north"));
+    const south = [...byPanel.entries()].find(([id]) => id.includes("south"));
+    expect(north).toBeDefined();
+    expect(south).toBeDefined();
+    // North: merged spelling pair [0,1] + singleton day-2 [2].
+    expect(north![1]).toEqual(new Set(["0,1", "2"]));
+    // South: source rows 3 and 4 only (local 0,1 in that panel).
+    expect(south![1]).toEqual(new Set(["3", "4"]));
+  });
+
   it("bin layers intern source rows using closed bin edges", () => {
     const model = runPipeline(
       {
