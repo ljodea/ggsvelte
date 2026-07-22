@@ -2307,6 +2307,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "LetterboxRect": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "LineageRef": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -2812,6 +2816,10 @@
           "lifecycle": "experimental"
         },
         "legendValueEqual": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "letterboxGutterRects": {
           "kind": "value",
           "lifecycle": "experimental"
         },

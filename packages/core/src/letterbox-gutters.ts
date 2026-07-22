@@ -3,6 +3,7 @@
  * data rectangle (ADR 0020). Renderers paint these with `theme.letterboxFill`
  * and must not cover the panel interior so transparent/`panel: "none"` charts
  * keep letterbox styling on gutters only.
+ * Public via `letterboxGutterRects` for Core SVG and Svelte parity.
  */
 
 export interface LetterboxRect {
