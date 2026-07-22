@@ -17,6 +17,19 @@ export function copySessionMatchesOutputs<T>(sessionOutputs: T | null, currentOu
   return sessionOutputs !== null && sessionOutputs === currentOutputs;
 }
 
+/**
+ * Reducer for copy-session binding. Keep the session only while `currentOutputs`
+ * is the same reference; otherwise return `null`.
+ *
+ * Invalidation is monotonic: once the session is cleared, a later return to a
+ * prior outputs identity (e.g. undo restoring a WeakMap-cached array) must not
+ * revive manual-copy UI from the earlier attempt — call this on every outputs
+ * observation and store the result.
+ */
+export function nextCopySessionOutputs<T>(sessionOutputs: T | null, currentOutputs: T): T | null {
+  return copySessionMatchesOutputs(sessionOutputs, currentOutputs) ? sessionOutputs : null;
+}
+
 export function playgroundDiagnosticSignature(
   diagnostics: readonly {
     readonly source: string;
