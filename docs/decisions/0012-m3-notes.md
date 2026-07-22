@@ -129,7 +129,7 @@ medians × 1.5, marked PROVISIONAL pending CI-runner re-baselining.
 `bench:json` emits github-action-benchmark customSmallerIsBetter format from
 the same workload table mitata uses (`workloads.ts` — one source);
 `bench:budgets` gates results against budgets (set-equality both ways).
-`bench.yml`: main-branch trend job (gh-pages via github-action-benchmark,
+`bench.yml`: PR label budget gate (`run-bench`; historical gh-pages trend publish removed,
 alert 150%, not a gate) + `run-bench` label job (budget-gated). PR
 bench-smoke unchanged.
 

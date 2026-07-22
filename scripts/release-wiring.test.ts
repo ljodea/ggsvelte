@@ -35,9 +35,10 @@ describe("R0 release wiring", () => {
     );
   });
 
-  it("checks packed links in CI and the Pages deployment", () => {
+  it("checks packed links in CI and the Cloudflare Pages deployment", () => {
     expect(read(".github/workflows/ci.yml")).toContain("bun run check:pages-links");
-    expect(read(".github/workflows/pages.yml")).toContain("bun run check:pages-links");
+    expect(read(".github/workflows/cloudflare-pages.yml")).toContain("bun run build:cloudflare");
+    expect(read("package.json")).toContain("check:pages-links");
   });
 
   it("runs the Playwright interaction performance gate with benchmark budgets", () => {
@@ -301,9 +302,6 @@ describe("R0 release wiring", () => {
     // Static analysis formerly on pre-push now lives on the build job.
     expect(ci).toContain("bun run lint:type-aware");
     expect(ci).toContain("bun run knip");
-    expect(read(".github/workflows/pages.yml")).toContain(
-      "scripts/ci-routing.ts emit-github-output",
-    );
     expect(read(".github/workflows/vr-compare.yml")).toContain(
       "scripts/ci-routing.ts emit-github-output",
     );
@@ -412,7 +410,6 @@ it("tiers the PR consumer matrix (issue #246)", () => {
 it("uses one self-hosted ggsvelte pool (no heavy/light label split)", () => {
   const ci = read(".github/workflows/ci.yml");
   const vr = read(".github/workflows/vr-compare.yml");
-  const pages = read(".github/workflows/pages.yml");
   const bench = read(".github/workflows/bench.yml");
   const nightly = read(".github/workflows/compatibility-nightly.yml");
   const cancel = read(".github/workflows/cancel-on-pr-close.yml");
@@ -421,13 +418,12 @@ it("uses one self-hosted ggsvelte pool (no heavy/light label split)", () => {
   // Dual-label scheduling was theater; the old 2-slot heavy-only pool was the
   // real bottleneck (issues #247, #319, #321). Comments may mention the retired
   // label when explaining history — assert on runs-on lines only.
-  for (const workflow of [ci, vr, pages, bench, nightly]) {
+  for (const workflow of [ci, vr, bench, nightly]) {
     expect(heavyRunsOnCount(workflow)).toBe(0);
     expect(workflow).not.toContain("heavy-self-hosted-cpu");
   }
   expect(selfHostedGgsvelteCount(ci)).toBeGreaterThanOrEqual(10);
   expect(selfHostedGgsvelteCount(vr)).toBe(3);
-  expect(selfHostedGgsvelteCount(pages)).toBe(2);
   expect(selfHostedGgsvelteCount(bench)).toBe(1);
   expect(selfHostedGgsvelteCount(nightly)).toBeGreaterThanOrEqual(1);
   expect(ci).not.toContain("heavy-component");
@@ -439,11 +435,10 @@ it("uses one self-hosted ggsvelte pool (no heavy/light label split)", () => {
   expect(ci).toContain("cancel-in-progress: true");
   expect(cancel).toContain("pull_request_target");
   expect(cancel).toContain("head_sha");
-  // Pages/Bench: job-level concurrency so skip-only runs cannot cancel real work.
-  expect(pages).toContain("group: pages-build-");
-  expect(pages).not.toMatch(/^concurrency:\s*$/m);
+  // Bench: job-level concurrency so skip-only runs cannot cancel real work.
   expect(bench).toContain("group: bench-label-");
-  expect(bench).toContain("group: bench-trend-");
+  expect(bench).not.toContain("gh-pages");
+  expect(bench).not.toContain("github-action-benchmark");
 });
 
 it("binds approved baselines to a post-merge default-branch commit", () => {
@@ -500,7 +495,6 @@ it("uses job-private Bun caches in self-hosted workflows (issue #319)", () => {
   const workflows = [
     ".github/workflows/ci.yml",
     ".github/workflows/vr-compare.yml",
-    ".github/workflows/pages.yml",
     ".github/workflows/bench.yml",
     ".github/workflows/compatibility-nightly.yml",
     ".github/workflows/evals.yml",

@@ -43,7 +43,7 @@
 
   Add deterministic named, exact-format, epoch, timezone, and DST-disambiguation parsers; parser-keyed immutable table views; structured scale decisions and diagnostics; ggplot2-style scale aliases; and lubridate-style authoring helpers. Preserve original source values for interactions while using semantic epoch values before stats, positions, scale training, and rendering.
 
-  Migration: <https://ljodea.github.io/ggsvelte/guide/temporal-scales>
+  Migration: <https://ggsvelte.sh/guide/temporal-scales>
 
   If a four-digit string field is an identifier rather than a calendar year, set the position scale to `type: "band"`, call `scaleXDiscrete()` / `scaleYDiscrete()`, or use the equivalent snake_case alias. Ambiguous DMY/MDY input now requires an explicit parser such as `parse: "dmy"` or `parse: "mdy"`.
 
@@ -83,7 +83,7 @@
   `buildHitIndex` and related `@ggsvelte/core/dom` types so interactive plots no
   longer build and retain a second geometry index.
 
-  Migration: <https://ljodea.github.io/ggsvelte/guide/upgrading#0-2-to-0-3>
+  Migration: <https://ggsvelte.sh/guide/upgrading#0-2-to-0-3>
 
 - e4b02b5: # Delegate keyboard navigation to CandidateStore
 
@@ -92,7 +92,7 @@
   directional, and coincident keyboard navigation to the model-owned store
   without materializing a second candidate traversal list.
 
-  Migration: <https://ljodea.github.io/ggsvelte/guide/upgrading#0-2-to-0-3>
+  Migration: <https://ggsvelte.sh/guide/upgrading#0-2-to-0-3>
 
 - 57e4c85: # Internalize plot interaction assembly
 
@@ -139,7 +139,7 @@
   emphasis, stable semantic scopes, explicit key reconciliation, and a complete
   linked plots-controls-table example.
 
-  Migration: <https://ljodea.github.io/ggsvelte/guide/upgrading#0-1-to-0-2>
+  Migration: <https://ggsvelte.sh/guide/upgrading#0-1-to-0-2>
 
 - 70b1070: # Add precise filtering and faceted intervals
 
@@ -159,7 +159,7 @@
   construction order and effect-registration order are unchanged. Consumers on
   Svelte 5.29.0–5.33.0 must upgrade Svelte to take this release.
 
-  Migration: <https://ljodea.github.io/ggsvelte/guide/upgrading#0-1-to-0-2>
+  Migration: <https://ggsvelte.sh/guide/upgrading#0-1-to-0-2>
 
 ### Patch Changes
 

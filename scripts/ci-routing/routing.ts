@@ -97,13 +97,6 @@ export const DOCS_CONTENT_SCRIPT_PATTERNS: readonly string[] = [
   "scripts/deployment-smoke.ts",
   "scripts/deployment-smoke-cli.ts",
   "scripts/deployment-smoke.test.ts",
-  "scripts/gen-legacy-routes.ts",
-  "scripts/legacy-artifact.ts",
-  "scripts/legacy-artifact.test.ts",
-  "scripts/legacy-migration.ts",
-  "scripts/legacy-migration.test.ts",
-  "scripts/legacy-routes.ts",
-  "scripts/legacy-routes.test.ts",
   "lifecycle.json",
 ];
 
@@ -134,8 +127,8 @@ export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
     // after the monlith split (Codex P2: pure scripts/** no longer runs vite docs).
     "scripts/gen-docs-routes.ts",
     "scripts/gen-docs-routes.test.ts",
-    // Shared inventory imported by gen-docs-routes / check-docs-metadata / gen-legacy-routes
-    // / deployment-artifact (Codex P2: inventory-only PRs were scripts-lane only).
+    // Shared inventory imported by gen-docs-routes / check-docs-metadata /
+    // deployment-artifact (Codex P2: inventory-only PRs were scripts-lane only).
     "scripts/docs-route-inventory.ts",
     "scripts/docs-route-inventory.test.ts",
     "scripts/gen-playground-seeds.ts",
@@ -151,13 +144,6 @@ export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
     "scripts/deployment-smoke.ts",
     "scripts/deployment-smoke-cli.ts",
     "scripts/deployment-smoke.test.ts",
-    "scripts/gen-legacy-routes.ts",
-    "scripts/legacy-artifact.ts",
-    "scripts/legacy-artifact.test.ts",
-    "scripts/legacy-migration.ts",
-    "scripts/legacy-migration.test.ts",
-    "scripts/legacy-routes.ts",
-    "scripts/legacy-routes.test.ts",
     // Public gallery previews are materialized from canonical light baselines.
     "tests/visual/__screenshots__/**",
     "lifecycle.json",

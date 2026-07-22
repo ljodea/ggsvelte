@@ -748,7 +748,7 @@ jobs:
           fi
       - name: build packaged interaction test target
         if: steps.content_hash.outputs.hit != 'true'
-        run: DOCS_BUILD_MODE=legacy-full BASE_PATH=/ggsvelte bun run build:docs
+        run: DOCS_BUILD_MODE=cloudflare-preview bun run build:docs
       - name: docs shell, home/gallery, progressive, themes, interaction, playground journeys
         if: steps.content_hash.outputs.hit != 'true'
         # Enumerate every non-pixel docs journey. --grep-invert drops visual-contract
@@ -808,7 +808,7 @@ jobs:
           cache_key_prefix: bun-container
       - uses: ./.github/actions/ci-download-packages-dist
       - name: build docs for interaction performance fixtures
-        run: DOCS_BUILD_MODE=legacy-full BASE_PATH=/ggsvelte bun run build:docs
+        run: DOCS_BUILD_MODE=cloudflare-preview bun run build:docs
       - name: interaction performance p50/p95 (informational — never fail the check)
         id: perf
         # Wall-clock budgets flake on the shared self-hosted host. Hard gate is
