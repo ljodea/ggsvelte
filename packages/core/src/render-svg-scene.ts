@@ -126,11 +126,11 @@ function renderStrip(panel: ScenePanel, scene: Scene): string {
   } else if (position === "bottom") {
     // Below the panel content box; axis ticks/labels sit in the bottom margin
     // immediately under the panel, then the strip band follows.
-    const axisBand = panel.axisX !== null ? 28 : 0;
+    const axisBand = panel.axisX === null ? 0 : 28;
     originY = panel.y + panel.height + axisBand;
   } else if (position === "left") {
     // Left of the y-axis margin so strip sits outside tick labels.
-    const axisBand = panel.axisY !== null ? 36 : 0;
+    const axisBand = panel.axisY === null ? 0 : 36;
     originX = panel.x - axisBand - band;
     rectW = bandDraw;
     rectH = panel.height;

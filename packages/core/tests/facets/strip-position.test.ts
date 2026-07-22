@@ -49,7 +49,7 @@ describe("facet strip position — layout and render (#590)", () => {
     for (let i = 0; i < panels.length; i++) {
       const panel = panels[i]!;
       const stripY = Number(strips[i]![2]);
-      const axisBand = panel.axisX !== null ? 28 : 0;
+      const axisBand = panel.axisX === null ? 0 : 28;
       expect(stripY).toBeCloseTo(panel.y + panel.height + axisBand, 1);
     }
   });
@@ -80,7 +80,7 @@ describe("facet strip position — layout and render (#590)", () => {
     expect(match).not.toBeNull();
     const stripX = Number(match![1]);
     // Strip is left of the y-axis margin when the panel draws a left axis.
-    const axisBand = panel.axisY !== null ? 36 : 0;
+    const axisBand = panel.axisY === null ? 0 : 36;
     expect(stripX).toBeCloseTo(panel.x - axisBand - panel.stripBand!, 1);
   });
 

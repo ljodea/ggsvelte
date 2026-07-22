@@ -83,7 +83,7 @@
     }
     if (position === "bottom") {
       // Below the x-axis margin so strip text does not collide with ticks.
-      const axisBand = panel.axisX !== null ? 28 : 0;
+      const axisBand = panel.axisX === null ? 0 : 28;
       return {
         x: panel.x,
         y: panel.y + panel.height + axisBand,
@@ -96,7 +96,7 @@
     }
     if (position === "left") {
       // Left of the y-axis margin so strip text does not collide with ticks.
-      const axisBand = panel.axisY !== null ? 36 : 0;
+      const axisBand = panel.axisY === null ? 0 : 36;
       const textX = bandDraw / 2;
       const textY = panel.height / 2;
       return {
