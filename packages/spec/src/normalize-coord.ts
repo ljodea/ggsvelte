@@ -21,8 +21,10 @@ function normalizeCoordAxis(
       limits: [...(record["limits"] as unknown[])],
     }),
   } as CoordTransformAxisSpec;
-  if (record["reverse"] !== true) delete normalized.reverse;
-  if (record["expand"] !== false) delete normalized.expand;
+  // Drop valid defaults (including explicit undefined from option spreads);
+  // preserve malformed non-booleans for schema reject.
+  if (record["reverse"] === false || record["reverse"] === undefined) delete normalized.reverse;
+  if (record["expand"] === true || record["expand"] === undefined) delete normalized.expand;
   return normalized;
 }
 
@@ -31,11 +33,18 @@ function effectiveCoordAxis(axis: ReturnType<typeof normalizeCoordAxis>): boolea
   const runtimeAxis = axis as unknown;
   if (runtimeAxis === null || typeof runtimeAxis !== "object" || Array.isArray(runtimeAxis))
     return true;
+  const reverse = (axis as { reverse?: unknown }).reverse;
+  const expand = (axis as { expand?: unknown }).expand;
+  // Non-boolean reverse/expand must stay effective so schema can reject them.
+  const malformedReverse = reverse !== undefined && reverse !== true && reverse !== false;
+  const malformedExpand = expand !== undefined && expand !== true && expand !== false;
   return (
     axis.transform !== "identity" ||
     axis.limits !== undefined ||
     axis.reverse === true ||
     axis.expand === false ||
+    malformedReverse ||
+    malformedExpand ||
     Object.keys(axis).some(
       (key) => key !== "transform" && key !== "limits" && key !== "reverse" && key !== "expand",
     )
@@ -60,12 +69,9 @@ export function normalizeCoord(coord: CoordSpec | undefined): CoordSpec | undefi
   const hasUnknownKey = Object.keys(transformed).some(
     (key) => key !== "type" && key !== "x" && key !== "y" && key !== "clip",
   );
-  if (
-    !effectiveCoordAxis(x) &&
-    !effectiveCoordAxis(y) &&
-    transformed.clip !== false &&
-    !hasUnknownKey
-  ) {
+  // Default clip is true/absent; only collapse when clip is a valid default.
+  const clipIsDefault = transformed.clip === true || transformed.clip === undefined;
+  if (!effectiveCoordAxis(x) && !effectiveCoordAxis(y) && clipIsDefault && !hasUnknownKey) {
     return undefined;
   }
   const normalized: CoordSpec = {
@@ -76,6 +82,7 @@ export function normalizeCoord(coord: CoordSpec | undefined): CoordSpec | undefi
   };
   if (!effectiveCoordAxis(x)) delete normalized.x;
   if (!effectiveCoordAxis(y)) delete normalized.y;
-  if (transformed.clip !== false) delete normalized.clip;
+  // Keep false and non-boolean clip (malformed) for validation.
+  if (transformed.clip === true || transformed.clip === undefined) delete normalized.clip;
   return normalized;
 }

@@ -2,6 +2,13 @@
   import { base } from "$app/paths";
   import { onMount } from "svelte";
 
+  import {
+    readDocsAppearance,
+    toggleDocsAppearance,
+    writeDocsAppearance,
+    type DocsAppearance,
+  } from "$lib/docs-appearance";
+  import { primaryNavLinks } from "$lib/primary-nav-links";
   import { primaryNavigationOwner } from "$lib/routes";
   import type { DocsRouteMetadata } from "$lib/route-types";
 
@@ -12,55 +19,18 @@
 
   let menu = $state<HTMLDialogElement>();
   let search = $state<{ open: (trigger: HTMLElement) => void }>();
-  let appearance = $state<"light" | "dark">("light");
+  let appearance = $state<DocsAppearance>("light");
 
-  const links = $derived([
-    {
-      label: "Docs",
-      href: "/docs",
-      active: owner === "docs",
-    },
-    {
-      label: "Gallery",
-      href: "/examples",
-      active: path.startsWith("/examples"),
-    },
-    {
-      label: "Playground",
-      href: "/playground",
-      active: path === "/playground",
-    },
-    {
-      label: "Themes",
-      href: "/themes",
-      active: path === "/themes",
-    },
-    {
-      label: "Interactions",
-      href: "/interactions",
-      active: path === "/interactions",
-    },
-    {
-      label: "Reference",
-      href: "/reference",
-      active: owner === "reference",
-    },
-  ]);
+  const links = $derived(primaryNavLinks(path, owner));
 
   function syncAppearance(): void {
-    appearance =
-      document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+    appearance = readDocsAppearance();
   }
 
   function toggleAppearance(): void {
     syncAppearance();
-    appearance = appearance === "dark" ? "light" : "dark";
-    document.documentElement.dataset.theme = appearance;
-    try {
-      localStorage.setItem("ggsvelte-theme", appearance);
-    } catch {
-      // The in-page control still works when storage is unavailable.
-    }
+    appearance = toggleDocsAppearance(appearance);
+    writeDocsAppearance(appearance);
   }
 
   function openMenu(): void {

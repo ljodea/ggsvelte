@@ -5,11 +5,13 @@
  * Tier-1 mechanism (decision 0004): TypeBox 1.x compiled checks plus
  * `Value.Errors` over the same schemas that emit `schema/v0.json` — one
  * artifact, no drift.
+ * Layer/plot shape walks: validate-schema-shape.ts (shared GEOM_BRANCHES).
  * Raw TypeBox union noise is mapped to the agent error contract in
- * validate-map-errors.ts (schema/path inspection in validate-schema-walk.ts).
- * Data-free grammar rules live in validate-structure.ts. Data-aware checks
- * live in validate-data*.ts (evidence + checks modules, barrel at
- * validate-data.ts).
+ * validate-map-errors.ts (schema walk: validate-schema-walk.ts; channel/data
+ * form classification: validate-map-forms.ts).
+ * Data-free grammar rules live in validate-structure*.ts (layers / color
+ * schemes / facet form). Data-aware checks live in validate-data*.ts
+ * (evidence + checks modules, barrel at validate-data.ts).
  *
  * Output: `{ ok: true, spec }` or `{ ok: false, errors: SpecError[] }` with
  * the agent error contract from errors.ts. Messages are snapshot-tested.
@@ -22,21 +24,7 @@ import type { SpecError } from "./errors.js";
 import type { SpecAdvisory } from "./lint.js";
 import { lintSpec } from "./lint.js";
 import type { Aes, PortableSpec } from "./schema.js";
-import {
-  AreaLayerSchema,
-  BarLayerSchema,
-  BoxplotLayerSchema,
-  ColLayerSchema,
-  DensityLayerSchema,
-  ErrorbarLayerSchema,
-  HistogramLayerSchema,
-  LineLayerSchema,
-  PlotSpecSchema,
-  PointLayerSchema,
-  RuleLayerSchema,
-  SmoothLayerSchema,
-  TextLayerSchema,
-} from "./schema.js";
+import { PlotSpecSchema } from "./schema.js";
 import type { ValidateOptions } from "./validate-data.js";
 import {
   dataChecks,
@@ -44,7 +32,7 @@ import {
   jsonDepth,
   resolveFieldEvidence,
 } from "./validate-data.js";
-import { mapValueErrors, unknownGeomError } from "./validate-map-errors.js";
+import { collectSchemaShapeErrors, GEOM_BRANCHES } from "./validate-schema-shape.js";
 import {
   colorScaleStructuralErrors,
   facetStructuralErrors,
@@ -65,96 +53,8 @@ const PLOT_SPEC_VALIDATOR = (() => {
   }
 })();
 
-const GEOM_BRANCHES = {
-  point: PointLayerSchema,
-  line: LineLayerSchema,
-  col: ColLayerSchema,
-  bar: BarLayerSchema,
-  histogram: HistogramLayerSchema,
-  area: AreaLayerSchema,
-  rule: RuleLayerSchema,
-  text: TextLayerSchema,
-  smooth: SmoothLayerSchema,
-  boxplot: BoxplotLayerSchema,
-  density: DensityLayerSchema,
-  errorbar: ErrorbarLayerSchema,
-} as const;
-
 function isRecord(v: unknown): v is Record<string, unknown> {
   return typeof v === "object" && v !== null && !Array.isArray(v);
-}
-
-/** Discriminator-aware layer walk — one layer's tier-1 shape errors. */
-function mapLayerShapeErrors(layer: unknown, layerPath: string): SpecError[] {
-  if (!isRecord(layer)) {
-    return [
-      {
-        code: "invalid-layer",
-        path: layerPath,
-        message: `Each layer must be an object with a "geom" (got ${typeof layer}).`,
-        fix: { description: "Replace with a layer object.", example: { geom: "point" } },
-      },
-    ];
-  }
-  const geom = layer["geom"];
-  if (typeof geom !== "string" || !(geom in GEOM_BRANCHES)) {
-    return [unknownGeomError(geom, layerPath)];
-  }
-  const branch = GEOM_BRANCHES[geom as keyof typeof GEOM_BRANCHES];
-  return mapValueErrors(Value.Errors(branch, layer), {
-    schema: branch,
-    value: layer,
-    pathPrefix: layerPath,
-  });
-}
-
-/** Tier-1 schema walk (caller must set TypeBox Settings for the process). */
-function collectSchemaShapeErrors(input: Record<string, unknown>): SpecError[] {
-  const errors: SpecError[] = [];
-  const layers = input["layers"];
-  if (!Array.isArray(layers)) {
-    errors.push({
-      code: "missing-layers",
-      path: "/layers",
-      message: `"layers" must be an array of layer objects (got ${layers === undefined ? "nothing" : typeof layers}).`,
-      fix: {
-        description: "Add a layers array with at least one layer.",
-        example: [{ geom: "point" }],
-      },
-    });
-  } else if (layers.length === 0) {
-    errors.push({
-      code: "empty-layers",
-      path: "/layers",
-      message: '"layers" must contain at least one layer.',
-      fix: { description: "Add a layer.", example: [{ geom: "point" }] },
-    });
-  } else {
-    for (let i = 0; i < layers.length; i++) {
-      errors.push(...mapLayerShapeErrors(layers[i], `/layers/${i}`));
-    }
-  }
-
-  // Plot-level walk with a known-valid layer shell so layer noise is not
-  // re-reported alongside the branch-selected layer walk above.
-  const shell = { ...input, layers: [{ geom: "point" }] };
-  errors.push(
-    ...mapValueErrors(Value.Errors(PlotSpecSchema, shell), {
-      schema: PlotSpecSchema,
-      value: shell,
-      pathPrefix: "",
-    }),
-  );
-
-  if (errors.length === 0) {
-    // Value.Check failed but neither walk produced a mapped error.
-    errors.push({
-      code: "invalid-type",
-      path: "",
-      message: "The spec does not match the schema.",
-    });
-  }
-  return errors;
 }
 
 /**
@@ -231,7 +131,7 @@ export function validate(input: unknown, options?: ValidateOptions): ValidateRes
     // equivalent structured errors); tier 1 stays schema-shape-only so partial
     // specs remain composable.
     // Eligibility: only record layers with a known geom whose branch passes
-    // Value.Check (shape errors already reported above).
+    // Value.Check (shape errors already reported above). Uses shared GEOM_BRANCHES.
     if (options !== undefined && isRecord(input) && Array.isArray(input["layers"])) {
       const plotAes = isRecord(input["aes"]) ? (input["aes"] as Aes) : undefined;
       const layers = input["layers"] as unknown[];

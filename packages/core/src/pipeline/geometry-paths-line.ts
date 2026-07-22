@@ -11,7 +11,7 @@ import {
   numericStyleVector,
   type ResolvedStyleScales,
 } from "./geometry-style.js";
-import { DEFAULT_LINEWIDTH, bucketByGroup, xSortKey } from "./geometry-shared.js";
+import { DEFAULT_LINEWIDTH, bucketByGroup, sortGroupRowsByX } from "./geometry-shared.js";
 import { writeLineSubpaths } from "./geometry-paths-line-write.js";
 import { splitStyleSubpaths } from "./geometry-paths-style-subpaths.js";
 
@@ -25,8 +25,7 @@ export function lineBatch(
   const { binding } = frame;
   const groupedRows = bucketByGroup(frame, fx, null, warnings);
   if (groupedRows.length === 0) return null;
-  const sortKey = xSortKey(frame, fx);
-  for (const rows of groupedRows) rows.sort((a, b) => sortKey(a) - sortKey(b));
+  sortGroupRowsByX(groupedRows, frame, fx);
   const subpaths = splitStyleSubpaths(frame, groupedRows, styles);
   const styleSplit = subpaths.length > groupedRows.length;
 

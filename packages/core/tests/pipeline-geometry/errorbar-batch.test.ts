@@ -23,7 +23,7 @@ describe("makeErrorbarHalfWidth", () => {
   });
 });
 
-describe("batchMarkCount", () => {
+describe("batchMarkCount / renderPrimitiveCount", () => {
   it("counts points and glyphs by rowIndex length", () => {
     const points: PointsBatch = {
       kind: "points",
@@ -37,6 +37,19 @@ describe("batchMarkCount", () => {
       fill: null,
     };
     expect(batchMarkCount(points)).toBe(3);
+    const glyphs = {
+      kind: "glyphs" as const,
+      layerIndex: 0,
+      panelIndex: 0,
+      positions: new Float32Array(4),
+      rowIndex: new Uint32Array([0, 1]),
+      texts: ["a", "b"],
+      color: null,
+      size: 12,
+      anchor: "middle" as const,
+      alpha: 1,
+    };
+    expect(batchMarkCount(glyphs)).toBe(2);
   });
 
   it("counts paths by subpath count (pathOffsets length - 1)", () => {

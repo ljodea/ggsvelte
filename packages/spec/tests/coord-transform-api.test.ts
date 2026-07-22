@@ -97,4 +97,52 @@ describe("coord_transform public contract", () => {
     expect(coordTransform()).toEqual({ type: "cartesian" });
     expect(coordTransform({ clip: true })).toEqual({ type: "cartesian" });
   });
+
+  it("drops explicit undefined coord defaults from option spreads", () => {
+    const spec = normalize({
+      layers: [{ geom: "point" }],
+      coord: {
+        type: "transform",
+        x: { transform: "log10", reverse: undefined, expand: undefined },
+        clip: undefined,
+      },
+    } as never);
+    expect(spec.coord).toEqual({ type: "transform", x: { transform: "log10" } });
+    expect(validate(spec).ok).toBe(true);
+  });
+
+  it("preserves malformed identity axes so schema still rejects them", () => {
+    const badIdentity = normalize({
+      layers: [{ geom: "point" }],
+      coord: { type: "transform", x: { transform: "identity", reverse: "yes" } },
+    } as never);
+    expect(badIdentity.coord).toBeDefined();
+    expect((badIdentity.coord as { x?: { reverse?: unknown } } | undefined)?.x?.reverse).toBe(
+      "yes",
+    );
+    expect(validate(badIdentity).ok).toBe(false);
+  });
+
+  it("preserves malformed coord axis booleans and clip for schema validation", () => {
+    const badReverse = normalize({
+      layers: [{ geom: "point" }],
+      coord: { type: "transform", x: { transform: "log10", reverse: "yes" } },
+    } as never);
+    expect((badReverse.coord as { x?: { reverse?: unknown } } | undefined)?.x?.reverse).toBe("yes");
+    expect(validate(badReverse).ok).toBe(false);
+
+    const badExpand = normalize({
+      layers: [{ geom: "point" }],
+      coord: { type: "transform", x: { transform: "log10", expand: "no" } },
+    } as never);
+    expect((badExpand.coord as { x?: { expand?: unknown } } | undefined)?.x?.expand).toBe("no");
+    expect(validate(badExpand).ok).toBe(false);
+
+    const badClip = normalize({
+      layers: [{ geom: "point" }],
+      coord: { type: "transform", x: { transform: "log10" }, clip: "off" },
+    } as never);
+    expect((badClip.coord as { clip?: unknown } | undefined)?.clip).toBe("off");
+    expect(validate(badClip).ok).toBe(false);
+  });
 });

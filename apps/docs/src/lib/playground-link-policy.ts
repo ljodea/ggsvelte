@@ -68,6 +68,18 @@ export function shouldConfirmDiscardForSampleLoad(state: PlaygroundState): boole
   return !state.synchronized || state.candidate !== null || state.seed.source.kind === "custom";
 }
 
+/** window.confirm body when undo would discard a dirty draft. */
+export const PLAYGROUND_UNDO_DISCARD_CONFIRM =
+  "Discard the current draft and undo to the previous rendered chart? Copy it first if you need to keep it.";
+
+/** window.confirm body when loading a sample would discard local work. */
+export const PLAYGROUND_SAMPLE_DISCARD_CONFIRM =
+  "Discard the current draft and load this sample? Copy it first if you need to keep it.";
+
+/** Status after the active chart fails safely (last valid retained). */
+export const PLAYGROUND_ACTIVE_FAILED_STATUS =
+  "The current chart stopped safely. Reset the source to recover.";
+
 export function shouldClearPlayHashAfterPromotion(
   origin: PlaygroundCandidateOrigin | undefined,
   locationHash: string,

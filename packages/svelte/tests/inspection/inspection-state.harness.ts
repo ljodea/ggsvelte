@@ -115,38 +115,49 @@ export function applyInspect(
   );
 }
 
-/** Wrap a reducer so inspect-null dispatches are logged (shared spy). */
-export function wrapReducerWithLog(
-  base: InteractionReducer,
-  onInspectNull: (count: number) => void,
-): InteractionReducer {
-  let nullDispatches = 0;
-  return {
-    ...base,
-    dispatch: (action) => {
-      if (action.type === "inspect" && action.candidate === null) {
-        nullDispatches++;
-        onInspectNull(nullDispatches);
-      }
-      base.dispatch(action);
-    },
-    get state() {
-      return base.state;
-    },
-  };
-}
-
 export type InspectionHarness = {
   state: ReturnType<typeof createInspectionState>;
   reducer: InteractionReducer;
   destroy: () => void;
+  /** Flush a deferred frame when mount used `deferredFrames: true`. */
+  flushFrame: () => void;
 };
+
+/** Controllable rAF for schedulePointerInspect tests (never sync — handle assign). */
+function createDeferredFrameScheduler(): {
+  scheduleFrame: (callback: () => void) => number;
+  cancelFrame: (handle: unknown) => void;
+  flush: () => void;
+  readonly pending: boolean;
+} {
+  let frame: (() => void) | null = null;
+  return {
+    scheduleFrame: (callback) => {
+      frame = callback;
+      return 1;
+    },
+    cancelFrame: () => {
+      frame = null;
+    },
+    flush: () => {
+      const next = frame;
+      frame = null;
+      next?.();
+    },
+    get pending() {
+      return frame !== null;
+    },
+  };
+}
 
 /**
  * Mount the controller with production-shaped deps: every reactive dep is a
  * getter (mirroring InspectionStateDeps). Harness owns the component-held
  * reducer and passes a getter. Call registerInspectionEffects when effects
  * are under test.
+ *
+ * When `deferredFrames` is true, owns a deferred scheduler and wires
+ * `onPointerFrame` → `onInspectPointerFrame` so schedule+flush is testable.
  */
 export function mountInspectionController(
   options: {
@@ -168,17 +179,32 @@ export function mountInspectionController(
     announce?: (message: string) => void;
     clearAnnouncement?: () => void;
     registerEffects?: boolean;
+    /** Wire deferred frame + onInspectPointerFrame (for schedulePointerInspect). */
+    deferredFrames?: boolean;
   } = {},
 ): InspectionHarness {
   const defaultModel = modelFor(continuousSpec());
+  const scheduler = options.deferredFrames === true ? createDeferredFrameScheduler() : null;
+  let controllerRef: ReturnType<typeof createInspectionState> | null = null;
+
   const ownedReducer =
     options.reducer === undefined
       ? createInteractionReducer({
-          scheduleFrame: (callback) => {
-            callback();
-            return 0;
-          },
-          cancelFrame: () => {},
+          scheduleFrame:
+            scheduler?.scheduleFrame ??
+            ((callback) => {
+              callback();
+              return 0;
+            }),
+          cancelFrame: scheduler?.cancelFrame ?? (() => {}),
+          onPointerFrame:
+            scheduler === null
+              ? undefined
+              : (action) => {
+                  if (action.type === "inspect")
+                    return controllerRef!.onInspectPointerFrame(action);
+                  return true;
+                },
         })
       : null;
   const getReducer = options.reducer ?? (() => ownedReducer!);
@@ -208,11 +234,19 @@ export function mountInspectionController(
       announce: options.announce ?? (() => {}),
       clearAnnouncement: options.clearAnnouncement ?? (() => {}),
     });
+    controllerRef = controller;
     if (options.registerEffects !== false) controller.registerInspectionEffects();
     return controller;
   });
 
-  return { state, reducer: getReducer(), destroy };
+  return {
+    state,
+    reducer: getReducer(),
+    destroy,
+    flushFrame: () => {
+      scheduler?.flush();
+    },
+  };
 }
 
 // Re-exports used by construction / armed-getter suites

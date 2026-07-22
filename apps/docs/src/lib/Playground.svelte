@@ -4,7 +4,7 @@
 
   import type { RenderModel } from "@ggsvelte/core";
 
-  import { copyText, MANUAL_LINK_COPY_STATUS } from "$lib/clipboard";
+  import { copyText } from "$lib/clipboard";
   import PlaygroundEditor from "$lib/components/PlaygroundEditor.svelte";
   import PlaygroundEvents from "$lib/components/PlaygroundEvents.svelte";
   import PlaygroundOutput from "$lib/components/PlaygroundOutput.svelte";
@@ -40,11 +40,15 @@
     resolvePlaygroundHashRestore,
   } from "$lib/playground-hash-restore";
   import {
+    PLAYGROUND_ACTIVE_FAILED_STATUS,
+    PLAYGROUND_SAMPLE_DISCARD_CONFIRM,
+    PLAYGROUND_UNDO_DISCARD_CONFIRM,
     shouldClearPlayHashAfterPromotion,
     shouldConfirmDiscardForSampleLoad,
     shouldConfirmDiscardForUndo,
   } from "$lib/playground-link-policy";
   import { playgroundOutputs } from "$lib/playground-output";
+  import { playgroundShareCopyStatus } from "$lib/playground-output-status";
   import {
     confirmPlaygroundRendered,
     createPlaygroundState,
@@ -179,9 +183,7 @@
     if (workbench.undoSnapshots.length === 0 || workbench.candidate !== null)
       return;
     if (shouldConfirmDiscardForUndo(workbench)) {
-      const discard = window.confirm(
-        "Discard the current draft and undo to the previous rendered chart? Copy it first if you need to keep it.",
-      );
+      const discard = window.confirm(PLAYGROUND_UNDO_DISCARD_CONFIRM);
       if (!discard) return;
     }
     const previous = activeCandidate();
@@ -193,9 +195,7 @@
   function loadSample(id: string): boolean {
     if (id === "") return false;
     if (shouldConfirmDiscardForSampleLoad(workbench)) {
-      const discard = window.confirm(
-        "Discard the current draft and load this sample? Copy it first if you need to keep it.",
-      );
+      const discard = window.confirm(PLAYGROUND_SAMPLE_DISCARD_CONFIRM);
       if (!discard) return false;
     }
     const sample = PLAYGROUND_SAMPLES.find((entry) => entry.id === id);
@@ -280,7 +280,7 @@
     workbench = reportPlaygroundDiagnostic(
       workbench,
       diagnostic,
-      "The current chart stopped safely. Reset the source to recover.",
+      PLAYGROUND_ACTIVE_FAILED_STATUS,
       false,
     );
     for (const detail of phaseNotesForCandidateTransition(previous, {
@@ -302,8 +302,7 @@
     await tick();
     if (shareSource === undefined) return;
     const result = await copyText(shareUrl, shareSource);
-    shareStatus =
-      result === "copied" ? "Share link copied." : MANUAL_LINK_COPY_STATUS;
+    shareStatus = playgroundShareCopyStatus(result);
   }
 </script>
 

@@ -16,10 +16,9 @@ import type {
 } from "./interaction/interaction.js";
 import { INTERACTION_DIAGNOSTIC_CATALOG } from "./interaction/interaction.js";
 import { createPlotAnnouncer } from "./runtime/announcer.svelte.js";
+import { createSourceIdentityTracker, dataIdentityEpochToken } from "./runtime/semantic-keys.js";
 import {
-  createSourceIdentityTracker,
   createSemanticKeyService,
-  dataIdentityEpochToken,
   type SemanticKeyService,
 } from "./runtime/semantic-keys.svelte.js";
 import { createPlotRuntime } from "./runtime/runtime.svelte.js";

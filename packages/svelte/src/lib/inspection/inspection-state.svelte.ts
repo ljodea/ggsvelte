@@ -21,11 +21,7 @@
 import type { CandidateFacts, CellValue, RenderModel, ScenePanel } from "@ggsvelte/core";
 
 import { createInspectionCoordinator } from "./coordinator.js";
-import type {
-  createInteractionReducer,
-  InteractionAction,
-  InteractionFrameToken,
-} from "../interaction/reducer.js";
+import type { createInteractionReducer, InteractionAction } from "../interaction/reducer.js";
 import type {
   InteractionSource,
   PlotInspection,
@@ -37,7 +33,11 @@ import { inspectionLiveText as inspectionLiveTextFor } from "../assembly/labels.
 import { plotTooltipDomId } from "../assembly/layout.js";
 import { panelContainingAnchor } from "../scene/geometry.js";
 import { hitFromCandidate, type SceneHit } from "../surface/plot-px.js";
-import { resolveQueuedInspectFrameAction, type QueuedPointerInspection } from "./frame.js";
+import {
+  buildQueuedInspectFrame,
+  resolveQueuedInspectFrameAction,
+  type QueuedPointerInspection,
+} from "./frame.js";
 import {
   resolveInspectionCompleteness,
   resolveInspectionMode,
@@ -45,7 +45,6 @@ import {
   resolveToggleInspectionPinAction,
   shouldAnnounceUnpin,
   shouldClearInspectionAnnouncement,
-  shouldCommitInspection,
   shouldFocusPinnedInteractiveTooltip,
 } from "./apply.js";
 import {
@@ -97,6 +96,20 @@ export type InspectionStateDeps = {
   clearAnnouncement: () => void;
 };
 
+/** Intent for a coalesced pointer-inspect frame (nearest lookup owned here). */
+type SchedulePointerInspectInput = {
+  readonly point: Readonly<{ x: number; y: number }>;
+  readonly source: InteractionSource;
+  readonly mode: "auto" | "exact" | "x" | "y" | "xy";
+  readonly maxDistance: number;
+};
+
+/** Cancel policy for pending pointer-inspect work. */
+type CancelPointerInspectPolicy = {
+  /** Leave/clear: discard stash. Cancel/down/blur tool paths: preserve. */
+  readonly pendingPinned: "preserve" | "discard";
+};
+
 export type InspectionState = {
   readonly inspection: PlotInspectionChange<Record<string, CellValue>, PropertyKey> | null;
   readonly inspectionPanel: ScenePanel | null;
@@ -120,14 +133,20 @@ export type InspectionState = {
   /** Blur-path reset; scene-reconcile does NOT reset the index. */
   resetTraversalIndex(): void;
   /**
-   * Reducer onPointerFrame non-move-area branch: snapshot-then-clear queues,
-   * pure route, stash or setInspection apply.
+   * Schedule a coalesced pointer-inspect frame from pointer intent.
+   * Owns nearest/hitTest, queue payload+token, and reducer.queuePointer.
    */
-  applyQueuedInspectFrame(action: InspectPointerFrameAction): void;
-  queuePointerFrame(queued: QueuedPointerInspection, token: InteractionFrameToken): void;
-  /** Clears ONLY the queued payload (token stays). Matches every host clear site. */
-  clearQueuedPointer(): void;
-  clearPendingPinned(): void;
+  schedulePointerInspect(input: SchedulePointerInspectInput): void;
+  /**
+   * Cancel pending inspect schedule + clear queued payload.
+   * Does not cancel move-area (typed cancel on the reducer).
+   */
+  cancelPointerInspect(policy: CancelPointerInspectPolicy): void;
+  /**
+   * Reducer onPointerFrame inspect branch sink.
+   * Returns false when the frame is dropped so the reducer skips dispatch.
+   */
+  onInspectPointerFrame(action: InspectPointerFrameAction): boolean;
   /** Register disposal + scene-reconcile effects at the original host site. */
   registerInspectionEffects(): void;
 };
@@ -152,6 +171,13 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
   let inspectionSeed: CandidateFacts | null = null;
   let lastInspectionFingerprint = "";
   let activeCandidateId: number | null = null;
+  /**
+   * Same-candidate suppression after dismiss of a *transient* inspection
+   * (Escape). Pinned dismiss does not set the latch. Cleared on different
+   * candidate apply, effective null-clear, and scene invalidate.
+   */
+  let dismissedCandidateId: number | null = null;
+  let dismissedRunId: number | null = null;
 
   let queuedPointerToken: {
     readonly epoch: number;
@@ -159,6 +185,16 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
   } | null = null;
   let queuedPointerInspection: QueuedPointerInspection | null = null;
   let pendingPinnedPointer: QueuedPointerInspection | null = null;
+
+  function clearDismissedLatch(): void {
+    dismissedCandidateId = null;
+    dismissedRunId = null;
+  }
+
+  /** Cancel inspect schedule + payload; optional stash clear. */
+  function invalidatePointerInspect(policy: CancelPointerInspectPolicy): void {
+    cancelPointerInspect(policy);
+  }
 
   // Construction-safe: own state + earlier host model.
   const inspectionPanel = $derived.by(() => {
@@ -246,6 +282,10 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
       })
     )
       deps.clearAnnouncement();
+    // Non-pointer applies must cancel queued hover (was: reducer boundary cancel).
+    if (source !== "pointer" && source !== "touch") {
+      invalidatePointerInspect({ pendingPinned: "preserve" });
+    }
     const action = resolveSetInspectionAction({
       hasHit: hit !== null,
       requestedState: state,
@@ -256,14 +296,11 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
       case "ignore":
         return;
       case "clear": {
-        // Preserve both dispatches (before emit/release and after) — do not
-        // dedupe; may be load-bearing for reducer revision counting.
-        deps.reducer().dispatch({ type: "inspect", candidate: null, source });
         if (action.emitClear) emitInspection({ type: "inspect", phase: "clear", source });
         inspection = null;
         inspectionSeed = null;
+        clearDismissedLatch();
         inspectionCoordinator.release("transient");
-        deps.reducer().dispatch({ type: "inspect", candidate: null, source });
         return;
       }
       case "apply": {
@@ -274,32 +311,27 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
           setInspection(null, source);
           return;
         }
-        const next = resolved.snapshot;
-        const candidateRef = {
-          epoch: deps.model()?.runId ?? 0,
-          id: resolved.seed.id,
-          panelId: next.panelId,
-          x: hit!.x,
-          y: hit!.y,
-        };
-        deps.reducer().dispatch({ type: "inspect", candidate: candidateRef, source });
-        if (state === "pinned") deps.reducer().dispatch({ type: "toggle-pin", source });
+        const runId = deps.model()?.runId ?? 0;
+        // Same-candidate dismiss latch (Escape on transient).
         if (
-          !shouldCommitInspection({
-            requestedState: state,
-            reducerKind: deps.reducer().state.inspection.kind,
-          })
+          dismissedCandidateId === resolved.seed.id &&
+          dismissedRunId === runId &&
+          state === "transient"
         )
           return;
-        inspection = next;
+        if (dismissedCandidateId !== null && dismissedCandidateId !== resolved.seed.id)
+          clearDismissedLatch();
+        inspection = resolved.snapshot;
         inspectionSeed = resolved.seed;
         activeCandidateId = resolved.seed.id;
-        if (resolved.semanticChanged) emitInspection(next, resolved.semanticFingerprint);
+        if (resolved.semanticChanged)
+          emitInspection(resolved.snapshot, resolved.semanticFingerprint);
       }
     }
   }
 
   function toggleInspectionPin(source: InteractionSource): void {
+    invalidatePointerInspect({ pendingPinned: "preserve" });
     const pinAction = resolveToggleInspectionPinAction({
       hasInspection: inspection !== null,
       hasSeed: inspectionSeed !== null,
@@ -307,12 +339,8 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
       pending: pendingPinnedPointer,
     });
     if (pinAction.type === "ignore") return;
-    // toggle-pin always runs before restore/flip side effects; if flip
-    // resolve returns null the reducer stays toggled (no rollback).
-    deps.reducer().dispatch({ type: "toggle-pin", source });
     switch (pinAction.type) {
       case "restore-pending": {
-        // Pure gate carries pending payload — no host non-null assert.
         pendingPinnedPointer = null;
         inspectionCoordinator.release("pinned");
         inspection = null;
@@ -327,38 +355,25 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
         return;
       }
       case "flip": {
-        // inspection + seed non-null after non-ignore (pure gate).
-        const state = pinAction.state;
+        const nextState = pinAction.state;
         const resolved = resolveInspection(
           hitFromCandidate(inspectionSeed!),
           source,
-          state,
+          nextState,
           inspection!.mode,
           inspectionSeed!,
         );
         if (resolved === null) return;
         inspection = resolved.snapshot;
         inspectionSeed = resolved.seed;
-        if (state === "transient")
-          deps.reducer().dispatch({
-            type: "inspect",
-            candidate: {
-              epoch: deps.model()?.runId ?? 0,
-              id: inspectionSeed.id,
-              panelId: resolved.snapshot.panelId,
-              x: inspectionSeed.x,
-              y: inspectionSeed.y,
-            },
-            source,
-          });
-        if (state === "transient") inspectionCoordinator.release("pinned");
-        if (shouldAnnounceUnpin({ state, source }))
+        if (nextState === "transient") inspectionCoordinator.release("pinned");
+        if (shouldAnnounceUnpin({ state: nextState, source }))
           deps.announce(`${inspectionLiveText(resolved.snapshot)}, unpinned`);
         if (resolved.semanticChanged)
           emitInspection(resolved.snapshot, resolved.semanticFingerprint);
         if (
           shouldFocusPinnedInteractiveTooltip({
-            state,
+            state: nextState,
             contentMode: deps.inspectConfig()?.contentMode,
           })
         )
@@ -374,7 +389,7 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
 
   /**
    * Shared dismiss path for Escape and closeInspection.
-   * Pure plan owns escape-vs-close differences; host owns dispatch/emit/DOM.
+   * Escape also cancels area via reducer; close does not masquerade as Escape.
    */
   function dismissInspection(
     kind: "escape" | "close",
@@ -391,7 +406,18 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
         returnToInspect: opts.returnToInspect,
       }),
     });
-    deps.reducer().dispatch({ type: "escape", source });
+    invalidatePointerInspect({
+      pendingPinned: plan.clearPendingPinned ? "discard" : "preserve",
+    });
+    // Latch only when dismissing a *transient* inspection (Escape path).
+    if (inspection?.state === "transient" && inspectionSeed !== null) {
+      dismissedCandidateId = inspectionSeed.id;
+      dismissedRunId = deps.model()?.runId ?? null;
+    } else if (inspection?.state === "pinned") {
+      clearDismissedLatch();
+    }
+    // Real Escape cancels area + bumps epoch; close does not.
+    if (kind === "escape") deps.reducer().dispatch({ type: "escape", source });
     if (plan.emitClear) emitInspection({ type: "inspect", phase: "clear", source });
     inspection = null;
     inspectionSeed = null;
@@ -448,7 +474,54 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
     activeCandidateId = null;
   }
 
-  function applyQueuedInspectFrame(action: InspectPointerFrameAction): void {
+  function panelIdForIndex(index: number): string | null {
+    const panel = deps.model()?.scene.panels[index];
+    if (panel === undefined) return null;
+    return panel.id;
+  }
+
+  function schedulePointerInspect(input: SchedulePointerInspectInput): void {
+    const model = deps.model();
+    const match =
+      model?.candidates.nearest(input.point.x, input.point.y, {
+        mode: input.mode,
+        maxDistance: input.maxDistance,
+      }) ?? null;
+    const frame = buildQueuedInspectFrame({
+      match,
+      source: input.source,
+      epoch: model?.runId ?? 0,
+      fallbackCandidate: () => model?.candidates.hitTest(input.point.x, input.point.y) ?? null,
+      panelIdForIndex,
+    });
+    const reducer = deps.reducer();
+    queuedPointerInspection = frame.queued;
+    queuedPointerToken = reducer.frameToken();
+    try {
+      reducer.queuePointer({
+        type: "inspect",
+        candidate: frame.candidate,
+        source: input.source,
+      });
+    } catch (error) {
+      // No orphan payload if scheduling throws (Codex plan review).
+      queuedPointerInspection = null;
+      queuedPointerToken = null;
+      throw error;
+    }
+  }
+
+  function cancelPointerInspect(policy: CancelPointerInspectPolicy): void {
+    queuedPointerInspection = null;
+    if (policy.pendingPinned === "discard") pendingPinnedPointer = null;
+    deps.reducer().cancelScheduledPointer("inspect");
+  }
+
+  /**
+   * Inspect branch of onPointerFrame. Returns false on drop so the reducer
+   * skips dispatch (atomic with InspectionState — Codex plan review).
+   */
+  function onInspectPointerFrame(action: InspectPointerFrameAction): boolean {
     // Snapshot then clear queues before pure routing (matches prior host).
     const pending = queuedPointerInspection;
     const token = queuedPointerToken;
@@ -465,37 +538,27 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
     });
     switch (frameAction.type) {
       case "none":
+        // Empty frame: still allow reducer dispatch (prior host behavior when
+        // payload was cleared but a scheduled inspect still flushed).
+        return true;
       case "drop":
-        return;
+        return false;
       case "stash-pending":
-        if (pending === null) return;
-        pendingPinnedPointer = pending;
-        return;
+        if (pending !== null) pendingPinnedPointer = pending;
+        return true;
       case "apply-pending":
-        if (pending === null) return;
-        setInspection(
-          pending.hit,
-          pending.source,
-          "transient",
-          pending.concreteMode,
-          pending.candidate,
-        );
-        break;
+        if (pending !== null) {
+          setInspection(
+            pending.hit,
+            pending.source,
+            "transient",
+            pending.concreteMode,
+            pending.candidate,
+          );
+        }
+        return true;
     }
-  }
-
-  function queuePointerFrame(queued: QueuedPointerInspection, token: InteractionFrameToken): void {
-    queuedPointerInspection = queued;
-    queuedPointerToken = token;
-  }
-
-  function clearQueuedPointer(): void {
-    // Only the payload — token is NOT cleared (every host clear site).
-    queuedPointerInspection = null;
-  }
-
-  function clearPendingPinned(): void {
-    pendingPinnedPointer = null;
+    return true;
   }
 
   function registerInspectionEffects(): void {
@@ -523,11 +586,8 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
           inspectionCoordinator.invalidate();
           inspection = null;
           inspectionSeed = null;
-          deps.reducer().dispatch({
-            type: "inspect",
-            candidate: null,
-            source: "programmatic",
-          });
+          clearDismissedLatch();
+          invalidatePointerInspect({ pendingPinned: "discard" });
           return;
         case "invalidate-clear-transient":
         case "invalidate-idle":
@@ -539,16 +599,12 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
           pendingPinnedPointer = null;
           queuedPointerToken = null;
           deps.reducer().cancelScheduledPointer();
+          clearDismissedLatch();
           reconciledRun = runId;
           if (plan.type === "invalidate-clear-transient") {
             inspectionCoordinator.release("transient");
             inspection = null;
             inspectionSeed = null;
-            deps.reducer().dispatch({
-              type: "inspect",
-              candidate: null,
-              source: "programmatic",
-            });
             return;
           }
           if (plan.type === "invalidate-idle") return;
@@ -560,8 +616,7 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
             completeness: "complete",
           });
           if (reconciled === null) {
-            deps.reducer().dispatch({ type: "escape", source: "programmatic" });
-            deps.reducer().dispatch({ type: "set-active", candidate: null });
+            // Failed pinned reconcile: clear inspection only (not area Escape).
             emitInspection({
               type: "inspect",
               phase: "clear",
@@ -597,10 +652,9 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
     navigateDirection,
     cycleCoincident,
     resetTraversalIndex,
-    applyQueuedInspectFrame,
-    queuePointerFrame,
-    clearQueuedPointer,
-    clearPendingPinned,
+    schedulePointerInspect,
+    cancelPointerInspect,
+    onInspectPointerFrame,
     registerInspectionEffects,
   };
 }

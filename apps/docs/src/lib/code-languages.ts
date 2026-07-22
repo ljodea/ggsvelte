@@ -35,3 +35,18 @@ export function resolveCodeLanguage(lang: string | undefined): LanguageType<stri
   if (lang === undefined || lang.trim() === "") return plaintext;
   return LANGUAGE_MODULES[lang.trim().toLowerCase()] ?? plaintext;
 }
+
+/**
+ * Infer a highlight language from a code-tab label when no explicit language prop is set
+ * (e.g. "Builder (TS)", "Spec (JSON)", "Svelte").
+ */
+export function languageFromCodeTabLabel(label: string | undefined): string {
+  if (label === undefined) return "plaintext";
+  const lower = label.toLowerCase();
+  if (lower.includes("svelte")) return "svelte";
+  if (lower.includes("json") || lower.includes("spec")) return "json";
+  if (lower.includes("ts") || lower.includes("builder") || lower.includes("type")) {
+    return "typescript";
+  }
+  return "plaintext";
+}

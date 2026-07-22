@@ -3,7 +3,7 @@
   import CopyIcon from "phosphor-svelte/lib/CopyIcon";
   import Highlight from "svelte-highlight";
 
-  import { copyText, MANUAL_COPY_STATUS } from "$lib/clipboard";
+  import { briefCopyStatus, COPIED_STATUS, copyText } from "$lib/clipboard";
   import { resolveCodeLanguage } from "$lib/code-languages";
 
   const {
@@ -25,13 +25,13 @@
   let status = $state("");
   let timer: ReturnType<typeof setTimeout> | undefined;
   const languageModule = $derived(resolveCodeLanguage(language));
-  const copied = $derived(status === "Copied.");
+  const copied = $derived(status === COPIED_STATUS);
 
   async function copy(): Promise<void> {
     if (timer !== undefined) clearTimeout(timer);
     if (source === undefined) return;
     const result = await copyText(code, source);
-    status = result === "copied" ? "Copied." : MANUAL_COPY_STATUS;
+    status = briefCopyStatus(result);
     if (result === "copied") timer = setTimeout(() => (status = ""), 2000);
   }
 </script>

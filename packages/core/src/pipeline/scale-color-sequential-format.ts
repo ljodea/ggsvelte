@@ -16,11 +16,13 @@ export interface ColorLegendFormatter {
 function resolveColorLegendFormat(input: {
   domain: readonly [number, number];
   temporalKind: TemporalKind | null;
-  config: Pick<ColorScaleSpec, "labels" | "timezone"> | undefined;
+  transform?: "identity" | "log10" | "sqrt";
+  config: Pick<ColorScaleSpec, "labels" | "timezone" | "transform"> | undefined;
   name: string;
   warnings: PipelineWarning[];
 }): ColorLegendFormatter {
   const { domain, temporalKind, config, name, warnings } = input;
+  const transform = input.transform ?? config?.transform ?? "identity";
   const labelFormat = config?.labels;
   if (temporalKind !== null) {
     const options = {
@@ -54,7 +56,24 @@ function resolveColorLegendFormat(input: {
     return { label, fullLabel };
   }
 
-  let label = defaultTickFormat(tickStep(domain[0], domain[1], 5));
+  // Log colorbars use decade ticks; linear span precision labels sub-unit
+  // powers (0.001, 0.01, 0.1) as "0". Derive decimals from the domain floor.
+  let label: (value: number) => string;
+  if (transform === "log10" && labelFormat === undefined) {
+    const positives = domain.filter((value) => Number.isFinite(value) && value > 0);
+    const minAbs = positives.length > 0 ? Math.min(...positives) : 1;
+    const decimals = minAbs < 1 ? Math.max(0, Math.ceil(-Math.log10(minAbs))) : 0;
+    label = (value: number) => {
+      if (!Number.isFinite(value)) return String(value);
+      if (decimals === 0) return defaultTickFormat(tickStep(domain[0], domain[1], 5))(value);
+      return value.toLocaleString("en-US", {
+        maximumFractionDigits: decimals,
+        minimumFractionDigits: 0,
+      });
+    };
+  } else {
+    label = defaultTickFormat(tickStep(domain[0], domain[1], 5));
+  }
   if (labelFormat !== undefined) {
     const formatter = numberFormatter(labelFormat);
     if (formatter.ok) {
@@ -88,6 +107,7 @@ export function resolveSequentialLegendFormat(
   return resolveColorLegendFormat({
     domain: scale.domain,
     temporalKind: scale.temporalKind ?? null,
+    transform: scale.transform,
     config,
     name,
     warnings,

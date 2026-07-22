@@ -69,6 +69,13 @@ export interface PathsBatch {
   /** Original/stat primitive index for each render vertex. Candidate datum
    * resolution uses this instead of synthetic render topology indexes. */
   semanticIndex?: Uint32Array;
+  /**
+   * Closed ribbons only: frame-row id per **pre-projection** semantic vertex
+   * (upper ascending, then lower descending). Matches emitted vertices after
+   * non-finite edge filtering so coord `semanticIndex` maps to the correct
+   * frame row (#502). Length = pre-projection vertex count.
+   */
+  closedFrameRows?: Uint32Array;
   /** Start offset (in points) of each subpath; length = subpathCount + 1. */
   pathOffsets: Uint32Array;
   /** Stroke color per subpath (null = theme ink). */

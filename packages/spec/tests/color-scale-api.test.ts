@@ -1,3 +1,7 @@
+/**
+ * Color/fill scale authoring API: helpers, aliases, normalize parity, schema
+ * field acceptance. Data-aware validation: validate-tier2-color.test.ts.
+ */
 import { describe, expect, it } from "bun:test";
 
 import {
@@ -183,99 +187,6 @@ describe("color/fill scale authoring API", () => {
         },
       ],
     });
-  });
-
-  it("validates explicit temporal color parsing against whole-column evidence", () => {
-    const temporal = {
-      data: {
-        values: [
-          { x: 1, y: 2, when: "03/04/2024" },
-          { x: 2, y: 3, when: "04/05/2024" },
-        ],
-      },
-      aes: { x: { field: "x" }, y: { field: "y" }, color: { field: "when" } },
-      layers: [point],
-      scales: {
-        color: {
-          type: "sequential" as const,
-          temporalKind: "date" as const,
-          parse: "dmy" as const,
-        },
-      },
-    };
-    expect(validate(temporal, {}).ok).toBe(true);
-    expect(
-      validate(
-        {
-          ...temporal,
-          scales: { color: { type: "sequential", temporalKind: "date" } },
-        },
-        {},
-      ).ok,
-    ).toBe(false);
-
-    expect(
-      validate(
-        {
-          ...temporal,
-          scales: { color: { temporalKind: "date", parse: "dmy" } },
-        },
-        {},
-      ).ok,
-    ).toBe(true);
-  });
-
-  it("rejects inferred ordinal and temporal fields with incompatible transforms", () => {
-    const nominal = validate(
-      {
-        data: { values: [{ x: 1, y: 2, group: "control" }] },
-        aes: { x: { field: "x" }, y: { field: "y" }, color: { field: "group" } },
-        layers: [point],
-        scales: { color: { transform: "log10" } },
-      },
-      {},
-    );
-    expect(nominal.ok).toBe(false);
-    if (nominal.ok) throw new Error("expected nominal transform rejection");
-    expect(nominal.errors.map(({ code }) => code)).toContain("scale-type-mismatch");
-
-    const temporal = validate(
-      {
-        data: {
-          values: [
-            { x: 1, y: 2, when: "2024-01-01" },
-            { x: 2, y: 3, when: "2024-01-02" },
-          ],
-        },
-        aes: { x: { field: "x" }, y: { field: "y" }, color: { field: "when" } },
-        layers: [point],
-        scales: { color: { type: "sequential", transform: "log10" } },
-      },
-      {},
-    );
-    expect(temporal.ok).toBe(false);
-    if (temporal.ok) throw new Error("expected temporal transform rejection");
-    expect(temporal.errors.map(({ code }) => code)).toContain("scale-type-mismatch");
-
-    const explicitlyParsed = validate(
-      {
-        data: {
-          values: [
-            { x: 1, y: 2, when: "03/04/2024" },
-            { x: 2, y: 3, when: "04/05/2024" },
-          ],
-        },
-        aes: { x: { field: "x" }, y: { field: "y" }, color: { field: "when" } },
-        layers: [point],
-        scales: { color: { transform: "log10", parse: "dmy" } },
-      },
-      {},
-    );
-    expect(explicitlyParsed.ok).toBe(false);
-    if (explicitlyParsed.ok) throw new Error("expected parsed temporal transform rejection");
-    expect(explicitlyParsed.errors.map(({ code }) => code)).toContain(
-      "scale-type-transform-conflict",
-    );
   });
 
   it("accepts the complete portable family fields and rejects contradictions", () => {

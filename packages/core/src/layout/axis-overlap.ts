@@ -13,9 +13,23 @@ export interface ProjectedLabel {
   half: number;
 }
 
+export interface OverlapOrderOptions {
+  /**
+   * When true, `items` are already sorted by ascending `pos` and the O(k log k)
+   * sort is skipped. Callers that project domain order (or reverse then reverse
+   * for flipped axes) should pass this for the hot band-thinning path.
+   */
+  alreadySorted?: boolean;
+}
+
 /** True when any adjacent pair (sorted by position) collides within `gapPx`. */
-export function neighbourOverlap(items: readonly ProjectedLabel[], gapPx: number): boolean {
-  const sorted = [...items].toSorted((a, b) => a.pos - b.pos);
+export function neighbourOverlap(
+  items: readonly ProjectedLabel[],
+  gapPx: number,
+  options?: OverlapOrderOptions,
+): boolean {
+  const sorted =
+    options?.alreadySorted === true ? items : [...items].toSorted((a, b) => a.pos - b.pos);
   for (let i = 1; i < sorted.length; i++) {
     const prev = sorted[i - 1]!;
     const cur = sorted[i]!;
@@ -37,8 +51,13 @@ export interface AsymProjectedLabel {
 /** Asymmetric variant: collide the left neighbour's right extent against the
  *  right neighbour's left extent, so end-anchored rotated labels are judged at
  *  their real (renderer-matched) footprint rather than a centered approximation. */
-export function neighbourOverlapAsym(items: readonly AsymProjectedLabel[], gapPx: number): boolean {
-  const sorted = [...items].toSorted((a, b) => a.pos - b.pos);
+export function neighbourOverlapAsym(
+  items: readonly AsymProjectedLabel[],
+  gapPx: number,
+  options?: OverlapOrderOptions,
+): boolean {
+  const sorted =
+    options?.alreadySorted === true ? items : [...items].toSorted((a, b) => a.pos - b.pos);
   for (let i = 1; i < sorted.length; i++) {
     const prev = sorted[i - 1]!;
     const cur = sorted[i]!;

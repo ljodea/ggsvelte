@@ -136,6 +136,44 @@ describe("post-stat coordinate axis projector", () => {
     expect(warnings.some((warning) => warning.code === "coord-tessellation-cap")).toBe(true);
   });
 
+  it("reserves tessellation budget so segment endpoints still emit under a tight cap", () => {
+    // A shared remaining counter lets the left recursive half spend every slot
+    // and drop the true endpoint; split remaining so the right half keeps one.
+    const projector = buildPanelCoordProjector(
+      { x: linear([1, 100]), y: linear([1, 100]) },
+      {
+        type: "transform",
+        x: { transform: "log10", expand: false },
+        y: { transform: "sqrt", expand: false },
+      },
+    );
+    const batch: SegmentsBatch = {
+      kind: "segments",
+      layerIndex: 0,
+      panelIndex: 0,
+      segments: Float32Array.from([1, 1, 100, 100]),
+      rowIndex: Uint32Array.from([0]),
+      stroke: null,
+      linewidth: 1,
+      alpha: 1,
+    };
+    projectGeometryBatch(batch, projector, 100, 100, [], {
+      mandatoryVertices: 2,
+      // Tiny allowance: enough that recursion is attempted but left-biased
+      // consumption would otherwise starve the endpoint.
+      extraRemaining: 2,
+    });
+    const rendered = batch.renderPositions;
+    expect(rendered).toBeDefined();
+    expect(rendered!.length).toBeGreaterThanOrEqual(4);
+    const lastX = rendered![rendered!.length - 2]!;
+    const lastY = rendered![rendered!.length - 1]!;
+    const expectedX = projector.x.projectFraction(1) * 100;
+    const expectedY = (1 - projector.y.projectFraction(0)) * 100;
+    expect(lastX).toBeCloseTo(expectedX, 5);
+    expect(lastY).toBeCloseTo(expectedY, 5);
+  });
+
   it("tessellates diagonal segment render topology while retaining one semantic anchor", () => {
     const x = linear([1, 100]);
     const y = linear([1, 100]);

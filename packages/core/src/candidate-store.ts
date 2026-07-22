@@ -5,7 +5,7 @@
  * - candidate-geometry.ts — pure geometry hit helpers
  * - candidate-path-geometry.ts — path AABB / edge helpers for hit shortlists
  * - candidate-store-indexes.ts — typed arrays, traversal, group buckets
- * - candidate-store-spatial.ts — spatial shortlist + geometry refine
+ * - candidate-store-spatial.ts — spatial shortlist + geometry refine (index + refine)
  * - candidate-store-eager.ts — assembles indexes/spatial into CandidateStore
  * - candidate-store-lazy.ts — deferred construction shell
  */

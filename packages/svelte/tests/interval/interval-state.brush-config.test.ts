@@ -1,5 +1,5 @@
 /**
- * createIntervalState tests — write-before-emit, applyBrushSelectEnd, selectConfig.
+ * createIntervalState tests — write-before-emit, finishBrushSelect, selectConfig.
  */
 import { fromAny } from "@total-typescript/shoehorn";
 import { flushSync } from "svelte";
@@ -30,7 +30,7 @@ describe("createIntervalState write-before-emit", () => {
       },
     });
 
-    state.applyBrushSelectEnd(brushEvent(model), "pointer");
+    state.finishBrushSelect(brushEvent(model), "pointer");
     flushSync();
     expect(state.committedInterval).not.toBeNull();
 
@@ -42,44 +42,51 @@ describe("createIntervalState write-before-emit", () => {
   });
 });
 
-describe("createIntervalState applyBrushSelectEnd", () => {
-  it("persistent sets committed + record; non-persistent nulls committed; method never emits", () => {
+describe("createIntervalState finishBrushSelect", () => {
+  it("persistent commits then emits end; non-persistent nulls commit but still emits end once", () => {
     const model = modelFor(continuousSpec());
     const events: PlotSelection[] = [];
+    const observedAtEmit: Array<IntervalSelection | null> = [];
     const selectBox = reactiveBox<SelectConfig>(persistentSelect());
 
     const { state, destroy } = mountIntervalController({
       model: () => model,
       selectConfig: () => selectBox.value,
       emitSelection: (event) => {
+        observedAtEmit.push(state.committedInterval);
         events.push(event);
       },
     });
 
-    state.applyBrushSelectEnd(brushEvent(model), "pointer");
+    state.finishBrushSelect(brushEvent(model), "pointer");
     flushSync();
     expect(state.committedInterval).not.toBeNull();
     expect(state.effectiveIntervals).toHaveLength(1);
-    expect(events).toEqual([]);
+    expect(events).toHaveLength(1);
+    expect(events[0]?.phase).toBe("end");
+    expect(observedAtEmit[0]).not.toBeNull();
 
     state.clearIntervalSelection("programmatic");
     flushSync();
     events.length = 0;
+    observedAtEmit.length = 0;
 
     selectBox.set(nonPersistentSelect());
     flushSync();
-    state.applyBrushSelectEnd(brushEvent(model), "pointer");
+    state.finishBrushSelect(brushEvent(model), "pointer");
     flushSync();
     expect(state.committedInterval).toBeNull();
     expect(state.effectiveIntervals).toEqual([]);
-    expect(events).toEqual([]);
+    expect(events).toHaveLength(1);
+    expect(events[0]?.phase).toBe("end");
+    expect(observedAtEmit[0]).toBeNull();
 
     destroy();
   });
 });
 
 describe("createIntervalState selectConfig replacement", () => {
-  it("flipping persistent post-flush is honored by the next applyBrushSelectEnd", () => {
+  it("flipping persistent post-flush is honored by the next finishBrushSelect", () => {
     const model = modelFor(continuousSpec());
     const selectBox = reactiveBox<SelectConfig>(persistentSelect());
     const { state, destroy } = mountIntervalController({
@@ -87,7 +94,7 @@ describe("createIntervalState selectConfig replacement", () => {
       selectConfig: () => selectBox.value,
     });
 
-    state.applyBrushSelectEnd(brushEvent(model), "pointer");
+    state.finishBrushSelect(brushEvent(model), "pointer");
     flushSync();
     expect(state.effectiveIntervals).toHaveLength(1);
 
@@ -96,7 +103,7 @@ describe("createIntervalState selectConfig replacement", () => {
     selectBox.set(nonPersistentSelect());
     flushSync();
 
-    state.applyBrushSelectEnd(brushEvent(model), "keyboard");
+    state.finishBrushSelect(brushEvent(model), "keyboard");
     flushSync();
     expect(state.committedInterval).toBeNull();
     expect(state.effectiveIntervals).toEqual([]);
@@ -104,7 +111,7 @@ describe("createIntervalState selectConfig replacement", () => {
     // Flip back to persistent.
     selectBox.set(persistentSelect());
     flushSync();
-    state.applyBrushSelectEnd(brushEvent(model), "keyboard");
+    state.finishBrushSelect(brushEvent(model), "keyboard");
     flushSync();
     expect(state.committedInterval).not.toBeNull();
     expect(state.effectiveIntervals).toHaveLength(1);
