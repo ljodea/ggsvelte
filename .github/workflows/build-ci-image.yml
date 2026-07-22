@@ -5,13 +5,21 @@
 # free: ljodea/ggsvelte is public, so GHCR storage/bandwidth are not billed, and
 # image pulls inside Actions never bill data transfer.
 #
-# Runs on Dockerfile changes and on demand. After the first successful run
-# publishes ghcr.io/<owner>/<repo>/ci-runner:<tag>, container jobs can switch
-# their `image:` to it and drop the ci-install-unzip step.
+# Runs ONLY on pushes to main that touch the Dockerfile or this workflow. After
+# the first successful run publishes ghcr.io/<owner>/<repo>/ci-runner:<tag>,
+# container jobs can switch their `image:` to it and drop the ci-install-unzip step.
+#
+# No `workflow_dispatch`: dispatchability is keyed to the workflow file on the
+# DEFAULT branch, but a dispatched run executes the SELECTED branch's copy. With
+# dispatch enabled, a write collaborator could branch, strip the `main` guard
+# below while keeping `packages: write`, and dispatch to overwrite the published
+# tag with a poisoned image — bypassing review entirely. Omitting dispatch makes
+# the workflow non-dispatchable, so publishing requires a commit on main (review-
+# gated). On-demand rebuilds: re-run the last successful main run from the Actions
+# UI, or push a no-op change to the Dockerfile / this file.
 name: build CI image
 
 on:
-  workflow_dispatch:
   push:
     branches: [main]
     paths:
@@ -41,10 +49,11 @@ jobs:
       # cache export silently no-ops (or errors). Set up Buildx first.
       - name: set up Buildx
         uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
-      # Only publish from main. workflow_dispatch can target any branch, so a
-      # write collaborator dispatching from an unmerged branch must NOT be able
-      # to overwrite the published tag — non-main dispatches are build-only
-      # (push=false below), and there is no reason to authenticate to GHCR.
+      # Defense-in-depth: this workflow only triggers on main pushes (no
+      # workflow_dispatch, see the `on:` note), so github.ref is always
+      # refs/heads/main here. The explicit ref guards remain so that if a future
+      # change ever broadens the trigger, non-main runs stay build-only and never
+      # authenticate to GHCR or overwrite the published tag.
       - name: log in to GHCR
         if: github.ref == 'refs/heads/main'
         uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
@@ -57,7 +66,8 @@ jobs:
         with:
           context: .github/docker/ci-runner
           build-args: PLAYWRIGHT_TAG=${{ env.PLAYWRIGHT_TAG }}
-          # Build-only on non-main dispatches; publish only from main.
+          # Publish only from main (always true given the main-only trigger; kept
+          # explicit as defense-in-depth if the trigger ever broadens).
           push: ${{ github.ref == 'refs/heads/main' }}
           tags: ghcr.io/${{ github.repository }}/ci-runner:${{ env.PLAYWRIGHT_TAG }}
           # Cache layers across builds to keep republishes fast.
