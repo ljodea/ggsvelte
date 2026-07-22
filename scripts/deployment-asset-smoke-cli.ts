@@ -15,11 +15,14 @@ function pathArguments(): string[] {
   for (let index = 0; index < process.argv.length; index += 1) {
     if (process.argv[index] !== "--paths") continue;
     let cursor = index + 1;
-    if (cursor >= process.argv.length || process.argv[cursor]!.startsWith("--")) {
+    const first = process.argv[cursor];
+    if (first === undefined || first.startsWith("--")) {
       throw new Error("Missing value for --paths");
     }
-    while (cursor < process.argv.length && !process.argv[cursor]!.startsWith("--")) {
-      values.push(process.argv[cursor]!);
+    while (cursor < process.argv.length) {
+      const value = process.argv[cursor];
+      if (value === undefined || value.startsWith("--")) break;
+      values.push(value);
       cursor += 1;
     }
   }

@@ -30,13 +30,13 @@
   }
 
   function shouldRecover(error) {
-    if (error === null || error === undefined) return false;
-    var message = typeof error === "string" ? error : error.message;
-    if (typeof message !== "string") return false;
+    // String(TypeError) includes the message text without property access that
+    // type-aware oxlint treats as unsafe any under --deny-warnings.
+    var message = typeof error === "string" ? error : String(error);
     return (
-      message.indexOf("Failed to fetch dynamically imported module") !== -1 ||
-      message.indexOf("error loading dynamically imported module") !== -1 ||
-      message.indexOf("Importing a module script failed") !== -1
+      message.includes("Failed to fetch dynamically imported module") ||
+      message.includes("error loading dynamically imported module") ||
+      message.includes("Importing a module script failed")
     );
   }
 

@@ -60,7 +60,13 @@ export async function smokeImmutableAssets(input: {
   readonly fetchImpl?: FetchLike;
 }): Promise<AssetSmokeProblem[]> {
   const origin = new URL(input.baseUrl).origin;
-  const fetchImpl = input.fetchImpl ?? (fetch as FetchLike);
+  const fetchImpl: FetchLike =
+    input.fetchImpl ??
+    ((url, init) =>
+      fetch(url, {
+        redirect: init?.redirect,
+        headers: init?.headers,
+      }));
   const problems: AssetSmokeProblem[] = [];
 
   for (const path of input.paths) {

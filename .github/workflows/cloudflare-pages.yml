@@ -88,9 +88,12 @@ jobs:
           test -n "${deployment_url}"
           printf 'deployment-url=%s\n' "${deployment_url}" >> "${GITHUB_OUTPUT}"
       - name: Verify immutable assets on the new deployment
+        env:
+          # Env-indirection: step outputs must not expand into the script body (zizmor).
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
         shell: bash
         run: |
           set -euo pipefail
           bun scripts/deployment-asset-smoke-cli.ts \
-            --base-url "${{ steps.deploy.outputs.deployment-url }}" \
+            --base-url "${DEPLOYMENT_URL}" \
             --paths / /guide/getting-started /examples /playground

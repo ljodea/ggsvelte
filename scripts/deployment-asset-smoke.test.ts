@@ -105,12 +105,11 @@ describe("deployment immutable asset smoke", () => {
       return Promise.reject(new Error(`unexpected fetch: ${input}`));
     };
 
-    await expect(
-      smokeImmutableAssets({
-        baseUrl: "https://example.pages.dev",
-        paths: ["/"],
-        fetchImpl,
-      }),
-    ).resolves.toEqual([]);
+    const problems = await smokeImmutableAssets({
+      baseUrl: "https://example.pages.dev",
+      paths: ["/"],
+      fetchImpl,
+    });
+    expect(problems).toEqual([]);
   });
 });
