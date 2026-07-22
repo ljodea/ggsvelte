@@ -72,7 +72,6 @@
   }
 
   onMount(() => {
-    addEventListener("popstate", readLocation);
     readLocation();
     if (resetNotice) {
       const url = new URL(location.href);
@@ -80,11 +79,12 @@
       history.replaceState(null, "", url);
     }
     return () => {
-      removeEventListener("popstate", readLocation);
       if (timer !== undefined) clearTimeout(timer);
     };
   });
 </script>
+
+<svelte:window onpopstate={readLocation} />
 
 <svelte:head><meta name="theme-color" content="#ffffff" /></svelte:head>
 
