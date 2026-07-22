@@ -137,11 +137,12 @@
     noteStagedCandidate(previous, next);
   }
 
+  function onPopState(): void {
+    restoreLocation("popstate");
+  }
+
   onMount(() => {
     restoreLocation("initial-navigation");
-    const onPopState = () => restoreLocation("popstate");
-    addEventListener("popstate", onPopState);
-    return () => removeEventListener("popstate", onPopState);
   });
 
   function editDraft(draft: string): void {
@@ -305,6 +306,8 @@
       result === "copied" ? "Share link copied." : MANUAL_LINK_COPY_STATUS;
   }
 </script>
+
+<svelte:window onpopstate={onPopState} />
 
 <section class="playground" aria-labelledby="playground-heading">
   <header class="playground-intro">
