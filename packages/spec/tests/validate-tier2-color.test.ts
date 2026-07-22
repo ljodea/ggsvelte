@@ -339,6 +339,176 @@ describe("tier 2 — color scale data-aware validation", () => {
     expect(result.ok).toBe(true);
   });
 
+  it("rejects all-failed censored epoch parses when the explicit domain does not parse", () => {
+    // Runtime only maps domain endpoints through semanticOf and throws
+    // color-domain-invalid when either endpoint fails the parser. A two-entry
+    // domain of unparseable strings must not suppress the scale-type-mismatch.
+    const result = validate(
+      normalize({
+        data: {
+          values: [
+            { x: 1, y: 1, t: 1e100 },
+            { x: 2, y: 2, t: 1e101 },
+          ],
+        },
+        layers: [
+          {
+            geom: "point",
+            aes: { x: { field: "x" }, y: { field: "y" }, color: { field: "t" } },
+          },
+        ],
+        scales: {
+          color: {
+            type: "sequential",
+            temporalKind: "datetime",
+            parse: { epoch: "milliseconds" },
+            parseFailure: "censor",
+            domain: ["bad", "worse"],
+          },
+        },
+      }),
+      {},
+    );
+    expect(result.ok).toBe(false);
+    if (result.ok) throw new Error("expected failure");
+    expect(result.errors.some((error) => error.code === "scale-type-mismatch")).toBe(true);
+  });
+
+  it("allows all-failed censored temporal colors when a sibling layer trains the channel", () => {
+    // Runtime collectColorChannelValues unions every layer's color values before
+    // finiteExtent. An all-invalid layer is censored when another layer supplies
+    // a valid epoch; validation must not reject field-by-field independently.
+    const result = validate(
+      normalize({
+        data: {
+          values: [
+            { x: 1, y: 1, bad: 1e100, good: 1_700_000_000_000 },
+            { x: 2, y: 2, bad: 1e101, good: 1_706_745_600_000 },
+          ],
+        },
+        layers: [
+          {
+            geom: "point",
+            aes: { x: { field: "x" }, y: { field: "y" }, color: { field: "bad" } },
+          },
+          {
+            geom: "point",
+            aes: { x: { field: "x" }, y: { field: "y" }, color: { field: "good" } },
+          },
+        ],
+        scales: {
+          color: {
+            type: "sequential",
+            temporalKind: "datetime",
+            parse: { epoch: "milliseconds" },
+            parseFailure: "censor",
+          },
+        },
+      }),
+      {},
+    );
+    expect(result.ok).toBe(true);
+  });
+
+  it("allows all-failed censored temporal colors when a scaled constant trains the channel", () => {
+    const result = validate(
+      normalize({
+        data: {
+          values: [
+            { x: 1, y: 1, t: 1e100 },
+            { x: 2, y: 2, t: 1e101 },
+          ],
+        },
+        layers: [
+          {
+            geom: "point",
+            aes: { x: { field: "x" }, y: { field: "y" }, color: { field: "t" } },
+          },
+          {
+            geom: "point",
+            aes: {
+              x: { field: "x" },
+              y: { field: "y" },
+              color: { value: 1_700_000_000_000, scale: true },
+            },
+          },
+        ],
+        scales: {
+          color: {
+            type: "sequential",
+            temporalKind: "datetime",
+            parse: { epoch: "milliseconds" },
+            parseFailure: "censor",
+          },
+        },
+      }),
+      {},
+    );
+    expect(result.ok).toBe(true);
+  });
+
+  it("allows all-failed censored binned temporal colors trained from authored breaks", () => {
+    // resolveBinnedColorScale maps breaks and uses first/last as domain when the
+    // data extent is empty under parseFailure: "censor".
+    const result = validate(
+      normalize({
+        data: {
+          values: [
+            { x: 1, y: 1, t: "not-a-date" },
+            { x: 2, y: 2, t: "also-bad" },
+          ],
+        },
+        layers: [
+          {
+            geom: "point",
+            aes: { x: { field: "x" }, y: { field: "y" }, color: { field: "t" } },
+          },
+        ],
+        scales: {
+          color: {
+            type: "binned",
+            parse: "iso",
+            parseFailure: "censor",
+            breaks: ["2024-01-01", "2024-01-15", "2024-01-31"],
+          },
+        },
+      }),
+      {},
+    );
+    expect(result.ok).toBe(true);
+  });
+
+  it("rejects all-failed censored binned temporal colors when breaks do not parse", () => {
+    const result = validate(
+      normalize({
+        data: {
+          values: [
+            { x: 1, y: 1, t: "not-a-date" },
+            { x: 2, y: 2, t: "also-bad" },
+          ],
+        },
+        layers: [
+          {
+            geom: "point",
+            aes: { x: { field: "x" }, y: { field: "y" }, color: { field: "t" } },
+          },
+        ],
+        scales: {
+          color: {
+            type: "binned",
+            parse: "iso",
+            parseFailure: "censor",
+            breaks: ["not-a-date", "also-bad"],
+          },
+        },
+      }),
+      {},
+    );
+    expect(result.ok).toBe(false);
+    if (result.ok) throw new Error("expected failure");
+    expect(result.errors.some((error) => error.code === "scale-type-mismatch")).toBe(true);
+  });
+
   it("still rejects when scaled constants alone exceed the manual range under DataProfile", () => {
     const profile: DataProfile = {
       fields: [

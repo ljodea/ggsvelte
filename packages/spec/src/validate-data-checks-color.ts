@@ -7,6 +7,7 @@ import type { SpecError } from "./errors.js";
 import { configuredColorScaleType } from "./scale-helpers.js";
 import type { ColorScaleSpec } from "./schema.js";
 import { SEQUENTIAL_SCHEME_NAMES } from "./schema.js";
+import { parseTemporal } from "./temporal-parse.js";
 import type { FieldEvidenceMap } from "./validate-data-evidence.js";
 import {
   temporalDecisionForField,
@@ -17,6 +18,121 @@ import {
 
 const COLOR_CHANNELS = ["color", "fill"] as const;
 const SEQUENTIAL_SCHEMES = new Set<string>(SEQUENTIAL_SCHEME_NAMES);
+
+/**
+ * Recovery sources for `parseFailure: "censor"` on temporal color/fill scales.
+ * Mirrors runtime `collectColorChannelValues` + sequential/binned train:
+ * - domain endpoints must parse (else color-domain-invalid / color-binned-domain)
+ * - binned breaks of length ≥ 2 must parse (else color-binned-breaks)
+ * - sibling fields / scaled constants that yield at least one temporal value train
+ *   the channel even when the current field is entirely censored
+ */
+function colorTemporalCensorRecovery(input: {
+  config: ColorScaleSpec | undefined;
+  colorFields: readonly ChannelFieldUse[];
+  colorScaledConstants: readonly unknown[];
+  fields: FieldEvidenceMap;
+  temporalDecisionCache: TemporalDecisionCache;
+  typeOf: (field: string) => string | null;
+}): {
+  hasExplicitDomain: boolean;
+  hasBinnedBreaks: boolean;
+  trainingFields: ReadonlySet<string>;
+  constantTrains: boolean;
+} {
+  const { config, colorFields, colorScaledConstants, fields, temporalDecisionCache, typeOf } =
+    input;
+  const parseUsable = temporalParserUsable(config?.parse);
+  const temporalOptionsUsable =
+    (config?.timezone === undefined || typeof config.timezone === "string") &&
+    (config?.disambiguation === undefined || typeof config.disambiguation === "string");
+  const temporalInputsUsable = parseUsable && temporalOptionsUsable;
+  const temporalOptions = {
+    ...(config?.timezone !== undefined &&
+      typeof config.timezone === "string" && { timezone: config.timezone }),
+    ...(config?.disambiguation !== undefined &&
+      typeof config.disambiguation === "string" && {
+        disambiguation: config.disambiguation,
+      }),
+  };
+  const parseableBound = (value: unknown): boolean =>
+    temporalInputsUsable &&
+    config?.parse !== undefined &&
+    parseTemporal(value, config.parse as Parameters<typeof parseTemporal>[1], temporalOptions).ok;
+
+  const domainValues = Array.isArray(config?.domain)
+    ? config.domain.filter((value) => value !== null)
+    : [];
+  const hasExplicitDomain =
+    domainValues.length === 2 && domainValues.every((value) => parseableBound(value));
+  const binnedBreaks =
+    config?.type === "binned" && Array.isArray(config.breaks)
+      ? config.breaks.filter((value) => value !== null)
+      : [];
+  const hasBinnedBreaks =
+    binnedBreaks.length >= 2 && binnedBreaks.every((value) => parseableBound(value));
+
+  const trainingFields = new Set<string>();
+  const requestsTemporal =
+    config?.temporalKind !== undefined ||
+    config?.parse !== undefined ||
+    config?.timezone !== undefined ||
+    config?.disambiguation !== undefined;
+  if (temporalInputsUsable && requestsTemporal) {
+    const parser = (config?.parse ?? "auto") as Parameters<typeof temporalDecisionForField>[3];
+    for (const use of colorFields) {
+      const type = typeOf(use.field);
+      if (type === "temporal") {
+        trainingFields.add(use.field);
+        continue;
+      }
+      if (type !== "quantitative" && type !== "nominal" && type !== "ordinal") continue;
+      const decision = temporalDecisionForField(
+        temporalDecisionCache,
+        use.field,
+        fields.get(use.field),
+        parser,
+        temporalOptions,
+      );
+      if (
+        decision !== null &&
+        decision !== undefined &&
+        (decision.status === "temporal" || (decision.validatedCount ?? 0) > 0)
+      ) {
+        trainingFields.add(use.field);
+      }
+    }
+  } else {
+    for (const use of colorFields) {
+      if (typeOf(use.field) === "temporal") trainingFields.add(use.field);
+    }
+  }
+
+  const constantTrains = colorScaledConstants.some((value) => parseableBound(value));
+  return { hasExplicitDomain, hasBinnedBreaks, trainingFields, constantTrains };
+}
+
+function censoredTemporalColorRecovers(input: {
+  config: ColorScaleSpec | undefined;
+  decision: { status: string; validatedCount?: number } | null | undefined;
+  field: string;
+  recovery: {
+    hasExplicitDomain: boolean;
+    hasBinnedBreaks: boolean;
+    trainingFields: ReadonlySet<string>;
+    constantTrains: boolean;
+  };
+}): boolean {
+  if (input.config?.parse === undefined || input.config.parseFailure !== "censor") return false;
+  if (input.decision?.status !== "invalid") return false;
+  if ((input.decision.validatedCount ?? 0) > 0) return true;
+  if (input.recovery.hasExplicitDomain || input.recovery.hasBinnedBreaks) return true;
+  if (input.recovery.constantTrains) return true;
+  for (const field of input.recovery.trainingFields) {
+    if (field !== input.field) return true;
+  }
+  return false;
+}
 
 /** Type-preserving key for discrete domain identity (mirrors core encodeKey). */
 function discreteDomainKey(value: unknown): string {
@@ -130,6 +246,21 @@ export function checkColorScaleDataCompatibility(input: {
       config?.scheme !== undefined &&
       SEQUENTIAL_SCHEMES.has(config.scheme);
     if (effectiveType !== "sequential" && effectiveType !== "binned") continue;
+
+    const requestsTemporal =
+      config?.temporalKind !== undefined ||
+      config?.parse !== undefined ||
+      config?.timezone !== undefined ||
+      config?.disambiguation !== undefined;
+    const recovery = colorTemporalCensorRecovery({
+      config,
+      colorFields: colorFields[channel],
+      colorScaledConstants: colorScaledConstants[channel],
+      fields,
+      temporalDecisionCache,
+      typeOf,
+    });
+
     for (const use of colorFields[channel]) {
       const type = typeOf(use.field);
       if (
@@ -148,14 +279,10 @@ export function checkColorScaleDataCompatibility(input: {
         continue;
       }
 
-      const requestsTemporal =
-        config?.temporalKind !== undefined ||
-        config?.parse !== undefined ||
-        config?.timezone !== undefined ||
-        config?.disambiguation !== undefined;
-
       // Quantitative fields with temporal-only options fail at resolve time unless
-      // parseFailure: "censor" recovers at least one temporal value (status invalid).
+      // parseFailure: "censor" recovers via this field, a sibling, a scaled constant,
+      // or a parseable domain / binned breaks (pipeline only throws color-transform-empty
+      // when every channel value fails and no authored bound trains the scale).
       if (type === "quantitative" && requestsTemporal) {
         // A schema-invalid parser reaches tier-2 (schema errors don't short-circuit
         // it); handing it to temporalDecisionForField would throw instead of
@@ -174,17 +301,12 @@ export function checkColorScaleDataCompatibility(input: {
             }),
           },
         );
-        // Censor when at least one value parsed, or when an explicit domain can
-        // still train the scale (pipeline only throws color-transform-empty
-        // when domain is absent and extent is empty).
-        const hasExplicitDomain =
-          Array.isArray(config?.domain) &&
-          config.domain.filter((value) => value !== null).length === 2;
-        const censoredInvalid =
-          config?.parse !== undefined &&
-          config.parseFailure === "censor" &&
-          decision?.status === "invalid" &&
-          ((decision.validatedCount ?? 0) > 0 || hasExplicitDomain);
+        const censoredInvalid = censoredTemporalColorRecovers({
+          config,
+          decision,
+          field: use.field,
+          recovery,
+        });
         if (decision?.status !== "temporal" && !censoredInvalid) {
           errors.push({
             code: "scale-type-mismatch",
@@ -250,14 +372,12 @@ export function checkColorScaleDataCompatibility(input: {
           }),
         },
       );
-      const hasExplicitDomain =
-        Array.isArray(config?.domain) &&
-        config.domain.filter((value) => value !== null).length === 2;
-      const censoredInvalid =
-        config?.parse !== undefined &&
-        config.parseFailure === "censor" &&
-        decision?.status === "invalid" &&
-        ((decision.validatedCount ?? 0) > 0 || hasExplicitDomain);
+      const censoredInvalid = censoredTemporalColorRecovers({
+        config,
+        decision,
+        field: use.field,
+        recovery,
+      });
       if (decision?.status === "temporal" || censoredInvalid) {
         // Mirror runtime: compare recovered kind even when status is invalid+censored.
         if (
