@@ -17,6 +17,7 @@ const DOWNLOAD_DIST = ".github/actions/ci-download-packages-dist/action.yml";
 const PACKAGES_DIST_CONSUMERS = [
   "consumer-compat",
   "component-svelte",
+  "component-svelte-fx",
   "component-spikes",
   "component-journeys",
   "interaction-perf",
@@ -31,6 +32,7 @@ const SETUP_BUN_JOBS = [
   "compatibility-matrix",
   "consumer-compat",
   "component-svelte",
+  "component-svelte-fx",
   "component-spikes",
   "component-journeys",
   "interaction-perf",
@@ -49,6 +51,7 @@ const BUN_INSTALL_JOBS = [
   "checks",
   "unit",
   "component-svelte",
+  "component-svelte-fx",
   "component-spikes",
   "component-journeys",
   "interaction-perf",
@@ -61,6 +64,7 @@ const BUN_INSTALL_JOBS = [
 
 const CONTAINER_BUN_INSTALL_JOBS = new Set([
   "component-svelte",
+  "component-svelte-fx",
   "component-spikes",
   "component-journeys",
   "interaction-perf",
@@ -87,7 +91,7 @@ describe("ci-download-packages-dist composite", () => {
     expect(action).toContain("shell: bash");
   });
 
-  it("is the sole packages-dist download path for the five consumer jobs", () => {
+  it("is the sole packages-dist download path for the six consumer jobs", () => {
     const ci = read(".github/workflows/ci.yml");
     for (const jobId of PACKAGES_DIST_CONSUMERS) {
       const job = jobSlice(ci, jobId);
@@ -97,9 +101,9 @@ describe("ci-download-packages-dist composite", () => {
         /download-artifact@[0-9a-f]+[\s\S]{0,120}name:\s*packages-dist/,
       );
     }
-    // Exactly five uses in ci.yml.
+    // Exactly six uses in ci.yml (component-svelte split into chromium + fx).
     const uses = ci.match(/uses: \.\/\.github\/actions\/ci-download-packages-dist/g) ?? [];
-    expect(uses.length).toBe(5);
+    expect(uses.length).toBe(6);
   });
 });
 
@@ -138,7 +142,7 @@ describe("ci-bun-install composite", () => {
     expect(action).toMatch(/cache_key_prefix|cache-key-prefix/);
   });
 
-  it("wires host vs container cache prefixes for the twelve cache+install jobs", () => {
+  it("wires host vs container cache prefixes for the cache+install jobs", () => {
     const ci = read(".github/workflows/ci.yml");
     for (const jobId of BUN_INSTALL_JOBS) {
       const job = jobSlice(ci, jobId);

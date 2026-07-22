@@ -430,18 +430,17 @@ jobs:
           execution: consumer
           hash: ${{ steps.content_hash.outputs.hash }}
 
+  # packages/svelte browser surface is two parallel jobs so chromium+coverage
+  # and firefox+webkit do not serialize (~90s wall-clock savings on the
+  # component path). Coverage + Codecov stay on the chromium job only.
   component-svelte:
-    name: component-svelte (packages/svelte vitest browser + ssr)
+    name: component-svelte (packages/svelte chromium + coverage + ssr)
 
     needs: [detect-changes, packages-dist]
     if: >-
       needs.detect-changes.outputs.component == 'true' &&
       needs.packages-dist.result == 'success'
     runs-on: ubuntu-latest
-    env:
-      # GitHub runs the container as root, while /github/home belongs to
-      # pwuser. Firefox refuses that ownership mismatch.
-      HOME: /root
     container:
       # Keep in sync with env.PLAYWRIGHT_CONTAINER_TAG above.
       image: mcr.microsoft.com/playwright:v1.61.1-noble
@@ -483,10 +482,11 @@ jobs:
             exit 1
           fi
       # Chromium collects browser v8 coverage (CDP; works under bun) and enforces
-      # thresholds. Firefox/webkit stay coverage-free. SSR runs under bun without
-      # --coverage: @vitest/coverage-v8 needs Node inspector Coverage APIs that
-      # bun does not implement ("Coverage APIs are not supported"). Local
-      # `test:coverage` can still collect SSR lcov under node for offline use.
+      # thresholds. SSR runs under bun without --coverage: @vitest/coverage-v8
+      # needs Node inspector Coverage APIs that bun does not implement
+      # ("Coverage APIs are not supported"). Local `test:coverage` can still
+      # collect SSR lcov under node for offline use. Firefox/webkit run in the
+      # parallel component-svelte-fx job (coverage-free).
       #
       # One shell retry: vitest `retry` only re-runs failed *tests*, not suite
       # import / iframe / coverage-v8 dynamic-import harness failures (PR #440).
@@ -500,10 +500,6 @@ jobs:
           fi
           echo "::warning::chromium+coverage failed once; retrying once for browser harness flake"
           bunx --bun vitest run --coverage --project chromium
-      - name: component tests (packages/svelte, firefox + webkit)
-        if: steps.content_hash.outputs.hit != 'true'
-        working-directory: packages/svelte
-        run: bunx --bun vitest run --project firefox --project webkit
       - name: component tests (packages/svelte, SSR)
         if: steps.content_hash.outputs.hit != 'true'
         working-directory: packages/svelte
@@ -556,6 +552,79 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: component-svelte-failure-artifacts
+          path: packages/svelte/test-results/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  # Parallel sibling of component-svelte: firefox + webkit only (no coverage).
+  # Distinct content-hash execution so a chromium cache hit cannot skip these
+  # engines, and vice versa.
+  component-svelte-fx:
+    name: component-svelte-fx (packages/svelte firefox + webkit)
+
+    needs: [detect-changes, packages-dist]
+    if: >-
+      needs.detect-changes.outputs.component == 'true' &&
+      needs.packages-dist.result == 'success'
+    runs-on: ubuntu-latest
+    env:
+      # GitHub runs the container as root, while /github/home belongs to
+      # pwuser. Firefox refuses that ownership mismatch.
+      HOME: /root
+    container:
+      # Keep in sync with env.PLAYWRIGHT_CONTAINER_TAG above.
+      image: mcr.microsoft.com/playwright:v1.61.1-noble
+    defaults:
+      run:
+        # The container's /bin/sh is dash, which rejects `set -o pipefail`.
+        shell: bash
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: install unzip (playwright image lacks it; setup-bun needs it)
+        run: apt-get update && apt-get install -y --no-install-recommends unzip
+      - uses: ./.github/actions/ci-setup-bun
+      - uses: ./.github/actions/ci-content-hash-restore
+        id: content_hash
+        with:
+          execution: component_svelte_fx
+          bypass: ${{ needs.detect-changes.outputs.bypass_content_cache }}
+          disable: ${{ vars.CI_DISABLE_CONTENT_HASH }}
+          container_tag: ${{ env.PLAYWRIGHT_CONTAINER_TAG }}
+      - uses: ./.github/actions/ci-bun-install
+        if: steps.content_hash.outputs.hit != 'true'
+        with:
+          cache_key_prefix: bun-container
+      - uses: ./.github/actions/ci-download-packages-dist
+        if: steps.content_hash.outputs.hit != 'true'
+      - name: assert playwright npm/container version sync (packages/svelte)
+        if: steps.content_hash.outputs.hit != 'true'
+        run: |
+          set -euo pipefail
+          npm_version="$(cd packages/svelte && bun -e 'console.log(require("playwright/package.json").version)')"
+          expected="v${npm_version}-noble"
+          echo "packages/svelte playwright: ${npm_version}; container tag: ${PLAYWRIGHT_CONTAINER_TAG}"
+          if [ "${expected}" != "${PLAYWRIGHT_CONTAINER_TAG}" ]; then
+            echo "::error::playwright npm version in packages/svelte (${npm_version}) does not match pinned container tag (${PLAYWRIGHT_CONTAINER_TAG})"
+            exit 1
+          fi
+      - name: component tests (packages/svelte, firefox + webkit)
+        if: steps.content_hash.outputs.hit != 'true'
+        working-directory: packages/svelte
+        run: bunx --bun vitest run --project firefox --project webkit
+      - uses: ./.github/actions/ci-content-hash-write
+        if: success() && steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
+        with:
+          execution: component_svelte_fx
+          hash: ${{ steps.content_hash.outputs.hash }}
+      - name: upload packages/svelte-fx failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: component-svelte-fx-failure-artifacts
           path: packages/svelte/test-results/
           if-no-files-found: ignore
           retention-days: 7
@@ -1026,6 +1095,7 @@ jobs:
       - compatibility-matrix
       - consumer-compat
       - component-svelte
+      - component-svelte-fx
       - component-spikes
       - component-journeys
       - build
@@ -1059,6 +1129,7 @@ jobs:
           CHECKS_RES: ${{ needs.checks.result }}
           UNIT_RES: ${{ needs.unit.result }}
           COMPONENT_SVELTE_RES: ${{ needs.component-svelte.result }}
+          COMPONENT_SVELTE_FX_RES: ${{ needs.component-svelte-fx.result }}
           COMPONENT_SPIKES_RES: ${{ needs.component-spikes.result }}
           DOCS_JOURNEYS_RES: ${{ needs.component-journeys.result }}
           CONSUMER_RES: ${{ needs.consumer-compat.result }}
@@ -1103,8 +1174,11 @@ jobs:
             const shard = (k: string): JobResult => (env[k] as JobResult) || "skipped";
             // Issue #243: package browser surface is svelte+spikes only.
             // Journeys are gated separately via docs_journeys.
+            // component-svelte (chromium+ssr) and component-svelte-fx
+            // (firefox+webkit) run in parallel; both must succeed.
             const componentShards = [
               shard("COMPONENT_SVELTE_RES"),
+              shard("COMPONENT_SVELTE_FX_RES"),
               shard("COMPONENT_SPIKES_RES"),
             ];
             let componentResult: JobResult = "skipped";

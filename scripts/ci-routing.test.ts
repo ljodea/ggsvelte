@@ -614,10 +614,14 @@ describe("content-hash inputs", () => {
 
   test("component shards are distinct cacheable executions", () => {
     expect(CACHEABLE_EXECUTIONS).toContain("component_svelte");
+    expect(CACHEABLE_EXECUTIONS).toContain("component_svelte_fx");
     expect(CACHEABLE_EXECUTIONS).toContain("component_spikes");
     expect(CACHEABLE_EXECUTIONS).toContain("component_journeys");
     expect(JOB_CONTENT_INPUTS.component_spikes).toContain("spikes/**");
     expect(JOB_CONTENT_INPUTS.component_svelte).not.toContain("spikes/**");
+    // chromium and firefox+webkit share the packages/svelte input surface but
+    // must cache independently (parallel jobs, distinct execution keys).
+    expect(JOB_CONTENT_INPUTS.component_svelte_fx).toEqual(JOB_CONTENT_INPUTS.component_svelte);
   });
 
   test("listJobContentPaths is sorted and unique", () => {

@@ -24,7 +24,8 @@ export const CONTENT_HASH_SCHEMA = 2;
 
 /**
  * Physical CI executions that may content-hash short-circuit.
- * Distinct from JobName: component is three shards; consumer is matrixed.
+ * Distinct from JobName: component is four shards (svelte chromium, svelte
+ * firefox+webkit, spikes, journeys); consumer is matrixed.
  */
 export type CacheableExecution =
   | "packages_dist"
@@ -36,6 +37,7 @@ export type CacheableExecution =
   | "bench_smoke"
   | "interaction_perf"
   | "component_svelte"
+  | "component_svelte_fx"
   | "component_spikes"
   | "component_journeys"
   | "consumer";
@@ -50,6 +52,7 @@ export const CACHEABLE_EXECUTIONS: readonly CacheableExecution[] = [
   "bench_smoke",
   "interaction_perf",
   "component_svelte",
+  "component_svelte_fx",
   "component_spikes",
   "component_journeys",
   "consumer",
@@ -214,6 +217,15 @@ export const JOB_CONTENT_INPUTS: Record<CacheableExecution, readonly string[]> =
     "examples/**",
   ],
   component_svelte: [
+    ...UNIVERSAL_CONTENT_INPUTS,
+    "packages/spec/**",
+    "packages/core/**",
+    "packages/svelte/**",
+    "skills/ggsvelte/**",
+  ],
+  // Same inputs as component_svelte (shared packages/svelte tree); distinct
+  // execution key so chromium+coverage and firefox+webkit cache independently.
+  component_svelte_fx: [
     ...UNIVERSAL_CONTENT_INPUTS,
     "packages/spec/**",
     "packages/core/**",
