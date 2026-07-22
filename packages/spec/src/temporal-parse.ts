@@ -405,42 +405,90 @@ function escapeRegex(value: string): string {
   return value.replaceAll(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+/**
+ * Compile-time exact-format artifacts only (pattern + capture tokens, or a
+ * format-level failure). Shared across scalar parseTemporal, column parsing,
+ * helpers, and temporalParserConfigurationError so a column of n values with
+ * the same format pays one compile, not n.
+ *
+ * Only pre-match failures are cached (length, trailing %, unsupported /
+ * duplicate tokens). Post-match semantic rules (%Y required, %m+%q, clock
+ * completeness) stay value-driven.
+ */
+type CompiledExactFormat =
+  | { ok: true; tokens: readonly string[]; regex: RegExp }
+  | { ok: false; reason: string };
+
+const EXACT_FORMAT_CACHE = new Map<string, CompiledExactFormat>();
+
+function compileExactFormat(format: string): CompiledExactFormat {
+  const cached = EXACT_FORMAT_CACHE.get(format);
+  if (cached !== undefined) return cached;
+
+  let compiled: CompiledExactFormat;
+  if (format.length === 0 || format.length > 128) {
+    compiled = {
+      ok: false,
+      reason: "format length must be from 1 through 128 characters",
+    };
+  } else {
+    const tokens: string[] = [];
+    let pattern = "^";
+    let reason: string | null = null;
+    for (let index = 0; index < format.length; index++) {
+      const char = format[index]!;
+      if (char !== "%") {
+        pattern += escapeRegex(char);
+        continue;
+      }
+      const token = format[++index];
+      if (token === undefined) {
+        reason = "format cannot end with %";
+        break;
+      }
+      if (token === "%") {
+        pattern += "%";
+        continue;
+      }
+      const tokenPattern = FORMAT_TOKEN_PATTERNS[token];
+      if (tokenPattern === undefined) {
+        reason = `unsupported format token %${token}`;
+        break;
+      }
+      if (tokens.includes(token)) {
+        reason = `duplicate semantic format token %${token}`;
+        break;
+      }
+      tokens.push(token);
+      if (tokens.length > 32) {
+        reason = "format may contain at most 32 semantic tokens";
+        break;
+      }
+      pattern += tokenPattern;
+    }
+    compiled =
+      reason !== null
+        ? { ok: false, reason }
+        : { ok: true, tokens, regex: new RegExp(`${pattern}$`) };
+  }
+
+  EXACT_FORMAT_CACHE.set(format, compiled);
+  return compiled;
+}
+
 function parseExactFormat(
   value: string,
   format: string,
   options: TemporalParseOptions,
 ): TemporalParseResult {
-  if (format.length === 0 || format.length > 128)
-    return temporalParseFailure("format length must be from 1 through 128 characters");
-  const tokens: string[] = [];
-  let pattern = "^";
-  for (let index = 0; index < format.length; index++) {
-    const char = format[index]!;
-    if (char !== "%") {
-      pattern += escapeRegex(char);
-      continue;
-    }
-    const token = format[++index];
-    if (token === undefined) return temporalParseFailure("format cannot end with %");
-    if (token === "%") {
-      pattern += "%";
-      continue;
-    }
-    const tokenPattern = FORMAT_TOKEN_PATTERNS[token];
-    if (tokenPattern === undefined)
-      return temporalParseFailure(`unsupported format token %${token}`);
-    if (tokens.includes(token))
-      return temporalParseFailure(`duplicate semantic format token %${token}`);
-    tokens.push(token);
-    if (tokens.length > 32)
-      return temporalParseFailure("format may contain at most 32 semantic tokens");
-    pattern += tokenPattern;
-  }
-  pattern += "$";
-  const match = new RegExp(pattern).exec(value);
+  const compiled = compileExactFormat(format);
+  if (!compiled.ok) return temporalParseFailure(compiled.reason);
+  const match = compiled.regex.exec(value);
   if (match === null) return temporalParseFailure("value does not match the exact format");
   const values: Record<string, string> = {};
-  for (let index = 0; index < tokens.length; index++) values[tokens[index]!] = match[index + 1]!;
+  for (let index = 0; index < compiled.tokens.length; index++) {
+    values[compiled.tokens[index]!] = match[index + 1]!;
+  }
   if (values["Y"] === undefined) return temporalParseFailure("exact formats require %Y");
   if (values["m"] !== undefined && values["q"] !== undefined)
     return temporalParseFailure("exact formats cannot contain both %m and %q");

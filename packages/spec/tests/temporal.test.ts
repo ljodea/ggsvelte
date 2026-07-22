@@ -5,6 +5,8 @@ import {
   inferTemporalColumn,
   parseTemporal,
   parseTemporalColumn,
+  parseTemporalFormat,
+  temporalParserConfigurationError,
   TemporalParseError,
   ymd,
   dmy,
@@ -80,6 +82,77 @@ describe("strict temporal parsing", () => {
     expect(parseTemporal("2024", { format: "%s" })).toMatchObject({ ok: false });
     expect(parseTemporal("2024-12", { format: "%Y-%Y" })).toMatchObject({ ok: false });
     expect(parseTemporal("2024", { format: "x".repeat(129) })).toMatchObject({ ok: false });
+  });
+
+  /**
+   * Characterization for compile-once exact-format parsing (#424): column,
+   * scalar, helper, and config-error entry points must keep identical
+   * success/failure semantics when the same format is reused many times.
+   */
+  it("keeps exact-format column decisions identical to per-cell parseTemporal", () => {
+    const format = { format: "%d|%m|%Y" } as const;
+    const values = ["31|12|2024", "01|01|2025", "not-a-date", "15|06|2023"];
+    const column = parseTemporalColumn(values, format);
+    expect(column.decision.status).toBe("invalid");
+    expect(column.decision.failedCount).toBe(1);
+    expect(column.decision.validatedCount).toBe(3);
+    for (let index = 0; index < values.length; index++) {
+      const cell = parseTemporal(values[index]!, format);
+      if (cell.ok) {
+        expect(column.valid[index]).toBe(1);
+        expect(column.semantic[index]).toBe(cell.epochMs);
+      } else {
+        expect(column.valid[index]).toBe(0);
+        expect(Number.isNaN(column.semantic[index]!)).toBe(true);
+      }
+    }
+  });
+
+  it("reuses exact-format success and failure reasons across repeated scalar calls", () => {
+    const format = { format: "%Y-%m-%d %H:%M" } as const;
+    const good = "2024-07-04 13:45";
+    const bad = "2024/07/04 13:45";
+    const firstGood = parseTemporal(good, format);
+    const secondGood = parseTemporal(good, format);
+    expect(firstGood).toEqual(secondGood);
+    expect(firstGood).toMatchObject({ ok: true, kind: "datetime", precision: "minute" });
+
+    const firstBad = parseTemporal(bad, format);
+    const secondBad = parseTemporal(bad, format);
+    expect(firstBad).toEqual(secondBad);
+    expect(firstBad).toMatchObject({ ok: false });
+
+    // Helper array path shares the same compiled format surface.
+    const dates = parseTemporalFormat([good, good], format.format);
+    expect(dates).toHaveLength(2);
+    expect(dates[0]?.getTime()).toBe(dates[1]?.getTime());
+    if (firstGood.ok) expect(dates[0]?.getTime()).toBe(firstGood.epochMs);
+  });
+
+  it("keeps compile-time format configuration errors stable across repeated checks", () => {
+    const unsupported = { format: "%s" } as const;
+    const duplicate = { format: "%Y-%Y" } as const;
+    const tooLong = { format: "x".repeat(129) } as const;
+
+    for (const parser of [unsupported, duplicate, tooLong] as const) {
+      const first = temporalParserConfigurationError(parser);
+      const second = temporalParserConfigurationError(parser);
+      expect(first).not.toBeNull();
+      expect(second).toBe(first);
+    }
+
+    expect(temporalParserConfigurationError({ format: "ends-with-%" })).toBe(
+      temporalParserConfigurationError({ format: "ends-with-%" }),
+    );
+    expect(temporalParserConfigurationError({ format: "ends-with-%" })).not.toBeNull();
+
+    // Post-match semantic rules (%Y required) are value-driven, not pure config
+    // sampling failures only when the sample also lacks %Y.
+    expect(temporalParserConfigurationError({ format: "%m-%d" })).not.toBeNull();
+    expect(parseTemporal("12-31", { format: "%m-%d" })).toMatchObject({ ok: false });
+    expect(parseTemporal("12-31", { format: "%m-%d" })).toEqual(
+      parseTemporal("12-31", { format: "%m-%d" }),
+    );
   });
 
   it("rejects DST gaps/folds by default and supports explicit disambiguation", () => {
