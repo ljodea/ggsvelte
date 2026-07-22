@@ -419,11 +419,18 @@ type CompiledExactFormat =
   | { ok: true; tokens: readonly string[]; regex: RegExp }
   | { ok: false; reason: string };
 
+/** Cap retained formats so adversarial/churned author strings cannot grow unbounded. */
+const EXACT_FORMAT_CACHE_MAX = 256;
 const EXACT_FORMAT_CACHE = new Map<string, CompiledExactFormat>();
 
 function compileExactFormat(format: string): CompiledExactFormat {
   const cached = EXACT_FORMAT_CACHE.get(format);
-  if (cached !== undefined) return cached;
+  if (cached !== undefined) {
+    // Refresh LRU order (Map iterates in insertion order).
+    EXACT_FORMAT_CACHE.delete(format);
+    EXACT_FORMAT_CACHE.set(format, cached);
+    return cached;
+  }
 
   let compiled: CompiledExactFormat;
   if (format.length === 0 || format.length > 128) {
@@ -472,6 +479,10 @@ function compileExactFormat(format: string): CompiledExactFormat {
         : { ok: false, reason };
   }
 
+  if (EXACT_FORMAT_CACHE.size >= EXACT_FORMAT_CACHE_MAX) {
+    const oldest = EXACT_FORMAT_CACHE.keys().next().value;
+    if (oldest !== undefined) EXACT_FORMAT_CACHE.delete(oldest);
+  }
   EXACT_FORMAT_CACHE.set(format, compiled);
   return compiled;
 }
