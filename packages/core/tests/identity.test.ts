@@ -179,11 +179,8 @@ describe("pipeline semantic identity", () => {
     expect(model.domains.effective.panels).toHaveLength(2);
   });
 
-  // SKIP (PR 3 follow-up): the natural baseline is trained from the same frames
-  // the effective pin already censored pre-stat, so an all-excluding pin starves
-  // it. The natural baseline (zoom-out reference) needs an uncensored evidence
-  // pass; the assertions below encode the correct target contract.
-  it.skip("trains latest natural baseline domains beside explicit effective zoom domains", () => {
+  // Uncensored second evidence pass when baselineScales + domain pins (#449).
+  it("trains latest natural baseline domains beside explicit effective zoom domains", () => {
     const model = runPipeline(
       {
         data: {
@@ -218,11 +215,7 @@ describe("pipeline semantic identity", () => {
       [1.9, 4.1],
       [1.9, 4.1],
     ]);
-    // Natural baseline: the un-pinned extent [0,20] widened by expansion. NOTE:
-    // under PR 3's pre-stat pin censoring the natural baseline currently shares
-    // the effective pin's censored frames, so an all-excluding pin starves it.
-    // Restoring an uncensored second evidence pass for the natural baseline (the
-    // zoom-out reference) is tracked as a follow-up.
+    // Natural baseline: uncensored data extent [0,20] with expansion (#449).
     expect(model.domains.baseline.x).toEqual([-1, 21]);
     expect(model.domains.baseline.y).toEqual([-1, 21]);
     expect(model.domains.baseline.panels.map((panel) => panel.x)).toEqual([
