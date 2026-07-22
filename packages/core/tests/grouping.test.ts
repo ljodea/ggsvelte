@@ -222,4 +222,17 @@ describe("deriveGroups: edge cases", () => {
   test("unequal column lengths throw", () => {
     expect(() => deriveGroups({ a: [1], b: [1, 2] }, { x: { field: "a" } })).toThrow(/unequal/);
   });
+
+  test("large R does not blow the stack computing groupCount (#556)", () => {
+    // Math.max(...groups) used to re-spread the whole row vector and hit
+    // argument/call-stack limits on large tables. groupCount must come from
+    // the distinct-id map size (O(1) after the assign pass).
+    const R = 200_000;
+    const cat = Array.from({ length: R }, (_, i) => (i % 17 === 0 ? "a" : "b"));
+    const r = deriveGroups({ cat }, { x: { field: "cat" } });
+    expect(r.groupCount).toBe(2);
+    expect(r.groups.length).toBe(R);
+    expect(r.groups[0]).toBe(0);
+    expect(r.groups[1]).toBe(1);
+  });
 });
