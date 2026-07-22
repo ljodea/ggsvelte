@@ -1,0 +1,45 @@
+{
+  "status": "pass",
+  "date": "2026-07-21",
+  "builtArtifact": "apps/docs/build",
+  "server": "scripts/serve-docs.ts on isolated port 4199",
+  "routes": ["/examples/color/binned", "/examples/color/continuous"],
+  "viewports": [320, 640, 1200],
+  "appearances": ["light", "dark"],
+  "colorsteps": {
+    "sceneSteps": 4,
+    "labels": ["55–100", "35–55", "12–35", "0–12"],
+    "readyAtAllWidths": true,
+    "visibleAt320": true,
+    "horizontalOverflow": false,
+    "screenshots": [
+      "colorsteps-320-light.png",
+      "colorsteps-640-light.png",
+      "colorsteps-1200-light.png",
+      "colorsteps-320-dark.png",
+      "colorsteps-640-dark.png",
+      "colorsteps-1200-dark.png"
+    ]
+  },
+  "colorbar": {
+    "ramps": 1,
+    "gradientStops": 10,
+    "readyAtAllWidths": true,
+    "visibleAt320": true,
+    "horizontalOverflow": false,
+    "screenshots": [
+      "colorbar-320-light.png",
+      "colorbar-1200-light.png",
+      "colorbar-320-dark.png",
+      "colorbar-1200-dark.png"
+    ]
+  },
+  "consoleErrors": [],
+  "failedRequests": [],
+  "observations": [
+    "Binned marks match the four semantic step swatches at every viewport, with high values at the top like the ggplot2 reference.",
+    "The continuous example exposes one ten-stop viridis ramp and semantic reference labels.",
+    "Container-width examples keep both the panel and guide visible at 320 px without document overflow.",
+    "Docs-shell appearance changes do not rewrite the chart theme; chart paper remains the explicit light plotting surface."
+  ]
+}

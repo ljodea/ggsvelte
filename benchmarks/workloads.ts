@@ -28,6 +28,9 @@ import {
   coordTransform,
   gg,
   MAX_BINNED_BREAKS,
+  scaleColorBinned,
+  scaleColorLog10,
+  scaleColorManual,
   scaleXBinned,
   scaleXContinuous,
 } from "@ggsvelte/spec";
@@ -191,6 +194,46 @@ function maxBoundaryBinnedSpec(n: number): PortableSpec {
   return gg({ x, y }, aes({ x: "x", y: "y" }))
     .geomPoint({ render: "canvas" })
     .scales(scaleXBinned({ breaks }))
+    .spec();
+}
+
+function nonPositionColorSpec(n: number, family: "log10" | "binned" | "manual"): PortableSpec {
+  const x = Array.from<number>({ length: n });
+  const y = Array.from<number>({ length: n });
+  const color = Array.from<number | string>({ length: n });
+  for (let index = 0; index < n; index++) {
+    x[index] = index % 1_000;
+    y[index] = (index * 17) % 1_000;
+    color[index] = family === "manual" ? `series-${index % 10}` : 1 + (index % 1_000);
+  }
+  const scale =
+    family === "log10"
+      ? scaleColorLog10()
+      : family === "binned"
+        ? scaleColorBinned({
+            breaks: Array.from(
+              { length: MAX_BINNED_BREAKS + 1 },
+              (_, index) => 1 + (index * 999) / MAX_BINNED_BREAKS,
+            ),
+          })
+        : scaleColorManual({
+            domain: Array.from({ length: 10 }, (_, index) => `series-${index}`),
+            values: [
+              "#4269d0",
+              "#efb118",
+              "#ff725c",
+              "#6cc5b0",
+              "#3ca951",
+              "#ff8ab7",
+              "#a463f2",
+              "#97bbf5",
+              "#9c6b4e",
+              "#9498a0",
+            ],
+          });
+  return gg({ x, y, color }, aes({ x: "x", y: "y", color: "color" }))
+    .geomPoint({ render: "canvas" })
+    .scales(scale)
     .spec();
 }
 
@@ -609,6 +652,20 @@ export function buildWorkloads(smoke: boolean): Workload[] {
       bench: `runPipeline worst-case coord tessellation ${fmtK(vertices)}`,
       fn: () => runPipeline(tessellated, opts),
     });
+  }
+
+  // --- PR 5 generic non-position scale families ----------------------------
+  {
+    const n = smoke ? 1_000 : 100_000;
+    for (const family of ["log10", "binned", "manual"] as const) {
+      const spec = nonPositionColorSpec(n, family);
+      workloads.push({
+        id: `pipeline color-${family} ${fmtK(n)}`,
+        group: `non-position color ${family} ${fmtK(n)}`,
+        bench: `runPipeline color ${family} ${fmtK(n)}`,
+        fn: () => runPipeline(spec, opts),
+      });
+    }
   }
 
   // --- M2 statistical workloads (plan: bin 100k, loess 5k, density 100k) ----

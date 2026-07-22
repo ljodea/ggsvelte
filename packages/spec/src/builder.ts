@@ -17,6 +17,24 @@ import { SpecValidationError } from "./errors.js";
 import type { AesInput, FacetInput, LayerInput, SpecInput } from "./normalize.js";
 import { normalize } from "./normalize.js";
 import {
+  scaleColorBinned,
+  scaleColorContinuous,
+  scaleColorDate,
+  scaleColorDatetime,
+  scaleColorDiscrete,
+  scaleColorIdentity,
+  scaleColorLog10,
+  scaleColorManual,
+  scaleColorSqrt,
+  scaleFillBinned,
+  scaleFillContinuous,
+  scaleFillDate,
+  scaleFillDatetime,
+  scaleFillDiscrete,
+  scaleFillIdentity,
+  scaleFillLog10,
+  scaleFillManual,
+  scaleFillSqrt,
   scaleXBinned,
   scaleXContinuous,
   scaleXDate,
@@ -33,9 +51,16 @@ import {
   scaleYLog10,
   scaleYReverse,
   scaleYSqrt,
+  type BinnedColorScaleOptions,
   type ContinuousPositionScaleOptions,
+  type DiscreteColorScaleOptions,
   type DiscretePositionScaleOptions,
+  type IdentityColorScaleOptions,
+  type ManualColorScaleOptions,
+  type SequentialColorScaleOptions,
+  type TemporalColorScaleOptions,
   type TemporalScaleOptions,
+  type TransformedColorScaleOptions,
   type TransformedPositionScaleOptions,
 } from "./scale-helpers.js";
 import type {
@@ -507,6 +532,96 @@ export class GGBuilder {
   /** Configure the y scale as a binned (ordered-bin) quantitative scale. */
   scaleYBinned(options: ContinuousPositionScaleOptions = {}): GGBuilder {
     return this.scales(scaleYBinned(options));
+  }
+
+  /** Configure color as a continuous sequential ramp. */
+  scaleColorContinuous(options: SequentialColorScaleOptions = {}): GGBuilder {
+    return this.scales(scaleColorContinuous(options));
+  }
+
+  /** Configure color as discrete categories. */
+  scaleColorDiscrete(options: DiscreteColorScaleOptions = {}): GGBuilder {
+    return this.scales(scaleColorDiscrete(options));
+  }
+
+  /** Configure color as ordered quantitative bins. */
+  scaleColorBinned(options: BinnedColorScaleOptions = {}): GGBuilder {
+    return this.scales(scaleColorBinned(options));
+  }
+
+  /** Configure color as a pre-training base-10 transformed ramp. */
+  scaleColorLog10(options: TransformedColorScaleOptions = {}): GGBuilder {
+    return this.scales(scaleColorLog10(options));
+  }
+
+  /** Configure color as a pre-training square-root transformed ramp. */
+  scaleColorSqrt(options: TransformedColorScaleOptions = {}): GGBuilder {
+    return this.scales(scaleColorSqrt(options));
+  }
+
+  /** Configure color as calendar dates. */
+  scaleColorDate(options: TemporalColorScaleOptions = {}): GGBuilder {
+    return this.scales(scaleColorDate(options));
+  }
+
+  /** Configure color as date-time instants. */
+  scaleColorDatetime(options: TemporalColorScaleOptions = {}): GGBuilder {
+    return this.scales(scaleColorDatetime(options));
+  }
+
+  /** Configure an explicit color domain-to-value mapping. */
+  scaleColorManual(options: ManualColorScaleOptions): GGBuilder {
+    return this.scales(scaleColorManual(options));
+  }
+
+  /** Use validated source values directly as colors. */
+  scaleColorIdentity(options: IdentityColorScaleOptions = {}): GGBuilder {
+    return this.scales(scaleColorIdentity(options));
+  }
+
+  /** Configure fill as a continuous sequential ramp. */
+  scaleFillContinuous(options: SequentialColorScaleOptions = {}): GGBuilder {
+    return this.scales(scaleFillContinuous(options));
+  }
+
+  /** Configure fill as discrete categories. */
+  scaleFillDiscrete(options: DiscreteColorScaleOptions = {}): GGBuilder {
+    return this.scales(scaleFillDiscrete(options));
+  }
+
+  /** Configure fill as ordered quantitative bins. */
+  scaleFillBinned(options: BinnedColorScaleOptions = {}): GGBuilder {
+    return this.scales(scaleFillBinned(options));
+  }
+
+  /** Configure fill as a pre-training base-10 transformed ramp. */
+  scaleFillLog10(options: TransformedColorScaleOptions = {}): GGBuilder {
+    return this.scales(scaleFillLog10(options));
+  }
+
+  /** Configure fill as a pre-training square-root transformed ramp. */
+  scaleFillSqrt(options: TransformedColorScaleOptions = {}): GGBuilder {
+    return this.scales(scaleFillSqrt(options));
+  }
+
+  /** Configure fill as calendar dates. */
+  scaleFillDate(options: TemporalColorScaleOptions = {}): GGBuilder {
+    return this.scales(scaleFillDate(options));
+  }
+
+  /** Configure fill as date-time instants. */
+  scaleFillDatetime(options: TemporalColorScaleOptions = {}): GGBuilder {
+    return this.scales(scaleFillDatetime(options));
+  }
+
+  /** Configure an explicit fill domain-to-value mapping. */
+  scaleFillManual(options: ManualColorScaleOptions): GGBuilder {
+    return this.scales(scaleFillManual(options));
+  }
+
+  /** Use validated source values directly as fills. */
+  scaleFillIdentity(options: IdentityColorScaleOptions = {}): GGBuilder {
+    return this.scales(scaleFillIdentity(options));
   }
 
   /** Configure the legend (merged over previous calls). */

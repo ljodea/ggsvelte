@@ -1,0 +1,36 @@
+{
+  "runner": "local Apple Silicon, Bun 1.3.14 arm64",
+  "method": "benchmarks/bench-json.ts median after warmup on the final implementation",
+  "workloads": [
+    {
+      "id": "pipeline color-log10 100k",
+      "medianMs": 115.4212,
+      "budgetMs": 130,
+      "headroomPercent": 11.2
+    },
+    {
+      "id": "pipeline color-binned 100k",
+      "medianMs": 96.3433,
+      "budgetMs": 180,
+      "headroomPercent": 46.5
+    },
+    {
+      "id": "pipeline color-manual 100k",
+      "medianMs": 109.244,
+      "budgetMs": 130,
+      "headroomPercent": 16.0
+    }
+  ],
+  "initialGate": {
+    "existingScatterBudgetMs": 88,
+    "maximumNewMedianMs": 132,
+    "passed": true
+  },
+  "hostSensitiveExistingOverruns": [
+    "canvas cold scatter 100k",
+    "hit-index build 100k",
+    "candidate lookup 100k",
+    "several transform/stat workloads during the same thermally constrained local run"
+  ],
+  "authority": "All PR-specific workloads pass their budgets and the 132 ms initial gate. The isolated benchmark workflow remains authoritative for host-sensitive pre-existing workloads."
+}

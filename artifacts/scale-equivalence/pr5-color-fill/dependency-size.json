@@ -1,0 +1,6 @@
+{
+  "runtimeDependenciesAdded": [],
+  "lockfilePackagesAdded": 0,
+  "portableCallbacksAdded": false,
+  "notes": "Color/fill families reuse the existing parser, transform, palette, scene, and renderer modules; no dependency or executable portable surface was added."
+}

@@ -48,6 +48,24 @@
         fill={ink}>{entry.label}</text
       >
     {/each}
+  {:else if legend.type === "steps"}
+    {#each legend.entries as entry (entry.y)}
+      <rect
+        class="gg-legend-step"
+        x="4"
+        y={rampTop + entry.y}
+        width={legend.stepWidth}
+        height={legend.stepHeight}
+        fill={entry.color}
+      />
+      <text
+        class="gg-legend-label"
+        x={4 + legend.stepWidth + 6}
+        y={rampTop + entry.y + legend.stepHeight / 2}
+        dy="0.32em"
+        fill={ink}>{entry.label}</text
+      >
+    {/each}
   {:else}
     <defs>
       <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
@@ -64,7 +82,7 @@
       height={legend.rampHeight}
       fill={`url(#${gradientId})`}
     />
-    {#each legend.ticks as tick (tick.y)}
+    {#each legend.ticks as tick}
       <text
         class="gg-legend-label"
         x={4 + legend.rampWidth + 6}

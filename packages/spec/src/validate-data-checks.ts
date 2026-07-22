@@ -395,16 +395,23 @@ export function dataChecks(
       config?.scheme !== undefined &&
       SEQUENTIAL_SCHEMES.has(config.scheme);
     const effectiveType = config?.type ?? (inferredFromSequentialScheme ? "sequential" : undefined);
-    if (effectiveType !== "sequential") continue;
+    if (effectiveType !== "sequential" && effectiveType !== "binned") continue;
     for (const use of colorFields[channel]) {
       const type = typeOf(use.field);
-      if (type === "nominal" || type === "ordinal") {
+      if (type !== "nominal" && type !== "ordinal") continue;
+
+      const requestsTemporal =
+        config?.temporalKind !== undefined ||
+        config?.parse !== undefined ||
+        config?.timezone !== undefined ||
+        config?.disambiguation !== undefined;
+      if (!requestsTemporal) {
         errors.push({
           code: "scale-type-mismatch",
           path: use.path,
           message: inferredFromSequentialScheme
             ? `scales.${channel}.scheme is "${config.scheme}" and selects a sequential scale, but field "${use.field}" is ${type}; sequential color ramps need quantitative values.`
-            : `scales.${channel}.type is "sequential" but field "${use.field}" is ${type}; sequential color ramps need quantitative values.`,
+            : `scales.${channel}.type is "${effectiveType}" but field "${use.field}" is ${type}; quantitative color scales need quantitative or temporal values.`,
           fix: inferredFromSequentialScheme
             ? {
                 description: `Set scales.${channel}.scheme to a categorical scheme, remove it to infer an ordinal scale from "${use.field}", or map a quantitative field.`,
@@ -412,7 +419,58 @@ export function dataChecks(
               }
             : { description: `Set scales.${channel}.type to "ordinal".` },
         });
+        continue;
       }
+
+      const info = fields.get(use.field);
+      const decision =
+        info?.values === null || info?.values === undefined
+          ? info?.temporal
+          : parseTemporalColumn(info.values, config?.parse ?? "auto", {
+              ...(config?.timezone !== undefined && { timezone: config.timezone }),
+              ...(config?.disambiguation !== undefined && {
+                disambiguation: config.disambiguation,
+              }),
+            }).decision;
+      const censoredInvalid =
+        config?.parse !== undefined &&
+        config.parseFailure === "censor" &&
+        decision?.status === "invalid";
+      if (decision?.status === "temporal" || censoredInvalid) {
+        if (
+          decision?.status === "temporal" &&
+          config?.temporalKind !== undefined &&
+          decision.kind !== config.temporalKind
+        ) {
+          errors.push({
+            code: "scale-type-mismatch",
+            path: use.path,
+            message: `scales.${channel} requests temporal kind "${config.temporalKind}" but field "${use.field}" parses as "${decision.kind}".`,
+            fix: {
+              description: `Use the ${decision.kind ?? "matching"} color helper or correct the source precision.`,
+            },
+          });
+        }
+        continue;
+      }
+
+      const detail =
+        decision?.status === "ambiguous"
+          ? ` Automatic temporal inference was ambiguous between: ${decision.candidates.join(", ")}.`
+          : decision?.status === "invalid"
+            ? ` Temporal parsing rejected ${String(decision.failedCount)} value(s).`
+            : "";
+      errors.push({
+        code: "scale-type-mismatch",
+        path: use.path,
+        message: `scales.${channel} requests temporal colors but field "${use.field}" is ${type}.${detail}`,
+        fix: {
+          description:
+            config?.parse === undefined
+              ? `Set scales.${channel}.parse to the exact temporal order, or use type: "ordinal".`
+              : `Correct the rejected values, choose the matching parser, or set parseFailure: "censor" explicitly.`,
+        },
+      });
     }
   }
 

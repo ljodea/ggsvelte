@@ -1,0 +1,45 @@
+{
+  "id": "51-binned-colorsteps",
+  "kind": "chart",
+  "prompt": "Plot pm25 against hour as points. Map pm25 to binned color using semantic boundaries 0, 12, 35, 55, and 100 so the chart renders a colorsteps guide, not a continuous colorbar or a discrete category legend.",
+  "dataProfile": {
+    "fields": [
+      { "name": "hour", "type": "quantitative" },
+      { "name": "pm25", "type": "quantitative" }
+    ],
+    "rowCount": 5
+  },
+  "data": {
+    "main": [
+      { "hour": 0, "pm25": 4 },
+      { "hour": 6, "pm25": 18 },
+      { "hour": 12, "pm25": 42 },
+      { "hour": 18, "pm25": 76 },
+      { "hour": 22, "pm25": 11 }
+    ]
+  },
+  "gold": {
+    "edition": 2,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "point",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "hour" },
+          "y": { "field": "pm25" },
+          "color": { "field": "pm25" }
+        }
+      }
+    ],
+    "scales": {
+      "color": {
+        "type": "binned",
+        "breaks": [0, 12, 35, 55, 100]
+      }
+    }
+  },
+  "expectRefusal": false,
+  "notes": "The deterministic agent must select the binned color family and preserve semantic colorstep boundaries."
+}

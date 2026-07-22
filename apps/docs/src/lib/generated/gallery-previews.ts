@@ -63,6 +63,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "45b623a6d8489f9cdc34d6fd9228643ad818672a1bdbd48f56fcae5df3aa246c",
   },
   {
+    id: "color/binned",
+    filename: "color-binned-light.png",
+    path: "/previews/color-binned-light.png",
+    sha256: "ba8aa00bdc8dd6cbc9bfa1d29ee2bf3860f7577b04863b2ae0a79a6546f9f8e9",
+  },
+  {
     id: "color/continuous",
     filename: "color-continuous-light.png",
     path: "/previews/color-continuous-light.png",

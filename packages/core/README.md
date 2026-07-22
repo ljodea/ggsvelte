@@ -55,6 +55,14 @@ separate `transform`. Binned scales retain private integer identities for
 count/stack/dodge while guides, candidates, and interactions use semantic
 centers and edges.
 
+Non-position color/fill scales resolve ordinal, sequential, binned, manual,
+and identity families through one semantic value path. Sequential and binned
+families expose semantic and transformed domains; manual/identity preserve
+explicit NA and unknown policies. Bounded warnings count fallback use, and
+numeric or temporal `labels` formats apply to colorbars and colorsteps.
+`guidePlans` includes immutable `discrete`, `colorbar`, and `colorsteps`
+payloads, while SVG, canvas, and Svelte consume the same resolved mark colors.
+
 `coordTransform` is a separate post-stat projector. Per-panel projectors map
 trained scale-space values through identity/log10/sqrt coordinates, project
 axis ticks and grids, adaptively tessellate curved paths/segments, and expose

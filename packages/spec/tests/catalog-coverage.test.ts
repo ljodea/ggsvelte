@@ -41,6 +41,18 @@ const TRIGGERS: Record<SpecErrorCode, Trigger> = {
   "scale-range-color": {
     spec: { layers: [point], scales: { color: { range: ["tomato"] } } },
   },
+  "scale-type-transform-conflict": {
+    spec: {
+      layers: [point],
+      scales: { color: { type: "sequential", temporalKind: "date", transform: "sqrt" } },
+    },
+  },
+  "scale-manual-domain-range": {
+    spec: {
+      layers: [point],
+      scales: { color: { type: "manual", domain: ["a", "b"], range: ["#f00"] } },
+    },
+  },
   "missing-required-channel": { spec: { layers: [{ geom: "point" }] }, options: {} },
   "rule-form-ambiguous": {
     spec: {

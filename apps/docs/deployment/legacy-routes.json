@@ -96,6 +96,12 @@
       "sources": ["canonical", "sitemap", "live-crawl"]
     },
     {
+      "sourcePath": "/examples/color/binned",
+      "destinationPath": "/examples/color/binned",
+      "kind": "page",
+      "sources": ["canonical"]
+    },
+    {
       "sourcePath": "/examples/color/continuous",
       "destinationPath": "/examples/color/continuous",
       "kind": "page",

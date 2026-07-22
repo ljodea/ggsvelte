@@ -53,6 +53,13 @@ statistics without changing the values consumed by a fit or bin. Nonlinear paths
 tessellated without creating inspectable rows, and interval or brush inversion returns
 semantic values.
 
+Color/fill helpers are re-exported from the package root. For example,
+`scales={scaleColorBinned({ breaks: [0, 10, 100], range: ["#ddd", "#222"] })}`
+renders deterministic color steps and a colorsteps guide. Continuous,
+discrete, log10, sqrt, date, datetime, manual, and identity families use the
+same JSON accepted by `<GGPlot>`, with binding-identical `color`/`colour` and
+ggplot2 snake-case aliases.
+
 ## Links
 
 - [Documentation](https://ggsvelte.sh/)
