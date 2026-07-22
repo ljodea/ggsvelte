@@ -118,7 +118,9 @@ export function deriveLayerGroups(binding: LayerBinding, table: ColumnTable): nu
               mapping.field === binding.yminField ||
               mapping.field === binding.ymaxField
             ? binding.yConversion
-            : undefined;
+            : mapping.field === binding.xminField || mapping.field === binding.xmaxField
+              ? binding.xConversion
+              : undefined;
       const forcedDiscrete =
         (channel === "color" && binding.color.forcedDiscrete === true) ||
         (channel === "fill" && binding.fill.forcedDiscrete === true) ||

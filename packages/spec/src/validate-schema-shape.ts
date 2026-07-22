@@ -20,9 +20,12 @@ import {
   LineLayerSchema,
   PlotSpecSchema,
   PointLayerSchema,
+  RasterLayerSchema,
+  RectLayerSchema,
   RuleLayerSchema,
   SmoothLayerSchema,
   TextLayerSchema,
+  TileLayerSchema,
 } from "./schema.js";
 import { mapValueErrors, unknownGeomError } from "./validate-map-errors.js";
 
@@ -40,6 +43,9 @@ export const GEOM_BRANCHES = {
   boxplot: BoxplotLayerSchema,
   density: DensityLayerSchema,
   errorbar: ErrorbarLayerSchema,
+  rect: RectLayerSchema,
+  tile: TileLayerSchema,
+  raster: RasterLayerSchema,
 } as const;
 
 function isRecord(v: unknown): v is Record<string, unknown> {

@@ -30,6 +30,10 @@ export function resolveLayerPositionChannels(input: {
   yStatColumn: string | null;
   yminField: string | null;
   ymaxField: string | null;
+  xminField: string | null;
+  xmaxField: string | null;
+  widthField: string | null;
+  heightField: string | null;
 } {
   const { layer, aes, index, table, warnings, xConversion, yConversion } = input;
   const geom = layer.geom;
@@ -50,6 +54,10 @@ export function resolveLayerPositionChannels(input: {
 
   const yminField = checkField(aes.ymin, "ymin", index, table, warnings);
   const ymaxField = checkField(aes.ymax, "ymax", index, table, warnings);
+  const xminField = checkField(aes.xmin, "xmin", index, table, warnings);
+  const xmaxField = checkField(aes.xmax, "xmax", index, table, warnings);
+  const widthField = checkField(aes.width, "width", index, table, warnings);
+  const heightField = checkField(aes.height, "height", index, table, warnings);
 
   assertRequiredChannels({
     geom,
@@ -61,7 +69,20 @@ export function resolveLayerPositionChannels(input: {
     yStatColumn,
     yminField,
     ymaxField,
+    xminField,
+    xmaxField,
   });
 
-  return { ruleForm, xField, yField, yStatColumn, yminField, ymaxField };
+  return {
+    ruleForm,
+    xField,
+    yField,
+    yStatColumn,
+    yminField,
+    ymaxField,
+    xminField,
+    xmaxField,
+    widthField,
+    heightField,
+  };
 }

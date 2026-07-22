@@ -15,6 +15,10 @@ export function makeLayerBinding(input: {
   yConversion: LayerBinding["yConversion"];
   yminField: string | null;
   ymaxField: string | null;
+  xminField: string | null;
+  xmaxField: string | null;
+  widthField: string | null;
+  heightField: string | null;
   color: LayerBinding["color"];
   fill: LayerBinding["fill"];
   size: LayerBinding["size"];
@@ -37,6 +41,10 @@ export function makeLayerBinding(input: {
     yConversion: input.yConversion,
     yminField: input.yminField,
     ymaxField: input.ymaxField,
+    xminField: input.xminField,
+    xmaxField: input.xmaxField,
+    widthField: input.widthField,
+    heightField: input.heightField,
     color: input.color,
     fill: input.fill,
     size: input.size,

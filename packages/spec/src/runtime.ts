@@ -28,9 +28,12 @@ import type {
   LineLayer,
   PointLayer,
   PortableSpec,
+  RasterLayer,
+  RectLayer,
   RuleLayer,
   SmoothLayer,
   TextLayer,
+  TileLayer,
 } from "./schema.js";
 
 /** A function channel accessor: computes the channel value per row. */
@@ -63,6 +66,9 @@ export interface RuntimeSmoothLayer extends WithRuntimeAes<SmoothLayer> {}
 export interface RuntimeBoxplotLayer extends WithRuntimeAes<BoxplotLayer> {}
 export interface RuntimeDensityLayer extends WithRuntimeAes<DensityLayer> {}
 export interface RuntimeErrorbarLayer extends WithRuntimeAes<ErrorbarLayer> {}
+export interface RuntimeRectLayer extends WithRuntimeAes<RectLayer> {}
+export interface RuntimeTileLayer extends WithRuntimeAes<TileLayer> {}
+export interface RuntimeRasterLayer extends WithRuntimeAes<RasterLayer> {}
 
 export type RuntimeLayerSpec =
   | RuntimePointLayer
@@ -76,7 +82,10 @@ export type RuntimeLayerSpec =
   | RuntimeSmoothLayer
   | RuntimeBoxplotLayer
   | RuntimeDensityLayer
-  | RuntimeErrorbarLayer;
+  | RuntimeErrorbarLayer
+  | RuntimeRectLayer
+  | RuntimeTileLayer
+  | RuntimeRasterLayer;
 
 /** The in-memory spec superset ({ fn } channel accessors allowed). */
 type RuntimeSpecPortableFields = Omit<PortableSpec, "aes" | "layers">;

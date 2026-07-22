@@ -112,6 +112,9 @@ export const SmoothLayerSchema = SpecModule.Import("SmoothLayer");
 export const BoxplotLayerSchema = SpecModule.Import("BoxplotLayer");
 export const DensityLayerSchema = SpecModule.Import("DensityLayer");
 export const ErrorbarLayerSchema = SpecModule.Import("ErrorbarLayer");
+export const RectLayerSchema = SpecModule.Import("RectLayer");
+export const TileLayerSchema = SpecModule.Import("TileLayer");
+export const RasterLayerSchema = SpecModule.Import("RasterLayer");
 export const AesSchema = SpecModule.Import("Aes");
 export const ChannelValueSchema = SpecModule.Import("ChannelValue");
 export const DataRefSchema = SpecModule.Import("DataRef");
@@ -180,6 +183,12 @@ export type DensityParams = SpecType<"DensityParams">;
 export type SummaryFun = SpecType<"SummaryFun">;
 /** Errorbar layer params (styling + summary-stat functions). */
 export type ErrorbarParams = SpecType<"ErrorbarParams">;
+/** Rect layer params. */
+export type RectParams = SpecType<"RectParams">;
+/** Tile layer params. */
+export type TileParams = SpecType<"TileParams">;
+/** Raster layer params. */
+export type RasterParams = SpecType<"RasterParams">;
 /** Jitter/nudge position parameters. */
 export type PositionParams = SpecType<"PositionParams">;
 /** A point layer. */
@@ -206,6 +215,12 @@ export type BoxplotLayer = SpecType<"BoxplotLayer">;
 export type DensityLayer = SpecType<"DensityLayer">;
 /** An errorbar layer. */
 export type ErrorbarLayer = SpecType<"ErrorbarLayer">;
+/** A rect layer (arbitrary xmin/xmax/ymin/ymax regions). */
+export type RectLayer = SpecType<"RectLayer">;
+/** A tile layer (center-sized cells). */
+export type TileLayer = SpecType<"TileLayer">;
+/** A raster layer (equal-cell dense grid). */
+export type RasterLayer = SpecType<"RasterLayer">;
 /** One plot layer, discriminated by `geom`. */
 export type LayerSpec = SpecType<"LayerSpec">;
 /** Stackable position adjustment names. */

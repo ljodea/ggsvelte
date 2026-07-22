@@ -67,10 +67,13 @@ export type {
   LayerInput,
   LineLayerInput,
   PointLayerInput,
+  RasterLayerInput,
+  RectLayerInput,
   RuleLayerInput,
   SmoothLayerInput,
   SpecInput,
   TextLayerInput,
+  TileLayerInput,
 } from "./normalize-input.js";
 
 /** Canonicalize one channel: bare string -> { field }; clone canonical forms. */

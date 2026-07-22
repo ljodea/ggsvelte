@@ -215,6 +215,18 @@ export const PIPELINE_ERROR_CATALOG = {
       "A fixed-intercept annotation rule maps a style to a field or after-stat column, but it has no data rows to map.",
     fix: "Use a constant style value (optionally { value, scale: true }) on the annotation rule.",
   },
+  "tile-nonpositive-size": {
+    summary: "A tile layer has a non-positive or non-finite width/height.",
+    fix: "Map a positive width/height or set params.width / params.height to a positive number.",
+  },
+  "raster-duplicate-cells": {
+    summary: "A raster layer has duplicate (x, y) coordinates.",
+    fix: 'Aggregate to one value per cell, or use geom "tile" for overlapping cells.',
+  },
+  "unsupported-param": {
+    summary: "A layer param value is not supported by this runtime.",
+    fix: "Use a documented supported value for the param (see the error message).",
+  },
   "invalid-aesthetic-constant": {
     summary: "A literal style constant is outside the aesthetic's supported output domain.",
     fix: "Use a positive size/linewidth, alpha in [0,1], or a documented shape/linetype name.",
@@ -285,6 +297,10 @@ export const PIPELINE_WARNING_CATALOG = {
   "removed-missing": {
     summary:
       "Rows with missing/non-finite values in required channels were dropped (count in message).",
+  },
+  "raster-irregular-spacing": {
+    summary:
+      "Raster cell centers are not on a regular grid; the minimum spacing is used (prefer geom tile).",
   },
   "scale-transform-domain": {
     summary:

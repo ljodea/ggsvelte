@@ -72,7 +72,7 @@ export function dataChecks(
   const layers = Array.isArray(spec["layers"]) ? (spec["layers"] as unknown[]) : [];
   const scaleRequestsTimeForChannel = (channel: ChannelName): boolean => {
     const axis =
-      channel === "x"
+      channel === "x" || channel === "xmin" || channel === "xmax"
         ? "x"
         : channel === "y" || channel === "ymin" || channel === "ymax"
           ? "y"
@@ -175,6 +175,48 @@ export function dataChecks(
         }
       }
     }
+    if (geom === "rect") {
+      for (const channel of ["xmin", "xmax"] as const) {
+        const info = fieldTypeOf(channel);
+        if (
+          info !== null &&
+          (info[1] === "nominal" || info[1] === "ordinal") &&
+          !scaleRequestsTime(scales, "x")
+        ) {
+          typeError(
+            channel,
+            `The rect geom needs quantitative edges, but field "${info[0]}" (${channel}) is ${info[1]}.`,
+            "Map the channel to a numeric field.",
+          );
+        }
+      }
+      for (const channel of ["ymin", "ymax"] as const) {
+        const info = fieldTypeOf(channel);
+        if (
+          info !== null &&
+          (info[1] === "nominal" || info[1] === "ordinal") &&
+          !scaleRequestsTime(scales, "y")
+        ) {
+          typeError(
+            channel,
+            `The rect geom needs quantitative edges, but field "${info[0]}" (${channel}) is ${info[1]}.`,
+            "Map the channel to a numeric field.",
+          );
+        }
+      }
+    }
+    if (geom === "raster") {
+      for (const channel of ["x", "y"] as const) {
+        const info = fieldTypeOf(channel);
+        if (info !== null && (info[1] === "nominal" || info[1] === "ordinal")) {
+          typeError(
+            channel,
+            `The raster geom needs continuous ${channel}, but field "${info[0]}" is ${info[1]}.`,
+            'Use geom "tile" for discrete axes.',
+          );
+        }
+      }
+    }
 
     for (const channel of CHANNELS) {
       const mapped = effectiveChannel(plotAes, layerAes, channel);
@@ -236,7 +278,9 @@ export function dataChecks(
         });
         continue;
       }
-      if (channel === "x") axisFields.x.push({ field: mapped.field, path });
+      if (channel === "x" || channel === "xmin" || channel === "xmax") {
+        axisFields.x.push({ field: mapped.field, path });
+      }
       if (channel === "y" || channel === "ymin" || channel === "ymax") {
         axisFields.y.push({ field: mapped.field, path });
       }

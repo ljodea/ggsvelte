@@ -383,13 +383,35 @@ export const SpecDeclarations = {
       ymin: Type.Optional(
         Type.Ref("ChannelValue", {
           description:
-            "Lower bound channel (errorbar with the identity stat). Quantitative values only.",
+            "Lower bound channel (errorbar with the identity stat; also y edge for geom rect). Quantitative values only.",
         }),
       ),
       ymax: Type.Optional(
         Type.Ref("ChannelValue", {
           description:
-            "Upper bound channel (errorbar with the identity stat). Quantitative values only.",
+            "Upper bound channel (errorbar with the identity stat; also y edge for geom rect). Quantitative values only.",
+        }),
+      ),
+      xmin: Type.Optional(
+        Type.Ref("ChannelValue", {
+          description: "Left edge channel (geom rect). Quantitative values only.",
+        }),
+      ),
+      xmax: Type.Optional(
+        Type.Ref("ChannelValue", {
+          description: "Right edge channel (geom rect). Quantitative values only.",
+        }),
+      ),
+      width: Type.Optional(
+        Type.Ref("ChannelValue", {
+          description:
+            "Cell width for geom tile (data units after position transform; not a trained position scale). Prefer params.width for a constant.",
+        }),
+      ),
+      height: Type.Optional(
+        Type.Ref("ChannelValue", {
+          description:
+            "Cell height for geom tile (data units after position transform; not a trained position scale). Prefer params.height for a constant.",
         }),
       ),
     },
@@ -749,6 +771,102 @@ export const SpecDeclarations = {
       additionalProperties: false,
       description:
         'Parameters for the errorbar geom: styling plus the summary-stat functions (fun, funMin, funMax) used when stat is "summary".',
+    },
+  ),
+
+  RectParams: Type.Object(
+    {
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Outline stroke width in px when color is set. Must be greater than 0.",
+        }),
+      ),
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Rectangle opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description: "Styling parameters for the rect geom (arbitrary xmin/xmax/ymin/ymax regions).",
+    },
+  ),
+
+  TileParams: Type.Object(
+    {
+      width: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description:
+            "Constant tile width in data units after position transform (band axes: fraction of the band step). Default: resolution of unique x centers (continuous) or 1 (band).",
+        }),
+      ),
+      height: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description:
+            "Constant tile height in data units after position transform (band axes: fraction of the band step). Default: resolution of unique y centers (continuous) or 1 (band).",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Outline stroke width in px when color is set. Must be greater than 0.",
+        }),
+      ),
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Tile opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Parameters for the tile geom: center-sized cells (x/y + optional width/height).",
+    },
+  ),
+
+  RasterParams: Type.Object(
+    {
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Raster opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      hjust: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description:
+            "Horizontal justification of each cell over its x center (0–1). Default 0.5.",
+        }),
+      ),
+      vjust: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Vertical justification of each cell over its y center (0–1). Default 0.5.",
+        }),
+      ),
+      interpolate: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Interpolation between cells. Only false (nearest / no interpolation) is supported.",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description: "Parameters for the raster geom: equal-cell dense grid (no per-cell stroke).",
     },
   ),
 
@@ -1142,6 +1260,75 @@ export const SpecDeclarations = {
     },
   ),
 
+  RectLayer: Type.Object(
+    {
+      geom: Type.Literal("rect", {
+        description:
+          "Rectangle geometry: one rectangle per data row from mapped xmin/xmax/ymin/ymax edges. Use for arbitrary shaded regions and time bands.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("identity", { description: "Rect layers draw the data as-is." }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Rect layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      params: Type.Optional(Type.Ref("RectParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A rectangle layer. Requires xmin, xmax, ymin, and ymax channels (quantitative edges).",
+    },
+  ),
+
+  TileLayer: Type.Object(
+    {
+      geom: Type.Literal("tile", {
+        description:
+          "Tile geometry: center-sized cells at (x, y) with optional width/height. Use for heatmaps and gridded categorical cells; supports stroke outlines.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("identity", { description: "Tile layers draw the data as-is." }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Tile layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      params: Type.Optional(Type.Ref("TileParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A tile layer. Requires x and y channels; optional width/height (params or aes) size each cell after position transform.",
+    },
+  ),
+
+  RasterLayer: Type.Object(
+    {
+      geom: Type.Literal("raster", {
+        description:
+          "Raster geometry: equal-cell grid at (x, y) with fill; optimized dense heatmaps without per-cell strokes. Irregular spacing warns and suggests geom tile.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("identity", { description: "Raster layers draw the data as-is." }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Raster layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      params: Type.Optional(Type.Ref("RasterParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A raster layer. Requires x and y (regular spacing); fill maps cell color. No stroke. interpolate must be false when set.",
+    },
+  ),
+
   AreaLayer: Type.Object(
     {
       geom: Type.Literal("area", {
@@ -1226,6 +1413,9 @@ export const SpecDeclarations = {
       Type.Ref("BoxplotLayer"),
       Type.Ref("DensityLayer"),
       Type.Ref("ErrorbarLayer"),
+      Type.Ref("RectLayer"),
+      Type.Ref("TileLayer"),
+      Type.Ref("RasterLayer"),
     ],
     {
       description:

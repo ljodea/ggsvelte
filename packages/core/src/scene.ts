@@ -114,7 +114,9 @@ export interface RectsBatch {
   /** Outline stroke: a color string, or null for theme ink. Omitted =
    *  no outline (bars/cols — decision 0008 note 7). */
   stroke?: string | null;
-  /** Outline width in px (only with `stroke`). */
+  /** Per-rect outline colors when aes.color is data-mapped (rect/tile). */
+  strokes?: string[];
+  /** Outline width in px (only with `stroke` / `strokes`). */
   strokeWidth?: number;
   strokeWidths?: Float32Array;
   /** Constant outline linetype (boxplot boxes; omitted = solid). */
@@ -123,6 +125,11 @@ export interface RectsBatch {
   linetypeIndexes?: Uint8Array;
   alpha: number;
   alphas?: Float32Array;
+  /**
+   * Candidate/tooltip anchor: top-center (default, bars/boxplot) or geometric
+   * center (rect/tile/raster).
+   */
+  anchor?: "top-center" | "center";
 }
 
 export interface SegmentsBatch {

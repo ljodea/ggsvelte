@@ -40,6 +40,10 @@ export function resolveLayerFields(
     }
     push("ymin", binding.yminField);
     push("ymax", binding.ymaxField);
+    push("xmin", binding.xminField);
+    push("xmax", binding.xmaxField);
+    push("width", binding.widthField);
+    push("height", binding.heightField);
     push("color", binding.color.field);
     push("fill", binding.fill.field);
     for (const channel of ["size", "linewidth", "alpha", "shape", "linetype"] as const) {

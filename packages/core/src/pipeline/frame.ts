@@ -7,6 +7,7 @@ import type { ColumnTable } from "../table.js";
 import type { Advisory, LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
 import { NO_ROW } from "./types.js";
 import { buildAnnotationFrame } from "./frame-annotation.js";
+import { expandEdgeFrame } from "./frame-edge-expand.js";
 import { deriveLayerGroups } from "./frame-helpers.js";
 import { buildIdentityFrame } from "./frame-identity.js";
 import { buildNonIdentityFrame } from "./frame-stats.js";
@@ -40,7 +41,9 @@ export function buildFrame(
   );
   if (nonIdentity !== null) return { ...nonIdentity, inputGroups };
 
-  return { ...buildIdentityFrame(binding, table, inputGroups), inputGroups };
+  const frame = { ...buildIdentityFrame(binding, table, inputGroups), inputGroups };
+  expandEdgeFrame(frame, warnings);
+  return frame;
 }
 
 /**

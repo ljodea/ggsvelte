@@ -53,7 +53,17 @@ export interface GroupDerivation {
 }
 
 /** Channels that never participate in the discrete interaction. */
-const NON_GROUPING_CHANNELS: ReadonlySet<string> = new Set(["group", "label"]);
+const NON_GROUPING_CHANNELS: ReadonlySet<string> = new Set([
+  "group",
+  "label",
+  "weight",
+  "width",
+  "height",
+  "xmin",
+  "xmax",
+  "ymin",
+  "ymax",
+]);
 
 /** Distinct sentinel for null cells so null forms its own interaction level. */
 const NULL_KEY = "\u0000null";

@@ -46,8 +46,13 @@ function drawBatchInner(
           batch.rects[j * 4 + 2]!,
           batch.rects[j * 4 + 3]!,
         );
-        if (batch.stroke !== undefined) {
-          ctx.strokeStyle = resolve(batch.stroke ?? themeVar("ink", theme));
+        const strokeColor =
+          batch.strokes?.[j] ??
+          (batch.stroke === undefined && batch.strokes === undefined
+            ? undefined
+            : (batch.stroke ?? themeVar("ink", theme)));
+        if (strokeColor !== undefined) {
+          ctx.strokeStyle = resolve(strokeColor);
           ctx.lineWidth = batch.strokeWidths?.[j] ?? batch.strokeWidth ?? 1;
           applyDash(ctx, linetypeAt(batch, j));
           ctx.strokeRect(
@@ -102,8 +107,13 @@ function drawBatchSubsetInner(
           batch.rects[j * 4 + 2]!,
           batch.rects[j * 4 + 3]!,
         );
-        if (batch.stroke !== undefined) {
-          ctx.strokeStyle = resolve(batch.stroke ?? themeVar("ink", theme));
+        const strokeColor =
+          batch.strokes?.[j] ??
+          (batch.stroke === undefined && batch.strokes === undefined
+            ? undefined
+            : (batch.stroke ?? themeVar("ink", theme)));
+        if (strokeColor !== undefined) {
+          ctx.strokeStyle = resolve(strokeColor);
           ctx.lineWidth = batch.strokeWidths?.[j] ?? batch.strokeWidth ?? 1;
           applyDash(ctx, linetypeAt(batch, j));
           ctx.strokeRect(

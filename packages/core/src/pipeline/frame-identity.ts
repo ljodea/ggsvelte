@@ -110,5 +110,25 @@ export function buildIdentityFrame(
             binding.yTransform,
             binding.yBinning,
           ),
+    xmin:
+      binding.xminField === null
+        ? null
+        : positionNumeric(
+            table,
+            binding.xminField,
+            binding.xConversion,
+            binding.xTransform,
+            binding.xBinning,
+          ),
+    xmax:
+      binding.xmaxField === null
+        ? null
+        : positionNumeric(
+            table,
+            binding.xmaxField,
+            binding.xConversion,
+            binding.xTransform,
+            binding.xBinning,
+          ),
   };
 }

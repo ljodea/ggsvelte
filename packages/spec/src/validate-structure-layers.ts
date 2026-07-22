@@ -30,6 +30,9 @@ const REQUIRED_CHANNELS: Record<string, ChannelName[]> = {
   boxplot: ["x", "y"],
   density: ["x"],
   errorbar: ["x"], // ymin/ymax vs y are stat-dependent, checked separately
+  rect: ["xmin", "xmax", "ymin", "ymax"],
+  tile: ["x", "y"],
+  raster: ["x", "y"],
 };
 
 function hasIntercepts(layer: Record<string, unknown>): boolean {
