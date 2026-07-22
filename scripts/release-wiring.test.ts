@@ -295,8 +295,8 @@ describe("R0 release wiring", () => {
 
   it("path-routes CI jobs through scripts/ci-routing.ts and a ci-gate aggregator", () => {
     const ci = read(".github/workflows/ci.yml");
-    // ci.yml detect-changes delegates to the detect-changes driver; vr-compare
-    // still uses emit-github-output for its thinner base-resolution path.
+    // ci.yml and vr-compare both delegate path routing to the detect-changes
+    // driver (shared resolveRouteInputs base resolution — issue #415).
     expect(ci).toContain("scripts/ci-routing.ts detect-changes");
     expect(ci).toContain("  detect-changes:");
     expect(ci).toContain("  ci-gate:");
@@ -329,9 +329,11 @@ describe("R0 release wiring", () => {
     expect(ci).toContain("bun run lint:type-aware");
     expect(ci).toContain("bun run knip");
     expect(read(".pre-commit-config.yaml")).not.toContain("pre-push");
-    expect(read(".github/workflows/vr-compare.yml")).toContain(
-      "scripts/ci-routing.ts emit-github-output",
-    );
+    const vrCompare = read(".github/workflows/vr-compare.yml");
+    // Shared base-resolution with ci.yml (issue #415) — no inline force-all bash.
+    expect(vrCompare).toContain("scripts/ci-routing.ts detect-changes");
+    expect(vrCompare).not.toContain("emit-github-output");
+    expect(vrCompare).not.toContain('zero="0000000000000000000000000000000000000000"');
   });
 
   it("uses bash for the containerized visual approval job", () => {
