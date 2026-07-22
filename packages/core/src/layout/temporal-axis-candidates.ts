@@ -119,12 +119,14 @@ function evaluateTicks(
     })
     .toSorted((left, right) => left.pos - right.pos);
 
+  // projected is already sorted by pos above — skip re-sort in neighbourOverlap.
   const overlap = neighbourOverlap(
     projected.map((tick) => ({
       pos: tick.pos,
       half: input.orient === "horizontal" ? tick.width / 2 : tick.height / 2,
     })),
     MIN_TEMPORAL_LABEL_GAP_PX,
+    { alreadySorted: true },
   );
   // Layout reserves tickLength + tickLabelGap (defaults 6 + 3) in addition to the
   // label extent. Match that chrome so near-cap labels still diagnose overflow.

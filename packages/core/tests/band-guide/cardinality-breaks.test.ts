@@ -38,6 +38,32 @@ describe("planBandAxis: sparse explicit breaks (Codex P2)", () => {
     expect(p.ticks.every((t) => t.labeled)).toBe(true); // every authored break kept
     expect(p.overlap).toBe(false);
   });
+
+  it("orders overlap by position even when breaks are authored out of domain order", () => {
+    // Authored order [99, 0, 50] must not false-positive overlap: positions are
+    // far apart; sorting by pos (not array index) is required.
+    const longLabel = "Muy larga etiqueta de categoría con detalle";
+    const p = planBandAxis({
+      aesthetic: "x",
+      panelIndex: 0,
+      categoryCount: 100,
+      entries: [99, 0, 50].map((domainIndex) => ({
+        value: `c${domainIndex}`,
+        label: longLabel,
+        domainIndex,
+      })),
+      orient: "horizontal",
+      extentPx: 480,
+      reverse: false,
+      measurer,
+      fontSize: 11,
+      marginCapPx: 168,
+      orthogonalMarginCapPx: 400,
+    });
+    expect(p.labelEvery).toBe(1);
+    expect(p.ticks.every((t) => t.labeled)).toBe(true);
+    expect(p.overlap).toBe(false);
+  });
 });
 describe("planBandAxis: small authored break subset (Codex P2)", () => {
   it("never thins a handful of close-together authored breaks in a huge domain", () => {
