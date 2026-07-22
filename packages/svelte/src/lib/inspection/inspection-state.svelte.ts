@@ -20,7 +20,7 @@
  */
 import type { CandidateFacts, CellValue, RenderModel, ScenePanel } from "@ggsvelte/core";
 
-import { createInspectionCoordinator } from "./resolver.js";
+import { createInspectionCoordinator } from "./coordinator.js";
 import type {
   createInteractionReducer,
   InteractionAction,
