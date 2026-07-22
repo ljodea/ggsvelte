@@ -182,9 +182,14 @@ for (const width of [375, 768, 1024, 1280, 1600]) {
   test(`themes has no horizontal overflow at ${String(width)}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
     await page.goto("/themes?theme=light");
-    expect(
-      await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
-    ).toBe(true);
+    // Wait for the themes specimen list so layout is past first paint/fonts;
+    // a one-shot scrollWidth check races chart/font settling on CI.
+    await expect(page.getByRole("list", { name: "Built-in chart themes" })).toBeVisible();
+    await page.waitForFunction(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+      undefined,
+      { timeout: 10_000 },
+    );
   });
 }
 
