@@ -1,10 +1,16 @@
 <script lang="ts">
   import { tick, untrack } from "svelte";
 
-  import { copyText, MANUAL_COPY_STATUS } from "$lib/clipboard";
+  import { copyText } from "$lib/clipboard";
   import UiButton from "$lib/components/UiButton.svelte";
   import { playgroundSVGExport } from "$lib/playground-export";
   import type { PlaygroundOutput } from "$lib/playground-output";
+  import {
+    PLAYGROUND_SVG_DOWNLOADED_STATUS,
+    playgroundCopyStatus,
+    playgroundSvgDownloadFailureStatus,
+    playgroundSvgExportFailureStatus,
+  } from "$lib/playground-output-status";
   import { nextRovingTabIndex } from "$lib/tab-roving";
   import type { PortableSpec } from "@ggsvelte/spec";
 
@@ -81,10 +87,7 @@
     if (revision !== outputRevision) return;
     copying = false;
     manualFallback = result !== "copied";
-    copyStatus =
-      result === "copied"
-        ? `${selected.label} output copied.`
-        : MANUAL_COPY_STATUS;
+    copyStatus = playgroundCopyStatus(selected.label, result);
   }
 
   function exportSVG(): void {
@@ -92,7 +95,7 @@
     exportStatus = "";
     const result = playgroundSVGExport(rendered);
     if (!result.ok) {
-      exportStatus = `SVG export failed · ${result.diagnostic.source}/${result.diagnostic.code}: ${result.diagnostic.message} ${result.diagnostic.fix ?? ""}`;
+      exportStatus = playgroundSvgExportFailureStatus(result.diagnostic);
       return;
     }
 
@@ -106,9 +109,9 @@
       anchor.href = objectUrl;
       anchor.download = result.filename;
       anchor.click();
-      exportStatus = "SVG downloaded.";
+      exportStatus = PLAYGROUND_SVG_DOWNLOADED_STATUS;
     } catch (error) {
-      exportStatus = `SVG export failed · export/download-failed: ${error instanceof Error ? error.message : "The browser refused the download."} The chart and outputs were retained.`;
+      exportStatus = playgroundSvgDownloadFailureStatus(error);
     } finally {
       if (objectUrl !== null) URL.revokeObjectURL(objectUrl);
     }

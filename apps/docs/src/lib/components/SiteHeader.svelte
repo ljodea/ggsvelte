@@ -8,6 +8,7 @@
     writeDocsAppearance,
     type DocsAppearance,
   } from "$lib/docs-appearance";
+  import { primaryNavLinks } from "$lib/primary-nav-links";
   import { primaryNavigationOwner } from "$lib/routes";
   import type { DocsRouteMetadata } from "$lib/route-types";
 
@@ -20,38 +21,7 @@
   let search = $state<{ open: (trigger: HTMLElement) => void }>();
   let appearance = $state<DocsAppearance>("light");
 
-  const links = $derived([
-    {
-      label: "Docs",
-      href: "/docs",
-      active: owner === "docs",
-    },
-    {
-      label: "Gallery",
-      href: "/examples",
-      active: path.startsWith("/examples"),
-    },
-    {
-      label: "Playground",
-      href: "/playground",
-      active: path === "/playground",
-    },
-    {
-      label: "Themes",
-      href: "/themes",
-      active: path === "/themes",
-    },
-    {
-      label: "Interactions",
-      href: "/interactions",
-      active: path === "/interactions",
-    },
-    {
-      label: "Reference",
-      href: "/reference",
-      active: owner === "reference",
-    },
-  ]);
+  const links = $derived(primaryNavLinks(path, owner));
 
   function syncAppearance(): void {
     appearance = readDocsAppearance();

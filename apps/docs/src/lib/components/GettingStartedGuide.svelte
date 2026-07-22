@@ -11,6 +11,7 @@
     QUICKSTART_PAGE_SVELTE,
     QUICKSTART_PORTABLE_SPEC_FRAGMENT,
   } from "$scripts/quickstart";
+  import { nextRovingTabIndex } from "$lib/tab-roving";
 
   import CopyCode from "./CopyCode.svelte";
 
@@ -20,6 +21,7 @@
     { weight: 3.1, economy: 25 },
     { weight: 4, economy: 19 },
   ];
+  const lessonSurfaces = ["output", "svelte"] as const;
   let lessonEnhanced = $state(false);
   let lessonSurface = $state<"output" | "svelte">("output");
   let outputTab = $state<HTMLButtonElement>();
@@ -38,19 +40,11 @@
   }
 
   function handleLessonTabs(event: KeyboardEvent): void {
-    if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
-      event.preventDefault();
-      selectLessonSurface(
-        lessonSurface === "output" ? "svelte" : "output",
-        true,
-      );
-    } else if (event.key === "Home") {
-      event.preventDefault();
-      selectLessonSurface("output", true);
-    } else if (event.key === "End") {
-      event.preventDefault();
-      selectLessonSurface("svelte", true);
-    }
+    const index = lessonSurface === "output" ? 0 : 1;
+    const next = nextRovingTabIndex(event.key, index, lessonSurfaces.length);
+    if (next === null) return;
+    event.preventDefault();
+    selectLessonSurface(lessonSurfaces[next]!, true);
   }
 
   const lessonCars = [
