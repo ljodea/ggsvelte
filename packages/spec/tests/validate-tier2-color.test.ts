@@ -617,6 +617,55 @@ describe("tier 2 — color scale data-aware validation", () => {
     expect(result.errors.some((error) => error.code === "scale-type-mismatch")).toBe(true);
   });
 
+  it("rejects a kind-mismatched scaled constant even when a sibling field would recover", () => {
+    // Runtime unions sibling field values with scaled constants before the kind check.
+    const result = validate(
+      normalize({
+        data: {
+          values: [
+            { x: 1, y: 1, bad: "xx", good: "2024-01-15" },
+            { x: 2, y: 2, bad: "yy", good: "2024-02-15" },
+          ],
+        },
+        layers: [
+          {
+            geom: "point",
+            aes: { x: { field: "x" }, y: { field: "y" }, color: { field: "bad" } },
+          },
+          {
+            geom: "point",
+            aes: { x: { field: "x" }, y: { field: "y" }, color: { field: "good" } },
+          },
+          {
+            geom: "point",
+            aes: {
+              x: { field: "x" },
+              y: { field: "y" },
+              color: { value: "2024-01-01T12:00", scale: true },
+            },
+          },
+        ],
+        scales: {
+          color: {
+            type: "sequential",
+            temporalKind: "date",
+            parse: "iso",
+            parseFailure: "censor",
+          },
+        },
+      }),
+      {},
+    );
+    expect(result.ok).toBe(false);
+    if (result.ok) throw new Error("expected failure");
+    expect(
+      result.errors.some(
+        (error) =>
+          error.code === "scale-type-mismatch" && error.message.includes("scaled constant"),
+      ),
+    ).toBe(true);
+  });
+
   it("rejects all-failed censored colors when an authored domain is present but unusable", () => {
     // Runtime throws color-domain-invalid before other recovery sources can train.
     const result = validate(

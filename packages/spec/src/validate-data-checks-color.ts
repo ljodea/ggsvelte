@@ -42,6 +42,13 @@ function colorTemporalCensorRecovery(input: {
   domainBlocksRecovery: boolean;
   trainingFields: ReadonlySet<string>;
   constantTrains: boolean;
+  /**
+   * A scaled constant parses under the configured parser but conflicts with
+   * temporalKind — runtime still includes it in collectColorChannelValues and
+   * throws color-temporal-kind, so recovery and otherwise-valid fields must fail.
+   */
+  constantKindConflicts: boolean;
+  conflictingConstantKind: string | null;
 } {
   const { config, colorFields, colorScaledConstants, fields, temporalDecisionCache, typeOf } =
     input;
@@ -141,16 +148,27 @@ function colorTemporalCensorRecovery(input: {
 
   const kindOk = (kind: string | undefined): boolean =>
     config?.temporalKind === undefined || kind === undefined || kind === config.temporalKind;
-  const constantTrains = colorScaledConstants.some((value) => {
+  let constantTrains = false;
+  let constantKindConflicts = false;
+  let conflictingConstantKind: string | null = null;
+  for (const value of colorScaledConstants) {
     const parsed = parseBound(value);
-    return parsed !== null && kindOk(parsed.kind);
-  });
+    if (parsed === null) continue;
+    if (kindOk(parsed.kind)) {
+      constantTrains = true;
+    } else {
+      constantKindConflicts = true;
+      conflictingConstantKind = parsed.kind;
+    }
+  }
   return {
     hasExplicitDomain,
     hasBinnedBreaks,
     domainBlocksRecovery,
     trainingFields,
     constantTrains,
+    constantKindConflicts,
+    conflictingConstantKind,
   };
 }
 
@@ -164,12 +182,16 @@ function censoredTemporalColorRecovers(input: {
     domainBlocksRecovery: boolean;
     trainingFields: ReadonlySet<string>;
     constantTrains: boolean;
+    constantKindConflicts: boolean;
   };
 }): boolean {
   if (input.config?.parse === undefined || input.config.parseFailure !== "censor") return false;
   if (input.decision?.status !== "invalid") return false;
   // A present-but-unusable domain always throws at runtime before recovery sources apply.
   if (input.recovery.domainBlocksRecovery) return false;
+  // Wrong-kind scaled constants still participate in channel training and throw
+  // color-temporal-kind — they cannot be ignored as non-training.
+  if (input.recovery.constantKindConflicts) return false;
   if ((input.decision.validatedCount ?? 0) > 0) return true;
   if (input.recovery.hasExplicitDomain || input.recovery.hasBinnedBreaks) return true;
   if (input.recovery.constantTrains) return true;
@@ -305,6 +327,22 @@ export function checkColorScaleDataCompatibility(input: {
       temporalDecisionCache,
       typeOf,
     });
+    // Runtime collects scaled constants into the same temporal column as fields;
+    // a kind conflict throws color-temporal-kind for the whole channel.
+    if (
+      recovery.constantKindConflicts &&
+      typeof config?.temporalKind === "string" &&
+      recovery.conflictingConstantKind !== null
+    ) {
+      errors.push({
+        code: "scale-type-mismatch",
+        path: `/scales/${channel}`,
+        message: `scales.${channel} requests temporal kind "${config.temporalKind}" but a scaled constant parses as "${recovery.conflictingConstantKind}".`,
+        fix: {
+          description: `Use a ${config.temporalKind} scaled constant, or set temporalKind to "${recovery.conflictingConstantKind}".`,
+        },
+      });
+    }
 
     for (const use of colorFields[channel]) {
       const type = typeOf(use.field);
