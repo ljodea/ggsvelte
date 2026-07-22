@@ -467,9 +467,9 @@ function compileExactFormat(format: string): CompiledExactFormat {
       pattern += tokenPattern;
     }
     compiled =
-      reason !== null
-        ? { ok: false, reason }
-        : { ok: true, tokens, regex: new RegExp(`${pattern}$`) };
+      reason === null
+        ? { ok: true, tokens, regex: new RegExp(`${pattern}$`) }
+        : { ok: false, reason };
   }
 
   EXACT_FORMAT_CACHE.set(format, compiled);

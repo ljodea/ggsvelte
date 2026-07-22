@@ -123,10 +123,12 @@ describe("strict temporal parsing", () => {
     expect(firstBad).toMatchObject({ ok: false });
 
     // Helper array path shares the same compiled format surface.
-    const dates = parseTemporalFormat([good, good], format.format);
+    const dates: Date[] = parseTemporalFormat([good, good], format.format);
     expect(dates).toHaveLength(2);
-    expect(dates[0]?.getTime()).toBe(dates[1]?.getTime());
-    if (firstGood.ok) expect(dates[0]?.getTime()).toBe(firstGood.epochMs);
+    const firstMs = dates[0]!.getTime();
+    const secondMs = dates[1]!.getTime();
+    expect(firstMs).toBe(secondMs);
+    if (firstGood.ok) expect(firstMs).toBe(firstGood.epochMs);
   });
 
   it("keeps compile-time format configuration errors stable across repeated checks", () => {
