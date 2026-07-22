@@ -5,13 +5,11 @@ import type { GlyphsBatch } from "../scene.js";
 
 import type { LayerFrame } from "./types.js";
 import { DEFAULT_TEXT_SIZE } from "./geometry-shared.js";
+import type { EmittedGlyphs } from "./geometry-glyphs-rows.js";
 
 export function packGlyphsBatch(input: {
   frame: LayerFrame;
-  positions: number[];
-  rowIndex: number[];
-  texts: string[];
-  colors: string[];
+  emitted: EmittedGlyphs;
   wantsColors: boolean;
   params: {
     anchor?: "start" | "middle" | "end";
@@ -19,21 +17,21 @@ export function packGlyphsBatch(input: {
     alpha?: number;
   };
 }): GlyphsBatch | null {
-  const { frame, positions, rowIndex, texts, colors, wantsColors, params } = input;
-  if (texts.length === 0) return null;
+  const { frame, emitted, wantsColors, params } = input;
+  if (emitted.kept === 0) return null;
   const { binding } = frame;
   const batch: GlyphsBatch = {
     kind: "glyphs",
     layerIndex: binding.index,
     panelIndex: 0,
-    positions: Float32Array.from(positions),
-    rowIndex: Uint32Array.from(rowIndex),
-    texts,
+    positions: emitted.positions,
+    rowIndex: emitted.rowIndex,
+    texts: emitted.texts,
     color: binding.color.constant,
     size: params.size ?? DEFAULT_TEXT_SIZE,
     anchor: params.anchor ?? "middle",
     alpha: params.alpha ?? 1,
   };
-  if (wantsColors) batch.colors = colors;
+  if (wantsColors && emitted.colors !== null) batch.colors = emitted.colors;
   return batch;
 }
