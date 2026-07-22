@@ -6,6 +6,7 @@
 import { describe, expect, it } from "bun:test";
 
 import { normalize, validate } from "../src/index.js";
+import type { DataProfile } from "../src/validate-data.ts";
 
 const point = { geom: "point" as const };
 
@@ -239,5 +240,144 @@ describe("tier 2 — color scale data-aware validation", () => {
       {},
     );
     expect(result.ok).toBe(true);
+  });
+
+  it("does not infer manual domain length from scaled constants alone under DataProfile", () => {
+    // Profile fields have values: null. Constants must not stand in for unknown categories.
+    const profile: DataProfile = {
+      fields: [
+        { name: "g", type: "nominal" },
+        { name: "x", type: "quantitative" },
+        { name: "y", type: "quantitative" },
+      ],
+    };
+    const result = validate(
+      normalize({
+        data: { name: "rows" },
+        layers: [
+          {
+            geom: "point",
+            aes: { x: { field: "x" }, y: { field: "y" }, color: { field: "g" } },
+          },
+          {
+            geom: "point",
+            aes: {
+              x: { field: "x" },
+              y: { field: "y" },
+              color: { value: "ref", scale: true },
+            },
+          },
+        ],
+        // Runtime domain is categories(g) ∪ {ref}; under a profile we cannot
+        // know category count, so range length must not be checked against
+        // constants alone.
+        scales: { color: { type: "manual", range: ["#f00", "#0f0", "#00f"] } },
+      }),
+      { profile },
+    );
+    expect(result.ok).toBe(true);
+  });
+
+  it("rejects all-failed censored epoch parses that leave no train extent", () => {
+    const result = validate(
+      normalize({
+        data: {
+          values: [
+            { x: 1, y: 1, t: 1e100 },
+            { x: 2, y: 2, t: 1e101 },
+          ],
+        },
+        layers: [
+          {
+            geom: "point",
+            aes: { x: { field: "x" }, y: { field: "y" }, color: { field: "t" } },
+          },
+        ],
+        scales: {
+          color: {
+            type: "sequential",
+            temporalKind: "datetime",
+            parse: { epoch: "milliseconds" },
+            parseFailure: "censor",
+          },
+        },
+      }),
+      {},
+    );
+    expect(result.ok).toBe(false);
+    if (result.ok) throw new Error("expected failure");
+    expect(result.errors.some((error) => error.code === "scale-type-mismatch")).toBe(true);
+  });
+
+  it("allows all-failed censored epoch parses when an explicit domain can train", () => {
+    const result = validate(
+      normalize({
+        data: {
+          values: [
+            { x: 1, y: 1, t: 1e100 },
+            { x: 2, y: 2, t: 1e101 },
+          ],
+        },
+        layers: [
+          {
+            geom: "point",
+            aes: { x: { field: "x" }, y: { field: "y" }, color: { field: "t" } },
+          },
+        ],
+        scales: {
+          color: {
+            type: "sequential",
+            temporalKind: "datetime",
+            parse: { epoch: "milliseconds" },
+            parseFailure: "censor",
+            domain: [1_700_000_000_000, 1_706_745_600_000],
+          },
+        },
+      }),
+      {},
+    );
+    expect(result.ok).toBe(true);
+  });
+
+  it("still rejects when scaled constants alone exceed the manual range under DataProfile", () => {
+    const profile: DataProfile = {
+      fields: [
+        { name: "g", type: "nominal" },
+        { name: "x", type: "quantitative" },
+        { name: "y", type: "quantitative" },
+      ],
+    };
+    const result = validate(
+      normalize({
+        data: { name: "rows" },
+        layers: [
+          {
+            geom: "point",
+            aes: { x: { field: "x" }, y: { field: "y" }, color: { field: "g" } },
+          },
+          {
+            geom: "point",
+            aes: {
+              x: { field: "x" },
+              y: { field: "y" },
+              color: { value: "a", scale: true },
+            },
+          },
+          {
+            geom: "point",
+            aes: {
+              x: { field: "x" },
+              y: { field: "y" },
+              color: { value: "b", scale: true },
+            },
+          },
+        ],
+        scales: { color: { type: "manual", range: ["#f00"] } },
+      }),
+      { profile },
+    );
+    expect(result.ok).toBe(false);
+    if (result.ok) throw new Error("expected failure");
+    expect(result.errors.some((error) => error.code === "scale-manual-domain-range")).toBe(true);
   });
 });

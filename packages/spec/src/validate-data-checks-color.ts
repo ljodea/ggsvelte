@@ -42,16 +42,28 @@ function discreteDomainKey(value: unknown): string {
   }
 }
 
+/** Exact domain size, or a lower bound when some field values are unknown. */
+type ManualDomainEstimate = { readonly kind: "exact" | "min"; readonly size: number };
+
 function expectedManualDomainLength(
   domain: unknown,
   fieldValueLists: readonly (readonly unknown[] | null | undefined)[],
   scaledConstants: readonly unknown[] = [],
-): number | null {
-  if (Array.isArray(domain)) return domain.filter((value) => value !== null).length;
+): ManualDomainEstimate | null {
+  if (Array.isArray(domain)) {
+    return { kind: "exact", size: domain.filter((value) => value !== null).length };
+  }
+  // DataProfile fields have values: null. Unknown field values disable an
+  // exact inference, but known scaled constants still yield a lower bound
+  // (runtime domain is at least those constants, plus any field categories).
   const seen = new Set<string>();
   let sawValues = false;
+  let unknownFieldValues = false;
   for (const values of fieldValueLists) {
-    if (values === null || values === undefined) continue;
+    if (values === null || values === undefined) {
+      unknownFieldValues = true;
+      continue;
+    }
     sawValues = true;
     for (const value of values) {
       if (value === null) continue;
@@ -63,7 +75,8 @@ function expectedManualDomainLength(
     sawValues = true;
     seen.add(discreteDomainKey(value));
   }
-  return sawValues ? seen.size : null;
+  if (!sawValues) return null;
+  return { kind: unknownFieldValues ? "min" : "exact", size: seen.size };
 }
 
 /** Post-layer color/fill scale type compatibility against collected field uses. */
@@ -92,13 +105,19 @@ export function checkColorScaleDataCompatibility(input: {
         colorFields[channel].map((use) => fields.get(use.field)?.values),
         colorScaledConstants[channel],
       );
-      if (expected !== null && range.length !== expected) {
+      const rangeMismatch =
+        expected !== null &&
+        (expected.kind === "exact" ? range.length !== expected.size : range.length < expected.size);
+      if (rangeMismatch && expected !== null) {
         errors.push({
           code: "scale-manual-domain-range",
           path: `/scales/${channel}`,
-          message: `The manual ${channel} scale needs one range color per domain value (${String(expected)} values, ${String(range.length)} colors).`,
+          message:
+            expected.kind === "exact"
+              ? `The manual ${channel} scale needs one range color per domain value (${String(expected.size)} values, ${String(range.length)} colors).`
+              : `The manual ${channel} scale has at least ${String(expected.size)} known domain values (scaled constants and/or observed categories) but only ${String(range.length)} range colors.`,
           fix: {
-            description: `Provide ${String(expected)} range colors, or set scales.${channel}.domain explicitly to match the range length.`,
+            description: `Provide at least ${String(expected.size)} range colors, or set scales.${channel}.domain explicitly to match the range length.`,
           },
         });
       }
@@ -150,10 +169,17 @@ export function checkColorScaleDataCompatibility(input: {
             }),
           },
         );
+        // Censor when at least one value parsed, or when an explicit domain can
+        // still train the scale (pipeline only throws color-transform-empty
+        // when domain is absent and extent is empty).
+        const hasExplicitDomain =
+          Array.isArray(config?.domain) &&
+          config.domain.filter((value) => value !== null).length === 2;
         const censoredInvalid =
           config?.parse !== undefined &&
           config.parseFailure === "censor" &&
-          decision?.status === "invalid";
+          decision?.status === "invalid" &&
+          ((decision.validatedCount ?? 0) > 0 || hasExplicitDomain);
         if (decision?.status !== "temporal" && !censoredInvalid) {
           errors.push({
             code: "scale-type-mismatch",
@@ -215,10 +241,14 @@ export function checkColorScaleDataCompatibility(input: {
           }),
         },
       );
+      const hasExplicitDomain =
+        Array.isArray(config?.domain) &&
+        config.domain.filter((value) => value !== null).length === 2;
       const censoredInvalid =
         config?.parse !== undefined &&
         config.parseFailure === "censor" &&
-        decision?.status === "invalid";
+        decision?.status === "invalid" &&
+        ((decision.validatedCount ?? 0) > 0 || hasExplicitDomain);
       if (decision?.status === "temporal" || censoredInvalid) {
         // Mirror runtime: compare recovered kind even when status is invalid+censored.
         if (
