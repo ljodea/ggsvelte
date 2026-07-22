@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { tick, untrack } from "svelte";
+  import { tick } from "svelte";
 
   import { copyText } from "$lib/clipboard";
   import UiButton from "$lib/components/UiButton.svelte";
@@ -11,6 +11,10 @@
     playgroundSvgDownloadFailureStatus,
     playgroundSvgExportFailureStatus,
   } from "$lib/playground-output-status";
+  import {
+    clampOutputTabIndex,
+    copySessionMatchesOutputs,
+  } from "$lib/playground-output-ui";
   import { nextRovingTabIndex } from "$lib/tab-roving";
   import type { PortableSpec } from "@ggsvelte/spec";
 
@@ -24,38 +28,30 @@
     enabled: boolean;
   } = $props();
 
-  let active = $state(0);
+  let selected = $state(0);
   let fallbackSource = $state<HTMLElement>();
   let fallbackCode = $state("");
   let fallbackLabel = $state("output");
-  let manualFallback = $state(false);
+  let manualFallbackIntent = $state(false);
   let copying = $state(false);
-  let copyStatus = $state("");
+  let copyStatusRaw = $state("");
   let exportStatus = $state("");
-  let outputRevision = 0;
+  /** Outputs identity for the in-flight / completed copy session. */
+  let copySessionOutputs = $state<readonly PlaygroundOutput[] | null>(null);
   const tabsetId = $props.id();
   const panelId = `${tabsetId}-panel`;
+  const active = $derived(clampOutputTabIndex(selected, outputs.length));
   const activeOutput = $derived(outputs[active] ?? outputs[0]!);
-
-  $effect(() => {
-    const nextOutputs = outputs;
-    untrack(() => {
-      outputRevision += 1;
-      if (active >= nextOutputs.length) active = 0;
-      const hadFallback = fallbackCode !== "";
-      fallbackCode = "";
-      fallbackLabel = "output";
-      manualFallback = false;
-      copyStatus = "";
-      copying = false;
-      if (hadFallback) getSelection()?.removeAllRanges();
-    });
-  });
+  const copySessionLive = $derived(
+    copySessionMatchesOutputs(copySessionOutputs, outputs),
+  );
+  const manualFallback = $derived(manualFallbackIntent && copySessionLive);
+  const copyStatus = $derived(copySessionLive ? copyStatusRaw : "");
 
   function select(index: number): void {
     if (copying) return;
-    active = index;
-    copyStatus = "";
+    selected = index;
+    copyStatusRaw = "";
   }
 
   function handleTabKey(event: KeyboardEvent, index: number): void {
@@ -72,22 +68,27 @@
 
   async function copy(): Promise<void> {
     if (!enabled || !activeOutput.supported || copying) return;
-    const selected = activeOutput;
-    const revision = outputRevision;
-    fallbackCode = selected.code;
-    fallbackLabel = selected.label;
-    manualFallback = false;
+    const selectedOutput = activeOutput;
+    const sessionOutputs = outputs;
+    copySessionOutputs = sessionOutputs;
+    fallbackCode = selectedOutput.code;
+    fallbackLabel = selectedOutput.label;
+    manualFallbackIntent = false;
     copying = true;
     await tick();
     if (fallbackSource === undefined) {
       copying = false;
       return;
     }
-    const result = await copyText(selected.code, fallbackSource);
-    if (revision !== outputRevision) return;
+    const result = await copyText(selectedOutput.code, fallbackSource);
+    if (!copySessionMatchesOutputs(sessionOutputs, outputs)) {
+      // Outputs changed mid-copy; drop the in-flight session without applying UI.
+      copying = false;
+      return;
+    }
     copying = false;
-    manualFallback = result !== "copied";
-    copyStatus = playgroundCopyStatus(selected.label, result);
+    manualFallbackIntent = result !== "copied";
+    copyStatusRaw = playgroundCopyStatus(selectedOutput.label, result);
   }
 
   function exportSVG(): void {
