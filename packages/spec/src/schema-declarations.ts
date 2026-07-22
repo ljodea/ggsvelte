@@ -404,6 +404,18 @@ export const SpecDeclarations = {
             "Right edge / upper x bound (geom rect; ribbon y-orientation). Quantitative values only.",
         }),
       ),
+      xend: Type.Optional(
+        Type.Ref("ChannelValue", {
+          description:
+            "Segment end x (geom segment). Trains the x scale together with aes.x; may be discrete or continuous.",
+        }),
+      ),
+      yend: Type.Optional(
+        Type.Ref("ChannelValue", {
+          description:
+            "Segment end y (geom segment). Trains the y scale together with aes.y; may be discrete or continuous.",
+        }),
+      ),
       width: Type.Optional(
         Type.Ref("ChannelValue", {
           description:
@@ -1031,6 +1043,34 @@ export const SpecDeclarations = {
     },
   ),
 
+  SegmentParams: Type.Object(
+    {
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Segment opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Stroke width in px. Must be greater than 0. Default 1.",
+        }),
+      ),
+      lineend: Type.Optional(
+        Type.Union([Type.Literal("butt"), Type.Literal("round"), Type.Literal("square")], {
+          description: 'SVG stroke-linecap for segment ends. Default "butt".',
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Styling parameters for the segment geom (finite line from (x,y) to (xend,yend)).",
+    },
+  ),
+
   TextParams: Type.Object(
     {
       alpha: Type.Optional(
@@ -1477,6 +1517,29 @@ export const SpecDeclarations = {
     },
   ),
 
+  SegmentLayer: Type.Object(
+    {
+      geom: Type.Literal("segment", {
+        description:
+          "Segment geometry: one finite line per data row from (x, y) to (xend, yend). Unlike rule, endpoints are data-mapped and do not span the panel.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("identity", { description: "Segment layers draw the data as-is." }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Segment layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      params: Type.Optional(Type.Ref("SegmentParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A finite segment layer (ggplot2's geom_segment). Requires x, y, xend, and yend channels.",
+    },
+  ),
+
   LayerSpec: Type.Union(
     [
       Type.Ref("PointLayer"),
@@ -1495,6 +1558,7 @@ export const SpecDeclarations = {
       Type.Ref("RectLayer"),
       Type.Ref("TileLayer"),
       Type.Ref("RasterLayer"),
+      Type.Ref("SegmentLayer"),
     ],
     {
       description:

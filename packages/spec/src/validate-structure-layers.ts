@@ -31,6 +31,7 @@ const REQUIRED_CHANNELS: Record<string, ChannelName[]> = {
   density: ["x"],
   errorbar: ["x"], // ymin/ymax vs y are stat-dependent, checked separately
   rect: ["xmin", "xmax", "ymin", "ymax"],
+  segment: ["x", "y", "xend", "yend"],
   tile: ["x", "y"],
   raster: ["x", "y"],
   ribbon: [], // orientation-dependent; checked separately

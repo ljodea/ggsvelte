@@ -167,6 +167,8 @@ export interface SegmentsBatch {
   alphas?: Float32Array;
   linetype?: Linetype;
   linetypeIndexes?: Uint8Array;
+  /** Optional stroke linecap (segment geom). Undefined leaves renderer default / no attribute. */
+  linecap?: "butt" | "round" | "square";
 }
 
 export interface GlyphsBatch {

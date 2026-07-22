@@ -19,6 +19,7 @@ import type {
   RectParams,
   RenderBackend,
   RuleParams,
+  SegmentParams,
   SmoothParams,
   StackablePosition,
   TextParams,
@@ -119,6 +120,12 @@ export interface GeomAreaOptions extends AreaParams {
 
 /** Rule-layer sugar options: params (incl. annotation intercepts) plus aes. */
 export interface GeomRuleOptions extends RuleParams {
+  aes?: AesInput;
+  render?: RenderBackend;
+}
+
+/** Segment-layer sugar options: params plus optional layer-level aes. */
+export interface GeomSegmentOptions extends SegmentParams {
   aes?: AesInput;
   render?: RenderBackend;
 }

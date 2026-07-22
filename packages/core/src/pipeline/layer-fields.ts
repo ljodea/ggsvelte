@@ -42,6 +42,8 @@ export function resolveLayerFields(
     push("ymax", binding.ymaxField);
     push("xmin", binding.xminField);
     push("xmax", binding.xmaxField);
+    push("xend", binding.xendField);
+    push("yend", binding.yendField);
     push("width", binding.widthField);
     push("height", binding.heightField);
     push("color", binding.color.field);

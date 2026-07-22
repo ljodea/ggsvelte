@@ -73,6 +73,22 @@ export function collectAxisInputsY(frame: LayerFrame, acc: AxisCollectAcc): void
     if (fieldType !== "temporal") acc.allTemporal = false;
     acc.sawContinuousEvidence = true;
   }
+  // Segment end y: dual evidence (numeric + discrete) even when yField is set.
+  if (frame.yend !== null) {
+    acc.numeric.push(frame.yend);
+    if (frame.yendValues !== null) acc.columns.push(frame.yendValues);
+    const endField = binding.yendField;
+    if (endField !== null && frame.table.has(endField)) {
+      const endType = positionFieldType(frame.table, endField, yConversion);
+      acc.typeParts.add(endType);
+      if (endType === "nominal") acc.anyDiscrete = true;
+      if (endType !== "temporal") acc.allTemporal = false;
+    } else {
+      acc.typeParts.add("quantitative");
+      acc.allTemporal = false;
+    }
+    acc.sawContinuousEvidence = true;
+  }
   for (const v of frame.yIntercepts) {
     acc.columns.push([v]);
     const converted = positionValuesToNumeric([v], yConversion);

@@ -37,8 +37,8 @@ export function preflightTemporalFields(input: {
       assertTemporalConfiguration(axis, axisConversion);
       const fields =
         axis === "x"
-          ? [binding.xField, binding.xminField, binding.xmaxField]
-          : [binding.yField, binding.yminField, binding.ymaxField];
+          ? [binding.xField, binding.xminField, binding.xmaxField, binding.xendField]
+          : [binding.yField, binding.yminField, binding.ymaxField, binding.yendField];
       const fieldResolutions: PositionConversionContext[] = [];
       for (const field of new Set(fields)) {
         if (field === null || !table.has(field)) continue;

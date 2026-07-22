@@ -50,8 +50,8 @@ export function preflightTemporalBindings(input: {
     for (const binding of bindings) {
       const fields =
         axis === "x"
-          ? [binding.xField, binding.xminField, binding.xmaxField]
-          : [binding.yField, binding.yminField, binding.ymaxField];
+          ? [binding.xField, binding.xminField, binding.xmaxField, binding.xendField]
+          : [binding.yField, binding.yminField, binding.ymaxField, binding.yendField];
       const conversion = axis === "x" ? binding.xConversion : binding.yConversion;
       if (fields.some((field) => field !== null) && conversion.parser !== "auto") {
         concrete.set(JSON.stringify(conversion), conversion);

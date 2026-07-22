@@ -26,6 +26,8 @@ const AES_CHANNEL_KEYS = new Set([
   "ymax",
   "xmin",
   "xmax",
+  "xend",
+  "yend",
 ]);
 
 /** True only for the channel node itself (`…/aes/<channel>`), not nested paths. */

@@ -241,6 +241,14 @@
           "$ref": "#/$defs/ChannelValue",
           "description": "Right edge / upper x bound (geom rect; ribbon y-orientation). Quantitative values only."
         },
+        "xend": {
+          "$ref": "#/$defs/ChannelValue",
+          "description": "Segment end x (geom segment). Trains the x scale together with aes.x; may be discrete or continuous."
+        },
+        "yend": {
+          "$ref": "#/$defs/ChannelValue",
+          "description": "Segment end y (geom segment). Trains the y scale together with aes.y; may be discrete or continuous."
+        },
         "width": {
           "$ref": "#/$defs/ChannelValue",
           "description": "Cell width for geom tile (data units after position transform; not a trained position scale). Prefer params.width for a constant."
@@ -863,6 +871,41 @@
       },
       "additionalProperties": false,
       "description": "Styling parameters for the rule geom. The annotation form sets xintercept and/or yintercept here; the data-driven form maps aes.x OR aes.y instead (never both forms at once)."
+    },
+    "SegmentParams": {
+      "type": "object",
+      "properties": {
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Segment opacity. Must be between 0 and 1 (inclusive). Default 1."
+        },
+        "linewidth": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Stroke width in px. Must be greater than 0. Default 1."
+        },
+        "lineend": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "butt"
+            },
+            {
+              "type": "string",
+              "const": "round"
+            },
+            {
+              "type": "string",
+              "const": "square"
+            }
+          ],
+          "description": "SVG stroke-linecap for segment ends. Default \"butt\"."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Styling parameters for the segment geom (finite line from (x,y) to (xend,yend))."
     },
     "TextParams": {
       "type": "object",
@@ -1531,6 +1574,40 @@
       "additionalProperties": false,
       "description": "A text-label layer. Requires x, y, and label channels."
     },
+    "SegmentLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "segment",
+          "description": "Segment geometry: one finite line per data row from (x, y) to (xend, yend). Unlike rule, endpoints are data-mapped and do not span the panel."
+        },
+        "stat": {
+          "type": "string",
+          "const": "identity",
+          "description": "Segment layers draw the data as-is."
+        },
+        "position": {
+          "type": "string",
+          "const": "identity",
+          "description": "Segment layers use identity positioning."
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "params": {
+          "$ref": "#/$defs/SegmentParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A finite segment layer (ggplot2's geom_segment). Requires x, y, xend, and yend channels."
+    },
     "LayerSpec": {
       "anyOf": [
         {
@@ -1580,6 +1657,9 @@
         },
         {
           "$ref": "#/$defs/RasterLayer"
+        },
+        {
+          "$ref": "#/$defs/SegmentLayer"
         }
       ],
       "description": "One plot layer. The `geom` field selects the geometry and determines which stat, position, and params are allowed."

@@ -65,6 +65,7 @@ export type {
   FacetInput,
   HistogramLayerInput,
   RibbonLayerInput,
+  SegmentLayerInput,
   LayerInput,
   LineLayerInput,
   PointLayerInput,

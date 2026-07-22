@@ -1,0 +1,6 @@
+{
+  "title": "Segment annotations",
+  "description": "Finite data-driven segments from (x,y) to (xend,yend) — leader lines and range ticks that do not span the panel (unlike rule).",
+  "tags": ["segment", "annotation", "leader"],
+  "docsSection": "Lines & rules"
+}

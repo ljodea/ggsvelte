@@ -21,6 +21,7 @@ import type {
   GeomRasterOptions,
   GeomRectOptions,
   GeomRuleOptions,
+  GeomSegmentOptions,
   GeomSmoothOptions,
   GeomTextOptions,
   GeomTileOptions,
@@ -194,6 +195,14 @@ export class GGBuilderCore {
    */
   geomRibbon(options: GeomRibbonOptions = {}): GGBuilder {
     return this.layer(layerFrom("ribbon", options));
+  }
+
+  /**
+   * Sugar for .layer({ geom: 'segment', ... }). Map x, y, xend, and yend for
+   * finite two-endpoint lines (leader lines, range ticks, annotations).
+   */
+  geomSegment(options: GeomSegmentOptions = {}): GGBuilder {
+    return this.layer(layerFrom("segment", options));
   }
 
   /**

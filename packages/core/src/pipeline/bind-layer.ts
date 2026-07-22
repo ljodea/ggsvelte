@@ -85,6 +85,8 @@ export function bindLayer(
     xmaxField: position.xmaxField,
     widthField: position.widthField,
     heightField: position.heightField,
+    xendField: position.xendField,
+    yendField: position.yendField,
     ...(position.ribbonOrientation !== undefined && {
       ribbonOrientation: position.ribbonOrientation,
     }),

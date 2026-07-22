@@ -21,6 +21,7 @@ import GeomPoint from "../../src/lib/geoms/GeomPoint.svelte";
 import GeomRaster from "../../src/lib/geoms/GeomRaster.svelte";
 import GeomRect from "../../src/lib/geoms/GeomRect.svelte";
 import GeomRule from "../../src/lib/geoms/GeomRule.svelte";
+import GeomSegment from "../../src/lib/geoms/GeomSegment.svelte";
 import GeomSmooth from "../../src/lib/geoms/GeomSmooth.svelte";
 import GeomText from "../../src/lib/geoms/GeomText.svelte";
 import GeomTile from "../../src/lib/geoms/GeomTile.svelte";
@@ -249,6 +250,20 @@ const cases: readonly GeomCase[] = [
     paramKey: "alpha",
     paramValue: 0.85,
     markSelector: ".gg-rects rect",
+  },
+  {
+    name: "GeomSegment",
+    Component: GeomSegment,
+    geom: "segment",
+    data: [
+      { x: 0, y: 0, xend: 1, yend: 1 },
+      { x: 1, y: 2, xend: 2, yend: 0 },
+    ],
+    aes: { x: "x", y: "y", xend: "xend", yend: "yend" },
+    geomProps: { linewidth: 2, lineend: "round" },
+    paramKey: "linewidth",
+    paramValue: 2,
+    markSelector: ".gg-segments line",
   },
 ];
 

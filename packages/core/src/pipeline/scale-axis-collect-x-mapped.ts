@@ -41,4 +41,21 @@ export function collectMappedXEvidence(
   if (barX || fieldType === "nominal") acc.anyDiscrete = true;
   if (fieldType !== "temporal") acc.allTemporal = false;
   acc.sawContinuousEvidence = true;
+
+  // Segment end x: same dual evidence as mapped x (numeric + discrete categories).
+  if (frame.xend !== null) {
+    acc.numeric.push(frame.xend);
+    if (frame.xendValues !== null) acc.columns.push(frame.xendValues);
+    const endField = binding.xendField;
+    if (endField !== null && frame.table.has(endField)) {
+      const endType = positionFieldType(frame.table, endField, conversion);
+      acc.typeParts.add(endType);
+      if (endType === "nominal") acc.anyDiscrete = true;
+      if (endType !== "temporal") acc.allTemporal = false;
+    } else {
+      acc.typeParts.add("quantitative");
+      acc.allTemporal = false;
+    }
+    acc.sawContinuousEvidence = true;
+  }
 }

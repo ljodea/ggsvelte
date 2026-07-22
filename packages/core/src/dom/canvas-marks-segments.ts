@@ -48,6 +48,8 @@ export function drawSegments(
 ): void {
   const themeInk = resolve(themeVar("ink", theme));
   ctx.lineWidth = batch.linewidth;
+  // Only touch lineCap when the batch opts in (rule batches leave it undefined).
+  if (batch.linecap !== undefined) ctx.lineCap = batch.linecap;
   applyDash(ctx, batch.linetype ?? "solid");
   const n = batch.segments.length / 4;
   if (n === 0) return;
