@@ -225,7 +225,7 @@ describe("createLegendFilterState scaled-constant gating (#598)", () => {
 
     const entries = state.computeEntries(model);
     expect(entries).toHaveLength(2);
-    expect(entries.map((entry) => entry.entry.value).toSorted()).toEqual(["a", "b"]);
+    expect(new Set(entries.map((entry) => entry.entry.value))).toEqual(new Set(["a", "b"]));
     expect(entries.every((entry) => entry.field === "group")).toBe(true);
 
     destroy();
