@@ -451,7 +451,7 @@ export function evaluateGate(
   const failures: string[] = [];
   for (const job of JOB_NAMES) {
     if (!required[job]) continue;
-    const result = normalizeResult(results[job]);
+    const result = normalizeJobResult(results[job]);
     if (result === "success") continue;
     if (result === "skipped") {
       failures.push(job);
@@ -463,7 +463,8 @@ export function evaluateGate(
   return { ok: failures.length === 0, failures };
 }
 
-function normalizeResult(value: string | undefined): JobResult {
+/** Coerce a raw `needs.<job>.result` string to `JobResult`; missing/empty → skipped. */
+export function normalizeJobResult(value: string | undefined): JobResult {
   if (value === "success" || value === "failure" || value === "cancelled" || value === "skipped") {
     return value;
   }

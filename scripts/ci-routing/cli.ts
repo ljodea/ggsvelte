@@ -15,6 +15,7 @@ import {
   type JobName,
   type JobPlan,
 } from "./routing";
+import { evaluateCiGate } from "./ci-gate";
 import {
   CACHEABLE_EXECUTIONS,
   CONTENT_HASH_SCHEMA,
@@ -86,6 +87,11 @@ export async function runCiRoutingCli(argv: string[]): Promise<void> {
     return;
   }
 
+  if (cmd === "ci-gate") {
+    runCiGateCli();
+    return;
+  }
+
   if (cmd === "gate") {
     const requiredPath = flagValue(args, "--required");
     const resultsPath = flagValue(args, "--results");
@@ -117,12 +123,17 @@ function printHelp(): void {
   bun scripts/ci-routing.ts write-success-marker --execution <name> --hash <hex>
   bun scripts/ci-routing.ts validate-success-marker --execution <name> --hash <hex>
   bun scripts/ci-routing.ts gate --required <file|-> --results <file|->
+  bun scripts/ci-routing.ts ci-gate
 
   detect-changes reads EVENT_NAME, GITHUB_REF, BASE_SHA, HEAD_SHA, PR_LABELS,
   REPO, GITHUB_OUTPUT (and uses gh/git for main base widening).
   --from-git uses git diff --name-status (rename source + dest).
   --stdin accepts plain paths or name-status lines (tab-separated).
   hash-inputs uses git ls-tree -r HEAD (fail-closed). Emits hash + cache_key (+ GITHUB_OUTPUT).
+  ci-gate reads the ci.yml ci-gate job's required/result env vars (CHECKS_REQ
+  .. DOCS_JOURNEYS_REQ, CHECKS_RES .. VR_GUARD_RES, EVENT_NAME) and evaluates
+  the required-jobs gate, including component-shard rollup and the PR-only
+  vr-baseline-guard rule. Prints "ci-gate ok" or "ci-gate failed: <list>".
 `);
 }
 
@@ -222,6 +233,60 @@ function runDetectChangesCli(): void {
     throw new Error("detect-changes requires GITHUB_OUTPUT (job outputs path)");
   }
   runDetectChanges(input, createDetectChangesIo());
+}
+
+/**
+ * `ci-gate` job driver. The workflow's bash guard on `DETECT_RESULT` runs
+ * before this command (see ci.yml's `ci-gate` job) — by the time this is
+ * invoked, detect-changes is known to have succeeded.
+ */
+function runCiGateCli(): void {
+  const env = process.env;
+  const req = (k: string) => env[k] === "true";
+  const required: JobPlan = {
+    checks: req("CHECKS_REQ"),
+    unit: req("UNIT_REQ"),
+    component: req("COMPONENT_REQ"),
+    consumer: req("CONSUMER_REQ"),
+    build: req("BUILD_REQ"),
+    svelte_check: req("SVELTE_CHECK_REQ"),
+    docs_site: req("DOCS_SITE_REQ"),
+    actions_security: req("ACTIONS_REQ"),
+    bench_smoke: req("BENCH_REQ"),
+    interaction_perf: false,
+    packages_dist: req("PACKAGES_DIST_REQ"),
+    vr: false,
+    pages: false,
+    docs_journeys: req("DOCS_JOURNEYS_REQ"),
+  };
+  const gate = evaluateCiGate({
+    eventName: env.EVENT_NAME ?? "",
+    required,
+    results: {
+      checks: env.CHECKS_RES,
+      unit: env.UNIT_RES,
+      consumer: env.CONSUMER_RES,
+      build: env.BUILD_RES,
+      svelte_check: env.SVELTE_CHECK_RES,
+      docs_site: env.DOCS_SITE_RES,
+      actions_security: env.ACTIONS_RES,
+      bench_smoke: env.BENCH_RES,
+      packages_dist: env.PACKAGES_DIST_RES,
+      docs_journeys: env.DOCS_JOURNEYS_RES,
+    },
+    componentShardResults: [
+      env.COMPONENT_SVELTE_RES,
+      env.COMPONENT_SVELTE_FX_RES,
+      env.COMPONENT_SPIKES_RES,
+    ],
+    vrBaselineGuardResult: env.VR_GUARD_RES,
+  });
+  if (!gate.ok) {
+    process.stderr.write(`ci-gate failed: ${gate.failures.join(", ")}\n`);
+    process.exitCode = 1;
+    return;
+  }
+  process.stdout.write("ci-gate ok\n");
 }
 
 function parseCacheableExecution(raw: string | undefined): CacheableExecution {
