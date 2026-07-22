@@ -2,7 +2,12 @@
  * Fluent builder core: state, geom/facet/coord/labs/theme/spec.
  * Scale sugar mixin: builder-scales.ts. Public GGBuilder: builder.ts.
  */
-import { coordTransform, type CoordTransformOptions } from "./coord-helpers.js";
+import {
+  coordFixed,
+  coordTransform,
+  type CoordFixedOptions,
+  type CoordTransformOptions,
+} from "./coord-helpers.js";
 import { SpecValidationError } from "./errors.js";
 import type { AesInput, FacetInput, LayerInput, SpecInput } from "./normalize.js";
 import { normalize } from "./normalize.js";
@@ -218,6 +223,16 @@ export class GGBuilderCore {
   /** Configure a post-stat coordinate transform (distinct from scale transforms). */
   coordTransform(options: CoordTransformOptions = {}): GGBuilder {
     return this.coord(coordTransform(options));
+  }
+
+  /** Preserve a physical y-unit/x-unit ratio in the fitted data rectangle. */
+  coordFixed(options: CoordFixedOptions = {}): GGBuilder {
+    return this.coord(coordFixed(options));
+  }
+
+  /** Equal-unit spelling of coordFixed(). */
+  coordEqual(options: CoordFixedOptions = {}): GGBuilder {
+    return this.coord(coordFixed(options));
   }
 
   /** Set the accessibility mode ("force-svg" keeps every layer in SVG). */

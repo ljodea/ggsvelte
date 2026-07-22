@@ -11,4 +11,4 @@
 
 export { layerStructuralErrors } from "./validate-structure-layers.js";
 export { colorScaleStructuralErrors, guideStructuralErrors } from "./validate-structure-scales.js";
-export { facetStructuralErrors } from "./validate-structure-facet.js";
+export { coordFacetStructuralErrors, facetStructuralErrors } from "./validate-structure-facet.js";

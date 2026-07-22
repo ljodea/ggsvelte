@@ -4,6 +4,35 @@
  */
 import type { SpecError } from "./errors.js";
 
+export function coordFacetStructuralErrors(input: Record<string, unknown>): SpecError[] {
+  const coord = input["coord"];
+  const facet = input["facet"];
+  if (
+    typeof coord !== "object" ||
+    coord === null ||
+    Array.isArray(coord) ||
+    (coord as Record<string, unknown>)["type"] !== "fixed" ||
+    typeof facet !== "object" ||
+    facet === null ||
+    Array.isArray(facet)
+  ) {
+    return [];
+  }
+  const scales = (facet as Record<string, unknown>)["scales"];
+  if (scales === undefined || scales === "fixed") return [];
+  return [
+    {
+      code: "coord-fixed-free-scales",
+      path: "/facet/scales",
+      message: `coord_fixed cannot use facet scales ${JSON.stringify(scales)} because panels would imply unequal physical data-unit lengths.`,
+      fix: {
+        description: 'Use facet.scales = "fixed", or remove the fixed-aspect coordinate.',
+        example: "fixed",
+      },
+    },
+  ];
+}
+
 export function facetStructuralErrors(facet: Record<string, unknown>): SpecError[] {
   const errors: SpecError[] = [];
   const hasWrap = facet["wrap"] !== undefined;

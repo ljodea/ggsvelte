@@ -56,6 +56,7 @@ export function resolveTheme(
     accent: theme.accent ?? base.accent,
     grid: theme.grid ?? base.grid,
     panel: theme.panel ?? base.panel,
+    ...(theme.letterboxFill !== undefined && { letterboxFill: theme.letterboxFill }),
     axisText: theme.axisText ?? base.axisText,
     axisLine: theme.axisLine ?? base.axisLine,
     tickColor: theme.tickColor ?? base.tickColor,
@@ -115,6 +116,7 @@ export type ThemeColorRole =
   | "accent"
   | "grid"
   | "panel"
+  | "letterboxFill"
   | "axisText"
   | "axisLine"
   | "tickColor"

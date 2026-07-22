@@ -161,6 +161,14 @@ export const PIPELINE_ERROR_CATALOG = {
       "A quantitative coordinate transform or numeric limits were requested for a band axis.",
     fix: "Use identity coordinates for categories, or configure a continuous quantitative scale.",
   },
+  "coord-fixed-free-scales": {
+    summary: "Fixed-aspect coordinates were combined with free positional facet scales.",
+    fix: 'Use facet.scales = "fixed", or remove coord_fixed.',
+  },
+  "coord-fixed-degraded": {
+    summary: "A fixed-aspect data rectangle is below the documented readable minimum.",
+    fix: "Increase the plot allocation or choose a less extreme fixed ratio; the rendered ratio remains exact.",
+  },
   "binned-scale-requires-continuous": {
     summary: 'A type: "binned" scale is bound to a discrete or temporal field.',
     fix: 'Map a quantitative field, or use type: "band"/"time" instead of "binned".',

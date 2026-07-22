@@ -110,6 +110,7 @@ export function finalizePanelLayoutPass(input: {
       faceted,
       freeX,
       freeY,
+      ...(normalized.coord?.type === "fixed" && { coordFixed: normalized.coord }),
       nrow,
       ncol,
       facetPanels,

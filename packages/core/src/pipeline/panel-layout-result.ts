@@ -9,6 +9,7 @@ import type { PanelLayoutResult, PanelPlacement } from "./panel-layout-types.js"
 export function panelLayoutResultFromChrome(
   chrome: PanelLayoutChrome,
   placements: PanelPlacement[],
+  degraded = false,
 ): PanelLayoutResult {
   const guidePlans = placements.flatMap((placement, panelIndex) => {
     const { h, v } = chrome.displayScales(panelIndex);
@@ -57,5 +58,6 @@ export function panelLayoutResultFromChrome(
     displayScales: chrome.displayScales,
     legendBlock: chrome.legendBlock,
     guidePlans: Object.freeze(guidePlans),
+    degraded,
   };
 }

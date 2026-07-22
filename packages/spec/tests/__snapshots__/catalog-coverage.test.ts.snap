@@ -262,9 +262,10 @@ exports[`ERROR_CATALOG coverage [invalid-enum-value] is reproducible; message + 
       "cartesian",
       "flip",
       "transform",
+      "fixed",
     ],
     "code": "invalid-enum-value",
-    "message": "Invalid value "polar" for "type"; allowed: "cartesian", "flip", "transform".",
+    "message": "Invalid value "polar" for "type"; allowed: "cartesian", "flip", "transform", "fixed".",
     "path": "/coord/type",
   },
 }
@@ -423,6 +424,25 @@ exports[`ERROR_CATALOG coverage [guide-aesthetic-incompatible] is reproducible; 
     },
     "message": "The legend guide is incompatible with the x aesthetic.",
     "path": "/scales/x/guide",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [coord-fixed-free-scales] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Use facet.scales = "fixed", or remove coord_fixed.",
+    "summary": "Fixed-aspect coordinates cannot represent free positional facet scales truthfully.",
+    "tier": 1,
+  },
+  "instance": {
+    "code": "coord-fixed-free-scales",
+    "fix": {
+      "description": "Use facet.scales = "fixed", or remove the fixed-aspect coordinate.",
+      "example": "fixed",
+    },
+    "message": "coord_fixed cannot use facet scales "free_x" because panels would imply unequal physical data-unit lengths.",
+    "path": "/facet/scales",
   },
 }
 `;

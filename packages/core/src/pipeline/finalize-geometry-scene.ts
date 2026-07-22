@@ -92,6 +92,7 @@ export function finalizeGeometryAndScene(input: {
     legendBlock: panelLayout.legendBlock,
     topBand: panelLayout.topBand,
     bottomBand: panelLayout.bottomBand,
+    degraded: panelLayout.degraded,
     theme,
     title: panelLayout.title,
     subtitle: panelLayout.subtitle,

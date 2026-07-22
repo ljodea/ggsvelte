@@ -4566,6 +4566,10 @@
           "type": "string",
           "description": "Panel background color (CSS color)."
         },
+        "letterboxFill": {
+          "type": "string",
+          "description": "Fixed-aspect gutter color (CSS color). Defaults to the resolved paper role."
+        },
         "axisText": {
           "type": "string",
           "description": "Axis tick-label color (CSS color)."
@@ -4961,6 +4965,26 @@
       "additionalProperties": false,
       "description": "A post-stat Cartesian coordinate transform with independent x/y projectors. It is intentionally distinct from pre-stat scale transforms."
     },
+    "CoordFixedSpec": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "fixed",
+          "description": "Cartesian coordinates with a fixed physical data-unit ratio."
+        },
+        "ratio": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Physical y-unit length divided by physical x-unit length (default 1, equal units)."
+        }
+      },
+      "additionalProperties": false,
+      "description": "A fixed-aspect Cartesian coordinate system. Layout fits the largest centered data rectangle after chart chrome is allocated."
+    },
     "CoordSpec": {
       "anyOf": [
         {
@@ -4968,9 +4992,12 @@
         },
         {
           "$ref": "#/$defs/CoordTransformSpec"
+        },
+        {
+          "$ref": "#/$defs/CoordFixedSpec"
         }
       ],
-      "description": "The plot coordinate system: ordinary Cartesian, flipped Cartesian, or a post-stat coordinate transform."
+      "description": "The plot coordinate system: ordinary Cartesian, flipped Cartesian, post-stat transformed, or fixed-aspect."
     },
     "PlotSpec": {
       "type": "object",
@@ -4985,7 +5012,7 @@
         "edition": {
           "type": "integer",
           "minimum": 1,
-          "description": "Defaults edition this spec was authored against (currently 1). normalize() stamps the current edition when absent, so a spec keeps ITS edition's default look (theme roles, categorical palette) even after ggsvelte's defaults improve in a later edition. Explicit theme/scale settings always win over edition defaults."
+          "description": "Defaults edition this spec was authored against (currently 2). normalize() stamps the current edition when absent, so a spec keeps ITS edition's default look (theme roles, categorical palette) even after ggsvelte's defaults improve in a later edition. Explicit theme/scale settings always win over edition defaults."
         },
         "data": {
           "$ref": "#/$defs/DataRef",

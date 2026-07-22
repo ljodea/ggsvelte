@@ -30,6 +30,7 @@ export interface AssembleSceneInput {
   legendBlock: { legends: SceneLegend[]; width: number; bottomHeight: number };
   topBand: number;
   bottomBand: number;
+  degraded: boolean;
   theme: ThemeTokens;
   title: string;
   subtitle: string;

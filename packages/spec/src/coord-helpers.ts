@@ -1,4 +1,9 @@
-import type { CoordSpec, CoordTransformAxisSpec, CoordTransformSpec } from "./schema.js";
+import type {
+  CoordFixedSpec,
+  CoordSpec,
+  CoordTransformAxisSpec,
+  CoordTransformSpec,
+} from "./schema.js";
 
 export type CoordTransformName = CoordTransformAxisSpec["transform"];
 
@@ -40,3 +45,22 @@ export function coordTransform(options: CoordTransformOptions = {}): CoordSpec {
 
 /** ggplot2-style alias for coordTransform(). */
 export const coord_transform = coordTransform;
+
+export interface CoordFixedOptions {
+  /** Physical y-unit length divided by physical x-unit length (default 1). */
+  ratio?: number;
+}
+
+/** Build a canonical fixed-aspect Cartesian coordinate configuration. */
+export function coordFixed(options: CoordFixedOptions = {}): CoordFixedSpec {
+  return {
+    type: "fixed",
+    ...(options.ratio !== undefined && options.ratio !== 1 && { ratio: options.ratio }),
+  };
+}
+
+/** Equal-unit spelling of coordFixed(); accepts ratio for exact alias parity. */
+export const coordEqual = coordFixed;
+/** ggplot2-style aliases over the same implementation. */
+export const coord_fixed = coordFixed;
+export const coord_equal = coordEqual;

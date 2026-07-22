@@ -310,8 +310,10 @@ export function sceneToSVGString(scene: Scene): string {
   const ink = themeVar("ink", theme);
   const parts: string[] = [];
   const label = sceneLabel(scene);
+  const titleX = panel.allocation?.x ?? panel.x;
+  const layoutAttribute = scene.layout === undefined ? "" : ` data-gg-layout="${scene.layout}"`;
   parts.push(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${px(scene.width)}" height="${px(scene.height)}" viewBox="0 0 ${px(scene.width)} ${px(scene.height)}" role="img" aria-label="${escapeXML(label)}" class="gg-plot" font-family="${escapeXML(scene.theme.fontFamily)}" font-size="${px(scene.theme.fontSize)}" font-weight="${scene.theme.fontWeight}" text-rendering="optimizeLegibility" shape-rendering="geometricPrecision">`,
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${px(scene.width)}" height="${px(scene.height)}" viewBox="0 0 ${px(scene.width)} ${px(scene.height)}" role="img" aria-label="${escapeXML(label)}" class="gg-plot"${layoutAttribute} font-family="${escapeXML(scene.theme.fontFamily)}" font-size="${px(scene.theme.fontSize)}" font-weight="${scene.theme.fontWeight}" text-rendering="optimizeLegibility" shape-rendering="geometricPrecision">`,
     `<title>${escapeXML(label)}</title>`,
   );
   if (theme.paper !== "none") {
@@ -321,7 +323,7 @@ export function sceneToSVGString(scene: Scene): string {
   }
   if (scene.title !== "") {
     parts.push(
-      `<text class="gg-title" x="${px(panel.x)}" y="${px(scene.theme.titleSize)}" font-size="${px(scene.theme.titleSize)}" font-weight="${scene.theme.titleWeight}" fill="${ink}">${escapeXML(scene.title)}</text>`,
+      `<text class="gg-title" x="${px(titleX)}" y="${px(scene.theme.titleSize)}" font-size="${px(scene.theme.titleSize)}" font-weight="${scene.theme.titleWeight}" fill="${ink}">${escapeXML(scene.title)}</text>`,
     );
   }
   if (scene.subtitle !== "") {
@@ -330,7 +332,7 @@ export function sceneToSVGString(scene: Scene): string {
         ? scene.theme.subtitleSize
         : scene.theme.titleSize + scene.theme.subtitleSize + 3;
     parts.push(
-      `<text class="gg-subtitle" x="${px(panel.x)}" y="${px(y)}" font-size="${px(scene.theme.subtitleSize)}" font-weight="${scene.theme.subtitleWeight}" fill="${ink}">${escapeXML(scene.subtitle)}</text>`,
+      `<text class="gg-subtitle" x="${px(titleX)}" y="${px(y)}" font-size="${px(scene.theme.subtitleSize)}" font-weight="${scene.theme.subtitleWeight}" fill="${ink}">${escapeXML(scene.subtitle)}</text>`,
     );
   }
   // Panel clip paths (decision 0008/0010 follow-up: marks clip to their
@@ -345,6 +347,12 @@ export function sceneToSVGString(scene: Scene): string {
     )
     .join("");
   parts.push(`<defs>${clips}</defs>`);
+  for (const p of scene.panels) {
+    if (p.allocation === undefined) continue;
+    parts.push(
+      `<rect class="gg-letterbox" x="${px(p.allocation.x)}" y="${px(p.allocation.y)}" width="${px(p.allocation.width)}" height="${px(p.allocation.height)}" fill="${themeVar("letterboxFill", theme)}"/>`,
+    );
+  }
   // One O(P+B) panel→batch index (issue #185) instead of re-scanning all
   // batches per panel (O(P·B)). Bucket order preserves original batch list
   // order within each panel.
