@@ -5,7 +5,7 @@
  */
 
 import type { InteractionSource } from "../interaction/interaction.js";
-import { clearInspectionFingerprint } from "./resolver.js";
+import { clearInspectionFingerprint } from "./coordinator.js";
 import type { InspectionHostState } from "./frame.js";
 
 // ---- surface blur / outside pointer dismiss ----
