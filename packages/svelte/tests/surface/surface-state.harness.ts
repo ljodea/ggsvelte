@@ -40,14 +40,14 @@ import { withFlushedEffectRoot } from "../helpers/effect-root.svelte.js";
 import { modelFor } from "../helpers/model.js";
 import { reactiveBox } from "../helpers/reactive-box.svelte.js";
 
-export const continuousRows = [
+const continuousRows = [
   { id: "a", x: 1, y: 1 },
   { id: "b", x: 10, y: 20 },
   { id: "c", x: 5, y: 8 },
 ];
 
 /** Getter that supplies no interaction controller (chart-local mode). */
-export const noController = (): ReturnType<typeof createPlotInteraction> | undefined => {
+const noController = (): ReturnType<typeof createPlotInteraction> | undefined => {
   /* chart-local */
 };
 
@@ -88,7 +88,7 @@ export function secondCandidate(model: RenderModel, firstId: number): CandidateF
   throw new Error("expected a second candidate");
 }
 
-export function identityKeyAt(model: RenderModel): (index: number) => PropertyKey | null {
+function identityKeyAt(model: RenderModel): (index: number) => PropertyKey | null {
   return (index) => {
     const row = model.row(index);
     if (row === null) return null;
@@ -97,12 +97,12 @@ export function identityKeyAt(model: RenderModel): (index: number) => PropertyKe
   };
 }
 
-export function identityCandidateKeys(candidate: CandidateFacts): PropertyKey[] {
+function identityCandidateKeys(candidate: CandidateFacts): PropertyKey[] {
   if (candidate.rowIndex === null) return [];
   return [String(candidate.rowIndex)];
 }
 
-export function identitySemanticKey(): (
+function identitySemanticKey(): (
   row: Record<string, CellValue> | null,
   index: number | null,
 ) => PropertyKey | null {
@@ -116,7 +116,7 @@ export function identitySemanticKey(): (
 }
 
 /** Deferred controllable frame pump — mirrors production RAF (assign-after-schedule). */
-export function createFramePump(): {
+function createFramePump(): {
   scheduleFrame: (callback: () => void) => number;
   cancelFrame: (handle: number) => void;
   flush: () => void;
@@ -145,7 +145,7 @@ export function createFramePump(): {
 }
 
 /** Capture target sized to the model scene for plotPointFromClient. */
-export function mountCaptureTarget(model: RenderModel): HTMLDivElement {
+function mountCaptureTarget(model: RenderModel): HTMLDivElement {
   const el = document.createElement("div");
   el.style.position = "fixed";
   el.style.left = "0px";
@@ -464,5 +464,4 @@ void originalCaf;
 
 // Re-exports used by construction-armed tests
 export { fromAny, createSurfaceState, normalizeInteractionConfig, modelFor };
-export type { SurfaceState, SurfaceStateDeps, RenderModel };
-export type { InteractionTool, InteractionSource };
+export type { SurfaceStateDeps, InteractionTool };
