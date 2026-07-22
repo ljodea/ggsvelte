@@ -270,6 +270,38 @@ describe("responsive guide planning", () => {
     expect(result.scene.panels[0]!.x).toBeGreaterThan(automatic.scene.panels[0]!.x);
   });
 
+  it("does not leak the auto wrap/rotate band plan into collision:preserve diagnostics", () => {
+    const categories = [
+      { category: "A deliberately long northern category", y: 1 },
+      { category: "A deliberately long southern category", y: 2 },
+    ];
+    const build = gg(categories, aes({ x: "category", y: "y" }))
+      .geomPoint()
+      .scales({ x: { type: "band" } })
+      .labs({ x: "Category" });
+    // At this width, automatic layout must escalate to wrap or rotate.
+    const automatic = runPipeline(build.spec(), { width: 280, height: 300 });
+    const automaticPlan = automatic.guidePlans.find(
+      (candidate) => candidate.type === "axis" && candidate.aesthetic === "x",
+    );
+    expect(automaticPlan?.type === "axis" && automaticPlan.bandLabelMode).not.toBe("single-line");
+
+    const result = runPipeline(build.guides({ x: guideAxis({ collision: "preserve" }) }).spec(), {
+      width: 280,
+      height: 300,
+    });
+    const plan = result.guidePlans.find(
+      (candidate) => candidate.type === "axis" && candidate.aesthetic === "x",
+    );
+    expect(plan?.type).toBe("axis");
+    if (plan?.type !== "axis") return;
+    // The rendered labels are always single-line full text (presentForLayout), so
+    // the guide plan must say so too — not the auto wrap/rotate plan that never renders.
+    expect(plan.bandLabelMode).toBe("single-line");
+    expect(result.scene.axes.x.titleOffset).toBeUndefined();
+    expect(result.advisories.filter(({ code }) => code.startsWith("band-labels-"))).toEqual([]);
+  });
+
   it("reclaims tick-label margins and diagnostics for hidden axes", () => {
     const categories = [
       { category: "A deliberately long northern category", y: 1 },

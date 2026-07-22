@@ -87,7 +87,7 @@ export interface DeriveTicksContext {
   quantum?: number;
   ellipsis?: string;
   /** Top-level band-axis collision override, resolved after scale-local guide settings. */
-  bandCollision?: "ellipsis";
+  bandCollision?: "ellipsis" | "preserve";
   previousGuidePlan?: AxisGuidePlan;
 }
 
@@ -249,8 +249,14 @@ export function deriveTicks(
     // Vertical band (native Y, or categorical-on-Y after coord_flip) falls through
     // to the legacy thin/truncate path.
     if (domain.band !== undefined && context.orient === "horizontal") {
+      // "preserve" renders full single-line labels downstream (presentForLayout),
+      // so the guide plan must reflect single-line mode too — otherwise the auto
+      // wrap/rotate plan leaks into the axis-title offset and wrap/rotate advisories
+      // for a layout that is never actually rendered.
       const resolvedGuide =
-        context.bandCollision === "ellipsis" ? { ...guide, mode: "single" as const } : guide;
+        context.bandCollision === "ellipsis" || context.bandCollision === "preserve"
+          ? { ...guide, mode: "single" as const }
+          : guide;
       const planned = planBandAxis({
         aesthetic: domain.band.aesthetic,
         panelIndex: domain.band.panelIndex,

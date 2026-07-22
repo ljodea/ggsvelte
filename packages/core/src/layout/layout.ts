@@ -163,6 +163,7 @@ export function layoutPass(margins: Margins, input: LayoutInput, theme: LayoutTh
     quantum,
     ellipsis,
     ...(xPresentation?.collision === "ellipsis" && { bandCollision: "ellipsis" as const }),
+    ...(xPreserve && { bandCollision: "preserve" as const }),
     ...(input.previousGuidePlans?.x !== undefined && {
       previousGuidePlan: input.previousGuidePlans.x,
     }),
