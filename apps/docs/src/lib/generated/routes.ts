@@ -1444,6 +1444,11 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "unsupported-annotation-style",
+        title: "unsupported-annotation-style",
+        level: 3,
+      },
+      {
         id: "invalid-aesthetic-constant",
         title: "invalid-aesthetic-constant",
         level: 3,

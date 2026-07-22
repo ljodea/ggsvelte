@@ -2204,6 +2204,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["unsupported-geom-aesthetic — pipeline"],
   },
   {
+    id: "heading:guide-errors:unsupported-annotation-style",
+    kind: "heading",
+    title: "unsupported-annotation-style",
+    summary:
+      "unsupported-annotation-style in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#unsupported-annotation-style",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["unsupported-annotation-style"],
+  },
+  {
     id: "heading:guide-errors:invalid-aesthetic-constant",
     kind: "heading",
     title: "invalid-aesthetic-constant",
@@ -14742,6 +14752,20 @@ export const DOCS_SEARCH_INDEX = [
       "Remove the mapping or move it to one of the compatible geoms listed in the error.",
     ],
     exact: ["unsupported-geom-aesthetic", "pipeline:unsupported-geom-aesthetic"],
+  },
+  {
+    id: "diagnostic:pipeline:unsupported-annotation-style",
+    kind: "diagnostic",
+    title: "unsupported-annotation-style · pipeline",
+    summary:
+      "A fixed-intercept annotation rule maps a style to a field or after-stat column, but it has no data rows to map.",
+    href: "/guide/errors#unsupported-annotation-style",
+    keywords: [
+      "pipeline",
+      "error",
+      "Use a constant style value (optionally { value, scale: true }) on the annotation rule.",
+    ],
+    exact: ["unsupported-annotation-style", "pipeline:unsupported-annotation-style"],
   },
   {
     id: "diagnostic:pipeline:invalid-aesthetic-constant",
