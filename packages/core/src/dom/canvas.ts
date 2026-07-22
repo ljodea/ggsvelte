@@ -22,6 +22,7 @@
  * Module split: leaf DOM helpers in `canvas-dom.ts`, mark drawers in
  * `canvas-marks.ts`, panel routing + focus presentation here.
  */
+import { groupBatchesByPanel } from "../group-batches-by-panel.js";
 import type { GeometryBatch, Scene } from "../scene.js";
 import type { ColorResolver } from "./canvas-dom.js";
 import { drawClippedToPanel } from "./canvas-dom.js";
@@ -33,37 +34,8 @@ import {
   maskIsAllFocused,
 } from "./canvas-marks.js";
 
-/**
- * Group geometry batches by panel once (issue #185): O(B) instead of
- * re-filtering the full list per panel (O(P·B)). Within each panel bucket,
- * order matches the original batch list so paint order is preserved.
- * When `withIndices` is true, also record each batch's original list index
- * for focus-mask alignment on the presentation path.
- *
- * Exported for unit tests that lock the single-pass complexity contract.
- */
-export function groupBatchesByPanel(
-  panelCount: number,
-  batches: readonly GeometryBatch[],
-  withIndices: boolean,
-): { byPanel: GeometryBatch[][]; indices: number[][] | null } {
-  const byPanel: GeometryBatch[][] = Array.from({ length: panelCount }, () => []);
-  const indices: number[][] | null = withIndices
-    ? Array.from({ length: panelCount }, () => [])
-    : null;
-  for (let i = 0; i < batches.length; i++) {
-    const batch = batches[i]!;
-    const p = batch.panelIndex;
-    // Malformed panelIndex (NaN, non-integer, out of range) is a pipeline bug;
-    // skip rather than throw so a bad batch cannot take down the whole stratum
-    // draw. Integer check matters: `byPanel[1.5]` / `byPanel[NaN]` are not
-    // real buckets, and the old filter path silently dropped those too.
-    if (!Number.isInteger(p) || p < 0 || p >= panelCount) continue;
-    byPanel[p]!.push(batch);
-    indices?.[p]!.push(i);
-  }
-  return { byPanel, indices };
-}
+/** Re-export pure helper for canvas tests and callers (issue #185). */
+export { groupBatchesByPanel };
 
 /**
  * Draw a canvas stratum's batches, clipped per panel (one canvas per

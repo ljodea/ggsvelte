@@ -10,6 +10,8 @@ import { aes, gg, normalize } from "@ggsvelte/spec";
 
 import { PipelineError } from "../src/pipeline.ts";
 import { renderToSVGString } from "../src/render-svg.ts";
+import { resolveTheme } from "../src/theme.ts";
+import type { GeometryBatch, Scene, ScenePanel } from "../src/scene.ts";
 
 const rows = [
   { x: 1, y: 10, cls: "a" },
@@ -143,5 +145,127 @@ describe("render-svg public facade", () => {
     type _Opts = import("../src/index.ts").RenderSVGOptions;
     const opts: _Opts = { width: 1, height: 1 };
     expect(opts.width).toBe(1);
+  });
+});
+
+describe("sceneToSVGString panel batch routing", () => {
+  function multiPanelScene(
+    panelCount: number,
+    batchesPerPanel: number,
+  ): {
+    theme: ReturnType<typeof resolveTheme>;
+    panels: ScenePanel[];
+    rawBatches: GeometryBatch[];
+    sceneBase: Omit<Scene, "theme" | "panels" | "batches">;
+  } {
+    const theme = resolveTheme();
+    const panels: ScenePanel[] = Array.from({ length: panelCount }, (_, i) => ({
+      id: `p${i}`,
+      x: i * 10,
+      y: 0,
+      width: 10,
+      height: 10,
+      strip: "",
+      axisX: null,
+      axisY: null,
+      grid: { x: [], y: [] },
+      clip: true,
+    }));
+    // Interleave layers across panels so a full re-scan would thrash:
+    // batch order: (panel 0 layer 0), (panel 1 layer 0), … then layer 1…
+    const rawBatches: GeometryBatch[] = [];
+    for (let layer = 0; layer < batchesPerPanel; layer++) {
+      for (let p = 0; p < panelCount; p++) {
+        rawBatches.push({
+          kind: "points",
+          layerIndex: layer,
+          panelIndex: p,
+          positions: Float32Array.from([layer + 1, p + 1]),
+          rowIndex: Uint32Array.from([layer * panelCount + p]),
+          size: 1,
+          alpha: 1,
+          shape: "circle",
+          fill: `c${layer}-${p}`,
+        });
+      }
+    }
+    // Invalid indices must be skipped without throwing or polluting buckets.
+    rawBatches.push({
+      kind: "points",
+      layerIndex: 99,
+      panelIndex: Number.NaN,
+      positions: Float32Array.from([0, 0]),
+      rowIndex: Uint32Array.from([999]),
+      size: 1,
+      alpha: 1,
+      shape: "circle",
+      fill: "invalid",
+    });
+    return {
+      theme,
+      panels,
+      rawBatches,
+      sceneBase: {
+        width: panelCount * 10,
+        height: 20,
+        axes: { x: { ticks: [], title: "" }, y: { ticks: [], title: "" } },
+        grid: { x: [], y: [] },
+        legends: [],
+        title: "",
+        subtitle: "",
+        caption: "",
+      },
+    };
+  }
+
+  it("inspects each batch once regardless of panel count (not O(P·B) re-scan)", async () => {
+    const { sceneToSVGString } = await import("../src/render-svg-scene.ts");
+    const panelCount = 16;
+    const batchesPerPanel = 3;
+    const { theme, panels, rawBatches, sceneBase } = multiPanelScene(panelCount, batchesPerPanel);
+    let indexReads = 0;
+    const batches = new Proxy(rawBatches, {
+      get(target, property, receiver): unknown {
+        if (typeof property === "string" && /^\d+$/.test(property)) indexReads++;
+        return Reflect.get(target, property, receiver) as unknown;
+      },
+    });
+    const svg = sceneToSVGString({
+      ...sceneBase,
+      theme,
+      panels,
+      batches,
+    });
+    // groupBatchesByPanel walks each list index once (including the invalid entry).
+    expect(indexReads).toBe(rawBatches.length);
+    // Every valid batch still rendered once (fill color is unique per batch).
+    for (let layer = 0; layer < batchesPerPanel; layer++) {
+      for (let p = 0; p < panelCount; p++) {
+        expect(svg).toContain(`fill="c${layer}-${p}"`);
+      }
+    }
+    expect(svg).not.toContain('fill="invalid"');
+  });
+
+  it("keeps panel order, within-panel batch order, and clip wrappers", async () => {
+    const { sceneToSVGString } = await import("../src/render-svg-scene.ts");
+    const { theme, panels, rawBatches, sceneBase } = multiPanelScene(3, 2);
+    panels[1] = { ...panels[1]!, clip: false };
+    const svg = sceneToSVGString({
+      ...sceneBase,
+      theme,
+      panels,
+      batches: rawBatches.filter((b) => Number.isInteger(b.panelIndex)),
+    });
+    const panelStarts = [...svg.matchAll(/data-panel="(\d+)"/g)].map((m) => m[1]);
+    expect(panelStarts).toEqual(["0", "1", "2"]);
+    // Within panel 0: layer 0 then layer 1 (c0-0 before c1-0).
+    expect(svg.indexOf('fill="c0-0"')).toBeLessThan(svg.indexOf('fill="c1-0"'));
+    expect(svg.indexOf('fill="c0-1"')).toBeLessThan(svg.indexOf('fill="c1-1"'));
+    // Panel 0 clipped; panel 1 unclipped marks group.
+    expect(svg).toContain('clip-path="url(#gg-clip-0)"');
+    const panel1Block = svg.slice(svg.indexOf('data-panel="1"'), svg.indexOf('data-panel="2"'));
+    expect(panel1Block).toContain('class="gg-marks"');
+    expect(panel1Block).not.toContain("clip-path=");
   });
 });
