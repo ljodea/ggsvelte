@@ -29,6 +29,8 @@ export function sequentialColorResolution(
   format: ColorLegendFormatter,
 ): ColorResolution {
   const tickValues = colorbarTicks(scale);
+  const transform = scaleTransform(scale.transform);
+  const transformedSpan = scale.transformedDomain[1] - scale.transformedDomain[0];
   const stops = Array.from({ length: GUIDE_STOP_COUNT }, (_, index) => {
     const offset = index / (GUIDE_STOP_COUNT - 1);
     return Object.freeze([offset, scale.at(offset)] as const);
@@ -46,6 +48,10 @@ export function sequentialColorResolution(
       at: (t: number) => scale.at(t),
       format: (value: number) => format.label(value),
       ticks: tickValues,
+      position: (value: number) =>
+        transformedSpan === 0
+          ? 0.5
+          : (transform.forward(value) - scale.transformedDomain[0]) / transformedSpan,
     },
     guidePlan: Object.freeze({
       type: "colorbar" as const,

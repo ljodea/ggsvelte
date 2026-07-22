@@ -61,6 +61,14 @@ describe("generic non-position color scales", () => {
       unknownValue: "#999999",
     });
     expect(plan.ticks.map((tick) => tick.value)).toEqual([1, 10, 100, 1000]);
+    const legend = model.scene.legends.find((candidate) => candidate.type === "ramp");
+    if (legend?.type !== "ramp") throw new Error("expected ramp scene legend");
+    expect(legend.ticks).toEqual([
+      { y: 96, label: "1" },
+      { y: 64, label: "10" },
+      { y: 32, label: "100" },
+      { y: 0, label: "1,000" },
+    ]);
     expect(Object.isFrozen(plan)).toBe(true);
   });
 
@@ -76,6 +84,46 @@ describe("generic non-position color scales", () => {
     const plan = model.guidePlans.find((candidate) => candidate.type === "colorbar");
     if (plan?.type !== "colorbar") throw new Error("expected colorbar plan");
     expect(plan.ticks.map(({ value }) => value)).toEqual([1, 100, 1000]);
+  });
+
+  it("uses sequential intent when transform or temporal options omit the family", () => {
+    expect(() =>
+      runPipeline(pointSpec(["control", "treated"], { transform: "log10" }), size),
+    ).toThrow(
+      expect.objectContaining({
+        code: "color-transform-empty",
+        path: "/scales/color",
+      }),
+    );
+
+    const temporal = runPipeline(
+      pointSpec(["03/04/2024", "04/05/2024"], {
+        temporalKind: "date",
+        parse: "dmy",
+      }),
+      size,
+    );
+    expect(temporal.scales.color?.kind).toBe("sequential");
+    const plan = temporal.guidePlans.find((candidate) => candidate.type === "colorbar");
+    if (plan?.type !== "colorbar") throw new Error("expected inferred temporal colorbar");
+    expect(plan.temporalKind).toBe("date");
+  });
+
+  it("rejects a transformed color scale when source evidence is temporal", () => {
+    expect(() =>
+      runPipeline(
+        pointSpec(["2024-01-01", "2024-01-02"], {
+          type: "sequential",
+          transform: "log10",
+        }),
+        size,
+      ),
+    ).toThrow(
+      expect.objectContaining({
+        code: "scale-type-transform-conflict",
+        path: "/scales/color/transform",
+      }),
+    );
   });
 
   it("classifies deterministic binned boundaries and publishes colorsteps", () => {
@@ -134,6 +182,21 @@ describe("generic non-position color scales", () => {
         color: "#eeeeee",
       },
     ]);
+  });
+
+  it("squishes binned values in semantic space before transforming", () => {
+    const model = runPipeline(
+      pointSpec([0, 1, 10, 100], {
+        type: "binned",
+        transform: "log10",
+        breaks: [1, 10, 100],
+        range: ["#111", "#eee"],
+        oob: "squish",
+      }),
+      size,
+    );
+    expect(pointColors(model)).toEqual(["#111111", "#111111", "#eeeeee", "#eeeeee"]);
+    expect(model.warnings.map(({ code }) => code)).not.toContain("color-unknown-values");
   });
 
   it("maps manual domains without recycling and distinguishes NA from unknown", () => {

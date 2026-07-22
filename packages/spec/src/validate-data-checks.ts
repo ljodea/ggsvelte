@@ -5,6 +5,7 @@
  */
 import type { SpecError } from "./errors.js";
 import { didYouMean } from "./errors.js";
+import { configuredColorScaleType } from "./scale-helpers.js";
 import type { Aes, ChannelName, ColorScaleSpec, PositionScaleSpec } from "./schema.js";
 import { CHANNELS, GEOM_DEFAULTS, SEQUENTIAL_SCHEME_NAMES } from "./schema.js";
 import type { ProfileFieldType, ValidateLimits, ValidateOptions } from "./validate-data.js";
@@ -394,10 +395,25 @@ export function dataChecks(
       config?.range === undefined &&
       config?.scheme !== undefined &&
       SEQUENTIAL_SCHEMES.has(config.scheme);
-    const effectiveType = config?.type ?? (inferredFromSequentialScheme ? "sequential" : undefined);
+    const effectiveType = configuredColorScaleType(config);
     if (effectiveType !== "sequential" && effectiveType !== "binned") continue;
     for (const use of colorFields[channel]) {
       const type = typeOf(use.field);
+      if (
+        type === "temporal" &&
+        config?.transform !== undefined &&
+        config.transform !== "identity"
+      ) {
+        errors.push({
+          code: "scale-type-mismatch",
+          path: use.path,
+          message: `scales.${channel}.transform is "${config.transform}" but field "${use.field}" is temporal; temporal color scales permit only the identity transform.`,
+          fix: {
+            description: `Remove scales.${channel}.transform to keep temporal inference, or map a non-temporal quantitative field.`,
+          },
+        });
+        continue;
+      }
       if (type !== "nominal" && type !== "ordinal") continue;
 
       const requestsTemporal =

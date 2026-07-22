@@ -2972,14 +2972,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/spec"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-340",
+    id: "heading:guide-lifecycle:experimental-341",
     kind: "heading",
-    title: "experimental (340)",
+    title: "experimental (341)",
     summary:
-      "experimental (340) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-340",
+      "experimental (341) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-341",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (340)"],
+    exact: ["experimental (341)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-8",
@@ -5640,6 +5640,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-spec",
     keywords: ["@ggsvelte/spec", ".", "value", "experimental"],
     exact: ["canonicalTemporalParserKey"],
+  },
+  {
+    id: "api:ggsvelte-spec:configuredColorScaleType",
+    kind: "api",
+    title: "configuredColorScaleType",
+    summary: "@ggsvelte/spec · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "value", "experimental"],
+    exact: ["configuredColorScaleType"],
   },
   {
     id: "api:ggsvelte-spec:coordTransform",

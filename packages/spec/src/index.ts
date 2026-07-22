@@ -192,6 +192,7 @@ export type {
 
 // Scale helpers
 export {
+  configuredColorScaleType,
   scaleColorBinned,
   scaleColorContinuous,
   scaleColorDate,

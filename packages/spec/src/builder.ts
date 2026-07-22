@@ -200,9 +200,14 @@ function mappedField(value: AesInput[keyof AesInput]): string | null {
 
 function calendarDateFields(state: BuilderState): ReadonlySet<string> {
   const fields = new Set<string>();
-  for (const axis of ["x", "y"] as const) {
-    if (state.scales?.[axis]?.temporalKind !== "date") continue;
-    const channels = axis === "x" ? (["x"] as const) : (["y", "ymin", "ymax"] as const);
+  const mappings = [
+    ["x", ["x"]],
+    ["y", ["y", "ymin", "ymax"]],
+    ["color", ["color"]],
+    ["fill", ["fill"]],
+  ] as const;
+  for (const [scale, channels] of mappings) {
+    if (state.scales?.[scale]?.temporalKind !== "date") continue;
     for (const channel of channels) {
       const plotField = mappedField(state.aes?.[channel]);
       if (plotField !== null) fields.add(plotField);

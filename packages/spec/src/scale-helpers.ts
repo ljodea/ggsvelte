@@ -1,4 +1,32 @@
 import type { ColorScaleSpec, PositionScaleSpec, Scales } from "./schema.js";
+import { SEQUENTIAL_SCHEME_NAMES } from "./schema-names.js";
+
+const SEQUENTIAL_SCHEMES = new Set<string>(SEQUENTIAL_SCHEME_NAMES);
+
+/** Resolve family intent encoded by family-specific options before data inference. */
+export function configuredColorScaleType(
+  config: ColorScaleSpec | undefined,
+): ColorScaleSpec["type"] | undefined {
+  if (config?.type !== undefined) return config.type;
+  if (config?.scheme !== undefined && config.range === undefined) {
+    return SEQUENTIAL_SCHEMES.has(config.scheme) ? "sequential" : "ordinal";
+  }
+  if (
+    config?.transform !== undefined ||
+    config?.temporalKind !== undefined ||
+    config?.parse !== undefined ||
+    config?.parseFailure !== undefined ||
+    config?.timezone !== undefined ||
+    config?.disambiguation !== undefined ||
+    config?.breaks !== undefined ||
+    config?.oob !== undefined ||
+    config?.labels !== undefined
+  ) {
+    return "sequential";
+  }
+  if (config?.domainMode !== undefined || config?.onExhaust !== undefined) return "ordinal";
+  return undefined;
+}
 
 export type TemporalScaleOptions = Omit<PositionScaleSpec, "type" | "temporalKind">;
 

@@ -279,15 +279,20 @@ export function resolveBinnedColorScale(input: {
         );
   if (config.reverse === true) colors = colors.toReversed();
   const { naValue, unknownValue } = fallbackColors(config);
-  const semanticColorOf = (semantic: number): string => {
-    let transformed = transform.forward(semantic);
-    if (!Number.isFinite(transformed)) return unknownValue;
-    const lower = transformedBreaks[0]!;
-    const upper = transformedBreaks.at(-1)!;
-    if (transformed < lower || transformed > upper) {
-      if (config.oob !== "squish") return unknownValue;
-      transformed = Math.min(upper, Math.max(lower, transformed));
+  const sourceLower = domain[0];
+  const sourceUpper = domain[1];
+  const transformedOf = (semantic: number): number | undefined => {
+    let bounded = semantic;
+    if (bounded < sourceLower || bounded > sourceUpper) {
+      if (config.oob !== "squish") return undefined;
+      bounded = Math.min(sourceUpper, Math.max(sourceLower, bounded));
     }
+    const transformed = transform.forward(bounded);
+    return Number.isFinite(transformed) ? transformed : undefined;
+  };
+  const semanticColorOf = (semantic: number): string => {
+    const transformed = transformedOf(semantic);
+    if (transformed === undefined) return unknownValue;
     // Upper-bound search makes exact internal boundaries start the next bin;
     // the final boundary remains in the final closed interval.
     let low = 0;
@@ -324,11 +329,7 @@ export function resolveBinnedColorScale(input: {
       if (value === null) return false;
       const semantic = view.semanticOf(value);
       if (semantic === undefined) return true;
-      const transformed = transform.forward(semantic);
-      if (!Number.isFinite(transformed)) return true;
-      const lower = transformedBreaks[0]!;
-      const upper = transformedBreaks.at(-1)!;
-      return config.oob !== "squish" && (transformed < lower || transformed > upper);
+      return transformedOf(semantic) === undefined;
     }).length,
     warnings,
   );

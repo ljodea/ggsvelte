@@ -38,6 +38,8 @@ export interface RampLegendInput {
   format(value: number): string;
   /** Optional semantic tick positions; numeric ramps use linear ticks. */
   ticks?: readonly number[];
+  /** Map a semantic tick value to its normalized position on the trained ramp. */
+  position?: (value: number) => number;
 }
 
 export interface StepsLegendInput {
@@ -225,10 +227,13 @@ export function buildLegends(
       const step = min === max ? 0 : tickStep(min, max, 5);
       void step;
       const span = max - min;
-      const ticks = tickValues.map((v) => ({
-        y: span === 0 ? RAMP_HEIGHT / 2 : RAMP_HEIGHT - ((v - min) / span) * RAMP_HEIGHT,
-        label: input.format(v),
-      }));
+      const ticks = tickValues.map((v) => {
+        const position = input.position?.(v) ?? (span === 0 ? 0.5 : (v - min) / span);
+        return {
+          y: RAMP_HEIGHT - Math.min(1, Math.max(0, position)) * RAMP_HEIGHT,
+          label: input.format(v),
+        };
+      });
       let labelWidth = 0;
       for (const t of ticks) {
         labelWidth = Math.max(labelWidth, measurer.measureWidth(t.label, FONT_SIZE));

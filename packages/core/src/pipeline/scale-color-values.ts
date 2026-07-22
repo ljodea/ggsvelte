@@ -26,8 +26,9 @@ function colorScaleError(
   problem: string,
   cause: string,
   fixes: readonly { description: string }[],
+  pathSuffix = "",
 ): PipelineError {
-  const path = `/scales/${name}`;
+  const path = `/scales/${name}${pathSuffix}`;
   return new PipelineError(code, path, cause, {
     code,
     severity: "error",
@@ -57,6 +58,24 @@ export function resolveColorValueView(input: {
   };
   const parsed = parseTemporalColumn(values, config?.parse ?? "auto", options);
   const temporal = parsed.decision.status === "temporal";
+
+  if (
+    (temporal || requestsTemporal) &&
+    config?.transform !== undefined &&
+    config.transform !== "identity"
+  ) {
+    throw colorScaleError(
+      name,
+      "scale-type-transform-conflict",
+      `The ${name} scale combines temporal values with a quantitative transform.`,
+      `Temporal ${name} values permit only the identity transform, but transform: "${config.transform}" was requested.`,
+      [
+        { description: "Remove the transform to keep temporal color semantics." },
+        { description: "Map a non-temporal quantitative field to use log10 or sqrt." },
+      ],
+      "/transform",
+    );
+  }
 
   if (requestsTemporal && !temporal) {
     const cause =

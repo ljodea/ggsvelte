@@ -1,7 +1,7 @@
 /**
  * Color/fill scale resolution (ordinal value-stable + sequential ramps).
  */
-import { SEQUENTIAL_SCHEME_NAMES, type ColorScaleSpec } from "@ggsvelte/spec";
+import { configuredColorScaleType, type ColorScaleSpec } from "@ggsvelte/spec";
 
 import type { ScaleState } from "../scales/state.js";
 import type { ColumnTable } from "../table.js";
@@ -19,8 +19,6 @@ import type { ColorResolution } from "./scale-color-types.js";
 import type { Advisory, LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
 
 export type { ColorResolution } from "./scale-color-types.js";
-
-const SEQUENTIAL_SCHEMES = new Set<string>(SEQUENTIAL_SCHEME_NAMES);
 
 export function resolveColorScale(
   name: "color" | "fill",
@@ -49,13 +47,7 @@ export function resolveColorScale(
   const anyField = collected.anyField || catalog.anyField;
   if (!anyField) return { resolved: null, legendInput: null, guidePlan: null, state: null };
 
-  const schemeType =
-    config?.scheme === undefined || config.range !== undefined
-      ? undefined
-      : SEQUENTIAL_SCHEMES.has(config.scheme)
-        ? "sequential"
-        : "ordinal";
-  const type = config?.type ?? schemeType ?? (anyDiscreteField ? "ordinal" : "sequential");
+  const type = configuredColorScaleType(config) ?? (anyDiscreteField ? "ordinal" : "sequential");
 
   if (type === "sequential") {
     return resolveSequentialColorScale({
