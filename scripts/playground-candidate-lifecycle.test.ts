@@ -5,6 +5,7 @@ import {
   candidateTransitionAccepted,
   createCandidateLifecycleTracker,
   emitPlaygroundCandidatePhase,
+  phaseNotesForCandidateTransition,
   PLAYGROUND_CANDIDATE_EVENT,
   type PlaygroundCandidatePhaseDetail,
 } from "../apps/docs/src/lib/playground-candidate-lifecycle";
@@ -100,5 +101,76 @@ describe("playground candidate lifecycle", () => {
     });
     emitPlaygroundCandidatePhase(detail({ phase: "pending" }), target);
     expect(seen).toEqual([detail({ phase: "pending" })]);
+  });
+
+  test("phaseNotesForCandidateTransition orders cancel then pending and no-ops when unchanged", () => {
+    const previous = { generation: 1, origin: "apply" as const };
+    const pending = { generation: 2, origin: "source" as const };
+
+    expect(
+      phaseNotesForCandidateTransition(previous, {
+        candidate: pending,
+        status: "Checking the next chart before replacing the last valid result.",
+      }),
+    ).toEqual([
+      {
+        generation: 1,
+        origin: "apply",
+        phase: "cancelled",
+        status: "Checking the next chart before replacing the last valid result.",
+      },
+      {
+        generation: 2,
+        origin: "source",
+        phase: "pending",
+        status: "Checking the next chart before replacing the last valid result.",
+      },
+    ]);
+
+    expect(
+      phaseNotesForCandidateTransition(previous, {
+        candidate: null,
+        status: "Draft changed. Apply it to check and render the next chart.",
+      }),
+    ).toEqual([
+      {
+        generation: 1,
+        origin: "apply",
+        phase: "cancelled",
+        status: "Draft changed. Apply it to check and render the next chart.",
+      },
+    ]);
+
+    expect(
+      phaseNotesForCandidateTransition(previous, {
+        candidate: previous,
+        status: "same generation still pending",
+      }),
+    ).toEqual([
+      {
+        generation: 1,
+        origin: "apply",
+        phase: "pending",
+        status: "same generation still pending",
+      },
+    ]);
+
+    expect(
+      phaseNotesForCandidateTransition(null, {
+        candidate: pending,
+        status: "Checking the next chart before replacing the last valid result.",
+      }),
+    ).toEqual([
+      {
+        generation: 2,
+        origin: "source",
+        phase: "pending",
+        status: "Checking the next chart before replacing the last valid result.",
+      },
+    ]);
+
+    expect(phaseNotesForCandidateTransition(null, { candidate: null, status: "Ready." })).toEqual(
+      [],
+    );
   });
 });
