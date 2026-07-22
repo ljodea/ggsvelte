@@ -47,6 +47,7 @@ export function assembleScene(input: AssembleSceneInput): Scene {
     legendBlock,
     topBand,
     bottomBand,
+    degraded,
     theme,
     title,
     subtitle,
@@ -69,6 +70,7 @@ export function assembleScene(input: AssembleSceneInput): Scene {
     hAxisTextSize: hGuide.theme?.labelSize ?? axisTextSize,
     vAxisTextSize: vGuide.theme?.labelSize ?? axisTextSize,
     tickChromePx,
+    degraded,
     ...(hMinorBreaks !== undefined && { hMinorBreaks }),
     ...(vMinorBreaks !== undefined && { vMinorBreaks }),
   });
@@ -87,12 +89,19 @@ export function assembleScene(input: AssembleSceneInput): Scene {
   const panelX = scenePanels.length === 0 ? 0 : Math.min(...scenePanels.map((panel) => panel.x));
   const panelY =
     scenePanels.length === 0 ? topBand : Math.min(...scenePanels.map((panel) => panel.y));
+  const minimumLegendY =
+    scenePanels.length === 0
+      ? topBand
+      : Math.min(...scenePanels.map((panel) => panel.allocation?.y ?? panel.y));
   const legends = placeSceneLegends({
     legends: legendBlock.legends,
     legendWidth: legendBlock.width,
     sceneWidth: width,
     panelX,
     panelY,
+    minimumY: minimumLegendY,
+    sceneHeight: height,
+    rightBottomInset: bottomBand + LEGEND_EDGE_PAD,
     bottomLegendY: height - bottomBand - LEGEND_EDGE_PAD - legendBlock.bottomHeight,
   });
 
@@ -100,6 +109,7 @@ export function assembleScene(input: AssembleSceneInput): Scene {
     width,
     height,
     panels: scenePanels,
+    ...(degraded && { layout: "degraded" as const }),
     batches,
     axes: { x: xAxis, y: yAxis },
     grid: {

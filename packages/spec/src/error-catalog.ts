@@ -114,6 +114,11 @@ export const ERROR_CATALOG = {
     summary: "A guide variant is incompatible with its aesthetic or trained scale family.",
     fix: "Use axis for x/y, legend for discrete/style scales, colorbar for sequential color, or colorsteps for binned color.",
   },
+  "coord-fixed-free-scales": {
+    tier: 1,
+    summary: "Fixed-aspect coordinates cannot represent free positional facet scales truthfully.",
+    fix: 'Use facet.scales = "fixed", or remove coord_fixed.',
+  },
   // --- tier 1 structural (grammar rules the schema alone cannot express) ---
   "missing-required-channel": {
     tier: 2,

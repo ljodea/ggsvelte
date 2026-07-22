@@ -18,7 +18,12 @@
     GeometryBatch,
     Scene,
   } from "@ggsvelte/core";
-  import { sceneLabel, STRIP_BAND, themeVar } from "@ggsvelte/core";
+  import {
+    letterboxGutterRects,
+    sceneLabel,
+    STRIP_BAND,
+    themeVar,
+  } from "@ggsvelte/core";
 
   import Axis from "./Axis.svelte";
   import Batch from "./Batch.svelte";
@@ -73,6 +78,28 @@
       bottom: Math.max(...panels.map((p) => p.y + p.height)),
     };
   });
+  const rootBounds = $derived.by(() => {
+    const panels = scene.panels;
+    if (panels.length === 0) return gridBounds;
+    return {
+      left: Math.min(...panels.map((p) => p.allocation?.x ?? p.x)),
+      right: Math.max(
+        ...panels.map((p) =>
+          p.allocation === undefined
+            ? p.x + p.width
+            : p.allocation.x + p.allocation.width,
+        ),
+      ),
+      top: Math.min(...panels.map((p) => p.allocation?.y ?? p.y)),
+      bottom: Math.max(
+        ...panels.map((p) =>
+          p.allocation === undefined
+            ? p.y + p.height
+            : p.allocation.y + p.allocation.height,
+        ),
+      ),
+    };
+  });
 </script>
 
 <svg
@@ -84,6 +111,7 @@
   aria-label={mode === "full" || mode === "chrome-bottom" ? label : undefined}
   aria-hidden={mode === "marks" || mode === "chrome-top" ? "true" : undefined}
   class={mode === "full" ? "gg-plot" : `gg-plot gg-stratum gg-svg-${mode}`}
+  data-gg-layout={scene.layout}
   font-family={scene.theme.fontFamily}
   font-size={scene.theme.fontSize}
   font-weight={scene.theme.fontWeight}
@@ -101,10 +129,26 @@
       fill={themeVar("paper", scene.theme)}
     />
   {/if}
+  {#if drawChrome}
+    {#each scene.panels as panel, i (`letterbox-${i}`)}
+      {#if panel.allocation !== undefined}
+        {#each letterboxGutterRects(panel.allocation, panel) as gutter, gi (`letterbox-${i}-${gi}`)}
+          <rect
+            class="gg-letterbox"
+            x={gutter.x}
+            y={gutter.y}
+            width={gutter.width}
+            height={gutter.height}
+            fill={themeVar("letterboxFill", scene.theme)}
+          />
+        {/each}
+      {/if}
+    {/each}
+  {/if}
   {#if drawTop && scene.title !== ""}
     <text
       class="gg-title"
-      x={gridBounds.left}
+      x={rootBounds.left}
       y={scene.theme.titleSize}
       font-size={scene.theme.titleSize}
       font-weight={scene.theme.titleWeight}
@@ -114,7 +158,7 @@
   {#if drawTop && scene.subtitle !== ""}
     <text
       class="gg-subtitle"
-      x={gridBounds.left}
+      x={rootBounds.left}
       y={scene.title === ""
         ? scene.theme.subtitleSize
         : scene.theme.titleSize + scene.theme.subtitleSize + 3}

@@ -22,6 +22,8 @@ export interface PanelPlacement {
   vGuidePlan?: AxisGuidePlan;
   showAxisX: boolean;
   showAxisY: boolean;
+  /** Original panel allocation before a fixed-aspect data rectangle is fitted. */
+  allocation?: { x: number; y: number; width: number; height: number };
 }
 
 export interface PanelLayoutResult {
@@ -40,6 +42,7 @@ export interface PanelLayoutResult {
   displayScales: (p: number) => { h: PositionScale; v: PositionScale };
   legendBlock: ReturnType<typeof buildLegends>;
   guidePlans: readonly AxisGuidePlan[];
+  degraded: boolean;
 }
 
 export type DisplayScalesFn = (p: number) => { h: PositionScale; v: PositionScale };

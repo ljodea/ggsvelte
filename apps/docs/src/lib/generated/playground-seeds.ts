@@ -255,6 +255,15 @@ export const PLAYGROUND_EXAMPLES: readonly GeneratedPlaygroundExample[] = [
     },
   },
   {
+    id: "point/fixed-aspect",
+    title: "Fixed aspect ratio",
+    compatibility: {
+      supported: true,
+      fragment:
+        "#play=v1.eyJ2ZXJzaW9uIjoxLCJzb3VyY2UiOnsia2luZCI6ImV4YW1wbGUiLCJpZCI6InBvaW50L2ZpeGVkLWFzcGVjdCJ9LCJzcGVjIjp7ImVkaXRpb24iOjIsImRhdGEiOnsidmFsdWVzIjpbeyJ4IjoxLCJ5IjowLCJvcmRlciI6MH0seyJ4IjowLjg2NjAyNSwieSI6MC41LCJvcmRlciI6MX0seyJ4IjowLjUsInkiOjAuODY2MDI1LCJvcmRlciI6Mn0seyJ4IjowLCJ5IjoxLCJvcmRlciI6M30seyJ4IjotMC41LCJ5IjowLjg2NjAyNSwib3JkZXIiOjR9LHsieCI6LTAuODY2MDI1LCJ5IjowLjUsIm9yZGVyIjo1fSx7IngiOi0xLCJ5IjowLCJvcmRlciI6Nn0seyJ4IjotMC44NjYwMjUsInkiOi0wLjUsIm9yZGVyIjo3fSx7IngiOi0wLjUsInkiOi0wLjg2NjAyNSwib3JkZXIiOjh9LHsieCI6MCwieSI6LTEsIm9yZGVyIjo5fSx7IngiOjAuNSwieSI6LTAuODY2MDI1LCJvcmRlciI6MTB9LHsieCI6MC44NjYwMjUsInkiOi0wLjUsIm9yZGVyIjoxMX0seyJ4IjoxLCJ5IjowLCJvcmRlciI6MTJ9XX0sImxheWVycyI6W3siZ2VvbSI6InBvaW50Iiwic3RhdCI6ImlkZW50aXR5IiwicG9zaXRpb24iOiJpZGVudGl0eSIsImFlcyI6eyJ4Ijp7ImZpZWxkIjoieCJ9LCJ5Ijp7ImZpZWxkIjoieSJ9fSwicGFyYW1zIjp7InNpemUiOjN9fV0sImNvb3JkIjp7InR5cGUiOiJmaXhlZCJ9LCJsYWJzIjp7InRpdGxlIjoiRXF1YWwgdW5pdHMgc3RheSBjaXJjdWxhciIsInN1YnRpdGxlIjoiY29vcmRfZml4ZWQgcHJlc2VydmVzIG9uZSBDU1MgcGl4ZWwgcGVyIHggYW5kIHkgZGF0YSB1bml0IiwieCI6IngiLCJ5IjoieSJ9fX0",
+    },
+  },
+  {
     id: "point/jitter",
     title: "Jittered points",
     compatibility: {
@@ -816,6 +825,91 @@ export const PLAYGROUND_SAMPLES: readonly GeneratedPlaygroundSample[] = [
     },
     fragment:
       "#play=v1.eyJ2ZXJzaW9uIjoxLCJzb3VyY2UiOnsia2luZCI6InNhbXBsZSIsImlkIjoicG9zdC1zdGF0LWNvb3JkaW5hdGUifSwic3BlYyI6eyJlZGl0aW9uIjoyLCJkYXRhIjp7InZhbHVlcyI6W3siZXhwb3N1cmUiOjEsInJlc3BvbnNlIjoyLjJ9LHsiZXhwb3N1cmUiOjIsInJlc3BvbnNlIjoyLjF9LHsiZXhwb3N1cmUiOjUsInJlc3BvbnNlIjoyLjR9LHsiZXhwb3N1cmUiOjEwLCJyZXNwb25zZSI6Mi4yfSx7ImV4cG9zdXJlIjoyMCwicmVzcG9uc2UiOjIuNX0seyJleHBvc3VyZSI6NTAsInJlc3BvbnNlIjoyLjh9LHsiZXhwb3N1cmUiOjEwMCwicmVzcG9uc2UiOjMuMX0seyJleHBvc3VyZSI6MjAwLCJyZXNwb25zZSI6NC4yfSx7ImV4cG9zdXJlIjo1MDAsInJlc3BvbnNlIjo3LjF9LHsiZXhwb3N1cmUiOjEwMDAsInJlc3BvbnNlIjoxMi4zfV19LCJsYXllcnMiOlt7Imdlb20iOiJwb2ludCIsInN0YXQiOiJpZGVudGl0eSIsInBvc2l0aW9uIjoiaWRlbnRpdHkiLCJhZXMiOnsieCI6eyJmaWVsZCI6ImV4cG9zdXJlIn0sInkiOnsiZmllbGQiOiJyZXNwb25zZSJ9fSwicGFyYW1zIjp7InNpemUiOjN9fSx7Imdlb20iOiJzbW9vdGgiLCJzdGF0Ijoic21vb3RoIiwicG9zaXRpb24iOiJpZGVudGl0eSIsImFlcyI6eyJ4Ijp7ImZpZWxkIjoiZXhwb3N1cmUifSwieSI6eyJmaWVsZCI6InJlc3BvbnNlIn19LCJwYXJhbXMiOnsibWV0aG9kIjoibG0iLCJzZSI6ZmFsc2UsIm4iOjgwfX1dLCJjb29yZCI6eyJ0eXBlIjoidHJhbnNmb3JtIiwieCI6eyJ0cmFuc2Zvcm0iOiJsb2cxMCJ9fSwibGFicyI6eyJ0aXRsZSI6IlBvc3Qtc3RhdCBjb29yZGluYXRlIHRyYW5zZm9ybSIsInN1YnRpdGxlIjoiVGhlIGxpbmVhciBmaXQgaXMgY29tcHV0ZWQgYmVmb3JlIHRoZSB4IGNvb3JkaW5hdGUgaXMgcHJvamVjdGVkIiwieCI6IkV4cG9zdXJlIChsb2cxMCBjb29yZGluYXRlKSIsInkiOiJSZXNwb25zZSJ9LCJoZWlnaHQiOjQwMH19",
+  },
+  {
+    id: "fixed-aspect-coordinate",
+    title: "Fixed physical data units",
+    description:
+      "Fit an equal-unit data rectangle after chart chrome so a unit circle stays circular.",
+    seed: {
+      version: 1,
+      source: {
+        kind: "sample",
+        id: "fixed-aspect-coordinate",
+      },
+      spec: {
+        edition: 2,
+        data: {
+          values: [
+            {
+              x: 1,
+              y: 0,
+            },
+            {
+              x: 0.7,
+              y: 0.7,
+            },
+            {
+              x: 0,
+              y: 1,
+            },
+            {
+              x: -0.7,
+              y: 0.7,
+            },
+            {
+              x: -1,
+              y: 0,
+            },
+            {
+              x: -0.7,
+              y: -0.7,
+            },
+            {
+              x: 0,
+              y: -1,
+            },
+            {
+              x: 0.7,
+              y: -0.7,
+            },
+            {
+              x: 1,
+              y: 0,
+            },
+          ],
+        },
+        layers: [
+          {
+            geom: "line",
+            stat: "identity",
+            position: "identity",
+            aes: {
+              x: {
+                field: "x",
+              },
+              y: {
+                field: "y",
+              },
+            },
+            params: {
+              linewidth: 2,
+            },
+          },
+        ],
+        coord: {
+          type: "fixed",
+        },
+        labs: {
+          title: "Equal units stay circular",
+          x: "x",
+          y: "y",
+        },
+        height: 440,
+      },
+    },
+    fragment:
+      "#play=v1.eyJ2ZXJzaW9uIjoxLCJzb3VyY2UiOnsia2luZCI6InNhbXBsZSIsImlkIjoiZml4ZWQtYXNwZWN0LWNvb3JkaW5hdGUifSwic3BlYyI6eyJlZGl0aW9uIjoyLCJkYXRhIjp7InZhbHVlcyI6W3sieCI6MSwieSI6MH0seyJ4IjowLjcsInkiOjAuN30seyJ4IjowLCJ5IjoxfSx7IngiOi0wLjcsInkiOjAuN30seyJ4IjotMSwieSI6MH0seyJ4IjotMC43LCJ5IjotMC43fSx7IngiOjAsInkiOi0xfSx7IngiOjAuNywieSI6LTAuN30seyJ4IjoxLCJ5IjowfV19LCJsYXllcnMiOlt7Imdlb20iOiJsaW5lIiwic3RhdCI6ImlkZW50aXR5IiwicG9zaXRpb24iOiJpZGVudGl0eSIsImFlcyI6eyJ4Ijp7ImZpZWxkIjoieCJ9LCJ5Ijp7ImZpZWxkIjoieSJ9fSwicGFyYW1zIjp7ImxpbmV3aWR0aCI6Mn19XSwiY29vcmQiOnsidHlwZSI6ImZpeGVkIn0sImxhYnMiOnsidGl0bGUiOiJFcXVhbCB1bml0cyBzdGF5IGNpcmN1bGFyIiwieCI6IngiLCJ5IjoieSJ9LCJoZWlnaHQiOjQ0MH19",
   },
   {
     id: "binned-colorsteps",

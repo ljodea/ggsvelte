@@ -129,6 +129,7 @@ interface MockSpec {
     x?: { transform: string; limits?: number[]; reverse?: boolean; expand?: boolean };
     y?: { transform: string; limits?: number[]; reverse?: boolean; expand?: boolean };
     clip?: boolean;
+    ratio?: number;
   };
   scales?: Record<string, { type: string; parse?: string; transform?: string; breaks?: number[] }>;
   guides?: Record<
@@ -295,7 +296,7 @@ export class MockResponder implements Responder {
       STYLE_CHANNELS.some((channel) => mappedStyleField(prompt, profile, channel) !== undefined);
     if (
       /choropleth|\b3-?d\b|surface plot|network diagram/.test(prompt) ||
-      (/\bmap\b/.test(prompt) && !aestheticMapping)
+      (/\bmap\b/.test(prompt) && !aestheticMapping && !/\bribbon\b/.test(prompt))
     ) {
       return Promise.resolve(
         JSON.stringify({
@@ -363,14 +364,14 @@ export class MockResponder implements Responder {
       scales["x"] = { type: "linear", transform: "log10" };
       xField = x;
     } else if (/\braster\b/.test(prompt)) {
-      const x = fieldNamed("x") ?? pick.quant() ?? "x";
-      const y = fieldNamed("y") ?? pick.quant() ?? "y";
+      const x = fieldNamed("x") ?? fieldNamed("lon") ?? pick.quant() ?? "x";
+      const y = fieldNamed("y") ?? fieldNamed("lat") ?? pick.quant() ?? "y";
       const fill =
         fieldNamed("z") ?? fieldNamed("elev") ?? pick.mentionedQuant() ?? pick.quant() ?? "z";
       const aes: MockAes = { x: f(x), y: f(y), fill: f(fill) };
       spec.layers.push({ geom: "raster", aes });
       xField = x;
-    } else if (/\b(?:geom )?tile\b|heatmap/.test(prompt)) {
+    } else if (/\b(?:geom )?tiles?\b|heatmap/.test(prompt)) {
       const cats = profile.fields.filter(
         (field) => field.type === "nominal" || field.type === "ordinal",
       );
@@ -543,7 +544,11 @@ export class MockResponder implements Responder {
         }
       }
       xField = x;
-    } else if (/line chart|over time|time series|per (?:day|week|month|hour)|trend/.test(prompt)) {
+    } else if (
+      /line chart|connected line|over time|time series|per (?:day|week|month|hour)|trend/.test(
+        prompt,
+      )
+    ) {
       const x = /identifier|model code|category/.test(prompt)
         ? (pick.mentionedCat() ?? pick.cat() ?? "x")
         : (pick.temporal() ?? pick.quant() ?? "x");
@@ -636,7 +641,13 @@ export class MockResponder implements Responder {
     }
 
     // --- coord / scales ---------------------------------------------------------
-    if (prompt.includes("horizontal")) spec.coord = { type: "flip" };
+    const hasHorizontalRibbon = spec.layers.some(
+      (layer) => layer.geom === "ribbon" && layer.aes?.["xmin"] !== undefined,
+    );
+    if (prompt.includes("horizontal") && !hasHorizontalRibbon) spec.coord = { type: "flip" };
+    if (/fixed[- ]aspect|equal physical lengths|not stretched/.test(prompt)) {
+      spec.coord = { type: "fixed" };
+    }
     const postStatCoordinate =
       /post-stat coordinate|coordinate transform/.test(prompt) &&
       /\blog(?:10|arithmic)?\b/.test(prompt);

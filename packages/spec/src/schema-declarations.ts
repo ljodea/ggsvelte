@@ -17,6 +17,7 @@ import {
 } from "./temporal-interval.js";
 
 import { TemporalParserSpecSchema } from "./temporal-parse.js";
+import { CURRENT_EDITION } from "./schema-catalog.js";
 
 import {
   COLOR_SCHEME_NAME_SCHEMAS,
@@ -2322,6 +2323,12 @@ export const SpecDeclarations = {
       ),
       grid: Type.Optional(Type.String({ description: "Panel grid line color (CSS color)." })),
       panel: Type.Optional(Type.String({ description: "Panel background color (CSS color)." })),
+      letterboxFill: Type.Optional(
+        Type.String({
+          description:
+            "Fixed-aspect gutter color (CSS color). Defaults to the resolved paper role.",
+        }),
+      ),
       axisText: Type.Optional(Type.String({ description: "Axis tick-label color (CSS color)." })),
       axisLine: Type.Optional(Type.String({ description: "Axis-line color (CSS color)." })),
       tickColor: Type.Optional(Type.String({ description: "Axis-tick color (CSS color)." })),
@@ -2554,10 +2561,33 @@ export const SpecDeclarations = {
     },
   ),
 
-  CoordSpec: Type.Union([Type.Ref("CoordCartesianSpec"), Type.Ref("CoordTransformSpec")], {
-    description:
-      "The plot coordinate system: ordinary Cartesian, flipped Cartesian, or a post-stat coordinate transform.",
-  }),
+  CoordFixedSpec: Type.Object(
+    {
+      type: Type.Literal("fixed", {
+        description: "Cartesian coordinates with a fixed physical data-unit ratio.",
+      }),
+      ratio: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description:
+            "Physical y-unit length divided by physical x-unit length (default 1, equal units).",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A fixed-aspect Cartesian coordinate system. Layout fits the largest centered data rectangle after chart chrome is allocated.",
+    },
+  ),
+
+  CoordSpec: Type.Union(
+    [Type.Ref("CoordCartesianSpec"), Type.Ref("CoordTransformSpec"), Type.Ref("CoordFixedSpec")],
+    {
+      description:
+        "The plot coordinate system: ordinary Cartesian, flipped Cartesian, post-stat transformed, or fixed-aspect.",
+    },
+  ),
 
   PlotSpec: Type.Object(
     {
@@ -2569,8 +2599,7 @@ export const SpecDeclarations = {
       edition: Type.Optional(
         Type.Integer({
           minimum: 1,
-          description:
-            "Defaults edition this spec was authored against (currently 1). normalize() stamps the current edition when absent, so a spec keeps ITS edition's default look (theme roles, categorical palette) even after ggsvelte's defaults improve in a later edition. Explicit theme/scale settings always win over edition defaults.",
+          description: `Defaults edition this spec was authored against (currently ${CURRENT_EDITION}). normalize() stamps the current edition when absent, so a spec keeps ITS edition's default look (theme roles, categorical palette) even after ggsvelte's defaults improve in a later edition. Explicit theme/scale settings always win over edition defaults.`,
         }),
       ),
       data: Type.Optional(

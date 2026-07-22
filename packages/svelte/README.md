@@ -54,6 +54,12 @@ statistics without changing the values consumed by a fit or bin. Nonlinear paths
 tessellated without creating inspectable rows, and interval or brush inversion returns
 semantic values.
 
+Use `coord={coordFixed()}` when equal data units must remain physically equal.
+The Svelte renderer uses the same centered data rectangle and theme-owned
+letterbox gutters as headless SVG, including the `data-gg-layout="degraded"`
+state for unusually constrained allocations. `coord_fixed`, `coordEqual`, and
+`coord_equal` are re-exported aliases over the same portable implementation.
+
 Color/fill helpers are re-exported from the package root. For example,
 `scales={scaleColorBinned({ breaks: [0, 10, 100], range: ["#ddd", "#222"] })}`
 renders deterministic color steps and a colorsteps guide. Continuous,

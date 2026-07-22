@@ -531,6 +531,29 @@ areas, smooth confidence bands, and segments use bounded adaptive tessellation;
 synthetic render vertices never become inspectable data. Set \`clip: false\`
 only for intentional panel overflow.
 
+## Preserve physical data-unit ratios
+
+Use \`coordFixed()\` when equal data units must have equal physical lengths. The
+layout reserves titles, axes, and responsive guides first, then centers the
+largest exact-ratio data rectangle in the remaining allocation. Panel fill,
+grids, marks, clipping, axes, and facet strips occupy only that rectangle;
+letterbox gutters use the theme paper role by default.
+
+\`\`\`ts fragment
+gg(rows, aes({ x: "x", y: "y" }))
+  .geomLine()
+  .coordFixed({ ratio: 1 });
+\`\`\`
+
+\`ratio\` is physical y-unit length divided by physical x-unit length. The
+camelCase helper, builder \`.coordFixed()\`, \`coord_fixed\`, \`coordEqual\`, and
+\`coord_equal\` all emit the same strict JSON. Free positional facet scales are
+rejected with \`coord-fixed-free-scales\`; use fixed facet scales when panels must
+share one physical comparison. On an unusually constrained container the ratio
+is never stretched: minor furniture is removed, the SVG declares
+\`data-gg-layout="degraded"\`, and authors receive one \`coord-fixed-degraded\`
+warning. See the runnable [fixed-aspect example](/examples/point/fixed-aspect).
+
 Non-identity coordinate transforms reject band and temporal axes with
 \`coord-transform-continuous\` or \`coord-transform-temporal\`. Domains that
 cross log10/sqrt boundaries fail with \`coord-transform-domain\` and exact
@@ -1658,6 +1681,63 @@ Top-level \`guides\` override scale-local \`guide\` settings. Use
 single-value manual guide is intentional. Guide appearance does not alter scale
 domains or assignments. Exact discrete entries remain focus/filter targets;
 numeric guide ticks and bins remain representative and non-interactive.
+
+## 0.8 to 0.9
+
+### Constrain the data rectangle instead of the outer box
+
+Before 0.9, CSS \`aspect-ratio\` on a chart wrapper constrained the complete SVG.
+Axes, titles, and guides still changed the inner panel ratio, so equal data
+units could render at unequal physical lengths:
+
+\`\`\`svelte fragment
+<script lang="ts">
+  import { GGPlot, GeomLine } from "@ggsvelte/svelte";
+
+  // Before 0.9, an outer CSS aspect ratio could not preserve data-unit lengths
+  // after axes, titles, and guides consumed chart space.
+  const circle = [
+    { x: 1, y: 0 },
+    { x: 0, y: 1 },
+    { x: -1, y: 0 },
+    { x: 0, y: -1 },
+    { x: 1, y: 0 },
+  ];
+</script>
+
+<div style="aspect-ratio: 1">
+  <GGPlot data={circle} aes={{ x: "x", y: "y" }}>
+    <GeomLine />
+  </GGPlot>
+</div>
+\`\`\`
+
+Since 0.9, remove that wrapper workaround and author the coordinate directly:
+
+\`\`\`svelte fragment
+<script lang="ts">
+  import { coordFixed, GGPlot, GeomLine } from "@ggsvelte/svelte";
+
+  // Since 0.9, constrain the measured data rectangle instead of the outer box.
+  const circle = [
+    { x: 1, y: 0 },
+    { x: 0, y: 1 },
+    { x: -1, y: 0 },
+    { x: 0, y: -1 },
+    { x: 1, y: 0 },
+  ];
+</script>
+
+<GGPlot data={circle} aes={{ x: "x", y: "y" }} coord={coordFixed()}>
+  <GeomLine />
+</GGPlot>
+\`\`\`
+
+\`coordFixed({ ratio: 1 })\` measures the trained data rectangle after chart
+chrome is allocated and letterboxes it without distortion. Fixed aspect now
+rejects \`facet.scales\` values \`"free"\`, \`"free_x"\`, and \`"free_y"\`; switch those
+facets to \`"fixed"\` or remove the fixed coordinate rather than presenting a
+false shared physical scale.
 
 ## 0.6 to 0.7
 

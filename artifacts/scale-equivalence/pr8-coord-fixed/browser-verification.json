@@ -1,0 +1,38 @@
+{
+  "workflow": "gstack-browse",
+  "example": "/examples/point/fixed-aspect",
+  "checks": [
+    {
+      "viewport": "1280x720",
+      "scene": "640x440",
+      "allocation": "588x350",
+      "dataRectangle": "350x350",
+      "measuredAspect": 1,
+      "targetAspect": 1,
+      "overflowPx": 0,
+      "consoleErrors": 0,
+      "artifact": "browser-1280.png"
+    },
+    {
+      "viewport": "375x812",
+      "scene": "343x440",
+      "allocation": "291x350",
+      "dataRectangle": "291x291",
+      "measuredAspect": 1,
+      "targetAspect": 1,
+      "overflowPx": 0,
+      "consoleErrors": 0,
+      "artifact": "browser-375.png"
+    },
+    {
+      "viewport": "1280x720",
+      "theme": "dark",
+      "scene": "640x440",
+      "measuredAspect": 1,
+      "targetAspect": 1,
+      "consoleErrors": 0,
+      "artifact": "browser-dark-1280.png"
+    }
+  ],
+  "acceptance": "Every measured data rectangle is within 1% of the requested aspect; observed error was 0%."
+}

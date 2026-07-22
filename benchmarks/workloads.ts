@@ -175,6 +175,19 @@ function coordPointSpec(n: number, transform: "identity" | "log10"): PortableSpe
     .spec();
 }
 
+function coordFixedSpec(n: number): PortableSpec {
+  const x = Array.from<number>({ length: n });
+  const y = Array.from<number>({ length: n });
+  for (let i = 0; i < n; i++) {
+    x[i] = i % 1_000;
+    y[i] = (i * 17) % 1_000;
+  }
+  return gg({ x, y }, aes({ x: "x", y: "y" }))
+    .geomPoint({ render: "canvas" })
+    .coordFixed()
+    .spec();
+}
+
 function coordTessellationSpec(n: number): PortableSpec {
   const x = Array.from<number>({ length: n });
   const y = Array.from<number>({ length: n });
@@ -736,6 +749,26 @@ export function buildWorkloads(smoke: boolean): Workload[] {
       fn: () => {
         narrow = !narrow;
         return runPipeline(spec, { ...opts, width: narrow ? 420 : 800 });
+      },
+    });
+  }
+
+  // --- PR 8 fixed-aspect allocation under responsive resize ----------------
+  {
+    const n = smoke ? 1_000 : 10_000;
+    const spec = coordFixedSpec(n);
+    let narrow = false;
+    workloads.push({
+      id: `pipeline coord-fixed resize ${fmtK(n)}`,
+      group: `fixed-aspect resize ${fmtK(n)}`,
+      bench: `runPipeline coord_fixed resize ${fmtK(n)}`,
+      fn: () => {
+        narrow = !narrow;
+        return runPipeline(spec, {
+          ...opts,
+          width: narrow ? 360 : 900,
+          height: narrow ? 640 : 420,
+        });
       },
     });
   }

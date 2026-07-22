@@ -1,0 +1,39 @@
+{
+  "id": "60-fixed-aspect-coordinate",
+  "kind": "chart",
+  "prompt": "Draw the unit-circle x and y observations as a connected line and preserve equal physical lengths for x and y data units so the circle is not stretched.",
+  "dataProfile": {
+    "fields": [
+      { "name": "x", "type": "quantitative" },
+      { "name": "y", "type": "quantitative" }
+    ],
+    "rowCount": 5
+  },
+  "data": {
+    "main": [
+      { "x": 1, "y": 0 },
+      { "x": 0, "y": 1 },
+      { "x": -1, "y": 0 },
+      { "x": 0, "y": -1 },
+      { "x": 1, "y": 0 }
+    ]
+  },
+  "gold": {
+    "edition": 2,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "line",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "x" },
+          "y": { "field": "y" }
+        }
+      }
+    ],
+    "coord": { "type": "fixed" }
+  },
+  "expectRefusal": false,
+  "notes": "Fixed aspect is a coordinate layout constraint after statistics and scale training, not a scale transform."
+}

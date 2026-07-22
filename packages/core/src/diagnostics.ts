@@ -161,6 +161,15 @@ export const PIPELINE_ERROR_CATALOG = {
       "A quantitative coordinate transform or numeric limits were requested for a band axis.",
     fix: "Use identity coordinates for categories, or configure a continuous quantitative scale.",
   },
+  "coord-fixed-free-scales": {
+    summary: "Fixed-aspect coordinates were combined with free positional facet scales.",
+    fix: 'Use facet.scales = "fixed", or remove coord_fixed.',
+  },
+  "coord-fixed-invalid-aspect": {
+    summary:
+      "A fixed-aspect target or fitted data rectangle is non-finite or non-positive after chrome is allocated.",
+    fix: "Use a moderate finite ratio and non-degenerate positional domains, or enlarge the plot allocation.",
+  },
   "binned-scale-requires-continuous": {
     summary: 'A type: "binned" scale is bound to a discrete or temporal field.',
     fix: 'Map a quantitative field, or use type: "band"/"time" instead of "binned".',
@@ -430,6 +439,10 @@ export const PIPELINE_WARNING_CATALOG = {
   "coord-invalid-geometry": {
     summary:
       "Path vertices outside a coordinate transform's domain were removed without bridging the remaining finite runs.",
+  },
+  "coord-fixed-degraded": {
+    summary:
+      "A fixed-aspect data rectangle is below the documented readable minimum; the ratio remains exact and minor furniture is removed.",
   },
 } as const satisfies Record<string, { summary: string }>;
 

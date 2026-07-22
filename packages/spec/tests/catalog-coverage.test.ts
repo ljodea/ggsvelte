@@ -56,6 +56,13 @@ const TRIGGERS: Record<SpecErrorCode, Trigger> = {
   "guide-aesthetic-incompatible": {
     spec: { layers: [point], scales: { x: { guide: { type: "legend" } } } },
   },
+  "coord-fixed-free-scales": {
+    spec: {
+      layers: [point],
+      coord: { type: "fixed" },
+      facet: { wrap: { field: "group" }, scales: "free_x" },
+    },
+  },
   "missing-required-channel": { spec: { layers: [{ geom: "point" }] }, options: {} },
   "rule-form-ambiguous": {
     spec: {

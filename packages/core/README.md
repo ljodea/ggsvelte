@@ -83,6 +83,13 @@ axis ticks and grids, adaptively tessellate curved paths/segments, and expose
 the inverse used before scale inversion. Synthetic tessellation vertices are
 render topology only; `CandidateStore` retains original/stat semantic anchors.
 
+`coordFixed({ ratio: 1 })` runs after chart chrome allocation and fits the
+largest centered data rectangle whose physical y-unit/x-unit ratio is exact.
+Fixed-scale facets retain equal panel dimensions; free positional facet scales
+fail with `coord-fixed-free-scales`. Letterbox gutters use the theme paper role
+by default. Constrained scenes preserve the ratio, remove minor furniture, and
+publish one `coord-fixed-degraded` warning plus `scene.layout = "degraded"`.
+
 Browser rendering:
 
 ```ts

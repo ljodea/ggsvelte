@@ -1,0 +1,15 @@
+export const unitCircle = [
+  { x: 1, y: 0, order: 0 },
+  { x: 0.866025, y: 0.5, order: 1 },
+  { x: 0.5, y: 0.866025, order: 2 },
+  { x: 0, y: 1, order: 3 },
+  { x: -0.5, y: 0.866025, order: 4 },
+  { x: -0.866025, y: 0.5, order: 5 },
+  { x: -1, y: 0, order: 6 },
+  { x: -0.866025, y: -0.5, order: 7 },
+  { x: -0.5, y: -0.866025, order: 8 },
+  { x: 0, y: -1, order: 9 },
+  { x: 0.5, y: -0.866025, order: 10 },
+  { x: 0.866025, y: -0.5, order: 11 },
+  { x: 1, y: 0, order: 12 },
+] as const;

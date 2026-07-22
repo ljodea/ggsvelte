@@ -22,6 +22,7 @@ export {
   ChannelValueSchema,
   ColLayerSchema,
   CoordSpecSchema,
+  CoordFixedSpecSchema,
   CoordTransformAxisSpecSchema,
   CoordTransformSpecSchema,
   CURRENT_EDITION,
@@ -72,6 +73,7 @@ export type {
   AlphaScaleSpec,
   ColParams,
   CoordSpec,
+  CoordFixedSpec,
   CoordTransformAxisSpec,
   CoordTransformSpec,
   DataColumns,
@@ -234,8 +236,16 @@ export type {
 } from "./temporal-guides.js";
 
 // Coordinate helpers
-export { coord_transform, coordTransform } from "./coord-helpers.js";
+export {
+  coord_equal,
+  coord_fixed,
+  coord_transform,
+  coordEqual,
+  coordFixed,
+  coordTransform,
+} from "./coord-helpers.js";
 export type {
+  CoordFixedOptions,
   CoordTransformAxisOptions,
   CoordTransformName,
   CoordTransformOptions,

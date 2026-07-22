@@ -236,6 +236,8 @@ export interface ScenePanel {
   height: number;
   /** Facet strip label above the panel ("" = no strip). */
   strip: string;
+  /** Original panel allocation before a fixed-aspect data rectangle was fitted. */
+  allocation?: { x: number; y: number; width: number; height: number };
   /** Whether renderers clip marks to this panel rectangle (default true). */
   clip?: boolean;
   /** Bottom-axis ticks for THIS panel (null = this panel draws no x axis:
@@ -363,6 +365,8 @@ export interface Scene {
   height: number;
   /** Facet panels in row-major order (one panel when unfaceted). */
   panels: ScenePanel[];
+  /** Declared responsive layout state; absent means the normal layout. */
+  layout?: "degraded";
   batches: GeometryBatch[];
   /**
    * The shared-axis view: plot-level axis TITLES plus the ticks of the first

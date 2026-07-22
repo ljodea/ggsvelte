@@ -86,6 +86,21 @@ one chart but must preserve the same typography hierarchy and semantic interacti
 Static numeric ticks/bins are not tab stops; exact finite entries retain native button
 semantics and complete accessible names.
 
+## Fixed-aspect coordinates
+
+Fixed coordinates constrain the data rectangle, never the outer chart box.
+Allocate titles, captions, axes, and responsive guides first; then fit the
+largest centered rectangle whose physical y-unit/x-unit ratio is exact. Panel
+fill, grids, clipping, marks, axes, and facet strips occupy only that rectangle.
+Unused gutters use the `letterboxFill` theme role, which defaults to `paper`,
+with no grid, border, card, or host-background leak.
+
+Fixed-scale facets use equal data-rectangle dimensions. Free positional facet
+scales are incompatible because they would imply a false common physical unit.
+Never stretch the requested ratio to satisfy a narrow container. Below the
+64px readable threshold, retain the largest exact rectangle, remove minor
+furniture, declare the layout degraded, and emit one author diagnostic.
+
 ## Color and palettes
 
 Color is semantic, not decorative. Theme roles style chart furniture and unmapped

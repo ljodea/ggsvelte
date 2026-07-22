@@ -110,6 +110,7 @@ export function assembleScenePanels(input: {
   tickChromePx?: number;
   hMinorBreaks?: readonly number[] | undefined;
   vMinorBreaks?: readonly number[] | undefined;
+  degraded?: boolean;
 }): {
   scenePanels: ScenePanel[];
   xAxis: SceneAxis;
@@ -176,6 +177,7 @@ export function assembleScenePanels(input: {
       y: placement.y,
       width: placement.width,
       height: placement.height,
+      ...(placement.allocation !== undefined && { allocation: { ...placement.allocation } }),
       strip: facetPanels[p]!.label,
       clip: projector?.clip ?? true,
       axisX: placement.showAxisX ? bottom : null,
@@ -183,8 +185,8 @@ export function assembleScenePanels(input: {
       grid: {
         x: xGrid.major,
         y: yGrid.major,
-        minorX: xGrid.minor,
-        minorY: yGrid.minor,
+        minorX: input.degraded === true ? [] : xGrid.minor,
+        minorY: input.degraded === true ? [] : yGrid.minor,
       },
     };
   });

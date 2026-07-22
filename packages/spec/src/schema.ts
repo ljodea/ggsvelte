@@ -125,6 +125,7 @@ export const TemporalParserSpecSchemaRef = SpecModule.Import("TemporalParserSpec
 export const FacetSpecSchema = SpecModule.Import("FacetSpec");
 export const CoordTransformAxisSpecSchema = SpecModule.Import("CoordTransformAxisSpec");
 export const CoordTransformSpecSchema = SpecModule.Import("CoordTransformSpec");
+export const CoordFixedSpecSchema = SpecModule.Import("CoordFixedSpec");
 export const CoordSpecSchema = SpecModule.Import("CoordSpec");
 
 // ---------------------------------------------------------------------------
@@ -282,7 +283,9 @@ export type FacetSpec = SpecType<"FacetSpec">;
 export type CoordTransformAxisSpec = SpecType<"CoordTransformAxisSpec">;
 /** Post-stat coordinate transform configuration. */
 export type CoordTransformSpec = SpecType<"CoordTransformSpec">;
-/** Cartesian, flipped, or post-stat transformed coordinate system. */
+/** Fixed-aspect Cartesian coordinate configuration. */
+export type CoordFixedSpec = SpecType<"CoordFixedSpec">;
+/** Cartesian, flipped, post-stat transformed, or fixed-aspect coordinate system. */
 export type CoordSpec = SpecType<"CoordSpec">;
 /** Per-layer rendering backend hint. */
 export type RenderBackend = SpecType<"RenderBackend">;
