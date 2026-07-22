@@ -2,6 +2,7 @@ import adapter from "@sveltejs/adapter-static";
 import { vitePreprocess } from "@sveltejs/vite-plugin-svelte";
 
 import { resolveDocsBuildConfig } from "./build-mode.ts";
+import { docsCspDirectives } from "./csp.ts";
 
 const build = resolveDocsBuildConfig({
   mode: process.env.DOCS_BUILD_MODE,
@@ -16,26 +17,7 @@ export default {
     paths: { base: build.base },
     csp: {
       mode: "hash",
-      directives: {
-        "default-src": ["self"],
-        "base-uri": ["self"],
-        "connect-src": ["self", "https://cloudflareinsights.com"],
-        "font-src": ["self"],
-        "form-action": ["self"],
-        "frame-src": ["none"],
-        "img-src": ["self", "data:"],
-        "manifest-src": ["self"],
-        "media-src": ["self"],
-        "object-src": ["none"],
-        "script-src": ["self", "https://static.cloudflareinsights.com"],
-        "script-src-attr": ["none"],
-        "style-src": ["self"],
-        // Chart layout and palette values are bounded application output, not
-        // executable code. Keep this exception scoped to style attributes;
-        // inline style elements remain hash-only.
-        "style-src-attr": ["unsafe-inline"],
-        "upgrade-insecure-requests": true,
-      },
+      directives: docsCspDirectives(build.mode),
     },
     prerender: {
       handleMissingId: ({ id, message }) => {

@@ -1780,7 +1780,7 @@
                   "const": "sqrt"
                 }
               ],
-              "description": "Pre-training quantitative transform for sequential/binned color values. Temporal, ordinal, manual, and identity families permit only \"identity\"."
+              "description": "Pre-training quantitative transform for sequential/binned color values. log10/sqrt require non-temporal values; ordinal, manual, and identity families do not accept a transform."
             },
             "temporalKind": {
               "anyOf": [
@@ -2123,8 +2123,7 @@
                   "const": "ordinal"
                 },
                 "transform": {
-                  "type": "string",
-                  "const": "identity"
+                  "not": {}
                 },
                 "temporalKind": {
                   "not": {}
