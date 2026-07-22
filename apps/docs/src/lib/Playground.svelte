@@ -20,8 +20,10 @@
     candidateTransitionAccepted,
     createCandidateLifecycleTracker,
     emitPlaygroundCandidatePhase,
+    phaseNotesForCandidateTransition,
     type PlaygroundCandidateIsolation,
     type PlaygroundCandidatePhaseDetail,
+    type PlaygroundCandidateRef,
   } from "$lib/playground-candidate-lifecycle";
   import {
     appendPlaygroundEvent,
@@ -33,6 +35,13 @@
     encodePlaygroundSeed,
     type PlaygroundSeedV1,
   } from "$lib/playground-codec";
+  import {
+    sharedLinkRejectDiagnostic,
+    shouldClearPlayHashAfterPromotion,
+    shouldConfirmDiscardForSampleLoad,
+    shouldConfirmDiscardForUndo,
+    verifiedSharedSeed,
+  } from "$lib/playground-link-policy";
   import { playgroundOutputs } from "$lib/playground-output";
   import {
     confirmPlaygroundRendered,
@@ -46,11 +55,14 @@
     stagePlaygroundDraft,
     stagePlaygroundSeed,
     stagePlaygroundUndo,
-    type PlaygroundCandidateOrigin,
     type PlaygroundDiagnostic,
   } from "$lib/playground-state";
   const initialSample = PLAYGROUND_SAMPLES[0]!;
   const initialSeed: PlaygroundSeedV1 = initialSample.seed;
+  const shareCatalogs = {
+    examples: PLAYGROUND_EXAMPLES,
+    samples: PLAYGROUND_SAMPLES,
+  };
 
   let workbench = $state(createPlaygroundState(initialSeed));
   let shareUrl = $state("");
@@ -67,35 +79,18 @@
   }
 
   function noteStagedCandidate(
-    previous: { generation: number; origin: PlaygroundCandidateOrigin } | null,
+    previous: PlaygroundCandidateRef | null,
     next: typeof workbench,
   ): void {
-    if (
-      previous !== null &&
-      (next.candidate === null ||
-        next.candidate.generation !== previous.generation)
-    ) {
-      noteCandidatePhase({
-        generation: previous.generation,
-        origin: previous.origin,
-        phase: "cancelled",
-        status: next.status,
-      });
-    }
-    if (next.candidate !== null) {
-      noteCandidatePhase({
-        generation: next.candidate.generation,
-        origin: next.candidate.origin,
-        phase: "pending",
-        status: next.status,
-      });
+    for (const detail of phaseNotesForCandidateTransition(previous, {
+      candidate: next.candidate,
+      status: next.status,
+    })) {
+      noteCandidatePhase(detail);
     }
   }
 
-  function activeCandidate(): {
-    generation: number;
-    origin: PlaygroundCandidateOrigin;
-  } | null {
+  function activeCandidate(): PlaygroundCandidateRef | null {
     const candidate = workbench.candidate;
     return candidate === null
       ? null
@@ -111,26 +106,6 @@
     const url = new URL(window.location.href);
     url.hash = hash ?? "";
     history.replaceState(history.state, "", url);
-  }
-
-  function verifiedSharedSeed(
-    hash: string,
-    seed: PlaygroundSeedV1,
-  ): PlaygroundSeedV1 {
-    const source = seed.source;
-    if (source.kind === "custom") return seed;
-    const trusted =
-      source.kind === "example"
-        ? PLAYGROUND_EXAMPLES.some(
-            (entry) =>
-              entry.id === source.id &&
-              entry.compatibility.supported &&
-              entry.compatibility.fragment === hash,
-          )
-        : PLAYGROUND_SAMPLES.some(
-            (entry) => entry.id === source.id && entry.fragment === hash,
-          );
-    return trusted ? seed : { ...seed, source: { kind: "custom" } };
   }
 
   function restoreLocation(origin: "initial-navigation" | "popstate"): void {
@@ -149,13 +124,7 @@
       const previous = activeCandidate();
       workbench = reportPlaygroundDiagnostic(
         workbench,
-        {
-          source: "playground",
-          code: decoded.error.code.toLowerCase().replaceAll("_", "-"),
-          path: "#play",
-          message: decoded.error.message,
-          fix: "Open a generated example link or reset to a built-in sample.",
-        },
+        sharedLinkRejectDiagnostic(decoded.error),
         "The shared link was rejected. The current local chart and a truthful URL were retained.",
       );
       if (previous !== null) {
@@ -171,7 +140,7 @@
     const previous = activeCandidate();
     const next = stagePlaygroundSeed(
       workbench,
-      verifiedSharedSeed(window.location.hash, decoded.seed),
+      verifiedSharedSeed(window.location.hash, decoded.seed, shareCatalogs),
       origin,
       window.location.hash,
     );
@@ -190,13 +159,11 @@
     const previous = activeCandidate();
     const edited = editPlaygroundDraft(workbench, draft);
     workbench = edited;
-    if (previous !== null && edited.candidate === null) {
-      noteCandidatePhase({
-        generation: previous.generation,
-        origin: previous.origin,
-        phase: "cancelled",
-        status: edited.status,
-      });
+    for (const detail of phaseNotesForCandidateTransition(previous, {
+      candidate: edited.candidate,
+      status: edited.status,
+    })) {
+      noteCandidatePhase(detail);
     }
     if (!edited.synchronized) {
       shareUrl = "";
@@ -221,7 +188,7 @@
   function undoChart(): void {
     if (workbench.undoSnapshots.length === 0 || workbench.candidate !== null)
       return;
-    if (!workbench.synchronized) {
+    if (shouldConfirmDiscardForUndo(workbench)) {
       const discard = window.confirm(
         "Discard the current draft and undo to the previous rendered chart? Copy it first if you need to keep it.",
       );
@@ -235,11 +202,7 @@
 
   function loadSample(id: string): boolean {
     if (id === "") return false;
-    if (
-      !workbench.synchronized ||
-      workbench.candidate !== null ||
-      workbench.seed.source.kind === "custom"
-    ) {
+    if (shouldConfirmDiscardForSampleLoad(workbench)) {
       const discard = window.confirm(
         "Discard the current draft and load this sample? Copy it first if you need to keep it.",
       );
@@ -287,13 +250,7 @@
       status: promoted.status,
     });
     events = [];
-    if (
-      (origin === "apply" ||
-        origin === "source" ||
-        origin === "reset" ||
-        origin === "undo") &&
-      window.location.hash.startsWith("#play=")
-    ) {
+    if (shouldClearPlayHashAfterPromotion(origin, window.location.hash)) {
       replaceLocationHash(null);
     }
     shareUrl = "";
@@ -336,13 +293,11 @@
       "The current chart stopped safely. Reset the source to recover.",
       false,
     );
-    if (previous !== null) {
-      noteCandidatePhase({
-        generation: previous.generation,
-        origin: previous.origin,
-        phase: "cancelled",
-        status: workbench.status,
-      });
+    for (const detail of phaseNotesForCandidateTransition(previous, {
+      candidate: null,
+      status: workbench.status,
+    })) {
+      noteCandidatePhase(detail);
     }
   }
 
