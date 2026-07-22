@@ -193,6 +193,18 @@ describe("measured band x-axis (planner integration)", () => {
     );
   });
 
+  it("reserves tick chrome: band height + tickLength/gap stays within the bottom cap (Codex P2)", () => {
+    // The planner budgets the label band against the cap MINUS tick chrome, so
+    // once layoutPass adds tickLength+tickLabelGap the total still honors the cap
+    // (no silent clip). Assert the reserved band leaves room for the chrome.
+    const height = 300;
+    const r = layout(base({ width: 240, height, x: bandX(SPANISH) }));
+    const cap = theme.maxMarginFraction * height;
+    const chrome = theme.tickLength + theme.tickLabelGap;
+    expect(r.x.guidePlan?.bandLabelBandHeight ?? 0).toBeLessThanOrEqual(cap - chrome + 1e-6);
+    expect(r.margins.bottom).toBeLessThanOrEqual(cap);
+  });
+
   it("does NOT plan a vertical band axis — categorical-on-Y keeps legacy truncation", () => {
     const yBand: Domain = {
       type: "band",

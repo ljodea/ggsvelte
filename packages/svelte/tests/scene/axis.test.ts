@@ -80,6 +80,68 @@ describe("Axis", () => {
     },
   );
 
+  it("renders wrapped band labels as one tspan per line (Codex P2)", () => {
+    const model = modelFor(
+      gg(rows, aes({ x: "x", y: "y" }))
+        .geomPoint()
+        .spec(),
+    );
+    const panel = model.scene.panels[0];
+    if (panel === undefined) throw new Error("expected panel");
+    const ticks = [
+      {
+        pos: 40,
+        value: "a",
+        label: "Corrección errores",
+        fullLabel: "Corrección errores",
+        kind: "major" as const,
+        lines: ["Corrección", "errores"],
+      },
+    ];
+    const { container } = render(Axis, {
+      ticks,
+      orient: "x" as const,
+      panel,
+      theme: model.scene.theme,
+    });
+    const tspans = [...container.querySelectorAll("g.gg-tick text tspan")];
+    expect(tspans).toHaveLength(2);
+    expect(tspans.map((t) => t.textContent)).toEqual(["Corrección", "errores"]);
+    expect(container.querySelector("g.gg-tick text")?.getAttribute("text-anchor")).toBe("middle");
+    model.dispose();
+  });
+
+  it("renders rotated band labels with a rotate() transform anchored at the tick end (Codex P2)", () => {
+    const model = modelFor(
+      gg(rows, aes({ x: "x", y: "y" }))
+        .geomPoint()
+        .spec(),
+    );
+    const panel = model.scene.panels[0];
+    if (panel === undefined) throw new Error("expected panel");
+    const ticks = [
+      {
+        pos: 40,
+        value: "a",
+        label: "Corrección",
+        fullLabel: "Corrección",
+        kind: "major" as const,
+        angle: -45,
+      },
+    ];
+    const { container } = render(Axis, {
+      ticks,
+      orient: "x" as const,
+      panel,
+      theme: model.scene.theme,
+    });
+    const label = container.querySelector("g.gg-tick text");
+    expect(label?.getAttribute("transform")).toContain("rotate(-45)");
+    expect(label?.getAttribute("text-anchor")).toBe("end");
+    expect(label?.textContent).toBe("Corrección");
+    model.dispose();
+  });
+
   it("omits label text when tick.label is empty (geometry-only tick)", () => {
     const model = modelFor(
       gg(rows, aes({ x: "x", y: "y" }))

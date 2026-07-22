@@ -261,7 +261,8 @@ export const PIPELINE_WARNING_CATALOG = {
     summary: "Categorical (band) axis labels overlap even after wrapping and rotation.",
   },
   "band-label-margin-overflow": {
-    summary: "A rotated band label is truncated (ellipsis) to fit the bounded axis margin.",
+    summary:
+      "A band label is truncated (ellipsis) to fit a bounded axis margin — a rotated label past the bottom cap, or a single-line end label past the side cap.",
   },
   "coord-tessellation-cap": {
     summary:

@@ -18,7 +18,7 @@
  * use this planner — they keep the classic width-cap + thin/truncate path.
  */
 
-import { neighbourOverlap } from "./axis-overlap.js";
+import { neighbourOverlap, neighbourOverlapAsym } from "./axis-overlap.js";
 import type { TextMeasurer } from "./measure.js";
 
 export type BandLabelMode = "single-line" | "wrapped" | "rotated";
@@ -335,13 +335,16 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
   }
 
   // --- rotated (−45 then −90) ---
-  // Per-label footprints (not a single uniform max), so overlap/margin decisions
-  // use each tick's own width and — once thinning hides some ticks — only the
-  // widths that will actually render.
-  const alongOf = (width: number, angle: number) => {
+  // The SVG renderer hangs rotated labels with text-anchor="end", so the along-
+  // axis footprint is ASYMMETRIC about the tick: it extends mostly to the LEFT
+  // (the text runs up-left from the tick), with only a half-line-height to the
+  // right. Model those exact bounds so mixed-width labels can't pass the overlap
+  // / side-margin checks and then clip the previous tick or the left edge.
+  const leftExtOf = (width: number, angle: number) => {
     const a = Math.abs(angle) * RAD;
-    return width * Math.cos(a) + lineHeight * Math.sin(a);
+    return width * Math.cos(a) + (lineHeight / 2) * Math.sin(a);
   };
+  const rightExtOf = (angle: number) => (lineHeight / 2) * Math.sin(Math.abs(angle) * RAD);
   const orthoOf = (width: number, angle: number) => {
     const a = Math.abs(angle) * RAD;
     return width * Math.sin(a) + lineHeight * Math.cos(a);
@@ -350,14 +353,15 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
   const labeledMaxWidth = (every: number) =>
     Math.max(0, ...entries.filter((_, i) => i % every === 0).map((e) => e.width));
   // Overlap of the rotated footprint measured at the ACTUAL displayed tick
-  // positions (every k-th when thinned) with each label's own footprint, not the
-  // uniform band width — so a sparse break subset that is hundreds of px apart is
-  // never wrongly thinned, and a hidden wide label never inflates the check.
+  // positions (every k-th when thinned) with each label's own end-anchored
+  // footprint — so a sparse break subset hundreds of px apart is never wrongly
+  // thinned, a hidden wide label never inflates the check, and a long label after
+  // a short one is caught overlapping its left neighbour.
   const rotatedOverlaps = (angle: number, every: number) =>
-    neighbourOverlap(
+    neighbourOverlapAsym(
       entries
         .filter((_, i) => i % every === 0)
-        .map((e) => ({ pos: e.center, half: alongOf(e.width, angle) / 2 })),
+        .map((e) => ({ pos: e.center, left: leftExtOf(e.width, angle), right: rightExtOf(angle) })),
       gap,
     );
   // Prefer -45 when it clears neighbours and fits the cap; else -90.
@@ -414,16 +418,16 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
     ...ticks.filter((t) => t.labeled).map((t) => measurer.measureWidth(t.label, fontSize)),
   );
   const labelBandHeight = quantizeUp(Math.min(orthoOf(shownMaxWidth, angle), orthoCap), quantum);
-  // End overhang of the rotated footprint at the real end positions (usually small
-  // for −90 since the horizontal footprint is ~one line height). Tracked per side
-  // from the labeled ticks' own footprints, clamped to the cap.
+  // End overhang of the end-anchored rotated footprint at the real end positions.
+  // Left extent dominates (text runs up-left from the tick); right is ~half a line
+  // height. Tracked per side from the labeled ticks, clamped to the cap.
   let rotLeft = 0;
   let rotRight = 0;
   for (let i = 0; i < ticks.length; i++) {
     if (!ticks[i]!.labeled) continue;
-    const half = alongOf(measurer.measureWidth(ticks[i]!.label, fontSize), angle) / 2;
-    rotLeft = Math.max(rotLeft, half - entries[i]!.center);
-    rotRight = Math.max(rotRight, half - (extentPx - entries[i]!.center));
+    const w = measurer.measureWidth(ticks[i]!.label, fontSize);
+    rotLeft = Math.max(rotLeft, leftExtOf(w, angle) - entries[i]!.center);
+    rotRight = Math.max(rotRight, rightExtOf(angle) - (extentPx - entries[i]!.center));
   }
   const alongOverhang = Math.max(0, Math.min(marginCapPx, rotRight));
   const leftOverhang = Math.max(0, Math.min(marginCapPx, rotLeft));

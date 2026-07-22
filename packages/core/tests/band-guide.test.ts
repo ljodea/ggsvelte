@@ -3,6 +3,7 @@ import { describe, expect, it } from "bun:test";
 import { FONT_METRICS } from "../src/layout/font-metrics.ts";
 import { MetricsTableMeasurer } from "../src/layout/measure.ts";
 import { planBandAxis, type BandAxisPlanInput } from "../src/layout/band-guide.ts";
+import { neighbourOverlapAsym } from "../src/layout/axis-overlap.ts";
 
 const measurer = new MetricsTableMeasurer(FONT_METRICS);
 
@@ -184,6 +185,45 @@ describe("planBandAxis: footprint after thinning (Codex P2)", () => {
     const giant = p.ticks.find((t) => t.fullLabel.startsWith("Anlage"));
     expect(giant?.labeled).toBe(false); // hidden by thinning
     expect(p.degraded).not.toContain("band-label-margin-overflow");
+  });
+});
+
+describe("neighbourOverlapAsym: end-anchored rotated footprint (Codex P2)", () => {
+  it("catches a left-heavy label colliding with its LEFT neighbour", () => {
+    // Two ticks 20px apart. The right tick's label extends 30px to its LEFT
+    // (end-anchored rotation) and only 2px right; the left tick is tiny. A
+    // symmetric/centered model (half≈16 each side) would just barely pass, but
+    // the real left extent reaches back into the left tick → overlap.
+    const items = [
+      { pos: 0, left: 2, right: 2 },
+      { pos: 20, left: 30, right: 2 },
+    ];
+    expect(neighbourOverlapAsym(items, 4)).toBe(true);
+  });
+
+  it("does not flag when the left extent stays clear of the neighbour", () => {
+    const items = [
+      { pos: 0, left: 2, right: 2 },
+      { pos: 60, left: 30, right: 2 },
+    ];
+    expect(neighbourOverlapAsym(items, 4)).toBe(false);
+  });
+});
+
+describe("planBandAxis: rotated overhang is left-heavy (Codex P2)", () => {
+  it("reserves far more LEFT than right overhang for end-anchored −45 labels", () => {
+    // A rotated axis whose leftmost label is wide: because the renderer anchors
+    // rotated text at the end (extends up-LEFT), the left overhang must dominate
+    // the right, not be a symmetric half-width.
+    const p = plan(["Departamento de Recursos", "B", "C", "D"], 300, {
+      orthogonalMarginCapPx: 200,
+    });
+    if (p.mode === "rotated" && p.angle === -45) {
+      expect(p.leftOverhang).toBeGreaterThan(p.alongOverhang);
+    }
+    // At −90 the footprint is symmetric, so the assertion above is angle-gated;
+    // the plan must still label every category regardless of chosen angle.
+    expect(p.ticks.every((t) => t.labeled)).toBe(true);
   });
 });
 

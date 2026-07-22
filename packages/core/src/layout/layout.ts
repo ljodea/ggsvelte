@@ -212,6 +212,9 @@ interface DeriveTicksContext {
   fontSize: number;
   marginCapPx: number;
   orthogonalMarginCapPx?: number;
+  /** Tick chrome (tickLength + gap) that layoutPass adds AFTER the label band; the
+   *  band planner subtracts it so the band + chrome together honor the margin cap. */
+  orthogonalChromePx?: number;
   quantum?: number;
   previousGuidePlan?: AxisGuidePlan;
 }
@@ -307,7 +310,14 @@ function deriveTicks(
         measurer: context.measurer,
         fontSize: context.fontSize,
         marginCapPx: context.marginCapPx,
-        orthogonalMarginCapPx: context.orthogonalMarginCapPx ?? context.marginCapPx,
+        // Reserve tick chrome: layoutPass adds tickLength+tickLabelGap to the band
+        // height and the renderer offsets labels by it, so the label band itself
+        // must fit the cap MINUS that chrome or it clips without truncating.
+        orthogonalMarginCapPx: Math.max(
+          1,
+          (context.orthogonalMarginCapPx ?? context.marginCapPx) -
+            (context.orthogonalChromePx ?? 0),
+        ),
         ...(context.quantum !== undefined && { quantum: context.quantum }),
         previousMode: context.previousGuidePlan?.bandLabelMode ?? null,
       });
@@ -524,6 +534,7 @@ export function layoutPass(margins: Margins, input: LayoutInput, theme: LayoutTh
     fontSize,
     marginCapPx: capRight,
     orthogonalMarginCapPx: capBottom,
+    orthogonalChromePx: tickLength + tickLabelGap,
     quantum,
     ...(input.previousGuidePlans?.x !== undefined && {
       previousGuidePlan: input.previousGuidePlans.x,
