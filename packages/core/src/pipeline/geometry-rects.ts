@@ -37,29 +37,29 @@ export function rectsBatch(
     widthFrac = span === 0 ? 0 : ((params.width ?? DEFAULT_BAR_WIDTH) * resolution) / span;
   }
 
-  const { rects, rowIndexKept, keptRows, removed } = emitRectRows({
+  const { rects, rowIndex, keptRows, kept, removed } = emitRectRows({
     frame,
     fx,
     binned,
     widthFrac,
   });
   removedWarning(removed, binding.index, warnings);
-  if (keptRows.length === 0) return null;
+  if (kept === 0) return null;
 
   const batch: RectsBatch = {
     kind: "rects",
     layerIndex: binding.index,
     panelIndex: 0,
-    rects: Float32Array.from(rects),
-    rowIndex: Uint32Array.from(rowIndexKept),
+    rects,
+    rowIndex,
     fill: binding.fill.constant,
     alpha: params.alpha ?? 1,
   };
   if (fill !== null && (frame.fillValues !== null || binding.fill.scaledConstant !== null)) {
-    batch.fills = keptRows.map((row) =>
+    batch.fills = Array.from({ length: kept }, (_, j) =>
       colorOf(
         fill,
-        frame.fillValues === null ? binding.fill.scaledConstant! : frame.fillValues[row]!,
+        frame.fillValues === null ? binding.fill.scaledConstant! : frame.fillValues[keptRows[j]!]!,
       ),
     );
   }
