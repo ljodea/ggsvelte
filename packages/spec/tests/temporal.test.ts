@@ -134,9 +134,8 @@ describe("strict temporal parsing", () => {
   it("keeps compile-time format configuration errors stable across repeated checks", () => {
     const unsupported = { format: "%s" } as const;
     const duplicate = { format: "%Y-%Y" } as const;
-    const tooLong = { format: "x".repeat(129) } as const;
 
-    for (const parser of [unsupported, duplicate, tooLong] as const) {
+    for (const parser of [unsupported, duplicate] as const) {
       const first = temporalParserConfigurationError(parser);
       const second = temporalParserConfigurationError(parser);
       expect(first).not.toBeNull();
@@ -155,6 +154,38 @@ describe("strict temporal parsing", () => {
     expect(parseTemporal("12-31", { format: "%m-%d" })).toEqual(
       parseTemporal("12-31", { format: "%m-%d" }),
     );
+  });
+
+  /**
+   * #451: empty and oversize formats must fail without retaining the full
+   * user string as a cache key (only 1..128 char formats enter the Map).
+   */
+  it("rejects empty and oversize exact formats with a stable length reason", () => {
+    const lengthReason = "format length must be from 1 through 128 characters";
+    const empty = parseTemporal("2024", { format: "" });
+    const emptyAgain = parseTemporal("2024", { format: "" });
+    expect(empty).toMatchObject({ ok: false, reason: lengthReason });
+    expect(emptyAgain).toEqual(empty);
+    expect(temporalParserConfigurationError({ format: "" })).toBe(lengthReason);
+
+    // Distinct oversize strings must each fail the same way without relying on
+    // cache identity (they must not be stored as Map keys).
+    const hugeA = "a".repeat(200);
+    const hugeB = "b".repeat(10_000);
+    const firstA = parseTemporal("x", { format: hugeA });
+    const secondA = parseTemporal("x", { format: hugeA });
+    const firstB = parseTemporal("x", { format: hugeB });
+    expect(firstA).toMatchObject({ ok: false, reason: lengthReason });
+    expect(secondA).toEqual(firstA);
+    expect(firstB).toMatchObject({ ok: false, reason: lengthReason });
+    expect(temporalParserConfigurationError({ format: hugeA })).toBe(lengthReason);
+    expect(temporalParserConfigurationError({ format: hugeB })).toBe(lengthReason);
+
+    // In-range formats still compile and can be reused.
+    const okFormat = { format: "%Y-%m-%d" } as const;
+    const ok = parseTemporal("2024-01-02", okFormat);
+    expect(ok).toMatchObject({ ok: true });
+    expect(parseTemporal("2024-01-02", okFormat)).toEqual(ok);
   });
 
   it("rejects DST gaps/folds by default and supports explicit disambiguation", () => {
