@@ -1,7 +1,7 @@
 /**
  * Tier-2 temporal decision reuse characterization (cache keys, multi-consumer paths).
  * Other data-aware checks: validate-tier2-data.test.ts.
- * Production: validate-data-checks.ts temporalDecisionForField.
+ * Production: validate-data-checks-temporal.ts temporalDecisionForField.
  */
 import { describe, expect, it } from "bun:test";
 
