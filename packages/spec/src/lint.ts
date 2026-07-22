@@ -164,6 +164,15 @@ function countTransformDomain(
   return [inDomain, outOfDomain];
 }
 
+/** Distinct non-null values in a column (single pass, no intermediate filter). */
+function countDistinctNonNull(values: readonly unknown[]): number {
+  const distinct = new Set<unknown>();
+  for (const value of values) {
+    if (value !== null) distinct.add(value);
+  }
+  return distinct.size;
+}
+
 // ---------------------------------------------------------------------------
 // lintSpec
 // ---------------------------------------------------------------------------
@@ -201,6 +210,11 @@ export function lintSpec(
     if (info === undefined) return null;
     return { field: mapped.field, info };
   };
+
+  // FieldEvidenceMap is built once per lintSpec/validate call; distinct counts
+  // for many-discrete-colors are memoized across layers/channels that share a
+  // field so a high-cardinality column is scanned O(n), not O(L·n).
+  const distinctNonNullByField = new Map<string, number>();
 
   for (let i = 0; i < layers.length; i++) {
     const layer = layers[i];
@@ -287,7 +301,11 @@ export function lintSpec(
         c.info.type !== null &&
         DISCRETE.has(c.info.type)
       ) {
-        const distinct = new Set(values.filter((v) => v !== null)).size;
+        let distinct = distinctNonNullByField.get(c.field);
+        if (distinct === undefined) {
+          distinct = countDistinctNonNull(values);
+          distinctNonNullByField.set(c.field, distinct);
+        }
         if (distinct > 10) {
           advisories.push({
             code: "many-discrete-colors",
