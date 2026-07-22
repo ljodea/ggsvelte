@@ -132,6 +132,38 @@ describe("statSummary edges", () => {
     expect(result.ymin[0]).toBe(2);
     expect(result.ymax[0]).toBe(2);
   });
+
+  it("default mean_se is order-independent (no sort required)", () => {
+    // Large multiset; mean and se must match regardless of input order.
+    const yAsc = Float64Array.from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    const yDesc = Float64Array.from([10, 9, 8, 7, 6, 5, 4, 3, 2, 1]);
+    const x = Array.from({ length: 10 }, () => "a");
+    const groups = Array.from({ length: 10 }, () => 0);
+    const a = statSummary({ x, y: yAsc, groups });
+    const b = statSummary({ x, y: yDesc, groups });
+    expect(a.y[0]).toBeCloseTo(5.5, 12);
+    expect(b.y[0]).toBeCloseTo(5.5, 12);
+    expect(a.ymin[0]).toBeCloseTo(b.ymin[0]!, 12);
+    expect(a.ymax[0]).toBeCloseTo(b.ymax[0]!, 12);
+    // se = sd/sqrt(10); sd of 1..10 is known.
+    const se = a.y[0]! - a.ymin[0]!;
+    expect(se).toBeGreaterThan(0);
+    expect(a.ymax[0]! - a.y[0]!).toBeCloseTo(se, 12);
+  });
+
+  it("min/max bounds without median skip full-group sort semantics", () => {
+    const result = statSummary({
+      x: ["a", "a", "a", "a"],
+      y: Float64Array.from([9, 1, 5, 3]),
+      groups: [0, 0, 0, 0],
+      fun: "mean",
+      funMin: "min",
+      funMax: "max",
+    });
+    expect(result.y[0]).toBeCloseTo(4.5, 12);
+    expect(result.ymin[0]).toBe(1);
+    expect(result.ymax[0]).toBe(9);
+  });
 });
 
 describe("loessFit edges", () => {
