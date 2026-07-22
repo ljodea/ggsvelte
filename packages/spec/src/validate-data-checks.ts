@@ -82,6 +82,7 @@ export function dataChecks(
 
   const axisFields: Record<"x" | "y", ChannelFieldUse[]> = { x: [], y: [] };
   const colorFields: Record<"color" | "fill", ChannelFieldUse[]> = { color: [], fill: [] };
+  const colorScaledConstants: Record<"color" | "fill", unknown[]> = { color: [], fill: [] };
 
   for (let i = 0; i < layers.length; i++) {
     const layer = layers[i];
@@ -186,6 +187,17 @@ export function dataChecks(
         }
         continue;
       }
+      if ("value" in mapped) {
+        // Runtime trains manual/ordinal color domains on scaled constants too.
+        if (
+          (channel === "color" || channel === "fill") &&
+          mapped.scale === true &&
+          mapped.value !== null
+        ) {
+          colorScaledConstants[channel].push(mapped.value);
+        }
+        continue;
+      }
       if (!("field" in mapped)) continue;
 
       const info = fields.get(mapped.field);
@@ -238,6 +250,7 @@ export function dataChecks(
       scales,
       fields,
       colorFields,
+      colorScaledConstants,
       temporalDecisionCache,
     }),
   );
