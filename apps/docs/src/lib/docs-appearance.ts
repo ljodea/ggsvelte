@@ -22,6 +22,19 @@ export function toggleDocsAppearance(current: DocsAppearance): DocsAppearance {
   return current === "dark" ? "light" : "dark";
 }
 
+function resolveDocsAppearanceStorage(
+  storage: DocsAppearanceStorage | null | undefined,
+): DocsAppearanceStorage | null {
+  if (storage !== undefined) return storage;
+  // Accessing `localStorage` can throw (opaque origins); keep that inside try.
+  try {
+    if (typeof localStorage === "undefined") return null;
+    return localStorage;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Apply appearance to the document root. Always sets data-theme; storage writes
  * are best-effort (toggle still works when localStorage is unavailable).
@@ -29,12 +42,13 @@ export function toggleDocsAppearance(current: DocsAppearance): DocsAppearance {
 export function writeDocsAppearance(
   appearance: DocsAppearance,
   root: { dataset: DOMStringMap } = document.documentElement,
-  storage: DocsAppearanceStorage | null = typeof localStorage === "undefined" ? null : localStorage,
+  storage?: DocsAppearanceStorage | null,
 ): void {
   root.dataset.theme = appearance;
-  if (storage === null) return;
+  const store = resolveDocsAppearanceStorage(storage);
+  if (store === null) return;
   try {
-    storage.setItem(DOCS_THEME_STORAGE_KEY, appearance);
+    store.setItem(DOCS_THEME_STORAGE_KEY, appearance);
   } catch {
     // In-page control still works when storage is unavailable.
   }
