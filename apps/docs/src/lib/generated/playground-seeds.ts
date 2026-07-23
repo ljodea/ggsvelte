@@ -103,6 +103,15 @@ export const PLAYGROUND_EXAMPLES: readonly GeneratedPlaygroundExample[] = [
     },
   },
   {
+    id: "col/mixed-outlier-labels",
+    title: "Columns with one multi-word category outlier",
+    compatibility: {
+      supported: true,
+      fragment:
+        "#play=v1.eyJ2ZXJzaW9uIjoxLCJzb3VyY2UiOnsia2luZCI6ImV4YW1wbGUiLCJpZCI6ImNvbC9taXhlZC1vdXRsaWVyLWxhYmVscyJ9LCJzcGVjIjp7ImVkaXRpb24iOjIsImRhdGEiOnsidmFsdWVzIjpbeyJjYXRlZ29yeSI6IlJlYWwgRGVjcmV0byIsImNvdW50Ijo3ODAwfSx7ImNhdGVnb3J5IjoiT3JkZW4iLCJjb3VudCI6NzAwMH0seyJjYXRlZ29yeSI6IkxleSIsImNvdW50Ijo2NzExfSx7ImNhdGVnb3J5IjoiUmVzb2x1Y2nDs24iLCJjb3VudCI6MzAwMH0seyJjYXRlZ29yeSI6IkNvcnJlY2Npw7NuIChlcnJvcmVzIG8gZXJyYXRhcykiLCJjb3VudCI6MjIwMH0seyJjYXRlZ29yeSI6IlNlbnRlbmNpYSIsImNvdW50IjoxODAwfSx7ImNhdGVnb3J5IjoiRGlyZWN0aXZhIiwiY291bnQiOjEyMDB9LHsiY2F0ZWdvcnkiOiJSZWdsYW1lbnRvIiwiY291bnQiOjEwMDB9XX0sImxheWVycyI6W3siZ2VvbSI6ImNvbCIsInN0YXQiOiJpZGVudGl0eSIsInBvc2l0aW9uIjoic3RhY2siLCJhZXMiOnsieCI6eyJmaWVsZCI6ImNhdGVnb3J5In0sInkiOnsiZmllbGQiOiJjb3VudCJ9fX1dLCJsYWJzIjp7InRpdGxlIjoiRmlsaW5nIHR5cGVzIChtaXhlZCBsYWJlbCBsZW5ndGhzKSIsIngiOiJDYXRlZ29yeSIsInkiOiJDb3VudCJ9fX0",
+    },
+  },
+  {
     id: "col/value-labels",
     title: "Columns with value labels",
     compatibility: {

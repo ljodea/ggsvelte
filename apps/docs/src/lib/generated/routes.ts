@@ -2378,6 +2378,17 @@ export const DOCS_ROUTES = [
     shell: "site",
   },
   {
+    path: "/examples/col/mixed-outlier-labels",
+    title: "Columns with one multi-word category outlier — ggsvelte gallery",
+    description:
+      "Desktop-width (640px) column chart: mostly short labels plus one four-token Spanish outlier — band planner should wrap, not fall to −90° + truncate (#634).",
+    canonicalPath: "/examples/col/mixed-outlier-labels",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
     path: "/examples/col/value-labels",
     title: "Columns with value labels — ggsvelte gallery",
     description:
