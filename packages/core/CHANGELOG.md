@@ -1,5 +1,84 @@
 # @ggsvelte/core
 
+## 0.10.0
+
+### Minor Changes
+
+- 69415d9: <!-- markdownlint-disable MD041 -->
+
+  feat: portable within-mark gradients and bounded glow (#591)
+
+  Add a closed JSON-serializable paint vocabulary on compatible geom params
+  (`fillPaint`, `strokePaint`, `glow`) with deterministic linear/radial gradients,
+  ordered hex color stops, required solid fallbacks, and bounded glow radii.
+
+  Migration: none — additive
+
+### Patch Changes
+
+- 5d04e1f: <!-- markdownlint-disable MD041 -->
+
+  fix: remaining multi-table edges after per-layer DataRef
+
+  Binned axes and fixed histogram bin ranges read each layer filtered table;
+  transform diagnostics count filtered (not unfiltered) rows; scale validation
+  keeps per-layer field evidence; boxplot outlier lineage is not double-remapped
+  under facets; Svelte identity epochs fingerprint geom-child data props.
+
+  Migration: none — corrects multi-table behavior under per-layer data
+
+- 7e3b717: <!-- markdownlint-disable MD041 -->
+
+  Add a model-owned semantic viewport for panel lookup, pixel/domain inversion,
+  domain projection, categorical identity resolution, and interval candidate
+  queries. Route Svelte interval selection, precise bounds, inspection panel
+  lookup, and brush zoom through that shared coordinate boundary.
+
+- af2efc2: <!-- markdownlint-disable MD041 -->
+
+  fix: cap and clip rotated left/right facet strip labels to panel height
+
+  Long side-strip labels no longer paint into neighboring multi-row panels.
+  Labels truncate with ellipsis to the panel-height advance budget; SVG/Svelte
+  strip chrome clips to the strip band as defense in depth. Strip band width
+  is remeasured against that vertical budget.
+
+- 38683bc: <!-- markdownlint-disable MD041 -->
+
+  fix: ribbon temporal preflight, band measure drop, outline focus mute
+
+  - Preflight xmin/xmax only for rect/ribbon (not unused point mappings)
+  - Drop ribbon rows when measure projection is non-finite (band measure axes)
+  - Mirror fill focus masks onto presentation-only ribbon outline batches
+
+- 59232e8: <!-- markdownlint-disable MD041 -->
+
+  fix: segment endpoint grouping, binned extent, auto-hit, validation
+
+  - Exclude xend/yend from default discrete grouping
+  - Gate binned-axis endpoint fields to segment layers only
+  - Preserve geometry-based auto hit mode for geom segment
+  - Reject non-field segment endpoint mappings at validate time
+
+- 92e7049: <!-- markdownlint-disable MD041 -->
+
+  fix: multi-table DataRef post-merge edges from #603
+
+  - Seed named table cache from plot-level named data
+  - Deduplicate plot+layer named refs in validation maxRows
+  - Snapshot data on builder .layer()
+  - Unify binned style binExtent across layers
+  - Gate legend rowFilters to layers that map the scale field
+  - Skip globalSourceRows retention on annotation frames
+
+- Updated dependencies [69415d9]
+- Updated dependencies [5d04e1f]
+- Updated dependencies [127e3fc]
+- Updated dependencies [59232e8]
+- Updated dependencies [92e7049]
+- Updated dependencies [ae74d06]
+  - @ggsvelte/spec@0.10.0
+
 ## 0.9.0
 
 ### Minor Changes

@@ -1,6 +1,6 @@
 {
   "name": "@ggsvelte/svelte",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "ggsvelte: a layered grammar of graphics for Svelte 5 — ggplot2 semantics, JSON-serializable specs, agent-friendly validation, hybrid SVG/canvas rendering, and the ggsvelte-render CLI.",
   "keywords": [
     "charts",
@@ -53,8 +53,8 @@
     "test:coverage": "vitest run --coverage --project chromium && vitest run --coverage --config vitest.ssr.config.ts"
   },
   "dependencies": {
-    "@ggsvelte/core": "^0.9.0",
-    "@ggsvelte/spec": "^0.9.0"
+    "@ggsvelte/core": "^0.10.0",
+    "@ggsvelte/spec": "^0.10.0"
   },
   "devDependencies": {
     "@sveltejs/package": "^2.5.8",
