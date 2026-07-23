@@ -332,4 +332,35 @@ describe("explicit legend filtering", () => {
 
     expect(container.querySelector(".gg-legend-filters")).toBeNull();
   });
+
+  it("still offers filters when a hidden annotation constant shares the style scale (#598)", async () => {
+    // Rowless rule annotation trains the scale but is excluded from the
+    // interactive legend domain. That must not disable filters for the data
+    // categories that *are* visible.
+    const { container } = render(GGPlot, {
+      data: [
+        { x: 1, y: 1, group: "a" },
+        { x: 2, y: 2, group: "a" },
+        { x: 1, y: 3, group: "b" },
+        { x: 2, y: 4, group: "b" },
+      ],
+      layers: [
+        { geom: "line", aes: { x: "x", y: "y", linetype: "group" } },
+        {
+          geom: "rule",
+          aes: { linetype: { value: "threshold", scale: true } },
+          params: { yintercept: 2 },
+        },
+      ],
+      scales: { linetype: { type: "ordinal" } },
+      legendFilter: true,
+      width: 360,
+      height: 260,
+    });
+    await until(() => container.querySelectorAll(".gg-legend-filters input").length === 2);
+
+    expect(container.querySelector("input[aria-label='Show a']")).not.toBeNull();
+    expect(container.querySelector("input[aria-label='Show b']")).not.toBeNull();
+    expect(container.querySelector("input[aria-label='Show threshold']")).toBeNull();
+  });
 });

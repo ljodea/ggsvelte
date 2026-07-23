@@ -175,6 +175,94 @@ describe("createLegendFilterState toggle and mode", () => {
   });
 });
 
+describe("createLegendFilterState scaled-constant gating (#598)", () => {
+  it("still filters data entries when a rowless annotation constant shares the style scale", () => {
+    // Core drops the annotation-only value from the interactive legend domain
+    // (empty key bucket), but still exports it on layerScaledConstants. Filter
+    // gating must key off *visible* legend entries — otherwise the hidden
+    // annotation disables filters for the real data categories.
+    const spec = gg(
+      [
+        { x: 1, y: 1, group: "a" },
+        { x: 2, y: 2, group: "a" },
+        { x: 1, y: 3, group: "b" },
+        { x: 2, y: 4, group: "b" },
+      ],
+      aes({ x: "x", y: "y" }),
+    )
+      .geomLine({ aes: { linetype: "group" } })
+      .geomRule({
+        yintercept: 2,
+        aes: { linetype: { value: "threshold", scale: true } },
+      })
+      .scaleLinetypeDiscrete()
+      .spec();
+    const model = modelFor(spec);
+
+    // Preconditions: annotation trains the scale but is not a legend entry;
+    // layerScaledConstants still carries it (focus/index contract).
+    const legend = model.scene.legends.find(
+      (entry) => entry.type === "discrete" && entry.scale === "linetype",
+    );
+    expect(legend?.type).toBe("discrete");
+    if (legend?.type !== "discrete") throw new Error("expected discrete linetype legend");
+    expect(legend.interactive).toBe(true);
+    expect(legend.entries.map((entry) => entry.value)).toEqual(["a", "b"]);
+    expect(model.layerScaledConstants.some((constants) => constants.linetype !== undefined)).toBe(
+      true,
+    );
+
+    const { value: state, destroy } = withFlushedEffectRoot(() =>
+      createLegendFilterState({
+        effectiveSpec: () => spec,
+        legendFilterProp: () => true,
+        onlegendfilter: noCallback,
+        oninteraction: noCallback,
+        announce: () => {},
+        model: () => model,
+      }),
+    );
+
+    const entries = state.computeEntries(model);
+    expect(entries).toHaveLength(2);
+    expect(new Set(entries.map((entry) => entry.entry.value))).toEqual(new Set(["a", "b"]));
+    expect(entries.every((entry) => entry.field === "group")).toBe(true);
+
+    destroy();
+  });
+
+  it("keeps a rowful scaled-constant legend non-filterable", () => {
+    // A data-backed constant still appears as a legend entry; toggling data
+    // categories would filter the field while the constant-colored layer stays.
+    const spec = gg(
+      [
+        { x: 1, y: 1, group: "north" },
+        { x: 2, y: 2, group: "south" },
+      ],
+      aes({ x: "x", y: "y" }),
+    )
+      .geomPoint({ aes: { color: "group" } })
+      .geomLine({ aes: { color: { value: "reference", scale: true } } })
+      .spec();
+    const model = modelFor(spec);
+
+    const { value: state, destroy } = withFlushedEffectRoot(() =>
+      createLegendFilterState({
+        effectiveSpec: () => spec,
+        legendFilterProp: () => true,
+        onlegendfilter: noCallback,
+        oninteraction: noCallback,
+        announce: () => {},
+        model: () => model,
+      }),
+    );
+
+    expect(state.computeEntries(model)).toEqual([]);
+
+    destroy();
+  });
+});
+
 describe("createLegendFilterState capability and mode reset", () => {
   it("capability disable resets filters atomically with a single clear event + announce", () => {
     const events: LegendFilterEvent[] = [];
