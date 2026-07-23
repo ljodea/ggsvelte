@@ -138,7 +138,7 @@ function renderPanelAxes(panel: ScenePanel, theme: ThemeTokens): string {
 }
 
 /** Facet strip: band + centered label on the authored side of the panel. */
-function renderStrip(panel: ScenePanel, scene: Scene): string {
+function renderStrip(panel: ScenePanel, scene: Scene, panelIndex: number): string {
   if (panel.strip === "" || panel.showStrip === false) return "";
   const band = panel.stripBand ?? STRIP_BAND;
   if (band <= 0) return "";
@@ -153,6 +153,7 @@ function renderStrip(panel: ScenePanel, scene: Scene): string {
   let textX = panel.width / 2;
   let textY = bandDraw / 2;
   let textTransform = "";
+  let sideClip = false;
 
   // Layout reserves strip outside the axis margin band (see
   // panel-layout-facet-cells-place). Renderers place chrome in that reserved
@@ -173,6 +174,9 @@ function renderStrip(panel: ScenePanel, scene: Scene): string {
     textX = bandDraw / 2;
     textY = panel.height / 2;
     textTransform = ` transform="rotate(-90 ${px(textX)} ${px(textY)})"`;
+    // Rotated advance is vertical — clip to the panel-height band so a long
+    // label cannot paint into the row above/below (#611).
+    sideClip = true;
   } else {
     originX = panel.x + panel.width;
     rectW = bandDraw;
@@ -180,10 +184,18 @@ function renderStrip(panel: ScenePanel, scene: Scene): string {
     textX = bandDraw / 2;
     textY = panel.height / 2;
     textTransform = ` transform="rotate(90 ${px(textX)} ${px(textY)})"`;
+    sideClip = true;
   }
 
+  const clipId = `gg-strip-clip-${panelIndex}`;
+  const clipAttr = sideClip ? ` clip-path="url(#${clipId})"` : "";
+  const clipDef = sideClip
+    ? `<clipPath id="${clipId}"><rect width="${px(rectW)}" height="${px(rectH)}"/></clipPath>`
+    : "";
+
   return (
-    `<g class="gg-strip" transform="translate(${px(originX)},${px(originY)})">` +
+    `<g class="gg-strip" transform="translate(${px(originX)},${px(originY)})"${clipAttr}>` +
+    clipDef +
     `<rect width="${px(rectW)}" height="${px(rectH)}" fill="${stripFill}"/>` +
     `<text x="${px(textX)}" y="${px(textY)}" dy="0.32em" text-anchor="middle" fill="${ink}" font-size="${px(scene.theme.stripSize)}" font-weight="${scene.theme.stripWeight}"${textTransform}>${escapeXML(panel.strip)}</text>` +
     "</g>"
@@ -465,7 +477,7 @@ export function sceneToSVGString(scene: Scene, options: SceneSVGOptions = {}): s
         `<rect class="gg-panel-border" width="${px(p.width)}" height="${px(p.height)}" fill="none" stroke="${themeVar("panelBorder", theme)}" stroke-width="${px(theme.panelBorderWidth)}" vector-effect="non-scaling-stroke"/>`,
       );
     }
-    parts.push("</g>", renderStrip(p, scene), renderPanelAxes(p, theme));
+    parts.push("</g>", renderStrip(p, scene, i), renderPanelAxes(p, theme));
   }
   parts.push(renderAxisTitles(scene));
   for (const legend of scene.legends) {

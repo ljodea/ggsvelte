@@ -8,6 +8,7 @@ import type { SceneAxis, ScenePanel, SceneTick } from "../scene.js";
 import type { PositionScale } from "../scales/train.js";
 
 import type { FacetPanelDef } from "./facets.js";
+import { capSideStripLabel, isSideStrip } from "./facets-strip.js";
 import { axisTicks } from "./layout-helpers.js";
 import type { PanelPlacement } from "./panel-layout.js";
 
@@ -105,6 +106,8 @@ export function assembleScenePanels(input: {
   coordProjectors: readonly PanelCoordProjector[];
   measureText?: TextMeasurer | undefined;
   axisTextSize: number;
+  /** Theme strip font size used to cap rotated side-strip labels (#611). */
+  stripSize?: number;
   /** Resolved per-axis guide font sizes used for projected-label collision checks. */
   hAxisTextSize?: number;
   vAxisTextSize?: number;
@@ -120,6 +123,7 @@ export function assembleScenePanels(input: {
 } {
   const { placements, facetPanels, displayScales, hTitle, vTitle, strip, stripBand } = input;
   const measurer = input.measureText ?? new MetricsTableMeasurer(FONT_METRICS);
+  const stripSize = input.stripSize ?? 12;
 
   const scenePanels: ScenePanel[] = placements.map((placement, p) => {
     const { h, v } = displayScales(p);
@@ -174,6 +178,13 @@ export function assembleScenePanels(input: {
     const yGrid = gridPositionsByKind(left);
     const label = facetPanels[p]!.label;
     const hasStrip = label !== "";
+    // Left/right strips rotate labels 90°: advance width becomes vertical
+    // extent. Cap to panel height so multi-row layouts cannot paint into
+    // neighboring panel content (#611).
+    const stripLabel =
+      hasStrip && strip.show && isSideStrip(strip.position)
+        ? capSideStripLabel(label, placement.height, measurer, stripSize)
+        : label;
     return {
       identity: facetPanels[p]!.identity,
       id: facetPanels[p]!.id,
@@ -181,7 +192,7 @@ export function assembleScenePanels(input: {
       y: placement.y,
       width: placement.width,
       height: placement.height,
-      strip: label,
+      strip: stripLabel,
       ...(hasStrip && {
         stripPosition: strip.position,
         showStrip: strip.show,

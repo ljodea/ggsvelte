@@ -60,7 +60,7 @@ export function computePanelLayout(input: {
   const strip = input.strip ?? DEFAULT_FACET_STRIP;
 
   const chrome = resolvePanelLayoutChrome(input);
-  const stripBand = measureFacetStripBand({
+  let stripBand = measureFacetStripBand({
     faceted,
     strip,
     panels: facetPanels,
@@ -85,6 +85,40 @@ export function computePanelLayout(input: {
     axis: { x: input.hGuide, y: input.vGuide },
     options,
   });
+  // Side strips rotate labels: advance becomes vertical. Remeasure the band
+  // against the shortest panel height so reserved width matches the capped
+  // rotated labels (#611). Left/right strip height does not feed approxH, so
+  // one remeasure converges.
+  if (
+    faceted &&
+    strip.show &&
+    (strip.position === "left" || strip.position === "right") &&
+    placements.length > 0
+  ) {
+    const sideMaxAdvance = Math.min(...placements.map((placement) => placement.height));
+    const cappedBand = measureFacetStripBand({
+      faceted,
+      strip,
+      panels: facetPanels,
+      measurer: chrome.measurer,
+      stripSize: input.theme.stripSize,
+      sideMaxAdvance,
+    });
+    if (cappedBand !== stripBand) {
+      stripBand = cappedBand;
+      placements = buildPanelPlacements({
+        faceted,
+        nrow,
+        ncol,
+        facetPanels,
+        strip,
+        stripBand,
+        chrome,
+        axis: { x: input.hGuide, y: input.vGuide },
+        options,
+      });
+    }
+  }
   let degraded = false;
   if (input.coordFixed !== undefined) {
     const fitted = applyFixedAspectLayout({
