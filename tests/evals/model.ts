@@ -291,8 +291,10 @@ export class MockResponder implements Responder {
     // must not trigger the geographic-map refusal. Only known aesthetic /
     // position / style channels count — "map revenue to state" is geo-ish and
     // must still refuse when the prompt also contains "map".
+    // Scale modifiers match mappedStyleField (continuous/discrete/binned/point/line)
+    // so "map z to continuous fill" and "map region to discrete color" stay aesthetic.
     const aesChannel =
-      "(?:binned\\s+)?(?:colou?r|fill|x|y|xmin|xmax|ymin|ymax|width|height|size|alpha|shape|linewidth|linetype|label)";
+      "(?:(?:continuous|discrete|binned|point|line)\\s+){0,3}(?:colou?r|fill|x|y|xmin|xmax|ymin|ymax|width|height|size|alpha|shape|linewidth|linetype|label)";
     const aestheticMapping =
       new RegExp(`\\bmap\\s+\\S+\\s+to\\s+${aesChannel}\\b`).test(prompt) ||
       new RegExp(`\\bmap\\s+${aesChannel}\\s+to\\s+\\S+\\b`).test(prompt) ||

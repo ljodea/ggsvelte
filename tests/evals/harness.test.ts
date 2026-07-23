@@ -235,6 +235,19 @@ describe("MockResponder map refusal", () => {
     expect(parsed.unsupported).toBeUndefined();
     expect(Array.isArray(parsed.layers)).toBe(true);
   });
+
+  test("allows continuous/discrete scale modifiers before color/fill/style channels", async () => {
+    const mock = new MockResponder();
+    for (const prompt of [
+      "map z to continuous fill",
+      "map region to discrete color",
+      "map magnitude to continuous point size",
+    ]) {
+      const reply = await mock.complete("", `${prompt}.\n${profileLine}`);
+      const parsed = JSON.parse(reply) as { unsupported?: string };
+      expect(parsed.unsupported, `should allow aesthetic mapping: ${prompt}`).toBeUndefined();
+    }
+  });
 });
 
 // ---------------------------------------------------------------------------
