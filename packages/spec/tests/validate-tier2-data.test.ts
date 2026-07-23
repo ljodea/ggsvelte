@@ -523,6 +523,48 @@ describe("tier 2 — data-aware checks (inline data)", () => {
       ).ok,
     ).toBe(true);
   });
+
+  it("accepts an all-invalid censored quantitative field when a sibling field trains the scale", () => {
+    // Runtime collects all size-channel values together; a parseable ISO field trains
+    // while a numeric column is censored — validation must not reject field-by-field.
+    expect(
+      validate(
+        {
+          data: {
+            values: [
+              { city: "Berlin", temp: 21.5, when: "2026-01-01", bad: 1e100 },
+              { city: "Oslo", temp: -3.2, when: "2026-01-02", bad: 1e101 },
+            ],
+          },
+          aes: { x: { field: "city" }, y: { field: "temp" } },
+          scales: { size: { type: "sequential", parse: "iso", parseFailure: "censor" } },
+          layers: [
+            { geom: "point", aes: { size: { field: "when" } } },
+            { geom: "point", aes: { size: { field: "bad" } } },
+          ],
+        },
+        {},
+      ).ok,
+    ).toBe(true);
+  });
+
+  it("accepts an invalid censored constant when a sibling constant trains the scale", () => {
+    // Valid scaled ISO constant trains the scale; invalid "large" is censored to unknown.
+    expect(
+      validate(
+        {
+          data: { values: rows },
+          aes: { x: { field: "city" }, y: { field: "temp" } },
+          scales: { size: { type: "sequential", parse: "iso", parseFailure: "censor" } },
+          layers: [
+            { geom: "point", aes: { size: { value: "2026-01-01", scale: true } } },
+            { geom: "point", aes: { size: { value: "large", scale: true } } },
+          ],
+        },
+        {},
+      ).ok,
+    ).toBe(true);
+  });
 });
 
 describe("tier 2 — DataProfile", () => {
