@@ -66,7 +66,10 @@ export interface Tick {
   domainIndex?: number;
   /** false when band-label thinning hides this tick's label. */
   labeled: boolean;
-  /** Wrapped label lines (band axis, mode "wrapped"). */
+  /**
+   * Multi-line label: mode "wrapped" (horizontal) or wrap-then-rotate
+   * (mode "rotated" + angle + lines).
+   */
   lines?: string[];
   /** Rotation in degrees (band axis, mode "rotated"): 0 | -45 | -90. */
   angle?: number;

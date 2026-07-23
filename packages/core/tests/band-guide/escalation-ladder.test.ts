@@ -64,8 +64,8 @@ describe("planBandAxis: escalation ladder", () => {
   });
 
   it("measures each rotated labeled tick once for height and overhang", () => {
-    // Pre-fix: shownMaxWidth pass + overhang pass each called measureWidth
-    // per labeled tick (~30 total on this fixture). Single-pass is ~25.
+    // Full-string rotate path (single-token labels → hybrid cannot engage):
+    // pre-fix double-scanned ~30 measureWidth calls; single overhang pass ≤20.
     let measureWidthCalls = 0;
     const counting = {
       measureWidth: (text: string, fontSizePx: number) => {
@@ -75,11 +75,12 @@ describe("planBandAxis: escalation ladder", () => {
       measureHeight: (fontSizePx: number) => measurer.measureHeight(fontSizePx),
     };
     const p = plan(
-      ["Resolución", "Corrección (errores o erratas)", "Sentencia", "Orden", "Otro"],
+      ["Anlageverwaltungsgesellschaftsvertrag", "Kurzlabel", "Mittelwort", "Andere", "Noch"],
       240,
       { measurer: counting },
     );
     expect(p.mode).toBe("rotated");
+    expect(p.ticks.every((t) => t.lines === undefined || t.lines.length <= 1)).toBe(true);
     expect(measureWidthCalls).toBeLessThanOrEqual(27);
     expect(measureWidthCalls).toBeGreaterThan(0);
   });

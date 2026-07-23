@@ -51,6 +51,25 @@ function collectPaintResources(scene: Scene): {
   return { paints, glows };
 }
 
+/** End-anchored rotated band label; multi-line via tspan dy (wrap-then−45°, #637). */
+function rotatedBandLabelSvg(
+  tick: { label: string; lines?: string[]; angle: number },
+  yOff: number,
+  labelSize: number,
+  font: string,
+): string {
+  const transform = `transform="translate(0,${px(yOff)}) rotate(${tick.angle})"`;
+  const attrs = `${transform} text-anchor="end" dominant-baseline="central" ${font}`;
+  if (tick.lines !== undefined && tick.lines.length > 1) {
+    const lineH = labelSize * 1.15;
+    const tspans = tick.lines
+      .map((line, i) => `<tspan x="0" dy="${i === 0 ? "0" : px(lineH)}">${escapeXML(line)}</tspan>`)
+      .join("");
+    return `<text ${attrs}>${tspans}</text>`;
+  }
+  return `<text ${attrs}>${escapeXML(tick.label)}</text>`;
+}
+
 function renderPanelAxes(panel: ScenePanel, theme: ThemeTokens): string {
   const parts: string[] = [];
   const axisText = themeVar("axisText", theme);
@@ -81,10 +100,7 @@ function renderPanelAxes(panel: ScenePanel, theme: ThemeTokens): string {
         const labelSize = tick.labelSize ?? theme.axisTextSize;
         const font = `fill="${axisText}" font-size="${px(labelSize)}" font-weight="${theme.fontWeight}"`;
         if (tick.angle !== undefined && tick.angle !== 0) {
-          // Rotated band label: hang below the axis, anchored at the tick.
-          parts.push(
-            `<text transform="translate(0,${px(yOff)}) rotate(${tick.angle})" text-anchor="end" dominant-baseline="central" ${font}>${escapeXML(tick.label)}</text>`,
-          );
+          parts.push(rotatedBandLabelSvg({ ...tick, angle: tick.angle }, yOff, labelSize, font));
         } else if (tick.lines !== undefined && tick.lines.length > 1) {
           // Wrapped band label: one tspan per line, centered.
           const lineH = labelSize * 1.15;

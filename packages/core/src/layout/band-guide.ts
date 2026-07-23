@@ -4,7 +4,8 @@
  *
  *   single-line → wrapped (≤2 lines, top-aligned plane overlap; balanced
  *     breaks when greedy exceeds the line cap)
- *     → rotated (−45° then −90°; parallel-baseline text-text, not AABB vs column)
+ *     → wrap-then−45° (balanced ≤2 lines rotated; mode still "rotated"+lines)
+ *     → rotated full-string (−45° then −90°; parallel-baseline text-text)
  *     → truncate + margin-overflow warning
  *     → thin (labelEvery)
  *     → overlap warning
@@ -14,7 +15,8 @@
  *
  * Types live in `band-guide-types.ts`; wrap/cap helpers in `band-label-layout.ts`.
  * Wrap overlap assumes the same top-aligned tspan stack as Axis.svelte /
- * render-svg-scene (plane 0 = first line).
+ * render-svg-scene (plane 0 = first line). Multi-line rotated uses the same
+ * end-anchored `rotate()` + per-line `tspan` dy stack in both renderers.
  */
 
 import {
@@ -30,6 +32,7 @@ import {
   MIN_BAND_LABEL_GAP_PX,
   MODE_RANK,
   RAD,
+  balanceLabelLines,
   capEndOverhang,
   quantizeUp,
   wrapLabel,
@@ -254,16 +257,20 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
   // The SVG renderer hangs rotated labels with text-anchor="end", so the along-
   // axis footprint is ASYMMETRIC about the tick: it extends mostly to the LEFT
   // (the text runs up-left from the tick), with only a half-line-height to the
-  // right. Model those exact bounds so mixed-width labels can't pass the overlap
-  // / side-margin checks and then clip the previous tick or the left edge.
+  // right. Multi-line rotated stacks additional lines with local +y dy (first
+  // line end-anchored at the tick); at −45° that grows the RIGHT extent.
   const leftExtOf = (width: number, angle: number) => {
     const a = Math.abs(angle) * RAD;
     return width * Math.cos(a) + (lineHeight / 2) * Math.sin(a);
   };
-  const rightExtOf = (angle: number) => (lineHeight / 2) * Math.sin(Math.abs(angle) * RAD);
-  const orthoOf = (width: number, angle: number) => {
+  const rightExtOf = (angle: number, lineCount = 1) => {
+    const lines = Math.max(1, lineCount);
+    return (lines - 0.5) * lineHeight * Math.sin(Math.abs(angle) * RAD);
+  };
+  const orthoOf = (width: number, angle: number, lineCount = 1) => {
     const a = Math.abs(angle) * RAD;
-    return width * Math.sin(a) + lineHeight * Math.cos(a);
+    const lines = Math.max(1, lineCount);
+    return width * Math.sin(a) + lines * lineHeight * Math.cos(a);
   };
   /** Widest label among the currently-labeled (every k-th) entries. */
   const labeledMaxWidth = (every: number) => {
@@ -285,15 +292,24 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
     return rotatedTextCollides(1, -45) ? -90 : -45;
   };
 
-  const rotatedPlan = (angle: number): BandAxisPlan => {
+  type RotatedLineSource = {
+    /** Per-entry display lines (length 1 = full string). */
+    linesList: readonly (readonly string[])[];
+    /** Max glyph width per entry (after any truncation callers apply). */
+    widths: readonly number[];
+  };
+
+  const rotatedPlan = (angle: number, hybrid?: RotatedLineSource): BandAxisPlan => {
     const degraded: string[] = [];
     let labelEvery = 1;
     let overlap = false;
     let marginOverflow = false;
+    const isHybrid = hybrid !== undefined;
+    const lineCountOf = (i: number) => hybrid?.linesList[i]?.length ?? 1;
 
-    // Along-axis: do adjacent rotated labels still collide at their real positions?
-    // Gate thinning on the number of DISPLAYED ticks (a small authored-break subset
-    // of a huge domain must keep every break), never the full category count.
+    // Along-axis: parallel-baseline text-text only (same as full-string −45°).
+    // Multi-line dy stack grows the right AABB at −45°, but that is column-box
+    // geometry — not glyph collision. Asym extents still drive overhang below.
     if (rotatedTextCollides(1, angle)) {
       if (entries.length >= BAND_THIN_MIN_CATEGORIES) {
         // High cardinality: thin (never for a handful of named bars).
@@ -312,8 +328,14 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
 
     // Orthogonal: recompute the footprint from the labels that survive thinning, so
     // a hidden wide label neither truncates visible text nor emits a false overflow.
-    const shownWidth = labeledMaxWidth(labelEvery);
-    const orthoNeeded = orthoOf(shownWidth, angle);
+    let shownWidth = 0;
+    let shownLines = 1;
+    for (let i = 0; i < entries.length; i += labelEvery) {
+      const w = isHybrid ? hybrid.widths[i]! : entries[i]!.width;
+      shownWidth = Math.max(shownWidth, w);
+      shownLines = Math.max(shownLines, lineCountOf(i));
+    }
+    const orthoNeeded = orthoOf(shownWidth, angle, shownLines);
     const a = Math.abs(angle) * RAD;
     const cosA = Math.cos(a);
     const sinA = Math.sin(a);
@@ -322,7 +344,7 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
     // width cap from the orthogonal budget (side-cap truncation still applies).
     const orthoWidthBudget =
       orthoNeeded > orthoCap && sinA > 1e-9
-        ? Math.max(1, (orthoCap - lineHeight * cosA) / sinA)
+        ? Math.max(1, (orthoCap - shownLines * lineHeight * cosA) / sinA)
         : Number.POSITIVE_INFINITY;
 
     // Truncate each label to the TIGHTER of the bottom-cap budget and its own LEFT
@@ -330,11 +352,38 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
     // must fit `center + marginCapPx` or it draws past the viewport into chrome.
     // (For −90 the left extent is width-independent, so truncation can't help; that
     // degenerate case is flagged in the overhang pass below.)
-    const ticks = buildTicks(labelEvery, (e) => {
+    // Hybrid: truncate only the widest line of each tick so display lines stay
+    // multi-line; full-string path truncates the single label as before.
+    const ticks = buildTicks(labelEvery, (e, i) => {
       let widthBudget = orthoWidthBudget;
       if (cosA > 1e-9) {
         const sideBudget = (e.center + marginCapPx - (lineHeight / 2) * sinA) / cosA;
         widthBudget = Math.min(widthBudget, sideBudget);
+      }
+      if (isHybrid) {
+        const lines = [...hybrid.linesList[i]!];
+        if (widthBudget !== Number.POSITIVE_INFINITY) {
+          let maxW = 0;
+          let maxIdx = 0;
+          for (let li = 0; li < lines.length; li++) {
+            const w = measurer.measureWidth(lines[li]!, fontSize);
+            if (w > maxW) {
+              maxW = w;
+              maxIdx = li;
+            }
+          }
+          if (maxW > widthBudget) {
+            lines[maxIdx] = truncateToFit(
+              lines[maxIdx]!,
+              Math.max(1, widthBudget),
+              measurer,
+              fontSize,
+              ellipsis,
+            );
+            marginOverflow = true;
+          }
+        }
+        return { label: lines.join(" "), lines, angle };
       }
       const label =
         widthBudget === Number.POSITIVE_INFINITY
@@ -347,15 +396,24 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
     // One measureWidth per labeled tick: drives both band height (max width) and
     // end-anchored overhang (left/right extent). Avoids a second full scan.
     let shownMaxWidth = 0;
+    let shownMaxLines = 1;
     let rotLeft = 0;
     let rotRight = 0;
     for (let i = 0; i < ticks.length; i++) {
       if (!ticks[i]!.labeled) continue;
       const center = entries[i]!.center;
-      const width = measurer.measureWidth(ticks[i]!.label, fontSize);
+      const lines = ticks[i]!.lines;
+      const lineCount = lines !== undefined && lines.length > 0 ? lines.length : 1;
+      let width: number;
+      if (lines !== undefined && lines.length > 1) {
+        width = Math.max(...lines.map((l) => measurer.measureWidth(l, fontSize)));
+      } else {
+        width = measurer.measureWidth(ticks[i]!.label, fontSize);
+      }
       shownMaxWidth = Math.max(shownMaxWidth, width);
+      shownMaxLines = Math.max(shownMaxLines, lineCount);
       const leftExt = leftExtOf(width, angle);
-      const rightExt = rightExtOf(angle);
+      const rightExt = rightExtOf(angle, lineCount);
       // Width-independent residual (chiefly −90): if the footprint still exceeds the
       // side cap after truncation we cannot shrink it further — flag honestly.
       if (
@@ -367,7 +425,10 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
       rotLeft = Math.max(rotLeft, leftExt - center);
       rotRight = Math.max(rotRight, rightExt - (extentPx - center));
     }
-    const labelBandHeight = quantizeUp(Math.min(orthoOf(shownMaxWidth, angle), orthoCap), quantum);
+    const labelBandHeight = quantizeUp(
+      Math.min(orthoOf(shownMaxWidth, angle, shownMaxLines), orthoCap),
+      quantum,
+    );
     if (marginOverflow) degraded.push("band-label-margin-overflow");
     const alongOverhang = Math.max(0, Math.min(marginCapPx, rotRight));
     const leftOverhang = Math.max(0, Math.min(marginCapPx, rotLeft));
@@ -386,6 +447,41 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
     };
   };
 
+  /**
+   * Wrap-then−45°: balance multi-word labels onto ≤maxWrapLines, rotate at −45°.
+   * Accepted only when it beats full-string rotation on readability (no
+   * text-text collision, no margin overflow, and strictly less ortho band than
+   * full-string −45° — or full-string would overflow the bottom cap).
+   * Single-token-only axes return null.
+   */
+  const tryHybridRotatePlan = (): BandAxisPlan | null => {
+    const linesList = entries.map((e) =>
+      balanceLabelLines(e.label, maxWrapLines, measurer, fontSize),
+    );
+    if (!linesList.some((lines) => lines.length > 1)) return null;
+
+    const widths = linesList.map((lines) =>
+      Math.max(...lines.map((l) => measurer.measureWidth(l, fontSize))),
+    );
+    // Parallel −45 must clear; otherwise full-string may escalate to −90.
+    if (rotatedTextCollides(1, -45)) return null;
+
+    const hybrid = rotatedPlan(-45, { linesList, widths });
+    // Reject hybrid when it still collides or overflows — fall through to the
+    // full-string path which may thin / use −90 / truncate more honestly.
+    if (hybrid.overlap || hybrid.marginOverflow) return null;
+
+    // Compare against full-string −45° ortho without building a second plan
+    // (avoids doubling measureWidth on the common hybrid path).
+    const fullMaxW = labeledMaxWidth(1);
+    const fullOrtho = orthoOf(fullMaxW, -45, 1);
+    const fullWouldOverflow = fullOrtho > orthoCap + 1e-6;
+    if (!fullWouldOverflow && hybrid.labelBandHeight >= fullOrtho - 1e-6) {
+      return null;
+    }
+    return hybrid;
+  };
+
   // --- Author pins (no auto-escalation away from the chosen presentation) ---
   if (guideMode === "single") return withPin(singlePlan({ reportOverlap: true }));
   if (guideMode === "wrap") {
@@ -393,6 +489,7 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
   }
   if (guideMode === "rotate") {
     // Prefer author angle; else the measured −45/−90 choice used by auto.
+    // Pins stay full-string (no silent wrap-then-rotate under mode:"rotate").
     return withPin(rotatedPlan(pinnedAngle ?? chooseAutoAngle()));
   }
 
@@ -412,6 +509,12 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
   if (floor <= MODE_RANK.wrapped) {
     const wrapped = tryWrapPlan(false);
     if (wrapped !== null) return wrapped;
+  }
+
+  // --- wrap-then−45° (mode "rotated" + lines) before full-string rotate ---
+  if (floor <= MODE_RANK.rotated) {
+    const hybrid = tryHybridRotatePlan();
+    if (hybrid !== null) return hybrid;
   }
 
   // Prefer −45 (more readable, less bottom footprint); escalate to −90 ONLY when

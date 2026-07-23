@@ -27,7 +27,20 @@ describe("band axis diagnostics (#387)", () => {
   });
 
   it("emits a band-label-margin-overflow diagnostic with a coord_flip fix", () => {
-    const model = runPipeline(spec, { width: 240, height: 300 });
+    // Unbreakable single-token labels: wrap and wrap-then−45° cannot help, so
+    // full-string −45° truncates and surfaces margin-overflow + coord_flip.
+    // (Multi-word Spanish rows at 240px now clear via hybrid #637 without this diag.)
+    const unbreakable: SpecInput = {
+      data: {
+        values: [
+          { category: "Anlageverwaltungsgesellschaftsvertrag", count: 9 },
+          { category: "Rechtsschutzversicherungsgesellschaften", count: 3 },
+          { category: "Donaudampfschiffahrtsgesellschaftskapitän", count: 2 },
+        ],
+      },
+      layers: [{ geom: "col", aes: { x: { field: "category" }, y: { field: "count" } } }],
+    };
+    const model = runPipeline(unbreakable, { width: 240, height: 300 });
     const diag = model.scaleDiagnostics.find((d) => d.code === "band-label-margin-overflow");
     expect(diag).toBeDefined();
     expect(diag?.path).toBe("/scales/x");

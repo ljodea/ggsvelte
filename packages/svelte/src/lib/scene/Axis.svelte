@@ -57,14 +57,22 @@
         {/if}
         {#if tick.label !== "" && tick.showLabel !== false}
           {#if tick.angle !== undefined && tick.angle !== 0}
-            <!-- Rotated band label: hang below the axis, anchored at the tick. -->
+            <!-- Rotated band label: hang below the axis, end-anchored at the tick.
+                 Wrap-then-rotate (#637): multi-line via tspan dy in local Y. -->
             <text
               transform={`translate(0,${(theme.ticksX && tick.showTick !== false ? theme.tickLength : 0) + 3}) rotate(${tick.angle})`}
               text-anchor="end"
               dominant-baseline="central"
               fill={axisText}
               font-size={tick.labelSize ?? theme.axisTextSize}
-              font-weight={theme.fontWeight}>{tick.label}</text
+              font-weight={theme.fontWeight}
+              >{#if tick.lines !== undefined && tick.lines.length > 1}{#each tick.lines as line, li (li)}<tspan
+                    x="0"
+                    dy={li === 0
+                      ? 0
+                      : (tick.labelSize ?? theme.axisTextSize) * 1.15}
+                    >{line}</tspan
+                  >{/each}{:else}{tick.label}{/if}</text
             >
           {:else if tick.lines !== undefined && tick.lines.length > 1}
             <!-- Wrapped band label: one tspan per line, centered. -->

@@ -38,6 +38,18 @@ describe("band label rendering (#387)", () => {
     expect(title).not.toBeNull();
   });
 
+  it("wrap-then−45° emits multi-line rotated tspans for the multi-word outlier (#637)", () => {
+    // 240px: plain wrap fails; hybrid balances the long label onto 2 lines at −45°.
+    const svg = renderToSVGString(spec, { width: 240, height: 300 });
+    expect(svg).toContain('rotate(-45)" text-anchor="end"');
+    // Hybrid path: rotated <text> contains <tspan> children (not a single glyph run).
+    const rotatedWithTspans = svg.match(/rotate\(-45\)"[^>]*>[\s\S]*?<tspan[\s\S]*?<\/text>/);
+    expect(rotatedWithTspans).not.toBeNull();
+    expect(svg).toContain("Corrección");
+    expect(svg).toContain("(errores o erratas)");
+    expect(svg).not.toContain("Corrección (errores o err…");
+  });
+
   it("keeps single-line rendering unchanged for short labels", () => {
     const shortSpec: SpecInput = {
       data: {
