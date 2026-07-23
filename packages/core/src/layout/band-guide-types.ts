@@ -61,7 +61,10 @@ export interface BandAxisPlanTick {
   fullLabel: string;
   labeled: boolean;
   domainIndex: number;
-  /** Wrapped lines (present when mode === "wrapped"). */
+  /**
+   * Multi-line layout: mode `"wrapped"` (horizontal stack) or mode `"rotated"`
+   * with wrap-then-rotate (lines rotated at `angle`, ≤2 by default).
+   */
   lines?: string[];
   /** Rotation in degrees (present when mode === "rotated"). */
   angle?: number;

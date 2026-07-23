@@ -19,12 +19,16 @@ describe("measured band x-axis (planner integration)", () => {
     expect(r.x.ticks.some((t) => (t.lines?.length ?? 1) === 2)).toBe(true);
   });
 
-  it("rotates and truncates at narrow width, still labelling every bar", () => {
+  it("wrap-then−45° at narrow width keeps every bar labelled without truncating (#637)", () => {
+    // 240px: plain wrap fails; hybrid balances multi-word labels and rotates −45°
+    // so the long outlier no longer needs ellipsis (full-string −45° used to).
     const r = layout(base({ width: 240, height: 300, x: bandX(SPANISH) }));
     expect(r.x.guidePlan?.bandLabelMode).toBe("rotated");
-    expect([-45, -90]).toContain(r.x.guidePlan?.bandLabelAngle);
+    expect(r.x.guidePlan?.bandLabelAngle).toBe(-45);
     expect(r.x.ticks.every((t) => t.labeled)).toBe(true);
-    expect(r.degradations).toContain("band-label-margin-overflow");
+    expect(r.x.ticks.some((t) => (t.lines?.length ?? 1) > 1)).toBe(true);
+    expect(r.x.ticks.every((t) => !t.label.includes("…"))).toBe(true);
+    expect(r.degradations).not.toContain("band-label-margin-overflow");
     expect(r.margins.bottom).toBeLessThanOrEqual(theme.maxMarginFraction * 300);
   });
 

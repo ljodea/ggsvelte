@@ -136,6 +136,30 @@ function bestFixedLineWrap(
 }
 
 /**
+ * Balanced multi-line split for wrap-then-rotate: ignore band width and pick
+ * word breaks that minimize the widest line (≤`maxLines`). Single-token labels
+ * stay one line. Used when plain wrap failed but shorter rotated lines would
+ * clear the orthogonal budget that full-string −45°/ −90° cannot.
+ */
+export function balanceLabelLines(
+  label: string,
+  maxLines: number,
+  measurer: TextMeasurer,
+  fontSize: number,
+): string[] {
+  const words = label.split(/\s+/).filter((w) => w.length > 0);
+  if (words.length <= 1) return [label === "" ? "" : (words[0] ?? label)];
+  const capped = Math.max(1, Math.min(maxLines, words.length));
+  if (capped === 1) return [words.join(" ")];
+  // Unlimited maxWidth → score is pure minimax line width (all "fit").
+  return (
+    bestFixedLineWrap(words, Number.POSITIVE_INFINITY, measurer, fontSize, capped) ?? [
+      words.join(" "),
+    ]
+  );
+}
+
+/**
  * Cap the along-axis overhang of the end labels using their ACTUAL displayed
  * positions (not the uniform band width). Horizontal labels that overhang past
  * the panel edge + margin cap are truncated (ellipsis) and flagged; the returned

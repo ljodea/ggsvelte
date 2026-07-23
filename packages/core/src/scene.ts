@@ -225,7 +225,10 @@ export interface SceneTick {
   showTick?: boolean;
   showLabel?: boolean;
   labelSize?: number;
-  /** Wrapped label lines (band axis, mode "wrapped"). */
+  /**
+   * Multi-line label: mode "wrapped" (horizontal) or wrap-then-rotate
+   * (mode "rotated" + angle + lines).
+   */
   lines?: string[];
   /** Rotation in degrees (band axis, mode "rotated"): -45 | -90. */
   angle?: number;
