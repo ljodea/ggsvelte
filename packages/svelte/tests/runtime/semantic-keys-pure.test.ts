@@ -204,44 +204,31 @@ describe("dataIdentityEpochToken", () => {
       { x: 9, y: 8 },
       { x: 7, y: 6 },
     ];
-    const withoutLayers = dataIdentityEpochToken({
-      ready: true,
-      dataToken: id(undefined),
-      specToken: id(undefined),
+    // Plot-level data/spec absent — tokens are stable literals.
+    const absent = {
+      ready: true as const,
+      dataToken: "none",
+      specToken: "none",
       data: null,
       datasets: null,
       sourceIdentity: id,
-    });
+    };
+    const withoutLayers = dataIdentityEpochToken(absent);
     const withLayerA = dataIdentityEpochToken({
-      ready: true,
-      dataToken: id(undefined),
-      specToken: id(undefined),
-      data: null,
-      datasets: null,
+      ...absent,
       layers: [{ data: rowsA }],
-      sourceIdentity: id,
     });
     const withLayerB = dataIdentityEpochToken({
-      ready: true,
-      dataToken: id(undefined),
-      specToken: id(undefined),
-      data: null,
-      datasets: null,
+      ...absent,
       layers: [{ data: rowsB }],
-      sourceIdentity: id,
     });
     expect(withLayerA).not.toBe(withoutLayers);
     expect(withLayerA).not.toBe(withLayerB);
     // Same layer data reference → stable epoch.
     expect(
       dataIdentityEpochToken({
-        ready: true,
-        dataToken: id(undefined),
-        specToken: id(undefined),
-        data: null,
-        datasets: null,
+        ...absent,
         layers: [{ data: rowsA }],
-        sourceIdentity: id,
       }),
     ).toBe(withLayerA);
   });

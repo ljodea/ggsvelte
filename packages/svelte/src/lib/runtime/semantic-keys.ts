@@ -162,7 +162,7 @@ function datasetsOrderToken(datasets: unknown, sourceIdentity: (value: unknown) 
  * O(layers) fingerprint of geom-child / layer-local data props.
  * Missing `layers` → `"null"` so legacy callers keep a stable suffix.
  */
-export function layersDataOrderToken(
+function layersDataOrderToken(
   layers: readonly { readonly data?: unknown }[] | undefined,
   sourceIdentity: (value: unknown) => string,
 ): string {
