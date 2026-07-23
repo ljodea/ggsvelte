@@ -53,6 +53,18 @@ const TRIGGERS: Record<SpecErrorCode, Trigger> = {
       scales: { color: { type: "manual", domain: ["a", "b"], range: ["#f00"] } },
     },
   },
+  "scale-binned-breaks": {
+    spec: {
+      layers: [point],
+      scales: { size: { type: "binned", breaks: [10, 5, 0] } },
+    },
+  },
+  "scale-binned-domain": {
+    spec: {
+      layers: [point],
+      scales: { size: { type: "binned", domain: [0, 50], breaks: [0, 5, 10] } },
+    },
+  },
   "guide-aesthetic-incompatible": {
     spec: { layers: [point], scales: { x: { guide: { type: "legend" } } } },
   },

@@ -109,6 +109,18 @@ export const ERROR_CATALOG = {
     summary: "A manual color scale has different domain and range lengths.",
     fix: "Provide exactly one range color for each explicit domain value.",
   },
+  "scale-binned-breaks": {
+    tier: 1,
+    summary:
+      "A binned style scale's authored breaks are missing, non-finite after parsing, duplicated, or not strictly increasing.",
+    fix: "Provide 2+ strictly increasing boundaries (numeric, or temporal strings that parse under the scale's parser).",
+  },
+  "scale-binned-domain": {
+    tier: 1,
+    summary:
+      "A binned style scale's explicit domain does not match the first and last authored breaks.",
+    fix: "Set domain to the first and last break values, or omit domain and let breaks define it.",
+  },
   "guide-aesthetic-incompatible": {
     tier: 1,
     summary: "A guide variant is incompatible with its aesthetic or trained scale family.",

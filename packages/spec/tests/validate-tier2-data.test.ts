@@ -356,6 +356,103 @@ describe("tier 2 — data-aware checks (inline data)", () => {
     ).toBe(true);
   });
 
+  it("rejects descending/duplicate binned style breaks with scale-binned-breaks (#599)", () => {
+    // Runtime throws style-binned-breaks for non-strictly-increasing boundaries;
+    // validation must pre-empt with a breaks-specific code (not scale-type-mismatch).
+    const descending = errorsOf({
+      ...base,
+      aes: { ...base.aes, size: { field: "temp" } },
+      scales: { size: { type: "binned", breaks: [10, 5, 0], range: [2, 6] } },
+      layers: [{ geom: "point" }],
+    });
+    expect(descending.map((e) => e.code)).toContain("scale-binned-breaks");
+    expect(descending.some((e) => e.code === "scale-type-mismatch")).toBe(false);
+
+    const duplicate = errorsOf({
+      ...base,
+      aes: { ...base.aes, linewidth: { field: "temp" } },
+      scales: { linewidth: { type: "binned", breaks: [0, 10, 10], range: [0.5, 2] } },
+      layers: [{ geom: "point" }],
+    });
+    expect(duplicate.map((e) => e.code)).toContain("scale-binned-breaks");
+
+    const finite = errorsOf({
+      ...base,
+      aes: { ...base.aes, shape: { field: "temp" } },
+      scales: { shape: { type: "binned", breaks: [2, 1, 0] } },
+      layers: [{ geom: "point" }],
+    });
+    expect(finite.map((e) => e.code)).toContain("scale-binned-breaks");
+  });
+
+  it("rejects binned domain that disagrees with breaks with scale-binned-domain (#599)", () => {
+    // Runtime style-domain-invalid when domain endpoints ≠ first/last breaks.
+    const errors = errorsOf({
+      ...base,
+      aes: { ...base.aes, size: { field: "temp" } },
+      scales: {
+        size: { type: "binned", domain: [0, 50], breaks: [0, 5, 10], range: [2, 6] },
+      },
+      layers: [{ geom: "point" }],
+    });
+    expect(errors.map((e) => e.code)).toContain("scale-binned-domain");
+    expect(errors[0]?.path).toBe("/scales/size/domain");
+  });
+
+  it("rejects non-monotonic temporal binned breaks regardless of parseFailure (#599)", () => {
+    // Censor recovery must not treat non-monotonic ISO breaks as a valid bound;
+    // the diagnostic is breaks-specific, not a generic type mismatch.
+    for (const parseFailure of ["error", "censor"] as const) {
+      const errors = errorsOf({
+        ...base,
+        aes: { ...base.aes, size: { field: "temp" } },
+        scales: {
+          size: {
+            type: "binned",
+            parse: "iso",
+            parseFailure,
+            breaks: ["2024-01-31", "2024-01-15", "2024-01-01"],
+          },
+        },
+        layers: [{ geom: "point" }],
+      });
+      expect(errors.map((e) => e.code)).toContain("scale-binned-breaks");
+    }
+  });
+
+  it("rejects temporal domain/breaks endpoint disagreement (#599)", () => {
+    const errors = errorsOf({
+      ...base,
+      aes: { ...base.aes, size: { field: "temp" } },
+      scales: {
+        size: {
+          type: "binned",
+          parse: "iso",
+          domain: ["2024-01-01", "2024-02-01"],
+          breaks: ["2024-01-01", "2024-01-15", "2024-01-31"],
+        },
+      },
+      layers: [{ geom: "point" }],
+    });
+    expect(errors.map((e) => e.code)).toContain("scale-binned-domain");
+  });
+
+  it("accepts matching domain and strictly increasing binned breaks (#599)", () => {
+    expect(
+      validate(
+        {
+          ...base,
+          aes: { ...base.aes, size: { field: "temp" } },
+          scales: {
+            size: { type: "binned", domain: [0, 20], breaks: [0, 10, 20], range: [2, 6] },
+          },
+          layers: [{ geom: "point" }],
+        },
+        {},
+      ).ok,
+    ).toBe(true);
+  });
+
   it("returns a diagnostic (not a thrown error) for a schema-invalid numeric-style parser", () => {
     // parse: 123 is a schema error, but tier-2 still runs; the temporal check must
     // defer to the schema diagnostic instead of crashing when the malformed parser
@@ -402,7 +499,8 @@ describe("tier 2 — data-aware checks (inline data)", () => {
   it("rejects a censored binned temporal style whose breaks do not parse", () => {
     // Authored binned breaks only rescue a censored all-invalid column if they parse
     // under the configured parser; unparseable breaks still throw style-binned-breaks
-    // at runtime, so validation must not accept them as a recovery bound.
+    // at runtime. Validation emits scale-binned-breaks for the malformed bounds and
+    // still scale-type-mismatch because they are not a usable recovery bound.
     const errors = errorsOf({
       ...base,
       aes: { ...base.aes, size: { field: "temp" } },
@@ -416,7 +514,7 @@ describe("tier 2 — data-aware checks (inline data)", () => {
       },
       layers: [{ geom: "point" }],
     });
-    expect(errors.map((e) => e.code)).toEqual(["scale-type-mismatch"]);
+    expect(errors.map((e) => e.code)).toEqual(["scale-binned-breaks", "scale-type-mismatch"]);
   });
 
   it("does not throw formatting a BigInt scaled constant in a diagnostic", () => {

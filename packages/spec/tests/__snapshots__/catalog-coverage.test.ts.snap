@@ -886,3 +886,48 @@ exports[`ERROR_CATALOG coverage [paint-scale-conflict] is reproducible; message 
   },
 }
 `;
+
+exports[`ERROR_CATALOG coverage [scale-binned-breaks] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Provide 2+ strictly increasing boundaries (numeric, or temporal strings that parse under the scale's parser).",
+    "summary": "A binned style scale's authored breaks are missing, non-finite after parsing, duplicated, or not strictly increasing.",
+    "tier": 1,
+  },
+  "instance": {
+    "code": "scale-binned-breaks",
+    "fix": {
+      "description": "Provide 2+ strictly increasing boundaries that parse under the scale's parser.",
+      "example": [
+        0,
+        10,
+        20,
+      ],
+    },
+    "message": "The size boundaries must be finite and strictly increasing.",
+    "path": "/scales/size/breaks",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [scale-binned-domain] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Set domain to the first and last break values, or omit domain and let breaks define it.",
+    "summary": "A binned style scale's explicit domain does not match the first and last authored breaks.",
+    "tier": 1,
+  },
+  "instance": {
+    "code": "scale-binned-domain",
+    "fix": {
+      "description": "Set domain to the first and last break values, or omit domain.",
+      "example": [
+        0,
+        10,
+      ],
+    },
+    "message": "The size binned domain must match its first and last boundaries.",
+    "path": "/scales/size/domain",
+  },
+}
+`;
