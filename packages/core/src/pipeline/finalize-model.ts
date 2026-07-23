@@ -49,6 +49,7 @@ export function finalizeRenderModel(input: FinalizeRenderModelInput): RenderMode
     prepared,
     panelLayout,
     coordProjectors,
+    flipped: flip,
     runId,
     warnings,
     advisories,

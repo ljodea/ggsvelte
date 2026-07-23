@@ -22,9 +22,9 @@ import {
   decodeKey,
   encodeKey,
   type CandidateFacts,
-  type CellValue,
   type RenderModel,
   type ScenePanel,
+  type SemanticViewportSelection,
 } from "@ggsvelte/core";
 
 import type { PlotInteractionController } from "../interaction/controller.svelte.js";
@@ -44,7 +44,6 @@ import {
   buildIntervalSelection,
   clearIntervalSelectionEvent,
   persistentSelectionOrNull,
-  type IntervalDomain,
 } from "./interval.js";
 import {
   consumeIntervalKeys,
@@ -53,7 +52,6 @@ import {
   sameIntervalRecord,
   type IntervalConsumptionCandidate,
 } from "./consumption.js";
-import { bandDomainValuesFromKeys, intervalPixelsFromDomains } from "./query.js";
 import { boundsEditorInputForScale, semanticAxisFromBounds } from "./precise-bounds.js";
 
 // ---------------------------------------------------------------------------
@@ -70,7 +68,6 @@ export type IntervalStateDeps = {
   effectiveZoomDomains: () => ContinuousZoomDomains | null;
   /** S4 controller write path for the bounds-editor zoom branch (stable fn). */
   commitZoom: (domains: ContinuousZoomDomains | null, source: InteractionSource) => void;
-  coordFlipped: () => boolean;
   captureSurface: () => HTMLDivElement | null;
   /** Used by the precise-bounds lineage projection. */
   candidateSemanticKeys: (candidate: CandidateFacts) => PropertyKey[];
@@ -132,6 +129,25 @@ function facetIdentityValueLabel(encodedValue: string): string {
           : typeof value;
   const display = value instanceof Date ? value.toISOString() : String(value);
   return `${kind} ${display}`;
+}
+
+function semanticViewportAxisSelection(
+  semantic: SemanticIntervalAxis | undefined,
+): SemanticViewportSelection["x"] {
+  return semantic === undefined
+    ? undefined
+    : semantic.kind === "band"
+      ? { kind: "band", keys: semantic.values }
+      : { kind: "continuous", domain: semantic.domain };
+}
+
+function viewportSelection(domains: ReadonlyIntervalDomains): SemanticViewportSelection {
+  const x = semanticViewportAxisSelection(domains.x);
+  const y = semanticViewportAxisSelection(domains.y);
+  return {
+    ...(x !== undefined && { x }),
+    ...(y !== undefined && { y }),
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -386,29 +402,6 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
     ]);
   }
 
-  function eventAxisBounds(
-    panelIndex: number,
-    axis: "x" | "y",
-    semantic: SemanticIntervalAxis | undefined,
-  ): readonly [CellValue, CellValue] | undefined {
-    if (semantic === undefined || deps.model() === null) return undefined;
-    if (semantic.kind !== "band") return semantic.domain;
-    const model = deps.model()!;
-    const scale = model.scales.panels[panelIndex]?.[axis] ?? model.scales[axis];
-    if (scale.type !== "band" || semantic.values.length === 0) return undefined;
-    const values = bandDomainValuesFromKeys(scale.rawDomain, semantic.values);
-    return values.length === 0 ? undefined : [values[0]!, values.at(-1)!];
-  }
-
-  function eventDomain(panelIndex: number, domains: ReadonlyIntervalDomains): IntervalDomain {
-    const x = eventAxisBounds(panelIndex, "x", domains.x);
-    const y = eventAxisBounds(panelIndex, "y", domains.y);
-    return {
-      ...(x !== undefined && { x }),
-      ...(y !== undefined && { y }),
-    };
-  }
-
   /**
    * One full-store pass for precise-bounds apply: semantic keys + lineage row
    * count for the target panel/domains. Was two walks (consumption bag then
@@ -552,24 +545,18 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
         });
       }
     }
-    const panel = model.scene.panels[panelIndex]!;
+    const viewportPanel = model.viewport.panel(targetPanelId);
+    if (viewportPanel === null) return;
+    const selection = viewportSelection(domains);
     const eventValue = buildIntervalSelection({
       phase: "end",
       mode: deps.selectConfig()?.mode ?? "xy",
       panelId: targetPanelId,
-      domain: eventDomain(panelIndex, domains),
+      domain: viewportPanel.resolve(selection),
       // The overlay must depict the interval that was actually applied, so
       // project the edited domains back into pixels rather than reusing the
       // pre-edit rectangle (or defaulting to the whole panel).
-      pixels: intervalPixelsFromDomains({
-        domains,
-        panel,
-        scales: model.scales.panels[panelIndex] ?? model.scales,
-        ...(model.coordProjectors?.[panelIndex] !== undefined && {
-          coord: model.coordProjectors[panelIndex],
-        }),
-        flipped: deps.coordFlipped(),
-      }),
+      pixels: viewportPanel.project(selection),
       keys,
       lineageCount,
       source: event.inputSource,

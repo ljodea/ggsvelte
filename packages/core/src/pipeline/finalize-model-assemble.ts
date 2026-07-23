@@ -26,6 +26,7 @@ export function assembleFinalizeRenderModel(input: {
   prepared: PreparedPanels;
   panelLayout: PanelLayoutResult;
   coordProjectors: readonly PanelCoordProjector[];
+  flipped: boolean;
   runId: number;
   warnings: PipelineWarning[];
   advisories: Advisory[];
@@ -74,6 +75,7 @@ export function assembleFinalizeRenderModel(input: {
       ),
     ]),
     coordProjectors: input.coordProjectors,
+    flipped: input.flipped,
     xConversion: prepared.xConversion,
     yConversion: prepared.yConversion,
     runId: input.runId,

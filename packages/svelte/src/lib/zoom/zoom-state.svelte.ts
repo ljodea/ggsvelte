@@ -3,7 +3,7 @@
  *
  * Owns chart-local zoom domains, effective-domain / effective-spec deriveds,
  * and zoom commit/reset/brush/set handlers. Construction-time deriveds must
- * NOT read model/coordFlipped/announce (later-declared / handler-only;
+ * NOT read model/announce (later-declared / handler-only;
  * construction-order DAG). Those are handler-only deferred getters.
  */
 import type { CellValue, RenderModel } from "@ggsvelte/core";
@@ -45,7 +45,6 @@ export type PlotZoomStateDeps = {
    * after createPlotRuntime in the host — handler-only reads.
    */
   model: () => RenderModel | null;
-  coordFlipped: () => boolean;
   onzoom: () => ((event: ZoomEvent) => void) | undefined;
   oninteraction: () =>
     | ((event: PlotInteractionEvent<Record<string, CellValue>>) => void)
@@ -82,7 +81,7 @@ export type PlotZoomState = {
  * Create the zoom controller. Construction registers only the
  * construction-time `effectiveZoomDomains` / `effectiveSpec` deriveds (over
  * earlier host bindings). Handlers may read later-declared bindings via
- * deferred getters (`model`, `coordFlipped`, `announce`).
+ * deferred getters (`model`, `announce`).
  */
 export function createPlotZoomState(deps: PlotZoomStateDeps): PlotZoomState {
   let localZoomDomains = $state<ContinuousZoomDomains | null>(null);
@@ -186,7 +185,6 @@ export function createPlotZoomState(deps: PlotZoomStateDeps): PlotZoomState {
     const next = resolveBrushZoomFromModel({
       model: deps.model(),
       rect,
-      flipped: deps.coordFlipped(),
       mode: deps.zoomConfig()?.mode ?? "xy",
       current: effectiveZoomDomains,
     });

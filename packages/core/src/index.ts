@@ -111,6 +111,16 @@ export { MAX_BINNED_BREAKS } from "./pipeline/binned-scale.js";
 export { buildCoordAxisProjector, buildPanelCoordProjector } from "./coord-projector.js";
 export type { CoordAxisProjector, PanelCoordProjector } from "./coord-projector.js";
 
+// Model-owned plot-pixel ↔ semantic projection
+export type {
+  PlotRect,
+  SemanticViewportAxisSelection,
+  SemanticViewport,
+  SemanticViewportDomains,
+  SemanticViewportPanel,
+  SemanticViewportSelection,
+} from "./semantic-viewport.js";
+
 // Theme registry
 export { BUILTIN_THEMES, resolveTheme, themeVar, UnknownThemeError } from "./theme.js";
 export type { ThemeColorRole, ThemeRole, ThemeTokens } from "./theme.js";

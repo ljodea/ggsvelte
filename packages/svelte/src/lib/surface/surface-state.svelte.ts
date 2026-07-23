@@ -44,7 +44,6 @@ type InteractionReducer = ReturnType<typeof createInteractionReducer>;
 
 export type SurfaceStateDeps = {
   model: () => RenderModel | null;
-  coordFlipped: () => boolean;
   root: () => HTMLDivElement | null;
   /** Controlled-tool prop + resolved config/chrome (host/S8-held). */
   toolProp: () => InteractionTool | undefined;

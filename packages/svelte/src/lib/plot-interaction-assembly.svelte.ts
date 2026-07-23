@@ -123,15 +123,14 @@ export function createPlotInteractionAssembly<
 
   // ------------------------------------------------------------ zoom respec
   // Construction-time deriveds read interaction/scope/zoomConfig/assembled
-  // only — model/coordFlipped/announce are deferred getters (later-declared).
+  // only — model/announce are deferred getters (later-declared).
   const zoomState = createPlotZoomState({
     interaction: inputs.interaction,
     resolvedInteractionScope: () => resolvedInteractionScope,
     zoomConfig: () => interactionConfig.zoom,
     assembled,
-    // model / coordFlipped declared after the runtime; handlers only.
+    // Model is declared after the runtime; handlers only.
     model: () => runtime.model,
-    coordFlipped: () => coordFlipped,
     onzoom: () => inputs.onzoom(),
     oninteraction: inputs.oninteraction,
     announce: announceSink,
@@ -290,7 +289,6 @@ export function createPlotInteractionAssembly<
   // Phased effects register later via registerSurfaceEffects().
   const surfaceState = createSurfaceState({
     model: () => runtime.model,
-    coordFlipped: () => coordFlipped,
     root: inputs.root,
     toolProp: () => inputs.tool(),
     initialTool: () => interactionConfig.initialTool,
@@ -369,7 +367,6 @@ export function createPlotInteractionAssembly<
     commitZoom: (...args: Parameters<PlotZoomState["commitZoom"]>) => {
       zoomState.commitZoom(...args);
     },
-    coordFlipped: () => coordFlipped,
     captureSurface: inputs.captureSurface,
     candidateSemanticKeys: (candidate) => candidateSemanticKeys(candidate),
     // Deferred: the projection module is constructed immediately after interval.

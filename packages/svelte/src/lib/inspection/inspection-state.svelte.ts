@@ -31,7 +31,6 @@ import type {
 } from "../interaction/interaction.js";
 import { inspectionLiveText as inspectionLiveTextFor } from "../assembly/labels.js";
 import { plotTooltipDomId } from "../assembly/layout.js";
-import { panelContainingAnchor } from "../scene/geometry.js";
 import { hitFromCandidate, type SceneHit } from "../surface/plot-px.js";
 import {
   buildQueuedInspectFrame,
@@ -201,7 +200,9 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
   // Construction-safe: own state + earlier host model.
   const inspectionPanel = $derived.by(() => {
     if (inspection === null || deps.model() === null) return null;
-    return panelContainingAnchor(deps.model()!.scene.panels, inspection.focus.anchor);
+    const model = deps.model()!;
+    const viewportPanel = model.viewport.panelAt(inspection.focus.anchor);
+    return model.scene.panels.find((panel) => panel.id === viewportPanel?.id) ?? null;
   });
 
   // Coordinator closes over keyAt — handler-only invocation (deferred).
